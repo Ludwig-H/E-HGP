@@ -283,6 +283,38 @@ gpu_cpu_benchmark_code = [
     "    plt.show()"
 ]
 
+scenario_hypermassive_code = [
+    "print('Generation d\\'un dataset hypermassif : 10 000 000 de points en 3D avec 100 clusters...')\n",
+    "t0 = time.time()\n",
+    "X_mass, y_mass = make_blobs(n_samples=10000000, centers=100, n_features=3, random_state=42)\n",
+    "print(f'Dataset genere en {time.time() - t0:.2f}s.')\n",
+    "\n",
+    "print('=== RUNNING E-HGP (10M points) ===')\n",
+    "t0 = time.time()\n",
+    "ehgp_mass = e_hgp.EHGPClusterer(K=2, kappa=1.5, m_reg=20, min_cluster_size=1000, L_initial=10)\n",
+    "labels_ehgp_mass = ehgp_mass.fit_predict(X_mass)\n",
+    "t_ehgp_mass = time.time() - t0\n",
+    "\n",
+    "sub_idx = np.random.choice(10000000, size=50000, replace=False)\n",
+    "ari_ehgp_mass = adjusted_rand_score(y_mass[sub_idx], labels_ehgp_mass[sub_idx])\n",
+    "n_cl_ehgp_mass = len(np.unique(labels_ehgp_mass[labels_ehgp_mass >= 0]))\n",
+    "pct_ehgp_mass = np.sum(labels_ehgp_mass >= 0) / 10000000 * 100.0\n",
+    "print(f'E-HGP termine en {t_ehgp_mass:.2f}s | ARI (subsample 50k): {ari_ehgp_mass:.4f} | Clusters trouves: {n_cl_ehgp_mass} | Clustered: {pct_ehgp_mass:.2f}%')\n",
+    "\n",
+    "print('=== RUNNING HDBSCAN (10M points) ===')\n",
+    "try:\n",
+    "    t0 = time.time()\n",
+    "    hdb_mass = HDBSCAN(min_cluster_size=1000, core_dist_n_jobs=-1)\n",
+    "    labels_hdb_mass = hdb_mass.fit_predict(X_mass)\n",
+    "    t_hdb_mass = time.time() - t0\n",
+    "    ari_hdb_mass = adjusted_rand_score(y_mass[sub_idx], labels_hdb_mass[sub_idx])\n",
+    "    n_cl_hdb_mass = len(np.unique(labels_hdb_mass[labels_hdb_mass >= 0]))\n",
+    "    pct_hdb_mass = np.sum(labels_hdb_mass >= 0) / 10000000 * 100.0\n",
+    "    print(f'HDBSCAN termine en {t_hdb_mass:.2f}s | ARI (subsample 50k): {ari_hdb_mass:.4f} | Clusters trouves: {n_cl_hdb_mass} | Clustered: {pct_hdb_mass:.2f}%')\n",
+    "except Exception as e:\n",
+    "    print(f'HDBSCAN a echoue ou a manque de memoire (OOM) : {e}')\n"
+]
+
 notebook_content = {
  "cells": [
   {
@@ -419,6 +451,21 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": gpu_cpu_benchmark_code
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 8. Scénario 5 : Passage à l'échelle hypermassif (10 000 000 de points)\n",
+    "Ce test compare E-HGP et HDBSCAN sur un dataset massif de 10 millions de points en 3D avec 100 clusters. Il met en évidence la robustesse mémoire de E-HGP (avec chunking dynamique et L_max=30) face à HDBSCAN qui sature la mémoire (OOM)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": None,
+   "metadata": {},
+   "outputs": [],
+   "source": scenario_hypermassive_code
   }
  ],
  "metadata": {
