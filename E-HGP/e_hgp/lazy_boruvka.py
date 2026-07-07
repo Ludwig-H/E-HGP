@@ -114,7 +114,7 @@ def lazy_cut_boruvka(Z, a, K, L_initial=30, max_iter=20, tol=1e-6):
     n, p = Z.shape
     
     # 1. Build beta lists locally
-    L_max = max(150, L_initial + 50)
+    L_max = max(30, L_initial + 10)
     beta, sorted_neighbors = compute_pairwise_beta(Z, a, L_max=L_max)
     
     # Neighbor lists
