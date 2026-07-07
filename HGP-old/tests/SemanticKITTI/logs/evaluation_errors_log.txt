@@ -1,0 +1,1075 @@
+=== RÉSULTATS 3D PANOPTIC (PHASE 0) ===
+********************************************************************************
+INTERFACE:
+Data:  /content/eval_data
+Predictions:  /content/eval_predictions_3d
+Split:  valid
+Config:  /content/custom_eval_config.yaml
+Limit:  None
+Min instance points:  50
+Output directory /content/eval_output_3d
+********************************************************************************
+Ignoring classes:  [0]
+[PANOPTIC EVAL] IGNORE:  [0]
+[PANOPTIC EVAL] INCLUDE:  [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19]
+Evaluating sequences: 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+Completed in 3.937119960784912 s
+Generating output files.
+
+
+=== RÉSULTATS 4D TRACKING (LSTQ) ===
+********************************************************************************
+INTERFACE:
+Data:  /content/eval_data
+Predictions:  /content/eval_predictions
+Split:  valid
+Config:  /content/custom_eval_config.yaml
+Limit:  None
+Min instance points:  50
+Output directory None
+********************************************************************************
+Ignoring classes:  [0]
+[PANOPTIC4D EVAL] IGNORE:  [0]
+[PANOPTIC4D EVAL] INCLUDE:  [ 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19]
+Evaluating sequences: 10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+=== Results ===
+LSTQ: 0.825270339401516
+S_assoc (LAQ): 0.6810711330958933
+Assoc: [0.00 0.72 0.38 0.00 0.00 0.00 0.76 0.44 0.00 0.00 0.00 0.00 0.00 0.00
+ 0.00 0.00 0.00 0.00 0.00 0.00]
+iou: [0.00 1.00 1.00 0.00 0.00 0.00 1.00 1.00 0.00 1.00 1.00 1.00 1.00 1.00
+ 1.00 1.00 1.00 1.00 1.00 1.00]
+things_iou: 0.5
+stuff_iou: 1.0
+S_cls (LSQ): 1.0
+
+
+=== LOG D'ERREURS ULTRA COMPLET ===
+Sequence: 8
+
+--- FRAME 0 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 2 pts | Dist: 31.9m | Pos: (31.0, -7.4, 0.3) | Dim: 0.1x0.1x0.0 | Sévérité: 2
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 1 pts | Dist: 45.8m | Pos: (45.4, -5.9, -0.8) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 11 fusionne les GT: ['15 (18 pts)', '0 (3 pts)'] | Taille Pred: 21 pts | Dist: 35.7m | Pos: (35.2, -5.7, -0.1) | Dim: 0.4x0.4x1.5 | Sévérité: 3
+--- FRAME 1 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 1 pts | Dist: 31.1m | Pos: (30.2, -7.5, 1.1) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 1 pts | Dist: 44.2m | Pos: (43.8, -5.9, -0.2) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 2 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 5 pts | Dist: 30.4m | Pos: (29.5, -7.6, 1.7) | Dim: 0.4x0.1x0.3 | Sévérité: 5
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 21.9m | Pos: (15.8, 15.2, 1.7) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: person | GT_ID: 10 | Taille: 1 pts | Dist: 31.5m | Pos: (30.5, -7.6, 1.7) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 3 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 2 pts | Dist: 29.7m | Pos: (28.7, -7.6, 2.4) | Dim: 0.1x0.1x0.0 | Sévérité: 2
+  [FN - Non Détecté] Classe: person | GT_ID: 10 | Taille: 1 pts | Dist: 30.8m | Pos: (29.9, -7.7, 2.4) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 11 fusionne les GT: ['15 (20 pts)', '0 (5 pts)'] | Taille Pred: 25 pts | Dist: 33.4m | Pos: (32.8, -6.0, 2.0) | Dim: 0.3x0.4x1.6 | Sévérité: 5
+--- FRAME 4 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 4 pts | Dist: 29.1m | Pos: (28.0, -7.7, 3.2) | Dim: 0.4x0.2x0.0 | Sévérité: 4
+  [FN - Non Détecté] Classe: person | GT_ID: 10 | Taille: 1 pts | Dist: 30.1m | Pos: (29.1, -7.8, 3.2) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 5 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['6 (177 pts)', '14 (44 pts)'] | Taille GT: 244 pts | Dist: 23.3m | Pos: (13.4, -19.0, 3.0) | Dim: 2.0x4.1x1.4 | Sévérité: 67
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 11 fusionne les GT: ['15 (25 pts)', '0 (4 pts)'] | Taille Pred: 29 pts | Dist: 32.0m | Pos: (31.4, -6.1, 3.4) | Dim: 0.6x0.4x1.6 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (6 pts)', '10 (1 pts)'] | Taille Pred: 7 pts | Dist: 28.5m | Pos: (27.4, -7.7, 3.8) | Dim: 1.1x0.3x0.2 | Sévérité: 1
+--- FRAME 6 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 4 | Taille: 9 pts | Dist: 49.7m | Pos: (49.6, 3.3, 3.9) | Dim: 0.4x1.7x0.3 | Sévérité: 9
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 11 fusionne les GT: ['15 (25 pts)', '0 (4 pts)'] | Taille Pred: 29 pts | Dist: 31.3m | Pos: (30.7, -6.1, 4.1) | Dim: 0.3x0.4x1.5 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (7 pts)', '10 (1 pts)'] | Taille Pred: 8 pts | Dist: 27.8m | Pos: (26.7, -7.7, 4.5) | Dim: 1.1x0.4x0.2 | Sévérité: 1
+--- FRAME 7 ---
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 1 pts | Dist: 40.4m | Pos: (39.9, -6.4, 4.7) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (8 pts)', '10 (1 pts)'] | Taille Pred: 9 pts | Dist: 27.1m | Pos: (26.0, -7.7, 5.3) | Dim: 1.1x0.2x0.3 | Sévérité: 1
+--- FRAME 8 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 198 divisée en preds: ['2 (44 pts)', '17 (14 pts)'] | Taille GT: 59 pts | Dist: 34.9m | Pos: (34.0, 7.7, 5.2) | Dim: 1.4x3.7x1.3 | Sévérité: 15
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 11 fusionne les GT: ['15 (32 pts)', '0 (5 pts)'] | Taille Pred: 37 pts | Dist: 30.0m | Pos: (29.4, -6.1, 5.6) | Dim: 0.6x0.5x1.6 | Sévérité: 5
+--- FRAME 9 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 4 | Taille: 37 pts | Dist: 44.6m | Pos: (44.5, 3.3, 6.2) | Dim: 1.7x1.7x0.8 | Sévérité: 37
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 1 pts | Dist: 39.3m | Pos: (38.8, -6.2, 6.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 10 ---
+  [ID SWITCH] Classe: car | GT_ID: 4 | Ancien Pred: 16 -> Nouveau Pred: 18 | Taille: 48 pts | Dist: 43.2m | Pos: (43.1, 3.4, 7.0) | Dim: 2.7x1.8x1.6 | Sévérité: 48
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 1 pts | Dist: 38.9m | Pos: (38.4, -6.2, 6.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (8 pts)', '10 (1 pts)'] | Taille Pred: 9 pts | Dist: 25.2m | Pos: (24.0, -7.7, 7.4) | Dim: 1.0x0.4x0.3 | Sévérité: 1
+--- FRAME 11 ---
+  [ID SWITCH] Classe: car | GT_ID: 0 | Ancien Pred: 16 -> Nouveau Pred: 18 | Taille: 1 pts | Dist: 44.6m | Pos: (44.6, 2.5, 7.4) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 12 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 196 divisée en preds: ['7 (63 pts)', '19 (14 pts)'] | Taille GT: 81 pts | Dist: 29.0m | Pos: (9.6, -27.3, 7.6) | Dim: 1.5x3.5x1.4 | Sévérité: 18
+--- FRAME 13 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 196 divisée en preds: ['7 (51 pts)', '19 (11 pts)'] | Taille GT: 62 pts | Dist: 28.7m | Pos: (9.1, -27.2, 8.0) | Dim: 1.3x3.4x1.4 | Sévérité: 11
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 41.7m | Pos: (41.7, 2.6, 8.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 2 pts | Dist: 37.2m | Pos: (36.7, -6.1, 8.2) | Dim: 0.1x0.0x0.3 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (17 pts)', '10 (3 pts)'] | Taille Pred: 20 pts | Dist: 23.7m | Pos: (22.5, -7.6, 8.7) | Dim: 1.2x0.4x0.9 | Sévérité: 3
+--- FRAME 14 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['6 (255 pts)', '21 (40 pts)'] | Taille GT: 300 pts | Dist: 20.2m | Pos: (8.4, -18.4, 8.5) | Dim: 1.7x2.8x1.4 | Sévérité: 45
+  [ID SWITCH] Classe: car | GT_ID: 0 | Ancien Pred: 18 -> Nouveau Pred: 4 | Taille: 1 pts | Dist: 32.2m | Pos: (32.2, 1.3, 8.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (17 pts)', '10 (2 pts)'] | Taille Pred: 19 pts | Dist: 23.3m | Pos: (22.0, -7.5, 9.2) | Dim: 1.2x0.3x0.9 | Sévérité: 2
+--- FRAME 15 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 4 divisée en preds: ['18 (54 pts)', '22 (20 pts)'] | Taille GT: 95 pts | Dist: 35.8m | Pos: (35.7, 3.6, 9.1) | Dim: 3.8x2.0x1.6 | Sévérité: 41
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 41.1m | Pos: (41.0, 2.9, 8.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (19 pts)', '10 (4 pts)'] | Taille Pred: 23 pts | Dist: 22.9m | Pos: (21.7, -7.4, 9.5) | Dim: 1.2x0.5x1.0 | Sévérité: 4
+--- FRAME 16 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 49.9m | Pos: (49.9, -1.3, 9.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 3 pts | Dist: 35.7m | Pos: (35.2, -5.7, 9.5) | Dim: 0.3x0.0x0.6 | Sévérité: 3
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (22 pts)', '10 (5 pts)'] | Taille Pred: 27 pts | Dist: 22.5m | Pos: (21.3, -7.4, 9.7) | Dim: 1.2x0.5x1.0 | Sévérité: 5
+--- FRAME 17 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 49.6m | Pos: (49.6, -1.5, 10.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (28 pts)', '10 (8 pts)'] | Taille Pred: 36 pts | Dist: 22.2m | Pos: (20.9, -7.5, 10.1) | Dim: 1.3x0.5x1.1 | Sévérité: 8
+--- FRAME 18 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 49.2m | Pos: (49.2, -1.6, 10.6) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 3 pts | Dist: 34.9m | Pos: (34.4, -5.9, 10.2) | Dim: 0.2x0.1x0.2 | Sévérité: 3
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (28 pts)', '10 (7 pts)'] | Taille Pred: 35 pts | Dist: 21.8m | Pos: (20.5, -7.5, 10.3) | Dim: 1.2x0.5x1.1 | Sévérité: 7
+--- FRAME 19 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 48.9m | Pos: (48.8, -1.5, 11.0) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 1 pts | Dist: 34.5m | Pos: (34.0, -5.8, 10.7) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 11 fusionne les GT: ['15 (16 pts)', '0 (2 pts)'] | Taille Pred: 18 pts | Dist: 24.7m | Pos: (24.1, -5.7, 10.6) | Dim: 0.4x0.5x1.7 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (32 pts)', '10 (8 pts)'] | Taille Pred: 40 pts | Dist: 21.5m | Pos: (20.2, -7.5, 10.7) | Dim: 1.2x0.4x1.1 | Sévérité: 8
+--- FRAME 20 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 48.5m | Pos: (48.5, -1.1, 11.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 1 pts | Dist: 34.1m | Pos: (33.7, -5.5, 11.0) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 11 fusionne les GT: ['15 (18 pts)', '0 (3 pts)'] | Taille Pred: 21 pts | Dist: 24.5m | Pos: (23.8, -5.5, 10.9) | Dim: 0.5x0.5x1.6 | Sévérité: 3
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (36 pts)', '10 (11 pts)'] | Taille Pred: 47 pts | Dist: 21.2m | Pos: (19.9, -7.3, 11.0) | Dim: 1.2x0.6x1.2 | Sévérité: 11
+--- FRAME 21 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 5 pts | Dist: 48.8m | Pos: (48.7, -1.2, 11.9) | Dim: 0.9x1.1x0.5 | Sévérité: 5
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (37 pts)', '10 (9 pts)'] | Taille Pred: 46 pts | Dist: 20.9m | Pos: (19.7, -7.2, 11.3) | Dim: 1.2x0.4x1.2 | Sévérité: 9
+--- FRAME 22 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 2 pts | Dist: 48.1m | Pos: (48.1, -0.7, 12.1) | Dim: 0.3x0.4x0.5 | Sévérité: 2
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['6 (248 pts)', '24 (56 pts)'] | Taille GT: 337 pts | Dist: 19.3m | Pos: (6.0, -18.3, 11.5) | Dim: 1.7x3.4x1.4 | Sévérité: 89
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 4 pts | Dist: 33.8m | Pos: (33.4, -5.1, 11.5) | Dim: 0.1x0.1x0.2 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (42 pts)', '10 (11 pts)'] | Taille Pred: 53 pts | Dist: 20.7m | Pos: (19.5, -7.1, 11.6) | Dim: 1.2x0.5x1.3 | Sévérité: 11
+--- FRAME 23 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 27.9m | Pos: (27.5, 4.5, 11.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 2 pts | Dist: 33.7m | Pos: (33.3, -5.0, 11.7) | Dim: 0.0x0.1x0.2 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (44 pts)', '10 (11 pts)'] | Taille Pred: 55 pts | Dist: 20.5m | Pos: (19.3, -7.0, 11.9) | Dim: 1.2x0.5x1.3 | Sévérité: 11
+--- FRAME 24 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 2 pts | Dist: 47.7m | Pos: (47.7, -0.5, 12.6) | Dim: 0.3x0.4x0.5 | Sévérité: 2
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 3 pts | Dist: 33.5m | Pos: (33.1, -5.0, 11.8) | Dim: 0.2x0.1x0.4 | Sévérité: 3
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (37 pts)', '10 (11 pts)'] | Taille Pred: 48 pts | Dist: 20.4m | Pos: (19.1, -7.0, 12.0) | Dim: 1.2x0.5x1.2 | Sévérité: 11
+--- FRAME 25 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 5 pts | Dist: 47.9m | Pos: (47.9, -0.7, 12.8) | Dim: 0.9x1.1x0.5 | Sévérité: 5
+  [SPLIT - Sur-segmentation] Classe: person | GT_ID: 2 divisée en preds: ['10 (72 pts)', '26 (12 pts)'] | Taille GT: 85 pts | Dist: 19.0m | Pos: (18.3, -5.2, 12.0) | Dim: 0.9x0.7x1.4 | Sévérité: 13
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 2 pts | Dist: 33.3m | Pos: (32.9, -4.9, 12.0) | Dim: 0.0x0.1x0.0 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (44 pts)', '10 (12 pts)'] | Taille Pred: 56 pts | Dist: 20.2m | Pos: (18.9, -6.9, 12.2) | Dim: 1.2x0.6x1.2 | Sévérité: 12
+--- FRAME 26 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 47.3m | Pos: (47.3, -0.2, 12.7) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 5 pts | Dist: 32.9m | Pos: (32.5, -4.9, 12.1) | Dim: 0.5x0.2x0.6 | Sévérité: 5
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (39 pts)', '10 (12 pts)'] | Taille Pred: 51 pts | Dist: 20.1m | Pos: (18.8, -7.0, 12.3) | Dim: 1.2x0.5x1.1 | Sévérité: 12
+--- FRAME 27 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 49.4m | Pos: (49.4, 0.0, 12.8) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 3 pts | Dist: 32.9m | Pos: (32.5, -5.0, 12.3) | Dim: 0.5x0.1x0.4 | Sévérité: 3
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 11.4m | Pos: (5.8, 9.9, 12.0) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (44 pts)', '10 (10 pts)'] | Taille Pred: 54 pts | Dist: 19.8m | Pos: (18.5, -7.0, 12.5) | Dim: 1.2x0.4x1.1 | Sévérité: 10
+--- FRAME 28 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 47.4m | Pos: (47.4, -0.5, 13.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (47 pts)', '10 (16 pts)'] | Taille Pred: 63 pts | Dist: 19.8m | Pos: (18.5, -7.0, 12.7) | Dim: 1.3x0.5x1.2 | Sévérité: 16
+--- FRAME 29 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 46.8m | Pos: (46.8, -0.2, 12.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (46 pts)', '10 (13 pts)'] | Taille Pred: 59 pts | Dist: 19.6m | Pos: (18.3, -7.0, 12.7) | Dim: 1.3x0.5x1.2 | Sévérité: 13
+--- FRAME 30 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 2 pts | Dist: 48.3m | Pos: (48.3, 0.2, 12.7) | Dim: 2.7x0.3x0.6 | Sévérité: 2
+  [SPLIT - Sur-segmentation] Classe: person | GT_ID: 0 divisée en preds: ['11 (3 pts)', '9 (1 pts)'] | Taille GT: 4 pts | Dist: 19.6m | Pos: (17.6, -8.8, 12.3) | Dim: 18.0x13.8x1.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 2 pts | Dist: 32.4m | Pos: (32.0, -4.8, 12.7) | Dim: 0.2x0.1x0.2 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (47 pts)', '10 (10 pts)'] | Taille Pred: 57 pts | Dist: 19.4m | Pos: (18.2, -6.9, 12.9) | Dim: 1.2x0.5x1.3 | Sévérité: 10
+--- FRAME 31 ---
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 3 pts | Dist: 32.4m | Pos: (32.0, -4.8, 12.8) | Dim: 0.3x0.1x0.4 | Sévérité: 3
+  [ID SWITCH] Classe: person | GT_ID: 0 | Ancien Pred: 11 -> Nouveau Pred: 9 | Taille: 3 pts | Dist: 17.6m | Pos: (10.0, -14.4, 12.2) | Dim: 17.8x13.8x0.1 | Sévérité: 3
+  [SPLIT - Sur-segmentation] Classe: person | GT_ID: 0 divisée en preds: ['9 (2 pts)', '11 (1 pts)'] | Taille GT: 3 pts | Dist: 17.6m | Pos: (10.0, -14.4, 12.2) | Dim: 17.8x13.8x0.1 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (43 pts)', '10 (10 pts)'] | Taille Pred: 53 pts | Dist: 19.3m | Pos: (18.0, -6.9, 13.0) | Dim: 1.2x0.5x1.1 | Sévérité: 10
+--- FRAME 32 ---
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 3 pts | Dist: 32.3m | Pos: (32.0, -4.7, 12.8) | Dim: 0.3x0.1x0.2 | Sévérité: 3
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (48 pts)', '10 (12 pts)'] | Taille Pred: 60 pts | Dist: 19.2m | Pos: (17.9, -6.8, 13.1) | Dim: 1.2x0.6x1.2 | Sévérité: 12
+--- FRAME 33 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 2 pts | Dist: 47.2m | Pos: (47.2, -0.1, 13.7) | Dim: 0.1x0.1x0.0 | Sévérité: 2
+  [ID SWITCH] Classe: person | GT_ID: 0 | Ancien Pred: 9 -> Nouveau Pred: 11 | Taille: 3 pts | Dist: 22.4m | Pos: (21.7, -5.3, 12.8) | Dim: 0.2x0.2x1.1 | Sévérité: 3
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 4 pts | Dist: 32.0m | Pos: (31.6, -4.8, 12.9) | Dim: 0.7x0.2x0.8 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (50 pts)', '10 (11 pts)'] | Taille Pred: 61 pts | Dist: 19.1m | Pos: (17.8, -6.8, 13.2) | Dim: 1.2x0.5x1.2 | Sévérité: 11
+--- FRAME 34 ---
+  [ID SWITCH] Classe: bicycle | GT_ID: 25 | Ancien Pred: 28 -> Nouveau Pred: 31 | Taille: 5 pts | Dist: 31.9m | Pos: (31.6, -4.8, 12.8) | Dim: 0.2x0.2x0.6 | Sévérité: 5
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (51 pts)', '10 (13 pts)'] | Taille Pred: 64 pts | Dist: 19.0m | Pos: (17.7, -6.8, 13.2) | Dim: 1.2x0.5x1.2 | Sévérité: 13
+--- FRAME 35 ---
+  [SPLIT - Sur-segmentation] Classe: person | GT_ID: 2 divisée en preds: ['10 (105 pts)', '33 (12 pts)'] | Taille GT: 118 pts | Dist: 17.8m | Pos: (17.1, -4.9, 13.2) | Dim: 0.8x0.8x2.2 | Sévérité: 13
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 4 pts | Dist: 31.6m | Pos: (31.2, -4.7, 13.0) | Dim: 1.5x0.2x0.6 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (51 pts)', '10 (13 pts)'] | Taille Pred: 64 pts | Dist: 18.9m | Pos: (17.6, -6.8, 13.3) | Dim: 1.2x0.5x1.2 | Sévérité: 13
+--- FRAME 36 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['6 (240 pts)', '34 (39 pts)'] | Taille GT: 288 pts | Dist: 18.7m | Pos: (4.3, -18.2, 13.5) | Dim: 1.6x3.5x1.4 | Sévérité: 48
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 5 pts | Dist: 31.5m | Pos: (31.2, -4.7, 13.0) | Dim: 1.6x0.2x0.8 | Sévérité: 5
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (55 pts)', '10 (13 pts)'] | Taille Pred: 68 pts | Dist: 18.8m | Pos: (17.5, -6.8, 13.4) | Dim: 1.3x0.5x1.2 | Sévérité: 13
+--- FRAME 37 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['6 (211 pts)', '34 (41 pts)'] | Taille GT: 289 pts | Dist: 18.7m | Pos: (4.1, -18.3, 13.7) | Dim: 1.6x3.6x1.4 | Sévérité: 78
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 5 pts | Dist: 31.2m | Pos: (30.9, -4.8, 13.1) | Dim: 1.5x0.3x0.8 | Sévérité: 5
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (53 pts)', '10 (17 pts)'] | Taille Pred: 70 pts | Dist: 18.7m | Pos: (17.4, -6.8, 13.5) | Dim: 1.3x0.5x1.3 | Sévérité: 17
+--- FRAME 38 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['6 (206 pts)', '34 (37 pts)'] | Taille GT: 277 pts | Dist: 18.7m | Pos: (3.9, -18.3, 13.8) | Dim: 1.6x3.6x1.4 | Sévérité: 71
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 4 pts | Dist: 31.3m | Pos: (30.9, -4.9, 13.2) | Dim: 1.2x0.2x0.5 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (52 pts)', '10 (14 pts)'] | Taille Pred: 66 pts | Dist: 18.6m | Pos: (17.3, -6.9, 13.7) | Dim: 1.3x0.5x1.3 | Sévérité: 14
+--- FRAME 39 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 48.5m | Pos: (48.5, 0.2, 12.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 5 pts | Dist: 31.0m | Pos: (30.6, -5.0, 13.2) | Dim: 1.0x0.3x0.7 | Sévérité: 5
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (55 pts)', '10 (10 pts)'] | Taille Pred: 65 pts | Dist: 18.4m | Pos: (17.0, -7.0, 13.7) | Dim: 1.3x0.5x1.2 | Sévérité: 10
+--- FRAME 40 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['6 (202 pts)', '34 (30 pts)'] | Taille GT: 266 pts | Dist: 18.7m | Pos: (3.4, -18.4, 14.0) | Dim: 1.9x3.8x1.5 | Sévérité: 64
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 4 -> Nouveau Pred: 13 | Taille: 5 pts | Dist: 45.6m | Pos: (45.6, -0.8, 13.6) | Dim: 0.5x1.4x1.1 | Sévérité: 5
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 5 pts | Dist: 31.0m | Pos: (30.5, -5.2, 13.3) | Dim: 1.3x0.2x0.8 | Sévérité: 5
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 13 fusionne les GT: ['199 (31 pts)', '200 (5 pts)'] | Taille Pred: 36 pts | Dist: 39.0m | Pos: (39.0, -1.2, 13.4) | Dim: 8.1x1.8x1.1 | Sévérité: 5
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (54 pts)', '10 (13 pts)'] | Taille Pred: 67 pts | Dist: 18.3m | Pos: (16.9, -7.1, 13.8) | Dim: 1.3x0.6x1.3 | Sévérité: 13
+--- FRAME 41 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['6 (194 pts)', '34 (28 pts)'] | Taille GT: 264 pts | Dist: 18.7m | Pos: (3.2, -18.4, 14.1) | Dim: 2.3x3.8x1.5 | Sévérité: 70
+  [ID SWITCH] Classe: bicycle | GT_ID: 25 | Ancien Pred: 31 -> Nouveau Pred: 38 | Taille: 7 pts | Dist: 30.9m | Pos: (30.4, -5.4, 13.6) | Dim: 1.4x0.3x0.8 | Sévérité: 7
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 1 | Taille: 3 pts | Dist: 49.3m | Pos: (2.5, 49.2, 12.2) | Dim: 0.3x0.1x0.6 | Sévérité: 3
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 5.3m | Pos: (3.7, 3.8, 13.7) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (51 pts)', '10 (12 pts)'] | Taille Pred: 63 pts | Dist: 18.2m | Pos: (16.7, -7.2, 13.9) | Dim: 1.3x0.5x1.3 | Sévérité: 12
+--- FRAME 42 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['6 (192 pts)', '34 (28 pts)'] | Taille GT: 254 pts | Dist: 18.6m | Pos: (2.9, -18.4, 14.3) | Dim: 1.9x3.9x1.5 | Sévérité: 62
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 3 pts | Dist: 46.6m | Pos: (46.6, -1.2, 13.6) | Dim: 2.7x0.7x1.2 | Sévérité: 3
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (52 pts)', '10 (19 pts)'] | Taille Pred: 71 pts | Dist: 18.2m | Pos: (16.6, -7.3, 14.1) | Dim: 1.3x0.5x1.3 | Sévérité: 19
+--- FRAME 43 ---
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (56 pts)', '10 (17 pts)'] | Taille Pred: 73 pts | Dist: 18.0m | Pos: (16.4, -7.5, 14.2) | Dim: 1.3x0.5x1.2 | Sévérité: 17
+--- FRAME 44 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 197 | Taille: 5 pts | Dist: 40.6m | Pos: (3.0, -40.5, 15.1) | Dim: 0.9x0.7x0.3 | Sévérité: 5
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 47.9m | Pos: (47.8, -1.7, 13.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 4 pts | Dist: 30.5m | Pos: (29.9, -6.2, 13.7) | Dim: 0.8x0.3x0.3 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (55 pts)', '10 (22 pts)'] | Taille Pred: 77 pts | Dist: 18.0m | Pos: (16.2, -7.7, 14.3) | Dim: 1.3x0.5x1.2 | Sévérité: 22
+--- FRAME 45 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 197 | Taille: 4 pts | Dist: 40.5m | Pos: (2.5, -40.4, 15.3) | Dim: 0.7x0.2x0.0 | Sévérité: 4
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['6 (217 pts)', '34 (26 pts)'] | Taille GT: 259 pts | Dist: 18.6m | Pos: (1.9, -18.5, 14.7) | Dim: 2.3x2.3x1.4 | Sévérité: 42
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (58 pts)', '10 (23 pts)'] | Taille Pred: 81 pts | Dist: 17.8m | Pos: (16.0, -7.8, 14.5) | Dim: 1.4x0.6x1.2 | Sévérité: 23
+--- FRAME 46 ---
+  [ID SWITCH] Classe: person | GT_ID: 0 | Ancien Pred: 11 -> Nouveau Pred: 10 | Taille: 51 pts | Dist: 16.8m | Pos: (15.7, -5.9, 14.7) | Dim: 4.3x1.2x1.5 | Sévérité: 51
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (59 pts)', '10 (26 pts)'] | Taille Pred: 85 pts | Dist: 17.7m | Pos: (15.7, -8.1, 14.6) | Dim: 1.4x0.7x1.2 | Sévérité: 26
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 10 fusionne les GT: ['2 (109 pts)', '0 (49 pts)'] | Taille Pred: 158 pts | Dist: 16.7m | Pos: (15.5, -6.1, 14.4) | Dim: 0.6x0.9x1.5 | Sévérité: 49
+--- FRAME 47 ---
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 5 pts | Dist: 29.9m | Pos: (28.9, -7.7, 14.2) | Dim: 0.8x0.2x0.7 | Sévérité: 5
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 47.2m | Pos: (47.0, -4.0, 13.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 9.3m | Pos: (3.7, 8.5, 14.4) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 10 fusionne les GT: ['0 (113 pts)', '2 (50 pts)'] | Taille Pred: 163 pts | Dist: 16.5m | Pos: (15.2, -6.5, 14.6) | Dim: 0.5x0.9x1.5 | Sévérité: 50
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (53 pts)', '10 (25 pts)'] | Taille Pred: 78 pts | Dist: 17.5m | Pos: (15.4, -8.4, 14.7) | Dim: 1.3x0.6x1.2 | Sévérité: 25
+--- FRAME 48 ---
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (55 pts)', '10 (26 pts)'] | Taille Pred: 81 pts | Dist: 17.4m | Pos: (15.0, -8.8, 15.0) | Dim: 1.4x0.7x1.2 | Sévérité: 26
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 10 fusionne les GT: ['0 (82 pts)', '2 (66 pts)'] | Taille Pred: 148 pts | Dist: 16.4m | Pos: (14.9, -6.8, 14.8) | Dim: 0.6x0.8x1.4 | Sévérité: 66
+--- FRAME 49 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 43.9m | Pos: (43.5, -6.2, 14.6) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (63 pts)', '10 (27 pts)'] | Taille Pred: 90 pts | Dist: 17.1m | Pos: (14.4, -9.2, 15.1) | Dim: 1.4x0.6x1.3 | Sévérité: 27
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 10 fusionne les GT: ['0 (105 pts)', '2 (43 pts)'] | Taille Pred: 148 pts | Dist: 16.2m | Pos: (14.5, -7.2, 15.0) | Dim: 0.5x0.9x1.5 | Sévérité: 43
+--- FRAME 50 ---
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 10 fusionne les GT: ['0 (120 pts)', '2 (35 pts)'] | Taille Pred: 155 pts | Dist: 16.0m | Pos: (14.1, -7.6, 15.3) | Dim: 0.6x0.9x1.5 | Sévérité: 35
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (58 pts)', '10 (24 pts)'] | Taille Pred: 82 pts | Dist: 16.9m | Pos: (13.9, -9.6, 15.4) | Dim: 1.4x0.7x1.2 | Sévérité: 24
+  [MERGE - Sous-segmentation] Classe: bicyclist | Pred_ID: 39 fusionne les GT: ['1 (6 pts)', '2 (1 pts)'] | Taille Pred: 7 pts | Dist: 44.7m | Pos: (7.8, 44.0, 13.9) | Dim: 0.5x2.9x1.3 | Sévérité: 1
+--- FRAME 51 ---
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 2 | Taille: 4 pts | Dist: 46.9m | Pos: (8.9, 46.0, 14.0) | Dim: 0.1x0.2x0.6 | Sévérité: 4
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 8.8m | Pos: (3.8, 8.0, 15.0) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (63 pts)', '10 (25 pts)'] | Taille Pred: 88 pts | Dist: 16.7m | Pos: (13.3, -10.1, 15.7) | Dim: 1.3x0.7x1.3 | Sévérité: 25
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 10 fusionne les GT: ['0 (111 pts)', '2 (45 pts)'] | Taille Pred: 156 pts | Dist: 15.9m | Pos: (13.6, -8.1, 15.5) | Dim: 0.5x1.0x1.5 | Sévérité: 45
+--- FRAME 52 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 46.1m | Pos: (44.8, -10.6, 15.0) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (68 pts)', '10 (27 pts)'] | Taille Pred: 95 pts | Dist: 16.5m | Pos: (12.6, -10.6, 16.0) | Dim: 1.4x0.7x1.3 | Sévérité: 27
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 10 fusionne les GT: ['0 (137 pts)', '2 (22 pts)'] | Taille Pred: 159 pts | Dist: 15.7m | Pos: (13.1, -8.6, 15.8) | Dim: 0.6x1.0x1.5 | Sévérité: 22
+--- FRAME 53 ---
+  [SPLIT - Sur-segmentation] Classe: person | GT_ID: 1 divisée en preds: ['9 (101 pts)', '43 (17 pts)'] | Taille GT: 118 pts | Dist: 19.6m | Pos: (-5.1, -19.0, 16.5) | Dim: 0.9x0.9x1.7 | Sévérité: 17
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (70 pts)', '10 (23 pts)'] | Taille Pred: 93 pts | Dist: 16.2m | Pos: (11.8, -11.1, 16.3) | Dim: 1.4x0.7x1.2 | Sévérité: 23
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 10 fusionne les GT: ['0 (131 pts)', '2 (34 pts)'] | Taille Pred: 165 pts | Dist: 15.4m | Pos: (12.4, -9.2, 16.1) | Dim: 0.6x1.0x1.4 | Sévérité: 34
+--- FRAME 54 ---
+  [SPLIT - Sur-segmentation] Classe: person | GT_ID: 1 divisée en preds: ['9 (97 pts)', '43 (16 pts)'] | Taille GT: 113 pts | Dist: 19.8m | Pos: (-6.2, -18.8, 16.7) | Dim: 0.8x1.0x1.6 | Sévérité: 16
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 2 pts | Dist: 42.4m | Pos: (40.1, -13.7, 16.3) | Dim: 0.2x0.0x0.2 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (71 pts)', '10 (22 pts)'] | Taille Pred: 93 pts | Dist: 15.9m | Pos: (11.0, -11.6, 16.6) | Dim: 1.2x0.8x1.2 | Sévérité: 22
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 10 fusionne les GT: ['0 (94 pts)', '2 (69 pts)'] | Taille Pred: 163 pts | Dist: 15.2m | Pos: (11.8, -9.7, 16.4) | Dim: 0.7x1.0x1.4 | Sévérité: 69
+--- FRAME 55 ---
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 13 -> Nouveau Pred: 44 | Taille: 7 pts | Dist: 42.3m | Pos: (39.0, -16.2, 16.8) | Dim: 0.8x1.3x1.0 | Sévérité: 7
+  [ID SWITCH] Classe: car | GT_ID: 0 | Ancien Pred: 4 -> Nouveau Pred: 6 | Taille: 2 pts | Dist: 20.2m | Pos: (-7.3, -18.8, 17.2) | Dim: 0.0x0.1x0.4 | Sévérité: 2
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 8.2m | Pos: (3.6, 7.3, 16.2) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 44 fusionne les GT: ['200 (7 pts)', '199 (2 pts)'] | Taille Pred: 9 pts | Dist: 40.7m | Pos: (37.6, -15.6, 16.8) | Dim: 7.0x3.5x1.0 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 10 fusionne les GT: ['0 (102 pts)', '2 (66 pts)'] | Taille Pred: 168 pts | Dist: 15.0m | Pos: (10.9, -10.3, 16.7) | Dim: 0.6x1.0x1.5 | Sévérité: 66
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (76 pts)', '10 (21 pts)'] | Taille Pred: 97 pts | Dist: 15.7m | Pos: (10.0, -12.1, 16.9) | Dim: 1.3x0.8x1.2 | Sévérité: 21
+--- FRAME 56 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 197 | Taille: 1 pts | Dist: 42.3m | Pos: (-15.4, -39.4, 17.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 44.6m | Pos: (40.7, -18.3, 16.6) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 10 fusionne les GT: ['2 (94 pts)', '0 (78 pts)'] | Taille Pred: 172 pts | Dist: 14.8m | Pos: (10.1, -10.9, 17.0) | Dim: 0.6x1.0x1.5 | Sévérité: 78
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (80 pts)', '10 (25 pts)'] | Taille Pred: 105 pts | Dist: 15.5m | Pos: (8.9, -12.6, 17.1) | Dim: 1.1x0.8x1.2 | Sévérité: 25
+--- FRAME 57 ---
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 44 -> Nouveau Pred: 45 | Taille: 7 pts | Dist: 41.7m | Pos: (36.6, -19.9, 17.7) | Dim: 1.1x1.3x1.0 | Sévérité: 7
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 10 fusionne les GT: ['2 (111 pts)', '0 (49 pts)'] | Taille Pred: 160 pts | Dist: 14.6m | Pos: (9.2, -11.3, 17.4) | Dim: 0.6x0.7x1.4 | Sévérité: 49
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (87 pts)', '10 (23 pts)'] | Taille Pred: 110 pts | Dist: 15.3m | Pos: (7.9, -13.1, 17.5) | Dim: 1.2x0.9x1.2 | Sévérité: 23
+--- FRAME 58 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 5 pts | Dist: 41.3m | Pos: (35.3, -21.4, 18.3) | Dim: 1.1x0.8x0.5 | Sévérité: 5
+  [FN - Non Détecté] Classe: car | GT_ID: 197 | Taille: 1 pts | Dist: 42.2m | Pos: (-18.7, -37.8, 17.7) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (90 pts)', '10 (28 pts)'] | Taille Pred: 118 pts | Dist: 15.1m | Pos: (6.7, -13.5, 17.9) | Dim: 1.2x0.9x1.3 | Sévérité: 28
+--- FRAME 59 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 199 divisée en preds: ['13 (17 pts)', '46 (11 pts)'] | Taille GT: 61 pts | Dist: 33.2m | Pos: (26.7, -19.8, 18.2) | Dim: 3.8x1.7x1.4 | Sévérité: 44
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 4 pts | Dist: 41.3m | Pos: (34.1, -23.2, 18.3) | Dim: 2.9x1.3x0.6 | Sévérité: 4
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 196 divisée en preds: ['7 (18 pts)', '48 (9 pts)'] | Taille GT: 41 pts | Dist: 29.0m | Pos: (-14.9, -24.9, 17.5) | Dim: 1.6x3.8x1.4 | Sévérité: 23
+  [ID SWITCH] Classe: car | GT_ID: 197 | Ancien Pred: 20 -> Nouveau Pred: 47 | Taille: 15 pts | Dist: 43.6m | Pos: (-21.7, -37.8, 17.5) | Dim: 1.8x4.5x0.9 | Sévérité: 15
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 15.7m | Pos: (6.5, 14.3, 16.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (88 pts)', '10 (26 pts)'] | Taille Pred: 114 pts | Dist: 15.0m | Pos: (5.5, -13.9, 18.2) | Dim: 1.2x0.9x1.3 | Sévérité: 26
+--- FRAME 60 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 199 divisée en preds: ['13 (41 pts)', '50 (13 pts)'] | Taille GT: 67 pts | Dist: 32.9m | Pos: (25.1, -21.3, 18.5) | Dim: 3.7x1.9x1.4 | Sévérité: 26
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 4 pts | Dist: 40.7m | Pos: (32.1, -25.0, 18.7) | Dim: 2.1x1.2x0.5 | Sévérité: 4
+  [ID SWITCH] Classe: car | GT_ID: 197 | Ancien Pred: 47 -> Nouveau Pred: 49 | Taille: 15 pts | Dist: 43.5m | Pos: (-23.9, -36.3, 17.6) | Dim: 1.4x3.2x0.9 | Sévérité: 15
+  [ID SWITCH] Classe: person | GT_ID: 0 | Ancien Pred: 10 -> Nouveau Pred: 11 | Taille: 4 pts | Dist: 17.4m | Pos: (8.2, -15.3, 17.6) | Dim: 0.1x0.0x0.0 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (76 pts)', '10 (24 pts)'] | Taille Pred: 100 pts | Dist: 14.9m | Pos: (4.2, -14.3, 18.5) | Dim: 1.2x1.0x1.2 | Sévérité: 24
+--- FRAME 61 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 7 pts | Dist: 40.4m | Pos: (30.2, -26.9, 19.0) | Dim: 2.8x1.8x0.6 | Sévérité: 7
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (78 pts)', '10 (22 pts)'] | Taille Pred: 100 pts | Dist: 14.9m | Pos: (2.8, -14.6, 18.7) | Dim: 1.2x1.0x1.3 | Sévérité: 22
+--- FRAME 62 ---
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 45 -> Nouveau Pred: 52 | Taille: 7 pts | Dist: 39.4m | Pos: (27.3, -28.4, 19.2) | Dim: 0.5x1.2x0.8 | Sévérité: 7
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 196 divisée en preds: ['7 (40 pts)', '53 (12 pts)'] | Taille GT: 60 pts | Dist: 30.1m | Pos: (-20.5, -22.1, 18.2) | Dim: 1.7x2.9x1.4 | Sévérité: 20
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (76 pts)', '10 (18 pts)'] | Taille Pred: 94 pts | Dist: 14.9m | Pos: (1.4, -14.8, 19.0) | Dim: 1.1x1.1x1.2 | Sévérité: 18
+--- FRAME 63 ---
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 52 -> Nouveau Pred: 54 | Taille: 11 pts | Dist: 39.2m | Pos: (25.1, -30.1, 19.4) | Dim: 1.0x1.4x1.0 | Sévérité: 11
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (67 pts)', '10 (16 pts)'] | Taille Pred: 83 pts | Dist: 15.0m | Pos: (-0.2, -15.0, 19.1) | Dim: 1.1x1.1x1.3 | Sévérité: 16
+--- FRAME 64 ---
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 54 -> Nouveau Pred: 55 | Taille: 18 pts | Dist: 39.2m | Pos: (22.7, -31.9, 19.8) | Dim: 2.0x1.6x1.0 | Sévérité: 18
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 2 | Taille: 5 pts | Dist: 36.1m | Pos: (23.0, 27.8, 19.0) | Dim: 0.4x0.2x0.9 | Sévérité: 5
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (55 pts)', '10 (12 pts)'] | Taille Pred: 67 pts | Dist: 15.2m | Pos: (-1.8, -15.1, 19.4) | Dim: 1.0x1.2x1.2 | Sévérité: 12
+--- FRAME 65 ---
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 55 -> Nouveau Pred: 57 | Taille: 13 pts | Dist: 38.6m | Pos: (20.1, -32.9, 19.9) | Dim: 0.9x1.4x1.0 | Sévérité: 13
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 2 | Taille: 5 pts | Dist: 34.8m | Pos: (23.2, 25.9, 19.5) | Dim: 0.4x0.1x1.4 | Sévérité: 5
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 196 divisée en preds: ['7 (54 pts)', '58 (11 pts)'] | Taille GT: 68 pts | Dist: 32.1m | Pos: (-26.1, -18.7, 18.8) | Dim: 2.2x3.1x1.4 | Sévérité: 14
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 2 pts | Dist: 20.9m | Pos: (-20.7, 3.0, 18.3) | Dim: 2.7x31.2x0.9 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (53 pts)', '10 (10 pts)'] | Taille Pred: 63 pts | Dist: 15.4m | Pos: (-3.3, -15.1, 19.6) | Dim: 1.0x1.2x1.1 | Sévérité: 10
+--- FRAME 66 ---
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 57 -> Nouveau Pred: 59 | Taille: 14 pts | Dist: 38.3m | Pos: (17.5, -34.1, 20.2) | Dim: 0.8x1.3x1.0 | Sévérité: 14
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 2 | Taille: 3 pts | Dist: 33.7m | Pos: (23.4, 24.3, 19.7) | Dim: 0.4x0.2x0.6 | Sévérité: 3
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 4 divisée en preds: ['18 (153 pts)', '56 (21 pts)'] | Taille GT: 202 pts | Dist: 25.7m | Pos: (-18.6, 17.8, 18.9) | Dim: 4.0x3.8x1.6 | Sévérité: 49
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (52 pts)', '10 (10 pts)'] | Taille Pred: 62 pts | Dist: 15.8m | Pos: (-4.9, -15.1, 19.9) | Dim: 1.0x1.2x1.2 | Sévérité: 10
+--- FRAME 67 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 16 pts | Dist: 38.3m | Pos: (15.2, -35.2, 20.5) | Dim: 2.4x2.3x0.6 | Sévérité: 16
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 2 | Taille: 2 pts | Dist: 32.5m | Pos: (23.3, 22.7, 20.0) | Dim: 0.7x0.4x0.2 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (58 pts)', '10 (9 pts)'] | Taille Pred: 67 pts | Dist: 16.3m | Pos: (-6.5, -14.9, 20.2) | Dim: 1.0x1.3x1.2 | Sévérité: 9
+--- FRAME 68 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 19 pts | Dist: 37.9m | Pos: (12.4, -35.8, 20.9) | Dim: 1.0x1.0x1.0 | Sévérité: 19
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 15 fusionne les GT: ['9 (56 pts)', '10 (7 pts)'] | Taille Pred: 63 pts | Dist: 16.8m | Pos: (-8.0, -14.8, 20.5) | Dim: 0.9x1.3x1.1 | Sévérité: 7
+--- FRAME 69 ---
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 59 -> Nouveau Pred: 60 | Taille: 21 pts | Dist: 38.0m | Pos: (9.5, -36.8, 21.1) | Dim: 2.4x2.6x1.0 | Sévérité: 21
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 5.5m | Pos: (0.5, 5.5, 20.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 70 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 11 | Taille: 3 pts | Dist: 47.3m | Pos: (24.8, -40.3, 22.2) | Dim: 0.3x0.1x0.0 | Sévérité: 3
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 60 -> Nouveau Pred: 61 | Taille: 23 pts | Dist: 38.2m | Pos: (6.7, -37.6, 21.2) | Dim: 2.3x2.6x1.0 | Sévérité: 23
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 3 | Taille: 2 pts | Dist: 28.3m | Pos: (22.4, 17.2, 21.2) | Dim: 0.2x0.0x0.0 | Sévérité: 2
+  [FN - Non Détecté] Classe: car | GT_ID: 5 | Taille: 7 pts | Dist: 34.6m | Pos: (-21.8, 26.8, 18.9) | Dim: 0.5x1.3x1.0 | Sévérité: 7
+--- FRAME 71 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 11 | Taille: 1 pts | Dist: 47.1m | Pos: (21.5, -41.9, 22.4) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 23 pts | Dist: 38.1m | Pos: (3.7, -37.9, 21.4) | Dim: 1.1x0.5x0.9 | Sévérité: 23
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 26.8m | Pos: (21.7, 15.7, 21.4) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 72 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 11 | Taille: 1 pts | Dist: 46.9m | Pos: (19.0, -42.9, 22.8) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 61 -> Nouveau Pred: 62 | Taille: 17 pts | Dist: 38.4m | Pos: (1.1, -38.4, 21.6) | Dim: 2.2x2.8x0.3 | Sévérité: 17
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 196 divisée en preds: ['7 (20 pts)', '63 (12 pts)'] | Taille GT: 55 pts | Dist: 38.4m | Pos: (-37.4, -9.0, 20.2) | Dim: 2.7x2.3x1.4 | Sévérité: 35
+--- FRAME 73 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 11 | Taille: 2 pts | Dist: 46.8m | Pos: (15.8, -44.1, 22.8) | Dim: 0.4x0.1x0.3 | Sévérité: 2
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 62 -> Nouveau Pred: 64 | Taille: 27 pts | Dist: 38.6m | Pos: (-1.8, -38.6, 21.7) | Dim: 1.4x0.8x0.9 | Sévérité: 27
+--- FRAME 74 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 11 | Taille: 1 pts | Dist: 46.8m | Pos: (12.5, -45.1, 23.0) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 29 pts | Dist: 39.1m | Pos: (-4.9, -38.8, 21.8) | Dim: 1.4x0.7x0.9 | Sévérité: 29
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['6 (54 pts)', '67 (12 pts)'] | Taille GT: 80 pts | Dist: 32.6m | Pos: (-32.5, -3.3, 20.6) | Dim: 3.7x3.1x1.8 | Sévérité: 26
+  [FN - Non Détecté] Classe: person | GT_ID: 3 | Taille: 6 pts | Dist: 32.6m | Pos: (-32.6, -0.2, 20.5) | Dim: 0.2x0.1x0.9 | Sévérité: 6
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 194 divisée en preds: ['5 (146 pts)', '66 (18 pts)'] | Taille GT: 166 pts | Dist: 26.2m | Pos: (-26.1, -1.7, 20.4) | Dim: 4.9x4.1x1.4 | Sévérité: 20
+--- FRAME 75 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 11 | Taille: 3 pts | Dist: 46.7m | Pos: (10.1, -45.6, 23.1) | Dim: 0.2x0.1x0.0 | Sévérité: 3
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 64 -> Nouveau Pred: 68 | Taille: 24 pts | Dist: 39.6m | Pos: (-7.1, -38.9, 21.9) | Dim: 1.9x2.6x0.5 | Sévérité: 24
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 4 pts | Dist: 32.6m | Pos: (-32.4, -4.0, 20.9) | Dim: 0.0x0.2x0.0 | Sévérité: 4
+--- FRAME 76 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 11 | Taille: 1 pts | Dist: 46.5m | Pos: (9.1, -45.6, 23.1) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: car | GT_ID: 197 | Ancien Pred: 49 -> Nouveau Pred: 69 | Taille: 14 pts | Dist: 56.4m | Pos: (-55.7, -8.8, 20.3) | Dim: 1.5x1.3x0.8 | Sévérité: 14
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 12 -> Nouveau Pred: 73 | Taille: 39 pts | Dist: 35.0m | Pos: (-35.0, 0.1, 20.5) | Dim: 0.6x0.4x1.1 | Sévérité: 39
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 9 -> Nouveau Pred: 73 | Taille: 16 pts | Dist: 35.6m | Pos: (-35.6, -1.2, 20.9) | Dim: 0.5x1.0x0.3 | Sévérité: 16
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 7 -> Nouveau Pred: 72 | Taille: 20 pts | Dist: 42.3m | Pos: (-41.9, -6.3, 20.3) | Dim: 1.6x2.2x1.0 | Sévérité: 20
+  [ID SWITCH] Classe: car | GT_ID: 0 | Ancien Pred: 6 -> Nouveau Pred: 71 | Taille: 12 pts | Dist: 32.6m | Pos: (-32.6, -0.6, 20.6) | Dim: 10.1x42.1x2.1 | Sévérité: 12
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 73 fusionne les GT: ['3 (39 pts)', '1 (16 pts)'] | Taille Pred: 55 pts | Dist: 35.2m | Pos: (-35.2, -0.3, 20.6) | Dim: 0.9x2.1x1.1 | Sévérité: 16
+--- FRAME 77 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 11 | Taille: 1 pts | Dist: 46.0m | Pos: (9.6, -45.0, 23.2) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 65 -> Nouveau Pred: 76 | Taille: 29 pts | Dist: 17.4m | Pos: (13.5, 10.9, 21.5) | Dim: 1.1x0.5x1.2 | Sévérité: 29
+  [ID SWITCH] Classe: bicycle | GT_ID: 25 | Ancien Pred: 38 -> Nouveau Pred: 75 | Taille: 46 pts | Dist: 30.3m | Pos: (-16.6, -25.4, 21.6) | Dim: 1.1x1.4x0.8 | Sévérité: 46
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 4 pts | Dist: 25.4m | Pos: (-21.8, -13.0, 21.6) | Dim: 0.6x0.3x0.2 | Sévérité: 4
+  [FN - Faible Overlap] Classe: car | GT_ID: 4 | Taille: 92 pts | Max Pred ID: 18 (12 pts) | Dist: 42.3m | Pos: (-25.7, 33.6, 19.5) | Dim: 2.7x4.3x1.6 | Sévérité: 80
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['6 (15 pts)', '71 (14 pts)'] | Taille GT: 36 pts | Dist: 36.6m | Pos: (-36.4, -3.8, 20.3) | Dim: 4.0x2.4x1.4 | Sévérité: 21
+  [ID SWITCH] Classe: person | GT_ID: 0 | Ancien Pred: 11 -> Nouveau Pred: 10 | Taille: 2 pts | Dist: 24.4m | Pos: (-19.0, -15.3, 21.2) | Dim: 0.9x2.0x0.9 | Sévérité: 2
+  [SPLIT - Sur-segmentation] Classe: person | GT_ID: 0 divisée en preds: ['10 (1 pts)', '11 (1 pts)'] | Taille GT: 2 pts | Dist: 24.4m | Pos: (-19.0, -15.3, 21.2) | Dim: 0.9x2.0x0.9 | Sévérité: 1
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 38.5m | Pos: (-38.0, -6.5, 20.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 73 fusionne les GT: ['3 (41 pts)', '1 (13 pts)'] | Taille Pred: 54 pts | Dist: 36.4m | Pos: (-36.4, -1.5, 20.5) | Dim: 0.8x1.9x1.3 | Sévérité: 13
+--- FRAME 78 ---
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 68 -> Nouveau Pred: 80 | Taille: 36 pts | Dist: 39.2m | Pos: (-5.3, -38.9, 22.0) | Dim: 1.7x0.7x1.0 | Sévérité: 36
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 13 -> Nouveau Pred: 79 | Taille: 65 pts | Dist: 33.3m | Pos: (-8.2, -32.3, 21.8) | Dim: 2.9x3.6x1.0 | Sévérité: 65
+  [ID SWITCH] Classe: bicyclist | GT_ID: 1 | Ancien Pred: 39 -> Nouveau Pred: 86 | Taille: 96 pts | Dist: 13.4m | Pos: (7.4, 11.2, 21.5) | Dim: 1.1x0.7x1.5 | Sévérité: 96
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 11 -> Nouveau Pred: 84 | Taille: 78 pts | Dist: 25.3m | Pos: (-18.2, -17.6, 21.6) | Dim: 0.4x0.5x1.5 | Sévérité: 78
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 76 -> Nouveau Pred: 87 | Taille: 36 pts | Dist: 16.6m | Pos: (10.6, 12.7, 21.5) | Dim: 1.0x0.5x1.3 | Sévérité: 36
+  [ID SWITCH] Classe: person | GT_ID: 2 | Ancien Pred: 10 -> Nouveau Pred: 83 | Taille: 84 pts | Dist: 24.2m | Pos: (-18.5, -15.5, 21.5) | Dim: 0.7x0.4x1.4 | Sévérité: 84
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 4 pts | Dist: 25.9m | Pos: (-21.5, -14.5, 21.7) | Dim: 0.1x0.2x0.3 | Sévérité: 4
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 1 divisée en preds: ['3 (322 pts)', '74 (151 pts)'] | Taille GT: 584 pts | Dist: 22.7m | Pos: (-22.2, -4.8, 21.1) | Dim: 3.9x3.1x1.6 | Sévérité: 262
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 73 -> Nouveau Pred: 85 | Taille: 19 pts | Dist: 38.1m | Pos: (-37.7, -5.4, 20.9) | Dim: 0.6x0.8x0.4 | Sévérité: 19
+  [ID SWITCH] Classe: car | GT_ID: 4 | Ancien Pred: 18 -> Nouveau Pred: 77 | Taille: 102 pts | Dist: 44.7m | Pos: (-30.6, 32.6, 19.6) | Dim: 2.5x4.6x1.6 | Sévérité: 102
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 4 divisée en preds: ['77 (74 pts)', '78 (25 pts)'] | Taille GT: 102 pts | Dist: 44.7m | Pos: (-30.6, 32.6, 19.6) | Dim: 2.5x4.6x1.6 | Sévérité: 28
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 6 -> Nouveau Pred: 82 | Taille: 55 pts | Dist: 37.7m | Pos: (-37.0, -6.8, 20.4) | Dim: 4.0x2.8x1.3 | Sévérité: 55
+  [ID SWITCH] Classe: car | GT_ID: 194 | Ancien Pred: 5 -> Nouveau Pred: 81 | Taille: 161 pts | Dist: 30.9m | Pos: (-30.6, -4.3, 20.3) | Dim: 3.9x2.9x1.5 | Sévérité: 161
+--- FRAME 79 ---
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 28.7m | Pos: (12.9, 25.6, 22.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 84 -> Nouveau Pred: 96 | Taille: 78 pts | Dist: 24.0m | Pos: (-13.6, -19.8, 21.5) | Dim: 0.8x0.4x1.6 | Sévérité: 78
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 79 -> Nouveau Pred: 89 | Taille: 58 pts | Dist: 30.6m | Pos: (0.7, -30.6, 21.6) | Dim: 3.8x3.2x1.0 | Sévérité: 58
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 80 -> Nouveau Pred: 89 | Taille: 36 pts | Dist: 36.4m | Pos: (5.3, -36.0, 21.8) | Dim: 1.2x1.0x0.7 | Sévérité: 36
+  [FN - Faible Overlap] Classe: car | GT_ID: 198 | Taille: 632 pts | Max Pred ID: 2 (99 pts) | Dist: 13.6m | Pos: (0.0, -13.6, 21.5) | Dim: 3.3x3.2x1.4 | Sévérité: 533
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 87 -> Nouveau Pred: 101 | Taille: 48 pts | Dist: 18.1m | Pos: (4.0, 17.7, 21.4) | Dim: 1.0x0.8x1.4 | Sévérité: 48
+  [ID SWITCH] Classe: bicyclist | GT_ID: 1 | Ancien Pred: 86 -> Nouveau Pred: 100 | Taille: 104 pts | Dist: 15.3m | Pos: (1.5, 15.2, 21.4) | Dim: 1.1x1.1x1.4 | Sévérité: 104
+  [ID SWITCH] Classe: person | GT_ID: 2 | Ancien Pred: 83 -> Nouveau Pred: 97 | Taille: 84 pts | Dist: 23.1m | Pos: (-14.4, -18.0, 21.3) | Dim: 0.6x0.4x1.4 | Sévérité: 84
+  [ID SWITCH] Classe: bicycle | GT_ID: 25 | Ancien Pred: 75 -> Nouveau Pred: 94 | Taille: 38 pts | Dist: 28.3m | Pos: (-7.9, -27.2, 21.4) | Dim: 1.4x1.2x0.8 | Sévérité: 38
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 5 pts | Dist: 25.0m | Pos: (-17.6, -17.8, 21.7) | Dim: 0.1x0.4x0.2 | Sévérité: 5
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 85 -> Nouveau Pred: 99 | Taille: 17 pts | Dist: 38.5m | Pos: (-35.7, -14.4, 21.1) | Dim: 0.6x0.8x0.3 | Sévérité: 17
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 72 -> Nouveau Pred: 93 | Taille: 27 pts | Dist: 45.5m | Pos: (-40.5, -20.8, 20.2) | Dim: 1.3x1.1x1.1 | Sévérité: 27
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 3 -> Nouveau Pred: 90 | Taille: 568 pts | Dist: 23.1m | Pos: (-21.3, -8.9, 21.1) | Dim: 4.1x3.4x1.5 | Sévérité: 568
+  [ID SWITCH] Classe: car | GT_ID: 4 | Ancien Pred: 77 -> Nouveau Pred: 88 | Taille: 98 pts | Dist: 48.3m | Pos: (-41.6, 24.6, 19.7) | Dim: 2.5x4.1x1.5 | Sévérité: 98
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 73 -> Nouveau Pred: 98 | Taille: 42 pts | Dist: 38.2m | Pos: (-35.9, -13.0, 20.6) | Dim: 0.6x0.5x1.2 | Sévérité: 42
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 82 -> Nouveau Pred: 92 | Taille: 46 pts | Dist: 37.8m | Pos: (-34.5, -15.4, 20.8) | Dim: 3.5x3.5x1.5 | Sévérité: 46
+  [ID SWITCH] Classe: bicycle | GT_ID: 24 | Ancien Pred: 8 -> Nouveau Pred: 95 | Taille: 93 pts | Dist: 21.6m | Pos: (-12.4, -17.8, 21.1) | Dim: 1.1x1.6x1.0 | Sévérité: 93
+  [ID SWITCH] Classe: car | GT_ID: 194 | Ancien Pred: 81 -> Nouveau Pred: 91 | Taille: 151 pts | Dist: 31.3m | Pos: (-29.3, -10.9, 20.4) | Dim: 2.6x3.5x1.4 | Sévérité: 151
+  [ID SWITCH] Classe: person | GT_ID: 0 | Ancien Pred: 10 -> Nouveau Pred: 96 | Taille: 2 pts | Dist: 24.5m | Pos: (-14.2, -20.0, 20.7) | Dim: 0.1x0.0x0.0 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 89 fusionne les GT: ['199 (58 pts)', '200 (36 pts)'] | Taille Pred: 94 pts | Dist: 32.8m | Pos: (2.5, -32.7, 21.7) | Dim: 6.3x7.0x1.0 | Sévérité: 36
+--- FRAME 80 ---
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 89 -> Nouveau Pred: 104 | Taille: 33 pts | Dist: 29.5m | Pos: (26.1, 13.6, 21.8) | Dim: 2.4x3.1x1.0 | Sévérité: 33
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 96 -> Nouveau Pred: 112 | Taille: 76 pts | Dist: 10.1m | Pos: (8.9, -4.8, 21.5) | Dim: 0.4x0.8x1.6 | Sévérité: 76
+  [ID SWITCH] Classe: bicyclist | GT_ID: 1 | Ancien Pred: 100 -> Nouveau Pred: 116 | Taille: 120 pts | Dist: 27.4m | Pos: (-25.0, 11.4, 21.4) | Dim: 1.2x1.2x1.5 | Sévérité: 120
+  [ID SWITCH] Classe: car | GT_ID: 198 | Ancien Pred: 2 -> Nouveau Pred: 102 | Taille: 639 pts | Dist: 9.7m | Pos: (3.4, 9.1, 21.4) | Dim: 3.1x3.4x1.5 | Sévérité: 639
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 101 -> Nouveau Pred: 117 | Taille: 57 pts | Dist: 30.7m | Pos: (-27.3, 14.0, 21.4) | Dim: 0.8x1.0x1.2 | Sévérité: 57
+  [ID SWITCH] Classe: person | GT_ID: 2 | Ancien Pred: 97 -> Nouveau Pred: 113 | Taille: 81 pts | Dist: 9.0m | Pos: (7.2, -5.5, 21.3) | Dim: 0.5x0.6x1.5 | Sévérité: 81
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 89 -> Nouveau Pred: 105 | Taille: 19 pts | Dist: 22.7m | Pos: (20.6, 9.6, 21.5) | Dim: 3.0x3.5x0.6 | Sévérité: 19
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 199 divisée en preds: ['105 (17 pts)', '104 (2 pts)'] | Taille GT: 19 pts | Dist: 22.7m | Pos: (20.6, 9.6, 21.5) | Dim: 3.0x3.5x0.6 | Sévérité: 2
+  [ID SWITCH] Classe: bicycle | GT_ID: 25 | Ancien Pred: 94 -> Nouveau Pred: 110 | Taille: 40 pts | Dist: 16.5m | Pos: (16.5, 0.5, 21.4) | Dim: 1.2x1.5x0.7 | Sévérité: 40
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 99 -> Nouveau Pred: 115 | Taille: 15 pts | Dist: 26.9m | Pos: (2.5, -26.7, 21.2) | Dim: 0.6x0.5x0.4 | Sévérité: 15
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 90 -> Nouveau Pred: 2 | Taille: 483 pts | Dist: 12.4m | Pos: (-2.2, -12.2, 21.1) | Dim: 3.3x4.4x1.6 | Sévérité: 483
+  [ID SWITCH] Classe: car | GT_ID: 4 | Ancien Pred: 88 -> Nouveau Pred: 103 | Taille: 88 pts | Dist: 48.9m | Pos: (-37.5, -31.3, 19.9) | Dim: 4.0x2.3x1.5 | Sévérité: 88
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 98 -> Nouveau Pred: 114 | Taille: 42 pts | Dist: 26.9m | Pos: (1.2, -26.9, 20.7) | Dim: 0.5x0.6x1.2 | Sévérité: 42
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 92 -> Nouveau Pred: 108 | Taille: 39 pts | Dist: 25.8m | Pos: (3.6, -25.6, 20.8) | Dim: 3.2x2.8x1.2 | Sévérité: 39
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 93 -> Nouveau Pred: 109 | Taille: 25 pts | Dist: 32.8m | Pos: (8.7, -31.6, 20.4) | Dim: 2.6x2.0x0.6 | Sévérité: 25
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 2 pts | Dist: 11.2m | Pos: (6.9, -8.8, 21.6) | Dim: 0.1x0.2x0.0 | Sévérité: 2
+  [ID SWITCH] Classe: car | GT_ID: 194 | Ancien Pred: 91 -> Nouveau Pred: 107 | Taille: 154 pts | Dist: 20.3m | Pos: (-0.6, -20.3, 20.5) | Dim: 3.5x2.7x1.4 | Sévérité: 154
+  [ID SWITCH] Classe: bicycle | GT_ID: 24 | Ancien Pred: 95 -> Nouveau Pred: 111 | Taille: 88 pts | Dist: 7.8m | Pos: (7.0, -3.5, 21.1) | Dim: 1.6x1.1x1.0 | Sévérité: 88
+  [ID SWITCH] Classe: person | GT_ID: 0 | Ancien Pred: 96 -> Nouveau Pred: 112 | Taille: 3 pts | Dist: 10.6m | Pos: (9.1, -5.4, 20.7) | Dim: 0.0x0.1x0.0 | Sévérité: 3
+  [FN - Faible Overlap] Classe: car | GT_ID: 3 | Taille: 5939 pts | Max Pred ID: 1 (581 pts) | Dist: 13.1m | Pos: (-13.0, -1.5, 21.4) | Dim: 2.6x3.2x0.9 | Sévérité: 5358
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 13.9m | Pos: (-13.7, -2.4, 20.8) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 81 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 1 | Ancien Pred: 116 -> Nouveau Pred: 132 | Taille: 139 pts | Dist: 28.5m | Pos: (-28.4, 2.0, 21.4) | Dim: 1.5x0.8x1.5 | Sévérité: 139
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 117 -> Nouveau Pred: 133 | Taille: 70 pts | Dist: 32.0m | Pos: (-31.9, 3.1, 21.4) | Dim: 1.4x0.6x1.3 | Sévérité: 70
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 112 -> Nouveau Pred: 129 | Taille: 63 pts | Dist: 10.4m | Pos: (8.4, 6.1, 21.5) | Dim: 0.4x0.5x1.5 | Sévérité: 63
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 104 -> Nouveau Pred: 121 | Taille: 37 pts | Dist: 33.6m | Pos: (13.5, 30.7, 21.4) | Dim: 1.5x3.6x0.7 | Sévérité: 37
+  [ID SWITCH] Classe: car | GT_ID: 198 | Ancien Pred: 102 -> Nouveau Pred: 118 | Taille: 576 pts | Dist: 15.5m | Pos: (-3.7, 15.1, 21.3) | Dim: 4.0x2.0x1.5 | Sévérité: 576
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 105 -> Nouveau Pred: 120 | Taille: 53 pts | Dist: 26.2m | Pos: (10.9, 23.8, 21.3) | Dim: 1.5x4.2x0.8 | Sévérité: 53
+  [ID SWITCH] Classe: person | GT_ID: 2 | Ancien Pred: 113 -> Nouveau Pred: 130 | Taille: 69 pts | Dist: 8.7m | Pos: (7.3, 4.6, 21.2) | Dim: 0.7x0.6x1.4 | Sévérité: 69
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 115 -> Nouveau Pred: 131 | Taille: 11 pts | Dist: 21.5m | Pos: (14.3, -16.0, 21.0) | Dim: 0.3x0.4x0.4 | Sévérité: 11
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 109 -> Nouveau Pred: 126 | Taille: 27 pts | Dist: 27.9m | Pos: (22.3, -16.8, 20.2) | Dim: 2.9x1.5x1.1 | Sévérité: 27
+  [ID SWITCH] Classe: bicycle | GT_ID: 25 | Ancien Pred: 110 -> Nouveau Pred: 127 | Taille: 44 pts | Dist: 19.0m | Pos: (12.2, 14.6, 21.2) | Dim: 0.7x1.7x0.7 | Sévérité: 44
+  [ID SWITCH] Classe: car | GT_ID: 4 | Ancien Pred: 103 -> Nouveau Pred: 119 | Taille: 72 pts | Dist: 45.3m | Pos: (-17.8, -41.7, 20.0) | Dim: 2.7x3.1x1.3 | Sévérité: 72
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 114 -> Nouveau Pred: 131 | Taille: 40 pts | Dist: 21.4m | Pos: (13.3, -16.7, 20.5) | Dim: 0.5x0.6x1.3 | Sévérité: 40
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 108 -> Nouveau Pred: 124 | Taille: 38 pts | Dist: 20.6m | Pos: (14.6, -14.5, 20.6) | Dim: 3.8x2.2x1.4 | Sévérité: 38
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['124 (25 pts)', '125 (10 pts)'] | Taille GT: 38 pts | Dist: 20.6m | Pos: (14.6, -14.5, 20.6) | Dim: 3.8x2.2x1.4 | Sévérité: 13
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 2 -> Nouveau Pred: 122 | Taille: 480 pts | Dist: 6.6m | Pos: (2.7, -6.1, 21.0) | Dim: 4.2x2.4x1.5 | Sévérité: 480
+  [ID SWITCH] Classe: car | GT_ID: 194 | Ancien Pred: 107 -> Nouveau Pred: 123 | Taille: 142 pts | Dist: 14.7m | Pos: (8.4, -12.1, 20.3) | Dim: 4.0x1.5x1.4 | Sévérité: 142
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 1 pts | Dist: 8.5m | Pos: (8.4, 1.5, 21.4) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: bicycle | GT_ID: 24 | Ancien Pred: 111 -> Nouveau Pred: 128 | Taille: 86 pts | Dist: 8.7m | Pos: (6.1, 6.2, 20.9) | Dim: 1.2x1.7x1.0 | Sévérité: 86
+  [ID SWITCH] Classe: car | GT_ID: 0 | Ancien Pred: 71 -> Nouveau Pred: 119 | Taille: 1 pts | Dist: 47.7m | Pos: (-17.9, -44.3, 19.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Faible Overlap] Classe: car | GT_ID: 3 | Taille: 5110 pts | Max Pred ID: 1 (31 pts) | Dist: 12.4m | Pos: (-12.1, -2.5, 21.4) | Dim: 3.4x2.1x1.0 | Sévérité: 5079
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 131 fusionne les GT: ['3 (40 pts)', '1 (11 pts)'] | Taille Pred: 51 pts | Dist: 21.4m | Pos: (13.5, -16.6, 20.6) | Dim: 1.2x1.2x1.4 | Sévérité: 11
+--- FRAME 82 ---
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 120 -> Nouveau Pred: 137 | Taille: 49 pts | Dist: 27.1m | Pos: (8.9, 25.6, 21.3) | Dim: 1.4x4.2x1.0 | Sévérité: 49
+  [SPLIT - Sur-segmentation] Classe: person | GT_ID: 15 divisée en preds: ['129 (59 pts)', '140 (7 pts)'] | Taille GT: 67 pts | Dist: 10.9m | Pos: (7.8, 7.6, 21.2) | Dim: 0.7x1.0x1.6 | Sévérité: 8
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 121 -> Nouveau Pred: 138 | Taille: 35 pts | Dist: 34.3m | Pos: (10.9, 32.6, 21.3) | Dim: 1.5x3.6x0.5 | Sévérité: 35
+  [ID SWITCH] Classe: car | GT_ID: 4 | Ancien Pred: 119 -> Nouveau Pred: 136 | Taille: 48 pts | Dist: 45.1m | Pos: (-14.2, -42.8, 19.9) | Dim: 1.6x1.5x1.3 | Sévérité: 48
+  [FN - Non Détecté] Classe: person | GT_ID: 1 | Taille: 5 pts | Dist: 20.8m | Pos: (15.5, -14.0, 20.8) | Dim: 0.3x0.2x0.3 | Sévérité: 5
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['124 (22 pts)', '125 (9 pts)'] | Taille GT: 38 pts | Dist: 20.1m | Pos: (15.7, -12.6, 20.5) | Dim: 3.7x2.2x1.3 | Sévérité: 16
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 126 -> Nouveau Pred: 139 | Taille: 37 pts | Dist: 27.5m | Pos: (23.5, -14.2, 19.9) | Dim: 0.7x1.3x1.2 | Sévérité: 37
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 1 pts | Dist: 9.1m | Pos: (8.8, 2.5, 21.2) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: person | GT_ID: 10 | Taille: 1 pts | Dist: 9.5m | Pos: (8.8, 3.6, 20.7) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: person | GT_ID: 0 | Ancien Pred: 112 -> Nouveau Pred: 140 | Taille: 1 pts | Dist: 11.0m | Pos: (8.4, 7.2, 20.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: car | GT_ID: 3 | Ancien Pred: 1 -> Nouveau Pred: 134 | Taille: 4692 pts | Dist: 12.2m | Pos: (-11.9, -2.6, 21.3) | Dim: 3.6x1.7x1.0 | Sévérité: 4692
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 140 fusionne les GT: ['15 (7 pts)', '0 (1 pts)'] | Taille Pred: 8 pts | Dist: 10.8m | Pos: (8.2, 7.1, 20.4) | Dim: 0.3x0.3x0.1 | Sévérité: 1
+--- FRAME 83 ---
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 129 -> Nouveau Pred: 141 | Taille: 55 pts | Dist: 10.8m | Pos: (7.7, 7.6, 21.2) | Dim: 0.5x0.4x1.5 | Sévérité: 55
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 124 -> Nouveau Pred: 125 | Taille: 27 pts | Dist: 19.9m | Pos: (15.5, -12.5, 20.3) | Dim: 3.2x2.1x1.0 | Sévérité: 27
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 5 | Taille: 2 pts | Dist: 19.3m | Pos: (-19.2, -2.5, 20.2) | Dim: 0.0x0.0x0.0 | Sévérité: 2
+--- FRAME 84 ---
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 141 -> Nouveau Pred: 130 | Taille: 53 pts | Dist: 10.8m | Pos: (7.7, 7.5, 21.2) | Dim: 0.4x0.5x1.5 | Sévérité: 53
+  [ID SWITCH] Classe: person | GT_ID: 2 | Ancien Pred: 130 -> Nouveau Pred: 141 | Taille: 56 pts | Dist: 9.2m | Pos: (6.8, 6.1, 20.9) | Dim: 0.6x0.5x1.3 | Sévérité: 56
+  [ID SWITCH] Classe: bicycle | GT_ID: 25 | Ancien Pred: 127 -> Nouveau Pred: 143 | Taille: 36 pts | Dist: 19.4m | Pos: (10.7, 16.2, 20.9) | Dim: 0.4x1.7x0.7 | Sévérité: 36
+  [FN - Non Détecté] Classe: person | GT_ID: 3 | Taille: 28 pts | Dist: 20.9m | Pos: (14.8, -14.8, 20.2) | Dim: 0.4x0.5x1.1 | Sévérité: 28
+  [FN - Non Détecté] Classe: car | GT_ID: 4 | Taille: 2 pts | Dist: 47.1m | Pos: (-13.8, -45.1, 19.7) | Dim: 0.0x0.1x0.3 | Sévérité: 2
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 5 | Taille: 2 pts | Dist: 19.4m | Pos: (-19.2, -2.7, 20.1) | Dim: 0.0x0.0x0.0 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 139 fusionne les GT: ['196 (16 pts)', '195 (2 pts)'] | Taille Pred: 18 pts | Dist: 26.7m | Pos: (22.8, -13.9, 19.6) | Dim: 7.0x2.6x0.5 | Sévérité: 2
+--- FRAME 85 ---
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 130 -> Nouveau Pred: 153 | Taille: 49 pts | Dist: 9.6m | Pos: (8.4, 4.8, 21.4) | Dim: 0.4x0.5x1.5 | Sévérité: 49
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 137 -> Nouveau Pred: 145 | Taille: 54 pts | Dist: 25.3m | Pos: (11.4, 22.6, 21.3) | Dim: 1.4x4.1x0.9 | Sévérité: 54
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 138 -> Nouveau Pred: 145 | Taille: 21 pts | Dist: 32.3m | Pos: (14.1, 29.0, 21.7) | Dim: 1.4x0.7x0.5 | Sévérité: 21
+  [ID SWITCH] Classe: bicyclist | GT_ID: 1 | Ancien Pred: 132 -> Nouveau Pred: 154 | Taille: 291 pts | Dist: 26.5m | Pos: (-26.5, 0.8, 21.2) | Dim: 1.7x0.9x1.5 | Sévérité: 291
+  [ID SWITCH] Classe: car | GT_ID: 260 | Ancien Pred: 135 -> Nouveau Pred: 144 | Taille: 19 pts | Dist: 61.4m | Pos: (-58.9, 17.5, 21.2) | Dim: 0.7x1.4x0.6 | Sévérité: 19
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 133 -> Nouveau Pred: 155 | Taille: 128 pts | Dist: 30.1m | Pos: (-30.0, 2.1, 21.2) | Dim: 1.3x0.7x1.3 | Sévérité: 128
+  [ID SWITCH] Classe: bicycle | GT_ID: 25 | Ancien Pred: 143 -> Nouveau Pred: 150 | Taille: 36 pts | Dist: 18.1m | Pos: (12.3, 13.2, 21.2) | Dim: 0.6x1.6x0.7 | Sévérité: 36
+  [ID SWITCH] Classe: bicycle | GT_ID: 24 | Ancien Pred: 128 -> Nouveau Pred: 151 | Taille: 73 pts | Dist: 7.8m | Pos: (6.1, 5.0, 20.8) | Dim: 1.0x1.6x1.2 | Sévérité: 73
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 131 -> Nouveau Pred: 152 | Taille: 27 pts | Dist: 22.3m | Pos: (13.0, -18.1, 20.3) | Dim: 0.4x0.7x1.1 | Sévérité: 27
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 131 -> Nouveau Pred: 152 | Taille: 9 pts | Dist: 22.3m | Pos: (13.9, -17.4, 20.7) | Dim: 0.4x0.3x0.2 | Sévérité: 9
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 139 -> Nouveau Pred: 149 | Taille: 21 pts | Dist: 28.6m | Pos: (21.9, -18.4, 19.9) | Dim: 3.4x1.1x1.4 | Sévérité: 21
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 122 -> Nouveau Pred: 146 | Taille: 371 pts | Dist: 7.7m | Pos: (2.6, -7.2, 20.7) | Dim: 4.3x1.9x1.3 | Sévérité: 371
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 1 pts | Dist: 8.3m | Pos: (8.3, 0.2, 21.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 125 -> Nouveau Pred: 148 | Taille: 23 pts | Dist: 21.2m | Pos: (14.0, -16.0, 20.4) | Dim: 3.8x2.2x1.0 | Sévérité: 23
+  [ID SWITCH] Classe: car | GT_ID: 194 | Ancien Pred: 123 -> Nouveau Pred: 147 | Taille: 96 pts | Dist: 15.4m | Pos: (7.8, -13.3, 20.1) | Dim: 4.0x1.4x1.2 | Sévérité: 96
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 145 fusionne les GT: ['199 (54 pts)', '200 (21 pts)'] | Taille Pred: 75 pts | Dist: 27.2m | Pos: (12.2, 24.4, 21.4) | Dim: 4.2x7.7x0.9 | Sévérité: 21
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 152 fusionne les GT: ['3 (27 pts)', '1 (9 pts)'] | Taille Pred: 36 pts | Dist: 22.3m | Pos: (13.2, -18.0, 20.4) | Dim: 1.3x1.2x1.1 | Sévérité: 9
+--- FRAME 86 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 11 | Taille: 2 pts | Dist: 42.1m | Pos: (11.2, 40.6, 23.4) | Dim: 0.1x0.2x0.0 | Sévérité: 2
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 145 -> Nouveau Pred: 160 | Taille: 18 pts | Dist: 29.9m | Pos: (18.6, 23.4, 22.2) | Dim: 1.3x1.1x0.7 | Sévérité: 18
+  [ID SWITCH] Classe: car | GT_ID: 198 | Ancien Pred: 118 -> Nouveau Pred: 157 | Taille: 97 pts | Dist: 10.8m | Pos: (-0.1, 10.8, 21.2) | Dim: 1.1x1.0x1.5 | Sévérité: 97
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 153 -> Nouveau Pred: 166 | Taille: 41 pts | Dist: 8.7m | Pos: (8.7, 0.5, 21.4) | Dim: 0.4x0.5x1.4 | Sévérité: 41
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 145 -> Nouveau Pred: 159 | Taille: 47 pts | Dist: 23.0m | Pos: (14.8, 17.5, 21.5) | Dim: 2.0x4.3x1.1 | Sévérité: 47
+  [ID SWITCH] Classe: person | GT_ID: 2 | Ancien Pred: 141 -> Nouveau Pred: 165 | Taille: 60 pts | Dist: 7.6m | Pos: (7.6, -0.4, 21.0) | Dim: 1.0x0.8x1.5 | Sévérité: 60
+  [ID SWITCH] Classe: car | GT_ID: 260 | Ancien Pred: 144 -> Nouveau Pred: 158 | Taille: 15 pts | Dist: 60.7m | Pos: (-55.6, 24.4, 21.2) | Dim: 1.4x1.3x0.8 | Sévérité: 15
+  [ID SWITCH] Classe: bicycle | GT_ID: 25 | Ancien Pred: 150 -> Nouveau Pred: 163 | Taille: 41 pts | Dist: 16.1m | Pos: (14.0, 7.8, 21.4) | Dim: 0.7x1.8x0.6 | Sévérité: 41
+  [FN - Non Détecté] Classe: person | GT_ID: 10 | Taille: 1 pts | Dist: 9.4m | Pos: (8.7, -3.5, 21.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Faible Overlap] Classe: car | GT_ID: 1 | Taille: 349 pts | Max Pred ID: 146 (12 pts) | Dist: 10.4m | Pos: (1.0, -10.3, 20.7) | Dim: 4.2x2.2x1.4 | Sévérité: 337
+  [ID SWITCH] Classe: bicycle | GT_ID: 24 | Ancien Pred: 151 -> Nouveau Pred: 164 | Taille: 69 pts | Dist: 6.5m | Pos: (6.4, 0.9, 20.9) | Dim: 1.2x1.5x1.0 | Sévérité: 69
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 152 -> Nouveau Pred: 167 | Taille: 25 pts | Dist: 24.8m | Pos: (9.5, -22.9, 20.2) | Dim: 0.4x0.6x1.2 | Sévérité: 25
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 152 -> Nouveau Pred: 167 | Taille: 7 pts | Dist: 24.6m | Pos: (10.4, -22.3, 20.6) | Dim: 0.3x0.2x0.2 | Sévérité: 7
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 148 -> Nouveau Pred: 162 | Taille: 11 pts | Dist: 23.6m | Pos: (11.2, -20.8, 20.1) | Dim: 3.5x2.3x1.0 | Sévérité: 11
+  [ID SWITCH] Classe: car | GT_ID: 194 | Ancien Pred: 147 -> Nouveau Pred: 161 | Taille: 102 pts | Dist: 18.1m | Pos: (5.2, -17.4, 20.0) | Dim: 3.9x1.9x1.4 | Sévérité: 102
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 149 -> Nouveau Pred: 156 | Taille: 18 pts | Dist: 30.4m | Pos: (17.9, -24.5, 19.8) | Dim: 0.9x1.1x0.5 | Sévérité: 18
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 20.1m | Pos: (-20.0, -1.8, 20.0) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 167 fusionne les GT: ['3 (25 pts)', '1 (7 pts)'] | Taille Pred: 32 pts | Dist: 24.7m | Pos: (9.7, -22.8, 20.3) | Dim: 1.2x1.0x1.2 | Sévérité: 7
+--- FRAME 87 ---
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 146 -> Nouveau Pred: 169 | Taille: 316 pts | Dist: 11.4m | Pos: (0.6, -11.4, 20.7) | Dim: 4.3x2.3x1.4 | Sévérité: 316
+  [ID SWITCH] Classe: person | GT_ID: 0 | Ancien Pred: 140 -> Nouveau Pred: 165 | Taille: 2 pts | Dist: 8.1m | Pos: (7.9, -1.8, 21.1) | Dim: 1.5x0.8x0.7 | Sévérité: 2
+--- FRAME 88 ---
+  [ID SWITCH] Classe: car | GT_ID: 198 | Ancien Pred: 157 -> Nouveau Pred: 171 | Taille: 22 pts | Dist: 10.6m | Pos: (-1.4, 10.5, 21.8) | Dim: 1.3x1.1x0.3 | Sévérité: 22
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 155 -> Nouveau Pred: 175 | Taille: 265 pts | Dist: 28.5m | Pos: (-28.2, 3.8, 20.9) | Dim: 1.8x1.0x1.7 | Sévérité: 265
+  [FN - Non Détecté] Classe: person | GT_ID: 10 | Taille: 1 pts | Dist: 10.3m | Pos: (7.9, -6.7, 20.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 167 fusionne les GT: ['3 (24 pts)', '1 (6 pts)'] | Taille Pred: 30 pts | Dist: 26.9m | Pos: (7.3, -25.9, 20.3) | Dim: 1.4x0.8x1.3 | Sévérité: 6
+--- FRAME 89 ---
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 166 -> Nouveau Pred: 184 | Taille: 21 pts | Dist: 11.1m | Pos: (6.8, -8.8, 21.8) | Dim: 0.5x0.3x1.1 | Sévérité: 21
+  [ID SWITCH] Classe: car | GT_ID: 198 | Ancien Pred: 171 -> Nouveau Pred: 177 | Taille: 83 pts | Dist: 5.3m | Pos: (0.9, 5.2, 21.9) | Dim: 2.9x2.9x0.6 | Sévérité: 83
+  [ID SWITCH] Classe: person | GT_ID: 2 | Ancien Pred: 165 -> Nouveau Pred: 184 | Taille: 28 pts | Dist: 10.7m | Pos: (5.4, -9.2, 21.5) | Dim: 0.3x0.4x0.9 | Sévérité: 28
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 1 pts | Dist: 27.7m | Pos: (24.8, 12.2, 22.1) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: bicycle | GT_ID: 25 | Ancien Pred: 163 -> Nouveau Pred: 182 | Taille: 21 pts | Dist: 14.7m | Pos: (14.3, -3.1, 21.4) | Dim: 1.2x1.1x0.8 | Sévérité: 21
+  [FN - Faible Overlap] Classe: car | GT_ID: 1 | Taille: 243 pts | Max Pred ID: 169 (10 pts) | Dist: 17.3m | Pos: (-3.7, -16.9, 20.8) | Dim: 3.7x2.9x1.5 | Sévérité: 233
+  [ID SWITCH] Classe: bicycle | GT_ID: 24 | Ancien Pred: 164 -> Nouveau Pred: 181 | Taille: 28 pts | Dist: 9.1m | Pos: (5.1, -7.5, 21.2) | Dim: 1.2x0.8x0.9 | Sévérité: 28
+  [ID SWITCH] Classe: car | GT_ID: 260 | Ancien Pred: 158 -> Nouveau Pred: 176 | Taille: 22 pts | Dist: 57.6m | Pos: (-46.7, 33.8, 20.8) | Dim: 1.1x1.0x0.3 | Sévérité: 22
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 167 -> Nouveau Pred: 183 | Taille: 25 pts | Dist: 31.4m | Pos: (0.4, -31.4, 20.2) | Dim: 0.4x0.6x1.3 | Sévérité: 25
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 167 -> Nouveau Pred: 183 | Taille: 7 pts | Dist: 31.1m | Pos: (1.4, -31.1, 20.7) | Dim: 0.6x0.3x0.3 | Sévérité: 7
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 156 -> Nouveau Pred: 180 | Taille: 18 pts | Dist: 36.5m | Pos: (7.9, -35.6, 20.1) | Dim: 1.1x0.9x1.3 | Sévérité: 18
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 162 -> Nouveau Pred: 179 | Taille: 12 pts | Dist: 30.1m | Pos: (2.6, -30.0, 20.3) | Dim: 2.8x2.6x1.3 | Sévérité: 12
+  [ID SWITCH] Classe: car | GT_ID: 194 | Ancien Pred: 161 -> Nouveau Pred: 178 | Taille: 75 pts | Dist: 24.8m | Pos: (-1.9, -24.8, 20.0) | Dim: 3.5x2.5x1.0 | Sévérité: 75
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 32.6m | Pos: (6.5, -32.0, 19.8) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 184 fusionne les GT: ['2 (28 pts)', '15 (21 pts)'] | Taille Pred: 49 pts | Dist: 10.9m | Pos: (6.0, -9.1, 21.7) | Dim: 1.8x0.8x1.1 | Sévérité: 21
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 183 fusionne les GT: ['3 (25 pts)', '1 (7 pts)'] | Taille Pred: 32 pts | Dist: 31.3m | Pos: (0.6, -31.3, 20.3) | Dim: 1.6x0.6x1.3 | Sévérité: 7
+--- FRAME 90 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 6 pts | Dist: 26.3m | Pos: (24.3, 10.0, 22.2) | Dim: 2.4x2.3x0.5 | Sévérité: 6
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 159 -> Nouveau Pred: 188 | Taille: 15 pts | Dist: 17.7m | Pos: (17.4, 3.3, 22.0) | Dim: 0.9x1.1x0.6 | Sévérité: 15
+  [FN - Faible Overlap] Classe: car | GT_ID: 1 | Taille: 245 pts | Max Pred ID: 169 (25 pts) | Dist: 18.5m | Pos: (-4.4, -18.0, 21.1) | Dim: 3.7x3.8x1.5 | Sévérité: 220
+  [FN - Faible Overlap] Classe: bicyclist | GT_ID: 1 | Taille: 1310 pts | Max Pred ID: 154 (98 pts) | Dist: 24.4m | Pos: (-24.4, 1.4, 20.7) | Dim: 1.8x1.5x1.9 | Sévérité: 1212
+  [FN - Faible Overlap] Classe: bicyclist | GT_ID: 4 | Taille: 466 pts | Max Pred ID: 187 (52 pts) | Dist: 27.3m | Pos: (-27.0, 4.3, 20.6) | Dim: 2.0x1.6x1.7 | Sévérité: 414
+  [SPLIT - Sur-segmentation] Classe: bicyclist | GT_ID: 4 divisée en preds: ['187 (52 pts)', '186 (48 pts)'] | Taille GT: 466 pts | Dist: 27.3m | Pos: (-27.0, 4.3, 20.6) | Dim: 2.0x1.6x1.7 | Sévérité: 414
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 6 | Taille: 3 pts | Dist: 26.9m | Pos: (0.7, -26.9, 20.3) | Dim: 0.0x0.3x0.0 | Sévérité: 3
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 184 fusionne les GT: ['15 (29 pts)', '2 (4 pts)'] | Taille Pred: 33 pts | Dist: 11.8m | Pos: (6.1, -10.1, 21.9) | Dim: 1.6x0.5x1.1 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 183 fusionne les GT: ['3 (23 pts)', '1 (8 pts)'] | Taille Pred: 31 pts | Dist: 32.4m | Pos: (-0.5, -32.4, 20.7) | Dim: 1.3x0.6x1.3 | Sévérité: 8
+--- FRAME 91 ---
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 4 pts | Dist: 14.5m | Pos: (4.6, -13.8, 21.9) | Dim: 0.4x0.4x1.0 | Sévérité: 4
+  [FN - Non Détecté] Classe: person | GT_ID: 1 | Taille: 8 pts | Dist: 32.1m | Pos: (0.9, -32.1, 21.5) | Dim: 0.4x0.3x0.7 | Sévérité: 8
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 169 -> Nouveau Pred: 191 | Taille: 205 pts | Dist: 18.6m | Pos: (-4.2, -18.1, 21.2) | Dim: 3.8x3.7x1.2 | Sévérité: 205
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 179 -> Nouveau Pred: 178 | Taille: 5 pts | Dist: 31.0m | Pos: (2.1, -31.0, 21.3) | Dim: 0.3x1.1x0.7 | Sévérité: 5
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 180 -> Nouveau Pred: 190 | Taille: 15 pts | Dist: 37.6m | Pos: (7.8, -36.8, 20.9) | Dim: 1.4x0.8x0.5 | Sévérité: 15
+  [FN - Non Détecté] Classe: car | GT_ID: 262 | Taille: 8 pts | Dist: 63.8m | Pos: (-51.9, 37.1, 20.4) | Dim: 1.3x0.5x0.3 | Sévérité: 8
+  [ID SWITCH] Classe: bicyclist | GT_ID: 1 | Ancien Pred: 154 -> Nouveau Pred: 192 | Taille: 1894 pts | Dist: 24.3m | Pos: (-24.3, 0.3, 20.7) | Dim: 1.9x1.3x1.9 | Sévérité: 1894
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 175 -> Nouveau Pred: 195 | Taille: 583 pts | Dist: 27.2m | Pos: (-27.1, 3.0, 20.6) | Dim: 2.0x1.5x1.8 | Sévérité: 583
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 184 fusionne les GT: ['15 (31 pts)', '2 (27 pts)'] | Taille Pred: 58 pts | Dist: 11.6m | Pos: (5.7, -10.1, 21.9) | Dim: 1.5x0.7x1.5 | Sévérité: 27
+--- FRAME 92 ---
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 184 -> Nouveau Pred: 202 | Taille: 24 pts | Dist: 9.6m | Pos: (7.3, -6.2, 22.0) | Dim: 0.4x0.4x1.2 | Sévérité: 24
+  [ID SWITCH] Classe: person | GT_ID: 9 | Ancien Pred: 15 -> Nouveau Pred: 184 | Taille: 8 pts | Dist: 12.1m | Pos: (6.3, -10.3, 21.9) | Dim: 0.4x0.3x0.3 | Sévérité: 8
+  [ID SWITCH] Classe: person | GT_ID: 2 | Ancien Pred: 184 -> Nouveau Pred: 202 | Taille: 32 pts | Dist: 9.2m | Pos: (6.3, -6.7, 21.5) | Dim: 0.4x0.3x1.3 | Sévérité: 32
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 183 -> Nouveau Pred: 201 | Taille: 7 pts | Dist: 29.6m | Pos: (5.6, -29.1, 21.6) | Dim: 0.4x0.4x0.8 | Sévérité: 7
+  [FN - Faible Overlap] Classe: car | GT_ID: 1 | Taille: 161 pts | Max Pred ID: 191 (12 pts) | Dist: 16.1m | Pos: (-1.6, -16.0, 21.3) | Dim: 4.0x3.2x1.4 | Sévérité: 149
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 183 -> Nouveau Pred: 201 | Taille: 21 pts | Dist: 29.9m | Pos: (4.9, -29.5, 21.1) | Dim: 0.3x0.7x1.2 | Sévérité: 21
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 178 -> Nouveau Pred: 199 | Taille: 12 pts | Dist: 28.8m | Pos: (6.8, -28.0, 21.4) | Dim: 2.7x2.0x1.3 | Sévérité: 12
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 190 -> Nouveau Pred: 197 | Taille: 9 pts | Dist: 35.1m | Pos: (13.0, -32.6, 21.0) | Dim: 1.2x0.8x0.6 | Sévérité: 9
+  [ID SWITCH] Classe: bicycle | GT_ID: 24 | Ancien Pred: 181 -> Nouveau Pred: 200 | Taille: 48 pts | Dist: 7.5m | Pos: (5.2, -5.4, 21.1) | Dim: 1.3x1.3x1.0 | Sévérité: 48
+  [ID SWITCH] Classe: car | GT_ID: 194 | Ancien Pred: 178 -> Nouveau Pred: 198 | Taille: 69 pts | Dist: 23.6m | Pos: (1.4, -23.5, 20.7) | Dim: 3.8x3.1x1.0 | Sévérité: 69
+  [FN - Non Détecté] Classe: car | GT_ID: 6 | Taille: 2 pts | Dist: 20.8m | Pos: (4.8, -20.3, 21.1) | Dim: 0.0x0.1x0.0 | Sévérité: 2
+  [ID SWITCH] Classe: car | GT_ID: 260 | Ancien Pred: 176 -> Nouveau Pred: 196 | Taille: 35 pts | Dist: 59.0m | Pos: (-52.5, 27.1, 19.8) | Dim: 1.6x1.4x0.9 | Sévérité: 35
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 38 | Taille: 1 pts | Dist: 31.0m | Pos: (-12.5, 28.4, 20.7) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 202 fusionne les GT: ['2 (32 pts)', '15 (24 pts)'] | Taille Pred: 56 pts | Dist: 9.4m | Pos: (6.7, -6.5, 21.7) | Dim: 1.4x0.9x1.7 | Sévérité: 24
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 201 fusionne les GT: ['3 (21 pts)', '1 (7 pts)'] | Taille Pred: 28 pts | Dist: 29.8m | Pos: (5.1, -29.4, 21.2) | Dim: 1.1x1.0x1.4 | Sévérité: 7
+--- FRAME 93 ---
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 202 -> Nouveau Pred: 212 | Taille: 22 pts | Dist: 9.1m | Pos: (7.7, 4.9, 21.7) | Dim: 0.3x0.5x1.4 | Sévérité: 22
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 201 -> Nouveau Pred: 211 | Taille: 9 pts | Dist: 22.5m | Pos: (14.9, -16.9, 21.4) | Dim: 0.5x0.4x0.8 | Sévérité: 9
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 191 -> Nouveau Pred: 207 | Taille: 134 pts | Dist: 8.2m | Pos: (3.0, -7.6, 21.1) | Dim: 4.1x1.8x1.2 | Sévérité: 134
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 201 -> Nouveau Pred: 211 | Taille: 21 pts | Dist: 22.7m | Pos: (14.4, -17.6, 20.9) | Dim: 0.4x0.6x1.2 | Sévérité: 21
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 199 -> Nouveau Pred: 209 | Taille: 11 pts | Dist: 21.7m | Pos: (15.2, -15.5, 21.3) | Dim: 3.1x1.3x1.1 | Sévérité: 11
+  [ID SWITCH] Classe: person | GT_ID: 2 | Ancien Pred: 202 -> Nouveau Pred: 212 | Taille: 28 pts | Dist: 8.1m | Pos: (7.0, 4.1, 21.3) | Dim: 0.5x0.4x1.2 | Sévérité: 28
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 197 -> Nouveau Pred: 206 | Taille: 6 pts | Dist: 28.5m | Pos: (22.7, -17.2, 20.7) | Dim: 0.5x0.6x0.6 | Sévérité: 6
+  [ID SWITCH] Classe: car | GT_ID: 194 | Ancien Pred: 198 -> Nouveau Pred: 208 | Taille: 60 pts | Dist: 15.8m | Pos: (8.6, -13.3, 20.6) | Dim: 3.8x1.4x0.9 | Sévérité: 60
+  [ID SWITCH] Classe: bicycle | GT_ID: 24 | Ancien Pred: 200 -> Nouveau Pred: 210 | Taille: 42 pts | Dist: 7.3m | Pos: (5.5, 4.8, 20.9) | Dim: 1.1x1.5x1.0 | Sévérité: 42
+  [ID SWITCH] Classe: car | GT_ID: 198 | Ancien Pred: 177 -> Nouveau Pred: 203 | Taille: 28 pts | Dist: 14.6m | Pos: (-5.8, 13.4, 20.9) | Dim: 0.6x0.4x0.9 | Sévérité: 28
+  [ID SWITCH] Classe: car | GT_ID: 262 | Ancien Pred: 196 -> Nouveau Pred: 205 | Taille: 2 pts | Dist: 67.6m | Pos: (-66.1, 14.3, 20.4) | Dim: 0.3x0.9x0.0 | Sévérité: 2
+  [ID SWITCH] Classe: car | GT_ID: 3 | Ancien Pred: 134 -> Nouveau Pred: 204 | Taille: 1051 pts | Dist: 13.8m | Pos: (-13.1, -4.4, 20.8) | Dim: 3.8x1.6x1.2 | Sévérité: 1051
+  [ID SWITCH] Classe: car | GT_ID: 260 | Ancien Pred: 196 -> Nouveau Pred: 205 | Taille: 32 pts | Dist: 61.5m | Pos: (-60.2, 12.5, 19.9) | Dim: 0.5x1.4x0.5 | Sévérité: 32
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 1 pts | Dist: 8.9m | Pos: (8.9, 0.0, 20.6) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 212 fusionne les GT: ['2 (28 pts)', '15 (22 pts)'] | Taille Pred: 50 pts | Dist: 8.5m | Pos: (7.3, 4.4, 21.5) | Dim: 1.2x1.2x1.6 | Sévérité: 22
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 211 fusionne les GT: ['3 (21 pts)', '1 (9 pts)'] | Taille Pred: 30 pts | Dist: 22.6m | Pos: (14.5, -17.4, 21.0) | Dim: 1.0x1.1x1.5 | Sévérité: 9
+--- FRAME 94 ---
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 211 -> Nouveau Pred: 219 | Taille: 6 pts | Dist: 20.1m | Pos: (17.3, -10.2, 21.0) | Dim: 0.3x0.2x0.5 | Sévérité: 6
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 212 -> Nouveau Pred: 220 | Taille: 22 pts | Dist: 11.8m | Pos: (6.4, 9.9, 21.4) | Dim: 0.2x0.4x1.1 | Sévérité: 22
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 211 -> Nouveau Pred: 219 | Taille: 17 pts | Dist: 20.3m | Pos: (17.0, -11.0, 20.6) | Dim: 0.3x0.6x1.0 | Sévérité: 17
+  [ID SWITCH] Classe: person | GT_ID: 2 | Ancien Pred: 212 -> Nouveau Pred: 220 | Taille: 27 pts | Dist: 10.8m | Pos: (5.8, 9.1, 21.0) | Dim: 0.4x0.4x1.3 | Sévérité: 27
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 207 -> Nouveau Pred: 216 | Taille: 105 pts | Dist: 5.2m | Pos: (4.1, -3.1, 20.8) | Dim: 4.2x1.6x0.8 | Sévérité: 105
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 188 -> Nouveau Pred: 214 | Taille: 3 pts | Dist: 28.8m | Pos: (4.7, 28.4, 21.1) | Dim: 0.2x3.0x0.2 | Sévérité: 3
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 160 -> Nouveau Pred: 214 | Taille: 8 pts | Dist: 35.7m | Pos: (5.8, 35.2, 21.1) | Dim: 0.8x3.2x0.3 | Sévérité: 8
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 206 -> Nouveau Pred: 213 | Taille: 10 pts | Dist: 26.8m | Pos: (25.2, -9.1, 20.2) | Dim: 0.2x0.8x0.3 | Sévérité: 10
+  [ID SWITCH] Classe: car | GT_ID: 260 | Ancien Pred: 205 -> Nouveau Pred: 215 | Taille: 39 pts | Dist: 62.3m | Pos: (-62.0, 5.5, 20.3) | Dim: 1.5x1.5x0.9 | Sévérité: 39
+  [ID SWITCH] Classe: car | GT_ID: 262 | Ancien Pred: 205 -> Nouveau Pred: 215 | Taille: 2 pts | Dist: 68.9m | Pos: (-68.6, 5.7, 20.5) | Dim: 0.3x0.1x0.3 | Sévérité: 2
+  [ID SWITCH] Classe: car | GT_ID: 194 | Ancien Pred: 208 -> Nouveau Pred: 217 | Taille: 53 pts | Dist: 13.0m | Pos: (10.4, -7.8, 20.2) | Dim: 3.6x1.4x1.0 | Sévérité: 53
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 209 -> Nouveau Pred: 217 | Taille: 2 pts | Dist: 20.1m | Pos: (18.3, -8.3, 20.1) | Dim: 3.1x0.4x0.6 | Sévérité: 2
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 195 divisée en preds: ['217 (1 pts)', '213 (1 pts)'] | Taille GT: 2 pts | Dist: 20.1m | Pos: (18.3, -8.3, 20.1) | Dim: 3.1x0.4x0.6 | Sévérité: 1
+  [ID SWITCH] Classe: bicycle | GT_ID: 24 | Ancien Pred: 210 -> Nouveau Pred: 218 | Taille: 22 pts | Dist: 10.1m | Pos: (4.2, 9.1, 20.8) | Dim: 0.4x1.4x0.9 | Sévérité: 22
+  [FN - Non Détecté] Classe: person | GT_ID: 10 | Taille: 2 pts | Dist: 10.3m | Pos: (8.1, 6.4, 20.7) | Dim: 0.2x0.1x0.0 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 219 fusionne les GT: ['3 (17 pts)', '1 (6 pts)'] | Taille Pred: 23 pts | Dist: 20.2m | Pos: (17.1, -10.8, 20.7) | Dim: 0.7x1.2x1.3 | Sévérité: 6
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 220 fusionne les GT: ['2 (27 pts)', '15 (22 pts)'] | Taille Pred: 49 pts | Dist: 11.3m | Pos: (6.1, 9.5, 21.2) | Dim: 1.0x1.2x1.5 | Sévérité: 22
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 214 fusionne les GT: ['200 (8 pts)', '199 (1 pts)'] | Taille Pred: 9 pts | Dist: 35.2m | Pos: (5.7, 34.7, 21.1) | Dim: 1.4x7.6x0.4 | Sévérité: 1
+--- FRAME 95 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 262 | Taille: 8 pts | Dist: 68.7m | Pos: (-68.6, 2.8, 21.2) | Dim: 0.5x0.9x0.3 | Sévérité: 8
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 219 -> Nouveau Pred: 224 | Taille: 16 pts | Dist: 19.5m | Pos: (17.7, -8.1, 20.3) | Dim: 0.4x0.4x1.0 | Sévérité: 16
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 219 -> Nouveau Pred: 224 | Taille: 8 pts | Dist: 19.4m | Pos: (18.0, -7.3, 20.5) | Dim: 0.1x0.5x0.5 | Sévérité: 8
+  [FN - Non Détecté] Classe: person | GT_ID: 15 | Taille: 13 pts | Dist: 13.3m | Pos: (5.7, 12.1, 21.1) | Dim: 0.1x0.3x0.6 | Sévérité: 13
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 214 -> Nouveau Pred: 222 | Taille: 8 pts | Dist: 37.1m | Pos: (3.3, 37.0, 20.6) | Dim: 1.6x0.4x0.6 | Sévérité: 8
+  [ID SWITCH] Classe: car | GT_ID: 196 | Ancien Pred: 213 -> Nouveau Pred: 221 | Taille: 9 pts | Dist: 26.2m | Pos: (25.6, -5.6, 19.8) | Dim: 0.4x0.9x0.3 | Sévérité: 9
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 194 divisée en preds: ['217 (26 pts)', '223 (6 pts)'] | Taille GT: 49 pts | Dist: 12.3m | Pos: (11.2, -5.3, 19.9) | Dim: 3.6x1.7x1.0 | Sévérité: 23
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 217 -> Nouveau Pred: 221 | Taille: 2 pts | Dist: 19.5m | Pos: (18.8, -5.3, 19.8) | Dim: 3.5x0.1x0.4 | Sévérité: 2
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 1 pts | Dist: 10.5m | Pos: (7.2, 7.6, 20.8) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 24 | Taille: 1 pts | Dist: 11.6m | Pos: (3.5, 11.1, 20.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 224 fusionne les GT: ['3 (16 pts)', '1 (8 pts)'] | Taille Pred: 24 pts | Dist: 19.4m | Pos: (17.8, -7.8, 20.4) | Dim: 0.5x1.2x1.0 | Sévérité: 8
+--- FRAME 96 ---
+  [ID SWITCH] Classe: car | GT_ID: 260 | Ancien Pred: 215 -> Nouveau Pred: 225 | Taille: 47 pts | Dist: 62.4m | Pos: (-62.4, 1.0, 20.9) | Dim: 1.4x1.5x0.9 | Sévérité: 47
+  [ID SWITCH] Classe: car | GT_ID: 262 | Ancien Pred: 215 -> Nouveau Pred: 225 | Taille: 3 pts | Dist: 69.3m | Pos: (-69.3, 0.2, 21.3) | Dim: 1.4x0.4x0.3 | Sévérité: 3
+  [FN - Non Détecté] Classe: person | GT_ID: 1 | Taille: 10 pts | Dist: 19.0m | Pos: (18.2, -5.4, 20.0) | Dim: 0.5x0.4x0.8 | Sévérité: 10
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 221 -> Nouveau Pred: 227 | Taille: 8 pts | Dist: 19.2m | Pos: (18.8, -3.8, 19.8) | Dim: 3.6x1.5x1.5 | Sévérité: 8
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 214 -> Nouveau Pred: 222 | Taille: 1 pts | Dist: 33.3m | Pos: (1.2, 33.3, 20.6) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: car | GT_ID: 194 | Ancien Pred: 217 -> Nouveau Pred: 226 | Taille: 30 pts | Dist: 11.8m | Pos: (11.2, -3.7, 19.7) | Dim: 3.6x1.6x1.0 | Sévérité: 30
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 1 pts | Dist: 12.1m | Pos: (7.1, 9.8, 20.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [SPLIT - Sur-segmentation] Classe: bicyclist | GT_ID: 1 divisée en preds: ['192 (1079 pts)', '228 (177 pts)'] | Taille GT: 1276 pts | Dist: 20.7m | Pos: (-20.5, -2.7, 20.5) | Dim: 2.2x0.7x1.9 | Sévérité: 197
+  [FN - Non Détecté] Classe: person | GT_ID: 10 | Taille: 1 pts | Dist: 12.4m | Pos: (7.1, 10.1, 19.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 220 fusionne les GT: ['15 (9 pts)', '2 (8 pts)'] | Taille Pred: 17 pts | Dist: 13.9m | Pos: (4.8, 13.1, 20.8) | Dim: 0.8x1.1x0.6 | Sévérité: 8
+--- FRAME 97 ---
+  [ID SWITCH] Classe: car | GT_ID: 262 | Ancien Pred: 225 -> Nouveau Pred: 231 | Taille: 8 pts | Dist: 68.5m | Pos: (-68.4, 4.3, 21.9) | Dim: 0.8x1.1x0.2 | Sévérité: 8
+  [ID SWITCH] Classe: car | GT_ID: 260 | Ancien Pred: 225 -> Nouveau Pred: 231 | Taille: 40 pts | Dist: 62.2m | Pos: (-62.1, 3.8, 21.1) | Dim: 1.2x1.4x0.9 | Sévérité: 40
+  [SPLIT - Sur-segmentation] Classe: bicyclist | GT_ID: 1 divisée en preds: ['192 (798 pts)', '228 (108 pts)'] | Taille GT: 924 pts | Dist: 20.5m | Pos: (-20.2, -3.1, 20.3) | Dim: 2.0x0.9x2.0 | Sévérité: 126
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 220 -> Nouveau Pred: 235 | Taille: 7 pts | Dist: 12.6m | Pos: (6.0, 11.1, 20.7) | Dim: 0.1x0.3x0.4 | Sévérité: 7
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 224 -> Nouveau Pred: 236 | Taille: 8 pts | Dist: 19.7m | Pos: (17.7, -8.6, 19.5) | Dim: 0.3x0.5x0.5 | Sévérité: 8
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 216 -> Nouveau Pred: 232 | Taille: 102 pts | Dist: 4.6m | Pos: (4.1, -2.1, 19.8) | Dim: 3.9x2.0x1.2 | Sévérité: 102
+  [ID SWITCH] Classe: person | GT_ID: 2 | Ancien Pred: 220 -> Nouveau Pred: 235 | Taille: 4 pts | Dist: 11.8m | Pos: (5.4, 10.5, 20.6) | Dim: 0.2x0.2x0.2 | Sévérité: 4
+  [ID SWITCH] Classe: car | GT_ID: 198 | Ancien Pred: 203 -> Nouveau Pred: 229 | Taille: 83 pts | Dist: 18.2m | Pos: (-7.5, 16.6, 20.3) | Dim: 3.5x1.8x1.2 | Sévérité: 83
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 222 -> Nouveau Pred: 230 | Taille: 7 pts | Dist: 37.9m | Pos: (4.1, 37.7, 19.9) | Dim: 0.2x2.8x0.4 | Sévérité: 7
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 224 -> Nouveau Pred: 236 | Taille: 8 pts | Dist: 19.7m | Pos: (17.4, -9.3, 19.2) | Dim: 0.3x0.4x0.8 | Sévérité: 8
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 222 -> Nouveau Pred: 230 | Taille: 3 pts | Dist: 32.3m | Pos: (3.6, 32.1, 19.8) | Dim: 0.0x0.2x0.3 | Sévérité: 3
+  [ID SWITCH] Classe: bicycle | GT_ID: 25 | Ancien Pred: 182 -> Nouveau Pred: 234 | Taille: 4 pts | Dist: 22.0m | Pos: (7.1, 20.8, 19.7) | Dim: 0.1x0.8x0.5 | Sévérité: 4
+  [ID SWITCH] Classe: car | GT_ID: 194 | Ancien Pred: 226 -> Nouveau Pred: 233 | Taille: 21 pts | Dist: 12.6m | Pos: (10.8, -6.5, 19.2) | Dim: 3.4x1.6x0.7 | Sévérité: 21
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 227 -> Nouveau Pred: 233 | Taille: 1 pts | Dist: 18.1m | Pos: (16.9, -6.6, 19.1) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Faible Overlap] Classe: car | GT_ID: 3 | Taille: 598 pts | Max Pred ID: 204 (37 pts) | Dist: 12.4m | Pos: (-12.1, -2.6, 20.1) | Dim: 3.5x1.5x1.3 | Sévérité: 561
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 231 fusionne les GT: ['260 (40 pts)', '262 (8 pts)'] | Taille Pred: 48 pts | Dist: 63.3m | Pos: (-63.1, 3.9, 21.2) | Dim: 7.0x1.7x1.1 | Sévérité: 8
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 235 fusionne les GT: ['15 (7 pts)', '2 (4 pts)'] | Taille Pred: 11 pts | Dist: 12.3m | Pos: (5.8, 10.9, 20.7) | Dim: 0.8x0.9x0.4 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 236 fusionne les GT: ['1 (8 pts)', '3 (8 pts)'] | Taille Pred: 16 pts | Dist: 19.7m | Pos: (17.6, -9.0, 19.3) | Dim: 0.6x1.1x1.0 | Sévérité: 8
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 230 fusionne les GT: ['200 (7 pts)', '199 (3 pts)'] | Taille Pred: 10 pts | Dist: 36.2m | Pos: (3.9, 36.0, 19.9) | Dim: 0.6x7.2x0.4 | Sévérité: 3
+--- FRAME 98 ---
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 230 -> Nouveau Pred: 238 | Taille: 14 pts | Dist: 36.0m | Pos: (5.6, 35.5, 20.1) | Dim: 1.0x3.3x1.2 | Sévérité: 14
+  [FN - Faible Overlap] Classe: car | GT_ID: 3 | Taille: 517 pts | Max Pred ID: 204 (45 pts) | Dist: 12.7m | Pos: (-12.3, -3.0, 20.0) | Dim: 3.4x1.5x1.3 | Sévérité: 472
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 231 fusionne les GT: ['260 (35 pts)', '262 (11 pts)'] | Taille Pred: 46 pts | Dist: 63.6m | Pos: (-63.3, 5.2, 21.2) | Dim: 6.9x1.9x1.1 | Sévérité: 11
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 236 fusionne les GT: ['3 (9 pts)', '1 (8 pts)'] | Taille Pred: 17 pts | Dist: 20.1m | Pos: (17.2, -10.5, 19.2) | Dim: 0.5x1.1x0.8 | Sévérité: 8
+--- FRAME 99 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 262 | Taille: 4 pts | Dist: 68.7m | Pos: (-68.6, 4.2, 21.6) | Dim: 1.0x1.2x0.3 | Sévérité: 4
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 230 -> Nouveau Pred: 238 | Taille: 4 pts | Dist: 29.0m | Pos: (3.8, 28.7, 20.1) | Dim: 0.9x1.1x0.5 | Sévérité: 4
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 236 -> Nouveau Pred: 240 | Taille: 9 pts | Dist: 19.7m | Pos: (17.6, -8.7, 19.5) | Dim: 0.5x0.4x0.8 | Sévérité: 9
+  [FN - Non Détecté] Classe: person | GT_ID: 10 | Taille: 1 pts | Dist: 10.8m | Pos: (7.6, 7.7, 20.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 236 -> Nouveau Pred: 240 | Taille: 4 pts | Dist: 19.9m | Pos: (17.5, -9.5, 19.2) | Dim: 0.1x0.3x0.3 | Sévérité: 4
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 2 pts | Dist: 22.2m | Pos: (7.2, 21.0, 19.6) | Dim: 0.1x0.2x0.3 | Sévérité: 2
+  [FN - Faible Overlap] Classe: car | GT_ID: 3 | Taille: 450 pts | Max Pred ID: 204 (69 pts) | Dist: 12.3m | Pos: (-12.0, -2.6, 20.1) | Dim: 4.4x1.5x1.3 | Sévérité: 381
+  [FN - Non Détecté] Classe: car | GT_ID: 194 | Taille: 2 pts | Dist: 15.2m | Pos: (13.9, -6.0, 18.8) | Dim: 0.2x0.1x0.0 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 238 fusionne les GT: ['200 (9 pts)', '199 (2 pts)'] | Taille Pred: 11 pts | Dist: 35.2m | Pos: (4.3, 34.9, 20.0) | Dim: 1.2x7.9x0.8 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 240 fusionne les GT: ['1 (9 pts)', '3 (4 pts)'] | Taille Pred: 13 pts | Dist: 19.7m | Pos: (17.6, -9.0, 19.4) | Dim: 0.5x1.2x0.8 | Sévérité: 4
+--- FRAME 100 ---
+  [ID SWITCH] Classe: car | GT_ID: 260 | Ancien Pred: 231 -> Nouveau Pred: 242 | Taille: 70 pts | Dist: 62.2m | Pos: (-62.1, -3.4, 20.7) | Dim: 2.0x1.8x1.0 | Sévérité: 70
+  [ID SWITCH] Classe: car | GT_ID: 262 | Ancien Pred: 231 -> Nouveau Pred: 242 | Taille: 4 pts | Dist: 68.9m | Pos: (-68.7, -5.0, 21.2) | Dim: 1.8x0.6x0.3 | Sévérité: 4
+  [ID SWITCH] Classe: car | GT_ID: 198 | Ancien Pred: 229 -> Nouveau Pred: 243 | Taille: 38 pts | Dist: 24.0m | Pos: (-11.3, 21.2, 19.9) | Dim: 3.9x1.6x1.3 | Sévérité: 38
+  [ID SWITCH] Classe: car | GT_ID: 200 | Ancien Pred: 238 -> Nouveau Pred: 244 | Taille: 18 pts | Dist: 42.8m | Pos: (-4.3, 42.6, 19.8) | Dim: 1.9x0.9x0.9 | Sévérité: 18
+  [FN - Non Détecté] Classe: person | GT_ID: 9 | Taille: 1 pts | Dist: 16.1m | Pos: (5.3, 15.2, 20.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: bicyclist | GT_ID: 1 | Ancien Pred: 192 -> Nouveau Pred: 251 | Taille: 359 pts | Dist: 18.2m | Pos: (-18.2, -1.0, 20.4) | Dim: 1.9x0.7x1.9 | Sévérité: 359
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 240 -> Nouveau Pred: 248 | Taille: 10 pts | Dist: 18.6m | Pos: (18.5, 1.7, 19.7) | Dim: 0.3x0.5x0.5 | Sévérité: 10
+  [ID SWITCH] Classe: car | GT_ID: 3 | Ancien Pred: 204 -> Nouveau Pred: 241 | Taille: 423 pts | Dist: 11.7m | Pos: (-11.7, 1.2, 20.1) | Dim: 4.1x2.2x1.6 | Sévérité: 423
+  [ID SWITCH] Classe: car | GT_ID: 195 | Ancien Pred: 233 -> Nouveau Pred: 247 | Taille: 9 pts | Dist: 18.6m | Pos: (18.2, 3.7, 19.2) | Dim: 1.0x1.6x1.4 | Sévérité: 9
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 232 -> Nouveau Pred: 245 | Taille: 78 pts | Dist: 6.3m | Pos: (3.7, 5.1, 19.8) | Dim: 2.8x2.1x1.1 | Sévérité: 78
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 1 divisée en preds: ['245 (58 pts)', '246 (17 pts)'] | Taille GT: 78 pts | Dist: 6.3m | Pos: (3.7, 5.1, 19.8) | Dim: 2.8x2.1x1.1 | Sévérité: 20
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 238 -> Nouveau Pred: 244 | Taille: 10 pts | Dist: 37.8m | Pos: (-3.9, 37.6, 19.4) | Dim: 0.2x1.9x0.5 | Sévérité: 10
+  [FN - Non Détecté] Classe: car | GT_ID: 194 | Taille: 3 pts | Dist: 11.6m | Pos: (11.4, 2.4, 20.0) | Dim: 0.0x0.2x0.0 | Sévérité: 3
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 240 -> Nouveau Pred: 248 | Taille: 1 pts | Dist: 18.5m | Pos: (18.4, 1.0, 19.4) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 244 fusionne les GT: ['200 (18 pts)', '199 (10 pts)'] | Taille Pred: 28 pts | Dist: 41.0m | Pos: (-4.2, 40.8, 19.6) | Dim: 1.9x6.5x1.0 | Sévérité: 10
+--- FRAME 101 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 262 | Taille: 3 pts | Dist: 68.4m | Pos: (-68.2, -5.7, 20.9) | Dim: 0.8x0.4x0.3 | Sévérité: 3
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 1 divisée en preds: ['245 (54 pts)', '246 (21 pts)'] | Taille GT: 100 pts | Dist: 7.3m | Pos: (3.8, 6.3, 20.0) | Dim: 4.1x2.5x1.4 | Sévérité: 46
+  [FN - Non Détecté] Classe: car | GT_ID: 194 | Taille: 1 pts | Dist: 11.9m | Pos: (11.3, 3.8, 20.2) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 1 pts | Dist: 29.5m | Pos: (1.2, 29.5, 19.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 18.0m | Pos: (15.3, 9.4, 19.2) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 12.2m | Pos: (-12.2, 0.1, 19.4) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 244 fusionne les GT: ['199 (34 pts)', '200 (11 pts)'] | Taille Pred: 45 pts | Dist: 40.2m | Pos: (-4.6, 39.9, 19.7) | Dim: 2.6x8.2x1.0 | Sévérité: 11
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 248 fusionne les GT: ['1 (8 pts)', '3 (1 pts)'] | Taille Pred: 9 pts | Dist: 18.8m | Pos: (18.6, 3.1, 19.9) | Dim: 0.2x0.9x0.6 | Sévérité: 1
+--- FRAME 102 ---
+  [ID SWITCH] Classe: car | GT_ID: 262 | Ancien Pred: 242 -> Nouveau Pred: 254 | Taille: 12 pts | Dist: 68.5m | Pos: (-68.5, -2.4, 20.9) | Dim: 0.5x1.2x0.5 | Sévérité: 12
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 245 -> Nouveau Pred: 252 | Taille: 103 pts | Dist: 5.9m | Pos: (4.4, 4.1, 20.2) | Dim: 3.8x2.1x1.4 | Sévérité: 103
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 1 divisée en preds: ['252 (60 pts)', '253 (38 pts)'] | Taille GT: 103 pts | Dist: 5.9m | Pos: (4.4, 4.1, 20.2) | Dim: 3.8x2.1x1.4 | Sévérité: 43
+  [FN - Non Détecté] Classe: person | GT_ID: 10 | Taille: 1 pts | Dist: 15.7m | Pos: (5.8, 14.6, 20.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 11 pts | Dist: 41.6m | Pos: (-2.8, 41.5, 19.7) | Dim: 0.7x0.7x0.9 | Sévérité: 11
+  [ID SWITCH] Classe: person | GT_ID: 1 | Ancien Pred: 248 -> Nouveau Pred: 255 | Taille: 8 pts | Dist: 18.6m | Pos: (18.6, 0.1, 20.1) | Dim: 0.3x0.5x0.6 | Sévérité: 8
+  [ID SWITCH] Classe: car | GT_ID: 260 | Ancien Pred: 242 -> Nouveau Pred: 254 | Taille: 59 pts | Dist: 62.2m | Pos: (-62.1, -1.7, 20.2) | Dim: 2.4x1.8x0.6 | Sévérité: 59
+  [ID SWITCH] Classe: person | GT_ID: 3 | Ancien Pred: 248 -> Nouveau Pred: 255 | Taille: 1 pts | Dist: 18.5m | Pos: (18.5, -0.7, 19.8) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 3 pts | Dist: 27.4m | Pos: (3.1, 27.3, 19.5) | Dim: 0.1x0.4x0.3 | Sévérité: 3
+  [FN - Non Détecté] Classe: car | GT_ID: 195 | Taille: 1 pts | Dist: 18.3m | Pos: (18.1, 2.8, 18.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: car | GT_ID: 194 | Taille: 1 pts | Dist: 11.4m | Pos: (10.9, 3.2, 19.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 254 fusionne les GT: ['260 (59 pts)', '262 (12 pts)'] | Taille Pred: 71 pts | Dist: 63.2m | Pos: (-63.2, -1.8, 20.4) | Dim: 6.9x2.1x1.1 | Sévérité: 12
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 255 fusionne les GT: ['1 (8 pts)', '3 (1 pts)'] | Taille Pred: 9 pts | Dist: 18.6m | Pos: (18.6, -0.0, 20.1) | Dim: 0.3x1.0x0.6 | Sévérité: 1
+--- FRAME 103 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 1 divisée en preds: ['252 (30 pts)', '253 (22 pts)'] | Taille GT: 56 pts | Dist: 6.7m | Pos: (3.8, 5.5, 20.3) | Dim: 2.8x2.0x1.1 | Sévérité: 26
+  [FN - Non Détecté] Classe: person | GT_ID: 10 | Taille: 1 pts | Dist: 16.9m | Pos: (5.3, 16.1, 20.4) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 199 divisée en preds: ['244 (13 pts)', '256 (7 pts)'] | Taille GT: 20 pts | Dist: 37.3m | Pos: (-3.0, 37.1, 19.5) | Dim: 1.7x5.0x1.1 | Sévérité: 7
+  [FN - Non Détecté] Classe: car | GT_ID: 262 | Taille: 5 pts | Dist: 68.4m | Pos: (-68.3, -3.7, 20.5) | Dim: 1.0x1.4x0.4 | Sévérité: 5
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 2 pts | Dist: 11.4m | Pos: (9.0, 7.1, 19.8) | Dim: 5.1x0.8x0.3 | Sévérité: 2
+  [FN - Non Détecté] Classe: car | GT_ID: 200 | Taille: 4 pts | Dist: 42.5m | Pos: (-4.4, 42.3, 19.4) | Dim: 0.2x0.5x0.0 | Sévérité: 4
+--- FRAME 104 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 261 | Taille: 1 pts | Dist: 82.7m | Pos: (-82.7, -1.5, 21.0) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: car | GT_ID: 262 | Ancien Pred: 254 -> Nouveau Pred: 260 | Taille: 7 pts | Dist: 68.8m | Pos: (-68.8, -1.4, 20.7) | Dim: 1.7x0.9x0.5 | Sévérité: 7
+  [ID SWITCH] Classe: car | GT_ID: 260 | Ancien Pred: 254 -> Nouveau Pred: 260 | Taille: 89 pts | Dist: 62.5m | Pos: (-62.5, -0.6, 20.1) | Dim: 3.6x1.9x1.0 | Sévérité: 89
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 252 -> Nouveau Pred: 257 | Taille: 45 pts | Dist: 5.0m | Pos: (3.6, 3.5, 19.9) | Dim: 2.7x1.8x1.1 | Sévérité: 45
+  [ID SWITCH] Classe: car | GT_ID: 198 | Ancien Pred: 243 -> Nouveau Pred: 258 | Taille: 31 pts | Dist: 23.7m | Pos: (-11.3, 20.8, 19.8) | Dim: 3.8x1.3x1.1 | Sévérité: 31
+  [ID SWITCH] Classe: car | GT_ID: 199 | Ancien Pred: 244 -> Nouveau Pred: 259 | Taille: 28 pts | Dist: 35.7m | Pos: (-0.9, 35.7, 19.5) | Dim: 2.1x3.8x1.0 | Sévérité: 28
+  [ID SWITCH] Classe: person | GT_ID: 11 | Ancien Pred: 249 -> Nouveau Pred: 261 | Taille: 6 pts | Dist: 52.8m | Pos: (-20.3, 48.8, 19.8) | Dim: 0.6x0.4x0.0 | Sévérité: 6
+  [ID SWITCH] Classe: car | GT_ID: 0 | Ancien Pred: 119 -> Nouveau Pred: 257 | Taille: 1 pts | Dist: 13.0m | Pos: (11.8, 5.2, 19.6) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 105 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 261 | Taille: 2 pts | Dist: 83.2m | Pos: (-83.1, -3.0, 20.4) | Dim: 0.0x0.1x0.3 | Sévérité: 2
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 1 divisée en preds: ['257 (44 pts)', '262 (18 pts)'] | Taille GT: 64 pts | Dist: 5.4m | Pos: (3.6, 4.0, 19.7) | Dim: 2.9x1.9x1.3 | Sévérité: 20
+  [FN - Non Détecté] Classe: car | GT_ID: 194 | Taille: 4 pts | Dist: 11.3m | Pos: (11.2, 1.1, 19.5) | Dim: 0.5x0.3x0.8 | Sévérité: 4
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 8.4m | Pos: (6.6, 5.2, 19.2) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 24 | Taille: 3 pts | Dist: 17.5m | Pos: (1.8, 17.4, 19.1) | Dim: 0.2x0.2x0.3 | Sévérité: 3
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 1 pts | Dist: 27.7m | Pos: (3.4, 27.5, 19.0) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 106 ---
+  [ID SWITCH] Classe: car | GT_ID: 262 | Ancien Pred: 260 -> Nouveau Pred: 264 | Taille: 14 pts | Dist: 68.8m | Pos: (-68.8, -1.1, 20.8) | Dim: 1.9x1.3x0.6 | Sévérité: 14
+  [FN - Non Détecté] Classe: car | GT_ID: 261 | Taille: 2 pts | Dist: 83.2m | Pos: (-83.1, -2.5, 20.5) | Dim: 0.0x0.2x0.0 | Sévérité: 2
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 257 -> Nouveau Pred: 262 | Taille: 43 pts | Dist: 5.5m | Pos: (3.7, 4.1, 19.3) | Dim: 3.0x1.8x1.5 | Sévérité: 43
+  [FN - Non Détecté] Classe: car | GT_ID: 194 | Taille: 2 pts | Dist: 11.2m | Pos: (11.2, 0.2, 19.1) | Dim: 0.1x0.1x0.0 | Sévérité: 2
+  [ID SWITCH] Classe: bicycle | GT_ID: 24 | Ancien Pred: 218 -> Nouveau Pred: 265 | Taille: 6 pts | Dist: 17.5m | Pos: (1.8, 17.4, 19.0) | Dim: 0.3x0.5x0.7 | Sévérité: 6
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 1 pts | Dist: 27.9m | Pos: (3.4, 27.7, 18.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 107 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 262 | Taille: 14 pts | Dist: 68.4m | Pos: (-68.4, -1.9, 20.7) | Dim: 1.2x1.4x0.8 | Sévérité: 14
+  [FN - Non Détecté] Classe: person | GT_ID: 15 | Taille: 1 pts | Dist: 19.8m | Pos: (3.1, 19.6, 19.7) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: person | GT_ID: 0 | Taille: 1 pts | Dist: 19.6m | Pos: (2.5, 19.4, 19.4) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: car | GT_ID: 194 | Taille: 1 pts | Dist: 11.4m | Pos: (11.2, 2.3, 19.0) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 3 pts | Dist: 29.2m | Pos: (2.5, 29.1, 18.7) | Dim: 0.1x0.9x0.6 | Sévérité: 3
+--- FRAME 108 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 262 | Taille: 16 pts | Dist: 68.2m | Pos: (-68.2, -2.5, 20.6) | Dim: 1.3x1.4x0.8 | Sévérité: 16
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 1 divisée en preds: ['262 (30 pts)', '267 (19 pts)'] | Taille GT: 58 pts | Dist: 7.9m | Pos: (3.1, 7.2, 19.1) | Dim: 2.8x1.9x1.2 | Sévérité: 28
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 235 -> Nouveau Pred: 268 | Taille: 9 pts | Dist: 21.0m | Pos: (2.4, 20.8, 18.9) | Dim: 0.5x0.2x1.3 | Sévérité: 9
+  [FN - Non Détecté] Classe: car | GT_ID: 194 | Taille: 4 pts | Dist: 11.8m | Pos: (11.1, 4.2, 18.8) | Dim: 0.2x1.0x0.6 | Sévérité: 4
+  [ID SWITCH] Classe: person | GT_ID: 0 | Ancien Pred: 165 -> Nouveau Pred: 268 | Taille: 1 pts | Dist: 20.9m | Pos: (2.0, 20.8, 19.0) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 2 pts | Dist: 30.9m | Pos: (1.6, 30.8, 18.4) | Dim: 0.1x0.0x0.3 | Sévérité: 2
+--- FRAME 109 ---
+  [ID SWITCH] Classe: car | GT_ID: 262 | Ancien Pred: 264 -> Nouveau Pred: 269 | Taille: 10 pts | Dist: 68.2m | Pos: (-68.0, -3.8, 20.4) | Dim: 2.0x1.6x0.7 | Sévérité: 10
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 262 -> Nouveau Pred: 267 | Taille: 51 pts | Dist: 9.9m | Pos: (2.9, 9.5, 19.0) | Dim: 2.7x2.0x1.2 | Sévérité: 51
+  [ID SWITCH] Classe: person | GT_ID: 15 | Ancien Pred: 268 -> Nouveau Pred: 270 | Taille: 11 pts | Dist: 23.0m | Pos: (1.6, 22.9, 18.8) | Dim: 0.6x0.2x1.1 | Sévérité: 11
+  [ID SWITCH] Classe: person | GT_ID: 0 | Ancien Pred: 268 -> Nouveau Pred: 270 | Taille: 2 pts | Dist: 22.9m | Pos: (1.0, 22.9, 18.7) | Dim: 0.1x0.0x0.3 | Sévérité: 2
+  [FN - Non Détecté] Classe: car | GT_ID: 194 | Taille: 3 pts | Dist: 12.7m | Pos: (10.8, 6.6, 18.5) | Dim: 0.2x0.2x0.0 | Sévérité: 3
+  [FN - Non Détecté] Classe: bicycle | GT_ID: 25 | Taille: 2 pts | Dist: 32.2m | Pos: (0.3, 32.2, 18.4) | Dim: 0.2x0.5x0.0 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: person | Pred_ID: 270 fusionne les GT: ['15 (11 pts)', '0 (2 pts)'] | Taille Pred: 13 pts | Dist: 23.0m | Pos: (1.5, 22.9, 18.8) | Dim: 0.9x0.2x1.1 | Sévérité: 2
+--- FRAME 110 ---
+  [ID SWITCH] Classe: car | GT_ID: 1 | Ancien Pred: 267 -> Nouveau Pred: 262 | Taille: 51 pts | Dist: 9.9m | Pos: (2.8, 9.5, 18.8) | Dim: 2.8x2.1x1.3 | Sévérité: 51
+  [ID SWITCH] Classe: bicycle | GT_ID: 24 | Ancien Pred: 265 -> Nouveau Pred: 271 | Taille: 8 pts | Dist: 22.3m | Pos: (-0.3, 22.3, 18.2) | Dim: 0.5x1.4x0.6 | Sévérité: 8
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 12.3m | Pos: (5.5, 11.0, 18.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 111 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 12.8m | Pos: (5.1, 11.7, 18.1) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 112 ---
+  Parfait (Aucune erreur majeure détectée).
+--- FRAME 113 ---
+  Parfait (Aucune erreur majeure détectée).
+--- FRAME 114 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 0 | Ancien Pred: 39 -> Nouveau Pred: 251 | Taille: 1 pts | Dist: 12.3m | Pos: (-10.5, 6.5, 18.4) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 115 ---
+  [ID SWITCH] Classe: car | GT_ID: 0 | Ancien Pred: 257 -> Nouveau Pred: 262 | Taille: 1 pts | Dist: 17.7m | Pos: (1.8, 17.6, 18.8) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: bicycle | GT_ID: 24 | Ancien Pred: 271 -> Nouveau Pred: 272 | Taille: 10 pts | Dist: 28.8m | Pos: (-3.4, 28.6, 17.7) | Dim: 0.7x1.5x0.6 | Sévérité: 10
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 266 fusionne les GT: ['261 (27 pts)', '263 (4 pts)'] | Taille Pred: 31 pts | Dist: 83.4m | Pos: (-82.9, -9.1, 19.3) | Dim: 6.9x2.9x1.4 | Sévérité: 4
+--- FRAME 116 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 17.4m | Pos: (-10.1, 14.2, 18.0) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 117 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 259 | Taille: 3 pts | Dist: 93.8m | Pos: (-93.0, -12.9, 19.0) | Dim: 0.2x0.3x0.0 | Sévérité: 3
+--- FRAME 118 ---
+  [ID SWITCH] Classe: car | GT_ID: 259 | Ancien Pred: 273 -> Nouveau Pred: 274 | Taille: 6 pts | Dist: 93.9m | Pos: (-93.1, -12.9, 19.0) | Dim: 0.3x0.5x0.3 | Sévérité: 6
+--- FRAME 119 ---
+  Parfait (Aucune erreur majeure détectée).
+--- FRAME 120 ---
+  [ID SWITCH] Classe: car | GT_ID: 263 | Ancien Pred: 266 -> Nouveau Pred: 274 | Taille: 4 pts | Dist: 88.6m | Pos: (-88.0, -10.8, 18.7) | Dim: 1.0x0.4x1.2 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 274 fusionne les GT: ['259 (5 pts)', '263 (1 pts)'] | Taille Pred: 6 pts | Dist: 93.0m | Pos: (-92.2, -12.3, 18.9) | Dim: 4.6x2.0x0.4 | Sévérité: 1
+--- FRAME 121 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 198 | Taille: 5 pts | Dist: 41.9m | Pos: (-22.0, 35.6, 16.9) | Dim: 0.7x0.3x0.3 | Sévérité: 5
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 274 fusionne les GT: ['259 (7 pts)', '263 (2 pts)'] | Taille Pred: 9 pts | Dist: 92.5m | Pos: (-91.5, -13.5, 18.8) | Dim: 4.4x2.4x0.8 | Sévérité: 2
+--- FRAME 122 ---
+  [ID SWITCH] Classe: car | GT_ID: 263 | Ancien Pred: 274 -> Nouveau Pred: 276 | Taille: 3 pts | Dist: 88.3m | Pos: (-87.1, -14.7, 19.0) | Dim: 1.0x0.6x0.2 | Sévérité: 3
+  [ID SWITCH] Classe: car | GT_ID: 259 | Ancien Pred: 274 -> Nouveau Pred: 276 | Taille: 10 pts | Dist: 92.7m | Pos: (-91.1, -17.1, 18.6) | Dim: 0.9x1.0x0.5 | Sévérité: 10
+  [ID SWITCH] Classe: bicyclist | GT_ID: 1 | Ancien Pred: 251 -> Nouveau Pred: 277 | Taille: 21 pts | Dist: 23.4m | Pos: (-12.6, 19.7, 17.9) | Dim: 1.4x0.6x1.3 | Sévérité: 21
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 195 -> Nouveau Pred: 278 | Taille: 19 pts | Dist: 25.3m | Pos: (-16.5, 19.1, 17.8) | Dim: 1.1x0.5x1.2 | Sévérité: 19
+  [ID SWITCH] Classe: car | GT_ID: 3 | Ancien Pred: 241 -> Nouveau Pred: 275 | Taille: 57 pts | Dist: 27.0m | Pos: (-16.1, 21.7, 17.5) | Dim: 3.2x3.7x1.2 | Sévérité: 57
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 276 fusionne les GT: ['259 (10 pts)', '263 (2 pts)'] | Taille Pred: 12 pts | Dist: 92.0m | Pos: (-90.4, -16.7, 18.7) | Dim: 4.5x3.2x0.8 | Sévérité: 2
+--- FRAME 123 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 1 | Ancien Pred: 277 -> Nouveau Pred: 279 | Taille: 19 pts | Dist: 25.8m | Pos: (-13.4, 22.1, 17.7) | Dim: 1.2x0.4x1.3 | Sévérité: 19
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 278 -> Nouveau Pred: 280 | Taille: 19 pts | Dist: 27.5m | Pos: (-17.2, 21.5, 17.6) | Dim: 1.1x0.5x1.5 | Sévérité: 19
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 276 fusionne les GT: ['259 (9 pts)', '263 (2 pts)'] | Taille Pred: 11 pts | Dist: 91.6m | Pos: (-89.9, -17.8, 18.4) | Dim: 6.1x4.4x0.9 | Sévérité: 2
+--- FRAME 124 ---
+  [ID SWITCH] Classe: car | GT_ID: 263 | Ancien Pred: 276 -> Nouveau Pred: 281 | Taille: 7 pts | Dist: 86.4m | Pos: (-84.9, -16.0, 18.8) | Dim: 0.9x1.3x0.8 | Sévérité: 7
+  [ID SWITCH] Classe: bicyclist | GT_ID: 1 | Ancien Pred: 279 -> Nouveau Pred: 283 | Taille: 20 pts | Dist: 29.3m | Pos: (-14.5, 25.4, 17.6) | Dim: 1.4x0.4x1.1 | Sévérité: 20
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 280 -> Nouveau Pred: 282 | Taille: 19 pts | Dist: 30.8m | Pos: (-18.4, 24.7, 17.6) | Dim: 1.7x0.6x1.3 | Sévérité: 19
+  [FN - Non Détecté] Classe: car | GT_ID: 258 | Taille: 1 pts | Dist: 59.0m | Pos: (-58.9, 3.4, 17.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 125 ---
+  [FN - Faible Overlap] Classe: car | GT_ID: 263 | Taille: 16 pts | Max Pred ID: 276 (1 pts) | Dist: 86.2m | Pos: (-84.6, -16.4, 18.7) | Dim: 2.0x2.0x1.1 | Sévérité: 15
+  [ID SWITCH] Classe: bicyclist | GT_ID: 1 | Ancien Pred: 283 -> Nouveau Pred: 285 | Taille: 20 pts | Dist: 31.8m | Pos: (-15.6, 27.7, 17.6) | Dim: 1.0x0.5x1.1 | Sévérité: 20
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 282 -> Nouveau Pred: 284 | Taille: 18 pts | Dist: 33.2m | Pos: (-19.3, 27.0, 17.5) | Dim: 1.7x0.7x1.1 | Sévérité: 18
+  [FN - Non Détecté] Classe: car | GT_ID: 258 | Taille: 1 pts | Dist: 60.2m | Pos: (-60.1, 3.4, 17.2) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 126 ---
+  [ID SWITCH] Classe: car | GT_ID: 263 | Ancien Pred: 281 -> Nouveau Pred: 286 | Taille: 16 pts | Dist: 85.5m | Pos: (-83.7, -17.6, 18.7) | Dim: 1.6x1.6x0.8 | Sévérité: 16
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 263 divisée en preds: ['286 (14 pts)', '276 (2 pts)'] | Taille GT: 16 pts | Dist: 85.5m | Pos: (-83.7, -17.6, 18.7) | Dim: 1.6x1.6x0.8 | Sévérité: 2
+  [FN - Non Détecté] Classe: car | GT_ID: 257 | Taille: 4 pts | Dist: 100.5m | Pos: (-96.2, -29.0, 18.2) | Dim: 0.2x0.4x0.3 | Sévérité: 4
+  [ID SWITCH] Classe: bicyclist | GT_ID: 1 | Ancien Pred: 285 -> Nouveau Pred: 287 | Taille: 18 pts | Dist: 35.9m | Pos: (-17.6, 31.3, 17.5) | Dim: 1.2x0.5x1.1 | Sévérité: 18
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 284 -> Nouveau Pred: 288 | Taille: 15 pts | Dist: 37.0m | Pos: (-21.2, 30.4, 17.4) | Dim: 1.5x0.8x1.1 | Sévérité: 15
+  [FN - Non Détecté] Classe: car | GT_ID: 258 | Taille: 2 pts | Dist: 61.4m | Pos: (-61.3, 3.2, 17.1) | Dim: 0.0x0.0x0.0 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 276 fusionne les GT: ['259 (17 pts)', '263 (2 pts)'] | Taille Pred: 19 pts | Dist: 89.8m | Pos: (-87.2, -21.3, 18.1) | Dim: 4.1x4.0x0.9 | Sévérité: 2
+--- FRAME 127 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 288 -> Nouveau Pred: 290 | Taille: 12 pts | Dist: 40.9m | Pos: (-23.2, 33.7, 17.3) | Dim: 0.9x0.4x1.1 | Sévérité: 12
+--- FRAME 128 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 257 | Taille: 4 pts | Dist: 98.2m | Pos: (-92.8, -32.0, 18.1) | Dim: 0.3x0.3x0.6 | Sévérité: 4
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 290 -> Nouveau Pred: 291 | Taille: 13 pts | Dist: 44.8m | Pos: (-25.5, 36.8, 17.3) | Dim: 0.7x0.5x0.9 | Sévérité: 13
+--- FRAME 129 ---
+  [ID SWITCH] Classe: car | GT_ID: 257 | Ancien Pred: 289 -> Nouveau Pred: 292 | Taille: 8 pts | Dist: 97.1m | Pos: (-91.2, -33.4, 18.8) | Dim: 1.1x0.5x1.1 | Sévérité: 8
+  [ID SWITCH] Classe: bicyclist | GT_ID: 4 | Ancien Pred: 291 -> Nouveau Pred: 293 | Taille: 9 pts | Dist: 49.3m | Pos: (-28.5, 40.2, 16.9) | Dim: 0.6x0.3x0.9 | Sévérité: 9
+--- FRAME 130 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 257 | Taille: 3 pts | Dist: 95.9m | Pos: (-89.8, -33.7, 18.1) | Dim: 0.1x0.2x0.6 | Sévérité: 3
+--- FRAME 131 ---
+  [ID SWITCH] Classe: car | GT_ID: 257 | Ancien Pred: 292 -> Nouveau Pred: 294 | Taille: 8 pts | Dist: 95.4m | Pos: (-89.1, -34.0, 18.3) | Dim: 1.0x0.8x1.1 | Sévérité: 8
+--- FRAME 132 ---
+  Parfait (Aucune erreur majeure détectée).
+--- FRAME 133 ---
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 294 fusionne les GT: ['257 (7 pts)', '256 (4 pts)'] | Taille Pred: 11 pts | Dist: 94.8m | Pos: (-87.6, -36.3, 17.6) | Dim: 3.5x7.0x0.5 | Sévérité: 4
+--- FRAME 134 ---
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 294 fusionne les GT: ['257 (14 pts)', '256 (8 pts)'] | Taille Pred: 22 pts | Dist: 93.0m | Pos: (-85.3, -36.9, 17.8) | Dim: 3.1x7.3x1.4 | Sévérité: 8
+--- FRAME 135 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 256 | Taille: 6 pts | Dist: 93.0m | Pos: (-82.7, -42.4, 17.7) | Dim: 0.7x1.1x0.9 | Sévérité: 6
+--- FRAME 136 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 256 | Taille: 11 pts | Dist: 91.3m | Pos: (-81.0, -42.2, 17.9) | Dim: 1.0x1.3x0.9 | Sévérité: 11
+--- FRAME 137 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 256 | Taille: 8 pts | Dist: 89.5m | Pos: (-79.2, -41.6, 17.8) | Dim: 0.6x1.3x0.8 | Sévérité: 8
+--- FRAME 138 ---
+  [ID SWITCH] Classe: car | GT_ID: 257 | Ancien Pred: 294 -> Nouveau Pred: 297 | Taille: 18 pts | Dist: 86.9m | Pos: (-80.5, -32.7, 17.8) | Dim: 1.1x1.2x1.1 | Sévérité: 18
+  [ID SWITCH] Classe: car | GT_ID: 256 | Ancien Pred: 294 -> Nouveau Pred: 297 | Taille: 11 pts | Dist: 91.0m | Pos: (-81.8, -40.1, 17.8) | Dim: 1.1x1.2x1.1 | Sévérité: 11
+  [ID SWITCH] Classe: car | GT_ID: 263 | Ancien Pred: 286 -> Nouveau Pred: 295 | Taille: 126 pts | Dist: 78.8m | Pos: (-77.2, -15.4, 17.7) | Dim: 1.4x3.0x1.3 | Sévérité: 126
+  [ID SWITCH] Classe: car | GT_ID: 259 | Ancien Pred: 276 -> Nouveau Pred: 296 | Taille: 83 pts | Dist: 81.0m | Pos: (-78.2, -21.4, 17.5) | Dim: 1.6x3.6x0.9 | Sévérité: 83
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 297 fusionne les GT: ['257 (18 pts)', '256 (11 pts)'] | Taille Pred: 29 pts | Dist: 88.4m | Pos: (-81.0, -35.5, 17.8) | Dim: 2.4x8.5x1.1 | Sévérité: 11
+--- FRAME 139 ---
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 297 fusionne les GT: ['257 (14 pts)', '256 (10 pts)'] | Taille Pred: 24 pts | Dist: 87.8m | Pos: (-80.7, -34.6, 17.6) | Dim: 1.5x8.7x0.9 | Sévérité: 10
+--- FRAME 140 ---
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 297 fusionne les GT: ['257 (25 pts)', '256 (10 pts)'] | Taille Pred: 35 pts | Dist: 87.4m | Pos: (-81.0, -32.7, 17.7) | Dim: 1.3x10.1x1.0 | Sévérité: 10
+--- FRAME 141 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 256 | Taille: 14 pts | Dist: 90.9m | Pos: (-83.1, -36.7, 17.5) | Dim: 0.5x2.7x1.0 | Sévérité: 14
+--- FRAME 142 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 256 | Taille: 17 pts | Dist: 91.6m | Pos: (-84.5, -35.4, 17.5) | Dim: 0.6x2.8x1.0 | Sévérité: 17
+--- FRAME 143 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 256 | Taille: 14 pts | Dist: 91.8m | Pos: (-85.3, -33.9, 17.5) | Dim: 0.4x1.3x0.7 | Sévérité: 14
+  [FN - Non Détecté] Classe: car | GT_ID: 265 | Taille: 1 pts | Dist: 96.8m | Pos: (-94.7, -19.8, 17.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 144 ---
+  [ID SWITCH] Classe: car | GT_ID: 257 | Ancien Pred: 297 -> Nouveau Pred: 299 | Taille: 51 pts | Dist: 91.3m | Pos: (-87.9, -24.9, 17.5) | Dim: 1.3x3.5x1.2 | Sévérité: 51
+  [ID SWITCH] Classe: car | GT_ID: 256 | Ancien Pred: 297 -> Nouveau Pred: 299 | Taille: 24 pts | Dist: 95.1m | Pos: (-89.4, -32.3, 17.8) | Dim: 1.4x1.3x1.1 | Sévérité: 24
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 299 fusionne les GT: ['257 (51 pts)', '256 (24 pts)'] | Taille Pred: 75 pts | Dist: 92.5m | Pos: (-88.4, -27.3, 17.6) | Dim: 3.1x8.6x1.2 | Sévérité: 24
+--- FRAME 145 ---
+  [ID SWITCH] Classe: car | GT_ID: 256 | Ancien Pred: 299 -> Nouveau Pred: 300 | Taille: 27 pts | Dist: 95.1m | Pos: (-89.8, -31.3, 17.7) | Dim: 1.1x2.3x1.1 | Sévérité: 27
+--- FRAME 146 ---
+  [ID SWITCH] Classe: car | GT_ID: 257 | Ancien Pred: 299 -> Nouveau Pred: 301 | Taille: 92 pts | Dist: 93.1m | Pos: (-90.4, -22.2, 17.4) | Dim: 1.5x3.5x1.3 | Sévérité: 92
+  [ID SWITCH] Classe: car | GT_ID: 256 | Ancien Pred: 300 -> Nouveau Pred: 302 | Taille: 25 pts | Dist: 96.6m | Pos: (-92.0, -29.5, 17.5) | Dim: 0.8x3.3x0.9 | Sévérité: 25
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 7 | Taille: 2 pts | Dist: 105.1m | Pos: (-95.3, -44.5, 17.5) | Dim: 0.1x0.1x0.0 | Sévérité: 2
+--- FRAME 147 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 264 | Taille: 2 pts | Dist: 112.7m | Pos: (-105.1, -40.7, 18.1) | Dim: 0.2x0.0x0.0 | Sévérité: 2
+  [ID SWITCH] Classe: bicyclist | GT_ID: 0 | Ancien Pred: 251 -> Nouveau Pred: 303 | Taille: 13 pts | Dist: 105.7m | Pos: (-95.9, -44.5, 17.6) | Dim: 0.3x0.9x1.2 | Sévérité: 13
+  [FN - Non Détecté] Classe: car | GT_ID: 265 | Taille: 1 pts | Dist: 101.2m | Pos: (-100.3, -12.9, 17.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: bicyclist | Pred_ID: 303 fusionne les GT: ['0 (13 pts)', '7 (3 pts)'] | Taille Pred: 16 pts | Dist: 105.7m | Pos: (-95.9, -44.5, 17.7) | Dim: 0.3x0.9x1.5 | Sévérité: 3
+--- FRAME 148 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 265 | Taille: 1 pts | Dist: 101.0m | Pos: (-100.2, -12.8, 17.1) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 149 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 303 -> Nouveau Pred: 307 | Taille: 9 pts | Dist: 106.7m | Pos: (-97.5, -43.4, 18.0) | Dim: 0.3x0.7x1.2 | Sévérité: 9
+  [FN - Non Détecté] Classe: car | GT_ID: 264 | Taille: 2 pts | Dist: 114.4m | Pos: (-107.9, -38.1, 17.7) | Dim: 0.7x0.1x0.6 | Sévérité: 2
+  [ID SWITCH] Classe: car | GT_ID: 256 | Ancien Pred: 302 -> Nouveau Pred: 306 | Taille: 42 pts | Dist: 97.7m | Pos: (-94.1, -26.3, 17.4) | Dim: 1.0x3.7x1.1 | Sévérité: 42
+  [ID SWITCH] Classe: bicyclist | GT_ID: 0 | Ancien Pred: 303 -> Nouveau Pred: 307 | Taille: 8 pts | Dist: 106.6m | Pos: (-97.4, -43.3, 17.3) | Dim: 0.3x0.5x0.9 | Sévérité: 8
+  [MERGE - Sous-segmentation] Classe: bicyclist | Pred_ID: 307 fusionne les GT: ['7 (9 pts)', '0 (8 pts)'] | Taille Pred: 17 pts | Dist: 106.7m | Pos: (-97.5, -43.4, 17.7) | Dim: 0.4x0.8x1.5 | Sévérité: 8
+--- FRAME 150 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 307 -> Nouveau Pred: 311 | Taille: 21 pts | Dist: 109.4m | Pos: (-101.1, -41.8, 17.8) | Dim: 0.6x0.9x1.7 | Sévérité: 21
+  [ID SWITCH] Classe: car | GT_ID: 255 | Ancien Pred: 305 -> Nouveau Pred: 308 | Taille: 28 pts | Dist: 111.3m | Pos: (-102.9, -42.2, 17.8) | Dim: 1.4x0.7x0.9 | Sévérité: 28
+  [ID SWITCH] Classe: car | GT_ID: 264 | Ancien Pred: 304 -> Nouveau Pred: 309 | Taille: 6 pts | Dist: 116.6m | Pos: (-111.1, -35.3, 17.7) | Dim: 1.1x0.3x0.3 | Sévérité: 6
+  [ID SWITCH] Classe: car | GT_ID: 256 | Ancien Pred: 306 -> Nouveau Pred: 310 | Taille: 55 pts | Dist: 99.8m | Pos: (-96.7, -24.6, 17.5) | Dim: 1.5x3.8x1.1 | Sévérité: 55
+  [FN - Non Détecté] Classe: car | GT_ID: 266 | Taille: 1 pts | Dist: 106.5m | Pos: (-105.9, -11.2, 17.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: car | GT_ID: 265 | Taille: 1 pts | Dist: 104.3m | Pos: (-103.9, -9.2, 17.1) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 151 ---
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 88.4m | Pos: (-88.2, -5.9, 18.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: car | GT_ID: 264 | Ancien Pred: 309 -> Nouveau Pred: 312 | Taille: 10 pts | Dist: 114.5m | Pos: (-108.6, -36.3, 18.2) | Dim: 2.4x0.8x0.6 | Sévérité: 10
+  [FN - Non Détecté] Classe: car | GT_ID: 266 | Taille: 2 pts | Dist: 106.2m | Pos: (-105.7, -10.8, 17.2) | Dim: 0.0x0.4x0.0 | Sévérité: 2
+  [FN - Non Détecté] Classe: car | GT_ID: 265 | Taille: 4 pts | Dist: 104.1m | Pos: (-103.7, -8.7, 17.0) | Dim: 0.3x1.1x0.3 | Sévérité: 4
+--- FRAME 152 ---
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 89.7m | Pos: (-89.5, -5.9, 18.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 311 -> Nouveau Pred: 315 | Taille: 17 pts | Dist: 108.7m | Pos: (-100.5, -41.3, 18.0) | Dim: 0.5x1.0x1.4 | Sévérité: 17
+  [ID SWITCH] Classe: car | GT_ID: 255 | Ancien Pred: 308 -> Nouveau Pred: 313 | Taille: 29 pts | Dist: 109.9m | Pos: (-102.1, -40.7, 17.6) | Dim: 1.5x0.7x1.4 | Sévérité: 29
+  [FN - Non Détecté] Classe: car | GT_ID: 264 | Taille: 5 pts | Dist: 116.3m | Pos: (-111.1, -34.2, 17.7) | Dim: 0.9x0.3x0.6 | Sévérité: 5
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 314 fusionne les GT: ['265 (7 pts)', '266 (4 pts)'] | Taille Pred: 11 pts | Dist: 105.9m | Pos: (-105.6, -8.3, 17.1) | Dim: 3.1x2.7x0.8 | Sévérité: 4
+--- FRAME 153 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 264 | Taille: 3 pts | Dist: 116.2m | Pos: (-111.3, -33.6, 17.8) | Dim: 0.4x0.4x0.3 | Sévérité: 3
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 314 fusionne les GT: ['265 (11 pts)', '266 (2 pts)'] | Taille Pred: 13 pts | Dist: 106.0m | Pos: (-105.8, -6.8, 17.0) | Dim: 2.4x3.4x0.7 | Sévérité: 2
+--- FRAME 154 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 264 | Taille: 4 pts | Dist: 116.5m | Pos: (-111.9, -32.7, 17.8) | Dim: 0.8x0.4x0.6 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 314 fusionne les GT: ['266 (13 pts)', '265 (11 pts)'] | Taille Pred: 24 pts | Dist: 107.5m | Pos: (-107.3, -6.7, 17.0) | Dim: 2.4x3.6x0.6 | Sévérité: 11
+--- FRAME 155 ---
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 92.4m | Pos: (-92.2, -6.0, 18.4) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: car | GT_ID: 264 | Taille: 2 pts | Dist: 114.8m | Pos: (-110.0, -32.9, 18.1) | Dim: 1.4x0.4x0.3 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 314 fusionne les GT: ['266 (25 pts)', '265 (10 pts)'] | Taille Pred: 35 pts | Dist: 108.4m | Pos: (-108.1, -6.9, 17.1) | Dim: 3.0x3.7x1.2 | Sévérité: 10
+--- FRAME 156 ---
+  [ID SWITCH] Classe: car | GT_ID: 264 | Ancien Pred: 312 -> Nouveau Pred: 316 | Taille: 12 pts | Dist: 114.2m | Pos: (-109.5, -32.2, 18.2) | Dim: 1.8x0.8x0.5 | Sévérité: 12
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 314 fusionne les GT: ['266 (64 pts)', '265 (15 pts)'] | Taille Pred: 79 pts | Dist: 109.2m | Pos: (-109.0, -6.2, 17.3) | Dim: 2.4x4.0x1.2 | Sévérité: 15
+--- FRAME 157 ---
+  [ID SWITCH] Classe: car | GT_ID: 264 | Ancien Pred: 316 -> Nouveau Pred: 317 | Taille: 7 pts | Dist: 116.2m | Pos: (-112.2, -30.2, 18.0) | Dim: 2.4x0.7x0.7 | Sévérité: 7
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 315 -> Nouveau Pred: 318 | Taille: 20 pts | Dist: 109.4m | Pos: (-102.3, -38.8, 17.9) | Dim: 0.5x1.0x1.3 | Sévérité: 20
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 314 fusionne les GT: ['266 (92 pts)', '265 (56 pts)'] | Taille Pred: 148 pts | Dist: 110.0m | Pos: (-109.9, -4.0, 17.3) | Dim: 3.3x3.9x1.0 | Sévérité: 56
+--- FRAME 158 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 318 -> Nouveau Pred: 315 | Taille: 16 pts | Dist: 108.2m | Pos: (-101.1, -38.5, 18.0) | Dim: 0.5x0.9x1.0 | Sévérité: 16
+  [ID SWITCH] Classe: car | GT_ID: 266 | Ancien Pred: 314 -> Nouveau Pred: 319 | Taille: 105 pts | Dist: 111.6m | Pos: (-111.5, -4.5, 17.3) | Dim: 2.1x1.3x1.1 | Sévérité: 105
+--- FRAME 159 ---
+  Parfait (Aucune erreur majeure détectée).
+--- FRAME 160 ---
+  [ID SWITCH] Classe: car | GT_ID: 264 | Ancien Pred: 317 -> Nouveau Pred: 320 | Taille: 16 pts | Dist: 115.9m | Pos: (-112.4, -28.1, 17.9) | Dim: 3.1x1.2x0.6 | Sévérité: 16
+--- FRAME 161 ---
+  [ID SWITCH] Classe: car | GT_ID: 264 | Ancien Pred: 320 -> Nouveau Pred: 317 | Taille: 23 pts | Dist: 115.2m | Pos: (-111.8, -27.8, 17.7) | Dim: 3.5x1.2x0.8 | Sévérité: 23
+--- FRAME 162 ---
+  Parfait (Aucune erreur majeure détectée).
+--- FRAME 163 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 315 -> Nouveau Pred: 323 | Taille: 23 pts | Dist: 110.3m | Pos: (-104.4, -35.5, 17.6) | Dim: 0.5x1.0x1.4 | Sévérité: 23
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 105.9m | Pos: (-105.4, 10.5, 16.7) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 164 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 323 -> Nouveau Pred: 326 | Taille: 25 pts | Dist: 114.1m | Pos: (-108.8, -34.3, 17.5) | Dim: 0.5x0.8x1.6 | Sévérité: 25
+  [ID SWITCH] Classe: car | GT_ID: 255 | Ancien Pred: 313 -> Nouveau Pred: 324 | Taille: 82 pts | Dist: 112.7m | Pos: (-109.2, -27.8, 17.4) | Dim: 1.5x1.5x1.6 | Sévérité: 82
+  [ID SWITCH] Classe: car | GT_ID: 264 | Ancien Pred: 317 -> Nouveau Pred: 325 | Taille: 48 pts | Dist: 119.8m | Pos: (-117.6, -22.6, 17.5) | Dim: 3.8x1.7x1.2 | Sévérité: 48
+  [FN - Non Détecté] Classe: car | GT_ID: 260 | Taille: 11 pts | Dist: 106.3m | Pos: (-98.6, 39.7, 16.3) | Dim: 0.7x2.1x1.0 | Sévérité: 11
+  [FN - Faible Overlap] Classe: car | GT_ID: 262 | Taille: 92 pts | Max Pred ID: 269 (11 pts) | Dist: 105.6m | Pos: (-99.9, 34.3, 16.2) | Dim: 2.1x4.2x1.2 | Sévérité: 81
+--- FRAME 165 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 258 | Taille: 4 pts | Dist: 110.3m | Pos: (-98.3, 50.0, 15.3) | Dim: 0.4x0.3x0.0 | Sévérité: 4
+  [FN - Non Détecté] Classe: car | GT_ID: 260 | Taille: 2 pts | Dist: 107.1m | Pos: (-99.4, 40.1, 15.8) | Dim: 0.1x0.6x0.3 | Sévérité: 2
+--- FRAME 166 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 260 | Taille: 7 pts | Dist: 109.0m | Pos: (-100.8, 41.6, 15.6) | Dim: 0.5x1.0x0.7 | Sévérité: 7
+--- FRAME 167 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 260 | Taille: 4 pts | Dist: 110.4m | Pos: (-101.8, 42.6, 15.6) | Dim: 0.2x0.5x0.5 | Sévérité: 4
+--- FRAME 168 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 260 | Taille: 3 pts | Dist: 110.4m | Pos: (-101.4, 43.6, 15.7) | Dim: 0.2x0.5x0.5 | Sévérité: 3
+--- FRAME 169 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 260 | Taille: 2 pts | Dist: 110.5m | Pos: (-101.2, 44.5, 15.7) | Dim: 0.1x0.1x0.0 | Sévérité: 2
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 107.3m | Pos: (-106.9, 10.0, 17.6) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 170 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 260 | Taille: 5 pts | Dist: 110.2m | Pos: (-99.9, 46.6, 16.3) | Dim: 0.2x2.0x0.7 | Sévérité: 5
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 8 | Taille: 3 pts | Dist: 105.6m | Pos: (-104.5, 15.1, 16.0) | Dim: 0.1x0.0x0.0 | Sévérité: 3
+--- FRAME 171 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 260 | Taille: 3 pts | Dist: 110.6m | Pos: (-100.4, 46.5, 15.9) | Dim: 0.1x0.2x0.2 | Sévérité: 3
+--- FRAME 172 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 260 | Taille: 1 pts | Dist: 110.1m | Pos: (-99.4, 47.3, 15.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 173 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 326 -> Nouveau Pred: 331 | Taille: 36 pts | Dist: 129.4m | Pos: (-126.9, -25.2, 17.1) | Dim: 0.6x0.8x1.4 | Sévérité: 36
+  [ID SWITCH] Classe: car | GT_ID: 262 | Ancien Pred: 269 -> Nouveau Pred: 330 | Taille: 37 pts | Dist: 107.3m | Pos: (-98.3, 42.9, 16.1) | Dim: 1.7x1.9x0.7 | Sévérité: 37
+  [ID SWITCH] Classe: car | GT_ID: 260 | Ancien Pred: 260 -> Nouveau Pred: 330 | Taille: 1 pts | Dist: 106.7m | Pos: (-95.8, 47.1, 15.9) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [ID SWITCH] Classe: car | GT_ID: 266 | Ancien Pred: 319 -> Nouveau Pred: 314 | Taille: 2 pts | Dist: 124.3m | Pos: (-123.1, 17.7, 16.5) | Dim: 0.1x0.0x0.0 | Sévérité: 2
+--- FRAME 174 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 331 -> Nouveau Pred: 332 | Taille: 36 pts | Dist: 131.2m | Pos: (-129.0, -23.9, 17.1) | Dim: 0.8x1.1x1.6 | Sévérité: 36
+  [FN - Non Détecté] Classe: car | GT_ID: 260 | Taille: 2 pts | Dist: 105.9m | Pos: (-94.7, 47.4, 15.7) | Dim: 0.0x0.1x0.3 | Sévérité: 2
+--- FRAME 175 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 260 | Taille: 1 pts | Dist: 105.8m | Pos: (-94.3, 48.1, 15.5) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 176 ---
+  Parfait (Aucune erreur majeure détectée).
+--- FRAME 177 ---
+  Parfait (Aucune erreur majeure détectée).
+--- FRAME 178 ---
+  Parfait (Aucune erreur majeure détectée).
+--- FRAME 179 ---
+  Parfait (Aucune erreur majeure détectée).
+--- FRAME 180 ---
+  Parfait (Aucune erreur majeure détectée).
+--- FRAME 181 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 332 -> Nouveau Pred: 333 | Taille: 58 pts | Dist: 138.7m | Pos: (-137.6, -18.1, 16.7) | Dim: 1.1x1.6x1.7 | Sévérité: 58
+  [FN - Non Détecté] Classe: car | GT_ID: 261 | Taille: 15 pts | Dist: 111.9m | Pos: (-105.9, 36.3, 15.8) | Dim: 1.6x2.6x0.9 | Sévérité: 15
+  [FN - Non Détecté] Classe: car | GT_ID: 265 | Taille: 1 pts | Dist: 127.1m | Pos: (-123.4, 30.4, 16.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 182 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 261 | Taille: 14 pts | Dist: 113.2m | Pos: (-106.9, 37.2, 15.6) | Dim: 1.4x2.6x1.1 | Sévérité: 14
+--- FRAME 183 ---
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 333 -> Nouveau Pred: 332 | Taille: 58 pts | Dist: 141.3m | Pos: (-140.4, -15.8, 16.7) | Dim: 1.0x1.0x1.6 | Sévérité: 58
+  [ID SWITCH] Classe: car | GT_ID: 263 | Ancien Pred: 295 -> Nouveau Pred: 266 | Taille: 14 pts | Dist: 113.3m | Pos: (-107.8, 34.7, 15.8) | Dim: 2.3x2.4x1.1 | Sévérité: 14
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 266 fusionne les GT: ['261 (14 pts)', '263 (4 pts)'] | Taille Pred: 18 pts | Dist: 112.2m | Pos: (-105.9, 37.1, 15.4) | Dim: 2.7x4.1x0.9 | Sévérité: 4
+--- FRAME 184 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 144.2m | Pos: (-143.6, 13.7, 15.8) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [FN - Non Détecté] Classe: car | GT_ID: 254 | Taille: 1 pts | Dist: 125.7m | Pos: (-125.4, 9.0, 15.3) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 185 ---
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 266 fusionne les GT: ['261 (16 pts)', '263 (6 pts)'] | Taille Pred: 22 pts | Dist: 114.4m | Pos: (-107.5, 38.9, 15.6) | Dim: 3.1x5.0x1.1 | Sévérité: 6
+--- FRAME 186 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 125.9m | Pos: (-125.4, 10.6, 16.8) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 266 fusionne les GT: ['261 (11 pts)', '263 (7 pts)'] | Taille Pred: 18 pts | Dist: 114.2m | Pos: (-107.3, 39.0, 15.4) | Dim: 4.6x5.6x1.3 | Sévérité: 7
+--- FRAME 187 ---
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 11 | Taille: 2 pts | Dist: 130.2m | Pos: (-130.1, 2.7, 16.1) | Dim: 0.0x0.0x0.0 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 266 fusionne les GT: ['261 (11 pts)', '263 (4 pts)'] | Taille Pred: 15 pts | Dist: 114.8m | Pos: (-107.4, 40.5, 15.3) | Dim: 5.4x4.6x1.3 | Sévérité: 4
+--- FRAME 188 ---
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 12 | Taille: 2 pts | Dist: 131.4m | Pos: (-131.4, 2.7, 16.0) | Dim: 0.0x0.0x0.0 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 266 fusionne les GT: ['261 (12 pts)', '263 (2 pts)'] | Taille Pred: 14 pts | Dist: 117.0m | Pos: (-109.0, 42.7, 15.3) | Dim: 2.9x5.0x1.2 | Sévérité: 2
+--- FRAME 189 ---
+  [ID SWITCH] Classe: car | GT_ID: 263 | Ancien Pred: 266 -> Nouveau Pred: 339 | Taille: 3 pts | Dist: 121.0m | Pos: (-113.0, 43.3, 14.8) | Dim: 2.2x0.9x1.1 | Sévérité: 3
+  [ID SWITCH] Classe: car | GT_ID: 261 | Ancien Pred: 266 -> Nouveau Pred: 339 | Taille: 5 pts | Dist: 120.7m | Pos: (-112.0, 45.0, 14.8) | Dim: 0.4x0.4x0.3 | Sévérité: 5
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 339 fusionne les GT: ['261 (5 pts)', '263 (3 pts)'] | Taille Pred: 8 pts | Dist: 120.8m | Pos: (-112.4, 44.3, 14.8) | Dim: 2.8x2.4x1.1 | Sévérité: 3
+--- FRAME 190 ---
+  [ID SWITCH] Classe: car | GT_ID: 270 | Ancien Pred: 338 -> Nouveau Pred: 342 | Taille: 20 pts | Dist: 157.1m | Pos: (-152.1, -39.3, 16.7) | Dim: 1.4x1.5x1.2 | Sévérité: 20
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 332 -> Nouveau Pred: 346 | Taille: 79 pts | Dist: 142.4m | Pos: (-141.7, -14.1, 16.3) | Dim: 0.7x1.4x1.4 | Sévérité: 79
+  [ID SWITCH] Classe: car | GT_ID: 259 | Ancien Pred: 296 -> Nouveau Pred: 344 | Taille: 28 pts | Dist: 130.7m | Pos: (-124.9, 38.6, 14.8) | Dim: 2.1x4.0x1.0 | Sévérité: 28
+  [FN - Non Détecté] Classe: car | GT_ID: 261 | Taille: 4 pts | Dist: 130.8m | Pos: (-121.2, 49.3, 14.7) | Dim: 0.2x0.3x0.3 | Sévérité: 4
+  [ID SWITCH] Classe: car | GT_ID: 257 | Ancien Pred: 301 -> Nouveau Pred: 345 | Taille: 69 pts | Dist: 131.4m | Pos: (-128.3, 28.2, 15.3) | Dim: 1.9x3.3x1.2 | Sévérité: 69
+  [FN - Faible Overlap] Classe: car | GT_ID: 256 | Taille: 471 pts | Max Pred ID: 310 (27 pts) | Dist: 132.7m | Pos: (-131.0, 21.0, 15.3) | Dim: 2.6x4.1x1.3 | Sévérité: 444
+  [FN - Non Détecté] Classe: car | GT_ID: 267 | Taille: 1 pts | Dist: 150.6m | Pos: (-149.9, 14.2, 15.2) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 191 ---
+  [ID SWITCH] Classe: car | GT_ID: 270 | Ancien Pred: 342 -> Nouveau Pred: 348 | Taille: 10 pts | Dist: 153.3m | Pos: (-148.0, -40.0, 16.8) | Dim: 1.4x0.6x0.8 | Sévérité: 10
+  [FN - Non Détecté] Classe: car | GT_ID: 261 | Taille: 4 pts | Dist: 137.3m | Pos: (-127.1, 52.0, 14.7) | Dim: 0.4x0.8x0.2 | Sévérité: 4
+  [ID SWITCH] Classe: car | GT_ID: 257 | Ancien Pred: 345 -> Nouveau Pred: 349 | Taille: 53 pts | Dist: 135.3m | Pos: (-131.9, 30.0, 15.3) | Dim: 1.6x3.4x1.2 | Sévérité: 53
+  [ID SWITCH] Classe: car | GT_ID: 259 | Ancien Pred: 344 -> Nouveau Pred: 347 | Taille: 13 pts | Dist: 135.7m | Pos: (-129.7, 39.8, 14.7) | Dim: 1.2x2.5x0.6 | Sévérité: 13
+  [FN - Faible Overlap] Classe: car | GT_ID: 256 | Taille: 391 pts | Max Pred ID: 310 (10 pts) | Dist: 135.6m | Pos: (-133.8, 22.4, 15.2) | Dim: 2.3x4.2x1.3 | Sévérité: 381
+--- FRAME 192 ---
+  [ID SWITCH] Classe: car | GT_ID: 270 | Ancien Pred: 348 -> Nouveau Pred: 350 | Taille: 22 pts | Dist: 155.8m | Pos: (-151.1, -37.9, 16.3) | Dim: 1.5x0.8x1.4 | Sévérité: 22
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 346 -> Nouveau Pred: 351 | Taille: 96 pts | Dist: 143.3m | Pos: (-142.7, -13.1, 16.2) | Dim: 0.7x1.9x1.4 | Sévérité: 96
+  [FN - Non Détecté] Classe: car | GT_ID: 261 | Taille: 4 pts | Dist: 136.3m | Pos: (-125.7, 52.7, 14.6) | Dim: 0.4x0.6x0.3 | Sévérité: 4
+  [FN - Faible Overlap] Classe: car | GT_ID: 256 | Taille: 337 pts | Max Pred ID: 310 (32 pts) | Dist: 135.9m | Pos: (-133.9, 23.6, 15.2) | Dim: 2.4x4.0x1.3 | Sévérité: 305
+--- FRAME 193 ---
+  [ID SWITCH] Classe: car | GT_ID: 270 | Ancien Pred: 350 -> Nouveau Pred: 352 | Taille: 25 pts | Dist: 162.7m | Pos: (-159.3, -33.2, 16.2) | Dim: 3.9x1.3x1.4 | Sévérité: 25
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 351 -> Nouveau Pred: 356 | Taille: 100 pts | Dist: 147.1m | Pos: (-146.7, -10.9, 16.1) | Dim: 0.7x1.5x1.4 | Sévérité: 100
+  [ID SWITCH] Classe: car | GT_ID: 259 | Ancien Pred: 347 -> Nouveau Pred: 355 | Taille: 13 pts | Dist: 129.9m | Pos: (-123.3, 40.7, 14.8) | Dim: 2.1x3.8x0.9 | Sévérité: 13
+  [FN - Non Détecté] Classe: car | GT_ID: 261 | Taille: 3 pts | Dist: 128.9m | Pos: (-118.2, 51.3, 14.6) | Dim: 0.3x0.4x0.3 | Sévérité: 3
+  [ID SWITCH] Classe: car | GT_ID: 257 | Ancien Pred: 349 -> Nouveau Pred: 354 | Taille: 28 pts | Dist: 131.5m | Pos: (-127.7, 31.4, 15.2) | Dim: 1.8x3.1x1.3 | Sévérité: 28
+  [ID SWITCH] Classe: car | GT_ID: 256 | Ancien Pred: 310 -> Nouveau Pred: 353 | Taille: 292 pts | Dist: 133.5m | Pos: (-131.3, 24.2, 15.2) | Dim: 2.9x3.9x1.2 | Sévérité: 292
+  [FN - Faible Overlap] Classe: car | GT_ID: 264 | Taille: 488 pts | Max Pred ID: 325 (79 pts) | Dist: 146.1m | Pos: (-145.2, 16.0, 15.5) | Dim: 4.2x2.1x1.3 | Sévérité: 409
+--- FRAME 194 ---
+  [ID SWITCH] Classe: car | GT_ID: 270 | Ancien Pred: 352 -> Nouveau Pred: 357 | Taille: 26 pts | Dist: 165.0m | Pos: (-162.1, -31.0, 16.2) | Dim: 4.5x2.5x1.3 | Sévérité: 26
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 0 | Taille: 1 pts | Dist: 138.6m | Pos: (-138.5, 2.9, 15.8) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 195 ---
+  [SPLIT - Sur-segmentation] Classe: car | GT_ID: 270 divisée en preds: ['357 (12 pts)', '358 (9 pts)'] | Taille GT: 33 pts | Dist: 164.9m | Pos: (-162.0, -30.3, 16.2) | Dim: 4.5x3.0x1.6 | Sévérité: 21
+  [ID SWITCH] Classe: car | GT_ID: 259 | Ancien Pred: 355 -> Nouveau Pred: 359 | Taille: 12 pts | Dist: 130.7m | Pos: (-123.5, 42.7, 14.5) | Dim: 2.3x3.0x0.5 | Sévérité: 12
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 17 | Taille: 4 pts | Dist: 139.7m | Pos: (-139.7, 2.9, 15.7) | Dim: 0.0x0.0x0.0 | Sévérité: 4
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 359 fusionne les GT: ['259 (12 pts)', '257 (2 pts)'] | Taille Pred: 14 pts | Dist: 130.9m | Pos: (-124.1, 41.6, 14.6) | Dim: 5.2x9.4x1.0 | Sévérité: 2
+--- FRAME 196 ---
+  [ID SWITCH] Classe: car | GT_ID: 270 | Ancien Pred: 357 -> Nouveau Pred: 358 | Taille: 27 pts | Dist: 162.9m | Pos: (-160.0, -30.6, 16.3) | Dim: 1.6x2.8x1.5 | Sévérité: 27
+  [ID SWITCH] Classe: bicyclist | GT_ID: 7 | Ancien Pred: 356 -> Nouveau Pred: 362 | Taille: 130 pts | Dist: 149.3m | Pos: (-149.0, -9.1, 16.0) | Dim: 0.6x1.5x1.5 | Sévérité: 130
+  [ID SWITCH] Classe: car | GT_ID: 257 | Ancien Pred: 354 -> Nouveau Pred: 360 | Taille: 27 pts | Dist: 135.9m | Pos: (-131.1, 35.8, 14.8) | Dim: 1.9x2.8x1.4 | Sévérité: 27
+  [ID SWITCH] Classe: car | GT_ID: 259 | Ancien Pred: 359 -> Nouveau Pred: 361 | Taille: 9 pts | Dist: 134.9m | Pos: (-127.5, 44.0, 14.3) | Dim: 1.9x2.7x0.7 | Sévérité: 9
+  [FN - Faible Overlap] Classe: car | GT_ID: 256 | Taille: 190 pts | Max Pred ID: 353 (17 pts) | Dist: 137.4m | Pos: (-134.5, 28.0, 14.8) | Dim: 2.8x3.7x1.2 | Sévérité: 173
+--- FRAME 197 ---
+  [ID SWITCH] Classe: car | GT_ID: 259 | Ancien Pred: 361 -> Nouveau Pred: 363 | Taille: 8 pts | Dist: 137.1m | Pos: (-129.2, 45.8, 14.2) | Dim: 2.0x3.2x0.6 | Sévérité: 8
+  [FN - Faible Overlap] Classe: car | GT_ID: 256 | Taille: 167 pts | Max Pred ID: 353 (10 pts) | Dist: 139.1m | Pos: (-136.0, 29.4, 14.7) | Dim: 2.8x4.0x1.1 | Sévérité: 157
+  [FN - Non Détecté] Classe: bicyclist | GT_ID: 19 | Taille: 2 pts | Dist: 142.0m | Pos: (-142.0, 3.0, 15.6) | Dim: 0.0x0.0x0.0 | Sévérité: 2
+  [MERGE - Sous-segmentation] Classe: car | Pred_ID: 363 fusionne les GT: ['259 (8 pts)', '257 (2 pts)'] | Taille Pred: 10 pts | Dist: 137.1m | Pos: (-129.7, 44.4, 14.2) | Dim: 4.0x9.7x0.6 | Sévérité: 2
+--- FRAME 198 ---
+  [FN - Faible Overlap] Classe: car | GT_ID: 256 | Taille: 158 pts | Max Pred ID: 353 (10 pts) | Dist: 141.3m | Pos: (-137.9, 30.8, 14.7) | Dim: 2.7x3.9x1.2 | Sévérité: 148
+  [FN - Non Détecté] Classe: car | GT_ID: 259 | Taille: 4 pts | Dist: 140.1m | Pos: (-131.8, 47.7, 14.2) | Dim: 0.4x0.1x0.0 | Sévérité: 4
+  [FN - Non Détecté] Classe: car | GT_ID: 0 | Taille: 1 pts | Dist: 150.0m | Pos: (-149.8, -7.6, 15.2) | Dim: 0.0x0.0x0.0 | Sévérité: 1
+--- FRAME 199 ---
+  [FN - Non Détecté] Classe: car | GT_ID: 259 | Taille: 3 pts | Dist: 144.9m | Pos: (-135.6, 51.0, 14.4) | Dim: 0.8x1.5x0.2 | Sévérité: 3
+  [ID SWITCH] Classe: car | GT_ID: 256 | Ancien Pred: 353 -> Nouveau Pred: 364 | Taille: 137 pts | Dist: 144.5m | Pos: (-140.9, 32.2, 14.7) | Dim: 2.4x3.4x1.1 | Sévérité: 137
+
+=== RÉSUMÉ DES ERREURS ===
+Total False Negatives (Pistes non détectées ou très faibles) : 271
+Total False Positives (Ghosts ou très faible overlap GT) : 0
+Total Splits (Sur-segmentations d'une GT) : 51
+Total Merges (Sous-segmentations, plusieurs GT fusionnées) : 148
+Total ID Switches (Inconsistance temporelle) : 337
+====================================

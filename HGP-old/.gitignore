@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.so
+*.c
+*.egg-info/
+.venv/
+build/
+dist/
+.eggs/
+*.log
+.DS_Store
+src/hgp_clusterer/_cython.cpp
+node_modules
+geogram_*
