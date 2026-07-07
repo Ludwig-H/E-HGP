@@ -106,7 +106,7 @@ def expand_site_neighbors(i, target_beta, Z, a, tree, n, neigh_list, beta_list, 
         if lambda_cert > target_beta:
             break
             
-        L_new = min(n, L_current[i] + 15)
+        L_new = min(n, L_current[i] * 2)
         if L_new <= L_current[i]:
             break
             
@@ -236,9 +236,6 @@ def lazy_cut_boruvka(Z, a, K, L_initial=30, max_iter=20, tol=1e-6):
                 for j in ext_candidates:
                     if j in tau:
                         continue
-                    j_face = tuple(sorted(neigh_list[j][:K]))
-                    if j_face in face_to_id and uf.find(face_to_id[j_face]) == root:
-                        continue
                     is_valid = True
                     for i in tau:
                         if get_beta_val(i, j, neigh_list, beta_list) >= np.inf:
@@ -250,11 +247,14 @@ def lazy_cut_boruvka(Z, a, K, L_initial=30, max_iter=20, tol=1e-6):
                 if not valid_ext:
                     continue
                     
+                # Generate and filter candidate cofaces (check if internal to component early)
                 cofaces_cand = []
                 for j in valid_ext:
-                    cofaces_cand.append(tuple(sorted(tau + (j,))))
-                cofaces_cand = list(set(cofaces_cand))
-                
+                    sigma = tuple(sorted(tau + (j,)))
+                    if is_internal_coface(sigma, root, face_to_id, uf):
+                        continue
+                    cofaces_cand.append(sigma)
+                    
                 if not cofaces_cand:
                     continue
                     
@@ -266,9 +266,6 @@ def lazy_cut_boruvka(Z, a, K, L_initial=30, max_iter=20, tol=1e-6):
                     union_support_tau.update(neigh_list[i][:L_current[i]])
                     
                 for idx, sigma in enumerate(cofaces_cand):
-                    # Filter out internal candidates BEFORE local/global tests
-                    if is_internal_coface(sigma, root, face_to_id, uf):
-                        continue
                     rho = np.sqrt(max(radii_sq[idx], 0.0))
                     if not check_gabriel_local_tau(centers[idx], radii_sq[idx], sigma, Z, a, union_support_tau, tol=tol):
                         continue
@@ -330,19 +327,23 @@ def lazy_cut_boruvka(Z, a, K, L_initial=30, max_iter=20, tol=1e-6):
                 best_edge = (rho, fid, other_fid, sigma)
                 break
                 
-            # 4. Check certification and expand locally if needed
+            # 4. Check certification and expand locally across ALL boundary faces if needed
             if best_edge is not None:
                 rho, fid, other_fid, sigma = best_edge
-                tau = id_to_face[fid]
                 
-                min_lambda = min(get_certified_lambda(i, neigh_list, beta_list, D_max_list, L_current, n) for i in tau)
-                if rho >= min_lambda:
-                    # Expand neighbor lists
-                    for i in tau:
-                        expand_site_neighbors(i, rho, Z, a, tree, n, neigh_list, beta_list, D_max_list, L_current)
-                    min_lambda = min(get_certified_lambda(i, neigh_list, beta_list, D_max_list, L_current, n) for i in tau)
+                # We must audit all boundary faces of the component to ensure no omitted coface is smaller than rho
+                for f_id_check in fids:
+                    if not component_certified[root]:
+                        break
+                    tau_check = id_to_face[f_id_check]
+                    min_lambda = min(get_certified_lambda(i, neigh_list, beta_list, D_max_list, L_current, n) for i in tau_check)
                     if rho >= min_lambda:
-                        component_certified[root] = False
+                        # Expand neighbor lists
+                        for i in tau_check:
+                            expand_site_neighbors(i, rho, Z, a, tree, n, neigh_list, beta_list, D_max_list, L_current)
+                        min_lambda = min(get_certified_lambda(i, neigh_list, beta_list, D_max_list, L_current, n) for i in tau_check)
+                        if rho >= min_lambda:
+                            component_certified[root] = False
                 best_edges[root] = best_edge
             else:
                 # No edge passed global Gabriel. If any boundary face has finite certification bound, the component is not certified.
