@@ -10,26 +10,40 @@ def gabriel_global_test_pytorch(centers, radii_sq, Z, a, cofaces, tol=1e-8):
     B, K_plus_1 = cofaces.shape
     n, p = Z.shape
     
-    norm_C = torch.sum(centers ** 2, dim=1)
+    # Target memory footprint: ~100MB max per chunk
+    chunk_size = max(1, 25000000 // n)
+    
+    is_gabriel = torch.empty(B, dtype=torch.bool, device=centers.device)
+    gaps = torch.empty(B, dtype=centers.dtype, device=centers.device)
+    
     norm_Z_a = torch.sum(Z ** 2, dim=1) + a
     
-    dist_matrix = norm_C[:, None] + norm_Z_a[None, :] - 2.0 * torch.matmul(centers, Z.t())
-    
-    row_indices = torch.repeat_interleave(torch.arange(B, device=cofaces.device), K_plus_1)
-    col_indices = cofaces.ravel()
-    
-    dist_matrix[row_indices, col_indices] = float('inf')
-    
-    min_dist = torch.min(dist_matrix, dim=1).values
-    gaps = min_dist - radii_sq
-    is_gabriel = gaps >= -tol
-    
+    for start in range(0, B, chunk_size):
+        end = min(start + chunk_size, B)
+        c_chunk = centers[start:end]
+        r_chunk = radii_sq[start:end]
+        cof_chunk = cofaces[start:end]
+        B_c = end - start
+        
+        norm_C = torch.sum(c_chunk ** 2, dim=1)
+        dist_matrix = norm_C[:, None] + norm_Z_a[None, :] - 2.0 * torch.matmul(c_chunk, Z.t())
+        
+        row_indices = torch.repeat_interleave(torch.arange(B_c, device=cofaces.device), K_plus_1)
+        col_indices = cof_chunk.ravel()
+        dist_matrix[row_indices, col_indices] = float('inf')
+        
+        min_dist = torch.min(dist_matrix, dim=1).values
+        g_chunk = min_dist - r_chunk
+        
+        is_gabriel[start:end] = g_chunk >= -tol
+        gaps[start:end] = g_chunk
+        
     return is_gabriel, gaps
 
 def gabriel_global_test_batch(centers, radii_sq, Z, a, cofaces, tol=1e-8):
     """
     Performs a global Gabriel certificate test on a batch of cofaces.
-    Optimized for GPU/TPU/CPU using GEMM.
+    Optimized for GPU/TPU/CPU using GEMM with dynamic chunking for scalability.
     """
     if HAS_TORCH and torch.cuda.is_available():
         centers_t = torch.as_tensor(centers, device='cuda')
@@ -44,31 +58,34 @@ def gabriel_global_test_batch(centers, radii_sq, Z, a, cofaces, tol=1e-8):
     B, K_plus_1 = cofaces.shape
     n, p = Z.shape
     
-    # 1. Compute norms
-    norm_C = np.sum(centers ** 2, axis=1) # (B,)
-    norm_Z_a = np.sum(Z ** 2, axis=1) + a # (n,)
+    # Target memory footprint: ~100MB max per chunk
+    chunk_size = max(1, 25000000 // n)
     
-    # 2. Compute power distance matrix using GEMM
-    # dist_matrix[b, j] = ||c_b - z_j||^2 + a_j
-    dist_matrix = norm_C[:, np.newaxis] + norm_Z_a[np.newaxis, :] - 2.0 * np.dot(centers, Z.T)
+    is_gabriel = np.empty(B, dtype=bool)
+    gaps = np.empty(B, dtype=centers.dtype)
     
-    # 3. Mask out the points that belong to the coface itself
-    # row_indices: [0, 0, ..., B-1, B-1] (each row repeated K+1 times)
-    # col_indices: cofaces index values
-    row_indices = np.repeat(np.arange(B), K_plus_1)
-    col_indices = cofaces.ravel()
+    norm_Z_a = np.sum(Z ** 2, axis=1) + a
     
-    # Set distance of coface elements to infinity so they are excluded from the minimum
-    dist_matrix[row_indices, col_indices] = np.inf
-    
-    # 4. Find the minimum power distance for each coface
-    min_dist = np.min(dist_matrix, axis=1)
-    
-    # 5. Compute Gabriel gap: min_{j notin sigma} phi_j(c_b) - rho^2
-    gaps = min_dist - radii_sq
-    
-    is_gabriel = gaps >= -tol
-    
+    for start in range(0, B, chunk_size):
+        end = min(start + chunk_size, B)
+        c_chunk = centers[start:end]
+        r_chunk = radii_sq[start:end]
+        cof_chunk = cofaces[start:end]
+        B_c = end - start
+        
+        norm_C = np.sum(c_chunk ** 2, axis=1)
+        dist_matrix = norm_C[:, np.newaxis] + norm_Z_a[np.newaxis, :] - 2.0 * np.dot(c_chunk, Z.T)
+        
+        row_indices = np.repeat(np.arange(B_c), K_plus_1)
+        col_indices = cof_chunk.ravel()
+        dist_matrix[row_indices, col_indices] = np.inf
+        
+        min_dist = np.min(dist_matrix, axis=1)
+        g_chunk = min_dist - r_chunk
+        
+        is_gabriel[start:end] = g_chunk >= -tol
+        gaps[start:end] = g_chunk
+        
     return is_gabriel, gaps
 
 
