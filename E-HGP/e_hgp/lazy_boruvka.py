@@ -195,7 +195,18 @@ def lazy_cut_boruvka(Z, a, K, L_initial=30, max_iter=20, tol=1e-6):
                     if j in tau:
                         continue
                     # Check if beta_ij < U_C for all i in tau
-                    if all(beta[i, j] < U_C for i in tau):
+                    # Since beta is local of shape (n, L_max), lookup local index of j in sorted_neighbors[i]
+                    is_valid = True
+                    for i in tau:
+                        idx = np.where(sorted_neighbors[i] == j)[0]
+                        if len(idx) > 0:
+                            if beta[i, idx[0]] >= U_C:
+                                is_valid = False
+                                break
+                        else:
+                            is_valid = False
+                            break
+                    if is_valid:
                         valid_ext.append(j)
                         
                 if not valid_ext:
