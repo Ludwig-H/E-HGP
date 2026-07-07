@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# C++ / CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeMembers
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_core.cpp
+e_hgp/_core.cpp
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+.gemini/
+
+
+# Node / JS
+node_modules/
+package-lock.json
+
+# Local files / logs
+*.log
