@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial import KDTree
 from .miniball import compute_weighted_miniball_batch
 from .gabriel import gabriel_global_test_batch
 
@@ -34,48 +35,54 @@ class UnionFind:
         return False
 
 
-def compute_pairwise_beta(Z, a):
+def compute_pairwise_beta(Z, a, L_max=150):
     r"""
-    Computes the pairwise birth radius beta_ij for all pairs of sites.
-    beta_ij = \rho_\kappa({i, j})
-    
-    Returns
-    -------
-    beta : np.ndarray
-        Pairwise beta matrix of shape (n, n).
-    sorted_neighbors : np.ndarray
-        Indices of neighbors sorted by beta_ij, shape (n, n).
+    Computes the localized pairwise birth radius beta_ij using KDTree.
+    This avoids O(N^2) memory footprint and scales to millions of points.
     """
     n, p = Z.shape
+    L_max = min(n, L_max)
     
-    # 1. Compute pairwise Euclidean distances
-    # D[i, j] = ||z_i - z_j||
-    sum_Z2 = np.sum(Z**2, axis=1)
-    D2 = sum_Z2[:, np.newaxis] + sum_Z2[np.newaxis, :] - 2.0 * np.dot(Z, Z.T)
-    # Avoid negative values due to float precision
-    D2 = np.maximum(D2, 0.0)
-    D = np.sqrt(D2)
+    # 1. Build KDTree and query L_max nearest neighbors
+    tree = KDTree(Z)
+    dists, indices = tree.query(Z, k=L_max, workers=-1)
     
-    # 2. Compute u_ij = clip((D_ij^2 + a_j - a_i) / (2 D_ij), 0, D_ij)
-    # Avoid division by zero by adding epsilon
+    # 2. Compute D2, D, and a weights for local neighbors
+    D2 = dists ** 2
+    D = dists
+    
+    a_j = a[indices]
+    a_i = a[:, np.newaxis]
+    
+    # 3. Compute u_ij
     denom = 2.0 * D
     mask_zero = D < 1e-12
     denom[mask_zero] = 1.0
     
-    u = (D2 + a[np.newaxis, :] - a[:, np.newaxis]) / denom
+    u = (D2 + a_j - a_i) / denom
     u = np.clip(u, 0.0, D)
     u[mask_zero] = 0.0
     
-    # 3. beta_ij^2 = max(u_ij^2 + a_i, (D_ij - u_ij)^2 + a_j)
-    term1 = u**2 + a[:, np.newaxis]
-    term2 = (D - u)**2 + a[np.newaxis, :]
+    # 4. beta_ij^2 = max(u_ij^2 + a_i, (D_ij - u_ij)^2 + a_j)
+    term1 = u**2 + a_i
+    term2 = (D - u)**2 + a_j
     beta2 = np.maximum(term1, term2)
-    beta = np.sqrt(beta2)
+    beta_local = np.sqrt(beta2)
     
-    # Sort neighbors by beta for each site
-    sorted_neighbors = np.argsort(beta, axis=1)
+    # 5. Sort local neighbors by beta_local for each site
+    sort_local = np.argsort(beta_local, axis=1)
     
-    return beta, sorted_neighbors
+    # Construct output arrays
+    sorted_neighbors = np.empty((n, L_max), dtype=np.int32)
+    beta_sorted = np.empty((n, L_max), dtype=np.float64)
+    
+    # Fast row-wise gather
+    for i in range(n):
+        idx = sort_local[i]
+        sorted_neighbors[i] = indices[i, idx]
+        beta_sorted[i] = beta_local[i, idx]
+        
+    return beta_sorted, sorted_neighbors
 
 
 def lazy_cut_boruvka(Z, a, K, L_initial=30, max_iter=20, tol=1e-6):
@@ -106,13 +113,14 @@ def lazy_cut_boruvka(Z, a, K, L_initial=30, max_iter=20, tol=1e-6):
     """
     n, p = Z.shape
     
-    # 1. Build beta lists
-    beta, sorted_neighbors = compute_pairwise_beta(Z, a)
+    # 1. Build beta lists locally
+    L_max = max(150, L_initial + 50)
+    beta, sorted_neighbors = compute_pairwise_beta(Z, a, L_max=L_max)
     
     # Neighbor lists
     N_L = sorted_neighbors[:, :L_initial]
     # Tail bounds: weight of the first omitted neighbor
-    lambda_L = beta[np.arange(n), sorted_neighbors[:, min(L_initial, n-1)]]
+    lambda_L = beta[:, min(L_initial, beta.shape[1]-1)]
     
     # 2. Discover initial K-faces
     # For each site i, we take the K-subset consisting of i and its K-1 closest beta-neighbors
