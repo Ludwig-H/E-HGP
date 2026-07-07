@@ -14,7 +14,7 @@ class EHGPClusterer(BaseEstimator, ClusterMixin):
     lazy Borůvka, and extracts clusters from the hierarchy.
     """
     def __init__(self, K=2, kappa=2.0, m_reg=30, min_cluster_size=None, 
-                 regularization='entropy_local', eps_sinkhorn=0.1, L_initial=30):
+                 regularization='entropy_local', eps_sinkhorn=0.1, L_initial=30, expZ=2.0):
         self.K = K
         self.kappa = kappa
         self.m_reg = m_reg
@@ -22,6 +22,7 @@ class EHGPClusterer(BaseEstimator, ClusterMixin):
         self.regularization = regularization
         self.eps_sinkhorn = eps_sinkhorn
         self.L_initial = L_initial
+        self.expZ = expZ
         
     def fit(self, X, y=None):
         """
@@ -85,7 +86,7 @@ class EHGPClusterer(BaseEstimator, ClusterMixin):
             w_mst[idx] = weight
             
         # 4. Compute face weights W_nodes
-        W_nodes, S_faces = compute_face_weights(faces_unique_arr, Z, a)
+        W_nodes, S_faces = compute_face_weights(faces_unique_arr, Z, a, expZ=self.expZ)
         
         # 5. Condense tree hierarchy
         Z_tree = condense_tree(W_nodes, u_mst, v_mst, w_mst, self.min_cluster_size)

@@ -8,7 +8,7 @@ except ImportError:
     HAS_CYTHON = False
 from .miniball import compute_weighted_miniball_batch
 
-def compute_face_weights(faces_unique, Z, a):
+def compute_face_weights(faces_unique, Z, a, expZ=2.0):
     """
     Computes node weights for the K-faces based on point density.
     Matches the formula in section 4.4 / HGP-old.
@@ -16,12 +16,12 @@ def compute_face_weights(faces_unique, Z, a):
     N, K = faces_unique.shape
     n = Z.shape[0]
     
-    # 1. Compute birth radius of each face to get S_faces = 1.0 / rho
+    # 1. Compute birth radius of each face to get S_faces = 1.0 / (rho ** expZ)
     centers, radii_sq = compute_weighted_miniball_batch(Z, a, faces_unique)
     rho = np.sqrt(np.maximum(radii_sq, 0.0))
     
     with np.errstate(divide='ignore'):
-        S_faces = 1.0 / (rho + 1e-12)
+        S_faces = 1.0 / ((rho + 1e-12) ** expZ)
         
     # 2. Compute T_points[p] = sum_{f contains p} S_faces[f]
     flat_faces = faces_unique.flatten()

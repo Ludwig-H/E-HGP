@@ -1,32 +1,46 @@
 import numpy as np
 
+try:
+    import torch
+    HAS_TORCH = True
+except ImportError:
+    HAS_TORCH = False
+
+def gabriel_global_test_pytorch(centers, radii_sq, Z, a, cofaces, tol=1e-8):
+    B, K_plus_1 = cofaces.shape
+    n, p = Z.shape
+    
+    norm_C = torch.sum(centers ** 2, dim=1)
+    norm_Z_a = torch.sum(Z ** 2, dim=1) + a
+    
+    dist_matrix = norm_C[:, None] + norm_Z_a[None, :] - 2.0 * torch.matmul(centers, Z.t())
+    
+    row_indices = torch.repeat_interleave(torch.arange(B, device=cofaces.device), K_plus_1)
+    col_indices = cofaces.ravel()
+    
+    dist_matrix[row_indices, col_indices] = float('inf')
+    
+    min_dist = torch.min(dist_matrix, dim=1).values
+    gaps = min_dist - radii_sq
+    is_gabriel = gaps >= -tol
+    
+    return is_gabriel, gaps
+
 def gabriel_global_test_batch(centers, radii_sq, Z, a, cofaces, tol=1e-8):
     """
     Performs a global Gabriel certificate test on a batch of cofaces.
     Optimized for GPU/TPU/CPU using GEMM.
-    
-    Parameters
-    ----------
-    centers : np.ndarray
-        Miniball centers of the cofaces, shape (B, p).
-    radii_sq : np.ndarray
-        Miniball radii squared, shape (B,).
-    Z : np.ndarray
-        Regularized site centers, shape (n, p).
-    a : np.ndarray
-        Power weights, shape (n,).
-    cofaces : np.ndarray
-        Batch of cofaces, shape (B, K+1).
-    tol : float
-        Gabriel gap tolerance.
-        
-    Returns
-    -------
-    is_gabriel : np.ndarray
-        Boolean array of shape (B,) indicating which cofaces are globally Gabriel.
-    gaps : np.ndarray
-        Gabriel gap values for each coface, shape (B,).
     """
+    if HAS_TORCH and torch.cuda.is_available():
+        centers_t = torch.as_tensor(centers, device='cuda')
+        radii_sq_t = torch.as_tensor(radii_sq, device='cuda')
+        Z_t = torch.as_tensor(Z, device='cuda')
+        a_t = torch.as_tensor(a, device='cuda')
+        cofaces_t = torch.as_tensor(cofaces, device='cuda', dtype=torch.long)
+        
+        is_gabriel_t, gaps_t = gabriel_global_test_pytorch(centers_t, radii_sq_t, Z_t, a_t, cofaces_t, tol)
+        return is_gabriel_t.cpu().numpy(), gaps_t.cpu().numpy()
+
     B, K_plus_1 = cofaces.shape
     n, p = Z.shape
     

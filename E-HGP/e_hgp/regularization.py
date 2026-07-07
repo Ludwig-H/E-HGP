@@ -1,30 +1,63 @@
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
+try:
+    import torch
+    HAS_TORCH = True
+except ImportError:
+    HAS_TORCH = False
+
+def solve_gibbs_entropy_pytorch(D, log_kappa, max_iter=40, tol=1e-5):
+    n, m = D.shape
+    log_m = np.log(m)
+    effective_target = min(log_kappa, log_m - 1e-6)
+    
+    if effective_target <= 1e-9:
+        Q = torch.zeros_like(D)
+        Q[:, 0] = 1.0
+        return Q, torch.zeros(n, dtype=D.dtype, device=D.device)
+        
+    low = torch.full((n,), 1e-8, dtype=D.dtype, device=D.device)
+    high = 100.0 * torch.max(D, dim=1).values + 1e-5
+    
+    for _ in range(max_iter):
+        mid = 0.5 * (low + high)
+        exponent = -D / mid[:, None]
+        max_exp = torch.max(exponent, dim=1, keepdim=True).values
+        exp_w = torch.exp(exponent - max_exp)
+        sum_exp = torch.sum(exp_w, dim=1, keepdim=True)
+        q = exp_w / sum_exp
+        
+        log_q = exponent - max_exp - torch.log(sum_exp)
+        entropy = -torch.sum(q * log_q, dim=1)
+        
+        too_small = entropy < effective_target
+        low = torch.where(too_small, mid, low)
+        high = torch.where(too_small, high, mid)
+        
+    eta = 0.5 * (low + high)
+    exponent = -D / eta[:, None]
+    max_exp = torch.max(exponent, dim=1, keepdim=True).values
+    exp_w = torch.exp(exponent - max_exp)
+    Q = exp_w / torch.sum(exp_w, dim=1, keepdim=True)
+    
+    if log_kappa >= log_m:
+        Q.fill_(1.0 / m)
+        eta.fill_(float('inf'))
+        
+    return Q, eta
+
 def solve_gibbs_entropy_vectorized(D, log_kappa, max_iter=40, tol=1e-5):
     """
     Vectorized solver for Gibbs weights under local entropy constraints.
-    
-    Parameters
-    ----------
-    D : np.ndarray
-        Squared distances to local support points. Shape (n, m).
-        D[:, 0] should be 0 (distance to self).
-    log_kappa : float
-        Target entropy (log(kappa)).
-    max_iter : int
-        Number of bisection iterations.
-    tol : float
-        Tolerance for convergence.
-        
-    Returns
-    -------
-    Q : np.ndarray
-        Entropy-regularized weights of shape (n, m).
-    eta : np.ndarray
-        Temperature values of shape (n,).
     """
     n, m = D.shape
+    
+    if HAS_TORCH and torch.cuda.is_available():
+        D_t = torch.as_tensor(D, device='cuda')
+        Q_t, eta_t = solve_gibbs_entropy_pytorch(D_t, log_kappa, max_iter, tol)
+        return Q_t.cpu().numpy(), eta_t.cpu().numpy()
+        
     Q = np.zeros_like(D)
     eta = np.zeros(n, dtype=D.dtype)
     
