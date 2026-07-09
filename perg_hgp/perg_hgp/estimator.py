@@ -21,7 +21,9 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                  beam_per_bucket=4, rank_eps_schedule=[1.0, 0.5, 0.25, 0.125],
                  L_shell=4, support_cap=4, local_gabriel=True, global_gabriel='selective',
                  gabriel_tol=1e-6, min_cluster_size=100, expZ=2.0, device='cpu',
-                 checkpoint_dir=None, exactness_mode='atlas_exact'):
+                 checkpoint_dir=None, exactness_mode='atlas_exact',
+                 max_witnesses_per_rank=100000, max_cofaces=1000000,
+                 max_unique_facets=10000000, max_dual_edges=50000000):
         
         self.K = K
         self.K_rho = K_rho
@@ -43,6 +45,10 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         self.device = device
         self.checkpoint_dir = checkpoint_dir
         self.exactness_mode = exactness_mode
+        self.max_witnesses_per_rank = max_witnesses_per_rank
+        self.max_cofaces = max_cofaces
+        self.max_unique_facets = max_unique_facets
+        self.max_dual_edges = max_dual_edges
         
     def fit(self, X, y=None):
         """
@@ -315,6 +321,20 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             if len(certified_idx) == 0:
                 print("[PERG-HGP] Warning: No cofaces passed Gabriel certification. Hierarchy will be empty.")
                 self.labels_ = np.full(N, -1, dtype=np.int32)
+                W_coords_len = w_pool.coords.shape[0] if w_pool is not None else 0
+                self.exactness_report_ = {
+                    "exactness_mode": cfg.exactness_mode,
+                    "model_exact_for_chosen_supports": (cfg.alpha == 0.0),
+                    "accepted_cofaces_are_true_gabriel": (self.global_gabriel in ['all', 'selective']),
+                    "hgp_hierarchy_complete": False,
+                    "candidate_cofaces": cofaces.shape[0],
+                    "certified_cofaces": 0,
+                    "num_facets": 0,
+                    "witness_budget_exceeded": (W_coords_len > cfg.max_witnesses_per_rank),
+                    "cofaces_budget_exceeded": (cofaces.shape[0] > cfg.max_cofaces),
+                    "facets_budget_exceeded": False,
+                    "edges_budget_exceeded": False
+                }
                 return self
                 
             certified_cofaces = cofaces[certified_idx]

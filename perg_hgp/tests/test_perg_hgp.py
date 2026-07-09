@@ -258,5 +258,24 @@ class TestPERGHGP(unittest.TestCase):
             np.testing.assert_array_equal(labels1, labels2)
             self.assertEqual(clusterer2.exactness_report_['candidate_cofaces'], clusterer1.exactness_report_['candidate_cofaces'])
             
+    def test_no_cofaces_certified(self):
+        # Set gabriel_tol to a huge negative value to reject all cofaces
+        X, _ = make_blobs(n_samples=50, centers=2, n_features=3, random_state=42)
+        X = X.astype(np.float32)
+        
+        clusterer = PERGHGPClusterer(
+            K=2,
+            grid_resolution=4,
+            m_local=10,
+            m_active=10,
+            gabriel_tol=-1e9, # force rejection
+            device='cpu'
+        )
+        labels = clusterer.fit_predict(X)
+        self.assertEqual(labels.shape[0], 50)
+        self.assertTrue(np.all(labels == -1))
+        self.assertEqual(clusterer.exactness_report_['certified_cofaces'], 0)
+        self.assertEqual(clusterer.exactness_report_['num_facets'], 0)
+        
 if __name__ == '__main__':
     unittest.main()
