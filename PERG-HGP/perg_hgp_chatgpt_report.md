@@ -1,4 +1,4 @@
-# Rapport de Version 3.1 & Phase 4 (Transmission à ChatGPT)
+# Rapport de Version 3.2 & Phase 4 (Transmission à ChatGPT)
 
 Ce rapport documente la validation des **modes d'exactitude (Phase 4)** et la résolution des derniers verrous techniques et de robustesse de la bibliothèque **PERG-HGP**.
 
@@ -18,26 +18,30 @@ Ce rapport documente la validation des **modes d'exactitude (Phase 4)** et la r�
 *   **Alerte Scientifique** : Pour éviter toute fausse allégation d'exactitude complète, le flag `hgp_hierarchy_complete` est désormais forcé à `False` dans le rapport d'exactitude.
 *   **Condition de Validation** : Il ne pourra passer à `True` que si un audit géométrique complet de la coupe (lazy cut-audit) est effectivement programmé et validé.
 
-### 1.4 Audit Réel du Budget des Arêtes du Dual
-*   **Évaluation Rigoureuse** : Remplacement du calcul erroné de dépassement de budget d'arêtes qui se basait sur `len(mst_u)` (taille de l'arbre MST) par le nombre réel d'arêtes candidates du graphe dual (`num_dual_edges`).
-*   **Bénéfice** : Cela prévient les sous-estimations massives de la combinatoire du graphe dual avant l'extraction du MST.
+### 1.4 Audit Réel du Budget des Arêtes du Dual & Exposition des Paramètres
+*   **Évaluation Rigoureuse** : Remplacement du calcul de dépassement de budget d'arêtes qui se basait à tort sur `len(mst_u)` (taille de l'arbre MST) par le nombre réel d'arêtes candidates du graphe dual (`num_dual_edges`).
+*   **Exposition Scikit-Learn** : Les budgets de combinatoire (`max_witnesses_per_rank`, `max_cofaces`, `max_unique_facets`, `max_dual_edges`) ont été ajoutés comme paramètres du constructeur `PERGHGPClusterer.__init__` et sauvés en tant qu'attributs de l'objet, les rendant paramétrables et compatibles avec le protocole de Scikit-Learn.
 
-### 1.5 Élimination du Warning "Divide by Zero"
+### 1.5 Diagnostic en Cas d'Échec de Certification
+*   **Comportement Robuste** : Si aucune coface ne passe la certification Gabriel (par exemple avec une tolérance très stricte ou un bruit excessif), l'estimateur peuple désormais un rapport d'exactitude cohérent (`self.exactness_report_`) avec 0 coface certifiée avant de retourner `self`.
+
+### 1.6 Élimination du Warning "Divide by Zero"
 *   **Vectorisation Propre** : Remplacement de la division `1.0 / T_points` par une division NumPy sécurisée via `np.divide` avec le paramètre `where=(T_points > 0.0)`.
 *   **Bénéfice** : Le warning d'exécution est totalement résolu sans dégradation de performance.
 
-### 1.6 Mode `soft_only` et Propagation des Configurations
-*   **Mode Léger sans Cofaces** : Implémentation complète du mode `exactness_mode='soft_only'`. Dans ce mode, l'extraction combinatoire des cofaces et la certification Gabriel sont ignorées au profit d'un MST direct calculé sur les sites de puissance régularisés $Z, a$.
+### 1.7 Mode `soft_only` et Propagation des Configurations
+*   **Baseline Heuristique Légère** : Implémentation complète du mode `exactness_mode='soft_only'`. Ce mode est documenté comme une baseline rapide sans coface : l'extraction combinatoire et la certification Gabriel sont ignorées au profit d'un MST direct calculé sur les sites de puissance régularisés $Z, a$. Il permet un traitement rapide mais plus fragmenté que la hiérarchie HGP duale complète.
 *   **Propagation Automatique** : Configuration automatique et cohérente des filtres de Gabriel locaux et globaux (modes `atlas_exact`, `global_gabriel_certified`, `cut_certified`).
 
 ---
 
 ## 2. Validation de la Suite de Tests
 
-La suite de tests unitaires et d'intégration a été étendue à 10 tests, validant de bout en bout :
+La suite de tests unitaires et d'intégration a été étendue à 11 tests, validant de bout en bout :
 *   L'active-set du miniball 3D.
 *   Le test de Gabriel global par élagage AABB.
 *   La reprise robuste sur coupure depuis les checkpoints.
 *   Le mode `soft_only` direct.
+*   Le comportement robuste et le rapport d'exactitude lorsque aucune coface n'est certifiée (`test_no_cofaces_certified`).
 
-**Statut** : `OK` (Exécution complète des 10 tests en **5,921 secondes** sur CPU).
+**Statut** : `OK` (Exécution complète des 11 tests en **5,609 secondes** sur CPU).
