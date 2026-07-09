@@ -50,6 +50,9 @@ class PERGHGPConfig:
         
         # Device
         self.device = kwargs.get('device', 'cpu') # 'cpu' or 'cuda'
+        
+        # Checkpointing
+        self.checkpoint_dir = kwargs.get('checkpoint_dir', None)
 
     @classmethod
     def load_from_yaml(cls, filepath):

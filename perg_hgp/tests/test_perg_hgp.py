@@ -9,7 +9,10 @@ from perg_hgp import (
     solve_local_gibbs_entropy,
     compute_regularized_sites,
     compute_rank_soft_dp,
-    solve_weighted_miniball_active_set_3d
+    compute_rank_soft_dp_batched,
+    solve_weighted_miniball_active_set_3d,
+    compute_facet_ids,
+    build_dual_edges
 )
 from perg_hgp.cofaces import solve_weighted_miniball_brute_force_3d, extract_top_cofaces
 from perg_hgp.gabriel import global_gabriel_grid_test
@@ -62,6 +65,24 @@ class TestPERGHGP(unittest.TestCase):
         # Shell weights must sum to 1
         for k in range(Kmax + 1):
             self.assertAlmostEqual(torch.sum(b[k]).item(), 1.0, places=4)
+            
+    def test_rank_dp_batched(self):
+        device = 'cpu'
+        # 5 batches of 32 energies
+        E = torch.rand((5, 32), device=device, dtype=torch.float32)
+        Kmax = 10
+        eps = 0.5
+        
+        Q_batch, b_batch = compute_rank_soft_dp_batched(E, Kmax, eps)
+        
+        self.assertEqual(Q_batch.shape, (5, Kmax + 1))
+        self.assertEqual(b_batch.shape, (5, Kmax + 1, 32))
+        
+        # Verify that each batch element matches the scalar computation exactly
+        for i in range(5):
+            Q_scalar, b_scalar = compute_rank_soft_dp(E[i], Kmax, eps)
+            self.assertLess(torch.norm(Q_batch[i] - Q_scalar).item(), 1e-4)
+            self.assertLess(torch.norm(b_batch[i] - b_scalar).item(), 1e-4)
             
     def test_miniball_vs_brute_force(self):
         device = 'cpu'
@@ -123,6 +144,8 @@ class TestPERGHGP(unittest.TestCase):
         clusterer = PERGHGPClusterer(
             K=3,
             m_local=20,
+            m_active=20,
+            grid_resolution=8,
             W1_budget=100,
             budget_per_rank=100,
             min_cluster_size=3,
@@ -135,6 +158,41 @@ class TestPERGHGP(unittest.TestCase):
         unique_labels = np.unique(labels[labels >= 0])
         self.assertGreaterEqual(len(unique_labels), 1)
         self.assertIn("candidate_cofaces", clusterer.exactness_report_)
+        
+    def test_dual_graph(self):
+        device = 'cpu'
+        # 3 cofaces of size K+1 = 4 (K=3)
+        # We define them with overlapping elements to check facet sharing
+        cofaces = torch.tensor([
+            [0, 1, 2, 3],
+            [1, 2, 3, 4],
+            [2, 3, 4, 5]
+        ], dtype=torch.int64, device=device)
+        
+        facet_ids, unique_facets = compute_facet_ids(cofaces, K=3)
+        
+        # Verify shape
+        # Each cofaces has 4 facets of size 3
+        # Unique facets should contain all unique combinations of size 3 from each coface
+        # Facets for [0, 1, 2, 3]: (1,2,3), (0,2,3), (0,1,3), (0,1,2)
+        # Facets for [1, 2, 3, 4]: (2,3,4), (1,3,4), (1,2,4), (1,2,3)
+        # Facets for [2, 3, 4, 5]: (3,4,5), (2,4,5), (2,3,5), (2,3,4)
+        # Total unique facets:
+        # (0,1,2), (0,1,3), (0,2,3), (1,2,3), (1,2,4), (1,3,4), (2,3,4), (2,3,5), (2,4,5), (3,4,5)
+        # That's 10 unique facets
+        self.assertEqual(unique_facets.shape[1], 3)
+        self.assertEqual(unique_facets.shape[0], 10)
+        
+        # Build dual edges
+        weights = torch.tensor([0.5, 0.4, 0.3], dtype=torch.float32, device=device)
+        edge_u, edge_v, edge_w, edge_coface = build_dual_edges(cofaces, facet_ids, weights)
+        
+        # Each coface has K=3 edges (star expansion, pivot is facet 0 to facets 1, 2, 3)
+        # Total edges = 3 * 3 = 9
+        self.assertEqual(edge_u.shape[0], 9)
+        self.assertEqual(edge_v.shape[0], 9)
+        self.assertEqual(edge_w.shape[0], 9)
+        self.assertEqual(edge_coface.shape[0], 9)
         
 if __name__ == '__main__':
     unittest.main()

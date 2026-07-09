@@ -204,33 +204,43 @@ def solve_weighted_miniball_active_set_3d(Z_coface, a_coface, max_iter=100, tol=
 
 def extract_top_cofaces(witness_pool, Z, a, eta, grid_z, K, cfg):
     """
-    Extracts candidate cofaces from the witness pool and filters them by top-consistency.
+    Extracts candidate cofaces from the witness pool and filters them by top-consistency in chunks.
     """
     device = Z.device
     W_coords = witness_pool.coords
     M = W_coords.shape[0]
     
-    # 1. Query neighborhood of witnesses on Z
-    nbr_indices, nbr_dists_sq = grid_z.query_knn_grid(W_coords, m_local=cfg.m_active)
-    Z_nbrs = Z[nbr_indices]
-    a_nbrs = a[nbr_indices]
-    diff = Z_nbrs - W_coords[:, None, :]
-    dist_sq = torch.sum(diff ** 2, dim=2)
-    E = dist_sq + a_nbrs
-    
     cofaces_list = []
     
-    for i in range(M):
+    # 1. Query neighborhood of witnesses in chunks to prevent VRAM spikes
+    chunk_size = 10000
+    for start in range(0, M, chunk_size):
+        end = min(start + chunk_size, M)
+        W_chunk = W_coords[start:end]
+        
+        nbr_indices_chunk, nbr_dists_sq_chunk = grid_z.query_knn_grid(W_chunk, m_local=cfg.m_active)
+        Z_nbrs = Z[nbr_indices_chunk]
+        a_nbrs = a[nbr_indices_chunk]
+        diff = Z_nbrs - W_chunk[:, None, :]
+        dist_sq = torch.sum(diff ** 2, dim=2)
+        E = dist_sq + a_nbrs
+        
         # Sort neighbors by energy
-        sorted_idx = torch.argsort(E[i])
-        coface = nbr_indices[i, sorted_idx[:K + 1]]
+        sorted_idx = torch.argsort(E, dim=1)
+        row_indices = torch.arange(end - start, device=device).unsqueeze(1)
+        cofaces_chunk = nbr_indices_chunk[row_indices, sorted_idx[:, :K + 1]]
         
         # Sort indices of the coface for deduplication
-        coface_sorted, _ = torch.sort(coface)
-        cofaces_list.append(coface_sorted)
+        cofaces_chunk_sorted, _ = torch.sort(cofaces_chunk, dim=1)
+        cofaces_list.append(cofaces_chunk_sorted)
         
+    if len(cofaces_list) == 0:
+        return torch.empty((0, K + 1), dtype=torch.int64, device=device), \
+               torch.empty((0, 3), dtype=torch.float32, device=device), \
+               torch.empty((0,), dtype=torch.float32, device=device)
+               
     # Stack and deduplicate
-    cofaces_tensor = torch.stack(cofaces_list)
+    cofaces_tensor = torch.cat(cofaces_list, dim=0)
     unique_cofaces = torch.unique(cofaces_tensor, dim=0)
     
     U = unique_cofaces.shape[0]
@@ -239,30 +249,33 @@ def extract_top_cofaces(witness_pool, Z, a, eta, grid_z, K, cfg):
     centers_list = []
     weights_list = []
     
-    # Solve weighted miniball and check top-consistency for unique cofaces
-    for i in range(U):
-        cof_idx = unique_cofaces[i]
-        Z_cof = Z[cof_idx]
-        a_cof = a[cof_idx]
+    # 2. Solve weighted miniball and check top-consistency in chunks
+    cof_chunk_size = 5000
+    for start in range(0, U, cof_chunk_size):
+        end = min(start + cof_chunk_size, U)
         
-        c, r2 = solve_weighted_miniball_active_set_3d(Z_cof, a_cof, tol=cfg.gabriel_tol)
-        
-        # Top-consistency check: Top_{K+1}(c) == cof_idx
-        # Query nearest neighbors of center c
-        nbr_idx, _ = grid_z.query_knn_grid(c.unsqueeze(0), m_local=cfg.m_active)
-        nbr_idx = nbr_idx[0]
-        
-        diff_pts = Z[nbr_idx] - c
-        phi_pts = torch.sum(diff_pts ** 2, dim=1) + a[nbr_idx]
-        
-        sorted_nbr_idx = nbr_idx[torch.argsort(phi_pts)]
-        top_k_plus_1 = sorted_nbr_idx[:K + 1]
-        top_k_plus_1_sorted, _ = torch.sort(top_k_plus_1)
-        
-        if torch.equal(top_k_plus_1_sorted, cof_idx):
-            valid_cofaces.append(cof_idx)
-            centers_list.append(c)
-            weights_list.append(torch.sqrt(torch.clamp(r2, min=0.0)))
+        for i in range(start, end):
+            cof_idx = unique_cofaces[i]
+            Z_cof = Z[cof_idx]
+            a_cof = a[cof_idx]
+            
+            c, r2 = solve_weighted_miniball_active_set_3d(Z_cof, a_cof, tol=cfg.gabriel_tol)
+            
+            # Top-consistency check: Top_{K+1}(c) == cof_idx
+            nbr_idx, _ = grid_z.query_knn_grid(c.unsqueeze(0), m_local=cfg.m_active)
+            nbr_idx = nbr_idx[0]
+            
+            diff_pts = Z[nbr_idx] - c
+            phi_pts = torch.sum(diff_pts ** 2, dim=1) + a[nbr_idx]
+            
+            sorted_nbr_idx = nbr_idx[torch.argsort(phi_pts)]
+            top_k_plus_1 = sorted_nbr_idx[:K + 1]
+            top_k_plus_1_sorted, _ = torch.sort(top_k_plus_1)
+            
+            if torch.equal(top_k_plus_1_sorted, cof_idx):
+                valid_cofaces.append(cof_idx)
+                centers_list.append(c)
+                weights_list.append(torch.sqrt(torch.clamp(r2, min=0.0)))
             
     if len(valid_cofaces) == 0:
         return torch.empty((0, K + 1), dtype=torch.int64, device=device), \

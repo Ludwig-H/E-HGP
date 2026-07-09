@@ -105,7 +105,9 @@ class SpatialGrid3D:
 
     def query_knn_grid(self, query_points, m_local=128):
         """
-        Fast localized KNN search using the grid.
+        Fast certified localized KNN search using the grid.
+        Guarantees 100% exactness using a queue-certificate (stopping condition)
+        and deterministic fallback to global scan if the neighborhood is uncertified.
         query_points: Tensor of shape (M, 3)
         Returns:
             nbr_indices: (M, m_local)
@@ -117,6 +119,7 @@ class SpatialGrid3D:
         
         # Normalize queries
         q_norm = (query_points - self.bbox_min) / self.scale
+        q_norm_cpu = q_norm.cpu().numpy()
         
         # Compute cell keys of query points
         q_morton = morton3D_encode_pytorch(q_norm, bits_per_axis=21)
@@ -151,21 +154,24 @@ class SpatialGrid3D:
         for i in range(M):
             cx, cy, cz = qx[i], qy[i], qz[i]
             q_pt = query_points[i]
+            q_norm_i = q_norm_cpu[i]
             
             # Search candidates from cells in radius
-            candidates = []
+            candidates = None
             radius = 1
             max_radius = 4
+            certified = False
             
-            while len(candidates) < m_local and radius <= max_radius:
+            while radius <= max_radius:
+                r_search = radius - 1
                 candidates_list = []
-                for dx in range(-radius, radius + 1):
+                for dx in range(-r_search, r_search + 1):
                     nx = cx + dx
                     if nx < 0 or nx >= self.grid_resolution: continue
-                    for dy in range(-radius, radius + 1):
+                    for dy in range(-r_search, r_search + 1):
                         ny = cy + dy
                         if ny < 0 or ny >= self.grid_resolution: continue
-                        for dz in range(-radius, radius + 1):
+                        for dz in range(-r_search, r_search + 1):
                             nz = cz + dz
                             if nz < 0 or nz >= self.grid_resolution: continue
                             
@@ -173,18 +179,57 @@ class SpatialGrid3D:
                             n_points_idx = self.get_points_in_cell(n_cell_key)
                             if len(n_points_idx) > 0:
                                 candidates_list.append(n_points_idx)
+                                
                 if candidates_list:
                     candidates = torch.cat(candidates_list)
+                    if len(candidates) >= m_local:
+                        # Compute distance to candidates
+                        diff = self.X[candidates] - q_pt
+                        dist2 = torch.sum(diff ** 2, dim=1)
+                        # Find the m_local-th smallest distance
+                        d_max_sq = torch.topk(dist2, m_local, largest=False).values[-1].item()
+                        
+                        # Compute minimum distance to unsearched cells AABB boundary
+                        x_min = (cx - r_search) / self.grid_resolution
+                        x_max = (cx + r_search + 1) / self.grid_resolution
+                        y_min = (cy - r_search) / self.grid_resolution
+                        y_max = (cy + r_search + 1) / self.grid_resolution
+                        z_min = (cz - r_search) / self.grid_resolution
+                        z_max = (cz + r_search + 1) / self.grid_resolution
+                        
+                        d_border = float('inf')
+                        if cx - r_search > 0:
+                            d_border = min(d_border, q_norm_i[0] - x_min)
+                        if cx + r_search + 1 < self.grid_resolution:
+                            d_border = min(d_border, x_max - q_norm_i[0])
+                        if cy - r_search > 0:
+                            d_border = min(d_border, q_norm_i[1] - y_min)
+                        if cy + r_search + 1 < self.grid_resolution:
+                            d_border = min(d_border, y_max - q_norm_i[1])
+                        if cz - r_search > 0:
+                            d_border = min(d_border, q_norm_i[2] - z_min)
+                        if cz + r_search + 1 < self.grid_resolution:
+                            d_border = min(d_border, z_max - q_norm_i[2])
+                            
+                        d_out_min_sq = (d_border * self.scale) ** 2
+                        
+                        # Certified stopping condition
+                        if d_max_sq <= d_out_min_sq + 1e-6:
+                            certified = True
+                            break
+                            
                 radius += 1
                 
-            if len(candidates) < m_local:
-                # Deterministic fallback to all points
+            if not certified or candidates is None:
+                # Deterministic exact fallback to all points
                 candidates = torch.arange(self.n_points, device=self.device)
-                    
-            # Compute distance to query
-            diff = self.X[candidates] - q_pt
-            dist2 = torch.sum(diff ** 2, dim=1)
-            
+                diff = self.X[candidates] - q_pt
+                dist2 = torch.sum(diff ** 2, dim=1)
+                
+            else:
+                diff = self.X[candidates] - q_pt
+                dist2 = torch.sum(diff ** 2, dim=1)
+                
             # Select top-m_local closest
             val, idx = torch.topk(dist2, min(m_local, len(dist2)), largest=False)
             

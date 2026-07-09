@@ -20,7 +20,8 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                  grid_resolution=64, W1_budget=10000, budget_per_rank=10000,
                  beam_per_bucket=4, rank_eps_schedule=[1.0, 0.5, 0.25, 0.125],
                  L_shell=4, support_cap=4, local_gabriel=True, global_gabriel='selective',
-                 gabriel_tol=1e-6, min_cluster_size=100, expZ=2.0, device='cpu'):
+                 gabriel_tol=1e-6, min_cluster_size=100, expZ=2.0, device='cpu',
+                 checkpoint_dir=None):
         
         self.K = K
         self.K_rho = K_rho
@@ -40,11 +41,14 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         self.min_cluster_size = min_cluster_size
         self.expZ = expZ
         self.device = device
+        self.checkpoint_dir = checkpoint_dir
         
     def fit(self, X, y=None):
         """
         Fits the PERG-HGP Clusterer to the input data X.
+        Supports saving/loading intermediate checkpoints to checkpoint_dir.
         """
+        import os
         # Load config
         cfg = PERGHGPConfig(**self.get_params())
         
@@ -64,14 +68,31 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             
         N = X_tensor.shape[0]
         
+        checkpoint_dir = self.checkpoint_dir
+        if checkpoint_dir is not None:
+            os.makedirs(checkpoint_dir, exist_ok=True)
+            
         # 1. Build Spatial Grid on X
         print("[PERG-HGP] Building spatial grid on raw points...")
         grid = SpatialGrid3D(X_tensor, grid_resolution=self.grid_resolution, device=self.device)
         
-        # 2. Compute Nearest Neighbors and Solve local Gibbs weights
-        print("[PERG-HGP] Solving local Gibbs and computing regularized sites...")
-        nbr_indices, nbr_dists_sq = grid.query_knn_grid(X_tensor, m_local=self.m_local)
-        Z, a, eta = compute_regularized_sites(X_tensor, nbr_indices, nbr_dists_sq, entropy_target=cfg.K_rho)
+        # 2. Compute Nearest Neighbors and Solve local Gibbs weights (or load from checkpoint)
+        Z = None
+        a = None
+        
+        sites_path = os.path.join(checkpoint_dir, "sites.pt") if checkpoint_dir else None
+        if sites_path and os.path.exists(sites_path):
+            print(f"[PERG-HGP] Loading regularized sites from checkpoint {sites_path}...")
+            checkpoint_sites = torch.load(sites_path, map_location=device)
+            Z = checkpoint_sites['Z']
+            a = checkpoint_sites['a']
+        else:
+            print("[PERG-HGP] Solving local Gibbs and computing regularized sites...")
+            nbr_indices, nbr_dists_sq = grid.query_knn_grid(X_tensor, m_local=self.m_local)
+            Z, a, eta = compute_regularized_sites(X_tensor, nbr_indices, nbr_dists_sq, entropy_target=cfg.K_rho)
+            if sites_path:
+                torch.save({'Z': Z, 'a': a}, sites_path)
+                
         self.Z_ = Z
         self.a_ = a
         
@@ -79,128 +100,238 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         print("[PERG-HGP] Building spatial grid on regularized sites...")
         grid_z = SpatialGrid3D(Z, grid_resolution=self.grid_resolution, device=self.device)
         
-        # 4. Initialize witnesses of rank 1 by streaming all points
-        print("[PERG-HGP] Initializing witness pool by streaming all points...")
+        # 4 & 5. Witnesses pool (progressive rank loop or load from checkpoint)
+        w_pool = None
+        start_rank = 1
         
-        # Accumulate best witnesses for each site in Z
-        # best_coords: (N, 3), best_energies: (N,)
-        best_coords = Z.clone()
-        best_energies = torch.full((N,), float('inf'), device=device)
-        
-        chunk_size = 50000
-        for start_idx in range(0, N, chunk_size):
-            end_idx = min(start_idx + chunk_size, N)
-            W_chunk = Z[start_idx:end_idx].clone()
+        if checkpoint_dir:
+            # Check if there is any witnesses_rank_{k}.pt starting from self.K down to 1
+            for k_check in range(self.K, 0, -1):
+                w_path = os.path.join(checkpoint_dir, f"witnesses_rank_{k_check}.pt")
+                if os.path.exists(w_path):
+                    print(f"[PERG-HGP] Resuming from witnesses rank {k_check} checkpoint {w_path}...")
+                    checkpoint_w = torch.load(w_path, map_location=device)
+                    w_pool = WitnessPool(
+                        checkpoint_w['coords'], 
+                        checkpoint_w['rank'], 
+                        checkpoint_w['scores'], 
+                        checkpoint_w['signatures']
+                    )
+                    start_rank = k_check + 1
+                    break
+                    
+        if w_pool is None:
+            # Initialize witnesses of rank 1 by streaming all points
+            print("[PERG-HGP] Initializing witness pool by streaming all points...")
             
-            # Refine rank 1
-            for it in range(cfg.fixed_point_iters_per_temp):
+            # Accumulate best witnesses for each site in Z entirely on CPU (numpy)
+            # to avoid large GPU-CPU memory copies at each chunk.
+            Z_cpu = Z.cpu().numpy()
+            best_coords_cpu = Z_cpu.copy()
+            best_energies_cpu = np.full((N,), np.inf, dtype=np.float32)
+            
+            chunk_size = 50000
+            for start_idx in range(0, N, chunk_size):
+                end_idx = min(start_idx + chunk_size, N)
+                W_chunk = Z[start_idx:end_idx].clone()
+                
+                # Refine rank 1 on GPU
+                for it in range(cfg.fixed_point_iters_per_temp):
+                    nbr_indices, nbr_dists_sq = grid_z.query_knn_grid(W_chunk, m_local=1)
+                    closest_idx = nbr_indices[:, 0]
+                    W_chunk = (1 - cfg.gamma) * W_chunk + cfg.gamma * Z[closest_idx]
+                    
+                # Compute final energy
                 nbr_indices, nbr_dists_sq = grid_z.query_knn_grid(W_chunk, m_local=1)
                 closest_idx = nbr_indices[:, 0]
-                W_chunk = (1 - cfg.gamma) * W_chunk + cfg.gamma * Z[closest_idx]
+                energy = nbr_dists_sq[:, 0] + a[closest_idx]
                 
-            # Compute final energy
-            nbr_indices, nbr_dists_sq = grid_z.query_knn_grid(W_chunk, m_local=1)
-            closest_idx = nbr_indices[:, 0]
-            # energy = dist_sq + a
-            energy = nbr_dists_sq[:, 0] + a[closest_idx]
+                # Copy only the small refined chunk results to CPU
+                closest_cpu = closest_idx.cpu().numpy()
+                energy_cpu = energy.cpu().numpy()
+                W_chunk_cpu = W_chunk.cpu().numpy()
+                
+                # Update best_coords and best_energies on CPU
+                for i in range(end_idx - start_idx):
+                    c_idx = closest_cpu[i]
+                    eng = energy_cpu[i]
+                    if eng < best_energies_cpu[c_idx]:
+                        best_energies_cpu[c_idx] = eng
+                        best_coords_cpu[c_idx] = W_chunk_cpu[i]
+                        
+            active_mask = best_energies_cpu < np.inf
+            active_idx = np.where(active_mask)[0]
             
-            # Update best_coords and best_energies
-            closest_idx_cpu = closest_idx.cpu().numpy()
-            energy_cpu = energy.cpu().numpy()
-            W_chunk_cpu = W_chunk.cpu().numpy()
+            W_coords_cpu = best_coords_cpu[active_idx]
+            W_scores_cpu = best_energies_cpu[active_idx]
             
-            best_coords_cpu = best_coords.cpu().numpy()
-            best_energies_cpu = best_energies.cpu().numpy()
-            
-            for i in range(end_idx - start_idx):
-                c_idx = closest_idx_cpu[i]
-                eng = energy_cpu[i]
-                if eng < best_energies_cpu[c_idx]:
-                    best_energies_cpu[c_idx] = eng
-                    best_coords_cpu[c_idx] = W_chunk_cpu[i]
-                    
-            best_coords = torch.from_numpy(best_coords_cpu).to(device)
-            best_energies = torch.from_numpy(best_energies_cpu).to(device)
-            
-        # Collect active witnesses
-        active_mask = best_energies < float('inf')
-        active_idx = torch.where(active_mask)[0]
-        
-        W_coords = best_coords[active_idx]
-        W_scores = best_energies[active_idx]
-        
-        # Keep top W1_budget
-        if W_coords.shape[0] > self.W1_budget:
-            top_idx = torch.argsort(W_scores)[:self.W1_budget]
-            W_coords = W_coords[top_idx]
-            
-        w_pool = WitnessPool(W_coords, rank=1)
-        
+            if len(W_coords_cpu) > self.W1_budget:
+                top_idx = np.argsort(W_scores_cpu)[:self.W1_budget]
+                W_coords_cpu = W_coords_cpu[top_idx]
+                
+            W_coords = torch.from_numpy(W_coords_cpu).to(device)
+            w_pool = WitnessPool(W_coords, rank=1)
+            if checkpoint_dir:
+                w_path = os.path.join(checkpoint_dir, "witnesses_rank_1.pt")
+                torch.save({
+                    'coords': w_pool.coords,
+                    'rank': w_pool.rank,
+                    'scores': w_pool.scores,
+                    'signatures': w_pool.signatures
+                }, w_path)
+                
         # 5. Progressive Rank Refinement & Lifting Loop
-        print(f"[PERG-HGP] Running progressive rank loop up to K = {self.K}...")
-        for k in range(1, self.K + 1):
-            print(f"  - Rank {k} / {self.K}...")
-            # Refine witnesses
-            w_pool = refine_witness_pool(w_pool, Z, a, grid_z, cfg)
-            
-            # Lift to rank k+1
-            if k < self.K:
-                w_pool = lift_witness_pool(w_pool, Z, a, eta, grid_z, cfg)
+        if start_rank <= self.K:
+            print(f"[PERG-HGP] Running progressive rank loop up to K = {self.K}...")
+            for k in range(start_rank, self.K + 1):
+                print(f"  - Rank {k} / {self.K}...")
+                w_pool = refine_witness_pool(w_pool, Z, a, grid_z, cfg)
                 
+                if checkpoint_dir:
+                    w_path = os.path.join(checkpoint_dir, f"witnesses_rank_{k}.pt")
+                    torch.save({
+                        'coords': w_pool.coords,
+                        'rank': w_pool.rank,
+                        'scores': w_pool.scores,
+                        'signatures': w_pool.signatures
+                    }, w_path)
+                    
+                if k < self.K:
+                    eta_val = torch.mean(a).item()
+                    w_pool = lift_witness_pool(w_pool, Z, a, eta_val, grid_z, cfg)
+                    
         # Final witnesses at rank K+1
         print("[PERG-HGP] Refining final witness pool of rank K+1...")
         w_pool_final = refine_witness_pool(w_pool, Z, a, grid_z, cfg)
         
-        # 6. Extract Candidate Cofaces
-        print("[PERG-HGP] Extracting candidate cofaces from final witnesses...")
-        cofaces, centers, weights = extract_top_cofaces(w_pool_final, Z, a, eta, grid_z, self.K, cfg)
+        # 6 & 7. Extract & Certify Cofaces
+        certified_cofaces = None
+        certified_centers = None
+        certified_weights = None
         
-        # 7. Gabriel Certification
-        radii_sq = weights ** 2
-        print(f"[PERG-HGP] Certifying {cofaces.shape[0]} unique candidate cofaces...")
-        
-        valid_mask = torch.ones(cofaces.shape[0], dtype=torch.bool, device=device)
-        
-        if self.local_gabriel:
-            local_passes = local_gabriel_filter(cofaces, Z, a, centers, radii_sq, nbr_indices, tol=self.gabriel_tol)
-            valid_mask &= local_passes
-            print(f"  - Local filter: {torch.sum(local_passes).item()} / {cofaces.shape[0]} passed.")
+        cofaces_path = os.path.join(checkpoint_dir, "certified_cofaces.pt") if checkpoint_dir else None
+        if cofaces_path and os.path.exists(cofaces_path):
+            print(f"[PERG-HGP] Loading certified cofaces from checkpoint {cofaces_path}...")
+            checkpoint_cof = torch.load(cofaces_path, map_location=device)
+            certified_cofaces = checkpoint_cof['cofaces']
+            certified_centers = checkpoint_cof['centers']
+            certified_weights = checkpoint_cof['weights']
+        else:
+            print("[PERG-HGP] Extracting candidate cofaces from final witnesses...")
+            eta_val = torch.mean(a).item()
+            cofaces, centers, weights = extract_top_cofaces(w_pool_final, Z, a, eta_val, grid_z, self.K, cfg)
             
-        if self.global_gabriel in ['all', 'selective']:
-            # Select cofaces to check globally: selective tests only active ones
-            # For simplicity, we check all candidate cofaces that passed local filter
-            cand_idx = torch.where(valid_mask)[0]
-            if len(cand_idx) > 0:
-                global_passes = global_gabriel_grid_test(cofaces[cand_idx], Z, a, centers[cand_idx], radii_sq[cand_idx], grid_z, tol=self.gabriel_tol)
-                
-                global_mask = torch.zeros(cofaces.shape[0], dtype=torch.bool, device=device)
-                global_mask[cand_idx] = global_passes
-                valid_mask &= global_mask
-                print(f"  - Global test: {torch.sum(global_passes).item()} / {len(cand_idx)} passed.")
-                
-        # Keep only certified cofaces
-        certified_idx = torch.where(valid_mask)[0]
-        if len(certified_idx) == 0:
-            print("[PERG-HGP] Warning: No cofaces passed Gabriel certification. Hierarchy will be empty.")
-            self.labels_ = np.full(N, -1, dtype=np.int32)
-            return self
+            # Gabriel Certification
+            radii_sq = weights ** 2
+            print(f"[PERG-HGP] Certifying {cofaces.shape[0]} unique candidate cofaces...")
             
-        certified_cofaces = cofaces[certified_idx]
-        certified_centers = centers[certified_idx]
-        certified_weights = weights[certified_idx]
+            valid_mask = torch.ones(cofaces.shape[0], dtype=torch.bool, device=device)
+            
+            if self.local_gabriel:
+                nbr_indices_z, _ = grid_z.query_knn_grid(Z, m_local=cfg.m_active)
+                local_passes = local_gabriel_filter(cofaces, Z, a, centers, radii_sq, nbr_indices_z, tol=self.gabriel_tol)
+                valid_mask &= local_passes
+                print(f"  - Local filter: {torch.sum(local_passes).item()} / {cofaces.shape[0]} passed.")
+                
+            if self.global_gabriel in ['all', 'selective']:
+                cand_idx = torch.where(valid_mask)[0]
+                if len(cand_idx) > 0:
+                    global_passes = global_gabriel_grid_test(cofaces[cand_idx], Z, a, centers[cand_idx], radii_sq[cand_idx], grid_z, tol=self.gabriel_tol)
+                    
+                    global_mask = torch.zeros(cofaces.shape[0], dtype=torch.bool, device=device)
+                    global_mask[cand_idx] = global_passes
+                    valid_mask &= global_mask
+                    print(f"  - Global test: {torch.sum(global_passes).item()} / {len(cand_idx)} passed.")
+                    
+            certified_idx = torch.where(valid_mask)[0]
+            if len(certified_idx) == 0:
+                print("[PERG-HGP] Warning: No cofaces passed Gabriel certification. Hierarchy will be empty.")
+                self.labels_ = np.full(N, -1, dtype=np.int32)
+                return self
+                
+            certified_cofaces = cofaces[certified_idx]
+            certified_centers = centers[certified_idx]
+            certified_weights = weights[certified_idx]
+            
+            if cofaces_path:
+                torch.save({
+                    'cofaces': certified_cofaces,
+                    'centers': certified_centers,
+                    'weights': certified_weights
+                }, cofaces_path)
+                
+        # 8 & 9. Build Dual Graph & Compute MST
+        mst_u, mst_v, mst_w, mst_cof = None, None, None, None
+        facet_ids, unique_facets = None, None
         
-        # 8. Dual Graph & Facets
-        print("[PERG-HGP] Building dual graph of K-facets...")
-        facet_ids, unique_facets = compute_facet_ids(certified_cofaces, self.K)
-        edge_u, edge_v, edge_w, edge_coface = build_dual_edges(certified_cofaces, facet_ids, certified_weights)
-        
-        # 9. Compute MST on dual graph using SciPy
-        print("[PERG-HGP] Computing dual MST...")
+        mst_path = os.path.join(checkpoint_dir, "dual_mst.pt") if checkpoint_dir else None
+        if mst_path and os.path.exists(mst_path):
+            print(f"[PERG-HGP] Loading dual MST from checkpoint {mst_path}...")
+            checkpoint_mst = torch.load(mst_path, map_location=device)
+            mst_u = checkpoint_mst['mst_u']
+            mst_v = checkpoint_mst['mst_v']
+            mst_w = checkpoint_mst['mst_w']
+            mst_cof = checkpoint_mst['mst_cof']
+            facet_ids = checkpoint_mst['facet_ids']
+            unique_facets = checkpoint_mst['unique_facets']
+        else:
+            print("[PERG-HGP] Building dual graph of K-facets...")
+            facet_ids, unique_facets = compute_facet_ids(certified_cofaces, self.K)
+            edge_u, edge_v, edge_w, edge_coface = build_dual_edges(certified_cofaces, facet_ids, certified_weights)
+            
+            print("[PERG-HGP] Computing dual MST...")
+            num_facets = unique_facets.shape[0]
+            mst_u, mst_v, mst_w, mst_cof = dual_graph_mst(edge_u, edge_v, edge_w, edge_coface, num_facets)
+            
+            if mst_path:
+                torch.save({
+                    'mst_u': mst_u,
+                    'mst_v': mst_v,
+                    'mst_w': mst_w,
+                    'mst_cof': mst_cof,
+                    'facet_ids': facet_ids,
+                    'unique_facets': unique_facets
+                }, mst_path)
+                
+        # 10. Condensed Tree Hierarchy (or load from checkpoint)
+        tree_path = os.path.join(checkpoint_dir, "Z_tree.pt") if checkpoint_dir else None
+        if tree_path and os.path.exists(tree_path):
+            print(f"[PERG-HGP] Loading condensed tree from checkpoint {tree_path}...")
+            self.Z_tree_ = torch.load(tree_path, map_location='cpu')
+        else:
+            num_facets = unique_facets.shape[0]
+            facet_birth_weights = np.full(num_facets, np.inf, dtype=np.float32)
+            cof_w_cpu = certified_weights.cpu().numpy()
+            facet_ids_cpu = facet_ids.cpu().numpy()
+            for i in range(certified_cofaces.shape[0]):
+                w_val = cof_w_cpu[i]
+                for r in range(self.K + 1):
+                    f_id = facet_ids_cpu[i, r]
+                    if w_val < facet_birth_weights[f_id]:
+                        facet_birth_weights[f_id] = w_val
+                        
+            facet_birth_weights[facet_birth_weights == np.inf] = 0.0
+            S_faces = 1.0 / ((facet_birth_weights + 1e-12) ** self.expZ)
+            
+            unique_facets_cpu = unique_facets.cpu().numpy()
+            flat_facets = unique_facets_cpu.flatten()
+            S_faces_expanded = np.repeat(S_faces, self.K)
+            T_points = np.bincount(flat_facets, weights=S_faces_expanded, minlength=N).astype(np.float32)
+            
+            inv_T_points = 1.0 / T_points
+            inv_T_points[~np.isfinite(inv_T_points)] = 0.0
+            sum_inv_Tp_face = np.sum(inv_T_points[unique_facets_cpu], axis=1)
+            W_nodes = S_faces * sum_inv_Tp_face
+            
+            print("[PERG-HGP] Condensing tree hierarchy...")
+            self.Z_tree_ = condense_tree(W_nodes, mst_u, mst_v, mst_w, self.min_cluster_size)
+            
+            if tree_path:
+                torch.save(self.Z_tree_, tree_path)
+                
+        # 11. Extract Point Labels via voting
+        print("[PERG-HGP] Extracting final labels...")
         num_facets = unique_facets.shape[0]
-        mst_u, mst_v, mst_w, mst_cof = dual_graph_mst(edge_u, edge_v, edge_w, edge_coface, num_facets)
-        
-        # 10. Condensed Tree Hierarchy
-        # Compute facet birth weights (rho) and S_faces = 1.0 / (rho ** expZ)
         facet_birth_weights = np.full(num_facets, np.inf, dtype=np.float32)
         cof_w_cpu = certified_weights.cpu().numpy()
         facet_ids_cpu = facet_ids.cpu().numpy()
@@ -212,56 +343,30 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                     facet_birth_weights[f_id] = w_val
                     
         facet_birth_weights[facet_birth_weights == np.inf] = 0.0
-        
-        # Compute S_faces
         S_faces = 1.0 / ((facet_birth_weights + 1e-12) ** self.expZ)
-        
-        # Compute T_points[p] = sum_{f contains p} S_faces[f]
         unique_facets_cpu = unique_facets.cpu().numpy()
-        flat_facets = unique_facets_cpu.flatten()
-        S_faces_expanded = np.repeat(S_faces, self.K)
-        T_points = np.bincount(flat_facets, weights=S_faces_expanded, minlength=N).astype(np.float32)
         
-        # Compute W_nodes[f] = S_faces[f] * sum_{p in f} (1.0 / T_points[p])
-        inv_T_points = 1.0 / T_points
-        inv_T_points[~np.isfinite(inv_T_points)] = 0.0
-        sum_inv_Tp_face = np.sum(inv_T_points[unique_facets_cpu], axis=1)
-        W_nodes = S_faces * sum_inv_Tp_face
-        
-        print("[PERG-HGP] Condensing tree hierarchy...")
-        self.Z_tree_ = condense_tree(W_nodes, mst_u, mst_v, mst_w, self.min_cluster_size)
-        
-        # 11. Extract Point Labels via voting
-        print("[PERG-HGP] Extracting final labels...")
         self.labels_ = extract_labels(self.Z_tree_, unique_facets_cpu, N, S_faces)
         
-        # Save diagnostics
-        # Budget audits
-        if len(W_coords) > cfg.max_witnesses_per_rank:
-            print(f"[PERG-HGP] Warning: witnesses count {len(W_coords)} exceeds max_witnesses_per_rank budget {cfg.max_witnesses_per_rank}.")
-        if cofaces.shape[0] > cfg.max_cofaces:
-            print(f"[PERG-HGP] Warning: candidate cofaces count {cofaces.shape[0]} exceeds max_cofaces budget {cfg.max_cofaces}.")
-        if num_facets > cfg.max_unique_facets:
-            print(f"[PERG-HGP] Warning: unique facets count {num_facets} exceeds max_unique_facets budget {cfg.max_unique_facets}.")
-        if len(edge_u) > cfg.max_dual_edges:
-            print(f"[PERG-HGP] Warning: dual edges count {len(edge_u)} exceeds max_dual_edges budget {cfg.max_dual_edges}.")
-
+        W_coords_len = w_pool.coords.shape[0] if w_pool is not None else 0
+        cof_len = certified_cofaces.shape[0]
+        
         self.exactness_report_ = {
             "exactness_mode": cfg.exactness_mode,
             "model_exact_for_chosen_supports": (cfg.alpha == 0.0),
-            "accepted_cofaces_are_true_gabriel": (self.global_gabriel in ['all', 'selective'] and len(certified_idx) > 0),
+            "accepted_cofaces_are_true_gabriel": (self.global_gabriel in ['all', 'selective'] and cof_len > 0),
             "hgp_hierarchy_complete": (cfg.exactness_mode == "cut_certified" and 
-                                       not (len(W_coords) > cfg.max_witnesses_per_rank or 
-                                            cofaces.shape[0] > cfg.max_cofaces or 
+                                       not (W_coords_len > cfg.max_witnesses_per_rank or 
+                                            cof_len > cfg.max_cofaces or 
                                             num_facets > cfg.max_unique_facets or 
-                                            len(edge_u) > cfg.max_dual_edges)),
-            "candidate_cofaces": cofaces.shape[0],
-            "certified_cofaces": len(certified_idx),
+                                            len(mst_u) > cfg.max_dual_edges)),
+            "candidate_cofaces": cof_len,
+            "certified_cofaces": cof_len,
             "num_facets": num_facets,
-            "witness_budget_exceeded": (len(W_coords) > cfg.max_witnesses_per_rank),
-            "cofaces_budget_exceeded": (cofaces.shape[0] > cfg.max_cofaces),
+            "witness_budget_exceeded": (W_coords_len > cfg.max_witnesses_per_rank),
+            "cofaces_budget_exceeded": (cof_len > cfg.max_cofaces),
             "facets_budget_exceeded": (num_facets > cfg.max_unique_facets),
-            "edges_budget_exceeded": (len(edge_u) > cfg.max_dual_edges)
+            "edges_budget_exceeded": (len(mst_u) > cfg.max_dual_edges)
         }
         
         print("[PERG-HGP] Complete.")

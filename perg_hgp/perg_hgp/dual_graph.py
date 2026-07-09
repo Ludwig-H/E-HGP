@@ -1,35 +1,37 @@
 import torch
+import numpy as np
 
 def compute_facet_ids(cofaces, K):
     """
     Computes unique IDs for each K-facet of the cofaces.
-    cofaces: shape (U, K+1)
-    Returns:
-        facet_ids: shape (U, K+1) of unique face IDs
-        unique_facets: shape (NumFacets, K) of unique facet indices
+    Runs 100% exact row-wise deduplication on CPU using NumPy, guaranteeing zero collision risk.
     """
     device = cofaces.device
     U = cofaces.shape[0]
     
     # 1. Generate all K-facets for all cofaces
-    # For each coface, there are K+1 facets (obtained by dropping one index)
     facets_list = []
     for r in range(K + 1):
-        # Drop position r
         mask = torch.ones(K + 1, dtype=torch.bool, device=device)
         mask[r] = False
-        facet = cofaces[:, mask] # shape (U, K)
+        facet = cofaces[:, mask]
         facets_list.append(facet)
         
     facets_all = torch.cat(facets_list, dim=0) # shape ((K+1)*U, K)
     
-    # 2. Sort indices of each facet to ensure canonical representation
+    # 2. Sort indices of each facet for canonical representation
     facets_all_sorted, _ = torch.sort(facets_all, dim=1)
     
-    # 3. Deduplicate facets using unique
-    unique_facets, inverse_indices = torch.unique(facets_all_sorted, dim=0, return_inverse=True)
+    # 3. Direct exact row-wise deduplication on CPU
+    facets_all_sorted_cpu = facets_all_sorted.cpu().numpy()
+    unique_facets_cpu, unique_idx_cpu, inverse_indices_cpu = np.unique(
+        facets_all_sorted_cpu, axis=0, return_index=True, return_inverse=True
+    )
     
-    # 4. Reshape inverse_indices back to (K+1, U) and transpose to (U, K+1)
+    unique_idx = torch.from_numpy(unique_idx_cpu).to(device)
+    inverse_indices = torch.from_numpy(inverse_indices_cpu).to(device)
+    
+    unique_facets = facets_all_sorted[unique_idx]
     facet_ids = inverse_indices.view(K + 1, U).t()
     
     return facet_ids, unique_facets
@@ -37,15 +39,7 @@ def compute_facet_ids(cofaces, K):
 
 def build_dual_edges(cofaces, facet_ids, weights):
     """
-    Builds the dual graph edges.
-    For each coface, we add edges between its K-facets.
-    Using star expansion: choose facet 0 as pivot, and add edges to other facets 1..K.
-    This creates K edges per coface.
-    Returns:
-        edge_u: (U * K,)
-        edge_v: (U * K,)
-        edge_w: (U * K,) weight of the coface (rho)
-        edge_coface: (U * K,) coface index
+    Builds the dual graph edges using star expansion.
     """
     U = cofaces.shape[0]
     K = cofaces.shape[1] - 1

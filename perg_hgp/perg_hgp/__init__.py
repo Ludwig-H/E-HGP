@@ -2,7 +2,7 @@ from .estimator import PERGHGPClusterer
 from .config import PERGHGPConfig
 from .grid import SpatialGrid3D
 from .local_gibbs import solve_local_gibbs_entropy, compute_regularized_sites
-from .rank_field import compute_rank_soft_dp, compute_rank_shell_weights
+from .rank_field import compute_rank_soft_dp, compute_rank_shell_weights, compute_rank_soft_dp_batched
 from .witnesses import WitnessPool, refine_witness_pool, lift_witness_pool
 from .cofaces import extract_top_cofaces, solve_weighted_miniball_active_set_3d
 from .gabriel import local_gabriel_filter, global_gabriel_grid_test
@@ -17,6 +17,7 @@ __all__ = [
     'compute_regularized_sites',
     'compute_rank_soft_dp',
     'compute_rank_shell_weights',
+    'compute_rank_soft_dp_batched',
     'WitnessPool',
     'refine_witness_pool',
     'lift_witness_pool',
