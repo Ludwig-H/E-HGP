@@ -478,5 +478,60 @@ class TestPERGHGP(unittest.TestCase):
         self.assertEqual(facet_ids.shape, (10, 3))
         self.assertEqual(unique_facets.shape[0], 15)
 
+    def test_oracle_six_points(self):
+        # Exact CPU reference oracle test for 6 points (K=2)
+        from perg_hgp.reference.oracle import exact_regularized_sites, exact_cech_gabriel_complex, exact_dual_mst, exact_condense_tree, exact_extract_labels
+
+        # 6 points in 3D: 2 clusters of size 3 (triangles)
+        X = np.array([
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.5, 0.8, 0.0],
+            [10.0, 0.0, 0.0],
+            [11.0, 0.0, 0.0],
+            [10.5, 0.8, 0.0]
+        ], dtype=np.float32)
+
+        # 1. Exact sites and weights
+        Z, a = exact_regularized_sites(X, entropy_target=3)
+        self.assertEqual(Z.shape, (6, 3))
+        self.assertEqual(a.shape, (6,))
+
+        # 2. Exact Čech/Gabriel complex (K=2)
+        cofaces, weights = exact_cech_gabriel_complex(Z, a, K=2)
+        # Should have at least the two triangles certified
+        self.assertGreaterEqual(cofaces.shape[0], 2)
+
+        # 3. Exact dual MST
+        mst_u, mst_v, mst_w, mst_cof, num_facets, unique_facets = exact_dual_mst(cofaces, weights, K=2)
+        self.assertGreaterEqual(num_facets, 2)
+
+        # 4. Exact condense tree
+        # Compute facet_birth_weights first
+        from itertools import combinations
+        facet_birth_weights = np.full(num_facets, np.inf, dtype=np.float32)
+        facet_to_idx = {tuple(f): idx for idx, f in enumerate(unique_facets)}
+        for i, cof in enumerate(cofaces):
+            w_val = weights[i]
+            for f in combinations(cof, 2):
+                f_idx = facet_to_idx[tuple(sorted(f))]
+                if w_val < facet_birth_weights[f_idx]:
+                    facet_birth_weights[f_idx] = w_val
+        facet_birth_weights[facet_birth_weights == np.inf] = 0.0
+
+        S_faces = 1.0 / ((facet_birth_weights + 1e-12) ** 2)
+        flat_facets = unique_facets.flatten()
+        S_faces_expanded = np.repeat(S_faces, 2)
+        T_points = np.bincount(flat_facets, weights=S_faces_expanded, minlength=6).astype(np.float32)
+        inv_T_points = np.divide(1.0, T_points, out=np.zeros_like(T_points), where=(T_points > 0.0))
+        sum_inv_Tp_face = np.sum(inv_T_points[unique_facets], axis=1)
+        W_nodes = S_faces * sum_inv_Tp_face
+
+        Z_tree = exact_condense_tree(W_nodes, mst_u, mst_v, mst_w, min_cluster_size=2)
+
+        # 5. Extract labels
+        labels = exact_extract_labels(Z_tree, unique_facets, 6, S_faces, K=2)
+        self.assertEqual(labels.shape[0], 6)
+
 if __name__ == '__main__':
     unittest.main()
