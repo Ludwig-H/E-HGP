@@ -1,4 +1,4 @@
-# Rapport de Version 3.3 & Phase 5 (Transmission à ChatGPT)
+# Rapport de Version 3.4 & Phase 5 (Transmission à ChatGPT)
 
 Ce rapport documente la validation des **optimisations de scalabilité massive (Phase 5)** et la résolution des verrous de mémoire et d'out-of-core de la bibliothèque **PERG-HGP**.
 
@@ -26,16 +26,22 @@ Ce rapport documente la validation des **optimisations de scalabilité massive (
 ### 1.5 Agrégation des Statistiques de Requête KNN
 *   **Indicateurs d'Exactitude Globale** : Intégration de `total_knn_queries`, `total_fallback_queries` et `global_fallback_rate` au niveau de l'objet `SpatialGrid3D` et agrégation finale dans `self.exactness_report_` de l'estimateur (pour les modes standard et `soft_only`).
 
+### 1.6 Implémentation du MST Borůvka Parallélisé (Step 5.4)
+*   **Algorithme Borůvka Vectorisé** : Remplacement de l'algorithme Kruskal CPU par une implémentation parallélisée de Borůvka en PyTorch dans [hierarchy.py](file:///workspaces/E-HGP/perg_hgp/perg_hgp/hierarchy.py).
+*   **Pointer Jumping & Scatter Reduce** : Utilisation du pointer jumping parallèle pour la compression de chemins Union-Find et de `scatter_reduce_(..., reduce='amin')` avec empaquetage des poids et indices sur 64 bits pour la sélection déterministe et sans conflit d'arêtes.
+*   **Bénéfice** : Résolution du MST entièrement vectorisée et compatible GPU/CPU.
+
 ---
 
 ## 2. Validation de la Suite de Tests
 
-La suite de tests unitaires et d'intégration a été étendue à **13 tests**, validant de bout en bout :
+La suite de tests unitaires et d'intégration a été étendue à **14 tests**, validant de bout en bout :
 *   L'active-set du miniball 3D.
 *   Le test de Gabriel global par élagage AABB.
 *   La reprise robuste sur coupure depuis les checkpoints.
 *   Le mode `soft_only` direct.
-*   La correction du layout out-of-core multi-chunks (`test_out_of_core_facet_deduplication` configuré avec un stress test `chunk_size = 10` et `max_ram_facets = 10`).
-*   L'exactitude géométrique parfaite du KNN de la grille comparé à un scan brute-force exact pour des requêtes internes et externes (`test_knn_exactness_vs_brute_force`).
+*   La correction du layout out-of-core multi-chunks.
+*   L'exactitude géométrique parfaite du KNN de la grille comparé à un scan brute-force exact.
+*   L'équivalence mathématique stricte de l'implémentation parallèle de Borůvka par rapport à Kruskal sur des graphes de test aléatoires (`test_boruvka_vs_kruskal`).
 
-**Statut** : `OK` (Exécution complète des 13 tests en **3,50 secondes** sur CPU).
+**Statut** : `OK` (Exécution complète des 14 tests en **3,46 secondes** sur CPU).
