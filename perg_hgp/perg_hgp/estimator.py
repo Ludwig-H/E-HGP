@@ -21,7 +21,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                  beam_per_bucket=4, rank_eps_schedule=[1.0, 0.5, 0.25, 0.125],
                  L_shell=4, support_cap=4, local_gabriel=True, global_gabriel='selective',
                  gabriel_tol=1e-6, min_cluster_size=100, expZ=2.0, device='cpu',
-                 checkpoint_dir=None):
+                 checkpoint_dir=None, exactness_mode='atlas_exact'):
         
         self.K = K
         self.K_rho = K_rho
@@ -42,6 +42,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         self.expZ = expZ
         self.device = device
         self.checkpoint_dir = checkpoint_dir
+        self.exactness_mode = exactness_mode
         
     def fit(self, X, y=None):
         """
@@ -83,7 +84,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         sites_path = os.path.join(checkpoint_dir, "sites.pt") if checkpoint_dir else None
         if sites_path and os.path.exists(sites_path):
             print(f"[PERG-HGP] Loading regularized sites from checkpoint {sites_path}...")
-            checkpoint_sites = torch.load(sites_path, map_location=device)
+            checkpoint_sites = torch.load(sites_path, map_location=device, weights_only=False)
             Z = checkpoint_sites['Z']
             a = checkpoint_sites['a']
         else:
@@ -100,6 +101,73 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         print("[PERG-HGP] Building spatial grid on regularized sites...")
         grid_z = SpatialGrid3D(Z, grid_resolution=self.grid_resolution, device=self.device)
         
+        # Propagate configuration flags based on exactness_mode
+        if cfg.exactness_mode == 'atlas_exact':
+            self.local_gabriel = True
+            self.global_gabriel = 'none'
+        elif cfg.exactness_mode == 'global_gabriel_certified':
+            self.local_gabriel = True
+            self.global_gabriel = 'selective'
+        elif cfg.exactness_mode == 'cut_certified':
+            self.local_gabriel = True
+            self.global_gabriel = 'all'
+            
+        if cfg.exactness_mode == 'soft_only':
+            print("[PERG-HGP] Running in soft_only mode (no cofaces, direct sites MST)...")
+            # Build MST directly on regularized sites Z
+            # Each site is connected to its 2 nearest neighbors in Z
+            nbr_indices_z, nbr_dists_sq_z = grid_z.query_knn_grid(Z, m_local=2)
+            
+            # Edges: connect site i to site j = nbr_indices_z[i, 1]
+            edge_u = torch.arange(N, device=device)
+            edge_v = nbr_indices_z[:, 1]
+            # weight = dist_sq + max(a_i, a_j)
+            edge_w = nbr_dists_sq_z[:, 1] + torch.max(a, a[edge_v])
+            
+            # Since K=1 (each site is a facet of size 1)
+            unique_facets = torch.arange(N, device=device).unsqueeze(1)
+            facet_ids = torch.arange(N, device=device).unsqueeze(1)
+            
+            # Run MST on sites
+            mst_u, mst_v, mst_w, mst_cof = dual_graph_mst(
+                edge_u, edge_v, edge_w, torch.zeros_like(edge_u), N
+            )
+            
+            # S_faces for sites is just 1.0 / (a_i ** expZ)
+            S_faces = 1.0 / ((a.cpu().numpy() + 1e-12) ** self.expZ)
+            
+            unique_facets_cpu = unique_facets.cpu().numpy()
+            flat_facets = unique_facets_cpu.flatten()
+            S_faces_expanded = S_faces
+            T_points = np.bincount(flat_facets, weights=S_faces_expanded, minlength=N).astype(np.float32)
+            
+            inv_T_points = 1.0 / T_points
+            inv_T_points[~np.isfinite(inv_T_points)] = 0.0
+            sum_inv_Tp_face = np.sum(inv_T_points[unique_facets_cpu], axis=1)
+            W_nodes = S_faces * sum_inv_Tp_face
+            
+            print("[PERG-HGP] Condensing tree hierarchy...")
+            self.Z_tree_ = condense_tree(W_nodes, mst_u, mst_v, mst_w, self.min_cluster_size)
+            
+            print("[PERG-HGP] Extracting final labels...")
+            self.labels_ = extract_labels(self.Z_tree_, unique_facets_cpu, N, S_faces)
+            
+            self.exactness_report_ = {
+                "exactness_mode": cfg.exactness_mode,
+                "model_exact_for_chosen_supports": False,
+                "accepted_cofaces_are_true_gabriel": False,
+                "hgp_hierarchy_complete": False,
+                "candidate_cofaces": 0,
+                "certified_cofaces": 0,
+                "num_facets": N,
+                "witness_budget_exceeded": False,
+                "cofaces_budget_exceeded": False,
+                "facets_budget_exceeded": False,
+                "edges_budget_exceeded": False
+            }
+            print("[PERG-HGP] Complete.")
+            return self
+            
         # 4 & 5. Witnesses pool (progressive rank loop or load from checkpoint)
         w_pool = None
         start_rank = 1
@@ -110,7 +178,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                 w_path = os.path.join(checkpoint_dir, f"witnesses_rank_{k_check}.pt")
                 if os.path.exists(w_path):
                     print(f"[PERG-HGP] Resuming from witnesses rank {k_check} checkpoint {w_path}...")
-                    checkpoint_w = torch.load(w_path, map_location=device)
+                    checkpoint_w = torch.load(w_path, map_location=device, weights_only=False)
                     w_pool = WitnessPool(
                         checkpoint_w['coords'], 
                         checkpoint_w['rank'], 
@@ -212,7 +280,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         cofaces_path = os.path.join(checkpoint_dir, "certified_cofaces.pt") if checkpoint_dir else None
         if cofaces_path and os.path.exists(cofaces_path):
             print(f"[PERG-HGP] Loading certified cofaces from checkpoint {cofaces_path}...")
-            checkpoint_cof = torch.load(cofaces_path, map_location=device)
+            checkpoint_cof = torch.load(cofaces_path, map_location=device, weights_only=False)
             certified_cofaces = checkpoint_cof['cofaces']
             certified_centers = checkpoint_cof['centers']
             certified_weights = checkpoint_cof['weights']
@@ -267,13 +335,14 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         mst_path = os.path.join(checkpoint_dir, "dual_mst.pt") if checkpoint_dir else None
         if mst_path and os.path.exists(mst_path):
             print(f"[PERG-HGP] Loading dual MST from checkpoint {mst_path}...")
-            checkpoint_mst = torch.load(mst_path, map_location=device)
+            checkpoint_mst = torch.load(mst_path, map_location=device, weights_only=False)
             mst_u = checkpoint_mst['mst_u']
             mst_v = checkpoint_mst['mst_v']
             mst_w = checkpoint_mst['mst_w']
             mst_cof = checkpoint_mst['mst_cof']
             facet_ids = checkpoint_mst['facet_ids']
             unique_facets = checkpoint_mst['unique_facets']
+            num_dual_edges = checkpoint_mst.get('num_dual_edges', len(mst_u))
         else:
             print("[PERG-HGP] Building dual graph of K-facets...")
             facet_ids, unique_facets = compute_facet_ids(certified_cofaces, self.K)
@@ -282,6 +351,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             print("[PERG-HGP] Computing dual MST...")
             num_facets = unique_facets.shape[0]
             mst_u, mst_v, mst_w, mst_cof = dual_graph_mst(edge_u, edge_v, edge_w, edge_coface, num_facets)
+            num_dual_edges = len(edge_u)
             
             if mst_path:
                 torch.save({
@@ -290,14 +360,15 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                     'mst_w': mst_w,
                     'mst_cof': mst_cof,
                     'facet_ids': facet_ids,
-                    'unique_facets': unique_facets
+                    'unique_facets': unique_facets,
+                    'num_dual_edges': num_dual_edges
                 }, mst_path)
                 
         # 10. Condensed Tree Hierarchy (or load from checkpoint)
         tree_path = os.path.join(checkpoint_dir, "Z_tree.pt") if checkpoint_dir else None
         if tree_path and os.path.exists(tree_path):
             print(f"[PERG-HGP] Loading condensed tree from checkpoint {tree_path}...")
-            self.Z_tree_ = torch.load(tree_path, map_location='cpu')
+            self.Z_tree_ = torch.load(tree_path, map_location='cpu', weights_only=False)
         else:
             num_facets = unique_facets.shape[0]
             facet_birth_weights = np.full(num_facets, np.inf, dtype=np.float32)
@@ -318,8 +389,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             S_faces_expanded = np.repeat(S_faces, self.K)
             T_points = np.bincount(flat_facets, weights=S_faces_expanded, minlength=N).astype(np.float32)
             
-            inv_T_points = 1.0 / T_points
-            inv_T_points[~np.isfinite(inv_T_points)] = 0.0
+            inv_T_points = np.divide(1.0, T_points, out=np.zeros_like(T_points), where=(T_points > 0.0))
             sum_inv_Tp_face = np.sum(inv_T_points[unique_facets_cpu], axis=1)
             W_nodes = S_faces * sum_inv_Tp_face
             
@@ -351,22 +421,28 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         W_coords_len = w_pool.coords.shape[0] if w_pool is not None else 0
         cof_len = certified_cofaces.shape[0]
         
+        # Budget audits & warnings
+        if W_coords_len > cfg.max_witnesses_per_rank:
+            print(f"[PERG-HGP] Warning: witnesses count {W_coords_len} exceeds budget {cfg.max_witnesses_per_rank}.")
+        if cof_len > cfg.max_cofaces:
+            print(f"[PERG-HGP] Warning: candidate cofaces count {cof_len} exceeds budget {cfg.max_cofaces}.")
+        if num_facets > cfg.max_unique_facets:
+            print(f"[PERG-HGP] Warning: unique facets count {num_facets} exceeds budget {cfg.max_unique_facets}.")
+        if num_dual_edges > cfg.max_dual_edges:
+            print(f"[PERG-HGP] Warning: dual edges count {num_dual_edges} exceeds budget {cfg.max_dual_edges}.")
+            
         self.exactness_report_ = {
             "exactness_mode": cfg.exactness_mode,
             "model_exact_for_chosen_supports": (cfg.alpha == 0.0),
             "accepted_cofaces_are_true_gabriel": (self.global_gabriel in ['all', 'selective'] and cof_len > 0),
-            "hgp_hierarchy_complete": (cfg.exactness_mode == "cut_certified" and 
-                                       not (W_coords_len > cfg.max_witnesses_per_rank or 
-                                            cof_len > cfg.max_cofaces or 
-                                            num_facets > cfg.max_unique_facets or 
-                                            len(mst_u) > cfg.max_dual_edges)),
+            "hgp_hierarchy_complete": False, # True only if a strict geometric cut-audit is implemented and passes
             "candidate_cofaces": cof_len,
             "certified_cofaces": cof_len,
             "num_facets": num_facets,
             "witness_budget_exceeded": (W_coords_len > cfg.max_witnesses_per_rank),
             "cofaces_budget_exceeded": (cof_len > cfg.max_cofaces),
             "facets_budget_exceeded": (num_facets > cfg.max_unique_facets),
-            "edges_budget_exceeded": (len(mst_u) > cfg.max_dual_edges)
+            "edges_budget_exceeded": (num_dual_edges > cfg.max_dual_edges)
         }
         
         print("[PERG-HGP] Complete.")

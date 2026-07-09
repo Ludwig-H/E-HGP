@@ -194,5 +194,69 @@ class TestPERGHGP(unittest.TestCase):
         self.assertEqual(edge_w.shape[0], 9)
         self.assertEqual(edge_coface.shape[0], 9)
         
+    def test_soft_only_mode(self):
+        # Test soft_only mode on blobs
+        X, y = make_blobs(n_samples=100, centers=2, n_features=3, random_state=42)
+        X = X.astype(np.float32)
+        
+        clusterer = PERGHGPClusterer(
+            exactness_mode='soft_only',
+            grid_resolution=8,
+            m_local=20,
+            min_cluster_size=3,
+            device='cpu'
+        )
+        
+        labels = clusterer.fit_predict(X)
+        self.assertEqual(labels.shape[0], 100)
+        self.assertEqual(clusterer.exactness_report_['exactness_mode'], 'soft_only')
+        self.assertEqual(clusterer.exactness_report_['candidate_cofaces'], 0)
+        self.assertEqual(clusterer.exactness_report_['num_facets'], 100)
+        
+    def test_checkpoint_save_and_resume(self):
+        import tempfile
+        import os
+        
+        X, _ = make_blobs(n_samples=50, centers=2, n_features=3, random_state=42)
+        X = X.astype(np.float32)
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # 1. Run first time to save checkpoints
+            clusterer1 = PERGHGPClusterer(
+                K=2,
+                grid_resolution=4,
+                m_local=10,
+                m_active=10,
+                W1_budget=50,
+                budget_per_rank=50,
+                min_cluster_size=2,
+                device='cpu',
+                checkpoint_dir=tmpdir
+            )
+            labels1 = clusterer1.fit_predict(X)
+            
+            # Assert checkpoint files exist
+            expected_files = ["sites.pt", "witnesses_rank_1.pt", "certified_cofaces.pt", "dual_mst.pt", "Z_tree.pt"]
+            for f in expected_files:
+                self.assertTrue(os.path.exists(os.path.join(tmpdir, f)), f"Checkpoint file {f} was not saved")
+                
+            # 2. Run second time to load checkpoints
+            clusterer2 = PERGHGPClusterer(
+                K=2,
+                grid_resolution=4,
+                m_local=10,
+                m_active=10,
+                W1_budget=50,
+                budget_per_rank=50,
+                min_cluster_size=2,
+                device='cpu',
+                checkpoint_dir=tmpdir
+            )
+            labels2 = clusterer2.fit_predict(X)
+            
+            # Assert both runs produced identical results
+            np.testing.assert_array_equal(labels1, labels2)
+            self.assertEqual(clusterer2.exactness_report_['candidate_cofaces'], clusterer1.exactness_report_['candidate_cofaces'])
+            
 if __name__ == '__main__':
     unittest.main()
