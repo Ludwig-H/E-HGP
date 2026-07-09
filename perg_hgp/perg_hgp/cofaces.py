@@ -416,3 +416,10 @@ def extract_top_cofaces(witness_pool, Z, a, eta, grid_z, K, cfg):
                torch.empty((0,), dtype=torch.float32, device=device)
 
     return torch.cat(valid_cofaces, dim=0), torch.cat(centers_list, dim=0), torch.cat(weights_list, dim=0)
+
+if hasattr(torch, 'compile'):
+    try:
+        solve_support_ball_batched = torch.compile(solve_support_ball_batched)
+        solve_weighted_miniball_batched = torch.compile(solve_weighted_miniball_batched)
+    except Exception:
+        pass

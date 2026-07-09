@@ -161,3 +161,12 @@ def compute_rank_soft_dp_batched(E, Kmax, eps):
     b = b / b_sums
 
     return Q, b
+
+if hasattr(torch, 'compile'):
+    try:
+        compute_elementary_symmetric_polynomials_prefix_suffix_batched = torch.compile(
+            compute_elementary_symmetric_polynomials_prefix_suffix_batched
+        )
+        compute_rank_soft_dp_batched = torch.compile(compute_rank_soft_dp_batched)
+    except Exception:
+        pass
