@@ -28,25 +28,30 @@ def refine_witness_pool(witness_pool, Z, a, grid_z, cfg):
 
     chunk_size = 50000 # Strictly bounds maximum VRAM allocations
 
-    for it in range(cfg.fixed_point_iters_per_temp):
-        for start in range(0, M, chunk_size):
-            end = min(start + chunk_size, M)
-            W_chunk = W_coords[start:end]
+    # 1. Temperature annealing loop
+    for eps in cfg.rank_eps_schedule:
+        for it in range(cfg.fixed_point_iters_per_temp):
+            for start in range(0, M, chunk_size):
+                end = min(start + chunk_size, M)
+                W_chunk = W_coords[start:end]
 
-            # Local grid power search query and neighborhood energy computation
-            nbr_indices_chunk, E_chunk = grid_z.query_power_grid(W_chunk, a, m_local=cfg.m_active)
-            Z_nbrs_chunk = Z[nbr_indices_chunk] # (chunk_size, m_active, 3)
+                # Local grid power search query and neighborhood energy computation
+                nbr_indices_chunk, E_chunk = grid_z.query_power_grid(W_chunk, a, m_local=cfg.m_active)
+                Z_nbrs_chunk = Z[nbr_indices_chunk] # (chunk_size, m_active, 3)
 
-            Q_val, b_val = compute_rank_soft_dp_batched(E_chunk, rank, cfg.rank_eps_schedule[-1])
-            b_weights = b_val[:, rank - 1] # (chunk_size, m_active)
+                Q_val, b_val = compute_rank_soft_dp_batched(E_chunk, rank, eps)
+                b_weights = b_val[:, rank - 1] # (chunk_size, m_active)
 
-            # Barycenter update
-            T = torch.sum(b_weights[:, :, None] * Z_nbrs_chunk, dim=1) # (chunk_size, 3)
-            W_coords[start:end] = (1.0 - gamma) * W_chunk + gamma * T
+                # Barycenter update
+                T = torch.sum(b_weights[:, :, None] * Z_nbrs_chunk, dim=1) # (chunk_size, 3)
+                W_coords[start:end] = (1.0 - gamma) * W_chunk + gamma * T
 
-    # Final evaluation of scores and signatures in a strictly chunked manner
-    scores = torch.zeros(M, device=device)
-    signatures = torch.zeros((M, rank + 1), dtype=torch.int64, device=device)
+    # 2. Final evaluation and capacity filtering in a chunked manner
+    coords_list = []
+    scores_list = []
+    signatures_list = []
+
+    scale_sq = grid_z.scale ** 2
 
     for start in range(0, M, chunk_size):
         end = min(start + chunk_size, M)
@@ -55,18 +60,46 @@ def refine_witness_pool(witness_pool, Z, a, grid_z, cfg):
         nbr_indices_chunk, E_chunk = grid_z.query_power_grid(W_chunk, a, m_local=cfg.m_active)
         Z_nbrs_chunk = Z[nbr_indices_chunk]
 
-        signatures[start:end] = nbr_indices_chunk[:, :rank + 1]
-
         Q_val, b_val = compute_rank_soft_dp_batched(E_chunk, rank, cfg.rank_eps_schedule[-1])
         b_weights = b_val[:, rank - 1]
         T = torch.sum(b_weights[:, :, None] * Z_nbrs_chunk, dim=1)
         dist_to_update = torch.sum((W_chunk - T) ** 2, dim=1)
-        scores[start:end] = -dist_to_update
+        
+        # Normalized score
+        scores_chunk = -dist_to_update / scale_sq
 
-    return WitnessPool(W_coords, rank, scores, signatures)
+        # Capacity filter: count how many neighbors have energy <= E_{rank-1} + tolerance
+        # In sorted E_chunk, the rank-1 index is min(rank - 1, m_active - 1)
+        r_est = E_chunk[:, min(rank - 1, cfg.m_active - 1)].unsqueeze(1)
+        count = torch.sum(E_chunk <= r_est + 1e-3, dim=1)
+        
+        # We expect count to be close to rank + 1
+        valid_mask = torch.abs(count - (rank + 1)) <= 2
+        valid_idx = torch.where(valid_mask)[0]
+
+        if len(valid_idx) == 0:
+            # Fallback to prevent emptying the pool
+            valid_idx = torch.arange(W_chunk.shape[0], device=device)
+
+        coords_list.append(W_chunk[valid_idx])
+        scores_list.append(scores_chunk[valid_idx])
+        signatures_list.append(nbr_indices_chunk[valid_idx][:, :rank + 1])
+
+    refined_coords = torch.cat(coords_list, dim=0)
+    refined_scores = torch.cat(scores_list, dim=0)
+    refined_signatures = torch.cat(signatures_list, dim=0)
+
+    # Strictly enforce budget_per_rank
+    if refined_coords.shape[0] > cfg.budget_per_rank:
+        val, idx = torch.topk(refined_scores, cfg.budget_per_rank, largest=True)
+        refined_coords = refined_coords[idx]
+        refined_scores = val
+        refined_signatures = refined_signatures[idx]
+
+    return WitnessPool(refined_coords, rank, refined_scores, refined_signatures)
 
 
-def lift_witness_pool(witness_pool, Z, a, eta, grid_z, cfg):
+def lift_witness_pool(witness_pool, Z, a, grid_z, cfg):
     """
     Lifts witnesses of rank k to rank k+1.
     Strictly chunked to bound VRAM/RAM allocations.

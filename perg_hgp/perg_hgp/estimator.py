@@ -363,8 +363,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                     }, w_path)
 
                 if k < self.K:
-                    eta_val = torch.mean(a).item()
-                    w_pool = lift_witness_pool(w_pool, Z, a, eta_val, grid_z, cfg)
+                    w_pool = lift_witness_pool(w_pool, Z, a, grid_z, cfg)
 
         # Final witnesses at rank K+1
         print("[PERG-HGP] Refining final witness pool of rank K+1...")
