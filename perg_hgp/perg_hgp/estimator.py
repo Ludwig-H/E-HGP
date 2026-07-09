@@ -16,6 +16,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
     Progressive Entropic Rank-Gabriel HGP (PERG-HGP) Clusterer.
     An optimized, Scikit-Learn compatible GPU-friendly implementation.
     """
+    __module__ = 'perg_hgp'
     def __init__(self, K=10, K_rho=None, alpha=0.0, m_local=128, m_active=128,
                  grid_resolution=64, W1_budget=10000, budget_per_rank=10000,
                  beam_per_bucket=4, rank_eps_schedule=[1.0, 0.5, 0.25, 0.125],
