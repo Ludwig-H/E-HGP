@@ -22,7 +22,8 @@ def dual_graph_mst(edge_u, edge_v, edge_w, edge_coface, num_facets):
     mst_edges_indices = []
     
     # We loop for at most ceil(log2(num_facets)) phases.
-    for phase in range(25):
+    max_phases = max(25, int(np.ceil(np.log2(max(2, num_facets)))) + 2)
+    for phase in range(max_phases):
         # 1. Pointer jumping to find representative roots for all components
         while True:
             p = parent[parent]
@@ -39,36 +40,38 @@ def dual_graph_mst(edge_u, edge_v, edge_w, edge_coface, num_facets):
         if not active_edges_mask.any():
             break
             
-        # 3. For each active edge, we pack its weight and its index to select deterministically
-        w_min = edge_w.min()
-        shift = 0.0
-        if w_min < 0:
-            shift = -w_min + 1.0
-        w_shifted = edge_w + shift
-        
-        w_int = w_shifted.view(torch.int32).to(torch.int64)
-        edge_idx = torch.arange(num_edges, device=device)
-        
-        packed = (w_int << 32) | edge_idx
-        
-        # 4. Find the cheapest edge for each component using scatter_reduce
-        cheapest = torch.full((num_facets,), torch.iinfo(torch.int64).max, dtype=torch.int64, device=device)
+        # 3. Find the cheapest edge weight for each component using scatter_reduce
+        cheapest_w = torch.full((num_facets,), float('inf'), dtype=edge_w.dtype, device=device)
         
         active_idx = torch.where(active_edges_mask)[0]
         if active_idx.shape[0] == 0:
             break
             
-        cheapest.scatter_reduce_(0, ru[active_idx], packed[active_idx], 'amin', include_self=False)
-        cheapest.scatter_reduce_(0, rv[active_idx], packed[active_idx], 'amin', include_self=True)
+        # We perform scatter_reduce with 'amin' to get the minimum incident edge weight for each component.
+        cheapest_w.scatter_reduce_(0, ru[active_idx], edge_w[active_idx], 'amin', include_self=True)
+        cheapest_w.scatter_reduce_(0, rv[active_idx], edge_w[active_idx], 'amin', include_self=True)
+        
+        # 4. Break ties deterministically using the minimum edge index among edges matching the cheapest weight.
+        cheapest_idx = torch.full((num_facets,), num_edges, dtype=torch.int64, device=device)
+        
+        # For ru: select edges whose weight matches cheapest_w of their ru root
+        match_ru_mask = (edge_w[active_idx] == cheapest_w[ru[active_idx]])
+        match_ru_idx = active_idx[match_ru_mask]
+        cheapest_idx.scatter_reduce_(0, ru[match_ru_idx], match_ru_idx, 'amin', include_self=True)
+        
+        # For rv: select edges whose weight matches cheapest_w of their rv root
+        match_rv_mask = (edge_w[active_idx] == cheapest_w[rv[active_idx]])
+        match_rv_idx = active_idx[match_rv_mask]
+        cheapest_idx.scatter_reduce_(0, rv[match_rv_idx], match_rv_idx, 'amin', include_self=True)
         
         # 5. Add cheapest edges to the MST and merge components
-        valid_mask = cheapest < torch.iinfo(torch.int64).max
+        valid_mask = cheapest_idx < num_edges
         valid_roots = torch.where(valid_mask)[0]
         
         if valid_roots.shape[0] == 0:
             break
             
-        cheapest_edges_idx = cheapest[valid_roots] & 0xFFFFFFFF
+        cheapest_edges_idx = cheapest_idx[valid_roots]
         unique_edges_idx = torch.unique(cheapest_edges_idx)
         
         # Union-Find union steps on CPU to avoid parallel write conflicts

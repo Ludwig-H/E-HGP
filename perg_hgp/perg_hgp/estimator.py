@@ -18,13 +18,13 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
     """
     __module__ = 'perg_hgp'
     def __init__(self, K=10, K_rho=None, alpha=0.0, m_local=128, m_active=128,
-                 grid_resolution=64, W1_budget=10000, budget_per_rank=10000,
+                 grid_resolution=64, W1_budget=3000000, budget_per_rank=2000000,
                  beam_per_bucket=4, rank_eps_schedule=[1.0, 0.5, 0.25, 0.125],
                  L_shell=4, support_cap=4, local_gabriel=True, global_gabriel='selective',
                  gabriel_tol=1e-6, min_cluster_size=100, expZ=2.0, device='cpu',
                  checkpoint_dir=None, exactness_mode='atlas_exact',
-                 max_witnesses_per_rank=100000, max_cofaces=1000000,
-                 max_unique_facets=10000000, max_dual_edges=50000000):
+                 max_witnesses_per_rank=5000000, max_cofaces=20000000,
+                 max_unique_facets=100000000, max_dual_edges=300000000):
         
         self.K = K
         self.K_rho = K_rho
@@ -96,20 +96,19 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             a = checkpoint_sites['a']
         else:
             print("[PERG-HGP] Solving local Gibbs and computing regularized sites...")
-            # Query KNN in memory-safe chunks to prevent VRAM overflow
+            # Query KNN and compute regularized sites in memory-safe chunks to prevent VRAM/RAM overflow
             chunk_size = 500000
-            nbr_indices_list = []
-            nbr_dists_list = []
+            Z_list = []
+            a_list = []
             for start_idx in range(0, N, chunk_size):
                 end_idx = min(start_idx + chunk_size, N)
                 indices_chunk, dists_chunk = grid.query_knn_grid(X_tensor[start_idx:end_idx], m_local=self.m_local)
-                # Move to CPU immediately to keep VRAM bounded
-                nbr_indices_list.append(indices_chunk.cpu())
-                nbr_dists_list.append(dists_chunk.cpu())
-            nbr_indices = torch.cat(nbr_indices_list, dim=0)
-            nbr_dists_sq = torch.cat(nbr_dists_list, dim=0)
-            
-            Z, a, eta = compute_regularized_sites(X_tensor, nbr_indices, nbr_dists_sq, entropy_target=cfg.K_rho)
+                Z_chunk, a_chunk, _ = compute_regularized_sites(X_tensor, indices_chunk, dists_chunk, entropy_target=cfg.K_rho)
+                # Move to CPU immediately to keep RAM/VRAM bounded
+                Z_list.append(Z_chunk.cpu())
+                a_list.append(a_chunk.cpu())
+            Z = torch.cat(Z_list, dim=0).to(device)
+            a = torch.cat(a_list, dim=0).to(device)
             if sites_path:
                 torch.save({'Z': Z, 'a': a}, sites_path)
                 
@@ -347,6 +346,16 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                 print("[PERG-HGP] Warning: No cofaces passed Gabriel certification. Hierarchy will be empty.")
                 self.labels_ = np.full(N, -1, dtype=np.int32)
                 W_coords_len = w_pool.coords.shape[0] if w_pool is not None else 0
+                
+                total_queries = 0
+                total_fallbacks = 0
+                if 'grid' in locals() and grid is not None:
+                    total_queries += grid.total_queries_
+                    total_fallbacks += grid.total_fallbacks_
+                if 'grid_z' in locals() and grid_z is not None:
+                    total_queries += grid_z.total_queries_
+                    total_fallbacks += grid_z.total_fallbacks_
+                    
                 self.exactness_report_ = {
                     "exactness_mode": cfg.exactness_mode,
                     "model_exact_for_chosen_supports": (cfg.alpha == 0.0),
@@ -358,7 +367,10 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                     "witness_budget_exceeded": (W_coords_len > cfg.max_witnesses_per_rank),
                     "cofaces_budget_exceeded": (cofaces.shape[0] > cfg.max_cofaces),
                     "facets_budget_exceeded": False,
-                    "edges_budget_exceeded": False
+                    "edges_budget_exceeded": False,
+                    "total_knn_queries": total_queries,
+                    "total_fallback_queries": total_fallbacks,
+                    "global_fallback_rate": total_fallbacks / max(1, total_queries)
                 }
                 return self
                 
@@ -390,7 +402,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             num_dual_edges = checkpoint_mst.get('num_dual_edges', len(mst_u))
         else:
             print("[PERG-HGP] Building dual graph of K-facets...")
-            facet_ids, unique_facets = compute_facet_ids(certified_cofaces, self.K)
+            facet_ids, unique_facets = compute_facet_ids(certified_cofaces, self.K, max_ram_facets=self.max_unique_facets)
             edge_u, edge_v, edge_w, edge_coface = build_dual_edges(certified_cofaces, facet_ids, certified_weights)
             
             print("[PERG-HGP] Computing dual MST...")

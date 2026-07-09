@@ -16,10 +16,10 @@ class PERGHGPConfig:
         self.exactness_mode = kwargs.get('exactness_mode', 'atlas_exact') # 'soft_only', 'atlas_exact', 'global_gabriel_certified', 'cut_certified'
         
         # Budgets
-        self.max_witnesses_per_rank = kwargs.get('max_witnesses_per_rank', 100000)
-        self.max_cofaces = kwargs.get('max_cofaces', 1000000)
-        self.max_unique_facets = kwargs.get('max_unique_facets', 10000000)
-        self.max_dual_edges = kwargs.get('max_dual_edges', 50000000)
+        self.max_witnesses_per_rank = kwargs.get('max_witnesses_per_rank', 5000000)
+        self.max_cofaces = kwargs.get('max_cofaces', 20000000)
+        self.max_unique_facets = kwargs.get('max_unique_facets', 100000000)
+        self.max_dual_edges = kwargs.get('max_dual_edges', 300000000)
         
         # Grid parameters
         self.m_local = kwargs.get('m_local', 128)
@@ -27,8 +27,8 @@ class PERGHGPConfig:
         
         # Witness parameters
         self.m_active = kwargs.get('m_active', 128)
-        self.W1_budget = kwargs.get('W1_budget', 100000)
-        self.budget_per_rank = kwargs.get('budget_per_rank', 100000)
+        self.W1_budget = kwargs.get('W1_budget', 3000000)
+        self.budget_per_rank = kwargs.get('budget_per_rank', 2000000)
         self.beam_per_bucket = kwargs.get('beam_per_bucket', 4)
         self.rank_eps_schedule = kwargs.get('rank_eps_schedule', [1.0, 0.5, 0.25, 0.125])
         self.gamma = kwargs.get('gamma', 0.8)
