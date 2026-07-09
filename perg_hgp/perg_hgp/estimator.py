@@ -1,6 +1,12 @@
+import os
 import torch
 import numpy as np
 from sklearn.base import BaseEstimator, ClusterMixin
+
+def _save_atomic(data, path):
+    tmp_path = path + ".tmp"
+    torch.save(data, tmp_path)
+    os.replace(tmp_path, path)
 
 from .config import PERGHGPConfig
 from .grid import SpatialGrid3D
@@ -163,7 +169,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             Z = torch.cat(Z_list, dim=0).to(device)
             a = torch.cat(a_list, dim=0).to(device)
             if sites_path:
-                torch.save({'Z': Z, 'a': a}, sites_path)
+                _save_atomic({'Z': Z, 'a': a}, sites_path)
 
         self.Z_ = Z
         self.a_ = a
@@ -339,7 +345,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             w_pool = WitnessPool(W_coords, rank=1)
             if checkpoint_dir:
                 w_path = os.path.join(checkpoint_dir, "witnesses_rank_1.pt")
-                torch.save({
+                _save_atomic({
                     'coords': w_pool.coords,
                     'rank': w_pool.rank,
                     'scores': w_pool.scores,
@@ -355,7 +361,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
 
                 if checkpoint_dir:
                     w_path = os.path.join(checkpoint_dir, f"witnesses_rank_{k}.pt")
-                    torch.save({
+                    _save_atomic({
                         'coords': w_pool.coords,
                         'rank': w_pool.rank,
                         'scores': w_pool.scores,
@@ -446,7 +452,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             certified_weights = weights[certified_idx]
 
             if cofaces_path:
-                torch.save({
+                _save_atomic({
                     'cofaces': certified_cofaces,
                     'centers': certified_centers,
                     'weights': certified_weights
@@ -478,7 +484,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             num_dual_edges = certified_cofaces.shape[0] * self.K
 
             if mst_path:
-                torch.save({
+                _save_atomic({
                     'mst_u': mst_u,
                     'mst_v': mst_v,
                     'mst_w': mst_w,
@@ -521,7 +527,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             self.Z_tree_ = condense_tree(W_nodes, mst_u, mst_v, mst_w, self.min_cluster_size)
 
             if tree_path:
-                torch.save(self.Z_tree_, tree_path)
+                _save_atomic(self.Z_tree_, tree_path)
 
         # 11. Extract Point Labels via voting
         print("[PERG-HGP] Extracting final labels...")
