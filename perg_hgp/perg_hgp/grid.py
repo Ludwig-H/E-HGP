@@ -36,7 +36,7 @@ def morton3D_encode_pytorch(coords, bits_per_axis=21):
 class SpatialGrid3D:
     """
     Spatial Grid for fast 3D neighbor queries.
-    Organizes points in Morton-sorted order to enable fast localized grid searches.
+    Organizes points in flat cell index sorted order to enable fast localized grid searches.
     """
     def __init__(self, X, grid_resolution=64, device='cpu'):
         self.device = torch.device(device)
@@ -59,45 +59,33 @@ class SpatialGrid3D:
             
         self.X_normalized = (self.X - self.bbox_min) / self.scale
         
-        # 2. Compute Morton keys
-        # For grid_resolution=64, 6 bits per axis are enough (2^6 = 64)
-        # But we can use bits_per_axis=21 for general high-resolution and shift
-        self.morton_keys = morton3D_encode_pytorch(self.X_normalized, bits_per_axis=21)
+        # 2. Compute flat cell keys on GPU
+        cell_coords = (self.X_normalized * self.grid_resolution).clamp(0, self.grid_resolution - 1).to(torch.int64)
+        self.cell_keys = cell_coords[:, 0] * (self.grid_resolution**2) + cell_coords[:, 1] * self.grid_resolution + cell_coords[:, 2]
         
         # 3. Sort keys and keep track of original indices
-        self.sorted_keys, self.sorted_indices = torch.sort(self.morton_keys)
+        self.sorted_keys, self.sorted_indices = torch.sort(self.cell_keys)
         self.X_sorted = self.X[self.sorted_indices]
         self.X_norm_sorted = self.X_normalized[self.sorted_indices]
         
-        # 4. Define cells by taking the top bits of Morton keys corresponding to grid_resolution
-        # e.g., grid_resolution=64 (6 bits per axis, 18 bits total)
-        # We shift right by (21 - 6) * 3 = 45 bits
-        bits_resolution = int(np.log2(grid_resolution))
-        shift_bits = (21 - bits_resolution) * 3
-        self.cell_keys = self.sorted_keys >> shift_bits
-        
-        # 5. Build start and count pointers for each cell
-        # cell_keys is sorted, so we can find cell transitions
-        diff = self.cell_keys[1:] != self.cell_keys[:-1]
+        # 4. Build start and end pointers for each cell on GPU
+        diff = self.sorted_keys[1:] != self.sorted_keys[:-1]
         transitions = torch.where(diff)[0] + 1
         
-        # Start and end positions of each cell in sorted arrays
         cell_starts = torch.cat([torch.tensor([0], device=self.device), transitions])
         cell_ends = torch.cat([transitions, torch.tensor([self.n_points], device=self.device)])
         
-        self.unique_cell_keys = self.cell_keys[cell_starts]
-        self.cell_counts = cell_ends - cell_starts
-        
-        # Fast lookup map from cell key to start position
-        # We use a hash map or sorted search (binary search via torch.bucketize)
-        self.cell_key_to_idx = {key.item(): idx for idx, key in enumerate(self.unique_cell_keys)}
-        
+        self.unique_cell_keys = self.sorted_keys[cell_starts]
         self.cell_starts = cell_starts
         self.cell_ends = cell_ends
+        
+        # 5. Fast GPU flat lookup map from cell key to start/end index
+        self.cell_starts_map = torch.full((self.grid_resolution**3,), -1, dtype=torch.int64, device=self.device)
+        self.cell_starts_map[self.unique_cell_keys] = torch.arange(len(self.unique_cell_keys), device=self.device)
 
     def get_points_in_cell(self, cell_key):
-        idx = self.cell_key_to_idx.get(cell_key, None)
-        if idx is None:
+        idx = self.cell_starts_map[cell_key].item()
+        if idx < 0:
             return torch.empty(0, dtype=torch.int64, device=self.device)
         start = self.cell_starts[idx]
         end = self.cell_ends[idx]
@@ -121,34 +109,12 @@ class SpatialGrid3D:
         q_norm = (query_points - self.bbox_min) / self.scale
         q_norm_cpu = q_norm.cpu().numpy()
         
-        # Compute cell keys of query points
-        q_morton = morton3D_encode_pytorch(q_norm, bits_per_axis=21)
-        bits_resolution = int(np.log2(self.grid_resolution))
-        shift_bits = (21 - bits_resolution) * 3
-        q_cell_keys = q_morton >> shift_bits
-        
-        # Decode cell keys on CPU for fast python loops
-        q_cell_keys_cpu = q_cell_keys.cpu().numpy()
-        
-        def decode_cell_key_cpu(key, bits):
-            x = np.zeros_like(key)
-            y = np.zeros_like(key)
-            z = np.zeros_like(key)
-            for b in range(bits):
-                x |= ((key >> (3 * b)) & 1) << b
-                y |= ((key >> (3 * b + 1)) & 1) << b
-                z |= ((key >> (3 * b + 2)) & 1) << b
-            return x, y, z
-            
-        def encode_cell_coords_cpu(x, y, z, bits):
-            key = 0
-            for b in range(bits):
-                key |= ((x >> b) & 1) << (3 * b)
-                key |= ((y >> b) & 1) << (3 * b + 1)
-                key |= ((z >> b) & 1) << (3 * b + 2)
-            return key
-            
-        qx, qy, qz = decode_cell_key_cpu(q_cell_keys_cpu, bits_resolution)
+        # Compute cell coordinates and decode directly on CPU/GPU
+        q_cell_coords = (q_norm * self.grid_resolution).clamp(0, self.grid_resolution - 1).to(torch.int64)
+        q_cell_coords_cpu = q_cell_coords.cpu().numpy()
+        qx = q_cell_coords_cpu[:, 0]
+        qy = q_cell_coords_cpu[:, 1]
+        qz = q_cell_coords_cpu[:, 2]
         
         # Search cell neighborhoods
         for i in range(M):
@@ -175,7 +141,7 @@ class SpatialGrid3D:
                             nz = cz + dz
                             if nz < 0 or nz >= self.grid_resolution: continue
                             
-                            n_cell_key = encode_cell_coords_cpu(nx, ny, nz, bits_resolution)
+                            n_cell_key = nx * (self.grid_resolution**2) + ny * self.grid_resolution + nz
                             n_points_idx = self.get_points_in_cell(n_cell_key)
                             if len(n_points_idx) > 0:
                                 candidates_list.append(n_points_idx)

@@ -48,31 +48,24 @@ def global_gabriel_grid_test(cofaces, Z, a, centers, radii_sq, grid_z, tol=1e-6)
     
     # 1. Precompute cell_min_a for all active cells
     cell_min_a = {}
-    for cell_key in grid_z.cell_key_to_idx.keys():
+    active_keys = grid_z.unique_cell_keys.cpu().numpy()
+    for cell_key in active_keys:
         p_indices = grid_z.get_points_in_cell(cell_key)
         cell_min_a[cell_key] = torch.min(a[p_indices]).item()
         
     cell_size = (grid_z.scale / grid_z.grid_resolution).item()
     bbox_min_cpu = grid_z.bbox_min.cpu().numpy()
     
-    # Decode coordinates of all active cell keys
-    active_keys = list(grid_z.cell_key_to_idx.keys())
-    bits_resolution = int(np.log2(grid_z.grid_resolution))
-    
-    def decode_cell_key_scalar(key, bits):
-        x = 0
-        y = 0
-        z = 0
-        for b in range(bits):
-            x |= ((key >> (3 * b)) & 1) << b
-            y |= ((key >> (3 * b + 1)) & 1) << b
-            z |= ((key >> (3 * b + 2)) & 1) << b
-        return x, y, z
+    def decode_cell_key_scalar(key, resolution):
+        nx = key // (resolution**2)
+        ny = (key % (resolution**2)) // resolution
+        nz = key % resolution
+        return nx, ny, nz
         
     # Predecode all active cell bboxes
     active_cells_info = []
     for cell_key in active_keys:
-        nx, ny, nz = decode_cell_key_scalar(cell_key, bits_resolution)
+        nx, ny, nz = decode_cell_key_scalar(cell_key, grid_z.grid_resolution)
         xmin = bbox_min_cpu[0] + nx * cell_size
         xmax = xmin + cell_size
         ymin = bbox_min_cpu[1] + ny * cell_size
