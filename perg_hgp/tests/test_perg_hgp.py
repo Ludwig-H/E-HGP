@@ -331,5 +331,75 @@ class TestPERGHGP(unittest.TestCase):
         np.testing.assert_array_equal(facet_ids_in_mem.cpu().numpy(), facet_ids_ooc.cpu().numpy())
         np.testing.assert_array_equal(unique_facets_in_mem.cpu().numpy(), unique_facets_ooc.cpu().numpy())
         
+    def test_boruvka_vs_kruskal(self):
+        from perg_hgp.hierarchy import dual_graph_mst
+        device = 'cpu'
+        np.random.seed(42)
+        torch.manual_seed(42)
+        
+        # Generate random connected-like graph edges
+        num_facets = 50
+        num_edges = 150
+        edge_u = torch.randint(0, num_facets, (num_edges,), device=device)
+        edge_v = torch.randint(0, num_facets, (num_edges,), device=device)
+        # Avoid self-loops for basic edge pool
+        mask = edge_u != edge_v
+        edge_u = edge_u[mask]
+        edge_v = edge_v[mask]
+        
+        # Ensure graph is connected by adding a cycle/line 0-1-2...-N-0
+        line_u = torch.arange(num_facets, device=device)
+        line_v = (line_u + 1) % num_facets
+        edge_u = torch.cat([edge_u, line_u])
+        edge_v = torch.cat([edge_v, line_v])
+        
+        num_edges = edge_u.shape[0]
+        # Assign unique weights to make MST unique
+        edge_w = torch.rand(num_edges, dtype=torch.float32, device=device)
+        edge_coface = torch.arange(num_edges, device=device)
+        
+        # 1. Run Boruvka
+        u_b, v_b, w_b, cof_b = dual_graph_mst(edge_u, edge_v, edge_w, edge_coface, num_facets)
+        
+        # 2. Run reference Kruskal
+        parent = np.arange(num_facets, dtype=np.int32)
+        def find(i):
+            path = []
+            while parent[i] != i:
+                path.append(i)
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            for node in path:
+                parent[node] = i
+            return i
+            
+        u_np = edge_u.cpu().numpy()
+        v_np = edge_v.cpu().numpy()
+        w_np = edge_w.cpu().numpy()
+        cof_np = edge_coface.cpu().numpy()
+        
+        order = np.argsort(w_np)
+        mst_u_ref = []
+        mst_v_ref = []
+        mst_w_ref = []
+        mst_cof_ref = []
+        
+        for idx in order:
+            ru = find(u_np[idx])
+            rv = find(v_np[idx])
+            if ru != rv:
+                parent[rv] = ru
+                mst_u_ref.append(u_np[idx])
+                mst_v_ref.append(v_np[idx])
+                mst_w_ref.append(w_np[idx])
+                mst_cof_ref.append(cof_np[idx])
+                
+        # Compare MST weights sum (must be identical)
+        self.assertAlmostEqual(w_b.sum(), np.array(mst_w_ref).sum(), places=4)
+        
+        # Compare sorted edge indices (since weights are unique, the MST is unique)
+        self.assertEqual(len(cof_b), len(mst_cof_ref))
+        np.testing.assert_array_equal(np.sort(cof_b), np.sort(mst_cof_ref))
+
 if __name__ == '__main__':
     unittest.main()

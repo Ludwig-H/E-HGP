@@ -4,58 +4,153 @@ from scipy.sparse import coo_matrix
 
 def dual_graph_mst(edge_u, edge_v, edge_w, edge_coface, num_facets):
     """
-    Computes the MST on the dual graph of facets.
-    Uses Kruskal's algorithm on edge list to avoid SciPy sparse matrix overhead.
+    Computes the MST on the dual graph of facets using a vectorized Boruvka algorithm in PyTorch.
+    Supports both GPU (CUDA) and CPU.
     """
-    # Move to CPU
-    u = edge_u.cpu().numpy()
-    v = edge_v.cpu().numpy()
-    w = edge_w.cpu().numpy()
-    cof = edge_coface.cpu().numpy()
+    device = edge_u.device
+    num_edges = edge_u.shape[0]
     
-    # Sort edges by weight ascending
-    order = np.argsort(w)
-    u_sorted = u[order]
-    v_sorted = v[order]
-    w_sorted = w[order]
-    cof_sorted = cof[order]
+    if num_edges == 0:
+        return (np.empty(0, dtype=np.int32),
+                np.empty(0, dtype=np.int32),
+                np.empty(0, dtype=np.float32),
+                np.empty(0, dtype=np.int32))
+                
+    # Union-Find parent pointers on device
+    parent = torch.arange(num_facets, device=device)
     
-    # Union-Find representing the merging components of facets
-    parent = np.arange(num_facets, dtype=np.int32)
+    mst_edges_indices = []
     
-    def find(i):
+    # We loop for at most ceil(log2(num_facets)) phases.
+    for phase in range(25):
+        # 1. Pointer jumping to find representative roots for all components
+        while True:
+            p = parent[parent]
+            if torch.equal(p, parent):
+                break
+            parent = p
+            
+        # 2. Find roots of endpoints for all edges
+        ru = parent[edge_u]
+        rv = parent[edge_v]
+        
+        # Filter out self-loops (edges within the same component)
+        active_edges_mask = ru != rv
+        if not active_edges_mask.any():
+            break
+            
+        # 3. For each active edge, we pack its weight and its index to select deterministically
+        w_min = edge_w.min()
+        shift = 0.0
+        if w_min < 0:
+            shift = -w_min + 1.0
+        w_shifted = edge_w + shift
+        
+        w_int = w_shifted.view(torch.int32).to(torch.int64)
+        edge_idx = torch.arange(num_edges, device=device)
+        
+        packed = (w_int << 32) | edge_idx
+        
+        # 4. Find the cheapest edge for each component using scatter_reduce
+        cheapest = torch.full((num_facets,), (1 << 62) - 1, dtype=torch.int64, device=device)
+        
+        active_idx = torch.where(active_edges_mask)[0]
+        if active_idx.shape[0] == 0:
+            break
+            
+        cheapest.scatter_reduce_(0, ru[active_idx], packed[active_idx], 'amin', include_self=False)
+        cheapest.scatter_reduce_(0, rv[active_idx], packed[active_idx], 'amin', include_self=True)
+        
+        # 5. Add cheapest edges to the MST and merge components
+        valid_mask = cheapest < ((1 << 62) - 1)
+        valid_roots = torch.where(valid_mask)[0]
+        
+        if valid_roots.shape[0] == 0:
+            break
+            
+        cheapest_edges_idx = cheapest[valid_roots] & 0xFFFFFFFF
+        unique_edges_idx = torch.unique(cheapest_edges_idx)
+        
+        # Union-Find union steps on CPU to avoid parallel write conflicts
+        mst_u_cpu = edge_u[unique_edges_idx].cpu().numpy()
+        mst_v_cpu = edge_v[unique_edges_idx].cpu().numpy()
+        
+        parent_cpu = parent.cpu().numpy()
+        
+        def find_cpu(i):
+            path = []
+            while parent_cpu[i] != i:
+                path.append(i)
+                parent_cpu[i] = parent_cpu[parent_cpu[i]]
+                i = parent_cpu[i]
+            for node in path:
+                parent_cpu[node] = i
+            return i
+            
+        merged_edges_idx = []
+        for idx_idx, edge_idx_val in enumerate(unique_edges_idx.cpu().numpy()):
+            u_val = mst_u_cpu[idx_idx]
+            v_val = mst_v_cpu[idx_idx]
+            ru_val = find_cpu(u_val)
+            rv_val = find_cpu(v_val)
+            if ru_val != rv_val:
+                parent_cpu[ru_val] = rv_val
+                merged_edges_idx.append(edge_idx_val)
+                
+        parent = torch.from_numpy(parent_cpu).to(device)
+        if len(merged_edges_idx) > 0:
+            mst_edges_indices.append(torch.tensor(merged_edges_idx, dtype=torch.int64, device=device))
+        
+    if len(mst_edges_indices) == 0:
+        return (np.empty(0, dtype=np.int32),
+                np.empty(0, dtype=np.int32),
+                np.empty(0, dtype=np.float32),
+                np.empty(0, dtype=np.int32))
+                
+    final_edges_idx = torch.cat(mst_edges_indices)
+    
+    # Run a clean step to filter out any potential cycle or redundant edges
+    u_mst = edge_u[final_edges_idx].cpu().numpy()
+    v_mst = edge_v[final_edges_idx].cpu().numpy()
+    w_mst = edge_w[final_edges_idx].cpu().numpy()
+    cof_mst = edge_coface[final_edges_idx].cpu().numpy()
+    
+    order = np.argsort(w_mst)
+    u_sorted = u_mst[order]
+    v_sorted = v_mst[order]
+    w_sorted = w_mst[order]
+    cof_sorted = cof_mst[order]
+    
+    clean_parent = np.arange(num_facets, dtype=np.int32)
+    def clean_find(i):
         path = []
-        while parent[i] != i:
+        while clean_parent[i] != i:
             path.append(i)
-            parent[i] = parent[parent[i]]
-            i = parent[i]
+            clean_parent[i] = clean_parent[clean_parent[i]]
+            i = clean_parent[i]
         for node in path:
-            parent[node] = i
+            clean_parent[node] = i
         return i
         
-    mst_u = []
-    mst_v = []
-    mst_w = []
-    mst_cof = []
+    mst_u_out = []
+    mst_v_out = []
+    mst_w_out = []
+    mst_cof_out = []
     
-    num_edges_found = 0
     for i in range(len(w_sorted)):
-        ru = find(u_sorted[i])
-        rv = find(v_sorted[i])
-        if ru != rv:
-            parent[rv] = ru
-            mst_u.append(u_sorted[i])
-            mst_v.append(v_sorted[i])
-            mst_w.append(w_sorted[i])
-            mst_cof.append(cof_sorted[i])
-            num_edges_found += 1
-            if num_edges_found == num_facets - 1:
-                break
-                
-    return (np.array(mst_u, dtype=np.int32), 
-            np.array(mst_v, dtype=np.int32), 
-            np.array(mst_w, dtype=np.float32), 
-            np.array(mst_cof, dtype=np.int32))
+        ru_cl = clean_find(u_sorted[i])
+        rv_cl = clean_find(v_sorted[i])
+        if ru_cl != rv_cl:
+            clean_parent[rv_cl] = ru_cl
+            mst_u_out.append(u_sorted[i])
+            mst_v_out.append(v_sorted[i])
+            mst_w_out.append(w_sorted[i])
+            mst_cof_out.append(cof_sorted[i])
+            
+    return (np.array(mst_u_out, dtype=np.int32),
+            np.array(mst_v_out, dtype=np.int32),
+            np.array(mst_w_out, dtype=np.float32),
+            np.array(mst_cof_out, dtype=np.int32))
 
 
 
