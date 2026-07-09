@@ -33,14 +33,9 @@ def refine_witness_pool(witness_pool, Z, a, grid_z, cfg):
             end = min(start + chunk_size, M)
             W_chunk = W_coords[start:end]
 
-            # Local grid KNN query and neighborhood energy computation
-            nbr_indices_chunk, _ = grid_z.query_knn_grid(W_chunk, m_local=cfg.m_active)
+            # Local grid power search query and neighborhood energy computation
+            nbr_indices_chunk, E_chunk = grid_z.query_power_grid(W_chunk, a, m_local=cfg.m_active)
             Z_nbrs_chunk = Z[nbr_indices_chunk] # (chunk_size, m_active, 3)
-            a_nbrs_chunk = a[nbr_indices_chunk] # (chunk_size, m_active)
-
-            diff = Z_nbrs_chunk - W_chunk[:, None, :]
-            dist_sq = torch.sum(diff ** 2, dim=2)
-            E_chunk = dist_sq + a_nbrs_chunk # (chunk_size, m_active)
 
             Q_val, b_val = compute_rank_soft_dp_batched(E_chunk, rank, cfg.rank_eps_schedule[-1])
             b_weights = b_val[:, rank - 1] # (chunk_size, m_active)
@@ -57,17 +52,10 @@ def refine_witness_pool(witness_pool, Z, a, grid_z, cfg):
         end = min(start + chunk_size, M)
         W_chunk = W_coords[start:end]
 
-        nbr_indices_chunk, _ = grid_z.query_knn_grid(W_chunk, m_local=cfg.m_active)
+        nbr_indices_chunk, E_chunk = grid_z.query_power_grid(W_chunk, a, m_local=cfg.m_active)
         Z_nbrs_chunk = Z[nbr_indices_chunk]
-        a_nbrs_chunk = a[nbr_indices_chunk]
 
-        diff = Z_nbrs_chunk - W_chunk[:, None, :]
-        dist_sq = torch.sum(diff ** 2, dim=2)
-        E_chunk = dist_sq + a_nbrs_chunk
-
-        sorted_idx = torch.argsort(E_chunk, dim=1)
-        row_indices = torch.arange(end - start, device=device).unsqueeze(1)
-        signatures[start:end] = nbr_indices_chunk[row_indices, sorted_idx[:, :rank + 1]]
+        signatures[start:end] = nbr_indices_chunk[:, :rank + 1]
 
         Q_val, b_val = compute_rank_soft_dp_batched(E_chunk, rank, cfg.rank_eps_schedule[-1])
         b_weights = b_val[:, rank - 1]
@@ -104,14 +92,9 @@ def lift_witness_pool(witness_pool, Z, a, eta, grid_z, cfg):
         seeds_chunk = []
         seeds_chunk.append(W_chunk.clone()) # Generator A (Continuation)
 
-        # Query local neighborhood
-        nbr_indices_chunk, _ = grid_z.query_knn_grid(W_chunk, m_local=cfg.m_active)
-        diff_chunk = Z[nbr_indices_chunk] - W_chunk[:, None, :]
-        E_chunk = torch.sum(diff_chunk ** 2, dim=2) + a[nbr_indices_chunk]
-        sorted_idx = torch.argsort(E_chunk, dim=1)
-
-        row_indices = torch.arange(M_c, device=device).unsqueeze(1)
-        top_k_indices = nbr_indices_chunk[row_indices, sorted_idx[:, :next_rank]]
+        # Query local neighborhood using power distance
+        nbr_indices_chunk, _ = grid_z.query_power_grid(W_chunk, a, m_local=cfg.m_active)
+        top_k_indices = nbr_indices_chunk[:, :next_rank]
         top_k_coords = Z[top_k_indices]
 
         # Generator B: Shell lift
@@ -134,13 +117,11 @@ def lift_witness_pool(witness_pool, Z, a, eta, grid_z, cfg):
             s_end = min(s_start + sub_chunk_size, S_num_c)
             sub_seeds = all_seeds_chunk[s_start:s_end]
 
-            nbr_indices_s, _ = grid_z.query_knn_grid(sub_seeds, m_local=cfg.m_active)
-            diff_s = Z[nbr_indices_s] - sub_seeds[:, None, :]
-            E_s = torch.sum(diff_s ** 2, dim=2) + a[nbr_indices_s]
+            # Query power distance on sub_seeds (sorted_E is exactly E_s because query_power_grid returns sorted distances)
+            _, sorted_E = grid_z.query_power_grid(sub_seeds, a, m_local=cfg.m_active)
 
-            sorted_E, _ = torch.sort(E_s, dim=1)
             r_est = sorted_E[:, min(next_rank - 1, cfg.m_active - 1)].unsqueeze(1)
-            count = torch.sum(E_s <= r_est + 1e-3, dim=1)
+            count = torch.sum(sorted_E <= r_est + 1e-3, dim=1)
 
             valid_mask = torch.abs(count - next_rank) <= 2
             valid_idx = torch.where(valid_mask)[0]
@@ -149,7 +130,7 @@ def lift_witness_pool(witness_pool, Z, a, eta, grid_z, cfg):
                 valid_idx = torch.arange(min(1000, sub_seeds.shape[0]), device=device)
 
             filtered_seeds_chunk_list.append(sub_seeds[valid_idx])
-            filtered_E_chunk_list.append(E_s[valid_idx][:, 0])
+            filtered_E_chunk_list.append(sorted_E[valid_idx][:, 0])
 
         filtered_seeds_chunk = torch.cat(filtered_seeds_chunk_list, dim=0)
         filtered_E_chunk = torch.cat(filtered_E_chunk_list, dim=0)

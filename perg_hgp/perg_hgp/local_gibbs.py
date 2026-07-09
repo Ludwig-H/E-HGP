@@ -15,23 +15,37 @@ def solve_local_gibbs_entropy(nbr_dists_sq, entropy_target, max_iter=32, tol=1e-
     log_m = np.log(m)
     effective_target = min(log_target, log_m - 1e-6)
 
-    # Bisection search bounds
-    low = torch.full((N,), 1e-8, dtype=dtype, device=device)
-    high = 100.0 * torch.max(nbr_dists_sq, dim=1).values + 1e-5
-
-    for _ in range(max_iter):
-        mid = 0.5 * (low + high)
-
-        # Gibbs weights: q = exp(-D / mid) / sum(exp(-D / mid))
-        exponent = -nbr_dists_sq / mid[:, None]
+    def get_entropy(t):
+        # Prevent division by zero
+        t_clamped = torch.clamp(t, min=1e-12)
+        exponent = -nbr_dists_sq / t_clamped[:, None]
         max_exp = torch.max(exponent, dim=1, keepdim=True).values
         exp_w = torch.exp(exponent - max_exp)
         sum_exp = torch.sum(exp_w, dim=1, keepdim=True)
         q = exp_w / sum_exp
-
-        # Entropy: H(q) = - sum(q * log_q)
         log_q = exponent - max_exp - torch.log(sum_exp)
-        entropy = -torch.sum(q * log_q, dim=1)
+        return -torch.sum(q * log_q, dim=1)
+
+    # Bisection search bounds
+    low = torch.full((N,), 1e-8, dtype=dtype, device=device)
+    high = 100.0 * torch.max(nbr_dists_sq, dim=1).values + 1e-3
+
+    # Robust bracketing of high temperature bound
+    entropy_high = get_entropy(high)
+    for _ in range(8):
+        too_small = entropy_high < effective_target
+        if not torch.any(too_small):
+            break
+        high = torch.where(too_small, 2.0 * high, high)
+        entropy_high = get_entropy(high)
+
+    for _ in range(max_iter):
+        mid = 0.5 * (low + high)
+        entropy = get_entropy(mid)
+
+        # Check convergence
+        if torch.max(high - low).item() < tol:
+            break
 
         too_small = entropy < effective_target
         low = torch.where(too_small, mid, low)

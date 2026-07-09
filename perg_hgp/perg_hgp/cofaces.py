@@ -321,17 +321,8 @@ def extract_top_cofaces(witness_pool, Z, a, eta, grid_z, K, cfg):
         end = min(start + chunk_size, M)
         W_chunk = W_coords[start:end]
 
-        nbr_indices_chunk, nbr_dists_sq_chunk = grid_z.query_knn_grid(W_chunk, m_local=cfg.m_active)
-        Z_nbrs = Z[nbr_indices_chunk]
-        a_nbrs = a[nbr_indices_chunk]
-        diff = Z_nbrs - W_chunk[:, None, :]
-        dist_sq = torch.sum(diff ** 2, dim=2)
-        E = dist_sq + a_nbrs
-
-        # Sort neighbors by energy
-        sorted_idx = torch.argsort(E, dim=1)
-        row_indices = torch.arange(end - start, device=device).unsqueeze(1)
-        cofaces_chunk = nbr_indices_chunk[row_indices, sorted_idx[:, :K + 1]]
+        nbr_indices_chunk, nbr_dists_sq_chunk_power = grid_z.query_power_grid(W_chunk, a, m_local=cfg.m_active)
+        cofaces_chunk = nbr_indices_chunk[:, :K + 1]
 
         # Sort indices of the coface for deduplication
         cofaces_chunk_sorted, _ = torch.sort(cofaces_chunk, dim=1)
@@ -375,14 +366,8 @@ def extract_top_cofaces(witness_pool, Z, a, eta, grid_z, K, cfg):
                 r2_chunk[i] = r2
 
         # Batched top-consistency check: Top_{K+1}(c) == cof_idx
-        nbr_idx, _ = grid_z.query_knn_grid(centers_chunk, m_local=cfg.m_active) # (chunk_len, m_active)
-
-        diff_pts = Z[nbr_idx] - centers_chunk.unsqueeze(1) # (chunk_len, m_active, 3)
-        phi_pts = torch.sum(diff_pts ** 2, dim=2) + a[nbr_idx] # (chunk_len, m_active)
-
-        sorted_idx = torch.argsort(phi_pts, dim=1) # (chunk_len, m_active)
-        row_idx = torch.arange(chunk_len, device=device).unsqueeze(1)
-        top_k_plus_1 = nbr_idx[row_idx, sorted_idx[:, :K + 1]] # (chunk_len, K+1)
+        nbr_idx, _ = grid_z.query_power_grid(centers_chunk, a, m_local=cfg.m_active) # (chunk_len, m_active)
+        top_k_plus_1 = nbr_idx[:, :K + 1] # (chunk_len, K+1)
         top_k_plus_1_sorted, _ = torch.sort(top_k_plus_1, dim=1)
 
         matches = torch.all(top_k_plus_1_sorted == cof_idx_chunk, dim=1) # (chunk_len,)

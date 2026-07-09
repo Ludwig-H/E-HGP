@@ -303,3 +303,124 @@ class SpatialGrid3D:
         self.total_queries_ += M
         self.total_fallbacks_ += self.fallback_count_
         return nbr_indices, nbr_dists_sq
+
+    def query_power_grid(self, query_points, weights, m_local=128):
+        """
+        Vectorized certified neighborhood search in the power complex.
+        query_points: (M, 3)
+        weights: (N,) - weights a of the sites
+        """
+        device = self.device
+        M = query_points.shape[0]
+        m_local = min(m_local, self.n_points)
+
+        # Move queries and weights to self.device
+        q_pts = query_points.to(device)
+        w_sites = weights.to(device)
+
+        # Calculate cell size in normalized coords
+        delta = 1.0 / self.grid_resolution
+        delta_scaled = delta * self.scale
+
+        min_a = float(w_sites.min().item())
+
+        # Output tensors on query device
+        nbr_indices = torch.zeros((M, m_local), dtype=torch.int64, device=query_points.device)
+        nbr_dists_sq = torch.zeros((M, m_local), dtype=torch.float32, device=query_points.device)
+
+        # Process in chunks to strictly bound VRAM/RAM
+        grid_chunk_size = min(10000, max(1000, int(5000000 / m_local)))
+
+        total_fallback_count = 0
+
+        for start_q in range(0, M, grid_chunk_size):
+            end_q = min(start_q + grid_chunk_size, M)
+            q_pts_chunk = q_pts[start_q:end_q]
+            M_c = q_pts_chunk.shape[0]
+
+            # Map query points to flat cell keys
+            q_norm = (q_pts_chunk - self.bbox_min) / self.scale
+            q_coords = (q_norm * self.grid_resolution).clamp(0, self.grid_resolution - 1).to(torch.int64)
+            q_cell_keys = q_coords[:, 0] * (self.grid_resolution**2) + q_coords[:, 1] * self.grid_resolution + q_coords[:, 2]
+
+            # Initialize running top-m_local candidates
+            cand_indices = torch.full((M_c, m_local), -1, dtype=torch.int64, device=device)
+            cand_dists_sq = torch.full((M_c, m_local), float('inf'), dtype=torch.float32, device=device)
+
+            # Track which queries are finished
+            finished = torch.zeros(M_c, dtype=torch.bool, device=device)
+
+            radius = 1
+            max_search_radius = self.grid_resolution
+
+            while not torch.all(finished) and radius <= max_search_radius:
+                stopping_threshold = ((radius - 1) * delta_scaled) ** 2 + min_a
+                finished = cand_dists_sq[:, -1] <= stopping_threshold
+
+                if torch.all(finished):
+                    break
+
+                offsets = self._get_shell_offsets(radius)
+
+                active_idx = torch.where(~finished)[0]
+                if len(active_idx) == 0:
+                    break
+
+                # cells: (len(active_idx), O, 3)
+                cells = q_coords[active_idx].unsqueeze(1) + offsets.unsqueeze(0)
+                cells = torch.clamp(cells, 0, self.grid_resolution - 1)
+                flat_keys = cells[:, :, 0] * (self.grid_resolution**2) + cells[:, :, 1] * self.grid_resolution + cells[:, :, 2]
+
+                for i, q_idx in enumerate(active_idx):
+                    q_pt = q_pts_chunk[q_idx]
+                    cell_keys_q = flat_keys[i]
+                    pt_indices_list = []
+
+                    for key in cell_keys_q:
+                        key_item = key.item()
+                        key_tensor = torch.tensor([key_item], device=device)
+                        idx = torch.searchsorted(self.unique_cell_keys, key_tensor)[0].item()
+                        if idx < len(self.unique_cell_keys) and self.unique_cell_keys[idx].item() == key_item:
+                            st = self.cell_starts[idx]
+                            en = self.cell_ends[idx]
+                            pt_indices_list.append(self.sorted_indices[st:en])
+
+                    if len(pt_indices_list) == 0:
+                        continue
+
+                    db_idx = torch.cat(pt_indices_list)
+                    dist_sq = torch.sum((self.X[db_idx] - q_pt) ** 2, dim=1) + w_sites[db_idx]
+
+                    merged_dist = torch.cat([cand_dists_sq[q_idx], dist_sq])
+                    merged_idx = torch.cat([cand_indices[q_idx], db_idx])
+
+                    val_top, idx_top = torch.topk(merged_dist, m_local, largest=False)
+                    cand_dists_sq[q_idx] = val_top
+                    cand_indices[q_idx] = merged_idx[idx_top]
+
+                radius += 1
+
+            # Global scan for uncertified queries
+            uncertified = ~finished
+            if torch.any(uncertified):
+                uncert_idx = torch.where(uncertified)[0]
+                total_fallback_count += len(uncert_idx)
+
+                # Vectorized global scan for uncertified chunk queries
+                q_uncert = q_pts_chunk[uncert_idx]
+                diff = self.X.unsqueeze(0) - q_uncert.unsqueeze(1)
+                dist_sq = torch.sum(diff ** 2, dim=2) + w_sites.unsqueeze(0)
+
+                val_top, idx_top = torch.topk(dist_sq, m_local, dim=1, largest=False)
+                cand_dists_sq[uncert_idx] = val_top
+                cand_indices[uncert_idx] = idx_top
+
+            nbr_indices[start_q:end_q] = cand_indices.to(query_points.device)
+            nbr_dists_sq[start_q:end_q] = cand_dists_sq.to(query_points.device)
+
+        self.fallback_count_ = total_fallback_count
+        self.fallback_rate_ = self.fallback_count_ / M
+        self.certified_rate_ = 1.0 - self.fallback_rate_
+        self.total_queries_ += M
+        self.total_fallbacks_ += self.fallback_count_
+        return nbr_indices, nbr_dists_sq

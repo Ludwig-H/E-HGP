@@ -189,7 +189,8 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             print("[PERG-HGP] Running in soft_only mode (no cofaces, direct sites MST)...")
             # Build MST directly on regularized sites Z
             # Each site is connected to its 2 nearest neighbors in Z
-            nbr_indices_z, nbr_dists_sq_z = grid_z.query_knn_grid(Z, m_local=2)
+            nbr_indices_z, nbr_dists_sq_z_power = grid_z.query_power_grid(Z, a, m_local=2)
+            nbr_dists_sq_z = nbr_dists_sq_z_power - a[nbr_indices_z]
 
             # Edges: connect site i to site j = nbr_indices_z[i, 1]
             edge_u = torch.arange(N, device=device)
@@ -302,14 +303,14 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
 
                 # Refine rank 1 on GPU
                 for it in range(cfg.fixed_point_iters_per_temp):
-                    nbr_indices, nbr_dists_sq = grid_z.query_knn_grid(W_chunk, m_local=1)
+                    nbr_indices, _ = grid_z.query_power_grid(W_chunk, a, m_local=1)
                     closest_idx = nbr_indices[:, 0]
                     W_chunk = (1 - cfg.gamma) * W_chunk + cfg.gamma * Z[closest_idx]
 
                 # Compute final energy
-                nbr_indices, nbr_dists_sq = grid_z.query_knn_grid(W_chunk, m_local=1)
+                nbr_indices, nbr_dists_sq_power = grid_z.query_power_grid(W_chunk, a, m_local=1)
                 closest_idx = nbr_indices[:, 0]
-                energy = nbr_dists_sq[:, 0] + a[closest_idx]
+                energy = nbr_dists_sq_power[:, 0]
 
                 # Copy only the small refined chunk results to CPU
                 closest_cpu = closest_idx.cpu().numpy()
@@ -393,7 +394,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             valid_mask = torch.ones(cofaces.shape[0], dtype=torch.bool, device=device)
 
             if self.local_gabriel_:
-                nbr_indices_z, _ = grid_z.query_knn_grid(Z, m_local=cfg.m_active)
+                nbr_indices_z, _ = grid_z.query_power_grid(Z, a, m_local=cfg.m_active)
                 local_passes = local_gabriel_filter(cofaces, Z, a, centers, radii_sq, nbr_indices_z, tol=self.gabriel_tol)
                 valid_mask &= local_passes
                 print(f"  - Local filter: {torch.sum(local_passes).item()} / {cofaces.shape[0]} passed.")
