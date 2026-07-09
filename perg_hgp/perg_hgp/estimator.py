@@ -25,7 +25,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                  checkpoint_dir=None, exactness_mode='atlas_exact',
                  max_witnesses_per_rank=5000000, max_cofaces=20000000,
                  max_unique_facets=100000000, max_dual_edges=300000000,
-                 max_ram_facets=2000000):
+                 max_ram_facets=100000000):
 
         self.K = K
         self.K_rho = K_rho

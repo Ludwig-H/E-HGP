@@ -20,7 +20,7 @@ class PERGHGPConfig:
         self.max_cofaces = kwargs.get('max_cofaces', 20000000)
         self.max_unique_facets = kwargs.get('max_unique_facets', 100000000)
         self.max_dual_edges = kwargs.get('max_dual_edges', 300000000)
-        self.max_ram_facets = kwargs.get('max_ram_facets', 2000000)
+        self.max_ram_facets = kwargs.get('max_ram_facets', 100000000)
 
         # Grid parameters
         self.m_local = kwargs.get('m_local', 128)
