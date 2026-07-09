@@ -266,7 +266,7 @@ def exact_condense_tree(W_nodes, u_mst, v_mst, w_mst, min_cluster_size):
     w_mst = w_mst[order]
 
     parent = np.arange(N)
-    size = W_nodes.copy()
+    size = np.ones(N, dtype=np.int32)
 
     next_label = N
     tree_list = []
@@ -332,20 +332,49 @@ def exact_condense_tree(W_nodes, u_mst, v_mst, w_mst, min_cluster_size):
     parent_tree = np.full(next_label, -1)
 
     for row in tree_list:
-        parent_node, child_node, lam_val, sz_val = row
-        parent_tree[child_node] = parent_node
-        if parent_node >= N:
-            children[parent_node - N].append((child_node, lam_val, sz_val))
+        p, c, lam, sz = row
+        parent_tree[c] = p
+        if p >= N:
+            children[p - N].append(c)
+        if c >= N:
+            lambda_births[c - N] = lam
+
+    # Compute stabilities
+    stabilities = np.zeros(num_clusters)
+    for row in tree_list:
+        p, c, lam, sz = row
+        if p >= N:
+            birth = lambda_births[p - N]
+            stabilities[p - N] += (lam - birth) * sz
+
+    # Recursive selection
+    subtree_stability = np.zeros(num_clusters)
+    selected_at_node = {}
 
     for i in range(num_clusters):
         node_id = N + i
-        for child, lam_val, sz_val in children[i]:
-            if child < N:
-                sizes[i] += sz_val
-            else:
-                sizes[i] += sizes[child - N]
-        if parent_tree[node_id] != -1:
-            lambda_births[i] = next(row[2] for row in tree_list if row[0] == parent_tree[node_id] and row[1] == node_id)
+        c_children = children[i]
+        self_stability = stabilities[i]
+
+        desc_stability = 0.0
+        desc_selected = set()
+        for child in c_children:
+            if child >= N:
+                desc_stability += subtree_stability[child - N]
+                desc_selected.update(selected_at_node[child])
+
+        if self_stability >= desc_stability:
+            subtree_stability[i] = self_stability
+            selected_at_node[node_id] = {node_id}
+        else:
+            subtree_stability[i] = desc_stability
+            selected_at_node[node_id] = desc_selected
+
+    roots = [i for i in range(N, next_label) if parent_tree[i] == -1]
+    selected_clusters = set()
+    for r in roots:
+        if r in selected_at_node:
+            selected_clusters.update(selected_at_node[r])
 
     return {
         'children': children,
@@ -354,7 +383,8 @@ def exact_condense_tree(W_nodes, u_mst, v_mst, w_mst, min_cluster_size):
         'N': N,
         'next_label': next_label,
         'parent_tree': parent_tree,
-        'tree_list': tree_list
+        'tree_list': tree_list,
+        'selected_clusters': list(selected_clusters)
     }
 
 def exact_extract_labels(Z_tree, unique_facets, n_points, S_faces, K):
@@ -365,19 +395,23 @@ def exact_extract_labels(Z_tree, unique_facets, n_points, S_faces, K):
     next_label = Z_tree['next_label']
     parent_tree = Z_tree['parent_tree']
 
-    num_clusters = next_label - N
+    selected = Z_tree.get('selected_clusters', [])
+    if len(selected) == 0:
+        # Fallback to root clusters
+        selected = [i for i in range(N, next_label) if parent_tree[i] == -1]
+
+    num_clusters = len(selected)
     if num_clusters == 0:
         return np.full(n_points, -1, dtype=np.int32)
 
-    roots = [i for i in range(N, next_label) if parent_tree[i] == -1]
-    root_to_idx = {r: idx for idx, r in enumerate(roots)}
-
+    selected_to_idx = {c: idx for idx, c in enumerate(selected)}
     labels_facets = np.full(N, -1, dtype=np.int32)
+
     for f in range(N):
         curr = f
         while curr != -1:
-            if curr in root_to_idx:
-                labels_facets[f] = root_to_idx[curr]
+            if curr in selected_to_idx:
+                labels_facets[f] = selected_to_idx[curr]
                 break
             curr = parent_tree[curr]
 
@@ -393,7 +427,7 @@ def exact_extract_labels(Z_tree, unique_facets, n_points, S_faces, K):
     S_faces_expanded = np.repeat(S_faces, K)
     data = S_faces_expanded[mask]
 
-    mat = coo_matrix((data, (rows, cols)), shape=(n_points, len(roots)), dtype=np.float32).tocsr()
+    mat = coo_matrix((data, (rows, cols)), shape=(n_points, num_clusters), dtype=np.float32).tocsr()
     best_clusters = np.asarray(mat.argmax(axis=1)).flatten()
     has_votes = mat.getnnz(axis=1) > 0
 

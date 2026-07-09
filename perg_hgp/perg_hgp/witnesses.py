@@ -64,7 +64,7 @@ def refine_witness_pool(witness_pool, Z, a, grid_z, cfg):
         b_weights = b_val[:, rank - 1]
         T = torch.sum(b_weights[:, :, None] * Z_nbrs_chunk, dim=1)
         dist_to_update = torch.sum((W_chunk - T) ** 2, dim=1)
-        
+
         # Normalized score
         scores_chunk = -dist_to_update / scale_sq
 
@@ -72,7 +72,7 @@ def refine_witness_pool(witness_pool, Z, a, grid_z, cfg):
         # In sorted E_chunk, the rank-1 index is min(rank - 1, m_active - 1)
         r_est = E_chunk[:, min(rank - 1, cfg.m_active - 1)].unsqueeze(1)
         count = torch.sum(E_chunk <= r_est + 1e-3, dim=1)
-        
+
         # We expect count to be close to rank + 1
         valid_mask = torch.abs(count - (rank + 1)) <= 2
         valid_idx = torch.where(valid_mask)[0]
