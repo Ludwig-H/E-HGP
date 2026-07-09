@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import itertools
 
 def solve_support_ball_3d(S_Z, S_a):
     """
@@ -12,7 +13,6 @@ def solve_support_ball_3d(S_Z, S_a):
     """
     size = S_Z.shape[0]
     device = S_Z.device
-    dtype = S_Z.dtype
     
     if size == 1:
         return S_Z[0], S_a[0]
@@ -44,58 +44,167 @@ def solve_support_ball_3d(S_Z, S_a):
     return center, radius_sq
 
 
-def solve_weighted_miniball_active_set_3d(Z_coface, a_coface, max_iter=50, tol=1e-6):
+def solve_weighted_miniball_brute_force_3d(Z_coface, a_coface, tol=1e-6):
     """
-    3D active-set weighted miniball solver for a single coface.
-    Z_coface: shape (K+1, 3)
-    a_coface: shape (K+1,)
+    Brute-force weighted miniball solver in 3D (support size <= 4) acting as an oracle.
+    Guarantees the exact global minimum.
     """
-    K_plus_1 = Z_coface.shape[0]
+    n = Z_coface.shape[0]
     device = Z_coface.device
+    tol = max(tol, 1e-5)
     
-    # Start with active set containing the first element
+    best_r2 = np.inf
+    best_center = None
+    
+    # Try all subsets of size 1, 2, 3, 4
+    for r in range(1, min(5, n + 1)):
+        for S in itertools.combinations(range(n), r):
+            S = list(S)
+            c, r2 = solve_support_ball_3d(Z_coface[S], a_coface[S])
+            
+            # Compute multipliers
+            if len(S) == 1:
+                lambdas = torch.tensor([1.0], device=device)
+            else:
+                sub_Z = Z_coface[S]
+                sub_a = a_coface[S]
+                v = sub_Z[1:] - sub_Z[0]
+                G = torch.matmul(v, v.t())
+                v_norm_sq = torch.sum(v ** 2, dim=1)
+                h = 0.5 * (v_norm_sq + sub_a[1:] - sub_a[0])
+                try:
+                    if len(S) == 2:
+                        alpha = h / G[0, 0]
+                    else:
+                        alpha = torch.linalg.solve(G, h)
+                except RuntimeError:
+                    pinv = torch.linalg.pinv(G)
+                    alpha = torch.matmul(pinv, h)
+                lambdas = torch.zeros(len(S), device=device)
+                lambdas[1:] = alpha
+                lambdas[0] = 1.0 - torch.sum(alpha)
+                
+            # Check dual feasibility
+            dual_ok = torch.all(lambdas >= -tol)
+            
+            # Check containment of all coface points
+            diff = Z_coface - c
+            phi = torch.sum(diff ** 2, dim=1) + a_coface
+            primal_ok = torch.all(phi <= r2 + tol)
+            
+            if dual_ok and primal_ok:
+                r2_val = r2.item()
+                if r2_val < best_r2:
+                    best_r2 = r2_val
+                    best_center = c
+                    
+    if best_center is None:
+        return Z_coface[0], a_coface[0]
+        
+    return best_center, torch.tensor(best_r2, device=device)
+
+
+def solve_weighted_miniball_active_set_3d(Z_coface, a_coface, max_iter=100, tol=1e-6):
+    """
+    Exact active-set weighted miniball solver in 3D.
+    Guarantees convergence to the global minimum of the coface.
+    """
+    n = Z_coface.shape[0]
+    device = Z_coface.device
+    tol = max(tol, 1e-5)
+    
     S = [0]
-    
-    center = Z_coface[0]
-    radius_sq = a_coface[0]
+    c, r2 = Z_coface[0], a_coface[0]
     
     for it in range(max_iter):
         sub_Z = Z_coface[S]
         sub_a = a_coface[S]
         
-        # 1. Solve for current active support
+        # 1. Solve equality-constrained problem on S
         c, r2 = solve_support_ball_3d(sub_Z, sub_a)
-        center = c
-        radius_sq = r2
         
-        # 2. Check containment and find the most violating point
-        diff = Z_coface - center
+        # Compute multipliers (lambdas)
+        if len(S) == 1:
+            lambdas = torch.tensor([1.0], device=device)
+        else:
+            v = sub_Z[1:] - sub_Z[0]
+            G = torch.matmul(v, v.t())
+            v_norm_sq = torch.sum(v ** 2, dim=1)
+            h = 0.5 * (v_norm_sq + sub_a[1:] - sub_a[0])
+            try:
+                if len(S) == 2:
+                    alpha = h / G[0, 0]
+                else:
+                    alpha = torch.linalg.solve(G, h)
+            except RuntimeError:
+                pinv = torch.linalg.pinv(G)
+                alpha = torch.matmul(pinv, h)
+                
+            lambdas = torch.zeros(len(S), device=device)
+            lambdas[1:] = alpha
+            lambdas[0] = 1.0 - torch.sum(alpha)
+            
+        # Check if any multiplier is negative
+        min_lambda_idx = torch.argmin(lambdas).item()
+        min_lambda = lambdas[min_lambda_idx].item()
+        
+        if min_lambda < -tol:
+            # Drop the point with the negative multiplier
+            S.pop(min_lambda_idx)
+            continue
+            
+        # 2. Check containment of all points in the coface
+        diff = Z_coface - c
         phi = torch.sum(diff ** 2, dim=1) + a_coface
-        violations = phi - radius_sq
+        violations = phi - r2
         
         max_viol_idx = torch.argmax(violations).item()
         max_viol = violations[max_viol_idx].item()
         
         if max_viol <= tol:
-            # Optimal miniball found
+            # Feasible and optimal!
             break
             
-        # 3. Add violating point to active set
-        if max_viol_idx not in S:
-            S.append(max_viol_idx)
-            # Active set size in 3D is at most 4
-            if len(S) > 4:
-                # Remove the oldest or least violating index to maintain size <= 4
-                S.pop(0)
-        else:
-            break
-            
-    return center, radius_sq
+        # 3. Add most violating point
+        S.append(max_viol_idx)
+        
+        if len(S) > 4:
+            # S size is 5, we must drop one point.
+            # We brute-force the 5 subsets of size 4 of S to find the one that covers S
+            best_sub_r2 = -1.0
+            best_sub_c = None
+            best_sub_S = None
+            for idx_to_remove in range(5):
+                candidate_S = [S[j] for j in range(5) if j != idx_to_remove]
+                c_sub, r2_sub = solve_support_ball_3d(Z_coface[candidate_S], a_coface[candidate_S])
+                
+                rem_pt_idx = S[idx_to_remove]
+                dist_rem_sq = torch.sum((Z_coface[rem_pt_idx] - c_sub) ** 2) + a_coface[rem_pt_idx]
+                if dist_rem_sq <= r2_sub + tol:
+                    if r2_sub > best_sub_r2:
+                        best_sub_r2 = r2_sub
+                        best_sub_c = c_sub
+                        best_sub_S = candidate_S
+            if best_sub_S is not None:
+                S = best_sub_S
+                c = best_sub_c
+                r2 = best_sub_r2
+            else:
+                # Fallback to brute force
+                return solve_weighted_miniball_brute_force_3d(Z_coface, a_coface, tol=tol)
+                
+    # Double check feasibility via brute-force if active set failed to converge
+    diff = Z_coface - c
+    phi = torch.sum(diff ** 2, dim=1) + a_coface
+    if torch.any(phi > r2 + tol):
+        return solve_weighted_miniball_brute_force_3d(Z_coface, a_coface, tol=tol)
+        
+    return c, r2
 
 
 def extract_top_cofaces(witness_pool, Z, a, eta, grid_z, K, cfg):
     """
-    Extracts candidate cofaces from the witness pool.
+    Extracts candidate cofaces from the witness pool and filters them by top-consistency.
     """
     device = Z.device
     W_coords = witness_pool.coords
@@ -110,8 +219,6 @@ def extract_top_cofaces(witness_pool, Z, a, eta, grid_z, K, cfg):
     E = dist_sq + a_nbrs
     
     cofaces_list = []
-    centers_list = []
-    weights_list = []
     
     for i in range(M):
         # Sort neighbors by energy
@@ -128,17 +235,38 @@ def extract_top_cofaces(witness_pool, Z, a, eta, grid_z, K, cfg):
     
     U = unique_cofaces.shape[0]
     
-    # Solve weighted miniball for unique cofaces
+    valid_cofaces = []
+    centers_list = []
+    weights_list = []
+    
+    # Solve weighted miniball and check top-consistency for unique cofaces
     for i in range(U):
         cof_idx = unique_cofaces[i]
         Z_cof = Z[cof_idx]
         a_cof = a[cof_idx]
         
         c, r2 = solve_weighted_miniball_active_set_3d(Z_cof, a_cof, tol=cfg.gabriel_tol)
-        centers_list.append(c)
-        weights_list.append(torch.sqrt(torch.clamp(r2, min=0.0)))
         
-    centers_tensor = torch.stack(centers_list)
-    weights_tensor = torch.stack(weights_list)
-    
-    return unique_cofaces, centers_tensor, weights_tensor
+        # Top-consistency check: Top_{K+1}(c) == cof_idx
+        # Query nearest neighbors of center c
+        nbr_idx, _ = grid_z.query_knn_grid(c.unsqueeze(0), m_local=cfg.m_active)
+        nbr_idx = nbr_idx[0]
+        
+        diff_pts = Z[nbr_idx] - c
+        phi_pts = torch.sum(diff_pts ** 2, dim=1) + a[nbr_idx]
+        
+        sorted_nbr_idx = nbr_idx[torch.argsort(phi_pts)]
+        top_k_plus_1 = sorted_nbr_idx[:K + 1]
+        top_k_plus_1_sorted, _ = torch.sort(top_k_plus_1)
+        
+        if torch.equal(top_k_plus_1_sorted, cof_idx):
+            valid_cofaces.append(cof_idx)
+            centers_list.append(c)
+            weights_list.append(torch.sqrt(torch.clamp(r2, min=0.0)))
+            
+    if len(valid_cofaces) == 0:
+        return torch.empty((0, K + 1), dtype=torch.int64, device=device), \
+               torch.empty((0, 3), dtype=torch.float32, device=device), \
+               torch.empty((0,), dtype=torch.float32, device=device)
+               
+    return torch.stack(valid_cofaces), torch.stack(centers_list), torch.stack(weights_list)

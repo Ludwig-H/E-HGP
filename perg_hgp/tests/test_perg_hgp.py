@@ -11,6 +11,8 @@ from perg_hgp import (
     compute_rank_soft_dp,
     solve_weighted_miniball_active_set_3d
 )
+from perg_hgp.cofaces import solve_weighted_miniball_brute_force_3d, extract_top_cofaces
+from perg_hgp.gabriel import global_gabriel_grid_test
 
 class TestPERGHGP(unittest.TestCase):
     
@@ -61,16 +63,57 @@ class TestPERGHGP(unittest.TestCase):
         for k in range(Kmax + 1):
             self.assertAlmostEqual(torch.sum(b[k]).item(), 1.0, places=4)
             
-    def test_miniball_active_set_3d(self):
+    def test_miniball_vs_brute_force(self):
         device = 'cpu'
-        # 5 points in 3D
-        Z_cof = torch.randn((5, 3), device=device)
-        a_cof = torch.rand(5, device=device) * 0.1
+        np.random.seed(42)
+        torch.manual_seed(42)
         
-        center, r2 = solve_weighted_miniball_active_set_3d(Z_cof, a_cof)
+        # Generate 20 random trials
+        for trial in range(20):
+            # Size of coface between 4 and 8
+            n_pts = np.random.randint(4, 9)
+            Z_cof = torch.randn((n_pts, 3), device=device)
+            a_cof = torch.rand(n_pts, device=device) * 0.1
+            
+            c_as, r2_as = solve_weighted_miniball_active_set_3d(Z_cof, a_cof, tol=1e-6)
+            c_bf, r2_bf = solve_weighted_miniball_brute_force_3d(Z_cof, a_cof, tol=1e-6)
+            
+            # Compare center and radius squared
+            self.assertLess(torch.norm(c_as - c_bf).item(), 1e-4)
+            self.assertAlmostEqual(r2_as.item(), r2_bf.item(), places=4)
+            
+    def test_global_gabriel_vs_scan(self):
+        device = 'cpu'
+        np.random.seed(42)
+        torch.manual_seed(42)
         
-        self.assertEqual(center.shape, (3,))
-        self.assertTrue(r2.item() >= 0.0)
+        # Generate 50 points
+        X = torch.rand((50, 3), device=device)
+        a = torch.rand(50, device=device) * 0.05
+        grid_z = SpatialGrid3D(X, grid_resolution=8, device=device)
+        
+        # Generate a candidate coface (first 4 points)
+        cof = torch.tensor([0, 1, 2, 3], device=device)
+        cofaces = cof.unsqueeze(0)
+        
+        # Compute exact miniball of this coface
+        c, r2 = solve_weighted_miniball_active_set_3d(X[cof], a[cof], tol=1e-6)
+        centers = c.unsqueeze(0)
+        radii_sq = r2.unsqueeze(0)
+        
+        # Grid-based global Gabriel test
+        grid_passes = global_gabriel_grid_test(cofaces, X, a, centers, radii_sq, grid_z, tol=1e-6)
+        
+        # Brute-force scan of all points in the dataset
+        brute_pass = True
+        for j in range(50):
+            if j not in cof:
+                dist_sq = torch.sum((X[j] - c) ** 2) + a[j]
+                if dist_sq < r2 - 1e-6:
+                    brute_pass = False
+                    break
+                    
+        self.assertEqual(grid_passes[0].item(), brute_pass)
         
     def test_estimator_basic(self):
         # Test the end-to-end fit_predict on simple blobs

@@ -79,15 +79,60 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         print("[PERG-HGP] Building spatial grid on regularized sites...")
         grid_z = SpatialGrid3D(Z, grid_resolution=self.grid_resolution, device=self.device)
         
-        # 4. Initialize witnesses of rank 1
-        # Stream points as seeds
-        print("[PERG-HGP] Initializing witness pool...")
-        # Since N can be massive (30M), we subsample for the witness pool initialization to respect W1_budget
-        if N > self.W1_budget:
-            idx = torch.randperm(N, device=device)[:self.W1_budget]
-            W_coords = Z[idx].clone()
-        else:
-            W_coords = Z.clone()
+        # 4. Initialize witnesses of rank 1 by streaming all points
+        print("[PERG-HGP] Initializing witness pool by streaming all points...")
+        
+        # Accumulate best witnesses for each site in Z
+        # best_coords: (N, 3), best_energies: (N,)
+        best_coords = Z.clone()
+        best_energies = torch.full((N,), float('inf'), device=device)
+        
+        chunk_size = 50000
+        for start_idx in range(0, N, chunk_size):
+            end_idx = min(start_idx + chunk_size, N)
+            W_chunk = Z[start_idx:end_idx].clone()
+            
+            # Refine rank 1
+            for it in range(cfg.fixed_point_iters_per_temp):
+                nbr_indices, nbr_dists_sq = grid_z.query_knn_grid(W_chunk, m_local=1)
+                closest_idx = nbr_indices[:, 0]
+                W_chunk = (1 - cfg.gamma) * W_chunk + cfg.gamma * Z[closest_idx]
+                
+            # Compute final energy
+            nbr_indices, nbr_dists_sq = grid_z.query_knn_grid(W_chunk, m_local=1)
+            closest_idx = nbr_indices[:, 0]
+            # energy = dist_sq + a
+            energy = nbr_dists_sq[:, 0] + a[closest_idx]
+            
+            # Update best_coords and best_energies
+            closest_idx_cpu = closest_idx.cpu().numpy()
+            energy_cpu = energy.cpu().numpy()
+            W_chunk_cpu = W_chunk.cpu().numpy()
+            
+            best_coords_cpu = best_coords.cpu().numpy()
+            best_energies_cpu = best_energies.cpu().numpy()
+            
+            for i in range(end_idx - start_idx):
+                c_idx = closest_idx_cpu[i]
+                eng = energy_cpu[i]
+                if eng < best_energies_cpu[c_idx]:
+                    best_energies_cpu[c_idx] = eng
+                    best_coords_cpu[c_idx] = W_chunk_cpu[i]
+                    
+            best_coords = torch.from_numpy(best_coords_cpu).to(device)
+            best_energies = torch.from_numpy(best_energies_cpu).to(device)
+            
+        # Collect active witnesses
+        active_mask = best_energies < float('inf')
+        active_idx = torch.where(active_mask)[0]
+        
+        W_coords = best_coords[active_idx]
+        W_scores = best_energies[active_idx]
+        
+        # Keep top W1_budget
+        if W_coords.shape[0] > self.W1_budget:
+            top_idx = torch.argsort(W_scores)[:self.W1_budget]
+            W_coords = W_coords[top_idx]
             
         w_pool = WitnessPool(W_coords, rank=1)
         
@@ -204,8 +249,12 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         self.exactness_report_ = {
             "exactness_mode": cfg.exactness_mode,
             "model_exact_for_chosen_supports": (cfg.alpha == 0.0),
-            "accepted_cofaces_are_true_gabriel": (cfg.exactness_mode in ["global_gabriel_certified", "cut_certified"]),
-            "hgp_hierarchy_complete": (cfg.exactness_mode == "cut_certified"),
+            "accepted_cofaces_are_true_gabriel": (self.global_gabriel in ['all', 'selective'] and len(certified_idx) > 0),
+            "hgp_hierarchy_complete": (cfg.exactness_mode == "cut_certified" and 
+                                       not (len(W_coords) > cfg.max_witnesses_per_rank or 
+                                            cofaces.shape[0] > cfg.max_cofaces or 
+                                            num_facets > cfg.max_unique_facets or 
+                                            len(edge_u) > cfg.max_dual_edges)),
             "candidate_cofaces": cofaces.shape[0],
             "certified_cofaces": len(certified_idx),
             "num_facets": num_facets,

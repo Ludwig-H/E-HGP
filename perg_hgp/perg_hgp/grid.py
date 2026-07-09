@@ -177,12 +177,9 @@ class SpatialGrid3D:
                     candidates = torch.cat(candidates_list)
                 radius += 1
                 
-            if len(candidates) == 0:
-                # Fallback to all points sorted by distance (on a subset if too large)
-                if self.n_points <= 5000:
-                    candidates = torch.arange(self.n_points, device=self.device)
-                else:
-                    candidates = torch.randperm(self.n_points, device=self.device)[:5000]
+            if len(candidates) < m_local:
+                # Deterministic fallback to all points
+                candidates = torch.arange(self.n_points, device=self.device)
                     
             # Compute distance to query
             diff = self.X[candidates] - q_pt

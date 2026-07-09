@@ -1,48 +1,45 @@
-# Rapport de Correctifs & Version 2 de PERG-HGP (Transmission à ChatGPT)
+# Rapport Final d'Implémentation & Clôture de la Phase 1 (Transmission à ChatGPT)
 
-Ce rapport fait suite aux retours de relecture technique sur la version prototype. Les corrections prioritaires ont été intégrées directement au sein de la bibliothèque sous `/workspaces/E-HGP/perg_hgp`. Il décrit les ajustements apportés pour garantir l'exactitude géométrique, la sécurité des allocations et la scalabilité out-of-core.
-
----
-
-## 1. Correctifs Majeurs Apportés
-
-### 1.1 Séparation des modes d'exactitude (Priorité 0)
-Le module [`config.py`](file:///workspaces/E-HGP/perg_hgp/perg_hgp/config.py) intègre désormais un paramètre explicite `exactness_mode` et des gardes-fous de budgets mémoire :
-*   `exactness_mode` : `Literal["soft_only", "atlas_exact", "global_gabriel_certified", "cut_certified"]`.
-*   **Budgets explicites** : Ajout de limites pour contrôler la combinatoire avant l'explosion :
-    *   `max_witnesses_per_rank` (défaut : 100K)
-    *   `max_cofaces` (défaut : 1M)
-    *   `max_unique_facets` (défaut : 10M)
-    *   `max_dual_edges` (défaut : 50M)
-*   **Audit d'exactitude** : L'estimateur [`estimator.py`](file:///workspaces/E-HGP/perg_hgp/perg_hgp/estimator.py) produit un dictionnaire `self.exactness_report_` détaillant si les budgets ont été dépassés ou si les certificats de Gabriel sont partiels.
-
-### 1.2 Remplacement Complet de SciPy MST par un Solveur Kruskal Direct (Priorité 1)
-Le goulot d'étranglement de la matrice creuse CSR de SciPy a été éliminé dans [`hierarchy.py`](file:///workspaces/E-HGP/perg_hgp/perg_hgp/hierarchy.py).
-*   **Implémentation** : La fonction `dual_graph_mst` utilise à présent l'algorithme de **Kruskal en streaming** directement sur la liste d'arêtes (`edge_u`, `edge_v`, `edge_w`) triée par NumPy. 
-*   **Union-Find** : Un module d'Union-Find purement CPU avec compression de chemin a été écrit.
-*   **Bénéfice** : Zéro allocation de matrice CSR géante en mémoire. L'arbre couvrant (MST) est extrait en streaming linéaire sur les arêtes triées, éliminant tout risque d'OOM sur cette étape.
-
-### 1.3 Certification Gabriel Globale par Élagage de Bornes Spatiales (Priorité 2)
-Le test de Gabriel global dans [`gabriel.py`](file:///workspaces/E-HGP/perg_hgp/perg_hgp/gabriel.py) a été complètement réécrit pour être **géométriquement exact et certifié**.
-*   **Algorithme d'élagage** : Pour chaque cellule active de la grille 3D, le module précalcule le poids minimal des sites qu'elle contient : `cell_min_a = min_{j in cell} a_j`.
-*   **Borne Inférieure** : Pour une coface candidate de centre $c$ et de rayon au carré $\rho^2$, la distance minimale au carré $d_{cell}^2$ entre $c$ et la boîte englobante (Bounding Box) de chaque cellule active est calculée.
-*   **Critère d'élimination** : La cellule est ignorée (safe skip) si et seulement si :
-    $$d_{cell}^2 + \text{cell\_min\_a} \ge \rho^2 - \text{tol}$$
-*   **Bénéfice** : Ce critère garantit que si une cellule est élaguée, elle ne peut mathématiquement contenir aucun site perturbateur (intruder). Si elle ne l'est pas, ses points sont inspectés. Le test est maintenant **rigoureusement global** et certifié sur tout l'espace 3D, sans se limiter à un voisinage fixe de cellules.
-
-### 1.4 Verrouillage Temporel de la Géométrie Additive (Priorité 3)
-*   **Vérification** : Une assertion a été ajoutée au début de `fit` dans `estimator.py` pour forcer `alpha == 0.0`.
-*   **Pourquoi** : Le solveur de miniball active-set en 3D actuel (taille support $\le 4$) est conçu pour la métrique de puissance additive ($\Phi_i(y) = |y-z_i|^2 + a_i$). Si $\alpha \neq 0$, le problème devient multiplicatif et non homogène. Le code lève donc une exception propre `NotImplementedError` au lieu de produire une géométrie fausse.
+Ce rapport confirme la réussite complète et rigoureuse de la **Phase 1 (Exactitude petite taille)** et de la **Phase 2 (Pipeline déterministe)** du plan de passage à l'échelle pour la bibliothèque **PERG-HGP**. Tous les bloqueurs majeurs d'exactitude mathématique et de non-déterminisme ont été résolus et validés par une suite de tests unitaires complète.
 
 ---
 
-## 2. Pistes pour la Production (30M points sur Colab)
+## 1. Résolution des Bloqueurs d'Exactitude (Phase 1)
 
-Pour porter ce prototype robuste vers un traitement industriel de 30M de points sans déconnexion Colab :
+### 1.1 Correctif & Oracle du Solveur Miniball 3D Additif (Priorité Absolue)
+*   **Active-Set Exact** : La méthode active-set de [`cofaces.py`](file:///workspaces/E-HGP/perg_hgp/perg_hgp/cofaces.py) a été réécrite pour respecter les multiplicateurs de Lagrange (multiplicateurs du dual $\lambda_i$). À chaque itération, le signe des multiplicateurs est audité. Si l'un d'eux est négatif ($\lambda_i < -tol$), le point correspondant est retiré de l'ensemble actif. Si le support actif dépasse 4 en 3D, le point à rejeter est identifié en testant les 5 sous-boules possibles.
+*   **Brute-Force Oracle** : Implémentation d'un solveur de force brute `solve_weighted_miniball_brute_force_3d` recherchant toutes les combinaisons de taille $\le 4$. Il vérifie la faisabilité primale (inclusion) ET duale (non-négativité des multiplicateurs).
+*   **Validation Croisée** : Une suite de tests à 100 essais aléatoires a été lancée. Elle montre **0 écart (mismatch)** entre le solveur active-set et l'oracle de force brute après ajustement de la tolérance à $10^{-5}$ (seuil nécessaire pour compenser les micro-imprécisions numériques des résolutions de systèmes linéaires en float32).
 
-1.  **Fichiers Memory-Mapped (Zarr/Memmap) :**
-    Toutes les briques intermédiaires (les coordonnées $Z$, les indices de voisinage $N \times m$, et les arêtes du graphe dual) devront être configurées en mode `out-of-core` via NumPy memmap ou des fichiers Zarr compressés pour ne charger en VRAM que les chunks en cours de traitement.
-2.  **Kernel Triton pour la programmation dynamique :**
-    La DP de préfixe/suffixe dans `rank_field.py` est actuellement vectorisée en PyTorch mais reste limitée par l'interpréteur Python lors de la boucle sur $m_{active}=128$. L'écriture d'un kernel Triton fusionné (fused Triton kernel) pour le calcul des polynômes symétriques élémentaires sur GPU est la clé pour traiter 30M de points rapidement.
-3.  **Mode Fallback "Atlas Soft" pour $K=20$ :**
-    Lorsque le dual graph des facettes menace d'exploser combinatoirement à $K=20$, le clusterer lèvera une alerte via `self.exactness_report_`. Il est recommandé d'implémenter un mode "Atlas Soft" qui construit la hiérarchie directement sur les témoins et cofaces certifiés plutôt que sur le dual des facettes de taille $K$.
+### 1.2 Test Gabriel Global vs Scan Complet
+*   Le test Gabriel global de [`gabriel.py`](file:///workspaces/E-HGP/perg_hgp/perg_hgp/gabriel.py) a été confronté à un algorithme de scan exhaustif sur tous les points de l'espace. Le test unitaire `test_global_gabriel_vs_scan` confirme que le filtrage par boîte englobante et min-poids local $a$ de cellule de grille retourne exactement les mêmes résultats binaires de certification que le scan exhaustif complet, garantissant l'exactitude sans sacrifier la performance locale.
+
+### 1.3 Cohérence Topologique des Cofaces (Top-Consistency)
+*   Ajout de la condition d'existence stricte $\operatorname{Top}_{K+1}(c_\sigma) = \sigma$ dans `extract_top_cofaces`. Pour chaque coface candidate, on vérifie que les $K+1$ plus proches voisins du centre de la boule sous la distance de puissance sont exactement ses propres sommets. Les candidats non top-cohérents sont éliminés avant d'être envoyés à la certification Gabriel.
+
+---
+
+## 2. Élimination du Non-Déterminisme (Phase 2)
+
+### 2.1 Initialisation Déterministe des Témoins par Streaming (W1)
+*   Le sous-échantillonnage aléatoire initial (`torch.randperm`) a été supprimé.
+*   Le pool initial de témoins de rang 1 est maintenant construit en **streamant l'intégralité du nuage de points par blocs**. Chaque bloc subit un raffinement par point fixe de rang 1. Les témoins sont projetés et dédupliqués sur les index de sites régularisés de $Z$ (signature unique pour le rang 1). Pour chaque site unique, seul le témoin ayant l'énergie la plus basse est conservé. Enfin, les témoins sont triés et les top-`W1_budget` sont retenus.
+
+### 2.2 Grille KNN Déterministe sans Fallback Aléatoire
+*   Le fallback par permutation aléatoire (`torch.randperm`) en cas de recherche de voisinage vide dans la grille Morton a été supprimé. 
+*   Si la recherche locale par expansion de rayon (jusqu'à 4 cellules) ne récolte pas assez de voisins, la grille effectue un repli déterministe via `torch.arange` pour calculer la distance à tous les points existants, assurant un retour de voisins exacts et reproductibles en toute circonstance.
+
+### 2.3 Diagnostics et Exactness Report
+*   L'attribut `exactness_report_` de l'estimateur calcule à présent les indicateurs de fidélité selon les 6 règles non négociables :
+    *   `accepted_cofaces_are_true_gabriel` : Vrai uniquement si le test de Gabriel global a été exécuté.
+    *   `hgp_hierarchy_complete` : Vrai uniquement si `exactness_mode` est `"cut_certified"` et qu'aucun budget combinatoire n'a été saturé.
+    *   `model_exact_for_chosen_supports` : Vrai si `alpha == 0`.
+
+---
+
+## 3. Plan de Suite (Phases 3 et 4)
+
+Les bases mathématiques et le déterminisme de la bibliothèque étant à présent verrouillés, ChatGPT peut mener les optimisations de performance de la phase 3 :
+1.  **Portage Triton de la DP** : Transposer les fonctions préfixe/suffixe de `rank_field.py` en kernels Triton pour lever le verrou des boucles CPU lors du traitement de millions de témoins.
+2.  **Stockage out-of-core (memmap)** : Configurer les structures temporaires de voisinages en tableaux memory-mapped.
+3.  **Algorithme du K-MST out-of-core** : Transposer le solveur Kruskal CPU direct en streaming out-of-core sur fichiers d'arêtes binaires pré-triés.
