@@ -39,94 +39,93 @@ def local_gabriel_filter(cofaces, Z, a, centers, radii_sq, nbr_indices, tol=1e-6
 
 def global_gabriel_grid_test(cofaces, Z, a, centers, radii_sq, grid_z, tol=1e-6):
     """
-    Exact global Gabriel test using the spatial grid Z.
-    Query grid cells intersecting the ball to certify that no site is an intruder.
+    Certified global Gabriel test using cell-bounding box pruning on active cells.
+    Guaranteeing that no site in the entire space is an intruder.
     """
     device = Z.device
     U = cofaces.shape[0]
     passes = torch.ones(U, dtype=torch.bool, device=device)
     
-    # Grid coordinates decoding/encoding
+    # 1. Precompute cell_min_a for all active cells
+    cell_min_a = {}
+    for cell_key in grid_z.cell_key_to_idx.keys():
+        p_indices = grid_z.get_points_in_cell(cell_key)
+        cell_min_a[cell_key] = torch.min(a[p_indices]).item()
+        
+    cell_size = (grid_z.scale / grid_z.grid_resolution).item()
+    bbox_min_cpu = grid_z.bbox_min.cpu().numpy()
+    
+    # Decode coordinates of all active cell keys
+    active_keys = list(grid_z.cell_key_to_idx.keys())
     bits_resolution = int(np.log2(grid_z.grid_resolution))
     
-    def decode_cell_key(key):
-        x = torch.zeros_like(key)
-        y = torch.zeros_like(key)
-        z = torch.zeros_like(key)
-        for b in range(bits_resolution):
+    def decode_cell_key_scalar(key, bits):
+        x = 0
+        y = 0
+        z = 0
+        for b in range(bits):
             x |= ((key >> (3 * b)) & 1) << b
             y |= ((key >> (3 * b + 1)) & 1) << b
             z |= ((key >> (3 * b + 2)) & 1) << b
         return x, y, z
-    
-    def encode_cell_coords(x, y, z):
-        key = torch.zeros_like(x)
-        for b in range(bits_resolution):
-            key |= ((x >> b) & 1) << (3 * b)
-            key |= ((y >> b) & 1) << (3 * b + 1)
-            key |= ((z >> b) & 1) << (3 * b + 2)
-        return key
-
+        
+    # Predecode all active cell bboxes
+    active_cells_info = []
+    for cell_key in active_keys:
+        nx, ny, nz = decode_cell_key_scalar(cell_key, bits_resolution)
+        xmin = bbox_min_cpu[0] + nx * cell_size
+        xmax = xmin + cell_size
+        ymin = bbox_min_cpu[1] + ny * cell_size
+        ymax = ymin + cell_size
+        zmin = bbox_min_cpu[2] + nz * cell_size
+        zmax = zmin + cell_size
+        
+        active_cells_info.append({
+            'key': cell_key,
+            'xmin': xmin, 'xmax': xmax,
+            'ymin': ymin, 'ymax': ymax,
+            'zmin': zmin, 'zmax': zmax,
+            'min_a': cell_min_a[cell_key]
+        })
+        
     for i in range(U):
         cof = cofaces[i]
         c = centers[i]
-        r2 = radii_sq[i]
-        r = torch.sqrt(torch.clamp(r2, min=0.0))
+        r2 = radii_sq[i].item()
+        c_cpu = c.cpu().numpy()
         
-        # 1. Normalize center
-        c_norm = (c - grid_z.bbox_min) / grid_z.scale
-        
-        # 2. Get cell coordinate of the center
-        from .grid import morton3D_encode_pytorch
-        c_morton = morton3D_encode_pytorch(c_norm.unsqueeze(0), bits_per_axis=21)
-        shift_bits = (21 - bits_resolution) * 3
-        c_cell_key = c_morton >> shift_bits
-        
-        cx, cy, cz = decode_cell_key(c_cell_key)
-        cx, cy, cz = cx.item(), cy.item(), cz.item()
-        
-        # 3. Determine grid search radius (r in grid units)
-        cell_size = grid_z.scale / grid_z.grid_resolution
-        search_radius_cells = int(np.ceil(r.item() / cell_size)) + 1
-        
-        # 4. Search all cell keys in bounding box
         intruder_found = False
         
-        for dx in range(-search_radius_cells, search_radius_cells + 1):
-            nx = cx + dx
-            if nx < 0 or nx >= grid_z.grid_resolution: continue
-            for dy in range(-search_radius_cells, search_radius_cells + 1):
-                ny = cy + dy
-                if ny < 0 or ny >= grid_z.grid_resolution: continue
-                for dz in range(-search_radius_cells, search_radius_cells + 1):
-                    nz = cz + dz
-                    if nz < 0 or nz >= grid_z.grid_resolution: continue
-                    
-                    cell_key = encode_cell_coords(torch.tensor(nx, device=device), 
-                                                  torch.tensor(ny, device=device), 
-                                                  torch.tensor(nz, device=device)).item()
-                                                  
-                    cell_pts_idx = grid_z.get_points_in_cell(cell_key)
-                    if len(cell_pts_idx) == 0:
-                        continue
-                        
-                    # Filter out coface vertices
-                    mask = torch.ones(cell_pts_idx.shape[0], dtype=torch.bool, device=device)
-                    for val in cof:
-                        mask &= (cell_pts_idx != val)
-                    check_pts = cell_pts_idx[mask]
-                    
-                    if len(check_pts) == 0:
-                        continue
-                        
-                    # Compute power distances
-                    diff = Z[check_pts] - c
-                    phi = torch.sum(diff ** 2, dim=1) + a[check_pts]
-                    
-                    if torch.any(phi < r2 - tol):
-                        intruder_found = True
-                        break
-            if intruder_found:
+        for cell in active_cells_info:
+            # Distance from c to cell bounding box
+            dx = max(0.0, cell['xmin'] - c_cpu[0], c_cpu[0] - cell['xmax'])
+            dy = max(0.0, cell['ymin'] - c_cpu[1], c_cpu[1] - cell['ymax'])
+            dz = max(0.0, cell['zmin'] - c_cpu[2], c_cpu[2] - cell['zmax'])
+            dist_sq = dx**2 + dy**2 + dz**2
+            
+            # Pruning check
+            if dist_sq + cell['min_a'] >= r2 - tol:
+                continue
+                
+            # Otherwise, we must check points in the cell
+            cell_pts_idx = grid_z.get_points_in_cell(cell['key'])
+            if len(cell_pts_idx) == 0:
+                continue
+                
+            # Filter out coface vertices
+            mask = torch.ones(cell_pts_idx.shape[0], dtype=torch.bool, device=device)
+            for val in cof:
+                mask &= (cell_pts_idx != val)
+            check_pts = cell_pts_idx[mask]
+            
+            if len(check_pts) == 0:
+                continue
+                
+            diff = Z[check_pts] - c
+            phi = torch.sum(diff ** 2, dim=1) + a[check_pts]
+            
+            if torch.any(phi < r2 - tol):
+                intruder_found = True
                 break
                 
         if intruder_found:

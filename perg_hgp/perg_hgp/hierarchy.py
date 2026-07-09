@@ -1,66 +1,62 @@
 import torch
 import numpy as np
-from scipy.sparse import csr_matrix, coo_matrix
-from scipy.sparse.csgraph import minimum_spanning_tree
+from scipy.sparse import coo_matrix
 
 def dual_graph_mst(edge_u, edge_v, edge_w, edge_coface, num_facets):
     """
     Computes the MST on the dual graph of facets.
-    Uses SciPy's highly optimized sparse minimum spanning tree algorithm.
+    Uses Kruskal's algorithm on edge list to avoid SciPy sparse matrix overhead.
     """
-    # Move to CPU for SciPy
+    # Move to CPU
     u = edge_u.cpu().numpy()
     v = edge_v.cpu().numpy()
     w = edge_w.cpu().numpy()
     cof = edge_coface.cpu().numpy()
     
-    # Construct sparse matrix
-    # Since MST is undirected, we insert both directions.
-    # SciPy's MST expects a directed matrix (typically upper triangular or symmetric),
-    # and returns a directed MST.
-    row = np.concatenate([u, v])
-    col = np.concatenate([v, u])
-    data = np.concatenate([w, w])
+    # Sort edges by weight ascending
+    order = np.argsort(w)
+    u_sorted = u[order]
+    v_sorted = v[order]
+    w_sorted = w[order]
+    cof_sorted = cof[order]
     
-    # Store coface index mapping
-    cof_mapped = np.concatenate([cof, cof])
+    # Union-Find representing the merging components of facets
+    parent = np.arange(num_facets, dtype=np.int32)
     
-    # Remove duplicate edges keeping the minimum weight
-    # We do this by sorting by weight and building the CSR matrix
-    order = np.argsort(data)
-    row_s = row[order]
-    col_s = col[order]
-    data_s = data[order]
-    cof_s = cof_mapped[order]
-    
-    # Build CSR to deduplicate (CSR construction will keep only one edge if duplicates are resolved,
-    # but to be safe we can use a dict or simple coo construction)
-    # Actually, SciPy's minimum_spanning_tree works fine with duplicate entries in coo
-    mat = coo_matrix((data_s, (row_s, col_s)), shape=(num_facets, num_facets))
-    
-    # Compute MST
-    mst_mat = minimum_spanning_tree(mat.tocsr())
-    
-    # Extract MST edges
-    mst_coo = mst_mat.tocoo()
-    mst_u = mst_coo.row
-    mst_v = mst_coo.col
-    mst_w = mst_coo.data
-    
-    # Map back to cofaces
-    # Find which coface produced each MST edge
-    # We can do this by matching (u, v) pairs
-    # Create unique keys
-    edge_to_cof = {}
-    for i in range(len(row_s)):
-        edge_to_cof[(row_s[i], col_s[i])] = cof_s[i]
-        edge_to_cof[(col_s[i], row_s[i])] = cof_s[i]
+    def find(i):
+        path = []
+        while parent[i] != i:
+            path.append(i)
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        for node in path:
+            parent[node] = i
+        return i
         
-    mst_cof = np.zeros(len(mst_u), dtype=np.int32)
-    for i in range(len(mst_u)):
-        mst_cof[i] = edge_to_cof[(mst_u[i], mst_v[i])]
-        
-    return mst_u, mst_v, mst_w, mst_cof
+    mst_u = []
+    mst_v = []
+    mst_w = []
+    mst_cof = []
+    
+    num_edges_found = 0
+    for i in range(len(w_sorted)):
+        ru = find(u_sorted[i])
+        rv = find(v_sorted[i])
+        if ru != rv:
+            parent[rv] = ru
+            mst_u.append(u_sorted[i])
+            mst_v.append(v_sorted[i])
+            mst_w.append(w_sorted[i])
+            mst_cof.append(cof_sorted[i])
+            num_edges_found += 1
+            if num_edges_found == num_facets - 1:
+                break
+                
+    return (np.array(mst_u, dtype=np.int32), 
+            np.array(mst_v, dtype=np.int32), 
+            np.array(mst_w, dtype=np.float32), 
+            np.array(mst_cof, dtype=np.int32))
+
 
 
 def condense_tree(facet_birth_weights, u_mst, v_mst, w_mst, min_cluster_size):

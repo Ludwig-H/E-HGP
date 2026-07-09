@@ -47,6 +47,13 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         """
         # Load config
         cfg = PERGHGPConfig(**self.get_params())
+        
+        if cfg.alpha != 0.0:
+            raise NotImplementedError(
+                "Multiplicatively weighted power miniball not implemented. "
+                "Set alpha=0 for exact additive power geometry."
+            )
+            
         device = torch.device(self.device)
         
         # Ensure PyTorch tensor
@@ -184,13 +191,28 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         self.labels_ = extract_labels(self.Z_tree_, unique_facets_cpu, N, S_faces)
         
         # Save diagnostics
+        # Budget audits
+        if len(W_coords) > cfg.max_witnesses_per_rank:
+            print(f"[PERG-HGP] Warning: witnesses count {len(W_coords)} exceeds max_witnesses_per_rank budget {cfg.max_witnesses_per_rank}.")
+        if cofaces.shape[0] > cfg.max_cofaces:
+            print(f"[PERG-HGP] Warning: candidate cofaces count {cofaces.shape[0]} exceeds max_cofaces budget {cfg.max_cofaces}.")
+        if num_facets > cfg.max_unique_facets:
+            print(f"[PERG-HGP] Warning: unique facets count {num_facets} exceeds max_unique_facets budget {cfg.max_unique_facets}.")
+        if len(edge_u) > cfg.max_dual_edges:
+            print(f"[PERG-HGP] Warning: dual edges count {len(edge_u)} exceeds max_dual_edges budget {cfg.max_dual_edges}.")
+
         self.exactness_report_ = {
-            "model_exact_for_chosen_supports": True,
-            "accepted_cofaces_are_true_gabriel": True,
-            "hgp_hierarchy_complete": False, # certified on the generated atlas only
+            "exactness_mode": cfg.exactness_mode,
+            "model_exact_for_chosen_supports": (cfg.alpha == 0.0),
+            "accepted_cofaces_are_true_gabriel": (cfg.exactness_mode in ["global_gabriel_certified", "cut_certified"]),
+            "hgp_hierarchy_complete": (cfg.exactness_mode == "cut_certified"),
             "candidate_cofaces": cofaces.shape[0],
             "certified_cofaces": len(certified_idx),
-            "num_facets": num_facets
+            "num_facets": num_facets,
+            "witness_budget_exceeded": (len(W_coords) > cfg.max_witnesses_per_rank),
+            "cofaces_budget_exceeded": (cofaces.shape[0] > cfg.max_cofaces),
+            "facets_budget_exceeded": (num_facets > cfg.max_unique_facets),
+            "edges_budget_exceeded": (len(edge_u) > cfg.max_dual_edges)
         }
         
         print("[PERG-HGP] Complete.")

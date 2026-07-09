@@ -12,6 +12,15 @@ class PERGHGPConfig:
             self.K_rho = max(32, 3 * self.K)
         self.alpha = kwargs.get('alpha', 0.0)
         
+        # Exactness Mode
+        self.exactness_mode = kwargs.get('exactness_mode', 'atlas_exact') # 'soft_only', 'atlas_exact', 'global_gabriel_certified', 'cut_certified'
+        
+        # Budgets
+        self.max_witnesses_per_rank = kwargs.get('max_witnesses_per_rank', 100000)
+        self.max_cofaces = kwargs.get('max_cofaces', 1000000)
+        self.max_unique_facets = kwargs.get('max_unique_facets', 10000000)
+        self.max_dual_edges = kwargs.get('max_dual_edges', 50000000)
+        
         # Grid parameters
         self.m_local = kwargs.get('m_local', 128)
         self.grid_resolution = kwargs.get('grid_resolution', 64)
