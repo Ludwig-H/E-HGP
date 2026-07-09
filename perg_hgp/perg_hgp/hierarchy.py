@@ -52,7 +52,7 @@ def dual_graph_mst(edge_u, edge_v, edge_w, edge_coface, num_facets):
         packed = (w_int << 32) | edge_idx
         
         # 4. Find the cheapest edge for each component using scatter_reduce
-        cheapest = torch.full((num_facets,), (1 << 62) - 1, dtype=torch.int64, device=device)
+        cheapest = torch.full((num_facets,), torch.iinfo(torch.int64).max, dtype=torch.int64, device=device)
         
         active_idx = torch.where(active_edges_mask)[0]
         if active_idx.shape[0] == 0:
@@ -62,7 +62,7 @@ def dual_graph_mst(edge_u, edge_v, edge_w, edge_coface, num_facets):
         cheapest.scatter_reduce_(0, rv[active_idx], packed[active_idx], 'amin', include_self=True)
         
         # 5. Add cheapest edges to the MST and merge components
-        valid_mask = cheapest < ((1 << 62) - 1)
+        valid_mask = cheapest < torch.iinfo(torch.int64).max
         valid_roots = torch.where(valid_mask)[0]
         
         if valid_roots.shape[0] == 0:

@@ -96,7 +96,19 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             a = checkpoint_sites['a']
         else:
             print("[PERG-HGP] Solving local Gibbs and computing regularized sites...")
-            nbr_indices, nbr_dists_sq = grid.query_knn_grid(X_tensor, m_local=self.m_local)
+            # Query KNN in memory-safe chunks to prevent VRAM overflow
+            chunk_size = 500000
+            nbr_indices_list = []
+            nbr_dists_list = []
+            for start_idx in range(0, N, chunk_size):
+                end_idx = min(start_idx + chunk_size, N)
+                indices_chunk, dists_chunk = grid.query_knn_grid(X_tensor[start_idx:end_idx], m_local=self.m_local)
+                # Move to CPU immediately to keep VRAM bounded
+                nbr_indices_list.append(indices_chunk.cpu())
+                nbr_dists_list.append(dists_chunk.cpu())
+            nbr_indices = torch.cat(nbr_indices_list, dim=0)
+            nbr_dists_sq = torch.cat(nbr_dists_list, dim=0)
+            
             Z, a, eta = compute_regularized_sites(X_tensor, nbr_indices, nbr_dists_sq, entropy_target=cfg.K_rho)
             if sites_path:
                 torch.save({'Z': Z, 'a': a}, sites_path)
@@ -161,9 +173,9 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             
             total_queries = 0
             total_fallbacks = 0
-            if 'grid_x' in locals() and grid_x is not None:
-                total_queries += grid_x.total_queries_
-                total_fallbacks += grid_x.total_fallbacks_
+            if 'grid' in locals() and grid is not None:
+                total_queries += grid.total_queries_
+                total_fallbacks += grid.total_fallbacks_
             if 'grid_z' in locals() and grid_z is not None:
                 total_queries += grid_z.total_queries_
                 total_fallbacks += grid_z.total_fallbacks_
@@ -466,9 +478,9 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             
         total_queries = 0
         total_fallbacks = 0
-        if 'grid_x' in locals() and grid_x is not None:
-            total_queries += grid_x.total_queries_
-            total_fallbacks += grid_x.total_fallbacks_
+        if 'grid' in locals() and grid is not None:
+            total_queries += grid.total_queries_
+            total_fallbacks += grid.total_fallbacks_
         if 'grid_z' in locals() and grid_z is not None:
             total_queries += grid_z.total_queries_
             total_fallbacks += grid_z.total_fallbacks_

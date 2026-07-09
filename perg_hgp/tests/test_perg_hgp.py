@@ -353,10 +353,10 @@ class TestPERGHGP(unittest.TestCase):
         edge_u = torch.cat([edge_u, line_u])
         edge_v = torch.cat([edge_v, line_v])
         
-        num_edges = edge_u.shape[0]
-        # Assign unique weights to make MST unique
-        edge_w = torch.rand(num_edges, dtype=torch.float32, device=device)
-        edge_coface = torch.arange(num_edges, device=device)
+        actual_num_edges = edge_u.shape[0]
+        # Assign unique weights to make MST unique (multiplied by 10.0 to stress-test large weights)
+        edge_w = torch.rand(actual_num_edges, dtype=torch.float32, device=device) * 10.0
+        edge_coface = torch.arange(actual_num_edges, device=device)
         
         # 1. Run Boruvka
         u_b, v_b, w_b, cof_b = dual_graph_mst(edge_u, edge_v, edge_w, edge_coface, num_facets)

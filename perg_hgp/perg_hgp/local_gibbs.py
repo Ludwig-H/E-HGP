@@ -53,7 +53,7 @@ def solve_local_gibbs_entropy(nbr_dists_sq, entropy_target, max_iter=32, tol=1e-
 
 def compute_regularized_sites(X, nbr_indices, nbr_dists_sq, entropy_target, shift_cost=True):
     """
-    Computes regularized sites (Z, a) from points X and neighbors.
+    Computes regularized sites (Z, a) from points X and neighbors in memory-safe chunks.
     X: shape (N, 3)
     nbr_indices: shape (N, m_local)
     nbr_dists_sq: shape (N, m_local)
@@ -61,26 +61,43 @@ def compute_regularized_sites(X, nbr_indices, nbr_dists_sq, entropy_target, shif
     device = X.device
     N, m = nbr_indices.shape
     
-    # Shift cost like UMAP if shift_cost is True: c_ij = max(0, d_ij - rho_i)^2
-    if shift_cost:
-        rho = torch.sqrt(nbr_dists_sq[:, 0:1]) # closest neighbor distance
-        dists = torch.sqrt(nbr_dists_sq)
-        cost = (torch.clamp(dists - rho, min=0.0)) ** 2
-    else:
-        cost = nbr_dists_sq
+    chunk_size = 500000
+    Z_list = []
+    a_list = []
+    eta_list = []
+    
+    for start in range(0, N, chunk_size):
+        end = min(start + chunk_size, N)
         
-    # Solve local Gibbs
-    Q, eta = solve_local_gibbs_entropy(cost, entropy_target)
-    
-    # Compute centers z_i = sum_j Q_ij X_nbr_j
-    # Indexing: X[nbr_indices] has shape (N, m, 3)
-    # Weights: Q[:, :, None] has shape (N, m, 1)
-    X_nbrs = X[nbr_indices]
-    Z = torch.sum(Q[:, :, None] * X_nbrs, dim=1)
-    
-    # Compute variances a_i = sum_j Q_ij ||X_nbr_j - z_i||^2
-    diff = X_nbrs - Z[:, None, :]
-    dist_to_center = torch.sum(diff ** 2, dim=2) # (N, m)
-    a = torch.sum(Q * dist_to_center, dim=1)
+        # Ensure neighbors and distances are on device for math operations
+        nbr_idx_c = nbr_indices[start:end].to(device)
+        nbr_dists_c = nbr_dists_sq[start:end].to(device)
+        
+        if shift_cost:
+            rho = torch.sqrt(nbr_dists_c[:, 0:1])
+            dists = torch.sqrt(nbr_dists_c)
+            cost_c = (torch.clamp(dists - rho, min=0.0)) ** 2
+        else:
+            cost_c = nbr_dists_c
+            
+        Q_c, eta_c = solve_local_gibbs_entropy(cost_c, entropy_target)
+        
+        # Gather neighbor coordinates on device
+        X_nbrs_c = X[nbr_idx_c] # (chunk_len, m, 3)
+        
+        Z_c = torch.sum(Q_c[:, :, None] * X_nbrs_c, dim=1)
+        
+        diff_c = X_nbrs_c - Z_c[:, None, :]
+        dist_to_center_c = torch.sum(diff_c ** 2, dim=2)
+        a_c = torch.sum(Q_c * dist_to_center_c, dim=1)
+        
+        # Accumulate results on CPU to save VRAM
+        Z_list.append(Z_c.cpu())
+        a_list.append(a_c.cpu())
+        eta_list.append(eta_c.cpu())
+        
+    Z = torch.cat(Z_list, dim=0).to(device)
+    a = torch.cat(a_list, dim=0).to(device)
+    eta = torch.cat(eta_list, dim=0).to(device)
     
     return Z, a, eta

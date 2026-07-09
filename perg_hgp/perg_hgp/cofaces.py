@@ -362,8 +362,8 @@ def extract_top_cofaces(witness_pool, Z, a, eta, grid_z, K, cfg):
         Z_cof = Z[cof_idx_chunk] # (chunk_len, K+1, 3)
         a_cof = a[cof_idx_chunk] # (chunk_len, K+1)
         
-        # Check if coface size is <= 4 to use batched solver, otherwise fallback
-        if K + 1 <= 4:
+        # Use batched solver for target ranks up to K=20, otherwise fallback
+        if K + 1 <= 21:
             centers_chunk, r2_chunk = solve_weighted_miniball_batched(Z_cof, a_cof, tol=cfg.gabriel_tol)
         else:
             # Fallback to sequential active-set solver
