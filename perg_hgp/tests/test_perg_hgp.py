@@ -324,8 +324,8 @@ class TestPERGHGP(unittest.TestCase):
         # 1. Run in-memory unique
         facet_ids_in_mem, unique_facets_in_mem = compute_facet_ids(cofaces, K=3, max_ram_facets=100000)
         
-        # 2. Run out-of-core unique (set threshold very low to force out-of-core)
-        facet_ids_ooc, unique_facets_ooc = compute_facet_ids(cofaces, K=3, max_ram_facets=10)
+        # 2. Run out-of-core unique (set threshold very low and chunk_size small to force multiple chunks)
+        facet_ids_ooc, unique_facets_ooc = compute_facet_ids(cofaces, K=3, max_ram_facets=10, chunk_size=10)
         
         # Verify identity
         np.testing.assert_array_equal(facet_ids_in_mem.cpu().numpy(), facet_ids_ooc.cpu().numpy())

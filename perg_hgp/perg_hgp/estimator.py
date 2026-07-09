@@ -159,6 +159,15 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             print("[PERG-HGP] Extracting final labels...")
             self.labels_ = extract_labels(self.Z_tree_, unique_facets_cpu, N, S_faces)
             
+            total_queries = 0
+            total_fallbacks = 0
+            if 'grid_x' in locals() and grid_x is not None:
+                total_queries += grid_x.total_queries_
+                total_fallbacks += grid_x.total_fallbacks_
+            if 'grid_z' in locals() and grid_z is not None:
+                total_queries += grid_z.total_queries_
+                total_fallbacks += grid_z.total_fallbacks_
+                
             self.exactness_report_ = {
                 "exactness_mode": cfg.exactness_mode,
                 "model_exact_for_chosen_supports": False,
@@ -170,7 +179,10 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                 "witness_budget_exceeded": False,
                 "cofaces_budget_exceeded": False,
                 "facets_budget_exceeded": False,
-                "edges_budget_exceeded": False
+                "edges_budget_exceeded": False,
+                "total_knn_queries": total_queries,
+                "total_fallback_queries": total_fallbacks,
+                "global_fallback_rate": total_fallbacks / max(1, total_queries)
             }
             print("[PERG-HGP] Complete.")
             return self
@@ -452,6 +464,15 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         if num_dual_edges > cfg.max_dual_edges:
             print(f"[PERG-HGP] Warning: dual edges count {num_dual_edges} exceeds budget {cfg.max_dual_edges}.")
             
+        total_queries = 0
+        total_fallbacks = 0
+        if 'grid_x' in locals() and grid_x is not None:
+            total_queries += grid_x.total_queries_
+            total_fallbacks += grid_x.total_fallbacks_
+        if 'grid_z' in locals() and grid_z is not None:
+            total_queries += grid_z.total_queries_
+            total_fallbacks += grid_z.total_fallbacks_
+            
         self.exactness_report_ = {
             "exactness_mode": cfg.exactness_mode,
             "model_exact_for_chosen_supports": (cfg.alpha == 0.0),
@@ -463,7 +484,10 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             "witness_budget_exceeded": (W_coords_len > cfg.max_witnesses_per_rank),
             "cofaces_budget_exceeded": (cof_len > cfg.max_cofaces),
             "facets_budget_exceeded": (num_facets > cfg.max_unique_facets),
-            "edges_budget_exceeded": (num_dual_edges > cfg.max_dual_edges)
+            "edges_budget_exceeded": (num_dual_edges > cfg.max_dual_edges),
+            "total_knn_queries": total_queries,
+            "total_fallback_queries": total_fallbacks,
+            "global_fallback_rate": total_fallbacks / max(1, total_queries)
         }
         
         print("[PERG-HGP] Complete.")

@@ -51,6 +51,8 @@ class SpatialGrid3D:
         self.fallback_count_ = 0
         self.fallback_rate_ = 0.0
         self.certified_rate_ = 1.0
+        self.total_queries_ = 0
+        self.total_fallbacks_ = 0
 
     def get_points_in_cell(self, cell_key):
         key_tensor = torch.tensor([cell_key], device=self.device, dtype=torch.int64)
@@ -91,7 +93,7 @@ class SpatialGrid3D:
         
         # We search cell neighborhoods progressively
         radius = 1
-        max_radius = 4
+        max_radius = 8
         
         # We accumulate candidates for each query
         cand_indices = torch.empty((M, 0), dtype=torch.int64, device=device)
@@ -281,4 +283,6 @@ class SpatialGrid3D:
                 nbr_indices[chunk_active] = chunk_nbrs_idx
                 nbr_dists_sq[chunk_active] = chunk_nbrs_dist
                 
+        self.total_queries_ += M
+        self.total_fallbacks_ += self.fallback_count_
         return nbr_indices, nbr_dists_sq

@@ -3,7 +3,7 @@ import tempfile
 import torch
 import numpy as np
 
-def compute_facet_ids(cofaces, K, max_ram_facets=2000000):
+def compute_facet_ids(cofaces, K, max_ram_facets=2000000, chunk_size=100000):
     """
     Computes unique IDs for each K-facet of the cofaces.
     If the total number of facets exceeds max_ram_facets, runs in out-of-core
@@ -48,29 +48,22 @@ def compute_facet_ids(cofaces, K, max_ram_facets=2000000):
         orig_idx_path = os.path.join(temp_dir, "orig_idx.bin")
         unique_path = os.path.join(temp_dir, "facets_unique.bin")
         
-        # 1. Generate and sort facets in chunks and write to raw memmap
+        # 1. Generate and sort facets in chunks and write to raw memmap in global layout
         facets_raw = np.memmap(facets_path, dtype=np.int32, mode='w+', shape=(total_facets, K))
         
-        chunk_size = 100000
         for start_u in range(0, U, chunk_size):
             end_u = min(start_u + chunk_size, U)
             
             cofaces_chunk = cofaces[start_u:end_u]
-            facets_list = []
             for r in range(K + 1):
                 mask = torch.ones(K + 1, dtype=torch.bool, device=device)
                 mask[r] = False
                 facet = cofaces_chunk[:, mask]
-                facets_list.append(facet)
+                facet_sorted, _ = torch.sort(facet, dim=1)
                 
-            facets_chunk = torch.cat(facets_list, dim=0) # ((K+1)*C, K)
-            facets_chunk_sorted, _ = torch.sort(facets_chunk, dim=1)
-            
-            # Write to raw memmap
-            start_f = start_u * (K + 1)
-            end_f = end_u * (K + 1)
-            facets_raw[start_f:end_f] = facets_chunk_sorted.cpu().numpy()
-            
+                # Write to the correct global layout position (r * U + u)
+                facets_raw[r * U + start_u : r * U + end_u] = facet_sorted.cpu().numpy()
+                
         facets_raw.flush()
         
         # Find maximum vertex index in cofaces to determine bucket ranges
@@ -97,19 +90,36 @@ def compute_facet_ids(cofaces, K, max_ram_facets=2000000):
         
         write_pointers = bucket_offsets.copy()
         
-        # Pass 2: Write facets to bucket sections
+        # Pass 2: Write facets to bucket sections (vectorized)
         for start_f in range(0, total_facets, chunk_size * (K + 1)):
             end_f = min(start_f + chunk_size * (K + 1), total_facets)
+            chunk_len = end_f - start_f
             chunk_facets = facets_raw[start_f:end_f]
             first_v = chunk_facets[:, 0]
             b_idx = np.minimum(first_v // bucket_size_v, B - 1)
             
-            for i in range(end_f - start_f):
-                b = b_idx[i]
+            # Sort the chunk elements by bucket index to write contiguously
+            sort_order = np.argsort(b_idx)
+            sorted_facets = chunk_facets[sort_order]
+            sorted_b_idx = b_idx[sort_order]
+            
+            # Find transitions in sorted bucket indices
+            diff = sorted_b_idx[1:] != sorted_b_idx[:-1]
+            transitions = np.where(diff)[0] + 1
+            starts = np.concatenate([[0], transitions])
+            ends = np.concatenate([transitions, [chunk_len]])
+            active_buckets = sorted_b_idx[starts]
+            
+            for idx_b in range(len(active_buckets)):
+                b = active_buckets[idx_b]
+                st = starts[idx_b]
+                en = ends[idx_b]
+                count = en - st
+                
                 ptr = write_pointers[b]
-                facets_bucketed[ptr] = chunk_facets[i]
-                orig_indices[ptr] = start_f + i
-                write_pointers[b] += 1
+                facets_bucketed[ptr : ptr + count] = sorted_facets[st:en]
+                orig_indices[ptr : ptr + count] = start_f + sort_order[st:en]
+                write_pointers[b] += count
                 
         facets_bucketed.flush()
         orig_indices.flush()
