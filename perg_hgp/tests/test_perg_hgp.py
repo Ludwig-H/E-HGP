@@ -277,5 +277,26 @@ class TestPERGHGP(unittest.TestCase):
         self.assertEqual(clusterer.exactness_report_['certified_cofaces'], 0)
         self.assertEqual(clusterer.exactness_report_['num_facets'], 0)
         
+    def test_out_of_core_facet_deduplication(self):
+        from perg_hgp.dual_graph import compute_facet_ids
+        device = 'cpu'
+        
+        # Generate dummy cofaces
+        np.random.seed(42)
+        cofaces_np = np.random.randint(0, 100, size=(100, 4))
+        # ensure unique rows
+        cofaces_np = np.unique(cofaces_np, axis=0)
+        cofaces = torch.from_numpy(cofaces_np).to(device)
+        
+        # 1. Run in-memory unique
+        facet_ids_in_mem, unique_facets_in_mem = compute_facet_ids(cofaces, K=3, max_ram_facets=100000)
+        
+        # 2. Run out-of-core unique (set threshold very low to force out-of-core)
+        facet_ids_ooc, unique_facets_ooc = compute_facet_ids(cofaces, K=3, max_ram_facets=10)
+        
+        # Verify identity
+        np.testing.assert_array_equal(facet_ids_in_mem.cpu().numpy(), facet_ids_ooc.cpu().numpy())
+        np.testing.assert_array_equal(unique_facets_in_mem.cpu().numpy(), unique_facets_ooc.cpu().numpy())
+        
 if __name__ == '__main__':
     unittest.main()
