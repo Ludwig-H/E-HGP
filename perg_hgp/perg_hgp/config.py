@@ -31,7 +31,9 @@ class PERGHGPConfig:
         self.W1_budget = kwargs.get('W1_budget', 3000000)
         self.budget_per_rank = kwargs.get('budget_per_rank', 2000000)
         self.beam_per_bucket = kwargs.get('beam_per_bucket', 4)
-        self.rank_eps_schedule = kwargs.get('rank_eps_schedule', [1.0, 0.5, 0.25, 0.125])
+        self.rank_eps_schedule = kwargs.get('rank_eps_schedule', (1.0, 0.5, 0.25, 0.125))
+        if isinstance(self.rank_eps_schedule, list):
+            self.rank_eps_schedule = tuple(self.rank_eps_schedule)
         self.gamma = kwargs.get('gamma', 0.8)
         self.fixed_point_iters_per_temp = kwargs.get('fixed_point_iters_per_temp', 4)
 

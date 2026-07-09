@@ -9,7 +9,8 @@ setup(
         "scipy>=1.7",
         "torch>=2.0",
         "pyyaml",
-        "tqdm"
+        "tqdm",
+        "scikit-learn>=1.0"
     ],
     description="Progressive Entropic Rank-Gabriel HGP for massive 3D point clouds",
     author="Louis Hauseux",

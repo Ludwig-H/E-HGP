@@ -62,6 +62,46 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         # Load config
         cfg = PERGHGPConfig(**self.get_params())
 
+        # Validate input shapes and values
+        if not isinstance(X, (np.ndarray, torch.Tensor)):
+            raise ValueError("Input X must be a numpy array or PyTorch tensor.")
+
+        N_in = X.shape[0]
+        if N_in <= 0:
+            raise ValueError(f"Input X must contain at least 1 point. Got N = {N_in}")
+
+        if len(X.shape) != 2 or X.shape[1] != 3:
+            raise ValueError(f"Input X must have shape (N, 3). Got {X.shape}")
+
+        if isinstance(X, np.ndarray):
+            if not np.isfinite(X).all():
+                raise ValueError("Input X contains non-finite values (NaN or Inf).")
+        else:
+            if not torch.isfinite(X).all():
+                raise ValueError("Input X contains non-finite values (NaN or Inf).")
+
+        # Validate hyperparameters
+        if self.K < 1 or self.K >= N_in:
+            raise ValueError(f"Hyperparameter K must satisfy 1 <= K < N. Got K = {self.K}, N = {N_in}")
+
+        if self.m_active < self.K + 1:
+            raise ValueError(f"m_active ({self.m_active}) must be >= K + 1 ({self.K + 1})")
+
+        if self.m_local < 1:
+            raise ValueError(f"m_local must be >= 1. Got {self.m_local}")
+
+        if self.grid_resolution < 1:
+            raise ValueError(f"grid_resolution must be >= 1. Got {self.grid_resolution}")
+
+        if not self.rank_eps_schedule or len(self.rank_eps_schedule) == 0:
+            raise ValueError("rank_eps_schedule must not be empty.")
+
+        if any(eps <= 0 for eps in self.rank_eps_schedule):
+            raise ValueError("rank_eps_schedule temperatures must be strictly positive.")
+
+        if self.max_ram_facets < 1:
+            raise ValueError(f"max_ram_facets must be >= 1. Got {self.max_ram_facets}")
+
         if cfg.alpha != 0.0:
             raise NotImplementedError(
                 "Multiplicatively weighted power miniball not implemented. "
@@ -133,15 +173,17 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         grid_z = SpatialGrid3D(Z, grid_resolution=self.grid_resolution, device=self.device)
 
         # Propagate configuration flags based on exactness_mode
+        self.local_gabriel_ = self.local_gabriel
+        self.global_gabriel_ = self.global_gabriel
         if cfg.exactness_mode == 'atlas_exact':
-            self.local_gabriel = True
-            self.global_gabriel = 'none'
+            self.local_gabriel_ = True
+            self.global_gabriel_ = 'none'
         elif cfg.exactness_mode == 'global_gabriel_certified':
-            self.local_gabriel = True
-            self.global_gabriel = 'selective'
+            self.local_gabriel_ = True
+            self.global_gabriel_ = 'selective'
         elif cfg.exactness_mode == 'cut_certified':
-            self.local_gabriel = True
-            self.global_gabriel = 'all'
+            self.local_gabriel_ = True
+            self.global_gabriel_ = 'all'
 
         if cfg.exactness_mode == 'soft_only':
             print("[PERG-HGP] Running in soft_only mode (no cofaces, direct sites MST)...")
@@ -208,6 +250,18 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                 "total_fallback_queries": total_fallbacks,
                 "global_fallback_rate": total_fallbacks / max(1, total_queries)
             }
+            # Expose artifact properties as fitted attributes in soft_only mode
+            self.cofaces_ = None
+            self.coface_weights_ = None
+            self.facets_ = unique_facets_cpu
+            self.msf_ = {
+                "mst_u": mst_u.cpu().numpy() if isinstance(mst_u, torch.Tensor) else mst_u,
+                "mst_v": mst_v.cpu().numpy() if isinstance(mst_v, torch.Tensor) else mst_v,
+                "mst_w": mst_w.cpu().numpy() if isinstance(mst_w, torch.Tensor) else mst_w,
+                "mst_cof": mst_cof.cpu().numpy() if isinstance(mst_cof, torch.Tensor) else mst_cof
+            }
+            self.merge_tree_ = self.Z_tree_
+
             print("[PERG-HGP] Complete.")
             return self
 
@@ -338,13 +392,13 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
 
             valid_mask = torch.ones(cofaces.shape[0], dtype=torch.bool, device=device)
 
-            if self.local_gabriel:
+            if self.local_gabriel_:
                 nbr_indices_z, _ = grid_z.query_knn_grid(Z, m_local=cfg.m_active)
                 local_passes = local_gabriel_filter(cofaces, Z, a, centers, radii_sq, nbr_indices_z, tol=self.gabriel_tol)
                 valid_mask &= local_passes
                 print(f"  - Local filter: {torch.sum(local_passes).item()} / {cofaces.shape[0]} passed.")
 
-            if self.global_gabriel in ['all', 'selective']:
+            if self.global_gabriel_ in ['all', 'selective']:
                 cand_idx = torch.where(valid_mask)[0]
                 if len(cand_idx) > 0:
                     global_passes = global_gabriel_grid_test(cofaces[cand_idx], Z, a, centers[cand_idx], radii_sq[cand_idx], grid_z, tol=self.gabriel_tol)
@@ -372,7 +426,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                 self.exactness_report_ = {
                     "exactness_mode": cfg.exactness_mode,
                     "model_exact_for_chosen_supports": (cfg.alpha == 0.0),
-                    "accepted_cofaces_are_true_gabriel": (self.global_gabriel in ['all', 'selective']),
+                    "accepted_cofaces_are_true_gabriel": (self.global_gabriel_ in ['all', 'selective']),
                     "hgp_hierarchy_complete": False,
                     "candidate_cofaces": cofaces.shape[0],
                     "certified_cofaces": 0,
@@ -513,7 +567,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         self.exactness_report_ = {
             "exactness_mode": cfg.exactness_mode,
             "model_exact_for_chosen_supports": (cfg.alpha == 0.0),
-            "accepted_cofaces_are_true_gabriel": (self.global_gabriel in ['all', 'selective'] and cof_len > 0),
+            "accepted_cofaces_are_true_gabriel": (self.global_gabriel_ in ['all', 'selective'] and cof_len > 0),
             "hgp_hierarchy_complete": False, # True only if a strict geometric cut-audit is implemented and passes
             "candidate_cofaces": cof_len,
             "certified_cofaces": cof_len,
@@ -526,6 +580,18 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
             "total_fallback_queries": total_fallbacks,
             "global_fallback_rate": total_fallbacks / max(1, total_queries)
         }
+
+        # Expose artifact properties as fitted attributes
+        self.cofaces_ = certified_cofaces.cpu().numpy() if certified_cofaces is not None else None
+        self.coface_weights_ = certified_weights.cpu().numpy() if certified_weights is not None else None
+        self.facets_ = unique_facets.cpu().numpy()
+        self.msf_ = {
+            "mst_u": mst_u.cpu().numpy() if isinstance(mst_u, torch.Tensor) else mst_u,
+            "mst_v": mst_v.cpu().numpy() if isinstance(mst_v, torch.Tensor) else mst_v,
+            "mst_w": mst_w.cpu().numpy() if isinstance(mst_w, torch.Tensor) else mst_w,
+            "mst_cof": mst_cof.cpu().numpy() if isinstance(mst_cof, torch.Tensor) else mst_cof
+        }
+        self.merge_tree_ = self.Z_tree_
 
         print("[PERG-HGP] Complete.")
         return self
