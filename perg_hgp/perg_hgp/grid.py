@@ -1,38 +1,6 @@
 import torch
 import numpy as np
 
-def morton3D_encode_pytorch(coords, bits_per_axis=21):
-    """
-    Vectorized 3D Morton encoding in PyTorch.
-    coords: PyTorch tensor of shape (N, 3) in [0, 1].
-    Returns: PyTorch tensor of shape (N,) of dtype=torch.int64.
-    """
-    device = coords.device
-    # Scale coordinates to integer grid of size 2^bits_per_axis
-    max_val = (1 << bits_per_axis) - 1
-    xyz = (coords * max_val).clamp(0, max_val).to(torch.int64)
-    
-    # Interleave bits of x, y, z
-    # Morton key = ... z2 y2 x2 z1 y1 x1 z0 y0 x0
-    x = xyz[:, 0]
-    y = xyz[:, 1]
-    z = xyz[:, 2]
-    
-    # Interleave bits using standard bit manipulation masks
-    # We do it by spreading bits
-    def spread_bits(val):
-        # val has 21 bits. Spread them by inserting 2 zeros between each bit.
-        # e.g. bit 20 is shifted to position 60, bit 19 to 57, etc.
-        val = (val | (val << 32)) & 0x7fff00000000ffff
-        val = (val | (val << 16)) & 0x00ff0000ff0000ff
-        val = (val | (val << 8))  & 0x700f00f00f00f00f
-        val = (val | (val << 4))  & 0x30c30c30c30c30c3
-        val = (val | (val << 2))  & 0x1249249249249249
-        return val
-    
-    morton = spread_bits(x) | (spread_bits(y) << 1) | (spread_bits(z) << 2)
-    return morton
-
 class SpatialGrid3D:
     """
     Spatial Grid for fast 3D neighbor queries.
@@ -79,17 +47,19 @@ class SpatialGrid3D:
         self.cell_starts = cell_starts
         self.cell_ends = cell_ends
         
-        # 5. Fast GPU flat lookup map from cell key to start/end index
-        self.cell_starts_map = torch.full((self.grid_resolution**3,), -1, dtype=torch.int64, device=self.device)
-        self.cell_starts_map[self.unique_cell_keys] = torch.arange(len(self.unique_cell_keys), device=self.device)
+        # Diagnostics
+        self.fallback_count_ = 0
+        self.fallback_rate_ = 0.0
+        self.certified_rate_ = 1.0
 
     def get_points_in_cell(self, cell_key):
-        idx = self.cell_starts_map[cell_key].item()
-        if idx < 0:
-            return torch.empty(0, dtype=torch.int64, device=self.device)
-        start = self.cell_starts[idx]
-        end = self.cell_ends[idx]
-        return self.sorted_indices[start:end]
+        key_tensor = torch.tensor([cell_key], device=self.device, dtype=torch.int64)
+        idx = torch.searchsorted(self.unique_cell_keys, key_tensor)[0].item()
+        if idx < len(self.unique_cell_keys) and self.unique_cell_keys[idx].item() == cell_key:
+            start = self.cell_starts[idx]
+            end = self.cell_ends[idx]
+            return self.sorted_indices[start:end]
+        return torch.empty(0, dtype=torch.int64, device=self.device)
 
     def query_knn_grid(self, query_points, m_local=128):
         """
@@ -97,6 +67,7 @@ class SpatialGrid3D:
         Guarantees 100% exactness using a queue-certificate (stopping condition)
         and deterministic fallback to global scan if the neighborhood is uncertified.
         Fully vectorized in PyTorch without python loops over query points.
+        Uses memory-efficient searchsorted lookup instead of dense hash map.
         query_points: Tensor of shape (M, 3)
         Returns:
             nbr_indices: (M, m_local)
@@ -159,9 +130,11 @@ class SpatialGrid3D:
             # Clamped key to prevent out of bounds indexing
             n_cell_key_clamped = torch.clamp(n_cell_key, max=self.grid_resolution**3 - 1)
             
-            # Look up cell index
-            n_cell_idx = self.cell_starts_map[n_cell_key_clamped] # (M_active, O)
-            n_cell_idx = torch.where(mask_valid, n_cell_idx, torch.tensor(-1, device=device))
+            # Look up cell index using binary search on unique keys
+            n_cell_idx = torch.searchsorted(self.unique_cell_keys, n_cell_key_clamped) # (M_active, O)
+            clamped_lookup_idx = torch.clamp(n_cell_idx, max=len(self.unique_cell_keys) - 1)
+            mask_match = (n_cell_idx < len(self.unique_cell_keys)) & (self.unique_cell_keys[clamped_lookup_idx] == n_cell_key_clamped)
+            n_cell_idx = torch.where(mask_match & mask_valid, n_cell_idx, torch.tensor(-1, device=device))
             
             # Gather candidates for each offset
             active_cand_idx_list = []
@@ -270,20 +243,42 @@ class SpatialGrid3D:
             radius += 1
             
         # Fallback to exact global scan for queries that are still active
+        self.fallback_count_ = torch.sum(active_mask).item()
+        self.fallback_rate_ = self.fallback_count_ / M
+        self.certified_rate_ = 1.0 - self.fallback_rate_
+        
         if active_mask.any():
             active_idx = torch.where(active_mask)[0]
             
-            # Chunk fallback to prevent GPU memory spikes if active_idx is large
-            chunk_size = 10000
-            for s_idx in range(0, active_idx.shape[0], chunk_size):
-                e_idx = min(s_idx + chunk_size, active_idx.shape[0])
-                chunk_active = active_idx[s_idx:e_idx]
+            # Double-chunk fallback: chunk both queries (chunk_query) and database points (chunk_db)
+            # to strictly bound memory consumption for O(M_active * N) scans.
+            chunk_query = 100
+            chunk_db = 100000
+            
+            for s_q in range(0, active_idx.shape[0], chunk_query):
+                e_q = min(s_q + chunk_query, active_idx.shape[0])
+                chunk_active = active_idx[s_q:e_q]
+                Q_c = chunk_active.shape[0]
                 
-                diff = self.X.unsqueeze(0) - query_points[chunk_active].unsqueeze(1) # (M_chunk, N, 3)
-                dist_sq = torch.sum(diff ** 2, dim=2) # (M_chunk, N)
+                chunk_nbrs_dist = torch.full((Q_c, m_local), float('inf'), device=device)
+                chunk_nbrs_idx = torch.zeros((Q_c, m_local), dtype=torch.int64, device=device)
                 
-                val, idx = torch.topk(dist_sq, m_local, dim=1, largest=False)
-                nbr_indices[chunk_active] = idx
-                nbr_dists_sq[chunk_active] = val
+                for s_db in range(0, self.n_points, chunk_db):
+                    e_db = min(s_db + chunk_db, self.n_points)
+                    db_chunk = self.X[s_db:e_db] # (db_c, 3)
+                    
+                    diff = db_chunk.unsqueeze(0) - query_points[chunk_active].unsqueeze(1) # (Q_c, db_c, 3)
+                    dist_sq = torch.sum(diff ** 2, dim=2) # (Q_c, db_c)
+                    
+                    merged_dist = torch.cat([chunk_nbrs_dist, dist_sq], dim=1) # (Q_c, m_local + db_c)
+                    db_indices = torch.arange(s_db, e_db, device=device).unsqueeze(0).repeat(Q_c, 1)
+                    merged_idx = torch.cat([chunk_nbrs_idx, db_indices], dim=1)
+                    
+                    val, idx = torch.topk(merged_dist, m_local, dim=1, largest=False)
+                    chunk_nbrs_dist = val
+                    chunk_nbrs_idx = torch.gather(merged_idx, 1, idx)
+                    
+                nbr_indices[chunk_active] = chunk_nbrs_idx
+                nbr_dists_sq[chunk_active] = chunk_nbrs_dist
                 
         return nbr_indices, nbr_dists_sq

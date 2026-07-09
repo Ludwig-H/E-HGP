@@ -19,7 +19,7 @@ from perg_hgp.gabriel import global_gabriel_grid_test
 
 class TestPERGHGP(unittest.TestCase):
     
-    def test_morton_encoding_and_grid(self):
+    def test_flat_grid_indexing_and_search(self):
         device = 'cpu'
         # Generate 100 points
         X = np.random.uniform(0, 1, (100, 3)).astype(np.float32)
@@ -35,6 +35,39 @@ class TestPERGHGP(unittest.TestCase):
         # Closest neighbor should be the point itself (dist close to 0)
         self.assertLess(nbr_dists_sq[0, 0].item(), 1e-5)
         
+    def test_knn_exactness_vs_brute_force(self):
+        device = 'cpu'
+        np.random.seed(42)
+        torch.manual_seed(42)
+        
+        # 1. Generate random point cloud
+        X = np.random.uniform(10.0, 20.0, (200, 3)).astype(np.float32)
+        grid = SpatialGrid3D(X, grid_resolution=8, device=device)
+        
+        # 2. Query points: some internal, some external (outside the bbox)
+        query_pts = np.random.uniform(5.0, 25.0, (20, 3)).astype(np.float32)
+        query_pts_tensor = torch.from_numpy(query_pts).to(device)
+        
+        # 3. Query grid KNN
+        nbr_indices, nbr_dists_sq = grid.query_knn_grid(query_pts_tensor, m_local=10)
+        
+        # Verify fallback and certified rate are tracked
+        self.assertTrue(hasattr(grid, 'fallback_count_'))
+        self.assertTrue(hasattr(grid, 'fallback_rate_'))
+        self.assertAlmostEqual(grid.fallback_rate_ + grid.certified_rate_, 1.0, places=5)
+        
+        # 4. Compare with brute-force scan
+        X_tensor = torch.from_numpy(X).to(device)
+        for i in range(20):
+            q_pt = query_pts_tensor[i]
+            diff = X_tensor - q_pt
+            dist2 = torch.sum(diff ** 2, dim=1)
+            
+            top_val, top_idx = torch.topk(dist2, 10, largest=False)
+            
+            for k in range(10):
+                self.assertAlmostEqual(nbr_dists_sq[i, k].item(), top_val[k].item(), places=4)
+                
     def test_local_gibbs(self):
         device = 'cpu'
         nbr_dists_sq = torch.rand((10, 32), device=device, dtype=torch.float32) + 0.1
