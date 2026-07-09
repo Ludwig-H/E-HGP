@@ -78,6 +78,17 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
 
         N = X_tensor.shape[0]
 
+        # Cap neighborhood search parameters by dataset size to prevent invalid neighbors
+        self.m_local = min(self.m_local, N)
+        self.m_active = min(self.m_active, N)
+        if self.K_rho is not None:
+            self.K_rho = min(self.K_rho, N)
+        else:
+            self.K_rho = min(max(32, 3 * self.K), N)
+        cfg.m_local = self.m_local
+        cfg.m_active = self.m_active
+        cfg.K_rho = self.K_rho
+
         checkpoint_dir = self.checkpoint_dir
         if checkpoint_dir is not None:
             os.makedirs(checkpoint_dir, exist_ok=True)

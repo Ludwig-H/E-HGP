@@ -89,6 +89,7 @@ class SpatialGrid3D:
         """
         device = self.device
         M = query_points.shape[0]
+        m_local = min(m_local, self.n_points)
 
         # Adaptive chunk size based on m_local to strictly bound memory, capped at 10000 max
         grid_chunk_size = min(10000, max(1000, int(5000000 / m_local)))

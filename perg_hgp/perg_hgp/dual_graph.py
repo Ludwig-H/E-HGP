@@ -70,7 +70,8 @@ def compute_facet_ids(cofaces, K, max_ram_facets=2000000, chunk_size=100000):
         N = int(cofaces.max().item()) + 1
 
         # 2. Partition facets into B buckets based on first vertex
-        B = 64
+        # Scale B dynamically to keep average bucket size around 500k elements
+        B = max(64, int(np.ceil(total_facets / 500000)))
         bucket_size_v = (N + B - 1) // B
 
         # Pass 1: Count facets per bucket
@@ -138,14 +139,59 @@ def compute_facet_ids(cofaces, K, max_ram_facets=2000000, chunk_size=100000):
             start_b = bucket_offsets[b]
             end_b = start_b + count
 
-            # Load bucket into RAM
-            loaded_facets = facets_bucketed[start_b:end_b]
+            # Load bucket into RAM and deduplicate, with skew protection
             loaded_orig = orig_indices[start_b:end_b]
 
-            # Deduplicate
-            unique_b, unique_idx_b, inv_idx_b = np.unique(
-                loaded_facets, axis=0, return_index=True, return_inverse=True
-            )
+            if count > max_ram_facets:
+                import warnings
+                warnings.warn(
+                    f"Bucket {b} has size {count} which exceeds max_ram_facets {max_ram_facets}. "
+                    "Applying second-level partitioning to prevent memory spike.",
+                    UserWarning
+                )
+                 # Check if first vertex varies or is unique in this bucket
+                first_vertices = facets_bucketed[start_b:end_b, 0]
+                min_v, max_v = int(first_vertices.min()), int(first_vertices.max())
+
+                B2 = 16
+                if min_v < max_v:
+                    # Partition by first vertex to preserve lexicographical order
+                    v_range = max_v - min_v + 1
+                    sub_bucket_size = (v_range + B2 - 1) // B2
+                    sub_assigned = (first_vertices - min_v) // sub_bucket_size
+                else:
+                    # All have the same first vertex, partition by second vertex to preserve order
+                    second_vertices = facets_bucketed[start_b:end_b, 1]
+                    min_v2, max_v2 = int(second_vertices.min()), int(second_vertices.max())
+                    v_range = max(1, max_v2 - min_v2 + 1)
+                    sub_bucket_size = (v_range + B2 - 1) // B2
+                    sub_assigned = (second_vertices - min_v2) // sub_bucket_size
+
+                sub_assigned = np.clip(sub_assigned, 0, B2 - 1)
+
+                sub_unique_list = []
+                inv_idx_b = np.zeros(count, dtype=np.int64)
+                sub_offset = 0
+                for sb in range(B2):
+                    sb_mask = sub_assigned == sb
+                    sb_indices = np.where(sb_mask)[0]
+                    if sb_indices.shape[0] == 0:
+                        continue
+                    # Load only this sub-bucket into RAM
+                    sb_facets = facets_bucketed[start_b + sb_indices]
+                    sb_unique, sb_idx, sb_inv = np.unique(
+                        sb_facets, axis=0, return_index=True, return_inverse=True
+                    )
+                    sub_unique_list.append(sb_unique)
+                    inv_idx_b[sb_indices] = sub_offset + sb_inv
+                    sub_offset += sb_unique.shape[0]
+
+                unique_b = np.concatenate(sub_unique_list, axis=0)
+            else:
+                loaded_facets = facets_bucketed[start_b:end_b]
+                unique_b, unique_idx_b, inv_idx_b = np.unique(
+                    loaded_facets, axis=0, return_index=True, return_inverse=True
+                )
 
             U_b = unique_b.shape[0]
 
@@ -188,8 +234,15 @@ class DualEdgesIterable:
         return get_edge_chunks(self.cofaces, self.facet_ids, self.weights, chunk_size)
 
     def __iter__(self):
+        import warnings
         U = self.cofaces.shape[0]
         K = self.cofaces.shape[1] - 1
+        if U * K > 5000000:
+            warnings.warn(
+                f"Unpacking {U * K} edges in memory using legacy mode. "
+                "For better memory scaling, use build_dual_edges(...).chunks() instead.",
+                UserWarning
+            )
         edge_u = torch.zeros((U, K), dtype=torch.int64, device='cpu')
         edge_v = torch.zeros((U, K), dtype=torch.int64, device='cpu')
         edge_w = torch.zeros((U, K), dtype=torch.float32, device='cpu')
