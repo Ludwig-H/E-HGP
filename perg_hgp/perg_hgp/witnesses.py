@@ -90,8 +90,10 @@ def lift_witness_pool(witness_pool, Z, a, eta, grid_z, cfg):
     next_rank = rank + 1
 
     chunk_size = 50000
-    valid_seeds_list = []
-    valid_E_closest_list = []
+
+    # Running top-budget_per_rank witnesses to strictly bound memory at all times
+    running_seeds = torch.empty((0, 3), dtype=torch.float32, device=device)
+    running_E = torch.empty((0,), dtype=torch.float32, device=device)
 
     for start in range(0, M, chunk_size):
         end = min(start + chunk_size, M)
@@ -147,25 +149,21 @@ def lift_witness_pool(witness_pool, Z, a, eta, grid_z, cfg):
                 valid_idx = torch.arange(min(1000, sub_seeds.shape[0]), device=device)
 
             filtered_seeds_chunk_list.append(sub_seeds[valid_idx])
-            filtered_E_chunk_list.append(E_s[valid_idx])
+            filtered_E_chunk_list.append(E_s[valid_idx][:, 0])
 
         filtered_seeds_chunk = torch.cat(filtered_seeds_chunk_list, dim=0)
         filtered_E_chunk = torch.cat(filtered_E_chunk_list, dim=0)
 
-        valid_seeds_list.append(filtered_seeds_chunk)
-        valid_E_closest_list.append(filtered_E_chunk[:, 0])
+        # Merge with running top-budget_per_rank witnesses
+        combined_seeds = torch.cat([running_seeds, filtered_seeds_chunk], dim=0)
+        combined_E = torch.cat([running_E, filtered_E_chunk], dim=0)
 
-    # Concatenate filtered seeds from all chunks
-    if valid_seeds_list:
-        all_valid_seeds = torch.cat(valid_seeds_list, dim=0)
-        all_valid_E = torch.cat(valid_E_closest_list, dim=0)
-    else:
-        all_valid_seeds = torch.empty((0, 3), device=device)
-        all_valid_E = torch.empty((0,), device=device)
+        if combined_seeds.shape[0] > cfg.budget_per_rank:
+            val, idx = torch.topk(combined_E, cfg.budget_per_rank, largest=False)
+            running_seeds = combined_seeds[idx]
+            running_E = val
+        else:
+            running_seeds = combined_seeds
+            running_E = combined_E
 
-    # Limit to the budget_per_rank deterministically by energy to the closest site
-    if all_valid_seeds.shape[0] > cfg.budget_per_rank:
-        top_idx = torch.argsort(all_valid_E)[:cfg.budget_per_rank]
-        all_valid_seeds = all_valid_seeds[top_idx]
-
-    return WitnessPool(all_valid_seeds, next_rank)
+    return WitnessPool(running_seeds, next_rank)

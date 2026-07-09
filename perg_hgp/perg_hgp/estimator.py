@@ -25,7 +25,7 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
                  checkpoint_dir=None, exactness_mode='atlas_exact',
                  max_witnesses_per_rank=5000000, max_cofaces=20000000,
                  max_unique_facets=100000000, max_dual_edges=300000000,
-                 max_ram_facets=100000000):
+                 max_ram_facets=2000000):
 
         self.K = K
         self.K_rho = K_rho
@@ -405,14 +405,11 @@ class PERGHGPClusterer(BaseEstimator, ClusterMixin):
         else:
             print("[PERG-HGP] Building dual graph of K-facets...")
             facet_ids, unique_facets = compute_facet_ids(certified_cofaces, self.K, max_ram_facets=cfg.max_ram_facets)
+            edges = build_dual_edges(certified_cofaces, facet_ids, certified_weights)
 
             print("[PERG-HGP] Computing dual MST...")
             num_facets = unique_facets.shape[0]
-
-            def edge_generator():
-                return get_edge_chunks(certified_cofaces, facet_ids, certified_weights, chunk_size=1000000)
-
-            mst_u, mst_v, mst_w, mst_cof = dual_graph_mst(edge_generator, num_facets)
+            mst_u, mst_v, mst_w, mst_cof = dual_graph_mst(lambda: edges.chunks(1000000), num_facets)
             num_dual_edges = certified_cofaces.shape[0] * self.K
 
             if mst_path:

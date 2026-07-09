@@ -178,29 +178,44 @@ def compute_facet_ids(cofaces, K, max_ram_facets=2000000, chunk_size=100000):
         return facet_ids, unique_facets
 
 
+class DualEdgesIterable:
+    def __init__(self, cofaces, facet_ids, weights):
+        self.cofaces = cofaces
+        self.facet_ids = facet_ids
+        self.weights = weights
+
+    def chunks(self, chunk_size=1000000):
+        return get_edge_chunks(self.cofaces, self.facet_ids, self.weights, chunk_size)
+
+    def __iter__(self):
+        U = self.cofaces.shape[0]
+        K = self.cofaces.shape[1] - 1
+        edge_u = torch.zeros((U, K), dtype=torch.int64, device='cpu')
+        edge_v = torch.zeros((U, K), dtype=torch.int64, device='cpu')
+        edge_w = torch.zeros((U, K), dtype=torch.float32, device='cpu')
+        edge_coface = torch.zeros((U, K), dtype=torch.int64, device='cpu')
+        facet_ids_cpu = self.facet_ids.cpu()
+        weights_cpu = self.weights.cpu()
+        for j in range(1, K + 1):
+            edge_u[:, j - 1] = facet_ids_cpu[:, 0]
+            edge_v[:, j - 1] = facet_ids_cpu[:, j]
+            edge_w[:, j - 1] = weights_cpu
+            edge_coface[:, j - 1] = torch.arange(U, device='cpu')
+        yield edge_u.flatten()
+        yield edge_v.flatten()
+        yield edge_w.flatten()
+        yield edge_coface.flatten()
+
+
 def build_dual_edges(cofaces, facet_ids, weights):
     """
     Builds the dual graph edges using star expansion.
-    Allocates on CPU to avoid VRAM overhead.
+    Returns a DualEdgesIterable that supports legacy unpacking:
+      edge_u, edge_v, edge_w, edge_coface = build_dual_edges(...)
+    as well as memory-efficient chunked streaming:
+      build_dual_edges(...).chunks(chunk_size)
     """
-    U = cofaces.shape[0]
-    K = cofaces.shape[1] - 1
-
-    edge_u = torch.zeros((U, K), dtype=torch.int64, device='cpu')
-    edge_v = torch.zeros((U, K), dtype=torch.int64, device='cpu')
-    edge_w = torch.zeros((U, K), dtype=torch.float32, device='cpu')
-    edge_coface = torch.zeros((U, K), dtype=torch.int64, device='cpu')
-
-    facet_ids_cpu = facet_ids.cpu()
-    weights_cpu = weights.cpu()
-
-    for j in range(1, K + 1):
-        edge_u[:, j - 1] = facet_ids_cpu[:, 0]
-        edge_v[:, j - 1] = facet_ids_cpu[:, j]
-        edge_w[:, j - 1] = weights_cpu
-        edge_coface[:, j - 1] = torch.arange(U, device='cpu')
-
-    return edge_u.flatten(), edge_v.flatten(), edge_w.flatten(), edge_coface.flatten()
+    return DualEdgesIterable(cofaces, facet_ids, weights)
 
 
 def get_edge_chunks(cofaces, facet_ids, weights, chunk_size=1000000):

@@ -191,7 +191,7 @@ class SpatialGrid3D:
                         diff = self.X[point_indices_clamped] - q_pts_chunk[active_idx].unsqueeze(1) # (M_active, max_count, 3)
                         dist_sq = torch.sum(diff ** 2, dim=2) # (M_active, max_count)
 
-                        dist_sq = torch.where(mask, dist_sq, torch.tensor(float('inf'), device=device))
+                        dist_sq = torch.where(mask, dist_sq, float('inf'))
 
                         active_cand_idx_list.append(point_indices)
                         active_cand_dist_list.append(dist_sq)
