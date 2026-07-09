@@ -13,7 +13,7 @@ Ce rapport documente la validation des **optimisations de scalabilité massive (
 ### 1.2 Fallback Exact Double-Chunké & Rayon de Recherche
 *   **Contrôle strict de la mémoire** : Le scan de fallback global exact a été réécrit avec un double-chunking bidimensionnel (`chunk_query = 100` requêtes et `chunk_db = 100,000` points).
 *   **Bénéfice** : Élimination des pics d'allocation de taille $O(M_{fallback} \times N)$. La mémoire VRAM allouée pour le fallback est strictement plafonnée à **~120 Mo** maximum pour $N=30\text{M}$ points.
-*   **Optimisation du Taux de Fallback** : Le paramètre `max_radius` a été augmenté à `8` pour élargir la recherche locale certifiée avant de basculer en fallback. Le taux de fallback de la grille sur les distributions typiques tombe ainsi à **0%** (tout est résolu localement et certifié).
+*   **Optimisation du Taux de Fallback** : Le paramètre `max_radius` a été augmenté à `24` pour élargir la recherche locale certifiée avant de basculer en fallback. Le taux de fallback de la grille sur les distributions typiques tombe ainsi à **0%** (tout est résolu localement et certifié).
 
 ### 1.3 Correction du Chemin Out-Of-Core (`compute_facet_ids`)
 *   **Correction de Layout de Facettes** : Résolution du bug de reconstruction de mapping des IDs de facettes par coface (`unique_ids_raw.reshape(K+1, U).T`) en présence de chunks multiples. Les facettes sont maintenant écrites directement à leurs positions globales exactes `r * U + start_u` dans le fichier binaire memmap.
@@ -28,7 +28,7 @@ Ce rapport documente la validation des **optimisations de scalabilité massive (
 
 ### 1.6 Implémentation du MST Borůvka Parallélisé (Step 5.4)
 *   **Algorithme Borůvka Vectorisé** : Remplacement de l'algorithme Kruskal CPU par une implémentation parallélisée de Borůvka en PyTorch dans [hierarchy.py](file:///workspaces/E-HGP/perg_hgp/perg_hgp/hierarchy.py).
-*   **Pointer Jumping & Scatter Reduce** : Utilisation du pointer jumping parallèle pour la compression de chemins Union-Find et de `scatter_reduce_(..., reduce='amin')` avec empaquetage des poids et indices sur 64 bits pour la sélection déterministe et sans conflit d'arêtes.
+*   **Pointer Jumping & Scatter Reduce** : Utilisation du pointer jumping parallèle pour la compression de chemins Union-Find et de `scatter_reduce_(..., reduce='amin')` avec sélection déterministe d'arêtes basée sur des réductions par étapes scatter_reduce_(amin) pour la sélection déterministe et sans conflit d'arêtes.
 *   **Bénéfice** : Résolution du MST entièrement vectorisée et compatible GPU/CPU.
 
 ### 1.7 Vectorisation et Batch du Miniball & Top-Consistency (Step 5.5)

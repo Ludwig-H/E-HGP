@@ -49,7 +49,7 @@ Le dépôt contient deux implémentations complémentaires de la percolation d'h
 │   │   ├── dual_graph.py         <- Construction des facettes et arêtes duales (memmap/out-of-core)
 │   │   ├── estimator.py          <- PERGHGPClusterer (API scikit-learn pour nuages 3D géants)
 │   │   ├── gabriel.py            <- Filtres Gabriel locaux et globaux sur grille
-│   │   ├── grid.py               <- Grille spatiale 3D avec Morton sort GPU & Triton KNN
+│   │   ├── grid.py               <- Grille spatiale 3D avec Morton sort CPU/GPU & PyTorch KNN
 │   │   ├── hierarchy.py          <- MST Borůvka parallélisé sur GPU, Union-Find et condensation
 │   │   ├── local_gibbs.py        <- Régularisation Gibbs / entropie en PyTorch vectorisé
 │   │   ├── rank_field.py         <- Calcul soft du champ de rang (programmation dynamique)
