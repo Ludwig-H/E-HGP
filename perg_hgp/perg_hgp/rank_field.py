@@ -164,9 +164,12 @@ def compute_rank_soft_dp_batched(E, Kmax, eps):
 
 if hasattr(torch, 'compile'):
     try:
-        compute_elementary_symmetric_polynomials_prefix_suffix_batched = torch.compile(
-            compute_elementary_symmetric_polynomials_prefix_suffix_batched
-        )
-        compute_rank_soft_dp_batched = torch.compile(compute_rank_soft_dp_batched)
+        import importlib.util
+        triton_available = importlib.util.find_spec("triton") is not None
+        if not torch.cuda.is_available() or triton_available:
+            compute_elementary_symmetric_polynomials_prefix_suffix_batched = torch.compile(
+                compute_elementary_symmetric_polynomials_prefix_suffix_batched
+            )
+            compute_rank_soft_dp_batched = torch.compile(compute_rank_soft_dp_batched)
     except Exception:
         pass

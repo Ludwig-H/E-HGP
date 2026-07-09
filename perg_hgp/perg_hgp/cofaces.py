@@ -419,7 +419,10 @@ def extract_top_cofaces(witness_pool, Z, a, eta, grid_z, K, cfg):
 
 if hasattr(torch, 'compile'):
     try:
-        solve_support_ball_batched = torch.compile(solve_support_ball_batched)
-        solve_weighted_miniball_batched = torch.compile(solve_weighted_miniball_batched)
+        import importlib.util
+        triton_available = importlib.util.find_spec("triton") is not None
+        if not torch.cuda.is_available() or triton_available:
+            solve_support_ball_batched = torch.compile(solve_support_ball_batched)
+            solve_weighted_miniball_batched = torch.compile(solve_weighted_miniball_batched)
     except Exception:
         pass

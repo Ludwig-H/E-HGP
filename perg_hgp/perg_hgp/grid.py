@@ -307,6 +307,8 @@ class SpatialGrid3D:
     def query_power_grid(self, query_points, weights, m_local=128):
         """
         Vectorized certified neighborhood search in the power complex.
+        Fully vectorized in PyTorch without python loops over query points.
+        Uses memory-efficient searchsorted lookup instead of dense hash map.
         query_points: (M, 3)
         weights: (N,) - weights a of the sites
         """
@@ -321,10 +323,9 @@ class SpatialGrid3D:
         # Calculate cell size in normalized coords
         delta = 1.0 / self.grid_resolution
         delta_scaled = delta * self.scale
-
         min_a = float(w_sites.min().item())
 
-        # Output tensors on query device
+        # Output tensors allocated on the same device as query_points
         nbr_indices = torch.zeros((M, m_local), dtype=torch.int64, device=query_points.device)
         nbr_dists_sq = torch.zeros((M, m_local), dtype=torch.float32, device=query_points.device)
 
@@ -340,68 +341,113 @@ class SpatialGrid3D:
 
             # Map query points to flat cell keys
             q_norm = (q_pts_chunk - self.bbox_min) / self.scale
-            q_coords = (q_norm * self.grid_resolution).clamp(0, self.grid_resolution - 1).to(torch.int64)
-            q_cell_keys = q_coords[:, 0] * (self.grid_resolution**2) + q_coords[:, 1] * self.grid_resolution + q_coords[:, 2]
+            q_cell_coords = (q_norm * self.grid_resolution).clamp(0, self.grid_resolution - 1).to(torch.int64)
 
             # Initialize running top-m_local candidates
             cand_indices = torch.full((M_c, m_local), -1, dtype=torch.int64, device=device)
             cand_dists_sq = torch.full((M_c, m_local), float('inf'), dtype=torch.float32, device=device)
 
-            # Track which queries are finished
-            finished = torch.zeros(M_c, dtype=torch.bool, device=device)
+            # Active mask: which queries still need to be processed
+            active_mask = torch.ones(M_c, dtype=torch.bool, device=device)
 
             radius = 1
             max_search_radius = self.grid_resolution
 
-            while not torch.all(finished) and radius <= max_search_radius:
-                stopping_threshold = ((radius - 1) * delta_scaled) ** 2 + min_a
-                finished = cand_dists_sq[:, -1] <= stopping_threshold
+            while radius <= max_search_radius and active_mask.any():
+                r_search = radius - 1
 
-                if torch.all(finished):
-                    break
-
+                # Fetch precomputed/cached offsets for this radius shell
                 offsets = self._get_shell_offsets(radius)
+                O = offsets.shape[0]
 
-                active_idx = torch.where(~finished)[0]
-                if len(active_idx) == 0:
-                    break
+                # For all active queries, find neighbor cell keys
+                active_idx = torch.where(active_mask)[0]
+                M_active = active_idx.shape[0]
 
-                # cells: (len(active_idx), O, 3)
-                cells = q_coords[active_idx].unsqueeze(1) + offsets.unsqueeze(0)
-                cells = torch.clamp(cells, 0, self.grid_resolution - 1)
-                flat_keys = cells[:, :, 0] * (self.grid_resolution**2) + cells[:, :, 1] * self.grid_resolution + cells[:, :, 2]
+                cx = q_cell_coords[active_idx, 0].unsqueeze(1) # (M_active, 1)
+                cy = q_cell_coords[active_idx, 1].unsqueeze(1)
+                cz = q_cell_coords[active_idx, 2].unsqueeze(1)
 
-                for i, q_idx in enumerate(active_idx):
-                    q_pt = q_pts_chunk[q_idx]
-                    cell_keys_q = flat_keys[i]
-                    pt_indices_list = []
+                # Chunk offsets loop before building nx/ny/nz/n_cell_idx to keep memory strictly O(M_active * offset_chunk_size)
+                offset_chunk_size = 32
+                for o_start in range(0, O, offset_chunk_size):
+                    o_end = min(o_start + offset_chunk_size, O)
+                    offsets_chunk = offsets[o_start:o_end]
+                    O_c = offsets_chunk.shape[0]
 
-                    for key in cell_keys_q:
-                        key_item = key.item()
-                        key_tensor = torch.tensor([key_item], device=device)
-                        idx = torch.searchsorted(self.unique_cell_keys, key_tensor)[0].item()
-                        if idx < len(self.unique_cell_keys) and self.unique_cell_keys[idx].item() == key_item:
-                            st = self.cell_starts[idx]
-                            en = self.cell_ends[idx]
-                            pt_indices_list.append(self.sorted_indices[st:en])
+                    nx = cx + offsets_chunk[:, 0].unsqueeze(0) # (M_active, O_c)
+                    ny = cy + offsets_chunk[:, 1].unsqueeze(0)
+                    nz = cz + offsets_chunk[:, 2].unsqueeze(0)
 
-                    if len(pt_indices_list) == 0:
-                        continue
+                    mask_valid = (nx >= 0) & (nx < self.grid_resolution) & \
+                                 (ny >= 0) & (ny < self.grid_resolution) & \
+                                 (nz >= 0) & (nz < self.grid_resolution)
 
-                    db_idx = torch.cat(pt_indices_list)
-                    dist_sq = torch.sum((self.X[db_idx] - q_pt) ** 2, dim=1) + w_sites[db_idx]
+                    n_cell_key = nx * (self.grid_resolution**2) + ny * self.grid_resolution + nz
+                    # Clamped key to prevent out of bounds indexing
+                    n_cell_key_clamped = torch.clamp(n_cell_key, max=self.grid_resolution**3 - 1)
 
-                    merged_dist = torch.cat([cand_dists_sq[q_idx], dist_sq])
-                    merged_idx = torch.cat([cand_indices[q_idx], db_idx])
+                    # Look up cell index using binary search on unique keys
+                    n_cell_idx = torch.searchsorted(self.unique_cell_keys, n_cell_key_clamped) # (M_active, O_c)
+                    clamped_lookup_idx = torch.clamp(n_cell_idx, max=len(self.unique_cell_keys) - 1)
+                    mask_match = (n_cell_idx < len(self.unique_cell_keys)) & (self.unique_cell_keys[clamped_lookup_idx] == n_cell_key_clamped)
+                    n_cell_idx = torch.where(mask_match & mask_valid, n_cell_idx, torch.tensor(-1, device=device))
 
-                    val_top, idx_top = torch.topk(merged_dist, m_local, largest=False)
-                    cand_dists_sq[q_idx] = val_top
-                    cand_indices[q_idx] = merged_idx[idx_top]
+                    active_cand_idx_list = []
+                    active_cand_dist_list = []
+
+                    for o in range(O_c):
+                        c_idx = n_cell_idx[:, o] # (M_active,)
+                        starts = torch.where(c_idx >= 0, self.cell_starts[c_idx], torch.tensor(0, device=device))
+                        ends = torch.where(c_idx >= 0, self.cell_ends[c_idx], torch.tensor(0, device=device))
+                        counts = ends - starts
+
+                        max_count = counts.max().item()
+                        if max_count == 0:
+                            continue
+
+                        offsets_local = torch.arange(max_count, device=device).unsqueeze(0) # (1, max_count)
+                        gather_idx = starts.unsqueeze(1) + offsets_local # (M_active, max_count)
+                        gather_idx = torch.clamp(gather_idx, max=self.n_points - 1)
+
+                        point_indices = self.sorted_indices[gather_idx] # (M_active, max_count)
+                        mask = (offsets_local < counts.unsqueeze(1)) & (c_idx.unsqueeze(1) >= 0)
+                        point_indices = torch.where(mask, point_indices, torch.tensor(-1, device=device))
+
+                        # Compute distances with power metric!
+                        point_indices_clamped = torch.clamp(point_indices, min=0)
+                        diff = self.X[point_indices_clamped] - q_pts_chunk[active_idx].unsqueeze(1) # (M_active, max_count, 3)
+                        dist_sq = torch.sum(diff ** 2, dim=2) + w_sites[point_indices_clamped] # (M_active, max_count)
+
+                        dist_sq = torch.where(mask, dist_sq, float('inf'))
+
+                        active_cand_idx_list.append(point_indices)
+                        active_cand_dist_list.append(dist_sq)
+
+                    if active_cand_idx_list:
+                        new_cand_idx = torch.cat(active_cand_idx_list, dim=1) # (M_active, C_new)
+                        new_cand_dist = torch.cat(active_cand_dist_list, dim=1) # (M_active, C_new)
+
+                        # Merge with running candidates
+                        prev_active_idx = cand_indices[active_idx]
+                        prev_active_dist = cand_dists_sq[active_idx]
+
+                        merged_idx = torch.cat([prev_active_idx, new_cand_idx], dim=1)
+                        merged_dist = torch.cat([prev_active_dist, new_cand_dist], dim=1)
+
+                        # Find top-m_local closest in the merged candidate list
+                        val, idx = torch.topk(merged_dist, m_local, dim=1, largest=False)
+                        cand_indices[active_idx] = torch.gather(merged_idx, 1, idx)
+                        cand_dists_sq[active_idx] = val
+
+                # Update stopping criterion for active queries
+                stopping_threshold = ((radius - 1) * delta_scaled) ** 2 + min_a
+                active_mask[active_idx] = cand_dists_sq[active_idx, -1] > stopping_threshold
 
                 radius += 1
 
             # Global scan for uncertified queries
-            uncertified = ~finished
+            uncertified = active_mask
             if torch.any(uncertified):
                 uncert_idx = torch.where(uncertified)[0]
                 total_fallback_count += len(uncert_idx)
@@ -423,4 +469,5 @@ class SpatialGrid3D:
         self.certified_rate_ = 1.0 - self.fallback_rate_
         self.total_queries_ += M
         self.total_fallbacks_ += self.fallback_count_
+
         return nbr_indices, nbr_dists_sq
