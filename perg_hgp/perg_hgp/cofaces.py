@@ -8,11 +8,15 @@ def solve_support_ball_batched(sub_Z, sub_a):
     sub_Z: shape (U, size, 3)
     sub_a: shape (U, size)
     """
+    dtype_orig = sub_Z.dtype
+    sub_Z = sub_Z.to(torch.float64)
+    sub_a = sub_a.to(torch.float64)
+
     U, size, _ = sub_Z.shape
     device = sub_Z.device
 
     if size == 1:
-        return sub_Z[:, 0], sub_a[:, 0]
+        return sub_Z[:, 0].to(dtype_orig), sub_a[:, 0].to(dtype_orig)
 
     v = sub_Z[:, 1:] - sub_Z[:, 0:1] # shape (U, size-1, 3)
 
@@ -24,7 +28,7 @@ def solve_support_ball_batched(sub_Z, sub_a):
     if size == 2:
         alpha = h / (G[:, 0, 0:1] + 1e-12)
     else:
-        ridge = 1e-6 * torch.eye(size-1, device=device).unsqueeze(0)
+        ridge = 1e-12 * torch.eye(size-1, device=device).unsqueeze(0).to(torch.float64)
         try:
             alpha = torch.linalg.solve(G + ridge, h)
         except RuntimeError:
@@ -35,7 +39,7 @@ def solve_support_ball_batched(sub_Z, sub_a):
     G_alpha = torch.bmm(G, alpha.unsqueeze(2)).squeeze(2)
     radius_sq = sub_a[:, 0] + torch.sum(alpha * G_alpha, dim=1)
 
-    return center, radius_sq
+    return center.to(dtype_orig), radius_sq.to(dtype_orig)
 
 
 def solve_weighted_miniball_batched(Z_cofaces, a_cofaces, tol=1e-6):
@@ -44,34 +48,40 @@ def solve_weighted_miniball_batched(Z_cofaces, a_cofaces, tol=1e-6):
     Z_cofaces: shape (U, Nc, 3)
     a_cofaces: shape (U, Nc)
     """
-    U, Nc, _ = Z_cofaces.shape
-    device = Z_cofaces.device
-    tol = max(tol, 1e-5)
+    dtype_orig = Z_cofaces.dtype
+    Z_cofaces_64 = Z_cofaces.to(torch.float64)
+    a_cofaces_64 = a_cofaces.to(torch.float64)
+
+    U, Nc, _ = Z_cofaces_64.shape
+    device = Z_cofaces_64.device
+    tol = max(tol, 1e-8)
 
     subsets = []
     for r in range(1, min(5, Nc + 1)):
         for S in itertools.combinations(range(Nc), r):
             subsets.append(list(S))
 
-    best_r2 = torch.full((U,), float('inf'), device=device)
-    best_centers = torch.zeros((U, 3), device=device)
+    best_r2 = torch.full((U,), float('inf'), dtype=torch.float64, device=device)
+    best_centers = torch.zeros((U, 3), dtype=torch.float64, device=device)
 
     for S in subsets:
         sz = len(S)
-        sub_Z = Z_cofaces[:, S]
-        sub_a = a_cofaces[:, S]
+        sub_Z = Z_cofaces_64[:, S]
+        sub_a = a_cofaces_64[:, S]
 
         c, r2 = solve_support_ball_batched(sub_Z, sub_a)
+        c = c.to(torch.float64)
+        r2 = r2.to(torch.float64)
 
         if sz == 1:
-            lambdas = torch.ones((U, 1), device=device)
+            lambdas = torch.ones((U, 1), dtype=torch.float64, device=device)
         else:
             v = sub_Z[:, 1:] - sub_Z[:, 0:1]
             G = torch.matmul(v, v.transpose(1, 2))
             v_norm_sq = torch.sum(v ** 2, dim=2)
             h = 0.5 * (v_norm_sq + sub_a[:, 1:] - sub_a[:, 0:1])
 
-            ridge = 1e-6 * torch.eye(sz-1, device=device).unsqueeze(0)
+            ridge = 1e-12 * torch.eye(sz-1, device=device).unsqueeze(0).to(torch.float64)
             try:
                 if sz == 2:
                     alpha = h / (G[:, 0, 0:1] + 1e-12)
@@ -81,14 +91,14 @@ def solve_weighted_miniball_batched(Z_cofaces, a_cofaces, tol=1e-6):
                 pinv = torch.linalg.pinv(G)
                 alpha = torch.bmm(pinv, h.unsqueeze(2)).squeeze(2)
 
-            lambdas = torch.zeros((U, sz), device=device)
+            lambdas = torch.zeros((U, sz), dtype=torch.float64, device=device)
             lambdas[:, 1:] = alpha
             lambdas[:, 0] = 1.0 - torch.sum(alpha, dim=1)
 
         dual_ok = torch.all(lambdas >= -tol, dim=1)
 
-        diff = Z_cofaces - c.unsqueeze(1)
-        phi = torch.sum(diff ** 2, dim=2) + a_cofaces
+        diff = Z_cofaces_64 - c.unsqueeze(1)
+        phi = torch.sum(diff ** 2, dim=2) + a_cofaces_64
         primal_ok = torch.all(phi <= r2.unsqueeze(1) + tol, dim=1)
 
         valid = dual_ok & primal_ok
@@ -99,10 +109,10 @@ def solve_weighted_miniball_batched(Z_cofaces, a_cofaces, tol=1e-6):
 
     failed = best_r2 == float('inf')
     if failed.any():
-        best_r2 = torch.where(failed, a_cofaces[:, 0], best_r2)
-        best_centers = torch.where(failed.unsqueeze(1), Z_cofaces[:, 0], best_centers)
+        best_r2 = torch.where(failed, a_cofaces_64[:, 0], best_r2)
+        best_centers = torch.where(failed.unsqueeze(1), Z_cofaces_64[:, 0], best_centers)
 
-    return best_centers, best_r2
+    return best_centers.to(dtype_orig), best_r2.to(dtype_orig)
 
 
 def solve_support_ball_3d(S_Z, S_a):
@@ -114,11 +124,15 @@ def solve_support_ball_3d(S_Z, S_a):
         center: (3,)
         radius_sq: float
     """
+    dtype_orig = S_Z.dtype
+    S_Z = S_Z.to(torch.float64)
+    S_a = S_a.to(torch.float64)
+
     size = S_Z.shape[0]
     device = S_Z.device
 
     if size == 1:
-        return S_Z[0], S_a[0]
+        return S_Z[0].to(dtype_orig), S_a[0].to(dtype_orig)
 
     # Pivot is element 0
     v = S_Z[1:] - S_Z[0] # shape (size-1, 3)
@@ -135,7 +149,9 @@ def solve_support_ball_3d(S_Z, S_a):
         if size == 2:
             alpha = h / G[0, 0]
         else:
-            alpha = torch.linalg.solve(G, h)
+            # Add small ridge for stability
+            ridge = 1e-12 * torch.eye(size-1, device=device, dtype=torch.float64)
+            alpha = torch.linalg.solve(G + ridge, h)
     except RuntimeError:
         # Fallback to pseudo-inverse
         pinv = torch.linalg.pinv(G)
@@ -144,7 +160,7 @@ def solve_support_ball_3d(S_Z, S_a):
     center = S_Z[0] + torch.matmul(alpha, v)
     radius_sq = S_a[0] + torch.dot(alpha, torch.matmul(G, alpha))
 
-    return center, radius_sq
+    return center.to(dtype_orig), radius_sq.to(dtype_orig)
 
 
 def solve_weighted_miniball_brute_force_3d(Z_coface, a_coface, tol=1e-6):
@@ -152,9 +168,13 @@ def solve_weighted_miniball_brute_force_3d(Z_coface, a_coface, tol=1e-6):
     Brute-force weighted miniball solver in 3D (support size <= 4) acting as an oracle.
     Guarantees the exact global minimum.
     """
-    n = Z_coface.shape[0]
-    device = Z_coface.device
-    tol = max(tol, 1e-5)
+    dtype_orig = Z_coface.dtype
+    Z_coface_64 = Z_coface.to(torch.float64)
+    a_coface_64 = a_coface.to(torch.float64)
+
+    n = Z_coface_64.shape[0]
+    device = Z_coface_64.device
+    tol = max(tol, 1e-8)
 
     best_r2 = np.inf
     best_center = None
@@ -163,14 +183,16 @@ def solve_weighted_miniball_brute_force_3d(Z_coface, a_coface, tol=1e-6):
     for r in range(1, min(5, n + 1)):
         for S in itertools.combinations(range(n), r):
             S = list(S)
-            c, r2 = solve_support_ball_3d(Z_coface[S], a_coface[S])
+            c, r2 = solve_support_ball_3d(Z_coface_64[S], a_coface_64[S])
+            c = c.to(torch.float64)
+            r2 = r2.to(torch.float64)
 
             # Compute multipliers
             if len(S) == 1:
-                lambdas = torch.tensor([1.0], device=device)
+                lambdas = torch.tensor([1.0], dtype=torch.float64, device=device)
             else:
-                sub_Z = Z_coface[S]
-                sub_a = a_coface[S]
+                sub_Z = Z_coface_64[S]
+                sub_a = a_coface_64[S]
                 v = sub_Z[1:] - sub_Z[0]
                 G = torch.matmul(v, v.t())
                 v_norm_sq = torch.sum(v ** 2, dim=1)
@@ -179,11 +201,12 @@ def solve_weighted_miniball_brute_force_3d(Z_coface, a_coface, tol=1e-6):
                     if len(S) == 2:
                         alpha = h / G[0, 0]
                     else:
-                        alpha = torch.linalg.solve(G, h)
+                        ridge = 1e-12 * torch.eye(len(S)-1, device=device, dtype=torch.float64)
+                        alpha = torch.linalg.solve(G + ridge, h)
                 except RuntimeError:
                     pinv = torch.linalg.pinv(G)
                     alpha = torch.matmul(pinv, h)
-                lambdas = torch.zeros(len(S), device=device)
+                lambdas = torch.zeros(len(S), dtype=torch.float64, device=device)
                 lambdas[1:] = alpha
                 lambdas[0] = 1.0 - torch.sum(alpha)
 
@@ -191,8 +214,8 @@ def solve_weighted_miniball_brute_force_3d(Z_coface, a_coface, tol=1e-6):
             dual_ok = torch.all(lambdas >= -tol)
 
             # Check containment of all coface points
-            diff = Z_coface - c
-            phi = torch.sum(diff ** 2, dim=1) + a_coface
+            diff = Z_coface_64 - c
+            phi = torch.sum(diff ** 2, dim=1) + a_coface_64
             primal_ok = torch.all(phi <= r2 + tol)
 
             if dual_ok and primal_ok:
@@ -204,7 +227,7 @@ def solve_weighted_miniball_brute_force_3d(Z_coface, a_coface, tol=1e-6):
     if best_center is None:
         return Z_coface[0], a_coface[0]
 
-    return best_center, torch.tensor(best_r2, device=device)
+    return best_center.to(dtype_orig), torch.tensor(best_r2, dtype=dtype_orig, device=device)
 
 
 def solve_weighted_miniball_active_set_3d(Z_coface, a_coface, max_iter=100, tol=1e-6):
@@ -212,23 +235,29 @@ def solve_weighted_miniball_active_set_3d(Z_coface, a_coface, max_iter=100, tol=
     Exact active-set weighted miniball solver in 3D.
     Guarantees convergence to the global minimum of the coface.
     """
-    n = Z_coface.shape[0]
-    device = Z_coface.device
-    tol = max(tol, 1e-5)
+    dtype_orig = Z_coface.dtype
+    Z_coface_64 = Z_coface.to(torch.float64)
+    a_coface_64 = a_coface.to(torch.float64)
+
+    n = Z_coface_64.shape[0]
+    device = Z_coface_64.device
+    tol = max(tol, 1e-8)
 
     S = [0]
-    c, r2 = Z_coface[0], a_coface[0]
+    c, r2 = Z_coface_64[0], a_coface_64[0]
 
     for it in range(max_iter):
-        sub_Z = Z_coface[S]
-        sub_a = a_coface[S]
+        sub_Z = Z_coface_64[S]
+        sub_a = a_coface_64[S]
 
         # 1. Solve equality-constrained problem on S
         c, r2 = solve_support_ball_3d(sub_Z, sub_a)
+        c = c.to(torch.float64)
+        r2 = r2.to(torch.float64)
 
         # Compute multipliers (lambdas)
         if len(S) == 1:
-            lambdas = torch.tensor([1.0], device=device)
+            lambdas = torch.tensor([1.0], dtype=torch.float64, device=device)
         else:
             v = sub_Z[1:] - sub_Z[0]
             G = torch.matmul(v, v.t())
@@ -238,12 +267,13 @@ def solve_weighted_miniball_active_set_3d(Z_coface, a_coface, max_iter=100, tol=
                 if len(S) == 2:
                     alpha = h / G[0, 0]
                 else:
-                    alpha = torch.linalg.solve(G, h)
+                    ridge = 1e-12 * torch.eye(len(S)-1, device=device, dtype=torch.float64)
+                    alpha = torch.linalg.solve(G + ridge, h)
             except RuntimeError:
                 pinv = torch.linalg.pinv(G)
                 alpha = torch.matmul(pinv, h)
 
-            lambdas = torch.zeros(len(S), device=device)
+            lambdas = torch.zeros(len(S), dtype=torch.float64, device=device)
             lambdas[1:] = alpha
             lambdas[0] = 1.0 - torch.sum(alpha)
 
@@ -257,8 +287,8 @@ def solve_weighted_miniball_active_set_3d(Z_coface, a_coface, max_iter=100, tol=
             continue
 
         # 2. Check containment of all points in the coface
-        diff = Z_coface - c
-        phi = torch.sum(diff ** 2, dim=1) + a_coface
+        diff = Z_coface_64 - c
+        phi = torch.sum(diff ** 2, dim=1) + a_coface_64
         violations = phi - r2
 
         max_viol_idx = torch.argmax(violations).item()
@@ -279,10 +309,12 @@ def solve_weighted_miniball_active_set_3d(Z_coface, a_coface, max_iter=100, tol=
             best_sub_S = None
             for idx_to_remove in range(5):
                 candidate_S = [S[j] for j in range(5) if j != idx_to_remove]
-                c_sub, r2_sub = solve_support_ball_3d(Z_coface[candidate_S], a_coface[candidate_S])
+                c_sub, r2_sub = solve_support_ball_3d(Z_coface_64[candidate_S], a_coface_64[candidate_S])
+                c_sub = c_sub.to(torch.float64)
+                r2_sub = r2_sub.to(torch.float64)
 
                 rem_pt_idx = S[idx_to_remove]
-                dist_rem_sq = torch.sum((Z_coface[rem_pt_idx] - c_sub) ** 2) + a_coface[rem_pt_idx]
+                dist_rem_sq = torch.sum((Z_coface_64[rem_pt_idx] - c_sub) ** 2) + a_coface_64[rem_pt_idx]
                 if dist_rem_sq <= r2_sub + tol:
                     if r2_sub > best_sub_r2:
                         best_sub_r2 = r2_sub
@@ -302,7 +334,7 @@ def solve_weighted_miniball_active_set_3d(Z_coface, a_coface, max_iter=100, tol=
     if torch.any(phi > r2 + tol):
         return solve_weighted_miniball_brute_force_3d(Z_coface, a_coface, tol=tol)
 
-    return c, r2
+    return c.to(dtype_orig), r2.to(dtype_orig)
 
 
 def extract_top_cofaces(witness_pool, Z, a, eta, grid_z, K, cfg):
