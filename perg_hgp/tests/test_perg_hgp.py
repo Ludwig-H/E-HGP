@@ -400,6 +400,26 @@ class TestPERGHGP(unittest.TestCase):
         # Compare sorted edge indices (since weights are unique, the MST is unique)
         self.assertEqual(len(cof_b), len(mst_cof_ref))
         np.testing.assert_array_equal(np.sort(cof_b), np.sort(mst_cof_ref))
+        
+    def test_batched_miniball_vs_active_set(self):
+        from perg_hgp.cofaces import solve_weighted_miniball_batched, solve_weighted_miniball_active_set_3d
+        device = 'cpu'
+        np.random.seed(42)
+        torch.manual_seed(42)
+        
+        U = 20
+        Nc = 4 # size <= 4
+        Z_cofaces = torch.rand((U, Nc, 3), dtype=torch.float32, device=device)
+        a_cofaces = torch.rand((U, Nc), dtype=torch.float32, device=device)
+        
+        # 1. Run batched
+        centers_b, r2_b = solve_weighted_miniball_batched(Z_cofaces, a_cofaces, tol=1e-6)
+        
+        # 2. Run sequential
+        for i in range(U):
+            c_seq, r2_seq = solve_weighted_miniball_active_set_3d(Z_cofaces[i], a_cofaces[i], tol=1e-6)
+            np.testing.assert_allclose(centers_b[i].cpu().numpy(), c_seq.cpu().numpy(), rtol=1e-4, atol=1e-4)
+            self.assertAlmostEqual(r2_b[i].item(), r2_seq.item(), places=4)
 
 if __name__ == '__main__':
     unittest.main()

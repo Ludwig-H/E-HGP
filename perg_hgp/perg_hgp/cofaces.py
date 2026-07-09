@@ -2,6 +2,109 @@ import torch
 import numpy as np
 import itertools
 
+def solve_support_ball_batched(sub_Z, sub_a):
+    """
+    Solves the support ball problem for a batch of U subsets of size <= 4.
+    sub_Z: shape (U, size, 3)
+    sub_a: shape (U, size)
+    """
+    U, size, _ = sub_Z.shape
+    device = sub_Z.device
+    
+    if size == 1:
+        return sub_Z[:, 0], sub_a[:, 0]
+        
+    v = sub_Z[:, 1:] - sub_Z[:, 0:1] # shape (U, size-1, 3)
+    
+    G = torch.matmul(v, v.transpose(1, 2)) # shape (U, size-1, size-1)
+    
+    v_norm_sq = torch.sum(v ** 2, dim=2)
+    h = 0.5 * (v_norm_sq + sub_a[:, 1:] - sub_a[:, 0:1])
+    
+    if size == 2:
+        alpha = h / (G[:, 0, 0:1] + 1e-12)
+    else:
+        ridge = 1e-6 * torch.eye(size-1, device=device).unsqueeze(0)
+        try:
+            alpha = torch.linalg.solve(G + ridge, h)
+        except RuntimeError:
+            pinv = torch.linalg.pinv(G)
+            alpha = torch.bmm(pinv, h.unsqueeze(2)).squeeze(2)
+            
+    center = sub_Z[:, 0] + torch.bmm(alpha.unsqueeze(1), v).squeeze(1)
+    G_alpha = torch.bmm(G, alpha.unsqueeze(2)).squeeze(2)
+    radius_sq = sub_a[:, 0] + torch.sum(alpha * G_alpha, dim=1)
+    
+    return center, radius_sq
+
+
+def solve_weighted_miniball_batched(Z_cofaces, a_cofaces, tol=1e-6):
+    """
+    Batched solver for weighted miniball in 3D for U cofaces of size Nc <= 4.
+    Z_cofaces: shape (U, Nc, 3)
+    a_cofaces: shape (U, Nc)
+    """
+    U, Nc, _ = Z_cofaces.shape
+    device = Z_cofaces.device
+    tol = max(tol, 1e-5)
+    
+    subsets = []
+    for r in range(1, min(5, Nc + 1)):
+        for S in itertools.combinations(range(Nc), r):
+            subsets.append(list(S))
+            
+    best_r2 = torch.full((U,), float('inf'), device=device)
+    best_centers = torch.zeros((U, 3), device=device)
+    
+    for S in subsets:
+        sz = len(S)
+        sub_Z = Z_cofaces[:, S]
+        sub_a = a_cofaces[:, S]
+        
+        c, r2 = solve_support_ball_batched(sub_Z, sub_a)
+        
+        if sz == 1:
+            lambdas = torch.ones((U, 1), device=device)
+        else:
+            v = sub_Z[:, 1:] - sub_Z[:, 0:1]
+            G = torch.matmul(v, v.transpose(1, 2))
+            v_norm_sq = torch.sum(v ** 2, dim=2)
+            h = 0.5 * (v_norm_sq + sub_a[:, 1:] - sub_a[:, 0:1])
+            
+            ridge = 1e-6 * torch.eye(sz-1, device=device).unsqueeze(0)
+            try:
+                if sz == 2:
+                    alpha = h / (G[:, 0, 0:1] + 1e-12)
+                else:
+                    alpha = torch.linalg.solve(G + ridge, h)
+            except RuntimeError:
+                pinv = torch.linalg.pinv(G)
+                alpha = torch.bmm(pinv, h.unsqueeze(2)).squeeze(2)
+                
+            lambdas = torch.zeros((U, sz), device=device)
+            lambdas[:, 1:] = alpha
+            lambdas[:, 0] = 1.0 - torch.sum(alpha, dim=1)
+            
+        dual_ok = torch.all(lambdas >= -tol, dim=1)
+        
+        diff = Z_cofaces - c.unsqueeze(1)
+        phi = torch.sum(diff ** 2, dim=2) + a_cofaces
+        primal_ok = torch.all(phi <= r2.unsqueeze(1) + tol, dim=1)
+        
+        valid = dual_ok & primal_ok
+        
+        better = valid & (r2 < best_r2)
+        best_r2 = torch.where(better, r2, best_r2)
+        best_centers = torch.where(better.unsqueeze(1), c, best_centers)
+        
+    failed = best_r2 == float('inf')
+    if failed.any():
+        best_r2 = torch.where(failed, a_cofaces[:, 0], best_r2)
+        best_centers = torch.where(failed.unsqueeze(1), Z_cofaces[:, 0], best_centers)
+        
+    return best_centers, best_r2
+
+
 def solve_support_ball_3d(S_Z, S_a):
     """
     Solves the weighted miniball problem exactly for a small support set of size <= 4 in 3D.
@@ -253,33 +356,46 @@ def extract_top_cofaces(witness_pool, Z, a, eta, grid_z, K, cfg):
     cof_chunk_size = 5000
     for start in range(0, U, cof_chunk_size):
         end = min(start + cof_chunk_size, U)
+        chunk_len = end - start
         
-        for i in range(start, end):
-            cof_idx = unique_cofaces[i]
-            Z_cof = Z[cof_idx]
-            a_cof = a[cof_idx]
-            
-            c, r2 = solve_weighted_miniball_active_set_3d(Z_cof, a_cof, tol=cfg.gabriel_tol)
-            
-            # Top-consistency check: Top_{K+1}(c) == cof_idx
-            nbr_idx, _ = grid_z.query_knn_grid(c.unsqueeze(0), m_local=cfg.m_active)
-            nbr_idx = nbr_idx[0]
-            
-            diff_pts = Z[nbr_idx] - c
-            phi_pts = torch.sum(diff_pts ** 2, dim=1) + a[nbr_idx]
-            
-            sorted_nbr_idx = nbr_idx[torch.argsort(phi_pts)]
-            top_k_plus_1 = sorted_nbr_idx[:K + 1]
-            top_k_plus_1_sorted, _ = torch.sort(top_k_plus_1)
-            
-            if torch.equal(top_k_plus_1_sorted, cof_idx):
-                valid_cofaces.append(cof_idx)
-                centers_list.append(c)
-                weights_list.append(torch.sqrt(torch.clamp(r2, min=0.0)))
+        cof_idx_chunk = unique_cofaces[start:end]
+        Z_cof = Z[cof_idx_chunk] # (chunk_len, K+1, 3)
+        a_cof = a[cof_idx_chunk] # (chunk_len, K+1)
+        
+        # Check if coface size is <= 4 to use batched solver, otherwise fallback
+        if K + 1 <= 4:
+            centers_chunk, r2_chunk = solve_weighted_miniball_batched(Z_cof, a_cof, tol=cfg.gabriel_tol)
+        else:
+            # Fallback to sequential active-set solver
+            centers_chunk = torch.zeros((chunk_len, 3), device=device)
+            r2_chunk = torch.zeros(chunk_len, device=device)
+            for i in range(chunk_len):
+                c, r2 = solve_weighted_miniball_active_set_3d(Z_cof[i], a_cof[i], tol=cfg.gabriel_tol)
+                centers_chunk[i] = c
+                r2_chunk[i] = r2
+                
+        # Batched top-consistency check: Top_{K+1}(c) == cof_idx
+        nbr_idx, _ = grid_z.query_knn_grid(centers_chunk, m_local=cfg.m_active) # (chunk_len, m_active)
+        
+        diff_pts = Z[nbr_idx] - centers_chunk.unsqueeze(1) # (chunk_len, m_active, 3)
+        phi_pts = torch.sum(diff_pts ** 2, dim=2) + a[nbr_idx] # (chunk_len, m_active)
+        
+        sorted_idx = torch.argsort(phi_pts, dim=1) # (chunk_len, m_active)
+        row_idx = torch.arange(chunk_len, device=device).unsqueeze(1)
+        top_k_plus_1 = nbr_idx[row_idx, sorted_idx[:, :K + 1]] # (chunk_len, K+1)
+        top_k_plus_1_sorted, _ = torch.sort(top_k_plus_1, dim=1)
+        
+        matches = torch.all(top_k_plus_1_sorted == cof_idx_chunk, dim=1) # (chunk_len,)
+        
+        valid_idx = torch.where(matches)[0]
+        if valid_idx.shape[0] > 0:
+            valid_cofaces.append(cof_idx_chunk[valid_idx])
+            centers_list.append(centers_chunk[valid_idx])
+            weights_list.append(torch.sqrt(torch.clamp(r2_chunk[valid_idx], min=0.0)))
             
     if len(valid_cofaces) == 0:
         return torch.empty((0, K + 1), dtype=torch.int64, device=device), \
                torch.empty((0, 3), dtype=torch.float32, device=device), \
                torch.empty((0,), dtype=torch.float32, device=device)
                
-    return torch.stack(valid_cofaces), torch.stack(centers_list), torch.stack(weights_list)
+    return torch.cat(valid_cofaces, dim=0), torch.cat(centers_list, dim=0), torch.cat(weights_list, dim=0)
