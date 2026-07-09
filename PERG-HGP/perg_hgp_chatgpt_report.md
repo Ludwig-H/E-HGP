@@ -1,4 +1,4 @@
-# Rapport de Version 3.4 & Phase 5 (Transmission à ChatGPT)
+# Rapport de Version 3.5 & Phase 5 (Transmission à ChatGPT)
 
 Ce rapport documente la validation des **optimisations de scalabilité massive (Phase 5)** et la résolution des verrous de mémoire et d'out-of-core de la bibliothèque **PERG-HGP**.
 
@@ -31,17 +31,23 @@ Ce rapport documente la validation des **optimisations de scalabilité massive (
 *   **Pointer Jumping & Scatter Reduce** : Utilisation du pointer jumping parallèle pour la compression de chemins Union-Find et de `scatter_reduce_(..., reduce='amin')` avec empaquetage des poids et indices sur 64 bits pour la sélection déterministe et sans conflit d'arêtes.
 *   **Bénéfice** : Résolution du MST entièrement vectorisée et compatible GPU/CPU.
 
+### 1.7 Vectorisation et Batch du Miniball & Top-Consistency (Step 5.5)
+*   **Solveur Miniball Batched** : Implémentation du solveur de miniball pondéré par batch dans [cofaces.py](file:///workspaces/E-HGP/perg_hgp/perg_hgp/cofaces.py) (`solve_weighted_miniball_batched`), qui résout simultanément le problème pour des milliers de cofaces en utilisant l'algèbre linéaire par lots de PyTorch.
+*   **Top-Consistency Vectorisée** : Remplacement de la boucle séquentielle par coface dans `extract_top_cofaces` par des requêtes de grilles par lots et des tris et comparaisons tensoriels.
+*   **Bénéfice** : Élimination complète de la latence d'exécution séquentielle en Python lors de l'extraction et de la certification des complexes.
+
 ---
 
 ## 2. Validation de la Suite de Tests
 
-La suite de tests unitaires et d'intégration a été étendue à **14 tests**, validant de bout en bout :
+La suite de tests unitaires et d'intégration a été étendue à **15 tests**, validant de bout en bout :
 *   L'active-set du miniball 3D.
 *   Le test de Gabriel global par élagage AABB.
 *   La reprise robuste sur coupure depuis les checkpoints.
 *   Le mode `soft_only` direct.
 *   La correction du layout out-of-core multi-chunks.
 *   L'exactitude géométrique parfaite du KNN de la grille comparé à un scan brute-force exact.
-*   L'équivalence mathématique stricte de l'implémentation parallèle de Borůvka par rapport à Kruskal sur des graphes de test aléatoires (`test_boruvka_vs_kruskal`).
+*   L'équivalence mathématique stricte de l'implémentation parallèle de Borůvka par rapport à Kruskal.
+*   La parfaite exactitude et équivalence du solveur batched de miniball par rapport au solveur séquentiel active-set (`test_batched_miniball_vs_active_set`).
 
-**Statut** : `OK` (Exécution complète des 14 tests en **3,46 secondes** sur CPU).
+**Statut** : `OK` (Exécution complète des 15 tests en **8,96 secondes** sur CPU).
