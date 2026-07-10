@@ -21,6 +21,7 @@ from .contracts import (
     estimate_memory,
 )
 from .cubical_msf import CubicalMSFResult, build_cubical_msf
+from .progress import ProgressCallback, emit_progress
 from .spatial_core import (
     CertifiedPowerKNN,
     CubicalField,
@@ -32,6 +33,106 @@ from .spatial_core import (
     regularize_sites_streaming,
     solve_entropy_gibbs,
 )
+
+
+_FIT_PROGRESS_STAGES = (
+    "input",
+    "raw_index",
+    "regularization",
+    "power_index",
+    "power_field",
+    "cubical_msf",
+)
+
+
+class _FitProgress:
+    """Emit consistent stage events while keeping display policy in the caller."""
+
+    def __init__(self, callback: ProgressCallback | None):
+        self.callback = callback
+        self.started: dict[str, float] = {}
+
+    def _details(
+        self, stage: str, extra: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        details: dict[str, Any] = {
+            "stage_index": int(_FIT_PROGRESS_STAGES.index(stage) + 1),
+            "stage_count": int(len(_FIT_PROGRESS_STAGES)),
+        }
+        if extra:
+            details.update(extra)
+        return details
+
+    def start(
+        self,
+        stage: str,
+        *,
+        total: int,
+        unit: str,
+        details: dict[str, Any] | None = None,
+    ) -> float:
+        started = time.perf_counter()
+        self.started[stage] = started
+        emit_progress(
+            self.callback,
+            stage=stage,
+            kind="start",
+            completed=0,
+            total=total,
+            unit=unit,
+            started_at=started,
+            details=self._details(stage, details),
+        )
+        return started
+
+    def message(self, stage: str, operation: str) -> None:
+        emit_progress(
+            self.callback,
+            stage=stage,
+            kind="message",
+            started_at=self.started.get(stage),
+            details=self._details(stage, {"operation": str(operation)}),
+        )
+
+    @property
+    def helper_callback(self) -> ProgressCallback | None:
+        return self._forward_helper_event if self.callback is not None else None
+
+    def _forward_helper_event(self, event: dict[str, Any]) -> None:
+        """Align helper timing/details with the enclosing fit stage."""
+
+        stage = str(event["stage"])
+        forwarded = event.copy()
+        started = self.started.get(stage)
+        if started is not None:
+            forwarded["elapsed_seconds"] = float(
+                max(0.0, time.perf_counter() - started)
+            )
+        forwarded["details"] = self._details(
+            stage, dict(event.get("details", {}))
+        )
+        callback = self.callback
+        if callback is not None:
+            callback(forwarded)
+
+    def done(
+        self,
+        stage: str,
+        *,
+        total: int,
+        unit: str,
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        emit_progress(
+            self.callback,
+            stage=stage,
+            kind="done",
+            completed=total,
+            total=total,
+            unit=unit,
+            started_at=self.started.get(stage),
+            details=self._details(stage, details),
+        )
 
 
 @dataclass
@@ -248,7 +349,9 @@ class PowerCover3D:
     CPU mode is an exact small-data reference.  CUDA mode uses RAPIDS RBC with
     a mandatory empirical cuVS audit, a global power guard under the declared
     float32 envelope, and the implicit CuPy Boruvka implementation for the
-    26-connected grid.
+    26-connected grid.  The optional ``progress`` callback receives
+    synchronous, JSON-safe event dictionaries; callback exceptions are
+    intentionally propagated.
     """
 
     def __init__(
@@ -257,6 +360,7 @@ class PowerCover3D:
         *,
         backend: str = "cpu",
         distortion_budget: float | None = None,
+        progress: ProgressCallback | None = None,
     ):
         self.config = config or PowerCoverConfig()
         normalized = backend.lower().replace("-", "_")
@@ -264,19 +368,27 @@ class PowerCover3D:
             raise ValueError("backend must be cpu or cuda/cupy/gpu")
         self.backend = "cpu" if normalized == "cpu" else "cuda"
         self.distortion_budget = distortion_budget
+        if progress is not None and not callable(progress):
+            raise TypeError("progress must be callable or None")
+        self.progress = progress
 
     def fit(self, points: Any) -> PowerCoverHierarchy:
         config = self.config
         timings: dict[str, float] = {}
         audits: dict[str, dict[str, Any]] = {}
         start_total = time.perf_counter()
+        progress = _FitProgress(self.progress)
 
+        progress.start(
+            "input",
+            total=1,
+            unit="stage",
+            details={"backend": self.backend},
+        )
         if self.backend == "cpu":
             original_values = np.ascontiguousarray(np.asarray(points))
             transform = _spatial_transform(original_values)
             values = _normalize_points(original_values, transform)
-            raw_index = ExactKDTreeIndex(values)
-            neighbor_support = raw_index.backend_name
             hardware_manifest: dict[str, Any] = {
                 "backend": "cpu_reference",
                 "numpy": np.__version__,
@@ -293,15 +405,39 @@ class PowerCover3D:
             original_values = cp.ascontiguousarray(cp.asarray(points))
             transform = _spatial_transform(original_values)
             values = _normalize_points(original_values, transform)
-            memory = estimate_memory(int(values.shape[0]), config)
+
+        n_points = int(values.shape[0])
+        if n_points < config.K:
+            raise ValueError(f"K={config.K} requires at least K input points")
+        memory = estimate_memory(n_points, config)
+        if self.backend == "cuda":
             ensure_memory_budget(
                 memory.estimated_peak_bytes, fraction=config.max_vram_fraction
             )
+        progress.done(
+            "input",
+            total=1,
+            unit="stage",
+            details={"points": n_points},
+        )
+
+        progress.start(
+            "raw_index",
+            total=1,
+            unit="stage",
+            details={"points": n_points},
+        )
+        if self.backend == "cpu":
+            raw_index = ExactKDTreeIndex(values)
+            neighbor_support = raw_index.backend_name
+        else:
+            progress.message("raw_index", "build_rapids_rbc")
             raw_index = RBCAuditedIndex(
                 values, max_k=min(config.m_reg, values.shape[0])
             )
             hardware_manifest = collect_hardware_manifest()
             if config.neighbor_audit_queries:
+                progress.message("raw_index", "audit_against_cuvs_bruteforce")
                 audit = raw_index.audit_against_bruteforce(
                     _sample_rows(values, config.neighbor_audit_queries),
                     k=min(config.m_reg, int(values.shape[0])),
@@ -312,19 +448,23 @@ class PowerCover3D:
                 raise RuntimeError("raw-site RBC audit failed; strict run aborted")
             raw_rbc_audited = bool(raw_index.audited)
             neighbor_support = "rapids_rbc_empirical_audit_pending_power_queries"
+        progress.done(
+            "raw_index",
+            total=1,
+            unit="stage",
+            details={"audit_queries": int(config.neighbor_audit_queries)},
+        )
 
-        n_points = int(values.shape[0])
-        if n_points < config.K:
-            raise ValueError(f"K={config.K} requires at least K input points")
-        memory = estimate_memory(n_points, config)
-
-        start = time.perf_counter()
+        start = progress.start(
+            "regularization", total=n_points, unit="points"
+        )
         sites = regularize_sites_streaming(
             values,
             raw_index,
             m_reg=config.m_reg,
             kappa=config.kappa,
             chunk_size=config.chunk_size,
+            progress=progress.helper_callback,
         )
         _synchronize(self.backend)
         timings["regularization"] = time.perf_counter() - start
@@ -334,9 +474,21 @@ class PowerCover3D:
                 f"full-run distortion s={s_original:.6g} exceeds "
                 f"budget {self.distortion_budget:.6g}; lower kappa and rerun"
             )
+        progress.done(
+            "regularization",
+            total=n_points,
+            unit="points",
+            details={"s_max_input_units": float(s_original)},
+        )
         del raw_index, values, original_values
         _release_cached_gpu_memory(self.backend)
 
+        progress.start(
+            "power_index",
+            total=1,
+            unit="stage",
+            details={"grid_shape": [int(value) for value in config.grid_shape]},
+        )
         spec = build_grid_spec(sites.centers, config.grid_shape)
         start = time.perf_counter()
         if self.backend == "cpu":
@@ -344,11 +496,13 @@ class PowerCover3D:
         else:
             from .cuda_runtime import RBCAuditedIndex
 
+            progress.message("power_index", "build_rapids_rbc")
             site_index = RBCAuditedIndex(
                 sites.centers,
                 max_k=min(n_points, config.candidate_k_max + 1),
             )
             if config.neighbor_audit_queries:
+                progress.message("power_index", "audit_grid_against_cuvs_bruteforce")
                 audit_count = min(config.neighbor_audit_queries, spec.n_cubes)
                 flat = cp.linspace(
                     0, spec.n_cubes - 1, audit_count, dtype=cp.int64
@@ -371,6 +525,15 @@ class PowerCover3D:
                 else "rapids_rbc_empirical_audit_incomplete_or_failed"
             )
         timings["power_index"] = time.perf_counter() - start
+        progress.done(
+            "power_index",
+            total=1,
+            unit="stage",
+            details={
+                "cubes": int(spec.n_cubes),
+                "audit_queries": int(config.neighbor_audit_queries),
+            },
+        )
 
         oracle = CertifiedPowerKNN(
             sites.centers,
@@ -382,20 +545,38 @@ class PowerCover3D:
             numerical_margin_factor=config.numerical_margin_factor,
             strict=config.strict_certification,
         )
-        start = time.perf_counter()
+        start = progress.start(
+            "power_field", total=spec.n_cubes, unit="cubes"
+        )
         field = evaluate_cubical_field(
-            oracle, spec, chunk_size=config.power_chunk_size
+            oracle,
+            spec,
+            chunk_size=config.power_chunk_size,
+            progress=progress.helper_callback,
         )
         _synchronize(self.backend)
         timings["power_field"] = time.perf_counter() - start
+        progress.done(
+            "power_field",
+            total=spec.n_cubes,
+            unit="cubes",
+            details={
+                "certified": int(field.diagnostics.certified_queries),
+                "uncertain": int(field.diagnostics.uncertain_queries),
+            },
+        )
         del oracle, site_index
         _release_cached_gpu_memory(self.backend)
 
-        start = time.perf_counter()
+        msf_edge_count = max(0, int(spec.n_cubes) - 1)
+        start = progress.start(
+            "cubical_msf", total=msf_edge_count, unit="edges"
+        )
         base_forest_normalized = build_cubical_msf(
             field.radii,
             dims=spec.shape,
             backend="cpu" if self.backend == "cpu" else "cuda",
+            progress=progress.helper_callback,
         )
         # Uniform cubes have a constant H.  The two certified filtrations have
         # identical topology and differ only by this radius translation.
@@ -409,6 +590,12 @@ class PowerCover3D:
         outer_forest = base_forest.shifted(-effective_half_width)
         _synchronize(self.backend)
         timings["cubical_msf"] = time.perf_counter() - start
+        progress.done(
+            "cubical_msf",
+            total=msf_edge_count,
+            unit="edges",
+            details={"vertices": int(spec.n_cubes)},
+        )
 
         spatial_enveloped = field.diagnostics.uncertain_queries == 0
         report = AccuracyReport(

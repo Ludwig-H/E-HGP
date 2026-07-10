@@ -8,6 +8,7 @@ No function in this module materialises an ``N x m_reg`` array globally.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import time
 from typing import Any, Protocol, Sequence
 
 import numpy as np
@@ -19,6 +20,7 @@ from .contracts import (
     RegularizationDiagnostics,
     _shape3,
 )
+from .progress import ProgressCallback, emit_progress
 
 
 class EuclideanKNNIndex(Protocol):
@@ -321,6 +323,7 @@ def regularize_sites_streaming(
     kappa: float,
     chunk_size: int,
     require_self_neighbor: bool = True,
+    progress: ProgressCallback | None = None,
 ) -> RegularizedSites:
     """Compute ``(z_i, a_i, s_i)`` while releasing every neighbor block."""
 
@@ -343,6 +346,7 @@ def regularize_sites_streaming(
     max_entropy_violation = 0.0
     max_entropy_deviation = 0.0
     max_simplex_residual = 0.0
+    progress_started = time.perf_counter()
 
     for start in range(0, n_points, int(chunk_size)):
         stop = min(start + int(chunk_size), n_points)
@@ -407,6 +411,22 @@ def regularize_sites_streaming(
             distortion_chunk,
             queries,
         )
+        if progress is not None:
+            emit_progress(
+                progress,
+                stage="regularization",
+                kind="progress",
+                completed=stop,
+                total=n_points,
+                unit="points",
+                started_at=progress_started,
+                details={
+                    "chunk": int(start // int(chunk_size) + 1),
+                    "chunks": int(
+                        (n_points + int(chunk_size) - 1) // int(chunk_size)
+                    ),
+                },
+            )
 
     quantile_levels = (0.0, 0.5, 0.9, 0.99, 1.0)
     quantile_sample_size = min(n_points, 1_000_000)
@@ -824,6 +844,7 @@ def evaluate_cubical_field(
     spec: GridSpec,
     *,
     chunk_size: int,
+    progress: ProgressCallback | None = None,
 ) -> CubicalField:
     """Evaluate the radius field and its inner/outer cube activations."""
 
@@ -836,6 +857,7 @@ def evaluate_cubical_field(
     histogram: dict[str, int] = {}
     minimum_gap: float | None = None
     numerical_radius_error = 0.0
+    progress_started = time.perf_counter()
 
     for start in range(0, n_cubes, int(chunk_size)):
         stop = min(start + int(chunk_size), n_cubes)
@@ -854,6 +876,24 @@ def evaluate_cubical_field(
         numerical_radius_error = max(
             numerical_radius_error, result.diagnostics.radius_error_max
         )
+        if progress is not None:
+            emit_progress(
+                progress,
+                stage="power_field",
+                kind="progress",
+                completed=stop,
+                total=n_cubes,
+                unit="cubes",
+                started_at=progress_started,
+                details={
+                    "chunk": int(start // int(chunk_size) + 1),
+                    "chunks": int(
+                        (n_cubes + int(chunk_size) - 1) // int(chunk_size)
+                    ),
+                    "certified": int(total_certified),
+                    "uncertain": int(total_uncertain),
+                },
+            )
 
     # A global envelope preserves the common MSF topology of the two uniform
     # filtrations while accounting for centre-value roundoff explicitly.

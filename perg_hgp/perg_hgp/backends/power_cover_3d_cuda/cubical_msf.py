@@ -19,9 +19,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+import time
 from typing import Any, Sequence
 
 import numpy as np
+
+from .progress import ProgressCallback, emit_progress
 
 
 _NEIGHBOUR_OFFSETS_26 = tuple(
@@ -567,6 +570,7 @@ def cubical_msf_gpu(
     dims: int | Sequence[int] | None = None,
     *,
     threads_per_block: int = 256,
+    progress: ProgressCallback | None = None,
 ) -> CubicalMSFResult:
     """Build the cubical MSF with an implicit-edge CuPy Boruvka backend.
 
@@ -633,6 +637,7 @@ def cubical_msf_gpu(
     )
     phase_start = 0
     max_phases = int(math.ceil(math.log2(n_vertices))) + 2
+    progress_started = time.perf_counter()
     for _phase in range(max_phases):
         kernels["reset_best"](
             vertex_blocks, block, (best_key, np.int32(n_vertices))
@@ -688,6 +693,21 @@ def cubical_msf_gpu(
             vertex_blocks, block, (parent, np.int32(n_vertices))
         )
         phase_start = phase_end
+        if progress is not None:
+            emit_progress(
+                progress,
+                stage="cubical_msf",
+                kind="progress",
+                completed=phase_end,
+                total=n_vertices - 1,
+                unit="edges",
+                started_at=progress_started,
+                details={
+                    "phase": int(_phase + 1),
+                    "max_phases": int(max_phases),
+                    "selected_edges": int(selected_count),
+                },
+            )
         if phase_end == n_vertices - 1:
             break
 
@@ -695,6 +715,18 @@ def cubical_msf_gpu(
         raise RuntimeError(
             "CUDA Boruvka did not produce a spanning tree within the expected "
             f"number of phases ({phase_start}/{n_vertices - 1} edges)"
+        )
+
+    if progress is not None:
+        emit_progress(
+            progress,
+            stage="cubical_msf",
+            kind="message",
+            completed=phase_start,
+            total=n_vertices - 1,
+            unit="edges",
+            started_at=progress_started,
+            details={"operation": "device_to_host_and_deterministic_sort"},
         )
 
     # Atomic output positions are intentionally unordered.  Sorting the compact
@@ -720,6 +752,7 @@ def build_cubical_msf(
     *,
     backend: str = "cpu",
     threads_per_block: int = 256,
+    progress: ProgressCallback | None = None,
 ) -> CubicalMSFResult:
     """Dispatch to the explicit ``cpu`` or ``cupy`` cubical MSF backend."""
 
@@ -728,7 +761,10 @@ def build_cubical_msf(
         return cubical_msf_cpu(activations, dims=dims)
     if normalized_backend in {"cupy", "cuda", "gpu"}:
         return cubical_msf_gpu(
-            activations, dims=dims, threads_per_block=threads_per_block
+            activations,
+            dims=dims,
+            threads_per_block=threads_per_block,
+            progress=progress,
         )
     raise ValueError("backend must be one of: cpu, reference, cupy, cuda, gpu")
 

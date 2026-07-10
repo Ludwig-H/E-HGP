@@ -15,6 +15,7 @@ from .contracts import (
     SpatialTransform,
     estimate_memory,
 )
+from .progress import ProgressCallback, ProgressEvent
 from .spatial_core import (
     CertifiedPowerKNN,
     ExactKDTreeIndex,
@@ -39,6 +40,8 @@ __all__ = [
     "PowerCover3D",
     "PowerCoverConfig",
     "PowerCoverHierarchy",
+    "ProgressCallback",
+    "ProgressEvent",
     "PowerKNNCertificationError",
     "SpatialTransform",
     "brute_force_power_topk",

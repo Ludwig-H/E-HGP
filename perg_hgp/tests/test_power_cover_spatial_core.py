@@ -1,8 +1,10 @@
 import json
+from pathlib import Path
 
 import numpy as np
 import pytest
 
+import perg_hgp.backends.power_cover_3d_cuda.api as power_cover_api
 from perg_hgp.backends.power_cover_3d_cuda.api import (
     PowerCover3D,
     pilot_kappa_calibration,
@@ -169,6 +171,26 @@ def test_regularization_is_chunk_invariant():
     np.testing.assert_allclose(first.centers, second.centers)
     np.testing.assert_allclose(first.additive_weights, second.additive_weights)
     np.testing.assert_allclose(first.distortions, second.distortions)
+
+
+def test_regularization_progress_is_monotone_complete_and_json_safe():
+    rng = np.random.default_rng(40)
+    points = rng.normal(size=(7, 3)).astype(np.float32)
+    events = []
+    result = regularize_sites_streaming(
+        points,
+        ExactKDTreeIndex(points),
+        m_reg=1,
+        kappa=1.0,
+        chunk_size=3,
+        progress=events.append,
+    )
+
+    assert [event["completed"] for event in events] == [3, 6, 7]
+    assert all(event["total"] == 7 for event in events)
+    assert all(event["stage"] == "regularization" for event in events)
+    json.dumps(events, allow_nan=False)
+    np.testing.assert_array_equal(result.centers, points)
 
 
 def test_power_candidate_guard_matches_blocked_bruteforce():
@@ -351,6 +373,95 @@ def test_end_to_end_cpu_builds_two_shifted_hierarchies():
     assert hierarchy.report.full_power_hgp_complete is False
 
 
+def test_end_to_end_progress_reports_ordered_stages_and_partial_chunks(
+    monkeypatch,
+):
+    points = np.array(
+        [
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 0.0, 1.0],
+            [1.0, 1.0, 0.0],
+            [1.0, 0.0, 1.0],
+            [0.0, 1.0, 1.0],
+        ],
+        dtype=np.float32,
+    )
+    config = PowerCoverConfig(
+        K=1,
+        kappa=1.0,
+        m_reg=1,
+        grid_shape=2,
+        chunk_size=3,
+        power_chunk_size=2,
+        candidate_k_initial=7,
+        candidate_k_max=7,
+        neighbor_audit_queries=0,
+        require_neighbor_audit=False,
+    )
+    synchronize_calls = []
+    monkeypatch.setattr(
+        power_cover_api,
+        "_synchronize",
+        lambda backend: synchronize_calls.append(backend),
+    )
+
+    quiet = PowerCover3D(config, backend="cpu").fit(points)
+    quiet_synchronizations = list(synchronize_calls)
+    synchronize_calls.clear()
+    events = []
+    loud = PowerCover3D(
+        config, backend="cpu", progress=events.append
+    ).fit(points)
+
+    assert synchronize_calls == quiet_synchronizations
+    starts = [event["stage"] for event in events if event["kind"] == "start"]
+    dones = [event["stage"] for event in events if event["kind"] == "done"]
+    expected = [
+        "input",
+        "raw_index",
+        "regularization",
+        "power_index",
+        "power_field",
+        "cubical_msf",
+    ]
+    assert starts == expected
+    assert dones == expected
+    regularization = [
+        event
+        for event in events
+        if event["stage"] == "regularization" and event["kind"] == "progress"
+    ]
+    power_field = [
+        event
+        for event in events
+        if event["stage"] == "power_field" and event["kind"] == "progress"
+    ]
+    assert [event["completed"] for event in regularization] == [3, 6, 7]
+    assert [event["completed"] for event in power_field] == [2, 4, 6, 8]
+    assert all(
+        0 <= event.get("completed", 0) <= event.get("total", 1)
+        for event in events
+    )
+    assert all(
+        event["details"]["stage_count"] == 6
+        and 1 <= event["details"]["stage_index"] <= 6
+        for event in events
+    )
+    json.dumps(events, allow_nan=False)
+
+    np.testing.assert_array_equal(loud.sites.centers, quiet.sites.centers)
+    np.testing.assert_array_equal(loud.field.radii, quiet.field.radii)
+    np.testing.assert_array_equal(loud.base_forest.edges, quiet.base_forest.edges)
+    np.testing.assert_array_equal(loud.base_forest.weights, quiet.base_forest.weights)
+
+
+def test_progress_callback_must_be_callable():
+    with pytest.raises(TypeError, match="progress must be callable or None"):
+        PowerCover3D(backend="cpu", progress=True)
+
+
 def test_saved_hierarchy_is_atomic_versioned_and_strict_json(tmp_path):
     points = np.array(
         [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
@@ -464,3 +575,19 @@ def test_non_strict_uncertain_field_never_advertises_interleaving_bounds():
     assert hierarchy.report.total_interleaving_radius is None
     with pytest.raises(RuntimeError, match="declared envelope"):
         hierarchy.fusion_intervals()
+
+
+def test_blackwell_notebook_verbose_param_is_wired_to_long_running_stages():
+    notebook_path = (
+        Path(__file__).resolve().parents[2] / "PERG_HGP_Blackwell_30M.ipynb"
+    )
+    notebook = json.loads(notebook_path.read_text(encoding="utf-8"))
+    sources = ["".join(cell.get("source", ())) for cell in notebook["cells"]]
+    combined = "\n".join(sources)
+
+    assert 'verbose = True  # @param {type:"boolean"}' in sources[1]
+    assert "progress=progress_reporter if verbose else None" in combined
+    assert "generate_mixture_3d(N_FULL, FULL_SEED, verbose=verbose)" in combined
+    assert "[PERG-HGP heartbeat]" in combined
+    for index in (1, 15, 17, 19, 21):
+        compile(sources[index], f"{notebook_path.name}:cell-{index}", "exec")
