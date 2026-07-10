@@ -458,8 +458,17 @@ def _candidate_power_values(
             np.subtract(query_values[:, axis, None], scratch, out=scratch)
             np.square(scratch, out=scratch)
             np.add(output, scratch, out=output)
-        np.take(additive, selected, out=scratch)
-        np.add(output, scratch, out=output)
+        # NumPy 2.0 requires the source and ``out`` dtypes of ``take`` to
+        # match, even when the conversion is otherwise safe.  Reuse the
+        # geometric scratch when possible; otherwise replace it with a local
+        # Q x C weight scratch instead of converting the global N-vector.
+        if additive.dtype == scratch.dtype:
+            weight_scratch = scratch
+        else:
+            del scratch
+            weight_scratch = np.empty(output.shape, dtype=additive.dtype)
+        np.take(additive, selected, out=weight_scratch)
+        np.add(output, weight_scratch, out=output, casting="same_kind")
         return output
 
     # The massive CUDA path stores normalized sites in float32 and RBC emits

@@ -196,6 +196,7 @@ def test_power_guard_escalates_when_close_sites_have_large_weights():
         (np.arange(12, dtype=np.float32), np.zeros(12), np.zeros(12))
     )
     additive = np.array([100.0] * 5 + [0.0] * 7, dtype=np.float32)
+    assert sites.dtype == np.float64 and additive.dtype == np.float32
     queries = np.array([[0.0, 0.0, 0.0]], dtype=np.float32)
     oracle = CertifiedPowerKNN(
         sites,
@@ -205,10 +206,58 @@ def test_power_guard_escalates_when_close_sites_have_large_weights():
         candidate_k_initial=2,
         candidate_k_max=12,
     )
+    assert oracle.sites.dtype == sites.dtype
+    assert oracle.additive.dtype == additive.dtype
     result = oracle.query(queries)
     assert result.candidates_used.item() > 2
     exact, _ = brute_force_power_topk(queries, sites, additive, 2)
     np.testing.assert_allclose(result.power_values, exact[:, -1], rtol=1e-6)
+
+
+@pytest.mark.parametrize(
+    ("site_dtype", "additive_dtype"),
+    [
+        (np.float32, np.float32),
+        (np.float64, np.float32),
+        (np.float32, np.float64),
+        (np.float64, np.float64),
+    ],
+)
+def test_power_guard_supports_mixed_float_dtypes(
+    monkeypatch, site_dtype, additive_dtype
+):
+    sites = np.column_stack(
+        (
+            np.arange(8, dtype=site_dtype),
+            np.zeros(8, dtype=site_dtype),
+            np.zeros(8, dtype=site_dtype),
+        )
+    )
+    additive = np.array([9.0] * 3 + [0.0] * 5, dtype=additive_dtype)
+    queries = np.array([[0.25, 0.0, 0.0]], dtype=additive_dtype)
+
+    # Emulate NumPy 2.0's strict ``take(..., out=...)`` dtype contract even
+    # when this suite runs on a newer NumPy release.
+    original_take = np.take
+
+    def strict_take(array, indices, *args, out=None, **kwargs):
+        if out is not None and np.asarray(array).dtype != out.dtype:
+            raise TypeError("mixed source/out dtype rejected")
+        return original_take(array, indices, *args, out=out, **kwargs)
+
+    monkeypatch.setattr(np, "take", strict_take)
+    oracle = CertifiedPowerKNN(
+        sites,
+        additive,
+        ExactKDTreeIndex(sites),
+        K=2,
+        candidate_k_initial=2,
+        candidate_k_max=8,
+    )
+    result = oracle.query(queries)
+    exact, _ = brute_force_power_topk(queries, sites, additive, 2)
+    assert result.power_values.dtype == np.dtype(site_dtype)
+    np.testing.assert_allclose(result.power_values, exact[:, -1], rtol=1e-6, atol=1e-6)
 
 
 def test_uncertified_power_query_is_never_silently_accepted():
