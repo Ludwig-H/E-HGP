@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "perg_hgp"
-version = "0.1.0"
-description = "Research prototype for Progressive Entropic Rank-Gabriel HGP in 3D"
+version = "0.2.0"
+description = "Entropy-regularized power-cover H0 and Rank-Gabriel HGP research backends in 3D"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [{name = "Louis Hauseux"}]
 license = "MIT"
 classifiers = [
@@ -23,5 +23,10 @@ dependencies = [
     "scikit-learn>=1.0"
 ]
 
-[tool.setuptools]
-packages = ["perg_hgp"]
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["perg_hgp*"]
+exclude = ["tests*"]

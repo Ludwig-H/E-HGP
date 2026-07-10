@@ -2,8 +2,11 @@
 
 **Date :** 10 juillet 2026  
 **Dépôt :** `Ludwig-H/E-HGP`  
-**Base auditée :** `fe8fa10` (`main`) et correctifs non commités décrits en section 11  
-**Cible annoncée :** 30 000 000 de points dans R^3, K=10, environ 160 Go de RAM et 80 Go de VRAM
+**Base auditée initialement :** `fe8fa10`, puis correctifs `b84f883` (`main`)
+
+**Mise en œuvre issue de la revue :** branche `agent/power-cover-3d-cuda`, détaillée en section 14
+
+**Cible annoncée :** 30 000 000 de points dans R^3, K=10, GPU NVIDIA Blackwell avec au moins 69 Go décimaux de VRAM (seuil opérationnel : 65 Gio libres, soit environ 69,8 Go)
 
 ## 0. Verdict
 
@@ -32,6 +35,28 @@ La garantie réaliste de ce backend est additive en **paramètre rayon** pour la
 où `s` mesure la distorsion de régularisation et `H` est la plus grande demi-diagonale des cubes. Cette borne n'est ni une garantie de labels plats, ni une garantie additive sur la densité, ni une preuve de consistance statistique à K fixé.
 
 Les corrections appliquées pendant cette revue réparent des erreurs réelles du prototype. Elles ne constituent pas encore le nouveau backend et ne valident pas la cible 30 M.
+
+**Mise à jour après implémentation, le 10 juillet 2026.** Un backend séparé
+`power_cover_3d_cuda` existe maintenant. Il implémente une référence CPU complète,
+la régularisation entropique en streaming, un garde global du top-K de puissance,
+les champs cubiques en rayon et un MSF implicite 26-connexe CPU/CuPy. Le notebook
+`PERG_HGP_Blackwell_30M.ipynb` contient le protocole Blackwell jusqu'à 30 M. Tous les
+tests CPU passent. En revanche, aucun GPU NVIDIA n'est présent dans l'environnement
+de développement : le kernel CuPy, le débit RAPIDS et le run 30 M restent donc
+**à valider par l'exécution du notebook**, sans résultat GPU inventé.
+
+Le chemin implémenté remplace le LBVH proposé par un Random Ball Cover 3D RAPIDS,
+soumis à un audit échantillonné obligatoire contre le brute force cuVS, puis accepte
+la puissance sous l'enveloppe float32 déclarée à l'aide d'une distance euclidienne de
+garde et de `min(a)`. La marge flottante est exposée séparément ; elle n'est pas une
+preuve par intervalles dirigés. La borne conditionnelle publiée par le code est donc
+
+\[
+\boxed{s+2(H+\delta_{\rm num})},
+\]
+
+et se réduit à `s+2H` en arithmétique exacte. Elle reste une borne en rayon et H0,
+pas une garantie de labels plats.
 
 ## 1. Périmètre et méthode
 
@@ -372,7 +397,7 @@ perg_hgp/
 Contrats publics recommandés :
 
 ```yaml
-mode: spatial_certified       # R3, erreur s + 2H
+mode: spatial_enveloped       # R3, borne conditionnelle au contrat numérique déclaré
 mode: atlas_conservative      # connectivité edge-induced exacte, complétude inconnue
 mode: graph_conditional       # exact seulement pour un graphe candidat déclaré
 mode: exact_small             # oracle exhaustif
@@ -471,13 +496,21 @@ Pour conserver une borne globale simple, imposer une demi-diagonale maximale aux
 
 ### 6.7 Affectation des observations
 
-Les sorties primaires doivent être les deux merge forests et leurs intervalles de fusion. Les labels ne sont calculés qu'à une coupe demandée :
+Les sorties primaires doivent être les deux merge forests et leurs intervalles de
+fusion. Pour obtenir des labels canoniques à une coupe demandée, il faut encore :
 
-1. localiser chaque `x_i` dans une feuille ;
-2. utiliser la composante intérieure si elle est non ambiguë ;
-3. marquer le point comme incertain si les forêts intérieure et extérieure ne s'accordent pas ;
-4. raffiner localement ou retourner ce masque d'incertitude ;
-5. ne forcer une partition par vote qu'en tant que post-traitement déclaré.
+1. construire pour chaque site la boule de puissance
+   `B_i(r)={y: ||y-z_i||^2+a_i<=r^2}` ;
+2. tester son intersection avec les unions de cubes des composantes intérieure et
+   extérieure (un test boule/boîte fournit le prédicat élémentaire exact) ;
+3. n'affecter le site que si les intersections désignent une composante unique et si
+   les deux encadrements concordent ;
+4. sinon, raffiner localement ou retourner un masque d'incertitude ;
+5. ne traiter la localisation de `x_i` ou `z_i` dans sa cellule, ou un vote, que comme
+   un post-traitement heuristique explicitement déclaré.
+
+Cette affectation par intersection n'est pas implémentée dans le backend livré en
+section 14.
 
 ## 7. Garanties à exposer
 
@@ -486,14 +519,14 @@ Les sorties primaires doivent être les deux merge forests et leurs intervalles 
 | support `m_reg`-NN | exact/certifié pour chaque bloc |
 | Gibbs local | résidu de simplex et d'entropie mesuré |
 | régularisation vs 10-NN | `s`-entrelacement en rayon |
-| top-10 de puissance | certifié par requête ou incertain |
+| top-10 de puissance | certifié sous l'enveloppe float32 déclarée, ou incertain |
 | grille vs champ régularisé | `2H`-entrelacement |
 | grille vs 10-NN original | `s+2H` en rayon et H0 |
 | connectivité du graphe edge-induced généré | exacte combinatoirement pour ses poids fournis |
 | complétude de l'atlas | inconnue sans preuve de couverture/coupe |
 | labels plats | post-traitement, non garanti par l'entrelacement seul |
 | K=10 statistique | résolution finie-échantillon |
-| calcul flottant | exact seulement si bornes dirigées/intervalles validés |
+| calcul flottant | certificat conditionnel à l'enveloppe déclarée ; exact formel seulement avec bornes dirigées/intervalles validés |
 
 Schéma machine-lisible proposé :
 
@@ -719,3 +752,380 @@ La bonne cible scientifique est une hiérarchie H0 du dixième champ de distance
 La bonne cible logicielle n'est pas une optimisation incrémentale de `PERGHGPClusterer.fit`. C'est un backend CUDA 3D dédié, fondé sur Morton/LBVH, des voisins streaming, un top-10 de puissance certifié et deux merge forests cubiques 26-connexes.
 
 PERG-HGP Rank-Gabriel doit rester un atlas expérimental : la connectivité de son graphe edge-induced est exacte pour les poids numériques effectivement produits, mais ses naissances de facettes et sa complétude restent inconnues pour le HGP complet. Cette séparation rend les garanties plus fortes, l'API plus honnête et la cible 30 M techniquement testable.
+
+## 14. Mise en œuvre des recommandations après la revue
+
+Cette section est le journal de réalisation demandé. Elle distingue ce qui a été
+implémenté et testé sur CPU de ce qui attend encore une mesure GPU.
+
+### 14.1 Lecture scientifique effectuée avant modification
+
+Les Parties I et II du manuscrit ont été lues intégralement, pages PDF 35 à 134.
+Les invariants suivants ont guidé le code :
+
+1. le champ est paramétré par le rayon, avec la convention d'intersection à `2r` ;
+2. le K-ième voisin compte le point lui-même lorsque la requête est une observation ;
+3. la cible primaire est la hiérarchie des composantes continues des niveaux K-NN ;
+4. pour K supérieur ou égal à 2, les amas discrets naturels forment un recouvrement,
+   non nécessairement une partition ;
+5. pour K=10, les faces HGP ont cardinalité 10 et les cofaces cardinalité 11 ;
+6. les égalités sont des événements multiway, jamais une suite binaire dépendant de
+   l'ordre ;
+7. la preuve du théorème de correspondance s'étend aux boules de puissance par
+   convexité, contrairement aux raccourcis Gabriel/Delaunay pondérés ;
+8. une hiérarchie H0 correcte peut être calculée directement sur le champ continu
+   approché, sans énumérer les faces de cardinalité 10.
+
+Les synthèses de lecture ont aussi relevé les ambiguïtés du manuscrit sur les boules
+ouvertes/fermées, le facteur deux, la position générale, les ex aequo, les paramètres
+de HDBSCAN et la différence entre rayon, densité et score EOM. Les nouveaux tests
+couvrent ces pièges lorsqu'ils affectent le backend.
+
+### 14.2 Nouvelle architecture livrée
+
+Le chemin massif est séparé du prototype Rank-Gabriel :
+
+```text
+perg_hgp/backends/power_cover_3d_cuda/
+  contracts.py       configuration, rapports et budget mémoire
+  spatial_core.py    Gibbs, streaming, top-K puissance et champ cubique
+  cuda_runtime.py    RAPIDS RBC, audit cuVS et manifeste matériel
+  cubical_msf.py      MSF implicite CPU et CuPy/Borůvka
+  api.py              PowerCover3D et PowerCoverHierarchy
+```
+
+Le backend public est `PowerCover3D`. `PERGHGPClusterer` conserve sa sémantique
+d'atlas historique ; aucune revendication de complétude ne lui a été ajoutée.
+
+#### Normalisation
+
+Les données sont recentrées et mises à l'échelle isotropiquement avant les prédicats
+GPU. Les rayons, sites, poids et bornes exposés sont reconvertis dans les unités
+d'entrée. Les axes constants deviennent des grilles de taille un, ce qui couvre les
+nuages plans, linéaires et constants sans dupliquer artificiellement les cellules.
+Le recentrage est effectué dans le dtype d'entrée avant le cast float32 ; le test
+`1e9 + {0, 0.25, 0.5, 0.75}` empêche la perte silencieuse de ces écarts. Les centres
+absolus rendus par l'API sont donc dénormalisés en float64.
+
+#### K-NN euclidien de régularisation
+
+La référence CPU utilise `scipy.spatial.cKDTree`. Le chemin CUDA utilise
+`cuml.neighbors.NearestNeighbors(algorithm="rbc")`, disponible pour l'euclidien 3D.
+Le notebook compare obligatoirement un échantillon de listes, jusqu'à `m_reg`, avec
+le brute force exact de cuVS. Un échec arrête un run strict. Cet audit empirique
+détecte les régressions mais ne prouve pas les requêtes non échantillonnées.
+
+Références d'API : [cuML NearestNeighbors](https://docs.rapids.ai/api/cuml/stable/api/generated/cuml.neighbors.nearestneighbors/),
+[cuVS brute force](https://docs.rapids.ai/api/cuvs/stable/python_api/neighbors_brute_force/).
+
+Les voisins sont demandés par chunks. Le code calcule immédiatement `Z`, `a`, `s_i`,
+le résidu de simplexe et le résidu d'entropie, puis libère indices, distances,
+probabilités et coordonnées voisines du chunk. Aucun tableau global
+`N x m_reg` n'est conservé. Le maximum `s` reste exact ; les quantiles diagnostiques
+sont calculés sur au plus un million d'indices déterministes afin d'éviter un tri ou
+une copie globale de 30 millions de valeurs.
+
+#### Régularisation canonique
+
+Le solveur traite explicitement :
+
+- `kappa=1`, qui donne une masse de Dirac et retrouve `z_i=x_i`, `a_i=s_i=0` ;
+- `kappa=m_reg`, qui donne la loi uniforme ;
+- les minima ex aequo, pour lesquels la loi uniforme sur les minimiseurs est une
+  solution optimale admissible ;
+- les changements d'unités, grâce à une normalisation par ligne des coûts.
+
+La revue finale a ajouté un contre-exemple de quasi-ex aequo
+`[0, 1e-20, 1]` pour `kappa=1.5`. La première version utilisait un plancher de
+température et violait la contrainte d'entropie. Le solveur définitif distingue
+seulement les égalités représentées, travaille en log inverse-température à partir du
+plus petit gap strict et refuse un résultat dont les résidus d'entropie ou de simplexe
+dépassent la tolérance.
+
+`pilot_kappa_calibration` teste plusieurs valeurs de `kappa` sur un échantillon et
+choisit la plus forte compatible avec un budget pilote. Le `s=max(s_i)` du run complet
+est toujours recalculé ; le backend s'arrête si ce `s` dépasse le budget final. Le pilote
+n'est donc jamais présenté comme une borne globale.
+
+#### Top-K de puissance global
+
+Le backend ne suppose pas que les plus proches voisins de puissance sont les K plus
+proches centres euclidiens. Il demande `C+1` voisins selon le contrat euclidien du
+backend, évalue la puissance des C premiers et utilise le dernier comme garde. Pour
+tout site omis, en arithmétique exacte,
+
+\[
+\|y-z_i\|^2+a_i
+\ge d_{C+1}(y)^2+\min_j a_j.
+\]
+
+Si le K-ième candidat, augmenté de son enveloppe numérique, est sous cette borne
+diminuée de la même enveloppe, la requête est acceptée sous ce contrat float32. Sinon
+`C` double de 64 jusqu'à 1 024 par défaut. Arrivé au plafond : exception en mode
+strict, ou statut `certified=False` explicite. Il n'existe aucun fallback ANN
+silencieux.
+
+Le wrapper refuse aussi explicitement `C+1 > floor(sqrt(N))`, seuil auquel cuML peut
+substituer brute force à RBC. Les petites campagnes plafonnent donc `C` en fonction
+de `N`, tandis que la cible 30 M autorise largement le plafond 1 025. L'audit du
+second index porte sur de vrais centres de la grille, et pas seulement sur des sites
+d'entraînement.
+
+#### Marge numérique
+
+Les points normalisés sont stockés en float32. L'enveloppe de comparaison utilise un
+multiple explicite de l'epsilon machine. Elle est convertie en une erreur de rayon
+`delta_num` et incorporée aux deux filtrations :
+
+```text
+outer_Q = g_hat(c_Q) - H - delta_num
+inner_Q = g_hat(c_Q) + H + delta_num
+```
+
+Cette décision évite d'appliquer `+/-H` à l'énergie carrée, erreur qui invaliderait la
+preuve. Le rapport JSON utilise le mode `spatial_enveloped` et expose
+`numerical_radius_error` séparément. Une future
+arithmétique d'intervalles dirigée pourrait réduire cette marge ; le code actuel ne
+prétend pas à une preuve en nombres réels au-delà de l'enveloppe déclarée.
+
+#### Champ cubique et 26-connexité
+
+Le champ est évalué par chunks sur les centres des cubes de la boîte englobante des
+sites. Les tableaux globaux sont seulement les valeurs et statuts par cube. Les cubes
+sont fermés : la connexité est 26-connexe en 3D, 8-connexe sur un nuage plan et
+2-connexe sur une ligne.
+
+#### MSF implicite
+
+La référence CPU visite les voisins implicitement et produit un MSF déterministe avec
+la clé totale `(poids, edge_id)`. Le chemin CuPy compile des `RawKernel` Borůvka :
+
+1. scan des 13 directions canoniques de chaque cellule ;
+2. meilleure arête sortante par composante avec `atomicMin` sur une clé 64 bits ;
+3. union déterministe par racine minimale avec `atomicCAS` ;
+4. compression et répétition jusqu'à `N-1` arêtes ;
+5. tri du seul résultat compact.
+
+La liste des arêtes cubiques n'est jamais matérialisée. Sur `256^3`, le modèle compte
+16 777 216 sommets et 216 338 940 arêtes implicites. Le résultat compact fait environ
+256 Mio, le pic device propre au MSF environ 448 Mio, et environ 3,22 Gio de liste
+d'arêtes explicite sont évités.
+
+Sur une grille uniforme, chacun des champs intérieur et extérieur est une translation
+du champ de base de `+(H+delta_num)` et `-(H+delta_num)` respectivement ; ils diffèrent
+donc entre eux de `2(H+delta_num)`. Ils ont la même topologie MSF. Une seule exécution
+de Borůvka est effectuée, puis les deux forêts sont obtenues par translation de leurs
+naissances et fusions.
+
+### 14.3 Oracles de Phase 0 ajoutés
+
+`perg_hgp/reference/power_oracle.py` fournit une frontière indépendante pour petites
+tailles :
+
+- top-K de puissance bloqué, stable par `(valeur, id)` ;
+- min-ball additive float64 par énumération exhaustive des supports de cardinalité au
+  plus quatre, avec résidus primal, dual, actif, stationnarité et simplexe ;
+- toutes les facettes de cardinalité K et toutes les cofaces de cardinalité K+1 ;
+- aucun filtre Gabriel ;
+- vraies naissances en rayon ;
+- composantes incluant les facettes isolées ;
+- événements égaux atomiques ;
+- comparaison K=1 avec le Single-Linkage au rayon distance/2.
+
+L'ancien `reference/oracle.py` est conservé pour compatibilité historique, mais le
+nouvel oracle est celui à utiliser pour la correction du power-HGP.
+
+### 14.4 API, packaging et checkpoints
+
+Le wheel utilisait `packages=["perg_hgp"]` et excluait déjà `reference/`. La découverte
+inclut maintenant `perg_hgp*`, donc les oracles et backends sont empaquetés.
+
+Le shim d'import racine chargeait les classes une seconde fois sous
+`perg_hgp.inner`. Il utilise maintenant le chemin canonique `perg_hgp.*` ;
+`perg_hgp.WitnessPool is perg_hgp.witnesses.WitnessPool` est vrai.
+
+Le hash de checkpoint de l'atlas parcourt récursivement les fichiers Python, CUDA,
+C++ et en-têtes du package. Une modification du nouveau backend ne peut donc plus
+laisser un manifeste de code inchangé.
+
+Le wheel `perg_hgp-0.2.0` contient notamment :
+
+```text
+perg_hgp/reference/power_oracle.py
+perg_hgp/backends/power_cover_3d_cuda/api.py
+perg_hgp/backends/power_cover_3d_cuda/cubical_msf.py
+```
+
+### 14.5 Rapport machine-lisible et sorties
+
+`PowerCoverHierarchy` contient les sites, le champ, le MSF de base, les forêts
+intérieure/extérieure, les intervalles de fusion, les temps par étage, le budget mémoire
+et `AccuracyReport`. `save()` publie atomiquement un NPZ versionné (MSF, masque de
+certification et translations intérieure/extérieure), éventuellement les sites, et un
+JSON strict sans `NaN`/`Infinity`, avec :
+
+- support voisin et audits RBC ;
+- résidus d'entropie ;
+- `s`, `H`, `delta_num` et la borne totale ;
+- fraction de top-K certifiés et compte incertain ;
+- manifeste matériel ;
+- limites sur K fixe, H0 et labels.
+
+Les configurations rejettent désormais booléens, entiers tronqués et valeurs non
+finies. Si le mode exploratoire non strict conserve au moins une requête incertaine,
+le rapport passe à `spatial_uncertain`, met les bornes spatiale et totale à `null` et
+`fusion_intervals()` refuse de présenter les fusions comme un encadrement.
+
+La sortie plate est volontairement absente. `components_at_cut()` donne les
+composantes de cubes intérieure/extérieure, mais localiser simplement `x_i` ou `z_i`
+dans un cube ne satisfait pas la définition canonique
+
+\[
+\exists y\in C:\ \|y-z_i\|^2+a_i\le r^2.
+\]
+
+L'affectation certifiée des observations et le raffinement adaptatif non uniforme
+restent donc des étapes futures, et non des heuristiques cachées.
+
+### 14.6 Tests CPU exécutés
+
+Commandes finales de validation :
+
+```text
+cd perg_hgp && python -m pytest -q
+cd E-HGP && python -m pytest -q
+python -m compileall -q perg_hgp/perg_hgp
+git diff --check
+python -m pip wheel perg_hgp --no-deps
+```
+
+Résultats observés avant publication :
+
+```text
+perg_hgp : 92 passed, 17 warnings historiques, 10,96 s
+E-HGP    : 1 passed, 8,18 s
+wheel    : sous-packages reference/ et backends/ présents
+```
+
+Les 92 tests comprennent :
+
+- les 27 régressions historiques de l'atlas ;
+- 18 tests du MSF cubique ;
+- 31 tests du cœur spatial, incluant les quasi-ex aequo, grands offsets float64 et
+  artefacts JSON/NPZ versionnés ;
+- 8 tests du contrat CUDA/RBC sans GPU ;
+- 8 tests de l'oracle power-HGP exhaustif.
+
+Les audits déterministes intégrés aux tests comparent aussi les composantes du MSF
+cubique à celles du graphe brut à de nombreux seuils, ainsi que le Borůvka du graphe
+dual historique à son oracle Kruskal. Les tests couvrent égalités, valeurs négatives,
+dimensions dégénérées, doublons, translations, homothéties et changements de chunks.
+
+### 14.7 Contrôle CPU de bout en bout
+
+Un contrôle reproductible a été exécuté avec NumPy `default_rng(20260710)`. Les
+observations sont tirées par
+`labels=rng.integers(0, 4, N)` puis
+`X=mu[labels]+rng.normal(0, 0.35, (N, 3)).astype(float32)`, où
+`mu=[(-2,0,0),(2,0,0),(0,2,1),(0,-2,-1)]` :
+
+```text
+N=10 000, dimension=3, K=10, kappa=4, m_reg=64
+grille=32^3, chunks régularisation/puissance=2 048, candidats puissance=64 -> 512
+graine=20260710
+```
+
+Résultat :
+
+```text
+mode : spatial_enveloped
+requêtes acceptées sous l'enveloppe déclarée : 100 %
+requêtes incertaines : 0
+cubes : 32 768
+arêtes MSF : 32 767
+régularisation : 0,738 s
+index des sites : 0,002 s
+champ de puissance : 0,522 s
+MSF cubique : 1,032 s
+total : 2,298 s
+RSS maximal du processus : environ 585 Mio
+s = 0,33615 ; H = 0,15500 ; delta_num = 0,00254
+borne totale = 0,65122 dans les unités synthétiques
+```
+
+Ce contrôle prouve le fonctionnement CPU à cette taille. Il ne constitue ni une
+extrapolation de temps à 30 M, ni une mesure Blackwell.
+
+### 14.8 Budget analytique pour 30 M
+
+Pour `N=30 000 000`, `m_reg=64`, chunk de régularisation 262 144, chunk de
+puissance 65 536, plafond 1 024 candidats et une grille `128^3` ou `256^3`, le
+modèle révisé après revue des durées de vie compte :
+
+```text
+tableaux persistants + provision index : 3,02 Gio
+chunk de régularisation connu : 0,95 Gio
+chunk puissance au pire plafond : 1,26 Gio
+pic analytique conservatif des tableaux modélisés : 4,27 Gio
+```
+
+Le kernel fusionné lit directement `sites[indices]` et calcule les puissances sans
+matérialiser `candidats`, `différences`, `différences^2` ni les poids rassemblés en
+`Q x C x 3`. Une taille de chunk distincte évite aussi le pic de 14,5 Gio identifié
+pendant la revue du premier brouillon. Le chiffre reste volontairement séparé d'une
+mesure : les buffers internes RAPIDS/CUB, l'espace de travail de partition, RMM,
+NVRTC et le driver ne sont pas entièrement modélisés. Le notebook vérifie le budget
+avec la VRAM réellement libre, impose une limite de 85 %, partage l'allocateur RMM
+entre CuPy et cuML et mesure le pic NVML.
+
+### 14.9 Notebook Blackwell livré
+
+`PERG_HGP_Blackwell_30M.ipynb` :
+
+- installe RAPIDS par le [script Colab officiel](https://docs.rapids.ai/deployment/stable/platforms/colab/) ;
+- clone la branche et installe le package en mode éditable ;
+- refuse un GPU non Blackwell ou moins de 65 Gio (environ 69,8 Go décimaux) de VRAM
+  libre pour le full run ;
+- exécute toute la suite CPU ;
+- audite RBC contre cuVS brute force sur les points bruts et des centres de grille ;
+- audite séparément l'index RBC utilisé par le pilote de `kappa` avant toute
+  sélection ;
+- smoke-compile le kernel CuPy et compare GPU/CPU sur cas aléatoires et adversariaux ;
+- audite RBC sur des cas uniformes, skew, plans, lignes, constantes, doublons et
+  poids dynamiques ; le MSF est testé séparément sur champs négatifs, ex aequo,
+  motifs structurés et champ constant ;
+- permet les échelles 100 k, 1 M, 3 M, 10 M et 30 M ;
+- synchronise CUDA, mesure NVML, RSS, disque et temps par étage ; le `PASS` impose
+  VRAM et RAM hôte sous 85 %, ainsi qu'au moins 30 Gio de scratch restant après
+  sauvegarde ;
+- conserve les artefacts sur scratch local avant archivage ;
+- conclut par `PASS`, `INCONCLUSIVE` ou `FAIL` selon les certificats, ressources et,
+  pour le jeu synthétique, l'existence d'au moins une persistance dépassant deux fois
+  la borne. Ce dernier test ne valide pas à lui seul plusieurs branches scientifiques.
+
+Le notebook versionné ne contient aucune sortie et aucun `execution_count`. Il est un
+protocole à exécuter, pas un résultat GPU.
+
+### 14.10 Écarts assumés et travail restant
+
+| Recommandation | Statut | Commentaire |
+|---|---|---|
+| Oracles Phase 0 | Fait CPU | power top-K, min-ball, complexe complet, H0 cubique |
+| Sites entropiques streaming | Fait CPU/CUDA API | GPU à mesurer |
+| Morton/LBVH exact | Remplacé | RBC 3D RAPIDS + audit cuVS ; fallback brute force implicite refusé |
+| Top-10 puissance certifié | Conditionnel | garde euclidienne + `min(a)`, escalade ; certificat sous l'enveloppe float32 déclarée |
+| Bornes numériques | Enveloppe explicite | `delta_num` mesuré ; dérivation dirigée formelle future |
+| H0 cubique 26-connexe | Fait CPU/CuPy | kernel GPU non exécuté localement |
+| Pas de liste d'arêtes cubiques | Fait | Borůvka implicite 13 directions |
+| Forêts intérieure/extérieure | Fait | une topologie, deux translations sur grille uniforme |
+| Raffinement adaptatif non uniforme | Non fait | grille 128^3/256^3 configurable ; arrêt si borne insuffisante |
+| Affectation canonique des 30 M sites | Non fait | aucune étiquette heuristique présentée comme certifiée |
+| Validation 30 M Blackwell | Notebook prêt | attente d'exécution et de logs utilisateur |
+| Trois répétitions full 30 M | Paramétrable | une par défaut pour respecter la durée Colab |
+
+Le backend est donc **implémenté et prêt à être testé** pour la cible. Ses grands
+tableaux explicites sont bornés par chunks, mais les allocations internes RAPIDS/CuPy
+doivent encore être mesurées. Le terme « validé à 30 M » ne devra être utilisé qu'après
+un notebook terminé avec `uncertain=0`, MSF GPU conforme à la référence, ressources
+sous 85 % et une étude de `s+2(H+delta_num)` branche par branche sur les données
+scientifiques visées.
