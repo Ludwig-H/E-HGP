@@ -341,9 +341,9 @@ def cubical_msf_cpu(
     )
 
 
+# Keep this source header-free: minimal NVRTC wheel environments do not expose
+# host libc headers such as stdint.h, and these kernels only need CUDA built-ins.
 _CUDA_SOURCE = r"""
-#include <stdint.h>
-
 #define INF_KEY 0xffffffffffffffffULL
 
 __device__ __forceinline__ int find_root(const int* parent, int vertex) {

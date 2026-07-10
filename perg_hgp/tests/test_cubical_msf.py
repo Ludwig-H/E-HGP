@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from perg_hgp.backends.power_cover_3d_cuda.cubical_msf import (
+    _CUDA_SOURCE,
     build_cubical_msf,
     cubical_msf_cpu,
     cubical_msf_gpu,
@@ -21,6 +22,10 @@ OFFSETS_26 = tuple(tuple(coordinate - 1 for coordinate in offset) for offset in 
 OFFSETS_6 = tuple(
     offset for offset in OFFSETS_26 if sum(abs(coordinate) for coordinate in offset) == 1
 )
+
+
+def test_cuda_source_is_header_free_for_minimal_nvrtc_runtimes():
+    assert "#include" not in _CUDA_SOURCE
 
 
 def _dims3(shape):
