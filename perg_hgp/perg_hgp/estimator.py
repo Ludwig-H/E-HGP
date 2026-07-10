@@ -18,9 +18,18 @@ def _algorithm_fingerprint():
     """Hash the Python implementation that defines checkpoint semantics."""
     digest = hashlib.sha256()
     package_dir = os.path.dirname(__file__)
-    for name in sorted(entry for entry in os.listdir(package_dir) if entry.endswith('.py')):
-        digest.update(name.encode('utf-8'))
-        with open(os.path.join(package_dir, name), 'rb') as stream:
+    algorithm_files = []
+    for root, directories, files in os.walk(package_dir):
+        directories[:] = sorted(
+            name for name in directories if name != '__pycache__'
+        )
+        for name in sorted(files):
+            if name.endswith(('.py', '.cu', '.cuh', '.cpp', '.hpp')):
+                path = os.path.join(root, name)
+                algorithm_files.append((os.path.relpath(path, package_dir), path))
+    for relative, path in sorted(algorithm_files):
+        digest.update(relative.encode('utf-8'))
+        with open(path, 'rb') as stream:
             for chunk in iter(lambda: stream.read(1024 * 1024), b''):
                 digest.update(chunk)
     return digest.hexdigest()

@@ -8,6 +8,12 @@ from .cofaces import extract_top_cofaces, solve_weighted_miniball_active_set_3d
 from .gabriel import local_gabriel_filter, global_gabriel_grid_test
 from .dual_graph import compute_facet_ids, build_dual_edges
 from .hierarchy import dual_graph_mst, condense_tree, extract_labels
+from .backends.power_cover_3d_cuda.api import (
+    PowerCover3D,
+    PowerCoverHierarchy,
+    pilot_kappa_calibration,
+)
+from .backends.power_cover_3d_cuda.contracts import PowerCoverConfig
 
 __all__ = [
     'PERGHGPClusterer',
@@ -29,5 +35,9 @@ __all__ = [
     'build_dual_edges',
     'dual_graph_mst',
     'condense_tree',
-    'extract_labels'
+    'extract_labels',
+    'PowerCover3D',
+    'PowerCoverHierarchy',
+    'PowerCoverConfig',
+    'pilot_kappa_calibration',
 ]
