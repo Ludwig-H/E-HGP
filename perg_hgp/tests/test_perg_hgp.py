@@ -12,7 +12,9 @@ from perg_hgp import (
     compute_rank_soft_dp_batched,
     solve_weighted_miniball_active_set_3d,
     compute_facet_ids,
-    build_dual_edges
+    build_dual_edges,
+    condense_tree,
+    extract_labels,
 )
 from perg_hgp.cofaces import solve_weighted_miniball_brute_force_3d, extract_top_cofaces
 from perg_hgp.gabriel import global_gabriel_grid_test
@@ -68,6 +70,51 @@ class TestPERGHGP(unittest.TestCase):
             for k in range(10):
                 self.assertAlmostEqual(nbr_dists_sq[i, k].item(), top_val[k].item(), places=4)
 
+    def test_knn_certificate_never_uses_positive_slack(self):
+        X = torch.tensor([
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.4978, 0.0, 0.0],
+            [0.5001, 0.0, 0.0],
+        ])
+        query = torch.tensor([[0.499, 0.0, 0.0]])
+        grid = SpatialGrid3D(X, grid_resolution=2, device='cpu')
+
+        indices, distances = grid.query_knn_grid(query, m_local=1)
+
+        self.assertEqual(indices.item(), 3)
+        self.assertAlmostEqual(distances.item(), 1.21e-6, places=10)
+
+    def test_power_knn_exactness_vs_brute_force(self):
+        torch.manual_seed(7)
+        Z = torch.randn((200, 3), dtype=torch.float32)
+        a = torch.exp(torch.linspace(-6.0, 3.0, 200))
+        queries = torch.randn((17, 3), dtype=torch.float32) * 2.0
+        grid = SpatialGrid3D(Z, grid_resolution=8, device='cpu')
+
+        indices, distances = grid.query_power_grid(queries, a, m_local=11)
+        exact = torch.sum((queries[:, None] - Z[None]) ** 2, dim=2) + a[None]
+        expected_distances, _ = torch.topk(exact, 11, dim=1, largest=False)
+
+        torch.testing.assert_close(distances, expected_distances)
+        gathered = torch.gather(exact, 1, indices)
+        torch.testing.assert_close(gathered, expected_distances)
+
+    def test_power_knn_spatial_certificate_vs_brute_force(self):
+        torch.manual_seed(71)
+        Z = torch.rand((5000, 3), dtype=torch.float32)
+        a = torch.rand(5000, dtype=torch.float32) * 0.01
+        queries = Z[:9] + 0.001
+        grid = SpatialGrid3D(Z, grid_resolution=16, device='cpu')
+
+        _, distances = grid.query_power_grid(queries, a, m_local=11)
+        exact = torch.sum((queries[:, None] - Z[None]) ** 2, dim=2) + a[None]
+        expected_distances, _ = torch.topk(exact, 11, dim=1, largest=False)
+
+        torch.testing.assert_close(distances, expected_distances)
+        self.assertEqual(grid.fallback_count_, 0)
+        self.assertEqual(grid.certified_rate_, 1.0)
+
     def test_local_gibbs(self):
         device = 'cpu'
         nbr_dists_sq = torch.rand((10, 32), device=device, dtype=torch.float32) + 0.1
@@ -82,6 +129,17 @@ class TestPERGHGP(unittest.TestCase):
         row_sums = torch.sum(Q, dim=1)
         for val in row_sums:
             self.assertAlmostEqual(val.item(), 1.0, places=4)
+
+    def test_local_gibbs_is_scale_invariant(self):
+        costs = torch.tensor([[0.0, 1.0, 4.0, 9.0]], dtype=torch.float32)
+        weights = []
+        for scale in (1e-12, 1.0, 1e12):
+            Q, _ = solve_local_gibbs_entropy(costs * scale, entropy_target=2.0)
+            entropy = -torch.sum(Q * torch.log(torch.clamp(Q, min=1e-30)), dim=1)
+            self.assertAlmostEqual(entropy.item(), np.log(2.0), places=5)
+            weights.append(Q)
+        torch.testing.assert_close(weights[0], weights[1], rtol=1e-5, atol=1e-7)
+        torch.testing.assert_close(weights[1], weights[2], rtol=1e-5, atol=1e-7)
 
     def test_rank_dp(self):
         device = 'cpu'
@@ -135,6 +193,55 @@ class TestPERGHGP(unittest.TestCase):
             # Compare center and radius squared
             self.assertLess(torch.norm(c_as - c_bf).item(), 1e-4)
             self.assertAlmostEqual(r2_as.item(), r2_bf.item(), places=4)
+
+    def test_miniball_uses_relative_power_tolerance(self):
+        from perg_hgp.cofaces import solve_weighted_miniball_batched
+
+        points = torch.tensor([[[0.0, 0.0, 0.0], [1e-4, 0.0, 0.0]]])
+        weights = torch.zeros((1, 2))
+        centers, radii_sq = solve_weighted_miniball_batched(points, weights)
+
+        torch.testing.assert_close(centers[0], torch.tensor([5e-5, 0.0, 0.0], dtype=torch.float64))
+        self.assertAlmostEqual(radii_sq.item(), 2.5e-9, places=15)
+
+    def test_miniball_reports_a_feasible_radius(self):
+        from perg_hgp.cofaces import solve_weighted_miniball_batched
+
+        points = torch.tensor(
+            [[[-1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0 + 1e-6, 0.0, 0.0]]],
+            dtype=torch.float64,
+        )
+        weights = torch.zeros((1, 3), dtype=torch.float64)
+        centers, radii_sq = solve_weighted_miniball_batched(points, weights)
+        powers = torch.sum((points - centers[:, None]) ** 2, dim=2) + weights
+
+        self.assertGreaterEqual(radii_sq.item(), torch.max(powers).item())
+        self.assertAlmostEqual(radii_sq.item(), (1.0 + 0.5e-6) ** 2, places=12)
+
+    def test_miniball_is_translation_and_scale_invariant(self):
+        from perg_hgp.cofaces import solve_weighted_miniball_batched, _outward_float32_radius
+
+        expected_unit_radius_sq = 1.0 / 3.0
+        for side in (1e-12, 1e-6, 1.0, 1e6):
+            height = np.sqrt(3.0) * side / 2.0
+            offset = 1e6 * side
+            points = torch.tensor(
+                [[[offset, 0.0, 0.0], [offset + side, 0.0, 0.0],
+                  [offset + side / 2.0, height, 0.0]]],
+                dtype=torch.float64,
+            )
+            weights = torch.zeros((1, 3), dtype=torch.float64)
+            centers, radii_sq = solve_weighted_miniball_batched(points, weights)
+            powers = torch.sum((points - centers[:, None]) ** 2, dim=2)
+
+            self.assertGreaterEqual(radii_sq.item(), torch.max(powers).item())
+            self.assertAlmostEqual(
+                radii_sq.item() / (side ** 2), expected_unit_radius_sq, places=6
+            )
+            stored_radius = _outward_float32_radius(radii_sq)
+            self.assertGreaterEqual(
+                stored_radius.to(torch.float64).square().item(), radii_sq.item()
+            )
 
     def test_global_gabriel_vs_scan(self):
         device = 'cpu'
@@ -191,6 +298,12 @@ class TestPERGHGP(unittest.TestCase):
         unique_labels = np.unique(labels[labels >= 0])
         self.assertGreaterEqual(len(unique_labels), 1)
         self.assertIn("candidate_cofaces", clusterer.exactness_report_)
+        self.assertFalse(clusterer.exactness_report_["atlas_hierarchy_exact"])
+        self.assertTrue(
+            clusterer.exactness_report_[
+                "edge_induced_connectivity_exact_for_float32_edge_weights"
+            ]
+        )
 
     def test_estimator_small_n(self):
         # Regression test for small N (N < 128) where m_local / m_active might exceed N.
@@ -214,6 +327,10 @@ class TestPERGHGP(unittest.TestCase):
         self.assertFalse(np.isnan(clusterer.a_.cpu().numpy()).any(), "a_ contains NaN values!")
         # Check for NaN in labels
         self.assertFalse(np.isnan(labels).any(), "Labels contain NaN values!")
+        self.assertEqual(clusterer.m_local, 128)
+        self.assertEqual(clusterer.m_active, 128)
+        self.assertEqual(clusterer.m_local_, 50)
+        self.assertEqual(clusterer.final_witness_rank_, 3)
 
     def test_dual_graph(self):
         device = 'cpu'
@@ -272,6 +389,7 @@ class TestPERGHGP(unittest.TestCase):
     def test_checkpoint_save_and_resume(self):
         import tempfile
         import os
+        import json
 
         X, _ = make_blobs(n_samples=50, centers=2, n_features=3, random_state=42)
         X = X.astype(np.float32)
@@ -290,6 +408,11 @@ class TestPERGHGP(unittest.TestCase):
                 checkpoint_dir=tmpdir
             )
             labels1 = clusterer1.fit_predict(X)
+
+            with open(os.path.join(tmpdir, "manifest.json"), encoding="utf-8") as stream:
+                manifest = json.load(stream)
+            self.assertEqual(manifest["schema_version"], 3)
+            self.assertEqual(len(manifest["algorithm_sha256"]), 64)
 
             # Assert checkpoint files exist
             expected_files = ["sites.pt", "witnesses_rank_1.pt", "certified_cofaces.pt", "dual_mst.pt", "Z_tree.pt"]
@@ -314,8 +437,23 @@ class TestPERGHGP(unittest.TestCase):
             np.testing.assert_array_equal(labels1, labels2)
             self.assertEqual(clusterer2.exactness_report_['candidate_cofaces'], clusterer1.exactness_report_['candidate_cofaces'])
 
+            clusterer3 = PERGHGPClusterer(
+                K=2,
+                grid_resolution=4,
+                m_local=10,
+                m_active=10,
+                W1_budget=50,
+                budget_per_rank=50,
+                min_cluster_size=2,
+                device='cpu',
+                checkpoint_dir=tmpdir,
+            )
+            with self.assertRaisesRegex(ValueError, "different data or parameters"):
+                clusterer3.fit_predict(X + 0.01)
+
     def test_no_cofaces_certified(self):
-        # Set gabriel_tol to a huge negative value to reject all cofaces
+        # A negative numerical tolerance used to be accepted as a hidden way to
+        # reject every coface. It is now an invalid API value.
         X, _ = make_blobs(n_samples=50, centers=2, n_features=3, random_state=42)
         X = X.astype(np.float32)
 
@@ -327,11 +465,38 @@ class TestPERGHGP(unittest.TestCase):
             gabriel_tol=-1e9, # force rejection
             device='cpu'
         )
-        labels = clusterer.fit_predict(X)
-        self.assertEqual(labels.shape[0], 50)
-        self.assertTrue(np.all(labels == -1))
-        self.assertEqual(clusterer.exactness_report_['certified_cofaces'], 0)
-        self.assertEqual(clusterer.exactness_report_['num_facets'], 0)
+        with self.assertRaisesRegex(ValueError, "gabriel_tol"):
+            clusterer.fit_predict(X)
+
+    def test_weighted_condensation_keeps_subthreshold_members(self):
+        W_nodes = np.ones(3, dtype=np.float64)
+        u = np.array([0, 1], dtype=np.int32)
+        v = np.array([1, 2], dtype=np.int32)
+        w = np.array([0.1, 0.2], dtype=np.float32)
+
+        tree = condense_tree(W_nodes, u, v, w, min_cluster_size=3)
+        labels = extract_labels(
+            tree,
+            np.arange(3, dtype=np.int64)[:, None],
+            n_points=3,
+            facet_birth_weights=np.ones(3),
+        )
+
+        np.testing.assert_array_equal(tree['initial_membership'], np.zeros(3, dtype=np.int32))
+        np.testing.assert_array_equal(labels, np.zeros(3, dtype=np.int32))
+        self.assertAlmostEqual(tree['size'][0], 3.0)
+
+    def test_weighted_condensation_batches_equal_weight_merges(self):
+        W_nodes = np.ones(4, dtype=np.float64)
+        u = np.array([0, 1, 2], dtype=np.int32)
+        v = np.array([1, 2, 3], dtype=np.int32)
+        w = np.ones(3, dtype=np.float32)
+
+        tree = condense_tree(W_nodes, u, v, w, min_cluster_size=1)
+
+        self.assertEqual(tree['children'], [[]])
+        np.testing.assert_array_equal(tree['initial_membership'], np.zeros(4, dtype=np.int32))
+        self.assertAlmostEqual(tree['size'][0], 4.0)
 
     def test_out_of_core_facet_deduplication(self):
         from perg_hgp.dual_graph import compute_facet_ids

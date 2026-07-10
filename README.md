@@ -11,10 +11,12 @@ This repository contains the implementations of **Entropy-Regularized Hypergraph
 > Following the technical and mathematical audit of July 2026, the codebase is undergoing a structured alignment process to bridge gaps between candidate witness complex generation and exact Čech/K-MST hierarchies.
 
 ### Current Implementation Characteristics & Limits
-1. **Hierarchical Label Extraction**: Currently, `condense_tree` and `extract_labels` identify final connected components of the dual graph of certified facets.
-2. **K-NN Power Search**: K-NN queries use a spatial grid on regularized sites to perform fast local search. A dynamic capping mechanism guarantees that neighborhood sizes do not exceed dataset dimensions, preventing out-of-bounds queries for small $N$.
-3. **Out-of-Core Facet Deduplication**: Employs a dynamique bucket-sorting strategy to deduplicate massive collections of facets on disk. A second-level in-memory partition protects against bucket skew under highly non-uniform distributions.
+1. **Hierarchical Label Extraction**: `condense_tree` now preserves weighted sub-threshold components, batches equal-radius merges, computes stability, and performs EOM selection. Exact facet births are still missing, so the flat selection remains a post-processing heuristic.
+2. **K-NN Power Search**: Euclidean and additive-power K-NN queries use conservative grid certificates with a bounded-memory exact fallback for stored float32 sites. The fixed grid remains unsuitable for the target 30M workload under skew.
+3. **Out-of-Core Facet Deduplication**: Bucketed disk sorting limits some peak allocations, but global IDs and the final facet arrays are still materialized. This is not yet a strict memory-bounded implementation.
 4. **Exposed Fitted Attributes**: The estimator exposes Scikit-Learn compliant fitted attributes: `cofaces_`, `coface_weights_`, `facets_`, `msf_` (minimum spanning forest), and `merge_tree_`.
+
+The complete July 2026 review is available in [`perg_hgp/Rapport_revue_complete_PERG_HGP_2026-07-10.md`](perg_hgp/Rapport_revue_complete_PERG_HGP_2026-07-10.md).
 
 ---
 

@@ -22,8 +22,8 @@ class SpatialGrid3D:
         self.bbox_min = self.X.min(dim=0).values
         self.bbox_max = self.X.max(dim=0).values
         self.scale = (self.bbox_max - self.bbox_min).max()
-        if self.scale < 1e-12:
-            self.scale = 1.0
+        if self.scale.item() < 1e-12:
+            self.scale = torch.ones((), dtype=self.X.dtype, device=self.device)
 
         self.X_normalized = (self.X - self.bbox_min) / self.scale
 
@@ -90,6 +90,10 @@ class SpatialGrid3D:
         device = self.device
         M = query_points.shape[0]
         m_local = min(m_local, self.n_points)
+
+        if M == 0:
+            return (torch.empty((0, m_local), dtype=torch.int64, device=query_points.device),
+                    torch.empty((0, m_local), dtype=torch.float32, device=query_points.device))
 
         # Adaptive chunk size based on m_local to strictly bound memory, capped at 10000 max
         grid_chunk_size = min(10000, max(1000, int(5000000 / m_local)))
@@ -247,7 +251,13 @@ class SpatialGrid3D:
 
                 d_out_min_sq = (d_border * self.scale) ** 2
 
-                certified = has_enough & (d_max_sq <= d_out_min_sq + 1e-6)
+                finite_border = torch.isfinite(d_out_min_sq)
+                roundoff = 16.0 * torch.finfo(d_max_sq.dtype).eps * torch.maximum(
+                    torch.abs(d_max_sq), torch.abs(d_out_min_sq)
+                )
+                separated = finite_border & (d_max_sq + roundoff < d_out_min_sq - roundoff)
+                all_cells_covered = ~finite_border
+                certified = has_enough & (separated | all_cells_covered)
 
                 # Deactivate certified queries
                 new_active_mask = active_mask.clone()
@@ -304,6 +314,43 @@ class SpatialGrid3D:
         self.total_fallbacks_ += self.fallback_count_
         return nbr_indices, nbr_dists_sq
 
+    def _global_power_knn(self, query_points, weights, m_local):
+        """Exact double-chunked power KNN used as a bounded-memory fallback."""
+        device = self.device
+        query_points = query_points.to(device)
+        weights = weights.to(device)
+        m_local = min(m_local, self.n_points)
+        M = query_points.shape[0]
+        out_idx = torch.zeros((M, m_local), dtype=torch.int64, device=device)
+        out_dist = torch.full((M, m_local), float('inf'), dtype=torch.float32, device=device)
+
+        query_chunk = 100
+        db_chunk = 100000
+        for start_q in range(0, M, query_chunk):
+            end_q = min(start_q + query_chunk, M)
+            q_chunk = query_points[start_q:end_q]
+            q_len = q_chunk.shape[0]
+            best_idx = torch.zeros((q_len, m_local), dtype=torch.int64, device=device)
+            best_dist = torch.full((q_len, m_local), float('inf'), dtype=torch.float32, device=device)
+
+            for start_db in range(0, self.n_points, db_chunk):
+                end_db = min(start_db + db_chunk, self.n_points)
+                db = self.X[start_db:end_db]
+                diff = db.unsqueeze(0) - q_chunk.unsqueeze(1)
+                dist = torch.sum(diff ** 2, dim=2) + weights[start_db:end_db].unsqueeze(0)
+                db_idx = torch.arange(start_db, end_db, dtype=torch.int64, device=device)
+                db_idx = db_idx.unsqueeze(0).expand(q_len, -1)
+
+                merged_dist = torch.cat([best_dist, dist], dim=1)
+                merged_idx = torch.cat([best_idx, db_idx], dim=1)
+                best_dist, order = torch.topk(merged_dist, m_local, dim=1, largest=False)
+                best_idx = torch.gather(merged_idx, 1, order)
+
+            out_idx[start_q:end_q] = best_idx
+            out_dist[start_q:end_q] = best_dist
+
+        return out_idx, out_dist
+
     def query_power_grid(self, query_points, weights, m_local=128):
         """
         Vectorized certified neighborhood search in the power complex.
@@ -315,6 +362,10 @@ class SpatialGrid3D:
         device = self.device
         M = query_points.shape[0]
         m_local = min(m_local, self.n_points)
+
+        if M == 0:
+            return (torch.empty((0, m_local), dtype=torch.int64, device=query_points.device),
+                    torch.empty((0, m_local), dtype=torch.float32, device=query_points.device))
 
         # Move queries and weights to self.device
         q_pts = query_points.to(device)
@@ -328,6 +379,17 @@ class SpatialGrid3D:
         # Output tensors allocated on the same device as query_points
         nbr_indices = torch.zeros((M, m_local), dtype=torch.int64, device=query_points.device)
         nbr_dists_sq = torch.zeros((M, m_local), dtype=torch.float32, device=query_points.device)
+
+        # Sparse high-resolution grids are dominated by empty-shell traversal.
+        # For small databases an exact blocked scan is both faster and safer.
+        if self.n_points <= 4096:
+            exact_idx, exact_dist = self._global_power_knn(q_pts, w_sites, m_local)
+            self.fallback_count_ = M
+            self.fallback_rate_ = 1.0
+            self.certified_rate_ = 0.0
+            self.total_queries_ += M
+            self.total_fallbacks_ += M
+            return exact_idx.to(query_points.device), exact_dist.to(query_points.device)
 
         # Process in chunks to strictly bound VRAM/RAM
         grid_chunk_size = min(10000, max(1000, int(5000000 / m_local)))
@@ -440,9 +502,18 @@ class SpatialGrid3D:
                         cand_indices[active_idx] = torch.gather(merged_idx, 1, idx)
                         cand_dists_sq[active_idx] = val
 
-                # Update stopping criterion for active queries
+                # Update the stopping criterion conservatively. Ambiguous
+                # floating-point comparisons keep searching (or fall back).
                 stopping_threshold = ((radius - 1) * delta_scaled) ** 2 + min_a
-                active_mask[active_idx] = cand_dists_sq[active_idx, -1] > stopping_threshold
+                kth = cand_dists_sq[active_idx, -1]
+                threshold = torch.as_tensor(stopping_threshold, dtype=kth.dtype, device=device)
+                roundoff = 16.0 * torch.finfo(kth.dtype).eps * torch.maximum(
+                    torch.abs(kth), torch.abs(threshold)
+                )
+                enough = torch.isfinite(kth)
+                separated = kth + roundoff < threshold - roundoff
+                all_cells_covered = radius >= self.grid_resolution
+                active_mask[active_idx] = ~(enough & (separated | all_cells_covered))
 
                 radius += 1
 
@@ -452,12 +523,8 @@ class SpatialGrid3D:
                 uncert_idx = torch.where(uncertified)[0]
                 total_fallback_count += len(uncert_idx)
 
-                # Vectorized global scan for uncertified chunk queries
                 q_uncert = q_pts_chunk[uncert_idx]
-                diff = self.X.unsqueeze(0) - q_uncert.unsqueeze(1)
-                dist_sq = torch.sum(diff ** 2, dim=2) + w_sites.unsqueeze(0)
-
-                val_top, idx_top = torch.topk(dist_sq, m_local, dim=1, largest=False)
+                idx_top, val_top = self._global_power_knn(q_uncert, w_sites, m_local)
                 cand_dists_sq[uncert_idx] = val_top
                 cand_indices[uncert_idx] = idx_top
 

@@ -5,12 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "perg_hgp"
 version = "0.1.0"
-description = "Progressive Entropic Rank-Gabriel HGP for massive 3D point clouds"
+description = "Research prototype for Progressive Entropic Rank-Gabriel HGP in 3D"
 readme = "README.md"
 requires-python = ">=3.9"
+authors = [{name = "Louis Hauseux"}]
+license = "MIT"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 dependencies = [

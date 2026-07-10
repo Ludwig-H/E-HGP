@@ -15,6 +15,22 @@ class WitnessPool:
         self.signatures = signatures if signatures is not None else torch.zeros((coords.shape[0], rank + 1), dtype=torch.int64, device=coords.device)
 
 
+def _normalize_rank_energies(energies):
+    """Normalize each active set so rank temperatures are unitless."""
+    row_min = torch.min(energies, dim=1, keepdim=True).values
+    shifted = energies - row_min
+    scale = torch.max(shifted, dim=1, keepdim=True).values
+    scale = torch.clamp(scale, min=torch.finfo(energies.dtype).tiny)
+    return shifted / scale
+
+
+def _rank_tie_count(energies, rank_index, rtol=1e-6):
+    threshold = energies[:, rank_index:rank_index + 1]
+    span = torch.max(energies, dim=1, keepdim=True).values - torch.min(energies, dim=1, keepdim=True).values
+    atol = rtol * torch.clamp(span, min=torch.finfo(energies.dtype).tiny)
+    return torch.sum(energies <= threshold + atol, dim=1)
+
+
 def refine_witness_pool(witness_pool, Z, a, grid_z, cfg):
     """
     Runs fixed-point iterations on witness coordinates to find critical witnesses of rank k.
@@ -39,7 +55,8 @@ def refine_witness_pool(witness_pool, Z, a, grid_z, cfg):
                 nbr_indices_chunk, E_chunk = grid_z.query_power_grid(W_chunk, a, m_local=cfg.m_active)
                 Z_nbrs_chunk = Z[nbr_indices_chunk] # (chunk_size, m_active, 3)
 
-                Q_val, b_val = compute_rank_soft_dp_batched(E_chunk, rank, eps)
+                E_normalized = _normalize_rank_energies(E_chunk)
+                Q_val, b_val = compute_rank_soft_dp_batched(E_normalized, rank, eps)
                 b_weights = b_val[:, rank - 1] # (chunk_size, m_active)
 
                 # Barycenter update
@@ -60,7 +77,8 @@ def refine_witness_pool(witness_pool, Z, a, grid_z, cfg):
         nbr_indices_chunk, E_chunk = grid_z.query_power_grid(W_chunk, a, m_local=cfg.m_active)
         Z_nbrs_chunk = Z[nbr_indices_chunk]
 
-        Q_val, b_val = compute_rank_soft_dp_batched(E_chunk, rank, cfg.rank_eps_schedule[-1])
+        E_normalized = _normalize_rank_energies(E_chunk)
+        Q_val, b_val = compute_rank_soft_dp_batched(E_normalized, rank, cfg.rank_eps_schedule[-1])
         b_weights = b_val[:, rank - 1]
         T = torch.sum(b_weights[:, :, None] * Z_nbrs_chunk, dim=1)
         dist_to_update = torch.sum((W_chunk - T) ** 2, dim=1)
@@ -70,8 +88,8 @@ def refine_witness_pool(witness_pool, Z, a, grid_z, cfg):
 
         # Capacity filter: count how many neighbors have energy <= E_{rank-1} + tolerance
         # In sorted E_chunk, the rank-1 index is min(rank - 1, m_active - 1)
-        r_est = E_chunk[:, min(rank - 1, cfg.m_active - 1)].unsqueeze(1)
-        count = torch.sum(E_chunk <= r_est + 1e-3, dim=1)
+        rank_index = min(rank - 1, E_chunk.shape[1] - 1)
+        count = _rank_tie_count(E_chunk, rank_index)
 
         # We expect count to be close to rank + 1
         valid_mask = torch.abs(count - (rank + 1)) <= 2
@@ -153,8 +171,8 @@ def lift_witness_pool(witness_pool, Z, a, grid_z, cfg):
             # Query power distance on sub_seeds (sorted_E is exactly E_s because query_power_grid returns sorted distances)
             _, sorted_E = grid_z.query_power_grid(sub_seeds, a, m_local=cfg.m_active)
 
-            r_est = sorted_E[:, min(next_rank - 1, cfg.m_active - 1)].unsqueeze(1)
-            count = torch.sum(sorted_E <= r_est + 1e-3, dim=1)
+            rank_index = min(next_rank - 1, sorted_E.shape[1] - 1)
+            count = _rank_tie_count(sorted_E, rank_index)
 
             valid_mask = torch.abs(count - next_rank) <= 2
             valid_idx = torch.where(valid_mask)[0]

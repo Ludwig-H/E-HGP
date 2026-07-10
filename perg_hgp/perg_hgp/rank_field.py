@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import os
 
 def compute_elementary_symmetric_polynomials_prefix_suffix(u, Kmax):
     """
@@ -162,11 +163,11 @@ def compute_rank_soft_dp_batched(E, Kmax, eps):
 
     return Q, b
 
-if hasattr(torch, 'compile'):
+if os.environ.get('PERG_HGP_ENABLE_TORCH_COMPILE') == '1' and hasattr(torch, 'compile'):
     try:
         import importlib.util
         triton_available = importlib.util.find_spec("triton") is not None
-        if not torch.cuda.is_available() or triton_available:
+        if torch.cuda.is_available() and triton_available:
             compute_elementary_symmetric_polynomials_prefix_suffix_batched = torch.compile(
                 compute_elementary_symmetric_polynomials_prefix_suffix_batched
             )
