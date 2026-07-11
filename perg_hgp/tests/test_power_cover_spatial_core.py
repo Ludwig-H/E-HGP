@@ -1,4 +1,7 @@
+import ast
+import gc
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -586,8 +589,134 @@ def test_blackwell_notebook_verbose_param_is_wired_to_long_running_stages():
     combined = "\n".join(sources)
 
     assert 'verbose = True  # @param {type:"boolean"}' in sources[1]
+    assert (
+        "PILOT_KAPPA_CANDIDATES = (1.0, 2.0, 4.0, 8.0, 16.0, 32.0)"
+        in sources[1]
+    )
+    assert "FULL_DISTORTION_BUDGET = 0.25" in sources[1]
+    assert "PILOT_BUDGET_FRACTION = 0.60" in sources[1]
+    assert "distortion_budget=FULL_DISTORTION_BUDGET" in combined
+    assert "def run_power_cover_with_fallback" in combined
+    assert "except FullRunDistortionExceeded" in combined
+    assert "run_power_cover_with_fallback(full_points" in sources[21]
     assert "progress=progress_reporter if verbose else None" in combined
     assert "generate_mixture_3d(N_FULL, FULL_SEED, verbose=verbose)" in combined
     assert "[PERG-HGP heartbeat]" in combined
-    for index in (1, 15, 17, 19, 21):
+    for index in (1, 15, 17, 19, 21, 23):
         compile(sources[index], f"{notebook_path.name}:cell-{index}", "exec")
+
+
+def test_blackwell_notebook_distortion_fallback_executes_and_persists(tmp_path):
+    notebook_path = (
+        Path(__file__).resolve().parents[2] / "PERG_HGP_Blackwell_30M.ipynb"
+    )
+    notebook = json.loads(notebook_path.read_text(encoding="utf-8"))
+    tree = ast.parse("".join(notebook["cells"][17]["source"]))
+    selected_nodes = []
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name)
+            and target.id == "FULL_DISTORTION_PATTERN"
+            for target in node.targets
+        ):
+            selected_nodes.append(node)
+        elif isinstance(node, ast.ClassDef) and node.name == "FullRunDistortionExceeded":
+            selected_nodes.append(node)
+        elif (
+            isinstance(node, ast.FunctionDef)
+            and node.name == "run_power_cover_with_fallback"
+        ):
+            selected_nodes.append(node)
+
+    class FakeDevice:
+        def synchronize(self):
+            return None
+
+    class FakePool:
+        def free_all_blocks(self):
+            return None
+
+    class FakeCuda:
+        Device = FakeDevice
+
+    class FakeCupy:
+        cuda = FakeCuda()
+
+        @staticmethod
+        def get_default_memory_pool():
+            return FakePool()
+
+    namespace = {
+        "FULL_DISTORTION_BUDGET": 0.25,
+        "KAPPA_SELECTED": 8.0,
+        "PILOT_KAPPA_CANDIDATES": (1.0, 2.0, 4.0, 8.0, 16.0, 32.0),
+        "Path": Path,
+        "cp": FakeCupy(),
+        "gc": gc,
+        "json": json,
+        "re": re,
+    }
+    module = ast.Module(body=selected_nodes, type_ignores=[])
+    exec(compile(module, str(notebook_path), "exec"), namespace)
+
+    message = (
+        "full-run distortion s=0.328804 exceeds budget 0.25; "
+        "lower kappa and rerun"
+    )
+    match = namespace["FULL_DISTORTION_PATTERN"].fullmatch(message)
+    assert match is not None
+    assert float(match.group("observed")) == pytest.approx(0.328804)
+
+    def resources(used):
+        return {
+            "samples": 3,
+            "legacy_cupy_pool_allocated_peak_bytes": 0,
+            "legacy_cupy_pool_reserved_peak_bytes": 0,
+            "nvml_used_peak_bytes": used,
+            "nvml_total_bytes": 100,
+            "vram_peak_fraction": used / 100.0,
+            "rss_peak_bytes": 2 * used,
+            "disk_free_min_bytes": 1_000 - used,
+            "nvml_source": "pynvml",
+            "monitor_errors": [],
+        }
+
+    failure_type = namespace["FullRunDistortionExceeded"]
+    calls = []
+
+    def fake_run_power_cover(*args):
+        kappa = float(args[-1])
+        calls.append(kappa)
+        if kappa == 8.0:
+            raise failure_type(
+                kappa=kappa,
+                observed=0.328804,
+                budget=0.25,
+                resources=resources(8),
+                wall_seconds=8.0,
+            )
+        return {
+            "run_dir": str(tmp_path),
+            "regularization": {"s_max": 0.22},
+            "resources": resources(4),
+            "attempt_wall_seconds": 5.0,
+        }
+
+    namespace["run_power_cover"] = fake_run_power_cover
+    record = namespace["run_power_cover_with_fallback"](
+        object(), 30_000_000, 20260710, 0, "full"
+    )
+    validation = record["kappa_full_validation"]
+    assert calls == [8.0, 4.0]
+    assert validation["selected_after_full_validation"] == 4.0
+    assert [row["status"] for row in validation["attempts"]] == [
+        "rejected",
+        "accepted",
+    ]
+    assert validation["attempts"][0]["s_observed"] == pytest.approx(0.328804)
+    assert validation["resource_summary"]["nvml_used_peak_bytes"] == 8
+    assert validation["resource_summary"]["total_attempt_wall_seconds"] == 13.0
+    persisted = json.loads(
+        (tmp_path / "benchmark_metrics.json").read_text(encoding="utf-8")
+    )
+    assert persisted["kappa_full_validation"] == validation
