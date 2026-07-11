@@ -643,8 +643,8 @@ def _cuda_regularize_budget_chunk(
                 float log_beta_high = regime == 1 ? logf(80.0f) - logf(minimum_gap) : 0.0f;
 
                 if (regime == 1) {
-                    # The high side is cost-feasible; 28 iterations exceed the
-                    # useful resolution of a float32 log-temperature bracket.
+                    // The high side is cost-feasible; 28 iterations exceed the
+                    // useful resolution of a float32 log-temperature bracket.
                     for (int iteration = 0; iteration < 28; ++iteration) {
                         float middle = 0.5f * (log_beta_low + log_beta_high);
                         float weight = 0.0f;
