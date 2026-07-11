@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "perg_hgp"
-version = "0.2.0"
+version = "0.3.0"
 description = "Entropy-regularized power-cover H0 and Rank-Gabriel HGP research backends in 3D"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,14 +17,17 @@ classifiers = [
 dependencies = [
     "numpy>=1.20",
     "scipy>=1.7",
-    "torch>=2.0",
-    "pyyaml",
-    "tqdm",
-    "scikit-learn>=1.0"
 ]
 
 [project.optional-dependencies]
-test = ["pytest>=8"]
+atlas = ["torch>=2.0", "pyyaml", "tqdm", "scikit-learn>=1.0"]
+test = [
+    "pytest>=8",
+    "torch>=2.0",
+    "pyyaml",
+    "tqdm",
+    "scikit-learn>=1.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]

@@ -20,12 +20,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 import math
 import time
-from typing import Any, Sequence
+from typing import Any, Sequence, cast
 
 import numpy as np
 
 from .progress import ProgressCallback, emit_progress
-
 
 _NEIGHBOUR_OFFSETS_26 = tuple(
     (dx, dy, dz)
@@ -44,6 +43,7 @@ _INT32_MAX = np.iinfo(np.int32).max
 
 
 def _validate_dims(dims: int | Sequence[int]) -> tuple[int, ...]:
+    result: tuple[int, ...]
     if isinstance(dims, (bool, np.bool_)):
         raise TypeError("grid dimensions must be integers")
     if isinstance(dims, (int, np.integer)):
@@ -51,8 +51,7 @@ def _validate_dims(dims: int | Sequence[int]) -> tuple[int, ...]:
     else:
         raw_dims = tuple(dims)
         if any(
-            isinstance(d, (bool, np.bool_))
-            or not isinstance(d, (int, np.integer))
+            isinstance(d, (bool, np.bool_)) or not isinstance(d, (int, np.integer))
             for d in raw_dims
         ):
             raise TypeError("grid dimensions must be integers")
@@ -71,7 +70,7 @@ def _validate_dims(dims: int | Sequence[int]) -> tuple[int, ...]:
 
 
 def _dims3(dims: tuple[int, ...]) -> tuple[int, int, int]:
-    return dims + (1,) * (3 - len(dims))
+    return cast(tuple[int, int, int], dims + (1,) * (3 - len(dims)))
 
 
 def _validate_edge_ids(n_vertices: int) -> None:
@@ -189,7 +188,9 @@ class CubicalMSFResult:
 
         return int(self.births.size)
 
-    def components_at_cut(self, threshold: float, *, reshape: bool = False) -> np.ndarray:
+    def components_at_cut(
+        self, threshold: float, *, reshape: bool = False
+    ) -> np.ndarray:
         """Return canonical component labels in the sublevel set at ``threshold``.
 
         Inactive vertices receive ``-1``.  Every active component is labelled
@@ -639,9 +640,7 @@ def cubical_msf_gpu(
     max_phases = int(math.ceil(math.log2(n_vertices))) + 2
     progress_started = time.perf_counter()
     for _phase in range(max_phases):
-        kernels["reset_best"](
-            vertex_blocks, block, (best_key, np.int32(n_vertices))
-        )
+        kernels["reset_best"](vertex_blocks, block, (best_key, np.int32(n_vertices)))
         kernels["scan_implicit_edges"](
             vertex_blocks,
             block,
@@ -731,9 +730,9 @@ def cubical_msf_gpu(
 
     # Atomic output positions are intentionally unordered.  Sorting the compact
     # N-1 result by the common total key makes the public result bitwise stable.
-    edges = np.column_stack(
-        (cp.asnumpy(output_u), cp.asnumpy(output_v))
-    ).astype(np.int32, copy=False)
+    edges = np.column_stack((cp.asnumpy(output_u), cp.asnumpy(output_v))).astype(
+        np.int32, copy=False
+    )
     edge_ids = cp.asnumpy(output_edge_id)
     weights = np.maximum(births[edges[:, 0]], births[edges[:, 1]])
     weights[weights == 0] = np.float32(0)

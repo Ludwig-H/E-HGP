@@ -1076,3 +1076,87 @@ La bonne stratégie n'est pas un \(K=10\) universel sur une grille globale. Il f
 - [NVIDIA cuML — `NearestNeighbors`](https://docs.rapids.ai/api/cuml/nightly/api/generated/cuml.neighbors.nearestneighbors/)
 - [SemanticKITTI — tâches officielles](https://semantic-kitti.org/tasks.html)
 - [Behley et al., *SemanticKITTI: A Dataset for Semantic Scene Understanding of LiDAR Sequences*, ICCV 2019](https://openaccess.thecvf.com/content_ICCV_2019/papers/Behley_SemanticKITTI_A_Dataset_for_Semantic_Scene_Understanding_of_LiDAR_Sequences_ICCV_2019_paper.pdf)
+
+---
+
+## 10. Suivi post-audit dans la révision de travail
+
+Le rapport ci-dessus reste l’audit du commit `150c1ce`. Depuis cet audit, les
+changements suivants ont été implémentés et testés sur CPU :
+
+1. `local_distortion` remplace dans le protocole 30 M le pilote et les relances
+   globales de `kappa`. Le budget est
+   \(B_i=\min(B_{\rm abs},\gamma R_K(x_i))\), la perplexité \(\kappa_i\) est
+   locale et ses quantiles sont publiés.
+2. Lorsque `local_scale_k=K`, le code vérifie le ratio maximal observé et publie
+   le théorème
+   \((1-2\gamma)r_K\le r_{K,\rm reg}\le(1+2\gamma)r_K\) relativement au nuage
+   quantifié. Les échelles nulles incompatibles désactivent explicitement ce
+   contrat.
+3. Le mode local CUDA utilise un RawKernel fusionné par ligne : 28 bissections
+   float32, coûts en registres/mémoire partagée et accumulation directe des
+   sites. Il supprime les grands temporaires de probabilités et d’offsets du
+   solveur CuPy initial. Ce kernel est inclus dans les smoke tests Blackwell,
+   mais n’a pas été exécuté sur le CPU d’audit.
+4. Le CPU interroge exactement les sites de puissance dans le relèvement 4D.
+   Le chemin conditionnel CUDA accepte aussi un intervalle étroit de valeur au
+   rang K pour les grandes multiplicités, sans accepter les intervalles larges.
+5. L’erreur de quantification \(\varepsilon_X\), une borne \(s^\uparrow\)
+   recalculée en float64, la borne base
+   \(\varepsilon_X+s^\uparrow+H+\delta\) et la borne enveloppe
+   \(\varepsilon_X+s^\uparrow+2(H+\delta)\) figurent dans le rapport machine.
+6. `min_resolved_radius` pilote une grille uniforme anisotrope vérifiant
+   géométriquement \(2H\le\eta r_{\min}\). Le run refuse un budget de cellules
+   ou une résolution de centres float32 impossible. Le taux de sites
+   (R_K(x_i)<r_{\min}) est enregistré et peut rendre le verdict
+   `INCONCLUSIVE`.
+7. Une référence CPU calcule maintenant la relation canonique site–composantes
+   par intersection boule–AABB, avec appartenance multivaluée et ambiguïté
+   inner/outer. Elle est découpable mais non adaptée à 30 M.
+8. Le notebook Blackwell conserve \(N=30\,000\,000\), \(K=10\), ajoute un
+   smoke end-to-end du solveur local, supprime le fallback global, archive les
+   échecs et distingue `CONDITIONAL_PASS`, `INCONCLUSIVE` et `FAIL`.
+9. Le routage CUDA ne dépend plus d’un seuil minimal implicite de taille. RBC
+   n’est choisi que s’il peut honorer le support demandé ou le cap complet de
+   puissance plus sa garde ; sinon cuVS brute force est sélectionné sans
+   diminuer `candidate_k_max`. Le run 30 M à cap 1 024 reste sur RBC, tandis
+   que les petits nuages avec ce défaut empruntent la route exhaustive.
+10. L’auto-voisin est canonisé avant le calcul du rang local : identifiant
+    propre si présent, sinon doublon de coordonnées exact, puis distance
+    forcée à zéro. Une approximation seulement proche provoque un échec.
+11. Le kernel fusionné déclare `simplex_residual_max=null`, car il ne mesure
+    pas ce résidu indépendamment. Le diagnostic de violation du cap absolu
+    inclut désormais \(\varepsilon_X\). Les sorties physiques sont promues en
+    float64 et les échelles dont les puissances carrées ne sont pas
+    représentables sont refusées.
+12. `save()`/`load()` utilisent un schéma 2 avec un `run_id` commun au
+    manifeste et aux NPZ. Les mélanges de générations, formes, compteurs,
+    décalages ou valeurs non finies sont rejetés ; une sauvegarde sans sites
+    élimine un ancien `power_sites.npz`.
+
+### Validation disponible
+
+- **124 tests CPU `perg_hgp` réussis** sur la suite complète ;
+- **1 test E-HGP réussi** séparément ;
+- compilation syntaxique du package et des 14 cellules de code du notebook ;
+- aucune exécution CUDA/NVML locale, faute de GPU NVIDIA ;
+- aucun JSON 30 M versionné, donc toujours aucune revendication de débit ou de
+  validation Blackwell.
+
+Les tests CPU couvrent le planificateur RBC/cuVS, les invariants de l’auto-
+voisin, les diagnostics et la sérialisation. Ils n’exécutent ni cuVS, ni RBC,
+ni le RawKernel ; la validation de ces implémentations reste précisément le
+rôle des cellules Blackwell.
+
+### Ce que ce suivi ne ferme pas
+
+La grille actuelle n’est pas encore l’octree/tuilage local recommandé dans
+l’audit. Elle utilise un unique plancher (r_{\min}) et une borne globale (H).
+Une certification réellement locale devra conserver (H_Q,\delta_Q), raffiner
+les cols et corridors pertinents, puis construire deux MSF distincts.
+
+Le top-K CUDA massif reste conditionnel à RBC. Le routeur cuVS brute force des
+petites scènes est implémenté, mais n’a pas été exécuté dans l’environnement
+CPU de ce suivi. Enfin, l’affectation GPU 30 M, le merge tree enrichi, la
+reprise par checkpoints et la sélection plate restent des bloqueurs avant une
+campagne SemanticKITTI complète.

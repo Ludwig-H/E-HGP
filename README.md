@@ -1,69 +1,115 @@
-# E-HGP & PERG-HGP Repository
+# E-HGP / PERG-HGP
 
-This repository contains historical HGP/E-HGP implementations, the experimental Rank-Gabriel PERG-HGP atlas, and a new spatial power-cover backend for massive 3-D data.
+Ce dépôt regroupe les implémentations historiques HGP/E-HGP, le prototype
+d’atlas Rank-Gabriel `PERGHGPClusterer` et le backend spatial `PowerCover3D`
+destiné aux nuages 3D massifs.
 
----
+## État au 11 juillet 2026
 
-## 📌 Project Status: Research Prototype
+`PowerCover3D` calcule une approximation contrôlée de la hiérarchie (H_0) du
+champ K-NN régularisé. Le chemin CPU utilise désormais le relèvement euclidien
+exact en dimension 4 pour les distances de puissance. Le chemin CUDA conserve
+RAPIDS RBC : son garde est conditionnel à l’ordre euclidien renvoyé et aux
+enveloppes flottantes déclarées, avec audits contre cuVS brute force.
 
-> [!IMPORTANT]
-> **PERG-HGP remains research software.** The CPU correctness boundary is tested, but the CUDA kernels and the 30-million-point run still require execution of the Blackwell notebook. No unexecuted notebook is presented as a benchmark result.
+Le routage CUDA est explicite et ne réduit jamais silencieusement la
+configuration : RBC est utilisé seulement s’il peut honorer le support demandé
+ou, pour le champ de puissance, `candidate_k_max` plus le candidat de garde.
+Sinon cuVS brute force est sélectionné avec le même cap. Avant la
+régularisation, l’observation elle-même — ou un doublon de coordonnées exact —
+est canonisée comme atome de coût nul, y compris si RBC a renvoyé une petite
+distance positive.
 
-### Current Implementation Characteristics & Limits
-1. **`PowerCover3D` (30 M path)**: streaming entropy sites, RAPIDS RBC candidate search with a mandatory runtime audit, a top-K power guard certified under its declared float32 envelope, inner/outer cubical fields, and an implicit 26-connected Borůvka MSF. Its primary output is an H0 hierarchy with a measured radius bound.
-2. **`PERGHGPClusterer` (atlas path)**: explicit Rank-Gabriel cofaces, facets, MSF, condensation and voting. It remains useful experimentally, but atlas completeness and exact facet births are unknown.
-3. **Exact small CPU oracles**: stable blocked power top-K, additive miniballs with primal/dual diagnostics, exhaustive power-HGP without Gabriel pruning, and cubical H0 references.
-4. **Honest boundary**: the implemented spatial bound is `s + 2 * (H + delta_num)`. It is not a guarantee on flat labels, and fixed `K=10` is not an asymptotic consistency claim.
+Le statut dépend de la taille :
 
-The complete July 2026 review is available in [`perg_hgp/Rapport_revue_complete_PERG_HGP_2026-07-10.md`](perg_hgp/Rapport_revue_complete_PERG_HGP_2026-07-10.md).
-The backend contract and API are documented in [`perg_hgp/POWER_COVER_3D.md`](perg_hgp/POWER_COVER_3D.md). GPU acceptance is scripted in [`PERG_HGP_Blackwell_30M.ipynb`](PERG_HGP_Blackwell_30M.ipynb).
+| Régime | Chemin recommandé | Statut |
+|---|---|---|
+| Quelques milliers à quelques centaines de milliers | CPU, cKDTree 3D + relèvement exact 4D | Testé localement |
+| Tailles intermédiaires | CPU exact si la grille reste abordable ; CUDA explicite sinon | Dépend du matériel |
+| Jusqu’à 30 000 000, (K=10) | CUDA/RAPIDS + noyaux CuPy fusionnés | Protocole Blackwell prêt, exécution non versionnée |
 
----
+Le nouveau mode `local_distortion` maximise l’entropie sous
 
-## 🛠️ Installation & Dependencies
+\[
+s_i\le \min(B_{\rm abs},\gamma R_K(x_i)).
+\]
 
-To install the package in editable mode along with its dependencies:
+Si `local_scale_k == K`, si le ratio observé vérifie \(\gamma<1/2\), et
+conditionnellement au voisinage calculé, alors sur le nuage quantifié :
+
+\[
+(1-2\gamma)r_K(y)\le r_{K,\mathrm{reg}}(y)
+\le(1+2\gamma)r_K(y).
+\]
+
+L’erreur de quantification d’entrée \(\varepsilon_X\) reste additive. Pour une
+grille uniforme de demi-diagonale \(H\) et une marge numérique
+\(\delta_{\rm num}\), les contrats publiés sont :
+
+- forêt de base : \(\varepsilon_X+s^\uparrow+H+\delta_{\rm num}\) ;
+- enveloppes inner/outer :
+  \(\varepsilon_X+s^\uparrow+2(H+\delta_{\rm num})\).
+
+La grille peut être dimensionnée par `min_resolved_radius` plutôt que par un
+nombre global arbitraire de cellules. Elle est uniforme anisotrope, refuse tout
+dépassement de `max_grid_cells` et ne doit pas être décrite comme adaptative :
+un véritable octree avec erreurs \(H_Q,\delta_Q\) reste à construire.
+
+Les calculs normalisés restent en float32 sur CUDA, mais centres, poids de
+puissance, rayons publics et forêts sont promus en float64 lors du retour aux
+unités d’entrée. Les étendues dont le carré sous-déborde ou déborde le contrat
+float64 sont refusées avec une demande explicite de changement d’unités. Si un
+budget absolu est demandé, `distortion_budget_violation_max` inclut aussi
+\(\varepsilon_X\). Sur le solveur CUDA fusionné, le résidu de simplexe non
+recalculé vaut `null`, jamais un faux zéro probant.
+
+`PowerCoverHierarchy.save()` et `load()` utilisent un schéma versionné. Chaque
+sauvegarde reçoit un `run_id` commun au manifeste et aux NPZ ; un mélange
+d’artefacts provenant de deux générations est rejeté au chargement.
+
+## Installation
+
+Le chemin puissance CPU n’impose plus PyTorch :
+
+```bash
+pip install -e perg_hgp
+```
+
+Pour l’atlas historique et tous les tests :
 
 ```bash
 pip install -e 'perg_hgp[test]'
 ```
 
-### Core Dependencies
-* `numpy >= 1.20`
-* `scipy >= 1.7`
-* `torch >= 2.0`
-* `scikit-learn >= 1.0`
-* `pyyaml`
-* `tqdm`
+La pile CUDA (CuPy, cuML, cuVS, RMM) est installée par le notebook avec la
+procédure RAPIDS adaptée à Colab.
 
----
-
-## 🧪 Running Unit Tests
-
-The test suite covers both the historical atlas and the new spatial CPU oracles.
-
-To execute the entire test suite:
+## Validation CPU
 
 ```bash
-python -m pytest -q perg_hgp/tests
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q perg_hgp/tests
 ```
 
-To run E-HGP base tests:
+La campagne locale de cette révision compte 124 tests `perg_hgp` réussis et
+1 test E-HGP réussi. Le notebook GPU réexécute toute la suite `perg_hgp` avec
+CUDA masqué avant tout benchmark.
 
-```bash
-python -m unittest discover -s E-HGP/tests -v
-```
+## Documents importants
 
----
+- [contrat PowerCover3D](perg_hgp/POWER_COVER_3D.md) ;
+- [README du package](perg_hgp/README.md) ;
+- [audit PERG-HGP du 11 juillet](perg_hgp/Rapport_audit_PERG_HGP_2026-07-11.md) ;
+- [audit PowerCover3D 30 M / K=10](perg_hgp/Rapport_audit_PowerCover3D_30M_K10_SemanticKITTI_2026-07-11.md) ;
+- [notebook Blackwell 30 M](PERG_HGP_Blackwell_30M.ipynb).
 
-## 🗺️ Remaining GPU validation
+## Limites encore ouvertes
 
-The notebook must still establish, on the declared Blackwell machine:
-
-- RAPIDS RBC agreement with cuVS brute force for raw-site queries and sampled grid centres;
-- CuPy/NVRTC compilation and CPU/GPU equivalence of the implicit cubical MSF;
-- zero uncertified top-10 power queries in strict mode;
-- synchronized stage timings, NVML peak VRAM, RSS, scratch-space use and artifact persistence;
-- runs at 100 k, 1 M, 3 M, 10 M and 30 M points;
-- whether the maximum persistence of the synthetic validation cloud exceeds the
-  measured bound; scientific data still require a branch-by-branch analysis.
+- aucune mesure Blackwell/30 M n’est incluse tant que le notebook n’a pas été
+  réellement exécuté et ses JSON versionnés ;
+- RBC CUDA n’est pas une preuve exhaustive, malgré les audits échantillonnés ;
+- l’appartenance canonique boule–composante existe comme référence CPU
+  découpable, mais pas encore comme kernel GPU 30 M ;
+- il manque encore un merge tree enrichi, une reprise par checkpoints et une
+  sélection plate explicitement séparée de la hiérarchie de Hartigan ;
+- (K=10) est un choix à taille finie, pas une preuve de consistance ni un
+  résultat SemanticKITTI.

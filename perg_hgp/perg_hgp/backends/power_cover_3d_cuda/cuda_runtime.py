@@ -175,9 +175,7 @@ class RBCAuditedIndex:
             )
             stop_bf.record()
             stop_bf.synchronize()
-            brute_seconds = (
-                float(cp.cuda.get_elapsed_time(start_bf, stop_bf)) / 1_000.0
-            )
+            brute_seconds = float(cp.cuda.get_elapsed_time(start_bf, stop_bf)) / 1_000.0
             exact_squared = cp.asarray(exact_squared)
 
             # Compare values rather than IDs: duplicate or equidistant sites may
@@ -186,8 +184,10 @@ class RBCAuditedIndex:
             rbc_sorted = cp.sort(rbc_squared, axis=1)
             exact_sorted = cp.sort(exact_squared, axis=1)
             maximum_error = float(cp.max(cp.abs(rbc_sorted - exact_sorted)).item())
-            tolerance = 128.0 * np.finfo(np.float32).eps * max(
-                1.0, float(cp.max(cp.abs(exact_sorted)).item())
+            tolerance = (
+                128.0
+                * np.finfo(np.float32).eps
+                * max(1.0, float(cp.max(cp.abs(exact_sorted)).item()))
             )
             values_match = maximum_error <= tolerance
             self.audited = bool(values_match)
@@ -207,6 +207,74 @@ class RBCAuditedIndex:
         )
         self.last_audit = result
         return result
+
+
+class CuvsBruteForceIndex:
+    """Explicit exhaustive 3-D Euclidean KNN for small CUDA workloads.
+
+    This route is selected deliberately when cuML RBC's ``sqrt(N)`` neighbor
+    limit cannot cover regularization support or a power-query guard.  It is
+    slower but avoids both a hidden cuML fallback and the previous artificial
+    lower bound on usable cloud sizes.
+    """
+
+    exact = True
+    numerically_proven = False
+    algorithmically_exhaustive = True
+    euclidean_order_contract = True
+    backend_name = "cuvs_brute_force_3d"
+
+    def __init__(self, points: Any, *, max_k: int):
+        cp, _, _ = require_cuda_stack()
+        try:
+            from cuvs.neighbors import brute_force  # type: ignore
+        except Exception as error:  # pragma: no cover - depends on RAPIDS runtime
+            raise CUDABackendUnavailable(
+                "the explicit small-cloud CUDA route requires cuVS from the "
+                "matching RAPIDS release"
+            ) from error
+        values = cp.ascontiguousarray(cp.asarray(points, dtype=cp.float32))
+        if values.ndim != 2 or values.shape[1] != 3 or values.shape[0] < 1:
+            raise ValueError("brute-force points must have shape (N, 3), N >= 1")
+        if not bool(cp.all(cp.isfinite(values)).item()):
+            raise ValueError("brute-force points contain NaN or Inf")
+        self.points = values
+        self.size = int(values.shape[0])
+        self.max_k = _positive_integer(max_k, name="max_k")
+        if self.max_k > self.size:
+            raise ValueError(
+                f"max_k={self.max_k} exceeds the number of indexed points "
+                f"N={self.size}"
+            )
+        self._cp = cp
+        self._brute_force = brute_force
+        self.index = brute_force.build(values, metric="sqeuclidean")
+        self.audited = False
+        self.audit_status = "not_required_exhaustive"
+
+    @property
+    def status(self) -> dict[str, Any]:
+        return {
+            "backend": self.backend_name,
+            "requested_algorithm": "brute_force",
+            "hidden_fallback_allowed": False,
+            "algorithmically_exhaustive": True,
+            "empirical_audit_status": self.audit_status,
+            "empirical_audit_passed": None,
+            "numerically_proven": self.numerically_proven,
+        }
+
+    def query(self, queries: Any, k: int):
+        requested = _positive_integer(k, name="k")
+        if requested > self.max_k:
+            raise ValueError(f"k must satisfy 1 <= k <= configured max_k={self.max_k}")
+        values = self._cp.ascontiguousarray(
+            self._cp.asarray(queries, dtype=self._cp.float32)
+        )
+        _validate_queries(self._cp, values)
+        squared, indices = self._brute_force.search(self.index, values, requested)
+        distances = self._cp.sqrt(self._cp.maximum(self._cp.asarray(squared), 0.0))
+        return distances, self._cp.asarray(indices, dtype=self._cp.int64)
 
 
 # Backward-compatible import for the first prototype.  The new name avoids

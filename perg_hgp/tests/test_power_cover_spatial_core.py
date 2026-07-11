@@ -1,8 +1,7 @@
 import ast
-import gc
 import json
-import re
 from pathlib import Path
+import shutil
 
 import numpy as np
 import pytest
@@ -153,21 +152,47 @@ def test_regularization_kappa_one_is_identity_and_counts_self():
     rng = np.random.default_rng(3)
     points = rng.normal(size=(31, 3)).astype(np.float32)
     index = ExactKDTreeIndex(points)
-    result = regularize_sites_streaming(
-        points, index, m_reg=9, kappa=1.0, chunk_size=7
-    )
+    result = regularize_sites_streaming(points, index, m_reg=9, kappa=1.0, chunk_size=7)
     np.testing.assert_allclose(result.centers, points, atol=0.0, rtol=0.0)
     np.testing.assert_allclose(result.additive_weights, 0.0, atol=1e-12)
     np.testing.assert_allclose(result.distortions, 0.0, atol=1e-12)
+
+
+def test_regularization_canonicalizes_a_noisy_reported_self_distance():
+    class NoisySelfIndex:
+        exact = False
+        euclidean_order_contract = True
+
+        def __init__(self, values):
+            self.base = ExactKDTreeIndex(values)
+            self.size = self.base.size
+
+        def query(self, queries, k):
+            distances, indices = self.base.query(queries, k)
+            distances = distances.copy()
+            distances[:, 0] = 0.5 * np.sqrt(np.finfo(np.float32).eps)
+            return distances, indices
+
+    points = np.arange(18, dtype=np.float32).reshape(6, 3)
+    result = regularize_sites_streaming(
+        points,
+        NoisySelfIndex(points),
+        m_reg=3,
+        kappa=1.0,
+        chunk_size=2,
+        mode="local_distortion",
+        distortion_budget_absolute=0.0,
+    )
+    np.testing.assert_array_equal(result.centers, points)
+    np.testing.assert_array_equal(result.additive_weights, 0.0)
+    np.testing.assert_array_equal(result.distortions, 0.0)
 
 
 def test_regularization_is_chunk_invariant():
     rng = np.random.default_rng(4)
     points = rng.normal(size=(43, 3)).astype(np.float32)
     index = ExactKDTreeIndex(points)
-    first = regularize_sites_streaming(
-        points, index, m_reg=12, kappa=4.0, chunk_size=5
-    )
+    first = regularize_sites_streaming(points, index, m_reg=12, kappa=4.0, chunk_size=5)
     second = regularize_sites_streaming(
         points, index, m_reg=12, kappa=4.0, chunk_size=43
     )
@@ -358,10 +383,7 @@ def test_end_to_end_cpu_builds_two_shifted_hierarchies():
         require_neighbor_audit=False,
     )
     hierarchy = PowerCover3D(config, backend="cpu").fit(points)
-    h = (
-        hierarchy.field.spec.half_diagonal
-        + hierarchy.field.numerical_radius_error
-    )
+    h = hierarchy.field.spec.half_diagonal + hierarchy.field.numerical_radius_error
     np.testing.assert_allclose(
         hierarchy.inner_forest.weights, hierarchy.base_forest.weights + h
     )
@@ -414,9 +436,7 @@ def test_end_to_end_progress_reports_ordered_stages_and_partial_chunks(
     quiet_synchronizations = list(synchronize_calls)
     synchronize_calls.clear()
     events = []
-    loud = PowerCover3D(
-        config, backend="cpu", progress=events.append
-    ).fit(points)
+    loud = PowerCover3D(config, backend="cpu", progress=events.append).fit(points)
 
     assert synchronize_calls == quiet_synchronizations
     starts = [event["stage"] for event in events if event["kind"] == "start"]
@@ -444,8 +464,7 @@ def test_end_to_end_progress_reports_ordered_stages_and_partial_chunks(
     assert [event["completed"] for event in regularization] == [3, 6, 7]
     assert [event["completed"] for event in power_field] == [2, 4, 6, 8]
     assert all(
-        0 <= event.get("completed", 0) <= event.get("total", 1)
-        for event in events
+        0 <= event.get("completed", 0) <= event.get("total", 1) for event in events
     )
     assert all(
         event["details"]["stage_count"] == 6
@@ -488,12 +507,43 @@ def test_saved_hierarchy_is_atomic_versioned_and_strict_json(tmp_path):
     assert "Infinity" not in raw and "NaN" not in raw
     metadata = json.loads(raw)
     assert metadata["schema"] == "perg_hgp.power_cover_run"
-    assert metadata["schema_version"] == 1
+    assert metadata["schema_version"] == 2
     with np.load(tmp_path / "cubical_hierarchy.npz") as artifact:
-        assert int(artifact["schema_version"]) == 1
+        assert int(artifact["schema_version"]) == 2
         assert artifact["field_certified"].dtype == np.bool_
         assert artifact["field_certified"].all()
+    loaded = type(hierarchy).load(str(tmp_path))
+    np.testing.assert_array_equal(loaded.base_forest.edges, hierarchy.base_forest.edges)
+    np.testing.assert_allclose(
+        loaded.base_forest.weights, hierarchy.base_forest.weights
+    )
+    np.testing.assert_allclose(loaded.sites.centers, hierarchy.sites.centers)
+    assert loaded.report.to_dict() == hierarchy.report.to_dict()
     assert not list(tmp_path.glob("*.tmp*"))
+
+    # A later compact save in the same directory must neither expose nor load
+    # the optional sites from the preceding run.
+    hierarchy.save(str(tmp_path), include_sites=False)
+    assert not (tmp_path / "power_sites.npz").exists()
+    compact_metadata = json.loads(
+        (tmp_path / "run_report.json").read_text(encoding="utf-8")
+    )
+    assert "power_sites.npz" not in compact_metadata["artifacts"]
+    compact = type(hierarchy).load(str(tmp_path))
+    assert compact.sites.centers.shape == (0, 3)
+
+    # The manifest, not a stale same-named file, controls optional loading.
+    np.savez(tmp_path / "power_sites.npz", schema_version=np.asarray(2))
+    compact_again = type(hierarchy).load(str(tmp_path))
+    assert compact_again.sites.centers.shape == (0, 3)
+
+    # Publishing the JSON manifest last is crash-safe because every artifact
+    # carries the same generation ID; a mixed checkpoint is rejected.
+    other = tmp_path / "other"
+    hierarchy.save(str(other), include_sites=False)
+    shutil.copyfile(other / "cubical_hierarchy.npz", tmp_path / "cubical_hierarchy.npz")
+    with pytest.raises(ValueError, match="different save generation"):
+        type(hierarchy).load(str(tmp_path))
 
 
 def test_end_to_end_is_translation_and_scale_covariant():
@@ -515,7 +565,10 @@ def test_end_to_end_is_translation_and_scale_covariant():
     translated = points * factor + np.array([100.0, -40.0, 7.0], dtype=np.float32)
     changed = PowerCover3D(config, backend="cpu").fit(translated)
     np.testing.assert_allclose(
-        changed.base_forest.births, base.base_forest.births * factor, rtol=3e-5, atol=3e-5
+        changed.base_forest.births,
+        base.base_forest.births * factor,
+        rtol=3e-5,
+        atol=3e-5,
     )
     np.testing.assert_array_equal(changed.base_forest.edges, base.base_forest.edges)
     assert changed.report.total_interleaving_radius == pytest.approx(
@@ -551,7 +604,7 @@ def test_float64_large_offset_is_recentered_before_float32_cast():
     assert np.unique(hierarchy.sites.centers, axis=0).shape[0] == points.shape[0]
 
 
-def test_non_strict_uncertain_field_never_advertises_interleaving_bounds():
+def test_non_strict_uncertain_field_never_advertises_interleaving_bounds(monkeypatch):
     rng = np.random.default_rng(0)
     points = np.concatenate(
         (
@@ -571,6 +624,21 @@ def test_non_strict_uncertain_field_never_advertises_interleaving_bounds():
         neighbor_audit_queries=0,
         require_neighbor_audit=False,
     )
+
+    def deliberately_capped_oracle(sites, additive_weights, *, K):
+        return CertifiedPowerKNN(
+            sites,
+            additive_weights,
+            ExactKDTreeIndex(sites),
+            K=K,
+            candidate_k_initial=1,
+            candidate_k_max=1,
+            strict=False,
+        )
+
+    monkeypatch.setattr(
+        power_cover_api, "ExactLiftedPowerKNN", deliberately_capped_oracle
+    )
     hierarchy = PowerCover3D(config, backend="cpu").fit(points)
     assert hierarchy.field.diagnostics.uncertain_queries > 0
     assert hierarchy.report.mode == "spatial_uncertain"
@@ -581,142 +649,153 @@ def test_non_strict_uncertain_field_never_advertises_interleaving_bounds():
 
 
 def test_blackwell_notebook_verbose_param_is_wired_to_long_running_stages():
-    notebook_path = (
-        Path(__file__).resolve().parents[2] / "PERG_HGP_Blackwell_30M.ipynb"
-    )
+    notebook_path = Path(__file__).resolve().parents[2] / "PERG_HGP_Blackwell_30M.ipynb"
     notebook = json.loads(notebook_path.read_text(encoding="utf-8"))
     sources = ["".join(cell.get("source", ())) for cell in notebook["cells"]]
     combined = "\n".join(sources)
 
     assert 'verbose = True  # @param {type:"boolean"}' in sources[1]
-    assert (
-        "PILOT_KAPPA_CANDIDATES = (1.0, 2.0, 4.0, 8.0, 16.0, 32.0)"
-        in sources[1]
-    )
-    assert "FULL_DISTORTION_BUDGET = 0.25" in sources[1]
-    assert "PILOT_BUDGET_FRACTION = 0.60" in sources[1]
-    assert "distortion_budget=FULL_DISTORTION_BUDGET" in combined
-    assert "def run_power_cover_with_fallback" in combined
-    assert "except FullRunDistortionExceeded" in combined
-    assert "run_power_cover_with_fallback(full_points" in sources[21]
+    assert "N_FULL = 30_000_000" in sources[1]
+    assert "K = 10" in sources[1]
+    assert 'REGULARIZATION_MODE = "local_distortion"' in sources[1]
+    assert "DISTORTION_GAMMA = 0.08" in sources[1]
+    assert "MIN_RESOLVED_RADIUS_OVERRIDE = 0.0" in sources[1]
+    assert "LOCAL_SCALE_TARGET_QUANTILE = 0.05" in sources[1]
+    assert "LOCAL_SCALE_DIMENSION = 3.0" in sources[1]
+    assert "MAX_GRID_CELLS = 50_000_000" in sources[1]
+    assert "regularization_mode=REGULARIZATION_MODE" in combined
+    assert "distortion_budget_relative=DISTORTION_GAMMA" in combined
+    assert "min_resolved_radius=run_min_resolved_radius" in combined
+    assert "def choose_run_min_resolved_radius" in combined
+    assert "newly_fixed = {axis for axis in unresolved" in combined
+    assert "FUSED_BUDGET_PARITY_OK" in combined
+    assert "boundary_1024" in combined
+    assert "Redémarrage de session obligatoire après modification" in combined
+    assert "def run_power_cover_with_fallback" not in combined
+    assert "FullRunDistortionExceeded" not in combined
+    assert "PILOT_KAPPA_CANDIDATES" not in combined
+    assert "run_power_cover(full_points" in sources[21]
+    assert "epsilon_x = float(hierarchy.report.input_quantization_radius)" in combined
+    assert '"CONDITIONAL_PASS"' in combined
+    assert "failure_path = ARTIFACT_ROOT" in combined
     assert "progress=progress_reporter if verbose else None" in combined
     assert "generate_mixture_3d(N_FULL, FULL_SEED, verbose=verbose)" in combined
     assert "[PERG-HGP heartbeat]" in combined
-    for index in (1, 15, 17, 19, 21, 23):
-        compile(sources[index], f"{notebook_path.name}:cell-{index}", "exec")
+    for index, (cell, source) in enumerate(zip(notebook["cells"], sources)):
+        if cell.get("cell_type") == "code":
+            compile(source, f"{notebook_path.name}:cell-{index}", "exec")
 
 
-def test_blackwell_notebook_distortion_fallback_executes_and_persists(tmp_path):
-    notebook_path = (
-        Path(__file__).resolve().parents[2] / "PERG_HGP_Blackwell_30M.ipynb"
-    )
+def test_blackwell_notebook_acceptance_distinguishes_conditional_and_unresolved():
+    notebook_path = Path(__file__).resolve().parents[2] / "PERG_HGP_Blackwell_30M.ipynb"
     notebook = json.loads(notebook_path.read_text(encoding="utf-8"))
-    tree = ast.parse("".join(notebook["cells"][17]["source"]))
-    selected_nodes = []
-    for node in tree.body:
-        if isinstance(node, ast.Assign) and any(
-            isinstance(target, ast.Name)
-            and target.id == "FULL_DISTORTION_PATTERN"
-            for target in node.targets
-        ):
-            selected_nodes.append(node)
-        elif isinstance(node, ast.ClassDef) and node.name == "FullRunDistortionExceeded":
-            selected_nodes.append(node)
-        elif (
-            isinstance(node, ast.FunctionDef)
-            and node.name == "run_power_cover_with_fallback"
-        ):
-            selected_nodes.append(node)
-
-    class FakeDevice:
-        def synchronize(self):
-            return None
-
-    class FakePool:
-        def free_all_blocks(self):
-            return None
-
-    class FakeCuda:
-        Device = FakeDevice
-
-    class FakeCupy:
-        cuda = FakeCuda()
-
-        @staticmethod
-        def get_default_memory_pool():
-            return FakePool()
-
+    tree = ast.parse("".join(notebook["cells"][23]["source"]))
+    helper_node = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "record_rbc_audits_pass"
+    )
+    acceptance_node = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "acceptance_for"
+    )
     namespace = {
-        "FULL_DISTORTION_BUDGET": 0.25,
-        "KAPPA_SELECTED": 8.0,
-        "PILOT_KAPPA_CANDIDATES": (1.0, 2.0, 4.0, 8.0, 16.0, 32.0),
-        "Path": Path,
-        "cp": FakeCupy(),
-        "gc": gc,
-        "json": json,
-        "re": re,
+        "np": np,
+        "CPU_TESTS_OK": True,
+        "GPU_STACK_OK": True,
+        "cc": (12, 0),
+        "RBC_AUDITS_OK": True,
+        "MSF_SMOKE_OK": True,
+        "FUSED_BUDGET_PARITY_OK": True,
+        "LOCAL_BUDGET_SMOKE_OK": True,
+        "RESIDUAL_TOL": 5e-4,
+        "DISTORTION_GAMMA": 0.08,
+        "MAX_RELATIVE_SPATIAL_ERROR": 0.25,
+        "MAX_VRAM_FRACTION": 0.85,
+        "MAX_HOST_RAM_FRACTION": 0.85,
+        "MIN_DISK_FREE_GIB": 30.0,
+        "MAX_UNRESOLVED_LOCAL_SCALE_FRACTION": 0.05,
+        "N_FULL": 30_000_000,
+        "HARDWARE_MANIFEST_PRE": {"ram": {"total_bytes": 1_000_000}},
     }
-    module = ast.Module(body=selected_nodes, type_ignores=[])
+    module = ast.Module(body=[helper_node, acceptance_node], type_ignores=[])
     exec(compile(module, str(notebook_path), "exec"), namespace)
-
-    message = (
-        "full-run distortion s=0.328804 exceeds budget 0.25; "
-        "lower kappa and rerun"
-    )
-    match = namespace["FULL_DISTORTION_PATTERN"].fullmatch(message)
-    assert match is not None
-    assert float(match.group("observed")) == pytest.approx(0.328804)
-
-    def resources(used):
-        return {
+    record = {
+        "run_name": "test",
+        "regularization": {
+            "solver_backend": "cuda_fused_budget_v1",
+            "distortion_budget_violation_max": 1e-6,
+            "relative_distortion_ratio_max": 0.08001,
+            "relative_contract_status": "conditional_knn_order_float_enveloped",
+            "simplex_residual_max": 0.0,
+            "local_scale_below_resolution_fraction": 0.01,
+        },
+        "power_queries": {
+            "conditional_guard_pass_fraction": 1.0,
+            "uncertain_queries": 0,
+        },
+        "accuracy": {
+            "grid_policy": "local_scale",
+            "mode": "spatial_enveloped",
+            "base_total_interleaving_radius": 0.5,
+            "total_interleaving_radius": 1.0,
+            "relative_spatial_error_at_min_radius": 0.249,
+            "min_resolved_radius": 0.05,
+        },
+        "resources": {
+            "vram_peak_fraction": 0.5,
+            "rss_peak_bytes": 100,
+            "disk_free_min_bytes": 100 * 2**30,
             "samples": 3,
-            "legacy_cupy_pool_allocated_peak_bytes": 0,
-            "legacy_cupy_pool_reserved_peak_bytes": 0,
-            "nvml_used_peak_bytes": used,
             "nvml_total_bytes": 100,
-            "vram_peak_fraction": used / 100.0,
-            "rss_peak_bytes": 2 * used,
-            "disk_free_min_bytes": 1_000 - used,
-            "nvml_source": "pynvml",
-            "monitor_errors": [],
-        }
-
-    failure_type = namespace["FullRunDistortionExceeded"]
-    calls = []
-
-    def fake_run_power_cover(*args):
-        kappa = float(args[-1])
-        calls.append(kappa)
-        if kappa == 8.0:
-            raise failure_type(
-                kappa=kappa,
-                observed=0.328804,
-                budget=0.25,
-                resources=resources(8),
-                wall_seconds=8.0,
-            )
-        return {
-            "run_dir": str(tmp_path),
-            "regularization": {"s_max": 0.22},
-            "resources": resources(4),
-            "attempt_wall_seconds": 5.0,
-        }
-
-    namespace["run_power_cover"] = fake_run_power_cover
-    record = namespace["run_power_cover_with_fallback"](
-        object(), 30_000_000, 20260710, 0, "full"
-    )
-    validation = record["kappa_full_validation"]
-    assert calls == [8.0, 4.0]
-    assert validation["selected_after_full_validation"] == 4.0
-    assert [row["status"] for row in validation["attempts"]] == [
-        "rejected",
-        "accepted",
-    ]
-    assert validation["attempts"][0]["s_observed"] == pytest.approx(0.328804)
-    assert validation["resource_summary"]["nvml_used_peak_bytes"] == 8
-    assert validation["resource_summary"]["total_attempt_wall_seconds"] == 13.0
-    persisted = json.loads(
-        (tmp_path / "benchmark_metrics.json").read_text(encoding="utf-8")
-    )
-    assert persisted["kappa_full_validation"] == validation
+        },
+        "rss_after_save_bytes": 100,
+        "disk_free_after_save_bytes": 100 * 2**30,
+        "bound_terms": {"base_total": 0.5, "envelope_total": 1.0},
+        "persistence": {"max": 3.0, "count_above_comparison_threshold": 1},
+        "n_points": 30_000_000,
+        "config": {
+            "K": 10,
+            "m_reg": 64,
+            "local_scale_k": 10,
+            "candidate_k_max": 1024,
+            "regularization_mode": "local_distortion",
+            "distortion_budget_relative": 0.08,
+            "min_resolved_radius": 0.05,
+            "max_grid_cells": 50_000_000,
+        },
+        "grid_selection": {
+            "selected_radius": 0.05,
+            "selected_shape": [10, 10, 10],
+            "selected_cells": 1000,
+        },
+        "grid": {"policy": "local_scale", "shape": [8, 8, 8]},
+        "neighbor_audits": {
+            "raw_rbc_vs_cuvs_bruteforce": {
+                "queries": 32,
+                "k": 64,
+                "values_match": True,
+            },
+            "power_grid_centers_rbc_vs_cuvs_bruteforce": {
+                "queries": 32,
+                "k": 1025,
+                "values_match": True,
+            },
+            "raw_neighbor_status": {
+                "requested_algorithm": "rbc",
+                "empirical_audit_passed": True,
+                "hidden_fallback_allowed": False,
+            },
+            "power_neighbor_status": {
+                "requested_algorithm": "rbc",
+                "empirical_audit_passed": True,
+                "hidden_fallback_allowed": False,
+            },
+        },
+    }
+    accepted = namespace["acceptance_for"](record)
+    assert accepted["status"] == "CONDITIONAL_PASS"
+    record["regularization"]["local_scale_below_resolution_fraction"] = 0.2
+    unresolved = namespace["acceptance_for"](record)
+    assert unresolved["status"] == "INCONCLUSIVE"

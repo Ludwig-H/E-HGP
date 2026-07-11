@@ -217,7 +217,7 @@ g(c_Q)-h_Q\le g(y)\le g(c_Q)+h_Q,
 Avec \(H=\max_Qh_Q\), les complexes cubiques intérieur et extérieur vérifient un entrelacement de largeur \(2H\). En ajoutant la marge numérique globale \(\delta_{\rm num}\), la borne publiée est
 
 \[
-\boxed{\varepsilon_{m total}=s+2(H+\delta_{\rm num}).}
+\boxed{\varepsilon_{\rm total}=s+2(H+\delta_{\rm num}).}
 \]
 
 Le choix des cubes fermés impose la 26-connexité en dimension 3. Le poids d’une arête de cubes est \(\max(g_u,g_v)\), puis un MSF conserve toutes les composantes. Cette construction est correcte ; voir [`spatial_core.py`, lignes 805–914](https://github.com/Ludwig-H/E-HGP/blob/150c1ce16387e45e085c32b17c15847ecac9d390/perg_hgp/perg_hgp/backends/power_cover_3d_cuda/spatial_core.py#L805-L914) et [`cubical_msf.py`](https://github.com/Ludwig-H/E-HGP/blob/150c1ce16387e45e085c32b17c15847ecac9d390/perg_hgp/perg_hgp/backends/power_cover_3d_cuda/cubical_msf.py).
@@ -226,7 +226,7 @@ La boîte englobante des \(z_i\) suffit pour \(H_0\) : la projection coordonnée
 
 ### 4.5 Portée exacte de la garantie
 
-La garantie porte sur les filtrations et leur module de persistance \(H_0\). Une branche dont la persistance dépasse largement \(2\varepsilon_{m total}\) est robuste à cette approximation. En revanche, [`fusion_intervals()`](https://github.com/Ludwig-H/E-HGP/blob/150c1ce16387e45e085c32b17c15847ecac9d390/perg_hgp/perg_hgp/backends/power_cover_3d_cuda/api.py#L167-L187) ne doit pas être interprété comme un appariement canonique, fusion par fusion, avec le merge tree K-NN original.
+La garantie porte sur les filtrations et leur module de persistance \(H_0\). Une branche dont la persistance dépasse largement \(2\varepsilon_{\rm total}\) est robuste à cette approximation. En revanche, [`fusion_intervals()`](https://github.com/Ludwig-H/E-HGP/blob/150c1ce16387e45e085c32b17c15847ecac9d390/perg_hgp/perg_hgp/backends/power_cover_3d_cuda/api.py#L167-L187) ne doit pas être interprété comme un appariement canonique, fusion par fusion, avec le merge tree K-NN original.
 
 Le critère scientifique utile est donc simple : **si \(s+2(H+\delta_{\rm num})\) est du même ordre que la persistance d’une branche ou que l’écart physique entre deux objets, le calcul ne permet pas de conclure sur cette branche.**
 
@@ -591,3 +591,65 @@ La bonne prochaine étape n’est pas une nouvelle optimisation interne de l’a
 1. terminer la sortie observationnelle de `PowerCover3D` ;
 2. exécuter le run GPU versionné ;
 3. lancer l’ablation SemanticKITTI qui sépare proprement l’effet de \(K\), de \(\kappa\), de la grille et du downstream.
+
+---
+
+## 12. Suivi post-audit dans la révision de travail
+
+Cette section décrit les corrections réalisées après l’audit du commit
+`150c1ce`. Elle ne modifie pas rétroactivement le verdict historique et ne
+constitue toujours pas un résultat Blackwell exécuté.
+
+| Constat de l’audit | Correction implémentée | Validation CPU |
+|---|---|---|
+| `kappa` global et relances 30 M | mode `local_distortion` : maximisation d’entropie sous \(s_i\le\min(B_{\rm abs},\gamma R_K(x_i))\) en une passe | budgets nul/intermédiaire/uniforme, invariance et propriétés aléatoires |
+| Échelle locale sans théorème | publication du ratio observé et du contrat \((1-2\gamma)r_K\le r_{K,\rm reg}\le(1+2\gamma)r_K\) lorsque `local_scale_k=K`, \(\gamma<1/2\) | comparaison aléatoire au champ K-NN exact |
+| Solveur CuPy trop coûteux | RawKernel CUDA fusionné par ligne, 28 bissections, accumulation directe de \(z,a,s,\kappa_i\) | source compilable et contrat CPU ; exécution CUDA seulement dans le notebook |
+| Top-K CPU limité par le garde 3D | relèvement exact \((z_i,\sqrt{a_i})\in\mathbb R^4\) avec cKDTree | égalité au brute force et cas de 1 100 sites ex æquo |
+| Ex æquo rejetés au plafond CUDA | intervalle étroit sur la valeur du rang K lorsque les bornes ne se chevauchent qu’à la marge numérique | cas constant au-delà de l’ancien cap |
+| Petits nuages CUDA incompatibles avec RBC | routeur explicite : RBC seulement s’il honore le support ou le cap complet plus la garde ; cuVS brute force sinon, sans réduction silencieuse | tests du plan brut/puissance aux frontières \(\lfloor\sqrt N\rfloor\) ; exécution cuVS réservée au notebook |
+| Auto-voisin RBC potentiellement positif ou absent | canonisation de l’identifiant propre, ou d’un doublon de coordonnées exact, avec coût nul avant le rang local et Gibbs | faux index, doublons et rang \(R_K\) après insertion canonique |
+| \(\varepsilon_X\) absent | mesure/enveloppe de quantification, rejet des entiers hors \([-2^{53},2^{53}]\), recalcul float64 de \(s^\uparrow\), violation du budget absolu incluant \(\varepsilon_X\) | contre-exemples grande translation, écart \(10^{-20}\) et dépassement stocké du cap absolu |
+| Contrats de dtype incomplets | calcul normalisé float32, sorties physiques float64, rejet des échelles dont les poids carrés sous-débordent/débordent ou deviennent non finis | extrêmes float64, poids positif non représentable et promotion des forêts |
+| Résidu de simplexe CUDA présenté comme mesuré | `simplex_residual_max=null` pour le kernel fusionné ; parité séparée avec l’oracle CPU | sérialisation JSON de `null` et cas budget nul/actif/uniforme |
+| Une seule borne cubique | champs séparés `base_total_interleaving_radius` et `total_interleaving_radius` | tests de recomposition des deux formules |
+| `grid_shape=128³` universel | grille uniforme anisotrope dérivée de `min_resolved_radius`, refus au-delà de `max_grid_cells`, contrôle de représentabilité des centres | formes anisotropes, axes dégénérés, budgets et résolution float32 |
+| Aucune appartenance observationnelle | référence CPU CSR par intersection exacte boule de puissance–AABB, statuts `confirmed/possible/excluded` et appariement inner→outer | relation multivaluée et ambiguïtés de branche |
+| Sauvegarde non rechargeable et artefacts mélangeables | schéma 2, `load()`, manifeste strict et `run_id` partagé par JSON/NPZ ; suppression d’un ancien fichier de sites non manifesté | round-trip avec/sans sites, mélange de générations, formes et compteurs incohérents |
+| Dépendances atlas imposées | imports atlas paresseux ; cœur CPU limité à NumPy/SciPy ; extras `atlas` et `test` | import et suite complète |
+| Notebook avec fallback global | protocole Blackwell local, smoke du kernel fusionné, \(N=30\,000\,000\), \(K=10\), deux bornes, fichiers d’échec et verdict `CONDITIONAL_PASS/INCONCLUSIVE/FAIL` | validation JSON et compilation de toutes les cellules |
+
+La suite locale complète exécutée après ces changements donne **124 tests
+`perg_hgp` réussis**, avec **1 test E-HGP réussi** séparément. Les 17
+avertissements proviennent du test historique de partitionnement secondaire de
+`dual_graph.py`. La compilation Python du package et de toutes les cellules du
+notebook réussit.
+
+Les validations de la colonne CPU prouvent les formules, le routage et les
+contrats de sérialisation sans matériel NVIDIA. Elles ne constituent pas une
+exécution de RBC, de cuVS ou du RawKernel : ces trois chemins restent soumis
+aux smoke tests du notebook Blackwell.
+
+### Portée actualisée
+
+Le chemin CPU est désormais exact pour le top-K de puissance des sites stockés
+et utilisable de quelques milliers de points jusqu’aux tailles compatibles avec
+la RAM et la grille. Le chemin massif CUDA dispose d’un solveur local conçu pour
+30 M, mais RBC et les enveloppes flottantes gardent un statut conditionnel.
+
+La politique `min_resolved_radius` sépare bien l’échelle physique minimale de
+la taille globale de la scène et refuse un budget impossible. Elle demeure une
+grille uniforme anisotrope conservatrice, pas une grille locale par cellule.
+Une vraie discrétisation adaptative devra utiliser \(H_Q,\delta_Q\), raffiner
+les corridors de fusion et construire séparément les MSF inner/outer.
+
+### Bloqueurs restant ouverts
+
+- aucune sortie Blackwell ni mesure 30 M n’a été produite dans l’environnement
+  CPU de cette révision ;
+- le routeur cuVS exact pour les petites tailles est implémenté mais n’a pas
+  été exécuté localement ; un index massif 4D certifiable reste à écrire ;
+- l’appartenance boule–composante 30 M demande encore un kernel GPU deux passes ;
+- le merge tree enrichi, les checkpoints/reprises et la sélection plate ne
+  sont pas encore disponibles ;
+- aucun nouveau score SemanticKITTI ne peut donc être revendiqué.
