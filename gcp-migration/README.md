@@ -5,47 +5,37 @@ Ce répertoire contient les scripts et instructions pour migrer votre GitHub Cod
 ---
 
 ## 🛠️ État actuel et Historique
-- **Authentification GCP :** Réalisée avec succès lors de la session précédente pour le compte `louis.hauseux@gmail.com` sur le projet GCP `devpod-gpu-exploration`.
-- **Audit des quotas :** Exécuté et en échec. Les quotas par défaut bloquent actuellement le démarrage de cette VM.
+- **Statut de l'instance :** **🟢 RUNNING**
+- **Nom de la VM :** `ehgp-blackwell-spot`
+- **Zone :** `europe-west4-a`
+- **IP Externe :** `34.178.198.3`
+- **IP Interne :** `10.164.0.4`
+- **Machine Type :** `g4-standard-48` (1x NVIDIA RTX PRO 6000 Blackwell GPU, 48 vCPUs, 180 GB RAM).
+
+> [!NOTE]
+> Il y avait une confusion initiale sur l'architecture : la machine `g4-standard-48` embarque **1 seul GPU NVIDIA RTX PRO 6000 (Blackwell)** et non 4x NVIDIA L4. Vos quotas actuels (`GPUS_ALL_REGIONS` à 1.0 et `PREEMPTIBLE_CPUS` à 48.0) sont donc déjà suffisants pour faire tourner cette instance.
 
 ---
 
-## 📋 Action Requise : Demande de Quotas
+## 🚀 Utilisation des Scripts
 
-Avant de lancer le déploiement, vous devez effectuer une demande d'augmentation manuelle dans la console GCP dans la section **IAM et administration > Quotas** (ou via [ce lien direct](https://console.cloud.google.com/iam-admin/quotas?project=devpod-gpu-exploration)).
-
-| Nom de la métrique dans GCP | Dimension / Région | Valeur cible requise |
-| :--- | :---: | :---: |
-| **`GPUs (all regions)`** | Global | **`4`** |
-| **`NVIDIA L4 GPUs`** | `europe-west4` | **`4`** |
-| **`Preemptible NVIDIA L4 GPUs`** | `europe-west4` | **`4`** |
-| **`Preemptible CPUs`** | `europe-west4` | **`48`** |
-
----
-
-## 🚀 Utilisation des Scripts lors de la Prochaine Session
-
-Une fois que les quotas ont été approuvés par Google Cloud, ouvrez un terminal dans ce Codespace et suivez ces étapes :
-
-### 1. Valider que les quotas sont prêts
-Exécutez le script d'audit des quotas pour obtenir le feu vert officiel :
+### 1. Valider les quotas requis
 ```bash
-chmod +x gcp-migration/check_quotas.sh
 ./gcp-migration/check_quotas.sh
 ```
-*Si le script affiche `[SUCCÈS] Feu vert des quotas`, vous pouvez passer à l'étape suivante.*
 
-### 2. Déployer l'instance VM
-Exécutez le script de déploiement pour instancier la machine :
-```bash
-chmod +x gcp-migration/deploy.sh
-./gcp-migration/deploy.sh
-```
+### 2. Gestion de l'instance VM
+Comme l'instance est déjà créée, vous n'avez plus besoin de la commande `create`. Utilisez plutôt les commandes de démarrage et d'arrêt pour gérer ses coûts :
 
----
-
-## ⚙️ Détails techniques de l'architecture
-* **Type de machine :** `g4-standard-48` (embarquant nativement 4 GPU NVIDIA L4). Pas besoin de flag `--accelerator`.
-* **Modèle de provisionnement :** `SPOT` (tarification économique).
-* **Action en cas de préemption :** `TERMINATE` (la machine s'éteint mais le disque dur Hyperdisk Balanced persistant de 100 Go est conservé intact).
-* **Image système :** `common-cu122-ubuntu-2204` de `deeplearning-platform-release` (Ubuntu avec pilotes CUDA 12.2 pré-configurés).
+- **Démarrer l'instance :**
+  ```bash
+  gcloud compute instances start ehgp-blackwell-spot --zone="europe-west4-a"
+  ```
+- **Arrêter l'instance (pour ne pas consommer de crédits) :**
+  ```bash
+  gcloud compute instances stop ehgp-blackwell-spot --zone="europe-west4-a"
+  ```
+- **Se connecter en SSH à l'instance :**
+  ```bash
+  gcloud compute ssh ehgp-blackwell-spot --zone="europe-west4-a"
+  ```
