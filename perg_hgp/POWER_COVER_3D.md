@@ -193,12 +193,14 @@ cap configuré pour satisfaire RBC :
   la totalité du support demandé ; sinon cuVS brute force est choisi ;
 - pour le champ de puissance, RBC doit pouvoir honorer
   `candidate_k_max` — limité seulement par \(N\) — plus le candidat de garde ;
-- si cette capacité dépasse \(\lfloor\sqrt N\rfloor\), l’index cuVS exhaustif
-  est utilisé avec le même cap.
+- cette capacité doit respecter à la fois \(\lfloor\sqrt N\rfloor\) et la
+  frontière `k <= 1024` du kernel RBC RAPIDS 26.02 ;
+- si l’une de ces limites est dépassée, l’index cuVS exhaustif est utilisé avec
+  le même cap.
 
 Le plan effectif (`power_candidate_plan`) et le statut des deux index sont
-conservés dans `neighbor_audits`. Pour le run 30 M, le cap 1 024 et sa garde
-tiennent dans la capacité RBC ; avec les mêmes défauts, les petits nuages
+conservés dans `neighbor_audits`. Pour le run 30 M, le cap 1 023 et son rang de
+garde 1 024 tiennent dans la capacité RBC ; avec les mêmes défauts, les petits nuages
 passent explicitement en brute force. L’exhaustivité algorithmique de cuVS ne
 constitue toujours pas une preuve d’arrondi dirigé.
 

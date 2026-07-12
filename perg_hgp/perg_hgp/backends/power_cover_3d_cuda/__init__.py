@@ -7,7 +7,12 @@ from .cubical_msf import (
     cubical_msf_gpu,
     estimate_cubical_msf_memory,
 )
-from .api import PowerCover3D, PowerCoverHierarchy, pilot_kappa_calibration
+from .api import (
+    NeighborAuditError,
+    PowerCover3D,
+    PowerCoverHierarchy,
+    pilot_kappa_calibration,
+)
 from .coverage import (
     SiteComponentMembership,
     site_component_membership_cpu,
@@ -49,6 +54,7 @@ __all__ = [
     "GridCoordinateResolutionError",
     "GridResolutionBudgetError",
     "GridSpec",
+    "NeighborAuditError",
     "PowerCover3D",
     "PowerCoverConfig",
     "PowerCoverHierarchy",

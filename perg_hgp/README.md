@@ -138,8 +138,10 @@ support demandé ; sinon `CuvsBruteForceIndex` est choisi explicitement. Pour
 les requêtes de puissance, RBC n’est retenu que s’il peut honorer le
 `candidate_k_max` configuré plus un candidat de garde. Les petits nuages qui ne
 satisfont pas cette capacité passent donc en brute force sans réduire le cap.
-Le rapport enregistre le backend, le cap demandé, le cap effectif — limité
-uniquement par \(N\) — et la raison du choix.
+La capacité RBC est bornée par `min(floor(sqrt(N)), 1024)` avec RAPIDS 26.02 ;
+le plus grand cap compatible avec le rang de garde est donc 1 023. Le rapport
+enregistre le backend, le cap demandé, le cap effectif — limité uniquement par
+\(N\) — et la raison du choix.
 
 Le support KNN contient canoniquement l’observation elle-même. Si son identifiant
 est absent mais qu’un doublon de coordonnées exact est présent, celui-ci sert

@@ -96,6 +96,18 @@ def test_rbc_refuses_cuml_hidden_brute_force_fallback(monkeypatch):
     assert index.exact is False
 
 
+def test_rbc_refuses_rank_above_rapids_kernel_capacity(monkeypatch):
+    _install_fake_cuda(monkeypatch)
+    points = np.zeros((1_050_625, 3), dtype=np.float32)
+
+    index = cuda_runtime.RBCExactIndex(
+        points, max_k=cuda_runtime.RBC_MAX_QUERY_K
+    )
+    assert index.max_k == 1_024
+    with pytest.raises(ValueError, match="at most 1024 neighbors"):
+        cuda_runtime.RBCExactIndex(points, max_k=1_025)
+
+
 def test_rbc_validates_integer_parameters_and_cannot_be_preaudited(monkeypatch):
     _install_fake_cuda(monkeypatch)
     points = np.zeros((100, 3), dtype=np.float32)
@@ -142,6 +154,7 @@ def test_neighbor_audit_labels_sample_evidence_as_not_a_proof():
     )
     assert audit.audit_scope == "sampled_query_value_comparison"
     assert audit.is_numerical_proof is False
+    assert audit.comparison_tolerance == 0.0
     assert audit.to_dict()["is_numerical_proof"] is False
 
 

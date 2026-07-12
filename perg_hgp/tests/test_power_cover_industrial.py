@@ -237,13 +237,23 @@ def test_cuda_candidate_plan_routes_small_and_industrial_clouds_explicitly():
     assert small["candidate_k_max"] == 1_000
     assert small["index_max_k"] == 1_000
 
-    industrial = _cuda_power_candidate_plan(
+    unsupported_rbc_rank = _cuda_power_candidate_plan(
         30_000_000, K=10, candidate_k_initial=64, candidate_k_max=1_024
+    )
+    assert unsupported_rbc_rank["index_backend"] == "cuvs_brute_force"
+    assert unsupported_rbc_rank["candidate_k_max"] == 1_024
+    assert unsupported_rbc_rank["index_max_k"] == 1_025
+    assert unsupported_rbc_rank["rbc_max_k"] == 1_024
+    assert unsupported_rbc_rank["rbc_kernel_max_k"] == 1_024
+    assert unsupported_rbc_rank["rbc_landmark_max_k"] == math.isqrt(30_000_000)
+
+    industrial = _cuda_power_candidate_plan(
+        30_000_000, K=10, candidate_k_initial=64, candidate_k_max=1_023
     )
     assert industrial["index_backend"] == "rbc"
     assert industrial["candidate_k_initial"] == 64
-    assert industrial["candidate_k_max"] == 1_024
-    assert industrial["index_max_k"] == 1_025
+    assert industrial["candidate_k_max"] == 1_023
+    assert industrial["index_max_k"] == 1_024
 
 
 def test_small_cloud_memory_plan_uses_effective_regularization_support():

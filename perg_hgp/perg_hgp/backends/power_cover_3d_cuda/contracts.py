@@ -110,7 +110,9 @@ class PowerCoverConfig:
     chunk_size: int = 262_144
     power_chunk_size: int = 65_536
     candidate_k_initial: int = 64
-    candidate_k_max: int = 1_024
+    # RBC can return at most 1024 ranks and the power certificate consumes one
+    # extra guard rank, so 1023 is the largest RBC-compatible default.
+    candidate_k_max: int = 1_023
     strict_certification: bool = True
     neighbor_audit_queries: int = 32
     require_neighbor_audit: bool = True

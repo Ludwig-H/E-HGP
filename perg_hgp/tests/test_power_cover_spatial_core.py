@@ -663,6 +663,8 @@ def test_blackwell_notebook_verbose_param_is_wired_to_long_running_stages():
     assert "LOCAL_SCALE_TARGET_QUANTILE = 0.05" in sources[1]
     assert "LOCAL_SCALE_DIMENSION = 3.0" in sources[1]
     assert "MAX_GRID_CELLS = 50_000_000" in sources[1]
+    assert "RBC_MAX_QUERY_K = 1_024" in sources[1]
+    assert "CANDIDATE_K_MAX = 1_023" in sources[1]
     assert "regularization_mode=REGULARIZATION_MODE" in combined
     assert "distortion_budget_relative=DISTORTION_GAMMA" in combined
     assert "min_resolved_radius=run_min_resolved_radius" in combined
@@ -670,6 +672,7 @@ def test_blackwell_notebook_verbose_param_is_wired_to_long_running_stages():
     assert "newly_fixed = {axis for axis in unresolved" in combined
     assert "FUSED_BUDGET_PARITY_OK" in combined
     assert "boundary_1024" in combined
+    assert 'RBC_AUDIT_RESULTS["frontiere_rbc_k1024"]' in combined
     assert "Redémarrage de session obligatoire après modification" in combined
     assert "def run_power_cover_with_fallback" not in combined
     assert "FullRunDistortionExceeded" not in combined
@@ -678,6 +681,7 @@ def test_blackwell_notebook_verbose_param_is_wired_to_long_running_stages():
     assert "epsilon_x = float(hierarchy.report.input_quantization_radius)" in combined
     assert '"CONDITIONAL_PASS"' in combined
     assert "failure_path = ARTIFACT_ROOT" in combined
+    assert '"neighbor_audits": partial_neighbor_audits' in combined
     assert "progress=progress_reporter if verbose else None" in combined
     assert "generate_mixture_3d(N_FULL, FULL_SEED, verbose=verbose)" in combined
     assert "[PERG-HGP heartbeat]" in combined
@@ -759,7 +763,7 @@ def test_blackwell_notebook_acceptance_distinguishes_conditional_and_unresolved(
             "K": 10,
             "m_reg": 64,
             "local_scale_k": 10,
-            "candidate_k_max": 1024,
+            "candidate_k_max": 1023,
             "regularization_mode": "local_distortion",
             "distortion_budget_relative": 0.08,
             "min_resolved_radius": 0.05,
@@ -779,7 +783,7 @@ def test_blackwell_notebook_acceptance_distinguishes_conditional_and_unresolved(
             },
             "power_grid_centers_rbc_vs_cuvs_bruteforce": {
                 "queries": 32,
-                "k": 1025,
+                "k": 1024,
                 "values_match": True,
             },
             "raw_neighbor_status": {

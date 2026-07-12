@@ -12,6 +12,7 @@ import uuid
 
 import numpy as np
 
+from .cuda_runtime import RBC_MAX_QUERY_K
 from .contracts import (
     AccuracyReport,
     GridSpec,
@@ -46,6 +47,37 @@ _FIT_PROGRESS_STAGES = (
     "power_field",
     "cubical_msf",
 )
+
+
+class NeighborAuditError(RuntimeError):
+    """Strict CUDA failure carrying the empirical evidence collected so far."""
+
+    def __init__(self, stage: str, audits: Any):
+        self.stage = str(stage)
+
+        def _sanitize(val: Any) -> Any:
+            if isinstance(val, dict):
+                return {str(k): _sanitize(v) for k, v in val.items()}
+            if isinstance(val, (list, tuple)):
+                return [_sanitize(v) for v in val]
+            if isinstance(val, np.ndarray):
+                return _sanitize(val.tolist())
+            if isinstance(val, np.integer):
+                return int(val)
+            if isinstance(val, np.floating):
+                return float(val) if np.isfinite(val) else repr(float(val))
+            if isinstance(val, np.bool_):
+                return bool(val)
+            if isinstance(val, float) and not np.isfinite(val):
+                return repr(val)
+            return val
+
+        self.neighbor_audits = _sanitize(audits) if isinstance(audits, dict) else {"raw_audits": _sanitize(audits)}
+        super().__init__(
+            f"{self.stage}-site neighbor evidence is insufficient; strict run "
+            "aborted; collected audits="
+            + json.dumps(self.neighbor_audits, sort_keys=True)
+        )
 
 
 class _FitProgress:
@@ -782,9 +814,7 @@ class PowerCover3D:
             audits["raw_neighbor_status"] = raw_index.status
             raw_neighbor_supported = raw_exhaustive or bool(raw_index.audited)
             if config.require_neighbor_audit and not raw_neighbor_supported:
-                raise RuntimeError(
-                    "raw-site neighbor evidence is insufficient; strict run aborted"
-                )
+                raise NeighborAuditError("raw", audits)
             neighbor_support = (
                 "cuvs_bruteforce_exhaustive_raw_pending_power_queries"
                 if raw_exhaustive
@@ -959,9 +989,7 @@ class PowerCover3D:
             audits["power_candidate_plan"] = candidate_plan
             power_neighbor_supported = power_exhaustive or bool(site_index.audited)
             if config.require_neighbor_audit and not power_neighbor_supported:
-                raise RuntimeError(
-                    "power-site neighbor evidence is insufficient; strict run aborted"
-                )
+                raise NeighborAuditError("power", audits)
             if raw_neighbor_supported and power_neighbor_supported:
                 neighbor_support = (
                     "cuda_exhaustive_or_empirically_audited_euclidean_candidates"
@@ -1187,7 +1215,8 @@ def _cuda_power_candidate_plan(
 
     n = int(n_points)
     cover_k = int(K)
-    rbc_limit = math.isqrt(n)
+    rbc_landmark_limit = math.isqrt(n)
+    rbc_limit = min(rbc_landmark_limit, RBC_MAX_QUERY_K)
     effective_max = min(int(candidate_k_max), n)
     effective_initial = min(int(candidate_k_initial), effective_max)
     index_max = n if effective_max == n else effective_max + 1
@@ -1203,6 +1232,8 @@ def _cuda_power_candidate_plan(
         "index_backend": backend,
         "reason": reason,
         "rbc_max_k": int(rbc_limit),
+        "rbc_landmark_max_k": int(rbc_landmark_limit),
+        "rbc_kernel_max_k": int(RBC_MAX_QUERY_K),
         "requested_candidate_k_initial": int(candidate_k_initial),
         "requested_candidate_k_max": int(candidate_k_max),
         "candidate_k_initial": int(effective_initial),
