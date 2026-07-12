@@ -52,9 +52,27 @@ _FIT_PROGRESS_STAGES = (
 class NeighborAuditError(RuntimeError):
     """Strict CUDA failure carrying the empirical evidence collected so far."""
 
-    def __init__(self, stage: str, audits: dict[str, dict[str, Any]]):
+    def __init__(self, stage: str, audits: Any):
         self.stage = str(stage)
-        self.neighbor_audits = {key: dict(value) for key, value in audits.items()}
+
+        def _sanitize(val: Any) -> Any:
+            if isinstance(val, dict):
+                return {str(k): _sanitize(v) for k, v in val.items()}
+            if isinstance(val, (list, tuple)):
+                return [_sanitize(v) for v in val]
+            if isinstance(val, np.ndarray):
+                return _sanitize(val.tolist())
+            if isinstance(val, np.integer):
+                return int(val)
+            if isinstance(val, np.floating):
+                return float(val) if np.isfinite(val) else repr(float(val))
+            if isinstance(val, np.bool_):
+                return bool(val)
+            if isinstance(val, float) and not np.isfinite(val):
+                return repr(val)
+            return val
+
+        self.neighbor_audits = _sanitize(audits) if isinstance(audits, dict) else {"raw_audits": _sanitize(audits)}
         super().__init__(
             f"{self.stage}-site neighbor evidence is insufficient; strict run "
             "aborted; collected audits="
