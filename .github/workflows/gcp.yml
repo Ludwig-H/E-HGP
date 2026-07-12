@@ -1,5 +1,28 @@
-- name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
-      with:
-        workload_identity_provider: 'projects/856038408749/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
-        service_account: 'github-deployer@devpod-gpu-exploration.iam.gserviceaccount.com'
+name: Google Cloud Integration
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  gcp-connection-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/856038408749/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          service_account: 'github-deployer@devpod-gpu-exploration.iam.gserviceaccount.com'
+
+      - name: Verify Identity and List Resources
+        run: |
+          gcloud auth list
+          gcloud compute instances list --limit=5
