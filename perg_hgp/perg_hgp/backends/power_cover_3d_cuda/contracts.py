@@ -8,7 +8,7 @@ the Colab benchmark notebook.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from math import isfinite, prod, ulp
+from math import isfinite, isqrt, prod, ulp
 from numbers import Integral, Real
 from typing import Any, Dict, Sequence, Tuple, cast
 
@@ -109,7 +109,7 @@ class PowerCoverConfig:
     grid_shape: Tuple[int, int, int] = (128, 128, 128)
     chunk_size: int = 262_144
     power_chunk_size: int = 65_536
-    candidate_k_initial: int = 64
+    candidate_k_initial: int = 16
     # RBC can return at most 1024 ranks and the power certificate consumes one
     # extra guard rank, so 1023 is the largest RBC-compatible default.
     candidate_k_max: int = 1_023
@@ -380,6 +380,9 @@ class RegularizationDiagnostics:
     entropy_degenerate_rows: int = 0
     query_count: int = 0
     s_quantile_sample_size: int = 0
+    stored_budget_projection_count: int = 0
+    stored_budget_identity_fallback_count: int = 0
+    stored_budget_projection_factor_min: float = 1.0
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -393,7 +396,11 @@ class PowerQueryDiagnostics:
     candidate_histogram: Dict[str, int] = field(default_factory=dict)
     min_certificate_gap: float | None = None
     radius_error_max: float = 0.0
+    # Keep the original positional ABI through ``numerical_certificate``;
+    # schema-v3 extension fields are deliberately appended.
     numerical_certificate: str = "float64_distance_guard"
+    power_arithmetic_radius_error: float = 0.0
+    grid_center_quantization_radius: float = 0.0
 
     @property
     def certified_fraction(self) -> float:
@@ -424,6 +431,7 @@ class MemoryEstimate:
     cubical_msf_bytes_per_forest: int
     estimated_peak_bytes: int
     assumptions: Tuple[str, ...]
+    neighbor_audit_chunk_bytes: int = 0
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -529,24 +537,62 @@ def estimate_memory(
             ),
         ),
     )
+    analytic_identity = (
+        config.regularization_mode == "fixed_kappa" and config.kappa == 1.0
+    )
+    if analytic_identity:
+        raw_query_support = 0
+    raw_uses_rbc = raw_query_support > 0 and raw_query_support <= min(
+        isqrt(n_points), 1_024
+    )
+    raw_materialized_support = (
+        min(n_points, isqrt(n_points), 1_024, 4 * raw_query_support)
+        if raw_uses_rbc
+        else raw_query_support
+    )
     # The 60-byte Gibbs/geometry allowance applies to m_reg entries; any
     # additional KNN distances used only to read R_K need distance+id storage.
-    regularization_chunk = q_regularization * effective_m_reg * 60
-    regularization_chunk += (
-        q_regularization * max(0, raw_query_support - effective_m_reg) * 12
-    )
-    regularization_chunk += q_regularization * 64
+    if analytic_identity:
+        regularization_chunk = q_regularization * 64
+    else:
+        regularization_chunk = q_regularization * effective_m_reg * 60
+        regularization_chunk += (
+            q_regularization * max(0, raw_query_support - effective_m_reg) * 12
+        )
+        regularization_chunk += (
+            q_regularization
+            * max(0, raw_materialized_support - raw_query_support)
+            * 12
+        )
+        regularization_chunk += q_regularization * 64
 
     candidates = min(n_points, config.candidate_k_max + 1)
     # Fused CUDA power evaluation retains distances (4), indices (8), powers
     # (4), validation masks and a partition-workspace allowance (4) per
     # candidate.  It does not create Q x C x 3 coordinate tensors.
     power_chunk = q_power * candidates * 20
+    power_uses_rbc = candidates <= min(isqrt(n_points), 1_024)
+    power_materialized_candidates = (
+        min(n_points, isqrt(n_points), 1_024, 4 * candidates)
+        if power_uses_rbc
+        else candidates
+    )
+    power_chunk += q_power * max(0, power_materialized_candidates - candidates) * 12
     power_chunk += q_power * 64
+
+    # The strict sampled audit streams at most a 512 MiB float64 distance
+    # matrix and an equally sized argpartition index workspace.
+    audit_queries = min(config.neighbor_audit_queries, n_points)
+    audit_matrix = min(512 << 20, audit_queries * n_points * 8)
+    audit_chunk = 2 * audit_matrix + audit_queries * max(
+        raw_materialized_support, power_materialized_candidates
+    ) * 32
 
     # values, parent, best-key, N-1 compact edges and sort scratch allowance.
     msf_one = n_cubes * (4 + 4 + 8 + 12 + 8)
-    peak = persistent + max(regularization_chunk, power_chunk, 2 * msf_one)
+    peak = persistent + max(
+        regularization_chunk, power_chunk, audit_chunk, 2 * msf_one
+    )
 
     return MemoryEstimate(
         n_points=n_points,
@@ -566,5 +612,9 @@ def estimate_memory(
             "fused power kernel; no Q x C x 3 candidate tensors",
             "implicit 26-neighbor grid; no explicit grid edge list",
             "one dominant streaming scratch allocation at a time",
+            "RBC queries overfetch up to 4x then rerank stored-coordinate distances",
+            "strict neighbor audit uses chunked direct float64 differences",
+            "kappa=1 fixed regularization is the analytic identity and skips raw KNN",
         ),
+        neighbor_audit_chunk_bytes=int(audit_chunk),
     )

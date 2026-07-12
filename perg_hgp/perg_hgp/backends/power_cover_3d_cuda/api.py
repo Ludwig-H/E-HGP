@@ -298,6 +298,81 @@ class PowerCoverHierarchy:
             max_total_cells=max_total_cells,
         )
 
+    def labels_at_cut(
+        self,
+        radius: float,
+        min_cluster_size: int = 1,
+        policy: str = "confirmed_unique",
+        *,
+        max_sites: int = 1_000_000,
+        max_candidate_cells_per_site: int = 100_000,
+        max_active_cells: int = 5_000_000,
+        max_total_cells: int = 5_000_000,
+    ) -> np.ndarray:
+        """Return conservative flat labels for all stored sites at one cut.
+
+        ``confirmed_unique`` assigns a site only when the canonical
+        ball--AABB relation returned by :meth:`site_components_at_cut` has
+        status ``CONFIRMED`` *and* its outer relation contains exactly one
+        component.  All other sites are labelled ``-1``.  Components with
+        fewer than ``min_cluster_size`` assigned sites are then discarded and
+        the survivors are recoded contiguously in increasing component-ID
+        order.
+
+        This is strict, deterministic post-processing of the stored cubical
+        inner/outer relations, not a certified flat-partition theorem or a
+        persistence-based cluster selection.  It intentionally uses the full
+        site set so that ``min_cluster_size`` is global.  The implementation
+        inherits the bounded CPU coverage limits below; in particular, it is
+        not a viable 30-million-site path without a GPU ball--AABB backend.
+        """
+
+        if isinstance(min_cluster_size, (bool, np.bool_)) or not isinstance(
+            min_cluster_size, (int, np.integer)
+        ):
+            raise TypeError("min_cluster_size must be an integer")
+        minimum = int(min_cluster_size)
+        if minimum < 1:
+            raise ValueError("min_cluster_size must be positive")
+        if not isinstance(policy, str):
+            raise TypeError("policy must be a string")
+        normalized_policy = policy.strip().lower().replace("-", "_")
+        if normalized_policy != "confirmed_unique":
+            raise ValueError("policy must be 'confirmed_unique'")
+
+        from .coverage import CONFIRMED
+
+        membership = self.site_components_at_cut(
+            radius,
+            site_start=0,
+            site_stop=None,
+            max_sites=max_sites,
+            max_candidate_cells_per_site=max_candidate_cells_per_site,
+            max_active_cells=max_active_cells,
+            max_total_cells=max_total_cells,
+        )
+        labels = np.full(membership.n_sites, -1, dtype=np.int32)
+        outer_lengths = membership.outer_indptr[1:] - membership.outer_indptr[:-1]
+        assigned_rows = np.flatnonzero(
+            (membership.status == CONFIRMED) & (outer_lengths == 1)
+        )
+        if assigned_rows.size == 0:
+            return labels
+
+        component_ids = membership.outer_labels[
+            membership.outer_indptr[assigned_rows]
+        ]
+        components, inverse, counts = np.unique(
+            component_ids, return_inverse=True, return_counts=True
+        )
+        surviving_components = components[counts >= minimum]
+        keep = counts[inverse] >= minimum
+        if np.any(keep):
+            labels[assigned_rows[keep]] = np.searchsorted(
+                surviving_components, component_ids[keep]
+            ).astype(np.int32, copy=False)
+        return labels
+
     def save(self, directory: str, *, include_sites: bool = False) -> None:
         """Persist compact artifacts and JSON metadata on local scratch storage."""
 
@@ -307,7 +382,7 @@ class PowerCoverHierarchy:
         _savez_atomic(
             hierarchy_path,
             compressed=True,
-            schema_version=np.asarray(2, dtype=np.int32),
+            schema_version=np.asarray(3, dtype=np.int32),
             run_id=np.asarray(run_id),
             births=self.base_forest.births,
             edges=self.base_forest.edges,
@@ -336,7 +411,7 @@ class PowerCoverHierarchy:
             _savez_atomic(
                 os.path.join(directory, "power_sites.npz"),
                 compressed=False,
-                schema_version=np.asarray(2, dtype=np.int32),
+                schema_version=np.asarray(3, dtype=np.int32),
                 run_id=np.asarray(run_id),
                 centers=centers,
                 additive_weights=additive,
@@ -350,7 +425,7 @@ class PowerCoverHierarchy:
             artifacts.append("power_sites.npz")
         metadata = {
             "schema": "perg_hgp.power_cover_run",
-            "schema_version": 2,
+            "schema_version": 3,
             "run_id": run_id,
             "artifacts": artifacts,
             "config": self.config.to_dict(),
@@ -380,7 +455,7 @@ class PowerCoverHierarchy:
 
     @classmethod
     def load(cls, directory: str) -> "PowerCoverHierarchy":
-        """Load a schema-v2 hierarchy saved by :meth:`save`.
+        """Load a schema-v2 or schema-v3 hierarchy saved by :meth:`save`.
 
         Runs saved without sites still support cuts, fusion intervals and
         accuracy queries.  Observation coverage explicitly requires the
@@ -393,8 +468,9 @@ class PowerCoverHierarchy:
             metadata = json.load(stream)
         if metadata.get("schema") != "perg_hgp.power_cover_run":
             raise ValueError("not a perg_hgp power-cover run directory")
-        if int(metadata.get("schema_version", -1)) != 2:
-            raise ValueError("PowerCoverHierarchy.load requires schema version 2")
+        schema_version = int(metadata.get("schema_version", -1))
+        if schema_version not in {2, 3}:
+            raise ValueError("PowerCoverHierarchy.load requires schema version 2 or 3")
         run_id = metadata.get("run_id")
         if (
             not isinstance(run_id, str)
@@ -429,7 +505,7 @@ class PowerCoverHierarchy:
         memory = MemoryEstimate(**memory_payload)
 
         with np.load(hierarchy_path, allow_pickle=False) as artifact:
-            if int(artifact["schema_version"]) != 2:
+            if int(artifact["schema_version"]) != schema_version:
                 raise ValueError("cubical hierarchy artifact has an unsupported schema")
             if str(np.asarray(artifact["run_id"]).item()) != run_id:
                 raise ValueError(
@@ -497,7 +573,7 @@ class PowerCoverHierarchy:
             if not os.path.isfile(sites_path):
                 raise FileNotFoundError("manifested power_sites.npz is missing")
             with np.load(sites_path, allow_pickle=False) as artifact:
-                if int(artifact["schema_version"]) != 2:
+                if int(artifact["schema_version"]) != schema_version:
                     raise ValueError("power-sites artifact has an unsupported schema")
                 if str(np.asarray(artifact["run_id"]).item()) != run_id:
                     raise ValueError(
@@ -585,6 +661,18 @@ def _sample_rows(values: Any, count: int):
 
         ids = cp.asarray(ids)
     return values[ids]
+
+
+class _AnalyticIdentityRegularizationIndex:
+    """Size contract for the exact kappa=1 regularization fast path."""
+
+    backend_name = "analytic_identity_kappa_one_no_raw_knn"
+
+    def __init__(self, size: int):
+        self.size = int(size)
+
+    def query(self, queries: Any, k: int):  # pragma: no cover - defensive
+        raise AssertionError("the analytic kappa=1 path must not query an index")
 
 
 def pilot_kappa_calibration(
@@ -778,11 +866,29 @@ class PowerCover3D:
             details={"points": n_points},
         )
         oracle: Any
-        if self.backend == "cpu":
+        analytic_identity = (
+            config.regularization_mode == "fixed_kappa" and config.kappa == 1.0
+        )
+        if analytic_identity:
+            raw_index = _AnalyticIdentityRegularizationIndex(n_points)
+            neighbor_support = raw_index.backend_name
+            audits["raw_neighbor_status"] = {
+                "backend": raw_index.backend_name,
+                "analytically_exact": True,
+                "knn_query_required": False,
+                "reason": (
+                    "entropy target log(kappa)=0 plus the self-neighbor "
+                    "convention gives z=x and a=s=0"
+                ),
+            }
+            if self.backend == "cuda":
+                hardware_manifest = collect_hardware_manifest()
+            raw_neighbor_supported = True
+            progress.message("raw_index", "skip_analytic_identity_kappa_one")
+        elif self.backend == "cpu":
             raw_index = ExactKDTreeIndex(values)
             neighbor_support = raw_index.backend_name
         else:
-            progress.message("raw_index", "build_rapids_rbc")
             raw_query_k = max(
                 config.m_reg,
                 (
@@ -794,9 +900,16 @@ class PowerCover3D:
                 ),
             )
             raw_query_k = min(raw_query_k, n_points)
+            raw_backend = _cuda_raw_index_backend(n_points, raw_query_k)
+            progress.message(
+                "raw_index",
+                "build_rapids_rbc"
+                if raw_backend == "rbc"
+                else "build_cuvs_brute_force_index",
+            )
             raw_index_class = (
                 RBCAuditedIndex
-                if raw_query_k < n_points and raw_query_k <= math.isqrt(n_points)
+                if raw_backend == "rbc"
                 else CuvsBruteForceIndex
             )
             raw_index = raw_index_class(values, max_k=raw_query_k)
@@ -809,6 +922,7 @@ class PowerCover3D:
                 audit = raw_index.audit_against_bruteforce(
                     _sample_rows(values, config.neighbor_audit_queries),
                     k=min(raw_query_k, n_points),
+                    require_support_equivalence=True,
                 )
                 audits["raw_rbc_vs_cuvs_bruteforce"] = audit.to_dict()
             audits["raw_neighbor_status"] = raw_index.status
@@ -824,7 +938,12 @@ class PowerCover3D:
             "raw_index",
             total=1,
             unit="stage",
-            details={"audit_queries": int(config.neighbor_audit_queries)},
+            details={
+                "audit_queries": (
+                    0 if analytic_identity else int(config.neighbor_audit_queries)
+                ),
+                "analytic_identity": analytic_identity,
+            },
         )
 
         start = progress.start("regularization", total=n_points, unit="points")
@@ -885,6 +1004,21 @@ class PowerCover3D:
             sites.diagnostics.relative_distortion_ratio_max = stored_gamma_upper
             sites.diagnostics.relative_contract_status = relative_contract_status
             sites.diagnostics.relative_zero_scale_violations = zero_scale_violations
+            relative_budget_tolerance = max(
+                512.0 * np.finfo(np.float32).eps, 1.0e-6
+            )
+            if (
+                stored_gamma_upper is None
+                or stored_gamma_upper
+                > config.distortion_budget_relative + relative_budget_tolerance
+            ):
+                raise RuntimeError(
+                    "stored power-site distortion violates the requested local "
+                    f"ratio: observed={stored_gamma_upper!r}, requested="
+                    f"{config.distortion_budget_relative:.9g}, tolerance="
+                    f"{relative_budget_tolerance:.3g}. The run is rejected "
+                    "instead of publishing an invalid multiplicative contract."
+                )
         sites.diagnostics.local_scale_below_resolution_count = (
             local_scale_below_resolution_count
         )
@@ -948,7 +1082,11 @@ class PowerCover3D:
             oracle = ExactLiftedPowerKNN(
                 sites.centers, sites.additive_weights, K=config.K
             )
-            neighbor_support = "scipy_ckdtree_exact_raw_3d_and_exact_lifted_power_4d"
+            neighbor_support = (
+                "analytic_identity_kappa_one_and_exact_lifted_power_4d"
+                if analytic_identity
+                else "scipy_ckdtree_exact_raw_3d_and_exact_lifted_power_4d"
+            )
         else:
             from .cuda_runtime import CuvsBruteForceIndex, RBCAuditedIndex
 
@@ -982,6 +1120,7 @@ class PowerCover3D:
                 audit = site_index.audit_against_bruteforce(
                     audit_queries,
                     k=candidate_plan["index_max_k"],
+                    require_support_equivalence=False,
                 )
                 audits["power_grid_centers_rbc_vs_cuvs_bruteforce"] = audit.to_dict()
                 del flat, audit_queries
@@ -992,7 +1131,11 @@ class PowerCover3D:
                 raise NeighborAuditError("power", audits)
             if raw_neighbor_supported and power_neighbor_supported:
                 neighbor_support = (
-                    "cuda_exhaustive_or_empirically_audited_euclidean_candidates"
+                    "analytic_identity_kappa_one_and_cuda_"
+                    "exhaustive_or_empirically_audited_power_candidates"
+                    if analytic_identity
+                    else "cuda_exhaustive_or_empirically_audited_"
+                    "euclidean_candidates"
                 )
             else:
                 neighbor_support = "cuda_neighbor_evidence_incomplete_or_failed"
@@ -1197,6 +1340,21 @@ class PowerCover3D:
             timings=timings,
             neighbor_audits=audits,
         )
+
+
+def _cuda_raw_index_backend(n_points: int, query_k: int) -> str:
+    """Route raw KNN without relying on cuML's hidden fallback or rank sentinel."""
+
+    n = int(n_points)
+    requested = int(query_k)
+    if not 1 <= requested <= n:
+        raise ValueError("raw CUDA query_k must lie in [1, number of points]")
+    rbc_capacity = min(math.isqrt(n), RBC_MAX_QUERY_K)
+    return (
+        "rbc"
+        if requested < n and requested <= rbc_capacity
+        else "cuvs_brute_force"
+    )
 
 
 def _cuda_power_candidate_plan(
@@ -1406,8 +1564,12 @@ def _stored_site_contract_upper(
                 below_resolution_count += int(
                     xp.sum(raw_scale < float(min_resolved_radius)).item()
                 )
-            round_margin = (
-                64.0 * np.finfo(np.float32).eps * xp.maximum(xp.abs(raw_scale), 1.0)
+            raw_scale_abs = xp.abs(raw_scale)
+            round_margin = 64.0 * np.finfo(np.float32).eps * raw_scale_abs
+            round_margin = xp.where(
+                raw_scale_abs > 0.0,
+                xp.nextafter(round_margin, xp.inf),
+                0.0,
             )
             scale_lower = xp.maximum(raw_scale - round_margin, 0.0)
             positive = scale_lower > 0.0
@@ -1417,7 +1579,10 @@ def _stored_site_contract_upper(
                     gamma_max, float(xp.max(s[positive] / scale_lower[positive]).item())
                 )
         del x, z, a, squared, squared_upper, s
-    s_upper = float(np.nextafter(s_max, np.inf))
+    # For kappa=1 with the canonical self atom, z_i=x_i and a_i=0 exactly in
+    # the stored geometry.  Preserve that exact identity instead of turning a
+    # computed zero into the smallest positive float64 through ``nextafter``.
+    s_upper = 0.0 if s_max == 0.0 else float(np.nextafter(s_max, np.inf))
     if not relative_requested:
         return s_upper, None, "not_requested", 0, below_resolution_count
     if zero_scale_violations:
@@ -1430,7 +1595,7 @@ def _stored_site_contract_upper(
         )
     return (
         s_upper,
-        float(np.nextafter(gamma_max, np.inf)),
+        0.0 if gamma_max == 0.0 else float(np.nextafter(gamma_max, np.inf)),
         "conditional_knn_order_float_enveloped",
         0,
         below_resolution_count,
@@ -1477,7 +1642,13 @@ def _denormalize_sites(
         entropy_residual_max=sites.diagnostics.entropy_residual_max,
         entropy_target_deviation_max=sites.diagnostics.entropy_target_deviation_max,
         simplex_residual_max=sites.diagnostics.simplex_residual_max,
-        s_max=float(np.nextafter(sites.diagnostics.s_max * transform.scale, np.inf)),
+        s_max=(
+            0.0
+            if sites.diagnostics.s_max == 0.0
+            else float(
+                np.nextafter(sites.diagnostics.s_max * transform.scale, np.inf)
+            )
+        ),
         s_quantiles={
             key: value * transform.scale
             for key, value in sites.diagnostics.s_quantiles.items()
@@ -1504,6 +1675,15 @@ def _denormalize_sites(
         entropy_degenerate_rows=sites.diagnostics.entropy_degenerate_rows,
         query_count=sites.diagnostics.query_count,
         s_quantile_sample_size=sites.diagnostics.s_quantile_sample_size,
+        stored_budget_projection_count=(
+            sites.diagnostics.stored_budget_projection_count
+        ),
+        stored_budget_identity_fallback_count=(
+            sites.diagnostics.stored_budget_identity_fallback_count
+        ),
+        stored_budget_projection_factor_min=(
+            sites.diagnostics.stored_budget_projection_factor_min
+        ),
     )
     return RegularizedSites(
         centers,
@@ -1564,6 +1744,12 @@ def _denormalize_field(
         ),
         radius_error_max=field.diagnostics.radius_error_max * transform.scale,
         numerical_certificate=field.diagnostics.numerical_certificate,
+        power_arithmetic_radius_error=(
+            field.diagnostics.power_arithmetic_radius_error * transform.scale
+        ),
+        grid_center_quantization_radius=(
+            field.diagnostics.grid_center_quantization_radius * transform.scale
+        ),
     )
     radii = xp.asarray(field.radii, dtype=xp.float64) * transform.scale
     numerical_radius_error = field.numerical_radius_error * transform.scale

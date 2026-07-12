@@ -1,0 +1,722 @@
+{
+  "K": 10,
+  "dataset": {
+    "component_counts": [
+      240,
+      230,
+      220,
+      210,
+      100
+    ],
+    "description": "four rotated anisotropic Gaussian clouds plus uniform noise",
+    "generation": {
+      "chunk_size": 1000000,
+      "n": 1000,
+      "name": "anisotropic_blobs",
+      "seed": 20260712
+    },
+    "generation_wall_seconds": 0.019230394000260276,
+    "ground_truth_available": true,
+    "identity": {
+      "generator_version": 1,
+      "n": 1000,
+      "name": "anisotropic_blobs",
+      "seed": 20260712
+    },
+    "labels": {
+      "bytes": 4128,
+      "dtype": "int32",
+      "file": "anisotropic_blobs-n1000-s20260712-011e4de18283.labels.npy",
+      "sha256": "bc8899572be7adddaba8c893ca184f1ca8cc9e6e1250a8be90d07cca14fdd199",
+      "shape": [
+        1000
+      ]
+    },
+    "noise_label": -1,
+    "ordering": "deterministic_contiguous_component_blocks",
+    "points": {
+      "bytes": 12128,
+      "coordinates": {
+        "max": [
+          4.39741325378418,
+          3.7840874195098877,
+          2.674510955810547
+        ],
+        "mean": [
+          0.17273705580458046,
+          0.23444936928711832,
+          0.0838855392858386
+        ],
+        "min": [
+          -4.389995574951172,
+          -3.7832250595092773,
+          -3.536550521850586
+        ]
+      },
+      "dtype": "float32",
+      "file": "anisotropic_blobs-n1000-s20260712-011e4de18283.points.npy",
+      "sha256": "51b520230315e5413d247017f4e5787b41abb7042bcb732c1edacbab60b26f03",
+      "shape": [
+        1000,
+        3
+      ]
+    },
+    "schema": "perg_hgp.benchmark_dataset",
+    "schema_version": 1,
+    "software": {
+      "numpy": "2.5.1"
+    }
+  },
+  "dataset_manifest": "/workspaces/E-HGP/perg_hgp/benchmarks/results/cpu_comparison_3d/grid48_probe/datasets/anisotropic_blobs-n1000-s20260712-011e4de18283.json",
+  "finished_at": "2026-07-12T17:42:58.417880+00:00",
+  "git": {
+    "commit": "7dca601b3cc102d596be7197db332e613788cb18",
+    "dirty": true,
+    "status_porcelain": "M PERG_HGP_Blackwell_30M.ipynb\n M gcp-migration/README.md\n M gcp-migration/check_quotas.sh\n M gcp-migration/deploy.sh\n M perg_hgp/README.md\n M perg_hgp/__init__.py\n M perg_hgp/perg_hgp/backends/power_cover_3d_cuda/api.py\n M perg_hgp/perg_hgp/backends/power_cover_3d_cuda/contracts.py\n M perg_hgp/perg_hgp/backends/power_cover_3d_cuda/cuda_runtime.py\n M perg_hgp/perg_hgp/backends/power_cover_3d_cuda/spatial_core.py\n M perg_hgp/tests/test_cuda_runtime_contract.py\n M perg_hgp/tests/test_power_cover_industrial.py\n M perg_hgp/tests/test_power_cover_spatial_core.py\n?? gcp-migration/blackwell_preflight.sh\n?? gcp-migration/stop_and_verify.sh\n?? perg_hgp/benchmarks/\n?? perg_hgp/tests/test_power_cover_flat_labels.py\n?? perg_hgp/tests/test_power_cover_import_contract.py"
+  },
+  "job": {
+    "K": 10,
+    "allow_single_cluster": false,
+    "cgal_root": "/workspaces/E-HGP/HGP-old/CGALDelaunay",
+    "cut_count": 7,
+    "dataset_identity": {
+      "generator_version": 1,
+      "n": 1000,
+      "name": "anisotropic_blobs",
+      "seed": 20260712
+    },
+    "dataset_metadata_path": "/workspaces/E-HGP/perg_hgp/benchmarks/results/cpu_comparison_3d/grid48_probe/datasets/anisotropic_blobs-n1000-s20260712-011e4de18283.json",
+    "distortion_budget_absolute": null,
+    "distortion_budget_relative": 0.1,
+    "entropy_mode": "fixed_hard",
+    "hard_kappa": 1.0,
+    "hgp_backend": "cgal",
+    "hgp_exp_z": 2.0,
+    "hgp_method": "eom",
+    "hgp_min_samples": 0,
+    "hgp_old_root": "/workspaces/E-HGP/HGP-old",
+    "hierarchy_path": "/workspaces/E-HGP/perg_hgp/benchmarks/results/cpu_comparison_3d/grid48_probe/hierarchies/anisotropic-blobs-n1000-s20260712-powercover-cpu-k10-fixed-hard-g48x48x48-d430c0c13d953e18",
+    "job_id": "d430c0c13d953e18",
+    "labels_path": "/workspaces/E-HGP/perg_hgp/benchmarks/results/cpu_comparison_3d/grid48_probe/labels/anisotropic-blobs-n1000-s20260712-powercover-cpu-k10-fixed-hard-g48x48x48-d430c0c13d953e18.labels.npy",
+    "local_scale_k": null,
+    "log_path": "/workspaces/E-HGP/perg_hgp/benchmarks/results/cpu_comparison_3d/grid48_probe/logs/anisotropic-blobs-n1000-s20260712-powercover-cpu-k10-fixed-hard-g48x48x48-d430c0c13d953e18.log",
+    "max_active_cells": 5000000,
+    "max_candidate_cells_per_site": 100000,
+    "max_n_cut_scan": 1000,
+    "max_total_cells": 5000000,
+    "method": "powercover_cpu",
+    "min_cluster_size": 30,
+    "n_jobs": 2,
+    "output_path": "/workspaces/E-HGP/perg_hgp/benchmarks/results/cpu_comparison_3d/grid48_probe/results/anisotropic-blobs-n1000-s20260712-powercover-cpu-k10-fixed-hard-g48x48x48-d430c0c13d953e18.json",
+    "powercover_backend": "cpu",
+    "powercover_config": {
+      "candidate_k_initial": 16,
+      "candidate_k_max": 128,
+      "chunk_size": 16384,
+      "grid_shape": [
+        48,
+        48,
+        48
+      ],
+      "m_reg": 32,
+      "max_grid_cells": 50000000,
+      "max_relative_spatial_error": 0.25,
+      "max_vram_fraction": 0.85,
+      "min_resolved_radius": null,
+      "neighbor_audit_queries": 16,
+      "numerical_margin_factor": 64.0,
+      "power_chunk_size": 8192,
+      "require_neighbor_audit": true,
+      "strict_certification": true
+    },
+    "resource_interval_seconds": 0.02,
+    "save_hierarchy": false,
+    "schema": "perg_hgp.benchmark_job",
+    "schema_version": 1,
+    "size_limit": 1000,
+    "source_fingerprint": "sha256:7a0f88c3885f38bf843b223d10162a965f88526ff69fcc32c9b51b076c7a1040",
+    "verbose_algorithm": false
+  },
+  "job_id": "d430c0c13d953e18",
+  "method": "powercover_cpu",
+  "method_result": {
+    "accuracy_report": {
+      "K_fixed_finite_sample_resolution": true,
+      "atlas_completeness": "not_used",
+      "base_spatial_interleaving_radius": 0.1370336374911743,
+      "base_total_interleaving_radius": 0.13703428699483153,
+      "conditional_guard_pass_fraction": null,
+      "cubical_connectivity": 26,
+      "cubical_msf_exact_for_stored_float32_values": false,
+      "cubical_msf_exact_for_stored_values": true,
+      "entropy_residual_max": 0.0,
+      "field_dtype": "float64",
+      "flat_selection": "none",
+      "full_power_hgp_complete": false,
+      "grid_policy": "fixed_shape",
+      "hardware_manifest": {
+        "backend": "cpu_reference",
+        "numpy": "2.5.1"
+      },
+      "inner_outer_merge_disagreement_count": null,
+      "input_quantization_radius": 6.495036572268567e-07,
+      "min_resolved_radius": null,
+      "mode": "spatial_enveloped",
+      "neighbor_support": "scipy_ckdtree_exact_raw_3d_and_exact_lifted_power_4d",
+      "notes": [
+        "Primary output is the inner/outer cubical H0 hierarchy.",
+        "epsilon_X+s+(H+delta_num) is the base-forest radius/H0 interleaving bound; epsilon_X+s+2(H+delta_num) is the inner/outer envelope bound, never a flat-label guarantee.",
+        "CPU power top-K uses the exact 4-D Euclidean lifting with SciPy cKDTree for the stored float64 sites.",
+        "Canonical site-to-component coverage is not replaced by cell lookup.",
+        "K fixed at finite sample size is not an asymptotic consistency claim.",
+        "Uniform-grid inner and outer forests share one MSF topology.",
+        "Geometry was isotropically recentered/scaled; public radii use input units.",
+        "The cubical envelope includes an explicit float32 radius margin."
+      ],
+      "numerical_radius_error": 1.335484504592109e-13,
+      "power_knn_certified_fraction": 1.0,
+      "power_knn_uncertain_count": 0,
+      "power_oracle_exact": true,
+      "regularization_interleaving_radius": 0.0,
+      "regularization_multiplicative_lower": null,
+      "regularization_multiplicative_upper": null,
+      "relative_spatial_error_at_min_radius": null,
+      "spatial_interleaving_radius": 0.2740672749823486,
+      "total_interleaving_radius": 0.27406792448600586
+    },
+    "backend": "cpu",
+    "config": {
+      "K": 10,
+      "candidate_k_initial": 16,
+      "candidate_k_max": 128,
+      "chunk_size": 16384,
+      "distortion_budget_absolute": null,
+      "distortion_budget_relative": null,
+      "grid_shape": [
+        48,
+        48,
+        48
+      ],
+      "kappa": 1.0,
+      "local_scale_k": null,
+      "m_reg": 32,
+      "max_grid_cells": 50000000,
+      "max_relative_spatial_error": 0.25,
+      "max_vram_fraction": 0.85,
+      "min_resolved_radius": null,
+      "neighbor_audit_queries": 16,
+      "numerical_margin_factor": 64.0,
+      "power_chunk_size": 8192,
+      "regularization_mode": "fixed_kappa",
+      "require_neighbor_audit": true,
+      "strict_certification": true
+    },
+    "cut_scan": {
+      "assignment_seconds_sum": 87.4771016240029,
+      "candidate_count": 9,
+      "candidate_strategy": "quantiles_of_base_inner_outer_vertex_births_and_msf_weights",
+      "compatibility_aliases": {
+        "oracle_best_ARI": "sampled_oracle_best_ARI"
+      },
+      "cuts": [
+        {
+          "assignment_seconds": 0.047033971999553614,
+          "labels": {
+            "cluster_size_max": null,
+            "cluster_size_median": null,
+            "cluster_size_min": null,
+            "largest_cluster_sizes": [],
+            "n_clusters_excluding_noise": 0,
+            "n_labels": 1000,
+            "noise_count": 1000,
+            "noise_fraction": 1.0
+          },
+          "metrics": {
+            "ARI": 0.0,
+            "ARI_non_noise_truth": 0.0,
+            "assigned_fraction_on_non_noise_truth": 0.0,
+            "ground_truth_available": true,
+            "ground_truth_non_noise_count": 900
+          },
+          "radius": 0.0015383430134514597,
+          "status": "ok"
+        },
+        {
+          "assignment_seconds": 0.26396577900050033,
+          "labels": {
+            "cluster_size_max": 197,
+            "cluster_size_median": 122.5,
+            "cluster_size_min": 48,
+            "largest_cluster_sizes": [
+              197,
+              48
+            ],
+            "n_clusters_excluding_noise": 2,
+            "n_labels": 1000,
+            "noise_count": 755,
+            "noise_fraction": 0.755
+          },
+          "metrics": {
+            "ARI": 0.17586994784288112,
+            "ARI_non_noise_truth": 0.23715088157395225,
+            "assigned_fraction_on_non_noise_truth": 0.27111111111111114,
+            "ground_truth_available": true,
+            "ground_truth_non_noise_count": 900
+          },
+          "radius": 0.2964394188011531,
+          "status": "ok"
+        },
+        {
+          "assignment_seconds": 1.9620400400017388,
+          "labels": {
+            "cluster_size_max": 258,
+            "cluster_size_median": 244.5,
+            "cluster_size_min": 231,
+            "largest_cluster_sizes": [
+              258,
+              231
+            ],
+            "n_clusters_excluding_noise": 2,
+            "n_labels": 1000,
+            "noise_count": 511,
+            "noise_fraction": 0.511
+          },
+          "metrics": {
+            "ARI": 0.586210126106618,
+            "ARI_non_noise_truth": 0.7215364924398635,
+            "assigned_fraction_on_non_noise_truth": 0.51,
+            "ground_truth_available": true,
+            "ground_truth_non_noise_count": 900
+          },
+          "radius": 1.0805899227107976,
+          "status": "ok"
+        },
+        {
+          "assignment_seconds": 2.6989495859997987,
+          "labels": {
+            "cluster_size_max": null,
+            "cluster_size_median": null,
+            "cluster_size_min": null,
+            "largest_cluster_sizes": [],
+            "n_clusters_excluding_noise": 0,
+            "n_labels": 1000,
+            "noise_count": 1000,
+            "noise_fraction": 1.0
+          },
+          "metrics": {
+            "ARI": 0.0,
+            "ARI_non_noise_truth": 0.0,
+            "assigned_fraction_on_non_noise_truth": 0.0,
+            "ground_truth_available": true,
+            "ground_truth_non_noise_count": 900
+          },
+          "radius": 1.4522033169602757,
+          "status": "ok"
+        },
+        {
+          "assignment_seconds": 4.392434224999306,
+          "labels": {
+            "cluster_size_max": null,
+            "cluster_size_median": null,
+            "cluster_size_min": null,
+            "largest_cluster_sizes": [],
+            "n_clusters_excluding_noise": 0,
+            "n_labels": 1000,
+            "noise_count": 1000,
+            "noise_fraction": 1.0
+          },
+          "metrics": {
+            "ARI": 0.0,
+            "ARI_non_noise_truth": 0.0,
+            "assigned_fraction_on_non_noise_truth": 0.0,
+            "ground_truth_available": true,
+            "ground_truth_non_noise_count": 900
+          },
+          "radius": 1.7545545466845514,
+          "status": "ok"
+        },
+        {
+          "assignment_seconds": 8.77056580899989,
+          "labels": {
+            "cluster_size_max": 1000,
+            "cluster_size_median": 1000.0,
+            "cluster_size_min": 1000,
+            "largest_cluster_sizes": [
+              1000
+            ],
+            "n_clusters_excluding_noise": 1,
+            "n_labels": 1000,
+            "noise_count": 0,
+            "noise_fraction": 0.0
+          },
+          "metrics": {
+            "ARI": 0.0,
+            "ARI_non_noise_truth": 0.0,
+            "assigned_fraction_on_non_noise_truth": 1.0,
+            "ground_truth_available": true,
+            "ground_truth_non_noise_count": 900
+          },
+          "radius": 2.0656063686604416,
+          "status": "ok"
+        },
+        {
+          "assignment_seconds": 10.18365564800115,
+          "labels": {
+            "cluster_size_max": 1000,
+            "cluster_size_median": 1000.0,
+            "cluster_size_min": 1000,
+            "largest_cluster_sizes": [
+              1000
+            ],
+            "n_clusters_excluding_noise": 1,
+            "n_labels": 1000,
+            "noise_count": 0,
+            "noise_fraction": 0.0
+          },
+          "metrics": {
+            "ARI": 0.0,
+            "ARI_non_noise_truth": 0.0,
+            "assigned_fraction_on_non_noise_truth": 1.0,
+            "ground_truth_available": true,
+            "ground_truth_non_noise_count": 900
+          },
+          "radius": 2.476181052627699,
+          "status": "ok"
+        },
+        {
+          "assignment_seconds": 24.87041989700083,
+          "labels": {
+            "cluster_size_max": 1000,
+            "cluster_size_median": 1000.0,
+            "cluster_size_min": 1000,
+            "largest_cluster_sizes": [
+              1000
+            ],
+            "n_clusters_excluding_noise": 1,
+            "n_labels": 1000,
+            "noise_count": 0,
+            "noise_fraction": 0.0
+          },
+          "metrics": {
+            "ARI": 0.0,
+            "ARI_non_noise_truth": 0.0,
+            "assigned_fraction_on_non_noise_truth": 1.0,
+            "ground_truth_available": true,
+            "ground_truth_non_noise_count": 900
+          },
+          "radius": 3.5564903685182543,
+          "status": "ok"
+        },
+        {
+          "assignment_seconds": 34.28803666800013,
+          "labels": {
+            "cluster_size_max": 1000,
+            "cluster_size_median": 1000.0,
+            "cluster_size_min": 1000,
+            "largest_cluster_sizes": [
+              1000
+            ],
+            "n_clusters_excluding_noise": 1,
+            "n_labels": 1000,
+            "noise_count": 0,
+            "noise_fraction": 0.0
+          },
+          "metrics": {
+            "ARI": 0.0,
+            "ARI_non_noise_truth": 0.0,
+            "assigned_fraction_on_non_noise_truth": 1.0,
+            "ground_truth_available": true,
+            "ground_truth_non_noise_count": 900
+          },
+          "radius": 4.7191183083730674,
+          "status": "ok"
+        }
+      ],
+      "enabled": true,
+      "max_n_cut_scan": 1000,
+      "oracle_best_ARI": 0.586210126106618,
+      "oracle_best_cut": 1.0805899227107976,
+      "oracle_best_labels_artifact": {
+        "bytes": 4128,
+        "dtype": "int32",
+        "path": "/workspaces/E-HGP/perg_hgp/benchmarks/results/cpu_comparison_3d/grid48_probe/labels/anisotropic-blobs-n1000-s20260712-powercover-cpu-k10-fixed-hard-g48x48x48-d430c0c13d953e18.labels.npy",
+        "sha256": "e17618e352b9e9ee3332529b0c1cb7de14e6b12b0bc7590138eb75bcba2c621e",
+        "shape": [
+          1000
+        ]
+      },
+      "production_selection": false,
+      "sampled_oracle_best_ARI": 0.586210126106618,
+      "scan_wall_seconds": 89.17639884900018,
+      "selection_kind": "truth_oracle_diagnostic_only",
+      "status": "ok",
+      "successful_count": 9,
+      "warning": "sampled_oracle_best_ARI uses ground truth over sampled cuts and must not be reported as an unsupervised production score"
+    },
+    "fit_wall_seconds": 6.960998376000134,
+    "forest": {
+      "base_forest": {
+        "edges": 110591,
+        "vertices": 110592
+      },
+      "inner_forest": {
+        "edges": 110591,
+        "vertices": 110592
+      },
+      "outer_forest": {
+        "edges": 110591,
+        "vertices": 110592
+      }
+    },
+    "grid": {
+      "bbox_max": [
+        4.39741325378418,
+        3.7840873772687473,
+        2.6745108884682622
+      ],
+      "bbox_min": [
+        -4.389995574951172,
+        -3.7832250595092773,
+        -3.536550521850586
+      ],
+      "cell_widths": [
+        0.18307101726531982,
+        0.15765234243287551,
+        0.129397112714976
+      ],
+      "half_diagonal": 0.13703363749104075,
+      "policy": "fixed_shape",
+      "requested_half_diagonal_limit": null,
+      "shape": [
+        48,
+        48,
+        48
+      ]
+    },
+    "hierarchy_artifact": null,
+    "hierarchy_save_seconds": null,
+    "implementation": "perg_hgp.PowerCover3D",
+    "memory_estimate": {
+      "assumptions": [
+        "float32 input/normalized compute geometry; float64 public centers",
+        "4-byte caller coordinate dtype",
+        "int64 neighbor outputs (conservative)",
+        "64 bytes/point spatial-index allowance",
+        "caller input and normalized coordinates may coexist",
+        "separate 65536-default chunks for cubical power queries",
+        "fused power kernel; no Q x C x 3 candidate tensors",
+        "implicit 26-neighbor grid; no explicit grid edge list",
+        "one dominant streaming scratch allocation at a time",
+        "RBC queries overfetch up to 4x then rerank stored-coordinate distances",
+        "strict neighbor audit uses chunked direct float64 differences",
+        "kappa=1 fixed regularization is the analytic identity and skips raw KNN"
+      ],
+      "cubical_msf_bytes_per_forest": 3981312,
+      "estimated_peak_bytes": 21767648,
+      "n_cubes": 110592,
+      "n_points": 1000,
+      "neighbor_audit_chunk_bytes": 322048,
+      "persistent_bytes": 108000,
+      "power_query_chunk_bytes": 21659648,
+      "regularization_chunk_bytes": 64000
+    },
+    "neighbor_audits": {
+      "raw_neighbor_status": {
+        "analytically_exact": true,
+        "backend": "analytic_identity_kappa_one_no_raw_knn",
+        "knn_query_required": false,
+        "reason": "entropy target log(kappa)=0 plus the self-neighbor convention gives z=x and a=s=0"
+      }
+    },
+    "power_query_diagnostics": {
+      "candidate_histogram": {
+        "lifted_exact": 110592
+      },
+      "certified_fraction": 1.0,
+      "certified_queries": 110592,
+      "conditional_guard_pass_fraction": 1.0,
+      "grid_center_quantization_radius": 8.671860270969364e-15,
+      "min_certificate_gap": null,
+      "numerical_certificate": "exact_ckdtree_search_on_float64_lifted_sites+grid_center_roundoff_bound",
+      "power_arithmetic_radius_error": 1.248765901882415e-13,
+      "radius_error_max": 1.335484504592109e-13,
+      "total_queries": 110592,
+      "uncertain_queries": 0
+    },
+    "progress": {
+      "cubical_msf": {
+        "done": "2026-07-12T17:41:29.214604+00:00",
+        "event_count": 2,
+        "last_completed": 110591,
+        "last_details": {
+          "stage_count": 6,
+          "stage_index": 6,
+          "vertices": 110592
+        },
+        "last_total": 110591,
+        "progress_event_count": 0,
+        "start": "2026-07-12T17:41:22.615788+00:00"
+      },
+      "input": {
+        "done": "2026-07-12T17:41:22.255202+00:00",
+        "event_count": 2,
+        "last_completed": 1,
+        "last_details": {
+          "points": 1000,
+          "stage_count": 6,
+          "stage_index": 1
+        },
+        "last_total": 1,
+        "progress_event_count": 0,
+        "start": "2026-07-12T17:41:22.254044+00:00"
+      },
+      "power_field": {
+        "done": "2026-07-12T17:41:22.615647+00:00",
+        "event_count": 16,
+        "last_completed": 110592,
+        "last_details": {
+          "certified": 110592,
+          "stage_count": 6,
+          "stage_index": 5,
+          "uncertain": 0
+        },
+        "last_total": 110592,
+        "progress_event_count": 14,
+        "start": "2026-07-12T17:41:22.256548+00:00"
+      },
+      "power_index": {
+        "done": "2026-07-12T17:41:22.256492+00:00",
+        "event_count": 2,
+        "last_completed": 1,
+        "last_details": {
+          "audit_queries": 16,
+          "cubes": 110592,
+          "stage_count": 6,
+          "stage_index": 4
+        },
+        "last_total": 1,
+        "progress_event_count": 0,
+        "start": "2026-07-12T17:41:22.255742+00:00"
+      },
+      "raw_index": {
+        "done": "2026-07-12T17:41:22.255329+00:00",
+        "event_count": 3,
+        "last_completed": 1,
+        "last_details": {
+          "analytic_identity": true,
+          "audit_queries": 0,
+          "stage_count": 6,
+          "stage_index": 2
+        },
+        "last_total": 1,
+        "progress_event_count": 0,
+        "start": "2026-07-12T17:41:22.255277+00:00"
+      },
+      "regularization": {
+        "done": "2026-07-12T17:41:22.255688+00:00",
+        "event_count": 3,
+        "last_completed": 1000,
+        "last_details": {
+          "s_max_input_units": 0.0,
+          "stage_count": 6,
+          "stage_index": 3
+        },
+        "last_total": 1000,
+        "progress_event_count": 1,
+        "start": "2026-07-12T17:41:22.255373+00:00"
+      }
+    },
+    "regularization_diagnostics": {
+      "distortion_budget_violation_max": 0.0,
+      "effective_kappa_quantiles": {
+        "0.0": 1.0,
+        "0.5": 1.0,
+        "0.9": 1.0,
+        "0.99": 1.0,
+        "1.0": 1.0
+      },
+      "entropy_degenerate_rows": 0,
+      "entropy_residual_max": 0.0,
+      "entropy_target_deviation_max": 0.0,
+      "local_scale_below_resolution_count": null,
+      "local_scale_below_resolution_fraction": null,
+      "local_scale_quantiles": {},
+      "mode": "fixed_kappa",
+      "query_count": 1000,
+      "relative_contract_status": "not_requested",
+      "relative_distortion_ratio_max": null,
+      "relative_zero_scale_violations": 0,
+      "s_max": 0.0,
+      "s_quantile_sample_size": 1000,
+      "s_quantiles": {
+        "0.0": 0.0,
+        "0.5": 0.0,
+        "0.9": 0.0,
+        "0.99": 0.0,
+        "1.0": 0.0
+      },
+      "simplex_residual_max": 0.0,
+      "solver_backend": "analytic_identity_kappa_one"
+    },
+    "stage_timings_seconds": {
+      "cubical_msf": 6.598796130001574,
+      "power_field": 0.3590849829997751,
+      "power_index": 0.00042311300057917833,
+      "regularization": 0.0003091909984505037,
+      "total": 6.960872306000965
+    },
+    "transform": {
+      "offset": [
+        -4.389995574951172,
+        -3.7832250595092773,
+        -3.536550521850586
+      ],
+      "scale": 8.787408828735352
+    }
+  },
+  "resources": {
+    "device_used_baseline_bytes": null,
+    "device_used_peak_bytes": null,
+    "monitor_wall_seconds": 96.87577652099935,
+    "nvml_available": false,
+    "nvml_devices": [],
+    "nvml_error": "pynvml_not_installed",
+    "process_vram_baseline_bytes": null,
+    "process_vram_peak_bytes": null,
+    "process_vram_peak_increment_bytes": null,
+    "rss_baseline_bytes": 39231488,
+    "rss_peak_increment_bytes": 118231040,
+    "rss_peak_process_lifetime_bytes": 157171712,
+    "rss_peak_sampled_bytes": 157462528,
+    "samples": 4094,
+    "sampling_interval_seconds": 0.02
+  },
+  "runtime": {
+    "cpu_count": 2,
+    "hostname": "codespaces-c578ac",
+    "machine": "x86_64",
+    "pid": 202707,
+    "platform": "Linux-6.8.0-1052-azure-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+    "python_executable": "/home/codespace/.python/current/bin/python"
+  },
+  "schema": "perg_hgp.benchmark_result",
+  "schema_version": 1,
+  "software_versions": {
+    "cuml-cu12": null,
+    "cupy-cuda12x": null,
+    "cuvs-cu12": null,
+    "hdbscan": "0.8.44",
+    "numpy": "2.5.1",
+    "nvidia-ml-py": null,
+    "perg-hgp": "0.3.0",
+    "psutil": "7.2.2",
+    "scikit-learn": "1.9.0",
+    "scipy": "1.18.0",
+    "torch": "2.13.0"
+  },
+  "started_at": "2026-07-12T17:41:21.457460+00:00",
+  "status": "ok",
+  "worker_wall_seconds": 96.96042364700043
+}

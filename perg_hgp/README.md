@@ -50,6 +50,10 @@ coverage = hierarchy.site_components_at_cut(
     0.75, site_start=0, site_stop=2_000
 )
 print(coverage.summary())
+
+# Partition plate conservatrice : seuls les sites confirmés et rattachés à
+# une unique composante sont affectés; -1 désigne le bruit/l'indécision.
+labels = hierarchy.labels_at_cut(0.75, min_cluster_size=20)
 ```
 
 Le CPU construit le voisinage brut avec cKDTree, puis interroge le top-K de
@@ -78,6 +82,26 @@ pipeline avec une suite de `kappa` globaux. Le chemin CUDA utilise un RawKernel
 fusionné par ligne : coûts en registres, 28 bissections utiles en float32 et
 accumulation directe de (z_i,a_i,s_i,\kappa_i), sans tenseurs globaux de
 probabilités ou d’offsets.
+
+Le barycentre est sommé en coordonnées locales `x_j - x_i`, puis le poids
+additif est fermé par l’identité de variance
+`E||X_j-x_i||² = ||z_i-x_i||² + a_i`. Cette formulation évite la cancellation
+float32 observée lorsque les rayons locaux deviennent très petits à 10--30 M.
+Après promotion des sites stockés en float64, le ratio est recalculé sur tous
+les points. Un dépassement du budget relatif arrête désormais le run au lieu
+de publier une borne multiplicative invalide.
+
+Pour les très rares sites dont le barycentre float32 reste hors budget après
+stockage, le backend contracte explicitement le site de puissance vers le site
+identité `z=x`; si nécessaire il replie le centre exactement sur `x` et arrondit
+le poids additif vers le bas. Cette projection ne peut qu’abaisser la
+distorsion. Son nombre, le nombre de replis identité et le facteur minimal sont
+exposés dans `RegularizationDiagnostics` afin de ne pas confondre cette garde
+numérique avec la solution de Gibbs non modifiée.
+
+Dans le mode dur `fixed_kappa` avec `kappa=1`, la solution est analytiquement
+`z_i=x_i, a_i=s_i=0` par la convention d’auto-voisinage. Le backend saute donc
+entièrement l’index et les requêtes KNN de régularisation dans ce cas exact.
 
 Le kernel fusionné ne recalcule pas un résidu de simplexe indépendant : son
 champ `simplex_residual_max` vaut donc `null`. L’acceptation GPU vérifie la
@@ -131,6 +155,22 @@ Cette implémentation est une référence CPU bornée par `max_sites` et
 `max_active_cells`, utilisable par tranches. Elle ne constitue pas encore le
 kernel d’affectation 30 M.
 
+`labels_at_cut(..., policy="confirmed_unique")` fournit une vue plate stricte
+et déterministe de cette relation. Un site reçoit une étiquette uniquement si
+son statut est `confirmed` et si sa relation extérieure contient exactement
+une composante. Les relations multivaluées, `possible` et `excluded` deviennent
+du bruit `-1`; les groupes plus petits que `min_cluster_size` sont ensuite
+supprimés et les composantes restantes recodées en entiers contigus, par
+identifiant de composante croissant.
+
+Cette sortie est un **post-traitement conservateur**, pas une garantie de
+partition plate ni une sélection par persistance : les garanties mathématiques
+restent celles des inclusions H_0 inner/outer. Le calcul porte volontairement
+sur tous les sites afin que `min_cluster_size` soit global et transmet les
+mêmes limites CPU que `site_components_at_cut`. Il est donc impossible de
+l’utiliser tel quel sur 30 millions de sites; cela exige le futur kernel GPU
+de relation boule--AABB en deux passes.
+
 ## Routage CUDA explicite
 
 Le voisinage brut utilise RBC seulement si celui-ci peut fournir tout le
@@ -149,6 +189,25 @@ de représentant ; son identifiant est remplacé par celui de l’observation et
 sa distance est forcée à zéro avant le calcul de \(R_K(x_i)\) et de Gibbs.
 Aucun voisin seulement « presque égal » n’est accepté comme auto-voisin.
 
+RBC est utilisé comme générateur de support : chaque requête sur-échantillonne
+jusqu’à quatre fois le nombre de rangs demandé (dans les plafonds `sqrt(N)` et
+1 024), recalcule les distances à partir des paires requête/identifiant, puis
+rerange et tronque. Ce choix corrige une omission top-64 détectée à 10 M.
+
+L’audit strict ne prend pas les distances `sqeuclidean` de cuVS pour autorité :
+sur Blackwell, leur formulation en produits scalaires subit une cancellation
+mesurable près de l’auto-voisin. Un balayage indépendant calcule directement
+les différences en float64, par blocs de mémoire bornée, et fusionne ses
+top-K. cuVS reste enregistré comme diagnostic. Comme tout audit échantillonné,
+ce résultat constitue une preuve empirique sur les requêtes testées, pas une
+preuve numérique universelle de RBC.
+
+Le premier palier du garde de puissance vaut désormais 16 par défaut. Sur le
+run local 10 M/K=10, les 884 736 centres ont tous été certifiés à ce palier :
+le champ passe de 24,68 s à 5,56 s et le fit de 178,59 s à 159,23 s. Les
+requêtes non séparées continuent d’escalader 16→32→… jusqu’au cap configuré ;
+ce réglage change donc le coût, pas le critère de certification.
+
 ## Dtypes et sauvegarde
 
 La géométrie de calcul normalisée est float32. Après calcul, les centres,
@@ -157,10 +216,11 @@ les unités d’entrée. Le run refuse les étendues dont les carrés de distanc
 ne sont pas représentables en float64, ainsi que tout poids positif qui
 sous-déborderait lors de la dénormalisation.
 
-`hierarchy.save(path, include_sites=...)` écrit le schéma 2 et un `run_id`
+`hierarchy.save(path, include_sites=...)` écrit le schéma 3 et un `run_id`
 commun au JSON et à chaque NPZ. `PowerCoverHierarchy.load(path)` vérifie ce
 `run_id`, les formes, les comptes, les décalages inner/outer et les valeurs
-finies. Un ancien `power_sites.npz` est supprimé lorsqu’une nouvelle
+finies. Le loader migre aussi les artefacts schéma 2 antérieurs à la séparation
+des deux termes d’erreur numérique. Un ancien `power_sites.npz` est supprimé lorsqu’une nouvelle
 sauvegarde est demandée sans sites, ce qui empêche de réutiliser silencieusement
 des observations d’un autre run.
 
@@ -177,8 +237,10 @@ des observations d’un autre run.
   RSS, histogrammes et fichiers d’échec ;
 - renvoie `CONDITIONAL_PASS`, `INCONCLUSIVE` ou `FAIL`.
 
-Aucune sortie exécutée n’est versionnée aujourd’hui : le cas 30 M reste un
-protocole prêt à exécuter, pas un benchmark acquis.
+Une campagne G4 exécutée le 12 juillet 2026, ses résultats JSON/CSV légers et
+les comparaisons HDBSCAN/HGP-CGAL sont documentés dans
+[`benchmarks/results/G4_20260712_REPORT.md`](benchmarks/results/G4_20260712_REPORT.md).
+Les gros nuages `.npy` et les logs restent ignorés par Git.
 
 Voir [POWER_COVER_3D.md](POWER_COVER_3D.md) et les deux audits datés du
 11 juillet 2026 pour les preuves, réserves et priorités restantes.

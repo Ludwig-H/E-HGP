@@ -1,0 +1,35 @@
+{
+  "result_count": 1,
+  "rows": [
+    {
+      "ARI": null,
+      "K": 10,
+      "dataset": "mixture",
+      "entropy_mode": "local_distortion",
+      "error": null,
+      "fit_wall_seconds": 961.608064041,
+      "grid_shape": [
+        128,
+        128,
+        128
+      ],
+      "job_id": "31d67f40e123849f",
+      "method": "powercover_cuda",
+      "n": 30000000,
+      "oracle_best_ARI": null,
+      "points_per_second": 31197.74170146819,
+      "rss_peak_bytes": 2327298048,
+      "sampled_oracle_best_ARI": null,
+      "seed": 20260712,
+      "status": "ok",
+      "total_interleaving_radius": 0.16817528542345234,
+      "vram_peak_bytes": 5156896768
+    }
+  ],
+  "schema": "perg_hgp.benchmark_summary",
+  "schema_version": 1,
+  "status_counts": {
+    "ok": 1
+  },
+  "updated_at": "2026-07-12T17:40:34.793604+00:00"
+}

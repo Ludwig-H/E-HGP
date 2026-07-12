@@ -1,0 +1,71 @@
+{
+  "component_counts": [
+    1600000,
+    1500000,
+    1400000,
+    1300000,
+    1200000,
+    1100000,
+    1000000,
+    600000,
+    300000
+  ],
+  "description": "scalable eight-component density/anisotropy mixture plus noise",
+  "generation": {
+    "chunk_size": 1000000,
+    "n": 10000000,
+    "name": "mixture",
+    "seed": 20260712
+  },
+  "generation_wall_seconds": 1.31301294900004,
+  "ground_truth_available": true,
+  "identity": {
+    "generator_version": 1,
+    "n": 10000000,
+    "name": "mixture",
+    "seed": 20260712
+  },
+  "labels": {
+    "bytes": 40000128,
+    "dtype": "int32",
+    "file": "mixture-n10000000-s20260712-23e5e11c40d0.labels.npy",
+    "sha256": "175f092da5046cc8f32e63e1d895eb1623a8b3e247c2e34ab8addace041844aa",
+    "shape": [
+      10000000
+    ]
+  },
+  "noise_label": -1,
+  "ordering": "deterministic_contiguous_component_blocks",
+  "points": {
+    "bytes": 120000128,
+    "coordinates": {
+      "max": [
+        5.999993324279785,
+        5.9999680519104,
+        3.499974250793457
+      ],
+      "mean": [
+        0.07510349581773253,
+        0.47100953296787496,
+        -0.20255871624954394
+      ],
+      "min": [
+        -5.999981880187988,
+        -5.99997091293335,
+        -2.9999756813049316
+      ]
+    },
+    "dtype": "float32",
+    "file": "mixture-n10000000-s20260712-23e5e11c40d0.points.npy",
+    "sha256": "840b80f0095ff06d31b8e5a4a3b62e031782f3f19d549b3a43815d5094d4f1ba",
+    "shape": [
+      10000000,
+      3
+    ]
+  },
+  "schema": "perg_hgp.benchmark_dataset",
+  "schema_version": 1,
+  "software": {
+    "numpy": "2.2.6"
+  }
+}

@@ -1,0 +1,2 @@
+job_id,status,method,dataset,n,seed,K,entropy_mode,grid_shape,fit_wall_seconds,points_per_second,ARI,sampled_oracle_best_ARI,oracle_best_ARI,total_interleaving_radius,rss_peak_bytes,vram_peak_bytes,error
+93635d26352de73b,ok,powercover_cuda,mixture,100000,20260712,10,local_distortion,"[48, 48, 48]",14.671296128999984,6816.030371190943,,,,0.5431550986841908,1356054528,1415577600,

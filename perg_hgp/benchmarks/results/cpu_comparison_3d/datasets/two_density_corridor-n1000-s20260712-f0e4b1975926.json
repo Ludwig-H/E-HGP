@@ -1,0 +1,66 @@
+{
+  "component_counts": [
+    500,
+    360,
+    100,
+    40
+  ],
+  "description": "dense and sparse 3-D clusters joined by a thin noise corridor",
+  "generation": {
+    "chunk_size": 1000000,
+    "n": 1000,
+    "name": "two_density_corridor",
+    "seed": 20260712
+  },
+  "generation_wall_seconds": 0.0027182980011275504,
+  "ground_truth_available": true,
+  "identity": {
+    "generator_version": 1,
+    "n": 1000,
+    "name": "two_density_corridor",
+    "seed": 20260712
+  },
+  "labels": {
+    "bytes": 4128,
+    "dtype": "int32",
+    "file": "two_density_corridor-n1000-s20260712-f0e4b1975926.labels.npy",
+    "sha256": "cf99062a7b955b1d685efba3f18676a1ee9b09baea03ae1a6caf7bf4eed8976f",
+    "shape": [
+      1000
+    ]
+  },
+  "noise_label": -1,
+  "ordering": "deterministic_contiguous_component_blocks",
+  "points": {
+    "bytes": 12128,
+    "coordinates": {
+      "max": [
+        3.9581058025360107,
+        1.9853416681289673,
+        1.7639715671539307
+      ],
+      "mean": [
+        -0.3296307827774435,
+        -0.021281487154577918,
+        -0.0012723895731141966
+      ],
+      "min": [
+        -3.413356304168701,
+        -1.890489101409912,
+        -1.376072883605957
+      ]
+    },
+    "dtype": "float32",
+    "file": "two_density_corridor-n1000-s20260712-f0e4b1975926.points.npy",
+    "sha256": "6477eca794232024804150e85a5b0c307f42bb2723a5099a487ab26b7579c2fd",
+    "shape": [
+      1000,
+      3
+    ]
+  },
+  "schema": "perg_hgp.benchmark_dataset",
+  "schema_version": 1,
+  "software": {
+    "numpy": "2.5.1"
+  }
+}

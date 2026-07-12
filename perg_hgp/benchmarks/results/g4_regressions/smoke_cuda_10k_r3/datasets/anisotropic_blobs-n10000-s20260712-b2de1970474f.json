@@ -1,0 +1,67 @@
+{
+  "component_counts": [
+    2400,
+    2300,
+    2200,
+    2100,
+    1000
+  ],
+  "description": "four rotated anisotropic Gaussian clouds plus uniform noise",
+  "generation": {
+    "chunk_size": 1000000,
+    "n": 10000,
+    "name": "anisotropic_blobs",
+    "seed": 20260712
+  },
+  "generation_wall_seconds": 0.01291407300004721,
+  "ground_truth_available": true,
+  "identity": {
+    "generator_version": 1,
+    "n": 10000,
+    "name": "anisotropic_blobs",
+    "seed": 20260712
+  },
+  "labels": {
+    "bytes": 40128,
+    "dtype": "int32",
+    "file": "anisotropic_blobs-n10000-s20260712-b2de1970474f.labels.npy",
+    "sha256": "be6b23f4aac71dd03991a5c33ecbe59bfd8809645dedb059abac6c1c0389f496",
+    "shape": [
+      10000
+    ]
+  },
+  "noise_label": -1,
+  "ordering": "deterministic_contiguous_component_blocks",
+  "points": {
+    "bytes": 120128,
+    "coordinates": {
+      "max": [
+        4.497417449951172,
+        3.7975919246673584,
+        2.6941072940826416
+      ],
+      "mean": [
+        0.2088079627440311,
+        0.23358756716111675,
+        0.09839247116571642
+      ],
+      "min": [
+        -5.223349094390869,
+        -4.145823955535889,
+        -3.570039749145508
+      ]
+    },
+    "dtype": "float32",
+    "file": "anisotropic_blobs-n10000-s20260712-b2de1970474f.points.npy",
+    "sha256": "140eb73a81a2f484d86548b8a47de7036780fa4e1deaf2eb7785c89d6a25561f",
+    "shape": [
+      10000,
+      3
+    ]
+  },
+  "schema": "perg_hgp.benchmark_dataset",
+  "schema_version": 1,
+  "software": {
+    "numpy": "2.2.6"
+  }
+}

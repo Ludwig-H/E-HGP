@@ -1,0 +1,574 @@
+{
+  "K": 6,
+  "dataset": {
+    "component_counts": [
+      16000,
+      15000,
+      14000,
+      13000,
+      12000,
+      11000,
+      10000,
+      6000,
+      3000
+    ],
+    "description": "scalable eight-component density/anisotropy mixture plus noise",
+    "generation": {
+      "chunk_size": 1000000,
+      "n": 100000,
+      "name": "mixture",
+      "seed": 20260712
+    },
+    "generation_wall_seconds": 0.03406900899972243,
+    "ground_truth_available": true,
+    "identity": {
+      "generator_version": 1,
+      "n": 100000,
+      "name": "mixture",
+      "seed": 20260712
+    },
+    "labels": {
+      "bytes": 400128,
+      "dtype": "int32",
+      "file": "mixture-n100000-s20260712-35374d9bcb69.labels.npy",
+      "sha256": "79916efa12ef1a1240b3725b442f3103676ece86897e0b6cac7210ea22958908",
+      "shape": [
+        100000
+      ]
+    },
+    "noise_label": -1,
+    "ordering": "deterministic_contiguous_component_blocks",
+    "points": {
+      "bytes": 1200128,
+      "coordinates": {
+        "max": [
+          5.99928617477417,
+          5.999229431152344,
+          3.499105930328369
+        ],
+        "mean": [
+          0.0764292974212335,
+          0.4693333524461895,
+          -0.20142352688372833
+        ],
+        "min": [
+          -5.996737003326416,
+          -5.9967780113220215,
+          -2.996849298477173
+        ]
+      },
+      "dtype": "float32",
+      "file": "mixture-n100000-s20260712-35374d9bcb69.points.npy",
+      "sha256": "02501a3782b13719c5399d8e9f5b2b9b1658c1a3e415ea37c5223be293179161",
+      "shape": [
+        100000,
+        3
+      ]
+    },
+    "schema": "perg_hgp.benchmark_dataset",
+    "schema_version": 1,
+    "software": {
+      "numpy": "2.2.6"
+    }
+  },
+  "dataset_manifest": "/workspace/benchmarks/results/g4_k_sweep_100k_final/datasets/mixture-n100000-s20260712-35374d9bcb69.json",
+  "finished_at": "2026-07-12T19:01:42.307425+00:00",
+  "git": {
+    "commit": null,
+    "dirty": null,
+    "status_porcelain": null
+  },
+  "job": {
+    "K": 6,
+    "allow_single_cluster": false,
+    "cgal_root": "/HGP-old/CGALDelaunay",
+    "cut_count": 15,
+    "dataset_identity": {
+      "generator_version": 1,
+      "n": 100000,
+      "name": "mixture",
+      "seed": 20260712
+    },
+    "dataset_metadata_path": "/workspace/benchmarks/results/g4_k_sweep_100k_final/datasets/mixture-n100000-s20260712-35374d9bcb69.json",
+    "distortion_budget_absolute": null,
+    "distortion_budget_relative": 0.1,
+    "entropy_mode": "fixed_hard",
+    "hard_kappa": 1.0,
+    "hgp_backend": "cgal",
+    "hgp_exp_z": 2.0,
+    "hgp_method": "eom",
+    "hgp_min_samples": 0,
+    "hgp_old_root": "/HGP-old",
+    "hierarchy_path": "/workspace/benchmarks/results/g4_k_sweep_100k_final/hierarchies/mixture-n100000-s20260712-powercover-cuda-k6-fixed-hard-g48x48x48-0825d5219169e5e7",
+    "job_id": "0825d5219169e5e7",
+    "labels_path": null,
+    "local_scale_k": null,
+    "log_path": "/workspace/benchmarks/results/g4_k_sweep_100k_final/logs/mixture-n100000-s20260712-powercover-cuda-k6-fixed-hard-g48x48x48-0825d5219169e5e7.log",
+    "max_active_cells": 5000000,
+    "max_candidate_cells_per_site": 100000,
+    "max_n_cut_scan": 0,
+    "max_total_cells": 5000000,
+    "method": "powercover_cuda",
+    "min_cluster_size": 100,
+    "n_jobs": -1,
+    "output_path": "/workspace/benchmarks/results/g4_k_sweep_100k_final/results/mixture-n100000-s20260712-powercover-cuda-k6-fixed-hard-g48x48x48-0825d5219169e5e7.json",
+    "powercover_backend": "cuda",
+    "powercover_config": {
+      "candidate_k_initial": 16,
+      "candidate_k_max": 256,
+      "chunk_size": 131072,
+      "grid_shape": [
+        48,
+        48,
+        48
+      ],
+      "m_reg": 64,
+      "max_grid_cells": 50000000,
+      "max_relative_spatial_error": 0.25,
+      "max_vram_fraction": 0.85,
+      "min_resolved_radius": null,
+      "neighbor_audit_queries": 8,
+      "numerical_margin_factor": 64.0,
+      "power_chunk_size": 32768,
+      "require_neighbor_audit": true,
+      "strict_certification": true
+    },
+    "resource_interval_seconds": 0.05,
+    "save_hierarchy": false,
+    "schema": "perg_hgp.benchmark_job",
+    "schema_version": 1,
+    "size_limit": 0,
+    "source_fingerprint": "sha256:25213193fb1c6d651d5dde7a276a10f1e52b8658d7d2f957b2aceb16a68f45d9",
+    "verbose_algorithm": false
+  },
+  "job_id": "0825d5219169e5e7",
+  "method": "powercover_cuda",
+  "method_result": {
+    "accuracy_report": {
+      "K_fixed_finite_sample_resolution": true,
+      "atlas_completeness": "not_used",
+      "base_spatial_interleaving_radius": 0.1892435048621921,
+      "base_total_interleaving_radius": 0.18924468085254675,
+      "conditional_guard_pass_fraction": 1.0,
+      "cubical_connectivity": 26,
+      "cubical_msf_exact_for_stored_float32_values": true,
+      "cubical_msf_exact_for_stored_values": true,
+      "entropy_residual_max": 0.0,
+      "field_dtype": "float64",
+      "flat_selection": "none",
+      "full_power_hgp_complete": false,
+      "grid_policy": "fixed_shape",
+      "hardware_manifest": {
+        "cpu": "x86_64",
+        "cuda_driver": 13000,
+        "cuda_runtime": 12090,
+        "cuml": "26.02.00",
+        "cupy": "13.6.0",
+        "disk_free_bytes": 74174726144,
+        "git_head": null,
+        "gpu_compute_capability": [
+          12,
+          0
+        ],
+        "gpu_free_bytes_at_manifest": 101382356992,
+        "gpu_name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+        "gpu_total_bytes": 101973950464,
+        "host_ram_available_bytes": 184855719936,
+        "host_ram_total_bytes": 189915058176,
+        "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Tue_May_27_02:21:03_PDT_2025\nCuda compilation tools, release 12.9, V12.9.86\nBuild cuda_12.9.r12.9/compiler.36037853_0",
+        "nvidia_smi": "Sun Jul 12 19:01:41 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.159.03             Driver Version: 580.159.03     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA RTX PRO 6000 Blac...    Off |   00000000:05:00.0 Off |                    0 |\n| N/A   36C    P0             87W /  600W |     565MiB /  97887MiB |      0%      Default |\n|                                         |                        |             Disabled |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A             659      C   /opt/conda/bin/python                   556MiB |\n+-----------------------------------------------------------------------------------------+",
+        "platform": "Linux-6.8.0-1063-gcp-x86_64-with-glibc2.39",
+        "python": "3.12.12 | packaged by conda-forge | (main, Jan 26 2026, 23:51:32) [GCC 14.3.0]"
+      },
+      "inner_outer_merge_disagreement_count": null,
+      "input_quantization_radius": 1.1759903546504514e-06,
+      "min_resolved_radius": null,
+      "mode": "spatial_enveloped",
+      "neighbor_support": "analytic_identity_kappa_one_and_cuda_exhaustive_or_empirically_audited_power_candidates",
+      "notes": [
+        "Primary output is the inner/outer cubical H0 hierarchy.",
+        "epsilon_X+s+(H+delta_num) is the base-forest radius/H0 interleaving bound; epsilon_X+s+2(H+delta_num) is the inner/outer envelope bound, never a flat-label guarantee.",
+        "CUDA power top-K is conditional on the sampled RBC order and declared float32 envelope; directed intervals remain future work.",
+        "Canonical site-to-component coverage is not replaced by cell lookup.",
+        "K fixed at finite sample size is not an asymptotic consistency claim.",
+        "Uniform-grid inner and outer forests share one MSF topology.",
+        "Geometry was isotropically recentered/scaled; public radii use input units.",
+        "The cubical envelope includes an explicit float32 radius margin."
+      ],
+      "numerical_radius_error": 1.3573459214745228e-05,
+      "power_knn_certified_fraction": 1.0,
+      "power_knn_uncertain_count": 0,
+      "power_oracle_exact": false,
+      "regularization_interleaving_radius": 0.0,
+      "regularization_multiplicative_lower": null,
+      "regularization_multiplicative_upper": null,
+      "relative_spatial_error_at_min_radius": null,
+      "spatial_interleaving_radius": 0.3784870097243842,
+      "total_interleaving_radius": 0.37848818571473886
+    },
+    "backend": "cuda",
+    "config": {
+      "K": 6,
+      "candidate_k_initial": 16,
+      "candidate_k_max": 256,
+      "chunk_size": 131072,
+      "distortion_budget_absolute": null,
+      "distortion_budget_relative": null,
+      "grid_shape": [
+        48,
+        48,
+        48
+      ],
+      "kappa": 1.0,
+      "local_scale_k": null,
+      "m_reg": 64,
+      "max_grid_cells": 50000000,
+      "max_relative_spatial_error": 0.25,
+      "max_vram_fraction": 0.85,
+      "min_resolved_radius": null,
+      "neighbor_audit_queries": 8,
+      "numerical_margin_factor": 64.0,
+      "power_chunk_size": 32768,
+      "regularization_mode": "fixed_kappa",
+      "require_neighbor_audit": true,
+      "strict_certification": true
+    },
+    "cut_scan": {
+      "compatibility_aliases": {
+        "oracle_best_ARI": "sampled_oracle_best_ARI"
+      },
+      "enabled": false,
+      "max_n_cut_scan": 0,
+      "oracle_best_ARI": null,
+      "oracle_best_cut": null,
+      "oracle_best_labels_artifact": null,
+      "production_selection": false,
+      "sampled_oracle_best_ARI": null,
+      "selection_kind": "truth_oracle_diagnostic_only",
+      "status": "disabled",
+      "warning": "sampled_oracle_best_ARI uses ground truth over sampled cuts and must not be reported as an unsupervised production score"
+    },
+    "fit_wall_seconds": 1.1347306980001122,
+    "forest": {
+      "base_forest": {
+        "edges": 110591,
+        "vertices": 110592
+      },
+      "inner_forest": {
+        "edges": 110591,
+        "vertices": 110592
+      },
+      "outer_forest": {
+        "edges": 110591,
+        "vertices": 110592
+      }
+    },
+    "grid": {
+      "bbox_max": [
+        5.99928617477417,
+        5.999230151385859,
+        3.4991063185567555
+      ],
+      "bbox_min": [
+        -5.996737003326416,
+        -5.9967780113220215,
+        -2.996849298477173
+      ],
+      "cell_widths": [
+        0.2499171495437622,
+        0.24991683672308085,
+        0.13533240868820684
+      ],
+      "half_diagonal": 0.18922993140297736,
+      "policy": "fixed_shape",
+      "requested_half_diagonal_limit": null,
+      "shape": [
+        48,
+        48,
+        48
+      ]
+    },
+    "hierarchy_artifact": null,
+    "hierarchy_save_seconds": null,
+    "implementation": "perg_hgp.PowerCover3D",
+    "memory_estimate": {
+      "assumptions": [
+        "float32 input/normalized compute geometry; float64 public centers",
+        "4-byte caller coordinate dtype",
+        "int64 neighbor outputs (conservative)",
+        "64 bytes/point spatial-index allowance",
+        "caller input and normalized coordinates may coexist",
+        "separate 65536-default chunks for cubical power queries",
+        "fused power kernel; no Q x C x 3 candidate tensors",
+        "implicit 26-neighbor grid; no explicit grid edge list",
+        "one dominant streaming scratch allocation at a time",
+        "RBC queries overfetch up to 4x then rerank stored-coordinate distances",
+        "strict neighbor audit uses chunked direct float64 differences",
+        "kappa=1 fixed regularization is the analytic identity and skips raw KNN"
+      ],
+      "cubical_msf_bytes_per_forest": 3981312,
+      "estimated_peak_bytes": 204524416,
+      "n_cubes": 110592,
+      "n_points": 100000,
+      "neighbor_audit_chunk_bytes": 12880896,
+      "persistent_bytes": 10800000,
+      "power_query_chunk_bytes": 193724416,
+      "regularization_chunk_bytes": 6400000
+    },
+    "neighbor_audits": {
+      "power_candidate_plan": {
+        "candidate_k_initial": 16,
+        "candidate_k_max": 256,
+        "index_backend": "rbc",
+        "index_max_k": 257,
+        "rbc_kernel_max_k": 1024,
+        "rbc_landmark_max_k": 316,
+        "rbc_max_k": 316,
+        "reason": "rbc_honors_requested_candidate_and_guard_capacity",
+        "requested_candidate_k_initial": 16,
+        "requested_candidate_k_max": 256
+      },
+      "power_grid_centers_rbc_vs_cuvs_bruteforce": {
+        "audit_scope": "sampled_direct_float64_bruteforce_value_and_tie_aware_support_comparison_with_cuvs_diagnostic",
+        "brute_force_seconds": 0.021284095764160155,
+        "comparison_tolerance": 2.9115178676875075e-06,
+        "coordinate_equivalent_tie_rows": 0,
+        "cuvs_brute_force_seconds": 0.0020386879444122315,
+        "cuvs_non_equivalent_support_rows": 0,
+        "cuvs_reported_maximum_absolute_error": 7.970192958950406e-07,
+        "cuvs_support_equivalent_to_direct": true,
+        "distance_values_match": true,
+        "identifier_mismatch_rows": 0,
+        "identifiers_match": true,
+        "is_numerical_proof": false,
+        "k": 257,
+        "library_reference_distances_used": false,
+        "maximum_absolute_error": 3.0728537381286e-08,
+        "maximum_relative_error": 2.2756393768360974e-07,
+        "non_equivalent_support_rows": 0,
+        "queries": 8,
+        "rbc_reported_distances_recomputed": true,
+        "rbc_seconds": 0.06873551940917969,
+        "reference_distance_source": "stored_float32_coordinates_recomputed_float64",
+        "support_equivalence_required": false,
+        "support_equivalent": true,
+        "values_match": true
+      },
+      "power_neighbor_status": {
+        "backend": "rapids_cuml_rbc_3d",
+        "empirical_audit_passed": true,
+        "empirical_audit_status": "passed",
+        "hidden_fallback_allowed": false,
+        "internal_overfetch_factor": 4,
+        "internal_overfetch_max_k": 316,
+        "numerically_proven": false,
+        "requested_algorithm": "rbc"
+      },
+      "raw_neighbor_status": {
+        "analytically_exact": true,
+        "backend": "analytic_identity_kappa_one_no_raw_knn",
+        "knn_query_required": false,
+        "reason": "entropy target log(kappa)=0 plus the self-neighbor convention gives z=x and a=s=0"
+      }
+    },
+    "power_query_diagnostics": {
+      "candidate_histogram": {
+        "16": 110592
+      },
+      "certified_fraction": 1.0,
+      "certified_queries": 110592,
+      "conditional_guard_pass_fraction": 1.0,
+      "grid_center_quantization_radius": 6.959536237450874e-06,
+      "min_certificate_gap": 0.0002482388803266026,
+      "numerical_certificate": "conditional_float_gap_plus_underflow_or_narrow_rank_value_interval_not_directed+grid_center_roundoff_bound",
+      "power_arithmetic_radius_error": 6.613922977294351e-06,
+      "radius_error_max": 1.3573459214745228e-05,
+      "total_queries": 110592,
+      "uncertain_queries": 0
+    },
+    "progress": {
+      "cubical_msf": {
+        "done": "2026-07-12T19:01:42.305582+00:00",
+        "event_count": 8,
+        "last_completed": 110591,
+        "last_details": {
+          "stage_count": 6,
+          "stage_index": 6,
+          "vertices": 110592
+        },
+        "last_total": 110591,
+        "progress_event_count": 5,
+        "start": "2026-07-12T19:01:42.233830+00:00"
+      },
+      "input": {
+        "done": "2026-07-12T19:01:41.970463+00:00",
+        "event_count": 2,
+        "last_completed": 1,
+        "last_details": {
+          "points": 100000,
+          "stage_count": 6,
+          "stage_index": 1
+        },
+        "last_total": 1,
+        "progress_event_count": 0,
+        "start": "2026-07-12T19:01:41.170992+00:00"
+      },
+      "power_field": {
+        "done": "2026-07-12T19:01:42.233762+00:00",
+        "event_count": 6,
+        "last_completed": 110592,
+        "last_details": {
+          "certified": 110592,
+          "stage_count": 6,
+          "stage_index": 5,
+          "uncertain": 0
+        },
+        "last_total": 110592,
+        "progress_event_count": 4,
+        "start": "2026-07-12T19:01:42.141397+00:00"
+      },
+      "power_index": {
+        "done": "2026-07-12T19:01:42.138964+00:00",
+        "event_count": 4,
+        "last_completed": 1,
+        "last_details": {
+          "audit_queries": 8,
+          "cubes": 110592,
+          "stage_count": 6,
+          "stage_index": 4
+        },
+        "last_total": 1,
+        "progress_event_count": 0,
+        "start": "2026-07-12T19:01:41.999364+00:00"
+      },
+      "raw_index": {
+        "done": "2026-07-12T19:01:41.994626+00:00",
+        "event_count": 3,
+        "last_completed": 1,
+        "last_details": {
+          "analytic_identity": true,
+          "audit_queries": 0,
+          "stage_count": 6,
+          "stage_index": 2
+        },
+        "last_total": 1,
+        "progress_event_count": 0,
+        "start": "2026-07-12T19:01:41.970544+00:00"
+      },
+      "regularization": {
+        "done": "2026-07-12T19:01:41.999258+00:00",
+        "event_count": 3,
+        "last_completed": 100000,
+        "last_details": {
+          "s_max_input_units": 0.0,
+          "stage_count": 6,
+          "stage_index": 3
+        },
+        "last_total": 100000,
+        "progress_event_count": 1,
+        "start": "2026-07-12T19:01:41.994673+00:00"
+      }
+    },
+    "regularization_diagnostics": {
+      "distortion_budget_violation_max": 0.0,
+      "effective_kappa_quantiles": {
+        "0.0": 1.0,
+        "0.5": 1.0,
+        "0.9": 1.0,
+        "0.99": 1.0,
+        "1.0": 1.0
+      },
+      "entropy_degenerate_rows": 0,
+      "entropy_residual_max": 0.0,
+      "entropy_target_deviation_max": 0.0,
+      "local_scale_below_resolution_count": null,
+      "local_scale_below_resolution_fraction": null,
+      "local_scale_quantiles": {},
+      "mode": "fixed_kappa",
+      "query_count": 100000,
+      "relative_contract_status": "not_requested",
+      "relative_distortion_ratio_max": null,
+      "relative_zero_scale_violations": 0,
+      "s_max": 0.0,
+      "s_quantile_sample_size": 100000,
+      "s_quantiles": {
+        "0.0": 0.0,
+        "0.5": 0.0,
+        "0.9": 0.0,
+        "0.99": 0.0,
+        "1.0": 0.0
+      },
+      "simplex_residual_max": 0.0,
+      "solver_backend": "analytic_identity_kappa_one",
+      "stored_budget_identity_fallback_count": 0,
+      "stored_budget_projection_count": 0,
+      "stored_budget_projection_factor_min": 1.0
+    },
+    "stage_timings_seconds": {
+      "cubical_msf": 0.07174282899995887,
+      "power_field": 0.09236188900013076,
+      "power_index": 0.13916240899970944,
+      "regularization": 0.0045797200000379235,
+      "total": 1.134711817999687
+    },
+    "transform": {
+      "offset": [
+        -5.996737003326416,
+        -5.9967780113220215,
+        -2.996849298477173
+      ],
+      "scale": 11.996023178100586
+    }
+  },
+  "resources": {
+    "device_used_baseline_bytes": 668008448,
+    "device_used_peak_bytes": 1330905088,
+    "monitor_wall_seconds": 1.4512234250000802,
+    "nvml_available": true,
+    "nvml_devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+        "uuid": "GPU-52efbea2-3b4f-0d15-7890-ffb3e675eb70"
+      }
+    ],
+    "nvml_error": null,
+    "process_vram_baseline_bytes": 0,
+    "process_vram_peak_bytes": 654311424,
+    "process_vram_peak_increment_bytes": 654311424,
+    "rss_baseline_bytes": 40706048,
+    "rss_peak_increment_bytes": 1138151424,
+    "rss_peak_process_lifetime_bytes": 1178861568,
+    "rss_peak_sampled_bytes": 1178857472,
+    "samples": 27,
+    "sampling_interval_seconds": 0.05
+  },
+  "runtime": {
+    "cpu_count": 48,
+    "hostname": "cce2701a9f48",
+    "machine": "x86_64",
+    "pid": 659,
+    "platform": "Linux-6.8.0-1063-gcp-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.12 | packaged by conda-forge | (main, Jan 26 2026, 23:51:32) [GCC 14.3.0]",
+    "python_executable": "/opt/conda/bin/python"
+  },
+  "schema": "perg_hgp.benchmark_result",
+  "schema_version": 1,
+  "software_versions": {
+    "cuml-cu12": null,
+    "cupy-cuda12x": null,
+    "cuvs-cu12": null,
+    "hdbscan": "0.8.40",
+    "numpy": "2.2.6",
+    "nvidia-ml-py": "13.590.48",
+    "perg-hgp": "0.3.0",
+    "psutil": "7.0.0",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.16.3",
+    "torch": null
+  },
+  "started_at": "2026-07-12T19:01:39.719996+00:00",
+  "status": "ok",
+  "worker_wall_seconds": 2.5874258539997754
+}

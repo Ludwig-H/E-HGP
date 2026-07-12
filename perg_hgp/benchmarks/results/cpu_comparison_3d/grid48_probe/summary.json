@@ -1,0 +1,35 @@
+{
+  "result_count": 1,
+  "rows": [
+    {
+      "ARI": null,
+      "K": 10,
+      "dataset": "anisotropic_blobs",
+      "entropy_mode": "fixed_hard",
+      "error": null,
+      "fit_wall_seconds": 6.960998376000134,
+      "grid_shape": [
+        48,
+        48,
+        48
+      ],
+      "job_id": "d430c0c13d953e18",
+      "method": "powercover_cpu",
+      "n": 1000,
+      "oracle_best_ARI": 0.586210126106618,
+      "points_per_second": 143.65755398647443,
+      "rss_peak_bytes": 157462528,
+      "sampled_oracle_best_ARI": 0.586210126106618,
+      "seed": 20260712,
+      "status": "ok",
+      "total_interleaving_radius": 0.27406792448600586,
+      "vram_peak_bytes": null
+    }
+  ],
+  "schema": "perg_hgp.benchmark_summary",
+  "schema_version": 1,
+  "status_counts": {
+    "ok": 1
+  },
+  "updated_at": "2026-07-12T17:42:58.623079+00:00"
+}

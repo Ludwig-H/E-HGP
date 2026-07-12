@@ -343,8 +343,66 @@ def test_grid_collapses_constant_axes_and_bounds_radius_not_power():
     )
     field = evaluate_cubical_field(oracle, spec, chunk_size=2)
     effective = spec.half_diagonal + field.numerical_radius_error
-    np.testing.assert_allclose(field.inner_activation - field.radii, effective)
-    np.testing.assert_allclose(field.radii - field.outer_activation, effective)
+    stored_effective = field.radii.dtype.type(effective)
+    tolerance = 4.0 * np.finfo(field.radii.dtype).eps
+    np.testing.assert_allclose(
+        field.inner_activation - field.radii,
+        stored_effective,
+        rtol=tolerance,
+        atol=tolerance,
+    )
+    np.testing.assert_allclose(
+        field.radii - field.outer_activation,
+        stored_effective,
+        rtol=tolerance,
+        atol=tolerance,
+    )
+    assert field.diagnostics.grid_center_quantization_radius > 0.0
+    assert (
+        field.diagnostics.radius_error_max
+        >= field.diagnostics.grid_center_quantization_radius
+    )
+
+
+def test_grid_center_roundoff_bound_covers_generated_float32_centers():
+    from perg_hgp.backends.power_cover_3d_cuda.spatial_core import (
+        grid_centers,
+        grid_center_roundoff_radius,
+    )
+
+    sites = np.array(
+        [[-0.987654321, -0.25, 0.125], [1.234567891, 0.75, 0.625]],
+        dtype=np.float64,
+    )
+    spec = build_grid_spec(sites, (31, 17, 9))
+    ids = np.arange(spec.n_cubes, dtype=np.int64)
+    generated = grid_centers(spec, ids, xp=np, dtype=np.float32).astype(np.float64)
+    ideal = grid_centers(spec, ids, xp=np, dtype=np.float64)
+    observed = float(np.max(np.linalg.norm(generated - ideal, axis=1)))
+
+    assert observed <= grid_center_roundoff_radius(spec, np.float32)
+
+
+def test_grid_center_roundoff_bound_covers_subnormal_cell_width():
+    from perg_hgp.backends.power_cover_3d_cuda.spatial_core import (
+        grid_centers,
+        grid_center_roundoff_radius,
+    )
+
+    width = float(np.nextafter(np.float32(0.0), np.float32(1.0)))
+    spec = GridSpec(
+        bbox_min=(0.0, 0.0, 0.0),
+        bbox_max=(width, 0.0, 0.0),
+        shape=(1, 1, 1),
+        cell_widths=(width, 0.0, 0.0),
+        half_diagonal=0.5 * width,
+    )
+    generated = grid_centers(spec, np.array([0]), xp=np, dtype=np.float32)[0]
+    ideal = grid_centers(spec, np.array([0]), xp=np, dtype=np.float64)[0]
+    observed = float(np.linalg.norm(generated.astype(np.float64) - ideal))
+
+    assert observed > 0.0
+    assert observed <= grid_center_roundoff_radius(spec, np.float32)
 
 
 def test_pilot_kappa_selection_obeys_requested_sample_budget():
@@ -507,9 +565,9 @@ def test_saved_hierarchy_is_atomic_versioned_and_strict_json(tmp_path):
     assert "Infinity" not in raw and "NaN" not in raw
     metadata = json.loads(raw)
     assert metadata["schema"] == "perg_hgp.power_cover_run"
-    assert metadata["schema_version"] == 2
+    assert metadata["schema_version"] == 3
     with np.load(tmp_path / "cubical_hierarchy.npz") as artifact:
-        assert int(artifact["schema_version"]) == 2
+        assert int(artifact["schema_version"]) == 3
         assert artifact["field_certified"].dtype == np.bool_
         assert artifact["field_certified"].all()
     loaded = type(hierarchy).load(str(tmp_path))
@@ -520,6 +578,29 @@ def test_saved_hierarchy_is_atomic_versioned_and_strict_json(tmp_path):
     np.testing.assert_allclose(loaded.sites.centers, hierarchy.sites.centers)
     assert loaded.report.to_dict() == hierarchy.report.to_dict()
     assert not list(tmp_path.glob("*.tmp*"))
+
+    # A pre-extension schema-v2 manifest has neither separated roundoff term.
+    # The v3 loader migrates it through dataclass defaults.
+    legacy = tmp_path / "legacy_v2"
+    hierarchy.save(str(legacy), include_sites=True)
+    legacy_metadata_path = legacy / "run_report.json"
+    legacy_metadata = json.loads(legacy_metadata_path.read_text(encoding="utf-8"))
+    legacy_metadata["schema_version"] = 2
+    legacy_metadata["power_queries"].pop("power_arithmetic_radius_error")
+    legacy_metadata["power_queries"].pop("grid_center_quantization_radius")
+    legacy_metadata_path.write_text(
+        json.dumps(legacy_metadata, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    for artifact_name in ("cubical_hierarchy.npz", "power_sites.npz"):
+        artifact_path = legacy / artifact_name
+        with np.load(artifact_path, allow_pickle=False) as stored:
+            payload = {key: np.asarray(stored[key]) for key in stored.files}
+        payload["schema_version"] = np.asarray(2, dtype=np.int32)
+        np.savez(artifact_path, **payload)
+    migrated = type(hierarchy).load(str(legacy))
+    assert migrated.field.diagnostics.power_arithmetic_radius_error == 0.0
+    assert migrated.field.diagnostics.grid_center_quantization_radius == 0.0
 
     # A later compact save in the same directory must neither expose nor load
     # the optional sites from the preceding run.
@@ -533,7 +614,7 @@ def test_saved_hierarchy_is_atomic_versioned_and_strict_json(tmp_path):
     assert compact.sites.centers.shape == (0, 3)
 
     # The manifest, not a stale same-named file, controls optional loading.
-    np.savez(tmp_path / "power_sites.npz", schema_version=np.asarray(2))
+    np.savez(tmp_path / "power_sites.npz", schema_version=np.asarray(3))
     compact_again = type(hierarchy).load(str(tmp_path))
     assert compact_again.sites.centers.shape == (0, 3)
 
@@ -574,6 +655,43 @@ def test_end_to_end_is_translation_and_scale_covariant():
     assert changed.report.total_interleaving_radius == pytest.approx(
         base.report.total_interleaving_radius * factor, rel=3e-5
     )
+    assert changed.field.diagnostics.power_arithmetic_radius_error == pytest.approx(
+        base.field.diagnostics.power_arithmetic_radius_error * factor,
+        rel=3e-5,
+    )
+    assert changed.field.diagnostics.grid_center_quantization_radius == pytest.approx(
+        base.field.diagnostics.grid_center_quantization_radius * factor,
+        rel=3e-5,
+    )
+
+
+def test_powercover_fixed_kappa_one_skips_raw_cpu_index(monkeypatch):
+    def forbidden_raw_index(points):
+        raise AssertionError("raw KNN index should be skipped for kappa=1")
+
+    monkeypatch.setattr(power_cover_api, "ExactKDTreeIndex", forbidden_raw_index)
+    points = np.array(
+        [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+        dtype=np.float32,
+    )
+    config = PowerCoverConfig(
+        K=1,
+        kappa=1.0,
+        m_reg=3,
+        grid_shape=2,
+        chunk_size=2,
+        power_chunk_size=2,
+        candidate_k_initial=3,
+        candidate_k_max=3,
+        neighbor_audit_queries=0,
+        require_neighbor_audit=False,
+    )
+
+    hierarchy = PowerCover3D(config, backend="cpu").fit(points)
+
+    assert hierarchy.sites.diagnostics.solver_backend == "analytic_identity_kappa_one"
+    assert hierarchy.neighbor_audits["raw_neighbor_status"]["analytically_exact"]
+    assert hierarchy.report.neighbor_support.startswith("analytic_identity")
 
 
 def test_float64_large_offset_is_recentered_before_float32_cast():

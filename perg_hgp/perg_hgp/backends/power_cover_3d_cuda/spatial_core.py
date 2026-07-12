@@ -571,8 +571,16 @@ def _cuda_regularize_budget_chunk(
 
     query_values = cp.ascontiguousarray(queries, dtype=cp.float32)
     point_values = cp.ascontiguousarray(points, dtype=cp.float32)
-    distance_values = cp.ascontiguousarray(distances, dtype=cp.float32)
-    index_values = cp.ascontiguousarray(indices, dtype=cp.int64)
+    distance_values = cp.asarray(distances, dtype=cp.float32)
+    index_values = cp.asarray(indices, dtype=cp.int64)
+    if distance_values.strides[1] != distance_values.dtype.itemsize:
+        distance_values = cp.ascontiguousarray(distance_values)
+    if index_values.strides[1] != index_values.dtype.itemsize:
+        index_values = cp.ascontiguousarray(index_values)
+    distance_stride = int(
+        distance_values.strides[0] // distance_values.dtype.itemsize
+    )
+    index_stride = int(index_values.strides[0] // index_values.dtype.itemsize)
     budget_values = cp.ascontiguousarray(budgets, dtype=cp.float32)
     rows, support = (int(value) for value in distance_values.shape)
     if support > 1_024:
@@ -601,7 +609,8 @@ def _cuda_regularize_budget_chunk(
                 float* kappa_out,
                 int rows,
                 int support,
-                int stride
+                int distance_stride,
+                int index_stride
             ) {
                 int row = (int)blockIdx.x;
                 int tid = (int)threadIdx.x;
@@ -610,8 +619,11 @@ def _cuda_regularize_budget_chunk(
                 float* first = shared;
                 float* second = shared + blockDim.x;
                 bool valid = tid < support;
-                float distance = valid ? distances[(long long)row * stride + tid] : 0.0f;
+                float distance = valid
+                    ? distances[(long long)row * distance_stride + tid]
+                    : 0.0f;
                 float cost = distance * distance;
+                float log_cost = (valid && cost > 0.0f) ? logf(cost) : 0.0f;
 
                 first[tid] = valid ? cost : 0.0f;
                 second[tid] = valid ? 1.0f : 0.0f;
@@ -651,7 +663,7 @@ def _cuda_regularize_budget_chunk(
                         if (valid) {
                             float energy = 0.0f;
                             if (cost > 0.0f) {
-                                energy = expf(fminf(80.0f, middle + logf(cost)));
+                                energy = expf(fminf(80.0f, middle + log_cost));
                             }
                             weight = expf(-energy);
                         }
@@ -681,7 +693,9 @@ def _cuda_regularize_budget_chunk(
                         weight = 1.0f;
                     } else {
                         if (cost > 0.0f) {
-                            beta_cost = expf(fminf(80.0f, log_beta_high + logf(cost)));
+                            beta_cost = expf(
+                                fminf(80.0f, log_beta_high + log_cost)
+                            );
                         }
                         weight = expf(-beta_cost);
                     }
@@ -707,44 +721,45 @@ def _cuda_regularize_budget_chunk(
                 }
                 float row_entropy = second[0];
 
-                long long point_id = valid ? indices[(long long)row * stride + tid] : 0;
+                long long point_id = valid
+                    ? indices[(long long)row * index_stride + tid]
+                    : 0;
                 for (int axis = 0; axis < 3; ++axis) {
-                    float coordinate = valid ? points[3LL * point_id + axis] : 0.0f;
-                    first[tid] = probability * coordinate;
+                    // Sum local offsets, not absolute coordinates.  At large N
+                    // the distortion budget can be orders of magnitude below
+                    // the unit-normalized coordinate scale; a naive barycentre
+                    // then loses the whole budget to float32 cancellation.
+                    float query_coordinate = queries[3LL * row + axis];
+                    float coordinate_offset = valid
+                        ? points[3LL * point_id + axis] - query_coordinate
+                        : 0.0f;
+                    first[tid] = probability * coordinate_offset;
                     __syncthreads();
                     for (int offset = blockDim.x / 2; offset > 0; offset >>= 1) {
                         if (tid < offset) first[tid] += first[tid + offset];
                         __syncthreads();
                     }
-                    if (tid == 0) centers[3LL * row + axis] = first[0];
-                    __syncthreads();
-                }
-                float centered_norm2 = 0.0f;
-                if (valid) {
-                    float px = points[3LL * point_id];
-                    float py = points[3LL * point_id + 1];
-                    float pz = points[3LL * point_id + 2];
-                    float ox = px - centers[3LL * row];
-                    float oy = py - centers[3LL * row + 1];
-                    float oz = pz - centers[3LL * row + 2];
-                    centered_norm2 = ox * ox + oy * oy + oz * oz;
-                }
-                first[tid] = probability * centered_norm2;
-                __syncthreads();
-                for (int offset = blockDim.x / 2; offset > 0; offset >>= 1) {
-                    if (tid < offset) first[tid] += first[tid + offset];
+                    if (tid == 0) {
+                        centers[3LL * row + axis] = query_coordinate + first[0];
+                    }
                     __syncthreads();
                 }
                 if (tid == 0) {
                     float zx = centers[3LL * row];
                     float zy = centers[3LL * row + 1];
                     float zz = centers[3LL * row + 2];
-                    float variance = fmaxf(first[0], 0.0f);
                     float dx = queries[3LL * row] - zx;
                     float dy = queries[3LL * row + 1] - zy;
                     float dz = queries[3LL * row + 2] - zz;
+                    float displacement2 = dx*dx + dy*dy + dz*dz;
+                    // Total-variance identity: E||P-X||^2 =
+                    // ||Z-X||^2 + E||P-Z||^2.  Reusing the already constrained
+                    // expected cost makes the stored power site consistent with
+                    // the Gibbs budget and avoids a second cancellation-prone
+                    // variance reduction.
+                    float variance = fmaxf(expected_cost - displacement2, 0.0f);
                     additive[row] = variance;
-                    distortions[row] = sqrtf(fmaxf(dx*dx + dy*dy + dz*dz + variance, 0.0f));
+                    distortions[row] = sqrtf(fmaxf(displacement2 + variance, 0.0f));
                     entropy_out[row] = row_entropy;
                     kappa_out[row] = expf(row_entropy);
                 }
@@ -769,11 +784,102 @@ def _cuda_regularize_budget_chunk(
             effective_kappa,
             np.int32(rows),
             np.int32(support),
-            np.int32(distance_values.shape[1]),
+            np.int32(distance_stride),
+            np.int32(index_stride),
         ),
         shared_mem=2 * threads * np.dtype(np.float32).itemsize,
     )
     return centers, additive, distortions, entropy, effective_kappa
+
+
+def _project_cuda_sites_into_stored_budget(
+    queries: Any,
+    centers: Any,
+    additive: Any,
+    budgets: Any,
+) -> tuple[Any, Any, Any, int, int, float]:
+    """Project rare float32 site outliers back into their distortion balls.
+
+    The Gibbs solve constrains the expected cost before the barycentre and
+    additive weight are rounded to stored float32.  At tens of millions of
+    points, exceptionally small local scales can fall below the resolution of
+    an absolute-coordinate barycentre.  Contract the power site toward the
+    exact identity site; if the rounded contraction is still outside, use
+    ``z=x`` and a downward-rounded additive cap.  Both operations can only
+    reduce ``sqrt(||z-x||^2+a)``.  Counts and the strongest contraction are
+    surfaced in the run diagnostics rather than hidden.
+    """
+
+    import cupy as cp  # type: ignore
+
+    query64 = cp.asarray(queries, dtype=cp.float64)
+    center64 = cp.asarray(centers, dtype=cp.float64)
+    additive64 = cp.maximum(cp.asarray(additive, dtype=cp.float64), 0.0)
+    budget64 = cp.maximum(cp.asarray(budgets, dtype=cp.float64), 0.0)
+    squared = cp.sum((query64 - center64) ** 2, axis=1) + additive64
+    radii = cp.sqrt(cp.maximum(squared, 0.0))
+    eps32 = float(np.finfo(np.float32).eps)
+    trigger = budget64 * (1.0 + 256.0 * eps32)
+    projected_ids = cp.flatnonzero(radii > trigger)
+    projected_count = int(projected_ids.size)
+    if projected_count == 0:
+        return centers, additive, cp.asarray(radii, dtype=cp.float32), 0, 0, 1.0
+
+    target = budget64[projected_ids] * (1.0 - 256.0 * eps32)
+    source_radius = radii[projected_ids]
+    factors = cp.where(
+        source_radius > 0.0,
+        cp.minimum(target / source_radius, 1.0),
+        0.0,
+    )
+    selected_queries = query64[projected_ids]
+    selected_centers = center64[projected_ids]
+    centers[projected_ids] = cp.asarray(
+        selected_queries
+        + factors[:, None] * (selected_centers - selected_queries),
+        dtype=cp.float32,
+    )
+    additive[projected_ids] = cp.asarray(
+        additive64[projected_ids] * factors * factors,
+        dtype=cp.float32,
+    )
+
+    projected_center64 = cp.asarray(centers[projected_ids], dtype=cp.float64)
+    projected_additive64 = cp.maximum(
+        cp.asarray(additive[projected_ids], dtype=cp.float64), 0.0
+    )
+    projected_squared = (
+        cp.sum((selected_queries - projected_center64) ** 2, axis=1)
+        + projected_additive64
+    )
+    fallback_local = cp.flatnonzero(
+        cp.sqrt(cp.maximum(projected_squared, 0.0)) > target
+    )
+    fallback_count = int(fallback_local.size)
+    if fallback_count:
+        fallback_ids = projected_ids[fallback_local]
+        centers[fallback_ids] = queries[fallback_ids]
+        additive_cap = cp.asarray(target[fallback_local] ** 2, dtype=cp.float32)
+        additive[fallback_ids] = cp.nextafter(
+            additive_cap, cp.asarray(0.0, dtype=cp.float32)
+        )
+
+    final_center64 = cp.asarray(centers, dtype=cp.float64)
+    final_additive64 = cp.maximum(cp.asarray(additive, dtype=cp.float64), 0.0)
+    final_squared = (
+        cp.sum((query64 - final_center64) ** 2, axis=1) + final_additive64
+    )
+    final_radii = cp.sqrt(cp.maximum(final_squared, 0.0))
+    if bool(cp.any(final_radii > budget64 * (1.0 + 8.0 * eps32)).item()):
+        raise RuntimeError("stored-site budget projection failed to close its bound")
+    return (
+        centers,
+        additive,
+        cp.asarray(final_radii, dtype=cp.float32),
+        projected_count,
+        fallback_count,
+        float(cp.min(factors).item()),
+    )
 
 
 def regularize_sites_streaming(
@@ -833,6 +939,71 @@ def regularize_sites_streaming(
         ):
             raise ValueError("distortion_budget_relative must lie in (0, 0.5)")
 
+    # Entropy target log(kappa)=0 forces a Dirac mass.  With the thesis
+    # self-neighbour convention its unique zero-cost representative is the
+    # observation itself, hence z_i=x_i and a_i=s_i=0 exactly.  Building and
+    # querying a KNN index in this hard K=1-entropy baseline is unnecessary;
+    # at 30 M it would dominate the entire run without changing one bit of the
+    # result.  Keep the explicit index-size check above so callers cannot pass
+    # inconsistent data accidentally.
+    if (
+        normalized_mode == "fixed_kappa"
+        and float(kappa) == 1.0
+        and require_self_neighbor
+    ):
+        progress_started = time.perf_counter()
+        centers = values.copy()
+        additive = xp.zeros(n_points, dtype=values.dtype)
+        distortions = xp.zeros(n_points, dtype=values.dtype)
+        for start in range(0, n_points, int(chunk_size)):
+            stop = min(start + int(chunk_size), n_points)
+            if progress is not None:
+                emit_progress(
+                    progress,
+                    stage="regularization",
+                    kind="progress",
+                    completed=stop,
+                    total=n_points,
+                    unit="points",
+                    started_at=progress_started,
+                    details={
+                        "chunk": int(start // int(chunk_size) + 1),
+                        "chunks": int(
+                            (n_points + int(chunk_size) - 1) // int(chunk_size)
+                        ),
+                        "analytic_identity": True,
+                    },
+                )
+        quantile_levels = (0.0, 0.5, 0.9, 0.99, 1.0)
+        diagnostics = RegularizationDiagnostics(
+            mode=normalized_mode,
+            solver_backend="analytic_identity_kappa_one",
+            entropy_residual_max=0.0,
+            entropy_target_deviation_max=0.0,
+            simplex_residual_max=0.0,
+            s_max=0.0,
+            s_quantiles={str(level): 0.0 for level in quantile_levels},
+            effective_kappa_quantiles={
+                str(level): 1.0 for level in quantile_levels
+            },
+            local_scale_quantiles={},
+            distortion_budget_violation_max=0.0,
+            relative_distortion_ratio_max=None,
+            relative_contract_status="not_requested",
+            relative_zero_scale_violations=0,
+            entropy_degenerate_rows=0,
+            query_count=n_points,
+            s_quantile_sample_size=min(n_points, 1_000_000),
+        )
+        return RegularizedSites(
+            centers,
+            additive,
+            distortions,
+            diagnostics,
+            None,
+            None,
+        )
+
     centers = xp.empty((n_points, 3), dtype=values.dtype)
     additive = xp.empty(n_points, dtype=values.dtype)
     distortions = xp.empty(n_points, dtype=values.dtype)
@@ -854,6 +1025,9 @@ def regularize_sites_streaming(
     max_relative_ratio: float | None = None
     zero_scale_violations = 0
     degenerate_rows = 0
+    stored_projection_count = 0
+    stored_identity_fallback_count = 0
+    stored_projection_factor_min = 1.0
     progress_started = time.perf_counter()
 
     for start in range(0, n_points, int(chunk_size)):
@@ -983,6 +1157,24 @@ def regularize_sites_streaming(
                 support_distances,
                 support_indices,
                 budgets,
+            )
+            (
+                centers_chunk,
+                additive_chunk,
+                distortion_chunk,
+                projection_count_chunk,
+                identity_fallback_count_chunk,
+                projection_factor_chunk,
+            ) = _project_cuda_sites_into_stored_budget(
+                queries,
+                centers_chunk,
+                additive_chunk,
+                budgets,
+            )
+            stored_projection_count += projection_count_chunk
+            stored_identity_fallback_count += identity_fallback_count_chunk
+            stored_projection_factor_min = min(
+                stored_projection_factor_min, projection_factor_chunk
             )
             effective_kappa[start:stop] = effective_kappa_chunk
             costs = gibbs = probabilities = neighbors = offsets = displacement = None
@@ -1178,6 +1370,9 @@ def regularize_sites_streaming(
         entropy_degenerate_rows=degenerate_rows,
         query_count=n_points,
         s_quantile_sample_size=quantile_sample_size,
+        stored_budget_projection_count=stored_projection_count,
+        stored_budget_identity_fallback_count=stored_identity_fallback_count,
+        stored_budget_projection_factor_min=stored_projection_factor_min,
     )
     return RegularizedSites(
         centers,
@@ -1190,6 +1385,27 @@ def regularize_sites_streaming(
 
 
 _POWER_VALUES_KERNEL: Any | None = None
+
+
+def _power_roundoff_envelope(xp: Any, values: Any, margin_factor: float) -> Any:
+    """Bound relative roundoff plus binary underflow/possible CUDA FTZ.
+
+    A purely relative error model vanishes at zero, but three float32 squared
+    coordinate differences can underflow (or be flushed to zero by a device
+    arithmetic path) even when their mathematical value is positive.  Eight
+    minimum-normal power units conservatively cover the three products, their
+    additions and the stored additive weight.  Its radius effect is below
+    4e-19 in normalized float32 geometry, so it is negligible at useful 3-D
+    resolutions while closing the zero/subnormal hole in the certificate.
+    """
+
+    value_array = xp.asarray(values)
+    info = xp.finfo(value_array.dtype)
+    relative = float(margin_factor) * info.eps * xp.abs(value_array)
+    underflow = xp.asarray(8.0 * float(info.tiny), dtype=value_array.dtype)
+    envelope = relative + underflow
+    infinity = xp.asarray(xp.inf, dtype=value_array.dtype)
+    return xp.nextafter(envelope, infinity)
 
 
 def _candidate_power_values(
@@ -1235,7 +1451,9 @@ def _candidate_power_values(
 
     if sites.dtype != cp.float32 or additive.dtype != cp.float32:
         raise TypeError("CUDA power evaluation requires float32 sites and weights")
-    index_values = cp.ascontiguousarray(indices, dtype=cp.int64)
+    index_values = cp.asarray(indices, dtype=cp.int64)
+    if index_values.strides[1] != index_values.dtype.itemsize:
+        index_values = cp.ascontiguousarray(index_values)
     query_values = cp.ascontiguousarray(queries, dtype=cp.float32)
     output = cp.empty((query_values.shape[0], count), dtype=cp.float32)
     total = int(output.size)
@@ -1281,7 +1499,7 @@ def _candidate_power_values(
             output,
             np.uint64(total),
             np.int32(count),
-            np.int32(index_values.shape[1]),
+            np.int32(index_values.strides[0] // index_values.dtype.itemsize),
         ),
     )
     return output
@@ -1331,7 +1549,7 @@ class CertifiedPowerKNN:
         index: EuclideanKNNIndex,
         *,
         K: int,
-        candidate_k_initial: int = 64,
+        candidate_k_initial: int = 16,
         candidate_k_max: int = 1_024,
         numerical_margin_factor: float = 64.0,
         strict: bool = True,
@@ -1467,8 +1685,15 @@ class CertifiedPowerKNN:
                 candidate_powers.partition(self.K - 1, axis=1)
                 kth = candidate_powers[:, self.K - 1].copy()
                 del candidate_powers
-                scale = xp.maximum(xp.maximum(xp.abs(kth), xp.abs(outside_lower)), 1.0)
-                envelope = self.margin_factor * xp.finfo(self.sites.dtype).eps * scale
+                # Power values are sums of non-negative squared differences and
+                # additive weights.  Their ordinary roundoff scales locally;
+                # a tiny absolute term separately covers underflow/possible FTZ.
+                # This avoids the old unit floor (an O(sqrt(eps)) radius error)
+                # without incorrectly declaring every computed zero exact.
+                scale = xp.maximum(xp.abs(kth), xp.abs(outside_lower))
+                envelope = _power_roundoff_envelope(
+                    xp, scale, self.margin_factor
+                )
                 gaps = outside_lower - kth
                 accepted = kth + envelope <= outside_lower - envelope
 
@@ -1503,14 +1728,11 @@ class CertifiedPowerKNN:
                 rejected_kth = kth[~accepted]
                 rejected_gap = gaps[~accepted]
                 rejected_scale = xp.maximum(
-                    xp.maximum(
-                        xp.abs(rejected_kth),
-                        xp.abs(rejected_kth + rejected_gap),
-                    ),
-                    1.0,
+                    xp.abs(rejected_kth),
+                    xp.abs(rejected_kth + rejected_gap),
                 )
-                rejected_envelope = (
-                    self.margin_factor * xp.finfo(self.sites.dtype).eps * rejected_scale
+                rejected_envelope = _power_roundoff_envelope(
+                    xp, rejected_scale, self.margin_factor
                 )
                 interval_ok = rejected_gap >= -2.0 * rejected_envelope
                 interval_ids = rejected_indices[interval_ok]
@@ -1545,10 +1767,8 @@ class CertifiedPowerKNN:
             candidate_count = next_count
 
         uncertain_count = int(_scalar(xp.sum(~certified)))
-        power_envelope = (
-            self.margin_factor
-            * xp.finfo(self.sites.dtype).eps
-            * xp.maximum(xp.abs(powers_out), 1.0)
+        power_envelope = _power_roundoff_envelope(
+            xp, powers_out, self.margin_factor
         )
         radius_center = xp.sqrt(xp.maximum(powers_out, 0.0))
         radius_lower = xp.sqrt(xp.maximum(powers_out - power_envelope, 0.0))
@@ -1566,7 +1786,7 @@ class CertifiedPowerKNN:
             min_certificate_gap=minimum_gap,
             radius_error_max=radius_error_max,
             numerical_certificate=(
-                "conditional_float_gap_or_narrow_rank_value_interval_not_directed"
+                "conditional_float_gap_plus_underflow_or_narrow_rank_value_interval_not_directed"
             ),
         )
         if uncertain_count and self.strict:
@@ -1825,6 +2045,62 @@ def grid_centers(spec: GridSpec, flat_indices: Any, xp=np, dtype=np.float32):
     return lower[None, :] + (coordinates + 0.5) * widths[None, :]
 
 
+def grid_center_roundoff_radius(spec: GridSpec, dtype: Any = np.float32) -> float:
+    """Bound displacement of generated centres from their ideal positions.
+
+    ``GridSpec`` stores binary64 bounds and widths, while the massive backend
+    evaluates centres in the geometry dtype (normally binary32).  This helper
+    accounts for conversion of the lower bound and width, conversion/addition
+    of the cell coordinate, the product and the final addition.  The bound is
+    separable by axis and does not require enumerating the grid.
+    """
+
+    floating = np.dtype(dtype)
+    if floating.kind != "f":
+        raise TypeError("grid centre dtype must be floating point")
+    info = np.finfo(floating)
+    unit_roundoff = float(info.eps)
+    # Relative models say zero error for a subnormal operation rounded/flushed
+    # to zero.  One minimum-normal coordinate unit per axis covers conversion
+    # and arithmetic throughout that regime (and is negligible for any useful
+    # normalized float32 grid).
+    underflow_floor = float(info.tiny)
+    denominator = max(1.0 - unit_roundoff, 0.5)
+    axis_errors: list[float] = []
+    for lower, width, cells in zip(
+        spec.bbox_min, spec.cell_widths, spec.shape
+    ):
+        lower_stored = float(np.asarray(lower, dtype=floating))
+        width_stored = float(np.asarray(width, dtype=floating))
+        lower_error = abs(lower_stored - float(lower))
+        width_error = abs(width_stored - float(width))
+        coordinate = float(cells) - 0.5
+        # Standard relative-error bounds for normal floating operations.  The
+        # grid-coordinate validator rejects shapes for which adjacent centres
+        # collapse, so this also covers the integer-to-float conversion used by
+        # ``grid_centers`` in the supported regime.
+        coordinate_error = unit_roundoff * abs(coordinate) / denominator
+        product_exact_bound = (
+            (abs(coordinate) + coordinate_error) * abs(width_stored)
+            + abs(coordinate) * width_error
+        )
+        product_roundoff = (
+            unit_roundoff * product_exact_bound / denominator
+        )
+        sum_magnitude = abs(lower_stored) + product_exact_bound + product_roundoff
+        addition_roundoff = unit_roundoff * sum_magnitude / denominator
+        axis_errors.append(
+            lower_error
+            + coordinate_error * abs(width_stored)
+            + abs(coordinate) * width_error
+            + product_roundoff
+            + addition_roundoff
+            + underflow_floor
+        )
+    radius = math.sqrt(sum(error * error for error in axis_errors))
+    return 0.0 if radius == 0.0 else float(np.nextafter(radius, np.inf))
+
+
 def evaluate_cubical_field(
     oracle: CertifiedPowerKNN | ExactLiftedPowerKNN,
     spec: GridSpec,
@@ -1842,7 +2118,10 @@ def evaluate_cubical_field(
     total_uncertain = 0
     histogram: dict[str, int] = {}
     minimum_gap: float | None = None
-    numerical_radius_error = 0.0
+    power_arithmetic_radius_error = 0.0
+    center_quantization_radius = grid_center_roundoff_radius(
+        spec, oracle.sites.dtype
+    )
     numerical_certificates: set[str] = set()
     progress_started = time.perf_counter()
 
@@ -1860,8 +2139,8 @@ def evaluate_cubical_field(
         gap = result.diagnostics.min_certificate_gap
         if gap is not None:
             minimum_gap = gap if minimum_gap is None else min(minimum_gap, gap)
-        numerical_radius_error = max(
-            numerical_radius_error, result.diagnostics.radius_error_max
+        power_arithmetic_radius_error = max(
+            power_arithmetic_radius_error, result.diagnostics.radius_error_max
         )
         numerical_certificates.add(result.diagnostics.numerical_certificate)
         if progress is not None:
@@ -1881,8 +2160,11 @@ def evaluate_cubical_field(
                 },
             )
 
+    numerical_radius_error = power_arithmetic_radius_error + center_quantization_radius
+    if numerical_radius_error > 0.0:
+        numerical_radius_error = float(np.nextafter(numerical_radius_error, np.inf))
     # A global envelope preserves the common MSF topology of the two uniform
-    # filtrations while accounting for centre-value roundoff explicitly.
+    # filtrations while accounting for centre generation and value roundoff.
     h = spec.half_diagonal + numerical_radius_error
     inner = radii + h
     outer = radii - h
@@ -1893,10 +2175,14 @@ def evaluate_cubical_field(
         candidate_histogram=histogram,
         min_certificate_gap=minimum_gap,
         radius_error_max=numerical_radius_error,
+        power_arithmetic_radius_error=power_arithmetic_radius_error,
+        grid_center_quantization_radius=center_quantization_radius,
         numerical_certificate=(
-            next(iter(numerical_certificates))
+            next(iter(numerical_certificates)) + "+grid_center_roundoff_bound"
             if len(numerical_certificates) == 1
-            else "mixed:" + ",".join(sorted(numerical_certificates))
+            else "mixed:"
+            + ",".join(sorted(numerical_certificates))
+            + "+grid_center_roundoff_bound"
         ),
     )
     return CubicalField(

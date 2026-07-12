@@ -1,0 +1,4 @@
+job_id,status,method,dataset,n,seed,K,entropy_mode,grid_shape,fit_wall_seconds,points_per_second,ARI,sampled_oracle_best_ARI,oracle_best_ARI,total_interleaving_radius,rss_peak_bytes,vram_peak_bytes,error
+c9fc0c3bff48c44d,ok,hdbscan,mixture,10000,20260712,10,,,0.5131369139999151,19487.976263585773,0.9908748816459219,,,,141357056,,
+5af8cfde06eeefd5,ok,hdbscan,mixture,100000,20260712,10,,,55.8774477299994,1789.630773459829,0.9911239813175379,,,,170516480,,
+b3ffa894598432ec,skipped,hdbscan,mixture,1000000,20260712,10,,,,,,,,,,,

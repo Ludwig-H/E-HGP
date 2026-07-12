@@ -107,6 +107,17 @@ def _cell_relation(
     max_candidate_cells_per_site: int,
     max_active_cells: int,
 ) -> tuple[list[np.ndarray], np.ndarray]:
+    """Return one ball--cell-component relation.
+
+    The one-component case is common at the larger cuts used by flat-label
+    scans.  Enumerating every cell covered by every ball is needlessly
+    quadratic there: after the candidate-count guard has been checked, one
+    intersecting cell proves the complete component relation.  The nearest
+    centre is only a fast witness; a failed witness always falls back to the
+    exhaustive broad phase, so this does not approximate the ball--AABB
+    predicate.
+    """
+
     active_ids = np.flatnonzero(labels >= 0)
     if active_ids.size == 0:
         return [np.empty(0, dtype=np.int32) for _ in range(centers.shape[0])], labels
@@ -126,6 +137,76 @@ def _cell_relation(
         * np.finfo(np.float64).eps
         * max(1.0, radius_squared, float(np.max(np.abs(centers))) ** 2)
     )
+
+    active_component_labels = labels[active_ids]
+    first_component = int(active_component_labels[0])
+    if np.all(active_component_labels == first_component):
+        singleton = np.asarray([first_component], dtype=np.int32)
+        empty = np.empty(0, dtype=np.int32)
+        result = [empty for _ in range(centers.shape[0])]
+        remaining_by_site = radius_squared - additive
+        valid_rows = np.flatnonzero(remaining_by_site >= -arithmetic_margin)
+        if valid_rows.size == 0:
+            return result, labels
+
+        ball_radii = np.sqrt(np.maximum(remaining_by_site[valid_rows], 0.0))
+
+        # Preserve the public resource-budget behaviour even though the fast
+        # witness path below does not materialise the candidate lists.
+        candidate_counts = np.asarray(
+            tree.query_ball_point(
+                centers[valid_rows],
+                ball_radii + enclosing_half_diagonal,
+                return_length=True,
+            ),
+            dtype=np.int64,
+        ).reshape(-1)
+        if np.any(candidate_counts > int(max_candidate_cells_per_site)):
+            raise RuntimeError(
+                "power ball intersects too many candidate cells for the CPU "
+                "coverage budget; process a finer grid/smaller radius or use the GPU backend"
+            )
+
+        _, nearest_rows = tree.query(centers[valid_rows], k=1)
+        nearest_rows = np.asarray(nearest_rows, dtype=np.int64).reshape(-1)
+        nearest_delta = np.maximum(
+            np.abs(active_centers[nearest_rows] - centers[valid_rows]) - half_widths,
+            0.0,
+        )
+        nearest_intersects = np.sum(nearest_delta * nearest_delta, axis=1) <= (
+            remaining_by_site[valid_rows] + arithmetic_margin
+        )
+        # Match the original KD-tree broad phase exactly.  Its search radius
+        # does not include ``arithmetic_margin``; a nearest AABB accepted only
+        # by that margin must therefore not bypass an empty candidate query.
+        nearest_intersects &= candidate_counts > 0
+        for local_row in valid_rows[nearest_intersects]:
+            result[int(local_row)] = singleton
+
+        # Euclidean-nearest cell centres do not in general minimise distance
+        # to equal AABBs (axis clipping can change the order).  Therefore every
+        # failed witness is resolved with the original exhaustive predicate.
+        for offset in np.flatnonzero(~nearest_intersects):
+            row_id = int(valid_rows[offset])
+            candidates = tree.query_ball_point(
+                centers[row_id],
+                float(ball_radii[offset]) + enclosing_half_diagonal,
+                return_sorted=True,
+            )
+            if not candidates:
+                continue
+            candidate_rows = np.asarray(candidates, dtype=np.int64)
+            delta = np.maximum(
+                np.abs(active_centers[candidate_rows] - centers[row_id]) - half_widths,
+                0.0,
+            )
+            if np.any(
+                np.sum(delta * delta, axis=1)
+                <= remaining_by_site[row_id] + arithmetic_margin
+            ):
+                result[row_id] = singleton
+        return result, labels
+
     for site, weight in zip(centers, additive):
         remaining = radius_squared - float(weight)
         if remaining < -arithmetic_margin:
@@ -153,6 +234,98 @@ def _cell_relation(
         component_ids = np.unique(labels[cell_ids]).astype(np.int32, copy=False)
         result.append(component_ids)
     return result, labels
+
+
+def _nested_cell_relations(
+    centers: np.ndarray,
+    additive: np.ndarray,
+    radius: float,
+    labels_by_relation: tuple[np.ndarray, ...],
+    spec: GridSpec,
+    *,
+    max_candidate_cells_per_site: int,
+    max_active_cells: int,
+) -> tuple[list[list[np.ndarray]], tuple[np.ndarray, ...]] | None:
+    """Evaluate nested active-cell relations with one shared exact geometry pass.
+
+    ``None`` means that no active mask contains all the others, in which case
+    callers must use independent trees.  The hierarchy normally has nested
+    inner/outer active cells, but retaining the fallback keeps this CPU
+    reference correct for independently constructed test forests too.
+    """
+
+    active_masks = tuple(labels >= 0 for labels in labels_by_relation)
+    active_counts = tuple(int(np.count_nonzero(mask)) for mask in active_masks)
+    if any(count > int(max_active_cells) for count in active_counts):
+        largest = max(active_counts, default=0)
+        raise RuntimeError(
+            f"CPU coverage has {largest:,} active cells, above "
+            f"max_active_cells={int(max_active_cells):,}"
+        )
+    if not labels_by_relation:
+        return [], labels_by_relation
+
+    primary_order = np.argsort(np.asarray(active_counts))[::-1]
+    primary_index: int | None = None
+    for candidate in primary_order:
+        mask = active_masks[int(candidate)]
+        if all(np.all(~other | mask) for other in active_masks):
+            primary_index = int(candidate)
+            break
+    if primary_index is None:
+        return None
+
+    primary_ids = np.flatnonzero(active_masks[primary_index])
+    n_sites = centers.shape[0]
+    if primary_ids.size == 0:
+        empty_rows = [
+            [np.empty(0, dtype=np.int32) for _ in range(n_sites)]
+            for _ in labels_by_relation
+        ]
+        return empty_rows, labels_by_relation
+
+    active_centers = grid_centers(spec, primary_ids, xp=np, dtype=np.float64)
+    tree = cKDTree(active_centers, leafsize=32, compact_nodes=True)
+    half_widths = 0.5 * np.asarray(spec.cell_widths, dtype=np.float64)
+    enclosing_half_diagonal = float(np.linalg.norm(half_widths))
+    radius_squared = float(radius) ** 2
+    arithmetic_margin = (
+        128.0
+        * np.finfo(np.float64).eps
+        * max(1.0, radius_squared, float(np.max(np.abs(centers))) ** 2)
+    )
+    results: list[list[np.ndarray]] = [[] for _ in labels_by_relation]
+    for site, weight in zip(centers, additive):
+        remaining = radius_squared - float(weight)
+        if remaining < -arithmetic_margin:
+            for rows in results:
+                rows.append(np.empty(0, dtype=np.int32))
+            continue
+        ball_radius = math.sqrt(max(remaining, 0.0))
+        candidates = tree.query_ball_point(
+            site, ball_radius + enclosing_half_diagonal, return_sorted=True
+        )
+        if len(candidates) > int(max_candidate_cells_per_site):
+            raise RuntimeError(
+                "power ball intersects too many candidate cells for the CPU "
+                "coverage budget; process a finer grid/smaller radius or use the GPU backend"
+            )
+        if not candidates:
+            for rows in results:
+                rows.append(np.empty(0, dtype=np.int32))
+            continue
+        candidate_rows = np.asarray(candidates, dtype=np.int64)
+        delta = np.maximum(
+            np.abs(active_centers[candidate_rows] - site[None, :]) - half_widths,
+            0.0,
+        )
+        intersects = np.sum(delta * delta, axis=1) <= remaining + arithmetic_margin
+        intersecting_ids = primary_ids[candidate_rows[intersects]]
+        for rows, relation_labels in zip(results, labels_by_relation):
+            component_ids = relation_labels[intersecting_ids]
+            component_ids = component_ids[component_ids >= 0]
+            rows.append(np.unique(component_ids).astype(np.int32, copy=False))
+    return results, labels_by_relation
 
 
 def _to_csr(rows: list[np.ndarray]) -> tuple[np.ndarray, np.ndarray]:
@@ -252,54 +425,119 @@ def site_component_membership_cpu(
         )
     inner_cell_labels = inner_forest.components_at_cut(level)
     outer_cell_labels = outer_forest.components_at_cut(level)
-    inner_rows, _ = _cell_relation(
-        centers,
-        additive,
-        level,
-        inner_cell_labels,
-        spec,
-        max_candidate_cells_per_site=max_candidate_cells_per_site,
-        max_active_cells=max_active_cells,
-    )
-    outer_rows, _ = _cell_relation(
-        centers,
-        additive,
-        level,
-        outer_cell_labels,
-        spec,
-        max_candidate_cells_per_site=max_candidate_cells_per_site,
-        max_active_cells=max_active_cells,
-    )
-
-    # Every active inner cell is active in the outer envelope.  Map inner
-    # component IDs into outer component IDs before comparing the two relations.
-    inner_to_outer: dict[int, int] = {}
-    outer_preimages: dict[int, set[int]] = {}
-    for cell_id in np.flatnonzero(inner_cell_labels >= 0):
-        inner_label = int(inner_cell_labels[cell_id])
-        outer_label = int(outer_cell_labels[cell_id])
-        inner_to_outer.setdefault(inner_label, outer_label)
-        outer_preimages.setdefault(outer_label, set()).add(inner_label)
-    status = np.empty(stop - start, dtype=np.uint8)
-    for row_id, (inner, outer) in enumerate(zip(inner_rows, outer_rows)):
-        if outer.size == 0:
-            status[row_id] = EXCLUDED
-            continue
-        mapped_inner = np.unique(
-            np.fromiter(
-                (inner_to_outer[int(label)] for label in inner),
-                dtype=np.int32,
-                count=inner.size,
+    relation_options = {
+        "max_candidate_cells_per_site": max_candidate_cells_per_site,
+        "max_active_cells": max_active_cells,
+    }
+    identical_cuts = np.array_equal(inner_cell_labels, outer_cell_labels)
+    if identical_cuts:
+        # Identical cuts have identical canonical geometry and component IDs.
+        # Reusing the immutable row arrays avoids constructing and traversing a
+        # second spatial index without changing either CSR relation.
+        inner_rows, _ = _cell_relation(
+            centers,
+            additive,
+            level,
+            inner_cell_labels,
+            spec,
+            **relation_options,
+        )
+        outer_rows = inner_rows
+    else:
+        nonempty_labels = (
+            inner_cell_labels[inner_cell_labels >= 0],
+            outer_cell_labels[outer_cell_labels >= 0],
+        )
+        singleton_relations = tuple(
+            values.size > 0 and np.all(values == values[0])
+            for values in nonempty_labels
+        )
+        if any(singleton_relations):
+            # Let each singleton use its exact witness shortcut.  The remaining
+            # relation (if any) is evaluated independently.
+            inner_rows, _ = _cell_relation(
+                centers,
+                additive,
+                level,
+                inner_cell_labels,
+                spec,
+                **relation_options,
             )
+            outer_rows, _ = _cell_relation(
+                centers,
+                additive,
+                level,
+                outer_cell_labels,
+                spec,
+                **relation_options,
+            )
+        else:
+            shared = _nested_cell_relations(
+                centers,
+                additive,
+                level,
+                (inner_cell_labels, outer_cell_labels),
+                spec,
+                **relation_options,
+            )
+            if shared is None:
+                inner_rows, _ = _cell_relation(
+                    centers,
+                    additive,
+                    level,
+                    inner_cell_labels,
+                    spec,
+                    **relation_options,
+                )
+                outer_rows, _ = _cell_relation(
+                    centers,
+                    additive,
+                    level,
+                    outer_cell_labels,
+                    spec,
+                    **relation_options,
+                )
+            else:
+                (inner_rows, outer_rows), _ = shared
+
+    if identical_cuts:
+        # The relations are literally equal and every component maps to itself
+        # with one preimage, so only emptiness distinguishes the two statuses.
+        status = np.fromiter(
+            (CONFIRMED if row.size else EXCLUDED for row in outer_rows),
+            dtype=np.uint8,
+            count=stop - start,
         )
-        one_to_one = all(
-            len(outer_preimages.get(int(label), set())) == 1 for label in outer
-        )
-        status[row_id] = (
-            CONFIRMED
-            if one_to_one and np.array_equal(mapped_inner, outer)
-            else POSSIBLE
-        )
+    else:
+        # Every active inner cell is active in the outer envelope.  Map inner
+        # component IDs into outer component IDs before comparing relations.
+        inner_to_outer: dict[int, int] = {}
+        outer_preimages: dict[int, set[int]] = {}
+        for cell_id in np.flatnonzero(inner_cell_labels >= 0):
+            inner_label = int(inner_cell_labels[cell_id])
+            outer_label = int(outer_cell_labels[cell_id])
+            inner_to_outer.setdefault(inner_label, outer_label)
+            outer_preimages.setdefault(outer_label, set()).add(inner_label)
+        status = np.empty(stop - start, dtype=np.uint8)
+        for row_id, (inner, outer) in enumerate(zip(inner_rows, outer_rows)):
+            if outer.size == 0:
+                status[row_id] = EXCLUDED
+                continue
+            mapped_inner = np.unique(
+                np.fromiter(
+                    (inner_to_outer[int(label)] for label in inner),
+                    dtype=np.int32,
+                    count=inner.size,
+                )
+            )
+            one_to_one = all(
+                len(outer_preimages.get(int(label), set())) == 1 for label in outer
+            )
+            status[row_id] = (
+                CONFIRMED
+                if one_to_one and np.array_equal(mapped_inner, outer)
+                else POSSIBLE
+            )
 
     inner_indptr, inner_labels = _to_csr(inner_rows)
     outer_indptr, outer_labels = _to_csr(outer_rows)

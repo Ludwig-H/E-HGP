@@ -1,0 +1,200 @@
+{
+  "K": 10,
+  "dataset": {
+    "component_counts": [
+      1600000,
+      1500000,
+      1400000,
+      1300000,
+      1200000,
+      1100000,
+      1000000,
+      600000,
+      300000
+    ],
+    "description": "scalable eight-component density/anisotropy mixture plus noise",
+    "generation": {
+      "chunk_size": 1000000,
+      "n": 10000000,
+      "name": "mixture",
+      "seed": 20260712
+    },
+    "generation_wall_seconds": 1.3080646240000533,
+    "ground_truth_available": true,
+    "identity": {
+      "generator_version": 1,
+      "n": 10000000,
+      "name": "mixture",
+      "seed": 20260712
+    },
+    "labels": {
+      "bytes": 40000128,
+      "dtype": "int32",
+      "file": "mixture-n10000000-s20260712-23e5e11c40d0.labels.npy",
+      "sha256": "175f092da5046cc8f32e63e1d895eb1623a8b3e247c2e34ab8addace041844aa",
+      "shape": [
+        10000000
+      ]
+    },
+    "noise_label": -1,
+    "ordering": "deterministic_contiguous_component_blocks",
+    "points": {
+      "bytes": 120000128,
+      "coordinates": {
+        "max": [
+          5.999993324279785,
+          5.9999680519104,
+          3.499974250793457
+        ],
+        "mean": [
+          0.07510349581773253,
+          0.47100953296787496,
+          -0.20255871624954394
+        ],
+        "min": [
+          -5.999981880187988,
+          -5.99997091293335,
+          -2.9999756813049316
+        ]
+      },
+      "dtype": "float32",
+      "file": "mixture-n10000000-s20260712-23e5e11c40d0.points.npy",
+      "sha256": "840b80f0095ff06d31b8e5a4a3b62e031782f3f19d549b3a43815d5094d4f1ba",
+      "shape": [
+        10000000,
+        3
+      ]
+    },
+    "schema": "perg_hgp.benchmark_dataset",
+    "schema_version": 1,
+    "software": {
+      "numpy": "2.2.6"
+    }
+  },
+  "dataset_manifest": "/workspace/benchmarks/results/g4_scaling_10m/datasets/mixture-n10000000-s20260712-23e5e11c40d0.json",
+  "error": "raw-site neighbor evidence is insufficient; strict run aborted; collected audits={\"raw_neighbor_status\": {\"backend\": \"rapids_cuml_rbc_3d\", \"empirical_audit_passed\": false, \"empirical_audit_status\": \"failed\", \"hidden_fallback_allowed\": false, \"numerically_proven\": false, \"requested_algorithm\": \"rbc\"}, \"raw_rbc_vs_cuvs_bruteforce\": {\"audit_scope\": \"sampled_direct_float64_bruteforce_value_and_tie_aware_support_comparison_with_cuvs_diagnostic\", \"brute_force_seconds\": 2.13584765625, \"comparison_tolerance\": 1.4936404113541357e-08, \"coordinate_equivalent_tie_rows\": 0, \"cuvs_brute_force_seconds\": 0.003192320108413696, \"cuvs_non_equivalent_support_rows\": 13, \"cuvs_reported_maximum_absolute_error\": 0.000858684255380382, \"cuvs_support_equivalent_to_direct\": false, \"distance_values_match\": false, \"identifier_mismatch_rows\": 1, \"identifiers_match\": false, \"is_numerical_proof\": false, \"k\": 64, \"library_reference_distances_used\": false, \"maximum_absolute_error\": 5.464522856435394e-08, \"maximum_relative_error\": 0.06064803931090928, \"non_equivalent_support_rows\": 1, \"queries\": 16, \"rbc_reported_distances_recomputed\": true, \"rbc_seconds\": 2.82363134765625, \"reference_distance_source\": \"stored_float32_coordinates_recomputed_float64\", \"support_equivalence_required\": true, \"support_equivalent\": false, \"values_match\": false}}",
+  "error_type": "NeighborAuditError",
+  "finished_at": "2026-07-12T17:17:51.623620+00:00",
+  "git": {
+    "commit": null,
+    "dirty": null,
+    "status_porcelain": null
+  },
+  "job": {
+    "K": 10,
+    "allow_single_cluster": false,
+    "cgal_root": "/HGP-old/CGALDelaunay",
+    "cut_count": 15,
+    "dataset_identity": {
+      "generator_version": 1,
+      "n": 10000000,
+      "name": "mixture",
+      "seed": 20260712
+    },
+    "dataset_metadata_path": "/workspace/benchmarks/results/g4_scaling_10m/datasets/mixture-n10000000-s20260712-23e5e11c40d0.json",
+    "distortion_budget_absolute": null,
+    "distortion_budget_relative": 0.1,
+    "entropy_mode": "fixed_hard",
+    "hard_kappa": 1.0,
+    "hgp_backend": "cgal",
+    "hgp_exp_z": 2.0,
+    "hgp_method": "eom",
+    "hgp_min_samples": 0,
+    "hgp_old_root": "/HGP-old",
+    "hierarchy_path": "/workspace/benchmarks/results/g4_scaling_10m/hierarchies/mixture-n10000000-s20260712-powercover-cuda-k10-fixed-hard-g96x96x96-272868badc4fa6b3",
+    "job_id": "272868badc4fa6b3",
+    "labels_path": null,
+    "local_scale_k": null,
+    "log_path": "/workspace/benchmarks/results/g4_scaling_10m/logs/mixture-n10000000-s20260712-powercover-cuda-k10-fixed-hard-g96x96x96-272868badc4fa6b3.log",
+    "max_active_cells": 5000000,
+    "max_candidate_cells_per_site": 100000,
+    "max_n_cut_scan": 0,
+    "max_total_cells": 5000000,
+    "method": "powercover_cuda",
+    "min_cluster_size": 100,
+    "n_jobs": -1,
+    "output_path": "/workspace/benchmarks/results/g4_scaling_10m/results/mixture-n10000000-s20260712-powercover-cuda-k10-fixed-hard-g96x96x96-272868badc4fa6b3.json",
+    "powercover_backend": "cuda",
+    "powercover_config": {
+      "candidate_k_initial": 64,
+      "candidate_k_max": 1023,
+      "chunk_size": 262144,
+      "grid_shape": [
+        96,
+        96,
+        96
+      ],
+      "m_reg": 64,
+      "max_grid_cells": 50000000,
+      "max_relative_spatial_error": 0.25,
+      "max_vram_fraction": 0.85,
+      "min_resolved_radius": null,
+      "neighbor_audit_queries": 16,
+      "numerical_margin_factor": 64.0,
+      "power_chunk_size": 65536,
+      "require_neighbor_audit": true,
+      "strict_certification": true
+    },
+    "resource_interval_seconds": 0.05,
+    "save_hierarchy": false,
+    "schema": "perg_hgp.benchmark_job",
+    "schema_version": 1,
+    "size_limit": 0,
+    "source_fingerprint": "sha256:8910334208f561935721e7e4f86b99b4bedf7c89e67578c4bcc7da26969d230c",
+    "verbose_algorithm": false
+  },
+  "job_id": "272868badc4fa6b3",
+  "method": "powercover_cuda",
+  "resources": {
+    "device_used_baseline_bytes": 668008448,
+    "device_used_peak_bytes": 4585684992,
+    "monitor_wall_seconds": 9.834140960999775,
+    "nvml_available": true,
+    "nvml_devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+        "uuid": "GPU-7b2e8ebd-18cb-80fd-478f-107920dffff7"
+      }
+    ],
+    "nvml_error": null,
+    "process_vram_baseline_bytes": 0,
+    "process_vram_peak_bytes": 3909091328,
+    "process_vram_peak_increment_bytes": 3909091328,
+    "rss_baseline_bytes": 41226240,
+    "rss_peak_increment_bytes": 1346584576,
+    "rss_peak_process_lifetime_bytes": 1385529344,
+    "rss_peak_sampled_bytes": 1387810816,
+    "samples": 194,
+    "sampling_interval_seconds": 0.05
+  },
+  "runtime": {
+    "cpu_count": 48,
+    "hostname": "ed9ded9c45b9",
+    "machine": "x86_64",
+    "pid": 59,
+    "platform": "Linux-6.8.0-1063-gcp-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.12 | packaged by conda-forge | (main, Jan 26 2026, 23:51:32) [GCC 14.3.0]",
+    "python_executable": "/opt/conda/bin/python"
+  },
+  "schema": "perg_hgp.benchmark_result",
+  "schema_version": 1,
+  "software_versions": {
+    "cuml-cu12": null,
+    "cupy-cuda12x": null,
+    "cuvs-cu12": null,
+    "hdbscan": "0.8.40",
+    "numpy": "2.2.6",
+    "nvidia-ml-py": "13.590.48",
+    "perg-hgp": "0.3.0",
+    "psutil": "7.0.0",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.16.3",
+    "torch": null
+  },
+  "started_at": "2026-07-12T17:17:40.644411+00:00",
+  "status": "error",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/benchmarks/worker.py\", line 518, in execute_job\n    method_result = METHODS[method](points, truth, job)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/benchmarks/worker.py\", line 336, in _run_powercover\n    hierarchy = estimator.fit(points)\n                ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/perg_hgp/backends/power_cover_3d_cuda/api.py\", line 900, in fit\n    raise NeighborAuditError(\"raw\", audits)\nperg_hgp.backends.power_cover_3d_cuda.api.NeighborAuditError: raw-site neighbor evidence is insufficient; strict run aborted; collected audits={\"raw_neighbor_status\": {\"backend\": \"rapids_cuml_rbc_3d\", \"empirical_audit_passed\": false, \"empirical_audit_status\": \"failed\", \"hidden_fallback_allowed\": false, \"numerically_proven\": false, \"requested_algorithm\": \"rbc\"}, \"raw_rbc_vs_cuvs_bruteforce\": {\"audit_scope\": \"sampled_direct_float64_bruteforce_value_and_tie_aware_support_comparison_with_cuvs_diagnostic\", \"brute_force_seconds\": 2.13584765625, \"comparison_tolerance\": 1.4936404113541357e-08, \"coordinate_equivalent_tie_rows\": 0, \"cuvs_brute_force_seconds\": 0.003192320108413696, \"cuvs_non_equivalent_support_rows\": 13, \"cuvs_reported_maximum_absolute_error\": 0.000858684255380382, \"cuvs_support_equivalent_to_direct\": false, \"distance_values_match\": false, \"identifier_mismatch_rows\": 1, \"identifiers_match\": false, \"is_numerical_proof\": false, \"k\": 64, \"library_reference_distances_used\": false, \"maximum_absolute_error\": 5.464522856435394e-08, \"maximum_relative_error\": 0.06064803931090928, \"non_equivalent_support_rows\": 1, \"queries\": 16, \"rbc_reported_distances_recomputed\": true, \"rbc_seconds\": 2.82363134765625, \"reference_distance_source\": \"stored_float32_coordinates_recomputed_float64\", \"support_equivalence_required\": true, \"support_equivalent\": false, \"values_match\": false}}\n",
+  "worker_wall_seconds": 10.979210797000178
+}

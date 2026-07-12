@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 from scipy.spatial import cKDTree
 
+import perg_hgp.backends.power_cover_3d_cuda.api as power_cover_api
 from perg_hgp.backends.power_cover_3d_cuda import (
     CertifiedPowerKNN,
     ExactKDTreeIndex,
@@ -107,6 +108,32 @@ def test_exact_lifted_power_oracle_handles_more_ties_than_old_candidate_cap():
     assert result.diagnostics.candidate_histogram == {"lifted_exact": 3}
 
 
+def test_fixed_kappa_one_is_analytic_identity_without_knn_queries():
+    rng = np.random.default_rng(20260712)
+    points = rng.normal(size=(37, 3)).astype(np.float32)
+
+    class NeverQueriedIndex:
+        size = points.shape[0]
+
+        def query(self, queries, k):
+            raise AssertionError("kappa=1 must not query KNN")
+
+    sites = regularize_sites_streaming(
+        points,
+        NeverQueriedIndex(),
+        m_reg=16,
+        kappa=1.0,
+        chunk_size=7,
+        mode="fixed_kappa",
+    )
+
+    np.testing.assert_array_equal(sites.centers, points)
+    np.testing.assert_array_equal(sites.additive_weights, 0.0)
+    np.testing.assert_array_equal(sites.distortions, 0.0)
+    assert sites.diagnostics.solver_backend == "analytic_identity_kappa_one"
+    assert sites.diagnostics.s_max == 0.0
+
+
 def test_conditional_candidate_guard_certifies_narrow_value_interval_on_large_tie():
     sites = np.zeros((1_100, 3), dtype=np.float32)
     additive = np.zeros(1_100, dtype=np.float32)
@@ -123,8 +150,55 @@ def test_conditional_candidate_guard_certifies_narrow_value_interval_on_large_ti
 
     assert bool(result.certified[0])
     assert result.radii[0] == 0.0
-    assert result.radius_errors[0] > 0.0
+    assert 0.0 < result.radius_errors[0] < 1.0e-18
     assert result.diagnostics.candidate_histogram["1024:value_interval"] == 1
+    assert sum(result.diagnostics.candidate_histogram.values()) == 1
+
+
+def test_power_radius_envelope_covers_float32_squared_distance_underflow():
+    distance = np.float32(1.0e-23)
+    sites = np.array([[0.0, 0.0, 0.0], [distance, 0.0, 0.0]], dtype=np.float32)
+    oracle = CertifiedPowerKNN(
+        sites,
+        np.zeros(2, dtype=np.float32),
+        ExactKDTreeIndex(sites),
+        K=2,
+        candidate_k_initial=2,
+        candidate_k_max=2,
+        strict=True,
+    )
+
+    result = oracle.query(np.zeros((1, 3), dtype=np.float32))
+
+    # The float32 square is zero, but the declared radius interval still
+    # contains the non-zero stored-coordinate distance.
+    assert result.radii[0] == 0.0
+    assert float(result.radius_errors[0]) >= float(distance)
+    assert float(result.radius_errors[0]) < 1.0e-18
+
+
+def test_conditional_candidate_guard_margin_scales_with_small_power_values():
+    # A unit-scale absolute floor used to report an O(sqrt(float32 eps))
+    # radius error here, swamping the actual 1e-4 local radius.  The roundoff
+    # envelope must instead scale with the non-negative power computation.
+    sites = np.array(
+        [[0.0, 0.0, 0.0], [1.0e-4, 0.0, 0.0], [2.0e-4, 0.0, 0.0]],
+        dtype=np.float32,
+    )
+    additive = np.zeros(3, dtype=np.float32)
+    oracle = CertifiedPowerKNN(
+        sites,
+        additive,
+        ExactKDTreeIndex(sites),
+        K=2,
+        candidate_k_initial=2,
+        candidate_k_max=2,
+        strict=True,
+    )
+    result = oracle.query(np.zeros((1, 3), dtype=np.float32))
+
+    np.testing.assert_allclose(result.radii[0], 1.0e-4, rtol=2e-7, atol=0.0)
+    assert 0.0 < result.radius_errors[0] < 1.0e-8
 
 
 def test_local_scale_grid_is_anisotropic_bounded_and_refuses_silent_coarsening():
@@ -348,6 +422,8 @@ def test_large_scale_field_envelopes_survive_save_load_roundtrip(tmp_path):
         require_neighbor_audit=False,
     )
     hierarchy = PowerCover3D(config, backend="cpu").fit(points)
+    assert hierarchy.sites.diagnostics.s_max == 0.0
+    assert hierarchy.report.regularization_interleaving_radius == 0.0
     hierarchy.save(str(tmp_path))
     loaded = type(hierarchy).load(str(tmp_path))
 
@@ -514,3 +590,30 @@ def test_end_to_end_local_report_uses_observed_gamma_and_local_grid():
     assert hierarchy.report.relative_spatial_error_at_min_radius <= 0.5 + 1e-10
     scale_report = hierarchy.accuracy_at_scale(1.5)
     assert scale_report["envelope_relative_radius"] > 0.0
+
+
+def test_relative_budget_violation_is_rejected_fail_closed(monkeypatch):
+    monkeypatch.setattr(
+        power_cover_api,
+        "_stored_site_contract_upper",
+        lambda *args, **kwargs: (
+            0.2,
+            0.2,
+            "conditional_knn_order_float_enveloped",
+            0,
+            None,
+        ),
+    )
+    points = np.random.default_rng(4).normal(size=(20, 3)).astype(np.float32)
+    config = _local_config(
+        K=2,
+        m_reg=4,
+        local_scale_k=2,
+        grid_shape=2,
+        candidate_k_initial=2,
+        candidate_k_max=20,
+        distortion_budget_relative=0.1,
+    )
+
+    with pytest.raises(RuntimeError, match="run is rejected"):
+        PowerCover3D(config, backend="cpu").fit(points)
