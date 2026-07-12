@@ -1,3 +1,9 @@
+# ==============================================================================
+# INSTRUCTIONS POUR LES AGENTS IA / AI AGENTS INSTRUCTIONS:
+# NE JAMAIS CRÉER DE BRANCHES sans l'accord explicite de l'utilisateur.
+# NEVER CREATE BRANCHES without the user's explicit consent.
+# ==============================================================================
+
 # Python
 __pycache__/
 *.py[cod]
