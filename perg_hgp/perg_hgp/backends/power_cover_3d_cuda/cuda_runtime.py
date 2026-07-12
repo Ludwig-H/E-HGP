@@ -19,6 +19,13 @@ from typing import Any
 import numpy as np
 
 
+# RAPIDS 26.02 dispatches the low-dimensional RBC KNN kernel through fixed
+# specializations ending at k=1024.  cuML only checks the independent
+# sqrt(N)-landmark condition, so asking for k=1025 otherwise reaches RBC with
+# an unsupported rank and can return the initialized sentinel output.
+RBC_MAX_QUERY_K = 1_024
+
+
 class CUDABackendUnavailable(RuntimeError):
     pass
 
@@ -46,6 +53,7 @@ class NeighborAudit:
     maximum_absolute_error: float
     rbc_seconds: float
     brute_force_seconds: float
+    comparison_tolerance: float = 0.0
     audit_scope: str = "sampled_query_value_comparison"
     is_numerical_proof: bool = False
 
@@ -84,14 +92,22 @@ class RBCAuditedIndex:
                 f"max_k={self.max_k} exceeds the number of indexed points "
                 f"N={self.size}"
             )
-        rbc_limit = math.isqrt(self.size)
-        if self.max_k > rbc_limit:
+        landmark_limit = math.isqrt(self.size)
+        if self.max_k > landmark_limit:
             raise ValueError(
-                f"cuML RBC requires max_k <= floor(sqrt(N))={rbc_limit} for "
+                f"cuML RBC requires max_k <= floor(sqrt(N))={landmark_limit} for "
                 f"N={self.size}, but max_k={self.max_k} was requested. cuML "
                 "may otherwise select a brute-force fallback; this wrapper "
                 "refuses that hidden algorithm change. Reduce max_k, increase "
                 "N, or select an explicit brute-force backend."
+            )
+        if self.max_k > RBC_MAX_QUERY_K:
+            raise ValueError(
+                f"RAPIDS RBC supports at most {RBC_MAX_QUERY_K} neighbors per "
+                f"query, but max_k={self.max_k} was requested. Reserve one of "
+                "those ranks for the global power guard (candidate_k_max <= "
+                f"{RBC_MAX_QUERY_K - 1}) or select an explicit brute-force "
+                "backend."
             )
         if audited:
             raise ValueError(
@@ -204,6 +220,7 @@ class RBCAuditedIndex:
             maximum_absolute_error=maximum_error,
             rbc_seconds=rbc_seconds,
             brute_force_seconds=brute_seconds,
+            comparison_tolerance=float(tolerance),
         )
         self.last_audit = result
         return result
