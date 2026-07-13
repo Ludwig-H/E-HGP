@@ -58,7 +58,7 @@ Quatre sparsités différentes sont souvent confondues.
 | Arêtes | graphe sur les sites | ANN, bottleneck spanner, Borůvka à raffinement | aucun |
 | Sortie | nombre d'événements du merge tree | MST puis simplification par persistance | aucun |
 
-Cette séparation est structurante : **régulariser davantage ne compense pas un nombre excessif de sites ou d'arêtes**. Réciproquement, une hiérarchie $H_0$ sur $M$ sites possède déjà une représentation de taille $O(M)$ par un MST, même si le champ sous-jacent est défini sur tout $\mathbb R^p$.
+Cette séparation est structurante : **régulariser davantage ne compense pas un nombre excessif de sites ou d'arêtes**. Réciproquement, une hiérarchie $H_0$ sur $M$ sites possède déjà une représentation de taille $O(M)$ par un MST, même si le champ sous-jacent est défini sur tout $\mathbb{R}^p$.
 
 La difficulté restante n'est donc plus une mosaïque de Delaunay d'ordre supérieur. Elle devient :
 
@@ -75,7 +75,7 @@ La difficulté restante n'est donc plus une mosaïque de Delaunay d'ordre supér
 Soit
 
 $$
-X=\{x_1,\ldots,x_n\}\subset\mathbb R^p,
+X=\{x_1,\ldots,x_n\}\subset\mathbb{R}^p,
 $$
 
 et soient
@@ -93,7 +93,7 @@ $$
 La DTM empirique de masse $m=K/n$ est
 
 $$
-D_K^2(y)=\frac1K\sum_{j=1}^{K}r_j^2(y).
+D_K^2(y)=\frac{1}{K}\sum_{j=1}^{K}r_j^2(y).
 $$
 
 Elle remplace donc l'agrégateur $L^\infty$ sur les $K$ voisins par un agrégateur $L^2$. Cette modification est volontaire : elle est précisément celle qui donne une identité barycentrique quadratique et, par suite, des sites de puissance.
@@ -115,10 +115,10 @@ $$
 \mathcal C_{K,n}
 =
 \left\{
-q\in\mathbb R_+^n:
+q\in\mathbb{R}_+^n:
 \sum_{j=1}^nq_j=1,
 \quad
-q_j\leq\frac1K
+q_j\leq\frac{1}{K}
 \right\}.
 $$
 
@@ -136,7 +136,7 @@ $$
 Le polytope $\mathcal C_{K,n}$ est un hypersimplexe redimensionné. Ses sommets sont exactement les mesures uniformes sur les sous-ensembles de cardinal $K$ :
 
 $$
-q^S_j=\frac1K\mathbf 1_{\{j\in S\}},
+q^S_j=\frac{1}{K}\mathbf{1}_{\{j\in S\}},
 \qquad |S|=K.
 $$
 
@@ -174,7 +174,7 @@ $$
 
 Une mesure locale complète est donc résumée exactement par :
 
-- un centre $z(q)\in\mathbb R^p$ ;
+- un centre $z(q)\in\mathbb{R}^p$ ;
 - un scalaire additif $v(q)\geq0$.
 
 La DTM exacte est l'enveloppe inférieure de ces fonctions de puissance pour tous les $q\in\mathcal C_{K,n}$. Dans le cas dur, il suffirait en principe de considérer tous les barycentres de $K$-sous-ensembles, ce qui est à nouveau combinatoire. La sparsification consiste à ne conserver qu'un ensemble bien choisi de mesures $q$.
@@ -184,7 +184,7 @@ La DTM exacte est l'enveloppe inférieure de ces fonctions de puissance pour tou
 On a toujours
 
 $$
-\frac{r_K(y)}{\sqrt K}
+\frac{r_K(y)}{\sqrt{K}}
 \leq D_K(y)
 \leq r_K(y),
 $$
@@ -196,7 +196,7 @@ $$
 \subseteq
 \{D_K\leq r\}
 \subseteq
-\{r_K\leq\sqrt K\,r\}.
+\{r_K\leq\sqrt{K}\,r\}.
 $$
 
 Pour $K=10$, le facteur uniforme $\sqrt{10}\simeq3{,}16$ est trop lâche pour annoncer une équivalence des deux arbres.
@@ -231,7 +231,7 @@ Cette relation est une approximation locale, pas un théorème uniforme. Elle do
 - en 3D, le facteur limite vaut $\sqrt{3/5}\simeq0{,}775$ ; sous un modèle de Poisson conditionné par $r_{10}$, une requête indépendante donne une correction de taille finie proche de $0{,}80$, tandis qu'une ancre observée avec auto-voisin inclus donne plutôt $\sqrt{0{,}58}\simeq0{,}762$ ;
 - lorsque $d_\star$ augmente, le facteur tend vers 1 et les premières distances se concentrent : la DTM devient alors numériquement plus proche du rayon $K$-NN, même si l'estimation de densité devient statistiquement plus difficile.
 
-La DTM est donc un surrogate particulièrement plausible en grande dimension, mais sa fidélité doit être mesurée sur les arbres et les coupes, pas déduite de la seule borne $\sqrt K$.
+La DTM est donc un surrogate particulièrement plausible en grande dimension, mais sa fidélité doit être mesurée sur les arbres et les coupes, pas déduite de la seule borne $\sqrt{K}$.
 
 ---
 
@@ -265,7 +265,7 @@ $$
 q_j^\tau(y)
 =
 \min\left\{
-\frac1K,
+\frac{1}{K},
 A(y)e^{-c_j(y)/\tau}
 \right\},
 \qquad
@@ -278,7 +278,7 @@ Le facteur $1/L$ de la référence uniforme est absorbé dans $A$. Lorsque $\tau
 $$
 q_j^\tau(y)
 \longrightarrow
-\frac1K\mathbf 1_{\{j\in N_K(y)\}}.
+\frac{1}{K}\mathbf{1}_{\{j\in N_K(y)\}}.
 $$
 
 Ce calcul n'est pas un Sinkhorn matriciel. Si $L=K$, la contrainte impose directement $q_j=1/K$. Si $L>K$ et si les coûts sont déjà triés par la recherche de voisins, on peut tester le nombre $s\in\{0,\ldots,K-1\}$ de coordonnées saturées, puis écrire
@@ -497,7 +497,7 @@ $$
 q_j
 =
 \min\left\{
-\frac1K,
+\frac{1}{K},
 \left[A-\frac{c_j}{\tau}\right]_+
 \right\}.
 $$
@@ -510,7 +510,7 @@ $$
 D_{K,\tau,\mathrm{quad}}^2-D_K^2
 \leq
 \frac{\tau}{2}
-\left(\frac1K-\frac1L\right).
+\left(\frac{1}{K}-\frac{1}{L}\right).
 $$
 
 Ce solveur demande un scan ou un petit tri, ce qui reste excellent sur GPU. Il doit être comparé au KL, mais non substitué sans le dire : l'analogie avec le transport entropique/Sinkhorn devient moins directe.
@@ -535,7 +535,7 @@ La fonction de partition est un polynôme symétrique élémentaire. Elle se cal
 Cependant, après réduction à un site de puissance, seuls les premiers moments marginaux
 
 $$
-q_j=\frac1K\mathbb P(j\in S)
+q_j=\frac{1}{K}\mathbb{P}(j\in S)
 $$
 
 subsistent. Les corrélations d'ordre supérieur ne sont plus visibles dans $(z,v)$. Pour construire une hiérarchie $H_0$ de puissance, le simplexe capé KL fournit donc une formulation plus directe et moins chère.
@@ -573,7 +573,7 @@ La [*Witnessed $k$-Distance*](https://arxiv.org/abs/1102.4972) conserve une mesu
 $$
 q_i^0
 =
-\frac1K
+\frac{1}{K}
 \sum_{j\in N_K(x_i)}e_j,
 $$
 
@@ -597,7 +597,7 @@ $$
 n'utilise que $n$ sites, au lieu de $\binom nK$. Buchet, Chazal, Oudot et Sheehy donnent notamment la comparaison générale améliorée
 
 $$
-D_K\leq D_K^W\leq\sqrt6\,D_K
+D_K\leq D_K^W\leq\sqrt{6}\,D_K
 $$
 
 dans [*Efficient and Robust Persistent Homology for Measures*](https://arxiv.org/abs/1306.0039).
@@ -871,7 +871,7 @@ $$
 Alors
 
 $$
-\beta_{ij}=\frac12\lVert x_i-x_j\rVert,
+\beta_{ij}=\frac{1}{2}\lVert x_i-x_j\rVert,
 $$
 
 et le power-MST est exactement l'EMST ordinaire, avec le facteur $1/2$ dû à la convention de rayon des boules.
@@ -882,7 +882,7 @@ $$
 D_{1,\tau}^2(y)
 =
 -\tau\log\left[
-\frac1n\sum_{j=1}^n
+\frac{1}{n}\sum_{j=1}^n
 e^{-\lVert y-x_j\rVert^2/\tau}
 \right].
 $$
@@ -1002,7 +1002,7 @@ Il est plus pertinent de mesurer ou certifier cette propriété sur des petits c
 Les poids additifs sont non négatifs, donc
 
 $$
-\beta_{ij}\geq\frac12\lVert z_i-z_j\rVert.
+\beta_{ij}\geq\frac{1}{2}\lVert z_i-z_j\rVert.
 $$
 
 Supposons que, pour un sommet $i$, **toutes** les arêtes de centre de longueur strictement inférieure à une distance garde $D_{g,i}$ aient été exhaustivement énumérées. Toute arête omise issue de $i$ vérifie alors
@@ -1039,11 +1039,11 @@ Pour $K=10$, $L=64$ et $M$ ancres :
    - mode dur : moyenne préfixe et barycentre des $K$ voisins ;
    - mode KL : capped softmax, KL et dual scalaire ;
    - mode quadratic : scan sparsemax capé ;
-   - aucune matrice $Q\in\mathbb R^{M\times L}$ persistante.
+   - aucune matrice $Q\in\mathbb{R}^{M\times L}$ persistante.
 3. **Moments**
    - calcul de $z_a$, $v_a$ et éventuellement du terme KL ;
    - accumulation des offsets autour de l'ancre pour limiter la cancellation ;
-   - conservation de $z\in\mathbb R^{M\times p}$ et $b\in\mathbb R^M$ seulement.
+   - conservation de $z\in\mathbb{R}^{M\times p}$ et $b\in\mathbb{R}^M$ seulement.
 4. **Graphe candidat**
    - 3D : RBC/BVH ou recherche exacte tiled ;
    - grande dimension : [CAGRA](https://arxiv.org/abs/2308.15136) ou IVF, avec reranking exact des candidats ;
@@ -1191,9 +1191,9 @@ $$
 Elle conserve les observations comme centres et utilise une DTM scalaire comme poids. Buchet et al. établissent, pour les nuages euclidiens finis, une comparaison multiplicative
 
 $$
-\frac1{\sqrt2}D_K
+\frac{1}{\sqrt{2}}D_K
 \leq P_K
-\leq\sqrt3\,D_K.
+\leq\sqrt{3}\,D_K.
 $$
 
 Cette variante est moins adaptative que la barycentrique witnessed DTM, mais constitue un excellent premier oracle GPU : top-$K$ aux observations, puis PMST.
@@ -1216,7 +1216,7 @@ $$
 
 ou sa version entropique. Le résultat est extrêmement GPU-friendly. La robust single linkage standard possède des résultats de consistance pour les cluster trees ; voir [Chaudhuri, Dasgupta, Kpotufe et von Luxburg](https://arxiv.org/abs/1406.1546). Ces résultats ne couvrent pas automatiquement le remplacement de la core distance par une DTM/eDTM : cette extension demanderait une preuve séparée.
 
-Il s'agit toutefois d'une hiérarchie sur le graphe des observations, pas des composantes d'un champ continu dans $\mathbb R^p$. Elle doit rester une baseline forte, non être renommée HGP ou DTM witnessed.
+Il s'agit toutefois d'une hiérarchie sur le graphe des observations, pas des composantes d'un champ continu dans $\mathbb{R}^p$. Elle doit rester une baseline forte, non être renommée HGP ou DTM witnessed.
 
 ### 8.4 Sparse Rips et net-trees
 
@@ -1307,7 +1307,7 @@ Une version $H_0$-only peut probablement éviter une partie du complexe, mais ce
 
 Un préprint très récent de Kenneth McCabe, [*Lower Bounds for Approximating the Vietoris–Rips Filtration*](https://arxiv.org/abs/2607.06524), daté du 7 juillet 2026, montre sur des familles de métriques finies générales :
 
-- une taille exponentielle peut être nécessaire pour un facteur fixe $c<\sqrt2$ ;
+- une taille exponentielle peut être nécessaire pour un facteur fixe $c<\sqrt{2}$ ;
 - une taille superlinéaire peut être nécessaire pour tout facteur constant ;
 - les résultats s'étendent à l'intrinsic Čech et à des bifiltrations contenant une tranche Rips, notamment function-, degree- et subdivision-Rips.
 
@@ -1374,7 +1374,7 @@ $$
 et non
 
 $$
-q_i=\frac1K\sum_{j\in N_K(i)}\delta_{x_j}.
+q_i=\frac{1}{K}\sum_{j\in N_K(i)}\delta_{x_j}.
 $$
 
 Pour obtenir une DTM, il faut donc :
@@ -1468,7 +1468,7 @@ Un registre d'erreur explicite devrait séparer :
 
 | Terme | Exemple de champ |
 |---|---|
-| changement HGP $\to$ DTM | borne $\sqrt K$ + métriques empiriques d'arbre |
+| changement HGP $\to$ DTM | borne $\sqrt{K}$ + métriques empiriques d'arbre |
 | entropie | `entropy_radius_bias_bound` |
 | support local | `tail_lower_upper_gap` |
 | coreset | `anchor_cover_radius`, `max_anchor_residual` |
@@ -1640,15 +1640,15 @@ La réponse la plus satisfaisante mathématiquement et pratiquement est :
 $$
 \boxed{
 \begin{aligned}
-&\textbf{régularisation :}
+&\text{\textbf{régularisation :}}
 &&\text{DTM sur simplexe capé, puis KL optionnel à biais contrôlé},\\
-&\textbf{sparsification :}
+&\text{\textbf{sparsification :}}
 &&\text{témoins/coreset et génération de colonnes aux selles},\\
-&\textbf{topologie :}
+&\text{\textbf{topologie :}}
 &&\text{minimum extérieur dur et power-MST},\\
-&\textbf{GPU :}
+&\text{\textbf{GPU :}}
 &&\text{ANN + réductions par ligne + CSR + Borůvka},\\
-&\textbf{certification :}
+&\text{\textbf{certification :}}
 &&\text{queue, réseau d'ancres, résidu et gardes de coupe séparés}.
 \end{aligned}
 }
@@ -1657,7 +1657,7 @@ $$
 La formule fondamentale est
 
 $$
-\min_{q\geq0,\ \mathbf1^\top q=1,\ q\leq1/K}
+\min_{q\geq0,\ \mathbf{1}^\top q=1,\ q\leq1/K}
 \left[
 \langle q,c(y)\rangle
 +
@@ -1697,7 +1697,7 @@ La mesure $q^0$ uniforme sur les $K$ plus petits coûts est admissible et vérif
 $$
 \mathrm{KL}(q^0\Vert u_L)
 =
-K\frac1K\log\frac{1/K}{1/L}
+K\frac{1}{K}\log\frac{1/K}{1/L}
 =
 \log(L/K).
 $$
@@ -1715,7 +1715,7 @@ Si le support contient les vrais $K$ plus petits coûts, $D_{K,L}=D_K$ global. S
 Enfin, pour $a,b\geq0$,
 
 $$
-\sqrt{a+b}-\sqrt a\leq\sqrt b,
+\sqrt{a+b}-\sqrt{a}\leq\sqrt{b},
 $$
 
 ce qui donne la borne en rayon.
