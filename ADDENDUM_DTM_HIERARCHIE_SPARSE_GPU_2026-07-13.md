@@ -655,7 +655,7 @@ $$
 Si $d_{ij}>0$, définissons
 
 $$
-u_{ij} = \operatorname{clip} \left( \frac{d_{ij}^2+b_j-b_i}{2d_{ij}}, 0, d_{ij} \right).
+u_{ij} = \mathrm{clip} \left( \frac{d_{ij}^2+b_j-b_i}{2d_{ij}}, 0, d_{ij} \right).
 $$
 
 Leur premier niveau de collision est
@@ -755,7 +755,7 @@ C'est précisément le gain par rapport à `PowerCover3D` :
 Schématiquement,
 
 $$
-\underbrace{\operatorname{ord}_K \{\phi_i(y)\}_{i=1}^n}_{\text{multicouverture, combinatoire pour }K>1} \quad\longrightarrow\quad \underbrace{\min_{a\in A} \phi_a^{(K)}(y)}_{\text{DTM témoignée, power-MST}}.
+\underbrace{\mathrm{ord}_K \{\phi_i(y)\}_{i=1}^n}_{\text{multicouverture, combinatoire pour }K>1} \quad\longrightarrow\quad \underbrace{\min_{a\in A} \phi_a^{(K)}(y)}_{\text{DTM témoignée, power-MST}}.
 $$
 
 Le prix mathématique de cette simplification est le changement d'estimateur déjà explicité en section 2.4.
@@ -1063,7 +1063,7 @@ Le résultat théorique le plus directement pertinent est le préprint d'Ángel 
 Pour la multicouverture
 
 $$
-\operatorname{Cov}(r,K) = \{y:r_K(y)\leq r\},
+\mathrm{Cov}(r,K) = \{y:r_K(y)\leq r\},
 $$
 
 il construit une approximation multiplicative $(1+\varepsilon)$ de toute la bifiltration $(r,K)$, la dilation portant sur le paramètre métrique $r$ et non sur l'ordre $K$, avec :
@@ -1138,7 +1138,7 @@ Il n'existe donc encore :
 [`PowerCover3D`](https://github.com/Ludwig-H/E-HGP/tree/70423fa354e4f0252f8a8eddcf5e311bf1a4ac42/perg_hgp/perg_hgp/backends/power_cover_3d_cuda) construit des atomes locaux $(z_i,a_i)$, puis évalue sur une grille la $K$-ième valeur de puissance :
 
 $$
-R_K^{\mathrm{PC}}(y) = \operatorname{ord}_K \left\{ \sqrt{\lVert y-z_i\rVert^2+a_i} \right\}_{i=1}^n.
+R_K^{\mathrm{PC}}(y) = \mathrm{ord}_K \left\{ \sqrt{\lVert y-z_i\rVert^2+a_i} \right\}_{i=1}^n.
 $$
 
 Cette construction reste une multicouverture de boules de puissance. Elle préserve donc mieux l'objet HGP régularisé, mais conserve la combinatoire d'ordre $K$ et la résout actuellement par une approximation cubique 3D.
