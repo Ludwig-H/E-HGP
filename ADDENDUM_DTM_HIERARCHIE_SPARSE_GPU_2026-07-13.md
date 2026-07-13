@@ -17,15 +17,7 @@ La conclusion de cet addendum est plus précise que « utiliser de l'entropie »
 Le pipeline recommandé est donc
 
 $$
-\boxed{
-\text{transport partiel capé, dur ou KL}
-\longrightarrow
-\text{sites de puissance témoins}
-\longrightarrow
-\text{graphe sparse certifiable}
-\longrightarrow
-\text{power-MST GPU}
-}.
+\boxed{ \text{transport partiel capé, dur ou KL} \longrightarrow \text{sites de puissance témoins} \longrightarrow \text{graphe sparse certifiable} \longrightarrow \text{power-MST GPU} }.
 $$
 
 Il faut retenir six points.
@@ -101,8 +93,7 @@ Elle remplace donc l'agrégateur $L^\infty$ sur les $K$ voisins par un agrégate
 La DTM a été introduite comme un champ robuste et stable en Wasserstein par Chazal, Cohen-Steiner et Mérigot dans [*Geometric Inference for Probability Measures*](https://doi.org/10.1007/s10208-011-9098-0). Pour une masse $m$ fixée, elle est 1-lipschitzienne en $y$ et satisfait notamment
 
 $$
-\lVert D_{\mu,m}-D_{\nu,m}\rVert_\infty
-\leq m^{-1/2}W_2(\mu,\nu).
+\lVert D_{\mu,m}-D_{\nu,m}\rVert_\infty \leq m^{-1/2}W_2(\mu,\nu).
 $$
 
 Attention au régime statistique : si $K=10$ reste fixé tandis que $n\to\infty$, alors $m=K/n\to0$. Ce n'est pas le régime classique de consistance d'un estimateur de densité. Pour une théorie asymptotique, on demande généralement $K_n\to\infty$ et $K_n/n\to0$. Le choix $K=10$ reste parfaitement légitime comme objet géométrique à taille finie, mais il ne faut pas lui attribuer une garantie asymptotique qu'il n'a pas.
@@ -112,32 +103,19 @@ Attention au régime statistique : si $K=10$ reste fixé tandis que $n\to\infty$
 Définissons
 
 $$
-\mathcal C_{K,n}
-=
-\left\{
-q\in\mathbb{R}_+^n:
-\sum_{j=1}^nq_j=1,
-\quad
-q_j\leq\frac{1}{K}
-\right\}.
+\mathcal C_{K,n} = \left\{ q\in\mathbb{R}_+^n: \sum_{j=1}^nq_j=1, \quad q_j\leq\frac{1}{K} \right\}.
 $$
 
 Alors
 
 $$
-\boxed{
-D_K^2(y)
-=
-\min_{q\in\mathcal C_{K,n}}
-\sum_{j=1}^nq_j\lVert y-x_j\rVert^2
-}.
+\boxed{ D_K^2(y) = \min_{q\in\mathcal C_{K,n}} \sum_{j=1}^nq_j\lVert y-x_j\rVert^2 }.
 $$
 
 Le polytope $\mathcal C_{K,n}$ est un hypersimplexe redimensionné. Ses sommets sont exactement les mesures uniformes sur les sous-ensembles de cardinal $K$ :
 
 $$
-q^S_j=\frac{1}{K}\mathbf{1}_{\{j\in S\}},
-\qquad |S|=K.
+q^S_j=\frac{1}{K}\mathbf{1}_{\{j\in S\}}, \qquad |S|=K.
 $$
 
 Le minimum linéaire choisit donc les $K$ plus petites distances sans avoir à énumérer les $\binom nK$ sous-ensembles.
@@ -167,9 +145,7 @@ $$
 L'identité barycentrique donne, pour tout $y$,
 
 $$
-\sum_jq_j\lVert y-x_j\rVert^2
-=
-\lVert y-z(q)\rVert^2+v(q).
+\sum_jq_j\lVert y-x_j\rVert^2 = \lVert y-z(q)\rVert^2+v(q).
 $$
 
 Une mesure locale complète est donc résumée exactement par :
@@ -184,19 +160,13 @@ La DTM exacte est l'enveloppe inférieure de ces fonctions de puissance pour tou
 On a toujours
 
 $$
-\frac{r_K(y)}{\sqrt{K}}
-\leq D_K(y)
-\leq r_K(y),
+\frac{r_K(y)}{\sqrt{K}} \leq D_K(y) \leq r_K(y),
 $$
 
 d'où
 
 $$
-\{r_K\leq r\}
-\subseteq
-\{D_K\leq r\}
-\subseteq
-\{r_K\leq\sqrt{K}\,r\}.
+\{r_K\leq r\} \subseteq \{D_K\leq r\} \subseteq \{r_K\leq\sqrt{K}\,r\}.
 $$
 
 Pour $K=10$, le facteur uniforme $\sqrt{10}\simeq3{,}16$ est trop lâche pour annoncer une équivalence des deux arbres.
@@ -204,26 +174,19 @@ Pour $K=10$, le facteur uniforme $\sqrt{10}\simeq3{,}16$ est trop lâche pour an
 Il explique cependant mal le régime usuel. Sous une densité localement régulière de dimension intrinsèque $d_\star$, les quantiles de distance vérifient heuristiquement
 
 $$
-r_u(y)
-\simeq
-\left(\frac{u}{f(y)\omega_{d_\star}}\right)^{1/d_\star}.
+r_u(y) \simeq \left(\frac{u}{f(y)\omega_{d_\star}}\right)^{1/d_\star}.
 $$
 
 En intégrant les carrés de ces quantiles,
 
 $$
-D_m^2(y)
-\simeq
-\frac{d_\star}{d_\star+2}
-r_m^2(y).
+D_m^2(y) \simeq \frac{d_\star}{d_\star+2} r_m^2(y).
 $$
 
 Ainsi, après une reparamétrisation presque constante,
 
 $$
-D_m(y)
-\simeq
-\sqrt{\frac{d_\star}{d_\star+2}}\,r_m(y).
+D_m(y) \simeq \sqrt{\frac{d_\star}{d_\star+2}}\,r_m(y).
 $$
 
 Cette relation est une approximation locale, pas un théorème uniforme. Elle donne néanmoins deux indications utiles :
@@ -242,14 +205,7 @@ La DTM est donc un surrogate particulièrement plausible en grande dimension, ma
 Pour un support de $L$ candidats et la mesure uniforme $u_L=(1/L,\ldots,1/L)$, définissons
 
 $$
-D_{K,\tau,L}^2(y)
-=
-\min_{q\in\mathcal C_{K,L}}
-\left[
-\sum_{j=1}^Lq_jc_j(y)
-+
-\tau\,\mathrm{KL}(q\Vert u_L)
-\right],
+D_{K,\tau,L}^2(y) = \min_{q\in\mathcal C_{K,L}} \left[ \sum_{j=1}^Lq_jc_j(y) + \tau\,\mathrm{KL}(q\Vert u_L) \right],
 $$
 
 avec
@@ -261,32 +217,19 @@ $$
 Les conditions KKT donnent
 
 $$
-\boxed{
-q_j^\tau(y)
-=
-\min\left\{
-\frac{1}{K},
-A(y)e^{-c_j(y)/\tau}
-\right\},
-\qquad
-\sum_jq_j^\tau(y)=1
-}.
+\boxed{ q_j^\tau(y) = \min\left\{ \frac{1}{K}, A(y)e^{-c_j(y)/\tau} \right\}, \qquad \sum_jq_j^\tau(y)=1 }.
 $$
 
 Le facteur $1/L$ de la référence uniforme est absorbé dans $A$. Lorsque $\tau\downarrow0$, et hors ex æquo,
 
 $$
-q_j^\tau(y)
-\longrightarrow
-\frac{1}{K}\mathbf{1}_{\{j\in N_K(y)\}}.
+q_j^\tau(y) \longrightarrow \frac{1}{K}\mathbf{1}_{\{j\in N_K(y)\}}.
 $$
 
 Ce calcul n'est pas un Sinkhorn matriciel. Si $L=K$, la contrainte impose directement $q_j=1/K$. Si $L>K$ et si les coûts sont déjà triés par la recherche de voisins, on peut tester le nombre $s\in\{0,\ldots,K-1\}$ de coordonnées saturées, puis écrire
 
 $$
-A_s
-=
-\frac{1-s/K}{\sum_{j>s}e^{-c_j/\tau}}.
+A_s = \frac{1-s/K}{\sum_{j>s}e^{-c_j/\tau}}.
 $$
 
 Il suffit de choisir le $s$ compatible avec les inégalités de saturation. Pour $K=10$ et $L=32$, $64$ ou $128$, cela tient dans un bloc CUDA par ancre, avec un log-sum-exp stable et sans stocker la matrice globale des $q$.
@@ -302,21 +245,13 @@ $$
 on obtient la borne élémentaire
 
 $$
-0
-\leq
-D_{K,\tau,L}^2(y)-D_{K,L}^2(y)
-\leq
-\tau\log(L/K).
+0 \leq D_{K,\tau,L}^2(y)-D_{K,L}^2(y) \leq \tau\log(L/K).
 $$
 
 Par conséquent,
 
 $$
-0
-\leq
-D_{K,\tau,L}(y)-D_{K,L}(y)
-\leq
-\sqrt{\tau\log(L/K)}.
+0 \leq D_{K,\tau,L}(y)-D_{K,L}(y) \leq \sqrt{\tau\log(L/K)}.
 $$
 
 Ici, $D_{K,L}$ désigne l'optimum dur sur le même support de $L$ candidats. Il coïncide avec la DTM globale dès que ce support contient les vrais $K$ plus proches voisins.
@@ -324,9 +259,7 @@ Ici, $D_{K,L}$ désigne l'optimum dur sur le même support de $L$ candidats. Il 
 Cette inégalité suggère une API fondée sur un **budget de biais en rayon** $\eta_{\mathrm{ent}}$ plutôt que sur une température opaque :
 
 $$
-\tau
-\leq
-\frac{\eta_{\mathrm{ent}}^2}{\log(L/K)}.
+\tau \leq \frac{\eta_{\mathrm{ent}}^2}{\log(L/K)}.
 $$
 
 Cette règle suppose $L>K$. Si $L=K$, l'ensemble admissible est réduit à $q_j=1/K$ : le biais est nul pour toute $\tau$ et la division par $\log(L/K)=0$ n'a pas lieu d'être.
@@ -365,24 +298,13 @@ le coût garde.
 Si $t$ est la masse totale omise, le problème minorant exact est
 
 $$
-\begin{aligned}
-\min_{q,t}\quad
-&\sum_{j\in S_L}q_jc_j+t c_g\\
-&+\tau\left[
-\sum_{j\in S_L}q_j\log(nq_j)
-+t\log\frac{nt}{n-L}
-\right],
-\end{aligned}
+\begin{aligned} \min_{q,t}\quad &\sum_{j\in S_L}q_jc_j+t c_g\\ &+\tau\left[ \sum_{j\in S_L}q_j\log(nq_j) +t\log\frac{nt}{n-L} \right], \end{aligned}
 $$
 
 sous les contraintes
 
 $$
-\sum_{j\in S_L}q_j+t=1,
-\qquad
-0\leq q_j\leq1/K,
-\qquad
-0\leq t\leq\min\left(1,\frac{n-L}{K}\right).
+\sum_{j\in S_L}q_j+t=1, \qquad 0\leq q_j\leq1/K, \qquad 0\leq t\leq\min\left(1,\frac{n-L}{K}\right).
 $$
 
 Le terme agrégé vient du partage entropiquement optimal $t/(n-L)$ entre les coordonnées omises. Le problème garde un dual scalaire et une multiplicité connue.
@@ -396,9 +318,7 @@ Cette stratégie est plus honnête que de présenter un Shannon tronqué comme l
 À une ancre $a$, calculons une mesure $q_a^\tau$ et posons
 
 $$
-z_a=\sum_jq_{a,j}^\tau x_j,
-\qquad
-v_a=\sum_jq_{a,j}^\tau\lVert x_j-z_a\rVert^2.
+z_a=\sum_jq_{a,j}^\tau x_j, \qquad v_a=\sum_jq_{a,j}^\tau\lVert x_j-z_a\rVert^2.
 $$
 
 Deux champs différents peuvent ensuite être construits.
@@ -408,20 +328,13 @@ Deux champs différents peuvent ensuite être construits.
 On prend
 
 $$
-b_a^{\mathrm{FE}}
-=
-v_a
-+
-\tau\,\mathrm{KL}(q_a^\tau\Vert u),
+b_a^{\mathrm{FE}} = v_a + \tau\,\mathrm{KL}(q_a^\tau\Vert u),
 $$
 
 et
 
 $$
-W_{A,K,\tau}^{\mathrm{FE}}(y)
-=
-\min_{a\in A}
-\sqrt{\lVert y-z_a\rVert^2+b_a^{\mathrm{FE}}}.
+W_{A,K,\tau}^{\mathrm{FE}}(y) = \min_{a\in A} \sqrt{\lVert y-z_a\rVert^2+b_a^{\mathrm{FE}}}.
 $$
 
 Si les $q_a^\tau$ sont calculés pour un même problème global — même ensemble admissible, même référence $u$ et même $\tau$ — ce champ est une restriction par témoins du fonctionnel DTM-KL. C'est la convention à employer si le backend annonce « entropic DTM » au sens variationnel. Des supports/références propres à chaque ancre définissent au contraire un estimateur localisé et ne bénéficient pas automatiquement de cette interprétation globale.
@@ -437,10 +350,7 @@ $$
 puis
 
 $$
-W_{A,K,\tau}^{\mathrm{TO}}(y)
-=
-\min_{a\in A}
-\sqrt{\lVert y-z_a\rVert^2+b_a^{\mathrm{TO}}}.
+W_{A,K,\tau}^{\mathrm{TO}}(y) = \min_{a\in A} \sqrt{\lVert y-z_a\rVert^2+b_a^{\mathrm{TO}}}.
 $$
 
 L'entropie sert ici à choisir une mesure locale stable, mais le champ final reste un coût de transport. Cette version est naturelle lorsque la température varie par ancre. Il faut la nommer `entropy_selected_witnessed_dtm` ou `kl_transport_only`, pas « DTM-KL exacte ».
@@ -452,9 +362,7 @@ La seconde convention reste un majorant de la DTM dure, puisque chaque $q_a^\tau
 Une idée de type UMAP consiste à résoudre, pour chaque ancre,
 
 $$
-\exp H(q_a)=\rho K,
-\qquad
-1\leq\rho\leq L/K.
+\exp H(q_a)=\rho K, \qquad 1\leq\rho\leq L/K.
 $$
 
 L'entropie est non décroissante avec $\tau_a$. En présence d'ex æquo, elle n'est pas nécessairement strictement croissante et sa limite quand $\tau\downarrow0$ peut dépasser $\log K$. Une bissection batched ne doit donc être lancée qu'après avoir vérifié que la cible appartient à l'intervalle d'entropie réellement atteignable ; les bornes $\log K$ et $\log L$ sont en général des limites, non des valeurs finies garanties. Cette calibration a deux intérêts :
@@ -483,34 +391,19 @@ $$
 Le problème
 
 $$
-\min_{q\in\mathcal C_{K,L}}
-\left[
-\langle q,c\rangle
-+
-\frac{\tau}{2}\lVert q-u_L\rVert_2^2
-\right]
+\min_{q\in\mathcal C_{K,L}} \left[ \langle q,c\rangle + \frac{\tau}{2}\lVert q-u_L\rVert_2^2 \right]
 $$
 
 a pour solution
 
 $$
-q_j
-=
-\min\left\{
-\frac{1}{K},
-\left[A-\frac{c_j}{\tau}\right]_+
-\right\}.
+q_j = \min\left\{ \frac{1}{K}, \left[A-\frac{c_j}{\tau}\right]_+ \right\}.
 $$
 
 Il s'agit d'un sparsemax capé, relié aux entropies de Tsallis. Son support est fini même à température positive. Une évaluation sur la mesure dure donne
 
 $$
-0
-\leq
-D_{K,\tau,\mathrm{quad}}^2-D_K^2
-\leq
-\frac{\tau}{2}
-\left(\frac{1}{K}-\frac{1}{L}\right).
+0 \leq D_{K,\tau,\mathrm{quad}}^2-D_K^2 \leq \frac{\tau}{2} \left(\frac{1}{K}-\frac{1}{L}\right).
 $$
 
 Ce solveur demande un scan ou un petit tri, ce qui reste excellent sur GPU. Il doit être comparé au KL, mais non substitué sans le dire : l'analogie avec le transport entropique/Sinkhorn devient moins directe.
@@ -522,12 +415,7 @@ Dans le pipeline recommandé, la différence de sparsité locale est moins déci
 Une autre régularisation porte une loi de Gibbs sur les sous-ensembles $S$ de cardinal exactement $K$ :
 
 $$
-\Pi_\tau(S)
-\propto
-\exp\left[
--\frac{1}{K\tau}
-\sum_{j\in S}c_j
-\right].
+\Pi_\tau(S) \propto \exp\left[ -\frac{1}{K\tau} \sum_{j\in S}c_j \right].
 $$
 
 La fonction de partition est un polynôme symétrique élémentaire. Elle se calcule en $O(LK)$ et les marginales en $O(LK)$ par une passe préfixe/suffixe, sans énumérer $\binom LK$ sous-ensembles. Cette piste encode explicitement le tirage sans remise et ses corrélations négatives.
@@ -571,27 +459,19 @@ Le calcul n'est pas intégralement log-domain, puis certaines différences de ma
 La [*Witnessed $k$-Distance*](https://arxiv.org/abs/1102.4972) conserve une mesure par observation. Pour chaque témoin $x_i$, on prend
 
 $$
-q_i^0
-=
-\frac{1}{K}
-\sum_{j\in N_K(x_i)}e_j,
+q_i^0 = \frac{1}{K} \sum_{j\in N_K(x_i)}e_j,
 $$
 
 puis
 
 $$
-z_i^0=\sum_jq_{i,j}^0x_j,
-\qquad
-v_i^0=\sum_jq_{i,j}^0\lVert x_j-z_i^0\rVert^2.
+z_i^0=\sum_jq_{i,j}^0x_j, \qquad v_i^0=\sum_jq_{i,j}^0\lVert x_j-z_i^0\rVert^2.
 $$
 
 Le champ
 
 $$
-D_K^{W}(y)
-=
-\min_i
-\sqrt{\lVert y-z_i^0\rVert^2+v_i^0}
+D_K^{W}(y) = \min_i \sqrt{\lVert y-z_i^0\rVert^2+v_i^0}
 $$
 
 n'utilise que $n$ sites, au lieu de $\binom nK$. Buchet, Chazal, Oudot et Sheehy donnent notamment la comparaison générale améliorée
@@ -609,13 +489,7 @@ Cette borne multiplicative est indépendante de l'échantillonnage mais reste la
 Soit $A$ un ensemble d'ancres qui forme un $\delta$-réseau du domaine pertinent $\Omega$. À chaque $a\in A$, supposons que $q_a^\star$ soit l'optimum exact d'un **même fonctionnel global** au point $a$. Définissons
 
 $$
-W_A(y)
-=
-\min_{a\in A}
-\sqrt{
-\sum_jq_{a,j}^\star\lVert y-x_j\rVert^2
-+R(q_a^\star)
-},
+W_A(y) = \min_{a\in A} \sqrt{ \sum_jq_{a,j}^\star\lVert y-x_j\rVert^2 +R(q_a^\star) },
 $$
 
 où $R=0$ pour la DTM dure et $R=\tau\mathrm{KL}$ pour la libre énergie KL.
@@ -625,9 +499,7 @@ La même famille admissible et le même $R$ doivent être utilisés pour toutes 
 Alors, sur $\Omega$,
 
 $$
-\boxed{
-0\leq W_A(y)-D(y)\leq2\delta
-}.
+\boxed{ 0\leq W_A(y)-D(y)\leq2\delta }.
 $$
 
 En effet :
@@ -638,10 +510,7 @@ En effet :
 4. pour une ancre $a$ à distance au plus $\delta$ de $y$,
 
    $$
-   W_A(y)
-   \leq W_A(a)+\delta
-   =D(a)+\delta
-   \leq D(y)+2\delta.
+   W_A(y) \leq W_A(a)+\delta =D(a)+\delta \leq D(y)+2\delta.
    $$
 
 Si l'atome n'est qu'approché et si son résidu en valeur à l'ancre est au plus $\rho$, la borne devient
@@ -659,10 +528,7 @@ Pour la DTM dure, combiner cette erreur de coreset avec la comparaison à $r_K$ 
 La [k-PDTM](https://arxiv.org/abs/1801.10346) de Brécheteau et Levrard — notée ici **$M$-PDTM** pour ne pas confondre le nombre de sites $M$ avec l'ordre $K$ — apprend directement $M\ll n$ sites de puissance :
 
 $$
-D_{K,M}^{\mathrm{PDTM}}(y)
-=
-\min_{1\leq\ell\leq M}
-\sqrt{\lVert y-z_\ell\rVert^2+b_\ell}.
+D_{K,M}^{\mathrm{PDTM}}(y) = \min_{1\leq\ell\leq M} \sqrt{\lVert y-z_\ell\rVert^2+b_\ell}.
 $$
 
 Sous des hypothèses de régularité et de dimension intrinsèque $d_\star$, la littérature obtient une erreur intégrée en carré de l'ordre de $M^{-2/d_\star}$ ; le compromis statistique suggère dans certains régimes
@@ -685,18 +551,13 @@ La $M$-PDTM est donc une option de compression, pas le seul garde-fou topologiqu
 La représentation par mesures locales suggère un algorithme itératif simple. Fixons d'abord un oracle commun $D$ : DTM dure pour les atomes `hard`/`transport_only`, ou DTM-KL globale pour les atomes `free_energy`. Soit $\mathcal Q_t$ l'ensemble courant d'atomes admissibles pour cet oracle. Le champ
 
 $$
-W_t(y)
-=
-\min_{q\in\mathcal Q_t}
-\sqrt{\lVert y-z(q)\rVert^2+b(q)}
+W_t(y) = \min_{q\in\mathcal Q_t} \sqrt{\lVert y-z(q)\rVert^2+b(q)}
 $$
 
 est toujours un majorant du fonctionnel DTM ciblé. Ajouter un atome ne peut que le faire décroître :
 
 $$
-W_{t+1}\leq W_t,
-\qquad
-W_t\geq D.
+W_{t+1}\leq W_t, \qquad W_t\geq D.
 $$
 
 On obtient ainsi une approximation **anytime, monotone et d'un seul côté**.
@@ -706,9 +567,7 @@ On obtient ainsi une approximation **anytime, monotone et d'un seul côté**.
 Construisons le power-MST du champ courant. Pour chaque arête $(i,j)$ de ce MST, le premier point de contact de ses deux boules est un candidat de selle du surrogate. Notons-le $y_{ij}$. On évalue alors :
 
 $$
-\rho_{ij}
-=
-W_t(y_{ij})-D(y_{ij}).
+\rho_{ij} = W_t(y_{ij})-D(y_{ij}).
 $$
 
 Pour la DTM dure, calculer $D(y_{ij})$ et son atome optimal revient simplement à chercher les $K$ voisins de $y_{ij}$ et à leur donner la masse $1/K$. Pour la DTM-KL, on applique le capped softmax, avec éventuellement le certificat de queue.
@@ -766,16 +625,13 @@ Cette génération de colonnes fournit la « très bonne heuristique de points c
 Considérons un ensemble fini de sites
 
 $$
-(z_i,b_i),
-\qquad b_i\geq0,
+(z_i,b_i), \qquad b_i\geq0,
 $$
 
 et le champ
 
 $$
-W(y)=\min_i\phi_i(y),
-\qquad
-\phi_i(y)=\sqrt{\lVert y-z_i\rVert^2+b_i}.
+W(y)=\min_i\phi_i(y), \qquad \phi_i(y)=\sqrt{\lVert y-z_i\rVert^2+b_i}.
 $$
 
 Le site $i$ naît au niveau
@@ -787,8 +643,7 @@ $$
 À l'échelle $r$, son sous-niveau est la boule
 
 $$
-B\left(z_i,\sqrt{r^2-b_i}\right),
-\qquad r^2\geq b_i.
+B\left(z_i,\sqrt{r^2-b_i}\right), \qquad r^2\geq b_i.
 $$
 
 Pour deux sites, posons
@@ -800,27 +655,13 @@ $$
 Si $d_{ij}>0$, définissons
 
 $$
-u_{ij}
-=
-\operatorname{clip}
-\left(
-\frac{d_{ij}^2+b_j-b_i}{2d_{ij}},
-0,
-d_{ij}
-\right).
+u_{ij} = \operatorname{clip} \left( \frac{d_{ij}^2+b_j-b_i}{2d_{ij}}, 0, d_{ij} \right).
 $$
 
 Leur premier niveau de collision est
 
 $$
-\boxed{
-\beta_{ij}^2
-=
-\max\left\{
-u_{ij}^2+b_i,
-(d_{ij}-u_{ij})^2+b_j
-\right\}
-}.
+\boxed{ \beta_{ij}^2 = \max\left\{ u_{ij}^2+b_i, (d_{ij}-u_{ij})^2+b_j \right\} }.
 $$
 
 Si $d_{ij}=0$, on prend
@@ -832,9 +673,7 @@ $$
 Le point de contact utilisé par la génération de colonnes est
 
 $$
-y_{ij}
-=
-z_i+\frac{u_{ij}}{d_{ij}}(z_j-z_i)
+y_{ij} = z_i+\frac{u_{ij}}{d_{ij}}(z_j-z_i)
 $$
 
 dans le cas non dégénéré.
@@ -861,11 +700,7 @@ Dans tout ce rapport, la convention aux ancres est que la requête elle-même ap
 Pour la DTM dure avec $K=1$,
 
 $$
-q_i=\delta_{x_i},
-\qquad
-z_i=x_i,
-\qquad
-b_i=0.
+q_i=\delta_{x_i}, \qquad z_i=x_i, \qquad b_i=0.
 $$
 
 Alors
@@ -879,12 +714,7 @@ et le power-MST est exactement l'EMST ordinaire, avec le facteur $1/2$ dû à la
 Pour $K=1$ et $\tau>0$, le fonctionnel KL global exact vaut
 
 $$
-D_{1,\tau}^2(y)
-=
--\tau\log\left[
-\frac{1}{n}\sum_{j=1}^n
-e^{-\lVert y-x_j\rVert^2/\tau}
-\right].
+D_{1,\tau}^2(y) = -\tau\log\left[ \frac{1}{n}\sum_{j=1}^n e^{-\lVert y-x_j\rVert^2/\tau} \right].
 $$
 
 C'est la libre énergie d'une KDE gaussienne. Son merge tree continu n'est pas, en général, un MST des observations. La structure sparse proposée est sa **restriction témoignée par fonctions de puissance** :
@@ -898,11 +728,7 @@ Elle est exacte pour le champ fini témoigné et converge vers l'EMST lorsque $\
 C'est la définition la plus propre du « 1-NN régularisé » compatible avec une hiérarchie sparse :
 
 $$
-\boxed{
-\text{1-NN régularisé}
-=
-\text{power-MST des atomes entropiques témoins}
-}.
+\boxed{ \text{1-NN régularisé} = \text{power-MST des atomes entropiques témoins} }.
 $$
 
 ### 5.4 Généralisation à $K>1$
@@ -916,9 +742,7 @@ $$
 à
 
 $$
-\mathcal C_{K,L}
-=
-\{q\in\Delta_L:q_j\leq1/K\}.
+\mathcal C_{K,L} = \{q\in\Delta_L:q_j\leq1/K\}.
 $$
 
 L'interaction de cardinal $K$ modifie le barycentre et le poids du site, mais le minimum extérieur reste un minimum de fonctions de puissance. Le même power-MST calcule donc $H_0$ pour tout $K$.
@@ -931,11 +755,7 @@ C'est précisément le gain par rapport à `PowerCover3D` :
 Schématiquement,
 
 $$
-\underbrace{\operatorname{ord}_K
-\{\phi_i(y)\}_{i=1}^n}_{\text{multicouverture, combinatoire pour }K>1}
-\quad\longrightarrow\quad
-\underbrace{\min_{a\in A}
-\phi_a^{(K)}(y)}_{\text{DTM témoignée, power-MST}}.
+\underbrace{\operatorname{ord}_K \{\phi_i(y)\}_{i=1}^n}_{\text{multicouverture, combinatoire pour }K>1} \quad\longrightarrow\quad \underbrace{\min_{a\in A} \phi_a^{(K)}(y)}_{\text{DTM témoignée, power-MST}}.
 $$
 
 Le prix mathématique de cette simplification est le changement d'estimateur déjà explicité en section 2.4.
@@ -988,9 +808,7 @@ Il faut distinguer trois modes.
 Le contrat pertinent pour une hiérarchie $H_0$ n'est pas la seule `recall@L`. Un graphe candidat $G$ est un $(1+\varepsilon)$-*bottleneck spanner* si, pour toute paire $(i,j)$, il contient un chemin $P_{ij}$ tel que
 
 $$
-\max_{e\in P_{ij}}\beta_e
-\leq
-(1+\varepsilon)\beta_{ij}.
+\max_{e\in P_{ij}}\beta_e \leq (1+\varepsilon)\beta_{ij}.
 $$
 
 Cette propriété donne directement un entrelacement multiplicatif des composantes à tous les seuils. Pour $\varepsilon=0$, le graphe préserve exactement la hiérarchie du graphe complet.
@@ -1072,14 +890,7 @@ Toutes les primitives lourdes sont des top-$L$, exponentielles/clips, réduction
 Avec dimension $p$, $M$ ancres, support d'atome $L_a$, degré de graphe $L_g$ et $J$ itérations scalaires pour une éventuelle bissection,
 
 $$
-T
-=
-T_{\mathrm{atom\text{-}NN}}
-+T_{\mathrm{site\text{-}graph}}
-+O(ML_aJ)
-+O(ML_ap)
-+O(ML_gp)
-+T_{\mathrm{MST}}(ML_g).
+T = T_{\mathrm{atom\text{-}NN}} +T_{\mathrm{site\text{-}graph}} +O(ML_aJ) +O(ML_ap) +O(ML_gp) +T_{\mathrm{MST}}(ML_g).
 $$
 
 Les deux premiers coûts correspondent en général à deux structures différentes : voisinage des ancres vers $X$, puis graphe des nouveaux centres $z$. Un seul index ne se réutilise pas automatiquement. Le solveur dur remplace $O(ML_aJ)$ par une simple réduction ; le scan explicite des coordonnées saturées du KL peut également éviter $J$.
@@ -1166,13 +977,7 @@ $$
 Les boules ont ici le rayon $r-w_i$, et le temps de collision est
 
 $$
-\beta_{ij}^{(1)}
-=
-\max\left\{
-w_i,
-w_j,
-\frac{\lVert a_i-a_j\rVert+w_i+w_j}{2}
-\right\}.
+\beta_{ij}^{(1)} = \max\left\{ w_i, w_j, \frac{\lVert a_i-a_j\rVert+w_i+w_j}{2} \right\}.
 $$
 
 Cette construction est probablement le baseline continu le plus simple et le plus rapide : centres inchangés, un scalaire DTM par point, puis MST pondéré. Elle abandonne cependant l'identité quadratique du transport $W_2$ et le modèle de sites de puissance $p=2$ déjà présent dans le dépôt.
@@ -1182,18 +987,13 @@ Cette construction est probablement le baseline continu le plus simple et le plu
 Une autre approximation très simple est
 
 $$
-P_K(y)
-=
-\min_i
-\sqrt{\lVert y-x_i\rVert^2+D_K^2(x_i)}.
+P_K(y) = \min_i \sqrt{\lVert y-x_i\rVert^2+D_K^2(x_i)}.
 $$
 
 Elle conserve les observations comme centres et utilise une DTM scalaire comme poids. Buchet et al. établissent, pour les nuages euclidiens finis, une comparaison multiplicative
 
 $$
-\frac{1}{\sqrt{2}}D_K
-\leq P_K
-\leq\sqrt{3}\,D_K.
+\frac{1}{\sqrt{2}}D_K \leq P_K \leq\sqrt{3}\,D_K.
 $$
 
 Cette variante est moins adaptative que la barycentrique witnessed DTM, mais constitue un excellent premier oracle GPU : top-$K$ aux observations, puis PMST.
@@ -1203,9 +1003,7 @@ Cette variante est moins adaptative que la barycentrique witnessed DTM, mais con
 Avec un core radius $c_i$, la mutual reachability est
 
 $$
-d_{\mathrm{mr}}(i,j)
-=
-\max\{c_i,c_j,\lVert x_i-x_j\rVert\}.
+d_{\mathrm{mr}}(i,j) = \max\{c_i,c_j,\lVert x_i-x_j\rVert\}.
 $$
 
 Son MST donne une hiérarchie de type HDBSCAN. On peut choisir
@@ -1265,9 +1063,7 @@ Le résultat théorique le plus directement pertinent est le préprint d'Ángel 
 Pour la multicouverture
 
 $$
-\operatorname{Cov}(r,K)
-=
-\{y:r_K(y)\leq r\},
+\operatorname{Cov}(r,K) = \{y:r_K(y)\leq r\},
 $$
 
 il construit une approximation multiplicative $(1+\varepsilon)$ de toute la bifiltration $(r,K)$, la dilation portant sur le paramètre métrique $r$ et non sur l'ordre $K$, avec :
@@ -1342,12 +1138,7 @@ Il n'existe donc encore :
 [`PowerCover3D`](https://github.com/Ludwig-H/E-HGP/tree/70423fa354e4f0252f8a8eddcf5e311bf1a4ac42/perg_hgp/perg_hgp/backends/power_cover_3d_cuda) construit des atomes locaux $(z_i,a_i)$, puis évalue sur une grille la $K$-ième valeur de puissance :
 
 $$
-R_K^{\mathrm{PC}}(y)
-=
-\operatorname{ord}_K
-\left\{
-\sqrt{\lVert y-z_i\rVert^2+a_i}
-\right\}_{i=1}^n.
+R_K^{\mathrm{PC}}(y) = \operatorname{ord}_K \left\{ \sqrt{\lVert y-z_i\rVert^2+a_i} \right\}_{i=1}^n.
 $$
 
 Cette construction reste une multicouverture de boules de puissance. Elle préserve donc mieux l'objet HGP régularisé, mais conserve la combinatoire d'ordre $K$ et la résout actuellement par une approximation cubique 3D.
@@ -1355,10 +1146,7 @@ Cette construction reste une multicouverture de boules de puissance. Elle prése
 Le backend proposé calcule à chaque ancre une mesure de masse $K/n$, puis prend un minimum :
 
 $$
-W_K(y)
-=
-\min_{a\in A}
-\sqrt{\lVert y-z_a^{(K)}\rVert^2+b_a^{(K)}}.
+W_K(y) = \min_{a\in A} \sqrt{\lVert y-z_a^{(K)}\rVert^2+b_a^{(K)}}.
 $$
 
 Il change l'estimateur en DTM, mais toute sa hiérarchie $H_0$ devient un PMST, sans grille et dans toute dimension.
@@ -1638,31 +1426,13 @@ Si elle n'apporte pas ce gain, la conclusion correcte sera que **la DTM dure suf
 La réponse la plus satisfaisante mathématiquement et pratiquement est :
 
 $$
-\boxed{
-\begin{aligned}
-&\text{\textbf{régularisation :}}
-&&\text{DTM sur simplexe capé, puis KL optionnel à biais contrôlé},\\
-&\text{\textbf{sparsification :}}
-&&\text{témoins/coreset et génération de colonnes aux selles},\\
-&\text{\textbf{topologie :}}
-&&\text{minimum extérieur dur et power-MST},\\
-&\text{\textbf{GPU :}}
-&&\text{ANN + réductions par ligne + CSR + Borůvka},\\
-&\text{\textbf{certification :}}
-&&\text{queue, réseau d'ancres, résidu et gardes de coupe séparés}.
-\end{aligned}
-}
+\boxed{ \begin{aligned} &\text{\textbf{régularisation :}} &&\text{DTM sur simplexe capé, puis KL optionnel à biais contrôlé},\\ &\text{\textbf{sparsification :}} &&\text{témoins/coreset et génération de colonnes aux selles},\\ &\text{\textbf{topologie :}} &&\text{minimum extérieur dur et power-MST},\\ &\text{\textbf{GPU :}} &&\text{ANN + réductions par ligne + CSR + Borůvka},\\ &\text{\textbf{certification :}} &&\text{queue, réseau d'ancres, résidu et gardes de coupe séparés}. \end{aligned} }
 $$
 
 La formule fondamentale est
 
 $$
-\min_{q\geq0,\ \mathbf{1}^\top q=1,\ q\leq1/K}
-\left[
-\langle q,c(y)\rangle
-+
-\tau\mathrm{KL}(q\Vert u)
-\right].
+\min_{q\geq0,\ \mathbf{1}^\top q=1,\ q\leq1/K} \left[ \langle q,c(y)\rangle + \tau\mathrm{KL}(q\Vert u) \right].
 $$
 
 Elle représente exactement la contrainte de cardinalité $K$ au niveau des marginales, sans hypergraphe ni Delaunay d'ordre supérieur, et se réduit sur GPU à un capped softmax par ligne. Elle ne conserve pas les corrélations d'inclusion de la Gibbs higher-order. Après barycentration, chaque ligne devient un site de puissance. Le MST représente exactement $H_0$ du surrogate fini si le graphe est complet, `cut_certified` ou un 0-bottleneck spanner ; sinon, il représente exactement seulement la hiérarchie du graphe candidat.
@@ -1695,19 +1465,13 @@ $$
 La mesure $q^0$ uniforme sur les $K$ plus petits coûts est admissible et vérifie
 
 $$
-\mathrm{KL}(q^0\Vert u_L)
-=
-K\frac{1}{K}\log\frac{1/K}{1/L}
-=
-\log(L/K).
+\mathrm{KL}(q^0\Vert u_L) = K\frac{1}{K}\log\frac{1/K}{1/L} = \log(L/K).
 $$
 
 En évaluant l'objectif en $q^0$,
 
 $$
-D_{K,\tau,L}^2
-\leq
-D_{K,L}^2+\tau\log(L/K).
+D_{K,\tau,L}^2 \leq D_{K,L}^2+\tau\log(L/K).
 $$
 
 Si le support contient les vrais $K$ plus petits coûts, $D_{K,L}=D_K$ global. Si $L=K$, le polytope est réduit à une seule mesure uniforme et le biais est identiquement nul, malgré une température quelconque.
@@ -1731,13 +1495,7 @@ $$
 Pour tout $y$, choisissons $a\in A$ tel que $\lVert y-a\rVert\leq\delta$. Les deux champs étant 1-lipschitziens,
 
 $$
-W(y)
-\leq
-W(a)+\delta
-\leq
-D(a)+\rho+\delta
-\leq
-D(y)+\rho+2\delta.
+W(y) \leq W(a)+\delta \leq D(a)+\rho+\delta \leq D(y)+\rho+2\delta.
 $$
 
 ### A.3 Préservation des seuils par un MST
