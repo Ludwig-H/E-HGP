@@ -264,10 +264,10 @@ $$
 \boxed{
 q_j^\tau(y)
 =
-\min\left{
+\min\left\{
 \frac1K,
 A(y)e^{-c_j(y)/\tau}
-\right},
+\right\},
 \qquad
 \sum_jq_j^\tau(y)=1
 }.
@@ -816,10 +816,10 @@ $$
 \boxed{
 \beta_{ij}^2
 =
-\max\left{
+\max\left\{
 u_{ij}^2+b_i,
 (d_{ij}-u_{ij})^2+b_j
-\right}
+\right\}
 }.
 $$
 
@@ -1168,11 +1168,11 @@ Les boules ont ici le rayon $r-w_i$, et le temps de collision est
 $$
 \beta_{ij}^{(1)}
 =
-\max\left{
+\max\left\{
 w_i,
 w_j,
 \frac{\lVert a_i-a_j\rVert+w_i+w_j}{2}
-\right}.
+\right\}.
 $$
 
 Cette construction est probablement le baseline continu le plus simple et le plus rapide : centres inchangés, un scalaire DTM par point, puis MST pondéré. Elle abandonne cependant l'identité quadratique du transport $W_2$ et le modèle de sites de puissance $p=2$ déjà présent dans le dépôt.
@@ -1345,9 +1345,9 @@ $$
 R_K^{\mathrm{PC}}(y)
 =
 \operatorname{ord}_K
-\left{
+\left\{
 \sqrt{\lVert y-z_i\rVert^2+a_i}
-\right}_{i=1}^n.
+\right\}_{i=1}^n.
 $$
 
 Cette construction reste une multicouverture de boules de puissance. Elle préserve donc mieux l'objet HGP régularisé, mais conserve la combinatoire d'ordre $K$ et la résout actuellement par une approximation cubique 3D.
