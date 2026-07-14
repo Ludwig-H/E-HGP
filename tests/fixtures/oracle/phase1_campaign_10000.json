@@ -1,6 +1,6 @@
 {
   "backend": "reference_cpu",
-  "campaign_id": "e859d9d1e765eca6d8c90734a4d151b95c1d8ceed1649c83821bbac6c0cbd245",
+  "campaign_id": "c0aff3b7225baef00d77a4059609e8181d8c8e1798095fc3f0782c735f5cd4a9",
   "cases_attempted_by_dimension": {
     "1": 10000,
     "2": 10000,
@@ -23,7 +23,8 @@
   },
   "comparison_scope": {
     "cross_construction_differential": [
-      "covered point unions of reduced Gabriel components versus nontrivial full Gamma components"
+      "every raw Gabriel component is contained in one unique exhaustive Gamma component",
+      "Gamma/Gabriel divergences are counted diagnostically and never fail the normative hgp_reduced profile"
     ],
     "independent_implementation_differential": {
       "performed": false,
@@ -31,8 +32,10 @@
     },
     "internal_consistency": [
       "full forest replay against the Gamma filtration from which it is reduced",
-      "reduced forest replay against the Gabriel filtration from which it is reduced",
+      "normative hgp_reduced cuts and batches against nontrivial exhaustive Gamma components",
+      "raw Gabriel partial-forest replay against the Gabriel sub-filtration",
       "explicit cut monotonicity and separate adjacent-order naturality for Gamma, full_pi0 and hgp_reduced",
+      "normative hgp_reduced vertical assignments against their exhaustive Gamma projection",
       "Kmax prefix coherence across every configured common order"
     ],
     "metamorphic": [
@@ -46,6 +49,9 @@
   "config": {
     "ci": false,
     "coordinate_bound": 1048576,
+    "diagnostic_flows": [
+      "gabriel_raw_partial_refinement"
+    ],
     "dimensions": [
       1,
       2,
@@ -62,6 +68,7 @@
       "n_less_than_k_max": false
     },
     "metamorphic_stride": 100,
+    "normative_hgp_reduced_relation": "gamma",
     "permutations_per_seed": 1,
     "point_counts": [
       4
@@ -81,7 +88,7 @@
     "cofaces_enumerated": 330000,
     "coordinate_minimization_evaluations": 0,
     "coordinate_reductions_accepted": 0,
-    "cut_monotonicity_transitions_checked": 3440000,
+    "cut_monotonicity_transitions_checked": 4300000,
     "dyadic_translations_checked": 300,
     "facets_enumerated": 450000,
     "failures": 0,
@@ -90,7 +97,12 @@
     "full_gamma_cut_comparisons": 980000,
     "full_profile_naturality_squares_checked": 764980,
     "full_profile_vertical_families_checked": 90000,
+    "gabriel_gamma_divergences_observed": 20000,
     "gabriel_hyperedges_enumerated": 210000,
+    "gabriel_partial_cut_comparisons": 980000,
+    "gabriel_partial_equal_level_batches": 210000,
+    "gabriel_partial_forest_nodes": 260000,
+    "gabriel_partial_positive_inclusion_comparisons": 980000,
     "gamma_naturality_squares_checked": 764980,
     "gamma_vertical_families_checked": 90000,
     "homotheties_checked": 300,
@@ -103,10 +115,11 @@
     "point_minimization_evaluations": 0,
     "points_generated": 120000,
     "profile_order_checks": 240000,
-    "reduced_equal_level_batches": 210000,
+    "reduced_equal_level_batches": 310000,
     "reduced_forest_nodes": 260000,
-    "reduced_gabriel_cut_comparisons": 980000,
-    "reduced_gamma_nontrivial_comparisons": 600000,
+    "reduced_gamma_batch_comparisons": 310000,
+    "reduced_gamma_cut_comparisons": 980000,
+    "reduced_gamma_vertical_map_comparisons": 960000,
     "reduced_profile_naturality_squares_checked": 155020,
     "reduced_profile_vertical_families_checked": 90000,
     "signed_axis_permutations_checked": 300,
@@ -119,45 +132,130 @@
   },
   "failure": null,
   "gcp_used": false,
+  "input_hash_roots": {
+    "algorithm": "sha256 ordered-root-v1",
+    "case_count": 30000,
+    "case_root_sha256": "3fe4d4e9b8872b73897ca2cf92e789cfa8a8ae76a863a70d788d590a308432e1",
+    "cloud_count": 30000,
+    "cloud_root_sha256": "d695002e72d397c8cd6d7f3ba0294286aae55ea4e918d333113191fb4bc4aa9f",
+    "counts_match_attempted_work": true
+  },
   "kind": "morsehgp3d_oracle_campaign_manifest",
   "matrix_gate": {
+    "configuration_satisfied": false,
     "coverage": {
       "multiple_k_max_values": false,
       "n_at_least_k_max_plus_one": false,
       "n_equal_to_k_max": true,
       "n_less_than_k_max": false
     },
+    "evidence_ready": false,
+    "may_be_aggregated_with_seed_scale_manifest": true,
     "prefix_coherence_checked": false,
+    "provenance_requirements_satisfied": true,
     "satisfied": false,
-    "scope": "configured n/Kmax relation matrix only"
+    "scope": "configured n/Kmax relation matrix audited by this manifest only"
   },
   "mode": "certified",
   "phase": "1",
   "phase1_campaign_scale": {
     "all_affine_dimensions": true,
     "automatic_failure_fixture_enabled": true,
+    "combined_seed_and_matrix_requirements_satisfied_in_this_manifest": false,
+    "configuration_requirements_satisfied": true,
+    "configuration_scope": "10k seed-scale manifest; n/Kmax matrix coverage is evaluated separately and may come from another manifest",
+    "gabriel_diagnostic_checks_satisfied": true,
     "geometric_metamorphic_sampling_enabled": true,
+    "input_hash_roots_complete": true,
     "input_permutation_sampling_enabled": true,
+    "matrix_audit_satisfied_in_this_manifest": false,
+    "matrix_evidence_ready_in_this_manifest": false,
     "minimization_scope": "counterexamples are minimized by greedy point deletion, then by deterministic bounded integer-coordinate shrinking",
-    "reason": "the repository phase gate also depends on frozen fixtures, serialization evidence and reviewed artifacts outside this runner",
+    "normative_gamma_checks_satisfied": true,
+    "permanent_gabriel_counterexample_checked_by_runner": false,
+    "provenance_requirements_satisfied": true,
+    "reason": "the repository phase gate also depends on frozen fixtures, the permanent Gabriel counterexample, serialization evidence and reviewed artifacts outside this runner",
     "repository_phase_exit_claimed": false,
-    "runner_scale_requirements_satisfied": false,
+    "runner_scale_requirements_satisfied": true,
+    "seed_scale_evidence_ready": true,
+    "seed_scale_scientific_audit_satisfied": true,
+    "separate_matrix_manifest_may_be_aggregated": true,
     "ten_thousand_seeds_per_dimension": true
   },
-  "schema_version": 1,
+  "provenance": {
+    "clean_worktree_required": false,
+    "complete": true,
+    "generator": {
+      "name": "generate_affine_cloud",
+      "source_sha256": "a808732f79a17dba5d83ce0a39f6fd0dfeada33082015d2ff83a55a674815985",
+      "version": "1.0.0"
+    },
+    "repository": {
+      "end": {
+        "available": true,
+        "git_head": "145194d422669ac83563f97c1ea41faadc7f0545",
+        "porcelain_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked_content_root_sha256": "5792d25d27c3176b0455a79afa9523521a18508bbd8c66a8274fa56b6b0a4fbf",
+        "untracked_file_count": 0,
+        "worktree_fingerprint_sha256": "5977888ac1443d527b145ec58c3558125da62b79f2d342d294b893dc84368fac",
+        "worktree_state": "clean"
+      },
+      "git_head": "145194d422669ac83563f97c1ea41faadc7f0545",
+      "stable_during_run": true,
+      "start": {
+        "available": true,
+        "git_head": "145194d422669ac83563f97c1ea41faadc7f0545",
+        "porcelain_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked_content_root_sha256": "5792d25d27c3176b0455a79afa9523521a18508bbd8c66a8274fa56b6b0a4fbf",
+        "untracked_file_count": 0,
+        "worktree_fingerprint_sha256": "5977888ac1443d527b145ec58c3558125da62b79f2d342d294b893dc84368fac",
+        "worktree_state": "clean"
+      },
+      "worktree_state_at_end": "clean",
+      "worktree_state_at_start": "clean"
+    },
+    "runner": {
+      "name": "run_oracle_campaign",
+      "source_sha256": "1db81da797ba28ea100b28604997ebea1e4cfcb723ce66e1e629d6102ed8598d",
+      "version": "2.0.0"
+    }
+  },
+  "reconstruction_contract_id": "hgp-reduced-v2",
+  "schema_version": 2,
+  "scientific_roles": {
+    "full_pi0": {
+      "normative": false,
+      "reason": "M.1 remains a proof obligation outside this campaign",
+      "relation": "gamma"
+    },
+    "gabriel_raw": {
+      "forest_semantics": "partial_refinement",
+      "normative": false,
+      "proof_basis": "gabriel_positive_connectivity",
+      "relation": "gabriel",
+      "vertical_maps": "not_constructed"
+    },
+    "hgp_reduced": {
+      "comparison": "nontrivial Gamma components above order one",
+      "normative": true,
+      "relation": "gamma"
+    }
+  },
   "status": "passed",
   "timings_ns": {
     "by_dimension": {
-      "1": 1379177307425,
-      "2": 1532887106394,
-      "3": 1054411727651
+      "1": 672463881251,
+      "2": 776962800111,
+      "3": 777648896941
     },
     "mean_per_cloud_by_dimension": {
-      "1": 137917730,
-      "2": 153288710,
-      "3": 105441172
+      "1": 67246388,
+      "2": 77696280,
+      "3": 77764889
     },
-    "mean_per_generated_cloud": 132215994,
-    "total": 3966479833042
+    "mean_per_generated_cloud": 74235852,
+    "total": 2227075588780
   }
 }
