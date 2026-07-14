@@ -1,0 +1,163 @@
+{
+  "backend": "reference_cpu",
+  "campaign_id": "e859d9d1e765eca6d8c90734a4d151b95c1d8ceed1649c83821bbac6c0cbd245",
+  "cases_attempted_by_dimension": {
+    "1": 10000,
+    "2": 10000,
+    "3": 10000
+  },
+  "cases_completed_by_dimension": {
+    "1": 10000,
+    "2": 10000,
+    "3": 10000
+  },
+  "clouds_attempted_by_dimension": {
+    "1": 10000,
+    "2": 10000,
+    "3": 10000
+  },
+  "clouds_completed_by_dimension": {
+    "1": 10000,
+    "2": 10000,
+    "3": 10000
+  },
+  "comparison_scope": {
+    "cross_construction_differential": [
+      "covered point unions of reduced Gabriel components versus nontrivial full Gamma components"
+    ],
+    "independent_implementation_differential": {
+      "performed": false,
+      "reason": "this runner audits one exhaustive reference implementation; external or production differentials are separate gates"
+    },
+    "internal_consistency": [
+      "full forest replay against the Gamma filtration from which it is reduced",
+      "reduced forest replay against the Gabriel filtration from which it is reduced",
+      "explicit cut monotonicity and separate adjacent-order naturality for Gamma, full_pi0 and hgp_reduced",
+      "Kmax prefix coherence across every configured common order"
+    ],
+    "metamorphic": [
+      "input permutation",
+      "signed axis permutation",
+      "binary64-exact dyadic translation",
+      "power-of-two homothety with exact squared-level scaling"
+    ],
+    "sampling_policy": "horizontal checks run for every (dimension,n,seed,Kmax); input permutations and geometric metamorphisms run only at the largest configured Kmax for each cloud, at the declared stride"
+  },
+  "config": {
+    "ci": false,
+    "coordinate_bound": 1048576,
+    "dimensions": [
+      1,
+      2,
+      3
+    ],
+    "failure_dir": "tests/fixtures/regressions/oracle_campaign",
+    "k_max_values": [
+      4
+    ],
+    "matrix_coverage": {
+      "multiple_k_max_values": false,
+      "n_at_least_k_max_plus_one": false,
+      "n_equal_to_k_max": true,
+      "n_less_than_k_max": false
+    },
+    "metamorphic_stride": 100,
+    "permutations_per_seed": 1,
+    "point_counts": [
+      4
+    ],
+    "profiles": [
+      "full_pi0",
+      "hgp_reduced"
+    ],
+    "seed_start": 0,
+    "seeds_per_dimension": 10000
+  },
+  "counters": {
+    "campaign_cases_attempted": 30000,
+    "campaign_cases_audited": 30000,
+    "clouds_audited": 30000,
+    "clouds_generated": 30000,
+    "cofaces_enumerated": 330000,
+    "coordinate_minimization_evaluations": 0,
+    "coordinate_reductions_accepted": 0,
+    "cut_monotonicity_transitions_checked": 3440000,
+    "dyadic_translations_checked": 300,
+    "facets_enumerated": 450000,
+    "failures": 0,
+    "full_equal_level_batches": 490000,
+    "full_forest_nodes": 490000,
+    "full_gamma_cut_comparisons": 980000,
+    "full_profile_naturality_squares_checked": 764980,
+    "full_profile_vertical_families_checked": 90000,
+    "gabriel_hyperedges_enumerated": 210000,
+    "gamma_naturality_squares_checked": 764980,
+    "gamma_vertical_families_checked": 90000,
+    "homotheties_checked": 300,
+    "homothety_levels_checked": 7800,
+    "kmax_prefix_comparisons": 0,
+    "minimization_evaluations": 0,
+    "naturality_squares_checked": 1684980,
+    "orders_checked": 120000,
+    "permutations_checked": 30000,
+    "point_minimization_evaluations": 0,
+    "points_generated": 120000,
+    "profile_order_checks": 240000,
+    "reduced_equal_level_batches": 210000,
+    "reduced_forest_nodes": 260000,
+    "reduced_gabriel_cut_comparisons": 980000,
+    "reduced_gamma_nontrivial_comparisons": 600000,
+    "reduced_profile_naturality_squares_checked": 155020,
+    "reduced_profile_vertical_families_checked": 90000,
+    "signed_axis_permutations_checked": 300,
+    "vertical_families_checked": 270000
+  },
+  "environment": {
+    "implementation": "CPython",
+    "platform": "Linux-6.8.0-1052-azure-x86_64-with-glibc2.39",
+    "python": "3.12.1"
+  },
+  "failure": null,
+  "gcp_used": false,
+  "kind": "morsehgp3d_oracle_campaign_manifest",
+  "matrix_gate": {
+    "coverage": {
+      "multiple_k_max_values": false,
+      "n_at_least_k_max_plus_one": false,
+      "n_equal_to_k_max": true,
+      "n_less_than_k_max": false
+    },
+    "prefix_coherence_checked": false,
+    "satisfied": false,
+    "scope": "configured n/Kmax relation matrix only"
+  },
+  "mode": "certified",
+  "phase": "1",
+  "phase1_campaign_scale": {
+    "all_affine_dimensions": true,
+    "automatic_failure_fixture_enabled": true,
+    "geometric_metamorphic_sampling_enabled": true,
+    "input_permutation_sampling_enabled": true,
+    "minimization_scope": "counterexamples are minimized by greedy point deletion, then by deterministic bounded integer-coordinate shrinking",
+    "reason": "the repository phase gate also depends on frozen fixtures, serialization evidence and reviewed artifacts outside this runner",
+    "repository_phase_exit_claimed": false,
+    "runner_scale_requirements_satisfied": false,
+    "ten_thousand_seeds_per_dimension": true
+  },
+  "schema_version": 1,
+  "status": "passed",
+  "timings_ns": {
+    "by_dimension": {
+      "1": 1379177307425,
+      "2": 1532887106394,
+      "3": 1054411727651
+    },
+    "mean_per_cloud_by_dimension": {
+      "1": 137917730,
+      "2": 153288710,
+      "3": 105441172
+    },
+    "mean_per_generated_cloud": 132215994,
+    "total": 3966479833042
+  }
+}
