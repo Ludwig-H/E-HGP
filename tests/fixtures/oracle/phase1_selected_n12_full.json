@@ -1,21 +1,22 @@
 {
   "backend": "reference_cpu",
-  "campaign_id": "5169639b6be18062da096ced4bf2eecb6862ac1773f3c26c83407c23dcd1fcfb",
+  "campaign_id": "e99be8833c16ac42161d3fb94bd797cbd26b6cf202c3a2a99a62c8402c2a0826",
   "cases_attempted_by_dimension": {
     "3": 1
   },
   "cases_completed_by_dimension": {
-    "3": 0
+    "3": 1
   },
   "clouds_attempted_by_dimension": {
     "3": 1
   },
   "clouds_completed_by_dimension": {
-    "3": 0
+    "3": 1
   },
   "comparison_scope": {
     "cross_construction_differential": [
-      "covered point unions of reduced Gabriel components versus nontrivial full Gamma components"
+      "every raw Gabriel component is contained in one unique exhaustive Gamma component",
+      "Gamma/Gabriel divergences are counted diagnostically and never fail the normative hgp_reduced profile"
     ],
     "independent_implementation_differential": {
       "performed": false,
@@ -23,8 +24,10 @@
     },
     "internal_consistency": [
       "full forest replay against the Gamma filtration from which it is reduced",
-      "reduced forest replay against the Gabriel filtration from which it is reduced",
+      "normative hgp_reduced cuts and batches against nontrivial exhaustive Gamma components",
+      "raw Gabriel partial-forest replay against the Gabriel sub-filtration",
       "explicit cut monotonicity and separate adjacent-order naturality for Gamma, full_pi0 and hgp_reduced",
+      "normative hgp_reduced vertical assignments against their exhaustive Gamma projection",
       "Kmax prefix coherence across every configured common order"
     ],
     "metamorphic": [
@@ -38,6 +41,9 @@
   "config": {
     "ci": false,
     "coordinate_bound": 97,
+    "diagnostic_flows": [
+      "gabriel_raw_partial_refinement"
+    ],
     "dimensions": [
       3
     ],
@@ -52,6 +58,7 @@
       "n_less_than_k_max": false
     },
     "metamorphic_stride": 0,
+    "normative_hgp_reduced_relation": "gamma",
     "permutations_per_seed": 0,
     "point_counts": [
       12
@@ -65,146 +72,176 @@
   },
   "counters": {
     "campaign_cases_attempted": 1,
-    "campaign_cases_audited": 0,
-    "clouds_audited": 0,
+    "campaign_cases_audited": 1,
+    "clouds_audited": 1,
     "clouds_generated": 1,
-    "cofaces_enumerated": 0,
-    "coordinate_minimization_evaluations": 581,
-    "coordinate_reductions_accepted": 18,
-    "cut_monotonicity_transitions_checked": 0,
+    "cofaces_enumerated": 4082,
+    "coordinate_minimization_evaluations": 0,
+    "coordinate_reductions_accepted": 0,
+    "cut_monotonicity_transitions_checked": 7750,
     "dyadic_translations_checked": 0,
-    "facets_enumerated": 0,
-    "failures": 1,
-    "full_equal_level_batches": 0,
-    "full_forest_nodes": 0,
-    "full_gamma_cut_comparisons": 0,
-    "full_profile_naturality_squares_checked": 0,
-    "full_profile_vertical_families_checked": 0,
-    "gabriel_hyperedges_enumerated": 0,
-    "gamma_naturality_squares_checked": 0,
-    "gamma_vertical_families_checked": 0,
+    "facets_enumerated": 4082,
+    "failures": 0,
+    "full_equal_level_batches": 780,
+    "full_forest_nodes": 286,
+    "full_gamma_cut_comparisons": 1560,
+    "full_profile_naturality_squares_checked": 3186,
+    "full_profile_vertical_families_checked": 9,
+    "gabriel_gamma_divergences_observed": 1187,
+    "gabriel_hyperedges_enumerated": 165,
+    "gabriel_partial_cut_comparisons": 1560,
+    "gabriel_partial_equal_level_batches": 163,
+    "gabriel_partial_forest_nodes": 37,
+    "gabriel_partial_positive_inclusion_comparisons": 1560,
+    "gamma_naturality_squares_checked": 3186,
+    "gamma_vertical_families_checked": 9,
     "homotheties_checked": 0,
     "homothety_levels_checked": 0,
     "kmax_prefix_comparisons": 0,
-    "minimization_evaluations": 609,
-    "naturality_squares_checked": 0,
-    "orders_checked": 0,
+    "minimization_evaluations": 0,
+    "naturality_squares_checked": 7914,
+    "orders_checked": 10,
     "permutations_checked": 0,
-    "point_minimization_evaluations": 28,
+    "point_minimization_evaluations": 0,
     "points_generated": 12,
-    "profile_order_checks": 0,
-    "reduced_equal_level_batches": 0,
-    "reduced_forest_nodes": 0,
-    "reduced_gabriel_cut_comparisons": 0,
-    "reduced_gamma_nontrivial_comparisons": 0,
-    "reduced_profile_naturality_squares_checked": 0,
-    "reduced_profile_vertical_families_checked": 0,
+    "profile_order_checks": 20,
+    "reduced_equal_level_batches": 622,
+    "reduced_forest_nodes": 35,
+    "reduced_gamma_batch_comparisons": 622,
+    "reduced_gamma_cut_comparisons": 1560,
+    "reduced_gamma_vertical_map_comparisons": 1734,
+    "reduced_profile_naturality_squares_checked": 1542,
+    "reduced_profile_vertical_families_checked": 9,
     "signed_axis_permutations_checked": 0,
-    "vertical_families_checked": 0
+    "vertical_families_checked": 27
   },
   "environment": {
     "implementation": "CPython",
     "platform": "Linux-6.8.0-1052-azure-x86_64-with-glibc2.39",
     "python": "3.12.1"
   },
-  "failure": {
-    "coordinate_minimization_evaluations": 581,
-    "coordinate_reductions_accepted": 18,
-    "dimension": 3,
-    "failure": {
-      "context": {
-        "dimension": 3,
-        "exception_type": "ValueError",
-        "k_max": 10,
-        "seed": 0
-      },
-      "invariant": "unexpected_exception",
-      "message": "ValueError: a profile component and its Gamma container cover different points"
-    },
-    "fixture_path": "tests/fixtures/regressions/oracle_campaign/oracle-campaign-5b8d545852e858b3313346708d5341b223d0233e75a1a08e99aa6cfb3df4f385.json",
-    "k_max_values": [
-      10
-    ],
-    "minimized_failure": {
-      "context": {
-        "dimension": 3,
-        "exception_type": "ValueError",
-        "k_max": 10,
-        "seed": 0
-      },
-      "invariant": "unexpected_exception",
-      "message": "ValueError: a profile component and its Gamma container cover different points"
-    },
-    "minimized_point_count": 5,
-    "minimized_points": [
-      [
-        0,
-        0,
-        7
-      ],
-      [
-        0,
-        9,
-        6
-      ],
-      [
-        1,
-        4,
-        0
-      ],
-      [
-        0,
-        0,
-        1
-      ],
-      [
-        4,
-        1,
-        2
-      ]
-    ],
-    "original_point_count": 12,
-    "point_count": 12,
-    "point_deletion_minimized_point_count": 5,
-    "point_minimization_evaluations": 28,
-    "seed": 0
-  },
+  "failure": null,
   "gcp_used": false,
+  "input_hash_roots": {
+    "algorithm": "sha256 ordered-root-v1",
+    "case_count": 1,
+    "case_root_sha256": "2ddc966dceb9ab3c32bf4cc8c0504bb955a368be38d3c4f44a8929d3a46e88d7",
+    "cloud_count": 1,
+    "cloud_root_sha256": "507c0921db8bad214512208988ecabe25440014abaceb4a9905503ad1fd4bdae",
+    "counts_match_attempted_work": true
+  },
   "kind": "morsehgp3d_oracle_campaign_manifest",
   "matrix_gate": {
+    "configuration_satisfied": false,
     "coverage": {
       "multiple_k_max_values": false,
       "n_at_least_k_max_plus_one": true,
       "n_equal_to_k_max": false,
       "n_less_than_k_max": false
     },
+    "evidence_ready": false,
+    "may_be_aggregated_with_seed_scale_manifest": true,
     "prefix_coherence_checked": false,
+    "provenance_requirements_satisfied": true,
     "satisfied": false,
-    "scope": "configured n/Kmax relation matrix only"
+    "scope": "configured n/Kmax relation matrix audited by this manifest only"
   },
   "mode": "certified",
   "phase": "1",
   "phase1_campaign_scale": {
     "all_affine_dimensions": false,
     "automatic_failure_fixture_enabled": true,
+    "combined_seed_and_matrix_requirements_satisfied_in_this_manifest": false,
+    "configuration_requirements_satisfied": false,
+    "configuration_scope": "10k seed-scale manifest; n/Kmax matrix coverage is evaluated separately and may come from another manifest",
+    "gabriel_diagnostic_checks_satisfied": true,
     "geometric_metamorphic_sampling_enabled": false,
+    "input_hash_roots_complete": true,
     "input_permutation_sampling_enabled": false,
+    "matrix_audit_satisfied_in_this_manifest": false,
+    "matrix_evidence_ready_in_this_manifest": false,
     "minimization_scope": "counterexamples are minimized by greedy point deletion, then by deterministic bounded integer-coordinate shrinking",
-    "reason": "the repository phase gate also depends on frozen fixtures, serialization evidence and reviewed artifacts outside this runner",
+    "normative_gamma_checks_satisfied": true,
+    "permanent_gabriel_counterexample_checked_by_runner": false,
+    "provenance_requirements_satisfied": true,
+    "reason": "the repository phase gate also depends on frozen fixtures, the permanent Gabriel counterexample, serialization evidence and reviewed artifacts outside this runner",
     "repository_phase_exit_claimed": false,
     "runner_scale_requirements_satisfied": false,
+    "seed_scale_evidence_ready": false,
+    "seed_scale_scientific_audit_satisfied": false,
+    "separate_matrix_manifest_may_be_aggregated": true,
     "ten_thousand_seeds_per_dimension": false
   },
-  "schema_version": 1,
-  "status": "failed",
+  "provenance": {
+    "clean_worktree_required": false,
+    "complete": true,
+    "generator": {
+      "name": "generate_affine_cloud",
+      "source_sha256": "a808732f79a17dba5d83ce0a39f6fd0dfeada33082015d2ff83a55a674815985",
+      "version": "1.0.0"
+    },
+    "repository": {
+      "end": {
+        "available": true,
+        "git_head": "a24008bbd4f2b10f9ca2f001bc80cfe4b82fce27",
+        "porcelain_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked_content_root_sha256": "5792d25d27c3176b0455a79afa9523521a18508bbd8c66a8274fa56b6b0a4fbf",
+        "untracked_file_count": 0,
+        "worktree_fingerprint_sha256": "839f391295d8b0fe61e32f05251635bd8137071c7027e31b837c047831264a28",
+        "worktree_state": "clean"
+      },
+      "git_head": "a24008bbd4f2b10f9ca2f001bc80cfe4b82fce27",
+      "stable_during_run": true,
+      "start": {
+        "available": true,
+        "git_head": "a24008bbd4f2b10f9ca2f001bc80cfe4b82fce27",
+        "porcelain_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "untracked_content_root_sha256": "5792d25d27c3176b0455a79afa9523521a18508bbd8c66a8274fa56b6b0a4fbf",
+        "untracked_file_count": 0,
+        "worktree_fingerprint_sha256": "839f391295d8b0fe61e32f05251635bd8137071c7027e31b837c047831264a28",
+        "worktree_state": "clean"
+      },
+      "worktree_state_at_end": "clean",
+      "worktree_state_at_start": "clean"
+    },
+    "runner": {
+      "name": "run_oracle_campaign",
+      "source_sha256": "1db81da797ba28ea100b28604997ebea1e4cfcb723ce66e1e629d6102ed8598d",
+      "version": "2.0.0"
+    }
+  },
+  "reconstruction_contract_id": "hgp-reduced-v2",
+  "schema_version": 2,
+  "scientific_roles": {
+    "full_pi0": {
+      "normative": false,
+      "reason": "M.1 remains a proof obligation outside this campaign",
+      "relation": "gamma"
+    },
+    "gabriel_raw": {
+      "forest_semantics": "partial_refinement",
+      "normative": false,
+      "proof_basis": "gabriel_positive_connectivity",
+      "relation": "gabriel",
+      "vertical_maps": "not_constructed"
+    },
+    "hgp_reduced": {
+      "comparison": "nontrivial Gamma components above order one",
+      "normative": true,
+      "relation": "gamma"
+    }
+  },
+  "status": "passed",
   "timings_ns": {
     "by_dimension": {
-      "3": 1853591437605
+      "3": 340186254836
     },
     "mean_per_cloud_by_dimension": {
-      "3": 1853591437605
+      "3": 340186254836
     },
-    "mean_per_generated_cloud": 1853591443608,
-    "total": 1853591443608
+    "mean_per_generated_cloud": 340186258173,
+    "total": 340186258173
   }
 }
