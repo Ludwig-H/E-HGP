@@ -196,13 +196,13 @@ Dans ce cadre min–max, une modification non triviale à $K=1$ devrait agir sur
 La naissance possède déjà un dual de taille $K$ :
 
 $$
-\beta_\tau(Q)=\max_{\alpha\in\Delta_Q}\left\{\sum_{i\in Q}\alpha_i\|x_i\|^2-\left\|\sum_{i\in Q}\alpha_i x_i\right\|^2-\tau\,\mathrm{KL}(\alpha\|u_Q)\right\}.
+\beta_\tau(Q)=\max_{\alpha\in\Delta_Q}\left\{\sum_{i\in Q}\alpha_i\|x_i\|^2-\left\Vert\sum_{i\in Q}\alpha_i x_i\right\Vert^2-\tau\,\mathrm{KL}(\alpha\|u_Q)\right\}.
 $$
 
 Son centre est $y_Q^\star=\sum_i\alpha_i^\star x_i$. À $\tau=0$, on retrouve le dual de la miniball ; à $\tau=\infty$, $\alpha^\star=u_Q$ et $\beta_\infty(Q)=v_Q$. Le poids de rencontre $w_\tau(Q,R)$ se calcule de même sans optimiser directement dans $\mathbb{R}^{p}$. Introduisons $u_i\ge0$ pour $i\in Q$, $v_j\ge0$ pour $j\in R$, avec $\sum_i u_i+\sum_jv_j=1$, $\gamma=\sum_i u_i$, et agrégeons les doublons dans $\eta_s=u_s+v_s$. Alors
 
 $$
-w_\tau(Q,R)=\max_{\substack{u,v\ge0\\\sum_i u_i+\sum_jv_j=1}}\left\{\sum_s\eta_s\|x_s\|^2-\left\|\sum_s\eta_sx_s\right\|^2-\tau\left[\sum_{i\in Q}u_i\log\left(\frac{Ku_i}{\gamma}\right)+\sum_{j\in R}v_j\log\left(\frac{Kv_j}{1-\gamma}\right)\right]\right\}.
+w_\tau(Q,R)=\max_{\substack{u,v\ge0\\\sum_i u_i+\sum_jv_j=1}}\left\{\sum_s\eta_s\|x_s\|^2-\left\Vert\sum_s\eta_sx_s\right\Vert^2-\tau\left[\sum_{i\in Q}u_i\log\left(\frac{Ku_i}{\gamma}\right)+\sum_{j\in R}v_j\log\left(\frac{Kv_j}{1-\gamma}\right)\right]\right\}.
 $$
 
 Les coordonnées de $u$ ou $v$ absentes d'un des deux ensembles sont prises nulles dans $\eta_s=u_s+v_s$. La dérivation introduit un poids $\gamma\in[0,1]$ pour écrire le maximum de deux fonctions comme un maximum de combinaisons convexes, applique deux fois la représentation variationnelle de $\phi$, puis élimine $y$ analytiquement ; le théorème minimax s'applique par coercivité en $y$ et compacité des simplexes. Les termes entropiques aux faces $\gamma=0$ et $\gamma=1$ sont compris par prolongement continu. Il s'agit d'une maximisation concave sur un simplexe de dimension au plus $2K-1$. Le centre de rencontre est

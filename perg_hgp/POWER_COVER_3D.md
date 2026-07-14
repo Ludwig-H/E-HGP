@@ -158,7 +158,7 @@ changer les unités.
 L’identité
 
 \[
-d_i(y)=\left\|(y,0)-(z_i,\sqrt{a_i})\right\|_{\mathbb R^4}
+d_i(y)=\left\Vert(y,0)-(z_i,\sqrt{a_i})\right\Vert_{\mathbb R^4}
 \]
 
 permet un cKDTree exact en dimension 4 pour les sites stockés. Ce chemin gère

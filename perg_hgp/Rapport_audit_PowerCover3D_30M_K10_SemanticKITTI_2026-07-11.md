@@ -203,7 +203,7 @@ Une propriété importante n'est pas exploitée par l'implémentation :
 \[
 d_i^\kappa(y)
 =
-\left\|(y,0)-\left(z_i,\sqrt{a_i}\right)\right\|_{\mathbb R^4}.
+\left\Vert(y,0)-\left(z_i,\sqrt{a_i}\right)\right\Vert_{\mathbb R^4}.
 \]
 
 Le top-K de puissance est donc exactement un top-K euclidien en dimension 4, où les requêtes vivent dans l'hyperplan de quatrième coordonnée nulle.
