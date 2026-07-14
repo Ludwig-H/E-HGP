@@ -11,6 +11,7 @@ Ce dossier est le corpus scientifique actif de E-HGP. Il a été recentré sur l
 5. Vérifier le [registre des preuves et heuristiques](math/STATUT_PREUVES_ET_HEURISTIQUES.md).
 6. Lire l'[architecture GPU G4](GPU_G4_ARCHITECTURE.md), puis la [feuille de route d'implémentation](ROADMAP_IMPLEMENTATION_MORSEHGP3D.md).
 7. Utiliser le [plan de tests](TEST_PLAN_MORSEHGP3D.md) comme contrat de réception et le [registre des phases](implementation_status.toml) comme état opérationnel.
+8. Consulter les [contrats de données de phase 0](contracts/README.md) avant de produire ou de consommer un certificat sérialisé.
 
 ## Sources fondatrices
 

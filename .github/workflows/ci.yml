@@ -22,6 +22,12 @@ jobs:
       - name: Validate active documentation
         run: python tools/check_docs.py
 
+      - name: Validate frozen data contracts
+        run: python tools/check_contracts.py
+
+      - name: Test contract validation and canonical round-trips
+        run: python -m unittest discover -s tests/contracts -p 'test_*.py'
+
       - name: Validate local references
         run: python tools/check_references.py
 
