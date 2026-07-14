@@ -2,7 +2,7 @@
 
 ## Décision
 
-La phase 0 corrective v2 est fermée. La porte d'entrée de la phase 1 est satisfaite pour le backend `reference_cpu`, les profils `hgp_reduced` et `full_pi0`, et le mode `certified`. La phase 1 est ouverte uniquement pour requalifier l'oracle et ses campagnes contre Gamma exhaustif; elle n'est pas encore fermée.
+La phase 0 corrective v2 est rouverte après un audit par mutations négatives. Sa porte de sortie n'est plus satisfaite et la phase 1 est de nouveau bloquée. Le périmètre actif reste le backend `reference_cpu`, les profils `hgp_reduced` et `full_pi0`, et le mode `certified`.
 
 Le contre-exemple exact `gabriel-point-set-counterexample-5-points-v1` invalide la base `reduced_manuscript_theorem_5` du contrat v1. La cible scientifique reste la tour des K-polyèdres : le contrat v2 définit donc `hgp_reduced` exact par Gamma exhaustif sur le backend CPU de référence. Le flot Gabriel brut ne fournit qu'une connectivité positive conditionnelle. Cette correction ne démontre pas M.1 et n'autorise aucun code CUDA.
 
@@ -37,7 +37,7 @@ Le commit `b305a39` (`feat: figer les contrats MorseHGP3D v1`) est l'archive his
 - M.1 reste `proof_obligation` jusqu'à la phase 12.
 - Aucun code CUDA n'a été introduit.
 
-La porte de sortie G0 est satisfaite. Cette décision ferme uniquement les formats et la sémantique contractuelle v2. La phase 1 doit encore reconstruire `hgp_reduced` depuis Gamma, conserver Gabriel comme voie partielle séparée et requalifier sa campagne avant que G2 ou la phase 2A puissent être ouverts.
+La porte de sortie G0 n'est plus satisfaite. L'audit a montré que le validateur sémantique pouvait accepter un faux résultat `exact` dont une forêt, un lot ou une application verticale était déclaré incomplet, ainsi que certaines références pendantes, identités non canoniques et fractions non réduites. Le migrateur pouvait aussi publier une partie des fixtures avant un échec tardif. Ces cas doivent devenir des tests négatifs permanents, le validateur doit les refuser et le migrateur doit préparer toutes les sorties avant toute publication. La phase 1 ne reprendra qu'après fermeture de ces défauts.
 
 ## Commandes de réception
 
@@ -56,7 +56,7 @@ python -m unittest discover -s tests/gcp -p 'test_*.py'
 bash -n gcp-migration/*.sh
 ```
 
-Résultats enregistrés le 14 juillet 2026 sur le commit `5351704` : 24 documents actifs, 21 définitions de contrat, 21 exemples de schéma, cinq fixtures v2 au point fixe canonique, 18 tests de contrat et 81 tests d'oracle validés. La campagne CI bornée a terminé ses trois cas avec `status=passed`; sa propre `matrix_gate` reste fausse et ne constitue donc pas une preuve de fermeture de la phase 1. Les cinq références, les 20 entrées du registre, les workflows GCP en lecture seule, les 11 tests de sécurité GCP et la syntaxe des scripts ont aussi été validés.
+Résultats enregistrés le 14 juillet 2026 sur le commit `5351704` : 24 documents actifs, 21 définitions de contrat, 21 exemples de schéma, cinq fixtures v2 au point fixe canonique, 18 tests de contrat et 81 tests d'oracle validés. La campagne CI bornée a terminé ses trois cas avec `status=passed`; sa propre `matrix_gate` reste fausse et ne constitue donc pas une preuve de fermeture de la phase 1. Les cinq références, les 20 entrées du registre, les workflows GCP en lecture seule, les 11 tests de sécurité GCP et la syntaxe des scripts ont aussi été validés. Ces résultats restent un checkpoint reproductible, mais leur couverture négative est insuffisante pour fermer G0 depuis l'audit par mutations.
 
 ## Limites reportées à leurs phases
 
