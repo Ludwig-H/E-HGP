@@ -31,6 +31,19 @@
       "added_facet_point_ids": [
         [
           0,
+          3
+        ]
+      ],
+      "added_point_ids": [],
+      "batch_id": "76b179d3808f8f5a932ba11fa18268ba4c37d0c009b0088dcb47c32b77e50710",
+      "order": 2,
+      "root_node_id": "b997f51919c43f4aaeaa86eda7f1cf48ab1fe63cfe5ec138f31fe1a7ff098bbb",
+      "schema_version": "2.0.0"
+    },
+    {
+      "added_facet_point_ids": [
+        [
+          0,
           4
         ]
       ],
@@ -63,6 +76,19 @@
       ],
       "added_point_ids": [],
       "batch_id": "fcce862b71553e9e61706dacdf50828196071dafd25668cf56ae6c366e0674b9",
+      "order": 2,
+      "root_node_id": "b997f51919c43f4aaeaa86eda7f1cf48ab1fe63cfe5ec138f31fe1a7ff098bbb",
+      "schema_version": "2.0.0"
+    },
+    {
+      "added_facet_point_ids": [
+        [
+          1,
+          4
+        ]
+      ],
+      "added_point_ids": [],
+      "batch_id": "3fcf4adefe86d75f04d091869761d37062788845ac198d81396e13e5c6e2aba9",
       "order": 2,
       "root_node_id": "b997f51919c43f4aaeaa86eda7f1cf48ab1fe63cfe5ec138f31fe1a7ff098bbb",
       "schema_version": "2.0.0"
@@ -1492,7 +1518,21 @@
       "attachments_complete": true,
       "batch_id": "3fcf4adefe86d75f04d091869761d37062788845ac198d81396e13e5c6e2aba9",
       "batch_status": "closed",
-      "coverage_deltas": [],
+      "coverage_deltas": [
+        {
+          "added_facet_point_ids": [
+            [
+              1,
+              4
+            ]
+          ],
+          "added_point_ids": [],
+          "batch_id": "3fcf4adefe86d75f04d091869761d37062788845ac198d81396e13e5c6e2aba9",
+          "order": 2,
+          "root_node_id": "b997f51919c43f4aaeaa86eda7f1cf48ab1fe63cfe5ec138f31fe1a7ff098bbb",
+          "schema_version": "2.0.0"
+        }
+      ],
       "event_ids": [],
       "events_complete": true,
       "gamma_coface_ids": [
@@ -1762,7 +1802,21 @@
       "attachments_complete": true,
       "batch_id": "76b179d3808f8f5a932ba11fa18268ba4c37d0c009b0088dcb47c32b77e50710",
       "batch_status": "closed",
-      "coverage_deltas": [],
+      "coverage_deltas": [
+        {
+          "added_facet_point_ids": [
+            [
+              0,
+              3
+            ]
+          ],
+          "added_point_ids": [],
+          "batch_id": "76b179d3808f8f5a932ba11fa18268ba4c37d0c009b0088dcb47c32b77e50710",
+          "order": 2,
+          "root_node_id": "b997f51919c43f4aaeaa86eda7f1cf48ab1fe63cfe5ec138f31fe1a7ff098bbb",
+          "schema_version": "2.0.0"
+        }
+      ],
       "event_ids": [],
       "events_complete": true,
       "gamma_coface_ids": [
@@ -3124,6 +3178,19 @@
           "added_facet_point_ids": [
             [
               0,
+              3
+            ]
+          ],
+          "added_point_ids": [],
+          "batch_id": "76b179d3808f8f5a932ba11fa18268ba4c37d0c009b0088dcb47c32b77e50710",
+          "order": 2,
+          "root_node_id": "b997f51919c43f4aaeaa86eda7f1cf48ab1fe63cfe5ec138f31fe1a7ff098bbb",
+          "schema_version": "2.0.0"
+        },
+        {
+          "added_facet_point_ids": [
+            [
+              0,
               4
             ]
           ],
@@ -3142,6 +3209,19 @@
           ],
           "added_point_ids": [],
           "batch_id": "fcce862b71553e9e61706dacdf50828196071dafd25668cf56ae6c366e0674b9",
+          "order": 2,
+          "root_node_id": "b997f51919c43f4aaeaa86eda7f1cf48ab1fe63cfe5ec138f31fe1a7ff098bbb",
+          "schema_version": "2.0.0"
+        },
+        {
+          "added_facet_point_ids": [
+            [
+              1,
+              4
+            ]
+          ],
+          "added_point_ids": [],
+          "batch_id": "3fcf4adefe86d75f04d091869761d37062788845ac198d81396e13e5c6e2aba9",
           "order": 2,
           "root_node_id": "b997f51919c43f4aaeaa86eda7f1cf48ab1fe63cfe5ec138f31fe1a7ff098bbb",
           "schema_version": "2.0.0"
@@ -3172,7 +3252,7 @@
           "schema_version": "2.0.0"
         }
       ],
-      "forest_id": "54a2728da72ae8bfd3a744962a7456b5f1fd6673d6ba9de40d4a239effed6952",
+      "forest_id": "6615c5d7bcd2fe5bdefc655846812079f7b45cee98bd2902c373a851e1408734",
       "forest_semantics": "exact",
       "nodes": [
         {
@@ -4351,7 +4431,7 @@
   ],
   "mode": "certified",
   "profile": "hgp_reduced",
-  "result_id": "d1d08584f485ddd567f16ede7b7411c2490a01bc06230b192c1c9e3174a7540f",
+  "result_id": "7a36688d807cbd3147920f1fccc484cdd7daf3c31bced5f1f8ca96c3629517f4",
   "result_kind": "hierarchy",
   "run_certificate": {
     "active_cross_incidences_complete": true,

@@ -37,28 +37,36 @@ def walk_keyed_values(value: Any) -> Iterator[tuple[dict[str, Any], str]]:
             yield from walk_keyed_values(child)
 
 
-def canonicalize_gamma_ids(result: dict[str, Any]) -> None:
-    """Repair copied fixture IDs in memory so semantic mutations are isolated."""
+def canonicalize_certificate_ids(value: dict[str, Any]) -> None:
+    """Rekey a certificate after a test intentionally changes its evidence."""
 
-    replacements: dict[str, str] = {}
-    for coface in result["gamma_cofaces"]:
-        projection = {
-            "schema_version": coface["schema_version"],
-            "order": coface["order"],
-            "simplex_point_ids": coface["simplex_point_ids"],
-            "facet_point_ids": coface["facet_point_ids"],
-            "squared_level_exact": coface["squared_level_exact"],
-        }
-        old_id = coface["coface_id"]
-        new_id = canonical_contract_id("GammaCoface", projection)
-        replacements[old_id] = new_id
-        coface["coface_id"] = new_id
-    result["gamma_cofaces"].sort(key=lambda coface: coface["coface_id"])
-    for batch in result["equal_level_batches"]:
-        batch["gamma_coface_ids"] = sorted(
-            replacements.get(coface_id, coface_id)
-            for coface_id in batch["gamma_coface_ids"]
-        )
+    result = value if "run_certificate" in value else None
+    certificate = value["run_certificate"] if result is not None else value
+    snapshot = certificate["final_budget_snapshot"]
+    snapshot["snapshot_id"] = canonical_contract_id(
+        "BudgetSnapshot",
+        {key: child for key, child in snapshot.items() if key != "snapshot_id"},
+    )
+    certificate["run_id"] = canonical_contract_id(
+        "Run",
+        {
+            "input_sha256": certificate["input_semantics"]["input_sha256"],
+            "k_max": certificate["k_max"],
+            "profile": certificate["effective_profile"],
+            "backend": certificate["effective_backend"],
+            "mode": certificate["requested_mode"],
+        },
+    )
+    certificate["certificate_id"] = canonical_contract_id(
+        "RunCertificate",
+        {
+            key: child
+            for key, child in certificate.items()
+            if key != "certificate_id"
+        },
+    )
+    if result is not None:
+        result["run_id"] = certificate["run_id"]
 
 
 class ContractSchemaTests(unittest.TestCase):
@@ -202,6 +210,7 @@ class ContractSchemaTests(unittest.TestCase):
         certificate["result_kind"] = "verified_events_only"
         certificate["public_status"] = "numeric_failure"
         certificate["stop_reason"] = "numeric_failure"
+        canonicalize_certificate_ids(certificate)
         self.assertTrue(certificate["require_exact"])
         validate_certificate_semantics(certificate)
 
@@ -217,7 +226,6 @@ class ContractSchemaTests(unittest.TestCase):
 
     def test_exact_gamma_requires_every_coface_and_batch_assignment(self) -> None:
         exact = load_json(FIXTURE_DIR / "k1-emst.json")
-        canonicalize_gamma_ids(exact)
         self.assertTrue(exact["gamma_cofaces"])
         validate_result_semantics(exact)
 
@@ -229,6 +237,7 @@ class ContractSchemaTests(unittest.TestCase):
         for batch in missing_record["equal_level_batches"]:
             if removed["coface_id"] in batch["gamma_coface_ids"]:
                 batch["gamma_coface_ids"].remove(removed["coface_id"])
+        canonicalize_certificate_ids(missing_record)
         with self.assertRaisesRegex(ContractError, "missing or inventing cofaces"):
             validate_result_semantics(missing_record)
 
@@ -244,8 +253,8 @@ class ContractSchemaTests(unittest.TestCase):
 
     def test_gamma_structure_is_checked_even_when_completeness_is_false(self) -> None:
         base = load_json(FIXTURE_DIR / "isolated-birth-k2.json")
-        canonicalize_gamma_ids(base)
         base["run_certificate"]["gamma_complete_by_order"] = [False, False]
+        canonicalize_certificate_ids(base)
         validate_result_semantics(base)
 
         mutations: list[tuple[str, str, Any]] = []
@@ -275,6 +284,7 @@ class ContractSchemaTests(unittest.TestCase):
         duplicate_label["run_certificate"]["work_and_memory_counters"][
             "gamma_cofaces_emitted"
         ] += 1
+        canonicalize_certificate_ids(duplicate_label)
         mutations.append(
             ("duplicate-label", "unique \\(order, simplex\\) labels", duplicate_label)
         )
@@ -290,8 +300,8 @@ class ContractSchemaTests(unittest.TestCase):
 
     def test_gamma_batch_keys_and_assignments_are_unambiguous(self) -> None:
         base = load_json(FIXTURE_DIR / "isolated-birth-k2.json")
-        canonicalize_gamma_ids(base)
         base["run_certificate"]["gamma_complete_by_order"] = [False, False]
+        canonicalize_certificate_ids(base)
         validate_result_semantics(base)
 
         duplicate_assignment = copy.deepcopy(base)
@@ -376,7 +386,6 @@ class ContractSchemaTests(unittest.TestCase):
 
     def test_raw_gabriel_is_only_a_conditional_partial_refinement(self) -> None:
         partial = load_json(FIXTURE_DIR / "isolated-birth-k2.json")
-        canonicalize_gamma_ids(partial)
         partial["profile"] = "hgp_reduced"
         for forest in partial["forests"]:
             forest["profile"] = "hgp_reduced"
@@ -390,7 +399,12 @@ class ContractSchemaTests(unittest.TestCase):
             "positive_connectivity",
             "verified_events",
         ]
-        validate_result_semantics(partial)
+        partial["partial_scope"]["positive_guarantees"] = list(
+            certificate["partial_guarantees"]
+        )
+        # This test isolates the proof/status lattice; the strict identity graph is
+        # covered independently below and would require rekeying every forest node.
+        validate_result_semantics(partial, check_canonical_ids=False)
 
         exact_claim = copy.deepcopy(partial)
         exact_claim["result_kind"] = "hierarchy"
@@ -404,7 +418,7 @@ class ContractSchemaTests(unittest.TestCase):
         for forest in exact_claim["forests"]:
             forest["forest_semantics"] = "exact"
         with self.assertRaises(ContractError):
-            validate_result_semantics(exact_claim)
+            validate_result_semantics(exact_claim, check_canonical_ids=False)
 
     def test_budgeted_mode_cannot_publish_exact(self) -> None:
         mutated = copy.deepcopy(
@@ -416,6 +430,291 @@ class ContractSchemaTests(unittest.TestCase):
         certificate["budget_policy"]["mode"] = "budgeted"
         with self.assertRaises(ContractError):
             validate_result_semantics(mutated)
+
+    def test_exact_payload_completeness_is_fail_closed(self) -> None:
+        base = load_json(FIXTURE_DIR / "overlap-k2.json")
+        mutations: list[tuple[str, Any]] = []
+
+        incomplete_forest = copy.deepcopy(base)
+        incomplete_forest["forests"][0]["complete"] = False
+        mutations.append(("forest", incomplete_forest))
+
+        incomplete_events = copy.deepcopy(base)
+        incomplete_events["equal_level_batches"][0]["events_complete"] = False
+        mutations.append(("batch-events", incomplete_events))
+
+        incomplete_attachments = copy.deepcopy(base)
+        incomplete_attachments["equal_level_batches"][0][
+            "attachments_complete"
+        ] = False
+        mutations.append(("batch-attachments", incomplete_attachments))
+
+        partial_batch = copy.deepcopy(base)
+        partial_batch["equal_level_batches"][0]["batch_status"] = "partial"
+        mutations.append(("batch-status", partial_batch))
+
+        incomplete_vertical = copy.deepcopy(base)
+        incomplete_vertical["vertical_maps"][0]["complete"] = False
+        mutations.append(("vertical-complete", incomplete_vertical))
+
+        failed_naturality = copy.deepcopy(base)
+        failed_naturality["vertical_maps"][0]["naturality_failures"] = 1
+        mutations.append(("vertical-naturality", failed_naturality))
+
+        partial_scope = copy.deepcopy(base)
+        partial_scope["partial_scope"] = {}
+        mutations.append(("partial-scope", partial_scope))
+
+        for label, mutated in mutations:
+            with self.subTest(mutation=label):
+                with self.assertRaises(ContractError):
+                    validate_result_semantics(
+                        mutated, check_canonical_ids=False
+                    )
+
+    def test_every_scientific_identifier_is_content_addressed(self) -> None:
+        base = load_json(FIXTURE_DIR / "overlap-k2.json")
+        mutations: list[tuple[str, Any]] = []
+
+        result_id = copy.deepcopy(base)
+        result_id["result_id"] = "0" * 64
+        mutations.append(("result", result_id))
+
+        certificate_id = copy.deepcopy(base)
+        certificate_id["run_certificate"]["certificate_id"] = "0" * 64
+        mutations.append(("certificate", certificate_id))
+
+        run_id = copy.deepcopy(base)
+        run_id["run_id"] = "0" * 64
+        run_id["run_certificate"]["run_id"] = "0" * 64
+        mutations.append(("run", run_id))
+
+        snapshot_id = copy.deepcopy(base)
+        snapshot_id["run_certificate"]["final_budget_snapshot"][
+            "snapshot_id"
+        ] = "0" * 64
+        mutations.append(("snapshot", snapshot_id))
+
+        event_id = copy.deepcopy(base)
+        event_id["critical_catalog"][0]["event_id"] = "0" * 64
+        mutations.append(("event", event_id))
+
+        hyperedge_id = copy.deepcopy(base)
+        hyperedge_id["gabriel_hyperedges"][0]["hyperedge_id"] = "0" * 64
+        mutations.append(("hyperedge", hyperedge_id))
+
+        batch_id = copy.deepcopy(base)
+        batch_id["equal_level_batches"][0]["batch_id"] = "0" * 64
+        mutations.append(("batch", batch_id))
+
+        node_id = copy.deepcopy(base)
+        node_id["forests"][0]["nodes"][0]["node_id"] = "0" * 64
+        mutations.append(("node", node_id))
+
+        forest_id = copy.deepcopy(base)
+        forest_id["forests"][0]["forest_id"] = "0" * 64
+        mutations.append(("forest", forest_id))
+
+        map_id = copy.deepcopy(base)
+        map_id["vertical_maps"][0]["map_id"] = "0" * 64
+        mutations.append(("vertical-map", map_id))
+
+        for label, mutated in mutations:
+            with self.subTest(identifier=label):
+                with self.assertRaises(ContractError):
+                    validate_result_semantics(mutated)
+
+    def test_every_typed_reference_must_resolve(self) -> None:
+        base = load_json(FIXTURE_DIR / "overlap-k2.json")
+        unknown = "0" * 64
+        mutations: list[tuple[str, Any]] = []
+
+        hyperedge_event = copy.deepcopy(base)
+        hyperedge_event["gabriel_hyperedges"][0]["event_id"] = unknown
+        mutations.append(("hyperedge-event", hyperedge_event))
+
+        batch_event = copy.deepcopy(base)
+        batch = next(
+            item for item in batch_event["equal_level_batches"] if item["event_ids"]
+        )
+        batch["event_ids"][0] = unknown
+        mutations.append(("batch-event", batch_event))
+
+        forest_root = copy.deepcopy(base)
+        forest_root["forests"][0]["root_ids"][0] = unknown
+        mutations.append(("forest-root", forest_root))
+
+        node_child = copy.deepcopy(base)
+        merge = next(
+            node
+            for forest in node_child["forests"]
+            for node in forest["nodes"]
+            if node["child_ids"]
+        )
+        merge["child_ids"][0] = unknown
+        mutations.append(("node-child", node_child))
+
+        coverage_batch = copy.deepcopy(base)
+        coverage_batch["coverage_log"][0]["batch_id"] = unknown
+        mutations.append(("coverage-batch", coverage_batch))
+
+        vertical_target = copy.deepcopy(base)
+        vertical_target["vertical_maps"][0]["assignments"][0][
+            "target_node_id"
+        ] = unknown
+        mutations.append(("vertical-target", vertical_target))
+
+        materialized_node = copy.deepcopy(base)
+        materialized_node["materialized_point_sets"][0]["node_id"] = unknown
+        mutations.append(("materialized-node", materialized_node))
+
+        attachment_target = load_json(FIXTURE_DIR / "binary-merge-k2.json")
+        attachment_target["attachments"][0]["target_node_id"] = unknown
+        mutations.append(("attachment-target", attachment_target))
+
+        for label, mutated in mutations:
+            with self.subTest(reference=label):
+                with self.assertRaises(ContractError):
+                    validate_result_semantics(
+                        mutated, check_canonical_ids=False
+                    )
+
+    def test_input_events_and_rationals_remain_semantically_canonical(self) -> None:
+        base = load_json(FIXTURE_DIR / "overlap-k2.json")
+        mutations: list[tuple[str, Any]] = []
+
+        multiplicity = copy.deepcopy(base)
+        multiplicity["embedded_input_points"][0]["multiplicity"] += 1
+        mutations.append(("multiplicity", multiplicity))
+
+        input_hash = copy.deepcopy(base)
+        input_hash["run_certificate"]["input_semantics"]["input_sha256"] = (
+            "0" * 64
+        )
+        mutations.append(("input-hash", input_hash))
+
+        perturbation = copy.deepcopy(base)
+        perturbation["run_certificate"]["input_semantics"][
+            "perturbation_policy"
+        ] = "explicit_symbolic_diagnostic"
+        mutations.append(("perturbation", perturbation))
+
+        similarity = copy.deepcopy(base)
+        similarity["run_certificate"]["input_semantics"][
+            "similarity_transform"
+        ]["scale"]["numerator"] = "2"
+        mutations.append(("similarity", similarity))
+
+        rank = copy.deepcopy(base)
+        rank["critical_catalog"][0]["closed_rank"] += 1
+        mutations.append(("closed-rank", rank))
+
+        support = copy.deepcopy(base)
+        support["critical_catalog"][0]["minimal_support_ids"] = [
+            support["run_certificate"]["input_point_count"] - 1
+        ]
+        mutations.append(("support", support))
+
+        barycentric = copy.deepcopy(base)
+        barycentric["critical_catalog"][0]["barycentric_signs"][0] = -1
+        mutations.append(("barycentric", barycentric))
+
+        role = copy.deepcopy(base)
+        role["critical_catalog"][0]["morse_roles"][0][
+            "local_multiplicity"
+        ] += 1
+        mutations.append(("morse-role", role))
+
+        predicate = copy.deepcopy(base)
+        predicate["critical_catalog"][0]["predicate_status"] = "numeric_failure"
+        mutations.append(("predicate", predicate))
+
+        degeneracy = copy.deepcopy(base)
+        degeneracy["critical_catalog"][0]["degeneracy_class"] = "unsupported"
+        mutations.append(("degeneracy", degeneracy))
+
+        level = copy.deepcopy(base)
+        exact_level = level["critical_catalog"][0]["squared_level_exact"]
+        exact_level["numerator"] = str(2 * int(exact_level["numerator"]))
+        exact_level["denominator"] = str(2 * int(exact_level["denominator"]))
+        mutations.append(("exact-level", level))
+
+        center = copy.deepcopy(base)
+        exact_center = center["critical_catalog"][0][
+            "center_witness_homogeneous"
+        ]
+        for field in ("x_numerator", "y_numerator", "z_numerator"):
+            exact_center[field] = str(2 * int(exact_center[field]))
+        exact_center["denominator"] = str(2 * int(exact_center["denominator"]))
+        mutations.append(("exact-center", center))
+
+        scale = copy.deepcopy(base)
+        exact_scale = scale["run_certificate"]["input_semantics"][
+            "similarity_transform"
+        ]["scale"]
+        exact_scale["numerator"] = "2"
+        exact_scale["denominator"] = "2"
+        mutations.append(("exact-scale", scale))
+
+        for label, mutated in mutations:
+            with self.subTest(invariant=label):
+                with self.assertRaises(ContractError):
+                    validate_result_semantics(
+                        mutated, check_canonical_ids=False
+                    )
+
+    def test_exact_payload_objects_cannot_be_orphaned_from_replay(self) -> None:
+        base = load_json(FIXTURE_DIR / "overlap-k2.json")
+        mutations: list[tuple[str, Any]] = []
+
+        orphan_event = copy.deepcopy(base)
+        event_id = next(
+            event_id
+            for batch in orphan_event["equal_level_batches"]
+            for event_id in batch["event_ids"]
+        )
+        for batch in orphan_event["equal_level_batches"]:
+            batch["event_ids"] = [
+                candidate for candidate in batch["event_ids"] if candidate != event_id
+            ]
+        mutations.append(("event", orphan_event))
+
+        orphan_hyperedge = copy.deepcopy(base)
+        hyperedge_id = next(
+            hyperedge_id
+            for batch in orphan_hyperedge["equal_level_batches"]
+            for hyperedge_id in batch["hyperedge_ids"]
+        )
+        for batch in orphan_hyperedge["equal_level_batches"]:
+            batch["hyperedge_ids"] = [
+                candidate
+                for candidate in batch["hyperedge_ids"]
+                if candidate != hyperedge_id
+            ]
+        mutations.append(("hyperedge", orphan_hyperedge))
+
+        missing_coverage = copy.deepcopy(base)
+        missing_coverage["coverage_log"].pop()
+        mutations.append(("coverage", missing_coverage))
+
+        wrong_materialization = copy.deepcopy(base)
+        point_set = wrong_materialization["materialized_point_sets"][0]
+        point_set["point_ids"] = []
+        mutations.append(("materialization", wrong_materialization))
+
+        wrong_vertical_level = copy.deepcopy(base)
+        assignment = wrong_vertical_level["vertical_maps"][0]["assignments"][0]
+        assignment["at_squared_level"]["numerator"] = str(
+            int(assignment["at_squared_level"]["numerator"]) + 1
+        )
+        mutations.append(("vertical-level", wrong_vertical_level))
+
+        for label, mutated in mutations:
+            with self.subTest(orphan=label):
+                with self.assertRaises(ContractError):
+                    validate_result_semantics(
+                        mutated, check_canonical_ids=False
+                    )
 
     def test_gcp_benchmark_requires_both_cutoffs_and_targeted_shutdown(self) -> None:
         benchmark = copy.deepcopy(self.definitions["BenchmarkRecord"]["examples"][0])

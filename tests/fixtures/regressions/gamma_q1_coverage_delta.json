@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "kind": "morsehgp3d_exact_replay_regression",
+  "fixture_id": "gamma-q1-coverage-delta-v1",
+  "source_fixture": "tests/fixtures/contracts/overlap-k2.json",
+  "order": 2,
+  "squared_level": {
+    "numerator": 17,
+    "denominator": 2
+  },
+  "pre_lot_component": {
+    "root_id": "persistent-root",
+    "active_facet_point_ids": [
+      [0, 1],
+      [1, 3]
+    ],
+    "covered_point_ids": [0, 1, 3]
+  },
+  "gamma_coface": {
+    "simplex_point_ids": [0, 1, 3],
+    "facet_point_ids": [
+      [0, 1],
+      [0, 3],
+      [1, 3]
+    ]
+  },
+  "post_lot_component": {
+    "root_id": "persistent-root",
+    "active_facet_point_ids": [
+      [0, 1],
+      [0, 3],
+      [1, 3]
+    ],
+    "covered_point_ids": [0, 1, 3]
+  },
+  "expected_coverage_delta": {
+    "root_id": "persistent-root",
+    "added_facet_point_ids": [
+      [0, 3]
+    ],
+    "added_point_ids": []
+  },
+  "regression_invariant": "Every Gamma q=1 growth is replay-visible even when the covered point union is unchanged."
+}

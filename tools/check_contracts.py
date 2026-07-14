@@ -114,6 +114,110 @@ def _exact_level_key(level: dict[str, Any]) -> Fraction:
     return Fraction(int(level["numerator"]), int(level["denominator"]))
 
 
+def _canonical_integer(value: Any, *, positive: bool, path: str) -> int:
+    """Parse one canonical arbitrary-precision decimal integer string."""
+
+    if not isinstance(value, str):
+        raise ContractError(f"{path}: expected a canonical decimal string")
+    pattern = r"^[1-9][0-9]*$" if positive else r"^(0|-?[1-9][0-9]*)$"
+    if re.fullmatch(pattern, value) is None:
+        raise ContractError(f"{path}: integer string is not canonical")
+    parsed = int(value)
+    if positive and parsed <= 0:
+        raise ContractError(f"{path}: denominator must be positive")
+    return parsed
+
+
+def validate_canonical_rationals(value: Any, path: str = "$") -> None:
+    """Reject non-reduced exact rational records anywhere in a contract."""
+
+    if isinstance(value, dict):
+        keys = set(value)
+        if {
+            "x_numerator",
+            "y_numerator",
+            "z_numerator",
+            "denominator",
+            "unit",
+        } <= keys:
+            numerators = [
+                _canonical_integer(
+                    value[field], positive=False, path=f"{path}.{field}"
+                )
+                for field in ("x_numerator", "y_numerator", "z_numerator")
+            ]
+            denominator = _canonical_integer(
+                value["denominator"],
+                positive=True,
+                path=f"{path}.denominator",
+            )
+            divisor = math.gcd(
+                math.gcd(abs(numerators[0]), abs(numerators[1])),
+                math.gcd(abs(numerators[2]), denominator),
+            )
+            if divisor != 1:
+                raise ContractError(f"{path}: ExactRational3 is not reduced")
+        elif {"numerator", "denominator", "unit"} <= keys:
+            numerator = _canonical_integer(
+                value["numerator"], positive=False, path=f"{path}.numerator"
+            )
+            if numerator < 0:
+                raise ContractError(f"{path}: ExactLevel numerator must be non-negative")
+            denominator = _canonical_integer(
+                value["denominator"],
+                positive=True,
+                path=f"{path}.denominator",
+            )
+            if math.gcd(numerator, denominator) != 1:
+                raise ContractError(f"{path}: ExactLevel is not reduced")
+        elif keys == {"schema_version", "numerator", "denominator"}:
+            numerator = _canonical_integer(
+                value["numerator"], positive=True, path=f"{path}.numerator"
+            )
+            denominator = _canonical_integer(
+                value["denominator"],
+                positive=True,
+                path=f"{path}.denominator",
+            )
+            if math.gcd(numerator, denominator) != 1:
+                raise ContractError(f"{path}: ExactPositiveRational is not reduced")
+        for key, child in value.items():
+            validate_canonical_rationals(child, f"{path}.{key}")
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            validate_canonical_rationals(child, f"{path}[{index}]")
+
+
+def _canonical_id(
+    actual: Any, record_type: str, projection: Any, context: str
+) -> None:
+    expected = canonical_contract_id(record_type, projection)
+    if actual != expected:
+        raise ContractError(
+            f"{context} is not its canonical MorseHGP3D/v2 identifier"
+        )
+
+
+def _index_records(
+    records: list[dict[str, Any]], id_field: str, context: str
+) -> dict[str, dict[str, Any]]:
+    indexed: dict[str, dict[str, Any]] = {}
+    for record in records:
+        record_id = record[id_field]
+        if record_id in indexed:
+            raise ContractError(f"{context} must have unique {id_field} values")
+        indexed[record_id] = record
+    return indexed
+
+
+def _require_references(
+    references: list[str], indexed: dict[str, Any], context: str
+) -> None:
+    unknown = [reference for reference in references if reference not in indexed]
+    if unknown:
+        raise ContractError(f"{context} references unknown identifiers {unknown!r}")
+
+
 def _is_type(value: Any, expected: str) -> bool:
     if expected == "null":
         return value is None
@@ -356,8 +460,12 @@ def validate_round_trip(value: Any, label: str) -> None:
         raise ContractError(f"{label}: canonical JSON serialization is unstable")
 
 
-def validate_certificate_semantics(certificate: dict[str, Any]) -> None:
+def validate_certificate_semantics(
+    certificate: dict[str, Any], *, check_canonical_ids: bool = True
+) -> None:
     """Check cross-field guarantees that JSON Schema cannot express readably."""
+
+    validate_canonical_rationals(certificate, "run_certificate")
 
     n = certificate["input_point_count"]
     k_eff = certificate["k_eff"]
@@ -532,10 +640,100 @@ def validate_certificate_semantics(certificate: dict[str, Any]) -> None:
     if status == "numeric_failure" and certificate["stop_reason"] != status:
         raise ContractError("numeric_failure status and stop reason must agree")
 
+    _validate_budget_snapshot(
+        certificate["budget_policy"], certificate["final_budget_snapshot"]
+    )
 
-def validate_result_semantics(result: dict[str, Any]) -> None:
+    if check_canonical_ids:
+        snapshot = certificate["final_budget_snapshot"]
+        _canonical_id(
+            snapshot["snapshot_id"],
+            "BudgetSnapshot",
+            {key: value for key, value in snapshot.items() if key != "snapshot_id"},
+            "run_certificate.final_budget_snapshot.snapshot_id",
+        )
+        run_projection = {
+            "input_sha256": certificate["input_semantics"]["input_sha256"],
+            "k_max": certificate["k_max"],
+            "profile": certificate["effective_profile"],
+            "backend": certificate["effective_backend"],
+            "mode": certificate["requested_mode"],
+        }
+        _canonical_id(
+            certificate["run_id"],
+            "Run",
+            run_projection,
+            "run_certificate.run_id",
+        )
+        _canonical_id(
+            certificate["certificate_id"],
+            "RunCertificate",
+            {
+                key: value
+                for key, value in certificate.items()
+                if key != "certificate_id"
+            },
+            "run_certificate.certificate_id",
+        )
+
+
+def _validate_budget_snapshot(
+    policy: dict[str, Any], snapshot: dict[str, Any]
+) -> None:
+    """Validate one closed transactional resource-accounting snapshot."""
+
+    if snapshot["boundary"] != "final":
+        raise ContractError("final_budget_snapshot must use boundary=final")
+    if snapshot["byte_unit"] != policy["byte_unit"]:
+        raise ContractError("budget snapshot byte unit disagrees with its policy")
+    if snapshot["time_unit"] != policy["time_unit"]:
+        raise ContractError("budget snapshot time unit disagrees with its policy")
+
+    for resource in ("device", "host", "scratch", "output"):
+        policy_limit = policy[f"{resource}_budget_bytes"]
+        limit = snapshot[f"{resource}_limit_bytes"]
+        used = snapshot[f"{resource}_used_bytes"]
+        reserved = snapshot[f"{resource}_reserved_bytes"]
+        remaining = snapshot[f"{resource}_remaining_bytes"]
+        if limit != policy_limit:
+            raise ContractError(
+                f"budget snapshot {resource} limit disagrees with its policy"
+            )
+        if limit is None:
+            if remaining is not None:
+                raise ContractError(
+                    f"an unlimited {resource} budget must have null remaining bytes"
+                )
+            continue
+        expected_remaining = limit - used - reserved
+        if expected_remaining < 0 or remaining != expected_remaining:
+            raise ContractError(
+                f"budget snapshot {resource} accounting is not closed"
+            )
+
+    time_limit = snapshot["time_limit_s"]
+    if time_limit != policy["time_budget_s"]:
+        raise ContractError("budget snapshot time limit disagrees with its policy")
+    if time_limit is None:
+        if snapshot["remaining_s"] is not None:
+            raise ContractError("an unlimited time budget must have null remaining time")
+    else:
+        expected_remaining = max(0.0, time_limit - snapshot["elapsed_s"])
+        remaining = snapshot["remaining_s"]
+        if remaining is None or not math.isclose(
+            remaining, expected_remaining, rel_tol=0.0, abs_tol=1e-12
+        ):
+            raise ContractError("budget snapshot time accounting is not closed")
+
+
+def validate_result_semantics(
+    result: dict[str, Any], *, check_canonical_ids: bool = True
+) -> None:
     certificate = result["run_certificate"]
-    validate_certificate_semantics(certificate)
+    validate_canonical_rationals(result)
+    validate_certificate_semantics(
+        certificate, check_canonical_ids=check_canonical_ids
+    )
 
     equal_fields = {
         "run_id": "run_id",
@@ -704,6 +902,1227 @@ def validate_result_semantics(result: dict[str, Any]) -> None:
     for vertical_map in result["vertical_maps"]:
         if vertical_map["target_order"] != vertical_map["source_order"] - 1:
             raise ContractError("vertical maps must target the adjacent lower order")
+
+    if certificate["public_status"] == "exact":
+        if "partial_scope" in result:
+            raise ContractError("an exact hierarchy must not carry partial_scope")
+        if any(not forest["complete"] for forest in result["forests"]):
+            raise ContractError("an exact hierarchy contains an incomplete forest")
+        for batch in result["equal_level_batches"]:
+            if (
+                not batch["events_complete"]
+                or not batch["attachments_complete"]
+                or batch["batch_status"] != "closed"
+            ):
+                raise ContractError("an exact hierarchy contains an open batch")
+        for vertical_map in result["vertical_maps"]:
+            if not vertical_map["complete"]:
+                raise ContractError("an exact hierarchy contains an incomplete vertical map")
+            if vertical_map["naturality_failures"] != 0:
+                raise ContractError("an exact hierarchy has a vertical naturality failure")
+
+    _validate_result_identifiers_and_references(
+        result, check_canonical_ids=check_canonical_ids
+    )
+
+
+def _validate_result_identifiers_and_references(
+    result: dict[str, Any], *, check_canonical_ids: bool
+) -> None:
+    """Validate the content-addressed result graph and every typed reference."""
+
+    certificate = result["run_certificate"]
+    n = certificate["input_point_count"]
+
+    points = result.get("embedded_input_points")
+    if points is not None:
+        if len(points) != n:
+            raise ContractError(
+                "embedded_input_points length must equal input_point_count"
+            )
+        point_ids = [point["point_id"] for point in points]
+        if point_ids != list(range(n)):
+            raise ContractError("embedded point IDs must be contiguous from zero")
+        coordinate_keys: set[tuple[str, str, str]] = set()
+        source_indices: set[int] = set()
+        for point in points:
+            if point["multiplicity"] != len(point["source_indices"]):
+                raise ContractError(
+                    "an embedded point multiplicity disagrees with source_indices"
+                )
+            coordinate_key = tuple(point["coordinate_bits"])
+            if coordinate_key in coordinate_keys:
+                raise ContractError("embedded canonical points repeat coordinates")
+            coordinate_keys.add(coordinate_key)
+            overlap = source_indices.intersection(point["source_indices"])
+            if overlap:
+                raise ContractError("embedded points repeat source indices")
+            source_indices.update(point["source_indices"])
+        input_projection = [
+            {
+                "point_id": point["point_id"],
+                "source_indices": point["source_indices"],
+                "multiplicity": point["multiplicity"],
+                "coordinate_bits": point["coordinate_bits"],
+            }
+            for point in points
+        ]
+        _canonical_id(
+            certificate["input_semantics"]["input_sha256"],
+            "Input",
+            input_projection,
+            "run_certificate.input_semantics.input_sha256",
+        )
+
+    input_semantics = certificate["input_semantics"]
+    similarity = input_semantics["similarity_transform"]
+    if not similarity["applied"]:
+        if similarity["scale"] != {
+            "schema_version": similarity["scale"]["schema_version"],
+            "numerator": "1",
+            "denominator": "1",
+        }:
+            raise ContractError("an unapplied similarity must have unit scale")
+        translation = similarity["translation"]
+        if any(
+            translation[field] != "0"
+            for field in ("x_numerator", "y_numerator", "z_numerator")
+        ) or translation["denominator"] != "1":
+            raise ContractError("an unapplied similarity must have zero translation")
+    if (
+        certificate["public_status"] == "exact"
+        and input_semantics["perturbation_policy"] != "none"
+    ):
+        raise ContractError("an exact result cannot use symbolic perturbation")
+
+    events = _index_records(result["critical_catalog"], "event_id", "critical_catalog")
+    cofaces = _index_records(result["gamma_cofaces"], "coface_id", "gamma_cofaces")
+    hyperedges = _index_records(
+        result["gabriel_hyperedges"], "hyperedge_id", "gabriel_hyperedges"
+    )
+    attachments = _index_records(result["attachments"], "attachment_id", "attachments")
+    batches = _index_records(
+        result["equal_level_batches"], "batch_id", "equal_level_batches"
+    )
+    forests = _index_records(result["forests"], "forest_id", "forests")
+    vertical_maps = _index_records(result["vertical_maps"], "map_id", "vertical_maps")
+
+    exact_result = certificate["public_status"] == "exact"
+    for event in events.values():
+        _validate_critical_event(event, n, certificate["k_eff"], exact_result)
+    if exact_result:
+        rank_one_shells = sorted(
+            tuple(event["shell_ids"])
+            for event in events.values()
+            if event["closed_rank"] == 1
+        )
+        if rank_one_shells != [(point_id,) for point_id in range(n)]:
+            raise ContractError(
+                "an exact critical catalog must contain one rank-one birth per point"
+            )
+
+    for hyperedge in hyperedges.values():
+        _validate_gabriel_hyperedge(
+            hyperedge,
+            events[hyperedge["event_id"]]
+            if hyperedge["event_id"] in events
+            else None,
+            n,
+            certificate["k_eff"],
+        )
+
+    counters = certificate["work_and_memory_counters"]
+    if counters["accepted_events"] != len(events):
+        raise ContractError("accepted_events must equal the critical_catalog size")
+    if counters["candidate_events"] != (
+        counters["accepted_events"] + counters["rejected_events"]
+    ):
+        raise ContractError("candidate event accounting is not closed")
+    if counters["gamma_cofaces_emitted"] != len(cofaces):
+        raise ContractError("gamma_cofaces_emitted must equal the serialized count")
+    if counters["hyperedges_emitted"] != len(hyperedges):
+        raise ContractError("hyperedges_emitted must equal the serialized count")
+
+    if check_canonical_ids:
+        for event in events.values():
+            _canonical_id(
+                event["event_id"],
+                "CriticalEvent",
+                {
+                    "interior_ids": event["interior_ids"],
+                    "shell_ids": event["shell_ids"],
+                    "minimal_support_ids": event["minimal_support_ids"],
+                    "center_witness_homogeneous": event[
+                        "center_witness_homogeneous"
+                    ],
+                    "squared_level_exact": event["squared_level_exact"],
+                },
+                "critical_catalog.event_id",
+            )
+        for hyperedge in hyperedges.values():
+            _canonical_id(
+                hyperedge["hyperedge_id"],
+                "GabrielHyperedge",
+                {
+                    "event_id": hyperedge["event_id"],
+                    "order": hyperedge["order"],
+                    "simplex_point_ids": hyperedge["simplex_point_ids"],
+                    "facet_point_ids": hyperedge["facet_point_ids"],
+                    "strict_arm_point_ids": hyperedge["strict_arm_point_ids"],
+                    "squared_level_exact": hyperedge["squared_level_exact"],
+                },
+                "gabriel_hyperedges.hyperedge_id",
+            )
+        for attachment in attachments.values():
+            _canonical_id(
+                attachment["attachment_id"],
+                "Attachment",
+                {
+                    "event_id": attachment["event_id"],
+                    "order": attachment["order"],
+                    "removed_shell_id": attachment["removed_shell_id"],
+                },
+                "attachments.attachment_id",
+            )
+        for batch in batches.values():
+            _canonical_id(
+                batch["batch_id"],
+                "EqualLevelBatch",
+                {
+                    "order": batch["order"],
+                    "squared_level_exact": batch["squared_level_exact"],
+                    "event_ids": batch["event_ids"],
+                    "gamma_coface_ids": batch["gamma_coface_ids"],
+                    "hyperedge_ids": batch["hyperedge_ids"],
+                    "attachment_ids": batch["attachment_ids"],
+                },
+                "equal_level_batches.batch_id",
+            )
+
+    forest_by_order: dict[int, dict[str, Any]] = {}
+    nodes: dict[str, dict[str, Any]] = {}
+    node_order: dict[str, int] = {}
+    nodes_by_order: dict[int, dict[str, dict[str, Any]]] = {}
+    for forest in result["forests"]:
+        order = forest["order"]
+        if order in forest_by_order:
+            raise ContractError("forests must have unique order values")
+        forest_by_order[order] = forest
+        local_nodes = _index_records(
+            forest["nodes"], "node_id", f"forest order {order} nodes"
+        )
+        nodes_by_order[order] = local_nodes
+        for node_id, node in local_nodes.items():
+            if node_id in nodes:
+                raise ContractError("merge node IDs must be globally unique")
+            nodes[node_id] = node
+            node_order[node_id] = order
+
+    for hyperedge in hyperedges.values():
+        _require_references(
+            [hyperedge["event_id"]], events, "a Gabriel hyperedge"
+        )
+    for attachment in attachments.values():
+        _require_references([attachment["event_id"]], events, "an attachment")
+        _require_references(
+            [attachment["target_node_id"]], nodes, "an attachment target"
+        )
+        if node_order[attachment["target_node_id"]] != attachment["order"]:
+            raise ContractError("an attachment target belongs to the wrong order")
+        event = events[attachment["event_id"]]
+        target = nodes[attachment["target_node_id"]]
+        expected_arm = sorted(
+            (
+                set(event["interior_ids"])
+                | set(event["shell_ids"])
+            )
+            - {attachment["removed_shell_id"]}
+        )
+        if (
+            event["saddle_order"] != attachment["order"]
+            or attachment["removed_shell_id"] not in event["shell_ids"]
+            or attachment["arm_point_ids"] != expected_arm
+            or _exact_level_key(attachment["event_squared_level"])
+            != _exact_level_key(event["squared_level_exact"])
+        ):
+            raise ContractError("an attachment disagrees with its critical-event arm")
+        if not set(attachment["arm_point_ids"]) <= set(target["covered_point_ids"]):
+            raise ContractError("an attachment target does not cover its arm")
+        if _exact_level_key(target["squared_level"]) >= _exact_level_key(
+            attachment["event_squared_level"]
+        ):
+            raise ContractError("an attachment target is not at a strict lower level")
+        previous_label = attachment["arm_point_ids"]
+        previous_level = attachment["event_squared_level"]
+        for expected_index, step in enumerate(attachment["descent_path"]):
+            if step["step_index"] != expected_index:
+                raise ContractError("attachment descent step indices must be contiguous")
+            if step["from_point_ids"] != previous_label or _exact_level_key(
+                step["from_squared_level"]
+            ) != _exact_level_key(previous_level):
+                raise ContractError("an attachment descent path is not causally chained")
+            if len(step["from_point_ids"]) != attachment["order"] or len(
+                step["to_point_ids"]
+            ) != attachment["order"]:
+                raise ContractError("an attachment descent step has the wrong order")
+            expected_shared = sorted(
+                set(step["from_point_ids"]).intersection(step["to_point_ids"])
+            )
+            if (
+                step["shared_facet_point_ids"] != expected_shared
+                or len(expected_shared) != max(1, attachment["order"] - 1)
+            ):
+                raise ContractError("an attachment descent step has the wrong shared facet")
+            if _exact_level_key(step["to_squared_level"]) >= _exact_level_key(
+                step["from_squared_level"]
+            ):
+                raise ContractError("an attachment descent step is not strictly decreasing")
+            previous_label = step["to_point_ids"]
+            previous_level = step["to_squared_level"]
+        if not set(previous_label) <= set(target["covered_point_ids"]):
+            raise ContractError("an attachment descent does not terminate in its target")
+        if _exact_level_key(target["squared_level"]) > _exact_level_key(
+            previous_level
+        ):
+            raise ContractError("an attachment descent terminates below its target birth")
+
+    assigned_event_ids: list[str] = []
+    assigned_hyperedge_ids: list[str] = []
+    assigned_attachment_ids: list[str] = []
+    for batch in batches.values():
+        _require_references(batch["event_ids"], events, "a batch event list")
+        _require_references(
+            batch["gamma_coface_ids"], cofaces, "a batch Gamma list"
+        )
+        _require_references(
+            batch["hyperedge_ids"], hyperedges, "a batch hyperedge list"
+        )
+        _require_references(
+            batch["attachment_ids"], attachments, "a batch attachment list"
+        )
+        assigned_event_ids.extend(batch["event_ids"])
+        assigned_hyperedge_ids.extend(batch["hyperedge_ids"])
+        assigned_attachment_ids.extend(batch["attachment_ids"])
+        order = batch["order"]
+        level = _exact_level_key(batch["squared_level_exact"])
+        for event_id in batch["event_ids"]:
+            event = events[event_id]
+            if _exact_level_key(event["squared_level_exact"]) != level or order not in {
+                event["birth_order"],
+                event["saddle_order"],
+            }:
+                raise ContractError("a batch contains an event at the wrong order or level")
+        for hyperedge_id in batch["hyperedge_ids"]:
+            hyperedge = hyperedges[hyperedge_id]
+            if hyperedge["order"] != order or _exact_level_key(
+                hyperedge["squared_level_exact"]
+            ) != level:
+                raise ContractError("a batch contains a hyperedge at the wrong order or level")
+        for attachment_id in batch["attachment_ids"]:
+            attachment = attachments[attachment_id]
+            if attachment["order"] != order or _exact_level_key(
+                attachment["event_squared_level"]
+            ) != level:
+                raise ContractError("a batch contains an attachment at the wrong order or level")
+        for field in ("pre_lot_components", "post_lot_components"):
+            component_ids: set[str] = set()
+            active_facets: set[tuple[int, ...]] = set()
+            for component in batch[field]:
+                component_id = component["component_id"]
+                if component_id in component_ids:
+                    raise ContractError("a batch repeats a component identity")
+                component_ids.add(component_id)
+                _require_references([component_id], nodes, f"batch.{field}")
+                if node_order[component_id] != order:
+                    raise ContractError("a batch component belongs to the wrong order")
+                component_facets = [
+                    tuple(facet) for facet in component["active_facet_point_ids"]
+                ]
+                if any(
+                    len(facet) != order
+                    or tuple(sorted(set(facet))) != facet
+                    or any(point_id < 0 or point_id >= n for point_id in facet)
+                    for facet in component_facets
+                ):
+                    raise ContractError(
+                        "a batch component contains a noncanonical active facet"
+                    )
+                if active_facets.intersection(component_facets):
+                    raise ContractError(
+                        "a batch snapshot assigns one facet to multiple components"
+                    )
+                active_facets.update(component_facets)
+                expected_covered = sorted(
+                    {point_id for facet in component_facets for point_id in facet}
+                )
+                if component["covered_point_ids"] != expected_covered:
+                    raise ContractError(
+                        "a batch component coverage disagrees with its active facets"
+                    )
+        for delta in batch["coverage_deltas"]:
+            if delta["batch_id"] != batch["batch_id"] or delta["order"] != order:
+                raise ContractError("a batch coverage delta has inconsistent ownership")
+            _require_references(
+                [delta["root_node_id"]], nodes, "a batch coverage delta"
+            )
+            if node_order[delta["root_node_id"]] != order:
+                raise ContractError("a coverage delta root belongs to the wrong order")
+
+    if exact_result:
+        for assigned_ids, records, label in (
+            (assigned_event_ids, events, "critical event"),
+            (assigned_hyperedge_ids, hyperedges, "Gabriel hyperedge"),
+            (assigned_attachment_ids, attachments, "attachment"),
+        ):
+            assignment_counts = Counter(assigned_ids)
+            if set(assignment_counts) != set(records) or any(
+                count != 1 for count in assignment_counts.values()
+            ):
+                raise ContractError(
+                    f"every exact {label} must occur in exactly one batch"
+                )
+
+    for order in range(1, certificate["k_eff"] + 1):
+        order_batches = [
+            batch for batch in batches.values() if batch["order"] == order
+        ]
+        if certificate["batches_complete_by_order"][order - 1]:
+            if any(
+                batch["batch_status"] != "closed"
+                or not batch["events_complete"]
+                for batch in order_batches
+            ):
+                raise ContractError(
+                    "a complete batch order contains an open or event-incomplete batch"
+                )
+            hyperedge_counts = Counter(
+                hyperedge_id
+                for batch in order_batches
+                for hyperedge_id in batch["hyperedge_ids"]
+            )
+            if any(
+                hyperedge_counts[hyperedge_id] != 1
+                for hyperedge_id, hyperedge in hyperedges.items()
+                if hyperedge["order"] == order
+            ):
+                raise ContractError(
+                    "a complete batch order must assign every Gabriel hyperedge once"
+                )
+            if result["profile"] == "full_pi0":
+                event_counts = Counter(
+                    event_id
+                    for batch in order_batches
+                    for event_id in batch["event_ids"]
+                )
+                if any(
+                    event_counts[event_id] != 1
+                    for event_id, event in events.items()
+                    if order in {event["birth_order"], event["saddle_order"]}
+                ):
+                    raise ContractError(
+                        "a complete full_pi0 order must assign every active event once"
+                    )
+        if certificate["attachments_complete_by_order"][order - 1]:
+            if any(not batch["attachments_complete"] for batch in order_batches):
+                raise ContractError(
+                    "a complete attachment order contains an incomplete batch"
+                )
+            attachment_counts = Counter(
+                attachment_id
+                for batch in order_batches
+                for attachment_id in batch["attachment_ids"]
+            )
+            if any(
+                attachment_counts[attachment_id] != 1
+                for attachment_id, attachment in attachments.items()
+                if attachment["order"] == order
+            ):
+                raise ContractError(
+                    "a complete attachment order must assign every attachment once"
+                )
+
+    for order, forest in forest_by_order.items():
+        local_nodes = nodes_by_order[order]
+        child_ids: set[str] = set()
+        child_parent_counts: Counter[str] = Counter()
+        for node in local_nodes.values():
+            _require_references(node["child_ids"], local_nodes, "a merge node child list")
+            _require_references(node["event_ids"], events, "a merge node event list")
+            if node["kind"] == "birth" and node["child_ids"]:
+                raise ContractError("a birth node cannot have children")
+            if node["kind"] == "merge" and len(node["child_ids"]) < 2:
+                raise ContractError("a merge node must have at least two children")
+            if node["kind"] == "merge" and node["batch_id"] is None:
+                raise ContractError("a merge node must reference its equal-level batch")
+            for child_id in node["child_ids"]:
+                if _exact_level_key(local_nodes[child_id]["squared_level"]) >= (
+                    _exact_level_key(node["squared_level"])
+                ):
+                    raise ContractError("a merge child must be at a strictly lower level")
+                child_ids.add(child_id)
+                child_parent_counts[child_id] += 1
+            if node["kind"] == "merge":
+                expected_covered = sorted(
+                    {
+                        point_id
+                        for child_id in node["child_ids"]
+                        for point_id in local_nodes[child_id]["covered_point_ids"]
+                    }
+                )
+            else:
+                expected_covered = sorted(
+                    {
+                        point_id
+                        for event_id in node["event_ids"]
+                        for point_id in (
+                            events[event_id]["interior_ids"]
+                            + events[event_id]["shell_ids"]
+                        )
+                    }
+                )
+            if node["covered_point_ids"] != expected_covered:
+                raise ContractError(
+                    "a merge node coverage disagrees with its children or birth events"
+                )
+            node_level = _exact_level_key(node["squared_level"])
+            for event_id in node["event_ids"]:
+                event = events[event_id]
+                if order not in {event["birth_order"], event["saddle_order"]} or (
+                    _exact_level_key(event["squared_level_exact"]) != node_level
+                ):
+                    raise ContractError(
+                        "a merge node cites an event at the wrong order or level"
+                    )
+                if not any(
+                    candidate["order"] == order
+                    and _exact_level_key(candidate["squared_level_exact"])
+                    == node_level
+                    and event_id in candidate["event_ids"]
+                    for candidate in batches.values()
+                ):
+                    raise ContractError(
+                        "a merge node event is absent from its equal-level batch"
+                    )
+            batch_id = node["batch_id"]
+            if batch_id is not None:
+                _require_references([batch_id], batches, "a merge node batch")
+                batch = batches[batch_id]
+                if batch["order"] != order or _exact_level_key(
+                    batch["squared_level_exact"]
+                ) != _exact_level_key(node["squared_level"]):
+                    raise ContractError("a merge node batch has the wrong order or level")
+            if check_canonical_ids:
+                _canonical_id(
+                    node["node_id"],
+                    "MergeNode",
+                    {
+                        "order": order,
+                        "profile": result["profile"],
+                        "kind": node["kind"],
+                        "squared_level": node["squared_level"],
+                        "child_ids": node["child_ids"],
+                        "event_ids": node["event_ids"],
+                        "batch_id": node["batch_id"],
+                    },
+                    "forests.nodes.node_id",
+                )
+        if any(count != 1 for count in child_parent_counts.values()):
+            raise ContractError("a forest node must have at most one parent")
+        _require_references(forest["root_ids"], local_nodes, "forest.root_ids")
+        expected_roots = set(local_nodes) - child_ids
+        if set(forest["root_ids"]) != expected_roots:
+            raise ContractError("forest.root_ids do not equal the DAG roots")
+        for delta in forest["coverage_log"]:
+            _validate_coverage_reference(delta, batches, nodes, node_order, order)
+        if check_canonical_ids:
+            _canonical_id(
+                forest["forest_id"],
+                "MergeForest",
+                {
+                    "order": order,
+                    "profile": result["profile"],
+                    "forest_semantics": result["forest_semantics"],
+                    "node_ids": [node["node_id"] for node in forest["nodes"]],
+                    "root_ids": forest["root_ids"],
+                    "coverage_log": forest["coverage_log"],
+                },
+                "forests.forest_id",
+            )
+
+    for delta in result["coverage_log"]:
+        _validate_coverage_reference(delta, batches, nodes, node_order, delta["order"])
+
+    result_coverage = Counter(canonical_json(delta) for delta in result["coverage_log"])
+    forest_coverage = Counter(
+        canonical_json(delta)
+        for forest in result["forests"]
+        for delta in forest["coverage_log"]
+    )
+    batch_coverage = Counter(
+        canonical_json(delta)
+        for batch in result["equal_level_batches"]
+        for delta in batch["coverage_deltas"]
+    )
+    if result_coverage != forest_coverage or result_coverage != batch_coverage:
+        raise ContractError(
+            "result, forest, and batch coverage logs must encode the same deltas"
+        )
+
+    materialized_keys: set[tuple[int, str]] = set()
+    for point_set in result["materialized_point_sets"]:
+        _require_references(
+            [point_set["node_id"]], nodes, "a materialized point set"
+        )
+        if node_order[point_set["node_id"]] != point_set["order"]:
+            raise ContractError("a materialized point set belongs to the wrong order")
+        materialized_key = (point_set["order"], point_set["node_id"])
+        if materialized_key in materialized_keys:
+            raise ContractError("a merge node has multiple materialized point sets")
+        materialized_keys.add(materialized_key)
+        if point_set["point_ids"] != nodes[point_set["node_id"]][
+            "covered_point_ids"
+        ]:
+            raise ContractError(
+                "a materialized point set disagrees with its merge node coverage"
+            )
+
+    for vertical_map in vertical_maps.values():
+        source_order = vertical_map["source_order"]
+        target_order = vertical_map["target_order"]
+        source_nodes = nodes_by_order.get(source_order, {})
+        target_nodes = nodes_by_order.get(target_order, {})
+        assigned_source_ids: set[str] = set()
+        for assignment in vertical_map["assignments"]:
+            _require_references(
+                [assignment["source_node_id"]],
+                source_nodes,
+                "a vertical assignment source",
+            )
+            _require_references(
+                [assignment["target_node_id"]],
+                target_nodes,
+                "a vertical assignment target",
+            )
+            _require_references(
+                assignment["proof_reference_ids"],
+                events,
+                "a vertical assignment proof list",
+            )
+            if assignment["source_node_id"] in assigned_source_ids:
+                raise ContractError(
+                    "a vertical map repeats an assignment source node"
+                )
+            assigned_source_ids.add(assignment["source_node_id"])
+            source_node = source_nodes[assignment["source_node_id"]]
+            target_node = target_nodes[assignment["target_node_id"]]
+            if _exact_level_key(assignment["at_squared_level"]) != _exact_level_key(
+                source_node["squared_level"]
+            ):
+                raise ContractError(
+                    "a vertical assignment must be recorded at its source-node level"
+                )
+            if _exact_level_key(target_node["squared_level"]) > _exact_level_key(
+                assignment["at_squared_level"]
+            ):
+                raise ContractError(
+                    "a vertical assignment targets a node born above its level"
+                )
+            if not set(source_node["covered_point_ids"]) <= set(
+                target_node["covered_point_ids"]
+            ):
+                raise ContractError(
+                    "a vertical assignment target does not cover its source"
+                )
+            if set(assignment["proof_reference_ids"]) != set(
+                source_node["event_ids"]
+            ):
+                raise ContractError(
+                    "a vertical assignment proof does not identify its source events"
+                )
+        if vertical_map["complete"] and assigned_source_ids != set(source_nodes):
+            raise ContractError(
+                "a complete vertical map must assign every source forest node"
+            )
+        if vertical_map["naturality_failures"] > vertical_map[
+            "naturality_squares_checked"
+        ]:
+            raise ContractError("vertical naturality failures exceed checked squares")
+        if check_canonical_ids:
+            _canonical_id(
+                vertical_map["map_id"],
+                "VerticalMap",
+                {
+                    "source_order": source_order,
+                    "target_order": target_order,
+                    "assignments": vertical_map["assignments"],
+                },
+                "vertical_maps.map_id",
+            )
+
+    if certificate["vertical_maps_complete"]:
+        expected_sources = set(range(2, certificate["k_eff"] + 1))
+        if set(vertical_map["source_order"] for vertical_map in vertical_maps.values()) != (
+            expected_sources
+        ) or any(not vertical_map["complete"] for vertical_map in vertical_maps.values()):
+            raise ContractError(
+                "vertical_maps_complete requires every adjacent complete vertical map"
+            )
+
+    partial_scope = result.get("partial_scope")
+    if partial_scope is not None:
+        _require_references(
+            partial_scope["verified_event_ids"],
+            events,
+            "partial_scope.verified_event_ids",
+        )
+        locus_ids = [locus["locus_id"] for locus in partial_scope["unresolved_loci"]]
+        if len(locus_ids) != len(set(locus_ids)):
+            raise ContractError("partial_scope unresolved locus IDs must be unique")
+        if set(certificate["unresolved_locus_ids"]) != set(locus_ids):
+            raise ContractError(
+                "run_certificate unresolved_locus_ids must match partial_scope"
+            )
+        _validate_partial_scope(
+            partial_scope,
+            certificate,
+            events,
+            n,
+            check_canonical_ids=check_canonical_ids,
+        )
+    elif certificate["unresolved_locus_ids"]:
+        raise ContractError("unresolved_locus_ids require a partial_scope")
+
+    if exact_result and result["profile"] == "hgp_reduced":
+        _validate_exact_reduced_replay(
+            result,
+            events,
+            cofaces,
+            batches,
+            forest_by_order,
+            nodes_by_order,
+        )
+
+    if check_canonical_ids:
+        scientific_projection = {
+            "input_sha256": certificate["input_semantics"]["input_sha256"],
+            "profile": result["profile"],
+            "forest_semantics": result.get("forest_semantics"),
+            "event_ids": [event["event_id"] for event in result["critical_catalog"]],
+            "hyperedge_ids": [
+                hyperedge["hyperedge_id"] for hyperedge in result["gabriel_hyperedges"]
+            ],
+            "gamma_coface_ids": [
+                coface["coface_id"] for coface in result["gamma_cofaces"]
+            ],
+            "attachment_ids": [
+                attachment["attachment_id"] for attachment in result["attachments"]
+            ],
+            "batch_ids": [batch["batch_id"] for batch in result["equal_level_batches"]],
+            "forest_ids": [forest["forest_id"] for forest in result["forests"]],
+            "vertical_map_ids": [
+                vertical_map["map_id"] for vertical_map in result["vertical_maps"]
+            ],
+        }
+        _canonical_id(
+            result["result_id"],
+            "MorseHGP3DResult",
+            scientific_projection,
+            "result.result_id",
+        )
+
+
+def _validate_critical_event(
+    event: dict[str, Any], n: int, k_eff: int, exact_result: bool
+) -> None:
+    interior = event["interior_ids"]
+    shell = event["shell_ids"]
+    support = event["minimal_support_ids"]
+    for field, point_ids in (
+        ("interior_ids", interior),
+        ("shell_ids", shell),
+        ("minimal_support_ids", support),
+    ):
+        if any(point_id < 0 or point_id >= n for point_id in point_ids):
+            raise ContractError(f"a critical event has an out-of-range {field}")
+    if set(interior).intersection(shell):
+        raise ContractError("critical-event interior and shell must be disjoint")
+    if not set(support) <= set(shell):
+        raise ContractError("critical-event minimal support must lie on its shell")
+    if event["closed_rank"] != len(interior) + len(shell):
+        raise ContractError("critical-event closed_rank disagrees with interior and shell")
+    if len(event["barycentric_signs"]) != len(support):
+        raise ContractError("critical-event barycentric signs do not match its support")
+    if event["predicate_status"] == "certified_exact" and any(
+        sign != 1 for sign in event["barycentric_signs"]
+    ):
+        raise ContractError("a certified critical support is not relatively interior")
+
+    rank = event["closed_rank"]
+    expected_birth = rank if rank <= k_eff else None
+    expected_saddle = rank - 1 if 2 <= rank <= k_eff + 1 else None
+    if event["birth_order"] != expected_birth:
+        raise ContractError("critical-event birth_order disagrees with closed_rank")
+    if event["saddle_order"] != expected_saddle:
+        raise ContractError("critical-event saddle_order disagrees with closed_rank")
+
+    roles_by_order: dict[int, dict[str, Any]] = {}
+    for role in event["morse_roles"]:
+        if role["order"] in roles_by_order:
+            raise ContractError("critical-event Morse roles repeat an order")
+        roles_by_order[role["order"]] = role
+    expected_orders = {
+        order for order in (expected_birth, expected_saddle) if order is not None
+    }
+    if set(roles_by_order) != expected_orders:
+        raise ContractError("critical-event Morse roles do not match its active orders")
+    if expected_birth is not None:
+        role = roles_by_order[expected_birth]
+        if (
+            role["morse_index"] != 0
+            or role["local_multiplicity"] != 1
+            or role["arm_count"] != 0
+        ):
+            raise ContractError("a critical birth has an incoherent Morse role")
+    if expected_saddle is not None:
+        role = roles_by_order[expected_saddle]
+        if (
+            role["morse_index"] != 1
+            or role["arm_count"] != len(shell)
+            or role["local_multiplicity"] != len(shell) - 1
+        ):
+            raise ContractError("a critical saddle has an incoherent Morse role")
+
+    if exact_result:
+        if event["predicate_status"] != "certified_exact":
+            raise ContractError("an exact result contains an uncertified critical event")
+        if event["degeneracy_class"] == "unsupported":
+            raise ContractError("an exact result contains an unsupported critical event")
+
+
+def _validate_gabriel_hyperedge(
+    hyperedge: dict[str, Any],
+    event: dict[str, Any] | None,
+    n: int,
+    k_eff: int,
+) -> None:
+    """Validate the complete geometric projection of one Gabriel hyperedge."""
+
+    order = hyperedge["order"]
+    simplex = hyperedge["simplex_point_ids"]
+    if order < 1 or order > k_eff:
+        raise ContractError("a Gabriel hyperedge order is outside 1..k_eff")
+    if (
+        len(simplex) != order + 1
+        or simplex != sorted(set(simplex))
+        or any(point_id < 0 or point_id >= n for point_id in simplex)
+    ):
+        raise ContractError(
+            "a Gabriel hyperedge simplex is not a canonical order+1 point label"
+        )
+    expected_facets = sorted(
+        [list(facet) for facet in combinations(simplex, order)], key=canonical_json
+    )
+    if hyperedge["facet_point_ids"] != expected_facets:
+        raise ContractError("a Gabriel hyperedge does not list all canonical facets")
+    if hyperedge["covered_point_ids"] != simplex:
+        raise ContractError("a Gabriel hyperedge coverage must equal its simplex")
+    if not 0 <= hyperedge["star_pivot_facet_index"] < len(expected_facets):
+        raise ContractError("a Gabriel hyperedge pivot facet index is out of range")
+    if event is None:
+        raise ContractError("a Gabriel hyperedge references an unknown critical event")
+    event_label = sorted(event["interior_ids"] + event["shell_ids"])
+    if (
+        event_label != simplex
+        or event["saddle_order"] != order
+        or _exact_level_key(event["squared_level_exact"])
+        != _exact_level_key(hyperedge["squared_level_exact"])
+    ):
+        raise ContractError(
+            "a Gabriel hyperedge disagrees with its geometric critical event"
+        )
+    expected_arms = sorted(
+        [
+            sorted(point_id for point_id in simplex if point_id != shell_id)
+            for shell_id in event["shell_ids"]
+        ],
+        key=canonical_json,
+    )
+    if hyperedge["strict_arm_point_ids"] != expected_arms:
+        raise ContractError("a Gabriel hyperedge strict arms disagree with its shell")
+
+
+def _component_snapshot(
+    components: list[dict[str, Any]],
+) -> dict[str, tuple[tuple[tuple[int, ...], ...], tuple[int, ...]]]:
+    return {
+        component["component_id"]: (
+            tuple(tuple(facet) for facet in component["active_facet_point_ids"]),
+            tuple(component["covered_point_ids"]),
+        )
+        for component in components
+    }
+
+
+def _validate_exact_reduced_replay(
+    result: dict[str, Any],
+    events: dict[str, dict[str, Any]],
+    cofaces: dict[str, dict[str, Any]],
+    batches: dict[str, dict[str, Any]],
+    forests: dict[int, dict[str, Any]],
+    nodes_by_order: dict[int, dict[str, dict[str, Any]]],
+) -> None:
+    """Replay every exact reduced Gamma batch from its strict-sublevel state."""
+
+    gamma_keys = {
+        (
+            coface["order"],
+            tuple(coface["simplex_point_ids"]),
+            _exact_level_key(coface["squared_level_exact"]),
+        )
+        for coface in cofaces.values()
+    }
+    for hyperedge in result["gabriel_hyperedges"]:
+        key = (
+            hyperedge["order"],
+            tuple(hyperedge["simplex_point_ids"]),
+            _exact_level_key(hyperedge["squared_level_exact"]),
+        )
+        if key not in gamma_keys:
+            raise ContractError(
+                "an exact Gabriel hyperedge has no matching exhaustive Gamma coface"
+            )
+
+    for order in range(1, result["k_eff"] + 1):
+        forest = forests[order]
+        local_nodes = nodes_by_order[order]
+        ordered_batches = sorted(
+            (batch for batch in batches.values() if batch["order"] == order),
+            key=lambda batch: _exact_level_key(batch["squared_level_exact"]),
+        )
+        previous_post: dict[
+            str, tuple[tuple[tuple[int, ...], ...], tuple[int, ...]]
+        ] = {}
+        created_node_ids: set[str] = set()
+
+        for batch in ordered_batches:
+            pre_snapshot = _component_snapshot(batch["pre_lot_components"])
+            if pre_snapshot != previous_post:
+                raise ContractError(
+                    "an exact batch pre-lot snapshot is not the preceding post-lot state"
+                )
+
+            parent: dict[tuple[int, ...], tuple[int, ...]] = {}
+
+            def add(facet: tuple[int, ...]) -> None:
+                parent.setdefault(facet, facet)
+
+            def find(facet: tuple[int, ...]) -> tuple[int, ...]:
+                root = parent[facet]
+                if root != facet:
+                    parent[facet] = find(root)
+                return parent[facet]
+
+            def union(left: tuple[int, ...], right: tuple[int, ...]) -> None:
+                left_root = find(left)
+                right_root = find(right)
+                if left_root == right_root:
+                    return
+                if left_root < right_root:
+                    parent[right_root] = left_root
+                else:
+                    parent[left_root] = right_root
+
+            pre_facets_by_root: dict[str, set[tuple[int, ...]]] = {}
+            pre_covered_by_root: dict[str, set[int]] = {}
+            for component in batch["pre_lot_components"]:
+                root_id = component["component_id"]
+                facets = {
+                    tuple(facet) for facet in component["active_facet_point_ids"]
+                }
+                pre_facets_by_root[root_id] = facets
+                pre_covered_by_root[root_id] = set(component["covered_point_ids"])
+                for facet in facets:
+                    add(facet)
+                for facet in sorted(facets)[1:]:
+                    union(sorted(facets)[0], facet)
+
+            relation_facets: list[tuple[tuple[int, ...], ...]] = []
+            for coface_id in batch["gamma_coface_ids"]:
+                facets = tuple(
+                    tuple(facet) for facet in cofaces[coface_id]["facet_point_ids"]
+                )
+                relation_facets.append(facets)
+                for facet in facets:
+                    add(facet)
+                for facet in facets[1:]:
+                    union(facets[0], facet)
+
+            if order == 1:
+                for event_id in batch["event_ids"]:
+                    event = events[event_id]
+                    if event["closed_rank"] == 1:
+                        add(tuple(event["shell_ids"]))
+
+            groups: dict[tuple[int, ...], set[tuple[int, ...]]] = {}
+            for facet in parent:
+                groups.setdefault(find(facet), set()).add(facet)
+
+            post_components_by_facets: dict[
+                frozenset[tuple[int, ...]], dict[str, Any]
+            ] = {}
+            for component in batch["post_lot_components"]:
+                facet_key = frozenset(
+                    tuple(facet) for facet in component["active_facet_point_ids"]
+                )
+                if facet_key in post_components_by_facets:
+                    raise ContractError(
+                        "an exact post-lot snapshot repeats one component"
+                    )
+                post_components_by_facets[facet_key] = component
+            expected_group_keys = {frozenset(group) for group in groups.values()}
+            if set(post_components_by_facets) != expected_group_keys:
+                raise ContractError(
+                    "an exact post-lot snapshot is not the Gamma batch contraction"
+                )
+
+            expected_deltas: list[dict[str, Any]] = []
+            for group_key, component in post_components_by_facets.items():
+                pre_roots = sorted(
+                    root_id
+                    for root_id, facets in pre_facets_by_root.items()
+                    if facets.intersection(group_key)
+                )
+                root_id = component["component_id"]
+                if not pre_roots:
+                    node = local_nodes[root_id]
+                    if (
+                        node["kind"] != "birth"
+                        or _exact_level_key(node["squared_level"])
+                        != _exact_level_key(batch["squared_level_exact"])
+                        or node["batch_id"] not in {None, batch["batch_id"]}
+                    ):
+                        raise ContractError(
+                            "a new exact component lacks its equal-level birth node"
+                        )
+                    created_node_ids.add(root_id)
+                elif len(pre_roots) == 1:
+                    if root_id != pre_roots[0]:
+                        raise ContractError(
+                            "a q=1 exact growth must retain its existing root"
+                        )
+                else:
+                    node = local_nodes[root_id]
+                    if (
+                        node["kind"] != "merge"
+                        or node["batch_id"] != batch["batch_id"]
+                        or node["child_ids"] != pre_roots
+                    ):
+                        raise ContractError(
+                            "an exact multifusion node disagrees with its pre-lot roots"
+                        )
+                    created_node_ids.add(root_id)
+
+                old_facets = {
+                    facet for pre_root in pre_roots for facet in pre_facets_by_root[pre_root]
+                }
+                old_points = {
+                    point_id
+                    for pre_root in pre_roots
+                    for point_id in pre_covered_by_root[pre_root]
+                }
+                added_facets = sorted(group_key - old_facets)
+                added_points = sorted(set(component["covered_point_ids"]) - old_points)
+                if added_facets or added_points:
+                    expected_deltas.append(
+                        {
+                            "batch_id": batch["batch_id"],
+                            "order": order,
+                            "root_node_id": root_id,
+                            "added_facet_point_ids": [
+                                list(facet) for facet in added_facets
+                            ],
+                            "added_point_ids": added_points,
+                        }
+                    )
+
+            actual_deltas = [
+                {key: value for key, value in delta.items() if key != "schema_version"}
+                for delta in batch["coverage_deltas"]
+            ]
+            if sorted(actual_deltas, key=canonical_json) != sorted(
+                expected_deltas, key=canonical_json
+            ):
+                raise ContractError(
+                    "an exact batch coverage log is not its pre/post state delta "
+                    f"for batch {batch['batch_id']}"
+                )
+            previous_post = _component_snapshot(batch["post_lot_components"])
+
+        if set(forest["root_ids"]) != set(previous_post):
+            raise ContractError(
+                "an exact forest root set is not its final post-lot component set"
+            )
+        if set(local_nodes) != created_node_ids:
+            raise ContractError(
+                "an exact forest contains a node not created by its batch replay"
+            )
+
+
+def _validate_coverage_reference(
+    delta: dict[str, Any],
+    batches: dict[str, dict[str, Any]],
+    nodes: dict[str, dict[str, Any]],
+    node_order: dict[str, int],
+    expected_order: int,
+) -> None:
+    _require_references([delta["batch_id"]], batches, "a coverage delta batch")
+    _require_references([delta["root_node_id"]], nodes, "a coverage delta root")
+    if (
+        delta["order"] != expected_order
+        or batches[delta["batch_id"]]["order"] != expected_order
+        or node_order[delta["root_node_id"]] != expected_order
+    ):
+        raise ContractError("a coverage delta crosses orders")
+
+
+def _validate_partial_scope(
+    scope: dict[str, Any],
+    certificate: dict[str, Any],
+    events: dict[str, dict[str, Any]],
+    n: int,
+    *,
+    check_canonical_ids: bool,
+) -> None:
+    """Validate the positive perimeter of a conditional or partial result."""
+
+    if set(scope["positive_guarantees"]) != set(
+        certificate["partial_guarantees"]
+    ):
+        raise ContractError(
+            "partial_scope positive guarantees must match the run certificate"
+        )
+    if any(
+        depth < 0 or depth > certificate["m_star"]
+        for depth in scope["closed_parent_depths"]
+    ):
+        raise ContractError("partial_scope closes a parent depth outside 0..m_star")
+    if any(
+        order < 1 or order > certificate["k_eff"]
+        for order in scope["closed_orders"]
+    ):
+        raise ContractError("partial_scope closes an order outside 1..k_eff")
+    if any(
+        rank < 1 or rank > certificate["s_max"]
+        for rank in scope["catalog_complete_ranks"]
+    ):
+        raise ContractError("partial_scope closes a rank outside 1..s_max")
+    for rank in scope["catalog_complete_ranks"]:
+        if not certificate["catalog_complete_by_rank"][rank - 1]:
+            raise ContractError(
+                "partial_scope claims a catalog rank whose certificate gate is open"
+            )
+    for order in scope["closed_orders"]:
+        if not certificate["batches_complete_by_order"][order - 1]:
+            raise ContractError(
+                "partial_scope claims an order whose batch gate is open"
+            )
+    if scope["closed_parent_depths"] and not certificate[
+        "canonical_children_complete"
+    ]:
+        raise ContractError(
+            "partial_scope closes parent depths while canonical children are incomplete"
+        )
+
+    if "verified_events" in scope["positive_guarantees"] and not scope[
+        "verified_event_ids"
+    ]:
+        raise ContractError("verified_events requires at least one verified event")
+    _require_references(
+        scope["verified_event_ids"], events, "partial_scope.verified_event_ids"
+    )
+
+    cell_ids: set[str] = set()
+    for cell in scope["canonical_cell_certificates"]:
+        cell_id = cell["cell_id"]
+        if cell_id in cell_ids:
+            raise ContractError("partial_scope repeats a canonical cell certificate")
+        cell_ids.add(cell_id)
+        depth = cell["depth"]
+        label = cell["label_point_ids"]
+        if depth < 0 or depth > certificate["m_star"] or len(label) != depth:
+            raise ContractError(
+                "a canonical cell certificate has an invalid depth or label size"
+            )
+        if label != sorted(set(label)) or any(
+            point_id < 0 or point_id >= n for point_id in label
+        ):
+            raise ContractError("a canonical cell label is outside the input domain")
+        closed_flags = all(
+            cell[field]
+            for field in (
+                "global_queue_empty",
+                "all_vertices_certified",
+                "active_cross_incidences_complete",
+                "artificial_boundary_only_marked",
+            )
+        )
+        if (cell["certificate_status"] == "closed") != closed_flags:
+            raise ContractError(
+                "a canonical cell status disagrees with its closure flags"
+            )
+        if depth in scope["closed_parent_depths"] and not closed_flags:
+            raise ContractError(
+                "partial_scope contains an open cell at a declared closed depth"
+            )
+        if check_canonical_ids:
+            _canonical_id(
+                cell_id,
+                "CanonicalCellCertificate",
+                {
+                    "depth": depth,
+                    "label_point_ids": label,
+                    "vertex_witnesses": cell["vertex_witnesses"],
+                    "cross_constraint_ids": cell["cross_constraint_ids"],
+                    "active_cross_incidence_ids": cell[
+                        "active_cross_incidence_ids"
+                    ],
+                },
+                "partial_scope.canonical_cell_certificates.cell_id",
+            )
+
+    for locus in scope["unresolved_loci"]:
+        point_ids = locus["point_ids"]
+        if point_ids != sorted(set(point_ids)) or any(
+            point_id < 0 or point_id >= n for point_id in point_ids
+        ):
+            raise ContractError("a partial locus is outside the input domain")
+        order = locus["order"]
+        depth = locus["depth"]
+        if order is not None and not 1 <= order <= certificate["k_eff"]:
+            raise ContractError("a partial locus order is outside 1..k_eff")
+        if depth is not None and not 0 <= depth <= certificate["m_star"]:
+            raise ContractError("a partial locus depth is outside 0..m_star")
+        if locus["kind"] == "open_cell" and depth is None:
+            raise ContractError("an open-cell locus must identify its depth")
+        if locus["kind"] == "open_attachment" and order is None:
+            raise ContractError("an open-attachment locus must identify its order")
+        if locus["kind"] == "open_cell" and depth in scope[
+            "closed_parent_depths"
+        ]:
+            raise ContractError("an open-cell locus contradicts a closed parent depth")
+        if locus["kind"] == "open_attachment" and order in scope["closed_orders"]:
+            raise ContractError("an open attachment contradicts a closed order")
+        if check_canonical_ids:
+            _canonical_id(
+                locus["locus_id"],
+                "PartialLocus",
+                {
+                    key: value
+                    for key, value in locus.items()
+                    if key not in {"schema_version", "locus_id"}
+                },
+                "partial_scope.unresolved_loci.locus_id",
+            )
 
 
 def validate_benchmark_semantics(record: dict[str, Any]) -> None:

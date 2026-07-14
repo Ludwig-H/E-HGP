@@ -1736,8 +1736,8 @@
       "examples": [
         {
           "schema_version": "2.0.0",
-          "certificate_id": "00000000000000000000000000000000000000000000000000000000000000f1",
-          "run_id": "00000000000000000000000000000000000000000000000000000000000000d1",
+          "certificate_id": "7950c3cc4fd27a5f957862e43f5d456f26e4bae56a62a9200e9c64b715c236fa",
+          "run_id": "285432e230b9773de6b6ea79acef54a2f779e9656a483a98ce1cb6905f87ab0e",
           "reconstruction_contract_id": "hgp-reduced-v2",
           "proof_basis": "gamma_exhaustive_reference",
           "result_kind": "hierarchy",
@@ -1760,7 +1760,7 @@
             "duplicate_policy": "reject",
             "signed_zero_policy": "canonicalize_to_positive_zero",
             "perturbation_policy": "none",
-            "input_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+            "input_sha256": "835b960e241bac5331b87d5525ac13d4cd3a78b406957f61c30abea61335cf34",
             "similarity_transform": {
               "schema_version": "2.0.0",
               "applied": false,
@@ -1828,7 +1828,7 @@
           },
           "final_budget_snapshot": {
             "schema_version": "2.0.0",
-            "snapshot_id": "00000000000000000000000000000000000000000000000000000000000000b0",
+            "snapshot_id": "675c6d19d5db2de44c14423d20e9f4df7bacbed3ff902f609722b53894e608a2",
             "boundary": "final",
             "sequence_number": 0,
             "byte_unit": "byte",
@@ -2185,8 +2185,8 @@
       "examples": [
         {
           "schema_version": "2.0.0",
-          "result_id": "00000000000000000000000000000000000000000000000000000000000000f2",
-          "run_id": "00000000000000000000000000000000000000000000000000000000000000d1",
+          "result_id": "921139744a5d5fcbd896194ef46258ddc1a99e90ccd65076a609f66cf651d876",
+          "run_id": "285432e230b9773de6b6ea79acef54a2f779e9656a483a98ce1cb6905f87ab0e",
           "result_kind": "hierarchy",
           "backend": "reference_cpu",
           "profile": "hgp_reduced",
@@ -2207,7 +2207,7 @@
           "critical_catalog": [
             {
               "schema_version": "2.0.0",
-              "event_id": "0000000000000000000000000000000000000000000000000000000000000010",
+              "event_id": "aaa76ddc6723440dfd7f5a505c2ba97b30bb04bf3bc5e8633d5dc4d031350182",
               "closed_rank": 1,
               "interior_ids": [],
               "shell_ids": [0],
@@ -2230,19 +2230,19 @@
           "equal_level_batches": [
             {
               "schema_version": "2.0.0",
-              "batch_id": "0000000000000000000000000000000000000000000000000000000000000050",
+              "batch_id": "8eff1919cf983436aa0f1841c51faab3f277ebf0184d8a96ac5823bcb12e3102",
               "order": 1,
               "squared_level_exact": { "schema_version": "2.0.0", "numerator": "0", "denominator": "1", "unit": "input_coordinate_unit_squared" },
-              "event_ids": ["0000000000000000000000000000000000000000000000000000000000000010"],
+              "event_ids": ["aaa76ddc6723440dfd7f5a505c2ba97b30bb04bf3bc5e8633d5dc4d031350182"],
               "gamma_coface_ids": [],
               "hyperedge_ids": [],
               "attachment_ids": [],
               "pre_lot_components": [],
               "post_lot_components": [
-                { "schema_version": "2.0.0", "component_id": "0000000000000000000000000000000000000000000000000000000000000040", "active_facet_point_ids": [[0]], "covered_point_ids": [0] }
+                { "schema_version": "2.0.0", "component_id": "25e5db6c11bcd99896aac29c39b14e10a2475b9b9170f82bbe1973fe56692b74", "active_facet_point_ids": [[0]], "covered_point_ids": [0] }
               ],
               "coverage_deltas": [
-                { "schema_version": "2.0.0", "batch_id": "0000000000000000000000000000000000000000000000000000000000000050", "order": 1, "root_node_id": "0000000000000000000000000000000000000000000000000000000000000040", "added_facet_point_ids": [[0]], "added_point_ids": [0] }
+                { "schema_version": "2.0.0", "batch_id": "8eff1919cf983436aa0f1841c51faab3f277ebf0184d8a96ac5823bcb12e3102", "order": 1, "root_node_id": "25e5db6c11bcd99896aac29c39b14e10a2475b9b9170f82bbe1973fe56692b74", "added_facet_point_ids": [[0]], "added_point_ids": [0] }
               ],
               "events_complete": true,
               "attachments_complete": true,
@@ -2252,40 +2252,40 @@
           "forests": [
             {
               "schema_version": "2.0.0",
-              "forest_id": "0000000000000000000000000000000000000000000000000000000000000060",
+              "forest_id": "a93776adb96e58df48292823a4c49e49d956071b9f5520aa3fd2c21348fa0ebb",
               "order": 1,
               "profile": "hgp_reduced",
               "forest_semantics": "exact",
               "nodes": [
                 {
                   "schema_version": "2.0.0",
-                  "node_id": "0000000000000000000000000000000000000000000000000000000000000040",
+                  "node_id": "25e5db6c11bcd99896aac29c39b14e10a2475b9b9170f82bbe1973fe56692b74",
                   "kind": "birth",
                   "squared_level": { "schema_version": "2.0.0", "numerator": "0", "denominator": "1", "unit": "input_coordinate_unit_squared" },
                   "child_ids": [],
                   "covered_point_ids": [0],
-                  "event_ids": ["0000000000000000000000000000000000000000000000000000000000000010"],
-                  "batch_id": "0000000000000000000000000000000000000000000000000000000000000050"
+                  "event_ids": ["aaa76ddc6723440dfd7f5a505c2ba97b30bb04bf3bc5e8633d5dc4d031350182"],
+                  "batch_id": "8eff1919cf983436aa0f1841c51faab3f277ebf0184d8a96ac5823bcb12e3102"
                 }
               ],
-              "root_ids": ["0000000000000000000000000000000000000000000000000000000000000040"],
+              "root_ids": ["25e5db6c11bcd99896aac29c39b14e10a2475b9b9170f82bbe1973fe56692b74"],
               "coverage_log": [
-                { "schema_version": "2.0.0", "batch_id": "0000000000000000000000000000000000000000000000000000000000000050", "order": 1, "root_node_id": "0000000000000000000000000000000000000000000000000000000000000040", "added_facet_point_ids": [[0]], "added_point_ids": [0] }
+                { "schema_version": "2.0.0", "batch_id": "8eff1919cf983436aa0f1841c51faab3f277ebf0184d8a96ac5823bcb12e3102", "order": 1, "root_node_id": "25e5db6c11bcd99896aac29c39b14e10a2475b9b9170f82bbe1973fe56692b74", "added_facet_point_ids": [[0]], "added_point_ids": [0] }
               ],
               "complete": true
             }
           ],
           "vertical_maps": [],
           "coverage_log": [
-            { "schema_version": "2.0.0", "batch_id": "0000000000000000000000000000000000000000000000000000000000000050", "order": 1, "root_node_id": "0000000000000000000000000000000000000000000000000000000000000040", "added_facet_point_ids": [[0]], "added_point_ids": [0] }
+            { "schema_version": "2.0.0", "batch_id": "8eff1919cf983436aa0f1841c51faab3f277ebf0184d8a96ac5823bcb12e3102", "order": 1, "root_node_id": "25e5db6c11bcd99896aac29c39b14e10a2475b9b9170f82bbe1973fe56692b74", "added_facet_point_ids": [[0]], "added_point_ids": [0] }
           ],
           "materialized_point_sets": [
-            { "schema_version": "2.0.0", "order": 1, "node_id": "0000000000000000000000000000000000000000000000000000000000000040", "point_ids": [0] }
+            { "schema_version": "2.0.0", "order": 1, "node_id": "25e5db6c11bcd99896aac29c39b14e10a2475b9b9170f82bbe1973fe56692b74", "point_ids": [0] }
           ],
           "run_certificate": {
             "schema_version": "2.0.0",
-            "certificate_id": "00000000000000000000000000000000000000000000000000000000000000f1",
-            "run_id": "00000000000000000000000000000000000000000000000000000000000000d1",
+            "certificate_id": "7950c3cc4fd27a5f957862e43f5d456f26e4bae56a62a9200e9c64b715c236fa",
+            "run_id": "285432e230b9773de6b6ea79acef54a2f779e9656a483a98ce1cb6905f87ab0e",
             "reconstruction_contract_id": "hgp-reduced-v2",
             "proof_basis": "gamma_exhaustive_reference",
             "result_kind": "hierarchy",
@@ -2308,7 +2308,7 @@
               "duplicate_policy": "reject",
               "signed_zero_policy": "canonicalize_to_positive_zero",
               "perturbation_policy": "none",
-              "input_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+              "input_sha256": "835b960e241bac5331b87d5525ac13d4cd3a78b406957f61c30abea61335cf34",
               "similarity_transform": {
                 "schema_version": "2.0.0",
                 "applied": false,
@@ -2363,7 +2363,7 @@
             },
             "final_budget_snapshot": {
               "schema_version": "2.0.0",
-              "snapshot_id": "00000000000000000000000000000000000000000000000000000000000000b0",
+              "snapshot_id": "675c6d19d5db2de44c14423d20e9f4df7bacbed3ff902f609722b53894e608a2",
               "boundary": "final",
               "sequence_number": 0,
               "byte_unit": "byte",
