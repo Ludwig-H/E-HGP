@@ -431,6 +431,7 @@ class Phase1FixtureTests(unittest.TestCase):
                 "multifusion_one_center",
                 "overlapping_k_polyhedra",
                 "gabriel_pair_missing_small_lnn",
+                "gabriel_point_set_counterexample",
                 "one_ulp_quasi_coplanar",
                 "one_ulp_quasi_cospherical",
                 "selected_n12",

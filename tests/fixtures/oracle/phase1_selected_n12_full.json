@@ -1,0 +1,210 @@
+{
+  "backend": "reference_cpu",
+  "campaign_id": "5169639b6be18062da096ced4bf2eecb6862ac1773f3c26c83407c23dcd1fcfb",
+  "cases_attempted_by_dimension": {
+    "3": 1
+  },
+  "cases_completed_by_dimension": {
+    "3": 0
+  },
+  "clouds_attempted_by_dimension": {
+    "3": 1
+  },
+  "clouds_completed_by_dimension": {
+    "3": 0
+  },
+  "comparison_scope": {
+    "cross_construction_differential": [
+      "covered point unions of reduced Gabriel components versus nontrivial full Gamma components"
+    ],
+    "independent_implementation_differential": {
+      "performed": false,
+      "reason": "this runner audits one exhaustive reference implementation; external or production differentials are separate gates"
+    },
+    "internal_consistency": [
+      "full forest replay against the Gamma filtration from which it is reduced",
+      "reduced forest replay against the Gabriel filtration from which it is reduced",
+      "explicit cut monotonicity and separate adjacent-order naturality for Gamma, full_pi0 and hgp_reduced",
+      "Kmax prefix coherence across every configured common order"
+    ],
+    "metamorphic": [
+      "input permutation",
+      "signed axis permutation",
+      "binary64-exact dyadic translation",
+      "power-of-two homothety with exact squared-level scaling"
+    ],
+    "sampling_policy": "horizontal checks run for every (dimension,n,seed,Kmax); input permutations and geometric metamorphisms run only at the largest configured Kmax for each cloud, at the declared stride"
+  },
+  "config": {
+    "ci": false,
+    "coordinate_bound": 97,
+    "dimensions": [
+      3
+    ],
+    "failure_dir": "tests/fixtures/regressions/oracle_campaign",
+    "k_max_values": [
+      10
+    ],
+    "matrix_coverage": {
+      "multiple_k_max_values": false,
+      "n_at_least_k_max_plus_one": true,
+      "n_equal_to_k_max": false,
+      "n_less_than_k_max": false
+    },
+    "metamorphic_stride": 0,
+    "permutations_per_seed": 0,
+    "point_counts": [
+      12
+    ],
+    "profiles": [
+      "full_pi0",
+      "hgp_reduced"
+    ],
+    "seed_start": 0,
+    "seeds_per_dimension": 1
+  },
+  "counters": {
+    "campaign_cases_attempted": 1,
+    "campaign_cases_audited": 0,
+    "clouds_audited": 0,
+    "clouds_generated": 1,
+    "cofaces_enumerated": 0,
+    "coordinate_minimization_evaluations": 581,
+    "coordinate_reductions_accepted": 18,
+    "cut_monotonicity_transitions_checked": 0,
+    "dyadic_translations_checked": 0,
+    "facets_enumerated": 0,
+    "failures": 1,
+    "full_equal_level_batches": 0,
+    "full_forest_nodes": 0,
+    "full_gamma_cut_comparisons": 0,
+    "full_profile_naturality_squares_checked": 0,
+    "full_profile_vertical_families_checked": 0,
+    "gabriel_hyperedges_enumerated": 0,
+    "gamma_naturality_squares_checked": 0,
+    "gamma_vertical_families_checked": 0,
+    "homotheties_checked": 0,
+    "homothety_levels_checked": 0,
+    "kmax_prefix_comparisons": 0,
+    "minimization_evaluations": 609,
+    "naturality_squares_checked": 0,
+    "orders_checked": 0,
+    "permutations_checked": 0,
+    "point_minimization_evaluations": 28,
+    "points_generated": 12,
+    "profile_order_checks": 0,
+    "reduced_equal_level_batches": 0,
+    "reduced_forest_nodes": 0,
+    "reduced_gabriel_cut_comparisons": 0,
+    "reduced_gamma_nontrivial_comparisons": 0,
+    "reduced_profile_naturality_squares_checked": 0,
+    "reduced_profile_vertical_families_checked": 0,
+    "signed_axis_permutations_checked": 0,
+    "vertical_families_checked": 0
+  },
+  "environment": {
+    "implementation": "CPython",
+    "platform": "Linux-6.8.0-1052-azure-x86_64-with-glibc2.39",
+    "python": "3.12.1"
+  },
+  "failure": {
+    "coordinate_minimization_evaluations": 581,
+    "coordinate_reductions_accepted": 18,
+    "dimension": 3,
+    "failure": {
+      "context": {
+        "dimension": 3,
+        "exception_type": "ValueError",
+        "k_max": 10,
+        "seed": 0
+      },
+      "invariant": "unexpected_exception",
+      "message": "ValueError: a profile component and its Gamma container cover different points"
+    },
+    "fixture_path": "tests/fixtures/regressions/oracle_campaign/oracle-campaign-5b8d545852e858b3313346708d5341b223d0233e75a1a08e99aa6cfb3df4f385.json",
+    "k_max_values": [
+      10
+    ],
+    "minimized_failure": {
+      "context": {
+        "dimension": 3,
+        "exception_type": "ValueError",
+        "k_max": 10,
+        "seed": 0
+      },
+      "invariant": "unexpected_exception",
+      "message": "ValueError: a profile component and its Gamma container cover different points"
+    },
+    "minimized_point_count": 5,
+    "minimized_points": [
+      [
+        0,
+        0,
+        7
+      ],
+      [
+        0,
+        9,
+        6
+      ],
+      [
+        1,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ],
+      [
+        4,
+        1,
+        2
+      ]
+    ],
+    "original_point_count": 12,
+    "point_count": 12,
+    "point_deletion_minimized_point_count": 5,
+    "point_minimization_evaluations": 28,
+    "seed": 0
+  },
+  "gcp_used": false,
+  "kind": "morsehgp3d_oracle_campaign_manifest",
+  "matrix_gate": {
+    "coverage": {
+      "multiple_k_max_values": false,
+      "n_at_least_k_max_plus_one": true,
+      "n_equal_to_k_max": false,
+      "n_less_than_k_max": false
+    },
+    "prefix_coherence_checked": false,
+    "satisfied": false,
+    "scope": "configured n/Kmax relation matrix only"
+  },
+  "mode": "certified",
+  "phase": "1",
+  "phase1_campaign_scale": {
+    "all_affine_dimensions": false,
+    "automatic_failure_fixture_enabled": true,
+    "geometric_metamorphic_sampling_enabled": false,
+    "input_permutation_sampling_enabled": false,
+    "minimization_scope": "counterexamples are minimized by greedy point deletion, then by deterministic bounded integer-coordinate shrinking",
+    "reason": "the repository phase gate also depends on frozen fixtures, serialization evidence and reviewed artifacts outside this runner",
+    "repository_phase_exit_claimed": false,
+    "runner_scale_requirements_satisfied": false,
+    "ten_thousand_seeds_per_dimension": false
+  },
+  "schema_version": 1,
+  "status": "failed",
+  "timings_ns": {
+    "by_dimension": {
+      "3": 1853591437605
+    },
+    "mean_per_cloud_by_dimension": {
+      "3": 1853591437605
+    },
+    "mean_per_generated_cloud": 1853591443608,
+    "total": 1853591443608
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "kind": "morsehgp3d_exact_mathematical_counterexample",
+  "fixture_id": "gabriel-point-set-counterexample-5-points-v1",
+  "source_failure_fixture": {
+    "path": "tests/fixtures/regressions/oracle_campaign/oracle-campaign-5b8d545852e858b3313346708d5341b223d0233e75a1a08e99aa6cfb3df4f385.json",
+    "fixture_id": "5b8d545852e858b3313346708d5341b223d0233e75a1a08e99aa6cfb3df4f385"
+  },
+  "point_labels": ["A", "B", "C", "D", "E"],
+  "points": [
+    [0, 0, 7],
+    [0, 9, 6],
+    [1, 4, 0],
+    [0, 0, 1],
+    [4, 1, 2]
+  ],
+  "domain_checks": {
+    "affine_dimension": 3,
+    "k_max": 5,
+    "relevant_gp_complete": true,
+    "degenerate_candidate_count": 0,
+    "critical_event_count": 22,
+    "general_position_subsets_checked": 26,
+    "external_exact_comparisons_checked": 55,
+    "minimum_absolute_nonzero_margin": 1
+  },
+  "counterexample": {
+    "order": 2,
+    "closed": true,
+    "squared_level": {"numerator": 83886, "denominator": 3563},
+    "gamma_components": [
+      {
+        "facet_point_ids": [[0, 1], [0, 2], [0, 3], [0, 4], [1, 2], [2, 3], [2, 4], [3, 4]],
+        "covered_point_ids": [0, 1, 2, 3, 4]
+      }
+    ],
+    "gabriel_components": [
+      {
+        "facet_point_ids": [[0, 1], [0, 2], [1, 2]],
+        "covered_point_ids": [0, 1, 2]
+      },
+      {
+        "facet_point_ids": [[0, 3], [0, 4], [2, 3], [2, 4], [3, 4]],
+        "covered_point_ids": [0, 2, 3, 4]
+      }
+    ],
+    "point_set_collections_equal": false
+  },
+  "lost_incidence_witness": {
+    "facet_point_ids": [0, 2],
+    "facet_label": "AC",
+    "earlier_squared_level": {"numerator": 33, "denominator": 2},
+    "earlier_non_gabriel_cofaces": [[0, 2, 3], [0, 2, 4]],
+    "later_gabriel_coface": [0, 1, 2],
+    "later_gabriel_squared_level": {"numerator": 83886, "denominator": 3563},
+    "first_delayed_gabriel_connection_level": {"numerator": 24, "denominator": 1},
+    "explanation": "The non-Gabriel cofaces attach facet AC to the existing Gamma component without changing its point union. Pruning that incidence and reintroducing AC only with the later Gabriel coface creates a second Gabriel component and delays the Gamma fusion."
+  },
+  "contradicted_claims": [
+    "Proposition 6 of the manuscript as equality of nontrivial component point-set collections for the pruned K-Gabriel graph",
+    "Theorem 5 when derived from that pruned graph without preserving lost facet incidences",
+    "The repository claim that the raw Gabriel flow reconstructs the normative hgp_reduced K-polyhedra"
+  ]
+}

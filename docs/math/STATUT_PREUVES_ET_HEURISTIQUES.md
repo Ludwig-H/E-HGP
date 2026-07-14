@@ -23,8 +23,8 @@ Le statut d'une exécution est distinct : `exact`, `conditional`, `budget_exhaus
 | K-polyèdres $\leftrightarrow\pi_0(L_k(a))$ | `theorem_external` | théorème 2 du manuscrit |
 | les adjacences élémentaires suffisent | `theorem_external` | proposition 5 du manuscrit |
 | un simplexe séparant est de Gabriel | `theorem_external` | théorème 4, position générale |
-| Gabriel préserve les K-polyèdres non triviaux | `theorem_external` | proposition 6 |
-| un K-MST élagué préserve ces composantes | `theorem_external` | théorème 5 |
+| Gabriel préserve les K-polyèdres non triviaux | `false_in_general` pour le graphe élagué formulé dans le manuscrit | la fixture exacte `gabriel-point-set-counterexample-5-points-v1` contredit la proposition 6 comme égalité de collections d'ensembles de points; une formulation enrichie en incidences reste à étudier |
+| un K-MST élagué préserve ces composantes | `false_in_general` pour le graphe élagué formulé dans le manuscrit | le théorème 5 hérite du contre-exemple à la proposition 6; une structure corrigée peut demander plus que le K-graphe brut |
 | centre critique si et seulement si bien centré | `theorem_external` | Reani–Bobrowski, position générale |
 | indice $\mu=s-k$ | `theorem_external` | Reani–Bobrowski |
 | multiplicité locale d'indice $\mu$ égale à $\binom{\lvert U\rvert-1}{\mu}$ | `theorem_external` | Reani–Bobrowski; ce rang local ne préjuge pas des attaches globales |
@@ -33,7 +33,8 @@ Le statut d'une exécution est distinct : `exact`, `conditional`, `budget_exhaus
 | une sphère de rang $k+1$ équivaut à un $k$-simplexe de Gabriel | `proved_here` | position générale du manuscrit |
 | une étoile remplace la clique de facettes pour $H_0$ | `proved_here` | tous niveaux, traitement simultané |
 | une vraie naissance isolée possède un rang fermé $k$ | `proved_here` | modèle de facettes complet |
-| le flot de Gabriel reconstruit `hgp_reduced` | `theorem_external` | composantes non triviales pour $k\geq2$; feuilles singleton ajoutées explicitement à $k=1$ |
+| le flot de Gabriel brut reconstruit le profil normatif `hgp_reduced` | `false_in_general` | contre-exemple exact générique à $k=2$; le profil ne peut plus publier `exact` comme hiérarchie des K-polyèdres sans définition et preuve corrigées |
+| les seules unions de points forment un invariant inductif suffisant pour élaguer les cofaces non-Gabriel | `false_in_general` | une facette peut être attachée silencieusement par une coface non-Gabriel puis participer à une fusion Gabriel ultérieure |
 | le flot de Gabriel seul reconstruit toute facette isolée | `false_in_general` comme conséquence automatique du théorème 5 | une attache supplémentaire est requise |
 | catalogue critique complet et attaches exactes reconstruisent `full_pi0` | `proof_obligation` | M.1 reste à démontrer, notamment aux niveaux égaux |
 | le remplacement intrus–support localise une racine Gabriel verticale | `proved_here` | position générale, baisse stricte de $\beta$ et traitement post-lot |
@@ -137,6 +138,14 @@ Conclusion normative : l'entropie régularise un **oracle local**, pas la défin
 
 ## 9. Verrous ouverts prioritaires
 
+### V0 — contre-exemple à la réduction de Gabriel
+
+La fixture `tests/fixtures/regressions/gabriel_point_set_counterexample.json`, issue du cas automatiquement minimisé `tests/fixtures/regressions/oracle_campaign/oracle-campaign-5b8d545852e858b3313346708d5341b223d0233e75a1a08e99aa6cfb3df4f385.json`, contient cinq points de dimension affine trois, sans dégénérescence exacte et avec `relevant_gp_complete=true`. À l'ordre deux et au niveau carré fermé $83886/3563$, le graphe complet de facettes Gamma possède l'unique union de points `(0,1,2,3,4)`, tandis que le flot Gabriel élagué possède les deux unions recouvrantes `(0,1,2)` et `(0,2,3,4)`.
+
+La facette `(0,2)` est attachée dès le niveau $33/2$ par deux cofaces non-Gabriel. Cette attache ne change pas alors l'union de points de sa composante, mais elle devient décisive lorsqu'une coface Gabriel la réutilise au niveau $83886/3563$. La preuve par induction des pages 90–91 du chapitre 8 conserve seulement les unions de points et oublie cette incidence; le flot élagué retarde la fusion jusqu'au niveau $24$.
+
+Avant toute reprise de l'optimisation réduite, il faut choisir puis prouver l'une des voies suivantes : enrichir le flot Gabriel par les incidences silencieuses nécessaires, construire un locator horizontal certifié qui restitue exactement ces attaches, ou redéfinir le profil comme une hiérarchie propre au graphe Gabriel sans l'identifier aux K-polyèdres. Cette dernière voie exige une décision de contrat et ne peut porter le statut public `exact` pour la cible HGP actuelle. La phase 1 reste ouverte et la porte G2 ne peut pas être déclarée satisfaite sur le profil réduit.
+
 ### V1 — corollaire complet de reconstruction
 
 Formaliser, dans le langage de la théorie de Morse des sélections continues, que minima de rang $k$, germes d'indice un et attaches sous-niveau suffisent à reconstruire exactement $\pi_0(L_k(a))$, événements simultanés compris. Le test exhaustif est nécessaire mais ne remplace pas la preuve.
@@ -172,5 +181,7 @@ Une expérimentation ou une API ne peut employer le mot `exact` que si elle publ
 - les budgets et la raison d'arrêt;
 - les tailles intermédiaires et le pic mémoire;
 - la version du code, du compilateur, du pilote et du matériel.
+
+Tant que V0 n'est pas fermé par une définition et une preuve corrigées, `hgp_reduced` ne peut pas publier `exact` comme hiérarchie des K-polyèdres, même si son exécution est bit-à-bit déterministe et son catalogue exhaustif. Le profil `full_pi0` conserve séparément son statut conditionnel lié à M.1.
 
 Un bon ARI, une stabilité sous bruit ou un accord moyen avec une baseline ne remplace aucune de ces preuves.

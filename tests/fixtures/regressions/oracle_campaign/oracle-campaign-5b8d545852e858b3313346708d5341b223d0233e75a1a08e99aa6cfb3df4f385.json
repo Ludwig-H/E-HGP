@@ -1,0 +1,183 @@
+{
+  "backend": "reference_cpu",
+  "coordinate_bound": 97,
+  "coordinate_minimization_evaluations": 581,
+  "coordinate_reductions_accepted": 18,
+  "dimension_requested": 3,
+  "fixture_id": "5b8d545852e858b3313346708d5341b223d0233e75a1a08e99aa6cfb3df4f385",
+  "k_max_values": [
+    10
+  ],
+  "kind": "morsehgp3d_oracle_campaign_failure",
+  "metamorphic_stride": 0,
+  "minimization_evaluations": 609,
+  "minimization_scope": "greedy one-minimal point deletion followed by deterministic integer-coordinate shrinking",
+  "minimized_failure": {
+    "context": {
+      "dimension": 3,
+      "exception_type": "ValueError",
+      "k_max": 10,
+      "seed": 0
+    },
+    "invariant": "unexpected_exception",
+    "message": "ValueError: a profile component and its Gamma container cover different points"
+  },
+  "minimized_points": [
+    [
+      0,
+      0,
+      7
+    ],
+    [
+      0,
+      9,
+      6
+    ],
+    [
+      1,
+      4,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      4,
+      1,
+      2
+    ]
+  ],
+  "mode": "certified",
+  "original_failure": {
+    "context": {
+      "dimension": 3,
+      "exception_type": "ValueError",
+      "k_max": 10,
+      "seed": 0
+    },
+    "invariant": "unexpected_exception",
+    "message": "ValueError: a profile component and its Gamma container cover different points"
+  },
+  "original_points": [
+    [
+      25,
+      -6,
+      52
+    ],
+    [
+      27,
+      6,
+      -20
+    ],
+    [
+      -42,
+      32,
+      -62
+    ],
+    [
+      39,
+      83,
+      57
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      -73,
+      61,
+      -33
+    ],
+    [
+      2,
+      5,
+      1
+    ],
+    [
+      -87,
+      -31,
+      33
+    ],
+    [
+      -25,
+      -62,
+      96
+    ],
+    [
+      1,
+      2,
+      3
+    ],
+    [
+      1,
+      97,
+      10
+    ],
+    [
+      4,
+      1,
+      2
+    ]
+  ],
+  "permutations_per_seed": 0,
+  "point_count": 12,
+  "point_deletion_minimized_points": [
+    [
+      25,
+      -6,
+      52
+    ],
+    [
+      39,
+      83,
+      57
+    ],
+    [
+      2,
+      5,
+      1
+    ],
+    [
+      1,
+      2,
+      3
+    ],
+    [
+      4,
+      1,
+      2
+    ]
+  ],
+  "point_minimization_evaluations": 28,
+  "profiles": [
+    "full_pi0",
+    "hgp_reduced"
+  ],
+  "reproduction": {
+    "command": [
+      "/home/codespace/.python/current/bin/python",
+      "tools/run_oracle_campaign.py",
+      "--dimensions",
+      "3",
+      "--seed-start",
+      "0",
+      "--seeds-per-dimension",
+      "1",
+      "--point-count",
+      "12",
+      "--k-max-values",
+      "10",
+      "--coordinate-bound",
+      "97",
+      "--permutations-per-seed",
+      "0",
+      "--metamorphic-stride",
+      "0"
+    ]
+  },
+  "schema_version": 1,
+  "seed": 0
+}
