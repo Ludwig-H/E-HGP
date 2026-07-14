@@ -2,7 +2,7 @@
 set -euo pipefail
 
 readonly DEFAULT_PROJECT_ID="devpod-gpu-exploration"
-readonly REGION="europe-west4"
+readonly REGION="${GCP_REGION:-europe-west4}"
 readonly PROJECT_ID="${GCP_PROJECT_ID:-${DEFAULT_PROJECT_ID}}"
 
 die() {

@@ -1,6 +1,6 @@
 # Corpus mathématique E-HGP
 
-Ce dossier transforme les pistes du rapport du 14 juillet 2026 en cinq résultats séparés, citables et réfutables. Il sert de référence à la future architecture à deux backends ; les rapports datés conservent l'historique du raisonnement.
+Ce dossier contient cinq résultats séparés, citables et réfutables. Il constitue le corpus normatif de l'architecture à deux backends décrite dans [`ARCHITECTURE_MATHEMATIQUE.md`](../ARCHITECTURE_MATHEMATIQUE.md).
 
 ## Doctrine commune
 
@@ -59,11 +59,6 @@ Lire C, B puis D. La sortie cible est le HGP dur. Les lentilles de A peuvent ord
 
 Lire A, B, C puis E. La structure cible est une tour de forêts exacte sur atlas, durcie par continuation et enrichie de certificats de coupes. La globalité n'est annoncée que pour les branches condensées couvertes par E.
 
-## Documents d'origine
+## Autorité documentaire
 
-- [Rapport ordre–échelle, descente et GPU — 14 juillet 2026](../../RAPPORT_HGP_ORDRE_ECHELLE_DESCENTE_GPU_2026-07-14.md)
-- [Rapport Morse et SoftLens — 13 juillet 2026](../../RAPPORT_HIERARCHIE_HGP_MORSE_SOFTLENS_GPU_2026-07-13%20%281%29.md)
-- [Addendum DTM et hiérarchie sparse — 13 juillet 2026](../../ADDENDUM_DTM_HIERARCHIE_SPARSE_GPU_2026-07-13.md)
-- [Synthèse du manuscrit](../../thesis_repo_summary.md)
-
-En cas de divergence, les annexes A–E et le README racine expriment l'orientation actuelle. Les rapports datés restent des documents de recherche et peuvent contenir des voies abandonnées.
+En cas de divergence, les annexes A–E prévalent sur la synthèse d'architecture et sur le prototype exécutable. Les documents de recherche antérieurs restent accessibles dans l'[instantané historique](https://github.com/Ludwig-H/E-HGP/tree/0b8a1a11750b931f486ce666265eed4b6e95e2b1), mais ne font plus partie du corpus courant.

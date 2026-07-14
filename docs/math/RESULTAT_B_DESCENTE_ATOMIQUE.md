@@ -316,6 +316,6 @@ Le résultat B ferme donc le problème des attaches sous position générale san
 
 ## Références
 
-- L. Hauseux, [*Manuscrit de thèse*](../../Manuscrit_de_these_LouisHauseux.pdf), chapitres 6 à 8 : régions témoins, simplexes séparants, supports de miniballs et K-arbre minimum couvrant.
+- L. Hauseux, [*Manuscrit de thèse*](../references/MANUSCRIT_THESE_HAUSEUX.pdf), chapitres 6 à 8 : régions témoins, simplexes séparants, supports de miniballs et K-arbre minimum couvrant.
 - Y. Reani et O. Bobrowski, [*Morse Theory for the k-NN Distance Function*](https://arxiv.org/abs/2403.12792), 2024 : indices critiques, description locale et supports bien centrés du champ K-NN.
 - E. Welzl, [*Smallest Enclosing Disks (Balls and Ellipsoids)*](https://doi.org/10.1007/BFb0038202), 1991 : plus petite boule englobante et calcul à dimension fixée.

@@ -1,0 +1,56 @@
+name: Repository checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Validate active documentation
+        run: python tools/check_docs.py
+
+  powercover-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: perg_hgp/pyproject.toml
+
+      - name: Install reference package
+        run: python -m pip install -e 'perg_hgp[test]'
+
+      - name: Compile Python sources
+        run: python -m compileall -q perg_hgp/perg_hgp
+
+      - name: Run CPU and contract tests
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+        run: python -m pytest -q perg_hgp/tests
+
+  gcp-scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Validate shell syntax
+        run: bash -n gcp-migration/*.sh

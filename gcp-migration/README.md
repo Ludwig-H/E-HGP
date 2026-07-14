@@ -1,9 +1,34 @@
-# Gestion sûre de la VM G4 Blackwell
+# Infrastructure de benchmark GPU sur GCP
 
-Ce répertoire gère la VM Compute Engine `ehgp-blackwell-spot`, une
+> [!IMPORTANT]
+> Ce répertoire est maintenu comme infrastructure active. Les scripts créent et
+> pilotent des ressources facturables, mais exigent des confirmations
+> interactives et ne suppriment jamais une instance ou un disque.
+
+Ce répertoire gère par défaut la VM Compute Engine `ehgp-blackwell-spot`, une
 `g4-standard-48` de `europe-west4-a` dotée d'une RTX PRO 6000 Blackwell
-Server Edition (96 Go de VRAM). Les scripts ne suppriment jamais l'instance,
-le disque ni les paquets existants.
+Server Edition (96 Go de VRAM). Cette configuration a été revérifiée le
+14 juillet 2026 dans la documentation officielle : [série G4](https://cloud.google.com/compute/docs/accelerator-optimized-machines), [zones GPU](https://cloud.google.com/compute/docs/gpus/gpu-regions-zones) et [images Deep Learning VM](https://cloud.google.com/deep-learning-vm/docs/images).
+
+La disponibilité effective d'une VM Spot n'est jamais garantie par le seul
+quota. Les commandes de création et d'arrêt doivent être lancées depuis un
+terminal local; le workflow GitHub ne fait qu'un contrôle de connexion en
+lecture seule, déclenché manuellement.
+
+## Dépendances et configuration
+
+Les scripts exigent Bash, `gcloud` et, pour le contrôle des quotas, `jq`.
+Copiez les variables non secrètes si vous souhaitez changer la cible :
+
+```bash
+cp gcp-migration/.env.example .env.gcp
+set -a
+source .env.gcp
+set +a
+```
+
+`.env.gcp` est ignoré par Git. Ne placez jamais de clé de compte de service
+dans le dépôt; l'authentification GitHub utilise Workload Identity Federation.
 
 ## Préparer le contexte GCP
 
@@ -40,23 +65,37 @@ existante. Ses invariants sont :
 - provisioning Spot avec `instanceTerminationAction=STOP` ;
 - disque de démarrage Hyperdisk Balanced de 100 Go ;
 - coupe-circuit GCE `maxRunDuration=8h`, réglable avant création avec
-  `GCP_MAX_RUN_DURATION` (par exemple `GCP_MAX_RUN_DURATION=12h`).
+  `GCP_MAX_RUN_DURATION` (par exemple `GCP_MAX_RUN_DURATION=12h`) ;
+- résolution de la dernière image non dépréciée de la famille avant la
+  confirmation, puis création avec ce nom d'image exact ;
+- politique de maintenance `TERMINATE`, protection contre la suppression et
+  labels de suivi des coûts ;
+- aucune identité de service attachée à la VM par défaut ; définir explicitement
+  `GCP_RUNTIME_SERVICE_ACCOUNT` seulement si le calcul doit appeler des API GCP.
 
 L'expiration du coupe-circuit et une préemption Spot arrêtent donc la VM et
 conservent son disque ; elles ne la suppriment pas.
+
+Par défaut, la VM utilise le réseau `default` avec une adresse externe afin de
+préserver le chemin SSH existant. Pour une infrastructure durcie, fournissez
+`GCP_NETWORK_INTERFACE` avec un VPC contrôlé et utilisez IAP/OS Login. La
+métadonnée OS Login est activée par le script.
 
 ## Ouvrir une session de calcul
 
 Démarrez puis connectez-vous en indiquant toujours le projet :
 
 ```bash
-gcloud compute instances start ehgp-blackwell-spot \
-  --project="${GCP_PROJECT_ID}" \
-  --zone="europe-west4-a"
+INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
+ZONE="${GCP_ZONE:-europe-west4-a}"
 
-gcloud compute ssh ehgp-blackwell-spot \
+gcloud compute instances start "${INSTANCE_NAME}" \
   --project="${GCP_PROJECT_ID}" \
-  --zone="europe-west4-a"
+  --zone="${ZONE}"
+
+gcloud compute ssh "${INSTANCE_NAME}" \
+  --project="${GCP_PROJECT_ID}" \
+  --zone="${ZONE}"
 ```
 
 Dans la VM, armez immédiatement un second coupe-circuit et lancez le preflight.
@@ -142,15 +181,32 @@ que l'état GCE `TERMINATED` (qui signifie « arrêtée », pas « supprimée »
 La vérification manuelle équivalente est :
 
 ```bash
-gcloud compute instances stop ehgp-blackwell-spot \
-  --project="${GCP_PROJECT_ID}" \
-  --zone="europe-west4-a"
+INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
+ZONE="${GCP_ZONE:-europe-west4-a}"
 
-gcloud compute instances describe ehgp-blackwell-spot \
+gcloud compute instances stop "${INSTANCE_NAME}" \
   --project="${GCP_PROJECT_ID}" \
-  --zone="europe-west4-a" \
+  --zone="${ZONE}"
+
+gcloud compute instances describe "${INSTANCE_NAME}" \
+  --project="${GCP_PROJECT_ID}" \
+  --zone="${ZONE}" \
   --format='value(status)'
 ```
 
 La dernière commande doit afficher `TERMINATED`. Si ce n'est pas le cas,
 contrôlez immédiatement la VM dans la console GCP.
+
+## Contrôles du dépôt
+
+La syntaxe des scripts est vérifiée à chaque passage de la CI :
+
+```bash
+bash -n gcp-migration/*.sh
+```
+
+Le workflow manuel `.github/workflows/gcp.yml` utilise les versions courantes
+de `google-github-actions/auth` et `setup-gcloud`. Les variables GitHub
+`GCP_PROJECT_ID`, `GCP_INSTANCE_NAME` et `GCP_ZONE` peuvent remplacer les
+valeurs par défaut sans modifier le workflow. La relation WIF côté GCP doit
+rester restreinte à ce dépôt et à ce workflow.

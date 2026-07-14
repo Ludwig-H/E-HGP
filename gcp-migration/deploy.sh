@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly INSTANCE_NAME="ehgp-blackwell-spot"
-readonly ZONE="europe-west4-a"
+readonly INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
+readonly ZONE="${GCP_ZONE:-europe-west4-a}"
 readonly MACHINE_TYPE="g4-standard-48"
 readonly IMAGE_FAMILY="common-cu129-ubuntu-2204-nvidia-580"
 readonly IMAGE_PROJECT="deeplearning-platform-release"
@@ -10,6 +10,8 @@ readonly DEFAULT_PROJECT_ID="devpod-gpu-exploration"
 
 PROJECT_ID="${GCP_PROJECT_ID:-${DEFAULT_PROJECT_ID}}"
 MAX_RUN_DURATION="${GCP_MAX_RUN_DURATION:-8h}"
+NETWORK_INTERFACE="${GCP_NETWORK_INTERFACE:-network=default,access-config-type=ONE_TO_ONE_NAT,nic-type=GVNIC}"
+RUNTIME_SERVICE_ACCOUNT="${GCP_RUNTIME_SERVICE_ACCOUNT:-}"
 
 die() {
     printf '[ERREUR] %s\n' "$*" >&2
@@ -28,6 +30,13 @@ fi
 
 account="$(gcloud config get-value account 2>/dev/null || true)"
 [[ -n "${account}" && "${account}" != "(unset)" ]] || die "Aucun compte gcloud actif."
+
+if ! resolved_image="$(gcloud compute images describe-from-family "${IMAGE_FAMILY}" \
+    --project="${IMAGE_PROJECT}" \
+    --format='value(name)')"; then
+    die "Impossible de résoudre la famille d'image ${IMAGE_PROJECT}/${IMAGE_FAMILY}."
+fi
+[[ -n "${resolved_image}" ]] || die "La famille ${IMAGE_FAMILY} n'a renvoyé aucune image."
 
 if ! existing_instance="$(gcloud compute instances list \
     --project="${PROJECT_ID}" \
@@ -48,7 +57,9 @@ printf '%s\n' \
     "  instance    : ${INSTANCE_NAME}" \
     "  zone        : ${ZONE}" \
     "  machine     : ${MACHINE_TYPE} (1 x RTX PRO 6000 Blackwell, 96 Go)" \
-    "  image       : ${IMAGE_FAMILY} (CUDA 12.9 / pilote 580)" \
+    "  image       : ${resolved_image} (${IMAGE_FAMILY}, CUDA 12.9 / pilote 580)" \
+    "  réseau      : ${NETWORK_INTERFACE}" \
+    "  identité VM : ${RUNTIME_SERVICE_ACCOUNT:-aucune}" \
     "  Spot        : oui, action de terminaison STOP" \
     "  coupe-circuit GCE : ${MAX_RUN_DURATION}"
 
@@ -57,6 +68,14 @@ expected_confirmation="CREER ${INSTANCE_NAME} DANS ${PROJECT_ID}"
 read -r -p "Tapez exactement « ${expected_confirmation} » : " confirmation
 [[ "${confirmation}" == "${expected_confirmation}" ]] || die "Création annulée."
 
+service_account_args=(--no-service-account --no-scopes)
+if [[ -n "${RUNTIME_SERVICE_ACCOUNT}" ]]; then
+    service_account_args=(
+        "--service-account=${RUNTIME_SERVICE_ACCOUNT}"
+        "--scopes=cloud-platform"
+    )
+fi
+
 gcloud compute instances create "${INSTANCE_NAME}" \
     --project="${PROJECT_ID}" \
     --zone="${ZONE}" \
@@ -64,11 +83,15 @@ gcloud compute instances create "${INSTANCE_NAME}" \
     --provisioning-model="SPOT" \
     --instance-termination-action="STOP" \
     --max-run-duration="${MAX_RUN_DURATION}" \
-    --image-family="${IMAGE_FAMILY}" \
+    --maintenance-policy="TERMINATE" \
+    --image="${resolved_image}" \
     --image-project="${IMAGE_PROJECT}" \
     --boot-disk-size="100GB" \
     --boot-disk-type="hyperdisk-balanced" \
-    --network-interface="network=default,access-config-type=ONE_TO_ONE_NAT" \
-    --metadata="install-nvidia-driver=true"
+    --network-interface="${NETWORK_INTERFACE}" \
+    --metadata="enable-oslogin=TRUE" \
+    --labels="project=e-hgp,role=gpu-benchmark,managed-by=manual-script" \
+    --deletion-protection \
+    "${service_account_args[@]}"
 
 printf '[SUCCÈS] %s créée. Lancez immédiatement le preflight Blackwell.\n' "${INSTANCE_NAME}"

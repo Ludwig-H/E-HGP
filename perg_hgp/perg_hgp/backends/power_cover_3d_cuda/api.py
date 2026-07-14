@@ -1,4 +1,4 @@
-"""End-to-end API for the spatial, entropy-regularized PERG-HGP backend."""
+"""End-to-end API for the historical PowerCover3D reference prototype."""
 
 from __future__ import annotations
 

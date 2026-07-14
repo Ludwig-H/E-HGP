@@ -244,7 +244,7 @@ Le résultat A justifie donc `HomogeneousLensTower` comme **objet mathématique*
 
 ## Références
 
-- L. Hauseux, [*Manuscrit de thèse*](../../Manuscrit_de_these_LouisHauseux.pdf), chapitres 6 et 8 : régions témoins, graphe élémentaire des facettes et réduction par arbre couvrant.
+- L. Hauseux, [*Manuscrit de thèse*](../references/MANUSCRIT_THESE_HAUSEUX.pdf), chapitres 6 et 8 : régions témoins, graphe élémentaire des facettes et réduction par arbre couvrant.
 - F. Chazal, D. Cohen-Steiner et Q. Mérigot, [*Geometric Inference for Probability Measures*](https://doi.org/10.1007/s10208-011-9098-0), *Foundations of Computational Mathematics*, 2011 : distance à une mesure.
 - L. J. Guibas, Q. Mérigot et D. Morozov, [*Witnessed k-Distance*](https://arxiv.org/abs/1102.4972), 2011 : distance-$k$, sites de puissance et approximation witnessed.
 - Y. Reani et O. Bobrowski, [*Morse Theory for the k-NN Distance Function*](https://arxiv.org/abs/2403.12792), 2024 : structure critique du champ K-NN dur.

@@ -767,7 +767,12 @@ def test_non_strict_uncertain_field_never_advertises_interleaving_bounds(monkeyp
 
 
 def test_blackwell_notebook_verbose_param_is_wired_to_long_running_stages():
-    notebook_path = Path(__file__).resolve().parents[2] / "PERG_HGP_Blackwell_30M.ipynb"
+    notebook_path = (
+        Path(__file__).resolve().parents[2]
+        / "experiments"
+        / "powercover3d"
+        / "blackwell_30m.ipynb"
+    )
     notebook = json.loads(notebook_path.read_text(encoding="utf-8"))
     sources = ["".join(cell.get("source", ())) for cell in notebook["cells"]]
     combined = "\n".join(sources)
@@ -809,7 +814,12 @@ def test_blackwell_notebook_verbose_param_is_wired_to_long_running_stages():
 
 
 def test_blackwell_notebook_acceptance_distinguishes_conditional_and_unresolved():
-    notebook_path = Path(__file__).resolve().parents[2] / "PERG_HGP_Blackwell_30M.ipynb"
+    notebook_path = (
+        Path(__file__).resolve().parents[2]
+        / "experiments"
+        / "powercover3d"
+        / "blackwell_30m.ipynb"
+    )
     notebook = json.loads(notebook_path.read_text(encoding="utf-8"))
     tree = ast.parse("".join(notebook["cells"][23]["source"]))
     helper_node = next(

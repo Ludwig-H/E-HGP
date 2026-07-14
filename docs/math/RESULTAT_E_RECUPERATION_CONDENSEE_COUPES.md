@@ -364,5 +364,5 @@ La bonne ambition en grande dimension est donc précise : **maximiser la part du
 
 - L. Hauseux, *Détection d'amas et interactions d'ordre supérieur*, chapitres 6 à 8 : équivalence avec les amas $k$-NN, adjacences élémentaires, simplexes séparants et $k$-MST.
 - Y. Reani et O. Bobrowski, [*Morse Theory for the k-NN Distance Function*](https://arxiv.org/abs/2403.12792), 2024 : événements critiques et distinction entre effet local et effet homologique global.
-- [`RAPPORT_HGP_ORDRE_ECHELLE_DESCENTE_GPU_2026-07-14.md`](../../RAPPORT_HGP_ORDRE_ECHELLE_DESCENTE_GPU_2026-07-14.md) : échafaudage classé, niveaux minimax et statuts d'atlas.
+- [Architecture mathématique E-HGP](../ARCHITECTURE_MATHEMATIQUE.md) : échafaudage classé, niveaux minimax et statuts d'atlas.
 - [`RESULTAT_C_COMPLEXE_MORSE_BIFILTRE.md`](RESULTAT_C_COMPLEXE_MORSE_BIFILTRE.md) : définition de la tour de forêts et des morphismes verticaux.

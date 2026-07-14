@@ -1,10 +1,4 @@
-# ==============================================================================
-# INSTRUCTIONS POUR LES AGENTS IA / AI AGENTS INSTRUCTIONS:
-# NE JAMAIS CRÉER DE BRANCHES sans l'accord explicite de l'utilisateur.
-# NEVER CREATE BRANCHES without the user's explicit consent.
-# ==============================================================================
-
-# Python
+# Python bytecode and environments
 __pycache__/
 *.py[cod]
 *$py.class
@@ -12,25 +6,25 @@ __pycache__/
 .venv/
 venv/
 ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
 
-# C++ / CMake
+# Python tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+coverage.xml
+htmlcov/
+
+# Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+
+# C++ / CMake / CUDA
 CMakeCache.txt
 CMakeFiles/
 CMakeMembers
@@ -39,22 +33,49 @@ cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
+*.o
+*.a
+*.cubin
+*.fatbin
+*.ptx
 _core.cpp
 e_hgp/_core.cpp
 
-# Jupyter Notebooks
-.ipynb_checkpoints
+# Notebooks
+.ipynb_checkpoints/
 
-# OS / IDE
+# Generated experiments and model artefacts
+artifacts/
+checkpoints/
+runs/
+**/benchmarks/results/
+*.npy
+*.npz
+*.parquet
+*.memmap
+*.zarr/
+*.pt
+*.pth
+*.ckpt
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+service-account*.json
+application_default_credentials.json
+gcp-credentials*.json
+gha-creds-*.json
+*.pem
+*.key
+
+# Logs, editors and operating systems
+*.log
 .DS_Store
 .vscode/
 .idea/
 .gemini/
 
-
-# Node / JS
+# Node / JavaScript tooling
 node_modules/
 package-lock.json
-
-# Local files / logs
-*.log

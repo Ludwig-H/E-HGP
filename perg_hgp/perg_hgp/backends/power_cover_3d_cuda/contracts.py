@@ -1,8 +1,8 @@
-"""Public contracts for the spatial PERG-HGP backend.
+"""Public contracts for the historical PowerCover3D reference prototype.
 
 The objects in this module deliberately contain no CUDA dependency.  They are
 used by the exact CPU reference, the optional RAPIDS/CuPy implementation and
-the Colab benchmark notebook.
+the preserved Blackwell experiment.
 """
 
 from __future__ import annotations
@@ -487,8 +487,8 @@ def estimate_memory(
     """Estimate the peak device memory without claiming a measured value.
 
     The estimate includes a deliberately conservative allowance for an RBC or
-    spatial index.  The notebook compares it with NVML measurements; it must
-    never be presented as a benchmark result.
+    spatial index. The preserved experiment compares it with NVML measurements;
+    it must never be presented as a benchmark result.
     """
 
     n_points = _integer("n_points", n_points, minimum=1)

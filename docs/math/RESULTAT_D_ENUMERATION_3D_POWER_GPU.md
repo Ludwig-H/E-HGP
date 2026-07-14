@@ -1,6 +1,6 @@
 # Résultat D — cascade de puissance certifiée pour l’énumération 3D
 
-> - Annexe mathématique au rapport [`RAPPORT_HGP_ORDRE_ECHELLE_DESCENTE_GPU_2026-07-14.md`](../../RAPPORT_HGP_ORDRE_ECHELLE_DESCENTE_GPU_2026-07-14.md)
+> - Annexe mathématique à l'[architecture E-HGP](../ARCHITECTURE_MATHEMATIQUE.md)
 > - Cible : $X\subset\mathbb{R}^{3}$, $K_{\max}=10$, catalogue critique exact lorsque le certificat de fermeture est obtenu ; hiérarchies $H_0$ exactes après certification séparée des attaches et des lots
 > - Statut : noyau exact sous position générale ; contrat de plateaux dégénérés explicité ; complexité strictement sensible à la sortie $H_0$ encore ouverte
 

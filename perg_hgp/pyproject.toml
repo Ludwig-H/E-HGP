@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "perg_hgp"
 version = "0.3.0"
-description = "Entropy-regularized power-cover H0 and Rank-Gabriel HGP research backends in 3D"
+description = "Historical PowerCover3D reference prototype for the E-HGP research project"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{name = "Louis Hauseux"}]
@@ -20,16 +20,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-atlas = ["torch>=2.0", "pyyaml", "tqdm", "scikit-learn>=1.0"]
-test = [
-    "pytest>=8",
-    "torch>=2.0",
-    "pyyaml",
-    "tqdm",
-    "scikit-learn>=1.0",
-]
+test = ["pytest>=8"]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["perg_hgp*"]
 exclude = ["tests*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,30 +1,34 @@
 # Documentation E-HGP
 
-La documentation est organisée par **statut scientifique**, non par date de création.
+Ce dossier contient uniquement la documentation scientifique active. Les rapports datés et les prototypes remplacés ont été retirés de l'arbre courant; l'[historique du projet](HISTORIQUE.md) indique où les retrouver.
 
-## Références actives
+## Ordre de lecture
 
-1. Le [`README.md` racine](../README.md) fixe l'ambition, les deux backends et les limites annoncées.
-2. Le [corpus mathématique A–E](math/README.md) contient les définitions, théorèmes, conjectures et certificats qui gouverneront les futurs backends.
-3. Le [rapport ordre–échelle du 14 juillet 2026](../RAPPORT_HGP_ORDRE_ECHELLE_DESCENTE_GPU_2026-07-14.md) conserve la synthèse longue et la comparaison avec le code existant.
+1. Le [`README.md` racine](../README.md) fixe l'ambition, les deux régimes de données et le statut actuel du code.
+2. L'[architecture mathématique](ARCHITECTURE_MATHEMATIQUE.md) définit la bifiltration, les contrats des deux backends et le programme expérimental susceptible de les invalider.
+3. Le [corpus mathématique A–E](math/README.md) sépare les résultats démontrés, conditionnels, conjecturaux et heuristiques.
+4. Le [manuscrit de thèse](references/MANUSCRIT_THESE_HAUSEUX.pdf) fournit les fondations HGP, multicovertures et K-arbres couvrants.
 
-## Documents de recherche datés
+## Lecture par régime
 
-Ces textes expliquent l'évolution des idées. Ils restent utiles pour les preuves intermédiaires, les contre-exemples et l'audit du code, mais ne prévalent pas sur le corpus actif.
+### Données massives en 3D
 
-- [Rapport Morse et SoftLens — 13 juillet 2026](../RAPPORT_HIERARCHIE_HGP_MORSE_SOFTLENS_GPU_2026-07-13%20%281%29.md)
-- [Addendum DTM et hiérarchie sparse — 13 juillet 2026](../ADDENDUM_DTM_HIERARCHIE_SPARSE_GPU_2026-07-13.md)
-- [Rapport grande dimension — 12 juillet 2026](../perg_hgp/RAPPORT_PERG_HGP_GRANDE_DIMENSION_2026-07-12.md)
-- [Spécification certifiée antérieure](../algorithme_reg_knn_hgp_certifie_v2.md)
-- [Audit PowerCover3D](../perg_hgp/Rapport_audit_PowerCover3D_30M_K10_SemanticKITTI_2026-07-11.md)
+Lire les résultats C, B puis D. La sortie cible est le HGP dur jusqu'à $K_{\max}=10$. La structure de production envisagée est un catalogue classé d'événements critiques, fermé par diagrammes de puissance ordinaires puis réduit par attaches et lots.
 
-## Documentation du code existant
+### Grande dimension
 
-- [`perg_hgp/README.md`](../perg_hgp/README.md) — package Python actuel ;
-- [`perg_hgp/POWER_COVER_3D.md`](../perg_hgp/POWER_COVER_3D.md) — contrat du backend cubique ;
-- [`E-HGP/DESIGN.md`](../E-HGP/DESIGN.md) — architecture E-HGP antérieure ;
-- [`perg_hgp/benchmarks/`](../perg_hgp/benchmarks/) — protocoles et résultats de benchmark.
+Lire les résultats A, B, C puis E. La sortie cible est une tour de forêts exacte sur l'atlas courant et globalement certifiée seulement sur le périmètre condensé effectivement fermé.
 
-## Règle de lecture
+## Statuts à ne pas confondre
 
-Une affirmation de performance dans un rapport daté décrit un prototype et son protocole. Une garantie du futur `MorseHGP3D` ou `HomogeneousLensTower` doit apparaître dans le corpus A–E, puis dans le contrat du backend correspondant lorsqu'il existera.
+| statut d'exécution | sens |
+|---|---|
+| `exact` | la hiérarchie annoncée est complète sur le périmètre `full` |
+| `atlas_exact` | toutes les décisions sont exactes relativement à l'atlas matérialisé |
+| `conditional` | au moins une condition globale de fermeture ou un budget reste non certifié |
+
+Une mesure empirique, un reranking exact des candidats trouvés ou un bon accord moyen ne transforme jamais `conditional` en `exact`.
+
+## Prototype conservé
+
+[`HGP-old`](../HGP-old/) est conservé comme référence historique liée au manuscrit. Le package [`perg_hgp`](../perg_hgp/) et l'[expérience PowerCover3D](../experiments/powercover3d/) sont des références d'ingénierie postérieures. Aucun de ces éléments n'est un backend cible, et leurs performances ne préjugent pas de celles de `MorseHGP3D` ou `HomogeneousLensTower`.

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly INSTANCE_NAME="ehgp-blackwell-spot"
-readonly ZONE="europe-west4-a"
+readonly INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
+readonly ZONE="${GCP_ZONE:-europe-west4-a}"
 readonly DEFAULT_PROJECT_ID="devpod-gpu-exploration"
 readonly STOP_TIMEOUT_SECONDS=180
 

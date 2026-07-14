@@ -1,5 +1,8 @@
 # HGP-clusterer
 
+> [!IMPORTANT]
+> **Référence historique figée.** Ce dossier conserve l'implémentation HGP associée au manuscrit de thèse. Il n'est pas le package actif du projet, n'implémente pas l'architecture `MorseHGP3D` / `HomogeneousLensTower` et n'est plus maintenu comme cible de production. Sa licence non commerciale propre continue de s'appliquer à tout ce sous-arbre.
+
 **HGP-clusterer** est une implémentation Python haute performance de l'algorithme de clustering par percolation d'hypergraphes. Il combine la topologie algébrique (complexes simpliciaux) et la théorie de la percolation pour détecter des clusters de formes complexes, même en présence de bruit important.
 
 Ce projet inclut désormais un **double backend géométrique (CGAL et Geogram)** optimisé pour le calcul parallèle intensif.
