@@ -715,3 +715,256 @@ Pour le cas 3D à 50 000 points, la priorité de recherche doit être un prototy
 - A. Prokopenko, P. Sao et D. Lebrun-Grandié, [*A single-tree algorithm to compute the Euclidean minimum spanning tree on GPUs*](https://arxiv.org/abs/2207.00514), 2022.
 - B. Taveira et al., [*Scalable GPU Construction of 3D Voronoi and Power Diagrams*](https://arxiv.org/abs/2605.06408), 2026.
 - J. Erickson, [*Nice Point Sets Can Have Nasty Delaunay Triangulations*](https://arxiv.org/abs/cs/0103017), 2001.
+
+## Addendum mathématique normatif — 14 juillet 2026
+
+Cet addendum corrige et précise les énoncés du rapport sans en modifier l'architecture. En cas d'ambiguïté ou de conflit, les formulations ci-dessous prévalent. Elles distinguent les théorèmes de représentation, les résultats valables sous position générale et les conditions encore nécessaires à l'exactitude algorithmique.
+
+### A. Convention de paramétrage
+
+Posons
+
+$$ D_K(y)=d_{(K)}(y)^2. $$
+
+Les quantités $F_{K,\tau}$, $\phi_{Q,\tau}$, $\beta_\tau$ et $w_\tau$ ont la dimension d'une **distance carrée**. Leurs sous-niveaux sont paramétrés par $t=r^2$ ; les valeurs exprimées dans le paramètre rayon s'obtiennent par racine carrée.
+
+En particulier :
+
+- pour $X=\lbrace e_1,\ldots,e_n\rbrace$, le niveau de naissance carré est $1-1/K$, tandis que le rayon est $\sqrt{1-1/K}$ ;
+- pour $K=1$, $w_\tau(\lbrace x_i\rbrace,\lbrace x_j\rbrace)=\lVert x_i-x_j\rVert^2/4$, donc le rayon de fusion vaut $\lVert x_i-x_j\rVert/2$. L'arbre est combinatoirement un EMST, avec une transformation monotone de ses poids usuels.
+
+Les notations $F_{K,0}$ et $F_{K,\infty}$ désignent des limites.
+
+### B. Théorème SoftLens complété
+
+Pour $a=(a_1,\ldots,a_K)\in\mathbb{R}^K$ et $\tau>0$, posons
+
+$$ M_\tau(a)=\tau\log\left(\frac{1}{K}\sum_{i=1}^K e^{a_i/\tau}\right). $$
+
+Si $A=\max_i a_i$, alors
+
+$$ e^{A/\tau}\le\sum_i e^{a_i/\tau}\le K e^{A/\tau}, $$
+
+d'où
+
+$$ A-\tau\log K\le M_\tau(a)\le A. $$
+
+En appliquant cette inégalité à chaque $K$-facette puis en prenant le minimum extérieur, on obtient la borne uniforme globale
+
+$$ \boxed{D_K(y)-\tau\log K\le F_{K,\tau}(y)\le D_K(y)\qquad\text{pour tout }y.} $$
+
+Ainsi, pour tout $t\in\mathbb{R}$,
+
+$$ \left\lbrace D_K\le t\right\rbrace \subseteq \left\lbrace F_{K,\tau}\le t\right\rbrace \subseteq \left\lbrace D_K\le t+\tau\log K\right\rbrace. $$
+
+Les deux filtrations sont donc $\tau\log K$-entrelacées dans le paramètre carré. Elles sont décrites par un nombre fini d'atomes convexes ; leurs modules de persistance sont constructibles. Pour tout degré homologique, leur distance d'entrelacement, et donc la distance bottleneck de leurs diagrammes, est au plus $\tau\log K$. La même borne vaut pour l'entrelacement standard de leurs merge trees de sous-niveaux.
+
+Pour chaque facette $Q$ et chaque paire $Q,R$, les mêmes inégalités donnent
+
+$$ \beta_0(Q)-\tau\log K\le\beta_\tau(Q)\le\beta_0(Q), $$
+
+$$ w_0(Q,R)-\tau\log K\le w_\tau(Q,R)\le w_0(Q,R), $$
+
+où
+
+$$ \beta_0(Q)=\rho(Q)^2, \qquad w_0(Q,R)=\rho(Q\cup R)^2. $$
+
+Pour deux poids associés à des candidats fixés et séparés, à $\tau=0$, par un écart $g>0$, la condition $\tau\log K<g$ suffit à préserver leur ordre. La récupération de toute la combinatoire exige en plus la persistance des candidats et les marges d'attache et de non-dégénérescence précisées plus bas.
+
+Le maximiseur de la représentation variationnelle est
+
+$$ \alpha_i(y)=\frac{\exp(\lVert y-x_i\rVert^2/\tau)}{\sum_{j\in Q}\exp(\lVert y-x_j\rVert^2/\tau)}. $$
+
+Avec $\bar x_\alpha=\sum_i\alpha_i x_i$, on a
+
+$$ \nabla\phi_{Q,\tau}(y)=2(y-\bar x_\alpha), $$
+
+$$ \nabla^2\phi_{Q,\tau}(y) =2I+\frac{4}{\tau}\sum_{i\in Q}\alpha_i(x_i-\bar x_\alpha)(x_i-\bar x_\alpha)^\top \succeq2I, $$
+
+et
+
+$$ \frac{\partial\phi_{Q,\tau}(y)}{\partial\tau} =-\mathrm{KL}(\alpha(y)\Vert u_Q)\le0. $$
+
+Chaque atome est réel-analytique et $2$-fortement convexe. En revanche,
+
+$$ F_{K,\tau}=\min_{\lvert Q\rvert=K}\phi_{Q,\tau} $$
+
+reste en général non différentiable aux frontières où plusieurs $K$-facettes minimisent simultanément. SoftLens lisse le maximum interne, pas le minimum combinatoire extérieur.
+
+Enfin, $F_{K,\tau}\to D_K$ uniformément sur $\mathbb{R}^p$ lorsque $\tau\downarrow0$. Lorsque $\tau\to\infty$, la convergence vers la DTM quadratique est ponctuelle et uniforme sur tout compact, mais elle n'est en général pas uniforme sur tout $\mathbb{R}^p$.
+
+### C. Portée exacte du théorème des swaps
+
+Pour l'atlas complet $\binom{X}{K}$, deux atomes actifs au même point peuvent être reliés par une suite de swaps dont tous les atomes intermédiaires restent actifs à ce point : il suffit d'exécuter d'abord les swaps dont l'incrément de somme exponentielle est négatif, puis ceux dont l'incrément est positif. Le graphe des swaps possède donc, à chaque seuil, les mêmes composantes que le graphe d'intersection complet.
+
+Comme les atomes sont connexes, ce graphe a les mêmes composantes que leur union. La propriété minimax d'un arbre couvrant minimum implique ensuite que son sous-graphe d'arêtes de poids au plus $t$ possède les mêmes composantes que le graphe pondéré au seuil $t$. Les poids de naissance doivent être conservés séparément ; on a automatiquement
+
+$$ w_\tau(Q,R)\ge\max\left\lbrace \beta_\tau(Q),\beta_\tau(R)\right\rbrace. $$
+
+Il s'agit d'un théorème exact de **représentation**, pas d'une borne sparse : le graphe de départ possède $\binom{n}{K}$ sommets.
+
+Pour un atlas arbitraire $\mathcal{A}\subsetneq\binom{X}{K}$, le chemin de swaps peut sortir de $\mathcal{A}$. L'exactitude sur l'atlas exige donc le graphe complet des rencontres dans $\mathcal{A}$, ou un sous-graphe muni d'un certificat minimax équivalent. Ajouter des facettes intermédiaires change $F_{\mathcal{A},\tau}$ et impose de recalculer sa forêt.
+
+### D. Hypothèses exactes pour la réduction Morse–Gabriel
+
+La position générale de la définition 26 de la thèse sera notée $(\mathrm{GP}_\partial)$. Pour tout $A\subseteq X$ de cardinal au moins deux, si $B_A$ est sa plus petite boule englobante, elle impose
+
+$$ (X\setminus A)\cap\partial B_A=\varnothing. $$
+
+Sous $(\mathrm{GP}_\partial)$, les points de $A$ situés sur $\partial B_A$ forment exactement le support minimal de la miniball : ils sont affinement indépendants et son centre appartient à l'intérieur relatif de leur enveloppe convexe.
+
+La vacuité de Gabriel est une propriété séparée : au sens de la définition 28 de la thèse, une coface $\sigma$ est de Gabriel lorsque
+
+$$ B_\sigma^\circ\cap(X\setminus\sigma)=\varnothing. $$
+
+L'unicité des valeurs critiques est encore une troisième propriété. Elle n'est pas impliquée par $(\mathrm{GP}_\partial)$ et n'est pas nécessaire si les événements de même valeur sont traités par lot.
+
+**Proposition.** Sous $(\mathrm{GP}_\partial)$, l'application qui associe à toute coface de Gabriel $\sigma\subset X$, $\lvert\sigma\rvert=K+1$, le centre de sa plus petite boule englobante établit une bijection avec les points critiques non dégénérés d'indice $1$ de $d_{(K)}$.
+
+**Preuve.** Soit $B_\sigma=B(c,\rho)$ et posons
+
+$$ I=\sigma\cap B_\sigma^\circ, \qquad U=\sigma\cap\partial B_\sigma. $$
+
+La vacuité de Gabriel exclut les points extérieurs dans $B_\sigma^\circ$, tandis que $(\mathrm{GP}_\partial)$ les exclut de $\partial B_\sigma$. Ainsi $X\cap B_\sigma=\sigma$. De plus, $U$ est le support minimal de la miniball, il est affinement indépendant et
+
+$$ c\in\mathrm{relint}\,\mathrm{conv}(U). $$
+
+Une miniball non triviale possède au moins deux points de support ; ainsi $\lvert I\rvert\le K-1$. Comme la boule fermée contient exactement $K+1$ points, $d_{(K)}(c)=\rho$, le critère de Reani–Bobrowski donne la criticité, et
+
+$$ \mu(c)=\lvert I\rvert+\lvert U\rvert-K=(K+1)-K=1. $$
+
+Réciproquement, si $c$ est critique non dégénéré d'indice $1$, alors
+
+$$ \sigma=I(c)\cup U(c) $$
+
+a cardinal $K+1$. La condition barycentrique caractérise $B(c,d_{(K)}(c))$ comme la miniball de $\sigma$. Par définition de $I(c)$ et $U(c)$, aucun autre point de $X$ n'appartient à cette boule fermée. Ainsi $\sigma$ est de Gabriel ; elle satisfait même la vacuité fermée. $\square$
+
+Cette bijection concerne toutes les selles locales d'indice $1$. Être **$K$-séparante** est une propriété globale supplémentaire : une selle peut ne fusionner aucune composante de $H_0$ et créer uniquement des classes de $H_1$.
+
+### E. Bras locaux, attaches globales et niveaux égaux
+
+Pour une selle d'indice $1$, notons $j=\lvert U\rvert$ et $t=D_K(c)$. Les facettes
+
+$$ Q_u=I\cup(U\setminus\lbrace u\rbrace),\qquad u\in U, $$
+
+indexent les $j$ germes localement connexes de $\left\lbrace D_K<t\right\rbrace$. Elles portent les bras locaux, mais ne sont pas elles-mêmes des sous-ensembles de l'espace ambiant. La multiplicité locale vaut
+
+$$ \Delta=\binom{j-1}{1}=j-1. $$
+
+Si $c$ est l'unique point critique au niveau $t$ — ou si son incidence est isolée du reste du lot — et si ses germes appartiennent à $q$ composantes globales distinctes de $\left\lbrace D_K<t\right\rbrace$, alors
+
+$$ \Delta^-_{H_0}=q-1, \qquad \Delta^+_{H_1}=j-q. $$
+
+Cette formule est exacte une fois l'application d'attache globale connue et sous cette hypothèse d'isolement. La théorie locale de Reani–Bobrowski ne fournit ni cette application, ni un algorithme la calculant.
+
+Pour un lot de selles d'indice $1$ de même valeur $t$, soit
+
+$$ \mathcal{C}_{<t}=\pi_0\!\left(\left\lbrace D_K<t\right\rbrace\right). $$
+
+L'application d'attache associe au germe porté par $Q_u$ une composante $\kappa_c(u)\in\mathcal{C}_{<t}$. Construisons l'hypergraphe $H_t$ dont les sommets sont les composantes incidentes et dont chaque selle porte l'hyperarête
+
+$$ E_c=\left\lbrace\kappa_c(u):u\in U(c)\right\rbrace. $$
+
+Si $V_t$ est l'ensemble de ses sommets et $b_0(H_t)$ son nombre de composantes connexes, le nombre total de morts dans $H_0$ provoquées par le lot est
+
+$$ \lvert V_t\rvert-b_0(H_t), $$
+
+et non la somme des $\lvert E_c\rvert-1$. L'attribution des morts selle par selle n'est pas canonique. Si le lot ne contient que des points d'indice $1$, le nombre total de nouvelles classes de $H_1$ vaut
+
+$$ \sum_c(\lvert U(c)\rvert-1)-\bigl(\lvert V_t\rvert-b_0(H_t)\bigr). $$
+
+Si des minima naissent au même niveau, ils doivent être ajoutés à la structure d'incidence complète du niveau avant d'imposer simultanément toutes les identifications ; une preuve spécifique, ou le graphe exact des facettes, doit déterminer les incidences de persistance nulle. Un ordre séquentiel peut choisir une forêt couvrante, mais la sortie doit recoller le lot en nœuds multifurqués indépendants de cet ordre.
+
+### F. Dégénérescences et statut exact de `MorseHGP3D`
+
+La borne $\lvert U\rvert\le p+1$, donc $\lvert U\rvert\le4$ en dimension trois, ne vaut que sous $(\mathrm{GP}_\partial)$. Sans cette hypothèse, le plein ensemble frontière $U=X\cap\partial B(c,r)$ peut contenir plus de $p+1$ points. Toute miniball admet encore un sous-support déterminant de cardinal au plus $p+1$, mais ce sous-support ne suffit pas en général à restituer les bras ni la topologie locale de l'événement non perturbé.
+
+Un backend exact doit traiter directement ces dégénérescences, échouer avec un statut explicite, ou employer une perturbation symbolique. Dans ce dernier cas, la hiérarchie obtenue est celle de l'entrée perturbée tant qu'un théorème de recollement vers l'entrée originale n'a pas été établi. Un filtre arithmétique adaptatif certifie le signe d'un prédicat ; il ne résout pas à lui seul une dégénérescence exacte.
+
+La théorie du support de taille au plus $p+1$ concerne le champ dur $D_K$. Pour $\tau>0$, un minimum de $\phi_{Q,\tau}$ dépend en général des $K$ points de $Q$ avec des poids strictement positifs. Aucune bijection entre événements SoftLens à température positive et événements de Morse durs n'est démontrée ici.
+
+Pour reconstruire $H_0$, l'information minimale est constituée de toutes les naissances d'indice $0$ et de tous les effets effectivement séparants d'indice $1$, avec leurs incidences de lot. Comme le caractère séparant est global et n'est connu qu'après calcul des attaches, la voie certifiante naturelle consiste à énumérer tous les événements d'indice $0$ et $1$.
+
+Une condition suffisante d'exactitude de `MorseHGP3D` est donc :
+
+1. tous les événements d'indice $0$ et $1$ dans la plage demandée sont énumérés ;
+2. le rang et la géométrie de chacun sont certifiés ;
+3. chaque germe reçoit une attache globale correcte, obtenue par une descente prouvée complète restant dans le sous-niveau strict, ou par une procédure globale équivalente certifiée ;
+4. les valeurs égales et les dégénérescences sont traitées comme ci-dessus ;
+5. toute décision numérique susceptible de modifier l'ordre ou l'incidence des événements utilise un prédicat exact ou un filtre certifié.
+
+Lorsque ces conditions sont satisfaites, la merge forest continue est exacte. D'autres certificats peuvent éviter l'énumération des selles non séparantes : les cinq conditions sont suffisantes, non logiquement nécessaires. En leur absence, les statuts « hyperforêt exacte » et `critical_complete` doivent être remplacés par `conditional`.
+
+Une BVH certifie le rang d'un candidat, pas l'absence d'un support jamais proposé. La linéarité en espérance du nombre de points critiques sous Poisson ne borne ni le nombre de candidats examinés, ni le coût des attaches. L'objectif « 50 000 points en moins d'une seconde » reste expérimental. La restitution exacte du recouvrement discret observation–branche exige en plus une procédure d'incidence géométrique certifiée à chaque coupe.
+
+### G. Statut exact d'un atlas incomplet
+
+À $\tau=0$, pour $\mathcal{A}\subseteq\binom{X}{K}$,
+
+$$ \bigcup_{Q\in\mathcal{A}}T_Q(r)\subseteq L_K(r). $$
+
+Cette inclusion interdit à l'atlas de créer un chemin absent de HGP, mais elle peut scinder une composante HGP en plusieurs composantes d'atlas. Un atlas incomplet peut donc manquer une naissance, retarder une fusion, créer des branches excédentaires et modifier artificiellement leur persistance.
+
+Le certificat global requis est que, pour tout $r$, l'inclusion induise une bijection
+
+$$ \pi_0\!\left(\bigcup_{Q\in\mathcal{A}}T_Q(r)\right) \xrightarrow{\ \sim\ } \pi_0(L_K(r)). $$
+
+Ces bijections commutent automatiquement avec les applications de structure lorsque $r$ croît ; elles forment un isomorphisme naturel des filtrations de composantes.
+
+Connaître une arête minimale pour chaque coupe de Borůvka rencontrée **dans l'atlas courant** ne suffit pas si des facettes absentes peuvent fournir une naissance ou une arête globalement meilleure. Il faut un oracle couvrant tous les blocs omis avec des minorants certifiés, ou un certificat équivalent de forêt minimax globale et de complétude des naissances. Une stabilisation sans nouvelle colonne reste heuristique.
+
+À température positive, SoftLens conserve l'indexation par facettes, l'union d'atomes convexes et la représentation de $H_0$ par une forêt ; il remplace les lentilles dures par des lentilles entropiques déformées. La continuation en $\tau$ est un warm start : des événements peuvent apparaître, disparaître ou permuter leur ordre.
+
+### H. Contre-exemple de grande dimension renforcé
+
+Pour $X=\lbrace e_1,\ldots,e_n\rbrace\subset\mathbb{R}^n$, chaque $K$-ensemble $Q$ donne un minimum strict en
+
+$$ b_Q=\frac{1}{K}\sum_{i\in Q}e_i $$
+
+au niveau carré
+
+$$ \beta_0=1-\frac{1}{K}. $$
+
+Pour deux facettes distinctes $Q,R$, posons $\ell=\lvert Q\setminus R\rvert\ge1$. Leur union contient $K+\ell$ vecteurs de la base canonique, donc
+
+$$ w_0(Q,R)=1-\frac{1}{K+\ell}. $$
+
+Le poids de rencontre minimal correspond ainsi à $\ell=1$, c'est-à-dire à un swap, et vaut
+
+$$ w_0=1-\frac{1}{K+1}, $$
+
+d'où
+
+$$ w_0-\beta_0=\frac{1}{K(K+1)}>0. $$
+
+À la limite DTM/power, les variances valent $1-1/K$ et
+
+$$ \lVert b_Q-b_R\rVert^2=\frac{2\ell}{K^2}, \qquad w_\infty(Q,R)=1-\frac{1}{K}+\frac{\ell}{2K^2}. $$
+
+Ici encore, le poids minimal non trivial correspond à un swap et vaut
+
+$$ w_\infty=1-\frac{1}{K}+\frac{1}{2K^2}. $$
+
+Les $\binom{n}{K}$ branches ont ainsi une persistance positive aux deux extrémités. Cette obstruction concerne un régime où la dimension ambiante croît avec $n$ ; elle ne fournit pas, à elle seule, une borne inférieure en dimension fixée.
+
+### I. Marges nécessaires à une récupération certifiée
+
+Dans $\delta_{\mathrm{shell}}$, un minimum sur un ensemble vide vaut $+\infty$. Une garantie de récupération doit aussi contrôler :
+
+- la plus petite coordonnée barycentrique positive ;
+- le conditionnement affine du support ;
+- l'écart entre niveaux critiques concurrents ;
+- une marge d'attache dans le sous-niveau strict ;
+- l'écart entre la persistance et le seuil de condensation.
+
+Si le centre est déplacé de $h$, avec $\lVert h\rVert\le\varepsilon$, alors, pour tout $x$,
+
+$$ \left\lvert\lVert x-(c+h)\rVert^2-\lVert x-c\rVert^2\right\rvert \le2\lVert x-c\rVert\varepsilon+\varepsilon^2. $$
+
+Pour un certificat de shell, il faut employer la plus grande distance au centre parmi les points effectivement comparés, puis ajouter séparément les erreurs sur les données, le rayon et les prédicats numériques avant de comparer le total à $\delta_{\mathrm{shell}}$.
+
+### J. Verdict corrigé
+
+> **Dimension trois.** Sous $(\mathrm{GP}_\partial)$, toute modification de $H_0$ de la filtration $K$-NN est portée par des événements d'indice $0$ ou $1$, dont l'ensemble frontière contient au plus quatre points. Les selles d'indice $1$ correspondent aux cofaces de Gabriel de cardinal $K+1$. L'énumération certifiée de tous ces événements, de leurs attaches globales et de leurs incidences par lot suffit à produire une hyperforêt exacte ; sans certificat équivalent, la sortie est conditionnelle.
+
+> **Grande dimension.** SoftLens définit une hiérarchie exacte sur tout atlas déclaré et fournit une approximation du champ dur uniformément contrôlée par $\tau\log K$ dans le paramètre carré. L'exactitude HGP globale exige en plus un certificat de complétude sur les naissances et les coupes ; l'entropie et la continuation ne suppriment pas l'obstruction combinatoire $\binom{n}{K}$.
