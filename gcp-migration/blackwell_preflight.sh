@@ -4,6 +4,7 @@ set -euo pipefail
 readonly OPEN_MODULE_MESSAGE="requires use of the NVIDIA open kernel modules"
 readonly OPEN_MODULE_PACKAGE="linux-modules-nvidia-580-server-open-gcp"
 readonly OPEN_DRIVER_PACKAGE="nvidia-driver-580-server-open"
+readonly MAX_GUEST_SHUTDOWN_MINUTES=480
 
 CUDA_IMAGE="${CUDA_IMAGE:-nvidia/cuda:12.9.1-base-ubuntu22.04}"
 ARM_SHUTDOWN_MINUTES=""
@@ -100,21 +101,27 @@ collect_kernel_log() {
 }
 
 arm_shutdown_guard() {
+    local guard_output=""
+
     [[ -n "${ARM_SHUTDOWN_MINUTES}" ]] || return 0
 
     confirm_exactly "ARMER ARRET ${ARM_SHUTDOWN_MINUTES} MINUTES"
     run_as_root shutdown -P "+${ARM_SHUTDOWN_MINUTES}" \
         "Coupe-circuit de sécurité de la session GPU E-HGP"
-    SHUTDOWN_GUARD_ARMED=true
-    success "Arrêt de sécurité programmé dans ${ARM_SHUTDOWN_MINUTES} minutes."
 
-    if shutdown --show >/dev/null 2>&1; then
-        shutdown --show
-    elif [[ -r /run/systemd/shutdown/scheduled ]]; then
-        cat /run/systemd/shutdown/scheduled
+    if guard_output="$(run_as_root shutdown --show 2>&1)" && \
+        [[ -n "${guard_output}" && "${guard_output}" != *"No scheduled shutdown"* ]]; then
+        :
+    elif guard_output="$(run_as_root cat /run/systemd/shutdown/scheduled 2>&1)" && \
+        [[ -n "${guard_output}" ]]; then
+        :
     else
-        warn "Impossible d'afficher l'échéance ; vérifiez-la avec : shutdown --show"
+        die "Arrêt invité demandé, mais son échéance ne peut pas être relue; benchmark interdit."
     fi
+
+    SHUTDOWN_GUARD_ARMED=true
+    success "Arrêt de sécurité programmé et relu dans ${ARM_SHUTDOWN_MINUTES} minutes."
+    printf '%s\n' "${guard_output}"
 }
 
 inspect_driver_diagnostics() {
@@ -334,8 +341,8 @@ done
 
 if [[ -n "${ARM_SHUTDOWN_MINUTES}" ]]; then
     if [[ ! "${ARM_SHUTDOWN_MINUTES}" =~ ^[1-9][0-9]*$ ]] || \
-        ((${#ARM_SHUTDOWN_MINUTES} > 4)) || ((ARM_SHUTDOWN_MINUTES > 1440)); then
-        die "--arm-shutdown attend un entier entre 1 et 1440 minutes."
+        ((${#ARM_SHUTDOWN_MINUTES} > 3)) || ((ARM_SHUTDOWN_MINUTES > MAX_GUEST_SHUTDOWN_MINUTES)); then
+        die "--arm-shutdown attend un entier entre 1 et ${MAX_GUEST_SHUTDOWN_MINUTES} minutes."
     fi
 fi
 

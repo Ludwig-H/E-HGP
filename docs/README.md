@@ -1,34 +1,44 @@
-# Documentation E-HGP
+# Documentation MorseHGP3D
 
-Ce dossier contient uniquement la documentation scientifique active. Les rapports datés et les prototypes remplacés ont été retirés de l'arbre courant; l'[historique du projet](HISTORIQUE.md) indique où les retrouver.
+Ce dossier est le corpus scientifique actif de E-HGP. Il a été recentré sur la voie 3D : reconstruire une tour hiérarchique K-NN exacte jusqu'à $K_{\max}=10$, avec une implémentation future adaptée au GPU. Les textes décrivent séparément ce qui est démontré, ce qui dépend d'une hypothèse et ce qui reste heuristique.
 
-## Ordre de lecture
+## Parcours recommandé
 
-1. Le [`README.md` racine](../README.md) fixe l'ambition, les deux régimes de données et le statut actuel du code.
-2. L'[architecture mathématique](ARCHITECTURE_MATHEMATIQUE.md) définit la bifiltration, les contrats des deux backends et le programme expérimental susceptible de les invalider.
-3. Le [corpus mathématique A–E](math/README.md) sépare les résultats démontrés, conditionnels, conjecturaux et heuristiques.
-4. Le [manuscrit de thèse](references/MANUSCRIT_THESE_HAUSEUX.pdf) fournit les fondations HGP, multicovertures et K-arbres couvrants.
+1. Lire la [spécification MorseHGP3D](SPECIFICATION_MORSEHGP3D.md) pour fixer l'objet et les deux profils de sortie.
+2. Lire la [définition HGP 3D](math/DEFINITION_HGP_3D.md) pour relier les multicovertures aux K-polyèdres du manuscrit.
+3. Lire le [catalogue critique 3D](math/CATALOGUE_CRITIQUE_3D.md) pour la caractérisation Morse et l'énumération sans mosaïque matérialisée.
+4. Consulter les [attaches par miniball](math/ATTACHES_DESCENTE_MINIBALL.md) pour le profil complet et le contrôle croisé.
+5. Vérifier le [registre des preuves et heuristiques](math/STATUT_PREUVES_ET_HEURISTIQUES.md).
+6. Lire l'[architecture GPU G4](GPU_G4_ARCHITECTURE.md), puis la [feuille de route d'implémentation](ROADMAP_IMPLEMENTATION_MORSEHGP3D.md).
+7. Utiliser le [plan de tests](TEST_PLAN_MORSEHGP3D.md) comme contrat de réception et le [registre des phases](implementation_status.toml) comme état opérationnel.
 
-## Lecture par régime
+## Sources fondatrices
 
-### Données massives en 3D
+Le [manuscrit de thèse](references/MANUSCRIT_THESE_HAUSEUX.pdf) est la source normative pour :
 
-Lire les résultats C, B puis D. La sortie cible est le HGP dur jusqu'à $K_{\max}=10$. La structure de production envisagée est un catalogue classé d'événements critiques, fermé par diagrammes de puissance ordinaires puis réduit par attaches et lots.
+- l'équivalence entre K-polyèdres de Čech et amas discrets de forte densité K-NN;
+- la suffisance des adjacences élémentaires;
+- la nécessité de Gabriel pour les simplexes séparants;
+- la préservation des K-polyèdres non triviaux par le K-graphe de Gabriel et un K-arbre minimum couvrant.
 
-### Grande dimension
+La théorie de Morse de la distance K-NN fournit la caractérisation locale des centres critiques et de leur indice. Les articles sur les mosaïques d'ordre supérieur guident l'énumération, mais la structure combinatoire complète n'est pas matérialisée. L'article GPU sur les diagrammes de puissance guide la primitive de clipping, sans être utilisé comme certificat numérique. Le [répertoire des références](references/README.md) distingue les PDF locaux des liens externes et documente les licences.
 
-Lire les résultats A, B, C puis E. La sortie cible est une tour de forêts exacte sur l'atlas courant et globalement certifiée seulement sur le périmètre condensé effectivement fermé.
+## Contrats scientifiques
 
-## Statuts à ne pas confondre
-
-| statut d'exécution | sens |
+| mot | signification dans ce dépôt |
 |---|---|
-| `exact` | la hiérarchie annoncée est complète sur le périmètre `full` |
-| `atlas_exact` | toutes les décisions sont exactes relativement à l'atlas matérialisé |
-| `conditional` | au moins une condition globale de fermeture ou un budget reste non certifié |
+| `exact` | résultat complet sur le profil annoncé, relativement aux coordonnées d'entrée interprétées exactement |
+| `conditional` | événements retournés vérifiés, mais catalogue, attaches ou dégénérescences non fermés |
+| `unsupported_degeneracy` | l'entrée sort du domaine exact actuellement implémenté; aucun résultat exact n'est publié |
+| `budget_exhausted` | une limite de temps, mémoire ou sortie a interrompu la fermeture |
+| objectif | valeur à falsifier expérimentalement, jamais une garantie de complexité |
 
-Une mesure empirique, un reranking exact des candidats trouvés ou un bon accord moyen ne transforme jamais `conditional` en `exact`.
+Le profil `hgp_reduced` conserve toutes les composantes singleton à $k=1$, puis vise les K-polyèdres non triviaux garantis par le manuscrit pour $k\geq2$. Le profil `full_pi0` ajoute les composantes isolées et leurs attaches globales à tous les ordres. Les statuts ne sont jamais convertis silencieusement.
 
-## Prototype conservé
+## Hors périmètre actuel
 
-[`HGP-old`](../HGP-old/) est conservé comme référence historique liée au manuscrit. Le package [`perg_hgp`](../perg_hgp/) et l'[expérience PowerCover3D](../experiments/powercover3d/) sont des références d'ingénierie postérieures. Aucun de ces éléments n'est un backend cible, et leurs performances ne préjugent pas de celles de `MorseHGP3D` ou `HomogeneousLensTower`.
+La voie de très grande dimension est différée. La DTM, les lissages entropiques et les index ANN restent documentés comme mécanismes de proposition éventuels, mais ne font pas partie de la définition exacte du backend 3D. Le code historique du manuscrit reste dans [`HGP-old`](../HGP-old/); il n'est ni un oracle numérique ni une dépendance du futur backend.
+
+## Traçabilité
+
+L'[historique condensé](HISTORIQUE.md) explique les suppressions et les changements de direction. Les anciens rapports restent accessibles dans l'historique Git; leurs résultats utiles ont été reformulés ici sous forme de contrats testables.

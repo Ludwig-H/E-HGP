@@ -1,64 +1,35 @@
-# Corpus mathématique E-HGP
+# Noyau mathématique de MorseHGP3D
 
-Ce dossier contient cinq résultats séparés, citables et réfutables. Il constitue le corpus normatif de l'architecture à deux backends décrite dans [`ARCHITECTURE_MATHEMATIQUE.md`](../ARCHITECTURE_MATHEMATIQUE.md).
+Les quatre documents de ce dossier forment un ensemble normatif.
 
-## Doctrine commune
-
-L'objet premier est la bifiltration des multicovertures $L(k,t)$ et son invariant de composantes connexes. Toute construction proposée ici doit donc répondre à trois questions distinctes :
-
-1. **fidélité** — quelle hiérarchie continue est représentée ?
-2. **fermeture** — quels événements ou quelles coupes ont été prouvés complets ?
-3. **réalisation** — quelles opérations locales peuvent être évaluées en lots sur GPU ?
-
-Une accélération locale ne vaut jamais preuve de fermeture globale. Réciproquement, une construction exacte mais impossible à matérialiser n'est pas retenue comme architecture de production.
-
-## Les cinq résultats
-
-| annexe | question résolue | backend principal |
-|---|---|---|
-| [A — Lentilles homogènes](RESULTAT_A_LENTILLES_HOMOGENES.md) | comment relier DTM et HGP sans casser la bifiltration ni introduire une température dimensionnée ? | haute dimension |
-| [B — Descente atomique](RESULTAT_B_DESCENTE_ATOMIQUE.md) | comment relier un germe critique à un minimum par un chemin certifié sous le niveau ? | commun |
-| [C — Complexe de Morse bifiltré](RESULTAT_C_COMPLEXE_MORSE_BIFILTRE.md) | quel objet minimal porte simultanément les hiérarchies des ordres $1$ à $K_{\max}$ ? | commun ; exact sous catalogue, attaches et lots complets |
-| [D — Énumération 3D par puissance](RESULTAT_D_ENUMERATION_3D_POWER_GPU.md) | comment proposer puis fermer les événements classés sans mosaïque d'ordre supérieur ? | 3D massive |
-| [E — Récupération condensée par coupes](RESULTAT_E_RECUPERATION_CONDENSEE_COUPES.md) | quand un atlas incomplet suffit-il à certifier les branches hiérarchiques importantes ? | haute dimension |
-
-## Dépendances logiques
-
-```mermaid
-flowchart TD
-    C["C — sortie bifiltrée"] --> D["D — catalogue 3D"]
-    C --> E["E — récupération condensée"]
-    A["A — lentilles homogènes"] --> B["B — descente atomique"]
-    A --> E
-    B --> D
-```
-
-Le résultat C fixe ce qui doit être calculé. D donne la voie exacte ou conditionnelle en 3D. A fournit la continuation adaptée à la grande dimension, B son oracle de descente, et E le contrat qui permet de rester sparse sans prétendre reconstruire l'impossible.
-
-## Niveaux de statut
-
-Chaque annexe emploie les catégories suivantes.
-
-| statut | sens |
+| document | question résolue |
 |---|---|
-| **théorème** | démontré dans l'annexe à partir d'hypothèses explicites ou cité depuis une source primaire |
-| **corollaire algorithmique** | conséquence exacte du théorème, indépendamment de sa vitesse pratique |
-| **conditionnel** | implication exacte sous une hypothèse d'oracle, de marge ou de fermeture explicitement indiquée ; ce n'est pas encore un certificat global tant que cette hypothèse n'est pas vérifiée |
-| **conjecture** | énoncé mathématique précis qui reste à démontrer ou à réfuter |
-| **heuristique** | mécanisme de proposition sans valeur de certificat |
+| [Définition HGP 3D](DEFINITION_HGP_3D.md) | quelle hiérarchie doit être calculée et quelle partie Gabriel garantit-elle directement ? |
+| [Catalogue critique 3D](CATALOGUE_CRITIQUE_3D.md) | quels événements suffisent jusqu'à $K_{\max}=10$ et comment les énumérer sans mosaïque globale ? |
+| [Attaches par miniball](ATTACHES_DESCENTE_MINIBALL.md) | comment rattacher un bras connu à sa composante globale ? |
+| [Preuves et heuristiques](STATUT_PREUVES_ET_HEURISTIQUES.md) | quelles affirmations sont démontrées, conditionnelles, ouvertes ou fausses en général ? |
 
-Les futurs backends exposeront seulement les statuts d'exécution `exact`, `atlas_exact` et `conditional`, accompagnés d'un périmètre. Les noms comme `power_closed` ou $\pi$-complétude désignent des certificats susceptibles de justifier un statut ; ils ne constituent pas des statuts publics supplémentaires. Un résultat `conditional` ne pourra pas être renommé `exact` parce qu'il passe une campagne empirique.
+## Résumé de la construction
 
-## Lecture par régime
+Posons $K_{\mathrm{eff}}=\min(K_{\max},n)$, $s_{\max}=\min(K_{\mathrm{eff}}+1,n)$ et, si $s_{\max}\geq2$, $m_{\star}=s_{\max}-2$. Alors :
 
-### 3D massive
+1. injecter directement les événements ponctuels de rang un; si $s_{\max}=1$, arrêter la cascade géométrique;
+2. fermer les parents top-$m$ pour $0\leq m\leq m_{\star}$ par raffinements restreints et reconstruire canoniquement chaque enfant avant propagation;
+3. extraire les supports bien centrés de tailles deux à quatre, terminer leur shell et compter leur rang fermé global;
+4. réutiliser chaque sphère de rang $s$ comme minimum de $D_s$ et point d'indice un de $D_{s-1}$, avec multiplicité locale $\binom{\lvert U\rvert-1}{\mu}$;
+5. convertir les événements de rang $k+1$ en hyperarêtes multifurquées du K-graphe de Gabriel;
+6. réduire les hyperarêtes par lots de niveau exact pour obtenir `hgp_reduced`, avec feuilles singleton explicites à $k=1$;
+7. pour `full_pi0`, attacher tous les bras par descentes certifiées; cette reconstruction reste l'obligation de preuve M.1 et ne publie pas encore le statut `exact`;
+8. construire les morphismes réduits par `locate_reduced_root`, utiliser les ancres naissance–selle seulement pour $2\leq s\leq K_{\mathrm{eff}}$ dans `full_pi0` ou comme contrôle lorsqu'une source réduite existe, puis vérifier toute la naturalité ordre–échelle.
 
-Lire C, B puis D. La sortie cible est le HGP dur. Les lentilles de A peuvent ordonner ou proposer des candidats, mais elles ne remplacent pas les niveaux critiques durs. D donne une fermeture exacte par séparation aux sommets ; le verrou pratique devient la taille de ce certificat et la recherche d'une exclusion directement sensible à $H_0$.
+## Frontière exacte
 
-### Grande dimension
+La réduction de Gabriel est un théorème pour les K-polyèdres non triviaux. Elle ne doit pas être présentée comme une preuve automatique de la généalogie des facettes isolées. Le profil complet exige un argument de Morse et des attaches globales.
 
-Lire A, B, C puis E. La structure cible est une tour de forêts exacte sur atlas, durcie par continuation et enrichie de certificats de coupes. La globalité n'est annoncée que pour les branches condensées couvertes par E.
+La primitive GPU de diagramme de puissance est un accélérateur géométrique. La complétude vient de la fermeture par oracle global, de la reconstruction canonique des enfants et des prédicats exacts. Une simple déduplication des fragments ne certifie pas leurs coutures. DTM, entropie et ANN sont des propositions seulement.
 
-## Autorité documentaire
+## Convention de lecture
 
-En cas de divergence, les annexes A–E prévalent sur la synthèse d'architecture et sur le prototype exécutable. Les documents de recherche antérieurs restent accessibles dans l'[instantané historique](https://github.com/Ludwig-H/E-HGP/tree/0b8a1a11750b931f486ce666265eed4b6e95e2b1), mais ne font plus partie du corpus courant.
+Les équations utilisent des rayons carrés. Un « rang » est le nombre de points dans la boule fermée. Un « support » est le sous-ensemble minimal de points frontière dont l'enveloppe convexe relative contient le centre. Un « lot » regroupe tous les événements d'un même niveau exact.
+
+Le [manuscrit](../references/MANUSCRIT_THESE_HAUSEUX.pdf) et le [corpus bibliographique](../references/README.md) restent les sources primaires. La [spécification générale](../SPECIFICATION_MORSEHGP3D.md) fixe les schémas publics et les statuts d'exécution.

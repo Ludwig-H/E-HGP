@@ -7,17 +7,85 @@ readonly DEFAULT_PROJECT_ID="devpod-gpu-exploration"
 readonly STOP_TIMEOUT_SECONDS=180
 
 PROJECT_ID="${GCP_PROJECT_ID:-${DEFAULT_PROJECT_ID}}"
+ASSUME_YES=0
 
 die() {
     printf '[ERREUR] %s\n' "$*" >&2
     exit 1
 }
 
+usage() {
+    cat <<'EOF'
+Usage : ./gcp-migration/stop_and_verify.sh [--yes]
+
+Vérifie le label project=e-hgp, arrête uniquement la VM ciblée et attend l'état
+GCE TERMINATED. Les autres VM labellisées sont inventoriées sans être modifiées.
+Le mode est interactif par défaut. --yes ne désactive aucune vérification.
+EOF
+}
+
+while (($# > 0)); do
+    case "$1" in
+        --yes)
+            ASSUME_YES=1
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            die "Option inconnue : $1"
+            ;;
+    esac
+done
+
 instance_status() {
     gcloud compute instances describe "${INSTANCE_NAME}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --format='value(status)'
+}
+
+instance_label() {
+    gcloud compute instances describe "${INSTANCE_NAME}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --format='value(labels.project)'
+}
+
+report_other_labeled_instances() {
+    local inventory active_count name zone status
+    if ! inventory="$(gcloud compute instances list \
+        --project="${PROJECT_ID}" \
+        --filter='labels.project=e-hgp' \
+        --format='csv[no-heading](name,zone.basename(),status)')"; then
+        printf '[ATTENTION] Inventaire des autres VM project=e-hgp illisible; aucune autre ressource n’a été modifiée.\n' >&2
+        return 0
+    fi
+
+    active_count=0
+    while IFS=',' read -r name zone status; do
+        [[ -n "${name}" ]] || continue
+        if [[ "${name}" == "${INSTANCE_NAME}" && "${zone}" == "${ZONE}" ]]; then
+            continue
+        fi
+        if [[ "${status}" != "TERMINATED" ]]; then
+            if ((active_count == 0)); then
+                printf '[ATTENTION] Autres VM project=e-hgp actives (signalement seulement) :\n' >&2
+            fi
+            printf '  - projet=%s zone=%s instance=%s état=%s\n' \
+                "${PROJECT_ID}" "${zone}" "${name}" "${status}" >&2
+            active_count=$((active_count + 1))
+        fi
+    done <<<"${inventory}"
+
+    if ((active_count > 0)); then
+        printf '[ATTENTION] %s autre(s) VM active(s) détectée(s); elles peuvent appartenir à une session concurrente et ne sont pas arrêtées.\n' \
+            "${active_count}" >&2
+    else
+        printf '[INFO] Aucune autre VM project=e-hgp active détectée.\n'
+    fi
 }
 
 command -v gcloud >/dev/null 2>&1 || die "gcloud est introuvable."
@@ -27,29 +95,55 @@ if [[ "${configured_project}" != "${PROJECT_ID}" ]]; then
     die "Projet actif « ${configured_project:-non configuré} » différent de « ${PROJECT_ID} »."
 fi
 
-status="$(instance_status)" || die "Instance ${INSTANCE_NAME} introuvable dans ${PROJECT_ID}/${ZONE}."
+if ! existing_instance="$(gcloud compute instances list \
+    --project="${PROJECT_ID}" \
+    --zones="${ZONE}" \
+    --filter="name=${INSTANCE_NAME}" \
+    --limit=1 \
+    --format='value(name)')"; then
+    die "Impossible de vérifier l’existence de ${INSTANCE_NAME}; fermeture non certifiée."
+fi
+
+if [[ -z "${existing_instance}" ]]; then
+    printf '[INFO] Instance cible %s absente de %s/%s.\n' "${INSTANCE_NAME}" "${PROJECT_ID}" "${ZONE}"
+    report_other_labeled_instances
+    exit 0
+fi
+[[ "${existing_instance}" == "${INSTANCE_NAME}" ]] || die "Résultat d’inventaire ambigu pour ${INSTANCE_NAME}."
+
+label="$(instance_label)" || die "Label de ${INSTANCE_NAME} illisible; arrêt refusé."
+[[ "${label}" == "e-hgp" ]] || \
+    die "La cible ${PROJECT_ID}/${ZONE}/${INSTANCE_NAME} ne porte pas le label project=e-hgp; arrêt refusé."
+
+status="$(instance_status)" || die "État de ${INSTANCE_NAME} illisible dans ${PROJECT_ID}/${ZONE}."
 if [[ "${status}" == "TERMINATED" ]]; then
-    printf '[OK] %s est déjà arrêtée (état GCE TERMINATED).\n' "${INSTANCE_NAME}"
+    printf '[OK] Cible %s labellisée project=e-hgp et déjà arrêtée (état GCE TERMINATED).\n' "${INSTANCE_NAME}"
+    report_other_labeled_instances
     exit 0
 fi
 
 printf '[STOP] État actuel de %s : %s.\n' "${INSTANCE_NAME}" "${status}"
-[[ -t 0 ]] || die "Confirmation interactive requise pour arrêter la VM."
-expected_confirmation="STOPPER ${INSTANCE_NAME}"
-read -r -p "Tapez exactement « ${expected_confirmation} » : " confirmation
-[[ "${confirmation}" == "${expected_confirmation}" ]] || die "Arrêt annulé."
+if [[ "${status}" != "STOPPING" ]] && ((ASSUME_YES == 0)); then
+    [[ -t 0 ]] || die "Confirmation interactive requise; utilisez --yes seulement après autorisation explicite."
+    expected_confirmation="STOPPER ${INSTANCE_NAME}"
+    read -r -p "Tapez exactement « ${expected_confirmation} » : " confirmation
+    [[ "${confirmation}" == "${expected_confirmation}" ]] || die "Arrêt annulé."
+fi
 
-gcloud compute instances stop "${INSTANCE_NAME}" \
-    --project="${PROJECT_ID}" \
-    --zone="${ZONE}" \
-    --quiet
+if [[ "${status}" != "STOPPING" ]]; then
+    gcloud compute instances stop "${INSTANCE_NAME}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet
+fi
 
 deadline=$((SECONDS + STOP_TIMEOUT_SECONDS))
 while ((SECONDS < deadline)); do
     if current_status="$(instance_status 2>/dev/null)"; then
         status="${current_status}"
         if [[ "${status}" == "TERMINATED" ]]; then
-            printf '[OK] %s est arrêtée et vérifiée (état GCE TERMINATED).\n' "${INSTANCE_NAME}"
+            printf '[OK] Cible %s arrêtée et vérifiée (état GCE TERMINATED).\n' "${INSTANCE_NAME}"
+            report_other_labeled_instances
             exit 0
         fi
         printf '[ATTENTE] État GCE : %s\n' "${status}"

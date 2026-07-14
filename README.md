@@ -1,115 +1,103 @@
-# E-HGP — hiérarchies K-NN d'ordre supérieur
+# E-HGP — MorseHGP3D
 
-E-HGP est un projet de recherche consacré au calcul de la **hiérarchie complète des amas de forte densité K-NN**. L'objet central est la bifiltration des multicovertures
+E-HGP est désormais centré sur **MorseHGP3D**, le backend 3D destiné à reconstruire la hiérarchie des amas de forte densité K-NN pour tous les ordres $1\leq k\leq K_{\max}$, avec $K_{\max}=10$ comme première cible. Le projet est encore en phase de spécification : le présent dépôt fixe l'objet mathématique, les certificats, l'architecture GPU et les tests avant toute implémentation de production.
 
-$$L(k,t)=\left\lbrace y\in\mathbb{R}^{d}:D_k(y)\leq t\right\rbrace,$$
+L'objet continu est la tour de multicovertures
 
-où $D_k(y)$ est la $k$-ième distance euclidienne au carré ordonnée. Le projet vise simultanément les ordres $1\leq k\leq K_{\max}$ : la sortie n'est ni une partition plate ni un champ échantillonné, mais une famille cohérente de forêts de fusion reliées par les inclusions $L(k+1,t)\subseteq L(k,t)$.
+$$L_k(a)=\left\lbrace y\in\mathbb{R}^{3}:D_k(y)\leq a\right\rbrace,$$
+
+où $D_k(y)$ est le carré de la distance au $k$-ième plus proche voisin. À chaque ordre, on suit les composantes connexes de $L_k(a)$ quand $a$ croît; entre deux ordres, on conserve les applications induites par $L_{k+1}(a)\subseteq L_k(a)$. La sortie est donc une **tour de forêts de fusion**, pas une partition plate.
 
 > [!IMPORTANT]
-> Le dépôt est actuellement dans une **phase de spécification mathématique**. Les backends cibles décrits ci-dessous ne sont pas encore implémentés. Le package `perg_hgp` conservé dans l'arbre est uniquement le prototype de référence `PowerCover3D`; sa grille cubique ne constitue pas l'algorithme cible.
+> La voie mathématique retenue est : **catalogue de sphères critiques peu profondes, flot de simplexes de Gabriel, réduction hiérarchique par lots**. Une grille, une mosaïque de Delaunay d'ordre supérieur matérialisée ou un rhomboid tiling ne font pas partie de l'algorithme cible.
 
-## Deux backends, un même contrat hiérarchique
+## Décision mathématique
 
-| régime | backend cible | structure retenue | sortie visée |
-|---|---|---|---|
-| petite dimension fixée, notamment 3D, avec données massives | `MorseHGP3D` | catalogue classé de sphères critiques, descente K-NN–miniball, hyper-Kruskal gradué | HGP dur exact lorsque catalogue, prédicats, attaches et incidences de lots sont fermés |
-| grande ou très grande dimension | `HomogeneousLensTower` | atlas de blocs top-$K_{\max}$, continuation DTM $q=1$ vers HGP $q=\infty$, coupes minimax certifiées | exact sur l'atlas; exact globalement sur un périmètre condensé seulement sous certificat explicite |
+Une sphère critique de centre $c$, de rayon carré $a$ et de rang fermé $s$ intervient comme minimum à l'ordre $s$ si $1\leq s\leq10$, et comme événement d'indice un à l'ordre $s-1$ si $2\leq s\leq11$. Pour $K_{\max}=10$, seuls les rangs $s\leq11$ sont utiles. En dimension trois et en position générale, son support frontal contient au plus quatre observations.
 
-Les deux backends devront produire un `GradedMergeForest` commun :
+Le verrou combinatoire est donc reformulé ainsi : énumérer exactement les sphères bien centrées de rang au plus onze sans énumérer les $\binom{n}{k}$ sous-ensembles. La primitive retenue adapte la construction incrémentale des ordres à des **raffinements de Voronoï restreints**, calculables par un moteur de diagrammes de puissance GPU. Chaque cellule est ensuite fermée par un oracle global exact; le moteur flottant propose, il ne certifie pas.
 
-- une forêt de fusion $T_k$ pour chaque ordre;
-- les niveaux de naissance et de fusion dans les unités d'entrée;
-- les morphismes verticaux $T_{k+1}\to T_k$;
-- des lots déterministes pour les événements de même niveau;
-- un statut parmi `exact`, `atlas_exact` et `conditional`, accompagné d'un périmètre `full` ou `condensed(pi)`.
+Le chemin hiérarchique de référence est le $k$-graphe de Gabriel du manuscrit : un événement de rang $k+1$ émet ses facettes de cardinal $k$ et une hyperarête au niveau exact de sa miniball. Un hyper-Kruskal par lots reconstruit alors les fusions non triviales garanties par les théorèmes du manuscrit. La reconstruction de toutes les composantes isolées et de leur généalogie reste un profil distinct, fondé sur le catalogue de Morse et des attaches certifiées.
 
-## Voie 3D : `MorseHGP3D`
+## Deux profils de sortie honnêtes
 
-Pour $K_{\max}=10$, une même sphère critique de rang fermé $s$ porte une naissance à l'ordre $s$ et, pour $s\geq2$, une selle à l'ordre $s-1$. La voie `PowerCascadeH0` doit exploiter cette réutilisation entre ordres :
+| profil | objet promis | condition du statut `exact` |
+|---|---|---|
+| `hgp_reduced` | toutes les composantes à $k=1$, puis les K-polyèdres non triviaux pour $k\geq2$, comme ensembles d'observations éventuellement recouvrants | catalogue de Gabriel complet, niveaux exacts, lots fermés et ancre EMST validée |
+| `full_pi0` | toutes les composantes de $L_k(a)$, y compris les naissances isolées, avec morphismes verticaux | catalogue critique complet, attaches globales certifiées et lots fermés |
 
-1. représenter les domaines top-$k$ par des diagrammes de puissance ordinaires en 3D sur des sites barycentriques pondérés;
-2. engendrer l'ordre suivant par récurrence, puis fermer chaque cellule par séparation top-$k$ exacte à ses sommets;
-3. extraire et certifier les supports critiques de tailles deux à quatre;
-4. calculer les attaches par descente K-NN–miniball;
-5. traiter les événements égaux par lots dans une réduction graduée.
+Le premier profil est directement adossé aux résultats des chapitres 6 et 8 du manuscrit. Le second est la cible complète de MorseHGP3D; il ne recevra le statut `exact` qu'après validation de son théorème de reconstruction et de ses oracles d'attache. Un arrêt sur budget produit `conditional`, jamais un faux résultat exact.
 
-Le backend de production ne matérialisera ni rhomboid tiling, ni mosaïque de Delaunay d'ordre supérieur, ni grille uniforme. La cible de latence inférieure à une seconde pour environ $50\,000$ points 3D reste une hypothèse expérimentale à tester sur données résidentes GPU; ce n'est pas une borne de complexité annoncée.
+## Ce qui n'est pas la régularisation recherchée
 
-## Voie grande dimension : `HomogeneousLensTower`
+La DTM et les lissages entropiques restent utiles pour ordonner les candidats, initialiser l'ordre suivant ou construire un mode budgété. Ils ne réduisent pas, à eux seuls, l'atlas des ensembles top-$k$ et deviennent neutres au cas fondamental $k=1$. Ils ne définissent donc pas la hiérarchie exacte de MorseHGP3D.
 
-La régularisation principale est la lentille homogène
+La régularisation opérationnelle retenue est plutôt une **sparsification certifiée du calcul** : événements de rang borné, génération de colonnes, fermeture globale, traitement par lots et stockage en flux. Elle conserve exactement l'objet HGP lorsqu'elle termine.
 
-$$F_{k,q}(y)=\left(\frac{1}{k}\sum_{j=1}^{k}a_j(y)^q\right)^{1/q},\qquad 1\leq q\leq\infty,$$
+## Objectifs GPU
 
-où $a_j(y)$ est la $j$-ième distance au carré ordonnée. Elle relie exactement la DTM empirique au carré, $q=1$, au champ HGP dur, $q=\infty$. L'entropie rend les oracles locaux homogènes et batchables; elle ne crée pas à elle seule la sparsité globale.
+La machine de référence est une VM GCP `g4-standard-48` avec une RTX PRO 6000 Blackwell Server Edition de 96 Go. Le cœur futur sera C++/CUDA, mono-GPU d'abord, avec :
 
-Le backend partagera des blocs top-$K_{\max}$ entre tous les ordres, poursuivra $q$ vers l'infini et certifiera les décisions minimax par coupes. UMAP, CAGRA, NN-descent ou tout autre index ANN peuvent proposer des blocs, jamais certifier seuls la hiérarchie.
+- propositions géométriques en FP32;
+- filtres FP64 et bornes d'erreur;
+- expansions exactes sur GPU pour les cas ambigus;
+- repli multiprécision CPU rare;
+- données en structures de tableaux, tris radiaux, files compactes et traitement out-of-core des cellules;
+- plafond d'allocation à 80 % de la VRAM.
 
-## Documentation normative
+La cible $50\,000$ points, $K_{\max}=10$, en moins d'une seconde est un **objectif expérimental réfutable** en protocole `warm_e2e` sur nuages volumiques réguliers : runtime initialisé, mais validation, transfert, construction de l'index, calcul et matérialisation du résultat inclus. Le pire cas 3D peut être quadratique; aucune garantie universelle de latence n'est annoncée. Pour plusieurs millions de points, le calcul devra diffuser cellules et incidences vers des runs triés, reprendre après préemption et refuser proprement une certification devenue matériellement impossible.
+
+## Documentation active
 
 | document | rôle |
 |---|---|
-| [Architecture mathématique](docs/ARCHITECTURE_MATHEMATIQUE.md) | synthèse des deux backends, contrats GPU et programme de falsification |
-| [Résultat A — Lentilles homogènes](docs/math/RESULTAT_A_LENTILLES_HOMOGENES.md) | interpolation DTM–HGP, convexité et bifiltration |
-| [Résultat B — Descente atomique](docs/math/RESULTAT_B_DESCENTE_ATOMIQUE.md) | terminaison, chemins sous-niveau et attaches |
-| [Résultat C — Complexe de Morse bifiltré](docs/math/RESULTAT_C_COMPLEXE_MORSE_BIFILTRE.md) | définition de la sortie hiérarchique commune |
-| [Résultat D — Énumération 3D par puissance](docs/math/RESULTAT_D_ENUMERATION_3D_POWER_GPU.md) | cascade de diagrammes de puissance et fermeture exacte |
-| [Résultat E — Récupération condensée par coupes](docs/math/RESULTAT_E_RECUPERATION_CONDENSEE_COUPES.md) | certificat sparse en grande dimension |
+| [Spécification mathématique](docs/SPECIFICATION_MORSEHGP3D.md) | définition exacte de l'objet, profils de sortie et théorème cible |
+| [Catalogue critique 3D](docs/math/CATALOGUE_CRITIQUE_3D.md) | caractérisation des événements et énumération par raffinement restreint |
+| [Définition HGP 3D](docs/math/DEFINITION_HGP_3D.md) | équivalence avec les K-polyèdres et réduction de Gabriel |
+| [Attaches par miniball](docs/math/ATTACHES_DESCENTE_MINIBALL.md) | mécanisme facultatif pour `full_pi0` et contrôle croisé |
+| [Preuves et heuristiques](docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md) | registre des garanties, hypothèses et verrous ouverts |
+| [Architecture GPU G4](docs/GPU_G4_ARCHITECTURE.md) | données, noyaux, prédicats et stratégie mémoire |
+| [Feuille de route](docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md) | plan d'implémentation détaillé, artefacts et portes de validation |
+| [État des phases](docs/implementation_status.toml) | registre opérationnel lisible par les futurs agents |
+| [Plan de tests](docs/TEST_PLAN_MORSEHGP3D.md) | oracles, familles de nuages, métriques et critères go/no-go |
+| [Références](docs/references/README.md) | corpus relu, PDF locaux et licences |
 
-L'[index de la documentation](docs/README.md) précise l'ordre de lecture et les statuts scientifiques.
+L'[index documentaire](docs/README.md) donne l'ordre de lecture. Les décisions remplacées restent traçables dans l'[historique](docs/HISTORIQUE.md).
 
-## Arborescence actuelle
+## Arborescence
 
 ```text
 .
-├── docs/                         # corpus scientifique actif
-│   ├── ARCHITECTURE_MATHEMATIQUE.md
-│   ├── math/                     # résultats A–E
-│   └── references/               # sources fondatrices locales
-├── HGP-old/                      # référence historique liée au manuscrit
-├── perg_hgp/                     # prototype PowerCover3D de référence
-├── experiments/powercover3d/     # protocole Blackwell historique isolé
-├── gcp-migration/                # infrastructure active de VM GPU G4
-├── .github/workflows/            # CI et contrôle GCP manuel
-├── tools/check_docs.py           # validation locale de la documentation
-└── README.md
+├── docs/                         # spécification scientifique active
+│   ├── math/                    # définitions, propositions et statut des preuves
+│   └── references/              # manuscrit et articles redistribuables
+├── HGP-old/                     # code historique lié au manuscrit, conservé tel quel
+├── gcp-migration/               # VM G4, coupe-circuits et arrêt vérifié
+├── tools/                       # contrôles documentaires et bibliographiques
+├── .github/workflows/           # CI non facturable et inspection GCP en lecture seule
+└── AGENTS.md                    # règles impératives pour les agents IA
 ```
 
-La lignée `HGP-old` est conservée intégralement comme référence du manuscrit, sous sa licence propre. Les lignées `E-HGP`, l'atlas `PERGHGPClusterer`, les rapports datés et les résultats de benchmarks générés ont été retirés du répertoire courant. Ils restent consultables dans l'[instantané historique du 14 juillet 2026](https://github.com/Ludwig-H/E-HGP/tree/0b8a1a11750b931f486ce666265eed4b6e95e2b1).
-
-## Prototype de référence
-
-`PowerCover3D` reste disponible pour auditer les contrats numériques, les budgets mémoire et certaines primitives CPU/CUDA. Il calcule une approximation cubique régularisée; il ne doit pas être utilisé comme substitut de `MorseHGP3D` ou `HomogeneousLensTower`.
-
-```bash
-python -m pip install -e 'perg_hgp[test]'
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q perg_hgp/tests
-```
-
-Voir [`perg_hgp/README.md`](perg_hgp/README.md) pour son périmètre exact et [`experiments/powercover3d/`](experiments/powercover3d/) pour le protocole historique conservé.
-
-## Infrastructure GPU GCP
-
-Le répertoire [`gcp-migration/`](gcp-migration/) est une infrastructure **active** et indépendante du statut scientifique des prototypes. Il permet de vérifier les quotas, créer de façon interactive une VM Spot `g4-standard-48`, contrôler son environnement Blackwell, puis l'arrêter avec vérification. Cette machine peut servir aux expériences `PowerCover3D` et aux futurs noyaux des deux backends.
-
-La création reste volontairement locale et confirmée par l'utilisateur : aucun workflow GitHub ne crée, ne démarre ou n'arrête une ressource facturable. Le workflow [`gcp.yml`](.github/workflows/gcp.yml), déclenché manuellement, vérifie uniquement l'identité fédérée et rend visible l'état de la VM cible. Voir le [mode d'emploi GCP](gcp-migration/README.md).
-
-## Validation documentaire
+## Vérifications locales
 
 ```bash
 python tools/check_docs.py
+python tools/check_references.py
+python tools/check_scope.py
+python tools/check_implementation_status.py
+python tools/check_gcp_workflows.py
+python -m unittest discover -s tests/gcp -p 'test_*.py'
+bash -n gcp-migration/*.sh
 ```
 
-Ce contrôle vérifie les liens locaux, les blocs mathématiques monolignes et les constructions LaTeX interdites par [`agents.md`](agents.md). La même commande est exécutée par l'intégration continue.
+## Sécurité GCP
 
-## Feuille de route
+Toute session GPU doit être lancée par les scripts du dossier [`gcp-migration`](gcp-migration/), avec un coupe-circuit GCE borné et un arrêt invité déjà armé. Elle se termine obligatoirement par un arrêt dont l'état `TERMINATED` est vérifié. Les règles normatives figurent dans [`AGENTS.md`](AGENTS.md); aucun workflow GitHub ne doit créer ou démarrer une ressource facturable.
 
-1. éprouver les résultats A–E sur des contre-exemples minimaux;
-2. construire un oracle CPU exhaustif commun aux deux régimes;
-3. mesurer la taille réelle du certificat de fermeture 3D;
-4. rendre effectif le certificat de $\pi$-complétude en grande dimension;
-5. figer le schéma `GradedMergeForest`;
-6. seulement ensuite, spécifier et implémenter les noyaux GPU des deux backends.
+## Licences
 
-Toute future revendication de performance devra préciser le backend, le statut de certification, le périmètre hiérarchique, le matériel et le protocole reproductible.
+La licence MIT à la racine couvre le code actif et la documentation produits par ce projet. Elle ne relicencie ni [`HGP-old/`](HGP-old/), qui conserve sa licence historique non commerciale, ni les PDF de [`docs/references/`](docs/references/), dont les droits et les conditions de redistribution sont indiqués fichier par fichier dans le manifeste bibliographique.
+
+## État du projet
+
+Il n'existe pas encore de package `MorseHGP3D`. La première livraison logicielle sera un oracle CPU exhaustif de petite taille; les noyaux CUDA ne commenceront qu'après gel des schémas, des sémantiques numériques et des tests différentiels. Toute revendication future devra indiquer le profil, le statut de certification, $n$, $K_{\max}$, la famille de données, le matériel, le pic mémoire et le protocole de mesure.

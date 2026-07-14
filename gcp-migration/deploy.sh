@@ -7,6 +7,9 @@ readonly MACHINE_TYPE="g4-standard-48"
 readonly IMAGE_FAMILY="common-cu129-ubuntu-2204-nvidia-580"
 readonly IMAGE_PROJECT="deeplearning-platform-release"
 readonly DEFAULT_PROJECT_ID="devpod-gpu-exploration"
+readonly MIN_ALLOWED_RUN_SECONDS=30
+readonly MAX_ALLOWED_RUN_SECONDS=28800
+readonly GUARD_TIMEOUT_SECONDS=60
 
 PROJECT_ID="${GCP_PROJECT_ID:-${DEFAULT_PROJECT_ID}}"
 MAX_RUN_DURATION="${GCP_MAX_RUN_DURATION:-8h}"
@@ -18,7 +21,104 @@ die() {
     exit 1
 }
 
+duration_to_seconds() {
+    local value="$1"
+    local amount unit multiplier
+
+    if [[ ! "${value}" =~ ^([1-9][0-9]*)(s|m|h)$ ]]; then
+        die "Durée invalide « ${value} ». Utilisez un entier positif suivi de s, m ou h (par exemple 8h)."
+    fi
+
+    amount="${BASH_REMATCH[1]}"
+    unit="${BASH_REMATCH[2]}"
+    ((${#amount} <= 5)) || die "Durée ${value} supérieure à la limite absolue de 8h."
+    amount=$((10#${amount}))
+    case "${unit}" in
+        s) multiplier=1 ;;
+        m) multiplier=60 ;;
+        h) multiplier=3600 ;;
+    esac
+    printf '%s\n' "$((amount * multiplier))"
+}
+
+timestamp_to_epoch() {
+    python3 - "$1" <<'PY'
+from datetime import datetime
+import sys
+
+value = sys.argv[1]
+if value.endswith("Z"):
+    value = value[:-1] + "+00:00"
+print(int(datetime.fromisoformat(value).timestamp()))
+PY
+}
+
+instance_field() {
+    local field="$1"
+    gcloud compute instances describe "${INSTANCE_NAME}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --format="value(${field})"
+}
+
+verify_runtime_guard() {
+    local action configured_seconds start_timestamp start_epoch computed_deadline
+    local termination_timestamp termination_epoch now maximum_deadline
+
+    action="$(instance_field 'scheduling.instanceTerminationAction')" || return 1
+    configured_seconds="$(instance_field 'scheduling.maxRunDuration.seconds')" || return 1
+    start_timestamp="$(instance_field 'lastStartTimestamp')" || return 1
+    termination_timestamp="$(instance_field 'terminationTimestamp')" || return 1
+
+    [[ "${action}" == "STOP" ]] || return 1
+    [[ "${configured_seconds}" =~ ^[0-9]+$ ]] || return 1
+    ((configured_seconds >= MIN_ALLOWED_RUN_SECONDS && configured_seconds <= MAX_ALLOWED_RUN_SECONDS)) || return 1
+    ((configured_seconds == MAX_RUN_SECONDS)) || return 1
+    [[ -n "${start_timestamp}" ]] || return 1
+    [[ -n "${termination_timestamp}" ]] || return 1
+
+    start_epoch="$(timestamp_to_epoch "${start_timestamp}")" || return 1
+    now="$(date +%s)"
+    computed_deadline=$((start_epoch + configured_seconds))
+    maximum_deadline=$((now + MAX_ALLOWED_RUN_SECONDS + 300))
+    ((computed_deadline > now && computed_deadline <= maximum_deadline)) || return 1
+
+    termination_epoch="$(timestamp_to_epoch "${termination_timestamp}")" || return 1
+    ((termination_epoch > now && termination_epoch <= maximum_deadline)) || return 1
+    ((termination_epoch >= computed_deadline - 300 && termination_epoch <= computed_deadline + 300)) || return 1
+
+    printf '[GARDE-FOU] action=%s, maxRunDuration=%ss, échéance calculée=%s' \
+        "${action}" "${configured_seconds}" "${computed_deadline}"
+    printf ', terminationTimestamp=%s' "${termination_timestamp}"
+    printf '\n'
+}
+
+creation_attempted=0
+creation_verified=0
+emergency_stop_on_exit() {
+    local exit_code=$?
+    if ((exit_code != 0 && creation_attempted == 1 && creation_verified == 0)); then
+        printf '[URGENCE] Création non certifiée : tentative d’arrêt immédiat de %s.\n' "${INSTANCE_NAME}" >&2
+        GCP_PROJECT_ID="${PROJECT_ID}" \
+        GCP_INSTANCE_NAME="${INSTANCE_NAME}" \
+        GCP_ZONE="${ZONE}" \
+        "$(dirname "${BASH_SOURCE[0]}")/stop_and_verify.sh" --yes || \
+            printf '[URGENCE] Arrêt non vérifié. Projet=%s zone=%s instance=%s. Contrôlez GCP immédiatement.\n' \
+                "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" >&2
+    fi
+}
+trap emergency_stop_on_exit EXIT
+
 command -v gcloud >/dev/null 2>&1 || die "gcloud est introuvable."
+command -v python3 >/dev/null 2>&1 || die "python3 est requis pour certifier l’échéance de la VM."
+
+MAX_RUN_SECONDS="$(duration_to_seconds "${MAX_RUN_DURATION}")"
+if ((MAX_RUN_SECONDS < MIN_ALLOWED_RUN_SECONDS)); then
+    die "GCP_MAX_RUN_DURATION=${MAX_RUN_DURATION} est inférieur au minimum GCE de 30 secondes."
+fi
+if ((MAX_RUN_SECONDS > MAX_ALLOWED_RUN_SECONDS)); then
+    die "GCP_MAX_RUN_DURATION=${MAX_RUN_DURATION} dépasse la limite absolue de 8h."
+fi
 
 configured_project="$(gcloud config get-value project 2>/dev/null || true)"
 if [[ -z "${configured_project}" || "${configured_project}" == "(unset)" ]]; then
@@ -56,7 +156,7 @@ printf '%s\n' \
     "  projet      : ${PROJECT_ID}" \
     "  instance    : ${INSTANCE_NAME}" \
     "  zone        : ${ZONE}" \
-    "  machine     : ${MACHINE_TYPE} (1 x RTX PRO 6000 Blackwell, 96 Go)" \
+    "  machine     : ${MACHINE_TYPE} (48 vCPU, 180 Go RAM, 1 x RTX PRO 6000 Blackwell 96 Go)" \
     "  image       : ${resolved_image} (${IMAGE_FAMILY}, CUDA 12.9 / pilote 580)" \
     "  réseau      : ${NETWORK_INTERFACE}" \
     "  identité VM : ${RUNTIME_SERVICE_ACCOUNT:-aucune}" \
@@ -76,6 +176,7 @@ if [[ -n "${RUNTIME_SERVICE_ACCOUNT}" ]]; then
     )
 fi
 
+creation_attempted=1
 gcloud compute instances create "${INSTANCE_NAME}" \
     --project="${PROJECT_ID}" \
     --zone="${ZONE}" \
@@ -94,4 +195,26 @@ gcloud compute instances create "${INSTANCE_NAME}" \
     --deletion-protection \
     "${service_account_args[@]}"
 
-printf '[SUCCÈS] %s créée. Lancez immédiatement le preflight Blackwell.\n' "${INSTANCE_NAME}"
+guard_deadline=$((SECONDS + GUARD_TIMEOUT_SECONDS))
+guard_verified=0
+while ((SECONDS < guard_deadline)); do
+    if verify_runtime_guard; then
+        guard_verified=1
+        break
+    fi
+    printf '[ATTENTE] Matérialisation du coupe-circuit GCE; nouvel essai dans 5 s.\n'
+    sleep 5
+done
+if ((guard_verified == 0)); then
+    die "La VM a été créée, mais son action STOP, sa durée ou son échéance n’a pas pu être certifiée."
+fi
+
+printf '[SÉCURITÉ] La création démarre la VM : arrêt immédiat avant toute session de calcul.\n'
+GCP_PROJECT_ID="${PROJECT_ID}" \
+GCP_INSTANCE_NAME="${INSTANCE_NAME}" \
+GCP_ZONE="${ZONE}" \
+"$(dirname "${BASH_SOURCE[0]}")/stop_and_verify.sh" --yes || \
+    die "La VM a été créée, mais son arrêt post-création n’a pas pu être certifié."
+creation_verified=1
+
+printf '[SUCCÈS] %s créée, coupe-circuit GCE certifié, puis arrêtée. Utilisez start_and_verify.sh pour ouvrir une session.\n' "${INSTANCE_NAME}"

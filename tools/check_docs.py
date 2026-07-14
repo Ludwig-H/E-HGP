@@ -11,6 +11,7 @@ from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
 MARKDOWN_LINK = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)")
+INLINE_CODE = re.compile(r"`[^`]*`")
 EXPLICIT_BRACES = re.compile(r"\\(?:mathbb|mathbf|frac|sqrt)(?!\{)")
 BANNED_LATEX = (
     r"\operatorname",
@@ -19,17 +20,23 @@ BANNED_LATEX = (
     r"\left\{",
     r"\right\}",
 )
+AMPUTATED_LATEX = (
+    re.compile(r"(?<!\\)\bqquad\b"),
+    re.compile(r"(?<!\\)\bpi_0\b"),
+    re.compile(r"(?<!\\)\bmathrm\b"),
+)
 
 
 def active_markdown() -> list[Path]:
+    """Return the maintained Markdown corpus, excluding the historical code."""
+
     paths = [
         ROOT / "README.md",
-        ROOT / "perg_hgp" / "README.md",
+        ROOT / "AGENTS.md",
         ROOT / "gcp-migration" / "README.md",
     ]
     paths.extend(sorted((ROOT / "docs").rglob("*.md")))
-    paths.extend(sorted((ROOT / "experiments").rglob("*.md")))
-    return paths
+    return list(dict.fromkeys(paths))
 
 
 def local_target(source: Path, raw_target: str) -> Path | None:
@@ -56,16 +63,23 @@ def validate(path: Path) -> list[str]:
         if line.endswith((" ", "\t")):
             errors.append(f"{relative}:{number}: trailing whitespace")
 
-        dollar_blocks = line.count("$$")
+        lint_line = INLINE_CODE.sub("", line)
+        dollar_blocks = lint_line.count("$$")
         if dollar_blocks not in (0, 2):
             errors.append(
                 f"{relative}:{number}: a $$ equation must open and close on one line"
             )
 
         for token in BANNED_LATEX:
-            if token in line:
+            if token in lint_line:
                 errors.append(f"{relative}:{number}: banned LaTeX token {token}")
-        if EXPLICIT_BRACES.search(line):
+        for pattern in AMPUTATED_LATEX:
+            match = pattern.search(lint_line)
+            if match:
+                errors.append(
+                    f"{relative}:{number}: probable missing LaTeX backslash before {match.group(0)}"
+                )
+        if EXPLICIT_BRACES.search(lint_line):
             errors.append(
                 f"{relative}:{number}: mathbb, mathbf, frac and sqrt require braces"
             )

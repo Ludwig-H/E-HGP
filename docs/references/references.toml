@@ -1,0 +1,82 @@
+schema_version = 1
+checked_on = "2026-07-14"
+
+[[reference]]
+id = "hauseux-thesis-2026"
+title = "Utilisation de graphes pour la classification et l'extraction de structures. Généralisation à des interactions d'ordre supérieur"
+authors = ["Louis Hauseux"]
+path = "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf"
+source_url = ""
+source_status = "Copie fournie par l'auteur; aucune URL publique n'est enregistrée."
+version = "Copie auteur générée le 5 juillet 2026; soutenance annoncée le 8 septembre 2026"
+doi = ""
+doi_status = "Aucun DOI attribué dans la copie locale."
+license = "Tous droits réservés; droits de l'auteur"
+license_url = ""
+redistribution_note = "La licence MIT du dépôt ne s'applique pas. Toute réutilisation au-delà de la consultation du dépôt requiert l'autorisation de l'auteur."
+bytes = 14529297
+sha256 = "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef"
+
+[[reference]]
+id = "edelsbrunner-osang-higher-order-delaunay-2020"
+title = "A Simple Algorithm for Higher-order Delaunay Mosaics and Alpha Shapes"
+authors = ["Herbert Edelsbrunner", "Georg Osang"]
+path = "docs/references/pdfs/edelsbrunner-osang-higher-order-delaunay-arxiv-2011.03617v1.pdf"
+source_url = "https://arxiv.org/abs/2011.03617v1"
+source_status = "Copie arXiv versionnée."
+version = "arXiv:2011.03617v1, 6 novembre 2020"
+doi = "10.48550/arXiv.2011.03617"
+doi_status = "DOI DataCite de l'enregistrement arXiv."
+license = "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+license_url = "https://creativecommons.org/licenses/by/4.0/"
+redistribution_note = "Copie inchangée redistribuée avec attribution sous CC BY 4.0; la licence MIT du dépôt ne s'applique pas."
+bytes = 945290
+sha256 = "1beb57a7f6dc99aef09f2db3027e66ecde526452e7b8fa69c6892e3b52c8392f"
+
+[[reference]]
+id = "corbet-et-al-multicover-2022"
+title = "Computing the Multicover Bifiltration"
+authors = ["René Corbet", "Michael Kerber", "Michael Lesnick", "Georg Osang"]
+path = "docs/references/pdfs/corbet-et-al-multicover-bifiltration-arxiv-2103.07823v3.pdf"
+source_url = "https://arxiv.org/abs/2103.07823v3"
+source_status = "Version intégrale arXiv; la version courte SoCG 2021 porte le DOI 10.4230/LIPIcs.SoCG.2021.27."
+version = "arXiv:2103.07823v3, 13 avril 2022, 28 pages"
+doi = "10.48550/arXiv.2103.07823"
+doi_status = "DOI DataCite de l'enregistrement arXiv; DOI de la version SoCG: 10.4230/LIPIcs.SoCG.2021.27."
+license = "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+license_url = "https://creativecommons.org/licenses/by/4.0/"
+redistribution_note = "Copie inchangée redistribuée avec attribution sous CC BY 4.0; la licence MIT du dépôt ne s'applique pas."
+bytes = 1065495
+sha256 = "567db2c38e0b3dafce6dcb2d4f265e2894d9b81db85d5b6f13492f13629ac48a"
+
+[[reference]]
+id = "taveira-et-al-paragram-2026"
+title = "Scalable GPU Construction of 3D Voronoi and Power Diagrams"
+authors = ["Bernardo Taveira", "Carl Lindström", "Maryam Fatemi", "Lars Hammarstrand", "Fredrik Kahl"]
+path = "docs/references/pdfs/taveira-et-al-paragram-arxiv-2605.06408v1.pdf"
+source_url = "https://arxiv.org/abs/2605.06408v1"
+source_status = "Copie arXiv versionnée; DOI ACM annoncé dans le PDF: 10.1145/3799902.3811229."
+version = "arXiv:2605.06408v1, 7 mai 2026"
+doi = "10.48550/arXiv.2605.06408"
+doi_status = "DOI DataCite de l'enregistrement arXiv; le DOI ACM annoncé doit être revérifié lors de la publication."
+license = "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+license_url = "https://creativecommons.org/licenses/by/4.0/"
+redistribution_note = "Copie inchangée redistribuée avec attribution sous CC BY 4.0; la licence MIT du dépôt ne s'applique pas."
+bytes = 5922733
+sha256 = "b25b75bd6571e031d20a71b8bad00c01338728b1048cdb15623aab157c531c78"
+
+[[reference]]
+id = "hauseux-et-al-hgp-2026"
+title = "Generalization of single-linkage with higher-order interactions"
+authors = ["Louis Hauseux", "Konstantin Avrachenkov", "Josiane Zerubia"]
+path = "docs/references/pdfs/hauseux-et-al-hgp-applied-network-science-2026.pdf"
+source_url = "https://link.springer.com/article/10.1007/s41109-025-00756-1"
+source_status = "Version éditeur en accès ouvert."
+version = "Applied Network Science 11, article 9, 2026"
+doi = "10.1007/s41109-025-00756-1"
+doi_status = "DOI de la version éditeur."
+license = "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)"
+license_url = "https://creativecommons.org/licenses/by-nc-nd/4.0/"
+redistribution_note = "Copie éditeur inchangée. Attribution requise, usage commercial et adaptations interdits par la licence; la licence MIT du dépôt ne s'applique pas."
+bytes = 7339226
+sha256 = "c191acad64a40f4c2bec381d682e014ea2396c9543afdb11a7d0688d1d1d2171"

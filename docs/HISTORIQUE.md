@@ -1,23 +1,41 @@
 # Historique condensé du projet
 
-Le dépôt a successivement contenu plusieurs familles d'algorithmes :
+E-HGP a exploré plusieurs façons de prolonger HGP-Clusterer : code géométrique proche de la thèse, régularisation entropique, atlas progressifs de cofaces, récupération sparse en grande dimension et approximation 3D sur grille.
 
-1. `HGP-old`, proche des constructions exactes de la thèse et dépendant notamment de CGAL;
-2. `E-HGP`, première tentative de régularisation entropique et de Borůvka paresseux;
-3. `PERGHGPClusterer`, atlas progressif de témoins et cofaces;
-4. `PowerCover3D`, champ de puissance régularisé échantillonné sur une grille cubique;
-5. l'architecture actuelle à deux backends, `MorseHGP3D` et `HomogeneousLensTower`.
+## Éléments conservés
 
-Les quatre premières étapes ont été utiles pour isoler plusieurs principes : distinguer proposition et certification, publier le périmètre exact, traiter les ex æquo par lots, mesurer les coûts de voisinage séparément de la réduction hiérarchique et ne pas confondre une hiérarchie sur atlas avec le HGP global.
+`HGP-old/` reste intégralement dans l'arbre. Il constitue la référence historique au code et aux expériences des deux premières parties du manuscrit. Ses dépendances, perturbations numériques et sorties ne lui donnent pas le statut d'oracle pour MorseHGP3D; l'oracle futur sera réécrit de façon indépendante.
 
-Elles ont aussi montré les limites qui motivent le changement actuel :
+`gcp-migration/` reste également actif. Il ne s'agit pas d'un ancien prototype scientifique, mais de l'infrastructure nécessaire pour créer, démarrer, contrôler et arrêter les VM GPU G4. Ses coupe-circuits et sa vérification finale sont désormais normatifs.
 
-- une grille introduit ses propres événements et une échelle de résolution;
-- une mosaïque de Delaunay d'ordre supérieur est trop coûteuse comme structure de production;
-- une régularisation locale ne rend pas spontanément la hiérarchie globale sparse;
-- un atlas incomplet peut retarder les fusions sans que les poids locaux soient faux;
-- une partition plate ne permet pas d'auditer la hiérarchie ordre–échelle.
+Le manuscrit et les articles redistribuables restent sous `docs/references/`, avec leurs licences et empreintes propres.
 
-Le nettoyage du dépôt ne détruit pas ces travaux. `HGP-old` reste présent intégralement comme référence directe du manuscrit, sous sa licence non commerciale propre. L'arbre complet précédant la consolidation reste disponible dans l'[instantané `0b8a1a1`](https://github.com/Ludwig-H/E-HGP/tree/0b8a1a11750b931f486ce666265eed4b6e95e2b1), avec les rapports datés, notebooks, résultats de benchmarks et les autres générations de code.
+## Éléments retirés le 14 juillet 2026
 
-Dans l'arbre courant, `HGP-old` porte la référence historique au manuscrit et `PowerCover3D` conserve les contrats numériques et certaines primitives GPU postérieures. Aucun des deux n'est présenté comme un backend scientifique actif.
+Le package `perg_hgp` et l'expérience `PowerCover3D` ont été supprimés de la branche courante. Leur grille cubique approximait un champ régularisé, introduisait une échelle de discrétisation et ne répondait ni au contrat hiérarchique exact, ni au besoin de plusieurs millions de points. Conserver ce code actif aurait entretenu une fausse continuité avec MorseHGP3D.
+
+Les anciens rapports A–E et l'architecture à deux backends ont aussi été remplacés par un corpus MorseHGP3D cohérent. Les idées utiles ont été reprises : distinction entre proposition et certification, lots de niveaux égaux, descente miniball, fermeture par séparation et statuts explicites.
+
+La piste grande dimension, anciennement nommée `HomogeneousLensTower`, n'est pas déclarée fausse; elle est différée. Le dépôt courant doit d'abord résoudre et implémenter proprement le cas 3D. DTM et entropie restent des heuristiques de proposition, non des définitions de la hiérarchie.
+
+## Décision actuelle
+
+La voie active est :
+
+$$\text{catalogue critique shallow}\longrightarrow\text{simplexes de Gabriel}\longrightarrow\text{hyper-Kruskal par lots}\longrightarrow\text{tour ordre–échelle}.$$
+
+L'énumération adapte l'algorithme incrémental des ordres à une primitive de diagramme de puissance GPU, sous forme de raffinements de Voronoï restreints. Elle ne matérialise ni mosaïque de Delaunay d'ordre supérieur, ni rhomboid tiling.
+
+## Traçabilité Git
+
+L'arbre antérieur au premier nettoyage reste consultable dans l'[instantané `0b8a1a1`](https://github.com/Ludwig-H/E-HGP/tree/0b8a1a11750b931f486ce666265eed4b6e95e2b1). La consolidation intermédiaire à deux backends est disponible dans les commits suivants de l'historique. Les suppressions courantes n'effacent donc ni le code, ni les rapports, ni les notebooks; elles retirent seulement ces pistes du corpus maintenu.
+
+## Leçons retenues
+
+- Une régularisation locale n'engendre pas automatiquement une hiérarchie globale sparse.
+- La DTM change la filtration; une continuation ne certifie pas le résultat dur.
+- Une liste locale fixe peut manquer un simplexe de Gabriel.
+- Un moteur flottant GPU propose des cellules, mais la fermeture exacte doit rester externe.
+- Le pire cas 3D est superlinéaire; les budgets doivent dégrader le statut, jamais la vérité annoncée.
+- Une hiérarchie HGP comporte des recouvrements et des applications entre ordres, pas seulement une partition.
+- Les facettes isolées ne sont pas couvertes automatiquement par le théorème du K-MST; le profil complet exige des attaches.

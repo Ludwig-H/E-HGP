@@ -1,0 +1,248 @@
+schema_version = 1
+updated_at = "2026-07-14"
+
+[project]
+name = "MorseHGP3D"
+implementation_started = false
+current_phase = "0"
+current_track = "foundation"
+status_authority = "This file is operational; mathematical authority remains in the specification and proof-status register."
+
+[conventions]
+allowed_status = ["blocked", "ready", "in_progress", "completed"]
+completion_requires = ["entry gate satisfied", "exit gate evaluated", "tests recorded", "artifacts recorded", "evidence commit recorded"]
+parallel_after_phase_11 = ["full_pi0", "performance"]
+
+[milestones.v1_correctness]
+status = "blocked"
+requires_phases = ["0", "1", "2A", "2B", "3", "4", "5", "7", "8", "9", "10", "11", "18"]
+requires_gates = ["G0", "G1", "G2", "G3", "G4", "G5", "G9"]
+full_pi0_requires_phase = "12"
+blocking_reason = "Les portes de correction et le durcissement ne sont pas encore fermes."
+
+[milestones.v1_interactive_scalable]
+status = "blocked"
+depends_on = ["v1_correctness"]
+requires_phases = ["14", "15", "16", "18"]
+requires_gates = ["G6", "G7", "G7b", "G9"]
+blocking_reason = "Le jalon v1-correctness et les portes de performance ne sont pas encore fermes."
+
+[[phases]]
+id = "0"
+title = "Gel de l'enonce M.1 et des schemas"
+track = "foundation"
+status = "ready"
+entry_gate_satisfied = true
+exit_gate_satisfied = false
+depends_on = []
+evidence = []
+blocking_reason = ""
+
+[[phases]]
+id = "1"
+title = "Oracle CPU exhaustif"
+track = "foundation"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["0"]
+evidence = []
+blocking_reason = "Phase 0 non fermee."
+
+[[phases]]
+id = "2A"
+title = "Predicats exacts CPU"
+track = "foundation"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["0", "1"]
+evidence = []
+blocking_reason = "Phases 0 et 1 non fermees."
+
+[[phases]]
+id = "3"
+title = "Environnement CUDA G4 reproductible"
+track = "foundation"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["0"]
+evidence = []
+blocking_reason = "Schemas de phase 0 non geles."
+
+[[phases]]
+id = "2B"
+title = "Predicats exacts GPU"
+track = "generic_core"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["2A", "3"]
+evidence = []
+blocking_reason = "Reference CPU et environnement CUDA indisponibles."
+
+[[phases]]
+id = "4"
+title = "Canonisation et oracle spatial"
+track = "generic_core"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["2A", "2B", "3"]
+evidence = []
+blocking_reason = "Predicats et environnement non fermes."
+
+[[phases]]
+id = "5"
+title = "Ancre k=1 et EMST"
+track = "generic_core"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["1", "4"]
+evidence = []
+blocking_reason = "Oracle et index spatial indisponibles."
+
+[[phases]]
+id = "6"
+title = "Miniballs et descentes"
+track = "full_pi0"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["1", "4"]
+evidence = []
+blocking_reason = "Oracle et index spatial indisponibles."
+
+[[phases]]
+id = "7"
+title = "Audit de la primitive de puissance"
+track = "generic_core"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["2B", "4"]
+evidence = []
+blocking_reason = "Predicats GPU et oracle spatial indisponibles."
+
+[[phases]]
+id = "8"
+title = "Raffinement ancre initial"
+track = "generic_core"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["1", "4", "7"]
+evidence = []
+blocking_reason = "Primitive GPU non auditee."
+
+[[phases]]
+id = "9"
+title = "Raffinement canonique jusqu'a m_star"
+track = "generic_core"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["8"]
+evidence = []
+blocking_reason = "Raffinement initial non ferme."
+
+[[phases]]
+id = "10"
+title = "Catalogue, Gabriel et hgp_reduced"
+track = "generic_core"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["5", "9"]
+evidence = []
+blocking_reason = "Ancre k=1 ou catalogue incomplet."
+
+[[phases]]
+id = "11"
+title = "Tour verticale reduite"
+track = "generic_core"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["10"]
+evidence = []
+blocking_reason = "Profil reduit non ferme."
+
+[[phases]]
+id = "12"
+title = "Preuve et implementation full_pi0 generique"
+track = "full_pi0"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["1", "6", "9", "10", "11"]
+evidence = []
+blocking_reason = "Attaches ou tour reduite non fermees."
+
+[[phases]]
+id = "13"
+title = "Degenerescences et multiplicites"
+track = "full_pi0"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["2A", "2B", "12"]
+evidence = []
+blocking_reason = "Profil full_pi0 generique non ferme."
+
+[[phases]]
+id = "14"
+title = "Latence 50 000 points"
+track = "performance"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["10", "11"]
+evidence = []
+blocking_reason = "Tour reduite certifiee indisponible."
+
+[[phases]]
+id = "15"
+title = "Streaming a un million"
+track = "performance"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["9", "10", "11"]
+evidence = []
+blocking_reason = "Cellules canoniques et tour reduite non fermees."
+
+[[phases]]
+id = "16"
+title = "Campagne a plusieurs millions"
+track = "performance"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["14", "15"]
+evidence = []
+blocking_reason = "Jalons 50k et million non fermes."
+
+[[phases]]
+id = "17"
+title = "Oracle direct sensible a H0"
+track = "research"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["9", "16"]
+evidence = []
+blocking_reason = "Ne s'ouvre que si les compteurs justifient un backend direct."
+
+[[phases]]
+id = "18"
+title = "Durcissement et releases"
+track = "release"
+status = "blocked"
+entry_gate_satisfied = false
+exit_gate_satisfied = false
+depends_on = ["milestone-specific"]
+evidence = []
+blocking_reason = "Les portes du jalon choisi ne sont pas encore fermees."
