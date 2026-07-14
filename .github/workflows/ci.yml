@@ -19,6 +19,36 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Build and test the certified CPU core
+        run: |
+          cmake -S morsehgp3d -B build/morsehgp3d -DMORSEHGP3D_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/morsehgp3d --parallel 2
+          ctest --test-dir build/morsehgp3d --output-on-failure
+
+      - name: Test the installed CMake package
+        run: |
+          cmake --install build/morsehgp3d --prefix /tmp/morsehgp3d-install
+          cmake -S morsehgp3d/tests/consumer -B build/morsehgp3d-consumer -DCMAKE_PREFIX_PATH=/tmp/morsehgp3d-install -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/morsehgp3d-consumer --parallel 2
+          ctest --test-dir build/morsehgp3d-consumer --output-on-failure
+
+      - name: Build the certified CPU core with Clang
+        env:
+          CC: clang
+          CXX: clang++
+        run: |
+          cmake -S morsehgp3d -B build/morsehgp3d-clang -DMORSEHGP3D_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/morsehgp3d-clang --parallel 2
+          ctest --test-dir build/morsehgp3d-clang --output-on-failure
+
+      - name: Test the certified CPU core with sanitizers
+        env:
+          ASAN_OPTIONS: detect_leaks=1
+        run: |
+          cmake -S morsehgp3d -B build/morsehgp3d-sanitized -DMORSEHGP3D_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          cmake --build build/morsehgp3d-sanitized --parallel 2
+          ctest --test-dir build/morsehgp3d-sanitized --output-on-failure
+
       - name: Validate active documentation
         run: python tools/check_docs.py
 

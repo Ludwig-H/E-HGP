@@ -1,6 +1,6 @@
 # E-HGP — MorseHGP3D
 
-E-HGP est désormais centré sur **MorseHGP3D**, le backend 3D destiné à reconstruire la hiérarchie des amas de forte densité K-NN pour tous les ordres $1\leq k\leq K_{\max}$, avec $K_{\max}=10$ comme première cible. Le projet est en intégration fondatrice : le présent dépôt fixe l'objet mathématique, exécute l'oracle CPU exhaustif, versionne les certificats et prépare l'architecture GPU avant toute implémentation de production.
+E-HGP est désormais centré sur **MorseHGP3D**, le backend 3D destiné à reconstruire la hiérarchie des amas de forte densité K-NN pour tous les ordres $1\leq k\leq K_{\max}$, avec $K_{\max}=10$ comme première cible. Le projet est en intégration fondatrice : le présent dépôt fixe l'objet mathématique, exécute l'oracle CPU exhaustif, versionne les certificats et construit maintenant le cœur certifié de prédicats CPU avant le portage GPU.
 
 L'objet continu est la tour de multicovertures
 
@@ -75,6 +75,7 @@ L'[index documentaire](docs/README.md) donne l'ordre de lecture. Les décisions 
 │   └── references/              # manuscrit et articles redistribuables
 ├── schemas/                     # contrat JSON canonique versionné
 ├── reference/                   # oracle CPU exhaustif indépendant de petite taille
+├── morsehgp3d/                  # nouveau cœur C++20 certifié, indépendant de HGP-old
 ├── tests/oracle/                # fixtures, différentiels et campagnes de phase 1
 ├── HGP-old/                     # code historique lié au manuscrit, conservé tel quel
 ├── gcp-migration/               # VM G4, coupe-circuits et arrêt vérifié
@@ -86,6 +87,9 @@ L'[index documentaire](docs/README.md) donne l'ordre de lecture. Les décisions 
 ## Vérifications locales
 
 ```bash
+cmake -S morsehgp3d -B build/morsehgp3d -DMORSEHGP3D_BUILD_TESTS=ON
+cmake --build build/morsehgp3d --parallel
+ctest --test-dir build/morsehgp3d --output-on-failure
 python tools/check_docs.py
 python tools/check_contracts.py
 python -m unittest discover -s tests/contracts -p 'test_*.py'
@@ -109,4 +113,4 @@ La licence MIT à la racine couvre le code actif et la documentation produits pa
 
 ## État du projet
 
-Le premier composant logiciel actif est l'[oracle CPU exhaustif](reference/README.md) de petite taille. Il est indépendant du futur backend de production et sert de vérité terrain différentielle; il n'est pas destiné au passage à l'échelle. Les noyaux CUDA ne commencent qu'après fermeture des portes de schéma, d'oracle et de prédicats. Toute revendication future devra indiquer le profil, le statut de certification, $n$, $K_{\max}$, la famille de données, le matériel, le pic mémoire et le protocole de mesure.
+La Phase 1 est fermée : l'[oracle CPU exhaustif](reference/README.md) de petite taille sert de vérité terrain différentielle et reste indépendant du backend de production. La Phase 2A construit désormais le [cœur C++20 certifié](morsehgp3d/README.md), en commençant par les dyadiques binary64, `ExactRational3` et `ExactLevel`; sa porte de sortie et G1 restent ouvertes jusqu'à la cascade complète de prédicats et aux campagnes prévues. Les noyaux CUDA ne commencent qu'après fermeture des portes CPU et d'environnement. Toute revendication future devra indiquer le profil, le statut de certification, $n$, $K_{\max}$, la famille de données, le matériel, le pic mémoire et le protocole de mesure.

@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(Boost 1.74 CONFIG COMPONENTS headers)
+
+include("${CMAKE_CURRENT_LIST_DIR}/MorseHGP3DTargets.cmake")
+check_required_components(MorseHGP3D)
