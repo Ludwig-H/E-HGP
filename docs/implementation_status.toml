@@ -3,7 +3,7 @@ updated_at = "2026-07-14"
 
 [project]
 name = "MorseHGP3D"
-implementation_started = false
+implementation_started = true
 current_phase = "0"
 current_track = "foundation"
 status_authority = "This file is operational; mathematical authority remains in the specification and proof-status register."
@@ -31,7 +31,7 @@ blocking_reason = "Le jalon v1-correctness et les portes de performance ne sont 
 id = "0"
 title = "Gel de l'enonce M.1 et des schemas"
 track = "foundation"
-status = "ready"
+status = "in_progress"
 entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = []
