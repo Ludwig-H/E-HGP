@@ -1,5 +1,8 @@
 # Algorithme certifié pour HGP régularisé : Čech de puissance, Gabriel pondéré et `K`-MST GPU
 
+> [!WARNING]
+> **Architecture antérieure, non normative.** Les modes fondés sur une mosaïque de Delaunay d'ordre supérieur ne sont plus la voie retenue. L'orientation active est décrite dans le [`README.md`](README.md), le [rapport ordre–échelle](RAPPORT_HGP_ORDRE_ECHELLE_DESCENTE_GPU_2026-07-14.md) et les [résultats A–E](docs/math/README.md) : cascade de diagrammes de puissance ordinaires en 3D, et tour de lentilles homogènes certifiée par coupes en grande dimension.
+
 ## 0. Analyse honnête de la version précédente
 
 La version précédente décrivait correctement le modèle régularisé par sites de puissance et distinguait déjà trois couches : modèle exact, génération de candidats, certification. C'était la bonne séparation. Mais elle donnait encore trop de place à la construction progressive de la mosaïque complète par témoins. C'est élégant sur le papier, mais ce n'est pas le meilleur cœur algorithmique pour HGP. Construire une mosaïque complète alors qu'on veut seulement une hiérarchie, c'est l'équivalent géométrique d'imprimer Internet pour retrouver une citation. Impressionnant, idiot, et mauvais pour la mémoire globale.
@@ -178,7 +181,7 @@ Cas limite :
 Si la haute dimension crée des hubs, remplacer les softmax indépendants par un transport entropique sparse :
 
 \[
-\min_{P\ge0,\ \operatorname{supp}(P)\subset E}
+\min_{P\ge0,\ \mathrm{supp}(P)\subset E}
 \sum_{(i,j)\in E}P_{ij}\|x_i-x_j\|^2
 +
 \varepsilon_{reg}KL(P\|A)

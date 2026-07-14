@@ -1,12 +1,15 @@
 # HGP ordre–échelle : échafaudage de Morse classé, descente facette–centre et réalisation GPU
 
+> [!NOTE]
+> **Statut éditorial.** Ce rapport reste la synthèse qui motive l'architecture à deux backends. Les résultats A–E annoncés en section 13 sont désormais développés dans [`docs/math/`](docs/math/README.md). Pour le résultat D, la direction active renonce à matérialiser le rhomboid tiling ou une mosaïque de Delaunay d'ordre supérieur : elle adapte leur récurrence à une cascade de diagrammes de puissance 3D ordinaires, avec certificat explicite de fermeture.
+
 > Suite mathématique et algorithmique — 14 juillet 2026  
 > Dépôt examiné : [`Ludwig-H/E-HGP`](https://github.com/Ludwig-H/E-HGP), branche `main`, révision [`5a8d5445d0772efcc77082165dd558b2dfb82ea8`](https://github.com/Ludwig-H/E-HGP/tree/5a8d5445d0772efcc77082165dd558b2dfb82ea8)  
 > Point de départ : [`RAPPORT_HIERARCHIE_HGP_MORSE_SOFTLENS_GPU_2026-07-13 (1).md`](https://github.com/Ludwig-H/E-HGP/blob/5a8d5445d0772efcc77082165dd558b2dfb82ea8/RAPPORT_HIERARCHIE_HGP_MORSE_SOFTLENS_GPU_2026-07-13%20%281%29.md), y compris son addendum normatif  
 > Cibles : tous les ordres $1\leq k\leq K_{\max}=10$ ; nuages 3D de l'ordre de $50\,000$ points ; très grande dimension
 
 > [!IMPORTANT]
-> **Verdict révisé.** La bonne structure n'est pas un arbre calculé dix fois, mais une **bifiltration ordre–échelle**. En 3D, son squelette $H_0$ exact est un catalogue unique de sphères critiques classées : une sphère de rang fermé $s$ porte une naissance à l'ordre $s$ et une selle à l'ordre $s-1$. Le problème des attaches globales peut être résolu sans mosaïque par une descente alternée « facette K-NN $\leftrightarrow$ centre de miniball », monotone et finie sous l'hypothèse de frontière essentielle $(\mathrm{GP}_{\partial}^{\mathrm{desc}})$ précisée ci-dessous. En grande dimension, la meilleure relaxation semble être une lentille entropique **homogène**, reliant la DTM à HGP sans température dimensionnée, sur un atlas de blocs de taille $K_{\max}$ fermé par sous-ensembles. L'entropie rend les noyaux locaux réguliers et GPU-friendly ; la sparsité vient de l'atlas d'événements et de la forêt, jamais de l'entropie seule.
+> **Verdict révisé.** La bonne structure n'est pas un arbre calculé dix fois, mais une **bifiltration ordre–échelle**. En 3D, son squelette $H_0$ exact est porté par un catalogue unique de sphères critiques classées, muni des attaches globales et des incidences de lots : une sphère de rang fermé $s$ porte une naissance à l'ordre $s$ et une selle à l'ordre $s-1$. Le problème des attaches globales peut être résolu sans mosaïque par une descente alternée « facette K-NN $\leftrightarrow$ centre de miniball », monotone et finie sous l'hypothèse de frontière essentielle $(\mathrm{GP}_{\partial}^{\mathrm{desc}})$ précisée ci-dessous. En grande dimension, la meilleure relaxation semble être une lentille entropique **homogène**, reliant la DTM à HGP sans température dimensionnée, sur un atlas de blocs de taille $K_{\max}$ fermé par sous-ensembles. L'entropie rend les noyaux locaux réguliers et GPU-friendly ; la sparsité vient de l'atlas d'événements et de la forêt, jamais de l'entropie seule.
 
 ## 1. Ce que change la version GitHub modifiée
 
@@ -23,7 +26,7 @@ La présente suite conserve ces corrections. Elle apporte surtout trois élémen
 
 - un objet commun à tous les ordres $k\leq K_{\max}$ ;
 - une régularisation entropique sans unité, mieux adaptée à une filtration multi-échelle ;
-- un théorème de descente qui ferme, sous position générale, le problème des attaches laissé ouvert dans le premier rapport.
+- un théorème de descente qui ferme le problème des attaches laissé ouvert dans le premier rapport sous les hypothèses explicites de support, d'oracles exacts, de catalogue terminal et de traitement des lots données dans l'annexe B.
 
 ## 2. L'objet central : la bifiltration ordre–échelle
 
@@ -88,11 +91,11 @@ L'extrémité $q=1$ est exactement la DTM empirique au carré ; l'extrémité $q
 
 ### 3.1 Il s'agit bien d'une régularisation KL
 
-Posons $\varepsilon=1/q\in(0,1]$. Pour les distances non nulles, la formule variationnelle du log-sum-exp donne
+Fixons une longueur de référence $\ell_0>0$ et posons $\varepsilon=1/q\in(0,1]$. Pour les distances non nulles, la formule variationnelle du log-sum-exp donne
 
-$$\log\Phi_{Q,1/\varepsilon}(y)=\max_{\alpha\in\Delta_Q}\left\lbrace\sum_{i\in Q}\alpha_i\log\left\Vert y-x_i\right\Vert^2-\varepsilon\,\mathrm{KL}(\alpha\Vert u_Q)\right\rbrace.$$
+$$\log\frac{\Phi_{Q,1/\varepsilon}(y)}{\ell_0^2}=\max_{\alpha\in\Delta_Q}\left\lbrace\sum_{i\in Q}\alpha_i\log\frac{\left\Vert y-x_i\right\Vert^2}{\ell_0^2}-\varepsilon\,\mathrm{KL}(\alpha\Vert u_Q)\right\rbrace.$$
 
-La convention continue s'applique lorsqu'une distance est nulle. L'entropie régularise ici le maximum des **log-distances**. Cette position possède quatre avantages.
+Avec $\log0=-\infty$, la convention étendue restreint le simplexe aux distances positives ; si elles sont toutes nulles, les deux membres valent $-\infty$. L'entropie régularise ici le maximum des **log-distances**. Cette position possède quatre avantages.
 
 1. Le minimum extérieur sur les facettes reste dur ; la représentation par union d'atomes est conservée.
 2. $\varepsilon$ est sans unité.
@@ -297,21 +300,29 @@ Une fois le catalogue complet disponible, avec K-NN, miniballs et comparaisons d
 
 Pour $k=1$, les naissances de rang $1$ sont les observations. Les selles de rang $2$ sont les paires à boule diamétrale vide ; Kruskal conserve exactement un EMST. Le cas fondamental demandé dans la question initiale apparaît donc comme la première tranche de l'échafaudage classé, et non comme un cas spécial ajouté après coup.
 
-### 5.4 Le verrou restant : énumérer toutes les sphères peu profondes
+### 5.4 Fermeture exacte par diagrammes de puissance ordinaires
 
-Une sphère utile possède un rang fermé au plus $K_{\max}+1$, mais cela ne signifie pas que ses points frontière figurent dans une liste de $L$ voisins de chacun d'eux. Une grande sphère presque vide peut relier des points éloignés, tandis que de nombreux points extérieurs à la sphère peuvent être proches d'un de ses points frontière. Aucun $L=O(K)$ universel ne donne donc une énumération exacte.
+Une sphère utile possède un rang fermé au plus $K_{\max}+1$, mais cela ne signifie pas que ses points frontière figurent dans une liste de $L$ voisins de chacun d'eux. Aucun $L=O(K)$ universel ne donne une énumération exacte. La solution retenue n'est donc pas une liste locale plus large : c'est une génération de colonnes avec certificat global.
 
-Trois modes doivent être distingués.
+Pour tout $Q\subseteq X$ de cardinal $k$, posons
 
-- **Référence exacte.** Construire les premières couches de la rhomboid tiling ou les mosaïques d'ordres successifs, puis extraire les événements de rang au plus $11$.
-- **Rapide conditionnel.** Proposer paires, triangles et tétraèdres depuis des réservoirs locaux, la continuation entropique et les centres d'événements ; certifier durement chaque sphère proposée.
-- **Rapide à précision certifiée.** Lorsque le catalogue ne se ferme pas dans le budget, basculer explicitement vers une multicoverture sparse avec paramètre d'approximation, jamais vers une prétendue exactitude globale.
+$$b_Q=\frac{1}{k}\sum_{x\in Q}x,\qquad \omega_Q=\left\Vert b_Q\right\Vert^2-\frac{1}{k}\sum_{x\in Q}\left\Vert x\right\Vert^2.$$
 
-La voie de recherche exacte la plus crédible est un énumérateur sensible à la taille de sortie du niveau peu profond dans le relèvement paraboloïdal, ou une construction incrémentale exploitant un diagramme de puissance 3D GPU comme primitive. Les travaux récents de Taveira et al. montrent qu'une cellule de puissance peut être construite par découpage progressif et parcours prioritaire de volumes englobants sur GPU ; cette primitive est pertinente, mais elle ne constitue pas encore l'algorithme d'ordre supérieur recherché.
+La puissance du site $(b_Q,\omega_Q)$ vérifie
+
+$$\pi_Q(y)=\left\Vert y-b_Q\right\Vert^2-\omega_Q=\frac{1}{k}\sum_{x\in Q}\left\Vert y-x\right\Vert^2.$$
+
+Ses minimiseurs globaux sont exactement les labels top-$k$ en $y$. Partons d'un ensemble de colonnes $\mathcal S_k$ et construisons leurs cellules de puissance dans un polytope borné $\Omega\supset\mathrm{conv}(X)$. Pour chaque sommet $v$ de la cellule courante d'un label $Q$, une requête top-$k$ exacte fournit le shell complet des minimiseurs globaux. Un label strictement meilleur est inséré et redécoupe la cellule ; un label de même puissance est inséré pour reconstruire l'incidence non perturbée.
+
+La différence $\pi_R-\pi_Q$ est affine. Par conséquent, si elle est positive ou nulle à tous les sommets de la cellule courante, elle l'est dans toute la cellule. L'absence de violation aux sommets est donc un **certificat exact de fermeture** contre les $\binom{n}{k}$ sites implicites. Chaque ronde non fermée ajoute une colonne ; la procédure termine en temps fini, même si sa borne générale reste combinatoire.
+
+La récurrence d'Edelsbrunner–Osang fournit les colonnes initiales des ordres suivants. Elle est utilisée comme initialisation chaude, pas comme objet de stockage ni comme unique certificat. Une sphère ayant $i$ points strictement intérieurs et un support $U$ de taille $2$, $3$ ou $4$ apparaît déjà dans le diagramme fermé d'ordre $i+1$, sur une face de codimension $\lvert U\rvert-1$. Cet **ordre de détection** ne doit pas être confondu avec l'ordre $s-1$ où la même sphère est une selle d'indice $1$, avec $s=i+\lvert U\rvert$.
+
+Deux modes internes seulement sont scientifiquement honnêtes : `power_closed`, lorsque toutes les cellules et incidences des ordres $1$ à $K_{\max}$ portent leur certificat, et `power_budgeted`, lorsque chaque événement retourné est validé mais que la complétude du catalogue reste inconnue. Le premier ne justifie le statut public `exact` qu'après fermeture des prédicats, attaches et lots ; le second impose `conditional`. Le résultat D donne le théorème et le contrat détaillés.
 
 ### 5.5 Complexité honnête
 
-Même la Delaunay 3D ordinaire peut avoir une taille quadratique. Il n'existe donc pas de garantie universelle « exact, $50\,000$ points, moins d'une seconde ». La cible est plausible sur des nuages volumétriques réguliers parce que le nombre moyen de cellules peu profondes est alors proche du linéaire pour $K$ fixé. Elle doit rester conditionnée à des diagnostics mesurés :
+Même la Delaunay 3D ordinaire peut avoir une taille quadratique. Il n'existe donc pas de garantie universelle « exact, $50\,000$ points, moins d'une seconde ». Cette cible doit être testée sur des nuages volumétriques réguliers et rester conditionnée à des diagnostics mesurés ; la proximité du linéaire du certificat ne peut pas être postulée :
 
 - nombre de supports proposés et acceptés par point ;
 - profondeur et taux d'élagage du BVH ;
@@ -354,7 +365,7 @@ La hiérarchie restreinte est donc une vraie tour
 
 $$T^{\mathcal B}_{1,q}\longleftarrow T^{\mathcal B}_{2,q}\longleftarrow\cdots\longleftarrow T^{\mathcal B}_{K_{\max},q}.$$
 
-Si chaque observation appartient à au moins un bloc, la tranche $k=1$ contient tous les singletons et son champ est exactement celui de l'EMST. Le calcul retrouve effectivement cet EMST seulement si toutes les rencontres de paires sont couvertes par le graphe complet implicite ou par un oracle de coupe global certifié. Aux ordres supérieurs, la tour reste une sous-filtration de l'objet complet et peut manquer des naissances ou retarder des fusions.
+Si chaque observation appartient à au moins un bloc, la tranche $k=1$ contient tous les singletons et son champ restreint est exactement $D_1$. Sa hiérarchie de composantes admet donc l'EMST comme représentation mince. Le calcul retrouve effectivement cet EMST seulement si toutes les rencontres de paires sont couvertes par le graphe complet implicite ou par un oracle de coupe global certifié. Aux ordres supérieurs, la tour reste une sous-filtration de l'objet complet et peut manquer des naissances ou retarder des fusions.
 
 ### 6.2 Fermeture exacte, matérialisation paresseuse
 
@@ -447,15 +458,13 @@ Le point crucial reste « toutes les faces et tous les blocs non visités ». CA
 
 La fermeture descendante garantit la bifiltration entre ordres ; elle ne garantit pas que les swaps actifs restent dans l'atlas. Pour chaque $k$, un calcul exact sur l'atlas doit utiliser le graphe complet implicite des rencontres ou certifier les chemins minimax manquants.
 
-Les statuts de sortie proposés sont :
+Les trois statuts publics sont ceux du résultat E :
 
-- `atlas_exact` : les arbres et morphismes sont exacts pour $\Downarrow\mathcal B$ ;
-- `hard_atlas_exact_via_q` : la forêt dure sur l'atlas a été certifiée par les intervalles en $q$ et les raffinements nécessaires ;
-- `critical_complete` : un oracle externe a certifié que tous les événements globaux requis ont été capturés ;
-- `conditional` : l'atlas s'est stabilisé sous le budget, sans certificat global ;
-- `condensed_exact(pi)` : seuls les événements de persistance supérieure à un seuil déclaré $\pi$ sont certifiés complets.
+- `exact` : la tour globale est certifiée sur le périmètre déclaré, `full` ou `condensed(pi)` ;
+- `atlas_exact` : les arbres et morphismes sont exacts pour l'atlas descendant identifié, sans conclusion globale automatique ;
+- `conditional` : la conclusion globale dépend encore d'une hypothèse ou d'un oracle non fermé.
 
-Un recall ANN élevé, l'absence de nouvelle colonne pendant quelques rondes ou la stabilité visuelle d'un dendrogramme ne doivent jamais être renommés `critical_complete`.
+Les propriétés `hard_via_q`, `critical_complete`, `power_closed` et $\pi$-complétude sont des certificats ou des diagnostics internes. Elles justifient éventuellement `exact` dans un périmètre donné, mais ne créent pas de nouveaux statuts concurrents. Un rappel ANN élevé, l'absence de nouvelle colonne pendant quelques rondes ou la stabilité visuelle d'un dendrogramme ne changent jamais seuls `conditional` en `exact`.
 
 ### 6.7 Pourquoi UMAP n'est qu'une infrastructure de proposition
 
@@ -476,25 +485,19 @@ Les deux backends doivent partager l'orchestration et les primitives bas niveau,
 
 | primitive | 3D massive | grande dimension |
 |---|---|---|
-| candidats K-NN | LBVH exact ; RBC éventuel en proposition | cuVS CAGRA, IVF-PQ ou NN-descent en proposition |
-| validation K-NN | parcours LBVH branch-and-bound | scan cuVS brute force sur petits cas ; sinon aucune certification globale générale |
+| candidats K-NN | index spatial ou cascade précédente, en proposition | cuVS CAGRA, IVF-PQ ou NN-descent en proposition |
+| validation K-NN | oracle top-$k$/shell exact sur les observations originales | scan exhaustif sur petits cas ; sinon aucune certification globale générale |
 | atome chaud | barycentre/DTM | barycentre/DTM |
 | atome dur | miniball de $k\leq10$ points en 3D | miniball ou dual de dimension $\leq k$ dans un Gram |
 | événement global | sphère critique de support $\leq4$ | rencontre de deux faces de l'atlas |
-| complétude | rhomboïdes/mosaïques ou énumérateur shallow couvrant | impossible universellement ; atlas et statut explicites |
+| complétude | cascade de puissance fermée par séparation top-$k$ aux sommets ; arrêt budgété conditionnel | impossible universellement ; atlas, certificats de coupes et statut explicites |
 | sortie | échafaudage classé + dix forêts + morphismes | tour de blocs + dix forêts + morphismes |
 
-### 7.1 Bibliothèques et niveau d'implémentation
+### 7.1 Critère de compatibilité GPU
 
-Le prototype peut rester en CuPy `RawKernel`, ce qui permet de réutiliser l'infrastructure actuelle. Le chemin faible latence devrait toutefois devenir une extension C++/CUDA :
+Une construction est retenue seulement si son travail dominant se décompose en lots parmi les familles suivantes : distances et produits scalaires, top-$k$ de petite taille, découpage indépendant de cellules convexes 3D, petits problèmes convexes sur au plus $2K_{\max}$ points, tris segmentés, réductions de coupes et union–find par lots de niveaux.
 
-- CUB/CCCL pour Morton, radix sort, run-length encoding, scans, files compactées et réductions segmentées ;
-- RMM pour une arène commune et des allocations ordonnées par stream ;
-- cuVS brute force pour les références exhaustives et CAGRA pour les propositions haute dimension ;
-- cuCollections pour les caches de facettes, avec vérification des identifiants après le hash ;
-- CUDA Graphs pour les calendriers d'itérations fixes et les phases répétées de Borůvka, sans placer de synchronisation Python dans chaque ronde.
-
-La documentation cuVS décrit CAGRA comme un index ANN construit spécifiquement pour GPU, avec graphe K-NN puis élagage. Elle propose aussi un backend brute force exhaustif fondé sur des multiplications matricielles. Cette séparation correspond exactement au contrat requis ici : CAGRA propose ; le brute force ou un oracle géométrique couvrant certifie lorsque cela reste faisable.
+Cette liste est un contrat mathématique de granularité, pas un choix de bibliothèque. Les index ANN restent des producteurs de colonnes ; les parcours couvrants, les bornes primales–duales et les prédicats filtrés restent les décideurs. Le partage entre backends porte sur les lots, les intervalles et le format de sortie, tandis que leurs oracles globaux demeurent différents. CuPy, C++/CUDA, CUB, RMM ou cuVS seront évalués après validation des oracles, sans rétroagir sur les résultats A–E.
 
 ### 7.2 Arithmétique et statuts
 
@@ -508,148 +511,85 @@ La géométrie de proposition peut utiliser `float32`, voire `float16` ou BF16 p
 
 Un booléen global `certified=True` serait trop ambigu. Une arête peut avoir un poids certifié alors que l'atlas qui l'a proposée est incomplet.
 
-## 8. Backend GPU 3D proposé : `MorseHGP3D`
+## 8. Contrat mathématique GPU-friendly du backend 3D : `MorseHGP3D`
 
-### 8.1 Index spatial et requêtes exactes
+Cette section ne fige plus une architecture CUDA ni un budget en millisecondes. Elle identifie les primitives dont la sémantique est assez locale, régulière et batchable pour qu'une implémentation GPU soit plausible sans modifier l'objet mathématique.
 
-Les coordonnées sont triées par code Morton ; un LBVH binaire stocke une AABB et l'effectif de chaque sous-arbre. Il sert à trois requêtes.
+### 8.1 `PowerCascadeH0`
 
-- **Top-$k$ exact.** Un warp maintient un petit tas de taille $k\leq11$ et élague un nœud lorsque sa distance minimale à la requête dépasse le meilleur rayon courant.
-- **Rang d'une sphère.** Un nœud est entièrement intérieur si sa distance maximale au centre est strictement inférieure au rayon ; il est extérieur si sa distance minimale est strictement supérieure. Le parcours s'arrête dès que le rang fermé dépasse $11$.
-- **Liste intérieure.** Pour une sphère acceptée, un second passage compacté renvoie les identifiants nécessaires aux bras et à la relation de couverture.
+À chaque ordre $k$, la cascade reçoit des labels $Q$, construit les cellules de puissance ordinaires de leurs sites $(b_Q,\omega_Q)$, interroge le top-$k$ exact aux sommets non fermés, insère les colonnes violatrices et répète. Les opérations d'un même lot de cellules sont indépendantes jusqu'aux tris de déduplication et d'incidence. L'ordre $k+1$ dépend des colonnes émises aux ordres précédents, mais tout le travail lourd à ordre fixé est parallèle.
 
-Une grille de hachage pourrait éventuellement accélérer ces requêtes. Elle serait alors un index spatial interchangeable, pas le support topologique de la hiérarchie. Le LBVH évite toutefois l'ambiguïté conceptuelle et fournit des bornes géométriques naturelles.
+Le contrat exact porte sur quatre objets : les cellules fermées, les classes complètes de minimiseurs ex æquo, les incidences internes appariées et la file vide des colonnes violatrices. La structure supérieure n'est jamais matérialisée. Les polyèdres d'un ordre peuvent être libérés dès que leurs incidences, leurs événements et leurs propositions inter-ordres ont été réduits.
 
-### 8.2 Noyaux de supports et miniballs
+### 8.2 Trois oracles globaux seulement
 
-Un warp évalue une paire, un triangle ou un tétraèdre :
+Le backend exact a besoin de trois requêtes sur les observations originales.
 
-- milieu pour deux points ;
-- système de Gram $2\times2$ pour trois points ;
-- système $3\times3$ pour quatre points ;
-- coordonnées barycentriques et test de `relint` ;
-- filtre rapide, puis chemin précis si le déterminant ou une coordonnée est proche de zéro.
+1. `top_k_shell(y,k)` renvoie les points strictement avant le rang $k$ et le shell complet au rang $k$ ; il sépare les cellules contre tous les labels implicites.
+2. `closed_rank(c,r)` compte les points intérieurs et frontaux, avec arrêt dès que le rang dépasse $K_{\max}+1$ ; il valide une sphère proposée.
+3. `interior_ids(c,r)` restitue les identifiants nécessaires aux bras, aux ancres verticales et à la relation de couverture.
 
-Pour une facette de dix points, une miniball déterministe peut être calculée en testant tous les supports de tailles $1$ à $4$ :
+Un BVH, une grille de hachage ou une autre structure spatiale peut réaliser ces requêtes. Ce choix appartient à l'implémentation future. Mathématiquement, le premier oracle décide la complétude géométrique et les deux autres décident le catalogue ; aucun audit échantillonné ne peut porter le même statut.
 
-$$\binom{10}{1}+\binom{10}{2}+\binom{10}{3}+\binom{10}{4}=385.$$
+### 8.3 Supports critiques et descente
 
-Ces candidats ont une charge fixe, se parallélisent dans un warp et évitent la récursion de Welzl. Le meilleur candidat contenant tous les points donne la miniball ; les quasi-égalités passent au filtre adaptatif.
+Les faces de codimensions $1$, $2$ et $3$ fournissent respectivement les supports de tailles $2$, $3$ et $4$. Leur traitement demande seulement de petits systèmes de Gram, des signes barycentriques, un test d'appartenance à la face et un comptage de rang. Pour $k\leq10$ en dimension $3$, une miniball de facette possède elle aussi un support d'au plus quatre points : la descente `AlternatingMEB` se ramène donc à des lots de petits problèmes indépendants suivis de requêtes top-$k$.
 
-### 8.3 `AlternatingMEB` batché et mémoïsé
+La valeur de miniball décroît strictement le long des transitions non stationnaires sous $(\mathrm{GP}_{\partial}^{\mathrm{desc}})$. Cette monotonie donne un graphe d'états acyclique hors plateaux et autorise la mémoïsation, mais elle ne borne pas uniformément le nombre d'étapes. Les plateaux restent des lots, jamais des choix arbitraires de voisin.
 
-Chaque bras est un état `(k, facet_ids)`. Un warp :
+### 8.4 Réduction hiérarchique
 
-1. calcule sa miniball ;
-2. requête le top-$k$ exact au centre ;
-3. vérifie le point fixe ;
-4. insère le nouvel état dans une file persistante si nécessaire.
+Les événements sont triés et réduits par la clé combinatoire de leur sphère, puis par lots de niveaux certifiés. Les attaches des bras sont ramenées aux composantes strictement sous le lot ; chaque composante connexe de l'hypergraphe du lot crée au plus une multifurcation. L'identifiant partagé d'une sphère relie sa naissance d'ordre $s$ à son ancre d'ordre $s-1$.
 
-La valeur de miniball décroît le long des transitions non stationnaires. Le graphe des états est donc acyclique hors plateaux dégénérés. Une table de hachage peut mémoriser l'attache terminale d'une facette déjà visitée et partager le résultat entre plusieurs selles ou plusieurs bras.
+Cette dernière étape est composée de tris segmentés, de réductions et d'union–find. Elle est GPU-friendly, mais sa correction vient du résultat C : la concurrence d'exécution ne doit jamais imposer l'ordre mathématique de deux événements égaux.
 
-Diagnostics obligatoires : nombre d'itérations, nombre de nœuds BVH visités, décroissance des valeurs, marge terminale, taux de précision adaptée, plafond éventuel, et présence du minimum terminal dans le catalogue de naissances. Un minimum terminal absent est un certificat positif d'incomplétude du catalogue.
+### 8.5 Complexité et cible de latence
 
-### 8.4 Enregistrement et forêt
+Pour l'ordre $k$, notons $M_k$ le nombre de cellules actives, $P_k$ le nombre d'incidences émises, $W_k$ le nombre de sommets testés par l'oracle, $J_k$ le nombre de nouvelles colonnes strictement violatrices ou co-minimisantes, $A_k$ le nombre de tests conservatifs colonne–cellule, $L_k$ le nombre de découpages et $Z_k$ le nombre d'événements acceptés. Le volume combinatoire pertinent est gouverné par
 
-Un enregistrement de sphère peut prendre la forme conceptuelle suivante :
+$$\sum_{k=1}^{K_{\max}}(M_k+P_k+W_k+J_k+A_k+L_k+Z_k),$$
 
-```text
-closed_ids[11]          uint32
-boundary_mask           uint16
-closed_rank             uint8
-support_size            uint8
-center[3]               float64
-radius2_lo, radius2_hi  float64
-numeric_status          uint8
-```
+et non par le seul nombre final de branches. Ce décompte n'est pas une borne de temps : il faut encore lui appliquer les coûts des top-$k$, découpages, tris, prédicats et comptages de rang. Rien n'empêche ces quantités d'être quadratiques dans le pire cas. La cible de moins d'une seconde pour $50\,000$ points en 3D est donc une hypothèse de régime volumétrique à tester, données déjà résidentes et décompte ci-dessus mesuré proche du linéaire ; elle n'est pas un corollaire du théorème de fermeture. Un arrêt par budget conserve la validité individuelle des événements, mais transforme obligatoirement le statut global en `conditional`.
 
-Après déduplication :
+## 9. Contrat mathématique GPU-friendly en grande dimension : `HomogeneousLensTower`
 
-- radix sort par `(ordre, rayon2, event_id)` ;
-- gel des composantes strictement sous chaque lot de niveau ;
-- réduction des attaches de bras vers leurs racines ;
-- union simultanée des racines distinctes ;
-- création d'un nœud multifurqué par composante de l'hypergraphe du lot ;
-- utilisation de `event_id` comme ancrage, localisation de la composante post-lot à l'ordre inférieur, puis propagation aux ancêtres.
+Le backend haute dimension n'essaie pas de reproduire la géométrie 3D. Il construit une tour exacte sur un atlas descendant, puis cherche à certifier le plus grand squelette condensé possible contre l'univers global. L'itération porte simultanément sur l'atlas et sur $q$, pas sur dix problèmes indépendants.
 
-Le Borůvka cubique actuel a montré que les primitives de `parent`, compression et union CAS sont solides. Elles peuvent être extraites dans un module commun ; le balayage des 26 voisins de voxels, lui, ne doit pas être conservé.
+### 9.1 État sparse commun aux ordres
 
-### 8.5 Budget visant moins d'une seconde pour le mode conditionnel rapide
+L'état primaire est une famille de blocs $B$ de cardinal $K_{\max}$, accompagnée sémantiquement de toutes leurs faces. Une face est matérialisée seulement si elle porte un minimum, une rencontre, une coupe concurrente ou une flèche verticale. Une requête top-$K_{\max}$ à un centre critique ajoute un bloc et enrichit ainsi tous les ordres en une seule opération.
 
-Le tableau suivant est un budget d'ingénierie, pas un benchmark. Il suppose les données déjà sur GPU, les noyaux compilés, un nuage non pathologique, environ $16$ à $32$ propositions par point, un catalogue accepté de taille au plus quelques multiples de $n$ et une médiane de descente inférieure à six étapes.
+Pour un couple `(point, bloc)`, le calcul des $K_{\max}$ distances, leur tri et les moyennes préfixes donnent en une passe les valeurs des meilleurs sous-blocs de chaque taille. Cette structure répétée, de taille fixée par $K_{\max}=10$ et non par la dimension ambiante, est la raison mathématique principale de la compatibilité GPU.
 
-| étape | budget cible non mesuré |
-|---|---:|
-| normalisation, Morton, LBVH, top-$11$/shell | 60–150 ms |
-| propositions, miniballs, déduplication | 80–180 ms |
-| certification de rang des survivants | 120–300 ms |
-| attaches `AlternatingMEB` | 100–250 ms |
-| tri, lots, hyper-union–find, forêts | 10–30 ms |
-| orchestration et marge | 30–80 ms |
-| **total visé** | **0,40–0,99 s** |
+### 9.2 Petits problèmes convexes après les produits scalaires
 
-L'API doit préciser le comportement lorsque le budget est dépassé : `return_conditional`, `continue_exact` ou `error`. Une énumération exhaustive peut dépasser arbitrairement une seconde ; aucune optimisation CUDA ne supprime cette limite de sortie.
+Les naissances $\beta_q(Q)$ et les rencontres $w_q(Q,R)$ se calculent sur au plus $K_{\max}$ et $2K_{\max}$ observations. Après formation des produits scalaires, la dimension du problème convexe dépend de ces cardinalités, non de $d$. Les blocs partageant des observations réutilisent donc leurs matrices de Gram, et les valeurs à l'ordre $k$ ou à l'exposant $q$ précédent fournissent des initialisations cohérentes.
 
-## 9. Backend grande dimension proposé : `HomogeneousLensTower`
+Le contrat du solveur n'est pas « converger rapidement » : il doit retourner des bornes inférieure et supérieure sur chaque niveau. Ces intervalles alimentent directement les lots, les coupes fondamentales et le statut de la hiérarchie. Le choix futur entre Newton projeté, miroir ou autre méthode n'a aucune portée topologique.
 
-### 9.1 Stockage et noyau de blocs
+### 9.3 Boucle de colonnes hiérarchique
 
-Les blocs sont stockés comme dix identifiants `uint32`, alignés. Un warp traite un couple `(requête, bloc)` :
+Une ronde conceptuelle suit cinq étapes.
 
-1. calcul des dix distances ;
-2. réseau de tri fixe de taille dix ;
-3. scan des dix préfixes $k=1,\ldots,10$ ;
-4. valeurs pour plusieurs $q$ ;
-5. masques de faces actives.
+1. Calculer exactement les dix forêts sur l'atlas courant et leurs flèches verticales.
+2. Identifier les naissances, rencontres, attaches et coupes qui portent la condensation demandée.
+3. Interroger en lot les familles absentes susceptibles de battre ces décisions.
+4. Ajouter un bloc top-$K_{\max}$ à chaque témoin violateur et reprendre toutes les tranches affectées.
+5. Arrêter seulement lorsque les certificats requis sont fermés, ou lorsque le budget impose le statut `conditional`.
 
-Pour éviter les débordements, si $m$ est le maximum courant,
+Les dix union–find sont distinctes, puisque les dix tranches le sont, mais elles partagent blocs, produits scalaires, candidats et témoins de coupe. Une réduction de type Borůvka peut choisir les rencontres minimax à l'intérieur de l'atlas ; l'exactitude globale exige en plus les minorants couvrants de l'annexe E.
 
-$$\Phi_{Q,q}=m\left(\frac{1}{k}\sum_i\left(\frac{a_i}{m}\right)^q\right)^{1/q}.$$
+### 9.4 Rôle précis des méthodes ANN et de la continuation
 
-Le calendrier dyadique $q=1,2,4,8,16,32,\infty$ permet d'utiliser des multiplications répétées et se termine par un maximum. Une branche séparée traite $m=0$.
+UMAP, CAGRA, IVF-PQ ou NN-descent sont des générateurs de blocs et de concurrents. Un reranking exact corrige le poids des candidats trouvés, mais ne certifie pas l'absence d'un candidat meilleur. Ces méthodes ne changent donc jamais seules `conditional` en `exact`.
 
-### 9.2 Matrices de Gram et duaux batchés
+La continuation $q=1\to\infty$ joue un rôle différent : elle ordonne les cas difficiles, réutilise les solutions locales et fournit les intervalles multiplicatifs $[w_q,k^{1/q}w_q]$ pour le problème dur. Elle peut fermer tôt une coupe lorsque ces intervalles sont disjoints. Elle ne prouve pas qu'un événement absent de l'atlas n'existe pas.
 
-Un Gram $10\times10$ par bloc sert à toutes ses faces. Un Gram d'au plus $20\times20$ sert à une rencontre de faces quelconques ; une rencontre de swaps n'utilise que $k+1\leq11$ points distincts.
+### 9.5 Mesure de la difficulté réelle
 
-- Un warp résout le petit dual par Newton projeté ou mirror-ascent.
-- Chaque itération maintient une paire de bornes primale–duale.
-- Le solveur à l'ordre $k+1$ démarre de celui à l'ordre $k$ par ajout d'une masse nulle.
-- Le solveur à $q'$ démarre de celui à $q$.
-- Les candidats partageant un bloc sont triés ensemble afin de réutiliser les lignes de données et le Gram.
+La dimension ambiante commande essentiellement le coût des distances et des produits scalaires. La difficulté combinatoire se mesure plutôt par le nombre de blocs $M$, de faces matérialisées, de rencontres concurrentes, de rondes de colonnes et de coupes non fermées. Une complexité honnête doit publier ces quantités ainsi que la part du squelette condensé certifiée globalement.
 
-La dimension ambiante affecte la construction des produits scalaires, donc la bande passante, mais pas la taille du solveur non linéaire.
-
-### 9.3 Borůvka partagé entre ordres
-
-Les dix union–find restent séparées, car les dix arbres le sont mathématiquement. Elles partagent cependant :
-
-- l'atlas de blocs ;
-- les requêtes top-$10$ et les réservoirs ANN ;
-- les matrices de Gram ;
-- les candidats de shell et de swaps ;
-- les bornes de puissance à $q=1$ ;
-- les raffinements successifs en $q$.
-
-Une paire de blocs peut produire en une passe les candidats pertinents pour plusieurs ordres. Les réductions de meilleure arête sortante sont segmentées par `(k, component_id)`. Pour être exact sur l'atlas, le majorant du gagnant doit être inférieur aux minorants de toutes les faces implicites, de tous les blocs et de tous les groupes non explorés. Un index ANN sans borne couvrante ne satisfait pas ce contrat.
-
-### 9.4 Rôle précis de cuVS
-
-[CAGRA](https://docs.rapids.ai/api/cuvs/stable/neighbors/cagra/) est adapté à la génération des blocs, des shells et des paires concurrentes. Son degré de graphe et son `itopk_size` règlent le compromis rappel–coût. La compression ou IVF-PQ peut réduire la mémoire, puis un rerank sur les vecteurs originaux corrige les candidats retournés.
-
-Le rerank exact d'une shortlist ne prouve pas qu'un voisin global absent de la shortlist n'était pas meilleur. Pour les petites tailles ou les jeux de validation, le backend [cuVS brute force](https://docs.rapids.ai/api/cuvs/stable/neighbors/bruteforce/) fournit la référence exhaustive. Pour les très grands jeux, le statut restera conditionnel sauf hypothèse supplémentaire ou borne certifiée de l'index.
-
-### 9.5 Mémoire et temps
-
-Pour $M$ blocs, un degré de proposition $B$ et une dimension $d$, les principaux termes sont :
-
-- données originales : environ $4nd$ octets en `float32` ;
-- blocs : $4K_{\max}M$ octets ;
-- graphe candidat : environ $12BM$ octets ;
-- centres comprimés éventuels pour ANN : environ $2dM$ octets en `float16` ;
-- faces : matérialisées seulement pour les événements actifs, non $1023M$ par défaut.
-
-À titre de cible de recherche, non de benchmark, un atlas de l'ordre du million de blocs en dimension $128$, avec CAGRA déjà construit et $B\simeq16$, devrait viser quelques secondes par ronde, et non moins d'une seconde. Le nombre de rondes, le plafond de blocs et le nombre de raffinements en $q$ doivent faire partie du contrat public.
+Dans le pire cas, l'atlas nécessaire n'est pas sparse. La sortie correcte est alors une tour `atlas_exact` accompagnée d'une conclusion globale `conditional`, ou un refus d'atteindre le périmètre condensé demandé ; jamais une partition plate présentée comme substitut.
 
 ## 10. Comparaison avec l'implémentation GitHub la plus récente
 
@@ -687,57 +627,26 @@ Les éléments suivants doivent donc rester dans `power_cover_3d_cuda` :
 - la couverture boule–AABB spécifique aux voxels ;
 - les sorties `base/inner/outer` de la forêt cubique.
 
-### 10.3 Migration recommandée
+### 10.3 Séparation mathématique recommandée
 
 | étage actuel | `MorseHGP3D` | `HomogeneousLensTower` |
 |---|---|---|
-| RBC audité | proposition seulement ; LBVH exact final | remplacé par cuVS haute dimension |
+| RBC audité | proposition seulement ; oracle top-$k$ couvrant pour décider | générateur ANN de blocs, sans portée certifiante seul |
 | Gibbs site par site | supprimé | remplacé par moyenne de puissance dans chaque face |
-| champ de rang sur grille | événements de sphères classées | atomes d'un atlas de blocs |
-| MSF cubique | hyper-Kruskal des attaches | Borůvka implicite avec intervalles |
+| champ de rang sur grille | cellules de puissance fermées puis sphères classées | atomes d'un atlas descendant |
+| MSF cubique | lots d'attaches et hyper-Kruskal gradué | niveaux minimax et coupes certifiées |
 | grille 26-connexe | aucune | aucune |
 | `certified` global | statuts séparés | statuts séparés |
 
-Une arborescence plausible est :
-
-```text
-backends/common_cuda/
-    runtime.py
-    exact_knn.cu
-    small_meb.cu
-    predicates.cu
-    generic_boruvka.cu
-    event_sort.cu
-
-backends/morse_hgp_3d_cuda/
-    contracts.py
-    lbvh.cu
-    scaffold.cu
-    candidate_generation.cu
-    alternating_meb.cu
-    hyperkruskal.cu
-    api.py
-
-backends/homogeneous_lens_tower_cuda/
-    contracts.py
-    block_store.cu
-    block_prefix.cu
-    distance_matrix.cu
-    homogeneous_dual.cu
-    graded_boruvka.cu
-    column_generation.cu
-    api.py
-```
-
-Le code courant ne doit pas être modifié pour imiter partiellement cette architecture. Il constitue une excellente référence cubique. Les deux nouveaux backends ont des contrats mathématiques différents et doivent être testés séparément.
+Le partage entre backends doit porter sur le format `GradedMergeForest`, les lots, les intervalles numériques et les statuts, pas sur une géométrie artificiellement commune. `PowerCover3D` constitue une référence cubique et une source de briques d'exécution ; il ne doit pas être renommé ni étendu silencieusement pour simuler l'un des nouveaux objets. L'arborescence de code et le choix des bibliothèques seront décidés après validation des résultats A–E.
 
 ## 11. Garanties portant directement sur la hiérarchie
 
 Le critère de qualité ne doit pas être une distance Wasserstein entre champs. Il doit comparer les niveaux auxquels les points ou les branches deviennent connectés.
 
-Pour un graphe pondéré $G$, avec les mêmes poids de naissance de sommets dans toutes les représentations, notons $\lambda_G(u,v)$ le plus petit niveau auquel $u$ et $v$ appartiennent à la même composante, c'est-à-dire le maximum des naissances terminales et de la valeur minimax d'un chemin. Soit $T$ un arbre couvrant candidat utilisant des arêtes de $G$ avec leurs poids hérités, donc $w_T(e)=w_G(e)$. Supposons que, pour chaque arête $e$ de $T$, la suppression de $e$ définisse une coupe et que
+Pour un graphe pondéré $G$, notons $\beta(u)$ la naissance d'un sommet et $w(uv)$ le niveau brut d'une rencontre. Le poids effectif est $\omega(uv)=\max\left\lbrace w(uv),\beta(u),\beta(v)\right\rbrace$. Notons $\lambda_G(u,v)$ le plus petit niveau auquel $u$ et $v$ appartiennent à la même composante, c'est-à-dire la valeur minimax des $\omega$ le long d'un chemin. Soit $T$ un arbre couvrant candidat utilisant des arêtes de $G$ avec leurs poids effectifs hérités. Supposons que, pour chaque arête $e$ de $T$, la suppression de $e$ définisse une coupe et que
 
-$$w_T(e)\leq(1+\delta)\min\left\lbrace w_G(f):f\text{ traverse cette coupe}\right\rbrace.$$
+$$\omega_T(e)\leq(1+\delta)\min\left\lbrace\omega_G(f):f\text{ traverse cette coupe}\right\rbrace.$$
 
 Alors
 
@@ -803,73 +712,62 @@ Comparer quatre sorties : DTM $q=1$, calendriers intermédiaires, HGP dur sur at
 
 L'exemple perturbé de la base canonique doit figurer dans les tests. Il doit provoquer une croissance explosive ou un statut `conditional`, et non une fausse réussite sparse.
 
-## 13. Résultats mathématiques à rédiger en priorité
+## 13. Résultats mathématiques désormais séparés
 
-### Résultat A — lentilles homogènes
+Les cinq objectifs précédents sont développés comme annexes autonomes dans [`docs/math/`](docs/math/README.md). Ce découpage distingue les théorèmes, les conséquences conditionnelles et les conjectures qui doivent encore être tranchées.
 
-Formaliser dans un article court : représentation KL dans le domaine logarithmique, convexité des atomes, suffisance des swaps sur l'atlas complet, bifiltration en ordre et échelle, limites DTM/HGP et intervalles multiplicatifs des naissances et rencontres.
+### [Résultat A — lentilles homogènes](docs/math/RESULTAT_A_LENTILLES_HOMOGENES.md)
 
-### Résultat B — descente atomique
+L'annexe formalise l'écriture KL logarithmique, la convexité des atomes, la bifiltration, la suffisance des swaps sur l'atlas complet et les limites DTM/HGP.
 
-Énoncer le théorème général pour une enveloppe inférieure d'atomes convexes indexés par les facettes K-NN. Traiter séparément la limite du maximum par le lemme du support essentiel. En déduire `AlternatingMEB` et la correction des attaches globales des selles de Morse.
+### [Résultat B — descente atomique](docs/math/RESULTAT_B_DESCENTE_ATOMIQUE.md)
 
-### Résultat C — complexe de Morse bifiltré en rang
+L'annexe sépare le théorème lisse, la limite miniball sous support essentiel, les dégénérescences et les conditions qui transforment une descente locale en certificat d'attache globale.
 
-Définir le catalogue des sphères critiques peu profondes et prouver que l'événement de rang $s$ est simultanément la naissance d'ordre $s$ et la selle d'ordre $s-1$. Construire les morphismes verticaux, y compris lorsque la selle ne fusionne aucune composante $H_0$.
+### [Résultat C — complexe de Morse bifiltré](docs/math/RESULTAT_C_COMPLEXE_MORSE_BIFILTRE.md)
 
-### Résultat D — énumération 3D sensible à la taille de sortie
+L'annexe définit la sortie `GradedMergeForest`, les événements classés, les lots de niveaux égaux et les morphismes verticaux entre ordres.
 
-C'est désormais le verrou central. Il faut soit :
+### [Résultat D — énumération 3D par diagrammes de puissance](docs/math/RESULTAT_D_ENUMERATION_3D_POWER_GPU.md)
 
-- extraire directement le sous-complexe bien centré de profondeur au plus $K_{\max}+1$ de la rhomboid tiling ;
-- adapter l'algorithme incrémental des mosaïques à une primitive de diagramme de puissance GPU ;
-- ou donner un branch-and-bound couvrant avec bornes prouvées et coût moyen analysé.
+La piste unique retenue adapte la récurrence incrémentale des mosaïques à une cascade de diagrammes de puissance 3D ordinaires. Ni rhomboid tiling ni mosaïque d'ordre supérieur ne devient une structure du backend. Le lemme de séparation aux sommets donne désormais un certificat exact de fermeture de chaque cellule contre tous les labels top-$k$ implicites. La taille de ce certificat et l'exclusion directe des cellules inutiles à $H_0$ restent ouvertes ; un arrêt budgété demeure conditionnel.
 
-Le théorème souhaité doit borner la sortie réellement nécessaire à $H_0$, pas la mosaïque entière.
+### [Résultat E — récupération condensée par coupes](docs/math/RESULTAT_E_RECUPERATION_CONDENSEE_COUPES.md)
 
-### Résultat E — récupération condensée par coupes
+L'annexe formule une récupération directement hiérarchique en termes de niveaux minimax, de coupes fondamentales, de marges critiques et de persistance minimale, sans détour par une distance Wasserstein entre champs.
 
-En grande dimension, viser un théorème conditionnel : sous marges de shell, barycentriques et de coupe, si l'atlas rencontre tous les événements de persistance supérieure à $\pi$ et si les coupes sont certifiées à facteur $1+\delta$, alors les tours de forêts condensées sont isomorphes à reparamétrisation multiplicative près.
+## 14. Feuille de route mathématique avant implémentation
 
-## 14. Feuille de route d'implémentation
-
-### Étape 0 — contrats et oracle
+### Étape 0 — objet et oracle
 
 - figer `GradedMergeForest`, les lots de niveaux et les statuts ;
-- écrire l'oracle CPU de petite taille ;
-- ajouter les tests $k=1$ et les morphismes inter-ordres.
+- écrire un oracle exhaustif de petite taille pour les multicovertures, les attaches et les morphismes ;
+- vérifier que $k=1$ redonne exactement l'EMST et son arbre de fusion.
 
-### Étape 1 — noyaux communs
+### Étape 1 — audit des preuves locales
 
-- top-$k$ exact de référence ;
-- miniball $k\leq10$ ;
-- matrices de Gram $20\times20$ ;
-- intervalles numériques ;
-- tri d'événements et union–find déterministe.
+- relire les preuves de A et B en incluant les zéros, ex æquo et supports non essentiels ;
+- tester la descente contre l'oracle sur toutes les petites configurations ;
+- formaliser les événements simultanés de C comme morphismes de composantes, et non comme ordre arbitraire d'arêtes.
 
-### Étape 2 — 3D conditionnel rapide
+### Étape 2 — éprouver et affiner le résultat D
 
-- LBVH ;
-- propositions locales ;
-- certification de rang ;
-- `AlternatingMEB` ;
-- échafaudage et forêts jusqu'à $k=10$ ;
-- comparaison systématique à l'oracle.
+- vérifier exhaustivement le lemme de fermeture et la reconstruction des incidences sur de petits nuages ;
+- formaliser le traitement stratifié des cosphéricités et duplications au-delà de la position générale ;
+- distinguer dans les tests l'ordre de détection $i+1$ de l'ordre de selle $s-1$ ;
+- chercher un oracle d'exclusion qui prouve l'absence d'événement $H_0$ sans fermer toutes les cellules ;
+- borner ou mesurer séparément la taille du certificat de cascade et celle du catalogue $H_0$.
 
-### Étape 3 — référence exacte 3D
+### Étape 3 — rendre le résultat E effectif
 
-- intégrer les mosaïques/rhomboïdes sur des tailles croissantes ;
-- mesurer les supports manqués par le mode rapide ;
-- transformer les motifs de manque en nouvelles règles de proposition ou bornes couvrantes.
+- caractériser des familles de données où la $\pi$-complétude possède un certificat sparse ;
+- construire un oracle d'exclusion global pour les branches absentes, et pas seulement pour les arêtes proposées ;
+- vérifier les marges de niveau, de coupe, d'attache et d'ordre contre l'oracle exhaustif ;
+- construire des contre-exemples qui forcent le statut `conditional` et mesurer la frontière de certification.
 
-### Étape 4 — tour homogène haute dimension
+### Étape 4 — porte d'entrée vers le GPU
 
-- blocs top-$10$ et fermeture descendante paresseuse ;
-- $q=1$ et descente barycentrique ;
-- petits duaux ;
-- Borůvka partagé ;
-- continuation adaptative jusqu'au dur ;
-- statuts d'atlas et garantie minimax.
+La spécification des noyaux ne commence qu'après les étapes précédentes. Elle devra montrer que les oracles retenus se ramènent à des lots de diagrammes de puissance 3D, de top-$k$, de petits problèmes convexes, de tris segmentés et de réductions de coupes. Les détails d'implémentation ne doivent pas modifier les objets définis par A–E.
 
 ## 15. Décision finale par régime
 
@@ -879,9 +777,9 @@ La sortie scientifique doit rester la hiérarchie dure HGP. La bonne architectur
 
 $$\boxed{\text{sphères critiques de rang }s\leq11\ \longrightarrow\ \text{descente K-NN–miniball}\ \longrightarrow\ \text{hyper-Kruskal gradué}.}$$
 
-L'entropie et la DTM servent à proposer et ordonner, pas à redéfinir la sortie. Le même catalogue calcule tous les ordres. La descente des attaches est démontrée sous $(\mathrm{GP}_{\partial}^{\mathrm{desc}})$, avec top-$k$, miniballs, catalogue terminal et lots d'ex æquo certifiés. L'unique grand problème géométrique encore ouvert est alors la complétude rapide de l'énumération des sphères peu profondes.
+L'entropie et la DTM servent à proposer et ordonner, pas à redéfinir la sortie. Le même catalogue calcule tous les ordres. La descente des attaches est démontrée sous $(\mathrm{GP}_{\partial}^{\mathrm{desc}})$, avec top-$k$, miniballs, catalogue terminal et lots d'ex æquo certifiés. La fermeture par diagrammes de puissance ordinaires est exacte sous les hypothèses du résultat D ; le grand problème restant est de la rendre sensible aux seuls événements $H_0$ utiles, sans fermer une sortie intermédiaire potentiellement quadratique.
 
-Pour $50\,000$ points, un temps inférieur à une seconde est une cible crédible en régime volumétrique et données résidentes GPU, mais seulement pour un catalogue de taille quasi linéaire. Le backend doit rendre le statut `conditional` ou basculer vers une multicoverture sparse lorsque cette hypothèse empirique échoue.
+Pour $50\,000$ points, un temps inférieur à une seconde est une cible de recherche à tester en régime volumétrique et données résidentes GPU, et seulement lorsque le certificat entier reste mesuré proche du linéaire. Lorsque le budget expire, le backend doit conserver les événements individuellement validés et rendre le statut global `conditional`, sans redéfinir silencieusement la hiérarchie.
 
 ### Très grande dimension
 
@@ -891,7 +789,7 @@ $$\boxed{\text{blocs }K_{\max}\ \longrightarrow\ \text{fermeture descendante imp
 
 La lentille homogène est préférable à la SoftLens additive comme continuation principale. Elle conserve la hiérarchie, possède la DTM comme extrémité exacte, partage une seule requête top-$10$ entre tous les ordres et permet de certifier de nombreuses coupes du problème dur avant de résoudre leurs miniballs.
 
-Il ne faut cependant pas promettre une représentation globale exacte et sparse. La sortie honnête est une tour exacte sur atlas, éventuellement dure et certifiée par coupes, accompagnée d'un statut global conditionnel ou condensé. UMAP et CAGRA restent dans la couche de proposition.
+Il ne faut cependant pas promettre une représentation globale exacte et sparse. La sortie honnête est une tour `atlas_exact`, accompagnée soit d'un périmètre global `condensed(pi)` entièrement certifié, soit d'un statut global `conditional`. UMAP et CAGRA restent dans la couche de proposition.
 
 ### Réponse synthétique à l'intuition initiale
 
@@ -913,4 +811,3 @@ C'est précisément ce partage des rôles qui rend la proposition à la fois mat
 - A. Prokopenko, P. Sao et D. Lebrun-Grandié, [*A single-tree algorithm to compute the Euclidean minimum spanning tree on GPUs*](https://arxiv.org/abs/2207.00514), 2022.
 - L. McInnes, J. Healy et J. Melville, [*UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction*](https://arxiv.org/abs/1802.03426), 2018–2020.
 - NVIDIA RAPIDS, [documentation officielle cuVS CAGRA](https://docs.rapids.ai/api/cuvs/stable/neighbors/cagra/) et [brute force](https://docs.rapids.ai/api/cuvs/stable/neighbors/bruteforce/), version stable 26.06.
-- NVIDIA, [*CUDA Programming Guide — CUDA Graphs*](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cuda-graphs.html), 2026.

@@ -1,115 +1,118 @@
-# E-HGP / PERG-HGP
+# E-HGP — hiérarchies K-NN d'ordre supérieur
 
-Ce dépôt regroupe les implémentations historiques HGP/E-HGP, le prototype
-d’atlas Rank-Gabriel `PERGHGPClusterer` et le backend spatial `PowerCover3D`
-destiné aux nuages 3D massifs.
+E-HGP est un projet de recherche consacré au calcul de la **hiérarchie complète des amas de forte densité K-NN**. L'objectif n'est pas de produire une partition plate, ni d'échantillonner un champ sur une grille, mais de représenter les composantes connexes des multicovertures
 
-## État au 11 juillet 2026
+$$L(k,t)=\left\lbrace y\in\mathbb{R}^{d}:D_k(y)\leq t\right\rbrace,$$
 
-`PowerCover3D` calcule une approximation contrôlée de la hiérarchie (H_0) du
-champ K-NN régularisé. Le chemin CPU utilise désormais le relèvement euclidien
-exact en dimension 4 pour les distances de puissance. Le chemin CUDA conserve
-RAPIDS RBC : son garde est conditionnel à l’ordre euclidien renvoyé et aux
-enveloppes flottantes déclarées, avec audits contre cuVS brute force.
+où $D_k(y)$ est la $k$-ième distance euclidienne au carré ordonnée, simultanément pour les ordres $1\leq k\leq K_{\max}$. Cette bifiltration ordre–échelle prolonge le Single-Linkage : pour $k=1$, sa structure mince est l'arbre minimum couvrant euclidien ; pour $k>1$, les objets porteurs deviennent des régions témoins et leurs événements critiques.
 
-Le routage CUDA est explicite et ne réduit jamais silencieusement la
-configuration : RBC est utilisé seulement s’il peut honorer le support demandé
-ou, pour le champ de puissance, `candidate_k_max` plus le candidat de garde.
-Sinon cuVS brute force est sélectionné avec le même cap. Avant la
-régularisation, l’observation elle-même — ou un doublon de coordonnées exact —
-est canonisée comme atome de coût nul, y compris si RBC a renvoyé une petite
-distance positive.
+> [!IMPORTANT]
+> Le dépôt contient aujourd'hui des implémentations historiques et le backend expérimental `PowerCover3D`. Les deux backends décrits ci-dessous constituent la **nouvelle cible scientifique** ; ils ne sont pas encore implémentés. Les documents mathématiques précisent ce qui est démontré, conditionnel ou encore conjectural.
 
-Le statut dépend de la taille :
+## Deux backends, une même sortie hiérarchique
 
-| Régime | Chemin recommandé | Statut |
+| régime | backend cible | structure mathématique | statut de sortie visé |
+|---|---|---|---|
+| dimension petite et fixée, notamment 3D ; données massives | `MorseHGP3D` | sphères critiques classées, descente K-NN–miniball, hyper-Kruskal gradué | HGP dur exact lorsque prédicats, catalogue, attaches et incidences de lots sont fermés ; mode rapide explicitement conditionnel sinon |
+| grande ou très grande dimension | `HomogeneousLensTower` | atlas de blocs top-$K_{\max}$, continuation DTM $q=1$ vers HGP $q=\infty$, Borůvka certifié par coupes | exact sur l'atlas ; exact globalement sur un périmètre condensé seulement sous $\pi$-complétude certifiée |
+
+Les deux backends doivent produire le même contrat abstrait, `GradedMergeForest` :
+
+- une forêt de fusion $T_k$ pour chaque ordre ;
+- les niveaux de naissance et de fusion en unités d'entrée ;
+- les morphismes verticaux $T_{k+1}\to T_k$ induits par $L(k+1,t)\subseteq L(k,t)$ ;
+- des lots déterministes pour les événements de même niveau ;
+- un statut séparant `exact`, `atlas_exact` et `conditional`, avec un périmètre distinct `full` ou `condensed(pi)`.
+
+La hiérarchie est le produit principal. Une partition, une condensation par persistance ou une affectation des points ne sont que des vues dérivées.
+
+## Voie 1 — 3D massive et faible latence
+
+`MorseHGP3D` vise notamment $K_{\max}=10$ sur des nuages 3D d'environ $50\,000$ points. Un unique catalogue de sphères critiques doit servir tous les ordres : une sphère de rang fermé $s$ porte la naissance d'ordre $s$ et, pour $s\geq2$, l'événement d'indice 1 d'ordre $s-1$.
+
+La voie retenue est `PowerCascadeH0` :
+
+1. représenter chaque domaine top-$k$ par un **diagramme de puissance ordinaire en 3D** sur les sites barycentriques pondérés, sans rhomboid tiling ni mosaïque de Delaunay d'ordre supérieur matérialisée ;
+2. engendrer les sites de l'ordre suivant par la récurrence incrémentale, puis fermer chaque cellule par séparation top-$k$ exacte à ses sommets ;
+3. extraire les supports de tailles deux à quatre depuis les faces, arêtes et sommets fermés, puis certifier centre, rang et niveau ;
+4. certifier les attaches par descente K-NN–miniball sous les hypothèses explicites du résultat B ;
+5. traiter les événements par niveau avec une variante graduée de Kruskal.
+
+Le test aux sommets est le point nouveau décisif : la différence de deux puissances est affine, donc l'absence de colonne violatrice à tous les sommets d'une cellule bornée certifie la cellule contre l'ensemble implicite des $\binom{n}{k}$ labels. La complétude du catalogue exige en plus les classes entières d'ex æquo et l'appariement des incidences internes. La procédure termine en temps fini, mais sa borne de pire cas reste combinatoire ; un arrêt budgété doit donc publier `conditional`.
+
+La cible « moins d'une seconde » est une cible de benchmark chaud, données déjà résidentes sur un GPU puissant. Elle ne sera évaluée que dans les régimes où le certificat entier — cellules, incidences et sommets séparés — reste mesuré proche du linéaire ; aucune complexité sous-seconde universelle n'est annoncée.
+
+## Voie 2 — grande dimension
+
+Une structure globalement exacte et toujours sparse est impossible sans hypothèses sur les données. `HomogeneousLensTower` adopte donc une sortie honnête : exacte sur un atlas adaptatif et globalement exacte seulement pour un périmètre condensé dont les événements, attaches, coupes et porteurs verticaux sont certifiés complets.
+
+La régularisation principale est la lentille homogène
+
+$$F_{k,q}(y)=\left(\frac{1}{k}\sum_{j=1}^{k}a_j(y)^q\right)^{1/q},\qquad 1\leq q\leq\infty,$$
+
+où $a_j(y)$ est la $j$-ième distance au carré ordonnée. Elle relie exactement la DTM empirique au carré, $q=1$, au champ HGP dur, $q=\infty$. L'entropie régularise les comparaisons locales et fournit des noyaux batchables ; elle ne crée pas, à elle seule, la sparsité globale.
+
+Le backend doit partager les blocs top-$K_{\max}$ entre tous les ordres, matérialiser leurs faces à la demande, poursuivre $q$ vers l'infini et certifier les niveaux minimax par coupes fondamentales. UMAP ou un index ANN peuvent proposer des blocs, jamais certifier seuls la hiérarchie.
+
+## Résultats mathématiques structurants
+
+Les cinq annexes suivantes remplacent la liste de problèmes ouverte du rapport du 14 juillet :
+
+| résultat | objet | rôle dans le projet |
 |---|---|---|
-| Quelques milliers à quelques centaines de milliers | CPU, cKDTree 3D + relèvement exact 4D | Testé localement |
-| Tailles intermédiaires | CPU exact si la grille reste abordable ; CUDA explicite sinon | Dépend du matériel |
-| Jusqu’à 30 000 000, (K=10) | CUDA/RAPIDS + noyaux CuPy fusionnés | Protocole Blackwell prêt, exécution non versionnée |
+| [A — Lentilles homogènes](docs/math/RESULTAT_A_LENTILLES_HOMOGENES.md) | interpolation KL, convexité, bifiltration et swaps | relaxation commune DTM–HGP |
+| [B — Descente atomique](docs/math/RESULTAT_B_DESCENTE_ATOMIQUE.md) | terminaison, chemins sous-niveau et attaches | oracle local commun aux deux régimes |
+| [C — Complexe de Morse bifiltré](docs/math/RESULTAT_C_COMPLEXE_MORSE_BIFILTRE.md) | sphères classées, événements et morphismes verticaux | définition de la sortie exacte |
+| [D — Énumération 3D par puissance](docs/math/RESULTAT_D_ENUMERATION_3D_POWER_GPU.md) | construction incrémentale et certificat de fermeture | cœur géométrique de `MorseHGP3D` |
+| [E — Récupération condensée par coupes](docs/math/RESULTAT_E_RECUPERATION_CONDENSEE_COUPES.md) | certificats minimax et branches persistantes | contrat global de `HomogeneousLensTower` |
 
-Le nouveau mode `local_distortion` maximise l’entropie sous
+Voir aussi l'[index général de la documentation](docs/README.md), l'[index mathématique](docs/math/README.md) et le [rapport de synthèse ordre–échelle](RAPPORT_HGP_ORDRE_ECHELLE_DESCENTE_GPU_2026-07-14.md).
 
-\[
-s_i\le \min(B_{\rm abs},\gamma R_K(x_i)).
-\]
+## Principes de conception désormais retenus
 
-Si `local_scale_k == K`, si le ratio observé vérifie \(\gamma<1/2\), et
-conditionnellement au voisinage calculé, alors sur le nuage quantifié :
+- La sortie reste hiérarchique pour tous les ordres, y compris lorsqu'elle est condensée.
+- Le cas $k=1$ reste exactement ancré par l'EMST ; aucune régularisation ne doit le déformer.
+- La sparsité provient d'un catalogue d'événements, d'un atlas ou de certificats de coupes, pas du lissage entropique seul.
+- Le nouveau backend 3D n'utilise ni grille uniforme ni mosaïque d'ordre supérieur comme structure de production.
+- Le backend haute dimension distingue toujours exactitude sur atlas et exactitude globale.
+- Toute accélération ANN reste une couche de proposition suivie d'un reranking ou d'un certificat.
+- Les prédicats géométriques, les niveaux égaux et les dégénérescences font partie du contrat mathématique.
 
-\[
-(1-2\gamma)r_K(y)\le r_{K,\mathrm{reg}}(y)
-\le(1+2\gamma)r_K(y).
-\]
+## État du code
 
-L’erreur de quantification d’entrée \(\varepsilon_X\) reste additive. Pour une
-grille uniforme de demi-diagonale \(H\) et une marge numérique
-\(\delta_{\rm num}\), les contrats publiés sont :
+| chemin | rôle actuel |
+|---|---|
+| [`perg_hgp/`](perg_hgp/) | package Python actif, atlas historique et backend expérimental `PowerCover3D` |
+| [`perg_hgp/POWER_COVER_3D.md`](perg_hgp/POWER_COVER_3D.md) | contrat du backend cubique actuel |
+| [`E-HGP/`](E-HGP/) | implémentation E-HGP antérieure |
+| [`HGP-old/`](HGP-old/) | prototypes historiques |
+| [`PERG-HGP/`](PERG-HGP/) | spécifications et expérimentations antérieures |
 
-- forêt de base : \(\varepsilon_X+s^\uparrow+H+\delta_{\rm num}\) ;
-- enveloppes inner/outer :
-  \(\varepsilon_X+s^\uparrow+2(H+\delta_{\rm num})\).
+`PowerCover3D` reste une référence utile pour l'infrastructure CUDA, les budgets mémoire et les audits numériques. Son champ régularisé puis échantillonné sur grille n'est toutefois pas l'algorithme mathématique cible décrit ici.
 
-La grille peut être dimensionnée par `min_resolved_radius` plutôt que par un
-nombre global arbitraire de cellules. Elle est uniforme anisotrope, refuse tout
-dépassement de `max_grid_cells` et ne doit pas être décrite comme adaptative :
-un véritable octree avec erreurs \(H_Q,\delta_Q\) reste à construire.
+## Installation et validation du code existant
 
-Les calculs normalisés restent en float32 sur CUDA, mais centres, poids de
-puissance, rayons publics et forêts sont promus en float64 lors du retour aux
-unités d’entrée. Les étendues dont le carré sous-déborde ou déborde le contrat
-float64 sont refusées avec une demande explicite de changement d’unités. Si un
-budget absolu est demandé, `distortion_budget_violation_max` inclut aussi
-\(\varepsilon_X\). Sur le solveur CUDA fusionné, le résidu de simplexe non
-recalculé vaut `null`, jamais un faux zéro probant.
-
-`PowerCoverHierarchy.save()` et `load()` utilisent un schéma versionné. Chaque
-sauvegarde reçoit un `run_id` commun au manifeste et aux NPZ ; un mélange
-d’artefacts provenant de deux générations est rejeté au chargement.
-
-## Installation
-
-Le chemin puissance CPU n’impose plus PyTorch :
+Le chemin CPU de `perg_hgp` s'installe avec :
 
 ```bash
 pip install -e perg_hgp
 ```
 
-Pour l’atlas historique et tous les tests :
+Pour l'atlas historique et les tests :
 
 ```bash
 pip install -e 'perg_hgp[test]'
-```
-
-La pile CUDA (CuPy, cuML, cuVS, RMM) est installée par le notebook avec la
-procédure RAPIDS adaptée à Colab.
-
-## Validation CPU
-
-```bash
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q perg_hgp/tests
 ```
 
-La campagne locale de cette révision compte 124 tests `perg_hgp` réussis et
-1 test E-HGP réussi. Le notebook GPU réexécute toute la suite `perg_hgp` avec
-CUDA masqué avant tout benchmark.
+La pile CUDA actuelle repose sur CuPy et RAPIDS. Les nouveaux backends auront leurs propres contrats et suites de tests ; ils ne doivent pas être simulés par une extension silencieuse de `PowerCover3D`.
 
-## Documents importants
+## Feuille de route immédiate
 
-- [contrat PowerCover3D](perg_hgp/POWER_COVER_3D.md) ;
-- [README du package](perg_hgp/README.md) ;
-- [audit PERG-HGP du 11 juillet](perg_hgp/Rapport_audit_PERG_HGP_2026-07-11.md) ;
-- [audit PowerCover3D 30 M / K=10](perg_hgp/Rapport_audit_PowerCover3D_30M_K10_SemanticKITTI_2026-07-11.md) ;
-- [notebook Blackwell 30 M](PERG_HGP_Blackwell_30M.ipynb).
+1. stabiliser les hypothèses et contre-exemples des résultats A–E ;
+2. confronter le certificat de fermeture 3D et les lots dégénérés à un oracle exhaustif de petite taille ;
+3. chercher un oracle d'exclusion sensible à la sortie $H_0$, afin d'éviter de fermer des cellules inutiles ;
+4. figer le schéma `GradedMergeForest`, la condensation verticale et les statuts de certification ;
+5. seulement ensuite, spécifier les noyaux GPU des deux backends.
 
-## Limites encore ouvertes
-
-- aucune mesure Blackwell/30 M n’est incluse tant que le notebook n’a pas été
-  réellement exécuté et ses JSON versionnés ;
-- RBC CUDA n’est pas une preuve exhaustive, malgré les audits échantillonnés ;
-- l’appartenance canonique boule–composante existe comme référence CPU
-  découpable, mais pas encore comme kernel GPU 30 M ;
-- il manque encore un merge tree enrichi, une reprise par checkpoints et une
-  sélection plate explicitement séparée de la hiérarchie de Hartigan ;
-- (K=10) est un choix à taille finie, pas une preuve de consistance ni un
-  résultat SemanticKITTI.
+Les benchmarks historiques et audits restent consultables depuis [`perg_hgp/benchmarks/`](perg_hgp/benchmarks/) et les rapports datés. Ils décrivent l'état des prototypes, non les performances futures de `MorseHGP3D` ou `HomogeneousLensTower`.

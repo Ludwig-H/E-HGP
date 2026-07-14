@@ -1,5 +1,8 @@
 # Addendum — DTM, hiérarchie sparse et régularisation GPU
 
+> [!NOTE]
+> **Document de recherche conservé pour l'historique.** La DTM demeure l'extrémité convexe utile, mais l'architecture actuelle est décrite dans le [rapport ordre–échelle](RAPPORT_HGP_ORDRE_ECHELLE_DESCENTE_GPU_2026-07-14.md) et les [résultats mathématiques A–E](docs/math/README.md). Ceux-ci séparent désormais la sortie exacte 3D de la récupération certifiée sur atlas en grande dimension.
+
 - **Date :** 13 juillet 2026
 - **Dépôt :** [`Ludwig-H/E-HGP`](https://github.com/Ludwig-H/E-HGP)
 - **Révision vérifiée :** [`70423fa354e4f0252f8a8eddcf5e311bf1a4ac42`](https://github.com/Ludwig-H/E-HGP/tree/70423fa354e4f0252f8a8eddcf5e311bf1a4ac42)

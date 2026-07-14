@@ -1,5 +1,8 @@
 # Repenser HGP à partir de la hiérarchie : complexe de Morse en 3D et lentilles entropiques en grande dimension
 
+> [!NOTE]
+> **Document de recherche conservé pour l'historique.** L'orientation actuelle est consolidée par le [rapport ordre–échelle du 14 juillet](RAPPORT_HGP_ORDRE_ECHELLE_DESCENTE_GPU_2026-07-14.md) et les [résultats A–E](docs/math/README.md). La lentille homogène remplace la SoftLens additive comme continuation principale ; le backend 3D vise le HGP dur sans grille ni mosaïque d'ordre supérieur matérialisée.
+
 > Rapport mathématique — 13 juillet 2026  
 > Dépôt examiné : [`Ludwig-H/E-HGP`](https://github.com/Ludwig-H/E-HGP), branche `main`, révision `f4c61bde13fb2a0c847f31e46e235eaf2dae7c3a`  
 > Manuscrit relu : `Manuscrit_de_thèse(7).pdf`, en particulier les parties I et II (chapitres 2 à 9)

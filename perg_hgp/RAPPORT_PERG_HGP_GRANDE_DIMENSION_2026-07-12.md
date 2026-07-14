@@ -1,5 +1,8 @@
 # PERG-HGP sans grille : hiérarchie entropique de forte densité en grande dimension
 
+> [!NOTE]
+> **Document de recherche conservé pour l'historique.** La proposition actuelle pour la grande dimension est `HomogeneousLensTower`, décrite dans le [rapport ordre–échelle](../RAPPORT_HGP_ORDRE_ECHELLE_DESCENTE_GPU_2026-07-14.md) et les [annexes mathématiques](../docs/math/README.md). Elle distingue exactitude sur atlas, continuation DTM–HGP et récupération condensée certifiée par coupes.
+
 - **Date :** 12 juillet 2026
 - **Dépôt audité :** [`Ludwig-H/E-HGP`](https://github.com/Ludwig-H/E-HGP)
 - **Révision auditée :** [`d67647f5bc6ad7ce76e259541a5b77d116359555`](https://github.com/Ludwig-H/E-HGP/tree/d67647f5bc6ad7ce76e259541a5b77d116359555)
@@ -496,8 +499,8 @@ Une borne GPU bon marché de $W_2(\nu_i^{\tau},\nu_i^0)$ peut être obtenue en f
 
 $$
 W_2^2(\nu_i^{\tau},\nu_i^0)
-\le \operatorname{diam}(A_i)^2
-\operatorname{TV}(q_i^{\tau},q_i^0).
+\le \mathrm{diam}(A_i)^2
+\mathrm{TV}(q_i^{\tau},q_i^0).
 $$
 
 #### Rapport avec le rayon $K$-NN dur
@@ -775,7 +778,7 @@ $$
 Les différences $\phi_j-\phi_i$ sont affines et
 
 $$
-\operatorname{Lip}(\phi_j-\phi_i)
+\mathrm{Lip}(\phi_j-\phi_i)
 =2\lVert z_j-z_i\rVert.
 $$
 
