@@ -2,7 +2,7 @@
 
 ## Décision
 
-La phase 0 corrective v2 est rouverte après un audit par mutations négatives. Sa porte de sortie n'est plus satisfaite et la phase 1 est de nouveau bloquée. Le périmètre actif reste le backend `reference_cpu`, les profils `hgp_reduced` et `full_pi0`, et le mode `certified`.
+La phase 0 corrective v2 est refermée après audit contradictoire et mutations négatives. La porte d'entrée de la phase 1 est satisfaite pour le backend `reference_cpu`, les profils `hgp_reduced` et `full_pi0`, et le mode `certified`. La phase 1 reprend uniquement pour requalifier l'oracle contre Gamma exhaustif; elle n'est pas encore fermée.
 
 Le contre-exemple exact `gabriel-point-set-counterexample-5-points-v1` invalide la base `reduced_manuscript_theorem_5` du contrat v1. La cible scientifique reste la tour des K-polyèdres : le contrat v2 définit donc `hgp_reduced` exact par Gamma exhaustif sur le backend CPU de référence. Le flot Gabriel brut ne fournit qu'une connectivité positive conditionnelle. Cette correction ne démontre pas M.1 et n'autorise aucun code CUDA.
 
@@ -16,12 +16,15 @@ Le contre-exemple exact `gabriel-point-set-counterexample-5-points-v1` invalide 
 | unités, indexation et canonisation | [conventions v2](SCHEMA_CONVENTIONS_V2.md) |
 | cinq sorties attendues | [`tests/fixtures/contracts`](../../tests/fixtures/contracts/) |
 | validation et round-trip | [`tools/check_contracts.py`](../../tools/check_contracts.py) et [`tests/contracts`](../../tests/contracts/) |
+| rejeu transactionnel des lots | tests de graphe sémantique, égalité pré/post, contractions Gamma simultanées et triple journal lot/forêt/résultat |
+| migration multi-fixtures | préparation et validation globales avant publication, remplacements unitaires atomiques et diagnostic exact d'une publication partielle |
 | obstruction Gabriel | [preuve des incidences silencieuses](../math/INCIDENCES_SILENCIEUSES_GAMMA.md), [registre des preuves, verrou V0](../math/STATUT_PREUVES_ET_HEURISTIQUES.md#v0--contre-exemple-à-la-réduction-de-gabriel) et fixture exacte permanente |
+| croissance silencieuse rejouable | [`gamma_q1_coverage_delta.json`](../../tests/fixtures/regressions/gamma_q1_coverage_delta.json) et fixture `overlap-k2` réparée/re-hashée |
 | germes d'indice un | [contrat M.1, sections 2 à 4](M1_RECONSTRUCTION.md#2-notation) |
 | morphismes verticaux comprimés | [spécification, section 11](../SPECIFICATION_MORSEHGP3D.md#11-morphismes-verticaux) et type `VerticalMap` du schéma |
 | position générale et doublons | [spécification, section 12](../SPECIFICATION_MORSEHGP3D.md#12-domaine-exact-et-dégénérescences) et `InputSemantics` |
 
-Le commit `b305a39` (`feat: figer les contrats MorseHGP3D v1`) est l'archive historique. Le commit `5351704` (`feat: définir le contrat MorseHGP3D v2`) fournit le schéma actif, les validateurs, le migrateur canonique, les fixtures et la documentation corrective.
+Le commit `b305a39` (`feat: figer les contrats MorseHGP3D v1`) est l'archive historique. Le commit `5351704` (`feat: définir le contrat MorseHGP3D v2`) fournit le schéma actif. Les commits `1587646` (migration transactionnelle), `7038f69` (graphe sémantique et rejeu exact) et `8892c40` (garanties conditionnelles, entrée canonique et rejeu `full_pi0`) ferment les défauts trouvés par le réaudit. Leurs CI GitHub sont terminées avec succès.
 
 ## Évaluation de la porte de sortie
 
@@ -33,11 +36,16 @@ Le commit `b305a39` (`feat: figer les contrats MorseHGP3D v1`) est l'archive his
 - Un mode `budgeted` ne peut pas publier `exact`.
 - Les unités publiques sont fermées et les niveaux sont des rayons carrés rationnels canoniques.
 - Les objets critiques refusent les champs inconnus.
+- Tous les identifiants scientifiques publiés sont recalculés sur leur projection v2; les références typées doivent se résoudre et respecter ordre, niveau et rôle.
+- Une sortie `exact` impose `partial_guarantees=["none"]`; une sortie conditionnelle ou de budget ne peut pas employer `none`.
+- Les catalogues et ordres déclarés complets imposent les naissances de rang un, une hyperarête par selle certifiée et, pour `full_pi0`, une attache par bras du shell.
+- Les lots Gamma déclarés fermés sont rejoués depuis leur état pré-lot; les snapshots, nœuds, racines, flèches verticales, matérialisations et journaux de couverture doivent être causalement cohérents.
+- Les limites, utilisations, réserves et restes d'un `BudgetSnapshot` ferment arithmétiquement; le migrateur ne publie rien avant validation de toutes les sorties préparées.
 - Les cinq exemples couvrent l'ordre un, une naissance isolée, une fusion binaire, une multifusion et un recouvrement d'ordre deux; leur migration v2 passe les tests actifs et atteint un point fixe canonique.
 - M.1 reste `proof_obligation` jusqu'à la phase 12.
 - Aucun code CUDA n'a été introduit.
 
-La porte de sortie G0 n'est plus satisfaite. L'audit a montré que le validateur sémantique pouvait accepter un faux résultat `exact` dont une forêt, un lot ou une application verticale était déclaré incomplet, ainsi que certaines références pendantes, identités non canoniques et fractions non réduites. Le migrateur pouvait aussi publier une partie des fixtures avant un échec tardif. Ces cas doivent devenir des tests négatifs permanents, le validateur doit les refuser et le migrateur doit préparer toutes les sorties avant toute publication. La phase 1 ne reprendra qu'après fermeture de ces défauts.
+La porte de sortie G0 est satisfaite. Les faux certificats identifiés par les deux audits sont désormais des tests permanents et sont refusés, y compris après recalcul volontaire des identifiants. Le contre-audit final a rejoué tous ses témoins initiaux sans retrouver de chemin accepté. Cette décision ferme les formats, les identités et la sémantique contractuelle v2; elle ne ferme ni la requalification Gamma de phase 1, ni M.1, ni une porte CUDA.
 
 ## Commandes de réception
 
@@ -56,7 +64,7 @@ python -m unittest discover -s tests/gcp -p 'test_*.py'
 bash -n gcp-migration/*.sh
 ```
 
-Résultats enregistrés le 14 juillet 2026 sur le commit `5351704` : 24 documents actifs, 21 définitions de contrat, 21 exemples de schéma, cinq fixtures v2 au point fixe canonique, 18 tests de contrat et 81 tests d'oracle validés. La campagne CI bornée a terminé ses trois cas avec `status=passed`; sa propre `matrix_gate` reste fausse et ne constitue donc pas une preuve de fermeture de la phase 1. Les cinq références, les 20 entrées du registre, les workflows GCP en lecture seule, les 11 tests de sécurité GCP et la syntaxe des scripts ont aussi été validés. Ces résultats restent un checkpoint reproductible, mais leur couverture négative est insuffisante pour fermer G0 depuis l'audit par mutations.
+Résultats enregistrés le 14 juillet 2026 après `8892c40` : 24 documents actifs, 21 définitions de contrat, 21 exemples de schéma, cinq fixtures v2 au point fixe canonique, 58 tests de contrat et 81 tests d'oracle validés. La suite agrégée hors garde GCP compte 139 tests; les 11 tests de sécurité GCP passent séparément. La campagne CI bornée a terminé ses trois cas avec `status=passed`; sa propre `matrix_gate` reste fausse et ne constitue donc pas une preuve de fermeture de la phase 1. Les cinq références, les 20 entrées du registre, les workflows GCP en lecture seule, la syntaxe des scripts et les CI GitHub des trois commits de durcissement sont validés.
 
 ## Limites reportées à leurs phases
 
