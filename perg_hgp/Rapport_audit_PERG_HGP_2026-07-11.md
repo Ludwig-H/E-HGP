@@ -181,7 +181,7 @@ s_i=\sqrt{\lVert x_i-z_i\rVert^2+a_i},
 Par l’inégalité triangulaire dans \(L^2(q_i)\),
 
 \[
-\left|d_i^\kappa(y)-\lVert y-x_i\rVert\right|\le s_i.
+\left\lvert d_i^\kappa(y)-\lVert y-x_i\rVert\right\rvert\le s_i.
 \]
 
 Le K-ième ordre statistique est 1-lipschitz pour la norme uniforme. Par conséquent,

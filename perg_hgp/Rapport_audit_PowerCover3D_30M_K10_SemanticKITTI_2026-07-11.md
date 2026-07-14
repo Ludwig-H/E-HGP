@@ -215,7 +215,7 @@ Cette observation fournit une voie naturelle vers un oracle exact : un LBVH/BVH 
 Par l'inégalité triangulaire dans le relèvement 4D :
 
 \[
-\left|d_i^\kappa(y)-\|y-x_i\|\right|\le s_i.
+\left\lvert d_i^\kappa(y)-\|y-x_i\|\right\rvert\le s_i.
 \]
 
 L'ordre statistique K-ième est 1-lipschitz pour la norme uniforme. Par conséquent :

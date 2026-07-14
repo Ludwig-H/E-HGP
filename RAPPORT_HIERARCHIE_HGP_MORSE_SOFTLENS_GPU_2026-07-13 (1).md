@@ -12,7 +12,7 @@
 Soit $X=\{x_1,\ldots,x_n\}\subset\mathbb{R}^{p}$, et soit $d_{(K)}(y)$ la distance de $y$ à son $K$-ième plus proche voisin. En variable rayon, l'ensemble de forte densité K-NN est
 
 $$
-L_K(r)=\left\{y\in\mathbb{R}^{p}:\left|B(y,r)\cap X\right|\ge K\right\}=\left\{y:d_{(K)}(y)\le r\right\}.
+L_K(r)=\left\{y\in\mathbb{R}^{p}:\left\lvert B(y,r)\cap X\right\rvert\ge K\right\}=\left\{y:d_{(K)}(y)\le r\right\}.
 $$
 
 La hiérarchie de Hartigan estimée est la filtration de composantes
