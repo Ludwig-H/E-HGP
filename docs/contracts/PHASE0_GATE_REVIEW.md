@@ -2,7 +2,7 @@
 
 ## Décision
 
-La phase 0 est rouverte pour correction et sa porte de sortie n'est pas encore refermée. La phase 1 reste bloquée. Le périmètre actif est le backend `reference_cpu`, les profils `hgp_reduced` et `full_pi0`, et le mode `certified`.
+La phase 0 corrective v2 est fermée. La porte d'entrée de la phase 1 est satisfaite pour le backend `reference_cpu`, les profils `hgp_reduced` et `full_pi0`, et le mode `certified`. La phase 1 est ouverte uniquement pour requalifier l'oracle et ses campagnes contre Gamma exhaustif; elle n'est pas encore fermée.
 
 Le contre-exemple exact `gabriel-point-set-counterexample-5-points-v1` invalide la base `reduced_manuscript_theorem_5` du contrat v1. La cible scientifique reste la tour des K-polyèdres : le contrat v2 définit donc `hgp_reduced` exact par Gamma exhaustif sur le backend CPU de référence. Le flot Gabriel brut ne fournit qu'une connectivité positive conditionnelle. Cette correction ne démontre pas M.1 et n'autorise aucun code CUDA.
 
@@ -21,7 +21,7 @@ Le contre-exemple exact `gabriel-point-set-counterexample-5-points-v1` invalide 
 | morphismes verticaux comprimés | [spécification, section 11](../SPECIFICATION_MORSEHGP3D.md#11-morphismes-verticaux) et type `VerticalMap` du schéma |
 | position générale et doublons | [spécification, section 12](../SPECIFICATION_MORSEHGP3D.md#12-domaine-exact-et-dégénérescences) et `InputSemantics` |
 
-Le commit `b305a39` (`feat: figer les contrats MorseHGP3D v1`) est l'archive historique. La correction v2 ne devient preuve de fermeture qu'après validation et commit cohérent avec `implementation_status.toml`.
+Le commit `b305a39` (`feat: figer les contrats MorseHGP3D v1`) est l'archive historique. Le commit `5351704` (`feat: définir le contrat MorseHGP3D v2`) fournit le schéma actif, les validateurs, le migrateur canonique, les fixtures et la documentation corrective.
 
 ## Évaluation de la porte de sortie
 
@@ -33,11 +33,11 @@ Le commit `b305a39` (`feat: figer les contrats MorseHGP3D v1`) est l'archive his
 - Un mode `budgeted` ne peut pas publier `exact`.
 - Les unités publiques sont fermées et les niveaux sont des rayons carrés rationnels canoniques.
 - Les objets critiques refusent les champs inconnus.
-- Les cinq exemples couvrent l'ordre un, une naissance isolée, une fusion binaire, une multifusion et un recouvrement d'ordre deux; leur migration v2 doit passer les tests actifs.
+- Les cinq exemples couvrent l'ordre un, une naissance isolée, une fusion binaire, une multifusion et un recouvrement d'ordre deux; leur migration v2 passe les tests actifs et atteint un point fixe canonique.
 - M.1 reste `proof_obligation` jusqu'à la phase 12.
 - Aucun code CUDA n'a été introduit.
 
-La porte de sortie reste ouverte jusqu'à exécution réussie des commandes de réception v2 et enregistrement de leur preuve. En particulier, aucun résultat de phase 1 ne peut encore ouvrir la phase 2A.
+La porte de sortie G0 est satisfaite. Cette décision ferme uniquement les formats et la sémantique contractuelle v2. La phase 1 doit encore reconstruire `hgp_reduced` depuis Gamma, conserver Gabriel comme voie partielle séparée et requalifier sa campagne avant que G2 ou la phase 2A puissent être ouverts.
 
 ## Commandes de réception
 
@@ -45,6 +45,9 @@ La porte de sortie reste ouverte jusqu'à exécution réussie des commandes de r
 python tools/check_docs.py
 python tools/check_contracts.py
 python -m unittest discover -s tests/contracts -p 'test_*.py'
+python tools/rekey_contract_fixtures_v2.py
+python -m unittest discover -s tests/oracle -p 'test_*.py'
+python tools/run_oracle_campaign.py --ci --manifest /tmp/morsehgp3d-oracle-ci-v2.json
 python tools/check_references.py
 python tools/check_scope.py
 python tools/check_implementation_status.py
@@ -53,12 +56,12 @@ python -m unittest discover -s tests/gcp -p 'test_*.py'
 bash -n gcp-migration/*.sh
 ```
 
-Les résultats v1 enregistrés le 14 juillet 2026 restent historiques. Ils ne valent pas réception v2. Les résultats de la campagne corrective seront ajoutés avant toute nouvelle fermeture de la phase 0.
+Résultats enregistrés le 14 juillet 2026 sur le commit `5351704` : 24 documents actifs, 21 définitions de contrat, 21 exemples de schéma, cinq fixtures v2 au point fixe canonique, 18 tests de contrat et 81 tests d'oracle validés. La campagne CI bornée a terminé ses trois cas avec `status=passed`; sa propre `matrix_gate` reste fausse et ne constitue donc pas une preuve de fermeture de la phase 1. Les cinq références, les 20 entrées du registre, les workflows GCP en lecture seule, les 11 tests de sécurité GCP et la syntaxe des scripts ont aussi été validés.
 
 ## Limites reportées à leurs phases
 
 - la preuve O1–O9 de M.1 reste en phase 12;
-- la reprise de l'oracle exhaustif et de ses tests aléatoires attend la fermeture corrective de la phase 0;
+- la requalification Gamma de l'oracle exhaustif et de ses tests aléatoires appartient à la phase 1;
 - les prédicats filtrés commencent en phase 2A;
 - la validation octet par octet des sérialisations C++/Python précède CUDA;
 - les dégénérescences non génériques restent hors statut `exact` tant que leur phase n'est pas fermée.

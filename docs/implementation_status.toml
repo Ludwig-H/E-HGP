@@ -4,7 +4,7 @@ updated_at = "2026-07-14"
 [project]
 name = "MorseHGP3D"
 implementation_started = true
-current_phase = "0"
+current_phase = "1"
 current_track = "foundation"
 status_authority = "This file is operational; mathematical authority remains in the specification and proof-status register."
 
@@ -18,7 +18,7 @@ status = "blocked"
 requires_phases = ["0", "1", "2A", "2B", "3", "4", "5", "7", "8", "9", "10", "11", "18"]
 requires_gates = ["G0", "G1", "G2", "G3", "G4", "G5", "G9"]
 full_pi0_requires_phase = "12"
-blocking_reason = "La phase 0 corrective et la requalification Gamma de la phase 1 doivent etre fermees avant la poursuite."
+blocking_reason = "La requalification Gamma de la phase 1 et les phases fondatrices suivantes doivent etre fermees avant la poursuite."
 
 [milestones.v1_interactive_scalable]
 status = "blocked"
@@ -31,23 +31,23 @@ blocking_reason = "Le jalon v1-correctness et les portes de performance ne sont 
 id = "0"
 title = "Correction v2 de l'enonce et des schemas"
 track = "foundation"
-status = "in_progress"
+status = "completed"
 entry_gate_satisfied = true
-exit_gate_satisfied = false
+exit_gate_satisfied = true
 depends_on = []
-evidence = ["b305a39 feat: figer les contrats MorseHGP3D v1 (archive)", "schemas/morsehgp3d-contract-v2.schema.json", "docs/contracts/PHASE0_GATE_REVIEW.md"]
+evidence = ["b305a39 feat: figer les contrats MorseHGP3D v1 (archive)", "5351704 feat: definir le contrat MorseHGP3D v2", "docs/contracts/PHASE0_GATE_REVIEW.md"]
 blocking_reason = ""
 
 [[phases]]
 id = "1"
 title = "Oracle CPU exhaustif"
 track = "foundation"
-status = "blocked"
-entry_gate_satisfied = false
+status = "in_progress"
+entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["0"]
 evidence = ["068084a test: enregistrer le contre-exemple a la reduction de Gabriel", "docs/validation/PHASE1_GATE_REVIEW.md"]
-blocking_reason = "La phase 0 corrective v2 n'est pas fermee; la campagne doit ensuite etre requalifiee contre Gamma exhaustif et Gabriel comme raffinement partiel."
+blocking_reason = ""
 
 [[phases]]
 id = "2A"
@@ -64,12 +64,12 @@ blocking_reason = "Phases 0 et 1 non fermees."
 id = "3"
 title = "Environnement CUDA G4 reproductible"
 track = "foundation"
-status = "blocked"
-entry_gate_satisfied = false
+status = "ready"
+entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["0"]
 evidence = []
-blocking_reason = "Schemas de phase 0 non geles."
+blocking_reason = ""
 
 [[phases]]
 id = "2B"
