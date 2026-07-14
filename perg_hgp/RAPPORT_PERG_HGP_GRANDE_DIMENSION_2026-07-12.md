@@ -423,14 +423,7 @@ L'exacte DTM est une distance de puissance sur tous les barycentres de $K$-sous-
 
 Pour chaque ancre $x_i$, prenons un support $A_i$ de taille $m_{\rm reg}\ge K$ et une Gibbs sur les sous-ensembles $S\subset A_i$, $|S|=K$ :
 
-$$
-\Pi_i^{K,\tau}(S)
-\propto
-\exp\!\left[
--\frac{1}{K\tau_i}
-\sum_{j\in S}\lVert x_i-x_j\rVert^2
-\right].
-$$
+$$ \Pi_i^{K,\tau}(S) \propto \exp\!\left[ -\frac{1}{K\tau_i} \sum_{j\in S}\lVert x_i-x_j\rVert^2 \right]. $$
 
 Définissons les marginales
 
@@ -568,23 +561,13 @@ $$
 Soit $D_{ij}=\lVert z_i-z_j\rVert$. Si $D_{ij}>0$, posons
 
 $$
-u_{ij}
-=\operatorname{clip}\!\left(
-\frac{D_{ij}^2+a_j-a_i}{2D_{ij}},
-0,D_{ij}
-\right).
+u_{ij} =\mathrm{clip}\!\left( \frac{D_{ij}^2+a_j-a_i}{2D_{ij}}, 0,D_{ij} \right).
 $$
 
 Alors
 
 $$
-\boxed{
-\beta_{ij}^2
-=\max\left\{
-u_{ij}^2+a_i,
-(D_{ij}-u_{ij})^2+a_j
-\right\}.
-}
+\boxed{ \beta_{ij}^2 =\max\left\{ u_{ij}^2+a_i, (D_{ij}-u_{ij})^2+a_j \right\}. }
 $$
 
 Si $D_{ij}=0$,
@@ -674,23 +657,11 @@ En 3D, une triangulation régulière des sites pondérés $(z_i,w_i=-a_i)$ fourn
 
 Pour une face $\tau\subset[n]$, définissons son rayon de naissance
 
-$$
-\rho_q(\tau)^2
-=\min_y\max_{i\in\tau}
-\left(\lVert y-z_i\rVert^2+a_i\right).
-$$
+$$ \rho_q(\tau)^2 =\min_y\max_{i\in\tau} \left(\lVert y-z_i\rVert^2+a_i\right). $$
 
 Pour $m=|\tau|$, cette miniballe additive admet le dual concave
 
-$$
-\rho_q(\tau)^2
-=\max_{\lambda\in\Delta_m}
-\left[
-\sum_{i\in\tau}\lambda_i
-\bigl(\lVert z_i\rVert^2+a_i\bigr)
--\left\lVert\sum_{i\in\tau}\lambda_i z_i\right\rVert^2
-\right],
-$$
+$$ \rho_q(\tau)^2 =\max_{\lambda\in\Delta_m} \left[ \sum_{i\in\tau}\lambda_i \bigl(\lVert z_i\rVert^2+a_i\bigr) -\left\lVert\sum_{i\in\tau}\lambda_i z_i\right\rVert^2 \right], $$
 
 et son centre vaut $c_\tau=\sum_i\lambda_i z_i$. Pour $K=10$, une coface ne contient que 11 sites : une fois le candidat découvert, son poids et son centre se calculent donc par un petit solveur actif, facilement batchable sur GPU. La difficulté n'est pas la validation d'une coface, mais sa découverte exhaustive.
 
@@ -727,14 +698,7 @@ Elle ne doit jamais n'utiliser que les arêtes ou cofaces du MSF précédent.
 
 À un témoin $y$, la Gibbs sur les $k$-sous-ensembles de sites de puissance est
 
-$$
-\mathbb P_{k,\tau}(A\mid y)
-\propto
-\exp\!\left[
--\frac1\tau\sum_{i\in A}\phi_i(y)
-\right],
-\qquad |A|=k,
-$$
+$$ \mathbb P_{k,\tau}(A\mid y) \propto \exp\!\left[ -\frac1\tau\sum_{i\in A}\phi_i(y) \right], \qquad |A|=k, $$
 
 avec
 
@@ -792,14 +756,7 @@ $$
 
 Il s'écrit comme une recherche de produit scalaire maximal :
 
-$$
-\min_j\phi_j(c)
-=\lVert c\rVert^2
--\max_j\left\langle
-(2c,-1),\,
-(z_j,\lVert z_j\rVert^2+a_j)
-\right\rangle.
-$$
+$$ \min_j\phi_j(c) =\lVert c\rVert^2 -\max_j\left\langle (2c,-1),\, (z_j,\lVert z_j\rVert^2+a_j) \right\rangle. $$
 
 Le prédicat Gabriel global est donc compatible avec un top-1 MIPS GPU, suivi d'une garde exacte sur les quasi-ex æquo. L'ANN accélère le test ; seule une borne d'omission peut le certifier.
 
@@ -885,13 +842,7 @@ UMAP apporte des briques pratiques utiles :
 
 Sa calibration résout approximativement
 
-$$
-\sum_j
-\exp\!\left[
--\frac{\max(0,d_{ij}-\rho_i)}{\sigma_i}
-\right]
-=\log_2 K.
-$$
+$$ \sum_j \exp\!\left[ -\frac{\max(0,d_{ij}-\rho_i)}{\sigma_i} \right] =\log_2 K. $$
 
 Cette normalisation vise un voisinage flou de cardinalité comparable en tout point. Pour du clustering de densité, elle peut effacer une partie des variations de densité physique. Elle doit donc seulement initialiser la température ; le réglage final doit respecter un budget de déformation $s$, $B$ ou un gap de rang.
 

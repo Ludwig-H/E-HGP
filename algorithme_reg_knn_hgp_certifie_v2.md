@@ -855,11 +855,7 @@ d_{ij}=\|z_i-z_j\|.
 
 Si `d_ij > 0`,
 
-\[
-u_{ij}=\operatorname{clip}\left(
-\frac{d_{ij}^2+a_j-a_i}{2d_{ij}},0,d_{ij}
-\right),
-\]
+\[ u_{ij}=\mathrm{clip}\left(\frac{d_{ij}^2+a_j-a_i}{2d_{ij}},0,d_{ij}\right), \]
 
 \[
 \beta_{ij}^2
