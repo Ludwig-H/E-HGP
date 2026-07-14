@@ -6,7 +6,11 @@ This migration is intentionally independent from
 object graph, repairs batch component/root references by replaying the forest,
 then rekeys the graph in dependency order.  The default mode is read-only and
 fails when a fixture is not already at the canonical fixed point.  ``--write``
-publishes the migrated JSON atomically.
+validates the complete fixture set before publishing any file, then replaces
+each migrated JSON file atomically.  Because a filesystem cannot provide one
+atomic rename across several paths, a publication error reports every
+publication call that completed and identifies the failing path as possibly
+changed instead of claiming an impossible multi-file rollback.
 """
 
 from __future__ import annotations
@@ -20,6 +24,7 @@ import re
 import sys
 import tempfile
 from collections import defaultdict
+from dataclasses import dataclass
 from fractions import Fraction
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -967,6 +972,46 @@ def difference_count(left: Any, right: Any) -> int:
     return int(left != right)
 
 
+@dataclass(frozen=True)
+class PreparedFixture:
+    path: Path
+    migrated: dict[str, Any]
+    differences: int
+
+
+def prepare_fixtures(
+    paths: Sequence[Path],
+) -> tuple[list[PreparedFixture], list[tuple[Path, Exception]]]:
+    """Load, migrate and validate every fixture without mutating the filesystem."""
+
+    prepared: list[PreparedFixture] = []
+    failures: list[tuple[Path, Exception]] = []
+    for path in paths:
+        try:
+            source = load_json(path)
+            migrated = rekey_fixture(source)
+            validate_fixed_point(migrated, path)
+            prepared.append(
+                PreparedFixture(
+                    path=path,
+                    migrated=migrated,
+                    differences=difference_count(source, migrated),
+                )
+            )
+        except Exception as exc:
+            # Fail closed before publication even for an unexpected validator
+            # exception. KeyboardInterrupt/SystemExit still propagate.
+            failures.append((path, exc))
+    return prepared, failures
+
+
+def display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def atomic_write(path: Path, value: dict[str, Any]) -> None:
     encoded = (
         json.dumps(value, ensure_ascii=False, allow_nan=False, sort_keys=True, indent=2)
@@ -1031,7 +1076,9 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--check", action="store_true", help="verify only (default)")
     mode.add_argument(
-        "--write", action="store_true", help="atomically replace stale fixtures"
+        "--write",
+        action="store_true",
+        help="validate all fixtures, then atomically replace each stale fixture",
     )
     parser.add_argument(
         "fixtures", nargs="*", help="optional paths below tests/fixtures/contracts"
@@ -1047,41 +1094,80 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
 
-    failures = 0
-    changed = 0
-    for path in paths:
-        label = path.relative_to(ROOT)
-        try:
-            source = load_json(path)
-            migrated = rekey_fixture(source)
-            validate_fixed_point(migrated, path)
-            differences = difference_count(source, migrated)
-            if differences == 0:
-                print(f"OK      {label}: canonical MorseHGP3D/v2 fixed point")
-                continue
-            changed += 1
-            if args.write:
-                atomic_write(path, migrated)
-                print(f"UPDATED {label}: {differences} scalar/reference changes")
-            else:
-                failures += 1
-                print(
-                    f"STALE   {label}: {differences} scalar/reference changes required "
-                    "(use --write)",
-                    file=sys.stderr,
-                )
-        except (KeyError, TypeError, ValueError, RekeyError) as exc:
-            failures += 1
-            print(f"ERROR   {label}: {exc}", file=sys.stderr)
-
-    if failures:
+    # G0 publication boundary: every fixture is loaded, migrated and validated
+    # before the first call that can mutate a fixture path.
+    prepared, preparation_failures = prepare_fixtures(paths)
+    if preparation_failures:
+        for path, exc in preparation_failures:
+            print(f"ERROR   {display_path(path)}: {exc}", file=sys.stderr)
         print(
-            f"Rekey check failed: {failures}/{len(paths)} fixture(s); no file was written.",
+            "Rekey preparation failed: "
+            f"{len(preparation_failures)}/{len(paths)} fixture(s); "
+            "no file was written.",
             file=sys.stderr,
         )
         return 1
-    action = "updated" if args.write else "validated"
-    print(f"Rekey {action}: {len(paths)} fixture(s), {changed} changed.")
+
+    changed = [fixture for fixture in prepared if fixture.differences]
+    if not args.write:
+        for fixture in prepared:
+            label = display_path(fixture.path)
+            if fixture.differences:
+                print(
+                    f"STALE   {label}: {fixture.differences} "
+                    "scalar/reference changes required (use --write)",
+                    file=sys.stderr,
+                )
+            else:
+                print(f"OK      {label}: canonical MorseHGP3D/v2 fixed point")
+        if changed:
+            print(
+                f"Rekey check failed: {len(changed)}/{len(paths)} stale fixture(s); "
+                "no file was written.",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"Rekey validated: {len(paths)} fixture(s), 0 changed.")
+        return 0
+
+    published: list[Path] = []
+    for fixture in changed:
+        try:
+            atomic_write(fixture.path, fixture.migrated)
+        except Exception as exc:
+            label = display_path(fixture.path)
+            print(
+                f"ERROR   {label}: publication failed: {type(exc).__name__}: {exc}",
+                file=sys.stderr,
+            )
+            published_labels = ", ".join(display_path(path) for path in published)
+            print(
+                "Rekey publication failed after "
+                f"{len(published)}/{len(changed)} changed fixture(s) completed.",
+                file=sys.stderr,
+            )
+            print(
+                "Published before failure: "
+                f"{published_labels if published_labels else 'none completed'}.",
+                file=sys.stderr,
+            )
+            print(
+                f"Failing publication target: {label}; it may also have changed. "
+                "Inspect the working tree before retrying.",
+                file=sys.stderr,
+            )
+            return 1
+        published.append(fixture.path)
+
+    for fixture in prepared:
+        label = display_path(fixture.path)
+        if fixture.differences:
+            print(
+                f"UPDATED {label}: {fixture.differences} scalar/reference changes"
+            )
+        else:
+            print(f"OK      {label}: canonical MorseHGP3D/v2 fixed point")
+    print(f"Rekey updated: {len(paths)} fixture(s), {len(changed)} changed.")
     return 0
 
 
