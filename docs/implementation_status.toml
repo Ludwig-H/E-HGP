@@ -4,7 +4,7 @@ updated_at = "2026-07-14"
 [project]
 name = "MorseHGP3D"
 implementation_started = true
-current_phase = "1"
+current_phase = "2A"
 current_track = "foundation"
 status_authority = "This file is operational; mathematical authority remains in the specification and proof-status register."
 
@@ -18,7 +18,7 @@ status = "blocked"
 requires_phases = ["0", "1", "2A", "2B", "3", "4", "5", "7", "8", "9", "10", "11", "18"]
 requires_gates = ["G0", "G1", "G2", "G3", "G4", "G5", "G9"]
 full_pi0_requires_phase = "12"
-blocking_reason = "La requalification Gamma de la phase 1 et les phases fondatrices suivantes doivent etre fermees avant la poursuite."
+blocking_reason = "Les phases 2A et suivantes ainsi que leurs portes scientifiques doivent etre fermees avant la poursuite."
 
 [milestones.v1_interactive_scalable]
 status = "blocked"
@@ -42,23 +42,23 @@ blocking_reason = ""
 id = "1"
 title = "Oracle CPU exhaustif"
 track = "foundation"
-status = "in_progress"
+status = "completed"
 entry_gate_satisfied = true
-exit_gate_satisfied = false
+exit_gate_satisfied = true
 depends_on = ["0"]
-evidence = ["068084a test: enregistrer le contre-exemple a la reduction de Gabriel", "docs/validation/PHASE1_GATE_REVIEW.md"]
+evidence = ["068084a test: enregistrer le contre-exemple a la reduction de Gabriel", "febcd39 feat: integrer l'oracle Gamma exact de phase 1", "a24008b test: requalifier la matrice Gamma de phase 1", "145194d test: valider le cas exhaustif Gamma n12", "782f189 test: requalifier les trente mille nuages Gamma", "docs/validation/PHASE1_GATE_REVIEW.md"]
 blocking_reason = ""
 
 [[phases]]
 id = "2A"
 title = "Predicats exacts CPU"
 track = "foundation"
-status = "blocked"
-entry_gate_satisfied = false
+status = "in_progress"
+entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["0", "1"]
-evidence = []
-blocking_reason = "Phase 1 non fermee."
+evidence = ["docs/validation/PHASE1_GATE_REVIEW.md"]
+blocking_reason = ""
 
 [[phases]]
 id = "3"
@@ -80,7 +80,7 @@ entry_gate_satisfied = false
 exit_gate_satisfied = false
 depends_on = ["2A", "3"]
 evidence = []
-blocking_reason = "Reference CPU et environnement CUDA indisponibles."
+blocking_reason = "Les phases 2A et 3 ne sont pas fermees."
 
 [[phases]]
 id = "4"
@@ -102,7 +102,7 @@ entry_gate_satisfied = false
 exit_gate_satisfied = false
 depends_on = ["1", "4"]
 evidence = []
-blocking_reason = "Oracle et index spatial indisponibles."
+blocking_reason = "La phase 4 n'est pas fermee."
 
 [[phases]]
 id = "6"
@@ -113,7 +113,7 @@ entry_gate_satisfied = false
 exit_gate_satisfied = false
 depends_on = ["1", "4"]
 evidence = []
-blocking_reason = "Oracle et index spatial indisponibles."
+blocking_reason = "La phase 4 n'est pas fermee."
 
 [[phases]]
 id = "7"
