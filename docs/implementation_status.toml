@@ -18,7 +18,7 @@ status = "blocked"
 requires_phases = ["0", "1", "2A", "2B", "3", "4", "5", "7", "8", "9", "10", "11", "18"]
 requires_gates = ["G0", "G1", "G2", "G3", "G4", "G5", "G9"]
 full_pi0_requires_phase = "12"
-blocking_reason = "Les portes de correction et le durcissement ne sont pas encore fermes."
+blocking_reason = "La reduction de Gabriel normative est contredite par une fixture exacte generique; la cible et sa preuve doivent etre corrigees avant la poursuite."
 
 [milestones.v1_interactive_scalable]
 status = "blocked"
@@ -42,12 +42,12 @@ blocking_reason = ""
 id = "1"
 title = "Oracle CPU exhaustif"
 track = "foundation"
-status = "in_progress"
+status = "blocked"
 entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["0"]
-evidence = []
-blocking_reason = ""
+evidence = ["068084a test: enregistrer le contre-exemple a la reduction de Gabriel", "docs/validation/PHASE1_GATE_REVIEW.md"]
+blocking_reason = "Le flot Gabriel brut ne reproduit pas les K-polyedres sur la fixture exacte generique gabriel-point-set-counterexample-5-points-v1; le contrat hgp_reduced doit etre corrige ou explicitement redefini."
 
 [[phases]]
 id = "2A"
