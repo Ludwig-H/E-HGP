@@ -23,12 +23,12 @@ Le contrat ne porte pas sur :
 
 - la seule découverte locale des centres critiques;
 - la seule validité d'une descente d'attache prise isolément;
-- la réduction de Gabriel du profil `hgp_reduced`;
+- la réduction par Gamma exhaustif du profil `hgp_reduced`;
 - une condensation aval en partition de points;
 - les shells dégénérés, plateaux ou doublons avant la fermeture des extensions correspondantes;
 - une approximation statistique de la hiérarchie.
 
-À $k=1$, `hgp_reduced` et `full_pi0` coïncident par convention et la forêt doit aussi satisfaire l'oracle EMST. Pour $k\geq2$, la preuve du profil réduit ne vaut pas preuve de `full_pi0`. En particulier, un flot de Gabriel exact peut omettre la généalogie d'une facette isolée sans contredire le théorème du profil réduit.
+À $k=1$, `hgp_reduced` et `full_pi0` coïncident par convention et la forêt doit aussi satisfaire l'oracle EMST. Pour $k\geq2$, le profil réduit v2 est défini depuis les composantes de Gamma exhaustif après omission des composantes réduites à une facette isolée; sa correction définitionnelle ne vaut pas preuve de `full_pi0`. Le flot Gabriel brut peut omettre une incidence silencieuse nécessaire et ne constitue qu'une connectivité positive partielle.
 
 ## 2. Notation
 
@@ -214,7 +214,7 @@ Les noms ci-dessous sont des champs logiques normatifs; leur encodage est figé 
 | condition | objet ou champ probant | règle pour une invocation de M.1 |
 |---|---|---|
 | version du contrat | `RunCertificate.reconstruction_contract_id` | vaut exactement `M1-reconstruction-v1` |
-| base scientifique | `RunCertificate.proof_basis` | vaut `m1_conditional_contract` avant preuve et ne peut valoir `full_pi0_proved` qu'après fermeture relue de M.1 |
+| base scientifique | `RunCertificate.proof_basis` | vaut `m1_conditional_contract`; toute valeur prouvée future exige la fermeture relue de M.1 et une révision du schéma actif |
 | sémantique de l'entrée | `RunCertificate.input_semantics` | coordonnées, unités, $K_{\max}$, $K_{\mathrm{eff}}$ et politique de doublons conformes à H1 |
 | domaine générique | `RunCertificate.general_position_status` | statut certifié, jamais inféré d'une tolérance |
 | fermeture `RelevantGP` | `RunCertificate.relevant_gp_complete` | vrai sur tout le périmètre utile |
@@ -292,7 +292,8 @@ Le statut scientifique du contrat et le statut d'un run sont distincts.
 
 ### 10.1 Avant la fermeture de M.1
 
-- `hgp_reduced` peut publier `public_status=exact` sur son propre périmètre si ses théorèmes et certificats sont satisfaits; il n'invoque pas M.1 et utilise `proof_basis=reduced_manuscript_theorem_5`.
+- `hgp_reduced` peut publier `public_status=exact` sans invoquer M.1 seulement depuis Gamma exhaustif sur `effective_backend=reference_cpu`, avec `reconstruction_contract_id=hgp-reduced-v2` et `proof_basis=gamma_exhaustive_reference`;
+- un flot Gabriel brut utilise `proof_basis=gabriel_positive_connectivity`, `forest_semantics=partial_refinement`, `require_exact=false` et un statut `conditional` ou `budget_exhausted`;
 - `full_pi0` ne peut pas publier `public_status=exact`, même si H1–H8 passent expérimentalement.
 - un run `full_pi0` complet au regard de ses artefacts reste `public_status=conditional` avec `reconstruction_contract_id=M1-reconstruction-v1` et `proof_basis=m1_conditional_contract`;
 - `forest_semantics=exact` est interdit; `forest_semantics=partial_refinement` n'est permis que si sa garantie unilatérale est établie indépendamment, sinon le champ est absent;
@@ -304,7 +305,7 @@ Le statut scientifique du contrat et le statut d'un run sont distincts.
 `full_pi0` ne pourra publier `public_status=exact` que si toutes les conditions suivantes sont réunies :
 
 1. la preuve relue couvre exactement la version de contrat déclarée;
-2. `proof_basis=full_pi0_proved` identifie la base scientifique promue et liée à cette preuve;
+2. une révision contractuelle postérieure à v2 introduit une base scientifique promue et liée à cette preuve; le nom historique candidat `full_pi0_proved` n'est pas une valeur active v2;
 3. H1–H8 sont certifiées pour le run;
 4. tous les champs de complétude de la section 7 sont vrais sur leur périmètre entier;
 5. le replay des artefacts ne révèle ni incohérence ni objet manquant;

@@ -23,7 +23,7 @@ Le statut d'une exécution est distinct : `exact`, `conditional`, `budget_exhaus
 | K-polyèdres $\leftrightarrow\pi_0(L_k(a))$ | `theorem_external` | théorème 2 du manuscrit |
 | les adjacences élémentaires suffisent | `theorem_external` | proposition 5 du manuscrit |
 | un simplexe séparant est de Gabriel | `theorem_external` | théorème 4, position générale |
-| Gabriel préserve les K-polyèdres non triviaux | `false_in_general` pour le graphe élagué formulé dans le manuscrit | la fixture exacte `gabriel-point-set-counterexample-5-points-v1` contredit la proposition 6 comme égalité de collections d'ensembles de points; une formulation enrichie en incidences reste à étudier |
+| Gabriel préserve les K-polyèdres non triviaux | `false_in_general` pour le graphe élagué formulé dans le manuscrit | la fixture exacte `gabriel-point-set-counterexample-5-points-v1` contredit la proposition 6 comme égalité de collections d'ensembles de points |
 | un K-MST élagué préserve ces composantes | `false_in_general` pour le graphe élagué formulé dans le manuscrit | le théorème 5 hérite du contre-exemple à la proposition 6; une structure corrigée peut demander plus que le K-graphe brut |
 | centre critique si et seulement si bien centré | `theorem_external` | Reani–Bobrowski, position générale |
 | indice $\mu=s-k$ | `theorem_external` | Reani–Bobrowski |
@@ -33,11 +33,17 @@ Le statut d'une exécution est distinct : `exact`, `conditional`, `budget_exhaus
 | une sphère de rang $k+1$ équivaut à un $k$-simplexe de Gabriel | `proved_here` | position générale du manuscrit |
 | une étoile remplace la clique de facettes pour $H_0$ | `proved_here` | tous niveaux, traitement simultané |
 | une vraie naissance isolée possède un rang fermé $k$ | `proved_here` | modèle de facettes complet |
+| Gamma exhaustif puis omission de la généalogie publique des facettes isolées définit exactement `hgp_reduced` | `proved_here` | conséquence définitionnelle de la correspondance K-polyèdres–composantes de $\Gamma_k$; base v2 limitée au backend `reference_cpu` |
 | le flot de Gabriel brut reconstruit le profil normatif `hgp_reduced` | `false_in_general` | contre-exemple exact générique à $k=2$; le profil ne peut plus publier `exact` comme hiérarchie des K-polyèdres sans définition et preuve corrigées |
+| le flot de Gabriel brut fournit une connectivité positive incluse dans Gamma | `proved_here` | chaque hyperarête Gabriel est une coface de Gamma; cela autorise seulement `gabriel_positive_connectivity` et `partial_refinement` |
+| une coface non-Gabriel stricte ne fait qu'une attache silencieuse $q=1$ | `proved_here` | support essentiel unique, non-supports et intrus strictement intérieurs; preuve constructive par deux remplacements intrus–support |
+| Gabriel complété par toutes les attaches silencieuses reconstruit Gamma | `proved_here` | induction par lots exacts, lorsque toutes les cofaces sont connues |
+| une génération sparse certifiée de toutes les attaches nécessaires reconstruit `hgp_reduced` | `proof_obligation` | la future base `incidence_complete_reduction_proved` reste absente du schéma v2 jusqu'à fermeture de la complétude algorithmique et des dégénérescences |
 | les seules unions de points forment un invariant inductif suffisant pour élaguer les cofaces non-Gabriel | `false_in_general` | une facette peut être attachée silencieusement par une coface non-Gabriel puis participer à une fusion Gabriel ultérieure |
 | le flot de Gabriel seul reconstruit toute facette isolée | `false_in_general` comme conséquence automatique du théorème 5 | une attache supplémentaire est requise |
 | catalogue critique complet et attaches exactes reconstruisent `full_pi0` | `proof_obligation` | M.1 reste à démontrer, notamment aux niveaux égaux |
-| le remplacement intrus–support localise une racine Gabriel verticale | `proved_here` | position générale, baisse stricte de $\beta$ et traitement post-lot |
+| le remplacement intrus–support produit un chemin positif vers une coface Gabriel | `proved_here` | supports essentiels uniques, baisse stricte de $\beta$ à chaque descendant et absence de plateau |
+| ce chemin localise toujours la racine verticale exacte dans un DSU Gabriel incomplet | `proof_obligation` | requiert une complétion certifiée des incidences; faux comme conséquence du seul flot brut |
 
 ## 3. Énumération
 
@@ -144,7 +150,7 @@ La fixture `tests/fixtures/regressions/gabriel_point_set_counterexample.json`, i
 
 La facette `(0,2)` est attachée dès le niveau $33/2$ par deux cofaces non-Gabriel. Cette attache ne change pas alors l'union de points de sa composante, mais elle devient décisive lorsqu'une coface Gabriel la réutilise au niveau $83886/3563$. La preuve par induction des pages 90–91 du chapitre 8 conserve seulement les unions de points et oublie cette incidence; le flot élagué retarde la fusion jusqu'au niveau $24$.
 
-Avant toute reprise de l'optimisation réduite, il faut choisir puis prouver l'une des voies suivantes : enrichir le flot Gabriel par les incidences silencieuses nécessaires, construire un locator horizontal certifié qui restitue exactement ces attaches, ou redéfinir le profil comme une hiérarchie propre au graphe Gabriel sans l'identifier aux K-polyèdres. Cette dernière voie exige une décision de contrat et ne peut porter le statut public `exact` pour la cible HGP actuelle. La phase 1 reste ouverte et la porte G2 ne peut pas être déclarée satisfaite sur le profil réduit.
+La décision corrective v2 préserve la cible HGP : `hgp_reduced` exact est désormais construit depuis Gamma exhaustif sur `reference_cpu`, avec `proof_basis=gamma_exhaustive_reference`. Le flot Gabriel brut garde seulement `proof_basis=gabriel_positive_connectivity` et une sémantique `partial_refinement`. Enrichir ce flot par les incidences silencieuses ou construire un locator horizontal complet reste une piste de réduction; la base réservée `incidence_complete_reduction_proved` ne pourra entrer dans un schéma actif qu'après preuve et tests de falsification. La phase 0 est rouverte, la phase 1 reste bloquée et la porte G2 ne peut pas être déclarée satisfaite.
 
 ### V1 — corollaire complet de reconstruction
 
@@ -160,7 +166,7 @@ La v1 certifiée reconstruit chaque enfant dans sa H/V-représentation canonique
 
 ### V4 — longueur des descentes
 
-Obtenir des bornes moyennes ou au moins des lois empiriques robustes par famille de nuages. Si les descentes dominent, le flot de Gabriel reste le chemin normatif réduit.
+Obtenir des bornes moyennes ou au moins des lois empiriques robustes par famille de nuages. Si les descentes dominent, un flot complété en incidences peut devenir le candidat de réduction, sans remplacer la base Gamma exhaustive avant sa preuve.
 
 ### V5 — sortie sensible à $H_0$
 
@@ -182,6 +188,6 @@ Une expérimentation ou une API ne peut employer le mot `exact` que si elle publ
 - les tailles intermédiaires et le pic mémoire;
 - la version du code, du compilateur, du pilote et du matériel.
 
-Tant que V0 n'est pas fermé par une définition et une preuve corrigées, `hgp_reduced` ne peut pas publier `exact` comme hiérarchie des K-polyèdres, même si son exécution est bit-à-bit déterministe et son catalogue exhaustif. Le profil `full_pi0` conserve séparément son statut conditionnel lié à M.1.
+Le contrat v2 ferme l'ambiguïté de définition sans fermer la recherche de réduction : `hgp_reduced` ne peut publier `exact` qu'avec `hgp-reduced-v2`, `gamma_exhaustive_reference` et `effective_backend=reference_cpu`. Le flot Gabriel brut reste conditionnel, même si son exécution est bit-à-bit déterministe et son catalogue critique exhaustif. Le profil `full_pi0` conserve séparément son statut conditionnel lié à M.1.
 
 Un bon ARI, une stabilité sous bruit ou un accord moyen avec une baseline ne remplace aucune de ces preuves.

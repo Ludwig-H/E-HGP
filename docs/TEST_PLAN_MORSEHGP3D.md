@@ -42,10 +42,12 @@ Chaque exécution indique un `profile` :
 
 | valeur | objet comparé | exigence |
 |---|---|---|
-| `hgp_reduced` | toutes les composantes à $k=1$, puis les K-polyèdres non triviaux, leurs unions de points et leurs fusions pour $k\geq2$ | conformité à l'EMST à $k=1$, puis au théorème K-Gabriel/K-MST du manuscrit |
+| `hgp_reduced` | toutes les composantes à $k=1$, puis les K-polyèdres non triviaux, leurs unions de points et leurs fusions pour $k\geq2$ | conformité à l'EMST à $k=1$, puis réduction des composantes de Gamma exhaustif |
 | `full_pi0` | toutes les composantes de $L_k(t)$, y compris les naissances et la généalogie triviales | comparaison complète à l'oracle topologique ; statut certifié seulement si la spécification le permet |
 
 Un test ne doit jamais accepter une sortie `hgp_reduced` comme preuve implicite de `full_pi0`. À l'ordre $k\geq2$, les unions de points associées aux composantes forment en général une **couverture** et non une partition ; leur recouvrement est donc autorisé et doit être testé.
+
+Le contrat actif est v2. `hgp_reduced` exact exige `reconstruction_contract_id=hgp-reduced-v2`, `proof_basis=gamma_exhaustive_reference` et `effective_backend=reference_cpu`. Une sortie issue du flot Gabriel brut exige `proof_basis=gabriel_positive_connectivity`, `forest_semantics=partial_refinement`, `require_exact=false` et un statut non exact. Les tests T0 rejettent toute autre combinaison, notamment la base v1 `reduced_manuscript_theorem_5` et la base future non activée `incidence_complete_reduction_proved`.
 
 ### 2.3 Modes et statuts d'exécution
 
@@ -123,7 +125,7 @@ Soit $\Theta_k$ l'ensemble trié des valeurs distinctes de ces rayons, complét�
 - une adjacency entre les facettes de $S$ lorsque $\beta(S)\leq t$ ;
 - une réduction en composantes connexes sans supposer que les identifiants du backend coïncident.
 
-Cette construction sert de référence directe aux K-polyèdres. Une variante séparée construit le sous-graphe K-Gabriel puis son K-MST afin de vérifier le théorème de réduction et l'implémentation hyper-Kruskal.
+Cette construction sert de référence directe aux K-polyèdres. Une variante séparée construit le sous-graphe K-Gabriel afin de vérifier sa garantie de connectivité positive, de mesurer les connexions manquantes et de falsifier toute promotion abusive. Elle doit reproduire le désaccord permanent `gabriel-point-set-counterexample-5-points-v1`; elle ne vérifie plus le théorème de réduction comme base exacte.
 
 ### 4.4 Comparaison à tous les seuils
 
@@ -185,11 +187,11 @@ Les centres et rayons de supports trois ou quatre sont testés comme rationnels,
 
 Si l'algorithme manipule des cellules polyédriques, chaque sommet décisif est accompagné d'un témoin combinatoire : contraintes liantes, approximation, classe de dégénérescence et intervalle d'erreur. Les tests reconstruisent le signe de toute contrainte supplémentaire à partir de ce témoin, et vérifient qu'un sommet géométriquement imprécis ne puisse jamais produire un certificat de fermeture par simple tolérance.
 
-## 6. Tests du catalogue, des hyperarêtes et de la réduction
+## 6. Tests de Gamma, du catalogue Gabriel et de la réduction
 
-### 6.1 Événements Gabriel
+### 6.1 Gamma exact et événements Gabriel partiels
 
-Pour toute sphère critique de rang $k+1$, l'ensemble $S=I\cup U$ est comparé au simplex K-Gabriel attendu. L'implémentation doit émettre les $k+1$ facettes $S\setminus\{x\}$ et une hyperarête de niveau $r^2$.
+Le backend `reference_cpu` exact énumère tous les sommets, cofaces et incidences de Gamma. Pour toute sphère critique de rang $k+1$, l'ensemble $S=I\cup U$ est comparé au simplex K-Gabriel attendu. La voie Gabriel doit émettre les $k+1$ facettes $S\setminus\lbrace x\rbrace$ et une hyperarête de niveau $r^2$, sans revendiquer l'exhaustivité de Gamma.
 
 Les tests vérifient :
 
@@ -199,7 +201,10 @@ Les tests vérifient :
 - la conservation de l'union de points couverte ;
 - le cas $q=0$ qui crée une naissance réduite, $q=1$ qui ajoute seulement un `coverage_delta`, et $q\geq2$ qui crée une multifusion ;
 - l'activation de toutes les facettes d'un événement, y compris celles qui ne sont pas des bras stricts ;
-- l'égalité avec le graphe K-Gabriel exhaustif pour $n\leq14$ ;
+- l'égalité du profil exact avec Gamma exhaustif pour $n\leq14$ ;
+- la présence de chaque `GammaCoface` dans exactement un lot du même ordre et niveau, y compris lorsqu'aucun `CriticalEvent` n'existe à ce niveau ;
+- l'inclusion de chaque connexion Gabriel dans une composante Gamma au même niveau ;
+- la divergence attendue du contre-exemple exact, avec interdiction de `public_status=exact` pour la voie Gabriel ;
 - le rejet des simplexes non Gabriel, même s'ils proviennent d'une liste locale de voisins.
 
 ### 6.2 Lots de niveaux égaux
@@ -220,7 +225,7 @@ Pour chaque fixture moyenne, la réduction est rejouée avec des budgets de lot 
 
 Le résultat canonique doit être invariant. Un niveau égal ne peut être finalisé tant que tous les runs susceptibles de contenir ce niveau n'ont pas été fusionnés.
 
-Pour $m<m_{\star}$, les fragments provenant de parents ou chunks différents ne sont jamais unis géométriquement dans la v1. Les tests font découvrir le même label $Q$ depuis une, deux, trois et plusieurs sources, puis reconstruisent $C_{m+1}(Q)$ depuis la boîte paddée $\Omega$ avec des amorces de contraintes différentes, y compris l'amorce vide. À chaque sommet provisoire, les co-maximiseurs de $Q$ sont comparés exactement aux co-1-NN de $X\setminus Q$; toutes les égalités actives sont réconciliées. Cellule, strates et certificat final doivent être identiques. À $m=m_{\star}$, les morceaux et leurs strates sont fermés, mais le test exige qu'aucun $C_{m_{\star}+1}$ ne soit construit ou propagé. Un prototype futur de complexe de fragments reste non certifiant tant qu'il ne passe pas ce différentiel et ne possède pas sa propre preuve.
+Pour $m<m_{\star}$, les fragments provenant de parents ou chunks différents ne sont jamais unis géométriquement dans la v2. Les tests font découvrir le même label $Q$ depuis une, deux, trois et plusieurs sources, puis reconstruisent $C_{m+1}(Q)$ depuis la boîte paddée $\Omega$ avec des amorces de contraintes différentes, y compris l'amorce vide. À chaque sommet provisoire, les co-maximiseurs de $Q$ sont comparés exactement aux co-1-NN de $X\setminus Q$; toutes les égalités actives sont réconciliées. Cellule, strates et certificat final doivent être identiques. À $m=m_{\star}$, les morceaux et leurs strates sont fermés, mais le test exige qu'aucun $C_{m_{\star}+1}$ ne soit construit ou propagé. Un prototype futur de complexe de fragments reste non certifiant tant qu'il ne passe pas ce différentiel et ne possède pas sa propre preuve.
 
 La boîte $\Omega$ est testée sur des centres critiques situés sur les six faces, les douze arêtes et les huit sommets de l'AABB non paddée. Le padding dyadique doit les placer strictement à l'intérieur; seules les faces du padding portent le bit artificiel et elles ne produisent aucun événement.
 
@@ -710,15 +715,15 @@ Une campagne n'est pas « terminée » tant que cette condition n'est pas satisf
 
 | porte | condition `go` | condition `no-go` immédiate |
 |---|---|---|
-| G0 — formats | schémas, manifests et sorties canoniques stables | sortie non versionnée ou non reproductible |
+| G0 — formats | schéma v2 actif, v1 archivé, manifests et sorties canoniques stables | sortie non versionnée, base de preuve interdite ou résultat non reproductible |
 | G1 — prédicats | zéro faux signe sur tout T1 | un filtre certifie un mauvais signe |
 | G2 — catalogue | égalité exhaustive jusqu'à $n=14$ | événement manquant ou faux avec statut `exact` |
-| G3 — hiérarchie | partitions, multifusions et couvertures égales à l'oracle | ordre de threads modifiant la hiérarchie |
+| G3 — hiérarchie | référence exacte égale à Gamma; voie Gabriel incluse positivement et marquée partielle | ordre de threads modifiant la hiérarchie, connexion inventée ou Gabriel brut annoncé exact |
 | G4 — verticalité | unicité et commutation à tous les seuils | flèche absente, multiple ou non commutative |
-| G5 — GPU | zéro différence canonique CPU/GPU sur la campagne | approximation silencieuse ou repli non signalé |
+| G5 — GPU | zéro différence canonique seulement pour une future base exacte prouvée; sinon toutes les connexions GPU sont incluses dans Gamma et le statut reste conditionnel | approximation silencieuse, connexion absente de Gamma, repli non signalé ou faux statut exact |
 | G6 — 50k interactif | objectif $p95\leq1$ s atteint sur les deux familles favorables | dépassement : pas de revendication interactive, profilage requis |
-| G7 — million | fin certifiée sous budget sur cas sparse, sans dépassement mémoire | OOM non contrôlé ou perte de run/checkpoint |
-| G7b — trois millions | trois graines sparse exactes, streaming transactionnel et reprise vérifiée | OOM, cellule non fermée ou état durable incohérent |
+| G7 — million | fin sous budget sur cas sparse avec statut conforme à la base disponible, sans dépassement mémoire | OOM non contrôlé, perte de run/checkpoint ou faux statut exact |
+| G7b — trois millions | trois graines sparse au statut honnête, streaming transactionnel et reprise vérifiée | OOM, cellule non fermée, état durable incohérent ou faux statut exact |
 | G8 — adversarial | sortie exacte, ou statut limité honnête et exploitable | catalogue tronqué annoncé `exact` |
 | G9 — exploitation GCP | reprise identique et instance ciblée vérifiée `TERMINATED` | instance ciblée encore active ou garde de durée absente |
 
@@ -735,7 +740,7 @@ Ce jalon peut être qualifié uniquement si :
 3. le périmètre `hgp_reduced` est validé exhaustivement jusqu'à $n=14$ pour tous les ordres ;
 4. `full_pi0`, s'il n'est pas démontré, est désactivé ou explicitement conditionnel ;
 5. les données dégénérées sont traitées ou refusées sans jitter silencieux ;
-6. le backend GPU et le backend de référence produisent la même sortie canonique ;
+6. le backend GPU produit soit la même sortie sous une future base exacte prouvée, soit une connectivité positive incluse dans Gamma avec statut conditionnel ;
 7. les compteurs permettent d'expliquer le coût et tout abandon de budget ;
 8. le test $k=1$ coïncide avec l'EMST ;
 9. le jalon $50\,000$ points possède une mesure G4 reproductible, sans que l'étiquette `interactive` soit accordée si elle dépasse une seconde ;

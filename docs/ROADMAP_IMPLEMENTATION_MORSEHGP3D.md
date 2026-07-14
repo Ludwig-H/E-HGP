@@ -66,15 +66,16 @@ lorsque $n\geq2$; pour $n=1$, aucun raffinement n'est lancé. Ainsi $K_{\max}=1$
 
 Le développement suit cet ordre :
 
-1. backend `reference_cpu`, profil `full_pi0`, sur petits $n$;
-2. mode `certified`, profil `hgp_reduced`, sur `cuda_g4`, toujours comparé à `reference_cpu` aux tailles accessibles;
-3. morphismes verticaux du profil réduit;
-4. après la phase 11, ouvrir en parallèle la piste topologique 12–13 (`full_pi0` puis dégénérescences) et la piste produit 14–16 (latence puis streaming du profil réduit);
-5. réunir seulement les jalons dont les portes propres sont fermées;
-6. étendre ensuite les dégénérescences du profil réduit ou complet sans bloquer l'autre piste;
-7. mode `budgeted` sensible à $H_0$.
+1. backend `reference_cpu`, Gamma exhaustif et profil `hgp_reduced` exact sur petits $n$, avec `full_pi0` séparément conditionnel;
+2. flot Gabriel positif sur `cuda_g4`, explicitement `partial_refinement`, toujours comparé à Gamma aux tailles accessibles;
+3. recherche et preuve d'une réduction complétée en incidences avant toute promotion exacte du backend GPU;
+4. morphismes verticaux exacts de la référence et partiels de la voie accélérée;
+5. après la phase 11, ouvrir en parallèle la piste topologique 12–13 (`full_pi0` puis dégénérescences) et la piste produit 14–16 (latence puis streaming de la voie réduite au statut effectivement prouvé);
+6. réunir seulement les jalons dont les portes propres sont fermées;
+7. étendre ensuite les dégénérescences du profil réduit ou complet sans bloquer l'autre piste;
+8. mode `budgeted` sensible à $H_0$.
 
-Le profil réduit arrive avant le profil complet parce qu'il est directement garanti par le K-graphe de Gabriel du manuscrit. Le profil complet demeure l'objectif final, avec un statut séparé tant que ses attaches ne sont pas toutes certifiées.
+Le profil réduit arrive avant le profil complet parce que Gamma exhaustif en donne une définition directement testable sur petits nuages. Le K-graphe de Gabriel brut n'en est plus une réalisation exacte autorisée. Le profil complet demeure l'objectif final, avec un statut séparé tant que ses attaches ne sont pas toutes certifiées.
 
 ## 4. Arborescence logicielle cible
 
@@ -123,6 +124,7 @@ Les schémas suivants doivent avoir une version et une sérialisation canonique 
 - `InputSemantics`;
 - `CertifiedPoint3`, `ExactRational3`, `ExactLevel` et `VertexWitness`;
 - `CriticalEvent`;
+- `GammaCoface`;
 - `GabrielHyperedge`;
 - `Attachment`;
 - `EqualLevelBatch`;
@@ -146,6 +148,7 @@ Transformer les documents actuels en énoncés directement testables et fermer l
 ### Travaux
 
 - Formaliser `hgp_reduced` comme tour complète à $k=1$, puis comme tour des K-polyèdres non triviaux pour $k\geq2$.
+- Figer `hgp-reduced-v2` : Gamma exhaustif est la seule base exacte, limitée à `reference_cpu`; Gabriel brut ne donne qu'une connectivité positive `partial_refinement`.
 - Formaliser `full_pi0` comme tour de toutes les composantes des multicovertures.
 - Figer l'énoncé candidat M.1 avec événements simultanés, ses hypothèses, sa conclusion et ses obligations de preuve, sans le déclarer démontré.
 - Inscrire dans M.1 la multiplicité de Morse $\Delta=\binom{\lvert U\rvert-1}{\mu}$ et, pour $\mu=1$, les $\lvert U\rvert$ bras susceptibles de tuer au plus $\lvert U\rvert-1$ classes de $H_0$.
@@ -170,7 +173,7 @@ Transformer les documents actuels en énoncés directement testables et fermer l
 
 ### Porte de sortie
 
-Aucune phrase ne doit confondre profil réduit et profil complet. Chaque statut public est calculable à partir des champs du certificat. M.1 reste un contrat cible jusqu'à la preuve de la phase 12. Aucun code CUDA avant cette porte.
+Aucune phrase ne doit confondre profil réduit et profil complet, ni Gamma exhaustif et flot Gabriel brut. Chaque statut public est calculable à partir des champs du certificat. M.1 reste un contrat cible jusqu'à la preuve de la phase 12. Le contrat v1 reste archivé, le contrat v2 et ses tests négatifs sont actifs. Aucun code CUDA avant cette porte.
 
 ## Phase 1 — Oracle CPU exhaustif
 
@@ -216,11 +219,12 @@ L'arithmétique utilise les dyadiques exacts ou une multiprécision rationnelle.
 - monotonie des coupes en $a$;
 - inclusion verticale;
 - égalité entre $\pi_0(L_k)$ échantillonné symboliquement et $\Gamma_k$;
-- égalité réduit–Gabriel sur les composantes non triviales.
+- égalité entre `hgp_reduced` et la réduction des composantes de Gamma exhaustif;
+- inclusion positive de toute connexion Gabriel brute dans Gamma, sans exiger l'égalité contredite par la fixture permanente.
 
 ### Porte de sortie
 
-Toutes les fixtures et au moins $10\,000$ petits nuages aléatoires par dimension affine passent. Toute différence produit automatiquement un fichier minimal reproductible.
+Toutes les fixtures, y compris le contre-exemple Gabriel, et au moins $10\,000$ petits nuages aléatoires par dimension affine passent pour la cible Gamma. Toute différence produit automatiquement un fichier minimal reproductible. Le flot Gabriel doit passer sa garantie unilatérale et reproduire le désaccord attendu de la fixture, jamais masquer celle-ci.
 
 ## Phase 2A — Laboratoire de prédicats exacts CPU
 
@@ -521,23 +525,24 @@ Pour chaque $m$, publier $M_m$ parents, $P_m$ morceaux, $V_m$ sommets, $J_m$ col
 - pour $m<m_{\star}$, même label enfant découvert depuis deux, trois puis plusieurs parents ou chunks, avec reconstruction canonique identique à l'oracle;
 - à $m=m_{\star}$, absence vérifiée de toute allocation ou propagation d'un $C_{m_{\star}+1}$, avec catalogue final identique à l'oracle;
 - amorces de contraintes volontairement différentes, y compris l'amorce vide, donnant la même cellule fermée;
-- tentative d'union géométrique des fragments désactivée dans la v1 et testée seulement comme prototype futur différentiel.
+- tentative d'union géométrique des fragments désactivée dans la v2 et testée seulement comme prototype futur différentiel.
 
 ### Portes go/no-go
 
 Après les profondeurs $\min(3,m_{\star})$, $\min(5,m_{\star})$ et $m_{\star}$, estimer l'exposant de croissance sur Poisson volumique. Si les intermédiaires deviennent nettement superlinéaires dans le régime favorable, suspendre les micro-optimisations et ouvrir la phase 17. Une configuration adversariale superlinéaire n'est pas un échec de correction.
 
-## Phase 10 — Catalogue, Gabriel et `hgp_reduced`
+## Phase 10 — Catalogue, Gamma et réduction candidate
 
 ### But
 
-Livrer le premier profil mathématiquement certifié de bout en bout.
+Livrer `hgp_reduced` exact sur le backend CPU de référence et une voie Gabriel GPU honnêtement partielle.
 
 ### Travaux
 
-- convertir chaque événement de rang $k+1$ en label $S=I\cup U$;
-- émettre ses $k+1$ facettes et son hyperarête;
-- vérifier le critère Gabriel par le rang;
+- construire Gamma exhaustif avec tous ses sommets, cofaces et incidences sur `reference_cpu`;
+- convertir chaque événement de rang $k+1$ en label Gabriel $S=I\cup U$ pour la voie accélérée;
+- émettre ses $k+1$ facettes et son hyperarête positive;
+- vérifier le critère Gabriel par le rang sans l'assimiler à une preuve d'exhaustivité;
 - trier les niveaux par filtre puis comparateur exact;
 - construire les lots;
 - implémenter hyper-Kruskal déterministe;
@@ -549,7 +554,9 @@ Livrer le premier profil mathématiquement certifié de bout en bout.
 
 ### Tests
 
-- K-graphe de Gabriel exhaustif contre production;
+- Gamma exhaustif contre oracle de phase 1;
+- flot Gabriel contre Gamma comme sous-relation positive;
+- fixture `gabriel-point-set-counterexample-5-points-v1`, avec désaccord exact attendu et sérialisé;
 - composantes avant et après chaque lot;
 - même résultat clique, étoile et hyperarête;
 - événements redondants;
@@ -559,7 +566,7 @@ Livrer le premier profil mathématiquement certifié de bout en bout.
 
 ### Porte de sortie
 
-Pour tous les petits cas et toutes les coupes, `hgp_reduced` coïncide avec le théorème 5. Le certificat prouve catalogue complet, niveaux exacts, lots complets et absence de dégénérescence hors contrat.
+Pour tous les petits cas et toutes les coupes, `hgp_reduced` sur `reference_cpu` coïncide avec la réduction de Gamma exhaustif et utilise `gamma_exhaustive_reference`. La voie Gabriel utilise `gabriel_positive_connectivity`, reste `partial_refinement` et ne peut fermer cette phase comme backend exact. Une réduction accélérée exacte exige une preuve nouvelle couvrant les incidences silencieuses.
 
 ## Phase 11 — Tour verticale
 
@@ -569,9 +576,10 @@ Transformer dix forêts en une hiérarchie ordre–échelle cohérente.
 
 ### Travaux
 
-- implémenter `locate_reduced_root(k,Q,a)` par remplacement intrus–support strictement descendant;
+- construire les cibles exactes de référence par inclusion directe dans Gamma;
+- conserver `locate_reduced_root(k,Q,a)` comme candidat par remplacement intrus–support strictement descendant;
 - choisir canoniquement l'intrus et le support, enregistrer chaque facette partagée et vérifier $\beta(Q')<\beta(Q)$;
-- traiter par pointer-jumping les chaînes indépendantes jusqu'à un simplexe de Gabriel;
+- traiter par pointer-jumping les chaînes indépendantes jusqu'à un simplexe de Gabriel sans promouvoir leur racine brute en cible exacte;
 - créer l'ancre d'un événement rang $s$ entre sa naissance dans $T_s$ et l'état post-lot de $T_{s-1}$;
 - définir le comportement des nœuds réduits qui n'existent pas encore comme composantes non triviales;
 - propager les images le long des forêts;
@@ -592,7 +600,7 @@ Transformer dix forêts en une hiérarchie ordre–échelle cohérente.
 
 ### Porte de sortie
 
-Chaque image est unique et tous les carrés commutent. Le périmètre réduit de la flèche est explicitement marqué lorsque la source ou la cible isolée n'appartient pas au profil.
+Chaque image Gamma de référence est unique et tous ses carrés commutent. Toute flèche issue de Gabriel brut est absente, partielle ou vérifiée indépendamment contre Gamma; le périmètre réduit est explicitement marqué lorsque la source ou la cible isolée n'appartient pas au profil.
 
 À partir de cette porte, deux pistes sont indépendantes : les phases 12–13 ferment la cible topologique `full_pi0`, tandis que les phases 14–16 optimisent et diffusent `hgp_reduced`. Une piste ne peut revendiquer les garanties de l'autre et aucune n'attend artificiellement sa fermeture.
 
@@ -839,7 +847,8 @@ Zéro événement manquant sur l'oracle et la campagne exacte ne suffit pas : un
 ### Jalon `v1-correctness`
 
 - `backend=reference_cpu, profile=full_pi0` stable sur le domaine exhaustif annoncé;
-- `backend=cuda_g4, mode=certified, profile=hgp_reduced` stable et capable d'obtenir `public_status=exact` sur le domaine générique;
+- `backend=reference_cpu, mode=certified, profile=hgp_reduced` stable avec `gamma_exhaustive_reference` sur le domaine exhaustif annoncé;
+- `backend=cuda_g4, profile=hgp_reduced` ne peut obtenir `public_status=exact` qu'après activation d'une base de réduction complétée en incidences effectivement prouvée; Gabriel brut reste conditionnel;
 - `profile=full_pi0` activé en production uniquement si la phase 12 est fermée;
 - toute dégénérescence non couverte retourne `public_status=unsupported_degeneracy` sans `forest_semantics`, ou `mode=budgeted, forest_semantics=partial_refinement, public_status=conditional`, jamais `public_status=exact`;
 - aucune dépendance à une ressource GCP permanente;
@@ -883,7 +892,9 @@ Il dépend de `v1-correctness` et exige en plus : G6 atteint à 50 000 points, G
 | un overflow tronque une cellule | défaut bloquant |
 | top-$k$, shell ou rang incomplet | défaut bloquant |
 | événement manquant sur l'oracle | défaut bloquant |
-| profil réduit différent de Gabriel exhaustif | défaut mathématique ou logiciel bloquant |
+| profil réduit de référence différent de Gamma exhaustif | défaut mathématique ou logiciel bloquant |
+| flot Gabriel qui invente une connexion absente de Gamma | défaut bloquant de la garantie positive |
+| flot Gabriel qui manque une connexion Gamma | divergence attendue à sérialiser comme `partial_refinement`, jamais `exact` |
 | attache différente de $\Gamma_k$ | `full_pi0` reste non certifié |
 | lot égal dépendant de l'ordre | défaut bloquant |
 | carré vertical non commutatif | défaut bloquant |
@@ -949,7 +960,7 @@ Si aucune VM n'a été utilisée, la section GCP le dit explicitement. Si l'éta
 
 Les sept prochains lots de travail doivent être :
 
-1. phase 0 : énoncé candidat M.1, obligations de preuve et schémas;
+1. phase 0 : contrat v2, énoncé candidat M.1, obligations de preuve et schémas;
 2. phase 1 : oracle exhaustif et générateur de fixtures;
 3. phase 2A : prédicats CPU filtrés et fuzzing;
 4. phase 3 : environnement CUDA reproductible;

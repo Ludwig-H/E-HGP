@@ -1,0 +1,2408 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://e-hgp.invalid/schemas/morsehgp3d-contract-v2.schema.json",
+  "title": "MorseHGP3D canonical data contract v2",
+  "description": "Strict, versioned serialization contract for MorseHGP3D scientific and operational records. The root instance is a MorseHGP3DResult; every requested record type is independently available under $defs.",
+  "$ref": "#/$defs/MorseHGP3DResult",
+  "$defs": {
+    "SchemaVersion": {
+      "type": "string",
+      "const": "2.0.0",
+      "description": "Semantic version of each independently serializable record in this contract.",
+      "examples": ["2.0.0"]
+    },
+    "MorseRole": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "order", "morse_index", "local_multiplicity", "arm_count"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "order": { "$ref": "#/$defs/Order" },
+        "morse_index": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "local_multiplicity": { "$ref": "#/$defs/PositiveCount" },
+        "arm_count": { "$ref": "#/$defs/Count" }
+      },
+      "description": "Order-specific H0 role of a critical centre. For index one, arm_count=|U| and local_multiplicity=|U|-1; for index zero, arm_count=0 and multiplicity=1.",
+      "examples": [
+        { "schema_version": "2.0.0", "order": 2, "morse_index": 1, "local_multiplicity": 2, "arm_count": 3 }
+      ]
+    },
+    "CriticalEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "event_id",
+        "closed_rank",
+        "interior_ids",
+        "shell_ids",
+        "minimal_support_ids",
+        "center_witness_homogeneous",
+        "squared_level_exact",
+        "barycentric_signs",
+        "birth_order",
+        "saddle_order",
+        "morse_roles",
+        "degeneracy_class",
+        "predicate_status"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "event_id": { "$ref": "#/$defs/CanonicalId" },
+        "closed_rank": { "type": "integer", "minimum": 1, "maximum": 11 },
+        "interior_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointId" },
+          "maxItems": 10,
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "shell_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointId" },
+          "minItems": 1,
+          "maxItems": 11,
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "minimal_support_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointId" },
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "center_witness_homogeneous": { "$ref": "#/$defs/ExactRational3" },
+        "squared_level_exact": { "$ref": "#/$defs/ExactLevel" },
+        "barycentric_signs": {
+          "type": "array",
+          "items": { "type": "integer", "enum": [-1, 0, 1] },
+          "minItems": 1,
+          "maxItems": 4,
+          "description": "Signs in the fixed order of minimal_support_ids; this is a tuple and is not sorted."
+        },
+        "birth_order": { "$ref": "#/$defs/NullableOrder" },
+        "saddle_order": { "$ref": "#/$defs/NullableOrder" },
+        "morse_roles": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/MorseRole" },
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "x-canonical-order": "by:order"
+        },
+        "degeneracy_class": {
+          "type": "string",
+          "enum": [
+            "general_position",
+            "lower_dimensional_support",
+            "cospherical_shell",
+            "nonessential_support",
+            "external_shell_tie",
+            "duplicate_site",
+            "unsupported"
+          ]
+        },
+        "predicate_status": { "type": "string", "enum": ["certified_exact", "unsupported_degeneracy", "numeric_failure"] }
+      },
+      "description": "Canonical critical sphere. event_id hashes the complete shell, interior, minimal support and exact witnesses, never an approximate centre or thread-arrival index.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "event_id": "0000000000000000000000000000000000000000000000000000000000000010",
+          "closed_rank": 3,
+          "interior_ids": [],
+          "shell_ids": [0, 1, 2],
+          "minimal_support_ids": [0, 1, 2],
+          "center_witness_homogeneous": { "schema_version": "2.0.0", "x_numerator": "0", "y_numerator": "0", "z_numerator": "0", "denominator": "1", "unit": "input_coordinate_unit" },
+          "squared_level_exact": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+          "barycentric_signs": [1, 1, 1],
+          "birth_order": 3,
+          "saddle_order": 2,
+          "morse_roles": [
+            { "schema_version": "2.0.0", "order": 2, "morse_index": 1, "local_multiplicity": 2, "arm_count": 3 },
+            { "schema_version": "2.0.0", "order": 3, "morse_index": 0, "local_multiplicity": 1, "arm_count": 0 }
+          ],
+          "degeneracy_class": "general_position",
+          "predicate_status": "certified_exact"
+        }
+      ]
+    },
+    "PointLabel": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/PointId" },
+      "minItems": 1,
+      "maxItems": 11,
+      "uniqueItems": true,
+      "x-canonical-order": "ascending",
+      "description": "Canonical point label: ascending unique zero-based point IDs.",
+      "examples": [[0, 1]]
+    },
+    "GabrielHyperedge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "hyperedge_id",
+        "event_id",
+        "order",
+        "simplex_point_ids",
+        "facet_point_ids",
+        "strict_arm_point_ids",
+        "star_pivot_facet_index",
+        "squared_level_exact",
+        "covered_point_ids",
+        "predicate_status"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "hyperedge_id": { "$ref": "#/$defs/CanonicalId" },
+        "event_id": { "$ref": "#/$defs/CanonicalId" },
+        "order": { "$ref": "#/$defs/Order" },
+        "simplex_point_ids": { "$ref": "#/$defs/PointLabel" },
+        "facet_point_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointLabel" },
+          "minItems": 2,
+          "maxItems": 11,
+          "uniqueItems": true,
+          "x-canonical-order": "lexicographic"
+        },
+        "strict_arm_point_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointLabel" },
+          "minItems": 2,
+          "maxItems": 11,
+          "uniqueItems": true,
+          "x-canonical-order": "lexicographic"
+        },
+        "star_pivot_facet_index": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "squared_level_exact": { "$ref": "#/$defs/ExactLevel" },
+        "covered_point_ids": { "$ref": "#/$defs/PointLabel" },
+        "predicate_status": { "type": "string", "const": "certified_exact" }
+      },
+      "description": "One canonical H0 hyperedge emitted by a rank order+1 critical event. facet_point_ids contains every facet; strict_arm_point_ids contains only the pre-lot arms indexed by shell removals.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "hyperedge_id": "0000000000000000000000000000000000000000000000000000000000000020",
+          "event_id": "0000000000000000000000000000000000000000000000000000000000000010",
+          "order": 2,
+          "simplex_point_ids": [0, 1, 2],
+          "facet_point_ids": [[0, 1], [0, 2], [1, 2]],
+          "strict_arm_point_ids": [[0, 1], [0, 2], [1, 2]],
+          "star_pivot_facet_index": 0,
+          "squared_level_exact": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+          "covered_point_ids": [0, 1, 2],
+          "predicate_status": "certified_exact"
+        }
+      ]
+    },
+    "GammaCoface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "coface_id",
+        "order",
+        "simplex_point_ids",
+        "facet_point_ids",
+        "squared_level_exact",
+        "predicate_status"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "coface_id": { "$ref": "#/$defs/CanonicalId" },
+        "order": { "$ref": "#/$defs/Order" },
+        "simplex_point_ids": { "$ref": "#/$defs/PointLabel" },
+        "facet_point_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointLabel" },
+          "minItems": 2,
+          "maxItems": 11,
+          "uniqueItems": true,
+          "x-canonical-order": "lexicographic"
+        },
+        "squared_level_exact": { "$ref": "#/$defs/ExactLevel" },
+        "predicate_status": { "type": "string", "const": "certified_exact" }
+      },
+      "description": "One exhaustive Gamma relation. Exact hgp_reduced replay requires every order k+1 coface, including non-Gabriel relations that create only a silent incidence at their insertion level.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "coface_id": "0000000000000000000000000000000000000000000000000000000000000021",
+          "order": 2,
+          "simplex_point_ids": [0, 1, 2],
+          "facet_point_ids": [[0, 1], [0, 2], [1, 2]],
+          "squared_level_exact": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+          "predicate_status": "certified_exact"
+        }
+      ]
+    },
+    "AttachmentStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "step_index", "from_point_ids", "to_point_ids", "shared_facet_point_ids", "from_squared_level", "to_squared_level", "decrease_certified"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "step_index": { "$ref": "#/$defs/Count" },
+        "from_point_ids": { "$ref": "#/$defs/PointLabel" },
+        "to_point_ids": { "$ref": "#/$defs/PointLabel" },
+        "shared_facet_point_ids": { "$ref": "#/$defs/PointLabel" },
+        "from_squared_level": { "$ref": "#/$defs/ExactLevel" },
+        "to_squared_level": { "$ref": "#/$defs/ExactLevel" },
+        "decrease_certified": { "type": "boolean", "const": true }
+      },
+      "description": "One causal, strictly descending locator step. Steps retain traversal order and are not canonically sorted as a set.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "step_index": 0,
+          "from_point_ids": [0, 1],
+          "to_point_ids": [0, 2],
+          "shared_facet_point_ids": [0],
+          "from_squared_level": { "schema_version": "2.0.0", "numerator": "4", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+          "to_squared_level": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+          "decrease_certified": true
+        }
+      ]
+    },
+    "Attachment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "attachment_id",
+        "event_id",
+        "order",
+        "removed_shell_id",
+        "arm_point_ids",
+        "event_squared_level",
+        "target_node_id",
+        "method",
+        "descent_path",
+        "predicate_status"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "attachment_id": { "$ref": "#/$defs/CanonicalId" },
+        "event_id": { "$ref": "#/$defs/CanonicalId" },
+        "order": { "$ref": "#/$defs/Order" },
+        "removed_shell_id": { "$ref": "#/$defs/PointId" },
+        "arm_point_ids": { "$ref": "#/$defs/PointLabel" },
+        "event_squared_level": { "$ref": "#/$defs/ExactLevel" },
+        "target_node_id": { "$ref": "#/$defs/CanonicalId" },
+        "method": { "type": "string", "enum": ["gabriel_flow", "miniball_descent", "reference_oracle", "reduced_root_locator"] },
+        "descent_path": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AttachmentStep" },
+          "maxItems": 9007199254740991,
+          "description": "Causal order from the arm to its target; it is not sorted. Empty for a direct Gabriel-flow attachment."
+        },
+        "predicate_status": { "type": "string", "enum": ["certified_exact", "unsupported_degeneracy", "numeric_failure"] }
+      },
+      "description": "Globally replayable arm attachment. Its identity key is exactly (event_id, order, removed_shell_id); attachment_id is the canonical hash of that tuple.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "attachment_id": "0000000000000000000000000000000000000000000000000000000000000030",
+          "event_id": "0000000000000000000000000000000000000000000000000000000000000010",
+          "order": 2,
+          "removed_shell_id": 2,
+          "arm_point_ids": [0, 1],
+          "event_squared_level": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+          "target_node_id": "0000000000000000000000000000000000000000000000000000000000000040",
+          "method": "gabriel_flow",
+          "descent_path": [],
+          "predicate_status": "certified_exact"
+        }
+      ]
+    },
+    "ComponentState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "component_id", "active_facet_point_ids", "covered_point_ids"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "component_id": { "$ref": "#/$defs/CanonicalId" },
+        "active_facet_point_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointLabel" },
+          "uniqueItems": true,
+          "x-canonical-order": "lexicographic"
+        },
+        "covered_point_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        }
+      },
+      "description": "Canonical component snapshot immediately before or after one exact-level batch.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "component_id": "0000000000000000000000000000000000000000000000000000000000000040",
+          "active_facet_point_ids": [[0, 1]],
+          "covered_point_ids": [0, 1]
+        }
+      ]
+    },
+    "CoverageDelta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "batch_id", "order", "root_node_id", "added_facet_point_ids", "added_point_ids"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "batch_id": { "$ref": "#/$defs/CanonicalId" },
+        "order": { "$ref": "#/$defs/Order" },
+        "root_node_id": { "$ref": "#/$defs/CanonicalId" },
+        "added_facet_point_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointLabel" },
+          "uniqueItems": true,
+          "x-canonical-order": "lexicographic"
+        },
+        "added_point_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        }
+      },
+      "description": "Replayable coverage growth for a batch, including q=1 growth that creates no forest node.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "batch_id": "0000000000000000000000000000000000000000000000000000000000000050",
+          "order": 2,
+          "root_node_id": "0000000000000000000000000000000000000000000000000000000000000040",
+          "added_facet_point_ids": [[0, 2], [1, 2]],
+          "added_point_ids": [2]
+        }
+      ]
+    },
+    "EqualLevelBatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "batch_id",
+        "order",
+        "squared_level_exact",
+        "event_ids",
+        "gamma_coface_ids",
+        "hyperedge_ids",
+        "attachment_ids",
+        "pre_lot_components",
+        "post_lot_components",
+        "coverage_deltas",
+        "events_complete",
+        "attachments_complete",
+        "batch_status"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "batch_id": { "$ref": "#/$defs/CanonicalId" },
+        "order": { "$ref": "#/$defs/Order" },
+        "squared_level_exact": { "$ref": "#/$defs/ExactLevel" },
+        "event_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "gamma_coface_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "hyperedge_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "attachment_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "pre_lot_components": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ComponentState" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:component_id"
+        },
+        "post_lot_components": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ComponentState" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:component_id"
+        },
+        "coverage_deltas": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CoverageDelta" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:root_node_id"
+        },
+        "events_complete": { "type": "boolean" },
+        "attachments_complete": { "type": "boolean" },
+        "batch_status": { "type": "string", "enum": ["closed", "partial", "unsupported_degeneracy", "numeric_failure"] }
+      },
+      "description": "Simultaneous contraction at one exact squared level and order. gamma_coface_ids includes every exhaustive Gamma relation, so a replay batch may have no critical event. pre_lot_components are frozen strict-sublevel states; post_lot_components are states after all unions.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "batch_id": "0000000000000000000000000000000000000000000000000000000000000050",
+          "order": 2,
+          "squared_level_exact": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+          "event_ids": ["0000000000000000000000000000000000000000000000000000000000000010"],
+          "gamma_coface_ids": ["0000000000000000000000000000000000000000000000000000000000000021"],
+          "hyperedge_ids": ["0000000000000000000000000000000000000000000000000000000000000020"],
+          "attachment_ids": ["0000000000000000000000000000000000000000000000000000000000000030"],
+          "pre_lot_components": [
+            { "schema_version": "2.0.0", "component_id": "0000000000000000000000000000000000000000000000000000000000000040", "active_facet_point_ids": [[0, 1]], "covered_point_ids": [0, 1] }
+          ],
+          "post_lot_components": [
+            { "schema_version": "2.0.0", "component_id": "0000000000000000000000000000000000000000000000000000000000000041", "active_facet_point_ids": [[0, 1], [0, 2], [1, 2]], "covered_point_ids": [0, 1, 2] }
+          ],
+          "coverage_deltas": [
+            { "schema_version": "2.0.0", "batch_id": "0000000000000000000000000000000000000000000000000000000000000050", "order": 2, "root_node_id": "0000000000000000000000000000000000000000000000000000000000000041", "added_facet_point_ids": [[0, 2], [1, 2]], "added_point_ids": [2] }
+          ],
+          "events_complete": true,
+          "attachments_complete": true,
+          "batch_status": "closed"
+        }
+      ]
+    },
+    "CanonicalId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Lower-case SHA-256 digest of the type-specific canonical identity projection.",
+      "examples": ["0000000000000000000000000000000000000000000000000000000000000001"]
+    },
+    "PointId": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991,
+      "description": "Zero-based canonical point index, bounded to the exactly representable JSON integer range.",
+      "examples": [0]
+    },
+    "Order": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "description": "One-based multicover order k.",
+      "examples": [1]
+    },
+    "NullableOrder": {
+      "oneOf": [
+        { "$ref": "#/$defs/Order" },
+        { "type": "null" }
+      ],
+      "description": "A multicover order, or null when the corresponding H0 role does not exist in the computed tower.",
+      "examples": [1, null]
+    },
+    "Count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991,
+      "description": "Exact non-negative count in the JSON safe-integer range.",
+      "examples": [0]
+    },
+    "PositiveCount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "description": "Exact positive count in the JSON safe-integer range.",
+      "examples": [1]
+    },
+    "SignedIntegerString": {
+      "type": "string",
+      "pattern": "^(0|-?[1-9][0-9]*)$",
+      "description": "Canonical arbitrary-precision signed base-10 integer: no plus sign, no leading zero, and no negative zero.",
+      "examples": ["-3", "0", "17"]
+    },
+    "NonnegativeIntegerString": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "description": "Canonical arbitrary-precision non-negative base-10 integer.",
+      "examples": ["0", "17"]
+    },
+    "PositiveIntegerString": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$",
+      "description": "Canonical arbitrary-precision positive base-10 integer.",
+      "examples": ["1", "17"]
+    },
+    "Binary64Bits": {
+      "type": "string",
+      "pattern": "^(?![7f]ff)[0-9a-f]{16}$",
+      "description": "Exactly sixteen lower-case hexadecimal digits containing one finite IEEE-754 binary64 bit pattern, without a 0x prefix.",
+      "examples": ["3ff0000000000000"]
+    },
+    "CanonicalInputBinary64Bits": {
+      "type": "string",
+      "pattern": "^(?![7f]ff)(?!8000000000000000$)[0-9a-f]{16}$",
+      "description": "Finite binary64 input bit pattern after canonicalizing negative zero to positive zero.",
+      "examples": ["0000000000000000", "3ff0000000000000"]
+    },
+    "ExactPositiveRational": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "numerator", "denominator"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "numerator": { "$ref": "#/$defs/PositiveIntegerString" },
+        "denominator": { "$ref": "#/$defs/PositiveIntegerString" }
+      },
+      "description": "Positive dimensionless rational in lowest terms with positive denominator.",
+      "examples": [
+        { "schema_version": "2.0.0", "numerator": "1", "denominator": "1" }
+      ]
+    },
+    "SimilarityTransform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "applied", "scale", "translation"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "applied": { "type": "boolean" },
+        "scale": { "$ref": "#/$defs/ExactPositiveRational" },
+        "translation": { "$ref": "#/$defs/ExactRational3" }
+      },
+      "description": "Explicit similarity applied before computation. When applied=false, scale must be one and translation must be zero by semantic validation.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "applied": false,
+          "scale": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1" },
+          "translation": { "schema_version": "2.0.0", "x_numerator": "0", "y_numerator": "0", "z_numerator": "0", "denominator": "1", "unit": "input_coordinate_unit" }
+        }
+      ]
+    },
+    "InputSemantics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "coordinate_encoding",
+        "coordinate_unit",
+        "squared_level_unit",
+        "point_indexing",
+        "canonical_point_order",
+        "non_finite_policy",
+        "duplicate_policy",
+        "signed_zero_policy",
+        "perturbation_policy",
+        "input_sha256",
+        "similarity_transform"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "coordinate_encoding": { "type": "string", "const": "ieee754_binary64_bits" },
+        "coordinate_unit": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{0,63}$" },
+        "squared_level_unit": { "type": "string", "const": "input_coordinate_unit_squared" },
+        "point_indexing": { "type": "string", "const": "zero_based" },
+        "canonical_point_order": { "type": "string", "const": "lexicographic_binary64_total_order_then_source_index" },
+        "non_finite_policy": { "type": "string", "const": "reject" },
+        "duplicate_policy": { "type": "string", "enum": ["reject", "aggregate_exact"] },
+        "signed_zero_policy": { "type": "string", "const": "canonicalize_to_positive_zero" },
+        "perturbation_policy": { "type": "string", "enum": ["none", "explicit_symbolic_diagnostic"] },
+        "input_sha256": { "$ref": "#/$defs/CanonicalId" },
+        "similarity_transform": { "$ref": "#/$defs/SimilarityTransform" }
+      },
+      "description": "Normative interpretation of an input cloud. Coordinates are exact dyadics reconstructed from finite binary64 bits; public levels use squared input-coordinate units.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "coordinate_encoding": "ieee754_binary64_bits",
+          "coordinate_unit": "metre",
+          "squared_level_unit": "input_coordinate_unit_squared",
+          "point_indexing": "zero_based",
+          "canonical_point_order": "lexicographic_binary64_total_order_then_source_index",
+          "non_finite_policy": "reject",
+          "duplicate_policy": "reject",
+          "signed_zero_policy": "canonicalize_to_positive_zero",
+          "perturbation_policy": "none",
+          "input_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+          "similarity_transform": {
+            "schema_version": "2.0.0",
+            "applied": false,
+            "scale": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1" },
+            "translation": { "schema_version": "2.0.0", "x_numerator": "0", "y_numerator": "0", "z_numerator": "0", "denominator": "1", "unit": "input_coordinate_unit" }
+          }
+        }
+      ]
+    },
+    "CertifiedPoint3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "point_id", "source_indices", "multiplicity", "coordinate_bits", "coordinate_unit", "predicate_status"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "point_id": { "$ref": "#/$defs/PointId" },
+        "source_indices": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointId" },
+          "minItems": 1,
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "multiplicity": { "$ref": "#/$defs/PositiveCount" },
+        "coordinate_bits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalInputBinary64Bits" },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "x, y, z binary64 bit patterns in that fixed axis order. This is a tuple, not a set."
+        },
+        "coordinate_unit": { "type": "string", "const": "input_coordinate_unit" },
+        "predicate_status": { "type": "string", "const": "finite_exact_dyadic" }
+      },
+      "description": "Canonical finite input site. point_id is assigned only after exact coordinate canonicalization; source_indices preserve occurrence provenance.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "point_id": 0,
+          "source_indices": [0],
+          "multiplicity": 1,
+          "coordinate_bits": ["0000000000000000", "0000000000000000", "0000000000000000"],
+          "coordinate_unit": "input_coordinate_unit",
+          "predicate_status": "finite_exact_dyadic"
+        }
+      ]
+    },
+    "ExactRational3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "x_numerator", "y_numerator", "z_numerator", "denominator", "unit"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "x_numerator": { "$ref": "#/$defs/SignedIntegerString" },
+        "y_numerator": { "$ref": "#/$defs/SignedIntegerString" },
+        "z_numerator": { "$ref": "#/$defs/SignedIntegerString" },
+        "denominator": { "$ref": "#/$defs/PositiveIntegerString" },
+        "unit": { "type": "string", "const": "input_coordinate_unit" }
+      },
+      "description": "Canonical homogeneous rational triple (Cx,Cy,Cz,Dc): Dc>0 and gcd(|Cx|,|Cy|,|Cz|,Dc)=1.",
+      "examples": [
+        { "schema_version": "2.0.0", "x_numerator": "1", "y_numerator": "-2", "z_numerator": "0", "denominator": "3", "unit": "input_coordinate_unit" }
+      ]
+    },
+    "ExactLevel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "numerator", "denominator", "unit"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "numerator": { "$ref": "#/$defs/NonnegativeIntegerString" },
+        "denominator": { "$ref": "#/$defs/PositiveIntegerString" },
+        "unit": { "type": "string", "const": "input_coordinate_unit_squared" }
+      },
+      "description": "Canonical non-negative squared radius N/D: D>0 and gcd(N,D)=1. Equality and ordering use exact cross-products, never a floating tolerance.",
+      "examples": [
+        { "schema_version": "2.0.0", "numerator": "1", "denominator": "4", "unit": "input_coordinate_unit_squared" }
+      ]
+    },
+    "VertexWitness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "vertex_id",
+        "position_exact",
+        "binding_constraint_ids",
+        "approximation_bits",
+        "affine_dimension",
+        "artificial_boundary",
+        "certification_stage",
+        "degeneracy_class"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "vertex_id": { "$ref": "#/$defs/CanonicalId" },
+        "position_exact": { "$ref": "#/$defs/ExactRational3" },
+        "binding_constraint_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "minItems": 1,
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "approximation_bits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Binary64Bits" },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "Approximate x, y, z tuple used only for proposal and diagnostics."
+        },
+        "affine_dimension": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "artificial_boundary": { "type": "boolean" },
+        "certification_stage": { "type": "string", "enum": ["fp64_filtered", "expansion", "cpu_multiprecision"] },
+        "degeneracy_class": { "type": "string", "enum": ["none", "lower_dimensional", "coincident_constraints", "unsupported"] }
+      },
+      "description": "Replayable exact cell-vertex witness. Approximate coordinates never certify incidence or closure.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "vertex_id": "0000000000000000000000000000000000000000000000000000000000000001",
+          "position_exact": { "schema_version": "2.0.0", "x_numerator": "0", "y_numerator": "0", "z_numerator": "0", "denominator": "1", "unit": "input_coordinate_unit" },
+          "binding_constraint_ids": [
+            "0000000000000000000000000000000000000000000000000000000000000002",
+            "0000000000000000000000000000000000000000000000000000000000000003",
+            "0000000000000000000000000000000000000000000000000000000000000004"
+          ],
+          "approximation_bits": ["0000000000000000", "0000000000000000", "0000000000000000"],
+          "affine_dimension": 3,
+          "artificial_boundary": false,
+          "certification_stage": "cpu_multiprecision",
+          "degeneracy_class": "none"
+        }
+      ]
+    },
+    "MergeNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "node_id", "kind", "squared_level", "child_ids", "covered_point_ids", "event_ids", "batch_id"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "node_id": { "$ref": "#/$defs/CanonicalId" },
+        "kind": { "type": "string", "enum": ["birth", "merge"] },
+        "squared_level": { "$ref": "#/$defs/ExactLevel" },
+        "child_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "covered_point_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointId" },
+          "minItems": 1,
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "event_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "minItems": 1,
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "batch_id": {
+          "oneOf": [
+            { "$ref": "#/$defs/CanonicalId" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "description": "Canonical birth or multifusion node. A birth has no children; a merge has at least two by semantic validation. No q=1 growth node is created.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "node_id": "0000000000000000000000000000000000000000000000000000000000000040",
+          "kind": "birth",
+          "squared_level": { "schema_version": "2.0.0", "numerator": "0", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+          "child_ids": [],
+          "covered_point_ids": [0],
+          "event_ids": ["0000000000000000000000000000000000000000000000000000000000000010"],
+          "batch_id": null
+        }
+      ]
+    },
+    "MergeForest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "forest_id", "order", "profile", "forest_semantics", "nodes", "root_ids", "coverage_log", "complete"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "forest_id": { "$ref": "#/$defs/CanonicalId" },
+        "order": { "$ref": "#/$defs/Order" },
+        "profile": { "type": "string", "enum": ["hgp_reduced", "full_pi0"] },
+        "forest_semantics": { "type": "string", "enum": ["exact", "partial_refinement"] },
+        "nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/MergeNode" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:node_id"
+        },
+        "root_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "coverage_log": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CoverageDelta" },
+          "uniqueItems": true,
+          "x-canonical-order": "lexicographic"
+        },
+        "complete": { "type": "boolean" }
+      },
+      "description": "One horizontal compressed hierarchy at a one-based order. Nodes are content-addressed and sorted; overlapping covered_point_ids across components are valid for k>=2.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "forest_id": "0000000000000000000000000000000000000000000000000000000000000060",
+          "order": 1,
+          "profile": "hgp_reduced",
+          "forest_semantics": "exact",
+          "nodes": [
+            {
+              "schema_version": "2.0.0",
+              "node_id": "0000000000000000000000000000000000000000000000000000000000000040",
+              "kind": "birth",
+              "squared_level": { "schema_version": "2.0.0", "numerator": "0", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+              "child_ids": [],
+              "covered_point_ids": [0],
+              "event_ids": ["0000000000000000000000000000000000000000000000000000000000000010"],
+              "batch_id": null
+            }
+          ],
+          "root_ids": ["0000000000000000000000000000000000000000000000000000000000000040"],
+          "coverage_log": [],
+          "complete": true
+        }
+      ]
+    },
+    "VerticalAssignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "source_node_id", "target_node_id", "at_squared_level", "method", "proof_reference_ids"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "source_node_id": { "$ref": "#/$defs/CanonicalId" },
+        "target_node_id": { "$ref": "#/$defs/CanonicalId" },
+        "at_squared_level": { "$ref": "#/$defs/ExactLevel" },
+        "method": { "type": "string", "enum": ["morse_anchor", "reduced_root_locator", "forest_propagation", "reference_oracle"] },
+        "proof_reference_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "minItems": 1,
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        }
+      },
+      "description": "Image of one compressed source component in the adjacent lower-order forest at a fixed exact level.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "source_node_id": "0000000000000000000000000000000000000000000000000000000000000041",
+          "target_node_id": "0000000000000000000000000000000000000000000000000000000000000040",
+          "at_squared_level": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+          "method": "morse_anchor",
+          "proof_reference_ids": ["0000000000000000000000000000000000000000000000000000000000000010"]
+        }
+      ]
+    },
+    "VerticalMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "map_id", "source_order", "target_order", "assignments", "complete", "naturality_squares_checked", "naturality_failures"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "map_id": { "$ref": "#/$defs/CanonicalId" },
+        "source_order": { "$ref": "#/$defs/Order" },
+        "target_order": { "$ref": "#/$defs/Order" },
+        "assignments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/VerticalAssignment" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:source_node_id"
+        },
+        "complete": { "type": "boolean" },
+        "naturality_squares_checked": { "$ref": "#/$defs/Count" },
+        "naturality_failures": { "$ref": "#/$defs/Count" }
+      },
+      "description": "Adjacent vertical map from source_order=k+1 to target_order=k. Semantic validation requires source_order=target_order+1 and zero failures for an exact run.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "map_id": "0000000000000000000000000000000000000000000000000000000000000070",
+          "source_order": 2,
+          "target_order": 1,
+          "assignments": [
+            {
+              "schema_version": "2.0.0",
+              "source_node_id": "0000000000000000000000000000000000000000000000000000000000000041",
+              "target_node_id": "0000000000000000000000000000000000000000000000000000000000000040",
+              "at_squared_level": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+              "method": "morse_anchor",
+              "proof_reference_ids": ["0000000000000000000000000000000000000000000000000000000000000010"]
+            }
+          ],
+          "complete": true,
+          "naturality_squares_checked": 1,
+          "naturality_failures": 0
+        }
+      ]
+    },
+    "PartialLocus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "locus_id", "kind", "point_ids", "order", "depth", "reason_code"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "locus_id": { "$ref": "#/$defs/CanonicalId" },
+        "kind": { "type": "string", "enum": ["open_cell", "unresolved_shell", "unsupported_degeneracy", "numeric_indeterminacy", "unmerged_run", "open_attachment"] },
+        "point_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "order": { "$ref": "#/$defs/NullableOrder" },
+        "depth": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0, "maximum": 9 },
+            { "type": "null" }
+          ]
+        },
+        "reason_code": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{0,127}$" }
+      },
+      "description": "Canonical unresolved locus that bounds, rather than hides, an incomplete result.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "locus_id": "0000000000000000000000000000000000000000000000000000000000000080",
+          "kind": "open_cell",
+          "point_ids": [0, 1],
+          "order": 2,
+          "depth": 1,
+          "reason_code": "time_budget_exhausted"
+        }
+      ]
+    },
+    "FragmentHint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "fragment_id", "parent_point_ids", "child_point_ids", "source_chunk_index", "safe_cross_constraint_ids", "discovered_vertex_ids", "certifying_power"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "fragment_id": { "$ref": "#/$defs/CanonicalId" },
+        "parent_point_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "child_point_ids": { "$ref": "#/$defs/PointLabel" },
+        "source_chunk_index": { "$ref": "#/$defs/Count" },
+        "safe_cross_constraint_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "discovered_vertex_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "certifying_power": { "type": "string", "const": "proposal_only" }
+      },
+      "description": "Non-certifying discovery fragment. It can seed canonical reconstruction but never substitutes for a closed CanonicalCellCertificate.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "fragment_id": "0000000000000000000000000000000000000000000000000000000000000090",
+          "parent_point_ids": [0],
+          "child_point_ids": [0, 1],
+          "source_chunk_index": 0,
+          "safe_cross_constraint_ids": ["0000000000000000000000000000000000000000000000000000000000000002"],
+          "discovered_vertex_ids": ["0000000000000000000000000000000000000000000000000000000000000001"],
+          "certifying_power": "proposal_only"
+        }
+      ]
+    },
+    "CanonicalCellCertificate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "cell_id",
+        "depth",
+        "label_point_ids",
+        "vertex_witnesses",
+        "cross_constraint_ids",
+        "active_cross_incidence_ids",
+        "closure_rounds",
+        "global_queue_empty",
+        "all_vertices_certified",
+        "active_cross_incidences_complete",
+        "artificial_boundary_only_marked",
+        "certificate_status"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "cell_id": { "$ref": "#/$defs/CanonicalId" },
+        "depth": { "type": "integer", "minimum": 0, "maximum": 9 },
+        "label_point_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointId" },
+          "maxItems": 9,
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "vertex_witnesses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/VertexWitness" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:vertex_id"
+        },
+        "cross_constraint_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "active_cross_incidence_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "closure_rounds": { "$ref": "#/$defs/Count" },
+        "global_queue_empty": { "type": "boolean" },
+        "all_vertices_certified": { "type": "boolean" },
+        "active_cross_incidences_complete": { "type": "boolean" },
+        "artificial_boundary_only_marked": { "type": "boolean" },
+        "certificate_status": { "type": "string", "enum": ["closed", "open", "unsupported_degeneracy", "numeric_failure"] }
+      },
+      "description": "Certificate for the canonical reconstruction of C_depth(label) intersected with the padded box. Exact closure requires every boolean completeness flag and status=closed.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "cell_id": "00000000000000000000000000000000000000000000000000000000000000a0",
+          "depth": 0,
+          "label_point_ids": [],
+          "vertex_witnesses": [],
+          "cross_constraint_ids": [],
+          "active_cross_incidence_ids": [],
+          "closure_rounds": 0,
+          "global_queue_empty": true,
+          "all_vertices_certified": true,
+          "active_cross_incidences_complete": true,
+          "artificial_boundary_only_marked": true,
+          "certificate_status": "closed"
+        }
+      ]
+    },
+    "PartialScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "closed_parent_depths",
+        "closed_orders",
+        "catalog_complete_ranks",
+        "canonical_cell_certificates",
+        "verified_event_ids",
+        "unresolved_loci",
+        "positive_guarantees",
+        "absence_assertions_allowed"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "closed_parent_depths": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0, "maximum": 9 },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "closed_orders": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Order" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "catalog_complete_ranks": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1, "maximum": 11 },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "canonical_cell_certificates": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalCellCertificate" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:cell_id"
+        },
+        "verified_event_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "unresolved_loci": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PartialLocus" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:locus_id"
+        },
+        "positive_guarantees": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["verified_events", "emitted_paths", "positive_connectivity", "partial_forest_refines_exact"] },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "absence_assertions_allowed": { "type": "boolean", "const": false }
+      },
+      "description": "Explicit certified perimeter of a partial or event-only result. Open depths, orders and loci cannot be inferred closed by omission.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "closed_parent_depths": [0],
+          "closed_orders": [1],
+          "catalog_complete_ranks": [1, 2],
+          "canonical_cell_certificates": [],
+          "verified_event_ids": ["0000000000000000000000000000000000000000000000000000000000000010"],
+          "unresolved_loci": [
+            { "schema_version": "2.0.0", "locus_id": "0000000000000000000000000000000000000000000000000000000000000080", "kind": "open_cell", "point_ids": [0, 1], "order": 2, "depth": 1, "reason_code": "time_budget_exhausted" }
+          ],
+          "positive_guarantees": ["partial_forest_refines_exact", "verified_events"],
+          "absence_assertions_allowed": false
+        }
+      ]
+    },
+    "NullableCount": {
+      "oneOf": [
+        { "$ref": "#/$defs/Count" },
+        { "type": "null" }
+      ],
+      "description": "A non-negative safe integer or an explicitly unlimited/null quantity.",
+      "examples": [1024, null]
+    },
+    "NullableSeconds": {
+      "oneOf": [
+        { "type": "number", "minimum": 0 },
+        { "type": "null" }
+      ],
+      "description": "A non-negative duration in SI seconds or an explicitly unlimited/null duration.",
+      "examples": [1.5, null]
+    },
+    "BudgetPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "mode",
+        "require_exact",
+        "byte_unit",
+        "time_unit",
+        "device_budget_bytes",
+        "host_budget_bytes",
+        "scratch_budget_bytes",
+        "output_budget_bytes",
+        "time_budget_s",
+        "stop_policy"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "mode": { "type": "string", "enum": ["certified", "budgeted"] },
+        "require_exact": { "type": "boolean" },
+        "byte_unit": { "type": "string", "const": "byte" },
+        "time_unit": { "type": "string", "const": "second" },
+        "device_budget_bytes": { "$ref": "#/$defs/NullableCount" },
+        "host_budget_bytes": { "$ref": "#/$defs/NullableCount" },
+        "scratch_budget_bytes": { "$ref": "#/$defs/NullableCount" },
+        "output_budget_bytes": { "$ref": "#/$defs/NullableCount" },
+        "time_budget_s": { "$ref": "#/$defs/NullableSeconds" },
+        "stop_policy": { "type": "string", "enum": ["fail_closed", "checkpoint_then_stop"] }
+      },
+      "description": "Typed resource policy. null means unbounded by this policy, never unknown. A budget cannot silently downgrade require_exact=true.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "mode": "budgeted",
+          "require_exact": false,
+          "byte_unit": "byte",
+          "time_unit": "second",
+          "device_budget_bytes": 1073741824,
+          "host_budget_bytes": 2147483648,
+          "scratch_budget_bytes": 4294967296,
+          "output_budget_bytes": 1073741824,
+          "time_budget_s": 60,
+          "stop_policy": "checkpoint_then_stop"
+        }
+      ]
+    },
+    "BudgetSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "snapshot_id",
+        "boundary",
+        "sequence_number",
+        "byte_unit",
+        "time_unit",
+        "device_limit_bytes",
+        "device_used_bytes",
+        "device_reserved_bytes",
+        "device_remaining_bytes",
+        "host_limit_bytes",
+        "host_used_bytes",
+        "host_reserved_bytes",
+        "host_remaining_bytes",
+        "scratch_limit_bytes",
+        "scratch_used_bytes",
+        "scratch_reserved_bytes",
+        "scratch_remaining_bytes",
+        "output_limit_bytes",
+        "output_used_bytes",
+        "output_reserved_bytes",
+        "output_remaining_bytes",
+        "time_limit_s",
+        "elapsed_s",
+        "remaining_s",
+        "first_refusal_reason"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "snapshot_id": { "$ref": "#/$defs/CanonicalId" },
+        "boundary": { "type": "string", "enum": ["before_batch", "before_run", "before_merge", "before_serialization", "checkpoint", "final"] },
+        "sequence_number": { "$ref": "#/$defs/Count" },
+        "byte_unit": { "type": "string", "const": "byte" },
+        "time_unit": { "type": "string", "const": "second" },
+        "device_limit_bytes": { "$ref": "#/$defs/NullableCount" },
+        "device_used_bytes": { "$ref": "#/$defs/Count" },
+        "device_reserved_bytes": { "$ref": "#/$defs/Count" },
+        "device_remaining_bytes": { "$ref": "#/$defs/NullableCount" },
+        "host_limit_bytes": { "$ref": "#/$defs/NullableCount" },
+        "host_used_bytes": { "$ref": "#/$defs/Count" },
+        "host_reserved_bytes": { "$ref": "#/$defs/Count" },
+        "host_remaining_bytes": { "$ref": "#/$defs/NullableCount" },
+        "scratch_limit_bytes": { "$ref": "#/$defs/NullableCount" },
+        "scratch_used_bytes": { "$ref": "#/$defs/Count" },
+        "scratch_reserved_bytes": { "$ref": "#/$defs/Count" },
+        "scratch_remaining_bytes": { "$ref": "#/$defs/NullableCount" },
+        "output_limit_bytes": { "$ref": "#/$defs/NullableCount" },
+        "output_used_bytes": { "$ref": "#/$defs/Count" },
+        "output_reserved_bytes": { "$ref": "#/$defs/Count" },
+        "output_remaining_bytes": { "$ref": "#/$defs/NullableCount" },
+        "time_limit_s": { "$ref": "#/$defs/NullableSeconds" },
+        "elapsed_s": { "type": "number", "minimum": 0 },
+        "remaining_s": { "$ref": "#/$defs/NullableSeconds" },
+        "first_refusal_reason": {
+          "oneOf": [
+            { "type": "string", "enum": ["device", "host", "scratch", "output", "time", "transaction_reserve"] },
+            { "type": "null" }
+          ]
+        }
+      },
+      "description": "Transactional budget accounting at a deterministic processing boundary. remaining is null exactly when its limit is null.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "snapshot_id": "00000000000000000000000000000000000000000000000000000000000000b0",
+          "boundary": "before_batch",
+          "sequence_number": 0,
+          "byte_unit": "byte",
+          "time_unit": "second",
+          "device_limit_bytes": 1073741824,
+          "device_used_bytes": 1024,
+          "device_reserved_bytes": 2048,
+          "device_remaining_bytes": 1073738752,
+          "host_limit_bytes": 2147483648,
+          "host_used_bytes": 2048,
+          "host_reserved_bytes": 4096,
+          "host_remaining_bytes": 2147477504,
+          "scratch_limit_bytes": 4294967296,
+          "scratch_used_bytes": 0,
+          "scratch_reserved_bytes": 8192,
+          "scratch_remaining_bytes": 4294959104,
+          "output_limit_bytes": 1073741824,
+          "output_used_bytes": 0,
+          "output_reserved_bytes": 1024,
+          "output_remaining_bytes": 1073740800,
+          "time_limit_s": 60,
+          "elapsed_s": 0.5,
+          "remaining_s": 59.5,
+          "first_refusal_reason": null
+        }
+      ]
+    },
+    "CheckpointArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "relative_path", "sha256", "size_bytes", "kind"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "relative_path": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._/-]{0,255}$" },
+        "sha256": { "$ref": "#/$defs/CanonicalId" },
+        "size_bytes": { "$ref": "#/$defs/Count" },
+        "kind": { "type": "string", "enum": ["spatial_index", "cell_run", "event_run", "merge_state", "forest_state", "certificate_state"] }
+      },
+      "description": "One checksummed durable checkpoint artifact. Paths are relative and may not be interpreted before application-level traversal checks.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "relative_path": "runs/events-000.jsonl",
+          "sha256": "00000000000000000000000000000000000000000000000000000000000000c0",
+          "size_bytes": 1024,
+          "kind": "event_run"
+        }
+      ]
+    },
+    "CheckpointManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "checkpoint_id",
+        "run_id",
+        "input_sha256",
+        "git_commit",
+        "contract_schema_id",
+        "sequence_number",
+        "current_order",
+        "current_depth",
+        "last_fully_closed_level",
+        "completed_external_run_ids",
+        "artifacts",
+        "budget_snapshot",
+        "equal_level_batch_state",
+        "publication_state",
+        "created_at_utc"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "checkpoint_id": { "$ref": "#/$defs/CanonicalId" },
+        "run_id": { "$ref": "#/$defs/CanonicalId" },
+        "input_sha256": { "$ref": "#/$defs/CanonicalId" },
+        "git_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "contract_schema_id": { "type": "string", "const": "morsehgp3d-contract-v2" },
+        "sequence_number": { "$ref": "#/$defs/Count" },
+        "current_order": { "$ref": "#/$defs/NullableOrder" },
+        "current_depth": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0, "maximum": 9 },
+            { "type": "null" }
+          ]
+        },
+        "last_fully_closed_level": {
+          "oneOf": [
+            { "$ref": "#/$defs/ExactLevel" },
+            { "type": "null" }
+          ]
+        },
+        "completed_external_run_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CheckpointArtifact" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:relative_path"
+        },
+        "budget_snapshot": { "$ref": "#/$defs/BudgetSnapshot" },
+        "equal_level_batch_state": { "type": "string", "enum": ["none_open", "not_applied", "fully_applied"] },
+        "publication_state": { "type": "string", "const": "durable_atomic_rename_complete" },
+        "created_at_utc": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$" }
+      },
+      "description": "Atomically published, checksummed restart manifest. A partially applied equal-level batch is never publishable.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "checkpoint_id": "00000000000000000000000000000000000000000000000000000000000000d0",
+          "run_id": "00000000000000000000000000000000000000000000000000000000000000d1",
+          "input_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+          "git_commit": "0000000000000000000000000000000000000001",
+          "contract_schema_id": "morsehgp3d-contract-v2",
+          "sequence_number": 1,
+          "current_order": 2,
+          "current_depth": 1,
+          "last_fully_closed_level": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+          "completed_external_run_ids": ["00000000000000000000000000000000000000000000000000000000000000c1"],
+          "artifacts": [
+            { "schema_version": "2.0.0", "relative_path": "runs/events-000.jsonl", "sha256": "00000000000000000000000000000000000000000000000000000000000000c0", "size_bytes": 1024, "kind": "event_run" }
+          ],
+          "budget_snapshot": {
+            "schema_version": "2.0.0",
+            "snapshot_id": "00000000000000000000000000000000000000000000000000000000000000b0",
+            "boundary": "checkpoint",
+            "sequence_number": 1,
+            "byte_unit": "byte",
+            "time_unit": "second",
+            "device_limit_bytes": 1073741824,
+            "device_used_bytes": 1024,
+            "device_reserved_bytes": 0,
+            "device_remaining_bytes": 1073740800,
+            "host_limit_bytes": 2147483648,
+            "host_used_bytes": 2048,
+            "host_reserved_bytes": 0,
+            "host_remaining_bytes": 2147481600,
+            "scratch_limit_bytes": 4294967296,
+            "scratch_used_bytes": 1024,
+            "scratch_reserved_bytes": 0,
+            "scratch_remaining_bytes": 4294966272,
+            "output_limit_bytes": 1073741824,
+            "output_used_bytes": 0,
+            "output_reserved_bytes": 0,
+            "output_remaining_bytes": 1073741824,
+            "time_limit_s": 60,
+            "elapsed_s": 1,
+            "remaining_s": 59,
+            "first_refusal_reason": null
+          },
+          "equal_level_batch_state": "none_open",
+          "publication_state": "durable_atomic_rename_complete",
+          "created_at_utc": "2026-07-14T00:00:00Z"
+        }
+      ]
+    },
+    "Backend": {
+      "type": "string",
+      "enum": ["reference_cpu", "cuda_g4"],
+      "description": "Implementation backend that performed the computation.",
+      "examples": ["reference_cpu"]
+    },
+    "Profile": {
+      "type": "string",
+      "enum": ["hgp_reduced", "full_pi0"],
+      "description": "Requested or effective mathematical output profile.",
+      "examples": ["hgp_reduced"]
+    },
+    "ExecutionMode": {
+      "type": "string",
+      "enum": ["certified", "budgeted"],
+      "description": "Closure policy requested by the caller.",
+      "examples": ["certified"]
+    },
+    "PublicStatus": {
+      "type": "string",
+      "enum": ["exact", "conditional", "budget_exhausted", "unsupported_degeneracy", "numeric_failure"],
+      "description": "Actual scientific status obtained by one run, distinct from backend, profile, mode and forest semantics.",
+      "examples": ["exact"]
+    },
+    "PredicateCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fp32_proposals", "fp64_filtered_certified", "expansion_certified", "cpu_multiprecision_certified", "exact_zeros", "remaining_unknown"],
+      "properties": {
+        "fp32_proposals": { "$ref": "#/$defs/Count" },
+        "fp64_filtered_certified": { "$ref": "#/$defs/Count" },
+        "expansion_certified": { "$ref": "#/$defs/Count" },
+        "cpu_multiprecision_certified": { "$ref": "#/$defs/Count" },
+        "exact_zeros": { "$ref": "#/$defs/Count" },
+        "remaining_unknown": { "$ref": "#/$defs/Count" }
+      },
+      "description": "Counts of numerical proposals and exact certification stages; all fields are dimensionless call counts.",
+      "examples": [
+        { "fp32_proposals": 10, "fp64_filtered_certified": 8, "expansion_certified": 1, "cpu_multiprecision_certified": 1, "exact_zeros": 0, "remaining_unknown": 0 }
+      ]
+    },
+    "FallbackCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gpu_to_cpu", "multiprecision", "overflow_queue", "unsupported_degeneracies", "numeric_failures"],
+      "properties": {
+        "gpu_to_cpu": { "$ref": "#/$defs/Count" },
+        "multiprecision": { "$ref": "#/$defs/Count" },
+        "overflow_queue": { "$ref": "#/$defs/Count" },
+        "unsupported_degeneracies": { "$ref": "#/$defs/Count" },
+        "numeric_failures": { "$ref": "#/$defs/Count" }
+      },
+      "description": "Dimensionless counts of explicitly handled fallback and failure paths.",
+      "examples": [
+        { "gpu_to_cpu": 0, "multiprecision": 1, "overflow_queue": 0, "unsupported_degeneracies": 0, "numeric_failures": 0 }
+      ]
+    },
+    "WorkMemoryCounters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_events",
+        "accepted_events",
+        "rejected_events",
+        "canonical_cells_closed",
+        "gamma_cofaces_emitted",
+        "hyperedges_emitted",
+        "external_runs",
+        "bytes_read",
+        "bytes_written",
+        "peak_device_bytes",
+        "peak_host_bytes",
+        "peak_scratch_bytes",
+        "output_bytes"
+      ],
+      "properties": {
+        "candidate_events": { "$ref": "#/$defs/Count" },
+        "accepted_events": { "$ref": "#/$defs/Count" },
+        "rejected_events": { "$ref": "#/$defs/Count" },
+        "canonical_cells_closed": { "$ref": "#/$defs/Count" },
+        "gamma_cofaces_emitted": { "$ref": "#/$defs/Count" },
+        "hyperedges_emitted": { "$ref": "#/$defs/Count" },
+        "external_runs": { "$ref": "#/$defs/Count" },
+        "bytes_read": { "$ref": "#/$defs/Count" },
+        "bytes_written": { "$ref": "#/$defs/Count" },
+        "peak_device_bytes": { "$ref": "#/$defs/Count" },
+        "peak_host_bytes": { "$ref": "#/$defs/Count" },
+        "peak_scratch_bytes": { "$ref": "#/$defs/Count" },
+        "output_bytes": { "$ref": "#/$defs/Count" }
+      },
+      "description": "Work counts are dimensionless; every field ending in _bytes uses exact bytes, never MiB or MB.",
+      "examples": [
+        {
+          "candidate_events": 1,
+          "accepted_events": 1,
+          "rejected_events": 0,
+          "canonical_cells_closed": 1,
+          "gamma_cofaces_emitted": 1,
+          "hyperedges_emitted": 1,
+          "external_runs": 0,
+          "bytes_read": 0,
+          "bytes_written": 0,
+          "peak_device_bytes": 0,
+          "peak_host_bytes": 4096,
+          "peak_scratch_bytes": 0,
+          "output_bytes": 2048
+        }
+      ]
+    },
+    "SoftwareEnvironment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["git_commit", "compiler", "compiler_version", "cuda_version", "driver_version", "hardware", "build_options_sha256"],
+      "properties": {
+        "git_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "compiler": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9+._-]{0,63}$" },
+        "compiler_version": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9+._ -]{0,127}$" },
+        "cuda_version": {
+          "oneOf": [
+            { "type": "string", "pattern": "^[0-9]+\\.[0-9]+(\\.[0-9]+)?$" },
+            { "type": "null" }
+          ]
+        },
+        "driver_version": {
+          "oneOf": [
+            { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+)+$" },
+            { "type": "null" }
+          ]
+        },
+        "hardware": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9+._ -]{0,127}$" },
+        "build_options_sha256": { "$ref": "#/$defs/CanonicalId" }
+      },
+      "description": "Reproducibility manifest for the code and hardware that produced a certificate.",
+      "examples": [
+        {
+          "git_commit": "0000000000000000000000000000000000000001",
+          "compiler": "gcc",
+          "compiler_version": "14.1.0",
+          "cuda_version": null,
+          "driver_version": null,
+          "hardware": "reference-cpu",
+          "build_options_sha256": "00000000000000000000000000000000000000000000000000000000000000e0"
+        }
+      ]
+    },
+    "RunCertificate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "certificate_id",
+        "run_id",
+        "reconstruction_contract_id",
+        "proof_basis",
+        "result_kind",
+        "requested_backend",
+        "effective_backend",
+        "requested_profile",
+        "effective_profile",
+        "requested_mode",
+        "require_exact",
+        "public_status",
+        "input_semantics",
+        "input_point_count",
+        "k_max",
+        "k_eff",
+        "s_max",
+        "m_star",
+        "general_position_status",
+        "relevant_gp_complete",
+        "canonical_children_complete",
+        "active_cross_incidences_complete",
+        "catalog_complete_by_rank",
+        "attachments_complete_by_order",
+        "gamma_complete_by_order",
+        "batches_complete_by_order",
+        "vertical_maps_complete",
+        "partial_guarantees",
+        "exact_predicate_counts",
+        "fallback_counts",
+        "work_and_memory_counters",
+        "budget_policy",
+        "final_budget_snapshot",
+        "stop_reason",
+        "unresolved_locus_ids",
+        "software_environment"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "certificate_id": { "$ref": "#/$defs/CanonicalId" },
+        "run_id": { "$ref": "#/$defs/CanonicalId" },
+        "reconstruction_contract_id": {
+          "type": "string",
+          "enum": ["hgp-reduced-v2", "M1-reconstruction-v1"],
+          "description": "hgp_reduced invokes the v2 K-polyhedra contract; full_pi0 invokes M.1. The two identifiers are never interchanged."
+        },
+        "proof_basis": {
+          "type": "string",
+          "enum": ["gamma_exhaustive_reference", "gabriel_positive_connectivity", "m1_conditional_contract"],
+          "description": "Scientific basis actually available to this run. gamma_exhaustive_reference is the only exact hgp_reduced basis and is restricted to reference_cpu. gabriel_positive_connectivity and m1_conditional_contract provide conditional partial-refinement evidence only; active v2 has no exact full_pi0 basis."
+        },
+        "result_kind": { "type": "string", "enum": ["hierarchy", "partial_hierarchy", "verified_events_only"] },
+        "requested_backend": { "$ref": "#/$defs/Backend" },
+        "effective_backend": { "$ref": "#/$defs/Backend" },
+        "requested_profile": { "$ref": "#/$defs/Profile" },
+        "effective_profile": { "$ref": "#/$defs/Profile" },
+        "requested_mode": { "$ref": "#/$defs/ExecutionMode" },
+        "require_exact": { "type": "boolean" },
+        "public_status": { "$ref": "#/$defs/PublicStatus" },
+        "forest_semantics": { "type": "string", "enum": ["exact", "partial_refinement"] },
+        "input_semantics": { "$ref": "#/$defs/InputSemantics" },
+        "input_point_count": { "$ref": "#/$defs/PositiveCount" },
+        "k_max": { "$ref": "#/$defs/Order" },
+        "k_eff": { "$ref": "#/$defs/Order" },
+        "s_max": { "type": "integer", "minimum": 1, "maximum": 11 },
+        "m_star": { "type": "integer", "minimum": 0, "maximum": 9 },
+        "general_position_status": { "type": "string", "enum": ["verified_relevant", "violated", "unknown", "not_applicable"] },
+        "relevant_gp_complete": { "type": "boolean" },
+        "canonical_children_complete": { "type": "boolean" },
+        "active_cross_incidences_complete": { "type": "boolean" },
+        "catalog_complete_by_rank": {
+          "type": "array",
+          "items": { "type": "boolean" },
+          "minItems": 1,
+          "maxItems": 11,
+          "description": "Positional array: offset r-1 records completeness of closed rank r."
+        },
+        "attachments_complete_by_order": {
+          "type": "array",
+          "items": { "type": "boolean" },
+          "minItems": 1,
+          "maxItems": 10,
+          "description": "Positional array: offset k-1 records attachment completeness at one-based order k."
+        },
+        "gamma_complete_by_order": {
+          "type": "array",
+          "items": { "type": "boolean" },
+          "minItems": 1,
+          "maxItems": 10,
+          "description": "Positional array: offset k-1 records exhaustive enumeration and batch assignment of every Gamma facet and coface at one-based order k."
+        },
+        "batches_complete_by_order": {
+          "type": "array",
+          "items": { "type": "boolean" },
+          "minItems": 1,
+          "maxItems": 10,
+          "description": "Positional array: offset k-1 records exact-level batch completeness at one-based order k."
+        },
+        "vertical_maps_complete": { "type": "boolean" },
+        "partial_guarantees": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["none", "verified_events", "emitted_paths", "positive_connectivity", "partial_forest_refines_exact"] },
+          "minItems": 1,
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "exact_predicate_counts": { "$ref": "#/$defs/PredicateCounts" },
+        "fallback_counts": { "$ref": "#/$defs/FallbackCounts" },
+        "work_and_memory_counters": { "$ref": "#/$defs/WorkMemoryCounters" },
+        "budget_policy": { "$ref": "#/$defs/BudgetPolicy" },
+        "final_budget_snapshot": { "$ref": "#/$defs/BudgetSnapshot" },
+        "stop_reason": { "type": "string", "enum": ["completed", "device_budget", "host_budget", "scratch_budget", "output_budget", "time_budget", "unsupported_degeneracy", "numeric_failure", "preempted", "user_cancelled"] },
+        "unresolved_locus_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CanonicalId" },
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        },
+        "software_environment": { "$ref": "#/$defs/SoftwareEnvironment" }
+      },
+      "description": "Fail-closed evidence for one run. A status exact is a semantic function of profile/proof basis, every completeness field, zero remaining unknowns/failures, and stop_reason=completed; benchmark quality never changes it.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "certificate_id": "00000000000000000000000000000000000000000000000000000000000000f1",
+          "run_id": "00000000000000000000000000000000000000000000000000000000000000d1",
+          "reconstruction_contract_id": "hgp-reduced-v2",
+          "proof_basis": "gamma_exhaustive_reference",
+          "result_kind": "hierarchy",
+          "requested_backend": "reference_cpu",
+          "effective_backend": "reference_cpu",
+          "requested_profile": "hgp_reduced",
+          "effective_profile": "hgp_reduced",
+          "requested_mode": "certified",
+          "require_exact": true,
+          "public_status": "exact",
+          "forest_semantics": "exact",
+          "input_semantics": {
+            "schema_version": "2.0.0",
+            "coordinate_encoding": "ieee754_binary64_bits",
+            "coordinate_unit": "metre",
+            "squared_level_unit": "input_coordinate_unit_squared",
+            "point_indexing": "zero_based",
+            "canonical_point_order": "lexicographic_binary64_total_order_then_source_index",
+            "non_finite_policy": "reject",
+            "duplicate_policy": "reject",
+            "signed_zero_policy": "canonicalize_to_positive_zero",
+            "perturbation_policy": "none",
+            "input_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+            "similarity_transform": {
+              "schema_version": "2.0.0",
+              "applied": false,
+              "scale": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1" },
+              "translation": { "schema_version": "2.0.0", "x_numerator": "0", "y_numerator": "0", "z_numerator": "0", "denominator": "1", "unit": "input_coordinate_unit" }
+            }
+          },
+          "input_point_count": 1,
+          "k_max": 1,
+          "k_eff": 1,
+          "s_max": 1,
+          "m_star": 0,
+          "general_position_status": "not_applicable",
+          "relevant_gp_complete": true,
+          "canonical_children_complete": true,
+          "active_cross_incidences_complete": true,
+          "catalog_complete_by_rank": [true],
+          "attachments_complete_by_order": [true],
+          "gamma_complete_by_order": [true],
+          "batches_complete_by_order": [true],
+          "vertical_maps_complete": true,
+          "partial_guarantees": ["none"],
+          "exact_predicate_counts": {
+            "fp32_proposals": 0,
+            "fp64_filtered_certified": 0,
+            "expansion_certified": 0,
+            "cpu_multiprecision_certified": 0,
+            "exact_zeros": 0,
+            "remaining_unknown": 0
+          },
+          "fallback_counts": {
+            "gpu_to_cpu": 0,
+            "multiprecision": 0,
+            "overflow_queue": 0,
+            "unsupported_degeneracies": 0,
+            "numeric_failures": 0
+          },
+          "work_and_memory_counters": {
+            "candidate_events": 1,
+            "accepted_events": 1,
+            "rejected_events": 0,
+            "canonical_cells_closed": 0,
+            "gamma_cofaces_emitted": 0,
+            "hyperedges_emitted": 0,
+            "external_runs": 0,
+            "bytes_read": 0,
+            "bytes_written": 0,
+            "peak_device_bytes": 0,
+            "peak_host_bytes": 4096,
+            "peak_scratch_bytes": 0,
+            "output_bytes": 2048
+          },
+          "budget_policy": {
+            "schema_version": "2.0.0",
+            "mode": "certified",
+            "require_exact": true,
+            "byte_unit": "byte",
+            "time_unit": "second",
+            "device_budget_bytes": null,
+            "host_budget_bytes": null,
+            "scratch_budget_bytes": null,
+            "output_budget_bytes": null,
+            "time_budget_s": null,
+            "stop_policy": "fail_closed"
+          },
+          "final_budget_snapshot": {
+            "schema_version": "2.0.0",
+            "snapshot_id": "00000000000000000000000000000000000000000000000000000000000000b0",
+            "boundary": "final",
+            "sequence_number": 0,
+            "byte_unit": "byte",
+            "time_unit": "second",
+            "device_limit_bytes": null,
+            "device_used_bytes": 0,
+            "device_reserved_bytes": 0,
+            "device_remaining_bytes": null,
+            "host_limit_bytes": null,
+            "host_used_bytes": 4096,
+            "host_reserved_bytes": 0,
+            "host_remaining_bytes": null,
+            "scratch_limit_bytes": null,
+            "scratch_used_bytes": 0,
+            "scratch_reserved_bytes": 0,
+            "scratch_remaining_bytes": null,
+            "output_limit_bytes": null,
+            "output_used_bytes": 2048,
+            "output_reserved_bytes": 0,
+            "output_remaining_bytes": null,
+            "time_limit_s": null,
+            "elapsed_s": 0.01,
+            "remaining_s": null,
+            "first_refusal_reason": null
+          },
+          "stop_reason": "completed",
+          "unresolved_locus_ids": [],
+          "software_environment": {
+            "git_commit": "0000000000000000000000000000000000000001",
+            "compiler": "gcc",
+            "compiler_version": "14.1.0",
+            "cuda_version": null,
+            "driver_version": null,
+            "hardware": "reference-cpu",
+            "build_options_sha256": "00000000000000000000000000000000000000000000000000000000000000e0"
+          }
+        }
+      ]
+    },
+    "ComponentPointSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "order", "node_id", "point_ids"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "order": { "$ref": "#/$defs/Order" },
+        "node_id": { "$ref": "#/$defs/CanonicalId" },
+        "point_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PointId" },
+          "minItems": 1,
+          "uniqueItems": true,
+          "x-canonical-order": "ascending"
+        }
+      },
+      "description": "Optional materialization of the observation union covered by one forest node; sets from distinct nodes may overlap.",
+      "examples": [
+        { "schema_version": "2.0.0", "order": 2, "node_id": "0000000000000000000000000000000000000000000000000000000000000040", "point_ids": [0, 1, 2] }
+      ]
+    },
+    "BenchmarkTiming": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "total_s", "validation_s", "h2d_s", "spatial_index_s", "catalog_s", "hierarchy_s", "d2h_s", "serialization_s"],
+      "properties": {
+        "unit": { "type": "string", "const": "second" },
+        "total_s": { "type": "number", "minimum": 0 },
+        "validation_s": { "type": "number", "minimum": 0 },
+        "h2d_s": { "type": "number", "minimum": 0 },
+        "spatial_index_s": { "type": "number", "minimum": 0 },
+        "catalog_s": { "type": "number", "minimum": 0 },
+        "hierarchy_s": { "type": "number", "minimum": 0 },
+        "d2h_s": { "type": "number", "minimum": 0 },
+        "serialization_s": { "type": "number", "minimum": 0 }
+      },
+      "description": "One raw monotonic-clock benchmark sample in SI seconds; phases may overlap and therefore need not sum to total_s.",
+      "examples": [
+        { "unit": "second", "total_s": 0.01, "validation_s": 0.001, "h2d_s": 0, "spatial_index_s": 0.002, "catalog_s": 0.003, "hierarchy_s": 0.003, "d2h_s": 0, "serialization_s": 0.001 }
+      ]
+    },
+    "BenchmarkResources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["byte_unit", "peak_device_bytes", "peak_host_bytes", "peak_scratch_bytes", "output_bytes", "gpu_power_average_w", "gpu_temperature_initial_c", "gpu_temperature_max_c", "throttling_observed"],
+      "properties": {
+        "byte_unit": { "type": "string", "const": "byte" },
+        "peak_device_bytes": { "$ref": "#/$defs/Count" },
+        "peak_host_bytes": { "$ref": "#/$defs/Count" },
+        "peak_scratch_bytes": { "$ref": "#/$defs/Count" },
+        "output_bytes": { "$ref": "#/$defs/Count" },
+        "gpu_power_average_w": {
+          "oneOf": [
+            { "type": "number", "minimum": 0 },
+            { "type": "null" }
+          ]
+        },
+        "gpu_temperature_initial_c": {
+          "oneOf": [
+            { "type": "number" },
+            { "type": "null" }
+          ]
+        },
+        "gpu_temperature_max_c": {
+          "oneOf": [
+            { "type": "number" },
+            { "type": "null" }
+          ]
+        },
+        "throttling_observed": { "type": "boolean" }
+      },
+      "description": "Raw resource measurements: bytes, watts and degrees Celsius as named; null telemetry means unavailable, not zero.",
+      "examples": [
+        { "byte_unit": "byte", "peak_device_bytes": 0, "peak_host_bytes": 4096, "peak_scratch_bytes": 0, "output_bytes": 2048, "gpu_power_average_w": null, "gpu_temperature_initial_c": null, "gpu_temperature_max_c": null, "throttling_observed": false }
+      ]
+    },
+    "GcpSafetyRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["used", "project", "zone", "instance_name", "machine_type", "provisioning_model", "instance_termination_action", "max_run_duration_s", "guest_shutdown_armed", "initial_state", "final_state"],
+      "properties": {
+        "used": { "type": "boolean" },
+        "project": {
+          "oneOf": [
+            { "type": "string", "pattern": "^[a-z][a-z0-9-]{4,62}$" },
+            { "type": "null" }
+          ]
+        },
+        "zone": {
+          "oneOf": [
+            { "type": "string", "pattern": "^[a-z0-9-]+$" },
+            { "type": "null" }
+          ]
+        },
+        "instance_name": {
+          "oneOf": [
+            { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,62}$" },
+            { "type": "null" }
+          ]
+        },
+        "machine_type": {
+          "oneOf": [
+            { "type": "string", "const": "g4-standard-48" },
+            { "type": "null" }
+          ]
+        },
+        "provisioning_model": {
+          "oneOf": [
+            { "type": "string", "const": "SPOT" },
+            { "type": "null" }
+          ]
+        },
+        "instance_termination_action": {
+          "oneOf": [
+            { "type": "string", "const": "STOP" },
+            { "type": "null" }
+          ]
+        },
+        "max_run_duration_s": { "$ref": "#/$defs/NullableSeconds" },
+        "guest_shutdown_armed": { "type": "boolean" },
+        "initial_state": { "type": "string", "enum": ["NOT_USED", "TERMINATED", "RUNNING"] },
+        "final_state": { "type": "string", "enum": ["NOT_USED", "TERMINATED", "UNVERIFIED"] }
+      },
+      "description": "Target-specific GCP safety evidence. When used=true, semantic validation requires the guarded G4 Spot/STOP values, 30..28800 seconds, both cut-offs and final_state=TERMINATED before handoff.",
+      "examples": [
+        { "used": false, "project": null, "zone": null, "instance_name": null, "machine_type": null, "provisioning_model": null, "instance_termination_action": null, "max_run_duration_s": null, "guest_shutdown_armed": false, "initial_state": "NOT_USED", "final_state": "NOT_USED" }
+      ]
+    },
+    "BenchmarkRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "benchmark_id",
+        "run_id",
+        "run_certificate_id",
+        "payload_contract_id",
+        "protocol",
+        "repetition_index",
+        "sample_valid",
+        "invalid_reason",
+        "input_sha256",
+        "point_count",
+        "k_max",
+        "k_eff",
+        "profile",
+        "mode",
+        "public_status",
+        "generator_id",
+        "generator_version",
+        "seed",
+        "timing",
+        "resources",
+        "software_environment",
+        "gcp_safety"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "benchmark_id": { "$ref": "#/$defs/CanonicalId" },
+        "run_id": { "$ref": "#/$defs/CanonicalId" },
+        "run_certificate_id": { "$ref": "#/$defs/CanonicalId" },
+        "payload_contract_id": { "type": "string", "const": "BenchmarkOutputContract-v1" },
+        "protocol": { "type": "string", "enum": ["cold_e2e", "warm_e2e", "resident_core"] },
+        "repetition_index": { "$ref": "#/$defs/Count" },
+        "sample_valid": { "type": "boolean" },
+        "invalid_reason": {
+          "oneOf": [
+            { "type": "string", "enum": ["preempted", "configuration_mismatch", "throttled", "warmup", "runtime_failure"] },
+            { "type": "null" }
+          ]
+        },
+        "input_sha256": { "$ref": "#/$defs/CanonicalId" },
+        "point_count": { "$ref": "#/$defs/PositiveCount" },
+        "k_max": { "$ref": "#/$defs/Order" },
+        "k_eff": { "$ref": "#/$defs/Order" },
+        "profile": { "$ref": "#/$defs/Profile" },
+        "mode": { "$ref": "#/$defs/ExecutionMode" },
+        "public_status": { "$ref": "#/$defs/PublicStatus" },
+        "generator_id": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{0,127}$" },
+        "generator_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "seed": { "$ref": "#/$defs/Count" },
+        "timing": { "$ref": "#/$defs/BenchmarkTiming" },
+        "resources": { "$ref": "#/$defs/BenchmarkResources" },
+        "software_environment": { "$ref": "#/$defs/SoftwareEnvironment" },
+        "gcp_safety": { "$ref": "#/$defs/GcpSafetyRecord" }
+      },
+      "description": "One raw benchmark repetition. Aggregate p50/p95/p99 are derived records, never substituted for raw samples; clustering quality cannot change public_status.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "benchmark_id": "00000000000000000000000000000000000000000000000000000000000000f0",
+          "run_id": "00000000000000000000000000000000000000000000000000000000000000d1",
+          "run_certificate_id": "00000000000000000000000000000000000000000000000000000000000000f1",
+          "payload_contract_id": "BenchmarkOutputContract-v1",
+          "protocol": "cold_e2e",
+          "repetition_index": 0,
+          "sample_valid": true,
+          "invalid_reason": null,
+          "input_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+          "point_count": 1,
+          "k_max": 1,
+          "k_eff": 1,
+          "profile": "hgp_reduced",
+          "mode": "certified",
+          "public_status": "exact",
+          "generator_id": "contract.singleton",
+          "generator_version": "2.0.0",
+          "seed": 0,
+          "timing": { "unit": "second", "total_s": 0.01, "validation_s": 0.001, "h2d_s": 0, "spatial_index_s": 0.002, "catalog_s": 0.003, "hierarchy_s": 0.003, "d2h_s": 0, "serialization_s": 0.001 },
+          "resources": { "byte_unit": "byte", "peak_device_bytes": 0, "peak_host_bytes": 4096, "peak_scratch_bytes": 0, "output_bytes": 2048, "gpu_power_average_w": null, "gpu_temperature_initial_c": null, "gpu_temperature_max_c": null, "throttling_observed": false },
+          "software_environment": { "git_commit": "0000000000000000000000000000000000000001", "compiler": "gcc", "compiler_version": "14.1.0", "cuda_version": null, "driver_version": null, "hardware": "reference-cpu", "build_options_sha256": "00000000000000000000000000000000000000000000000000000000000000e0" },
+          "gcp_safety": { "used": false, "project": null, "zone": null, "instance_name": null, "machine_type": null, "provisioning_model": null, "instance_termination_action": null, "max_run_duration_s": null, "guest_shutdown_armed": false, "initial_state": "NOT_USED", "final_state": "NOT_USED" }
+        }
+      ]
+    },
+    "MorseHGP3DResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "result_id",
+        "run_id",
+        "result_kind",
+        "backend",
+        "profile",
+        "mode",
+        "k_eff",
+        "critical_catalog",
+        "gamma_cofaces",
+        "gabriel_hyperedges",
+        "attachments",
+        "equal_level_batches",
+        "forests",
+        "vertical_maps",
+        "coverage_log",
+        "materialized_point_sets",
+        "run_certificate"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "result_id": { "$ref": "#/$defs/CanonicalId" },
+        "run_id": { "$ref": "#/$defs/CanonicalId" },
+        "result_kind": { "type": "string", "enum": ["hierarchy", "partial_hierarchy", "verified_events_only"] },
+        "backend": { "$ref": "#/$defs/Backend" },
+        "profile": { "$ref": "#/$defs/Profile" },
+        "mode": { "$ref": "#/$defs/ExecutionMode" },
+        "forest_semantics": { "type": "string", "enum": ["exact", "partial_refinement"] },
+        "k_eff": { "$ref": "#/$defs/Order" },
+        "embedded_input_points": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CertifiedPoint3" },
+          "minItems": 1,
+          "uniqueItems": true,
+          "x-canonical-order": "by:point_id",
+          "description": "Optional fixture/replay payload; large production results normally omit it and rely on input_sha256."
+        },
+        "critical_catalog": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CriticalEvent" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:event_id"
+        },
+        "gamma_cofaces": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/GammaCoface" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:coface_id"
+        },
+        "gabriel_hyperedges": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/GabrielHyperedge" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:hyperedge_id"
+        },
+        "attachments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Attachment" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:attachment_id"
+        },
+        "equal_level_batches": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/EqualLevelBatch" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:batch_id"
+        },
+        "forests": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/MergeForest" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:order"
+        },
+        "vertical_maps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/VerticalMap" },
+          "uniqueItems": true,
+          "x-canonical-order": "by:source_order"
+        },
+        "coverage_log": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CoverageDelta" },
+          "uniqueItems": true,
+          "x-canonical-order": "lexicographic"
+        },
+        "materialized_point_sets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ComponentPointSet" },
+          "uniqueItems": true,
+          "x-canonical-order": "lexicographic"
+        },
+        "partial_scope": { "$ref": "#/$defs/PartialScope" },
+        "run_certificate": { "$ref": "#/$defs/RunCertificate" }
+      },
+      "description": "Canonical MorseHGP3D output. Exact/partial hierarchy results carry forest_semantics; verified_events_only omits it and carries partial_scope. Arrays remain present and empty when that record class has none.",
+      "examples": [
+        {
+          "schema_version": "2.0.0",
+          "result_id": "00000000000000000000000000000000000000000000000000000000000000f2",
+          "run_id": "00000000000000000000000000000000000000000000000000000000000000d1",
+          "result_kind": "hierarchy",
+          "backend": "reference_cpu",
+          "profile": "hgp_reduced",
+          "mode": "certified",
+          "forest_semantics": "exact",
+          "k_eff": 1,
+          "embedded_input_points": [
+            {
+              "schema_version": "2.0.0",
+              "point_id": 0,
+              "source_indices": [0],
+              "multiplicity": 1,
+              "coordinate_bits": ["0000000000000000", "0000000000000000", "0000000000000000"],
+              "coordinate_unit": "input_coordinate_unit",
+              "predicate_status": "finite_exact_dyadic"
+            }
+          ],
+          "critical_catalog": [
+            {
+              "schema_version": "2.0.0",
+              "event_id": "0000000000000000000000000000000000000000000000000000000000000010",
+              "closed_rank": 1,
+              "interior_ids": [],
+              "shell_ids": [0],
+              "minimal_support_ids": [0],
+              "center_witness_homogeneous": { "schema_version": "2.0.0", "x_numerator": "0", "y_numerator": "0", "z_numerator": "0", "denominator": "1", "unit": "input_coordinate_unit" },
+              "squared_level_exact": { "schema_version": "2.0.0", "numerator": "0", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+              "barycentric_signs": [1],
+              "birth_order": 1,
+              "saddle_order": null,
+              "morse_roles": [
+                { "schema_version": "2.0.0", "order": 1, "morse_index": 0, "local_multiplicity": 1, "arm_count": 0 }
+              ],
+              "degeneracy_class": "general_position",
+              "predicate_status": "certified_exact"
+            }
+          ],
+          "gamma_cofaces": [],
+          "gabriel_hyperedges": [],
+          "attachments": [],
+          "equal_level_batches": [
+            {
+              "schema_version": "2.0.0",
+              "batch_id": "0000000000000000000000000000000000000000000000000000000000000050",
+              "order": 1,
+              "squared_level_exact": { "schema_version": "2.0.0", "numerator": "0", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+              "event_ids": ["0000000000000000000000000000000000000000000000000000000000000010"],
+              "gamma_coface_ids": [],
+              "hyperedge_ids": [],
+              "attachment_ids": [],
+              "pre_lot_components": [],
+              "post_lot_components": [
+                { "schema_version": "2.0.0", "component_id": "0000000000000000000000000000000000000000000000000000000000000040", "active_facet_point_ids": [[0]], "covered_point_ids": [0] }
+              ],
+              "coverage_deltas": [
+                { "schema_version": "2.0.0", "batch_id": "0000000000000000000000000000000000000000000000000000000000000050", "order": 1, "root_node_id": "0000000000000000000000000000000000000000000000000000000000000040", "added_facet_point_ids": [[0]], "added_point_ids": [0] }
+              ],
+              "events_complete": true,
+              "attachments_complete": true,
+              "batch_status": "closed"
+            }
+          ],
+          "forests": [
+            {
+              "schema_version": "2.0.0",
+              "forest_id": "0000000000000000000000000000000000000000000000000000000000000060",
+              "order": 1,
+              "profile": "hgp_reduced",
+              "forest_semantics": "exact",
+              "nodes": [
+                {
+                  "schema_version": "2.0.0",
+                  "node_id": "0000000000000000000000000000000000000000000000000000000000000040",
+                  "kind": "birth",
+                  "squared_level": { "schema_version": "2.0.0", "numerator": "0", "denominator": "1", "unit": "input_coordinate_unit_squared" },
+                  "child_ids": [],
+                  "covered_point_ids": [0],
+                  "event_ids": ["0000000000000000000000000000000000000000000000000000000000000010"],
+                  "batch_id": "0000000000000000000000000000000000000000000000000000000000000050"
+                }
+              ],
+              "root_ids": ["0000000000000000000000000000000000000000000000000000000000000040"],
+              "coverage_log": [
+                { "schema_version": "2.0.0", "batch_id": "0000000000000000000000000000000000000000000000000000000000000050", "order": 1, "root_node_id": "0000000000000000000000000000000000000000000000000000000000000040", "added_facet_point_ids": [[0]], "added_point_ids": [0] }
+              ],
+              "complete": true
+            }
+          ],
+          "vertical_maps": [],
+          "coverage_log": [
+            { "schema_version": "2.0.0", "batch_id": "0000000000000000000000000000000000000000000000000000000000000050", "order": 1, "root_node_id": "0000000000000000000000000000000000000000000000000000000000000040", "added_facet_point_ids": [[0]], "added_point_ids": [0] }
+          ],
+          "materialized_point_sets": [
+            { "schema_version": "2.0.0", "order": 1, "node_id": "0000000000000000000000000000000000000000000000000000000000000040", "point_ids": [0] }
+          ],
+          "run_certificate": {
+            "schema_version": "2.0.0",
+            "certificate_id": "00000000000000000000000000000000000000000000000000000000000000f1",
+            "run_id": "00000000000000000000000000000000000000000000000000000000000000d1",
+            "reconstruction_contract_id": "hgp-reduced-v2",
+            "proof_basis": "gamma_exhaustive_reference",
+            "result_kind": "hierarchy",
+            "requested_backend": "reference_cpu",
+            "effective_backend": "reference_cpu",
+            "requested_profile": "hgp_reduced",
+            "effective_profile": "hgp_reduced",
+            "requested_mode": "certified",
+            "require_exact": true,
+            "public_status": "exact",
+            "forest_semantics": "exact",
+            "input_semantics": {
+              "schema_version": "2.0.0",
+              "coordinate_encoding": "ieee754_binary64_bits",
+              "coordinate_unit": "metre",
+              "squared_level_unit": "input_coordinate_unit_squared",
+              "point_indexing": "zero_based",
+              "canonical_point_order": "lexicographic_binary64_total_order_then_source_index",
+              "non_finite_policy": "reject",
+              "duplicate_policy": "reject",
+              "signed_zero_policy": "canonicalize_to_positive_zero",
+              "perturbation_policy": "none",
+              "input_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+              "similarity_transform": {
+                "schema_version": "2.0.0",
+                "applied": false,
+                "scale": { "schema_version": "2.0.0", "numerator": "1", "denominator": "1" },
+                "translation": { "schema_version": "2.0.0", "x_numerator": "0", "y_numerator": "0", "z_numerator": "0", "denominator": "1", "unit": "input_coordinate_unit" }
+              }
+            },
+            "input_point_count": 1,
+            "k_max": 1,
+            "k_eff": 1,
+            "s_max": 1,
+            "m_star": 0,
+            "general_position_status": "not_applicable",
+            "relevant_gp_complete": true,
+            "canonical_children_complete": true,
+            "active_cross_incidences_complete": true,
+            "catalog_complete_by_rank": [true],
+            "attachments_complete_by_order": [true],
+            "gamma_complete_by_order": [true],
+            "batches_complete_by_order": [true],
+            "vertical_maps_complete": true,
+            "partial_guarantees": ["none"],
+            "exact_predicate_counts": { "fp32_proposals": 0, "fp64_filtered_certified": 0, "expansion_certified": 0, "cpu_multiprecision_certified": 0, "exact_zeros": 0, "remaining_unknown": 0 },
+            "fallback_counts": { "gpu_to_cpu": 0, "multiprecision": 0, "overflow_queue": 0, "unsupported_degeneracies": 0, "numeric_failures": 0 },
+            "work_and_memory_counters": {
+              "candidate_events": 1,
+              "accepted_events": 1,
+              "rejected_events": 0,
+              "canonical_cells_closed": 0,
+              "gamma_cofaces_emitted": 0,
+              "hyperedges_emitted": 0,
+              "external_runs": 0,
+              "bytes_read": 0,
+              "bytes_written": 0,
+              "peak_device_bytes": 0,
+              "peak_host_bytes": 4096,
+              "peak_scratch_bytes": 0,
+              "output_bytes": 2048
+            },
+            "budget_policy": {
+              "schema_version": "2.0.0",
+              "mode": "certified",
+              "require_exact": true,
+              "byte_unit": "byte",
+              "time_unit": "second",
+              "device_budget_bytes": null,
+              "host_budget_bytes": null,
+              "scratch_budget_bytes": null,
+              "output_budget_bytes": null,
+              "time_budget_s": null,
+              "stop_policy": "fail_closed"
+            },
+            "final_budget_snapshot": {
+              "schema_version": "2.0.0",
+              "snapshot_id": "00000000000000000000000000000000000000000000000000000000000000b0",
+              "boundary": "final",
+              "sequence_number": 0,
+              "byte_unit": "byte",
+              "time_unit": "second",
+              "device_limit_bytes": null,
+              "device_used_bytes": 0,
+              "device_reserved_bytes": 0,
+              "device_remaining_bytes": null,
+              "host_limit_bytes": null,
+              "host_used_bytes": 4096,
+              "host_reserved_bytes": 0,
+              "host_remaining_bytes": null,
+              "scratch_limit_bytes": null,
+              "scratch_used_bytes": 0,
+              "scratch_reserved_bytes": 0,
+              "scratch_remaining_bytes": null,
+              "output_limit_bytes": null,
+              "output_used_bytes": 2048,
+              "output_reserved_bytes": 0,
+              "output_remaining_bytes": null,
+              "time_limit_s": null,
+              "elapsed_s": 0.01,
+              "remaining_s": null,
+              "first_refusal_reason": null
+            },
+            "stop_reason": "completed",
+            "unresolved_locus_ids": [],
+            "software_environment": {
+              "git_commit": "0000000000000000000000000000000000000001",
+              "compiler": "gcc",
+              "compiler_version": "14.1.0",
+              "cuda_version": null,
+              "driver_version": null,
+              "hardware": "reference-cpu",
+              "build_options_sha256": "00000000000000000000000000000000000000000000000000000000000000e0"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

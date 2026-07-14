@@ -1,6 +1,6 @@
 # Matrice énoncé–test–champ du certificat
 
-Cette matrice est normative pour les tests T0 des cinq fixtures contractuelles. Une assertion scientifique n'est permise que si le résultat observable et les champs de complétude indiqués sont présents. Les chemins JSON seront alignés sur le schéma `MorseHGP3DResult` v1; un champ de certificat ne remplace jamais la comparaison de la sortie attendue.
+Cette matrice est normative pour les tests T0 des cinq fixtures contractuelles. Une assertion scientifique n'est permise que si le résultat observable et les champs de complétude indiqués sont présents. Les chemins JSON sont alignés sur le schéma `MorseHGP3DResult` v2; un champ de certificat ne remplace jamais la comparaison de la sortie attendue.
 
 | identifiant | énoncé observable | fixture ou test | sortie comparée | champ du certificat requis |
 |---|---|---|---|---|
@@ -23,6 +23,7 @@ Cette matrice est normative pour les tests T0 des cinq fixtures contractuelles. 
 | `C-VERTICAL` | chaque composante source a une cible verticale unique au même niveau fermé | E2 et E5 | `B01` vers `M01`; deux sources vers une même cible dans E5 | `run_certificate.vertical_maps_complete` |
 | `C-NATURALITY` | la montée en ordre puis en échelle commute avec la montée en échelle puis en ordre | E2, E3 et E5 | carrés aux niveaux critiques consécutifs | `run_certificate.vertical_maps_complete` et complétude des lots adjacents |
 | `C-EXACT-GATE` | `public_status=exact` exige le contrat et la base de preuve autorisés, puis catalogue, enfants canoniques, incidences, lots, attaches et verticalité complets sur le profil annoncé | validation négative dérivée des cinq fixtures | mutation de chaque preuve ou booléen vers une valeur insuffisante doit interdire `exact` | `run_certificate.reconstruction_contract_id`, `run_certificate.proof_basis` et tous ses champs de complétude |
+| `C-HGP-BASIS` | `hgp_reduced` exact est la réduction des composantes de Gamma exhaustif et non du flot Gabriel élagué | fixtures réduites et contre-exemple `gabriel-point-set-counterexample-5-points-v1` | toute `GammaCoface`, même non-Gabriel, apparaît dans un lot unique; Gabriel brut reste une connectivité positive partielle | `gamma_cofaces`, `EqualLevelBatch.gamma_coface_ids`, `run_certificate.gamma_complete_by_order`, `run_certificate.proof_basis`, `run_certificate.effective_backend` et `forest_semantics` |
 | `C-M1` | l'accord des exemples `full_pi0` ne ferme pas l'obligation de preuve M.1 | E2, E3 et E4 | métadonnée de statut scientifique, distincte du résultat attendu | `run_certificate.reconstruction_contract_id`, `run_certificate.proof_basis` et `run_certificate.public_status` |
 
 ## Règles de validation négative
@@ -37,5 +38,7 @@ Cette matrice est normative pour les tests T0 des cinq fixtures contractuelles. 
 6. annoncer `exact` avec une fermeture requise fausse ou manquante doit être refusé;
 7. annoncer `hgp_reduced` tout en conservant la naissance terminale isolée E2 doit échouer au test de sémantique;
 8. annoncer `full_pi0` tout en omettant cette naissance doit échouer au test de sémantique.
+9. annoncer `exact` avec `proof_basis=gabriel_positive_connectivity` doit être refusé;
+10. annoncer `hgp_reduced` exact avec `gamma_exhaustive_reference` sur `cuda_g4` doit être refusé.
 
 Le schéma valide la forme. Les tests de contrat valident les relations entre champs et les objets mathématiques; aucune des deux couches ne remplace l'autre.

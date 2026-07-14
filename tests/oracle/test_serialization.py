@@ -6,6 +6,7 @@ from fractions import Fraction
 
 from reference.morsehgp3d_oracle.oracle import CanonicalPoint, run_oracle
 from reference.morsehgp3d_oracle.serialization import (
+    CONTRACT_DOMAIN,
     binary64_bits,
     canonical_id,
     canonical_json,
@@ -24,12 +25,27 @@ class SerializationPrimitiveTests(unittest.TestCase):
         self.assertEqual(canonical_id("CriticalEvent", left), canonical_id("CriticalEvent", right))
         self.assertNotEqual(canonical_id("CriticalEvent", left), canonical_id("MergeNode", left))
         self.assertEqual(len(canonical_id("CriticalEvent", left)), 64)
+        self.assertEqual(CONTRACT_DOMAIN, "MorseHGP3D/v2")
+
+    def test_record_versions_do_not_enter_v2_identity_projections(self) -> None:
+        version_one = {
+            "schema_version": "1.0.0",
+            "level": {"schema_version": "1.0.0", "numerator": "1"},
+        }
+        version_two = {
+            "schema_version": "2.0.0",
+            "level": {"schema_version": "2.0.0", "numerator": "1"},
+        }
+        self.assertEqual(
+            canonical_id("CriticalEvent", version_one),
+            canonical_id("CriticalEvent", version_two),
+        )
 
     def test_exact_values_are_reduced_and_use_squared_units(self) -> None:
         self.assertEqual(
             exact_level(Fraction(10, 4)),
             {
-                "schema_version": "1.0.0",
+                "schema_version": "2.0.0",
                 "numerator": "5",
                 "denominator": "2",
                 "unit": "input_coordinate_unit_squared",
@@ -38,7 +54,7 @@ class SerializationPrimitiveTests(unittest.TestCase):
         self.assertEqual(
             exact_rational3((Fraction(1, 2), Fraction(-1, 3), 0)),
             {
-                "schema_version": "1.0.0",
+                "schema_version": "2.0.0",
                 "x_numerator": "3",
                 "y_numerator": "-2",
                 "z_numerator": "0",

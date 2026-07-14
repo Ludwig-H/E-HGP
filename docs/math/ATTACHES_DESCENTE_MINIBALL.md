@@ -4,13 +4,13 @@
 
 ## 1. Rôle dans MorseHGP3D
 
-Le flot de Gabriel suffit au profil `hgp_reduced`. La descente remplit trois autres fonctions :
+Le flot de Gabriel brut ne suffit pas au profil exact `hgp_reduced`. La [preuve par incidences silencieuses](INCIDENCES_SILENCIEUSES_GAMMA.md) montre qu'une facette peut être attachée par une coface non-Gabriel sans changement immédiat de l'union de points. La descente remplit trois fonctions :
 
 1. attacher les bras du profil `full_pi0` à des minima globaux;
 2. comprimer un grand graphe de facettes en un DAG de successeurs;
-3. fournir un contrôle croisé indépendant de l'hyper-Kruskal.
+3. localiser une racine pour une future réduction complétée en incidences et fournir un contrôle croisé indépendant de l'hyper-Kruskal Gamma.
 
-Elle n'entre donc plus dans le chemin minimal de Gabriel, mais reste une brique mathématique importante.
+Elle n'autorise pas à elle seule une promotion du flot brut : la complétude de toutes les facettes-portes et de leurs premiers niveaux d'incidence doit aussi être certifiée.
 
 ## 2. Enveloppe des facettes
 
@@ -178,7 +178,8 @@ Pour $k=1$, toutes les facettes sont déjà des minima au niveau zéro; la desce
 
 | usage | nécessité | statut |
 |---|---|---|
-| `hgp_reduced` | facultative | contrôle croisé et compression |
+| `hgp_reduced` exact par Gamma exhaustif | facultative | contrôle croisé seulement |
+| `hgp_reduced` sparse complété en incidences | nécessaire au locator proposé, mais non suffisante | complétude algorithmique encore ouverte |
 | `full_pi0` sous position générale | nécessaire tant qu'aucun autre oracle global n'est prouvé | conditionnelle aux chemins certifiés et à la fermeture de M.1 |
 | plateau ou shell dégénéré | insuffisante dans la forme stricte | programme de recherche |
 | mode budgété | utile | attaches retournées vérifiées, complétude conditionnelle |

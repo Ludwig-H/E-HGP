@@ -152,7 +152,7 @@ union de points 012           union de points 234
               recouvrement : 2
 ```
 
-Sortie réduite attendue à l'ordre deux :
+Sortie réduite attendue à l'ordre deux, obtenue normativement depuis Gamma exhaustif :
 
 - avant $25/16$, aucune composante n'est représentée;
 - au niveau fermé $25/16$, la naissance réduite gauche apparaît;
@@ -175,3 +175,5 @@ Dans `full_pi0`, les facettes `01`, `02` et `12` naissent aux niveaux $1$, $5/4$
 | `binary-merge-k2.json` | deux bras stricts, facette simultanée et fusion binaire | `full_pi0` | `partial_refinement`, `conditional` | 2 |
 | `multifusion-k2.json` | trois bras et multifusion ternaire en un centre | `full_pi0` | `partial_refinement`, `conditional` | 2 |
 | `overlap-k2.json` | couverture recouvrante, jamais partition arbitraire | `hgp_reduced` | `exact` | 2 |
+
+Dans les deux lignes `hgp_reduced`, `exact` signifie `hgp-reduced-v2` avec `proof_basis=gamma_exhaustive_reference` sur `reference_cpu`. La concordance éventuelle du flot Gabriel brut sur ces exemples ne lui confère pas cette base; ce flot sérialise seulement une `partial_refinement` conditionnelle.

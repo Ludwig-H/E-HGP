@@ -19,7 +19,7 @@ from tools.check_contracts import (
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = ROOT / "tests" / "fixtures" / "contracts"
 SCHEMA = json.loads(
-    (ROOT / "schemas" / "morsehgp3d-contract-v1.schema.json").read_text(
+    (ROOT / "schemas" / "morsehgp3d-contract-v2.schema.json").read_text(
         encoding="utf-8"
     )
 )
@@ -58,6 +58,15 @@ def _hyperedge_projection(edge: dict[str, object]) -> tuple[object, ...]:
         tuple(tuple(facet) for facet in edge["facet_point_ids"]),
         tuple(tuple(arm) for arm in edge["strict_arm_point_ids"]),
         _fraction(edge["squared_level_exact"]),
+    )
+
+
+def _gamma_coface_projection(coface: dict[str, object]) -> tuple[object, ...]:
+    return (
+        coface["order"],
+        tuple(coface["simplex_point_ids"]),
+        tuple(tuple(facet) for facet in coface["facet_point_ids"]),
+        _fraction(coface["squared_level_exact"]),
     )
 
 
@@ -188,12 +197,32 @@ class FrozenContractIntegrationTests(unittest.TestCase):
                     },
                 )
                 self.assertEqual(
-                    {_batch_projection(batch) for batch in actual["equal_level_batches"]},
                     {
-                        _batch_projection(batch)
-                        for batch in expected["equal_level_batches"]
+                        _gamma_coface_projection(coface)
+                        for coface in actual["gamma_cofaces"]
+                    },
+                    {
+                        _gamma_coface_projection(coface)
+                        for coface in expected["gamma_cofaces"]
                     },
                 )
+                if expected["profile"] == "full_pi0":
+                    self.assertEqual(
+                        {
+                            _batch_projection(batch)
+                            for batch in actual["equal_level_batches"]
+                        },
+                        {
+                            _batch_projection(batch)
+                            for batch in expected["equal_level_batches"]
+                        },
+                    )
+                else:
+                    self.assertEqual(
+                        actual["run_certificate"]["proof_basis"],
+                        "gabriel_positive_connectivity",
+                    )
+                    self.assertEqual(actual["forest_semantics"], "partial_refinement")
                 self.assertEqual(
                     {
                         _node_projection(forest["order"], node)
@@ -206,9 +235,10 @@ class FrozenContractIntegrationTests(unittest.TestCase):
                         for node in forest["nodes"]
                     },
                 )
-                self.assertEqual(
-                    _vertical_projection(actual), _vertical_projection(expected)
-                )
+                if expected["profile"] == "full_pi0":
+                    self.assertEqual(
+                        _vertical_projection(actual), _vertical_projection(expected)
+                    )
                 self.assertTrue(
                     all(
                         assignment["method"] == "reference_oracle"

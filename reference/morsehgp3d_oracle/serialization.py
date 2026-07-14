@@ -15,8 +15,8 @@ from typing import Any, IO, Iterable, Mapping, Sequence
 from .oracle import CanonicalPoint, OracleResult, Point3
 
 
-SCHEMA_VERSION = "1.0.0"
-CONTRACT_DOMAIN = "MorseHGP3D/v1"
+SCHEMA_VERSION = "2.0.0"
+CONTRACT_DOMAIN = "MorseHGP3D/v2"
 COORDINATE_UNIT = "input_coordinate_unit"
 SQUARED_LEVEL_UNIT = "input_coordinate_unit_squared"
 
@@ -44,8 +44,22 @@ def canonical_id(record_type: str, identity_projection: Any) -> str:
         raise ValueError("record_type must be a non-empty path component")
     digest = hashlib.sha256()
     digest.update(f"{CONTRACT_DOMAIN}/{record_type}/".encode("ascii"))
-    digest.update(canonical_json_bytes(identity_projection))
+    digest.update(canonical_json_bytes(_without_schema_versions(identity_projection)))
     return digest.hexdigest()
+
+
+def _without_schema_versions(value: Any) -> Any:
+    """Remove record-version metadata from a scientific identity projection."""
+
+    if isinstance(value, Mapping):
+        return {
+            key: _without_schema_versions(child)
+            for key, child in value.items()
+            if key != "schema_version"
+        }
+    if isinstance(value, (list, tuple)):
+        return [_without_schema_versions(child) for child in value]
+    return value
 
 
 def exact_level(value: Fraction | int) -> dict[str, str]:
@@ -154,7 +168,7 @@ def serialize_oracle_result(
     run_id: str | None = None,
     software_environment: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Convert an internal result to the frozen v1 schema.
+    """Convert an internal result to the active v2 schema.
 
     The concrete event/forest adapters are installed once the sibling
     reference dataclasses are available.  Keeping the public entry point here
@@ -173,7 +187,7 @@ def serialize_oracle_cuts(result: OracleResult) -> dict[str, Any]:
 
     The frozen ``MorseHGP3DResult`` schema intentionally has no cut table.  The
     exhaustive phase-1 replay data therefore lives in this independent
-    canonical artifact instead of adding an unknown field to the v1 contract.
+    canonical artifact instead of adding an unknown field to the v2 contract.
     Coordinates are stored as exact rational triples so rational-only oracle
     fixtures remain serializable even when they are not binary64 inputs.
     """
@@ -291,6 +305,7 @@ def _serialize_shared_result(
     input_digest = input_sha256(points)
 
     event_records, event_ids = _serialize_events(result.critical_catalog)
+    gamma_coface_records, gamma_coface_ids = _serialize_gamma_cofaces(result)
     hyperedge_records, hyperedge_ids = _serialize_hyperedges(result, event_ids)
     attachment_ids = {
         _attachment_key(attachment): canonical_id(
@@ -306,6 +321,7 @@ def _serialize_shared_result(
 
     batch_ids: dict[tuple[int, Fraction], str] = {}
     batch_event_ids: dict[tuple[int, Fraction], tuple[str, ...]] = {}
+    batch_gamma_coface_ids: dict[tuple[int, Fraction], tuple[str, ...]] = {}
     batch_hyperedge_ids: dict[tuple[int, Fraction], tuple[str, ...]] = {}
     batch_attachment_ids: dict[tuple[int, Fraction], tuple[str, ...]] = {}
     for order_result in result.orders:
@@ -314,29 +330,14 @@ def _serialize_shared_result(
             events = _events_for_batch(
                 result.critical_catalog, event_ids, batch
             )
-            if not events:
-                pre_public_state = tuple(
-                    (component.root_id, component.covered_point_ids)
-                    for component in batch.pre_components
+            gamma_relations = tuple(
+                sorted(
+                    gamma_coface_ids[_gamma_coface_key(batch.order, coface)]
+                    for coface in order_result.filtration.cofaces
+                    if coface.squared_level == batch.squared_level
+                    and coface.point_ids in batch.relation_simplex_point_ids
                 )
-                post_public_state = tuple(
-                    (component.root_id, component.covered_point_ids)
-                    for component in batch.post_components
-                )
-                if (
-                    batch.created_node_ids
-                    or any(delta.added_point_ids for delta in batch.coverage_deltas)
-                    or pre_public_state != post_public_state
-                ):
-                    raise ValueError(
-                        "a topology-changing forest batch has no v1 critical "
-                        f"event (order={batch.order}, level={batch.squared_level})"
-                    )
-                # Exhaustive Gamma contains redundant non-critical relations.
-                # Facet-only q=1 activations may change the internal replay
-                # graph, but not a forest root or its observation coverage.
-                # The event-indexed public hierarchy intentionally omits them.
-                continue
+            )
             edges = tuple(
                 sorted(
                     hyperedge_ids[_hyperedge_key(edge)]
@@ -357,11 +358,13 @@ def _serialize_shared_result(
                 "order": batch.order,
                 "squared_level_exact": exact_level(batch.squared_level),
                 "event_ids": list(events),
+                "gamma_coface_ids": list(gamma_relations),
                 "hyperedge_ids": list(edges),
                 "attachment_ids": list(attachments),
             }
             batch_ids[key] = canonical_id("EqualLevelBatch", projection)
             batch_event_ids[key] = events
+            batch_gamma_coface_ids[key] = gamma_relations
             batch_hyperedge_ids[key] = edges
             batch_attachment_ids[key] = attachments
 
@@ -436,6 +439,7 @@ def _serialize_shared_result(
                     "order": batch.order,
                     "squared_level_exact": exact_level(batch.squared_level),
                     "event_ids": list(batch_event_ids[key]),
+                    "gamma_coface_ids": list(batch_gamma_coface_ids[key]),
                     "hyperedge_ids": list(batch_hyperedge_ids[key]),
                     "attachment_ids": list(batch_attachment_ids[key]),
                     "pre_lot_components": _component_states(
@@ -452,7 +456,9 @@ def _serialize_shared_result(
             )
     batch_records.sort(key=lambda record: record["batch_id"])
 
-    semantics = "exact" if result.profile == "hgp_reduced" else "partial_refinement"
+    # The current hgp_reduced implementation follows the raw Gabriel flow.
+    # Contract v2 permits that path only as positive partial connectivity.
+    semantics = "partial_refinement"
     forest_records = _serialize_forests(
         result,
         semantics,
@@ -497,23 +503,22 @@ def _serialize_shared_result(
             raise ValueError("run_id must be a lower-case 64-digit hexadecimal ID")
         effective_run_id = run_id
 
-    partial_scope = None
-    if result.profile == "full_pi0":
-        m_star = 0 if len(points) == 1 else min(result.k_eff - 1, len(points) - 2)
-        partial_scope = {
-            "schema_version": SCHEMA_VERSION,
-            "closed_parent_depths": list(range(m_star + 1)),
-            "closed_orders": list(range(1, result.k_eff + 1)),
-            "catalog_complete_ranks": list(range(1, result.s_max + 1)),
-            "canonical_cell_certificates": [],
-            "verified_event_ids": sorted(record["event_id"] for record in event_records),
-            "unresolved_loci": [],
-            "positive_guarantees": [
-                "partial_forest_refines_exact",
-                "verified_events",
-            ],
-            "absence_assertions_allowed": False,
-        }
+    m_star = 0 if len(points) == 1 else min(result.k_eff - 1, len(points) - 2)
+    partial_scope = {
+        "schema_version": SCHEMA_VERSION,
+        "closed_parent_depths": list(range(m_star + 1)),
+        "closed_orders": list(range(1, result.k_eff + 1)),
+        "catalog_complete_ranks": list(range(1, result.s_max + 1)),
+        "canonical_cell_certificates": [],
+        "verified_event_ids": sorted(record["event_id"] for record in event_records),
+        "unresolved_loci": [],
+        "positive_guarantees": (
+            ["partial_forest_refines_exact", "positive_connectivity", "verified_events"]
+            if result.profile == "hgp_reduced"
+            else ["partial_forest_refines_exact", "verified_events"]
+        ),
+        "absence_assertions_allowed": False,
+    }
 
     environment = _software_environment(software_environment)
     certificate = _run_certificate(
@@ -522,6 +527,7 @@ def _serialize_shared_result(
         input_digest=input_digest,
         event_count=len(event_records),
         hyperedge_count=len(hyperedge_records),
+        gamma_coface_count=len(gamma_coface_records),
         semantics=semantics,
         environment=environment,
     )
@@ -531,6 +537,7 @@ def _serialize_shared_result(
         "forest_semantics": semantics,
         "event_ids": [record["event_id"] for record in event_records],
         "hyperedge_ids": [record["hyperedge_id"] for record in hyperedge_records],
+        "gamma_coface_ids": [record["coface_id"] for record in gamma_coface_records],
         "attachment_ids": [record["attachment_id"] for record in attachment_records],
         "batch_ids": [record["batch_id"] for record in batch_records],
         "forest_ids": [record["forest_id"] for record in forest_records],
@@ -540,9 +547,7 @@ def _serialize_shared_result(
         "schema_version": SCHEMA_VERSION,
         "result_id": canonical_id("MorseHGP3DResult", scientific_projection),
         "run_id": effective_run_id,
-        "result_kind": "hierarchy"
-        if result.profile == "hgp_reduced"
-        else "partial_hierarchy",
+        "result_kind": "partial_hierarchy",
         "backend": "reference_cpu",
         "profile": result.profile,
         "mode": "certified",
@@ -550,6 +555,7 @@ def _serialize_shared_result(
         "k_eff": result.k_eff,
         "embedded_input_points": points,
         "critical_catalog": event_records,
+        "gamma_cofaces": gamma_coface_records,
         "gabriel_hyperedges": hyperedge_records,
         "attachments": attachment_records,
         "equal_level_batches": batch_records,
@@ -559,8 +565,7 @@ def _serialize_shared_result(
         "materialized_point_sets": materialized,
         "run_certificate": certificate,
     }
-    if partial_scope is not None:
-        contract["partial_scope"] = partial_scope
+    contract["partial_scope"] = partial_scope
     return contract
 
 
@@ -570,6 +575,12 @@ def _event_key(event: Any) -> tuple[tuple[int, ...], Fraction]:
 
 def _hyperedge_key(edge: Any) -> tuple[int, tuple[int, ...], Fraction]:
     return edge.order, tuple(edge.simplex_point_ids), Fraction(edge.squared_level)
+
+
+def _gamma_coface_key(
+    order: int, coface: Any
+) -> tuple[int, tuple[int, ...], Fraction]:
+    return order, tuple(coface.point_ids), Fraction(coface.squared_level)
 
 
 def _attachment_key(attachment: Any) -> tuple[tuple[int, ...], Fraction, int, int]:
@@ -708,6 +719,40 @@ def _serialize_hyperedges(
             }
         )
     records.sort(key=lambda record: record["hyperedge_id"])
+    return records, identifiers
+
+
+def _serialize_gamma_cofaces(
+    result: OracleResult,
+) -> tuple[
+    list[dict[str, Any]],
+    dict[tuple[int, tuple[int, ...], Fraction], str],
+]:
+    records: list[dict[str, Any]] = []
+    identifiers: dict[tuple[int, tuple[int, ...], Fraction], str] = {}
+    for order_result in result.orders:
+        for coface in order_result.filtration.cofaces:
+            facets = _canonical_labels(coface.facet_point_ids)
+            projection = {
+                "order": order_result.order,
+                "simplex_point_ids": list(coface.point_ids),
+                "facet_point_ids": facets,
+                "squared_level_exact": exact_level(coface.squared_level),
+            }
+            coface_id = canonical_id("GammaCoface", projection)
+            key = _gamma_coface_key(order_result.order, coface)
+            if key in identifiers:
+                raise ValueError(f"duplicate Gamma coface identity {key!r}")
+            identifiers[key] = coface_id
+            records.append(
+                {
+                    "schema_version": SCHEMA_VERSION,
+                    "coface_id": coface_id,
+                    **projection,
+                    "predicate_status": "certified_exact",
+                }
+            )
+    records.sort(key=lambda record: record["coface_id"])
     return records, identifiers
 
 
@@ -973,6 +1018,7 @@ def _run_certificate(
     input_digest: str,
     event_count: int,
     hyperedge_count: int,
+    gamma_coface_count: int,
     semantics: str,
     environment: Mapping[str, Any],
 ) -> dict[str, Any]:
@@ -1028,8 +1074,8 @@ def _run_certificate(
         + metrics["catalog_point_classifications"]
         + metrics["gamma_miniball_queries"]
     )
-    result_kind = "hierarchy" if reduced else "partial_hierarchy"
-    require_exact = reduced
+    result_kind = "partial_hierarchy"
+    require_exact = False
     m_star = (
         0
         if len(result.input_points) == 1
@@ -1069,10 +1115,10 @@ def _run_certificate(
     certificate_without_id = {
         "schema_version": SCHEMA_VERSION,
         "run_id": run_id,
-        "reconstruction_contract_id": "hgp-reduced-v1"
+        "reconstruction_contract_id": "hgp-reduced-v2"
         if reduced
         else "M1-reconstruction-v1",
-        "proof_basis": "reduced_manuscript_theorem_5"
+        "proof_basis": "gabriel_positive_connectivity"
         if reduced
         else "m1_conditional_contract",
         "result_kind": result_kind,
@@ -1082,7 +1128,7 @@ def _run_certificate(
         "effective_profile": result.profile,
         "requested_mode": "certified",
         "require_exact": require_exact,
-        "public_status": "exact" if reduced else "conditional",
+        "public_status": "conditional",
         "forest_semantics": semantics,
         "input_semantics": {
             "schema_version": SCHEMA_VERSION,
@@ -1125,11 +1171,14 @@ def _run_certificate(
         "active_cross_incidences_complete": active_cross_incidences_complete,
         "catalog_complete_by_rank": [True] * result.s_max,
         "attachments_complete_by_order": [True] * result.k_eff,
+        "gamma_complete_by_order": [not reduced] * result.k_eff,
         "batches_complete_by_order": [True] * result.k_eff,
         "vertical_maps_complete": True,
-        "partial_guarantees": ["none"]
-        if reduced
-        else ["partial_forest_refines_exact", "verified_events"],
+        "partial_guarantees": (
+            ["partial_forest_refines_exact", "positive_connectivity", "verified_events"]
+            if reduced
+            else ["partial_forest_refines_exact", "verified_events"]
+        ),
         "exact_predicate_counts": {
             "fp32_proposals": 0,
             "fp64_filtered_certified": 0,
@@ -1153,6 +1202,7 @@ def _run_certificate(
             "accepted_events": event_count,
             "rejected_events": metrics["catalog_rejected_candidates"],
             "canonical_cells_closed": metrics["canonical_cells_closed"],
+            "gamma_cofaces_emitted": gamma_coface_count,
             "hyperedges_emitted": hyperedge_count,
             "external_runs": 0,
             "bytes_read": 0,

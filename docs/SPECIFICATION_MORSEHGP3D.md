@@ -11,11 +11,11 @@ La bonne voie 3D n'est pas de lisser la hiérarchie puis d'espérer retrouver se
 2. leur support minimal contient au plus quatre observations en position générale;
 3. les événements d'indice un sont exactement les simplexes de Gabriel utiles au graphe de facettes du manuscrit.
 
-MorseHGP3D est donc défini par la chaîne
+MorseHGP3D exact est donc défini par la chaîne de référence
 
-$$\text{raffinement restreint certifié}\longrightarrow\text{catalogue critique}\longrightarrow\text{flot de Gabriel}\longrightarrow\text{hyper-Kruskal gradué}.$$
+$$\text{raffinement restreint certifié}\longrightarrow\text{catalogue critique}\longrightarrow\Gamma\text{ exhaustif}\longrightarrow\text{hyper-Kruskal gradué}.$$
 
-Les descentes par miniball sont conservées pour le profil complet, pour comprimer les attaches et pour contrôler le flot de Gabriel. La DTM, l'entropie et les voisinages approchés ne sont que des politiques de priorité.
+Le flot de Gabriel, les descentes par miniball, la DTM, l'entropie et les voisinages approchés restent des voies de proposition, de connectivité positive ou de compression. Aucun ne remplace Gamma exhaustif dans la base exacte v2 sans une nouvelle preuve couvrant les incidences silencieuses.
 
 ## 2. Entrée et sémantique numérique
 
@@ -152,17 +152,15 @@ La clique de facettes définissant le graphe de Gabriel est remplacée par une �
 
 Pour $k\geq2$, le profil `hgp_reduced` retourne la hiérarchie des K-polyèdres non réduits à une facette isolée. L'ordre un constitue une exception normative : `hgp_reduced` et `full_pi0` y coïncident et contiennent les $n$ feuilles singleton nées au niveau zéro. Cette convention est indispensable pour que $T_1$ soit exactement l'arbre de fusion du single-linkage et de l'EMST.
 
-Le profil réduit s'appuie directement sur :
-
-- le théorème 4 du manuscrit : tout simplexe qui fusionne deux K-polyèdres est de Gabriel;
-- la proposition 6 : le K-graphe de Gabriel préserve les K-polyèdres non triviaux comme ensembles de points;
-- le théorème 5 : un arbre couvrant minimum de ce graphe, élagué par niveau, préserve la même hiérarchie.
-
-Une réduction de Kruskal sur le flot complet d'hyperarêtes de Gabriel calcule donc exactement ce profil. Il n'est pas nécessaire de construire explicitement le K-arbre avant la réduction. À l'ordre un, le DSU est initialisé avec les $n$ racines ponctuelles de niveau zéro. Aux ordres $k\geq2$, aucune facette isolée ne devient une racine réduite. Pour chaque composante d'un lot, si $q$ est le nombre de racines réduites strictement antérieures, $q=0$ crée une naissance réduite, $q=1$ prolonge une racine et $q\geq2$ crée une multifusion. Toutes les facettes nouvellement vues sont activées dans les trois cas.
+La base exacte v2 est définitionnelle : le backend `reference_cpu` énumère tous les sommets et toutes les cofaces de $\Gamma_k$ avec leurs niveaux $\beta$, traite chaque niveau exact en un lot, puis réduit la généalogie des composantes réduites à une facette isolée. À l'ordre un, le DSU est initialisé avec les $n$ racines ponctuelles de niveau zéro. Aux ordres $k\geq2$, une facette isolée est active dans Gamma mais ne devient pas encore une racine publique réduite. Pour chaque composante d'un lot, si $q$ est le nombre de racines publiques strictement antérieures, $q=0$ crée une naissance réduite dès que la composante devient non triviale, $q=1$ prolonge une racine et $q\geq2$ crée une multifusion. Toutes les facettes et incidences Gamma nouvellement vues sont activées dans les trois cas.
 
 La forêt est accompagnée d'un journal `coverage_delta` : un lot avec $q=1$ peut ajouter des facettes et des observations sans changer la topologie de la forêt. Le DSU ne peut écarter une hyperarête comme pleinement redondante que si toutes ses facettes sont déjà actives dans la même racine et si son delta est vide.
 
-Le contrat ne promet pas la généalogie d'une facette isolée avant son absorption. C'est une limite mathématique explicite du théorème 5, pas une approximation numérique.
+Le contrat ne promet pas la généalogie publique d'une facette isolée avant son absorption, mais le calcul exact conserve son incidence interne dans Gamma. La proposition 6 et le théorème 5 du manuscrit ne sont plus une base autorisée : la fixture générique `gabriel-point-set-counterexample-5-points-v1` montre qu'une coface non-Gabriel peut attacher silencieusement une facette qui devient décisive lors d'une fusion ultérieure.
+
+Le flot Gabriel brut ne contient que des cofaces de Gamma et fournit donc une relation positive de connectivité sans inventer de connexion. Il peut manquer ou retarder des connexions; il émet `proof_basis=gabriel_positive_connectivity`, `forest_semantics=partial_refinement`, `require_exact=false` et un statut `conditional` ou `budget_exhausted`. Une future réduction complétée en incidences devra recevoir une preuve, une base de preuve nouvelle et des tests dédiés avant toute promotion.
+
+La [preuve des incidences silencieuses](math/INCIDENCES_SILENCIEUSES_GAMMA.md) ferme la partie combinatoire : sous support essentiel unique, une coface non-Gabriel ne peut produire qu'une attache $q=1$ sans nouveau point, et une étoile vers ses facettes simultanées restitue Gamma si toutes les cofaces sont connues. Elle ne ferme pas la partie algorithmique scalable, qui doit encore découvrir et certifier toutes les facettes-portes et leurs premiers niveaux d'incidence. La base contractuelle future reste donc désactivée.
 
 ## 8. Profil cible `full_pi0`
 
@@ -181,17 +179,21 @@ L'énoncé de reconstruction que l'implémentation devra satisfaire est le suiva
 
 > **Obligation de preuve M.1 — reconstruction complète.** Sous position générale, si le catalogue contient tous les événements de rang au plus $s_{\max}$, si les $\lvert U\rvert$ bras de chaque point d'indice un sont tous attachés à leur composante de $\left\lbrace D_k<a\right\rbrace$, et si tous les centres d'un même niveau exact sont traités dans un seul lot respectant leur multiplicité locale, alors la tour de forêts produite représente $\mathcal{H}_X(k,a)$ pour $1\leq k\leq K_{\mathrm{eff}}$.
 
-M.1 possède actuellement le statut `proof_obligation`. Les résultats de Reani–Bobrowski caractérisent les événements locaux, y compris la multiplicité $\binom{\lvert U\rvert-1}{\mu}$, mais la documentation active ne contient pas encore la preuve globale requise pour convertir simultanément toutes les attaches en morphismes de $\pi_0$, notamment lorsque plusieurs centres ont le même niveau. Un accord exhaustif avec l'oracle est nécessaire mais ne remplace pas cette preuve. Jusqu'à fermeture de M.1, `full_pi0` reste un profil de recherche qui ne peut pas publier le statut `exact`; `hgp_reduced` reste le premier objectif certifiable.
+M.1 possède actuellement le statut `proof_obligation`. Les résultats de Reani–Bobrowski caractérisent les événements locaux, y compris la multiplicité $\binom{\lvert U\rvert-1}{\mu}$, mais la documentation active ne contient pas encore la preuve globale requise pour convertir simultanément toutes les attaches en morphismes de $\pi_0$, notamment lorsque plusieurs centres ont le même niveau. Un accord exhaustif avec l'oracle est nécessaire mais ne remplace pas cette preuve. Jusqu'à fermeture de M.1, `full_pi0` reste un profil de recherche qui ne peut pas publier le statut `exact`; `hgp_reduced` exact reste limité au Gamma exhaustif du backend de référence.
 
 ## 9. Attaches : flot de Gabriel et descente
 
-Deux mécanismes complémentaires sont conservés.
+Trois mécanismes distincts sont conservés.
 
-### 9.1 Flot de Gabriel
+### 9.1 Gamma exhaustif
 
-Pour `hgp_reduced`, les hyperarêtes antérieures constituent directement l'oracle global de composantes. Pour $S=I\cup U$, les bras pré-lot sont les facettes strictes $S\setminus\lbrace u\rbrace$, $u\in U$; leurs racines décident $q$. Le lot active néanmoins toutes les facettes $S\setminus\lbrace x\rbrace$, $x\in S$, y compris celles dont la naissance propre égale le niveau. Cette distinction évite de perdre une facette requise par un événement futur.
+Pour `hgp_reduced` exact, toutes les facettes et cofaces de Gamma sont énumérées. Les composantes pré-lot constituent l'oracle global, y compris lorsque l'ajout d'une coface ne change pas immédiatement leur union de points. Ces incidences silencieuses restent actives et peuvent participer à un lot futur.
 
-### 9.2 Descente K-NN–miniball
+### 9.2 Flot de Gabriel brut
+
+Pour un événement Gabriel $S=I\cup U$, les bras pré-lot sont les facettes strictes $S\setminus\lbrace u\rbrace$, $u\in U$. Le lot active toutes les facettes $S\setminus\lbrace x\rbrace$, $x\in S$, mais il ne voit pas les cofaces non-Gabriel. Cette voie certifie seulement que les connexions émises appartiennent à Gamma; elle ne certifie ni leur exhaustivité, ni les temps de naissance ou de fusion de la hiérarchie HGP.
+
+### 9.3 Descente K-NN–miniball
 
 Pour une facette $F$ de cardinal $k$, soit $c_F$ le centre de sa miniball et posons
 
@@ -204,6 +206,10 @@ $$\beta\bigl(\mathrm{succ}(F)\bigr)<\beta(F).$$
 Le segment entre les centres reste dans le sous-niveau précédent. L'itération est un DAG fonctionnel vers un minimum; un pointer-jumping GPU peut en calculer les racines. Cette descente fournit un certificat d'attache pour `full_pi0` et un contrôle indépendant du flot de Gabriel.
 
 Les plateaux et shells dégénérés exigent un graphe de successeurs multivalué traité par composantes fortement connexes. Tant que ce quotient n'est pas prouvé et implémenté, ils déclenchent `unsupported_degeneracy` en mode exact.
+
+### 9.4 Premier niveau d'incidence
+
+Pour une facette $F$, posons $\lambda(F)=\min_{x\in X\setminus F}\beta(F\cup\lbrace x\rbrace)$. Une facette réutilisée par un futur événement Gabriel doit être rattachée à sa racine dès ce premier niveau, même si le delta d'observations est vide. Une coface minimisante et une descente intrus–support peuvent localiser cette racine; un oracle spatial scalable devra en plus certifier qu'aucun minimiseur de niveau inférieur n'a été omis.
 
 ## 10. Événements simultanés
 
@@ -227,11 +233,9 @@ Pour un centre isolé d'indice un, le nombre $q$ de racines globales distinctes 
 
 L'inclusion $L_{k+1}(a)\subseteq L_k(a)$ envoie chaque composante de l'ordre $k+1$ vers l'unique composante de l'ordre $k$ qui la contient. Pour une composante source, choisir un label $Q$ de cardinal $k+1$. Vu à l'ordre $k$, $Q$ est une coface qui relie toutes ses facettes, donc sa cible est non triviale.
 
-L'oracle `locate_reduced_root(k,Q,a)` transforme $Q$ en simplexe de Gabriel sans changer sa composante. Si $Q$ n'est pas Gabriel, choisir un intrus $z$ strictement intérieur à sa miniball et un support $u$, puis poser $Q'=(Q\setminus\lbrace u\rbrace)\cup\lbrace z\rbrace$. La preuve du théorème 4 donne $\beta(Q')<\beta(Q)$ et une facette partagée. L'itération termine donc sur un simplexe de Gabriel dont une facette possède une racine DSU. Les choix canoniques et chaque baisse de niveau sont certifiés.
+Dans la base exacte v2, le backend de référence détermine la cible directement dans les composantes exhaustives de $\Gamma_k(a)$. L'inclusion des labels de la composante source dans cette cible et son unicité sont vérifiées sur l'état fermé exact.
 
-Cette descente ne suppose pas que le catalogue shallow ait certifié toutes les cofaces non-Gabriel. À chaque étape, le locator certifie individuellement la miniball de $Q$, l'unicité et l'essentialité de son support, puis l'existence de l'intrus strict choisi. Une égalité extérieure, un support non unique ou une absence de témoin de décroissance déclenche `unsupported_degeneracy`; ces cas ne sont pas couverts artificiellement par `RelevantGP`.
-
-Deux labels adjacents dans la composante source partagent une facette; ils donnent la même cible. Cette construction définit les morphismes du profil réduit sans supposer qu'une facette arbitraire soit déjà présente dans le K-graphe de Gabriel.
+L'oracle expérimental `locate_reduced_root(k,Q,a)` peut transformer $Q$ par remplacements intrus–support et certifier chaque baisse de niveau. Il reste un candidat de localisation pour une future réduction complétée en incidences. Le contrat v2 ne permet pas de conclure qu'une racine du DSU Gabriel brut est la cible HGP exacte; une cible verticale de cette voie est partielle sauf si elle est vérifiée indépendamment contre Gamma.
 
 Pour $2\leq s\leq K_{\mathrm{eff}}$, une sphère de rang $s$ fournit dans `full_pi0` une ancre naturelle : sa naissance dans $T_s$ est envoyée vers la composante post-lot contenant son centre dans $T_{s-1}$. Le rang $s=1$ n'a pas de tranche inférieure, et le rang $s=K_{\mathrm{eff}}+1$ éventuellement catalogué ne possède pas de tranche source dans la tour. Dans `hgp_reduced`, pour $s\geq2$, cette naissance est une facette isolée omise et ne fournit donc aucun nœud source à ancrer. Les morphismes réduits utilisent `locate_reduced_root`; l'ancre Morse ne sert de contrôle que lorsqu'un représentant source réduit existe, éventuellement après une activation non triviale.
 
@@ -282,7 +286,7 @@ $$C_{m+1}(Q)=\bigcup_{u\in Q}P(Q\setminus\lbrace u\rbrace,u)$$
 
 adapte l'algorithme incrémental des ordres à une primitive de diagramme de puissance GPU. Les intersections de deux, trois ou quatre cellules extérieures donnent les supports critiques de même cardinal; le rang est ensuite compté globalement.
 
-Les morceaux issus de parents différents servent à découvrir les labels non vides, mais leur union n'est pas la représentation certifiée de la cellule enfant. Après tri et déduplication d'un label $Q$, $p=\lvert Q\rvert$, la v1 reconstruira obligatoirement le polytope canonique
+Les morceaux issus de parents différents servent à découvrir les labels non vides, mais leur union n'est pas la représentation certifiée de la cellule enfant. Après tri et déduplication d'un label $Q$, $p=\lvert Q\rvert$, la v2 reconstruira obligatoirement le polytope canonique
 
 $$C_p(Q)\cap\Omega=\Omega\cap\bigcap_{q\in Q,\ v\notin Q}\left\lbrace y:\left\Vert y-q\right\Vert^2\leq\left\Vert y-v\right\Vert^2\right\rbrace.$$
 
@@ -292,7 +296,7 @@ $$Q_{\max}(z)=\arg\max_{q\in Q}\left\Vert z-q\right\Vert^2,\qquad V_{\min}(z)=\a
 
 Notons $d_{\max}(z)$ et $d_{\min}(z)$ leurs valeurs communes. Si $d_{\max}(z)<d_{\min}(z)$, toutes les contraintes croisées sont strictes au sommet. Si $d_{\max}(z)=d_{\min}(z)$, toutes les paires de $Q_{\max}(z)\times V_{\min}(z)$ sont insérées ou enregistrées comme incidences actives, même sans violation. Si $d_{\max}(z)>d_{\min}(z)$, toutes ces paires violatrices sont ajoutées, puis la cellule est reclippée. Chaque différence étant affine, la validation de tous les sommets certifie toutes les contraintes sur le polytope; la fermeture exige en plus que toutes les paires actives à égalité aient été réconciliées. La déduplication du seul label $Q$ ne suffit pas; `canonical_children_complete` exige cette reconstruction fermée pour chaque enfant.
 
-Un complexe de fragments qui conserverait des coutures internes est une optimisation future. Une vraie strate naturelle pourrait croiser une couture; prouver sa propagation sans perte ni double compte reste une `proof_obligation`. Ce format n'est pas autorisé dans le chemin exact de la v1.
+Un complexe de fragments qui conserverait des coutures internes est une optimisation future. Une vraie strate naturelle pourrait croiser une couture; prouver sa propagation sans perte ni double compte reste une `proof_obligation`. Ce format n'est pas autorisé dans le chemin exact de la v2.
 
 Le calcul est restreint à une boîte tridimensionnelle exacte $\Omega$ telle que
 
@@ -379,6 +383,8 @@ MorseHGP3DResult
     vertical_maps[1..Keff-1]
     equal_level_batches
     critical_catalog
+    gamma_cofaces                  # toutes les cofaces exigées par gamma_complete_by_order
+    gabriel_hyperedges             # sous-flot positif, insuffisant seul aux ordres supérieurs
     coverage_log                  # obligatoire pour rejouer les coupes
     optional_materialized_point_sets
     run_certificate
@@ -392,6 +398,7 @@ RunCertificate
     active_cross_incidences_complete
     catalog_complete_by_rank[1..s_max]
     attachments_complete_by_order[1..Keff]
+    gamma_complete_by_order[1..Keff]
     batches_complete_by_order[1..Keff]
     vertical_maps_complete
     partial_guarantees
@@ -409,7 +416,7 @@ La spécification est satisfaite lorsque :
 
 1. l'oracle exhaustif vérifie toutes les tranches et flèches pour les petits nuages;
 2. la tranche $k=1$ coïncide avec l'arbre de fusion de l'EMST, niveaux divisés par quatre en unités carrées;
-3. le profil réduit coïncide avec le K-graphe de Gabriel exhaustif;
+3. le profil réduit exact est obtenu depuis les composantes du Gamma exhaustif, et le flot Gabriel brut ne revendique qu'une `partial_refinement`;
 4. le profil complet coïncide avec $\Gamma_k$ à chaque intervalle entre valeurs critiques;
 5. toute permutation des observations ne change que les identifiants canoniques;
 6. tout lot égal produit la même multifurcation quel que soit l'ordonnancement GPU;

@@ -59,7 +59,7 @@ La cible $50\,000$ points, $K_{\max}=10$, en moins d'une seconde est un **object
 | [Architecture GPU G4](docs/GPU_G4_ARCHITECTURE.md) | données, noyaux, prédicats et stratégie mémoire |
 | [Feuille de route](docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md) | plan d'implémentation détaillé, artefacts et portes de validation |
 | [État des phases](docs/implementation_status.toml) | registre opérationnel lisible par les futurs agents |
-| [Contrats exécutables de phase 0](docs/contracts/README.md) | schéma v1, M.1, exemples et matrice de traçabilité |
+| [Contrats exécutables de phase 0](docs/contracts/README.md) | schéma v2 actif, archive v1, M.1, exemples et matrice de traçabilité |
 | [Plan de tests](docs/TEST_PLAN_MORSEHGP3D.md) | oracles, familles de nuages, métriques et critères go/no-go |
 | [Références](docs/references/README.md) | corpus relu, PDF locaux et licences |
 
