@@ -26,6 +26,7 @@ Tant que M.1 garde le statut `proof_obligation`, une implémentation de producti
 - `ij` abrège la facette contenant les identifiants `i` et `j`;
 - `@ N/D` donne le niveau exact de rayon carré;
 - un nœud simultané ne reçoit que les composantes présentes à un niveau strictement inférieur comme enfants; les facettes nées et absorbées dans le même lot figurent dans le delta de couverture;
+- une flèche verticale conserve l'identifiant de la racine, mais sa couverture cible est rejouée au niveau fermé de la flèche; elle n'est pas limitée au snapshot immuable du nœud à sa naissance;
 - aucun nœud artificiel à l'infini n'est représenté.
 
 Pour un événement d'indice un porté par $S=I\cup U$, les seuls bras stricts sont $F_u=S\setminus\lbrace u\rbrace$ pour $u\in U$. Toutes les facettes de $S$ sont néanmoins activées au niveau fermé. Cette distinction est observable dans l'exemple de fusion binaire.

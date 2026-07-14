@@ -39,8 +39,8 @@ class OracleAttachment:
     """One strict arm frozen against its pre-lot forest root.
 
     Attachments are part of the conditional ``full_pi0`` reconstruction
-    contract.  The reduced profile has no attachment records: its Gabriel
-    relations already identify the roots directly.
+    contract.  The exhaustive reduced profile has no attachment records:
+    Gamma cofaces identify its roots directly.
     """
 
     event: Any
@@ -348,9 +348,8 @@ class SharedReferenceEngine:
         self._metrics["gamma_facets_enumerated"] += len(filtration.facets)
         self._metrics["gamma_cofaces_enumerated"] += len(filtration.cofaces)
         forest = build_merge_forest(filtration, profile)  # type: ignore[arg-type]
-        graph_kind = "gamma" if profile == "full_pi0" else "gabriel"
         cuts = tuple(
-            filtration.cut(level, closed=closed, graph_kind=graph_kind)
+            filtration.cut(level, closed=closed, graph_kind="gamma")
             for level in filtration.critical_levels
             for closed in (False, True)
         )

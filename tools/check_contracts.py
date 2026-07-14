@@ -1199,6 +1199,27 @@ def _validate_result_identifiers_and_references(
             raise ContractError("an attachment target belongs to the wrong order")
         event = events[attachment["event_id"]]
         target = nodes[attachment["target_node_id"]]
+        owner_batches = [
+            batch
+            for batch in batches.values()
+            if attachment["attachment_id"] in batch["attachment_ids"]
+        ]
+        if len(owner_batches) != 1:
+            raise ContractError(
+                "an attachment must occur in exactly one equal-level batch"
+            )
+        target_components = [
+            component
+            for component in owner_batches[0]["pre_lot_components"]
+            if component["component_id"] == attachment["target_node_id"]
+        ]
+        if len(target_components) != 1:
+            raise ContractError(
+                "an attachment target is absent from its strict pre-lot state"
+            )
+        target_covered_at_attachment = set(
+            target_components[0]["covered_point_ids"]
+        )
         expected_arm = sorted(
             (
                 set(event["interior_ids"])
@@ -1214,7 +1235,7 @@ def _validate_result_identifiers_and_references(
             != _exact_level_key(event["squared_level_exact"])
         ):
             raise ContractError("an attachment disagrees with its critical-event arm")
-        if not set(attachment["arm_point_ids"]) <= set(target["covered_point_ids"]):
+        if not set(attachment["arm_point_ids"]) <= target_covered_at_attachment:
             raise ContractError("an attachment target does not cover its arm")
         if _exact_level_key(target["squared_level"]) >= _exact_level_key(
             attachment["event_squared_level"]
@@ -1247,7 +1268,7 @@ def _validate_result_identifiers_and_references(
                 raise ContractError("an attachment descent step is not strictly decreasing")
             previous_label = step["to_point_ids"]
             previous_level = step["to_squared_level"]
-        if not set(previous_label) <= set(target["covered_point_ids"]):
+        if not set(previous_label) <= target_covered_at_attachment:
             raise ContractError("an attachment descent does not terminate in its target")
         if _exact_level_key(target["squared_level"]) > _exact_level_key(
             previous_level
@@ -1615,8 +1636,23 @@ def _validate_result_identifiers_and_references(
                 raise ContractError(
                     "a vertical assignment targets a node born above its level"
                 )
-            if not set(source_node["covered_point_ids"]) <= set(
-                target_node["covered_point_ids"]
+            assignment_level = _exact_level_key(
+                assignment["at_squared_level"]
+            )
+            source_component = _closed_component_at_level(
+                batches,
+                source_order,
+                assignment["source_node_id"],
+                assignment_level,
+            )
+            target_component = _closed_component_at_level(
+                batches,
+                target_order,
+                assignment["target_node_id"],
+                assignment_level,
+            )
+            if not set(source_component["covered_point_ids"]) <= set(
+                target_component["covered_point_ids"]
             ):
                 raise ContractError(
                     "a vertical assignment target does not cover its source"
@@ -1858,6 +1894,39 @@ def _component_snapshot(
         )
         for component in components
     }
+
+
+def _closed_component_at_level(
+    batches: dict[str, dict[str, Any]],
+    order: int,
+    root_id: str,
+    level: Fraction,
+) -> dict[str, Any]:
+    """Return one root's replayed closed component at an exact threshold."""
+
+    eligible = [
+        batch
+        for batch in batches.values()
+        if batch["order"] == order
+        and _exact_level_key(batch["squared_level_exact"]) <= level
+    ]
+    if not eligible:
+        raise ContractError(
+            "a vertical assignment has no replay state at its exact level"
+        )
+    latest = max(
+        eligible, key=lambda batch: _exact_level_key(batch["squared_level_exact"])
+    )
+    components = [
+        component
+        for component in latest["post_lot_components"]
+        if component["component_id"] == root_id
+    ]
+    if len(components) != 1:
+        raise ContractError(
+            "a vertical assignment root is absent from its replayed exact-level state"
+        )
+    return components[0]
 
 
 def _validate_closed_gamma_replay(

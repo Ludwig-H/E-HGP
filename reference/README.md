@@ -8,10 +8,11 @@ Cet oracle est une vérité terrain de petite taille, pas un backend de producti
 
 - Les entiers, fractions et coordonnées `binary64` finies sont interprétés exactement. Un `float` devient le dyadique exact porté par ses bits IEEE 754, sans conversion décimale intermédiaire.
 - Les doublons et les coordonnées non finies sont refusés sans perturbation.
-- `hgp_reduced` exact est la réduction des composantes Gamma non triviales. L'implémentation actuelle du profil suit encore Gabriel brut; sa sérialisation v2 porte donc `proof_basis=gabriel_positive_connectivity`, `forest_semantics=partial_refinement` et `public_status=conditional`.
+- `hgp_reduced` rejoue toutes les cofaces Gamma et conserve exactement les composantes Gamma non triviales au-dessus de l'ordre un. Sa sérialisation v2 porte `proof_basis=gamma_exhaustive_reference`, `forest_semantics=exact` et `public_status=exact` uniquement sur `reference_cpu` après rejeu déterministe complet.
 - `full_pi0` est calculé exhaustivement en interne, mais sa sérialisation contractuelle reste `partial_refinement` et `public_status=conditional` tant que l'obligation M.1 n'est pas démontrée.
+- Avant d'émettre un certificat de complétude, `serialize_oracle_result` relance l'oracle de référence depuis les points et exige l'égalité structurelle du catalogue, de Gamma, des coupes, forêts, lots, attaches, journaux, verticales et compteurs. Cette frontière volontairement coûteuse refuse une provenance simplement réétiquetée ou un objet cohérent mais amputé.
 - Une coquille extérieure exacte pertinente ou une autre dégénérescence hors du premier domaine générique provoque un échec explicite. Aucun jitter n'est appliqué.
-- Les cartes verticales Gamma restent l'oracle exact. Une carte issue du profil Gabriel brut est partielle et son écart à Gamma est un diagnostic attendu; une inclusion d'unions de points ne sert jamais à choisir une cible, car ces unions peuvent se recouvrir.
+- Les cartes verticales Gamma restent l'oracle exact. Le flot Gabriel brut est exposé séparément par `build_gabriel_partial_forest`; il ne construit aucune carte verticale normative et son écart à Gamma est un diagnostic attendu. Une inclusion d'unions de points ne sert jamais à choisir une cible, car ces unions peuvent se recouvrir.
 
 La [note du paquet](morsehgp3d_oracle/README.md) précise pourquoi l'énumération directe ferme l'univers des supports sans prétendre avoir construit des cellules canoniques de production.
 

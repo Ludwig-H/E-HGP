@@ -125,7 +125,7 @@ Une implémentation peut calculer ces hashes après un tri externe; elle ne peut
 | `Attachment` | identité par événement, ordre et point du shell retiré; chaque étape de descente diminue exactement le niveau |
 | `EqualLevelBatch` | un seul ordre et niveau exact; état pré-lot figé et état post-lot après toutes les unions |
 | `MergeForest` | niveaux non décroissants, multifusions non binarisées, croissance `q=1` dans `coverage_log` sans faux nœud |
-| `VerticalMap` | cible adjacente unique, aucun échec de naturalité pour une sortie exacte |
+| `VerticalMap` | cible adjacente unique au niveau fermé déclaré, couverture vérifiée dans l'état rejoué à ce niveau, aucun échec de naturalité pour une sortie exacte |
 | `PartialScope` | objets clos énumérés positivement, loci ouverts explicites, aucune assertion d'absence |
 | `FragmentHint` | proposition seulement; ne ferme jamais une cellule |
 | `CanonicalCellCertificate` | fermeture de la reconstruction canonique, file vide, sommets et incidences croisées tous certifiés |
@@ -158,6 +158,8 @@ La base mathématique est explicite :
 | `full_pi0` après fermeture formelle | version contractuelle future | valeur future hors de l'énumération v2 | non dans le schéma actif; exige une nouvelle révision après fermeture de M.1 |
 
 Un certificat `exact` exige notamment toutes les entrées des tableaux de complétude vraies, dont `gamma_complete_by_order`, `relevant_gp_complete`, `canonical_children_complete`, `active_cross_incidences_complete` et `vertical_maps_complete` vrais, zéro locus non résolu, zéro dégénérescence non prise en charge, zéro échec numérique et `stop_reason=completed`. Pour `hgp_reduced`, il exige en plus l'énumération exhaustive de chaque `GammaCoface`, y compris non-Gabriel, et son affectation unique à un `EqualLevelBatch` du même ordre et niveau sur le backend CPU de référence. Un lot sans événement critique reste obligatoire lorsqu'il porte une incidence Gamma silencieuse. Un mode `budgeted` ne publie jamais `exact`.
+
+Le champ `covered_point_ids` d'un `MergeNode` décrit la composante lors de la création immuable du nœud; une croissance ultérieure `q=1` ne le modifie pas et apparaît dans les snapshots de lots et le `coverage_log`. Par conséquent, la couverture d'une cible de `VerticalMap` est celle de sa composante dans le dernier état post-lot fermé de niveau inférieur ou égal à `at_squared_level`, jamais celle du seul nœud à sa naissance. De même, une `Attachment` vérifie son bras contre l'état pré-lot strict du lot qui la porte.
 
 Le nom futur `incidence_complete_reduction_proved` est réservé à une éventuelle réduction qui rétablirait et prouverait toutes les incidences silencieuses nécessaires. Il n'appartient pas à l'énumération v2 et aucun producteur ne peut l'émettre avant mise à jour du registre, du schéma et des tests de falsification.
 

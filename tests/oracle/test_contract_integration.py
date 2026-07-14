@@ -18,6 +18,9 @@ from tools.check_contracts import (
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = ROOT / "tests" / "fixtures" / "contracts"
+VERTICAL_Q1_REGRESSION = (
+    ROOT / "tests" / "fixtures" / "regressions" / "vertical_q1_growth_target.json"
+)
 SCHEMA = json.loads(
     (ROOT / "schemas" / "morsehgp3d-contract-v2.schema.json").read_text(
         encoding="utf-8"
@@ -70,17 +73,86 @@ def _gamma_coface_projection(coface: dict[str, object]) -> tuple[object, ...]:
     )
 
 
-def _node_projection(order: int, node: dict[str, object]) -> tuple[object, ...]:
+def _node_graph_projections(
+    contract: dict[str, object],
+) -> dict[str, tuple[object, ...]]:
+    nodes = {
+        node["node_id"]: (forest["order"], node)
+        for forest in contract["forests"]
+        for node in forest["nodes"]
+    }
+    events = {
+        event["event_id"]: _event_projection(event)
+        for event in contract["critical_catalog"]
+    }
+    batches = {
+        batch["batch_id"]: (
+            batch["order"],
+            _fraction(batch["squared_level_exact"]),
+        )
+        for batch in contract["equal_level_batches"]
+    }
+    cache: dict[str, tuple[object, ...]] = {}
+
+    def visit(node_id: str) -> tuple[object, ...]:
+        if node_id in cache:
+            return cache[node_id]
+        order, node = nodes[node_id]
+        batch_projection = batches.get(node["batch_id"])
+        if order == 1 and node["kind"] == "birth":
+            # A rank-one birth may optionally cite its level-zero batch; both
+            # forms encode the same scientific birth and are schema-valid.
+            batch_projection = None
+        projection = (
+            order,
+            node["kind"],
+            _fraction(node["squared_level"]),
+            tuple(node["covered_point_ids"]),
+            tuple(sorted((visit(child) for child in node["child_ids"]), key=repr)),
+            tuple(
+                sorted(
+                    (events[event_id] for event_id in node["event_ids"]),
+                    key=repr,
+                )
+            ),
+            batch_projection,
+        )
+        cache[node_id] = projection
+        return projection
+
+    return {node_id: visit(node_id) for node_id in nodes}
+
+
+def _attachment_projection(
+    attachment: dict[str, object],
+    *,
+    events: dict[str, tuple[object, ...]],
+    nodes: dict[str, tuple[object, ...]],
+) -> tuple[object, ...]:
     return (
-        order,
-        node["kind"],
-        _fraction(node["squared_level"]),
-        tuple(node["covered_point_ids"]),
-        len(node["child_ids"]),
+        events[attachment["event_id"]],
+        attachment["order"],
+        attachment["removed_shell_id"],
+        tuple(attachment["arm_point_ids"]),
+        _fraction(attachment["event_squared_level"]),
+        nodes[attachment["target_node_id"]],
+        tuple(
+            (
+                step["step_index"],
+                tuple(step["from_point_ids"]),
+                tuple(step["to_point_ids"]),
+                tuple(step["shared_facet_point_ids"]),
+                _fraction(step["from_squared_level"]),
+                _fraction(step["to_squared_level"]),
+            )
+            for step in attachment["descent_path"]
+        ),
     )
 
 
-def _batch_projection(batch: dict[str, object]) -> tuple[object, ...]:
+def _batch_projection(
+    contract: dict[str, object], batch: dict[str, object]
+) -> tuple[object, ...]:
     def states(name: str) -> tuple[object, ...]:
         return tuple(
             sorted(
@@ -92,29 +164,118 @@ def _batch_projection(batch: dict[str, object]) -> tuple[object, ...]:
             )
         )
 
+    events = {
+        event["event_id"]: _event_projection(event)
+        for event in contract["critical_catalog"]
+    }
+    hyperedges = {
+        edge["hyperedge_id"]: _hyperedge_projection(edge)
+        for edge in contract["gabriel_hyperedges"]
+    }
+    cofaces = {
+        coface["coface_id"]: _gamma_coface_projection(coface)
+        for coface in contract["gamma_cofaces"]
+    }
+    nodes = _node_graph_projections(contract)
+    attachments = {
+        attachment["attachment_id"]: _attachment_projection(
+            attachment, events=events, nodes=nodes
+        )
+        for attachment in contract["attachments"]
+    }
     return (
         batch["order"],
         _fraction(batch["squared_level_exact"]),
-        len(batch["event_ids"]),
-        len(batch["hyperedge_ids"]),
-        len(batch["attachment_ids"]),
+        tuple(sorted((events[item] for item in batch["event_ids"]), key=repr)),
+        tuple(
+            sorted((cofaces[item] for item in batch["gamma_coface_ids"]), key=repr)
+        ),
+        tuple(
+            sorted((hyperedges[item] for item in batch["hyperedge_ids"]), key=repr)
+        ),
+        tuple(
+            sorted((attachments[item] for item in batch["attachment_ids"]), key=repr)
+        ),
         states("pre_lot_components"),
         states("post_lot_components"),
+        tuple(
+            sorted(
+                (
+                    (
+                        nodes[delta["root_node_id"]],
+                        tuple(
+                            tuple(facet)
+                            for facet in delta["added_facet_point_ids"]
+                        ),
+                        tuple(delta["added_point_ids"]),
+                    )
+                    for delta in batch["coverage_deltas"]
+                ),
+                key=repr,
+            )
+        ),
     )
 
 
 def _vertical_projection(contract: dict[str, object]) -> set[tuple[object, ...]]:
-    nodes = {
-        node["node_id"]: _node_projection(forest["order"], node)
-        for forest in contract["forests"]
-        for node in forest["nodes"]
+    nodes = _node_graph_projections(contract)
+    events = {
+        event["event_id"]: _event_projection(event)
+        for event in contract["critical_catalog"]
     }
+
+
+def _attachment_projections(
+    contract: dict[str, object],
+) -> tuple[tuple[object, ...], ...]:
+    events = {
+        event["event_id"]: _event_projection(event)
+        for event in contract["critical_catalog"]
+    }
+    nodes = _node_graph_projections(contract)
+    return tuple(
+        sorted(
+            (
+                _attachment_projection(
+                    attachment,
+                    events=events,
+                    nodes=nodes,
+                )
+                for attachment in contract["attachments"]
+            ),
+            key=repr,
+        )
+    )
+
+
+def _forest_topology_projection(
+    contract: dict[str, object],
+) -> tuple[tuple[object, ...], ...]:
+    nodes = _node_graph_projections(contract)
+    return tuple(
+        (
+            forest["order"],
+            forest["complete"],
+            tuple(sorted((nodes[node["node_id"]] for node in forest["nodes"]), key=repr)),
+            tuple(sorted((nodes[node_id] for node_id in forest["root_ids"]), key=repr)),
+        )
+        for forest in contract["forests"]
+    )
     return {
         (
             mapping["source_order"],
             nodes[assignment["source_node_id"]],
             nodes[assignment["target_node_id"]],
             _fraction(assignment["at_squared_level"]),
+            tuple(
+                sorted(
+                    (events[item] for item in assignment["proof_reference_ids"]),
+                    key=repr,
+                )
+            ),
+            mapping["complete"],
+            mapping["naturality_squares_checked"],
+            mapping["naturality_failures"],
         )
         for mapping in contract["vertical_maps"]
         for assignment in mapping["assignments"]
@@ -122,6 +283,72 @@ def _vertical_projection(contract: dict[str, object]) -> set[tuple[object, ...]]
 
 
 class FrozenContractIntegrationTests(unittest.TestCase):
+    def test_vertical_target_coverage_uses_closed_q1_replay_state(self) -> None:
+        fixture = json.loads(VERTICAL_Q1_REGRESSION.read_text(encoding="utf-8"))
+        witness = fixture["vertical_witness"]
+        result = run_oracle(
+            fixture["points"],
+            fixture["k_max"],
+            profile=fixture["profile"],
+        )
+        contract = serialize_oracle_result(result)
+        SchemaValidator(SCHEMA).check(contract)
+        validate_result_semantics(contract)
+
+        nodes = {
+            node["node_id"]: node
+            for forest in contract["forests"]
+            for node in forest["nodes"]
+        }
+        mapping = next(
+            item
+            for item in contract["vertical_maps"]
+            if item["source_order"] == witness["source_order"]
+            and item["target_order"] == witness["target_order"]
+        )
+        level = Fraction(
+            witness["at_squared_level"]["numerator"],
+            witness["at_squared_level"]["denominator"],
+        )
+        assignment = next(
+            item
+            for item in mapping["assignments"]
+            if _fraction(item["at_squared_level"]) == level
+            and nodes[item["source_node_id"]]["covered_point_ids"]
+            == witness["source_covered_point_ids"]
+        )
+        target = nodes[assignment["target_node_id"]]
+        self.assertEqual(
+            _fraction(target["squared_level"]),
+            Fraction(
+                witness["target_birth_squared_level"]["numerator"],
+                witness["target_birth_squared_level"]["denominator"],
+            ),
+        )
+        self.assertEqual(
+            target["covered_point_ids"],
+            witness["target_birth_covered_point_ids"],
+        )
+
+        latest_target_batch = max(
+            (
+                batch
+                for batch in contract["equal_level_batches"]
+                if batch["order"] == witness["target_order"]
+                and _fraction(batch["squared_level_exact"]) <= level
+            ),
+            key=lambda batch: _fraction(batch["squared_level_exact"]),
+        )
+        replayed = next(
+            component
+            for component in latest_target_batch["post_lot_components"]
+            if component["component_id"] == assignment["target_node_id"]
+        )
+        self.assertEqual(
+            replayed["covered_point_ids"],
+            witness["target_replayed_covered_point_ids"],
+        )
+
     def test_reference_certificate_reports_closed_exhaustive_counts(self) -> None:
         result = run_oracle(
             [(0, 0, 0), (4, 0, 0), (1, 1, 0)],
@@ -129,9 +356,18 @@ class FrozenContractIntegrationTests(unittest.TestCase):
             profile="hgp_reduced",
         )
         contract = serialize_oracle_result(result)
-        counters = contract["run_certificate"]["work_and_memory_counters"]
-        predicates = contract["run_certificate"]["exact_predicate_counts"]
+        certificate = contract["run_certificate"]
+        counters = certificate["work_and_memory_counters"]
+        predicates = certificate["exact_predicate_counts"]
 
+        self.assertEqual(contract["result_kind"], "hierarchy")
+        self.assertEqual(contract["forest_semantics"], "exact")
+        self.assertNotIn("partial_scope", contract)
+        self.assertEqual(certificate["public_status"], "exact")
+        self.assertEqual(certificate["proof_basis"], "gamma_exhaustive_reference")
+        self.assertTrue(certificate["require_exact"])
+        self.assertTrue(all(certificate["gamma_complete_by_order"]))
+        self.assertEqual(certificate["partial_guarantees"], ["none"])
         self.assertEqual(counters["candidate_events"], 7)
         self.assertEqual(counters["accepted_events"], 6)
         self.assertEqual(counters["rejected_events"], 1)
@@ -206,39 +442,55 @@ class FrozenContractIntegrationTests(unittest.TestCase):
                         for coface in expected["gamma_cofaces"]
                     },
                 )
-                if expected["profile"] == "full_pi0":
-                    self.assertEqual(
-                        {
-                            _batch_projection(batch)
-                            for batch in actual["equal_level_batches"]
-                        },
-                        {
-                            _batch_projection(batch)
-                            for batch in expected["equal_level_batches"]
-                        },
-                    )
-                else:
-                    self.assertEqual(
-                        actual["run_certificate"]["proof_basis"],
-                        "gabriel_positive_connectivity",
-                    )
-                    self.assertEqual(actual["forest_semantics"], "partial_refinement")
                 self.assertEqual(
                     {
-                        _node_projection(forest["order"], node)
-                        for forest in actual["forests"]
-                        for node in forest["nodes"]
+                        _batch_projection(actual, batch)
+                        for batch in actual["equal_level_batches"]
                     },
                     {
-                        _node_projection(forest["order"], node)
-                        for forest in expected["forests"]
-                        for node in forest["nodes"]
+                        _batch_projection(expected, batch)
+                        for batch in expected["equal_level_batches"]
                     },
                 )
-                if expected["profile"] == "full_pi0":
+                if expected["profile"] == "hgp_reduced":
                     self.assertEqual(
-                        _vertical_projection(actual), _vertical_projection(expected)
+                        actual["run_certificate"]["proof_basis"],
+                        "gamma_exhaustive_reference",
                     )
+                    self.assertEqual(actual["result_kind"], "hierarchy")
+                    self.assertEqual(actual["forest_semantics"], "exact")
+                    self.assertNotIn("partial_scope", actual)
+                    self.assertEqual(
+                        actual["run_certificate"]["public_status"], "exact"
+                    )
+                    self.assertTrue(actual["run_certificate"]["require_exact"])
+                    self.assertTrue(
+                        all(
+                            actual["run_certificate"]["gamma_complete_by_order"]
+                        )
+                    )
+                    self.assertEqual(
+                        actual["run_certificate"]["partial_guarantees"], ["none"]
+                    )
+                else:
+                    self.assertEqual(actual["result_kind"], "partial_hierarchy")
+                    self.assertEqual(actual["forest_semantics"], "partial_refinement")
+                    self.assertIn("partial_scope", actual)
+                    self.assertEqual(
+                        actual["run_certificate"]["proof_basis"],
+                        "m1_conditional_contract",
+                    )
+                    self.assertEqual(
+                        actual["run_certificate"]["public_status"], "conditional"
+                    )
+                    self.assertFalse(actual["run_certificate"]["require_exact"])
+                self.assertEqual(
+                    _forest_topology_projection(actual),
+                    _forest_topology_projection(expected),
+                )
+                self.assertEqual(
+                    _vertical_projection(actual), _vertical_projection(expected)
+                )
                 self.assertTrue(
                     all(
                         assignment["method"] == "reference_oracle"
@@ -247,7 +499,8 @@ class FrozenContractIntegrationTests(unittest.TestCase):
                     )
                 )
                 self.assertEqual(
-                    len(actual["attachments"]), len(expected["attachments"])
+                    _attachment_projections(actual),
+                    _attachment_projections(expected),
                 )
 
     def test_deterministic_affine_clouds_run_in_dimensions_one_two_and_three(self) -> None:
@@ -273,6 +526,20 @@ class FrozenContractIntegrationTests(unittest.TestCase):
                     contract = serialize_oracle_result(result)
                     validator.check(contract)
                     validate_result_semantics(contract)
+                    certificate = contract["run_certificate"]
+                    if profile == "hgp_reduced":
+                        self.assertEqual(certificate["public_status"], "exact")
+                        self.assertEqual(
+                            certificate["proof_basis"],
+                            "gamma_exhaustive_reference",
+                        )
+                        self.assertNotIn("partial_scope", contract)
+                    else:
+                        self.assertEqual(certificate["public_status"], "conditional")
+                        self.assertEqual(
+                            certificate["proof_basis"], "m1_conditional_contract"
+                        )
+                        self.assertIn("partial_scope", contract)
                     validate_round_trip(
                         contract, f"affine-d{dimension}-{profile}"
                     )

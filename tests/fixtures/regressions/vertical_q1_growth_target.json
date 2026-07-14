@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "kind": "morsehgp3d_exact_replay_regression",
+  "fixture_id": "vertical-q1-growth-target-v1",
+  "profile": "hgp_reduced",
+  "k_max": 3,
+  "points": [
+    [-2, 0, 0],
+    [-1, 0, 0],
+    [0, 0, 0],
+    [2, 0, 0]
+  ],
+  "vertical_witness": {
+    "source_order": 3,
+    "target_order": 2,
+    "at_squared_level": {
+      "numerator": 4,
+      "denominator": 1
+    },
+    "source_covered_point_ids": [0, 1, 2, 3],
+    "target_birth_squared_level": {
+      "numerator": 1,
+      "denominator": 1
+    },
+    "target_birth_covered_point_ids": [0, 1, 2],
+    "target_growth_squared_level": {
+      "numerator": 9,
+      "denominator": 4
+    },
+    "target_replayed_covered_point_ids": [0, 1, 2, 3]
+  },
+  "minimality": {
+    "point_deletion_subsets_checked": 41,
+    "point_count_minimal": true,
+    "minimum_integer_maximum_absolute_coordinate": 2,
+    "minimum_integer_coordinate_l1_sum": 5,
+    "note": "No absolute rational-coordinate scale is minimal because exact homothety preserves the combinatorics."
+  },
+  "regression_invariant": "Vertical coverage is evaluated in the target root's closed replay state at the assignment level, never in the immutable birth snapshot of its MergeNode."
+}

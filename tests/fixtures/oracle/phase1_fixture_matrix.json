@@ -1,5 +1,5 @@
 {
-  "matrix_id": "phase1.minimum-fixtures.v1",
+  "matrix_id": "phase1.minimum-fixtures.v2",
   "objective": "Map every phase-1 minimum fixture requirement to one deterministic test without duplicating cases already covered.",
   "requirements": [
     {"id": "chapter6_six_points", "coverage": "new", "fixture": "tests/fixtures/exact/chapter6_six_points.json", "test": "tests.oracle.test_phase1_fixtures.Phase1FixtureTests.test_chapter6_exact_metric_and_rational_surrogate"},
@@ -14,6 +14,8 @@
     {"id": "overlapping_k_polyhedra", "coverage": "existing", "fixture": null, "test": "tests.oracle.test_gamma_hierarchy.GammaHierarchyTests.test_reduced_profile_preserves_overlapping_point_unions"},
     {"id": "gabriel_pair_missing_small_lnn", "coverage": "new", "fixture": "tests/fixtures/regressions/gabriel_pair_missing_lnn.json", "test": "tests.oracle.test_phase1_fixtures.Phase1FixtureTests.test_gabriel_pair_is_absent_from_fixed_small_lnn"},
     {"id": "gabriel_point_set_counterexample", "coverage": "permanent_mathematical_counterexample", "fixture": "tests/fixtures/regressions/gabriel_point_set_counterexample.json", "test": "tests.oracle.test_gabriel_counterexample.GabrielPointSetCounterexampleTests.test_pruned_gabriel_point_sets_differ_from_gamma"},
+    {"id": "gamma_q1_coverage_delta", "coverage": "permanent_exact_replay_regression", "fixture": "tests/fixtures/regressions/gamma_q1_coverage_delta.json", "test": "tests.contracts.test_contract_semantic_graph.ExactSemanticGraphMutationTests.test_gamma_q1_coverage_regression_is_permanent"},
+    {"id": "vertical_q1_growth_target", "coverage": "permanent_exact_replay_regression", "fixture": "tests/fixtures/regressions/vertical_q1_growth_target.json", "test": "tests.oracle.test_contract_integration.FrozenContractIntegrationTests.test_vertical_target_coverage_uses_closed_q1_replay_state"},
     {"id": "one_ulp_quasi_coplanar", "coverage": "new", "fixture": "tests/fixtures/degeneracies/one_ulp_boundaries.json", "test": "tests.oracle.test_phase1_fixtures.Phase1FixtureTests.test_one_ulp_coplanar_and_cospherical_boundaries"},
     {"id": "one_ulp_quasi_cospherical", "coverage": "new", "fixture": "tests/fixtures/degeneracies/one_ulp_boundaries.json", "test": "tests.oracle.test_phase1_fixtures.Phase1FixtureTests.test_one_ulp_coplanar_and_cospherical_boundaries"},
     {"id": "selected_n12", "coverage": "new_pr_catalog_full_tower_nightly", "fixture": "tests/fixtures/oracle/selected_n12_n14.json", "test": "tests.oracle.test_phase1_fixtures.Phase1FixtureTests.test_selected_n12_n14_catalogs_and_declared_scope"},

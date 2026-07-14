@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from fractions import Fraction
 from typing import Literal, Sequence, TypeAlias
 
@@ -19,6 +19,7 @@ from .gamma import (
 
 
 Profile: TypeAlias = Literal["full_pi0", "hgp_reduced"]
+ForestGraphKind: TypeAlias = Literal["gamma", "gabriel"]
 
 
 @dataclass(frozen=True)
@@ -89,6 +90,7 @@ class ForestCut:
     squared_level: Fraction
     closed: bool
     components: tuple[ForestComponent, ...]
+    graph_kind: ForestGraphKind = field(default="gamma", kw_only=True)
 
     @property
     def component_by_facet(self) -> dict[PointLabel, ForestComponent]:
@@ -109,6 +111,7 @@ class MergeForest:
     root_ids: tuple[str, ...]
     batches: tuple[ForestBatch, ...]
     coverage_log: tuple[CoverageDelta, ...]
+    graph_kind: ForestGraphKind = field(default="gamma", kw_only=True)
 
     def cut(self, squared_level: Fraction, *, closed: bool = True) -> ForestCut:
         level = Fraction(squared_level)
@@ -122,7 +125,14 @@ class MergeForest:
 
         eligible = [batch for batch in self.batches if included(batch)]
         components = eligible[-1].post_components if eligible else ()
-        return ForestCut(self.order, self.profile, level, closed, components)
+        return ForestCut(
+            self.order,
+            self.profile,
+            level,
+            closed,
+            components,
+            graph_kind=self.graph_kind,
+        )
 
     @property
     def critical_levels(self) -> tuple[Fraction, ...]:
@@ -261,10 +271,46 @@ def _node_id(order: int, profile: Profile, index: int) -> str:
 
 
 def build_merge_forest(filtration: GammaFiltration, profile: Profile) -> MergeForest:
-    """Reduce one exact filtration without sequentializing equal levels."""
+    """Reduce exhaustive Gamma without sequentializing equal levels.
+
+    ``hgp_reduced`` suppresses public isolated-facet births above order one,
+    but it still consumes every Gamma coface.  In particular, silent
+    incidences remain in the replay state and may contribute to a later merge.
+    """
+
+    return _build_relation_forest(filtration, profile, graph_kind="gamma")
+
+
+def build_gabriel_partial_forest(filtration: GammaFiltration) -> MergeForest:
+    """Build the positive Gabriel sub-filtration as a partial refinement.
+
+    This deliberately separate entry point must not be used as an exact
+    ``hgp_reduced`` oracle: non-Gabriel cofaces can be silent when first seen
+    and decisive later.  The returned provenance lets normative vertical-map
+    construction reject such a forest.
+    """
+
+    return _build_relation_forest(
+        filtration,
+        "hgp_reduced",
+        graph_kind="gabriel",
+    )
+
+
+def _build_relation_forest(
+    filtration: GammaFiltration,
+    profile: Profile,
+    *,
+    graph_kind: ForestGraphKind,
+) -> MergeForest:
+    """Shared deterministic batch reducer for a declared relation universe."""
 
     if profile not in ("full_pi0", "hgp_reduced"):
         raise ValueError(f"unknown profile {profile!r}")
+    if graph_kind not in ("gamma", "gabriel"):
+        raise ValueError(f"unknown forest graph kind {graph_kind!r}")
+    if profile == "full_pi0" and graph_kind != "gamma":
+        raise ValueError("full_pi0 reduction requires exhaustive Gamma")
     order = filtration.order
     facet_by_label = {facet.point_ids: facet for facet in filtration.facets}
 
@@ -273,7 +319,7 @@ def build_merge_forest(filtration: GammaFiltration, profile: Profile) -> MergeFo
     if profile == "full_pi0" or order == 1:
         for facet in filtration.facets:
             births_by_level.setdefault(facet.squared_level, []).append(facet.point_ids)
-    if profile == "full_pi0":
+    if graph_kind == "gamma":
         for coface in filtration.cofaces:
             relations_by_level.setdefault(coface.squared_level, []).append(
                 (coface.point_ids, coface.facet_point_ids)
@@ -436,6 +482,7 @@ def build_merge_forest(filtration: GammaFiltration, profile: Profile) -> MergeFo
     return MergeForest(
         order=order,
         profile=profile,
+        graph_kind=graph_kind,
         nodes=tuple(nodes),
         root_ids=tuple(sorted(components)),
         batches=tuple(batches),
@@ -648,7 +695,7 @@ def build_profile_vertical_map_family(
     """Project the exhaustive Gamma map onto one declared output profile.
 
     The projection is certified independently at every open and closed cut.
-    For ``hgp_reduced`` it verifies the bijection between reduced Gabriel
+    For ``hgp_reduced`` it verifies the bijection between reduced Gamma
     components and non-trivial Gamma components, then transports the exact
     Gamma target through that bijection.  Covered-point containment is never
     used to choose a target because different K-polyhedra may overlap.
@@ -658,6 +705,8 @@ def build_profile_vertical_map_family(
         raise ValueError(f"unknown profile {profile!r}")
     if source_forest.profile != profile or target_forest.profile != profile:
         raise ValueError("vertical projection forests must use the requested profile")
+    if source_forest.graph_kind != "gamma" or target_forest.graph_kind != "gamma":
+        raise ValueError("normative vertical maps require exhaustive Gamma forests")
     if source_forest.order != source.order or target_forest.order != target.order:
         raise ValueError("vertical projection forests and filtrations disagree")
 

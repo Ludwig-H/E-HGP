@@ -1,6 +1,6 @@
 # E-HGP — MorseHGP3D
 
-E-HGP est désormais centré sur **MorseHGP3D**, le backend 3D destiné à reconstruire la hiérarchie des amas de forte densité K-NN pour tous les ordres $1\leq k\leq K_{\max}$, avec $K_{\max}=10$ comme première cible. Le projet est encore en phase de spécification : le présent dépôt fixe l'objet mathématique, les certificats, l'architecture GPU et les tests avant toute implémentation de production.
+E-HGP est désormais centré sur **MorseHGP3D**, le backend 3D destiné à reconstruire la hiérarchie des amas de forte densité K-NN pour tous les ordres $1\leq k\leq K_{\max}$, avec $K_{\max}=10$ comme première cible. Le projet est en intégration fondatrice : le présent dépôt fixe l'objet mathématique, exécute l'oracle CPU exhaustif, versionne les certificats et prépare l'architecture GPU avant toute implémentation de production.
 
 L'objet continu est la tour de multicovertures
 
@@ -9,7 +9,7 @@ $$L_k(a)=\left\lbrace y\in\mathbb{R}^{3}:D_k(y)\leq a\right\rbrace,$$
 où $D_k(y)$ est le carré de la distance au $k$-ième plus proche voisin. À chaque ordre, on suit les composantes connexes de $L_k(a)$ quand $a$ croît; entre deux ordres, on conserve les applications induites par $L_{k+1}(a)\subseteq L_k(a)$. La sortie est donc une **tour de forêts de fusion**, pas une partition plate.
 
 > [!IMPORTANT]
-> La voie mathématique retenue est : **catalogue de sphères critiques peu profondes, flot de simplexes de Gabriel, réduction hiérarchique par lots**. Une grille, une mosaïque de Delaunay d'ordre supérieur matérialisée ou un rhomboid tiling ne font pas partie de l'algorithme cible.
+> La voie exacte de référence est : **catalogue de sphères critiques peu profondes, Gamma exhaustif, réduction hiérarchique par lots**. Le flot de simplexes de Gabriel reste une voie positive partielle tant que les incidences silencieuses manquantes ne sont pas restituées par une construction prouvée. Une grille, une mosaïque de Delaunay d'ordre supérieur matérialisée ou un rhomboid tiling ne font pas partie de l'algorithme cible.
 
 ## Décision mathématique
 
@@ -17,16 +17,16 @@ Une sphère critique de centre $c$, de rayon carré $a$ et de rang fermé $s$ in
 
 Le verrou combinatoire est donc reformulé ainsi : énumérer exactement les sphères bien centrées de rang au plus onze sans énumérer les $\binom{n}{k}$ sous-ensembles. La primitive retenue adapte la construction incrémentale des ordres à des **raffinements de Voronoï restreints**, calculables par un moteur de diagrammes de puissance GPU. Chaque cellule est ensuite fermée par un oracle global exact; le moteur flottant propose, il ne certifie pas.
 
-Le chemin hiérarchique de référence est le $k$-graphe de Gabriel du manuscrit : un événement de rang $k+1$ émet ses facettes de cardinal $k$ et une hyperarête au niveau exact de sa miniball. Un hyper-Kruskal par lots reconstruit alors les fusions non triviales garanties par les théorèmes du manuscrit. La reconstruction de toutes les composantes isolées et de leur généalogie reste un profil distinct, fondé sur le catalogue de Morse et des attaches certifiées.
+Le chemin hiérarchique exact de référence énumère chaque coface de Gamma : une coface de cardinal $k+1$ relie ses facettes de cardinal $k$ au niveau exact de sa miniball. Un hyper-Kruskal par lots reconstruit les composantes non triviales en conservant aussi les incidences silencieuses. Le sous-flot Gabriel est calculé séparément pour certifier une connectivité positive, mais le contre-exemple permanent à cinq points montre qu'il peut retarder une fusion Gamma. La reconstruction de toutes les composantes isolées et de leur généalogie reste un profil distinct, fondé sur le catalogue de Morse et des attaches certifiées.
 
 ## Deux profils de sortie honnêtes
 
 | profil | objet promis | condition du statut `exact` |
 |---|---|---|
-| `hgp_reduced` | toutes les composantes à $k=1$, puis les K-polyèdres non triviaux pour $k\geq2$, comme ensembles d'observations éventuellement recouvrants | catalogue de Gabriel complet, niveaux exacts, lots fermés et ancre EMST validée |
+| `hgp_reduced` | toutes les composantes à $k=1$, puis les K-polyèdres non triviaux pour $k\geq2$, comme ensembles d'observations éventuellement recouvrants | Gamma exhaustif sur `reference_cpu`, niveaux exacts, lots fermés, cartes verticales complètes et ancre EMST validée |
 | `full_pi0` | toutes les composantes de $L_k(a)$, y compris les naissances isolées, avec morphismes verticaux | catalogue critique complet, attaches globales certifiées et lots fermés |
 
-Le premier profil est directement adossé aux résultats des chapitres 6 et 8 du manuscrit. Le second est la cible complète de MorseHGP3D; il ne recevra le statut `exact` qu'après validation de son théorème de reconstruction et de ses oracles d'attache. Un arrêt sur budget produit `conditional`, jamais un faux résultat exact.
+Le premier profil est défini par la réduction des composantes de Gamma exhaustif; le théorème du manuscrit qui l'identifiait au seul flot Gabriel est faux en général. Le second est la cible complète de MorseHGP3D; il ne recevra le statut `exact` qu'après validation de son théorème de reconstruction et de ses oracles d'attache. Un arrêt sur budget produit `conditional`, jamais un faux résultat exact.
 
 ## Ce qui n'est pas la régularisation recherchée
 

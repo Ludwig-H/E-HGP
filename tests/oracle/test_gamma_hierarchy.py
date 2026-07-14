@@ -7,7 +7,10 @@ from itertools import combinations
 
 from reference.morsehgp3d_oracle.gamma import GammaFiltration, build_gamma_filtration
 from reference.morsehgp3d_oracle.hierarchy import (
+    ForestCut,
+    MergeForest,
     build_exhaustive_hierarchy,
+    build_gabriel_partial_forest,
     build_merge_forest,
     build_profile_vertical_map_family,
     build_vertical_map_family,
@@ -136,6 +139,12 @@ def _unchecked_reordering(filtration: GammaFiltration) -> GammaFiltration:
 
 
 class GammaHierarchyTests(unittest.TestCase):
+    def test_legacy_forest_constructors_default_to_gamma_keyword_only(self) -> None:
+        forest = MergeForest(1, "hgp_reduced", (), (), (), ())
+        cut = ForestCut(1, "hgp_reduced", Fraction(0), True, ())
+        self.assertEqual(forest.graph_kind, "gamma")
+        self.assertEqual(cut.graph_kind, "gamma")
+
     def test_default_geometry_matches_independent_planar_miniballs(self) -> None:
         cases = (
             ([(0, 0, 0), (2, 0, 0), (8, 0, 0)], 1),
@@ -191,6 +200,42 @@ class GammaHierarchyTests(unittest.TestCase):
                         _component_facets(forest.cut(level, closed=closed)),
                         _component_facets(filtration.cut(level, closed=closed)),
                     )
+
+    def test_reduced_forest_replays_exact_gamma_reduction_at_every_cut(self) -> None:
+        points = [(-2, -1, 0), (-2, 1, 0), (0, 0, 0), (3, 2, 0), (4, -1, 0)]
+        for order in (1, 2, 3):
+            filtration = build_gamma_filtration(
+                points, order, ball_fn=_independent_planar_miniball
+            )
+            forest = build_merge_forest(filtration, "hgp_reduced")
+
+            for level in filtration.critical_levels:
+                for closed in (False, True):
+                    with self.subTest(order=order, level=level, closed=closed):
+                        gamma_cut = filtration.cut(level, closed=closed)
+                        expected = tuple(
+                            component
+                            for component in gamma_cut.components
+                            if order == 1 or component.nontrivial
+                        )
+                        reduced_cut = forest.cut(level, closed=closed)
+                        self.assertEqual(
+                            sorted(
+                                component.facet_point_ids
+                                for component in reduced_cut.components
+                            ),
+                            sorted(component.facet_point_ids for component in expected),
+                        )
+                        self.assertEqual(
+                            {
+                                component.facet_point_ids: component.covered_point_ids
+                                for component in reduced_cut.components
+                            },
+                            {
+                                component.facet_point_ids: component.covered_point_ids
+                                for component in expected
+                            },
+                        )
 
     def test_binary_merge_keeps_simultaneous_facet_as_coverage_only(self) -> None:
         points = [(-2, 0, 0), (0, 0, 0), (2, 0, 0)]
@@ -282,8 +327,13 @@ class GammaHierarchyTests(unittest.TestCase):
         second_birth = Fraction(1105, 242)
 
         reduced_cut = reduced.cut(second_birth)
-        gabriel_cut = filtration.cut(second_birth, graph_kind="gabriel")
-        self.assertEqual(_component_facets(reduced_cut), _component_facets(gabriel_cut))
+        gamma_cut = filtration.cut(second_birth, graph_kind="gamma")
+        nontrivial_gamma = tuple(
+            component.facet_point_ids
+            for component in gamma_cut.components
+            if component.nontrivial
+        )
+        self.assertEqual(_component_facets(reduced_cut), tuple(sorted(nontrivial_gamma)))
         self.assertEqual(_covered_sets(reduced_cut), ((0, 1, 2), (2, 3, 4)))
         self.assertEqual(
             set(reduced_cut.components[0].covered_point_ids)
@@ -291,6 +341,35 @@ class GammaHierarchyTests(unittest.TestCase):
             {2},
         )
         self.assertEqual(_covered_sets(reduced.cut(Fraction(13, 2))), ((0, 1, 2, 3, 4),))
+
+    def test_gabriel_partial_forest_is_separate_from_exact_gamma(self) -> None:
+        points = [
+            (0, 0, 0),
+            (0, 0, 4),
+            (0, 3, 1),
+            (2, 3, 2),
+            (3, 1, 2),
+        ]
+        filtration = build_gamma_filtration(points, 2)
+        exact = build_merge_forest(filtration, "hgp_reduced")
+        partial = build_gabriel_partial_forest(filtration)
+
+        self.assertEqual(exact.graph_kind, "gamma")
+        self.assertEqual(partial.graph_kind, "gabriel")
+        self.assertEqual(exact.cut(Fraction(24)).graph_kind, "gamma")
+        self.assertEqual(partial.cut(Fraction(24)).graph_kind, "gabriel")
+        self.assertNotEqual(exact, partial)
+
+        target = build_gamma_filtration(points, 1)
+        target_exact = build_merge_forest(target, "hgp_reduced")
+        with self.assertRaisesRegex(ValueError, "exhaustive Gamma forests"):
+            build_profile_vertical_map_family(
+                filtration,
+                target,
+                partial,
+                target_exact,
+                "hgp_reduced",
+            )
 
     def test_terminal_order_is_present_only_in_full_profile(self) -> None:
         points = [(-1, 0, 0), (1, 0, 0)]

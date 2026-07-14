@@ -15,6 +15,7 @@ import json
 import os
 import platform
 import random
+import subprocess
 import sys
 import tempfile
 import time
@@ -34,6 +35,7 @@ from reference.morsehgp3d_oracle.generators import generate_affine_cloud
 from reference.morsehgp3d_oracle.hierarchy import (
     MergeForest,
     VerticalMapFamily,
+    build_gabriel_partial_forest,
     build_merge_forest,
     build_profile_vertical_map_family,
     build_vertical_map_family,
@@ -43,11 +45,102 @@ from reference.morsehgp3d_oracle.oracle import canonicalize_points
 
 Point3 = tuple[int | Fraction, int | Fraction, int | Fraction]
 PROFILES = ("full_pi0", "hgp_reduced")
+CAMPAIGN_SCHEMA_VERSION = 2
+CAMPAIGN_RUNNER_VERSION = "2.0.0"
+GENERATOR_NAME = "generate_affine_cloud"
+GENERATOR_VERSION = "1.0.0"
 CI_MAX_SEEDS_PER_DIMENSION = 3
 CI_MAX_POINT_COUNT = 7
 CI_MAX_K_MAX = 5
 CI_MAX_PERMUTATIONS = 1
 CI_MAX_N_K_CASES_PER_SEED = 6
+
+
+def _sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _ordered_hash_root(leaves: Sequence[str], *, domain: str) -> str:
+    digest = hashlib.sha256()
+    digest.update(f"morsehgp3d:{domain}:ordered-root-v1\0".encode("ascii"))
+    for leaf in leaves:
+        digest.update(leaf.encode("ascii"))
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def _untracked_content_root(raw_paths: bytes) -> tuple[str, int]:
+    paths = tuple(
+        sorted(path for path in raw_paths.split(b"\0") if path)
+    )
+    digest = hashlib.sha256()
+    digest.update(b"morsehgp3d:untracked-content-root-v1\0")
+    for raw_path in paths:
+        path = ROOT / os.fsdecode(raw_path)
+        digest.update(raw_path)
+        digest.update(b"\0")
+        if path.is_symlink():
+            digest.update(b"symlink\0")
+            digest.update(os.fsencode(os.readlink(path)))
+        elif path.is_file():
+            digest.update(b"file\0")
+            digest.update(hashlib.sha256(path.read_bytes()).digest())
+        else:
+            digest.update(b"other\0")
+        digest.update(b"\0")
+    return digest.hexdigest(), len(paths)
+
+
+def _repository_provenance() -> dict[str, object]:
+    """Describe one Git/worktree state without requiring it to be clean."""
+
+    def git(*arguments: str) -> bytes:
+        completed = subprocess.run(
+            ("git", *arguments),
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+        )
+        return completed.stdout
+
+    try:
+        git_head = git("rev-parse", "HEAD").decode("ascii").strip()
+        status = git(
+            "status",
+            "--porcelain=v1",
+            "-z",
+            "--untracked-files=all",
+        )
+        tracked_diff = git("diff", "--binary", "HEAD", "--", ".")
+        untracked_paths = git(
+            "ls-files", "--others", "--exclude-standard", "-z", "--", "."
+        )
+        untracked_root, untracked_count = _untracked_content_root(untracked_paths)
+        worktree_fingerprint = hashlib.sha256(
+            b"morsehgp3d:worktree-fingerprint-v1\0"
+            + git_head.encode("ascii")
+            + b"\0"
+            + hashlib.sha256(status).digest()
+            + hashlib.sha256(tracked_diff).digest()
+            + bytes.fromhex(untracked_root)
+        ).hexdigest()
+        return {
+            "available": True,
+            "git_head": git_head,
+            "worktree_state": "dirty" if status else "clean",
+            "porcelain_sha256": hashlib.sha256(status).hexdigest(),
+            "tracked_diff_sha256": hashlib.sha256(tracked_diff).hexdigest(),
+            "untracked_content_root_sha256": untracked_root,
+            "untracked_file_count": untracked_count,
+            "worktree_fingerprint_sha256": worktree_fingerprint,
+        }
+    except (OSError, subprocess.CalledProcessError, UnicodeError) as error:
+        return {
+            "available": False,
+            "git_head": None,
+            "worktree_state": "unavailable",
+            "error": f"{type(error).__name__}: {error}",
+        }
 
 
 @dataclass(frozen=True)
@@ -141,6 +234,22 @@ class CampaignConfig:
             "multiple_k_max_values": len(self.k_max_values) > 1,
         }
 
+    @property
+    def seed_scale_configuration_satisfied(self) -> bool:
+        """Whether this config qualifies the 10k seed-scale shard alone.
+
+        The n/Kmax relation matrix is an independent campaign artifact and is
+        intentionally not folded into this predicate.
+        """
+
+        return (
+            self.dimensions == (1, 2, 3)
+            and self.seeds_per_dimension >= 10_000
+            and self.failure_dir is not None
+            and self.permutations_per_seed > 0
+            and self.metamorphic_stride > 0
+        )
+
     def as_manifest(self) -> dict[str, object]:
         return {
             "dimensions": list(self.dimensions),
@@ -152,6 +261,8 @@ class CampaignConfig:
             "permutations_per_seed": self.permutations_per_seed,
             "metamorphic_stride": self.metamorphic_stride,
             "profiles": list(PROFILES),
+            "normative_hgp_reduced_relation": "gamma",
+            "diagnostic_flows": ["gabriel_raw_partial_refinement"],
             "matrix_coverage": self.matrix_coverage,
             "ci": self.ci,
             "failure_dir": str(self.failure_dir) if self.failure_dir is not None else None,
@@ -184,6 +295,7 @@ class CloudSnapshot:
     filtrations: tuple[GammaFiltration, ...]
     full_forests: tuple[MergeForest, ...]
     reduced_forests: tuple[MergeForest, ...]
+    gabriel_partial_forests: tuple[MergeForest, ...]
     vertical_maps: tuple[VerticalMapFamily, ...]
     full_profile_vertical_maps: tuple[VerticalMapFamily, ...]
     reduced_profile_vertical_maps: tuple[VerticalMapFamily, ...]
@@ -202,11 +314,17 @@ COUNTER_NAMES = (
     "gabriel_hyperedges_enumerated",
     "full_forest_nodes",
     "reduced_forest_nodes",
+    "gabriel_partial_forest_nodes",
     "full_equal_level_batches",
     "reduced_equal_level_batches",
+    "gabriel_partial_equal_level_batches",
     "full_gamma_cut_comparisons",
-    "reduced_gabriel_cut_comparisons",
-    "reduced_gamma_nontrivial_comparisons",
+    "reduced_gamma_cut_comparisons",
+    "reduced_gamma_batch_comparisons",
+    "reduced_gamma_vertical_map_comparisons",
+    "gabriel_partial_cut_comparisons",
+    "gabriel_partial_positive_inclusion_comparisons",
+    "gabriel_gamma_divergences_observed",
     "cut_monotonicity_transitions_checked",
     "vertical_families_checked",
     "gamma_vertical_families_checked",
@@ -253,6 +371,9 @@ def _build_snapshot(points: Sequence[Sequence[int | Fraction]], k_max: int) -> C
     reduced_forests = tuple(
         build_merge_forest(filtration, "hgp_reduced") for filtration in filtrations
     )
+    gabriel_partial_forests = tuple(
+        build_gabriel_partial_forest(filtration) for filtration in filtrations
+    )
     vertical_maps = tuple(
         build_vertical_map_family(filtrations[index], filtrations[index - 1])
         for index in range(1, len(filtrations))
@@ -278,13 +399,14 @@ def _build_snapshot(points: Sequence[Sequence[int | Fraction]], k_max: int) -> C
         for index in range(1, len(filtrations))
     )
     return CloudSnapshot(
-        exact_points,
-        filtrations,
-        full_forests,
-        reduced_forests,
-        vertical_maps,
-        full_profile_vertical_maps,
-        reduced_profile_vertical_maps,
+        points=exact_points,
+        filtrations=filtrations,
+        full_forests=full_forests,
+        reduced_forests=reduced_forests,
+        gabriel_partial_forests=gabriel_partial_forests,
+        vertical_maps=vertical_maps,
+        full_profile_vertical_maps=full_profile_vertical_maps,
+        reduced_profile_vertical_maps=reduced_profile_vertical_maps,
     )
 
 
@@ -295,15 +417,6 @@ def _component_signature(components: Iterable[object]) -> tuple[object, ...]:
                 tuple(getattr(component, "facet_point_ids")),
                 tuple(getattr(component, "covered_point_ids")),
             )
-            for component in components
-        )
-    )
-
-
-def _covered_signature(components: Iterable[object]) -> tuple[tuple[int, ...], ...]:
-    return tuple(
-        sorted(
-            tuple(getattr(component, "covered_point_ids"))
             for component in components
         )
     )
@@ -375,11 +488,324 @@ def _check_component_monotonicity(
             )
 
 
+def _reduced_gamma_components(gamma_cut: object) -> tuple[object, ...]:
+    components = tuple(getattr(gamma_cut, "components"))
+    if getattr(gamma_cut, "order") == 1:
+        return components
+    return tuple(component for component in components if component.nontrivial)
+
+
+def _check_gabriel_positive_refinement(
+    gamma_components: Iterable[object],
+    gabriel_components: Iterable[object],
+    *,
+    context: dict[str, object],
+) -> None:
+    """Reject any raw Gabriel connection that is absent from exhaustive Gamma."""
+
+    gamma = tuple(gamma_components)
+    gamma_by_facet = {
+        tuple(facet): component
+        for component in gamma
+        for facet in getattr(component, "facet_point_ids")
+    }
+    for component in gabriel_components:
+        facets = tuple(getattr(component, "facet_point_ids"))
+        containers = {
+            tuple(gamma_by_facet[tuple(facet)].facet_point_ids)
+            for facet in facets
+            if tuple(facet) in gamma_by_facet
+        }
+        if len(containers) != 1 or any(
+            tuple(facet) not in gamma_by_facet for facet in facets
+        ):
+            raise CampaignMismatch(
+                CampaignFailure(
+                    invariant="gabriel_positive_connectivity",
+                    message=(
+                        "a raw Gabriel component is not contained in one unique "
+                        "Gamma component"
+                    ),
+                    context={
+                        **context,
+                        "gabriel_component": _jsonable(
+                            (
+                                facets,
+                                tuple(getattr(component, "covered_point_ids")),
+                            )
+                        ),
+                    },
+                )
+            )
+        container_facets = next(iter(containers))
+        gamma_component = next(
+            item
+            for item in gamma
+            if tuple(getattr(item, "facet_point_ids")) == container_facets
+        )
+        if not set(getattr(component, "covered_point_ids")) <= set(
+            getattr(gamma_component, "covered_point_ids")
+        ):
+            raise CampaignMismatch(
+                CampaignFailure(
+                    invariant="gabriel_positive_connectivity",
+                    message=(
+                        "a raw Gabriel component covers an observation absent "
+                        "from its Gamma container"
+                    ),
+                    context={
+                        **context,
+                        "gabriel_component": _jsonable(
+                            (
+                                facets,
+                                tuple(getattr(component, "covered_point_ids")),
+                            )
+                        ),
+                        "gamma_container": _jsonable(
+                            (
+                                container_facets,
+                                tuple(
+                                    getattr(gamma_component, "covered_point_ids")
+                                ),
+                            )
+                        ),
+                    },
+                )
+            )
+
+
+def _check_reduced_gamma_batches(
+    filtration: GammaFiltration,
+    reduced_forest: MergeForest,
+    counters: dict[str, int] | None,
+) -> None:
+    """Compare every normative reduced batch with the exact Gamma state."""
+
+    if reduced_forest.graph_kind != "gamma":
+        raise CampaignMismatch(
+            CampaignFailure(
+                invariant="reduced_gamma_provenance",
+                message="the normative hgp_reduced forest is not Gamma-backed",
+                context={
+                    "order": filtration.order,
+                    "graph_kind": reduced_forest.graph_kind,
+                },
+            )
+        )
+    gamma_batches = tuple(
+        batch
+        for batch in filtration.batches
+        if filtration.order == 1 or batch.cofaces
+    )
+    _require_equal(
+        "reduced_gamma_batch_levels",
+        tuple(batch.squared_level for batch in gamma_batches),
+        tuple(batch.squared_level for batch in reduced_forest.batches),
+        context={"order": filtration.order, "profile": "hgp_reduced"},
+    )
+    for gamma_batch, forest_batch in zip(gamma_batches, reduced_forest.batches):
+        level = gamma_batch.squared_level
+        context = {
+            "order": filtration.order,
+            "profile": "hgp_reduced",
+            "squared_level": _exact_level(level),
+        }
+        expected_pre = _reduced_gamma_components(
+            filtration.cut(level, closed=False, graph_kind="gamma")
+        )
+        expected_post = _reduced_gamma_components(
+            filtration.cut(level, closed=True, graph_kind="gamma")
+        )
+        _require_equal(
+            "reduced_gamma_batch_pre_state",
+            _component_signature(expected_pre),
+            _component_signature(forest_batch.pre_components),
+            context=context,
+        )
+        _require_equal(
+            "reduced_gamma_batch_post_state",
+            _component_signature(expected_post),
+            _component_signature(forest_batch.post_components),
+            context=context,
+        )
+        _require_equal(
+            "reduced_gamma_batch_relations",
+            tuple(coface.point_ids for coface in gamma_batch.cofaces),
+            forest_batch.relation_simplex_point_ids,
+            context=context,
+        )
+        pre_facets = {
+            tuple(facet)
+            for component in expected_pre
+            for facet in getattr(component, "facet_point_ids")
+        }
+        post_facets = {
+            tuple(facet)
+            for component in expected_post
+            for facet in getattr(component, "facet_point_ids")
+        }
+        expected_activated = tuple(sorted(post_facets - pre_facets))
+        _require_equal(
+            "reduced_gamma_batch_activated_facets",
+            expected_activated,
+            forest_batch.activated_facet_point_ids,
+            context=context,
+        )
+        _require_equal(
+            "reduced_gamma_batch_coverage_facets",
+            expected_activated,
+            tuple(
+                sorted(
+                    facet
+                    for delta in forest_batch.coverage_deltas
+                    for facet in delta.added_facet_point_ids
+                )
+            ),
+            context=context,
+        )
+        expected_coverage_records = []
+        for post_component in forest_batch.post_components:
+            post_facet_set = set(post_component.facet_point_ids)
+            prior_components = tuple(
+                component
+                for component in forest_batch.pre_components
+                if set(component.facet_point_ids) <= post_facet_set
+            )
+            prior_facets = {
+                facet
+                for component in prior_components
+                for facet in component.facet_point_ids
+            }
+            prior_points = {
+                point_id
+                for component in prior_components
+                for point_id in component.covered_point_ids
+            }
+            added_facets = tuple(sorted(post_facet_set - prior_facets))
+            added_points = tuple(
+                sorted(set(post_component.covered_point_ids) - prior_points)
+            )
+            if added_facets or added_points:
+                expected_coverage_records.append(
+                    (post_component.root_id, added_facets, added_points)
+                )
+        _require_equal(
+            "reduced_gamma_batch_coverage_deltas",
+            tuple(sorted(expected_coverage_records)),
+            tuple(
+                sorted(
+                    (
+                        delta.root_id,
+                        delta.added_facet_point_ids,
+                        delta.added_point_ids,
+                    )
+                    for delta in forest_batch.coverage_deltas
+                )
+            ),
+            context=context,
+        )
+        _increment(counters, "reduced_gamma_batch_comparisons")
+
+
+def _assignment_signature(mapping: object) -> tuple[object, ...]:
+    return tuple(
+        sorted(
+            (
+                tuple(assignment.source_component_facets),
+                tuple(assignment.target_component_facets),
+            )
+            for assignment in getattr(mapping, "assignments")
+        )
+    )
+
+
+def _check_reduced_gamma_vertical_family(
+    source: GammaFiltration,
+    target: GammaFiltration,
+    gamma_family: VerticalMapFamily,
+    reduced_family: VerticalMapFamily,
+    counters: dict[str, int] | None,
+) -> None:
+    """Project Gamma assignments independently onto retained reduced components."""
+
+    gamma_maps = {
+        (mapping.squared_level, mapping.closed): mapping
+        for mapping in gamma_family.maps
+    }
+    reduced_maps = {
+        (mapping.squared_level, mapping.closed): mapping
+        for mapping in reduced_family.maps
+    }
+    _require_equal(
+        "reduced_gamma_vertical_levels",
+        tuple(gamma_maps),
+        tuple(reduced_maps),
+        context={
+            "source_order": source.order,
+            "target_order": target.order,
+            "profile": "hgp_reduced",
+        },
+    )
+    for key, gamma_map in gamma_maps.items():
+        level, closed = key
+        source_components = _reduced_gamma_components(
+            source.cut(level, closed=closed, graph_kind="gamma")
+        )
+        target_components = _reduced_gamma_components(
+            target.cut(level, closed=closed, graph_kind="gamma")
+        )
+        retained_sources = {
+            tuple(component.facet_point_ids) for component in source_components
+        }
+        retained_targets = {
+            tuple(component.facet_point_ids) for component in target_components
+        }
+        expected = []
+        for assignment in gamma_map.assignments:
+            source_facets = tuple(assignment.source_component_facets)
+            if source_facets not in retained_sources:
+                continue
+            target_facets = tuple(assignment.target_component_facets)
+            if target_facets not in retained_targets:
+                raise CampaignMismatch(
+                    CampaignFailure(
+                        invariant="reduced_gamma_vertical_target",
+                        message=(
+                            "a retained reduced Gamma source maps outside the "
+                            "retained target profile"
+                        ),
+                        context={
+                            "source_order": source.order,
+                            "target_order": target.order,
+                            "squared_level": _exact_level(level),
+                            "closed": closed,
+                            "source_component_facets": source_facets,
+                            "target_component_facets": target_facets,
+                        },
+                    )
+                )
+            expected.append((source_facets, target_facets))
+        _require_equal(
+            "reduced_gamma_vertical_assignments",
+            tuple(sorted(expected)),
+            _assignment_signature(reduced_maps[key]),
+            context={
+                "source_order": source.order,
+                "target_order": target.order,
+                "squared_level": _exact_level(level),
+                "closed": closed,
+                "profile": "hgp_reduced",
+            },
+        )
+        _increment(counters, "reduced_gamma_vertical_map_comparisons")
+
+
 def _check_snapshot(snapshot: CloudSnapshot, counters: dict[str, int] | None) -> None:
     for index, filtration in enumerate(snapshot.filtrations):
         order = filtration.order
         full_forest = snapshot.full_forests[index]
         reduced_forest = snapshot.reduced_forests[index]
+        gabriel_partial_forest = snapshot.gabriel_partial_forests[index]
         _increment(counters, "orders_checked")
         _increment(counters, "profile_order_checks", 2)
         _increment(counters, "facets_enumerated", len(filtration.facets))
@@ -391,8 +817,37 @@ def _check_snapshot(snapshot: CloudSnapshot, counters: dict[str, int] | None) ->
         )
         _increment(counters, "full_forest_nodes", len(full_forest.nodes))
         _increment(counters, "reduced_forest_nodes", len(reduced_forest.nodes))
+        _increment(
+            counters,
+            "gabriel_partial_forest_nodes",
+            len(gabriel_partial_forest.nodes),
+        )
         _increment(counters, "full_equal_level_batches", len(full_forest.batches))
         _increment(counters, "reduced_equal_level_batches", len(reduced_forest.batches))
+        _increment(
+            counters,
+            "gabriel_partial_equal_level_batches",
+            len(gabriel_partial_forest.batches),
+        )
+        _require_equal(
+            "full_gamma_provenance",
+            "gamma",
+            full_forest.graph_kind,
+            context={"order": order, "profile": "full_pi0"},
+        )
+        _require_equal(
+            "reduced_gamma_provenance",
+            "gamma",
+            reduced_forest.graph_kind,
+            context={"order": order, "profile": "hgp_reduced"},
+        )
+        _require_equal(
+            "gabriel_partial_provenance",
+            "gabriel",
+            gabriel_partial_forest.graph_kind,
+            context={"order": order, "diagnostic_flow": "gabriel_raw"},
+        )
+        _check_reduced_gamma_batches(filtration, reduced_forest, counters)
 
         for level in filtration.critical_levels:
             for closed in (False, True):
@@ -411,29 +866,41 @@ def _check_snapshot(snapshot: CloudSnapshot, counters: dict[str, int] | None) ->
                 )
                 _increment(counters, "full_gamma_cut_comparisons")
 
-                gabriel_cut = filtration.cut(level, closed=closed, graph_kind="gabriel")
                 reduced_cut = reduced_forest.cut(level, closed=closed)
+                expected_reduced = _reduced_gamma_components(gamma_cut)
                 _require_equal(
-                    "reduced_forest_vs_gabriel",
-                    _component_signature(gabriel_cut.components),
+                    "reduced_forest_vs_gamma",
+                    _component_signature(expected_reduced),
                     _component_signature(reduced_cut.components),
                     context={**context, "profile": "hgp_reduced"},
                 )
-                _increment(counters, "reduced_gabriel_cut_comparisons")
+                _increment(counters, "reduced_gamma_cut_comparisons")
 
-                if order >= 2:
-                    nontrivial_gamma = tuple(
-                        component
-                        for component in gamma_cut.components
-                        if component.nontrivial
-                    )
-                    _require_equal(
-                        "reduced_vs_gamma_nontrivial_coverage",
-                        _covered_signature(nontrivial_gamma),
-                        _covered_signature(reduced_cut.components),
-                        context={**context, "profile": "hgp_reduced"},
-                    )
-                    _increment(counters, "reduced_gamma_nontrivial_comparisons")
+                gabriel_cut = filtration.cut(
+                    level, closed=closed, graph_kind="gabriel"
+                )
+                gabriel_partial_cut = gabriel_partial_forest.cut(
+                    level, closed=closed
+                )
+                _require_equal(
+                    "gabriel_partial_forest_vs_gabriel",
+                    _component_signature(gabriel_cut.components),
+                    _component_signature(gabriel_partial_cut.components),
+                    context={**context, "diagnostic_flow": "gabriel_raw"},
+                )
+                _increment(counters, "gabriel_partial_cut_comparisons")
+                _check_gabriel_positive_refinement(
+                    gamma_cut.components,
+                    gabriel_partial_cut.components,
+                    context={**context, "diagnostic_flow": "gabriel_raw"},
+                )
+                _increment(
+                    counters, "gabriel_partial_positive_inclusion_comparisons"
+                )
+                if _component_signature(expected_reduced) != _component_signature(
+                    gabriel_partial_cut.components
+                ):
+                    _increment(counters, "gabriel_gamma_divergences_observed")
 
         ordered_cuts = tuple(
             (level, closed)
@@ -470,11 +937,20 @@ def _check_snapshot(snapshot: CloudSnapshot, counters: dict[str, int] | None) ->
                     full_forest.cut(later_level, closed=later_closed).components,
                 ),
                 (
-                    "reduced_forest_cut_monotonicity",
+                    "reduced_gamma_forest_cut_monotonicity",
                     reduced_forest.cut(
                         earlier_level, closed=earlier_closed
                     ).components,
                     reduced_forest.cut(later_level, closed=later_closed).components,
+                ),
+                (
+                    "gabriel_partial_forest_cut_monotonicity",
+                    gabriel_partial_forest.cut(
+                        earlier_level, closed=earlier_closed
+                    ).components,
+                    gabriel_partial_forest.cut(
+                        later_level, closed=later_closed
+                    ).components,
                 ),
             )
             for invariant, earlier_components, later_components in transitions:
@@ -491,6 +967,17 @@ def _check_snapshot(snapshot: CloudSnapshot, counters: dict[str, int] | None) ->
                     },
                 )
                 _increment(counters, "cut_monotonicity_transitions_checked")
+
+    for index, reduced_family in enumerate(
+        snapshot.reduced_profile_vertical_maps, start=1
+    ):
+        _check_reduced_gamma_vertical_family(
+            snapshot.filtrations[index],
+            snapshot.filtrations[index - 1],
+            snapshot.vertical_maps[index - 1],
+            reduced_family,
+            counters,
+        )
 
     vertical_groups = (
         (
@@ -744,6 +1231,12 @@ def _metamorphic_signature(
                             ).components,
                             point_id_map,
                         ),
+                        _mapped_components(
+                            snapshot.gabriel_partial_forests[index].cut(
+                                level, closed=closed
+                            ).components,
+                            point_id_map,
+                        ),
                     )
                 )
         orders.append(
@@ -758,6 +1251,11 @@ def _metamorphic_signature(
                 ),
                 _forest_metamorphic_signature(
                     snapshot.reduced_forests[index], point_id_map, level_divisor
+                ),
+                _forest_metamorphic_signature(
+                    snapshot.gabriel_partial_forests[index],
+                    point_id_map,
+                    level_divisor,
                 ),
             )
         )
@@ -1203,6 +1701,7 @@ def _snapshot_prefix_payload(
         snapshot.filtrations[:common_order_count],
         snapshot.full_forests[:common_order_count],
         snapshot.reduced_forests[:common_order_count],
+        snapshot.gabriel_partial_forests[:common_order_count],
         snapshot.vertical_maps[:vertical_count],
         snapshot.full_profile_vertical_maps[:vertical_count],
         snapshot.reduced_profile_vertical_maps[:vertical_count],
@@ -1272,6 +1771,38 @@ def _canonical_json(value: object, *, pretty: bool = False) -> str:
     )
 
 
+def _cloud_leaf_hash(
+    *,
+    config: CampaignConfig,
+    dimension: int,
+    point_count: int,
+    seed: int,
+    points: tuple[Point3, ...],
+) -> str:
+    payload = {
+        "domain": "morsehgp3d-oracle-cloud-v1",
+        "generator": {"name": GENERATOR_NAME, "version": GENERATOR_VERSION},
+        "dimension": dimension,
+        "point_count": point_count,
+        "seed": seed,
+        "coordinate_bound": config.coordinate_bound,
+        "points": points,
+    }
+    return hashlib.sha256(_canonical_json(payload).encode("utf-8")).hexdigest()
+
+
+def _case_leaf_hash(*, cloud_hash: str, k_max: int) -> str:
+    payload = {
+        "domain": "morsehgp3d-oracle-case-v1",
+        "reconstruction_contract_id": "hgp-reduced-v2",
+        "cloud_sha256": cloud_hash,
+        "k_max": k_max,
+        "profiles": list(PROFILES),
+        "diagnostic_flows": ["gabriel_raw_partial_refinement"],
+    }
+    return hashlib.sha256(_canonical_json(payload).encode("utf-8")).hexdigest()
+
+
 def _atomic_write_json(path: Path, payload: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_name = tempfile.mkstemp(
@@ -1308,11 +1839,14 @@ def _failure_fixture(
     coordinate_reductions_accepted: int,
 ) -> dict[str, object]:
     payload: dict[str, object] = {
-        "schema_version": 1,
+        "schema_version": CAMPAIGN_SCHEMA_VERSION,
         "kind": "morsehgp3d_oracle_campaign_failure",
+        "reconstruction_contract_id": "hgp-reduced-v2",
         "backend": "reference_cpu",
         "mode": "certified",
         "profiles": list(PROFILES),
+        "normative_hgp_reduced_relation": "gamma",
+        "diagnostic_flows": ["gabriel_raw_partial_refinement"],
         "dimension_requested": dimension,
         "seed": seed,
         "point_count": point_count,
@@ -1369,6 +1903,21 @@ def _failure_fixture(
 def run_campaign(config: CampaignConfig) -> dict[str, object]:
     """Run one campaign and return its JSON-safe manifest."""
 
+    repository_start = _repository_provenance()
+    runner_identity = {
+        "name": "run_oracle_campaign",
+        "version": CAMPAIGN_RUNNER_VERSION,
+        "source_sha256": _sha256_file(Path(__file__).resolve()),
+    }
+    generator_identity = {
+        "name": GENERATOR_NAME,
+        "version": GENERATOR_VERSION,
+        "source_sha256": _sha256_file(
+            ROOT / "reference" / "morsehgp3d_oracle" / "generators.py"
+        ),
+    }
+    cloud_leaf_hashes: list[str] = []
+    case_leaf_hashes: list[str] = []
     counters = _new_counters()
     dimension_elapsed_ns: dict[str, int] = {}
     cases_attempted_by_dimension = {
@@ -1472,12 +2021,23 @@ def run_campaign(config: CampaignConfig) -> dict[str, object]:
                 _increment(counters, "clouds_generated")
                 _increment(counters, "points_generated", len(points))
                 clouds_attempted_by_dimension[str(dimension)] += 1
+                cloud_hash = _cloud_leaf_hash(
+                    config=config,
+                    dimension=dimension,
+                    point_count=point_count,
+                    seed=seed,
+                    points=points,
+                )
+                cloud_leaf_hashes.append(cloud_hash)
                 snapshots: dict[int, CloudSnapshot] = {}
                 highest_k_max = max(config.k_max_values)
 
                 for k_max in config.k_max_values:
                     _increment(counters, "campaign_cases_attempted")
                     cases_attempted_by_dimension[str(dimension)] += 1
+                    case_leaf_hashes.append(
+                        _case_leaf_hash(cloud_hash=cloud_hash, k_max=k_max)
+                    )
                     snapshot_out: list[CloudSnapshot] = []
                     exercise_expensive_properties = k_max == highest_k_max
                     failure = _audit_case(
@@ -1591,6 +2151,40 @@ def run_campaign(config: CampaignConfig) -> dict[str, object]:
         for dimension, attempted in clouds_attempted_by_dimension.items()
         if dimension in dimension_elapsed_ns
     }
+    repository_end = _repository_provenance()
+    repository_state_stable = bool(
+        repository_start.get("available")
+        and repository_end.get("available")
+        and repository_start.get("worktree_fingerprint_sha256")
+        == repository_end.get("worktree_fingerprint_sha256")
+    )
+    provenance = {
+        "runner": runner_identity,
+        "generator": generator_identity,
+        "repository": {
+            "git_head": repository_start.get("git_head"),
+            "worktree_state_at_start": repository_start.get("worktree_state"),
+            "worktree_state_at_end": repository_end.get("worktree_state"),
+            "stable_during_run": repository_state_stable,
+            "start": repository_start,
+            "end": repository_end,
+        },
+        "complete": repository_state_stable,
+        "clean_worktree_required": False,
+    }
+    input_hash_roots = {
+        "algorithm": "sha256 ordered-root-v1",
+        "cloud_count": len(cloud_leaf_hashes),
+        "cloud_root_sha256": _ordered_hash_root(
+            cloud_leaf_hashes, domain="clouds"
+        ),
+        "case_count": len(case_leaf_hashes),
+        "case_root_sha256": _ordered_hash_root(case_leaf_hashes, domain="cases"),
+        "counts_match_attempted_work": (
+            len(cloud_leaf_hashes) == counters["clouds_generated"]
+            and len(case_leaf_hashes) == counters["campaign_cases_attempted"]
+        ),
+    }
     stable_identity = {
         "config": config.as_manifest(),
         "counters": counters,
@@ -1598,30 +2192,92 @@ def run_campaign(config: CampaignConfig) -> dict[str, object]:
         "cases_completed_by_dimension": cases_completed_by_dimension,
         "clouds_attempted_by_dimension": clouds_attempted_by_dimension,
         "clouds_completed_by_dimension": clouds_completed_by_dimension,
+        "provenance": provenance,
+        "input_hash_roots": input_hash_roots,
         "status": "failed" if failure_record is not None else "passed",
     }
     campaign_id = hashlib.sha256(
         _canonical_json(stable_identity).encode("utf-8")
     ).hexdigest()
+    seed_scale_configuration_satisfied = (
+        config.seed_scale_configuration_satisfied
+    )
+    normative_gamma_checks_satisfied = (
+        failure_record is None
+        and counters["reduced_gamma_cut_comparisons"] > 0
+        and counters["reduced_gamma_batch_comparisons"] > 0
+        and counters["reduced_gamma_vertical_map_comparisons"] > 0
+    )
+    gabriel_diagnostic_checks_satisfied = (
+        failure_record is None
+        and counters["gabriel_partial_cut_comparisons"] > 0
+        and counters["gabriel_partial_positive_inclusion_comparisons"] > 0
+    )
+    provenance_requirements_satisfied = bool(
+        provenance["complete"]
+        and input_hash_roots["counts_match_attempted_work"]
+    )
+    seed_scale_scientific_audit_satisfied = (
+        seed_scale_configuration_satisfied
+        and normative_gamma_checks_satisfied
+        and gabriel_diagnostic_checks_satisfied
+    )
+    seed_scale_evidence_ready = (
+        seed_scale_scientific_audit_satisfied
+        and provenance_requirements_satisfied
+    )
+    matrix_configuration_satisfied = all(config.matrix_coverage.values())
+    matrix_audit_satisfied = (
+        failure_record is None
+        and matrix_configuration_satisfied
+        and counters["kmax_prefix_comparisons"] > 0
+    )
+    matrix_evidence_ready = (
+        matrix_audit_satisfied and provenance_requirements_satisfied
+    )
     return {
-        "schema_version": 1,
+        "schema_version": CAMPAIGN_SCHEMA_VERSION,
         "kind": "morsehgp3d_oracle_campaign_manifest",
         "campaign_id": campaign_id,
         "phase": "1",
         "backend": "reference_cpu",
         "mode": "certified",
+        "reconstruction_contract_id": "hgp-reduced-v2",
         "gcp_used": False,
+        "provenance": provenance,
+        "input_hash_roots": input_hash_roots,
+        "scientific_roles": {
+            "hgp_reduced": {
+                "relation": "gamma",
+                "normative": True,
+                "comparison": "nontrivial Gamma components above order one",
+            },
+            "gabriel_raw": {
+                "relation": "gabriel",
+                "normative": False,
+                "forest_semantics": "partial_refinement",
+                "proof_basis": "gabriel_positive_connectivity",
+                "vertical_maps": "not_constructed",
+            },
+            "full_pi0": {
+                "relation": "gamma",
+                "normative": False,
+                "reason": "M.1 remains a proof obligation outside this campaign",
+            },
+        },
         "comparison_scope": {
             "internal_consistency": [
                 "full forest replay against the Gamma filtration from which it is reduced",
-                "reduced forest replay against the Gabriel filtration from which it is reduced",
+                "normative hgp_reduced cuts and batches against nontrivial exhaustive Gamma components",
+                "raw Gabriel partial-forest replay against the Gabriel sub-filtration",
                 "explicit cut monotonicity and separate adjacent-order naturality "
                 "for Gamma, full_pi0 and hgp_reduced",
+                "normative hgp_reduced vertical assignments against their exhaustive Gamma projection",
                 "Kmax prefix coherence across every configured common order",
             ],
             "cross_construction_differential": [
-                "covered point unions of reduced Gabriel components versus "
-                "nontrivial full Gamma components"
+                "every raw Gabriel component is contained in one unique exhaustive Gamma component",
+                "Gamma/Gabriel divergences are counted diagnostically and never fail the normative hgp_reduced profile",
             ],
             "metamorphic": [
                 "input permutation",
@@ -1656,23 +2312,53 @@ def run_campaign(config: CampaignConfig) -> dict[str, object]:
         "clouds_completed_by_dimension": clouds_completed_by_dimension,
         "matrix_gate": {
             "coverage": config.matrix_coverage,
-            "satisfied": all(config.matrix_coverage.values()),
-            "prefix_coherence_checked": len(config.k_max_values) > 1,
-            "scope": "configured n/Kmax relation matrix only",
+            "configuration_satisfied": matrix_configuration_satisfied,
+            "satisfied": matrix_audit_satisfied,
+            "evidence_ready": matrix_evidence_ready,
+            "prefix_coherence_checked": counters["kmax_prefix_comparisons"] > 0,
+            "provenance_requirements_satisfied": (
+                provenance_requirements_satisfied
+            ),
+            "scope": "configured n/Kmax relation matrix audited by this manifest only",
+            "may_be_aggregated_with_seed_scale_manifest": True,
         },
         "phase1_campaign_scale": {
             "all_affine_dimensions": config.dimensions == (1, 2, 3),
             "ten_thousand_seeds_per_dimension": (
                 config.seeds_per_dimension >= 10_000
             ),
-            "runner_scale_requirements_satisfied": (
-                config.dimensions == (1, 2, 3)
-                and config.seeds_per_dimension >= 10_000
-                and all(config.matrix_coverage.values())
-                and config.failure_dir is not None
-                and config.permutations_per_seed > 0
-                and config.metamorphic_stride > 0
+            "configuration_requirements_satisfied": (
+                seed_scale_configuration_satisfied
             ),
+            "configuration_scope": (
+                "10k seed-scale manifest; n/Kmax matrix coverage is evaluated "
+                "separately and may come from another manifest"
+            ),
+            "normative_gamma_checks_satisfied": (
+                normative_gamma_checks_satisfied
+            ),
+            "gabriel_diagnostic_checks_satisfied": (
+                gabriel_diagnostic_checks_satisfied
+            ),
+            "provenance_requirements_satisfied": (
+                provenance_requirements_satisfied
+            ),
+            "input_hash_roots_complete": input_hash_roots[
+                "counts_match_attempted_work"
+            ],
+            "runner_scale_requirements_satisfied": (
+                seed_scale_evidence_ready
+            ),
+            "seed_scale_scientific_audit_satisfied": (
+                seed_scale_scientific_audit_satisfied
+            ),
+            "seed_scale_evidence_ready": seed_scale_evidence_ready,
+            "matrix_audit_satisfied_in_this_manifest": matrix_audit_satisfied,
+            "matrix_evidence_ready_in_this_manifest": matrix_evidence_ready,
+            "combined_seed_and_matrix_requirements_satisfied_in_this_manifest": (
+                seed_scale_evidence_ready and matrix_evidence_ready
+            ),
+            "separate_matrix_manifest_may_be_aggregated": True,
             "automatic_failure_fixture_enabled": config.failure_dir is not None,
             "input_permutation_sampling_enabled": (
                 config.permutations_per_seed > 0
@@ -1683,8 +2369,10 @@ def run_campaign(config: CampaignConfig) -> dict[str, object]:
             "repository_phase_exit_claimed": False,
             "reason": (
                 "the repository phase gate also depends on frozen fixtures, "
-                "serialization evidence and reviewed artifacts outside this runner"
+                "the permanent Gabriel counterexample, serialization evidence "
+                "and reviewed artifacts outside this runner"
             ),
+            "permanent_gabriel_counterexample_checked_by_runner": False,
             "minimization_scope": (
                 "counterexamples are minimized by greedy point deletion, then "
                 "by deterministic bounded integer-coordinate shrinking"

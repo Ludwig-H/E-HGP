@@ -8,7 +8,7 @@ import platform
 import re
 import struct
 from fractions import Fraction
-from math import isfinite
+from math import comb, isfinite
 from pathlib import Path
 from typing import Any, IO, Iterable, Mapping, Sequence
 
@@ -162,6 +162,40 @@ def dump_contract(
     Path(destination).write_text(encoded, encoding="utf-8")
 
 
+def _validated_exhaustive_gamma_filtrations(
+    result: OracleResult,
+) -> tuple[Any, ...]:
+    """Rebuild Gamma and reject any amputated or relabelled cut artifact."""
+
+    from .gamma import build_gamma_filtration
+
+    rebuilt = []
+    for order_result in result.orders:
+        filtration = build_gamma_filtration(result.points, order_result.order)
+        if order_result.filtration != filtration:
+            raise ValueError(
+                f"order {order_result.order} Gamma filtration is not exhaustive"
+            )
+        expected_levels = filtration.critical_levels
+        if order_result.critical_levels != expected_levels:
+            raise ValueError(
+                f"order {order_result.order} does not expose the exhaustive "
+                "Gamma critical levels"
+            )
+        expected_cuts = tuple(
+            filtration.cut(level, closed=closed, graph_kind="gamma")
+            for level in expected_levels
+            for closed in (False, True)
+        )
+        if order_result.cuts != expected_cuts:
+            raise ValueError(
+                f"order {order_result.order} cuts are not the freshly rebuilt "
+                "exhaustive Gamma cuts"
+            )
+        rebuilt.append(filtration)
+    return tuple(rebuilt)
+
+
 def serialize_oracle_result(
     result: OracleResult,
     *,
@@ -192,6 +226,8 @@ def serialize_oracle_cuts(result: OracleResult) -> dict[str, Any]:
     fixtures remain serializable even when they are not binary64 inputs.
     """
 
+    _validated_exhaustive_gamma_filtrations(result)
+
     input_points = [
         {
             "schema_version": SCHEMA_VERSION,
@@ -204,7 +240,11 @@ def serialize_oracle_cuts(result: OracleResult) -> dict[str, Any]:
     input_id = canonical_id("OracleCutInput", input_points)
     order_records = []
     all_cut_ids = []
-    expected_graph_kind = "gamma" if result.profile == "full_pi0" else "gabriel"
+    # Both public profiles are replayed against exhaustive Gamma.  A raw
+    # Gabriel cut is a useful diagnostic artifact, but it is not the
+    # normative hgp_reduced hierarchy and must never cross this boundary as
+    # though it were exact.
+    expected_graph_kind = "gamma"
     for order_result in result.orders:
         cuts = tuple(
             sorted(
@@ -295,12 +335,99 @@ def serialize_oracle_cuts(result: OracleResult) -> dict[str, Any]:
     }
 
 
+def _validate_complete_reference_replay(result: OracleResult) -> None:
+    """Re-run the default oracle before asserting any completeness bit.
+
+    This applies to both profiles.  ``full_pi0`` remains conditional under
+    M.1, but its catalogue, Gamma filtration, batches, attachments and maps
+    are still declared complete and therefore must match a fresh reference
+    replay.  Labels or stale accounting metrics are never accepted as proof.
+    """
+
+    from .oracle import run_oracle
+
+    rebuilt = run_oracle(result.points, result.k_max, profile=result.profile)
+    if result.critical_catalog != rebuilt.critical_catalog:
+        raise ValueError(
+            "cannot serialize reference completeness: critical catalogue is "
+            "not the exhaustive deterministic catalogue"
+        )
+    for actual, expected in zip(result.orders, rebuilt.orders):
+        if actual.filtration != expected.filtration:
+            raise ValueError(
+                f"cannot serialize reference completeness: order {actual.order} "
+                "Gamma filtration is not exhaustive"
+            )
+        if actual.critical_levels != expected.critical_levels:
+            raise ValueError(
+                f"cannot serialize reference completeness: order {actual.order} "
+                "critical levels are not exhaustive"
+            )
+        if actual.cuts != expected.cuts:
+            raise ValueError(
+                f"cannot serialize reference completeness: order {actual.order} "
+                "cuts are not the exhaustive Gamma cuts"
+            )
+        if actual.forest != expected.forest:
+            raise ValueError(
+                f"cannot serialize reference completeness: order {actual.order} "
+                "forest is not the deterministic exhaustive Gamma replay"
+            )
+        if actual.hyperedges != expected.hyperedges:
+            raise ValueError(
+                f"cannot serialize reference completeness: order {actual.order} "
+                "Gabriel diagnostics are incomplete"
+            )
+        if actual.attachments != expected.attachments:
+            raise ValueError(
+                f"cannot serialize reference completeness: order {actual.order} "
+                "attachments are not the deterministic reference replay"
+            )
+        if actual.equal_level_batches != expected.equal_level_batches:
+            raise ValueError(
+                f"cannot serialize reference completeness: order {actual.order} "
+                "equal-level batches are not the deterministic reference replay"
+            )
+        if actual.coverage_log != expected.coverage_log:
+            raise ValueError(
+                f"cannot serialize reference completeness: order {actual.order} "
+                "coverage log is not the deterministic reference replay"
+            )
+    if result.vertical_maps != rebuilt.vertical_maps:
+        raise ValueError(
+            "cannot serialize reference completeness: vertical maps are not "
+            "the deterministic reference replay"
+        )
+    if result.metadata.get("reference_metrics") != rebuilt.metadata.get(
+        "reference_metrics"
+    ):
+        raise ValueError(
+            "cannot serialize reference completeness: accounting metrics do "
+            "not match the deterministic reference replay"
+        )
+
+
 def _serialize_shared_result(
     result: OracleResult,
     *,
     run_id: str | None,
     software_environment: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
+    reduced_exact = result.profile == "hgp_reduced"
+    if reduced_exact:
+        non_gamma_orders = [
+            order_result.order
+            for order_result in result.orders
+            if getattr(order_result.forest, "graph_kind", None) != "gamma"
+            or any(cut.graph_kind != "gamma" for cut in order_result.cuts)
+        ]
+        if non_gamma_orders:
+            raise ValueError(
+                "cannot serialize hgp_reduced as exact: exhaustive Gamma provenance "
+                f"is missing at orders {non_gamma_orders!r}"
+            )
+    _validate_complete_reference_replay(result)
+
     points = [certified_point(point) for point in result.input_points]
     input_digest = input_sha256(points)
 
@@ -456,9 +583,7 @@ def _serialize_shared_result(
             )
     batch_records.sort(key=lambda record: record["batch_id"])
 
-    # The current hgp_reduced implementation follows the raw Gabriel flow.
-    # Contract v2 permits that path only as positive partial connectivity.
-    semantics = "partial_refinement"
+    semantics = "exact" if reduced_exact else "partial_refinement"
     forest_records = _serialize_forests(
         result,
         semantics,
@@ -512,11 +637,7 @@ def _serialize_shared_result(
         "canonical_cell_certificates": [],
         "verified_event_ids": sorted(record["event_id"] for record in event_records),
         "unresolved_loci": [],
-        "positive_guarantees": (
-            ["partial_forest_refines_exact", "positive_connectivity", "verified_events"]
-            if result.profile == "hgp_reduced"
-            else ["partial_forest_refines_exact", "verified_events"]
-        ),
+        "positive_guarantees": ["partial_forest_refines_exact", "verified_events"],
         "absence_assertions_allowed": False,
     }
 
@@ -547,7 +668,7 @@ def _serialize_shared_result(
         "schema_version": SCHEMA_VERSION,
         "result_id": canonical_id("MorseHGP3DResult", scientific_projection),
         "run_id": effective_run_id,
-        "result_kind": "partial_hierarchy",
+        "result_kind": "hierarchy" if reduced_exact else "partial_hierarchy",
         "backend": "reference_cpu",
         "profile": result.profile,
         "mode": "certified",
@@ -565,7 +686,8 @@ def _serialize_shared_result(
         "materialized_point_sets": materialized,
         "run_certificate": certificate,
     }
-    contract["partial_scope"] = partial_scope
+    if not reduced_exact:
+        contract["partial_scope"] = partial_scope
     return contract
 
 
@@ -1023,6 +1145,11 @@ def _run_certificate(
     environment: Mapping[str, Any],
 ) -> dict[str, Any]:
     reduced = result.profile == "hgp_reduced"
+    expected_semantics = "exact" if reduced else "partial_refinement"
+    if semantics != expected_semantics:
+        raise ValueError(
+            f"{result.profile} requires forest_semantics={expected_semantics}"
+        )
     metrics = result.metadata.get("reference_metrics")
     required_metrics = {
         "catalog_support_candidates",
@@ -1036,6 +1163,8 @@ def _run_certificate(
         "active_cross_incidences_required",
         "active_cross_incidences_closed",
         "gamma_miniball_queries",
+        "gamma_facets_enumerated",
+        "gamma_cofaces_enumerated",
     }
     if not isinstance(metrics, Mapping) or not required_metrics <= set(metrics):
         raise ValueError(
@@ -1057,6 +1186,23 @@ def _run_certificate(
         raise ValueError("catalogue candidate accounting is not closed")
     if metrics["catalog_support_universe_complete"] != 1:
         raise ValueError("the exhaustive 3D support universe is not certified complete")
+    point_count = len(result.input_points)
+    expected_gamma_facets = sum(
+        comb(point_count, order) for order in range(1, result.k_eff + 1)
+    )
+    expected_gamma_cofaces = sum(
+        comb(point_count, order + 1)
+        for order in range(1, result.k_eff + 1)
+        if order < point_count
+    )
+    if metrics["gamma_facets_enumerated"] != expected_gamma_facets:
+        raise ValueError("Gamma facet accounting is not exhaustive")
+    if metrics["gamma_cofaces_enumerated"] != expected_gamma_cofaces:
+        raise ValueError("Gamma coface accounting is not exhaustive")
+    if metrics["gamma_miniball_queries"] != (
+        expected_gamma_facets + expected_gamma_cofaces
+    ):
+        raise ValueError("Gamma miniball accounting is not exhaustive")
     canonical_children_complete = (
         metrics["canonical_cells_closed"]
         == metrics["canonical_cells_required"]
@@ -1074,8 +1220,8 @@ def _run_certificate(
         + metrics["catalog_point_classifications"]
         + metrics["gamma_miniball_queries"]
     )
-    result_kind = "partial_hierarchy"
-    require_exact = False
+    result_kind = "hierarchy" if reduced else "partial_hierarchy"
+    require_exact = reduced
     m_star = (
         0
         if len(result.input_points) == 1
@@ -1118,7 +1264,7 @@ def _run_certificate(
         "reconstruction_contract_id": "hgp-reduced-v2"
         if reduced
         else "M1-reconstruction-v1",
-        "proof_basis": "gabriel_positive_connectivity"
+        "proof_basis": "gamma_exhaustive_reference"
         if reduced
         else "m1_conditional_contract",
         "result_kind": result_kind,
@@ -1128,7 +1274,7 @@ def _run_certificate(
         "effective_profile": result.profile,
         "requested_mode": "certified",
         "require_exact": require_exact,
-        "public_status": "conditional",
+        "public_status": "exact" if reduced else "conditional",
         "forest_semantics": semantics,
         "input_semantics": {
             "schema_version": SCHEMA_VERSION,
@@ -1171,11 +1317,11 @@ def _run_certificate(
         "active_cross_incidences_complete": active_cross_incidences_complete,
         "catalog_complete_by_rank": [True] * result.s_max,
         "attachments_complete_by_order": [True] * result.k_eff,
-        "gamma_complete_by_order": [not reduced] * result.k_eff,
+        "gamma_complete_by_order": [True] * result.k_eff,
         "batches_complete_by_order": [True] * result.k_eff,
         "vertical_maps_complete": True,
         "partial_guarantees": (
-            ["partial_forest_refines_exact", "positive_connectivity", "verified_events"]
+            ["none"]
             if reduced
             else ["partial_forest_refines_exact", "verified_events"]
         ),

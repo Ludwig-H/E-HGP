@@ -8,7 +8,9 @@ from pathlib import Path
 from reference.morsehgp3d_oracle.catalog import build_critical_catalog
 from reference.morsehgp3d_oracle.exact import affine_dimension
 from reference.morsehgp3d_oracle.gamma import build_gamma_filtration
+from reference.morsehgp3d_oracle.hierarchy import build_gabriel_partial_forest
 from reference.morsehgp3d_oracle.oracle import run_oracle
+from tools.run_oracle_campaign import CampaignConfig, _audit_case, _new_counters
 
 
 FIXTURE_ROOT = Path(__file__).parents[1] / "fixtures"
@@ -37,6 +39,29 @@ def _component_records(cut) -> list[dict[str, object]]:
         }
         for component in cut.components
     ]
+
+
+def _remap_component_records(
+    records: object, point_id_map: dict[int, int]
+) -> list[dict[str, object]]:
+    remapped = []
+    for component in records:
+        remapped.append(
+            {
+                "facet_point_ids": [
+                    list(facet)
+                    for facet in sorted(
+                        tuple(sorted(point_id_map[point_id] for point_id in facet))
+                        for facet in component["facet_point_ids"]
+                    )
+                ],
+                "covered_point_ids": sorted(
+                    point_id_map[point_id]
+                    for point_id in component["covered_point_ids"]
+                ),
+            }
+        )
+    return sorted(remapped, key=lambda component: component["facet_point_ids"])
 
 
 class GabrielPointSetCounterexampleTests(unittest.TestCase):
@@ -138,16 +163,103 @@ class GabrielPointSetCounterexampleTests(unittest.TestCase):
             delayed_closed.components[0].covered_point_ids, (0, 1, 2, 3, 4)
         )
 
-    def test_integrated_oracle_rejects_the_false_reduced_contract(self) -> None:
+    def test_integrated_oracle_uses_gamma_while_raw_gabriel_stays_partial(self) -> None:
         full_result = run_oracle(self.points, 5, profile="full_pi0")
+        reduced_result = run_oracle(self.points, 5, profile="hgp_reduced")
         self.assertEqual(full_result.k_eff, 5)
+        self.assertEqual(reduced_result.k_eff, 5)
         self.assertEqual(len(full_result.vertical_maps), 4)
+        self.assertEqual(len(reduced_result.vertical_maps), 4)
+        self.assertTrue(
+            all(family.is_natural for family in reduced_result.vertical_maps)
+        )
 
-        with self.assertRaisesRegex(
-            ValueError,
-            "profile component and its Gamma container cover different points",
-        ):
-            run_oracle(self.points, 5, profile="hgp_reduced")
+        order_result = reduced_result.for_order(self.counterexample["order"])
+        self.assertEqual(order_result.forest.graph_kind, "gamma")
+        level = _fraction(self.counterexample["squared_level"])
+        normative_cut = order_result.forest.cut(level)
+        gamma_cut = order_result.filtration.cut(level, graph_kind="gamma")
+        nontrivial_gamma = tuple(
+            component for component in gamma_cut.components if component.nontrivial
+        )
+        self.assertEqual(
+            _component_records(normative_cut),
+            _component_records(gamma_cut),
+        )
+        self.assertEqual(
+            _component_records(normative_cut),
+            [
+                {
+                    "facet_point_ids": [
+                        list(facet) for facet in component.facet_point_ids
+                    ],
+                    "covered_point_ids": list(component.covered_point_ids),
+                }
+                for component in nontrivial_gamma
+            ],
+        )
+        self.assertEqual(
+            _component_records(normative_cut),
+            _remap_component_records(
+                self.counterexample["gamma_components"],
+                {
+                    source_id: point.point_id
+                    for point in reduced_result.input_points
+                    for source_id in point.source_indices
+                },
+            ),
+        )
+
+        raw_gabriel = build_gabriel_partial_forest(order_result.filtration)
+        raw_cut = raw_gabriel.cut(level)
+        self.assertEqual(raw_gabriel.graph_kind, "gabriel")
+        self.assertEqual(
+            _component_records(raw_cut),
+            _remap_component_records(
+                self.counterexample["gabriel_components"],
+                {
+                    source_id: point.point_id
+                    for point in reduced_result.input_points
+                    for source_id in point.source_indices
+                },
+            ),
+        )
+        self.assertNotEqual(
+            _component_records(raw_cut),
+            _component_records(normative_cut),
+        )
+
+    def test_campaign_accepts_gamma_and_counts_the_raw_gabriel_divergence(self) -> None:
+        config = CampaignConfig(
+            dimensions=(3,),
+            seeds_per_dimension=1,
+            point_counts=(5,),
+            k_max_values=(5,),
+            permutations_per_seed=0,
+            metamorphic_stride=0,
+            ci=True,
+        )
+        counters = _new_counters()
+        failure = _audit_case(
+            tuple(tuple(point) for point in self.points),
+            config=config,
+            k_max=5,
+            dimension=3,
+            seed=0,
+            counters=counters,
+            exercise_permutations=False,
+            exercise_metamorphic=False,
+        )
+
+        self.assertIsNone(failure)
+        self.assertGreater(counters["reduced_gamma_cut_comparisons"], 0)
+        self.assertGreater(counters["reduced_gamma_batch_comparisons"], 0)
+        self.assertGreater(counters["reduced_gamma_vertical_map_comparisons"], 0)
+        self.assertEqual(
+            counters["gabriel_partial_cut_comparisons"],
+            counters["gabriel_partial_positive_inclusion_comparisons"],
+        )
+        self.assertGreater(counters["gabriel_gamma_divergences_observed"], 0)
 
 
 if __name__ == "__main__":
