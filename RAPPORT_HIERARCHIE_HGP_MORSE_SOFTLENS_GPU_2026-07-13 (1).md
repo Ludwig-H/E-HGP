@@ -11,11 +11,15 @@
 
 Soit $X=\{x_1,\ldots,x_n\}\subset\mathbb{R}^{p}$, et soit $d_{(K)}(y)$ la distance de $y$ à son $K$-ième plus proche voisin. En variable rayon, l'ensemble de forte densité K-NN est
 
-$$L_K(r)=\left\{y\in\mathbb{R}^{p}:\left|B(y,r)\cap X\right|\ge K\right\}=\left\{y:d_{(K)}(y)\le r\right\}.$$
+$$
+L_K(r)=\left\{y\in\mathbb{R}^{p}:\left|B(y,r)\cap X\right|\ge K\right\}=\left\{y:d_{(K)}(y)\le r\right\}.
+$$
 
 La hiérarchie de Hartigan estimée est la filtration de composantes
 
-$$\mathcal{H}_K=\left\{\pi_0\bigl(L_K(r)\bigr)\right\}_{r\ge0}.$$
+$$
+\mathcal{H}_K=\left\{\pi_0\bigl(L_K(r)\bigr)\right\}_{r\ge0}.
+$$
 
 Le manuscrit établit trois faits qui doivent rester des invariants de toute nouvelle proposition.
 
@@ -25,7 +29,9 @@ Le rayon $r$ augmente, les ensembles $L_K(r)$ croissent, et leurs composantes na
 
 À une composante continue $C\subset L_K(r)$, la thèse associe le cluster discret
 
-$$C^{\mathrm{disc}}=\left\{x\in X:\mathrm{dist}(x,C)\le r\right\}.$$
+$$
+C^{\mathrm{disc}}=\left\{x\in X:\mathrm{dist}(x,C)\le r\right\}.
+$$
 
 Pour $K\ge2$, les $C^{\mathrm{disc}}$ peuvent se recouvrir. Une sortie fidèle est donc un arbre de composantes continues enrichi d'une relation d'incidence avec les observations, ou, de manière équivalente, une **hiérarchie de recouvrements**. Imposer trop tôt une partition efface précisément l'information d'ordre supérieur que HGP introduit (définition 7 et discussion, PDF p. 45–47 / manuscrit p. 23–25).
 
@@ -33,11 +39,15 @@ Pour $K\ge2$, les $C^{\mathrm{disc}}$ peuvent se recouvrir. Une sortie fidèle e
 
 Pour chaque $K$-ensemble $Q\subset X$, la région témoin dure est la lentille
 
-$$T_Q(r)=\bigcap_{x_i\in Q}B(x_i,r).$$
+$$
+T_Q(r)=\bigcap_{x_i\in Q}B(x_i,r).
+$$
 
 Elle est convexe, donc connexe, et
 
-$$L_K(r)=\bigcup_{\substack{Q\subset X\\|Q|=K}}T_Q(r).$$
+$$
+L_K(r)=\bigcup_{\substack{Q\subset X\\|Q|=K}}T_Q(r).
+$$
 
 En prenant pour sommets les seules facettes actives $\{Q:|Q|=K,\ T_Q(r)\neq\varnothing\}$, leur graphe d'intersection est exactement le graphe $\Gamma_K(X,r)$ des $(K-1)$-simplexes de Čech du chapitre 6. Ses composantes sont en bijection avec celles de $L_K(r)$, et l'union des identifiants présents dans une composante donne exactement l'amas discret de la thèse (définitions 20–21 et théorème 2, PDF p. 81–85 / manuscrit p. 59–63).
 
@@ -45,7 +55,9 @@ En prenant pour sommets les seules facettes actives $\{Q:|Q|=K,\ T_Q(r)\neq\varn
 
 Le chapitre 8 réduit les adjacences à des swaps élémentaires : deux $K$-facettes $Q$ et $R$ sont reliées par une coface de cardinal $K+1$ lorsqu'elles diffèrent d'un seul point. Le poids de cette coface est le rayon de sa plus petite boule englobante,
 
-$$\rho(Q\cup R)=\min_{y\in\mathbb{R}^{p}}\max_{x_i\in Q\cup R}\|y-x_i\|.$$
+$$
+\rho(Q\cup R)=\min_{y\in\mathbb{R}^{p}}\max_{x_i\in Q\cup R}\|y-x_i\|.
+$$
 
 Sous l'hypothèse de position générale de la définition 26, après restriction aux cofaces de Gabriel, une forêt minimum couvrante restitue, à chaque seuil, les $K$-polyèdres non triviaux du graphe complet. Les facettes isolées ne sont pas toutes garanties par le graphe de Gabriel ; la hiérarchie complète exige donc de conserver séparément leur poids de naissance $\rho(Q)$, ou, de façon minimale, les minima critiques qui engendrent effectivement une composante. Avec cette convention, le $K$-MST de la thèse n'est pas seulement une analogie : il compresse exactement toutes les fusions utiles (définitions 26–30 et théorèmes 4–5, PDF p. 108–115 / manuscrit p. 86–93).
 
@@ -61,7 +73,9 @@ L'analogie avec Sinkhorn doit être maniée avec précaution. En transport optim
 
 Le carré de la distance K-NN s'écrit
 
-$$d_{(K)}(y)^2=\min_{\substack{Q\subset X\\|Q|=K}}\max_{x_i\in Q}\|y-x_i\|^2.$$
+$$
+d_{(K)}(y)^2=\min_{\substack{Q\subset X\\|Q|=K}}\max_{x_i\in Q}\|y-x_i\|^2.
+$$
 
 Le minimum choisit les $K$ plus proches voisins ; le maximum désigne, dans cette facette, le voisin qui contraint la lentille. C'est ce maximum interne qu'il est naturel de régulariser par KL.
 
@@ -69,33 +83,47 @@ Le minimum choisit les $K$ plus proches voisins ; le maximum désigne, dans cett
 
 Pour $\tau>0$, de dimension physique « distance au carré », et pour $|Q|=K$, posons
 
-$$\phi_{Q,\tau}(y)=\tau\log\left(\frac{1}{K}\sum_{x_i\in Q}\exp\left(\frac{\|y-x_i\|^2}{\tau}\right)\right).$$
+$$
+\phi_{Q,\tau}(y)=\tau\log\left(\frac{1}{K}\sum_{x_i\in Q}\exp\left(\frac{\|y-x_i\|^2}{\tau}\right)\right).
+$$
 
 Cette fonction possède la représentation variationnelle
 
-$$\phi_{Q,\tau}(y)=\max_{\alpha\in\Delta_Q}\left\{\sum_{i\in Q}\alpha_i\|y-x_i\|^2-\tau\,\mathrm{KL}(\alpha\|u_Q)\right\},$$
+$$
+\phi_{Q,\tau}(y)=\max_{\alpha\in\Delta_Q}\left\{\sum_{i\in Q}\alpha_i\|y-x_i\|^2-\tau\,\mathrm{KL}(\alpha\|u_Q)\right\},
+$$
 
 où $u_Q$ est la loi uniforme sur $Q$. À basse température, l'adversaire $\alpha$ se concentre sur le point le plus éloigné ; à haute température, il devient uniforme.
 
 Définissons ensuite le champ global en gardant le minimum extérieur **dur** :
 
-$$F_{K,\tau}(y)=\min_{\substack{Q\subset X\\|Q|=K}}\phi_{Q,\tau}(y).$$
+$$
+F_{K,\tau}(y)=\min_{\substack{Q\subset X\\|Q|=K}}\phi_{Q,\tau}(y).
+$$
 
 Comme l'exponentielle est croissante, le minimiseur est toujours un ensemble de $K$ plus proches voisins. Ainsi,
 
-$$F_{K,\tau}(y)=\tau\log\left(\frac{1}{K}\sum_{j=1}^{K}\exp\left(\frac{d_{(j)}(y)^2}{\tau}\right)\right).$$
+$$
+F_{K,\tau}(y)=\tau\log\left(\frac{1}{K}\sum_{j=1}^{K}\exp\left(\frac{d_{(j)}(y)^2}{\tau}\right)\right).
+$$
 
 Cette famille a deux limites exactes :
 
-$$F_{K,0}(y)=d_{(K)}(y)^2,$$
+$$
+F_{K,0}(y)=d_{(K)}(y)^2,
+$$
 
-$$F_{K,\infty}(y)=\frac{1}{K}\sum_{j=1}^{K}d_{(j)}(y)^2.$$
+$$
+F_{K,\infty}(y)=\frac{1}{K}\sum_{j=1}^{K}d_{(j)}(y)^2.
+$$
 
 La première est le champ K-NN de HGP. La seconde est le carré de la DTM empirique de masse $K/n$. La DTM n'est donc pas une idée étrangère à HGP : elle est la limite à haute température de la régularisation entropique naturelle du pire voisin.
 
 De plus, pour $0<\tau_1<\tau_2$,
 
-$$F_{K,\infty}\le F_{K,\tau_2}\le F_{K,\tau_1}\le F_{K,0}.$$
+$$
+F_{K,\infty}\le F_{K,\tau_2}\le F_{K,\tau_1}\le F_{K,0}.
+$$
 
 L'augmentation de la température dilate les sous-niveaux et peut avancer les fusions ; le retour vers $\tau=0$ resserre progressivement la filtration vers HGP.
 
@@ -103,17 +131,25 @@ L'augmentation de la température dilate les sous-niveaux et peut avancer les fu
 
 Pour un seuil carré $t$, posons
 
-$$A_{Q,\tau}(t)=\left\{y\in\mathbb{R}^{p}:\phi_{Q,\tau}(y)\le t\right\}.$$
+$$
+A_{Q,\tau}(t)=\left\{y\in\mathbb{R}^{p}:\phi_{Q,\tau}(y)\le t\right\}.
+$$
 
 Chaque $\phi_{Q,\tau}$ est $2$-fortement convexe ; chaque atome $A_{Q,\tau}(t)$ est donc convexe et
 
-$$\left\{F_{K,\tau}\le t\right\}=\bigcup_{|Q|=K}A_{Q,\tau}(t).$$
+$$
+\left\{F_{K,\tau}\le t\right\}=\bigcup_{|Q|=K}A_{Q,\tau}(t).
+$$
 
 Définissons la naissance d'une facette et la rencontre de deux facettes par
 
-$$\beta_\tau(Q)=\min_y\phi_{Q,\tau}(y),$$
+$$
+\beta_\tau(Q)=\min_y\phi_{Q,\tau}(y),
+$$
 
-$$w_\tau(Q,R)=\min_y\max\left\{\phi_{Q,\tau}(y),\phi_{R,\tau}(y)\right\}.$$
+$$
+w_\tau(Q,R)=\min_y\max\left\{\phi_{Q,\tau}(y),\phi_{R,\tau}(y)\right\}.
+$$
 
 Considérons le graphe filtré dont les sommets sont les $K$-ensembles, présents à partir de $\beta_\tau(Q)$, et dont les arêtes relient deux ensembles qui diffèrent d'un seul point, avec poids $w_\tau(Q,R)$.
 
@@ -123,11 +159,15 @@ Considérons le graphe filtré dont les sommets sont les $K$-ensembles, présent
 
 Aux deux extrémités,
 
-$$w_0(Q,R)=\rho(Q\cup R)^2$$
+$$
+w_0(Q,R)=\rho(Q\cup R)^2
+$$
 
 pour un swap élémentaire, tandis qu'à haute température
 
-$$\phi_{Q,\infty}(y)=\|y-b_Q\|^2+v_Q,$$
+$$
+\phi_{Q,\infty}(y)=\|y-b_Q\|^2+v_Q,
+$$
 
 avec $b_Q=K^{-1}\sum_{i\in Q}x_i$ et $v_Q=K^{-1}\sum_{i\in Q}\|x_i-b_Q\|^2$. On retrouve donc respectivement le graphe de facettes de Čech et une union de boules de puissance.
 
@@ -135,11 +175,15 @@ avec $b_Q=K^{-1}\sum_{i\in Q}x_i$ et $v_Q=K^{-1}\sum_{i\in Q}\|x_i-b_Q\|^2$. On 
 
 Pour une facette réduite à $Q=\{x_i\}$, le simplexe des poids $\Delta_Q$ est lui-même réduit à un point. Pour toute température,
 
-$$\phi_{\{x_i\},\tau}(y)=\|y-x_i\|^2.$$
+$$
+\phi_{\{x_i\},\tau}(y)=\|y-x_i\|^2.
+$$
 
 Pour deux points,
 
-$$w_\tau(\{x_i\},\{x_j\})=\frac{1}{4}\|x_i-x_j\|^2.$$
+$$
+w_\tau(\{x_i\},\{x_j\})=\frac{1}{4}\|x_i-x_j\|^2.
+$$
 
 La forêt couvrante est donc exactement l'EMST, indépendamment de $\tau$. La réponse mathématique à la question « quelle est la structure du 1-NN régularisé ? » est ainsi très nette :
 
@@ -151,27 +195,39 @@ Dans ce cadre min–max, une modification non triviale à $K=1$ devrait agir sur
 
 La naissance possède déjà un dual de taille $K$ :
 
-$$\beta_\tau(Q)=\max_{\alpha\in\Delta_Q}\left\{\sum_{i\in Q}\alpha_i\|x_i\|^2-\left\|\sum_{i\in Q}\alpha_i x_i\right\|^2-\tau\,\mathrm{KL}(\alpha\|u_Q)\right\}.$$
+$$
+\beta_\tau(Q)=\max_{\alpha\in\Delta_Q}\left\{\sum_{i\in Q}\alpha_i\|x_i\|^2-\left\|\sum_{i\in Q}\alpha_i x_i\right\|^2-\tau\,\mathrm{KL}(\alpha\|u_Q)\right\}.
+$$
 
 Son centre est $y_Q^\star=\sum_i\alpha_i^\star x_i$. À $\tau=0$, on retrouve le dual de la miniball ; à $\tau=\infty$, $\alpha^\star=u_Q$ et $\beta_\infty(Q)=v_Q$. Le poids de rencontre $w_\tau(Q,R)$ se calcule de même sans optimiser directement dans $\mathbb{R}^{p}$. Introduisons $u_i\ge0$ pour $i\in Q$, $v_j\ge0$ pour $j\in R$, avec $\sum_i u_i+\sum_jv_j=1$, $\gamma=\sum_i u_i$, et agrégeons les doublons dans $\eta_s=u_s+v_s$. Alors
 
-$$w_\tau(Q,R)=\max_{\substack{u,v\ge0\\\sum_i u_i+\sum_jv_j=1}}\left\{\sum_s\eta_s\|x_s\|^2-\left\|\sum_s\eta_sx_s\right\|^2-\tau\left[\sum_{i\in Q}u_i\log\left(\frac{Ku_i}{\gamma}\right)+\sum_{j\in R}v_j\log\left(\frac{Kv_j}{1-\gamma}\right)\right]\right\}.$$
+$$
+w_\tau(Q,R)=\max_{\substack{u,v\ge0\\\sum_i u_i+\sum_jv_j=1}}\left\{\sum_s\eta_s\|x_s\|^2-\left\|\sum_s\eta_sx_s\right\|^2-\tau\left[\sum_{i\in Q}u_i\log\left(\frac{Ku_i}{\gamma}\right)+\sum_{j\in R}v_j\log\left(\frac{Kv_j}{1-\gamma}\right)\right]\right\}.
+$$
 
 Les coordonnées de $u$ ou $v$ absentes d'un des deux ensembles sont prises nulles dans $\eta_s=u_s+v_s$. La dérivation introduit un poids $\gamma\in[0,1]$ pour écrire le maximum de deux fonctions comme un maximum de combinaisons convexes, applique deux fois la représentation variationnelle de $\phi$, puis élimine $y$ analytiquement ; le théorème minimax s'applique par coercivité en $y$ et compacité des simplexes. Les termes entropiques aux faces $\gamma=0$ et $\gamma=1$ sont compris par prolongement continu. Il s'agit d'une maximisation concave sur un simplexe de dimension au plus $2K-1$. Le centre de rencontre est
 
-$$y^\star=\sum_s\eta_sx_s.$$
+$$
+y^\star=\sum_s\eta_sx_s.
+$$
 
 Pour un swap élémentaire, l'union ne contient que $K+1$ points ; pour $K=10$, le noyau dur $\tau=0$ est donc un problème de miniball sur onze points, et le noyau général reste un petit problème à Gram. La dimension ambiante intervient dans le calcul initial des produits scalaires, mais pas dans la taille du solveur. Un active-set, Newton projeté ou mirror-ascent batché est naturellement compatible avec le GPU. Un nombre fixe d'itérations ne fournit toutefois qu'un poids approché : le statut `atlas_exact` exige des bornes primale–duale certifiées, une tolérance inférieure à l'écart entre événements concurrents et un chemin spécifique pour les quasi-égalités.
 
 À haute température, le poids de rencontre de deux sites de puissance possède même une forme fermée. Pour $d=\|b_Q-b_R\|>0$,
 
-$$s=\mathrm{clip}\left(\frac{d^2+v_R-v_Q}{2d},0,d\right),$$
+$$
+s=\mathrm{clip}\left(\frac{d^2+v_R-v_Q}{2d},0,d\right),
+$$
 
-$$w_\infty(Q,R)=\max\left\{v_Q+s^2,\ v_R+(d-s)^2\right\}.$$
+$$
+w_\infty(Q,R)=\max\left\{v_Q+s^2,\ v_R+(d-s)^2\right\}.
+$$
 
 Si $d=0$, $w_\infty(Q,R)=\max\{v_Q,v_R\}$. Enfin,
 
-$$w_\infty(Q,R)\le w_\tau(Q,R)\le w_0(Q,R).$$
+$$
+w_\infty(Q,R)\le w_\tau(Q,R)\le w_0(Q,R).
+$$
 
 Le poids power est donc un minorant très bon marché pour un Borůvka branch-and-bound. Celui-ci n'est exact que si chaque paire ou bloc non exploré possède un minorant certifié ; une shortlist ANN suivie du petit dual reste une heuristique. Sous cette condition, seuls les candidats encore susceptibles d'améliorer l'arête sortante courante passent dans le solveur certifié.
 
@@ -181,15 +237,21 @@ La mosaïque d'ordre $K$ contient toute l'information, mais elle en contient bea
 
 Pour $r=d_{(K)}(c)$, posons
 
-$$I(c)=X\cap B^\circ(c,r),\qquad U(c)=X\cap\partial B(c,r).$$
+$$
+I(c)=X\cap B^\circ(c,r),\qquad U(c)=X\cap\partial B(c,r).
+$$
 
 Sous une hypothèse de position générale, $c$ est critique si et seulement si
 
-$$c\in\mathrm{relint}\,\mathrm{conv}\,U(c),$$
+$$
+c\in\mathrm{relint}\,\mathrm{conv}\,U(c),
+$$
 
 et son indice vaut
 
-$$\mu(c)=|I(c)|+|U(c)|-K.$$
+$$
+\mu(c)=|I(c)|+|U(c)|-K.
+$$
 
 De plus, $|U(c)|\le p+1$. Ces résultats sont établis dans [Reani–Bobrowski, *Morse Theory for the k-NN Distance Function*](https://arxiv.org/abs/2403.12792).
 
@@ -201,10 +263,10 @@ De plus, $|U(c)|\le p+1$. Ces résultats sont établis dans [Reani–Bobrowski, 
 
 En dimension 3, $|U|\le4$. Ainsi, l'ordre $K=10$ n'impose jamais un **support géométrique frontière** à dix ou onze points : le centre et le rayon sont déterminés par deux, trois ou quatre points frontière. L'événement complet transporte néanmoins 10 ou 11 identifiants, les autres étant les points strictement intérieurs.
 
-| événement pour $K=10$ | $|U|=2$ | $|U|=3$ | $|U|=4$ |
+| événement pour $K=10$ | $\vert U\vert =2$ | $\vert U\vert =3$ | $\vert U\vert =4$ |
 |---|---:|---:|---:|
-| naissance $\mu=0$ | $|I|=8$ | $|I|=7$ | $|I|=6$ |
-| selle $\mu=1$ | $|I|=9$ | $|I|=8$ | $|I|=7$ |
+| naissance $\mu=0$ | $\vert I\vert =8$ | $\vert I\vert =7$ | $\vert I\vert =6$ |
+| selle $\mu=1$ | $\vert I\vert =9$ | $\vert I\vert =8$ | $\vert I\vert =7$ |
 
 Géométriquement, les supports sont respectivement une paire dont le centre est le milieu, un triangle bien centré dans son cercle, ou un tétraèdre bien centré dans sa sphère.
 
@@ -212,13 +274,17 @@ Géométriquement, les supports sont respectivement une paire dont le centre est
 
 Soit $\sigma$ une coface de cardinal $K+1$, de miniball $B_\sigma=B(c,\rho)$, et supposons $\sigma$ de Gabriel au sens du chapitre 8. On utilise ici la position générale de la définition 26 : aucun point extérieur à $\sigma$ sur $\partial B_\sigma$, indépendance affine du support frontière et unicité des niveaux critiques distincts. Écrivons $I=\sigma\cap B^\circ_\sigma$ et $U=\sigma\cap\partial B_\sigma$. La vacuité de Gabriel donne
 
-$$|I|+|U|=K+1,$$
+$$
+|I|+|U|=K+1,
+$$
 
 Comme $|U|\ge2$, on a $|I|\le K-1$ ; par conséquent $d_{(K)}(c)=\rho$. La propriété caractéristique d'une miniball donne $c\in\mathrm{relint}\,\mathrm{conv}\,U$. Le centre est donc un point critique d'indice 1. Réciproquement, un point critique d'indice 1 définit $\sigma=I\cup U$, de cardinal $K+1$ ; la condition $c\in\mathrm{relint}\,\mathrm{conv}\,U$ montre que $B(c,r)$ est la miniball de $\sigma$, et les définitions de $I,U$ avec la position générale excluent tout point extérieur dans cette boule. C'est une coface de Gabriel.
 
 On obtient donc, sous les mêmes hypothèses génériques, la correspondance
 
-$$\left\{\text{cofaces de Gabriel de cardinal }K+1\right\}\longleftrightarrow\left\{\text{points critiques de }d_{(K)}\text{ d'indice }1\right\}.$$
+$$
+\left\{\text{cofaces de Gabriel de cardinal }K+1\right\}\longleftrightarrow\left\{\text{points critiques de }d_{(K)}\text{ d'indice }1\right\}.
+$$
 
 Le théorème 4 de la thèse affirme ensuite que seules certaines de ces cofaces sont $K$-séparantes. Dans le langage de Morse, une selle d'indice 1 peut simultanément fusionner des composantes de $H_0$ et créer des classes de $H_1$. Une union–find ordonnée par rayon extrait exactement sa partie $H_0$.
 
@@ -228,7 +294,9 @@ De même, les configurations critiques d'indice 0 sont les facettes de cardinal 
 
 Pour une selle $c$ d'indice 1, les bras locaux juste sous le niveau critique sont portés par les $K$-ensembles
 
-$$Q_u=I\cup\bigl(U\setminus\{u\}\bigr),\qquad u\in U.$$
+$$
+Q_u=I\cup\bigl(U\setminus\{u\}\bigr),\qquad u\in U.
+$$
 
 Notons $j=|U|\le4$. Lorsque le rayon atteint $r(c)$, les $j$ bras sont attachés simultanément. S'ils appartiennent juste avant $r(c)$ à $m$ composantes globales distinctes, l'événement tue $m-1$ classes de $H_0$ et peut créer simultanément $j-m$ classes de $H_1$ ; l'hyper-Kruskal ne retient que le premier nombre.
 
@@ -250,7 +318,9 @@ L'hypothèse « un seul événement par niveau » est commode pour les preuves, 
 
 L'objet de sortie n'est ni une grille, ni le complexe alpha complet, ni la mosaïque complète. Le pipeline mathématique cible est
 
-$$\boxed{\text{minima de rang }K\ +\ \text{selles de rang }K+1\ +\ \text{attaches descendantes}\ +\ \text{hyper-Kruskal}.}$$
+$$
+\boxed{\text{minima de rang }K\ +\ \text{selles de rang }K+1\ +\ \text{attaches descendantes}\ +\ \text{hyper-Kruskal}.}
+$$
 
 La mosaïque de Delaunay d'ordre supérieur et la rhomboid tiling restent utiles comme **oracles de référence ou de complétude**, pas comme format obligatoire de calcul ni de sortie. Les constructions exactes du multicover sont décrites par [Corbet–Kerber–Lesnick–Osang](https://arxiv.org/abs/2103.07823) et l'algorithme incrémental des mosaïques par [Edelsbrunner–Osang](https://arxiv.org/abs/2011.03617).
 
@@ -297,21 +367,31 @@ Les filets persistants peuvent être approchés par des MIS parallèles sur des 
 
 La faible taille des miniballs ne suffit pas à rendre l'objet global sparse. Considérons
 
-$$X=\{e_1,\ldots,e_n\}\subset\mathbb{R}^{n},$$
+$$
+X=\{e_1,\ldots,e_n\}\subset\mathbb{R}^{n},
+$$
 
 où les $e_i$ sont les vecteurs de la base canonique. Pour chaque $K$-ensemble $Q$, son barycentre est
 
-$$b_Q=\frac{1}{K}\sum_{i\in Q}e_i.$$
+$$
+b_Q=\frac{1}{K}\sum_{i\in Q}e_i.
+$$
 
 On a
 
-$$\|b_Q-e_i\|^2=1-\frac{1}{K}\quad\text{si }i\in Q,$$
+$$
+\|b_Q-e_i\|^2=1-\frac{1}{K}\quad\text{si }i\in Q,
+$$
 
-$$\|b_Q-e_i\|^2=1+\frac{1}{K}\quad\text{si }i\notin Q.$$
+$$
+\|b_Q-e_i\|^2=1+\frac{1}{K}\quad\text{si }i\notin Q.
+$$
 
 Le $K$-ensemble $Q$ est donc l'unique ensemble de $K$ plus proches voisins dans un voisinage de $b_Q$, et $b_Q$ est un minimum local de $d_{(K)}$. La hiérarchie exacte possède ainsi au moins
 
-$$\binom{n}{K}$$
+$$
+\binom{n}{K}
+$$
 
 points de naissance spatialement distincts, tous au même niveau $1-1/K$. Toute représentation explicite et étiquetée de la merge forest possède donc au moins ce nombre de feuilles. Une représentation symbolique peut naturellement exploiter la symétrie exceptionnelle de cet exemple, mais une perturbation générique élimine cette compression sans éliminer les minima. L'explosion combinatoire appartient ici au **merge tree lui-même**, pas seulement à une mosaïque inutilement riche. Elle subsiste à haute température : la moyenne quadratique associée à $Q$ est également minimale en $b_Q$.
 
@@ -326,11 +406,15 @@ Il n'existe donc aucun analogue universel de Sinkhorn qui donnerait une représe
 
 Soit
 
-$$\mathcal{A}\subseteq\binom{X}{K}$$
+$$
+\mathcal{A}\subseteq\binom{X}{K}
+$$
 
 un ensemble fini de facettes. On définit
 
-$$F_{\mathcal{A},\tau}(y)=\min_{Q\in\mathcal{A}}\phi_{Q,\tau}(y).$$
+$$
+F_{\mathcal{A},\tau}(y)=\min_{Q\in\mathcal{A}}\phi_{Q,\tau}(y).
+$$
 
 La hiérarchie de $F_{\mathcal{A},\tau}$ peut être calculée exactement sans grille. Pour un atlas arbitraire, il faut initialement considérer le graphe complet des rencontres $w_\tau(Q,R)$, car le chemin de swaps reliant deux atomes peut sortir de $\mathcal{A}$. Une arête non élémentaire sélectionnée par la forêt peut, à son centre $y^\star$, proposer un chemin d'au plus $K$ swaps actifs. Cette factorisation n'est pas sémantiquement neutre : pour représenter exactement l'atlas courant, on conserve l'arête directe ; si les facettes intermédiaires sont ajoutées, elles deviennent de vraies nouvelles colonnes, susceptibles de créer ailleurs une naissance ou une fusion plus précoce, et toute la forêt du nouvel atlas doit être recalculée.
 
@@ -338,11 +422,15 @@ La hiérarchie de $F_{\mathcal{A},\tau}$ peut être calculée exactement sans gr
 
 En adoptant explicitement la convention où le témoin appartient à son propre voisinage, posons
 
-$$Q_i=\{x_i\}\cup N_{K-1}\left(x_i;X\setminus\{x_i\}\right).$$
+$$
+Q_i=\{x_i\}\cup N_{K-1}\left(x_i;X\setminus\{x_i\}\right).
+$$
 
 L'initialisation naturelle est
 
-$$\mathcal{A}_0=\mathrm{unique}\left\{Q_i:i=1,\ldots,n\right\}.$$
+$$
+\mathcal{A}_0=\mathrm{unique}\left\{Q_i:i=1,\ldots,n\right\}.
+$$
 
 Elle contient au plus $n$ facettes. À $\tau=\infty$, cette construction est exactement le *witnessed k-distance* de [Guibas–Mérigot–Morozov](https://arxiv.org/abs/1102.4972), donc une union de $O(n)$ boules de puissance. À $\tau=0$, les mêmes identifiants portent de vraies lentilles de Čech : la filtration obtenue est une sous-filtration de HGP, exacte sur l'atlas.
 
@@ -356,7 +444,9 @@ Le raffinement doit être piloté par les événements de la forêt, pas par une
 2. Récupérer les centres des minima et, surtout, les centres $y^\star$ des arêtes de fusion retenues ou presque retenues.
 3. À chaque centre, calculer le vrai $K$-NN dur
 
-$$Q^\star(y)=N_K(y).$$
+$$
+Q^\star(y)=N_K(y).
+$$
 
 À $y$ fixé, $Q^\star(y)$ est une colonne minimisante exacte de $F_{K,\tau}(y)$, pour toute température.
 4. Conserver les arêtes directes comme certificat de l'atlas courant, ajouter les facettes intermédiaires comme nouvelles colonnes, puis recalculer la forêt du nouvel atlas.
@@ -364,7 +454,9 @@ $$Q^\star(y)=N_K(y).$$
 
 L'oracle de proposition peut utiliser un soft-top-$K$ capé de type Fermi–Dirac sur le shell de rangs $K,\ldots,K+L$ :
 
-$$q_i(y;\varepsilon)=\frac{1}{1+\exp\left((\|y-x_i\|^2-\lambda)/\varepsilon\right)},\qquad\sum_iq_i=K.$$
+$$
+q_i(y;\varepsilon)=\frac{1}{1+\exp\left((\|y-x_i\|^2-\lambda)/\varepsilon\right)},\qquad\sum_iq_i=K.
+$$
 
 Il propose des swaps concurrents de forte probabilité, entièrement par primitives GPU. Mais la projection finale sur $K$ identifiants, le calcul de $w_\tau$ et les décisions d'union–find restent durs.
 
@@ -377,7 +469,9 @@ Il faut distinguer deux températures :
 
 La stratégie recommandée est une homotopie
 
-$$\tau=\infty\longrightarrow\tau_m\longrightarrow\cdots\longrightarrow\tau_1\longrightarrow0.$$
+$$
+\tau=\infty\longrightarrow\tau_m\longrightarrow\cdots\longrightarrow\tau_1\longrightarrow0.
+$$
 
 La forêt, les selles et les colonnes trouvées à haute température initialisent la température suivante. La sortie fidèle à la thèse est $\tau=0$. Une sortie à $\tau>0$ reste une hiérarchie mathématiquement bien définie, mais elle doit être nommée hiérarchie SoftLens et non HGP exact.
 
@@ -394,7 +488,9 @@ En faible dimension, cette continuation reflète l'algorithme exact d'Edelsbrunn
 
 Pour chaque composante courante $C$ de l'atlas, Borůvka demande seulement l'arête sortante de poids minimal :
 
-$$\mathrm{Sep}_{K,\tau}(C)=\mathop{\mathrm{argmin}}_{\substack{Q\in C\\R\in\mathcal{A}\setminus C}}w_\tau(Q,R).$$
+$$
+\mathrm{Sep}_{K,\tau}(C)=\mathop{\mathrm{argmin}}_{\substack{Q\in C\\R\in\mathcal{A}\setminus C}}w_\tau(Q,R).
+$$
 
 Un oracle exact de $\mathrm{Sep}_{K,\tau}$ donne une forêt exacte sur l'atlas en $O(\log|\mathcal{A}|)$ rondes. Le poids power $w_\infty$, les volumes englobants des barycentres et les bornes de variance permettent d'élaguer les paires. L'index doit toutefois couvrir tout $\mathcal{A}$ et fournir un minorant certifié pour chaque bloc élagué ; les candidats survivants passent alors dans le petit dual concave de la section 2.5.
 
@@ -408,13 +504,17 @@ Trois statuts doivent être séparés.
 - **HGP interne.** À $\tau=0$, un atlas incomplet donne une union de lentilles incluse dans $L_K(r)$. Il ne crée pas de chemin qui n'existerait pas dans HGP, mais il peut manquer des naissances ou retarder des fusions.
 - **HGP global.** Il exige qu'à chaque seuil l'inclusion de l'union des atomes de l'atlas dans $L_K(r)$ induise une bijection sur les composantes :
 
-$$\pi_0\left(\bigcup_{Q\in\mathcal{A}}T_Q(r)\right)\xrightarrow{\ \sim\ }\pi_0\left(L_K(r)\right)\qquad\text{pour tout }r.$$
+$$
+\pi_0\left(\bigcup_{Q\in\mathcal{A}}T_Q(r)\right)\xrightarrow{\ \sim\ }\pi_0\left(L_K(r)\right)\qquad\text{pour tout }r.
+$$
 
 Un certificat opérationnel doit couvrir les naissances et garantir, pour chaque coupe de Borůvka rencontrée, qu'une arête globale de poids minimal traversant la coupe est présente dans l'atlas ; une simple saturation sans nouvelle colonne ne suffit pas.
 
 Le bon théorème de récupération ne doit pas être formulé en Wasserstein. Il doit porter sur les événements critiques. Pour un point critique $c$, de rayon $r$, avec intérieur $I$ et support frontière $U$, définissons la marge de shell
 
-$$\delta_{\mathrm{shell}}(c)=\min\left\{r^2-\max_{x_i\in I}\|c-x_i\|^2,\ \min_{x_j\notin I\cup U}\|c-x_j\|^2-r^2\right\},$$
+$$
+\delta_{\mathrm{shell}}(c)=\min\left\{r^2-\max_{x_i\in I}\|c-x_i\|^2,\ \min_{x_j\notin I\cup U}\|c-x_j\|^2-r^2\right\},
+$$
 
 en omettant le premier terme si $I=\varnothing$. Sous position générale, cette marge est positive. Il faut lui adjoindre une marge barycentrique — distance de $c$ au bord relatif de $\mathrm{conv}(U)$ — et une marge entre niveaux de fusion pertinents.
 
@@ -453,11 +553,15 @@ La version GitHub examinée expose deux objets distincts dans [`perg_hgp/README.
 
 Pour chaque observation $x_i$, l'implémentation construit une loi locale $q_i$, puis un site de puissance
 
-$$z_i=\sum_jq_{ij}x_j,\qquad a_i=\sum_jq_{ij}\|x_j-z_i\|^2.$$
+$$
+z_i=\sum_jq_{ij}x_j,\qquad a_i=\sum_jq_{ij}\|x_j-z_i\|^2.
+$$
 
 Elle définit ensuite
 
-$$g(y)=K\text{-ième plus petite valeur de }\left\{\sqrt{\|y-z_i\|^2+a_i}\right\}_{i=1}^{n},$$
+$$
+g(y)=K\text{-ième plus petite valeur de }\left\{\sqrt{\|y-z_i\|^2+a_i}\right\}_{i=1}^{n},
+$$
 
 échantillonne $g$ aux centres d'une grille uniforme anisotrope, et calcule une forêt cubique 26-connexe. Le contrat est documenté dans [`POWER_COVER_3D.md`](https://github.com/Ludwig-H/E-HGP/blob/f4c61bde13fb2a0c847f31e46e235eaf2dae7c3a/perg_hgp/POWER_COVER_3D.md).
 
@@ -465,11 +569,15 @@ Cette architecture est techniquement sérieuse : noyau Gibbs fusionné, diagnost
 
 Mais sa régularisation n'est pas SoftLens-HGP. Elle effectue
 
-$$\text{rang }K\text{ après lissage local de chaque site},$$
+$$
+\text{rang }K\text{ après lissage local de chaque site},
+$$
 
 alors que la construction proposée effectue
 
-$$\text{minimum dur sur les facettes après lissage entropique du maximum interne}.$$
+$$
+\text{minimum dur sur les facettes après lissage entropique du maximum interne}.
+$$
 
 Ces deux opérations ne commutent pas. La première conserve une fonction de rang sur des sites déplacés ; la seconde conserve l'union de régions témoins et le graphe de facettes de la thèse.
 
@@ -576,9 +684,13 @@ Construire un branch-and-bound couvrant ou un énumérateur équivalent qui cert
 
 La voie recommandée n'est ni « DTM à la place de HGP », ni « UMAP d'ordre supérieur », ni « grille adaptative plus fine ». C'est une architecture à deux niveaux partageant le même invariant : une forêt couvrante des événements de la filtration.
 
-$$\boxed{\text{3D : complexe de Morse }H_0\text{ de }d_{(10)}\ \longrightarrow\ \text{hyperforêt exacte, sinon multicover sparse à précision certifiée}.}$$
+$$
+\boxed{\text{3D : complexe de Morse }H_0\text{ de }d_{(10)}\ \longrightarrow\ \text{hyperforêt exacte, sinon multicover sparse à précision certifiée}.}
+$$
 
-$$\boxed{\text{grande dimension : SoftLens-HGP}\ \longrightarrow\ \text{atlas critique adaptatif}\ \longrightarrow\ \text{Borůvka implicite}.}$$
+$$
+\boxed{\text{grande dimension : SoftLens-HGP}\ \longrightarrow\ \text{atlas critique adaptatif}\ \longrightarrow\ \text{Borůvka implicite}.}
+$$
 
 Le point conceptuel le plus important est que l'entropie doit régulariser **le choix du point contraignant à l'intérieur d'une facette**, jamais la décision extérieure qui assemble les facettes. Cette position conserve simultanément :
 
