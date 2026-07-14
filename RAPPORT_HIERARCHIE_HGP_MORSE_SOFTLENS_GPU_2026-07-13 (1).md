@@ -12,13 +12,13 @@
 Soit $X=\{x_1,\ldots,x_n\}\subset\mathbb{R}^{p}$, et soit $d_{(K)}(y)$ la distance de $y$ à son $K$-ième plus proche voisin. En variable rayon, l'ensemble de forte densité K-NN est
 
 $$
-L_K(r)=\left\{y\in\mathbb{R}^{p}:\left\lvert B(y,r)\cap X\right\rvert\ge K\right\}=\left\{y:d_{(K)}(y)\le r\right\}.
+L_K(r)=\left\lbrace y\in\mathbb{R}^{p}:\left\lvert B(y,r)\cap X\right\rvert\ge K\right\rbrace =\left\lbrace y:d_{(K)}(y)\le r\right\rbrace .
 $$
 
 La hiérarchie de Hartigan estimée est la filtration de composantes
 
 $$
-\mathcal{H}_K=\left\{\pi_0\bigl(L_K(r)\bigr)\right\}_{r\ge0}.
+\mathcal{H}_K=\left\lbrace \pi_0\bigl(L_K(r)\bigr)\right\rbrace _{r\ge0}.
 $$
 
 Le manuscrit établit trois faits qui doivent rester des invariants de toute nouvelle proposition.
@@ -30,7 +30,7 @@ Le rayon $r$ augmente, les ensembles $L_K(r)$ croissent, et leurs composantes na
 À une composante continue $C\subset L_K(r)$, la thèse associe le cluster discret
 
 $$
-C^{\mathrm{disc}}=\left\{x\in X:\mathrm{dist}(x,C)\le r\right\}.
+C^{\mathrm{disc}}=\left\lbrace x\in X:\mathrm{dist}(x,C)\le r\right\rbrace .
 $$
 
 Pour $K\ge2$, les $C^{\mathrm{disc}}$ peuvent se recouvrir. Une sortie fidèle est donc un arbre de composantes continues enrichi d'une relation d'incidence avec les observations, ou, de manière équivalente, une **hiérarchie de recouvrements**. Imposer trop tôt une partition efface précisément l'information d'ordre supérieur que HGP introduit (définition 7 et discussion, PDF p. 45–47 / manuscrit p. 23–25).
@@ -90,7 +90,7 @@ $$
 Cette fonction possède la représentation variationnelle
 
 $$
-\phi_{Q,\tau}(y)=\max_{\alpha\in\Delta_Q}\left\{\sum_{i\in Q}\alpha_i\|y-x_i\|^2-\tau\,\mathrm{KL}(\alpha\|u_Q)\right\},
+\phi_{Q,\tau}(y)=\max_{\alpha\in\Delta_Q}\left\lbrace \sum_{i\in Q}\alpha_i\|y-x_i\|^2-\tau\,\mathrm{KL}(\alpha\|u_Q)\right\rbrace ,
 $$
 
 où $u_Q$ est la loi uniforme sur $Q$. À basse température, l'adversaire $\alpha$ se concentre sur le point le plus éloigné ; à haute température, il devient uniforme.
@@ -132,13 +132,13 @@ L'augmentation de la température dilate les sous-niveaux et peut avancer les fu
 Pour un seuil carré $t$, posons
 
 $$
-A_{Q,\tau}(t)=\left\{y\in\mathbb{R}^{p}:\phi_{Q,\tau}(y)\le t\right\}.
+A_{Q,\tau}(t)=\left\lbrace y\in\mathbb{R}^{p}:\phi_{Q,\tau}(y)\le t\right\rbrace .
 $$
 
 Chaque $\phi_{Q,\tau}$ est $2$-fortement convexe ; chaque atome $A_{Q,\tau}(t)$ est donc convexe et
 
 $$
-\left\{F_{K,\tau}\le t\right\}=\bigcup_{|Q|=K}A_{Q,\tau}(t).
+\left\lbrace F_{K,\tau}\le t\right\rbrace =\bigcup_{|Q|=K}A_{Q,\tau}(t).
 $$
 
 Définissons la naissance d'une facette et la rencontre de deux facettes par
@@ -148,7 +148,7 @@ $$
 $$
 
 $$
-w_\tau(Q,R)=\min_y\max\left\{\phi_{Q,\tau}(y),\phi_{R,\tau}(y)\right\}.
+w_\tau(Q,R)=\min_y\max\left\lbrace \phi_{Q,\tau}(y),\phi_{R,\tau}(y)\right\rbrace .
 $$
 
 Considérons le graphe filtré dont les sommets sont les $K$-ensembles, présents à partir de $\beta_\tau(Q)$, et dont les arêtes relient deux ensembles qui diffèrent d'un seul point, avec poids $w_\tau(Q,R)$.
@@ -196,13 +196,13 @@ Dans ce cadre min–max, une modification non triviale à $K=1$ devrait agir sur
 La naissance possède déjà un dual de taille $K$ :
 
 $$
-\beta_\tau(Q)=\max_{\alpha\in\Delta_Q}\left\{\sum_{i\in Q}\alpha_i\|x_i\|^2-\left\Vert\sum_{i\in Q}\alpha_i x_i\right\Vert^2-\tau\,\mathrm{KL}(\alpha\|u_Q)\right\}.
+\beta_\tau(Q)=\max_{\alpha\in\Delta_Q}\left\lbrace \sum_{i\in Q}\alpha_i\|x_i\|^2-\left\Vert\sum_{i\in Q}\alpha_i x_i\right\Vert^2-\tau\,\mathrm{KL}(\alpha\|u_Q)\right\rbrace .
 $$
 
 Son centre est $y_Q^\star=\sum_i\alpha_i^\star x_i$. À $\tau=0$, on retrouve le dual de la miniball ; à $\tau=\infty$, $\alpha^\star=u_Q$ et $\beta_\infty(Q)=v_Q$. Le poids de rencontre $w_\tau(Q,R)$ se calcule de même sans optimiser directement dans $\mathbb{R}^{p}$. Introduisons $u_i\ge0$ pour $i\in Q$, $v_j\ge0$ pour $j\in R$, avec $\sum_i u_i+\sum_jv_j=1$, $\gamma=\sum_i u_i$, et agrégeons les doublons dans $\eta_s=u_s+v_s$. Alors
 
 $$
-w_\tau(Q,R)=\max_{\substack{u,v\ge0\\\sum_i u_i+\sum_jv_j=1}}\left\{\sum_s\eta_s\|x_s\|^2-\left\Vert\sum_s\eta_sx_s\right\Vert^2-\tau\left[\sum_{i\in Q}u_i\log\left(\frac{Ku_i}{\gamma}\right)+\sum_{j\in R}v_j\log\left(\frac{Kv_j}{1-\gamma}\right)\right]\right\}.
+w_\tau(Q,R)=\max_{\substack{u,v\ge0\\\sum_i u_i+\sum_jv_j=1}}\left\lbrace \sum_s\eta_s\|x_s\|^2-\left\Vert\sum_s\eta_sx_s\right\Vert^2-\tau\left[\sum_{i\in Q}u_i\log\left(\frac{Ku_i}{\gamma}\right)+\sum_{j\in R}v_j\log\left(\frac{Kv_j}{1-\gamma}\right)\right]\right\rbrace .
 $$
 
 Les coordonnées de $u$ ou $v$ absentes d'un des deux ensembles sont prises nulles dans $\eta_s=u_s+v_s$. La dérivation introduit un poids $\gamma\in[0,1]$ pour écrire le maximum de deux fonctions comme un maximum de combinaisons convexes, applique deux fois la représentation variationnelle de $\phi$, puis élimine $y$ analytiquement ; le théorème minimax s'applique par coercivité en $y$ et compacité des simplexes. Les termes entropiques aux faces $\gamma=0$ et $\gamma=1$ sont compris par prolongement continu. Il s'agit d'une maximisation concave sur un simplexe de dimension au plus $2K-1$. Le centre de rencontre est
@@ -220,7 +220,7 @@ s=\mathrm{clip}\left(\frac{d^2+v_R-v_Q}{2d},0,d\right),
 $$
 
 $$
-w_\infty(Q,R)=\max\left\{v_Q+s^2,\ v_R+(d-s)^2\right\}.
+w_\infty(Q,R)=\max\left\lbrace v_Q+s^2,\ v_R+(d-s)^2\right\rbrace .
 $$
 
 Si $d=0$, $w_\infty(Q,R)=\max\{v_Q,v_R\}$. Enfin,
@@ -283,7 +283,7 @@ Comme $|U|\ge2$, on a $|I|\le K-1$ ; par conséquent $d_{(K)}(c)=\rho$. La propr
 On obtient donc, sous les mêmes hypothèses génériques, la correspondance
 
 $$
-\left\{\text{cofaces de Gabriel de cardinal }K+1\right\}\longleftrightarrow\left\{\text{points critiques de }d_{(K)}\text{ d'indice }1\right\}.
+\left\lbrace \text{cofaces de Gabriel de cardinal }K+1\right\rbrace \longleftrightarrow\left\lbrace \text{points critiques de }d_{(K)}\text{ d'indice }1\right\rbrace .
 $$
 
 Le théorème 4 de la thèse affirme ensuite que seules certaines de ces cofaces sont $K$-séparantes. Dans le langage de Morse, une selle d'indice 1 peut simultanément fusionner des composantes de $H_0$ et créer des classes de $H_1$. Une union–find ordonnée par rayon extrait exactement sa partie $H_0$.
@@ -429,7 +429,7 @@ $$
 L'initialisation naturelle est
 
 $$
-\mathcal{A}_0=\mathrm{unique}\left\{Q_i:i=1,\ldots,n\right\}.
+\mathcal{A}_0=\mathrm{unique}\left\lbrace Q_i:i=1,\ldots,n\right\rbrace .
 $$
 
 Elle contient au plus $n$ facettes. À $\tau=\infty$, cette construction est exactement le *witnessed k-distance* de [Guibas–Mérigot–Morozov](https://arxiv.org/abs/1102.4972), donc une union de $O(n)$ boules de puissance. À $\tau=0$, les mêmes identifiants portent de vraies lentilles de Čech : la filtration obtenue est une sous-filtration de HGP, exacte sur l'atlas.
@@ -513,7 +513,7 @@ Un certificat opérationnel doit couvrir les naissances et garantir, pour chaque
 Le bon théorème de récupération ne doit pas être formulé en Wasserstein. Il doit porter sur les événements critiques. Pour un point critique $c$, de rayon $r$, avec intérieur $I$ et support frontière $U$, définissons la marge de shell
 
 $$
-\delta_{\mathrm{shell}}(c)=\min\left\{r^2-\max_{x_i\in I}\|c-x_i\|^2,\ \min_{x_j\notin I\cup U}\|c-x_j\|^2-r^2\right\},
+\delta_{\mathrm{shell}}(c)=\min\left\lbrace r^2-\max_{x_i\in I}\|c-x_i\|^2,\ \min_{x_j\notin I\cup U}\|c-x_j\|^2-r^2\right\rbrace ,
 $$
 
 en omettant le premier terme si $I=\varnothing$. Sous position générale, cette marge est positive. Il faut lui adjoindre une marge barycentrique — distance de $c$ au bord relatif de $\mathrm{conv}(U)$ — et une marge entre niveaux de fusion pertinents.
@@ -560,7 +560,7 @@ $$
 Elle définit ensuite
 
 $$
-g(y)=K\text{-ième plus petite valeur de }\left\{\sqrt{\|y-z_i\|^2+a_i}\right\}_{i=1}^{n},
+g(y)=K\text{-ième plus petite valeur de }\left\lbrace \sqrt{\|y-z_i\|^2+a_i}\right\rbrace _{i=1}^{n},
 $$
 
 échantillonne $g$ aux centres d'une grille uniforme anisotrope, et calcule une forêt cubique 26-connexe. Le contrat est documenté dans [`POWER_COVER_3D.md`](https://github.com/Ludwig-H/E-HGP/blob/f4c61bde13fb2a0c847f31e46e235eaf2dae7c3a/perg_hgp/POWER_COVER_3D.md).

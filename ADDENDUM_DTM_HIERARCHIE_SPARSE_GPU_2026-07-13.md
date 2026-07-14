@@ -103,7 +103,7 @@ Attention au régime statistique : si $K=10$ reste fixé tandis que $n\to\infty$
 Définissons
 
 $$
-\mathcal C_{K,n} = \left\{ q\in\mathbb{R}_+^n: \sum_{j=1}^nq_j=1, \quad q_j\leq\frac{1}{K} \right\}.
+\mathcal C_{K,n} = \left\lbrace  q\in\mathbb{R}_+^n: \sum_{j=1}^nq_j=1, \quad q_j\leq\frac{1}{K} \right\rbrace .
 $$
 
 Alors
@@ -217,7 +217,7 @@ $$
 Les conditions KKT donnent
 
 $$
-\boxed{ q_j^\tau(y) = \min\left\{ \frac{1}{K}, A(y)e^{-c_j(y)/\tau} \right\}, \qquad \sum_jq_j^\tau(y)=1 }.
+\boxed{ q_j^\tau(y) = \min\left\lbrace  \frac{1}{K}, A(y)e^{-c_j(y)/\tau} \right\rbrace , \qquad \sum_jq_j^\tau(y)=1 }.
 $$
 
 Le facteur $1/L$ de la référence uniforme est absorbé dans $A$. Lorsque $\tau\downarrow0$, et hors ex æquo,
@@ -397,7 +397,7 @@ $$
 a pour solution
 
 $$
-q_j = \min\left\{ \frac{1}{K}, \left[A-\frac{c_j}{\tau}\right]_+ \right\}.
+q_j = \min\left\lbrace  \frac{1}{K}, \left[A-\frac{c_j}{\tau}\right]_+ \right\rbrace .
 $$
 
 Il s'agit d'un sparsemax capé, relié aux entropies de Tsallis. Son support est fini même à température positive. Une évaluation sur la mesure dure donne
@@ -661,7 +661,7 @@ $$
 Leur premier niveau de collision est
 
 $$
-\boxed{ \beta_{ij}^2 = \max\left\{ u_{ij}^2+b_i, (d_{ij}-u_{ij})^2+b_j \right\} }.
+\boxed{ \beta_{ij}^2 = \max\left\lbrace  u_{ij}^2+b_i, (d_{ij}-u_{ij})^2+b_j \right\rbrace  }.
 $$
 
 Si $d_{ij}=0$, on prend
@@ -977,7 +977,7 @@ $$
 Les boules ont ici le rayon $r-w_i$, et le temps de collision est
 
 $$
-\beta_{ij}^{(1)} = \max\left\{ w_i, w_j, \frac{\lVert a_i-a_j\rVert+w_i+w_j}{2} \right\}.
+\beta_{ij}^{(1)} = \max\left\lbrace  w_i, w_j, \frac{\lVert a_i-a_j\rVert+w_i+w_j}{2} \right\rbrace .
 $$
 
 Cette construction est probablement le baseline continu le plus simple et le plus rapide : centres inchangés, un scalaire DTM par point, puis MST pondéré. Elle abandonne cependant l'identité quadratique du transport $W_2$ et le modèle de sites de puissance $p=2$ déjà présent dans le dépôt.
@@ -1138,7 +1138,7 @@ Il n'existe donc encore :
 [`PowerCover3D`](https://github.com/Ludwig-H/E-HGP/tree/70423fa354e4f0252f8a8eddcf5e311bf1a4ac42/perg_hgp/perg_hgp/backends/power_cover_3d_cuda) construit des atomes locaux $(z_i,a_i)$, puis évalue sur une grille la $K$-ième valeur de puissance :
 
 $$
-R_K^{\mathrm{PC}}(y) = \mathrm{ord}_K \left\{ \sqrt{\lVert y-z_i\rVert^2+a_i} \right\}_{i=1}^n.
+R_K^{\mathrm{PC}}(y) = \mathrm{ord}_K \left\lbrace  \sqrt{\lVert y-z_i\rVert^2+a_i} \right\rbrace _{i=1}^n.
 $$
 
 Cette construction reste une multicouverture de boules de puissance. Elle préserve donc mieux l'objet HGP régularisé, mais conserve la combinatoire d'ordre $K$ et la résout actuellement par une approximation cubique 3D.

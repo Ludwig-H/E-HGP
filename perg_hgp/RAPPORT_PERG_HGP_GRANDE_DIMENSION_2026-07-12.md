@@ -82,7 +82,7 @@ On a l'identité
 
 $$
 L_K(r)
-=\left\{y:\#\{i:\lVert y-x_i\rVert\le r\}\ge K\right\}
+=\left\lbrace y:\#\{i:\lVert y-x_i\rVert\le r\}\ge K\right\rbrace 
 =\bigcup_{\lvert\tau\rvert=K}
 \underbrace{\bigcap_{i\in\tau}B(x_i,r)}_{T_\tau(r)}.
 $$
@@ -103,7 +103,7 @@ Pour une composante continue $C\subset L_K(r)$, le cluster discret naturel est
 
 $$
 C^{\mathrm{disc}}
-=\left\{x_i:\exists y\in C,\ \lVert x_i-y\rVert\le r\right\}.
+=\left\lbrace x_i:\exists y\in C,\ \lVert x_i-y\rVert\le r\right\rbrace .
 $$
 
 Pour $K\ge2$, plusieurs composantes continues peuvent impliquer une même observation : la sortie naturelle est un recouvrement, pas nécessairement une partition. Toute fonction `labels_at_cut` impose donc une politique supplémentaire qui doit rester séparée de l'objet mathématique.
@@ -335,7 +335,7 @@ Alors
 
 $$
 \{r_{K,q}\le r\}
-=\left\{y:\#\left\{i:\lVert y-z_i\rVert^2+a_i\le r^2\right\}\ge K\right\}.
+=\left\lbrace y:\#\left\lbrace i:\lVert y-z_i\rVert^2+a_i\le r^2\right\rbrace \ge K\right\rbrace .
 $$
 
 Il s'agit exactement d'une $K$-couverture de boules de puissance. Le théorème Čech du manuscrit s'étend immédiatement, car les intersections restent convexes.
@@ -412,7 +412,7 @@ où
 
 $$
 \mathcal H_K
-=\left\{q\ge0:\sum_iq_i=1,\ q_i\le\frac1K\right\}.
+=\left\lbrace q\ge0:\sum_iq_i=1,\ q_i\le\frac1K\right\rbrace .
 $$
 
 $\mathcal H_K$ est un hypersimplexe redimensionné. Ses sommets sont exactement les lois uniformes sur les sous-ensembles de cardinal $K$. La contrainte $q_i\le1/K$ encode donc une interaction d'ordre $K$ plus fidèlement qu'une simple contrainte de perplexité.
@@ -567,7 +567,7 @@ $$
 Alors
 
 $$
-\boxed{ \beta_{ij}^2 =\max\left\{ u_{ij}^2+a_i, (D_{ij}-u_{ij})^2+a_j \right\}. }
+\boxed{ \beta_{ij}^2 =\max\left\lbrace  u_{ij}^2+a_i, (D_{ij}-u_{ij})^2+a_j \right\rbrace . }
 $$
 
 Si $D_{ij}=0$,
@@ -634,7 +634,7 @@ La borne
 
 $$
 \beta_{ij}\ge
-\max\left\{\frac{D_{ij}}2,\sqrt{a_i},\sqrt{a_j}\right\}
+\max\left\lbrace \frac{D_{ij}}2,\sqrt{a_i},\sqrt{a_j}\right\rbrace 
 $$
 
 donne un certificat utile. Si une composante Borůvka possède un meilleur candidat de rayon $U$, toute meilleure arête omise doit satisfaire

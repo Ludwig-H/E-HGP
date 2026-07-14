@@ -265,7 +265,7 @@ est 1-lipschitz. Le champ K-ième \(r_{K,\kappa}\) l'est donc aussi.
 
 Le sous-niveau est exactement une région de K-couverture :
 
-\[ L_{K,\kappa}(r) = \left\{y: \#\{i:d_i(y)\le r\}\ge K \right\}. \]
+\[ L_{K,\kappa}(r) = \left\lbrace y: \#\{i:d_i(y)\le r\}\ge K \right\rbrace . \]
 
 La restriction à la boîte englobante des \(z_i\) est suffisante pour \(H_0\). La projection coordonnée vers cette boîte n'augmente aucune distance aux sites ; un chemin extérieur se projette donc dans la boîte sans augmenter le champ.
 
@@ -835,7 +835,7 @@ Ces restrictions ne cassent pas l'identité de puissance ni la borne par \(s_i\)
 
 Une extension scientifique ultérieure pourrait utiliser un seuil de couverture pondéré :
 
-\[ r_T(y) = \inf\left\{r: \sum_{i:d_i(y)\le r}w_i\ge T \right\}, \]
+\[ r_T(y) = \inf\left\lbrace r: \sum_{i:d_i(y)\le r}w_i\ge T \right\rbrace , \]
 
 afin de compenser la densité d'acquisition ou les répétitions temporelles. Cette piste doit venir après un baseline non pondéré correctement validé.
 
