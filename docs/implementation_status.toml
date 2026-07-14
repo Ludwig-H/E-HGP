@@ -4,7 +4,7 @@ updated_at = "2026-07-14"
 [project]
 name = "MorseHGP3D"
 implementation_started = true
-current_phase = "0"
+current_phase = "1"
 current_track = "foundation"
 status_authority = "This file is operational; mathematical authority remains in the specification and proof-status register."
 
@@ -31,23 +31,23 @@ blocking_reason = "Le jalon v1-correctness et les portes de performance ne sont 
 id = "0"
 title = "Gel de l'enonce M.1 et des schemas"
 track = "foundation"
-status = "in_progress"
+status = "completed"
 entry_gate_satisfied = true
-exit_gate_satisfied = false
+exit_gate_satisfied = true
 depends_on = []
-evidence = []
+evidence = ["b305a39 feat: figer les contrats MorseHGP3D v1", "docs/contracts/PHASE0_GATE_REVIEW.md"]
 blocking_reason = ""
 
 [[phases]]
 id = "1"
 title = "Oracle CPU exhaustif"
 track = "foundation"
-status = "blocked"
-entry_gate_satisfied = false
+status = "in_progress"
+entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["0"]
 evidence = []
-blocking_reason = "Phase 0 non fermee."
+blocking_reason = ""
 
 [[phases]]
 id = "2A"

@@ -4,6 +4,8 @@ Ce répertoire rend testables les exemples minimaux exigés par la phase 0. Il n
 
 Les sorties JSON associées vivent dans [`tests/fixtures/contracts`](../../tests/fixtures/contracts/). Elles sont des enregistrements canoniques de `MorseHGP3DResult` conformes au [schéma de contrat v1](../../schemas/morsehgp3d-contract-v1.schema.json). Elles ne doivent pas être interprétées comme des résultats déjà produits par un backend.
 
+La [revue de porte de phase 0](PHASE0_GATE_REVIEW.md) enregistre les artefacts, tests, limites et conditions qui autorisent le démarrage de l'oracle CPU.
+
 ## Portée scientifique
 
 - phase : `0`;
