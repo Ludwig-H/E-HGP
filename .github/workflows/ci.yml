@@ -19,6 +19,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install certified CPU core dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes libboost-dev
+
       - name: Build and test the certified CPU core
         run: |
           cmake -S morsehgp3d -B build/morsehgp3d -DMORSEHGP3D_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
