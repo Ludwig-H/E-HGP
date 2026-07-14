@@ -1,0 +1,74 @@
+{
+  "fixture_id": "phase1.oracle.selected-n12-n14.v1",
+  "objective": "Freeze one generic deterministic 3D cloud at each selected exhaustive-oracle boundary.",
+  "generator": {
+    "module": "reference.morsehgp3d_oracle.generators",
+    "name": "generate_affine_cloud",
+    "version": 1,
+    "seed": 0,
+    "parameters": {"affine_dimension": 3, "coordinate_bound": 97}
+  },
+  "coordinate_hash_encoding": "SHA-256 of compact UTF-8 JSON after lexicographically sorting the integer point triples",
+  "units": "dimensionless",
+  "duplicate_policy": "reject",
+  "k_max": 10,
+  "profile_expectations": {
+    "hgp_reduced": {
+      "expected_public_status": "exact",
+      "condition": "RelevantGP is complete and every required reduced certificate is present"
+    },
+    "full_pi0": {
+      "expected_public_status": "conditional",
+      "forest_semantics": "partial_refinement",
+      "condition": "M.1 remains a target contract until the phase-12 attachment proof and certificates are closed"
+    }
+  },
+  "pr_scope": {
+    "operations": ["regenerate coordinates", "verify coordinate hash", "build exact critical catalog through K_max"],
+    "exclusion": "Do not build and retain every Gamma cut, both forests, and every vertical naturality square for all orders in the per-PR fixture test.",
+    "reason": "The reference implementation recomputes an exhaustive miniball for every facet/coface and materializes every exact cut plus quadratic families of naturality squares. This is materially more expensive than the combinatorial label counts alone."
+  },
+  "nightly_scope": {
+    "n12_orders": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "n14_orders": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "operations": ["Gamma filtration", "full_pi0", "hgp_reduced", "all adjacent vertical maps", "all exact open and closed cuts"]
+  },
+  "cases": [
+    {
+      "name": "selected-generic-n12",
+      "point_count": 12,
+      "coordinate_hash_sha256": "162c15758210c10d7277016491fd12350b87a6f2bc5989f64e188dd2092ecd95",
+      "expected_catalog": {"event_count": 177, "s_max": 11, "relevant_gp_complete": true},
+      "order_costs": [
+        {"order": 1, "facet_count": 12, "coface_count": 66},
+        {"order": 2, "facet_count": 66, "coface_count": 220},
+        {"order": 3, "facet_count": 220, "coface_count": 495},
+        {"order": 4, "facet_count": 495, "coface_count": 792},
+        {"order": 5, "facet_count": 792, "coface_count": 924},
+        {"order": 6, "facet_count": 924, "coface_count": 792},
+        {"order": 7, "facet_count": 792, "coface_count": 495},
+        {"order": 8, "facet_count": 495, "coface_count": 220},
+        {"order": 9, "facet_count": 220, "coface_count": 66},
+        {"order": 10, "facet_count": 66, "coface_count": 12}
+      ]
+    },
+    {
+      "name": "selected-generic-n14",
+      "point_count": 14,
+      "coordinate_hash_sha256": "4fc7f7e44c23f78730a092ff8decd89e315f52d0c43a6b2424697e0869bc2116",
+      "expected_catalog": {"event_count": 264, "s_max": 11, "relevant_gp_complete": true},
+      "order_costs": [
+        {"order": 1, "facet_count": 14, "coface_count": 91},
+        {"order": 2, "facet_count": 91, "coface_count": 364},
+        {"order": 3, "facet_count": 364, "coface_count": 1001},
+        {"order": 4, "facet_count": 1001, "coface_count": 2002},
+        {"order": 5, "facet_count": 2002, "coface_count": 3003},
+        {"order": 6, "facet_count": 3003, "coface_count": 3432},
+        {"order": 7, "facet_count": 3432, "coface_count": 3003},
+        {"order": 8, "facet_count": 3003, "coface_count": 2002},
+        {"order": 9, "facet_count": 2002, "coface_count": 1001},
+        {"order": 10, "facet_count": 1001, "coface_count": 364}
+      ]
+    }
+  ]
+}

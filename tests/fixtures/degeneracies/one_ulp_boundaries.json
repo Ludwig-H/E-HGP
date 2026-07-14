@@ -1,0 +1,44 @@
+{
+  "fixture_id": "phase1.degeneracies.one-ulp.v1",
+  "objective": "Cross exact coplanarity and cosphericity boundaries by one adjacent IEEE-754 binary64 value, without a tolerance.",
+  "generator": {
+    "name": "literal-float-hex",
+    "version": 1,
+    "seed": null,
+    "parameters": {
+      "one": "0x1.0000000000000p+0",
+      "one_toward_zero": "0x1.fffffffffffffp-1",
+      "one_away_from_zero": "0x1.0000000000001p+0",
+      "minus_one": "-0x1.0000000000000p+0",
+      "minus_one_toward_zero": "-0x1.fffffffffffffp-1",
+      "minus_one_away_from_zero": "-0x1.0000000000001p+0"
+    }
+  },
+  "coordinate_hash_sha256": "b7f4676fd174c79f6026628ff0ce88f6b495ca9e0e96b71a1ebb2d0f3b915e48",
+  "coordinate_hash_encoding": "SHA-256 of compact UTF-8 JSON with sorted object keys over the two fixed supports, moving xy coordinates, and ordered variant-z tokens",
+  "units": "dimensionless",
+  "duplicate_policy": "reject",
+  "k_max": 4,
+  "profile": "full_pi0",
+  "expected_public_status": "exact away from the boundary; explicit degeneracy at the boundary",
+  "quasi_coplanar": {
+    "fixed_points": [["0", "0", "0x1.0000000000000p+0"], ["0x1.0000000000000p+0", "0", "0x1.0000000000000p+0"], ["0", "0x1.0000000000000p+0", "0x1.0000000000000p+0"]],
+    "moving_xy": ["0x1.0000000000000p+0", "0x1.0000000000000p+0"],
+    "variants": [
+      {"name": "below", "z": "0x1.fffffffffffffp-1", "expected_affine_dimension": 3},
+      {"name": "exact", "z": "0x1.0000000000000p+0", "expected_affine_dimension": 2},
+      {"name": "above", "z": "0x1.0000000000001p+0", "expected_affine_dimension": 3}
+    ]
+  },
+  "quasi_cospherical": {
+    "support_points": [["1", "1", "1"], ["1", "-1", "-1"], ["-1", "1", "-1"], ["-1", "-1", "1"]],
+    "moving_xy": ["1", "1"],
+    "expected_center": ["0", "0", "0"],
+    "expected_squared_radius": "3",
+    "variants": [
+      {"name": "inside", "z": "-0x1.fffffffffffffp-1", "expected_relation": "interior"},
+      {"name": "shell", "z": "-0x1.0000000000000p+0", "expected_relation": "shell"},
+      {"name": "outside", "z": "-0x1.0000000000001p+0", "expected_relation": "exterior"}
+    ]
+  }
+}

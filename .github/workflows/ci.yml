@@ -28,6 +28,12 @@ jobs:
       - name: Test contract validation and canonical round-trips
         run: python -m unittest discover -s tests/contracts -p 'test_*.py'
 
+      - name: Test the independent exhaustive CPU oracle
+        run: PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests/oracle -p 'test_*.py'
+
+      - name: Run the bounded oracle campaign
+        run: PYTHONDONTWRITEBYTECODE=1 python tools/run_oracle_campaign.py --ci --manifest /tmp/morsehgp3d-oracle-ci.json
+
       - name: Validate local references
         run: python tools/check_references.py
 

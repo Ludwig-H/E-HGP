@@ -1,0 +1,72 @@
+{
+  "fixture_id": "phase1.chapter6.six-points.v1",
+  "objective": "Represent the six-point construction from thesis chapter 6 exactly, then exercise the same three-level hierarchy with rational 3D coordinates.",
+  "source": {
+    "document": "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+    "chapter": 6,
+    "figures": ["6.3", "6.4", "6.5"]
+  },
+  "units": "r=1, so every designated side and the bridge CD have length 2",
+  "duplicate_policy": "reject",
+  "k_max": 2,
+  "profile": "full_pi0 oracle fixture",
+  "expected_oracle_status": "exact arithmetic; no production public-status claim",
+  "exact_coordinate_model": {
+    "field": "Q(sqrt(3))",
+    "encoding": "Each scalar [a,b] denotes a + b*sqrt(3), with a and b encoded as rational strings.",
+    "coordinate_hash_sha256": "c8f1cd0a3af587ff2014d97cef7294dbb94de846f811264a072d7fc4ad326a89",
+    "coordinate_hash_encoding": "SHA-256 of compact UTF-8 JSON containing the point-coordinate arrays in label order A through F",
+    "labels": ["A", "B", "C", "D", "E", "F"],
+    "points": {
+      "A": [["0", "0"], ["1", "0"], ["0", "0"]],
+      "B": [["0", "0"], ["-1", "0"], ["0", "0"]],
+      "C": [["0", "1"], ["0", "0"], ["0", "0"]],
+      "D": [["2", "1"], ["0", "0"], ["0", "0"]],
+      "E": [["2", "2"], ["1", "0"], ["0", "0"]],
+      "F": [["2", "2"], ["-1", "0"], ["0", "0"]]
+    },
+    "expected": {
+      "side_and_bridge_pairs": ["AB", "AC", "BC", "CD", "DE", "DF", "EF"],
+      "side_squared_distance": ["4", "0"],
+      "edge_squared_level": ["1", "0"],
+      "triangle_simplices": ["ABC", "DEF"],
+      "triangle_squared_level": ["4/3", "0"],
+      "final_long_pairs": ["AD", "BD", "CE", "CF"],
+      "final_long_squared_distance": ["8", "4"],
+      "final_simplices": ["ACD", "BCD", "CDE", "CDF"],
+      "final_squared_level": ["2", "1"]
+    },
+    "rational_coordinate_diagnostic": {
+      "congruent_rational_copy_exists": false,
+      "reason": "AD squared is 8 + 4*sqrt(3), whereas the squared distance between two rational-coordinate points is rational. Thus this full metric configuration has no congruent rational-coordinate copy in any Euclidean dimension over Q.",
+      "scope_note": "This does not claim that an individual equilateral triangle lacks a rational 3D embedding. The rational surrogate below contains two such triangles."
+    }
+  },
+  "rational_3d_surrogate": {
+    "status": "diagnostic_only_not_congruent",
+    "purpose": "Preserve the chapter's seven edge births, two independent same-level triangle fusions, isolated bridge absorption, and final multifusion using only rational predicates.",
+    "metric_relationship_to_exact_model": "Combinatorial analogue only. Its squared levels 1/2, 2/3, and 3/2 are deliberately distinct from the exact chapter levels 1, 4/3, and 2+sqrt(3).",
+    "coordinate_hash_sha256": "7c0679025da2b7573f968b9f9b15a3a012c959781713dc3b6dfc5d77918e5541",
+    "coordinate_hash_encoding": "SHA-256 of compact UTF-8 JSON containing the point-coordinate arrays in label order A through F",
+    "labels": ["A", "B", "C", "D", "E", "F"],
+    "points": {
+      "A": ["-1", "0", "-1"],
+      "B": ["0", "-1", "-1"],
+      "C": ["0", "0", "0"],
+      "D": ["1", "1", "0"],
+      "E": ["2", "1", "1"],
+      "F": ["1", "2", "1"]
+    },
+    "expected": {
+      "edge_squared_level": "1/2",
+      "triangle_squared_level": "2/3",
+      "final_squared_level": "3/2",
+      "gabriel_simplices": ["ABC", "ACD", "BCD", "CDE", "CDF", "DEF"],
+      "component_labels_by_level": {
+        "1/2": [["AB"], ["AC"], ["BC"], ["CD"], ["DE"], ["DF"], ["EF"]],
+        "2/3": [["AB", "AC", "BC"], ["CD"], ["DE", "DF", "EF"]],
+        "3/2": [["AB", "AC", "AD", "BC", "BD", "CD", "CE", "CF", "DE", "DF", "EF"]]
+      }
+    }
+  }
+}

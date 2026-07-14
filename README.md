@@ -74,6 +74,8 @@ L'[index documentaire](docs/README.md) donne l'ordre de lecture. Les décisions 
 │   ├── contracts/               # contrats, exemples et traçabilité de phase 0
 │   └── references/              # manuscrit et articles redistribuables
 ├── schemas/                     # contrat JSON canonique versionné
+├── reference/                   # oracle CPU exhaustif indépendant de petite taille
+├── tests/oracle/                # fixtures, différentiels et campagnes de phase 1
 ├── HGP-old/                     # code historique lié au manuscrit, conservé tel quel
 ├── gcp-migration/               # VM G4, coupe-circuits et arrêt vérifié
 ├── tools/                       # contrôles documentaires et bibliographiques
@@ -87,6 +89,8 @@ L'[index documentaire](docs/README.md) donne l'ordre de lecture. Les décisions 
 python tools/check_docs.py
 python tools/check_contracts.py
 python -m unittest discover -s tests/contracts -p 'test_*.py'
+PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests/oracle -p 'test_*.py'
+PYTHONDONTWRITEBYTECODE=1 python tools/run_oracle_campaign.py --ci
 python tools/check_references.py
 python tools/check_scope.py
 python tools/check_implementation_status.py
@@ -105,4 +109,4 @@ La licence MIT à la racine couvre le code actif et la documentation produits pa
 
 ## État du projet
 
-Il n'existe pas encore de package `MorseHGP3D`. La première livraison logicielle sera un oracle CPU exhaustif de petite taille; les noyaux CUDA ne commenceront qu'après gel des schémas, des sémantiques numériques et des tests différentiels. Toute revendication future devra indiquer le profil, le statut de certification, $n$, $K_{\max}$, la famille de données, le matériel, le pic mémoire et le protocole de mesure.
+Le premier composant logiciel actif est l'[oracle CPU exhaustif](reference/README.md) de petite taille. Il est indépendant du futur backend de production et sert de vérité terrain différentielle; il n'est pas destiné au passage à l'échelle. Les noyaux CUDA ne commencent qu'après fermeture des portes de schéma, d'oracle et de prédicats. Toute revendication future devra indiquer le profil, le statut de certification, $n$, $K_{\max}$, la famille de données, le matériel, le pic mémoire et le protocole de mesure.
