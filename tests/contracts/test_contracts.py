@@ -583,9 +583,50 @@ class ContractSchemaTests(unittest.TestCase):
         base = load_json(FIXTURE_DIR / "overlap-k2.json")
         mutations: list[tuple[str, Any]] = []
 
+        def refresh_input_hash(result: dict[str, Any]) -> None:
+            projection = [
+                {
+                    "point_id": point["point_id"],
+                    "source_indices": point["source_indices"],
+                    "multiplicity": point["multiplicity"],
+                    "coordinate_bits": point["coordinate_bits"],
+                }
+                for point in result["embedded_input_points"]
+            ]
+            result["run_certificate"]["input_semantics"]["input_sha256"] = (
+                canonical_contract_id("Input", projection)
+            )
+
         multiplicity = copy.deepcopy(base)
         multiplicity["embedded_input_points"][0]["multiplicity"] += 1
         mutations.append(("multiplicity", multiplicity))
+
+        point_order = copy.deepcopy(base)
+        points = point_order["embedded_input_points"]
+        points[0], points[1] = points[1], points[0]
+        for point_id, point in enumerate(points):
+            point["point_id"] = point_id
+        refresh_input_hash(point_order)
+        mutations.append(("point-order", point_order))
+
+        source_gap = copy.deepcopy(base)
+        source_gap["embedded_input_points"][-1]["source_indices"] = [99]
+        refresh_input_hash(source_gap)
+        mutations.append(("source-index-gap", source_gap))
+
+        rejected_duplicate = copy.deepcopy(base)
+        first_point = rejected_duplicate["embedded_input_points"][0]
+        first_point["source_indices"] = [0, len(rejected_duplicate["embedded_input_points"])]
+        first_point["multiplicity"] = 2
+        refresh_input_hash(rejected_duplicate)
+        mutations.append(("duplicate-policy", rejected_duplicate))
+
+        signed_zero = copy.deepcopy(base)
+        signed_zero["embedded_input_points"][0]["coordinate_bits"][2] = (
+            "8000000000000000"
+        )
+        refresh_input_hash(signed_zero)
+        mutations.append(("signed-zero", signed_zero))
 
         input_hash = copy.deepcopy(base)
         input_hash["run_certificate"]["input_semantics"]["input_sha256"] = (

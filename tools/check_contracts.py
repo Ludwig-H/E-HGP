@@ -114,6 +114,17 @@ def _exact_level_key(level: dict[str, Any]) -> Fraction:
     return Fraction(int(level["numerator"]), int(level["denominator"]))
 
 
+def _binary64_total_order_key(bits: str) -> int:
+    """Return the unsigned key frozen for canonical finite binary64 inputs."""
+
+    if re.fullmatch(r"(?![7f]ff)(?!8000000000000000$)[0-9a-f]{16}", bits) is None:
+        raise ContractError("an embedded coordinate is not canonical finite binary64")
+    word = int(bits, 16)
+    if word >> 63:
+        return (~word) & ((1 << 64) - 1)
+    return word ^ (1 << 63)
+
+
 def _canonical_integer(value: Any, *, positive: bool, path: str) -> int:
     """Parse one canonical arbitrary-precision decimal integer string."""
 
@@ -522,6 +533,15 @@ def validate_certificate_semantics(
         raise ContractError("budget_policy.require_exact must match run certificate")
     if mode == "budgeted" and status == "exact":
         raise ContractError("a budgeted run can never publish public_status=exact")
+    if status == "exact":
+        if certificate["partial_guarantees"] != ["none"]:
+            raise ContractError("public_status=exact requires partial_guarantees=[none]")
+    elif status in {"conditional", "budget_exhausted"} and "none" in certificate[
+        "partial_guarantees"
+    ]:
+        raise ContractError(
+            "a conditional or budget result cannot claim partial_guarantees=none"
+        )
     if semantics == "partial_refinement" and certificate["require_exact"]:
         raise ContractError("partial_refinement is incompatible with require_exact=true")
     if semantics == "partial_refinement" and status not in {
@@ -933,6 +953,7 @@ def _validate_result_identifiers_and_references(
 
     certificate = result["run_certificate"]
     n = certificate["input_point_count"]
+    input_semantics = certificate["input_semantics"]
 
     points = result.get("embedded_input_points")
     if points is not None:
@@ -945,6 +966,7 @@ def _validate_result_identifiers_and_references(
             raise ContractError("embedded point IDs must be contiguous from zero")
         coordinate_keys: set[tuple[str, str, str]] = set()
         source_indices: set[int] = set()
+        point_order_keys: list[tuple[int, int, int, int]] = []
         for point in points:
             if point["multiplicity"] != len(point["source_indices"]):
                 raise ContractError(
@@ -954,10 +976,38 @@ def _validate_result_identifiers_and_references(
             if coordinate_key in coordinate_keys:
                 raise ContractError("embedded canonical points repeat coordinates")
             coordinate_keys.add(coordinate_key)
+            if point["source_indices"] != sorted(set(point["source_indices"])):
+                raise ContractError(
+                    "embedded point source_indices must be canonical and unique"
+                )
+            point_order_keys.append(
+                (
+                    *(
+                        _binary64_total_order_key(bits)
+                        for bits in point["coordinate_bits"]
+                    ),
+                    point["source_indices"][0],
+                )
+            )
             overlap = source_indices.intersection(point["source_indices"])
             if overlap:
                 raise ContractError("embedded points repeat source indices")
             source_indices.update(point["source_indices"])
+            if (
+                input_semantics["duplicate_policy"] == "reject"
+                and point["multiplicity"] != 1
+            ):
+                raise ContractError(
+                    "duplicate_policy=reject requires unit point multiplicities"
+                )
+        if point_order_keys != sorted(point_order_keys):
+            raise ContractError(
+                "embedded points do not follow the canonical binary64 total order"
+            )
+        if source_indices != set(range(sum(point["multiplicity"] for point in points))):
+            raise ContractError(
+                "embedded source indices must be contiguous from zero"
+            )
         input_projection = [
             {
                 "point_id": point["point_id"],
@@ -974,7 +1024,6 @@ def _validate_result_identifiers_and_references(
             "run_certificate.input_semantics.input_sha256",
         )
 
-    input_semantics = certificate["input_semantics"]
     similarity = input_semantics["similarity_transform"]
     if not similarity["applied"]:
         if similarity["scale"] != {
@@ -1010,7 +1059,14 @@ def _validate_result_identifiers_and_references(
     exact_result = certificate["public_status"] == "exact"
     for event in events.values():
         _validate_critical_event(event, n, certificate["k_eff"], exact_result)
-    if exact_result:
+        if certificate["catalog_complete_by_rank"][event["closed_rank"] - 1] and (
+            event["predicate_status"] != "certified_exact"
+            or event["degeneracy_class"] == "unsupported"
+        ):
+            raise ContractError(
+                "a complete catalog rank contains an uncertified critical event"
+            )
+    if certificate["catalog_complete_by_rank"][0]:
         rank_one_shells = sorted(
             tuple(event["shell_ids"])
             for event in events.values()
@@ -1018,7 +1074,7 @@ def _validate_result_identifiers_and_references(
         )
         if rank_one_shells != [(point_id,) for point_id in range(n)]:
             raise ContractError(
-                "an exact critical catalog must contain one rank-one birth per point"
+                "a complete critical catalog must contain one rank-one birth per point"
             )
 
     for hyperedge in hyperedges.values():
@@ -1029,6 +1085,18 @@ def _validate_result_identifiers_and_references(
             else None,
             n,
             certificate["k_eff"],
+        )
+    hyperedges_by_event = Counter(
+        hyperedge["event_id"] for hyperedge in hyperedges.values()
+    )
+    if any(
+        hyperedges_by_event[event_id] != 1
+        for event_id, event in events.items()
+        if event["saddle_order"] is not None
+        and certificate["catalog_complete_by_rank"][event["closed_rank"] - 1]
+    ):
+        raise ContractError(
+            "a complete saddle-event catalog must emit one Gabriel hyperedge per event"
         )
 
     counters = certificate["work_and_memory_counters"]
@@ -1340,6 +1408,26 @@ def _validate_result_identifiers_and_references(
                 raise ContractError(
                     "a complete attachment order must assign every attachment once"
                 )
+            if result["profile"] == "full_pi0":
+                expected_attachment_keys = {
+                    (event_id, order, shell_id)
+                    for event_id, event in events.items()
+                    if event["saddle_order"] == order
+                    for shell_id in event["shell_ids"]
+                }
+                actual_attachment_keys = {
+                    (
+                        attachment["event_id"],
+                        attachment["order"],
+                        attachment["removed_shell_id"],
+                    )
+                    for attachment in attachments.values()
+                    if attachment["order"] == order
+                }
+                if actual_attachment_keys != expected_attachment_keys:
+                    raise ContractError(
+                        "a complete full_pi0 order must attach every saddle arm"
+                    )
 
     for order, forest in forest_by_order.items():
         local_nodes = nodes_by_order[order]
@@ -1592,8 +1680,17 @@ def _validate_result_identifiers_and_references(
     elif certificate["unresolved_locus_ids"]:
         raise ContractError("unresolved_locus_ids require a partial_scope")
 
-    if exact_result and result["profile"] == "hgp_reduced":
-        _validate_exact_reduced_replay(
+    closed_gamma_replay = exact_result or (
+        result["profile"] == "full_pi0"
+        and all(certificate["catalog_complete_by_rank"])
+        and all(certificate["gamma_complete_by_order"])
+        and all(certificate["batches_complete_by_order"])
+        and all(certificate["attachments_complete_by_order"])
+    )
+    if closed_gamma_replay:
+        if any(not forest["complete"] for forest in result["forests"]):
+            raise ContractError("a closed Gamma replay contains an incomplete forest")
+        _validate_closed_gamma_replay(
             result,
             events,
             cofaces,
@@ -1763,7 +1860,7 @@ def _component_snapshot(
     }
 
 
-def _validate_exact_reduced_replay(
+def _validate_closed_gamma_replay(
     result: dict[str, Any],
     events: dict[str, dict[str, Any]],
     cofaces: dict[str, dict[str, Any]],
@@ -1771,7 +1868,7 @@ def _validate_exact_reduced_replay(
     forests: dict[int, dict[str, Any]],
     nodes_by_order: dict[int, dict[str, dict[str, Any]]],
 ) -> None:
-    """Replay every exact reduced Gamma batch from its strict-sublevel state."""
+    """Replay every declared-complete Gamma batch from its strict-sublevel state."""
 
     gamma_keys = {
         (
@@ -1789,7 +1886,7 @@ def _validate_exact_reduced_replay(
         )
         if key not in gamma_keys:
             raise ContractError(
-                "an exact Gabriel hyperedge has no matching exhaustive Gamma coface"
+                "a closed Gabriel hyperedge has no matching exhaustive Gamma coface"
             )
 
     for order in range(1, result["k_eff"] + 1):
@@ -1808,7 +1905,7 @@ def _validate_exact_reduced_replay(
             pre_snapshot = _component_snapshot(batch["pre_lot_components"])
             if pre_snapshot != previous_post:
                 raise ContractError(
-                    "an exact batch pre-lot snapshot is not the preceding post-lot state"
+                    "a closed batch pre-lot snapshot is not the preceding post-lot state"
                 )
 
             parent: dict[tuple[int, ...], tuple[int, ...]] = {}
@@ -1846,18 +1943,21 @@ def _validate_exact_reduced_replay(
                 for facet in sorted(facets)[1:]:
                     union(sorted(facets)[0], facet)
 
-            relation_facets: list[tuple[tuple[int, ...], ...]] = []
             for coface_id in batch["gamma_coface_ids"]:
                 facets = tuple(
                     tuple(facet) for facet in cofaces[coface_id]["facet_point_ids"]
                 )
-                relation_facets.append(facets)
                 for facet in facets:
                     add(facet)
                 for facet in facets[1:]:
                     union(facets[0], facet)
 
-            if order == 1:
+            if result["profile"] == "full_pi0":
+                for event_id in batch["event_ids"]:
+                    event = events[event_id]
+                    if event["birth_order"] == order:
+                        add(tuple(sorted(event["interior_ids"] + event["shell_ids"])))
+            elif order == 1:
                 for event_id in batch["event_ids"]:
                     event = events[event_id]
                     if event["closed_rank"] == 1:
@@ -1876,13 +1976,13 @@ def _validate_exact_reduced_replay(
                 )
                 if facet_key in post_components_by_facets:
                     raise ContractError(
-                        "an exact post-lot snapshot repeats one component"
+                        "a closed post-lot snapshot repeats one component"
                     )
                 post_components_by_facets[facet_key] = component
             expected_group_keys = {frozenset(group) for group in groups.values()}
             if set(post_components_by_facets) != expected_group_keys:
                 raise ContractError(
-                    "an exact post-lot snapshot is not the Gamma batch contraction"
+                    "a closed post-lot snapshot is not the Gamma batch contraction"
                 )
 
             expected_deltas: list[dict[str, Any]] = []
@@ -1899,16 +1999,22 @@ def _validate_exact_reduced_replay(
                         node["kind"] != "birth"
                         or _exact_level_key(node["squared_level"])
                         != _exact_level_key(batch["squared_level_exact"])
-                        or node["batch_id"] not in {None, batch["batch_id"]}
+                        or node["batch_id"]
+                        not in (
+                            {None, batch["batch_id"]}
+                            if order == 1
+                            else {batch["batch_id"]}
+                        )
                     ):
                         raise ContractError(
-                            "a new exact component lacks its equal-level birth node"
+                            "a new closed component lacks its equal-level birth node "
+                            f"in batch {batch['batch_id']}"
                         )
                     created_node_ids.add(root_id)
                 elif len(pre_roots) == 1:
                     if root_id != pre_roots[0]:
                         raise ContractError(
-                            "a q=1 exact growth must retain its existing root"
+                            "a q=1 closed growth must retain its existing root"
                         )
                 else:
                     node = local_nodes[root_id]
@@ -1918,7 +2024,7 @@ def _validate_exact_reduced_replay(
                         or node["child_ids"] != pre_roots
                     ):
                         raise ContractError(
-                            "an exact multifusion node disagrees with its pre-lot roots"
+                            "a closed multifusion node disagrees with its pre-lot roots"
                         )
                     created_node_ids.add(root_id)
 
@@ -1953,18 +2059,18 @@ def _validate_exact_reduced_replay(
                 expected_deltas, key=canonical_json
             ):
                 raise ContractError(
-                    "an exact batch coverage log is not its pre/post state delta "
+                    "a closed batch coverage log is not its pre/post state delta "
                     f"for batch {batch['batch_id']}"
                 )
             previous_post = _component_snapshot(batch["post_lot_components"])
 
         if set(forest["root_ids"]) != set(previous_post):
             raise ContractError(
-                "an exact forest root set is not its final post-lot component set"
+                "a closed forest root set is not its final post-lot component set"
             )
         if set(local_nodes) != created_node_ids:
             raise ContractError(
-                "an exact forest contains a node not created by its batch replay"
+                "a closed forest contains a node not created by its batch replay"
             )
 
 
@@ -2040,6 +2146,14 @@ def _validate_partial_scope(
     _require_references(
         scope["verified_event_ids"], events, "partial_scope.verified_event_ids"
     )
+    if any(
+        events[event_id]["predicate_status"] != "certified_exact"
+        or events[event_id]["degeneracy_class"] == "unsupported"
+        for event_id in scope["verified_event_ids"]
+    ):
+        raise ContractError(
+            "partial_scope verified_event_ids contains an uncertified event"
+        )
 
     cell_ids: set[str] = set()
     for cell in scope["canonical_cell_certificates"]:
@@ -2057,6 +2171,30 @@ def _validate_partial_scope(
             point_id < 0 or point_id >= n for point_id in label
         ):
             raise ContractError("a canonical cell label is outside the input domain")
+        vertex_ids: set[str] = set()
+        exact_vertex_projections: list[dict[str, Any]] = []
+        for witness in cell["vertex_witnesses"]:
+            vertex_id = witness["vertex_id"]
+            if vertex_id in vertex_ids:
+                raise ContractError("a canonical cell repeats a vertex witness")
+            vertex_ids.add(vertex_id)
+            projection = {
+                "position_exact": witness["position_exact"],
+                "binding_constraint_ids": witness["binding_constraint_ids"],
+                "affine_dimension": witness["affine_dimension"],
+                "artificial_boundary": witness["artificial_boundary"],
+                "degeneracy_class": witness["degeneracy_class"],
+            }
+            if check_canonical_ids:
+                _canonical_id(
+                    vertex_id,
+                    "VertexWitness",
+                    projection,
+                    "partial_scope.canonical_cell_certificates.vertex_id",
+                )
+            exact_vertex_projections.append(
+                {"vertex_id": vertex_id, **projection}
+            )
         closed_flags = all(
             cell[field]
             for field in (
@@ -2074,6 +2212,11 @@ def _validate_partial_scope(
             raise ContractError(
                 "partial_scope contains an open cell at a declared closed depth"
             )
+        if closed_flags and any(
+            witness["degeneracy_class"] == "unsupported"
+            for witness in cell["vertex_witnesses"]
+        ):
+            raise ContractError("a closed canonical cell has an unsupported vertex")
         if check_canonical_ids:
             _canonical_id(
                 cell_id,
@@ -2081,7 +2224,7 @@ def _validate_partial_scope(
                 {
                     "depth": depth,
                     "label_point_ids": label,
-                    "vertex_witnesses": cell["vertex_witnesses"],
+                    "vertex_witnesses": exact_vertex_projections,
                     "cross_constraint_ids": cell["cross_constraint_ids"],
                     "active_cross_incidence_ids": cell[
                         "active_cross_incidence_ids"

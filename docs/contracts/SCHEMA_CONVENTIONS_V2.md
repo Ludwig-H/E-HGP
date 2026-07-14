@@ -96,6 +96,7 @@ Sauf `point_id`, tout champ terminé par `_id` et déclaré `CanonicalId` contie
 
 | type | projection d'identité minimale |
 |---|---|
+| `VertexWitness` | position rationnelle exacte, contraintes liantes, dimension affine, marque de frontière artificielle et classe de dégénérescence; approximation et étage de calcul exclus |
 | `CriticalEvent` | intérieur, shell complet, support minimal, centre rationnel et niveau exact |
 | `GabrielHyperedge` | `event_id`, ordre, simplexe, facettes, bras stricts et niveau exact |
 | `GammaCoface` | ordre, simplexe, toutes ses facettes et niveau exact; aucune dépendance à un événement critique |
@@ -104,7 +105,7 @@ Sauf `point_id`, tout champ terminé par `_id` et déclaré `CanonicalId` contie
 | `MergeNode` | ordre de sa forêt, profil, nature, niveau, enfants, événements et `batch_id` |
 | `MergeForest` | ordre, profil, sémantique, nœuds, racines et journal de couverture |
 | `VerticalMap` | ordres source/cible et affectations canoniques |
-| `CanonicalCellCertificate` | profondeur, label, contraintes, incidences actives et témoins exacts |
+| `CanonicalCellCertificate` | profondeur, label, contraintes, incidences actives et identifiants/projections des témoins exacts |
 | `MorseHGP3DResult` | hash d'entrée, profil, sémantique et identifiants des objets scientifiques; `run_id`, backend, mode et diagnostics sont exclus afin de comparer CPU et GPU |
 | objets de run, checkpoint ou benchmark | manifeste opérationnel complet explicitement mesuré |
 
@@ -180,4 +181,10 @@ python tools/check_contracts.py
 python tools/check_docs.py
 ```
 
-`check_contracts.py` valide chaque exemple contre son `$defs`, effectue un aller-retour JSON canonique, refuse les propriétés critiques inconnues et vérifie les invariants croisés du certificat et de la racine. Les tests négatifs doivent au minimum couvrir un champ inconnu, une unité de niveau incorrecte, un rationnel non canonique, un tableau non trié, une longueur de complétude incohérente, une tentative de publier `full_pi0` exact sur la seule base conditionnelle M.1, une tentative de promouvoir Gabriel brut, et une tentative d'utiliser `gamma_exhaustive_reference` comme base exacte sur `cuda_g4`.
+`check_contracts.py` valide chaque exemple contre son `$defs`, effectue un aller-retour JSON canonique, refuse les propriétés critiques inconnues et vérifie les invariants croisés du certificat et de la racine. Il vérifie aussi l'ordre total binary64 des points, les identifiants de contenu, toutes les références typées, l'arithmétique des budgets, l'exhaustivité déclarée des événements, hyperarêtes et attaches, ainsi que les garanties positives d'un `PartialScope`.
+
+Une sortie `hgp_reduced` exacte et une sortie `full_pi0` conditionnelle qui déclare toutes ses portes de catalogue, Gamma, attaches et lots fermées sont rejouées lot par lot. L'état `pre_lot_components` doit être le dernier état post-lot strict, toutes les cofaces Gamma du niveau sont contractées simultanément, les nœuds de naissance ou multifusion doivent correspondre aux racines obtenues, et le delta pré/post doit être identique dans le lot, la forêt et la racine. Une croissance silencieuse qui ajoute une facette sans ajouter de point reste obligatoire dans `coverage_log`.
+
+Les tests négatifs couvrent notamment un champ inconnu, une unité incorrecte, un rationnel non canonique, un tableau non trié, une référence pendante, un identifiant recalculé sur une projection falsifiée, une longueur de complétude incohérente, un lot non rejouable, une flèche verticale incomplète, une arithmétique de budget ouverte, une tentative de publier `full_pi0` exact sur la seule base conditionnelle M.1, une tentative de promouvoir Gabriel brut, et une tentative d'utiliser `gamma_exhaustive_reference` comme base exacte sur `cuda_g4`.
+
+Le migrateur `tools/rekey_contract_fixtures_v2.py --write` prépare, migre et valide l'ensemble des chemins demandés avant la première publication. Chaque remplacement de fichier est atomique; si un remplacement système échoue après des publications réussies, l'outil énumère précisément les chemins déjà publiés et la cible dont l'état doit être inspecté, sans annoncer de rollback multi-fichiers impossible.
