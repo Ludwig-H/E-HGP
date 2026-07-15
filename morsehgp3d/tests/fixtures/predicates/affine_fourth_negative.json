@@ -1,0 +1,11 @@
+{
+  "kind": "morsehgp3d_predicate_replay_input",
+  "planes": [
+    {"a": "1", "b": "1", "c": "1", "d": "-1", "schema_version": "2.0.0"},
+    {"a": "1", "b": "-1", "c": "0", "d": "0", "schema_version": "2.0.0"},
+    {"a": "0", "b": "1", "c": "-1", "d": "0", "schema_version": "2.0.0"},
+    {"a": "-1", "b": "-1", "c": "-1", "d": "0", "schema_version": "2.0.0"}
+  ],
+  "predicate": "fourth_plane_incidence",
+  "schema_version": 3
+}

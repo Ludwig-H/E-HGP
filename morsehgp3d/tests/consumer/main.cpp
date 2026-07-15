@@ -11,9 +11,11 @@ int main() {
   using morsehgp3d::exact::CertifiedPoint3;
   using morsehgp3d::exact::ExactLabelMoments;
   using morsehgp3d::exact::ExactLevel;
+  using morsehgp3d::exact::ExactPlane3;
   using morsehgp3d::exact::CertificationStage;
   using morsehgp3d::exact::PredicateFilterPolicy;
   using morsehgp3d::exact::PredicateSign;
+  using morsehgp3d::exact::ThreePlaneIntersectionKind;
 
   if (!morsehgp3d::exact::fp64_filter_environment_supported()) {
     std::cerr << "installed target did not preserve the strict FP64 environment\n";
@@ -62,6 +64,28 @@ int main() {
       filtered_distance.certification_stage() !=
           CertificationStage::fp64_filtered) {
     std::cerr << "installed filtered predicate path changed semantics\n";
+    return 1;
+  }
+
+  const ExactPlane3 x_zero = ExactPlane3::from_integer_coefficients(
+      {BigInt{1}, BigInt{0}, BigInt{0}, BigInt{0}});
+  const ExactPlane3 y_zero = ExactPlane3::from_integer_coefficients(
+      {BigInt{0}, BigInt{1}, BigInt{0}, BigInt{0}});
+  const ExactPlane3 z_zero = ExactPlane3::from_integer_coefficients(
+      {BigInt{0}, BigInt{0}, BigInt{1}, BigInt{0}});
+  const auto intersection =
+      morsehgp3d::exact::intersect_three_planes(x_zero, y_zero, z_zero);
+  const auto fourth = morsehgp3d::exact::decide_fourth_plane_incidence(
+      x_zero,
+      y_zero,
+      z_zero,
+      ExactPlane3::from_integer_coefficients(
+          {BigInt{1}, BigInt{1}, BigInt{1}, BigInt{0}}));
+  if (intersection.kind() != ThreePlaneIntersectionKind::unique ||
+      !intersection.point().has_value() ||
+      intersection.affine_dimension() != 0U ||
+      fourth.sign() != PredicateSign::zero) {
+    std::cerr << "installed affine exact kernel changed semantics\n";
     return 1;
   }
   return 0;

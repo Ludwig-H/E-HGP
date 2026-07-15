@@ -23,18 +23,26 @@
 namespace {
 
 using morsehgp3d::exact::CertifiedPoint3;
+using morsehgp3d::exact::ExactAffineForm3;
 using morsehgp3d::exact::ExactLabelMoments;
+using morsehgp3d::exact::ExactPlane3;
+using morsehgp3d::exact::ExactPlane3Record;
 using morsehgp3d::exact::ExactRational;
 using morsehgp3d::exact::ExactRational3;
 using morsehgp3d::exact::ExactRational3Record;
 using morsehgp3d::exact::PredicateCounters;
 using morsehgp3d::exact::PredicateFilterPolicy;
 using morsehgp3d::exact::canonical_integer_string;
+using morsehgp3d::exact::classify_affine_form;
 using morsehgp3d::exact::compare_squared_distances;
+using morsehgp3d::exact::fourth_plane_incidence;
+using morsehgp3d::exact::intersect_three_planes;
 using morsehgp3d::exact::maximum_power_label_cardinality;
+using morsehgp3d::exact::orientation_2d_in_plane;
 using morsehgp3d::exact::orientation_3d;
 using morsehgp3d::exact::parse_binary64_hex;
 using morsehgp3d::exact::power_bisector_side;
+using morsehgp3d::exact::power_bisector_affine_form;
 using morsehgp3d::exact::to_string;
 
 std::string counters_json(const PredicateCounters& counters) {
@@ -51,6 +59,27 @@ std::string counters_json(const PredicateCounters& counters) {
 std::string rational_json(const ExactRational& value) {
   return "{\"denominator\":\"" + canonical_integer_string(value.denominator()) +
          "\",\"numerator\":\"" + canonical_integer_string(value.numerator()) + "\"}";
+}
+
+std::string affine_form_json(const ExactAffineForm3& form) {
+  return "{\"a\":" + rational_json(form.a()) +
+         ",\"b\":" + rational_json(form.b()) +
+         ",\"c\":" + rational_json(form.c()) +
+         ",\"d\":" + rational_json(form.d()) +
+         ",\"schema_version\":\"" + ExactAffineForm3::schema_version + "\"}";
+}
+
+ExactPlane3 parse_plane(
+    std::span<const std::string_view> arguments, std::size_t offset) {
+  if (offset > arguments.size() || arguments.size() - offset < 4U) {
+    throw std::invalid_argument("a replay plane is incomplete");
+  }
+  return ExactPlane3::from_record(ExactPlane3Record{
+      ExactPlane3::schema_version,
+      std::string{arguments[offset]},
+      std::string{arguments[offset + 1U]},
+      std::string{arguments[offset + 2U]},
+      std::string{arguments[offset + 3U]}});
 }
 
 CertifiedPoint3 parse_point(
@@ -86,66 +115,25 @@ std::uint32_t parse_id(std::string_view text) {
   return static_cast<std::uint32_t>(parsed);
 }
 
-int replay_distance(
-    std::span<const std::string_view> arguments,
-    std::ostream& output,
-    PredicateFilterPolicy filter_policy) {
-  const CertifiedPoint3 witness = parse_point(arguments, 1U);
-  const CertifiedPoint3 left = parse_point(arguments, 4U);
-  const CertifiedPoint3 right = parse_point(arguments, 7U);
-  PredicateCounters counters;
-  const auto result = compare_squared_distances(
-      witness, left, right, &counters, filter_policy);
-  output << "{\"certification_stage\":\""
-         << to_string(result.decision.certification_stage())
-         << "\",\"counters\":" << counters_json(counters)
-         << ",\"left_squared_distance\":" << result.left_squared_distance.canonical_json()
-         << ",\"predicate\":\"compare_squared_distances\""
-         << ",\"right_squared_distance\":" << result.right_squared_distance.canonical_json()
-         << ",\"sign\":\"" << to_string(result.decision.sign()) << "\"}\n";
-  return 0;
-}
+struct ParsedPowerLabels {
+  ExactLabelMoments r;
+  ExactLabelMoments q;
+};
 
-int replay_orientation(
-    std::span<const std::string_view> arguments,
-    std::ostream& output,
-    PredicateFilterPolicy filter_policy) {
-  const CertifiedPoint3 a = parse_point(arguments, 1U);
-  const CertifiedPoint3 b = parse_point(arguments, 4U);
-  const CertifiedPoint3 c = parse_point(arguments, 7U);
-  const CertifiedPoint3 d = parse_point(arguments, 10U);
-  PredicateCounters counters;
-  const auto result = orientation_3d(a, b, c, d, &counters, filter_policy);
-  output << "{\"certification_stage\":\""
-         << to_string(result.decision.certification_stage())
-         << "\",\"counters\":" << counters_json(counters)
-         << ",\"determinant_exact\":" << rational_json(result.determinant)
-         << ",\"predicate\":\"orientation_3d\""
-         << ",\"sign\":\"" << to_string(result.decision.sign()) << "\"}\n";
-  return 0;
-}
-
-int replay_power_bisector(
-    std::span<const std::string_view> arguments, std::ostream& output) {
-  if (arguments.size() < 8U) {
-    throw std::invalid_argument("a power-bisector replay is incomplete");
+ParsedPowerLabels parse_power_labels(
+    std::span<const std::string_view> arguments, std::size_t cursor) {
+  if (cursor >= arguments.size()) {
+    throw std::invalid_argument("the power-bisector point table size is missing");
   }
-  const ExactRational3 witness = ExactRational3::from_record(ExactRational3Record{
-      ExactRational3::schema_version,
-      std::string{arguments[1]},
-      std::string{arguments[2]},
-      std::string{arguments[3]},
-      std::string{arguments[4]},
-      ExactRational3::unit});
-  const std::size_t point_count = parse_size(arguments[5], "point table size");
-  constexpr std::size_t prefix_size = 6U;
-  if (point_count > (arguments.size() - prefix_size) / 3U) {
+  const std::size_t point_count =
+      parse_size(arguments[cursor], "point table size");
+  ++cursor;
+  if (point_count > (arguments.size() - cursor) / 3U) {
     throw std::invalid_argument("the power-bisector point table is truncated");
   }
 
   std::vector<CertifiedPoint3> point_table;
   point_table.reserve(point_count);
-  std::size_t cursor = prefix_size;
   for (std::size_t index = 0; index < point_count; ++index) {
     point_table.push_back(parse_point(arguments, cursor));
     cursor += 3U;
@@ -190,10 +178,65 @@ int replay_power_bisector(
     ++cursor;
   }
 
-  const ExactLabelMoments r = ExactLabelMoments::from_canonical_ids(r_ids, point_table);
-  const ExactLabelMoments q = ExactLabelMoments::from_canonical_ids(q_ids, point_table);
+  return ParsedPowerLabels{
+      ExactLabelMoments::from_canonical_ids(r_ids, point_table),
+      ExactLabelMoments::from_canonical_ids(q_ids, point_table)};
+}
+
+int replay_distance(
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
+  const CertifiedPoint3 witness = parse_point(arguments, 1U);
+  const CertifiedPoint3 left = parse_point(arguments, 4U);
+  const CertifiedPoint3 right = parse_point(arguments, 7U);
   PredicateCounters counters;
-  const auto result = power_bisector_side(witness, r, q, &counters);
+  const auto result = compare_squared_distances(
+      witness, left, right, &counters, filter_policy);
+  output << "{\"certification_stage\":\""
+         << to_string(result.decision.certification_stage())
+         << "\",\"counters\":" << counters_json(counters)
+         << ",\"left_squared_distance\":" << result.left_squared_distance.canonical_json()
+         << ",\"predicate\":\"compare_squared_distances\""
+         << ",\"right_squared_distance\":" << result.right_squared_distance.canonical_json()
+         << ",\"sign\":\"" << to_string(result.decision.sign()) << "\"}\n";
+  return 0;
+}
+
+int replay_orientation(
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
+  const CertifiedPoint3 a = parse_point(arguments, 1U);
+  const CertifiedPoint3 b = parse_point(arguments, 4U);
+  const CertifiedPoint3 c = parse_point(arguments, 7U);
+  const CertifiedPoint3 d = parse_point(arguments, 10U);
+  PredicateCounters counters;
+  const auto result = orientation_3d(a, b, c, d, &counters, filter_policy);
+  output << "{\"certification_stage\":\""
+         << to_string(result.decision.certification_stage())
+         << "\",\"counters\":" << counters_json(counters)
+         << ",\"determinant_exact\":" << rational_json(result.determinant)
+         << ",\"predicate\":\"orientation_3d\""
+         << ",\"sign\":\"" << to_string(result.decision.sign()) << "\"}\n";
+  return 0;
+}
+
+int replay_power_bisector(
+    std::span<const std::string_view> arguments, std::ostream& output) {
+  if (arguments.size() < 7U) {
+    throw std::invalid_argument("a power-bisector replay is incomplete");
+  }
+  const ExactRational3 witness = ExactRational3::from_record(ExactRational3Record{
+      ExactRational3::schema_version,
+      std::string{arguments[1]},
+      std::string{arguments[2]},
+      std::string{arguments[3]},
+      std::string{arguments[4]},
+      ExactRational3::unit});
+  const ParsedPowerLabels labels = parse_power_labels(arguments, 5U);
+  PredicateCounters counters;
+  const auto result = power_bisector_side(witness, labels.r, labels.q, &counters);
   output << "{\"affine_value_exact\":" << rational_json(result.witness.affine_value)
          << ",\"certification_stage\":\""
          << to_string(result.decision.certification_stage())
@@ -204,6 +247,94 @@ int replay_power_bisector(
          << rational_json(result.witness.delta_squared_norm_sum)
          << ",\"predicate\":\"power_bisector_side\""
          << ",\"sign\":\"" << to_string(result.decision.sign()) << "\"}\n";
+  return 0;
+}
+
+int replay_plane_through_points(
+    std::span<const std::string_view> arguments, std::ostream& output) {
+  const ExactPlane3 plane = ExactPlane3::through_points(
+      parse_point(arguments, 1U),
+      parse_point(arguments, 4U),
+      parse_point(arguments, 7U));
+  output << "{\"plane\":" << plane.canonical_json()
+         << ",\"predicate\":\"plane_through_points\"}\n";
+  return 0;
+}
+
+int replay_power_bisector_affine_form(
+    std::span<const std::string_view> arguments, std::ostream& output) {
+  const ParsedPowerLabels labels = parse_power_labels(arguments, 1U);
+  const ExactAffineForm3 form = power_bisector_affine_form(labels.r, labels.q);
+  const auto classification = classify_affine_form(form);
+  output << "{\"affine_form\":" << affine_form_json(form)
+         << ",\"classification\":\"" << to_string(classification.kind()) << "\"";
+  if (classification.plane().has_value()) {
+    output << ",\"plane\":" << classification.plane()->canonical_json();
+  }
+  output << ",\"predicate\":\"power_bisector_affine_form\"}\n";
+  return 0;
+}
+
+int replay_orientation_2d(
+    std::span<const std::string_view> arguments, std::ostream& output) {
+  const ExactPlane3 plane = parse_plane(arguments, 1U);
+  const CertifiedPoint3 a = parse_point(arguments, 5U);
+  const CertifiedPoint3 b = parse_point(arguments, 8U);
+  const CertifiedPoint3 c = parse_point(arguments, 11U);
+  PredicateCounters counters;
+  const auto result = orientation_2d_in_plane(plane, a, b, c, &counters);
+  output << "{\"certification_stage\":\""
+         << to_string(result.decision.certification_stage())
+         << "\",\"counters\":" << counters_json(counters)
+         << ",\"orientation_value_exact\":"
+         << rational_json(result.orientation_value)
+         << ",\"predicate\":\"orientation_2d_in_plane\""
+         << ",\"sign\":\"" << to_string(result.decision.sign()) << "\"}\n";
+  return 0;
+}
+
+int replay_three_plane_intersection(
+    std::span<const std::string_view> arguments, std::ostream& output) {
+  const auto result = intersect_three_planes(
+      parse_plane(arguments, 1U),
+      parse_plane(arguments, 5U),
+      parse_plane(arguments, 9U));
+  output << "{\"affine_dimension\":";
+  if (result.affine_dimension().has_value()) {
+    output << *result.affine_dimension();
+  } else {
+    output << "null";
+  }
+  output << ",\"augmented_rank\":" << result.augmented_rank()
+         << ",\"intersection_exact\":";
+  if (result.point().has_value()) {
+    output << result.point()->canonical_json();
+  } else {
+    output << "null";
+  }
+  output << ",\"intersection_kind\":\"" << to_string(result.kind())
+         << "\",\"normal_rank\":" << result.normal_rank()
+         << ",\"predicate\":\"intersect_three_planes\"}\n";
+  return 0;
+}
+
+int replay_fourth_plane_incidence(
+    std::span<const std::string_view> arguments, std::ostream& output) {
+  PredicateCounters counters;
+  const auto result = fourth_plane_incidence(
+      parse_plane(arguments, 1U),
+      parse_plane(arguments, 5U),
+      parse_plane(arguments, 9U),
+      parse_plane(arguments, 13U),
+      &counters);
+  output << "{\"certification_stage\":\""
+         << to_string(result.decision.certification_stage())
+         << "\",\"counters\":" << counters_json(counters)
+         << ",\"intersection_exact\":" << result.intersection.canonical_json()
+         << ",\"predicate\":\"fourth_plane_incidence\""
+         << ",\"sign\":\"" << to_string(result.decision.sign()) << "\""
+         << ",\"signed_value_exact\":" << rational_json(result.signed_value)
+         << "}\n";
   return 0;
 }
 
@@ -222,6 +353,21 @@ int replay_tokens(
   }
   if (arguments[0] == "power_bisector_side") {
     return replay_power_bisector(arguments, output);
+  }
+  if (arguments[0] == "plane_through_points" && arguments.size() == 10U) {
+    return replay_plane_through_points(arguments, output);
+  }
+  if (arguments[0] == "power_bisector_affine_form") {
+    return replay_power_bisector_affine_form(arguments, output);
+  }
+  if (arguments[0] == "orientation_2d_in_plane" && arguments.size() == 14U) {
+    return replay_orientation_2d(arguments, output);
+  }
+  if (arguments[0] == "intersect_three_planes" && arguments.size() == 13U) {
+    return replay_three_plane_intersection(arguments, output);
+  }
+  if (arguments[0] == "fourth_plane_incidence" && arguments.size() == 17U) {
+    return replay_fourth_plane_incidence(arguments, output);
   }
   throw std::invalid_argument("the predicate name or argument count is unsupported");
 }
@@ -273,8 +419,18 @@ void print_usage(const char* executable) {
             << " orientation_3d HEX_X HEX_Y HEX_Z ... (4 points)\n"
             << "   or: " << executable
             << " power_bisector_side XN YN ZN D POINT_COUNT ... R_COUNT ... Q_COUNT ...\n"
+            << "   or: " << executable
+            << " plane_through_points HEX_X HEX_Y HEX_Z ... (3 points)\n"
+            << "   or: " << executable
+            << " power_bisector_affine_form POINT_COUNT ... R_COUNT ... Q_COUNT ...\n"
+            << "   or: " << executable
+            << " orientation_2d_in_plane A B C D HEX_X HEX_Y HEX_Z ... (3 points)\n"
+            << "   or: " << executable
+            << " intersect_three_planes A B C D ... (3 planes)\n"
+            << "   or: " << executable
+            << " fourth_plane_incidence A B C D ... (4 planes)\n"
             << "   or: " << executable << " --batch < predicate-lines.txt\n"
-            << "prefix either form with --multiprecision-only to disable FP64 filters\n";
+            << "prefix any form with --multiprecision-only to disable FP64 filters\n";
 }
 
 }  // namespace

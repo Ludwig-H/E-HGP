@@ -3,6 +3,7 @@
 #include "morsehgp3d/exact/fp64_interval.hpp"
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/level.hpp"
+#include "morsehgp3d/exact/plane.hpp"
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/exact/predicate.hpp"
 
@@ -21,6 +22,22 @@ struct DistanceComparisonResult {
 struct Orientation3DResult {
   PredicateDecision decision;
   ExactRational determinant;
+};
+
+struct Orientation2DResult {
+  PredicateDecision decision;
+  ExactRational orientation_value;
+};
+
+struct PlaneSideResult {
+  PredicateDecision decision;
+  ExactRational signed_value;
+};
+
+struct FourthPlaneIncidenceResult {
+  PredicateDecision decision;
+  ExactRational3 intersection;
+  ExactRational signed_value;
 };
 
 struct PowerBisectorWitness {
@@ -199,6 +216,186 @@ inline void require_power_label_domain(
   return result;
 }
 
+// Sign convention: n dot ((b-a) cross (c-a)), where n is the oriented
+// ExactPlane3 normal. Every input point must be exactly incident to the plane.
+[[nodiscard]] inline ExactRational orientation_2d_determinant(
+    const ExactPlane3& plane,
+    const ExactRational3& a,
+    const ExactRational3& b,
+    const ExactRational3& c) {
+  if (!plane.evaluate(a).is_zero() || !plane.evaluate(b).is_zero() ||
+      !plane.evaluate(c).is_zero()) {
+    throw std::invalid_argument(
+        "orientation_2d points must be exactly incident to the support plane");
+  }
+  std::array<ExactRational, 3> u{};
+  std::array<ExactRational, 3> v{};
+  for (std::size_t axis = 0; axis < 3U; ++axis) {
+    u[axis] = b.coordinate(axis) - a.coordinate(axis);
+    v[axis] = c.coordinate(axis) - a.coordinate(axis);
+  }
+  const std::array<ExactRational, 3> cross{
+      u[1] * v[2] - u[2] * v[1],
+      u[2] * v[0] - u[0] * v[2],
+      u[0] * v[1] - u[1] * v[0]};
+  ExactRational result;
+  for (std::size_t axis = 0; axis < 3U; ++axis) {
+    result = result + ExactRational{plane.coefficient(axis)} * cross[axis];
+  }
+  return result;
+}
+
+[[nodiscard]] inline ExactRational orientation_2d_determinant(
+    const ExactPlane3& plane,
+    const CertifiedPoint3& a,
+    const CertifiedPoint3& b,
+    const CertifiedPoint3& c) {
+  return orientation_2d_determinant(plane, a.exact(), b.exact(), c.exact());
+}
+
+[[nodiscard]] inline PredicateDecision decide_orientation_2d_in_plane(
+    const ExactPlane3& plane,
+    const ExactRational3& a,
+    const ExactRational3& b,
+    const ExactRational3& c,
+    PredicateCounters* counters = nullptr) {
+  return detail::multiprecision_decision(
+      orientation_2d_determinant(plane, a, b, c).sign(), counters);
+}
+
+[[nodiscard]] inline PredicateDecision decide_orientation_2d_in_plane(
+    const ExactPlane3& plane,
+    const CertifiedPoint3& a,
+    const CertifiedPoint3& b,
+    const CertifiedPoint3& c,
+    PredicateCounters* counters = nullptr) {
+  return decide_orientation_2d_in_plane(
+      plane, a.exact(), b.exact(), c.exact(), counters);
+}
+
+[[nodiscard]] inline Orientation2DResult orientation_2d_in_plane(
+    const ExactPlane3& plane,
+    const ExactRational3& a,
+    const ExactRational3& b,
+    const ExactRational3& c,
+    PredicateCounters* counters = nullptr) {
+  ExactRational orientation_value = orientation_2d_determinant(plane, a, b, c);
+  const PredicateDecision decision =
+      detail::multiprecision_decision(orientation_value.sign(), counters);
+  return Orientation2DResult{decision, std::move(orientation_value)};
+}
+
+[[nodiscard]] inline Orientation2DResult orientation_2d_in_plane(
+    const ExactPlane3& plane,
+    const CertifiedPoint3& a,
+    const CertifiedPoint3& b,
+    const CertifiedPoint3& c,
+    PredicateCounters* counters = nullptr) {
+  return orientation_2d_in_plane(
+      plane, a.exact(), b.exact(), c.exact(), counters);
+}
+
+[[nodiscard]] inline PredicateDecision decide_plane_side(
+    const ExactPlane3& plane,
+    const ExactRational3& point,
+    PredicateCounters* counters = nullptr) {
+  return detail::multiprecision_decision(plane.evaluate(point).sign(), counters);
+}
+
+[[nodiscard]] inline PredicateDecision decide_plane_side(
+    const ExactPlane3& plane,
+    const CertifiedPoint3& point,
+    PredicateCounters* counters = nullptr) {
+  return decide_plane_side(plane, point.exact(), counters);
+}
+
+[[nodiscard]] inline PlaneSideResult plane_side(
+    const ExactPlane3& plane,
+    const ExactRational3& point,
+    PredicateCounters* counters = nullptr) {
+  ExactRational signed_value = plane.evaluate(point);
+  const PredicateDecision decision =
+      detail::multiprecision_decision(signed_value.sign(), counters);
+  return PlaneSideResult{decision, std::move(signed_value)};
+}
+
+[[nodiscard]] inline PlaneSideResult plane_side(
+    const ExactPlane3& plane,
+    const CertifiedPoint3& point,
+    PredicateCounters* counters = nullptr) {
+  return plane_side(plane, point.exact(), counters);
+}
+
+// The homogeneous 4x4 determinant equals det(N) times the fourth-plane value
+// at the unique intersection of the first three planes. Multiplying its sign
+// by sign(det(N)) therefore decides the oriented side without a division.
+[[nodiscard]] inline int fourth_plane_incidence_determinant_sign(
+    const ExactPlane3& first,
+    const ExactPlane3& second,
+    const ExactPlane3& third,
+    const ExactPlane3& fourth) {
+  const std::array<const ExactPlane3*, 4> planes{
+      &first, &second, &third, &fourth};
+  std::array<std::array<BigInt, 3>, 3> binding_normals{};
+  std::array<std::array<BigInt, 4>, 4> homogeneous{};
+  for (std::size_t row = 0; row < planes.size(); ++row) {
+    for (std::size_t column = 0; column < 4U; ++column) {
+      homogeneous[row][column] = planes[row]->coefficient(column);
+      if (row < 3U && column < 3U) {
+        binding_normals[row][column] = planes[row]->coefficient(column);
+      }
+    }
+  }
+  const BigInt binding_determinant = detail::determinant_3x3(binding_normals);
+  if (binding_determinant == 0) {
+    throw std::invalid_argument(
+        "fourth-plane incidence requires a unique first-three-plane intersection");
+  }
+  const BigInt homogeneous_determinant = detail::determinant_4x4(homogeneous);
+  const int binding_sign = binding_determinant < 0 ? -1 : 1;
+  const int homogeneous_sign = homogeneous_determinant < 0
+                                   ? -1
+                                   : (homogeneous_determinant == 0 ? 0 : 1);
+  return binding_sign * homogeneous_sign;
+}
+
+[[nodiscard]] inline PredicateDecision decide_fourth_plane_incidence(
+    const ExactPlane3& first,
+    const ExactPlane3& second,
+    const ExactPlane3& third,
+    const ExactPlane3& fourth,
+    PredicateCounters* counters = nullptr) {
+  return detail::multiprecision_decision(
+      fourth_plane_incidence_determinant_sign(first, second, third, fourth),
+      counters);
+}
+
+[[nodiscard]] inline FourthPlaneIncidenceResult fourth_plane_incidence(
+    const ExactPlane3& first,
+    const ExactPlane3& second,
+    const ExactPlane3& third,
+    const ExactPlane3& fourth,
+    PredicateCounters* counters = nullptr) {
+  const int determinant_sign = fourth_plane_incidence_determinant_sign(
+      first, second, third, fourth);
+  const ThreePlaneIntersection intersection =
+      intersect_three_planes(first, second, third);
+  if (intersection.kind() != ThreePlaneIntersectionKind::unique ||
+      !intersection.point().has_value()) {
+    throw std::invalid_argument(
+        "fourth-plane incidence requires a unique first-three-plane intersection");
+  }
+  ExactRational signed_value = fourth.evaluate(*intersection.point());
+  if (signed_value.sign() != determinant_sign) {
+    throw std::logic_error(
+        "fourth-plane determinant contradicted its exact rational witness");
+  }
+  const PredicateDecision decision =
+      detail::multiprecision_decision(signed_value.sign(), counters);
+  return FourthPlaneIncidenceResult{
+      decision, *intersection.point(), std::move(signed_value)};
+}
+
 // Decision-only entry point. Future filtered stages can return before either
 // exact squared distance is materialized.
 [[nodiscard]] inline PredicateDecision decide_squared_distance_order(
@@ -305,6 +502,19 @@ inline void require_power_label_domain(
 
 // Exact value of H_{R,Q}(y) = -2 <y, S_R-S_Q> + (N_R-N_Q).
 // R and Q must have the same cardinality so that the quadratic y term cancels.
+[[nodiscard]] inline ExactAffineForm3 power_bisector_affine_form(
+    const ExactLabelMoments& r,
+    const ExactLabelMoments& q) {
+  detail::require_power_label_domain(r, q);
+  std::array<ExactRational, 4> coefficients{};
+  for (std::size_t axis = 0; axis < 3U; ++axis) {
+    coefficients[axis] = ExactRational{BigInt{-2}} *
+                         (r.coordinate_sum(axis) - q.coordinate_sum(axis));
+  }
+  coefficients[3] = r.squared_norm_sum() - q.squared_norm_sum();
+  return ExactAffineForm3::from_rational_coefficients(coefficients);
+}
+
 [[nodiscard]] inline PowerBisectorWitness materialize_power_bisector_witness(
     const ExactRational3& witness,
     const ExactLabelMoments& r,

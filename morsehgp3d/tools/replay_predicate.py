@@ -19,10 +19,11 @@ from typing import Any
 
 INPUT_KIND = "morsehgp3d_predicate_replay_input"
 RESULT_KIND = "morsehgp3d_predicate_replay_result"
-SCHEMA_VERSIONS = {1, 2}
+SCHEMA_VERSIONS = {1, 2, 3}
 DOMAINS = {
     1: b"MorseHGP3D/predicate-replay-v1/",
     2: b"MorseHGP3D/predicate-replay-v2/",
+    3: b"MorseHGP3D/predicate-replay-v3/",
 }
 POINT_COUNTS = {
     "compare_squared_distances": 3,
@@ -121,6 +122,31 @@ def validate_exact_rational3(value: Any, label: str) -> dict[str, str]:
     return {key: value[key] for key in sorted(fields)}
 
 
+def validate_plane(value: Any, label: str) -> dict[str, str]:
+    fields = {"a", "b", "c", "d", "schema_version"}
+    if not isinstance(value, dict) or set(value) != fields:
+        raise ValueError(f"the replay {label} is not a closed ExactPlane3 object")
+    if value["schema_version"] != "2.0.0":
+        raise ValueError(f"the replay {label} has an unsupported ExactPlane3 contract")
+    coefficients: list[int] = []
+    for field in ("a", "b", "c", "d"):
+        coefficient = value[field]
+        if (
+            not isinstance(coefficient, str)
+            or CANONICAL_INTEGER.fullmatch(coefficient) is None
+        ):
+            raise ValueError(f"the replay {label} has noncanonical exact integers")
+        coefficients.append(int(coefficient))
+    if coefficients[:3] == [0, 0, 0]:
+        raise ValueError(f"the replay {label} has a zero normal")
+    divisor = 0
+    for coefficient in coefficients:
+        divisor = math.gcd(divisor, abs(coefficient))
+    if divisor != 1:
+        raise ValueError(f"the replay {label} is not primitive canonically")
+    return {key: value[key] for key in sorted(fields)}
+
+
 def validate_label_ids(value: Any, point_count: int, label: str) -> list[int]:
     if not isinstance(value, list) or not 1 <= len(value) <= 10:
         raise ValueError(
@@ -162,31 +188,105 @@ def validate_input(value: Any) -> dict[str, Any]:
             "points": points,
         }
 
-    required = {
-        "kind",
-        "schema_version",
-        "predicate",
-        "point_table",
-        "q_ids",
-        "r_ids",
-        "witness",
-    }
-    if set(value) != required or predicate != "power_bisector_side":
-        raise ValueError("the v2 replay input has missing, unknown, or unsupported fields")
-    point_table = validate_points(value["point_table"], "point_table")
-    q_ids = validate_label_ids(value["q_ids"], len(point_table), "Q label")
-    r_ids = validate_label_ids(value["r_ids"], len(point_table), "R label")
-    if len(q_ids) != len(r_ids):
-        raise ValueError("the replay power labels must have the same cardinality")
-    return {
-        "kind": INPUT_KIND,
-        "schema_version": 2,
-        "predicate": predicate,
-        "point_table": point_table,
-        "q_ids": q_ids,
-        "r_ids": r_ids,
-        "witness": validate_exact_rational3(value["witness"], "witness"),
-    }
+    if schema_version == 2:
+        required = {
+            "kind",
+            "schema_version",
+            "predicate",
+            "point_table",
+            "q_ids",
+            "r_ids",
+            "witness",
+        }
+        if set(value) != required or predicate != "power_bisector_side":
+            raise ValueError("the v2 replay input has missing, unknown, or unsupported fields")
+        point_table = validate_points(value["point_table"], "point_table")
+        q_ids = validate_label_ids(value["q_ids"], len(point_table), "Q label")
+        r_ids = validate_label_ids(value["r_ids"], len(point_table), "R label")
+        if len(q_ids) != len(r_ids):
+            raise ValueError("the replay power labels must have the same cardinality")
+        return {
+            "kind": INPUT_KIND,
+            "schema_version": 2,
+            "predicate": predicate,
+            "point_table": point_table,
+            "q_ids": q_ids,
+            "r_ids": r_ids,
+            "witness": validate_exact_rational3(value["witness"], "witness"),
+        }
+
+    if predicate == "plane_through_points":
+        required = {"kind", "schema_version", "predicate", "points"}
+        if set(value) != required:
+            raise ValueError("the v3 plane input has missing or unknown fields")
+        points = validate_points(value["points"], "points")
+        if len(points) != 3:
+            raise ValueError("plane construction requires exactly three points")
+        return {
+            "kind": INPUT_KIND,
+            "schema_version": 3,
+            "predicate": predicate,
+            "points": points,
+        }
+
+    if predicate == "power_bisector_affine_form":
+        required = {
+            "kind",
+            "schema_version",
+            "predicate",
+            "point_table",
+            "q_ids",
+            "r_ids",
+        }
+        if set(value) != required:
+            raise ValueError("the v3 affine-form input has missing or unknown fields")
+        point_table = validate_points(value["point_table"], "point_table")
+        q_ids = validate_label_ids(value["q_ids"], len(point_table), "Q label")
+        r_ids = validate_label_ids(value["r_ids"], len(point_table), "R label")
+        if len(q_ids) != len(r_ids):
+            raise ValueError("the replay power labels must have the same cardinality")
+        return {
+            "kind": INPUT_KIND,
+            "schema_version": 3,
+            "predicate": predicate,
+            "point_table": point_table,
+            "q_ids": q_ids,
+            "r_ids": r_ids,
+        }
+
+    if predicate == "orientation_2d_in_plane":
+        required = {"kind", "schema_version", "predicate", "plane", "points"}
+        if set(value) != required:
+            raise ValueError("the v3 orientation input has missing or unknown fields")
+        points = validate_points(value["points"], "points")
+        if len(points) != 3:
+            raise ValueError("orientation 2D requires exactly three points")
+        return {
+            "kind": INPUT_KIND,
+            "schema_version": 3,
+            "predicate": predicate,
+            "plane": validate_plane(value["plane"], "support plane"),
+            "points": points,
+        }
+
+    plane_counts = {"intersect_three_planes": 3, "fourth_plane_incidence": 4}
+    if predicate in plane_counts:
+        required = {"kind", "schema_version", "predicate", "planes"}
+        if set(value) != required or not isinstance(value["planes"], list):
+            raise ValueError("the v3 plane-system input has missing or unknown fields")
+        if len(value["planes"]) != plane_counts[predicate]:
+            raise ValueError("the v3 plane system has the wrong plane count")
+        return {
+            "kind": INPUT_KIND,
+            "schema_version": 3,
+            "predicate": predicate,
+            "planes": [
+                validate_plane(plane, f"plane {index}")
+                for index, plane in enumerate(value["planes"])
+            ],
+        }
+
+    raise ValueError("the v3 replay predicate is unsupported")
 
 
 def replay_id(value: dict[str, Any]) -> str:
@@ -250,6 +350,20 @@ def canonical_rational(value: Any, label: str, *, nonnegative: bool) -> Fraction
     return Fraction(numerator_value, denominator_value)
 
 
+def exact_affine_form(
+    value: Any, label: str
+) -> tuple[Fraction, Fraction, Fraction, Fraction]:
+    fields = {"a", "b", "c", "d", "schema_version"}
+    if not isinstance(value, dict) or set(value) != fields:
+        raise ValueError(f"the native {label} is not a closed exact affine form")
+    if value["schema_version"] != "2.0.0":
+        raise ValueError(f"the native {label} has an unsupported affine-form contract")
+    return tuple(
+        canonical_rational(value[field], f"{label} coefficient {field}", nonnegative=False)
+        for field in ("a", "b", "c", "d")
+    )  # type: ignore[return-value]
+
+
 def canonical_level(value: Any, label: str) -> Fraction:
     if not isinstance(value, dict) or set(value) != {
         "denominator",
@@ -279,6 +393,187 @@ def point_from_words(words: list[str]) -> tuple[Fraction, Fraction, Fraction]:
     return tuple(
         Fraction.from_float(struct.unpack(">d", bytes.fromhex(word))[0]) for word in words
     )  # type: ignore[return-value]
+
+
+def primitive_integer_coefficients(
+    coefficients: tuple[Fraction, Fraction, Fraction, Fraction],
+) -> tuple[int, int, int, int]:
+    common_denominator = 1
+    for coefficient in coefficients:
+        common_denominator = math.lcm(common_denominator, coefficient.denominator)
+    integers = [
+        coefficient.numerator * (common_denominator // coefficient.denominator)
+        for coefficient in coefficients
+    ]
+    divisor = 0
+    for coefficient in integers:
+        divisor = math.gcd(divisor, abs(coefficient))
+    if divisor != 0:
+        integers = [coefficient // divisor for coefficient in integers]
+    return tuple(integers)  # type: ignore[return-value]
+
+
+def plane_record(
+    coefficients: tuple[Fraction, Fraction, Fraction, Fraction],
+) -> dict[str, str]:
+    primitive = primitive_integer_coefficients(coefficients)
+    if primitive[:3] == (0, 0, 0):
+        raise ValueError("a zero normal does not define an exact plane")
+    return {
+        "a": str(primitive[0]),
+        "b": str(primitive[1]),
+        "c": str(primitive[2]),
+        "d": str(primitive[3]),
+        "schema_version": "2.0.0",
+    }
+
+
+def plane_coefficients(record: dict[str, str]) -> tuple[Fraction, Fraction, Fraction, Fraction]:
+    return tuple(Fraction(int(record[field])) for field in ("a", "b", "c", "d"))  # type: ignore[return-value]
+
+
+def cross_product(
+    left: tuple[Fraction, Fraction, Fraction],
+    right: tuple[Fraction, Fraction, Fraction],
+) -> tuple[Fraction, Fraction, Fraction]:
+    return (
+        left[1] * right[2] - left[2] * right[1],
+        left[2] * right[0] - left[0] * right[2],
+        left[0] * right[1] - left[1] * right[0],
+    )
+
+
+def plane_through_points(
+    points: list[tuple[Fraction, Fraction, Fraction]],
+) -> dict[str, str]:
+    a, b, c = points
+    first = tuple(bi - ai for ai, bi in zip(a, b))
+    second = tuple(ci - ai for ai, ci in zip(a, c))
+    normal = cross_product(first, second)
+    offset = -sum((coefficient * coordinate for coefficient, coordinate in zip(normal, a)), Fraction())
+    return plane_record((normal[0], normal[1], normal[2], offset))
+
+
+def evaluate_plane(
+    plane: dict[str, str], point: tuple[Fraction, Fraction, Fraction]
+) -> Fraction:
+    a, b, c, d = plane_coefficients(plane)
+    return a * point[0] + b * point[1] + c * point[2] + d
+
+
+def power_bisector_classification(
+    replay_input: dict[str, Any],
+) -> tuple[
+    str,
+    dict[str, str] | None,
+    tuple[Fraction, Fraction, Fraction, Fraction],
+]:
+    point_table = [point_from_words(words) for words in replay_input["point_table"]]
+    r_points = [point_table[identifier] for identifier in replay_input["r_ids"]]
+    q_points = [point_table[identifier] for identifier in replay_input["q_ids"]]
+    delta = tuple(
+        sum((value[axis] for value in r_points), Fraction())
+        - sum((value[axis] for value in q_points), Fraction())
+        for axis in range(3)
+    )
+    delta_norm = sum(
+        (sum((coordinate * coordinate for coordinate in value), Fraction()) for value in r_points),
+        Fraction(),
+    ) - sum(
+        (sum((coordinate * coordinate for coordinate in value), Fraction()) for value in q_points),
+        Fraction(),
+    )
+    coefficients = (-2 * delta[0], -2 * delta[1], -2 * delta[2], delta_norm)
+    if coefficients[:3] != (Fraction(), Fraction(), Fraction()):
+        return "proper_plane", plane_record(coefficients), coefficients
+    if coefficients[3] < 0:
+        return "constant_negative", None, coefficients
+    if coefficients[3] > 0:
+        return "constant_positive", None, coefficients
+    return "identically_zero", None, coefficients
+
+
+def matrix_rref(matrix: list[list[Fraction]]) -> tuple[list[list[Fraction]], list[int]]:
+    reduced = [list(row) for row in matrix]
+    pivot_columns: list[int] = []
+    pivot_row = 0
+    column_count = len(reduced[0]) if reduced else 0
+    for column in range(column_count):
+        selected = next(
+            (row for row in range(pivot_row, len(reduced)) if reduced[row][column] != 0),
+            None,
+        )
+        if selected is None:
+            continue
+        reduced[pivot_row], reduced[selected] = reduced[selected], reduced[pivot_row]
+        pivot = reduced[pivot_row][column]
+        reduced[pivot_row] = [entry / pivot for entry in reduced[pivot_row]]
+        for row in range(len(reduced)):
+            if row == pivot_row or reduced[row][column] == 0:
+                continue
+            factor = reduced[row][column]
+            reduced[row] = [
+                entry - factor * pivot_entry
+                for entry, pivot_entry in zip(reduced[row], reduced[pivot_row])
+            ]
+        pivot_columns.append(column)
+        pivot_row += 1
+        if pivot_row == len(reduced):
+            break
+    return reduced, pivot_columns
+
+
+def solve_three_planes(
+    planes: list[dict[str, str]],
+) -> tuple[
+    str,
+    tuple[Fraction, Fraction, Fraction] | None,
+    int,
+    int,
+    int | None,
+]:
+    normals: list[list[Fraction]] = []
+    augmented: list[list[Fraction]] = []
+    for plane in planes:
+        a, b, c, d = plane_coefficients(plane)
+        normals.append([a, b, c])
+        augmented.append([a, b, c, -d])
+    _, normal_pivots = matrix_rref(normals)
+    reduced, augmented_pivots = matrix_rref(augmented)
+    normal_rank = len(normal_pivots)
+    augmented_rank = len(augmented_pivots)
+    if normal_rank < augmented_rank:
+        return "empty", None, normal_rank, augmented_rank, None
+    if normal_rank < 3:
+        return "affine_family", None, normal_rank, augmented_rank, 3 - normal_rank
+    coordinates = [Fraction(), Fraction(), Fraction()]
+    for row, column in enumerate(augmented_pivots):
+        if column < 3:
+            coordinates[column] = reduced[row][3]
+    return "unique", tuple(coordinates), normal_rank, augmented_rank, 0  # type: ignore[return-value]
+
+
+def exact_rational3_record(
+    point: tuple[Fraction, Fraction, Fraction]
+) -> dict[str, str]:
+    denominator = math.lcm(*(coordinate.denominator for coordinate in point))
+    numerators = [
+        coordinate.numerator * (denominator // coordinate.denominator)
+        for coordinate in point
+    ]
+    divisor = denominator
+    for numerator in numerators:
+        divisor = math.gcd(divisor, abs(numerator))
+    denominator //= divisor
+    numerators = [numerator // divisor for numerator in numerators]
+    return {
+        "denominator": str(denominator),
+        "schema_version": "2.0.0",
+        "unit": "input_coordinate_unit",
+        "x_numerator": str(numerators[0]),
+        "y_numerator": str(numerators[1]),
+        "z_numerator": str(numerators[2]),
+    }
 
 
 def squared_distance(
@@ -313,9 +608,14 @@ def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None
         raise ValueError("the native predicate counters do not match PredicateCounts v2")
     if any(type(count) is not int or count < 0 for count in value.values()):
         raise ValueError("the native predicate counters must be nonnegative integers")
+    exact_only = {
+        "power_bisector_side",
+        "orientation_2d_in_plane",
+        "fourth_plane_incidence",
+    }
     allowed_stages = (
         {"cpu_multiprecision"}
-        if predicate == "power_bisector_side"
+        if predicate in exact_only
         else {"fp64_filtered", "cpu_multiprecision"}
     )
     if stage not in allowed_stages:
@@ -336,6 +636,83 @@ def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None
 
 def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str, Any]:
     predicate = replay_input["predicate"]
+    if predicate == "plane_through_points":
+        expected_fields = {"plane", "predicate"}
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError("the native plane construction returned unknown fields")
+        if value["predicate"] != predicate:
+            raise ValueError("the native replay returned a different predicate")
+        native_plane = validate_plane(value["plane"], "native constructed plane")
+        points = [point_from_words(words) for words in replay_input["points"]]
+        expected_plane = plane_through_points(points)
+        if native_plane != expected_plane:
+            raise ValueError("the native constructed plane differs from the replay input")
+        return value
+
+    if predicate == "power_bisector_affine_form":
+        classification, expected_plane, expected_coefficients = power_bisector_classification(
+            replay_input
+        )
+        expected_fields = {"affine_form", "classification", "predicate"}
+        if expected_plane is not None:
+            expected_fields.add("plane")
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError("the native affine-form classification returned unknown fields")
+        if value["predicate"] != predicate or value["classification"] != classification:
+            raise ValueError("the native affine-form classification differs from the replay input")
+        native_coefficients = exact_affine_form(
+            value["affine_form"], "power-bisector affine form"
+        )
+        if native_coefficients != expected_coefficients:
+            raise ValueError("the native affine-form coefficients differ from the replay input")
+        if expected_plane is not None:
+            native_plane = validate_plane(value["plane"], "native power-bisector plane")
+            if native_plane != expected_plane:
+                raise ValueError("the native power-bisector plane differs from the replay input")
+        return value
+
+    if predicate == "intersect_three_planes":
+        (
+            intersection_kind,
+            expected_point,
+            normal_rank,
+            augmented_rank,
+            affine_dimension,
+        ) = solve_three_planes(replay_input["planes"])
+        expected_fields = {
+            "affine_dimension",
+            "augmented_rank",
+            "intersection_exact",
+            "intersection_kind",
+            "normal_rank",
+            "predicate",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError("the native plane intersection returned unknown fields")
+        if (
+            value["predicate"] != predicate
+            or value["intersection_kind"] != intersection_kind
+            or type(value["normal_rank"]) is not int
+            or value["normal_rank"] != normal_rank
+            or type(value["augmented_rank"]) is not int
+            or value["augmented_rank"] != augmented_rank
+            or (
+                value["affine_dimension"] is not None
+                and type(value["affine_dimension"]) is not int
+            )
+            or value["affine_dimension"] != affine_dimension
+        ):
+            raise ValueError("the native plane-intersection invariants differ from the replay input")
+        if expected_point is not None:
+            native_point = validate_exact_rational3(
+                value["intersection_exact"], "native plane intersection"
+            )
+            if native_point != exact_rational3_record(expected_point):
+                raise ValueError("the native plane intersection differs from Gaussian elimination")
+        elif value["intersection_exact"] is not None:
+            raise ValueError("a nonunique native plane intersection exposed a point")
+        return value
+
     distance_fields = {
         "certification_stage",
         "counters",
@@ -360,10 +737,27 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
         "predicate",
         "sign",
     }
+    orientation_2d_fields = {
+        "certification_stage",
+        "counters",
+        "orientation_value_exact",
+        "predicate",
+        "sign",
+    }
+    fourth_plane_fields = {
+        "certification_stage",
+        "counters",
+        "intersection_exact",
+        "predicate",
+        "sign",
+        "signed_value_exact",
+    }
     expected_fields = {
         "compare_squared_distances": distance_fields,
         "orientation_3d": orientation_fields,
         "power_bisector_side": power_fields,
+        "orientation_2d_in_plane": orientation_2d_fields,
+        "fourth_plane_incidence": fourth_plane_fields,
     }[predicate]
     if not isinstance(value, dict) or set(value) != expected_fields:
         raise ValueError("the native replay returned missing or unknown predicate fields")
@@ -395,7 +789,7 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
         if determinant != expected_determinant:
             raise ValueError("the native orientation witness differs from the replay input")
         witness_sign = expected_sign(expected_determinant)
-    else:
+    elif predicate == "power_bisector_side":
         point_table = [point_from_words(words) for words in replay_input["point_table"]]
         r_points = [point_table[identifier] for identifier in replay_input["r_ids"]]
         q_points = [point_table[identifier] for identifier in replay_input["q_ids"]]
@@ -436,6 +830,45 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
         ):
             raise ValueError("the native power-bisector witness differs from the replay input")
         witness_sign = expected_sign(affine_value)
+    elif predicate == "orientation_2d_in_plane":
+        plane = replay_input["plane"]
+        points = [point_from_words(words) for words in replay_input["points"]]
+        if any(evaluate_plane(plane, point) != 0 for point in points):
+            raise ValueError("the orientation replay points are outside the exact support")
+        first = tuple(value - origin for origin, value in zip(points[0], points[1]))
+        second = tuple(value - origin for origin, value in zip(points[0], points[2]))
+        normal = plane_coefficients(plane)[:3]
+        cross = cross_product(first, second)
+        expected_value = sum(
+            (coefficient * component for coefficient, component in zip(normal, cross)),
+            Fraction(),
+        )
+        native_value = canonical_rational(
+            value["orientation_value_exact"],
+            "orientation 2D value",
+            nonnegative=False,
+        )
+        if native_value != expected_value:
+            raise ValueError("the native orientation 2D witness differs from the replay input")
+        witness_sign = expected_sign(expected_value)
+    else:
+        intersection_kind, expected_point, _, _, _ = solve_three_planes(
+            replay_input["planes"][:3]
+        )
+        if intersection_kind != "unique" or expected_point is None:
+            raise ValueError("fourth-plane incidence requires a unique exact intersection")
+        native_point = validate_exact_rational3(
+            value["intersection_exact"], "native fourth-plane intersection"
+        )
+        if native_point != exact_rational3_record(expected_point):
+            raise ValueError("the native fourth-plane intersection differs from Gaussian elimination")
+        expected_value = evaluate_plane(replay_input["planes"][3], expected_point)
+        native_value = canonical_rational(
+            value["signed_value_exact"], "fourth-plane signed value", nonnegative=False
+        )
+        if native_value != expected_value:
+            raise ValueError("the native fourth-plane value differs from the replay input")
+        witness_sign = expected_sign(expected_value)
     if sign != witness_sign:
         raise ValueError("the native replay sign contradicts its exact witness")
     return value
@@ -445,7 +878,7 @@ def replay(value: dict[str, Any], executable: Path) -> dict[str, Any]:
     arguments = [str(executable), value["predicate"]]
     if value["schema_version"] == 1:
         arguments.extend(word for point in value["points"] for word in point)
-    else:
+    elif value["schema_version"] == 2:
         witness = value["witness"]
         arguments.extend(
             [
@@ -461,6 +894,21 @@ def replay(value: dict[str, Any], executable: Path) -> dict[str, Any]:
         arguments.extend(str(identifier) for identifier in value["r_ids"])
         arguments.append(str(len(value["q_ids"])))
         arguments.extend(str(identifier) for identifier in value["q_ids"])
+    elif value["predicate"] == "plane_through_points":
+        arguments.extend(word for point in value["points"] for word in point)
+    elif value["predicate"] == "power_bisector_affine_form":
+        arguments.append(str(len(value["point_table"])))
+        arguments.extend(word for point in value["point_table"] for word in point)
+        arguments.append(str(len(value["r_ids"])))
+        arguments.extend(str(identifier) for identifier in value["r_ids"])
+        arguments.append(str(len(value["q_ids"])))
+        arguments.extend(str(identifier) for identifier in value["q_ids"])
+    elif value["predicate"] == "orientation_2d_in_plane":
+        arguments.extend(value["plane"][field] for field in ("a", "b", "c", "d"))
+        arguments.extend(word for point in value["points"] for word in point)
+    else:
+        for plane in value["planes"]:
+            arguments.extend(plane[field] for field in ("a", "b", "c", "d"))
     completed = subprocess.run(
         arguments,
         check=True,
@@ -468,6 +916,8 @@ def replay(value: dict[str, Any], executable: Path) -> dict[str, Any]:
         encoding="utf-8",
         timeout=NATIVE_TIMEOUT_SECONDS,
     )
+    if completed.stderr:
+        raise ValueError("the native replay wrote unexpected diagnostics to stderr")
     result = strict_json_loads(completed.stdout)
     if completed.stdout != canonical_json(result) + "\n":
         raise ValueError("the native replay stdout is not canonical JSON")

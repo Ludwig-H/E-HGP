@@ -1,0 +1,11 @@
+{
+  "kind": "morsehgp3d_predicate_replay_input",
+  "point_table": [
+    ["0000000000000000", "0000000000000000", "0000000000000000"],
+    ["4000000000000000", "0000000000000000", "0000000000000000"]
+  ],
+  "predicate": "power_bisector_affine_form",
+  "q_ids": [0],
+  "r_ids": [1],
+  "schema_version": 3
+}

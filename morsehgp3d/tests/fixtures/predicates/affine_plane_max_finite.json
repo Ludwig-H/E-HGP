@@ -1,0 +1,10 @@
+{
+  "kind": "morsehgp3d_predicate_replay_input",
+  "points": [
+    ["7fefffffffffffff", "0000000000000000", "0000000000000000"],
+    ["7fefffffffffffff", "3ff0000000000000", "0000000000000000"],
+    ["7fefffffffffffff", "0000000000000000", "3ff0000000000000"]
+  ],
+  "predicate": "plane_through_points",
+  "schema_version": 3
+}

@@ -20,9 +20,10 @@
 | socle rationnel | `daf3ff9` | entiers multiprécision, rationnels canoniques, coordonnées binary64 exactes, `ExactRational3`, `ExactLevel`, packaging CMake |
 | premiers signes exacts | `82bb676` | comparaison de distances carrées, orientation 3D, décisions, compteurs, replay par bits et différentiel `Fraction` |
 | forme affine de puissance | `08e432c` | moments exacts de labels, domaine de cardinalité 1 à 10, signe de `H_RQ`, témoin rationnel, replay v2 et flux batch |
-| intervalles FP64 conservateurs | commit du présent lot | filtres distance/orientation 3D, repli multiprécision, désactivation par appel, différentiel activé/désactivé et préservation du FENV |
+| intervalles FP64 conservateurs | `3d67d3c` | filtres distance/orientation 3D, repli multiprécision, désactivation par appel, différentiel activé/désactivé et préservation du FENV |
+| noyau affine exact 2A.4 | présent lot | `ExactPlane3`, forme `H_RQ` à échelle exacte, orientation 2D dans un support, rang et intersection de trois plans, incidence déterminantale d'un quatrième plan, replay v3 et oracle `Fraction` |
 
-La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe négatif signifie que `R` est moins coûteux au témoin. Les API riches matérialisent encore leurs témoins multiprécision lorsque le signe est filtré. Le champ `certification_stage` identifie donc l'autorité du signe, pas le coût total d'un replay diagnostique.
+La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe négatif signifie que `R` est moins coûteux au témoin. `ExactAffineForm3` conserve ses quatre coefficients rationnels et leur échelle exacte; sa clé primitive ne sert qu'à classifier le plan orienté ou la forme constante. Les API riches matérialisent encore leurs témoins multiprécision lorsque le signe est filtré. Le champ `certification_stage` identifie donc l'autorité du signe, pas le coût total d'un replay diagnostique.
 
 ## Matrice de couverture actuelle
 
@@ -31,10 +32,10 @@ La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe
 | comparaison de distances à un témoin explicite | oui | oui | non | oui | partiel terminé |
 | signe de `H_RQ` | oui | non | non | oui | référence exacte terminée |
 | orientation 3D | oui | oui | non | oui | partiel terminé |
-| orientation 2D dans un plan support | non | non | non | non | prochain noyau affine |
-| intersection de trois plans | non | non | non | non | prochain noyau affine |
-| appartenance d'un quatrième plan | non | non | non | non | prochain noyau affine |
-| centres circonscrits de deux, trois ou quatre points | non | non | non | non | en attente du noyau affine |
+| orientation 2D dans un plan support | oui | non | non | oui | référence exacte terminée |
+| intersection de trois plans | oui | non | non | oui | référence exacte terminée |
+| appartenance d'un quatrième plan | oui | non | non | oui | référence exacte terminée |
+| centres circonscrits de deux, trois ou quatre points | non | non | non | non | prochain lot 2A.5 |
 | coordonnées homogènes du centre et rayon carré | non | non | non | non | en attente des centres |
 | signes barycentriques et `relint` | non | non | non | non | en attente des centres |
 | intérieur, frontière ou extérieur d'une sphère | non | non | non | non | en attente des centres |
@@ -64,9 +65,9 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Qualification du lot courant
 
-- GCC 13, build strict : CTest 5/5.
-- Clang 18, build Release strict : CTest 5/5.
-- GCC 13 avec ASan, UBSan et détection de fuites : CTest 5/5.
+- GCC 13, build strict : CTest 8/8.
+- Clang 18, build Release strict : CTest 8/8.
+- GCC 13 avec ASan et UBSan : CTest 8/8.
 - Corpus court déterministe : 2 048 cas, hash `276619686350b9c4f900d856b657ce084466cfdea2c4e8711d5efc7e690a1d15`.
 - Signes du corpus court : 1 002 négatifs, 892 positifs et 154 zéros.
 - Distances du corpus court : 58 signes `fp64_filtered` et 966 fallbacks `cpu_multiprecision`.
@@ -74,26 +75,31 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 - Total filtrable du corpus court : 113 signes `fp64_filtered` et 1 423 fallbacks `cpu_multiprecision`.
 - Les 512 cas `H_RQ` supplémentaires restent, par construction, `cpu_multiprecision`.
 - Corpus additionnel local : 10 000 distances et 5 000 orientations, filtre activé puis désactivé, 1 246 certifications FP64, 13 754 fallbacks et zéro différence.
-- Package CMake installé, wrapper installé sur une fixture filtrée et consommateur externe exerçant les chemins filtré et multiprécision : 1/1.
+- Replay affine v3 : 17 fixtures, 5 familles, 4 classes de forme affine, 4 cas d'intersection, 3 signes d'incidence, 12 métamorphismes, 7 rejets d'entrée, 5 faux témoins natifs et 1 diagnostic natif inattendu rejetés.
+- Corpus affine `affine-dyadic-splitmix64-v1` : 1 760 cas, graine `0x414646494e453356`, hash des commandes `1dc9bce8051ba64ddc67d7943122190be36bed884fb35a9a9a6f78e111418457`, hash des réponses exactes de l'oracle `47929b8b1fed34e3ee38a77da13bf3d994b66962fb3b35e773ce49e0a785a0a9`, sorties normale et `--multiprecision-only` byte-identiques.
+- Répartition affine : 240 constructions de plan, 240 formes `H_RQ`, 336 orientations 2D, 608 intersections et 336 incidences de quatrième plan.
+- Classes `H_RQ` du corpus affine : 96 plans propres, 48 constantes négatives, 48 constantes positives et 48 formes identiquement nulles; cardinalités de labels 1 à 4 couvertes.
+- Intersections du corpus affine : 160 uniques, 160 vides et 288 familles affines; permutations, inversions d'orientation, translations dyadiques et changements d'échelle exacts couverts. Les fixtures v3 ajoutent le rang vide `(1,2)`, un support à un ULP, les sous-normaux minimaux et la valeur binary64 finie maximale.
+- Package CMake installé, wrapper installé rejoué sur une intersection rationnelle v3 et consommateur externe exerçant filtres, multiprécision, intersection et incidence déterminantale : 1/1.
 - Contrats : 21 définitions, 21 exemples de schéma et 5 fixtures validés; 58 tests contractuels réussis.
 - Oracle exhaustif indépendant : 91 tests réussis; campagne CI bornée sur trois dimensions affines, trois cas audités et zéro échec.
 - Documentation : 25 documents actifs validés; 5 références locales et 9 modules d'oracle indépendant validés.
 - Registre et sécurité : 20 phases validées, scope actif validé, workflow GCP en lecture seule validé et 11 tests de garde GCP réussis.
 - Limite de portabilité : MSVC, Apple et ARM ne sont pas exécutés localement; aucune conclusion n'est extrapolée à ces cibles.
 
-## Séquence détaillée restante avant la porte 2A
+## Séquence détaillée avant la porte 2A
 
-### 2A.4 — noyau affine exact
+### 2A.4 — noyau affine exact — terminé
 
-1. Figer la convention d'un plan orienté et sa clé géométrique non orientée.
-2. Introduire `ExactPlane3` avec coefficients homogènes canoniques, normalisation par PGCD et rejet d'une normale nulle.
-3. Construire un plan depuis trois points affinement indépendants et depuis une forme `H_RQ`.
-4. Évaluer exactement un plan sur `CertifiedPoint3` et `ExactRational3`.
-5. Définir l'orientation 2D par rapport à la normale orientée du plan support; refuser tout point hors du support avant de toucher les compteurs.
-6. Classer l'intersection de trois plans en `unique`, `empty` ou `affine_family` par rang exact.
-7. Représenter toute intersection unique par `ExactRational3` à dénominateur positif.
-8. Tester l'incidence et le côté d'un quatrième plan au point d'intersection.
-9. Ajouter replay fermé, oracle `Fraction`, cas parallèles, confondus, incompatibles, non dyadiques, à un ULP et métamorphismes de permutation ou changement d'échelle.
+1. Convention du plan orienté et clé géométrique non orientée figées.
+2. `ExactPlane3` homogène primitif, normalisé par PGCD positif, avec rejet d'une normale nulle et record fermé `2.0.0` livré.
+3. Construction depuis trois points rationnels ou dyadiques affinement indépendants et classification sûre de `H_RQ` livrées.
+4. Évaluation exacte sur `CertifiedPoint3` et `ExactRational3` livrée.
+5. Orientation 2D par normale orientée livrée; tout point hors support est rejeté avant les compteurs.
+6. Intersection classée en `unique`, `empty` ou `affine_family` par rang normal et augmenté exacts; dimension affine explicite livrée.
+7. Toute intersection unique est un `ExactRational3` canonique à dénominateur positif et est revérifiée sur les trois plans liants.
+8. Côté rationnel riche et signe déterminantal direct d'un quatrième plan livrés, avec contradiction interne fermée.
+9. Replay v3 fermé, oracle `Fraction` par élimination de Gauss, cas parallèles, confondus, incompatibles, non dyadiques, sous-normaux, à un ULP et métamorphismes livrés.
 
 ### 2A.5 — centres et niveaux homogènes
 
@@ -149,7 +155,7 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Prochaine sous-porte
 
-Le prochain lot est 2A.4, noyau affine exact, toujours sur `reference_cpu`, couche commune aux profils et mode `certified`. Il doit compléter la surface scientifique de référence avant d'étendre les optimisations flottantes. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
+Le prochain lot est 2A.5, centres circonscrits et niveaux homogènes, toujours sur `reference_cpu`, couche commune aux profils et mode `certified`. Il doit construire les centres de supports de taille deux à quatre, classifier les supports dépendants et produire centre et rayon carré exacts avant les décisions de minimalité. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
 
 ## GCP
 

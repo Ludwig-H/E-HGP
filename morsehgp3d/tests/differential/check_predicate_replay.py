@@ -104,7 +104,11 @@ def expected_counters(stage: str, exact_zero: bool) -> dict[str, int]:
 
 
 def check_distance(
-    wrapper: Path, executable: Path, fixture: Path, expected_stage: str | None = None
+    wrapper: Path,
+    executable: Path,
+    fixture: Path,
+    expected_stage: str | None = None,
+    expected_replay_id: str | None = None,
 ) -> None:
     first_output, replay = run_replay(wrapper, executable, fixture)
     second_output, repeated = run_replay(wrapper, executable, fixture)
@@ -118,6 +122,8 @@ def check_distance(
     ).hexdigest()
     if replay["replay_id"] != expected_id:
         raise AssertionError("predicate replay_id does not cover its normalized input")
+    if expected_replay_id is not None and replay["replay_id"] != expected_replay_id:
+        raise AssertionError("the historical v1 replay identity changed")
 
     points = [point(words) for words in replay["input"]["points"]]
     left = squared_distance(points[0], points[1])
@@ -174,6 +180,8 @@ def check_power_bisector(wrapper: Path, executable: Path, fixture: Path) -> None
     ).hexdigest()
     if replay["replay_id"] != expected_id or replay["schema_version"] != 2:
         raise AssertionError("power-bisector replay does not preserve its v2 identity")
+    if replay["replay_id"] != "b90d0731fa0f77f867c44532b08e70cf28ac02417ed5b8a9cc01e581be504da3":
+        raise AssertionError("the historical v2 power-bisector identity changed")
 
     replay_input = replay["input"]
     point_table = [point(words) for words in replay_input["point_table"]]
@@ -560,7 +568,12 @@ def main() -> int:
     wrapper = Path(sys.argv[1])
     executable = Path(sys.argv[2])
     fixtures = Path(sys.argv[3])
-    check_distance(wrapper, executable, fixtures / "distance_one_ulp.json")
+    check_distance(
+        wrapper,
+        executable,
+        fixtures / "distance_one_ulp.json",
+        expected_replay_id="db04d3582bb0a813cd60cf48ca5f0ce630b1f57ed209e63f363f8088a0bdd56c",
+    )
     check_distance(
         wrapper,
         executable,

@@ -12,17 +12,29 @@ La tranche actuellement intégrée fournit :
 - le fallback `boost::multiprecision::cpp_int` qui sert d'oracle aux filtres CPU;
 - la comparaison de distances carrées et l'orientation 3D exactes;
 - la forme affine exacte `H_RQ` pour deux labels canoniques de même cardinalité;
+- `ExactPlane3`, ses coefficients homogènes primitifs orientés, sa clé géométrique non orientée et son record fermé `2.0.0`;
+- la construction d'un plan depuis trois points dyadiques ou rationnels exactement indépendants;
+- la classification sûre de `H_RQ` en plan propre, constante négative, constante positive ou forme identiquement nulle;
+- l'orientation 2D exacte dans un plan support, avec validation exacte de l'incidence;
+- l'intersection de trois plans par rang exact, avec classes `unique`, `empty` et `affine_family`;
+- le signe déterminantal et le témoin rationnel d'incidence d'un quatrième plan;
 - des entrées `decision-only` séparées des témoins rationnels de replay;
 - des décisions séparant signe scientifique, étage de certification et compteurs;
 - des filtres d'intervalles FP64 conservateurs pour la comparaison de distances et l'orientation 3D;
 - une politique par appel permettant de désactiver ces filtres pour le différentiel multiprécision;
-- un replay diagnostique versionné à partir des mots binary64 d'entrée.
+- un replay diagnostique versionné à partir des mots binary64 et des plans exacts d'entrée.
 
-Cette tranche ne ferme ni la Phase 2A ni G1. Les comparaisons de distances et orientations 3D bien conditionnées peuvent être certifiées par `fp64_filtered`; toute borne contenant zéro, tout overflow ou environnement flottant non conforme revient à `cpu_multiprecision`. La forme `H_RQ` reste entièrement multiprécision. Les expansions et les autres prédicats géométriques seront ajoutés par lots testables ultérieurs.
+Cette tranche clôt le sous-lot affine 2A.4, mais ne ferme ni la Phase 2A ni G1. Les comparaisons de distances et orientations 3D bien conditionnées peuvent être certifiées par `fp64_filtered`; toute borne contenant zéro, tout overflow ou environnement flottant non conforme revient à `cpu_multiprecision`. Les prédicats affines restent entièrement multiprécision. Les centres, niveaux homogènes, barycentriques, sphères, expansions et autres prédicats géométriques seront ajoutés par lots testables ultérieurs.
 
 Le filtre exige IEEE binary64, l'arrondi au plus proche dans le FENV et MXCSR sur x86, les sous-normaux actifs et les options strictes exportées par la cible CMake. Chaque opération d'intervalle est élargie vers les deux infinis; les exceptions flottantes du processus appelant sont restaurées. `PredicateFilterPolicy::multiprecision_only` garde un chemin de décision indépendant. Dans les API riches et le replay, un témoin rationnel reste matérialisé même si le signe a été certifié en FP64 : `certification_stage` désigne l'autorité du signe, pas le coût du diagnostic.
 
 La convention d'orientation est exactement `det([b-a, c-a, d-a])` : le quadruplet `(0, e1, e2, e3)` est positif. Cette définition explicite prévaut sur les conventions de signe parfois opposées d'autres bibliothèques.
+
+Un plan orienté représente `a*x + b*y + c*z + d = 0`. Ses quatre coefficients entiers sont divisés par leur PGCD positif, sans imposer le signe du premier coefficient : multiplier une entrée par un facteur positif conserve le plan orienté, tandis qu'une négation inverse son orientation. `unoriented_key()` choisit séparément un signe canonique pour identifier le plan géométrique. Une normale nulle est toujours rejetée.
+
+`ExactAffineForm3` conserve les coefficients rationnels et leur échelle exacte. Sa clé orientée est seulement le représentant homogène primitif à facteur positif, utilisé pour classifier le lieu zéro; elle ne remplace pas la valeur exacte de la forme. L'orientation 2D utilise le signe de `n dot ((b-a) cross (c-a))` pour la normale primitive orientée `n` du support. Cette valeur n'est pas appelée aire, car `n` n'est pas normalisée.
+
+Une intersection unique expose un `ExactRational3`, les rangs normal et augmenté égaux à 3 et une dimension affine égale à 0. Une famille cohérente expose la dimension `3 - normal_rank`; un système incohérent n'expose ni point ni dimension. Le replay conserve les trois plans liants dans l'entrée normalisée couverte par son identifiant, de sorte que les coordonnées seules ne sont jamais présentées comme certificat autonome.
 
 ## Construction locale
 
@@ -44,9 +56,11 @@ python morsehgp3d/tools/replay_predicate.py \
   --executable build/morsehgp3d/morsehgp3d_replay_predicate
 ```
 
-Cet identifiant ne couvre ni le résultat ni le binaire et n'est donc pas un certificat public. Le replay conserve les bits de zéro signé à des fins diagnostiques, tout en canonisant leur valeur géométrique. Une coordonnée non finie, un prédicat inconnu, une sortie native non canonique ou incohérente, et un binaire explicitement demandé mais introuvable échouent fermés.
+Cet identifiant ne couvre ni le résultat ni le binaire et n'est donc pas un certificat public. Le replay conserve les bits de zéro signé à des fins diagnostiques, tout en canonisant leur valeur géométrique. Une coordonnée non finie, un prédicat inconnu, une sortie native non canonique ou incohérente, tout diagnostic natif inattendu sur `stderr`, et un binaire explicitement demandé mais introuvable échouent fermés.
 
-Le schéma diagnostique v1 reste actif pour les prédicats à nombre fixe de points. Le schéma v2 ajoute `power_bisector_side` avec table de points, labels de 1 à 10 identifiants triés et uniques, et témoin `ExactRational3`; les deux labels doivent avoir le même cardinal afin que le terme quadratique s'annule exactement. Un signe négatif signifie que le coût de `R` est inférieur à celui de `Q`.
+Le schéma diagnostique v1 reste actif pour les prédicats historiques à nombre fixe de points. Le schéma v2 ajoute `power_bisector_side` avec table de points, labels de 1 à 10 identifiants triés et uniques, et témoin `ExactRational3`; les deux labels doivent avoir le même cardinal afin que le terme quadratique s'annule exactement. Un signe négatif signifie que le coût de `R` est inférieur à celui de `Q`.
+
+Le schéma v3, dans le domaine SHA-256 distinct `MorseHGP3D/predicate-replay-v3/`, ajoute `plane_through_points`, `power_bisector_affine_form`, `orientation_2d_in_plane`, `intersect_three_planes` et `fourth_plane_incidence`. Un plan imbriqué est un objet fermé `ExactPlane3` `2.0.0` dont les chaînes entières doivent déjà être primitives et canoniques. Le wrapper recalcule les plans, coefficients exacts de `H_RQ`, orientations et intersections avec `Fraction`; son élimination de Gauss est indépendante des mineurs et de la règle de Cramer du C++.
 
 Le binaire accepte aussi un flux batch, une commande par ligne, afin que les différentiels n'ouvrent pas un processus par décision :
 
