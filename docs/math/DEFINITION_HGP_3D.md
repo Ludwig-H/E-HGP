@@ -194,7 +194,7 @@ La partition partielle est donc un raffinement de la partition exacte. Elle peut
 | une coface non-Gabriel stricte ne produit qu'une attache silencieuse $q=1$ | `proved_here` sous support essentiel unique et marge extérieure stricte |
 | Gabriel complété par toutes les attaches silencieuses restitue Gamma | `proved_here` sous les mêmes hypothèses; la génération sparse complète reste ouverte |
 | une étoile remplace une clique pour $H_0$ | fait élémentaire exact |
-| la multiplicité locale d'indice $\mu$ vaut $\binom{\lvert U\rvert-1}{\mu}$ | théorème de Reani–Bobrowski; le nombre de classes globalement tuées dépend des attaches |
+| pour $\lvert I\rvert<k\leq s$, la multiplicité locale d'indice $\mu=s-k$ vaut $\binom{\lvert U\rvert-1}{\mu}$ | théorème de Reani–Bobrowski; hors de cette fenêtre le centre n'est pas critique à ce niveau, et le nombre de classes globalement tuées dépend des attaches |
 | les naissances isolées ont rang fermé $k$ | lemme ci-dessus |
 | le flot de Gabriel seul reconstruit leur généalogie | `false_in_general`; fixture permanente à cinq points |
 | catalogue complet et attaches exactes reconstruisent `full_pi0` | `proof_obligation` M.1; aucune revendication exacte avant preuve |

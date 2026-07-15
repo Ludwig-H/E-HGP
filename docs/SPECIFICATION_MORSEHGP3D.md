@@ -17,6 +17,8 @@ $$\text{raffinement restreint certifié}\longrightarrow\text{catalogue critique}
 
 Le flot de Gabriel, les descentes par miniball, la DTM, l'entropie et les voisinages approchés restent des voies de proposition, de connectivité positive ou de compression. Aucun ne remplace Gamma exhaustif dans la base exacte v2 sans une nouvelle preuve couvrant les incidences silencieuses.
 
+Une seconde représentation combinatoire est désormais démontrée sur le papier : la [tour globale de boules saturées](math/TOUR_BOULES_SATUREES.md) engendre exactement le complexe de Čech, puis les composantes de Gamma, au moyen de simplexes implicites et d'une forêt d'intersections seuillée. Elle constitue une voie candidate indépendante, non un backend ni une base de preuve du contrat v2. Son prototype, sa persistance et son éventuelle migration contractuelle suivent une piste de recherche séparée; la chaîne active ci-dessus et la cible $K_{\max}=10$ restent inchangées.
+
 ## 2. Entrée et sémantique numérique
 
 L'entrée mathématique initiale est un ensemble fini non vide de points distincts
@@ -92,11 +94,13 @@ $$s(c,a)=\lvert I(c,a)\rvert+\lvert U(c,a)\rvert.$$
 
 Sous les hypothèses de Reani–Bobrowski, $c$ est critique pour $D_k$ si et seulement si
 
-$$c\in\mathrm{relint}\,\mathrm{conv}\bigl(U(c,a)\bigr),$$
+$$c\in\mathrm{relint}\,\mathrm{conv}\bigl(U(c,a)\bigr),\qquad \lvert I(c,a)\rvert<k\leq s(c,a).$$
 
-et son indice vaut
+Pour ces ordres critiques, son indice vaut
 
 $$\mu_k(c)=s(c,a)-k.$$
+
+La fenêtre de rang est équivalente à $0\leq\mu_k(c)\leq\lvert U(c,a)\rvert-1$. Hors de cette fenêtre, la même boule peut encoder des faces de Čech, mais son centre n'est pas un point critique de $D_k$ au niveau $a$.
 
 Le théorème local de Reani–Bobrowski associe à ce point critique la multiplicité
 
@@ -114,6 +118,8 @@ Une même sphère critique de rang $s$ donne donc, lorsque l'ordre appartient à
 - un événement susceptible de fusionner des composantes à l'ordre $k=s-1$, d'indice un, si $2\leq s\leq\min(K_{\mathrm{eff}}+1,n)$.
 
 Pour les tranches $1\leq k\leq K_{\mathrm{eff}}$, il suffit donc de cataloguer $s\leq s_{\max}=\min(K_{\mathrm{eff}}+1,n)$. En dimension trois et en position générale, le support frontal $U$ est affinement indépendant et $1\leq\lvert U\rvert\leq4$. Les événements non nuls ont donc une description de taille constante, même lorsque $k=10$.
+
+Cette borne concerne les événements de Morse capables de modifier immédiatement $H_0$ aux ordres demandés. Elle ne borne pas une représentation globale de toutes les incidences de Čech : le saturé de la miniball d'une petite face peut contenir jusqu'à $n$ observations. La tour saturée doit donc distinguer le rang utile du catalogue critique, borné par $s_{\max}$, de la capacité d'un générateur saturé, potentiellement égale à $n$.
 
 Un événement canonique stocke au minimum :
 
@@ -147,6 +153,22 @@ Cette bijection est le pont central entre Morse et HGP. Chaque événement de ra
 - si $k+1\leq K_{\mathrm{eff}}$, pour `full_pi0` une ancre verticale de l'ordre $k+1$ vers l'ordre $k$; pour `hgp_reduced`, seulement un contrôle conditionnel lorsqu'un représentant source réduit existe déjà.
 
 La clique de facettes définissant le graphe de Gabriel est remplacée par une étoile déterministe de $k$ unions. Les deux représentations ont exactement les mêmes composantes à tout seuil.
+
+### 6.1 Voie candidate par boules saturées
+
+Pour tout $Q\subseteq X$ non vide, définissons $\mathrm{Sat}(Q)=X\cap B_Q$, où $B_Q$ est sa miniball fermée. Les théorèmes S.1–S.6 de l'[audit dédié](math/TOUR_BOULES_SATUREES.md) établissent sans position générale :
+
+1. $\beta(\mathrm{Sat}(Q))=\beta(Q)$;
+2. les simplexes abstraits portés par tous les saturés actifs engendrent exactement le complexe de Čech;
+3. à l'ordre $k$, les composantes de Gamma sont celles du graphe de générateurs dont les arêtes vérifient $\lvert S\cap T\rvert\geq k$;
+4. une forêt couvrante de poids maximum, pondérée par $\lvert S\cap T\rvert$ et calculée par Kruskal décroissant, préserve simultanément toutes ces composantes après seuillage;
+5. une sous-famille exactement validée produit une sous-filtration, avec une sémantique scientifique interne `partial_refinement` tant que son exhaustivité n'est pas certifiée; le schéma v2 ne sérialise pas encore cette voie.
+
+Toute miniball en dimension trois possède un support minimal de taille au plus quatre; l'énumération exhaustive de ces supports suivie d'une classification fermée globale est donc mathématiquement complète, y compris lorsque le saturé a un rang élevé. Les shells cosphériques et supports multiples exigent néanmoins une canonicalisation distincte de celle du catalogue critique générique.
+
+Cette voie encode des faces silencieuses à des ordres très inférieurs au rang du générateur. Ces activations descendantes sont des faits combinatoires de Čech/Gamma, pas automatiquement des événements de Morse : la multiplicité $\binom{\lvert U\rvert-1}{\lvert S\rvert-k}$ peut être nulle. De même, une forêt de générateurs à une coupe n'est pas le `MergeForest` normatif; la généalogie, les `coverage_delta`, les lots égaux et les morphismes verticaux doivent encore être construits et certifiés.
+
+La voie candidate ne réutilise pas `CriticalEvent`. Un futur `SaturatedGenerator` conserverait une capacité jusqu'à $n$, sa boule exacte, son saturé et éventuellement plusieurs supports témoins. Aucun type public, aucune valeur de `backend` et aucune base de preuve nouvelle ne sont activés par la présente spécification v2.
 
 ## 7. Profil normatif `hgp_reduced`
 
@@ -257,6 +279,8 @@ La position générale requise n'est certifiée que sur le périmètre utile. Po
 $$\mathrm{RelevantGP}(X,K_{\mathrm{eff}})\Longleftrightarrow\forall A\subseteq X,\ 2\leq\lvert A\rvert\leq s_{\max},\ \bigl[\mathrm{Proper}(A)\land B_A^{\circ}\cap(X\setminus A)=\varnothing\bigr]\Longrightarrow\partial B_A\cap(X\setminus A)=\varnothing.$$
 
 Autrement dit, seuls les ensembles de taille utile qui sont Gabriel dans leur intérieur sont tenus de ne pas posséder de point extérieur supplémentaire sur leur frontière. Le champ `relevant_gp_complete` ne vaut vrai que si cette propriété est établie. Une simple absence de dégénérescence parmi les événements acceptés ne suffit pas : pour tout support propre rencontré avec au plus $m_{\star}=s_{\max}-2$ points strictement intérieurs lorsque $s_{\max}\geq2$, l'oracle doit terminer le shell complet avant de filtrer par rang. Si un point extérieur à un candidat Gabriel utile se trouve exactement sur sa miniball, l'exécution certifiée retourne `unsupported_degeneracy`, même lorsque le rang fermé total dépasse $s_{\max}$.
+
+Cette propriété `RelevantGP` ne certifie pas les générateurs saturés de rang arbitraire de la section 6.1. Leur théorème combinatoire tolère un grand shell fermé, mais leur future implémentation devra agréger les supports multiples au lieu d'interpréter `relevant_gp_complete=true` comme une généricité globale.
 
 Cette profondeur est suffisante pour détecter toute violation de la propriété ainsi restreinte. En effet, si $A$ satisfait l'antécédent et possède un point extérieur sur $\partial B_A$, l'absence d'intrus strict donne $X\cap B_A^{\circ}=A\cap B_A^{\circ}$. Comme le support propre contient au moins deux points, $\lvert X\cap B_A^{\circ}\rvert\leq\lvert A\rvert-2\leq m_{\star}$. Le centre appartient donc à une strate issue d'un parent fermé, où le shell global révèle le point extérieur. La promotion de ce raisonnement en certificat logiciel exige que toutes les strates naturelles et tous les co-minimiseurs concernés aient été réconciliés.
 
@@ -409,6 +433,8 @@ RunCertificate
 ```
 
 Le `coverage_log` contient les `coverage_delta` de chaque lot et fait partie de la sortie normative. Une matérialisation immédiate des ensembles de points peut être omise, mais une coupe exacte doit pouvoir retourner les composantes et, pour $k\geq2$, leurs ensembles d'observations recouvrants. Toute option de condensation ou de partition est une opération aval, distincte de la sortie HGP normative.
+
+Les objets `SaturatedGenerator`, forêt d'intersection et certificats de complétude associés sont réservés à une future migration. Ils ne doivent pas être sérialisés sous `critical_catalog`, `gamma_cofaces` ou une base de preuve v2 existante, car leur rang, leur provenance et leurs obligations de complétude diffèrent.
 
 ## 18. Critères de réception mathématiques
 

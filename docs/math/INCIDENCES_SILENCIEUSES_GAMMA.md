@@ -2,6 +2,8 @@
 
 > **Statut.** La réduction de Gamma aux seules composantes non triviales est exacte sans hypothèse de position générale. Le lemme plus fin qui remplace une coface non-Gabriel par des attaches silencieuses est démontré sous support essentiel unique et absence d'égalité extérieure. La découverte parcimonieuse de toutes les attaches utiles reste une obligation algorithmique distincte.
 
+La [tour globale de boules saturées](TOUR_BOULES_SATUREES.md) donne désormais une seconde résolution exacte de cette perte : elle représente implicitement toute coface par le saturé de sa miniball, éventuellement de rang beaucoup plus élevé. Cette résolution globale ne supprime pas l'intérêt du locator parcimonieux ci-dessous dans le régime $K_{\max}=10$, car son énumération exhaustive brute conserve des saturés de tous les rangs jusqu'à $n$, même si leurs supports ont toujours une taille au plus quatre.
+
 ## 1. Référence exacte par Gamma
 
 Soit un ensemble fini de sites $X$, un ordre $k$ et la valeur $\beta(F)$ du rayon carré de la miniball d'un label $F$. Pour $\prec\in\lbrace <,\leq\rbrace$, posons

@@ -53,6 +53,7 @@ La cible $50\,000$ points, $K_{\max}=10$, en moins d'une seconde est un **object
 |---|---|
 | [Spécification mathématique](docs/SPECIFICATION_MORSEHGP3D.md) | définition exacte de l'objet, profils de sortie et théorème cible |
 | [Catalogue critique 3D](docs/math/CATALOGUE_CRITIQUE_3D.md) | caractérisation des événements et énumération par raffinement restreint |
+| [Tour globale de boules saturées](docs/math/TOUR_BOULES_SATUREES.md) | audit, preuves exactes, limites de complexité et piste de référence alternative |
 | [Définition HGP 3D](docs/math/DEFINITION_HGP_3D.md) | équivalence avec les K-polyèdres et réduction de Gabriel |
 | [Attaches par miniball](docs/math/ATTACHES_DESCENTE_MINIBALL.md) | mécanisme facultatif pour `full_pi0` et contrôle croisé |
 | [Preuves et heuristiques](docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md) | registre des garanties, hypothèses et verrous ouverts |

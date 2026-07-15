@@ -2,6 +2,8 @@
 
 > **Résultat principal.** Pour $K_{\max}=10$, le calcul de $H_0$ ne requiert que les sphères bien centrées de rang fermé au plus onze. Elles peuvent être énumérées par une suite de raffinements de cellules top-$m$ au moyen d'une primitive de diagramme de puissance GPU, puis certifiées par séparation exacte aux sommets. Aucune mosaïque de Delaunay d'ordre supérieur ni aucun rhomboid tiling n'est matérialisé.
 
+Cette borne porte sur les événements de Morse qui peuvent changer immédiatement $H_0$. Elle ne borne pas les générateurs de la [tour globale de boules saturées](TOUR_BOULES_SATUREES.md), laquelle encode aussi les incidences latentes de Čech et peut exiger des saturés de rang jusqu'à $n$. Les deux constructions sont complémentaires et aucune ne réfute la borne de l'autre.
+
 ## 1. Caractérisation locale
 
 Soit une sphère $(c,a)$ de centre $c$ et de rayon carré $a$. Notons
@@ -10,11 +12,13 @@ $$I=X\cap B^{\circ}(c,\sqrt{a}),\qquad U=X\cap\partial B(c,\sqrt{a}),\qquad s=\l
 
 Sous position générale, Reani–Bobrowski caractérisent les points critiques de $D_k$ par
 
-$$c\in\mathrm{relint}\,\mathrm{conv}(U),$$
+$$c\in\mathrm{relint}\,\mathrm{conv}(U),\qquad \lvert I\rvert<k\leq s,$$
 
-et leur indice par
+et, dans cette fenêtre, leur indice par
 
 $$\mu=s-k.$$
+
+La condition d'ordre équivaut à $0\leq\mu\leq\lvert U\rvert-1$. Hors de cette fenêtre, la boule peut encore porter des incidences descendantes de Čech, mais elle n'est pas un événement critique de $D_k$ à ce niveau.
 
 Leur multiplicité locale d'indice $\mu$ vaut
 

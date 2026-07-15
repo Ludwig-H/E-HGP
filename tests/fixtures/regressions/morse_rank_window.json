@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "kind": "morse-rank-window-regression-v1",
+  "fixture_id": "morse-rank-window-regression-v1",
+  "description": "A saturated ball with two interior, two shell and one exterior point is critical only for |I| < k <= |I| + |U|, although its simplex acts combinatorially at lower orders.",
+  "points": [
+    [-1, 0, 0],
+    [1, 0, 0],
+    [0, "1/2", 0],
+    [0, 0, "1/2"],
+    [0, 0, 3]
+  ],
+  "expected": {
+    "affine_dimension": 3,
+    "target_subset_source_ids": [0, 1, 2, 3],
+    "center": [0, 0, 0],
+    "squared_level": 1,
+    "minimal_support_source_ids": [0, 1],
+    "interior_source_ids": [2, 3],
+    "shell_source_ids": [0, 1],
+    "exterior_source_ids": [4],
+    "closed_rank": 4,
+    "critical_orders": [
+      {"order": 3, "morse_index": 1, "local_multiplicity": 1},
+      {"order": 4, "morse_index": 0, "local_multiplicity": 1}
+    ],
+    "noncritical_descending_orders": [
+      {"order": 1, "formal_index": 3, "local_multiplicity": 0, "d_k_at_center": "1/4"},
+      {"order": 2, "formal_index": 2, "local_multiplicity": 0, "d_k_at_center": "1/4"}
+    ],
+    "noncritical_upper_orders": [
+      {"order": 5, "formal_index": -1, "local_multiplicity": 0, "d_k_at_center": 9}
+    ]
+  }
+}

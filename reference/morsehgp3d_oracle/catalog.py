@@ -127,7 +127,12 @@ class CriticalSphere:
         )
 
     def morse_index(self, order: int) -> int:
-        """Return the exact local Morse index at a positive order."""
+        """Return ``closed_rank - order`` at a positive order.
+
+        The value is a Morse index only when :meth:`is_critical_at_order` is
+        true.  At lower descending orders it is merely the formal rank
+        difference and its local multiplicity is zero.
+        """
 
         if isinstance(order, bool) or not isinstance(order, int):
             raise TypeError("order must be an integer")
@@ -135,8 +140,14 @@ class CriticalSphere:
             raise ValueError("order must be positive")
         return self.closed_rank - order
 
+    def is_critical_at_order(self, order: int) -> bool:
+        """Return whether ``|interior| < order <= closed_rank``."""
+
+        index = self.morse_index(order)
+        return 0 <= index <= len(self.shell_ids) - 1
+
     def local_multiplicity(self, order: int) -> int:
-        """Return the Reani--Bobrowski local multiplicity at ``order``."""
+        """Return the Reani--Bobrowski multiplicity, or zero off-window."""
 
         index = self.morse_index(order)
         upper = len(self.shell_ids) - 1

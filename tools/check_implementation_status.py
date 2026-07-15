@@ -67,6 +67,14 @@ def main() -> int:
                 isinstance(item, str) and item for item in value
             ):
                 errors.append(f"{label}.{field} must be a string array")
+        if "internal_gates" in phase:
+            internal_gates = phase["internal_gates"]
+            if not isinstance(internal_gates, list) or not internal_gates or not all(
+                isinstance(item, str) and item for item in internal_gates
+            ):
+                errors.append(
+                    f"{label}.internal_gates must be a non-empty string array"
+                )
 
         status = phase.get("status")
         if status not in allowed:

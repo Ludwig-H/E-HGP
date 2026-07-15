@@ -73,7 +73,8 @@ Le développement suit cet ordre :
 5. après la phase 11, ouvrir en parallèle la piste topologique 12–13 (`full_pi0` puis dégénérescences) et la piste produit 14–16 (latence puis streaming de la voie réduite au statut effectivement prouvé);
 6. réunir seulement les jalons dont les portes propres sont fermées;
 7. étendre ensuite les dégénérescences du profil réduit ou complet sans bloquer l'autre piste;
-8. mode `budgeted` sensible à $H_0$.
+8. après fermeture de la phase 2A, ouvrir sans bloquer la voie principale la phase 17A de tour saturée comme oracle exact borné; ses variantes scalables restent conditionnelles;
+9. après migration contractuelle dédiée seulement, mode `budgeted` sensible à $H_0$ pour toute sous-famille de générateurs dont l'exhaustivité n'est pas certifiée.
 
 Le profil réduit arrive avant le profil complet parce que Gamma exhaustif en donne une définition directement testable sur petits nuages. Le K-graphe de Gabriel brut n'en est plus une réalisation exacte autorisée. Le profil complet demeure l'objectif final, avec un statut séparé tant que ses attaches ne sont pas toutes certifiées.
 
@@ -802,32 +803,79 @@ Pour chaque combinaison, publier correction, statut, compteurs par ordre, temps,
 
 Courbes de complexité avec intervalles, seuils de passage au streaming et taxonomie des échecs. Objectif conditionnel : dix millions en moins de dix minutes si le certificat est sparse; sinon arrêt budgétaire explicite.
 
-## Phase 17 — Oracle direct sensible à $H_0$
+## Phase 17 — Tour de boules saturées sensible à $H_0$
 
-### Déclencheur
+### Position dans le programme
 
-Cette phase s'ouvre si les compteurs de la phase 9 montrent que fermer les cellules top-$m$ domine largement la taille du catalogue utile.
+Cette piste est parallèle et non bloquante. Sa première sous-phase s'ouvre seulement après fermeture des phases 1 et 2A; elle ne remplace ni le raffinement top-$m$ des phases 8–10, ni la preuve Morse M.1 de la phase 12. Elle exploite les théorèmes S.1–S.6 de l'[audit des boules saturées](math/TOUR_BOULES_SATUREES.md) comme représentation combinatoire directe de Čech et Gamma.
 
-### Question
+Le prototype reste `backend=reference_cpu`. Tant qu'aucune migration de schéma n'active une base de preuve dédiée, il s'exécute comme oracle de recherche et ne publie pas `public_status=exact`, même si ses objets internes sont calculés exhaustivement.
 
-Construire un branch-and-bound qui certifie qu'une région ne contient aucun centre bien centré de rang au plus onze, sans produire toutes les cellules d'ordre intermédiaire.
+### 17A — preuve exécutable et oracle CPU borné
 
-### Pistes autorisées
+Après les phases 1 et 2A :
 
-- bornes de rang sur nœuds BVH;
-- cônes de directions et tests de convexité;
-- séparation par supports de taille au plus quatre;
-- DTM ou entropie pour ordonner la recherche;
-- candidats ANN avec reranking;
-- bornes probabilistes uniquement pour le mode budgété.
+1. créer un type interne `SaturatedGenerator`, séparé de `CriticalEvent`, avec saturé, boule exacte, niveau, capacité et supports témoins;
+2. énumérer exhaustivement les supports affinement indépendants de tailles un à quatre;
+3. classifier exactement tous les points contre chaque boule fermée;
+4. agréger les supports multiples et dédupliquer par boule exacte et saturé;
+5. conserver tous les générateurs, sans pruning par inclusion;
+6. construire le graphe d'intersection statique, puis une forêt de Kruskal de poids maximum avec ordre total canonique;
+7. comparer à chaque coupe ouverte et fermée l'oracle structurel interne pour $1\leq k\leq n$ : faces de Čech matérialisées lorsque le budget le permet, Gamma exhaustif, graphe d'intersection et forêt seuillée; limiter toute comparaison au contrat v2 à $1\leq k\leq\min(10,n)$;
+8. reconstruire séparément `full_pi0`, la réduction `hgp_reduced`, les `coverage_delta` et les applications verticales;
+9. traiter chaque lot de niveaux égaux atomiquement et vérifier l'invariance par permutation;
+10. émettre les certificats internes `support_universe_complete`, `closed_ball_ranges_complete`, `ball_dedup_complete`, `generator_batches_complete`, `overlap_join_complete`, `generator_msf_complete`, `merge_replay_complete` et `vertical_maps_complete`.
 
-### Exigence
+Le système sous test réutilise les prédicats C++ de phase 2A, mais l'oracle Gamma Python `Fraction` garde ses propres miniballs et classifications. Partager la même géométrie entre les deux côtés invaliderait l'indépendance du différentiel.
 
-Une région ne peut être supprimée en mode exact que par une borne déterministe globale. Jusqu'à preuve de complétude, cette phase utilise `mode=budgeted, forest_semantics=partial_refinement` et retourne `public_status=conditional` ou `public_status=budget_exhausted`; elle se compare au catalogue exact sur toutes les tailles accessibles.
+Le domaine initial est $n\leq14$. La campagne rejoue toutes les fixtures et graines exactes enregistrées par la phase 1, puis au moins $10\,000$ petits nuages par dimension affine avec graines et sorties canoniques conservées. La fixture Gabriel à cinq points doit contenir `ACDE` au niveau $33/2$, reconnaître ce niveau comme non critique pour $D_2$, puis connecter ce générateur à `ABC` au niveau $83886/3563$ exactement à l'ordre deux. La matrice inclut les shells cosphériques, supports multiples, niveaux égaux et une famille dont le rang saturé croît jusqu'à $n$ alors que l'ordre observé reste petit.
 
-### Porte de promotion
+### 17B — range reporting et forêt insertionnelle
 
-Zéro événement manquant sur l'oracle et la campagne exacte ne suffit pas : une preuve de couverture des régions est requise avant promotion dans `certified`.
+Cette sous-phase attend en plus la fermeture de la phase 4. Elle remplace le balayage global uniquement par des requêtes fermées certifiées et étudie :
+
+- index spatial pour `closed_ball_range` avec shell complet;
+- listes inversées `postings[x]` et comptage exact de $\lvert S\cap T\rvert$;
+- activation des sommets et arêtes par lots exacts;
+- mise à jour d'une forêt de poids maximum depuis la forêt précédente et toutes les arêtes du nouveau lot;
+- snapshots persistants, journaux de remplacements et rejeu des coupes;
+- pruning par inclusion désactivé dans la baseline exacte, puis variante expérimentale comparée avec contraction, rewiring et provenance explicites;
+- propositions issues du raffinement top-$m$, de Delaunay, d'ANN ou de descentes, toujours resaturées exactement et traitées avec la sémantique scientifique interne `partial_refinement` sans certificat d'exhaustivité; aucune sortie publique v2 ne les sérialise avant migration contractuelle.
+
+La propriété insertionnelle ne permet de libérer les anciennes arêtes non retenues qu'après certification de leur génération complète. Toute suppression de générateur dominé exige une preuve et une règle distinctes; elle ne réutilise pas silencieusement le lemme d'insertion.
+
+Chaque checkpoint enregistre les checksums de l'entrée et de la configuration, le catalogue et la déduplication actifs, les postings, la forêt courante, le dernier lot entièrement committé, le curseur du flux restant, l'identifiant de l'ordre total canonique et le journal de rejeu. Le suffixe non traité est régénérable déterministement depuis ces checksums et ce curseur. Un état au milieu d'un lot n'est jamais publiable; la reprise l'annule ou le rejoue intégralement.
+
+### 17C — shadow benchmark et éventuelle promotion
+
+Cette sous-phase attend la fermeture de la phase 9 pour disposer de la baseline top-$m$. Elle s'exécute hors CI, sur activation explicite, avec arrêt budgétaire pour $n\in\left\lbrace16,24,32,48,64,96,128\right\rbrace$ et pour les familles volumique, surfacique, en amas et adversariale. Chaque manifeste fixe avant exécution les budgets de temps, RAM hôte, scratch et sortie; les observations censurées sont publiées comme telles. Mesurer au minimum :
+
+- $C_U$ par taille de support, $M_{\mathrm{sat}}$ et $L_{\mathrm{sat}}=\sum_S\lvert S\rvert$;
+- distribution des capacités $\lvert S\rvert$, memberships et `peak_active_inclusion_maxima`, défini comme le nombre maximal de générateurs actifs maximaux par inclusion; compter séparément le coût du join d'inclusion nécessaire à cette métrique;
+- longueurs $d_x$ des postings et $P_{\mathrm{post}}=\sum_x\binom{d_x}{2}$;
+- paires uniques, pic de l'accumulateur et arêtes examinées;
+- remplacements de forêt, octets de l'historique et coût des requêtes de coupe;
+- temps de saturation, déduplication, join, Kruskal et rejeu, pic RAM et bit-complexité exacte;
+- comparaison des temps, pics et octets avec la voie actuelle;
+- comparaison séparée des compteurs structurels et de leurs exposants empiriques avec $\sum_m(M_m+P_m+V_m+J_m)$, sans additionner des unités incompatibles.
+
+À $n=50\,000$, $\binom{n}{4}=260\,385\,417\,812\,487\,500$ : l'énumération brute est un no-go explicite. Les $M-1$ arêtes de la forêt résidente ne bornent ni les memberships, ni le join, ni le scratch, ni l'historique. Le pruning ne récupère pas les coûts déjà payés.
+
+Une voie de production ne peut être proposée qu'après :
+
+1. une génération output-sensitive évitant l'univers de tous les quadruplets;
+2. un certificat de complétude des générateurs;
+3. un join d'intersections certifié dont le régime dense est budgété;
+4. une conversion démontrée vers le `MergeForest`, `coverage_log` et les morphismes verticaux;
+5. une persistance déterministe et reprenable;
+6. une migration contractuelle ajoutant une base distincte, par exemple `saturated_ball_overlap_proved`;
+7. zéro différence aux portes G2–G4, sans présenter l'accord expérimental comme une preuve de complétude.
+
+Le qualificatif output-sensitive n'abolit pas le pire cas : seule la borne $M=O(n^{4})$ est établie ici et aucune borne universelle sous-quartique n'est démontrée pour cette famille. La cible est un surcoût proche de la sortie dans le régime sparse et un arrêt budgétaire explicite dans le régime dense, jamais une promesse sous-quartique universelle.
+
+### Porte de sortie
+
+La validation de 17A ouvre un jalon **oracle interne exact borné**, sans fermer la phase ni autoriser la production scalable. La phase 17 ferme après l'expérience 17B–17C, la publication de tous les compteurs et une décision documentée : promotion contractuelle si toutes les conditions sont prouvées, ou arrêt de la piste scalable en conservant l'oracle petit $n$ et un prototype hybride à sémantique scientifique interne `partial_refinement`. Un no-go de performance honnête peut donc fermer cette phase de recherche; un désaccord mathématique, un faux statut ou une complétude indécidable ne le peut pas.
 
 ## Phase 18 — Durcissement et jalons de release
 
@@ -864,16 +912,16 @@ Il dépend de `v1-correctness` et exige en plus : G6 atteint à 50 000 points, G
 | phase | dépend de | bloque |
 |---:|---|---|
 | 0 | documentation actuelle | toutes |
-| 1 | 0 | 5, 6, 8–13 |
-| 2A | 0–1 | 2B, 4–13 |
+| 1 | 0 | 5, 6, 8–13, 17A |
+| 2A | 0–1 | 2B, 4–13, 17A |
 | 2B | 2A, 3 | 4–13 GPU |
 | 3 | schémas de 0 | GPU 4–16 |
-| 4 | 2A–2B, 3 | 6, 8–9 |
+| 4 | 2A–2B, 3 | 6, 8–9, 17B |
 | 5 | 1–4 | revendications hiérarchiques GPU |
 | 6 | 1–4 | 12 |
 | 7 | 2B–4 | 8–9 |
 | 8 | 1–4, 7 | 9 |
-| 9 | 8 | 10, 17 |
+| 9 | 8 | 10 et baseline comparative de 17C |
 | 10 | 5, 9 | 11, 14–16 |
 | 11 | 10 | tour réduite publiable |
 | 12 | 1, 6, 9–11 | piste topologique complète |
@@ -881,7 +929,7 @@ Il dépend de `v1-correctness` et exige en plus : G6 atteint à 50 000 points, G
 | 14 | 10–11 | piste produit, SLO 50k |
 | 15 | 9–11 | piste produit, million exact |
 | 16 | 14–15 | domaine pratique |
-| 17 | profils de 9 et 16 | backend direct futur |
+| 17 | 1 et 2A pour 17A; 4 pour 17B; 9 pour 17C | piste de référence puis décision scalable, sans bloquer la voie principale |
 | 18 | phases livrées | release |
 
 ## 7. Portes go/no-go globales
@@ -895,6 +943,9 @@ Il dépend de `v1-correctness` et exige en plus : G6 atteint à 50 000 points, G
 | profil réduit de référence différent de Gamma exhaustif | défaut mathématique ou logiciel bloquant |
 | flot Gabriel qui invente une connexion absente de Gamma | défaut bloquant de la garantie positive |
 | flot Gabriel qui manque une connexion Gamma | divergence attendue à sérialiser comme `partial_refinement`, jamais `exact` |
+| tour saturée différente de Gamma à une coupe ouverte ou fermée | contradiction à minimiser et fixture permanente avant toute optimisation |
+| générateur saturé tronqué à $K_{\mathrm{eff}}+1$ | complétude fausse; interdire `exact` |
+| forêt de générateurs seulement maximale, ou join d'intersections incomplet | interdire toute équivalence à Gamma et tout statut `exact` |
 | attache différente de $\Gamma_k$ | `full_pi0` reste non certifié |
 | lot égal dépendant de l'ordre | défaut bloquant |
 | carré vertical non commutatif | défaut bloquant |
@@ -969,3 +1020,5 @@ Les sept prochains lots de travail doivent être :
 7. phase 7 : spike Paragram isolé sur G4.
 
 Cette séquence donne rapidement une vérité terrain, un cas $k=1$ incontestable et une mesure réaliste de la primitive GPU. Elle évite que les choix de bibliothèque ou de layout figent prématurément un objet mathématique incomplet.
+
+Après fermeture de la phase 2A, le jalon 17A peut être planifié comme expérience CPU indépendante sans déplacer la phase 3 ni les phases 2B–4 de la voie principale. La prochaine porte active reste donc la sortie 2A; aucune implémentation de la tour saturée ne commence avant sa fermeture.

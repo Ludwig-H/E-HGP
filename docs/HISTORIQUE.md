@@ -20,11 +20,13 @@ La piste grande dimension, anciennement nommée `HomogeneousLensTower`, n'est pa
 
 ## Décision actuelle
 
-La voie active est :
+La voie exacte de référence active est :
 
-$$\text{catalogue critique shallow}\longrightarrow\text{simplexes de Gabriel}\longrightarrow\text{hyper-Kruskal par lots}\longrightarrow\text{tour ordre–échelle}.$$
+$$\text{prédicats exacts}\longrightarrow\Gamma\text{ exhaustif}\longrightarrow\text{hyper-Kruskal par lots}\longrightarrow\text{tour ordre–échelle}.$$
 
-L'énumération adapte l'algorithme incrémental des ordres à une primitive de diagramme de puissance GPU, sous forme de raffinements de Voronoï restreints. Elle ne matérialise ni mosaïque de Delaunay d'ordre supérieur, ni rhomboid tiling.
+La voie accélérée construit un catalogue critique peu profond et un flot de Gabriel, mais conserve une sémantique `partial_refinement` tant que toutes les incidences silencieuses ne sont pas localisées par certificat. Son énumération adapte l'algorithme incrémental des ordres à une primitive de diagramme de puissance GPU, sous forme de raffinements de Voronoï restreints. Elle ne matérialise ni mosaïque de Delaunay d'ordre supérieur, ni rhomboid tiling.
+
+L'audit du 15 juillet 2026 a ajouté la [tour globale de boules saturées](math/TOUR_BOULES_SATUREES.md) comme piste de recherche. Sa représentation de Čech/Gamma par saturés et forêt d'intersections est mathématiquement exacte, mais son énumération brute de tous les supports de tailles un à quatre n'est pas une voie scalable au régime produit. Elle devient donc un futur oracle CPU borné et une source de raffinements partiels, sans remplacer l'architecture principale. Le même audit a corrigé la fenêtre critique de Morse en $\lvert I\rvert<k\leq\lvert I\rvert+\lvert U\rvert$ et l'a figée dans `morse-rank-window-regression-v1`.
 
 ## Traçabilité Git
 
@@ -39,3 +41,5 @@ L'arbre antérieur au premier nettoyage reste consultable dans l'[instantané `0
 - Le pire cas 3D est superlinéaire; les budgets doivent dégrader le statut, jamais la vérité annoncée.
 - Une hiérarchie HGP comporte des recouvrements et des applications entre ordres, pas seulement une partition.
 - Les facettes isolées ne sont pas couvertes automatiquement par le théorème du K-MST; le profil complet exige des attaches.
+- Une forêt couvrante de poids maximum peut compresser les coupes d'un graphe de générateurs, mais ses remplacements d'arêtes ne sont pas les événements d'un `MergeForest`.
+- Une borne de rang suffisante pour les changements de Morse de $H_0$ ne borne pas les saturés nécessaires pour encoder toutes les incidences latentes.

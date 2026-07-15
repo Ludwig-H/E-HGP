@@ -432,6 +432,7 @@ class Phase1FixtureTests(unittest.TestCase):
                 "overlapping_k_polyhedra",
                 "gabriel_pair_missing_small_lnn",
                 "gabriel_point_set_counterexample",
+                "morse_rank_window",
                 "gamma_q1_coverage_delta",
                 "vertical_q1_growth_target",
                 "one_ulp_quasi_coplanar",

@@ -243,6 +243,60 @@ Pour un événement de support frontal $U$ et d'indice $\mu$, l'oracle enregistr
 
 La sortie est une multifusion canonique. Elle ne doit jamais être binarisée par l'ordre des threads; tout nœud binaire auxiliaire imposé par un format est marqué et se contracte vers le lot unique.
 
+### 6.5 Tour globale de boules saturées
+
+Cette suite teste la voie candidate de la phase 17 sans l'activer comme base de preuve publique. Pour chaque nuage exact de $n\leq14$, l'oracle structurel interne couvre $1\leq k\leq n$, y compris le cas terminal; les assertions du contrat v2 restent séparément bornées à $1\leq k\leq\min(10,n)$.
+
+Le système sous test utilise le noyau exact C++ issu de la phase 2A. La référence Gamma reste l'oracle Python `Fraction`, soumis au contrôle d'indépendance existant. Les deux chemins ne doivent pas appeler la même implémentation de miniball, de classification de sphère ou de Kruskal; un différentiel seulement structurel qui partagerait sa géométrie ne fermerait pas 17A.
+
+L'oracle :
+
+1. énumère tous les supports affinement indépendants de tailles un à quatre;
+2. calcule leur miniball exacte et exige le centre dans $\mathrm{relint}\,\mathrm{conv}(U)$;
+3. classifie chaque observation comme intérieur, shell ou extérieur de la boule fermée;
+4. construit $S=\mathrm{Sat}(U)$ et vérifie $\beta(S)=\beta(U)$ ainsi que l'idempotence;
+5. déduplique les boules et saturés tout en conservant tous les supports témoins;
+6. matérialise $\Delta(S)$ seulement lorsque le budget combinatoire le permet;
+7. compare l'union descendante au complexe de Čech exhaustif;
+8. matérialise l'union des graphes de Johnson $J_k(S)$ et compare exactement ses $k$-faces et arêtes à Gamma;
+9. développe chaque composante de $H_k(a)$ en sa famille de $k$-faces et compare cette partition ainsi que sa couverture aux composantes de Gamma;
+10. compare de la même façon une forêt de Kruskal de poids maximum seuillée à $H_k(a)$ et à Gamma;
+11. répète les étapes 7–10 pour les coupes ouvertes $t<a$ et fermées $t\leq a$.
+
+Le graphe $H_k(a)$ n'est pas isomorphe à Gamma : ses sommets sont des générateurs, tandis que ceux de Gamma sont des $k$-faces. La comparaison exacte des sommets et arêtes concerne donc Gamma et l'union matérialisée des graphes de Johnson. Pour $H_k(a)$ et sa forêt seuillée, elle concerne les composantes après expansion en $k$-faces, puis les couvertures en observations, pas seulement leur nombre. Les générateurs dont $\lvert S\rvert<k$ sont absents de la coupe d'ordre $k$. Pour $k\geq2$, une composante omise par `hgp_reduced` est identifiée sémantiquement comme une seule $k$-face isolée; le nombre de supports témoins ne doit jamais la rendre artificiellement non triviale.
+
+La forêt statique de chaque coupe est comparée à la mise à jour insertionnelle lot par lot. Les tests mélangent l'ordre des supports, des arêtes, des poids égaux et des threads simulés, puis exigent :
+
+- le même ordre total canonique de Kruskal;
+- les mêmes composantes à chaque seuil d'ordre;
+- le même état strict pré-lot et fermé post-lot;
+- les mêmes naissances, prolongements, multifusions et `coverage_delta`;
+- les mêmes identifiants canoniques après rejeu;
+- les mêmes applications verticales et carrés de naturalité;
+- une reprise après checkpoint identique à une exécution continue.
+
+Le checkpoint contient les checksums de l'entrée et de la configuration, le catalogue et la déduplication actifs, les postings, la forêt courante, le dernier lot entièrement committé, le curseur du flux restant, l'identifiant de l'ordre total canonique et le journal de rejeu. Le test régénère le suffixe depuis les checksums et le curseur, puis exige son identité. Un état pris au milieu d'un lot est temporaire : il est annulé ou rejoué intégralement et ne devient jamais un snapshot publiable.
+
+Les remplacements d'arêtes de la forêt de générateurs ne sont jamais comparés directement aux événements HGP. Seules les différences de composantes pré-lot/post-lot alimentent le `MergeForest` attendu.
+
+Fixtures obligatoires :
+
+- `gabriel-point-set-counterexample-5-points-v1`, avec le générateur `ACDE` au niveau $33/2$, puis l'intersection de capacité deux avec `ABC` au niveau $83886/3563$;
+- `morse-rank-window-regression-v1`, qui impose $\lvert I\rvert=2$, $\lvert U\rvert=2$, les seuls ordres critiques trois et quatre, $D_2(c)<a$ malgré l'action combinatoire descendante et $D_5(c)>a$ au-dessus du rang fermé;
+- une famille obtenue en ajoutant arbitrairement des points strictement dans la miniball d'une petite face, afin de falsifier toute troncature $\lvert S\rvert\leq K_{\mathrm{eff}}+1$;
+- shells cosphériques de plus de quatre points et plusieurs supports minimaux de la même boule;
+- niveaux égaux provenant de boules distinctes et niveaux rationnels presque égaux;
+- nuages colinéaires, coplanaires et tridimensionnels, doublons refusés selon le contrat courant;
+- saturés emboîtés, disjoints, fortement recouvrants et antichaînes d'inclusion;
+- le contre-exemple non monotone de l'audit, où $Q\subseteq R$ mais $\mathrm{Sat}(Q)\nsubseteq\mathrm{Sat}(R)$;
+- triangle abstrait de capacités $2,2,1$, qui rejette une forêt seulement maximale ne contenant pas les deux arêtes de capacité deux.
+
+Le pruning par inclusion est désactivé dans la baseline. Sa variante expérimentale doit produire les mêmes coupes, couvertures, journaux et morphismes, avec une table explicite de domination et de provenance. Elle est testée contre des suppressions d'un sommet feuille et d'un sommet interne de la forêt; l'algorithme ne peut libérer les anciennes arêtes avant rewiring certifié.
+
+Pour chaque sous-famille de générateurs, la suite vérifie l'inclusion dans Gamma et l'absence de fausse connexion. Elle construit aussi des sous-familles qui retardent volontairement une naissance et une fusion, afin d'interdire la promotion de leurs nœuds partiels en événements HGP exacts. ANN, Delaunay ou le raffinement courant ne sont que des sources de propositions; chaque support retenu est resaturé exactement et l'artefact conserve la sémantique scientifique interne `partial_refinement` tant que l'univers complet n'est pas certifié. Aucun `MorseHGP3DResult` v2 n'est émis pour cette voie avant ajout contractuel d'une base de preuve dédiée.
+
+La campagne de performance CPU bornée couvre $n\in\left\lbrace16,24,32,48,64,96,128\right\rbrace$ avec arrêt budgétaire. Elle est hors CI et explicitement opt-in. Chaque manifeste fixe avant exécution `time_budget_s`, `host_budget_bytes`, `scratch_budget_bytes` et `output_budget_bytes`; une observation censurée par budget est une sortie valide à publier comme telle, pas un échec à masquer. La campagne compare graphe statique complet, postings dynamiques, forêt recalculée, mise à jour insertionnelle et pruning expérimental sur les familles volumique, surfacique, en amas et adversariale. Une moyenne favorable ne change aucun statut scientifique.
+
 ## 7. Invariants de hiérarchie
 
 ### 7.1 Invariants horizontaux
@@ -559,8 +613,13 @@ Chaque exécution émet un enregistrement structuré, versionné, comprenant au 
 - violations de fermeture trouvées, rondes de fermeture et taille maximale des files ;
 - visites LBVH, élagages, requêtes top-$k$, requêtes de rang et exclusions ;
 - hyperarêtes, facettes, émissions redondantes, unions DSU utiles et inutiles ;
-- runs externes, octets écrits/lus et volume de fusion.
-- cellules canoniques reconstruites, amorces vides ou non, violateurs et co-ties ajoutés par ronde.
+- runs externes, octets écrits/lus et volume de fusion;
+- cellules canoniques reconstruites, amorces vides ou non, violateurs et co-ties ajoutés par ronde;
+- pour la phase 17 : supports bruts par taille, supports bien centrés, boules et saturés distincts $M_{\mathrm{sat}}$;
+- memberships $L_{\mathrm{sat}}=\sum_S\lvert S\rvert$, distribution des capacités et `peak_active_inclusion_maxima`, avec coût du join d'inclusion compté séparément;
+- longueurs des postings $d_x$, $P_{\mathrm{post}}=\sum_x\binom{d_x}{2}$, paires uniques et pic de l'accumulateur;
+- arêtes d'intersection examinées et retenues, remplacements de forêt, octets de l'historique et temps des requêtes de coupe;
+- certificats de complétude des supports, ranges fermés, déduplication, lots, join, forêt, rejeu et applications verticales.
 
 ### 15.3 Numérique
 

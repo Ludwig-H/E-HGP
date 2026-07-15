@@ -25,9 +25,9 @@ Le statut d'une exécution est distinct : `exact`, `conditional`, `budget_exhaus
 | un simplexe séparant est de Gabriel | `theorem_external` | théorème 4, position générale |
 | Gabriel préserve les K-polyèdres non triviaux | `false_in_general` pour le graphe élagué formulé dans le manuscrit | la fixture exacte `gabriel-point-set-counterexample-5-points-v1` contredit la proposition 6 comme égalité de collections d'ensembles de points |
 | un K-MST élagué préserve ces composantes | `false_in_general` pour le graphe élagué formulé dans le manuscrit | le théorème 5 hérite du contre-exemple à la proposition 6; une structure corrigée peut demander plus que le K-graphe brut |
-| centre critique si et seulement si bien centré | `theorem_external` | Reani–Bobrowski, position générale |
-| indice $\mu=s-k$ | `theorem_external` | Reani–Bobrowski |
-| multiplicité locale d'indice $\mu$ égale à $\binom{\lvert U\rvert-1}{\mu}$ | `theorem_external` | Reani–Bobrowski; ce rang local ne préjuge pas des attaches globales |
+| centre critique si et seulement si bien centré dans la fenêtre $\lvert I\rvert<k\leq s$ | `theorem_external` | Reani–Bobrowski, position générale; équivalent à $0\leq\mu\leq\lvert U\rvert-1$ |
+| indice $\mu=s-k$ | `theorem_external` | Reani–Bobrowski, uniquement aux ordres de la fenêtre critique |
+| multiplicité locale d'indice $\mu$ égale à $\binom{\lvert U\rvert-1}{\mu}$ | `theorem_external` | Reani–Bobrowski dans la fenêtre critique; ce rang local ne préjuge pas des attaches globales |
 | à l'indice un, le sous-niveau strict possède les $\lvert U\rvert$ bras $F_u$ | `theorem_external` | une seule sphère peut tuer jusqu'à $\lvert U\rvert-1$ classes de $H_0$ |
 | seuls les rangs $s=k$ et $s=k+1$ modifient $H_0$ | `theorem_external` | conséquence des indices zéro et un |
 | une sphère de rang $k+1$ équivaut à un $k$-simplexe de Gabriel | `proved_here` | position générale du manuscrit |
@@ -45,6 +45,13 @@ Le statut d'une exécution est distinct : `exact`, `conditional`, `budget_exhaus
 | catalogue critique complet et attaches exactes reconstruisent `full_pi0` | `proof_obligation` | M.1 reste à démontrer, notamment aux niveaux égaux |
 | le remplacement intrus–support produit un chemin positif vers une coface Gabriel | `proved_here` | supports essentiels uniques, baisse stricte de $\beta$ à chaque descendant et absence de plateau |
 | ce chemin localise toujours la racine verticale exacte dans un DSU Gabriel incomplet | `proof_obligation` | requiert une complétion certifiée des incidences; faux comme conséquence du seul flot brut |
+| la saturation fermée conserve exactement la miniball et est idempotente | `proved_here` | théorème S.1 de [`TOUR_BOULES_SATUREES.md`](TOUR_BOULES_SATUREES.md); aucune position générale |
+| les simplexes des générateurs saturés actifs engendrent exactement le complexe de Čech | `proved_here` | théorème S.3; coupes fermées par $t\leq a$, coupes ouvertes par $t<a$ |
+| les composantes de Gamma sont celles du graphe de générateurs avec $\lvert S\cap T\rvert\geq k$ | `proved_here` | théorème S.4; graphes de Johnson connexes et couverture en observations par unions de saturés |
+| une forêt couvrante de poids maximum préserve simultanément toutes les composantes après seuillage en ordre | `proved_here` | théorème S.5; Kruskal décroissant, et non forêt seulement maximale au sens d'inclusion |
+| une sous-famille de générateurs exacts ne crée aucune connexion Gamma fictive | `proved_here` | théorème S.6; sémantique scientifique interne `partial_refinement`, sans sérialisation v2 avant migration |
+| les snapshots de la forêt de générateurs constituent déjà le `MergeForest` contractuel | `false_in_general` | les remplacements d'arêtes ne sont pas des événements topologiques; lots, `coverage_log`, généalogie et flèches restent à construire |
+| un générateur saturé est un événement critique de $D_k$ à tous ses ordres descendants | `false_in_general` | fixture `morse-rank-window-regression-v1` : deux points intérieurs donnent $D_2(c)<a$ alors que le saturé agit combinatoirement à l'ordre deux |
 
 ## 3. Énumération
 
@@ -65,6 +72,11 @@ Le statut d'une exécution est distinct : `exact`, `conditional`, `budget_exhaus
 | matérialiser la mosaïque d'ordre supérieur est nécessaire | `false_in_general` | le raffinement restreint suffit à l'énumération |
 | la sortie intermédiaire est toujours linéaire | `false_in_general` | pire cas 3D superlinéaire ou quadratique |
 | le coût moyen est linéaire sur Poisson volumique à ordre fixé | `theorem_external` pour les comptes étudiés | résultat moyen, pas borne déterministe du code |
+| tous les générateurs saturés 3D sont obtenus par supports de tailles un à quatre | `proved_here` | existence d'un support minimal de miniball; supports multiples agrégés par boule exacte et saturé |
+| l'implémentation par supports de tailles un à quatre est exhaustive | `conditional_theorem` | univers des supports complet, classifications fermées exactes, déduplication et lots certifiés |
+| borner les générateurs saturés par $K_{\mathrm{eff}}+1$ suffit aux ordres demandés | `false_in_general` | une petite face peut avoir un saturé de cardinal arbitrairement proche de $n$ |
+| la saturation est monotone pour l'inclusion | `false_in_general` | contre-exemple exact de la section 1 de [`TOUR_BOULES_SATUREES.md`](TOUR_BOULES_SATUREES.md) |
+| le pruning par inclusion s'intègre sans preuve à la forêt insertionnelle persistante | `proof_obligation` | l'inclusion préserve les complexes de coupe, mais la suppression exige contraction, rewiring et provenance historiques |
 
 ## 4. Attaches et lots
 
@@ -182,6 +194,10 @@ Obtenir des bornes moyennes ou au moins des lois empiriques robustes par famille
 
 À partir des profils de complexité, rechercher un branch-and-bound certifié qui exclut des régions sans fermer tous les parents top-$m$. Tant qu'un tel oracle ne possède pas de preuve de complétude, il reste le mode `budgeted`.
 
+### V6 — tour globale de boules saturées
+
+Les théorèmes S.1–S.6 de [`TOUR_BOULES_SATUREES.md`](TOUR_BOULES_SATUREES.md) donnent une représentation combinatoire exacte de Gamma par saturés et une forêt de Kruskal commune aux ordres. Il reste à construire un oracle indépendant borné, à convertir ses coupes en `MergeForest`, `coverage_log` et applications verticales canoniques, puis à certifier la persistance et les dégénérescences. La voie brute possède jusqu'à $O(n^4)$ supports, $O(n^5)$ memberships et $O(M^2)$ paires de générateurs; elle est donc un oracle petit $n$, pas un remplacement scalable de la voie actuelle. Une sous-famille proposée puis saturée reste `partial_refinement`.
+
 ## 10. Règles de publication d'un résultat
 
 Une expérimentation ou une API ne peut employer le mot `exact` que si elle publie :
@@ -198,6 +214,6 @@ Une expérimentation ou une API ne peut employer le mot `exact` que si elle publ
 - les tailles intermédiaires et le pic mémoire;
 - la version du code, du compilateur, du pilote et du matériel.
 
-Le contrat v2 ferme l'ambiguïté de définition sans fermer la recherche de réduction : `hgp_reduced` ne peut publier `exact` qu'avec `hgp-reduced-v2`, `gamma_exhaustive_reference` et `effective_backend=reference_cpu`. Le flot Gabriel brut reste conditionnel, même si son exécution est bit-à-bit déterministe et son catalogue critique exhaustif. Le profil `full_pi0` conserve séparément son statut conditionnel lié à M.1.
+Le contrat v2 ferme l'ambiguïté de définition sans fermer la recherche de réduction : `hgp_reduced` ne peut publier `exact` qu'avec `hgp-reduced-v2`, `gamma_exhaustive_reference` et `effective_backend=reference_cpu`. Le flot Gabriel brut reste conditionnel, même si son exécution est bit-à-bit déterministe et son catalogue critique exhaustif. La tour saturée n'est pas encore une base de preuve du schéma actif; une future base distincte demanderait une migration contractuelle. Le profil `full_pi0` conserve séparément son statut conditionnel lié à M.1 dans le contrat courant.
 
 Un bon ARI, une stabilité sous bruit ou un accord moyen avec une baseline ne remplace aucune de ces preuves.

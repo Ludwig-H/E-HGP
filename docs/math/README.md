@@ -1,6 +1,6 @@
 # Noyau mathématique de MorseHGP3D
 
-Les cinq documents de ce dossier forment un ensemble normatif.
+Les six documents de ce dossier forment un ensemble normatif.
 
 | document | question résolue |
 |---|---|
@@ -8,6 +8,7 @@ Les cinq documents de ce dossier forment un ensemble normatif.
 | [Catalogue critique 3D](CATALOGUE_CRITIQUE_3D.md) | quels événements suffisent jusqu'à $K_{\max}=10$ et comment les énumérer sans mosaïque globale ? |
 | [Attaches par miniball](ATTACHES_DESCENTE_MINIBALL.md) | comment rattacher un bras connu à sa composante globale ? |
 | [Incidences silencieuses](INCIDENCES_SILENCIEUSES_GAMMA.md) | pourquoi les cinq points réfutent-ils le flot brut et quelle complétion rétablit-elle Gamma ? |
+| [Tour globale de boules saturées](TOUR_BOULES_SATUREES.md) | comment représenter exactement toutes les incidences par saturés, et pourquoi la voie brute reste-t-elle non scalable ? |
 | [Preuves et heuristiques](STATUT_PREUVES_ET_HEURISTIQUES.md) | quelles affirmations sont démontrées, conditionnelles, ouvertes ou fausses en général ? |
 
 ## Résumé de la construction

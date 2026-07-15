@@ -23,7 +23,7 @@ La publication courte de Corbet et al. à SoCG 2021 porte le DOI [10.4230/LIPIcs
 
 ### Catalogue critique et topologie des multicovertures
 
-- Y. Reani et O. Bobrowski, [*Morse Theory for the k-NN Distance Function*](https://arxiv.org/abs/2403.12792), caractérisation des centres critiques, indice $\mu=s-k$ et effet homologique. Le PDF mentionne CC BY 4.0, mais sa notice arXiv expose actuellement la licence de distribution non exclusive d'arXiv; il n'est pas redistribué tant que ces informations ne concordent pas.
+- Y. Reani et O. Bobrowski, [*Morse Theory for the k-NN Distance Function*](https://arxiv.org/abs/2403.12792), caractérisation des centres critiques dans la fenêtre $\lvert I\rvert<k\leq s$, indice $\mu=s-k$ et effet homologique. Le PDF mentionne CC BY 4.0, mais sa notice arXiv expose actuellement la licence de distribution non exclusive d'arXiv; il n'est pas redistribué tant que ces informations ne concordent pas.
 - H. Edelsbrunner et G. Osang, [*The Multi-Cover Persistence of Euclidean Balls*](https://doi.org/10.1007/s00454-021-00281-9), structure ordre–échelle et mosaïques d'ordre supérieur.
 - H. Edelsbrunner et A. Nikitenko, [*Poisson–Delaunay Mosaics of Order k*](https://arxiv.org/abs/1709.09380), comptes moyens à ordre fixé dans le régime de Poisson.
 - R. Corbet, M. Kerber, M. Lesnick et G. Osang, [*Computing the Multicover Bifiltration*](https://doi.org/10.1007/s00454-022-00476-8), construction de la bifiltration multicoverture. Il ne faut pas confondre cet article avec celui d'Edelsbrunner–Osang ci-dessus.
@@ -51,15 +51,15 @@ Cette matrice sépare l'apport effectivement réutilisé de ce que la source ne 
 | source | résultat exploité dans MorseHGP3D | limite explicite |
 |---|---|---|
 | manuscrit et article HGP | équivalence multicoverture–K-polyèdres, adjacences élémentaires, nécessité de Gabriel pour une séparation, réduction par K-MST des composantes non triviales | ne donne ni énumérateur GPU du K-Gabriel, ni généalogie certifiée de toutes les facettes isolées |
-| Reani–Bobrowski | caractérisation des centres critiques, indice $\mu=s-k$ et multiplicité locale $\binom{\lvert U\rvert-1}{\mu}$ | une selle locale ne dit pas quelles classes globales de $H_0$ fusionnent; les attaches restent nécessaires |
-| Edelsbrunner–Osang et Corbet et al. | cellules top-$k$, identité incrémentale des ordres et complexes exacts de multicoverture | matérialiser la mosaïque ou le rhomboid tiling conserve une combinatoire dont MorseHGP3D n'a pas besoin |
+| Reani–Bobrowski | caractérisation des centres critiques pour $\lvert I\rvert<k\leq s$, indice $\mu=s-k$ et multiplicité locale $\binom{\lvert U\rvert-1}{\mu}$ | hors de cette fenêtre la multiplicité est nulle et l'activation descendante n'est pas un événement de Morse; une selle locale ne fixe pas les attaches globales |
+| Edelsbrunner–Osang et Corbet et al. | cellules top-$k$, identité incrémentale des ordres, complexes exacts de multicoverture et borne $O(n^{d+1})$ de leur modèle tous ordres sous position générale | ne démontrent ni la tour de saturés, ni une borne $O(n^{4})$ sur ses memberships, son join d'intersections ou son historique; « ombre $H_0$ » reste une interprétation |
 | Edelsbrunner–Nikitenko | croissance moyenne favorable à ordre fixé dans le modèle de Poisson | aucune borne déterministe pour une entrée surfacique, LiDAR ou adversariale |
 | Taveira et al. / Paragram | primitive cellulaire massivement parallèle pour Voronoï et puissance en 3D | les calculs flottants et `fast_math` proposent une géométrie; ils ne certifient ni les incidences, ni la complétude |
 | Welzl et Shewchuk | miniballs en dimension fixée, filtres adaptatifs et prédicats exacts | ces briques ne résolvent pas l'énumération globale des labels |
 | Prokopenko et al. | ancre GPU indépendante pour l'EMST et la tranche $k=1$ | ne généralise pas directement les interactions d'ordre supérieur |
 | approches sparse, DTM et witnessed k-distance | baselines, priorités de candidats et modes approximatifs comparatifs | elles changent ou approchent la filtration et ne prouvent pas la tour HGP dure |
 
-La décision architecturale résulte de cette intersection : reprendre l'induction sur les ordres, mais reconstruire seulement les cellules peu profondes utiles à $H_0$; utiliser une primitive de puissance comme moteur de proposition et fermer chaque décision par un oracle global exact; reconstruire enfin la hiérarchie avec les théorèmes de Gabriel du manuscrit.
+La décision architecturale principale résulte de cette intersection : reprendre l'induction sur les ordres, mais reconstruire seulement les cellules peu profondes utiles à $H_0$; utiliser une primitive de puissance comme moteur de proposition et fermer chaque décision par un oracle global exact; reconstruire enfin la hiérarchie avec Gamma exhaustif sur la référence et une future réduction d'incidences seulement après preuve. La [tour globale de boules saturées](../math/TOUR_BOULES_SATUREES.md) est une piste indépendante dont les théorèmes sont élémentaires et internes au dépôt; Corbet et al. en motivent le contexte multicoverture, pas la correction algorithmique.
 
 ## Intégrité et mise à jour
 
