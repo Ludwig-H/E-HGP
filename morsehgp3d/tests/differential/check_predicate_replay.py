@@ -89,14 +89,14 @@ def exact_level(value: Fraction) -> dict[str, str]:
 
 
 def expected_counters(stage: str, exact_zero: bool) -> dict[str, int]:
-    if stage not in {"fp64_filtered", "cpu_multiprecision"}:
+    if stage not in {"fp64_filtered", "expansion", "cpu_multiprecision"}:
         raise AssertionError(f"unsupported certification stage {stage}")
     if exact_zero and stage == "fp64_filtered":
         raise AssertionError("an FP64 filter certified an exact zero")
     return {
         "cpu_multiprecision_certified": 1 if stage == "cpu_multiprecision" else 0,
         "exact_zeros": 1 if exact_zero else 0,
-        "expansion_certified": 0,
+        "expansion_certified": 1 if stage == "expansion" else 0,
         "fp32_proposals": 0,
         "fp64_filtered_certified": 1 if stage == "fp64_filtered" else 0,
         "remaining_unknown": 0,
@@ -219,15 +219,78 @@ def check_power_bisector(wrapper: Path, executable: Path, fixture: Path) -> None
         "numerator": str(expected.numerator),
     }:
         raise AssertionError("native power-bisector exact witness differs from Fraction")
-    if result["certification_stage"] != "cpu_multiprecision" or result["counters"] != {
-        "cpu_multiprecision_certified": 1,
-        "exact_zeros": 1 if expected == 0 else 0,
-        "expansion_certified": 0,
-        "fp32_proposals": 0,
-        "fp64_filtered_certified": 0,
-        "remaining_unknown": 0,
-    }:
-        raise AssertionError("power-bisector stage accounting is not exact-only and closed")
+    stage = result["certification_stage"]
+    if stage != "expansion" or result["counters"] != expected_counters(
+        stage, expected == 0
+    ):
+        raise AssertionError("binary64 power-bisector replay did not use its expansion")
+
+
+def check_power_binary64_recovery(
+    wrapper: Path, executable: Path, fixture: Path
+) -> None:
+    template = json.loads(fixture.read_text(encoding="utf-8"))
+    finite_cases = (
+        ("0000000000000001", Fraction(1, 1 << 1074)),
+        ("7fefffffffffffff", rational_from_bits("7fefffffffffffff")),
+    )
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        temporary = Path(temporary_directory)
+        for index, (word, coordinate) in enumerate(finite_cases):
+            value = json.loads(json.dumps(template))
+            value["point_table"] = [[word, "0000000000000000", "0000000000000000"]]
+            value["r_ids"] = [0]
+            value["q_ids"] = [0]
+            value["witness"] = {
+                "denominator": str(coordinate.denominator),
+                "schema_version": "2.0.0",
+                "unit": "input_coordinate_unit",
+                "x_numerator": str(coordinate.numerator),
+                "y_numerator": "0",
+                "z_numerator": "0",
+            }
+            case_path = temporary / f"binary64-{index}.json"
+            case_path.write_text(canonical_json(value) + "\n", encoding="utf-8")
+            _, replay = run_replay(wrapper, executable, case_path)
+            result = replay["result"]
+            if (
+                result["certification_stage"] != "expansion"
+                or result["counters"] != expected_counters("expansion", True)
+            ):
+                raise AssertionError(
+                    "an exactly representable rational witness lost binary64 provenance"
+                )
+
+        non_binary = json.loads(json.dumps(template))
+        non_binary["point_table"] = [
+            ["0000000000000000", "0000000000000000", "0000000000000000"]
+        ]
+        non_binary["r_ids"] = [0]
+        non_binary["q_ids"] = [0]
+        non_binary["witness"] = {
+            "denominator": "3",
+            "schema_version": "2.0.0",
+            "unit": "input_coordinate_unit",
+            "x_numerator": "1",
+            "y_numerator": "0",
+            "z_numerator": "0",
+        }
+        case_path = temporary / "non-binary.json"
+        case_path.write_text(canonical_json(non_binary) + "\n", encoding="utf-8")
+        _, replay = run_replay(wrapper, executable, case_path)
+        result = replay["result"]
+        if (
+            result["certification_stage"] != "cpu_multiprecision"
+            or result["counters"]
+            != expected_counters("cpu_multiprecision", True)
+        ):
+            raise AssertionError("a non-binary rational witness entered a floating stage")
+        forged = json.loads(json.dumps(result))
+        forged["certification_stage"] = "expansion"
+        forged["counters"] = expected_counters("expansion", True)
+        fake = temporary / "fake-non-binary-expansion"
+        make_output_script(fake, canonical_json(forged))
+        expect_closed_failure(wrapper, fake, case_path)
 
 
 def check_invalid_power_input(wrapper: Path, executable: Path, fixture: Path) -> None:
@@ -578,7 +641,7 @@ def main() -> int:
         wrapper,
         executable,
         fixtures / "distance_equal.json",
-        expected_stage="cpu_multiprecision",
+        expected_stage="expansion",
     )
     check_distance(
         wrapper,
@@ -599,6 +662,9 @@ def main() -> int:
         expected_stage="fp64_filtered",
     )
     check_power_bisector(
+        wrapper, executable, fixtures / "power_bisector_rational_zero.json"
+    )
+    check_power_binary64_recovery(
         wrapper, executable, fixtures / "power_bisector_rational_zero.json"
     )
     check_invalid_input(wrapper, executable, fixtures / "distance_one_ulp.json")

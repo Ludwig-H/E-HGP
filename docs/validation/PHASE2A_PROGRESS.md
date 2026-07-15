@@ -24,7 +24,8 @@
 | noyau affine exact 2A.4 | `ed5bd7e` | `ExactPlane3`, forme `H_RQ` à échelle exacte, orientation 2D dans un support, rang et intersection de trois plans, incidence déterminantale d'un quatrième plan, replay v3 et oracle `Fraction` |
 | centres et niveaux homogènes 2A.5 | `3f3fa2b` | centres exacts de supports de taille deux à quatre, dimension affine, `ExactRational3` et `ExactLevel` atomiques, replay v4 et oracle Gram/RREF indépendant |
 | minimalité locale, barycentriques et sphères 2A.6 | `39f7902` | singleton exact, signes barycentriques de supports indépendants, réduction certifiée des supports de frontière, côté exact d'une sphère, replay v5 et oracle RREF indépendant |
-| ordre exact et lots canoniques 2A.7 | présent lot | comparaison instrumentée des `ExactLevel`, égalité par produit croisé, supports minimaux et provenances canoniques, lots exacts, replay v6 et oracle `Fraction` indépendant |
+| ordre exact et lots canoniques 2A.7 | `1718e08` | comparaison instrumentée des `ExactLevel`, égalité par produit croisé, supports minimaux et provenances canoniques, lots exacts, replay v6 et oracle `Fraction` indépendant |
+| cascade adaptative 2A.8a | présent lot | expansions flottantes exactes fermées, cascades distance/orientation 3D/`H_RQ` binary64, provenance canonique des labels, politiques indépendantes, replay et différentiel `Fraction` forçant les trois étages |
 
 La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe négatif signifie que `R` est moins coûteux au témoin. `ExactAffineForm3` conserve ses quatre coefficients rationnels et leur échelle exacte; sa clé primitive ne sert qu'à classifier le plan orienté ou la forme constante. Les API riches matérialisent encore leurs témoins multiprécision lorsque le signe est filtré. Le champ `certification_stage` identifie donc l'autorité du signe, pas le coût total d'un replay diagnostique.
 
@@ -32,9 +33,9 @@ La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe
 
 | famille de décision exigée par 2A | exact multiprécision | filtre FP64 | expansion | replay indépendant | état |
 |---|---:|---:|---:|---:|---|
-| comparaison de distances à un témoin explicite | oui | oui | non | oui | partiel terminé |
-| signe de `H_RQ` | oui | non | non | oui | référence exacte terminée |
-| orientation 3D | oui | oui | non | oui | partiel terminé |
+| comparaison de distances à un témoin explicite | oui | oui | oui | oui | cascade 2A.8a terminée |
+| signe de `H_RQ` | oui | oui si provenance binary64 | oui si provenance binary64 | oui | cascade 2A.8a conditionnelle à la provenance |
+| orientation 3D | oui | oui | oui | oui | cascade 2A.8a terminée |
 | orientation 2D dans un plan support | oui | non | non | oui | référence exacte terminée |
 | intersection de trois plans | oui | non | non | oui | référence exacte terminée |
 | appartenance d'un quatrième plan | oui | non | non | oui | référence exacte terminée |
@@ -45,9 +46,9 @@ La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe
 | comparaison de rayons de miniball | oui | non | non | oui | référence exacte terminée |
 | égalité de niveaux issus de supports distincts | oui | non | non | oui | référence exacte terminée |
 
-## Invariants du filtre FP64
+## Invariants de la cascade adaptative
 
-Le filtre n'émet qu'un signe strict. Une borne qui contient zéro retourne `uncertain`; seul le fallback exact peut certifier zéro. Les additions, soustractions, produits et carrés sont calculés en binary64 strict puis élargis par `nextafter` vers les deux infinis. Toute borne non finie, tout overflow ou toute incohérence invalide l'intervalle.
+Le filtre d'intervalles n'émet qu'un signe strict. Une borne qui contient zéro retourne `uncertain`. L'étage d'expansion suivant représente exactement une somme finie de composantes binary64 et peut donc certifier un zéro exact. Les additions, soustractions, produits et carrés du premier étage sont calculés en binary64 strict puis élargis par `nextafter` vers les deux infinis. Toute borne non finie, tout overflow ou toute incohérence invalide l'intervalle.
 
 La certification flottante exige simultanément :
 
@@ -58,7 +59,9 @@ La certification flottante exige simultanément :
 - FTZ et DAZ désactivés;
 - sauvegarde puis restauration de l'environnement et des drapeaux flottants de l'appelant.
 
-`PredicateFilterPolicy::multiprecision_only` désactive le filtre sans état global. Le différentiel rejoue exactement le même corpus avec et sans filtre, compare signe et témoins scientifiques, et ignore uniquement l'étage et ses compteurs attendus.
+Les expansions emploient les transformations sans erreur `TwoSum` et `TwoProduct` avec résidu FMA. Avant tout produit, l'exposant du bit exact le plus faible est calculé depuis les mots binary64; un bit sous `2^-1074` rend immédiatement la tentative incertaine. Toute exception `FE_INVALID`, `FE_DIVBYZERO`, `FE_OVERFLOW` ou `FE_UNDERFLOW`, toute composante non finie et tout échec de restauration invalident également la tentative. Cette règle ferme notamment `denorm_min * denorm_min`, que nulle somme de binary64 ne peut représenter.
+
+`PredicateFilterPolicy::allow_adaptive` active FP64, expansion puis multiprécision. `allow_fp64` conserve l'ancien chemin FP64 puis multiprécision et ses valeurs d'énumération historiques; `multiprecision_only` désactive les deux étages rapides sans état global. Le différentiel rejoue exactement le même corpus adaptatif en multiprécision seule et exige des signes et témoins scientifiques identiques.
 
 ## Régression numérique permanente
 
@@ -68,16 +71,18 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Qualification du lot courant
 
-- GCC 13, build strict : CTest 17/17.
-- Clang 18, build Release strict : CTest 17/17.
-- GCC 13 avec ASan et UBSan : CTest 17/17.
-- Corpus court déterministe : 2 048 cas, hash `276619686350b9c4f900d856b657ce084466cfdea2c4e8711d5efc7e690a1d15`.
-- Signes du corpus court : 1 002 négatifs, 892 positifs et 154 zéros.
-- Distances du corpus court : 58 signes `fp64_filtered` et 966 fallbacks `cpu_multiprecision`.
-- Orientations du corpus court : 55 signes `fp64_filtered` et 457 fallbacks `cpu_multiprecision`.
-- Total filtrable du corpus court : 113 signes `fp64_filtered` et 1 423 fallbacks `cpu_multiprecision`.
-- Les 512 cas `H_RQ` supplémentaires restent, par construction, `cpu_multiprecision`.
-- Corpus additionnel local : 10 000 distances et 5 000 orientations, filtre activé puis désactivé, 1 246 certifications FP64, 13 754 fallbacks et zéro différence.
+- GCC 13, build Release strict : CTest 18/18.
+- Clang 18, build Release strict : CTest 18/18.
+- GCC 13 avec ASan et UBSan : CTest 18/18.
+- Corpus court déterministe `mixed-binary64-splitmix64-v2` : 2 048 cas, hash `066f9ee577fc6c6d64ed930df4eaeca88e96895fa801a661980ba22fa98b4be3`.
+- Signes du corpus court : 1 001 négatifs, 891 positifs et 156 zéros.
+- Distances du corpus court : 58 signes `fp64_filtered`, 3 `expansion` et 963 fallbacks `cpu_multiprecision`.
+- Orientations du corpus court : 55 signes `fp64_filtered`, 3 `expansion` et 454 fallbacks `cpu_multiprecision`.
+- Les deux familles historiques totalisent 113 signes `fp64_filtered`, 6 `expansion` et 1 417 fallbacks `cpu_multiprecision`.
+- Les 512 cas `H_RQ` donnent 13 signes `fp64_filtered`, 3 `expansion` et 496 fallbacks `cpu_multiprecision`; les témoins non représentables exactement en binary64 restent sur la surcharge rationnelle.
+- Total du corpus court : 126 signes `fp64_filtered`, 9 `expansion`, 1 913 `cpu_multiprecision`, zéro différence scientifique avec le replay multiprécision seul et `remaining_unknown=0`.
+- Tests directs de l'expansion : 4 096 tirages arithmétiques contre `ExactRational`, puis 2 048 distances, 2 048 orientations 3D et 1 024 signes `H_RQ`; annulations, signes stricts, underflow, overflow, quatre modes d'arrondi et FTZ/DAZ sont couverts.
+- Corpus additionnel local v2 : 10 000 distances et 5 000 orientations, hash `3686e4d7872e879671d575ee0ad256afbef238097b41d257359db8e5034f58d7`, cascade activée puis multiprécision seule, 1 245 certifications FP64, 6 expansions, 13 749 fallbacks et zéro différence.
 - Replay affine v3 : 17 fixtures, 5 familles, 4 classes de forme affine, 4 cas d'intersection, 3 signes d'incidence, 12 métamorphismes, 7 rejets d'entrée, 5 faux témoins natifs et 1 diagnostic natif inattendu rejetés.
 - Corpus affine `affine-dyadic-splitmix64-v1` : 1 760 cas, graine `0x414646494e453356`, hash des commandes `1dc9bce8051ba64ddc67d7943122190be36bed884fb35a9a9a6f78e111418457`, hash des réponses exactes de l'oracle `47929b8b1fed34e3ee38a77da13bf3d994b66962fb3b35e773ce49e0a785a0a9`, sorties normale et `--multiprecision-only` byte-identiques.
 - Répartition affine : 240 constructions de plan, 240 formes `H_RQ`, 336 orientations 2D, 608 intersections et 336 incidences de quatrième plan.
@@ -94,8 +99,8 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 - Répartition ordre 2A.7 : 1 536 comparaisons, dont 640 négatives, 640 positives et 256 égalités exactes; six familles de 256 cas couvrent produits croisés `-1`, `1`, égalités, ULP, exposants extrêmes et rationnels génériques. Les 256 cas de chaînes, issus de 32 chaînes de base rejouées sous huit ordonnancements, totalisent 5 120 émissions, 1 536 occurrences de niveaux de lots, 768 émissions dupliquées, des supports minimaux et sources de tailles un à quatre, jusqu'à trois supports par niveau et trois provenances par support.
 - Package CMake installé, wrapper installé rejoué sur une intersection rationnelle v3, un centre non dyadique v4, une réduction de frontière v5, une sphère à dénominateurs non triviaux v5, un niveau nul v5, deux niveaux v6 séparés par un produit croisé `-1` et une provenance réduite v6. Le consommateur externe exerce filtres, multiprécision, noyau affine, centre tétraédrique, réduction de support, côté de sphère, ordre exact et lots canoniques : 1/1.
 - Contrats : 21 définitions, 21 exemples de schéma et 5 fixtures validés; 58 tests contractuels réussis.
-- Oracle exhaustif indépendant : 91 tests réussis; campagne CI bornée sur trois dimensions affines, trois cas audités et zéro échec.
-- Documentation : 25 documents actifs validés; 5 références locales et 9 modules d'oracle indépendant validés.
+- Oracle exhaustif indépendant : 92 tests réussis; campagne CI bornée sur trois dimensions affines, trois cas audités et zéro échec.
+- Documentation : 26 documents actifs validés; 5 références locales et 9 modules d'oracle indépendant validés.
 - Registre et sécurité : 20 phases validées, scope actif validé, workflow GCP en lecture seule validé et 11 tests de garde GCP réussis.
 - Limite de portabilité : MSVC, Apple et ARM ne sont pas exécutés localement; aucune conclusion n'est extrapolée à ces cibles.
 
@@ -143,13 +148,23 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 7. L'API refuse les supports vides, trop grands, dupliqués ou hors domaine, les provenances qui n'incluent pas leur support minimal, les analyses extérieures ou dépendantes et un même support minimal associé à deux niveaux.
 8. Le replay v6 et son oracle `Fraction` réexercent comparaison, groupement, ordre par cardinalité, réduction de provenance, duplication, quasi-égalité, gros entiers et compatibilité des identifiants v1 à v5.
 
-### 2A.8 — cascade adaptative complète
+### 2A.8a — première cascade adaptative — terminé
 
-1. Étendre les filtres FP64 aux nouveaux signes seulement après disponibilité de leur référence exacte.
-2. Ajouter les expansions adaptatives pour les cas que leurs bornes certifient.
-3. Conserver `cpu_multiprecision` comme dernier étage portable et comme chemin désactivable indépendant.
-4. Exiger exactement un compteur de certification par décision, même après plusieurs tentatives incertaines.
-5. Falsifier chaque étage sous GCC et Clang, plusieurs optimisations, modes d'arrondi, sous-normaux et sanitizers.
+1. Une expansion flottante zéro-éliminée ordonnée du composant le moins significatif au plus significatif implémente somme, différence et produit exacts par `TwoSum` et résidu FMA.
+2. Les produits dont le bit exact le plus faible serait sous `2^-1074`, les opérations non finies, les exceptions d'underflow ou overflow et les environnements non conformes retournent `uncertain`; aucun bit n'est tronqué silencieusement.
+3. Distance, orientation 3D et `H_RQ` sur données binary64 suivent désormais FP64, expansion puis multiprécision. L'expansion peut certifier les zéros, contrairement au filtre d'intervalles.
+4. `ExactLabelMoments` conserve une provenance binary64 triée par ordre total des coordonnées sans l'inclure dans l'égalité sémantique des moments; des provenances distinctes donnant les mêmes moments restent égales et le signe exact reste inchangé.
+5. `allow_adaptive`, `allow_fp64` et `multiprecision_only` gardent trois chemins indépendants. Une décision enregistre exactement une certification terminale, jamais ses tentatives incertaines.
+6. Le replay reconnaît sans arrondi un témoin rationnel exactement représentable en binary64; le corpus `Fraction` v2 force les signes négatif, nul et positif à l'étage expansion pour chacune des trois familles et rejoue les mêmes commandes en multiprécision seule.
+7. La Phase 2A reste ouverte : ce sous-lot ne prétend pas filtrer des plans ou niveaux rationnels arbitraires en convertissant leurs `BigInt` vers `double`.
+
+### 2A.8b et 2A.8c — cascade adaptative restante
+
+1. 2A.8b doit conserver la provenance dyadique des supports et niveaux afin de filtrer honnêtement les signes barycentriques, le côté de sphère et les comparaisons de niveaux, sans jamais matérialiser une division flottante.
+2. 2A.8c doit conserver la provenance des formes et plans afin de couvrir orientation 2D, décisions de rang, intersections et incidence d'un quatrième plan.
+3. Les surcharges acceptant des rationnels ou `BigInt` arbitraires conservent `cpu_multiprecision` comme autorité portable; une provenance absente rend l'étage rapide inapplicable, pas approximatif.
+4. Chaque nouvelle famille doit obtenir des cas différentiels négatifs, nuls et positifs à chaque étage disponible, les mêmes témoins lorsque la cascade est désactivée et exactement un compteur terminal.
+5. La qualification finale 2A.8 doit répéter GCC, Clang, optimisations strictes, modes d'arrondi, sous-normaux et sanitizers sur toute la matrice.
 
 ### 2A.9 — campagne de fermeture
 
@@ -173,7 +188,7 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Prochaine sous-porte
 
-Le prochain lot est 2A.8, cascade adaptative complète, toujours sur `reference_cpu`, couche commune aux profils et mode `certified`. Il doit étendre les filtres FP64 aux nouveaux signes dont la référence exacte est désormais disponible, ajouter les expansions de signe puis conserver le fallback multiprécision désactivable comme autorité terminale. Chaque décision doit rester attribuée à un unique étage, avec résultat canonique inchangé lorsque les étages rapides sont désactivés. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
+Le prochain lot est 2A.8b, provenance dyadique des supports, barycentriques, sphères et niveaux, toujours sur `reference_cpu`, couche commune aux profils et mode `certified`. Il doit permettre d'évaluer les polynômes homogènes de signe avant toute division, conserver les témoins rationnels canoniques et laisser les entrées arbitrairement rationnelles sur le fallback multiprécision. 2A.8c couvrira ensuite les formes et plans. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
 
 ## GCP
 

@@ -2,12 +2,14 @@
 
 #include "morsehgp3d/exact/point.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <span>
 #include <stdexcept>
+#include <vector>
 
 namespace morsehgp3d::exact {
 
@@ -37,6 +39,23 @@ class ExactLabelMoments {
       previous = id;
       has_previous = true;
     }
+    std::sort(
+        result.source_points_.begin(),
+        result.source_points_.end(),
+        [](const CertifiedPoint3& left, const CertifiedPoint3& right) {
+          const auto left_bits = left.canonical_input_bits();
+          const auto right_bits = right.canonical_input_bits();
+          for (std::size_t axis = 0; axis < 3U; ++axis) {
+            const std::uint64_t left_key =
+                binary64_total_order_key(left_bits[axis]);
+            const std::uint64_t right_key =
+                binary64_total_order_key(right_bits[axis]);
+            if (left_key != right_key) {
+              return left_key < right_key;
+            }
+          }
+          return false;
+        });
     return result;
   }
 
@@ -53,8 +72,20 @@ class ExactLabelMoments {
     return squared_norm_sum_;
   }
 
+  // Canonically coordinate-sorted binary64 provenance for adaptive filters.
+  // It is intentionally not part of moment equality: two labels with the same
+  // exact moments remain equal even when they came from different point tables.
+  [[nodiscard]] std::span<const CertifiedPoint3> source_points() const noexcept {
+    return source_points_;
+  }
+
   friend bool operator==(
-      const ExactLabelMoments&, const ExactLabelMoments&) noexcept = default;
+      const ExactLabelMoments& left,
+      const ExactLabelMoments& right) noexcept {
+    return left.cardinality_ == right.cardinality_ &&
+           left.coordinate_sum_ == right.coordinate_sum_ &&
+           left.squared_norm_sum_ == right.squared_norm_sum_;
+  }
 
  private:
   void add_unchecked(const CertifiedPoint3& point) {
@@ -62,6 +93,7 @@ class ExactLabelMoments {
       throw std::overflow_error("an exact label cardinality cannot overflow");
     }
     ++cardinality_;
+    source_points_.push_back(point);
     ExactRational squared_norm;
     for (std::size_t axis = 0; axis < coordinate_sum_.size(); ++axis) {
       const ExactRational coordinate = point.coordinate(axis);
@@ -73,6 +105,7 @@ class ExactLabelMoments {
   std::size_t cardinality_{0};
   std::array<ExactRational, 3> coordinate_sum_{};
   ExactRational squared_norm_sum_{};
+  std::vector<CertifiedPoint3> source_points_{};
 };
 
 }  // namespace morsehgp3d::exact

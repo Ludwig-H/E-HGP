@@ -30,13 +30,14 @@ La tranche actuellement intégrée fournit :
 - le regroupement déterministe des supports déjà vérifiés en lots de niveaux exactement égaux, avec provenance et multiplicité d'émission séparées;
 - des entrées `decision-only` séparées des témoins rationnels de replay;
 - des décisions séparant signe scientifique, étage de certification et compteurs;
-- des filtres d'intervalles FP64 conservateurs pour la comparaison de distances et l'orientation 3D;
-- une politique par appel permettant de désactiver ces filtres pour le différentiel multiprécision;
+- des filtres d'intervalles FP64 conservateurs pour la comparaison de distances, l'orientation 3D et `H_RQ` à provenance binary64;
+- des expansions flottantes exactes de signe, capables de certifier les annulations et insérées entre les intervalles FP64 et le fallback multiprécision;
+- une politique par appel distinguant la cascade adaptative, l'ancien chemin FP64 puis multiprécision et le différentiel multiprécision seul;
 - un replay diagnostique versionné à partir des mots binary64 et des plans exacts d'entrée.
 
-Cette tranche clôt les sous-lots affines 2A.4, centres 2A.5, minimalité locale 2A.6 et ordre exact 2A.7, mais ne ferme ni la Phase 2A ni G1. Les comparaisons de distances et orientations 3D bien conditionnées peuvent être certifiées par `fp64_filtered`; toute borne contenant zéro, tout overflow ou environnement flottant non conforme revient à `cpu_multiprecision`. Les prédicats affines, les constructions de centres, les barycentriques, les côtés de sphère et l'ordre des niveaux restent entièrement multiprécision. Les expansions et la cascade adaptative complète seront ajoutées par les lots testables suivants.
+Cette tranche clôt les sous-lots affines 2A.4, centres 2A.5, minimalité locale 2A.6 et ordre exact 2A.7, puis intègre le sous-lot adaptatif 2A.8a. Elle ne ferme ni la Phase 2A, ni 2A.8 dans son ensemble, ni G1. Les comparaisons de distances, orientations 3D et évaluations de `H_RQ` dont le témoin et les labels conservent leurs entrées binary64 suivent `fp64_filtered` puis `expansion`, avant `cpu_multiprecision`. Les plans, centres, barycentriques, sphères et niveaux arbitrairement rationnels restent multiprécision tant que leur provenance dyadique n'est pas conservée par un type dédié; aucun `BigInt` n'est converti approximativement en `double` pour inventer un filtre.
 
-Le filtre exige IEEE binary64, l'arrondi au plus proche dans le FENV et MXCSR sur x86, les sous-normaux actifs et les options strictes exportées par la cible CMake. Chaque opération d'intervalle est élargie vers les deux infinis; les exceptions flottantes du processus appelant sont restaurées. `PredicateFilterPolicy::multiprecision_only` garde un chemin de décision indépendant. Dans les API riches et le replay, un témoin rationnel reste matérialisé même si le signe a été certifié en FP64 : `certification_stage` désigne l'autorité du signe, pas le coût du diagnostic.
+Les deux étages flottants exigent IEEE binary64, l'arrondi au plus proche dans le FENV et MXCSR sur x86, les sous-normaux actifs et les options strictes exportées par la cible CMake. Chaque opération d'intervalle est élargie vers les deux infinis. Les expansions utilisent `TwoSum` et un résidu FMA, rejettent avant calcul tout bit de produit exact situé sous `2^-1074`, puis échouent fermées sur toute exception d'underflow, overflow ou opération invalide. L'environnement et les drapeaux flottants de l'appelant sont restaurés. `PredicateFilterPolicy::allow_adaptive` active la cascade complète; `allow_fp64` conserve le comportement historique FP64 puis multiprécision; `multiprecision_only` garde un chemin indépendant. Dans les API riches et le replay, un témoin rationnel reste matérialisé même si le signe a été certifié rapidement : `certification_stage` désigne l'autorité du signe, pas le coût du diagnostic.
 
 La convention d'orientation est exactement `det([b-a, c-a, d-a])` : le quadruplet `(0, e1, e2, e3)` est positif. Cette définition explicite prévaut sur les conventions de signe parfois opposées d'autres bibliothèques.
 
@@ -78,7 +79,7 @@ python morsehgp3d/tools/replay_predicate.py \
 
 Cet identifiant ne couvre ni le résultat ni le binaire et n'est donc pas un certificat public. Le replay conserve les bits de zéro signé à des fins diagnostiques, tout en canonisant leur valeur géométrique. Une coordonnée non finie, un prédicat inconnu, une sortie native non canonique ou incohérente, tout diagnostic natif inattendu sur `stderr`, et un binaire explicitement demandé mais introuvable échouent fermés.
 
-Le schéma diagnostique v1 reste actif pour les prédicats historiques à nombre fixe de points. Le schéma v2 ajoute `power_bisector_side` avec table de points, labels de 1 à 10 identifiants triés et uniques, et témoin `ExactRational3`; les deux labels doivent avoir le même cardinal afin que le terme quadratique s'annule exactement. Un signe négatif signifie que le coût de `R` est inférieur à celui de `Q`.
+Le schéma diagnostique v1 reste actif pour les prédicats historiques à nombre fixe de points. Le schéma v2 ajoute `power_bisector_side` avec table de points, labels de 1 à 10 identifiants triés et uniques, et témoin `ExactRational3`; les deux labels doivent avoir le même cardinal afin que le terme quadratique s'annule exactement. Lorsque les trois coordonnées rationnelles du témoin sont exactement représentables en binary64, le replay reconstruit cette provenance et exerce la cascade adaptative; sinon il conserve le chemin rationnel multiprécision. Un signe négatif signifie que le coût de `R` est inférieur à celui de `Q`.
 
 Le schéma v3, dans le domaine SHA-256 distinct `MorseHGP3D/predicate-replay-v3/`, ajoute `plane_through_points`, `power_bisector_affine_form`, `orientation_2d_in_plane`, `intersect_three_planes` et `fourth_plane_incidence`. Un plan imbriqué est un objet fermé `ExactPlane3` `2.0.0` dont les chaînes entières doivent déjà être primitives et canoniques. Le wrapper recalcule les plans, coefficients exacts de `H_RQ`, orientations et intersections avec `Fraction`; son élimination de Gauss est indépendante des mineurs et de la règle de Cramer du C++.
 
@@ -99,7 +100,7 @@ python morsehgp3d/tests/differential/check_predicate_random.py \
   build/morsehgp3d/morsehgp3d_replay_predicate
 ```
 
-La suite courte traite 2 048 cas déterministes, publie le hash du corpus, vérifie chaque sortie contre `Fraction`, puis rejoue le même flux avec `--multiprecision-only`. Les paramètres `--distance-cases`, `--orientation-cases` et `--power-cases` permettent d'augmenter ce volume; cette infrastructure riche ne constitue pas encore la campagne de fermeture à dix millions de signes.
+La suite courte traite 2 048 cas déterministes, publie le hash du corpus, force chacun des trois étages sur les trois familles adaptatives, vérifie chaque sortie contre `Fraction`, puis rejoue le même flux avec `--multiprecision-only`. Les paramètres `--distance-cases`, `--orientation-cases` et `--power-cases` permettent d'augmenter ce volume; cette infrastructure riche ne constitue pas encore la campagne de fermeture à dix millions de signes.
 
 Le mode indépendant est également disponible directement :
 

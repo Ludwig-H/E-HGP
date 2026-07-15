@@ -19,6 +19,9 @@ target_link_libraries(morsehgp3d_support_tests PRIVATE morsehgp3d::exact)
 add_executable(morsehgp3d_level_order_tests test_level_order.cpp)
 target_link_libraries(morsehgp3d_level_order_tests PRIVATE morsehgp3d::exact)
 
+add_executable(morsehgp3d_expansion_tests test_expansion.cpp)
+target_link_libraries(morsehgp3d_expansion_tests PRIVATE morsehgp3d::exact)
+
 if(MSVC)
   target_compile_options(morsehgp3d_exact_types_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_exact_types_dump PRIVATE /W4 /WX)
@@ -27,6 +30,7 @@ if(MSVC)
   target_compile_options(morsehgp3d_centers_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_support_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_level_order_tests PRIVATE /W4 /WX)
+  target_compile_options(morsehgp3d_expansion_tests PRIVATE /W4 /WX)
 else()
   target_compile_options(
     morsehgp3d_exact_types_tests
@@ -98,6 +102,16 @@ else()
       -Wsign-conversion
       -Werror
   )
+  target_compile_options(
+    morsehgp3d_expansion_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
 endif()
 
 add_test(NAME morsehgp3d.exact_types COMMAND morsehgp3d_exact_types_tests)
@@ -106,6 +120,7 @@ add_test(NAME morsehgp3d.affine COMMAND morsehgp3d_affine_tests)
 add_test(NAME morsehgp3d.centers COMMAND morsehgp3d_centers_tests)
 add_test(NAME morsehgp3d.support COMMAND morsehgp3d_support_tests)
 add_test(NAME morsehgp3d.level_order COMMAND morsehgp3d_level_order_tests)
+add_test(NAME morsehgp3d.expansion COMMAND morsehgp3d_expansion_tests)
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
 add_test(

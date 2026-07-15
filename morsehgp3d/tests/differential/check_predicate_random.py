@@ -21,7 +21,7 @@ DEFAULT_DISTANCE_CASES = 1024
 DEFAULT_ORIENTATION_CASES = 512
 DEFAULT_POWER_CASES = 512
 EXPECTED_DEFAULT_CORPUS_SHA256 = (
-    "276619686350b9c4f900d856b657ce084466cfdea2c4e8711d5efc7e690a1d15"
+    "066f9ee577fc6c6d64ed930df4eaeca88e96895fa801a661980ba22fa98b4be3"
 )
 UINT64_MASK = (1 << 64) - 1
 
@@ -122,9 +122,70 @@ def generated_points(generator: StableGenerator, count: int) -> list[list[str]]:
     return [[random_word(generator) for _ in range(3)] for _ in range(count)]
 
 
+ZERO = "0000000000000000"
+ONE = "3ff0000000000000"
+ONE_ULP_BELOW = "3fefffffffffffff"
+MINIMUM_SUBNORMAL = "0000000000000001"
+NEGATIVE_MINIMUM_SUBNORMAL = "8000000000000001"
+
+
+def expansion_fixed_case(predicate: str, case_index: int) -> list[list[str]] | None:
+    origin = [ZERO, ZERO, ZERO]
+    if predicate == "compare_squared_distances":
+        if case_index == 0:
+            return [origin, [ONE_ULP_BELOW, ZERO, ZERO], [ONE, ZERO, ZERO]]
+        if case_index == 1:
+            return [origin, [ONE, ZERO, ZERO], [ONE_ULP_BELOW, ZERO, ZERO]]
+        if case_index == 2:
+            return [origin, ["bff0000000000000", ZERO, ZERO], [ONE, ZERO, ZERO]]
+    if predicate == "orientation_3d":
+        first_axis = [ONE, ZERO, ZERO]
+        second_axis = [ZERO, ONE, ZERO]
+        if case_index == 0:
+            return [origin, first_axis, second_axis, [ZERO, ZERO, MINIMUM_SUBNORMAL]]
+        if case_index == 1:
+            return [
+                origin,
+                first_axis,
+                second_axis,
+                [ZERO, ZERO, NEGATIVE_MINIMUM_SUBNORMAL],
+            ]
+        if case_index == 2:
+            return [origin, first_axis, second_axis, [ONE, ONE, ZERO]]
+    return None
+
+
+def generated_fixed_case(
+    generator: StableGenerator, predicate: str, case_index: int, point_count: int
+) -> list[list[str]]:
+    targeted = expansion_fixed_case(predicate, case_index)
+    return targeted if targeted is not None else generated_points(generator, point_count)
+
+
 def generated_power_case(
-    generator: StableGenerator,
+    generator: StableGenerator, case_index: int,
 ) -> tuple[list[list[str]], list[int], list[int], tuple[int, int, int, int]]:
+    if case_index == 0:
+        return (
+            [[ONE, ZERO, ZERO], ["4000000000000000", ZERO, ZERO]],
+            [1],
+            [0],
+            (3, 0, 0, 2),
+        )
+    if case_index == 1:
+        return (
+            [[ONE_ULP_BELOW, ZERO, ZERO], [ONE, ZERO, ZERO]],
+            [0],
+            [1],
+            (0, 0, 0, 1),
+        )
+    if case_index == 2:
+        return (
+            [[ONE_ULP_BELOW, ZERO, ZERO], [ONE, ZERO, ZERO]],
+            [1],
+            [0],
+            (0, 0, 0, 1),
+        )
     point_count = generator.randint(2, 8)
     point_words = generated_points(generator, point_count)
     cardinality = generator.randint(1, min(4, point_count))
@@ -176,7 +237,7 @@ def expected_counters(expected: Fraction, stage: str) -> dict[str, int]:
     return {
         "cpu_multiprecision_certified": 1 if stage == "cpu_multiprecision" else 0,
         "exact_zeros": 1 if expected == 0 else 0,
-        "expansion_certified": 0,
+        "expansion_certified": 1 if stage == "expansion" else 0,
         "fp32_proposals": 0,
         "fp64_filtered_certified": 1 if stage == "fp64_filtered" else 0,
         "remaining_unknown": 0,
@@ -259,8 +320,8 @@ def validate_stage(
     stage = observed["certification_stage"]
     allowed = (
         {"cpu_multiprecision"}
-        if multiprecision_only or predicate == "power_bisector_side"
-        else {"fp64_filtered", "cpu_multiprecision"}
+        if multiprecision_only
+        else {"fp64_filtered", "expansion", "cpu_multiprecision"}
     )
     if (
         stage not in allowed
@@ -291,7 +352,7 @@ def audit_fixed(
     generator = StableGenerator(SEED ^ point_count)
     oracle = distance_difference if predicate == "compare_squared_distances" else orientation
     for case_index in range(cases):
-        words = generated_points(generator, point_count)
+        words = generated_fixed_case(generator, predicate, case_index, point_count)
         exact_points = [point(point_words) for point_words in words]
         expected = oracle(exact_points)
         observed = read_result(output, predicate, case_index)
@@ -356,7 +417,9 @@ def audit_power(
     predicate = "power_bisector_side"
     generator = StableGenerator(SEED ^ 0x485251)
     for case_index in range(cases):
-        words, r_ids, q_ids, witness_record = generated_power_case(generator)
+        words, r_ids, q_ids, witness_record = generated_power_case(
+            generator, case_index
+        )
         exact_points = [point(point_words) for point_words in words]
         r_points = [exact_points[index] for index in r_ids]
         q_points = [exact_points[index] for index in q_ids]
@@ -434,14 +497,26 @@ def write_corpus(
         stream.write(encoded.decode("ascii"))
 
     generator = StableGenerator(SEED ^ 3)
-    for _ in range(distance_cases):
-        write(fixed_command("compare_squared_distances", generated_points(generator, 3)))
+    for case_index in range(distance_cases):
+        write(
+            fixed_command(
+                "compare_squared_distances",
+                generated_fixed_case(
+                    generator, "compare_squared_distances", case_index, 3
+                ),
+            )
+        )
     generator = StableGenerator(SEED ^ 4)
-    for _ in range(orientation_cases):
-        write(fixed_command("orientation_3d", generated_points(generator, 4)))
+    for case_index in range(orientation_cases):
+        write(
+            fixed_command(
+                "orientation_3d",
+                generated_fixed_case(generator, "orientation_3d", case_index, 4),
+            )
+        )
     generator = StableGenerator(SEED ^ 0x485251)
-    for _ in range(power_cases):
-        write(power_command(*generated_power_case(generator)))
+    for case_index in range(power_cases):
+        write(power_command(*generated_power_case(generator, case_index)))
     stream.flush()
     stream.seek(0)
     return digest.hexdigest()
@@ -507,7 +582,11 @@ def main() -> int:
         batch_output.seek(0)
         multiprecision_output.seek(0)
         histogram = {"negative": 0, "positive": 0, "zero": 0}
-        stage_histogram = {"cpu_multiprecision": 0, "fp64_filtered": 0}
+        stage_histogram = {
+            "cpu_multiprecision": 0,
+            "expansion": 0,
+            "fp64_filtered": 0,
+        }
         stage_histogram_by_predicate: dict[str, dict[str, int]] = {}
         stage_before = dict(stage_histogram)
         audit_fixed(
@@ -559,19 +638,21 @@ def main() -> int:
         for predicate, cases in (
             ("compare_squared_distances", arguments.distance_cases),
             ("orientation_3d", arguments.orientation_cases),
+            ("power_bisector_side", arguments.power_cases),
         ):
             predicate_stages = stage_histogram_by_predicate[predicate]
-            default_cases = (
-                DEFAULT_DISTANCE_CASES
-                if predicate == "compare_squared_distances"
-                else DEFAULT_ORIENTATION_CASES
-            )
+            default_cases = {
+                "compare_squared_distances": DEFAULT_DISTANCE_CASES,
+                "orientation_3d": DEFAULT_ORIENTATION_CASES,
+                "power_bisector_side": DEFAULT_POWER_CASES,
+            }[predicate]
             if cases == default_cases and (
                 predicate_stages["fp64_filtered"] == 0
+                or predicate_stages["expansion"] == 0
                 or predicate_stages["cpu_multiprecision"] == 0
             ):
                 raise AssertionError(
-                    f"the {predicate} corpus did not exercise filtering and fallback"
+                    f"the {predicate} corpus did not exercise all adaptive stages"
                 )
 
     print(
@@ -583,7 +664,7 @@ def main() -> int:
                     + arguments.power_cases
                 ),
                 "corpus_sha256": corpus_hash,
-                "generator": "mixed-binary64-splitmix64-v1",
+                "generator": "mixed-binary64-splitmix64-v2",
                 "seed": f"0x{SEED:016x}",
                 "sign_histogram": histogram,
                 "stage_histogram": stage_histogram,

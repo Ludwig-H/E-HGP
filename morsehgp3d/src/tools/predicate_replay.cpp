@@ -9,12 +9,14 @@
 #include "morsehgp3d/exact/support.hpp"
 
 #include <array>
+#include <bit>
 #include <charconv>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
 #include <iostream>
 #include <limits>
+#include <optional>
 #include <sstream>
 #include <span>
 #include <stdexcept>
@@ -25,6 +27,7 @@
 
 namespace {
 
+using morsehgp3d::exact::BigInt;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::CircumcenterKind;
 using morsehgp3d::exact::CircumcenterResult;
@@ -61,6 +64,98 @@ using morsehgp3d::exact::parse_binary64_hex;
 using morsehgp3d::exact::power_bisector_side;
 using morsehgp3d::exact::power_bisector_affine_form;
 using morsehgp3d::exact::to_string;
+
+[[nodiscard]] std::optional<double> exact_binary64_value(
+    const ExactRational& value) {
+  if (value.is_zero()) {
+    return 0.0;
+  }
+
+  const BigInt& denominator = value.denominator();
+  if ((denominator & (denominator - 1)) != 0) {
+    return std::nullopt;
+  }
+
+  const bool negative = value.numerator() < 0;
+  const BigInt numerator =
+      negative ? -value.numerator() : value.numerator();
+  const auto denominator_exponent = boost::multiprecision::msb(denominator);
+  const auto lowest_numerator_bit = boost::multiprecision::lsb(numerator);
+  const auto highest_numerator_bit = boost::multiprecision::msb(numerator);
+  if (highest_numerator_bit - lowest_numerator_bit + 1U > 53U) {
+    return std::nullopt;
+  }
+
+  int highest_binary_exponent = 0;
+  if (highest_numerator_bit >= denominator_exponent) {
+    if (highest_numerator_bit - denominator_exponent > 1023U) {
+      return std::nullopt;
+    }
+    highest_binary_exponent =
+        static_cast<int>(highest_numerator_bit - denominator_exponent);
+  } else if (denominator_exponent - highest_numerator_bit > 1074U) {
+    return std::nullopt;
+  } else {
+    highest_binary_exponent =
+        -static_cast<int>(denominator_exponent - highest_numerator_bit);
+  }
+
+  int binary_exponent = 0;
+  if (lowest_numerator_bit >= denominator_exponent) {
+    const auto difference = lowest_numerator_bit - denominator_exponent;
+    if (difference > 1023U) {
+      return std::nullopt;
+    }
+    binary_exponent = static_cast<int>(difference);
+  } else {
+    const auto difference = denominator_exponent - lowest_numerator_bit;
+    if (difference > 1074U) {
+      return std::nullopt;
+    }
+    binary_exponent = -static_cast<int>(difference);
+  }
+
+  const BigInt odd_significand = numerator >> lowest_numerator_bit;
+  const std::uint64_t significand =
+      odd_significand.convert_to<std::uint64_t>();
+  constexpr std::uint64_t fraction_mask =
+      (std::uint64_t{1} << 52U) - std::uint64_t{1};
+  std::uint64_t bits = negative ? (std::uint64_t{1} << 63U) : 0U;
+  if (highest_binary_exponent >= -1022) {
+    const unsigned int significand_bits = static_cast<unsigned int>(
+        highest_numerator_bit - lowest_numerator_bit + 1U);
+    const unsigned int shift = 53U - significand_bits;
+    const std::uint64_t normalized_significand = significand << shift;
+    const auto exponent_bits =
+        static_cast<std::uint64_t>(highest_binary_exponent + 1023);
+    bits |= (exponent_bits << 52U) |
+            (normalized_significand & fraction_mask);
+  } else {
+    const unsigned int shift =
+        static_cast<unsigned int>(binary_exponent + 1074);
+    bits |= significand << shift;
+  }
+  const double result = std::bit_cast<double>(bits);
+  if (ExactRational::from_binary64(result) != value) {
+    return std::nullopt;
+  }
+  return result;
+}
+
+[[nodiscard]] std::optional<CertifiedPoint3> exact_binary64_point(
+    const ExactRational3& point) {
+  std::array<double, 3> coordinates{};
+  for (std::size_t axis = 0; axis < coordinates.size(); ++axis) {
+    const std::optional<double> coordinate =
+        exact_binary64_value(point.coordinate(axis));
+    if (!coordinate.has_value()) {
+      return std::nullopt;
+    }
+    coordinates[axis] = *coordinate;
+  }
+  return CertifiedPoint3::from_binary64(
+      coordinates[0], coordinates[1], coordinates[2]);
+}
 
 std::string counters_json(const PredicateCounters& counters) {
   return "{\"cpu_multiprecision_certified\":" +
@@ -281,7 +376,9 @@ int replay_orientation(
 }
 
 int replay_power_bisector(
-    std::span<const std::string_view> arguments, std::ostream& output) {
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
   if (arguments.size() < 7U) {
     throw std::invalid_argument("a power-bisector replay is incomplete");
   }
@@ -294,7 +391,17 @@ int replay_power_bisector(
       ExactRational3::unit});
   const ParsedPowerLabels labels = parse_power_labels(arguments, 5U);
   PredicateCounters counters;
-  const auto result = power_bisector_side(witness, labels.r, labels.q, &counters);
+  const std::optional<CertifiedPoint3> binary64_witness =
+      exact_binary64_point(witness);
+  const auto result = binary64_witness.has_value()
+                          ? power_bisector_side(
+                                *binary64_witness,
+                                labels.r,
+                                labels.q,
+                                &counters,
+                                filter_policy)
+                          : power_bisector_side(
+                                witness, labels.r, labels.q, &counters);
   output << "{\"affine_value_exact\":" << rational_json(result.witness.affine_value)
          << ",\"certification_stage\":\""
          << to_string(result.decision.certification_stage())
@@ -754,7 +861,7 @@ int replay_tokens(
     return replay_orientation(arguments, output, filter_policy);
   }
   if (arguments[0] == "power_bisector_side") {
-    return replay_power_bisector(arguments, output);
+    return replay_power_bisector(arguments, output, filter_policy);
   }
   if (arguments[0] == "plane_through_points" && arguments.size() == 10U) {
     return replay_plane_through_points(arguments, output);
@@ -857,7 +964,7 @@ void print_usage(const char* executable) {
             << "   or: " << executable
             << " canonical_level_batches COUNT LEVEL_N LEVEL_D MIN_COUNT ... SOURCE_COUNT ...\n"
             << "   or: " << executable << " --batch < predicate-lines.txt\n"
-            << "prefix any form with --multiprecision-only to disable FP64 filters\n";
+            << "prefix any form with --multiprecision-only to disable adaptive filters\n";
 }
 
 }  // namespace
@@ -869,7 +976,7 @@ int main(int argument_count, char** arguments) {
       return 2;
     }
     int first_argument = 1;
-    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_fp64;
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_adaptive;
     if (std::string_view{arguments[first_argument]} == "--multiprecision-only") {
       filter_policy = PredicateFilterPolicy::multiprecision_only;
       ++first_argument;

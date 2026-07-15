@@ -1187,7 +1187,22 @@ def expected_sign(value: Fraction) -> str:
     return "zero" if value == 0 else "positive"
 
 
-def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None:
+def exactly_representable_binary64(value: Fraction) -> bool:
+    try:
+        candidate = float(value)
+    except OverflowError:
+        return False
+    return math.isfinite(candidate) and Fraction.from_float(candidate) == value
+
+
+def validate_counters(
+    value: Any,
+    sign: str,
+    stage: str,
+    predicate: str,
+    *,
+    fast_stages_available: bool = True,
+) -> None:
     if not isinstance(value, dict) or set(value) != COUNTER_FIELDS:
         raise ValueError(
             "the native predicate counters do not match PredicateCounts v2"
@@ -1195,7 +1210,6 @@ def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None
     if any(type(count) is not int or count < 0 for count in value.values()):
         raise ValueError("the native predicate counters must be nonnegative integers")
     exact_only = {
-        "power_bisector_side",
         "orientation_2d_in_plane",
         "fourth_plane_incidence",
         "sphere_side",
@@ -1203,8 +1217,8 @@ def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None
     }
     allowed_stages = (
         {"cpu_multiprecision"}
-        if predicate in exact_only
-        else {"fp64_filtered", "cpu_multiprecision"}
+        if predicate in exact_only or not fast_stages_available
+        else {"fp64_filtered", "expansion", "cpu_multiprecision"}
     )
     if stage not in allowed_stages:
         raise ValueError("the native predicate used an unavailable certification stage")
@@ -1213,7 +1227,7 @@ def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None
     expected = {
         "cpu_multiprecision_certified": 1 if stage == "cpu_multiprecision" else 0,
         "exact_zeros": 1 if sign == "zero" else 0,
-        "expansion_certified": 0,
+        "expansion_certified": 1 if stage == "expansion" else 0,
         "fp32_proposals": 0,
         "fp64_filtered_certified": 1 if stage == "fp64_filtered" else 0,
         "remaining_unknown": 0,
@@ -1747,7 +1761,20 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
     sign = value["sign"]
     if not isinstance(sign, str) or sign not in SIGNS:
         raise ValueError("the native replay returned an invalid scientific sign")
-    validate_counters(value["counters"], sign, stage, predicate)
+    fast_stages_available = True
+    if predicate == "power_bisector_side":
+        witness_coordinates = rational3(replay_input["witness"], "input witness")
+        fast_stages_available = all(
+            exactly_representable_binary64(coordinate)
+            for coordinate in witness_coordinates
+        )
+    validate_counters(
+        value["counters"],
+        sign,
+        stage,
+        predicate,
+        fast_stages_available=fast_stages_available,
+    )
 
     if predicate == "compare_squared_distances":
         left = canonical_level(value["left_squared_distance"], "left squared distance")

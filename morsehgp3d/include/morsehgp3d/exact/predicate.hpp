@@ -25,8 +25,10 @@ enum class CertificationStage {
 };
 
 enum class PredicateFilterPolicy {
-  allow_fp64,
-  multiprecision_only,
+  // Preserve the original 2A.3 values and behavior for existing callers.
+  allow_fp64 = 0,
+  multiprecision_only = 1,
+  allow_adaptive = 2,
 };
 
 class FilterResult {
@@ -52,6 +54,38 @@ class FilterResult {
 
  private:
   FilterResult(FilterState state, std::optional<PredicateSign> sign) noexcept
+      : state_(state), sign_(sign) {}
+
+  FilterState state_;
+  std::optional<PredicateSign> sign_;
+};
+
+// Unlike the interval filter, an exact floating expansion can also certify a
+// zero. Keeping this result distinct from FilterResult prevents an interval
+// that merely contains zero from being mistaken for an exact cancellation.
+class ExpansionResult {
+ public:
+  ExpansionResult() = delete;
+
+  [[nodiscard]] static ExpansionResult uncertain() noexcept {
+    return ExpansionResult(FilterState::uncertain, std::nullopt);
+  }
+
+  [[nodiscard]] static ExpansionResult certified(PredicateSign value) {
+    if (value != PredicateSign::negative && value != PredicateSign::zero &&
+        value != PredicateSign::positive) {
+      throw std::invalid_argument("an expansion sign is invalid");
+    }
+    return ExpansionResult(FilterState::certified, value);
+  }
+
+  [[nodiscard]] FilterState state() const noexcept { return state_; }
+  [[nodiscard]] const std::optional<PredicateSign>& sign() const noexcept {
+    return sign_;
+  }
+
+ private:
+  ExpansionResult(FilterState state, std::optional<PredicateSign> sign) noexcept
       : state_(state), sign_(sign) {}
 
   FilterState state_;

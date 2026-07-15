@@ -24,6 +24,7 @@ using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactLabelMoments;
 using morsehgp3d::exact::ExactRational;
 using morsehgp3d::exact::ExactRational3;
+using morsehgp3d::exact::ExpansionResult;
 using morsehgp3d::exact::FilterResult;
 using morsehgp3d::exact::PredicateCounters;
 using morsehgp3d::exact::PredicateDecision;
@@ -35,6 +36,8 @@ using morsehgp3d::exact::decide_orientation_3d;
 using morsehgp3d::exact::decide_power_bisector_side;
 using morsehgp3d::exact::decide_squared_distance_order;
 using morsehgp3d::exact::evaluate_power_bisector;
+using morsehgp3d::exact::expansion_orientation_3d;
+using morsehgp3d::exact::expansion_squared_distance_order;
 using morsehgp3d::exact::filter_orientation_3d;
 using morsehgp3d::exact::filter_squared_distance_order;
 using morsehgp3d::exact::fp64_filter_environment_supported;
@@ -88,6 +91,11 @@ void test_filter_and_counter_contract() {
   check_throws<std::invalid_argument>(
       [] { static_cast<void>(FilterResult::certified(PredicateSign::zero)); },
       "a floating filter cannot certify exact zero");
+  const ExpansionResult expansion_zero =
+      ExpansionResult::certified(PredicateSign::zero);
+  check(expansion_zero.state() == morsehgp3d::exact::FilterState::certified &&
+            expansion_zero.sign() == PredicateSign::zero,
+        "an exact expansion can certify a zero that an interval cannot");
 
   PredicateCounters counters;
   counters.record_fp32_proposal();
@@ -350,9 +358,23 @@ void test_distance_comparison() {
       point(1.0, 0.0, 0.0),
       &zero_counters);
   check(equal.decision.sign() == PredicateSign::zero &&
-            zero_counters.cpu_multiprecision_certified() == 1U &&
+            equal.decision.certification_stage() == CertificationStage::expansion &&
+            zero_counters.expansion_certified() == 1U &&
             zero_counters.exact_zeros() == 1U,
         "symmetric distances produce and account for exact zero");
+
+  PredicateCounters legacy_fp64_counters;
+  const auto legacy_fp64_equal = compare_squared_distances(
+      point(0.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      &legacy_fp64_counters,
+      PredicateFilterPolicy::allow_fp64);
+  check(legacy_fp64_equal.decision.sign() == PredicateSign::zero &&
+            legacy_fp64_equal.decision.certification_stage() ==
+                CertificationStage::cpu_multiprecision &&
+            legacy_fp64_counters.cpu_multiprecision_certified() == 1U,
+        "the legacy FP64-only policy retains its pre-expansion fallback semantics");
 
   const double below = std::nextafter(1.0, 0.0);
   const auto one_ulp = compare_squared_distances(
@@ -418,7 +440,8 @@ void test_distance_comparison() {
       point(1.0, 0.0, 0.0),
       &decision_counters);
   check(decision.sign() == PredicateSign::zero &&
-            decision_counters.cpu_multiprecision_certified() == 1U &&
+            decision.certification_stage() == CertificationStage::expansion &&
+            decision_counters.expansion_certified() == 1U &&
             decision_counters.exact_zeros() == 1U,
         "the decision-only distance entry point preserves exact equality accounting");
 }
@@ -456,7 +479,9 @@ void test_orientation_3d() {
       &zero_counters);
   check(coplanar.decision.sign() == PredicateSign::zero &&
             coplanar.determinant.is_zero() &&
-            zero_counters.cpu_multiprecision_certified() == 1U &&
+            coplanar.decision.certification_stage() ==
+                CertificationStage::expansion &&
+            zero_counters.expansion_certified() == 1U &&
             zero_counters.exact_zeros() == 1U,
         "coplanarity is exact zero and is accounted independently of its stage");
 
@@ -469,8 +494,8 @@ void test_orientation_3d() {
   check(above_plane.decision.sign() == PredicateSign::positive,
         "minimum-subnormal height has a strict exact orientation");
   check(above_plane.decision.certification_stage() ==
-            CertificationStage::cpu_multiprecision,
-        "a minimum-subnormal orientation falls back to multiprecision");
+            CertificationStage::expansion,
+        "an exactly representable minimum-subnormal orientation is certified by expansion");
 
   PredicateCounters exact_only_counters;
   const auto exact_only = orientation_3d(
@@ -515,7 +540,10 @@ void test_power_bisector_side() {
             at_origin.witness.delta_coordinate_sum.coordinate(0).canonical_key() ==
                 "1/1" &&
             at_origin.witness.delta_squared_norm_sum.canonical_key() == "3/1" &&
-            counters.cpu_multiprecision_certified() == 1U,
+            at_origin.decision.certification_stage() ==
+                CertificationStage::fp64_filtered &&
+            counters.fp64_filtered_certified() == 1U &&
+            counters.certified_decisions() == 1U,
         "H_RQ is the exact R-minus-Q power cost at the witness");
   const auto reverse_at_origin =
       power_bisector_side(point(0.0, 0.0, 0.0), q, r);
@@ -537,6 +565,31 @@ void test_power_bisector_side() {
   check(at_midpoint.sign() == PredicateSign::zero &&
             zero_counters.exact_zeros() == 1U,
         "a rational witness on the power bisector is an exact zero");
+  PredicateCounters binary_midpoint_counters;
+  const auto binary_midpoint = power_bisector_side(
+      point(1.5, 0.0, 0.0), r, q, &binary_midpoint_counters);
+  check(binary_midpoint.decision.sign() == PredicateSign::zero &&
+            binary_midpoint.decision.certification_stage() ==
+                CertificationStage::expansion &&
+            binary_midpoint_counters.expansion_certified() == 1U &&
+            binary_midpoint_counters.certified_decisions() == 1U &&
+            binary_midpoint_counters.exact_zeros() == 1U,
+        "a binary64 power-bisector equality is certified by one expansion decision");
+  PredicateCounters binary_midpoint_exact_counters;
+  const auto binary_midpoint_exact = power_bisector_side(
+      point(1.5, 0.0, 0.0),
+      r,
+      q,
+      &binary_midpoint_exact_counters,
+      PredicateFilterPolicy::multiprecision_only);
+  check(binary_midpoint_exact.witness.affine_value ==
+                binary_midpoint.witness.affine_value &&
+            binary_midpoint_exact.decision.sign() ==
+                binary_midpoint.decision.sign() &&
+            binary_midpoint_exact.decision.certification_stage() ==
+                CertificationStage::cpu_multiprecision &&
+            binary_midpoint_exact_counters.cpu_multiprecision_certified() == 1U,
+        "disabling the adaptive power cascade preserves its exact witness");
 
   const ExactRational forward = evaluate_power_bisector(exact_midpoint, r, q);
   const ExactRational reverse = evaluate_power_bisector(exact_midpoint, q, r);
@@ -655,6 +708,9 @@ void test_power_bisector_side() {
   const auto ten_equality = power_bisector_side(
       point(3.0, -2.0, 1.0), ten_label, ten_label, &ten_counters);
   check(ten_equality.decision.sign() == PredicateSign::zero &&
+            ten_equality.decision.certification_stage() ==
+                CertificationStage::expansion &&
+            ten_counters.expansion_certified() == 1U &&
             ten_counters.exact_zeros() == 1U,
         "the maximum supported label cardinality ten preserves exact equality");
   ten_points.push_back(point(10.0, 0.0, 0.0));
@@ -717,8 +773,23 @@ void test_power_bisector_relations() {
   check(first_table_value.witness.affine_value ==
                 permuted_table_value.witness.affine_value &&
             first_table_value.witness.delta_coordinate_sum ==
-                permuted_table_value.witness.delta_coordinate_sum,
+                permuted_table_value.witness.delta_coordinate_sum &&
+            first_table_value.decision.certification_stage() ==
+                permuted_table_value.decision.certification_stage(),
         "permuting the point table and remapping canonical identifiers preserves H_RQ");
+
+  const ExactLabelMoments x_axis_moments =
+      label({point(-1.0, 0.0, 0.0), point(1.0, 0.0, 0.0)});
+  const ExactLabelMoments y_axis_moments =
+      label({point(0.0, -1.0, 0.0), point(0.0, 1.0, 0.0)});
+  const auto equal_moments = power_bisector_side(
+      point(0.25, -0.5, 2.0), x_axis_moments, y_axis_moments);
+  check(x_axis_moments == y_axis_moments &&
+            equal_moments.witness.affine_value.is_zero() &&
+            equal_moments.decision.sign() == PredicateSign::zero &&
+            equal_moments.decision.certification_stage() ==
+                CertificationStage::expansion,
+        "different binary64 provenances with equal exact moments preserve semantic equality");
 
   const ExactLabelMoments constant_r =
       label({point(0.0, 0.0, 0.0), point(2.0, 0.0, 0.0)});
