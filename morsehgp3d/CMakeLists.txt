@@ -14,6 +14,11 @@ option(
   "Build the MorseHGP3D CPU unit tests"
   ${PROJECT_IS_TOP_LEVEL}
 )
+option(
+  MORSEHGP3D_BUILD_TOOLS
+  "Build the MorseHGP3D diagnostic replay tools"
+  ${PROJECT_IS_TOP_LEVEL}
+)
 
 find_package(Boost 1.74 REQUIRED CONFIG COMPONENTS headers)
 
@@ -38,6 +43,22 @@ else()
   message(FATAL_ERROR "The certified FP mode is not configured for ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
+if(MORSEHGP3D_BUILD_TOOLS)
+  add_executable(
+    morsehgp3d_replay_predicate
+    src/tools/predicate_replay.cpp
+  )
+  target_link_libraries(morsehgp3d_replay_predicate PRIVATE morsehgp3d::exact)
+  if(MSVC)
+    target_compile_options(morsehgp3d_replay_predicate PRIVATE /W4 /WX)
+  else()
+    target_compile_options(
+      morsehgp3d_replay_predicate
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+endif()
+
 if(MORSEHGP3D_BUILD_TESTS)
   include(CTest)
   if(BUILD_TESTING)
@@ -52,6 +73,14 @@ install(
   TARGETS morsehgp3d_exact
   EXPORT MorseHGP3DTargets
 )
+if(MORSEHGP3D_BUILD_TOOLS)
+  install(TARGETS morsehgp3d_replay_predicate RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+  install(
+    PROGRAMS tools/replay_predicate.py
+    TYPE BIN
+    RENAME morsehgp3d-replay-predicate
+  )
+endif()
 install(
   DIRECTORY include/
   DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
