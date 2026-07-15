@@ -5,6 +5,7 @@
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/exact/predicate.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
+#include "morsehgp3d/exact/support.hpp"
 
 #include <array>
 #include <charconv>
@@ -26,8 +27,11 @@ namespace {
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::CircumcenterKind;
 using morsehgp3d::exact::CircumcenterResult;
+using morsehgp3d::exact::CircumcenterSupportAnalysis;
 using morsehgp3d::exact::ExactAffineForm3;
 using morsehgp3d::exact::ExactLabelMoments;
+using morsehgp3d::exact::ExactLevel;
+using morsehgp3d::exact::ExactLevelRecord;
 using morsehgp3d::exact::ExactPlane3;
 using morsehgp3d::exact::ExactPlane3Record;
 using morsehgp3d::exact::ExactRational;
@@ -36,6 +40,8 @@ using morsehgp3d::exact::ExactRational3Record;
 using morsehgp3d::exact::PredicateCounters;
 using morsehgp3d::exact::PredicateFilterPolicy;
 using morsehgp3d::exact::canonical_integer_string;
+using morsehgp3d::exact::analyze_circumcenter_support;
+using morsehgp3d::exact::classify_sphere_point;
 using morsehgp3d::exact::classify_affine_form;
 using morsehgp3d::exact::compare_squared_distances;
 using morsehgp3d::exact::circumcenter;
@@ -395,6 +401,163 @@ int replay_circumcenter_support(
   return 0;
 }
 
+int replay_circumcenter_support_analysis(
+    std::span<const std::string_view> arguments, std::ostream& output) {
+  if (arguments.size() < 2U) {
+    throw std::invalid_argument("the analyzed support size is missing");
+  }
+  const std::size_t support_size =
+      parse_size(arguments[1], "analyzed support size");
+  if (support_size < 1U || support_size > 4U) {
+    throw std::invalid_argument(
+        "a support analysis requires between one and four points");
+  }
+  if (arguments.size() != 2U + 3U * support_size) {
+    throw std::invalid_argument(
+        "the analyzed support has the wrong serialized point count");
+  }
+
+  std::vector<CertifiedPoint3> support;
+  support.reserve(support_size);
+  for (std::size_t index = 0; index < support_size; ++index) {
+    support.push_back(parse_point(arguments, 2U + 3U * index));
+  }
+
+  PredicateCounters counters;
+  CircumcenterSupportAnalysis analysis = [&support, support_size, &counters] {
+    if (support_size == 1U) {
+      return analyze_circumcenter_support(
+          std::array<CertifiedPoint3, 1>{support[0]}, &counters);
+    }
+    if (support_size == 2U) {
+      return analyze_circumcenter_support(
+          std::array<CertifiedPoint3, 2>{support[0], support[1]}, &counters);
+    }
+    if (support_size == 3U) {
+      return analyze_circumcenter_support(
+          std::array<CertifiedPoint3, 3>{
+              support[0], support[1], support[2]},
+          &counters);
+    }
+    return analyze_circumcenter_support(
+        std::array<CertifiedPoint3, 4>{
+            support[0], support[1], support[2], support[3]},
+        &counters);
+  }();
+
+  const CircumcenterResult& center = analysis.circumcenter_result();
+  const bool independent = center.kind() == CircumcenterKind::unique;
+  output << "{\"affine_dimension\":" << center.affine_dimension()
+         << ",\"barycentric_coordinates_exact\":";
+  if (analysis.barycentric().has_value()) {
+    output << '[';
+    for (std::size_t index = 0; index < support_size; ++index) {
+      if (index != 0U) {
+        output << ',';
+      }
+      output << rational_json(analysis.barycentric()->coordinate(index));
+    }
+    output << ']';
+  } else {
+    output << "null";
+  }
+  output << ",\"barycentric_signs\":";
+  if (analysis.barycentric().has_value()) {
+    output << '[';
+    for (std::size_t index = 0; index < support_size; ++index) {
+      if (index != 0U) {
+        output << ',';
+      }
+      output << '\"' << to_string(analysis.barycentric()->sign(index)) << '\"';
+    }
+    output << ']';
+  } else {
+    output << "null";
+  }
+  output << ",\"center_exact\":";
+  if (center.center().has_value()) {
+    output << center.center()->canonical_json();
+  } else {
+    output << "null";
+  }
+  output << ",\"certification_stage\":";
+  if (independent) {
+    output << "\"cpu_multiprecision\"";
+  } else {
+    output << "null";
+  }
+  output << ",\"convex_hull_location\":";
+  if (analysis.barycentric().has_value()) {
+    output << '\"' << to_string(analysis.barycentric()->location()) << '\"';
+  } else {
+    output << "null";
+  }
+  output << ",\"counters\":" << counters_json(counters)
+         << ",\"predicate\":\"circumcenter_support_analysis\""
+         << ",\"reduced_support_indices\":";
+  if (analysis.reduced_support_mask().has_value()) {
+    output << '[';
+    bool first = true;
+    for (std::size_t index = 0; index < support_size; ++index) {
+      if (analysis.reduced_support_contains(index)) {
+        if (!first) {
+          output << ',';
+        }
+        output << index;
+        first = false;
+      }
+    }
+    output << ']';
+  } else {
+    output << "null";
+  }
+  output << ",\"squared_level_exact\":";
+  if (center.squared_level().has_value()) {
+    output << center.squared_level()->canonical_json();
+  } else {
+    output << "null";
+  }
+  output << ",\"support_kind\":\""
+         << (independent ? "affinely_independent" : "affinely_dependent")
+         << "\",\"support_size\":" << support_size
+         << ",\"support_status\":\"" << to_string(analysis.status())
+         << "\"}\n";
+  return 0;
+}
+
+int replay_sphere_side(
+    std::span<const std::string_view> arguments, std::ostream& output) {
+  if (arguments.size() != 10U) {
+    throw std::invalid_argument(
+        "sphere-side replay requires one center, one level and one point");
+  }
+  const ExactRational3 center = ExactRational3::from_record(ExactRational3Record{
+      ExactRational3::schema_version,
+      std::string{arguments[1]},
+      std::string{arguments[2]},
+      std::string{arguments[3]},
+      std::string{arguments[4]},
+      ExactRational3::unit});
+  const ExactLevel squared_level = ExactLevel::from_record(ExactLevelRecord{
+      ExactLevel::schema_version,
+      std::string{arguments[5]},
+      std::string{arguments[6]},
+      ExactLevel::unit});
+  PredicateCounters counters;
+  const auto result = classify_sphere_point(
+      center, squared_level, parse_point(arguments, 7U), &counters);
+  output << "{\"certification_stage\":\""
+         << to_string(result.decision().certification_stage())
+         << "\",\"classification\":\"" << to_string(result.location())
+         << "\",\"counters\":" << counters_json(counters)
+         << ",\"predicate\":\"sphere_side\""
+         << ",\"sign\":\"" << to_string(result.decision().sign()) << "\""
+         << ",\"signed_offset_exact\":" << rational_json(result.signed_power())
+         << ",\"squared_distance_exact\":"
+         << result.point_squared_distance().canonical_json() << "}\n";
+  return 0;
+}
+
 int replay_tokens(
     std::span<const std::string_view> arguments,
     std::ostream& output,
@@ -428,6 +591,12 @@ int replay_tokens(
   }
   if (arguments[0] == "circumcenter_support") {
     return replay_circumcenter_support(arguments, output);
+  }
+  if (arguments[0] == "circumcenter_support_analysis") {
+    return replay_circumcenter_support_analysis(arguments, output);
+  }
+  if (arguments[0] == "sphere_side") {
+    return replay_sphere_side(arguments, output);
   }
   throw std::invalid_argument("the predicate name or argument count is unsupported");
 }
@@ -491,6 +660,10 @@ void print_usage(const char* executable) {
             << " fourth_plane_incidence A B C D ... (4 planes)\n"
             << "   or: " << executable
             << " circumcenter_support COUNT HEX_X HEX_Y HEX_Z ... (2 to 4 points)\n"
+            << "   or: " << executable
+            << " circumcenter_support_analysis COUNT HEX_X HEX_Y HEX_Z ... (1 to 4 points)\n"
+            << "   or: " << executable
+            << " sphere_side XN YN ZN D LEVEL_N LEVEL_D HEX_X HEX_Y HEX_Z\n"
             << "   or: " << executable << " --batch < predicate-lines.txt\n"
             << "prefix any form with --multiprecision-only to disable FP64 filters\n";
 }

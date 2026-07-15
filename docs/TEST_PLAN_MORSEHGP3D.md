@@ -166,7 +166,7 @@ Toute graine fautive devient une fixture permanente avant correction du code.
 | top-$k$ avec exclusions | $1\leq k\leq10$, jusqu'à 9 identifiants exclus | voisins, shell final, certificat |
 | clé canonique | permutations, duplications d'émission, plateaux | sérialisation identique |
 
-Dans le découpage incrémental de la Phase 2A, le lot 2A.5 couvre les centres circonscrits non triviaux de deux à quatre points définis par la feuille de route. Le cas singleton exigé par cette matrice, dont le centre est le point lui-même, la dimension affine zéro et le niveau carré nul, reste une obligation ouverte explicitement rattachée à la réduction vers le support minimal du lot 2A.6.
+Dans le découpage incrémental de la Phase 2A, le lot 2A.5 couvre les centres circonscrits non triviaux de deux à quatre points définis par la feuille de route. Le lot 2A.6 complète la matrice avec le singleton, dont le centre est le point lui-même, la dimension affine zéro et le niveau carré nul; il certifie aussi les signes barycentriques, la réduction exacte des supports de frontière et le côté exact d'une sphère. Cette analyse locale ne remplace pas l'énumération de tous les sous-supports exigée par l'oracle miniball.
 
 ### 5.2 Cascade de précision
 

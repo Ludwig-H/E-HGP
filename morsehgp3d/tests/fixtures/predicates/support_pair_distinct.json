@@ -1,0 +1,9 @@
+{
+  "kind": "morsehgp3d_predicate_replay_input",
+  "points": [
+    ["c000000000000000", "0000000000000000", "0000000000000000"],
+    ["4000000000000000", "0000000000000000", "0000000000000000"]
+  ],
+  "predicate": "circumcenter_support_analysis",
+  "schema_version": 5
+}

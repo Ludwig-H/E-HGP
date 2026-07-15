@@ -2,6 +2,7 @@
 #include "morsehgp3d/exact/level.hpp"
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
+#include "morsehgp3d/exact/support.hpp"
 
 #include <array>
 #include <cstdint>
@@ -11,6 +12,7 @@ int main() {
   using morsehgp3d::exact::BigInt;
   using morsehgp3d::exact::CertifiedPoint3;
   using morsehgp3d::exact::CircumcenterKind;
+  using morsehgp3d::exact::CircumcenterSupportStatus;
   using morsehgp3d::exact::ExactLabelMoments;
   using morsehgp3d::exact::ExactLevel;
   using morsehgp3d::exact::ExactPlane3;
@@ -18,6 +20,7 @@ int main() {
   using morsehgp3d::exact::CertificationStage;
   using morsehgp3d::exact::PredicateFilterPolicy;
   using morsehgp3d::exact::PredicateSign;
+  using morsehgp3d::exact::SpherePointLocation;
   using morsehgp3d::exact::ThreePlaneIntersectionKind;
 
   if (!morsehgp3d::exact::fp64_filter_environment_supported()) {
@@ -104,6 +107,28 @@ int main() {
           ExactRational3{BigInt{1}, BigInt{1}, BigInt{1}, BigInt{2}} ||
       *center.squared_level() != ExactLevel{BigInt{3}, BigInt{4}}) {
     std::cerr << "installed exact center construction changed semantics\n";
+    return 1;
+  }
+
+  const std::array<CertifiedPoint3, 3> right_triangle{
+      CertifiedPoint3::from_binary64(0.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(1.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(1.0, 1.0, 0.0)};
+  const auto support =
+      morsehgp3d::exact::analyze_circumcenter_support(right_triangle);
+  if (support.status() != CircumcenterSupportStatus::boundary_reduced ||
+      support.reduced_support_size() != 2U ||
+      !support.reduced_support_contains(0U) ||
+      support.reduced_support_contains(1U) ||
+      !support.reduced_support_contains(2U)) {
+    std::cerr << "installed exact support reduction changed semantics\n";
+    return 1;
+  }
+  const auto sphere_side = morsehgp3d::exact::classify_sphere_point(
+      support.circumcenter_result(), right_triangle[1]);
+  if (sphere_side.location() != SpherePointLocation::boundary ||
+      sphere_side.decision().sign() != PredicateSign::zero) {
+    std::cerr << "installed exact sphere classification changed semantics\n";
     return 1;
   }
   return 0;

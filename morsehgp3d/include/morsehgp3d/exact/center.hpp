@@ -41,13 +41,14 @@ class CircumcenterResult {
       std::size_t support_size,
       ExactCenter3 center,
       ExactLevel squared_level) {
-    if (support_size < 2U || support_size > 4U) {
+    if (support_size < 1U || support_size > 4U) {
       throw std::invalid_argument(
-          "a circumcenter support must contain two, three or four points");
+          "a circumcenter support must contain between one and four points");
     }
-    if (squared_level.numerator() == 0) {
+    const bool zero_level = squared_level.numerator() == 0;
+    if ((support_size == 1U) != zero_level) {
       throw std::invalid_argument(
-          "an affinely independent support must have a positive squared level");
+          "a unique circumcenter has a zero level exactly for a singleton support");
     }
     return CircumcenterResult{
         CircumcenterKind::unique,
@@ -100,9 +101,9 @@ class CircumcenterResult {
         affine_dimension_(affine_dimension),
         center_(std::move(center)),
         squared_level_(std::move(squared_level)) {
-    if (support_size_ < 2U || support_size_ > 4U) {
+    if (support_size_ < 1U || support_size_ > 4U) {
       throw std::invalid_argument(
-          "a circumcenter support must contain two, three or four points");
+          "a circumcenter support must contain between one and four points");
     }
     if (affine_dimension_ >= support_size_ || affine_dimension_ > 3U) {
       throw std::invalid_argument(
@@ -260,6 +261,11 @@ template <std::size_t SupportSize>
 }  // namespace center_detail
 
 [[nodiscard]] inline CircumcenterResult circumcenter(
+    const ExactRational3& a) {
+  return CircumcenterResult::unique(1U, a, ExactLevel{});
+}
+
+[[nodiscard]] inline CircumcenterResult circumcenter(
     const ExactRational3& a, const ExactRational3& b) {
   const std::size_t dimension = center_detail::affine_dimension(a, b);
   if (dimension != 1U) {
@@ -305,6 +311,11 @@ template <std::size_t SupportSize>
       center_detail::equidistance_plane(a, d));
   return center_detail::verified_unique_result(
       center, std::array<ExactRational3, 4>{a, b, c, d});
+}
+
+[[nodiscard]] inline CircumcenterResult circumcenter(
+    const CertifiedPoint3& a) {
+  return circumcenter(a.exact());
 }
 
 [[nodiscard]] inline CircumcenterResult circumcenter(

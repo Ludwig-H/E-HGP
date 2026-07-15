@@ -13,12 +13,16 @@ target_link_libraries(morsehgp3d_affine_tests PRIVATE morsehgp3d::exact)
 add_executable(morsehgp3d_centers_tests test_centers.cpp)
 target_link_libraries(morsehgp3d_centers_tests PRIVATE morsehgp3d::exact)
 
+add_executable(morsehgp3d_support_tests test_support.cpp)
+target_link_libraries(morsehgp3d_support_tests PRIVATE morsehgp3d::exact)
+
 if(MSVC)
   target_compile_options(morsehgp3d_exact_types_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_exact_types_dump PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_predicates_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_affine_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_centers_tests PRIVATE /W4 /WX)
+  target_compile_options(morsehgp3d_support_tests PRIVATE /W4 /WX)
 else()
   target_compile_options(
     morsehgp3d_exact_types_tests
@@ -70,12 +74,23 @@ else()
       -Wsign-conversion
       -Werror
   )
+  target_compile_options(
+    morsehgp3d_support_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
 endif()
 
 add_test(NAME morsehgp3d.exact_types COMMAND morsehgp3d_exact_types_tests)
 add_test(NAME morsehgp3d.predicates COMMAND morsehgp3d_predicates_tests)
 add_test(NAME morsehgp3d.affine COMMAND morsehgp3d_affine_tests)
 add_test(NAME morsehgp3d.centers COMMAND morsehgp3d_centers_tests)
+add_test(NAME morsehgp3d.support COMMAND morsehgp3d_support_tests)
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
 add_test(
@@ -133,6 +148,22 @@ if(TARGET morsehgp3d_replay_predicate)
     COMMAND
       "${Python3_EXECUTABLE}"
       "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_center_random.py"
+      "$<TARGET_FILE:morsehgp3d_replay_predicate>"
+  )
+  add_test(
+    NAME morsehgp3d.support_replay_differential
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_support_replay.py"
+      "${PROJECT_SOURCE_DIR}/tools/replay_predicate.py"
+      "$<TARGET_FILE:morsehgp3d_replay_predicate>"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../fixtures/predicates"
+  )
+  add_test(
+    NAME morsehgp3d.support_random_differential
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_support_random.py"
       "$<TARGET_FILE:morsehgp3d_replay_predicate>"
   )
 endif()

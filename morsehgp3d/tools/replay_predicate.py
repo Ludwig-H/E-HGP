@@ -19,12 +19,13 @@ from typing import Any
 
 INPUT_KIND = "morsehgp3d_predicate_replay_input"
 RESULT_KIND = "morsehgp3d_predicate_replay_result"
-SCHEMA_VERSIONS = {1, 2, 3, 4}
+SCHEMA_VERSIONS = {1, 2, 3, 4, 5}
 DOMAINS = {
     1: b"MorseHGP3D/predicate-replay-v1/",
     2: b"MorseHGP3D/predicate-replay-v2/",
     3: b"MorseHGP3D/predicate-replay-v3/",
     4: b"MorseHGP3D/predicate-replay-v4/",
+    5: b"MorseHGP3D/predicate-replay-v5/",
 }
 POINT_COUNTS = {
     "compare_squared_distances": 3,
@@ -120,6 +121,29 @@ def validate_exact_rational3(value: Any, label: str) -> dict[str, str]:
         divisor = math.gcd(divisor, abs(int(numerator)))
     if divisor != 1:
         raise ValueError(f"the replay {label} is not reduced canonically")
+    return {key: value[key] for key in sorted(fields)}
+
+
+def validate_exact_level_record(value: Any, label: str) -> dict[str, str]:
+    fields = {"denominator", "numerator", "schema_version", "unit"}
+    if not isinstance(value, dict) or set(value) != fields:
+        raise ValueError(f"the replay {label} is not a closed ExactLevel object")
+    if (
+        value["schema_version"] != "2.0.0"
+        or value["unit"] != "input_coordinate_unit_squared"
+    ):
+        raise ValueError(f"the replay {label} has an unsupported ExactLevel contract")
+    numerator = value["numerator"]
+    denominator = value["denominator"]
+    if (
+        not isinstance(numerator, str)
+        or CANONICAL_INTEGER.fullmatch(numerator) is None
+        or int(numerator) < 0
+        or not isinstance(denominator, str)
+        or CANONICAL_POSITIVE_INTEGER.fullmatch(denominator) is None
+        or math.gcd(int(numerator), int(denominator)) != 1
+    ):
+        raise ValueError(f"the replay {label} is not a canonical nonnegative level")
     return {key: value[key] for key in sorted(fields)}
 
 
@@ -229,6 +253,50 @@ def validate_input(value: Any) -> dict[str, Any]:
             "predicate": predicate,
             "points": points,
         }
+
+    if schema_version == 5:
+        if predicate == "circumcenter_support_analysis":
+            required = {"kind", "schema_version", "predicate", "points"}
+            if set(value) != required:
+                raise ValueError(
+                    "the v5 support-analysis input has missing or unknown fields"
+                )
+            points = validate_points(value["points"], "points")
+            if not 1 <= len(points) <= 4:
+                raise ValueError(
+                    "circumcenter support analysis requires between one and four points"
+                )
+            return {
+                "kind": INPUT_KIND,
+                "schema_version": 5,
+                "predicate": predicate,
+                "points": points,
+            }
+        if predicate == "sphere_side":
+            required = {
+                "center_exact",
+                "kind",
+                "point",
+                "predicate",
+                "schema_version",
+                "squared_level_exact",
+            }
+            if set(value) != required:
+                raise ValueError("the v5 sphere-side input has missing or unknown fields")
+            point = validate_points([value["point"]], "point")[0]
+            return {
+                "center_exact": validate_exact_rational3(
+                    value["center_exact"], "sphere center"
+                ),
+                "kind": INPUT_KIND,
+                "point": point,
+                "predicate": predicate,
+                "schema_version": 5,
+                "squared_level_exact": validate_exact_level_record(
+                    value["squared_level_exact"], "sphere squared level"
+                ),
+            }
+        raise ValueError("the v5 replay predicate is unsupported")
 
     if predicate == "plane_through_points":
         required = {"kind", "schema_version", "predicate", "points"}
@@ -598,6 +666,186 @@ def squared_distance(
     return sum(((a - b) ** 2 for a, b in zip(left, right)), Fraction())
 
 
+def exact_rational_record(value: Fraction) -> dict[str, str]:
+    return {
+        "denominator": str(value.denominator),
+        "numerator": str(value.numerator),
+    }
+
+
+def exact_level_record(value: Fraction) -> dict[str, str]:
+    if value < 0:
+        raise ValueError("an exact squared level cannot be negative")
+    return {
+        "denominator": str(value.denominator),
+        "numerator": str(value.numerator),
+        "schema_version": "2.0.0",
+        "unit": "input_coordinate_unit_squared",
+    }
+
+
+def independent_support_witness(
+    points: list[tuple[Fraction, Fraction, Fraction]],
+) -> tuple[
+    tuple[Fraction, Fraction, Fraction],
+    Fraction,
+    list[Fraction],
+]:
+    """Solve the bordered barycentric system independently of the C++ path."""
+
+    size = len(points)
+    gram = [
+        [
+            sum((a * b for a, b in zip(left, right)), Fraction())
+            for right in points
+        ]
+        for left in points
+    ]
+    system = [
+        [2 * entry for entry in row]
+        + [Fraction(-1), gram[index][index]]
+        for index, row in enumerate(gram)
+    ]
+    system.append([Fraction(1) for _ in range(size)] + [Fraction(), Fraction(1)])
+    reduced, pivots = matrix_rref(system)
+    if pivots != list(range(size + 1)):
+        raise ValueError(
+            "an affinely independent support produced a singular bordered system"
+        )
+    barycentric = [reduced[index][-1] for index in range(size)]
+    if sum(barycentric, Fraction()) != 1:
+        raise ValueError("the exact bordered system did not produce affine weights")
+    center = tuple(
+        sum(
+            (barycentric[index] * points[index][axis] for index in range(size)),
+            Fraction(),
+        )
+        for axis in range(3)
+    )
+    squared_level = squared_distance(center, points[0])
+    if any(squared_distance(center, point) != squared_level for point in points):
+        raise ValueError("the exact bordered-system center is not equidistant")
+    return center, squared_level, barycentric  # type: ignore[return-value]
+
+
+def empty_predicate_counters() -> dict[str, int]:
+    return {
+        "cpu_multiprecision_certified": 0,
+        "exact_zeros": 0,
+        "expansion_certified": 0,
+        "fp32_proposals": 0,
+        "fp64_filtered_certified": 0,
+        "remaining_unknown": 0,
+    }
+
+
+def support_analysis_oracle(replay_input: dict[str, Any]) -> dict[str, Any]:
+    points = [point_from_words(words) for words in replay_input["points"]]
+    directions = [
+        [point[axis] - points[0][axis] for axis in range(3)]
+        for point in points[1:]
+    ]
+    _, affine_pivots = matrix_rref(directions)
+    affine_dimension = len(affine_pivots)
+    independent = affine_dimension + 1 == len(points)
+    if not independent:
+        return {
+            "affine_dimension": affine_dimension,
+            "barycentric_coordinates_exact": None,
+            "barycentric_signs": None,
+            "center_exact": None,
+            "certification_stage": None,
+            "convex_hull_location": None,
+            "counters": empty_predicate_counters(),
+            "predicate": "circumcenter_support_analysis",
+            "reduced_support_indices": None,
+            "squared_level_exact": None,
+            "support_kind": "affinely_dependent",
+            "support_size": len(points),
+            "support_status": "affinely_dependent",
+        }
+
+    center, squared_level, barycentric = independent_support_witness(points)
+    signs = [expected_sign(coordinate) for coordinate in barycentric]
+    has_negative = "negative" in signs
+    has_zero = "zero" in signs
+    if has_negative:
+        location = "exterior"
+        status = "exterior_circumcenter"
+        reduced_indices = None
+    elif has_zero:
+        location = "relative_boundary"
+        status = "boundary_reduced"
+        reduced_indices = [
+            index for index, sign in enumerate(signs) if sign == "positive"
+        ]
+        if not reduced_indices:
+            raise ValueError("an exact boundary support has no positive weight")
+        reduced_points = [points[index] for index in reduced_indices]
+        reduced_center, reduced_level, reduced_barycentric = (
+            independent_support_witness(reduced_points)
+        )
+        if (
+            reduced_center != center
+            or reduced_level != squared_level
+            or any(coordinate <= 0 for coordinate in reduced_barycentric)
+        ):
+            raise ValueError("the exact boundary reduction changed its sphere")
+    else:
+        location = "relative_interior"
+        status = "minimal"
+        reduced_indices = list(range(len(points)))
+
+    counters = empty_predicate_counters()
+    counters["cpu_multiprecision_certified"] = len(points)
+    counters["exact_zeros"] = signs.count("zero")
+    return {
+        "affine_dimension": affine_dimension,
+        "barycentric_coordinates_exact": [
+            exact_rational_record(coordinate) for coordinate in barycentric
+        ],
+        "barycentric_signs": signs,
+        "center_exact": exact_rational3_record(center),
+        "certification_stage": "cpu_multiprecision",
+        "convex_hull_location": location,
+        "counters": counters,
+        "predicate": "circumcenter_support_analysis",
+        "reduced_support_indices": reduced_indices,
+        "squared_level_exact": exact_level_record(squared_level),
+        "support_kind": "affinely_independent",
+        "support_size": len(points),
+        "support_status": status,
+    }
+
+
+def sphere_side_oracle(replay_input: dict[str, Any]) -> dict[str, Any]:
+    center = rational3(replay_input["center_exact"], "sphere center")
+    point = point_from_words(replay_input["point"])
+    squared_level = canonical_level(
+        replay_input["squared_level_exact"], "sphere squared level"
+    )
+    distance = squared_distance(center, point)
+    offset = distance - squared_level
+    sign = expected_sign(offset)
+    classification = {
+        "negative": "strictly_inside",
+        "zero": "boundary",
+        "positive": "outside",
+    }[sign]
+    counters = empty_predicate_counters()
+    counters["cpu_multiprecision_certified"] = 1
+    counters["exact_zeros"] = 1 if sign == "zero" else 0
+    return {
+        "certification_stage": "cpu_multiprecision",
+        "classification": classification,
+        "counters": counters,
+        "predicate": "sphere_side",
+        "sign": sign,
+        "signed_offset_exact": exact_rational_record(offset),
+        "squared_distance_exact": exact_level_record(distance),
+    }
+
+
 def circumcenter_support_oracle(
     replay_input: dict[str, Any],
 ) -> tuple[
@@ -691,6 +939,7 @@ def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None
         "power_bisector_side",
         "orientation_2d_in_plane",
         "fourth_plane_incidence",
+        "sphere_side",
     }
     allowed_stages = (
         {"cpu_multiprecision"}
@@ -715,6 +964,115 @@ def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None
 
 def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str, Any]:
     predicate = replay_input["predicate"]
+    if predicate == "circumcenter_support_analysis":
+        expected_fields = {
+            "affine_dimension",
+            "barycentric_coordinates_exact",
+            "barycentric_signs",
+            "center_exact",
+            "certification_stage",
+            "convex_hull_location",
+            "counters",
+            "predicate",
+            "reduced_support_indices",
+            "squared_level_exact",
+            "support_kind",
+            "support_size",
+            "support_status",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError("the native support analysis returned unknown fields")
+        if (
+            type(value["affine_dimension"]) is not int
+            or type(value["support_size"]) is not int
+            or value["certification_stage"] not in (None, "cpu_multiprecision")
+            or value["convex_hull_location"]
+            not in (None, "relative_interior", "relative_boundary", "exterior")
+            or value["support_kind"]
+            not in ("affinely_independent", "affinely_dependent")
+            or value["support_status"]
+            not in (
+                "minimal",
+                "boundary_reduced",
+                "exterior_circumcenter",
+                "affinely_dependent",
+            )
+        ):
+            raise ValueError("the native support analysis has invalid classifications")
+        barycentric = value["barycentric_coordinates_exact"]
+        signs = value["barycentric_signs"]
+        if barycentric is not None:
+            if not isinstance(barycentric, list) or len(barycentric) != value["support_size"]:
+                raise ValueError("the native support analysis has invalid barycentric size")
+            for index, coordinate in enumerate(barycentric):
+                canonical_rational(
+                    coordinate, f"barycentric coordinate {index}", nonnegative=False
+                )
+        if signs is not None and (
+            not isinstance(signs, list)
+            or len(signs) != value["support_size"]
+            or any(not isinstance(sign, str) or sign not in SIGNS for sign in signs)
+        ):
+            raise ValueError("the native support analysis has invalid barycentric signs")
+        reduced = value["reduced_support_indices"]
+        if reduced is not None and (
+            not isinstance(reduced, list)
+            or any(type(index) is not int for index in reduced)
+            or any(index < 0 or index >= value["support_size"] for index in reduced)
+            or any(left >= right for left, right in zip(reduced, reduced[1:]))
+        ):
+            raise ValueError("the native reduced support indices are not canonical")
+        if value["center_exact"] is not None:
+            validate_exact_rational3(value["center_exact"], "native analyzed center")
+        if value["squared_level_exact"] is not None:
+            canonical_level(value["squared_level_exact"], "native analyzed level")
+        counters = value["counters"]
+        if (
+            not isinstance(counters, dict)
+            or set(counters) != COUNTER_FIELDS
+            or any(type(count) is not int or count < 0 for count in counters.values())
+        ):
+            raise ValueError("the native support counters are not PredicateCounts v2")
+        expected = support_analysis_oracle(replay_input)
+        if value != expected:
+            raise ValueError(
+                "the native support analysis differs from the exact bordered-system oracle"
+            )
+        return value
+
+    if predicate == "sphere_side":
+        expected_fields = {
+            "certification_stage",
+            "classification",
+            "counters",
+            "predicate",
+            "sign",
+            "signed_offset_exact",
+            "squared_distance_exact",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError("the native sphere-side result returned unknown fields")
+        if value["classification"] not in (
+            "strictly_inside",
+            "boundary",
+            "outside",
+        ):
+            raise ValueError("the native sphere-side classification is invalid")
+        if not isinstance(value["sign"], str) or value["sign"] not in SIGNS:
+            raise ValueError("the native sphere-side sign is invalid")
+        stage = value["certification_stage"]
+        if not isinstance(stage, str):
+            raise ValueError("the native sphere-side stage is invalid")
+        validate_counters(value["counters"], value["sign"], stage, predicate)
+        canonical_rational(
+            value["signed_offset_exact"], "sphere signed offset", nonnegative=False
+        )
+        canonical_level(value["squared_distance_exact"], "sphere squared distance")
+        expected = sphere_side_oracle(replay_input)
+        if value != expected:
+            raise ValueError("the native sphere-side result differs from the exact oracle")
+        return value
+
     if predicate == "circumcenter_support":
         support_kind, affine_dimension, expected_center, expected_level = (
             circumcenter_support_oracle(replay_input)
@@ -1015,6 +1373,19 @@ def replay(value: dict[str, Any], executable: Path) -> dict[str, Any]:
     elif value["schema_version"] == 4:
         arguments.append(str(len(value["points"])))
         arguments.extend(word for point in value["points"] for word in point)
+    elif value["schema_version"] == 5:
+        if value["predicate"] == "circumcenter_support_analysis":
+            arguments.append(str(len(value["points"])))
+            arguments.extend(word for point in value["points"] for word in point)
+        else:
+            center = value["center_exact"]
+            level = value["squared_level_exact"]
+            arguments.extend(
+                center[f"{axis}_numerator"] for axis in "xyz"
+            )
+            arguments.append(center["denominator"])
+            arguments.extend([level["numerator"], level["denominator"]])
+            arguments.extend(value["point"])
     elif value["predicate"] == "plane_through_points":
         arguments.extend(word for point in value["points"] for word in point)
     elif value["predicate"] == "power_bisector_affine_form":

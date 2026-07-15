@@ -1,0 +1,20 @@
+{
+  "center_exact": {
+    "denominator": "1",
+    "schema_version": "2.0.0",
+    "unit": "input_coordinate_unit",
+    "x_numerator": "0",
+    "y_numerator": "0",
+    "z_numerator": "0"
+  },
+  "kind": "morsehgp3d_predicate_replay_input",
+  "point": ["3ff0000000000000", "0000000000000000", "0000000000000000"],
+  "predicate": "sphere_side",
+  "schema_version": 5,
+  "squared_level_exact": {
+    "denominator": "1",
+    "numerator": "1",
+    "schema_version": "2.0.0",
+    "unit": "input_coordinate_unit_squared"
+  }
+}

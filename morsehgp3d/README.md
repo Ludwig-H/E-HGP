@@ -18,16 +18,20 @@ La tranche actuellement intégrée fournit :
 - l'orientation 2D exacte dans un plan support, avec validation exacte de l'incidence;
 - l'intersection de trois plans par rang exact, avec classes `unique`, `empty` et `affine_family`;
 - le signe déterminantal et le témoin rationnel d'incidence d'un quatrième plan;
-- les centres circonscrits exacts de supports de deux, trois ou quatre points;
+- les centres circonscrits exacts de supports d'un à quatre points;
 - la classification exacte des supports affinement dépendants, sans centre arbitraire;
 - le couplage atomique du centre homogène `ExactRational3` et de son rayon carré `ExactLevel`;
+- les coordonnées et signes barycentriques exacts dans tout support affinement indépendant de taille un à quatre;
+- la classification exacte `relative_interior`, `relative_boundary` ou `exterior` du centre circonscrit;
+- la réduction certifiée d'un support de frontière vers ses coefficients strictement positifs;
+- la classification exacte d'un point comme strictement intérieur, sur la frontière ou extérieur à une sphère;
 - des entrées `decision-only` séparées des témoins rationnels de replay;
 - des décisions séparant signe scientifique, étage de certification et compteurs;
 - des filtres d'intervalles FP64 conservateurs pour la comparaison de distances et l'orientation 3D;
 - une politique par appel permettant de désactiver ces filtres pour le différentiel multiprécision;
 - un replay diagnostique versionné à partir des mots binary64 et des plans exacts d'entrée.
 
-Cette tranche clôt les sous-lots affines 2A.4 et centres 2A.5, mais ne ferme ni la Phase 2A ni G1. Les comparaisons de distances et orientations 3D bien conditionnées peuvent être certifiées par `fp64_filtered`; toute borne contenant zéro, tout overflow ou environnement flottant non conforme revient à `cpu_multiprecision`. Les prédicats affines et les constructions de centres restent entièrement multiprécision. Les barycentriques, décisions de minimalité, sphères, expansions et autres prédicats géométriques seront ajoutés par lots testables ultérieurs.
+Cette tranche clôt les sous-lots affines 2A.4, centres 2A.5 et minimalité locale 2A.6, mais ne ferme ni la Phase 2A ni G1. Les comparaisons de distances et orientations 3D bien conditionnées peuvent être certifiées par `fp64_filtered`; toute borne contenant zéro, tout overflow ou environnement flottant non conforme revient à `cpu_multiprecision`. Les prédicats affines, les constructions de centres, les barycentriques et les côtés de sphère restent entièrement multiprécision. L'ordre total des niveaux, les expansions et les autres prédicats géométriques seront ajoutés par lots testables ultérieurs.
 
 Le filtre exige IEEE binary64, l'arrondi au plus proche dans le FENV et MXCSR sur x86, les sous-normaux actifs et les options strictes exportées par la cible CMake. Chaque opération d'intervalle est élargie vers les deux infinis; les exceptions flottantes du processus appelant sont restaurées. `PredicateFilterPolicy::multiprecision_only` garde un chemin de décision indépendant. Dans les API riches et le replay, un témoin rationnel reste matérialisé même si le signe a été certifié en FP64 : `certification_stage` désigne l'autorité du signe, pas le coût du diagnostic.
 
@@ -41,9 +45,9 @@ Une intersection unique expose un `ExactRational3`, les rangs normal et augment�
 
 `ExactCenter3` est un alias sémantique de `ExactRational3` : le centre conserve ainsi un dénominateur commun strictement positif et une réduction canonique déjà couverte par le contrat `2.0.0`. `CircumcenterResult` associe atomiquement ce centre et son `ExactLevel`. Une paire distincte utilise son milieu; un triangle indépendant intersecte son plan affine et deux plans médiateurs; un tétraèdre indépendant intersecte trois plans médiateurs. Chaque résultat est ensuite revérifié par égalité exacte des distances aux points du support.
 
-Un support dépendant expose sa dimension affine exacte et des témoins `null`; il n'est jamais complété par un centre arbitraire. Un triangle obtus possède néanmoins un centre circonscrit valide : décider si ce centre appartient à l'intérieur relatif du support, puis réduire un support non minimal, appartient au sous-lot 2A.6.
+Un support dépendant expose sa dimension affine exacte et des témoins `null`; il n'est jamais complété par un centre arbitraire. `analyze_circumcenter_support` calcule les barycentriques exacts du centre d'un support indépendant. Un centre intérieur rend le support localement minimal; un centre sur la frontière conserve seulement les coefficients strictement positifs, puis le centre, le niveau et l'intérieur relatif réduits sont revérifiés exactement. Un centre extérieur reste explicitement `exterior_circumcenter` et ne déclenche aucune recherche implicite parmi les sous-supports.
 
-Le support singleton du plan de test demeure une obligation ouverte de 2A.6 : il sera matérialisé avec le point lui-même comme centre, une dimension affine nulle et un `ExactLevel` nul au moment d'intégrer la réduction canonique vers le support minimal. Il n'est donc pas accepté silencieusement par l'API ou le replay v4 de 2A.5.
+Le support singleton a pour centre le point lui-même, dimension affine zéro et `ExactLevel` nul. `classify_sphere_point` compare exactement la distance carrée d'un point au niveau d'une sphère et expose simultanément le signe, la classe et le décalage rationnel signé. Ces décisions sont locales : elles n'énumèrent pas les candidats miniball, ne complètent pas `RelevantGP` et ne suffisent jamais à produire un statut public `exact`.
 
 ## Construction locale
 
@@ -72,6 +76,8 @@ Le schéma diagnostique v1 reste actif pour les prédicats historiques à nombre
 Le schéma v3, dans le domaine SHA-256 distinct `MorseHGP3D/predicate-replay-v3/`, ajoute `plane_through_points`, `power_bisector_affine_form`, `orientation_2d_in_plane`, `intersect_three_planes` et `fourth_plane_incidence`. Un plan imbriqué est un objet fermé `ExactPlane3` `2.0.0` dont les chaînes entières doivent déjà être primitives et canoniques. Le wrapper recalcule les plans, coefficients exacts de `H_RQ`, orientations et intersections avec `Fraction`; son élimination de Gauss est indépendante des mineurs et de la règle de Cramer du C++.
 
 Le schéma v4 utilise le domaine séparé `MorseHGP3D/predicate-replay-v4/` et ajoute `circumcenter_support` pour deux à quatre points. Sa sortie fixe publie la dimension et la classe du support, puis soit un centre homogène et un `ExactLevel`, soit deux témoins `null`. Le wrapper résout indépendamment le système de Gram par RREF sur `Fraction`, tandis que le C++ utilise les plans médiateurs et la règle de Cramer du noyau affine.
+
+Le schéma v5 utilise `MorseHGP3D/predicate-replay-v5/`. `circumcenter_support_analysis` accepte un à quatre points et ajoute coordonnées, signes, classe d'enveloppe convexe, statut local et indices du support réduit. `sphere_side` reçoit un centre rationnel canonique, un `ExactLevel` et un point binary64. Le wrapper recalcule les barycentriques et le côté de sphère avec `Fraction`; ni l'un ni l'autre ne représente une preuve de complétude `RelevantGP`.
 
 Le binaire accepte aussi un flux batch, une commande par ligne, afin que les différentiels n'ouvrent pas un processus par décision :
 

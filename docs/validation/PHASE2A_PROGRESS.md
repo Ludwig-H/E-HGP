@@ -22,7 +22,8 @@
 | forme affine de puissance | `08e432c` | moments exacts de labels, domaine de cardinalité 1 à 10, signe de `H_RQ`, témoin rationnel, replay v2 et flux batch |
 | intervalles FP64 conservateurs | `3d67d3c` | filtres distance/orientation 3D, repli multiprécision, désactivation par appel, différentiel activé/désactivé et préservation du FENV |
 | noyau affine exact 2A.4 | `ed5bd7e` | `ExactPlane3`, forme `H_RQ` à échelle exacte, orientation 2D dans un support, rang et intersection de trois plans, incidence déterminantale d'un quatrième plan, replay v3 et oracle `Fraction` |
-| centres et niveaux homogènes 2A.5 | présent lot | centres exacts de supports de taille deux à quatre, dimension affine, `ExactRational3` et `ExactLevel` atomiques, replay v4 et oracle Gram/RREF indépendant |
+| centres et niveaux homogènes 2A.5 | `3f3fa2b` | centres exacts de supports de taille deux à quatre, dimension affine, `ExactRational3` et `ExactLevel` atomiques, replay v4 et oracle Gram/RREF indépendant |
+| minimalité locale, barycentriques et sphères 2A.6 | présent lot | singleton exact, signes barycentriques de supports indépendants, réduction certifiée des supports de frontière, côté exact d'une sphère, replay v5 et oracle RREF indépendant |
 
 La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe négatif signifie que `R` est moins coûteux au témoin. `ExactAffineForm3` conserve ses quatre coefficients rationnels et leur échelle exacte; sa clé primitive ne sert qu'à classifier le plan orienté ou la forme constante. Les API riches matérialisent encore leurs témoins multiprécision lorsque le signe est filtré. Le champ `certification_stage` identifie donc l'autorité du signe, pas le coût total d'un replay diagnostique.
 
@@ -36,10 +37,10 @@ La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe
 | orientation 2D dans un plan support | oui | non | non | oui | référence exacte terminée |
 | intersection de trois plans | oui | non | non | oui | référence exacte terminée |
 | appartenance d'un quatrième plan | oui | non | non | oui | référence exacte terminée |
-| centres circonscrits de deux, trois ou quatre points | oui | non | non | oui | référence exacte terminée |
+| centres circonscrits d'un à quatre points | oui | non | non | oui | référence exacte terminée |
 | coordonnées homogènes du centre et rayon carré | oui | non | non | oui | référence exacte terminée |
-| signes barycentriques et `relint` | non | non | non | non | en attente des centres |
-| intérieur, frontière ou extérieur d'une sphère | non | non | non | non | en attente des centres |
+| signes barycentriques et `relint` | oui | non | non | oui | référence exacte terminée |
+| intérieur, frontière ou extérieur d'une sphère | oui | non | non | oui | référence exacte terminée |
 | comparaison de rayons de miniball | non | non | non | non | en attente des niveaux homogènes |
 | égalité de niveaux issus de supports distincts | infrastructure `ExactLevel` seulement | non | non | partiel | prédicat à terminer |
 
@@ -66,9 +67,9 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Qualification du lot courant
 
-- GCC 13, build strict : CTest 11/11.
-- Clang 18, build Release strict : CTest 11/11.
-- GCC 13 avec ASan et UBSan : CTest 11/11.
+- GCC 13, build strict : CTest 14/14.
+- Clang 18, build Release strict : CTest 14/14.
+- GCC 13 avec ASan et UBSan : CTest 14/14.
 - Corpus court déterministe : 2 048 cas, hash `276619686350b9c4f900d856b657ce084466cfdea2c4e8711d5efc7e690a1d15`.
 - Signes du corpus court : 1 002 négatifs, 892 positifs et 154 zéros.
 - Distances du corpus court : 58 signes `fp64_filtered` et 966 fallbacks `cpu_multiprecision`.
@@ -84,7 +85,10 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 - Replay centres v4 : 13 fixtures, tailles deux à quatre, dépendances de dimensions zéro à deux, 64 permutations exhaustives, 18 métamorphismes, 10 rejets d'entrée, 8 faux témoins natifs, 1 diagnostic natif inattendu et 3 sentinelles historiques v1 à v3 vérifiés. Les frontières à un ULP sont exercées depuis zéro sous-normal et autour des valeurs normales `1.0` et `2.0`.
 - Corpus centres `center-dyadic-splitmix64-v1` : 1 728 cas, graine `0x43454e5445523356`, hash des commandes `7277882dcdf66ba798087c19284283600821d56a4e5b60c723558a73224ea0cf`, hash des réponses exactes de l'oracle `3dfdd2b9727b5db7b7eccd1110bbdd1367deb0abaaf713c9c1b7e09c720d214f`, sorties normale et `--multiprecision-only` byte-identiques.
 - Répartition centres : 1 152 supports indépendants et 576 dépendants; 416 paires, 576 triangles et 736 tétraèdres; dimensions affines zéro à trois toutes couvertes.
-- Package CMake installé, wrapper installé rejoué sur une intersection rationnelle v3 et un centre non dyadique v4, consommateur externe exerçant filtres, multiprécision, noyau affine et centre tétraédrique : 1/1.
+- Replay supports et sphères v5 : 19 fixtures, dont 12 supports et 7 sphères, 4 statuts de support, 3 classes d'enveloppe, 4 tailles réduites, 3 côtés de sphère, 131 permutations exhaustives, 57 métamorphismes, 20 rejets d'entrée, 22 faux témoins natifs, 1 sortie non canonique, 1 diagnostic natif inattendu et 4 sentinelles historiques v1 à v4 vérifiés; centre et niveau à dénominateur non trivial, niveau nul et sorties normale et `--multiprecision-only` byte-identiques couverts.
+- Corpus supports et sphères `support-sphere-dyadic-splitmix64-v2` : 2 128 cas, graine `0x535550504f525435`, hash des commandes `0d5f30c7067c253b6e3c2cc36a530fad9a3f83e526b7f35fe23543ad1508a68c`, hash des réponses exactes de l'oracle `7d10f2cb87398847abcfae505c1365072d48786212b25159d8154f92d65f88d9`, sorties normale et `--multiprecision-only` byte-identiques. Le corpus contient 137 multisets barycentriques distincts, dont 128 géométries dyadiques non obtenues par simple similarité, 48 centres rationnels distincts et 136 niveaux distincts.
+- Répartition supports 2A.6 : 1 408 analyses, dont 512 `minimal`, 288 `boundary_reduced`, 320 `exterior_circumcenter` et 288 `affinely_dependent`; tailles un à quatre et dimensions affines zéro à trois couvertes. Les 720 côtés de sphère donnent 216 intérieurs stricts, 240 frontières et 264 extérieurs; les cas de rayon nul restent isolés dans leurs familles dédiées.
+- Package CMake installé, wrapper installé rejoué sur une intersection rationnelle v3, un centre non dyadique v4, une réduction de frontière v5, une sphère à dénominateurs non triviaux v5 et un niveau nul v5. Le consommateur externe exerce filtres, multiprécision, noyau affine, centre tétraédrique, réduction de support et côté de sphère : 1/1.
 - Contrats : 21 définitions, 21 exemples de schéma et 5 fixtures validés; 58 tests contractuels réussis.
 - Oracle exhaustif indépendant : 91 tests réussis; campagne CI bornée sur trois dimensions affines, trois cas audités et zéro échec.
 - Documentation : 25 documents actifs validés; 5 références locales et 9 modules d'oracle indépendant validés.
@@ -115,14 +119,14 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 6. Permutations exhaustives des triangles et tétraèdres, translations dyadiques représentables, permutations signées des axes et homothéties par puissances de deux vérifiées.
 7. Fixtures obtuses, collinéaires, coplanaires cosphériques, sous-normales, maximales finies et à un ULP livrées. La classification d'un cinquième point quasi cosphérique reste explicitement le prédicat de sphère de 2A.6.
 
-### 2A.6 — minimalité, barycentriques et sphères
+### 2A.6 — minimalité locale, barycentriques et sphères — terminé
 
-1. Matérialiser la base singleton du plan de test : centre égal au point, dimension affine zéro et `ExactLevel` nul.
-2. Calculer les signes barycentriques exacts d'un centre dans son support.
-3. Réduire canoniquement tout support sur la frontière à son support minimal.
-4. Décider `relint` sans epsilon.
-5. Classer chaque point comme strictement intérieur, sur la frontière ou extérieur à une sphère candidate.
-6. Relier ces décisions au domaine `RelevantGP` sans transformer une dégénérescence non couverte en résultat exact.
+1. Base singleton matérialisée : centre égal au point, dimension affine zéro et `ExactLevel` nul, y compris aux extrêmes binary64 finis.
+2. Coordonnées et signes barycentriques exacts calculés pour tout support affinement indépendant de taille un à quatre; somme un et reconstruction affine sont revérifiées avant certification.
+3. Tout centre sur la frontière relative est réduit aux indices de coefficients strictement positifs; le centre, le niveau et l'intérieur relatif du support réduit sont ensuite revérifiés exactement.
+4. `relative_interior`, `relative_boundary` et `exterior` sont décidés sans epsilon, avec une décision `cpu_multiprecision` par coefficient.
+5. Un point est classé `strictly_inside`, `boundary` ou `outside` par le signe exact de sa distance carrée moins le niveau de la sphère, avec témoin rationnel canonique.
+6. Les supports dépendants et les centres circonscrits extérieurs n'inventent aucun support minimal. Le résultat reste une décision locale : il ne renseigne pas `relevant_gp_complete`, ne constitue pas une énumération de miniball et ne promeut aucun statut public.
 
 ### 2A.7 — ordre total des miniballs
 
@@ -160,7 +164,7 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Prochaine sous-porte
 
-Le prochain lot est 2A.6, minimalité, barycentriques et sphères, toujours sur `reference_cpu`, couche commune aux profils et mode `certified`. Il doit calculer les signes barycentriques, réduire les supports de frontière et classifier exactement intérieur, frontière ou extérieur avant toute intégration à `RelevantGP`. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
+Le prochain lot est 2A.7, ordre total des miniballs, toujours sur `reference_cpu`, couche commune aux profils et mode `certified`. Il doit comparer les `ExactLevel`, décider leurs égalités et figer un tie-break canonique indépendant de l'ordre d'entrée et des threads. Il ne doit pas confondre l'analyse locale 2A.6 avec l'énumération de tous les sous-supports nécessaire pour construire une miniball. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
 
 ## GCP
 

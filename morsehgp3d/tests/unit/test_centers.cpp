@@ -73,8 +73,10 @@ ExactLevel squared_distance(
 template <std::size_t SupportSize>
 CircumcenterResult center_of(
     const std::array<ExactRational3, SupportSize>& support) {
-  static_assert(SupportSize >= 2U && SupportSize <= 4U);
-  if constexpr (SupportSize == 2U) {
+  static_assert(SupportSize >= 1U && SupportSize <= 4U);
+  if constexpr (SupportSize == 1U) {
+    return circumcenter(support[0]);
+  } else if constexpr (SupportSize == 2U) {
     return circumcenter(support[0], support[1]);
   } else if constexpr (SupportSize == 3U) {
     return circumcenter(support[0], support[1], support[2]);
@@ -86,8 +88,10 @@ CircumcenterResult center_of(
 template <std::size_t SupportSize>
 CircumcenterResult center_of(
     const std::array<CertifiedPoint3, SupportSize>& support) {
-  static_assert(SupportSize >= 2U && SupportSize <= 4U);
-  if constexpr (SupportSize == 2U) {
+  static_assert(SupportSize >= 1U && SupportSize <= 4U);
+  if constexpr (SupportSize == 1U) {
+    return circumcenter(support[0]);
+  } else if constexpr (SupportSize == 2U) {
     return circumcenter(support[0], support[1]);
   } else if constexpr (SupportSize == 3U) {
     return circumcenter(support[0], support[1], support[2]);
@@ -218,6 +222,25 @@ void test_two_point_centers() {
       2U,
       0U,
       "signed binary64 zeroes do not manufacture a distinct support");
+}
+
+void test_singleton_centers() {
+  const ExactRational3 singleton = rational_point(
+      ExactRational{BigInt{1}, BigInt{3}},
+      ExactRational{BigInt{-2}, BigInt{5}},
+      ExactRational{BigInt{7}, BigInt{11}});
+  check_unique(
+      circumcenter(singleton),
+      1U,
+      singleton,
+      ExactLevel{},
+      "singleton support");
+  check_unique(
+      circumcenter(binary_point(-0.0, 2.0, -3.0)),
+      1U,
+      point(0, 2, -3),
+      ExactLevel{},
+      "binary64 singleton support");
 }
 
 void test_three_point_centers() {
@@ -455,9 +478,9 @@ void test_result_invariants_and_domain_errors() {
   check_throws<std::invalid_argument>(
       [] {
         static_cast<void>(CircumcenterResult::unique(
-            1U, ExactRational3{}, ExactLevel{}));
+            1U, ExactRational3{}, ExactLevel{BigInt{1}}));
       },
-      "a unique result rejects a support smaller than two");
+      "a singleton result rejects a positive squared radius");
   check_throws<std::invalid_argument>(
       [] {
         static_cast<void>(CircumcenterResult::unique(
@@ -496,6 +519,7 @@ void test_result_invariants_and_domain_errors() {
 }  // namespace
 
 int main() {
+  test_singleton_centers();
   test_two_point_centers();
   test_three_point_centers();
   test_four_point_centers();
