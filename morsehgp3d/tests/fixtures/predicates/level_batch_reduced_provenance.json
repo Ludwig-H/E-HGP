@@ -1,0 +1,37 @@
+{
+  "items": [
+    {
+      "minimal_support_ids": [2, 0],
+      "source_support_ids": [2, 1, 0],
+      "squared_level_exact": {
+        "denominator": "1",
+        "numerator": "1",
+        "schema_version": "2.0.0",
+        "unit": "input_coordinate_unit_squared"
+      }
+    },
+    {
+      "minimal_support_ids": [0, 2],
+      "source_support_ids": [0, 1, 2],
+      "squared_level_exact": {
+        "denominator": "1",
+        "numerator": "1",
+        "schema_version": "2.0.0",
+        "unit": "input_coordinate_unit_squared"
+      }
+    },
+    {
+      "minimal_support_ids": [2, 0],
+      "source_support_ids": [3, 2, 0],
+      "squared_level_exact": {
+        "denominator": "1",
+        "numerator": "1",
+        "schema_version": "2.0.0",
+        "unit": "input_coordinate_unit_squared"
+      }
+    }
+  ],
+  "kind": "morsehgp3d_predicate_replay_input",
+  "predicate": "canonical_level_batches",
+  "schema_version": 6
+}

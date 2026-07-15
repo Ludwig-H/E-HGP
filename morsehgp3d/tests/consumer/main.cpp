@@ -1,5 +1,6 @@
 #include "morsehgp3d/exact/center.hpp"
 #include "morsehgp3d/exact/level.hpp"
+#include "morsehgp3d/exact/level_order.hpp"
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
 #include "morsehgp3d/exact/support.hpp"
@@ -7,18 +8,21 @@
 #include <array>
 #include <cstdint>
 #include <iostream>
+#include <vector>
 
 int main() {
   using morsehgp3d::exact::BigInt;
   using morsehgp3d::exact::CertifiedPoint3;
   using morsehgp3d::exact::CircumcenterKind;
   using morsehgp3d::exact::CircumcenterSupportStatus;
+  using morsehgp3d::exact::CanonicalSupportIds;
   using morsehgp3d::exact::ExactLabelMoments;
   using morsehgp3d::exact::ExactLevel;
   using morsehgp3d::exact::ExactPlane3;
   using morsehgp3d::exact::ExactRational3;
   using morsehgp3d::exact::CertificationStage;
   using morsehgp3d::exact::PredicateFilterPolicy;
+  using morsehgp3d::exact::PredicateCounters;
   using morsehgp3d::exact::PredicateSign;
   using morsehgp3d::exact::SpherePointLocation;
   using morsehgp3d::exact::ThreePlaneIntersectionKind;
@@ -31,6 +35,18 @@ int main() {
   const ExactLevel level{BigInt{2}, BigInt{8}};
   if (level.canonical_key() != "1/4") {
     std::cerr << "installed ExactLevel did not preserve canonical semantics\n";
+    return 1;
+  }
+  PredicateCounters level_counters;
+  const auto equal_level_order = morsehgp3d::exact::compare_exact_levels(
+      ExactLevel{BigInt{1}, BigInt{2}},
+      ExactLevel{BigInt{2}, BigInt{4}},
+      &level_counters);
+  if (equal_level_order.decision.sign() != PredicateSign::zero ||
+      equal_level_order.cross_product_difference != 0 ||
+      level_counters.cpu_multiprecision_certified() != 1U ||
+      level_counters.exact_zeros() != 1U) {
+    std::cerr << "installed exact-level ordering changed semantics\n";
     return 1;
   }
 
@@ -122,6 +138,26 @@ int main() {
       support.reduced_support_contains(1U) ||
       !support.reduced_support_contains(2U)) {
     std::cerr << "installed exact support reduction changed semantics\n";
+    return 1;
+  }
+  const std::array<std::uint64_t, 3> source_support_ids{0U, 1U, 2U};
+  const auto reduced_emission =
+      morsehgp3d::exact::support_level_emission_from_analysis(
+          source_support_ids, support);
+  const std::array<std::uint64_t, 2> reduced_support_ids{0U, 2U};
+  const auto direct_emission = morsehgp3d::exact::SupportLevelEmission::create(
+      reduced_emission.squared_level(),
+      CanonicalSupportIds::from_ids(reduced_support_ids),
+      CanonicalSupportIds::from_ids(reduced_support_ids));
+  const std::vector<morsehgp3d::exact::SupportLevelEmission> emissions{
+      reduced_emission, direct_emission, direct_emission};
+  const auto batches = morsehgp3d::exact::canonical_level_batches(emissions);
+  if (batches.batches.size() != 1U ||
+      batches.batches[0].supports.size() != 1U ||
+      batches.batches[0].supports[0].source_provenance.size() != 2U ||
+      batches.emission_count != 3U || batches.unique_emission_count != 2U ||
+      batches.duplicate_emission_count != 1U) {
+    std::cerr << "installed canonical level batching changed semantics\n";
     return 1;
   }
   const auto sphere_side = morsehgp3d::exact::classify_sphere_point(

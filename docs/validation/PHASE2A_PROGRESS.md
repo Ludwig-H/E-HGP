@@ -23,7 +23,8 @@
 | intervalles FP64 conservateurs | `3d67d3c` | filtres distance/orientation 3D, repli multiprécision, désactivation par appel, différentiel activé/désactivé et préservation du FENV |
 | noyau affine exact 2A.4 | `ed5bd7e` | `ExactPlane3`, forme `H_RQ` à échelle exacte, orientation 2D dans un support, rang et intersection de trois plans, incidence déterminantale d'un quatrième plan, replay v3 et oracle `Fraction` |
 | centres et niveaux homogènes 2A.5 | `3f3fa2b` | centres exacts de supports de taille deux à quatre, dimension affine, `ExactRational3` et `ExactLevel` atomiques, replay v4 et oracle Gram/RREF indépendant |
-| minimalité locale, barycentriques et sphères 2A.6 | présent lot | singleton exact, signes barycentriques de supports indépendants, réduction certifiée des supports de frontière, côté exact d'une sphère, replay v5 et oracle RREF indépendant |
+| minimalité locale, barycentriques et sphères 2A.6 | `39f7902` | singleton exact, signes barycentriques de supports indépendants, réduction certifiée des supports de frontière, côté exact d'une sphère, replay v5 et oracle RREF indépendant |
+| ordre exact et lots canoniques 2A.7 | présent lot | comparaison instrumentée des `ExactLevel`, égalité par produit croisé, supports minimaux et provenances canoniques, lots exacts, replay v6 et oracle `Fraction` indépendant |
 
 La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe négatif signifie que `R` est moins coûteux au témoin. `ExactAffineForm3` conserve ses quatre coefficients rationnels et leur échelle exacte; sa clé primitive ne sert qu'à classifier le plan orienté ou la forme constante. Les API riches matérialisent encore leurs témoins multiprécision lorsque le signe est filtré. Le champ `certification_stage` identifie donc l'autorité du signe, pas le coût total d'un replay diagnostique.
 
@@ -41,8 +42,8 @@ La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe
 | coordonnées homogènes du centre et rayon carré | oui | non | non | oui | référence exacte terminée |
 | signes barycentriques et `relint` | oui | non | non | oui | référence exacte terminée |
 | intérieur, frontière ou extérieur d'une sphère | oui | non | non | oui | référence exacte terminée |
-| comparaison de rayons de miniball | non | non | non | non | en attente des niveaux homogènes |
-| égalité de niveaux issus de supports distincts | infrastructure `ExactLevel` seulement | non | non | partiel | prédicat à terminer |
+| comparaison de rayons de miniball | oui | non | non | oui | référence exacte terminée |
+| égalité de niveaux issus de supports distincts | oui | non | non | oui | référence exacte terminée |
 
 ## Invariants du filtre FP64
 
@@ -67,9 +68,9 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Qualification du lot courant
 
-- GCC 13, build strict : CTest 14/14.
-- Clang 18, build Release strict : CTest 14/14.
-- GCC 13 avec ASan et UBSan : CTest 14/14.
+- GCC 13, build strict : CTest 17/17.
+- Clang 18, build Release strict : CTest 17/17.
+- GCC 13 avec ASan et UBSan : CTest 17/17.
 - Corpus court déterministe : 2 048 cas, hash `276619686350b9c4f900d856b657ce084466cfdea2c4e8711d5efc7e690a1d15`.
 - Signes du corpus court : 1 002 négatifs, 892 positifs et 154 zéros.
 - Distances du corpus court : 58 signes `fp64_filtered` et 966 fallbacks `cpu_multiprecision`.
@@ -88,7 +89,10 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 - Replay supports et sphères v5 : 19 fixtures, dont 12 supports et 7 sphères, 4 statuts de support, 3 classes d'enveloppe, 4 tailles réduites, 3 côtés de sphère, 131 permutations exhaustives, 57 métamorphismes, 20 rejets d'entrée, 22 faux témoins natifs, 1 sortie non canonique, 1 diagnostic natif inattendu et 4 sentinelles historiques v1 à v4 vérifiés; centre et niveau à dénominateur non trivial, niveau nul et sorties normale et `--multiprecision-only` byte-identiques couverts.
 - Corpus supports et sphères `support-sphere-dyadic-splitmix64-v2` : 2 128 cas, graine `0x535550504f525435`, hash des commandes `0d5f30c7067c253b6e3c2cc36a530fad9a3f83e526b7f35fe23543ad1508a68c`, hash des réponses exactes de l'oracle `7d10f2cb87398847abcfae505c1365072d48786212b25159d8154f92d65f88d9`, sorties normale et `--multiprecision-only` byte-identiques. Le corpus contient 137 multisets barycentriques distincts, dont 128 géométries dyadiques non obtenues par simple similarité, 48 centres rationnels distincts et 136 niveaux distincts.
 - Répartition supports 2A.6 : 1 408 analyses, dont 512 `minimal`, 288 `boundary_reduced`, 320 `exterior_circumcenter` et 288 `affinely_dependent`; tailles un à quatre et dimensions affines zéro à trois couvertes. Les 720 côtés de sphère donnent 216 intérieurs stricts, 240 frontières et 264 extérieurs; les cas de rayon nul restent isolés dans leurs familles dédiées.
-- Package CMake installé, wrapper installé rejoué sur une intersection rationnelle v3, un centre non dyadique v4, une réduction de frontière v5, une sphère à dénominateurs non triviaux v5 et un niveau nul v5. Le consommateur externe exerce filtres, multiprécision, noyau affine, centre tétraédrique, réduction de support et côté de sphère : 1/1.
+- Replay ordre v6 : 11 fixtures, 3 signes, supports de tailles un à quatre, 10 lots, 17 émissions uniques et 1 doublon; 5 symétries de comparaison, 159 permutations d'items, 6 permutations internes d'identifiants, 2 homothéties exactes, 34 rejets d'entrée, 10 commandes natives invalides, 30 faux natifs, 1 sortie non canonique, 1 diagnostic natif inattendu et 5 sentinelles historiques v1 à v5 vérifiés. Un niveau exact encodé comme chaîne de 5 000 chiffres décimaux est accepté par le wrapper et le natif, tandis qu'un entier numérique JSON de même taille est refusé avant conversion. `PointId=2^53-1` et le lot maximal de 64 émissions sont acceptés nativement; `PointId=2^53` est refusé. Au-delà de cinq items, les permutations du harnais sont bornées à huit ordres déterministes, tous exécutés de bout en bout sur un lot de 64 supports distincts; les sorties normale et `--multiprecision-only` sont byte-identiques.
+- Corpus d'ordre `level-order-dyadic-splitmix64-v1` : 1 792 cas, graine `0x4c4556454c324137`, hash des commandes `59fc92204073609b622d86eea14f92efcb704e6bcba3daba7eb6c9dbf53a7e8b`, hash des réponses exactes de l'oracle `3cb912b811f649d8bf96be79047234b7f5a1a59e6ac846be3e1efc8bd512bbec`, sorties normale et `--multiprecision-only` byte-identiques.
+- Répartition ordre 2A.7 : 1 536 comparaisons, dont 640 négatives, 640 positives et 256 égalités exactes; six familles de 256 cas couvrent produits croisés `-1`, `1`, égalités, ULP, exposants extrêmes et rationnels génériques. Les 256 cas de chaînes, issus de 32 chaînes de base rejouées sous huit ordonnancements, totalisent 5 120 émissions, 1 536 occurrences de niveaux de lots, 768 émissions dupliquées, des supports minimaux et sources de tailles un à quatre, jusqu'à trois supports par niveau et trois provenances par support.
+- Package CMake installé, wrapper installé rejoué sur une intersection rationnelle v3, un centre non dyadique v4, une réduction de frontière v5, une sphère à dénominateurs non triviaux v5, un niveau nul v5, deux niveaux v6 séparés par un produit croisé `-1` et une provenance réduite v6. Le consommateur externe exerce filtres, multiprécision, noyau affine, centre tétraédrique, réduction de support, côté de sphère, ordre exact et lots canoniques : 1/1.
 - Contrats : 21 définitions, 21 exemples de schéma et 5 fixtures validés; 58 tests contractuels réussis.
 - Oracle exhaustif indépendant : 91 tests réussis; campagne CI bornée sur trois dimensions affines, trois cas audités et zéro échec.
 - Documentation : 25 documents actifs validés; 5 références locales et 9 modules d'oracle indépendant validés.
@@ -128,12 +132,16 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 5. Un point est classé `strictly_inside`, `boundary` ou `outside` par le signe exact de sa distance carrée moins le niveau de la sphère, avec témoin rationnel canonique.
 6. Les supports dépendants et les centres circonscrits extérieurs n'inventent aucun support minimal. Le résultat reste une décision locale : il ne renseigne pas `relevant_gp_complete`, ne constitue pas une énumération de miniball et ne promeut aucun statut public.
 
-### 2A.7 — ordre total des miniballs
+### 2A.7 — ordre total des miniballs — terminé
 
-1. Comparer deux rayons carrés homogènes par produit croisé exact.
-2. Décider l'égalité de niveaux provenant de supports distincts.
-3. Figer le tie-break canonique indépendant de l'ordre d'entrée et des threads.
-4. Rejouer les lots de niveaux égaux et les supports réduits.
+1. `ExactLevel::operator<=>`, la décision seule et le résultat riche partagent le même produit croisé entier; le résultat riche expose son témoin et enregistre exactement une certification multiprécision explicite.
+2. L'égalité est exclusivement le produit croisé nul; les niveaux voisins dont le produit croisé vaut `-1` ou `1` restent distincts même avec des entiers de plusieurs milliers de bits.
+3. Les identifiants de support couvrent tout le domaine `PointId` JSON exact jusqu'à `2^53-1`, sont triés et validés uniques après application du masque positionnel de réduction 2A.6; tout doublon est refusé.
+4. Le tie-break local est `(niveau exact, cardinalité du support minimal, identifiants croissants)`. Le centre demeure un témoin de l'analyse, pas une clé supplémentaire susceptible de masquer un support associé à deux niveaux contradictoires.
+5. Les supports sources distincts réduits vers le même support minimal sont conservés comme provenances triées; les émissions identiques sont comptées séparément de toute multiplicité géométrique ou de Morse.
+6. Les lots sont groupés uniquement par égalité exacte, restent invariants par permutation d'arrivée et préservent les supports minimaux distincts d'un même niveau.
+7. L'API refuse les supports vides, trop grands, dupliqués ou hors domaine, les provenances qui n'incluent pas leur support minimal, les analyses extérieures ou dépendantes et un même support minimal associé à deux niveaux.
+8. Le replay v6 et son oracle `Fraction` réexercent comparaison, groupement, ordre par cardinalité, réduction de provenance, duplication, quasi-égalité, gros entiers et compatibilité des identifiants v1 à v5.
 
 ### 2A.8 — cascade adaptative complète
 
@@ -146,12 +154,13 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 ### 2A.9 — campagne de fermeture
 
 1. Ajouter un batch `decision-only` sans sérialisation systématique de témoins big-int.
-2. Geler générateur, graines, domaines d'exposants et hash du corpus.
-3. Atteindre au moins dix millions de signes pseudo-aléatoires contre la référence, comme exigé par la feuille de route.
-4. Couvrir séparément cas bien conditionnés, annulations, sous-normaux, grands offsets, quasi-coplanarité, quasi-cosphéricité et égalités exactes.
-5. Exécuter les métamorphismes de permutation, réflexion d'axes, translations dyadiques représentables et échelles exactes.
-6. Minimiser automatiquement toute différence; toute contradiction devient une fixture permanente et met à jour le registre des preuves avant reprise.
-7. Publier compteurs d'étages, zéros, fallbacks, inconnues restantes, versions de compilateurs et hashes.
+2. Ajouter un checkpoint local fermé pour les runs triés, puis vérifier la reprise à chaque coupure et la fusion d'un niveau égal traversant plusieurs chunks; les permutations stateless de 2A.7 ne sont pas présentées comme cette preuve transactionnelle.
+3. Geler générateur, graines, domaines d'exposants et hash du corpus.
+4. Atteindre au moins dix millions de signes pseudo-aléatoires contre la référence, comme exigé par la feuille de route.
+5. Couvrir séparément cas bien conditionnés, annulations, sous-normaux, grands offsets, quasi-coplanarité, quasi-cosphéricité et égalités exactes.
+6. Exécuter les métamorphismes de permutation, réflexion d'axes, translations dyadiques représentables et échelles exactes.
+7. Minimiser automatiquement toute différence; toute contradiction devient une fixture permanente et met à jour le registre des preuves avant reprise.
+8. Publier compteurs d'étages, zéros, fallbacks, inconnues restantes, versions de compilateurs et hashes.
 
 ### 2A.10 — revue de porte
 
@@ -164,7 +173,7 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Prochaine sous-porte
 
-Le prochain lot est 2A.7, ordre total des miniballs, toujours sur `reference_cpu`, couche commune aux profils et mode `certified`. Il doit comparer les `ExactLevel`, décider leurs égalités et figer un tie-break canonique indépendant de l'ordre d'entrée et des threads. Il ne doit pas confondre l'analyse locale 2A.6 avec l'énumération de tous les sous-supports nécessaire pour construire une miniball. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
+Le prochain lot est 2A.8, cascade adaptative complète, toujours sur `reference_cpu`, couche commune aux profils et mode `certified`. Il doit étendre les filtres FP64 aux nouveaux signes dont la référence exacte est désormais disponible, ajouter les expansions de signe puis conserver le fallback multiprécision désactivable comme autorité terminale. Chaque décision doit rester attribuée à un unique étage, avec résultat canonique inchangé lorsque les étages rapides sont désactivés. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
 
 ## GCP
 

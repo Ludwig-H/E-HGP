@@ -2,6 +2,7 @@
 #include "morsehgp3d/exact/center.hpp"
 #include "morsehgp3d/exact/integer.hpp"
 #include "morsehgp3d/exact/label.hpp"
+#include "morsehgp3d/exact/level_order.hpp"
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/exact/predicate.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
@@ -28,6 +29,8 @@ using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::CircumcenterKind;
 using morsehgp3d::exact::CircumcenterResult;
 using morsehgp3d::exact::CircumcenterSupportAnalysis;
+using morsehgp3d::exact::CanonicalLevelBatchResult;
+using morsehgp3d::exact::CanonicalSupportIds;
 using morsehgp3d::exact::ExactAffineForm3;
 using morsehgp3d::exact::ExactLabelMoments;
 using morsehgp3d::exact::ExactLevel;
@@ -39,11 +42,15 @@ using morsehgp3d::exact::ExactRational3;
 using morsehgp3d::exact::ExactRational3Record;
 using morsehgp3d::exact::PredicateCounters;
 using morsehgp3d::exact::PredicateFilterPolicy;
+using morsehgp3d::exact::PredicateSign;
+using morsehgp3d::exact::SupportLevelEmission;
 using morsehgp3d::exact::canonical_integer_string;
 using morsehgp3d::exact::analyze_circumcenter_support;
 using morsehgp3d::exact::classify_sphere_point;
 using morsehgp3d::exact::classify_affine_form;
+using morsehgp3d::exact::canonical_level_batches;
 using morsehgp3d::exact::compare_squared_distances;
+using morsehgp3d::exact::compare_exact_levels;
 using morsehgp3d::exact::circumcenter;
 using morsehgp3d::exact::fourth_plane_incidence;
 using morsehgp3d::exact::intersect_three_planes;
@@ -92,6 +99,18 @@ ExactPlane3 parse_plane(
       std::string{arguments[offset + 3U]}});
 }
 
+ExactLevel parse_level(
+    std::span<const std::string_view> arguments, std::size_t offset) {
+  if (offset > arguments.size() || arguments.size() - offset < 2U) {
+    throw std::invalid_argument("a replay exact level is incomplete");
+  }
+  return ExactLevel::from_record(ExactLevelRecord{
+      ExactLevel::schema_version,
+      std::string{arguments[offset]},
+      std::string{arguments[offset + 1U]},
+      ExactLevel::unit});
+}
+
 CertifiedPoint3 parse_point(
     std::span<const std::string_view> arguments, std::size_t offset) {
   if (offset > arguments.size() || arguments.size() - offset < 3U) {
@@ -123,6 +142,35 @@ std::uint32_t parse_id(std::string_view text) {
     throw std::invalid_argument("a point identifier exceeds uint32");
   }
   return static_cast<std::uint32_t>(parsed);
+}
+
+std::uint64_t parse_point_id(std::string_view text) {
+  if (text.empty() || (text.size() > 1U && text.front() == '0')) {
+    throw std::invalid_argument(
+        "a support identifier must be a canonical nonnegative integer");
+  }
+  std::uint64_t parsed = 0;
+  const auto conversion =
+      std::from_chars(text.data(), text.data() + text.size(), parsed);
+  if (conversion.ec != std::errc{} ||
+      conversion.ptr != text.data() + text.size() ||
+      parsed > CanonicalSupportIds::maximum_point_id) {
+    throw std::invalid_argument(
+        "a support identifier is outside the v2 PointId domain");
+  }
+  return parsed;
+}
+
+std::string support_ids_json(const CanonicalSupportIds& support) {
+  std::string result{"["};
+  for (std::size_t index = 0; index < support.size(); ++index) {
+    if (index != 0U) {
+      result += ',';
+    }
+    result += std::to_string(support.id(index));
+  }
+  result += ']';
+  return result;
 }
 
 struct ParsedPowerLabels {
@@ -558,6 +606,140 @@ int replay_sphere_side(
   return 0;
 }
 
+int replay_exact_level_comparison(
+    std::span<const std::string_view> arguments, std::ostream& output) {
+  const ExactLevel left = parse_level(arguments, 1U);
+  const ExactLevel right = parse_level(arguments, 3U);
+  PredicateCounters counters;
+  const auto result = compare_exact_levels(left, right, &counters);
+  const PredicateSign sign = result.decision.sign();
+  const char* ordering = sign == PredicateSign::negative
+                             ? "less"
+                             : sign == PredicateSign::zero ? "equal" : "greater";
+  output << "{\"certification_stage\":\""
+         << to_string(result.decision.certification_stage())
+         << "\",\"counters\":" << counters_json(counters)
+         << ",\"cross_product_difference_exact\":\""
+         << canonical_integer_string(result.cross_product_difference)
+         << "\",\"equal\":" << (sign == PredicateSign::zero ? "true" : "false")
+         << ",\"ordering\":\"" << ordering
+         << "\",\"predicate\":\"compare_exact_levels\""
+         << ",\"sign\":\"" << to_string(sign) << "\"}\n";
+  return 0;
+}
+
+int replay_canonical_level_batches(
+    std::span<const std::string_view> arguments, std::ostream& output) {
+  if (arguments.size() < 2U) {
+    throw std::invalid_argument("the canonical level-batch item count is missing");
+  }
+  const std::size_t emission_count =
+      parse_size(arguments[1], "canonical level-batch item count");
+  if (emission_count < 1U || emission_count > 64U) {
+    throw std::invalid_argument(
+        "a canonical level batch requires between one and 64 emissions");
+  }
+
+  std::vector<SupportLevelEmission> emissions;
+  emissions.reserve(emission_count);
+  std::size_t cursor = 2U;
+  for (std::size_t emission_index = 0U;
+       emission_index < emission_count;
+       ++emission_index) {
+    if (cursor > arguments.size() || arguments.size() - cursor < 3U) {
+      throw std::invalid_argument("a canonical level-batch emission is incomplete");
+    }
+    ExactLevel level = parse_level(arguments, cursor);
+    cursor += 2U;
+    const std::size_t minimal_size =
+        parse_size(arguments[cursor], "minimal support size");
+    ++cursor;
+    if (minimal_size < 1U || minimal_size > 4U ||
+        minimal_size > arguments.size() - cursor) {
+      throw std::invalid_argument(
+          "a minimal support must contain between one and four identifiers");
+    }
+    std::vector<std::uint64_t> minimal_ids;
+    minimal_ids.reserve(minimal_size);
+    for (std::size_t index = 0U; index < minimal_size; ++index) {
+      minimal_ids.push_back(parse_point_id(arguments[cursor]));
+      ++cursor;
+    }
+    if (cursor >= arguments.size()) {
+      throw std::invalid_argument("a source support size is missing");
+    }
+    const std::size_t source_size =
+        parse_size(arguments[cursor], "source support size");
+    ++cursor;
+    if (source_size < 1U || source_size > 4U ||
+        source_size > arguments.size() - cursor) {
+      throw std::invalid_argument(
+          "a source support must contain between one and four identifiers");
+    }
+    std::vector<std::uint64_t> source_ids;
+    source_ids.reserve(source_size);
+    for (std::size_t index = 0U; index < source_size; ++index) {
+      source_ids.push_back(parse_point_id(arguments[cursor]));
+      ++cursor;
+    }
+    emissions.push_back(SupportLevelEmission::create(
+        std::move(level),
+        CanonicalSupportIds::from_ids(minimal_ids),
+        CanonicalSupportIds::from_ids(source_ids)));
+  }
+  if (cursor != arguments.size()) {
+    throw std::invalid_argument(
+        "the canonical level batch has trailing serialized fields");
+  }
+
+  const CanonicalLevelBatchResult result = canonical_level_batches(emissions);
+  output << "{\"duplicate_emission_count\":"
+         << result.duplicate_emission_count
+         << ",\"emission_count\":" << result.emission_count
+         << ",\"equal_level_batches\":[";
+  for (std::size_t batch_index = 0U;
+       batch_index < result.batches.size();
+       ++batch_index) {
+    if (batch_index != 0U) {
+      output << ',';
+    }
+    const auto& batch = result.batches[batch_index];
+    output << "{\"emission_count\":" << batch.emission_count
+           << ",\"squared_level_exact\":" << batch.squared_level.canonical_json()
+           << ",\"supports\":[";
+    for (std::size_t support_index = 0U;
+         support_index < batch.supports.size();
+         ++support_index) {
+      if (support_index != 0U) {
+        output << ',';
+      }
+      const auto& support = batch.supports[support_index];
+      output << "{\"emission_count\":" << support.emission_count
+             << ",\"minimal_support_ids\":"
+             << support_ids_json(support.minimal_support_ids)
+             << ",\"source_provenance\":[";
+      for (std::size_t source_index = 0U;
+           source_index < support.source_provenance.size();
+           ++source_index) {
+        if (source_index != 0U) {
+          output << ',';
+        }
+        const auto& provenance = support.source_provenance[source_index];
+        output << "{\"emission_count\":" << provenance.emission_count
+               << ",\"source_support_ids\":"
+               << support_ids_json(provenance.source_support_ids) << '}';
+      }
+      output << "],\"squared_level_exact\":"
+             << support.squared_level.canonical_json() << '}';
+    }
+    output << "]}";
+  }
+  output << "],\"predicate\":\"canonical_level_batches\""
+         << ",\"unique_emission_count\":" << result.unique_emission_count
+         << "}\n";
+  return 0;
+}
+
 int replay_tokens(
     std::span<const std::string_view> arguments,
     std::ostream& output,
@@ -597,6 +779,12 @@ int replay_tokens(
   }
   if (arguments[0] == "sphere_side") {
     return replay_sphere_side(arguments, output);
+  }
+  if (arguments[0] == "compare_exact_levels" && arguments.size() == 5U) {
+    return replay_exact_level_comparison(arguments, output);
+  }
+  if (arguments[0] == "canonical_level_batches") {
+    return replay_canonical_level_batches(arguments, output);
   }
   throw std::invalid_argument("the predicate name or argument count is unsupported");
 }
@@ -664,6 +852,10 @@ void print_usage(const char* executable) {
             << " circumcenter_support_analysis COUNT HEX_X HEX_Y HEX_Z ... (1 to 4 points)\n"
             << "   or: " << executable
             << " sphere_side XN YN ZN D LEVEL_N LEVEL_D HEX_X HEX_Y HEX_Z\n"
+            << "   or: " << executable
+            << " compare_exact_levels LEFT_N LEFT_D RIGHT_N RIGHT_D\n"
+            << "   or: " << executable
+            << " canonical_level_batches COUNT LEVEL_N LEVEL_D MIN_COUNT ... SOURCE_COUNT ...\n"
             << "   or: " << executable << " --batch < predicate-lines.txt\n"
             << "prefix any form with --multiprecision-only to disable FP64 filters\n";
 }

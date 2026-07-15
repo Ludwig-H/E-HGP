@@ -16,16 +16,23 @@ from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
+# Exact integer records are intentionally unbounded and mirror boost::cpp_int in
+# the native replay. Python 3.11's process-wide decimal conversion guard would
+# otherwise reject valid records beyond 4,300 digits before the exact oracle can
+# inspect them.
+if hasattr(sys, "set_int_max_str_digits"):
+    sys.set_int_max_str_digits(0)
 
 INPUT_KIND = "morsehgp3d_predicate_replay_input"
 RESULT_KIND = "morsehgp3d_predicate_replay_result"
-SCHEMA_VERSIONS = {1, 2, 3, 4, 5}
+SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6}
 DOMAINS = {
     1: b"MorseHGP3D/predicate-replay-v1/",
     2: b"MorseHGP3D/predicate-replay-v2/",
     3: b"MorseHGP3D/predicate-replay-v3/",
     4: b"MorseHGP3D/predicate-replay-v4/",
     5: b"MorseHGP3D/predicate-replay-v5/",
+    6: b"MorseHGP3D/predicate-replay-v6/",
 }
 POINT_COUNTS = {
     "compare_squared_distances": 3,
@@ -45,11 +52,18 @@ COUNTER_FIELDS = {
 }
 NATIVE_EXECUTABLE = "morsehgp3d_replay_predicate" + (".exe" if os.name == "nt" else "")
 NATIVE_TIMEOUT_SECONDS = 30
+MAX_SAFE_JSON_INTEGER = 9_007_199_254_740_991
+MAX_LEVEL_BATCH_ITEMS = 64
+MAX_JSON_INTEGER_DIGITS = len(str(MAX_SAFE_JSON_INTEGER))
 
 
 def canonical_json(value: object) -> str:
     return json.dumps(
-        value, allow_nan=False, ensure_ascii=False, separators=(",", ":"), sort_keys=True
+        value,
+        allow_nan=False,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
     )
 
 
@@ -65,9 +79,16 @@ def strict_json_loads(text: str) -> Any:
     def reject_nonfinite_constant(value: str) -> None:
         raise ValueError(f"non-finite JSON number is forbidden: {value}")
 
+    def parse_bounded_integer(value: str) -> int:
+        digits = value[1:] if value.startswith("-") else value
+        if len(digits) > MAX_JSON_INTEGER_DIGITS:
+            raise ValueError("a JSON integer exceeds the exact numeric token domain")
+        return int(value)
+
     return json.loads(
         text,
         object_pairs_hook=reject_duplicate_keys,
+        parse_int=parse_bounded_integer,
         parse_constant=reject_nonfinite_constant,
     )
 
@@ -82,7 +103,9 @@ def validate_points(points: Any, label: str) -> list[list[str]]:
         normalized_point: list[str] = []
         for word in point:
             if not isinstance(word, str) or HEX_WORD.fullmatch(word) is None:
-                raise ValueError("binary64 words must use 16 lowercase hexadecimal digits")
+                raise ValueError(
+                    "binary64 words must use 16 lowercase hexadecimal digits"
+                )
             bits = int(word, 16)
             if ((bits >> 52) & 0x7FF) == 0x7FF:
                 raise ValueError("binary64 replay coordinates must be finite")
@@ -103,7 +126,9 @@ def validate_exact_rational3(value: Any, label: str) -> dict[str, str]:
     if not isinstance(value, dict) or set(value) != fields:
         raise ValueError(f"the replay {label} is not a closed ExactRational3 object")
     if value["schema_version"] != "2.0.0" or value["unit"] != "input_coordinate_unit":
-        raise ValueError(f"the replay {label} has an unsupported ExactRational3 contract")
+        raise ValueError(
+            f"the replay {label} has an unsupported ExactRational3 contract"
+        )
     denominator = value["denominator"]
     numerators = [value[f"{axis}_numerator"] for axis in "xyz"]
     if (
@@ -186,6 +211,26 @@ def validate_label_ids(value: Any, point_count: int, label: str) -> list[int]:
     return list(value)
 
 
+def validate_replay_id_set(
+    value: Any, label: str, *, maximum_size: int = 4
+) -> list[int]:
+    if not isinstance(value, list) or not 1 <= len(value) <= maximum_size:
+        raise ValueError(
+            f"the replay {label} must contain between one and {maximum_size} identifiers"
+        )
+    if any(type(identifier) is not int for identifier in value):
+        raise ValueError(f"the replay {label} identifiers must be integers")
+    if any(
+        identifier < 0 or identifier > MAX_SAFE_JSON_INTEGER for identifier in value
+    ):
+        raise ValueError(
+            f"the replay {label} identifiers must be JSON-safe nonnegative integers"
+        )
+    if len(set(value)) != len(value):
+        raise ValueError(f"the replay {label} identifiers must be unique")
+    return list(value)
+
+
 def validate_input(value: Any) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError("the replay input must be a JSON object")
@@ -195,7 +240,9 @@ def validate_input(value: Any) -> dict[str, Any]:
         or value["schema_version"] not in SCHEMA_VERSIONS
         or not isinstance(value.get("predicate"), str)
     ):
-        raise ValueError("the replay input kind, schema_version, or predicate is unsupported")
+        raise ValueError(
+            "the replay input kind, schema_version, or predicate is unsupported"
+        )
 
     schema_version = value["schema_version"]
     predicate = value["predicate"]
@@ -224,7 +271,9 @@ def validate_input(value: Any) -> dict[str, Any]:
             "witness",
         }
         if set(value) != required or predicate != "power_bisector_side":
-            raise ValueError("the v2 replay input has missing, unknown, or unsupported fields")
+            raise ValueError(
+                "the v2 replay input has missing, unknown, or unsupported fields"
+            )
         point_table = validate_points(value["point_table"], "point_table")
         q_ids = validate_label_ids(value["q_ids"], len(point_table), "Q label")
         r_ids = validate_label_ids(value["r_ids"], len(point_table), "R label")
@@ -243,10 +292,14 @@ def validate_input(value: Any) -> dict[str, Any]:
     if schema_version == 4:
         required = {"kind", "schema_version", "predicate", "points"}
         if set(value) != required or predicate != "circumcenter_support":
-            raise ValueError("the v4 replay input has missing, unknown, or unsupported fields")
+            raise ValueError(
+                "the v4 replay input has missing, unknown, or unsupported fields"
+            )
         points = validate_points(value["points"], "points")
         if not 2 <= len(points) <= 4:
-            raise ValueError("circumcenter construction requires between two and four points")
+            raise ValueError(
+                "circumcenter construction requires between two and four points"
+            )
         return {
             "kind": INPUT_KIND,
             "schema_version": 4,
@@ -282,7 +335,9 @@ def validate_input(value: Any) -> dict[str, Any]:
                 "squared_level_exact",
             }
             if set(value) != required:
-                raise ValueError("the v5 sphere-side input has missing or unknown fields")
+                raise ValueError(
+                    "the v5 sphere-side input has missing or unknown fields"
+                )
             point = validate_points([value["point"]], "point")[0]
             return {
                 "center_exact": validate_exact_rational3(
@@ -297,6 +352,92 @@ def validate_input(value: Any) -> dict[str, Any]:
                 ),
             }
         raise ValueError("the v5 replay predicate is unsupported")
+
+    if schema_version == 6:
+        if predicate == "compare_exact_levels":
+            required = {
+                "kind",
+                "left_squared_level_exact",
+                "predicate",
+                "right_squared_level_exact",
+                "schema_version",
+            }
+            if set(value) != required:
+                raise ValueError(
+                    "the v6 level-comparison input has missing or unknown fields"
+                )
+            return {
+                "kind": INPUT_KIND,
+                "left_squared_level_exact": validate_exact_level_record(
+                    value["left_squared_level_exact"], "left squared level"
+                ),
+                "predicate": predicate,
+                "right_squared_level_exact": validate_exact_level_record(
+                    value["right_squared_level_exact"], "right squared level"
+                ),
+                "schema_version": 6,
+            }
+        if predicate == "canonical_level_batches":
+            required = {"items", "kind", "predicate", "schema_version"}
+            if set(value) != required:
+                raise ValueError(
+                    "the v6 level-batch input has missing or unknown fields"
+                )
+            raw_items = value["items"]
+            if (
+                not isinstance(raw_items, list)
+                or not 1 <= len(raw_items) <= MAX_LEVEL_BATCH_ITEMS
+            ):
+                raise ValueError(
+                    "the v6 level batch must contain between one and 64 items"
+                )
+            items: list[dict[str, Any]] = []
+            levels_by_minimal_support: dict[tuple[int, ...], dict[str, str]] = {}
+            for index, item in enumerate(raw_items):
+                fields = {
+                    "minimal_support_ids",
+                    "source_support_ids",
+                    "squared_level_exact",
+                }
+                if not isinstance(item, dict) or set(item) != fields:
+                    raise ValueError(
+                        f"the v6 level item {index} has missing or unknown fields"
+                    )
+                minimal = validate_replay_id_set(
+                    item["minimal_support_ids"], f"minimal support {index}"
+                )
+                source = validate_replay_id_set(
+                    item["source_support_ids"], f"source support {index}"
+                )
+                if not set(minimal).issubset(source):
+                    raise ValueError(
+                        f"the v6 minimal support {index} is not included in its source support"
+                    )
+                level = validate_exact_level_record(
+                    item["squared_level_exact"], f"squared level {index}"
+                )
+                minimal_key = tuple(sorted(minimal))
+                previous_level = levels_by_minimal_support.setdefault(
+                    minimal_key, level
+                )
+                if previous_level != level:
+                    raise ValueError(
+                        "one canonical minimal support cannot carry two exact levels"
+                    )
+                items.append(
+                    {
+                        "minimal_support_ids": minimal,
+                        "source_support_ids": source,
+                        "squared_level_exact": level,
+                    }
+                )
+            return {
+                "items": items,
+                "kind": INPUT_KIND,
+                "predicate": predicate,
+                "schema_version": 6,
+            }
+        raise ValueError("the v6 replay predicate is unsupported")
 
     if predicate == "plane_through_points":
         required = {"kind", "schema_version", "predicate", "points"}
@@ -383,9 +524,13 @@ def checked_executable(candidate: Path, source: str) -> Path:
     try:
         resolved = candidate.expanduser().resolve(strict=True)
     except OSError as error:
-        raise FileNotFoundError(f"{source} replay executable does not exist: {candidate}") from error
+        raise FileNotFoundError(
+            f"{source} replay executable does not exist: {candidate}"
+        ) from error
     if not resolved.is_file() or not os.access(resolved, os.X_OK):
-        raise PermissionError(f"{source} replay executable is not an executable file: {resolved}")
+        raise PermissionError(
+            f"{source} replay executable is not an executable file: {resolved}"
+        )
     return resolved
 
 
@@ -442,7 +587,9 @@ def exact_affine_form(
     if value["schema_version"] != "2.0.0":
         raise ValueError(f"the native {label} has an unsupported affine-form contract")
     return tuple(
-        canonical_rational(value[field], f"{label} coefficient {field}", nonnegative=False)
+        canonical_rational(
+            value[field], f"{label} coefficient {field}", nonnegative=False
+        )
         for field in ("a", "b", "c", "d")
     )  # type: ignore[return-value]
 
@@ -455,7 +602,10 @@ def canonical_level(value: Any, label: str) -> Fraction:
         "unit",
     }:
         raise ValueError(f"the native {label} is not a closed ExactLevel object")
-    if value["schema_version"] != "2.0.0" or value["unit"] != "input_coordinate_unit_squared":
+    if (
+        value["schema_version"] != "2.0.0"
+        or value["unit"] != "input_coordinate_unit_squared"
+    ):
         raise ValueError(f"the native {label} has an unsupported ExactLevel contract")
     return canonical_rational(
         {"denominator": value["denominator"], "numerator": value["numerator"]},
@@ -474,7 +624,8 @@ def rational3(value: Any, label: str) -> tuple[Fraction, Fraction, Fraction]:
 
 def point_from_words(words: list[str]) -> tuple[Fraction, Fraction, Fraction]:
     return tuple(
-        Fraction.from_float(struct.unpack(">d", bytes.fromhex(word))[0]) for word in words
+        Fraction.from_float(struct.unpack(">d", bytes.fromhex(word))[0])
+        for word in words
     )  # type: ignore[return-value]
 
 
@@ -511,7 +662,9 @@ def plane_record(
     }
 
 
-def plane_coefficients(record: dict[str, str]) -> tuple[Fraction, Fraction, Fraction, Fraction]:
+def plane_coefficients(
+    record: dict[str, str],
+) -> tuple[Fraction, Fraction, Fraction, Fraction]:
     return tuple(Fraction(int(record[field])) for field in ("a", "b", "c", "d"))  # type: ignore[return-value]
 
 
@@ -533,7 +686,10 @@ def plane_through_points(
     first = tuple(bi - ai for ai, bi in zip(a, b))
     second = tuple(ci - ai for ai, ci in zip(a, c))
     normal = cross_product(first, second)
-    offset = -sum((coefficient * coordinate for coefficient, coordinate in zip(normal, a)), Fraction())
+    offset = -sum(
+        (coefficient * coordinate for coefficient, coordinate in zip(normal, a)),
+        Fraction(),
+    )
     return plane_record((normal[0], normal[1], normal[2], offset))
 
 
@@ -560,10 +716,16 @@ def power_bisector_classification(
         for axis in range(3)
     )
     delta_norm = sum(
-        (sum((coordinate * coordinate for coordinate in value), Fraction()) for value in r_points),
+        (
+            sum((coordinate * coordinate for coordinate in value), Fraction())
+            for value in r_points
+        ),
         Fraction(),
     ) - sum(
-        (sum((coordinate * coordinate for coordinate in value), Fraction()) for value in q_points),
+        (
+            sum((coordinate * coordinate for coordinate in value), Fraction())
+            for value in q_points
+        ),
         Fraction(),
     )
     coefficients = (-2 * delta[0], -2 * delta[1], -2 * delta[2], delta_norm)
@@ -583,7 +745,11 @@ def matrix_rref(matrix: list[list[Fraction]]) -> tuple[list[list[Fraction]], lis
     column_count = len(reduced[0]) if reduced else 0
     for column in range(column_count):
         selected = next(
-            (row for row in range(pivot_row, len(reduced)) if reduced[row][column] != 0),
+            (
+                row
+                for row in range(pivot_row, len(reduced))
+                if reduced[row][column] != 0
+            ),
             None,
         )
         if selected is None:
@@ -637,7 +803,7 @@ def solve_three_planes(
 
 
 def exact_rational3_record(
-    point: tuple[Fraction, Fraction, Fraction]
+    point: tuple[Fraction, Fraction, Fraction],
 ) -> dict[str, str]:
     denominator = math.lcm(*(coordinate.denominator for coordinate in point))
     numerators = [
@@ -695,15 +861,11 @@ def independent_support_witness(
 
     size = len(points)
     gram = [
-        [
-            sum((a * b for a, b in zip(left, right)), Fraction())
-            for right in points
-        ]
+        [sum((a * b for a, b in zip(left, right)), Fraction()) for right in points]
         for left in points
     ]
     system = [
-        [2 * entry for entry in row]
-        + [Fraction(-1), gram[index][index]]
+        [2 * entry for entry in row] + [Fraction(-1), gram[index][index]]
         for index, row in enumerate(gram)
     ]
     system.append([Fraction(1) for _ in range(size)] + [Fraction(), Fraction(1)])
@@ -742,8 +904,7 @@ def empty_predicate_counters() -> dict[str, int]:
 def support_analysis_oracle(replay_input: dict[str, Any]) -> dict[str, Any]:
     points = [point_from_words(words) for words in replay_input["points"]]
     directions = [
-        [point[axis] - points[0][axis] for axis in range(3)]
-        for point in points[1:]
+        [point[axis] - points[0][axis] for axis in range(3)] for point in points[1:]
     ]
     _, affine_pivots = matrix_rref(directions)
     affine_dimension = len(affine_pivots)
@@ -846,6 +1007,97 @@ def sphere_side_oracle(replay_input: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def exact_level_comparison_oracle(replay_input: dict[str, Any]) -> dict[str, Any]:
+    left_record = replay_input["left_squared_level_exact"]
+    right_record = replay_input["right_squared_level_exact"]
+    left_numerator = int(left_record["numerator"])
+    left_denominator = int(left_record["denominator"])
+    right_numerator = int(right_record["numerator"])
+    right_denominator = int(right_record["denominator"])
+    difference = left_numerator * right_denominator - right_numerator * left_denominator
+    difference_sign = (
+        "negative" if difference < 0 else "zero" if difference == 0 else "positive"
+    )
+    counters = empty_predicate_counters()
+    counters["cpu_multiprecision_certified"] = 1
+    counters["exact_zeros"] = 1 if difference == 0 else 0
+    return {
+        "certification_stage": "cpu_multiprecision",
+        "counters": counters,
+        "cross_product_difference_exact": str(difference),
+        "equal": difference == 0,
+        "ordering": {
+            "negative": "less",
+            "zero": "equal",
+            "positive": "greater",
+        }[difference_sign],
+        "predicate": "compare_exact_levels",
+        "sign": difference_sign,
+    }
+
+
+def canonical_level_batches_oracle(replay_input: dict[str, Any]) -> dict[str, Any]:
+    grouped: dict[tuple[int, ...], tuple[Fraction, dict[tuple[int, ...], int]]] = {}
+    for item in replay_input["items"]:
+        minimal = tuple(sorted(item["minimal_support_ids"]))
+        source = tuple(sorted(item["source_support_ids"]))
+        level = canonical_level(item["squared_level_exact"], "input batch level")
+        if minimal not in grouped:
+            grouped[minimal] = (level, {})
+        grouped_level, emissions = grouped[minimal]
+        if grouped_level != level:
+            raise ValueError("one canonical minimal support carries two exact levels")
+        emissions[source] = emissions.get(source, 0) + 1
+
+    ordered = sorted(
+        (
+            (level, minimal, emissions)
+            for minimal, (level, emissions) in grouped.items()
+        ),
+        key=lambda entry: (entry[0], len(entry[1]), entry[1]),
+    )
+    batches: list[dict[str, Any]] = []
+    unique_emission_count = 0
+    for level, minimal, emissions in ordered:
+        if (
+            not batches
+            or canonical_level(batches[-1]["squared_level_exact"], "oracle batch level")
+            != level
+        ):
+            batches.append(
+                {
+                    "emission_count": 0,
+                    "squared_level_exact": exact_level_record(level),
+                    "supports": [],
+                }
+            )
+        support_emission_count = sum(emissions.values())
+        batches[-1]["emission_count"] += support_emission_count
+        batches[-1]["supports"].append(
+            {
+                "emission_count": support_emission_count,
+                "minimal_support_ids": list(minimal),
+                "source_provenance": [
+                    {
+                        "emission_count": emissions[source],
+                        "source_support_ids": list(source),
+                    }
+                    for source in sorted(emissions, key=lambda ids: (len(ids), ids))
+                ],
+                "squared_level_exact": exact_level_record(level),
+            }
+        )
+        unique_emission_count += len(emissions)
+    emission_count = len(replay_input["items"])
+    return {
+        "duplicate_emission_count": emission_count - unique_emission_count,
+        "emission_count": emission_count,
+        "equal_level_batches": batches,
+        "predicate": "canonical_level_batches",
+        "unique_emission_count": unique_emission_count,
+    }
+
+
 def circumcenter_support_oracle(
     replay_input: dict[str, Any],
 ) -> tuple[
@@ -882,7 +1134,9 @@ def circumcenter_support_oracle(
     ]
     reduced, system_pivots = matrix_rref(system)
     if system_pivots != list(range(expected_dimension)):
-        raise ValueError("an affinely independent support produced a singular Gram system")
+        raise ValueError(
+            "an affinely independent support produced a singular Gram system"
+        )
     coefficients = [reduced[index][-1] for index in range(expected_dimension)]
     center = tuple(
         origin[axis]
@@ -896,13 +1150,16 @@ def circumcenter_support_oracle(
         for axis in range(3)
     )
     squared_level = squared_distance(center, origin)
-    gram_level = sum(
-        (
-            gram[index][index] * coefficients[index]
-            for index in range(expected_dimension)
-        ),
-        Fraction(),
-    ) / 2
+    gram_level = (
+        sum(
+            (
+                gram[index][index] * coefficients[index]
+                for index in range(expected_dimension)
+            ),
+            Fraction(),
+        )
+        / 2
+    )
     if squared_level != gram_level or squared_level <= 0:
         raise ValueError("the exact Gram center produced an invalid squared level")
     if any(squared_distance(center, point) != squared_level for point in points[1:]):
@@ -932,7 +1189,9 @@ def expected_sign(value: Fraction) -> str:
 
 def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None:
     if not isinstance(value, dict) or set(value) != COUNTER_FIELDS:
-        raise ValueError("the native predicate counters do not match PredicateCounts v2")
+        raise ValueError(
+            "the native predicate counters do not match PredicateCounts v2"
+        )
     if any(type(count) is not int or count < 0 for count in value.values()):
         raise ValueError("the native predicate counters must be nonnegative integers")
     exact_only = {
@@ -940,6 +1199,7 @@ def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None
         "orientation_2d_in_plane",
         "fourth_plane_incidence",
         "sphere_side",
+        "compare_exact_levels",
     }
     allowed_stages = (
         {"cpu_multiprecision"}
@@ -959,11 +1219,215 @@ def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None
         "remaining_unknown": 0,
     }
     if value != expected:
-        raise ValueError("the native predicate counters disagree with its certification stage")
+        raise ValueError(
+            "the native predicate counters disagree with its certification stage"
+        )
 
 
 def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str, Any]:
     predicate = replay_input["predicate"]
+    if predicate == "compare_exact_levels":
+        expected_fields = {
+            "certification_stage",
+            "counters",
+            "cross_product_difference_exact",
+            "equal",
+            "ordering",
+            "predicate",
+            "sign",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError(
+                "the native exact-level comparison returned unknown fields"
+            )
+        if value["predicate"] != predicate:
+            raise ValueError("the native exact-level comparison changed predicate")
+        sign = value["sign"]
+        stage = value["certification_stage"]
+        if not isinstance(sign, str) or sign not in SIGNS or not isinstance(stage, str):
+            raise ValueError(
+                "the native exact-level comparison has invalid classifications"
+            )
+        if value["ordering"] not in ("less", "equal", "greater"):
+            raise ValueError("the native exact-level ordering is invalid")
+        if type(value["equal"]) is not bool:
+            raise ValueError("the native exact-level equality flag is not boolean")
+        difference = value["cross_product_difference_exact"]
+        if (
+            not isinstance(difference, str)
+            or CANONICAL_INTEGER.fullmatch(difference) is None
+        ):
+            raise ValueError("the native exact-level cross product is not canonical")
+        validate_counters(value["counters"], sign, stage, predicate)
+        expected = exact_level_comparison_oracle(replay_input)
+        if value != expected:
+            raise ValueError(
+                "the native exact-level comparison differs from the Fraction oracle"
+            )
+        return value
+
+    if predicate == "canonical_level_batches":
+        if not isinstance(value, dict) or set(value) != {
+            "duplicate_emission_count",
+            "emission_count",
+            "equal_level_batches",
+            "predicate",
+            "unique_emission_count",
+        }:
+            raise ValueError(
+                "the native canonical level batches returned unknown fields"
+            )
+        if value["predicate"] != predicate:
+            raise ValueError("the native level batches changed predicate")
+        for field in (
+            "duplicate_emission_count",
+            "emission_count",
+            "unique_emission_count",
+        ):
+            if (
+                type(value[field]) is not int
+                or value[field] < 0
+                or value[field] > MAX_SAFE_JSON_INTEGER
+            ):
+                raise ValueError("the native level-batch counters are invalid")
+        if (
+            value["emission_count"] < 1
+            or value["emission_count"]
+            != value["unique_emission_count"] + value["duplicate_emission_count"]
+        ):
+            raise ValueError("the native level-batch counters are inconsistent")
+        batches = value["equal_level_batches"]
+        if not isinstance(batches, list) or not batches:
+            raise ValueError("the native level batch array must be nonempty")
+        previous_level: Fraction | None = None
+        observed_emission_count = 0
+        observed_unique_emission_count = 0
+        for batch_index, batch in enumerate(batches):
+            if not isinstance(batch, dict) or set(batch) != {
+                "emission_count",
+                "squared_level_exact",
+                "supports",
+            }:
+                raise ValueError(
+                    f"the native level batch {batch_index} is not a closed object"
+                )
+            if (
+                type(batch["emission_count"]) is not int
+                or batch["emission_count"] < 1
+                or batch["emission_count"] > MAX_SAFE_JSON_INTEGER
+            ):
+                raise ValueError("the native batch emission count is invalid")
+            level = canonical_level(
+                batch["squared_level_exact"], f"native batch level {batch_index}"
+            )
+            if previous_level is not None and level <= previous_level:
+                raise ValueError(
+                    "the native exact-level batches are not strictly ordered"
+                )
+            previous_level = level
+            supports = batch["supports"]
+            if not isinstance(supports, list) or not supports:
+                raise ValueError("a native exact-level batch must contain items")
+            observed_batch_emission_count = 0
+            previous_item_key: tuple[int, tuple[int, ...]] | None = None
+            for item_index, item in enumerate(supports):
+                if not isinstance(item, dict) or set(item) != {
+                    "emission_count",
+                    "minimal_support_ids",
+                    "source_provenance",
+                    "squared_level_exact",
+                }:
+                    raise ValueError(
+                        f"the native level item {item_index} is not a closed object"
+                    )
+                if (
+                    type(item["emission_count"]) is not int
+                    or item["emission_count"] < 1
+                    or item["emission_count"] > MAX_SAFE_JSON_INTEGER
+                ):
+                    raise ValueError("the native support emission count is invalid")
+                if (
+                    canonical_level(
+                        item["squared_level_exact"],
+                        f"native support level {item_index}",
+                    )
+                    != level
+                ):
+                    raise ValueError("a native support level differs from its batch")
+                minimal = validate_replay_id_set(
+                    item["minimal_support_ids"],
+                    f"native minimal support {item_index}",
+                )
+                if minimal != sorted(minimal):
+                    raise ValueError("the native minimal support is not canonical")
+                minimal_key = (len(minimal), tuple(minimal))
+                if previous_item_key is not None and minimal_key <= previous_item_key:
+                    raise ValueError(
+                        "the native batch items do not use the stable tie-break"
+                    )
+                previous_item_key = minimal_key
+                provenance = item["source_provenance"]
+                if not isinstance(provenance, list) or not provenance:
+                    raise ValueError("a native level item must retain its provenance")
+                observed_support_emission_count = 0
+                previous_source_key: tuple[int, tuple[int, ...]] | None = None
+                for source_index, source in enumerate(provenance):
+                    if not isinstance(source, dict) or set(source) != {
+                        "emission_count",
+                        "source_support_ids",
+                    }:
+                        raise ValueError(
+                            f"the native provenance {source_index} is not a closed object"
+                        )
+                    if (
+                        type(source["emission_count"]) is not int
+                        or source["emission_count"] < 1
+                        or source["emission_count"] > MAX_SAFE_JSON_INTEGER
+                    ):
+                        raise ValueError("the native emission count is invalid")
+                    source_ids = validate_replay_id_set(
+                        source["source_support_ids"],
+                        f"native source support {source_index}",
+                    )
+                    if source_ids != sorted(source_ids):
+                        raise ValueError("the native source support is not canonical")
+                    if not set(minimal).issubset(source_ids):
+                        raise ValueError(
+                            "the native minimal support is absent from its provenance"
+                        )
+                    source_key = (len(source_ids), tuple(source_ids))
+                    if (
+                        previous_source_key is not None
+                        and source_key <= previous_source_key
+                    ):
+                        raise ValueError(
+                            "the native provenance is not canonically ordered"
+                        )
+                    previous_source_key = source_key
+                    observed_support_emission_count += source["emission_count"]
+                    observed_unique_emission_count += 1
+                if observed_support_emission_count != item["emission_count"]:
+                    raise ValueError(
+                        "the native support and provenance emission counts disagree"
+                    )
+                observed_batch_emission_count += item["emission_count"]
+            if observed_batch_emission_count != batch["emission_count"]:
+                raise ValueError(
+                    "the native batch and support emission counts disagree"
+                )
+            observed_emission_count += batch["emission_count"]
+        if (
+            observed_emission_count != value["emission_count"]
+            or observed_unique_emission_count != value["unique_emission_count"]
+        ):
+            raise ValueError("the native global level-batch counters disagree")
+        expected = canonical_level_batches_oracle(replay_input)
+        if value != expected:
+            raise ValueError(
+                "the native exact-level batches differ from the Fraction oracle"
+            )
+        return value
+
     if predicate == "circumcenter_support_analysis":
         expected_fields = {
             "affine_dimension",
@@ -1002,8 +1466,13 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
         barycentric = value["barycentric_coordinates_exact"]
         signs = value["barycentric_signs"]
         if barycentric is not None:
-            if not isinstance(barycentric, list) or len(barycentric) != value["support_size"]:
-                raise ValueError("the native support analysis has invalid barycentric size")
+            if (
+                not isinstance(barycentric, list)
+                or len(barycentric) != value["support_size"]
+            ):
+                raise ValueError(
+                    "the native support analysis has invalid barycentric size"
+                )
             for index, coordinate in enumerate(barycentric):
                 canonical_rational(
                     coordinate, f"barycentric coordinate {index}", nonnegative=False
@@ -1013,7 +1482,9 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
             or len(signs) != value["support_size"]
             or any(not isinstance(sign, str) or sign not in SIGNS for sign in signs)
         ):
-            raise ValueError("the native support analysis has invalid barycentric signs")
+            raise ValueError(
+                "the native support analysis has invalid barycentric signs"
+            )
         reduced = value["reduced_support_indices"]
         if reduced is not None and (
             not isinstance(reduced, list)
@@ -1070,7 +1541,9 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
         canonical_level(value["squared_distance_exact"], "sphere squared distance")
         expected = sphere_side_oracle(replay_input)
         if value != expected:
-            raise ValueError("the native sphere-side result differs from the exact oracle")
+            raise ValueError(
+                "the native sphere-side result differs from the exact oracle"
+            )
         return value
 
     if predicate == "circumcenter_support":
@@ -1086,7 +1559,9 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
             "support_size",
         }
         if not isinstance(value, dict) or set(value) != expected_fields:
-            raise ValueError("the native circumcenter construction returned unknown fields")
+            raise ValueError(
+                "the native circumcenter construction returned unknown fields"
+            )
         if (
             value["predicate"] != predicate
             or value["support_kind"] != support_kind
@@ -1095,21 +1570,32 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
             or type(value["affine_dimension"]) is not int
             or value["affine_dimension"] != affine_dimension
         ):
-            raise ValueError("the native circumcenter invariants differ from the replay input")
+            raise ValueError(
+                "the native circumcenter invariants differ from the replay input"
+            )
         if expected_center is None or expected_level is None:
-            if value["center_exact"] is not None or value["squared_level_exact"] is not None:
-                raise ValueError("an affinely dependent support exposed a circumcenter witness")
+            if (
+                value["center_exact"] is not None
+                or value["squared_level_exact"] is not None
+            ):
+                raise ValueError(
+                    "an affinely dependent support exposed a circumcenter witness"
+                )
             return value
         native_center = validate_exact_rational3(
             value["center_exact"], "native circumcenter"
         )
         if native_center != exact_rational3_record(expected_center):
-            raise ValueError("the native circumcenter differs from the exact Gram oracle")
+            raise ValueError(
+                "the native circumcenter differs from the exact Gram oracle"
+            )
         native_level = canonical_level(
             value["squared_level_exact"], "native circumcenter squared level"
         )
         if native_level != expected_level:
-            raise ValueError("the native circumcenter level differs from the exact Gram oracle")
+            raise ValueError(
+                "the native circumcenter level differs from the exact Gram oracle"
+            )
         return value
 
     if predicate == "plane_through_points":
@@ -1122,29 +1608,39 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
         points = [point_from_words(words) for words in replay_input["points"]]
         expected_plane = plane_through_points(points)
         if native_plane != expected_plane:
-            raise ValueError("the native constructed plane differs from the replay input")
+            raise ValueError(
+                "the native constructed plane differs from the replay input"
+            )
         return value
 
     if predicate == "power_bisector_affine_form":
-        classification, expected_plane, expected_coefficients = power_bisector_classification(
-            replay_input
+        classification, expected_plane, expected_coefficients = (
+            power_bisector_classification(replay_input)
         )
         expected_fields = {"affine_form", "classification", "predicate"}
         if expected_plane is not None:
             expected_fields.add("plane")
         if not isinstance(value, dict) or set(value) != expected_fields:
-            raise ValueError("the native affine-form classification returned unknown fields")
+            raise ValueError(
+                "the native affine-form classification returned unknown fields"
+            )
         if value["predicate"] != predicate or value["classification"] != classification:
-            raise ValueError("the native affine-form classification differs from the replay input")
+            raise ValueError(
+                "the native affine-form classification differs from the replay input"
+            )
         native_coefficients = exact_affine_form(
             value["affine_form"], "power-bisector affine form"
         )
         if native_coefficients != expected_coefficients:
-            raise ValueError("the native affine-form coefficients differ from the replay input")
+            raise ValueError(
+                "the native affine-form coefficients differ from the replay input"
+            )
         if expected_plane is not None:
             native_plane = validate_plane(value["plane"], "native power-bisector plane")
             if native_plane != expected_plane:
-                raise ValueError("the native power-bisector plane differs from the replay input")
+                raise ValueError(
+                    "the native power-bisector plane differs from the replay input"
+                )
         return value
 
     if predicate == "intersect_three_planes":
@@ -1178,13 +1674,17 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
             )
             or value["affine_dimension"] != affine_dimension
         ):
-            raise ValueError("the native plane-intersection invariants differ from the replay input")
+            raise ValueError(
+                "the native plane-intersection invariants differ from the replay input"
+            )
         if expected_point is not None:
             native_point = validate_exact_rational3(
                 value["intersection_exact"], "native plane intersection"
             )
             if native_point != exact_rational3_record(expected_point):
-                raise ValueError("the native plane intersection differs from Gaussian elimination")
+                raise ValueError(
+                    "the native plane intersection differs from Gaussian elimination"
+                )
         elif value["intersection_exact"] is not None:
             raise ValueError("a nonunique native plane intersection exposed a point")
         return value
@@ -1236,7 +1736,9 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
         "fourth_plane_incidence": fourth_plane_fields,
     }[predicate]
     if not isinstance(value, dict) or set(value) != expected_fields:
-        raise ValueError("the native replay returned missing or unknown predicate fields")
+        raise ValueError(
+            "the native replay returned missing or unknown predicate fields"
+        )
     if value["predicate"] != predicate:
         raise ValueError("the native replay returned a different predicate")
     stage = value["certification_stage"]
@@ -1249,12 +1751,16 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
 
     if predicate == "compare_squared_distances":
         left = canonical_level(value["left_squared_distance"], "left squared distance")
-        right = canonical_level(value["right_squared_distance"], "right squared distance")
+        right = canonical_level(
+            value["right_squared_distance"], "right squared distance"
+        )
         points = [point_from_words(words) for words in replay_input["points"]]
         expected_left = squared_distance(points[0], points[1])
         expected_right = squared_distance(points[0], points[2])
         if left != expected_left or right != expected_right:
-            raise ValueError("the native distance witness differs from the replay input")
+            raise ValueError(
+                "the native distance witness differs from the replay input"
+            )
         witness_sign = expected_sign(expected_left - expected_right)
     elif predicate == "orientation_3d":
         determinant = canonical_rational(
@@ -1263,7 +1769,9 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
         points = [point_from_words(words) for words in replay_input["points"]]
         expected_determinant = orientation_determinant(points)
         if determinant != expected_determinant:
-            raise ValueError("the native orientation witness differs from the replay input")
+            raise ValueError(
+                "the native orientation witness differs from the replay input"
+            )
         witness_sign = expected_sign(expected_determinant)
     elif predicate == "power_bisector_side":
         point_table = [point_from_words(words) for words in replay_input["point_table"]]
@@ -1275,19 +1783,30 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
             for axis in range(3)
         )
         delta_squared_norm_sum = sum(
-            (sum((coordinate * coordinate for coordinate in point), Fraction())
-             for point in r_points),
+            (
+                sum((coordinate * coordinate for coordinate in point), Fraction())
+                for point in r_points
+            ),
             Fraction(),
         ) - sum(
-            (sum((coordinate * coordinate for coordinate in point), Fraction())
-             for point in q_points),
+            (
+                sum((coordinate * coordinate for coordinate in point), Fraction())
+                for point in q_points
+            ),
             Fraction(),
         )
         witness = rational3(replay_input["witness"], "input witness")
-        affine_value = -2 * sum(
-            (coordinate * delta for coordinate, delta in zip(witness, delta_coordinate_sum)),
-            Fraction(),
-        ) + delta_squared_norm_sum
+        affine_value = (
+            -2
+            * sum(
+                (
+                    coordinate * delta
+                    for coordinate, delta in zip(witness, delta_coordinate_sum)
+                ),
+                Fraction(),
+            )
+            + delta_squared_norm_sum
+        )
         native_delta = rational3(
             value["delta_coordinate_sum_exact"], "native delta coordinate sum"
         )
@@ -1304,13 +1823,17 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
             or native_norm != delta_squared_norm_sum
             or native_affine != affine_value
         ):
-            raise ValueError("the native power-bisector witness differs from the replay input")
+            raise ValueError(
+                "the native power-bisector witness differs from the replay input"
+            )
         witness_sign = expected_sign(affine_value)
     elif predicate == "orientation_2d_in_plane":
         plane = replay_input["plane"]
         points = [point_from_words(words) for words in replay_input["points"]]
         if any(evaluate_plane(plane, point) != 0 for point in points):
-            raise ValueError("the orientation replay points are outside the exact support")
+            raise ValueError(
+                "the orientation replay points are outside the exact support"
+            )
         first = tuple(value - origin for origin, value in zip(points[0], points[1]))
         second = tuple(value - origin for origin, value in zip(points[0], points[2]))
         normal = plane_coefficients(plane)[:3]
@@ -1325,33 +1848,45 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
             nonnegative=False,
         )
         if native_value != expected_value:
-            raise ValueError("the native orientation 2D witness differs from the replay input")
+            raise ValueError(
+                "the native orientation 2D witness differs from the replay input"
+            )
         witness_sign = expected_sign(expected_value)
     else:
         intersection_kind, expected_point, _, _, _ = solve_three_planes(
             replay_input["planes"][:3]
         )
         if intersection_kind != "unique" or expected_point is None:
-            raise ValueError("fourth-plane incidence requires a unique exact intersection")
+            raise ValueError(
+                "fourth-plane incidence requires a unique exact intersection"
+            )
         native_point = validate_exact_rational3(
             value["intersection_exact"], "native fourth-plane intersection"
         )
         if native_point != exact_rational3_record(expected_point):
-            raise ValueError("the native fourth-plane intersection differs from Gaussian elimination")
+            raise ValueError(
+                "the native fourth-plane intersection differs from Gaussian elimination"
+            )
         expected_value = evaluate_plane(replay_input["planes"][3], expected_point)
         native_value = canonical_rational(
             value["signed_value_exact"], "fourth-plane signed value", nonnegative=False
         )
         if native_value != expected_value:
-            raise ValueError("the native fourth-plane value differs from the replay input")
+            raise ValueError(
+                "the native fourth-plane value differs from the replay input"
+            )
         witness_sign = expected_sign(expected_value)
     if sign != witness_sign:
         raise ValueError("the native replay sign contradicts its exact witness")
     return value
 
 
-def replay(value: dict[str, Any], executable: Path) -> dict[str, Any]:
-    arguments = [str(executable), value["predicate"]]
+def replay(
+    value: dict[str, Any],
+    executable: Path,
+    executable_prefix_arguments: tuple[str, ...] = (),
+) -> dict[str, Any]:
+    arguments = [str(executable), *executable_prefix_arguments, value["predicate"]]
     if value["schema_version"] == 1:
         arguments.extend(word for point in value["points"] for word in point)
     elif value["schema_version"] == 2:
@@ -1380,12 +1915,34 @@ def replay(value: dict[str, Any], executable: Path) -> dict[str, Any]:
         else:
             center = value["center_exact"]
             level = value["squared_level_exact"]
-            arguments.extend(
-                center[f"{axis}_numerator"] for axis in "xyz"
-            )
+            arguments.extend(center[f"{axis}_numerator"] for axis in "xyz")
             arguments.append(center["denominator"])
             arguments.extend([level["numerator"], level["denominator"]])
             arguments.extend(value["point"])
+    elif value["schema_version"] == 6:
+        if value["predicate"] == "compare_exact_levels":
+            left = value["left_squared_level_exact"]
+            right = value["right_squared_level_exact"]
+            arguments.extend(
+                [
+                    left["numerator"],
+                    left["denominator"],
+                    right["numerator"],
+                    right["denominator"],
+                ]
+            )
+        else:
+            arguments.append(str(len(value["items"])))
+            for item in value["items"]:
+                level = item["squared_level_exact"]
+                minimal = item["minimal_support_ids"]
+                source = item["source_support_ids"]
+                arguments.extend(
+                    [level["numerator"], level["denominator"], str(len(minimal))]
+                )
+                arguments.extend(str(identifier) for identifier in minimal)
+                arguments.append(str(len(source)))
+                arguments.extend(str(identifier) for identifier in source)
     elif value["predicate"] == "plane_through_points":
         arguments.extend(word for point in value["points"] for word in point)
     elif value["predicate"] == "power_bisector_affine_form":
@@ -1427,12 +1984,28 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", type=Path, help="versioned predicate replay JSON")
     parser.add_argument("--executable", type=Path, help="native replay executable")
+    parser.add_argument(
+        "--executable-prefix-argument",
+        action="append",
+        default=[],
+        help="argument inserted before the native predicate (repeatable)",
+    )
     arguments = parser.parse_args()
     try:
         raw = strict_json_loads(arguments.input.read_text(encoding="utf-8"))
         value = validate_input(raw)
-        result = replay(value, locate_executable(arguments.executable))
-    except (OSError, ValueError, json.JSONDecodeError, subprocess.SubprocessError) as error:
+        result = replay(
+            value,
+            locate_executable(arguments.executable),
+            tuple(arguments.executable_prefix_argument),
+        )
+    except (
+        OSError,
+        RecursionError,
+        ValueError,
+        json.JSONDecodeError,
+        subprocess.SubprocessError,
+    ) as error:
         print(f"predicate replay failed closed: {error}", file=sys.stderr)
         return 2
     print(canonical_json(result))

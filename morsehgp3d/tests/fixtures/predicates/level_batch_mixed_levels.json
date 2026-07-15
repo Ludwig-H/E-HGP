@@ -1,0 +1,57 @@
+{
+  "items": [
+    {
+      "minimal_support_ids": [10, 9, 8],
+      "source_support_ids": [10, 9, 8],
+      "squared_level_exact": {
+        "denominator": "36",
+        "numerator": "169",
+        "schema_version": "2.0.0",
+        "unit": "input_coordinate_unit_squared"
+      }
+    },
+    {
+      "minimal_support_ids": [4],
+      "source_support_ids": [4],
+      "squared_level_exact": {
+        "denominator": "1",
+        "numerator": "0",
+        "schema_version": "2.0.0",
+        "unit": "input_coordinate_unit_squared"
+      }
+    },
+    {
+      "minimal_support_ids": [3, 2],
+      "source_support_ids": [3, 2],
+      "squared_level_exact": {
+        "denominator": "5",
+        "numerator": "2",
+        "schema_version": "2.0.0",
+        "unit": "input_coordinate_unit_squared"
+      }
+    },
+    {
+      "minimal_support_ids": [1, 0],
+      "source_support_ids": [1, 0],
+      "squared_level_exact": {
+        "denominator": "3",
+        "numerator": "1",
+        "schema_version": "2.0.0",
+        "unit": "input_coordinate_unit_squared"
+      }
+    },
+    {
+      "minimal_support_ids": [6],
+      "source_support_ids": [7, 6],
+      "squared_level_exact": {
+        "denominator": "5",
+        "numerator": "2",
+        "schema_version": "2.0.0",
+        "unit": "input_coordinate_unit_squared"
+      }
+    }
+  ],
+  "kind": "morsehgp3d_predicate_replay_input",
+  "predicate": "canonical_level_batches",
+  "schema_version": 6
+}

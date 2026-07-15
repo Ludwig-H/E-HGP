@@ -11,6 +11,13 @@
 
 namespace morsehgp3d::exact {
 
+class ExactLevel;
+
+// Homogeneous witness for left - right. Both denominators are strictly
+// positive, so its sign is exactly the order of the represented levels.
+[[nodiscard]] inline BigInt exact_level_cross_product_difference(
+    const ExactLevel& left, const ExactLevel& right);
+
 struct ExactLevelRecord {
   std::string schema_version;
   std::string numerator;
@@ -97,7 +104,15 @@ class ExactLevel {
   }
 
   friend std::strong_ordering operator<=>(const ExactLevel& left, const ExactLevel& right) {
-    return left.value_ <=> right.value_;
+    const BigInt difference =
+        exact_level_cross_product_difference(left, right);
+    if (difference < 0) {
+      return std::strong_ordering::less;
+    }
+    if (difference > 0) {
+      return std::strong_ordering::greater;
+    }
+    return std::strong_ordering::equal;
   }
 
  private:
@@ -109,6 +124,12 @@ class ExactLevel {
 
   ExactRational value_{};
 };
+
+[[nodiscard]] inline BigInt exact_level_cross_product_difference(
+    const ExactLevel& left, const ExactLevel& right) {
+  return left.numerator() * right.denominator() -
+         right.numerator() * left.denominator();
+}
 
 struct ExactLevelHash {
   [[nodiscard]] std::size_t operator()(const ExactLevel& level) const {

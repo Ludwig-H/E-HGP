@@ -25,13 +25,16 @@ La tranche actuellement intégrée fournit :
 - la classification exacte `relative_interior`, `relative_boundary` ou `exterior` du centre circonscrit;
 - la réduction certifiée d'un support de frontière vers ses coefficients strictement positifs;
 - la classification exacte d'un point comme strictement intérieur, sur la frontière ou extérieur à une sphère;
+- la comparaison instrumentée de deux `ExactLevel` par produit croisé entier, avec témoin et égalité exacte;
+- la clé canonique des supports de taille un à quatre, ordonnée par cardinalité puis par identifiants de points;
+- le regroupement déterministe des supports déjà vérifiés en lots de niveaux exactement égaux, avec provenance et multiplicité d'émission séparées;
 - des entrées `decision-only` séparées des témoins rationnels de replay;
 - des décisions séparant signe scientifique, étage de certification et compteurs;
 - des filtres d'intervalles FP64 conservateurs pour la comparaison de distances et l'orientation 3D;
 - une politique par appel permettant de désactiver ces filtres pour le différentiel multiprécision;
 - un replay diagnostique versionné à partir des mots binary64 et des plans exacts d'entrée.
 
-Cette tranche clôt les sous-lots affines 2A.4, centres 2A.5 et minimalité locale 2A.6, mais ne ferme ni la Phase 2A ni G1. Les comparaisons de distances et orientations 3D bien conditionnées peuvent être certifiées par `fp64_filtered`; toute borne contenant zéro, tout overflow ou environnement flottant non conforme revient à `cpu_multiprecision`. Les prédicats affines, les constructions de centres, les barycentriques et les côtés de sphère restent entièrement multiprécision. L'ordre total des niveaux, les expansions et les autres prédicats géométriques seront ajoutés par lots testables ultérieurs.
+Cette tranche clôt les sous-lots affines 2A.4, centres 2A.5, minimalité locale 2A.6 et ordre exact 2A.7, mais ne ferme ni la Phase 2A ni G1. Les comparaisons de distances et orientations 3D bien conditionnées peuvent être certifiées par `fp64_filtered`; toute borne contenant zéro, tout overflow ou environnement flottant non conforme revient à `cpu_multiprecision`. Les prédicats affines, les constructions de centres, les barycentriques, les côtés de sphère et l'ordre des niveaux restent entièrement multiprécision. Les expansions et la cascade adaptative complète seront ajoutées par les lots testables suivants.
 
 Le filtre exige IEEE binary64, l'arrondi au plus proche dans le FENV et MXCSR sur x86, les sous-normaux actifs et les options strictes exportées par la cible CMake. Chaque opération d'intervalle est élargie vers les deux infinis; les exceptions flottantes du processus appelant sont restaurées. `PredicateFilterPolicy::multiprecision_only` garde un chemin de décision indépendant. Dans les API riches et le replay, un témoin rationnel reste matérialisé même si le signe a été certifié en FP64 : `certification_stage` désigne l'autorité du signe, pas le coût du diagnostic.
 
@@ -48,6 +51,10 @@ Une intersection unique expose un `ExactRational3`, les rangs normal et augment�
 Un support dépendant expose sa dimension affine exacte et des témoins `null`; il n'est jamais complété par un centre arbitraire. `analyze_circumcenter_support` calcule les barycentriques exacts du centre d'un support indépendant. Un centre intérieur rend le support localement minimal; un centre sur la frontière conserve seulement les coefficients strictement positifs, puis le centre, le niveau et l'intérieur relatif réduits sont revérifiés exactement. Un centre extérieur reste explicitement `exterior_circumcenter` et ne déclenche aucune recherche implicite parmi les sous-supports.
 
 Le support singleton a pour centre le point lui-même, dimension affine zéro et `ExactLevel` nul. `classify_sphere_point` compare exactement la distance carrée d'un point au niveau d'une sphère et expose simultanément le signe, la classe et le décalage rationnel signé. Ces décisions sont locales : elles n'énumèrent pas les candidats miniball, ne complètent pas `RelevantGP` et ne suffisent jamais à produire un statut public `exact`.
+
+`compare_exact_levels` matérialise le témoin entier `N_left * D_right - N_right * D_left`; son signe est l'ordre scientifique et zéro est la seule égalité admise. Les comparateurs purs employés par le tri ne modifient aucun compteur, car leur nombre d'appels dépend de l'implémentation de la bibliothèque standard. Chaque comparaison scientifique explicite enregistre en revanche exactement une décision `cpu_multiprecision`.
+
+`canonical_level_batches` reçoit seulement des items de support déjà vérifiés. Il trie les lots par niveau exact puis les supports par cardinalité minimale et identifiants canoniques, agrège séparément les supports sources et compte les émissions identiques. Une même clé de support minimal associée à deux niveaux est une contradiction fermée. Cette canonisation ne recherche aucun sous-support, ne vérifie l'enveloppe d'aucun ensemble ambiant et ne remplace ni un `CriticalEvent` public ni un `EqualLevelBatch` contractuel complet.
 
 ## Construction locale
 
@@ -78,6 +85,12 @@ Le schéma v3, dans le domaine SHA-256 distinct `MorseHGP3D/predicate-replay-v3/
 Le schéma v4 utilise le domaine séparé `MorseHGP3D/predicate-replay-v4/` et ajoute `circumcenter_support` pour deux à quatre points. Sa sortie fixe publie la dimension et la classe du support, puis soit un centre homogène et un `ExactLevel`, soit deux témoins `null`. Le wrapper résout indépendamment le système de Gram par RREF sur `Fraction`, tandis que le C++ utilise les plans médiateurs et la règle de Cramer du noyau affine.
 
 Le schéma v5 utilise `MorseHGP3D/predicate-replay-v5/`. `circumcenter_support_analysis` accepte un à quatre points et ajoute coordonnées, signes, classe d'enveloppe convexe, statut local et indices du support réduit. `sphere_side` reçoit un centre rationnel canonique, un `ExactLevel` et un point binary64. Le wrapper recalcule les barycentriques et le côté de sphère avec `Fraction`; ni l'un ni l'autre ne représente une preuve de complétude `RelevantGP`.
+
+Le schéma v6 utilise `MorseHGP3D/predicate-replay-v6/`. `compare_exact_levels` reçoit deux records `ExactLevel` fermés et rejoue leur produit croisé exact. `canonical_level_batches` accepte des niveaux, supports minimaux et supports sources dans un ordre arbitraire, puis publie les lots, provenances et multiplicités canoniques. Le wrapper recalcule indépendamment l'ordre avec `Fraction` et refuse notamment les fractions irréduites, les identifiants hors du domaine JSON exact, les supports incohérents et un même support minimal annoncé à deux niveaux.
+
+Le wrapper accepte aussi `--executable-prefix-argument=ARG` de façon répétable. L'argument est transmis avant le nom du prédicat natif, sans shell; le différentiel l'utilise pour activer `--multiprecision-only` et pour lancer ses faux natifs Python de manière portable.
+
+Le wrapper et le binaire de replay sont des outils diagnostiques locaux, pas des services pour entrées hostiles. La taille des entiers exacts et des lignes batch reste volontairement non bornée afin de préserver le contrat multiprécision; une intégration réseau doit imposer ses propres quotas avant de les invoquer.
 
 Le binaire accepte aussi un flux batch, une commande par ligne, afin que les différentiels n'ouvrent pas un processus par décision :
 

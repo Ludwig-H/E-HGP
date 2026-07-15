@@ -1,0 +1,17 @@
+{
+  "kind": "morsehgp3d_predicate_replay_input",
+  "left_squared_level_exact": {
+    "denominator": "115792089237316195423570985008687907853269984665640564039457584007913129639937",
+    "numerator": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "schema_version": "2.0.0",
+    "unit": "input_coordinate_unit_squared"
+  },
+  "predicate": "compare_exact_levels",
+  "right_squared_level_exact": {
+    "denominator": "115792089237316195423570985008687907853269984665640564039457584007913129639937",
+    "numerator": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "schema_version": "2.0.0",
+    "unit": "input_coordinate_unit_squared"
+  },
+  "schema_version": 6
+}
