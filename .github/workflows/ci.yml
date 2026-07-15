@@ -33,6 +33,9 @@ jobs:
       - name: Test the installed CMake package
         run: |
           cmake --install build/morsehgp3d --prefix /tmp/morsehgp3d-install
+          /tmp/morsehgp3d-install/bin/morsehgp3d-replay-predicate \
+            morsehgp3d/tests/fixtures/predicates/power_bisector_rational_zero.json \
+            > /tmp/morsehgp3d-installed-replay.json
           cmake -S morsehgp3d/tests/consumer -B build/morsehgp3d-consumer -DCMAKE_PREFIX_PATH=/tmp/morsehgp3d-install -DCMAKE_BUILD_TYPE=Release
           cmake --build build/morsehgp3d-consumer --parallel 2
           ctest --test-dir build/morsehgp3d-consumer --output-on-failure

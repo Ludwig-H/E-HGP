@@ -1,26 +1,87 @@
 #!/usr/bin/env python3
-"""Run a deterministic small differential corpus against native predicates."""
+"""Run a deterministic batched differential corpus against exact predicates."""
 
 from __future__ import annotations
 
+import argparse
+import hashlib
 import json
-import random
+import math
 import struct
 import subprocess
-import sys
+import tempfile
 from fractions import Fraction
 from pathlib import Path
+from typing import TextIO
 
 
 SEED = 0x4D4F525345484750
 EXPONENTS = (0, 1, 2, 1022, 1023, 1024, 2045, 2046)
+DEFAULT_DISTANCE_CASES = 1024
+DEFAULT_ORIENTATION_CASES = 512
+DEFAULT_POWER_CASES = 512
+EXPECTED_DEFAULT_CORPUS_SHA256 = (
+    "276619686350b9c4f900d856b657ce084466cfdea2c4e8711d5efc7e690a1d15"
+)
+UINT64_MASK = (1 << 64) - 1
 
 
-def random_word(generator: random.Random) -> str:
-    sign = generator.getrandbits(1)
+class StableGenerator:
+    """Versioned SplitMix64 generator with stable selection primitives."""
+
+    def __init__(self, seed: int) -> None:
+        self.state = seed & UINT64_MASK
+
+    def next_u64(self) -> int:
+        self.state = (self.state + 0x9E3779B97F4A7C15) & UINT64_MASK
+        value = self.state
+        value = ((value ^ (value >> 30)) * 0xBF58476D1CE4E5B9) & UINT64_MASK
+        value = ((value ^ (value >> 27)) * 0x94D049BB133111EB) & UINT64_MASK
+        return (value ^ (value >> 31)) & UINT64_MASK
+
+    def getrandbits(self, width: int) -> int:
+        if not 0 <= width <= 64:
+            raise ValueError("StableGenerator supports widths from zero through 64")
+        return self.next_u64() & ((1 << width) - 1) if width else 0
+
+    def randbelow(self, bound: int) -> int:
+        if bound <= 0:
+            raise ValueError("StableGenerator bound must be positive")
+        limit = (1 << 64) - ((1 << 64) % bound)
+        while True:
+            value = self.next_u64()
+            if value < limit:
+                return value % bound
+
+    def randint(self, lower: int, upper: int) -> int:
+        if lower > upper:
+            raise ValueError("StableGenerator integer range is empty")
+        return lower + self.randbelow(upper - lower + 1)
+
+    def choice(self, values: tuple[int, ...]) -> int:
+        return values[self.randbelow(len(values))]
+
+    def sample(self, population: range, count: int) -> list[int]:
+        values = list(population)
+        if not 0 <= count <= len(values):
+            raise ValueError("StableGenerator sample size is invalid")
+        for index in range(count):
+            selected = index + self.randbelow(len(values) - index)
+            values[index], values[selected] = values[selected], values[index]
+        return values[:count]
+
+
+def canonical_json(value: object) -> str:
+    return json.dumps(
+        value, allow_nan=False, ensure_ascii=False, separators=(",", ":"), sort_keys=True
+    )
+
+
+def random_word(generator: StableGenerator) -> str:
+    sign_bit = generator.getrandbits(1)
     exponent = generator.choice(EXPONENTS)
     fraction = generator.getrandbits(52)
-    bits = (sign << 63) | (exponent << 52) | fraction
+    bits = (sign_bit << 63) | (exponent << 52) | fraction
     return f"{bits:016x}"
 
 
@@ -36,17 +97,6 @@ def sign(value: Fraction) -> str:
     if value < 0:
         return "negative"
     return "zero" if value == 0 else "positive"
-
-
-def invoke(executable: Path, predicate: str, points: list[list[str]]) -> dict:
-    completed = subprocess.run(
-        [str(executable), predicate, *(word for point_words in points for word in point_words)],
-        check=True,
-        capture_output=True,
-        encoding="utf-8",
-        timeout=10,
-    )
-    return json.loads(completed.stdout)
 
 
 def distance_difference(points: list[tuple[Fraction, Fraction, Fraction]]) -> Fraction:
@@ -68,30 +118,165 @@ def orientation(points: list[tuple[Fraction, Fraction, Fraction]]) -> Fraction:
     )
 
 
-def audit(executable: Path, predicate: str, point_count: int, cases: int) -> None:
-    generator = random.Random(SEED ^ point_count)
+def generated_points(generator: StableGenerator, count: int) -> list[list[str]]:
+    return [[random_word(generator) for _ in range(3)] for _ in range(count)]
+
+
+def generated_power_case(
+    generator: StableGenerator,
+) -> tuple[list[list[str]], list[int], list[int], tuple[int, int, int, int]]:
+    point_count = generator.randint(2, 8)
+    point_words = generated_points(generator, point_count)
+    cardinality = generator.randint(1, min(4, point_count))
+    r_ids = sorted(generator.sample(range(point_count), cardinality))
+    q_ids = sorted(generator.sample(range(point_count), cardinality))
+    denominator = generator.choice((1, 3, 5, 7))
+    numerators = [generator.randint(-17, 17) for _ in range(3)]
+    divisor = denominator
+    for numerator in numerators:
+        divisor = math.gcd(divisor, abs(numerator))
+    numerators = [numerator // divisor for numerator in numerators]
+    denominator //= divisor
+    return point_words, r_ids, q_ids, (
+        numerators[0], numerators[1], numerators[2], denominator
+    )
+
+
+def fixed_command(predicate: str, point_words: list[list[str]]) -> str:
+    return " ".join(
+        [predicate, *(word for point_words_item in point_words for word in point_words_item)]
+    )
+
+
+def power_command(
+    point_words: list[list[str]],
+    r_ids: list[int],
+    q_ids: list[int],
+    witness: tuple[int, int, int, int],
+) -> str:
+    x_numerator, y_numerator, z_numerator, denominator = witness
+    return " ".join(
+        [
+            "power_bisector_side",
+            str(x_numerator),
+            str(y_numerator),
+            str(z_numerator),
+            str(denominator),
+            str(len(point_words)),
+            *(word for point_words_item in point_words for word in point_words_item),
+            str(len(r_ids)),
+            *(str(identifier) for identifier in r_ids),
+            str(len(q_ids)),
+            *(str(identifier) for identifier in q_ids),
+        ]
+    )
+
+
+def expected_counters(expected: Fraction) -> dict[str, int]:
+    return {
+        "cpu_multiprecision_certified": 1,
+        "exact_zeros": 1 if expected == 0 else 0,
+        "expansion_certified": 0,
+        "fp32_proposals": 0,
+        "fp64_filtered_certified": 0,
+        "remaining_unknown": 0,
+    }
+
+
+NATIVE_FIELDS = {
+    "compare_squared_distances": {
+        "certification_stage",
+        "counters",
+        "left_squared_distance",
+        "predicate",
+        "right_squared_distance",
+        "sign",
+    },
+    "orientation_3d": {
+        "certification_stage",
+        "counters",
+        "determinant_exact",
+        "predicate",
+        "sign",
+    },
+    "power_bisector_side": {
+        "affine_value_exact",
+        "certification_stage",
+        "counters",
+        "delta_coordinate_sum_exact",
+        "delta_squared_norm_sum_exact",
+        "predicate",
+        "sign",
+    },
+}
+
+
+def exact_rational3_record(
+    coordinates: tuple[Fraction, Fraction, Fraction],
+) -> dict[str, str]:
+    denominator = math.lcm(*(coordinate.denominator for coordinate in coordinates))
+    numerators = [
+        coordinate.numerator * (denominator // coordinate.denominator)
+        for coordinate in coordinates
+    ]
+    divisor = denominator
+    for numerator in numerators:
+        divisor = math.gcd(divisor, abs(numerator))
+    denominator //= divisor
+    numerators = [numerator // divisor for numerator in numerators]
+    return {
+        "denominator": str(denominator),
+        "schema_version": "2.0.0",
+        "unit": "input_coordinate_unit",
+        "x_numerator": str(numerators[0]),
+        "y_numerator": str(numerators[1]),
+        "z_numerator": str(numerators[2]),
+    }
+
+
+def read_result(output: TextIO, predicate: str, case_index: int) -> dict:
+    line = output.readline()
+    if not line:
+        raise AssertionError(f"batch output ended before {predicate} case {case_index}")
+    observed = json.loads(line)
+    if line != canonical_json(observed) + "\n":
+        raise AssertionError(f"{predicate} case {case_index} is not canonical JSON")
+    if not isinstance(observed, dict) or set(observed) != NATIVE_FIELDS[predicate]:
+        raise AssertionError(f"{predicate} case {case_index} has an open native schema")
+    if observed.get("predicate") != predicate:
+        raise AssertionError(f"{predicate} case {case_index} returned another predicate")
+    return observed
+
+
+def validate_stage(observed: dict, expected: Fraction, predicate: str, case_index: int) -> None:
+    if (
+        observed["certification_stage"] != "cpu_multiprecision"
+        or observed["counters"] != expected_counters(expected)
+    ):
+        raise AssertionError(f"{predicate} case {case_index} has invalid counters")
+
+
+def audit_fixed(
+    output: TextIO,
+    predicate: str,
+    point_count: int,
+    cases: int,
+    sign_histogram: dict[str, int],
+) -> None:
+    generator = StableGenerator(SEED ^ point_count)
     oracle = distance_difference if predicate == "compare_squared_distances" else orientation
     for case_index in range(cases):
-        words = [[random_word(generator) for _ in range(3)] for _ in range(point_count)]
+        words = generated_points(generator, point_count)
         exact_points = [point(point_words) for point_words in words]
         expected = oracle(exact_points)
-        observed = invoke(executable, predicate, words)
+        observed = read_result(output, predicate, case_index)
         if observed["sign"] != sign(expected):
             raise AssertionError(
                 f"{predicate} case {case_index} differs: expected {sign(expected)}, "
                 f"observed {observed['sign']}, words={words}"
             )
-        counters = observed["counters"]
-        expected_counters = {
-            "cpu_multiprecision_certified": 1,
-            "exact_zeros": 1 if expected == 0 else 0,
-            "expansion_certified": 0,
-            "fp32_proposals": 0,
-            "fp64_filtered_certified": 0,
-            "remaining_unknown": 0,
-        }
-        if observed["certification_stage"] != "cpu_multiprecision" or counters != expected_counters:
-            raise AssertionError(f"{predicate} case {case_index} has invalid counters")
+        validate_stage(observed, expected, predicate, case_index)
+        sign_histogram[sign(expected)] += 1
         if predicate == "compare_squared_distances":
             witness, left, right = exact_points
             left_level = sum(((a - b) ** 2 for a, b in zip(witness, left)), Fraction())
@@ -115,12 +300,163 @@ def audit(executable: Path, predicate: str, point_count: int, cases: int) -> Non
             raise AssertionError(f"{predicate} case {case_index} has an invalid determinant")
 
 
+def audit_power(
+    output: TextIO, cases: int, sign_histogram: dict[str, int]
+) -> None:
+    predicate = "power_bisector_side"
+    generator = StableGenerator(SEED ^ 0x485251)
+    for case_index in range(cases):
+        words, r_ids, q_ids, witness_record = generated_power_case(generator)
+        exact_points = [point(point_words) for point_words in words]
+        r_points = [exact_points[index] for index in r_ids]
+        q_points = [exact_points[index] for index in q_ids]
+        delta = tuple(
+            sum((value[axis] for value in r_points), Fraction())
+            - sum((value[axis] for value in q_points), Fraction())
+            for axis in range(3)
+        )
+        delta_norm = sum(
+            (sum((coordinate * coordinate for coordinate in value), Fraction())
+             for value in r_points),
+            Fraction(),
+        ) - sum(
+            (sum((coordinate * coordinate for coordinate in value), Fraction())
+             for value in q_points),
+            Fraction(),
+        )
+        witness = tuple(
+            Fraction(numerator, witness_record[3]) for numerator in witness_record[:3]
+        )
+        expected = -2 * sum(
+            (coordinate * difference for coordinate, difference in zip(witness, delta)),
+            Fraction(),
+        ) + delta_norm
+        observed = read_result(output, predicate, case_index)
+        if observed["sign"] != sign(expected):
+            raise AssertionError(
+                f"{predicate} case {case_index} differs: expected {sign(expected)}, "
+                f"observed {observed['sign']}, words={words}, R={r_ids}, Q={q_ids}, "
+                f"witness={witness_record}"
+            )
+        validate_stage(observed, expected, predicate, case_index)
+        sign_histogram[sign(expected)] += 1
+        if observed["delta_coordinate_sum_exact"] != exact_rational3_record(delta) or observed[
+            "delta_squared_norm_sum_exact"
+        ] != {
+            "denominator": str(delta_norm.denominator),
+            "numerator": str(delta_norm.numerator),
+        } or observed["affine_value_exact"] != {
+            "denominator": str(expected.denominator),
+            "numerator": str(expected.numerator),
+        }:
+            raise AssertionError(f"{predicate} case {case_index} has an invalid exact witness")
+
+
+def write_corpus(
+    stream: TextIO, distance_cases: int, orientation_cases: int, power_cases: int
+) -> str:
+    digest = hashlib.sha256()
+
+    def write(command: str) -> None:
+        encoded = (command + "\n").encode("ascii")
+        digest.update(encoded)
+        stream.write(encoded.decode("ascii"))
+
+    generator = StableGenerator(SEED ^ 3)
+    for _ in range(distance_cases):
+        write(fixed_command("compare_squared_distances", generated_points(generator, 3)))
+    generator = StableGenerator(SEED ^ 4)
+    for _ in range(orientation_cases):
+        write(fixed_command("orientation_3d", generated_points(generator, 4)))
+    generator = StableGenerator(SEED ^ 0x485251)
+    for _ in range(power_cases):
+        write(power_command(*generated_power_case(generator)))
+    stream.flush()
+    stream.seek(0)
+    return digest.hexdigest()
+
+
+def nonnegative_count(value: str) -> int:
+    parsed = int(value)
+    if parsed < 0:
+        raise argparse.ArgumentTypeError("case counts must be nonnegative")
+    return parsed
+
+
 def main() -> int:
-    if len(sys.argv) != 2:
-        raise SystemExit("usage: check_predicate_random.py NATIVE_REPLAY")
-    executable = Path(sys.argv[1])
-    audit(executable, "compare_squared_distances", 3, 128)
-    audit(executable, "orientation_3d", 4, 64)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("native_replay", type=Path)
+    parser.add_argument(
+        "--distance-cases", type=nonnegative_count, default=DEFAULT_DISTANCE_CASES
+    )
+    parser.add_argument(
+        "--orientation-cases", type=nonnegative_count, default=DEFAULT_ORIENTATION_CASES
+    )
+    parser.add_argument("--power-cases", type=nonnegative_count, default=DEFAULT_POWER_CASES)
+    parser.add_argument("--timeout-seconds", type=nonnegative_count, default=180)
+    arguments = parser.parse_args()
+
+    with tempfile.TemporaryFile(mode="w+", encoding="ascii") as batch_input, tempfile.TemporaryFile(
+        mode="w+", encoding="utf-8"
+    ) as batch_output:
+        corpus_hash = write_corpus(
+            batch_input,
+            arguments.distance_cases,
+            arguments.orientation_cases,
+            arguments.power_cases,
+        )
+        if (
+            arguments.distance_cases == DEFAULT_DISTANCE_CASES
+            and arguments.orientation_cases == DEFAULT_ORIENTATION_CASES
+            and arguments.power_cases == DEFAULT_POWER_CASES
+            and corpus_hash != EXPECTED_DEFAULT_CORPUS_SHA256
+        ):
+            raise AssertionError(
+                "the default predicate corpus changed without a generator version update"
+            )
+        subprocess.run(
+            [str(arguments.native_replay), "--batch"],
+            check=True,
+            stdin=batch_input,
+            stdout=batch_output,
+            encoding="utf-8",
+            timeout=arguments.timeout_seconds,
+        )
+        batch_output.seek(0)
+        histogram = {"negative": 0, "positive": 0, "zero": 0}
+        audit_fixed(
+            batch_output,
+            "compare_squared_distances",
+            3,
+            arguments.distance_cases,
+            histogram,
+        )
+        audit_fixed(
+            batch_output,
+            "orientation_3d",
+            4,
+            arguments.orientation_cases,
+            histogram,
+        )
+        audit_power(batch_output, arguments.power_cases, histogram)
+        if batch_output.readline():
+            raise AssertionError("batch replay returned more results than requested")
+
+    print(
+        canonical_json(
+            {
+                "case_count": (
+                    arguments.distance_cases
+                    + arguments.orientation_cases
+                    + arguments.power_cases
+                ),
+                "corpus_sha256": corpus_hash,
+                "generator": "mixed-binary64-splitmix64-v1",
+                "seed": f"0x{SEED:016x}",
+                "sign_histogram": histogram,
+            }
+        )
+    )
     return 0
 
 

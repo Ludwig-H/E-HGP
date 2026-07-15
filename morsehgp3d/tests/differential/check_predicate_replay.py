@@ -15,8 +15,16 @@ from fractions import Fraction
 from pathlib import Path
 
 
+DOMAINS = {
+    1: b"MorseHGP3D/predicate-replay-v1/",
+    2: b"MorseHGP3D/predicate-replay-v2/",
+}
+
+
 def canonical_json(value: object) -> str:
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    return json.dumps(
+        value, allow_nan=False, ensure_ascii=False, separators=(",", ":"), sort_keys=True
+    )
 
 
 def rational_from_bits(word: str) -> Fraction:
@@ -88,7 +96,7 @@ def check_distance(wrapper: Path, executable: Path, fixture: Path) -> None:
     if re.fullmatch(r"[0-9a-f]{64}", replay["replay_id"]) is None:
         raise AssertionError("predicate replay_id is not a SHA-256 hex digest")
     expected_id = hashlib.sha256(
-        b"MorseHGP3D/predicate-replay-v1/"
+        DOMAINS[replay["input"]["schema_version"]]
         + canonical_json(replay["input"]).encode("utf-8")
     ).hexdigest()
     if replay["replay_id"] != expected_id:
@@ -136,6 +144,144 @@ def check_orientation(wrapper: Path, executable: Path, fixture: Path) -> None:
         "remaining_unknown": 0,
     }:
         raise AssertionError("orientation stage accounting is not exact-only and closed")
+
+
+def rational3(record: dict[str, str]) -> tuple[Fraction, Fraction, Fraction]:
+    denominator = int(record["denominator"])
+    return tuple(
+        Fraction(int(record[f"{axis}_numerator"]), denominator) for axis in "xyz"
+    )  # type: ignore[return-value]
+
+
+def check_power_bisector(wrapper: Path, executable: Path, fixture: Path) -> None:
+    first_output, replay = run_replay(wrapper, executable, fixture)
+    second_output, repeated = run_replay(wrapper, executable, fixture)
+    if first_output != second_output or replay["replay_id"] != repeated["replay_id"]:
+        raise AssertionError("power-bisector replay is not byte-stable")
+    expected_id = hashlib.sha256(
+        DOMAINS[2] + canonical_json(replay["input"]).encode("utf-8")
+    ).hexdigest()
+    if replay["replay_id"] != expected_id or replay["schema_version"] != 2:
+        raise AssertionError("power-bisector replay does not preserve its v2 identity")
+
+    replay_input = replay["input"]
+    point_table = [point(words) for words in replay_input["point_table"]]
+    r_points = [point_table[index] for index in replay_input["r_ids"]]
+    q_points = [point_table[index] for index in replay_input["q_ids"]]
+    delta = tuple(
+        sum((value[axis] for value in r_points), Fraction())
+        - sum((value[axis] for value in q_points), Fraction())
+        for axis in range(3)
+    )
+    delta_norm = sum(
+        (sum((coordinate * coordinate for coordinate in value), Fraction())
+         for value in r_points),
+        Fraction(),
+    ) - sum(
+        (sum((coordinate * coordinate for coordinate in value), Fraction())
+         for value in q_points),
+        Fraction(),
+    )
+    witness = rational3(replay_input["witness"])
+    expected = -2 * sum(
+        (coordinate * difference for coordinate, difference in zip(witness, delta)),
+        Fraction(),
+    ) + delta_norm
+    result = replay["result"]
+    if result["sign"] != sign(expected):
+        raise AssertionError("native power-bisector sign differs from Fraction")
+    if rational3(result["delta_coordinate_sum_exact"]) != delta:
+        raise AssertionError("native power-bisector coordinate delta differs from Fraction")
+    if result["delta_squared_norm_sum_exact"] != {
+        "denominator": str(delta_norm.denominator),
+        "numerator": str(delta_norm.numerator),
+    } or result["affine_value_exact"] != {
+        "denominator": str(expected.denominator),
+        "numerator": str(expected.numerator),
+    }:
+        raise AssertionError("native power-bisector exact witness differs from Fraction")
+    if result["certification_stage"] != "cpu_multiprecision" or result["counters"] != {
+        "cpu_multiprecision_certified": 1,
+        "exact_zeros": 1 if expected == 0 else 0,
+        "expansion_certified": 0,
+        "fp32_proposals": 0,
+        "fp64_filtered_certified": 0,
+        "remaining_unknown": 0,
+    }:
+        raise AssertionError("power-bisector stage accounting is not exact-only and closed")
+
+
+def check_invalid_power_input(wrapper: Path, executable: Path, fixture: Path) -> None:
+    base = json.loads(fixture.read_text(encoding="utf-8"))
+    variants: list[dict] = []
+    unequal = json.loads(json.dumps(base))
+    unequal["q_ids"] = []
+    variants.append(unequal)
+    both_empty = json.loads(json.dumps(base))
+    both_empty["q_ids"] = []
+    both_empty["r_ids"] = []
+    variants.append(both_empty)
+    duplicate = json.loads(json.dumps(base))
+    duplicate["point_table"].append(duplicate["point_table"][0])
+    duplicate["q_ids"] = [0, 0]
+    duplicate["r_ids"] = [0, 1]
+    variants.append(duplicate)
+    out_of_range = json.loads(json.dumps(base))
+    out_of_range["r_ids"] = [2]
+    variants.append(out_of_range)
+    unsorted = json.loads(json.dumps(base))
+    unsorted["q_ids"] = [1, 0]
+    unsorted["r_ids"] = [0, 1]
+    variants.append(unsorted)
+    boolean_id = json.loads(json.dumps(base))
+    boolean_id["q_ids"] = [True]
+    variants.append(boolean_id)
+    negative_id = json.loads(json.dumps(base))
+    negative_id["r_ids"] = [-1]
+    variants.append(negative_id)
+    too_large = json.loads(json.dumps(base))
+    too_large["point_table"] = [base["point_table"][0] for _ in range(11)]
+    too_large["q_ids"] = list(range(11))
+    too_large["r_ids"] = list(range(11))
+    variants.append(too_large)
+    noncanonical_witness = json.loads(json.dumps(base))
+    noncanonical_witness["witness"]["x_numerator"] = "6"
+    noncanonical_witness["witness"]["denominator"] = "4"
+    variants.append(noncanonical_witness)
+    negative_zero = json.loads(json.dumps(base))
+    negative_zero["witness"]["y_numerator"] = "-0"
+    variants.append(negative_zero)
+    zero_denominator = json.loads(json.dumps(base))
+    zero_denominator["witness"]["denominator"] = "0"
+    variants.append(zero_denominator)
+    wrong_witness_unit = json.loads(json.dumps(base))
+    wrong_witness_unit["witness"]["unit"] = "input_coordinate_unit_squared"
+    variants.append(wrong_witness_unit)
+    uppercase_point = json.loads(json.dumps(base))
+    uppercase_point["point_table"][0][0] = "3FF0000000000000"
+    variants.append(uppercase_point)
+    nonfinite_point = json.loads(json.dumps(base))
+    nonfinite_point["point_table"][0][0] = "7ff0000000000000"
+    variants.append(nonfinite_point)
+    unknown = json.loads(json.dumps(base))
+    unknown["unexpected"] = 1
+    variants.append(unknown)
+    wrong_schema = json.loads(json.dumps(base))
+    wrong_schema["schema_version"] = 1
+    variants.append(wrong_schema)
+
+    with tempfile.TemporaryDirectory(prefix="morsehgp3d-power-input-") as directory:
+        for index, value in enumerate(variants):
+            invalid = Path(directory) / f"invalid-power-{index}.json"
+            invalid.write_text(canonical_json(value) + "\n", encoding="utf-8")
+            completed = subprocess.run(
+                [sys.executable, str(wrapper), str(invalid), "--executable", str(executable)],
+                capture_output=True,
+                encoding="utf-8",
+                timeout=40,
+            )
+            if completed.returncode != 2 or "failed closed" not in completed.stderr:
+                raise AssertionError(f"invalid power replay input {index} did not fail closed")
 
 
 def check_invalid_input(wrapper: Path, executable: Path, fixture: Path) -> None:
@@ -229,11 +375,66 @@ def check_invalid_native_output(wrapper: Path, executable: Path, fixture: Path) 
     noncanonical = json.loads(json.dumps(valid))
     noncanonical["left_squared_distance"]["numerator"] = "01"
     variants.append(canonical_json(noncanonical))
+    coherent_but_false = json.loads(json.dumps(valid))
+    coherent_but_false["left_squared_distance"]["numerator"] = "0"
+    coherent_but_false["left_squared_distance"]["denominator"] = "1"
+    coherent_but_false["right_squared_distance"]["numerator"] = "0"
+    coherent_but_false["right_squared_distance"]["denominator"] = "1"
+    coherent_but_false["sign"] = "zero"
+    coherent_but_false["counters"]["exact_zeros"] = 1
+    variants.append(canonical_json(coherent_but_false))
 
     with tempfile.TemporaryDirectory(prefix="morsehgp3d-native-output-") as directory:
         for index, output in enumerate(variants):
             fake = Path(directory) / f"fake-{index}"
             make_output_script(fake, output)
+            expect_closed_failure(wrapper, fake, fixture)
+
+
+def check_invalid_orientation_native_output(
+    wrapper: Path, executable: Path, fixture: Path
+) -> None:
+    _, replay = run_replay(wrapper, executable, fixture)
+    coherent_but_false = json.loads(json.dumps(replay["result"]))
+    coherent_but_false["determinant_exact"] = {
+        "denominator": "1",
+        "numerator": "0",
+    }
+    coherent_but_false["sign"] = "zero"
+    coherent_but_false["counters"]["exact_zeros"] = 1
+    with tempfile.TemporaryDirectory(prefix="morsehgp3d-orientation-output-") as directory:
+        fake = Path(directory) / "fake-orientation"
+        make_output_script(fake, canonical_json(coherent_but_false))
+        expect_closed_failure(wrapper, fake, fixture)
+
+
+def check_invalid_power_native_output(
+    wrapper: Path, executable: Path, fixture: Path
+) -> None:
+    _, replay = run_replay(wrapper, executable, fixture)
+    valid = replay["result"]
+    variants: list[dict] = []
+    contradicted = json.loads(json.dumps(valid))
+    contradicted["sign"] = "positive"
+    variants.append(contradicted)
+    wrong_delta = json.loads(json.dumps(valid))
+    wrong_delta["delta_coordinate_sum_exact"]["x_numerator"] = "2"
+    variants.append(wrong_delta)
+    wrong_norm = json.loads(json.dumps(valid))
+    wrong_norm["delta_squared_norm_sum_exact"]["numerator"] = "4"
+    variants.append(wrong_norm)
+    wrong_affine = json.loads(json.dumps(valid))
+    wrong_affine["affine_value_exact"]["numerator"] = "1"
+    variants.append(wrong_affine)
+    noncanonical_delta = json.loads(json.dumps(valid))
+    noncanonical_delta["delta_coordinate_sum_exact"]["x_numerator"] = "2"
+    noncanonical_delta["delta_coordinate_sum_exact"]["denominator"] = "2"
+    variants.append(noncanonical_delta)
+
+    with tempfile.TemporaryDirectory(prefix="morsehgp3d-power-output-") as directory:
+        for index, value in enumerate(variants):
+            fake = Path(directory) / f"fake-power-{index}"
+            make_output_script(fake, canonical_json(value))
             expect_closed_failure(wrapper, fake, fixture)
 
 
@@ -279,6 +480,57 @@ def check_executable_resolution(wrapper: Path, executable: Path, fixture: Path) 
             json.loads(completed.stdout)
 
 
+def check_native_batch_fail_closed(executable: Path) -> None:
+    zero_point = "0000000000000000 0000000000000000 0000000000000000"
+    eleven_ids = " ".join(str(index) for index in range(11))
+    invalid_inputs = [
+        "\n",
+        "unknown_predicate\n",
+        "power_bisector_side 3 0 0 2 2 "
+        "3ff0000000000000 0000000000000000 0000000000000000 "
+        "4000000000000000 0000000000000000 0000000000000000 "
+        "2 0 0 2 0 1\n",
+        "power_bisector_side 0 0 0 1 11 "
+        + " ".join(zero_point for _ in range(11))
+        + f" 11 {eleven_ids} 11 {eleven_ids}\n",
+    ]
+    for index, batch_input in enumerate(invalid_inputs):
+        completed = subprocess.run(
+            [str(executable), "--batch"],
+            input=batch_input,
+            capture_output=True,
+            encoding="utf-8",
+            timeout=40,
+        )
+        if (
+            completed.returncode != 2
+            or "failed closed" not in completed.stderr
+            or "batch replay line 1" not in completed.stderr
+        ):
+            raise AssertionError(f"invalid native batch {index} did not fail closed")
+
+
+def check_native_output_failure(executable: Path, fixture: Path) -> None:
+    if os.name == "nt" or not Path("/dev/full").exists():
+        return
+    points = json.loads(fixture.read_text(encoding="utf-8"))["points"]
+    command = [
+        str(executable),
+        "compare_squared_distances",
+        *(word for point_words in points for word in point_words),
+    ]
+    with Path("/dev/full").open("wb") as sink:
+        completed = subprocess.run(
+            command,
+            stdout=sink,
+            stderr=subprocess.PIPE,
+            encoding="utf-8",
+            timeout=40,
+        )
+    if completed.returncode != 2 or "failed closed" not in completed.stderr:
+        raise AssertionError("a native replay output failure did not fail closed")
+
+
 def main() -> int:
     if len(sys.argv) != 4:
         raise SystemExit(
@@ -290,9 +542,23 @@ def main() -> int:
     check_distance(wrapper, executable, fixtures / "distance_one_ulp.json")
     check_distance(wrapper, executable, fixtures / "distance_equal.json")
     check_orientation(wrapper, executable, fixtures / "orientation_subnormal.json")
+    check_power_bisector(
+        wrapper, executable, fixtures / "power_bisector_rational_zero.json"
+    )
     check_invalid_input(wrapper, executable, fixtures / "distance_one_ulp.json")
+    check_invalid_power_input(
+        wrapper, executable, fixtures / "power_bisector_rational_zero.json"
+    )
     check_invalid_native_output(wrapper, executable, fixtures / "distance_one_ulp.json")
+    check_invalid_orientation_native_output(
+        wrapper, executable, fixtures / "orientation_subnormal.json"
+    )
+    check_invalid_power_native_output(
+        wrapper, executable, fixtures / "power_bisector_rational_zero.json"
+    )
     check_executable_resolution(wrapper, executable, fixtures / "distance_one_ulp.json")
+    check_native_batch_fail_closed(executable)
+    check_native_output_failure(executable, fixtures / "distance_one_ulp.json")
     return 0
 
 
