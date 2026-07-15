@@ -172,13 +172,13 @@ def power_command(
     )
 
 
-def expected_counters(expected: Fraction) -> dict[str, int]:
+def expected_counters(expected: Fraction, stage: str) -> dict[str, int]:
     return {
-        "cpu_multiprecision_certified": 1,
+        "cpu_multiprecision_certified": 1 if stage == "cpu_multiprecision" else 0,
         "exact_zeros": 1 if expected == 0 else 0,
         "expansion_certified": 0,
         "fp32_proposals": 0,
-        "fp64_filtered_certified": 0,
+        "fp64_filtered_certified": 1 if stage == "fp64_filtered" else 0,
         "remaining_unknown": 0,
     }
 
@@ -248,20 +248,45 @@ def read_result(output: TextIO, predicate: str, case_index: int) -> dict:
     return observed
 
 
-def validate_stage(observed: dict, expected: Fraction, predicate: str, case_index: int) -> None:
+def validate_stage(
+    observed: dict,
+    expected: Fraction,
+    predicate: str,
+    case_index: int,
+    *,
+    multiprecision_only: bool,
+) -> str:
+    stage = observed["certification_stage"]
+    allowed = (
+        {"cpu_multiprecision"}
+        if multiprecision_only or predicate == "power_bisector_side"
+        else {"fp64_filtered", "cpu_multiprecision"}
+    )
     if (
-        observed["certification_stage"] != "cpu_multiprecision"
-        or observed["counters"] != expected_counters(expected)
+        stage not in allowed
+        or (expected == 0 and stage == "fp64_filtered")
+        or observed["counters"] != expected_counters(expected, stage)
     ):
         raise AssertionError(f"{predicate} case {case_index} has invalid counters")
+    return stage
+
+
+def scientific_result(observed: dict) -> dict:
+    return {
+        key: value
+        for key, value in observed.items()
+        if key not in {"certification_stage", "counters"}
+    }
 
 
 def audit_fixed(
     output: TextIO,
+    multiprecision_output: TextIO,
     predicate: str,
     point_count: int,
     cases: int,
     sign_histogram: dict[str, int],
+    stage_histogram: dict[str, int],
 ) -> None:
     generator = StableGenerator(SEED ^ point_count)
     oracle = distance_difference if predicate == "compare_squared_distances" else orientation
@@ -270,13 +295,34 @@ def audit_fixed(
         exact_points = [point(point_words) for point_words in words]
         expected = oracle(exact_points)
         observed = read_result(output, predicate, case_index)
+        multiprecision_observed = read_result(
+            multiprecision_output, predicate, case_index
+        )
         if observed["sign"] != sign(expected):
             raise AssertionError(
                 f"{predicate} case {case_index} differs: expected {sign(expected)}, "
                 f"observed {observed['sign']}, words={words}"
             )
-        validate_stage(observed, expected, predicate, case_index)
+        stage = validate_stage(
+            observed,
+            expected,
+            predicate,
+            case_index,
+            multiprecision_only=False,
+        )
+        validate_stage(
+            multiprecision_observed,
+            expected,
+            predicate,
+            case_index,
+            multiprecision_only=True,
+        )
+        if scientific_result(observed) != scientific_result(multiprecision_observed):
+            raise AssertionError(
+                f"{predicate} case {case_index} differs with the FP64 filter disabled"
+            )
         sign_histogram[sign(expected)] += 1
+        stage_histogram[stage] += 1
         if predicate == "compare_squared_distances":
             witness, left, right = exact_points
             left_level = sum(((a - b) ** 2 for a, b in zip(witness, left)), Fraction())
@@ -301,7 +347,11 @@ def audit_fixed(
 
 
 def audit_power(
-    output: TextIO, cases: int, sign_histogram: dict[str, int]
+    output: TextIO,
+    multiprecision_output: TextIO,
+    cases: int,
+    sign_histogram: dict[str, int],
+    stage_histogram: dict[str, int],
 ) -> None:
     predicate = "power_bisector_side"
     generator = StableGenerator(SEED ^ 0x485251)
@@ -332,14 +382,35 @@ def audit_power(
             Fraction(),
         ) + delta_norm
         observed = read_result(output, predicate, case_index)
+        multiprecision_observed = read_result(
+            multiprecision_output, predicate, case_index
+        )
         if observed["sign"] != sign(expected):
             raise AssertionError(
                 f"{predicate} case {case_index} differs: expected {sign(expected)}, "
                 f"observed {observed['sign']}, words={words}, R={r_ids}, Q={q_ids}, "
                 f"witness={witness_record}"
             )
-        validate_stage(observed, expected, predicate, case_index)
+        stage = validate_stage(
+            observed,
+            expected,
+            predicate,
+            case_index,
+            multiprecision_only=False,
+        )
+        validate_stage(
+            multiprecision_observed,
+            expected,
+            predicate,
+            case_index,
+            multiprecision_only=True,
+        )
+        if scientific_result(observed) != scientific_result(multiprecision_observed):
+            raise AssertionError(
+                f"{predicate} case {case_index} differs with the FP64 filter disabled"
+            )
         sign_histogram[sign(expected)] += 1
+        stage_histogram[stage] += 1
         if observed["delta_coordinate_sum_exact"] != exact_rational3_record(delta) or observed[
             "delta_squared_norm_sum_exact"
         ] != {
@@ -398,7 +469,9 @@ def main() -> int:
 
     with tempfile.TemporaryFile(mode="w+", encoding="ascii") as batch_input, tempfile.TemporaryFile(
         mode="w+", encoding="utf-8"
-    ) as batch_output:
+    ) as batch_output, tempfile.TemporaryFile(
+        mode="w+", encoding="utf-8"
+    ) as multiprecision_output:
         corpus_hash = write_corpus(
             batch_input,
             arguments.distance_cases,
@@ -422,25 +495,84 @@ def main() -> int:
             encoding="utf-8",
             timeout=arguments.timeout_seconds,
         )
+        batch_input.seek(0)
+        subprocess.run(
+            [str(arguments.native_replay), "--multiprecision-only", "--batch"],
+            check=True,
+            stdin=batch_input,
+            stdout=multiprecision_output,
+            encoding="utf-8",
+            timeout=arguments.timeout_seconds,
+        )
         batch_output.seek(0)
+        multiprecision_output.seek(0)
         histogram = {"negative": 0, "positive": 0, "zero": 0}
+        stage_histogram = {"cpu_multiprecision": 0, "fp64_filtered": 0}
+        stage_histogram_by_predicate: dict[str, dict[str, int]] = {}
+        stage_before = dict(stage_histogram)
         audit_fixed(
             batch_output,
+            multiprecision_output,
             "compare_squared_distances",
             3,
             arguments.distance_cases,
             histogram,
+            stage_histogram,
         )
+        stage_histogram_by_predicate["compare_squared_distances"] = {
+            stage: stage_histogram[stage] - stage_before[stage]
+            for stage in stage_histogram
+        }
+        stage_before = dict(stage_histogram)
         audit_fixed(
             batch_output,
+            multiprecision_output,
             "orientation_3d",
             4,
             arguments.orientation_cases,
             histogram,
+            stage_histogram,
         )
-        audit_power(batch_output, arguments.power_cases, histogram)
+        stage_histogram_by_predicate["orientation_3d"] = {
+            stage: stage_histogram[stage] - stage_before[stage]
+            for stage in stage_histogram
+        }
+        filterable_stage_histogram = dict(stage_histogram)
+        stage_before = dict(stage_histogram)
+        audit_power(
+            batch_output,
+            multiprecision_output,
+            arguments.power_cases,
+            histogram,
+            stage_histogram,
+        )
+        stage_histogram_by_predicate["power_bisector_side"] = {
+            stage: stage_histogram[stage] - stage_before[stage]
+            for stage in stage_histogram
+        }
         if batch_output.readline():
             raise AssertionError("batch replay returned more results than requested")
+        if multiprecision_output.readline():
+            raise AssertionError(
+                "multiprecision batch replay returned more results than requested"
+            )
+        for predicate, cases in (
+            ("compare_squared_distances", arguments.distance_cases),
+            ("orientation_3d", arguments.orientation_cases),
+        ):
+            predicate_stages = stage_histogram_by_predicate[predicate]
+            default_cases = (
+                DEFAULT_DISTANCE_CASES
+                if predicate == "compare_squared_distances"
+                else DEFAULT_ORIENTATION_CASES
+            )
+            if cases == default_cases and (
+                predicate_stages["fp64_filtered"] == 0
+                or predicate_stages["cpu_multiprecision"] == 0
+            ):
+                raise AssertionError(
+                    f"the {predicate} corpus did not exercise filtering and fallback"
+                )
 
     print(
         canonical_json(
@@ -454,6 +586,9 @@ def main() -> int:
                 "generator": "mixed-binary64-splitmix64-v1",
                 "seed": f"0x{SEED:016x}",
                 "sign_histogram": histogram,
+                "stage_histogram": stage_histogram,
+                "filterable_stage_histogram": filterable_stage_histogram,
+                "stage_histogram_by_predicate": stage_histogram_by_predicate,
             }
         )
     )

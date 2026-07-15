@@ -28,6 +28,7 @@ using morsehgp3d::exact::ExactRational;
 using morsehgp3d::exact::ExactRational3;
 using morsehgp3d::exact::ExactRational3Record;
 using morsehgp3d::exact::PredicateCounters;
+using morsehgp3d::exact::PredicateFilterPolicy;
 using morsehgp3d::exact::canonical_integer_string;
 using morsehgp3d::exact::compare_squared_distances;
 using morsehgp3d::exact::maximum_power_label_cardinality;
@@ -86,12 +87,15 @@ std::uint32_t parse_id(std::string_view text) {
 }
 
 int replay_distance(
-    std::span<const std::string_view> arguments, std::ostream& output) {
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
   const CertifiedPoint3 witness = parse_point(arguments, 1U);
   const CertifiedPoint3 left = parse_point(arguments, 4U);
   const CertifiedPoint3 right = parse_point(arguments, 7U);
   PredicateCounters counters;
-  const auto result = compare_squared_distances(witness, left, right, &counters);
+  const auto result = compare_squared_distances(
+      witness, left, right, &counters, filter_policy);
   output << "{\"certification_stage\":\""
          << to_string(result.decision.certification_stage())
          << "\",\"counters\":" << counters_json(counters)
@@ -103,13 +107,15 @@ int replay_distance(
 }
 
 int replay_orientation(
-    std::span<const std::string_view> arguments, std::ostream& output) {
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
   const CertifiedPoint3 a = parse_point(arguments, 1U);
   const CertifiedPoint3 b = parse_point(arguments, 4U);
   const CertifiedPoint3 c = parse_point(arguments, 7U);
   const CertifiedPoint3 d = parse_point(arguments, 10U);
   PredicateCounters counters;
-  const auto result = orientation_3d(a, b, c, d, &counters);
+  const auto result = orientation_3d(a, b, c, d, &counters, filter_policy);
   output << "{\"certification_stage\":\""
          << to_string(result.decision.certification_stage())
          << "\",\"counters\":" << counters_json(counters)
@@ -202,15 +208,17 @@ int replay_power_bisector(
 }
 
 int replay_tokens(
-    std::span<const std::string_view> arguments, std::ostream& output) {
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
   if (arguments.empty()) {
     throw std::invalid_argument("a predicate name is required");
   }
   if (arguments[0] == "compare_squared_distances" && arguments.size() == 10U) {
-    return replay_distance(arguments, output);
+    return replay_distance(arguments, output, filter_policy);
   }
   if (arguments[0] == "orientation_3d" && arguments.size() == 13U) {
-    return replay_orientation(arguments, output);
+    return replay_orientation(arguments, output, filter_policy);
   }
   if (arguments[0] == "power_bisector_side") {
     return replay_power_bisector(arguments, output);
@@ -218,7 +226,10 @@ int replay_tokens(
   throw std::invalid_argument("the predicate name or argument count is unsupported");
 }
 
-int replay_batch(std::istream& input, std::ostream& output) {
+int replay_batch(
+    std::istream& input,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
   std::string line;
   std::size_t line_number = 0;
   while (std::getline(input, line)) {
@@ -239,7 +250,7 @@ int replay_batch(std::istream& input, std::ostream& output) {
       arguments.emplace_back(value);
     }
     try {
-      static_cast<void>(replay_tokens(arguments, output));
+      static_cast<void>(replay_tokens(arguments, output, filter_policy));
     } catch (const std::exception& error) {
       throw std::invalid_argument(
           "batch replay line " + std::to_string(line_number) + ": " + error.what());
@@ -262,26 +273,40 @@ void print_usage(const char* executable) {
             << " orientation_3d HEX_X HEX_Y HEX_Z ... (4 points)\n"
             << "   or: " << executable
             << " power_bisector_side XN YN ZN D POINT_COUNT ... R_COUNT ... Q_COUNT ...\n"
-            << "   or: " << executable << " --batch < predicate-lines.txt\n";
+            << "   or: " << executable << " --batch < predicate-lines.txt\n"
+            << "prefix either form with --multiprecision-only to disable FP64 filters\n";
 }
 
 }  // namespace
 
 int main(int argument_count, char** arguments) {
   try {
-    if (argument_count == 2 && std::string_view{arguments[1]} == "--batch") {
-      return replay_batch(std::cin, std::cout);
-    }
     if (argument_count < 2) {
       print_usage(arguments[0]);
       return 2;
     }
+    int first_argument = 1;
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_fp64;
+    if (std::string_view{arguments[first_argument]} == "--multiprecision-only") {
+      filter_policy = PredicateFilterPolicy::multiprecision_only;
+      ++first_argument;
+    }
+    if (first_argument >= argument_count) {
+      print_usage(arguments[0]);
+      return 2;
+    }
+    if (std::string_view{arguments[first_argument]} == "--batch") {
+      if (first_argument + 1 != argument_count) {
+        throw std::invalid_argument("--batch does not accept trailing arguments");
+      }
+      return replay_batch(std::cin, std::cout, filter_policy);
+    }
     std::vector<std::string_view> tokens;
-    tokens.reserve(static_cast<std::size_t>(argument_count - 1));
-    for (int index = 1; index < argument_count; ++index) {
+    tokens.reserve(static_cast<std::size_t>(argument_count - first_argument));
+    for (int index = first_argument; index < argument_count; ++index) {
       tokens.emplace_back(arguments[index]);
     }
-    const int status = replay_tokens(tokens, std::cout);
+    const int status = replay_tokens(tokens, std::cout, filter_policy);
     std::cout.flush();
     if (!std::cout) {
       throw std::runtime_error("predicate replay output could not be written completely");

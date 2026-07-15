@@ -24,6 +24,11 @@ enum class CertificationStage {
   cpu_multiprecision,
 };
 
+enum class PredicateFilterPolicy {
+  allow_fp64,
+  multiprecision_only,
+};
+
 class FilterResult {
  public:
   FilterResult() = delete;

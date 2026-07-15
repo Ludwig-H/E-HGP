@@ -1,5 +1,6 @@
 #pragma once
 
+#include "morsehgp3d/exact/fp64_interval.hpp"
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/level.hpp"
 #include "morsehgp3d/exact/point.hpp"
@@ -45,6 +46,39 @@ namespace detail {
   return decision;
 }
 
+[[nodiscard]] inline PredicateDecision filtered_decision(
+    PredicateSign sign, PredicateCounters* counters) {
+  const PredicateDecision decision{sign, CertificationStage::fp64_filtered};
+  if (counters != nullptr) {
+    counters->record_certification(decision);
+  }
+  return decision;
+}
+
+inline void require_filter_policy(PredicateFilterPolicy policy) {
+  if (policy != PredicateFilterPolicy::allow_fp64 &&
+      policy != PredicateFilterPolicy::multiprecision_only) {
+    throw std::invalid_argument("predicate filter policy is invalid");
+  }
+}
+
+[[nodiscard]] inline PredicateDecision certify_materialized_sign(
+    const FilterResult& filtered,
+    PredicateSign exact_sign,
+    PredicateFilterPolicy policy,
+    PredicateCounters* counters) {
+  require_filter_policy(policy);
+  if (policy == PredicateFilterPolicy::allow_fp64 &&
+      filtered.state() == FilterState::certified) {
+    if (!filtered.sign().has_value() || *filtered.sign() != exact_sign) {
+      throw std::runtime_error(
+          "fp64 filter contradicted its exact diagnostic witness");
+    }
+    return filtered_decision(*filtered.sign(), counters);
+  }
+  return multiprecision_decision(static_cast<int>(exact_sign), counters);
+}
+
 inline void require_power_label_domain(
     const ExactLabelMoments& r, const ExactLabelMoments& q) {
   if (r.cardinality() != q.cardinality()) {
@@ -60,6 +94,100 @@ inline void require_power_label_domain(
 }
 
 }  // namespace detail
+
+[[nodiscard]] inline FilterResult filter_squared_distance_order(
+    const CertifiedPoint3& witness,
+    const CertifiedPoint3& left,
+    const CertifiedPoint3& right) {
+  detail::Fp64EnvironmentGuard environment;
+  if (!environment.supported()) {
+    static_cast<void>(environment.restore());
+    return FilterResult::uncertain();
+  }
+
+  detail::Binary64Interval left_squared =
+      detail::point_binary64_interval(0.0);
+  detail::Binary64Interval right_squared =
+      detail::point_binary64_interval(0.0);
+  for (std::size_t axis = 0; axis < 3U; ++axis) {
+    const detail::Binary64Interval witness_coordinate =
+        detail::point_binary64_interval(witness.binary64_coordinate(axis));
+    const detail::Binary64Interval left_delta =
+        detail::subtract_binary64_intervals(
+            witness_coordinate,
+            detail::point_binary64_interval(left.binary64_coordinate(axis)));
+    const detail::Binary64Interval right_delta =
+        detail::subtract_binary64_intervals(
+            witness_coordinate,
+            detail::point_binary64_interval(right.binary64_coordinate(axis)));
+    left_squared = detail::add_binary64_intervals(
+        left_squared, detail::square_binary64_interval(left_delta));
+    right_squared = detail::add_binary64_intervals(
+        right_squared, detail::square_binary64_interval(right_delta));
+  }
+  const detail::Binary64Interval difference =
+      detail::subtract_binary64_intervals(left_squared, right_squared);
+  const FilterResult result = detail::sign_of_binary64_interval(difference);
+  if (!environment.restore()) {
+    return FilterResult::uncertain();
+  }
+  return result;
+}
+
+[[nodiscard]] inline FilterResult filter_orientation_3d(
+    const CertifiedPoint3& a,
+    const CertifiedPoint3& b,
+    const CertifiedPoint3& c,
+    const CertifiedPoint3& d) {
+  detail::Fp64EnvironmentGuard environment;
+  if (!environment.supported()) {
+    static_cast<void>(environment.restore());
+    return FilterResult::uncertain();
+  }
+
+  std::array<detail::Binary64Interval, 3> u{};
+  std::array<detail::Binary64Interval, 3> v{};
+  std::array<detail::Binary64Interval, 3> w{};
+  for (std::size_t axis = 0; axis < 3U; ++axis) {
+    const detail::Binary64Interval origin =
+        detail::point_binary64_interval(a.binary64_coordinate(axis));
+    u[axis] = detail::subtract_binary64_intervals(
+        detail::point_binary64_interval(b.binary64_coordinate(axis)), origin);
+    v[axis] = detail::subtract_binary64_intervals(
+        detail::point_binary64_interval(c.binary64_coordinate(axis)), origin);
+    w[axis] = detail::subtract_binary64_intervals(
+        detail::point_binary64_interval(d.binary64_coordinate(axis)), origin);
+  }
+
+  const auto product_difference = [](
+      const detail::Binary64Interval& left_first,
+      const detail::Binary64Interval& left_second,
+      const detail::Binary64Interval& right_first,
+      const detail::Binary64Interval& right_second) {
+    return detail::subtract_binary64_intervals(
+        detail::multiply_binary64_intervals(left_first, left_second),
+        detail::multiply_binary64_intervals(right_first, right_second));
+  };
+  const detail::Binary64Interval first_minor =
+      product_difference(v[1], w[2], v[2], w[1]);
+  const detail::Binary64Interval second_minor =
+      product_difference(v[0], w[2], v[2], w[0]);
+  const detail::Binary64Interval third_minor =
+      product_difference(v[0], w[1], v[1], w[0]);
+  const detail::Binary64Interval first_term =
+      detail::multiply_binary64_intervals(u[0], first_minor);
+  const detail::Binary64Interval second_term =
+      detail::multiply_binary64_intervals(u[1], second_minor);
+  const detail::Binary64Interval third_term =
+      detail::multiply_binary64_intervals(u[2], third_minor);
+  const detail::Binary64Interval determinant = detail::add_binary64_intervals(
+      detail::subtract_binary64_intervals(first_term, second_term), third_term);
+  const FilterResult result = detail::sign_of_binary64_interval(determinant);
+  if (!environment.restore()) {
+    return FilterResult::uncertain();
+  }
+  return result;
+}
 
 [[nodiscard]] inline ExactRational squared_distance(
     const CertifiedPoint3& left, const CertifiedPoint3& right) {
@@ -77,7 +205,16 @@ inline void require_power_label_domain(
     const CertifiedPoint3& witness,
     const CertifiedPoint3& left,
     const CertifiedPoint3& right,
-    PredicateCounters* counters = nullptr) {
+    PredicateCounters* counters = nullptr,
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_fp64) {
+  detail::require_filter_policy(filter_policy);
+  if (filter_policy == PredicateFilterPolicy::allow_fp64) {
+    const FilterResult filtered =
+        filter_squared_distance_order(witness, left, right);
+    if (filtered.state() == FilterState::certified) {
+      return detail::filtered_decision(*filtered.sign(), counters);
+    }
+  }
   const ExactRational difference =
       squared_distance(witness, left) - squared_distance(witness, right);
   return detail::multiprecision_decision(difference.sign(), counters);
@@ -88,11 +225,19 @@ inline void require_power_label_domain(
     const CertifiedPoint3& witness,
     const CertifiedPoint3& left,
     const CertifiedPoint3& right,
-    PredicateCounters* counters = nullptr) {
+    PredicateCounters* counters = nullptr,
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_fp64) {
+  detail::require_filter_policy(filter_policy);
+  const FilterResult filtered =
+      filter_policy == PredicateFilterPolicy::allow_fp64
+          ? filter_squared_distance_order(witness, left, right)
+          : FilterResult::uncertain();
   ExactLevel left_level{squared_distance(witness, left)};
   ExactLevel right_level{squared_distance(witness, right)};
-  const PredicateDecision decision = detail::multiprecision_decision(
-      (left_level < right_level) ? -1 : ((right_level < left_level) ? 1 : 0), counters);
+  const PredicateSign exact_sign = predicate_sign(
+      (left_level < right_level) ? -1 : ((right_level < left_level) ? 1 : 0));
+  const PredicateDecision decision = detail::certify_materialized_sign(
+      filtered, exact_sign, filter_policy, counters);
   DistanceComparisonResult result{
       decision, std::move(left_level), std::move(right_level)};
   return result;
@@ -126,7 +271,15 @@ inline void require_power_label_domain(
     const CertifiedPoint3& b,
     const CertifiedPoint3& c,
     const CertifiedPoint3& d,
-    PredicateCounters* counters = nullptr) {
+    PredicateCounters* counters = nullptr,
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_fp64) {
+  detail::require_filter_policy(filter_policy);
+  if (filter_policy == PredicateFilterPolicy::allow_fp64) {
+    const FilterResult filtered = filter_orientation_3d(a, b, c, d);
+    if (filtered.state() == FilterState::certified) {
+      return detail::filtered_decision(*filtered.sign(), counters);
+    }
+  }
   return detail::multiprecision_decision(
       orientation_3d_determinant(a, b, c, d).sign(), counters);
 }
@@ -136,10 +289,16 @@ inline void require_power_label_domain(
     const CertifiedPoint3& b,
     const CertifiedPoint3& c,
     const CertifiedPoint3& d,
-    PredicateCounters* counters = nullptr) {
+    PredicateCounters* counters = nullptr,
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_fp64) {
+  detail::require_filter_policy(filter_policy);
+  const FilterResult filtered =
+      filter_policy == PredicateFilterPolicy::allow_fp64
+          ? filter_orientation_3d(a, b, c, d)
+          : FilterResult::uncertain();
   ExactRational determinant = orientation_3d_determinant(a, b, c, d);
-  const PredicateDecision decision =
-      detail::multiprecision_decision(determinant.sign(), counters);
+  const PredicateDecision decision = detail::certify_materialized_sign(
+      filtered, predicate_sign(determinant.sign()), filter_policy, counters);
   Orientation3DResult result{decision, std::move(determinant)};
   return result;
 }

@@ -158,6 +158,13 @@ class CertifiedPoint3 {
     return input_bits_;
   }
 
+  [[nodiscard]] double binary64_coordinate(std::size_t axis) const {
+    if (axis >= input_bits_.size()) {
+      throw std::out_of_range("a CertifiedPoint3 axis must be 0, 1 or 2");
+    }
+    return std::bit_cast<double>(canonicalize_binary64_bits(input_bits_[axis]));
+  }
+
   [[nodiscard]] std::array<std::uint64_t, 3> canonical_input_bits() const {
     return {
         canonicalize_binary64_bits(input_bits_[0]),

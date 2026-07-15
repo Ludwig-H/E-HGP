@@ -1,7 +1,9 @@
 #include "morsehgp3d/exact/predicate.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
 
+#include <array>
 #include <cmath>
+#include <cfenv>
 #include <cstdint>
 #include <exception>
 #include <initializer_list>
@@ -9,6 +11,11 @@
 #include <limits>
 #include <string>
 #include <vector>
+
+#if defined(__SSE2__) || defined(_M_X64) || \
+    (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+#include <xmmintrin.h>
+#endif
 
 namespace {
 
@@ -20,6 +27,7 @@ using morsehgp3d::exact::ExactRational3;
 using morsehgp3d::exact::FilterResult;
 using morsehgp3d::exact::PredicateCounters;
 using morsehgp3d::exact::PredicateDecision;
+using morsehgp3d::exact::PredicateFilterPolicy;
 using morsehgp3d::exact::PredicateSign;
 using morsehgp3d::exact::BigInt;
 using morsehgp3d::exact::compare_squared_distances;
@@ -27,6 +35,9 @@ using morsehgp3d::exact::decide_orientation_3d;
 using morsehgp3d::exact::decide_power_bisector_side;
 using morsehgp3d::exact::decide_squared_distance_order;
 using morsehgp3d::exact::evaluate_power_bisector;
+using morsehgp3d::exact::filter_orientation_3d;
+using morsehgp3d::exact::filter_squared_distance_order;
+using morsehgp3d::exact::fp64_filter_environment_supported;
 using morsehgp3d::exact::orientation_3d;
 using morsehgp3d::exact::power_bisector_side;
 using morsehgp3d::exact::squared_distance;
@@ -95,6 +106,212 @@ void test_filter_and_counter_contract() {
             PredicateSign::zero, CertificationStage::fp64_filtered));
       },
       "an fp64 filter cannot construct an exact-zero decision");
+
+  check(fp64_filter_environment_supported(),
+        "the strict test target exposes a supported binary64 filter environment");
+
+  const FilterResult distance_filter = filter_squared_distance_order(
+      point(0.0, 0.0, 0.0), point(1.0, 0.0, 0.0), point(2.0, 0.0, 0.0));
+  check(distance_filter.state() == morsehgp3d::exact::FilterState::certified &&
+            distance_filter.sign() == PredicateSign::negative,
+        "a well-separated distance comparison is certified by its FP64 interval");
+  const FilterResult orientation_filter = filter_orientation_3d(
+      point(0.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, 0.0, 1.0));
+  check(orientation_filter.state() == morsehgp3d::exact::FilterState::certified &&
+            orientation_filter.sign() == PredicateSign::positive,
+        "a well-conditioned tetrahedron is certified by its FP64 interval");
+
+  const int original_rounding = std::fegetround();
+  const std::array<int, 3> unsupported_rounding_modes{
+      FE_UPWARD, FE_DOWNWARD, FE_TOWARDZERO};
+  for (const int rounding_mode : unsupported_rounding_modes) {
+    if (std::fesetround(rounding_mode) != 0) {
+      continue;
+    }
+    const FilterResult altered_rounding_filter = filter_squared_distance_order(
+        point(0.0, 0.0, 0.0), point(1.0, 0.0, 0.0), point(2.0, 0.0, 0.0));
+    check(altered_rounding_filter.state() ==
+                  morsehgp3d::exact::FilterState::uncertain &&
+              std::fegetround() == rounding_mode,
+          "a non-nearest rounding mode disables the filter without changing it");
+    PredicateCounters altered_rounding_counters;
+    const PredicateDecision altered_rounding_decision = decide_squared_distance_order(
+        point(0.0, 0.0, 0.0),
+        point(1.0, 0.0, 0.0),
+        point(2.0, 0.0, 0.0),
+        &altered_rounding_counters);
+    check(altered_rounding_decision.sign() == PredicateSign::negative &&
+              altered_rounding_decision.certification_stage() ==
+                  CertificationStage::cpu_multiprecision &&
+              altered_rounding_counters.cpu_multiprecision_certified() == 1U,
+          "an unsupported rounding mode falls back to the exact CPU decision");
+    check(std::fesetround(original_rounding) == 0,
+          "the rounding-mode fallback test restores round-to-nearest");
+  }
+
+  std::fenv_t original_environment{};
+  if (std::fegetenv(&original_environment) == 0) {
+    static_cast<void>(std::feclearexcept(FE_ALL_EXCEPT));
+    static_cast<void>(std::feraiseexcept(FE_INVALID));
+    const int flags_before = std::fetestexcept(FE_ALL_EXCEPT);
+    static_cast<void>(filter_squared_distance_order(
+        point(0.0, 0.0, 0.0), point(1.0, 0.0, 0.0), point(2.0, 0.0, 0.0)));
+    const int flags_after = std::fetestexcept(FE_ALL_EXCEPT);
+    check(flags_after == flags_before,
+          "the FP64 filter preserves the caller's floating exception flags");
+    static_cast<void>(std::fesetenv(&original_environment));
+  }
+
+#if defined(__SSE2__) || defined(_M_X64) || \
+    (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+  constexpr unsigned int flush_to_zero_mask = 1U << 15U;
+  constexpr unsigned int denormals_are_zero_mask = 1U << 6U;
+  constexpr unsigned int rounding_control_mask = 3U << 13U;
+  const unsigned int original_mxcsr = _mm_getcsr();
+  const CertifiedPoint3 regression_a = point(0.0, 0.0, 0.0);
+  const CertifiedPoint3 regression_b =
+      point(std::ldexp(1.0, -1074), 0.0, std::ldexp(1.0, -300));
+  const CertifiedPoint3 regression_c = point(0.0, std::ldexp(1.0, 500), 0.0);
+  const CertifiedPoint3 regression_d =
+      point(std::ldexp(1.0, -275), 0.0, std::ldexp(1.0, 500));
+  const ExactRational regression_determinant =
+      morsehgp3d::exact::orientation_3d_determinant(
+          regression_a, regression_b, regression_c, regression_d);
+  check(regression_determinant ==
+            ExactRational{BigInt{1}, BigInt{1} << 75U},
+        "the permanent DAZ regression determinant is exactly two to the minus seventy-five");
+  const std::array<unsigned int, 3> altered_mxcsr_modes{
+      (original_mxcsr | denormals_are_zero_mask) & ~flush_to_zero_mask,
+      (original_mxcsr | flush_to_zero_mask) & ~denormals_are_zero_mask,
+      original_mxcsr | flush_to_zero_mask | denormals_are_zero_mask};
+  for (const unsigned int altered_mxcsr : altered_mxcsr_modes) {
+    _mm_setcsr(altered_mxcsr);
+    const FilterResult flushed_filter = filter_orientation_3d(
+        regression_a, regression_b, regression_c, regression_d);
+    PredicateCounters flushed_counters;
+    const PredicateDecision flushed_decision = decide_orientation_3d(
+        regression_a,
+        regression_b,
+        regression_c,
+        regression_d,
+        &flushed_counters);
+    check(flushed_filter.state() == morsehgp3d::exact::FilterState::uncertain &&
+              flushed_decision.sign() == PredicateSign::positive &&
+              flushed_decision.certification_stage() ==
+                  CertificationStage::cpu_multiprecision &&
+              flushed_counters.cpu_multiprecision_certified() == 1U &&
+              (_mm_getcsr() & (flush_to_zero_mask | denormals_are_zero_mask)) ==
+                  (altered_mxcsr &
+                   (flush_to_zero_mask | denormals_are_zero_mask)),
+          "DAZ, FTZ, and their combination force the permanent regression to exact fallback");
+  }
+  const std::array<unsigned int, 3> altered_rounding_controls{
+      1U << 13U, 2U << 13U, 3U << 13U};
+  for (const unsigned int rounding_control : altered_rounding_controls) {
+    const unsigned int altered_mxcsr =
+        (original_mxcsr & ~rounding_control_mask) | rounding_control;
+    _mm_setcsr(altered_mxcsr);
+    const FilterResult altered_rounding_filter = filter_squared_distance_order(
+        point(0.0, 0.0, 0.0), point(1.0, 0.0, 0.0), point(2.0, 0.0, 0.0));
+    PredicateCounters altered_rounding_counters;
+    const PredicateDecision altered_rounding_decision =
+        decide_squared_distance_order(
+            point(0.0, 0.0, 0.0),
+            point(1.0, 0.0, 0.0),
+            point(2.0, 0.0, 0.0),
+            &altered_rounding_counters);
+    check(altered_rounding_filter.state() ==
+                  morsehgp3d::exact::FilterState::uncertain &&
+              altered_rounding_decision.sign() == PredicateSign::negative &&
+              altered_rounding_decision.certification_stage() ==
+                  CertificationStage::cpu_multiprecision &&
+              altered_rounding_counters.cpu_multiprecision_certified() == 1U &&
+              (_mm_getcsr() & rounding_control_mask) == rounding_control,
+          "an MXCSR-only rounding change forces exact fallback and is preserved");
+  }
+  _mm_setcsr(original_mxcsr);
+#endif
+}
+
+bool interval_contains(
+    const morsehgp3d::exact::detail::Binary64Interval& interval,
+    const ExactRational& exact_value) {
+  if (!interval.valid) {
+    return true;
+  }
+  return ExactRational::from_binary64(interval.lower) <= exact_value &&
+         exact_value <= ExactRational::from_binary64(interval.upper);
+}
+
+void test_interval_containment() {
+  const double subnormal = std::numeric_limits<double>::denorm_min();
+  const double minimum_normal = std::numeric_limits<double>::min();
+  const double maximum = std::numeric_limits<double>::max();
+  const std::vector<double> values{
+      0.0,
+      -0.0,
+      subnormal,
+      -subnormal,
+      minimum_normal,
+      -minimum_normal,
+      std::nextafter(1.0, 0.0),
+      1.0,
+      std::nextafter(1.0, 2.0),
+      -1.0,
+      std::ldexp(1.0, 500),
+      -std::ldexp(1.0, 500),
+      maximum};
+
+  morsehgp3d::exact::detail::Fp64EnvironmentGuard environment;
+  check(environment.supported(),
+        "interval containment tests run in the certified FP64 environment");
+  for (const double left : values) {
+    const auto left_interval =
+        morsehgp3d::exact::detail::point_binary64_interval(left);
+    const ExactRational exact_left = ExactRational::from_binary64(left);
+    check(
+        interval_contains(
+            morsehgp3d::exact::detail::square_binary64_interval(left_interval),
+            exact_left * exact_left),
+        "an outward FP64 square contains its exact binary64 value");
+    for (const double right : values) {
+      const auto right_interval =
+          morsehgp3d::exact::detail::point_binary64_interval(right);
+      const ExactRational exact_right = ExactRational::from_binary64(right);
+      check(
+          interval_contains(
+              morsehgp3d::exact::detail::add_binary64_intervals(
+                  left_interval, right_interval),
+              exact_left + exact_right),
+          "an outward FP64 sum contains its exact binary64 value");
+      check(
+          interval_contains(
+              morsehgp3d::exact::detail::subtract_binary64_intervals(
+                  left_interval, right_interval),
+              exact_left - exact_right),
+          "an outward FP64 difference contains its exact binary64 value");
+      check(
+          interval_contains(
+              morsehgp3d::exact::detail::multiply_binary64_intervals(
+                  left_interval, right_interval),
+              exact_left * exact_right),
+          "an outward FP64 product contains its exact binary64 value");
+      const auto difference =
+          morsehgp3d::exact::detail::subtract_binary64_intervals(
+              left_interval, right_interval);
+      const ExactRational exact_difference = exact_left - exact_right;
+      check(
+          interval_contains(
+              morsehgp3d::exact::detail::square_binary64_interval(difference),
+              exact_difference * exact_difference),
+          "a chained outward difference-square contains its exact value");
+    }
+  }
+  check(environment.restore(),
+        "interval containment tests restore the caller's FP environment");
 }
 
 void test_distance_comparison() {
@@ -107,11 +324,24 @@ void test_distance_comparison() {
             ordered.right_squared_distance.canonical_key() == "4/1",
         "distance comparison materializes exact squared levels");
   check(ordered.decision.certification_stage() ==
-                CertificationStage::cpu_multiprecision &&
-            counters.cpu_multiprecision_certified() == 1U &&
+                CertificationStage::fp64_filtered &&
+            counters.fp64_filtered_certified() == 1U &&
+            counters.cpu_multiprecision_certified() == 0U &&
             counters.certified_decisions() == 1U && counters.exact_zeros() == 0U &&
             counters.remaining_unknown() == 0U,
-        "distance fallback is accounted as one exact decision");
+        "distance filtering is accounted as one certified decision");
+
+  PredicateCounters filtered_decision_counters;
+  const PredicateDecision filtered_decision = decide_squared_distance_order(
+      point(0.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(2.0, 0.0, 0.0),
+      &filtered_decision_counters);
+  check(filtered_decision.sign() == PredicateSign::negative &&
+            filtered_decision.certification_stage() ==
+                CertificationStage::fp64_filtered &&
+            filtered_decision_counters.fp64_filtered_certified() == 1U,
+        "the decision-only distance path returns directly from the FP64 filter");
 
   PredicateCounters zero_counters;
   const auto equal = compare_squared_distances(
@@ -135,6 +365,51 @@ void test_distance_comparison() {
       point(0.0, 0.0, 0.0), point(subnormal, 0.0, 0.0), point(0.0, 0.0, 0.0));
   check(subnormal_difference.decision.sign() == PredicateSign::positive,
         "a minimum-subnormal displacement remains strictly positive");
+  check(subnormal_difference.decision.certification_stage() ==
+            CertificationStage::cpu_multiprecision,
+        "an underflow-scale distance interval falls back to multiprecision");
+
+  PredicateCounters exact_only_counters;
+  const auto exact_only = compare_squared_distances(
+      point(0.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(2.0, 0.0, 0.0),
+      &exact_only_counters,
+      PredicateFilterPolicy::multiprecision_only);
+  check(exact_only.decision.sign() == ordered.decision.sign() &&
+            exact_only.left_squared_distance == ordered.left_squared_distance &&
+            exact_only.right_squared_distance == ordered.right_squared_distance &&
+            exact_only.decision.certification_stage() ==
+                CertificationStage::cpu_multiprecision &&
+            exact_only_counters.cpu_multiprecision_certified() == 1U,
+        "disabling the filter preserves the exact distance result and witness");
+
+  const double maximum = std::numeric_limits<double>::max();
+  PredicateCounters overflow_counters;
+  const auto overflow = compare_squared_distances(
+      point(maximum, 0.0, 0.0),
+      point(-maximum, 0.0, 0.0),
+      point(maximum, 0.0, 0.0),
+      &overflow_counters);
+  check(overflow.decision.sign() == PredicateSign::positive &&
+            overflow.decision.certification_stage() ==
+                CertificationStage::cpu_multiprecision &&
+            overflow_counters.cpu_multiprecision_certified() == 1U,
+        "an overflowing FP64 distance interval falls back without saturation");
+
+  PredicateCounters invalid_policy_counters;
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(decide_squared_distance_order(
+            point(0.0, 0.0, 0.0),
+            point(1.0, 0.0, 0.0),
+            point(2.0, 0.0, 0.0),
+            &invalid_policy_counters,
+            static_cast<PredicateFilterPolicy>(99)));
+      },
+      "an invalid filter policy is rejected before any decision");
+  check(invalid_policy_counters.certified_decisions() == 0U,
+        "an invalid filter policy does not alter certification counters");
 
   PredicateCounters decision_counters;
   const PredicateDecision decision = decide_squared_distance_order(
@@ -159,9 +434,10 @@ void test_orientation_3d() {
   check(positive.decision.sign() == PredicateSign::positive &&
             positive.determinant.canonical_key() == "1/1",
         "right-handed tetrahedron has positive exact orientation");
-  check(counters.cpu_multiprecision_certified() == 1U &&
+  check(counters.fp64_filtered_certified() == 1U &&
+            counters.cpu_multiprecision_certified() == 0U &&
             counters.exact_zeros() == 0U && counters.remaining_unknown() == 0U,
-        "orientation fallback is accounted exactly");
+        "orientation certification is accounted exactly");
 
   const auto negative = orientation_3d(
       point(0.0, 0.0, 0.0),
@@ -192,6 +468,24 @@ void test_orientation_3d() {
       point(1.0, 1.0, subnormal));
   check(above_plane.decision.sign() == PredicateSign::positive,
         "minimum-subnormal height has a strict exact orientation");
+  check(above_plane.decision.certification_stage() ==
+            CertificationStage::cpu_multiprecision,
+        "a minimum-subnormal orientation falls back to multiprecision");
+
+  PredicateCounters exact_only_counters;
+  const auto exact_only = orientation_3d(
+      point(0.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, 0.0, 1.0),
+      &exact_only_counters,
+      PredicateFilterPolicy::multiprecision_only);
+  check(exact_only.decision.sign() == positive.decision.sign() &&
+            exact_only.determinant == positive.determinant &&
+            exact_only.decision.certification_stage() ==
+                CertificationStage::cpu_multiprecision &&
+            exact_only_counters.cpu_multiprecision_certified() == 1U,
+        "disabling the filter preserves the exact orientation and determinant");
 
   PredicateCounters decision_counters;
   const PredicateDecision decision = decide_orientation_3d(
@@ -466,6 +760,7 @@ void test_power_bisector_relations() {
 
 int main() {
   test_filter_and_counter_contract();
+  test_interval_containment();
   test_distance_comparison();
   test_orientation_3d();
   test_power_bisector_side();

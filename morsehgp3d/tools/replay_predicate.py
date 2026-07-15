@@ -308,21 +308,30 @@ def expected_sign(value: Fraction) -> str:
     return "zero" if value == 0 else "positive"
 
 
-def validate_counters(value: Any, sign: str) -> None:
+def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None:
     if not isinstance(value, dict) or set(value) != COUNTER_FIELDS:
         raise ValueError("the native predicate counters do not match PredicateCounts v2")
     if any(type(count) is not int or count < 0 for count in value.values()):
         raise ValueError("the native predicate counters must be nonnegative integers")
+    allowed_stages = (
+        {"cpu_multiprecision"}
+        if predicate == "power_bisector_side"
+        else {"fp64_filtered", "cpu_multiprecision"}
+    )
+    if stage not in allowed_stages:
+        raise ValueError("the native predicate used an unavailable certification stage")
+    if sign == "zero" and stage == "fp64_filtered":
+        raise ValueError("an FP64 filter cannot certify an exact zero")
     expected = {
-        "cpu_multiprecision_certified": 1,
+        "cpu_multiprecision_certified": 1 if stage == "cpu_multiprecision" else 0,
         "exact_zeros": 1 if sign == "zero" else 0,
         "expansion_certified": 0,
         "fp32_proposals": 0,
-        "fp64_filtered_certified": 0,
+        "fp64_filtered_certified": 1 if stage == "fp64_filtered" else 0,
         "remaining_unknown": 0,
     }
     if value != expected:
-        raise ValueError("the native predicate counters are not closed for the exact CPU slice")
+        raise ValueError("the native predicate counters disagree with its certification stage")
 
 
 def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str, Any]:
@@ -360,12 +369,13 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
         raise ValueError("the native replay returned missing or unknown predicate fields")
     if value["predicate"] != predicate:
         raise ValueError("the native replay returned a different predicate")
-    if value["certification_stage"] != "cpu_multiprecision":
-        raise ValueError("the native replay did not use the declared exact CPU stage")
+    stage = value["certification_stage"]
+    if not isinstance(stage, str):
+        raise ValueError("the native replay returned an invalid certification stage")
     sign = value["sign"]
     if not isinstance(sign, str) or sign not in SIGNS:
         raise ValueError("the native replay returned an invalid scientific sign")
-    validate_counters(value["counters"], sign)
+    validate_counters(value["counters"], sign, stage, predicate)
 
     if predicate == "compare_squared_distances":
         left = canonical_level(value["left_squared_distance"], "left squared distance")

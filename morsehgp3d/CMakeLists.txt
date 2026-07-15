@@ -38,7 +38,10 @@ target_link_libraries(morsehgp3d_exact INTERFACE Boost::headers)
 if(MSVC)
   target_compile_options(morsehgp3d_exact INTERFACE /fp:strict)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-  target_compile_options(morsehgp3d_exact INTERFACE -fno-fast-math -ffp-contract=off)
+  target_compile_options(
+    morsehgp3d_exact
+    INTERFACE -fno-fast-math -ffp-contract=off -frounding-math
+  )
 else()
   message(FATAL_ERROR "The certified FP mode is not configured for ${CMAKE_CXX_COMPILER_ID}")
 endif()

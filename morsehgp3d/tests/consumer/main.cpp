@@ -11,7 +11,14 @@ int main() {
   using morsehgp3d::exact::CertifiedPoint3;
   using morsehgp3d::exact::ExactLabelMoments;
   using morsehgp3d::exact::ExactLevel;
+  using morsehgp3d::exact::CertificationStage;
+  using morsehgp3d::exact::PredicateFilterPolicy;
   using morsehgp3d::exact::PredicateSign;
+
+  if (!morsehgp3d::exact::fp64_filter_environment_supported()) {
+    std::cerr << "installed target did not preserve the strict FP64 environment\n";
+    return 1;
+  }
 
   const ExactLevel level{BigInt{2}, BigInt{8}};
   if (level.canonical_key() != "1/4") {
@@ -32,6 +39,29 @@ int main() {
       CertifiedPoint3::from_binary64(0.0, 0.0, 0.0), r, q);
   if (side.sign() != PredicateSign::positive) {
     std::cerr << "installed power-bisector predicate changed exact semantics\n";
+    return 1;
+  }
+
+  const auto exact_only_distance =
+      morsehgp3d::exact::decide_squared_distance_order(
+          CertifiedPoint3::from_binary64(0.0, 0.0, 0.0),
+          points[0],
+          points[1],
+          nullptr,
+          PredicateFilterPolicy::multiprecision_only);
+  if (exact_only_distance.sign() != PredicateSign::negative ||
+      exact_only_distance.certification_stage() !=
+          CertificationStage::cpu_multiprecision) {
+    std::cerr << "installed exact-only predicate path changed semantics\n";
+    return 1;
+  }
+  const auto filtered_distance =
+      morsehgp3d::exact::decide_squared_distance_order(
+          CertifiedPoint3::from_binary64(0.0, 0.0, 0.0), points[0], points[1]);
+  if (filtered_distance.sign() != PredicateSign::negative ||
+      filtered_distance.certification_stage() !=
+          CertificationStage::fp64_filtered) {
+    std::cerr << "installed filtered predicate path changed semantics\n";
     return 1;
   }
   return 0;

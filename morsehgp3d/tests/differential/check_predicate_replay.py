@@ -88,7 +88,24 @@ def exact_level(value: Fraction) -> dict[str, str]:
     }
 
 
-def check_distance(wrapper: Path, executable: Path, fixture: Path) -> None:
+def expected_counters(stage: str, exact_zero: bool) -> dict[str, int]:
+    if stage not in {"fp64_filtered", "cpu_multiprecision"}:
+        raise AssertionError(f"unsupported certification stage {stage}")
+    if exact_zero and stage == "fp64_filtered":
+        raise AssertionError("an FP64 filter certified an exact zero")
+    return {
+        "cpu_multiprecision_certified": 1 if stage == "cpu_multiprecision" else 0,
+        "exact_zeros": 1 if exact_zero else 0,
+        "expansion_certified": 0,
+        "fp32_proposals": 0,
+        "fp64_filtered_certified": 1 if stage == "fp64_filtered" else 0,
+        "remaining_unknown": 0,
+    }
+
+
+def check_distance(
+    wrapper: Path, executable: Path, fixture: Path, expected_stage: str | None = None
+) -> None:
     first_output, replay = run_replay(wrapper, executable, fixture)
     second_output, repeated = run_replay(wrapper, executable, fixture)
     if first_output != second_output or replay["replay_id"] != repeated["replay_id"]:
@@ -112,18 +129,16 @@ def check_distance(wrapper: Path, executable: Path, fixture: Path) -> None:
         raise AssertionError("native left ExactLevel differs from Fraction")
     if result["right_squared_distance"] != exact_level(right):
         raise AssertionError("native right ExactLevel differs from Fraction")
-    if result["certification_stage"] != "cpu_multiprecision" or result["counters"] != {
-        "cpu_multiprecision_certified": 1,
-        "exact_zeros": 1 if left == right else 0,
-        "expansion_certified": 0,
-        "fp32_proposals": 0,
-        "fp64_filtered_certified": 0,
-        "remaining_unknown": 0,
-    }:
-        raise AssertionError("distance stage accounting is not exact-only and closed")
+    stage = result["certification_stage"]
+    if expected_stage is not None and stage != expected_stage:
+        raise AssertionError(f"distance used {stage} instead of {expected_stage}")
+    if result["counters"] != expected_counters(stage, left == right):
+        raise AssertionError("distance stage accounting is not closed")
 
 
-def check_orientation(wrapper: Path, executable: Path, fixture: Path) -> None:
+def check_orientation(
+    wrapper: Path, executable: Path, fixture: Path, expected_stage: str | None = None
+) -> None:
     _, replay = run_replay(wrapper, executable, fixture)
     points = [point(words) for words in replay["input"]["points"]]
     expected = determinant(*points)
@@ -135,15 +150,11 @@ def check_orientation(wrapper: Path, executable: Path, fixture: Path) -> None:
         "numerator": str(expected.numerator),
     }:
         raise AssertionError("native orientation determinant differs from Fraction")
-    if result["certification_stage"] != "cpu_multiprecision" or result["counters"] != {
-        "cpu_multiprecision_certified": 1,
-        "exact_zeros": 1 if expected == 0 else 0,
-        "expansion_certified": 0,
-        "fp32_proposals": 0,
-        "fp64_filtered_certified": 0,
-        "remaining_unknown": 0,
-    }:
-        raise AssertionError("orientation stage accounting is not exact-only and closed")
+    stage = result["certification_stage"]
+    if expected_stage is not None and stage != expected_stage:
+        raise AssertionError(f"orientation used {stage} instead of {expected_stage}")
+    if result["counters"] != expected_counters(stage, expected == 0):
+        raise AssertionError("orientation stage accounting is not closed")
 
 
 def rational3(record: dict[str, str]) -> tuple[Fraction, Fraction, Fraction]:
@@ -369,6 +380,16 @@ def check_invalid_native_output(wrapper: Path, executable: Path, fixture: Path) 
     boolean_counter = json.loads(json.dumps(valid))
     boolean_counter["counters"]["exact_zeros"] = False
     variants.append(canonical_json(boolean_counter))
+    mismatched_stage = json.loads(json.dumps(valid))
+    mismatched_stage["certification_stage"] = "fp64_filtered"
+    variants.append(canonical_json(mismatched_stage))
+    filtered_zero = json.loads(json.dumps(valid))
+    filtered_zero["certification_stage"] = "fp64_filtered"
+    filtered_zero["sign"] = "zero"
+    filtered_zero["counters"]["cpu_multiprecision_certified"] = 0
+    filtered_zero["counters"]["exact_zeros"] = 1
+    filtered_zero["counters"]["fp64_filtered_certified"] = 1
+    variants.append(canonical_json(filtered_zero))
     contradicted = json.loads(json.dumps(valid))
     contradicted["sign"] = "positive"
     variants.append(canonical_json(contradicted))
@@ -540,8 +561,30 @@ def main() -> int:
     executable = Path(sys.argv[2])
     fixtures = Path(sys.argv[3])
     check_distance(wrapper, executable, fixtures / "distance_one_ulp.json")
-    check_distance(wrapper, executable, fixtures / "distance_equal.json")
+    check_distance(
+        wrapper,
+        executable,
+        fixtures / "distance_equal.json",
+        expected_stage="cpu_multiprecision",
+    )
+    check_distance(
+        wrapper,
+        executable,
+        fixtures / "distance_filtered.json",
+        expected_stage="fp64_filtered",
+    )
     check_orientation(wrapper, executable, fixtures / "orientation_subnormal.json")
+    check_orientation(
+        wrapper,
+        executable,
+        fixtures / "orientation_daz_regression.json",
+    )
+    check_orientation(
+        wrapper,
+        executable,
+        fixtures / "orientation_filtered.json",
+        expected_stage="fp64_filtered",
+    )
     check_power_bisector(
         wrapper, executable, fixtures / "power_bisector_rational_zero.json"
     )

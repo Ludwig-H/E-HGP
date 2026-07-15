@@ -97,8 +97,11 @@ Le statut d'une exécution est distinct : `exact`, `conditional`, `budget_exhaus
 | égalité de niveaux | comparateur algébrique exact, jamais epsilon |
 | hash de label | collision vérifiée par le label complet |
 | overflow | file secondaire ou arrêt explicite, jamais troncature |
+| environnement FTZ ou DAZ | filtre FP64 désactivé et fallback exact obligatoire |
 
 Une expansion flottante certifie un signe lorsqu'une borne d'erreur l'exclut de zéro; elle ne représente pas une division exacte. Tout centre ou niveau ambigu est matérialisé par le fallback big-int ou rationnel. Une erreur de signe invalide le certificat entier, même si la partition finale semble plausible.
+
+La fixture permanente `morsehgp3d/tests/fixtures/predicates/orientation_daz_regression.json` enregistre une contradiction numérique découverte pendant la Phase 2A. Son déterminant exact vaut $2^{-75}>0$, alors qu'une première sonde qui comparait des valeurs sous-normales sous DAZ laissait le filtre s'activer et certifier un signe négatif. La sonde active inspecte désormais MXCSR sur x86 et les bits d'une opération sous-normale sur les autres cibles. Sur x86 avec SSE2, les tests activent séparément DAZ, FTZ et leur combinaison, exigent `FilterResult::uncertain`, puis vérifient le signe positif par `cpu_multiprecision`; les autres cibles exercent la sonde générique sans prétendre muter un registre matériel non portable. Cette régression interdit toute certification filtrée lorsque les sous-normaux ne sont pas préservés.
 
 ## 6. Dégénérescences
 
