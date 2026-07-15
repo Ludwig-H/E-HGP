@@ -41,6 +41,57 @@ namespace level_order_detail {
   return decision;
 }
 
+template <std::size_t SupportSize>
+[[nodiscard]] inline ExactLevel exact_support_level(
+    const std::array<CertifiedPoint3, SupportSize>& support) {
+  const auto exact_support = support_detail::exact_support(support);
+  const CircumcenterResult center = support_detail::circumcenter_of(exact_support);
+  if (center.kind() != CircumcenterKind::unique ||
+      !center.squared_level().has_value()) {
+    throw std::invalid_argument(
+        "support-level comparison requires affinely independent supports");
+  }
+  return *center.squared_level();
+}
+
+[[nodiscard]] inline ExactLevelOrderResult certify_support_level_order(
+    const ExactLevel& left,
+    const ExactLevel& right,
+    const FilterResult& filtered,
+    const ExpansionResult& expanded,
+    PredicateFilterPolicy filter_policy,
+    PredicateCounters* counters) {
+  BigInt witness = exact_level_cross_product_difference(left, right);
+  const PredicateSign exact_sign = predicate_sign(bigint_sign(witness));
+  const PredicateDecision decision = detail::certify_materialized_sign(
+      filtered, expanded, exact_sign, filter_policy, counters);
+  return ExactLevelOrderResult{decision, std::move(witness)};
+}
+
+template <typename Function>
+[[nodiscard]] decltype(auto) visit_binary64_support(
+    std::span<const CertifiedPoint3> support, Function&& function) {
+  switch (support.size()) {
+    case 1U:
+      return std::forward<Function>(function)(
+          std::array<CertifiedPoint3, 1>{support[0]});
+    case 2U:
+      return std::forward<Function>(function)(
+          std::array<CertifiedPoint3, 2>{support[0], support[1]});
+    case 3U:
+      return std::forward<Function>(function)(
+          std::array<CertifiedPoint3, 3>{
+              support[0], support[1], support[2]});
+    case 4U:
+      return std::forward<Function>(function)(
+          std::array<CertifiedPoint3, 4>{
+              support[0], support[1], support[2], support[3]});
+    default:
+      throw std::invalid_argument(
+          "binary64 level provenance must contain one to four points");
+  }
+}
+
 }  // namespace level_order_detail
 
 // Returns the sign of left - right and records exactly one explicit
@@ -64,6 +115,42 @@ namespace level_order_detail {
   const PredicateDecision decision =
       level_order_detail::record_multiprecision_decision(witness, counters);
   return ExactLevelOrderResult{decision, std::move(witness)};
+}
+
+// Compares the squared radii of the two circumspheres defined by independent
+// supports. This low-level overload does not prove that either support is a
+// minimal enclosing-ball support. Use analyzed SupportLevelEmission values
+// when miniball minimality/reduction is part of the caller's invariant.
+template <std::size_t LeftSize, std::size_t RightSize>
+[[nodiscard]] ExactLevelOrderResult compare_support_levels(
+    const std::array<CertifiedPoint3, LeftSize>& left_support,
+    const std::array<CertifiedPoint3, RightSize>& right_support,
+    PredicateCounters* counters = nullptr,
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_adaptive) {
+  static_assert(LeftSize >= 1U && LeftSize <= 4U);
+  static_assert(RightSize >= 1U && RightSize <= 4U);
+  detail::require_filter_policy(filter_policy);
+  const ExactLevel left =
+      level_order_detail::exact_support_level(left_support);
+  const ExactLevel right =
+      level_order_detail::exact_support_level(right_support);
+  const auto canonical_left =
+      detail::support_polynomial::canonicalize_support(left_support);
+  const auto canonical_right =
+      detail::support_polynomial::canonicalize_support(right_support);
+  FilterResult filtered = FilterResult::uncertain();
+  if (detail::policy_allows_fp64(filter_policy)) {
+    filtered = detail::support_polynomial::filter_level_order(
+        canonical_left, canonical_right);
+  }
+  ExpansionResult expanded = ExpansionResult::uncertain();
+  if (detail::policy_allows_expansion(filter_policy) &&
+      filtered.state() != FilterState::certified) {
+    expanded = detail::support_polynomial::expansion_level_order(
+        canonical_left, canonical_right);
+  }
+  return level_order_detail::certify_support_level_order(
+      left, right, filtered, expanded, filter_policy, counters);
 }
 
 // Point identifiers are serialized as exactly representable JSON integers in
@@ -194,7 +281,8 @@ class SupportLevelEmission {
     return SupportLevelEmission{
         std::move(squared_level),
         std::move(minimal_support_ids),
-        std::move(source_support_ids)};
+        std::move(source_support_ids),
+        {}};
   }
 
   [[nodiscard]] const ExactLevel& squared_level() const noexcept {
@@ -211,23 +299,122 @@ class SupportLevelEmission {
     return source_support_ids_;
   }
 
+  // Minimal binary64 support from a certified geometric analysis. Structural
+  // emissions built from arbitrary ExactLevel values intentionally leave it
+  // empty and therefore cannot use adaptive level predicates.
+  [[nodiscard]] std::span<const CertifiedPoint3> binary64_level_support()
+      const noexcept {
+    return binary64_level_support_;
+  }
+
   friend bool operator==(
-      const SupportLevelEmission&,
-      const SupportLevelEmission&) noexcept = default;
+      const SupportLevelEmission& left,
+      const SupportLevelEmission& right) noexcept {
+    return left.squared_level_ == right.squared_level_ &&
+           left.minimal_support_ids_ == right.minimal_support_ids_ &&
+           left.source_support_ids_ == right.source_support_ids_;
+  }
 
  private:
+  friend SupportLevelEmission support_level_emission_from_analysis(
+      std::span<const std::uint64_t> positional_source_ids,
+      const CircumcenterSupportAnalysis& analysis);
+
   SupportLevelEmission(
       ExactLevel squared_level,
       CanonicalSupportIds minimal_support_ids,
-      CanonicalSupportIds source_support_ids)
+      CanonicalSupportIds source_support_ids,
+      std::vector<CertifiedPoint3> binary64_level_support)
       : squared_level_(std::move(squared_level)),
         minimal_support_ids_(std::move(minimal_support_ids)),
-        source_support_ids_(std::move(source_support_ids)) {}
+        source_support_ids_(std::move(source_support_ids)),
+        binary64_level_support_(std::move(binary64_level_support)) {}
 
   ExactLevel squared_level_;
   CanonicalSupportIds minimal_support_ids_;
   CanonicalSupportIds source_support_ids_;
+  std::vector<CertifiedPoint3> binary64_level_support_;
 };
+
+[[nodiscard]] inline FilterResult filter_support_level_order(
+    const SupportLevelEmission& left,
+    const SupportLevelEmission& right) {
+  if (left.binary64_level_support().empty() ||
+      right.binary64_level_support().empty()) {
+    return FilterResult::uncertain();
+  }
+  return level_order_detail::visit_binary64_support(
+      left.binary64_level_support(),
+      [&right](const auto& left_support) {
+        const auto canonical_left =
+            detail::support_polynomial::canonicalize_support(left_support);
+        return level_order_detail::visit_binary64_support(
+            right.binary64_level_support(),
+            [&canonical_left](const auto& right_support) {
+              const auto canonical_right =
+                  detail::support_polynomial::canonicalize_support(
+                      right_support);
+              return detail::support_polynomial::filter_level_order(
+                  canonical_left, canonical_right);
+            });
+      });
+}
+
+[[nodiscard]] inline ExpansionResult expansion_support_level_order(
+    const SupportLevelEmission& left,
+    const SupportLevelEmission& right) {
+  if (left.binary64_level_support().empty() ||
+      right.binary64_level_support().empty()) {
+    return ExpansionResult::uncertain();
+  }
+  return level_order_detail::visit_binary64_support(
+      left.binary64_level_support(),
+      [&right](const auto& left_support) {
+        const auto canonical_left =
+            detail::support_polynomial::canonicalize_support(left_support);
+        return level_order_detail::visit_binary64_support(
+            right.binary64_level_support(),
+            [&canonical_left](const auto& right_support) {
+              const auto canonical_right =
+                  detail::support_polynomial::canonicalize_support(
+                      right_support);
+              return detail::support_polynomial::expansion_level_order(
+                  canonical_left, canonical_right);
+            });
+      });
+}
+
+[[nodiscard]] inline ExactLevelOrderResult compare_support_levels(
+    const SupportLevelEmission& left,
+    const SupportLevelEmission& right,
+    PredicateCounters* counters = nullptr,
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_adaptive) {
+  detail::require_filter_policy(filter_policy);
+  FilterResult filtered = FilterResult::uncertain();
+  if (detail::policy_allows_fp64(filter_policy)) {
+    filtered = filter_support_level_order(left, right);
+  }
+  ExpansionResult expanded = ExpansionResult::uncertain();
+  if (detail::policy_allows_expansion(filter_policy) &&
+      filtered.state() != FilterState::certified) {
+    expanded = expansion_support_level_order(left, right);
+  }
+  return level_order_detail::certify_support_level_order(
+      left.squared_level(),
+      right.squared_level(),
+      filtered,
+      expanded,
+      filter_policy,
+      counters);
+}
+
+[[nodiscard]] inline PredicateDecision decide_support_level_order(
+    const SupportLevelEmission& left,
+    const SupportLevelEmission& right,
+    PredicateCounters* counters = nullptr,
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_adaptive) {
+  return compare_support_levels(left, right, counters, filter_policy).decision;
+}
 
 // Converts the certified local minimality result from 2A.6 into a leveled
 // support emission. Exterior and dependent circumcentres require the later
@@ -279,10 +466,29 @@ class SupportLevelEmission {
   const CanonicalSupportIds minimal_support =
       CanonicalSupportIds::from_ids(
           std::span<const std::uint64_t>{reduced_ids.data(), reduced_size});
-  return SupportLevelEmission::create(
+  SupportLevelEmission emission = SupportLevelEmission::create(
       *circumcenter.squared_level(),
       minimal_support,
       std::move(source_support));
+  const std::span<const CertifiedPoint3> binary64_support =
+      analysis.binary64_support();
+  if (!binary64_support.empty()) {
+    if (binary64_support.size() != positional_source_ids.size()) {
+      throw std::logic_error(
+          "binary64 support provenance does not match its positional identifiers");
+    }
+    emission.binary64_level_support_.reserve(reduced_size);
+    for (std::size_t index = 0; index < binary64_support.size(); ++index) {
+      if (analysis.reduced_support_contains(index)) {
+        emission.binary64_level_support_.push_back(binary64_support[index]);
+      }
+    }
+    if (emission.binary64_level_support_.size() != reduced_size) {
+      throw std::logic_error(
+          "binary64 level provenance does not match the reduced support");
+    }
+  }
+  return emission;
 }
 
 struct SupportEmissionProvenance {

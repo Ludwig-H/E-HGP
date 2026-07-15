@@ -1,0 +1,10 @@
+{
+  "kind": "morsehgp3d_predicate_replay_input",
+  "point": ["4007ffffffffffff", "0000000000000000", "0000000000000000"],
+  "predicate": "support_sphere_side",
+  "schema_version": 7,
+  "support": [
+    ["3ff0000000000000", "0000000000000000", "0000000000000000"],
+    ["4008000000000000", "0000000000000000", "0000000000000000"]
+  ]
+}

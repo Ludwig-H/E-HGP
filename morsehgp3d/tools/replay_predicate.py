@@ -25,7 +25,7 @@ if hasattr(sys, "set_int_max_str_digits"):
 
 INPUT_KIND = "morsehgp3d_predicate_replay_input"
 RESULT_KIND = "morsehgp3d_predicate_replay_result"
-SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6}
+SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7}
 DOMAINS = {
     1: b"MorseHGP3D/predicate-replay-v1/",
     2: b"MorseHGP3D/predicate-replay-v2/",
@@ -33,6 +33,7 @@ DOMAINS = {
     4: b"MorseHGP3D/predicate-replay-v4/",
     5: b"MorseHGP3D/predicate-replay-v5/",
     6: b"MorseHGP3D/predicate-replay-v6/",
+    7: b"MorseHGP3D/predicate-replay-v7/",
 }
 POINT_COUNTS = {
     "compare_squared_distances": 3,
@@ -439,6 +440,117 @@ def validate_input(value: Any) -> dict[str, Any]:
             }
         raise ValueError("the v6 replay predicate is unsupported")
 
+    if schema_version == 7:
+        if predicate == "binary64_barycentric_coordinates":
+            required = {
+                "kind",
+                "predicate",
+                "query",
+                "schema_version",
+                "support",
+            }
+            if set(value) != required:
+                raise ValueError(
+                    "the v7 barycentric input has missing or unknown fields"
+                )
+            support = validate_points(value["support"], "support")
+            if not 1 <= len(support) <= 4:
+                raise ValueError(
+                    "binary64 barycentric coordinates require a support of "
+                    "size one to four"
+                )
+            query = validate_points([value["query"]], "query")[0]
+            require_affinely_independent_support_words(
+                support, "binary64 barycentric support"
+            )
+            require_query_in_support_affine_hull_words(query, support)
+            return {
+                "kind": INPUT_KIND,
+                "predicate": predicate,
+                "query": query,
+                "schema_version": 7,
+                "support": support,
+            }
+        if predicate == "binary64_circumcenter_support_analysis":
+            required = {"kind", "points", "predicate", "schema_version"}
+            if set(value) != required:
+                raise ValueError(
+                    "the v7 support-analysis input has missing or unknown fields"
+                )
+            points = validate_points(value["points"], "points")
+            if not 1 <= len(points) <= 4:
+                raise ValueError(
+                    "binary64 circumcenter support analysis requires between "
+                    "one and four points"
+                )
+            return {
+                "kind": INPUT_KIND,
+                "points": points,
+                "predicate": predicate,
+                "schema_version": 7,
+            }
+        if predicate == "support_sphere_side":
+            required = {
+                "kind",
+                "point",
+                "predicate",
+                "schema_version",
+                "support",
+            }
+            if set(value) != required:
+                raise ValueError(
+                    "the v7 support-sphere input has missing or unknown fields"
+                )
+            support = validate_points(value["support"], "support")
+            if not 1 <= len(support) <= 4:
+                raise ValueError(
+                    "support-sphere classification requires a support of "
+                    "size one to four"
+                )
+            point = validate_points([value["point"]], "point")[0]
+            require_affinely_independent_support_words(
+                support, "support-sphere support"
+            )
+            return {
+                "kind": INPUT_KIND,
+                "point": point,
+                "predicate": predicate,
+                "schema_version": 7,
+                "support": support,
+            }
+        if predicate == "compare_support_levels":
+            required = {
+                "kind",
+                "left_support",
+                "predicate",
+                "right_support",
+                "schema_version",
+            }
+            if set(value) != required:
+                raise ValueError(
+                    "the v7 support-level input has missing or unknown fields"
+                )
+            left_support = validate_points(value["left_support"], "left support")
+            right_support = validate_points(value["right_support"], "right support")
+            if not 1 <= len(left_support) <= 4 or not 1 <= len(right_support) <= 4:
+                raise ValueError(
+                    "support-level comparison requires supports of size one to four"
+                )
+            require_affinely_independent_support_words(
+                left_support, "left level support"
+            )
+            require_affinely_independent_support_words(
+                right_support, "right level support"
+            )
+            return {
+                "kind": INPUT_KIND,
+                "left_support": left_support,
+                "predicate": predicate,
+                "right_support": right_support,
+                "schema_version": 7,
+            }
+        raise ValueError("the v7 replay predicate is unsupported")
+
     if predicate == "plane_through_points":
         required = {"kind", "schema_version", "predicate", "points"}
         if set(value) != required:
@@ -772,6 +884,79 @@ def matrix_rref(matrix: list[list[Fraction]]) -> tuple[list[list[Fraction]], lis
     return reduced, pivot_columns
 
 
+def support_affine_dimension(
+    points: list[tuple[Fraction, Fraction, Fraction]],
+) -> int:
+    if not points:
+        raise ValueError("an exact support must be nonempty")
+    directions = [
+        [point[axis] - points[0][axis] for axis in range(3)] for point in points[1:]
+    ]
+    _, pivots = matrix_rref(directions)
+    return len(pivots)
+
+
+def require_affinely_independent_support_words(
+    support: list[list[str]], label: str
+) -> None:
+    points = [point_from_words(words) for words in support]
+    if support_affine_dimension(points) + 1 != len(points):
+        raise ValueError(f"the replay {label} is affinely dependent")
+
+
+def exact_barycentric_coordinates(
+    query: tuple[Fraction, Fraction, Fraction],
+    support: list[tuple[Fraction, Fraction, Fraction]],
+) -> list[Fraction]:
+    """Solve affine coordinates directly, without projecting the query."""
+
+    if support_affine_dimension(support) + 1 != len(support):
+        raise ValueError("exact barycentric coordinates require independent support")
+    if len(support) == 1:
+        if query != support[0]:
+            raise ValueError("a singleton affine hull contains only its support point")
+        return [Fraction(1)]
+
+    origin = support[0]
+    directions = [
+        tuple(point[axis] - origin[axis] for axis in range(3)) for point in support[1:]
+    ]
+    query_delta = tuple(query[axis] - origin[axis] for axis in range(3))
+    system = [
+        [direction[axis] for direction in directions] + [query_delta[axis]]
+        for axis in range(3)
+    ]
+    reduced, pivots = matrix_rref(system)
+    variable_count = len(directions)
+    if pivots != list(range(variable_count)):
+        raise ValueError(
+            "the replay barycentric query is outside the support affine hull"
+        )
+    trailing = [reduced[index][-1] for index in range(variable_count)]
+    coordinates = [Fraction(1) - sum(trailing, Fraction()), *trailing]
+    for axis in range(3):
+        reconstructed = sum(
+            (
+                coordinate * support[index][axis]
+                for index, coordinate in enumerate(coordinates)
+            ),
+            Fraction(),
+        )
+        if reconstructed != query[axis]:
+            raise ValueError(
+                "the replay barycentric query is outside the support affine hull"
+            )
+    return coordinates
+
+
+def require_query_in_support_affine_hull_words(
+    query: list[str], support: list[list[str]]
+) -> None:
+    exact_barycentric_coordinates(
+        point_from_words(query), [point_from_words(words) for words in support]
+    )
+
+
 def solve_three_planes(
     planes: list[dict[str, str]],
 ) -> tuple[
@@ -976,6 +1161,100 @@ def support_analysis_oracle(replay_input: dict[str, Any]) -> dict[str, Any]:
         "support_kind": "affinely_independent",
         "support_size": len(points),
         "support_status": status,
+    }
+
+
+def binary64_barycentric_oracle(replay_input: dict[str, Any]) -> dict[str, Any]:
+    support = [point_from_words(words) for words in replay_input["support"]]
+    query = point_from_words(replay_input["query"])
+    coordinates = exact_barycentric_coordinates(query, support)
+    signs = [expected_sign(coordinate) for coordinate in coordinates]
+    if "negative" in signs:
+        location = "exterior"
+    elif "zero" in signs:
+        location = "relative_boundary"
+    else:
+        location = "relative_interior"
+    counters = empty_predicate_counters()
+    counters["cpu_multiprecision_certified"] = len(support)
+    counters["exact_zeros"] = signs.count("zero")
+    return {
+        "barycentric_coordinates_exact": [
+            exact_rational_record(coordinate) for coordinate in coordinates
+        ],
+        "barycentric_signs": signs,
+        "certification_stage": "cpu_multiprecision",
+        "convex_hull_location": location,
+        "counters": counters,
+        "predicate": "binary64_barycentric_coordinates",
+        "support_size": len(support),
+    }
+
+
+def binary64_support_analysis_oracle(
+    replay_input: dict[str, Any],
+) -> dict[str, Any]:
+    expected = support_analysis_oracle({"points": replay_input["points"]})
+    expected["predicate"] = "binary64_circumcenter_support_analysis"
+    return expected
+
+
+def support_sphere_side_oracle(replay_input: dict[str, Any]) -> dict[str, Any]:
+    support = [point_from_words(words) for words in replay_input["support"]]
+    center, squared_level, _ = independent_support_witness(support)
+    point = point_from_words(replay_input["point"])
+    distance = squared_distance(center, point)
+    offset = distance - squared_level
+    sign = expected_sign(offset)
+    counters = empty_predicate_counters()
+    counters["cpu_multiprecision_certified"] = 1
+    counters["exact_zeros"] = 1 if sign == "zero" else 0
+    return {
+        "center_exact": exact_rational3_record(center),
+        "certification_stage": "cpu_multiprecision",
+        "classification": {
+            "negative": "strictly_inside",
+            "zero": "boundary",
+            "positive": "outside",
+        }[sign],
+        "counters": counters,
+        "predicate": "support_sphere_side",
+        "sign": sign,
+        "signed_offset_exact": exact_rational_record(offset),
+        "squared_distance_exact": exact_level_record(distance),
+        "squared_level_exact": exact_level_record(squared_level),
+    }
+
+
+def support_level_comparison_oracle(
+    replay_input: dict[str, Any],
+) -> dict[str, Any]:
+    left_support = [point_from_words(words) for words in replay_input["left_support"]]
+    right_support = [point_from_words(words) for words in replay_input["right_support"]]
+    _, left_level, _ = independent_support_witness(left_support)
+    _, right_level, _ = independent_support_witness(right_support)
+    difference = (
+        left_level.numerator * right_level.denominator
+        - right_level.numerator * left_level.denominator
+    )
+    sign = "negative" if difference < 0 else "zero" if difference == 0 else "positive"
+    counters = empty_predicate_counters()
+    counters["cpu_multiprecision_certified"] = 1
+    counters["exact_zeros"] = 1 if difference == 0 else 0
+    return {
+        "certification_stage": "cpu_multiprecision",
+        "counters": counters,
+        "cross_product_difference_exact": str(difference),
+        "equal": difference == 0,
+        "left_squared_level_exact": exact_level_record(left_level),
+        "ordering": {
+            "negative": "less",
+            "zero": "equal",
+            "positive": "greater",
+        }[sign],
+        "predicate": "compare_support_levels",
+        "right_squared_level_exact": exact_level_record(right_level),
+        "sign": sign,
     }
 
 
@@ -1238,8 +1517,298 @@ def validate_counters(
         )
 
 
+def validate_collective_counters(
+    value: Any,
+    signs: list[str],
+    stage: str,
+    support_size: int,
+) -> None:
+    if not isinstance(value, dict) or set(value) != COUNTER_FIELDS:
+        raise ValueError(
+            "the native collective counters do not match PredicateCounts v2"
+        )
+    if any(type(count) is not int or count < 0 for count in value.values()):
+        raise ValueError(
+            "the native collective predicate counters must be nonnegative integers"
+        )
+    if stage not in {"fp64_filtered", "expansion", "cpu_multiprecision"}:
+        raise ValueError("the native collective certification stage is unavailable")
+    if "zero" in signs and stage == "fp64_filtered":
+        raise ValueError("an FP64 filter cannot certify an exact zero")
+    expected = {
+        "cpu_multiprecision_certified": (
+            support_size if stage == "cpu_multiprecision" else 0
+        ),
+        "exact_zeros": signs.count("zero"),
+        "expansion_certified": support_size if stage == "expansion" else 0,
+        "fp32_proposals": 0,
+        "fp64_filtered_certified": (support_size if stage == "fp64_filtered" else 0),
+        "remaining_unknown": 0,
+    }
+    if value != expected:
+        raise ValueError(
+            "the native collective counters disagree with its certification stage"
+        )
+
+
 def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str, Any]:
     predicate = replay_input["predicate"]
+    if predicate == "binary64_barycentric_coordinates":
+        expected_fields = {
+            "barycentric_coordinates_exact",
+            "barycentric_signs",
+            "certification_stage",
+            "convex_hull_location",
+            "counters",
+            "predicate",
+            "support_size",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError(
+                "the native binary64 barycentric result returned unknown fields"
+            )
+        support_size = value["support_size"]
+        coordinates = value["barycentric_coordinates_exact"]
+        signs = value["barycentric_signs"]
+        stage = value["certification_stage"]
+        if (
+            value["predicate"] != predicate
+            or type(support_size) is not int
+            or support_size != len(replay_input["support"])
+            or not isinstance(coordinates, list)
+            or len(coordinates) != support_size
+            or not isinstance(signs, list)
+            or len(signs) != support_size
+            or any(not isinstance(sign, str) or sign not in SIGNS for sign in signs)
+            or not isinstance(stage, str)
+            or value["convex_hull_location"]
+            not in ("relative_interior", "relative_boundary", "exterior")
+        ):
+            raise ValueError(
+                "the native binary64 barycentric result has invalid classifications"
+            )
+        for index, coordinate in enumerate(coordinates):
+            canonical_rational(
+                coordinate,
+                f"binary64 barycentric coordinate {index}",
+                nonnegative=False,
+            )
+        validate_collective_counters(value["counters"], signs, stage, support_size)
+        expected = binary64_barycentric_oracle(replay_input)
+        expected["certification_stage"] = stage
+        expected["counters"] = value["counters"]
+        if value != expected:
+            raise ValueError(
+                "the native binary64 barycentric result differs from the "
+                "exact affine oracle"
+            )
+        return value
+
+    if predicate == "binary64_circumcenter_support_analysis":
+        expected_fields = {
+            "affine_dimension",
+            "barycentric_coordinates_exact",
+            "barycentric_signs",
+            "center_exact",
+            "certification_stage",
+            "convex_hull_location",
+            "counters",
+            "predicate",
+            "reduced_support_indices",
+            "squared_level_exact",
+            "support_kind",
+            "support_size",
+            "support_status",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError(
+                "the native binary64 support analysis returned unknown fields"
+            )
+        support_size = value["support_size"]
+        if (
+            value["predicate"] != predicate
+            or type(value["affine_dimension"]) is not int
+            or type(support_size) is not int
+            or support_size != len(replay_input["points"])
+            or value["convex_hull_location"]
+            not in (None, "relative_interior", "relative_boundary", "exterior")
+            or value["support_kind"]
+            not in ("affinely_independent", "affinely_dependent")
+            or value["support_status"]
+            not in (
+                "minimal",
+                "boundary_reduced",
+                "exterior_circumcenter",
+                "affinely_dependent",
+            )
+        ):
+            raise ValueError(
+                "the native binary64 support analysis has invalid classifications"
+            )
+        barycentric = value["barycentric_coordinates_exact"]
+        signs = value["barycentric_signs"]
+        if barycentric is not None:
+            if not isinstance(barycentric, list) or len(barycentric) != support_size:
+                raise ValueError(
+                    "the native binary64 support analysis has invalid barycentric size"
+                )
+            for index, coordinate in enumerate(barycentric):
+                canonical_rational(
+                    coordinate,
+                    f"binary64 support barycentric coordinate {index}",
+                    nonnegative=False,
+                )
+        if signs is not None and (
+            not isinstance(signs, list)
+            or len(signs) != support_size
+            or any(not isinstance(sign, str) or sign not in SIGNS for sign in signs)
+        ):
+            raise ValueError(
+                "the native binary64 support analysis has invalid barycentric signs"
+            )
+        reduced = value["reduced_support_indices"]
+        if reduced is not None and (
+            not isinstance(reduced, list)
+            or any(type(index) is not int for index in reduced)
+            or any(index < 0 or index >= support_size for index in reduced)
+            or any(left >= right for left, right in zip(reduced, reduced[1:]))
+        ):
+            raise ValueError(
+                "the native binary64 reduced support indices are not canonical"
+            )
+        if value["center_exact"] is not None:
+            validate_exact_rational3(
+                value["center_exact"], "native binary64 analyzed center"
+            )
+        if value["squared_level_exact"] is not None:
+            canonical_level(
+                value["squared_level_exact"], "native binary64 analyzed level"
+            )
+        counters = value["counters"]
+        if (
+            not isinstance(counters, dict)
+            or set(counters) != COUNTER_FIELDS
+            or any(type(count) is not int or count < 0 for count in counters.values())
+        ):
+            raise ValueError(
+                "the native binary64 support counters are not PredicateCounts v2"
+            )
+        expected = binary64_support_analysis_oracle(replay_input)
+        if expected["support_kind"] == "affinely_dependent":
+            if value["certification_stage"] is not None:
+                raise ValueError(
+                    "an affinely dependent support cannot expose a certification stage"
+                )
+        else:
+            stage = value["certification_stage"]
+            if not isinstance(stage, str) or signs is None:
+                raise ValueError(
+                    "an independent binary64 support lacks its collective decision"
+                )
+            validate_collective_counters(counters, signs, stage, support_size)
+            expected["certification_stage"] = stage
+            expected["counters"] = counters
+        if value != expected:
+            raise ValueError(
+                "the native binary64 support analysis differs from the exact "
+                "bordered-system oracle"
+            )
+        return value
+
+    if predicate == "support_sphere_side":
+        expected_fields = {
+            "center_exact",
+            "certification_stage",
+            "classification",
+            "counters",
+            "predicate",
+            "sign",
+            "signed_offset_exact",
+            "squared_distance_exact",
+            "squared_level_exact",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError("the native support-sphere result returned unknown fields")
+        sign = value["sign"]
+        stage = value["certification_stage"]
+        if (
+            value["predicate"] != predicate
+            or value["classification"] not in ("strictly_inside", "boundary", "outside")
+            or not isinstance(sign, str)
+            or sign not in SIGNS
+            or not isinstance(stage, str)
+        ):
+            raise ValueError(
+                "the native support-sphere result has invalid classifications"
+            )
+        validate_exact_rational3(value["center_exact"], "native support-sphere center")
+        canonical_level(
+            value["squared_level_exact"], "native support-sphere squared level"
+        )
+        canonical_level(
+            value["squared_distance_exact"], "native support-sphere squared distance"
+        )
+        canonical_rational(
+            value["signed_offset_exact"],
+            "native support-sphere signed offset",
+            nonnegative=False,
+        )
+        validate_counters(value["counters"], sign, stage, predicate)
+        expected = support_sphere_side_oracle(replay_input)
+        expected["certification_stage"] = stage
+        expected["counters"] = value["counters"]
+        if value != expected:
+            raise ValueError(
+                "the native support-sphere result differs from the exact support oracle"
+            )
+        return value
+
+    if predicate == "compare_support_levels":
+        expected_fields = {
+            "certification_stage",
+            "counters",
+            "cross_product_difference_exact",
+            "equal",
+            "left_squared_level_exact",
+            "ordering",
+            "predicate",
+            "right_squared_level_exact",
+            "sign",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError(
+                "the native support-level comparison returned unknown fields"
+            )
+        sign = value["sign"]
+        stage = value["certification_stage"]
+        difference = value["cross_product_difference_exact"]
+        if (
+            value["predicate"] != predicate
+            or not isinstance(sign, str)
+            or sign not in SIGNS
+            or not isinstance(stage, str)
+            or value["ordering"] not in ("less", "equal", "greater")
+            or type(value["equal"]) is not bool
+            or not isinstance(difference, str)
+            or CANONICAL_INTEGER.fullmatch(difference) is None
+        ):
+            raise ValueError(
+                "the native support-level comparison has invalid classifications"
+            )
+        canonical_level(value["left_squared_level_exact"], "native left support level")
+        canonical_level(
+            value["right_squared_level_exact"], "native right support level"
+        )
+        validate_counters(value["counters"], sign, stage, predicate)
+        expected = support_level_comparison_oracle(replay_input)
+        expected["certification_stage"] = stage
+        expected["counters"] = value["counters"]
+        if value != expected:
+            raise ValueError(
+                "the native support-level comparison differs from the Fraction oracle"
+            )
+        return value
+
     if predicate == "compare_exact_levels":
         expected_fields = {
             "certification_stage",
@@ -1970,6 +2539,23 @@ def replay(
                 arguments.extend(str(identifier) for identifier in minimal)
                 arguments.append(str(len(source)))
                 arguments.extend(str(identifier) for identifier in source)
+    elif value["schema_version"] == 7:
+        if value["predicate"] == "binary64_barycentric_coordinates":
+            arguments.append(str(len(value["support"])))
+            arguments.extend(word for point in value["support"] for word in point)
+            arguments.extend(value["query"])
+        elif value["predicate"] == "binary64_circumcenter_support_analysis":
+            arguments.append(str(len(value["points"])))
+            arguments.extend(word for point in value["points"] for word in point)
+        elif value["predicate"] == "support_sphere_side":
+            arguments.append(str(len(value["support"])))
+            arguments.extend(word for point in value["support"] for word in point)
+            arguments.extend(value["point"])
+        else:
+            arguments.append(str(len(value["left_support"])))
+            arguments.extend(word for point in value["left_support"] for word in point)
+            arguments.append(str(len(value["right_support"])))
+            arguments.extend(word for point in value["right_support"] for word in point)
     elif value["predicate"] == "plane_through_points":
         arguments.extend(word for point in value["points"] for word in point)
     elif value["predicate"] == "power_bisector_affine_form":

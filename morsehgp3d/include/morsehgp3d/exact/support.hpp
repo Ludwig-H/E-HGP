@@ -2,14 +2,17 @@
 
 #include "morsehgp3d/exact/center.hpp"
 #include "morsehgp3d/exact/predicate.hpp"
+#include "morsehgp3d/exact/support_polynomial.hpp"
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 namespace morsehgp3d::exact {
 
@@ -32,6 +35,13 @@ enum class ConvexHullLocation {
 }
 
 class BarycentricCoordinates;
+class CircumcenterSupportAnalysis;
+
+template <std::size_t SupportSize>
+[[nodiscard]] CircumcenterSupportAnalysis analyze_circumcenter_support(
+    const std::array<CertifiedPoint3, SupportSize>& support,
+    PredicateCounters* counters = nullptr,
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_adaptive);
 
 template <std::size_t SupportSize>
 [[nodiscard]] BarycentricCoordinates barycentric_coordinates(
@@ -39,16 +49,25 @@ template <std::size_t SupportSize>
     const std::array<ExactRational3, SupportSize>& support,
     PredicateCounters* counters = nullptr);
 
+template <std::size_t SupportSize>
+[[nodiscard]] BarycentricCoordinates barycentric_coordinates(
+    const CertifiedPoint3& query,
+    const std::array<CertifiedPoint3, SupportSize>& support,
+    PredicateCounters* counters = nullptr,
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_adaptive);
+
 // Exact barycentric coordinates in an affinely independent support for a
 // query in its affine hull. A query outside that affine hull is rejected
 // instead of being projected or mislabeled as merely outside the convex hull.
-// All signs are currently certified by the same CPU-multiprecision pass;
-// later filters may refine that collective stage without changing witnesses.
+// All signs are certified by one collective pass. If one coordinate remains
+// uncertain, the complete vector falls through to the next stage so its
+// location witness never mixes authorities.
 class BarycentricCoordinates {
  private:
   [[nodiscard]] static BarycentricCoordinates certified(
       std::size_t support_size,
       std::array<ExactRational, 4> coordinates,
+      CertificationStage certification_stage,
       PredicateCounters* counters = nullptr) {
     if (support_size < 1U || support_size > coordinates.size()) {
       throw std::invalid_argument(
@@ -77,6 +96,9 @@ class BarycentricCoordinates {
     if (sum != ExactRational{BigInt{1}}) {
       throw std::invalid_argument("barycentric coordinates must sum exactly to one");
     }
+    for (std::size_t index = 0; index < support_size; ++index) {
+      static_cast<void>(PredicateDecision{signs[index], certification_stage});
+    }
     const ConvexHullLocation location =
         has_negative
             ? ConvexHullLocation::exterior
@@ -85,11 +107,15 @@ class BarycentricCoordinates {
     if (counters != nullptr) {
       for (std::size_t index = 0; index < support_size; ++index) {
         counters->record_certification(PredicateDecision{
-            signs[index], CertificationStage::cpu_multiprecision});
+            signs[index], certification_stage});
       }
     }
     return BarycentricCoordinates{
-        support_size, std::move(coordinates), signs, location};
+        support_size,
+        std::move(coordinates),
+        signs,
+        certification_stage,
+        location};
   }
 
   template <std::size_t SupportSize>
@@ -97,6 +123,19 @@ class BarycentricCoordinates {
       const ExactRational3& query,
       const std::array<ExactRational3, SupportSize>& support,
       PredicateCounters* counters);
+
+  template <std::size_t SupportSize>
+  friend BarycentricCoordinates barycentric_coordinates(
+      const CertifiedPoint3& query,
+      const std::array<CertifiedPoint3, SupportSize>& support,
+      PredicateCounters* counters,
+      PredicateFilterPolicy filter_policy);
+
+  template <std::size_t SupportSize>
+  friend CircumcenterSupportAnalysis analyze_circumcenter_support(
+      const std::array<CertifiedPoint3, SupportSize>& support,
+      PredicateCounters* counters,
+      PredicateFilterPolicy filter_policy);
 
  public:
 
@@ -114,8 +153,8 @@ class BarycentricCoordinates {
     return signs_[index];
   }
 
-  [[nodiscard]] static constexpr CertificationStage certification_stage() noexcept {
-    return CertificationStage::cpu_multiprecision;
+  [[nodiscard]] CertificationStage certification_stage() const noexcept {
+    return certification_stage_;
   }
 
   [[nodiscard]] ConvexHullLocation location() const noexcept {
@@ -123,18 +162,24 @@ class BarycentricCoordinates {
   }
 
   friend bool operator==(
-      const BarycentricCoordinates&,
-      const BarycentricCoordinates&) noexcept = default;
+      const BarycentricCoordinates& left,
+      const BarycentricCoordinates& right) noexcept {
+    return left.support_size_ == right.support_size_ &&
+           left.coordinates_ == right.coordinates_ &&
+           left.signs_ == right.signs_ && left.location_ == right.location_;
+  }
 
  private:
   BarycentricCoordinates(
       std::size_t support_size,
       std::array<ExactRational, 4> coordinates,
       std::array<PredicateSign, 4> signs,
+      CertificationStage certification_stage,
       ConvexHullLocation location)
       : support_size_(support_size),
         coordinates_(std::move(coordinates)),
         signs_(signs),
+        certification_stage_(certification_stage),
         location_(location) {}
 
   void require_index(std::size_t index) const {
@@ -146,6 +191,7 @@ class BarycentricCoordinates {
   std::size_t support_size_;
   std::array<ExactRational, 4> coordinates_{};
   std::array<PredicateSign, 4> signs_{};
+  CertificationStage certification_stage_;
   ConvexHullLocation location_;
 };
 
@@ -229,6 +275,88 @@ template <std::size_t SupportSize>
   return result;
 }
 
+template <std::size_t SupportSize>
+[[nodiscard]] inline bool verify_collective_attempt(
+    const detail::support_polynomial::SignVectorAttempt<SupportSize>& attempt,
+    const detail::support_polynomial::CanonicalSupport<SupportSize>& support,
+    const std::array<PredicateSign, SupportSize>& exact_signs,
+    const char* contradiction_message) {
+  if (attempt.state() != FilterState::certified) {
+    return false;
+  }
+  if (!attempt.signs().has_value()) {
+    throw std::runtime_error(
+        "a certified barycentric attempt omitted its sign vector");
+  }
+  for (std::size_t canonical_index = 0;
+       canonical_index < SupportSize;
+       ++canonical_index) {
+    const std::size_t original_index =
+        support.original_indices[canonical_index];
+    if ((*attempt.signs())[canonical_index] != exact_signs[original_index]) {
+      throw std::runtime_error(contradiction_message);
+    }
+  }
+  return true;
+}
+
+template <std::size_t SupportSize>
+[[nodiscard]] inline CertificationStage query_barycentric_stage(
+    const CertifiedPoint3& query,
+    const std::array<CertifiedPoint3, SupportSize>& support,
+    const std::array<PredicateSign, SupportSize>& exact_signs,
+    PredicateFilterPolicy filter_policy) {
+  const auto canonical_support =
+      detail::support_polynomial::canonicalize_support(support);
+  if (detail::policy_allows_fp64(filter_policy) &&
+      verify_collective_attempt(
+          detail::support_polynomial::filter_query_barycentric_signs(
+              query, canonical_support),
+          canonical_support,
+          exact_signs,
+          "the FP64 barycentric filter contradicted its exact witness")) {
+    return CertificationStage::fp64_filtered;
+  }
+  if (detail::policy_allows_expansion(filter_policy) &&
+      verify_collective_attempt(
+          detail::support_polynomial::expansion_query_barycentric_signs(
+              query, canonical_support),
+          canonical_support,
+          exact_signs,
+          "the barycentric expansion contradicted its exact witness")) {
+    return CertificationStage::expansion;
+  }
+  return CertificationStage::cpu_multiprecision;
+}
+
+template <std::size_t SupportSize>
+[[nodiscard]] inline CertificationStage circumcenter_barycentric_stage(
+    const std::array<CertifiedPoint3, SupportSize>& support,
+    const std::array<PredicateSign, SupportSize>& exact_signs,
+    PredicateFilterPolicy filter_policy) {
+  const auto canonical_support =
+      detail::support_polynomial::canonicalize_support(support);
+  if (detail::policy_allows_fp64(filter_policy) &&
+      verify_collective_attempt(
+          detail::support_polynomial::filter_circumcenter_barycentric_signs(
+              canonical_support),
+          canonical_support,
+          exact_signs,
+          "the FP64 circumcenter-barycentric filter contradicted its exact witness")) {
+    return CertificationStage::fp64_filtered;
+  }
+  if (detail::policy_allows_expansion(filter_policy) &&
+      verify_collective_attempt(
+          detail::support_polynomial::expansion_circumcenter_barycentric_signs(
+              canonical_support),
+          canonical_support,
+          exact_signs,
+          "the circumcenter-barycentric expansion contradicted its exact witness")) {
+    return CertificationStage::expansion;
+  }
+  return CertificationStage::cpu_multiprecision;
+}
+
 }  // namespace support_detail
 
 template <std::size_t SupportSize>
@@ -310,16 +438,37 @@ template <std::size_t SupportSize>
   }
   support_detail::require_affine_reconstruction(query, support, coordinates);
   return BarycentricCoordinates::certified(
-      SupportSize, std::move(coordinates), counters);
+      SupportSize,
+      std::move(coordinates),
+      CertificationStage::cpu_multiprecision,
+      counters);
 }
 
 template <std::size_t SupportSize>
 [[nodiscard]] BarycentricCoordinates barycentric_coordinates(
     const CertifiedPoint3& query,
     const std::array<CertifiedPoint3, SupportSize>& support,
-    PredicateCounters* counters = nullptr) {
-  return barycentric_coordinates(
-      query.exact(), support_detail::exact_support(support), counters);
+    PredicateCounters* counters,
+    PredicateFilterPolicy filter_policy) {
+  detail::require_filter_policy(filter_policy);
+  const std::array<ExactRational3, SupportSize> exact_support =
+      support_detail::exact_support(support);
+  const BarycentricCoordinates exact_coordinates = barycentric_coordinates(
+      query.exact(), exact_support, nullptr);
+  std::array<ExactRational, 4> coordinates{};
+  std::array<PredicateSign, SupportSize> exact_signs{};
+  for (std::size_t index = 0; index < SupportSize; ++index) {
+    coordinates[index] = exact_coordinates.coordinate(index);
+    exact_signs[index] = exact_coordinates.sign(index);
+  }
+  const CertificationStage certification_stage =
+      support_detail::query_barycentric_stage(
+          query, support, exact_signs, filter_policy);
+  return BarycentricCoordinates::certified(
+      SupportSize,
+      std::move(coordinates),
+      certification_stage,
+      counters);
 }
 
 enum class CircumcenterSupportStatus {
@@ -354,7 +503,8 @@ template <std::size_t SupportSize>
 class CircumcenterSupportAnalysis {
  private:
   [[nodiscard]] static CircumcenterSupportAnalysis dependent(
-      CircumcenterResult circumcenter_result) {
+      CircumcenterResult circumcenter_result,
+      std::vector<CertifiedPoint3> binary64_support = {}) {
     if (circumcenter_result.kind() != CircumcenterKind::affinely_dependent) {
       throw std::invalid_argument(
           "a dependent support analysis requires a dependent circumcenter result");
@@ -363,12 +513,14 @@ class CircumcenterSupportAnalysis {
         std::move(circumcenter_result),
         std::nullopt,
         CircumcenterSupportStatus::affinely_dependent,
-        std::nullopt};
+        std::nullopt,
+        std::move(binary64_support)};
   }
 
   [[nodiscard]] static CircumcenterSupportAnalysis independent(
       CircumcenterResult circumcenter_result,
-      BarycentricCoordinates barycentric) {
+      BarycentricCoordinates barycentric,
+      std::vector<CertifiedPoint3> binary64_support = {}) {
     if (circumcenter_result.kind() != CircumcenterKind::unique ||
         circumcenter_result.support_size() != barycentric.support_size()) {
       throw std::invalid_argument(
@@ -405,13 +557,20 @@ class CircumcenterSupportAnalysis {
         std::move(circumcenter_result),
         std::move(barycentric),
         status,
-        reduced_mask};
+        reduced_mask,
+        std::move(binary64_support)};
   }
 
   template <std::size_t SupportSize>
   friend CircumcenterSupportAnalysis analyze_circumcenter_support(
       const std::array<ExactRational3, SupportSize>& support,
       PredicateCounters* counters);
+
+  template <std::size_t SupportSize>
+  friend CircumcenterSupportAnalysis analyze_circumcenter_support(
+      const std::array<CertifiedPoint3, SupportSize>& support,
+      PredicateCounters* counters,
+      PredicateFilterPolicy filter_policy);
 
  public:
 
@@ -431,6 +590,13 @@ class CircumcenterSupportAnalysis {
   [[nodiscard]] const std::optional<std::uint8_t>& reduced_support_mask()
       const noexcept {
     return reduced_support_mask_;
+  }
+
+  // Positional binary64 provenance. It is empty for arbitrary rational input
+  // and deliberately excluded from the scientific equality of an analysis.
+  [[nodiscard]] std::span<const CertifiedPoint3> binary64_support()
+      const noexcept {
+    return binary64_support_;
   }
 
   [[nodiscard]] std::optional<std::size_t> reduced_support_size() const noexcept {
@@ -457,24 +623,38 @@ class CircumcenterSupportAnalysis {
   }
 
   friend bool operator==(
-      const CircumcenterSupportAnalysis&,
-      const CircumcenterSupportAnalysis&) noexcept = default;
+      const CircumcenterSupportAnalysis& left,
+      const CircumcenterSupportAnalysis& right) noexcept {
+    return left.circumcenter_result_ == right.circumcenter_result_ &&
+           left.barycentric_ == right.barycentric_ &&
+           left.status_ == right.status_ &&
+           left.reduced_support_mask_ == right.reduced_support_mask_;
+  }
 
  private:
   CircumcenterSupportAnalysis(
       CircumcenterResult circumcenter_result,
       std::optional<BarycentricCoordinates> barycentric,
       CircumcenterSupportStatus status,
-      std::optional<std::uint8_t> reduced_support_mask)
+      std::optional<std::uint8_t> reduced_support_mask,
+      std::vector<CertifiedPoint3> binary64_support)
       : circumcenter_result_(std::move(circumcenter_result)),
         barycentric_(std::move(barycentric)),
         status_(status),
-        reduced_support_mask_(reduced_support_mask) {}
+        reduced_support_mask_(reduced_support_mask),
+        binary64_support_(std::move(binary64_support)) {
+    if (!binary64_support_.empty() &&
+        binary64_support_.size() != circumcenter_result_.support_size()) {
+      throw std::invalid_argument(
+          "binary64 support provenance must match the analyzed support");
+    }
+  }
 
   CircumcenterResult circumcenter_result_;
   std::optional<BarycentricCoordinates> barycentric_;
   CircumcenterSupportStatus status_;
   std::optional<std::uint8_t> reduced_support_mask_;
+  std::vector<CertifiedPoint3> binary64_support_;
 };
 
 namespace support_detail {
@@ -567,9 +747,44 @@ template <std::size_t SupportSize>
 template <std::size_t SupportSize>
 [[nodiscard]] CircumcenterSupportAnalysis analyze_circumcenter_support(
     const std::array<CertifiedPoint3, SupportSize>& support,
-    PredicateCounters* counters = nullptr) {
-  return analyze_circumcenter_support(
-      support_detail::exact_support(support), counters);
+    PredicateCounters* counters,
+    PredicateFilterPolicy filter_policy) {
+  detail::require_filter_policy(filter_policy);
+  const std::array<ExactRational3, SupportSize> exact_support =
+      support_detail::exact_support(support);
+  CircumcenterResult center = support_detail::circumcenter_of(exact_support);
+  std::vector<CertifiedPoint3> binary64_support{
+      support.begin(), support.end()};
+  if (center.kind() == CircumcenterKind::affinely_dependent) {
+    return CircumcenterSupportAnalysis::dependent(
+        std::move(center), std::move(binary64_support));
+  }
+  if (!center.center().has_value()) {
+    throw std::logic_error("a unique circumcenter omitted its center witness");
+  }
+  const BarycentricCoordinates exact_barycentric =
+      barycentric_coordinates(*center.center(), exact_support, nullptr);
+  std::array<ExactRational, 4> coordinates{};
+  std::array<PredicateSign, SupportSize> exact_signs{};
+  for (std::size_t index = 0; index < SupportSize; ++index) {
+    coordinates[index] = exact_barycentric.coordinate(index);
+    exact_signs[index] = exact_barycentric.sign(index);
+  }
+  const CertificationStage certification_stage =
+      support_detail::circumcenter_barycentric_stage(
+          support, exact_signs, filter_policy);
+  BarycentricCoordinates barycentric = BarycentricCoordinates::certified(
+      SupportSize,
+      std::move(coordinates),
+      certification_stage,
+      counters);
+  CircumcenterSupportAnalysis analysis =
+      CircumcenterSupportAnalysis::independent(
+          std::move(center),
+          std::move(barycentric),
+          std::move(binary64_support));
+  support_detail::verify_boundary_reduction(analysis, exact_support);
+  return analysis;
 }
 
 enum class SpherePointLocation {
@@ -590,31 +805,29 @@ enum class SpherePointLocation {
   throw std::invalid_argument("sphere point location is invalid");
 }
 
+class SpherePointClassification;
+
+// Classifies against the circumsphere of this affinely independent support.
+// This low-level overload does not assert that the support is a minimal
+// enclosing-ball support for any ambient point set.
+template <std::size_t SupportSize>
+[[nodiscard]] SpherePointClassification classify_sphere_point(
+    const std::array<CertifiedPoint3, SupportSize>& support,
+    const CertifiedPoint3& point,
+    PredicateCounters* counters = nullptr,
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_adaptive);
+
 class SpherePointClassification {
  public:
   [[nodiscard]] static SpherePointClassification certified(
       ExactLevel point_squared_distance,
       const ExactLevel& sphere_squared_level,
       PredicateCounters* counters = nullptr) {
-    ExactRational signed_power =
-        point_squared_distance.rational() - sphere_squared_level.rational();
-    const PredicateDecision decision{
-        predicate_sign(signed_power.sign()),
-        CertificationStage::cpu_multiprecision};
-    if (counters != nullptr) {
-      counters->record_certification(decision);
-    }
-    const SpherePointLocation location =
-        decision.sign() == PredicateSign::negative
-            ? SpherePointLocation::strictly_inside
-            : (decision.sign() == PredicateSign::zero
-                   ? SpherePointLocation::boundary
-                   : SpherePointLocation::outside);
-    return SpherePointClassification{
-        decision,
+    return certified_at_stage(
         std::move(point_squared_distance),
-        std::move(signed_power),
-        location};
+        sphere_squared_level,
+        CertificationStage::cpu_multiprecision,
+        counters);
   }
 
   [[nodiscard]] const PredicateDecision& decision() const noexcept {
@@ -645,6 +858,38 @@ class SpherePointClassification {
   }
 
  private:
+  template <std::size_t SupportSize>
+  friend SpherePointClassification classify_sphere_point(
+      const std::array<CertifiedPoint3, SupportSize>& support,
+      const CertifiedPoint3& point,
+      PredicateCounters* counters,
+      PredicateFilterPolicy filter_policy);
+
+  [[nodiscard]] static SpherePointClassification certified_at_stage(
+      ExactLevel point_squared_distance,
+      const ExactLevel& sphere_squared_level,
+      CertificationStage certification_stage,
+      PredicateCounters* counters) {
+    ExactRational signed_power =
+        point_squared_distance.rational() - sphere_squared_level.rational();
+    const PredicateDecision decision{
+        predicate_sign(signed_power.sign()),
+        certification_stage};
+    if (counters != nullptr) {
+      counters->record_certification(decision);
+    }
+    const SpherePointLocation location =
+        decision.sign() == PredicateSign::negative
+            ? SpherePointLocation::strictly_inside
+            : (decision.sign() == PredicateSign::zero
+                   ? SpherePointLocation::boundary
+                   : SpherePointLocation::outside);
+    return SpherePointClassification{
+        decision,
+        std::move(point_squared_distance),
+        std::move(signed_power),
+        location};
+  }
   SpherePointClassification(
       PredicateDecision decision,
       ExactLevel point_squared_distance,
@@ -702,6 +947,50 @@ class SpherePointClassification {
     const CertifiedPoint3& point,
     PredicateCounters* counters = nullptr) {
   return classify_sphere_point(sphere, point.exact(), counters);
+}
+
+template <std::size_t SupportSize>
+[[nodiscard]] SpherePointClassification classify_sphere_point(
+    const std::array<CertifiedPoint3, SupportSize>& support,
+    const CertifiedPoint3& point,
+    PredicateCounters* counters,
+    PredicateFilterPolicy filter_policy) {
+  static_assert(SupportSize >= 1U && SupportSize <= 4U);
+  detail::require_filter_policy(filter_policy);
+  const std::array<ExactRational3, SupportSize> exact_support =
+      support_detail::exact_support(support);
+  const CircumcenterResult sphere = support_detail::circumcenter_of(exact_support);
+  if (sphere.kind() != CircumcenterKind::unique ||
+      !sphere.center().has_value() || !sphere.squared_level().has_value()) {
+    throw std::invalid_argument(
+        "sphere-point classification requires an affinely independent support");
+  }
+  const SpherePointClassification exact_classification = classify_sphere_point(
+      *sphere.center(), *sphere.squared_level(), point.exact(), nullptr);
+  const auto canonical_support =
+      detail::support_polynomial::canonicalize_support(support);
+  FilterResult filtered = FilterResult::uncertain();
+  if (detail::policy_allows_fp64(filter_policy)) {
+    filtered = detail::support_polynomial::filter_sphere_side(
+        point, canonical_support);
+  }
+  ExpansionResult expanded = ExpansionResult::uncertain();
+  if (detail::policy_allows_expansion(filter_policy) &&
+      filtered.state() != FilterState::certified) {
+    expanded = detail::support_polynomial::expansion_sphere_side(
+        point, canonical_support);
+  }
+  const PredicateDecision decision = detail::certify_materialized_sign(
+      filtered,
+      expanded,
+      exact_classification.decision().sign(),
+      filter_policy,
+      nullptr);
+  return SpherePointClassification::certified_at_stage(
+      exact_classification.point_squared_distance(),
+      *sphere.squared_level(),
+      decision.certification_stage(),
+      counters);
 }
 
 }  // namespace morsehgp3d::exact

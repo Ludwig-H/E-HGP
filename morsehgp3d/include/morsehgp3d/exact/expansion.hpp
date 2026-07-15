@@ -14,6 +14,12 @@
 namespace morsehgp3d::exact {
 namespace detail {
 
+// These implementation limits bound diagnostic work without weakening the
+// exact authority: reaching either limit invalidates only the expansion
+// attempt, so the public cascade falls through to multiprecision.
+inline constexpr std::size_t maximum_expansion_components = 4'096U;
+inline constexpr std::size_t maximum_expansion_product_pairs = 16'384U;
+
 // A zero-eliminated floating expansion ordered from the least significant
 // component to the most significant one. All arithmetic is performed inside
 // Fp64EnvironmentGuard. Operations fail closed when a binary64 operation is
@@ -21,6 +27,8 @@ namespace detail {
 // transform. FE_INEXACT is expected and deliberately ignored.
 class FloatingExpansion {
  public:
+  FloatingExpansion() = default;
+
   [[nodiscard]] static FloatingExpansion scalar(double value) {
     if (!std::isfinite(value)) {
       return invalid();
@@ -157,6 +165,9 @@ struct Binary64IntegerScale {
   if (!expansion.valid() || !std::isfinite(value)) {
     return FloatingExpansion::invalid();
   }
+  if (expansion.components().size() >= maximum_expansion_components) {
+    return FloatingExpansion::invalid();
+  }
   double accumulator = value == 0.0 ? 0.0 : value;
   std::vector<double> output;
   output.reserve(expansion.components().size() + 1U);
@@ -167,11 +178,17 @@ struct Binary64IntegerScale {
     }
     if (sum.error != 0.0) {
       output.push_back(sum.error);
+      if (output.size() > maximum_expansion_components) {
+        return FloatingExpansion::invalid();
+      }
     }
     accumulator = sum.rounded;
   }
   if (accumulator != 0.0 || output.empty()) {
     output.push_back(accumulator == 0.0 ? 0.0 : accumulator);
+  }
+  if (output.size() > maximum_expansion_components) {
+    return FloatingExpansion::invalid();
   }
   return FloatingExpansion{true, std::move(output)};
 }
@@ -217,6 +234,11 @@ struct Binary64IntegerScale {
     const FloatingExpansion& left,
     const FloatingExpansion& right) {
   if (!left.valid() || !right.valid()) {
+    return FloatingExpansion::invalid();
+  }
+  if (!right.components().empty() &&
+      left.components().size() >
+          maximum_expansion_product_pairs / right.components().size()) {
     return FloatingExpansion::invalid();
   }
   FloatingExpansion result = FloatingExpansion::scalar(0.0);

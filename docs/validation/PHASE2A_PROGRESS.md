@@ -25,7 +25,8 @@
 | centres et niveaux homogènes 2A.5 | `3f3fa2b` | centres exacts de supports de taille deux à quatre, dimension affine, `ExactRational3` et `ExactLevel` atomiques, replay v4 et oracle Gram/RREF indépendant |
 | minimalité locale, barycentriques et sphères 2A.6 | `39f7902` | singleton exact, signes barycentriques de supports indépendants, réduction certifiée des supports de frontière, côté exact d'une sphère, replay v5 et oracle RREF indépendant |
 | ordre exact et lots canoniques 2A.7 | `1718e08` | comparaison instrumentée des `ExactLevel`, égalité par produit croisé, supports minimaux et provenances canoniques, lots exacts, replay v6 et oracle `Fraction` indépendant |
-| cascade adaptative 2A.8a | présent lot | expansions flottantes exactes fermées, cascades distance/orientation 3D/`H_RQ` binary64, provenance canonique des labels, politiques indépendantes, replay et différentiel `Fraction` forçant les trois étages |
+| cascade adaptative 2A.8a | `c98a5a1` | expansions flottantes exactes fermées, cascades distance/orientation 3D/`H_RQ` binary64, provenance canonique des labels, politiques indépendantes, replay et différentiel `Fraction` forçant les trois étages |
+| supports et niveaux adaptatifs 2A.8b | présent lot | provenance dyadique positionnelle et réduite, polynômes homogènes Gram/Cramer, barycentriques, côté de sphère et ordre de niveaux adaptatifs, replay v7 et oracles `Fraction` |
 
 La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe négatif signifie que `R` est moins coûteux au témoin. `ExactAffineForm3` conserve ses quatre coefficients rationnels et leur échelle exacte; sa clé primitive ne sert qu'à classifier le plan orienté ou la forme constante. Les API riches matérialisent encore leurs témoins multiprécision lorsque le signe est filtré. Le champ `certification_stage` identifie donc l'autorité du signe, pas le coût total d'un replay diagnostique.
 
@@ -41,10 +42,10 @@ La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe
 | appartenance d'un quatrième plan | oui | non | non | oui | référence exacte terminée |
 | centres circonscrits d'un à quatre points | oui | non | non | oui | référence exacte terminée |
 | coordonnées homogènes du centre et rayon carré | oui | non | non | oui | référence exacte terminée |
-| signes barycentriques et `relint` | oui | non | non | oui | référence exacte terminée |
-| intérieur, frontière ou extérieur d'une sphère | oui | non | non | oui | référence exacte terminée |
-| comparaison de rayons de miniball | oui | non | non | oui | référence exacte terminée |
-| égalité de niveaux issus de supports distincts | oui | non | non | oui | référence exacte terminée |
+| signes barycentriques et `relint` | oui | oui si support binary64 | oui si support binary64 | oui | cascade 2A.8b conditionnelle à la provenance |
+| intérieur, frontière ou extérieur d'une sphère | oui | oui si support binary64 | oui si support binary64 | oui | cascade 2A.8b sur sphère circonscrite |
+| comparaison de rayons de miniball | oui | oui si émissions géométriques | oui si émissions géométriques | oui | cascade 2A.8b après analyse et réduction |
+| égalité de niveaux issus de supports distincts | oui | oui si supports binary64 | oui si supports binary64 | oui | cascade 2A.8b conditionnelle à la provenance |
 
 ## Invariants de la cascade adaptative
 
@@ -59,9 +60,13 @@ La certification flottante exige simultanément :
 - FTZ et DAZ désactivés;
 - sauvegarde puis restauration de l'environnement et des drapeaux flottants de l'appelant.
 
-Les expansions emploient les transformations sans erreur `TwoSum` et `TwoProduct` avec résidu FMA. Avant tout produit, l'exposant du bit exact le plus faible est calculé depuis les mots binary64; un bit sous `2^-1074` rend immédiatement la tentative incertaine. Toute exception `FE_INVALID`, `FE_DIVBYZERO`, `FE_OVERFLOW` ou `FE_UNDERFLOW`, toute composante non finie et tout échec de restauration invalident également la tentative. Cette règle ferme notamment `denorm_min * denorm_min`, que nulle somme de binary64 ne peut représenter.
+Les expansions emploient les transformations sans erreur `TwoSum` et `TwoProduct` avec résidu FMA. Avant tout produit, l'exposant du bit exact le plus faible est calculé depuis les mots binary64; un bit sous `2^-1074` rend immédiatement la tentative incertaine. Toute exception `FE_INVALID`, `FE_DIVBYZERO`, `FE_OVERFLOW` ou `FE_UNDERFLOW`, toute composante non finie et tout échec de restauration invalident également la tentative. Cette règle ferme notamment `denorm_min * denorm_min`, que nulle somme de binary64 ne peut représenter. Les plafonds de 4 096 composantes et 16 384 couples de produit bornent le travail diagnostique; les atteindre invalide l'expansion et replie vers la multiprécision sans aucune troncature.
 
 `PredicateFilterPolicy::allow_adaptive` active FP64, expansion puis multiprécision. `allow_fp64` conserve l'ancien chemin FP64 puis multiprécision et ses valeurs d'énumération historiques; `multiprecision_only` désactive les deux étages rapides sans état global. Le différentiel rejoue exactement le même corpus adaptatif en multiprécision seule et exige des signes et témoins scientifiques identiques.
+
+Les supports binary64 sont triés par ordre total après canonicalisation du zéro signé uniquement pour évaluer les polynômes; les signes barycentriques sont ensuite remappés aux positions d'entrée. `CircumcenterSupportAnalysis` conserve le support source positionnel et `SupportLevelEmission` seulement le support réduit. Ces provenances et l'étage collectif sont exclus de l'égalité scientifique; une entrée rationnelle arbitraire laisse la provenance vide et rend les étages rapides inapplicables.
+
+Les numérateurs barycentriques, la puissance signée de la sphère et le produit croisé des rayons sont évalués sous forme Gram/Cramer homogène. Aucun quotient, centre ou rayon flottant n'est matérialisé. Le déterminant de Gram doit être strictement positif au même étage. Le résultat riche reconstruit toujours le témoin rationnel canonique et refuse toute contradiction avec un signe rapide. Les surcharges tableau décrivent une sphère circonscrite; la sémantique miniball exige la chaîne analyse, réduction exacte, puis émission géométrique.
 
 ## Régression numérique permanente
 
@@ -71,9 +76,9 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Qualification du lot courant
 
-- GCC 13, build Release strict : CTest 18/18.
-- Clang 18, build Release strict : CTest 18/18.
-- GCC 13 avec ASan et UBSan : CTest 18/18.
+- GCC 13, build Release strict : CTest 20/20 en 90,74 s.
+- Clang 18, build Release strict : CTest 20/20 en 185,95 s.
+- GCC 13 Debug avec ASan et UBSan : CTest 20/20 en 255,68 s.
 - Corpus court déterministe `mixed-binary64-splitmix64-v2` : 2 048 cas, hash `066f9ee577fc6c6d64ed930df4eaeca88e96895fa801a661980ba22fa98b4be3`.
 - Signes du corpus court : 1 001 négatifs, 891 positifs et 156 zéros.
 - Distances du corpus court : 58 signes `fp64_filtered`, 3 `expansion` et 963 fallbacks `cpu_multiprecision`.
@@ -97,7 +102,10 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 - Replay ordre v6 : 11 fixtures, 3 signes, supports de tailles un à quatre, 10 lots, 17 émissions uniques et 1 doublon; 5 symétries de comparaison, 159 permutations d'items, 6 permutations internes d'identifiants, 2 homothéties exactes, 34 rejets d'entrée, 10 commandes natives invalides, 30 faux natifs, 1 sortie non canonique, 1 diagnostic natif inattendu et 5 sentinelles historiques v1 à v5 vérifiés. Un niveau exact encodé comme chaîne de 5 000 chiffres décimaux est accepté par le wrapper et le natif, tandis qu'un entier numérique JSON de même taille est refusé avant conversion. `PointId=2^53-1` et le lot maximal de 64 émissions sont acceptés nativement; `PointId=2^53` est refusé. Au-delà de cinq items, les permutations du harnais sont bornées à huit ordres déterministes, tous exécutés de bout en bout sur un lot de 64 supports distincts; les sorties normale et `--multiprecision-only` sont byte-identiques.
 - Corpus d'ordre `level-order-dyadic-splitmix64-v1` : 1 792 cas, graine `0x4c4556454c324137`, hash des commandes `59fc92204073609b622d86eea14f92efcb704e6bcba3daba7eb6c9dbf53a7e8b`, hash des réponses exactes de l'oracle `3cb912b811f649d8bf96be79047234b7f5a1a59e6ac846be3e1efc8bd512bbec`, sorties normale et `--multiprecision-only` byte-identiques.
 - Répartition ordre 2A.7 : 1 536 comparaisons, dont 640 négatives, 640 positives et 256 égalités exactes; six familles de 256 cas couvrent produits croisés `-1`, `1`, égalités, ULP, exposants extrêmes et rationnels génériques. Les 256 cas de chaînes, issus de 32 chaînes de base rejouées sous huit ordonnancements, totalisent 5 120 émissions, 1 536 occurrences de niveaux de lots, 768 émissions dupliquées, des supports minimaux et sources de tailles un à quatre, jusqu'à trois supports par niveau et trois provenances par support.
-- Package CMake installé, wrapper installé rejoué sur une intersection rationnelle v3, un centre non dyadique v4, une réduction de frontière v5, une sphère à dénominateurs non triviaux v5, un niveau nul v5, deux niveaux v6 séparés par un produit croisé `-1` et une provenance réduite v6. Le consommateur externe exerce filtres, multiprécision, noyau affine, centre tétraédrique, réduction de support, côté de sphère, ordre exact et lots canoniques : 1/1.
+- Replay adaptatif v7 : 30 fixtures, dont 6 barycentriques, 8 analyses, 8 côtés de sphère et 8 comparaisons de niveaux. Chaque famille couvre les signes stricts au filtre FP64, les signes négatif, nul et positif à l'expansion et les trois signes au fallback multiprécision; une analyse dépendante n'émet aucune décision. Le manifeste vaut `9c4a399b7cc81da3274407e38c84a53041a1e335a34f32d741deb13bcb3fb8fc`; 10 entrées fermées invalides, dont un objet JSON à clé dupliquée, 7 commandes natives invalides et un résultat natif scientifiquement falsifié sont rejetés, et 6 sentinelles conservent les identités v1 à v6.
+- Corpus adaptatif supports/niveaux `support-adaptive-fraction-splitmix64-v1` : 4 050 cas, graine `0x3241384253555050`, hash des commandes `229c59e99a1d7d2404ec90cd8d30e430a0650f4972d8ce07f4dc5b2f0eb6019f` et hash des réponses de l'oracle `3f4094fe7768dcf14e3ad81d3e96ff529eb38cb0e8f1daceeb15a56c5b6d0ca1`. Les sorties adaptatives et multiprécision ont des projections scientifiques identiques; 3 589 cas terminent au filtre FP64, 447 à l'expansion, 11 en multiprécision et 3 analyses dépendantes sans signe.
+- Couverture adaptative 2A.8b : 31 cas construits forcent toutes les classes disponibles, 528 décisions exactes nulles sont observées et 288 relations métamorphiques vérifient permutations de support et transformations orthogonales signées. Les quatre tailles de support sont couvertes, chaque décision terminale est comptée exactement une fois et `remaining_unknown=0` partout.
+- Package CMake installé, wrapper installé rejoué sur une intersection rationnelle v3, un centre non dyadique v4, une réduction de frontière v5, une sphère à dénominateurs non triviaux v5, un niveau nul v5, deux niveaux v6 séparés par un produit croisé `-1`, une provenance réduite v6 et une égalité de niveaux v7 certifiée par expansion. Le consommateur externe exerce filtres, multiprécision, noyau affine, centre tétraédrique, réduction de support, côté de sphère adaptatif, ordre de niveaux avec provenance et lots canoniques : 1/1.
 - Contrats : 21 définitions, 21 exemples de schéma et 5 fixtures validés; 58 tests contractuels réussis.
 - Oracle exhaustif indépendant : 92 tests réussis; campagne CI bornée sur trois dimensions affines, trois cas audités et zéro échec.
 - Documentation : 26 documents actifs validés; 5 références locales et 9 modules d'oracle indépendant validés.
@@ -158,13 +166,23 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 6. Le replay reconnaît sans arrondi un témoin rationnel exactement représentable en binary64; le corpus `Fraction` v2 force les signes négatif, nul et positif à l'étage expansion pour chacune des trois familles et rejoue les mêmes commandes en multiprécision seule.
 7. La Phase 2A reste ouverte : ce sous-lot ne prétend pas filtrer des plans ou niveaux rationnels arbitraires en convertissant leurs `BigInt` vers `double`.
 
-### 2A.8b et 2A.8c — cascade adaptative restante
+### 2A.8b — provenance dyadique des supports et niveaux — terminé
 
-1. 2A.8b doit conserver la provenance dyadique des supports et niveaux afin de filtrer honnêtement les signes barycentriques, le côté de sphère et les comparaisons de niveaux, sans jamais matérialiser une division flottante.
-2. 2A.8c doit conserver la provenance des formes et plans afin de couvrir orientation 2D, décisions de rang, intersections et incidence d'un quatrième plan.
-3. Les surcharges acceptant des rationnels ou `BigInt` arbitraires conservent `cpu_multiprecision` comme autorité portable; une provenance absente rend l'étage rapide inapplicable, pas approximatif.
-4. Chaque nouvelle famille doit obtenir des cas différentiels négatifs, nuls et positifs à chaque étage disponible, les mêmes témoins lorsque la cascade est désactivée et exactement un compteur terminal.
-5. La qualification finale 2A.8 doit répéter GCC, Clang, optimisations strictes, modes d'arrondi, sous-normaux et sanitizers sur toute la matrice.
+1. `CircumcenterSupportAnalysis` conserve le support binary64 dans l'ordre positionnel et `SupportLevelEmission` seulement le support minimal après réduction; les entrées rationnelles et les émissions structurelles gardent une provenance vide.
+2. Les supports sont canonicalisés par ordre total avec normalisation de zéro signé pour l'évaluation, puis les signes barycentriques sont remappés aux positions d'origine. Provenance et étage collectif restent exclus de l'égalité scientifique.
+3. Les numérateurs barycentriques d'une requête et du centre circonscrit sont évalués par déterminants de Gram et règle de Cramer homogènes. Le déterminant doit être strictement positif au même étage et aucun quotient flottant n'est matérialisé.
+4. Le côté de la sphère et l'ordre de deux niveaux utilisent des polynômes homogènes équivalents à la puissance signée et au produit croisé exact des rayons. Le résultat riche conserve le centre, le niveau, les coordonnées ou le produit croisé rationnels comme témoins diagnostiques.
+5. Les surcharges tableau portent explicitement sur les sphères circonscrites de supports indépendants. La sémantique de miniball local passe par l'analyse, la réduction exacte puis l'émission géométrique; un centre extérieur ou un support dépendant n'est jamais promu.
+6. `allow_adaptive`, `allow_fp64` et `multiprecision_only` restent indépendants. Les rationnels ou `BigInt` arbitraires restent sous autorité `cpu_multiprecision`; une provenance absente désactive les étages rapides sans approximation.
+7. Le replay v7, 30 fixtures permanentes et le corpus de 4 050 cas forcent les classes de signe disponibles aux trois étages dans les quatre familles, comparent les témoins au mode multiprécision seul et enregistrent exactement une certification terminale par décision.
+8. Aucune contradiction mathématique n'a été observée. La Phase 2A, 2A.8 dans son ensemble et G1 restent ouvertes; ce sous-lot ne change aucun statut public.
+
+### 2A.8c — provenance dyadique des formes et plans — restant
+
+1. Conserver une provenance binary64 vérifiée pour les formes affines et plans sans l'inclure dans leur identité scientifique canonique.
+2. Étendre la cascade à l'orientation 2D, aux décisions de rang et d'intersection de trois plans, puis à l'incidence d'un quatrième plan, au moyen de polynômes homogènes sans conversion approximative de `BigInt`.
+3. Ajouter un replay versionné et des oracles indépendants forçant négatif, nul et positif à chaque étage disponible, avec témoins identiques en multiprécision seule et exactement une certification terminale par décision.
+4. La qualification finale 2A.8 répétera GCC, Clang, optimisations strictes, modes d'arrondi, sous-normaux et sanitizers sur toute la matrice 2A.8a à 2A.8c.
 
 ### 2A.9 — campagne de fermeture
 
@@ -188,7 +206,7 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Prochaine sous-porte
 
-Le prochain lot est 2A.8b, provenance dyadique des supports, barycentriques, sphères et niveaux, toujours sur `reference_cpu`, couche commune aux profils et mode `certified`. Il doit permettre d'évaluer les polynômes homogènes de signe avant toute division, conserver les témoins rationnels canoniques et laisser les entrées arbitrairement rationnelles sur le fallback multiprécision. 2A.8c couvrira ensuite les formes et plans. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
+Le prochain lot est 2A.8c, provenance dyadique des formes et plans, toujours sur `reference_cpu`, couche commune aux profils avec priorité `hgp_reduced`, mode `certified`. Sa porte d'entrée est satisfaite par les cascades 2A.8a et 2A.8b documentées ci-dessus. Il doit couvrir orientation 2D, rang, intersections et incidence sans conversion approximative de rationnels arbitraires. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
 
 ## GCP
 

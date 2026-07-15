@@ -163,8 +163,23 @@ int main() {
   const auto sphere_side = morsehgp3d::exact::classify_sphere_point(
       support.circumcenter_result(), right_triangle[1]);
   if (sphere_side.location() != SpherePointLocation::boundary ||
-      sphere_side.decision().sign() != PredicateSign::zero) {
+      sphere_side.decision().sign() != PredicateSign::zero ||
+      sphere_side.decision().certification_stage() !=
+          CertificationStage::cpu_multiprecision) {
     std::cerr << "installed exact sphere classification changed semantics\n";
+    return 1;
+  }
+  const auto adaptive_sphere_side = morsehgp3d::exact::classify_sphere_point(
+      right_triangle, right_triangle[1]);
+  const auto adaptive_level_order = morsehgp3d::exact::compare_support_levels(
+      reduced_emission, reduced_emission);
+  if (adaptive_sphere_side.location() != SpherePointLocation::boundary ||
+      adaptive_sphere_side.decision().certification_stage() !=
+          CertificationStage::expansion ||
+      adaptive_level_order.decision.sign() != PredicateSign::zero ||
+      adaptive_level_order.decision.certification_stage() !=
+          CertificationStage::expansion) {
+    std::cerr << "installed support-provenance cascade changed semantics\n";
     return 1;
   }
   return 0;

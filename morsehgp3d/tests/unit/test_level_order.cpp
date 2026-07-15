@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cfenv>
 #include <compare>
 #include <cstddef>
 #include <cstdint>
@@ -13,6 +14,11 @@
 #include <utility>
 #include <vector>
 
+#if defined(__SSE2__) || defined(_M_X64) || \
+    (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+#include <xmmintrin.h>
+#endif
+
 namespace {
 
 using morsehgp3d::exact::BigInt;
@@ -22,12 +28,15 @@ using morsehgp3d::exact::CertificationStage;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::CircumcenterSupportStatus;
 using morsehgp3d::exact::ExactLevel;
+using morsehgp3d::exact::ExactRational3;
 using morsehgp3d::exact::PredicateCounters;
+using morsehgp3d::exact::PredicateFilterPolicy;
 using morsehgp3d::exact::PredicateSign;
 using morsehgp3d::exact::SupportLevelEmission;
 using morsehgp3d::exact::analyze_circumcenter_support;
 using morsehgp3d::exact::canonical_level_batches;
 using morsehgp3d::exact::compare_exact_levels;
+using morsehgp3d::exact::compare_support_levels;
 using morsehgp3d::exact::decide_exact_level_order;
 using morsehgp3d::exact::exact_level_cross_product_difference;
 using morsehgp3d::exact::power_of_two;
@@ -35,11 +44,66 @@ using morsehgp3d::exact::support_level_emission_from_analysis;
 
 int failures = 0;
 
+class ScopedFloatingEnvironment {
+ public:
+  ScopedFloatingEnvironment() noexcept
+      : saved_(std::fegetenv(&environment_) == 0) {
+#if defined(__SSE2__) || defined(_M_X64) || \
+    (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+    mxcsr_ = _mm_getcsr();
+#endif
+  }
+
+  ScopedFloatingEnvironment(const ScopedFloatingEnvironment&) = delete;
+  ScopedFloatingEnvironment& operator=(const ScopedFloatingEnvironment&) =
+      delete;
+
+  ~ScopedFloatingEnvironment() {
+    if (saved_) {
+      static_cast<void>(std::fesetenv(&environment_));
+    }
+#if defined(__SSE2__) || defined(_M_X64) || \
+    (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+    _mm_setcsr(mxcsr_);
+#endif
+  }
+
+  [[nodiscard]] bool saved() const noexcept { return saved_; }
+
+ private:
+  std::fenv_t environment_{};
+  bool saved_;
+#if defined(__SSE2__) || defined(_M_X64) || \
+    (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+  unsigned int mxcsr_{};
+#endif
+};
+
 void check(bool condition, const std::string& message) {
   if (!condition) {
     ++failures;
     std::cerr << "FAIL: " << message << '\n';
   }
+}
+
+void check_single_terminal(
+    const PredicateCounters& counters,
+    CertificationStage expected_stage,
+    std::uint64_t expected_zeros,
+    const std::string& message) {
+  check(
+      counters.certified_decisions() == 1U &&
+          counters.fp64_filtered_certified() ==
+              (expected_stage == CertificationStage::fp64_filtered ? 1U : 0U) &&
+          counters.expansion_certified() ==
+              (expected_stage == CertificationStage::expansion ? 1U : 0U) &&
+          counters.cpu_multiprecision_certified() ==
+              (expected_stage == CertificationStage::cpu_multiprecision
+                   ? 1U
+                   : 0U) &&
+          counters.exact_zeros() == expected_zeros &&
+          counters.remaining_unknown() == 0U,
+      message);
 }
 
 template <typename Exception, typename Function>
@@ -60,6 +124,11 @@ void check_throws(Function&& function, const std::string& message) {
 
 [[nodiscard]] CertifiedPoint3 point(double x, double y, double z) {
   return CertifiedPoint3::from_binary64(x, y, z);
+}
+
+[[nodiscard]] ExactRational3 exact_point(
+    long long x, long long y, long long z) {
+  return ExactRational3{BigInt{x}, BigInt{y}, BigInt{z}, BigInt{1}};
 }
 
 [[nodiscard]] CanonicalSupportIds support_ids(
@@ -189,6 +258,168 @@ void test_exact_level_order_laws() {
   }
 }
 
+void test_adaptive_support_array_level_order() {
+  const std::array<CertifiedPoint3, 1> singleton{
+      point(0.0, 0.0, 0.0)};
+  const std::array<CertifiedPoint3, 2> unit_pair{
+      point(-1.0, 0.0, 0.0), point(1.0, 0.0, 0.0)};
+  const std::array<CertifiedPoint3, 2> equal_unit_pair{
+      point(0.0, 0.0, 0.0), point(2.0, 0.0, 0.0)};
+  const std::array<CertifiedPoint3, 2> radius_two_pair{
+      point(-2.0, 0.0, 0.0), point(2.0, 0.0, 0.0)};
+
+  PredicateCounters negative_counters;
+  const auto negative = compare_support_levels(
+      singleton,
+      unit_pair,
+      &negative_counters,
+      PredicateFilterPolicy::allow_adaptive);
+  check(
+      negative.decision.sign() == PredicateSign::negative &&
+          negative.decision.certification_stage() ==
+              CertificationStage::fp64_filtered &&
+          negative.cross_product_difference == -1,
+      "support levels 0 and 1 have an FP64-certified negative witness");
+  check_single_terminal(
+      negative_counters,
+      CertificationStage::fp64_filtered,
+      0U,
+      "a strict negative array comparison records one FP64 terminal");
+
+  PredicateCounters positive_counters;
+  const auto positive = compare_support_levels(
+      unit_pair,
+      singleton,
+      &positive_counters,
+      PredicateFilterPolicy::allow_fp64);
+  check(
+      positive.decision.sign() == PredicateSign::positive &&
+          positive.decision.certification_stage() ==
+              CertificationStage::fp64_filtered &&
+          positive.cross_product_difference == 1,
+      "reversed support levels have an FP64-certified positive witness");
+  check_single_terminal(
+      positive_counters,
+      CertificationStage::fp64_filtered,
+      0U,
+      "a strict positive array comparison records one FP64 terminal");
+
+  PredicateCounters equality_counters;
+  const auto equality = compare_support_levels(
+      unit_pair,
+      equal_unit_pair,
+      &equality_counters,
+      PredicateFilterPolicy::allow_adaptive);
+  check(
+      equality.decision.sign() == PredicateSign::zero &&
+          equality.decision.certification_stage() ==
+              CertificationStage::expansion &&
+          equality.cross_product_difference == 0,
+      "equal levels from distinct supports are certified by expansion");
+  check_single_terminal(
+      equality_counters,
+      CertificationStage::expansion,
+      1U,
+      "an equal array comparison records one expansion zero");
+
+  PredicateCounters fp64_only_equality_counters;
+  const auto fp64_only_equality = compare_support_levels(
+      unit_pair,
+      equal_unit_pair,
+      &fp64_only_equality_counters,
+      PredicateFilterPolicy::allow_fp64);
+  check(
+      fp64_only_equality.decision.sign() == PredicateSign::zero &&
+          fp64_only_equality.decision.certification_stage() ==
+              CertificationStage::cpu_multiprecision &&
+          fp64_only_equality.cross_product_difference ==
+              equality.cross_product_difference,
+      "the FP64-only policy falls back to MP for equal support levels");
+  check_single_terminal(
+      fp64_only_equality_counters,
+      CertificationStage::cpu_multiprecision,
+      1U,
+      "the FP64-only equality records one MP zero");
+
+  PredicateCounters multiprecision_counters;
+  const auto multiprecision = compare_support_levels(
+      singleton,
+      unit_pair,
+      &multiprecision_counters,
+      PredicateFilterPolicy::multiprecision_only);
+  check(
+      multiprecision.decision.sign() == negative.decision.sign() &&
+          multiprecision.decision.certification_stage() ==
+              CertificationStage::cpu_multiprecision &&
+          multiprecision.cross_product_difference ==
+              negative.cross_product_difference,
+      "MP-only array comparison retains the strict homogeneous witness");
+  check_single_terminal(
+      multiprecision_counters,
+      CertificationStage::cpu_multiprecision,
+      0U,
+      "MP-only array comparison records exactly one terminal");
+
+  const std::array<CertifiedPoint3, 3> right_triangle{
+      point(0.0, 0.0, 0.0),
+      point(2.0, 0.0, 0.0),
+      point(0.0, 2.0, 0.0)};
+  const std::array<CertifiedPoint3, 4> regular_tetrahedron{
+      point(1.0, 1.0, 1.0),
+      point(1.0, -1.0, -1.0),
+      point(-1.0, 1.0, -1.0),
+      point(-1.0, -1.0, 1.0)};
+  const auto triangle_over_pair =
+      compare_support_levels(right_triangle, unit_pair);
+  const auto tetrahedron_over_triangle =
+      compare_support_levels(regular_tetrahedron, right_triangle);
+  check(
+      triangle_over_pair.decision.sign() == PredicateSign::positive &&
+          triangle_over_pair.decision.certification_stage() ==
+              CertificationStage::fp64_filtered &&
+          tetrahedron_over_triangle.decision.sign() ==
+              PredicateSign::positive &&
+          tetrahedron_over_triangle.decision.certification_stage() ==
+              CertificationStage::fp64_filtered,
+      "triangle and tetrahedron support polynomials order levels 2 and 3 by FP64");
+
+  const std::array<CertifiedPoint3, 2> reversed_unit_pair{
+      unit_pair[1], unit_pair[0]};
+  const std::array<CertifiedPoint3, 2> reversed_radius_two_pair{
+      radius_two_pair[1], radius_two_pair[0]};
+  const std::array<std::array<CertifiedPoint3, 2>, 2> unit_permutations{
+      unit_pair, reversed_unit_pair};
+  const std::array<std::array<CertifiedPoint3, 2>, 2> radius_permutations{
+      radius_two_pair, reversed_radius_two_pair};
+  for (const auto& left : unit_permutations) {
+    for (const auto& right : radius_permutations) {
+      PredicateCounters counters;
+      const auto result = compare_support_levels(left, right, &counters);
+      check(
+          result.decision.sign() == PredicateSign::negative &&
+              result.decision.certification_stage() ==
+                  CertificationStage::fp64_filtered &&
+              result.cross_product_difference == -3,
+          "support permutations preserve the strict level witness and FP64 stage");
+      check_single_terminal(
+          counters,
+          CertificationStage::fp64_filtered,
+          0U,
+          "each permuted array comparison records one FP64 terminal");
+    }
+  }
+
+  check_throws<std::invalid_argument>(
+      [&unit_pair] {
+        const std::array<CertifiedPoint3, 3> dependent{
+            point(0.0, 0.0, 0.0),
+            point(1.0, 0.0, 0.0),
+            point(2.0, 0.0, 0.0)};
+        static_cast<void>(compare_support_levels(dependent, unit_pair));
+      },
+      "array level comparison rejects an affinely dependent support");
+}
+
 void test_canonical_support_ids() {
   const CanonicalSupportIds unordered = support_ids({9U, 2U, 5U, 1U});
   check_support_ids(
@@ -248,6 +479,9 @@ void test_support_emission_invariants() {
   check(
       emission.squared_level() == ExactLevel{BigInt{3}, BigInt{4}},
       "emission retains its exact level");
+  check(
+      emission.binary64_level_support().empty(),
+      "a structural exact-level emission cannot forge binary64 provenance");
 
   check_throws<std::invalid_argument>(
       [] {
@@ -272,6 +506,11 @@ void test_emission_from_local_support_analysis() {
   check(
       singleton_emission.squared_level() == ExactLevel{},
       "singleton analysis exports the exact zero level");
+  check(
+      singleton_emission.binary64_level_support().size() == 1U &&
+          singleton_emission.binary64_level_support()[0].exact() ==
+              singleton[0].exact(),
+      "binary singleton analysis exports its minimal level provenance");
 
   const std::array<CertifiedPoint3, 2> pair{
       point(-1.0, 0.0, 0.0), point(1.0, 0.0, 0.0)};
@@ -293,6 +532,9 @@ void test_emission_from_local_support_analysis() {
   check(
       pair_emission.squared_level() == ExactLevel{BigInt{1}},
       "minimal analysis exports its exact squared level");
+  check(
+      pair_emission.binary64_level_support().size() == 2U,
+      "binary pair analysis exports its complete minimal level provenance");
 
   const std::array<CertifiedPoint3, 3> right_triangle{
       point(0.0, 0.0, 0.0),
@@ -318,6 +560,28 @@ void test_emission_from_local_support_analysis() {
   check(
       boundary_emission.squared_level() == ExactLevel{BigInt{2}},
       "boundary reduction retains the unchanged exact sphere level");
+  check(
+      boundary_emission.binary64_level_support().size() == 2U &&
+          boundary_emission.binary64_level_support()[0].exact() ==
+              right_triangle[1].exact() &&
+          boundary_emission.binary64_level_support()[1].exact() ==
+              right_triangle[2].exact(),
+      "boundary emission reduces binary64 provenance to the positive minimal support");
+
+  const std::array<ExactRational3, 3> rational_right_triangle{
+      exact_point(0, 0, 0),
+      exact_point(2, 0, 0),
+      exact_point(0, 2, 0)};
+  const auto rational_boundary_analysis =
+      analyze_circumcenter_support(rational_right_triangle);
+  const SupportLevelEmission rational_boundary_emission =
+      support_level_emission_from_analysis(
+          positional_ids, rational_boundary_analysis);
+  check(
+      rational_boundary_emission == boundary_emission &&
+          rational_boundary_emission.binary64_level_support().empty(),
+      "rational and binary analyses emit the same science but only binary "
+      "input has fast provenance");
 
   std::array<std::size_t, 3> permutation{0U, 1U, 2U};
   do {
@@ -357,6 +621,9 @@ void test_emission_from_local_support_analysis() {
   check(
       tetrahedron_emission.squared_level() == ExactLevel{BigInt{3}},
       "well-centered tetrahedron exports its exact squared level");
+  check(
+      tetrahedron_emission.binary64_level_support().size() == 4U,
+      "well-centered binary tetrahedron exports four provenance points");
 
   const std::array<CertifiedPoint3, 3> obtuse_triangle{
       point(0.0, 0.0, 0.0),
@@ -404,6 +671,275 @@ void test_emission_from_local_support_analysis() {
             duplicate_ids, boundary_analysis));
       },
       "source provenance rejects duplicate identifiers");
+}
+
+void test_adaptive_emission_level_order() {
+  const std::array<CertifiedPoint3, 1> singleton{
+      point(0.0, 0.0, 0.0)};
+  const std::array<CertifiedPoint3, 2> unit_pair{
+      point(-1.0, 0.0, 0.0), point(1.0, 0.0, 0.0)};
+  const std::array<CertifiedPoint3, 2> equal_unit_pair{
+      point(0.0, 0.0, 0.0), point(2.0, 0.0, 0.0)};
+  const std::array<CertifiedPoint3, 2> radius_two_pair{
+      point(-2.0, 0.0, 0.0), point(2.0, 0.0, 0.0)};
+
+  const std::array<std::uint64_t, 1> singleton_ids{10U};
+  const std::array<std::uint64_t, 2> unit_ids{20U, 21U};
+  const std::array<std::uint64_t, 2> equal_ids{30U, 31U};
+  const std::array<std::uint64_t, 2> radius_two_ids{40U, 41U};
+  const SupportLevelEmission singleton_emission =
+      support_level_emission_from_analysis(
+          singleton_ids, analyze_circumcenter_support(singleton));
+  const SupportLevelEmission unit_emission =
+      support_level_emission_from_analysis(
+          unit_ids, analyze_circumcenter_support(unit_pair));
+  const SupportLevelEmission equal_emission =
+      support_level_emission_from_analysis(
+          equal_ids, analyze_circumcenter_support(equal_unit_pair));
+  const SupportLevelEmission radius_two_emission =
+      support_level_emission_from_analysis(
+          radius_two_ids, analyze_circumcenter_support(radius_two_pair));
+
+  PredicateCounters negative_counters;
+  const auto negative = compare_support_levels(
+      singleton_emission,
+      unit_emission,
+      &negative_counters,
+      PredicateFilterPolicy::allow_adaptive);
+  check(
+      negative.decision.sign() == PredicateSign::negative &&
+          negative.decision.certification_stage() ==
+              CertificationStage::fp64_filtered &&
+          negative.cross_product_difference == -1,
+      "provenance emissions use FP64 for a strict negative level order");
+  check_single_terminal(
+      negative_counters,
+      CertificationStage::fp64_filtered,
+      0U,
+      "strict negative emission comparison records one FP64 terminal");
+
+  PredicateCounters positive_counters;
+  const auto positive = compare_support_levels(
+      unit_emission,
+      singleton_emission,
+      &positive_counters,
+      PredicateFilterPolicy::allow_adaptive);
+  check(
+      positive.decision.sign() == PredicateSign::positive &&
+          positive.decision.certification_stage() ==
+              CertificationStage::fp64_filtered &&
+          positive.cross_product_difference == 1,
+      "reversed provenance emissions use FP64 for a positive order");
+  check_single_terminal(
+      positive_counters,
+      CertificationStage::fp64_filtered,
+      0U,
+      "strict positive emission comparison records one FP64 terminal");
+
+  PredicateCounters equality_counters;
+  const auto equality = compare_support_levels(
+      unit_emission,
+      equal_emission,
+      &equality_counters,
+      PredicateFilterPolicy::allow_adaptive);
+  check(
+      equality.decision.sign() == PredicateSign::zero &&
+          equality.decision.certification_stage() ==
+              CertificationStage::expansion &&
+          equality.cross_product_difference == 0,
+      "equal provenance emissions use expansion for their exact zero");
+  check_single_terminal(
+      equality_counters,
+      CertificationStage::expansion,
+      1U,
+      "equal emission comparison records one expansion zero");
+
+  PredicateCounters multiprecision_counters;
+  const auto multiprecision = compare_support_levels(
+      singleton_emission,
+      unit_emission,
+      &multiprecision_counters,
+      PredicateFilterPolicy::multiprecision_only);
+  check(
+      multiprecision.decision.sign() == negative.decision.sign() &&
+          multiprecision.decision.certification_stage() ==
+              CertificationStage::cpu_multiprecision &&
+          multiprecision.cross_product_difference ==
+              negative.cross_product_difference,
+      "MP-only emission comparison retains the homogeneous witness");
+  check_single_terminal(
+      multiprecision_counters,
+      CertificationStage::cpu_multiprecision,
+      0U,
+      "MP-only emission comparison records exactly one terminal");
+
+  const SupportLevelEmission structural_zero = SupportLevelEmission::create(
+      singleton_emission.squared_level(),
+      singleton_emission.minimal_support_ids(),
+      singleton_emission.source_support_ids());
+  const SupportLevelEmission structural_one = SupportLevelEmission::create(
+      unit_emission.squared_level(),
+      unit_emission.minimal_support_ids(),
+      unit_emission.source_support_ids());
+  PredicateCounters structural_counters;
+  const auto structural = compare_support_levels(
+      structural_zero,
+      structural_one,
+      &structural_counters,
+      PredicateFilterPolicy::allow_adaptive);
+  check(
+      structural.decision.sign() == PredicateSign::negative &&
+          structural.decision.certification_stage() ==
+              CertificationStage::cpu_multiprecision &&
+          structural.cross_product_difference ==
+              negative.cross_product_difference,
+      "emissions without geometric provenance fail closed to MP");
+  check_single_terminal(
+      structural_counters,
+      CertificationStage::cpu_multiprecision,
+      0U,
+      "structural emission fallback records one MP terminal");
+
+  PredicateCounters mixed_counters;
+  const auto mixed = compare_support_levels(
+      singleton_emission,
+      structural_one,
+      &mixed_counters,
+      PredicateFilterPolicy::allow_adaptive);
+  check(
+      mixed.decision.sign() == PredicateSign::negative &&
+          mixed.decision.certification_stage() ==
+              CertificationStage::cpu_multiprecision &&
+          mixed.cross_product_difference == negative.cross_product_difference,
+      "one missing provenance operand disables both fast level stages");
+  check_single_terminal(
+      mixed_counters,
+      CertificationStage::cpu_multiprecision,
+      0U,
+      "mixed-provenance comparison records one MP terminal");
+
+  const std::array<CertifiedPoint3, 2> reversed_unit_pair{
+      unit_pair[1], unit_pair[0]};
+  const std::array<CertifiedPoint3, 2> reversed_radius_two_pair{
+      radius_two_pair[1], radius_two_pair[0]};
+  const std::array<std::uint64_t, 2> reversed_unit_ids{unit_ids[1], unit_ids[0]};
+  const std::array<std::uint64_t, 2> reversed_radius_two_ids{
+      radius_two_ids[1], radius_two_ids[0]};
+  const SupportLevelEmission reversed_unit_emission =
+      support_level_emission_from_analysis(
+          reversed_unit_ids,
+          analyze_circumcenter_support(reversed_unit_pair));
+  const SupportLevelEmission reversed_radius_two_emission =
+      support_level_emission_from_analysis(
+          reversed_radius_two_ids,
+          analyze_circumcenter_support(reversed_radius_two_pair));
+  check(
+      reversed_unit_emission == unit_emission &&
+          reversed_radius_two_emission == radius_two_emission,
+      "paired point/ID permutations preserve canonical emissions");
+  PredicateCounters permutation_counters;
+  const auto permutation_order = compare_support_levels(
+      reversed_unit_emission,
+      reversed_radius_two_emission,
+      &permutation_counters);
+  check(
+      permutation_order.decision.sign() == PredicateSign::negative &&
+          permutation_order.decision.certification_stage() ==
+              CertificationStage::fp64_filtered &&
+          permutation_order.cross_product_difference == -3,
+      "permuted emission provenance preserves the strict FP64 level order");
+  check_single_terminal(
+      permutation_counters,
+      CertificationStage::fp64_filtered,
+      0U,
+      "permuted emission comparison records one FP64 terminal");
+}
+
+void test_adaptive_level_fenv_fail_closed() {
+  ScopedFloatingEnvironment restore_at_exit;
+  check(
+      restore_at_exit.saved(),
+      "the adaptive level FENV test saves the caller environment");
+  if (!restore_at_exit.saved()) {
+    return;
+  }
+
+  const std::array<CertifiedPoint3, 2> unit_pair{
+      point(-1.0, 0.0, 0.0), point(1.0, 0.0, 0.0)};
+  const std::array<CertifiedPoint3, 2> radius_two_pair{
+      point(-2.0, 0.0, 0.0), point(2.0, 0.0, 0.0)};
+  check(
+      std::fesetround(FE_DOWNWARD) == 0 &&
+          std::feclearexcept(FE_ALL_EXCEPT) == 0 &&
+          std::feraiseexcept(FE_INVALID | FE_DIVBYZERO) == 0,
+      "the platform accepts the non-nearest level FENV setup");
+  const int flags_before = std::fetestexcept(FE_ALL_EXCEPT);
+  PredicateCounters counters;
+  const auto result = compare_support_levels(
+      unit_pair,
+      radius_two_pair,
+      &counters,
+      PredicateFilterPolicy::allow_adaptive);
+  check(
+      result.decision.sign() == PredicateSign::negative &&
+          result.decision.certification_stage() ==
+              CertificationStage::cpu_multiprecision &&
+          result.cross_product_difference == -3,
+      "non-nearest rounding makes adaptive level comparison fail closed to MP");
+  check(
+      std::fegetround() == FE_DOWNWARD &&
+          std::fetestexcept(FE_ALL_EXCEPT) == flags_before,
+      "adaptive level comparison preserves caller rounding and exception flags");
+  check_single_terminal(
+      counters,
+      CertificationStage::cpu_multiprecision,
+      0U,
+      "non-nearest level comparison records exactly one MP terminal");
+
+#if defined(__SSE2__) || defined(_M_X64) || \
+    (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
+  check(
+      std::fesetround(FE_TONEAREST) == 0 &&
+          std::feclearexcept(FE_ALL_EXCEPT) == 0,
+      "the FTZ/DAZ level test selects a clean nearest environment");
+  constexpr unsigned int flush_to_zero_mask = 1U << 15U;
+  constexpr unsigned int denormals_are_zero_mask = 1U << 6U;
+  constexpr unsigned int rounding_control_mask = 3U << 13U;
+  constexpr unsigned int exception_status_mask = 0x3fU;
+  constexpr unsigned int preserved_mask = flush_to_zero_mask |
+                                           denormals_are_zero_mask |
+                                           rounding_control_mask |
+                                           exception_status_mask;
+  const unsigned int original_mxcsr = _mm_getcsr();
+  const std::array<unsigned int, 3> altered_modes{
+      (original_mxcsr | denormals_are_zero_mask) & ~flush_to_zero_mask,
+      (original_mxcsr | flush_to_zero_mask) & ~denormals_are_zero_mask,
+      original_mxcsr | flush_to_zero_mask | denormals_are_zero_mask};
+  for (const unsigned int altered_mode : altered_modes) {
+    _mm_setcsr(altered_mode);
+    PredicateCounters altered_counters;
+    const auto altered_result = compare_support_levels(
+        unit_pair,
+        radius_two_pair,
+        &altered_counters,
+        PredicateFilterPolicy::allow_adaptive);
+    check(
+        altered_result.decision.sign() == PredicateSign::negative &&
+            altered_result.decision.certification_stage() ==
+                CertificationStage::cpu_multiprecision &&
+            altered_result.cross_product_difference == -3,
+        "FTZ or DAZ makes adaptive level comparison fail closed to MP");
+    check(
+        (_mm_getcsr() & preserved_mask) == (altered_mode & preserved_mask),
+        "adaptive level comparison preserves caller FTZ/DAZ and MXCSR status");
+    check_single_terminal(
+        altered_counters,
+        CertificationStage::cpu_multiprecision,
+        0U,
+        "FTZ/DAZ level comparison records exactly one MP terminal");
+  }
+  _mm_setcsr(original_mxcsr);
+#endif
 }
 
 [[nodiscard]] std::vector<SupportLevelEmission> batch_fixture_emissions() {
@@ -553,9 +1089,12 @@ void test_canonical_level_batches() {
 int main() {
   test_exact_level_comparison_and_counters();
   test_exact_level_order_laws();
+  test_adaptive_support_array_level_order();
   test_canonical_support_ids();
   test_support_emission_invariants();
   test_emission_from_local_support_analysis();
+  test_adaptive_emission_level_order();
+  test_adaptive_level_fenv_fail_closed();
   test_canonical_level_batches();
 
   if (failures != 0) {
