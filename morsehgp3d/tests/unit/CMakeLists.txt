@@ -165,6 +165,22 @@ if(TARGET morsehgp3d_replay_predicate)
       "$<TARGET_FILE:morsehgp3d_replay_predicate>"
   )
   add_test(
+    NAME morsehgp3d.affine_adaptive_replay_differential
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_affine_adaptive_replay.py"
+      "${PROJECT_SOURCE_DIR}/tools/replay_predicate.py"
+      "$<TARGET_FILE:morsehgp3d_replay_predicate>"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../fixtures/predicates"
+  )
+  add_test(
+    NAME morsehgp3d.affine_adaptive_random_differential
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_affine_adaptive_random.py"
+      "$<TARGET_FILE:morsehgp3d_replay_predicate>"
+  )
+  add_test(
     NAME morsehgp3d.center_replay_differential
     COMMAND
       "${Python3_EXECUTABLE}"

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "morsehgp3d/exact/affine_polynomial.hpp"
 #include "morsehgp3d/exact/expansion.hpp"
 #include "morsehgp3d/exact/fp64_interval.hpp"
 #include "morsehgp3d/exact/label.hpp"
@@ -8,7 +9,9 @@
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/exact/predicate.hpp"
 
+#include <algorithm>
 #include <array>
+#include <optional>
 #include <stdexcept>
 #include <utility>
 
@@ -66,6 +69,108 @@ inline void require_power_label_domain(
   if (r.cardinality() > maximum_power_label_cardinality) {
     throw std::invalid_argument("power bisector labels cannot exceed cardinality ten");
   }
+}
+
+template <std::size_t PlaneCount>
+[[nodiscard]] inline std::optional<
+    std::array<const Binary64AffineProvenance*, PlaneCount>>
+binary64_plane_provenances(
+    const std::array<const ExactPlane3*, PlaneCount>& planes) {
+  std::array<const Binary64AffineProvenance*, PlaneCount> result{};
+  for (std::size_t index = 0U; index < PlaneCount; ++index) {
+    if (!planes[index]->binary64_provenance().has_value()) {
+      return std::nullopt;
+    }
+    result[index] = &*planes[index]->binary64_provenance();
+  }
+  return result;
+}
+
+[[nodiscard]] inline std::array<const ExactPlane3*, 3>
+canonical_binding_planes(
+    const ExactPlane3& first,
+    const ExactPlane3& second,
+    const ExactPlane3& third) {
+  std::array<const ExactPlane3*, 3> planes{&first, &second, &third};
+  std::sort(
+      planes.begin(),
+      planes.end(),
+      [](const ExactPlane3* left, const ExactPlane3* right) {
+        if (left->oriented_key() != right->oriented_key()) {
+          return left->oriented_key() < right->oriented_key();
+        }
+        const std::string left_provenance =
+            left->binary64_provenance().has_value()
+                ? left->binary64_provenance()->canonical_key()
+                : std::string{};
+        const std::string right_provenance =
+            right->binary64_provenance().has_value()
+                ? right->binary64_provenance()->canonical_key()
+                : std::string{};
+        return left_provenance < right_provenance;
+      });
+  return planes;
+}
+
+[[nodiscard]] inline int normal_determinant_sign(
+    const ExactPlane3& first,
+    const ExactPlane3& second,
+    const ExactPlane3& third) {
+  const std::array<const ExactPlane3*, 3> planes{&first, &second, &third};
+  std::array<std::array<BigInt, 3>, 3> normals{};
+  for (std::size_t row = 0U; row < planes.size(); ++row) {
+    for (std::size_t column = 0U; column < 3U; ++column) {
+      normals[row][column] = planes[row]->coefficient(column);
+    }
+  }
+  const BigInt determinant = determinant_3x3(normals);
+  return determinant < 0 ? -1 : (determinant == 0 ? 0 : 1);
+}
+
+inline void require_orientation_2d_incidence(
+    const ExactPlane3& plane,
+    const ExactRational3& a,
+    const ExactRational3& b,
+    const ExactRational3& c) {
+  if (!plane.evaluate(a).is_zero() || !plane.evaluate(b).is_zero() ||
+      !plane.evaluate(c).is_zero()) {
+    throw std::invalid_argument(
+        "orientation_2d points must be exactly incident to the support plane");
+  }
+}
+
+[[nodiscard]] inline ExactRational orientation_2d_value_unchecked(
+    const ExactPlane3& plane,
+    const ExactRational3& a,
+    const ExactRational3& b,
+    const ExactRational3& c) {
+  std::array<ExactRational, 3> u{};
+  std::array<ExactRational, 3> v{};
+  for (std::size_t axis = 0; axis < 3U; ++axis) {
+    u[axis] = b.coordinate(axis) - a.coordinate(axis);
+    v[axis] = c.coordinate(axis) - a.coordinate(axis);
+  }
+  const std::array<ExactRational, 3> cross{
+      u[1] * v[2] - u[2] * v[1],
+      u[2] * v[0] - u[0] * v[2],
+      u[0] * v[1] - u[1] * v[0]};
+  ExactRational result;
+  for (std::size_t axis = 0; axis < 3U; ++axis) {
+    result = result + ExactRational{plane.coefficient(axis)} * cross[axis];
+  }
+  return result;
+}
+
+[[nodiscard]] inline int require_unique_binding_determinant_sign(
+    const ExactPlane3& first,
+    const ExactPlane3& second,
+    const ExactPlane3& third) {
+  const int sign = normal_determinant_sign(first, second, third);
+  if (sign == 0) {
+    throw std::invalid_argument(
+        "fourth-plane incidence requires a unique first-three-plane intersection");
+  }
+  return sign;
 }
 
 }  // namespace detail
@@ -346,26 +451,8 @@ inline void require_power_label_domain(
     const ExactRational3& a,
     const ExactRational3& b,
     const ExactRational3& c) {
-  if (!plane.evaluate(a).is_zero() || !plane.evaluate(b).is_zero() ||
-      !plane.evaluate(c).is_zero()) {
-    throw std::invalid_argument(
-        "orientation_2d points must be exactly incident to the support plane");
-  }
-  std::array<ExactRational, 3> u{};
-  std::array<ExactRational, 3> v{};
-  for (std::size_t axis = 0; axis < 3U; ++axis) {
-    u[axis] = b.coordinate(axis) - a.coordinate(axis);
-    v[axis] = c.coordinate(axis) - a.coordinate(axis);
-  }
-  const std::array<ExactRational, 3> cross{
-      u[1] * v[2] - u[2] * v[1],
-      u[2] * v[0] - u[0] * v[2],
-      u[0] * v[1] - u[1] * v[0]};
-  ExactRational result;
-  for (std::size_t axis = 0; axis < 3U; ++axis) {
-    result = result + ExactRational{plane.coefficient(axis)} * cross[axis];
-  }
-  return result;
+  detail::require_orientation_2d_incidence(plane, a, b, c);
+  return detail::orientation_2d_value_unchecked(plane, a, b, c);
 }
 
 [[nodiscard]] inline ExactRational orientation_2d_determinant(
@@ -374,6 +461,34 @@ inline void require_power_label_domain(
     const CertifiedPoint3& b,
     const CertifiedPoint3& c) {
   return orientation_2d_determinant(plane, a.exact(), b.exact(), c.exact());
+}
+
+[[nodiscard]] inline FilterResult filter_orientation_2d_in_plane(
+    const ExactPlane3& plane,
+    const CertifiedPoint3& a,
+    const CertifiedPoint3& b,
+    const CertifiedPoint3& c) {
+  detail::require_orientation_2d_incidence(
+      plane, a.exact(), b.exact(), c.exact());
+  if (!plane.binary64_provenance().has_value()) {
+    return FilterResult::uncertain();
+  }
+  return detail::affine_polynomial::filter_orientation_2d(
+      *plane.binary64_provenance(), a, b, c);
+}
+
+[[nodiscard]] inline ExpansionResult expansion_orientation_2d_in_plane(
+    const ExactPlane3& plane,
+    const CertifiedPoint3& a,
+    const CertifiedPoint3& b,
+    const CertifiedPoint3& c) {
+  detail::require_orientation_2d_incidence(
+      plane, a.exact(), b.exact(), c.exact());
+  if (!plane.binary64_provenance().has_value()) {
+    return ExpansionResult::uncertain();
+  }
+  return detail::affine_polynomial::expansion_orientation_2d(
+      *plane.binary64_provenance(), a, b, c);
 }
 
 [[nodiscard]] inline PredicateDecision decide_orientation_2d_in_plane(
@@ -391,9 +506,48 @@ inline void require_power_label_domain(
     const CertifiedPoint3& a,
     const CertifiedPoint3& b,
     const CertifiedPoint3& c,
+    PredicateCounters* counters,
+    PredicateFilterPolicy filter_policy) {
+  detail::require_filter_policy(filter_policy);
+  detail::require_orientation_2d_incidence(
+      plane, a.exact(), b.exact(), c.exact());
+  if (detail::policy_allows_fp64(filter_policy) &&
+      plane.binary64_provenance().has_value()) {
+    const FilterResult filtered =
+        detail::affine_polynomial::filter_orientation_2d(
+            *plane.binary64_provenance(), a, b, c);
+    if (filtered.state() == FilterState::certified) {
+      return detail::filtered_decision(*filtered.sign(), counters);
+    }
+    if (detail::policy_allows_expansion(filter_policy)) {
+      const ExpansionResult expanded =
+          detail::affine_polynomial::expansion_orientation_2d(
+              *plane.binary64_provenance(), a, b, c);
+      if (expanded.state() == FilterState::certified) {
+        return detail::expansion_decision(*expanded.sign(), counters);
+      }
+    }
+  }
+  return detail::multiprecision_decision(
+      detail::orientation_2d_value_unchecked(
+          plane, a.exact(), b.exact(), c.exact())
+          .sign(),
+      counters);
+}
+
+[[nodiscard]] inline PredicateDecision decide_orientation_2d_in_plane(
+    const ExactPlane3& plane,
+    const CertifiedPoint3& a,
+    const CertifiedPoint3& b,
+    const CertifiedPoint3& c,
     PredicateCounters* counters = nullptr) {
   return decide_orientation_2d_in_plane(
-      plane, a.exact(), b.exact(), c.exact(), counters);
+      plane,
+      a,
+      b,
+      c,
+      counters,
+      PredicateFilterPolicy::allow_adaptive);
 }
 
 [[nodiscard]] inline Orientation2DResult orientation_2d_in_plane(
@@ -413,9 +567,169 @@ inline void require_power_label_domain(
     const CertifiedPoint3& a,
     const CertifiedPoint3& b,
     const CertifiedPoint3& c,
+    PredicateCounters* counters,
+    PredicateFilterPolicy filter_policy) {
+  detail::require_filter_policy(filter_policy);
+  detail::require_orientation_2d_incidence(
+      plane, a.exact(), b.exact(), c.exact());
+  const FilterResult filtered =
+      detail::policy_allows_fp64(filter_policy) &&
+              plane.binary64_provenance().has_value()
+          ? detail::affine_polynomial::filter_orientation_2d(
+                *plane.binary64_provenance(), a, b, c)
+          : FilterResult::uncertain();
+  const ExpansionResult expanded =
+      detail::policy_allows_expansion(filter_policy) &&
+              filtered.state() == FilterState::uncertain &&
+              plane.binary64_provenance().has_value()
+          ? detail::affine_polynomial::expansion_orientation_2d(
+                *plane.binary64_provenance(), a, b, c)
+          : ExpansionResult::uncertain();
+  ExactRational orientation_value = detail::orientation_2d_value_unchecked(
+      plane, a.exact(), b.exact(), c.exact());
+  const PredicateDecision decision = detail::certify_materialized_sign(
+      filtered,
+      expanded,
+      predicate_sign(orientation_value.sign()),
+      filter_policy,
+      counters);
+  return Orientation2DResult{decision, std::move(orientation_value)};
+}
+
+[[nodiscard]] inline Orientation2DResult orientation_2d_in_plane(
+    const ExactPlane3& plane,
+    const CertifiedPoint3& a,
+    const CertifiedPoint3& b,
+    const CertifiedPoint3& c,
     PredicateCounters* counters = nullptr) {
   return orientation_2d_in_plane(
-      plane, a.exact(), b.exact(), c.exact(), counters);
+      plane,
+      a,
+      b,
+      c,
+      counters,
+      PredicateFilterPolicy::allow_adaptive);
+}
+
+// Rich adaptive wrapper for the existing exact intersection witness. The
+// binding planes are canonically ordered only for stage evaluation; the
+// scientific intersection and ranks remain those of intersect_three_planes().
+class CertifiedThreePlaneIntersection {
+ public:
+  [[nodiscard]] const ThreePlaneIntersection& intersection() const noexcept {
+    return intersection_;
+  }
+
+  [[nodiscard]] CertificationStage certification_stage() const noexcept {
+    return certification_stage_;
+  }
+
+  [[nodiscard]] PredicateSign canonical_normal_determinant_sign()
+      const noexcept {
+    return canonical_normal_determinant_sign_;
+  }
+
+  friend bool operator==(
+      const CertifiedThreePlaneIntersection& left,
+      const CertifiedThreePlaneIntersection& right) noexcept {
+    const ThreePlaneIntersection& left_value = left.intersection_;
+    const ThreePlaneIntersection& right_value = right.intersection_;
+    return left_value.kind() == right_value.kind() &&
+           left_value.point() == right_value.point() &&
+           left_value.normal_rank() == right_value.normal_rank() &&
+           left_value.augmented_rank() == right_value.augmented_rank() &&
+           left_value.affine_dimension() == right_value.affine_dimension();
+  }
+
+ private:
+  friend CertifiedThreePlaneIntersection certified_intersect_three_planes(
+      const ExactPlane3&,
+      const ExactPlane3&,
+      const ExactPlane3&,
+      PredicateCounters*,
+      PredicateFilterPolicy);
+
+  CertifiedThreePlaneIntersection(
+      ThreePlaneIntersection intersection,
+      CertificationStage certification_stage,
+      PredicateSign canonical_normal_determinant_sign)
+      : intersection_(std::move(intersection)),
+        certification_stage_(certification_stage),
+        canonical_normal_determinant_sign_(
+            canonical_normal_determinant_sign) {
+    if ((intersection_.normal_rank() == 3U) !=
+        (canonical_normal_determinant_sign_ != PredicateSign::zero)) {
+      throw std::invalid_argument(
+          "a three-plane determinant sign must agree with the exact normal rank");
+    }
+    if (certification_stage_ == CertificationStage::fp64_filtered &&
+        canonical_normal_determinant_sign_ == PredicateSign::zero) {
+      throw std::invalid_argument(
+          "an FP64 interval cannot certify a singular three-plane system");
+    }
+  }
+
+  ThreePlaneIntersection intersection_;
+  CertificationStage certification_stage_;
+  PredicateSign canonical_normal_determinant_sign_;
+};
+
+[[nodiscard]] inline CertifiedThreePlaneIntersection
+certified_intersect_three_planes(
+    const ExactPlane3& first,
+    const ExactPlane3& second,
+    const ExactPlane3& third,
+    PredicateCounters* counters = nullptr,
+    PredicateFilterPolicy filter_policy = PredicateFilterPolicy::allow_adaptive) {
+  detail::require_filter_policy(filter_policy);
+  ThreePlaneIntersection exact_intersection =
+      intersect_three_planes(first, second, third);
+  const std::array<const ExactPlane3*, 3> canonical_planes =
+      detail::canonical_binding_planes(first, second, third);
+  const PredicateSign exact_determinant_sign = predicate_sign(
+      detail::normal_determinant_sign(
+          *canonical_planes[0], *canonical_planes[1], *canonical_planes[2]));
+  const detail::affine_polynomial::RankSignature exact_signature{
+      exact_intersection.normal_rank(),
+      exact_intersection.augmented_rank(),
+      exact_determinant_sign};
+
+  CertificationStage certification_stage =
+      CertificationStage::cpu_multiprecision;
+  const auto provenances =
+      detail::binary64_plane_provenances(canonical_planes);
+  if (provenances.has_value() &&
+      detail::policy_allows_fp64(filter_policy)) {
+    const auto filtered =
+        detail::affine_polynomial::filter_three_plane_ranks(*provenances);
+    if (filtered.state() == FilterState::certified) {
+      if (!filtered.signature().has_value() ||
+          *filtered.signature() != exact_signature) {
+        throw std::runtime_error(
+            "FP64 three-plane rank classification contradicted its exact witness");
+      }
+      certification_stage = CertificationStage::fp64_filtered;
+    } else if (detail::policy_allows_expansion(filter_policy)) {
+      const auto expanded =
+          detail::affine_polynomial::expansion_three_plane_ranks(*provenances);
+      if (expanded.state() == FilterState::certified) {
+        if (!expanded.signature().has_value() ||
+            *expanded.signature() != exact_signature) {
+          throw std::runtime_error(
+              "expansion three-plane rank classification contradicted its exact witness");
+        }
+        certification_stage = CertificationStage::expansion;
+      }
+    }
+  }
+  if (counters != nullptr) {
+    counters->record_certification_stage(
+        certification_stage, exact_determinant_sign == PredicateSign::zero);
+  }
+  return CertifiedThreePlaneIntersection{
+      std::move(exact_intersection),
+      certification_stage,
+      exact_determinant_sign};
 }
 
 [[nodiscard]] inline PredicateDecision decide_plane_side(
@@ -425,11 +739,55 @@ inline void require_power_label_domain(
   return detail::multiprecision_decision(plane.evaluate(point).sign(), counters);
 }
 
+[[nodiscard]] inline FilterResult filter_plane_side(
+    const ExactPlane3& plane, const CertifiedPoint3& point) {
+  if (!plane.binary64_provenance().has_value()) {
+    return FilterResult::uncertain();
+  }
+  return detail::affine_polynomial::filter_plane_side(
+      *plane.binary64_provenance(), point);
+}
+
+[[nodiscard]] inline ExpansionResult expansion_plane_side(
+    const ExactPlane3& plane, const CertifiedPoint3& point) {
+  if (!plane.binary64_provenance().has_value()) {
+    return ExpansionResult::uncertain();
+  }
+  return detail::affine_polynomial::expansion_plane_side(
+      *plane.binary64_provenance(), point);
+}
+
+[[nodiscard]] inline PredicateDecision decide_plane_side(
+    const ExactPlane3& plane,
+    const CertifiedPoint3& point,
+    PredicateCounters* counters,
+    PredicateFilterPolicy filter_policy) {
+  detail::require_filter_policy(filter_policy);
+  if (detail::policy_allows_fp64(filter_policy) &&
+      plane.binary64_provenance().has_value()) {
+    const FilterResult filtered = detail::affine_polynomial::filter_plane_side(
+        *plane.binary64_provenance(), point);
+    if (filtered.state() == FilterState::certified) {
+      return detail::filtered_decision(*filtered.sign(), counters);
+    }
+    if (detail::policy_allows_expansion(filter_policy)) {
+      const ExpansionResult expanded =
+          detail::affine_polynomial::expansion_plane_side(
+              *plane.binary64_provenance(), point);
+      if (expanded.state() == FilterState::certified) {
+        return detail::expansion_decision(*expanded.sign(), counters);
+      }
+    }
+  }
+  return detail::multiprecision_decision(plane.evaluate(point).sign(), counters);
+}
+
 [[nodiscard]] inline PredicateDecision decide_plane_side(
     const ExactPlane3& plane,
     const CertifiedPoint3& point,
     PredicateCounters* counters = nullptr) {
-  return decide_plane_side(plane, point.exact(), counters);
+  return decide_plane_side(
+      plane, point, counters, PredicateFilterPolicy::allow_adaptive);
 }
 
 [[nodiscard]] inline PlaneSideResult plane_side(
@@ -445,8 +803,34 @@ inline void require_power_label_domain(
 [[nodiscard]] inline PlaneSideResult plane_side(
     const ExactPlane3& plane,
     const CertifiedPoint3& point,
+    PredicateCounters* counters,
+    PredicateFilterPolicy filter_policy) {
+  detail::require_filter_policy(filter_policy);
+  const FilterResult filtered =
+      detail::policy_allows_fp64(filter_policy)
+          ? filter_plane_side(plane, point)
+          : FilterResult::uncertain();
+  const ExpansionResult expanded =
+      detail::policy_allows_expansion(filter_policy) &&
+              filtered.state() == FilterState::uncertain
+          ? expansion_plane_side(plane, point)
+          : ExpansionResult::uncertain();
+  ExactRational signed_value = plane.evaluate(point);
+  const PredicateDecision decision = detail::certify_materialized_sign(
+      filtered,
+      expanded,
+      predicate_sign(signed_value.sign()),
+      filter_policy,
+      counters);
+  return PlaneSideResult{decision, std::move(signed_value)};
+}
+
+[[nodiscard]] inline PlaneSideResult plane_side(
+    const ExactPlane3& plane,
+    const CertifiedPoint3& point,
     PredicateCounters* counters = nullptr) {
-  return plane_side(plane, point.exact(), counters);
+  return plane_side(
+      plane, point, counters, PredicateFilterPolicy::allow_adaptive);
 }
 
 // The homogeneous 4x4 determinant equals det(N) times the fourth-plane value
@@ -459,27 +843,90 @@ inline void require_power_label_domain(
     const ExactPlane3& fourth) {
   const std::array<const ExactPlane3*, 4> planes{
       &first, &second, &third, &fourth};
-  std::array<std::array<BigInt, 3>, 3> binding_normals{};
   std::array<std::array<BigInt, 4>, 4> homogeneous{};
   for (std::size_t row = 0; row < planes.size(); ++row) {
     for (std::size_t column = 0; column < 4U; ++column) {
       homogeneous[row][column] = planes[row]->coefficient(column);
-      if (row < 3U && column < 3U) {
-        binding_normals[row][column] = planes[row]->coefficient(column);
-      }
     }
   }
-  const BigInt binding_determinant = detail::determinant_3x3(binding_normals);
-  if (binding_determinant == 0) {
-    throw std::invalid_argument(
-        "fourth-plane incidence requires a unique first-three-plane intersection");
-  }
+  const int binding_sign =
+      detail::require_unique_binding_determinant_sign(first, second, third);
   const BigInt homogeneous_determinant = detail::determinant_4x4(homogeneous);
-  const int binding_sign = binding_determinant < 0 ? -1 : 1;
   const int homogeneous_sign = homogeneous_determinant < 0
                                    ? -1
                                    : (homogeneous_determinant == 0 ? 0 : 1);
   return binding_sign * homogeneous_sign;
+}
+
+[[nodiscard]] inline FilterResult filter_fourth_plane_incidence(
+    const ExactPlane3& first,
+    const ExactPlane3& second,
+    const ExactPlane3& third,
+    const ExactPlane3& fourth) {
+  static_cast<void>(
+      detail::require_unique_binding_determinant_sign(first, second, third));
+  const auto binding = detail::canonical_binding_planes(first, second, third);
+  const std::array<const ExactPlane3*, 4> planes{
+      binding[0], binding[1], binding[2], &fourth};
+  const auto provenances = detail::binary64_plane_provenances(planes);
+  if (!provenances.has_value()) {
+    return FilterResult::uncertain();
+  }
+  return detail::affine_polynomial::filter_fourth_plane_incidence(
+      *provenances);
+}
+
+[[nodiscard]] inline ExpansionResult expansion_fourth_plane_incidence(
+    const ExactPlane3& first,
+    const ExactPlane3& second,
+    const ExactPlane3& third,
+    const ExactPlane3& fourth) {
+  static_cast<void>(
+      detail::require_unique_binding_determinant_sign(first, second, third));
+  const auto binding = detail::canonical_binding_planes(first, second, third);
+  const std::array<const ExactPlane3*, 4> planes{
+      binding[0], binding[1], binding[2], &fourth};
+  const auto provenances = detail::binary64_plane_provenances(planes);
+  if (!provenances.has_value()) {
+    return ExpansionResult::uncertain();
+  }
+  return detail::affine_polynomial::expansion_fourth_plane_incidence(
+      *provenances);
+}
+
+[[nodiscard]] inline PredicateDecision decide_fourth_plane_incidence(
+    const ExactPlane3& first,
+    const ExactPlane3& second,
+    const ExactPlane3& third,
+    const ExactPlane3& fourth,
+    PredicateCounters* counters,
+    PredicateFilterPolicy filter_policy) {
+  detail::require_filter_policy(filter_policy);
+  static_cast<void>(
+      detail::require_unique_binding_determinant_sign(first, second, third));
+  const auto binding = detail::canonical_binding_planes(first, second, third);
+  const std::array<const ExactPlane3*, 4> planes{
+      binding[0], binding[1], binding[2], &fourth};
+  const auto provenances = detail::binary64_plane_provenances(planes);
+  if (provenances.has_value() &&
+      detail::policy_allows_fp64(filter_policy)) {
+    const FilterResult filtered =
+        detail::affine_polynomial::filter_fourth_plane_incidence(*provenances);
+    if (filtered.state() == FilterState::certified) {
+      return detail::filtered_decision(*filtered.sign(), counters);
+    }
+    if (detail::policy_allows_expansion(filter_policy)) {
+      const ExpansionResult expanded =
+          detail::affine_polynomial::expansion_fourth_plane_incidence(
+              *provenances);
+      if (expanded.state() == FilterState::certified) {
+        return detail::expansion_decision(*expanded.sign(), counters);
+      }
+    }
+  }
+  return detail::multiprecision_decision(
+      fourth_plane_incidence_determinant_sign(first, second, third, fourth),
+      counters);
 }
 
 [[nodiscard]] inline PredicateDecision decide_fourth_plane_incidence(
@@ -488,9 +935,13 @@ inline void require_power_label_domain(
     const ExactPlane3& third,
     const ExactPlane3& fourth,
     PredicateCounters* counters = nullptr) {
-  return detail::multiprecision_decision(
-      fourth_plane_incidence_determinant_sign(first, second, third, fourth),
-      counters);
+  return decide_fourth_plane_incidence(
+      first,
+      second,
+      third,
+      fourth,
+      counters,
+      PredicateFilterPolicy::allow_adaptive);
 }
 
 [[nodiscard]] inline FourthPlaneIncidenceResult fourth_plane_incidence(
@@ -498,9 +949,27 @@ inline void require_power_label_domain(
     const ExactPlane3& second,
     const ExactPlane3& third,
     const ExactPlane3& fourth,
-    PredicateCounters* counters = nullptr) {
-  const int determinant_sign = fourth_plane_incidence_determinant_sign(
-      first, second, third, fourth);
+    PredicateCounters* counters,
+    PredicateFilterPolicy filter_policy) {
+  detail::require_filter_policy(filter_policy);
+  static_cast<void>(
+      detail::require_unique_binding_determinant_sign(first, second, third));
+  const auto binding = detail::canonical_binding_planes(first, second, third);
+  const std::array<const ExactPlane3*, 4> planes{
+      binding[0], binding[1], binding[2], &fourth};
+  const auto provenances = detail::binary64_plane_provenances(planes);
+  const FilterResult filtered =
+      provenances.has_value() && detail::policy_allows_fp64(filter_policy)
+          ? detail::affine_polynomial::filter_fourth_plane_incidence(
+                *provenances)
+          : FilterResult::uncertain();
+  const ExpansionResult expanded =
+      provenances.has_value() &&
+              detail::policy_allows_expansion(filter_policy) &&
+              filtered.state() == FilterState::uncertain
+          ? detail::affine_polynomial::expansion_fourth_plane_incidence(
+                *provenances)
+          : ExpansionResult::uncertain();
   const ThreePlaneIntersection intersection =
       intersect_three_planes(first, second, third);
   if (intersection.kind() != ThreePlaneIntersectionKind::unique ||
@@ -509,14 +978,29 @@ inline void require_power_label_domain(
         "fourth-plane incidence requires a unique first-three-plane intersection");
   }
   ExactRational signed_value = fourth.evaluate(*intersection.point());
-  if (signed_value.sign() != determinant_sign) {
-    throw std::logic_error(
-        "fourth-plane determinant contradicted its exact rational witness");
-  }
-  const PredicateDecision decision =
-      detail::multiprecision_decision(signed_value.sign(), counters);
+  const PredicateDecision decision = detail::certify_materialized_sign(
+      filtered,
+      expanded,
+      predicate_sign(signed_value.sign()),
+      filter_policy,
+      counters);
   return FourthPlaneIncidenceResult{
       decision, *intersection.point(), std::move(signed_value)};
+}
+
+[[nodiscard]] inline FourthPlaneIncidenceResult fourth_plane_incidence(
+    const ExactPlane3& first,
+    const ExactPlane3& second,
+    const ExactPlane3& third,
+    const ExactPlane3& fourth,
+    PredicateCounters* counters = nullptr) {
+  return fourth_plane_incidence(
+      first,
+      second,
+      third,
+      fourth,
+      counters,
+      PredicateFilterPolicy::allow_adaptive);
 }
 
 // Decision-only entry point. A certified fast stage returns before either
@@ -662,6 +1146,18 @@ inline void require_power_label_domain(
                          (r.coordinate_sum(axis) - q.coordinate_sum(axis));
   }
   coefficients[3] = r.squared_norm_sum() - q.squared_norm_sum();
+  if (r.source_points().size() == r.cardinality() &&
+      q.source_points().size() == q.cardinality()) {
+    ExactAffineForm3 result = ExactAffineForm3::from_binary64_provenance(
+        Binary64AffineProvenance::power_bisector(
+            r.source_points(), q.source_points()));
+    if (result.a() != coefficients[0] || result.b() != coefficients[1] ||
+        result.c() != coefficients[2] || result.d() != coefficients[3]) {
+      throw std::logic_error(
+          "binary64 power-bisector provenance contradicted exact moments");
+    }
+    return result;
+  }
   return ExactAffineForm3::from_rational_coefficients(coefficients);
 }
 

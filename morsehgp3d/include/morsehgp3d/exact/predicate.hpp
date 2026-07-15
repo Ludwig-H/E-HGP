@@ -130,7 +130,17 @@ class PredicateCounters {
   void record_fp32_proposal() noexcept { ++fp32_proposals_; }
 
   void record_certification(const PredicateDecision& decision) noexcept {
-    switch (decision.certification_stage()) {
+    record_certification_stage(
+        decision.certification_stage(), decision.sign() == PredicateSign::zero);
+  }
+
+  // Collective classifications such as a three-plane rank decision have one
+  // terminal authority but no single scientific sign. This entry point keeps
+  // their counters honest without inventing a synthetic PredicateDecision.
+  void record_certification_stage(
+      CertificationStage certification_stage,
+      bool exact_zero = false) noexcept {
+    switch (certification_stage) {
       case CertificationStage::fp64_filtered:
         ++fp64_filtered_certified_;
         break;
@@ -141,7 +151,7 @@ class PredicateCounters {
         ++cpu_multiprecision_certified_;
         break;
     }
-    if (decision.sign() == PredicateSign::zero) {
+    if (exact_zero) {
       ++exact_zeros_;
     }
   }

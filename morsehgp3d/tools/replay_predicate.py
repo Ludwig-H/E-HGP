@@ -25,7 +25,7 @@ if hasattr(sys, "set_int_max_str_digits"):
 
 INPUT_KIND = "morsehgp3d_predicate_replay_input"
 RESULT_KIND = "morsehgp3d_predicate_replay_result"
-SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7}
+SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7, 8}
 DOMAINS = {
     1: b"MorseHGP3D/predicate-replay-v1/",
     2: b"MorseHGP3D/predicate-replay-v2/",
@@ -34,6 +34,7 @@ DOMAINS = {
     5: b"MorseHGP3D/predicate-replay-v5/",
     6: b"MorseHGP3D/predicate-replay-v6/",
     7: b"MorseHGP3D/predicate-replay-v7/",
+    8: b"MorseHGP3D/predicate-replay-v8/",
 }
 POINT_COUNTS = {
     "compare_squared_distances": 3,
@@ -113,6 +114,22 @@ def validate_points(points: Any, label: str) -> list[list[str]]:
             normalized_point.append(word)
         normalized_points.append(normalized_point)
     return normalized_points
+
+
+def validate_binary64_words(words: Any, label: str, expected_size: int) -> list[str]:
+    if not isinstance(words, list) or len(words) != expected_size:
+        raise ValueError(
+            f"the replay {label} must contain exactly {expected_size} binary64 words"
+        )
+    normalized: list[str] = []
+    for word in words:
+        if not isinstance(word, str) or HEX_WORD.fullmatch(word) is None:
+            raise ValueError("binary64 words must use 16 lowercase hexadecimal digits")
+        bits = int(word, 16)
+        if ((bits >> 52) & 0x7FF) == 0x7FF:
+            raise ValueError("binary64 replay values must be finite")
+        normalized.append(word)
+    return normalized
 
 
 def validate_exact_rational3(value: Any, label: str) -> dict[str, str]:
@@ -210,6 +227,69 @@ def validate_label_ids(value: Any, point_count: int, label: str) -> list[int]:
     if any(left >= right for left, right in zip(value, value[1:])):
         raise ValueError(f"the replay {label} identifiers must be sorted and unique")
     return list(value)
+
+
+def validate_plane_source(value: Any, label: str) -> dict[str, Any]:
+    if not isinstance(value, dict) or not isinstance(value.get("source_kind"), str):
+        raise ValueError(f"the replay {label} is not a tagged plane-source object")
+    source_kind = value["source_kind"]
+    if source_kind == "binary64_coefficients":
+        if set(value) != {"coefficient_words", "source_kind"}:
+            raise ValueError(
+                f"the replay {label} binary64 source has missing or unknown fields"
+            )
+        source = {
+            "coefficient_words": validate_binary64_words(
+                value["coefficient_words"], f"{label} coefficients", 4
+            ),
+            "source_kind": source_kind,
+        }
+    elif source_kind == "through_points":
+        if set(value) != {"points", "source_kind"}:
+            raise ValueError(
+                f"the replay {label} through-points source has missing or unknown fields"
+            )
+        points = validate_points(value["points"], f"{label} points")
+        if len(points) != 3:
+            raise ValueError(
+                f"the replay {label} through-points source requires exactly three points"
+            )
+        source = {"points": points, "source_kind": source_kind}
+    elif source_kind == "power_bisector":
+        if set(value) != {"point_table", "q_ids", "r_ids", "source_kind"}:
+            raise ValueError(
+                f"the replay {label} power-bisector source has missing or unknown fields"
+            )
+        point_table = validate_points(value["point_table"], f"{label} point_table")
+        r_ids = validate_label_ids(value["r_ids"], len(point_table), f"{label} R label")
+        q_ids = validate_label_ids(value["q_ids"], len(point_table), f"{label} Q label")
+        if len(r_ids) != len(q_ids):
+            raise ValueError(
+                f"the replay {label} power labels must have the same cardinality"
+            )
+        source = {
+            "point_table": point_table,
+            "q_ids": q_ids,
+            "r_ids": r_ids,
+            "source_kind": source_kind,
+        }
+    elif source_kind == "exact_plane":
+        if set(value) != {"plane", "source_kind"}:
+            raise ValueError(
+                f"the replay {label} exact-plane source has missing or unknown fields"
+            )
+        source = {
+            "plane": validate_plane(value["plane"], f"{label} exact plane"),
+            "source_kind": source_kind,
+        }
+    else:
+        raise ValueError(f"the replay {label} plane-source kind is unsupported")
+
+    # Resolve every recipe independently during input validation. This rejects
+    # dependent point triples, constant power bisectors and zero coefficient
+    # normals before the native process receives any tokens.
+    adaptive_plane_source_record(source)
+    return source
 
 
 def validate_replay_id_set(
@@ -551,6 +631,101 @@ def validate_input(value: Any) -> dict[str, Any]:
             }
         raise ValueError("the v7 replay predicate is unsupported")
 
+    if schema_version == 8:
+        if predicate == "adaptive_plane_side":
+            required = {
+                "kind",
+                "plane_source",
+                "point",
+                "predicate",
+                "schema_version",
+            }
+            if set(value) != required:
+                raise ValueError(
+                    "the v8 adaptive-plane-side input has missing or unknown fields"
+                )
+            return {
+                "kind": INPUT_KIND,
+                "plane_source": validate_plane_source(
+                    value["plane_source"], "plane-side source"
+                ),
+                "point": validate_points([value["point"]], "plane-side point")[0],
+                "predicate": predicate,
+                "schema_version": 8,
+            }
+
+        if predicate == "adaptive_orientation_2d_in_plane":
+            required = {
+                "kind",
+                "plane_source",
+                "points",
+                "predicate",
+                "schema_version",
+            }
+            if set(value) != required:
+                raise ValueError(
+                    "the v8 adaptive-orientation input has missing or unknown fields"
+                )
+            plane_source = validate_plane_source(
+                value["plane_source"], "orientation plane source"
+            )
+            points = validate_points(value["points"], "orientation points")
+            if len(points) != 3:
+                raise ValueError(
+                    "adaptive orientation 2D requires exactly three points"
+                )
+            plane = adaptive_plane_source_record(plane_source)
+            exact_points = [point_from_words(words) for words in points]
+            if any(evaluate_plane(plane, point) != 0 for point in exact_points):
+                raise ValueError(
+                    "the adaptive orientation points are outside the exact support"
+                )
+            return {
+                "kind": INPUT_KIND,
+                "plane_source": plane_source,
+                "points": points,
+                "predicate": predicate,
+                "schema_version": 8,
+            }
+
+        plane_counts = {
+            "adaptive_intersect_three_planes": 3,
+            "adaptive_fourth_plane_incidence": 4,
+        }
+        if predicate not in plane_counts:
+            raise ValueError("the v8 replay predicate is unsupported")
+        required = {
+            "kind",
+            "plane_sources",
+            "predicate",
+            "schema_version",
+        }
+        if set(value) != required or not isinstance(value["plane_sources"], list):
+            raise ValueError(
+                "the v8 adaptive plane-system input has missing or unknown fields"
+            )
+        if len(value["plane_sources"]) != plane_counts[predicate]:
+            raise ValueError("the v8 adaptive plane system has the wrong plane count")
+        plane_sources = [
+            validate_plane_source(source, f"plane source {index}")
+            for index, source in enumerate(value["plane_sources"])
+        ]
+        if predicate == "adaptive_fourth_plane_incidence":
+            binding_planes = [
+                adaptive_plane_source_record(source) for source in plane_sources[:3]
+            ]
+            intersection_kind, point, _, _, _ = solve_three_planes(binding_planes)
+            if intersection_kind != "unique" or point is None:
+                raise ValueError(
+                    "adaptive fourth-plane incidence requires a unique exact intersection"
+                )
+        return {
+            "kind": INPUT_KIND,
+            "plane_sources": plane_sources,
+            "predicate": predicate,
+            "schema_version": 8,
+        }
+
     if predicate == "plane_through_points":
         required = {"kind", "schema_version", "predicate", "points"}
         if set(value) != required:
@@ -850,6 +1025,34 @@ def power_bisector_classification(
     return "identically_zero", None, coefficients
 
 
+def adaptive_plane_source_record(source: dict[str, Any]) -> dict[str, str]:
+    source_kind = source["source_kind"]
+    if source_kind == "binary64_coefficients":
+        coefficients = tuple(
+            Fraction.from_float(struct.unpack(">d", bytes.fromhex(word))[0])
+            for word in source["coefficient_words"]
+        )
+        return plane_record(coefficients)  # type: ignore[arg-type]
+    if source_kind == "through_points":
+        return plane_through_points(
+            [point_from_words(words) for words in source["points"]]
+        )
+    if source_kind == "power_bisector":
+        classification, plane, _ = power_bisector_classification(source)
+        if classification != "proper_plane" or plane is None:
+            raise ValueError(
+                "an adaptive power-bisector source must define a proper plane"
+            )
+        return plane
+    if source_kind == "exact_plane":
+        return dict(source["plane"])
+    raise ValueError("an adaptive plane-source kind is unsupported")
+
+
+def adaptive_source_has_fast_provenance(source: dict[str, Any]) -> bool:
+    return source["source_kind"] != "exact_plane"
+
+
 def matrix_rref(matrix: list[list[Fraction]]) -> tuple[list[list[Fraction]], list[int]]:
     reduced = [list(row) for row in matrix]
     pivot_columns: list[int] = []
@@ -985,6 +1188,97 @@ def solve_three_planes(
         if column < 3:
             coordinates[column] = reduced[row][3]
     return "unique", tuple(coordinates), normal_rank, augmented_rank, 0  # type: ignore[return-value]
+
+
+def canonical_normal_determinant(planes: list[dict[str, str]]) -> Fraction:
+    if len(planes) != 3:
+        raise ValueError("a canonical normal determinant requires three planes")
+    ordered = sorted(
+        planes,
+        key=lambda plane: ":".join(plane[field] for field in ("a", "b", "c", "d")),
+    )
+    rows = [plane_coefficients(plane)[:3] for plane in ordered]
+    return (
+        rows[0][0] * (rows[1][1] * rows[2][2] - rows[1][2] * rows[2][1])
+        - rows[0][1] * (rows[1][0] * rows[2][2] - rows[1][2] * rows[2][0])
+        + rows[0][2] * (rows[1][0] * rows[2][1] - rows[1][1] * rows[2][0])
+    )
+
+
+def adaptive_orientation_2d_oracle(
+    replay_input: dict[str, Any],
+) -> dict[str, Any]:
+    plane = adaptive_plane_source_record(replay_input["plane_source"])
+    points = [point_from_words(words) for words in replay_input["points"]]
+    if any(evaluate_plane(plane, point) != 0 for point in points):
+        raise ValueError("adaptive orientation points are outside their exact plane")
+    first = tuple(value - origin for origin, value in zip(points[0], points[1]))
+    second = tuple(value - origin for origin, value in zip(points[0], points[2]))
+    cross = cross_product(first, second)
+    normal = plane_coefficients(plane)[:3]
+    orientation_value = sum(
+        (coefficient * component for coefficient, component in zip(normal, cross)),
+        Fraction(),
+    )
+    return {
+        "orientation_value_exact": exact_rational_record(orientation_value),
+        "predicate": "adaptive_orientation_2d_in_plane",
+        "sign": expected_sign(orientation_value),
+    }
+
+
+def adaptive_plane_side_oracle(replay_input: dict[str, Any]) -> dict[str, Any]:
+    plane = adaptive_plane_source_record(replay_input["plane_source"])
+    point = point_from_words(replay_input["point"])
+    signed_value = evaluate_plane(plane, point)
+    return {
+        "predicate": "adaptive_plane_side",
+        "sign": expected_sign(signed_value),
+        "signed_value_exact": exact_rational_record(signed_value),
+    }
+
+
+def adaptive_three_plane_intersection_oracle(
+    replay_input: dict[str, Any],
+) -> dict[str, Any]:
+    planes = [
+        adaptive_plane_source_record(source) for source in replay_input["plane_sources"]
+    ]
+    kind, point, normal_rank, augmented_rank, affine_dimension = solve_three_planes(
+        planes
+    )
+    determinant_sign = expected_sign(canonical_normal_determinant(planes))
+    return {
+        "affine_dimension": affine_dimension,
+        "augmented_rank": augmented_rank,
+        "intersection_exact": (
+            exact_rational3_record(point) if point is not None else None
+        ),
+        "intersection_kind": kind,
+        "normal_determinant_sign": determinant_sign,
+        "normal_rank": normal_rank,
+        "predicate": "adaptive_intersect_three_planes",
+    }
+
+
+def adaptive_fourth_plane_incidence_oracle(
+    replay_input: dict[str, Any],
+) -> dict[str, Any]:
+    planes = [
+        adaptive_plane_source_record(source) for source in replay_input["plane_sources"]
+    ]
+    kind, point, _, _, _ = solve_three_planes(planes[:3])
+    if kind != "unique" or point is None:
+        raise ValueError(
+            "adaptive fourth-plane incidence requires a unique exact intersection"
+        )
+    signed_value = evaluate_plane(planes[3], point)
+    return {
+        "intersection_exact": exact_rational3_record(point),
+        "predicate": "adaptive_fourth_plane_incidence",
+        "sign": expected_sign(signed_value),
+        "signed_value_exact": exact_rational_record(signed_value),
+    }
 
 
 def exact_rational3_record(
@@ -1551,7 +1845,214 @@ def validate_collective_counters(
         )
 
 
+def validate_adaptive_native_result(
+    value: Any, replay_input: dict[str, Any]
+) -> dict[str, Any]:
+    predicate = replay_input["predicate"]
+    if predicate == "adaptive_plane_side":
+        expected_fields = {
+            "certification_stage",
+            "counters",
+            "predicate",
+            "sign",
+            "signed_value_exact",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError(
+                "the native adaptive plane-side result returned unknown fields"
+            )
+        sign = value["sign"]
+        stage = value["certification_stage"]
+        if (
+            value["predicate"] != predicate
+            or not isinstance(sign, str)
+            or sign not in SIGNS
+            or not isinstance(stage, str)
+        ):
+            raise ValueError(
+                "the native adaptive plane-side result has invalid classifications"
+            )
+        canonical_rational(
+            value["signed_value_exact"],
+            "adaptive plane-side signed value",
+            nonnegative=False,
+        )
+        validate_counters(
+            value["counters"],
+            sign,
+            stage,
+            predicate,
+            fast_stages_available=adaptive_source_has_fast_provenance(
+                replay_input["plane_source"]
+            ),
+        )
+        expected = adaptive_plane_side_oracle(replay_input)
+        expected["certification_stage"] = stage
+        expected["counters"] = value["counters"]
+        if value != expected:
+            raise ValueError(
+                "the native adaptive plane side differs from direct Fraction evaluation"
+            )
+        return value
+
+    if predicate == "adaptive_orientation_2d_in_plane":
+        expected_fields = {
+            "certification_stage",
+            "counters",
+            "orientation_value_exact",
+            "predicate",
+            "sign",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError(
+                "the native adaptive-orientation result returned unknown fields"
+            )
+        sign = value["sign"]
+        stage = value["certification_stage"]
+        if (
+            value["predicate"] != predicate
+            or not isinstance(sign, str)
+            or sign not in SIGNS
+            or not isinstance(stage, str)
+        ):
+            raise ValueError(
+                "the native adaptive-orientation result has invalid classifications"
+            )
+        canonical_rational(
+            value["orientation_value_exact"],
+            "adaptive orientation value",
+            nonnegative=False,
+        )
+        validate_counters(
+            value["counters"],
+            sign,
+            stage,
+            predicate,
+            fast_stages_available=adaptive_source_has_fast_provenance(
+                replay_input["plane_source"]
+            ),
+        )
+        expected = adaptive_orientation_2d_oracle(replay_input)
+        expected["certification_stage"] = stage
+        expected["counters"] = value["counters"]
+        if value != expected:
+            raise ValueError(
+                "the native adaptive orientation differs from the Fraction oracle"
+            )
+        return value
+
+    if predicate == "adaptive_intersect_three_planes":
+        expected_fields = {
+            "affine_dimension",
+            "augmented_rank",
+            "certification_stage",
+            "counters",
+            "intersection_exact",
+            "intersection_kind",
+            "normal_determinant_sign",
+            "normal_rank",
+            "predicate",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError("the native adaptive intersection returned unknown fields")
+        determinant_sign = value["normal_determinant_sign"]
+        stage = value["certification_stage"]
+        if (
+            value["predicate"] != predicate
+            or value["intersection_kind"] not in ("unique", "empty", "affine_family")
+            or type(value["normal_rank"]) is not int
+            or type(value["augmented_rank"]) is not int
+            or (
+                value["affine_dimension"] is not None
+                and type(value["affine_dimension"]) is not int
+            )
+            or not isinstance(determinant_sign, str)
+            or determinant_sign not in SIGNS
+            or not isinstance(stage, str)
+        ):
+            raise ValueError(
+                "the native adaptive intersection has invalid classifications"
+            )
+        if value["intersection_exact"] is not None:
+            validate_exact_rational3(
+                value["intersection_exact"], "native adaptive intersection"
+            )
+        validate_counters(
+            value["counters"],
+            determinant_sign,
+            stage,
+            predicate,
+            fast_stages_available=all(
+                adaptive_source_has_fast_provenance(source)
+                for source in replay_input["plane_sources"]
+            ),
+        )
+        expected = adaptive_three_plane_intersection_oracle(replay_input)
+        expected["certification_stage"] = stage
+        expected["counters"] = value["counters"]
+        if value != expected:
+            raise ValueError(
+                "the native adaptive intersection differs from the Fraction RREF oracle"
+            )
+        return value
+
+    if predicate == "adaptive_fourth_plane_incidence":
+        expected_fields = {
+            "certification_stage",
+            "counters",
+            "intersection_exact",
+            "predicate",
+            "sign",
+            "signed_value_exact",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError(
+                "the native adaptive fourth-plane result returned unknown fields"
+            )
+        sign = value["sign"]
+        stage = value["certification_stage"]
+        if (
+            value["predicate"] != predicate
+            or not isinstance(sign, str)
+            or sign not in SIGNS
+            or not isinstance(stage, str)
+        ):
+            raise ValueError(
+                "the native adaptive fourth-plane result has invalid classifications"
+            )
+        validate_exact_rational3(
+            value["intersection_exact"], "native adaptive fourth-plane intersection"
+        )
+        canonical_rational(
+            value["signed_value_exact"],
+            "native adaptive fourth-plane signed value",
+            nonnegative=False,
+        )
+        validate_counters(
+            value["counters"],
+            sign,
+            stage,
+            predicate,
+            fast_stages_available=all(
+                adaptive_source_has_fast_provenance(source)
+                for source in replay_input["plane_sources"]
+            ),
+        )
+        expected = adaptive_fourth_plane_incidence_oracle(replay_input)
+        expected["certification_stage"] = stage
+        expected["counters"] = value["counters"]
+        if value != expected:
+            raise ValueError(
+                "the native adaptive fourth-plane result differs from direct Fraction evaluation"
+            )
+        return value
+
+    raise ValueError("the v8 native predicate is unsupported")
+
+
 def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str, Any]:
+    if replay_input["schema_version"] == 8:
+        return validate_adaptive_native_result(value, replay_input)
     predicate = replay_input["predicate"]
     if predicate == "binary64_barycentric_coordinates":
         expected_fields = {
@@ -2477,6 +2978,33 @@ def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str
     return value
 
 
+def extend_adaptive_plane_source_arguments(
+    arguments: list[str], source: dict[str, Any]
+) -> None:
+    source_kind = source["source_kind"]
+    if source_kind == "binary64_coefficients":
+        arguments.append("coeff")
+        arguments.extend(source["coefficient_words"])
+        return
+    if source_kind == "through_points":
+        arguments.append("through")
+        arguments.extend(word for point in source["points"] for word in point)
+        return
+    if source_kind == "power_bisector":
+        point_table = source["point_table"]
+        r_points = [point_table[identifier] for identifier in source["r_ids"]]
+        q_points = [point_table[identifier] for identifier in source["q_ids"]]
+        arguments.extend(["power", str(len(r_points))])
+        arguments.extend(word for point in r_points for word in point)
+        arguments.extend(word for point in q_points for word in point)
+        return
+    if source_kind == "exact_plane":
+        arguments.append("exact")
+        arguments.extend(source["plane"][field] for field in ("a", "b", "c", "d"))
+        return
+    raise ValueError("an adaptive plane-source kind is unsupported")
+
+
 def replay(
     value: dict[str, Any],
     executable: Path,
@@ -2556,6 +3084,16 @@ def replay(
             arguments.extend(word for point in value["left_support"] for word in point)
             arguments.append(str(len(value["right_support"])))
             arguments.extend(word for point in value["right_support"] for word in point)
+    elif value["schema_version"] == 8:
+        if value["predicate"] == "adaptive_plane_side":
+            extend_adaptive_plane_source_arguments(arguments, value["plane_source"])
+            arguments.extend(value["point"])
+        elif value["predicate"] == "adaptive_orientation_2d_in_plane":
+            extend_adaptive_plane_source_arguments(arguments, value["plane_source"])
+            arguments.extend(word for point in value["points"] for word in point)
+        else:
+            for source in value["plane_sources"]:
+                extend_adaptive_plane_source_arguments(arguments, source)
     elif value["predicate"] == "plane_through_points":
         arguments.extend(word for point in value["points"] for word in point)
     elif value["predicate"] == "power_bisector_affine_form":

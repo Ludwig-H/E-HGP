@@ -1,0 +1,1 @@
+{"kind":"morsehgp3d_predicate_replay_input","plane_source":{"coefficient_words":["3ff0000000000000","0000000000000000","0000000000000000","c190000000000000"],"source_kind":"binary64_coefficients"},"point":["4190000000000000","0000000000000000","0000000000000000"],"predicate":"adaptive_plane_side","schema_version":8}

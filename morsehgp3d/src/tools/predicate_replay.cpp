@@ -28,6 +28,7 @@
 namespace {
 
 using morsehgp3d::exact::BigInt;
+using morsehgp3d::exact::AffineFormKind;
 using morsehgp3d::exact::BarycentricCoordinates;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::CircumcenterKind;
@@ -55,6 +56,7 @@ using morsehgp3d::exact::barycentric_coordinates;
 using morsehgp3d::exact::classify_sphere_point;
 using morsehgp3d::exact::classify_affine_form;
 using morsehgp3d::exact::canonical_level_batches;
+using morsehgp3d::exact::certified_intersect_three_planes;
 using morsehgp3d::exact::compare_squared_distances;
 using morsehgp3d::exact::compare_exact_levels;
 using morsehgp3d::exact::compare_support_levels;
@@ -65,6 +67,7 @@ using morsehgp3d::exact::maximum_power_label_cardinality;
 using morsehgp3d::exact::orientation_2d_in_plane;
 using morsehgp3d::exact::orientation_3d;
 using morsehgp3d::exact::parse_binary64_hex;
+using morsehgp3d::exact::plane_side;
 using morsehgp3d::exact::power_bisector_side;
 using morsehgp3d::exact::power_bisector_affine_form;
 using morsehgp3d::exact::to_string;
@@ -317,6 +320,114 @@ std::size_t parse_size(std::string_view text, std::string_view label) {
     throw std::invalid_argument(std::string{label} + " is outside the supported size range");
   }
   return static_cast<std::size_t>(parsed);
+}
+
+class ReplayTokenCursor {
+ public:
+  explicit ReplayTokenCursor(
+      std::span<const std::string_view> arguments,
+      std::size_t cursor = 1U) noexcept
+      : arguments_(arguments), cursor_(cursor) {}
+
+  [[nodiscard]] std::string_view take(std::string_view label) {
+    if (cursor_ >= arguments_.size()) {
+      throw std::invalid_argument(std::string{label} + " is missing");
+    }
+    return arguments_[cursor_++];
+  }
+
+  [[nodiscard]] CertifiedPoint3 take_point(std::string_view label) {
+    if (cursor_ > arguments_.size() || arguments_.size() - cursor_ < 3U) {
+      throw std::invalid_argument(std::string{label} + " is incomplete");
+    }
+    const CertifiedPoint3 point = parse_point(arguments_, cursor_);
+    cursor_ += 3U;
+    return point;
+  }
+
+  void require_end(std::string_view label) const {
+    if (cursor_ != arguments_.size()) {
+      throw std::invalid_argument(
+          std::string{label} + " has trailing serialized fields");
+    }
+  }
+
+ private:
+  std::span<const std::string_view> arguments_;
+  std::size_t cursor_;
+};
+
+[[nodiscard]] ExactPlane3 parse_adaptive_plane_source(
+    ReplayTokenCursor& cursor) {
+  const std::string_view source_kind =
+      cursor.take("the adaptive plane source kind");
+  if (source_kind == "coeff") {
+    std::array<std::uint64_t, 4> coefficient_bits{};
+    for (std::size_t index = 0U; index < coefficient_bits.size(); ++index) {
+      coefficient_bits[index] = parse_binary64_hex(
+          cursor.take("an adaptive plane coefficient"), false);
+    }
+    return ExactPlane3::from_binary64_coefficient_bits(coefficient_bits);
+  }
+  if (source_kind == "through") {
+    const CertifiedPoint3 first =
+        cursor.take_point("the first through-plane point");
+    const CertifiedPoint3 second =
+        cursor.take_point("the second through-plane point");
+    const CertifiedPoint3 third =
+        cursor.take_point("the third through-plane point");
+    return ExactPlane3::through_points(first, second, third);
+  }
+  if (source_kind == "power") {
+    const std::size_t cardinality = parse_size(
+        cursor.take("the power-plane cardinality"),
+        "power-plane cardinality");
+    if (cardinality == 0U ||
+        cardinality > maximum_power_label_cardinality) {
+      throw std::invalid_argument(
+          "a power-plane cardinality must be between one and ten");
+    }
+
+    std::vector<CertifiedPoint3> point_table;
+    point_table.reserve(2U * cardinality);
+    for (std::size_t index = 0U; index < cardinality; ++index) {
+      point_table.push_back(cursor.take_point("a power-plane R point"));
+    }
+    for (std::size_t index = 0U; index < cardinality; ++index) {
+      point_table.push_back(cursor.take_point("a power-plane Q point"));
+    }
+
+    std::vector<std::uint32_t> r_ids;
+    std::vector<std::uint32_t> q_ids;
+    r_ids.reserve(cardinality);
+    q_ids.reserve(cardinality);
+    for (std::size_t index = 0U; index < cardinality; ++index) {
+      r_ids.push_back(static_cast<std::uint32_t>(index));
+      q_ids.push_back(static_cast<std::uint32_t>(cardinality + index));
+    }
+    const ExactLabelMoments r =
+        ExactLabelMoments::from_canonical_ids(r_ids, point_table);
+    const ExactLabelMoments q =
+        ExactLabelMoments::from_canonical_ids(q_ids, point_table);
+    const auto classification =
+        classify_affine_form(power_bisector_affine_form(r, q));
+    if (classification.kind() != AffineFormKind::proper_plane ||
+        !classification.plane().has_value()) {
+      throw std::invalid_argument(
+          "a power-plane source must classify as a proper plane");
+    }
+    return *classification.plane();
+  }
+  if (source_kind == "exact") {
+    return ExactPlane3::from_record(ExactPlane3Record{
+        ExactPlane3::schema_version,
+        std::string{cursor.take("the exact plane A coefficient")},
+        std::string{cursor.take("the exact plane B coefficient")},
+        std::string{cursor.take("the exact plane C coefficient")},
+        std::string{cursor.take("the exact plane D coefficient")}});
+  }
+  throw std::invalid_argument(
+      "an adaptive plane source kind must be coeff, through, power or exact");
 }
 
 std::uint32_t parse_id(std::string_view text) {
@@ -585,6 +696,118 @@ int replay_fourth_plane_incidence(
          << "\",\"counters\":" << counters_json(counters)
          << ",\"intersection_exact\":" << result.intersection.canonical_json()
          << ",\"predicate\":\"fourth_plane_incidence\""
+         << ",\"sign\":\"" << to_string(result.decision.sign()) << "\""
+         << ",\"signed_value_exact\":" << rational_json(result.signed_value)
+         << "}\n";
+  return 0;
+}
+
+int replay_adaptive_orientation_2d(
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
+  ReplayTokenCursor cursor{arguments};
+  const ExactPlane3 plane = parse_adaptive_plane_source(cursor);
+  const CertifiedPoint3 a =
+      cursor.take_point("the first adaptive orientation point");
+  const CertifiedPoint3 b =
+      cursor.take_point("the second adaptive orientation point");
+  const CertifiedPoint3 c =
+      cursor.take_point("the third adaptive orientation point");
+  cursor.require_end("the adaptive orientation replay");
+
+  PredicateCounters counters;
+  const auto result = orientation_2d_in_plane(
+      plane, a, b, c, &counters, filter_policy);
+  output << "{\"certification_stage\":\""
+         << to_string(result.decision.certification_stage())
+         << "\",\"counters\":" << counters_json(counters)
+         << ",\"orientation_value_exact\":"
+         << rational_json(result.orientation_value)
+         << ",\"predicate\":\"adaptive_orientation_2d_in_plane\""
+         << ",\"sign\":\"" << to_string(result.decision.sign()) << "\"}\n";
+  return 0;
+}
+
+int replay_adaptive_plane_side(
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
+  ReplayTokenCursor cursor{arguments};
+  const ExactPlane3 plane = parse_adaptive_plane_source(cursor);
+  const CertifiedPoint3 point =
+      cursor.take_point("the adaptive plane-side point");
+  cursor.require_end("the adaptive plane-side replay");
+
+  PredicateCounters counters;
+  const auto result = plane_side(plane, point, &counters, filter_policy);
+  output << "{\"certification_stage\":\""
+         << to_string(result.decision.certification_stage())
+         << "\",\"counters\":" << counters_json(counters)
+         << ",\"predicate\":\"adaptive_plane_side\""
+         << ",\"sign\":\"" << to_string(result.decision.sign()) << "\""
+         << ",\"signed_value_exact\":" << rational_json(result.signed_value)
+         << "}\n";
+  return 0;
+}
+
+int replay_adaptive_three_plane_intersection(
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
+  ReplayTokenCursor cursor{arguments};
+  const ExactPlane3 first = parse_adaptive_plane_source(cursor);
+  const ExactPlane3 second = parse_adaptive_plane_source(cursor);
+  const ExactPlane3 third = parse_adaptive_plane_source(cursor);
+  cursor.require_end("the adaptive three-plane intersection replay");
+
+  PredicateCounters counters;
+  const auto certified = certified_intersect_three_planes(
+      first, second, third, &counters, filter_policy);
+  const auto& intersection = certified.intersection();
+  output << "{\"affine_dimension\":";
+  if (intersection.affine_dimension().has_value()) {
+    output << *intersection.affine_dimension();
+  } else {
+    output << "null";
+  }
+  output << ",\"augmented_rank\":" << intersection.augmented_rank()
+         << ",\"certification_stage\":\""
+         << to_string(certified.certification_stage())
+         << "\",\"counters\":" << counters_json(counters)
+         << ",\"intersection_exact\":";
+  if (intersection.point().has_value()) {
+    output << intersection.point()->canonical_json();
+  } else {
+    output << "null";
+  }
+  output << ",\"intersection_kind\":\"" << to_string(intersection.kind())
+         << "\",\"normal_determinant_sign\":\""
+         << to_string(certified.canonical_normal_determinant_sign())
+         << "\",\"normal_rank\":" << intersection.normal_rank()
+         << ",\"predicate\":\"adaptive_intersect_three_planes\"}\n";
+  return 0;
+}
+
+int replay_adaptive_fourth_plane_incidence(
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
+  ReplayTokenCursor cursor{arguments};
+  const ExactPlane3 first = parse_adaptive_plane_source(cursor);
+  const ExactPlane3 second = parse_adaptive_plane_source(cursor);
+  const ExactPlane3 third = parse_adaptive_plane_source(cursor);
+  const ExactPlane3 fourth = parse_adaptive_plane_source(cursor);
+  cursor.require_end("the adaptive fourth-plane incidence replay");
+
+  PredicateCounters counters;
+  const auto result = fourth_plane_incidence(
+      first, second, third, fourth, &counters, filter_policy);
+  output << "{\"certification_stage\":\""
+         << to_string(result.decision.certification_stage())
+         << "\",\"counters\":" << counters_json(counters)
+         << ",\"intersection_exact\":" << result.intersection.canonical_json()
+         << ",\"predicate\":\"adaptive_fourth_plane_incidence\""
          << ",\"sign\":\"" << to_string(result.decision.sign()) << "\""
          << ",\"signed_value_exact\":" << rational_json(result.signed_value)
          << "}\n";
@@ -1252,6 +1475,21 @@ int replay_tokens(
   if (arguments[0] == "fourth_plane_incidence" && arguments.size() == 17U) {
     return replay_fourth_plane_incidence(arguments, output);
   }
+  if (arguments[0] == "adaptive_orientation_2d_in_plane") {
+    return replay_adaptive_orientation_2d(
+        arguments, output, filter_policy);
+  }
+  if (arguments[0] == "adaptive_plane_side") {
+    return replay_adaptive_plane_side(arguments, output, filter_policy);
+  }
+  if (arguments[0] == "adaptive_intersect_three_planes") {
+    return replay_adaptive_three_plane_intersection(
+        arguments, output, filter_policy);
+  }
+  if (arguments[0] == "adaptive_fourth_plane_incidence") {
+    return replay_adaptive_fourth_plane_incidence(
+        arguments, output, filter_policy);
+  }
   if (arguments[0] == "circumcenter_support") {
     return replay_circumcenter_support(arguments, output);
   }
@@ -1342,6 +1580,14 @@ void print_usage(const char* executable) {
             << " intersect_three_planes A B C D ... (3 planes)\n"
             << "   or: " << executable
             << " fourth_plane_incidence A B C D ... (4 planes)\n"
+            << "   or: " << executable
+            << " adaptive_orientation_2d_in_plane SOURCE ... (3 points)\n"
+            << "   or: " << executable
+            << " adaptive_plane_side SOURCE ... POINT_X POINT_Y POINT_Z\n"
+            << "   or: " << executable
+            << " adaptive_intersect_three_planes SOURCE ... (3 plane sources)\n"
+            << "   or: " << executable
+            << " adaptive_fourth_plane_incidence SOURCE ... (4 plane sources)\n"
             << "   or: " << executable
             << " circumcenter_support COUNT HEX_X HEX_Y HEX_Z ... (2 to 4 points)\n"
             << "   or: " << executable

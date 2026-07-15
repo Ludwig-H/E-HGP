@@ -1,0 +1,1 @@
+{"kind":"morsehgp3d_predicate_replay_input","plane_source":{"plane":{"a":"0","b":"0","c":"1","d":"0","schema_version":"2.0.0"},"source_kind":"exact_plane"},"point":["0000000000000000","0000000000000000","3ff0000000000000"],"predicate":"adaptive_plane_side","schema_version":8}

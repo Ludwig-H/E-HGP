@@ -1,6 +1,6 @@
 #pragma once
 
-#include "morsehgp3d/exact/point.hpp"
+#include "morsehgp3d/exact/affine_provenance.hpp"
 
 #include <array>
 #include <cstddef>
@@ -44,6 +44,24 @@ class ExactAffineForm3 {
     return ExactAffineForm3{std::move(coefficients)};
   }
 
+  [[nodiscard]] static ExactAffineForm3 from_binary64_coefficient_bits(
+      std::array<std::uint64_t, 4> coefficient_bits) {
+    return from_binary64_provenance(
+        Binary64AffineProvenance::from_coefficient_bits(coefficient_bits));
+  }
+
+  [[nodiscard]] static ExactAffineForm3 from_binary64_coefficients(
+      const std::array<double, 4>& coefficients) {
+    return from_binary64_provenance(
+        Binary64AffineProvenance::from_coefficients(coefficients));
+  }
+
+  [[nodiscard]] static ExactAffineForm3 from_binary64_provenance(
+      Binary64AffineProvenance provenance) {
+    return ExactAffineForm3{
+        provenance.exact_coefficients(), std::move(provenance)};
+  }
+
   [[nodiscard]] const ExactRational& coefficient(std::size_t index) const {
     if (index >= coefficients_.size()) {
       throw std::out_of_range(
@@ -73,6 +91,11 @@ class ExactAffineForm3 {
     return has_zero_normal() && d().is_zero();
   }
 
+  [[nodiscard]] const std::optional<Binary64AffineProvenance>&
+  binary64_provenance() const noexcept {
+    return binary64_provenance_;
+  }
+
   [[nodiscard]] ExactRational evaluate(const ExactRational3& point) const {
     ExactRational value = d();
     for (std::size_t axis = 0; axis < 3U; ++axis) {
@@ -93,11 +116,21 @@ class ExactAffineForm3 {
   }
 
   friend bool operator==(
-      const ExactAffineForm3&, const ExactAffineForm3&) noexcept = default;
+      const ExactAffineForm3& left, const ExactAffineForm3& right) noexcept {
+    return left.coefficients_ == right.coefficients_;
+  }
 
  private:
-  explicit ExactAffineForm3(std::array<ExactRational, 4> coefficients)
-      : coefficients_(std::move(coefficients)) {
+  explicit ExactAffineForm3(
+      std::array<ExactRational, 4> coefficients,
+      std::optional<Binary64AffineProvenance> binary64_provenance = std::nullopt)
+      : coefficients_(std::move(coefficients)),
+        binary64_provenance_(std::move(binary64_provenance)) {
+    if (binary64_provenance_.has_value() &&
+        binary64_provenance_->exact_coefficients() != coefficients_) {
+      throw std::invalid_argument(
+          "binary64 affine provenance must reproduce every exact coefficient");
+    }
     BigInt common_denominator = 1;
     for (const ExactRational& coefficient_value : coefficients_) {
       const BigInt divisor = greatest_common_divisor(
@@ -124,6 +157,7 @@ class ExactAffineForm3 {
 
   std::array<ExactRational, 4> coefficients_{};
   std::array<BigInt, 4> primitive_coefficients_{};
+  std::optional<Binary64AffineProvenance> binary64_provenance_;
 };
 
 // Oriented plane A*x + B*y + C*z + D = 0. Coefficients are primitive
@@ -142,6 +176,42 @@ class ExactPlane3 {
       const std::array<ExactRational, 4>& coefficients) {
     const ExactAffineForm3 form =
         ExactAffineForm3::from_rational_coefficients(coefficients);
+    return from_integer_coefficients({
+        form.primitive_coefficient(0U),
+        form.primitive_coefficient(1U),
+        form.primitive_coefficient(2U),
+        form.primitive_coefficient(3U)});
+  }
+
+  [[nodiscard]] static ExactPlane3 from_binary64_coefficient_bits(
+      std::array<std::uint64_t, 4> coefficient_bits) {
+    return from_binary64_provenance(
+        Binary64AffineProvenance::from_coefficient_bits(coefficient_bits));
+  }
+
+  [[nodiscard]] static ExactPlane3 from_binary64_coefficients(
+      const std::array<double, 4>& coefficients) {
+    return from_binary64_provenance(
+        Binary64AffineProvenance::from_coefficients(coefficients));
+  }
+
+  [[nodiscard]] static ExactPlane3 from_binary64_provenance(
+      Binary64AffineProvenance provenance) {
+    ExactPlane3 result =
+        from_rational_coefficients(provenance.exact_coefficients());
+    result.binary64_provenance_ = std::move(provenance);
+    return result;
+  }
+
+  [[nodiscard]] static ExactPlane3 from_affine_form(
+      const ExactAffineForm3& form) {
+    if (form.has_zero_normal()) {
+      throw std::invalid_argument(
+          "an affine form with zero normal cannot define an ExactPlane3");
+    }
+    if (form.binary64_provenance().has_value()) {
+      return from_binary64_provenance(*form.binary64_provenance());
+    }
     return from_integer_coefficients({
         form.primitive_coefficient(0U),
         form.primitive_coefficient(1U),
@@ -194,7 +264,15 @@ class ExactPlane3 {
       const CertifiedPoint3& a,
       const CertifiedPoint3& b,
       const CertifiedPoint3& c) {
-    return through_points(a.exact(), b.exact(), c.exact());
+    Binary64AffineProvenance provenance =
+        Binary64AffineProvenance::through_points(a, b, c);
+    const auto coefficients = provenance.exact_coefficients();
+    if (coefficients[0].is_zero() && coefficients[1].is_zero() &&
+        coefficients[2].is_zero()) {
+      throw std::invalid_argument(
+          "three affinely dependent points do not define an oriented plane");
+    }
+    return from_binary64_provenance(std::move(provenance));
   }
 
   [[nodiscard]] const BigInt& coefficient(std::size_t index) const {
@@ -221,7 +299,15 @@ class ExactPlane3 {
     return evaluate(point.exact());
   }
 
+  [[nodiscard]] const std::optional<Binary64AffineProvenance>&
+  binary64_provenance() const noexcept {
+    return binary64_provenance_;
+  }
+
   [[nodiscard]] ExactPlane3 opposite() const {
+    if (binary64_provenance_.has_value()) {
+      return from_binary64_provenance(binary64_provenance_->opposite());
+    }
     return from_integer_coefficients({-a(), -b(), -c(), -d()});
   }
 
@@ -265,7 +351,10 @@ class ExactPlane3 {
            "\",\"schema_version\":\"" + record.schema_version + "\"}";
   }
 
-  friend bool operator==(const ExactPlane3&, const ExactPlane3&) noexcept = default;
+  friend bool operator==(
+      const ExactPlane3& left, const ExactPlane3& right) noexcept {
+    return left.coefficients_ == right.coefficients_;
+  }
 
  private:
   explicit ExactPlane3(std::array<BigInt, 4> coefficients)
@@ -294,6 +383,7 @@ class ExactPlane3 {
   }
 
   std::array<BigInt, 4> coefficients_{};
+  std::optional<Binary64AffineProvenance> binary64_provenance_;
 };
 
 enum class AffineFormKind {
@@ -347,11 +437,7 @@ class AffineFormClassification {
   if (!form.has_zero_normal()) {
     return AffineFormClassification{
         AffineFormKind::proper_plane,
-        ExactPlane3::from_integer_coefficients(
-            {form.primitive_coefficient(0U),
-             form.primitive_coefficient(1U),
-             form.primitive_coefficient(2U),
-             form.primitive_coefficient(3U)})};
+        ExactPlane3::from_affine_form(form)};
   }
   if (form.d().sign() < 0) {
     return AffineFormClassification{

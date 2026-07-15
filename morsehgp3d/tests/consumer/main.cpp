@@ -111,6 +111,48 @@ int main() {
     return 1;
   }
 
+  const ExactPlane3 adaptive_x = ExactPlane3::from_binary64_coefficients(
+      std::array<double, 4>{1.0, 0.0, 0.0, 0.0});
+  const ExactPlane3 adaptive_y = ExactPlane3::from_binary64_coefficients(
+      std::array<double, 4>{0.0, 1.0, 0.0, 0.0});
+  const ExactPlane3 adaptive_z = ExactPlane3::through_points(
+      CertifiedPoint3::from_binary64(0.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(1.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(0.0, 1.0, 0.0));
+  const auto adaptive_orientation = morsehgp3d::exact::orientation_2d_in_plane(
+      adaptive_z,
+      CertifiedPoint3::from_binary64(0.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(1.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(0.0, 1.0, 0.0));
+  const auto adaptive_plane_side = morsehgp3d::exact::plane_side(
+      adaptive_x, CertifiedPoint3::from_binary64(1.0, 0.0, 0.0));
+  const auto adaptive_intersection =
+      morsehgp3d::exact::certified_intersect_three_planes(
+          adaptive_x, adaptive_y, adaptive_z);
+  const auto adaptive_fourth = morsehgp3d::exact::fourth_plane_incidence(
+      adaptive_x,
+      adaptive_y,
+      adaptive_z,
+      ExactPlane3::from_binary64_coefficients(
+          std::array<double, 4>{1.0, 1.0, 1.0, 1.0}));
+  if (adaptive_orientation.decision.sign() != PredicateSign::positive ||
+      adaptive_orientation.decision.certification_stage() !=
+          CertificationStage::fp64_filtered ||
+      adaptive_plane_side.decision.sign() != PredicateSign::positive ||
+      adaptive_plane_side.decision.certification_stage() !=
+          CertificationStage::fp64_filtered ||
+      adaptive_intersection.intersection().kind() !=
+          ThreePlaneIntersectionKind::unique ||
+      adaptive_intersection.intersection().point() != ExactRational3{} ||
+      adaptive_intersection.certification_stage() !=
+          CertificationStage::fp64_filtered ||
+      adaptive_fourth.decision.sign() != PredicateSign::positive ||
+      adaptive_fourth.decision.certification_stage() !=
+          CertificationStage::fp64_filtered) {
+    std::cerr << "installed affine-provenance cascade changed semantics\n";
+    return 1;
+  }
+
   const auto center = morsehgp3d::exact::circumcenter(
       CertifiedPoint3::from_binary64(0.0, 0.0, 0.0),
       CertifiedPoint3::from_binary64(1.0, 0.0, 0.0),

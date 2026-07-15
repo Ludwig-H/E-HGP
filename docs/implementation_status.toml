@@ -57,7 +57,7 @@ status = "in_progress"
 entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["0", "1"]
-evidence = ["docs/validation/PHASE1_GATE_REVIEW.md", "daf3ff9 feat: poser le socle exact CPU de phase 2A", "82bb676 feat: ajouter les premiers predicats exacts CPU", "08e432c feat: certifier le predicat affine H_RQ", "3d67d3c feat: certifier les premiers filtres FP64", "ed5bd7e feat: certifier le noyau affine exact", "3f3fa2b feat: certifier les centres exacts", "39f7902 feat: certifier les supports et spheres exacts", "1718e08 feat: ordonner exactement les niveaux et supports", "docs/validation/PHASE2A_PROGRESS.md"]
+evidence = ["docs/validation/PHASE1_GATE_REVIEW.md", "daf3ff9 feat: poser le socle exact CPU de phase 2A", "82bb676 feat: ajouter les premiers predicats exacts CPU", "08e432c feat: certifier le predicat affine H_RQ", "3d67d3c feat: certifier les premiers filtres FP64", "ed5bd7e feat: certifier le noyau affine exact", "3f3fa2b feat: certifier les centres exacts", "39f7902 feat: certifier les supports et spheres exacts", "1718e08 feat: ordonner exactement les niveaux et supports", "c98a5a1 feat: certifier la premiere cascade adaptative", "6651600 feat: certifier les supports et niveaux dyadiques", "docs/validation/PHASE2A_PROGRESS.md"]
 blocking_reason = ""
 
 [[phases]]
