@@ -1,4 +1,5 @@
 #include "morsehgp3d/exact/binary64.hpp"
+#include "morsehgp3d/exact/center.hpp"
 #include "morsehgp3d/exact/integer.hpp"
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/point.hpp"
@@ -23,6 +24,8 @@
 namespace {
 
 using morsehgp3d::exact::CertifiedPoint3;
+using morsehgp3d::exact::CircumcenterKind;
+using morsehgp3d::exact::CircumcenterResult;
 using morsehgp3d::exact::ExactAffineForm3;
 using morsehgp3d::exact::ExactLabelMoments;
 using morsehgp3d::exact::ExactPlane3;
@@ -35,6 +38,7 @@ using morsehgp3d::exact::PredicateFilterPolicy;
 using morsehgp3d::exact::canonical_integer_string;
 using morsehgp3d::exact::classify_affine_form;
 using morsehgp3d::exact::compare_squared_distances;
+using morsehgp3d::exact::circumcenter;
 using morsehgp3d::exact::fourth_plane_incidence;
 using morsehgp3d::exact::intersect_three_planes;
 using morsehgp3d::exact::maximum_power_label_cardinality;
@@ -338,6 +342,59 @@ int replay_fourth_plane_incidence(
   return 0;
 }
 
+int replay_circumcenter_support(
+    std::span<const std::string_view> arguments, std::ostream& output) {
+  if (arguments.size() < 2U) {
+    throw std::invalid_argument("the circumcenter support size is missing");
+  }
+  const std::size_t support_size =
+      parse_size(arguments[1], "circumcenter support size");
+  if (support_size < 2U || support_size > 4U) {
+    throw std::invalid_argument(
+        "a circumcenter support must contain two, three or four points");
+  }
+  if (arguments.size() != 2U + 3U * support_size) {
+    throw std::invalid_argument(
+        "the circumcenter support has the wrong serialized point count");
+  }
+
+  std::vector<CertifiedPoint3> support;
+  support.reserve(support_size);
+  for (std::size_t index = 0; index < support_size; ++index) {
+    support.push_back(parse_point(arguments, 2U + 3U * index));
+  }
+
+  CircumcenterResult result = [&support, support_size] {
+    if (support_size == 2U) {
+      return circumcenter(support[0], support[1]);
+    }
+    if (support_size == 3U) {
+      return circumcenter(support[0], support[1], support[2]);
+    }
+    return circumcenter(support[0], support[1], support[2], support[3]);
+  }();
+
+  const bool independent = result.kind() == CircumcenterKind::unique;
+  output << "{\"affine_dimension\":" << result.affine_dimension()
+         << ",\"center_exact\":";
+  if (result.center().has_value()) {
+    output << result.center()->canonical_json();
+  } else {
+    output << "null";
+  }
+  output << ",\"predicate\":\"circumcenter_support\""
+         << ",\"squared_level_exact\":";
+  if (result.squared_level().has_value()) {
+    output << result.squared_level()->canonical_json();
+  } else {
+    output << "null";
+  }
+  output << ",\"support_kind\":\""
+         << (independent ? "affinely_independent" : "affinely_dependent")
+         << "\",\"support_size\":" << result.support_size() << "}\n";
+  return 0;
+}
+
 int replay_tokens(
     std::span<const std::string_view> arguments,
     std::ostream& output,
@@ -368,6 +425,9 @@ int replay_tokens(
   }
   if (arguments[0] == "fourth_plane_incidence" && arguments.size() == 17U) {
     return replay_fourth_plane_incidence(arguments, output);
+  }
+  if (arguments[0] == "circumcenter_support") {
+    return replay_circumcenter_support(arguments, output);
   }
   throw std::invalid_argument("the predicate name or argument count is unsupported");
 }
@@ -429,6 +489,8 @@ void print_usage(const char* executable) {
             << " intersect_three_planes A B C D ... (3 planes)\n"
             << "   or: " << executable
             << " fourth_plane_incidence A B C D ... (4 planes)\n"
+            << "   or: " << executable
+            << " circumcenter_support COUNT HEX_X HEX_Y HEX_Z ... (2 to 4 points)\n"
             << "   or: " << executable << " --batch < predicate-lines.txt\n"
             << "prefix any form with --multiprecision-only to disable FP64 filters\n";
 }

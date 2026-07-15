@@ -166,6 +166,8 @@ Toute graine fautive devient une fixture permanente avant correction du code.
 | top-$k$ avec exclusions | $1\leq k\leq10$, jusqu'à 9 identifiants exclus | voisins, shell final, certificat |
 | clé canonique | permutations, duplications d'émission, plateaux | sérialisation identique |
 
+Dans le découpage incrémental de la Phase 2A, le lot 2A.5 couvre les centres circonscrits non triviaux de deux à quatre points définis par la feuille de route. Le cas singleton exigé par cette matrice, dont le centre est le point lui-même, la dimension affine zéro et le niveau carré nul, reste une obligation ouverte explicitement rattachée à la réduction vers le support minimal du lot 2A.6.
+
 ### 5.2 Cascade de précision
 
 Chaque décision suit le contrat : proposition rapide, filtre borné, expansion exacte, puis multiprécision CPU rare. Les tests instrumentent séparément les étages `fp32`, `fp64_filtered`, `expansion` et `cpu_mp`.

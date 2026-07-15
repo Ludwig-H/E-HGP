@@ -19,11 +19,12 @@ from typing import Any
 
 INPUT_KIND = "morsehgp3d_predicate_replay_input"
 RESULT_KIND = "morsehgp3d_predicate_replay_result"
-SCHEMA_VERSIONS = {1, 2, 3}
+SCHEMA_VERSIONS = {1, 2, 3, 4}
 DOMAINS = {
     1: b"MorseHGP3D/predicate-replay-v1/",
     2: b"MorseHGP3D/predicate-replay-v2/",
     3: b"MorseHGP3D/predicate-replay-v3/",
+    4: b"MorseHGP3D/predicate-replay-v4/",
 }
 POINT_COUNTS = {
     "compare_squared_distances": 3,
@@ -213,6 +214,20 @@ def validate_input(value: Any) -> dict[str, Any]:
             "q_ids": q_ids,
             "r_ids": r_ids,
             "witness": validate_exact_rational3(value["witness"], "witness"),
+        }
+
+    if schema_version == 4:
+        required = {"kind", "schema_version", "predicate", "points"}
+        if set(value) != required or predicate != "circumcenter_support":
+            raise ValueError("the v4 replay input has missing, unknown, or unsupported fields")
+        points = validate_points(value["points"], "points")
+        if not 2 <= len(points) <= 4:
+            raise ValueError("circumcenter construction requires between two and four points")
+        return {
+            "kind": INPUT_KIND,
+            "schema_version": 4,
+            "predicate": predicate,
+            "points": points,
         }
 
     if predicate == "plane_through_points":
@@ -583,6 +598,70 @@ def squared_distance(
     return sum(((a - b) ** 2 for a, b in zip(left, right)), Fraction())
 
 
+def circumcenter_support_oracle(
+    replay_input: dict[str, Any],
+) -> tuple[
+    str,
+    int,
+    tuple[Fraction, Fraction, Fraction] | None,
+    Fraction | None,
+]:
+    points = [point_from_words(words) for words in replay_input["points"]]
+    origin = points[0]
+    differences = [
+        [coordinate - origin[axis] for axis, coordinate in enumerate(point)]
+        for point in points[1:]
+    ]
+    _, affine_pivots = matrix_rref(differences)
+    affine_dimension = len(affine_pivots)
+    expected_dimension = len(points) - 1
+    if affine_dimension != expected_dimension:
+        return "affinely_dependent", affine_dimension, None, None
+
+    gram = [
+        [
+            sum(
+                (left * right for left, right in zip(first, second)),
+                Fraction(),
+            )
+            for second in differences
+        ]
+        for first in differences
+    ]
+    system = [
+        [2 * entry for entry in row] + [gram[index][index]]
+        for index, row in enumerate(gram)
+    ]
+    reduced, system_pivots = matrix_rref(system)
+    if system_pivots != list(range(expected_dimension)):
+        raise ValueError("an affinely independent support produced a singular Gram system")
+    coefficients = [reduced[index][-1] for index in range(expected_dimension)]
+    center = tuple(
+        origin[axis]
+        + sum(
+            (
+                coefficients[index] * differences[index][axis]
+                for index in range(expected_dimension)
+            ),
+            Fraction(),
+        )
+        for axis in range(3)
+    )
+    squared_level = squared_distance(center, origin)
+    gram_level = sum(
+        (
+            gram[index][index] * coefficients[index]
+            for index in range(expected_dimension)
+        ),
+        Fraction(),
+    ) / 2
+    if squared_level != gram_level or squared_level <= 0:
+        raise ValueError("the exact Gram center produced an invalid squared level")
+    if any(squared_distance(center, point) != squared_level for point in points[1:]):
+        raise ValueError("the exact Gram center is not equidistant from its support")
+    return "affinely_independent", affine_dimension, center, squared_level
+
+
 def orientation_determinant(
     points: list[tuple[Fraction, Fraction, Fraction]],
 ) -> Fraction:
@@ -636,6 +715,45 @@ def validate_counters(value: Any, sign: str, stage: str, predicate: str) -> None
 
 def validate_native_result(value: Any, replay_input: dict[str, Any]) -> dict[str, Any]:
     predicate = replay_input["predicate"]
+    if predicate == "circumcenter_support":
+        support_kind, affine_dimension, expected_center, expected_level = (
+            circumcenter_support_oracle(replay_input)
+        )
+        expected_fields = {
+            "affine_dimension",
+            "center_exact",
+            "predicate",
+            "squared_level_exact",
+            "support_kind",
+            "support_size",
+        }
+        if not isinstance(value, dict) or set(value) != expected_fields:
+            raise ValueError("the native circumcenter construction returned unknown fields")
+        if (
+            value["predicate"] != predicate
+            or value["support_kind"] != support_kind
+            or type(value["support_size"]) is not int
+            or value["support_size"] != len(replay_input["points"])
+            or type(value["affine_dimension"]) is not int
+            or value["affine_dimension"] != affine_dimension
+        ):
+            raise ValueError("the native circumcenter invariants differ from the replay input")
+        if expected_center is None or expected_level is None:
+            if value["center_exact"] is not None or value["squared_level_exact"] is not None:
+                raise ValueError("an affinely dependent support exposed a circumcenter witness")
+            return value
+        native_center = validate_exact_rational3(
+            value["center_exact"], "native circumcenter"
+        )
+        if native_center != exact_rational3_record(expected_center):
+            raise ValueError("the native circumcenter differs from the exact Gram oracle")
+        native_level = canonical_level(
+            value["squared_level_exact"], "native circumcenter squared level"
+        )
+        if native_level != expected_level:
+            raise ValueError("the native circumcenter level differs from the exact Gram oracle")
+        return value
+
     if predicate == "plane_through_points":
         expected_fields = {"plane", "predicate"}
         if not isinstance(value, dict) or set(value) != expected_fields:
@@ -894,6 +1012,9 @@ def replay(value: dict[str, Any], executable: Path) -> dict[str, Any]:
         arguments.extend(str(identifier) for identifier in value["r_ids"])
         arguments.append(str(len(value["q_ids"])))
         arguments.extend(str(identifier) for identifier in value["q_ids"])
+    elif value["schema_version"] == 4:
+        arguments.append(str(len(value["points"])))
+        arguments.extend(word for point in value["points"] for word in point)
     elif value["predicate"] == "plane_through_points":
         arguments.extend(word for point in value["points"] for word in point)
     elif value["predicate"] == "power_bisector_affine_form":

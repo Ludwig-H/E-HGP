@@ -10,7 +10,7 @@
 - Backend : `reference_cpu`.
 - Profils : couche numérique commune, priorité d'intégration `hgp_reduced`; aucune preuve supplémentaire pour `full_pi0`.
 - Mode : `certified`.
-- Rôle du code : certifier des décisions locales et produire des témoins de replay; il ne propose pas de cellules, ne réduit pas Gamma et ne construit pas encore de hiérarchie.
+- Rôle du code : certifier des décisions locales et produire des constructions ou témoins exacts de replay; il ne propose pas de cellules, ne réduit pas Gamma et ne construit pas encore de hiérarchie.
 - Statut de sortie : Phase 2A `in_progress`, porte de sortie non satisfaite, G1 ouverte, Phase 2B bloquée.
 
 ## Lots intégrés
@@ -21,7 +21,8 @@
 | premiers signes exacts | `82bb676` | comparaison de distances carrées, orientation 3D, décisions, compteurs, replay par bits et différentiel `Fraction` |
 | forme affine de puissance | `08e432c` | moments exacts de labels, domaine de cardinalité 1 à 10, signe de `H_RQ`, témoin rationnel, replay v2 et flux batch |
 | intervalles FP64 conservateurs | `3d67d3c` | filtres distance/orientation 3D, repli multiprécision, désactivation par appel, différentiel activé/désactivé et préservation du FENV |
-| noyau affine exact 2A.4 | présent lot | `ExactPlane3`, forme `H_RQ` à échelle exacte, orientation 2D dans un support, rang et intersection de trois plans, incidence déterminantale d'un quatrième plan, replay v3 et oracle `Fraction` |
+| noyau affine exact 2A.4 | `ed5bd7e` | `ExactPlane3`, forme `H_RQ` à échelle exacte, orientation 2D dans un support, rang et intersection de trois plans, incidence déterminantale d'un quatrième plan, replay v3 et oracle `Fraction` |
+| centres et niveaux homogènes 2A.5 | présent lot | centres exacts de supports de taille deux à quatre, dimension affine, `ExactRational3` et `ExactLevel` atomiques, replay v4 et oracle Gram/RREF indépendant |
 
 La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe négatif signifie que `R` est moins coûteux au témoin. `ExactAffineForm3` conserve ses quatre coefficients rationnels et leur échelle exacte; sa clé primitive ne sert qu'à classifier le plan orienté ou la forme constante. Les API riches matérialisent encore leurs témoins multiprécision lorsque le signe est filtré. Le champ `certification_stage` identifie donc l'autorité du signe, pas le coût total d'un replay diagnostique.
 
@@ -35,8 +36,8 @@ La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe
 | orientation 2D dans un plan support | oui | non | non | oui | référence exacte terminée |
 | intersection de trois plans | oui | non | non | oui | référence exacte terminée |
 | appartenance d'un quatrième plan | oui | non | non | oui | référence exacte terminée |
-| centres circonscrits de deux, trois ou quatre points | non | non | non | non | prochain lot 2A.5 |
-| coordonnées homogènes du centre et rayon carré | non | non | non | non | en attente des centres |
+| centres circonscrits de deux, trois ou quatre points | oui | non | non | oui | référence exacte terminée |
+| coordonnées homogènes du centre et rayon carré | oui | non | non | oui | référence exacte terminée |
 | signes barycentriques et `relint` | non | non | non | non | en attente des centres |
 | intérieur, frontière ou extérieur d'une sphère | non | non | non | non | en attente des centres |
 | comparaison de rayons de miniball | non | non | non | non | en attente des niveaux homogènes |
@@ -65,9 +66,9 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Qualification du lot courant
 
-- GCC 13, build strict : CTest 8/8.
-- Clang 18, build Release strict : CTest 8/8.
-- GCC 13 avec ASan et UBSan : CTest 8/8.
+- GCC 13, build strict : CTest 11/11.
+- Clang 18, build Release strict : CTest 11/11.
+- GCC 13 avec ASan et UBSan : CTest 11/11.
 - Corpus court déterministe : 2 048 cas, hash `276619686350b9c4f900d856b657ce084466cfdea2c4e8711d5efc7e690a1d15`.
 - Signes du corpus court : 1 002 négatifs, 892 positifs et 154 zéros.
 - Distances du corpus court : 58 signes `fp64_filtered` et 966 fallbacks `cpu_multiprecision`.
@@ -80,7 +81,10 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 - Répartition affine : 240 constructions de plan, 240 formes `H_RQ`, 336 orientations 2D, 608 intersections et 336 incidences de quatrième plan.
 - Classes `H_RQ` du corpus affine : 96 plans propres, 48 constantes négatives, 48 constantes positives et 48 formes identiquement nulles; cardinalités de labels 1 à 4 couvertes.
 - Intersections du corpus affine : 160 uniques, 160 vides et 288 familles affines; permutations, inversions d'orientation, translations dyadiques et changements d'échelle exacts couverts. Les fixtures v3 ajoutent le rang vide `(1,2)`, un support à un ULP, les sous-normaux minimaux et la valeur binary64 finie maximale.
-- Package CMake installé, wrapper installé rejoué sur une intersection rationnelle v3 et consommateur externe exerçant filtres, multiprécision, intersection et incidence déterminantale : 1/1.
+- Replay centres v4 : 13 fixtures, tailles deux à quatre, dépendances de dimensions zéro à deux, 64 permutations exhaustives, 18 métamorphismes, 10 rejets d'entrée, 8 faux témoins natifs, 1 diagnostic natif inattendu et 3 sentinelles historiques v1 à v3 vérifiés. Les frontières à un ULP sont exercées depuis zéro sous-normal et autour des valeurs normales `1.0` et `2.0`.
+- Corpus centres `center-dyadic-splitmix64-v1` : 1 728 cas, graine `0x43454e5445523356`, hash des commandes `7277882dcdf66ba798087c19284283600821d56a4e5b60c723558a73224ea0cf`, hash des réponses exactes de l'oracle `3dfdd2b9727b5db7b7eccd1110bbdd1367deb0abaaf713c9c1b7e09c720d214f`, sorties normale et `--multiprecision-only` byte-identiques.
+- Répartition centres : 1 152 supports indépendants et 576 dépendants; 416 paires, 576 triangles et 736 tétraèdres; dimensions affines zéro à trois toutes couvertes.
+- Package CMake installé, wrapper installé rejoué sur une intersection rationnelle v3 et un centre non dyadique v4, consommateur externe exerçant filtres, multiprécision, noyau affine et centre tétraédrique : 1/1.
 - Contrats : 21 définitions, 21 exemples de schéma et 5 fixtures validés; 58 tests contractuels réussis.
 - Oracle exhaustif indépendant : 91 tests réussis; campagne CI bornée sur trois dimensions affines, trois cas audités et zéro échec.
 - Documentation : 25 documents actifs validés; 5 références locales et 9 modules d'oracle indépendant validés.
@@ -101,23 +105,24 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 8. Côté rationnel riche et signe déterminantal direct d'un quatrième plan livrés, avec contradiction interne fermée.
 9. Replay v3 fermé, oracle `Fraction` par élimination de Gauss, cas parallèles, confondus, incompatibles, non dyadiques, sous-normaux, à un ULP et métamorphismes livrés.
 
-### 2A.5 — centres et niveaux homogènes
+### 2A.5 — centres et niveaux homogènes — terminé
 
-1. Construire le centre de deux points sans division flottante.
-2. Construire le centre circonscrit de trois points dans leur enveloppe affine.
-3. Construire le centre circonscrit de quatre points par le noyau affine.
-4. Classer les supports affinement dépendants avant toute décision.
-5. Produire ensemble le centre homogène et le rayon carré `ExactLevel`.
-6. Vérifier permutation, translations dyadiques représentables, permutations signées des axes et homothéties par puissances de deux.
-7. Ajouter des fixtures obtuses, coplanaires, quasi cosphériques et à un ULP.
+1. Centre d'une paire distincte construit comme milieu rationnel exact, sans division flottante.
+2. Centre d'un triangle indépendant construit dans son plan affine par deux médiateurs exacts.
+3. Centre d'un tétraèdre indépendant construit par trois médiateurs et le noyau affine exact.
+4. Dimension affine zéro à trois calculée avant toute construction; tout support dépendant expose deux témoins `null`.
+5. Centre homogène `ExactRational3` et rayon carré `ExactLevel` produits ensemble puis revérifiés sur toutes les distances du support.
+6. Permutations exhaustives des triangles et tétraèdres, translations dyadiques représentables, permutations signées des axes et homothéties par puissances de deux vérifiées.
+7. Fixtures obtuses, collinéaires, coplanaires cosphériques, sous-normales, maximales finies et à un ULP livrées. La classification d'un cinquième point quasi cosphérique reste explicitement le prédicat de sphère de 2A.6.
 
 ### 2A.6 — minimalité, barycentriques et sphères
 
-1. Calculer les signes barycentriques exacts d'un centre dans son support.
-2. Réduire canoniquement tout support sur la frontière à son support minimal.
-3. Décider `relint` sans epsilon.
-4. Classer chaque point comme strictement intérieur, sur la frontière ou extérieur à une sphère candidate.
-5. Relier ces décisions au domaine `RelevantGP` sans transformer une dégénérescence non couverte en résultat exact.
+1. Matérialiser la base singleton du plan de test : centre égal au point, dimension affine zéro et `ExactLevel` nul.
+2. Calculer les signes barycentriques exacts d'un centre dans son support.
+3. Réduire canoniquement tout support sur la frontière à son support minimal.
+4. Décider `relint` sans epsilon.
+5. Classer chaque point comme strictement intérieur, sur la frontière ou extérieur à une sphère candidate.
+6. Relier ces décisions au domaine `RelevantGP` sans transformer une dégénérescence non couverte en résultat exact.
 
 ### 2A.7 — ordre total des miniballs
 
@@ -155,7 +160,7 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Prochaine sous-porte
 
-Le prochain lot est 2A.5, centres circonscrits et niveaux homogènes, toujours sur `reference_cpu`, couche commune aux profils et mode `certified`. Il doit construire les centres de supports de taille deux à quatre, classifier les supports dépendants et produire centre et rayon carré exacts avant les décisions de minimalité. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
+Le prochain lot est 2A.6, minimalité, barycentriques et sphères, toujours sur `reference_cpu`, couche commune aux profils et mode `certified`. Il doit calculer les signes barycentriques, réduire les supports de frontière et classifier exactement intérieur, frontière ou extérieur avant toute intégration à `RelevantGP`. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
 
 ## GCP
 

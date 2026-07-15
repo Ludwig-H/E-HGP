@@ -1,3 +1,4 @@
+#include "morsehgp3d/exact/center.hpp"
 #include "morsehgp3d/exact/level.hpp"
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
@@ -9,9 +10,11 @@
 int main() {
   using morsehgp3d::exact::BigInt;
   using morsehgp3d::exact::CertifiedPoint3;
+  using morsehgp3d::exact::CircumcenterKind;
   using morsehgp3d::exact::ExactLabelMoments;
   using morsehgp3d::exact::ExactLevel;
   using morsehgp3d::exact::ExactPlane3;
+  using morsehgp3d::exact::ExactRational3;
   using morsehgp3d::exact::CertificationStage;
   using morsehgp3d::exact::PredicateFilterPolicy;
   using morsehgp3d::exact::PredicateSign;
@@ -86,6 +89,21 @@ int main() {
       intersection.affine_dimension() != 0U ||
       fourth.sign() != PredicateSign::zero) {
     std::cerr << "installed affine exact kernel changed semantics\n";
+    return 1;
+  }
+
+  const auto center = morsehgp3d::exact::circumcenter(
+      CertifiedPoint3::from_binary64(0.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(1.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(0.0, 1.0, 0.0),
+      CertifiedPoint3::from_binary64(0.0, 0.0, 1.0));
+  if (center.kind() != CircumcenterKind::unique ||
+      center.support_size() != 4U || center.affine_dimension() != 3U ||
+      !center.center().has_value() || !center.squared_level().has_value() ||
+      *center.center() !=
+          ExactRational3{BigInt{1}, BigInt{1}, BigInt{1}, BigInt{2}} ||
+      *center.squared_level() != ExactLevel{BigInt{3}, BigInt{4}}) {
+    std::cerr << "installed exact center construction changed semantics\n";
     return 1;
   }
   return 0;
