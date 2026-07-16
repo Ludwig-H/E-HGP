@@ -251,4 +251,12 @@ if(TARGET morsehgp3d_replay_predicate)
       "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_level_random.py"
       "$<TARGET_FILE:morsehgp3d_replay_predicate>"
   )
+  add_test(
+    NAME morsehgp3d.level_checkpoint_differential
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_level_checkpoint.py"
+      "${PROJECT_SOURCE_DIR}/tools/level_run_checkpoint.py"
+      "$<TARGET_FILE:morsehgp3d_replay_predicate>"
+  )
 endif()
