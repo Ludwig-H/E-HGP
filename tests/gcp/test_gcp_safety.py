@@ -642,6 +642,41 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertNotIn("ehgp-concurrent", commands)
         self.assertFalse(self.handoff_path().exists())
 
+    def test_exact_ai_capacity_target_is_allowed(self) -> None:
+        self.env["GCP_ZONE"] = "europe-west4-ai1a"
+        self.env["GCP_INSTANCE_NAME"] = "ehgp-blackwell-spot-ai1a"
+
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+        artifact = self.results / f"phase3-{self.head}.json"
+        value = json.loads(artifact.read_text(encoding="utf-8"))
+        self.assertEqual(
+            "ehgp-blackwell-spot-ai1a",
+            value["vm_lifecycle"]["instance"],
+        )
+        self.assertEqual("europe-west4-ai1a", value["vm_lifecycle"]["zone"])
+        self.assertIn(
+            "start project=devpod-gpu-exploration zone=europe-west4-ai1a "
+            "instance=ehgp-blackwell-spot-ai1a",
+            self.session_commands(),
+        )
+        self.assertIn(
+            "stop project=devpod-gpu-exploration zone=europe-west4-ai1a "
+            "instance=ehgp-blackwell-spot-ai1a args=--yes "
+            "--expected-last-start-timestamp " + self.last_start_timestamp,
+            self.session_commands(),
+        )
+        commands = self.gcloud_commands()
+        self.assertIn("compute ssh ehgp-blackwell-spot-ai1a", commands)
+        self.assertIn("compute scp ehgp-blackwell-spot-ai1a:", commands)
+        self.assertIn(
+            "compute instances describe ehgp-blackwell-spot-ai1a",
+            commands,
+        )
+        self.assertIn("[TERMINATED]", result.stdout)
+        self.assertFalse(self.handoff_path().exists())
+
     def test_remote_failure_still_stops_and_returns_original_failure(self) -> None:
         self.env["FAKE_GCLOUD_SCENARIO"] = "qualification-remote-failure"
         result = self.run_qualification(*self.standard_arguments())
@@ -831,9 +866,25 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         result = self.run_qualification(*self.standard_arguments())
 
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("Instance refusée", result.stdout)
+        self.assertIn("Cible refusée", result.stdout)
         self.assertEqual(self.session_commands(), "")
         self.assertEqual(self.gcloud_commands(), "")
+
+    def test_crossed_allowed_target_pair_is_rejected_without_mutation(self) -> None:
+        for zone, instance in (
+            ("europe-west4-ai1a", "ehgp-blackwell-spot"),
+            ("europe-west4-a", "ehgp-blackwell-spot-ai1a"),
+        ):
+            with self.subTest(zone=zone, instance=instance):
+                self.env["GCP_ZONE"] = zone
+                self.env["GCP_INSTANCE_NAME"] = instance
+
+                result = self.run_qualification(*self.standard_arguments())
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Cible refusée", result.stdout)
+                self.assertEqual(self.session_commands(), "")
+                self.assertEqual(self.gcloud_commands(), "")
 
 
 class WorkflowPolicyTests(unittest.TestCase):

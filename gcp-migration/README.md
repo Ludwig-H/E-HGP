@@ -12,6 +12,19 @@ démarrage est un Hyperdisk Balanced, car la série G4 n'accepte pas Persistent
 Disk. Cette configuration a été revérifiée le
 14 juillet 2026 dans la documentation officielle : [série G4](https://cloud.google.com/compute/docs/accelerator-optimized-machines), [zones GPU](https://cloud.google.com/compute/docs/gpus/gpu-regions-zones) et [images Deep Learning VM](https://cloud.google.com/deep-learning-vm/docs/images).
 
+L'orchestrateur Phase 3 accepte aussi le seul repli exact
+`europe-west4-ai1a/ehgp-blackwell-spot-ai1a`. Cette zone de capacité appartient
+à la même région et partage donc les quotas régionaux applicables; toute autre paire
+zone/nom, y compris un croisement entre les deux noms autorisés, est refusée
+avant le démarrage. La cible de repli doit être créée séparément avec les mêmes
+labels, le même type G4 Spot, l'action `STOP` et une durée GCE bornée.
+
+Pour G4, un quota CPU préemptible régional ne remplace pas le quota GPU : la
+création Spot consomme `PREEMPTIBLE_NVIDIA_RTX_PRO_6000_GPUS` ainsi que le quota
+global `GPUS_ALL_REGIONS`. La [documentation des quotas Compute Engine](https://cloud.google.com/compute/resource-usage)
+précise que G4 n'exige pas de quota CPU propre au type de machine. Le quota GPU
+doit être demandé pour chaque région envisagée avant d'y ajouter une cible.
+
 La sécurité repose sur deux coupe-circuits indépendants : l'arrêt GCE
 `maxRunDuration` avec action `STOP`, puis un `shutdown` programmé dans l'OS
 invité. Une session ne commence que si les deux sont vérifiés et se termine par
@@ -155,6 +168,16 @@ Ne lancez les benchmarks lourds qu'après le bilan vert.
 Après autorisation explicite, le point d'entrée Phase 3 réalise une seule session, exige un commit propre déjà poussé sur `origin/main`, puis certifie l'arrêt de la cible exacte même si le worker distant échoue. L'arrêt invité est armé pour 45 minutes à partir de la certification des gardes; le coupe-circuit GCE reste indépendamment borné entre 30 secondes et huit heures :
 
 ```bash
+./gcp-migration/run_phase3_qualification.sh \
+  --yes \
+  --result-dir /tmp/morsehgp3d-phase3-qualification
+```
+
+Pour la cible de capacité explicitement autorisée :
+
+```bash
+GCP_ZONE=europe-west4-ai1a \
+GCP_INSTANCE_NAME=ehgp-blackwell-spot-ai1a \
 ./gcp-migration/run_phase3_qualification.sh \
   --yes \
   --result-dir /tmp/morsehgp3d-phase3-qualification

@@ -4,6 +4,8 @@ set -Eeuo pipefail
 readonly DEFAULT_PROJECT_ID="devpod-gpu-exploration"
 readonly DEFAULT_ZONE="europe-west4-a"
 readonly DEFAULT_INSTANCE_NAME="ehgp-blackwell-spot"
+readonly AI_CAPACITY_ZONE="europe-west4-ai1a"
+readonly AI_CAPACITY_INSTANCE_NAME="ehgp-blackwell-spot-ai1a"
 readonly GUEST_SHUTDOWN_MINUTES=45
 readonly STOP_SCRIPT_FAILURE=90
 readonly STOP_READBACK_FAILURE=91
@@ -43,7 +45,7 @@ usage() {
 Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
-sur l'unique cible G4 E-HGP. L'arrêt invité est armé pour 45 minutes après la
+sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
 certification des gardes; le coupe-circuit GCE reste borné séparément. Le script
 utilise exclusivement start_and_verify.sh et stop_and_verify.sh, et ne réussit
 qu'après une relecture GCE indépendante de l'état TERMINATED.
@@ -80,10 +82,14 @@ done
 
 [[ "${PROJECT_ID}" == "${DEFAULT_PROJECT_ID}" ]] || \
     die "Projet refusé : cette qualification cible uniquement ${DEFAULT_PROJECT_ID}."
-[[ "${ZONE}" == "${DEFAULT_ZONE}" ]] || \
-    die "Zone refusée : cette qualification cible uniquement ${DEFAULT_ZONE}."
-[[ "${INSTANCE_NAME}" == "${DEFAULT_INSTANCE_NAME}" ]] || \
-    die "Instance refusée : cette qualification cible uniquement ${DEFAULT_INSTANCE_NAME}."
+case "${ZONE}/${INSTANCE_NAME}" in
+    "${DEFAULT_ZONE}/${DEFAULT_INSTANCE_NAME}"|\
+    "${AI_CAPACITY_ZONE}/${AI_CAPACITY_INSTANCE_NAME}")
+        ;;
+    *)
+        die "Cible refusée : couples autorisés ${DEFAULT_ZONE}/${DEFAULT_INSTANCE_NAME} ou ${AI_CAPACITY_ZONE}/${AI_CAPACITY_INSTANCE_NAME}."
+        ;;
+esac
 if [[ -n "${GCP_GUEST_SHUTDOWN_MINUTES+x}" ]]; then
     [[ "${GCP_GUEST_SHUTDOWN_MINUTES}" == "${GUEST_SHUTDOWN_MINUTES}" ]] || \
         die "GCP_GUEST_SHUTDOWN_MINUTES doit valoir exactement ${GUEST_SHUTDOWN_MINUTES}."
