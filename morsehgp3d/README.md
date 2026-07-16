@@ -141,6 +141,30 @@ Le manifeste `morsehgp3d_phase2a_level_checkpoint` v1 est un format opérationne
 
 Ce coordinateur impose un verrou mono-écrivain et exige POSIX pour `flock` et la synchronisation des répertoires. Sa validation exhaustive privilégie la preuve de reprise à la vitesse et garde en mémoire l'index global support–niveau ainsi que le niveau ouvert. Il qualifie la transaction locale de Phase 2A, pas encore le streaming budgété des phases 15 et 18, ni Apple, Windows ou ARM.
 
+La campagne de fermeture des signes utilise un second coordinateur interne, indépendant du format des niveaux :
+
+```bash
+python morsehgp3d/tools/predicate_campaign.py \
+  --config morsehgp3d/tests/campaigns/phase2a_predicates_v1.json \
+  --repository "$(pwd)" \
+  --precompute-roots /tmp/morsehgp3d-phase2a-roots.json
+```
+
+Ce premier passage ne lance aucun prédicat natif. Sur un commit propre, il dérive les racines ordonnées des commandes et des signes de l'oracle entier dyadique pour 10 800 000 cas de base. Ces racines doivent ensuite remplacer les deux valeurs `null` de la configuration et être commitées avant la campagne certifiante; le mode production refuse une racine absente ou divergente. Les 10 044 000 cas bien conditionnés pseudo-aléatoires dépassent à eux seuls le seuil de $10^7$; les sept strates adversariales ajoutent 756 000 cas construits. Les dérivés métamorphiques sont comptés séparément et ne contribuent jamais à ce seuil.
+
+Après gel et commit des racines, une transaction native se lance ainsi :
+
+```bash
+python morsehgp3d/tools/predicate_campaign.py \
+  --native build/morsehgp3d/morsehgp3d_replay_predicate \
+  --config morsehgp3d/tests/campaigns/phase2a_predicates_v1.json \
+  --checkpoint-dir /tmp/morsehgp3d-phase2a-campaign \
+  --repository "$(pwd)" \
+  --max-chunks 1
+```
+
+La configuration ferme trois prédicats, huit strates, les cardinalités `H_RQ` de 1 à 10, les dénominateurs de témoin 1, 2, 3, 5, 7 et 8, et cinq transformations exactes : permutation signée propre, réflexion impropre, translation dyadique non nulle, homothétie par puissance de deux et symétrie propre au prédicat. Un chunk contient au plus 8 800 cas de base et 9 691 sorties natives; entrées et sorties transitent par fichiers temporaires, tandis que seuls les agrégats et hashes sont durables. Le binaire, le cache CMake, le fichier `flags.make` effectif de la cible, le compilateur, les options, l'outil, la configuration et le commit propre sont revérifiés avant et après chaque chunk. Toute divergence publie d'abord son entrée originale, puis tente une réduction automatique des coordonnées, bits, témoin et labels. Le certificat distingue `scope=smoke` de `scope=production`, garde `repository_phase_exit_claimed=false` et `gcp_used=false`, et ne décide jamais à lui seul la fermeture du registre.
+
 La suite courte traite 2 048 cas déterministes, publie le hash du corpus, force chacun des trois étages sur les trois familles adaptatives, vérifie chaque sortie contre `Fraction`, puis rejoue le même flux avec `--multiprecision-only`. Les paramètres `--distance-cases`, `--orientation-cases` et `--power-cases` permettent d'augmenter ce volume; cette infrastructure riche ne constitue pas encore la campagne de fermeture à dix millions de signes.
 
 Le différentiel 2A.8b ajoute 4 050 commandes déterministes pour les quatre familles v7. Il couvre les tailles de support un à quatre, force les signes stricts aux intervalles, les trois signes aux expansions et les trois signes aux replis multiprécision, puis exige les mêmes témoins scientifiques avec la cascade désactivée. Trente fixtures permanentes, 288 relations métamorphiques et six sentinelles d'identité v1 à v6 complètent ce corpus; cette qualification locale ne remplace pas davantage la campagne de fermeture 2A.9.
