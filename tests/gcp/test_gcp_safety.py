@@ -37,12 +37,23 @@ elif args[:4] == ["beta", "quotas", "info", "describe"]:
     quota_id = args[4]
     region = os.environ.get("GCP_REGION", "europe-west4")
     zone = os.environ.get("GCP_ZONE", "europe-west4-a")
+    quota_zone = zone
+    if scenario == "quota-ai-parent" and quota_id in {
+        "HDB-TOTAL-IOPS-per-project-zone",
+        "HDB-TOTAL-THROUGHPUT-per-project-zone",
+    }:
+        quota_zone = f"{region}-a"
+    elif scenario == "quota-ai-parent-missing" and quota_id in {
+        "HDB-TOTAL-IOPS-per-project-zone",
+        "HDB-TOTAL-THROUGHPUT-per-project-zone",
+    }:
+        quota_zone = f"{region}-c"
     limits = {
         "GPUS-ALL-REGIONS-per-project": ("global", "1"),
         "PREEMPTIBLE-NVIDIA-RTX-PRO-6000-GPUS-per-project-region": (region, "1"),
         "HDB-TOTAL-GB-per-project-region": (region, "500"),
-        "HDB-TOTAL-IOPS-per-project-zone": (zone, "20000"),
-        "HDB-TOTAL-THROUGHPUT-per-project-zone": (zone, "2000"),
+        "HDB-TOTAL-IOPS-per-project-zone": (quota_zone, "20000"),
+        "HDB-TOTAL-THROUGHPUT-per-project-zone": (quota_zone, "2000"),
         "INSTANCES-per-project-region": (region, "24"),
         "IN-USE-ADDRESSES-per-project-region": (region, "8"),
         "PREEMPTIBLE-CPUS-per-project-region": (region, "48"),
@@ -105,31 +116,80 @@ elif args[:3] == ["compute", "regions", "describe"]:
 elif args[:3] == ["compute", "disks", "list"]:
     region = os.environ.get("GCP_REGION", "europe-west4")
     zone = os.environ.get("GCP_ZONE", "europe-west4-a")
+    if scenario in {"quota-ai-explicit", "quota-ai-parent"}:
+        disks = [
+            {
+                "name": "ai-balanced",
+                "provisionedIops": "3600",
+                "provisionedThroughput": "290",
+                "sizeGb": "100",
+                "type": f"zones/{zone}/diskTypes/hyperdisk-balanced",
+                "zone": f"zones/{zone}",
+            },
+            {
+                "name": "parent-balanced",
+                "provisionedIops": "4000",
+                "provisionedThroughput": "200",
+                "sizeGb": "50",
+                "type": (
+                    f"zones/{region}-a/diskTypes/hyperdisk-balanced"
+                ),
+                "zone": f"zones/{region}-a",
+            },
+            {
+                "name": "sibling-ai-balanced",
+                "provisionedIops": "3500",
+                "provisionedThroughput": "150",
+                "sizeGb": "50",
+                "type": (
+                    f"zones/{region}-ai2a/diskTypes/hyperdisk-balanced"
+                ),
+                "zone": f"zones/{region}-ai2a",
+            },
+            {
+                "name": "different-standard-zone",
+                "provisionedIops": "9000",
+                "provisionedThroughput": "500",
+                "sizeGb": "10",
+                "type": f"zones/{region}-b/diskTypes/hyperdisk-balanced",
+                "zone": f"zones/{region}-b",
+            },
+            {
+                "name": "different-ai-parent",
+                "provisionedIops": "9000",
+                "provisionedThroughput": "500",
+                "sizeGb": "10",
+                "type": (
+                    f"zones/{region}-ai1b/diskTypes/hyperdisk-balanced"
+                ),
+                "zone": f"zones/{region}-ai1b",
+            },
+        ]
+    else:
+        disks = [
+            {
+                "name": "zonal-balanced",
+                "provisionedIops": "3600",
+                "provisionedThroughput": "290",
+                "sizeGb": "100",
+                "type": f"zones/{zone}/diskTypes/hyperdisk-balanced",
+                "zone": f"zones/{zone}",
+            },
+            {
+                "name": "regional-balanced-ha",
+                "provisionedIops": "4000",
+                "provisionedThroughput": "200",
+                "region": f"regions/{region}",
+                "replicaZones": [f"zones/{zone}", f"zones/{region}-b"],
+                "sizeGb": "50",
+                "type": (
+                    f"regions/{region}/diskTypes/"
+                    "hyperdisk-balanced-high-availability"
+                ),
+            },
+        ]
     print(
-        json.dumps(
-            [
-                {
-                    "name": "zonal-balanced",
-                    "provisionedIops": "3600",
-                    "provisionedThroughput": "290",
-                    "sizeGb": "100",
-                    "type": f"zones/{zone}/diskTypes/hyperdisk-balanced",
-                    "zone": f"zones/{zone}",
-                },
-                {
-                    "name": "regional-balanced-ha",
-                    "provisionedIops": "4000",
-                    "provisionedThroughput": "200",
-                    "region": f"regions/{region}",
-                    "replicaZones": [f"zones/{zone}", f"zones/{region}-b"],
-                    "sizeGb": "50",
-                    "type": (
-                        f"regions/{region}/diskTypes/"
-                        "hyperdisk-balanced-high-availability"
-                    ),
-                },
-            ]
-        )
+        json.dumps(disks)
     )
 elif args[:3] == ["compute", "instances", "list"]:
     output_format = next((item.split("=", 1)[1] for item in args if item.startswith("--format=")), "")
@@ -763,6 +823,90 @@ class ScriptSafetyTests(unittest.TestCase):
         )
         self.assertIn("PREEMPTIBLE_NVIDIA_RTX_PRO_6000", result.stdout)
         self.assertIn("[SUCCÈS]", result.stdout)
+
+    def test_ai_zone_uses_parent_hdb_quota_and_combines_usage(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "quota-ai-parent"
+        self.env["GCP_ZONE"] = "europe-west4-ai1a"
+
+        result = self.run_script("check_quotas.sh")
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertRegex(
+            result.stdout,
+            r"HDB_TOTAL_GB\s+500\s+220\s+280\s+>= 100",
+        )
+        self.assertRegex(
+            result.stdout,
+            r"HDB_TOTAL_IOPS \(europe-west4-a\)\s+20000\s+2100\s+17900\s+>= 600",
+        )
+        self.assertRegex(
+            result.stdout,
+            r"HDB_TOTAL_THROUGHPUT \(europe-west4-a\)\s+2000\s+220\s+1780\s+>= 150",
+        )
+        self.assertIn(
+            "Zone IA europe-west4-ai1a : limite Hyperdisk dérivée de la zone "
+            "parente europe-west4-a",
+            result.stdout,
+        )
+        self.assertIn(
+            "Cloud Quotas ne publie pas de dimension IA; la création GCE reste "
+            "l’arbitre",
+            result.stdout,
+        )
+        self.assertIn(
+            "Le calcul additionne conservativement le parent et ses zones IA "
+            "associées",
+            result.stdout,
+        )
+
+    def test_explicit_ai_hdb_quota_takes_precedence_over_parent(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "quota-ai-explicit"
+        self.env["GCP_ZONE"] = "europe-west4-ai1a"
+
+        result = self.run_script("check_quotas.sh")
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertRegex(
+            result.stdout,
+            r"HDB_TOTAL_IOPS \(europe-west4-ai1a\)\s+20000\s+600\s+19400\s+>= 600",
+        )
+        self.assertRegex(
+            result.stdout,
+            r"HDB_TOTAL_THROUGHPUT \(europe-west4-ai1a\)\s+2000\s+150\s+1850\s+>= 150",
+        )
+        self.assertNotIn("limite Hyperdisk dérivée", result.stdout)
+
+    def test_ai_zone_fails_closed_when_parent_quota_is_also_missing(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "quota-ai-parent-missing"
+        self.env["GCP_ZONE"] = "europe-west4-ai1a"
+
+        result = self.run_script("check_quotas.sh")
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertRegex(
+            result.stdout,
+            r"HDB_TOTAL_IOPS \(europe-west4-a\)\s+UNKNOWN\s+\d+\s+UNKNOWN",
+        )
+        self.assertRegex(
+            result.stdout,
+            r"HDB_TOTAL_THROUGHPUT \(europe-west4-a\)\s+UNKNOWN\s+\d+\s+UNKNOWN",
+        )
+        self.assertIn("Quotas disponibles insuffisants ou inconnus", result.stdout)
+
+    def test_unknown_ai_zone_has_no_implicit_parent_quota_mapping(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "quota-success"
+        self.env["GCP_REGION"] = "europe-west8"
+        self.env["GCP_ZONE"] = "europe-west8-ai1b"
+
+        result = self.run_script("check_quotas.sh")
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "Aucune correspondance de quota parent n'est documentée pour "
+            "europe-west8-ai1b",
+            result.stdout,
+        )
+        self.assertEqual(self.commands(), "")
 
     def test_quota_check_fails_when_exact_rtx_spot_quota_is_missing(self) -> None:
         self.env["FAKE_GCLOUD_SCENARIO"] = "quota-missing-rtx"

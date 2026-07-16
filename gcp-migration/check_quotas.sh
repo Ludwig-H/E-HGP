@@ -26,6 +26,21 @@ die() {
     exit 1
 }
 
+AI_PARENT_ZONE=""
+AI_PARENT_SUFFIX=""
+case "${ZONE}" in
+    europe-west4-ai1a)
+        [[ "${REGION}" == "europe-west4" ]] || \
+        die "La zone IA ${ZONE} n'appartient pas à la région déclarée ${REGION}."
+        AI_PARENT_ZONE="europe-west4-a"
+        AI_PARENT_SUFFIX="a"
+        ;;
+    *-ai[0-9]*)
+        die "Aucune correspondance de quota parent n'est documentée pour ${ZONE}."
+        ;;
+esac
+readonly AI_PARENT_ZONE AI_PARENT_SUFFIX
+
 quota_values() {
     local quota_json="$1"
     local metric="$2"
@@ -156,8 +171,25 @@ DISK_DATA="$(gcloud compute disks list \
 GLOBAL_GPU_LIMIT="$(cloud_quota_limit "${GLOBAL_GPU_QUOTA_DATA}" "global")"
 RTX_SPOT_LIMIT="$(cloud_quota_limit "${RTX_SPOT_QUOTA_DATA}" "${REGION}" "region")"
 HDB_LIMIT="$(cloud_quota_limit "${HDB_QUOTA_DATA}" "${REGION}" "region")"
-HDB_IOPS_LIMIT="$(cloud_quota_limit "${HDB_IOPS_QUOTA_DATA}" "${ZONE}" "zone")"
-HDB_THROUGHPUT_LIMIT="$(cloud_quota_limit "${HDB_THROUGHPUT_QUOTA_DATA}" "${ZONE}" "zone")"
+HDB_IOPS_QUOTA_ZONE="${ZONE}"
+HDB_IOPS_PARENT_DERIVED=0
+HDB_IOPS_LIMIT="$(cloud_quota_limit "${HDB_IOPS_QUOTA_DATA}" "${HDB_IOPS_QUOTA_ZONE}" "zone")"
+if [[ "${HDB_IOPS_LIMIT}" == "UNKNOWN" && -n "${AI_PARENT_ZONE}" ]]; then
+    HDB_IOPS_QUOTA_ZONE="${AI_PARENT_ZONE}"
+    HDB_IOPS_PARENT_DERIVED=1
+    HDB_IOPS_LIMIT="$(cloud_quota_limit \
+        "${HDB_IOPS_QUOTA_DATA}" "${HDB_IOPS_QUOTA_ZONE}" "zone")"
+fi
+HDB_THROUGHPUT_QUOTA_ZONE="${ZONE}"
+HDB_THROUGHPUT_PARENT_DERIVED=0
+HDB_THROUGHPUT_LIMIT="$(cloud_quota_limit \
+    "${HDB_THROUGHPUT_QUOTA_DATA}" "${HDB_THROUGHPUT_QUOTA_ZONE}" "zone")"
+if [[ "${HDB_THROUGHPUT_LIMIT}" == "UNKNOWN" && -n "${AI_PARENT_ZONE}" ]]; then
+    HDB_THROUGHPUT_QUOTA_ZONE="${AI_PARENT_ZONE}"
+    HDB_THROUGHPUT_PARENT_DERIVED=1
+    HDB_THROUGHPUT_LIMIT="$(cloud_quota_limit \
+        "${HDB_THROUGHPUT_QUOTA_DATA}" "${HDB_THROUGHPUT_QUOTA_ZONE}" "zone")"
+fi
 INSTANCES_LIMIT="$(cloud_quota_limit "${INSTANCES_QUOTA_DATA}" "${REGION}" "region")"
 if [[ "${REQUIRE_EXTERNAL_ADDRESS}" == "1" ]]; then
     ADDRESSES_LIMIT="$(cloud_quota_limit "${ADDRESSES_QUOTA_DATA}" "${REGION}" "region")"
@@ -200,7 +232,20 @@ HDB_USAGE="$(jq -r --arg region "${REGION}" '
         end
     ] | add // 0
 ' <<<"${DISK_DATA}")"
-HDB_IOPS_USAGE="$(jq -r --arg zone "${ZONE}" --argjson baseline "${HDB_BASELINE_IOPS}" '
+HDB_IOPS_USAGE="$(jq -r \
+    --arg target_zone "${ZONE}" \
+    --arg quota_zone "${HDB_IOPS_QUOTA_ZONE}" \
+    --arg region "${REGION}" \
+    --arg ai_parent_suffix "${AI_PARENT_SUFFIX}" \
+    --arg use_parent_scope "${HDB_IOPS_PARENT_DERIVED}" \
+    --argjson baseline "${HDB_BASELINE_IOPS}" '
+    def in_quota_scope:
+        (. // "") as $candidate |
+        $candidate == $target_zone or
+        ($use_parent_scope == "1" and
+         ($candidate == $quota_zone or
+          ($ai_parent_suffix != "" and
+           ($candidate | test("^" + $region + "-ai[0-9]+" + $ai_parent_suffix + "$")))));
     [
         .[]? |
         ((.type // "") | split("/") | last) as $type |
@@ -208,14 +253,28 @@ HDB_IOPS_USAGE="$(jq -r --arg zone "${ZONE}" --argjson baseline "${HDB_BASELINE_
             ($type == "hyperdisk-balanced" or
              $type == "hyperdisk-balanced-high-availability") and
             (
-                (((.zone // "") | split("/") | last) == $zone) or
-                ([.replicaZones[]? | split("/") | last] | index($zone) != null)
+                (((.zone // "") | split("/") | last) | in_quota_scope) or
+                ([.replicaZones[]? | split("/") | last | select(in_quota_scope)] |
+                    length > 0)
             )
         ) |
         [((.provisionedIops | tonumber) - $baseline), 0] | max
     ] | add // 0
 ' <<<"${DISK_DATA}")"
-HDB_THROUGHPUT_USAGE="$(jq -r --arg zone "${ZONE}" --argjson baseline "${HDB_BASELINE_THROUGHPUT}" '
+HDB_THROUGHPUT_USAGE="$(jq -r \
+    --arg target_zone "${ZONE}" \
+    --arg quota_zone "${HDB_THROUGHPUT_QUOTA_ZONE}" \
+    --arg region "${REGION}" \
+    --arg ai_parent_suffix "${AI_PARENT_SUFFIX}" \
+    --arg use_parent_scope "${HDB_THROUGHPUT_PARENT_DERIVED}" \
+    --argjson baseline "${HDB_BASELINE_THROUGHPUT}" '
+    def in_quota_scope:
+        (. // "") as $candidate |
+        $candidate == $target_zone or
+        ($use_parent_scope == "1" and
+         ($candidate == $quota_zone or
+          ($ai_parent_suffix != "" and
+           ($candidate | test("^" + $region + "-ai[0-9]+" + $ai_parent_suffix + "$")))));
     [
         .[]? |
         ((.type // "") | split("/") | last) as $type |
@@ -223,8 +282,9 @@ HDB_THROUGHPUT_USAGE="$(jq -r --arg zone "${ZONE}" --argjson baseline "${HDB_BAS
             ($type == "hyperdisk-balanced" or
              $type == "hyperdisk-balanced-high-availability") and
             (
-                (((.zone // "") | split("/") | last) == $zone) or
-                ([.replicaZones[]? | split("/") | last] | index($zone) != null)
+                (((.zone // "") | split("/") | last) | in_quota_scope) or
+                ([.replicaZones[]? | split("/") | last | select(in_quota_scope)] |
+                    length > 0)
             )
         ) |
         [((.provisionedThroughput | tonumber) - $baseline), 0] | max
@@ -262,9 +322,9 @@ printf '%-37s %10s %10s %12s %10s\n' \
 printf '%-37s %10s %10s %12s %10s\n' \
     "HDB_TOTAL_GB" "${HDB_LIMIT}" "${HDB_USAGE}" "${HDB_AVAILABLE}" ">= ${REQUIRED_HDB_GB}"
 printf '%-37s %10s %10s %12s %10s\n' \
-    "HDB_TOTAL_IOPS (${ZONE})" "${HDB_IOPS_LIMIT}" "${HDB_IOPS_USAGE}" "${HDB_IOPS_AVAILABLE}" ">= ${REQUIRED_HDB_IOPS}"
+    "HDB_TOTAL_IOPS (${HDB_IOPS_QUOTA_ZONE})" "${HDB_IOPS_LIMIT}" "${HDB_IOPS_USAGE}" "${HDB_IOPS_AVAILABLE}" ">= ${REQUIRED_HDB_IOPS}"
 printf '%-37s %10s %10s %12s %10s\n' \
-    "HDB_TOTAL_THROUGHPUT (${ZONE})" "${HDB_THROUGHPUT_LIMIT}" "${HDB_THROUGHPUT_USAGE}" "${HDB_THROUGHPUT_AVAILABLE}" ">= ${REQUIRED_HDB_THROUGHPUT}"
+    "HDB_TOTAL_THROUGHPUT (${HDB_THROUGHPUT_QUOTA_ZONE})" "${HDB_THROUGHPUT_LIMIT}" "${HDB_THROUGHPUT_USAGE}" "${HDB_THROUGHPUT_AVAILABLE}" ">= ${REQUIRED_HDB_THROUGHPUT}"
 printf '%-37s %10s %10s %12s %10s\n' \
     "INSTANCES" "${INSTANCES_LIMIT}" "${INSTANCES_USAGE}" "${INSTANCES_AVAILABLE}" ">= 1"
 printf '%-37s %10s %10s %12s %10s\n' \
@@ -296,6 +356,15 @@ if [[ "${RTX_SPOT_AVAILABLE}" == "UNKNOWN" ]]; then
     printf '%s\n' \
         "[ÉCHEC] Le quota Cloud Quotas exact ${RTX_SPOT_QUOTA_ID} est absent ou illisible." \
         "        Son absence n'est jamais assimilée à une capacité Spot disponible." >&2
+fi
+
+if [[ -n "${AI_PARENT_ZONE}" && \
+    ("${HDB_IOPS_QUOTA_ZONE}" != "${ZONE}" || \
+     "${HDB_THROUGHPUT_QUOTA_ZONE}" != "${ZONE}") ]]; then
+    printf '%s\n' \
+        "[INFO] Zone IA ${ZONE} : limite Hyperdisk dérivée de la zone parente ${AI_PARENT_ZONE}." \
+        '       Cloud Quotas ne publie pas de dimension IA; la création GCE reste l’arbitre.' \
+        '       Le calcul additionne conservativement le parent et ses zones IA associées.'
 fi
 
 if [[ "${FAILED}" == true ]]; then

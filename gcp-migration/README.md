@@ -21,9 +21,9 @@ labels, le même type G4 Spot, l'action `STOP` et une durée GCE bornée.
 Les [zones IA](https://cloud.google.com/compute/docs/regions-zones/manage-ai-zones)
 exigent en plus l'activation explicite de `ai-zones-visibility`. `deploy.sh` relit
 cet état et échoue fermé s'il n'est pas `ENABLED`; il ne l'active jamais. Au
-16 juillet 2026, le projet renvoie `ACTIVATION_STATE_UNSPECIFIED`, donc aucune
-création dans `europe-west4-ai1a` n'est autorisée sans décision préalable de
-l'utilisateur.
+16 juillet 2026, cette fonctionnalité a été activée après autorisation explicite
+de l'utilisateur. Cette activation n'autorise toujours ni une création ailleurs,
+ni un provisioning Standard/on-demand.
 
 Pour G4 Spot exclusivement, les quotas déterminants sont le quota régional
 `PREEMPTIBLE_NVIDIA_RTX_PRO_6000_GPUS`, exposé dans Cloud Quotas sous
@@ -101,6 +101,14 @@ régionale historique peut omettre le quota RTX récent; cette omission n'est pa
 interprétée comme une absence. `PREEMPTIBLE_CPUS` est affiché à titre
 informatif, sans être exigé par G4. `deploy.sh` exécute ce contrôle
 automatiquement avant toute confirmation de création.
+
+Cloud Quotas ne publie actuellement aucune dimension IOPS ou débit Hyperdisk
+pour `europe-west4-ai1a`. Pour ce seul couple documenté, le contrôle qualifie
+donc explicitement la limite de *dérivée* : il relit celle de la zone parente
+`europe-west4-a` et additionne conservativement les usages du parent et de ses
+zones IA associées. Toute autre zone IA sans correspondance documentée est
+refusée. Cette dérivation n'est pas présentée comme une preuve de quota caché;
+l'API de création GCE reste l'arbitre et peut refuser la requête.
 
 ## Créer la VM si elle n'existe plus
 
