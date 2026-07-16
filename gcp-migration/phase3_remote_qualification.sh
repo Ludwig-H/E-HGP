@@ -18,6 +18,11 @@ readonly GUEST_GUARD_MAX_REMAINING_SECONDS=2820
 readonly WORK_RESERVE_SECONDS=1800
 readonly FAILURE_LOG_MAX_LINES=240
 readonly FAILURE_LOG_MAX_BYTES=65536
+readonly DOCKER_INFO_MAX_ATTEMPTS=6
+readonly DOCKER_INFO_RETRY_SECONDS=5
+readonly DOCKER_PROBE_TIMEOUT_SECONDS=5
+readonly DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS=10
+readonly SUDO_DOCKER_BIN="/usr/bin/docker"
 
 ASSUME_YES=0
 OUTPUT_RAW=""
@@ -96,6 +101,8 @@ command -v id >/dev/null 2>&1 || die "id est introuvable."
 command -v python3 >/dev/null 2>&1 || die "python3 est introuvable."
 command -v mktemp >/dev/null 2>&1 || die "mktemp est introuvable."
 command -v tail >/dev/null 2>&1 || die "tail est introuvable."
+command -v sleep >/dev/null 2>&1 || die "sleep est introuvable."
+command -v timeout >/dev/null 2>&1 || die "GNU timeout est introuvable."
 [[ -x "${PREFLIGHT_SCRIPT}" ]] || die "Preflight absent ou non exécutable : ${PREFLIGHT_SCRIPT}."
 
 REPOSITORY_ROOT="$(git -C "${SCRIPT_DIR}/.." rev-parse --show-toplevel 2>/dev/null)" || \
@@ -175,6 +182,7 @@ readonly RESULT_DIR="${SESSION_DIR}/results"
 readonly CONTAINER_HOME="${CONTAINER_BUILD}/.phase3-home"
 readonly GUARD_LOG="${LOG_DIR}/guest-shutdown-guard.log"
 readonly PREFLIGHT_LOG="${LOG_DIR}/preflight.log"
+readonly DOCKER_LOG="${LOG_DIR}/docker-info.log"
 readonly BUILD_LOG="${LOG_DIR}/docker-build.log"
 readonly RELEASE_LOG="${LOG_DIR}/cuda-release.log"
 readonly AUDIT_LOG="${LOG_DIR}/cuda-audit.log"
@@ -254,6 +262,114 @@ report_failure_log() {
     printf '[DIAGNOSTIC %s] fin.\n' "${label}" >&2
 }
 
+collect_docker_host_diagnostics() {
+    {
+        printf '%s\n' '[DIAGNOSTIC HÔTE DOCKER] début.'
+        if command -v systemctl >/dev/null 2>&1; then
+            printf '%s\n' '[systemctl is-active docker]'
+            timeout --foreground --kill-after=2s \
+                "${DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS}s" \
+                systemctl is-active docker || true
+            printf '%s\n' '[systemctl is-enabled docker]'
+            timeout --foreground --kill-after=2s \
+                "${DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS}s" \
+                systemctl is-enabled docker || true
+        else
+            printf '%s\n' 'systemctl absent.'
+        fi
+        if command -v dpkg-query >/dev/null 2>&1; then
+            printf '%s\n' '[paquets Docker/containerd/NVIDIA]'
+            timeout --foreground --kill-after=2s \
+                "${DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS}s" \
+                dpkg-query -W \
+                '-f=${binary:Package}\t${Status}\t${Version}\n' \
+                docker.io docker-ce docker-ce-cli containerd containerd.io \
+                nvidia-container-toolkit nvidia-container-runtime || true
+        else
+            printf '%s\n' 'dpkg-query absent.'
+        fi
+        if command -v journalctl >/dev/null 2>&1; then
+            printf '%s\n' '[journal Docker du boot, 80 lignes au plus]'
+            if command -v sudo >/dev/null 2>&1; then
+                timeout --foreground --kill-after=2s \
+                    "${DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS}s" \
+                    sudo -n -- journalctl --unit=docker.service --boot \
+                    --no-pager --lines=80 || true
+            else
+                timeout --foreground --kill-after=2s \
+                    "${DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS}s" \
+                    journalctl --unit=docker.service --boot \
+                    --no-pager --lines=80 || true
+            fi
+        else
+            printf '%s\n' 'journalctl absent.'
+        fi
+        printf '%s\n' '[DIAGNOSTIC HÔTE DOCKER] fin.'
+    } >>"${DOCKER_LOG}" 2>&1
+}
+
+certify_sudo_docker_client() {
+    local component=""
+    local index=0
+    local metadata=""
+    local mode=""
+    local owner_uid=""
+    local path=""
+    local -a expected_paths=(/ /usr /usr/bin "${SUDO_DOCKER_BIN}")
+
+    command -v sudo >/dev/null 2>&1 || return 1
+    timeout --foreground --kill-after=2s \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        sudo -n -- /usr/bin/test -f "${SUDO_DOCKER_BIN}" \
+        >>"${DOCKER_LOG}" 2>&1 || return 1
+    timeout --foreground --kill-after=2s \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        sudo -n -- /usr/bin/test ! -L "${SUDO_DOCKER_BIN}" \
+        >>"${DOCKER_LOG}" 2>&1 || return 1
+    timeout --foreground --kill-after=2s \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        sudo -n -- /usr/bin/test -x "${SUDO_DOCKER_BIN}" \
+        >>"${DOCKER_LOG}" 2>&1 || return 1
+    metadata="$(timeout --foreground --kill-after=2s \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        sudo -n -- /usr/bin/stat -Lc '%n|%u|%a' -- \
+        / /usr /usr/bin "${SUDO_DOCKER_BIN}" 2>>"${DOCKER_LOG}")" || return 1
+    printf '%s\n' "${metadata}" >>"${DOCKER_LOG}"
+    while IFS='|' read -r path owner_uid mode; do
+        ((index < ${#expected_paths[@]})) || return 1
+        [[ "${path}" == "${expected_paths[index]}" && "${owner_uid}" == "0" && \
+            "${mode}" =~ ^[0-7]{3,4}$ ]] || return 1
+        (((8#${mode} & 8#22) == 0)) || return 1
+        index=$((index + 1))
+    done <<<"${metadata}"
+    ((index == ${#expected_paths[@]})) || return 1
+    timeout --foreground --kill-after=2s \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        sudo -n -- "${SUDO_DOCKER_BIN}" --version \
+        >>"${DOCKER_LOG}" 2>&1
+}
+
+attempt_sudo_docker_certification() {
+    if ((sudo_docker_certification_attempted == 1)); then
+        ((sudo_docker_client == 1))
+        return
+    fi
+    sudo_docker_certification_attempted=1
+    if command -v sudo >/dev/null 2>&1; then
+        printf '[CLI SUDO] chemin système fixe à certifier : %s.\n' \
+            "${SUDO_DOCKER_BIN}" >>"${DOCKER_LOG}"
+        if certify_sudo_docker_client; then
+            sudo_docker_client=1
+            return 0
+        fi
+        printf '%s\n' '[CLI SUDO] chemin absent, non sûr ou client inexécutable.' \
+            >>"${DOCKER_LOG}"
+    else
+        printf '%s\n' '[CLI SUDO] sudo absent.' >>"${DOCKER_LOG}"
+    fi
+    return 1
+}
+
 read_guest_shutdown_guard() {
     local candidate="${SESSION_DIR}/guest-shutdown-candidate.log"
 
@@ -284,13 +400,108 @@ if ! "${PREFLIGHT_SCRIPT}" --skip-docker >"${PREFLIGHT_LOG}" 2>&1; then
     die "Le preflight Blackwell non destructif a échoué; voir ${PREFLIGHT_LOG}."
 fi
 
-declare -a DOCKER=(docker)
-if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-    DOCKER=(docker)
-elif command -v sudo >/dev/null 2>&1 && sudo -n docker info >/dev/null 2>&1; then
-    DOCKER=(sudo -n docker)
+declare -a DOCKER=()
+direct_docker_client=0
+docker_deadline_reached=0
+sudo_docker_client=0
+sudo_docker_certification_attempted=0
+docker_path="$(command -v docker 2>/dev/null || true)"
+if [[ -n "${docker_path}" && "${docker_path}" == /* && \
+    "${docker_path}" != *$'\n'* && "${docker_path}" != *$'\r'* && \
+    -f "${docker_path}" && -x "${docker_path}" ]]; then
+    printf '[CLI DIRECTE] %s\n' "${docker_path}" >>"${DOCKER_LOG}"
+    if timeout --foreground --kill-after=2s \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        "${docker_path}" --version >>"${DOCKER_LOG}" 2>&1; then
+        direct_docker_client=1
+    else
+        printf '%s\n' '[CLI DIRECTE] docker --version a échoué.' >>"${DOCKER_LOG}"
+    fi
 else
-    die "Docker est absent ou inaccessible sans interaction."
+    printf '%s\n' '[CLI DIRECTE] docker absent du PATH ou non exécutable absolu régulier.' \
+        >>"${DOCKER_LOG}"
+    docker_path=""
+fi
+if ((direct_docker_client == 0)); then
+    attempt_sudo_docker_certification || true
+fi
+if ((direct_docker_client == 0 && sudo_docker_client == 0)); then
+    collect_docker_host_diagnostics
+    report_failure_log "docker-info" "${DOCKER_LOG}"
+    die "Client Docker absent ou inexécutable dans le PATH utilisateur et indisponible via sudo non interactif."
+fi
+begin_unit "docker-access"
+for ((attempt = 1; attempt <= DOCKER_INFO_MAX_ATTEMPTS; attempt++)); do
+    probe_now="$(date +%s)" || die "Horloge invitée illisible pendant les sondes Docker."
+    [[ "${probe_now}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique pendant les sondes Docker."
+    if ((probe_now >= WORK_DEADLINE_EPOCH)); then
+        docker_deadline_reached=1
+        printf '[SONDE DOCKER] deadline atteinte avant tentative=%s/%s.\n' \
+            "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}" >>"${DOCKER_LOG}"
+        break
+    fi
+    if ((direct_docker_client == 1)); then
+        printf '[SONDE DOCKER] tentative=%s/%s, voie=directe.\n' \
+            "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}" >>"${DOCKER_LOG}"
+        if timeout --foreground --kill-after=2s \
+            "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+            "${docker_path}" info >>"${DOCKER_LOG}" 2>&1; then
+            DOCKER=("${docker_path}")
+            printf '[DOCKER] Daemon accessible directement à la tentative %s/%s.\n' \
+                "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}"
+            break
+        fi
+    fi
+    probe_now="$(date +%s)" || die "Horloge invitée illisible entre les voies Docker."
+    [[ "${probe_now}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique entre les voies Docker."
+    if ((probe_now >= WORK_DEADLINE_EPOCH)); then
+        docker_deadline_reached=1
+        printf '[SONDE DOCKER] deadline atteinte avant voie sudo, tentative=%s/%s.\n' \
+            "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}" >>"${DOCKER_LOG}"
+        break
+    fi
+    if ((sudo_docker_certification_attempted == 0)); then
+        attempt_sudo_docker_certification || true
+        probe_now="$(date +%s)" || die "Horloge invitée illisible après certification Docker sudo."
+        [[ "${probe_now}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique après certification Docker sudo."
+        if ((probe_now >= WORK_DEADLINE_EPOCH)); then
+            docker_deadline_reached=1
+            printf '[SONDE DOCKER] deadline atteinte après certification sudo, tentative=%s/%s.\n' \
+                "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}" >>"${DOCKER_LOG}"
+            break
+        fi
+    fi
+    if ((sudo_docker_client == 1)); then
+        printf '[SONDE DOCKER] tentative=%s/%s, voie=sudo-n.\n' \
+            "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}" >>"${DOCKER_LOG}"
+        if timeout --foreground --kill-after=2s \
+            "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+            sudo -n -- "${SUDO_DOCKER_BIN}" info >>"${DOCKER_LOG}" 2>&1; then
+            DOCKER=(sudo -n -- "${SUDO_DOCKER_BIN}")
+            printf '[DOCKER] Voie directe indisponible; sudo non interactif certifié à la tentative %s/%s.\n' \
+                "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}"
+            break
+        fi
+    fi
+    if ((attempt < DOCKER_INFO_MAX_ATTEMPTS)); then
+        probe_now="$(date +%s)" || die "Horloge invitée illisible avant l'attente Docker."
+        [[ "${probe_now}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique avant l'attente Docker."
+        if ((probe_now + DOCKER_INFO_RETRY_SECONDS >= WORK_DEADLINE_EPOCH)); then
+            docker_deadline_reached=1
+            printf '[SONDE DOCKER] attente refusée par la deadline après tentative=%s/%s.\n' \
+                "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}" >>"${DOCKER_LOG}"
+            break
+        fi
+        sleep "${DOCKER_INFO_RETRY_SECONDS}"
+    fi
+done
+if ((${#DOCKER[@]} == 0)); then
+    collect_docker_host_diagnostics
+    report_failure_log "docker-info" "${DOCKER_LOG}"
+    if ((docker_deadline_reached == 1)); then
+        die "Deadline de travail atteinte pendant les sondes Docker; aucune sonde suivante ni construction n'a été lancée."
+    fi
+    die "Client Docker présent mais daemon inaccessible directement et via sudo non interactif après les sondes bornées."
 fi
 
 IMAGE_REF="morsehgp3d-phase3:${HEAD_SHA}"

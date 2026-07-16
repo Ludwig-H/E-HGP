@@ -1543,6 +1543,85 @@ fi
         self.assertIn("/usr/local/cuda/bin/nvcc", source)
         self.assertIn("/usr/local/cuda-12.9/bin/nvcc", source)
 
+    def test_blackwell_preflight_keeps_sudo_docker_smoke_noninteractive(
+        self,
+    ) -> None:
+        self.prepare_blackwell_preflight_fixture(
+            "#!/usr/bin/env bash\nprintf 'Cuda compilation tools, release 12.9, V12.9.85\\n'\n"
+        )
+        docker_log = self.tmp / "docker.log"
+        docker = self.tmp / "docker"
+        docker.write_text(
+            """#!/usr/bin/env bash
+set -euo pipefail
+printf 'DOCKER %s\\n' "$*" >>"${FAKE_DOCKER_LOG}"
+if [[ "${1:-}" == "info" ]]; then
+    [[ "${FAKE_DOCKER_VIA_SUDO:-0}" == "1" ]]
+elif [[ "${1:-}" == "run" ]]; then
+    [[ "${FAKE_DOCKER_VIA_SUDO:-0}" == "1" ]]
+    printf 'NVIDIA RTX PRO 6000 Blackwell Server Edition, 12.0, 97887 MiB\\n'
+else
+    exit 2
+fi
+""",
+            encoding="utf-8",
+        )
+        docker.chmod(0o755)
+        secure_docker = self.tmp / "secure-docker"
+        secure_docker.write_text(
+            """#!/usr/bin/env bash
+set -euo pipefail
+printf 'SECURE-DOCKER %s\\n' "$*" >>"${FAKE_DOCKER_LOG}"
+if [[ "${1:-}" == "info" ]]; then
+    exit 0
+elif [[ "${1:-}" == "run" ]]; then
+    printf 'NVIDIA RTX PRO 6000 Blackwell Server Edition, 12.0, 97887 MiB\\n'
+else
+    exit 2
+fi
+""",
+            encoding="utf-8",
+        )
+        secure_docker.chmod(0o755)
+        sudo = self.tmp / "sudo"
+        sudo.write_text(
+            """#!/usr/bin/env bash
+set -euo pipefail
+printf 'SUDO %s\\n' "$*" >>"${FAKE_DOCKER_LOG}"
+if [[ "${1:-}" == "-n" && "${2:-}" == "--" && "${3:-}" == "/usr/bin/docker" ]]; then
+    shift 3
+    "${FAKE_SECURE_DOCKER}" "$@"
+    exit
+fi
+exit 1
+""",
+            encoding="utf-8",
+        )
+        sudo.chmod(0o755)
+        self.env["FAKE_DOCKER_LOG"] = str(docker_log)
+        self.env["FAKE_SECURE_DOCKER"] = str(secure_docker)
+
+        result = self.run_script("blackwell_preflight.sh")
+
+        self.assertEqual(0, result.returncode, result.stdout)
+        log = docker_log.read_text(encoding="utf-8")
+        self.assertIn("DOCKER info", log)
+        self.assertIn("SUDO -n -- /usr/bin/docker info", log)
+        self.assertIn("SUDO -n -- /usr/bin/docker run", log)
+        self.assertIn("SECURE-DOCKER run", log)
+        self.assertNotIn("\nDOCKER run", "\n" + log)
+        self.assertIn("Docker accède au GPU", result.stdout)
+
+        docker_log.write_text("", encoding="utf-8")
+        sudo.write_text("#!/usr/bin/env bash\nexit 1\n", encoding="utf-8")
+        sudo.chmod(0o755)
+
+        failed = self.run_script("blackwell_preflight.sh")
+
+        self.assertNotEqual(0, failed.returncode)
+        self.assertIn("daemon Docker est inaccessible", failed.stdout)
+        self.assertNotIn("DOCKER run", docker_log.read_text(encoding="utf-8"))
+
 
 class Phase3QualificationOrchestratorTests(unittest.TestCase):
     def setUp(self) -> None:

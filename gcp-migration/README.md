@@ -282,6 +282,21 @@ construction et chacune des sept unités CUDA ou d'audit, il refuse de lancer
 l'unité si cette deadline de travail est atteinte. L'arrêt invité doit en outre
 rester antérieur à l'échéance GCE sûre.
 
+Après le preflight, le worker certifie séparément le client Docker direct et le
+client système fixe `/usr/bin/docker` destiné à `sudo -n`; ce dernier et tous
+ses parents doivent appartenir à root et ne pas être inscriptibles par le
+groupe ou les autres. Lorsque le daemon démarre encore, le worker effectue au
+plus six tours, chacun sondant les voies disponibles puis attendant cinq
+secondes avant le suivant. Aucune nouvelle sonde ne démarre une fois la
+deadline atteinte et chaque sonde est elle-même limitée à cinq secondes. Il
+n'installe aucun paquet et ne démarre aucun service. Si l'accès reste
+impossible, il remonte un diagnostic
+borné comprenant les erreurs directes et sudo, l'état systemd, les paquets
+Docker/containerd/NVIDIA et au plus 80 lignes du journal Docker avant de
+nettoyer ses temporaires. Toute commande Docker ultérieure conserve la voie
+directe certifiée ou exactement `sudo -n -- /usr/bin/docker`; aucun chemin issu
+du `PATH` utilisateur n'est transmis à sudo.
+
 L'artefact distant demeure provisoire avec `status=worker_passed_pending_shutdown`. L'orchestrateur le valide localement, arrête la cible, relit indépendamment l'état exact `TERMINATED`, ajoute cette preuve à `vm_lifecycle`, convertit le statut en `passed`, puis publie l'artefact final atomiquement et sans remplacement par lien dur. Un échec ou une relecture illisible de l'arrêt ne laisse aucun artefact final, mais conserve le handoff ciblé local et bloque une nouvelle session sur le même SHA jusqu'à résolution. La priorité donnée à l'arrêt signifie que le clone temporaire distant peut rester dans `/tmp` sur le disque de la VM arrêtée.
 
 ## Cas Blackwell : « requires use of the NVIDIA open kernel modules »

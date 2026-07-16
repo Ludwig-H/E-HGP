@@ -746,6 +746,7 @@ La suite GCP vérifie au minimum :
 - deadline de travail au moins trente minutes avant cette borne GCE sûre, sans nouvelle unité lancée après cette deadline.
 - avant suppression des temporaires invités, remontée bornée des 240 dernières lignes et de 65 536 octets au plus du journal de toute unité de qualification en échec, sans publication d'un artefact de succès.
 - résolution de `nvcc` malgré un `PATH` non interactif réduit, depuis un `CUDA_HOME` absolu ou les emplacements CUDA 12.9 usuels, sans accepter une autre version du toolkit.
+- accès Docker direct ou via le chemin fixe `/usr/bin/docker` certifié root et non inscriptible avant `sudo -n`, avec clients séparés, timeout individuel, retry non mutatif borné et aucune nouvelle sonde après la deadline, puis diagnostic borné du daemon, de systemd, des paquets et du journal avant tout build en cas d'échec.
 
 ### 18.2 Checkpoints
 

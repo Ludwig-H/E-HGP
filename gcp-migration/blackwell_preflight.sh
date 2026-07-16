@@ -289,8 +289,9 @@ docker_gpu_smoke() {
     fi
 
     if ! docker info >/dev/null 2>&1; then
-        if command -v sudo >/dev/null 2>&1 && sudo -n docker info >/dev/null 2>&1; then
-            docker_command=(sudo docker)
+        if command -v sudo >/dev/null 2>&1 && \
+            sudo -n -- /usr/bin/docker info >/dev/null 2>&1; then
+            docker_command=(sudo -n -- /usr/bin/docker)
         else
             failure "Le daemon Docker est inaccessible pour cet utilisateur."
             return

@@ -77,10 +77,36 @@ if args == ["-n", "cat", "/run/systemd/shutdown/scheduled"]:
         print(f"USEC={usec}\nMODE={mode}")
         raise SystemExit(0)
     raise SystemExit(1)
-if len(args) >= 2 and args[:2] == ["-n", "docker"]:
+if len(args) >= 3 and args[:2] == ["-n", "--"] and args[2] == "/usr/bin/test":
+    raise SystemExit(1 if os.environ.get("FAKE_SUDO_DOCKER_MISSING") == "1" else 0)
+if len(args) >= 3 and args[:2] == ["-n", "--"] and args[2] == "/usr/bin/stat":
+    if os.environ.get("FAKE_SUDO_DOCKER_MISSING") == "1":
+        raise SystemExit(1)
+    unsafe = os.environ.get("FAKE_SUDO_DOCKER_UNSAFE", "")
+    print("/|0|755")
+    print("/usr|0|755")
+    print("/usr/bin|0|775" if unsafe == "parent-mode" else "/usr/bin|0|755")
+    if unsafe == "owner":
+        print("/usr/bin/docker|1000|755")
+    elif unsafe == "mode":
+        print("/usr/bin/docker|0|775")
+    else:
+        print("/usr/bin/docker|0|755")
+    raise SystemExit(0)
+if len(args) >= 3 and args[:2] == ["-n", "--"] and args[2] == "/usr/bin/docker":
+    if os.environ.get("FAKE_SUDO_DOCKER_MISSING") == "1":
+        print("sudo: /usr/bin/docker: command not found", file=sys.stderr)
+        raise SystemExit(127)
     environment = os.environ.copy()
     environment["FAKE_DOCKER_VIA_SUDO"] = "1"
-    raise SystemExit(subprocess.call(["docker", *args[2:]], env=environment))
+    environment["FAKE_DOCKER_LOG_PREFIX"] = "SECURE-DOCKER"
+    raise SystemExit(
+        subprocess.call(
+            [os.environ["FAKE_SECURE_DOCKER"], *args[3:]], env=environment
+        )
+    )
+if len(args) >= 3 and args[:2] == ["-n", "--"]:
+    raise SystemExit(subprocess.call(args[2:]))
 raise SystemExit("unexpected fake sudo invocation: " + " ".join(args))
 """
 
@@ -130,12 +156,32 @@ import sys
 args = sys.argv[1:]
 log = Path(os.environ["FAKE_COMMAND_LOG"])
 with log.open("a", encoding="utf-8") as stream:
-    stream.write("DOCKER " + " ".join(args) + "\n")
+    prefix = os.environ.get("FAKE_DOCKER_LOG_PREFIX", "DOCKER")
+    stream.write(prefix + " " + " ".join(args) + "\n")
 
 failure = os.environ.get("FAKE_FAIL", "")
 image_id = os.environ["FAKE_IMAGE_ID"]
 
+if args == ["--version"]:
+    if os.environ.get("FAKE_DOCKER_VERSION_FAIL") == "1":
+        print("simulated unusable Docker client", file=sys.stderr)
+        raise SystemExit(126)
+    print("Docker version 27.5.1, build fake")
+    raise SystemExit(0)
+
 if args == ["info"]:
+    if os.environ.get("FAKE_ALL_DOCKER_INFO_FAIL") == "1":
+        way = "sudo" if os.environ.get("FAKE_DOCKER_VIA_SUDO") == "1" else "direct"
+        print(f"simulated Docker daemon unavailable via {way}", file=sys.stderr)
+        raise SystemExit(1)
+    readiness_state = Path(os.environ["FAKE_DOCKER_READINESS_STATE"])
+    ready_after = int(os.environ.get("FAKE_DOCKER_READY_AFTER", "1"))
+    if ready_after > 1:
+        probe = int(readiness_state.read_text(encoding="utf-8")) if readiness_state.exists() else 0
+        readiness_state.write_text(str(probe + 1), encoding="utf-8")
+        if probe + 1 < ready_after:
+            print("simulated Docker daemon still starting", file=sys.stderr)
+            raise SystemExit(1)
     if os.environ.get("FAKE_DIRECT_DOCKER_INFO_FAIL") == "1" and os.environ.get("FAKE_DOCKER_VIA_SUDO") != "1":
         raise SystemExit(1)
     print("fake docker info")
@@ -461,22 +507,104 @@ raise SystemExit("unexpected fake container command: " + " ".join(command))
 """
 
 
+FAKE_SLEEP = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("SLEEP " + " ".join(sys.argv[1:]) + "\n")
+"""
+
+
+FAKE_SYSTEMCTL = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("SYSTEMCTL " + " ".join(sys.argv[1:]) + "\n")
+print("inactive" if "is-active" in sys.argv else "disabled")
+raise SystemExit(3 if "is-active" in sys.argv else 1)
+"""
+
+
+FAKE_JOURNALCTL = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("JOURNALCTL " + " ".join(sys.argv[1:]) + "\n")
+print("simulated docker.service journal: daemon inactive")
+"""
+
+
+FAKE_DPKG_QUERY = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("DPKG-QUERY " + " ".join(sys.argv[1:]) + "\n")
+print("docker.io\\tinstall ok installed\\t27.5.1-fake")
+print("nvidia-container-toolkit\\tinstall ok installed\\t1.17.8-fake")
+"""
+
+
+FAKE_TIMEOUT = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+args = sys.argv[1:]
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("TIMEOUT " + " ".join(args) + "\n")
+index = 0
+if index < len(args) and args[index] == "--foreground":
+    index += 1
+if index < len(args) and args[index].startswith("--kill-after="):
+    index += 1
+if index >= len(args):
+    raise SystemExit("fake timeout is missing its duration")
+index += 1
+command = args[index:]
+if not command:
+    raise SystemExit("fake timeout is missing its command")
+is_docker_info = command[-1:] == ["info"] and "docker" in " ".join(command)
+expire_count = int(os.environ.get("FAKE_DOCKER_INFO_TIMEOUTS", "0"))
+state = Path(os.environ["FAKE_TIMEOUT_STATE"])
+expired = int(state.read_text(encoding="utf-8")) if state.exists() else 0
+if is_docker_info and expired < expire_count:
+    state.write_text(str(expired + 1), encoding="utf-8")
+    with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+        stream.write("TIMEOUT-EXPIRED docker info 124\n")
+    raise SystemExit(124)
+raise SystemExit(subprocess.call(command))
+"""
+
+
 class Phase3RemoteQualificationTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory(prefix="phase3-remote-test-")
         self.root = Path(self.temporary.name)
         self.repository = self.root / "repository"
         self.fake_bin = self.root / "fake-bin"
+        self.fake_secure_bin = self.root / "fake-secure-bin"
         self.output_dir = self.root / "artifacts"
         self.session_tmp = self.root / "session-tmp"
         self.command_log = self.root / "commands.log"
         self.date_state = self.root / "date.state"
+        self.docker_readiness_state = self.root / "docker-readiness.state"
+        self.timeout_state = self.root / "timeout.state"
         self.gce_deadline_epoch = int(time.time()) + 3300
         for path in (
             self.repository / "gcp-migration",
             self.repository / "containers",
             self.repository / "morsehgp3d" / "tests" / "cuda",
             self.fake_bin,
+            self.fake_secure_bin,
             self.output_dir,
             self.session_tmp,
         ):
@@ -496,6 +624,12 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
         self._write_executable(self.fake_bin / "shutdown", FAKE_SHUTDOWN)
         self._write_executable(self.fake_bin / "date", FAKE_DATE)
         self._write_executable(self.fake_bin / "docker", FAKE_DOCKER)
+        self._write_executable(self.fake_secure_bin / "docker", FAKE_DOCKER)
+        self._write_executable(self.fake_bin / "sleep", FAKE_SLEEP)
+        self._write_executable(self.fake_bin / "systemctl", FAKE_SYSTEMCTL)
+        self._write_executable(self.fake_bin / "journalctl", FAKE_JOURNALCTL)
+        self._write_executable(self.fake_bin / "dpkg-query", FAKE_DPKG_QUERY)
+        self._write_executable(self.fake_bin / "timeout", FAKE_TIMEOUT)
         self._write_executable(
             self.repository / "gcp-migration" / "blackwell_preflight.sh",
             """#!/usr/bin/env bash
@@ -524,6 +658,9 @@ printf 'fake Blackwell preflight passed\\n'
                 "FAKE_GUARD": "present",
                 "FAKE_DATE_SEQUENCE": "",
                 "FAKE_DATE_STATE": str(self.date_state),
+                "FAKE_DOCKER_READINESS_STATE": str(self.docker_readiness_state),
+                "FAKE_SECURE_DOCKER": str(self.fake_secure_bin / "docker"),
+                "FAKE_TIMEOUT_STATE": str(self.timeout_state),
                 "PATH": str(self.fake_bin) + os.pathsep + self.environment["PATH"],
                 "TMPDIR": str(self.session_tmp),
                 "PYTHONDONTWRITEBYTECODE": "1",
@@ -546,6 +683,11 @@ printf 'fake Blackwell preflight passed\\n'
         guard: str = "present",
         output: Path | None = None,
         direct_docker_info_fail: bool = False,
+        all_docker_info_fail: bool = False,
+        docker_clients_unusable: bool = False,
+        unsafe_sudo_docker: str = "",
+        docker_info_timeouts: int = 0,
+        docker_ready_after: int = 1,
         date_sequence: list[int] | None = None,
     ) -> tuple[subprocess.CompletedProcess[str], Path]:
         artifact = output or (self.output_dir / "qualification.json")
@@ -555,10 +697,24 @@ printf 'fake Blackwell preflight passed\\n'
         environment["FAKE_DIRECT_DOCKER_INFO_FAIL"] = (
             "1" if direct_docker_info_fail else "0"
         )
+        environment["FAKE_ALL_DOCKER_INFO_FAIL"] = (
+            "1" if all_docker_info_fail else "0"
+        )
+        environment["FAKE_SUDO_DOCKER_MISSING"] = (
+            "1" if docker_clients_unusable else "0"
+        )
+        environment["FAKE_DOCKER_VERSION_FAIL"] = (
+            "1" if docker_clients_unusable else "0"
+        )
+        environment["FAKE_SUDO_DOCKER_UNSAFE"] = unsafe_sudo_docker
+        environment["FAKE_DOCKER_INFO_TIMEOUTS"] = str(docker_info_timeouts)
+        environment["FAKE_DOCKER_READY_AFTER"] = str(docker_ready_after)
         environment["FAKE_DATE_SEQUENCE"] = (
             "" if date_sequence is None else ",".join(map(str, date_sequence))
         )
         self.date_state.unlink(missing_ok=True)
+        self.docker_readiness_state.unlink(missing_ok=True)
+        self.timeout_state.unlink(missing_ok=True)
         command = [str(self.worker)]
         if arguments is None:
             command.extend(
@@ -579,7 +735,7 @@ printf 'fake Blackwell preflight passed\\n'
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            timeout=20,
+            timeout=60,
             check=False,
         )
         return result, artifact
@@ -668,12 +824,12 @@ printf 'fake Blackwell preflight passed\\n'
         cases = (
             (
                 "docker-build",
-                [base, base, base + 100, work_deadline],
+                [base, base, base + 100, base + 100, base + 100, work_deadline],
                 "DOCKER build",
             ),
             (
                 "compute-sanitizer",
-                [base] * 10 + [work_deadline],
+                [base] * 12 + [work_deadline],
                 "compute-sanitizer --tool memcheck",
             ),
         )
@@ -970,9 +1126,130 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertTrue(artifact.is_file())
         log = self.command_log_text()
-        self.assertIn("SUDO -n docker info", log)
-        self.assertIn("SUDO -n docker build", log)
-        self.assertIn("SUDO -n docker run", log)
+        self.assertIn("SUDO -n -- /usr/bin/docker info", log)
+        self.assertIn("SUDO -n -- /usr/bin/docker build", log)
+        self.assertIn("SUDO -n -- /usr/bin/docker image inspect", log)
+        self.assertEqual(7, log.count("SUDO -n -- /usr/bin/docker run"))
+        self.assertIn("SECURE-DOCKER build", log)
+        self.assertFalse(
+            any(
+                line.startswith(("DOCKER build", "DOCKER image", "DOCKER run"))
+                for line in log.splitlines()
+            )
+        )
+
+    def test_retries_docker_daemon_readiness_without_host_mutation(self) -> None:
+        result, artifact = self.run_worker(docker_ready_after=5)
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertTrue(artifact.is_file())
+        self.assertIn("tentative 3/6", result.stdout)
+        log = self.command_log_text()
+        self.assertEqual(2, log.count("SLEEP 5"))
+        self.assertEqual(5, log.count("DOCKER info"))
+        self.assertNotIn("SYSTEMCTL", log)
+
+    def test_retries_after_individually_timed_out_docker_probes(self) -> None:
+        result, artifact = self.run_worker(docker_info_timeouts=2)
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertTrue(artifact.is_file())
+        log = self.command_log_text()
+        self.assertEqual(2, log.count("TIMEOUT-EXPIRED docker info 124"))
+        self.assertEqual(1, log.count("SLEEP 5"))
+        self.assertIn("tentative 2/6", result.stdout)
+        self.assertIn("DOCKER build", log)
+
+    def test_reports_bounded_docker_diagnostics_after_all_retries(self) -> None:
+        result, artifact = self.run_worker(all_docker_info_fail=True)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn(
+            "[DIAGNOSTIC docker-info] 240 dernières lignes et 65536 octets",
+            result.stderr,
+        )
+        self.assertIn("simulated Docker daemon unavailable via direct", result.stderr)
+        self.assertIn("simulated Docker daemon unavailable via sudo", result.stderr)
+        self.assertIn("inactive", result.stderr)
+        self.assertIn("docker.io", result.stderr)
+        self.assertIn("daemon inaccessible", result.stderr)
+        self.assertFalse(artifact.exists())
+        self.assert_no_partial_artifact()
+        log = self.command_log_text()
+        self.assertEqual(5, log.count("SLEEP 5"))
+        self.assertEqual(12, log.count("DOCKER info"))
+        self.assertNotIn("DOCKER build", log)
+        self.assertNotIn("DOCKER run", log)
+
+    def test_rejects_unusable_docker_clients_without_retry(self) -> None:
+        result, artifact = self.run_worker(docker_clients_unusable=True)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Client Docker absent ou inexécutable", result.stderr)
+        self.assertFalse(artifact.exists())
+        self.assert_no_partial_artifact()
+        log = self.command_log_text()
+        self.assertNotIn("SLEEP", log)
+        self.assertNotIn("DOCKER info", log)
+        self.assertNotIn("DOCKER build", log)
+
+    def test_rejects_unsafe_elevated_docker_path(self) -> None:
+        for unsafe in ("owner", "mode", "parent-mode"):
+            with self.subTest(unsafe=unsafe):
+                self.command_log.unlink(missing_ok=True)
+                artifact = self.output_dir / f"unsafe-{unsafe}.json"
+                result, _ = self.run_worker(
+                    output=artifact,
+                    direct_docker_info_fail=True,
+                    unsafe_sudo_docker=unsafe,
+                )
+
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("daemon inaccessible", result.stderr)
+                self.assertFalse(artifact.exists())
+                self.assert_no_partial_artifact()
+                log = self.command_log_text()
+                self.assertIn("SUDO -n -- /usr/bin/stat", log)
+                self.assertNotIn("SUDO -n -- /usr/bin/docker --version", log)
+                self.assertNotIn("SUDO -n -- /usr/bin/docker info", log)
+                self.assertNotIn("SECURE-DOCKER", log)
+                self.assertNotIn("DOCKER build", log)
+
+    def test_docker_retry_stops_at_the_work_deadline(self) -> None:
+        base = int(time.time())
+        deadline = base + 3300
+        work_deadline = deadline - 1800
+        artifact = self.output_dir / "docker-deadline.json"
+
+        result, _ = self.run_worker(
+            arguments=[
+                "--yes",
+                "--gce-deadline-epoch",
+                str(deadline),
+                "--output",
+                str(artifact),
+            ],
+            output=artifact,
+            all_docker_info_fail=True,
+            date_sequence=[
+                base,
+                base,
+                base + 1,
+                base + 2,
+                base + 3,
+                work_deadline,
+            ],
+        )
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Deadline de travail atteinte pendant les sondes Docker", result.stderr)
+        self.assertFalse(artifact.exists())
+        self.assert_no_partial_artifact()
+        log = self.command_log_text()
+        self.assertNotIn("SLEEP", log)
+        self.assertEqual(1, log.count("DOCKER info"))
+        self.assertNotIn("SUDO -n -- /usr/bin/docker info", log)
+        self.assertNotIn("DOCKER build", log)
 
 
 if __name__ == "__main__":
