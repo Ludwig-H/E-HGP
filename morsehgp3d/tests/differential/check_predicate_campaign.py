@@ -242,9 +242,33 @@ def fraction_from_dyadic(value: tuple[int, int]) -> Fraction:
     )
 
 
-def audit_generator(module: ModuleType, config: dict[str, Any]) -> dict[str, Any]:
+def audit_generator(
+    module: ModuleType, config: dict[str, Any], regression: dict[str, Any]
+) -> dict[str, Any]:
     if set(config) != EXPECTED_CONFIG_FIELDS:
         raise AssertionError("the frozen campaign config schema is open")
+    module.validate_config(config)
+    expected_regression = {
+        "base_index": 32,
+        "expected": {
+            "generator_algorithm": module.GENERATOR_ID,
+            "predicate": "power_bisector_side",
+            "r_q_distinct": True,
+            "sign": "nonzero",
+            "stratum": "well_conditioned",
+        },
+        "kind": "morsehgp3d_phase2a_generator_regression",
+        "legacy_counterexample": {
+            "generator_algorithm": "splitmix64-counter-v1",
+            "q_ids": [0],
+            "r_ids": [0],
+            "sign": "zero",
+        },
+        "schema_version": "1.0.0",
+        "seed": config["generator"]["seed"],
+    }
+    if regression != expected_regression:
+        raise AssertionError("the permanent generator regression fixture changed")
     if config["base_case_count"] < 10_800_000:
         raise AssertionError("the frozen campaign does not contain 10.8M base signs")
     if config["base_case_count"] * 93 // 100 < 10_000_000:
@@ -286,6 +310,22 @@ def audit_generator(module: ModuleType, config: dict[str, Any]) -> dict[str, Any
                 raise AssertionError(
                     "the RNG accepted a lane outside its closed domain"
                 )
+        base_count = config["base_case_count"]
+        retry_stride = config["generator"]["well_conditioned_retry_stride"]
+        max_attempts = config["generator"]["well_conditioned_max_attempts"]
+        for attempt in (0, max_attempts - 2):
+            previous_retry_end = module.counter_value(
+                0, base_count - 1 + attempt * retry_stride, 69
+            )
+            next_retry_begin = module.counter_value(0, (attempt + 1) * retry_stride, 0)
+            if previous_retry_end >= next_retry_begin:
+                raise AssertionError("well-conditioned retry domains overlap")
+        if module.counter_value(0, base_count - 1, 126) >= module.counter_value(
+            0, retry_stride, 0
+        ):
+            raise AssertionError("retry and transformation counter domains overlap")
+        if module.counter_value(0, 0, 69) >= module.counter_value(0, 0, 121):
+            raise AssertionError("generation and transformation lanes overlap")
     finally:
         module.splitmix64 = original_splitmix64
 
@@ -328,9 +368,17 @@ def audit_generator(module: ModuleType, config: dict[str, Any]) -> dict[str, Any
     observed_strata = {name: 0 for name in module.STRATA}
     power_cardinalities: set[int] = set()
     power_overlaps: set[int] = set()
+    well_power_overlaps: set[int] = set()
     power_denominators: set[int] = set()
+    exact_equality_predicates: set[str] = set()
+    well_conditioned_predicates: set[str] = set()
+    well_conditioned_count = 0
     metamorphisms = {name: 0 for name in module.METAMORPHISMS}
     metamorphism_count = 0
+    nonvacuous_opposite_count = 0
+    zero_preserving_reflection_count = 0
+    nonzero_metamorphisms: set[str] = set()
+    transformed_exact_equality_predicates: set[str] = set()
     for base_index in range(600):
         case = module.generate_base_case(seed, base_index)
         observed_strata[case.stratum] += 1
@@ -344,6 +392,15 @@ def audit_generator(module: ModuleType, config: dict[str, Any]) -> dict[str, Any
             )
         if case.stratum == "exact_equalities" and exact_fraction != 0:
             raise AssertionError("the exact-equality stratum is not exactly zero")
+        if case.stratum == "exact_equalities":
+            exact_equality_predicates.add(case.predicate)
+        if case.stratum == "well_conditioned":
+            well_conditioned_count += 1
+            well_conditioned_predicates.add(case.predicate)
+            if exact_fraction == 0:
+                raise AssertionError(
+                    f"well-conditioned base case became zero: {base_index}"
+                )
         if case.stratum in module.STRATA[1:-1] and exact_fraction == 0:
             raise AssertionError(f"hard stratum became vacuous: {case.stratum}")
         words_for_case = tuple(word for point in case.points for word in point)
@@ -357,38 +414,206 @@ def audit_generator(module: ModuleType, config: dict[str, Any]) -> dict[str, Any
             raise AssertionError("the large-offset stratum lost its offset")
         if case.predicate == "power_bisector_side":
             power_cardinalities.add(len(case.r_ids))
-            power_overlaps.add(len(set(case.r_ids) & set(case.q_ids)))
+            overlap = len(set(case.r_ids) & set(case.q_ids))
+            power_overlaps.add(overlap)
             power_denominators.add(case.witness[3])
+            if case.stratum == "well_conditioned":
+                well_power_overlaps.add(overlap)
+                if overlap >= len(case.r_ids):
+                    raise AssertionError(
+                        "a well-conditioned H_RQ case has R equal to Q"
+                    )
         if module.should_metamorph(base_index, case.stratum, stride):
             metamorphism = module.metamorphism_for_base(
                 base_index, case.stratum, stride
             )
             transformed = module.metamorphic_case(case, seed, metamorphism)
-            expected = (
-                -exact_fraction
-                if metamorphism == module.PREDICATE_SYMMETRY
-                or (
-                    metamorphism == module.IMPROPER_REFLECTION
-                    and case.predicate == "orientation_3d"
-                )
-                else exact_fraction
+            reverses_sign = metamorphism == module.PREDICATE_SYMMETRY or (
+                metamorphism == module.IMPROPER_REFLECTION
+                and case.predicate == "orientation_3d"
             )
+            expected = -exact_fraction if reverses_sign else exact_fraction
             if metamorphism == module.POWER_OF_TWO_SCALING:
                 exponent = 1 + module.counter_value(seed, base_index, 124) % 3
                 degree = 3 if case.predicate == "orientation_3d" else 2
                 expected *= 1 << (degree * exponent)
-            if fraction_oracle(transformed) != expected:
+            transformed_fraction = fraction_oracle(transformed)
+            if transformed_fraction != expected:
                 raise AssertionError(f"metamorphism changed Fraction: {metamorphism}")
+            if case.stratum == "well_conditioned" and transformed_fraction == 0:
+                raise AssertionError("a well-conditioned metamorphism became vacuous")
+            if transformed_fraction != 0:
+                nonzero_metamorphisms.add(metamorphism)
+            elif case.stratum == "exact_equalities":
+                transformed_exact_equality_predicates.add(case.predicate)
+            if reverses_sign:
+                if exact_fraction == 0 or transformed_fraction == 0:
+                    if (
+                        metamorphism != module.IMPROPER_REFLECTION
+                        or module.expected_metamorphic_relation(
+                            "zero", case.predicate, metamorphism
+                        )
+                        != "same_sign"
+                    ):
+                        raise AssertionError(
+                            "a zero image was classified as an opposite relation"
+                        )
+                    zero_preserving_reflection_count += 1
+                else:
+                    nonvacuous_opposite_count += 1
             metamorphisms[metamorphism] += 1
             metamorphism_count += 1
     if any(count == 0 for count in observed_strata.values()):
         raise AssertionError("the smoke prefix omits a frozen stratum")
+    if exact_equality_predicates != set(module.PREDICATES):
+        raise AssertionError("exact equalities do not cover all three predicates")
+    if well_conditioned_predicates != set(module.PREDICATES):
+        raise AssertionError("well-conditioned cases do not cover all three predicates")
     if power_cardinalities != set(range(1, 11)) or len(power_overlaps) < 5:
         raise AssertionError("the H_RQ catalog omits cardinalities or overlaps")
     if power_denominators != set(module.POWER_WITNESS_DENOMINATORS):
         raise AssertionError("the H_RQ corpus omits witness denominators")
     if any(count == 0 for count in metamorphisms.values()):
         raise AssertionError("the smoke prefix omits a metamorphism type")
+    if nonvacuous_opposite_count == 0:
+        raise AssertionError("the smoke prefix omits a non-vacuous opposite relation")
+    if nonzero_metamorphisms != set(module.METAMORPHISMS):
+        raise AssertionError("a metamorphism has no nonzero smoke witness")
+    if transformed_exact_equality_predicates != set(module.PREDICATES):
+        raise AssertionError("transformed exact equalities omit a predicate")
+
+    zero_orientation = module.generate_base_case(seed, 199)
+    if (
+        zero_orientation.predicate != "orientation_3d"
+        or zero_orientation.stratum != "exact_equalities"
+        or fraction_oracle(zero_orientation) != 0
+        or module.metamorphism_for_base(199, zero_orientation.stratum, stride)
+        != module.IMPROPER_REFLECTION
+        or module.expected_metamorphic_sign(
+            "zero", "orientation_3d", module.IMPROPER_REFLECTION
+        )
+        != "zero"
+        or module.expected_metamorphic_relation(
+            "zero", "orientation_3d", module.IMPROPER_REFLECTION
+        )
+        != "same_sign"
+    ):
+        raise AssertionError("the exact-zero orientation regression reappeared")
+    try:
+        module.expected_metamorphic_sign(
+            "zero", "orientation_3d", module.PREDICATE_SYMMETRY
+        )
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("predicate symmetry was allowed to become vacuous")
+
+    retry_regressions = {
+        "compare_squared_distances": 3_400_314,
+        "orientation_3d": 50_890,
+        "power_bisector_side": 9_326,
+    }
+    retry_attempts: dict[str, int] = {}
+    try:
+        module.well_conditioned_candidate(seed, 0, module.WELL_CONDITIONED_MAX_ATTEMPTS)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("the deterministic retry bound is open")
+    for predicate, base_index in retry_regressions.items():
+        raw_case, raw_value = module.well_conditioned_candidate(seed, base_index, 0)
+        if (
+            raw_case.predicate != predicate
+            or raw_case.stratum != "well_conditioned"
+            or raw_value != 0
+            or fraction_oracle(raw_case) != 0
+        ):
+            raise AssertionError(
+                f"retry regression no longer starts at zero: {predicate}"
+            )
+        accepted_case = None
+        accepted_integer_value = 0
+        for attempt in range(1, module.WELL_CONDITIONED_MAX_ATTEMPTS):
+            candidate, integer_value = module.well_conditioned_candidate(
+                seed, base_index, attempt
+            )
+            if integer_value != 0:
+                accepted_case = candidate
+                accepted_integer_value = integer_value
+                retry_attempts[predicate] = attempt
+                break
+        if accepted_case is None:
+            raise AssertionError(f"retry regression exhausted its bound: {predicate}")
+        generated = module.generate_base_case(seed, base_index)
+        accepted_fraction = fraction_oracle(accepted_case)
+        if (
+            generated.command() != accepted_case.command()
+            or module.generate_base_case(seed, base_index).command()
+            != generated.command()
+            or accepted_fraction == 0
+            or (accepted_integer_value > 0) != (accepted_fraction > 0)
+        ):
+            raise AssertionError(f"deterministic retry failed: {predicate}")
+
+    h_rq_family_count = 600
+    for family_index in range(h_rq_family_count):
+        base_index = 60 * family_index + 32
+        case = module.generate_base_case(seed, base_index)
+        overlap = len(set(case.r_ids) & set(case.q_ids))
+        if (
+            case.predicate != "power_bisector_side"
+            or case.stratum != "well_conditioned"
+            or overlap >= len(case.r_ids)
+            or fraction_oracle(case) == 0
+            or module.generate_base_case(seed, base_index).command() != case.command()
+        ):
+            raise AssertionError(f"H_RQ 60k+32 regression failed: {base_index}")
+    regression_index = regression["base_index"]
+    index_32 = module.generate_base_case(seed, regression_index)
+    if (
+        len(index_32.r_ids) != 1
+        or len(index_32.q_ids) != 1
+        or set(index_32.r_ids) == set(index_32.q_ids)
+        or fraction_oracle(index_32) == 0
+    ):
+        raise AssertionError("the minimal H_RQ base-32 regression reappeared")
+
+    continuous = tuple(
+        case.command() for case in module.cases_for_range(seed, 0, 600, stride)
+    )
+    chunked = tuple(
+        case.command()
+        for begin, end in ((0, 300), (300, 600))
+        for case in module.cases_for_range(seed, begin, end, stride)
+    )
+    repeated = tuple(
+        case.command() for case in module.cases_for_range(seed, 0, 600, stride)
+    )
+    if continuous != chunked or continuous != repeated:
+        raise AssertionError("generator identity depends on retry or chunk boundaries")
+    original_oracle_value = module.oracle_value
+    oracle_value_calls = 0
+
+    def counted_oracle_value(case: Any) -> tuple[int, int]:
+        nonlocal oracle_value_calls
+        oracle_value_calls += 1
+        return original_oracle_value(case)
+
+    module.oracle_value = counted_oracle_value
+    try:
+        generated_cases = tuple(module.cases_for_range(seed, 0, 600, stride))
+        if oracle_value_calls != 0:
+            raise AssertionError("case generation duplicated the dyadic oracle")
+        _, precomputed_metamorphisms = module.precompute_ordered_roots(config, 600)
+        if (
+            oracle_value_calls != len(generated_cases)
+            or precomputed_metamorphisms != metamorphism_count
+        ):
+            raise AssertionError(
+                "precomputation did not call the oracle exactly once per sign"
+            )
+    finally:
+        module.oracle_value = original_oracle_value
     words = (module.ONE, module.TWO, module.NEGATIVE_ONE, module.MINIMUM_SUBNORMAL)
     minimized = module.greedy_minimize_words(
         words, lambda candidate: candidate[-1] == module.MINIMUM_SUBNORMAL
@@ -401,15 +626,25 @@ def audit_generator(module: ModuleType, config: dict[str, Any]) -> dict[str, Any
     ):
         raise AssertionError("the injected helper divergence was not minimized")
     return {
-        "closed_counter_domain_checks": 4,
+        "closed_counter_domain_checks": 7,
         "closed_reference_checks": 3,
         "closed_structural_count_checks": 2,
         "fraction_oracle_case_count": 600,
         "metamorphism_case_count": metamorphism_count,
         "metamorphism_counts": metamorphisms,
+        "nonvacuous_opposite_metamorphism_count": nonvacuous_opposite_count,
+        "oracle_call_bound_case_count": len(generated_cases),
+        "permanent_generator_regression_count": 1,
+        "zero_preserving_reflection_count": zero_preserving_reflection_count,
+        "deterministic_retry_attempts": retry_attempts,
+        "exact_equality_predicates": sorted(exact_equality_predicates),
+        "h_rq_60k_plus_32_regression_count": h_rq_family_count,
+        "h_rq_base_32_regression_count": 1,
         "power_cardinalities": sorted(power_cardinalities),
         "power_denominators": sorted(power_denominators),
         "power_overlap_pattern_count": len(power_overlaps),
+        "well_conditioned_base_count": well_conditioned_count,
+        "well_conditioned_power_overlap_pattern_count": len(well_power_overlaps),
     }
 
 
@@ -503,24 +738,65 @@ def audit_scientific_roots(
     seed = int(config["generator"]["seed"], 16)
     stride = config["metamorphisms"]["stride"]
     roots = module.initial_ordered_roots()
+    expected_relation_counts = {relation: 0 for relation in module.RELATIONS}
     for reference in manifest["chunks"]:
         chunk, _ = load_canonical(checkpoint / reference["relative_path"])
         cases = tuple(
             module.cases_for_range(seed, chunk["base_begin"], chunk["base_end"], stride)
         )
         corpus = "".join(f"{case.command()}\n" for case in cases).encode("utf-8")
-        oracle_rows = tuple(
-            canonical_bytes(
-                {
-                    "base_index": case.base_index,
-                    "predicate": case.predicate,
-                    "relation": case.relation,
-                    "sign": module.oracle_sign(case),
-                    "stratum": case.stratum,
-                }
+        oracle_rows: list[bytes] = []
+        current_base: Any | None = None
+        current_base_sign: str | None = None
+        for case in cases:
+            sign = module.oracle_sign(case)
+            if case.relation == "base":
+                current_base = case
+                current_base_sign = sign
+            else:
+                if current_base is None or current_base_sign is None:
+                    raise AssertionError("root audit found an orphan metamorphic case")
+                reverses_sign = case.relation == module.PREDICATE_SYMMETRY or (
+                    case.relation == module.IMPROPER_REFLECTION
+                    and case.predicate == "orientation_3d"
+                )
+                relation = (
+                    "opposite_sign"
+                    if reverses_sign and current_base_sign != "zero"
+                    else "same_sign"
+                )
+                if relation == "opposite_sign":
+                    if (
+                        sign == "zero"
+                        or module.opposite_sign(current_base_sign) != sign
+                    ):
+                        raise AssertionError("root audit found a vacuous opposite sign")
+                elif sign != current_base_sign:
+                    raise AssertionError("root audit found a broken same-sign relation")
+                if (
+                    module.expected_metamorphic_relation(
+                        current_base_sign, case.predicate, case.relation
+                    )
+                    != relation
+                ):
+                    raise AssertionError(
+                        "runtime metamorphic relation disagrees with audit"
+                    )
+                module.validate_metamorphic_sign(
+                    current_base, case, current_base_sign, sign
+                )
+                expected_relation_counts[relation] += 1
+            oracle_rows.append(
+                canonical_bytes(
+                    {
+                        "base_index": case.base_index,
+                        "predicate": case.predicate,
+                        "relation": case.relation,
+                        "sign": sign,
+                        "stratum": case.stratum,
+                    }
+                )
             )
-            for case in cases
-        )
         completed = subprocess.run(
             [str(native), "--decision-only", "--batch"],
             input=corpus,
@@ -560,6 +836,10 @@ def audit_scientific_roots(
         or roots["output"] != certificate["output_sha256"]
     ):
         raise AssertionError("certificate roots differ from the ordered actual corpus")
+    if expected_relation_counts != certificate["counts"]["by_metamorphic_relation"]:
+        raise AssertionError(
+            "certificate metamorphic relation counts differ from audit"
+        )
 
 
 def audit_checkpoint(
@@ -1087,7 +1367,11 @@ def main() -> int:
             raise SystemExit(f"{label} does not exist: {path}")
     module = load_module(arguments.campaign_tool.resolve())
     config, _ = load_canonical(arguments.config.resolve())
-    generator_summary = audit_generator(module, config)
+    regression, _ = load_canonical(
+        arguments.repository.resolve()
+        / "morsehgp3d/tests/fixtures/predicates/campaign_well_conditioned_zero_regression.json"
+    )
+    generator_summary = audit_generator(module, config, regression)
     with tempfile.TemporaryDirectory(
         prefix="morsehgp3d-phase2a-campaign-"
     ) as directory:

@@ -150,7 +150,7 @@ python morsehgp3d/tools/predicate_campaign.py \
   --precompute-roots /tmp/morsehgp3d-phase2a-roots.json
 ```
 
-Ce premier passage ne lance aucun prédicat natif. Sur un commit propre, il dérive les racines ordonnées des commandes et des signes de l'oracle entier dyadique pour 10 800 000 cas de base. Ces racines doivent ensuite remplacer les deux valeurs `null` de la configuration et être commitées avant la campagne certifiante; le mode production refuse une racine absente ou divergente. Les 10 044 000 cas bien conditionnés pseudo-aléatoires dépassent à eux seuls le seuil de $10^7$; les sept strates adversariales ajoutent 756 000 cas construits. Les dérivés métamorphiques sont comptés séparément et ne contribuent jamais à ce seuil.
+Ce premier passage ne lance aucun prédicat natif. Sur un commit propre, il dérive les racines ordonnées des commandes et des signes de l'oracle entier dyadique pour 10 800 000 cas de base. Ces racines doivent ensuite remplacer les deux valeurs `null` de la configuration et être commitées avant la campagne certifiante; le mode production refuse une racine absente ou divergente. Le générateur `splitmix64-counter-v2` exige qu'un cas `well_conditioned` ait un signe strict et régénère de façon déterministe et bornée toute égalité fortuite; la fixture `campaign_well_conditioned_zero_regression.json` conserve le contre-exemple minimal qui avait révélé `R=Q` dans la version précédente. Les 10 044 000 cas bien conditionnés pseudo-aléatoires dépassent ainsi à eux seuls le seuil de $10^7$; les sept strates adversariales ajoutent 756 000 cas construits. Les dérivés métamorphiques sont comptés séparément et ne contribuent jamais à ce seuil.
 
 Après gel et commit des racines, une transaction native se lance ainsi :
 

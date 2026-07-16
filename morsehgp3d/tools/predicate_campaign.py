@@ -28,7 +28,7 @@ CERTIFICATE_KIND = "morsehgp3d_phase2a_predicate_campaign_certificate"
 REPRO_KIND = "morsehgp3d_phase2a_predicate_campaign_repro"
 ORIGINAL_REPRO_KIND = "morsehgp3d_phase2a_predicate_campaign_original_repro"
 PRECOMPUTE_KIND = "morsehgp3d_phase2a_predicate_campaign_precomputed_roots"
-GENERATOR_ID = "splitmix64-counter-v1"
+GENERATOR_ID = "splitmix64-counter-v2"
 ORACLE_ID = "independent-integer-dyadic-v1"
 NATIVE_INTERFACE = "decision-only-batch-v1"
 ORDERED_ROOT_ALGORITHM = "sha256-record-chain-v1"
@@ -38,6 +38,8 @@ FAILPOINT_ENVIRONMENT = "MORSEHGP3D_PHASE2A_CAMPAIGN_FAIL_AFTER"
 UINT64_MASK = (1 << 64) - 1
 SPLITMIX_INCREMENT = 0x9E3779B97F4A7C15
 COUNTER_DOMAIN_SIZE = 128
+WELL_CONDITIONED_RETRY_STRIDE = 1 << 32
+WELL_CONDITIONED_MAX_ATTEMPTS = 1024
 MAX_CHUNK_BASE_CASES = 9_600
 MIN_PRODUCTION_BASE_CASES = 10_000_000
 SMOKE_MINIMUM = 300
@@ -400,7 +402,7 @@ METAMORPHISM_CATALOG = (
     {
         "id": IMPROPER_REFLECTION,
         "scope": "all_strata",
-        "sign_rule": "opposite_for_orientation_otherwise_same",
+        "sign_rule": "opposite_for_nonzero_orientation_zero_preserving_otherwise_same",
     },
     {
         "id": DYADIC_TRANSLATION,
@@ -477,13 +479,46 @@ def opposite_sign(value: str) -> str:
     )
 
 
-def expected_metamorphic_sign(base: PredicateCase, metamorphism: str) -> str:
-    base_sign = oracle_sign(base)
-    if metamorphism == PREDICATE_SYMMETRY or (
-        metamorphism == IMPROPER_REFLECTION and base.predicate == "orientation_3d"
+def expected_metamorphic_sign(base_sign: str, predicate: str, metamorphism: str) -> str:
+    relation = expected_metamorphic_relation(base_sign, predicate, metamorphism)
+    return opposite_sign(base_sign) if relation == "opposite_sign" else base_sign
+
+
+def expected_metamorphic_relation(
+    base_sign: str, predicate: str, metamorphism: str
+) -> str:
+    if base_sign not in SIGNS:
+        raise ValueError("a metamorphic relation received an invalid base sign")
+    if predicate not in PREDICATES or metamorphism not in METAMORPHISMS:
+        raise ValueError("a metamorphic relation escaped the frozen catalog")
+    reverses_sign = metamorphism == PREDICATE_SYMMETRY or (
+        metamorphism == IMPROPER_REFLECTION and predicate == "orientation_3d"
+    )
+    if base_sign == "zero":
+        if metamorphism == PREDICATE_SYMMETRY:
+            raise ValueError("predicate symmetry became vacuous on zero")
+        return "same_sign"
+    return "opposite_sign" if reverses_sign else "same_sign"
+
+
+def validate_metamorphic_sign(
+    base: PredicateCase,
+    transformed: PredicateCase,
+    base_sign: str,
+    transformed_sign: str,
+) -> None:
+    if (
+        transformed.relation == "base"
+        or transformed.base_index != base.base_index
+        or transformed.predicate != base.predicate
+        or transformed.stratum != base.stratum
     ):
-        return opposite_sign(base_sign)
-    return base_sign
+        raise ValueError("a generated metamorphic case lost its base identity")
+    expected = expected_metamorphic_sign(
+        base_sign, base.predicate, transformed.relation
+    )
+    if transformed_sign != expected:
+        raise ValueError("the generated metamorphism violated its exact sign relation")
 
 
 def canonical_witness(values: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
@@ -633,8 +668,6 @@ def metamorphic_case(
             )
     else:
         raise ValueError("the requested metamorphism is outside the frozen catalog")
-    if oracle_sign(result) != expected_metamorphic_sign(base, metamorphism):
-        raise ValueError("the generated metamorphism violated its exact sign relation")
     return result
 
 
@@ -642,22 +675,30 @@ def point_from_integers(x: int, y: int, z: int, exponent: int = 0) -> PointWords
     return scaled_word(x, exponent), scaled_word(y, exponent), scaled_word(z, exponent)
 
 
-def randomized_point(
+IntegerPoint = tuple[int, int, int]
+
+
+def randomized_integer_point(
     seed: int, base_index: int, lane: int, bound: int = 1024
-) -> PointWords:
-    return point_from_integers(
+) -> IntegerPoint:
+    return (
         signed_small(seed, base_index, lane, bound),
         signed_small(seed, base_index, lane + 1, bound),
         signed_small(seed, base_index, lane + 2, bound),
     )
 
 
+def randomized_point(
+    seed: int, base_index: int, lane: int, bound: int = 1024
+) -> PointWords:
+    return point_from_integers(*randomized_integer_point(seed, base_index, lane, bound))
+
+
 def distance_points(seed: int, base_index: int, stratum: str) -> tuple[PointWords, ...]:
     if stratum == "well_conditioned":
-        witness = randomized_point(seed, base_index, 0, 32)
-        left = randomized_point(seed, base_index, 3, 1024)
-        right = randomized_point(seed, base_index, 6, 1024)
-        return witness, left, right
+        raise ValueError(
+            "well-conditioned distance cases require the closed retry path"
+        )
     if stratum == "cancellation":
         return (
             point_from_integers(0, 0, 0),
@@ -706,14 +747,9 @@ def orientation_points(
     seed: int, base_index: int, stratum: str
 ) -> tuple[PointWords, ...]:
     if stratum == "well_conditioned":
-        while True:
-            points = tuple(
-                randomized_point(seed, base_index, lane, 32) for lane in (0, 3, 6, 9)
-            )
-            candidate = PredicateCase(base_index, "orientation_3d", stratum, points)
-            if oracle_sign(candidate) != "zero":
-                return points
-            base_index += 1 << 32
+        raise ValueError(
+            "well-conditioned orientation cases require the closed retry path"
+        )
     origin = point_from_integers(0, 0, 0)
     if stratum == "cancellation":
         return (
@@ -767,28 +803,33 @@ def orientation_points(
     )
 
 
-def power_case(seed: int, base_index: int, stratum: str) -> PredicateCase:
+def power_labels(
+    base_index: int, stratum: str
+) -> tuple[tuple[int, ...], tuple[int, ...]]:
     cardinality = 1 + ((base_index // 3) % 10)
     if stratum == "exact_equalities":
         overlap = cardinality
     elif stratum == "well_conditioned":
-        overlap = (base_index // 30) % (cardinality + 1)
+        overlap = (base_index // 30) % cardinality
     else:
         overlap = cardinality - 1
     r_ids = tuple(range(cardinality))
     q_ids = tuple(range(overlap)) + tuple(
         range(cardinality, cardinality + cardinality - overlap)
     )
-    point_count = max((*r_ids, *q_ids), default=0) + 1
-    points = [
-        randomized_point(seed, base_index, 10 + 3 * index, 32)
-        for index in range(point_count)
-    ]
+    if stratum == "well_conditioned" and not overlap < cardinality:
+        raise ValueError("a well-conditioned H_RQ label pair became identical")
+    return r_ids, q_ids
+
+
+def power_witness(
+    seed: int, base_index: int, sample_index: int
+) -> tuple[int, int, int, int]:
     denominator = POWER_WITNESS_DENOMINATORS[
         (base_index // 3) % len(POWER_WITNESS_DENOMINATORS)
     ]
     witness_numerators = [
-        signed_small(seed, base_index, lane, 16) for lane in (1, 2, 3)
+        signed_small(seed, sample_index, lane, 16) for lane in (1, 2, 3)
     ]
     while (
         math.gcd(
@@ -801,8 +842,109 @@ def power_case(seed: int, base_index: int, stratum: str) -> PredicateCase:
         != 1
     ):
         witness_numerators[0] += 1
-    witness = canonical_witness((*witness_numerators, denominator))
-    if stratum != "well_conditioned" and overlap < cardinality:
+    return canonical_witness((*witness_numerators, denominator))
+
+
+def integer_orientation_value(points: tuple[IntegerPoint, ...]) -> int:
+    a, b, c, d = points
+    u = tuple(b[axis] - a[axis] for axis in range(3))
+    v = tuple(c[axis] - a[axis] for axis in range(3))
+    w = tuple(d[axis] - a[axis] for axis in range(3))
+    return (
+        u[0] * (v[1] * w[2] - v[2] * w[1])
+        - u[1] * (v[0] * w[2] - v[2] * w[0])
+        + u[2] * (v[0] * w[1] - v[1] * w[0])
+    )
+
+
+def integer_power_value(
+    points: tuple[IntegerPoint, ...],
+    witness: tuple[int, int, int, int],
+    r_ids: tuple[int, ...],
+    q_ids: tuple[int, ...],
+) -> int:
+    coordinate_delta = tuple(
+        sum(points[index][axis] for index in r_ids)
+        - sum(points[index][axis] for index in q_ids)
+        for axis in range(3)
+    )
+    norm_delta = sum(
+        sum(coordinate * coordinate for coordinate in points[index]) for index in r_ids
+    ) - sum(
+        sum(coordinate * coordinate for coordinate in points[index]) for index in q_ids
+    )
+    return witness[3] * norm_delta - 2 * sum(
+        witness[axis] * coordinate_delta[axis] for axis in range(3)
+    )
+
+
+def well_conditioned_candidate(
+    seed: int, base_index: int, attempt: int
+) -> tuple[PredicateCase, int]:
+    if not 0 <= attempt < WELL_CONDITIONED_MAX_ATTEMPTS:
+        raise ValueError("a well-conditioned retry escaped its closed bound")
+    sample_index = base_index + attempt * WELL_CONDITIONED_RETRY_STRIDE
+    predicate = predicate_for_index(base_index)
+    if predicate == "compare_squared_distances":
+        integer_points = tuple(
+            randomized_integer_point(seed, sample_index, lane, bound)
+            for lane, bound in ((0, 32), (3, 1024), (6, 1024))
+        )
+        witness, left, right = integer_points
+        value = sum((witness[axis] - left[axis]) ** 2 for axis in range(3)) - sum(
+            (witness[axis] - right[axis]) ** 2 for axis in range(3)
+        )
+        case = PredicateCase(
+            base_index,
+            predicate,
+            "well_conditioned",
+            tuple(point_from_integers(*point) for point in integer_points),
+        )
+        return case, value
+    if predicate == "orientation_3d":
+        integer_points = tuple(
+            randomized_integer_point(seed, sample_index, lane, 32)
+            for lane in (0, 3, 6, 9)
+        )
+        case = PredicateCase(
+            base_index,
+            predicate,
+            "well_conditioned",
+            tuple(point_from_integers(*point) for point in integer_points),
+        )
+        return case, integer_orientation_value(integer_points)
+    r_ids, q_ids = power_labels(base_index, "well_conditioned")
+    point_count = max((*r_ids, *q_ids)) + 1
+    integer_points = tuple(
+        randomized_integer_point(seed, sample_index, 10 + 3 * index, 32)
+        for index in range(point_count)
+    )
+    witness = power_witness(seed, base_index, sample_index)
+    case = PredicateCase(
+        base_index,
+        predicate,
+        "well_conditioned",
+        tuple(point_from_integers(*point) for point in integer_points),
+        witness,
+        r_ids,
+        q_ids,
+    )
+    return case, integer_power_value(integer_points, witness, r_ids, q_ids)
+
+
+def power_case(seed: int, base_index: int, stratum: str) -> PredicateCase:
+    if stratum == "well_conditioned":
+        raise ValueError("well-conditioned H_RQ cases require the closed retry path")
+    r_ids, q_ids = power_labels(base_index, stratum)
+    cardinality = len(r_ids)
+    overlap = len(set(r_ids) & set(q_ids))
+    point_count = max((*r_ids, *q_ids), default=0) + 1
+    points = [
+        randomized_point(seed, base_index, 10 + 3 * index, 32)
+        for index in range(point_count)
+    ]
+    witness = power_witness(seed, base_index, base_index)
+    if overlap < cardinality:
         r_special = overlap
         q_special = cardinality
         if stratum == "cancellation":
@@ -844,6 +986,14 @@ def power_case(seed: int, base_index: int, stratum: str) -> PredicateCase:
 def generate_base_case(seed: int, base_index: int) -> PredicateCase:
     predicate = predicate_for_index(base_index)
     stratum = stratum_for_index(base_index)
+    if stratum == "well_conditioned":
+        for attempt in range(WELL_CONDITIONED_MAX_ATTEMPTS):
+            case, integer_value = well_conditioned_candidate(seed, base_index, attempt)
+            if integer_value != 0:
+                return case
+        raise ValueError(
+            f"well-conditioned {predicate} base {base_index} exhausted deterministic retries"
+        )
     if predicate == "compare_squared_distances":
         case = PredicateCase(
             base_index, predicate, stratum, distance_points(seed, base_index, stratum)
@@ -857,8 +1007,6 @@ def generate_base_case(seed: int, base_index: int) -> PredicateCase:
         )
     else:
         case = power_case(seed, base_index, stratum)
-    if stratum == "well_conditioned":
-        return case
     # Hard recipes keep their algebraic stratum, but their axes and signs are
     # selected from the global counter.  They are therefore not ten million
     # copies of seven hand-written fixtures.  A second independent rotation is
@@ -1127,7 +1275,14 @@ def validate_config(
     if base_count % 100:
         raise ValueError("the production base count must close the percentage cycle")
     generator = require_fields(
-        config["generator"], {"algorithm", "seed"}, "generator config"
+        config["generator"],
+        {
+            "algorithm",
+            "seed",
+            "well_conditioned_max_attempts",
+            "well_conditioned_retry_stride",
+        },
+        "generator config",
     )
     if (
         generator["algorithm"] != GENERATOR_ID
@@ -1136,6 +1291,26 @@ def validate_config(
     ):
         raise ValueError("the generator config is unsupported")
     int(generator["seed"], 16)
+    retry_attempts = require_integer(
+        generator["well_conditioned_max_attempts"],
+        "well-conditioned retry attempts",
+        minimum=1,
+    )
+    retry_stride = require_integer(
+        generator["well_conditioned_retry_stride"],
+        "well-conditioned retry stride",
+        minimum=base_count + 1,
+    )
+    if (
+        retry_attempts != WELL_CONDITIONED_MAX_ATTEMPTS
+        or retry_stride != WELL_CONDITIONED_RETRY_STRIDE
+    ):
+        raise ValueError("the well-conditioned retry policy changed")
+    maximum_retry_counter = (
+        base_count - 1 + (retry_attempts - 1) * retry_stride
+    ) * COUNTER_DOMAIN_SIZE + (COUNTER_DOMAIN_SIZE - 1)
+    if maximum_retry_counter > UINT64_MASK:
+        raise ValueError("the well-conditioned retry domains overlap modulo 2^64")
     metamorphisms = require_fields(
         config["metamorphisms"],
         {"catalog", "non_well_conditioned_ids", "stride"},
@@ -1651,6 +1826,7 @@ def update_case_count(
     case: PredicateCase,
     result: dict[str, Any],
     expected: str,
+    base_sign: str | None,
 ) -> None:
     counts["total_sign_count"] += 1
     counts["by_predicate"][case.predicate] += 1
@@ -1665,14 +1841,10 @@ def update_case_count(
         counts["metamorphic_sign_count"] += 1
         counts["metamorphisms_verified"] += 1
         counts["by_metamorphism"][case.relation] += 1
-        relation = (
-            "opposite_sign"
-            if case.relation == PREDICATE_SYMMETRY
-            or (
-                case.relation == IMPROPER_REFLECTION
-                and case.predicate == "orientation_3d"
-            )
-            else "same_sign"
+        if base_sign is None:
+            raise ValueError("a metamorphic count lost its generated base sign")
+        relation = expected_metamorphic_relation(
+            base_sign, case.predicate, case.relation
         )
         counts["by_metamorphic_relation"][relation] += 1
     if result["sign"] != expected:
@@ -1734,6 +1906,8 @@ def execute_chunk(
                 f"returncode={completed.returncode}, stderr={stderr!r}"
             )
         with output_path.open("r", encoding="utf-8", newline="") as stream:
+            current_base: PredicateCase | None = None
+            current_base_sign: str | None = None
             for case in cases_for_range(seed, begin, end, stride):
                 line = stream.readline()
                 if not line or not line.endswith("\n"):
@@ -1747,6 +1921,17 @@ def execute_chunk(
                 )
                 result = validate_native_row(line[:-1], case)
                 expected_sign = oracle_sign(case)
+                if case.relation == "base":
+                    current_base = case
+                    current_base_sign = expected_sign
+                else:
+                    if current_base is None or current_base_sign is None:
+                        raise ValueError(
+                            "a metamorphic case appeared without its generated base"
+                        )
+                    validate_metamorphic_sign(
+                        current_base, case, current_base_sign, expected_sign
+                    )
                 oracle_row = canonical_bytes(
                     {
                         "base_index": case.base_index,
@@ -1760,7 +1945,13 @@ def execute_chunk(
                 ordered_roots_after["oracle"] = extend_ordered_root(
                     "oracle", ordered_roots_after["oracle"], oracle_row
                 )
-                update_case_count(counts, case, result, expected_sign)
+                update_case_count(
+                    counts,
+                    case,
+                    result,
+                    expected_sign,
+                    current_base_sign if case.relation != "base" else None,
+                )
                 if result["sign"] != expected_sign:
                     repro = publish_repro(
                         checkpoint_dir,
@@ -2262,9 +2453,22 @@ def precompute_ordered_roots(
     seed = int(config["generator"]["seed"], 16)
     stride = config["metamorphisms"]["stride"]
     metamorphic_count = 0
+    current_base: PredicateCase | None = None
+    current_base_sign: str | None = None
     for case in cases_for_range(seed, 0, base_count, stride):
         command = (case.command() + "\n").encode("utf-8")
         expected_sign = oracle_sign(case)
+        if case.relation == "base":
+            current_base = case
+            current_base_sign = expected_sign
+        else:
+            if current_base is None or current_base_sign is None:
+                raise ValueError(
+                    "a metamorphic case appeared without its generated base"
+                )
+            validate_metamorphic_sign(
+                current_base, case, current_base_sign, expected_sign
+            )
         oracle_row = canonical_bytes(
             {
                 "base_index": case.base_index,
