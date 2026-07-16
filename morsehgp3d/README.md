@@ -116,6 +116,15 @@ python morsehgp3d/tests/differential/check_predicate_random.py \
   build/morsehgp3d/morsehgp3d_replay_predicate
 ```
 
+Le sous-lot 2A.9(1) ajoute un chemin compact destiné aux grandes campagnes de signes :
+
+```bash
+build/morsehgp3d/morsehgp3d_replay_predicate \
+  --decision-only --batch < predicate-lines.txt
+```
+
+Ce mode accepte uniquement `compare_squared_distances`, `orientation_3d` et `power_bisector_side`. Chaque ligne de sortie est un objet JSON canonique fermé réduit à `certification_stage`, `counters`, `predicate` et `sign`; aucun niveau, déterminant ou témoin rationnel multiprécision n'est sérialisé. Une invocation forme une transaction : toutes ses lignes sont certifiées avant publication, et une erreur tardive ne laisse aucun préfixe sur la sortie standard. La transaction conserve en mémoire la sortie compacte du chunk; jusqu'à 2A.9(2), l'appelant doit donc imposer une taille de chunk bornée. Les commandes, schémas et sorties riches des replays v1 à v8 restent inchangés et demeurent la voie de diagnostic. Le différentiel CTest rejoue 14 cas ciblés contre l'oracle `Fraction`, puis avec `--multiprecision-only`; il couvre les trois signes de chaque famille, les trois étages, les zéros exacts, les replis fermés et l'identité des sentinelles riches. Cette qualification de l'interface ne constitue ni le checkpoint transactionnel entre chunks, ni la campagne de fermeture à $10^7$ signes; cette dernière ne sera lancée qu'après activation de la reprise et de la borne de chunk.
+
 La suite courte traite 2 048 cas déterministes, publie le hash du corpus, force chacun des trois étages sur les trois familles adaptatives, vérifie chaque sortie contre `Fraction`, puis rejoue le même flux avec `--multiprecision-only`. Les paramètres `--distance-cases`, `--orientation-cases` et `--power-cases` permettent d'augmenter ce volume; cette infrastructure riche ne constitue pas encore la campagne de fermeture à dix millions de signes.
 
 Le différentiel 2A.8b ajoute 4 050 commandes déterministes pour les quatre familles v7. Il couvre les tailles de support un à quatre, force les signes stricts aux intervalles, les trois signes aux expansions et les trois signes aux replis multiprécision, puis exige les mêmes témoins scientifiques avec la cascade désactivée. Trente fixtures permanentes, 288 relations métamorphiques et six sentinelles d'identité v1 à v6 complètent ce corpus; cette qualification locale ne remplace pas davantage la campagne de fermeture 2A.9.
@@ -129,4 +138,4 @@ build/morsehgp3d/morsehgp3d_replay_predicate \
   --multiprecision-only --batch < predicate-lines.txt
 ```
 
-Le mode batch est un flux : une erreur tardive peut suivre des lignes déjà écrites. Un consommateur ne valide donc jamais ces lignes avant d'avoir observé la fin du processus avec un code nul. Toute erreur de lecture ou d'écriture du flux produit un échec fermé.
+Le batch riche historique reste un flux : une erreur tardive peut suivre des lignes déjà écrites. Un consommateur ne valide donc jamais ces lignes avant d'avoir observé la fin du processus avec un code nul. Toute erreur de lecture ou d'écriture du flux produit un échec fermé.

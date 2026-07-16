@@ -47,6 +47,7 @@ using morsehgp3d::exact::ExactRational3;
 using morsehgp3d::exact::ExactRational3Record;
 using morsehgp3d::exact::ExactLevelOrderResult;
 using morsehgp3d::exact::PredicateCounters;
+using morsehgp3d::exact::PredicateDecision;
 using morsehgp3d::exact::PredicateFilterPolicy;
 using morsehgp3d::exact::PredicateSign;
 using morsehgp3d::exact::SupportLevelEmission;
@@ -61,6 +62,9 @@ using morsehgp3d::exact::compare_squared_distances;
 using morsehgp3d::exact::compare_exact_levels;
 using morsehgp3d::exact::compare_support_levels;
 using morsehgp3d::exact::circumcenter;
+using morsehgp3d::exact::decide_orientation_3d;
+using morsehgp3d::exact::decide_power_bisector_side;
+using morsehgp3d::exact::decide_squared_distance_order;
 using morsehgp3d::exact::fourth_plane_incidence;
 using morsehgp3d::exact::intersect_three_planes;
 using morsehgp3d::exact::maximum_power_label_cardinality;
@@ -173,6 +177,19 @@ std::string counters_json(const PredicateCounters& counters) {
          ",\"fp64_filtered_certified\":" +
          std::to_string(counters.fp64_filtered_certified()) +
          ",\"remaining_unknown\":" + std::to_string(counters.remaining_unknown()) + "}";
+}
+
+int write_decision_only_result(
+    std::string_view predicate,
+    const PredicateDecision& decision,
+    const PredicateCounters& counters,
+    std::ostream& output) {
+  output << "{\"certification_stage\":\""
+         << to_string(decision.certification_stage())
+         << "\",\"counters\":" << counters_json(counters)
+         << ",\"predicate\":\"" << predicate
+         << "\",\"sign\":\"" << to_string(decision.sign()) << "\"}\n";
+  return 0;
 }
 
 std::string rational_json(const ExactRational& value) {
@@ -533,6 +550,68 @@ ParsedPowerLabels parse_power_labels(
   return ParsedPowerLabels{
       ExactLabelMoments::from_canonical_ids(r_ids, point_table),
       ExactLabelMoments::from_canonical_ids(q_ids, point_table)};
+}
+
+int replay_decision_only_distance(
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
+  PredicateCounters counters;
+  const PredicateDecision decision = decide_squared_distance_order(
+      parse_point(arguments, 1U),
+      parse_point(arguments, 4U),
+      parse_point(arguments, 7U),
+      &counters,
+      filter_policy);
+  return write_decision_only_result(
+      "compare_squared_distances", decision, counters, output);
+}
+
+int replay_decision_only_orientation(
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
+  PredicateCounters counters;
+  const PredicateDecision decision = decide_orientation_3d(
+      parse_point(arguments, 1U),
+      parse_point(arguments, 4U),
+      parse_point(arguments, 7U),
+      parse_point(arguments, 10U),
+      &counters,
+      filter_policy);
+  return write_decision_only_result(
+      "orientation_3d", decision, counters, output);
+}
+
+int replay_decision_only_power_bisector(
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
+  if (arguments.size() < 7U) {
+    throw std::invalid_argument("a power-bisector replay is incomplete");
+  }
+  const ExactRational3 witness = ExactRational3::from_record(ExactRational3Record{
+      ExactRational3::schema_version,
+      std::string{arguments[1]},
+      std::string{arguments[2]},
+      std::string{arguments[3]},
+      std::string{arguments[4]},
+      ExactRational3::unit});
+  const ParsedPowerLabels labels = parse_power_labels(arguments, 5U);
+  PredicateCounters counters;
+  const std::optional<CertifiedPoint3> binary64_witness =
+      exact_binary64_point(witness);
+  const PredicateDecision decision =
+      binary64_witness.has_value()
+          ? decide_power_bisector_side(
+                *binary64_witness,
+                labels.r,
+                labels.q,
+                &counters,
+                filter_policy)
+          : decide_power_bisector_side(witness, labels.r, labels.q, &counters);
+  return write_decision_only_result(
+      "power_bisector_side", decision, counters, output);
 }
 
 int replay_distance(
@@ -1523,10 +1602,41 @@ int replay_tokens(
   throw std::invalid_argument("the predicate name or argument count is unsupported");
 }
 
+int replay_decision_only_tokens(
+    std::span<const std::string_view> arguments,
+    std::ostream& output,
+    PredicateFilterPolicy filter_policy) {
+  if (arguments.empty()) {
+    throw std::invalid_argument("a predicate name is required");
+  }
+  if (arguments[0] == "compare_squared_distances" && arguments.size() == 10U) {
+    return replay_decision_only_distance(arguments, output, filter_policy);
+  }
+  if (arguments[0] == "orientation_3d" && arguments.size() == 13U) {
+    return replay_decision_only_orientation(arguments, output, filter_policy);
+  }
+  if (arguments[0] == "power_bisector_side") {
+    return replay_decision_only_power_bisector(
+        arguments, output, filter_policy);
+  }
+  throw std::invalid_argument(
+      "the predicate name or argument count is unsupported in decision-only batch mode");
+}
+
 int replay_batch(
     std::istream& input,
     std::ostream& output,
-    PredicateFilterPolicy filter_policy) {
+    PredicateFilterPolicy filter_policy,
+    bool decision_only) {
+  // A decision-only invocation is the transaction boundary used by the
+  // campaign runner. Buffer its compact rows until every input line has been
+  // parsed and certified so a late malformed command cannot publish a valid
+  // prefix that looks like a completed chunk. The historical rich batch keeps
+  // its streaming behavior unchanged.
+  std::ostringstream decision_transaction;
+  std::ostream& batch_output = decision_only
+                                   ? static_cast<std::ostream&>(decision_transaction)
+                                   : output;
   std::string line;
   std::size_t line_number = 0;
   while (std::getline(input, line)) {
@@ -1547,7 +1657,10 @@ int replay_batch(
       arguments.emplace_back(value);
     }
     try {
-      static_cast<void>(replay_tokens(arguments, output, filter_policy));
+      static_cast<void>(
+          decision_only
+              ? replay_decision_only_tokens(arguments, batch_output, filter_policy)
+              : replay_tokens(arguments, batch_output, filter_policy));
     } catch (const std::exception& error) {
       throw std::invalid_argument(
           "batch replay line " + std::to_string(line_number) + ": " + error.what());
@@ -1555,6 +1668,9 @@ int replay_batch(
   }
   if (!input.eof()) {
     throw std::runtime_error("batch replay input could not be read completely");
+  }
+  if (decision_only) {
+    output << std::move(decision_transaction).str();
   }
   output.flush();
   if (!output) {
@@ -1607,6 +1723,8 @@ void print_usage(const char* executable) {
             << "   or: " << executable
             << " canonical_level_batches COUNT LEVEL_N LEVEL_D MIN_COUNT ... SOURCE_COUNT ...\n"
             << "   or: " << executable << " --batch < predicate-lines.txt\n"
+            << "   or: " << executable
+            << " --decision-only --batch < predicate-lines.txt\n"
             << "prefix any form with --multiprecision-only to disable adaptive filters\n";
 }
 
@@ -1624,6 +1742,12 @@ int main(int argument_count, char** arguments) {
       filter_policy = PredicateFilterPolicy::multiprecision_only;
       ++first_argument;
     }
+    bool decision_only = false;
+    if (first_argument < argument_count &&
+        std::string_view{arguments[first_argument]} == "--decision-only") {
+      decision_only = true;
+      ++first_argument;
+    }
     if (first_argument >= argument_count) {
       print_usage(arguments[0]);
       return 2;
@@ -1632,7 +1756,10 @@ int main(int argument_count, char** arguments) {
       if (first_argument + 1 != argument_count) {
         throw std::invalid_argument("--batch does not accept trailing arguments");
       }
-      return replay_batch(std::cin, std::cout, filter_policy);
+      return replay_batch(std::cin, std::cout, filter_policy, decision_only);
+    }
+    if (decision_only) {
+      throw std::invalid_argument("--decision-only requires --batch");
     }
     std::vector<std::string_view> tokens;
     tokens.reserve(static_cast<std::size_t>(argument_count - first_argument));

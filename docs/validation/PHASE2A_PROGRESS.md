@@ -27,7 +27,8 @@
 | ordre exact et lots canoniques 2A.7 | `1718e08` | comparaison instrumentée des `ExactLevel`, égalité par produit croisé, supports minimaux et provenances canoniques, lots exacts, replay v6 et oracle `Fraction` indépendant |
 | cascade adaptative 2A.8a | `c98a5a1` | expansions flottantes exactes fermées, cascades distance/orientation 3D/`H_RQ` binary64, provenance canonique des labels, politiques indépendantes, replay et différentiel `Fraction` forçant les trois étages |
 | supports et niveaux adaptatifs 2A.8b | `6651600` | provenance dyadique positionnelle et réduite, polynômes homogènes Gram/Cramer, barycentriques, côté de sphère et ordre de niveaux adaptatifs, replay v7 et oracles `Fraction` |
-| formes et plans adaptatifs 2A.8c | présent lot | provenance dyadique canonique de trois origines, polynômes homogènes affines, orientation 2D, côté de plan, rangs et intersections, incidence d'un quatrième plan, replay v8 et oracles `Fraction` |
+| formes et plans adaptatifs 2A.8c | `ffabbdc` | provenance dyadique canonique de trois origines, polynômes homogènes affines, orientation 2D, côté de plan, rangs et intersections, incidence d'un quatrième plan, replay v8 et oracles `Fraction` |
+| batch décisionnel 2A.9(1) | présent sous-lot | `--decision-only --batch` pour distance, orientation 3D et `H_RQ`; sortie minimale sans témoin bigint sérialisé, replays riches v1 à v8 inchangés et différentiel `Fraction` fermé |
 
 La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe négatif signifie que `R` est moins coûteux au témoin. `ExactAffineForm3` conserve ses quatre coefficients rationnels et leur échelle exacte; sa clé primitive ne sert qu'à classifier le plan orienté ou la forme constante. Les API riches matérialisent encore leurs témoins multiprécision lorsque le signe est filtré. Le champ `certification_stage` identifie donc l'autorité du signe, pas le coût total d'un replay diagnostique.
 
@@ -82,9 +83,9 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Qualification du lot courant
 
-- GCC 13, build Release strict : CTest 22/22.
-- Clang 18, build Release strict : CTest 22/22.
-- GCC 13 Debug avec ASan et UBSan : CTest 22/22.
+- GCC 13, build Release strict : CTest 23/23.
+- Clang 18, build Release strict : CTest historique 22/22; différentiel décisionnel ajouté 1/1.
+- GCC 13 Debug avec ASan et UBSan : CTest historique 22/22; différentiel décisionnel ajouté 1/1.
 - Corpus court déterministe `mixed-binary64-splitmix64-v2` : 2 048 cas, hash `066f9ee577fc6c6d64ed930df4eaeca88e96895fa801a661980ba22fa98b4be3`.
 - Signes du corpus court : 1 001 négatifs, 891 positifs et 156 zéros.
 - Distances du corpus court : 58 signes `fp64_filtered`, 3 `expansion` et 963 fallbacks `cpu_multiprecision`.
@@ -115,7 +116,8 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 - Corpus affine adaptatif `affine-adaptive-fraction-rref-splitmix64-v2` : 5 120 cas, graine `0x3241384341464649`, hash des commandes `63d22e4daf8417de218b98101b49fcedf501c0557eaff7a2b251a17c07bed5eb` et hash des réponses de l'oracle `03dfcacbd777b2debaebd802a86f356fa7e34948ba04ef43e3d748bbdc2fabdc`. Les sorties adaptatives et multiprécision ont des projections scientifiques identiques; 3 350 décisions terminent au filtre FP64, 484 à l'expansion et 1 286 en multiprécision, avec 645 zéros exacts et `remaining_unknown=0` partout.
 - Couverture adaptative 2A.8c : 1 024 côtés de plan, 1 372 orientations, 1 363 intersections et 1 361 incidences; 13 cas à provenance binary64 complète forcent la chute expansion vers multiprécision. Les 1 363 intersections comprennent 1 258 points uniques, 53 familles et 52 systèmes vides, avec tous les couples de rang possibles pour trois plans propres. Un système mixte avec une source exacte sans provenance conserve une intersection de dénominateur trois et une incidence signée de même dénominateur sous autorité multiprécision. Les quatre origines, 20 sources obliques permanentes, un bisecteur de puissance à deux points, 48 groupes et 120 relations métamorphiques sont couverts.
 - Audit affine additionnel : GCC et Clang stricts, modes d'arrondi, FTZ/DAZ et restauration du FENV passent; 20 000 systèmes aléatoires, 10 000 orientations et 10 000 configurations de bisecteurs de puissance ont été recoupés, complétés par 2 923 incidences et 7 927 classifications de rang rationnelles indépendantes. Aucune conversion de `BigInt` vers `double` n'est présente.
-- Package CMake installé, wrapper installé rejoué sur une intersection rationnelle v3, un centre non dyadique v4, une réduction de frontière v5, une sphère à dénominateurs non triviaux v5, un niveau nul v5, deux niveaux v6 séparés par un produit croisé `-1`, une provenance réduite v6, une égalité de niveaux v7 certifiée par expansion et les quatre familles adaptatives v8. Le consommateur externe exerce filtres, multiprécision, noyau affine, provenance de coefficients et de trois points, côté de plan, intersection certifiée, incidence adaptative, centre tétraédrique, réduction de support, côté de sphère adaptatif, ordre de niveaux avec provenance et lots canoniques : 1/1.
+- Batch décisionnel 2A.9(1) : 14 cas ciblés couvrant les trois signes dans chacune des familles distance, orientation 3D et `H_RQ` passent contre l'oracle `Fraction`. La cascade adaptative termine 5 décisions au filtre FP64, 5 à l'expansion et 4 en multiprécision; le rejeu `multiprecision_only` termine les 14 en multiprécision avec les mêmes signes. Les trois sentinelles riches sont identiques entre invocation individuelle et batch, sept entrées ou usages invalides — dont une erreur sur la seconde ligne — échouent sans publier de préfixe, aucun champ témoin n'apparaît et `remaining_unknown=0` partout.
+- Package CMake installé, binaire installé qualifié sur les 14 décisions 2A.9(1), et wrapper installé rejoué sur une intersection rationnelle v3, un centre non dyadique v4, une réduction de frontière v5, une sphère à dénominateurs non triviaux v5, un niveau nul v5, deux niveaux v6 séparés par un produit croisé `-1`, une provenance réduite v6, une égalité de niveaux v7 certifiée par expansion et les quatre familles adaptatives v8. Le consommateur externe exerce filtres, multiprécision, noyau affine, provenance de coefficients et de trois points, côté de plan, intersection certifiée, incidence adaptative, centre tétraédrique, réduction de support, côté de sphère adaptatif, ordre de niveaux avec provenance et lots canoniques : 1/1.
 - Contrats : 21 définitions, 21 exemples de schéma et 5 fixtures validés; 58 tests contractuels réussis.
 - Oracle exhaustif indépendant : 92 tests réussis; campagne CI bornée sur trois dimensions affines, trois cas audités et zéro échec.
 - Documentation : 26 documents actifs validés; 5 références locales et 9 modules d'oracle indépendant validés.
@@ -200,14 +202,16 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ### 2A.9 — campagne de fermeture
 
-1. Ajouter un batch `decision-only` sans sérialisation systématique de témoins big-int.
-2. Ajouter un checkpoint local fermé pour les runs triés, puis vérifier la reprise à chaque coupure et la fusion d'un niveau égal traversant plusieurs chunks; les permutations stateless de 2A.7 ne sont pas présentées comme cette preuve transactionnelle.
-3. Geler générateur, graines, domaines d'exposants et hash du corpus.
-4. Atteindre au moins dix millions de signes pseudo-aléatoires contre la référence, comme exigé par la feuille de route.
-5. Couvrir séparément cas bien conditionnés, annulations, sous-normaux, grands offsets, quasi-coplanarité, quasi-cosphéricité et égalités exactes.
-6. Exécuter les métamorphismes de permutation, réflexion d'axes, translations dyadiques représentables et échelles exactes.
-7. Minimiser automatiquement toute différence; toute contradiction devient une fixture permanente et met à jour le registre des preuves avant reprise.
-8. Publier compteurs d'étages, zéros, fallbacks, inconnues restantes, versions de compilateurs et hashes.
+1. **Livré et qualifié dans le présent sous-lot :** batch `--decision-only --batch` limité à la comparaison de distances, à l'orientation 3D et au signe de `H_RQ`. Il émet seulement `certification_stage`, `counters`, `predicate` et `sign`, sans sérialiser les niveaux, déterminants ou témoins rationnels multiprécision; les replays riches v1 à v8 restent inchangés. L'invocation transactionnelle conserve sa sortie compacte en mémoire et reste donc limitée à un chunk borné; 2A.9(2) doit imposer cette borne avec la reprise avant la campagne longue.
+2. **Ouvert :** ajouter un checkpoint local fermé pour les runs triés, puis vérifier la reprise à chaque coupure et la fusion d'un niveau égal traversant plusieurs chunks; les permutations stateless de 2A.7 ne sont pas présentées comme cette preuve transactionnelle.
+3. **Ouvert :** geler générateur, graines, domaines d'exposants et hash du corpus.
+4. **Ouvert :** atteindre au moins dix millions de signes pseudo-aléatoires contre la référence, comme exigé par la feuille de route.
+5. **Ouvert :** couvrir séparément cas bien conditionnés, annulations, sous-normaux, grands offsets, quasi-coplanarité, quasi-cosphéricité et égalités exactes.
+6. **Ouvert :** exécuter les métamorphismes de permutation, réflexion d'axes, translations dyadiques représentables et échelles exactes.
+7. **Ouvert :** minimiser automatiquement toute différence; toute contradiction devient une fixture permanente et met à jour le registre des preuves avant reprise.
+8. **Ouvert :** publier compteurs d'étages, zéros, fallbacks, inconnues restantes, versions de compilateurs et hashes.
+
+La qualification de 2A.9(1) rejoue un corpus court par le batch décisionnel adaptatif, le replay riche et le batch décisionnel `multiprecision_only`, puis les compare à l'oracle `Fraction`. Elle vérifie les trois signes, les trois étages disponibles, l'exactitude des compteurs, `remaining_unknown=0`, le schéma JSON fermé sans témoins riches, la compatibilité des options et l'échec fermé sur entrée incomplète. Ce corpus ciblé qualifie l'interface; il ne remplace ni le gel du générateur long, ni la campagne d'au moins dix millions de signes.
 
 ### 2A.10 — revue de porte
 
@@ -220,7 +224,7 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 
 ## Prochaine sous-porte
 
-Le prochain lot est 2A.9, campagne de fermeture des prédicats, toujours sur `reference_cpu`, couche commune aux profils avec priorité `hgp_reduced`, mode `certified`. Sa porte d'entrée est satisfaite par les trois cascades 2A.8a à 2A.8c documentées ci-dessus. Il doit geler et exécuter la campagne d'au moins dix millions de signes, ajouter le batch décisionnel et la reprise locale fermée, minimiser toute divergence et publier tous les compteurs et hashes requis. La Phase 2B ne s'ouvre pas; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
+Le sous-lot 2A.9(1) fournit et qualifie le batch décisionnel compact. La prochaine sous-porte fonctionnelle est 2A.9(2), checkpoint local fermé et fusion transactionnelle des niveaux égaux traversant plusieurs chunks. Restent ensuite la campagne gelée d'au moins dix millions de signes, les familles et métamorphismes requis, la minimisation automatique et la publication des compteurs et hashes effectivement observés. La Phase 2A, G1 et la Phase 2B restent respectivement `in_progress`, ouverte et bloquée; aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
 
 ## GCP
 

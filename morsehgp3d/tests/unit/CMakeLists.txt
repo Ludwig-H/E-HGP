@@ -149,6 +149,13 @@ if(TARGET morsehgp3d_replay_predicate)
       "$<TARGET_FILE:morsehgp3d_replay_predicate>"
   )
   add_test(
+    NAME morsehgp3d.predicate_decision_batch_differential
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_predicate_decision_batch.py"
+      "$<TARGET_FILE:morsehgp3d_replay_predicate>"
+  )
+  add_test(
     NAME morsehgp3d.affine_replay_differential
     COMMAND
       "${Python3_EXECUTABLE}"
