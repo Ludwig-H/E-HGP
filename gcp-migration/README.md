@@ -150,6 +150,20 @@ Le feu vert exige :
 
 Ne lancez les benchmarks lourds qu'après le bilan vert.
 
+## Qualification bornée de la Phase 3
+
+Après autorisation explicite, le point d'entrée Phase 3 réalise une seule session, exige un commit propre déjà poussé sur `origin/main`, puis certifie l'arrêt de la cible exacte même si le worker distant échoue. L'arrêt invité est armé pour 45 minutes à partir de la certification des gardes; le coupe-circuit GCE reste indépendamment borné entre 30 secondes et huit heures :
+
+```bash
+./gcp-migration/run_phase3_qualification.sh \
+  --yes \
+  --result-dir /tmp/morsehgp3d-phase3-qualification
+```
+
+Le répertoire de résultat est créé si nécessaire, doit rester hors du dépôt et ne doit déjà contenir ni `phase3-<SHA>.json`, ni `phase3-<SHA>.start-handoff.json`. L'orchestrateur utilise exclusivement `start_and_verify.sh` pour le démarrage et `stop_and_verify.sh --yes` pour l'arrêt. Dès que la garde GCE post-démarrage certifie la génération, le démarrage publie atomiquement un handoff v3 ciblé avec le `lastStartTimestamp`, avant de tenter la garde invitée; toute fermeture automatique exige cette même génération et refuse une cible redémarrée. Si la garde invitée ou l'arrêt d'urgence échoue, ce handoff reste disponible pour reprendre l'arrêt exact et bloque une nouvelle session. Si une commande de démarrage échoue avant que la génération soit lisible, aucun arrêt non versionné n'est tenté : le script signale la cible et la commande de contrôle. Les appels GCP critiques sont bornés par GNU `timeout` avec `--foreground` et `--kill-after`. Le worker invité ne pilote aucune ressource GCP : il exige un arrêt `poweroff` futur dans `/run/systemd/shutdown/scheduled`, construit l'image CUDA épinglée, compile les profils release et audit, exécute les sondes runtime et Python/DLPack, vérifie le runtime AOT avec `cuobjdump`, puis passe ce runtime court sous `compute-sanitizer --leak-check full`.
+
+L'artefact distant demeure provisoire avec `status=worker_passed_pending_shutdown`. L'orchestrateur le valide localement, arrête la cible, relit indépendamment l'état exact `TERMINATED`, ajoute cette preuve à `vm_lifecycle`, convertit le statut en `passed`, puis publie l'artefact final atomiquement et sans remplacement par lien dur. Un échec ou une relecture illisible de l'arrêt ne laisse aucun artefact final, mais conserve le handoff ciblé local et bloque une nouvelle session sur le même SHA jusqu'à résolution. La priorité donnée à l'arrêt signifie que le clone temporaire distant peut rester dans `/tmp` sur le disque de la VM arrêtée.
+
 ## Cas Blackwell : « requires use of the NVIDIA open kernel modules »
 
 Le preflight cherche ce message exact dans les journaux noyau. Il affiche aussi

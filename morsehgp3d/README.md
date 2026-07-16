@@ -81,18 +81,23 @@ Le target exporté est `morsehgp3d::exact`. Après `cmake --install`, un consomm
 
 ### Profils reproductibles de Phase 3
 
-Le premier lot de Phase 3 ajoute quatre workflows CMake isolés :
+La Phase 3 fournit quatre workflows CMake isolés :
 
 ```bash
-cmake --workflow --preset cpu-release
-cmake --workflow --preset sanitizer
-cmake --workflow --preset cuda-release
-cmake --workflow --preset cuda-audit
+(
+  cd morsehgp3d
+  cmake --workflow --preset cpu-release
+  cmake --workflow --preset sanitizer
+  cmake --workflow --preset cuda-release
+  cmake --workflow --preset cuda-audit
+)
 ```
 
 Les deux premiers sont qualifiables sans CUDA. Les deux derniers exigent explicitement NVIDIA CUDA 12.9.x et produisent uniquement du code réel AOT pour `sm_120`; ils refusent PTX, fast math, architecture brute, fichier d'options ou injection par l'environnement. L'image associée est `containers/cuda12.9-sm120.Dockerfile`, épinglée par digest et snapshot Ubuntu.
 
-À ce point d'avancement, les workflows CUDA compilent seulement une sonde et ne lancent aucun kernel. Le runtime, le worker distant et le test G4 réel restent requis avant la fermeture de la Phase 3. Les preuves et limites de ce lot sont consignées dans `docs/validation/PHASE3_PROGRESS.md`.
+Les workflows CUDA construisent une sonde de compilation, le runtime JSONL `morsehgp3d_phase3_runtime` et le module nanobind `morsehgp3d_phase3`. Le runtime utilise CCCL/CUB, DLPack et NVTX dans une arène `cudaMallocAsync` unique et bornée; il sépare les mesures `warm` et `resident`, interdit toute compilation pendant ces mesures, compare le résultat bit à bit puis à un oracle CPU indépendant par vecteur, somme et hash, et convertit les erreurs CUDA attendues en records structurés. Les manifests et records ont un schéma fermé avec horodatages et durées vérifiés. Les checkouts DLPack et nanobind doivent conserver à la fois leur commit épinglé et un arbre propre. Le module Python expose uniquement une qualification d'environnement et une sonde DLPack sans copie; chaque capsule porte un contexte de propriété privé vérifié avant toute lecture du tenseur. Aucun artefact ne porte `public_status`; ils fixent `scientific_result_claimed=false` et `scientific_public_status=null`.
+
+La qualification réelle doit passer par `gcp-migration/run_phase3_qualification.sh`, qui délègue le calcul au worker invité puis certifie la cible exacte `TERMINATED`. Les preuves et limites de ce lot sont consignées dans `docs/validation/PHASE3_PROGRESS.md`; le test G4 réel reste requis avant la fermeture de la Phase 3.
 
 ## Replay d'un prédicat
 

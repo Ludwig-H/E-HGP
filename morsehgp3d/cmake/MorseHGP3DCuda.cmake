@@ -116,6 +116,14 @@ function(morsehgp3d_configure_cuda_target target_name)
       CUDA_STANDARD_REQUIRED ON
       POSITION_INDEPENDENT_CODE ON
   )
+  target_compile_options(
+    "${target_name}"
+    PRIVATE
+      $<$<COMPILE_LANGUAGE:CUDA>:--fmad=false>
+      $<$<COMPILE_LANGUAGE:CUDA>:--ftz=false>
+      $<$<COMPILE_LANGUAGE:CUDA>:--prec-div=true>
+      $<$<COMPILE_LANGUAGE:CUDA>:--prec-sqrt=true>
+  )
   if(MORSEHGP3D_CUDA_AUDIT)
     target_compile_options(
       "${target_name}"

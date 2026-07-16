@@ -87,7 +87,9 @@
       "name": "cuda-release",
       "configurePreset": "cuda-release",
       "targets": [
-        "morsehgp3d_cuda_environment_probe"
+        "morsehgp3d_cuda_environment_probe",
+        "morsehgp3d_phase3_runtime",
+        "morsehgp3d_phase3"
       ],
       "jobs": 2
     },
@@ -95,7 +97,9 @@
       "name": "cuda-audit",
       "configurePreset": "cuda-audit",
       "targets": [
-        "morsehgp3d_cuda_environment_probe"
+        "morsehgp3d_cuda_environment_probe",
+        "morsehgp3d_phase3_runtime",
+        "morsehgp3d_phase3"
       ],
       "jobs": 2
     }

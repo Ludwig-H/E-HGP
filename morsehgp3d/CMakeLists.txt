@@ -70,6 +70,62 @@ endfunction()
 
 if(MORSEHGP3D_ENABLE_CUDA)
   include(cmake/MorseHGP3DCuda.cmake)
+
+  find_package(Git REQUIRED)
+  file(
+    REAL_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/.."
+    MORSEHGP3D_PHASE3_REPOSITORY_ROOT
+  )
+  execute_process(
+    COMMAND
+      "${GIT_EXECUTABLE}"
+      -c "safe.directory=${MORSEHGP3D_PHASE3_REPOSITORY_ROOT}"
+      rev-parse HEAD
+    WORKING_DIRECTORY "${MORSEHGP3D_PHASE3_REPOSITORY_ROOT}"
+    RESULT_VARIABLE _morsehgp3d_git_revision_status
+    OUTPUT_VARIABLE MORSEHGP3D_PHASE3_GIT_SHA
+    ERROR_VARIABLE _morsehgp3d_git_revision_error
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  string(LENGTH "${MORSEHGP3D_PHASE3_GIT_SHA}" _morsehgp3d_git_revision_length)
+  if(
+    NOT _morsehgp3d_git_revision_status EQUAL 0
+    OR NOT _morsehgp3d_git_revision_length EQUAL 40
+    OR NOT MORSEHGP3D_PHASE3_GIT_SHA MATCHES "^[0-9a-f]+$"
+  )
+    message(
+      FATAL_ERROR
+      "The Phase 3 CUDA build requires a canonical Git HEAD: "
+      "${_morsehgp3d_git_revision_error}"
+    )
+  endif()
+  execute_process(
+    COMMAND
+      "${GIT_EXECUTABLE}"
+      -c "safe.directory=${MORSEHGP3D_PHASE3_REPOSITORY_ROOT}"
+      status --porcelain --untracked-files=normal
+    WORKING_DIRECTORY "${MORSEHGP3D_PHASE3_REPOSITORY_ROOT}"
+    RESULT_VARIABLE _morsehgp3d_git_status_result
+    OUTPUT_VARIABLE _morsehgp3d_git_status
+    ERROR_VARIABLE _morsehgp3d_git_status_error
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if(NOT _morsehgp3d_git_status_result EQUAL 0)
+    message(
+      FATAL_ERROR
+      "The Phase 3 CUDA build cannot verify the Git worktree: "
+      "${_morsehgp3d_git_status_error}"
+    )
+  endif()
+  if(NOT _morsehgp3d_git_status STREQUAL "")
+    message(
+      FATAL_ERROR
+      "The Phase 3 CUDA build requires a clean worktree so its manifest SHA "
+      "identifies the compiled sources"
+    )
+  endif()
+
   add_library(
     morsehgp3d_cuda_environment_probe
     OBJECT
@@ -77,6 +133,64 @@ if(MORSEHGP3D_ENABLE_CUDA)
     src/cuda/environment_probe.cu
   )
   morsehgp3d_configure_cuda_target(morsehgp3d_cuda_environment_probe)
+
+  include(cmake/MorseHGP3DPhase3Dependencies.cmake)
+
+  add_executable(
+    morsehgp3d_phase3_runtime
+    src/cuda/phase3_runtime.cu
+  )
+  target_link_libraries(
+    morsehgp3d_phase3_runtime
+    PRIVATE morsehgp3d::phase3_dependencies
+  )
+  target_compile_definitions(
+    morsehgp3d_phase3_runtime
+    PRIVATE
+      MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+      MORSEHGP3D_CUDA_AUDIT=$<IF:$<BOOL:${MORSEHGP3D_CUDA_AUDIT}>,1,0>
+  )
+  target_compile_options(
+    morsehgp3d_phase3_runtime
+    PRIVATE
+      $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wall,-Wextra,-Wpedantic,-Wconversion,-Wsign-conversion,-Werror>
+  )
+  morsehgp3d_configure_cuda_target(morsehgp3d_phase3_runtime)
+
+  nanobind_add_module(
+    morsehgp3d_phase3
+    NB_STATIC
+    NB_SUPPRESS_WARNINGS
+    NOMINSIZE
+    src/python/phase3_module.cpp
+  )
+  set_target_properties(
+    morsehgp3d_phase3
+    PROPERTIES
+      CXX_EXTENSIONS OFF
+      CXX_STANDARD 20
+      CXX_STANDARD_REQUIRED ON
+  )
+  target_link_libraries(
+    morsehgp3d_phase3
+    PRIVATE morsehgp3d::phase3_dependencies
+  )
+  if(MSVC)
+    target_compile_options(morsehgp3d_phase3 PRIVATE /W4 /WX)
+  else()
+    target_compile_options(
+      morsehgp3d_phase3
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
+  unset(_morsehgp3d_git_revision_error)
+  unset(_morsehgp3d_git_revision_length)
+  unset(_morsehgp3d_git_revision_status)
+  unset(_morsehgp3d_git_status)
+  unset(_morsehgp3d_git_status_error)
+  unset(_morsehgp3d_git_status_result)
+  unset(MORSEHGP3D_PHASE3_REPOSITORY_ROOT)
 endif()
 
 find_package(Boost 1.74 REQUIRED CONFIG COMPONENTS headers)

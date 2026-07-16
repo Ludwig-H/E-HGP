@@ -149,6 +149,14 @@ add_test(
     "${PROJECT_SOURCE_DIR}/.."
 )
 add_test(
+  NAME morsehgp3d.phase3_runtime_configuration
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../configuration/check_phase3_runtime.py"
+    "${PROJECT_SOURCE_DIR}"
+    "${PROJECT_SOURCE_DIR}/.."
+)
+add_test(
   NAME morsehgp3d.exact_contract_differential
   COMMAND
     "${Python3_EXECUTABLE}"

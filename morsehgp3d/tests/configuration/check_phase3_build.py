@@ -22,7 +22,11 @@ CONFIGURE_NAMES = {
     "cuda-audit",
 }
 PUBLIC_NAMES = {"cpu-release", "sanitizer", "cuda-release", "cuda-audit"}
-CUDA_TARGET = "morsehgp3d_cuda_environment_probe"
+CUDA_TARGETS = [
+    "morsehgp3d_cuda_environment_probe",
+    "morsehgp3d_phase3_runtime",
+    "morsehgp3d_phase3",
+]
 
 
 class ContractError(ValueError):
@@ -176,7 +180,8 @@ def validate_build_presets(presets: dict[str, dict[str, Any]]) -> None:
         )
         require(preset["configurePreset"] == name, f"{name} build/configure mismatch")
         require(
-            preset["targets"] == [CUDA_TARGET], f"{name} may only compile the probe"
+            preset["targets"] == CUDA_TARGETS,
+            f"{name} does not compile the frozen Phase 3 target catalog",
         )
         require(
             type(preset["jobs"]) is int and preset["jobs"] > 0, f"{name} jobs is open"
@@ -398,6 +403,14 @@ def validate_sources(project: Path, repository: Path) -> None:
         "src/cuda/environment_probe.cu",
         "morsehgp3d_configure_cuda_target",
         "morsehgp3d_apply_sanitizers(morsehgp3d_replay_predicate)",
+        "MorseHGP3DPhase3Dependencies.cmake",
+        "src/cuda/phase3_runtime.cu",
+        "src/python/phase3_module.cpp",
+        "MORSEHGP3D_PHASE3_GIT_SHA",
+        "safe.directory=${MORSEHGP3D_PHASE3_REPOSITORY_ROOT}",
+        "status --porcelain --untracked-files=normal",
+        "morsehgp3d_phase3_runtime",
+        "nanobind_add_module",
     ):
         require(token in cmake, f"root CMake is missing {token}")
 
@@ -437,12 +450,17 @@ def validate_sources(project: Path, repository: Path) -> None:
             forbidden not in probe, f"the compile-only probe executes CUDA: {forbidden}"
         )
     require(
-        re.search(rf"add_test\([^)]*\b{CUDA_TARGET}\b", cmake + unit_cmake, re.DOTALL)
+        re.search(
+            rf"add_test\([^)]*\b{CUDA_TARGETS[0]}\b",
+            cmake + unit_cmake,
+            re.DOTALL,
+        )
         is None,
         "the CUDA compile-only target is registered as a test",
     )
     require(
-        re.search(rf"install\([^)]*\b{CUDA_TARGET}\b", cmake, re.DOTALL) is None,
+        re.search(rf"install\([^)]*\b{CUDA_TARGETS[0]}\b", cmake, re.DOTALL)
+        is None,
         "the CUDA compile-only target is installed",
     )
     require(
@@ -513,6 +531,7 @@ def main(arguments: list[str]) -> int:
             {
                 "cuda_architecture": "120-real",
                 "cuda_runtime_executed": False,
+                "cuda_targets": CUDA_TARGETS,
                 "negative_mutations": 7,
                 "public_presets": sorted(PUBLIC_NAMES),
                 "schema_version": 6,

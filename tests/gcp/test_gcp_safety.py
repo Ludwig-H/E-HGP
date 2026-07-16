@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import shutil
 import subprocess
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 FAKE_GCLOUD = r"""#!/usr/bin/env python3
+import json
 import os
 from pathlib import Path
 import signal
@@ -33,7 +36,8 @@ elif args[:3] == ["config", "get-value", "account"]:
 elif args[:3] == ["compute", "instances", "list"]:
     output_format = next((item.split("=", 1)[1] for item in args if item.startswith("--format=")), "")
     if output_format == "value(name)":
-        print(os.environ.get("GCP_INSTANCE_NAME", "ehgp-blackwell-spot"))
+        if scenario != "missing-target":
+            print(os.environ.get("GCP_INSTANCE_NAME", "ehgp-blackwell-spot"))
     elif output_format.startswith("csv[no-heading]"):
         if scenario == "other-active":
             print("ehgp-concurrent,europe-west4-b,RUNNING")
@@ -48,11 +52,21 @@ elif args[:3] == ["compute", "instances", "describe"]:
         with open(log, encoding="utf-8") as stream:
             previous_commands = stream.read()
     status = "TERMINATED"
-    if scenario == "guest-readback" and "compute instances start" in previous_commands:
+    if scenario == "qualification-stop-still-running":
+        status = "RUNNING"
+    if scenario in {"guest-interrupt", "guest-readback", "guest-success"} and "compute instances start" in previous_commands:
         status = "RUNNING"
     if "compute instances stop" in previous_commands:
         status = "TERMINATED"
     now = datetime.now(timezone.utc)
+    last_start_timestamp = os.environ.get(
+        "FAKE_LAST_START_TIMESTAMP",
+        (now - timedelta(seconds=10)).isoformat().replace("+00:00", "Z"),
+    )
+    termination_timestamp = os.environ.get(
+        "FAKE_TERMINATION_TIMESTAMP",
+        (now + timedelta(seconds=28790)).isoformat().replace("+00:00", "Z"),
+    )
     values = {
         "status": status,
         "scheduling.instanceTerminationAction": "STOP",
@@ -60,14 +74,14 @@ elif args[:3] == ["compute", "instances", "describe"]:
         "labels.project": "e-hgp",
         "machineType.basename()": "n2-standard-48" if scenario == "wrong-machine" else "g4-standard-48",
         "scheduling.provisioningModel": "STANDARD" if scenario == "wrong-provisioning" else "SPOT",
-        "lastStartTimestamp": (now - timedelta(seconds=10)).isoformat().replace("+00:00", "Z"),
-        "terminationTimestamp": (now + timedelta(seconds=28790)).isoformat().replace("+00:00", "Z"),
+        "lastStartTimestamp": last_start_timestamp,
+        "terminationTimestamp": termination_timestamp,
     }
     if scenario == "unlabelled":
         values["labels.project"] = ""
     print(values.get(field, ""))
 elif args[:3] in (["compute", "instances", "start"], ["compute", "instances", "stop"]):
-    if scenario != "guest-readback":
+    if scenario not in {"guest-interrupt", "guest-readback", "guest-success"}:
         print("unexpected mutation", file=sys.stderr)
         sys.exit(97)
 elif args[:2] == ["compute", "ssh"]:
@@ -77,6 +91,10 @@ elif args[:2] == ["compute", "ssh"]:
     )
     if scenario == "guest-readback":
         print("No scheduled shutdown")
+    elif scenario == "guest-interrupt":
+        print("No scheduled shutdown")
+    elif scenario == "guest-success":
+        print("MODE=poweroff\nUSEC=9999999999999999\n__EHGP_GUEST_GUARD_VERIFIED__")
     elif scenario.startswith("qualification-"):
         if "mktemp -d /tmp/morsehgp3d-phase3.XXXXXXXX" in command:
             print("__EHGP_REMOTE_DIR__/tmp/morsehgp3d-phase3.A1b2C3d4")
@@ -107,10 +125,68 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
     if len(args) < 4:
         print("missing fake scp paths", file=sys.stderr)
         sys.exit(94)
-    Path(args[3]).write_text('{"kind":"phase3-result","status":"passed"}\n', encoding="utf-8")
+    head = os.environ.get("FAKE_GIT_HEAD", "a" * 40)
+    artifact = {
+        "backend": "cuda_g4",
+        "git": {"clean": True, "sha": head},
+        "image": {
+            "base_ref": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+            "id": "sha256:" + "b" * 64,
+            "ref": f"morsehgp3d-phase3:{head}",
+        },
+        "mode": "certified",
+        "phase": "3",
+        "profile": "hgp_reduced",
+        "schema": "morsehgp3d.phase3.qualification.v1",
+        "scientific_public_status": None,
+        "scientific_result_claimed": False,
+        "scientific_scope": "environment_reproducibility_only",
+        "status": "worker_passed_pending_shutdown",
+        "vm_lifecycle": {"worker_mutates_gcp": False},
+    }
+    if scenario == "qualification-invalid-artifact":
+        artifact["git"]["sha"] = "c" * 40
+    Path(args[3]).write_text(json.dumps(artifact) + "\n", encoding="utf-8")
 else:
     print("unsupported fake gcloud command: " + " ".join(args), file=sys.stderr)
     sys.exit(96)
+"""
+
+FAKE_TIMEOUT = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+args = sys.argv[1:]
+log = os.environ.get("FAKE_TIMEOUT_LOG")
+if log:
+    with Path(log).open("a", encoding="utf-8") as stream:
+        stream.write(" ".join(args) + "\n")
+
+scenario = os.environ.get("FAKE_TIMEOUT_SCENARIO", "pass")
+if args == ["--version"]:
+    if scenario == "invalid-version":
+        print("timeout (BusyBox) 1.0")
+    else:
+        print("timeout (GNU coreutils) 9.4")
+    raise SystemExit(0)
+
+if not args or args[0] != "--foreground":
+    raise SystemExit("fake timeout requires --foreground")
+args = args[1:]
+if not args or not args[0].startswith("--kill-after="):
+    raise SystemExit("fake timeout requires --kill-after")
+args = args[1:]
+if not args or not args[0].endswith("s"):
+    raise SystemExit("fake timeout requires a seconds duration")
+args = args[1:]
+if not args:
+    raise SystemExit("fake timeout requires a command")
+if scenario == "expire-start" and args[:4] == ["gcloud", "compute", "instances", "start"]:
+    raise SystemExit(124)
+if scenario == "expire-stop" and args[:4] == ["gcloud", "compute", "instances", "stop"]:
+    raise SystemExit(124)
+os.execvpe(args[0], args, os.environ)
 """
 
 FAKE_GIT = r"""#!/usr/bin/env python3
@@ -155,6 +231,26 @@ printf 'start project=%s zone=%s instance=%s args=%s\n' \
 if [[ "${FAKE_SESSION_SCENARIO:-}" == "start-failure" ]]; then
   exit 37
 fi
+handoff_file=""
+arguments=("$@")
+for ((index = 0; index < ${#arguments[@]}; ++index)); do
+  if [[ "${arguments[index]}" == "--handoff-file" ]]; then
+    handoff_file="${arguments[index + 1]}"
+  fi
+done
+[[ -n "${handoff_file}" ]]
+printf '{"guest_shutdown_minutes":45,"instance":"%s","last_start_timestamp":"%s","project":"%s","schema":"e-hgp.start-handoff.v3","status":"targeted_running","zone":"%s"}\n' \
+  "${GCP_INSTANCE_NAME}" "${FAKE_LAST_START_TIMESTAMP}" "${GCP_PROJECT_ID}" \
+  "${GCP_ZONE}" >"${handoff_file}"
+if [[ "${FAKE_SESSION_SCENARIO:-}" == "guard-failure-stop-failure" ]]; then
+  exit 37
+elif [[ "${FAKE_SESSION_SCENARIO:-}" == "start-race" ]]; then
+  kill -TERM "${PPID}"
+elif [[ "${FAKE_SESSION_SCENARIO:-}" == "invalid-handoff" ]]; then
+  printf '{}\n' >"${handoff_file}"
+elif [[ "${FAKE_SESSION_SCENARIO:-}" == "missing-handoff" ]]; then
+  rm -f -- "${handoff_file}"
+fi
 """
 
 FAKE_STOP = r"""#!/usr/bin/env bash
@@ -162,8 +258,11 @@ set -euo pipefail
 printf 'stop project=%s zone=%s instance=%s args=%s\n' \
   "${GCP_PROJECT_ID:-}" "${GCP_ZONE:-}" "${GCP_INSTANCE_NAME:-}" "$*" \
   >> "${FAKE_SESSION_LOG}"
-if [[ "${FAKE_SESSION_SCENARIO:-}" == "stop-failure" ]]; then
+if [[ "${FAKE_SESSION_SCENARIO:-}" == "stop-failure" || \
+      "${FAKE_SESSION_SCENARIO:-}" == "guard-failure-stop-failure" ]]; then
   exit 38
+elif [[ "${FAKE_SESSION_SCENARIO:-}" == "target-race" ]]; then
+  printf 'concurrent artifact\n' >"${FAKE_CONCURRENT_RESULT}"
 fi
 """
 
@@ -176,12 +275,22 @@ class ScriptSafetyTests(unittest.TestCase):
         fake = self.tmp / "gcloud"
         fake.write_text(FAKE_GCLOUD, encoding="utf-8")
         fake.chmod(0o755)
+        fake_timeout = self.tmp / "timeout"
+        fake_timeout.write_text(FAKE_TIMEOUT, encoding="utf-8")
+        fake_timeout.chmod(0o755)
         self.log = self.tmp / "gcloud.log"
+        self.timeout_log = self.tmp / "timeout.log"
+        now = datetime.now(timezone.utc)
+        self.last_start_timestamp = (now - timedelta(seconds=10)).isoformat().replace(
+            "+00:00", "Z"
+        )
         self.env = os.environ.copy()
         self.env.update(
             {
+                "FAKE_LAST_START_TIMESTAMP": self.last_start_timestamp,
                 "PATH": f"{self.tmp}:{self.env['PATH']}",
                 "FAKE_GCLOUD_LOG": str(self.log),
+                "FAKE_TIMEOUT_LOG": str(self.timeout_log),
                 "GCP_PROJECT_ID": "devpod-gpu-exploration",
                 "GCP_ZONE": "europe-west4-a",
                 "GCP_INSTANCE_NAME": "ehgp-blackwell-spot",
@@ -203,6 +312,34 @@ class ScriptSafetyTests(unittest.TestCase):
 
     def commands(self) -> str:
         return self.log.read_text(encoding="utf-8") if self.log.exists() else ""
+
+    def test_critical_gcloud_calls_use_bounded_gnu_timeout(self) -> None:
+        for name in (
+            "start_and_verify.sh",
+            "stop_and_verify.sh",
+            "run_phase3_qualification.sh",
+        ):
+            with self.subTest(script=name):
+                source = (ROOT / "gcp-migration" / name).read_text(encoding="utf-8")
+                self.assertIn("command -v timeout", source)
+                self.assertIn("timeout --foreground --kill-after=", source)
+        start_source = (ROOT / "gcp-migration" / "start_and_verify.sh").read_text(
+            encoding="utf-8"
+        )
+        stop_source = (ROOT / "gcp-migration" / "stop_and_verify.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("gcloud_mutation compute instances start", start_source)
+        self.assertIn("gcloud_mutation compute instances stop", stop_source)
+        self.assertIn("aucun arrêt automatique non versionné", start_source)
+        self.assertNotIn("fallback d’arrêt ciblé non versionné", start_source)
+
+    def test_non_gnu_timeout_is_rejected_before_any_gcloud_call(self) -> None:
+        self.env["FAKE_TIMEOUT_SCENARIO"] = "invalid-version"
+        result = self.run_script("start_and_verify.sh", "--yes")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("implémentation GNU", result.stdout)
+        self.assertEqual("", self.commands())
 
     def test_deploy_rejects_runtime_below_gce_minimum(self) -> None:
         self.env["GCP_MAX_RUN_DURATION"] = "29s"
@@ -233,12 +370,122 @@ class ScriptSafetyTests(unittest.TestCase):
         self.assertIn("compute instances start", self.commands())
         self.assertIn("compute instances stop", self.commands())
 
+    def test_start_timeout_never_triggers_an_unversioned_stop(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "guest-success"
+        self.env["FAKE_TIMEOUT_SCENARIO"] = "expire-start"
+        result = self.run_script("start_and_verify.sh", "--yes")
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("génération lastStartTimestamp inconnue", result.stdout)
+        self.assertIn("aucun arrêt automatique non versionné", result.stdout)
+        self.assertNotIn("compute instances stop", self.commands())
+        self.assertIn(
+            "gcloud compute instances start ehgp-blackwell-spot",
+            self.timeout_log.read_text(encoding="utf-8"),
+        )
+
+    def test_start_publishes_targeted_handoff_after_gce_guard(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "guest-success"
+        handoff = self.tmp / "start-handoff.json"
+        result = self.run_script(
+            "start_and_verify.sh",
+            "--yes",
+            "--guest-shutdown-minutes",
+            "45",
+            "--handoff-file",
+            str(handoff),
+        )
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertEqual(
+            {
+                "guest_shutdown_minutes": 45,
+                "instance": "ehgp-blackwell-spot",
+                "last_start_timestamp": self.last_start_timestamp,
+                "project": "devpod-gpu-exploration",
+                "schema": "e-hgp.start-handoff.v3",
+                "status": "targeted_running",
+                "zone": "europe-west4-a",
+            },
+            json.loads(handoff.read_text(encoding="utf-8")),
+        )
+        source = (ROOT / "gcp-migration" / "start_and_verify.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("tempfile.mkstemp", source)
+        self.assertIn("os.link(temporary, path, follow_symlinks=False)", source)
+        self.assertNotIn("os.open(path, os.O_WRONLY | os.O_CREAT", source)
+        stopped = self.run_script(
+            "stop_and_verify.sh",
+            "--yes",
+            "--expected-last-start-timestamp",
+            self.last_start_timestamp,
+        )
+        self.assertEqual(stopped.returncode, 0, stopped.stdout)
+
+    def test_guest_guard_interruption_and_failed_stop_preserve_generation(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "guest-interrupt"
+        self.env["FAKE_TIMEOUT_SCENARIO"] = "expire-stop"
+        fake_sleep = self.tmp / "sleep"
+        fake_sleep.write_text(
+            "#!/usr/bin/env bash\nkill -TERM \"${PPID}\"\nexit 143\n",
+            encoding="utf-8",
+        )
+        fake_sleep.chmod(0o755)
+        handoff = self.tmp / "start-handoff.json"
+
+        result = self.run_script(
+            "start_and_verify.sh",
+            "--yes",
+            "--guest-shutdown-minutes",
+            "45",
+            "--handoff-file",
+            str(handoff),
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Arrêt non vérifié", result.stdout)
+        self.assertIn("[HANDOFF CONSERVÉ]", result.stdout)
+        self.assertEqual(
+            {
+                "guest_shutdown_minutes": 45,
+                "instance": "ehgp-blackwell-spot",
+                "last_start_timestamp": self.last_start_timestamp,
+                "project": "devpod-gpu-exploration",
+                "schema": "e-hgp.start-handoff.v3",
+                "status": "targeted_running",
+                "zone": "europe-west4-a",
+            },
+            json.loads(handoff.read_text(encoding="utf-8")),
+        )
+        self.assertIn(
+            "gcloud compute instances stop ehgp-blackwell-spot",
+            self.timeout_log.read_text(encoding="utf-8"),
+        )
+
     def test_stop_refuses_unlabelled_target_before_mutation(self) -> None:
         self.env["FAKE_GCLOUD_SCENARIO"] = "unlabelled"
         result = self.run_script("stop_and_verify.sh", "--yes")
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("ne porte pas le label project=e-hgp", result.stdout)
         self.assertNotIn("compute instances stop", self.commands())
+
+    def test_stop_refuses_generation_mismatch_before_mutation(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "guest-success"
+        result = self.run_script(
+            "stop_and_verify.sh",
+            "--yes",
+            "--expected-last-start-timestamp",
+            "2000-01-01T00:00:00.000Z",
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Génération différente", result.stdout)
+        self.assertNotIn("compute instances stop", self.commands())
+
+    def test_stop_cannot_certify_a_missing_target_as_terminated(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "missing-target"
+        result = self.run_script("stop_and_verify.sh", "--yes")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("TERMINATED ne peut pas être certifié", result.stdout)
 
     def test_stop_does_not_claim_or_mutate_concurrent_vm(self) -> None:
         self.env["FAKE_GCLOUD_SCENARIO"] = "other-active"
@@ -285,12 +532,20 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         fake_git = fake_bin / "git"
         fake_git.write_text(FAKE_GIT, encoding="utf-8")
         fake_git.chmod(0o755)
+        fake_timeout = fake_bin / "timeout"
+        fake_timeout.write_text(FAKE_TIMEOUT, encoding="utf-8")
+        fake_timeout.chmod(0o755)
 
         self.gcloud_log = self.tmp / "qualification-gcloud.log"
         self.git_log = self.tmp / "qualification-git.log"
         self.session_log = self.tmp / "qualification-session.log"
+        self.timeout_log = self.tmp / "qualification-timeout.log"
         self.results = self.tmp / "results"
         self.head = "a" * 40
+        now = datetime.now(timezone.utc)
+        self.last_start_timestamp = (now - timedelta(seconds=10)).isoformat().replace(
+            "+00:00", "Z"
+        )
         self.env = os.environ.copy()
         self.env.update(
             {
@@ -300,8 +555,10 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
                 "FAKE_GIT_LOG": str(self.git_log),
                 "FAKE_GIT_HEAD": self.head,
                 "FAKE_GIT_SCENARIO": "clean",
+                "FAKE_LAST_START_TIMESTAMP": self.last_start_timestamp,
                 "FAKE_REPOSITORY_ROOT": str(self.repository),
                 "FAKE_SESSION_LOG": str(self.session_log),
+                "FAKE_TIMEOUT_LOG": str(self.timeout_log),
                 "GCP_PROJECT_ID": "devpod-gpu-exploration",
                 "GCP_ZONE": "europe-west4-a",
                 "GCP_INSTANCE_NAME": "ehgp-blackwell-spot",
@@ -331,6 +588,9 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
             return ""
         return self.session_log.read_text(encoding="utf-8")
 
+    def handoff_path(self) -> Path:
+        return self.results / f"phase3-{self.head}.start-handoff.json"
+
     def standard_arguments(self) -> tuple[str, ...]:
         return ("--yes", "--result-dir", str(self.results))
 
@@ -343,20 +603,30 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertIn("[TERMINATED]", result.stdout)
         self.assertIn("[SUCCÈS] Qualification Phase 3", result.stdout)
         artifact = self.results / f"phase3-{self.head}.json"
+        value = json.loads(artifact.read_text(encoding="utf-8"))
+        self.assertEqual("passed", value["status"])
+        self.assertEqual("TERMINATED", value["vm_lifecycle"]["final_status"])
+        self.assertTrue(value["vm_lifecycle"]["targeted_stop_verified"])
         self.assertEqual(
-            artifact.read_text(encoding="utf-8"),
-            '{"kind":"phase3-result","status":"passed"}\n',
+            self.last_start_timestamp,
+            value["vm_lifecycle"]["last_start_timestamp"],
+        )
+        self.assertEqual(
+            "ehgp-blackwell-spot",
+            value["vm_lifecycle"]["instance"],
         )
 
         session = self.session_commands()
         self.assertIn(
             "start project=devpod-gpu-exploration zone=europe-west4-a "
-            "instance=ehgp-blackwell-spot args=--yes --guest-shutdown-minutes 45",
+            "instance=ehgp-blackwell-spot args=--yes --guest-shutdown-minutes 45 "
+            "--handoff-file",
             session,
         )
         self.assertIn(
             "stop project=devpod-gpu-exploration zone=europe-west4-a "
-            "instance=ehgp-blackwell-spot args=--yes",
+            "instance=ehgp-blackwell-spot args=--yes "
+            "--expected-last-start-timestamp " + self.last_start_timestamp,
             session,
         )
 
@@ -364,12 +634,13 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertIn("compute ssh ehgp-blackwell-spot", commands)
         self.assertIn("compute scp ehgp-blackwell-spot:", commands)
         self.assertIn("compute instances describe ehgp-blackwell-spot", commands)
-        self.assertIn("rm -rf -- /tmp/morsehgp3d-phase3.A1b2C3d4", commands)
+        self.assertNotIn("rm -rf -- /tmp/morsehgp3d-phase3.A1b2C3d4", commands)
         self.assertIn(f"checkout --quiet --detach {self.head}", commands)
         self.assertIn("phase3_remote_qualification.sh --yes --output", commands)
         self.assertNotIn("compute instances start", commands)
         self.assertNotIn("compute instances stop", commands)
         self.assertNotIn("ehgp-concurrent", commands)
+        self.assertFalse(self.handoff_path().exists())
 
     def test_remote_failure_still_stops_and_returns_original_failure(self) -> None:
         self.env["FAKE_GCLOUD_SCENARIO"] = "qualification-remote-failure"
@@ -379,6 +650,7 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
         self.assertIn("[TERMINATED]", result.stdout)
         self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
+        self.assertFalse(self.handoff_path().exists())
 
     def test_dirty_worktree_is_rejected_before_start_or_gcloud(self) -> None:
         self.env["FAKE_GIT_SCENARIO"] = "dirty"
@@ -406,6 +678,56 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
         self.assertIn("[TERMINATED]", result.stdout)
 
+    def test_sigterm_at_start_handoff_still_stops_target(self) -> None:
+        self.env["FAKE_SESSION_SCENARIO"] = "start-race"
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertEqual(result.returncode, 143, result.stdout)
+        self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
+        self.assertIn("[TERMINATED]", result.stdout)
+        self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
+
+    def test_failed_guest_guard_and_failed_stop_keep_orchestrator_handoff(
+        self,
+    ) -> None:
+        self.env["FAKE_SESSION_SCENARIO"] = "guard-failure-stop-failure"
+
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertEqual(result.returncode, 90, result.stdout)
+        self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
+        self.assertIn("[HANDOFF CONSERVÉ]", result.stdout)
+        self.assertEqual(
+            self.last_start_timestamp,
+            json.loads(self.handoff_path().read_text(encoding="utf-8"))[
+                "last_start_timestamp"
+            ],
+        )
+        self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
+
+    def test_invalid_start_handoff_never_triggers_unversioned_stop(self) -> None:
+        for scenario in ("invalid-handoff", "missing-handoff"):
+            with self.subTest(scenario=scenario):
+                self.env["FAKE_SESSION_SCENARIO"] = scenario
+                result = self.run_qualification(*self.standard_arguments())
+
+                self.assertEqual(result.returncode, 90, result.stdout)
+                self.assertIn("témoin ciblé certifié", result.stdout)
+                self.assertIn("génération lastStartTimestamp absente", result.stdout)
+                self.assertNotIn(
+                    "stop project=devpod-gpu-exploration", self.session_commands()
+                )
+                self.assertFalse(
+                    (self.results / f"phase3-{self.head}.json").exists()
+                )
+                if scenario == "invalid-handoff":
+                    self.assertIn("[HANDOFF CONSERVÉ]", result.stdout)
+                    self.assertTrue(self.handoff_path().exists())
+                    self.handoff_path().unlink()
+                else:
+                    self.assertFalse(self.handoff_path().exists())
+                self.session_log.unlink(missing_ok=True)
+
     def test_remote_head_mismatch_fails_closed_and_stops_target(self) -> None:
         self.env["FAKE_REMOTE_HEAD"] = "b" * 40
         result = self.run_qualification(*self.standard_arguments())
@@ -414,7 +736,18 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertIn("HEAD distant", result.stdout)
         self.assertIn("différent du SHA local", result.stdout)
         self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
+        self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
         self.assertIn("[TERMINATED]", result.stdout)
+
+    def test_invalid_remote_artifact_is_never_published(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "qualification-invalid-artifact"
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("commit propre qualifié", result.stdout)
+        self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
+        self.assertIn("[TERMINATED]", result.stdout)
+        self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
 
     def test_unreadable_independent_stop_proof_has_distinct_code(self) -> None:
         self.env["FAKE_GCLOUD_SCENARIO"] = "qualification-stop-unreadable"
@@ -427,6 +760,14 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertIn("instance=ehgp-blackwell-spot", result.stdout)
         self.assertIn("Commande de contrôle", result.stdout)
         self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
+        self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
+        self.assertIn("[HANDOFF CONSERVÉ]", result.stdout)
+        self.assertEqual(
+            self.last_start_timestamp,
+            json.loads(self.handoff_path().read_text(encoding="utf-8"))[
+                "last_start_timestamp"
+            ],
+        )
 
     def test_stop_script_failure_has_distinct_code_and_precise_target(self) -> None:
         self.env["FAKE_SESSION_SCENARIO"] = "stop-failure"
@@ -438,6 +779,44 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertIn("zone=europe-west4-a", result.stdout)
         self.assertIn("instance=ehgp-blackwell-spot", result.stdout)
         self.assertIn("stop_and_verify.sh a échoué", result.stdout)
+        self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
+        self.assertIn("[HANDOFF CONSERVÉ]", result.stdout)
+        self.assertTrue(self.handoff_path().exists())
+
+    def test_independent_readback_must_be_terminated_before_publication(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "qualification-stop-still-running"
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertEqual(result.returncode, 92, result.stdout)
+        self.assertIn("dernier état connu=RUNNING", result.stdout)
+        self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
+        self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
+        self.assertIn("[HANDOFF CONSERVÉ]", result.stdout)
+        self.assertTrue(self.handoff_path().exists())
+
+    def test_existing_incident_handoff_blocks_a_new_session(self) -> None:
+        self.results.mkdir(parents=True)
+        self.handoff_path().write_text("incident\n", encoding="utf-8")
+
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("résolvez d'abord cette session ciblée", result.stdout)
+        self.assertEqual("incident\n", self.handoff_path().read_text(encoding="utf-8"))
+        self.assertEqual([self.handoff_path()], list(self.results.iterdir()))
+        self.assertEqual(self.session_commands(), "")
+
+    def test_final_publication_never_replaces_a_concurrent_artifact(self) -> None:
+        artifact = self.results / f"phase3-{self.head}.json"
+        self.env["FAKE_SESSION_SCENARIO"] = "target-race"
+        self.env["FAKE_CONCURRENT_RESULT"] = str(artifact)
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("refus de remplacer un artefact créé concurremment", result.stdout)
+        self.assertEqual("concurrent artifact\n", artifact.read_text(encoding="utf-8"))
+        self.assertIn("[TERMINATED]", result.stdout)
+        self.assertEqual(1, self.session_commands().count("stop project="))
 
     def test_yes_is_mandatory_before_any_session_action(self) -> None:
         result = self.run_qualification("--result-dir", str(self.results))
