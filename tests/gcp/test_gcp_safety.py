@@ -33,6 +33,104 @@ if args[:3] == ["config", "get-value", "project"]:
     print(os.environ.get("GCP_PROJECT_ID", "devpod-gpu-exploration"))
 elif args[:3] == ["config", "get-value", "account"]:
     print("tester@example.invalid")
+elif args[:4] == ["beta", "quotas", "info", "describe"]:
+    quota_id = args[4]
+    region = os.environ.get("GCP_REGION", "europe-west4")
+    zone = os.environ.get("GCP_ZONE", "europe-west4-a")
+    limits = {
+        "GPUS-ALL-REGIONS-per-project": ("global", "1"),
+        "PREEMPTIBLE-NVIDIA-RTX-PRO-6000-GPUS-per-project-region": (region, "1"),
+        "HDB-TOTAL-GB-per-project-region": (region, "500"),
+        "HDB-TOTAL-IOPS-per-project-zone": (zone, "20000"),
+        "HDB-TOTAL-THROUGHPUT-per-project-zone": (zone, "2000"),
+        "INSTANCES-per-project-region": (region, "24"),
+        "IN-USE-ADDRESSES-per-project-region": (region, "8"),
+        "PREEMPTIBLE-CPUS-per-project-region": (region, "48"),
+    }
+    if quota_id not in limits:
+        raise SystemExit("unsupported fake quota: " + quota_id)
+    if scenario == "quota-missing-cpu" and quota_id == "PREEMPTIBLE-CPUS-per-project-region":
+        raise SystemExit(7)
+    location, limit = limits[quota_id]
+    if scenario == "quota-unlimited-performance" and quota_id in {
+        "HDB-TOTAL-IOPS-per-project-zone",
+        "HDB-TOTAL-THROUGHPUT-per-project-zone",
+    }:
+        limit = "-1"
+    if (
+        scenario == "quota-missing-rtx"
+        and quota_id
+        == "PREEMPTIBLE-NVIDIA-RTX-PRO-6000-GPUS-per-project-region"
+    ):
+        dimensions_infos = []
+    elif quota_id == "GPUS-ALL-REGIONS-per-project":
+        dimensions_infos = [
+            {"applicableLocations": [location], "details": {"value": limit}}
+        ]
+    elif quota_id in {
+        "HDB-TOTAL-IOPS-per-project-zone",
+        "HDB-TOTAL-THROUGHPUT-per-project-zone",
+    }:
+        dimensions_infos = [
+            {"applicableLocations": [location], "details": {"value": limit}}
+        ]
+    else:
+        dimension = "region"
+        dimensions_infos = [
+            {
+                "applicableLocations": [location],
+                "details": {"value": limit},
+                "dimensions": {dimension: location},
+            }
+        ]
+    print(json.dumps({"dimensionsInfos": dimensions_infos}))
+elif args[:3] == ["compute", "project-info", "describe"]:
+    print(
+        json.dumps(
+            {"quotas": [{"metric": "GPUS_ALL_REGIONS", "limit": 1, "usage": 0}]}
+        )
+    )
+elif args[:3] == ["compute", "regions", "describe"]:
+    print(
+        json.dumps(
+            {
+                "quotas": [
+                    {"metric": "PREEMPTIBLE_CPUS", "limit": 48, "usage": 0},
+                    {"metric": "INSTANCES", "limit": 24, "usage": 2},
+                    {"metric": "IN_USE_ADDRESSES", "limit": 8, "usage": 0},
+                ]
+            }
+        )
+    )
+elif args[:3] == ["compute", "disks", "list"]:
+    region = os.environ.get("GCP_REGION", "europe-west4")
+    zone = os.environ.get("GCP_ZONE", "europe-west4-a")
+    print(
+        json.dumps(
+            [
+                {
+                    "name": "zonal-balanced",
+                    "provisionedIops": "3600",
+                    "provisionedThroughput": "290",
+                    "sizeGb": "100",
+                    "type": f"zones/{zone}/diskTypes/hyperdisk-balanced",
+                    "zone": f"zones/{zone}",
+                },
+                {
+                    "name": "regional-balanced-ha",
+                    "provisionedIops": "4000",
+                    "provisionedThroughput": "200",
+                    "region": f"regions/{region}",
+                    "replicaZones": [f"zones/{zone}", f"zones/{region}-b"],
+                    "sizeGb": "50",
+                    "type": (
+                        f"regions/{region}/diskTypes/"
+                        "hyperdisk-balanced-high-availability"
+                    ),
+                },
+            ]
+        )
+    )
 elif args[:3] == ["compute", "instances", "list"]:
     output_format = next((item.split("=", 1)[1] for item in args if item.startswith("--format=")), "")
     if output_format == "value(name)":
@@ -54,15 +152,53 @@ elif args[:3] == ["compute", "instances", "describe"]:
     status = "TERMINATED"
     if scenario == "qualification-stop-still-running":
         status = "RUNNING"
-    if scenario in {"guest-interrupt", "guest-readback", "guest-success"} and "compute instances start" in previous_commands:
+    start_observed = "compute instances start" in previous_commands
+    post_start_commands = (
+        previous_commands.rsplit("compute instances start", 1)[-1]
+        if start_observed
+        else ""
+    )
+    if scenario in {
+        "generation-race",
+        "guest-interrupt",
+        "guest-readback",
+        "guest-success",
+        "post-start-wrong-maintenance",
+        "post-start-wrong-provisioning",
+        "signal-after-capture",
+        "timestamp-lag",
+    } and start_observed:
         status = "RUNNING"
+    if scenario == "generation-race" and start_observed:
+        status_reads = post_start_commands.count("--format=value(status)")
+        status = "PROVISIONING" if status_reads == 1 else "RUNNING"
+    if scenario == "signal-after-capture" and start_observed:
+        status = "PROVISIONING"
     if "compute instances stop" in previous_commands:
         status = "TERMINATED"
     now = datetime.now(timezone.utc)
-    last_start_timestamp = os.environ.get(
-        "FAKE_LAST_START_TIMESTAMP",
-        (now - timedelta(seconds=10)).isoformat().replace("+00:00", "Z"),
-    )
+    if start_observed or scenario.startswith("qualification-"):
+        last_start_timestamp = os.environ.get(
+            "FAKE_LAST_START_TIMESTAMP",
+            (now - timedelta(seconds=10)).isoformat().replace("+00:00", "Z"),
+        )
+        if scenario == "generation-race":
+            generation_reads = post_start_commands.count(
+                "--format=value(lastStartTimestamp)"
+            )
+            if generation_reads >= 2:
+                last_start_timestamp = os.environ["FAKE_CONCURRENT_START_TIMESTAMP"]
+        if scenario == "timestamp-lag":
+            generation_reads = post_start_commands.count(
+                "--format=value(lastStartTimestamp)"
+            )
+            if generation_reads == 1:
+                last_start_timestamp = os.environ["FAKE_PRE_START_TIMESTAMP"]
+    else:
+        last_start_timestamp = os.environ.get(
+            "FAKE_PRE_START_TIMESTAMP",
+            (now - timedelta(seconds=20)).isoformat().replace("+00:00", "Z"),
+        )
     termination_timestamp = os.environ.get(
         "FAKE_TERMINATION_TIMESTAMP",
         (now + timedelta(seconds=28790)).isoformat().replace("+00:00", "Z"),
@@ -70,10 +206,21 @@ elif args[:3] == ["compute", "instances", "describe"]:
     values = {
         "status": status,
         "scheduling.instanceTerminationAction": "STOP",
+        "scheduling.automaticRestart": "False",
         "scheduling.maxRunDuration.seconds": "28800",
+        "scheduling.onHostMaintenance": (
+            "MIGRATE"
+            if scenario == "post-start-wrong-maintenance" and start_observed
+            else "TERMINATE"
+        ),
         "labels.project": "e-hgp",
         "machineType.basename()": "n2-standard-48" if scenario == "wrong-machine" else "g4-standard-48",
-        "scheduling.provisioningModel": "STANDARD" if scenario == "wrong-provisioning" else "SPOT",
+        "scheduling.provisioningModel": (
+            "STANDARD"
+            if scenario == "wrong-provisioning"
+            or (scenario == "post-start-wrong-provisioning" and start_observed)
+            else "SPOT"
+        ),
         "lastStartTimestamp": last_start_timestamp,
         "terminationTimestamp": termination_timestamp,
     }
@@ -81,7 +228,17 @@ elif args[:3] == ["compute", "instances", "describe"]:
         values["labels.project"] = ""
     print(values.get(field, ""))
 elif args[:3] in (["compute", "instances", "start"], ["compute", "instances", "stop"]):
-    if scenario not in {"guest-interrupt", "guest-readback", "guest-success"}:
+    if scenario not in {
+        "guest-interrupt",
+        "guest-readback",
+        "guest-success",
+        "generation-race",
+        "immediate-preemption",
+        "post-start-wrong-maintenance",
+        "post-start-wrong-provisioning",
+        "signal-after-capture",
+        "timestamp-lag",
+    }:
         print("unexpected mutation", file=sys.stderr)
         sys.exit(97)
 elif args[:2] == ["compute", "ssh"]:
@@ -93,7 +250,7 @@ elif args[:2] == ["compute", "ssh"]:
         print("No scheduled shutdown")
     elif scenario == "guest-interrupt":
         print("No scheduled shutdown")
-    elif scenario == "guest-success":
+    elif scenario in {"guest-success", "timestamp-lag"}:
         print("MODE=poweroff\nUSEC=9999999999999999\n__EHGP_GUEST_GUARD_VERIFIED__")
     elif scenario.startswith("qualification-"):
         if "mktemp -d /tmp/morsehgp3d-phase3.XXXXXXXX" in command:
@@ -239,10 +396,16 @@ for ((index = 0; index < ${#arguments[@]}; ++index)); do
   fi
 done
 [[ -n "${handoff_file}" ]]
-printf '{"guest_shutdown_minutes":45,"instance":"%s","last_start_timestamp":"%s","project":"%s","schema":"e-hgp.start-handoff.v3","status":"targeted_running","zone":"%s"}\n' \
+handoff_status="targeted_running"
+if [[ "${FAKE_SESSION_SCENARIO:-}" == "preemption-handoff" ]]; then
+  handoff_status="targeted_stopping"
+fi
+printf '{"guest_shutdown_minutes":45,"instance":"%s","last_start_timestamp":"%s","project":"%s","schema":"e-hgp.start-handoff.v3","status":"%s","zone":"%s"}\n' \
   "${GCP_INSTANCE_NAME}" "${FAKE_LAST_START_TIMESTAMP}" "${GCP_PROJECT_ID}" \
-  "${GCP_ZONE}" >"${handoff_file}"
+  "${handoff_status}" "${GCP_ZONE}" >"${handoff_file}"
 if [[ "${FAKE_SESSION_SCENARIO:-}" == "guard-failure-stop-failure" ]]; then
+  exit 37
+elif [[ "${FAKE_SESSION_SCENARIO:-}" == "preemption-handoff" ]]; then
   exit 37
 elif [[ "${FAKE_SESSION_SCENARIO:-}" == "start-race" ]]; then
   kill -TERM "${PPID}"
@@ -284,10 +447,18 @@ class ScriptSafetyTests(unittest.TestCase):
         self.last_start_timestamp = (now - timedelta(seconds=10)).isoformat().replace(
             "+00:00", "Z"
         )
+        self.pre_start_timestamp = (now - timedelta(seconds=20)).isoformat().replace(
+            "+00:00", "Z"
+        )
+        self.concurrent_start_timestamp = (
+            now - timedelta(seconds=5)
+        ).isoformat().replace("+00:00", "Z")
         self.env = os.environ.copy()
         self.env.update(
             {
                 "FAKE_LAST_START_TIMESTAMP": self.last_start_timestamp,
+                "FAKE_PRE_START_TIMESTAMP": self.pre_start_timestamp,
+                "FAKE_CONCURRENT_START_TIMESTAMP": self.concurrent_start_timestamp,
                 "PATH": f"{self.tmp}:{self.env['PATH']}",
                 "FAKE_GCLOUD_LOG": str(self.log),
                 "FAKE_TIMEOUT_LOG": str(self.timeout_log),
@@ -361,6 +532,285 @@ class ScriptSafetyTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Spot", result.stdout)
         self.assertNotIn("compute instances start", self.commands())
+
+    def test_start_rechecks_spot_after_mutation_and_stops_exact_generation(
+        self,
+    ) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "post-start-wrong-provisioning"
+        handoff = self.tmp / "post-start-failure-handoff.json"
+
+        result = self.run_script(
+            "start_and_verify.sh",
+            "--yes",
+            "--handoff-file",
+            str(handoff),
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("post-démarrage", result.stdout)
+        self.assertIn("compute instances start", self.commands())
+        self.assertIn("compute instances stop", self.commands())
+        self.assertIn(self.last_start_timestamp, result.stdout)
+        self.assertFalse(handoff.exists())
+
+    def test_start_rechecks_terminate_maintenance_after_mutation(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "post-start-wrong-maintenance"
+
+        result = self.run_script("start_and_verify.sh", "--yes")
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("post-démarrage", result.stdout)
+        self.assertIn("compute instances start", self.commands())
+        self.assertIn("compute instances stop", self.commands())
+
+    def test_post_start_guard_failure_preserves_targeted_stopping_handoff(
+        self,
+    ) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "post-start-wrong-provisioning"
+        self.env["FAKE_TIMEOUT_SCENARIO"] = "expire-stop"
+        handoff = self.tmp / "post-start-incident-handoff.json"
+
+        result = self.run_script(
+            "start_and_verify.sh",
+            "--yes",
+            "--handoff-file",
+            str(handoff),
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("[HANDOFF CONSERVÉ]", result.stdout)
+        self.assertEqual(
+            "targeted_stopping",
+            json.loads(handoff.read_text(encoding="utf-8"))["status"],
+        )
+        self.assertIn(
+            "gcloud compute instances stop ehgp-blackwell-spot",
+            self.timeout_log.read_text(encoding="utf-8"),
+        )
+
+    def test_signal_after_generation_capture_preserves_handoff_if_stop_fails(
+        self,
+    ) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "signal-after-capture"
+        self.env["FAKE_TIMEOUT_SCENARIO"] = "expire-stop"
+        handoff = self.tmp / "signal-window-handoff.json"
+        fake_sleep = self.tmp / "sleep"
+        fake_sleep.write_text(
+            '#!/usr/bin/env bash\nkill -TERM "${PPID}"\nexit 143\n',
+            encoding="utf-8",
+        )
+        fake_sleep.chmod(0o755)
+
+        result = self.run_script(
+            "start_and_verify.sh",
+            "--yes",
+            "--handoff-file",
+            str(handoff),
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("[HANDOFF CONSERVÉ]", result.stdout)
+        value = json.loads(handoff.read_text(encoding="utf-8"))
+        self.assertEqual("targeted_stopping", value["status"])
+        self.assertEqual(self.last_start_timestamp, value["last_start_timestamp"])
+        self.assertIn(
+            "gcloud compute instances stop ehgp-blackwell-spot",
+            self.timeout_log.read_text(encoding="utf-8"),
+        )
+
+    def test_immediate_spot_preemption_is_detected_and_certified_without_waiting(
+        self,
+    ) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "immediate-preemption"
+        handoff = self.tmp / "preemption-handoff.json"
+
+        result = self.run_script(
+            "start_and_verify.sh",
+            "--yes",
+            "--handoff-file",
+            str(handoff),
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("préemptée pendant le démarrage", result.stdout)
+        self.assertIn("Arrêt ciblé certifié", result.stdout)
+        self.assertIn(self.last_start_timestamp, result.stdout)
+        self.assertIn("compute instances start", self.commands())
+        self.assertNotIn("compute instances stop", self.commands())
+        self.assertFalse(handoff.exists())
+
+    def test_generation_latch_never_stops_a_concurrent_restart(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "generation-race"
+        handoff = self.tmp / "generation-race-handoff.json"
+        fake_sleep = self.tmp / "sleep"
+        fake_sleep.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+        fake_sleep.chmod(0o755)
+
+        result = self.run_script(
+            "start_and_verify.sh",
+            "--yes",
+            "--handoff-file",
+            str(handoff),
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("génération concurrente", result.stdout)
+        self.assertIn("Génération différente", result.stdout)
+        self.assertNotIn("compute instances stop", self.commands())
+        value = json.loads(handoff.read_text(encoding="utf-8"))
+        self.assertEqual("targeted_stopping", value["status"])
+        self.assertEqual(self.last_start_timestamp, value["last_start_timestamp"])
+
+    def test_running_retries_until_start_generation_is_materialized(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "timestamp-lag"
+        handoff = self.tmp / "timestamp-lag-handoff.json"
+        fake_sleep = self.tmp / "sleep"
+        fake_sleep.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+        fake_sleep.chmod(0o755)
+
+        result = self.run_script(
+            "start_and_verify.sh",
+            "--yes",
+            "--guest-shutdown-minutes",
+            "45",
+            "--handoff-file",
+            str(handoff),
+        )
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("non encore matérialisée", result.stdout)
+        self.assertEqual(
+            self.last_start_timestamp,
+            json.loads(handoff.read_text(encoding="utf-8"))[
+                "last_start_timestamp"
+            ],
+        )
+        stopped = self.run_script(
+            "stop_and_verify.sh",
+            "--yes",
+            "--expected-last-start-timestamp",
+            self.last_start_timestamp,
+        )
+        self.assertEqual(stopped.returncode, 0, stopped.stdout)
+
+    def test_deploy_declares_and_reads_back_spot_invariants(self) -> None:
+        source = (ROOT / "gcp-migration" / "deploy.sh").read_text(
+            encoding="utf-8"
+        )
+
+        for expected in (
+            '--provisioning-model="SPOT"',
+            '--maintenance-policy="TERMINATE"',
+            "--no-restart-on-failure",
+            "readonly BOOT_DISK_IOPS=3600",
+            "readonly BOOT_DISK_THROUGHPUT=290",
+            '--boot-disk-provisioned-iops="${BOOT_DISK_IOPS}"',
+            '--boot-disk-provisioned-throughput="${BOOT_DISK_THROUGHPUT}"',
+            "scheduling.provisioningModel",
+            "scheduling.onHostMaintenance",
+            "scheduling.automaticRestart",
+            "machineType.basename()",
+            "labels.project",
+            "ai-zones-visibility",
+        ):
+            with self.subTest(expected=expected):
+                self.assertIn(expected, source)
+        self.assertIn("check_quotas.sh", source)
+
+    def test_quota_check_uses_exact_spot_quota_and_never_requires_g4_cpus(
+        self,
+    ) -> None:
+        source = (ROOT / "gcp-migration" / "check_quotas.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn(
+            "PREEMPTIBLE-NVIDIA-RTX-PRO-6000-GPUS-per-project-region",
+            source,
+        )
+        self.assertIn("GPUS-ALL-REGIONS-per-project", source)
+        self.assertIn("HDB-TOTAL-GB-per-project-region", source)
+        self.assertIn("HDB-TOTAL-IOPS-per-project-zone", source)
+        self.assertIn("HDB-TOTAL-THROUGHPUT-per-project-zone", source)
+        self.assertIn("readonly REQUIRED_HDB_IOPS=600", source)
+        self.assertIn("readonly REQUIRED_HDB_THROUGHPUT=150", source)
+        self.assertIn("readonly HDB_BASELINE_IOPS=3000", source)
+        self.assertIn("readonly HDB_BASELINE_THROUGHPUT=140", source)
+        self.assertIn("PREEMPTIBLE_CPUS (informatif)", source)
+        self.assertNotIn(
+            'quota_is_sufficient "${CPUS_SPOT_AVAILABLE}"',
+            source,
+        )
+        self.assertNotIn("GPU-FAMILY:NVIDIA_RTX_PRO_6000", source)
+
+    def test_quota_check_executes_exact_limits_and_hdb_accounting(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "quota-success"
+
+        result = self.run_script("check_quotas.sh")
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertRegex(
+            result.stdout,
+            r"HDB_TOTAL_GB\s+500\s+200\s+300\s+>= 100",
+        )
+        self.assertRegex(
+            result.stdout,
+            r"HDB_TOTAL_IOPS \(europe-west4-a\)\s+20000\s+1600\s+18400\s+>= 600",
+        )
+        self.assertRegex(
+            result.stdout,
+            r"HDB_TOTAL_THROUGHPUT \(europe-west4-a\)\s+2000\s+210\s+1790\s+>= 150",
+        )
+        self.assertIn("PREEMPTIBLE_NVIDIA_RTX_PRO_6000", result.stdout)
+        self.assertIn("[SUCCÈS]", result.stdout)
+
+    def test_quota_check_fails_when_exact_rtx_spot_quota_is_missing(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "quota-missing-rtx"
+
+        result = self.run_script("check_quotas.sh")
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "Le quota Cloud Quotas exact "
+            "PREEMPTIBLE-NVIDIA-RTX-PRO-6000-GPUS-per-project-region "
+            "est absent ou illisible",
+            result.stdout,
+        )
+        self.assertNotIn("compute instances create", self.commands())
+        self.assertNotIn("compute instances start", self.commands())
+
+    def test_cpu_quota_is_optional_and_private_network_skips_address(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "quota-missing-cpu"
+        self.env["GCP_REQUIRE_EXTERNAL_ADDRESS"] = "0"
+
+        result = self.run_script("check_quotas.sh")
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertRegex(
+            result.stdout,
+            r"IN_USE_ADDRESSES\s+N/A\s+N/A\s+N/A\s+N/A",
+        )
+        self.assertRegex(
+            result.stdout,
+            r"PREEMPTIBLE_CPUS \(informatif\)\s+UNKNOWN\s+0\s+UNKNOWN\s+N/A G4",
+        )
+        self.assertNotIn("IN-USE-ADDRESSES-per-project-region", self.commands())
+        self.assertIn("[SUCCÈS]", result.stdout)
+
+    def test_unlimited_hdb_performance_quotas_are_accepted(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "quota-unlimited-performance"
+
+        result = self.run_script("check_quotas.sh")
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertRegex(
+            result.stdout,
+            r"HDB_TOTAL_IOPS \(europe-west4-a\)\s+-1\s+1600\s+UNLIMITED\s+>= 600",
+        )
+        self.assertRegex(
+            result.stdout,
+            r"HDB_TOTAL_THROUGHPUT \(europe-west4-a\)\s+-1\s+210\s+UNLIMITED\s+>= 150",
+        )
 
     def test_start_fails_closed_when_guest_guard_readback_is_missing(self) -> None:
         self.env["FAKE_GCLOUD_SCENARIO"] = "guest-readback"
@@ -720,6 +1170,22 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertEqual(result.returncode, 143, result.stdout)
         self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
         self.assertIn("[TERMINATED]", result.stdout)
+        self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
+
+    def test_immediate_preemption_handoff_is_stopped_before_exit(self) -> None:
+        self.env["FAKE_SESSION_SCENARIO"] = "preemption-handoff"
+
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertEqual(result.returncode, 37, result.stdout)
+        self.assertIn(
+            "stop project=devpod-gpu-exploration zone=europe-west4-a "
+            "instance=ehgp-blackwell-spot args=--yes "
+            "--expected-last-start-timestamp " + self.last_start_timestamp,
+            self.session_commands(),
+        )
+        self.assertIn("[TERMINATED]", result.stdout)
+        self.assertFalse(self.handoff_path().exists())
         self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
 
     def test_failed_guest_guard_and_failed_stop_keep_orchestrator_handoff(

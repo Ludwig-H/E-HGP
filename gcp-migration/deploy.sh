@@ -3,10 +3,15 @@ set -euo pipefail
 
 readonly INSTANCE_NAME="${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}"
 readonly ZONE="${GCP_ZONE:-europe-west4-a}"
+readonly REGION="${ZONE%-*}"
 readonly MACHINE_TYPE="g4-standard-48"
 readonly IMAGE_FAMILY="common-cu129-ubuntu-2204-nvidia-580"
 readonly IMAGE_PROJECT="deeplearning-platform-release"
 readonly DEFAULT_PROJECT_ID="devpod-gpu-exploration"
+readonly EXPECTED_MAINTENANCE_POLICY="TERMINATE"
+readonly EXPECTED_PROVISIONING_MODEL="SPOT"
+readonly BOOT_DISK_IOPS=3600
+readonly BOOT_DISK_THROUGHPUT=290
 readonly MIN_ALLOWED_RUN_SECONDS=30
 readonly MAX_ALLOWED_RUN_SECONDS=28800
 readonly GUARD_TIMEOUT_SECONDS=60
@@ -62,18 +67,29 @@ instance_field() {
 }
 
 verify_runtime_guard() {
-    local action configured_seconds start_timestamp start_epoch computed_deadline
+    local action automatic_restart configured_seconds label machine_type
+    local maintenance_policy provisioning_model start_timestamp start_epoch computed_deadline
     local termination_timestamp termination_epoch now maximum_deadline
 
     action="$(instance_field 'scheduling.instanceTerminationAction')" || return 1
+    automatic_restart="$(instance_field 'scheduling.automaticRestart')" || return 1
     configured_seconds="$(instance_field 'scheduling.maxRunDuration.seconds')" || return 1
+    label="$(instance_field 'labels.project')" || return 1
+    machine_type="$(instance_field 'machineType.basename()')" || return 1
+    maintenance_policy="$(instance_field 'scheduling.onHostMaintenance')" || return 1
+    provisioning_model="$(instance_field 'scheduling.provisioningModel')" || return 1
     start_timestamp="$(instance_field 'lastStartTimestamp')" || return 1
     termination_timestamp="$(instance_field 'terminationTimestamp')" || return 1
 
     [[ "${action}" == "STOP" ]] || return 1
+    [[ "${automatic_restart,,}" == "false" ]] || return 1
     [[ "${configured_seconds}" =~ ^[0-9]+$ ]] || return 1
     ((configured_seconds >= MIN_ALLOWED_RUN_SECONDS && configured_seconds <= MAX_ALLOWED_RUN_SECONDS)) || return 1
     ((configured_seconds == MAX_RUN_SECONDS)) || return 1
+    [[ "${label}" == "e-hgp" ]] || return 1
+    [[ "${machine_type}" == "${MACHINE_TYPE}" ]] || return 1
+    [[ "${maintenance_policy}" == "${EXPECTED_MAINTENANCE_POLICY}" ]] || return 1
+    [[ "${provisioning_model}" == "${EXPECTED_PROVISIONING_MODEL}" ]] || return 1
     [[ -n "${start_timestamp}" ]] || return 1
     [[ -n "${termination_timestamp}" ]] || return 1
 
@@ -131,6 +147,26 @@ fi
 account="$(gcloud config get-value account 2>/dev/null || true)"
 [[ -n "${account}" && "${account}" != "(unset)" ]] || die "Aucun compte gcloud actif."
 
+if [[ "${ZONE}" == *-ai* ]]; then
+    ai_zone_status="$(gcloud compute preview-features describe ai-zones-visibility \
+        --project="${PROJECT_ID}" \
+        --format='value(activationStatus)')" || \
+        die "Impossible de lire l'activation de ai-zones-visibility."
+    if [[ "${ai_zone_status}" != "ENABLED" && \
+        "${ai_zone_status}" != "ACTIVATION_STATE_ENABLED" ]]; then
+        die "La zone IA ${ZONE} exige ai-zones-visibility=enabled; activation automatique interdite."
+    fi
+fi
+
+require_external_address=0
+if [[ "${NETWORK_INTERFACE}" == *"access-config-type="* ]]; then
+    require_external_address=1
+fi
+GCP_PROJECT_ID="${PROJECT_ID}" GCP_REGION="${REGION}" GCP_ZONE="${ZONE}" \
+GCP_REQUIRE_EXTERNAL_ADDRESS="${require_external_address}" \
+    "$(dirname "${BASH_SOURCE[0]}")/check_quotas.sh" || \
+    die "Les quotas strictement nécessaires à une création G4 Spot ne sont pas disponibles."
+
 if ! resolved_image="$(gcloud compute images describe-from-family "${IMAGE_FAMILY}" \
     --project="${IMAGE_PROJECT}" \
     --format='value(name)')"; then
@@ -185,10 +221,13 @@ gcloud compute instances create "${INSTANCE_NAME}" \
     --instance-termination-action="STOP" \
     --max-run-duration="${MAX_RUN_DURATION}" \
     --maintenance-policy="TERMINATE" \
+    --no-restart-on-failure \
     --image="${resolved_image}" \
     --image-project="${IMAGE_PROJECT}" \
     --boot-disk-size="100GB" \
     --boot-disk-type="hyperdisk-balanced" \
+    --boot-disk-provisioned-iops="${BOOT_DISK_IOPS}" \
+    --boot-disk-provisioned-throughput="${BOOT_DISK_THROUGHPUT}" \
     --network-interface="${NETWORK_INTERFACE}" \
     --metadata="enable-oslogin=TRUE" \
     --labels="project=e-hgp,role=gpu-benchmark,managed-by=manual-script" \

@@ -6,6 +6,7 @@ readonly ZONE="${GCP_ZONE:-europe-west4-a}"
 readonly DEFAULT_PROJECT_ID="devpod-gpu-exploration"
 readonly EXPECTED_MACHINE_TYPE="g4-standard-48"
 readonly EXPECTED_PROVISIONING_MODEL="SPOT"
+readonly EXPECTED_MAINTENANCE_POLICY="TERMINATE"
 readonly MIN_ALLOWED_RUN_SECONDS=30
 readonly MAX_ALLOWED_RUN_SECONDS=28800
 readonly START_TIMEOUT_SECONDS=300
@@ -20,6 +21,8 @@ GUEST_SHUTDOWN_MINUTES="${GCP_GUEST_SHUTDOWN_MINUTES:-240}"
 ASSUME_YES=0
 HANDOFF_FILE=""
 VERIFIED_LAST_START_TIMESTAMP=""
+TARGET_LAST_START_TIMESTAMP=""
+PRE_START_LAST_START_TIMESTAMP=""
 
 die() {
     printf '[ERREUR] %s\n' "$*" >&2
@@ -34,8 +37,8 @@ Démarre la VM ciblée seulement si son coupe-circuit GCE est borné à huit heu
 certifie l'échéance après démarrage, puis arme et vérifie un arrêt dans l'OS invité.
 Le mode est interactif par défaut. --yes est réservé à une exécution explicitement
 autorisée et ne désactive aucun contrôle. --handoff-file publie atomiquement un
-témoin de génération dès que la garde GCE post-démarrage est certifiée; ce témoin
-reste utilisable pour un arrêt ciblé même si la garde invitée échoue ensuite.
+témoin de génération dès que la garde GCE post-démarrage est certifiée ou qu'une
+préemption immédiate est observée; ce témoin reste utilisable pour un arrêt ciblé.
 EOF
 }
 
@@ -109,42 +112,56 @@ instance_field() {
 }
 
 verify_static_guard() {
-    local action configured_seconds label machine_type provisioning_model
+    local action automatic_restart configured_seconds label machine_type
+    local maintenance_policy provisioning_model
     action="$(instance_field 'scheduling.instanceTerminationAction')" || return 1
+    automatic_restart="$(instance_field 'scheduling.automaticRestart')" || return 1
     configured_seconds="$(instance_field 'scheduling.maxRunDuration.seconds')" || return 1
     label="$(instance_field 'labels.project')" || return 1
     machine_type="$(instance_field 'machineType.basename()')" || return 1
+    maintenance_policy="$(instance_field 'scheduling.onHostMaintenance')" || return 1
     provisioning_model="$(instance_field 'scheduling.provisioningModel')" || return 1
 
     [[ "${action}" == "STOP" ]] || return 1
+    [[ "${automatic_restart,,}" == "false" ]] || return 1
     [[ "${configured_seconds}" =~ ^[0-9]+$ ]] || return 1
     ((configured_seconds >= MIN_ALLOWED_RUN_SECONDS && configured_seconds <= MAX_ALLOWED_RUN_SECONDS)) || return 1
     [[ "${label}" == "e-hgp" ]] || return 1
     [[ "${machine_type}" == "${EXPECTED_MACHINE_TYPE}" ]] || return 1
+    [[ "${maintenance_policy}" == "${EXPECTED_MAINTENANCE_POLICY}" ]] || return 1
     [[ "${provisioning_model}" == "${EXPECTED_PROVISIONING_MODEL}" ]] || return 1
     VERIFIED_MAX_RUN_SECONDS="${configured_seconds}"
 }
 
 verify_running_guard() {
-    local status action configured_seconds start_timestamp start_epoch
+    local status action automatic_restart configured_seconds label machine_type
+    local maintenance_policy provisioning_model start_timestamp start_epoch
     local termination_timestamp termination_epoch now computed_deadline maximum_deadline
 
     status="$(instance_field 'status')" || return 1
     action="$(instance_field 'scheduling.instanceTerminationAction')" || return 1
+    automatic_restart="$(instance_field 'scheduling.automaticRestart')" || return 1
     configured_seconds="$(instance_field 'scheduling.maxRunDuration.seconds')" || return 1
+    label="$(instance_field 'labels.project')" || return 1
+    machine_type="$(instance_field 'machineType.basename()')" || return 1
+    maintenance_policy="$(instance_field 'scheduling.onHostMaintenance')" || return 1
+    provisioning_model="$(instance_field 'scheduling.provisioningModel')" || return 1
     start_timestamp="$(instance_field 'lastStartTimestamp')" || return 1
     termination_timestamp="$(instance_field 'terminationTimestamp')" || return 1
 
     [[ "${status}" == "RUNNING" && "${action}" == "STOP" ]] || return 1
+    [[ "${automatic_restart,,}" == "false" ]] || return 1
     [[ "${configured_seconds}" =~ ^[0-9]+$ ]] || return 1
     ((configured_seconds >= MIN_ALLOWED_RUN_SECONDS && configured_seconds <= MAX_ALLOWED_RUN_SECONDS)) || return 1
+    [[ "${label}" == "e-hgp" ]] || return 1
+    [[ "${machine_type}" == "${EXPECTED_MACHINE_TYPE}" ]] || return 1
+    [[ "${maintenance_policy}" == "${EXPECTED_MAINTENANCE_POLICY}" ]] || return 1
+    [[ "${provisioning_model}" == "${EXPECTED_PROVISIONING_MODEL}" ]] || return 1
     [[ -n "${start_timestamp}" ]] || return 1
     [[ -n "${termination_timestamp}" ]] || return 1
     [[ "${start_timestamp}" != *$'\n'* && "${start_timestamp}" != *$'\r'* ]] || return 1
-    if [[ -n "${VERIFIED_LAST_START_TIMESTAMP}" && \
-        "${start_timestamp}" != "${VERIFIED_LAST_START_TIMESTAMP}" ]]; then
-        return 1
-    fi
+    [[ -n "${TARGET_LAST_START_TIMESTAMP}" ]] || return 1
+    [[ "${start_timestamp}" == "${TARGET_LAST_START_TIMESTAMP}" ]] || return 1
 
     start_epoch="$(timestamp_to_epoch "${start_timestamp}")" || return 1
     now="$(date +%s)"
@@ -165,6 +182,20 @@ verify_running_guard() {
     printf '\n'
 }
 
+capture_started_generation() {
+    local observed_generation=""
+
+    observed_generation="$(instance_field 'lastStartTimestamp')" || return 1
+    [[ -n "${observed_generation}" ]] || return 1
+    [[ "${observed_generation}" != *$'\n'* && "${observed_generation}" != *$'\r'* ]] || return 1
+    if [[ -n "${TARGET_LAST_START_TIMESTAMP}" ]]; then
+        [[ "${observed_generation}" == "${TARGET_LAST_START_TIMESTAMP}" ]] || return 2
+        return 0
+    fi
+    [[ "${observed_generation}" != "${PRE_START_LAST_START_TIMESTAMP}" ]] || return 1
+    TARGET_LAST_START_TIMESTAMP="${observed_generation}"
+}
+
 instance_status() {
     instance_field 'status'
 }
@@ -174,8 +205,9 @@ start_certified=0
 emergency_stop_on_exit() {
     local exit_code=$?
     local emergency_stop_status=0
+    trap - EXIT HUP INT TERM
     if ((exit_code != 0 && start_attempted == 1 && start_certified == 0)); then
-        if [[ -z "${VERIFIED_LAST_START_TIMESTAMP}" ]]; then
+        if [[ -z "${TARGET_LAST_START_TIMESTAMP}" ]]; then
             printf '[URGENCE] Démarrage non certifié de %s et génération lastStartTimestamp inconnue; aucun arrêt automatique non versionné n’est autorisé.\n' \
                 "${INSTANCE_NAME}" >&2
             printf '[URGENCE] Projet=%s zone=%s instance=%s; dernier état certifié avant mutation=TERMINATED.\n' \
@@ -185,13 +217,19 @@ emergency_stop_on_exit() {
                 'value(status,lastStartTimestamp)' >&2
             return 0
         fi
+        if [[ -n "${HANDOFF_FILE}" && ! -e "${HANDOFF_FILE}" && ! -L "${HANDOFF_FILE}" ]]; then
+            if ! publish_targeted_handoff "targeted_stopping"; then
+                printf '[URGENCE] Génération connue mais publication du handoff ciblé impossible : %s\n' \
+                    "${HANDOFF_FILE}" >&2
+            fi
+        fi
         printf '[URGENCE] Démarrage non certifié : tentative d’arrêt de la génération %s sur %s.\n' \
-            "${VERIFIED_LAST_START_TIMESTAMP}" "${INSTANCE_NAME}" >&2
+            "${TARGET_LAST_START_TIMESTAMP}" "${INSTANCE_NAME}" >&2
         if GCP_PROJECT_ID="${PROJECT_ID}" \
             GCP_INSTANCE_NAME="${INSTANCE_NAME}" \
             GCP_ZONE="${ZONE}" \
             "$(dirname "${BASH_SOURCE[0]}")/stop_and_verify.sh" --yes \
-                --expected-last-start-timestamp "${VERIFIED_LAST_START_TIMESTAMP}"; then
+                --expected-last-start-timestamp "${TARGET_LAST_START_TIMESTAMP}"; then
             emergency_stop_status=0
         else
             emergency_stop_status=$?
@@ -203,7 +241,7 @@ emergency_stop_on_exit() {
                         "${HANDOFF_FILE}" >&2
             fi
             printf '[URGENCE] Arrêt ciblé certifié pour la génération %s.\n' \
-                "${VERIFIED_LAST_START_TIMESTAMP}" >&2
+                "${TARGET_LAST_START_TIMESTAMP}" >&2
         else
             printf '[URGENCE] Arrêt non vérifié. Projet=%s zone=%s instance=%s. Contrôlez GCP immédiatement.\n' \
                 "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" >&2
@@ -214,12 +252,13 @@ emergency_stop_on_exit() {
         fi
     fi
 }
-trap emergency_stop_on_exit EXIT
 
 publish_targeted_handoff() {
+    local handoff_status="${1:-targeted_running}"
     [[ -n "${HANDOFF_FILE}" ]] || return 0
     python3 - "${HANDOFF_FILE}" "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
-        "${GUEST_SHUTDOWN_MINUTES}" "${VERIFIED_LAST_START_TIMESTAMP}" <<'PY'
+        "${GUEST_SHUTDOWN_MINUTES}" "${TARGET_LAST_START_TIMESTAMP}" \
+        "${handoff_status}" <<'PY'
 import json
 import os
 from pathlib import Path
@@ -233,7 +272,7 @@ record = {
     "last_start_timestamp": sys.argv[6],
     "project": sys.argv[2],
     "schema": "e-hgp.start-handoff.v3",
-    "status": "targeted_running",
+    "status": sys.argv[7],
     "zone": sys.argv[3],
 }
 encoded = (json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n").encode()
@@ -261,6 +300,22 @@ finally:
     temporary.unlink(missing_ok=True)
 PY
 }
+
+fail_started_generation() {
+    local message="$1"
+
+    if [[ -n "${TARGET_LAST_START_TIMESTAMP}" && -n "${HANDOFF_FILE}" && \
+        ! -e "${HANDOFF_FILE}" && ! -L "${HANDOFF_FILE}" ]]; then
+        publish_targeted_handoff "targeted_stopping" || \
+            die "La génération non certifiée est connue, mais son témoin ciblé n’a pas pu être publié."
+    fi
+    die "${message}"
+}
+
+trap emergency_stop_on_exit EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 command -v gcloud >/dev/null 2>&1 || die "gcloud est introuvable."
 command -v python3 >/dev/null 2>&1 || die "python3 est requis pour certifier l’échéance de la VM."
@@ -307,9 +362,14 @@ status="$(instance_status)" || die "Impossible de lire l’état de ${INSTANCE_N
 [[ "${status}" == "TERMINATED" ]] || \
     die "État ${status} : le script ne démarre qu’une VM explicitement arrêtée (TERMINATED)."
 verify_static_guard || \
-    die "Préconditions absentes : cible g4-standard-48 Spot, label project=e-hgp, action STOP et maxRunDuration entre 30 s et 8 h sont obligatoires."
+    die "Préconditions absentes : cible g4-standard-48 Spot, maintenance TERMINATE, redémarrage automatique désactivé, label project=e-hgp, action STOP et maxRunDuration entre 30 s et 8 h sont obligatoires."
 ((GUEST_SHUTDOWN_MINUTES * 60 <= VERIFIED_MAX_RUN_SECONDS)) || \
     die "Le coupe-circuit invité (${GUEST_SHUTDOWN_MINUTES} min) dépasse maxRunDuration (${VERIFIED_MAX_RUN_SECONDS} s)."
+PRE_START_LAST_START_TIMESTAMP="$(instance_field 'lastStartTimestamp')" || \
+    die "Impossible de lire la génération avant démarrage."
+[[ "${PRE_START_LAST_START_TIMESTAMP}" != *$'\n'* && \
+    "${PRE_START_LAST_START_TIMESTAMP}" != *$'\r'* ]] || \
+    die "Génération avant démarrage ambiguë."
 
 printf '%s\n' \
     "[START] Démarrage protégé demandé :" \
@@ -339,15 +399,33 @@ fi
 deadline=$((SECONDS + START_TIMEOUT_SECONDS))
 status="UNKNOWN"
 while ((SECONDS < deadline)); do
-    if status="$(instance_status 2>/dev/null)" && [[ "${status}" == "RUNNING" ]]; then
-        break
+    if status="$(instance_status 2>/dev/null)"; then
+        capture_status=0
+        capture_started_generation 2>/dev/null || capture_status=$?
+        if ((capture_status == 2)); then
+            fail_started_generation \
+                "Une génération concurrente a remplacé ${TARGET_LAST_START_TIMESTAMP}; aucun arrêt non versionné n’est autorisé."
+        fi
+        if [[ "${status}" == "RUNNING" ]]; then
+            if [[ -n "${TARGET_LAST_START_TIMESTAMP}" ]]; then
+                break
+            fi
+            printf '[ATTENTE] RUNNING observé, génération lastStartTimestamp non encore matérialisée.\n'
+        fi
+        if [[ -n "${TARGET_LAST_START_TIMESTAMP}" && \
+            ("${status}" == "STOPPING" || "${status}" == "TERMINATED") ]]; then
+            fail_started_generation \
+                "La VM Spot a été préemptée pendant le démarrage; la génération ${TARGET_LAST_START_TIMESTAMP} sera certifiée arrêtée."
+        fi
     fi
     printf '[ATTENTE] État GCE : %s\n' "${status:-inconnu}"
     sleep 5
 done
-[[ "${status}" == "RUNNING" ]] || die "La VM n’a pas atteint RUNNING dans le délai imparti."
-verify_running_guard || die "L’échéance GCE post-démarrage n’a pas pu être certifiée."
-publish_targeted_handoff || \
+[[ "${status}" == "RUNNING" && -n "${TARGET_LAST_START_TIMESTAMP}" ]] || \
+    fail_started_generation "La VM n’a pas atteint RUNNING dans le délai imparti."
+verify_running_guard || fail_started_generation \
+    "La garde post-démarrage g4-standard-48/SPOT/TERMINATE/STOP n’a pas pu être certifiée."
+publish_targeted_handoff "targeted_running" || \
     die "La génération démarrée est certifiée mais son témoin ciblé n’a pas pu être publié."
 
 printf '[GARDE-FOU INVITÉ] Armement de shutdown -P +%s via SSH.\n' "${GUEST_SHUTDOWN_MINUTES}"

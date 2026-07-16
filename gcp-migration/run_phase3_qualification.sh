@@ -32,6 +32,7 @@ LOCAL_TEMP_RESULT=""
 LOCAL_RESULT=""
 START_HANDOFF=""
 SESSION_LAST_START_TIMESTAMP=""
+SESSION_HANDOFF_STATUS=""
 FINAL_STATUS=""
 FINAL_STOP_VERIFIED_AT_UTC=""
 
@@ -185,9 +186,11 @@ remote_exec() {
 }
 
 load_targeted_handoff() {
+    local handoff_fields=""
     local generation=""
+    local handoff_status=""
     [[ -n "${START_HANDOFF}" && -f "${START_HANDOFF}" && ! -L "${START_HANDOFF}" ]] || return 1
-    generation="$(python3 - "${START_HANDOFF}" "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
+    handoff_fields="$(python3 - "${START_HANDOFF}" "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
         "${GUEST_SHUTDOWN_MINUTES}" <<'PY'
 import json
 from pathlib import Path
@@ -200,20 +203,26 @@ expected = {
     "instance": sys.argv[4],
     "project": sys.argv[2],
     "schema": "e-hgp.start-handoff.v3",
-    "status": "targeted_running",
     "zone": sys.argv[3],
 }
-if not isinstance(value, dict) or set(value) != set(expected) | {"last_start_timestamp"}:
+if not isinstance(value, dict) or set(value) != set(expected) | {"last_start_timestamp", "status"}:
     raise SystemExit("invalid targeted start handoff keys")
 generation = value.pop("last_start_timestamp")
+status = value.pop("status")
 if value != expected:
     raise SystemExit("invalid targeted start handoff")
 if not isinstance(generation, str) or not generation or "\n" in generation or "\r" in generation:
     raise SystemExit("invalid targeted start generation")
-print(generation)
+if status not in {"targeted_running", "targeted_stopping"}:
+    raise SystemExit("invalid targeted start status")
+print(f"{status}\t{generation}")
 PY
 )" || return 1
+    IFS=$'\t' read -r handoff_status generation <<<"${handoff_fields}"
+    [[ "${handoff_status}" == "targeted_running" || \
+        "${handoff_status}" == "targeted_stopping" ]] || return 1
     [[ -n "${generation}" ]] || return 1
+    SESSION_HANDOFF_STATUS="${handoff_status}"
     SESSION_LAST_START_TIMESTAMP="${generation}"
 }
 
@@ -361,6 +370,8 @@ printf '%s\n' \
     --handoff-file "${START_HANDOFF}"
 SESSION_CERTIFIED=1
 load_targeted_handoff || die "Le démarrage n'a pas publié son témoin ciblé certifié."
+[[ "${SESSION_HANDOFF_STATUS}" == "targeted_running" ]] || \
+    die "Le démarrage n'a pas publié un témoin targeted_running; statut reçu=${SESSION_HANDOFF_STATUS:-vide}."
 
 mktemp_output="$(remote_exec \
     'remote_dir=$(mktemp -d /tmp/morsehgp3d-phase3.XXXXXXXX) && printf "__EHGP_REMOTE_DIR__%s\n" "${remote_dir}"')"
