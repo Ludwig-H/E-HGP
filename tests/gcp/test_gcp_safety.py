@@ -1024,6 +1024,7 @@ class ScriptSafetyTests(unittest.TestCase):
         result = self.run_script("start_and_verify.sh", "--yes")
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("relu de manière certaine", result.stdout)
+        self.assertIn("[DIAGNOSTIC GARDE INVITÉE] No scheduled shutdown", result.stdout)
         self.assertIn("compute instances start", self.commands())
         self.assertIn("compute instances stop", self.commands())
 

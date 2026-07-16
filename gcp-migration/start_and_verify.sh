@@ -500,8 +500,11 @@ while ((SECONDS < ssh_deadline)); do
     printf '[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.\n' >&2
     sleep 10
 done
-[[ "${guest_guard_output}" == *"__EHGP_GUEST_GUARD_VERIFIED__"* ]] || \
+if [[ "${guest_guard_output}" != *"__EHGP_GUEST_GUARD_VERIFIED__"* ]]; then
+    printf '[DIAGNOSTIC GARDE INVITÉE] %s\n' \
+        "${guest_guard_output:-aucune sortie SSH reçue}" >&2
     die "Le coupe-circuit invité n’a pas pu être armé puis relu de manière certaine."
+fi
 printf '%s\n' "${guest_guard_output/__EHGP_GUEST_GUARD_VERIFIED__/}"
 
 verify_running_guard || die "Le garde-fou GCE n’est plus certifiable après l’armement invité."
