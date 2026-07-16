@@ -159,7 +159,8 @@ démarrage, il relit tous ces invariants, certifie l'échéance GCE, arme un
 `shutdown` dans l'OS invité puis relit explicitement son état. Une préemption
 pendant le démarrage publie immédiatement la génération ciblée, puis certifie
 son arrêt sans attendre le délai normal de cinq minutes. Le délai invité vaut
-quatre heures par défaut et ne peut jamais dépasser 480 minutes :
+quatre heures par défaut et ne peut jamais dépasser 480 minutes; il doit rester
+compatible avec `maxRunDuration`.
 
 Lorsque Compute Engine expose `terminationTimestamp`, le script exige que cette
 valeur concorde à 300 secondes près avec `lastStartTimestamp + maxRunDuration`.
@@ -171,27 +172,54 @@ qui couvre aussi l'apparition tardive d'un timestamp valide. Une valeur non vide
 mal formée ou incohérente, une génération non fraîche ou une modification de la
 durée après démarrage restent refusées.
 
+Le point d'entrée refuse désormais toute clé par défaut persistante ou
+indisponible en mode batch. `GCP_SSH_KEY_FILE` doit désigner une paire ED25519
+non chiffrée, privée en mode `0600`, déjà présente une seule fois dans OS Login
+avec une expiration future. La durée restante doit couvrir `maxRunDuration`
+sans le dépasser de plus de 660 secondes. Le script relit et transmet ensuite
+l'échéance UTC absolue exacte à gcloud, afin qu'une réimportation implicite ne
+puisse ni rendre la clé persistante ni renouveler un TTL relatif. Pour la cible
+actuelle bornée à une heure, la préparation manuelle suivante crée une clé de
+session hors dépôt et l'expire après 70 minutes :
+
 ```bash
-./gcp-migration/start_and_verify.sh
+export GCP_SSH_KEY_DIR="$(mktemp -d /tmp/ehgp-session-ssh.XXXXXXXX)"
+chmod 700 "${GCP_SSH_KEY_DIR}"
+export GCP_SSH_KEY_FILE="${GCP_SSH_KEY_DIR}/id_ed25519"
+ssh-keygen -q -t ed25519 -N '' -C 'e-hgp-session' -f "${GCP_SSH_KEY_FILE}"
+chmod 600 "${GCP_SSH_KEY_FILE}"
+export GCP_SSH_KEY_EXPIRATION_UTC="$(python3 - <<'PY'
+from datetime import datetime, timedelta, timezone
+print((datetime.now(timezone.utc) + timedelta(minutes=70)).isoformat(timespec="seconds").replace("+00:00", "Z"))
+PY
+)"
+gcloud compute os-login ssh-keys add \
+  --key-file="${GCP_SSH_KEY_FILE}.pub" \
+  --ttl=70m \
+  --project="${GCP_PROJECT_ID}"
+
+./gcp-migration/start_and_verify.sh --guest-shutdown-minutes 45
 ```
 
-Pour une session plus courte :
-
-```bash
-./gcp-migration/start_and_verify.sh --guest-shutdown-minutes 90
-```
+Pour une autre durée GCE, adaptez le TTL à la durée persistée sans dépasser la
+marge de 660 secondes, puis choisissez un arrêt invité compatible. Une clé
+chiffrée, même correcte, est refusée ici afin qu'aucun démarrage facturable ne
+dépende d'une invite de passphrase invisible.
 
 Le script est interactif. `--yes` existe pour une exécution non interactive
 déjà explicitement autorisée; il ne supprime aucun contrôle. Si GCP, SSH ou
 systemd ne permet pas de vérifier un coupe-circuit, le script tente un arrêt
 immédiat et échoue fermé.
 
-Connectez-vous ensuite en indiquant toujours le projet et la zone :
+Connectez-vous ensuite avec la même clé, en indiquant toujours le projet et la
+zone :
 
 ```bash
 gcloud compute ssh "${GCP_INSTANCE_NAME:-ehgp-blackwell-spot}" \
   --project="${GCP_PROJECT_ID}" \
-  --zone="${GCP_ZONE:-europe-west4-a}"
+  --zone="${GCP_ZONE:-europe-west4-a}" \
+  --ssh-key-file="${GCP_SSH_KEY_FILE}" \
+  --ssh-key-expiration="${GCP_SSH_KEY_EXPIRATION_UTC}"
 ```
 
 Dans la VM, lancez le preflight sans remplacer le coupe-circuit déjà armé :
@@ -237,6 +265,8 @@ GCP_INSTANCE_NAME=ehgp-blackwell-spot-ai1a \
 ```
 
 Le répertoire de résultat est créé si nécessaire, doit rester hors du dépôt et ne doit déjà contenir ni `phase3-<SHA>.json`, ni `phase3-<SHA>.start-handoff.json`. L'orchestrateur utilise exclusivement `start_and_verify.sh` pour le démarrage et `stop_and_verify.sh --yes` pour l'arrêt. Dès que la garde GCE post-démarrage certifie la génération, le démarrage publie atomiquement un handoff v3 `targeted_running` avec le `lastStartTimestamp`, avant de tenter la garde invitée; une préemption immédiate publie de la même façon un handoff `targeted_stopping`. Toute fermeture automatique exige cette même génération et refuse une cible redémarrée. Si la garde invitée ou l'arrêt d'urgence échoue, ce handoff reste disponible pour reprendre l'arrêt exact et bloque une nouvelle session. Si une commande de démarrage échoue avant que la génération soit lisible, aucun arrêt non versionné n'est tenté : le script signale la cible et la commande de contrôle. Les appels GCP critiques sont bornés par GNU `timeout` avec `--foreground` et `--kill-after`. Le worker invité ne pilote aucune ressource GCP : il exige un arrêt `poweroff` futur dans `/run/systemd/shutdown/scheduled`, construit l'image CUDA épinglée, compile les profils release et audit, exécute les sondes runtime et Python/DLPack, vérifie le runtime AOT avec `cuobjdump`, puis passe ce runtime court sous `compute-sanitizer --leak-check full`.
+
+Pour cette voie automatisée, aucune préparation SSH manuelle n'est nécessaire : l'orchestrateur crée une clé ED25519 de session dans un chemin physique canonisé hors dépôt, la valide localement, l'importe dans OS Login avec un TTL de 70 minutes juste avant le démarrage, relit son échéance UTC absolue exacte et transmet explicitement les deux à start, SSH et SCP. Tous les transports réutilisent cette échéance fixe, même si gcloud doit réimporter la clé; aucun TTL relatif n'est renouvelé. L'orchestrateur capture aussi l'état et la génération avant start. Après `TERMINATED` ciblé, il tente la révocation puis détruit la copie privée. Si start échoue sans handoff, ce nettoyage exige une seconde preuve `TERMINATED` avec génération inchangée; si l'arrêt ciblé ou cette preuve manque, la clé et le handoff éventuel sont conservés sous l'échéance initiale pour la reprise exacte de l'incident.
 
 Pour cette qualification courte, l'orchestrateur exige après les deux gardes
 `maxRunDuration=3600` secondes exactement et la même génération. Il transmet au
@@ -314,6 +344,20 @@ Le mode non interactif, à réserver à une fermeture explicitement autorisée, 
 
 ```bash
 ./gcp-migration/stop_and_verify.sh --yes
+```
+
+Après confirmation `TERMINATED` d'une session ouverte manuellement, révoquez
+la clé OS Login exacte avant d'effacer sa copie locale. Ne faites pas ce
+nettoyage tant qu'un incident d'arrêt reste non certifié, car cette clé bornée
+peut encore servir à la reprise ciblée :
+
+```bash
+gcloud compute os-login ssh-keys remove \
+  --key-file="${GCP_SSH_KEY_FILE}.pub" \
+  --project="${GCP_PROJECT_ID}"
+rm -f -- "${GCP_SSH_KEY_FILE}" "${GCP_SSH_KEY_FILE}.pub"
+rmdir -- "${GCP_SSH_KEY_DIR}"
+unset GCP_SSH_KEY_FILE GCP_SSH_KEY_DIR GCP_SSH_KEY_EXPIRATION_UTC
 ```
 
 La vérification manuelle équivalente est :

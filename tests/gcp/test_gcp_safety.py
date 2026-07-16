@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -33,6 +34,35 @@ if args[:3] == ["config", "get-value", "project"]:
     print(os.environ.get("GCP_PROJECT_ID", "devpod-gpu-exploration"))
 elif args[:3] == ["config", "get-value", "account"]:
     print("tester@example.invalid")
+elif args[:4] == ["compute", "os-login", "ssh-keys", "add"]:
+    if scenario == "qualification-oslogin-import-failure":
+        print("simulated OS Login import failure", file=sys.stderr)
+        sys.exit(41)
+elif args[:4] == ["compute", "os-login", "ssh-keys", "remove"]:
+    pass
+elif args[:3] == ["compute", "os-login", "describe-profile"]:
+    key_file = os.environ.get("GCP_SSH_KEY_FILE", "")
+    public_path = Path(key_file + ".pub")
+    public_key = (
+        public_path.read_text(encoding="utf-8").strip()
+        if key_file and public_path.is_file()
+        else ""
+    )
+    default_remaining = (
+        "4200"
+        if scenario.startswith("qualification-")
+        else str(int(os.environ.get("FAKE_MAX_RUN_SECONDS", "28800")) + 600)
+    )
+    remaining = int(
+        os.environ.get("FAKE_OSLOGIN_REMAINING_SECONDS", default_remaining)
+    )
+    record = {"key": public_key}
+    if scenario != "oslogin-key-unbounded":
+        record["expirationTimeUsec"] = str(
+            int(time.time() * 1_000_000) + remaining * 1_000_000
+        )
+    keys = {} if scenario == "oslogin-key-missing" else {"fake-key": record}
+    print(json.dumps({"sshPublicKeys": keys}))
 elif args[:4] == ["beta", "quotas", "info", "describe"]:
     quota_id = args[4]
     region = os.environ.get("GCP_REGION", "europe-west4")
@@ -200,9 +230,6 @@ elif args[:3] == ["compute", "instances", "list"]:
         if scenario == "other-active":
             print("ehgp-concurrent,europe-west4-b,RUNNING")
 elif args[:3] == ["compute", "instances", "describe"]:
-    if scenario == "qualification-stop-unreadable":
-        print("simulated unreadable target", file=sys.stderr)
-        sys.exit(98)
     output_format = next((item.split("=", 1)[1] for item in args if item.startswith("--format=")), "")
     field = output_format.removeprefix("value(").removesuffix(")")
     previous_commands = ""
@@ -214,10 +241,19 @@ elif args[:3] == ["compute", "instances", "describe"]:
     if session_log and os.path.exists(session_log):
         with open(session_log, encoding="utf-8") as stream:
             session_commands = stream.read()
+    qualification_start_observed = "start project=" in session_commands
+    qualification_stop_observed = "stop project=" in session_commands
+    if scenario == "qualification-stop-unreadable" and qualification_stop_observed:
+        print("simulated unreadable target", file=sys.stderr)
+        sys.exit(98)
     status = "TERMINATED"
-    if scenario.startswith("qualification-") and "stop project=" not in session_commands:
-        status = "RUNNING"
-    if scenario == "qualification-stop-still-running":
+    if (
+        scenario.startswith("qualification-")
+        and qualification_start_observed
+        and not qualification_stop_observed
+    ):
+        status = os.environ.get("FAKE_QUALIFICATION_POST_START_STATUS", "RUNNING")
+    if scenario == "qualification-stop-still-running" and qualification_start_observed:
         status = "RUNNING"
     start_observed = "compute instances start" in previous_commands
     post_start_commands = (
@@ -229,6 +265,7 @@ elif args[:3] == ["compute", "instances", "describe"]:
         "generation-race",
         "guest-interrupt",
         "guest-readback",
+        "guest-publickey-denied",
         "guest-success",
         "guest-success-late-termination-timestamp",
         "guest-success-no-term-duration-race",
@@ -247,7 +284,9 @@ elif args[:3] == ["compute", "instances", "describe"]:
     if "compute instances stop" in previous_commands:
         status = "TERMINATED"
     now = datetime.now(timezone.utc)
-    if start_observed or scenario.startswith("qualification-"):
+    if start_observed or (
+        scenario.startswith("qualification-") and qualification_start_observed
+    ):
         last_start_timestamp = os.environ.get(
             "FAKE_LAST_START_TIMESTAMP",
             (now - timedelta(seconds=10)).isoformat().replace("+00:00", "Z"),
@@ -336,6 +375,7 @@ elif args[:3] in (["compute", "instances", "start"], ["compute", "instances", "s
     if scenario not in {
         "guest-interrupt",
         "guest-readback",
+        "guest-publickey-denied",
         "guest-success",
         "guest-success-late-termination-timestamp",
         "guest-success-no-term-duration-race",
@@ -354,7 +394,10 @@ elif args[:2] == ["compute", "ssh"]:
         (item.split("=", 1)[1] for item in args if item.startswith("--command=")),
         "",
     )
-    if scenario == "guest-readback":
+    if scenario == "guest-publickey-denied":
+        print("tester@203.0.113.10: Permission denied (publickey).", file=sys.stderr)
+        sys.exit(255)
+    elif scenario == "guest-readback":
         print("No scheduled shutdown")
     elif scenario == "guest-interrupt":
         print("No scheduled shutdown")
@@ -495,8 +538,9 @@ else:
 
 FAKE_START = r"""#!/usr/bin/env bash
 set -euo pipefail
-printf 'start project=%s zone=%s instance=%s args=%s\n' \
+printf 'start project=%s zone=%s instance=%s args=%s ssh_key=%s\n' \
   "${GCP_PROJECT_ID:-}" "${GCP_ZONE:-}" "${GCP_INSTANCE_NAME:-}" "$*" \
+  "${GCP_SSH_KEY_FILE:-}" \
   >> "${FAKE_SESSION_LOG}"
 if [[ "${FAKE_SESSION_SCENARIO:-}" == "start-failure" ]]; then
   exit 37
@@ -548,6 +592,26 @@ class ScriptSafetyTests(unittest.TestCase):
         self.tempdir = tempfile.TemporaryDirectory()
         self.addCleanup(self.tempdir.cleanup)
         self.tmp = Path(self.tempdir.name)
+        self.ssh_key = self.tmp / "phase3-session-ed25519"
+        subprocess.run(
+            [
+                "ssh-keygen",
+                "-q",
+                "-t",
+                "ed25519",
+                "-N",
+                "",
+                "-C",
+                "phase3-test-session",
+                "-f",
+                str(self.ssh_key),
+            ],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        self.ssh_key.chmod(0o600)
         fake = self.tmp / "gcloud"
         fake.write_text(FAKE_GCLOUD, encoding="utf-8")
         fake.chmod(0o755)
@@ -557,10 +621,10 @@ class ScriptSafetyTests(unittest.TestCase):
         self.log = self.tmp / "gcloud.log"
         self.timeout_log = self.tmp / "timeout.log"
         now = datetime.now(timezone.utc)
-        self.last_start_timestamp = (now - timedelta(seconds=10)).isoformat().replace(
+        self.pre_start_timestamp = (now - timedelta(seconds=20)).isoformat().replace(
             "+00:00", "Z"
         )
-        self.pre_start_timestamp = (now - timedelta(seconds=20)).isoformat().replace(
+        self.last_start_timestamp = (now - timedelta(seconds=10)).isoformat().replace(
             "+00:00", "Z"
         )
         self.concurrent_start_timestamp = (
@@ -578,6 +642,7 @@ class ScriptSafetyTests(unittest.TestCase):
                 "GCP_PROJECT_ID": "devpod-gpu-exploration",
                 "GCP_ZONE": "europe-west4-a",
                 "GCP_INSTANCE_NAME": "ehgp-blackwell-spot",
+                "GCP_SSH_KEY_FILE": str(self.ssh_key),
             }
         )
 
@@ -1028,6 +1093,84 @@ class ScriptSafetyTests(unittest.TestCase):
         self.assertIn("compute instances start", self.commands())
         self.assertIn("compute instances stop", self.commands())
 
+    def test_start_rejects_unusable_session_keys_before_gce_mutation(self) -> None:
+        original_key = self.env["GCP_SSH_KEY_FILE"]
+        encrypted_key = self.tmp / "encrypted-session-ed25519"
+        subprocess.run(
+            [
+                "ssh-keygen",
+                "-q",
+                "-t",
+                "ed25519",
+                "-N",
+                "test-passphrase",
+                "-f",
+                str(encrypted_key),
+            ],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        encrypted_key.chmod(0o600)
+        permissive_key = self.tmp / "permissive-session-ed25519"
+        shutil.copy2(self.ssh_key, permissive_key)
+        shutil.copy2(Path(str(self.ssh_key) + ".pub"), Path(str(permissive_key) + ".pub"))
+        permissive_key.chmod(0o640)
+        cases = (
+            ("missing", self.tmp / "missing-session-ed25519", "absente"),
+            ("encrypted", encrypted_key, "chiffrée"),
+            ("permissive", permissive_key, "mode 600"),
+        )
+
+        for name, key, diagnostic in cases:
+            with self.subTest(name=name):
+                self.log.unlink(missing_ok=True)
+                self.env["FAKE_GCLOUD_SCENARIO"] = "guest-success"
+                self.env["GCP_SSH_KEY_FILE"] = str(key)
+                result = self.run_script("start_and_verify.sh", "--yes")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(diagnostic, result.stdout)
+                self.assertNotIn("compute instances start", self.commands())
+        self.env["GCP_SSH_KEY_FILE"] = original_key
+
+    def test_start_requires_unique_bounded_oslogin_session_key(self) -> None:
+        cases = (
+            ("oslogin-key-missing", None),
+            ("oslogin-key-unbounded", None),
+            ("guest-success", "28799"),
+        )
+
+        for scenario, remaining in cases:
+            with self.subTest(scenario=scenario, remaining=remaining):
+                self.log.unlink(missing_ok=True)
+                self.env["FAKE_GCLOUD_SCENARIO"] = scenario
+                if remaining is None:
+                    self.env.pop("FAKE_OSLOGIN_REMAINING_SECONDS", None)
+                else:
+                    self.env["FAKE_OSLOGIN_REMAINING_SECONDS"] = remaining
+                result = self.run_script("start_and_verify.sh", "--yes")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("expiration restante", result.stdout)
+                self.assertNotIn("compute instances start", self.commands())
+        self.env.pop("FAKE_OSLOGIN_REMAINING_SECONDS", None)
+
+    def test_publickey_denial_is_reported_after_bounded_propagation_retries(
+        self,
+    ) -> None:
+        fake_sleep = self.tmp / "sleep"
+        fake_sleep.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+        fake_sleep.chmod(0o755)
+        self.env["FAKE_GCLOUD_SCENARIO"] = "guest-publickey-denied"
+
+        result = self.run_script("start_and_verify.sh", "--yes")
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("refusée 6 fois", result.stdout)
+        self.assertIn("Permission denied (publickey)", result.stdout)
+        self.assertEqual(6, self.commands().count("compute ssh ehgp-blackwell-spot"))
+        self.assertIn("compute instances stop", self.commands())
+
     def test_start_timeout_never_triggers_an_unversioned_stop(self) -> None:
         self.env["FAKE_GCLOUD_SCENARIO"] = "guest-success"
         self.env["FAKE_TIMEOUT_SCENARIO"] = "expire-start"
@@ -1072,6 +1215,15 @@ class ScriptSafetyTests(unittest.TestCase):
         self.assertIn("tempfile.mkstemp", source)
         self.assertIn("os.link(temporary, path, follow_symlinks=False)", source)
         self.assertNotIn("os.open(path, os.O_WRONLY | os.O_CREAT", source)
+        self.assertIn(
+            f"--ssh-key-file={self.ssh_key}",
+            self.commands(),
+        )
+        self.assertRegex(
+            self.commands(),
+            r"--ssh-key-expiration=\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z",
+        )
+        self.assertNotIn("--ssh-key-expire-after", self.commands())
         stopped = self.run_script(
             "stop_and_verify.sh",
             "--yes",
@@ -1338,6 +1490,9 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.results = self.tmp / "results"
         self.head = "a" * 40
         now = datetime.now(timezone.utc)
+        self.pre_start_timestamp = (now - timedelta(seconds=20)).isoformat().replace(
+            "+00:00", "Z"
+        )
         self.last_start_timestamp = (now - timedelta(seconds=10)).isoformat().replace(
             "+00:00", "Z"
         )
@@ -1357,6 +1512,7 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
                 "FAKE_GIT_HEAD": self.head,
                 "FAKE_GIT_SCENARIO": "clean",
                 "FAKE_LAST_START_TIMESTAMP": self.last_start_timestamp,
+                "FAKE_PRE_START_TIMESTAMP": self.pre_start_timestamp,
                 "FAKE_MAX_RUN_SECONDS": "3600",
                 "FAKE_REPOSITORY_ROOT": str(self.repository),
                 "FAKE_SESSION_LOG": str(self.session_log),
@@ -1366,6 +1522,7 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
                 "GCP_ZONE": "europe-west4-a",
                 "GCP_INSTANCE_NAME": "ehgp-blackwell-spot",
                 "GCP_GUEST_SHUTDOWN_MINUTES": "45",
+                "TMPDIR": str(self.tmp),
             }
         )
 
@@ -1393,6 +1550,14 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
 
     def handoff_path(self) -> Path:
         return self.results / f"phase3-{self.head}.start-handoff.json"
+
+    def session_private_key_path(self) -> Path:
+        match = re.search(
+            r"--(?:ssh-)?key-file=(\S+/id_ed25519)(?:\.pub)?(?:\s|$)",
+            self.gcloud_commands(),
+        )
+        self.assertIsNotNone(match, self.gcloud_commands())
+        return Path(match.group(1))
 
     def standard_arguments(self) -> tuple[str, ...]:
         return ("--yes", "--result-dir", str(self.results))
@@ -1444,6 +1609,26 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         commands = self.gcloud_commands()
         self.assertIn("compute ssh ehgp-blackwell-spot", commands)
         self.assertIn("compute scp ehgp-blackwell-spot:", commands)
+        self.assertIn("compute os-login ssh-keys add", commands)
+        self.assertIn("--ttl=70m", commands)
+        self.assertIn("compute os-login ssh-keys remove", commands)
+        self.assertNotIn("--ssh-key-expire-after", commands)
+        transport_commands = [
+            line
+            for line in commands.splitlines()
+            if line.startswith("compute ssh ") or line.startswith("compute scp ")
+        ]
+        self.assertTrue(transport_commands, commands)
+        fixed_expirations = []
+        for command in transport_commands:
+            match = re.search(r"--ssh-key-expiration=(\S+)", command)
+            self.assertIsNotNone(match, command)
+            fixed_expirations.append(match.group(1))
+        self.assertEqual(1, len(set(fixed_expirations)), transport_commands)
+        self.assertRegex(
+            fixed_expirations[0],
+            r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$",
+        )
         self.assertIn("compute instances describe ehgp-blackwell-spot", commands)
         self.assertNotIn("rm -rf -- /tmp/morsehgp3d-phase3.A1b2C3d4", commands)
         self.assertIn(f"checkout --quiet --detach {self.head}", commands)
@@ -1456,6 +1641,12 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertNotIn("compute instances stop", commands)
         self.assertNotIn("ehgp-concurrent", commands)
         self.assertFalse(self.handoff_path().exists())
+        session_key = self.session_private_key_path()
+        self.assertIn(f"--ssh-key-file={session_key}", commands)
+        self.assertIn(f"ssh_key={session_key}", self.session_commands())
+        self.assertFalse(session_key.exists())
+        self.assertFalse(Path(str(session_key) + ".pub").exists())
+        self.assertFalse(session_key.parent.exists())
 
     def test_exact_ai_capacity_target_is_allowed(self) -> None:
         self.env["GCP_ZONE"] = "europe-west4-ai1a"
@@ -1552,6 +1743,68 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertIn("[TERMINATED]", result.stdout)
         self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
         self.assertFalse(self.handoff_path().exists())
+        self.assertIn("compute os-login ssh-keys remove", self.gcloud_commands())
+        self.assertFalse(self.session_private_key_path().exists())
+
+    def test_oslogin_import_failure_never_starts_and_cleans_local_key(self) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = (
+            "qualification-oslogin-import-failure"
+        )
+
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("aucun démarrage", result.stdout)
+        self.assertEqual("", self.session_commands())
+        commands = self.gcloud_commands()
+        self.assertIn("compute os-login ssh-keys add", commands)
+        self.assertIn("compute os-login ssh-keys remove", commands)
+        session_key = self.session_private_key_path()
+        self.assertFalse(session_key.exists())
+        self.assertFalse(session_key.parent.exists())
+
+    def test_failed_start_with_changed_generation_preserves_session_key(self) -> None:
+        self.env["FAKE_SESSION_SCENARIO"] = "start-failure"
+        self.env["FAKE_QUALIFICATION_POST_START_STATUS"] = "TERMINATED"
+
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertEqual(37, result.returncode, result.stdout)
+        self.assertIn("[CLÉ SSH CONSERVÉE]", result.stdout)
+        commands = self.gcloud_commands()
+        self.assertNotIn("compute os-login ssh-keys remove", commands)
+        session_key = self.session_private_key_path()
+        self.assertTrue(session_key.exists())
+        self.assertTrue(Path(str(session_key) + ".pub").exists())
+
+    def test_failed_start_without_new_generation_cleans_session_key(self) -> None:
+        self.env["FAKE_SESSION_SCENARIO"] = "start-failure"
+        self.env["FAKE_QUALIFICATION_POST_START_STATUS"] = "TERMINATED"
+        self.env["FAKE_LAST_START_TIMESTAMP"] = self.pre_start_timestamp
+
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertEqual(37, result.returncode, result.stdout)
+        commands = self.gcloud_commands()
+        self.assertIn("compute os-login ssh-keys remove", commands)
+        session_key = self.session_private_key_path()
+        self.assertFalse(session_key.exists())
+        self.assertFalse(session_key.parent.exists())
+
+    def test_symlinked_tmpdir_into_worktree_is_rejected_and_cleaned(self) -> None:
+        physical_tmp = self.repository / "key-tmp"
+        physical_tmp.mkdir()
+        linked_tmp = self.tmp / "linked-key-tmp"
+        linked_tmp.symlink_to(physical_tmp, target_is_directory=True)
+        self.env["TMPDIR"] = str(linked_tmp)
+
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertNotEqual(0, result.returncode, result.stdout)
+        self.assertIn("hors du worktree", result.stdout)
+        self.assertEqual("", self.session_commands())
+        self.assertNotIn("compute os-login ssh-keys add", self.gcloud_commands())
+        self.assertEqual([], list(physical_tmp.iterdir()))
 
     def test_dirty_worktree_is_rejected_before_start_or_gcloud(self) -> None:
         self.env["FAKE_GIT_SCENARIO"] = "dirty"
@@ -1621,6 +1874,9 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
             ],
         )
         self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
+        commands = self.gcloud_commands()
+        self.assertNotIn("compute os-login ssh-keys remove", commands)
+        self.assertTrue(self.session_private_key_path().exists())
 
     def test_invalid_start_handoff_never_triggers_unversioned_stop(self) -> None:
         for scenario in ("invalid-handoff", "missing-handoff"):

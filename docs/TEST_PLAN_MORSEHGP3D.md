@@ -737,6 +737,7 @@ Aucune campagne ne démarre si la VM ne possède pas une durée de vie maximale 
 La suite GCP vérifie au minimum :
 
 - refus d'une création ou d'un démarrage sans limite de durée ;
+- refus avant mutation GCE d'une clé SSH de session absente, chiffrée, symbolique, trop permissive, mal appariée, physiquement située dans le dépôt ou absente d'un profil OS Login unique à expiration bornée; import temporaire, propagation explicite de la même clé et de la même échéance UTC absolue vers start, SSH et SCP, absence de renouvellement relatif, révocation après certification de génération `TERMINATED`, nettoyage après preuve qu'aucune génération n'a changé et conservation sous l'échéance initiale lorsque cette preuve manque ;
 - présence d'un `maxRunDuration` borné et d'une échéance future : `terminationTimestamp` exposé et cohérent, ou à défaut somme certifiée d'un `lastStartTimestamp` frais et de la durée GCE relue; la borne sûre retranche toute tolérance d'acceptation, soit 300 secondes dans les scripts actuels ;
 - action de fin `STOP` et non redémarrage automatique incontrôlé ;
 - arrêt invité de secours armé ;

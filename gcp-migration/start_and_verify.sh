@@ -16,9 +16,14 @@ readonly GCLOUD_MUTATION_TIMEOUT_SECONDS=180
 readonly GCLOUD_SSH_CALL_TIMEOUT_SECONDS=30
 readonly GCLOUD_KILL_AFTER_SECONDS=10
 readonly TIMESTAMP_TOLERANCE_SECONDS=300
+readonly EXPECTED_SSH_KEY_ALGORITHM="ssh-ed25519"
+readonly SSH_KEY_TTL_SLACK_SECONDS=660
+readonly MAX_PUBLICKEY_DENIALS=6
 
 PROJECT_ID="${GCP_PROJECT_ID:-${DEFAULT_PROJECT_ID}}"
 GUEST_SHUTDOWN_MINUTES="${GCP_GUEST_SHUTDOWN_MINUTES:-240}"
+SSH_KEY_FILE="${GCP_SSH_KEY_FILE:-}"
+SSH_KEY_EXPIRATION_UTC=""
 ASSUME_YES=0
 HANDOFF_FILE=""
 VERIFIED_LAST_START_TIMESTAMP=""
@@ -41,6 +46,11 @@ Le mode est interactif par défaut. --yes est réservé à une exécution explic
 autorisée et ne désactive aucun contrôle. --handoff-file publie atomiquement un
 témoin de génération dès que la garde GCE post-démarrage est certifiée ou qu'une
 préemption immédiate est observée; ce témoin reste utilisable pour un arrêt ciblé.
+
+GCP_SSH_KEY_FILE doit désigner une clé de session ED25519 privée non chiffrée,
+déjà inscrite dans OS Login avec une expiration bornée. Le script la vérifie
+avant toute mutation GCE, mémorise cette expiration UTC exacte et les transmet
+toutes deux explicitement à la garde invitée.
 EOF
 }
 
@@ -103,6 +113,131 @@ gcloud_mutation() {
 gcloud_ssh_guard() {
     timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
         "${GCLOUD_SSH_CALL_TIMEOUT_SECONDS}s" gcloud "$@"
+}
+
+verify_batch_ssh_key() {
+    local declared_public=""
+    local derived_public=""
+    local fingerprint=""
+    local key_mode=""
+
+    [[ -n "${SSH_KEY_FILE}" ]] || {
+        printf '[ERREUR] GCP_SSH_KEY_FILE est obligatoire avant tout démarrage; utilisez une clé ED25519 de session expirante.\n' >&2
+        return 1
+    }
+    case "${SSH_KEY_FILE}" in
+        /*) ;;
+        *)
+            printf '[ERREUR] GCP_SSH_KEY_FILE doit être un chemin absolu.\n' >&2
+            return 1
+            ;;
+    esac
+    [[ -f "${SSH_KEY_FILE}" && ! -L "${SSH_KEY_FILE}" ]] || {
+        printf '[ERREUR] Clé privée de session absente, non régulière ou symbolique : %s.\n' \
+            "${SSH_KEY_FILE}" >&2
+        return 1
+    }
+    [[ -f "${SSH_KEY_FILE}.pub" && ! -L "${SSH_KEY_FILE}.pub" ]] || {
+        printf '[ERREUR] Clé publique de session absente, non régulière ou symbolique : %s.pub.\n' \
+            "${SSH_KEY_FILE}" >&2
+        return 1
+    }
+
+    key_mode="$(stat -c '%a' -- "${SSH_KEY_FILE}" 2>/dev/null)" || return 1
+    [[ "${key_mode}" =~ ^[0-7]{3,4}$ ]] || return 1
+    if [[ "${key_mode}" != "600" ]]; then
+        printf '[ERREUR] La clé privée de session doit être exactement en mode 600 (mode reçu=%s).\n' \
+            "${key_mode}" >&2
+        return 1
+    fi
+
+    declared_public="$(awk 'NF >= 2 {print $1 " " $2; exit}' "${SSH_KEY_FILE}.pub")" || return 1
+    [[ "${declared_public}" == "${EXPECTED_SSH_KEY_ALGORITHM} "* ]] || {
+        printf '[ERREUR] La clé de session doit utiliser %s.\n' \
+            "${EXPECTED_SSH_KEY_ALGORITHM}" >&2
+        return 1
+    }
+    if ! derived_public="$(ssh-keygen -y -P '' -f "${SSH_KEY_FILE}" 2>/dev/null)"; then
+        printf '[ERREUR] La clé privée de session est chiffrée ou illisible en BatchMode; aucun démarrage GCE ne sera tenté.\n' >&2
+        return 1
+    fi
+    derived_public="$(awk 'NF >= 2 {print $1 " " $2; exit}' <<<"${derived_public}")"
+    [[ "${derived_public}" == "${declared_public}" ]] || {
+        printf '[ERREUR] Les moitiés privée et publique de la clé de session ne correspondent pas.\n' >&2
+        return 1
+    }
+    fingerprint="$(ssh-keygen -lf "${SSH_KEY_FILE}.pub" -E sha256 2>/dev/null | awk 'NF >= 2 {print $2; exit}')" || return 1
+    [[ "${fingerprint}" == SHA256:* ]] || return 1
+    printf '[GARDE SSH] Clé de session %s utilisable sans interaction (%s).\n' \
+        "${EXPECTED_SSH_KEY_ALGORITHM}" "${fingerprint}"
+}
+
+verify_oslogin_session_key() {
+    local declared_algorithm=""
+    local declared_blob=""
+    local expiration_fields=""
+    local profile_json=""
+    local remaining_seconds=""
+
+    read -r declared_algorithm declared_blob _ <"${SSH_KEY_FILE}.pub" || return 1
+    [[ "${declared_algorithm}" == "${EXPECTED_SSH_KEY_ALGORITHM}" && \
+        -n "${declared_blob}" ]] || return 1
+    profile_json="$(gcloud_read compute os-login describe-profile \
+        --project="${PROJECT_ID}" \
+        --format=json)" || return 1
+    expiration_fields="$(python3 - \
+        "${declared_algorithm}" "${declared_blob}" \
+        "${VERIFIED_MAX_RUN_SECONDS}" "${SSH_KEY_TTL_SLACK_SECONDS}" \
+        "${profile_json}" <<'PY'
+from datetime import datetime, timezone
+import json
+import sys
+import time
+
+algorithm = sys.argv[1]
+blob = sys.argv[2]
+minimum = int(sys.argv[3])
+maximum = minimum + int(sys.argv[4])
+value = json.loads(sys.argv[5])
+keys = value.get("sshPublicKeys") if isinstance(value, dict) else None
+if not isinstance(keys, dict):
+    raise SystemExit("profil OS Login sans clés")
+matches = []
+for record in keys.values():
+    if not isinstance(record, dict):
+        continue
+    fields = str(record.get("key", "")).split()
+    if len(fields) < 2 or fields[0] != algorithm or fields[1] != blob:
+        continue
+    expiration = record.get("expirationTimeUsec")
+    if isinstance(expiration, bool):
+        continue
+    try:
+        expiration_usec = int(expiration)
+    except (TypeError, ValueError):
+        continue
+    matches.append(expiration_usec)
+if len(matches) != 1:
+    raise SystemExit("clé de session absente, dupliquée ou sans expiration OS Login")
+expiration_usec = matches[0]
+remaining = (expiration_usec - time.time_ns() // 1_000) // 1_000_000
+if remaining < minimum or remaining > maximum:
+    raise SystemExit(
+        f"durée OS Login restante hors borne: {remaining}s, attendu {minimum}..{maximum}s"
+    )
+seconds, microseconds = divmod(expiration_usec, 1_000_000)
+expiration = datetime.fromtimestamp(seconds, timezone.utc).replace(
+    microsecond=microseconds
+)
+expiration_utc = expiration.isoformat(timespec="microseconds").replace("+00:00", "Z")
+print(f"{remaining}\t{expiration_utc}")
+PY
+)" || return 1
+    IFS=$'\t' read -r remaining_seconds SSH_KEY_EXPIRATION_UTC <<<"${expiration_fields}"
+    [[ "${remaining_seconds}" =~ ^[0-9]+$ && \
+        "${SSH_KEY_EXPIRATION_UTC}" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6}Z$ ]] || return 1
+    printf '[GARDE SSH] Clé OS Login unique, expiration fixe=%s, durée restante=%ss.\n' \
+        "${SSH_KEY_EXPIRATION_UTC}" "${remaining_seconds}"
 }
 
 instance_field() {
@@ -337,6 +472,7 @@ trap 'exit 143' TERM
 
 command -v gcloud >/dev/null 2>&1 || die "gcloud est introuvable."
 command -v python3 >/dev/null 2>&1 || die "python3 est requis pour certifier l’échéance de la VM."
+command -v ssh-keygen >/dev/null 2>&1 || die "ssh-keygen est requis pour valider la clé de session."
 command -v timeout >/dev/null 2>&1 || die "GNU timeout est requis avant toute mutation GCP."
 verify_gnu_timeout || die "timeout doit être l'implémentation GNU compatible avec --foreground et --kill-after."
 if [[ -n "${HANDOFF_FILE}" ]]; then
@@ -383,6 +519,10 @@ verify_static_guard || \
     die "Préconditions absentes : cible g4-standard-48 Spot, maintenance TERMINATE, redémarrage automatique désactivé, label project=e-hgp, action STOP et maxRunDuration entre 30 s et 8 h sont obligatoires."
 ((GUEST_SHUTDOWN_MINUTES * 60 + TIMESTAMP_TOLERANCE_SECONDS <= VERIFIED_MAX_RUN_SECONDS)) || \
     die "Le coupe-circuit invité (${GUEST_SHUTDOWN_MINUTES} min) et sa marge de ${TIMESTAMP_TOLERANCE_SECONDS} s dépassent maxRunDuration (${VERIFIED_MAX_RUN_SECONDS} s)."
+verify_batch_ssh_key || \
+    die "La clé SSH de session n'est pas utilisable de manière non interactive; démarrage refusé."
+verify_oslogin_session_key || \
+    die "La clé SSH de session n'est pas inscrite une seule fois dans OS Login avec une expiration restante comprise entre maxRunDuration et maxRunDuration + ${SSH_KEY_TTL_SLACK_SECONDS} secondes; démarrage refusé."
 PRE_START_LAST_START_TIMESTAMP="$(instance_field 'lastStartTimestamp')" || \
     die "Impossible de lire la génération avant démarrage."
 [[ "${PRE_START_LAST_START_TIMESTAMP}" != *$'\n'* && \
@@ -451,6 +591,7 @@ publish_targeted_handoff "targeted_running" || \
 printf '[GARDE-FOU INVITÉ] Armement de shutdown -P +%s via SSH.\n' "${GUEST_SHUTDOWN_MINUTES}"
 ssh_deadline=$((SECONDS + SSH_TIMEOUT_SECONDS))
 guest_guard_output=""
+publickey_denials=0
 guest_guard_command="$(cat <<EOF
 sudo -n bash -s -- '${GUEST_SHUTDOWN_MINUTES}' '${VERIFIED_SAFE_DEADLINE_EPOCH}' <<'__EHGP_GUEST_GUARD__'
 set -euo pipefail
@@ -492,10 +633,22 @@ while ((SECONDS < ssh_deadline)); do
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
         --ssh-flag='-o ConnectTimeout=15' \
         --ssh-flag='-o BatchMode=yes' \
         --command="${guest_guard_command}" 2>&1)"; then
         break
+    fi
+    if [[ "${guest_guard_output}" == *"Permission denied (publickey)"* ]]; then
+        ((publickey_denials += 1))
+        if ((publickey_denials >= MAX_PUBLICKEY_DENIALS)); then
+            printf '[ERREUR] Authentification SSH refusée %s fois malgré la propagation OS Login; arrêt des nouvelles tentatives.\n' \
+                "${publickey_denials}" >&2
+            break
+        fi
+    else
+        publickey_denials=0
     fi
     printf '[ATTENTE] SSH ou systemd indisponible; nouvel essai dans 10 s.\n' >&2
     sleep 10

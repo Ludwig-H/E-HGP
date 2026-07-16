@@ -964,17 +964,18 @@ Tout agent qui utilise la G4 suit exactement :
 
 1. vérifier projet, zone, quota et instance cible;
 2. créer si nécessaire avec `deploy.sh`, durée GCE au plus huit heures;
-3. démarrer uniquement avec `start_and_verify.sh`;
-4. exiger une échéance GCE future dans la borne : `terminationTimestamp` s'il est exposé et cohérent, sinon `lastStartTimestamp + maxRunDuration` à partir d'une génération fraîche et d'une durée relue et bornée; si la validation tolère 300 secondes d'écart, retenir comme borne sûre la somme nominale diminuée de ces 300 secondes;
-5. exiger que l'arrêt invité soit armé et lisible;
-6. lancer le preflight Blackwell;
-7. estimer temps, VRAM, RAM, scratch et sortie avant le benchmark;
-8. fixer une échéance de travail laissant au moins trente minutes avant cette borne GCE sûre pour checkpoint, copie du manifeste et arrêt;
-9. ne lancer aucune nouvelle unité après cette échéance et checkpoint avant l'échéance;
-10. sur succès, échec ou interruption, exécuter `stop_and_verify.sh`;
-11. exiger l'état `TERMINATED` de l'instance exactement ciblée;
-12. inventorier et signaler les autres VM E-HGP actives sans bloquer la clôture, et ne jamais les arrêter, modifier ou supprimer sans autorisation explicite;
-13. inscrire états initial et final dans le manifeste.
+3. avant tout démarrage non interactif, créer une clé SSH de session non chiffrée dans un chemin physique hors dépôt, la protéger localement, l'inscrire dans OS Login avec une expiration bornée par la durée GCE, vérifier ce profil et conserver l'échéance UTC absolue exacte;
+4. démarrer uniquement avec `start_and_verify.sh`, en lui transmettant explicitement cette clé;
+5. exiger une échéance GCE future dans la borne : `terminationTimestamp` s'il est exposé et cohérent, sinon `lastStartTimestamp + maxRunDuration` à partir d'une génération fraîche et d'une durée relue et bornée; si la validation tolère 300 secondes d'écart, retenir comme borne sûre la somme nominale diminuée de ces 300 secondes;
+6. exiger que l'arrêt invité soit armé et lisible;
+7. lancer le preflight Blackwell;
+8. estimer temps, VRAM, RAM, scratch et sortie avant le benchmark;
+9. fixer une échéance de travail laissant au moins trente minutes avant cette borne GCE sûre pour checkpoint, copie du manifeste et arrêt;
+10. ne lancer aucune nouvelle unité après cette échéance et checkpoint avant l'échéance;
+11. sur succès, échec ou interruption, exécuter `stop_and_verify.sh`;
+12. exiger l'état `TERMINATED` de l'instance exactement ciblée, puis révoquer et supprimer la clé de session; transmettre la même échéance UTC absolue à chaque SSH/SCP pour interdire tout renouvellement ou réimport sans expiration; si l'arrêt reste non certifié avec sa génération, conserver la clé uniquement sous son échéance initiale pour la reprise ciblée;
+13. inventorier et signaler les autres VM E-HGP actives sans bloquer la clôture, et ne jamais les arrêter, modifier ou supprimer sans autorisation explicite;
+14. inscrire états initial et final dans le manifeste.
 
 Une fermeture du terminal SSH, une préemption attendue ou la fin du processus ne prouve pas l'arrêt de la VM.
 
