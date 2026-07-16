@@ -16,6 +16,8 @@ readonly MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-release"
 readonly GUEST_GUARD_MIN_REMAINING_SECONDS=1800
 readonly GUEST_GUARD_MAX_REMAINING_SECONDS=2820
 readonly WORK_RESERVE_SECONDS=1800
+readonly FAILURE_LOG_MAX_LINES=240
+readonly FAILURE_LOG_MAX_BYTES=65536
 
 ASSUME_YES=0
 OUTPUT_RAW=""
@@ -93,6 +95,7 @@ command -v git >/dev/null 2>&1 || die "git est introuvable."
 command -v id >/dev/null 2>&1 || die "id est introuvable."
 command -v python3 >/dev/null 2>&1 || die "python3 est introuvable."
 command -v mktemp >/dev/null 2>&1 || die "mktemp est introuvable."
+command -v tail >/dev/null 2>&1 || die "tail est introuvable."
 [[ -x "${PREFLIGHT_SCRIPT}" ]] || die "Preflight absent ou non exécutable : ${PREFLIGHT_SCRIPT}."
 
 REPOSITORY_ROOT="$(git -C "${SCRIPT_DIR}/.." rev-parse --show-toplevel 2>/dev/null)" || \
@@ -234,6 +237,23 @@ begin_unit() {
         "${label}" "${remaining}"
 }
 
+report_failure_log() {
+    local label="$1"
+    local path="$2"
+
+    if [[ ! -f "${path}" || -L "${path}" ]]; then
+        printf '[DIAGNOSTIC %s] Journal absent, non régulier ou symbolique : %s.\n' \
+            "${label}" "${path}" >&2
+        return 0
+    fi
+    printf '[DIAGNOSTIC %s] %s dernières lignes et %s octets au plus; début.\n' \
+        "${label}" "${FAILURE_LOG_MAX_LINES}" "${FAILURE_LOG_MAX_BYTES}" >&2
+    tail -c "${FAILURE_LOG_MAX_BYTES}" -- "${path}" | \
+        tail -n "${FAILURE_LOG_MAX_LINES}" >&2 || \
+        printf '[DIAGNOSTIC %s] Lecture bornée du journal impossible.\n' "${label}" >&2
+    printf '[DIAGNOSTIC %s] fin.\n' "${label}" >&2
+}
+
 read_guest_shutdown_guard() {
     local candidate="${SESSION_DIR}/guest-shutdown-candidate.log"
 
@@ -260,6 +280,7 @@ printf '[GARDE] Arrêt invité=%s, échéance GCE sûre=%s, deadline de travail=
 
 begin_unit "preflight-blackwell"
 if ! "${PREFLIGHT_SCRIPT}" --skip-docker >"${PREFLIGHT_LOG}" 2>&1; then
+    report_failure_log "preflight-blackwell" "${PREFLIGHT_LOG}"
     die "Le preflight Blackwell non destructif a échoué; voir ${PREFLIGHT_LOG}."
 fi
 
@@ -279,6 +300,7 @@ if ! "${DOCKER[@]}" build \
     --tag "${IMAGE_REF}" \
     --iidfile "${IID_FILE}" \
     "${DOCKER_CONTEXT}" >"${BUILD_LOG}" 2>&1; then
+    report_failure_log "docker-build" "${BUILD_LOG}"
     die "La construction de l'image CUDA Phase 3 a échoué; voir ${BUILD_LOG}."
 fi
 [[ -s "${IID_FILE}" ]] || die "Docker n'a pas écrit d'identifiant d'image."
@@ -326,10 +348,12 @@ run_container_split_output() {
 
 begin_unit "cuda-release"
 if ! run_container "${RELEASE_LOG}" cmake --workflow --preset cuda-release; then
+    report_failure_log "cuda-release" "${RELEASE_LOG}"
     die "Le workflow cuda-release a échoué; voir ${RELEASE_LOG}."
 fi
 begin_unit "cuda-audit"
 if ! run_container "${AUDIT_LOG}" cmake --workflow --preset cuda-audit; then
+    report_failure_log "cuda-audit" "${AUDIT_LOG}"
     die "Le workflow cuda-audit a échoué; voir ${AUDIT_LOG}."
 fi
 begin_unit "runtime"
@@ -337,26 +361,33 @@ if ! run_container "${RUNTIME_LOG}" "${RUNTIME_PATH}" \
     --allocation-bytes 67108864 \
     --exercise-structured-error \
     --output "${CONTAINER_RESULTS}/runtime.jsonl"; then
+    report_failure_log "runtime" "${RUNTIME_LOG}"
     die "Le runtime Phase 3 a échoué; voir ${RUNTIME_LOG}."
 fi
 begin_unit "binding-dlpack"
 if ! run_container "${BINDING_LOG}" python3 \
     tests/cuda/check_phase3_binding.py "${MODULE_DIR}"; then
+    report_failure_log "binding-dlpack" "${BINDING_LOG}"
     die "Le contrôle de liaison Python/DLPack a échoué; voir ${BINDING_LOG}."
 fi
 begin_unit "cuobjdump-elf"
 if ! run_container "${ELF_LOG}" cuobjdump -lelf "${RUNTIME_PATH}"; then
+    report_failure_log "cuobjdump-elf" "${ELF_LOG}"
     die "cuobjdump n'a pas pu lister les objets ELF AOT; voir ${ELF_LOG}."
 fi
 architectures="$(grep -Eo 'sm_[0-9]+' "${ELF_LOG}" | sort -u || true)"
-[[ "${architectures}" == "sm_120" ]] || \
+if [[ "${architectures}" != "sm_120" ]]; then
+    report_failure_log "cuobjdump-elf" "${ELF_LOG}"
     die "Le binaire AOT doit contenir au moins un ELF et uniquement sm_120; observé : ${architectures:-aucun}."
+fi
 begin_unit "cuobjdump-ptx"
 if ! run_container_split_output "${PTX_LOG}" "${PTX_STDERR_LOG}" \
     cuobjdump -lptx "${RUNTIME_PATH}"; then
+    report_failure_log "cuobjdump-ptx-stderr" "${PTX_STDERR_LOG}"
     die "cuobjdump n'a pas pu auditer les entrées PTX; voir ${PTX_STDERR_LOG}."
 fi
 if grep -q '[^[:space:]]' "${PTX_LOG}"; then
+    report_failure_log "cuobjdump-ptx" "${PTX_LOG}"
     die "Une entrée PTX a été détectée; le runtime mesuré doit être AOT sm_120 uniquement."
 fi
 begin_unit "compute-sanitizer"
@@ -368,6 +399,7 @@ if ! run_container "${SANITIZER_LOG}" compute-sanitizer \
     --allocation-bytes 4194304 \
     --exercise-structured-error \
     --output "${CONTAINER_RESULTS}/sanitizer-runtime.jsonl"; then
+    report_failure_log "compute-sanitizer" "${SANITIZER_LOG}"
     die "compute-sanitizer a détecté une erreur ou a échoué; voir ${SANITIZER_LOG}."
 fi
 

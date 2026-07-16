@@ -744,6 +744,7 @@ La suite GCP vérifie au minimum :
 - labels de projet permettant un balayage de sécurité ;
 - arrêt même après erreur de test, signal ou préemption.
 - deadline de travail au moins trente minutes avant cette borne GCE sûre, sans nouvelle unité lancée après cette deadline.
+- avant suppression des temporaires invités, remontée bornée des 240 dernières lignes et de 65 536 octets au plus du journal de toute unité de qualification en échec, sans publication d'un artefact de succès.
 
 ### 18.2 Checkpoints
 

@@ -502,7 +502,15 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
 set -euo pipefail
 printf 'PREFLIGHT %s\\n' "$*" >>"${FAKE_COMMAND_LOG}"
 [[ "$*" == "--skip-docker" ]]
-[[ "${FAKE_FAIL:-}" != "preflight" ]]
+if [[ "${FAKE_FAIL:-}" == "preflight-bytes" ]]; then
+    printf '%70000s\\n' x
+    exit 24
+elif [[ "${FAKE_FAIL:-}" == "preflight" ]]; then
+    for line in $(seq 1 260); do
+        printf 'simulated preflight diagnostic line %03d\\n' "${line}"
+    done
+    exit 23
+fi
 printf 'fake Blackwell preflight passed\\n'
 """,
         )
@@ -718,6 +726,41 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertIn("SUDO -n cat /run/systemd/shutdown/scheduled", log)
         self.assertNotIn("PREFLIGHT", log)
         self.assertNotIn("DOCKER ", log)
+        self.assert_no_partial_artifact()
+
+    def test_preflight_failure_emits_a_bounded_diagnostic_before_cleanup(
+        self,
+    ) -> None:
+        artifact = self.output_dir / "preflight-failure.json"
+
+        result, _ = self.run_worker(failure="preflight", output=artifact)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn(
+            "[DIAGNOSTIC preflight-blackwell] 240 dernières lignes et 65536 octets",
+            result.stderr,
+        )
+        self.assertNotIn("simulated preflight diagnostic line 001", result.stderr)
+        self.assertIn("simulated preflight diagnostic line 021", result.stderr)
+        self.assertIn("simulated preflight diagnostic line 260", result.stderr)
+        self.assertIn("[DIAGNOSTIC preflight-blackwell] fin.", result.stderr)
+        self.assertIn("Le preflight Blackwell non destructif a échoué", result.stderr)
+        self.assertFalse(artifact.exists())
+        self.assert_no_partial_artifact()
+
+        byte_artifact = self.output_dir / "preflight-byte-limit.json"
+        byte_result, _ = self.run_worker(
+            failure="preflight-bytes", output=byte_artifact
+        )
+        self.assertNotEqual(0, byte_result.returncode)
+        begin = "octets au plus; début.\n"
+        end = "[DIAGNOSTIC preflight-blackwell] fin."
+        self.assertIn(begin, byte_result.stderr)
+        self.assertIn(end, byte_result.stderr)
+        diagnostic = byte_result.stderr.split(begin, 1)[1].split(end, 1)[0]
+        self.assertLessEqual(len(diagnostic.encode("utf-8")), 65536)
+        self.assertGreater(len(diagnostic.encode("utf-8")), 65000)
+        self.assertFalse(byte_artifact.exists())
         self.assert_no_partial_artifact()
 
     def test_guard_file_fallback_must_be_future(self) -> None:
