@@ -764,6 +764,7 @@ class ScriptSafetyTests(unittest.TestCase):
             "--no-restart-on-failure",
             "readonly BOOT_DISK_IOPS=3600",
             "readonly BOOT_DISK_THROUGHPUT=290",
+            'NETWORK_INTERFACE="${GCP_NETWORK_INTERFACE:-network=default,nic-type=GVNIC}"',
             '--boot-disk-provisioned-iops="${BOOT_DISK_IOPS}"',
             '--boot-disk-provisioned-throughput="${BOOT_DISK_THROUGHPUT}"',
             "scheduling.provisioningModel",
@@ -776,6 +777,8 @@ class ScriptSafetyTests(unittest.TestCase):
             with self.subTest(expected=expected):
                 self.assertIn(expected, source)
         self.assertIn("check_quotas.sh", source)
+        self.assertIn('[[ "${NETWORK_INTERFACE}" != *"no-address"* ]]', source)
+        self.assertNotIn("access-config-type", source)
 
     def test_quota_check_uses_exact_spot_quota_and_never_requires_g4_cpus(
         self,

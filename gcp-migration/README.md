@@ -143,7 +143,9 @@ conservent son disque ; elles ne la suppriment pas.
 
 Par défaut, la VM utilise le réseau `default` avec une adresse externe afin de
 préserver le chemin SSH existant. Pour une infrastructure durcie, fournissez
-`GCP_NETWORK_INTERFACE` avec un VPC contrôlé et utilisez IAP/OS Login. La
+`GCP_NETWORK_INTERFACE` avec un VPC contrôlé et la clé `no-address`, puis
+utilisez IAP/OS Login. En l'absence de `no-address`, `gcloud` attribue une
+adresse externe éphémère et le préflight exige le quota correspondant. La
 métadonnée OS Login est activée par le script.
 
 ## Ouvrir une session de calcul

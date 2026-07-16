@@ -18,7 +18,7 @@ readonly GUARD_TIMEOUT_SECONDS=60
 
 PROJECT_ID="${GCP_PROJECT_ID:-${DEFAULT_PROJECT_ID}}"
 MAX_RUN_DURATION="${GCP_MAX_RUN_DURATION:-8h}"
-NETWORK_INTERFACE="${GCP_NETWORK_INTERFACE:-network=default,access-config-type=ONE_TO_ONE_NAT,nic-type=GVNIC}"
+NETWORK_INTERFACE="${GCP_NETWORK_INTERFACE:-network=default,nic-type=GVNIC}"
 RUNTIME_SERVICE_ACCOUNT="${GCP_RUNTIME_SERVICE_ACCOUNT:-}"
 
 die() {
@@ -159,7 +159,7 @@ if [[ "${ZONE}" == *-ai* ]]; then
 fi
 
 require_external_address=0
-if [[ "${NETWORK_INTERFACE}" == *"access-config-type="* ]]; then
+if [[ "${NETWORK_INTERFACE}" != *"no-address"* ]]; then
     require_external_address=1
 fi
 GCP_PROJECT_ID="${PROJECT_ID}" GCP_REGION="${REGION}" GCP_ZONE="${ZONE}" \
