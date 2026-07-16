@@ -19,6 +19,65 @@ option(
   "Build the MorseHGP3D diagnostic replay tools"
   ${PROJECT_IS_TOP_LEVEL}
 )
+option(
+  MORSEHGP3D_ENABLE_CUDA
+  "Enable the opt-in CUDA 12.9 sm_120 build envelope"
+  OFF
+)
+option(
+  MORSEHGP3D_CUDA_AUDIT
+  "Add compile-time CUDA audit diagnostics"
+  OFF
+)
+option(
+  MORSEHGP3D_ENABLE_SANITIZERS
+  "Instrument project-owned CPU targets with AddressSanitizer and UBSan"
+  OFF
+)
+
+if(MORSEHGP3D_CUDA_AUDIT AND NOT MORSEHGP3D_ENABLE_CUDA)
+  message(FATAL_ERROR "MORSEHGP3D_CUDA_AUDIT requires MORSEHGP3D_ENABLE_CUDA=ON")
+endif()
+if(MORSEHGP3D_ENABLE_SANITIZERS AND MORSEHGP3D_ENABLE_CUDA)
+  message(FATAL_ERROR "The Phase 3.1 sanitizer profile is CPU-only")
+endif()
+
+add_library(morsehgp3d_sanitizers INTERFACE)
+if(MORSEHGP3D_ENABLE_SANITIZERS)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+    target_compile_options(
+      morsehgp3d_sanitizers
+      INTERFACE -fsanitize=address,undefined -fno-omit-frame-pointer
+    )
+    target_link_options(
+      morsehgp3d_sanitizers
+      INTERFACE -fsanitize=address,undefined
+    )
+  else()
+    message(
+      FATAL_ERROR
+      "The Phase 3.1 sanitizer profile is unsupported for ${CMAKE_CXX_COMPILER_ID}"
+    )
+  endif()
+endif()
+
+function(morsehgp3d_apply_sanitizers target_name)
+  if(NOT TARGET "${target_name}")
+    message(FATAL_ERROR "Cannot sanitize missing target ${target_name}")
+  endif()
+  target_link_libraries("${target_name}" PRIVATE morsehgp3d_sanitizers)
+endfunction()
+
+if(MORSEHGP3D_ENABLE_CUDA)
+  include(cmake/MorseHGP3DCuda.cmake)
+  add_library(
+    morsehgp3d_cuda_environment_probe
+    OBJECT
+    EXCLUDE_FROM_ALL
+    src/cuda/environment_probe.cu
+  )
+  morsehgp3d_configure_cuda_target(morsehgp3d_cuda_environment_probe)
+endif()
 
 find_package(Boost 1.74 REQUIRED CONFIG COMPONENTS headers)
 
@@ -52,6 +111,7 @@ if(MORSEHGP3D_BUILD_TOOLS)
     src/tools/predicate_replay.cpp
   )
   target_link_libraries(morsehgp3d_replay_predicate PRIVATE morsehgp3d::exact)
+  morsehgp3d_apply_sanitizers(morsehgp3d_replay_predicate)
   if(MSVC)
     target_compile_options(morsehgp3d_replay_predicate PRIVATE /W4 /WX)
   else()

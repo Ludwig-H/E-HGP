@@ -79,6 +79,21 @@ ctest --test-dir build/morsehgp3d --output-on-failure
 
 Le target exporté est `morsehgp3d::exact`. Après `cmake --install`, un consommateur peut utiliser `find_package(MorseHGP3D CONFIG REQUIRED)` sans dépendre de chemins d'en-têtes propres à la machine de construction.
 
+### Profils reproductibles de Phase 3
+
+Le premier lot de Phase 3 ajoute quatre workflows CMake isolés :
+
+```bash
+cmake --workflow --preset cpu-release
+cmake --workflow --preset sanitizer
+cmake --workflow --preset cuda-release
+cmake --workflow --preset cuda-audit
+```
+
+Les deux premiers sont qualifiables sans CUDA. Les deux derniers exigent explicitement NVIDIA CUDA 12.9.x et produisent uniquement du code réel AOT pour `sm_120`; ils refusent PTX, fast math, architecture brute, fichier d'options ou injection par l'environnement. L'image associée est `containers/cuda12.9-sm120.Dockerfile`, épinglée par digest et snapshot Ubuntu.
+
+À ce point d'avancement, les workflows CUDA compilent seulement une sonde et ne lancent aucun kernel. Le runtime, le worker distant et le test G4 réel restent requis avant la fermeture de la Phase 3. Les preuves et limites de ce lot sont consignées dans `docs/validation/PHASE3_PROGRESS.md`.
+
 ## Replay d'un prédicat
 
 Le wrapper Python valide un artefact d'entrée séparé du schéma scientifique public, appelle le binaire C++ et produit un résultat JSON canonique muni d'un identifiant SHA-256 stable de l'entrée normalisée :

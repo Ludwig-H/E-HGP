@@ -68,7 +68,7 @@ status = "in_progress"
 entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["0"]
-evidence = ["docs/contracts/PHASE0_GATE_REVIEW.md", "docs/validation/PHASE2A_GATE_REVIEW.md"]
+evidence = ["docs/contracts/PHASE0_GATE_REVIEW.md", "docs/validation/PHASE2A_GATE_REVIEW.md", "docs/validation/PHASE3_PROGRESS.md"]
 blocking_reason = ""
 
 [[phases]]

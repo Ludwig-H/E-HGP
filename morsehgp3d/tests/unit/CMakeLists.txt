@@ -22,6 +22,23 @@ target_link_libraries(morsehgp3d_level_order_tests PRIVATE morsehgp3d::exact)
 add_executable(morsehgp3d_expansion_tests test_expansion.cpp)
 target_link_libraries(morsehgp3d_expansion_tests PRIVATE morsehgp3d::exact)
 
+set(
+  _morsehgp3d_cpu_test_targets
+  morsehgp3d_exact_types_tests
+  morsehgp3d_exact_types_dump
+  morsehgp3d_predicates_tests
+  morsehgp3d_affine_tests
+  morsehgp3d_centers_tests
+  morsehgp3d_support_tests
+  morsehgp3d_level_order_tests
+  morsehgp3d_expansion_tests
+)
+foreach(_morsehgp3d_cpu_test_target IN LISTS _morsehgp3d_cpu_test_targets)
+  morsehgp3d_apply_sanitizers("${_morsehgp3d_cpu_test_target}")
+endforeach()
+unset(_morsehgp3d_cpu_test_target)
+unset(_morsehgp3d_cpu_test_targets)
+
 if(MSVC)
   target_compile_options(morsehgp3d_exact_types_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_exact_types_dump PRIVATE /W4 /WX)
@@ -123,6 +140,14 @@ add_test(NAME morsehgp3d.level_order COMMAND morsehgp3d_level_order_tests)
 add_test(NAME morsehgp3d.expansion COMMAND morsehgp3d_expansion_tests)
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
+add_test(
+  NAME morsehgp3d.phase3_build_configuration
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../configuration/check_phase3_build.py"
+    "${PROJECT_SOURCE_DIR}"
+    "${PROJECT_SOURCE_DIR}/.."
+)
 add_test(
   NAME morsehgp3d.exact_contract_differential
   COMMAND

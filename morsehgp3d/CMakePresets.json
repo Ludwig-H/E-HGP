@@ -1,0 +1,191 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "phase3-base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/../build/morsehgp3d-${presetName}",
+      "environment": {
+        "CUDAFLAGS": "",
+        "NVCC_APPEND_FLAGS": "",
+        "NVCC_PREPEND_FLAGS": ""
+      },
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "MORSEHGP3D_BUILD_TESTS": "ON",
+        "MORSEHGP3D_BUILD_TOOLS": "ON"
+      }
+    },
+    {
+      "name": "cpu-release",
+      "displayName": "Phase 3 CPU release",
+      "inherits": "phase3-base",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "MORSEHGP3D_CUDA_AUDIT": "OFF",
+        "MORSEHGP3D_ENABLE_CUDA": "OFF",
+        "MORSEHGP3D_ENABLE_SANITIZERS": "OFF"
+      }
+    },
+    {
+      "name": "sanitizer",
+      "displayName": "Phase 3 CPU ASan and UBSan",
+      "inherits": "phase3-base",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "MORSEHGP3D_CUDA_AUDIT": "OFF",
+        "MORSEHGP3D_ENABLE_CUDA": "OFF",
+        "MORSEHGP3D_ENABLE_SANITIZERS": "ON"
+      }
+    },
+    {
+      "name": "cuda-release",
+      "displayName": "Phase 3 CUDA 12.9 sm_120 release compile",
+      "inherits": "phase3-base",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CUDA_ARCHITECTURES": "120-real",
+        "MORSEHGP3D_CUDA_AUDIT": "OFF",
+        "MORSEHGP3D_ENABLE_CUDA": "ON",
+        "MORSEHGP3D_ENABLE_SANITIZERS": "OFF"
+      }
+    },
+    {
+      "name": "cuda-audit",
+      "displayName": "Phase 3 CUDA 12.9 sm_120 audit compile",
+      "inherits": "phase3-base",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_CUDA_ARCHITECTURES": "120-real",
+        "MORSEHGP3D_CUDA_AUDIT": "ON",
+        "MORSEHGP3D_ENABLE_CUDA": "ON",
+        "MORSEHGP3D_ENABLE_SANITIZERS": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "cpu-release",
+      "configurePreset": "cpu-release",
+      "jobs": 2
+    },
+    {
+      "name": "sanitizer",
+      "configurePreset": "sanitizer",
+      "jobs": 2
+    },
+    {
+      "name": "cuda-release",
+      "configurePreset": "cuda-release",
+      "targets": [
+        "morsehgp3d_cuda_environment_probe"
+      ],
+      "jobs": 2
+    },
+    {
+      "name": "cuda-audit",
+      "configurePreset": "cuda-audit",
+      "targets": [
+        "morsehgp3d_cuda_environment_probe"
+      ],
+      "jobs": 2
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "cpu-release",
+      "configurePreset": "cpu-release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "stopOnFailure": true
+      }
+    },
+    {
+      "name": "sanitizer",
+      "configurePreset": "sanitizer",
+      "environment": {
+        "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "stopOnFailure": true
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "cpu-release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "cpu-release"
+        },
+        {
+          "type": "build",
+          "name": "cpu-release"
+        },
+        {
+          "type": "test",
+          "name": "cpu-release"
+        }
+      ]
+    },
+    {
+      "name": "sanitizer",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "sanitizer"
+        },
+        {
+          "type": "build",
+          "name": "sanitizer"
+        },
+        {
+          "type": "test",
+          "name": "sanitizer"
+        }
+      ]
+    },
+    {
+      "name": "cuda-release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "cuda-release"
+        },
+        {
+          "type": "build",
+          "name": "cuda-release"
+        }
+      ]
+    },
+    {
+      "name": "cuda-audit",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "cuda-audit"
+        },
+        {
+          "type": "build",
+          "name": "cuda-audit"
+        }
+      ]
+    }
+  ]
+}
