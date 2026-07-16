@@ -101,6 +101,26 @@ print("No scheduled shutdown")
 """
 
 
+FAKE_DATE = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+import time
+
+if sys.argv[1:] != ["+%s"]:
+    raise SystemExit("fake date only supports +%s")
+sequence = os.environ.get("FAKE_DATE_SEQUENCE", "")
+if not sequence:
+    print(int(time.time()))
+    raise SystemExit(0)
+values = [int(value) for value in sequence.split(",")]
+state = Path(os.environ["FAKE_DATE_STATE"])
+index = int(state.read_text(encoding="utf-8")) if state.exists() else 0
+state.write_text(str(index + 1), encoding="utf-8")
+print(values[min(index, len(values) - 1)])
+"""
+
+
 FAKE_DOCKER = r"""#!/usr/bin/env python3
 import json
 import os
@@ -450,6 +470,8 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
         self.output_dir = self.root / "artifacts"
         self.session_tmp = self.root / "session-tmp"
         self.command_log = self.root / "commands.log"
+        self.date_state = self.root / "date.state"
+        self.gce_deadline_epoch = int(time.time()) + 3300
         for path in (
             self.repository / "gcp-migration",
             self.repository / "containers",
@@ -472,6 +494,7 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
         self._write_executable(self.fake_bin / "git", FAKE_GIT)
         self._write_executable(self.fake_bin / "sudo", FAKE_SUDO)
         self._write_executable(self.fake_bin / "shutdown", FAKE_SHUTDOWN)
+        self._write_executable(self.fake_bin / "date", FAKE_DATE)
         self._write_executable(self.fake_bin / "docker", FAKE_DOCKER)
         self._write_executable(
             self.repository / "gcp-migration" / "blackwell_preflight.sh",
@@ -491,6 +514,8 @@ printf 'fake Blackwell preflight passed\\n'
                 "FAKE_IMAGE_ID": FAKE_IMAGE_ID,
                 "FAKE_REPO_ROOT": str(self.repository),
                 "FAKE_GUARD": "present",
+                "FAKE_DATE_SEQUENCE": "",
+                "FAKE_DATE_STATE": str(self.date_state),
                 "PATH": str(self.fake_bin) + os.pathsep + self.environment["PATH"],
                 "TMPDIR": str(self.session_tmp),
                 "PYTHONDONTWRITEBYTECODE": "1",
@@ -513,6 +538,7 @@ printf 'fake Blackwell preflight passed\\n'
         guard: str = "present",
         output: Path | None = None,
         direct_docker_info_fail: bool = False,
+        date_sequence: list[int] | None = None,
     ) -> tuple[subprocess.CompletedProcess[str], Path]:
         artifact = output or (self.output_dir / "qualification.json")
         environment = self.environment.copy()
@@ -521,9 +547,21 @@ printf 'fake Blackwell preflight passed\\n'
         environment["FAKE_DIRECT_DOCKER_INFO_FAIL"] = (
             "1" if direct_docker_info_fail else "0"
         )
+        environment["FAKE_DATE_SEQUENCE"] = (
+            "" if date_sequence is None else ",".join(map(str, date_sequence))
+        )
+        self.date_state.unlink(missing_ok=True)
         command = [str(self.worker)]
         if arguments is None:
-            command.extend(["--yes", "--output", str(artifact)])
+            command.extend(
+                [
+                    "--yes",
+                    "--gce-deadline-epoch",
+                    str(self.gce_deadline_epoch),
+                    "--output",
+                    str(artifact),
+                ]
+            )
         else:
             command.extend(arguments)
         result = subprocess.run(
@@ -567,10 +605,94 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertFalse(artifact.exists())
         self.assertEqual("", self.command_log_text())
 
-        result, _ = self.run_worker(arguments=["--yes", "--output", "relative.json"])
+        result, _ = self.run_worker(
+            arguments=[
+                "--yes",
+                "--gce-deadline-epoch",
+                str(self.gce_deadline_epoch),
+                "--output",
+                "relative.json",
+            ]
+        )
         self.assertNotEqual(0, result.returncode)
         self.assertIn("absolu", result.stderr.lower())
         self.assertEqual("", self.command_log_text())
+
+    def test_requires_valid_future_gce_deadline(self) -> None:
+        artifact = self.output_dir / "deadline.json"
+        for value in ("", "abc", "123", str(int(time.time()) + 1700)):
+            with self.subTest(value=value):
+                self.command_log.unlink(missing_ok=True)
+                arguments = ["--yes"]
+                if value:
+                    arguments.extend(["--gce-deadline-epoch", value])
+                arguments.extend(["--output", str(artifact)])
+                result, _ = self.run_worker(arguments=arguments, output=artifact)
+                self.assertNotEqual(0, result.returncode)
+                self.assertFalse(artifact.exists())
+                self.assertNotIn("PREFLIGHT", self.command_log_text())
+                self.assertNotIn("DOCKER ", self.command_log_text())
+
+    def test_guest_guard_must_precede_the_gce_deadline(self) -> None:
+        artifact = self.output_dir / "guard-after-gce.json"
+        deadline = int(time.time()) + 2000
+        result, _ = self.run_worker(
+            arguments=[
+                "--yes",
+                "--gce-deadline-epoch",
+                str(deadline),
+                "--output",
+                str(artifact),
+            ],
+            output=artifact,
+        )
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertFalse(artifact.exists())
+        self.assertIn("Arrêt invité planifié absent", result.stderr)
+        self.assertNotIn("PREFLIGHT", self.command_log_text())
+        self.assertNotIn("DOCKER ", self.command_log_text())
+
+    def test_no_new_unit_starts_at_the_work_deadline(self) -> None:
+        base = int(time.time())
+        deadline = base + 3300
+        work_deadline = deadline - 1800
+        cases = (
+            (
+                "docker-build",
+                [base, base, base + 100, work_deadline],
+                "DOCKER build",
+            ),
+            (
+                "compute-sanitizer",
+                [base] * 10 + [work_deadline],
+                "compute-sanitizer --tool memcheck",
+            ),
+        )
+
+        for label, sequence, forbidden in cases:
+            with self.subTest(label=label):
+                self.command_log.unlink(missing_ok=True)
+                artifact = self.output_dir / f"deadline-{label}.json"
+                result, _ = self.run_worker(
+                    arguments=[
+                        "--yes",
+                        "--gce-deadline-epoch",
+                        str(deadline),
+                        "--output",
+                        str(artifact),
+                    ],
+                    output=artifact,
+                    date_sequence=sequence,
+                )
+
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn(f"unité {label} non lancée", result.stderr)
+                self.assertFalse(artifact.exists())
+                log = self.command_log_text()
+                self.assertIn("PREFLIGHT --skip-docker", log)
+                self.assertNotIn(forbidden, log)
+                self.assert_no_partial_artifact()
 
     def test_rejects_output_inside_worktree_or_already_existing(self) -> None:
         inside = self.repository / "qualification.json"

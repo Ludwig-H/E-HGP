@@ -161,6 +161,16 @@ pendant le démarrage publie immédiatement la génération ciblée, puis certif
 son arrêt sans attendre le délai normal de cinq minutes. Le délai invité vaut
 quatre heures par défaut et ne peut jamais dépasser 480 minutes :
 
+Lorsque Compute Engine expose `terminationTimestamp`, le script exige que cette
+valeur concorde à 300 secondes près avec `lastStartTimestamp + maxRunDuration`.
+Certaines zones IA n'exposent pas ce champ : uniquement pour une telle zone et
+un champ entièrement vide, l'échéance est calculée depuis la nouvelle génération
+`lastStartTimestamp` et la durée GCE numérique relue et bornée. Le plafond sûr
+du coupe-circuit invité est fixé 300 secondes avant cette échéance calculée, ce
+qui couvre aussi l'apparition tardive d'un timestamp valide. Une valeur non vide
+mal formée ou incohérente, une génération non fraîche ou une modification de la
+durée après démarrage restent refusées.
+
 ```bash
 ./gcp-migration/start_and_verify.sh
 ```
@@ -208,7 +218,7 @@ Ne lancez les benchmarks lourds qu'après le bilan vert.
 
 ## Qualification bornée de la Phase 3
 
-Après autorisation explicite, le point d'entrée Phase 3 réalise une seule session, exige un commit propre déjà poussé sur `origin/main`, puis certifie l'arrêt de la cible exacte même si le worker distant échoue. L'arrêt invité est armé pour 45 minutes à partir de la certification des gardes; le coupe-circuit GCE reste indépendamment borné entre 30 secondes et huit heures :
+Après autorisation explicite, le point d'entrée Phase 3 réalise une seule session, exige un commit propre déjà poussé sur `origin/main`, puis certifie l'arrêt de la cible exacte même si le worker distant échoue. L'arrêt invité est armé pour 45 minutes à partir de la certification des gardes; contrairement au démarrage générique qui accepte une durée bornée entre 30 secondes et huit heures, cette qualification courte exige `maxRunDuration=3600` secondes exactement :
 
 ```bash
 ./gcp-migration/run_phase3_qualification.sh \
@@ -227,6 +237,14 @@ GCP_INSTANCE_NAME=ehgp-blackwell-spot-ai1a \
 ```
 
 Le répertoire de résultat est créé si nécessaire, doit rester hors du dépôt et ne doit déjà contenir ni `phase3-<SHA>.json`, ni `phase3-<SHA>.start-handoff.json`. L'orchestrateur utilise exclusivement `start_and_verify.sh` pour le démarrage et `stop_and_verify.sh --yes` pour l'arrêt. Dès que la garde GCE post-démarrage certifie la génération, le démarrage publie atomiquement un handoff v3 `targeted_running` avec le `lastStartTimestamp`, avant de tenter la garde invitée; une préemption immédiate publie de la même façon un handoff `targeted_stopping`. Toute fermeture automatique exige cette même génération et refuse une cible redémarrée. Si la garde invitée ou l'arrêt d'urgence échoue, ce handoff reste disponible pour reprendre l'arrêt exact et bloque une nouvelle session. Si une commande de démarrage échoue avant que la génération soit lisible, aucun arrêt non versionné n'est tenté : le script signale la cible et la commande de contrôle. Les appels GCP critiques sont bornés par GNU `timeout` avec `--foreground` et `--kill-after`. Le worker invité ne pilote aucune ressource GCP : il exige un arrêt `poweroff` futur dans `/run/systemd/shutdown/scheduled`, construit l'image CUDA épinglée, compile les profils release et audit, exécute les sondes runtime et Python/DLPack, vérifie le runtime AOT avec `cuobjdump`, puis passe ce runtime court sous `compute-sanitizer --leak-check full`.
+
+Pour cette qualification courte, l'orchestrateur exige après les deux gardes
+`maxRunDuration=3600` secondes exactement et la même génération. Il transmet au
+worker une échéance GCE sûre, placée 300 secondes avant l'échéance nominale. Le
+worker en retranche encore 1 800 secondes : juste avant le preflight, la
+construction et chacune des sept unités CUDA ou d'audit, il refuse de lancer
+l'unité si cette deadline de travail est atteinte. L'arrêt invité doit en outre
+rester antérieur à l'échéance GCE sûre.
 
 L'artefact distant demeure provisoire avec `status=worker_passed_pending_shutdown`. L'orchestrateur le valide localement, arrête la cible, relit indépendamment l'état exact `TERMINATED`, ajoute cette preuve à `vm_lifecycle`, convertit le statut en `passed`, puis publie l'artefact final atomiquement et sans remplacement par lien dur. Un échec ou une relecture illisible de l'arrêt ne laisse aucun artefact final, mais conserve le handoff ciblé local et bloque une nouvelle session sur le même SHA jusqu'à résolution. La priorité donnée à l'arrêt signifie que le clone temporaire distant peut rester dans `/tmp` sur le disque de la VM arrêtée.
 

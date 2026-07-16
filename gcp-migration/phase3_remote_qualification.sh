@@ -15,12 +15,17 @@ readonly RUNTIME_PATH="${CONTAINER_REPOSITORY}/${RUNTIME_RELATIVE}"
 readonly MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-release"
 readonly GUEST_GUARD_MIN_REMAINING_SECONDS=1800
 readonly GUEST_GUARD_MAX_REMAINING_SECONDS=2820
+readonly WORK_RESERVE_SECONDS=1800
 
 ASSUME_YES=0
 OUTPUT_RAW=""
 OUTPUT_PATH=""
 OUTPUT_PARENT=""
 OUTPUT_BASE=""
+GCE_DEADLINE_RAW=""
+GCE_DEADLINE_EPOCH=0
+WORK_DEADLINE_EPOCH=0
+GUEST_SHUTDOWN_EPOCH=0
 REPOSITORY_ROOT=""
 SESSION_DIR=""
 PUBLISH_TEMP=""
@@ -33,7 +38,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --output /CHEMIN/ABSOLU.json
+Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json
 
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
@@ -53,6 +58,12 @@ while (($# > 0)); do
             OUTPUT_RAW="$2"
             shift 2
             ;;
+        --gce-deadline-epoch)
+            (($# >= 2)) || die "Valeur manquante après --gce-deadline-epoch."
+            [[ -z "${GCE_DEADLINE_RAW}" ]] || die "--gce-deadline-epoch ne peut être fourni qu'une fois."
+            GCE_DEADLINE_RAW="$2"
+            shift 2
+            ;;
         -h|--help)
             usage
             exit 0
@@ -65,6 +76,14 @@ done
 
 ((ASSUME_YES == 1)) || die "--yes est obligatoire pour ce worker distant explicitement autorisé."
 [[ -n "${OUTPUT_RAW}" ]] || die "--output ABSOLU est obligatoire."
+[[ "${GCE_DEADLINE_RAW}" =~ ^[0-9]{10}$ ]] || \
+    die "--gce-deadline-epoch doit être un epoch UTC positif sur dix chiffres."
+GCE_DEADLINE_EPOCH=$((10#${GCE_DEADLINE_RAW}))
+WORK_DEADLINE_EPOCH=$((GCE_DEADLINE_EPOCH - WORK_RESERVE_SECONDS))
+now_epoch="$(date +%s)" || die "Horloge invitée illisible."
+[[ "${now_epoch}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique."
+((WORK_DEADLINE_EPOCH > now_epoch)) || \
+    die "La deadline de travail GCE-30 min est déjà atteinte; aucune unité ne sera lancée."
 case "${OUTPUT_RAW}" in
     /*) ;;
     *) die "--output doit être un chemin absolu." ;;
@@ -198,6 +217,21 @@ guard_is_scheduled() {
     remaining_seconds=$((scheduled_epoch - now_epoch))
     ((remaining_seconds >= GUEST_GUARD_MIN_REMAINING_SECONDS)) || return 1
     ((remaining_seconds <= GUEST_GUARD_MAX_REMAINING_SECONDS)) || return 1
+    ((scheduled_epoch <= GCE_DEADLINE_EPOCH)) || return 1
+    GUEST_SHUTDOWN_EPOCH="${scheduled_epoch}"
+}
+
+begin_unit() {
+    local label="$1"
+    local now=0
+    local remaining=0
+    now="$(date +%s)" || die "Horloge invitée illisible avant l'unité ${label}."
+    [[ "${now}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique avant l'unité ${label}."
+    ((now < WORK_DEADLINE_EPOCH)) || \
+        die "Deadline de travail atteinte; unité ${label} non lancée."
+    remaining=$((WORK_DEADLINE_EPOCH - now))
+    printf '[DEADLINE] unité=%s, secondes restantes avant GCE-30 min=%s.\n' \
+        "${label}" "${remaining}"
 }
 
 read_guest_shutdown_guard() {
@@ -221,8 +255,10 @@ read_guest_shutdown_guard() {
 
 read_guest_shutdown_guard || \
     die "Arrêt invité planifié absent ou illisible; aucun travail GPU ou Docker n'a été lancé."
-printf '[GARDE] Arrêt invité planifié relu avant tout travail lourd.\n'
+printf '[GARDE] Arrêt invité=%s, échéance GCE sûre=%s, deadline de travail=%s.\n' \
+    "${GUEST_SHUTDOWN_EPOCH}" "${GCE_DEADLINE_EPOCH}" "${WORK_DEADLINE_EPOCH}"
 
+begin_unit "preflight-blackwell"
 if ! "${PREFLIGHT_SCRIPT}" --skip-docker >"${PREFLIGHT_LOG}" 2>&1; then
     die "Le preflight Blackwell non destructif a échoué; voir ${PREFLIGHT_LOG}."
 fi
@@ -237,6 +273,7 @@ else
 fi
 
 IMAGE_REF="morsehgp3d-phase3:${HEAD_SHA}"
+begin_unit "docker-build"
 if ! "${DOCKER[@]}" build \
     --file "${DOCKERFILE}" \
     --tag "${IMAGE_REF}" \
@@ -287,28 +324,34 @@ run_container_split_output() {
         "${IMAGE_REF}" "$@" >"${stdout_path}" 2>"${stderr_path}"
 }
 
+begin_unit "cuda-release"
 if ! run_container "${RELEASE_LOG}" cmake --workflow --preset cuda-release; then
     die "Le workflow cuda-release a échoué; voir ${RELEASE_LOG}."
 fi
+begin_unit "cuda-audit"
 if ! run_container "${AUDIT_LOG}" cmake --workflow --preset cuda-audit; then
     die "Le workflow cuda-audit a échoué; voir ${AUDIT_LOG}."
 fi
+begin_unit "runtime"
 if ! run_container "${RUNTIME_LOG}" "${RUNTIME_PATH}" \
     --allocation-bytes 67108864 \
     --exercise-structured-error \
     --output "${CONTAINER_RESULTS}/runtime.jsonl"; then
     die "Le runtime Phase 3 a échoué; voir ${RUNTIME_LOG}."
 fi
+begin_unit "binding-dlpack"
 if ! run_container "${BINDING_LOG}" python3 \
     tests/cuda/check_phase3_binding.py "${MODULE_DIR}"; then
     die "Le contrôle de liaison Python/DLPack a échoué; voir ${BINDING_LOG}."
 fi
+begin_unit "cuobjdump-elf"
 if ! run_container "${ELF_LOG}" cuobjdump -lelf "${RUNTIME_PATH}"; then
     die "cuobjdump n'a pas pu lister les objets ELF AOT; voir ${ELF_LOG}."
 fi
 architectures="$(grep -Eo 'sm_[0-9]+' "${ELF_LOG}" | sort -u || true)"
 [[ "${architectures}" == "sm_120" ]] || \
     die "Le binaire AOT doit contenir au moins un ELF et uniquement sm_120; observé : ${architectures:-aucun}."
+begin_unit "cuobjdump-ptx"
 if ! run_container_split_output "${PTX_LOG}" "${PTX_STDERR_LOG}" \
     cuobjdump -lptx "${RUNTIME_PATH}"; then
     die "cuobjdump n'a pas pu auditer les entrées PTX; voir ${PTX_STDERR_LOG}."
@@ -316,6 +359,7 @@ fi
 if grep -q '[^[:space:]]' "${PTX_LOG}"; then
     die "Une entrée PTX a été détectée; le runtime mesuré doit être AOT sm_120 uniquement."
 fi
+begin_unit "compute-sanitizer"
 if ! run_container "${SANITIZER_LOG}" compute-sanitizer \
     --tool memcheck \
     --leak-check full \

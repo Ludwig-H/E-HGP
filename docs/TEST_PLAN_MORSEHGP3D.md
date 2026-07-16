@@ -737,12 +737,12 @@ Aucune campagne ne démarre si la VM ne possède pas une durée de vie maximale 
 La suite GCP vérifie au minimum :
 
 - refus d'une création ou d'un démarrage sans limite de durée ;
-- présence d'un `maxRunDuration` ou d'un `terminationTimestamp` futur dans la borne autorisée ;
+- présence d'un `maxRunDuration` borné et d'une échéance future : `terminationTimestamp` exposé et cohérent, ou à défaut somme certifiée d'un `lastStartTimestamp` frais et de la durée GCE relue; la borne sûre retranche toute tolérance d'acceptation, soit 300 secondes dans les scripts actuels ;
 - action de fin `STOP` et non redémarrage automatique incontrôlé ;
 - arrêt invité de secours armé ;
 - labels de projet permettant un balayage de sécurité ;
 - arrêt même après erreur de test, signal ou préemption.
-- deadline de travail au moins trente minutes avant `terminationTimestamp`, sans nouvelle unité lancée après cette deadline.
+- deadline de travail au moins trente minutes avant cette borne GCE sûre, sans nouvelle unité lancée après cette deadline.
 
 ### 18.2 Checkpoints
 

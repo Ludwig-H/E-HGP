@@ -965,11 +965,11 @@ Tout agent qui utilise la G4 suit exactement :
 1. vérifier projet, zone, quota et instance cible;
 2. créer si nécessaire avec `deploy.sh`, durée GCE au plus huit heures;
 3. démarrer uniquement avec `start_and_verify.sh`;
-4. exiger un `terminationTimestamp` futur dans la borne;
+4. exiger une échéance GCE future dans la borne : `terminationTimestamp` s'il est exposé et cohérent, sinon `lastStartTimestamp + maxRunDuration` à partir d'une génération fraîche et d'une durée relue et bornée; si la validation tolère 300 secondes d'écart, retenir comme borne sûre la somme nominale diminuée de ces 300 secondes;
 5. exiger que l'arrêt invité soit armé et lisible;
 6. lancer le preflight Blackwell;
 7. estimer temps, VRAM, RAM, scratch et sortie avant le benchmark;
-8. fixer une échéance de travail laissant au moins trente minutes avant le coupe-circuit GCE pour checkpoint, copie du manifeste et arrêt;
+8. fixer une échéance de travail laissant au moins trente minutes avant cette borne GCE sûre pour checkpoint, copie du manifeste et arrêt;
 9. ne lancer aucune nouvelle unité après cette échéance et checkpoint avant l'échéance;
 10. sur succès, échec ou interruption, exécuter `stop_and_verify.sh`;
 11. exiger l'état `TERMINATED` de l'instance exactement ciblée;

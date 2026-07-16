@@ -15,11 +15,13 @@ readonly BOOT_DISK_THROUGHPUT=290
 readonly MIN_ALLOWED_RUN_SECONDS=30
 readonly MAX_ALLOWED_RUN_SECONDS=28800
 readonly GUARD_TIMEOUT_SECONDS=60
+readonly TIMESTAMP_TOLERANCE_SECONDS=300
 
 PROJECT_ID="${GCP_PROJECT_ID:-${DEFAULT_PROJECT_ID}}"
 MAX_RUN_DURATION="${GCP_MAX_RUN_DURATION:-8h}"
 NETWORK_INTERFACE="${GCP_NETWORK_INTERFACE:-network=default,nic-type=GVNIC}"
 RUNTIME_SERVICE_ACCOUNT="${GCP_RUNTIME_SERVICE_ACCOUNT:-}"
+CREATE_REQUEST_EPOCH=""
 
 die() {
     printf '[ERREUR] %s\n' "$*" >&2
@@ -91,21 +93,34 @@ verify_runtime_guard() {
     [[ "${maintenance_policy}" == "${EXPECTED_MAINTENANCE_POLICY}" ]] || return 1
     [[ "${provisioning_model}" == "${EXPECTED_PROVISIONING_MODEL}" ]] || return 1
     [[ -n "${start_timestamp}" ]] || return 1
-    [[ -n "${termination_timestamp}" ]] || return 1
+    [[ "${CREATE_REQUEST_EPOCH}" =~ ^[0-9]+$ ]] || return 1
+    [[ "${start_timestamp}" != *$'\n'* && "${start_timestamp}" != *$'\r'* ]] || return 1
+    [[ "${termination_timestamp}" != *$'\n'* && \
+        "${termination_timestamp}" != *$'\r'* ]] || return 1
 
     start_epoch="$(timestamp_to_epoch "${start_timestamp}")" || return 1
     now="$(date +%s)"
+    ((start_epoch >= CREATE_REQUEST_EPOCH - TIMESTAMP_TOLERANCE_SECONDS)) || return 1
+    ((start_epoch <= now + TIMESTAMP_TOLERANCE_SECONDS)) || return 1
     computed_deadline=$((start_epoch + configured_seconds))
-    maximum_deadline=$((now + MAX_ALLOWED_RUN_SECONDS + 300))
+    maximum_deadline=$((now + configured_seconds + TIMESTAMP_TOLERANCE_SECONDS))
     ((computed_deadline > now && computed_deadline <= maximum_deadline)) || return 1
 
-    termination_epoch="$(timestamp_to_epoch "${termination_timestamp}")" || return 1
-    ((termination_epoch > now && termination_epoch <= maximum_deadline)) || return 1
-    ((termination_epoch >= computed_deadline - 300 && termination_epoch <= computed_deadline + 300)) || return 1
+    if [[ -n "${termination_timestamp}" ]]; then
+        termination_epoch="$(timestamp_to_epoch "${termination_timestamp}")" || return 1
+        ((termination_epoch > now && termination_epoch <= maximum_deadline)) || return 1
+        ((termination_epoch >= computed_deadline - TIMESTAMP_TOLERANCE_SECONDS && termination_epoch <= computed_deadline + TIMESTAMP_TOLERANCE_SECONDS)) || return 1
+    else
+        [[ "${ZONE}" == *-ai* ]] || return 1
+    fi
 
     printf '[GARDE-FOU] action=%s, maxRunDuration=%ss, échéance calculée=%s' \
         "${action}" "${configured_seconds}" "${computed_deadline}"
-    printf ', terminationTimestamp=%s' "${termination_timestamp}"
+    if [[ -n "${termination_timestamp}" ]]; then
+        printf ', terminationTimestamp=%s' "${termination_timestamp}"
+    else
+        printf ', terminationTimestamp non exposé; échéance calculée certifiée'
+    fi
     printf '\n'
 }
 
@@ -212,6 +227,8 @@ if [[ -n "${RUNTIME_SERVICE_ACCOUNT}" ]]; then
     )
 fi
 
+CREATE_REQUEST_EPOCH="$(date +%s)" || die "Impossible d'horodater la demande de création."
+[[ "${CREATE_REQUEST_EPOCH}" =~ ^[0-9]+$ ]] || die "Horodatage de création invalide."
 creation_attempted=1
 gcloud compute instances create "${INSTANCE_NAME}" \
     --project="${PROJECT_ID}" \

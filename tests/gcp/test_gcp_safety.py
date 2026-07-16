@@ -209,7 +209,14 @@ elif args[:3] == ["compute", "instances", "describe"]:
     if log and os.path.exists(log):
         with open(log, encoding="utf-8") as stream:
             previous_commands = stream.read()
+    session_commands = ""
+    session_log = os.environ.get("FAKE_SESSION_LOG")
+    if session_log and os.path.exists(session_log):
+        with open(session_log, encoding="utf-8") as stream:
+            session_commands = stream.read()
     status = "TERMINATED"
+    if scenario.startswith("qualification-") and "stop project=" not in session_commands:
+        status = "RUNNING"
     if scenario == "qualification-stop-still-running":
         status = "RUNNING"
     start_observed = "compute instances start" in previous_commands
@@ -223,6 +230,9 @@ elif args[:3] == ["compute", "instances", "describe"]:
         "guest-interrupt",
         "guest-readback",
         "guest-success",
+        "guest-success-late-termination-timestamp",
+        "guest-success-no-term-duration-race",
+        "guest-success-no-termination-timestamp",
         "post-start-wrong-maintenance",
         "post-start-wrong-provisioning",
         "signal-after-capture",
@@ -259,15 +269,36 @@ elif args[:3] == ["compute", "instances", "describe"]:
             "FAKE_PRE_START_TIMESTAMP",
             (now - timedelta(seconds=20)).isoformat().replace("+00:00", "Z"),
         )
+    max_run_seconds = os.environ.get("FAKE_MAX_RUN_SECONDS", "28800")
+    if scenario == "guest-success-no-term-duration-race":
+        max_run_seconds = "7200" if start_observed else "3600"
     termination_timestamp = os.environ.get(
         "FAKE_TERMINATION_TIMESTAMP",
         (now + timedelta(seconds=28790)).isoformat().replace("+00:00", "Z"),
     )
+    if scenario in {
+        "guest-success-no-term-duration-race",
+        "guest-success-no-termination-timestamp",
+    }:
+        termination_timestamp = ""
+    if scenario == "guest-success-late-termination-timestamp":
+        termination_reads = post_start_commands.count(
+            "--format=value(terminationTimestamp)"
+        )
+        if termination_reads == 1:
+            termination_timestamp = ""
+        else:
+            parsed_start = datetime.fromisoformat(
+                last_start_timestamp.replace("Z", "+00:00")
+            )
+            termination_timestamp = (
+                parsed_start + timedelta(seconds=int(max_run_seconds) - 300)
+            ).isoformat().replace("+00:00", "Z")
     values = {
         "status": status,
         "scheduling.instanceTerminationAction": "STOP",
         "scheduling.automaticRestart": "False",
-        "scheduling.maxRunDuration.seconds": "28800",
+        "scheduling.maxRunDuration.seconds": max_run_seconds,
         "scheduling.onHostMaintenance": (
             "MIGRATE"
             if scenario == "post-start-wrong-maintenance" and start_observed
@@ -286,12 +317,29 @@ elif args[:3] == ["compute", "instances", "describe"]:
     }
     if scenario == "unlabelled":
         values["labels.project"] = ""
-    print(values.get(field, ""))
+    if output_format == "json":
+        print(
+            json.dumps(
+                {
+                    "lastStartTimestamp": last_start_timestamp,
+                    "scheduling": {
+                        "maxRunDuration": {"seconds": max_run_seconds}
+                    },
+                    "status": status,
+                    "terminationTimestamp": termination_timestamp,
+                }
+            )
+        )
+    else:
+        print(values.get(field, ""))
 elif args[:3] in (["compute", "instances", "start"], ["compute", "instances", "stop"]):
     if scenario not in {
         "guest-interrupt",
         "guest-readback",
         "guest-success",
+        "guest-success-late-termination-timestamp",
+        "guest-success-no-term-duration-race",
+        "guest-success-no-termination-timestamp",
         "generation-race",
         "immediate-preemption",
         "post-start-wrong-maintenance",
@@ -310,7 +358,12 @@ elif args[:2] == ["compute", "ssh"]:
         print("No scheduled shutdown")
     elif scenario == "guest-interrupt":
         print("No scheduled shutdown")
-    elif scenario in {"guest-success", "timestamp-lag"}:
+    elif scenario in {
+        "guest-success",
+        "guest-success-late-termination-timestamp",
+        "guest-success-no-termination-timestamp",
+        "timestamp-lag",
+    }:
         print("MODE=poweroff\nUSEC=9999999999999999\n__EHGP_GUEST_GUARD_VERIFIED__")
     elif scenario.startswith("qualification-"):
         if "mktemp -d /tmp/morsehgp3d-phase3.XXXXXXXX" in command:
@@ -778,6 +831,13 @@ class ScriptSafetyTests(unittest.TestCase):
                 self.assertIn(expected, source)
         self.assertIn("check_quotas.sh", source)
         self.assertIn('[[ "${NETWORK_INTERFACE}" != *"no-address"* ]]', source)
+        self.assertIn('[[ "${ZONE}" == *-ai* ]] || return 1', source)
+        self.assertIn(
+            "CREATE_REQUEST_EPOCH - TIMESTAMP_TOLERANCE_SECONDS", source
+        )
+        self.assertIn(
+            "now + configured_seconds + TIMESTAMP_TOLERANCE_SECONDS", source
+        )
         self.assertNotIn("access-config-type", source)
 
     def test_quota_check_uses_exact_spot_quota_and_never_requires_g4_cpus(
@@ -1019,6 +1079,143 @@ class ScriptSafetyTests(unittest.TestCase):
         )
         self.assertEqual(stopped.returncode, 0, stopped.stdout)
 
+    def test_start_certifies_computed_deadline_when_ai_zone_omits_timestamp(
+        self,
+    ) -> None:
+        self.env["GCP_ZONE"] = "europe-west4-ai1a"
+        self.env["FAKE_MAX_RUN_SECONDS"] = "3600"
+        self.env["FAKE_GCLOUD_SCENARIO"] = (
+            "guest-success-no-termination-timestamp"
+        )
+        handoff = self.tmp / "ai-zone-start-handoff.json"
+
+        result = self.run_script(
+            "start_and_verify.sh",
+            "--yes",
+            "--guest-shutdown-minutes",
+            "45",
+            "--handoff-file",
+            str(handoff),
+        )
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn(
+            "terminationTimestamp non exposé; échéance calculée certifiée",
+            result.stdout,
+        )
+        self.assertEqual(
+            self.last_start_timestamp,
+            json.loads(handoff.read_text(encoding="utf-8"))[
+                "last_start_timestamp"
+            ],
+        )
+        stopped = self.run_script(
+            "stop_and_verify.sh",
+            "--yes",
+            "--expected-last-start-timestamp",
+            self.last_start_timestamp,
+        )
+        self.assertEqual(stopped.returncode, 0, stopped.stdout)
+
+    def test_missing_or_invalid_timestamp_paths_fail_closed(
+        self,
+    ) -> None:
+        now = datetime.now(timezone.utc)
+        cases = (
+            (
+                "regular-zone-missing",
+                "guest-success-no-termination-timestamp",
+                "europe-west4-a",
+                now - timedelta(seconds=10),
+                None,
+            ),
+            (
+                "future-generation",
+                "guest-success-no-termination-timestamp",
+                "europe-west4-ai1a",
+                now + timedelta(hours=2),
+                None,
+            ),
+            (
+                "stale-generation",
+                "guest-success-no-termination-timestamp",
+                "europe-west4-ai1a",
+                now - timedelta(minutes=10),
+                None,
+            ),
+            (
+                "malformed-nonempty-timestamp",
+                "guest-success",
+                "europe-west4-ai1a",
+                now - timedelta(seconds=10),
+                "not-a-timestamp",
+            ),
+            (
+                "duration-race",
+                "guest-success-no-term-duration-race",
+                "europe-west4-ai1a",
+                now - timedelta(seconds=10),
+                None,
+            ),
+        )
+
+        for name, scenario, zone, start_time, termination in cases:
+            with self.subTest(name=name):
+                self.log.unlink(missing_ok=True)
+                self.env["FAKE_GCLOUD_SCENARIO"] = scenario
+                self.env["GCP_ZONE"] = zone
+                self.env["FAKE_MAX_RUN_SECONDS"] = "3600"
+                self.env["FAKE_LAST_START_TIMESTAMP"] = (
+                    start_time.isoformat().replace("+00:00", "Z")
+                )
+                if termination is None:
+                    self.env.pop("FAKE_TERMINATION_TIMESTAMP", None)
+                else:
+                    self.env["FAKE_TERMINATION_TIMESTAMP"] = termination
+
+                result = self.run_script(
+                    "start_and_verify.sh",
+                    "--yes",
+                    "--guest-shutdown-minutes",
+                    "45",
+                )
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("garde post-démarrage", result.stdout)
+                self.assertIn("compute instances stop", self.commands())
+
+    def test_late_timestamp_cannot_shorten_the_guest_deadline(self) -> None:
+        self.env["GCP_ZONE"] = "europe-west4-ai1a"
+        self.env["FAKE_MAX_RUN_SECONDS"] = "3600"
+        self.env["FAKE_GCLOUD_SCENARIO"] = (
+            "guest-success-late-termination-timestamp"
+        )
+        handoff = self.tmp / "late-timestamp-handoff.json"
+        safe_deadline = int(
+            datetime.fromisoformat(
+                self.last_start_timestamp.replace("Z", "+00:00")
+            ).timestamp()
+        ) + 3600 - 300
+
+        result = self.run_script(
+            "start_and_verify.sh",
+            "--yes",
+            "--guest-shutdown-minutes",
+            "45",
+            "--handoff-file",
+            str(handoff),
+        )
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn(str(safe_deadline), self.commands())
+        stopped = self.run_script(
+            "stop_and_verify.sh",
+            "--yes",
+            "--expected-last-start-timestamp",
+            self.last_start_timestamp,
+        )
+        self.assertEqual(stopped.returncode, 0, stopped.stdout)
+
     def test_guest_guard_interruption_and_failed_stop_preserve_generation(self) -> None:
         self.env["FAKE_GCLOUD_SCENARIO"] = "guest-interrupt"
         self.env["FAKE_TIMEOUT_SCENARIO"] = "expire-stop"
@@ -1143,6 +1340,12 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.last_start_timestamp = (now - timedelta(seconds=10)).isoformat().replace(
             "+00:00", "Z"
         )
+        self.termination_timestamp = (
+            datetime.fromisoformat(
+                self.last_start_timestamp.replace("Z", "+00:00")
+            )
+            + timedelta(seconds=3600)
+        ).isoformat().replace("+00:00", "Z")
         self.env = os.environ.copy()
         self.env.update(
             {
@@ -1153,8 +1356,10 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
                 "FAKE_GIT_HEAD": self.head,
                 "FAKE_GIT_SCENARIO": "clean",
                 "FAKE_LAST_START_TIMESTAMP": self.last_start_timestamp,
+                "FAKE_MAX_RUN_SECONDS": "3600",
                 "FAKE_REPOSITORY_ROOT": str(self.repository),
                 "FAKE_SESSION_LOG": str(self.session_log),
+                "FAKE_TERMINATION_TIMESTAMP": self.termination_timestamp,
                 "FAKE_TIMEOUT_LOG": str(self.timeout_log),
                 "GCP_PROJECT_ID": "devpod-gpu-exploration",
                 "GCP_ZONE": "europe-west4-a",
@@ -1190,6 +1395,14 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
 
     def standard_arguments(self) -> tuple[str, ...]:
         return ("--yes", "--result-dir", str(self.results))
+
+    def safe_gce_deadline(self) -> int:
+        start_epoch = int(
+            datetime.fromisoformat(
+                self.last_start_timestamp.replace("Z", "+00:00")
+            ).timestamp()
+        )
+        return start_epoch + 3600 - 300
 
     def test_success_retrieves_artifact_and_independently_certifies_terminated(
         self,
@@ -1233,7 +1446,11 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertIn("compute instances describe ehgp-blackwell-spot", commands)
         self.assertNotIn("rm -rf -- /tmp/morsehgp3d-phase3.A1b2C3d4", commands)
         self.assertIn(f"checkout --quiet --detach {self.head}", commands)
-        self.assertIn("phase3_remote_qualification.sh --yes --output", commands)
+        self.assertIn(
+            "phase3_remote_qualification.sh --yes --gce-deadline-epoch "
+            + str(self.safe_gce_deadline()),
+            commands,
+        )
         self.assertNotIn("compute instances start", commands)
         self.assertNotIn("compute instances stop", commands)
         self.assertNotIn("ehgp-concurrent", commands)
@@ -1242,6 +1459,7 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
     def test_exact_ai_capacity_target_is_allowed(self) -> None:
         self.env["GCP_ZONE"] = "europe-west4-ai1a"
         self.env["GCP_INSTANCE_NAME"] = "ehgp-blackwell-spot-ai1a"
+        self.env["FAKE_TERMINATION_TIMESTAMP"] = ""
 
         result = self.run_qualification(*self.standard_arguments())
 
@@ -1272,7 +1490,57 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
             commands,
         )
         self.assertIn("[TERMINATED]", result.stdout)
+        self.assertIn(
+            "--gce-deadline-epoch " + str(self.safe_gce_deadline()),
+            commands,
+        )
         self.assertFalse(self.handoff_path().exists())
+
+    def test_deadline_recheck_rejects_wrong_duration_and_stops_target(
+        self,
+    ) -> None:
+        self.env["FAKE_MAX_RUN_SECONDS"] = "7200"
+
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("durée exacte de 3600 s", result.stdout)
+        self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
+        self.assertNotIn("phase3_remote_qualification.sh", self.gcloud_commands())
+        self.assertIn("[TERMINATED]", result.stdout)
+
+    def test_deadline_recheck_rejects_expired_work_window_and_stops_target(
+        self,
+    ) -> None:
+        old_start = datetime.now(timezone.utc) - timedelta(minutes=40)
+        self.last_start_timestamp = old_start.isoformat().replace("+00:00", "Z")
+        self.env["FAKE_LAST_START_TIMESTAMP"] = self.last_start_timestamp
+        self.env["FAKE_TERMINATION_TIMESTAMP"] = (
+            old_start + timedelta(seconds=3600)
+        ).isoformat().replace("+00:00", "Z")
+
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("GCE-30 min", result.stdout)
+        self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
+        self.assertNotIn("phase3_remote_qualification.sh", self.gcloud_commands())
+        self.assertIn("[TERMINATED]", result.stdout)
+
+    def test_deadline_recheck_rejects_incoherent_timestamp_and_stops_target(
+        self,
+    ) -> None:
+        self.env["FAKE_TERMINATION_TIMESTAMP"] = (
+            datetime.now(timezone.utc) + timedelta(hours=3)
+        ).isoformat().replace("+00:00", "Z")
+
+        result = self.run_qualification(*self.standard_arguments())
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("échéance de travail", result.stdout)
+        self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
+        self.assertNotIn("phase3_remote_qualification.sh", self.gcloud_commands())
+        self.assertIn("[TERMINATED]", result.stdout)
 
     def test_remote_failure_still_stops_and_returns_original_failure(self) -> None:
         self.env["FAKE_GCLOUD_SCENARIO"] = "qualification-remote-failure"

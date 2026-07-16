@@ -7,6 +7,9 @@ readonly DEFAULT_INSTANCE_NAME="ehgp-blackwell-spot"
 readonly AI_CAPACITY_ZONE="europe-west4-ai1a"
 readonly AI_CAPACITY_INSTANCE_NAME="ehgp-blackwell-spot-ai1a"
 readonly GUEST_SHUTDOWN_MINUTES=45
+readonly EXPECTED_MAX_RUN_SECONDS=3600
+readonly WORK_RESERVE_SECONDS=1800
+readonly TIMESTAMP_TOLERANCE_SECONDS=300
 readonly STOP_SCRIPT_FAILURE=90
 readonly STOP_READBACK_FAILURE=91
 readonly STOP_NOT_TERMINATED=92
@@ -35,6 +38,7 @@ SESSION_LAST_START_TIMESTAMP=""
 SESSION_HANDOFF_STATUS=""
 FINAL_STATUS=""
 FINAL_STOP_VERIFIED_AT_UTC=""
+EFFECTIVE_GCE_DEADLINE_EPOCH=""
 
 die() {
     printf '[ERREUR] %s\n' "$*" >&2
@@ -226,6 +230,71 @@ PY
     SESSION_LAST_START_TIMESTAMP="${generation}"
 }
 
+certify_session_deadline() {
+    local lifecycle_json=""
+    lifecycle_json="$(timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_READ_TIMEOUT_SECONDS}s" gcloud compute instances describe "${INSTANCE_NAME}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --format=json)" || return 1
+    EFFECTIVE_GCE_DEADLINE_EPOCH="$(python3 - \
+        "${SESSION_LAST_START_TIMESTAMP}" "${ZONE}" \
+        "${EXPECTED_MAX_RUN_SECONDS}" "${TIMESTAMP_TOLERANCE_SECONDS}" \
+        "${WORK_RESERVE_SECONDS}" "${lifecycle_json}" <<'PY'
+from datetime import datetime, timezone
+import json
+import sys
+
+
+def parse_timestamp(value: object, label: str) -> int:
+    if not isinstance(value, str) or not value or "\n" in value or "\r" in value:
+        raise SystemExit(f"{label} absent ou ambigu")
+    candidate = value[:-1] + "+00:00" if value.endswith("Z") else value
+    parsed = datetime.fromisoformat(candidate)
+    if parsed.tzinfo is None:
+        raise SystemExit(f"{label} sans fuseau")
+    return int(parsed.timestamp())
+
+
+expected_generation = sys.argv[1]
+zone = sys.argv[2]
+expected_duration = int(sys.argv[3])
+tolerance = int(sys.argv[4])
+reserve = int(sys.argv[5])
+value = json.loads(sys.argv[6])
+if not isinstance(value, dict) or value.get("status") != "RUNNING":
+    raise SystemExit("la cible n'est pas RUNNING après les deux gardes")
+if value.get("lastStartTimestamp") != expected_generation:
+    raise SystemExit("la génération GCE a changé après les deux gardes")
+scheduling = value.get("scheduling")
+if not isinstance(scheduling, dict):
+    raise SystemExit("scheduling absent de la relecture GCE")
+max_run = scheduling.get("maxRunDuration")
+if not isinstance(max_run, dict) or str(max_run.get("seconds")) != str(expected_duration):
+    raise SystemExit(f"maxRunDuration doit rester exactement {expected_duration} s")
+start_epoch = parse_timestamp(expected_generation, "lastStartTimestamp")
+computed_deadline = start_epoch + expected_duration
+termination = value.get("terminationTimestamp")
+if termination not in (None, ""):
+    termination_epoch = parse_timestamp(termination, "terminationTimestamp")
+    if not computed_deadline - tolerance <= termination_epoch <= computed_deadline + tolerance:
+        raise SystemExit("terminationTimestamp incohérent avec la durée GCE")
+elif "-ai" not in zone:
+    raise SystemExit("terminationTimestamp absent hors zone IA")
+safe_deadline = computed_deadline - tolerance
+now = int(datetime.now(timezone.utc).timestamp())
+if safe_deadline - reserve <= now:
+    raise SystemExit("la deadline de travail GCE-30 min est déjà atteinte")
+print(safe_deadline)
+PY
+)" || return 1
+    [[ "${EFFECTIVE_GCE_DEADLINE_EPOCH}" =~ ^[0-9]+$ ]] || return 1
+    printf '[ÉCHÉANCE] GCE sûre=%s; aucune nouvelle unité après %s (réserve=%ss).\n' \
+        "${EFFECTIVE_GCE_DEADLINE_EPOCH}" \
+        "$((EFFECTIVE_GCE_DEADLINE_EPOCH - WORK_RESERVE_SECONDS))" \
+        "${WORK_RESERVE_SECONDS}"
+}
+
 print_control_command() {
     printf 'Commande de contrôle : gcloud compute instances describe %q --project=%q --zone=%q --format=%q\n' \
         "${INSTANCE_NAME}" "${PROJECT_ID}" "${ZONE}" \
@@ -372,6 +441,8 @@ SESSION_CERTIFIED=1
 load_targeted_handoff || die "Le démarrage n'a pas publié son témoin ciblé certifié."
 [[ "${SESSION_HANDOFF_STATUS}" == "targeted_running" ]] || \
     die "Le démarrage n'a pas publié un témoin targeted_running; statut reçu=${SESSION_HANDOFF_STATUS:-vide}."
+certify_session_deadline || \
+    die "La durée exacte de 3600 s et l'échéance de travail GCE-30 min n'ont pas pu être certifiées après démarrage."
 
 mktemp_output="$(remote_exec \
     'remote_dir=$(mktemp -d /tmp/morsehgp3d-phase3.XXXXXXXX) && printf "__EHGP_REMOTE_DIR__%s\n" "${remote_dir}"')"
@@ -385,6 +456,7 @@ quoted_origin="$(shell_quote "${ORIGIN_URL}")"
 quoted_repository="$(shell_quote "${remote_repository}")"
 quoted_head="$(shell_quote "${HEAD_SHA}")"
 quoted_artifact="$(shell_quote "${remote_artifact}")"
+quoted_gce_deadline="$(shell_quote "${EFFECTIVE_GCE_DEADLINE_EPOCH}")"
 
 clone_output="$(remote_exec \
     "git clone --quiet --single-branch --branch main ${quoted_origin} ${quoted_repository} && git -C ${quoted_repository} checkout --quiet --detach ${quoted_head} && remote_head=\$(git -C ${quoted_repository} rev-parse HEAD) && printf '__EHGP_REMOTE_HEAD__%s\\n' \"\${remote_head}\"")"
@@ -393,7 +465,7 @@ remote_head="$(printf '%s\n' "${clone_output}" | sed -n 's/^__EHGP_REMOTE_HEAD__
     die "HEAD distant ${remote_head:-illisible} différent du SHA local ${HEAD_SHA}."
 
 remote_exec \
-    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --output ${quoted_artifact}"
+    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}"
 
 timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \

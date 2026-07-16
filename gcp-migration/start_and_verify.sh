@@ -15,6 +15,7 @@ readonly GCLOUD_READ_TIMEOUT_SECONDS=30
 readonly GCLOUD_MUTATION_TIMEOUT_SECONDS=180
 readonly GCLOUD_SSH_CALL_TIMEOUT_SECONDS=30
 readonly GCLOUD_KILL_AFTER_SECONDS=10
+readonly TIMESTAMP_TOLERANCE_SECONDS=300
 
 PROJECT_ID="${GCP_PROJECT_ID:-${DEFAULT_PROJECT_ID}}"
 GUEST_SHUTDOWN_MINUTES="${GCP_GUEST_SHUTDOWN_MINUTES:-240}"
@@ -23,6 +24,7 @@ HANDOFF_FILE=""
 VERIFIED_LAST_START_TIMESTAMP=""
 TARGET_LAST_START_TIMESTAMP=""
 PRE_START_LAST_START_TIMESTAMP=""
+START_REQUEST_EPOCH=""
 
 die() {
     printf '[ERREUR] %s\n' "$*" >&2
@@ -157,28 +159,44 @@ verify_running_guard() {
     [[ "${machine_type}" == "${EXPECTED_MACHINE_TYPE}" ]] || return 1
     [[ "${maintenance_policy}" == "${EXPECTED_MAINTENANCE_POLICY}" ]] || return 1
     [[ "${provisioning_model}" == "${EXPECTED_PROVISIONING_MODEL}" ]] || return 1
+    [[ "${configured_seconds}" == "${VERIFIED_MAX_RUN_SECONDS}" ]] || return 1
     [[ -n "${start_timestamp}" ]] || return 1
-    [[ -n "${termination_timestamp}" ]] || return 1
+    [[ "${START_REQUEST_EPOCH}" =~ ^[0-9]+$ ]] || return 1
+    [[ "${termination_timestamp}" != *$'\n'* && \
+        "${termination_timestamp}" != *$'\r'* ]] || return 1
     [[ "${start_timestamp}" != *$'\n'* && "${start_timestamp}" != *$'\r'* ]] || return 1
     [[ -n "${TARGET_LAST_START_TIMESTAMP}" ]] || return 1
     [[ "${start_timestamp}" == "${TARGET_LAST_START_TIMESTAMP}" ]] || return 1
 
     start_epoch="$(timestamp_to_epoch "${start_timestamp}")" || return 1
     now="$(date +%s)"
+    ((start_epoch >= START_REQUEST_EPOCH - TIMESTAMP_TOLERANCE_SECONDS)) || return 1
+    ((start_epoch <= now + TIMESTAMP_TOLERANCE_SECONDS)) || return 1
     computed_deadline=$((start_epoch + configured_seconds))
-    maximum_deadline=$((now + MAX_ALLOWED_RUN_SECONDS + 300))
+    maximum_deadline=$((now + configured_seconds + TIMESTAMP_TOLERANCE_SECONDS))
     ((computed_deadline > now && computed_deadline <= maximum_deadline)) || return 1
 
-    termination_epoch="$(timestamp_to_epoch "${termination_timestamp}")" || return 1
-    ((termination_epoch > now && termination_epoch <= maximum_deadline)) || return 1
-    ((termination_epoch >= computed_deadline - 300 && termination_epoch <= computed_deadline + 300)) || return 1
+    VERIFIED_SAFE_DEADLINE_EPOCH=$((computed_deadline - TIMESTAMP_TOLERANCE_SECONDS))
+    ((VERIFIED_SAFE_DEADLINE_EPOCH > now)) || return 1
+    if [[ -n "${termination_timestamp}" ]]; then
+        termination_epoch="$(timestamp_to_epoch "${termination_timestamp}")" || return 1
+        ((termination_epoch > now && termination_epoch <= maximum_deadline)) || return 1
+        ((termination_epoch >= computed_deadline - TIMESTAMP_TOLERANCE_SECONDS && termination_epoch <= computed_deadline + TIMESTAMP_TOLERANCE_SECONDS)) || return 1
+        ((VERIFIED_SAFE_DEADLINE_EPOCH <= termination_epoch)) || return 1
+    else
+        [[ "${ZONE}" == *-ai* ]] || return 1
+    fi
 
-    VERIFIED_TERMINATION_EPOCH="${termination_epoch}"
     VERIFIED_LAST_START_TIMESTAMP="${start_timestamp}"
 
     printf '[GARDE-FOU GCE] action=%s, maxRunDuration=%ss, échéance calculée=%s' \
         "${action}" "${configured_seconds}" "${computed_deadline}"
-    printf ', terminationTimestamp=%s' "${termination_timestamp}"
+    printf ', échéance sûre=%s' "${VERIFIED_SAFE_DEADLINE_EPOCH}"
+    if [[ -n "${termination_timestamp}" ]]; then
+        printf ', terminationTimestamp=%s' "${termination_timestamp}"
+    else
+        printf ', terminationTimestamp non exposé; échéance calculée certifiée'
+    fi
     printf '\n'
 }
 
@@ -363,8 +381,8 @@ status="$(instance_status)" || die "Impossible de lire l’état de ${INSTANCE_N
     die "État ${status} : le script ne démarre qu’une VM explicitement arrêtée (TERMINATED)."
 verify_static_guard || \
     die "Préconditions absentes : cible g4-standard-48 Spot, maintenance TERMINATE, redémarrage automatique désactivé, label project=e-hgp, action STOP et maxRunDuration entre 30 s et 8 h sont obligatoires."
-((GUEST_SHUTDOWN_MINUTES * 60 <= VERIFIED_MAX_RUN_SECONDS)) || \
-    die "Le coupe-circuit invité (${GUEST_SHUTDOWN_MINUTES} min) dépasse maxRunDuration (${VERIFIED_MAX_RUN_SECONDS} s)."
+((GUEST_SHUTDOWN_MINUTES * 60 + TIMESTAMP_TOLERANCE_SECONDS <= VERIFIED_MAX_RUN_SECONDS)) || \
+    die "Le coupe-circuit invité (${GUEST_SHUTDOWN_MINUTES} min) et sa marge de ${TIMESTAMP_TOLERANCE_SECONDS} s dépassent maxRunDuration (${VERIFIED_MAX_RUN_SECONDS} s)."
 PRE_START_LAST_START_TIMESTAMP="$(instance_field 'lastStartTimestamp')" || \
     die "Impossible de lire la génération avant démarrage."
 [[ "${PRE_START_LAST_START_TIMESTAMP}" != *$'\n'* && \
@@ -388,6 +406,8 @@ if ((ASSUME_YES == 0)); then
     [[ "${confirmation}" == "${expected_confirmation}" ]] || die "Démarrage annulé."
 fi
 
+START_REQUEST_EPOCH="$(date +%s)" || die "Impossible d'horodater la demande de démarrage."
+[[ "${START_REQUEST_EPOCH}" =~ ^[0-9]+$ ]] || die "Horodatage de démarrage invalide."
 start_attempted=1
 if ! gcloud_mutation compute instances start "${INSTANCE_NAME}" \
     --project="${PROJECT_ID}" \
@@ -432,7 +452,7 @@ printf '[GARDE-FOU INVITÉ] Armement de shutdown -P +%s via SSH.\n' "${GUEST_SHU
 ssh_deadline=$((SECONDS + SSH_TIMEOUT_SECONDS))
 guest_guard_output=""
 guest_guard_command="$(cat <<EOF
-sudo -n bash -s -- '${GUEST_SHUTDOWN_MINUTES}' '${VERIFIED_TERMINATION_EPOCH}' <<'__EHGP_GUEST_GUARD__'
+sudo -n bash -s -- '${GUEST_SHUTDOWN_MINUTES}' '${VERIFIED_SAFE_DEADLINE_EPOCH}' <<'__EHGP_GUEST_GUARD__'
 set -euo pipefail
 
 readonly requested_minutes="\$1"
