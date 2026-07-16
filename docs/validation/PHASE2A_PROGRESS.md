@@ -1,17 +1,17 @@
 # Avancement de la Phase 2A — prédicats exacts CPU
 
 > [!IMPORTANT]
-> Ce document est un point d'avancement, pas une revue de fermeture. La Phase 2A et la porte G1 restent ouvertes; aucun résultat MorseHGP3D public n'est promu vers `exact` par les lots décrits ici.
+> Ce document est le journal historique détaillé de l'implémentation. La [revue de fermeture](PHASE2A_GATE_REVIEW.md) a depuis fermé la Phase 2A avec `G1=go`; aucun résultat MorseHGP3D public n'est pour autant promu vers `exact`.
 
 ## Contexte opérationnel
 
-- Phase : 2A — laboratoire de prédicats exacts CPU.
+- Phase documentée : 2A — laboratoire de prédicats exacts CPU, désormais terminée.
 - Porte d'entrée : satisfaite par la clôture de la Phase 1.
 - Backend : `reference_cpu`.
 - Profils : couche numérique commune, priorité d'intégration `hgp_reduced`; aucune preuve supplémentaire pour `full_pi0`.
 - Mode : `certified`.
 - Rôle du code : certifier des décisions locales et produire des constructions ou témoins exacts de replay; il ne propose pas de cellules, ne réduit pas Gamma et ne construit pas encore de hiérarchie.
-- Statut de sortie : Phase 2A `in_progress`, porte de sortie non satisfaite, G1 ouverte, Phase 2B bloquée.
+- Statut de sortie : Phase 2A `completed`, porte de sortie satisfaite et `G1=go`; Phase 3 `in_progress`, Phase 2B bloquée par la seule Phase 3.
 
 ## Lots intégrés
 
@@ -32,6 +32,7 @@
 | checkpoint des niveaux 2A.9(2) | `0bab2dd` | runs natifs bornés et checksummés, manifeste interne v1, reprise après chaque run et niveau entièrement fermé, merge global des égalités inter-chunks et résultat adressé par contenu |
 | infrastructure de campagne 2A.9(3) | `92df6fc`, `eebd859`, `4c64d0c` | générateur indexé v2 de 10 800 000 bases strictement non nulles dans la strate bien conditionnée, oracle dyadique entier indépendant, cinq métamorphismes exacts, chunks natifs reprenables, racines ordonnées, provenance Git/build et minimisation durable |
 | campagne longue 2A.9(3) | `phase2a_predicates_v1.result.json` | 1 228 chunks, 10 800 000 bases, 1 080 000 dérivés et 11 880 000 décisions natives; certificat SHA-256 `57627bdb68662234ea1d1716d06e8c8abbb4cc828b2353fdf763cde64df54ad8`, zéro mauvais signe et zéro inconnue |
+| revue de porte 2A.10 | `PHASE2A_GATE_REVIEW.md` | matrice T1 complète, campagne certifiée, qualification GCC/Clang/sanitizers, package, consommateur, contrats, oracle et décision explicite `G1=go` |
 
 La forme `H_RQ` utilise la convention coût de `R` moins coût de `Q`; son signe négatif signifie que `R` est moins coûteux au témoin. `ExactAffineForm3` conserve ses quatre coefficients rationnels et leur échelle exacte; sa clé primitive ne sert qu'à classifier le plan orienté ou la forme constante. Les API riches matérialisent encore leurs témoins multiprécision lorsque le signe est filtré. Le champ `certification_stage` identifie donc l'autorité du signe, pas le coût total d'un replay diagnostique.
 
@@ -126,7 +127,7 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 - Package CMake installé, binaire installé qualifié sur les 14 décisions 2A.9(1) et les 95 reprises 2A.9(2), et wrapper installé rejoué sur une intersection rationnelle v3, un centre non dyadique v4, une réduction de frontière v5, une sphère à dénominateurs non triviaux v5, un niveau nul v5, deux niveaux v6 séparés par un produit croisé `-1`, une provenance réduite v6, une égalité de niveaux v7 certifiée par expansion et les quatre familles adaptatives v8. Le consommateur externe exerce filtres, multiprécision, noyau affine, provenance de coefficients et de trois points, côté de plan, intersection certifiée, incidence adaptative, centre tétraédrique, réduction de support, côté de sphère adaptatif, ordre de niveaux avec provenance et lots canoniques : 1/1.
 - Contrats : 21 définitions, 21 exemples de schéma et 5 fixtures validés; 58 tests contractuels réussis.
 - Oracle exhaustif indépendant : 92 tests réussis; campagne CI bornée sur trois dimensions affines, trois cas audités et zéro échec.
-- Documentation : 26 documents actifs validés; 5 références locales et 9 modules d'oracle indépendant validés.
+- Documentation : 27 documents actifs validés; 5 références locales et 9 modules d'oracle indépendant validés.
 - Registre et sécurité : 20 phases validées, scope actif validé, workflow GCP en lecture seule validé et 11 tests de garde GCP réussis.
 - Limite de portabilité : MSVC, Apple et ARM ne sont pas exécutés localement; aucune conclusion n'est extrapolée à ces cibles.
 
@@ -182,7 +183,7 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 4. `ExactLabelMoments` conserve une provenance binary64 triée par ordre total des coordonnées sans l'inclure dans l'égalité sémantique des moments; des provenances distinctes donnant les mêmes moments restent égales et le signe exact reste inchangé.
 5. `allow_adaptive`, `allow_fp64` et `multiprecision_only` gardent trois chemins indépendants. Une décision enregistre exactement une certification terminale, jamais ses tentatives incertaines.
 6. Le replay reconnaît sans arrondi un témoin rationnel exactement représentable en binary64; le corpus `Fraction` v2 force les signes négatif, nul et positif à l'étage expansion pour chacune des trois familles et rejoue les mêmes commandes en multiprécision seule.
-7. La Phase 2A reste ouverte : ce sous-lot ne prétend pas filtrer des plans ou niveaux rationnels arbitraires en convertissant leurs `BigInt` vers `double`.
+7. À ce stade historique, la Phase 2A restait ouverte : ce sous-lot ne prétendait pas filtrer des plans ou niveaux rationnels arbitraires en convertissant leurs `BigInt` vers `double`.
 
 ### 2A.8b — provenance dyadique des supports et niveaux — terminé
 
@@ -193,7 +194,7 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 5. Les surcharges tableau portent explicitement sur les sphères circonscrites de supports indépendants. La sémantique de miniball local passe par l'analyse, la réduction exacte puis l'émission géométrique; un centre extérieur ou un support dépendant n'est jamais promu.
 6. `allow_adaptive`, `allow_fp64` et `multiprecision_only` restent indépendants. Les rationnels ou `BigInt` arbitraires restent sous autorité `cpu_multiprecision`; une provenance absente désactive les étages rapides sans approximation.
 7. Le replay v7, 30 fixtures permanentes et le corpus de 4 050 cas forcent les classes de signe disponibles aux trois étages dans les quatre familles, comparent les témoins au mode multiprécision seul et enregistrent exactement une certification terminale par décision.
-8. Aucune contradiction mathématique n'a été observée. La Phase 2A, 2A.8 dans son ensemble et G1 restent ouvertes; ce sous-lot ne change aucun statut public.
+8. Aucune contradiction mathématique n'a été observée. À ce stade historique, la Phase 2A, 2A.8 dans son ensemble et G1 restaient ouvertes; ce sous-lot ne changeait aucun statut public.
 
 ### 2A.8c — provenance dyadique des formes et plans — terminé
 
@@ -204,7 +205,7 @@ La correction inspecte MXCSR sur x86 et les bits d'une opération sous-normale s
 5. L'incidence d'un quatrième plan exige exactement une intersection unique des trois premiers, puis combine le signe du déterminant normal et celui du déterminant homogène sans division. La permutation canonique des plans liants stabilise l'étage et le signe diagnostique; inversion d'un plan ne change pas l'objet intersection scientifique.
 6. Les API historiques conservent leurs signatures de pointeurs de fonction. Les variantes avec politique rendent `allow_adaptive`, `allow_fp64` et `multiprecision_only` indépendants; les tests vérifient notamment que `allow_fp64` saute l'expansion et replie exactement sur les zéros d'orientation, de côté, de rang et d'incidence. Une décision terminale est comptée exactement une fois et les tentatives incertaines ne le sont jamais.
 7. Le replay v8 et ses oracles `Fraction` fermés reconstruisent les recettes, évaluent le côté d'un plan, utilisent RREF pour les rangs et évaluent directement le quatrième plan. Les quatre familles forcent tous les signes disponibles aux trois étages, y compris un vrai repli expansion vers multiprécision avec provenance binary64, et rejettent les booléens à la place de rangs, dimensions ou compteurs entiers. Les systèmes mixtes sans provenance complète replient aussi vers un témoin rationnel non entier.
-8. La qualification 2A.8 couvre GCC, Clang, options flottantes strictes, modes d'arrondi, FTZ/DAZ, sous-normaux, ASan, UBSan, package installé et consommateur externe. Aucune contradiction mathématique n'a été observée. La Phase 2A et G1 restent ouvertes; ce sous-lot ne change aucun statut public.
+8. La qualification 2A.8 couvre GCC, Clang, options flottantes strictes, modes d'arrondi, FTZ/DAZ, sous-normaux, ASan, UBSan, package installé et consommateur externe. Aucune contradiction mathématique n'a été observée. À ce stade historique, la Phase 2A et G1 restaient ouvertes; ce sous-lot ne changeait aucun statut public.
 
 ### 2A.9 — campagne de fermeture
 
@@ -230,9 +231,11 @@ La qualification de 2A.9(2) distingue strictement les objets locaux des types pu
 5. Évaluer explicitement G1; un benchmark ou un accord moyen ne peut pas la fermer.
 6. Mettre `docs/implementation_status.toml` à jour dans le même commit seulement si la porte de sortie est réellement satisfaite.
 
+Ces six contrôles sont satisfaits par la revue de fermeture. La décision explicite est `G1=go`; le registre est modifié dans le même commit que cette revue.
+
 ## Prochaine sous-porte
 
-La campagne 2A.9 est publiée avec zéro signe erroné et `remaining_unknown=0`. La prochaine et unique sous-porte avant fermeture est 2A.10 : reconfigurer puis rejouer intégralement GCC, Clang et sanitizers, qualifier le package installé et le consommateur externe, rejouer contrats, oracle indépendant, documentation, références et registre, puis évaluer explicitement G1. Si toutes ces validations restent vertes, le même commit devra fermer réellement la Phase 2A et ouvrir la Phase 3. La Phase 2B restera bloquée jusqu'à fermeture de la Phase 3. Aucune commande CUDA ou GCP n'est autorisée par ce point d'avancement.
+La Phase 2A et G1 sont fermées. La Phase 3 est la phase active pour l'environnement CUDA G4 reproductible; sa fermeture est la prochaine porte avant la Phase 2B. La sous-phase 17A est parallèlement `ready` comme oracle CPU borné de recherche, sans activation d'un backend public. Ce journal n'autorise aucune création ou mise en route de VM GCP.
 
 ## GCP
 

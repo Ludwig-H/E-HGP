@@ -1021,4 +1021,4 @@ Les sept prochains lots de travail doivent être :
 
 Cette séquence donne rapidement une vérité terrain, un cas $k=1$ incontestable et une mesure réaliste de la primitive GPU. Elle évite que les choix de bibliothèque ou de layout figent prématurément un objet mathématique incomplet.
 
-Après fermeture de la phase 2A, le jalon 17A peut être planifié comme expérience CPU indépendante sans déplacer la phase 3 ni les phases 2B–4 de la voie principale. La prochaine porte active reste donc la sortie 2A; aucune implémentation de la tour saturée ne commence avant sa fermeture.
+La phase 2A est fermée et le jalon 17A est désormais prêt comme expérience CPU indépendante, sans déplacer la voie principale. La phase 3 est active; sa fermeture est la prochaine porte avant la phase 2B, puis la phase 4.
