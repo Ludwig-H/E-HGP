@@ -240,14 +240,35 @@ inspect_gpu() {
 }
 
 inspect_cuda_toolkit() {
+    local candidate=""
+    local nvcc_path=""
     local nvcc_output=""
+    local path_candidate=""
 
-    if ! command -v nvcc >/dev/null 2>&1; then
-        failure "nvcc est introuvable ; l'image CUDA 12.9 n'est pas complètement disponible dans le PATH."
+    path_candidate="$(command -v nvcc 2>/dev/null || true)"
+    for candidate in \
+        "${path_candidate}" \
+        "${CUDA_HOME:+${CUDA_HOME%/}/bin/nvcc}" \
+        /usr/local/cuda/bin/nvcc \
+        /usr/local/cuda-12.9/bin/nvcc; do
+        [[ -n "${candidate}" && "${candidate}" == /* && \
+            "${candidate}" != *$'\n'* && "${candidate}" != *$'\r'* ]] || continue
+        if [[ -f "${candidate}" && -x "${candidate}" ]]; then
+            nvcc_path="${candidate}"
+            break
+        fi
+    done
+    if [[ -z "${nvcc_path}" ]]; then
+        failure "nvcc est introuvable dans PATH, CUDA_HOME et les emplacements CUDA 12.9 usuels."
         return
     fi
 
-    nvcc_output="$(nvcc --version 2>&1 || true)"
+    printf '[INFO] nvcc : %s\n' "${nvcc_path}"
+    if ! nvcc_output="$("${nvcc_path}" --version 2>&1)"; then
+        printf '%s\n' "${nvcc_output}"
+        failure "La commande nvcc --version a échoué."
+        return
+    fi
     printf '%s\n' "${nvcc_output}"
     if grep -Eq 'release 12\.9([,[:space:]]|$)' <<<"${nvcc_output}"; then
         success "Toolkit CUDA 12.9 détecté."

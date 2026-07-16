@@ -242,6 +242,12 @@ Le feu vert exige :
 - `nvcc` en CUDA 12.9 ;
 - un accès GPU fonctionnel depuis Docker/NVIDIA Container Toolkit.
 
+Pour couvrir le `PATH` réduit des connexions non interactives, le preflight
+résout `nvcc` d'abord depuis `PATH`, puis depuis `CUDA_HOME/bin`,
+`/usr/local/cuda/bin` ou `/usr/local/cuda-12.9/bin`. Le chemin retenu doit être
+absolu et exécutable, et la sortie de `nvcc --version` doit toujours annoncer
+CUDA 12.9.
+
 Ne lancez les benchmarks lourds qu'après le bilan vert.
 
 ## Qualification bornée de la Phase 3

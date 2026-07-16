@@ -1448,6 +1448,101 @@ class ScriptSafetyTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("entre 1 et 480 minutes", result.stdout)
 
+    def prepare_blackwell_preflight_fixture(self, nvcc_content: str) -> Path:
+        def write_executable(name: str, content: str) -> Path:
+            path = self.tmp / name
+            path.write_text(content, encoding="utf-8")
+            path.chmod(0o755)
+            return path
+
+        write_executable(
+            "nvidia-smi",
+            """#!/usr/bin/env bash
+set -euo pipefail
+if [[ "$*" == --query-gpu=* ]]; then
+    printf '0, NVIDIA RTX PRO 6000 Blackwell Server Edition, 12.0, 97887, 580.159.03\\n'
+else
+    printf 'NVIDIA-SMI 580.159.03\\n'
+fi
+""",
+        )
+        write_executable("journalctl", "#!/usr/bin/env bash\nexit 0\n")
+        write_executable("dmesg", "#!/usr/bin/env bash\nexit 0\n")
+        write_executable(
+            "modinfo",
+            """#!/usr/bin/env bash
+set -euo pipefail
+if [[ "$*" == "nvidia" ]]; then
+    exit 0
+elif [[ "$*" == "-F license nvidia" ]]; then
+    printf 'Dual MIT/GPL\\n'
+elif [[ "$*" == "-F filename nvidia" ]]; then
+    printf '/lib/modules/fake/nvidia-open.ko\\n'
+else
+    exit 1
+fi
+""",
+        )
+        write_executable(
+            "dpkg-query",
+            "#!/usr/bin/env bash\nprintf 'install ok installed\\t580.159.03\\n'\n",
+        )
+        write_executable(
+            "sudo",
+            "#!/usr/bin/env bash\n[[ \"$*\" == \"-n true\" ]] && exit 1\nexit 1\n",
+        )
+        cuda_home = self.tmp / "cuda-12.9"
+        (cuda_home / "bin").mkdir(parents=True)
+        nvcc = cuda_home / "bin" / "nvcc"
+        nvcc.write_text(nvcc_content, encoding="utf-8")
+        nvcc.chmod(0o755)
+        self.env["CUDA_HOME"] = str(cuda_home)
+        self.env["PATH"] = f"{self.tmp}:/usr/bin:/bin"
+        return nvcc
+
+    def test_blackwell_preflight_resolves_nvcc_from_cuda_home_outside_path(
+        self,
+    ) -> None:
+        nvcc = self.prepare_blackwell_preflight_fixture(
+            "#!/usr/bin/env bash\nprintf 'Cuda compilation tools, release 12.9, V12.9.85\\n'\n"
+        )
+
+        result = self.run_script("blackwell_preflight.sh", "--skip-docker")
+
+        self.assertEqual(0, result.returncode, result.stdout)
+        self.assertIn(f"[INFO] nvcc : {nvcc}", result.stdout)
+        self.assertIn("Toolkit CUDA 12.9 détecté", result.stdout)
+
+    def test_blackwell_preflight_rejects_wrong_nvcc_version(self) -> None:
+        self.prepare_blackwell_preflight_fixture(
+            "#!/usr/bin/env bash\nprintf 'Cuda compilation tools, release 12.8, V12.8.93\\n'\n"
+        )
+
+        result = self.run_script("blackwell_preflight.sh", "--skip-docker")
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("nvcc n'annonce pas CUDA 12.9", result.stdout)
+        self.assertNotIn("[OK] Toolkit CUDA 12.9", result.stdout)
+
+    def test_blackwell_preflight_rejects_failed_nvcc_version_command(self) -> None:
+        self.prepare_blackwell_preflight_fixture(
+            "#!/usr/bin/env bash\nprintf 'Cuda compilation tools, release 12.9, V12.9.85\\n'\nexit 42\n"
+        )
+
+        result = self.run_script("blackwell_preflight.sh", "--skip-docker")
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("La commande nvcc --version a échoué", result.stdout)
+        self.assertNotIn("[OK] Toolkit CUDA 12.9", result.stdout)
+
+    def test_blackwell_preflight_declares_usual_cuda_12_9_fallbacks(self) -> None:
+        source = (ROOT / "gcp-migration" / "blackwell_preflight.sh").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("/usr/local/cuda/bin/nvcc", source)
+        self.assertIn("/usr/local/cuda-12.9/bin/nvcc", source)
+
 
 class Phase3QualificationOrchestratorTests(unittest.TestCase):
     def setUp(self) -> None:
