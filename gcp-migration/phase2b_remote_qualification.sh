@@ -33,6 +33,7 @@ WORK_DEADLINE_EPOCH=0
 OUTPUT_RAW=""
 OUTPUT_PATH=""
 REPOSITORY_ROOT=""
+REPOSITORY_BUILD_MOUNTPOINT=""
 SESSION_DIR=""
 BUILD_DIR=""
 RESULT_DIR=""
@@ -40,6 +41,7 @@ SESSION_TOKEN=""
 ACTIVE_CONTAINER_NAME=""
 ACTIVE_CONTAINER_CIDFILE=""
 UNIT_COUNTER=0
+CREATED_REPOSITORY_BUILD_MOUNTPOINT=0
 declare -a DOCKER=()
 declare -a DOCKER_IDENTITY_ARGS=()
 
@@ -274,6 +276,16 @@ cleanup() {
                 ;;
         esac
     fi
+    if ((CREATED_REPOSITORY_BUILD_MOUNTPOINT == 1)); then
+        if [[ -d "${REPOSITORY_BUILD_MOUNTPOINT}" && \
+            ! -L "${REPOSITORY_BUILD_MOUNTPOINT}" ]]; then
+            rmdir -- "${REPOSITORY_BUILD_MOUNTPOINT}" || cleanup_status=125
+        else
+            printf '[ERREUR PHASE 2B] point de montage build remplacé : %s.\n' \
+                "${REPOSITORY_BUILD_MOUNTPOINT}" >&2
+            cleanup_status=125
+        fi
+    fi
     ((cleanup_status == 0)) || exit "${cleanup_status}"
     exit "${original_status}"
 }
@@ -295,6 +307,21 @@ fi
 inspected_image_id="$(run_bounded image-inspect "${DOCKER[@]}" image inspect \
     --format '{{.Id}}' "${IMAGE_ID}")" || die "L'image CUDA qualifiée est absente."
 [[ "${inspected_image_id}" == "${IMAGE_ID}" ]] || die "L'identité de l'image CUDA a changé."
+
+# Docker ne peut pas créer un sous-point de montage sous le bind racine en
+# lecture seule. Le clone ignore build/; créer ce répertoire vide avant le bind
+# rend donc le sous-montage possible sans exposer le code source en écriture.
+REPOSITORY_BUILD_MOUNTPOINT="${REPOSITORY_ROOT}/build"
+if [[ -e "${REPOSITORY_BUILD_MOUNTPOINT}" || \
+    -L "${REPOSITORY_BUILD_MOUNTPOINT}" ]]; then
+    [[ -d "${REPOSITORY_BUILD_MOUNTPOINT}" && \
+        ! -L "${REPOSITORY_BUILD_MOUNTPOINT}" ]] || \
+        die "Le point de montage build du clone n'est pas un répertoire ordinaire."
+else
+    mkdir -- "${REPOSITORY_BUILD_MOUNTPOINT}" || \
+        die "Impossible de créer le point de montage build ignoré."
+    CREATED_REPOSITORY_BUILD_MOUNTPOINT=1
+fi
 
 SESSION_DIR="$(mktemp -d "${TMPDIR:-/tmp}/morsehgp3d-phase2b-worker.XXXXXXXX")" || \
     die "Impossible de créer le temporaire de session."

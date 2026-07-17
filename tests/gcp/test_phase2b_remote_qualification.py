@@ -217,6 +217,11 @@ class Phase2BWorkerStaticSafetyTests(unittest.TestCase):
         self.assertIn("--gce-deadline-epoch", source)
         self.assertIn("--cidfile", source)
         self.assertIn("cleanup_active_container", source)
+        self.assertIn(
+            'REPOSITORY_BUILD_MOUNTPOINT="${REPOSITORY_ROOT}/build"', source
+        )
+        self.assertIn('mkdir -- "${REPOSITORY_BUILD_MOUNTPOINT}"', source)
+        self.assertIn('rmdir -- "${REPOSITORY_BUILD_MOUNTPOINT}"', source)
         self.assertIn("readonly WORK_DEADLINE_RESERVE_SECONDS=1800", source)
         self.assertIn("--predicate all", source)
         self.assertIn("worker_passed_pending_shutdown", ASSEMBLER.read_text(encoding="utf-8"))
