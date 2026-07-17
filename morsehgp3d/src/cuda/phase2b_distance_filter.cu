@@ -161,14 +161,7 @@ __global__ void morsehgp3d_phase2b_squared_distance_filter_kernel(
 class CudaFailure final : public std::runtime_error {
  public:
   CudaFailure(cudaError_t code, std::string operation)
-      : std::runtime_error(message(code, operation)),
-        code_(code),
-        operation_(std::move(operation)) {}
-
-  [[nodiscard]] cudaError_t code() const noexcept { return code_; }
-  [[nodiscard]] const std::string& operation() const noexcept {
-    return operation_;
-  }
+      : std::runtime_error(message(code, operation)) {}
 
  private:
   [[nodiscard]] static std::string message(
@@ -178,9 +171,6 @@ class CudaFailure final : public std::runtime_error {
            (description == nullptr ? std::string{"unknown CUDA error"}
                                    : std::string{description});
   }
-
-  cudaError_t code_;
-  std::string operation_;
 };
 
 void check_cuda(cudaError_t code, std::string operation) {

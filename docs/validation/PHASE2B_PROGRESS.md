@@ -27,11 +27,22 @@ Le runner hôte conserve l'ordre et les identifiants. Il transmet chaque `unknow
 - différentiel borné avec lanceur GPU simulé : 2 052 cas, dont égalité exacte, sous-normal, overflow et plus de huit blocs logiques; 2 049 signes connus et trois replis CPU, zéro `unknown` terminal;
 - replay CPU multiprécision de toutes les commandes émises : réussi.
 
-Le lanceur simulé vérifie l'orchestration, les schémas, les compteurs et le replay; il ne qualifie ni le code device, ni le matériel G4. La qualification CUDA réelle reste obligatoire sur le commit poussé exact.
+Le lanceur simulé vérifie l'orchestration, les schémas, les compteurs et le replay; il ne qualifie ni le code device, ni le matériel G4.
+
+## Qualification matérielle du 17 juillet 2026
+
+Le commit propre et poussé `6f27a68177d21efb19f7ba4cb35ed4855ec73a90` a ensuite été compilé et exécuté sur `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, une `g4-standard-48` Spot. Le coupe-circuit GCE était `instanceTerminationAction=STOP` avec `maxRunDuration=3600`; l'arrêt invité était armé à 45 minutes.
+
+Les workflows CUDA release et audit ont compilé le runner avec NVCC 12.9.86. Le différentiel réel a traité 2 052 cas : 2 049 signes FP64 GPU ont été certifiés puis revérifiés par l'oracle CPU multiprécision; les trois cas attendus — égalité exacte, sous-normal et overflow — ont produit `unknown`, ont été transmis au CPU et n'ont laissé aucun `unknown` terminal. Toutes les commandes émises ont été rejouées par l'outil CPU.
+
+`cuobjdump` a trouvé uniquement l'ELF AOT `sm_120` et aucune entrée PTX. `compute-sanitizer --tool memcheck --leak-check full --error-exitcode=86` a réussi sur un lot contenant une décision GPU connue et un repli CPU. L'image réutilisée est `sha256:e3d96c187ca405790227e02aef1a66ca47df0820bb6b2a86b097359105956d58`, déjà qualifiée par la phase 3.
+
+L'artefact hors dépôt est `/tmp/morsehgp3d-phase2b-6f27a68177d21efb19f7ba4cb35ed4855ec73a90-20260717T172423Z/phase2b-6f27a68177d21efb19f7ba4cb35ed4855ec73a90.json`, de SHA-256 `65bc7175ed922a2515ecbf15a1a3b3c80445581c473232bc233d0d370a36cff1`. Il ne revendique aucun résultat scientifique public.
+
+Après le succès, l'arrêt ciblé de la génération `2026-07-17T10:24:56.396-07:00` a été exécuté et relu indépendamment : état final `TERMINATED` à `2026-07-17T17:27:51.338224Z`. Aucune autre VM `project=e-hgp` active n'a été observée et la clé OS Login de session a été révoquée puis supprimée. Deux tentatives préparatoires avaient échoué avant compilation sur l'accès Docker et son point de montage; chacune avait déjà été arrêtée et certifiée `TERMINATED` avant la tentative suivante.
 
 ## Travaux restant avant la porte de sortie
 
-- compiler et exécuter ce lot sur G4 Spot gardée, puis auditer AOT, absence de PTX et `compute-sanitizer`;
 - étendre le différentiel au corpus distance de la phase 2A et à la campagne supplémentaire requise;
 - porter les filtres et expansions encore nécessaires, notamment l'orientation et le bisecteur de puissance;
 - mesurer et publier les taux de chaque étage sans en faire une condition de correction;

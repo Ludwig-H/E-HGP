@@ -79,7 +79,7 @@ status = "in_progress"
 entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["2A", "3"]
-evidence = ["docs/validation/PHASE2A_GATE_REVIEW.md", "docs/validation/PHASE3_PROGRESS.md", "docs/validation/PHASE2B_PROGRESS.md"]
+evidence = ["docs/validation/PHASE2A_GATE_REVIEW.md", "docs/validation/PHASE3_PROGRESS.md", "6f27a68 first GPU distance-filter qualification", "phase2b-6f27a68177d21efb19f7ba4cb35ed4855ec73a90.json sha256:65bc7175ed922a2515ecbf15a1a3b3c80445581c473232bc233d0d370a36cff1", "docs/validation/PHASE2B_PROGRESS.md"]
 blocking_reason = ""
 
 [[phases]]
