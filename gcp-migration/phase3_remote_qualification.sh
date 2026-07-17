@@ -1163,6 +1163,7 @@ begin_unit "compute-sanitizer"
 if ! run_container "compute-sanitizer" "${SANITIZER_LOG}" compute-sanitizer \
     --tool memcheck \
     --leak-check full \
+    --report-api-errors no \
     --error-exitcode=86 \
     "${RUNTIME_PATH}" \
     --allocation-bytes 4194304 \

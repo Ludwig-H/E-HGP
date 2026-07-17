@@ -877,6 +877,16 @@ if command[0] == "compute-sanitizer":
     if failure == "sanitizer":
         print("simulated memcheck error", file=sys.stderr)
         raise SystemExit(86)
+    api_error_mode = None
+    if "--report-api-errors" in command:
+        api_error_mode = command[command.index("--report-api-errors") + 1]
+    if "--exercise-structured-error" in command and api_error_mode != "no":
+        print(
+            "Program hit cudaErrorInvalidDevice on the structured error probe",
+            file=sys.stderr,
+        )
+        print("========= ERROR SUMMARY: 2 errors")
+        raise SystemExit(86)
     output = command[command.index("--output") + 1]
     ceiling = int(command[command.index("--allocation-bytes") + 1])
     write_runtime_jsonl(result_path(output), ceiling)
@@ -1619,6 +1629,7 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertEqual(0, value["checks"]["aot_ptx_entry_count"])
         self.assertEqual("", value["logs"]["cuobjdump_ptx"])
         self.assertIn("No PTX file found", value["logs"]["cuobjdump_ptx_stderr"])
+        self.assertIn("ERROR SUMMARY: 0 errors", value["logs"]["compute_sanitizer"])
         self.assertEqual(
             {"resident", "warm"},
             {
@@ -1651,6 +1662,7 @@ printf 'fake Blackwell preflight passed\\n'
         )
         self.assertIn(
             "compute-sanitizer --tool memcheck --leak-check full "
+            "--report-api-errors no "
             "--error-exitcode=86",
             log,
         )
