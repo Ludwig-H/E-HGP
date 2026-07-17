@@ -23,6 +23,9 @@ readonly DOCKER_INFO_RETRY_SECONDS=5
 readonly DOCKER_PROBE_TIMEOUT_SECONDS=5
 readonly DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS=10
 readonly SUDO_DOCKER_BIN="/usr/bin/docker"
+readonly BUILDX_PLUGIN="/usr/libexec/docker/cli-plugins/docker-buildx"
+readonly BUILDX_TEST_BIN="/usr/bin/test"
+readonly BUILDX_STAT_BIN="/usr/bin/stat"
 
 ASSUME_YES=0
 OUTPUT_RAW=""
@@ -37,6 +40,8 @@ REPOSITORY_ROOT=""
 SESSION_DIR=""
 PUBLISH_TEMP=""
 SESSION_CREATED=0
+DOCKER_IDENTITY=""
+BUILDX_CONFIG=""
 
 die() {
     printf '[ERREUR] %s\n' "$*" >&2
@@ -149,6 +154,15 @@ cleanup() {
     if [[ -n "${PUBLISH_TEMP}" && -f "${PUBLISH_TEMP}" ]]; then
         rm -f -- "${PUBLISH_TEMP}" || true
     fi
+    if [[ -n "${SESSION_DIR}" && -n "${BUILDX_CONFIG}" && \
+        "${BUILDX_CONFIG}" == "${SESSION_DIR}/buildx-config" && \
+        -e "${BUILDX_CONFIG}" ]]; then
+        if [[ "${DOCKER_IDENTITY}" == "sudo" ]] && command -v sudo >/dev/null 2>&1; then
+            sudo -n -- /usr/bin/rm -rf -- "${BUILDX_CONFIG}" || true
+        else
+            rm -rf -- "${BUILDX_CONFIG}" || true
+        fi
+    fi
     if ((SESSION_CREATED == 1)) && [[ -n "${SESSION_DIR}" && -d "${SESSION_DIR}" ]]; then
         case "${SESSION_DIR}" in
             "${TMPDIR:-/tmp}"/morsehgp3d-phase3-worker.*)
@@ -171,7 +185,11 @@ trap 'exit 143' TERM
 SESSION_DIR="$(mktemp -d "${TMPDIR:-/tmp}/morsehgp3d-phase3-worker.XXXXXXXX")" || \
     die "Impossible de créer le temporaire borné de qualification."
 SESSION_CREATED=1
-mkdir -p -- "${SESSION_DIR}/build" "${SESSION_DIR}/logs" "${SESSION_DIR}/results"
+BUILDX_CONFIG="${SESSION_DIR}/buildx-config"
+mkdir -p -- "${SESSION_DIR}/build" "${SESSION_DIR}/logs" "${SESSION_DIR}/results" \
+    "${BUILDX_CONFIG}"
+chmod 700 "${BUILDX_CONFIG}"
+export BUILDX_CONFIG
 PUBLISH_TEMP="$(mktemp "${OUTPUT_PARENT}/.${OUTPUT_BASE}.XXXXXXXX.partial")" || \
     die "Impossible de réserver l'artefact temporaire atomique."
 chmod 600 "${PUBLISH_TEMP}"
@@ -349,6 +367,87 @@ certify_sudo_docker_client() {
         >>"${DOCKER_LOG}" 2>&1
 }
 
+certify_buildx_plugin() {
+    local index=0
+    local metadata=""
+    local mode=""
+    local owner_uid=""
+    local path=""
+    local parent="${BUILDX_PLUGIN}"
+    local -a identity=()
+    local -a reverse_paths=()
+    local -a expected_paths=()
+
+    case "${DOCKER_IDENTITY}" in
+        direct)
+            ;;
+        sudo)
+            identity=(sudo -n --)
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+
+    while true; do
+        reverse_paths+=("${parent}")
+        [[ "${parent}" == "/" ]] && break
+        parent="${parent%/*}"
+        [[ -n "${parent}" ]] || parent="/"
+    done
+    for ((index = ${#reverse_paths[@]} - 1; index >= 0; index--)); do
+        expected_paths+=("${reverse_paths[index]}")
+    done
+
+    for ((index = 0; index < ${#expected_paths[@]} - 1; index++)); do
+        path="${expected_paths[index]}"
+        timeout --foreground --kill-after=2s \
+            "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+            "${identity[@]}" "${BUILDX_TEST_BIN}" -d "${path}" \
+            >>"${DOCKER_LOG}" 2>&1 || return 1
+        timeout --foreground --kill-after=2s \
+            "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+            "${identity[@]}" "${BUILDX_TEST_BIN}" ! -L "${path}" \
+            >>"${DOCKER_LOG}" 2>&1 || return 1
+    done
+    timeout --foreground --kill-after=2s \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        "${identity[@]}" "${BUILDX_TEST_BIN}" -f "${BUILDX_PLUGIN}" \
+        >>"${DOCKER_LOG}" 2>&1 || return 1
+    timeout --foreground --kill-after=2s \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        "${identity[@]}" "${BUILDX_TEST_BIN}" ! -L "${BUILDX_PLUGIN}" \
+        >>"${DOCKER_LOG}" 2>&1 || return 1
+    timeout --foreground --kill-after=2s \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        "${identity[@]}" "${BUILDX_TEST_BIN}" -x "${BUILDX_PLUGIN}" \
+        >>"${DOCKER_LOG}" 2>&1 || return 1
+
+    metadata="$(timeout --foreground --kill-after=2s \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        "${identity[@]}" "${BUILDX_STAT_BIN}" -c '%n|%u|%a' -- \
+        "${expected_paths[@]}" 2>>"${DOCKER_LOG}")" || return 1
+    printf '%s\n' "${metadata}" >>"${DOCKER_LOG}"
+    index=0
+    while IFS='|' read -r path owner_uid mode; do
+        ((index < ${#expected_paths[@]})) || return 1
+        [[ "${path}" == "${expected_paths[index]}" && "${owner_uid}" == "0" && \
+            "${mode}" =~ ^[0-7]{3,4}$ ]] || return 1
+        (((8#${mode} & 8#22) == 0)) || return 1
+        index=$((index + 1))
+    done <<<"${metadata}"
+    ((index == ${#expected_paths[@]})) || return 1
+
+    if [[ "${DOCKER_IDENTITY}" == "sudo" ]]; then
+        BUILDX=(sudo -n --preserve-env=BUILDX_CONFIG -- "${BUILDX_PLUGIN}")
+    else
+        BUILDX=("${BUILDX_PLUGIN}")
+    fi
+    timeout --foreground --kill-after=2s \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        "${BUILDX[@]}" version >>"${DOCKER_LOG}" 2>&1
+}
+
 attempt_sudo_docker_certification() {
     if ((sudo_docker_certification_attempted == 1)); then
         ((sudo_docker_client == 1))
@@ -401,6 +500,7 @@ if ! "${PREFLIGHT_SCRIPT}" --skip-docker >"${PREFLIGHT_LOG}" 2>&1; then
 fi
 
 declare -a DOCKER=()
+declare -a BUILDX=()
 direct_docker_client=0
 docker_deadline_reached=0
 sudo_docker_client=0
@@ -447,6 +547,7 @@ for ((attempt = 1; attempt <= DOCKER_INFO_MAX_ATTEMPTS; attempt++)); do
             "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
             "${docker_path}" info >>"${DOCKER_LOG}" 2>&1; then
             DOCKER=("${docker_path}")
+            DOCKER_IDENTITY="direct"
             printf '[DOCKER] Daemon accessible directement à la tentative %s/%s.\n' \
                 "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}"
             break
@@ -478,6 +579,7 @@ for ((attempt = 1; attempt <= DOCKER_INFO_MAX_ATTEMPTS; attempt++)); do
             "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
             sudo -n -- "${SUDO_DOCKER_BIN}" info >>"${DOCKER_LOG}" 2>&1; then
             DOCKER=(sudo -n -- "${SUDO_DOCKER_BIN}")
+            DOCKER_IDENTITY="sudo"
             printf '[DOCKER] Voie directe indisponible; sudo non interactif certifié à la tentative %s/%s.\n' \
                 "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}"
             break
@@ -504,9 +606,18 @@ if ((${#DOCKER[@]} == 0)); then
     die "Client Docker présent mais daemon inaccessible directement et via sudo non interactif après les sondes bornées."
 fi
 
+begin_unit "buildx-certification"
+printf '[BUILDX] chemin système fixe à certifier : %s; identité=%s.\n' \
+    "${BUILDX_PLUGIN}" "${DOCKER_IDENTITY}" >>"${DOCKER_LOG}"
+if ! certify_buildx_plugin; then
+    collect_docker_host_diagnostics
+    report_failure_log "docker-info" "${DOCKER_LOG}"
+    die "Plugin Buildx fixe absent, inexécutable ou non sûr : ${BUILDX_PLUGIN}."
+fi
+
 IMAGE_REF="morsehgp3d-phase3:${HEAD_SHA}"
-begin_unit "docker-build"
-if ! "${DOCKER[@]}" build \
+begin_unit "buildx-build"
+if ! "${BUILDX[@]}" build --load \
     --file "${DOCKERFILE}" \
     --tag "${IMAGE_REF}" \
     --iidfile "${IID_FILE}" \

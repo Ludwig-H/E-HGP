@@ -309,6 +309,13 @@ elif args[:3] == ["compute", "instances", "describe"]:
             (now - timedelta(seconds=20)).isoformat().replace("+00:00", "Z"),
         )
     max_run_seconds = os.environ.get("FAKE_MAX_RUN_SECONDS", "28800")
+    if (
+        scenario == "qualification-post-provision-recertification-failure"
+        and output_format == "json"
+        and "phase3_remote_docker_provision.sh" in previous_commands
+        and "phase3_remote_qualification.sh" not in previous_commands
+    ):
+        max_run_seconds = "7200"
     if scenario == "guest-success-no-term-duration-race":
         max_run_seconds = "7200" if start_observed else "3600"
     termination_timestamp = os.environ.get(
@@ -418,6 +425,10 @@ elif args[:2] == ["compute", "ssh"]:
                     "FAKE_REMOTE_HEAD", os.environ.get("FAKE_GIT_HEAD", "a" * 40)
                 )
             )
+        elif "phase3_remote_docker_provision.sh" in command:
+            if scenario == "qualification-provision-failure":
+                print("simulated Docker provisioning failure", file=sys.stderr)
+                sys.exit(43)
         elif "phase3_remote_qualification.sh" in command:
             if scenario == "qualification-remote-failure":
                 print("simulated remote qualification failure", file=sys.stderr)
@@ -1637,6 +1648,12 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         shutil.copy2(source, orchestrator)
         orchestrator.chmod(0o755)
         self.orchestrator = orchestrator
+        provision_source = (
+            ROOT / "gcp-migration" / "phase3_remote_docker_provision.sh"
+        )
+        provision = migration / provision_source.name
+        shutil.copy2(provision_source, provision)
+        provision.chmod(0o755)
 
         start = migration / "start_and_verify.sh"
         start.write_text(FAKE_START, encoding="utf-8")
@@ -1821,6 +1838,90 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertFalse(session_key.exists())
         self.assertFalse(Path(str(session_key) + ".pub").exists())
         self.assertFalse(session_key.parent.exists())
+
+    def test_explicit_docker_provisioning_precedes_worker_and_recaptures_gce(
+        self,
+    ) -> None:
+        result = self.run_qualification(
+            "--yes",
+            "--provision-docker",
+            "--result-dir",
+            str(self.results),
+        )
+
+        self.assertEqual(0, result.returncode, result.stdout)
+        commands = self.gcloud_commands()
+        provision = commands.index("phase3_remote_docker_provision.sh")
+        worker = commands.index("phase3_remote_qualification.sh")
+        self.assertLess(provision, worker)
+        self.assertIn(
+            "phase3_remote_docker_provision.sh --yes --gce-deadline-epoch "
+            + str(self.safe_gce_deadline()),
+            commands,
+        )
+        describes_before_worker = commands[:worker].count(
+            "compute instances describe ehgp-blackwell-spot"
+        )
+        self.assertGreaterEqual(describes_before_worker, 3, commands)
+        self.assertIn("[TERMINATED]", result.stdout)
+
+    def test_docker_provisioning_failure_never_starts_worker_and_stops_target(
+        self,
+    ) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = "qualification-provision-failure"
+
+        result = self.run_qualification(
+            "--yes",
+            "--provision-docker",
+            "--result-dir",
+            str(self.results),
+        )
+
+        self.assertEqual(43, result.returncode, result.stdout)
+        commands = self.gcloud_commands()
+        self.assertIn("phase3_remote_docker_provision.sh", commands)
+        self.assertNotIn("phase3_remote_qualification.sh", commands)
+        self.assertIn("stop project=devpod-gpu-exploration", self.session_commands())
+        self.assertIn("[TERMINATED]", result.stdout)
+        self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
+
+    def test_post_provision_gce_recertification_failure_stops_without_worker(
+        self,
+    ) -> None:
+        self.env["FAKE_GCLOUD_SCENARIO"] = (
+            "qualification-post-provision-recertification-failure"
+        )
+
+        result = self.run_qualification(
+            "--yes",
+            "--provision-docker",
+            "--result-dir",
+            str(self.results),
+        )
+
+        self.assertNotEqual(0, result.returncode, result.stdout)
+        self.assertIn(
+            "La garde GCE n'a pas pu être recertifiée après la préparation Docker",
+            result.stdout,
+        )
+        commands = self.gcloud_commands()
+        provision_index = commands.index("phase3_remote_docker_provision.sh")
+        post_provision = commands[provision_index:]
+        self.assertIn(
+            "compute instances describe ehgp-blackwell-spot", post_provision
+        )
+        self.assertNotIn("phase3_remote_qualification.sh", commands)
+        session = self.session_commands()
+        self.assertIn(
+            "stop project=devpod-gpu-exploration zone=europe-west4-a "
+            "instance=ehgp-blackwell-spot args=--yes "
+            "--expected-last-start-timestamp " + self.last_start_timestamp,
+            session,
+        )
+        self.assertEqual(1, session.count("stop project="))
+        self.assertIn("[TERMINATED]", result.stdout)
+        self.assertFalse(self.handoff_path().exists())
+        self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
 
     def test_exact_ai_capacity_target_is_allowed(self) -> None:
         self.env["GCP_ZONE"] = "europe-west4-ai1a"

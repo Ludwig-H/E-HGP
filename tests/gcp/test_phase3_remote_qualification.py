@@ -105,6 +105,15 @@ if len(args) >= 3 and args[:2] == ["-n", "--"] and args[2] == "/usr/bin/docker":
             [os.environ["FAKE_SECURE_DOCKER"], *args[3:]], env=environment
         )
     )
+if (
+    len(args) >= 4
+    and args[:3] == ["-n", "--preserve-env=BUILDX_CONFIG", "--"]
+    and args[3] == os.environ["FAKE_BUILDX_PLUGIN"]
+):
+    environment = os.environ.copy()
+    environment["FAKE_BUILDX_VIA_SUDO"] = "1"
+    environment["FAKE_BUILDX_LOG_PREFIX"] = "SECURE-BUILDX"
+    raise SystemExit(subprocess.call(args[3:], env=environment))
 if len(args) >= 3 and args[:2] == ["-n", "--"]:
     raise SystemExit(subprocess.call(args[2:]))
 raise SystemExit("unexpected fake sudo invocation: " + " ".join(args))
@@ -144,6 +153,91 @@ state = Path(os.environ["FAKE_DATE_STATE"])
 index = int(state.read_text(encoding="utf-8")) if state.exists() else 0
 state.write_text(str(index + 1), encoding="utf-8")
 print(values[min(index, len(values) - 1)])
+"""
+
+
+FAKE_BUILDX = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+args = sys.argv[1:]
+prefix = os.environ.get("FAKE_BUILDX_LOG_PREFIX", "BUILDX")
+config = os.environ.get("BUILDX_CONFIG", "")
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write(prefix + " " + " ".join(args) + f" BUILDX_CONFIG={config}\n")
+
+if not config:
+    raise SystemExit("Buildx was invoked without an isolated BUILDX_CONFIG")
+config_path = Path(config)
+if not config_path.is_absolute() or config_path.name != "buildx-config":
+    raise SystemExit("Buildx config is not the session-scoped directory")
+
+if args == ["version"]:
+    print("github.com/docker/buildx v0.20.1 fake")
+    raise SystemExit(0)
+
+if not args or args[0] != "build":
+    raise SystemExit("unexpected fake buildx invocation: " + " ".join(args))
+if "--load" not in args:
+    raise SystemExit("fake buildx requires --load")
+if os.environ.get("FAKE_FAIL", "") == "build":
+    print("simulated buildx build failure", file=sys.stderr)
+    raise SystemExit(17)
+iidfile = Path(args[args.index("--iidfile") + 1])
+iidfile.write_text(os.environ["FAKE_IMAGE_ID"] + "\n", encoding="utf-8")
+print("fake Buildx build complete")
+"""
+
+
+FAKE_BUILDX_TEST = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+args = sys.argv[1:]
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("BUILDX-TEST " + " ".join(args) + "\n")
+plugin = Path(os.environ["FAKE_BUILDX_PLUGIN"])
+unsafe = os.environ.get("FAKE_BUILDX_UNSAFE", "")
+if len(args) == 2 and args[0] in {"-d", "-f", "-x"}:
+    target = Path(args[1])
+    result = {
+        "-d": target.is_dir(),
+        "-f": target.is_file(),
+        "-x": target.is_file() and os.access(target, os.X_OK),
+    }[args[0]]
+    raise SystemExit(0 if result else 1)
+if len(args) == 3 and args[:2] == ["!", "-L"]:
+    target = Path(args[2])
+    if unsafe == "plugin-symlink" and target == plugin:
+        raise SystemExit(1)
+    if unsafe == "parent-symlink" and target == plugin.parent:
+        raise SystemExit(1)
+    raise SystemExit(0 if not target.is_symlink() else 1)
+raise SystemExit("unexpected fake test invocation: " + " ".join(args))
+"""
+
+
+FAKE_BUILDX_STAT = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+args = sys.argv[1:]
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("BUILDX-STAT " + " ".join(args) + "\n")
+if args[:3] != ["-c", "%n|%u|%a", "--"]:
+    raise SystemExit("unexpected fake Buildx stat invocation: " + " ".join(args))
+plugin = Path(os.environ["FAKE_BUILDX_PLUGIN"])
+unsafe = os.environ.get("FAKE_BUILDX_UNSAFE", "")
+for raw_path in args[3:]:
+    path = Path(raw_path)
+    owner = "1000" if unsafe == "owner" and path == plugin else "0"
+    unsafe_mode = unsafe == "mode" and path == plugin
+    unsafe_parent_mode = unsafe == "parent-mode" and path == plugin.parent
+    mode = "775" if unsafe_mode or unsafe_parent_mode else "755"
+    print(f"{raw_path}|{owner}|{mode}")
 """
 
 
@@ -188,13 +282,7 @@ if args == ["info"]:
     raise SystemExit(0)
 
 if args and args[0] == "build":
-    if failure == "build":
-        print("simulated build failure", file=sys.stderr)
-        raise SystemExit(17)
-    iidfile = Path(args[args.index("--iidfile") + 1])
-    iidfile.write_text(image_id + "\n", encoding="utf-8")
-    print("fake Docker build complete")
-    raise SystemExit(0)
+    raise SystemExit("docker build is forbidden; the worker must invoke fixed Buildx")
 
 if args[:2] == ["image", "inspect"]:
     print(image_id)
@@ -592,6 +680,17 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
         self.repository = self.root / "repository"
         self.fake_bin = self.root / "fake-bin"
         self.fake_secure_bin = self.root / "fake-secure-bin"
+        self.fake_system_root = self.root / "trusted-system"
+        self.buildx_plugin = (
+            self.fake_system_root
+            / "usr"
+            / "libexec"
+            / "docker"
+            / "cli-plugins"
+            / "docker-buildx"
+        )
+        self.buildx_test = self.fake_bin / "buildx-test"
+        self.buildx_stat = self.fake_bin / "buildx-stat"
         self.output_dir = self.root / "artifacts"
         self.session_tmp = self.root / "session-tmp"
         self.command_log = self.root / "commands.log"
@@ -605,13 +704,30 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
             self.repository / "morsehgp3d" / "tests" / "cuda",
             self.fake_bin,
             self.fake_secure_bin,
+            self.buildx_plugin.parent,
             self.output_dir,
             self.session_tmp,
         ):
             path.mkdir(parents=True, exist_ok=True)
 
         self.worker = self.repository / "gcp-migration" / WORKER_SOURCE.name
-        shutil.copy2(WORKER_SOURCE, self.worker)
+        worker_text = WORKER_SOURCE.read_text(encoding="utf-8")
+        replacements = {
+            'readonly BUILDX_PLUGIN="/usr/libexec/docker/cli-plugins/docker-buildx"': (
+                f'readonly BUILDX_PLUGIN="{self.buildx_plugin}"'
+            ),
+            'readonly BUILDX_TEST_BIN="/usr/bin/test"': (
+                f'readonly BUILDX_TEST_BIN="{self.buildx_test}"'
+            ),
+            'readonly BUILDX_STAT_BIN="/usr/bin/stat"': (
+                f'readonly BUILDX_STAT_BIN="{self.buildx_stat}"'
+            ),
+        }
+        for source, replacement in replacements.items():
+            self.assertEqual(1, worker_text.count(source))
+            worker_text = worker_text.replace(source, replacement)
+        self.worker.write_text(worker_text, encoding="utf-8")
+        self.worker.chmod(WORKER_SOURCE.stat().st_mode)
         shutil.copy2(
             ASSEMBLER_SOURCE,
             self.repository / "morsehgp3d" / "tests" / "cuda" / ASSEMBLER_SOURCE.name,
@@ -625,6 +741,9 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
         self._write_executable(self.fake_bin / "date", FAKE_DATE)
         self._write_executable(self.fake_bin / "docker", FAKE_DOCKER)
         self._write_executable(self.fake_secure_bin / "docker", FAKE_DOCKER)
+        self._write_executable(self.buildx_plugin, FAKE_BUILDX)
+        self._write_executable(self.buildx_test, FAKE_BUILDX_TEST)
+        self._write_executable(self.buildx_stat, FAKE_BUILDX_STAT)
         self._write_executable(self.fake_bin / "sleep", FAKE_SLEEP)
         self._write_executable(self.fake_bin / "systemctl", FAKE_SYSTEMCTL)
         self._write_executable(self.fake_bin / "journalctl", FAKE_JOURNALCTL)
@@ -660,6 +779,8 @@ printf 'fake Blackwell preflight passed\\n'
                 "FAKE_DATE_STATE": str(self.date_state),
                 "FAKE_DOCKER_READINESS_STATE": str(self.docker_readiness_state),
                 "FAKE_SECURE_DOCKER": str(self.fake_secure_bin / "docker"),
+                "FAKE_BUILDX_PLUGIN": str(self.buildx_plugin),
+                "FAKE_BUILDX_UNSAFE": "",
                 "FAKE_TIMEOUT_STATE": str(self.timeout_state),
                 "PATH": str(self.fake_bin) + os.pathsep + self.environment["PATH"],
                 "TMPDIR": str(self.session_tmp),
@@ -686,6 +807,7 @@ printf 'fake Blackwell preflight passed\\n'
         all_docker_info_fail: bool = False,
         docker_clients_unusable: bool = False,
         unsafe_sudo_docker: str = "",
+        unsafe_buildx: str = "",
         docker_info_timeouts: int = 0,
         docker_ready_after: int = 1,
         date_sequence: list[int] | None = None,
@@ -707,6 +829,7 @@ printf 'fake Blackwell preflight passed\\n'
             "1" if docker_clients_unusable else "0"
         )
         environment["FAKE_SUDO_DOCKER_UNSAFE"] = unsafe_sudo_docker
+        environment["FAKE_BUILDX_UNSAFE"] = unsafe_buildx
         environment["FAKE_DOCKER_INFO_TIMEOUTS"] = str(docker_info_timeouts)
         environment["FAKE_DOCKER_READY_AFTER"] = str(docker_ready_after)
         environment["FAKE_DATE_SEQUENCE"] = (
@@ -823,13 +946,13 @@ printf 'fake Blackwell preflight passed\\n'
         work_deadline = deadline - 1800
         cases = (
             (
-                "docker-build",
-                [base, base, base + 100, base + 100, base + 100, work_deadline],
-                "DOCKER build",
+                "buildx-build",
+                [base] * 6 + [work_deadline],
+                "BUILDX build",
             ),
             (
                 "compute-sanitizer",
-                [base] * 12 + [work_deadline],
+                [base] * 13 + [work_deadline],
                 "compute-sanitizer --tool memcheck",
             ),
         )
@@ -971,6 +1094,9 @@ printf 'fake Blackwell preflight passed\\n'
 
         log = self.command_log_text()
         self.assertIn("PREFLIGHT --skip-docker", log)
+        self.assertIn("BUILDX version BUILDX_CONFIG=", log)
+        self.assertIn("BUILDX build --load", log)
+        self.assertNotIn("DOCKER build", log)
         self.assertIn(
             "--file "
             + str(self.repository / "containers" / "cuda12.9-sm120.Dockerfile"),
@@ -998,6 +1124,30 @@ printf 'fake Blackwell preflight passed\\n'
         second, _ = self.run_worker(output=artifact)
         self.assertNotEqual(0, second.returncode)
         self.assertEqual(value, json.loads(artifact.read_text(encoding="utf-8")))
+
+    def test_build_uses_only_the_fixed_buildx_plugin(self) -> None:
+        source = WORKER_SOURCE.read_text(encoding="utf-8")
+        self.assertIn(
+            'readonly BUILDX_PLUGIN="/usr/libexec/docker/cli-plugins/docker-buildx"',
+            source,
+        )
+        self.assertIn('"${BUILDX[@]}" build --load', source)
+        self.assertNotIn('"${DOCKER[@]}" build', source)
+
+        result, artifact = self.run_worker()
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertTrue(artifact.is_file())
+        log = self.command_log_text()
+        self.assertIn("BUILDX-STAT ", log)
+        self.assertIn(str(self.buildx_plugin.parent), log)
+        self.assertIn("BUILDX build --load", log)
+        self.assertNotIn("DOCKER build", log)
+        buildx_lines = [
+            line for line in log.splitlines() if line.startswith("BUILDX build ")
+        ]
+        self.assertEqual(1, len(buildx_lines))
+        self.assertIn("BUILDX_CONFIG=" + str(self.session_tmp), buildx_lines[0])
+        self.assert_no_partial_artifact()
 
     def test_failures_publish_no_artifact(self) -> None:
         for failure in ("build", "runtime", "audit", "sanitizer"):
@@ -1121,16 +1271,22 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertIn("sudo -n cat /run/systemd/shutdown/scheduled", log)
         self.assertNotIn("shutdown --show", log)
 
-    def test_uses_noninteractive_sudo_docker_fallback(self) -> None:
+    def test_uses_noninteractive_sudo_docker_and_buildx_fallback(self) -> None:
         result, artifact = self.run_worker(direct_docker_info_fail=True)
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertTrue(artifact.is_file())
         log = self.command_log_text()
         self.assertIn("SUDO -n -- /usr/bin/docker info", log)
-        self.assertIn("SUDO -n -- /usr/bin/docker build", log)
         self.assertIn("SUDO -n -- /usr/bin/docker image inspect", log)
         self.assertEqual(7, log.count("SUDO -n -- /usr/bin/docker run"))
-        self.assertIn("SECURE-DOCKER build", log)
+        self.assertIn(
+            "SUDO -n --preserve-env=BUILDX_CONFIG -- "
+            + str(self.buildx_plugin)
+            + " build --load",
+            log,
+        )
+        self.assertIn("SECURE-BUILDX build --load", log)
+        self.assertNotIn("SECURE-DOCKER build", log)
         self.assertFalse(
             any(
                 line.startswith(("DOCKER build", "DOCKER image", "DOCKER run"))
@@ -1158,7 +1314,8 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertEqual(2, log.count("TIMEOUT-EXPIRED docker info 124"))
         self.assertEqual(1, log.count("SLEEP 5"))
         self.assertIn("tentative 2/6", result.stdout)
-        self.assertIn("DOCKER build", log)
+        self.assertIn("BUILDX build --load", log)
+        self.assertNotIn("DOCKER build", log)
 
     def test_reports_bounded_docker_diagnostics_after_all_retries(self) -> None:
         result, artifact = self.run_worker(all_docker_info_fail=True)
@@ -1214,6 +1371,32 @@ printf 'fake Blackwell preflight passed\\n'
                 self.assertNotIn("SUDO -n -- /usr/bin/docker info", log)
                 self.assertNotIn("SECURE-DOCKER", log)
                 self.assertNotIn("DOCKER build", log)
+
+    def test_rejects_unsafe_fixed_buildx_plugin_or_parent(self) -> None:
+        for unsafe in (
+            "owner",
+            "mode",
+            "parent-mode",
+            "plugin-symlink",
+            "parent-symlink",
+        ):
+            with self.subTest(unsafe=unsafe):
+                self.command_log.unlink(missing_ok=True)
+                artifact = self.output_dir / f"unsafe-buildx-{unsafe}.json"
+                result, _ = self.run_worker(
+                    output=artifact,
+                    unsafe_buildx=unsafe,
+                )
+
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("Plugin Buildx fixe", result.stderr)
+                self.assertFalse(artifact.exists())
+                self.assert_no_partial_artifact()
+                log = self.command_log_text()
+                self.assertIn("DOCKER info", log)
+                self.assertNotIn("BUILDX build", log)
+                self.assertNotIn("DOCKER image inspect", log)
+                self.assertNotIn("DOCKER run", log)
 
     def test_docker_retry_stops_at_the_work_deadline(self) -> None:
         base = int(time.time())

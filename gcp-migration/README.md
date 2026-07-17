@@ -270,6 +270,26 @@ GCP_INSTANCE_NAME=ehgp-blackwell-spot-ai1a \
   --result-dir /tmp/morsehgp3d-phase3-qualification
 ```
 
+Si le diagnostic borné a prouvé que l'image invitée ne contient aucun moteur
+Docker, la même session peut autoriser explicitement sa préparation :
+
+```bash
+GCP_ZONE=europe-west4-ai1a \
+GCP_INSTANCE_NAME=ehgp-blackwell-spot-ai1a \
+./gcp-migration/run_phase3_qualification.sh \
+  --yes \
+  --provision-docker \
+  --result-dir /tmp/morsehgp3d-phase3-qualification
+```
+
+Cette option n'élargit ni la cible ni le cycle de vie GCP. Elle n'est exécutée
+qu'après les deux coupe-circuits et avant le worker. Le provisionneur séparé
+`phase3_remote_docker_provision.sh` relit lui-même l'arrêt invité, exige Ubuntu
+22.04 `amd64`, le toolkit NVIDIA 1.17.8-1 déjà installé et une fenêtre de
+travail suffisante. Après son succès, l'orchestrateur recertifie la même
+génération GCE et sa durée avant de permettre au worker de relire à son tour la
+garde invitée.
+
 Le répertoire de résultat est créé si nécessaire, doit rester hors du dépôt et ne doit déjà contenir ni `phase3-<SHA>.json`, ni `phase3-<SHA>.start-handoff.json`. L'orchestrateur utilise exclusivement `start_and_verify.sh` pour le démarrage et `stop_and_verify.sh --yes` pour l'arrêt. Dès que la garde GCE post-démarrage certifie la génération, le démarrage publie atomiquement un handoff v3 `targeted_running` avec le `lastStartTimestamp`, avant de tenter la garde invitée; une préemption immédiate publie de la même façon un handoff `targeted_stopping`. Toute fermeture automatique exige cette même génération et refuse une cible redémarrée. Si la garde invitée ou l'arrêt d'urgence échoue, ce handoff reste disponible pour reprendre l'arrêt exact et bloque une nouvelle session. Si une commande de démarrage échoue avant que la génération soit lisible, aucun arrêt non versionné n'est tenté : le script signale la cible et la commande de contrôle. Les appels GCP critiques sont bornés par GNU `timeout` avec `--foreground` et `--kill-after`. Le worker invité ne pilote aucune ressource GCP : il exige un arrêt `poweroff` futur dans `/run/systemd/shutdown/scheduled`, construit l'image CUDA épinglée, compile les profils release et audit, exécute les sondes runtime et Python/DLPack, vérifie le runtime AOT avec `cuobjdump`, puis passe ce runtime court sous `compute-sanitizer --leak-check full`. Si une unité échoue, il remonte avant nettoyage les 240 dernières lignes et 65 536 octets au plus de son journal, entourés de marqueurs explicites, tout en refusant l'artefact de succès.
 
 Pour cette voie automatisée, aucune préparation SSH manuelle n'est nécessaire : l'orchestrateur crée une clé ED25519 de session dans un chemin physique canonisé hors dépôt, la valide localement, l'importe dans OS Login avec un TTL de 70 minutes juste avant le démarrage, relit son échéance UTC absolue exacte et transmet explicitement les deux à start, SSH et SCP. Tous les transports réutilisent cette échéance fixe, même si gcloud doit réimporter la clé; aucun TTL relatif n'est renouvelé. L'orchestrateur capture aussi l'état et la génération avant start. Après `TERMINATED` ciblé, il tente la révocation puis détruit la copie privée. Si start échoue sans handoff, ce nettoyage exige une seconde preuve `TERMINATED` avec génération inchangée; si l'arrêt ciblé ou cette preuve manque, la clé et le handoff éventuel sont conservés sous l'échéance initiale pour la reprise exacte de l'incident.
@@ -296,6 +316,38 @@ Docker/containerd/NVIDIA et au plus 80 lignes du journal Docker avant de
 nettoyer ses temporaires. Toute commande Docker ultérieure conserve la voie
 directe certifiée ou exactement `sudo -n -- /usr/bin/docker`; aucun chemin issu
 du `PATH` utilisateur n'est transmis à sudo.
+
+Le provisionneur optionnel conserve cette séparation : il ne contient aucune
+commande GCP et ne lance aucun conteneur. Il n'ajoute aucun dépôt, ne télécharge
+aucun script et n'ajoute pas l'utilisateur au groupe `docker`. Si `docker.io`
+ou `docker-buildx` manque, il met seulement à jour l'index des dépôts déjà
+configurés, capture les candidats exacts, simule leur installation et refuse
+toute suppression, mise à niveau ou rétrogradation. L'installation réelle
+utilise ensuite les versions capturées avec `--no-remove`, `--no-upgrade` et
+`--no-install-recommends`. Docker CE, `containerd.io`, `podman-docker`, Moby,
+un état `dpkg` partiel, un binaire élevé non sûr ou un `daemon.json` étranger
+font échouer la préparation sans réparation improvisée.
+
+Les exécutables fixes de `/usr/bin` sont certifiés en un lot : le préfixe
+partagé n'est sondé qu'une fois, puis chaque fichier conserve ses contrôles de
+type, de lien, d'exécution, de propriétaire et de permissions avant une relecture
+groupée des métadonnées. Cette réduction des appels privilégiés accélère la
+préparation sans réduire l'enveloppe de sécurité.
+
+Lorsque la configuration Docker est absente, le seul générateur admis est le
+`nvidia-ctk` 1.17.8-1 déjà présent. Le JSON créé doit contenir uniquement le
+runtime NVIDIA attendu, rester root et non inscriptible par groupe ou autres,
+puis réussir `dockerd --validate`. Le service est activé et redémarré une seule
+fois sous timeout. Le même boot ID, l'arrêt invité futur, les services Docker
+et containerd, `docker buildx` et le runtime NVIDIA exposé par `docker info`
+sont relus avant succès. Un hôte déjà conforme suit une voie strictement
+idempotente sans APT, configuration ni systemd. Les commandes privilégiées
+utilisent toutes des chemins système fixes; les diagnostics restent bornés à
+240 lignes, 65 536 octets et 80 lignes du journal Docker. Les procédures
+suivent le paquet `docker.io` pris en charge par
+[Canonical](https://ubuntu.com/server/docs/how-to/containers/docker-for-system-admins/)
+et la configuration Docker prescrite par
+[NVIDIA](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/1.17.8/install-guide.html).
 
 L'artefact distant demeure provisoire avec `status=worker_passed_pending_shutdown`. L'orchestrateur le valide localement, arrête la cible, relit indépendamment l'état exact `TERMINATED`, ajoute cette preuve à `vm_lifecycle`, convertit le statut en `passed`, puis publie l'artefact final atomiquement et sans remplacement par lien dur. Un échec ou une relecture illisible de l'arrêt ne laisse aucun artefact final, mais conserve le handoff ciblé local et bloque une nouvelle session sur le même SHA jusqu'à résolution. La priorité donnée à l'arrêt signifie que le clone temporaire distant peut rester dans `/tmp` sur le disque de la VM arrêtée.
 

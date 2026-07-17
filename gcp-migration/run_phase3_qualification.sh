@@ -25,12 +25,14 @@ readonly SSH_KEY_TTL_SLACK_SECONDS=660
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 readonly START_SCRIPT="${SCRIPT_DIR}/start_and_verify.sh"
 readonly STOP_SCRIPT="${SCRIPT_DIR}/stop_and_verify.sh"
+readonly DOCKER_PROVISION_SCRIPT="${SCRIPT_DIR}/phase3_remote_docker_provision.sh"
 
 PROJECT_ID="${GCP_PROJECT_ID:-${DEFAULT_PROJECT_ID}}"
 ZONE="${GCP_ZONE:-${DEFAULT_ZONE}}"
 INSTANCE_NAME="${GCP_INSTANCE_NAME:-${DEFAULT_INSTANCE_NAME}}"
 RESULT_DIR="${MORSEHGP3D_PHASE3_RESULT_DIR:-${TMPDIR:-/tmp}/morsehgp3d-phase3-results}"
 ASSUME_YES=0
+PROVISION_DOCKER=0
 
 SESSION_CERTIFIED=0
 TARGET_STOP_CERTIFIED=0
@@ -58,7 +60,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -73,6 +75,12 @@ Il génère hors du dépôt une clé ED25519 de session non chiffrée, l'inscrit
 OS Login pour 70 minutes seulement, transmet explicitement à SSH/SCP la clé et
 son expiration UTC fixe, puis la révoque et supprime la copie locale après la
 certification TERMINATED de la génération ciblée.
+
+--provision-docker autorise, après certification des deux coupe-circuits, le
+provisionneur invité séparé à installer docker.io et docker-buildx depuis les
+dépôts Ubuntu déjà configurés, puis à configurer le runtime NVIDIA. Le worker
+de qualification reste non mutatif. Après la préparation, la garde GCE est
+recertifiée avant le worker.
 EOF
 }
 
@@ -80,6 +88,10 @@ while (($# > 0)); do
     case "$1" in
         --yes)
             ASSUME_YES=1
+            shift
+            ;;
+        --provision-docker)
+            PROVISION_DOCKER=1
             shift
             ;;
         --result-dir)
@@ -134,6 +146,10 @@ timeout --foreground --kill-after=1s 1s true >/dev/null 2>&1 || \
     die "GNU timeout ne prend pas en charge --foreground et --kill-after."
 [[ -x "${START_SCRIPT}" ]] || die "Point d'entrée de démarrage absent ou non exécutable : ${START_SCRIPT}."
 [[ -x "${STOP_SCRIPT}" ]] || die "Point d'entrée d'arrêt absent ou non exécutable : ${STOP_SCRIPT}."
+if ((PROVISION_DOCKER == 1)); then
+    [[ -x "${DOCKER_PROVISION_SCRIPT}" ]] || \
+        die "Provisionneur Docker absent ou non exécutable : ${DOCKER_PROVISION_SCRIPT}."
+fi
 
 REPOSITORY_ROOT="$(git -C "${SCRIPT_DIR}/.." rev-parse --show-toplevel 2>/dev/null)" || \
     die "Impossible d'identifier la racine Git."
@@ -727,6 +743,7 @@ printf '%s\n' \
     "  instance        : ${INSTANCE_NAME}" \
     "  SHA             : ${HEAD_SHA}" \
     "  arrêt invité    : ${GUEST_SHUTDOWN_MINUTES} min" \
+    "  Docker hôte     : $([[ ${PROVISION_DOCKER} == 1 ]] && printf 'provisioning Ubuntu autorisé' || printf 'aucune mutation')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -760,6 +777,13 @@ clone_output="$(remote_exec \
 remote_head="$(printf '%s\n' "${clone_output}" | sed -n 's/^__EHGP_REMOTE_HEAD__//p' | tail -n 1)"
 [[ "${remote_head}" == "${HEAD_SHA}" ]] || \
     die "HEAD distant ${remote_head:-illisible} différent du SHA local ${HEAD_SHA}."
+
+if ((PROVISION_DOCKER == 1)); then
+    remote_exec \
+        "test -x ${quoted_repository}/gcp-migration/phase3_remote_docker_provision.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_docker_provision.sh --yes --gce-deadline-epoch ${quoted_gce_deadline}"
+    certify_session_deadline || \
+        die "La garde GCE n'a pas pu être recertifiée après la préparation Docker; worker refusé."
+fi
 
 remote_exec \
     "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}"
