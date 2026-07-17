@@ -1063,6 +1063,7 @@ exec /usr/bin/python3 "$@"
         self.assertEqual(6, source.count('"${PYTHON_BIN}"'))
         self.assertNotIn("/usr/bin/python3 -I", source)
         self.assertEqual(2, source.count('"${unit}" --no-pager --all \\\n'))
+        self.assertIn("missing={missing}; unexpected={unexpected}", source)
 
     def test_rejects_unusable_or_wrong_version_python_before_mutation(self) -> None:
         for mode in ("broken", "wrong-version"):

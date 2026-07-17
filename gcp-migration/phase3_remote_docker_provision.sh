@@ -827,7 +827,12 @@ else:
         "ExecStopPost", "Environment", "EnvironmentFiles"
     }
 if set(values) != expected:
-    raise SystemExit("missing or unexpected systemctl property")
+    missing = ",".join(sorted(expected - set(values))) or "none"
+    unexpected = ",".join(sorted(set(values) - expected)) or "none"
+    raise SystemExit(
+        "missing or unexpected systemctl property names: "
+        f"missing={missing}; unexpected={unexpected}"
+    )
 if values["LoadState"] != "loaded":
     raise SystemExit("unit is not loaded")
 if values["FragmentPath"] not in {lexical, canonical}:
