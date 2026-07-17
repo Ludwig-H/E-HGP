@@ -4,6 +4,7 @@
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
 #include "phase2b_distance_filter_internal.hpp"
+#include "phase2b_orientation_filter_internal.hpp"
 
 #include <array>
 #include <cstddef>
@@ -57,6 +58,21 @@ void validate_inputs(std::span<const SquaredDistanceFilterInput> inputs) {
   }
 }
 
+void validate_inputs(std::span<const Orientation3DFilterInput> inputs) {
+  std::unordered_set<std::uint64_t> replay_ids;
+  replay_ids.reserve(inputs.size());
+  for (const Orientation3DFilterInput& input : inputs) {
+    if (!replay_ids.insert(input.replay_id).second) {
+      throw std::invalid_argument(
+          "Phase 2B replay identifiers must be unique within a batch");
+    }
+    require_finite_words(input.a_bits, "orientation point a");
+    require_finite_words(input.b_bits, "orientation point b");
+    require_finite_words(input.c_bits, "orientation point c");
+    require_finite_words(input.d_bits, "orientation point d");
+  }
+}
+
 [[nodiscard]] CertifiedPoint3 point_from_words(
     const std::array<std::uint64_t, 3>& words) {
   return CertifiedPoint3::from_binary64_bits(words);
@@ -73,6 +89,18 @@ void validate_inputs(std::span<const SquaredDistanceFilterInput> inputs) {
       policy);
 }
 
+[[nodiscard]] PredicateDecision cpu_decision(
+    const Orientation3DFilterInput& input,
+    PredicateFilterPolicy policy) {
+  return exact::decide_orientation_3d(
+      point_from_words(input.a_bits),
+      point_from_words(input.b_bits),
+      point_from_words(input.c_bits),
+      point_from_words(input.d_bits),
+      nullptr,
+      policy);
+}
+
 [[nodiscard]] PredicateSign predicate_sign_from_gpu(FilterSign sign) {
   switch (sign) {
     case FilterSign::negative:
@@ -85,9 +113,10 @@ void validate_inputs(std::span<const SquaredDistanceFilterInput> inputs) {
   throw std::logic_error("a GPU unknown cannot be promoted to a predicate sign");
 }
 
+template <typename Counters>
 void record_cpu_stage(
     const PredicateDecision& decision,
-    SquaredDistanceFilterCounters& counters) {
+    Counters& counters) {
   switch (decision.certification_stage()) {
     case CertificationStage::fp64_filtered:
       ++counters.cpu_fp64_filtered_certified;
@@ -106,6 +135,19 @@ void record_cpu_stage(
 
 [[nodiscard]] std::vector<IndexedDecision> resolve_unknowns(
     const std::vector<SquaredDistanceFilterInput>& inputs,
+    const std::vector<std::size_t>& unknown_indices) {
+  std::vector<IndexedDecision> decisions;
+  decisions.reserve(unknown_indices.size());
+  for (const std::size_t index : unknown_indices) {
+    decisions.push_back(IndexedDecision{
+        index,
+        cpu_decision(inputs[index], PredicateFilterPolicy::allow_adaptive)});
+  }
+  return decisions;
+}
+
+[[nodiscard]] std::vector<IndexedDecision> resolve_unknowns(
+    const std::vector<Orientation3DFilterInput>& inputs,
     const std::vector<std::size_t>& unknown_indices) {
   std::vector<IndexedDecision> decisions;
   decisions.reserve(unknown_indices.size());
@@ -198,11 +240,106 @@ void record_cpu_stage(
   return result;
 }
 
+[[nodiscard]] Orientation3DBatchResult decide_batch(
+    std::vector<Orientation3DFilterInput> inputs,
+    Orientation3DBatchOptions options) {
+  validate_inputs(
+      std::span<const Orientation3DFilterInput>{inputs.data(), inputs.size()});
+  const std::vector<detail::RawOrientation3DFilterOutput> gpu_outputs =
+      detail::filter_orientations_3d_on_gpu(inputs);
+  if (gpu_outputs.size() != inputs.size()) {
+    throw std::runtime_error(
+        "the Phase 2B orientation GPU output cardinality changed");
+  }
+
+  Orientation3DBatchResult result;
+  result.decisions.resize(inputs.size());
+  result.counters.gpu_inputs = static_cast<std::uint64_t>(inputs.size());
+  std::vector<std::size_t> unknown_indices;
+  unknown_indices.reserve(inputs.size());
+
+  for (std::size_t index = 0U; index < inputs.size(); ++index) {
+    const detail::RawOrientation3DFilterOutput& output = gpu_outputs[index];
+    if (output.replay_id != inputs[index].replay_id) {
+      throw std::runtime_error(
+          "the Phase 2B orientation GPU changed replay identifier ordering");
+    }
+    switch (output.sign) {
+      case FilterSign::negative:
+      case FilterSign::positive:
+        ++result.counters.gpu_fp64_certified;
+        result.decisions[index] = Orientation3DDecision{
+            output.replay_id,
+            output.sign,
+            predicate_sign_from_gpu(output.sign),
+            CertificationStage::fp64_filtered};
+        break;
+      case FilterSign::unknown:
+        ++result.counters.gpu_unknown_forwarded;
+        unknown_indices.push_back(index);
+        break;
+      default:
+        throw std::runtime_error(
+            "the Phase 2B orientation GPU returned an invalid tri-state");
+    }
+  }
+
+  std::future<std::vector<IndexedDecision>> fallback_future;
+  if (!unknown_indices.empty()) {
+    ++result.counters.async_fallback_batches;
+    fallback_future = std::async(
+        std::launch::async,
+        [&inputs, indices = unknown_indices] {
+          return resolve_unknowns(inputs, indices);
+        });
+  }
+
+  if (options.audit_gpu_signs) {
+    for (std::size_t index = 0U; index < inputs.size(); ++index) {
+      if (gpu_outputs[index].sign == FilterSign::unknown) {
+        continue;
+      }
+      const PredicateDecision oracle = cpu_decision(
+          inputs[index], PredicateFilterPolicy::multiprecision_only);
+      if (oracle.sign() != result.decisions[index].sign) {
+        throw std::runtime_error(
+            "the Phase 2B orientation GPU filter contradicted the CPU "
+            "multiprecision oracle");
+      }
+      ++result.counters.gpu_known_audited;
+    }
+  }
+
+  if (!unknown_indices.empty()) {
+    for (const IndexedDecision& resolved : fallback_future.get()) {
+      const std::size_t index = resolved.index;
+      result.decisions[index] = Orientation3DDecision{
+          inputs[index].replay_id,
+          FilterSign::unknown,
+          resolved.decision.sign(),
+          resolved.decision.certification_stage()};
+      record_cpu_stage(resolved.decision, result.counters);
+    }
+  }
+  result.counters.remaining_unknown = 0U;
+  return result;
+}
+
 }  // namespace
 
 std::future<SquaredDistanceBatchResult> decide_squared_distance_batch_async(
     std::vector<SquaredDistanceFilterInput> inputs,
     SquaredDistanceBatchOptions options) {
+  return std::async(
+      std::launch::async,
+      [owned_inputs = std::move(inputs), options]() mutable {
+        return decide_batch(std::move(owned_inputs), options);
+      });
+}
+
+std::future<Orientation3DBatchResult> decide_orientation_3d_batch_async(
+    std::vector<Orientation3DFilterInput> inputs,
+    Orientation3DBatchOptions options) {
   return std::async(
       std::launch::async,
       [owned_inputs = std::move(inputs), options]() mutable {

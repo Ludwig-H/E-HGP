@@ -229,6 +229,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
     morsehgp3d_gpu_predicates
     STATIC
       src/cuda/phase2b_distance_filter.cu
+      src/cuda/phase2b_orientation_filter.cu
       src/gpu/predicate_filter.cpp
   )
   add_library(

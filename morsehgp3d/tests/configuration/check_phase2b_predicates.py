@@ -14,8 +14,13 @@ from typing import Any, Callable
 
 
 PUBLIC_HEADER = Path("include/morsehgp3d/gpu/predicate_filter.hpp")
+INTERVAL_HEADER = Path("src/cuda/phase2b_interval.cuh")
 INTERNAL_HEADER = Path("src/cuda/phase2b_distance_filter_internal.hpp")
 CUDA_SOURCE = Path("src/cuda/phase2b_distance_filter.cu")
+ORIENTATION_INTERNAL_HEADER = Path(
+    "src/cuda/phase2b_orientation_filter_internal.hpp"
+)
+ORIENTATION_CUDA_SOURCE = Path("src/cuda/phase2b_orientation_filter.cu")
 HOST_SOURCE = Path("src/gpu/predicate_filter.cpp")
 CLI_SOURCE = Path("src/tools/gpu_predicate_replay.cpp")
 CMAKE_SOURCE = Path("CMakeLists.txt")
@@ -79,8 +84,11 @@ def strict_json(path: Path) -> dict[str, Any]:
 def load_contract(project: Path) -> ContractFiles:
     source_paths = (
         PUBLIC_HEADER,
+        INTERVAL_HEADER,
         INTERNAL_HEADER,
         CUDA_SOURCE,
+        ORIENTATION_INTERNAL_HEADER,
+        ORIENTATION_CUDA_SOURCE,
         HOST_SOURCE,
         CLI_SOURCE,
         CMAKE_SOURCE,
@@ -111,6 +119,26 @@ def struct_bodies(text: str) -> list[tuple[str, str]]:
         if depth == 0:
             result.append((match.group(1), clean[match.end() : cursor - 1]))
     return result
+
+
+def function_body(text: str, name: str) -> str:
+    clean = without_comments(text)
+    match = re.search(
+        rf"\b{re.escape(name)}\s*\([^;{{}}]*\)\s*(?:noexcept\s*)?\{{",
+        clean,
+        flags=re.DOTALL,
+    )
+    require(match is not None, f"missing function body: {name}")
+    depth = 1
+    cursor = match.end()
+    while cursor < len(clean) and depth > 0:
+        if clean[cursor] == "{":
+            depth += 1
+        elif clean[cursor] == "}":
+            depth -= 1
+        cursor += 1
+    require(depth == 0, f"unterminated function body: {name}")
+    return clean[match.end() : cursor - 1]
 
 
 def enum_members(body: str) -> dict[str, int]:
@@ -164,58 +192,72 @@ def validate_sign_enum(header: str) -> None:
     )
 
 
-def validate_binary64_replay_record(header: str) -> None:
-    matching_body: str | None = None
-    for _, body in struct_bodies(header):
-        if re.search(r"\breplay_id\b", body):
-            matching_body = body
-            break
-    require(matching_body is not None, "no public GPU record contains replay_id")
-    require(
-        re.search(r"std::uint64_t\s+replay_id\b", matching_body) is not None,
-        "replay_id must be an unsigned 64-bit value",
+def validate_binary64_replay_records(header: str) -> None:
+    bodies = dict(struct_bodies(header))
+    records = (
+        (
+            "SquaredDistanceFilterInput",
+            9,
+            ("witness_bits", "left_bits", "right_bits"),
+        ),
+        (
+            "Orientation3DFilterInput",
+            12,
+            ("a_bits", "b_bits", "c_bits", "d_bits"),
+        ),
     )
-    word_arrays = re.findall(
-        r"std::array\s*<\s*std::uint64_t\s*,\s*(\d+)\s*>", matching_body
-    )
-    word_count = sum(int(count) for count in word_arrays)
-    scalar_words = len(
-        re.findall(r"std::uint64_t\s+(?!replay_id\b)[A-Za-z_]\w*", matching_body)
-    )
-    require(
-        word_count + scalar_words >= 9,
-        "the replayable distance record must preserve all nine binary64 words",
-    )
-    require(
-        re.search(r"(?:binary64|bits|words?)", matching_body, re.IGNORECASE) is not None,
-        "the replay record does not identify its binary64 bit words",
-    )
+    for name, expected_words, fields in records:
+        body = bodies.get(name)
+        require(body is not None, f"the public header has no {name}")
+        require(
+            re.search(r"std::uint64_t\s+replay_id\b", body) is not None,
+            f"{name}.replay_id must be an unsigned 64-bit value",
+        )
+        for field in fields:
+            require(
+                re.search(
+                    rf"std::array\s*<\s*std::uint64_t\s*,\s*3\s*>\s*"
+                    rf"{re.escape(field)}\b",
+                    body,
+                )
+                is not None,
+                f"{name} does not preserve {field} as three binary64 words",
+            )
+        word_arrays = re.findall(
+            r"std::array\s*<\s*std::uint64_t\s*,\s*(\d+)\s*>", body
+        )
+        scalar_words = len(
+            re.findall(r"std::uint64_t\s+(?!replay_id\b)[A-Za-z_]\w*", body)
+        )
+        require(
+            sum(int(count) for count in word_arrays) + scalar_words
+            == expected_words,
+            f"{name} must preserve exactly {expected_words} binary64 words",
+        )
 
 
 def validate_public_header(header: str) -> None:
     validate_sign_enum(header)
-    validate_binary64_replay_record(header)
+    validate_binary64_replay_records(header)
     require(
         re.search(r"std::future\s*<", without_comments(header)) is not None,
         "the public GPU predicate API does not expose asynchronous completion",
     )
 
 
-def validate_cuda_source(cuda: str, internal: str, public: str) -> None:
-    clean = without_comments(cuda)
+def require_directed_call(body: str, call: str, expected: int = 1) -> None:
+    pattern = re.escape(call).replace(r"\ ", r"\s*")
+    actual = len(re.findall(pattern, body))
+    require(
+        actual == expected,
+        f"directed interval call {call} occurs {actual} times instead of {expected}",
+    )
+
+
+def validate_interval_header(interval: str) -> None:
+    clean = without_comments(interval)
     for intrinsic in DIRECTED_INTRINSICS:
         require(intrinsic in clean, f"CUDA interval filter is missing {intrinsic}")
-    require(
-        re.search(
-            r"__global__\s+(?:static\s+)?void\s+"
-            r"[A-Za-z_]\w*(?:distance|squared)[A-Za-z_]\w*\s*\(",
-            clean,
-            flags=re.IGNORECASE,
-        )
-        is not None,
-        "the distance filter has no dedicated CUDA kernel",
-    )
-    require("<<<" in clean and ">>>" in clean, "the distance kernel is never launched")
     require(
         "kBinary64ExponentMask" in clean
         and re.search(
@@ -228,57 +270,189 @@ def validate_cuda_source(cuda: str, internal: str, public: str) -> None:
         is not None,
         "non-finite binary64 words do not become an invalid interval",
     )
+    checked = function_body(clean, "checked_interval")
     require(
         re.search(
-            r"if\s*\(\s*!\s*difference[.]valid\s*\)\s*\{\s*"
+            r"!\s*is_finite\s*\(\s*lower\s*\).*?"
+            r"!\s*is_finite\s*\(\s*upper\s*\).*?lower\s*>\s*upper.*?"
+            r"return\s+invalid_interval\s*\(\s*\)\s*;",
+            checked,
+            flags=re.DOTALL,
+        )
+        is not None,
+        "invalid, overflowed or inverted interval bounds do not fail closed",
+    )
+
+    add = function_body(clean, "add_intervals")
+    require_directed_call(add, "__dadd_rd(left.lower, right.lower)")
+    require_directed_call(add, "__dadd_ru(left.upper, right.upper)")
+    subtract = function_body(clean, "subtract_intervals")
+    require_directed_call(subtract, "__dsub_rd(left.lower, right.upper)")
+    require_directed_call(subtract, "__dsub_ru(left.upper, right.lower)")
+
+    multiply = function_body(clean, "multiply_intervals")
+    multiplication_calls = (
+        "__dmul_rd(left.lower, right.lower)",
+        "__dmul_rd(left.lower, right.upper)",
+        "__dmul_rd(left.upper, right.lower)",
+        "__dmul_rd(left.upper, right.upper)",
+        "__dmul_ru(left.upper, right.upper)",
+        "__dmul_ru(left.upper, right.lower)",
+        "__dmul_ru(left.lower, right.upper)",
+        "__dmul_ru(left.lower, right.lower)",
+    )
+    for call in multiplication_calls:
+        require_directed_call(multiply, call, expected=2)
+    require(
+        multiply.count("__dmul_rd") == 8 and multiply.count("__dmul_ru") == 8,
+        "interval multiplication must use four two-product sign quadrants and one 4x2 fallback",
+    )
+
+    square = function_body(clean, "square_interval")
+    for call in (
+        "__dmul_rd(value.lower, value.lower)",
+        "__dmul_rd(value.upper, value.upper)",
+    ):
+        require_directed_call(square, call)
+    for call, expected in (
+        ("__dmul_ru(value.lower, value.lower)", 2),
+        ("__dmul_ru(value.upper, value.upper)", 2),
+    ):
+        require_directed_call(square, call, expected=expected)
+
+
+def validate_filter_cuda_source(
+    cuda: str,
+    internal: str,
+    public: str,
+    *,
+    label: str,
+    kernel_pattern: str,
+    interval_name: str,
+) -> None:
+    clean = without_comments(cuda)
+    require(
+        re.search(kernel_pattern, clean, flags=re.IGNORECASE) is not None,
+        f"the {label} filter has no dedicated CUDA kernel",
+    )
+    require(
+        "<<<" in clean and ">>>" in clean,
+        f"the {label} kernel is never launched",
+    )
+    require(
+        re.search(
+            rf"if\s*\(\s*!\s*{re.escape(interval_name)}[.]valid\s*\)\s*\{{\s*"
             r"return\s+FilterSign::unknown\s*;",
             clean,
             flags=re.DOTALL,
         )
         is not None,
-        "an invalid or non-finite CUDA interval does not map to unknown",
+        f"an invalid {label} interval does not map to unknown",
     )
     require(
-        "isfinite" in clean
-        and re.search(
-            r"!\s*device_is_finite\s*\(\s*lower\s*\).*?"
-            r"!\s*device_is_finite\s*\(\s*upper\s*\).*?"
-            r"return\s+invalid_interval\s*\(\s*\)\s*;",
+        re.search(
+            rf"{re.escape(interval_name)}[.]lower\s*>\s*0(?:[.]0+)?",
             clean,
+        )
+        is not None,
+        f"the {label} filter has no strictly-positive certification",
+    )
+    require(
+        re.search(
+            rf"{re.escape(interval_name)}[.]upper\s*<\s*0(?:[.]0+)?",
+            clean,
+        )
+        is not None,
+        f"the {label} filter has no strictly-negative certification",
+    )
+    require(
+        INTERVAL_HEADER.name in clean,
+        f"the {label} CUDA source bypasses the shared interval contract",
+    )
+    require(
+        "unknown" in internal and "unknown" in public,
+        f"the {label} launch contract loses tri-state semantics",
+    )
+
+
+def validate_cuda_sources(
+    distance: str,
+    distance_internal: str,
+    orientation: str,
+    orientation_internal: str,
+    public: str,
+) -> None:
+    validate_filter_cuda_source(
+        distance,
+        distance_internal,
+        public,
+        label="distance",
+        kernel_pattern=(
+            r"__global__\s+(?:static\s+)?void\s+"
+            r"[A-Za-z_]\w*(?:distance|squared)[A-Za-z_]\w*\s*\("
+        ),
+        interval_name="difference",
+    )
+    distance_clean = without_comments(distance)
+    require(
+        re.search(
+            r"difference\s*=\s*subtract_intervals\s*\(\s*"
+            r"left_squared\s*,\s*right_squared\s*\)",
+            distance_clean,
             flags=re.DOTALL,
         )
         is not None,
-        "overflowed directed operations do not fail closed",
+        "distance comparison no longer computes left squared minus right squared",
     )
     require(
-        re.search(r"\blower\b\s*>\s*0(?:[.]0+)?", clean) is not None,
-        "the CUDA interval filter has no strictly-positive certification",
+        re.search(r"field\s*\*\s*count\s*\+\s*index", distance_clean)
+        is not None,
+        "distance coordinates are not packed field-major for coalesced loads",
+    )
+    validate_filter_cuda_source(
+        orientation,
+        orientation_internal,
+        public,
+        label="orientation",
+        kernel_pattern=(
+            r"__global__\s+(?:static\s+)?void\s+"
+            r"[A-Za-z_]\w*orientation[A-Za-z_0-9]*\s*\("
+        ),
+        interval_name="determinant",
+    )
+    orientation_clean = without_comments(orientation)
+    require(
+        "multiply_intervals" in orientation_clean
+        and re.search(
+            r"add_intervals\s*\(\s*subtract_intervals\s*\(\s*"
+            r"first_term\s*,\s*second_term\s*\)\s*,\s*third_term\s*\)",
+            orientation_clean,
+            flags=re.DOTALL,
+        )
+        is not None,
+        "orientation_3d does not evaluate u0*m0 - u1*m1 + u2*m2",
     )
     require(
-        re.search(r"\bupper\b\s*<\s*0(?:[.]0+)?", clean) is not None,
-        "the CUDA interval filter has no strictly-negative certification",
+        re.search(r"field\s*\*\s*count\s*\+\s*index", orientation_clean)
+        is not None,
+        "orientation_3d coordinates are not packed field-major for coalesced loads",
     )
-    require(
-        re.search(r"(?:==|<=|>=)\s*0(?:[.]0+)?[^;\n]*(?:zero|equal)", clean)
-        is None,
-        "the CUDA filter appears to certify exact zero",
-    )
-    require(
-        INTERNAL_HEADER.name in cuda,
-        "the CUDA source does not include the private launch contract",
-    )
-    require("unknown" in internal and "unknown" in public, "the launch contract loses tri-state semantics")
 
 
-def validate_host_source(host: str, header: str, internal: str) -> None:
+def validate_host_source(
+    host: str,
+    header: str,
+    distance_internal: str,
+    orientation_internal: str,
+) -> None:
     clean = without_comments(host)
     require(PUBLIC_HEADER.name in clean, "the host path does not include its public API")
     require(
-        INTERNAL_HEADER.name in clean,
-        "the host path does not include the private CUDA launch contract",
+        INTERNAL_HEADER.name in clean and ORIENTATION_INTERNAL_HEADER.name in clean,
+        "the host path does not include both private CUDA launch contracts",
     )
     require(
-        len(re.findall(r"std::launch::async", clean)) >= 2
+        len(re.findall(r"std::launch::async", clean)) >= 4
         and re.search(
             r"fallback_future\s*=\s*std::async\s*\(\s*"
             r"std::launch::async",
@@ -292,6 +466,18 @@ def validate_host_source(host: str, header: str, internal: str) -> None:
         "compare_squared_distances" in clean
         or "decide_squared_distance_order" in clean,
         "the host fallback does not call the Phase 2A CPU predicate",
+    )
+    require(
+        "decide_orientation_3d" in clean,
+        "the orientation host fallback does not call the Phase 2A CPU predicate",
+    )
+    require(
+        clean.count("PredicateFilterPolicy::allow_adaptive") >= 2,
+        "both GPU predicates must use the adaptive CPU fallback",
+    )
+    require(
+        clean.count("PredicateFilterPolicy::multiprecision_only") >= 2,
+        "both GPU predicates must audit known signs with multiprecision",
     )
     require(
         re.search(
@@ -341,9 +527,14 @@ def validate_host_source(host: str, header: str, internal: str) -> None:
     )
     require(
         re.search(r"std::future\s*<", without_comments(header)) is not None
-        and "filter_squared_distances_on_gpu" in internal
+        and "filter_squared_distances_on_gpu" in distance_internal
         and "filter_squared_distances_on_gpu" in clean,
-        "the asynchronous API is detached from the CUDA launcher",
+        "the distance asynchronous API is detached from the CUDA launcher",
+    )
+    require(
+        "filter_orientations_3d_on_gpu" in orientation_internal
+        and "filter_orientations_3d_on_gpu" in clean,
+        "the orientation asynchronous API is detached from the CUDA launcher",
     )
 
 
@@ -353,6 +544,7 @@ def validate_cli(cli: str) -> None:
         "replay_id",
         "binary64",
         "compare_squared_distances",
+        "orientation_3d",
         "morsehgp3d",
     ):
         require(token in clean, f"GPU predicate replay CLI is missing {token}")
@@ -371,7 +563,7 @@ def target_body(cmake: str, command: str, target: str) -> str:
 def validate_cmake(cmake: str, cuda_module: str) -> None:
     library_body = target_body(cmake, "add_library", LIBRARY_TARGET)
     replay_body = target_body(cmake, "add_executable", REPLAY_TARGET)
-    for source in (CUDA_SOURCE, HOST_SOURCE):
+    for source in (CUDA_SOURCE, ORIENTATION_CUDA_SOURCE, HOST_SOURCE):
         require(
             source.as_posix() in library_body,
             f"{LIBRARY_TARGET} does not compile {source}",
@@ -435,15 +627,19 @@ def validate_presets(value: dict[str, Any]) -> None:
 
 def validate_contract(files: ContractFiles) -> None:
     validate_public_header(files.texts[PUBLIC_HEADER])
-    validate_cuda_source(
+    validate_interval_header(files.texts[INTERVAL_HEADER])
+    validate_cuda_sources(
         files.texts[CUDA_SOURCE],
         files.texts[INTERNAL_HEADER],
+        files.texts[ORIENTATION_CUDA_SOURCE],
+        files.texts[ORIENTATION_INTERNAL_HEADER],
         files.texts[PUBLIC_HEADER],
     )
     validate_host_source(
         files.texts[HOST_SOURCE],
         files.texts[PUBLIC_HEADER],
         files.texts[INTERNAL_HEADER],
+        files.texts[ORIENTATION_INTERNAL_HEADER],
     )
     validate_cli(files.texts[CLI_SOURCE])
     validate_cmake(files.texts[CMAKE_SOURCE], files.texts[CUDA_MODULE])
@@ -558,7 +754,7 @@ def validate_negative_mutations(files: ContractFiles) -> int:
         (
             "non-finite guard removed",
             mutate_text_regex(
-                CUDA_SOURCE,
+                INTERVAL_HEADER,
                 r"if\s*\(\s*\(\s*bits\s*&\s*kBinary64ExponentMask\s*\)\s*"
                 r"==\s*kBinary64ExponentMask\s*\)\s*\{\s*"
                 r"return\s+invalid_interval\s*\(\s*\)\s*;\s*\}",
@@ -619,13 +815,122 @@ def validate_negative_mutations(files: ContractFiles) -> int:
             "audit preset omits replay target",
             lambda candidate: remove_replay_target(candidate, "cuda-audit"),
         ),
+        (
+            "addition rounding directions inverted",
+            mutate_text_regex(
+                INTERVAL_HEADER,
+                r"__dadd_rd\(\s*left[.]lower\s*,\s*right[.]lower\s*\)\s*,\s*"
+                r"__dadd_ru\(\s*left[.]upper\s*,\s*right[.]upper\s*\)",
+                "__dadd_ru(left.lower, right.lower), "
+                "__dadd_rd(left.upper, right.upper)",
+                "addition directions",
+            ),
+        ),
+        (
+            "subtraction rounding directions inverted",
+            mutate_text_regex(
+                INTERVAL_HEADER,
+                r"__dsub_rd\(\s*left[.]lower\s*,\s*right[.]upper\s*\)\s*,\s*"
+                r"__dsub_ru\(\s*left[.]upper\s*,\s*right[.]lower\s*\)",
+                "__dsub_ru(left.lower, right.upper), "
+                "__dsub_rd(left.upper, right.lower)",
+                "subtraction directions",
+            ),
+        ),
+        (
+            "positive square rounding directions inverted",
+            mutate_text_regex(
+                INTERVAL_HEADER,
+                r"lower\s*=\s*__dmul_rd\(\s*value[.]lower\s*,\s*"
+                r"value[.]lower\s*\)\s*;\s*upper\s*=\s*__dmul_ru\(\s*"
+                r"value[.]upper\s*,\s*value[.]upper\s*\)\s*;",
+                "lower = __dmul_ru(value.lower, value.lower); "
+                "upper = __dmul_rd(value.upper, value.upper);",
+                "positive square directions",
+            ),
+        ),
+        (
+            "negative square endpoints inverted",
+            mutate_text_regex(
+                INTERVAL_HEADER,
+                r"lower\s*=\s*__dmul_rd\(\s*value[.]upper\s*,\s*"
+                r"value[.]upper\s*\)\s*;\s*upper\s*=\s*__dmul_ru\(\s*"
+                r"value[.]lower\s*,\s*value[.]lower\s*\)\s*;",
+                "lower = __dmul_rd(value.lower, value.lower); "
+                "upper = __dmul_ru(value.upper, value.upper);",
+                "negative square endpoints",
+            ),
+        ),
+        (
+            "positive certification accepts zero",
+            mutate_text(
+                CUDA_SOURCE,
+                "difference.lower > 0.0",
+                "difference.lower >= 0.0",
+                "strict positive distance sign",
+            ),
+        ),
+        (
+            "negative certification accepts zero",
+            mutate_text(
+                CUDA_SOURCE,
+                "difference.upper < 0.0",
+                "difference.upper <= 0.0",
+                "strict negative distance sign",
+            ),
+        ),
+        (
+            "distance comparison operands inverted",
+            mutate_text(
+                CUDA_SOURCE,
+                "subtract_intervals(left_squared, right_squared)",
+                "subtract_intervals(right_squared, left_squared)",
+                "distance subtraction order",
+            ),
+        ),
+        (
+            "orientation positive certification accepts zero",
+            mutate_text(
+                ORIENTATION_CUDA_SOURCE,
+                "determinant.lower > 0.0",
+                "determinant.lower >= 0.0",
+                "strict positive orientation sign",
+            ),
+        ),
+        (
+            "orientation negative certification accepts zero",
+            mutate_text(
+                ORIENTATION_CUDA_SOURCE,
+                "determinant.upper < 0.0",
+                "determinant.upper <= 0.0",
+                "strict negative orientation sign",
+            ),
+        ),
+        (
+            "orientation cofactor sign inverted",
+            mutate_text(
+                ORIENTATION_CUDA_SOURCE,
+                "subtract_intervals(first_term, second_term)",
+                "add_intervals(first_term, second_term)",
+                "orientation cofactor sign",
+            ),
+        ),
+        (
+            "positive-negative multiplication endpoint changed",
+            mutate_text(
+                INTERVAL_HEADER,
+                "__dmul_rd(left.upper, right.lower)",
+                "__dmul_rd(left.lower, right.lower)",
+                "positive-negative lower endpoint",
+            ),
+        ),
     ]
     for intrinsic in DIRECTED_INTRINSICS:
         mutations.append(
             (
                 f"directed intrinsic {intrinsic} removed",
                 mutate_text_all(
-                    CUDA_SOURCE,
+                    INTERVAL_HEADER,
                     intrinsic,
                     f"removed_{intrinsic.removeprefix('__')}",
                     intrinsic,
@@ -655,9 +960,9 @@ def main(arguments: list[str]) -> int:
                 "cuda_runtime_executed": False,
                 "cuda_target": LIBRARY_TARGET,
                 "negative_mutations": negative_mutations,
-                "predicate": "compare_squared_distances",
+                "predicates": ["compare_squared_distances", "orientation_3d"],
                 "replay_target": REPLAY_TARGET,
-                "schema_version": 1,
+                "schema_version": 2,
             },
             separators=(",", ":"),
             sort_keys=True,

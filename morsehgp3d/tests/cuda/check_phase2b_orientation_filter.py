@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Differentially qualify the bounded Phase 2B squared-distance GPU filter."""
+"""Differentially qualify the bounded Phase 2B orientation_3d GPU filter."""
 
 from __future__ import annotations
 
@@ -15,12 +15,15 @@ import sys
 from typing import Any, NoReturn, Sequence
 
 
-SCHEMA = "morsehgp3d.phase2b.distance_filter.v1"
-PREDICATE = "compare_squared_distances"
+SCHEMA = "morsehgp3d.phase2b.orientation_3d_filter.v1"
+PREDICATE = "orientation_3d"
 INTEGER_KNOWN_CASE_COUNT = 2_049
-ADVERSARIAL_PAIR_COUNT = 6
+ADVERSARIAL_PAIR_COUNT = 8
 ADVERSARIAL_KNOWN_CASE_COUNT = 2 * ADVERSARIAL_PAIR_COUNT
-KNOWN_CASE_COUNT = INTEGER_KNOWN_CASE_COUNT + ADVERSARIAL_KNOWN_CASE_COUNT
+REQUIRED_GPU_KNOWN_CASE_COUNT = (
+    INTEGER_KNOWN_CASE_COUNT + ADVERSARIAL_KNOWN_CASE_COUNT
+)
+OPTIONAL_GPU_CASE_COUNT = 2
 SIGN_NAMES = frozenset({"negative", "zero", "positive"})
 GPU_SIGN_NAMES = frozenset({"negative", "unknown", "positive"})
 STAGE_NAMES = frozenset(
@@ -161,22 +164,24 @@ def binary64_fraction(word: str) -> Fraction:
     return Fraction(numerator, 1 << -exponent)
 
 
-def exact_distance_sign(words: Sequence[str]) -> str:
-    require(len(words) == 9, "a squared-distance case must contain nine words")
+def exact_orientation_sign(words: Sequence[str]) -> str:
+    require(len(words) == 12, "an orientation_3d case must contain twelve words")
     values = tuple(binary64_fraction(word) for word in words)
-    witness = values[0:3]
-    left = values[3:6]
-    right = values[6:9]
-    difference = sum(
-        ((witness[axis] - left[axis]) ** 2 for axis in range(3)),
-        start=Fraction(0),
-    ) - sum(
-        ((witness[axis] - right[axis]) ** 2 for axis in range(3)),
-        start=Fraction(0),
+    a = values[0:3]
+    b = values[3:6]
+    c = values[6:9]
+    d = values[9:12]
+    u = tuple(b[axis] - a[axis] for axis in range(3))
+    v = tuple(c[axis] - a[axis] for axis in range(3))
+    w = tuple(d[axis] - a[axis] for axis in range(3))
+    determinant = (
+        u[0] * (v[1] * w[2] - v[2] * w[1])
+        - u[1] * (v[0] * w[2] - v[2] * w[0])
+        + u[2] * (v[0] * w[1] - v[1] * w[0])
     )
-    if difference < 0:
+    if determinant < 0:
         return "negative"
-    if difference > 0:
+    if determinant > 0:
         return "positive"
     return "zero"
 
@@ -188,6 +193,8 @@ class Case:
     label: str
     required_gpu_sign: str | None = None
     required_stage: str | None = None
+    allow_gpu_unknown: bool = False
+    unknown_stage: str | None = None
 
     @property
     def replay_command(self) -> str:
@@ -199,7 +206,7 @@ class Case:
 
     @property
     def oracle_sign(self) -> str:
-        return exact_distance_sign(self.words)
+        return exact_orientation_sign(self.words)
 
 
 def make_point(values: Sequence[int]) -> tuple[str, str, str]:
@@ -212,30 +219,36 @@ def make_point(values: Sequence[int]) -> tuple[str, str, str]:
 
 
 def make_known_cases() -> list[Case]:
-    generator = random.Random(0x4D4F525345484750)
+    generator = random.Random(0x4F5249454E543344)
     cases: list[Case] = []
     for index in range(INTEGER_KNOWN_CASE_COUNT):
-        witness = tuple(generator.randrange(-64, 65) for _ in range(3))
-        near_delta = tuple(generator.randrange(-3, 4) for _ in range(3))
-        if near_delta == (0, 0, 0):
-            near_delta = (1, 0, 0)
-        far_delta = (
-            (24 + generator.randrange(8))
-            * (-1 if generator.randrange(2) else 1),
-            generator.randrange(-5, 6),
-            generator.randrange(-5, 6),
+        a = tuple(generator.randrange(-64, 65) for _ in range(3))
+        u = (8 + generator.randrange(8), 0, 0)
+        v = (
+            generator.randrange(-4, 5),
+            9 + generator.randrange(8),
+            0,
         )
-        near = tuple(witness[axis] + near_delta[axis] for axis in range(3))
-        far = tuple(witness[axis] + far_delta[axis] for axis in range(3))
-        if index % 2 == 0:
-            left, right = near, far
-            expected = "negative"
-        else:
-            left, right = far, near
-            expected = "positive"
-        replay_id = 50_000_000 + (INTEGER_KNOWN_CASE_COUNT - index) * 17
-        words = (*make_point(witness), *make_point(left), *make_point(right))
-        case = Case(replay_id, words, f"known-{index}", expected, "fp64_filtered")
+        z_magnitude = 10 + generator.randrange(8)
+        z_sign = 1 if index % 2 == 0 else -1
+        w = (
+            generator.randrange(-4, 5),
+            generator.randrange(-4, 5),
+            z_sign * z_magnitude,
+        )
+        b = tuple(a[axis] + u[axis] for axis in range(3))
+        c = tuple(a[axis] + v[axis] for axis in range(3))
+        d = tuple(a[axis] + w[axis] for axis in range(3))
+        expected = "positive" if z_sign > 0 else "negative"
+        replay_id = 80_000_003 + (INTEGER_KNOWN_CASE_COUNT - index) * 29
+        words = (*make_point(a), *make_point(b), *make_point(c), *make_point(d))
+        case = Case(
+            replay_id,
+            words,
+            f"well-conditioned-{index}",
+            expected,
+            "fp64_filtered",
+        )
         require(
             case.oracle_sign == expected,
             f"generated case {index} does not have its constructed exact sign",
@@ -245,136 +258,246 @@ def make_known_cases() -> list[Case]:
 
 
 def make_adversarial_cases() -> list[Case]:
-    # Each base case contains non-integral binary64 operations across a distinct
-    # exponent regime. The left/right mirror forces both certified signs while
-    # preserving the exact same directed-rounding workload.
+    # These binary64 bit patterns exercise inexact products, signed branches,
+    # mixed exponents, large-offset subtraction, signed zero and cancellation.
+    # Their determinants remain separated enough from zero for the directed
+    # interval to be required to certify both permutations on the device.
     bases = (
         (
             "all-inexact",
             (
-                "3ff0000000000000", "3ff0000000000000", "3ff0000000000000",
-                "3fb999999999999a", "3fc999999999999a", "3fd3333333333333",
-                "4030000000000000", "402e000000000000", "402c000000000000",
+                "0000000000000000", "0000000000000000", "0000000000000000",
+                "3fb999999999999a", "0000000000000000", "0000000000000000",
+                "3fc999999999999a", "3fd3333333333333", "0000000000000000",
+                "3fd999999999999a", "3fe0000000000000", "3fe3333333333333",
             ),
+            "positive",
         ),
         (
-            "signed-square-branches",
+            "signed-inexact",
             (
                 "bff4000000000000", "3fe6666666666666", "c008000000000000",
-                "bfb999999999999a", "bfc999999999999a", "3fd3333333333333",
-                "403419999999999a", "c033333333333333", "40314ccccccccccd",
+                "bfb999999999999a", "3fe6666666666666", "c008000000000000",
+                "4002000000000000", "bff8000000000000", "c008000000000000",
+                "c010000000000000", "4016000000000000", "3ffc000000000000",
             ),
+            "negative",
         ),
         (
             "mixed-exponents",
             (
-                "4c70000000000000", "3ff0000000000000", "3370000000000000",
-                "3fb999999999999a", "c000000000000000", "0000000000000000",
-                "cc70000000000000", "4030000000000000", "3410000000000000",
+                "0000000000000000", "0000000000000000", "0000000000000000",
+                "4c70000000000000", "0000000000000000", "0000000000000000",
+                "3370000000000000", "39b0000000000000", "0000000000000000",
+                "3690000000000000", "3b40000000000000", "3cd0000000000000",
             ),
+            "positive",
         ),
         (
-            "multiply-isolated",
+            "large-offset-subtraction",
+            (
+                "4c70000000000000", "cc70000000000000", "4c70000000000000",
+                "4c70000000000004", "cc70000000000000", "4c70000000000000",
+                "4c70000000000002", "cc6ffffffffffff8", "4c70000000000000",
+                "4c6ffffffffffffe", "cc6ffffffffffffc", "4c70000000000004",
+            ),
+            "positive",
+        ),
+        (
+            "signed-zero-branches",
+            (
+                "8000000000000000", "0000000000000000", "8000000000000000",
+                "c020000000000000", "8000000000000000", "0000000000000000",
+                "4000000000000000", "c010000000000000", "8000000000000000",
+                "bff0000000000000", "4008000000000000", "4018000000000000",
+            ),
+            "positive",
+        ),
+        (
+            "cancellation-gap",
             (
                 "0000000000000000", "0000000000000000", "0000000000000000",
-                "3fb999999999999a", "0000000000000000", "0000000000000000",
-                "3fc999999999999a", "0000000000000000", "0000000000000000",
+                "3ff0000000000000", "3ff0000000000000", "3ff0000000000000",
+                "3ff0000000000000", "3ff0000100000000", "3ff0000000000000",
+                "3ff0000000000000", "3ff0000000000000", "3ff0000100000000",
             ),
+            "positive",
         ),
         (
-            "subtract-isolated",
+            "exact-dyadic-translation-2p40",
             (
+                "4270000000000000", "4270000000000000", "4270000000000000",
+                "4270000000001000", "4270000000000000", "4270000000000000",
+                "4270000000000000", "4270000000001000", "4270000000000000",
+                "4270000000000000", "4270000000000000", "4270000000001000",
+            ),
+            "positive",
+        ),
+        (
+            "near-coplanar-2m52",
+            (
+                "0000000000000000", "0000000000000000", "0000000000000000",
                 "3ff0000000000000", "0000000000000000", "0000000000000000",
-                "3fb999999999999a", "0000000000000000", "0000000000000000",
-                "c000000000000000", "0000000000000000", "0000000000000000",
+                "0000000000000000", "3ff0000000000000", "0000000000000000",
+                "3ff0000000000000", "3ff0000000000000", "3cb0000000000000",
             ),
-        ),
-        (
-            "add-isolated",
-            (
-                "0000000000000000", "0000000000000000", "0000000000000000",
-                "41a0000000000000", "3ff0000000000000", "0000000000000000",
-                "41b0000000000000", "0000000000000000", "0000000000000000",
-            ),
+            "positive",
         ),
     )
     require(
         len(bases) == ADVERSARIAL_PAIR_COUNT,
-        "the directed-rounding pair count changed",
+        "the adversarial directed-rounding pair count changed",
     )
     cases: list[Case] = []
-    for index, (label, negative_words) in enumerate(bases):
-        negative = Case(
-            101 + 2 * index,
-            negative_words,
-            f"adversarial-{label}-negative",
-            "negative",
+    for index, (label, words, expected) in enumerate(bases):
+        original = Case(
+            1_001 + 100 * index,
+            words,
+            f"adversarial-{label}-{expected}",
+            expected,
             "fp64_filtered",
         )
-        positive_words = (
-            *negative_words[0:3],
-            *negative_words[6:9],
-            *negative_words[3:6],
+        swapped_words = (
+            *words[0:3],
+            *words[6:9],
+            *words[3:6],
+            *words[9:12],
         )
-        positive = Case(
-            102 + 2 * index,
-            positive_words,
-            f"adversarial-{label}-positive",
-            "positive",
+        opposite = "negative" if expected == "positive" else "positive"
+        swapped = Case(
+            1_038 + 100 * index,
+            swapped_words,
+            f"adversarial-{label}-{opposite}",
+            opposite,
             "fp64_filtered",
         )
         require(
-            negative.oracle_sign == "negative",
-            f"adversarial case {label} lost its negative exact sign",
+            original.oracle_sign == expected,
+            f"adversarial case {label} lost its exact {expected} sign",
         )
         require(
-            positive.oracle_sign == "positive",
-            f"adversarial case {label} lost its positive exact sign",
+            swapped.oracle_sign == opposite,
+            f"adversarial case {label} did not reverse under point exchange",
         )
-        cases.extend((negative, positive))
+        cases.extend((original, swapped))
+    return cases
+
+
+def make_optional_gpu_cases() -> list[Case]:
+    # These strict signs are important DAZ/FTZ regressions, but a bounded GPU
+    # interval may conservatively return unknown. Either outcome is valid; the
+    # adaptive CPU fallback must then certify the exact sign by expansion.
+    zero = "0000000000000000"
+    cases = [
+        Case(
+            2_007,
+            (
+                zero, zero, zero,
+                "3ff0000000000000", zero, zero,
+                zero, "3ff0000000000000", zero,
+                "3ff0000000000000", "3ff0000000000000", "0000000000000001",
+            ),
+            "minimum-subnormal-height",
+            allow_gpu_unknown=True,
+            unknown_stage="expansion",
+        ),
+        Case(
+            2_044,
+            (
+                zero, zero, zero,
+                "0000000000000001", zero, "2d30000000000000",
+                zero, "5f30000000000000", zero,
+                "2ec0000000000000", zero, "5f30000000000000",
+            ),
+            "daz-regression",
+            allow_gpu_unknown=True,
+            unknown_stage="expansion",
+        ),
+    ]
+    require(
+        len(cases) == OPTIONAL_GPU_CASE_COUNT,
+        "the optional GPU adversarial case count changed",
+    )
+    for case in cases:
+        require(
+            case.oracle_sign == "positive",
+            f"optional adversarial case {case.label} lost its exact sign",
+        )
     return cases
 
 
 def make_corpus() -> list[Case]:
     zero = "0000000000000000"
+    one = "3ff0000000000000"
+    minimum_subnormal = "0000000000000001"
     maximum = "7fefffffffffffff"
-    negative_maximum = "ffefffffffffffff"
 
     equality = Case(
         7,
         (
             zero, zero, zero,
-            "3fb999999999999a", "3fc999999999999a", "3fd3333333333333",
-            "bfb999999999999a", "bfc999999999999a", "bfd3333333333333",
+            one, zero, zero,
+            zero, one, zero,
+            one, one, zero,
         ),
-        "exact-equality",
+        "exact-coplanarity",
         "unknown",
         "expansion",
+        allow_gpu_unknown=True,
+        unknown_stage="expansion",
     )
     underflow = Case(
         11,
-        (zero, zero, zero, "0010000000000000", zero, zero, zero, zero, zero),
-        "underflow-square",
+        (
+            zero, zero, zero,
+            minimum_subnormal, zero, zero,
+            zero, minimum_subnormal, zero,
+            zero, zero, minimum_subnormal,
+        ),
+        "determinant-underflow",
         "unknown",
         "cpu_multiprecision",
+        allow_gpu_unknown=True,
+        unknown_stage="cpu_multiprecision",
     )
     overflow = Case(
         13,
-        (maximum, zero, zero, negative_maximum, zero, zero, maximum, zero, zero),
-        "overflow",
+        (
+            zero, zero, zero,
+            maximum, zero, zero,
+            zero, maximum, zero,
+            zero, zero, maximum,
+        ),
+        "determinant-overflow",
         "unknown",
         "cpu_multiprecision",
+        allow_gpu_unknown=True,
+        unknown_stage="cpu_multiprecision",
     )
-    cases = make_adversarial_cases() + make_known_cases()
+    cases = make_adversarial_cases() + make_optional_gpu_cases() + make_known_cases()
     cases.insert(0, equality)
     cases.insert(257, underflow)
     cases.insert(1_026, overflow)
     require(len(cases) > 256 * 8, "the corpus must span more than eight CUDA blocks")
+    replay_ids = [case.replay_id for case in cases]
     require(
-        len({case.replay_id for case in cases}) == len(cases),
+        len(set(replay_ids)) == len(cases),
         "the positive corpus contains a duplicate replay identifier",
     )
-    require(equality.oracle_sign == "zero", "equality oracle is not exact zero")
+    require(
+        replay_ids != sorted(replay_ids)
+        and all(
+            abs(left - right) != 1
+            for left, right in zip(replay_ids, replay_ids[1:])
+        ),
+        "the corpus must retain non-sequential replay identifiers",
+    )
+    require(
+        sum(case.required_gpu_sign in {"negative", "positive"} for case in cases)
+        == REQUIRED_GPU_KNOWN_CASE_COUNT,
+        "the mandatory GPU-known corpus cardinality changed",
+    )
+    require(equality.oracle_sign == "zero", "coplanarity oracle is not exact zero")
     require(underflow.oracle_sign == "positive", "underflow oracle sign changed")
     require(overflow.oracle_sign == "positive", "overflow oracle sign changed")
     return cases
@@ -445,9 +568,14 @@ def validate_decision(
         )
     if gpu_sign == "unknown":
         require(
-            case.label in {"exact-equality", "underflow-square", "overflow"},
+            case.allow_gpu_unknown,
             f"{context} unexpectedly escaped the bounded GPU-known corpus",
         )
+        if case.unknown_stage is not None:
+            require(
+                stage == case.unknown_stage,
+                f"{context} expected fallback stage {case.unknown_stage}, got {stage}",
+            )
     else:
         require(gpu_sign == sign, f"{context} GPU-known sign changed during resolution")
         require(stage == "fp64_filtered", f"{context} GPU-known stage is not FP64")
@@ -540,8 +668,8 @@ def validate_cpu_replay(
         replay_input,
         timeout_seconds,
     )
-    require_success(completed, "CPU replay of GPU-emitted commands")
-    records = parse_jsonl(completed.stdout, "CPU replay")
+    require_success(completed, "CPU replay of GPU-emitted orientation commands")
+    records = parse_jsonl(completed.stdout, "CPU orientation replay")
     require(
         len(records) == len(cases),
         "CPU replay output cardinality differs from the GPU decision batch",
@@ -610,8 +738,8 @@ def run_qualification(
     cases = make_corpus()
     gpu_input = "".join(f"{case.gpu_input}\n" for case in cases)
     audited = run_process(gpu_runner, ["--audit-known"], gpu_input, timeout_seconds)
-    require_success(audited, "audited Phase 2B GPU replay")
-    audited_records = parse_jsonl(audited.stdout, "audited GPU replay")
+    require_success(audited, "audited Phase 2B orientation GPU replay")
+    audited_records = parse_jsonl(audited.stdout, "audited orientation GPU replay")
     require(
         len(audited_records) == len(cases) + 1,
         "audited GPU replay must emit one decision per input and one summary",
@@ -625,15 +753,19 @@ def run_qualification(
         summary,
         audited_counters,
         audit_known=True,
-        context="audited GPU summary",
+        context="audited orientation GPU summary",
     )
     require(
-        audited_counters["gpu_fp64_certified"] == KNOWN_CASE_COUNT,
-        "the expected GPU-known corpus was not wholly certified",
+        audited_counters["gpu_fp64_certified"] >= REQUIRED_GPU_KNOWN_CASE_COUNT,
+        "the mandatory GPU-known orientation corpus was not wholly certified",
     )
     require(
-        audited_counters["gpu_unknown_forwarded"] == 3,
-        "equality, underflow and overflow must be the three GPU unknowns",
+        3 <= audited_counters["gpu_unknown_forwarded"] <= 3 + OPTIONAL_GPU_CASE_COUNT,
+        "mandatory and optional orientation fallbacks have invalid cardinality",
+    )
+    require(
+        audited_counters["exact_zeros"] == 1,
+        "exact coplanarity must be the sole zero in the corpus",
     )
 
     validate_cpu_replay(cpu_replay, decisions, cases, timeout_seconds)
@@ -641,8 +773,10 @@ def run_qualification(
     summary_only = run_process(
         gpu_runner, ["--summary-only"], gpu_input, timeout_seconds
     )
-    require_success(summary_only, "summary-only Phase 2B GPU replay")
-    summary_records = parse_jsonl(summary_only.stdout, "summary-only GPU replay")
+    require_success(summary_only, "summary-only Phase 2B orientation GPU replay")
+    summary_records = parse_jsonl(
+        summary_only.stdout, "summary-only orientation replay"
+    )
     require(
         len(summary_records) == 1,
         "--summary-only must publish exactly one JSONL record",
@@ -653,10 +787,12 @@ def run_qualification(
         summary_records[0],
         unaudited_counters,
         audit_known=False,
-        context="summary-only GPU summary",
+        context="summary-only orientation GPU summary",
     )
 
-    valid_words = cases[1].words
+    valid_words = next(
+        case.words for case in cases if case.required_gpu_sign == "positive"
+    )
     nan_words = ("7ff8000000000000", *valid_words[1:])
     expect_gpu_rejection(
         gpu_runner,
@@ -669,6 +805,25 @@ def run_qualification(
         gpu_runner,
         duplicate_line + duplicate_line,
         "unique",
+        timeout_seconds,
+    )
+    expect_gpu_rejection(
+        gpu_runner,
+        f"95 {PREDICATE} {' '.join(valid_words[:-1])}\n",
+        "12 binary64 words",
+        timeout_seconds,
+    )
+    expect_gpu_rejection(
+        gpu_runner,
+        f"097 {PREDICATE} {' '.join(valid_words)}\n",
+        "canonical decimal",
+        timeout_seconds,
+    )
+    expect_gpu_rejection(
+        gpu_runner,
+        duplicate_line
+        + f"99 compare_squared_distances {' '.join(valid_words[:9])}\n",
+        "single predicate",
         timeout_seconds,
     )
     expect_gpu_rejection(gpu_runner, "\n", "empty", timeout_seconds)
@@ -705,7 +860,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
         )
     except (AssertionError, OSError, subprocess.TimeoutExpired) as error:
         print(
-            f"Phase 2B distance-filter qualification failed: {error}",
+            f"Phase 2B orientation-filter qualification failed: {error}",
             file=sys.stderr,
         )
         return 1

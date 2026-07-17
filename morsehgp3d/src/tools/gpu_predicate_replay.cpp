@@ -15,6 +15,7 @@
 #include <string_view>
 #include <system_error>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace {
@@ -23,14 +24,26 @@ using morsehgp3d::exact::binary64_hex;
 using morsehgp3d::exact::parse_binary64_hex;
 using morsehgp3d::exact::to_string;
 using morsehgp3d::gpu::FilterSign;
+using morsehgp3d::gpu::Orientation3DBatchOptions;
+using morsehgp3d::gpu::Orientation3DBatchResult;
+using morsehgp3d::gpu::Orientation3DFilterInput;
 using morsehgp3d::gpu::SquaredDistanceBatchOptions;
 using morsehgp3d::gpu::SquaredDistanceBatchResult;
 using morsehgp3d::gpu::SquaredDistanceFilterInput;
 
 constexpr std::size_t kMaximumBatchSize = std::size_t{1} << 20U;
 
+enum class ReplayPredicate {
+  squared_distance,
+  orientation_3d,
+};
+
+using ReplayInput =
+    std::variant<SquaredDistanceFilterInput, Orientation3DFilterInput>;
+
 struct ReplayRecord {
-  SquaredDistanceFilterInput input;
+  ReplayPredicate predicate{ReplayPredicate::squared_distance};
+  ReplayInput input{SquaredDistanceFilterInput{}};
   std::string replay_command;
 };
 
@@ -106,27 +119,60 @@ struct ReplayRecord {
 [[nodiscard]] ReplayRecord parse_record(
     const std::string& line, std::size_t line_number) {
   const std::vector<std::string> tokens = split_tokens(line);
-  if (tokens.size() != 11U || tokens[1] != "compare_squared_distances") {
-    throw std::invalid_argument(
-        "Phase 2B input line " + std::to_string(line_number) +
-        " must be: REPLAY_ID compare_squared_distances followed by 9 binary64 words");
+  if (tokens.size() >= 2U && tokens[1] == "compare_squared_distances") {
+    if (tokens.size() != 11U) {
+      throw std::invalid_argument(
+          "Phase 2B input line " + std::to_string(line_number) +
+          " must be: REPLAY_ID compare_squared_distances followed by 9 binary64 words");
+    }
+    SquaredDistanceFilterInput input;
+    input.replay_id = parse_replay_id(tokens[0]);
+    std::array<std::uint64_t, 9> words{};
+    for (std::size_t index = 0U; index < words.size(); ++index) {
+      words[index] = parse_binary64_hex(tokens[index + 2U], false);
+    }
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      input.witness_bits[axis] = words[axis];
+      input.left_bits[axis] = words[axis + 3U];
+      input.right_bits[axis] = words[axis + 6U];
+    }
+    ReplayRecord record{
+        ReplayPredicate::squared_distance,
+        input,
+        "compare_squared_distances"};
+    for (const std::uint64_t word : words) {
+      record.replay_command += " " + binary64_hex(word);
+    }
+    return record;
   }
-  ReplayRecord record;
-  record.input.replay_id = parse_replay_id(tokens[0]);
-  std::array<std::uint64_t, 9> words{};
-  for (std::size_t index = 0U; index < words.size(); ++index) {
-    words[index] = parse_binary64_hex(tokens[index + 2U], false);
+  if (tokens.size() >= 2U && tokens[1] == "orientation_3d") {
+    if (tokens.size() != 14U) {
+      throw std::invalid_argument(
+          "Phase 2B input line " + std::to_string(line_number) +
+          " must be: REPLAY_ID orientation_3d followed by 12 binary64 words");
+    }
+    Orientation3DFilterInput input;
+    input.replay_id = parse_replay_id(tokens[0]);
+    std::array<std::uint64_t, 12> words{};
+    for (std::size_t index = 0U; index < words.size(); ++index) {
+      words[index] = parse_binary64_hex(tokens[index + 2U], false);
+    }
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      input.a_bits[axis] = words[axis];
+      input.b_bits[axis] = words[axis + 3U];
+      input.c_bits[axis] = words[axis + 6U];
+      input.d_bits[axis] = words[axis + 9U];
+    }
+    ReplayRecord record{
+        ReplayPredicate::orientation_3d, input, "orientation_3d"};
+    for (const std::uint64_t word : words) {
+      record.replay_command += " " + binary64_hex(word);
+    }
+    return record;
   }
-  for (std::size_t axis = 0U; axis < 3U; ++axis) {
-    record.input.witness_bits[axis] = words[axis];
-    record.input.left_bits[axis] = words[axis + 3U];
-    record.input.right_bits[axis] = words[axis + 6U];
-  }
-  record.replay_command = "compare_squared_distances";
-  for (const std::uint64_t word : words) {
-    record.replay_command += " " + binary64_hex(word);
-  }
-  return record;
+  throw std::invalid_argument(
+      "Phase 2B input line " + std::to_string(line_number) +
+      " must name compare_squared_distances or orientation_3d");
 }
 
 [[nodiscard]] const char* filter_sign_name(FilterSign sign) {
@@ -156,7 +202,26 @@ void write_decision(
             << "}\n";
 }
 
-void write_summary(const SquaredDistanceBatchResult& result, bool audit_known) {
+void write_decision(
+    const ReplayRecord& record,
+    const morsehgp3d::gpu::Orientation3DDecision& decision) {
+  std::cout << "{\"certification_stage\":"
+            << encode_json_string(to_string(decision.certification_stage))
+            << ",\"gpu_filter_sign\":"
+            << encode_json_string(filter_sign_name(decision.gpu_filter_sign))
+            << ",\"kind\":\"decision\",\"predicate\":\"orientation_3d\""
+            << ",\"replay_command\":"
+            << encode_json_string(record.replay_command)
+            << ",\"replay_id\":" << decision.replay_id
+            << ",\"sign\":" << encode_json_string(to_string(decision.sign))
+            << "}\n";
+}
+
+template <typename BatchResult>
+void write_summary(
+    const BatchResult& result,
+    bool audit_known,
+    std::string_view schema) {
   const auto& counters = result.counters;
   std::cout
       << "{\"audit_gpu_signs\":" << (audit_known ? "true" : "false")
@@ -173,7 +238,63 @@ void write_summary(const SquaredDistanceBatchResult& result, bool audit_known) {
       << ",\"gpu_known_audited\":" << counters.gpu_known_audited
       << ",\"gpu_unknown_forwarded\":" << counters.gpu_unknown_forwarded
       << ",\"remaining_unknown\":" << counters.remaining_unknown
-      << "},\"kind\":\"summary\",\"schema\":\"morsehgp3d.phase2b.distance_filter.v1\"}\n";
+      << "},\"kind\":\"summary\",\"schema\":"
+      << encode_json_string(schema) << "}\n";
+}
+
+int run_squared_distance(
+    const std::vector<ReplayRecord>& records,
+    bool audit_known,
+    bool summary_only) {
+  std::vector<SquaredDistanceFilterInput> inputs;
+  inputs.reserve(records.size());
+  for (const ReplayRecord& record : records) {
+    inputs.push_back(std::get<SquaredDistanceFilterInput>(record.input));
+  }
+  const SquaredDistanceBatchResult result =
+      morsehgp3d::gpu::decide_squared_distance_batch_async(
+          std::move(inputs), SquaredDistanceBatchOptions{audit_known})
+          .get();
+  if (result.decisions.size() != records.size()) {
+    throw std::runtime_error("Phase 2B resolved decision count changed");
+  }
+  if (!summary_only) {
+    for (std::size_t index = 0U; index < records.size(); ++index) {
+      write_decision(records[index], result.decisions[index]);
+    }
+  }
+  write_summary(
+      result, audit_known, "morsehgp3d.phase2b.distance_filter.v1");
+  return 0;
+}
+
+int run_orientation_3d(
+    const std::vector<ReplayRecord>& records,
+    bool audit_known,
+    bool summary_only) {
+  std::vector<Orientation3DFilterInput> inputs;
+  inputs.reserve(records.size());
+  for (const ReplayRecord& record : records) {
+    inputs.push_back(std::get<Orientation3DFilterInput>(record.input));
+  }
+  const Orientation3DBatchResult result =
+      morsehgp3d::gpu::decide_orientation_3d_batch_async(
+          std::move(inputs), Orientation3DBatchOptions{audit_known})
+          .get();
+  if (result.decisions.size() != records.size()) {
+    throw std::runtime_error(
+        "Phase 2B orientation resolved decision count changed");
+  }
+  if (!summary_only) {
+    for (std::size_t index = 0U; index < records.size(); ++index) {
+      write_decision(records[index], result.decisions[index]);
+    }
+  }
+  write_summary(
+      result,
+      audit_known,
+      "morsehgp3d.phase2b.orientation_3d_filter.v1");
+  return 0;
 }
 
 int run(bool audit_known, bool summary_only) {
@@ -195,34 +316,31 @@ int run(bool audit_known, bool summary_only) {
     throw std::runtime_error("Phase 2B batch input could not be read completely");
   }
 
-  std::vector<SquaredDistanceFilterInput> inputs;
-  inputs.reserve(records.size());
+  const ReplayPredicate predicate =
+      records.empty() ? ReplayPredicate::squared_distance
+                      : records.front().predicate;
   for (const ReplayRecord& record : records) {
-    inputs.push_back(record.input);
-  }
-  const SquaredDistanceBatchResult result =
-      morsehgp3d::gpu::decide_squared_distance_batch_async(
-          std::move(inputs), SquaredDistanceBatchOptions{audit_known})
-          .get();
-  if (result.decisions.size() != records.size()) {
-    throw std::runtime_error("Phase 2B resolved decision count changed");
-  }
-  if (!summary_only) {
-    for (std::size_t index = 0U; index < records.size(); ++index) {
-      write_decision(records[index], result.decisions[index]);
+    if (record.predicate != predicate) {
+      throw std::invalid_argument(
+          "a Phase 2B replay batch must contain a single predicate");
     }
   }
-  write_summary(result, audit_known);
+  const int status =
+      predicate == ReplayPredicate::squared_distance
+          ? run_squared_distance(records, audit_known, summary_only)
+          : run_orientation_3d(records, audit_known, summary_only);
   if (!std::cout) {
     throw std::runtime_error("Phase 2B JSONL output could not be written");
   }
-  return 0;
+  return status;
 }
 
 void usage(const char* executable) {
   std::cerr
       << "usage: " << executable << " [--audit-known] [--summary-only]\n"
-      << "stdin: REPLAY_ID compare_squared_distances HEX_X HEX_Y HEX_Z ... (3 points)\n";
+      << "stdin: a homogeneous batch of either\n"
+      << "  REPLAY_ID compare_squared_distances HEX_X HEX_Y HEX_Z ... (3 points)\n"
+      << "  REPLAY_ID orientation_3d HEX_X HEX_Y HEX_Z ... (4 points)\n";
 }
 
 }  // namespace

@@ -70,4 +70,53 @@ decide_squared_distance_batch_async(
     std::vector<SquaredDistanceFilterInput> inputs,
     SquaredDistanceBatchOptions options = {});
 
+struct Orientation3DFilterInput {
+  std::uint64_t replay_id{0};
+  std::array<std::uint64_t, 3> a_bits{};
+  std::array<std::uint64_t, 3> b_bits{};
+  std::array<std::uint64_t, 3> c_bits{};
+  std::array<std::uint64_t, 3> d_bits{};
+};
+static_assert(std::is_trivially_copyable_v<Orientation3DFilterInput>);
+
+struct Orientation3DDecision {
+  std::uint64_t replay_id{0};
+  FilterSign gpu_filter_sign{FilterSign::unknown};
+  exact::PredicateSign sign{exact::PredicateSign::zero};
+  exact::CertificationStage certification_stage{
+      exact::CertificationStage::cpu_multiprecision};
+};
+
+struct Orientation3DFilterCounters {
+  std::uint64_t gpu_inputs{0};
+  std::uint64_t gpu_fp64_certified{0};
+  std::uint64_t gpu_unknown_forwarded{0};
+  std::uint64_t cpu_fp64_filtered_certified{0};
+  std::uint64_t cpu_expansion_certified{0};
+  std::uint64_t cpu_multiprecision_certified{0};
+  std::uint64_t exact_zeros{0};
+  std::uint64_t gpu_known_audited{0};
+  std::uint64_t async_fallback_batches{0};
+  std::uint64_t remaining_unknown{0};
+};
+
+struct Orientation3DBatchResult {
+  std::vector<Orientation3DDecision> decisions;
+  Orientation3DFilterCounters counters;
+};
+
+struct Orientation3DBatchOptions {
+  // Qualification mode: independently recompute every GPU-known result with
+  // the CPU multiprecision oracle and fail closed on any contradiction.
+  bool audit_gpu_signs{false};
+};
+
+// Sign convention: det([b-a, c-a, d-a]); the unit tetrahedron is positive.
+// Every device unknown is resolved by the adaptive CPU predicate before the
+// owning future becomes ready.
+[[nodiscard]] std::future<Orientation3DBatchResult>
+decide_orientation_3d_batch_async(
+    std::vector<Orientation3DFilterInput> inputs,
+    Orientation3DBatchOptions options = {});
+
 }  // namespace morsehgp3d::gpu

@@ -19,15 +19,27 @@ Le noyau CUDA calcule des intervalles avec les primitives d'arrondi dirigé `__d
 
 Le runner hôte conserve l'ordre et les identifiants. Il transmet chaque `unknown` à `decide_squared_distance_order` avec la politique CPU adaptative dans une tâche asynchrone. En mode d'audit, chaque signe connu du GPU est recalculé séparément avec la politique CPU `multiprecision_only`; une contradiction fait échouer le lot. Chaque décision publiée contient la commande canonique acceptée par l'outil de replay CPU.
 
+## Deuxième incrément : orientation exacte en dimension trois
+
+Le deuxième portage cible `orientation_3d` avec la même convention que le prédicat CPU :
+
+$$\det\left([b-a,c-a,d-a]\right)=u_0(v_1w_2-v_2w_1)-u_1(v_0w_2-v_2w_0)+u_2(v_0w_1-v_1w_0).$$
+
+Les douze mots binary64 et l'identifiant de replay restent intacts. Les primitives d'intervalles CUDA sont désormais mutualisées entre distance et orientation. La multiplication traite les quatre quadrants de signe avec deux produits dirigés; le chemin général à huit produits n'est utilisé que lorsqu'un intervalle traverse zéro. Les deux noyaux utilisent un stockage SoA par champ, afin que chaque warp lise des coordonnées contiguës plutôt que des structures espacées.
+
+Le GPU ne publie toujours qu'un signe strictement séparé de zéro. Coplanarité, underflow, overflow ou intervalle indécis produisent `unknown`, puis `decide_orientation_3d` résout le cas sur le CPU. Le mode d'audit recalcule chaque signe GPU connu avec l'oracle multiprécision. Le runner accepte des lots homogènes distance ou orientation et refuse toute transaction mélangeant les deux prédicats.
+
 ## Validations locales avant qualification matérielle
 
 - workflow `cpu-release` : 28 tests sur 28 réussis, contrôle statique 2B inclus;
-- contrôle statique 2B : 17 mutations négatives rejetées;
+- contrôle statique 2B : 28 mutations négatives rejetées, notamment les inversions des directions `rd/ru`, des extrémités de produit et des signes de cofacteurs;
 - compilation syntaxique stricte des unités hôtes : réussie;
-- différentiel borné avec lanceur GPU simulé : 2 052 cas, dont égalité exacte, sous-normal, overflow et plus de huit blocs logiques; 2 049 signes connus et trois replis CPU, zéro `unknown` terminal;
-- replay CPU multiprécision de toutes les commandes émises : réussi.
+- différentiel distance renforcé avec lanceur GPU simulé : 2 064 cas, dont douze cas non entiers ciblant séparément soustraction, multiplication et addition dirigées; 2 061 signes connus et trois replis CPU, zéro `unknown` terminal;
+- corpus orientation : 2 070 cas relus par un oracle rationnel indépendant et par une émulation bit-à-bit des intervalles dirigés; 2 065 signes GPU obligatoires, zéro mauvais signe et zéro `unknown` terminal après replay CPU;
+- test mathématique indépendant de la multiplication d'intervalles : 100 000 paires aléatoires, tous les quadrants couverts, 65 559 enveloppes finies exactes et 34 441 overflows rejetés de façon conservatrice;
+- replay CPU multiprécision de toutes les commandes distance et orientation : réussi.
 
-Le lanceur simulé vérifie l'orchestration, les schémas, les compteurs et le replay; il ne qualifie ni le code device, ni le matériel G4.
+Le lanceur simulé et l'émulation mathématique vérifient l'orchestration, les schémas, les compteurs, le replay et les formules. Ils ne qualifient ni le code device `orientation_3d`, ni ses performances sur G4. Cette qualification matérielle reste requise avant d'ajouter le deuxième incrément aux preuves de phase.
 
 ## Qualification matérielle du 17 juillet 2026
 
@@ -44,7 +56,7 @@ Après le succès, l'arrêt ciblé de la génération `2026-07-17T10:24:56.396-0
 ## Travaux restant avant la porte de sortie
 
 - étendre le différentiel au corpus distance de la phase 2A et à la campagne supplémentaire requise;
-- porter les filtres et expansions encore nécessaires, notamment l'orientation et le bisecteur de puissance;
+- qualifier matériellement `orientation_3d`, puis porter le bisecteur de puissance et les expansions GPU réellement rentables;
 - mesurer et publier les taux de chaque étage sans en faire une condition de correction;
 - vérifier que tout `unknown` GPU est transmis au CPU sur l'ensemble des prédicats portés.
 

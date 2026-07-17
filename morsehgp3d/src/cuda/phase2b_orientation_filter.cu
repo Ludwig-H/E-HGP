@@ -1,4 +1,4 @@
-#include "phase2b_distance_filter_internal.hpp"
+#include "phase2b_orientation_filter_internal.hpp"
 #include "phase2b_interval.cuh"
 
 #include <cuda_runtime.h>
@@ -12,11 +12,11 @@
 #include <vector>
 
 #if !defined(__CUDACC__)
-#error "phase2b_distance_filter.cu must be compiled ahead of time with NVCC"
+#error "phase2b_orientation_filter.cu must be compiled ahead of time with NVCC"
 #endif
 
 #if __CUDACC_VER_MAJOR__ != 12 || __CUDACC_VER_MINOR__ != 9
-#error "The Phase 2B distance filter requires the CUDA 12.9 compiler"
+#error "The Phase 2B orientation filter requires the CUDA 12.9 compiler"
 #endif
 
 #if defined(__FAST_MATH__) || defined(__CUDA_FAST_MATH__)
@@ -28,21 +28,21 @@
 #endif
 
 #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ != 1200
-#error "The Phase 2B distance filter must contain only sm_120 device code"
+#error "The Phase 2B orientation filter must contain only sm_120 device code"
 #endif
 
 namespace morsehgp3d::gpu::detail {
 namespace {
 
 constexpr unsigned int kThreadsPerBlock = 256U;
-constexpr std::size_t kPointCount = 3U;
+constexpr std::size_t kPointCount = 4U;
 constexpr std::size_t kAxisCount = 3U;
 constexpr std::size_t kCoordinateFieldCount = kPointCount * kAxisCount;
 
 using device::DeviceInterval;
 using device::add_intervals;
+using device::multiply_intervals;
 using device::point_interval;
-using device::square_interval;
 using device::subtract_intervals;
 
 [[nodiscard]] __device__ DeviceInterval coordinate_interval(
@@ -55,44 +55,68 @@ using device::subtract_intervals;
   return point_interval(coordinate_bits[field * count + index]);
 }
 
-[[nodiscard]] __device__ FilterSign filter_squared_distance(
+[[nodiscard]] __device__ DeviceInterval product_difference(
+    const DeviceInterval& left_first,
+    const DeviceInterval& left_second,
+    const DeviceInterval& right_first,
+    const DeviceInterval& right_second) noexcept {
+  return subtract_intervals(
+      multiply_intervals(left_first, left_second),
+      multiply_intervals(right_first, right_second));
+}
+
+// Sign convention is exactly the CPU convention:
+// det([b-a, c-a, d-a]); (0, e1, e2, e3) is positive.
+[[nodiscard]] __device__ FilterSign filter_orientation_3d(
     const std::uint64_t* coordinate_bits,
     std::size_t count,
     std::size_t index) noexcept {
-  DeviceInterval left_squared = point_interval(0U);
-  DeviceInterval right_squared = point_interval(0U);
+  DeviceInterval u[kAxisCount]{};
+  DeviceInterval v[kAxisCount]{};
+  DeviceInterval w[kAxisCount]{};
   for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
-    const DeviceInterval witness =
+    const DeviceInterval origin =
         coordinate_interval(coordinate_bits, count, index, 0U, axis);
-    const DeviceInterval left_delta = subtract_intervals(
-        witness,
-        coordinate_interval(coordinate_bits, count, index, 1U, axis));
-    const DeviceInterval right_delta = subtract_intervals(
-        witness,
-        coordinate_interval(coordinate_bits, count, index, 2U, axis));
-    left_squared = add_intervals(left_squared, square_interval(left_delta));
-    right_squared = add_intervals(right_squared, square_interval(right_delta));
+    u[axis] = subtract_intervals(
+        coordinate_interval(coordinate_bits, count, index, 1U, axis),
+        origin);
+    v[axis] = subtract_intervals(
+        coordinate_interval(coordinate_bits, count, index, 2U, axis),
+        origin);
+    w[axis] = subtract_intervals(
+        coordinate_interval(coordinate_bits, count, index, 3U, axis),
+        origin);
   }
-  const DeviceInterval difference =
-      subtract_intervals(left_squared, right_squared);
-  if (!difference.valid) {
+
+  const DeviceInterval first_minor =
+      product_difference(v[1], w[2], v[2], w[1]);
+  const DeviceInterval second_minor =
+      product_difference(v[0], w[2], v[2], w[0]);
+  const DeviceInterval third_minor =
+      product_difference(v[0], w[1], v[1], w[0]);
+  const DeviceInterval first_term = multiply_intervals(u[0], first_minor);
+  const DeviceInterval second_term = multiply_intervals(u[1], second_minor);
+  const DeviceInterval third_term = multiply_intervals(u[2], third_minor);
+  const DeviceInterval determinant = add_intervals(
+      subtract_intervals(first_term, second_term), third_term);
+  if (!determinant.valid) {
     return FilterSign::unknown;
   }
-  if (difference.lower > 0.0) {
+  if (determinant.lower > 0.0) {
     return FilterSign::positive;
   }
-  if (difference.upper < 0.0) {
+  if (determinant.upper < 0.0) {
     return FilterSign::negative;
   }
   return FilterSign::unknown;
 }
 
-// Coordinates are stored field-major from witness.x through right.z, so a
-// warp performs one coalesced load per field instead of striding over records.
-__global__ void morsehgp3d_phase2b_squared_distance_filter_kernel(
+// Coordinates are stored field-major: all a.x words, then all a.y words, and
+// so on through d.z. A warp therefore performs one coalesced load per field.
+__global__ void morsehgp3d_phase2b_orientation_3d_filter_kernel(
     const std::uint64_t* replay_ids,
     const std::uint64_t* coordinate_bits,
-    RawSquaredDistanceFilterOutput* outputs,
+    RawOrientation3DFilterOutput* outputs,
     std::size_t count) {
   const std::size_t index =
       static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
@@ -101,7 +125,7 @@ __global__ void morsehgp3d_phase2b_squared_distance_filter_kernel(
   }
   outputs[index].replay_id = replay_ids[index];
   outputs[index].sign =
-      filter_squared_distance(coordinate_bits, count, index);
+      filter_orientation_3d(coordinate_bits, count, index);
 }
 
 class CudaFailure final : public std::runtime_error {
@@ -177,19 +201,19 @@ class DeviceBuffer final {
 
 }  // namespace
 
-std::vector<RawSquaredDistanceFilterOutput> filter_squared_distances_on_gpu(
-    std::span<const SquaredDistanceFilterInput> inputs) {
+std::vector<RawOrientation3DFilterOutput> filter_orientations_3d_on_gpu(
+    std::span<const Orientation3DFilterInput> inputs) {
   if (inputs.empty()) {
     return {};
   }
   if (inputs.size() >
       std::numeric_limits<std::size_t>::max() / kCoordinateFieldCount) {
-    throw std::length_error("Phase 2B distance input packing overflow");
+    throw std::length_error("Phase 2B orientation input packing overflow");
   }
   const std::size_t block_count =
       (inputs.size() - 1U) / kThreadsPerBlock + 1U;
   if (block_count > std::numeric_limits<unsigned int>::max()) {
-    throw std::length_error("Phase 2B distance batch exceeds the CUDA grid");
+    throw std::length_error("Phase 2B orientation batch exceeds the CUDA grid");
   }
 
   std::vector<std::uint64_t> replay_ids(inputs.size());
@@ -199,19 +223,21 @@ std::vector<RawSquaredDistanceFilterOutput> filter_squared_distances_on_gpu(
     replay_ids[index] = inputs[index].replay_id;
     for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
       coordinate_bits[(0U * kAxisCount + axis) * inputs.size() + index] =
-          inputs[index].witness_bits[axis];
+          inputs[index].a_bits[axis];
       coordinate_bits[(1U * kAxisCount + axis) * inputs.size() + index] =
-          inputs[index].left_bits[axis];
+          inputs[index].b_bits[axis];
       coordinate_bits[(2U * kAxisCount + axis) * inputs.size() + index] =
-          inputs[index].right_bits[axis];
+          inputs[index].c_bits[axis];
+      coordinate_bits[(3U * kAxisCount + axis) * inputs.size() + index] =
+          inputs[index].d_bits[axis];
     }
   }
 
   Stream stream;
   DeviceBuffer<std::uint64_t> device_replay_ids(replay_ids.size());
   DeviceBuffer<std::uint64_t> device_coordinate_bits(coordinate_bits.size());
-  DeviceBuffer<RawSquaredDistanceFilterOutput> device_outputs(inputs.size());
-  std::vector<RawSquaredDistanceFilterOutput> outputs(inputs.size());
+  DeviceBuffer<RawOrientation3DFilterOutput> device_outputs(inputs.size());
+  std::vector<RawOrientation3DFilterOutput> outputs(inputs.size());
 
   check_cuda(
       cudaMemcpyAsync(
@@ -220,7 +246,7 @@ std::vector<RawSquaredDistanceFilterOutput> filter_squared_distances_on_gpu(
           replay_ids.size() * sizeof(std::uint64_t),
           cudaMemcpyHostToDevice,
           stream.get()),
-      "cudaMemcpyAsync distance replay identifiers host-to-device");
+      "cudaMemcpyAsync orientation replay identifiers host-to-device");
   check_cuda(
       cudaMemcpyAsync(
           device_coordinate_bits.get(),
@@ -228,23 +254,23 @@ std::vector<RawSquaredDistanceFilterOutput> filter_squared_distances_on_gpu(
           coordinate_bits.size() * sizeof(std::uint64_t),
           cudaMemcpyHostToDevice,
           stream.get()),
-      "cudaMemcpyAsync distance coordinates host-to-device");
-  morsehgp3d_phase2b_squared_distance_filter_kernel
+      "cudaMemcpyAsync orientation coordinates host-to-device");
+  morsehgp3d_phase2b_orientation_3d_filter_kernel
       <<<static_cast<unsigned int>(block_count), kThreadsPerBlock, 0U,
          stream.get()>>>(
           device_replay_ids.get(),
           device_coordinate_bits.get(),
           device_outputs.get(),
           inputs.size());
-  check_cuda(cudaGetLastError(), "Phase 2B distance filter launch");
+  check_cuda(cudaGetLastError(), "Phase 2B orientation filter launch");
   check_cuda(
       cudaMemcpyAsync(
           outputs.data(),
           device_outputs.get(),
-          outputs.size() * sizeof(RawSquaredDistanceFilterOutput),
+          outputs.size() * sizeof(RawOrientation3DFilterOutput),
           cudaMemcpyDeviceToHost,
           stream.get()),
-      "cudaMemcpyAsync device-to-host");
+      "cudaMemcpyAsync orientation results device-to-host");
   check_cuda(cudaStreamSynchronize(stream.get()), "cudaStreamSynchronize");
   return outputs;
 }
