@@ -8,7 +8,8 @@ permissions:
   contents: read
 
 jobs:
-  repository:
+  core_validation:
+    name: core-validation
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -81,11 +82,58 @@ jobs:
       - name: Validate implementation phase register
         run: python tools/check_implementation_status.py
 
+  gcp_lifecycle_safety:
+    name: gcp-lifecycle-safety
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
       - name: Enforce read-only GCP workflows
         run: python tools/check_gcp_workflows.py
 
-      - name: Test GCP safety guards
-        run: python -m unittest discover -s tests/gcp -p 'test_*.py'
+      - name: Validate GCP lifecycle and provisioning safety
+        run: python -m unittest tests.gcp.test_gcp_safety tests.gcp.test_phase3_docker_provision
 
       - name: Validate GCP shell syntax
         run: bash -n gcp-migration/*.sh
+
+  gcp_worker_safety:
+    name: gcp-worker-safety
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Validate the bounded Phase 3 worker
+        run: python -m unittest tests.gcp.test_phase3_remote_qualification
+
+  repository:
+    name: repository
+    if: ${{ always() }}
+    needs:
+      - core_validation
+      - gcp_lifecycle_safety
+      - gcp_worker_safety
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every validation shard
+        env:
+          CORE_VALIDATION_RESULT: ${{ needs.core_validation.result }}
+          GCP_LIFECYCLE_SAFETY_RESULT: ${{ needs.gcp_lifecycle_safety.result }}
+          GCP_WORKER_SAFETY_RESULT: ${{ needs.gcp_worker_safety.result }}
+        run: |
+          if [[ "$CORE_VALIDATION_RESULT" != "success" || "$GCP_LIFECYCLE_SAFETY_RESULT" != "success" || "$GCP_WORKER_SAFETY_RESULT" != "success" ]]; then
+            echo "core-validation=$CORE_VALIDATION_RESULT gcp-lifecycle-safety=$GCP_LIFECYCLE_SAFETY_RESULT gcp-worker-safety=$GCP_WORKER_SAFETY_RESULT" >&2
+            exit 1
+          fi

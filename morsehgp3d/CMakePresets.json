@@ -91,7 +91,7 @@
         "morsehgp3d_phase3_runtime",
         "morsehgp3d_phase3"
       ],
-      "jobs": 2
+      "jobs": 8
     },
     {
       "name": "cuda-audit",
@@ -101,7 +101,7 @@
         "morsehgp3d_phase3_runtime",
         "morsehgp3d_phase3"
       ],
-      "jobs": 2
+      "jobs": 8
     }
   ],
   "testPresets": [

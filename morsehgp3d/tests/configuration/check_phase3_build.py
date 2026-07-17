@@ -27,6 +27,7 @@ CUDA_TARGETS = [
     "morsehgp3d_phase3_runtime",
     "morsehgp3d_phase3",
 ]
+CUDA_BUILD_JOBS = 8
 
 
 class ContractError(ValueError):
@@ -184,7 +185,8 @@ def validate_build_presets(presets: dict[str, dict[str, Any]]) -> None:
             f"{name} does not compile the frozen Phase 3 target catalog",
         )
         require(
-            type(preset["jobs"]) is int and preset["jobs"] > 0, f"{name} jobs is open"
+            type(preset["jobs"]) is int and preset["jobs"] == CUDA_BUILD_JOBS,
+            f"{name} jobs must stay fixed at {CUDA_BUILD_JOBS}",
         )
 
 
@@ -362,6 +364,14 @@ def validate_negative_mutations(value: dict[str, Any]) -> None:
         ].__setitem__("MORSEHGP3D_ENABLE_CUDA", "ON"),
         "CUDA sanitizer profile",
     )
+    for name in ("cuda-release", "cuda-audit"):
+        expect_rejected(
+            value,
+            lambda candidate, preset_name=name: named_preset(
+                candidate, "buildPresets", preset_name
+            ).__setitem__("jobs", 2),
+            f"{name} build parallelism",
+        )
     expect_rejected(
         value,
         lambda candidate: named_preset(candidate, "workflowPresets", "cuda-audit")[
@@ -459,8 +469,7 @@ def validate_sources(project: Path, repository: Path) -> None:
         "the CUDA compile-only target is registered as a test",
     )
     require(
-        re.search(rf"install\([^)]*\b{CUDA_TARGETS[0]}\b", cmake, re.DOTALL)
-        is None,
+        re.search(rf"install\([^)]*\b{CUDA_TARGETS[0]}\b", cmake, re.DOTALL) is None,
         "the CUDA compile-only target is installed",
     )
     require(
@@ -532,7 +541,7 @@ def main(arguments: list[str]) -> int:
                 "cuda_architecture": "120-real",
                 "cuda_runtime_executed": False,
                 "cuda_targets": CUDA_TARGETS,
-                "negative_mutations": 7,
+                "negative_mutations": 9,
                 "public_presets": sorted(PUBLIC_NAMES),
                 "schema_version": 6,
             },
