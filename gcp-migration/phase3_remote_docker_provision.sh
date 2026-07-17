@@ -19,6 +19,7 @@ readonly FAILURE_LOG_MAX_BYTES=65536
 readonly EXPECTED_OS_ID="ubuntu"
 readonly EXPECTED_OS_VERSION="22.04"
 readonly EXPECTED_ARCHITECTURE="amd64"
+readonly EXPECTED_PYTHON_MAJOR_MINOR="3.10"
 readonly EXPECTED_NVIDIA_TOOLKIT_VERSION="1.17.8-1"
 readonly DOCKER_CONFIG="/etc/docker/daemon.json"
 readonly DOCKER_BIN="/usr/bin/docker"
@@ -46,6 +47,8 @@ readonly CHMOD_BIN="/usr/bin/chmod"
 readonly STAT_BIN="/usr/bin/stat"
 readonly TEST_BIN="/usr/bin/test"
 readonly CAT_BIN="/usr/bin/cat"
+# Jammy DLVM publie /usr/bin/python3 comme lien; certifier et appeler sa cible régulière.
+readonly PYTHON_BIN="/usr/bin/python3.10"
 
 ASSUME_YES=0
 GCE_DEADLINE_RAW=""
@@ -511,7 +514,7 @@ declare -a required_paths=(
     /usr/bin/install
     /usr/bin/journalctl
     /usr/bin/ln
-    /usr/bin/python3
+    "${PYTHON_BIN}"
     /usr/bin/readlink
     /usr/bin/systemctl
     "${NVIDIA_CTK_BIN}"
@@ -520,6 +523,20 @@ declare -a required_paths=(
 certify_fixed_executables "${required_paths[@]}" || \
     die "Chemin système absent ou non sûr : ${FAILED_FIXED_PATH:-groupe /usr/bin}."
 DIAGNOSTIC_PATHS_CERTIFIED=1
+
+python_major_minor="$(bounded_probe "${PYTHON_BIN}" -I -S - <<'PY'
+import json
+from pathlib import Path
+import re
+import sys
+from urllib.parse import urlparse
+
+assert json and Path and re and urlparse
+print(f"{sys.version_info.major}.{sys.version_info.minor}")
+PY
+)" || die "Interpréteur Python Jammy fixe inutilisable avant préparation."
+[[ "${python_major_minor}" == "${EXPECTED_PYTHON_MAJOR_MINOR}" ]] || \
+    die "Version Python fixe inattendue : ${python_major_minor:-vide}; ${EXPECTED_PYTHON_MAJOR_MINOR} requise."
 
 INITIAL_BOOT_ID="$(read_fixed_file /proc/sys/kernel/random/boot_id 2>/dev/null)" || \
     die "Boot ID initial illisible."
@@ -634,7 +651,7 @@ fi
 
 strict_validate_daemon_json() {
     local path="$1"
-    bounded_probe "${SUDO_BIN}" -n -- /usr/bin/python3 -I -S - "${path}" <<'PY'
+    bounded_probe "${SUDO_BIN}" -n -- "${PYTHON_BIN}" -I -S - "${path}" <<'PY'
 import json
 import sys
 
@@ -781,7 +798,7 @@ verify_systemd_unit() {
             --property=EnvironmentFiles 2>/dev/null)" || return 1
     fi
 
-    bounded_probe /usr/bin/python3 -I -S - "${role}" "${lexical_path}" \
+    bounded_probe "${PYTHON_BIN}" -I -S - "${role}" "${lexical_path}" \
         "${canonical_path}" "${properties}" <<'PY'
 import re
 import sys
@@ -932,7 +949,7 @@ docker_runtime_is_ready() {
     bounded_probe "${SUDO_BIN}" -n -- "${DOCKER_BIN}" --version >/dev/null 2>&1 || return 1
     runtime_json="$(bounded_probe "${SUDO_BIN}" -n -- "${DOCKER_BIN}" info \
         --format '{{json .Runtimes}}' 2>/dev/null)" || return 1
-    bounded_probe /usr/bin/python3 -I -S - "${runtime_json}" <<'PY'
+    bounded_probe "${PYTHON_BIN}" -I -S - "${runtime_json}" <<'PY'
 import json
 import sys
 
@@ -992,7 +1009,7 @@ verify_ubuntu_madison_origin() {
     local package="$1"
     local candidate="$2"
     local source_file="$3"
-    bounded_probe /usr/bin/python3 -I -S - "${package}" "${candidate}" "${source_file}" <<'PY'
+    bounded_probe "${PYTHON_BIN}" -I -S - "${package}" "${candidate}" "${source_file}" <<'PY'
 from pathlib import Path
 import sys
 from urllib.parse import urlparse

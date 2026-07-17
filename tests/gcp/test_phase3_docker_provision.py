@@ -9,6 +9,7 @@ import re
 import shutil
 import stat
 import subprocess
+import sys
 import tempfile
 import textwrap
 import unittest
@@ -282,6 +283,8 @@ def config_symlink():
 def is_symlink(path):
     if unsafe_kind(path) == "symlink":
         return True
+    if path == "/usr/bin/python3":
+        return os.environ.get("FAKE_PYTHON_ALIAS_STATE", "symlink") == "symlink"
     if path == "/etc/docker/daemon.json":
         return config_symlink()
     docker_available = not (
@@ -305,6 +308,13 @@ def directory_exists(path):
     return any(candidate == Path(item).parent or candidate in Path(item).parents for item in tool_files)
 
 def file_exists(path):
+    if unsafe_kind(path) == "missing":
+        return False
+    if (
+        path == "/usr/bin/python3"
+        and os.environ.get("FAKE_PYTHON_ALIAS_STATE") == "missing"
+    ):
+        return False
     initial_missing = os.environ.get("FAKE_INITIAL_MISSING", "")
     before_install = not state.get("apt_completed", False)
     if before_install and initial_missing == "docker-buildx" and path == plugin:
@@ -524,7 +534,7 @@ if name == "dpkg-query":
         finish(0 if diagnostic or emitted else 1)
     raise SystemExit("unexpected fake dpkg-query invocation: " + " ".join(arguments))
 
-if name == "python3":
+if name in {"python3", "python3.10"}:
     if not arguments or arguments[-2:-1] != ["-"]:
         raise SystemExit("unexpected privileged Python invocation: " + " ".join(arguments))
     path = arguments[-1]
@@ -834,6 +844,20 @@ class Phase3DockerProvisionerTests(unittest.TestCase):
             self.write_executable(self.tool_dir / name, FAKE_MULTICALL)
         self.sudo = self.tool_dir / "sudo"
         self.write_executable(self.sudo, FAKE_SUDO)
+        self.python = self.tool_dir / "python3.10"
+        self.write_executable(
+            self.python,
+            """#!/bin/sh
+if [ "${FAKE_PYTHON_MODE:-ok}" = "broken" ]; then
+    exit 97
+fi
+if [ "${FAKE_PYTHON_MODE:-ok}" = "wrong-version" ]; then
+    printf '%s\\n' '3.9'
+    exit 0
+fi
+exec /usr/bin/python3 "$@"
+""",
+        )
         self.buildx = self.tool_dir / "docker-buildx"
         self.write_executable(self.buildx, FAKE_MULTICALL)
 
@@ -857,6 +881,12 @@ class Phase3DockerProvisionerTests(unittest.TestCase):
             'readonly STAT_BIN="/usr/bin/stat"': f'readonly STAT_BIN="{self.tool_dir / "stat"}"',
             'readonly TEST_BIN="/usr/bin/test"': f'readonly TEST_BIN="{self.tool_dir / "test"}"',
             'readonly CAT_BIN="/usr/bin/cat"': f'readonly CAT_BIN="{self.tool_dir / "cat"}"',
+            'readonly PYTHON_BIN="/usr/bin/python3.10"': (
+                f'readonly PYTHON_BIN="{self.python}"'
+            ),
+            'readonly EXPECTED_PYTHON_MAJOR_MINOR="3.10"': (
+                f'readonly EXPECTED_PYTHON_MAJOR_MINOR="{sys.version_info.major}.{sys.version_info.minor}"'
+            ),
         }
         source = PROVISIONER_SOURCE.read_text(encoding="utf-8")
         for original, replacement in replacements.items():
@@ -875,6 +905,15 @@ class Phase3DockerProvisionerTests(unittest.TestCase):
         )
         self.assertEqual(1, source.count(bootstrap_stat))
         source = source.replace(bootstrap_stat, fake_bootstrap_stat)
+        fixed_prefix = (
+            '[[ "${candidate}" == /usr/bin/* && "${candidate}" != *$\'\\n\'* && \\\n'
+        )
+        fake_fixed_prefix = (
+            f'[[ ("${{candidate}}" == /usr/bin/* || "${{candidate}}" == "{self.python}") '
+            "&& \"${candidate}\" != *$'\\n'* && \\\n"
+        )
+        self.assertEqual(1, source.count(fixed_prefix))
+        source = source.replace(fixed_prefix, fake_fixed_prefix)
         self.provisioner = self.root / "phase3_remote_docker_provision.sh"
         self.write_executable(self.provisioner, source)
 
@@ -958,7 +997,12 @@ class Phase3DockerProvisionerTests(unittest.TestCase):
         return [line for line in log.splitlines() if line.startswith("SUDO ")]
 
     def test_idempotent_ready_host_performs_no_mutation(self) -> None:
-        result, log, state = self.run_provisioner(environment={"FAKE_READY": "1"})
+        result, log, state = self.run_provisioner(
+            environment={
+                "FAKE_READY": "1",
+                "FAKE_PYTHON_ALIAS_STATE": "missing",
+            }
+        )
 
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertIn("aucune mutation hôte", result.stdout)
@@ -968,6 +1012,8 @@ class Phase3DockerProvisionerTests(unittest.TestCase):
         self.assertTrue(state["enabled"])
         self.assertIn("docker --version", log)
         self.assertIn("docker info --format", log)
+        self.assertIn(f"{self.python} -I -S", log)
+        self.assertNotIn("/usr/bin/python3 -I -S", log)
         self.assertFalse(
             any(
                 re.search(
@@ -985,6 +1031,23 @@ class Phase3DockerProvisionerTests(unittest.TestCase):
         )
         self.assertNotEqual(0, mismatched.returncode)
         self.assertIn("runtime NVIDIA ne sont pas certifiés", mismatched.stderr)
+
+    def test_source_uses_jammy_versioned_python_entrypoint(self) -> None:
+        source = PROVISIONER_SOURCE.read_text(encoding="utf-8")
+
+        self.assertIn('readonly PYTHON_BIN="/usr/bin/python3.10"', source)
+        self.assertEqual(6, source.count('"${PYTHON_BIN}"'))
+        self.assertNotIn("/usr/bin/python3 -I", source)
+
+    def test_rejects_unusable_or_wrong_version_python_before_mutation(self) -> None:
+        for mode in ("broken", "wrong-version"):
+            with self.subTest(mode=mode):
+                result, log, _ = self.run_provisioner(
+                    environment={"FAKE_PYTHON_MODE": mode}
+                )
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("Python", result.stderr)
+                self.assert_no_host_mutation(log)
 
     def test_rejects_missing_or_invalid_guard_and_deadline_before_mutation(
         self,
@@ -1011,6 +1074,10 @@ class Phase3DockerProvisionerTests(unittest.TestCase):
             ("/usr/bin/nvidia-ctk", "owner"),
             ("/usr/bin/nvidia-container-runtime", "mode"),
             ("/usr/bin/apt-get", "symlink"),
+            (str(self.python), "missing"),
+            (str(self.python), "symlink"),
+            (str(self.python), "owner"),
+            (str(self.python), "mode"),
         )
         for path, kind in cases:
             with self.subTest(path=path, kind=kind):
