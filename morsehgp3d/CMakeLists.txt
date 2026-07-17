@@ -207,14 +207,79 @@ target_include_directories(
 target_link_libraries(morsehgp3d_exact INTERFACE Boost::headers)
 
 if(MSVC)
-  target_compile_options(morsehgp3d_exact INTERFACE /fp:strict)
+  target_compile_options(
+    morsehgp3d_exact
+    INTERFACE $<$<COMPILE_LANGUAGE:CXX>:/fp:strict>
+  )
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
   target_compile_options(
     morsehgp3d_exact
-    INTERFACE -fno-fast-math -ffp-contract=off -frounding-math
+    INTERFACE
+      $<$<COMPILE_LANGUAGE:CXX>:-fno-fast-math>
+      $<$<COMPILE_LANGUAGE:CXX>:-ffp-contract=off>
+      $<$<COMPILE_LANGUAGE:CXX>:-frounding-math>
   )
 else()
   message(FATAL_ERROR "The certified FP mode is not configured for ${CMAKE_CXX_COMPILER_ID}")
+endif()
+
+if(MORSEHGP3D_ENABLE_CUDA)
+  find_package(Threads REQUIRED)
+  add_library(
+    morsehgp3d_gpu_predicates
+    STATIC
+      src/cuda/phase2b_distance_filter.cu
+      src/gpu/predicate_filter.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_predicates
+    ALIAS morsehgp3d_gpu_predicates
+  )
+  target_include_directories(
+    morsehgp3d_gpu_predicates
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_predicates
+    PUBLIC morsehgp3d::exact
+    PRIVATE Threads::Threads
+  )
+  target_compile_features(morsehgp3d_gpu_predicates PUBLIC cxx_std_20)
+  morsehgp3d_configure_cuda_target(morsehgp3d_gpu_predicates)
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_predicates
+      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/W4> $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_predicates
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_predicate_replay
+    src/tools/gpu_predicate_replay.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_predicate_replay
+    PRIVATE morsehgp3d::gpu_predicates
+  )
+  if(MSVC)
+    target_compile_options(morsehgp3d_gpu_predicate_replay PRIVATE /W4 /WX)
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_predicate_replay
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
 endif()
 
 if(MORSEHGP3D_BUILD_TOOLS)
@@ -259,6 +324,7 @@ endif()
 install(
   DIRECTORY include/
   DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+  PATTERN "morsehgp3d/gpu" EXCLUDE
 )
 install(
   EXPORT MorseHGP3DTargets

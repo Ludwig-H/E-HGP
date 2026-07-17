@@ -26,6 +26,7 @@ CUDA_TARGETS = [
     "morsehgp3d_cuda_environment_probe",
     "morsehgp3d_phase3_runtime",
     "morsehgp3d_phase3",
+    "morsehgp3d_gpu_predicate_replay",
 ]
 CUDA_BUILD_JOBS = 8
 
