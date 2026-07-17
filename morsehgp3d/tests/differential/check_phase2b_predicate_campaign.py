@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -57,9 +59,21 @@ if len(oracle) != len(parsed):
     raise SystemExit(1)
 flip = os.environ.get("MORSEHGP3D_FAKE_FLIP_FIRST") == "1"
 emit_known = os.environ.get("MORSEHGP3D_FAKE_GPU_KNOWN") == "1"
+bad_json = os.environ.get("MORSEHGP3D_FAKE_GPU_BAD_JSON", "")
+if bad_json not in ("", "noncanonical", "duplicate"):
+    print("fake GPU received an invalid JSON mutation mode", file=sys.stderr)
+    raise SystemExit(1)
+fallback_mode = os.environ.get(
+    "MORSEHGP3D_FAKE_GPU_UNKNOWN_STAGE", "cpu_multiprecision"
+)
+allowed_fallback_stages = ("fp64_filtered", "expansion", "cpu_multiprecision")
+if fallback_mode != "cycle" and fallback_mode not in allowed_fallback_stages:
+    print("fake GPU received an invalid fallback stage", file=sys.stderr)
+    raise SystemExit(1)
 known_count = 0
 unknown_count = 0
 unknown_zeros = 0
+fallback_stage_counts = {stage: 0 for stage in allowed_fallback_stages}
 for index, ((replay, command, predicate), exact) in enumerate(zip(parsed, oracle, strict=True)):
     sign = exact["sign"]
     if flip and index == 0:
@@ -68,24 +82,36 @@ for index, ((replay, command, predicate), exact) in enumerate(zip(parsed, oracle
     known_count += known
     unknown_count += not known
     unknown_zeros += not known and sign == "zero"
-    print(json.dumps({
-        "certification_stage": "fp64_filtered" if known else "cpu_multiprecision",
+    fallback_stage = (
+        allowed_fallback_stages[index % len(allowed_fallback_stages)]
+        if fallback_mode == "cycle"
+        else fallback_mode
+    )
+    if not known:
+        fallback_stage_counts[fallback_stage] += 1
+    decision = json.dumps({
+        "certification_stage": "fp64_filtered" if known else fallback_stage,
         "gpu_filter_sign": sign if known else "unknown",
         "kind": "decision",
         "predicate": predicate,
         "replay_command": command,
         "replay_id": replay,
         "sign": sign,
-    }, ensure_ascii=True, separators=(",", ":"), sort_keys=True))
+    }, ensure_ascii=True, separators=(",", ":"), sort_keys=True)
+    if index == 0 and bad_json == "noncanonical":
+        decision = " " + decision
+    elif index == 0 and bad_json == "duplicate":
+        decision = decision[:-1] + ',"sign":"positive"}'
+    print(decision)
 count = len(parsed)
 predicate = parsed[0][2]
 print(json.dumps({
     "audit_gpu_signs": False,
     "counters": {
         "async_fallback_batches": 1 if unknown_count else 0,
-        "cpu_expansion_certified": 0,
-        "cpu_fp64_filtered_certified": 0,
-        "cpu_multiprecision_certified": unknown_count,
+        "cpu_expansion_certified": fallback_stage_counts["expansion"],
+        "cpu_fp64_filtered_certified": fallback_stage_counts["fp64_filtered"],
+        "cpu_multiprecision_certified": fallback_stage_counts["cpu_multiprecision"],
         "exact_zeros": unknown_zeros,
         "gpu_fp64_certified": known_count,
         "gpu_inputs": count,
@@ -200,6 +226,7 @@ def campaign_command(
     max_chunks: int | None = None,
     cases_per_predicate: int = 100,
     chunk_size: int = 60,
+    verify_only: bool = False,
 ) -> list[str]:
     result = [
         sys.executable,
@@ -220,7 +247,168 @@ def campaign_command(
     ]
     if max_chunks is not None:
         result.extend(("--max-chunks", str(max_chunks)))
+    if verify_only:
+        result.append("--verify-only")
     return result
+
+
+def tree_snapshot(root: Path) -> tuple[tuple[str, str, str], ...]:
+    result: list[tuple[str, str, str]] = []
+    for path in sorted(root.rglob("*")):
+        relative = path.relative_to(root).as_posix()
+        if path.is_symlink():
+            result.append((relative, "symlink", os.readlink(path)))
+        elif path.is_dir():
+            result.append((relative, "directory", ""))
+        elif path.is_file():
+            result.append((relative, "file", hashlib.sha256(path.read_bytes()).hexdigest()))
+        else:
+            result.append((relative, "other", ""))
+    return tuple(result)
+
+
+def expect_value_error(call: Any, diagnostic: str) -> None:
+    try:
+        call()
+    except ValueError as error:
+        if diagnostic not in str(error):
+            fail(f"guard lost diagnostic {diagnostic!r}: {error}")
+    else:
+        fail(f"guard accepted a mutation requiring {diagnostic!r}")
+
+
+def audit_count_guards(module: Any) -> None:
+    counts = module.empty_counts()
+    counts["base_case_count"] = 3
+    counts["metamorphic_sign_count"] = 3
+    counts["metamorphisms_verified"] = 3
+    counts["by_predicate"] = {predicate: 2 for predicate in module.PREDICATES}
+    counts["by_sign"]["positive"] = 6
+    counts["cpu_multiprecision_certified"] = 6
+    counts["gpu_unknown_forwarded"] = 6
+    counts["gpu_unknown_by_cpu_stage"]["cpu_multiprecision"] = 6
+    counts["total_sign_count"] = 6
+    for metamorphism in module.METAMORPHISMS[:3]:
+        counts["by_metamorphism"][metamorphism] = 1
+    counts["by_metamorphic_relation"]["same_sign"] = 2
+    counts["by_metamorphic_relation"]["opposite_sign"] = 1
+    module.validate_counts(counts, "guard baseline")
+
+    for mutation, diagnostic in (
+        (("exact_zeros",), "exact-zero counts"),
+        (("cpu_multiprecision_certified",), "exact CPU path"),
+        (("gpu_unknown_forwarded",), "GPU tri-state counts"),
+        (
+            ("gpu_unknown_by_cpu_stage", "cpu_multiprecision"),
+            "GPU fallback-stage counts",
+        ),
+        (("by_metamorphism", module.METAMORPHISMS[0]), "metamorphism counts"),
+        (
+            ("by_metamorphic_relation", "same_sign"),
+            "metamorphic relation counts",
+        ),
+    ):
+        forged = json.loads(json.dumps(counts))
+        if len(mutation) == 1:
+            forged[mutation[0]] += 1
+        else:
+            forged[mutation[0]][mutation[1]] += 1
+        expect_value_error(
+            lambda forged=forged: module.validate_counts(forged, "forged counts"),
+            diagnostic,
+        )
+
+    forged_zero = json.loads(json.dumps(counts))
+    forged_zero["by_sign"]["positive"] = 0
+    forged_zero["by_sign"]["zero"] = 6
+    forged_zero["exact_zeros"] = 6
+    forged_zero["gpu_fp64_certified"] = 6
+    forged_zero["gpu_unknown_forwarded"] = 0
+    forged_zero["gpu_unknown_by_cpu_stage"]["cpu_multiprecision"] = 0
+    expect_value_error(
+        lambda: module.validate_counts(forged_zero, "forged zero counts"),
+        "GPU-known sign",
+    )
+
+
+def audit_strict_scalar_schemas(module: Any) -> None:
+    case = SimpleNamespace(
+        base_index=0,
+        command=lambda: "compare_squared_distances 0 0 0 1 0 0 2 0 0",
+        predicate="compare_squared_distances",
+        relation="base",
+    )
+    boolean_counters = {
+        "cpu_multiprecision_certified": True,
+        "exact_zeros": False,
+        "expansion_certified": False,
+        "fp32_proposals": False,
+        "fp64_filtered_certified": False,
+        "remaining_unknown": False,
+    }
+    expect_value_error(
+        lambda: module.validate_cpu_row(
+            {
+                "certification_stage": "cpu_multiprecision",
+                "counters": boolean_counters,
+                "predicate": "compare_squared_distances",
+                "sign": "positive",
+            },
+            case,
+            "phase2a",
+            "positive",
+        ),
+        "must be an integer",
+    )
+
+    roots = {name: "a" * 64 for name in ("corpus", "oracle", "cpu", "gpu")}
+    module.validate_roots(roots, "valid roots")
+    for forged_root in ("+" + "a" * 63, "-" + "a" * 63, "A" * 64):
+        forged = {**roots, "gpu": forged_root}
+        expect_value_error(
+            lambda forged=forged: module.validate_roots(forged, "forged roots"),
+            "non-SHA256 root",
+        )
+
+
+def audit_aggregate_provenance(module: Any) -> None:
+    roots = {
+        "corpus": "1" * 64,
+        "oracle": "2" * 64,
+        "cpu": "3" * 64,
+        "gpu": "4" * 64,
+    }
+    certificates = {
+        name: (
+            {
+                "campaign": name,
+                "identities": {"shared": True},
+                "ordered_roots": {
+                    **roots,
+                    "corpus": ("1" if name == "phase2a" else "5") * 64,
+                },
+                "repository": {"git_head": "a" * 40},
+                "scope": "smoke",
+                "total_sign_count": 1,
+            },
+            f"{name}\n".encode("ascii"),
+        )
+        for name in module.CAMPAIGNS
+    }
+    module.aggregate_for(certificates, "smoke")
+    for field, diagnostic in (
+        ("identities", "runtime identities"),
+        ("repository", "repository provenance"),
+    ):
+        forged = {
+            name: (json.loads(json.dumps(value[0])), value[1])
+            for name, value in certificates.items()
+        }
+        forged["phase2b"][0][field] = {"forged": True}
+        expect_value_error(
+            lambda forged=forged: module.aggregate_for(forged, "smoke"),
+            diagnostic,
+        )
 
 
 def audit_power_guard(module: Any) -> None:
@@ -246,21 +434,24 @@ def audit_power_guard(module: Any) -> None:
 
 
 def audit_isolated_phase2b_root_guard(module: Any, root: Path) -> None:
-    total = module.MINIMUM_ADDITIONAL_SIGNS
+    base_count = module.EXPECTED_PRODUCTION_BASE_CASES
+    metamorphic_count = module.EXPECTED_PRODUCTION_METAMORPHIC_SIGNS
+    total = module.EXPECTED_PRODUCTION_TOTAL_SIGNS
     counts = module.empty_counts()
-    counts["base_case_count"] = total
-    counts["by_predicate"] = {
-        "compare_squared_distances": total // 3 + 1,
-        "orientation_3d": total // 3,
-        "power_bisector_side": total // 3,
-    }
+    counts["base_case_count"] = base_count
+    counts["metamorphic_sign_count"] = metamorphic_count
+    counts["metamorphisms_verified"] = metamorphic_count
+    counts["by_predicate"] = {predicate: total // 3 for predicate in module.PREDICATES}
+    counts["by_metamorphism"][module.METAMORPHISMS[0]] = metamorphic_count
+    counts["by_metamorphic_relation"]["same_sign"] = metamorphic_count
     counts["by_sign"]["positive"] = total
     counts["cpu_multiprecision_certified"] = total
     counts["gpu_unknown_forwarded"] = total
+    counts["gpu_unknown_by_cpu_stage"]["cpu_multiprecision"] = total
     counts["total_sign_count"] = total
     frozen_roots = {"corpus": "1" * 64, "oracle": "2" * 64}
     manifest = {
-        "base_case_count": total,
+        "base_case_count": base_count,
         "campaign": "phase2b",
         "counts": counts,
         "identities": {},
@@ -285,6 +476,31 @@ def audit_isolated_phase2b_root_guard(module: Any, root: Path) -> None:
             fail(f"isolated Phase 2B root guard lost its diagnostic: {error}")
     else:
         fail("an isolated Phase 2B certificate reused the frozen Phase 2A root")
+
+    truncated = json.loads(json.dumps(manifest))
+    truncated_counts = truncated["counts"]
+    truncated_counts["metamorphic_sign_count"] = 0
+    truncated_counts["metamorphisms_verified"] = 0
+    truncated_counts["by_metamorphism"] = {
+        name: 0 for name in module.METAMORPHISMS
+    }
+    truncated_counts["by_metamorphic_relation"] = {
+        name: 0 for name in module.METAMORPHIC_RELATIONS
+    }
+    truncated_counts["by_predicate"] = {
+        "compare_squared_distances": base_count // 3,
+        "orientation_3d": base_count // 3,
+        "power_bisector_side": base_count // 3,
+    }
+    truncated_counts["by_sign"]["positive"] = base_count
+    truncated_counts["cpu_multiprecision_certified"] = base_count
+    truncated_counts["gpu_unknown_forwarded"] = base_count
+    truncated_counts["gpu_unknown_by_cpu_stage"]["cpu_multiprecision"] = base_count
+    truncated_counts["total_sign_count"] = base_count
+    expect_value_error(
+        lambda: module.certificate_for(truncated, frozen_roots),
+        "frozen base and metamorphic scale",
+    )
 
 
 def load_tool(path: Path) -> Any:
@@ -317,6 +533,9 @@ def main(arguments: Sequence[str] | None = None) -> int:
     try:
         module = load_tool(options.campaign_tool.resolve())
         audit_power_guard(module)
+        audit_count_guards(module)
+        audit_strict_scalar_schemas(module)
+        audit_aggregate_provenance(module)
         with tempfile.TemporaryDirectory(prefix="morsehgp3d-phase2b-campaign-") as root_name:
             root = Path(root_name)
             audit_isolated_phase2b_root_guard(module, root)
@@ -328,9 +547,34 @@ def main(arguments: Sequence[str] | None = None) -> int:
             fake_gpu.chmod(fake_gpu.stat().st_mode | stat.S_IXUSR)
             environment = {
                 **os.environ,
+                "MORSEHGP3D_FAKE_GPU_BAD_JSON": "",
                 "MORSEHGP3D_FAKE_CPU": str(options.cpu_replay.resolve()),
                 "PYTHONDONTWRITEBYTECODE": "1",
             }
+            locked_checkpoint = root / "locked-checkpoint"
+            lock_path = locked_checkpoint.parent / f".{locked_checkpoint.name}.lock"
+            lock_descriptor = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o600)
+            try:
+                fcntl.flock(lock_descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                locked_run = run(
+                    campaign_command(
+                        options.campaign_tool.resolve(),
+                        fake_gpu,
+                        options.cpu_replay.resolve(),
+                        locked_checkpoint,
+                        repository,
+                        campaign="phase2b",
+                        cases_per_predicate=20,
+                        chunk_size=60,
+                    ),
+                    environment=environment,
+                    expected_status=1,
+                )
+                if "another writer holds the POSIX campaign lock" not in locked_run.stderr:
+                    fail("a concurrent writer did not encounter the campaign lock")
+            finally:
+                os.close(lock_descriptor)
+
             checkpoint = root / "checkpoint"
             partial = run(
                 campaign_command(
@@ -348,6 +592,22 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 "phase_gate_closed"
             ) is not False:
                 fail("the partial campaign claimed completion or a phase gate")
+            incomplete_verification = run(
+                campaign_command(
+                    options.campaign_tool.resolve(),
+                    fake_gpu,
+                    options.cpu_replay.resolve(),
+                    checkpoint,
+                    repository,
+                    verify_only=True,
+                ),
+                environment=environment,
+                expected_status=1,
+            )
+            if "read-only verification requires a complete campaign shard" not in (
+                incomplete_verification.stderr
+            ):
+                fail("read-only verification accepted an incomplete checkpoint")
 
             completed = run(
                 campaign_command(
@@ -382,13 +642,130 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 for value in certificates.values()
             ):
                 fail("a smoke certificate omitted a metamorphic relation check")
+            for value in certificates.values():
+                counts = value["counts"]
+                if (
+                    sum(counts["by_metamorphism"].values())
+                    != counts["metamorphic_sign_count"]
+                    or sum(counts["by_metamorphic_relation"].values())
+                    != counts["metamorphic_sign_count"]
+                    or counts["exact_zeros"] != counts["by_sign"]["zero"]
+                    or sum(counts["gpu_unknown_by_cpu_stage"].values())
+                    != counts["gpu_unknown_forwarded"]
+                ):
+                    fail("a smoke certificate lost detailed counter closure")
             if certificates["phase2a"]["ordered_roots"]["corpus"] == certificates[
                 "phase2b"
             ]["ordered_roots"]["corpus"]:
                 fail("the additional seed did not produce a distinct corpus")
 
+            before_verification = tree_snapshot(checkpoint)
+            verified = run(
+                campaign_command(
+                    options.campaign_tool.resolve(),
+                    fake_gpu,
+                    options.cpu_replay.resolve(),
+                    checkpoint,
+                    repository,
+                    verify_only=True,
+                ),
+                environment=environment,
+            )
+            if json.loads(verified.stdout) != aggregate:
+                fail("read-only verification did not return the committed aggregate")
+            if tree_snapshot(checkpoint) != before_verification:
+                fail("read-only verification modified the checkpoint copy")
+
+            mutated_gpu = root / "mutated-fake-gpu.py"
+            shutil.copy2(fake_gpu, mutated_gpu)
+            with mutated_gpu.open("a", encoding="utf-8") as stream:
+                stream.write("\n# executable identity mutation\n")
+            executable_mutation = run(
+                campaign_command(
+                    options.campaign_tool.resolve(),
+                    mutated_gpu,
+                    options.cpu_replay.resolve(),
+                    checkpoint,
+                    repository,
+                    verify_only=True,
+                ),
+                environment=environment,
+                expected_status=1,
+            )
+            if "campaign checkpoint mismatch: identities" not in (
+                executable_mutation.stderr
+            ):
+                fail("verification accepted a mutated GPU executable")
+
+            for campaign_name in ("phase2a", "phase2b"):
+                single_checkpoint = root / f"single-{campaign_name}-checkpoint"
+                single_run = run(
+                    campaign_command(
+                        options.campaign_tool.resolve(),
+                        fake_gpu,
+                        options.cpu_replay.resolve(),
+                        single_checkpoint,
+                        repository,
+                        campaign=campaign_name,
+                        cases_per_predicate=20,
+                        chunk_size=60,
+                    ),
+                    environment=environment,
+                )
+                single_aggregate = json.loads(single_run.stdout)
+                if (
+                    single_aggregate.get("additional_campaign_basis")
+                    != "single_campaign_only"
+                    or set(single_aggregate.get("campaigns", {})) != {campaign_name}
+                ):
+                    fail("a single-campaign aggregate claimed two-corpus evidence")
+                single_before = tree_snapshot(single_checkpoint)
+                single_verified = run(
+                    campaign_command(
+                        options.campaign_tool.resolve(),
+                        fake_gpu,
+                        options.cpu_replay.resolve(),
+                        single_checkpoint,
+                        repository,
+                        campaign=campaign_name,
+                        cases_per_predicate=20,
+                        chunk_size=60,
+                        verify_only=True,
+                    ),
+                    environment=environment,
+                )
+                if json.loads(single_verified.stdout) != single_aggregate:
+                    fail("single-campaign verification returned a different aggregate")
+                if tree_snapshot(single_checkpoint) != single_before:
+                    fail("single-campaign verification modified its checkpoint")
+                single_root = single_checkpoint / "result.json"
+                forged_single = load_canonical(single_root)
+                forged_single["total_sign_count"] += 1
+                single_root.write_text(
+                    canonical_json(forged_single) + "\n", encoding="ascii"
+                )
+                run(
+                    campaign_command(
+                        options.campaign_tool.resolve(),
+                        fake_gpu,
+                        options.cpu_replay.resolve(),
+                        single_checkpoint,
+                        repository,
+                        campaign=campaign_name,
+                        cases_per_predicate=20,
+                        chunk_size=60,
+                        verify_only=True,
+                    ),
+                    environment=environment,
+                    expected_status=1,
+                )
+
             known_checkpoint = root / "known-checkpoint"
-            known_environment = {**environment, "MORSEHGP3D_FAKE_GPU_KNOWN": "1"}
+            known_environment = {
+                **environment,
+                "MORSEHGP3D_FAKE_GPU_KNOWN": "1",
+                "MORSEHGP3D_FAKE_GPU_UNKNOWN_STAGE": "cycle",
+            }
             run(
                 campaign_command(
                     options.campaign_tool.resolve(),
@@ -408,8 +785,38 @@ def main(arguments: Sequence[str] | None = None) -> int:
             if (
                 known_certificate["counts"]["gpu_fp64_certified"] == 0
                 or known_certificate["counts"]["gpu_unknown_forwarded"] == 0
+                or any(
+                    value == 0
+                    for value in known_certificate["counts"][
+                        "gpu_unknown_by_cpu_stage"
+                    ].values()
+                )
             ):
-                fail("the smoke did not cover both GPU-known and GPU-unknown counters")
+                fail("the smoke did not cover GPU-known and every fallback stage")
+
+            for json_mode, diagnostic in (
+                ("noncanonical", "emitted non-canonical JSON"),
+                ("duplicate", "duplicate JSON key: sign"),
+            ):
+                malformed_run = run(
+                    campaign_command(
+                        options.campaign_tool.resolve(),
+                        fake_gpu,
+                        options.cpu_replay.resolve(),
+                        root / f"{json_mode}-gpu-json-checkpoint",
+                        repository,
+                        campaign="phase2b",
+                        cases_per_predicate=20,
+                        chunk_size=60,
+                    ),
+                    environment={
+                        **environment,
+                        "MORSEHGP3D_FAKE_GPU_BAD_JSON": json_mode,
+                    },
+                    expected_status=1,
+                )
+                if diagnostic not in malformed_run.stderr:
+                    fail(f"the GPU {json_mode} JSON guard lost its diagnostic")
 
             run(
                 campaign_command(
@@ -429,7 +836,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
             orphan_chunk = orphan_checkpoint / "phase2a/chunks/chunk-00000000.json"
             orphan_chunk.parent.mkdir(parents=True)
             orphan_chunk.write_text("orphan\n", encoding="ascii")
-            orphan_run = run(
+            run(
                 campaign_command(
                     options.campaign_tool.resolve(),
                     fake_gpu,
@@ -441,12 +848,128 @@ def main(arguments: Sequence[str] | None = None) -> int:
                     chunk_size=60,
                 ),
                 environment=environment,
+                expected_status=1,
             )
-            orphan_value = json.loads(orphan_run.stdout)
-            if orphan_value.get("campaigns_complete") != ["phase2a"] or (
-                orphan_checkpoint / "phase2b"
+
+            bounded_checkpoint = root / "bounded-checkpoint"
+            bounded_run = run(
+                campaign_command(
+                    options.campaign_tool.resolve(),
+                    fake_gpu,
+                    options.cpu_replay.resolve(),
+                    bounded_checkpoint,
+                    repository,
+                    max_chunks=1,
+                    cases_per_predicate=20,
+                    chunk_size=60,
+                ),
+                environment=environment,
+            )
+            bounded_value = json.loads(bounded_run.stdout)
+            if bounded_value.get("campaigns_complete") != ["phase2a"] or (
+                bounded_checkpoint / "phase2b"
             ).exists():
-                fail("an orphan chunk bypassed the exact --max-chunks bound")
+                fail("the transaction runner exceeded the exact --max-chunks bound")
+
+            referenced_orphan = root / "referenced-orphan-checkpoint"
+            shutil.copytree(checkpoint, referenced_orphan)
+            shutil.copy2(
+                referenced_orphan / "phase2a/chunks/chunk-00000000.json",
+                referenced_orphan / "phase2a/chunks/chunk-99999999.json",
+            )
+            run(
+                campaign_command(
+                    options.campaign_tool.resolve(),
+                    fake_gpu,
+                    options.cpu_replay.resolve(),
+                    referenced_orphan,
+                    repository,
+                    verify_only=True,
+                ),
+                environment=environment,
+                expected_status=1,
+            )
+
+            temporary_file_checkpoint = root / "temporary-file-checkpoint"
+            shutil.copytree(checkpoint, temporary_file_checkpoint)
+            (temporary_file_checkpoint / "phase2a/.checkpoint.json.stale.tmp").write_text(
+                "stale\n", encoding="ascii"
+            )
+            run(
+                campaign_command(
+                    options.campaign_tool.resolve(),
+                    fake_gpu,
+                    options.cpu_replay.resolve(),
+                    temporary_file_checkpoint,
+                    repository,
+                    verify_only=True,
+                ),
+                environment=environment,
+                expected_status=1,
+            )
+
+            temporary_directory_checkpoint = root / "temporary-directory-checkpoint"
+            shutil.copytree(checkpoint, temporary_directory_checkpoint)
+            (
+                temporary_directory_checkpoint
+                / "phase2a/chunks/.phase2b-chunk-stale"
+            ).mkdir()
+            run(
+                campaign_command(
+                    options.campaign_tool.resolve(),
+                    fake_gpu,
+                    options.cpu_replay.resolve(),
+                    temporary_directory_checkpoint,
+                    repository,
+                    verify_only=True,
+                ),
+                environment=environment,
+                expected_status=1,
+            )
+
+            forged_certificate_checkpoint = root / "forged-certificate-checkpoint"
+            shutil.copytree(checkpoint, forged_certificate_checkpoint)
+            forged_certificate_path = (
+                forged_certificate_checkpoint / "phase2a/result.json"
+            )
+            forged_certificate = load_canonical(forged_certificate_path)
+            forged_certificate["total_sign_count"] += 1
+            forged_certificate_path.write_text(
+                canonical_json(forged_certificate) + "\n", encoding="ascii"
+            )
+            run(
+                campaign_command(
+                    options.campaign_tool.resolve(),
+                    fake_gpu,
+                    options.cpu_replay.resolve(),
+                    forged_certificate_checkpoint,
+                    repository,
+                    verify_only=True,
+                ),
+                environment=environment,
+                expected_status=1,
+            )
+
+            forged_aggregate_checkpoint = root / "forged-aggregate-checkpoint"
+            shutil.copytree(checkpoint, forged_aggregate_checkpoint)
+            forged_aggregate_path = forged_aggregate_checkpoint / "result.json"
+            forged_aggregate = load_canonical(forged_aggregate_path)
+            forged_aggregate["total_sign_count"] += 1
+            forged_aggregate_path.write_text(
+                canonical_json(forged_aggregate) + "\n", encoding="ascii"
+            )
+            run(
+                campaign_command(
+                    options.campaign_tool.resolve(),
+                    fake_gpu,
+                    options.cpu_replay.resolve(),
+                    forged_aggregate_checkpoint,
+                    repository,
+                    verify_only=True,
+                ),
+                environment=environment,
+                expected_status=1,
+            )
 
             tampered_checkpoint = root / "tampered-checkpoint"
             shutil.copytree(checkpoint, tampered_checkpoint)
@@ -469,7 +992,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 "MORSEHGP3D_FAKE_FLIP_FIRST": "1",
             }
             failed_checkpoint = root / "failed-checkpoint"
-            run(
+            divergent_run = run(
                 campaign_command(
                     options.campaign_tool.resolve(),
                     fake_gpu,
@@ -481,6 +1004,21 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 environment=divergent_environment,
                 expected_status=1,
             )
+            for replay_field in (
+                '"base_index":',
+                '"campaign":"phase2b"',
+                '"expected_sign":',
+                '"actual_sign":',
+                '"predicate":',
+                '"relation":',
+                '"replay_command":',
+                '"replay_id":',
+            ):
+                if replay_field not in divergent_run.stderr:
+                    fail(
+                        "a GPU contradiction lost its permanent-fixture replay field: "
+                        + replay_field
+                    )
             failed_manifest = load_canonical(
                 failed_checkpoint / "phase2b" / "checkpoint.json"
             )
@@ -590,7 +1128,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 "-m",
                 "inject metamorphic sentinel",
             )
-            run(
+            metamorphic_run = run(
                 campaign_command(
                     options.campaign_tool.resolve(),
                     fake_gpu,
@@ -604,6 +1142,52 @@ def main(arguments: Sequence[str] | None = None) -> int:
                 environment=environment,
                 expected_status=1,
             )
+            for replay_field in (
+                '"base_index":',
+                '"base_replay_command":',
+                '"base_sign":',
+                '"campaign":"phase2b"',
+                '"cause":"metamorphic relation sentinel"',
+                '"predicate":',
+                '"relation":',
+                '"replay_command":',
+                '"replay_id":',
+                '"transformed_sign":',
+            ):
+                if replay_field not in metamorphic_run.stderr:
+                    fail(
+                        "a metamorphic contradiction lost its fixture replay field: "
+                        + replay_field
+                    )
+
+            repository_mutation = repository / "provenance-mutation.txt"
+            repository_mutation.write_text(
+                "committed after campaign completion\n", encoding="ascii"
+            )
+            git(repository, "add", repository_mutation.name)
+            git(
+                repository,
+                "commit",
+                "--quiet",
+                "-m",
+                "mutate repository provenance",
+            )
+            repository_verification = run(
+                campaign_command(
+                    options.campaign_tool.resolve(),
+                    fake_gpu,
+                    options.cpu_replay.resolve(),
+                    checkpoint,
+                    repository,
+                    verify_only=True,
+                ),
+                environment=environment,
+                expected_status=1,
+            )
+            if "campaign checkpoint mismatch: repository" not in (
+                repository_verification.stderr
+            ):
+                fail("verification accepted changed repository provenance")
     except (AssertionError, OSError, subprocess.TimeoutExpired, ValueError) as error:
         print(f"Phase 2B campaign smoke failed: {error}", file=sys.stderr)
         return 1

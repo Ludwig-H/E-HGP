@@ -25,7 +25,7 @@ from types import ModuleType
 from typing import Any, BinaryIO, NoReturn, Sequence
 
 
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "1.1.0"
 MANIFEST_KIND = "morsehgp3d_phase2b_gpu_sign_campaign_checkpoint"
 CHUNK_KIND = "morsehgp3d_phase2b_gpu_sign_campaign_chunk"
 CERTIFICATE_KIND = "morsehgp3d_phase2b_gpu_sign_campaign_certificate"
@@ -35,6 +35,9 @@ DEFAULT_CHUNK_BASE_CASES = 196_608
 MAXIMUM_CHUNK_BASE_CASES = 196_608
 DEFAULT_CASES_PER_PREDICATE = 3_600_000
 MINIMUM_ADDITIONAL_SIGNS = 10_000_000
+EXPECTED_PRODUCTION_BASE_CASES = 10_800_000
+EXPECTED_PRODUCTION_METAMORPHIC_SIGNS = 1_080_000
+EXPECTED_PRODUCTION_TOTAL_SIGNS = 11_880_000
 PHASE2B_SEED = 0x4257325F47505532
 CAMPAIGNS = ("phase2a", "phase2b")
 PREDICATES = (
@@ -42,9 +45,18 @@ PREDICATES = (
     "orientation_3d",
     "power_bisector_side",
 )
+METAMORPHISMS = (
+    "exact_power_of_two_scaling",
+    "improper_signed_axis_permutation",
+    "nonzero_exact_dyadic_translation",
+    "predicate_argument_symmetry",
+    "proper_signed_axis_permutation",
+)
+METAMORPHIC_RELATIONS = ("opposite_sign", "same_sign")
+CPU_FALLBACK_STAGES = ("fp64_filtered", "expansion", "cpu_multiprecision")
 SIGNS = frozenset({"negative", "zero", "positive"})
 GPU_SIGNS = frozenset({"negative", "unknown", "positive"})
-STAGES = frozenset({"fp64_filtered", "expansion", "cpu_multiprecision"})
+STAGES = frozenset(CPU_FALLBACK_STAGES)
 CPU_RESULT_FIELDS = frozenset(
     {"certification_stage", "counters", "predicate", "sign"}
 )
@@ -228,13 +240,89 @@ def load_canonical(path: Path, label: str) -> tuple[Any, bytes]:
     return value, content
 
 
+def prepare_shard_directory(path: Path) -> None:
+    if path.exists():
+        if path.is_symlink() or not path.is_dir():
+            fail("the campaign shard must be a physical directory")
+    else:
+        path.mkdir(parents=True)
+    chunks = path / "chunks"
+    if chunks.exists():
+        if chunks.is_symlink() or not chunks.is_dir():
+            fail("the campaign chunk store must be a physical directory")
+    else:
+        chunks.mkdir()
+
+
+def validate_shard_layout(
+    checkpoint_dir: Path, manifest: dict[str, Any] | None
+) -> None:
+    if checkpoint_dir.is_symlink() or not checkpoint_dir.is_dir():
+        fail("the campaign shard is not a physical directory")
+    chunks_dir = checkpoint_dir / "chunks"
+    if chunks_dir.is_symlink() or not chunks_dir.is_dir():
+        fail("the campaign chunk store is not a physical directory")
+
+    allowed_root = {"chunks"}
+    if manifest is not None:
+        allowed_root.add("checkpoint.json")
+        if manifest.get("state") == "complete":
+            allowed_root.add("result.json")
+    actual_root: set[str] = set()
+    for entry in checkpoint_dir.iterdir():
+        if entry.is_symlink():
+            fail(f"the campaign shard contains a symbolic entry: {entry.name}")
+        actual_root.add(entry.name)
+    unexpected_root = actual_root - allowed_root
+    if unexpected_root:
+        fail(
+            "the campaign shard contains a temporary or unexpected entry: "
+            + sorted(unexpected_root)[0]
+        )
+    if manifest is not None and "checkpoint.json" not in actual_root:
+        fail("the campaign shard lost its checkpoint manifest")
+
+    expected_chunks: set[str] = set()
+    if manifest is not None:
+        references = manifest.get("chunks")
+        if not isinstance(references, list):
+            fail("the campaign checkpoint chunks are invalid")
+        for reference in references:
+            if not isinstance(reference, dict):
+                fail("a checkpoint chunk reference is invalid")
+            relative = reference.get("relative_path")
+            if not isinstance(relative, str) or not relative.startswith("chunks/"):
+                fail("a checkpoint chunk reference escaped its canonical path")
+            expected_chunks.add(relative.removeprefix("chunks/"))
+
+    actual_chunks: set[str] = set()
+    for entry in chunks_dir.iterdir():
+        if entry.is_symlink() or not entry.is_file():
+            fail(
+                "the campaign chunk store contains a temporary or non-file entry: "
+                f"{entry.name}"
+            )
+        actual_chunks.add(entry.name)
+    orphaned = actual_chunks - expected_chunks
+    if orphaned:
+        fail(f"the campaign chunk store contains an orphan: {sorted(orphaned)[0]}")
+    missing = expected_chunks - actual_chunks
+    if missing:
+        fail(f"the campaign chunk store lost a referenced chunk: {sorted(missing)[0]}")
+
+
 def load_phase2a_tool(path: Path) -> ModuleType:
     spec = importlib.util.spec_from_file_location("phase2a_predicate_generator", path)
     if spec is None or spec.loader is None:
         fail("the Phase 2A generator cannot be loaded")
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
+    previous_bytecode_policy = sys.dont_write_bytecode
+    sys.dont_write_bytecode = True
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.dont_write_bytecode = previous_bytecode_policy
     return module
 
 
@@ -311,24 +399,33 @@ def validate_roots(value: Any, label: str) -> dict[str, str]:
     if not isinstance(value, dict) or set(value) != {"corpus", "oracle", "cpu", "gpu"}:
         fail(f"{label} has an invalid schema")
     for root in value.values():
-        if not isinstance(root, str) or len(root) != 64:
+        if (
+            not isinstance(root, str)
+            or len(root) != 64
+            or any(character not in "0123456789abcdef" for character in root)
+        ):
             fail(f"{label} contains a non-SHA256 root")
-        try:
-            int(root, 16)
-        except ValueError as error:
-            raise ValueError(f"{label} contains a non-hexadecimal root") from error
     return value
 
 
 def empty_counts() -> dict[str, Any]:
     return {
         "base_case_count": 0,
+        "by_metamorphic_relation": {
+            relation: 0 for relation in METAMORPHIC_RELATIONS
+        },
+        "by_metamorphism": {
+            metamorphism: 0 for metamorphism in METAMORPHISMS
+        },
         "by_predicate": {predicate: 0 for predicate in PREDICATES},
         "by_sign": {sign: 0 for sign in sorted(SIGNS)},
         "cpu_multiprecision_certified": 0,
         "exact_zeros": 0,
         "gpu_fp64_certified": 0,
         "gpu_unknown_forwarded": 0,
+        "gpu_unknown_by_cpu_stage": {
+            stage: 0 for stage in CPU_FALLBACK_STAGES
+        },
         "metamorphic_sign_count": 0,
         "metamorphisms_verified": 0,
         "remaining_unknown": 0,
@@ -353,6 +450,18 @@ def add_counts(target: dict[str, Any], addition: dict[str, Any]) -> None:
         target[field] += addition[field]
     for predicate in PREDICATES:
         target["by_predicate"][predicate] += addition["by_predicate"][predicate]
+    for stage in CPU_FALLBACK_STAGES:
+        target["gpu_unknown_by_cpu_stage"][stage] += addition[
+            "gpu_unknown_by_cpu_stage"
+        ][stage]
+    for metamorphism in METAMORPHISMS:
+        target["by_metamorphism"][metamorphism] += addition["by_metamorphism"][
+            metamorphism
+        ]
+    for relation in METAMORPHIC_RELATIONS:
+        target["by_metamorphic_relation"][relation] += addition[
+            "by_metamorphic_relation"
+        ][relation]
     for sign in SIGNS:
         target["by_sign"][sign] += addition["by_sign"][sign]
 
@@ -376,14 +485,30 @@ def validate_counts(counts: Any, label: str) -> dict[str, Any]:
         fail(f"{label} sign counts do not close")
     if counts["base_case_count"] + counts["metamorphic_sign_count"] != total:
         fail(f"{label} base/metamorphic counts do not close")
+    if sum(counts["by_metamorphism"].values()) != counts["metamorphic_sign_count"]:
+        fail(f"{label} metamorphism counts do not close")
+    if (
+        sum(counts["by_metamorphic_relation"].values())
+        != counts["metamorphic_sign_count"]
+    ):
+        fail(f"{label} metamorphic relation counts do not close")
     if counts["metamorphisms_verified"] != counts["metamorphic_sign_count"]:
         fail(f"{label} did not verify every metamorphic sign relation")
     if counts["cpu_multiprecision_certified"] != total:
         fail(f"{label} did not replay every sign through the exact CPU path")
     if counts["gpu_fp64_certified"] + counts["gpu_unknown_forwarded"] != total:
         fail(f"{label} GPU tri-state counts do not close")
+    if (
+        sum(counts["gpu_unknown_by_cpu_stage"].values())
+        != counts["gpu_unknown_forwarded"]
+    ):
+        fail(f"{label} GPU fallback-stage counts do not close")
     if counts["remaining_unknown"] != 0 or counts["wrong_sign"] != 0:
         fail(f"{label} contains an unresolved or contradictory sign")
+    if counts["exact_zeros"] != counts["by_sign"]["zero"]:
+        fail(f"{label} exact-zero counts do not close")
+    if counts["exact_zeros"] > counts["gpu_unknown_forwarded"]:
+        fail(f"{label} promotes an exact zero as a GPU-known sign")
     return counts
 
 
@@ -460,15 +585,55 @@ def read_canonical_line(stream: BinaryIO, label: str) -> tuple[dict[str, Any], b
     return value, row
 
 
-def validate_cpu_row(row: dict[str, Any], case: Any, expected_sign: str) -> None:
+def replay_diagnostic(
+    *,
+    campaign_name: str,
+    case: Any,
+    expected_sign: str,
+    row: dict[str, Any],
+) -> str:
+    return canonical_json(
+        {
+            "actual_certification_stage": row.get("certification_stage"),
+            "actual_filter_sign": row.get("gpu_filter_sign"),
+            "actual_replay_command": row.get("replay_command"),
+            "actual_replay_id": row.get("replay_id"),
+            "actual_sign": row.get("sign"),
+            "base_index": case.base_index,
+            "campaign": campaign_name,
+            "expected_sign": expected_sign,
+            "predicate": case.predicate,
+            "relation": case.relation,
+            "replay_command": case.command(),
+            "replay_id": replay_id(campaign_name, case),
+        }
+    )
+
+
+def validate_cpu_row(
+    row: dict[str, Any],
+    case: Any,
+    campaign_name: str,
+    expected_sign: str,
+) -> None:
     exact_fields(row, CPU_RESULT_FIELDS, "CPU decision")
     if (
         row["predicate"] != case.predicate
         or row["sign"] != expected_sign
         or row["certification_stage"] != "cpu_multiprecision"
     ):
-        fail("the exact CPU replay contradicts the independent dyadic oracle")
+        fail(
+            "the exact CPU replay contradicts the independent dyadic oracle: "
+            + replay_diagnostic(
+                campaign_name=campaign_name,
+                case=case,
+                expected_sign=expected_sign,
+                row=row,
+            )
+        )
     counters = exact_fields(row["counters"], CPU_COUNTER_FIELDS, "CPU counters")
+    for field, value in counters.items():
+        exact_integer(value, f"CPU counters.{field}")
     expected = {
         "cpu_multiprecision_certified": 1,
         "exact_zeros": 1 if expected_sign == "zero" else 0,
@@ -497,9 +662,25 @@ def validate_gpu_row(
         or row["replay_command"] != command
         or row["sign"] != expected_sign
     ):
-        fail("the GPU replay changed order, provenance, or exact sign")
+        fail(
+            "the GPU replay changed order, provenance, or exact sign: "
+            + replay_diagnostic(
+                campaign_name=campaign_name,
+                case=case,
+                expected_sign=expected_sign,
+                row=row,
+            )
+        )
     if row["gpu_filter_sign"] not in GPU_SIGNS or row["certification_stage"] not in STAGES:
-        fail("the GPU replay escaped its closed sign/stage enums")
+        fail(
+            "the GPU replay escaped its closed sign/stage enums: "
+            + replay_diagnostic(
+                campaign_name=campaign_name,
+                case=case,
+                expected_sign=expected_sign,
+                row=row,
+            )
+        )
     if row["gpu_filter_sign"] == "unknown":
         if row["certification_stage"] not in STAGES:
             fail("a GPU unknown has no certified CPU resolution")
@@ -507,7 +688,15 @@ def validate_gpu_row(
         row["gpu_filter_sign"] != expected_sign
         or row["certification_stage"] != "fp64_filtered"
     ):
-        fail("a GPU-known sign is not a strict FP64 certificate")
+        fail(
+            "a GPU-known sign is not a strict FP64 certificate: "
+            + replay_diagnostic(
+                campaign_name=campaign_name,
+                case=case,
+                expected_sign=expected_sign,
+                row=row,
+            )
+        )
 
 
 def empty_gpu_summary_counts() -> dict[str, int]:
@@ -669,12 +858,42 @@ def execute_chunk(
                 else:
                     if current_base is None or current_base_sign is None:
                         fail("a metamorphic case appeared without its generated base")
-                    phase2a.validate_metamorphic_sign(
-                        current_base,
-                        case,
+                    if case.relation not in METAMORPHISMS:
+                        fail("a generated metamorphism escaped the frozen catalog")
+                    try:
+                        phase2a.validate_metamorphic_sign(
+                            current_base,
+                            case,
+                            current_base_sign,
+                            expected_sign,
+                        )
+                    except ValueError as error:
+                        fail(
+                            "a metamorphic sign relation contradicts its base: "
+                            + canonical_json(
+                                {
+                                    "base_index": case.base_index,
+                                    "base_replay_command": current_base.command(),
+                                    "base_sign": current_base_sign,
+                                    "campaign": campaign_name,
+                                    "cause": str(error),
+                                    "predicate": case.predicate,
+                                    "relation": case.relation,
+                                    "replay_command": case.command(),
+                                    "replay_id": replay_id(campaign_name, case),
+                                    "transformed_sign": expected_sign,
+                                }
+                            )
+                        )
+                    relation = phase2a.expected_metamorphic_relation(
                         current_base_sign,
-                        expected_sign,
+                        case.predicate,
+                        case.relation,
                     )
+                    if relation not in METAMORPHIC_RELATIONS:
+                        fail("a generated metamorphic relation escaped the frozen catalog")
+                    counts["by_metamorphism"][case.relation] += 1
+                    counts["by_metamorphic_relation"][relation] += 1
                     counts["metamorphisms_verified"] += 1
                 cpu_row, cpu_encoded = read_canonical_line(
                     cpu_readers[case.predicate], f"{case.predicate} exact CPU replay"
@@ -682,7 +901,7 @@ def execute_chunk(
                 gpu_row, gpu_encoded = read_canonical_line(
                     gpu_readers[case.predicate], f"{case.predicate} GPU replay"
                 )
-                validate_cpu_row(cpu_row, case, expected_sign)
+                validate_cpu_row(cpu_row, case, campaign_name, expected_sign)
                 validate_gpu_row(gpu_row, case, campaign_name, expected_sign)
                 update_gpu_summary_counts(gpu_summary_counts[case.predicate], gpu_row)
                 command_row = (case.command() + "\n").encode("ascii")
@@ -714,6 +933,9 @@ def execute_chunk(
                     counts["metamorphic_sign_count"] += 1
                 if gpu_row["gpu_filter_sign"] == "unknown":
                     counts["gpu_unknown_forwarded"] += 1
+                    counts["gpu_unknown_by_cpu_stage"][
+                        gpu_row["certification_stage"]
+                    ] += 1
                 else:
                     counts["gpu_fp64_certified"] += 1
                 if cpu_row["sign"] != gpu_row["sign"] or gpu_row["sign"] != expected_sign:
@@ -885,16 +1107,22 @@ def validate_checkpoint(
     return manifest
 
 
-def publish_certificate(
-    checkpoint_dir: Path,
+def certificate_for(
     manifest: dict[str, Any],
     expected_phase2a_roots: dict[str, str | None],
-) -> tuple[dict[str, Any], bytes]:
+) -> dict[str, Any]:
     if manifest["state"] != "complete":
         fail("an incomplete campaign cannot publish a certificate")
     counts = validate_counts(manifest["counts"], "certificate counts")
     if counts["base_case_count"] != manifest["base_case_count"]:
         fail("a completed certificate does not cover every configured base case")
+    if manifest["scope"] == "production" and (
+        counts["base_case_count"] != EXPECTED_PRODUCTION_BASE_CASES
+        or counts["metamorphic_sign_count"]
+        != EXPECTED_PRODUCTION_METAMORPHIC_SIGNS
+        or counts["total_sign_count"] != EXPECTED_PRODUCTION_TOTAL_SIGNS
+    ):
+        fail("a production certificate does not cover the frozen base and metamorphic scale")
     if manifest["campaign"] == "phase2b" and manifest["scope"] == "production":
         if (
             counts["base_case_count"] < MINIMUM_ADDITIONAL_SIGNS
@@ -917,7 +1145,7 @@ def publish_certificate(
         )
         if not frozen_phase2a_corpus_distinct:
             fail("the independently seeded corpus reproduced the frozen Phase 2A root")
-    certificate = {
+    return {
         "base_case_count": manifest["base_case_count"],
         "campaign": manifest["campaign"],
         "counts": manifest["counts"],
@@ -936,6 +1164,14 @@ def publish_certificate(
         "scope": manifest["scope"],
         "total_sign_count": manifest["counts"]["total_sign_count"],
     }
+
+
+def publish_certificate(
+    checkpoint_dir: Path,
+    manifest: dict[str, Any],
+    expected_phase2a_roots: dict[str, str | None],
+) -> tuple[dict[str, Any], bytes]:
+    certificate = certificate_for(manifest, expected_phase2a_roots)
     content = canonical_bytes(certificate)
     atomic_publish(checkpoint_dir / "result.json", content)
     return certificate, content
@@ -961,8 +1197,7 @@ def run_shard(
     generator_path: Path,
     config_path: Path,
 ) -> tuple[tuple[dict[str, Any], bytes] | None, int]:
-    root.mkdir(parents=True, exist_ok=True)
-    (root / "chunks").mkdir(exist_ok=True)
+    prepare_shard_directory(root)
     manifest_path = root / "checkpoint.json"
     identity = {
         "base_case_count": base_case_count,
@@ -977,7 +1212,9 @@ def run_shard(
     if manifest_path.exists():
         manifest, _ = load_canonical(manifest_path, f"{campaign_name} checkpoint")
         manifest = validate_checkpoint(root, manifest, identity, initial_roots(phase2a))
+        validate_shard_layout(root, manifest)
     else:
+        validate_shard_layout(root, None)
         manifest = initialize_manifest(
             campaign_name=campaign_name,
             seed=seed,
@@ -1048,11 +1285,91 @@ def run_shard(
     return publish_certificate(root, manifest, expected_phase2a_roots), transactions
 
 
-def publish_aggregate(
-    checkpoint_dir: Path,
+def verify_shard_copy(
+    *,
+    campaign_name: str,
+    seed: int,
+    base_case_count: int,
+    chunk_size: int,
+    root: Path,
+    gpu_replay: Path,
+    cpu_replay: Path,
+    identities: dict[str, Any],
+    snapshot: dict[str, Any],
+    scope: str,
+    phase2a: ModuleType,
+    expected_phase2a_roots: dict[str, str | None],
+    repository: Path,
+    generator_path: Path,
+    config_path: Path,
+) -> tuple[dict[str, Any], bytes]:
+    if root.is_symlink() or not root.is_dir():
+        fail(f"the {campaign_name} verification shard is not a physical directory")
+    verify_runtime_inputs(
+        repository=repository,
+        snapshot=snapshot,
+        gpu_replay=gpu_replay,
+        cpu_replay=cpu_replay,
+        generator_path=generator_path,
+        config_path=config_path,
+        identities=identities,
+    )
+    identity = {
+        "base_case_count": base_case_count,
+        "campaign": campaign_name,
+        "chunk_size_base_cases": chunk_size,
+        "identities": identities,
+        "repository": snapshot,
+        "schema_version": SCHEMA_VERSION,
+        "scope": scope,
+        "seed": f"{seed:016x}",
+    }
+    manifest, _ = load_canonical(
+        root / "checkpoint.json", f"{campaign_name} verification checkpoint"
+    )
+    manifest = validate_checkpoint(root, manifest, identity, initial_roots(phase2a))
+    validate_shard_layout(root, manifest)
+    if manifest["state"] != "complete":
+        fail("a read-only verification requires a complete campaign shard")
+    expected_certificate = certificate_for(manifest, expected_phase2a_roots)
+    certificate, content = load_canonical(
+        root / "result.json", f"{campaign_name} verification certificate"
+    )
+    if certificate != expected_certificate:
+        fail(f"the {campaign_name} certificate differs from its checkpoint")
+    verify_runtime_inputs(
+        repository=repository,
+        snapshot=snapshot,
+        gpu_replay=gpu_replay,
+        cpu_replay=cpu_replay,
+        generator_path=generator_path,
+        config_path=config_path,
+        identities=identities,
+    )
+    return certificate, content
+
+
+def aggregate_for(
     certificates: dict[str, tuple[dict[str, Any], bytes]],
     scope: str,
 ) -> dict[str, Any]:
+    if not certificates:
+        fail("an empty campaign set cannot publish an aggregate")
+    names = set(certificates)
+    if not names.issubset(CAMPAIGNS):
+        fail("a campaign aggregate escaped the frozen campaign catalog")
+    if len(certificates) == 2:
+        if names != set(CAMPAIGNS):
+            fail("a two-campaign aggregate escaped the frozen campaign catalog")
+        phase2a = certificates["phase2a"][0]
+        phase2b = certificates["phase2b"][0]
+        if phase2a.get("identities") != phase2b.get("identities"):
+            fail("the campaign certificates do not share runtime identities")
+        if phase2a.get("repository") != phase2b.get("repository"):
+            fail("the campaign certificates do not share repository provenance")
+    for name, (certificate, _) in certificates.items():
+        if certificate.get("campaign") != name or certificate.get("scope") != scope:
+            fail("a campaign certificate escaped its aggregate scope")
     references = {
         name: {
             "relative_path": f"{name}/result.json",
@@ -1065,8 +1382,12 @@ def publish_aggregate(
     roots = {name: value[0]["ordered_roots"] for name, value in certificates.items()}
     if len(certificates) == 2 and roots["phase2a"]["corpus"] == roots["phase2b"]["corpus"]:
         fail("the Phase 2B additional campaign did not produce a distinct corpus root")
-    aggregate = {
-        "additional_campaign_basis": "independent_seed_and_distinct_corpus_root",
+    return {
+        "additional_campaign_basis": (
+            "independent_seed_and_distinct_corpus_root"
+            if len(certificates) == 2
+            else "single_campaign_only"
+        ),
         "campaigns": references,
         "kind": AGGREGATE_KIND,
         "ordered_roots": roots,
@@ -1076,6 +1397,14 @@ def publish_aggregate(
         "scope": scope,
         "total_sign_count": total,
     }
+
+
+def publish_aggregate(
+    checkpoint_dir: Path,
+    certificates: dict[str, tuple[dict[str, Any], bytes]],
+    scope: str,
+) -> dict[str, Any]:
+    aggregate = aggregate_for(certificates, scope)
     atomic_publish(checkpoint_dir / "result.json", canonical_bytes(aggregate))
     return aggregate
 
@@ -1107,6 +1436,11 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "--smoke-cases-per-predicate",
         type=bounded_positive,
         help="run a bounded non-production corpus instead of the frozen scale",
+    )
+    parser.add_argument(
+        "--verify-only",
+        action="store_true",
+        help="validate a quiescent complete checkpoint copy without writing to it",
     )
     parser.add_argument("--allow-dirty-repository", action="store_true")
     parser.add_argument(
@@ -1185,25 +1519,16 @@ def main(arguments: Sequence[str] | None = None) -> int:
         }
         if seeds["phase2a"] == seeds["phase2b"]:
             fail("the Phase 2B campaign seed is not independent from Phase 2A")
-        checkpoint_dir.parent.mkdir(parents=True, exist_ok=True)
-        checkpoint_dir.mkdir(exist_ok=True)
-        lock_path = checkpoint_dir.parent / f".{checkpoint_dir.name}.lock"
-        lock_descriptor = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o600)
-        try:
-            try:
-                fcntl.flock(lock_descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except BlockingIOError as error:
-                raise ValueError("another writer holds the POSIX campaign lock") from error
+        if options.verify_only:
+            if checkpoint_dir.is_symlink() or not checkpoint_dir.is_dir():
+                fail("read-only verification requires a physical checkpoint directory")
             certificates: dict[str, tuple[dict[str, Any], bytes]] = {}
-            remaining_chunks = options.max_chunks
             for campaign_name in selected:
-                result, committed_chunks = run_shard(
+                certificates[campaign_name] = verify_shard_copy(
                     campaign_name=campaign_name,
                     seed=seeds[campaign_name],
                     base_case_count=base_case_count,
                     chunk_size=options.chunk_size_base_cases,
-                    max_chunks=remaining_chunks,
-                    timeout_seconds=options.timeout_seconds,
                     root=checkpoint_dir / campaign_name,
                     gpu_replay=gpu_replay,
                     cpu_replay=cpu_replay,
@@ -1216,26 +1541,66 @@ def main(arguments: Sequence[str] | None = None) -> int:
                     generator_path=generator_path,
                     config_path=config_path,
                 )
-                remaining_chunks -= committed_chunks
-                if result is None:
-                    break
-                certificates[campaign_name] = result
-                if remaining_chunks <= 0:
-                    break
-            if len(certificates) == len(selected):
-                aggregate = publish_aggregate(checkpoint_dir, certificates, scope)
-            else:
-                aggregate = {
-                    "campaigns_complete": sorted(certificates),
-                    "kind": AGGREGATE_KIND,
-                    "phase_gate_closed": False,
-                    "qualification_claimed": False,
-                    "schema_version": SCHEMA_VERSION,
-                    "scope": scope,
-                    "state": "running",
-                }
-        finally:
-            os.close(lock_descriptor)
+            expected_aggregate = aggregate_for(certificates, scope)
+            aggregate, _ = load_canonical(
+                checkpoint_dir / "result.json", "campaign verification aggregate"
+            )
+            if aggregate != expected_aggregate:
+                fail("the campaign aggregate differs from its certificates")
+        else:
+            checkpoint_dir.parent.mkdir(parents=True, exist_ok=True)
+            checkpoint_dir.mkdir(exist_ok=True)
+            lock_path = checkpoint_dir.parent / f".{checkpoint_dir.name}.lock"
+            lock_descriptor = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o600)
+            try:
+                try:
+                    fcntl.flock(lock_descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError as error:
+                    raise ValueError(
+                        "another writer holds the POSIX campaign lock"
+                    ) from error
+                certificates = {}
+                remaining_chunks = options.max_chunks
+                for campaign_name in selected:
+                    result, committed_chunks = run_shard(
+                        campaign_name=campaign_name,
+                        seed=seeds[campaign_name],
+                        base_case_count=base_case_count,
+                        chunk_size=options.chunk_size_base_cases,
+                        max_chunks=remaining_chunks,
+                        timeout_seconds=options.timeout_seconds,
+                        root=checkpoint_dir / campaign_name,
+                        gpu_replay=gpu_replay,
+                        cpu_replay=cpu_replay,
+                        identities=identities,
+                        snapshot=snapshot,
+                        scope=scope,
+                        phase2a=phase2a,
+                        expected_phase2a_roots=expected_phase2a_roots,
+                        repository=repository,
+                        generator_path=generator_path,
+                        config_path=config_path,
+                    )
+                    remaining_chunks -= committed_chunks
+                    if result is None:
+                        break
+                    certificates[campaign_name] = result
+                    if remaining_chunks <= 0:
+                        break
+                if len(certificates) == len(selected):
+                    aggregate = publish_aggregate(checkpoint_dir, certificates, scope)
+                else:
+                    aggregate = {
+                        "campaigns_complete": sorted(certificates),
+                        "kind": AGGREGATE_KIND,
+                        "phase_gate_closed": False,
+                        "qualification_claimed": False,
+                        "schema_version": SCHEMA_VERSION,
+                        "scope": scope,
+                        "state": "running",
+                    }
+            finally:
+                os.close(lock_descriptor)
     except (OSError, TypeError, ValueError, subprocess.TimeoutExpired) as error:
         print(f"Phase 2B GPU sign campaign failed closed: {error}", file=sys.stderr)
         return 1
