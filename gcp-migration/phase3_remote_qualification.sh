@@ -67,6 +67,8 @@ SESSION_TOKEN=""
 ACTIVE_CONTAINER_CIDFILE=""
 ACTIVE_CONTAINER_LOG=""
 ACTIVE_CONTAINER_NAME=""
+REPOSITORY_BUILD_MOUNTPOINT=""
+REPOSITORY_BUILD_MOUNTPOINT_CREATED=0
 declare -a DOCKER=()
 declare -a BUILDX=()
 
@@ -403,6 +405,18 @@ cleanup() {
                     "${SESSION_DIR}" >&2
                 ;;
         esac
+    fi
+    if ((REPOSITORY_BUILD_MOUNTPOINT_CREATED == 1)); then
+        if [[ "${REPOSITORY_BUILD_MOUNTPOINT}" == "${REPOSITORY_ROOT}/build" && \
+            -d "${REPOSITORY_BUILD_MOUNTPOINT}" && \
+            ! -L "${REPOSITORY_BUILD_MOUNTPOINT}" ]]; then
+            rmdir -- "${REPOSITORY_BUILD_MOUNTPOINT}" || \
+                printf '[ATTENTION] Point de montage build non vide; conservation : %s\n' \
+                    "${REPOSITORY_BUILD_MOUNTPOINT}" >&2
+        else
+            printf '[ATTENTION] Nettoyage refusé pour le point de montage build non canonique : %s\n' \
+                "${REPOSITORY_BUILD_MOUNTPOINT}" >&2
+        fi
     fi
     if ((cleanup_status != 0 && original_status == 0)); then
         original_status="${cleanup_status}"
@@ -934,6 +948,24 @@ if ! certify_buildx_plugin; then
     report_failure_log "docker-info" "${DOCKER_LOG}"
     die "Plugin Buildx fixe absent, inexécutable ou non sûr : ${BUILDX_PLUGIN}."
 fi
+
+# Docker applique d'abord le bind du dépôt en lecture seule. Le point de
+# montage imbriqué doit donc exister dans la source hôte; un répertoire créé
+# uniquement dans l'image serait masqué par ce premier bind.
+REPOSITORY_BUILD_MOUNTPOINT="${REPOSITORY_ROOT}/build"
+if [[ -L "${REPOSITORY_BUILD_MOUNTPOINT}" || \
+    (-e "${REPOSITORY_BUILD_MOUNTPOINT}" && \
+        ! -d "${REPOSITORY_BUILD_MOUNTPOINT}") ]]; then
+    die "Le point de montage build du dépôt doit être un répertoire non symbolique."
+fi
+if [[ ! -e "${REPOSITORY_BUILD_MOUNTPOINT}" ]]; then
+    mkdir -- "${REPOSITORY_BUILD_MOUNTPOINT}" || \
+        die "Impossible de réserver le point de montage build dans le dépôt."
+    REPOSITORY_BUILD_MOUNTPOINT_CREATED=1
+fi
+[[ -d "${REPOSITORY_BUILD_MOUNTPOINT}" && \
+    ! -L "${REPOSITORY_BUILD_MOUNTPOINT}" ]] || \
+    die "Le point de montage build du dépôt n'est pas un répertoire sûr."
 
 IMAGE_REF="morsehgp3d-phase3:${HEAD_SHA}"
 begin_unit "buildx-build"

@@ -567,6 +567,15 @@ required_mounts = {
 for mount, mode in required_mounts.items():
     if volumes.get(mount, (None, None))[1] != mode:
         raise SystemExit(f"missing exact {mount}:{mode} mount")
+repository_mount = volumes["/workspace/repository"][0]
+repository_build_mountpoint = repository_mount / "build"
+if (
+    not repository_build_mountpoint.is_dir()
+    or repository_build_mountpoint.is_symlink()
+):
+    raise SystemExit("nested build mountpoint is absent from the read-only repository bind")
+if volumes["/workspace/repository/build"][0] == repository_build_mountpoint:
+    raise SystemExit("nested build volume must remain isolated from the repository")
 for key in ("MORSEHGP3D_CUDA_IMAGE_REF", "MORSEHGP3D_CUDA_IMAGE_ID", "MORSEHGP3D_GIT_SHA"):
     if not container_env.get(key):
         raise SystemExit(f"missing container environment {key}")
@@ -1649,10 +1658,28 @@ printf 'fake Blackwell preflight passed\\n'
             self.assertIn("--cidfile ", line)
         self.assertEqual(7, log.count("DOCKER rm -f " + "c" * 64))
         self.assertNotIn("PATH-DOCKER", log)
+        self.assertFalse((self.repository / "build").exists())
 
         second, _ = self.run_worker(output=artifact)
         self.assertNotEqual(0, second.returncode)
         self.assertEqual(value, json.loads(artifact.read_text(encoding="utf-8")))
+
+    def test_symlinked_repository_build_mountpoint_is_refused(self) -> None:
+        external_build = self.root / "external-build"
+        external_build.mkdir()
+        (self.repository / "build").symlink_to(external_build, target_is_directory=True)
+
+        result, artifact = self.run_worker()
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertFalse(artifact.exists())
+        self.assertIn(
+            "point de montage build du dépôt doit être un répertoire non symbolique",
+            result.stderr,
+        )
+        self.assertNotIn("DOCKER run ", self.command_log_text())
+        self.assertTrue((self.repository / "build").is_symlink())
+        self.assert_no_partial_artifact()
 
     def test_build_uses_only_the_fixed_buildx_plugin(self) -> None:
         source = WORKER_SOURCE.read_text(encoding="utf-8")
