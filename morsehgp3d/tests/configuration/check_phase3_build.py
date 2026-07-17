@@ -424,6 +424,11 @@ def validate_sources(project: Path, repository: Path) -> None:
     ):
         require(token in cmake, f"root CMake is missing {token}")
 
+    require(
+        "-Xcompiler=" not in cmake,
+        "CUDA targets must not forward host warning policy to nvcc-generated code",
+    )
+
     for token in (
         "check_language(CUDA)",
         "enable_language(CUDA)",

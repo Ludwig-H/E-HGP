@@ -150,11 +150,9 @@ if(MORSEHGP3D_ENABLE_CUDA)
       MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
       MORSEHGP3D_CUDA_AUDIT=$<IF:$<BOOL:${MORSEHGP3D_CUDA_AUDIT}>,1,0>
   )
-  target_compile_options(
-    morsehgp3d_phase3_runtime
-    PRIVATE
-      $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wall,-Wextra,-Wpedantic,-Wconversion,-Wsign-conversion,-Werror>
-  )
+  # nvcc compiles a cudafe-generated host translation unit in addition to the
+  # project source.  Do not forward host warning bundles or -Werror to that
+  # generated code; the native C++ targets below retain their strict policy.
   morsehgp3d_configure_cuda_target(morsehgp3d_phase3_runtime)
 
   nanobind_add_module(
