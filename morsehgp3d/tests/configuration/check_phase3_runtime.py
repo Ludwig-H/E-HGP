@@ -133,6 +133,27 @@ def validate_dependencies_and_binding(project: Path) -> None:
         "github.com/NVIDIA/cccl" not in dependencies,
         "CCCL must come from the selected CUDA toolkit rather than FetchContent",
     )
+    python_discovery = re.search(
+        r"find_package\(\s*Python 3[.]9\s+"
+        r"REQUIRED COMPONENTS Interpreter Development[.]Module\s+"
+        r"OPTIONAL_COMPONENTS Development[.]SABIModule\s*\)",
+        dependencies,
+    )
+    require(
+        python_discovery is not None,
+        "Python development headers are not discovered in the parent scope",
+    )
+    require(
+        python_discovery.start()
+        < dependencies.index(
+            "FetchContent_MakeAvailable(morsehgp3d_nanobind_content)"
+        ),
+        "Python must be discovered before nanobind enters its child directory",
+    )
+    require(
+        "NOT Python_INCLUDE_DIRS" in dependencies,
+        "the parent-scope Python include directories are not guarded",
+    )
 
     binding = read_text(project / "src/python/phase3_module.cpp")
     require_tokens(

@@ -119,6 +119,23 @@ set(NB_TEST_SHARED_BUILD OFF CACHE BOOL "" FORCE)
 set(NB_TEST_CUDA OFF CACHE BOOL "" FORCE)
 set(NB_TEST_FREE_THREADED OFF CACHE BOOL "" FORCE)
 
+# FetchContent configures nanobind in a child directory, while
+# nanobind_add_module is called later from the project root.  Resolve Python in
+# that root scope so the directory-scoped Python_INCLUDE_DIRS remains visible
+# when nanobind creates its support library and extension target.
+find_package(
+  Python 3.9
+  REQUIRED COMPONENTS Interpreter Development.Module
+  OPTIONAL_COMPONENTS Development.SABIModule
+)
+if(
+  NOT TARGET Python::Interpreter
+  OR NOT TARGET Python::Module
+  OR NOT Python_INCLUDE_DIRS
+)
+  message(FATAL_ERROR "Phase 3 requires visible Python development headers")
+endif()
+
 FetchContent_Declare(
   morsehgp3d_nanobind_content
   GIT_REPOSITORY https://github.com/wjakob/nanobind.git
