@@ -591,8 +591,13 @@ reject_partial_package() {
     local version=""
     if record="$(package_record "${package}")"; then
         IFS=$'\t' read -r status version <<<"${record}"
-        [[ "${status}" =~ ^(install|hold)\ ok\ installed$ && -n "${version}" ]] || \
-            die "État dpkg partiel ou ambigu pour ${package}: ${record}."
+        if [[ "${status}" =~ ^(install|hold)\ ok\ installed$ && -n "${version}" ]]; then
+            return 0
+        fi
+        if [[ "${status}" == "unknown ok not-installed" && -z "${version}" ]]; then
+            return 0
+        fi
+        die "État dpkg partiel ou ambigu pour ${package}: ${record}."
     fi
 }
 
@@ -961,7 +966,7 @@ if not isinstance(nvidia, dict):
     raise SystemExit("Docker does not expose the NVIDIA runtime")
 if nvidia.get("path") != "/usr/bin/nvidia-container-runtime":
     raise SystemExit("Docker exposes an unexpected NVIDIA runtime path")
-if nvidia.get("runtimeArgs") != []:
+if "runtimeArgs" in nvidia and nvidia["runtimeArgs"] != []:
     raise SystemExit("Docker exposes unexpected NVIDIA runtime arguments")
 PY
 }

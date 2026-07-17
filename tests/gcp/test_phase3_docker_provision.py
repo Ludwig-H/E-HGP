@@ -408,6 +408,11 @@ def package_record(package):
         return "install ok installed", versions[package]
     if package == os.environ.get("FAKE_COMPETING_PACKAGE", ""):
         return "install ok installed", "99.0-conflicting"
+    if package == "podman-docker":
+        return (
+            os.environ.get("FAKE_ABSENT_STATUS", "unknown ok not-installed"),
+            os.environ.get("FAKE_ABSENT_VERSION", ""),
+        )
     return None
 
 name = Path(command[0]).name
@@ -803,15 +808,21 @@ if name == "docker":
     if arguments[:2] == ["info", "--format"]:
         if not state["active"]:
             finish(1)
+        runtime = {
+            "path": os.environ.get(
+                "FAKE_RUNTIME_PATH", "/usr/bin/nvidia-container-runtime"
+            )
+        }
+        if "FAKE_RUNTIME_ARGS" in os.environ:
+            runtime["runtimeArgs"] = (
+                []
+                if not os.environ["FAKE_RUNTIME_ARGS"]
+                else [os.environ["FAKE_RUNTIME_ARGS"]]
+            )
         print(
             json.dumps(
                 {
-                    "nvidia": {
-                        "path": os.environ.get(
-                            "FAKE_RUNTIME_PATH", "/usr/bin/nvidia-container-runtime"
-                        ),
-                        "runtimeArgs": [],
-                    }
+                    "nvidia": runtime
                 }
             )
         )
@@ -1036,6 +1047,15 @@ exec /usr/bin/python3 "$@"
         self.assertNotEqual(0, mismatched.returncode)
         self.assertIn("runtime NVIDIA ne sont pas certifiés", mismatched.stderr)
 
+        runtime_args, _, _ = self.run_provisioner(
+            environment={
+                "FAKE_READY": "1",
+                "FAKE_RUNTIME_ARGS": "--unapproved",
+            }
+        )
+        self.assertNotEqual(0, runtime_args.returncode)
+        self.assertIn("runtime NVIDIA ne sont pas certifiés", runtime_args.stderr)
+
     def test_source_uses_jammy_versioned_python_entrypoint(self) -> None:
         source = PROVISIONER_SOURCE.read_text(encoding="utf-8")
 
@@ -1097,6 +1117,11 @@ exec /usr/bin/python3 "$@"
         cases = (
             ({"FAKE_COMPETING_PACKAGE": "docker-ce"}, "Famille Docker concurrente"),
             ({"FAKE_PARTIAL_PACKAGE": "docker.io"}, "État dpkg partiel ou ambigu"),
+            ({"FAKE_ABSENT_VERSION": "1.invalid"}, "État dpkg partiel ou ambigu"),
+            (
+                {"FAKE_ABSENT_STATUS": "deinstall ok config-files"},
+                "État dpkg partiel ou ambigu",
+            ),
         )
         for environment, message in cases:
             with self.subTest(environment=environment):
