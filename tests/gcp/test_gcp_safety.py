@@ -757,7 +757,7 @@ while True:
         def process_is_live(pid: int) -> bool:
             try:
                 stat = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8")
-            except FileNotFoundError:
+            except (FileNotFoundError, ProcessLookupError):
                 return False
             state = stat.rsplit(")", 1)[1].strip().split(maxsplit=1)[0]
             return state not in {"X", "Z"}
@@ -772,7 +772,10 @@ while True:
             )
         finally:
             if process_is_live(descendant_pid):
-                os.kill(descendant_pid, signal.SIGKILL)
+                try:
+                    os.kill(descendant_pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
 
     def test_non_gnu_timeout_is_rejected_before_any_gcloud_call(self) -> None:
         self.env["FAKE_TIMEOUT_SCENARIO"] = "invalid-version"
