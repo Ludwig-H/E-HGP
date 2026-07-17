@@ -81,7 +81,7 @@ usage() {
 }
 
 safety_probe() {
-    "${TIMEOUT_BIN}" --foreground --kill-after="${PROBE_KILL_AFTER_SECONDS}s" \
+    "${TIMEOUT_BIN}" --kill-after="${PROBE_KILL_AFTER_SECONDS}s" \
         "${PROBE_TIMEOUT_SECONDS}s" "$@"
 }
 
@@ -259,7 +259,7 @@ timeout_version="$(LC_ALL=C "${TIMEOUT_BIN}" --version 2>/dev/null)" || \
     die "Impossible d'identifier GNU timeout."
 timeout_version="${timeout_version%%$'\n'*}"
 [[ "${timeout_version}" == timeout\ \(GNU\ coreutils\)* ]] || \
-    die "timeout doit être GNU coreutils avec --foreground et --kill-after."
+    die "timeout doit être GNU coreutils avec gestion du groupe de processus et --kill-after."
 
 bounded_probe() {
     local now=0
@@ -271,7 +271,7 @@ bounded_probe() {
         ((remaining > PROBE_TIMEOUT_SECONDS + PROBE_KILL_AFTER_SECONDS + \
             DEADLINE_LAUNCH_SLACK_SECONDS)) || return 125
     fi
-    "${TIMEOUT_BIN}" --foreground --kill-after="${PROBE_KILL_AFTER_SECONDS}s" \
+    "${TIMEOUT_BIN}" --kill-after="${PROBE_KILL_AFTER_SECONDS}s" \
         "${PROBE_TIMEOUT_SECONDS}s" "$@"
 }
 
@@ -468,7 +468,7 @@ run_bounded() {
     printf '[UNITÉ] %s, timeout=%ss, kill-after=%ss, marge=%ss.\n' \
         "${label}" "${maximum_seconds}" "${TIMEOUT_KILL_AFTER_SECONDS}" "${remaining}" \
         >>"${PROVISION_LOG}"
-    "${TIMEOUT_BIN}" --foreground --kill-after="${TIMEOUT_KILL_AFTER_SECONDS}s" \
+    "${TIMEOUT_BIN}" --kill-after="${TIMEOUT_KILL_AFTER_SECONDS}s" \
         "${maximum_seconds}s" "$@" >>"${PROVISION_LOG}" 2>&1
 }
 
@@ -494,7 +494,7 @@ run_bounded_to_file() {
         >>"${PROVISION_LOG}"
     : >"${output_file}"
     "${CHMOD_BIN}" 600 "${output_file}"
-    "${TIMEOUT_BIN}" --foreground --kill-after="${TIMEOUT_KILL_AFTER_SECONDS}s" \
+    "${TIMEOUT_BIN}" --kill-after="${TIMEOUT_KILL_AFTER_SECONDS}s" \
         "${maximum_seconds}s" "$@" >"${output_file}" 2>&1
 }
 
@@ -937,8 +937,15 @@ import json
 import sys
 
 value = json.loads(sys.argv[1])
-if not isinstance(value, dict) or "nvidia" not in value:
+if not isinstance(value, dict):
+    raise SystemExit("Docker runtimes are not an object")
+nvidia = value.get("nvidia")
+if not isinstance(nvidia, dict):
     raise SystemExit("Docker does not expose the NVIDIA runtime")
+if nvidia.get("path") != "/usr/bin/nvidia-container-runtime":
+    raise SystemExit("Docker exposes an unexpected NVIDIA runtime path")
+if nvidia.get("runtimeArgs") != []:
+    raise SystemExit("Docker exposes unexpected NVIDIA runtime arguments")
 PY
 }
 

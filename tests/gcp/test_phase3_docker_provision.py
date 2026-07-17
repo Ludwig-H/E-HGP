@@ -191,7 +191,12 @@ def initial_config(kind):
 
 def initialize():
     ready = os.environ.get("FAKE_READY") == "1"
-    config_kind = os.environ.get("FAKE_CONFIG", "approved" if ready else "absent")
+    initial_missing = os.environ.get("FAKE_INITIAL_MISSING", "")
+    partially_ready = initial_missing in {"docker.io", "docker-buildx"}
+    config_kind = os.environ.get(
+        "FAKE_CONFIG", "approved" if ready or partially_ready else "absent"
+    )
+    docker_present = ready or (partially_ready and initial_missing != "docker.io")
     files = {}
     if config_kind not in {"absent", "symlink"}:
         files["/etc/docker/daemon.json"] = {
@@ -201,15 +206,16 @@ def initialize():
             "owner": "0",
         }
     return {
-        "active": ready,
+        "active": docker_present,
+        "apt_completed": False,
         "apt_updated": False,
         "boot_reads": 0,
         "configured": config_kind == "approved",
-        "docker_dir": ready or config_kind != "absent",
-        "enabled": ready,
+        "docker_dir": ready or partially_ready or config_kind != "absent",
+        "enabled": docker_present,
         "files": files,
         "guard_reads": 0,
-        "installed": ready,
+        "installed": ready or partially_ready,
         "next_inode": 100,
         "pre_apt_checked": False,
         "root_dirs": {},
@@ -278,7 +284,11 @@ def is_symlink(path):
         return True
     if path == "/etc/docker/daemon.json":
         return config_symlink()
-    if state["installed"] and path in unit_paths:
+    docker_available = not (
+        os.environ.get("FAKE_INITIAL_MISSING") == "docker.io"
+        and not state.get("apt_completed", False)
+    )
+    if state["installed"] and docker_available and path in unit_paths:
         return True
     if path in {"/bin/kmod", "/sbin/modprobe"}:
         return True
@@ -295,6 +305,17 @@ def directory_exists(path):
     return any(candidate == Path(item).parent or candidate in Path(item).parents for item in tool_files)
 
 def file_exists(path):
+    initial_missing = os.environ.get("FAKE_INITIAL_MISSING", "")
+    before_install = not state.get("apt_completed", False)
+    if before_install and initial_missing == "docker-buildx" and path == plugin:
+        return False
+    if before_install and initial_missing == "docker.io" and path in {
+        "/usr/bin/docker",
+        "/usr/bin/dockerd",
+        *unit_paths.keys(),
+        *unit_paths.values(),
+    }:
+        return False
     if path in state["files"]:
         return True
     if path in tool_files or path in always_executables:
@@ -364,6 +385,11 @@ def package_record(package):
     }:
         return "install ok installed", os.environ["FAKE_NVIDIA_VERSION"]
     if package in {"docker.io", "docker-buildx", "containerd"} and state["installed"]:
+        if (
+            package == os.environ.get("FAKE_INITIAL_MISSING", "")
+            and not state.get("apt_completed", False)
+        ):
+            return None
         versions = {
             "docker.io": os.environ["FAKE_DOCKER_VERSION"],
             "docker-buildx": os.environ["FAKE_BUILDX_VERSION"],
@@ -473,7 +499,10 @@ if name == "dpkg-query":
             "/lib/systemd/system/containerd.service": "containerd",
         }
         owner = owners.get(path)
-        if owner is None or (owner in {"docker.io", "docker-buildx", "containerd"} and not state["installed"]):
+        if owner is None or (
+            owner in {"docker.io", "docker-buildx", "containerd"}
+            and package_record(owner) is None
+        ):
             finish(1)
         print(f"{owner}: {path}")
         finish()
@@ -645,15 +674,19 @@ if name == "apt-get":
             print("Inst containerd (1.7.24-0ubuntu1~22.04.1 Ubuntu:22.04/jammy-updates [amd64])")
         state["simulated"] = True
         finish()
-    expected = {
-        "docker.io=" + os.environ["FAKE_DOCKER_VERSION"],
-        "docker-buildx=" + os.environ["FAKE_BUILDX_VERSION"],
+    versions = {
+        "docker.io": os.environ["FAKE_DOCKER_VERSION"],
+        "docker-buildx": os.environ["FAKE_BUILDX_VERSION"],
     }
+    initial_missing = os.environ.get("FAKE_INITIAL_MISSING", "")
+    expected_names = {initial_missing} if initial_missing else set(versions)
+    expected = {f"{package}={versions[package]}" for package in expected_names}
     required_flags = {"--yes", "--no-remove", "--no-upgrade", "--no-install-recommends"}
     if not state["apt_updated"] or not state["simulated"]:
         raise SystemExit("real fake install was attempted before update/simulation")
     if not expected.issubset(arguments) or not required_flags.issubset(arguments):
         raise SystemExit("fake install is not exactly pinned and guarded")
+    state["apt_completed"] = True
     state["installed"] = True
     print("fake pinned Docker packages installed")
     finish()
@@ -756,7 +789,18 @@ if name == "docker":
     if arguments[:2] == ["info", "--format"]:
         if not state["active"]:
             finish(1)
-        print(json.dumps({"nvidia": {"path": "/usr/bin/nvidia-container-runtime", "runtimeArgs": []}}))
+        print(
+            json.dumps(
+                {
+                    "nvidia": {
+                        "path": os.environ.get(
+                            "FAKE_RUNTIME_PATH", "/usr/bin/nvidia-container-runtime"
+                        ),
+                        "runtimeArgs": [],
+                    }
+                }
+            )
+        )
         finish()
     raise SystemExit("unexpected fake docker invocation: " + " ".join(arguments))
 
@@ -933,6 +977,15 @@ class Phase3DockerProvisionerTests(unittest.TestCase):
             )
         )
 
+        mismatched, _, _ = self.run_provisioner(
+            environment={
+                "FAKE_READY": "1",
+                "FAKE_RUNTIME_PATH": "/usr/bin/unapproved-runtime",
+            }
+        )
+        self.assertNotEqual(0, mismatched.returncode)
+        self.assertIn("runtime NVIDIA ne sont pas certifiés", mismatched.stderr)
+
     def test_rejects_missing_or_invalid_guard_and_deadline_before_mutation(
         self,
     ) -> None:
@@ -1067,7 +1120,33 @@ class Phase3DockerProvisionerTests(unittest.TestCase):
         self.assertTrue(state["enabled"])
         self.assertTrue(state["active"])
 
+        package_versions = {
+            "docker.io": DOCKER_VERSION,
+            "docker-buildx": BUILDX_VERSION,
+        }
+        for missing_package, missing_version in package_versions.items():
+            with self.subTest(missing_package=missing_package):
+                partial, partial_log, partial_state = self.run_provisioner(
+                    environment={"FAKE_INITIAL_MISSING": missing_package}
+                )
+                self.assertEqual(0, partial.returncode, partial.stdout + partial.stderr)
+                install_lines = [
+                    line
+                    for line in self.sudo_command_lines(partial_log)
+                    if "apt-get" in line
+                    and " install " in f" {line} "
+                    and "--simulate" not in line
+                ]
+                self.assertEqual(1, len(install_lines), partial_log)
+                self.assertIn(f"{missing_package}={missing_version}", install_lines[0])
+                for present_package in package_versions.keys() - {missing_package}:
+                    self.assertNotIn(f"{present_package}=", install_lines[0])
+                self.assertTrue(partial_state["apt_completed"])
+                self.assertTrue(partial_state["active"])
+
     def test_per_unit_timeout_prevents_all_later_units(self) -> None:
+        source = PROVISIONER_SOURCE.read_text(encoding="utf-8")
+        self.assertNotIn('"${TIMEOUT_BIN}" --foreground', source)
         result, log, _ = self.run_provisioner(
             environment={"FAKE_TIMEOUT_ON": "nvidia-ctk runtime configure"}
         )

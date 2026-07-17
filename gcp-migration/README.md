@@ -334,6 +334,12 @@ type, de lien, d'exécution, de propriétaire et de permissions avant une relect
 groupée des métadonnées. Cette réduction des appels privilégiés accélère la
 préparation sans réduire l'enveloppe de sécurité.
 
+Chaque unité mutante s'exécute sous un groupe de processus borné : à
+l'expiration, `timeout` signale aussi les descendants de l'unité au lieu de
+laisser un `apt-get`, un `dpkg` ou un configurateur continuer en arrière-plan.
+La postcondition Docker compare en outre le chemin et les arguments du runtime
+NVIDIA effectivement exposé par le daemon à la configuration absolue approuvée.
+
 Lorsque la configuration Docker est absente, le seul générateur admis est le
 `nvidia-ctk` 1.17.8-1 déjà présent. Le JSON créé doit contenir uniquement le
 runtime NVIDIA attendu, rester root et non inscriptible par groupe ou autres,
