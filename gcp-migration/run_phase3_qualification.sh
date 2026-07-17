@@ -141,9 +141,9 @@ command -v timeout >/dev/null 2>&1 || die "GNU timeout est requis avant toute mu
 timeout_version="$(timeout --version 2>/dev/null | sed -n '1p')" || \
     die "Impossible d'identifier GNU timeout."
 [[ "${timeout_version}" == timeout\ \(GNU\ coreutils\)* ]] || \
-    die "timeout doit être l'implémentation GNU compatible avec --foreground et --kill-after."
-timeout --foreground --kill-after=1s 1s true >/dev/null 2>&1 || \
-    die "GNU timeout ne prend pas en charge --foreground et --kill-after."
+    die "timeout doit être l'implémentation GNU compatible avec la gestion du groupe de processus et --kill-after."
+timeout --kill-after=1s 1s true >/dev/null 2>&1 || \
+    die "GNU timeout ne prend pas en charge la gestion du groupe de processus et --kill-after."
 [[ -x "${START_SCRIPT}" ]] || die "Point d'entrée de démarrage absent ou non exécutable : ${START_SCRIPT}."
 [[ -x "${STOP_SCRIPT}" ]] || die "Point d'entrée d'arrêt absent ou non exécutable : ${STOP_SCRIPT}."
 if ((PROVISION_DOCKER == 1)); then
@@ -213,7 +213,7 @@ shell_quote() {
 
 remote_exec() {
     local command="$1"
-    timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
         "${GCLOUD_REMOTE_TIMEOUT_SECONDS}s" gcloud compute ssh "${INSTANCE_NAME}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
@@ -289,7 +289,7 @@ capture_session_ssh_key_expiration() {
 
     read -r declared_algorithm declared_blob _ <"${SSH_KEY_FILE}.pub" || return 1
     [[ "${declared_algorithm}" == "ssh-ed25519" && -n "${declared_blob}" ]] || return 1
-    profile_json="$(timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+    profile_json="$(timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
         "${GCLOUD_IDENTITY_TIMEOUT_SECONDS}s" \
         gcloud compute os-login describe-profile \
         --project="${PROJECT_ID}" \
@@ -351,7 +351,7 @@ PY
 
 import_session_ssh_key() {
     SSH_KEY_IMPORT_ATTEMPTED=1
-    timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
         "${GCLOUD_IDENTITY_TIMEOUT_SECONDS}s" \
         gcloud compute os-login ssh-keys add \
         --key-file="${SSH_KEY_FILE}.pub" \
@@ -380,7 +380,7 @@ revoke_and_remove_session_ssh_key() {
 
     if ((SSH_KEY_IMPORT_ATTEMPTED == 1)) && \
         [[ -f "${SSH_KEY_FILE}.pub" && ! -L "${SSH_KEY_FILE}.pub" ]]; then
-        if timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        if timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
             "${GCLOUD_IDENTITY_TIMEOUT_SECONDS}s" \
             gcloud compute os-login ssh-keys remove \
             --key-file="${SSH_KEY_FILE}.pub" \
@@ -419,7 +419,7 @@ revoke_and_remove_session_ssh_key() {
 capture_pre_start_snapshot() {
     local lifecycle_json=""
 
-    lifecycle_json="$(timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+    lifecycle_json="$(timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
         "${GCLOUD_READ_TIMEOUT_SECONDS}s" gcloud compute instances describe "${INSTANCE_NAME}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
@@ -450,7 +450,7 @@ target_has_unchanged_terminated_generation() {
     local lifecycle_json=""
 
     ((PRE_START_SNAPSHOT_CERTIFIED == 1)) || return 1
-    lifecycle_json="$(timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+    lifecycle_json="$(timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
         "${GCLOUD_READ_TIMEOUT_SECONDS}s" gcloud compute instances describe "${INSTANCE_NAME}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
@@ -522,7 +522,7 @@ PY
 
 certify_session_deadline() {
     local lifecycle_json=""
-    lifecycle_json="$(timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+    lifecycle_json="$(timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
         "${GCLOUD_READ_TIMEOUT_SECONDS}s" gcloud compute instances describe "${INSTANCE_NAME}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
@@ -621,7 +621,7 @@ certify_target_stopped() {
         return "${STOP_SCRIPT_FAILURE}"
     fi
 
-    if ! final_status="$(timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+    if ! final_status="$(timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
         "${GCLOUD_READ_TIMEOUT_SECONDS}s" gcloud compute instances describe "${INSTANCE_NAME}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
@@ -637,7 +637,7 @@ certify_target_stopped() {
         print_control_command
         return "${STOP_NOT_TERMINATED}"
     fi
-    if ! final_generation="$(timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+    if ! final_generation="$(timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
         "${GCLOUD_READ_TIMEOUT_SECONDS}s" gcloud compute instances describe "${INSTANCE_NAME}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
@@ -788,7 +788,7 @@ fi
 remote_exec \
     "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}"
 
-timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
     "${INSTANCE_NAME}:${remote_artifact}" \
     "${LOCAL_TEMP_RESULT}" \

@@ -6,9 +6,11 @@ import importlib.util
 import json
 import os
 import re
+import signal
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -495,9 +497,8 @@ if args == ["--version"]:
         print("timeout (GNU coreutils) 9.4")
     raise SystemExit(0)
 
-if not args or args[0] != "--foreground":
-    raise SystemExit("fake timeout requires --foreground")
-args = args[1:]
+if args and args[0] == "--foreground":
+    raise SystemExit("fake timeout rejects --foreground")
 if not args or not args[0].startswith("--kill-after="):
     raise SystemExit("fake timeout requires --kill-after")
 args = args[1:]
@@ -632,15 +633,15 @@ class ScriptSafetyTests(unittest.TestCase):
         self.log = self.tmp / "gcloud.log"
         self.timeout_log = self.tmp / "timeout.log"
         now = datetime.now(timezone.utc)
-        self.pre_start_timestamp = (now - timedelta(seconds=20)).isoformat().replace(
-            "+00:00", "Z"
+        self.pre_start_timestamp = (
+            (now - timedelta(seconds=20)).isoformat().replace("+00:00", "Z")
         )
-        self.last_start_timestamp = (now - timedelta(seconds=10)).isoformat().replace(
-            "+00:00", "Z"
+        self.last_start_timestamp = (
+            (now - timedelta(seconds=10)).isoformat().replace("+00:00", "Z")
         )
         self.concurrent_start_timestamp = (
-            now - timedelta(seconds=5)
-        ).isoformat().replace("+00:00", "Z")
+            (now - timedelta(seconds=5)).isoformat().replace("+00:00", "Z")
+        )
         self.env = os.environ.copy()
         self.env.update(
             {
@@ -682,7 +683,8 @@ class ScriptSafetyTests(unittest.TestCase):
             with self.subTest(script=name):
                 source = (ROOT / "gcp-migration" / name).read_text(encoding="utf-8")
                 self.assertIn("command -v timeout", source)
-                self.assertIn("timeout --foreground --kill-after=", source)
+                self.assertIn("timeout --kill-after=", source)
+                self.assertNotIn("timeout --foreground", source)
         start_source = (ROOT / "gcp-migration" / "start_and_verify.sh").read_text(
             encoding="utf-8"
         )
@@ -693,6 +695,84 @@ class ScriptSafetyTests(unittest.TestCase):
         self.assertIn("gcloud_mutation compute instances stop", stop_source)
         self.assertIn("aucun arrêt automatique non versionné", start_source)
         self.assertNotIn("fallback d’arrêt ciblé non versionné", start_source)
+
+    def test_gnu_timeout_kills_a_forking_gcloud_descendant(self) -> None:
+        timeout_bin = shutil.which("timeout")
+        self.assertIsNotNone(timeout_bin)
+        version = subprocess.run(
+            [timeout_bin, "--version"],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+        )
+        self.assertEqual(version.returncode, 0, version.stdout)
+        self.assertIn("GNU coreutils", version.stdout)
+
+        descendant_pid_file = self.tmp / "forking-gcloud-descendant.pid"
+        forking_gcloud = self.tmp / "forking-gcloud"
+        forking_gcloud.write_text(
+            r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import signal
+import time
+
+signal.signal(signal.SIGTERM, signal.SIG_IGN)
+child = os.fork()
+if child == 0:
+    signal.signal(signal.SIGTERM, signal.SIG_DFL)
+    Path(os.environ["FAKE_DESCENDANT_PID_FILE"]).write_text(
+        str(os.getpid()), encoding="utf-8"
+    )
+    while True:
+        time.sleep(60)
+while True:
+    time.sleep(60)
+""",
+            encoding="utf-8",
+        )
+        forking_gcloud.chmod(0o755)
+        environment = os.environ.copy()
+        environment["FAKE_DESCENDANT_PID_FILE"] = str(descendant_pid_file)
+
+        result = subprocess.run(
+            [
+                timeout_bin,
+                "--kill-after=0.2s",
+                "1s",
+                str(forking_gcloud),
+            ],
+            env=environment,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+            timeout=5,
+        )
+        self.assertIn(result.returncode, {124, -signal.SIGKILL}, result.stdout)
+        self.assertTrue(descendant_pid_file.is_file())
+        descendant_pid = int(descendant_pid_file.read_text(encoding="utf-8"))
+
+        def process_is_live(pid: int) -> bool:
+            try:
+                stat = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8")
+            except FileNotFoundError:
+                return False
+            state = stat.rsplit(")", 1)[1].strip().split(maxsplit=1)[0]
+            return state not in {"X", "Z"}
+
+        try:
+            deadline = time.monotonic() + 2
+            while process_is_live(descendant_pid) and time.monotonic() < deadline:
+                time.sleep(0.02)
+            self.assertFalse(
+                process_is_live(descendant_pid),
+                f"le descendant gcloud {descendant_pid} a survécu au timeout",
+            )
+        finally:
+            if process_is_live(descendant_pid):
+                os.kill(descendant_pid, signal.SIGKILL)
 
     def test_non_gnu_timeout_is_rejected_before_any_gcloud_call(self) -> None:
         self.env["FAKE_TIMEOUT_SCENARIO"] = "invalid-version"
@@ -870,9 +950,7 @@ class ScriptSafetyTests(unittest.TestCase):
         self.assertIn("non encore matérialisée", result.stdout)
         self.assertEqual(
             self.last_start_timestamp,
-            json.loads(handoff.read_text(encoding="utf-8"))[
-                "last_start_timestamp"
-            ],
+            json.loads(handoff.read_text(encoding="utf-8"))["last_start_timestamp"],
         )
         stopped = self.run_script(
             "stop_and_verify.sh",
@@ -883,9 +961,7 @@ class ScriptSafetyTests(unittest.TestCase):
         self.assertEqual(stopped.returncode, 0, stopped.stdout)
 
     def test_deploy_declares_and_reads_back_spot_invariants(self) -> None:
-        source = (ROOT / "gcp-migration" / "deploy.sh").read_text(
-            encoding="utf-8"
-        )
+        source = (ROOT / "gcp-migration" / "deploy.sh").read_text(encoding="utf-8")
 
         for expected in (
             '--provisioning-model="SPOT"',
@@ -908,12 +984,8 @@ class ScriptSafetyTests(unittest.TestCase):
         self.assertIn("check_quotas.sh", source)
         self.assertIn('[[ "${NETWORK_INTERFACE}" != *"no-address"* ]]', source)
         self.assertIn('[[ "${ZONE}" == *-ai* ]] || return 1', source)
-        self.assertIn(
-            "CREATE_REQUEST_EPOCH - TIMESTAMP_TOLERANCE_SECONDS", source
-        )
-        self.assertIn(
-            "now + configured_seconds + TIMESTAMP_TOLERANCE_SECONDS", source
-        )
+        self.assertIn("CREATE_REQUEST_EPOCH - TIMESTAMP_TOLERANCE_SECONDS", source)
+        self.assertIn("now + configured_seconds + TIMESTAMP_TOLERANCE_SECONDS", source)
         self.assertNotIn("access-config-type", source)
 
     def test_quota_check_uses_exact_spot_quota_and_never_requires_g4_cpus(
@@ -1126,7 +1198,9 @@ class ScriptSafetyTests(unittest.TestCase):
         encrypted_key.chmod(0o600)
         permissive_key = self.tmp / "permissive-session-ed25519"
         shutil.copy2(self.ssh_key, permissive_key)
-        shutil.copy2(Path(str(self.ssh_key) + ".pub"), Path(str(permissive_key) + ".pub"))
+        shutil.copy2(
+            Path(str(self.ssh_key) + ".pub"), Path(str(permissive_key) + ".pub")
+        )
         permissive_key.chmod(0o640)
         cases = (
             ("missing", self.tmp / "missing-session-ed25519", "absente"),
@@ -1248,9 +1322,7 @@ class ScriptSafetyTests(unittest.TestCase):
     ) -> None:
         self.env["GCP_ZONE"] = "europe-west4-ai1a"
         self.env["FAKE_MAX_RUN_SECONDS"] = "3600"
-        self.env["FAKE_GCLOUD_SCENARIO"] = (
-            "guest-success-no-termination-timestamp"
-        )
+        self.env["FAKE_GCLOUD_SCENARIO"] = "guest-success-no-termination-timestamp"
         handoff = self.tmp / "ai-zone-start-handoff.json"
 
         result = self.run_script(
@@ -1269,9 +1341,7 @@ class ScriptSafetyTests(unittest.TestCase):
         )
         self.assertEqual(
             self.last_start_timestamp,
-            json.loads(handoff.read_text(encoding="utf-8"))[
-                "last_start_timestamp"
-            ],
+            json.loads(handoff.read_text(encoding="utf-8"))["last_start_timestamp"],
         )
         stopped = self.run_script(
             "stop_and_verify.sh",
@@ -1329,8 +1399,8 @@ class ScriptSafetyTests(unittest.TestCase):
                 self.env["FAKE_GCLOUD_SCENARIO"] = scenario
                 self.env["GCP_ZONE"] = zone
                 self.env["FAKE_MAX_RUN_SECONDS"] = "3600"
-                self.env["FAKE_LAST_START_TIMESTAMP"] = (
-                    start_time.isoformat().replace("+00:00", "Z")
+                self.env["FAKE_LAST_START_TIMESTAMP"] = start_time.isoformat().replace(
+                    "+00:00", "Z"
                 )
                 if termination is None:
                     self.env.pop("FAKE_TERMINATION_TIMESTAMP", None)
@@ -1351,15 +1421,17 @@ class ScriptSafetyTests(unittest.TestCase):
     def test_late_timestamp_cannot_shorten_the_guest_deadline(self) -> None:
         self.env["GCP_ZONE"] = "europe-west4-ai1a"
         self.env["FAKE_MAX_RUN_SECONDS"] = "3600"
-        self.env["FAKE_GCLOUD_SCENARIO"] = (
-            "guest-success-late-termination-timestamp"
-        )
+        self.env["FAKE_GCLOUD_SCENARIO"] = "guest-success-late-termination-timestamp"
         handoff = self.tmp / "late-timestamp-handoff.json"
-        safe_deadline = int(
-            datetime.fromisoformat(
-                self.last_start_timestamp.replace("Z", "+00:00")
-            ).timestamp()
-        ) + 3600 - 300
+        safe_deadline = (
+            int(
+                datetime.fromisoformat(
+                    self.last_start_timestamp.replace("Z", "+00:00")
+                ).timestamp()
+            )
+            + 3600
+            - 300
+        )
 
         result = self.run_script(
             "start_and_verify.sh",
@@ -1385,7 +1457,7 @@ class ScriptSafetyTests(unittest.TestCase):
         self.env["FAKE_TIMEOUT_SCENARIO"] = "expire-stop"
         fake_sleep = self.tmp / "sleep"
         fake_sleep.write_text(
-            "#!/usr/bin/env bash\nkill -TERM \"${PPID}\"\nexit 143\n",
+            '#!/usr/bin/env bash\nkill -TERM "${PPID}"\nexit 143\n',
             encoding="utf-8",
         )
         fake_sleep.chmod(0o755)
@@ -1500,7 +1572,7 @@ fi
         )
         write_executable(
             "sudo",
-            "#!/usr/bin/env bash\n[[ \"$*\" == \"-n true\" ]] && exit 1\nexit 1\n",
+            '#!/usr/bin/env bash\n[[ "$*" == "-n true" ]] && exit 1\nexit 1\n',
         )
         cuda_home = self.tmp / "cuda-12.9"
         (cuda_home / "bin").mkdir(parents=True)
@@ -1648,9 +1720,7 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         shutil.copy2(source, orchestrator)
         orchestrator.chmod(0o755)
         self.orchestrator = orchestrator
-        provision_source = (
-            ROOT / "gcp-migration" / "phase3_remote_docker_provision.sh"
-        )
+        provision_source = ROOT / "gcp-migration" / "phase3_remote_docker_provision.sh"
         provision = migration / provision_source.name
         shutil.copy2(provision_source, provision)
         provision.chmod(0o755)
@@ -1681,18 +1751,20 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.results = self.tmp / "results"
         self.head = "a" * 40
         now = datetime.now(timezone.utc)
-        self.pre_start_timestamp = (now - timedelta(seconds=20)).isoformat().replace(
-            "+00:00", "Z"
+        self.pre_start_timestamp = (
+            (now - timedelta(seconds=20)).isoformat().replace("+00:00", "Z")
         )
-        self.last_start_timestamp = (now - timedelta(seconds=10)).isoformat().replace(
-            "+00:00", "Z"
+        self.last_start_timestamp = (
+            (now - timedelta(seconds=10)).isoformat().replace("+00:00", "Z")
         )
         self.termination_timestamp = (
-            datetime.fromisoformat(
-                self.last_start_timestamp.replace("Z", "+00:00")
+            (
+                datetime.fromisoformat(self.last_start_timestamp.replace("Z", "+00:00"))
+                + timedelta(seconds=3600)
             )
-            + timedelta(seconds=3600)
-        ).isoformat().replace("+00:00", "Z")
+            .isoformat()
+            .replace("+00:00", "Z")
+        )
         self.env = os.environ.copy()
         self.env.update(
             {
@@ -1907,9 +1979,7 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         commands = self.gcloud_commands()
         provision_index = commands.index("phase3_remote_docker_provision.sh")
         post_provision = commands[provision_index:]
-        self.assertIn(
-            "compute instances describe ehgp-blackwell-spot", post_provision
-        )
+        self.assertIn("compute instances describe ehgp-blackwell-spot", post_provision)
         self.assertNotIn("phase3_remote_qualification.sh", commands)
         session = self.session_commands()
         self.assertIn(
@@ -1983,8 +2053,8 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.last_start_timestamp = old_start.isoformat().replace("+00:00", "Z")
         self.env["FAKE_LAST_START_TIMESTAMP"] = self.last_start_timestamp
         self.env["FAKE_TERMINATION_TIMESTAMP"] = (
-            old_start + timedelta(seconds=3600)
-        ).isoformat().replace("+00:00", "Z")
+            (old_start + timedelta(seconds=3600)).isoformat().replace("+00:00", "Z")
+        )
 
         result = self.run_qualification(*self.standard_arguments())
 
@@ -1998,8 +2068,10 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self,
     ) -> None:
         self.env["FAKE_TERMINATION_TIMESTAMP"] = (
-            datetime.now(timezone.utc) + timedelta(hours=3)
-        ).isoformat().replace("+00:00", "Z")
+            (datetime.now(timezone.utc) + timedelta(hours=3))
+            .isoformat()
+            .replace("+00:00", "Z")
+        )
 
         result = self.run_qualification(*self.standard_arguments())
 
@@ -2022,9 +2094,7 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         self.assertFalse(self.session_private_key_path().exists())
 
     def test_oslogin_import_failure_never_starts_and_cleans_local_key(self) -> None:
-        self.env["FAKE_GCLOUD_SCENARIO"] = (
-            "qualification-oslogin-import-failure"
-        )
+        self.env["FAKE_GCLOUD_SCENARIO"] = "qualification-oslogin-import-failure"
 
         result = self.run_qualification(*self.standard_arguments())
 
@@ -2165,9 +2235,7 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
                 self.assertNotIn(
                     "stop project=devpod-gpu-exploration", self.session_commands()
                 )
-                self.assertFalse(
-                    (self.results / f"phase3-{self.head}.json").exists()
-                )
+                self.assertFalse((self.results / f"phase3-{self.head}.json").exists())
                 if scenario == "invalid-handoff":
                     self.assertIn("[HANDOFF CONSERVÉ]", result.stdout)
                     self.assertTrue(self.handoff_path().exists())
@@ -2261,7 +2329,9 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
         result = self.run_qualification(*self.standard_arguments())
 
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("refus de remplacer un artefact créé concurremment", result.stdout)
+        self.assertIn(
+            "refus de remplacer un artefact créé concurremment", result.stdout
+        )
         self.assertEqual("concurrent artifact\n", artifact.read_text(encoding="utf-8"))
         self.assertIn("[TERMINATED]", result.stdout)
         self.assertEqual(1, self.session_commands().count("stop project="))

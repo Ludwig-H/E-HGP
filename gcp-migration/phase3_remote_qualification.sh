@@ -22,7 +22,28 @@ readonly DOCKER_INFO_MAX_ATTEMPTS=6
 readonly DOCKER_INFO_RETRY_SECONDS=5
 readonly DOCKER_PROBE_TIMEOUT_SECONDS=5
 readonly DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS=10
-readonly SUDO_DOCKER_BIN="/usr/bin/docker"
+readonly PROBE_KILL_AFTER_SECONDS=2
+readonly WORK_UNIT_KILL_AFTER_SECONDS=5
+readonly CONTAINER_CLEANUP_TIMEOUT_SECONDS=2
+readonly CONTAINER_CLEANUP_KILL_AFTER_SECONDS=1
+readonly CONTAINER_CLEANUP_MAX_ATTEMPTS=7
+readonly CONTAINER_CLEANUP_INITIAL_ABSENCES=5
+readonly CONTAINER_CLEANUP_POST_RM_ABSENCES=2
+readonly CONTAINER_CLEANUP_RETRY_SECONDS=1
+readonly WORK_UNIT_POST_TIMEOUT_RESERVE_SECONDS=60
+readonly CONTAINER_SESSION_LABEL="morsehgp3d.phase3.session"
+readonly DOCKER_BIN="/usr/bin/docker"
+readonly DOCKER_TEST_BIN="/usr/bin/test"
+readonly DOCKER_STAT_BIN="/usr/bin/stat"
+readonly TIMEOUT_BIN="/usr/bin/timeout"
+readonly TIMEOUT_TEST_BIN="/usr/bin/test"
+readonly TIMEOUT_STAT_BIN="/usr/bin/stat"
+readonly SLEEP_BIN="/usr/bin/sleep"
+readonly SLEEP_TEST_BIN="/usr/bin/test"
+readonly SLEEP_STAT_BIN="/usr/bin/stat"
+readonly DATE_BIN="/usr/bin/date"
+readonly DATE_TEST_BIN="/usr/bin/test"
+readonly DATE_STAT_BIN="/usr/bin/stat"
 readonly BUILDX_PLUGIN="/usr/libexec/docker/cli-plugins/docker-buildx"
 readonly BUILDX_TEST_BIN="/usr/bin/test"
 readonly BUILDX_STAT_BIN="/usr/bin/stat"
@@ -42,10 +63,72 @@ PUBLISH_TEMP=""
 SESSION_CREATED=0
 DOCKER_IDENTITY=""
 BUILDX_CONFIG=""
+SESSION_TOKEN=""
+ACTIVE_CONTAINER_CIDFILE=""
+ACTIVE_CONTAINER_LOG=""
+ACTIVE_CONTAINER_NAME=""
+declare -a DOCKER=()
+declare -a BUILDX=()
 
 die() {
     printf '[ERREUR] %s\n' "$*" >&2
     exit 1
+}
+
+certify_fixed_executable_chain() {
+    local fixed_bin="$1"
+    local test_bin="$2"
+    local stat_bin="$3"
+    local index=0
+    local metadata=""
+    local mode=""
+    local owner_uid=""
+    local parent="${fixed_bin}"
+    local path=""
+    local -a reverse_paths=()
+    local -a expected_paths=()
+
+    while true; do
+        reverse_paths+=("${parent}")
+        [[ "${parent}" == "/" ]] && break
+        parent="${parent%/*}"
+        [[ -n "${parent}" ]] || parent="/"
+    done
+    for ((index = ${#reverse_paths[@]} - 1; index >= 0; index--)); do
+        expected_paths+=("${reverse_paths[index]}")
+    done
+    for ((index = 0; index < ${#expected_paths[@]} - 1; index++)); do
+        path="${expected_paths[index]}"
+        "${test_bin}" -d "${path}" || return 1
+        "${test_bin}" ! -L "${path}" || return 1
+    done
+    "${test_bin}" -f "${fixed_bin}" || return 1
+    "${test_bin}" ! -L "${fixed_bin}" || return 1
+    "${test_bin}" -x "${fixed_bin}" || return 1
+    metadata="$("${stat_bin}" -Lc '%n|%u|%a' -- \
+        "${expected_paths[@]}")" || return 1
+    index=0
+    while IFS='|' read -r path owner_uid mode; do
+        ((index < ${#expected_paths[@]})) || return 1
+        [[ "${path}" == "${expected_paths[index]}" && "${owner_uid}" == "0" && \
+            "${mode}" =~ ^[0-7]{3,4}$ ]] || return 1
+        (((8#${mode} & 8#22) == 0)) || return 1
+        index=$((index + 1))
+    done <<<"${metadata}"
+    ((index == ${#expected_paths[@]}))
+}
+
+certify_fixed_timeout() {
+    local timeout_help=""
+    local timeout_version=""
+
+    certify_fixed_executable_chain \
+        "${TIMEOUT_BIN}" "${TIMEOUT_TEST_BIN}" "${TIMEOUT_STAT_BIN}" || return 1
+    timeout_version="$("${TIMEOUT_BIN}" --version 2>/dev/null || true)"
+    [[ "${timeout_version}" == timeout\ \(GNU\ coreutils\)* ]] || return 1
+    timeout_help="$("${TIMEOUT_BIN}" --help 2>/dev/null || true)"
+    [[ "${timeout_help}" == *"--kill-after=DURATION"* && \
+        "${timeout_help}" == *"--foreground"* ]]
 }
 
 usage() {
@@ -92,22 +175,28 @@ done
     die "--gce-deadline-epoch doit être un epoch UTC positif sur dix chiffres."
 GCE_DEADLINE_EPOCH=$((10#${GCE_DEADLINE_RAW}))
 WORK_DEADLINE_EPOCH=$((GCE_DEADLINE_EPOCH - WORK_RESERVE_SECONDS))
-now_epoch="$(date +%s)" || die "Horloge invitée illisible."
-[[ "${now_epoch}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique."
-((WORK_DEADLINE_EPOCH > now_epoch)) || \
-    die "La deadline de travail GCE-30 min est déjà atteinte; aucune unité ne sera lancée."
 case "${OUTPUT_RAW}" in
     /*) ;;
     *) die "--output doit être un chemin absolu." ;;
 esac
+certify_fixed_timeout || \
+    die "La chaîne fixe /usr/bin/timeout n'est pas sûre, GNU ou compatible avec les groupes/--kill-after."
+certify_fixed_executable_chain \
+    "${SLEEP_BIN}" "${SLEEP_TEST_BIN}" "${SLEEP_STAT_BIN}" || \
+    die "La chaîne fixe /usr/bin/sleep n'est pas sûre."
+certify_fixed_executable_chain \
+    "${DATE_BIN}" "${DATE_TEST_BIN}" "${DATE_STAT_BIN}" || \
+    die "La chaîne fixe /usr/bin/date n'est pas sûre."
+now_epoch="$("${DATE_BIN}" +%s)" || die "Horloge invitée illisible."
+[[ "${now_epoch}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique."
+((WORK_DEADLINE_EPOCH > now_epoch)) || \
+    die "La deadline de travail GCE-30 min est déjà atteinte; aucune unité ne sera lancée."
 
 command -v git >/dev/null 2>&1 || die "git est introuvable."
 command -v id >/dev/null 2>&1 || die "id est introuvable."
 command -v python3 >/dev/null 2>&1 || die "python3 est introuvable."
 command -v mktemp >/dev/null 2>&1 || die "mktemp est introuvable."
 command -v tail >/dev/null 2>&1 || die "tail est introuvable."
-command -v sleep >/dev/null 2>&1 || die "sleep est introuvable."
-command -v timeout >/dev/null 2>&1 || die "GNU timeout est introuvable."
 [[ -x "${PREFLIGHT_SCRIPT}" ]] || die "Preflight absent ou non exécutable : ${PREFLIGHT_SCRIPT}."
 
 REPOSITORY_ROOT="$(git -C "${SCRIPT_DIR}/.." rev-parse --show-toplevel 2>/dev/null)" || \
@@ -148,9 +237,150 @@ readonly ASSEMBLER="${REPOSITORY_ROOT}/${ASSEMBLER_RELATIVE}"
 [[ -f "${ASSEMBLER}" && ! -L "${ASSEMBLER}" ]] || \
     die "Assembleur Phase 3 absent ou symbolique : ${ASSEMBLER}."
 
+remove_container_from_cidfile() {
+    local cidfile="$1"
+    local container_name="$2"
+    local log_path="$3"
+    local absence_count=0
+    local attempt=0
+    local container_id=""
+    local cid_evidence_status=2
+    local cid_presence=""
+    local cleanup_target=""
+    local collision=""
+    local evidence=""
+    local observed_id=""
+    local observed_image=""
+    local observed_label=""
+    local observed_name=""
+    local extra=""
+    local required_absences="${CONTAINER_CLEANUP_INITIAL_ABSENCES}"
+
+    [[ "${container_name}" =~ ^morsehgp3d-phase3-[a-z0-9]{8}-[a-z0-9][a-z0-9-]*$ ]] || {
+        printf '[ERREUR NETTOYAGE] nom de conteneur non canonique : %s.\n' \
+            "${container_name}" >&2
+        return 1
+    }
+    if [[ -e "${cidfile}" || -L "${cidfile}" ]]; then
+        if [[ ! -f "${cidfile}" || -L "${cidfile}" ]]; then
+            printf '[ERREUR NETTOYAGE] cidfile non régulier ou symbolique : %s.\n' \
+                "${cidfile}" >&2
+        else
+            container_id="$(tr -d '\r\n' <"${cidfile}")" || container_id=""
+        fi
+        if [[ "${container_id}" =~ ^[0-9a-f]{64}$ ]]; then
+            cid_evidence_status=0
+        else
+            printf '[ERREUR NETTOYAGE] identifiant de conteneur non canonique dans %s.\n' \
+                "${cidfile}" >&2
+        fi
+    fi
+    if ((${#DOCKER[@]} == 0)); then
+        printf '[ERREUR NETTOYAGE] identité Docker indisponible pour supprimer %s.\n' \
+            "${container_name}" >&2
+        return 1
+    fi
+    for ((attempt = 1; attempt <= CONTAINER_CLEANUP_MAX_ATTEMPTS; attempt++)); do
+        cid_presence=""
+        if ((cid_evidence_status == 0)) && [[ -n "${container_id}" ]]; then
+            if ! cid_presence="$("${TIMEOUT_BIN}" \
+                --kill-after="${CONTAINER_CLEANUP_KILL_AFTER_SECONDS}s" \
+                "${CONTAINER_CLEANUP_TIMEOUT_SECONDS}s" \
+                "${DOCKER[@]}" ps -a --no-trunc \
+                --filter "id=${container_id}" --format '{{.ID}}' \
+                2>>"${log_path}")"; then
+                printf '[ERREUR NETTOYAGE] inspection bornée du CID Docker impossible.\n' >&2
+                return 1
+            fi
+            [[ -z "${cid_presence}" || "${cid_presence}" == "${container_id}" ]] || {
+                printf '[ERREUR NETTOYAGE] filtre CID Docker ambigu : %s.\n' \
+                    "${cid_presence}" >&2
+                return 1
+            }
+        fi
+        if ! collision="$("${TIMEOUT_BIN}" \
+            --kill-after="${CONTAINER_CLEANUP_KILL_AFTER_SECONDS}s" \
+            "${CONTAINER_CLEANUP_TIMEOUT_SECONDS}s" \
+            "${DOCKER[@]}" ps -a --no-trunc \
+            --filter "name=^/${container_name}$" --format '{{.Names}}' \
+            2>>"${log_path}")"; then
+            printf '[ERREUR NETTOYAGE] inspection bornée des noms Docker impossible.\n' >&2
+            return 1
+        fi
+        if [[ -z "${cid_presence}" && -z "${collision}" ]]; then
+            absence_count=$((absence_count + 1))
+            if ((absence_count >= required_absences)); then
+                rm -f -- "${cidfile}" || return 1
+                return "${cid_evidence_status}"
+            fi
+        else
+            absence_count=0
+            [[ -z "${collision}" || "${collision}" == "${container_name}" ]] || {
+                printf '[ERREUR NETTOYAGE] collision Docker ambiguë : %s.\n' \
+                    "${collision}" >&2
+                return 1
+            }
+            if [[ -n "${cid_presence}" ]]; then
+                cleanup_target="${container_id}"
+            else
+                cleanup_target="${container_name}"
+            fi
+            if ! evidence="$("${TIMEOUT_BIN}" \
+                --kill-after="${CONTAINER_CLEANUP_KILL_AFTER_SECONDS}s" \
+                "${CONTAINER_CLEANUP_TIMEOUT_SECONDS}s" \
+                "${DOCKER[@]}" inspect \
+                --format '{{.Id}}|{{.Name}}|{{.Config.Image}}|{{index .Config.Labels "morsehgp3d.phase3.session"}}' \
+                "${cleanup_target}" 2>>"${log_path}")"; then
+                printf '[ERREUR NETTOYAGE] attestation bornée du conteneur impossible.\n' >&2
+                return 1
+            fi
+            IFS='|' read -r observed_id observed_name observed_image observed_label extra \
+                <<<"${evidence}"
+            [[ "${observed_id}" =~ ^[0-9a-f]{64}$ && \
+                "${observed_name}" == "/${container_name}" && \
+                "${observed_image}" == "${IMAGE_REF}" && \
+                "${observed_label}" == "${SESSION_TOKEN}" && -z "${extra}" ]] || {
+                printf '[ERREUR NETTOYAGE] nom Docker occupé par une cible non attestée; suppression refusée.\n' >&2
+                return 1
+            }
+            if ((cid_evidence_status == 0)) && \
+                [[ -n "${container_id}" && "${observed_id}" != "${container_id}" ]]; then
+                printf '[ERREUR NETTOYAGE] le CID attesté diffère du cidfile; suppression refusée.\n' >&2
+                return 1
+            fi
+            cleanup_target="${observed_id}"
+            required_absences="${CONTAINER_CLEANUP_POST_RM_ABSENCES}"
+            if ! "${TIMEOUT_BIN}" \
+                --kill-after="${CONTAINER_CLEANUP_KILL_AFTER_SECONDS}s" \
+                "${CONTAINER_CLEANUP_TIMEOUT_SECONDS}s" \
+                "${DOCKER[@]}" rm -f "${cleanup_target}" \
+                >>"${log_path}" 2>&1; then
+                printf '[ERREUR NETTOYAGE] docker rm -f borné a échoué pour %s.\n' \
+                    "${cleanup_target}" >&2
+                return 1
+            fi
+        fi
+        if ((attempt < CONTAINER_CLEANUP_MAX_ATTEMPTS)); then
+            "${SLEEP_BIN}" "${CONTAINER_CLEANUP_RETRY_SECONDS}" || return 1
+        fi
+    done
+    printf '[ERREUR NETTOYAGE] absence stable non certifiée après la grâce bornée.\n' >&2
+    return 1
+}
+
 cleanup() {
     local original_status=$?
+    local cleanup_status=0
     trap - EXIT HUP INT TERM
+    if [[ -n "${ACTIVE_CONTAINER_CIDFILE}" ]]; then
+        remove_container_from_cidfile \
+            "${ACTIVE_CONTAINER_CIDFILE}" \
+            "${ACTIVE_CONTAINER_NAME}" \
+            "${ACTIVE_CONTAINER_LOG:-/dev/null}" || cleanup_status=$?
+        ACTIVE_CONTAINER_CIDFILE=""
+        ACTIVE_CONTAINER_LOG=""
+        ACTIVE_CONTAINER_NAME=""
+    fi
     if [[ -n "${PUBLISH_TEMP}" && -f "${PUBLISH_TEMP}" ]]; then
         rm -f -- "${PUBLISH_TEMP}" || true
     fi
@@ -174,6 +404,9 @@ cleanup() {
                 ;;
         esac
     fi
+    if ((cleanup_status != 0 && original_status == 0)); then
+        original_status="${cleanup_status}"
+    fi
     exit "${original_status}"
 }
 
@@ -185,10 +418,14 @@ trap 'exit 143' TERM
 SESSION_DIR="$(mktemp -d "${TMPDIR:-/tmp}/morsehgp3d-phase3-worker.XXXXXXXX")" || \
     die "Impossible de créer le temporaire borné de qualification."
 SESSION_CREATED=1
+SESSION_TOKEN="${SESSION_DIR##*.}"
+SESSION_TOKEN="${SESSION_TOKEN,,}"
+[[ "${SESSION_TOKEN}" =~ ^[a-z0-9]{8}$ ]] || \
+    die "Jeton de session privée non canonique."
 BUILDX_CONFIG="${SESSION_DIR}/buildx-config"
 mkdir -p -- "${SESSION_DIR}/build" "${SESSION_DIR}/logs" "${SESSION_DIR}/results" \
-    "${BUILDX_CONFIG}"
-chmod 700 "${BUILDX_CONFIG}"
+    "${SESSION_DIR}/container-cids" "${BUILDX_CONFIG}"
+chmod 700 "${SESSION_DIR}/container-cids" "${BUILDX_CONFIG}"
 export BUILDX_CONFIG
 PUBLISH_TEMP="$(mktemp "${OUTPUT_PARENT}/.${OUTPUT_BASE}.XXXXXXXX.partial")" || \
     die "Impossible de réserver l'artefact temporaire atomique."
@@ -197,6 +434,7 @@ chmod 600 "${PUBLISH_TEMP}"
 readonly BUILD_DIR="${SESSION_DIR}/build"
 readonly LOG_DIR="${SESSION_DIR}/logs"
 readonly RESULT_DIR="${SESSION_DIR}/results"
+readonly CONTAINER_CID_DIR="${SESSION_DIR}/container-cids"
 readonly CONTAINER_HOME="${CONTAINER_BUILD}/.phase3-home"
 readonly GUARD_LOG="${LOG_DIR}/guest-shutdown-guard.log"
 readonly PREFLIGHT_LOG="${LOG_DIR}/preflight.log"
@@ -242,7 +480,7 @@ guard_is_scheduled() {
     [[ "${scheduled_usec}" =~ ^[0-9]{1,18}$ ]] || return 1
     [[ "${mode}" == "poweroff" ]] || return 1
     scheduled_epoch=$((10#${scheduled_usec} / 1000000))
-    now_epoch="$(date +%s)"
+    now_epoch="$("${DATE_BIN}" +%s)"
     remaining_seconds=$((scheduled_epoch - now_epoch))
     ((remaining_seconds >= GUEST_GUARD_MIN_REMAINING_SECONDS)) || return 1
     ((remaining_seconds <= GUEST_GUARD_MAX_REMAINING_SECONDS)) || return 1
@@ -254,13 +492,68 @@ begin_unit() {
     local label="$1"
     local now=0
     local remaining=0
-    now="$(date +%s)" || die "Horloge invitée illisible avant l'unité ${label}."
+    now="$("${DATE_BIN}" +%s)" || die "Horloge invitée illisible avant l'unité ${label}."
     [[ "${now}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique avant l'unité ${label}."
     ((now < WORK_DEADLINE_EPOCH)) || \
         die "Deadline de travail atteinte; unité ${label} non lancée."
     remaining=$((WORK_DEADLINE_EPOCH - now))
     printf '[DEADLINE] unité=%s, secondes restantes avant GCE-30 min=%s.\n' \
         "${label}" "${remaining}"
+}
+
+run_until_work_deadline() {
+    local label="$1"
+    local now=0
+    local remaining=0
+    local soft_timeout=0
+    shift
+
+    now="$("${DATE_BIN}" +%s)" || {
+        printf '[ERREUR] Horloge invitée illisible avant exécution bornée de %s.\n' \
+            "${label}" >&2
+        return 125
+    }
+    [[ "${now}" =~ ^[0-9]+$ ]] || {
+        printf '[ERREUR] Horloge invitée non numérique avant exécution bornée de %s.\n' \
+            "${label}" >&2
+        return 125
+    }
+    remaining=$((WORK_DEADLINE_EPOCH - now))
+    soft_timeout=$((remaining - WORK_UNIT_KILL_AFTER_SECONDS - WORK_UNIT_POST_TIMEOUT_RESERVE_SECONDS))
+    if ((soft_timeout <= 0)); then
+        printf '[ERREUR] Réserve deadline insuffisante; unité %s non lancée.\n' \
+            "${label}" >&2
+        return 124
+    fi
+    printf '[TIMEOUT] unité=%s, borne douce=%ss, kill-after=%ss, réserve post-timeout=%ss.\n' \
+        "${label}" "${soft_timeout}" "${WORK_UNIT_KILL_AFTER_SECONDS}" \
+        "${WORK_UNIT_POST_TIMEOUT_RESERVE_SECONDS}" >&2
+    "${TIMEOUT_BIN}" --kill-after="${WORK_UNIT_KILL_AFTER_SECONDS}s" \
+        "${soft_timeout}s" "$@"
+}
+
+probe_until_work_deadline() {
+    local label="$1"
+    local maximum_seconds="$2"
+    local now=0
+    local remaining=0
+    local soft_timeout=0
+    shift 2
+
+    [[ "${maximum_seconds}" =~ ^[1-9][0-9]*$ ]] || return 125
+    now="$("${DATE_BIN}" +%s)" || return 125
+    [[ "${now}" =~ ^[0-9]+$ ]] || return 125
+    remaining=$((WORK_DEADLINE_EPOCH - now))
+    soft_timeout=$((remaining - PROBE_KILL_AFTER_SECONDS - WORK_UNIT_POST_TIMEOUT_RESERVE_SECONDS))
+    ((soft_timeout > 0)) || {
+        printf '[SONDE REFUSÉE] deadline/réserve atteinte avant %s.\n' "${label}" >&2
+        return 124
+    }
+    if ((soft_timeout > maximum_seconds)); then
+        soft_timeout="${maximum_seconds}"
+    fi
+    "${TIMEOUT_BIN}" --kill-after="${PROBE_KILL_AFTER_SECONDS}s" \
+        "${soft_timeout}s" "$@"
 }
 
 report_failure_log() {
@@ -285,11 +578,11 @@ collect_docker_host_diagnostics() {
         printf '%s\n' '[DIAGNOSTIC HÔTE DOCKER] début.'
         if command -v systemctl >/dev/null 2>&1; then
             printf '%s\n' '[systemctl is-active docker]'
-            timeout --foreground --kill-after=2s \
+            "${TIMEOUT_BIN}" --kill-after=2s \
                 "${DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS}s" \
                 systemctl is-active docker || true
             printf '%s\n' '[systemctl is-enabled docker]'
-            timeout --foreground --kill-after=2s \
+            "${TIMEOUT_BIN}" --kill-after=2s \
                 "${DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS}s" \
                 systemctl is-enabled docker || true
         else
@@ -297,7 +590,7 @@ collect_docker_host_diagnostics() {
         fi
         if command -v dpkg-query >/dev/null 2>&1; then
             printf '%s\n' '[paquets Docker/containerd/NVIDIA]'
-            timeout --foreground --kill-after=2s \
+            "${TIMEOUT_BIN}" --kill-after=2s \
                 "${DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS}s" \
                 dpkg-query -W \
                 '-f=${binary:Package}\t${Status}\t${Version}\n' \
@@ -309,12 +602,12 @@ collect_docker_host_diagnostics() {
         if command -v journalctl >/dev/null 2>&1; then
             printf '%s\n' '[journal Docker du boot, 80 lignes au plus]'
             if command -v sudo >/dev/null 2>&1; then
-                timeout --foreground --kill-after=2s \
+                "${TIMEOUT_BIN}" --kill-after=2s \
                     "${DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS}s" \
                     sudo -n -- journalctl --unit=docker.service --boot \
                     --no-pager --lines=80 || true
             else
-                timeout --foreground --kill-after=2s \
+                "${TIMEOUT_BIN}" --kill-after=2s \
                     "${DOCKER_DIAGNOSTIC_TIMEOUT_SECONDS}s" \
                     journalctl --unit=docker.service --boot \
                     --no-pager --lines=80 || true
@@ -326,33 +619,69 @@ collect_docker_host_diagnostics() {
     } >>"${DOCKER_LOG}" 2>&1
 }
 
-certify_sudo_docker_client() {
-    local component=""
+certify_docker_client() {
+    local access="$1"
     local index=0
     local metadata=""
     local mode=""
     local owner_uid=""
     local path=""
-    local -a expected_paths=(/ /usr /usr/bin "${SUDO_DOCKER_BIN}")
+    local parent="${DOCKER_BIN}"
+    local -a identity=()
+    local -a reverse_paths=()
+    local -a expected_paths=()
 
-    command -v sudo >/dev/null 2>&1 || return 1
-    timeout --foreground --kill-after=2s \
-        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
-        sudo -n -- /usr/bin/test -f "${SUDO_DOCKER_BIN}" \
+    case "${access}" in
+        direct)
+            ;;
+        sudo)
+            command -v sudo >/dev/null 2>&1 || return 1
+            identity=(sudo -n --)
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+
+    while true; do
+        reverse_paths+=("${parent}")
+        [[ "${parent}" == "/" ]] && break
+        parent="${parent%/*}"
+        [[ -n "${parent}" ]] || parent="/"
+    done
+    for ((index = ${#reverse_paths[@]} - 1; index >= 0; index--)); do
+        expected_paths+=("${reverse_paths[index]}")
+    done
+
+    for ((index = 0; index < ${#expected_paths[@]} - 1; index++)); do
+        path="${expected_paths[index]}"
+        probe_until_work_deadline "docker-${access}-dir-${index}" \
+            "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
+            "${identity[@]}" "${DOCKER_TEST_BIN}" -d "${path}" \
+            >>"${DOCKER_LOG}" 2>&1 || return 1
+        probe_until_work_deadline "docker-${access}-link-${index}" \
+            "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
+            "${identity[@]}" "${DOCKER_TEST_BIN}" ! -L "${path}" \
+            >>"${DOCKER_LOG}" 2>&1 || return 1
+    done
+    probe_until_work_deadline "docker-${access}-file" \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
+        "${identity[@]}" "${DOCKER_TEST_BIN}" -f "${DOCKER_BIN}" \
         >>"${DOCKER_LOG}" 2>&1 || return 1
-    timeout --foreground --kill-after=2s \
-        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
-        sudo -n -- /usr/bin/test ! -L "${SUDO_DOCKER_BIN}" \
+    probe_until_work_deadline "docker-${access}-binary-link" \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
+        "${identity[@]}" "${DOCKER_TEST_BIN}" ! -L "${DOCKER_BIN}" \
         >>"${DOCKER_LOG}" 2>&1 || return 1
-    timeout --foreground --kill-after=2s \
-        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
-        sudo -n -- /usr/bin/test -x "${SUDO_DOCKER_BIN}" \
+    probe_until_work_deadline "docker-${access}-executable" \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
+        "${identity[@]}" "${DOCKER_TEST_BIN}" -x "${DOCKER_BIN}" \
         >>"${DOCKER_LOG}" 2>&1 || return 1
-    metadata="$(timeout --foreground --kill-after=2s \
-        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
-        sudo -n -- /usr/bin/stat -Lc '%n|%u|%a' -- \
-        / /usr /usr/bin "${SUDO_DOCKER_BIN}" 2>>"${DOCKER_LOG}")" || return 1
+    metadata="$(probe_until_work_deadline "docker-${access}-metadata" \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
+        "${identity[@]}" "${DOCKER_STAT_BIN}" -Lc '%n|%u|%a' -- \
+        "${expected_paths[@]}" 2>>"${DOCKER_LOG}")" || return 1
     printf '%s\n' "${metadata}" >>"${DOCKER_LOG}"
+    index=0
     while IFS='|' read -r path owner_uid mode; do
         ((index < ${#expected_paths[@]})) || return 1
         [[ "${path}" == "${expected_paths[index]}" && "${owner_uid}" == "0" && \
@@ -361,9 +690,9 @@ certify_sudo_docker_client() {
         index=$((index + 1))
     done <<<"${metadata}"
     ((index == ${#expected_paths[@]})) || return 1
-    timeout --foreground --kill-after=2s \
-        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
-        sudo -n -- "${SUDO_DOCKER_BIN}" --version \
+    probe_until_work_deadline "docker-${access}-version" \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
+        "${identity[@]}" "${DOCKER_BIN}" --version \
         >>"${DOCKER_LOG}" 2>&1
 }
 
@@ -401,30 +730,30 @@ certify_buildx_plugin() {
 
     for ((index = 0; index < ${#expected_paths[@]} - 1; index++)); do
         path="${expected_paths[index]}"
-        timeout --foreground --kill-after=2s \
-            "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        probe_until_work_deadline "buildx-dir-${index}" \
+            "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
             "${identity[@]}" "${BUILDX_TEST_BIN}" -d "${path}" \
             >>"${DOCKER_LOG}" 2>&1 || return 1
-        timeout --foreground --kill-after=2s \
-            "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+        probe_until_work_deadline "buildx-link-${index}" \
+            "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
             "${identity[@]}" "${BUILDX_TEST_BIN}" ! -L "${path}" \
             >>"${DOCKER_LOG}" 2>&1 || return 1
     done
-    timeout --foreground --kill-after=2s \
-        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+    probe_until_work_deadline "buildx-file" \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
         "${identity[@]}" "${BUILDX_TEST_BIN}" -f "${BUILDX_PLUGIN}" \
         >>"${DOCKER_LOG}" 2>&1 || return 1
-    timeout --foreground --kill-after=2s \
-        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+    probe_until_work_deadline "buildx-binary-link" \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
         "${identity[@]}" "${BUILDX_TEST_BIN}" ! -L "${BUILDX_PLUGIN}" \
         >>"${DOCKER_LOG}" 2>&1 || return 1
-    timeout --foreground --kill-after=2s \
-        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+    probe_until_work_deadline "buildx-executable" \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
         "${identity[@]}" "${BUILDX_TEST_BIN}" -x "${BUILDX_PLUGIN}" \
         >>"${DOCKER_LOG}" 2>&1 || return 1
 
-    metadata="$(timeout --foreground --kill-after=2s \
-        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+    metadata="$(probe_until_work_deadline "buildx-metadata" \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
         "${identity[@]}" "${BUILDX_STAT_BIN}" -c '%n|%u|%a' -- \
         "${expected_paths[@]}" 2>>"${DOCKER_LOG}")" || return 1
     printf '%s\n' "${metadata}" >>"${DOCKER_LOG}"
@@ -443,8 +772,8 @@ certify_buildx_plugin() {
     else
         BUILDX=("${BUILDX_PLUGIN}")
     fi
-    timeout --foreground --kill-after=2s \
-        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
+    probe_until_work_deadline "buildx-version" \
+        "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
         "${BUILDX[@]}" version >>"${DOCKER_LOG}" 2>&1
 }
 
@@ -456,8 +785,8 @@ attempt_sudo_docker_certification() {
     sudo_docker_certification_attempted=1
     if command -v sudo >/dev/null 2>&1; then
         printf '[CLI SUDO] chemin système fixe à certifier : %s.\n' \
-            "${SUDO_DOCKER_BIN}" >>"${DOCKER_LOG}"
-        if certify_sudo_docker_client; then
+            "${DOCKER_BIN}" >>"${DOCKER_LOG}"
+        if certify_docker_client sudo; then
             sudo_docker_client=1
             return 0
         fi
@@ -494,33 +823,23 @@ printf '[GARDE] Arrêt invité=%s, échéance GCE sûre=%s, deadline de travail=
     "${GUEST_SHUTDOWN_EPOCH}" "${GCE_DEADLINE_EPOCH}" "${WORK_DEADLINE_EPOCH}"
 
 begin_unit "preflight-blackwell"
-if ! "${PREFLIGHT_SCRIPT}" --skip-docker >"${PREFLIGHT_LOG}" 2>&1; then
+if ! run_until_work_deadline "preflight-blackwell" \
+    "${PREFLIGHT_SCRIPT}" --skip-docker >"${PREFLIGHT_LOG}" 2>&1; then
     report_failure_log "preflight-blackwell" "${PREFLIGHT_LOG}"
     die "Le preflight Blackwell non destructif a échoué; voir ${PREFLIGHT_LOG}."
 fi
 
-declare -a DOCKER=()
-declare -a BUILDX=()
 direct_docker_client=0
 docker_deadline_reached=0
 sudo_docker_client=0
 sudo_docker_certification_attempted=0
-docker_path="$(command -v docker 2>/dev/null || true)"
-if [[ -n "${docker_path}" && "${docker_path}" == /* && \
-    "${docker_path}" != *$'\n'* && "${docker_path}" != *$'\r'* && \
-    -f "${docker_path}" && -x "${docker_path}" ]]; then
-    printf '[CLI DIRECTE] %s\n' "${docker_path}" >>"${DOCKER_LOG}"
-    if timeout --foreground --kill-after=2s \
-        "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
-        "${docker_path}" --version >>"${DOCKER_LOG}" 2>&1; then
-        direct_docker_client=1
-    else
-        printf '%s\n' '[CLI DIRECTE] docker --version a échoué.' >>"${DOCKER_LOG}"
-    fi
+printf '[CLI DIRECTE] chemin système fixe à certifier : %s; PATH ignoré.\n' \
+    "${DOCKER_BIN}" >>"${DOCKER_LOG}"
+if certify_docker_client direct; then
+    direct_docker_client=1
 else
-    printf '%s\n' '[CLI DIRECTE] docker absent du PATH ou non exécutable absolu régulier.' \
+    printf '%s\n' '[CLI DIRECTE] chemin fixe absent, non sûr ou client inexécutable.' \
         >>"${DOCKER_LOG}"
-    docker_path=""
 fi
 if ((direct_docker_client == 0)); then
     attempt_sudo_docker_certification || true
@@ -528,11 +847,11 @@ fi
 if ((direct_docker_client == 0 && sudo_docker_client == 0)); then
     collect_docker_host_diagnostics
     report_failure_log "docker-info" "${DOCKER_LOG}"
-    die "Client Docker absent ou inexécutable dans le PATH utilisateur et indisponible via sudo non interactif."
+    die "Client Docker fixe /usr/bin/docker absent, non sûr ou inexécutable directement et via sudo non interactif."
 fi
 begin_unit "docker-access"
 for ((attempt = 1; attempt <= DOCKER_INFO_MAX_ATTEMPTS; attempt++)); do
-    probe_now="$(date +%s)" || die "Horloge invitée illisible pendant les sondes Docker."
+    probe_now="$("${DATE_BIN}" +%s)" || die "Horloge invitée illisible pendant les sondes Docker."
     [[ "${probe_now}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique pendant les sondes Docker."
     if ((probe_now >= WORK_DEADLINE_EPOCH)); then
         docker_deadline_reached=1
@@ -543,17 +862,17 @@ for ((attempt = 1; attempt <= DOCKER_INFO_MAX_ATTEMPTS; attempt++)); do
     if ((direct_docker_client == 1)); then
         printf '[SONDE DOCKER] tentative=%s/%s, voie=directe.\n' \
             "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}" >>"${DOCKER_LOG}"
-        if timeout --foreground --kill-after=2s \
-            "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
-            "${docker_path}" info >>"${DOCKER_LOG}" 2>&1; then
-            DOCKER=("${docker_path}")
+        if probe_until_work_deadline "docker-info-direct-${attempt}" \
+            "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
+            "${DOCKER_BIN}" info >>"${DOCKER_LOG}" 2>&1; then
+            DOCKER=("${DOCKER_BIN}")
             DOCKER_IDENTITY="direct"
             printf '[DOCKER] Daemon accessible directement à la tentative %s/%s.\n' \
                 "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}"
             break
         fi
     fi
-    probe_now="$(date +%s)" || die "Horloge invitée illisible entre les voies Docker."
+    probe_now="$("${DATE_BIN}" +%s)" || die "Horloge invitée illisible entre les voies Docker."
     [[ "${probe_now}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique entre les voies Docker."
     if ((probe_now >= WORK_DEADLINE_EPOCH)); then
         docker_deadline_reached=1
@@ -563,7 +882,7 @@ for ((attempt = 1; attempt <= DOCKER_INFO_MAX_ATTEMPTS; attempt++)); do
     fi
     if ((sudo_docker_certification_attempted == 0)); then
         attempt_sudo_docker_certification || true
-        probe_now="$(date +%s)" || die "Horloge invitée illisible après certification Docker sudo."
+        probe_now="$("${DATE_BIN}" +%s)" || die "Horloge invitée illisible après certification Docker sudo."
         [[ "${probe_now}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique après certification Docker sudo."
         if ((probe_now >= WORK_DEADLINE_EPOCH)); then
             docker_deadline_reached=1
@@ -575,10 +894,10 @@ for ((attempt = 1; attempt <= DOCKER_INFO_MAX_ATTEMPTS; attempt++)); do
     if ((sudo_docker_client == 1)); then
         printf '[SONDE DOCKER] tentative=%s/%s, voie=sudo-n.\n' \
             "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}" >>"${DOCKER_LOG}"
-        if timeout --foreground --kill-after=2s \
-            "${DOCKER_PROBE_TIMEOUT_SECONDS}s" \
-            sudo -n -- "${SUDO_DOCKER_BIN}" info >>"${DOCKER_LOG}" 2>&1; then
-            DOCKER=(sudo -n -- "${SUDO_DOCKER_BIN}")
+        if probe_until_work_deadline "docker-info-sudo-${attempt}" \
+            "${DOCKER_PROBE_TIMEOUT_SECONDS}" \
+            sudo -n -- "${DOCKER_BIN}" info >>"${DOCKER_LOG}" 2>&1; then
+            DOCKER=(sudo -n -- "${DOCKER_BIN}")
             DOCKER_IDENTITY="sudo"
             printf '[DOCKER] Voie directe indisponible; sudo non interactif certifié à la tentative %s/%s.\n' \
                 "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}"
@@ -586,7 +905,7 @@ for ((attempt = 1; attempt <= DOCKER_INFO_MAX_ATTEMPTS; attempt++)); do
         fi
     fi
     if ((attempt < DOCKER_INFO_MAX_ATTEMPTS)); then
-        probe_now="$(date +%s)" || die "Horloge invitée illisible avant l'attente Docker."
+        probe_now="$("${DATE_BIN}" +%s)" || die "Horloge invitée illisible avant l'attente Docker."
         [[ "${probe_now}" =~ ^[0-9]+$ ]] || die "Horloge invitée non numérique avant l'attente Docker."
         if ((probe_now + DOCKER_INFO_RETRY_SECONDS >= WORK_DEADLINE_EPOCH)); then
             docker_deadline_reached=1
@@ -594,7 +913,8 @@ for ((attempt = 1; attempt <= DOCKER_INFO_MAX_ATTEMPTS; attempt++)); do
                 "${attempt}" "${DOCKER_INFO_MAX_ATTEMPTS}" >>"${DOCKER_LOG}"
             break
         fi
-        sleep "${DOCKER_INFO_RETRY_SECONDS}"
+        "${SLEEP_BIN}" "${DOCKER_INFO_RETRY_SECONDS}" || \
+            die "Attente Docker fixe interrompue."
     fi
 done
 if ((${#DOCKER[@]} == 0)); then
@@ -617,7 +937,7 @@ fi
 
 IMAGE_REF="morsehgp3d-phase3:${HEAD_SHA}"
 begin_unit "buildx-build"
-if ! "${BUILDX[@]}" build --load \
+if ! run_until_work_deadline "buildx-build" "${BUILDX[@]}" build --load \
     --file "${DOCKERFILE}" \
     --tag "${IMAGE_REF}" \
     --iidfile "${IID_FILE}" \
@@ -628,7 +948,8 @@ fi
 [[ -s "${IID_FILE}" ]] || die "Docker n'a pas écrit d'identifiant d'image."
 IMAGE_ID="$(tr -d '\r\n' <"${IID_FILE}")"
 [[ "${IMAGE_ID}" =~ ^sha256:[0-9a-f]{64}$ ]] || die "Identifiant d'image Docker non canonique."
-inspected_image_id="$("${DOCKER[@]}" image inspect --format '{{.Id}}' "${IMAGE_REF}")" || \
+inspected_image_id="$(run_until_work_deadline "docker-image-inspect" \
+    "${DOCKER[@]}" image inspect --format '{{.Id}}' "${IMAGE_REF}")" || \
     die "Impossible de relire l'identifiant de l'image construite."
 [[ "${inspected_image_id}" == "${IMAGE_ID}" ]] || \
     die "L'image taguée ne correspond pas à l'iidfile de construction."
@@ -636,9 +957,37 @@ printf 'base_image_ref=%s\nimage_ref=%s\nimage_id=%s\n' \
     "${BASE_IMAGE_REF}" "${IMAGE_REF}" "${IMAGE_ID}" >>"${BUILD_LOG}"
 
 run_container() {
-    local log_path="$1"
-    shift
-    "${DOCKER[@]}" run --rm --gpus all \
+    local label="$1"
+    local log_path="$2"
+    local cidfile="${CONTAINER_CID_DIR}/${label}.cid"
+    local container_name=""
+    local collision=""
+    local run_status=0
+    local cleanup_status=0
+    shift 2
+
+    [[ "${label}" =~ ^[a-z0-9][a-z0-9-]*$ ]] || \
+        die "Label de conteneur non canonique : ${label}."
+    container_name="morsehgp3d-phase3-${SESSION_TOKEN}-${label}"
+    [[ -d "${CONTAINER_CID_DIR}" && ! -L "${CONTAINER_CID_DIR}" ]] || \
+        die "Répertoire de cidfiles absent ou symbolique : ${CONTAINER_CID_DIR}."
+    [[ ! -e "${cidfile}" && ! -L "${cidfile}" ]] || \
+        die "Le cidfile doit être inexistant avant docker run : ${cidfile}."
+    if ! collision="$(run_until_work_deadline "${label}-name-check" \
+        "${DOCKER[@]}" ps -a --no-trunc \
+        --filter "name=^/${container_name}$" --format '{{.Names}}' \
+        2>>"${log_path}")"; then
+        return 125
+    fi
+    [[ -z "${collision}" ]] || \
+        die "Collision de nom Docker refusée avant run : ${container_name}."
+    ACTIVE_CONTAINER_CIDFILE="${cidfile}"
+    ACTIVE_CONTAINER_LOG="${log_path}"
+    ACTIVE_CONTAINER_NAME="${container_name}"
+    if run_until_work_deadline "${label}" "${DOCKER[@]}" run \
+        --name "${container_name}" \
+        --label "${CONTAINER_SESSION_LABEL}=${SESSION_TOKEN}" \
+        --cidfile "${cidfile}" --gpus all \
         "${DOCKER_IDENTITY_ARGS[@]}" \
         --volume "${REPOSITORY_ROOT}:${CONTAINER_REPOSITORY}:ro" \
         --volume "${BUILD_DIR}:${CONTAINER_BUILD}:rw" \
@@ -648,14 +997,59 @@ run_container() {
         --env "MORSEHGP3D_CUDA_IMAGE_REF=${IMAGE_REF}" \
         --env "MORSEHGP3D_CUDA_IMAGE_ID=${IMAGE_ID}" \
         --env "MORSEHGP3D_GIT_SHA=${HEAD_SHA}" \
-        "${IMAGE_REF}" "$@" >"${log_path}" 2>&1
+        "${IMAGE_REF}" "$@" >"${log_path}" 2>&1; then
+        run_status=0
+    else
+        run_status=$?
+    fi
+    if remove_container_from_cidfile \
+        "${cidfile}" "${container_name}" "${log_path}"; then
+        cleanup_status=0
+    else
+        cleanup_status=$?
+    fi
+    if ((cleanup_status == 0 || cleanup_status == 2)); then
+        ACTIVE_CONTAINER_CIDFILE=""
+        ACTIVE_CONTAINER_LOG=""
+        ACTIVE_CONTAINER_NAME=""
+    fi
+    ((cleanup_status == 0)) || return 125
+    return "${run_status}"
 }
 
 run_container_split_output() {
-    local stdout_path="$1"
-    local stderr_path="$2"
-    shift 2
-    "${DOCKER[@]}" run --rm --gpus all \
+    local label="$1"
+    local stdout_path="$2"
+    local stderr_path="$3"
+    local cidfile="${CONTAINER_CID_DIR}/${label}.cid"
+    local container_name=""
+    local collision=""
+    local run_status=0
+    local cleanup_status=0
+    shift 3
+
+    [[ "${label}" =~ ^[a-z0-9][a-z0-9-]*$ ]] || \
+        die "Label de conteneur non canonique : ${label}."
+    container_name="morsehgp3d-phase3-${SESSION_TOKEN}-${label}"
+    [[ -d "${CONTAINER_CID_DIR}" && ! -L "${CONTAINER_CID_DIR}" ]] || \
+        die "Répertoire de cidfiles absent ou symbolique : ${CONTAINER_CID_DIR}."
+    [[ ! -e "${cidfile}" && ! -L "${cidfile}" ]] || \
+        die "Le cidfile doit être inexistant avant docker run : ${cidfile}."
+    if ! collision="$(run_until_work_deadline "${label}-name-check" \
+        "${DOCKER[@]}" ps -a --no-trunc \
+        --filter "name=^/${container_name}$" --format '{{.Names}}' \
+        2>>"${stderr_path}")"; then
+        return 125
+    fi
+    [[ -z "${collision}" ]] || \
+        die "Collision de nom Docker refusée avant run : ${container_name}."
+    ACTIVE_CONTAINER_CIDFILE="${cidfile}"
+    ACTIVE_CONTAINER_LOG="${stderr_path}"
+    ACTIVE_CONTAINER_NAME="${container_name}"
+    if run_until_work_deadline "${label}" "${DOCKER[@]}" run \
+        --name "${container_name}" \
+        --label "${CONTAINER_SESSION_LABEL}=${SESSION_TOKEN}" \
+        --cidfile "${cidfile}" --gpus all \
         "${DOCKER_IDENTITY_ARGS[@]}" \
         --volume "${REPOSITORY_ROOT}:${CONTAINER_REPOSITORY}:ro" \
         --volume "${BUILD_DIR}:${CONTAINER_BUILD}:rw" \
@@ -665,21 +1059,38 @@ run_container_split_output() {
         --env "MORSEHGP3D_CUDA_IMAGE_REF=${IMAGE_REF}" \
         --env "MORSEHGP3D_CUDA_IMAGE_ID=${IMAGE_ID}" \
         --env "MORSEHGP3D_GIT_SHA=${HEAD_SHA}" \
-        "${IMAGE_REF}" "$@" >"${stdout_path}" 2>"${stderr_path}"
+        "${IMAGE_REF}" "$@" >"${stdout_path}" 2>"${stderr_path}"; then
+        run_status=0
+    else
+        run_status=$?
+    fi
+    if remove_container_from_cidfile \
+        "${cidfile}" "${container_name}" "${stderr_path}"; then
+        cleanup_status=0
+    else
+        cleanup_status=$?
+    fi
+    if ((cleanup_status == 0 || cleanup_status == 2)); then
+        ACTIVE_CONTAINER_CIDFILE=""
+        ACTIVE_CONTAINER_LOG=""
+        ACTIVE_CONTAINER_NAME=""
+    fi
+    ((cleanup_status == 0)) || return 125
+    return "${run_status}"
 }
 
 begin_unit "cuda-release"
-if ! run_container "${RELEASE_LOG}" cmake --workflow --preset cuda-release; then
+if ! run_container "cuda-release" "${RELEASE_LOG}" cmake --workflow --preset cuda-release; then
     report_failure_log "cuda-release" "${RELEASE_LOG}"
     die "Le workflow cuda-release a échoué; voir ${RELEASE_LOG}."
 fi
 begin_unit "cuda-audit"
-if ! run_container "${AUDIT_LOG}" cmake --workflow --preset cuda-audit; then
+if ! run_container "cuda-audit" "${AUDIT_LOG}" cmake --workflow --preset cuda-audit; then
     report_failure_log "cuda-audit" "${AUDIT_LOG}"
     die "Le workflow cuda-audit a échoué; voir ${AUDIT_LOG}."
 fi
 begin_unit "runtime"
-if ! run_container "${RUNTIME_LOG}" "${RUNTIME_PATH}" \
+if ! run_container "runtime" "${RUNTIME_LOG}" "${RUNTIME_PATH}" \
     --allocation-bytes 67108864 \
     --exercise-structured-error \
     --output "${CONTAINER_RESULTS}/runtime.jsonl"; then
@@ -687,13 +1098,13 @@ if ! run_container "${RUNTIME_LOG}" "${RUNTIME_PATH}" \
     die "Le runtime Phase 3 a échoué; voir ${RUNTIME_LOG}."
 fi
 begin_unit "binding-dlpack"
-if ! run_container "${BINDING_LOG}" python3 \
+if ! run_container "binding-dlpack" "${BINDING_LOG}" python3 \
     tests/cuda/check_phase3_binding.py "${MODULE_DIR}"; then
     report_failure_log "binding-dlpack" "${BINDING_LOG}"
     die "Le contrôle de liaison Python/DLPack a échoué; voir ${BINDING_LOG}."
 fi
 begin_unit "cuobjdump-elf"
-if ! run_container "${ELF_LOG}" cuobjdump -lelf "${RUNTIME_PATH}"; then
+if ! run_container "cuobjdump-elf" "${ELF_LOG}" cuobjdump -lelf "${RUNTIME_PATH}"; then
     report_failure_log "cuobjdump-elf" "${ELF_LOG}"
     die "cuobjdump n'a pas pu lister les objets ELF AOT; voir ${ELF_LOG}."
 fi
@@ -703,7 +1114,7 @@ if [[ "${architectures}" != "sm_120" ]]; then
     die "Le binaire AOT doit contenir au moins un ELF et uniquement sm_120; observé : ${architectures:-aucun}."
 fi
 begin_unit "cuobjdump-ptx"
-if ! run_container_split_output "${PTX_LOG}" "${PTX_STDERR_LOG}" \
+if ! run_container_split_output "cuobjdump-ptx" "${PTX_LOG}" "${PTX_STDERR_LOG}" \
     cuobjdump -lptx "${RUNTIME_PATH}"; then
     report_failure_log "cuobjdump-ptx-stderr" "${PTX_STDERR_LOG}"
     die "cuobjdump n'a pas pu auditer les entrées PTX; voir ${PTX_STDERR_LOG}."
@@ -713,7 +1124,7 @@ if grep -q '[^[:space:]]' "${PTX_LOG}"; then
     die "Une entrée PTX a été détectée; le runtime mesuré doit être AOT sm_120 uniquement."
 fi
 begin_unit "compute-sanitizer"
-if ! run_container "${SANITIZER_LOG}" compute-sanitizer \
+if ! run_container "compute-sanitizer" "${SANITIZER_LOG}" compute-sanitizer \
     --tool memcheck \
     --leak-check full \
     --error-exitcode=86 \

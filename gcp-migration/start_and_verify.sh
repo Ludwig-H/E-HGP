@@ -97,21 +97,21 @@ verify_gnu_timeout() {
     local version=""
     version="$(timeout --version 2>/dev/null | sed -n '1p')" || return 1
     [[ "${version}" == timeout\ \(GNU\ coreutils\)* ]] || return 1
-    timeout --foreground --kill-after=1s 1s true >/dev/null 2>&1
+    timeout --kill-after=1s 1s true >/dev/null 2>&1
 }
 
 gcloud_read() {
-    timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
         "${GCLOUD_READ_TIMEOUT_SECONDS}s" gcloud "$@"
 }
 
 gcloud_mutation() {
-    timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
         "${GCLOUD_MUTATION_TIMEOUT_SECONDS}s" gcloud "$@"
 }
 
 gcloud_ssh_guard() {
-    timeout --foreground --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
         "${GCLOUD_SSH_CALL_TIMEOUT_SECONDS}s" gcloud "$@"
 }
 
@@ -474,7 +474,7 @@ command -v gcloud >/dev/null 2>&1 || die "gcloud est introuvable."
 command -v python3 >/dev/null 2>&1 || die "python3 est requis pour certifier l’échéance de la VM."
 command -v ssh-keygen >/dev/null 2>&1 || die "ssh-keygen est requis pour valider la clé de session."
 command -v timeout >/dev/null 2>&1 || die "GNU timeout est requis avant toute mutation GCP."
-verify_gnu_timeout || die "timeout doit être l'implémentation GNU compatible avec --foreground et --kill-after."
+verify_gnu_timeout || die "timeout doit être l'implémentation GNU compatible avec la gestion du groupe de processus et --kill-after."
 if [[ -n "${HANDOFF_FILE}" ]]; then
     case "${HANDOFF_FILE}" in
         /*) ;;

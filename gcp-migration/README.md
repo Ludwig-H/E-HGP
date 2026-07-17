@@ -290,22 +290,30 @@ travail suffisante. Après son succès, l'orchestrateur recertifie la même
 génération GCE et sa durée avant de permettre au worker de relire à son tour la
 garde invitée.
 
-Le répertoire de résultat est créé si nécessaire, doit rester hors du dépôt et ne doit déjà contenir ni `phase3-<SHA>.json`, ni `phase3-<SHA>.start-handoff.json`. L'orchestrateur utilise exclusivement `start_and_verify.sh` pour le démarrage et `stop_and_verify.sh --yes` pour l'arrêt. Dès que la garde GCE post-démarrage certifie la génération, le démarrage publie atomiquement un handoff v3 `targeted_running` avec le `lastStartTimestamp`, avant de tenter la garde invitée; une préemption immédiate publie de la même façon un handoff `targeted_stopping`. Toute fermeture automatique exige cette même génération et refuse une cible redémarrée. Si la garde invitée ou l'arrêt d'urgence échoue, ce handoff reste disponible pour reprendre l'arrêt exact et bloque une nouvelle session. Si une commande de démarrage échoue avant que la génération soit lisible, aucun arrêt non versionné n'est tenté : le script signale la cible et la commande de contrôle. Les appels GCP critiques sont bornés par GNU `timeout` avec `--foreground` et `--kill-after`. Le worker invité ne pilote aucune ressource GCP : il exige un arrêt `poweroff` futur dans `/run/systemd/shutdown/scheduled`, construit l'image CUDA épinglée, compile les profils release et audit, exécute les sondes runtime et Python/DLPack, vérifie le runtime AOT avec `cuobjdump`, puis passe ce runtime court sous `compute-sanitizer --leak-check full`. Si une unité échoue, il remonte avant nettoyage les 240 dernières lignes et 65 536 octets au plus de son journal, entourés de marqueurs explicites, tout en refusant l'artefact de succès.
+Le répertoire de résultat est créé si nécessaire, doit rester hors du dépôt et ne doit déjà contenir ni `phase3-<SHA>.json`, ni `phase3-<SHA>.start-handoff.json`. L'orchestrateur utilise exclusivement `start_and_verify.sh` pour le démarrage et `stop_and_verify.sh --yes` pour l'arrêt. Dès que la garde GCE post-démarrage certifie la génération, le démarrage publie atomiquement un handoff v3 `targeted_running` avec le `lastStartTimestamp`, avant de tenter la garde invitée; une préemption immédiate publie de la même façon un handoff `targeted_stopping`. Toute fermeture automatique exige cette même génération et refuse une cible redémarrée. Si la garde invitée ou l'arrêt d'urgence échoue, ce handoff reste disponible pour reprendre l'arrêt exact et bloque une nouvelle session. Si une commande de démarrage échoue avant que la génération soit lisible, aucun arrêt non versionné n'est tenté : le script signale la cible et la commande de contrôle. Les appels GCP critiques sont bornés par GNU `timeout` dans son mode de groupe de processus par défaut, avec `--kill-after`; le client et ses descendants sont donc arrêtés ensemble à l'expiration. Le worker invité ne pilote aucune ressource GCP : il exige un arrêt `poweroff` futur dans `/run/systemd/shutdown/scheduled`, construit l'image CUDA épinglée, compile les profils release et audit, exécute les sondes runtime et Python/DLPack, vérifie le runtime AOT avec `cuobjdump`, puis passe ce runtime court sous `compute-sanitizer --leak-check full`. Si une unité échoue, il remonte avant nettoyage les 240 dernières lignes et 65 536 octets au plus de son journal, entourés de marqueurs explicites, tout en refusant l'artefact de succès.
 
 Pour cette voie automatisée, aucune préparation SSH manuelle n'est nécessaire : l'orchestrateur crée une clé ED25519 de session dans un chemin physique canonisé hors dépôt, la valide localement, l'importe dans OS Login avec un TTL de 70 minutes juste avant le démarrage, relit son échéance UTC absolue exacte et transmet explicitement les deux à start, SSH et SCP. Tous les transports réutilisent cette échéance fixe, même si gcloud doit réimporter la clé; aucun TTL relatif n'est renouvelé. L'orchestrateur capture aussi l'état et la génération avant start. Après `TERMINATED` ciblé, il tente la révocation puis détruit la copie privée. Si start échoue sans handoff, ce nettoyage exige une seconde preuve `TERMINATED` avec génération inchangée; si l'arrêt ciblé ou cette preuve manque, la clé et le handoff éventuel sont conservés sous l'échéance initiale pour la reprise exacte de l'incident.
 
 Pour cette qualification courte, l'orchestrateur exige après les deux gardes
 `maxRunDuration=3600` secondes exactement et la même génération. Il transmet au
 worker une échéance GCE sûre, placée 300 secondes avant l'échéance nominale. Le
-worker en retranche encore 1 800 secondes : juste avant le preflight, la
-construction et chacune des sept unités CUDA ou d'audit, il refuse de lancer
-l'unité si cette deadline de travail est atteinte. L'arrêt invité doit en outre
-rester antérieur à l'échéance GCE sûre.
+worker en retranche encore 1 800 secondes. Le preflight, la construction et
+chacune des sept unités CUDA ou d'audit sont exécutés sous le binaire fixe
+`/usr/bin/timeout`, dans un groupe de processus distinct. Les chemins fixes de
+`timeout`, `date` et `sleep`, ainsi que tous leurs parents, sont certifiés root
+et non inscriptibles par le groupe ou les autres avant le premier calcul de
+deadline. La borne douce de chaque unité réserve encore cinq secondes pour
+tuer les descendants et soixante secondes pour le diagnostic et le nettoyage;
+l'unité n'est pas lancée si cette réserve n'est plus disponible. Chaque sonde
+Docker ou Buildx relit elle aussi l'horloge fixe et borne son propre timeout au
+minimum de son plafond local et du temps encore disponible. L'arrêt invité
+doit en outre rester antérieur à l'échéance GCE sûre.
 
-Après le preflight, le worker certifie séparément le client Docker direct et le
-client système fixe `/usr/bin/docker` destiné à `sudo -n`; ce dernier et tous
-ses parents doivent appartenir à root et ne pas être inscriptibles par le
-groupe ou les autres. Lorsque le daemon démarre encore, le worker effectue au
+Après le preflight, le worker ignore tout client Docker injecté par `PATH` et
+certifie exclusivement le client système fixe `/usr/bin/docker`, d'abord en
+accès direct puis, si nécessaire, derrière `sudo -n`. Le binaire et tous ses
+parents doivent appartenir à root et ne pas être inscriptibles par le groupe
+ou les autres. Lorsque le daemon démarre encore, le worker effectue au
 plus six tours, chacun sondant les voies disponibles puis attendant cinq
 secondes avant le suivant. Aucune nouvelle sonde ne démarre une fois la
 deadline atteinte et chaque sonde est elle-même limitée à cinq secondes. Il
@@ -315,7 +323,14 @@ borné comprenant les erreurs directes et sudo, l'état systemd, les paquets
 Docker/containerd/NVIDIA et au plus 80 lignes du journal Docker avant de
 nettoyer ses temporaires. Toute commande Docker ultérieure conserve la voie
 directe certifiée ou exactement `sudo -n -- /usr/bin/docker`; aucun chemin issu
-du `PATH` utilisateur n'est transmis à sudo.
+du `PATH` utilisateur n'est exécuté. Chaque `docker run` écrit en outre son
+identifiant dans un `cidfile` privé à la session et porte un nom ainsi qu'un
+label propres à cette session. Le worker atteste le CID, le nom, l'image et le
+label avant tout `docker rm -f` borné, sur succès comme sur échec ou signal,
+puis exige des observations répétées de l'absence. Cette attestation fournit
+aussi un repli sûr si le daemon a créé le conteneur avant d'écrire le `cidfile`;
+un CID incomplet ou un échec de nettoyage ferme la qualification et interdit
+l'artefact final.
 
 Le provisionneur optionnel conserve cette séparation : il ne contient aucune
 commande GCP et ne lance aucun conteneur. Il n'ajoute aucun dépôt, ne télécharge

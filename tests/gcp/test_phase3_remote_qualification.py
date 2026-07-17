@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import shutil
 import stat
 import subprocess
@@ -77,25 +78,9 @@ if args == ["-n", "cat", "/run/systemd/shutdown/scheduled"]:
         print(f"USEC={usec}\nMODE={mode}")
         raise SystemExit(0)
     raise SystemExit(1)
-if len(args) >= 3 and args[:2] == ["-n", "--"] and args[2] == "/usr/bin/test":
-    raise SystemExit(1 if os.environ.get("FAKE_SUDO_DOCKER_MISSING") == "1" else 0)
-if len(args) >= 3 and args[:2] == ["-n", "--"] and args[2] == "/usr/bin/stat":
+if len(args) >= 3 and args[:2] == ["-n", "--"] and args[2] == os.environ["FAKE_DOCKER_BIN"]:
     if os.environ.get("FAKE_SUDO_DOCKER_MISSING") == "1":
-        raise SystemExit(1)
-    unsafe = os.environ.get("FAKE_SUDO_DOCKER_UNSAFE", "")
-    print("/|0|755")
-    print("/usr|0|755")
-    print("/usr/bin|0|775" if unsafe == "parent-mode" else "/usr/bin|0|755")
-    if unsafe == "owner":
-        print("/usr/bin/docker|1000|755")
-    elif unsafe == "mode":
-        print("/usr/bin/docker|0|775")
-    else:
-        print("/usr/bin/docker|0|755")
-    raise SystemExit(0)
-if len(args) >= 3 and args[:2] == ["-n", "--"] and args[2] == "/usr/bin/docker":
-    if os.environ.get("FAKE_SUDO_DOCKER_MISSING") == "1":
-        print("sudo: /usr/bin/docker: command not found", file=sys.stderr)
+        print("sudo: fixed docker: command not found", file=sys.stderr)
         raise SystemExit(127)
     environment = os.environ.copy()
     environment["FAKE_DOCKER_VIA_SUDO"] = "1"
@@ -144,6 +129,14 @@ import time
 
 if sys.argv[1:] != ["+%s"]:
     raise SystemExit("fake date only supports +%s")
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("DATE +%s\n")
+trigger_pattern = os.environ.get("FAKE_DATE_TRIGGER_PATTERN", "")
+if trigger_pattern:
+    command_log = Path(os.environ["FAKE_COMMAND_LOG"])
+    if trigger_pattern in command_log.read_text(encoding="utf-8"):
+        print(int(os.environ["FAKE_DATE_TRIGGER_EPOCH"]))
+        raise SystemExit(0)
 sequence = os.environ.get("FAKE_DATE_SEQUENCE", "")
 if not sequence:
     print(int(time.time()))
@@ -159,7 +152,9 @@ print(values[min(index, len(values) - 1)])
 FAKE_BUILDX = r"""#!/usr/bin/env python3
 import os
 from pathlib import Path
+import subprocess
 import sys
+import time
 
 args = sys.argv[1:]
 prefix = os.environ.get("FAKE_BUILDX_LOG_PREFIX", "BUILDX")
@@ -184,6 +179,15 @@ if "--load" not in args:
 if os.environ.get("FAKE_FAIL", "") == "build":
     print("simulated buildx build failure", file=sys.stderr)
     raise SystemExit(17)
+if os.environ.get("FAKE_BLOCK_BUILDX") == "1":
+    descendant = subprocess.Popen(
+        [sys.executable, "-c", "import time; time.sleep(60)"]
+    )
+    Path(os.environ["FAKE_DESCENDANT_PID_STATE"]).write_text(
+        str(descendant.pid), encoding="ascii"
+    )
+    while True:
+        time.sleep(1)
 iidfile = Path(args[args.index("--iidfile") + 1])
 iidfile.write_text(os.environ["FAKE_IMAGE_ID"] + "\n", encoding="utf-8")
 print("fake Buildx build complete")
@@ -241,11 +245,147 @@ for raw_path in args[3:]:
 """
 
 
+FAKE_DOCKER_TEST = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+args = sys.argv[1:]
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("DOCKER-TEST " + " ".join(args) + "\n")
+docker = Path(os.environ["FAKE_DOCKER_BIN"])
+unsafe = os.environ.get("FAKE_SUDO_DOCKER_UNSAFE", "")
+missing = os.environ.get("FAKE_SUDO_DOCKER_MISSING") == "1"
+if len(args) == 2 and args[0] in {"-d", "-f", "-x"}:
+    target = Path(args[1])
+    if missing and target == docker:
+        raise SystemExit(1)
+    result = {
+        "-d": target.is_dir(),
+        "-f": target.is_file(),
+        "-x": target.is_file() and os.access(target, os.X_OK),
+    }[args[0]]
+    raise SystemExit(0 if result else 1)
+if len(args) == 3 and args[:2] == ["!", "-L"]:
+    target = Path(args[2])
+    if unsafe == "binary-symlink" and target == docker:
+        raise SystemExit(1)
+    if unsafe == "parent-symlink" and target == docker.parent:
+        raise SystemExit(1)
+    raise SystemExit(0 if not target.is_symlink() else 1)
+raise SystemExit("unexpected fake Docker test invocation: " + " ".join(args))
+"""
+
+
+FAKE_DOCKER_STAT = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+args = sys.argv[1:]
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("DOCKER-STAT " + " ".join(args) + "\n")
+if args[:3] != ["-Lc", "%n|%u|%a", "--"]:
+    raise SystemExit("unexpected fake Docker stat invocation: " + " ".join(args))
+docker = Path(os.environ["FAKE_DOCKER_BIN"])
+unsafe = os.environ.get("FAKE_SUDO_DOCKER_UNSAFE", "")
+if os.environ.get("FAKE_SUDO_DOCKER_MISSING") == "1":
+    raise SystemExit(1)
+for raw_path in args[3:]:
+    path = Path(raw_path)
+    owner = "1000" if unsafe == "owner" and path == docker else "0"
+    unsafe_mode = unsafe == "mode" and path == docker
+    unsafe_parent_mode = unsafe == "parent-mode" and path == docker.parent
+    mode = "775" if unsafe_mode or unsafe_parent_mode else "755"
+    print(f"{raw_path}|{owner}|{mode}")
+"""
+
+
+FAKE_SYSTEM_TEST = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+args = sys.argv[1:]
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("SYSTEM-TEST " + " ".join(args) + "\n")
+unsafe = os.environ.get("FAKE_SYSTEM_UNSAFE", "")
+unsafe_target = Path(os.environ.get("FAKE_SYSTEM_UNSAFE_TARGET", "/nonexistent"))
+if len(args) == 2 and args[0] in {"-d", "-f", "-x"}:
+    target = Path(args[1])
+    result = {
+        "-d": target.is_dir(),
+        "-f": target.is_file(),
+        "-x": target.is_file() and os.access(target, os.X_OK),
+    }[args[0]]
+    raise SystemExit(0 if result else 1)
+if len(args) == 3 and args[:2] == ["!", "-L"]:
+    target = Path(args[2])
+    if unsafe == "symlink" and target == unsafe_target:
+        raise SystemExit(1)
+    if unsafe == "parent-symlink" and target == unsafe_target.parent:
+        raise SystemExit(1)
+    raise SystemExit(0 if not target.is_symlink() else 1)
+raise SystemExit("unexpected fixed-system test invocation: " + " ".join(args))
+"""
+
+
+FAKE_SYSTEM_STAT = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+args = sys.argv[1:]
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("SYSTEM-STAT " + " ".join(args) + "\n")
+if args[:3] != ["-Lc", "%n|%u|%a", "--"]:
+    raise SystemExit("unexpected fixed-system stat invocation: " + " ".join(args))
+unsafe = os.environ.get("FAKE_SYSTEM_UNSAFE", "")
+unsafe_target = Path(os.environ.get("FAKE_SYSTEM_UNSAFE_TARGET", "/nonexistent"))
+for raw_path in args[3:]:
+    path = Path(raw_path)
+    owner = "1000" if unsafe == "owner" and path == unsafe_target else "0"
+    if unsafe == "parent-owner" and path == unsafe_target.parent:
+        owner = "1000"
+    mode = "775" if unsafe == "mode" and path == unsafe_target else "755"
+    if unsafe == "parent-mode" and path == unsafe_target.parent:
+        mode = "775"
+    print(f"{raw_path}|{owner}|{mode}")
+"""
+
+
+FAKE_PATH_SYSTEM = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+name = Path(sys.argv[0]).name.upper()
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write(f"PATH-{name} " + " ".join(sys.argv[1:]) + "\n")
+raise SystemExit(99)
+"""
+
+
+FAKE_PATH_DOCKER = r"""#!/usr/bin/env python3
+import os
+from pathlib import Path
+import sys
+
+with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+    stream.write("PATH-DOCKER " + " ".join(sys.argv[1:]) + "\n")
+print("untrusted Docker client from PATH", file=sys.stderr)
+raise SystemExit(99)
+"""
+
+
 FAKE_DOCKER = r"""#!/usr/bin/env python3
 import json
 import os
 from pathlib import Path
+import signal
+import subprocess
 import sys
+import time
 
 args = sys.argv[1:]
 log = Path(os.environ["FAKE_COMMAND_LOG"])
@@ -288,12 +428,86 @@ if args[:2] == ["image", "inspect"]:
     print(image_id)
     raise SystemExit(0)
 
+if args and args[0] == "ps":
+    if "--filter" not in args or "--format" not in args:
+        raise SystemExit("docker ps is missing its exact filter or format")
+    name_filter = args[args.index("--filter") + 1]
+    state_path = Path(os.environ["FAKE_CONTAINER_STATE"])
+    state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
+    if name_filter.startswith("name=^/") and name_filter.endswith("$"):
+        container_name = name_filter[len("name=^/"):-1]
+        if os.environ.get("FAKE_NAME_COLLISION") == "1" or container_name in state:
+            print(container_name)
+    elif name_filter.startswith("id="):
+        container_id = name_filter[len("id="):]
+        matching = [
+            record["id"] for record in state.values() if record["id"] == container_id
+        ]
+        if matching:
+            print(matching[0])
+    else:
+        raise SystemExit("docker ps received a non-exact filter")
+    raise SystemExit(0)
+
+if len(args) == 4 and args[0:2] == ["inspect", "--format"]:
+    container_name = args[3]
+    state_path = Path(os.environ["FAKE_CONTAINER_STATE"])
+    state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
+    record = state.get(container_name)
+    if record is None:
+        record = next(
+            (candidate for candidate in state.values() if candidate["id"] == container_name),
+            None,
+        )
+    if record is None:
+        raise SystemExit(1)
+    observed_label = record["label"]
+    if os.environ.get("FAKE_ATTESTATION_MISMATCH") == "1":
+        observed_label = "foreign-session"
+    print(
+        f'{record["id"]}|/{record["name"]}|{record["image"]}|{observed_label}'
+    )
+    raise SystemExit(0)
+
+if len(args) == 3 and args[:2] == ["rm", "-f"]:
+    cleanup_target = args[2]
+    canonical_id = len(cleanup_target) == 64 and all(
+        ch in "0123456789abcdef" for ch in cleanup_target
+    )
+    canonical_name = cleanup_target.startswith("morsehgp3d-phase3-")
+    if not canonical_id and not canonical_name:
+        raise SystemExit("docker rm received a non-canonical target")
+    state_path = Path(os.environ["FAKE_CONTAINER_STATE"])
+    state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
+    state_name = cleanup_target if cleanup_target in state else next(
+        (
+            name
+            for name, candidate in state.items()
+            if candidate["id"] == cleanup_target
+        ),
+        None,
+    )
+    record = state.get(state_name) if state_name is not None else None
+    if record is not None and record.get("pid") is not None:
+        try:
+            os.killpg(int(record["pid"]), signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    if state_name is not None:
+        state.pop(state_name, None)
+    state_path.write_text(json.dumps(state), encoding="utf-8")
+    print(cleanup_target)
+    raise SystemExit(0)
+
 if not args or args[0] != "run":
     raise SystemExit("unexpected fake docker invocation: " + " ".join(args))
 
 index = 1
 volumes = {}
 container_env = {}
+cidfile = None
+container_name = None
+session_label = None
 while index < len(args):
     option = args[index]
     if option == "--rm":
@@ -305,6 +519,9 @@ while index < len(args):
         "--env",
         "--user",
         "--group-add",
+        "--cidfile",
+        "--name",
+        "--label",
     }:
         value = args[index + 1]
         if option == "--volume":
@@ -313,6 +530,15 @@ while index < len(args):
         elif option == "--env":
             key, env_value = value.split("=", 1)
             container_env[key] = env_value
+        elif option == "--cidfile":
+            cidfile = Path(value)
+        elif option == "--name":
+            container_name = value
+        elif option == "--label":
+            key, label_value = value.split("=", 1)
+            if key != "morsehgp3d.phase3.session":
+                raise SystemExit("fake docker run received an unexpected label")
+            session_label = label_value
         index += 2
     else:
         break
@@ -324,6 +550,14 @@ if image_ref != f"morsehgp3d-phase3:{os.environ['FAKE_GIT_SHA']}":
     raise SystemExit("image tag is not tied to the qualified SHA")
 if not command:
     raise SystemExit("fake docker run is missing its command")
+if cidfile is None or not cidfile.is_absolute() or cidfile.exists() or cidfile.is_symlink():
+    raise SystemExit("fake docker run requires a fresh absolute cidfile")
+if cidfile.parent.name != "container-cids":
+    raise SystemExit("fake docker cidfile is not session scoped")
+if container_name is None or not container_name.startswith("morsehgp3d-phase3-"):
+    raise SystemExit("fake docker run requires a canonical session-scoped name")
+if session_label is None or len(session_label) != 8:
+    raise SystemExit("fake docker run requires its canonical session label")
 
 required_mounts = {
     "/workspace/repository": "ro",
@@ -338,6 +572,47 @@ for key in ("MORSEHGP3D_CUDA_IMAGE_REF", "MORSEHGP3D_CUDA_IMAGE_ID", "MORSEHGP3D
         raise SystemExit(f"missing container environment {key}")
 if container_env.get("HOME") != "/workspace/repository/build/.phase3-home":
     raise SystemExit("container HOME is not the writable Phase 3 build home")
+
+container_id = "c" * 64
+blocked_container = (
+    os.environ.get("FAKE_BLOCK_TARGET") == "docker-run"
+    and os.environ.get("FAKE_BLOCK_CONTAINER_UNIT", "") == cidfile.stem
+)
+cidfile_mode = os.environ.get("FAKE_BLOCK_CIDFILE_MODE", "valid")
+if blocked_container and cidfile_mode == "absent":
+    pass
+elif blocked_container and cidfile_mode == "empty":
+    cidfile.touch()
+elif blocked_container and cidfile_mode == "truncated":
+    cidfile.write_text("deadbeef\n", encoding="ascii")
+else:
+    cidfile.write_text(container_id + "\n", encoding="ascii")
+state_path = Path(os.environ["FAKE_CONTAINER_STATE"])
+state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
+state[container_name] = {
+    "id": container_id,
+    "image": image_ref,
+    "label": session_label,
+    "name": container_name,
+    "pid": None,
+}
+state_path.write_text(json.dumps(state), encoding="utf-8")
+if blocked_container:
+    container = subprocess.Popen(
+        [sys.executable, "-c", "import time; time.sleep(60)"],
+        start_new_session=True,
+    )
+    state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
+    state[container_name]["pid"] = container.pid
+    state_path.write_text(json.dumps(state), encoding="utf-8")
+    descendant = subprocess.Popen(
+        [sys.executable, "-c", "import time; time.sleep(60)"]
+    )
+    Path(os.environ["FAKE_DESCENDANT_PID_STATE"]).write_text(
+        str(descendant.pid), encoding="ascii"
+    )
+    while True:
+        time.sleep(1)
 
 def result_path(container_path: str) -> Path:
     prefix = "/results/"
@@ -599,9 +874,13 @@ FAKE_SLEEP = r"""#!/usr/bin/env python3
 import os
 from pathlib import Path
 import sys
+import time
 
 with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
     stream.write("SLEEP " + " ".join(sys.argv[1:]) + "\n")
+if len(sys.argv) != 2:
+    raise SystemExit("fixed fake sleep requires one duration")
+time.sleep(min(float(sys.argv[1]) * 0.01, 0.02))
 """
 
 
@@ -643,14 +922,26 @@ print("nvidia-container-toolkit\\tinstall ok installed\\t1.17.8-fake")
 FAKE_TIMEOUT = r"""#!/usr/bin/env python3
 import os
 from pathlib import Path
+import signal
 import subprocess
 import sys
+import time
 
 args = sys.argv[1:]
 with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
     stream.write("TIMEOUT " + " ".join(args) + "\n")
+if args == ["--version"]:
+    print("timeout (GNU coreutils) 9.5")
+    raise SystemExit(0)
+if args == ["--help"]:
+    print("Usage: timeout [OPTION] DURATION COMMAND")
+    print("  -k, --kill-after=DURATION")
+    print("      --foreground")
+    raise SystemExit(0)
 index = 0
+foreground = False
 if index < len(args) and args[index] == "--foreground":
+    foreground = True
     index += 1
 if index < len(args) and args[index].startswith("--kill-after="):
     index += 1
@@ -668,6 +959,53 @@ if is_docker_info and expired < expire_count:
     state.write_text(str(expired + 1), encoding="utf-8")
     with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
         stream.write("TIMEOUT-EXPIRED docker info 124\n")
+    raise SystemExit(124)
+
+block_target = os.environ.get("FAKE_BLOCK_TARGET", "")
+is_buildx_build = "build" in command and os.environ["FAKE_BUILDX_PLUGIN"] in command
+is_docker_run = "run" in command and os.environ["FAKE_DOCKER_BIN"] in command
+should_block = (
+    (block_target == "buildx" and is_buildx_build)
+    or (block_target == "docker-run" and is_docker_run)
+)
+if should_block:
+    environment = os.environ.copy()
+    if is_buildx_build:
+        environment["FAKE_BLOCK_BUILDX"] = "1"
+        label = "buildx build"
+    else:
+        environment["FAKE_BLOCK_CONTAINER_UNIT"] = os.environ.get(
+            "FAKE_BLOCK_CONTAINER_UNIT", "cuda-release"
+        )
+        label = "docker run"
+    process = subprocess.Popen(
+        command,
+        env=environment,
+        start_new_session=not foreground,
+    )
+    descendant_state = Path(os.environ["FAKE_DESCENDANT_PID_STATE"])
+    deadline = time.monotonic() + 3
+    while time.monotonic() < deadline and not descendant_state.exists():
+        if process.poll() is not None:
+            raise SystemExit(process.returncode)
+        time.sleep(0.02)
+    if not descendant_state.exists():
+        process.kill()
+        raise SystemExit("blocked fake command did not create its descendant")
+    if foreground:
+        process.terminate()
+    else:
+        os.killpg(process.pid, signal.SIGTERM)
+    try:
+        process.wait(timeout=0.5)
+    except subprocess.TimeoutExpired:
+        if foreground:
+            process.kill()
+        else:
+            os.killpg(process.pid, signal.SIGKILL)
+        process.wait(timeout=1)
+    with Path(os.environ["FAKE_COMMAND_LOG"]).open("a", encoding="utf-8") as stream:
+        stream.write(f"TIMEOUT-EXPIRED {label} 124 foreground={int(foreground)}\n")
     raise SystemExit(124)
 raise SystemExit(subprocess.call(command))
 """
@@ -691,12 +1029,22 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
         )
         self.buildx_test = self.fake_bin / "buildx-test"
         self.buildx_stat = self.fake_bin / "buildx-stat"
+        self.docker_test = self.fake_bin / "docker-test"
+        self.docker_stat = self.fake_bin / "docker-stat"
+        self.fixed_docker = self.fake_secure_bin / "docker"
+        self.fixed_timeout = self.fake_secure_bin / "timeout"
+        self.fixed_sleep = self.fake_secure_bin / "sleep"
+        self.fixed_date = self.fake_secure_bin / "date"
+        self.system_test = self.fake_bin / "system-test"
+        self.system_stat = self.fake_bin / "system-stat"
         self.output_dir = self.root / "artifacts"
         self.session_tmp = self.root / "session-tmp"
         self.command_log = self.root / "commands.log"
         self.date_state = self.root / "date.state"
         self.docker_readiness_state = self.root / "docker-readiness.state"
         self.timeout_state = self.root / "timeout.state"
+        self.descendant_pid_state = self.root / "descendant.pid"
+        self.container_state = self.root / "containers.json"
         self.gce_deadline_epoch = int(time.time()) + 3300
         for path in (
             self.repository / "gcp-migration",
@@ -713,6 +1061,42 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
         self.worker = self.repository / "gcp-migration" / WORKER_SOURCE.name
         worker_text = WORKER_SOURCE.read_text(encoding="utf-8")
         replacements = {
+            'readonly DOCKER_BIN="/usr/bin/docker"': (
+                f'readonly DOCKER_BIN="{self.fixed_docker}"'
+            ),
+            'readonly DOCKER_TEST_BIN="/usr/bin/test"': (
+                f'readonly DOCKER_TEST_BIN="{self.docker_test}"'
+            ),
+            'readonly DOCKER_STAT_BIN="/usr/bin/stat"': (
+                f'readonly DOCKER_STAT_BIN="{self.docker_stat}"'
+            ),
+            'readonly TIMEOUT_BIN="/usr/bin/timeout"': (
+                f'readonly TIMEOUT_BIN="{self.fixed_timeout}"'
+            ),
+            'readonly TIMEOUT_TEST_BIN="/usr/bin/test"': (
+                f'readonly TIMEOUT_TEST_BIN="{self.system_test}"'
+            ),
+            'readonly TIMEOUT_STAT_BIN="/usr/bin/stat"': (
+                f'readonly TIMEOUT_STAT_BIN="{self.system_stat}"'
+            ),
+            'readonly SLEEP_BIN="/usr/bin/sleep"': (
+                f'readonly SLEEP_BIN="{self.fixed_sleep}"'
+            ),
+            'readonly SLEEP_TEST_BIN="/usr/bin/test"': (
+                f'readonly SLEEP_TEST_BIN="{self.system_test}"'
+            ),
+            'readonly SLEEP_STAT_BIN="/usr/bin/stat"': (
+                f'readonly SLEEP_STAT_BIN="{self.system_stat}"'
+            ),
+            'readonly DATE_BIN="/usr/bin/date"': (
+                f'readonly DATE_BIN="{self.fixed_date}"'
+            ),
+            'readonly DATE_TEST_BIN="/usr/bin/test"': (
+                f'readonly DATE_TEST_BIN="{self.system_test}"'
+            ),
+            'readonly DATE_STAT_BIN="/usr/bin/stat"': (
+                f'readonly DATE_STAT_BIN="{self.system_stat}"'
+            ),
             'readonly BUILDX_PLUGIN="/usr/libexec/docker/cli-plugins/docker-buildx"': (
                 f'readonly BUILDX_PLUGIN="{self.buildx_plugin}"'
             ),
@@ -738,17 +1122,24 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
         self._write_executable(self.fake_bin / "git", FAKE_GIT)
         self._write_executable(self.fake_bin / "sudo", FAKE_SUDO)
         self._write_executable(self.fake_bin / "shutdown", FAKE_SHUTDOWN)
-        self._write_executable(self.fake_bin / "date", FAKE_DATE)
-        self._write_executable(self.fake_bin / "docker", FAKE_DOCKER)
-        self._write_executable(self.fake_secure_bin / "docker", FAKE_DOCKER)
+        self._write_executable(self.fake_bin / "docker", FAKE_PATH_DOCKER)
+        self._write_executable(self.fixed_docker, FAKE_DOCKER)
+        self._write_executable(self.docker_test, FAKE_DOCKER_TEST)
+        self._write_executable(self.docker_stat, FAKE_DOCKER_STAT)
         self._write_executable(self.buildx_plugin, FAKE_BUILDX)
         self._write_executable(self.buildx_test, FAKE_BUILDX_TEST)
         self._write_executable(self.buildx_stat, FAKE_BUILDX_STAT)
-        self._write_executable(self.fake_bin / "sleep", FAKE_SLEEP)
+        self._write_executable(self.fixed_sleep, FAKE_SLEEP)
         self._write_executable(self.fake_bin / "systemctl", FAKE_SYSTEMCTL)
         self._write_executable(self.fake_bin / "journalctl", FAKE_JOURNALCTL)
         self._write_executable(self.fake_bin / "dpkg-query", FAKE_DPKG_QUERY)
-        self._write_executable(self.fake_bin / "timeout", FAKE_TIMEOUT)
+        self._write_executable(self.fixed_timeout, FAKE_TIMEOUT)
+        self._write_executable(self.fixed_date, FAKE_DATE)
+        self._write_executable(self.system_test, FAKE_SYSTEM_TEST)
+        self._write_executable(self.system_stat, FAKE_SYSTEM_STAT)
+        self._write_executable(self.fake_bin / "timeout", FAKE_PATH_SYSTEM)
+        self._write_executable(self.fake_bin / "sleep", FAKE_PATH_SYSTEM)
+        self._write_executable(self.fake_bin / "date", FAKE_PATH_SYSTEM)
         self._write_executable(
             self.repository / "gcp-migration" / "blackwell_preflight.sh",
             """#!/usr/bin/env bash
@@ -778,10 +1169,15 @@ printf 'fake Blackwell preflight passed\\n'
                 "FAKE_DATE_SEQUENCE": "",
                 "FAKE_DATE_STATE": str(self.date_state),
                 "FAKE_DOCKER_READINESS_STATE": str(self.docker_readiness_state),
-                "FAKE_SECURE_DOCKER": str(self.fake_secure_bin / "docker"),
+                "FAKE_SECURE_DOCKER": str(self.fixed_docker),
+                "FAKE_DOCKER_BIN": str(self.fixed_docker),
                 "FAKE_BUILDX_PLUGIN": str(self.buildx_plugin),
                 "FAKE_BUILDX_UNSAFE": "",
                 "FAKE_TIMEOUT_STATE": str(self.timeout_state),
+                "FAKE_DESCENDANT_PID_STATE": str(self.descendant_pid_state),
+                "FAKE_CONTAINER_STATE": str(self.container_state),
+                "FAKE_SYSTEM_UNSAFE": "",
+                "FAKE_SYSTEM_UNSAFE_TARGET": str(self.fixed_timeout),
                 "PATH": str(self.fake_bin) + os.pathsep + self.environment["PATH"],
                 "TMPDIR": str(self.session_tmp),
                 "PYTHONDONTWRITEBYTECODE": "1",
@@ -789,7 +1185,31 @@ printf 'fake Blackwell preflight passed\\n'
         )
 
     def tearDown(self) -> None:
+        self._cleanup_fake_processes()
         self.temporary.cleanup()
+
+    def _cleanup_fake_processes(self) -> None:
+        if self.descendant_pid_state.exists():
+            try:
+                os.kill(
+                    int(self.descendant_pid_state.read_text(encoding="ascii")),
+                    signal.SIGKILL,
+                )
+            except (ProcessLookupError, ValueError):
+                pass
+        if self.container_state.exists():
+            try:
+                state = json.loads(self.container_state.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                state = {}
+            for record in state.values():
+                pid = record.get("pid") if isinstance(record, dict) else record
+                if pid is None:
+                    continue
+                try:
+                    os.killpg(int(pid), signal.SIGKILL)
+                except (ProcessLookupError, ValueError):
+                    pass
 
     @staticmethod
     def _write_executable(path: Path, content: str) -> None:
@@ -811,6 +1231,14 @@ printf 'fake Blackwell preflight passed\\n'
         docker_info_timeouts: int = 0,
         docker_ready_after: int = 1,
         date_sequence: list[int] | None = None,
+        date_trigger_pattern: str = "",
+        date_trigger_epoch: int | None = None,
+        block_target: str = "",
+        block_container_unit: str = "cuda-release",
+        block_cidfile_mode: str = "valid",
+        fixed_system_unsafe: str = "",
+        fixed_system_target: str = "timeout",
+        name_collision: bool = False,
     ) -> tuple[subprocess.CompletedProcess[str], Path]:
         artifact = output or (self.output_dir / "qualification.json")
         environment = self.environment.copy()
@@ -819,9 +1247,7 @@ printf 'fake Blackwell preflight passed\\n'
         environment["FAKE_DIRECT_DOCKER_INFO_FAIL"] = (
             "1" if direct_docker_info_fail else "0"
         )
-        environment["FAKE_ALL_DOCKER_INFO_FAIL"] = (
-            "1" if all_docker_info_fail else "0"
-        )
+        environment["FAKE_ALL_DOCKER_INFO_FAIL"] = "1" if all_docker_info_fail else "0"
         environment["FAKE_SUDO_DOCKER_MISSING"] = (
             "1" if docker_clients_unusable else "0"
         )
@@ -832,12 +1258,35 @@ printf 'fake Blackwell preflight passed\\n'
         environment["FAKE_BUILDX_UNSAFE"] = unsafe_buildx
         environment["FAKE_DOCKER_INFO_TIMEOUTS"] = str(docker_info_timeouts)
         environment["FAKE_DOCKER_READY_AFTER"] = str(docker_ready_after)
+        environment["FAKE_BLOCK_TARGET"] = block_target
+        environment["FAKE_BLOCK_CONTAINER_UNIT"] = (
+            block_container_unit if block_target == "docker-run" else ""
+        )
+        environment["FAKE_BLOCK_CIDFILE_MODE"] = block_cidfile_mode
+        environment["FAKE_SYSTEM_UNSAFE"] = fixed_system_unsafe
+        fixed_targets = {
+            "timeout": self.fixed_timeout,
+            "sleep": self.fixed_sleep,
+            "date": self.fixed_date,
+        }
+        environment["FAKE_SYSTEM_UNSAFE_TARGET"] = str(
+            fixed_targets[fixed_system_target]
+        )
+        environment["FAKE_NAME_COLLISION"] = "1" if name_collision else "0"
         environment["FAKE_DATE_SEQUENCE"] = (
             "" if date_sequence is None else ",".join(map(str, date_sequence))
+        )
+        environment["FAKE_DATE_TRIGGER_PATTERN"] = date_trigger_pattern
+        environment["FAKE_DATE_TRIGGER_EPOCH"] = str(
+            self.gce_deadline_epoch
+            if date_trigger_epoch is None
+            else date_trigger_epoch
         )
         self.date_state.unlink(missing_ok=True)
         self.docker_readiness_state.unlink(missing_ok=True)
         self.timeout_state.unlink(missing_ok=True)
+        self.descendant_pid_state.unlink(missing_ok=True)
+        self.container_state.unlink(missing_ok=True)
         command = [str(self.worker)]
         if arguments is None:
             command.extend(
@@ -851,15 +1300,27 @@ printf 'fake Blackwell preflight passed\\n'
             )
         else:
             command.extend(arguments)
-        result = subprocess.run(
+        process = subprocess.Popen(
             command,
             cwd=self.repository,
             env=environment,
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            timeout=60,
-            check=False,
+            start_new_session=True,
+        )
+        try:
+            stdout, stderr = process.communicate(timeout=60)
+        except subprocess.TimeoutExpired:
+            os.killpg(process.pid, signal.SIGKILL)
+            process.communicate()
+            self._cleanup_fake_processes()
+            raise
+        result = subprocess.CompletedProcess(
+            command,
+            process.returncode,
+            stdout,
+            stderr,
         )
         return result, artifact
 
@@ -867,6 +1328,19 @@ printf 'fake Blackwell preflight passed\\n'
         if not self.command_log.exists():
             return ""
         return self.command_log.read_text(encoding="utf-8")
+
+    def assert_recorded_pid_stopped(self, state_path: Path) -> None:
+        self.assertTrue(state_path.is_file())
+        pid = int(state_path.read_text(encoding="ascii"))
+        for _ in range(100):
+            stat_path = Path(f"/proc/{pid}/stat")
+            if not stat_path.exists():
+                return
+            fields = stat_path.read_text(encoding="ascii").split()
+            if len(fields) >= 3 and fields[2] == "Z":
+                return
+            time.sleep(0.01)
+        self.fail(f"process {pid} is still alive")
 
     def assert_no_partial_artifact(self) -> None:
         self.assertEqual([], list(self.output_dir.glob(".*.partial")))
@@ -947,17 +1421,17 @@ printf 'fake Blackwell preflight passed\\n'
         cases = (
             (
                 "buildx-build",
-                [base] * 6 + [work_deadline],
+                "BUILDX version",
                 "BUILDX build",
             ),
             (
                 "compute-sanitizer",
-                [base] * 13 + [work_deadline],
+                "cuobjdump -lptx",
                 "compute-sanitizer --tool memcheck",
             ),
         )
 
-        for label, sequence, forbidden in cases:
+        for label, trigger_pattern, forbidden in cases:
             with self.subTest(label=label):
                 self.command_log.unlink(missing_ok=True)
                 artifact = self.output_dir / f"deadline-{label}.json"
@@ -970,7 +1444,8 @@ printf 'fake Blackwell preflight passed\\n'
                         str(artifact),
                     ],
                     output=artifact,
-                    date_sequence=sequence,
+                    date_trigger_pattern=trigger_pattern,
+                    date_trigger_epoch=work_deadline,
                 )
 
                 self.assertNotEqual(0, result.returncode)
@@ -980,6 +1455,42 @@ printf 'fake Blackwell preflight passed\\n'
                 self.assertIn("PREFLIGHT --skip-docker", log)
                 self.assertNotIn(forbidden, log)
                 self.assert_no_partial_artifact()
+
+    def test_no_docker_or_buildx_probe_starts_after_deadline_reserve(self) -> None:
+        base = int(time.time())
+        deadline = base + 3300
+        work_deadline = deadline - 1800
+        artifact = self.output_dir / "probe-deadline.json"
+
+        result, _ = self.run_worker(
+            arguments=[
+                "--yes",
+                "--gce-deadline-epoch",
+                str(deadline),
+                "--output",
+                str(artifact),
+            ],
+            output=artifact,
+            date_trigger_pattern="DOCKER-TEST -d /",
+            date_trigger_epoch=work_deadline,
+        )
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("SONDE REFUSÉE", result.stderr)
+        self.assertFalse(artifact.exists())
+        log = self.command_log_text()
+        docker_test_timeouts = [
+            line
+            for line in log.splitlines()
+            if line.startswith("TIMEOUT ") and str(self.docker_test) in line
+        ]
+        self.assertEqual(1, len(docker_test_timeouts))
+        self.assertNotIn("DOCKER-STAT", log)
+        self.assertNotIn("BUILDX-TEST", log)
+        self.assertNotIn("DOCKER --version", log)
+        self.assertNotIn("DOCKER info", log)
+        self.assertNotIn("DOCKER run", log)
+        self.assert_no_partial_artifact()
 
     def test_rejects_output_inside_worktree_or_already_existing(self) -> None:
         inside = self.repository / "qualification.json"
@@ -1025,6 +1536,14 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertIn("[DIAGNOSTIC preflight-blackwell] fin.", result.stderr)
         self.assertIn("Le preflight Blackwell non destructif a échoué", result.stderr)
         self.assertFalse(artifact.exists())
+        preflight_timeout_lines = [
+            line
+            for line in self.command_log_text().splitlines()
+            if "blackwell_preflight.sh --skip-docker" in line
+        ]
+        self.assertEqual(1, len(preflight_timeout_lines))
+        self.assertIn("TIMEOUT --kill-after=5s ", preflight_timeout_lines[0])
+        self.assertNotIn("--foreground", preflight_timeout_lines[0])
         self.assert_no_partial_artifact()
 
         byte_artifact = self.output_dir / "preflight-byte-limit.json"
@@ -1120,6 +1639,16 @@ printf 'fake Blackwell preflight passed\\n'
             "--env HOME=/workspace/repository/build/.phase3-home",
             log,
         )
+        docker_run_lines = [
+            line for line in log.splitlines() if line.startswith("DOCKER run ")
+        ]
+        self.assertEqual(7, len(docker_run_lines))
+        for line in docker_run_lines:
+            self.assertIn("--name morsehgp3d-phase3-", line)
+            self.assertIn("--label morsehgp3d.phase3.session=", line)
+            self.assertIn("--cidfile ", line)
+        self.assertEqual(7, log.count("DOCKER rm -f " + "c" * 64))
+        self.assertNotIn("PATH-DOCKER", log)
 
         second, _ = self.run_worker(output=artifact)
         self.assertNotEqual(0, second.returncode)
@@ -1147,6 +1676,151 @@ printf 'fake Blackwell preflight passed\\n'
         ]
         self.assertEqual(1, len(buildx_lines))
         self.assertIn("BUILDX_CONFIG=" + str(self.session_tmp), buildx_lines[0])
+        self.assert_no_partial_artifact()
+
+    def test_uses_only_certified_fixed_docker_and_gnu_timeout_paths(self) -> None:
+        source = WORKER_SOURCE.read_text(encoding="utf-8")
+        self.assertIn('readonly DOCKER_BIN="/usr/bin/docker"', source)
+        self.assertIn('readonly TIMEOUT_BIN="/usr/bin/timeout"', source)
+        self.assertIn('readonly DATE_BIN="/usr/bin/date"', source)
+        self.assertIn('readonly SLEEP_BIN="/usr/bin/sleep"', source)
+        self.assertNotIn("command -v docker", source)
+        self.assertNotIn("command -v timeout", source)
+        self.assertNotIn("$(date +%s)", source)
+        self.assertNotIn("\nsleep ", source)
+        self.assertNotIn("timeout --foreground", source)
+        self.assertIn(
+            "soft_timeout=$((remaining - WORK_UNIT_KILL_AFTER_SECONDS - "
+            "WORK_UNIT_POST_TIMEOUT_RESERVE_SECONDS))",
+            source,
+        )
+        self.assertIn('"${TIMEOUT_BIN}" --version', source)
+        self.assertIn('"${TIMEOUT_BIN}" --help', source)
+
+        result, artifact = self.run_worker()
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertTrue(artifact.is_file())
+        log = self.command_log_text()
+        self.assertIn("TIMEOUT --version", log)
+        self.assertIn("TIMEOUT --help", log)
+        self.assertIn("DOCKER-STAT ", log)
+        self.assertNotIn("PATH-DOCKER", log)
+        self.assertNotIn("PATH-TIMEOUT", log)
+        self.assertNotIn("PATH-DATE", log)
+        self.assertNotIn("PATH-SLEEP", log)
+        self.assertIn("SYSTEM-STAT ", log)
+        self.assertIn("DATE +%s", log)
+        self.assert_no_partial_artifact()
+
+    def test_rejects_unsafe_timeout_date_or_sleep_chain_before_preflight(
+        self,
+    ) -> None:
+        cases = (
+            ("timeout", "owner"),
+            ("date", "mode"),
+            ("sleep", "symlink"),
+            ("timeout", "parent-owner"),
+            ("date", "parent-mode"),
+            ("sleep", "parent-symlink"),
+        )
+        for fixed_system_target, unsafe in cases:
+            with self.subTest(target=fixed_system_target, unsafe=unsafe):
+                self.command_log.unlink(missing_ok=True)
+                artifact = (
+                    self.output_dir / f"unsafe-{fixed_system_target}-{unsafe}.json"
+                )
+                result, _ = self.run_worker(
+                    output=artifact,
+                    fixed_system_unsafe=unsafe,
+                    fixed_system_target=fixed_system_target,
+                )
+
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("chaîne fixe /usr/bin/", result.stderr)
+                self.assertFalse(artifact.exists())
+                log = self.command_log_text()
+                self.assertNotIn("PREFLIGHT", log)
+                self.assertNotIn("DOCKER ", log)
+                self.assertNotIn("PATH-TIMEOUT", log)
+                self.assertNotIn("PATH-DATE", log)
+                self.assertNotIn("PATH-SLEEP", log)
+
+    def test_blocked_buildx_is_group_killed_before_any_container_or_artifact(
+        self,
+    ) -> None:
+        result, artifact = self.run_worker(block_target="buildx")
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("construction de l'image CUDA Phase 3 a échoué", result.stderr)
+        self.assertFalse(artifact.exists())
+        log = self.command_log_text()
+        self.assertIn("TIMEOUT-EXPIRED buildx build 124 foreground=0", log)
+        self.assertNotIn("DOCKER image inspect", log)
+        self.assertNotIn("DOCKER run", log)
+        self.assert_recorded_pid_stopped(self.descendant_pid_state)
+        self.assert_no_partial_artifact()
+
+    def test_blocked_container_and_descendant_are_killed_and_cid_is_removed(
+        self,
+    ) -> None:
+        result, artifact = self.run_worker(
+            block_target="docker-run",
+            block_container_unit="cuda-release",
+        )
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("workflow cuda-release a échoué", result.stderr)
+        self.assertFalse(artifact.exists())
+        log = self.command_log_text()
+        self.assertIn("TIMEOUT-EXPIRED docker run 124 foreground=0", log)
+        self.assertIn("DOCKER run --name morsehgp3d-phase3-", log)
+        self.assertIn("DOCKER rm -f " + "c" * 64, log)
+        self.assertNotIn("cmake --workflow --preset cuda-audit", log)
+        self.assertNotIn("morsehgp3d_phase3_runtime", log)
+        self.assert_recorded_pid_stopped(self.descendant_pid_state)
+        state = json.loads(self.container_state.read_text(encoding="utf-8"))
+        self.assertEqual({}, state)
+        self.assert_no_partial_artifact()
+
+    def test_create_before_cidfile_is_attested_removed_and_never_published(
+        self,
+    ) -> None:
+        for cidfile_mode in ("absent", "empty", "truncated"):
+            with self.subTest(cidfile_mode=cidfile_mode):
+                self.command_log.unlink(missing_ok=True)
+                artifact = self.output_dir / f"blocked-{cidfile_mode}.json"
+                result, _ = self.run_worker(
+                    output=artifact,
+                    block_target="docker-run",
+                    block_container_unit="cuda-release",
+                    block_cidfile_mode=cidfile_mode,
+                )
+
+                self.assertNotEqual(0, result.returncode)
+                self.assertFalse(artifact.exists())
+                log = self.command_log_text()
+                self.assertIn("TIMEOUT-EXPIRED docker run 124 foreground=0", log)
+                self.assertIn("DOCKER inspect --format", log)
+                self.assertIn("DOCKER rm -f " + "c" * 64, log)
+                self.assertNotIn("DOCKER rm -f morsehgp3d-phase3-", log)
+                self.assertNotIn("cmake --workflow --preset cuda-audit", log)
+                self.assertGreaterEqual(log.count("SLEEP 1"), 2)
+                self.assert_recorded_pid_stopped(self.descendant_pid_state)
+                state = json.loads(self.container_state.read_text(encoding="utf-8"))
+                self.assertEqual({}, state)
+                self.assert_no_partial_artifact()
+
+    def test_name_collision_is_refused_before_docker_run(self) -> None:
+        result, artifact = self.run_worker(name_collision=True)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Collision de nom Docker refusée", result.stderr)
+        self.assertFalse(artifact.exists())
+        log = self.command_log_text()
+        self.assertIn("DOCKER ps -a --no-trunc --filter name=^/", log)
+        self.assertNotIn("DOCKER run --name", log)
+        self.assertNotIn("DOCKER rm -f", log)
         self.assert_no_partial_artifact()
 
     def test_failures_publish_no_artifact(self) -> None:
@@ -1276,9 +1950,10 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertTrue(artifact.is_file())
         log = self.command_log_text()
-        self.assertIn("SUDO -n -- /usr/bin/docker info", log)
-        self.assertIn("SUDO -n -- /usr/bin/docker image inspect", log)
-        self.assertEqual(7, log.count("SUDO -n -- /usr/bin/docker run"))
+        self.assertIn(f"SUDO -n -- {self.fixed_docker} info", log)
+        self.assertIn(f"SUDO -n -- {self.fixed_docker} image inspect", log)
+        self.assertEqual(7, log.count(f"SUDO -n -- {self.fixed_docker} run"))
+        self.assertEqual(7, log.count(f"SUDO -n -- {self.fixed_docker} rm -f"))
         self.assertIn(
             "SUDO -n --preserve-env=BUILDX_CONFIG -- "
             + str(self.buildx_plugin)
@@ -1342,7 +2017,7 @@ printf 'fake Blackwell preflight passed\\n'
         result, artifact = self.run_worker(docker_clients_unusable=True)
 
         self.assertNotEqual(0, result.returncode)
-        self.assertIn("Client Docker absent ou inexécutable", result.stderr)
+        self.assertIn("Client Docker fixe /usr/bin/docker", result.stderr)
         self.assertFalse(artifact.exists())
         self.assert_no_partial_artifact()
         log = self.command_log_text()
@@ -1362,13 +2037,13 @@ printf 'fake Blackwell preflight passed\\n'
                 )
 
                 self.assertNotEqual(0, result.returncode)
-                self.assertIn("daemon inaccessible", result.stderr)
+                self.assertIn("Client Docker fixe /usr/bin/docker", result.stderr)
                 self.assertFalse(artifact.exists())
                 self.assert_no_partial_artifact()
                 log = self.command_log_text()
-                self.assertIn("SUDO -n -- /usr/bin/stat", log)
-                self.assertNotIn("SUDO -n -- /usr/bin/docker --version", log)
-                self.assertNotIn("SUDO -n -- /usr/bin/docker info", log)
+                self.assertIn("DOCKER-STAT ", log)
+                self.assertNotIn(f"SUDO -n -- {self.fixed_docker} --version", log)
+                self.assertNotIn(f"SUDO -n -- {self.fixed_docker} info", log)
                 self.assertNotIn("SECURE-DOCKER", log)
                 self.assertNotIn("DOCKER build", log)
 
@@ -1414,24 +2089,20 @@ printf 'fake Blackwell preflight passed\\n'
             ],
             output=artifact,
             all_docker_info_fail=True,
-            date_sequence=[
-                base,
-                base,
-                base + 1,
-                base + 2,
-                base + 3,
-                work_deadline,
-            ],
+            date_trigger_pattern="DOCKER info",
+            date_trigger_epoch=work_deadline,
         )
 
         self.assertNotEqual(0, result.returncode)
-        self.assertIn("Deadline de travail atteinte pendant les sondes Docker", result.stderr)
+        self.assertIn(
+            "Deadline de travail atteinte pendant les sondes Docker", result.stderr
+        )
         self.assertFalse(artifact.exists())
         self.assert_no_partial_artifact()
         log = self.command_log_text()
         self.assertNotIn("SLEEP", log)
         self.assertEqual(1, log.count("DOCKER info"))
-        self.assertNotIn("SUDO -n -- /usr/bin/docker info", log)
+        self.assertNotIn(f"SUDO -n -- {self.fixed_docker} info", log)
         self.assertNotIn("DOCKER build", log)
 
 
