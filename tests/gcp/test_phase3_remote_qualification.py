@@ -505,6 +505,7 @@ if not args or args[0] != "run":
 index = 1
 volumes = {}
 container_env = {}
+container_entrypoint = None
 cidfile = None
 container_name = None
 session_label = None
@@ -522,6 +523,7 @@ while index < len(args):
         "--cidfile",
         "--name",
         "--label",
+        "--entrypoint",
     }:
         value = args[index + 1]
         if option == "--volume":
@@ -539,6 +541,8 @@ while index < len(args):
             if key != "morsehgp3d.phase3.session":
                 raise SystemExit("fake docker run received an unexpected label")
             session_label = label_value
+        elif option == "--entrypoint":
+            container_entrypoint = value
         index += 2
     else:
         break
@@ -546,6 +550,8 @@ if index >= len(args):
     raise SystemExit("fake docker run is missing its image")
 image_ref = args[index]
 command = args[index + 1:]
+if container_entrypoint is not None:
+    command = [container_entrypoint, *command]
 if image_ref != f"morsehgp3d-phase3:{os.environ['FAKE_GIT_SHA']}":
     raise SystemExit("image tag is not tied to the qualified SHA")
 if not command:
@@ -853,12 +859,14 @@ if command[0] == "python3":
     print("fake Python binding passed")
     raise SystemExit(0)
 
-if command[:2] == ["cuobjdump", "-lelf"]:
+if Path(command[0]).name == "cuobjdump" and command[1:2] == ["-lelf"]:
     architecture = "sm_90" if failure == "foreign_arch" else "sm_120"
     print(f"ELF file 1: morsehgp3d_phase3.{architecture}.cubin")
     raise SystemExit(0)
 
-if command[:2] == ["cuobjdump", "-lptx"]:
+if Path(command[0]).name == "cuobjdump" and command[1:2] == ["-lptx"]:
+    if container_entrypoint is None:
+        print("NVIDIA container entrypoint banner")
     if failure == "ptx":
         print("PTX file 1: morsehgp3d_phase3.ptx")
     else:
@@ -1435,7 +1443,7 @@ printf 'fake Blackwell preflight passed\\n'
             ),
             (
                 "compute-sanitizer",
-                "cuobjdump -lptx",
+                "--entrypoint /usr/local/cuda/bin/cuobjdump",
                 "compute-sanitizer --tool memcheck",
             ),
         )
@@ -1609,6 +1617,7 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertEqual(FAKE_BASE_IMAGE_REF, value["image"]["base_ref"])
         self.assertEqual(["sm_120"], value["checks"]["aot_elf_architectures"])
         self.assertEqual(0, value["checks"]["aot_ptx_entry_count"])
+        self.assertEqual("", value["logs"]["cuobjdump_ptx"])
         self.assertIn("No PTX file found", value["logs"]["cuobjdump_ptx_stderr"])
         self.assertEqual(
             {"resident", "warm"},
@@ -1636,7 +1645,10 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertIn("--allocation-bytes 67108864", log)
         self.assertIn("tests/cuda/check_phase3_binding.py", log)
         self.assertIn("cuobjdump -lelf", log)
-        self.assertIn("cuobjdump -lptx", log)
+        self.assertIn(
+            "--entrypoint /usr/local/cuda/bin/cuobjdump",
+            log,
+        )
         self.assertIn(
             "compute-sanitizer --tool memcheck --leak-check full "
             "--error-exitcode=86",

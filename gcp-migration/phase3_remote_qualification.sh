@@ -1053,15 +1053,18 @@ run_container_split_output() {
     local label="$1"
     local stdout_path="$2"
     local stderr_path="$3"
+    local container_entrypoint="$4"
     local cidfile="${CONTAINER_CID_DIR}/${label}.cid"
     local container_name=""
     local collision=""
     local run_status=0
     local cleanup_status=0
-    shift 3
+    shift 4
 
     [[ "${label}" =~ ^[a-z0-9][a-z0-9-]*$ ]] || \
         die "Label de conteneur non canonique : ${label}."
+    [[ "${container_entrypoint}" == /* ]] || \
+        die "Entrypoint de conteneur non absolu : ${container_entrypoint}."
     container_name="morsehgp3d-phase3-${SESSION_TOKEN}-${label}"
     [[ -d "${CONTAINER_CID_DIR}" && ! -L "${CONTAINER_CID_DIR}" ]] || \
         die "Répertoire de cidfiles absent ou symbolique : ${CONTAINER_CID_DIR}."
@@ -1082,6 +1085,7 @@ run_container_split_output() {
         --name "${container_name}" \
         --label "${CONTAINER_SESSION_LABEL}=${SESSION_TOKEN}" \
         --cidfile "${cidfile}" --gpus all \
+        --entrypoint "${container_entrypoint}" \
         "${DOCKER_IDENTITY_ARGS[@]}" \
         --volume "${REPOSITORY_ROOT}:${CONTAINER_REPOSITORY}:ro" \
         --volume "${BUILD_DIR}:${CONTAINER_BUILD}:rw" \
@@ -1147,7 +1151,7 @@ if [[ "${architectures}" != "sm_120" ]]; then
 fi
 begin_unit "cuobjdump-ptx"
 if ! run_container_split_output "cuobjdump-ptx" "${PTX_LOG}" "${PTX_STDERR_LOG}" \
-    cuobjdump -lptx "${RUNTIME_PATH}"; then
+    /usr/local/cuda/bin/cuobjdump -lptx "${RUNTIME_PATH}"; then
     report_failure_log "cuobjdump-ptx-stderr" "${PTX_STDERR_LOG}"
     die "cuobjdump n'a pas pu auditer les entrées PTX; voir ${PTX_STDERR_LOG}."
 fi
