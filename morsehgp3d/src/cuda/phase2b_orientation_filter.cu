@@ -114,18 +114,15 @@ using device::subtract_intervals;
 // Coordinates are stored field-major: all a.x words, then all a.y words, and
 // so on through d.z. A warp therefore performs one coalesced load per field.
 __global__ void morsehgp3d_phase2b_orientation_3d_filter_kernel(
-    const std::uint64_t* replay_ids,
     const std::uint64_t* coordinate_bits,
-    RawOrientation3DFilterOutput* outputs,
+    FilterSign* outputs,
     std::size_t count) {
   const std::size_t index =
       static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
   if (index >= count) {
     return;
   }
-  outputs[index].replay_id = replay_ids[index];
-  outputs[index].sign =
-      filter_orientation_3d(coordinate_bits, count, index);
+  outputs[index] = filter_orientation_3d(coordinate_bits, count, index);
 }
 
 class CudaFailure final : public std::runtime_error {
@@ -201,7 +198,7 @@ class DeviceBuffer final {
 
 }  // namespace
 
-std::vector<RawOrientation3DFilterOutput> filter_orientations_3d_on_gpu(
+std::vector<FilterSign> filter_orientation_3d_signs_on_gpu(
     std::span<const Orientation3DFilterInput> inputs) {
   if (inputs.empty()) {
     return {};
@@ -216,11 +213,9 @@ std::vector<RawOrientation3DFilterOutput> filter_orientations_3d_on_gpu(
     throw std::length_error("Phase 2B orientation batch exceeds the CUDA grid");
   }
 
-  std::vector<std::uint64_t> replay_ids(inputs.size());
   std::vector<std::uint64_t> coordinate_bits(
       inputs.size() * kCoordinateFieldCount);
   for (std::size_t index = 0U; index < inputs.size(); ++index) {
-    replay_ids[index] = inputs[index].replay_id;
     for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
       coordinate_bits[(0U * kAxisCount + axis) * inputs.size() + index] =
           inputs[index].a_bits[axis];
@@ -234,19 +229,10 @@ std::vector<RawOrientation3DFilterOutput> filter_orientations_3d_on_gpu(
   }
 
   Stream stream;
-  DeviceBuffer<std::uint64_t> device_replay_ids(replay_ids.size());
   DeviceBuffer<std::uint64_t> device_coordinate_bits(coordinate_bits.size());
-  DeviceBuffer<RawOrientation3DFilterOutput> device_outputs(inputs.size());
-  std::vector<RawOrientation3DFilterOutput> outputs(inputs.size());
+  DeviceBuffer<FilterSign> device_outputs(inputs.size());
+  std::vector<FilterSign> outputs(inputs.size());
 
-  check_cuda(
-      cudaMemcpyAsync(
-          device_replay_ids.get(),
-          replay_ids.data(),
-          replay_ids.size() * sizeof(std::uint64_t),
-          cudaMemcpyHostToDevice,
-          stream.get()),
-      "cudaMemcpyAsync orientation replay identifiers host-to-device");
   check_cuda(
       cudaMemcpyAsync(
           device_coordinate_bits.get(),
@@ -258,7 +244,6 @@ std::vector<RawOrientation3DFilterOutput> filter_orientations_3d_on_gpu(
   morsehgp3d_phase2b_orientation_3d_filter_kernel
       <<<static_cast<unsigned int>(block_count), kThreadsPerBlock, 0U,
          stream.get()>>>(
-          device_replay_ids.get(),
           device_coordinate_bits.get(),
           device_outputs.get(),
           inputs.size());
@@ -267,7 +252,7 @@ std::vector<RawOrientation3DFilterOutput> filter_orientations_3d_on_gpu(
       cudaMemcpyAsync(
           outputs.data(),
           device_outputs.get(),
-          outputs.size() * sizeof(RawOrientation3DFilterOutput),
+          outputs.size() * sizeof(FilterSign),
           cudaMemcpyDeviceToHost,
           stream.get()),
       "cudaMemcpyAsync orientation results device-to-host");

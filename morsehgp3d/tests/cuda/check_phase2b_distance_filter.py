@@ -305,7 +305,7 @@ def make_adversarial_cases() -> list[Case]:
     cases: list[Case] = []
     for index, (label, negative_words) in enumerate(bases):
         negative = Case(
-            101 + 2 * index,
+            101 + 4 * index,
             negative_words,
             f"adversarial-{label}-negative",
             "negative",
@@ -317,7 +317,7 @@ def make_adversarial_cases() -> list[Case]:
             *negative_words[3:6],
         )
         positive = Case(
-            102 + 2 * index,
+            103 + 4 * index,
             positive_words,
             f"adversarial-{label}-positive",
             "positive",
@@ -370,9 +370,18 @@ def make_corpus() -> list[Case]:
     cases.insert(257, underflow)
     cases.insert(1_026, overflow)
     require(len(cases) > 256 * 8, "the corpus must span more than eight CUDA blocks")
+    replay_ids = [case.replay_id for case in cases]
     require(
-        len({case.replay_id for case in cases}) == len(cases),
+        len(set(replay_ids)) == len(cases),
         "the positive corpus contains a duplicate replay identifier",
+    )
+    require(
+        replay_ids != sorted(replay_ids)
+        and all(
+            abs(left - right) != 1
+            for left, right in zip(replay_ids, replay_ids[1:])
+        ),
+        "the corpus must retain non-sequential replay identifiers",
     )
     require(equality.oracle_sign == "zero", "equality oracle is not exact zero")
     require(underflow.oracle_sign == "positive", "underflow oracle sign changed")

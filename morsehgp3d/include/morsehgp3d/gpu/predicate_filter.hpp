@@ -20,6 +20,8 @@ enum class FilterSign : std::int8_t {
   unknown = 0,
   positive = 1,
 };
+static_assert(sizeof(FilterSign) == sizeof(std::int8_t));
+static_assert(std::is_trivially_copyable_v<FilterSign>);
 static_assert(static_cast<std::int8_t>(FilterSign::negative) == -1);
 static_assert(static_cast<std::int8_t>(FilterSign::unknown) == 0);
 static_assert(static_cast<std::int8_t>(FilterSign::positive) == 1);

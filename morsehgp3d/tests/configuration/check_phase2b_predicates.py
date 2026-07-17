@@ -165,6 +165,14 @@ def enum_members(body: str) -> dict[str, int]:
 
 
 def validate_sign_enum(header: str) -> None:
+    require(
+        re.search(
+            r"enum\s+class\s+FilterSign\s*:\s*std::int8_t\s*\{",
+            without_comments(header),
+        )
+        is not None,
+        "FilterSign must occupy exactly one signed byte",
+    )
     candidates = re.findall(
         r"enum\s+class\s+([A-Za-z_]\w*)"
         r"(?:\s*:\s*[^\{]+)?\s*\{(?P<body>[^}]*)\}\s*;",
@@ -423,8 +431,26 @@ def validate_filter_cuda_source(
         f"the {label} CUDA source bypasses the shared interval contract",
     )
     require(
-        "unknown" in internal and "unknown" in public,
+        "FilterSign" in internal and "unknown" in public,
         f"the {label} launch contract loses tri-state semantics",
+    )
+    require(
+        re.search(r"std::vector\s*<\s*FilterSign\s*>", internal) is not None
+        and re.search(r"FilterSign\s*\*\s*outputs", clean) is not None
+        and re.search(
+            r"outputs\s*\[\s*index\s*\]\s*=\s*filter_[A-Za-z0-9_]+\s*\(",
+            clean,
+        )
+        is not None
+        and "sizeof(FilterSign)" in clean,
+        f"the {label} device path does not transfer one positional sign per input",
+    )
+    require(
+        all(
+            forbidden not in clean and forbidden not in without_comments(internal)
+            for forbidden in ("replay_id", "replay_ids", "device_replay_ids", "Raw")
+        ),
+        f"the {label} device path redundantly transfers replay identifiers",
     )
 
 
@@ -644,7 +670,7 @@ def validate_host_source(
     require(
         re.search(r"if\s*\(\s*options[.]audit_gpu_signs\s*\)", clean) is not None
         and re.search(
-            r"gpu_outputs\s*\[\s*index\s*\][.]sign\s*==\s*"
+            r"gpu_outputs\s*\[\s*index\s*\]\s*==\s*"
             r"FilterSign::unknown",
             clean,
         )
@@ -674,20 +700,37 @@ def validate_host_source(
     )
     require(
         re.search(r"std::future\s*<", without_comments(header)) is not None
-        and "filter_squared_distances_on_gpu" in distance_internal
-        and "filter_squared_distances_on_gpu" in clean,
+        and "filter_squared_distance_signs_on_gpu" in distance_internal
+        and "filter_squared_distance_signs_on_gpu" in clean,
         "the distance asynchronous API is detached from the CUDA launcher",
     )
     require(
-        "filter_orientations_3d_on_gpu" in orientation_internal
-        and "filter_orientations_3d_on_gpu" in clean,
+        "filter_orientation_3d_signs_on_gpu" in orientation_internal
+        and "filter_orientation_3d_signs_on_gpu" in clean,
         "the orientation asynchronous API is detached from the CUDA launcher",
     )
     require(
-        "filter_power_bisectors_on_gpu" in power_internal
-        and "filter_power_bisectors_on_gpu" in clean,
+        "filter_power_bisector_signs_on_gpu" in power_internal
+        and "filter_power_bisector_signs_on_gpu" in clean,
         "the power-bisector asynchronous API is detached from the CUDA launcher",
     )
+    for decision_type in (
+        "SquaredDistanceDecision",
+        "Orientation3DDecision",
+        "PowerBisectorDecision",
+    ):
+        require(
+            re.search(
+                rf"result[.]decisions\s*\[\s*index\s*\]\s*=\s*"
+                rf"{decision_type}\s*\{{\s*inputs\s*\[\s*index\s*\]"
+                r"[.]replay_id\s*,\s*output\s*,\s*"
+                r"predicate_sign_from_gpu\s*\(\s*output\s*\)",
+                clean,
+                flags=re.DOTALL,
+            )
+            is not None,
+            f"{decision_type} does not recover its authoritative host replay id",
+        )
 
 
 def validate_cli(cli: str) -> None:
@@ -909,8 +952,53 @@ def validate_negative_mutations(files: ContractFiles) -> int:
             ),
         ),
         (
+            "filter sign widened",
+            mutate_text(
+                PUBLIC_HEADER,
+                "enum class FilterSign : std::int8_t",
+                "enum class FilterSign : std::int16_t",
+                "one-byte filter sign",
+            ),
+        ),
+        (
             "replay id removed",
             mutate_text(PUBLIC_HEADER, "replay_id", "discarded_id", "replay id"),
+        ),
+        (
+            "device replay identifier restored",
+            mutate_text(
+                INTERNAL_HEADER,
+                "namespace morsehgp3d::gpu::detail {",
+                "namespace morsehgp3d::gpu::detail {\nstd::uint64_t replay_id{0};",
+                "device replay identifier",
+            ),
+        ),
+        (
+            "distance result transfer widened",
+            mutate_text(
+                CUDA_SOURCE,
+                "outputs.size() * sizeof(FilterSign)",
+                "outputs.size() * sizeof(std::uint64_t)",
+                "one-byte distance result transfer",
+            ),
+        ),
+        (
+            "distance result shifted by one index",
+            mutate_text(
+                CUDA_SOURCE,
+                "outputs[index] = filter_squared_distance",
+                "outputs[index + 1U] = filter_squared_distance",
+                "positional distance result",
+            ),
+        ),
+        (
+            "distance decision takes the first replay id",
+            mutate_text(
+                HOST_SOURCE,
+                "SquaredDistanceDecision{\n            inputs[index].replay_id",
+                "SquaredDistanceDecision{\n            inputs[0U].replay_id",
+                "authoritative distance replay id",
+            ),
         ),
         (
             "non-finite guard removed",

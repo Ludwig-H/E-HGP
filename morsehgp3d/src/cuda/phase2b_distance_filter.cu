@@ -90,18 +90,15 @@ using device::subtract_intervals;
 // Coordinates are stored field-major from witness.x through right.z, so a
 // warp performs one coalesced load per field instead of striding over records.
 __global__ void morsehgp3d_phase2b_squared_distance_filter_kernel(
-    const std::uint64_t* replay_ids,
     const std::uint64_t* coordinate_bits,
-    RawSquaredDistanceFilterOutput* outputs,
+    FilterSign* outputs,
     std::size_t count) {
   const std::size_t index =
       static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
   if (index >= count) {
     return;
   }
-  outputs[index].replay_id = replay_ids[index];
-  outputs[index].sign =
-      filter_squared_distance(coordinate_bits, count, index);
+  outputs[index] = filter_squared_distance(coordinate_bits, count, index);
 }
 
 class CudaFailure final : public std::runtime_error {
@@ -177,7 +174,7 @@ class DeviceBuffer final {
 
 }  // namespace
 
-std::vector<RawSquaredDistanceFilterOutput> filter_squared_distances_on_gpu(
+std::vector<FilterSign> filter_squared_distance_signs_on_gpu(
     std::span<const SquaredDistanceFilterInput> inputs) {
   if (inputs.empty()) {
     return {};
@@ -192,11 +189,9 @@ std::vector<RawSquaredDistanceFilterOutput> filter_squared_distances_on_gpu(
     throw std::length_error("Phase 2B distance batch exceeds the CUDA grid");
   }
 
-  std::vector<std::uint64_t> replay_ids(inputs.size());
   std::vector<std::uint64_t> coordinate_bits(
       inputs.size() * kCoordinateFieldCount);
   for (std::size_t index = 0U; index < inputs.size(); ++index) {
-    replay_ids[index] = inputs[index].replay_id;
     for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
       coordinate_bits[(0U * kAxisCount + axis) * inputs.size() + index] =
           inputs[index].witness_bits[axis];
@@ -208,19 +203,10 @@ std::vector<RawSquaredDistanceFilterOutput> filter_squared_distances_on_gpu(
   }
 
   Stream stream;
-  DeviceBuffer<std::uint64_t> device_replay_ids(replay_ids.size());
   DeviceBuffer<std::uint64_t> device_coordinate_bits(coordinate_bits.size());
-  DeviceBuffer<RawSquaredDistanceFilterOutput> device_outputs(inputs.size());
-  std::vector<RawSquaredDistanceFilterOutput> outputs(inputs.size());
+  DeviceBuffer<FilterSign> device_outputs(inputs.size());
+  std::vector<FilterSign> outputs(inputs.size());
 
-  check_cuda(
-      cudaMemcpyAsync(
-          device_replay_ids.get(),
-          replay_ids.data(),
-          replay_ids.size() * sizeof(std::uint64_t),
-          cudaMemcpyHostToDevice,
-          stream.get()),
-      "cudaMemcpyAsync distance replay identifiers host-to-device");
   check_cuda(
       cudaMemcpyAsync(
           device_coordinate_bits.get(),
@@ -232,7 +218,6 @@ std::vector<RawSquaredDistanceFilterOutput> filter_squared_distances_on_gpu(
   morsehgp3d_phase2b_squared_distance_filter_kernel
       <<<static_cast<unsigned int>(block_count), kThreadsPerBlock, 0U,
          stream.get()>>>(
-          device_replay_ids.get(),
           device_coordinate_bits.get(),
           device_outputs.get(),
           inputs.size());
@@ -241,7 +226,7 @@ std::vector<RawSquaredDistanceFilterOutput> filter_squared_distances_on_gpu(
       cudaMemcpyAsync(
           outputs.data(),
           device_outputs.get(),
-          outputs.size() * sizeof(RawSquaredDistanceFilterOutput),
+          outputs.size() * sizeof(FilterSign),
           cudaMemcpyDeviceToHost,
           stream.get()),
       "cudaMemcpyAsync device-to-host");

@@ -129,18 +129,16 @@ using device::subtract_intervals;
 // All scalar fields are stored field-major. For each numerator, denominator,
 // label point and axis, a warp therefore performs one coalesced load.
 __global__ void morsehgp3d_phase2b_power_bisector_filter_kernel(
-    const std::uint64_t* replay_ids,
     const std::uint64_t* coordinate_bits,
     const std::uint32_t* cardinalities,
-    RawPowerBisectorFilterOutput* outputs,
+    FilterSign* outputs,
     std::size_t count) {
   const std::size_t index =
       static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
   if (index >= count) {
     return;
   }
-  outputs[index].replay_id = replay_ids[index];
-  outputs[index].sign = filter_power_bisector(
+  outputs[index] = filter_power_bisector(
       coordinate_bits, cardinalities, count, index);
 }
 
@@ -231,7 +229,7 @@ class DeviceBuffer final {
 
 }  // namespace
 
-std::vector<RawPowerBisectorFilterOutput> filter_power_bisectors_on_gpu(
+std::vector<FilterSign> filter_power_bisector_signs_on_gpu(
     std::span<const PowerBisectorFilterInput> inputs) {
   if (inputs.empty()) {
     return {};
@@ -247,12 +245,10 @@ std::vector<RawPowerBisectorFilterOutput> filter_power_bisectors_on_gpu(
         "Phase 2B power-bisector batch exceeds the CUDA grid");
   }
 
-  std::vector<std::uint64_t> replay_ids(inputs.size());
   std::vector<std::uint32_t> cardinalities(inputs.size());
   std::vector<std::uint64_t> coordinate_bits(
       inputs.size() * kCoordinateFieldCount, 0U);
   for (std::size_t index = 0U; index < inputs.size(); ++index) {
-    replay_ids[index] = inputs[index].replay_id;
     cardinalities[index] = inputs[index].cardinality;
     for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
       coordinate_bits[axis * inputs.size() + index] =
@@ -288,20 +284,11 @@ std::vector<RawPowerBisectorFilterOutput> filter_power_bisectors_on_gpu(
   }
 
   Stream stream;
-  DeviceBuffer<std::uint64_t> device_replay_ids(replay_ids.size());
   DeviceBuffer<std::uint64_t> device_coordinate_bits(coordinate_bits.size());
   DeviceBuffer<std::uint32_t> device_cardinalities(cardinalities.size());
-  DeviceBuffer<RawPowerBisectorFilterOutput> device_outputs(inputs.size());
-  std::vector<RawPowerBisectorFilterOutput> outputs(inputs.size());
+  DeviceBuffer<FilterSign> device_outputs(inputs.size());
+  std::vector<FilterSign> outputs(inputs.size());
 
-  check_cuda(
-      cudaMemcpyAsync(
-          device_replay_ids.get(),
-          replay_ids.data(),
-          replay_ids.size() * sizeof(std::uint64_t),
-          cudaMemcpyHostToDevice,
-          stream.get()),
-      "cudaMemcpyAsync power-bisector replay identifiers host-to-device");
   check_cuda(
       cudaMemcpyAsync(
           device_coordinate_bits.get(),
@@ -321,7 +308,6 @@ std::vector<RawPowerBisectorFilterOutput> filter_power_bisectors_on_gpu(
   morsehgp3d_phase2b_power_bisector_filter_kernel
       <<<static_cast<unsigned int>(block_count), kThreadsPerBlock, 0U,
          stream.get()>>>(
-          device_replay_ids.get(),
           device_coordinate_bits.get(),
           device_cardinalities.get(),
           device_outputs.get(),
@@ -331,7 +317,7 @@ std::vector<RawPowerBisectorFilterOutput> filter_power_bisectors_on_gpu(
       cudaMemcpyAsync(
           outputs.data(),
           device_outputs.get(),
-          outputs.size() * sizeof(RawPowerBisectorFilterOutput),
+          outputs.size() * sizeof(FilterSign),
           cudaMemcpyDeviceToHost,
           stream.get()),
       "cudaMemcpyAsync power-bisector results device-to-host");

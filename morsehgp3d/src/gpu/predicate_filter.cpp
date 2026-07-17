@@ -324,8 +324,8 @@ void record_cpu_stage(
     std::vector<SquaredDistanceFilterInput> inputs,
     SquaredDistanceBatchOptions options) {
   validate_inputs(inputs);
-  const std::vector<detail::RawSquaredDistanceFilterOutput> gpu_outputs =
-      detail::filter_squared_distances_on_gpu(inputs);
+  const std::vector<FilterSign> gpu_outputs =
+      detail::filter_squared_distance_signs_on_gpu(inputs);
   if (gpu_outputs.size() != inputs.size()) {
     throw std::runtime_error("the Phase 2B GPU output cardinality changed");
   }
@@ -337,19 +337,15 @@ void record_cpu_stage(
   unknown_indices.reserve(inputs.size());
 
   for (std::size_t index = 0U; index < inputs.size(); ++index) {
-    const detail::RawSquaredDistanceFilterOutput& output = gpu_outputs[index];
-    if (output.replay_id != inputs[index].replay_id) {
-      throw std::runtime_error(
-          "the Phase 2B GPU changed replay identifier ordering");
-    }
-    switch (output.sign) {
+    const FilterSign output = gpu_outputs[index];
+    switch (output) {
       case FilterSign::negative:
       case FilterSign::positive:
         ++result.counters.gpu_fp64_certified;
         result.decisions[index] = SquaredDistanceDecision{
-            output.replay_id,
-            output.sign,
-            predicate_sign_from_gpu(output.sign),
+            inputs[index].replay_id,
+            output,
+            predicate_sign_from_gpu(output),
             CertificationStage::fp64_filtered};
         break;
       case FilterSign::unknown:
@@ -373,7 +369,7 @@ void record_cpu_stage(
 
   if (options.audit_gpu_signs) {
     for (std::size_t index = 0U; index < inputs.size(); ++index) {
-      if (gpu_outputs[index].sign == FilterSign::unknown) {
+      if (gpu_outputs[index] == FilterSign::unknown) {
         continue;
       }
       const PredicateDecision oracle = cpu_decision(
@@ -406,8 +402,8 @@ void record_cpu_stage(
     Orientation3DBatchOptions options) {
   validate_inputs(
       std::span<const Orientation3DFilterInput>{inputs.data(), inputs.size()});
-  const std::vector<detail::RawOrientation3DFilterOutput> gpu_outputs =
-      detail::filter_orientations_3d_on_gpu(inputs);
+  const std::vector<FilterSign> gpu_outputs =
+      detail::filter_orientation_3d_signs_on_gpu(inputs);
   if (gpu_outputs.size() != inputs.size()) {
     throw std::runtime_error(
         "the Phase 2B orientation GPU output cardinality changed");
@@ -420,19 +416,15 @@ void record_cpu_stage(
   unknown_indices.reserve(inputs.size());
 
   for (std::size_t index = 0U; index < inputs.size(); ++index) {
-    const detail::RawOrientation3DFilterOutput& output = gpu_outputs[index];
-    if (output.replay_id != inputs[index].replay_id) {
-      throw std::runtime_error(
-          "the Phase 2B orientation GPU changed replay identifier ordering");
-    }
-    switch (output.sign) {
+    const FilterSign output = gpu_outputs[index];
+    switch (output) {
       case FilterSign::negative:
       case FilterSign::positive:
         ++result.counters.gpu_fp64_certified;
         result.decisions[index] = Orientation3DDecision{
-            output.replay_id,
-            output.sign,
-            predicate_sign_from_gpu(output.sign),
+            inputs[index].replay_id,
+            output,
+            predicate_sign_from_gpu(output),
             CertificationStage::fp64_filtered};
         break;
       case FilterSign::unknown:
@@ -457,7 +449,7 @@ void record_cpu_stage(
 
   if (options.audit_gpu_signs) {
     for (std::size_t index = 0U; index < inputs.size(); ++index) {
-      if (gpu_outputs[index].sign == FilterSign::unknown) {
+      if (gpu_outputs[index] == FilterSign::unknown) {
         continue;
       }
       const PredicateDecision oracle = cpu_decision(
@@ -491,8 +483,8 @@ void record_cpu_stage(
     PowerBisectorBatchOptions options) {
   validate_inputs(
       std::span<const PowerBisectorFilterInput>{inputs.data(), inputs.size()});
-  const std::vector<detail::RawPowerBisectorFilterOutput> gpu_outputs =
-      detail::filter_power_bisectors_on_gpu(inputs);
+  const std::vector<FilterSign> gpu_outputs =
+      detail::filter_power_bisector_signs_on_gpu(inputs);
   if (gpu_outputs.size() != inputs.size()) {
     throw std::runtime_error(
         "the Phase 2B power-bisector GPU output cardinality changed");
@@ -505,19 +497,15 @@ void record_cpu_stage(
   unknown_indices.reserve(inputs.size());
 
   for (std::size_t index = 0U; index < inputs.size(); ++index) {
-    const detail::RawPowerBisectorFilterOutput& output = gpu_outputs[index];
-    if (output.replay_id != inputs[index].replay_id) {
-      throw std::runtime_error(
-          "the Phase 2B power-bisector GPU changed replay identifier ordering");
-    }
-    switch (output.sign) {
+    const FilterSign output = gpu_outputs[index];
+    switch (output) {
       case FilterSign::negative:
       case FilterSign::positive:
         ++result.counters.gpu_fp64_certified;
         result.decisions[index] = PowerBisectorDecision{
-            output.replay_id,
-            output.sign,
-            predicate_sign_from_gpu(output.sign),
+            inputs[index].replay_id,
+            output,
+            predicate_sign_from_gpu(output),
             CertificationStage::fp64_filtered};
         break;
       case FilterSign::unknown:
@@ -542,7 +530,7 @@ void record_cpu_stage(
 
   if (options.audit_gpu_signs) {
     for (std::size_t index = 0U; index < inputs.size(); ++index) {
-      if (gpu_outputs[index].sign == FilterSign::unknown) {
+      if (gpu_outputs[index] == FilterSign::unknown) {
         continue;
       }
       const PredicateDecision oracle = cpu_decision(inputs[index]);
