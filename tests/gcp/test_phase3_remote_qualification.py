@@ -1012,13 +1012,20 @@ if should_block:
     )
     descendant_state = Path(os.environ["FAKE_DESCENDANT_PID_STATE"])
     deadline = time.monotonic() + 3
-    while time.monotonic() < deadline and not descendant_state.exists():
+    descendant_pid = ""
+    while time.monotonic() < deadline:
+        try:
+            descendant_pid = descendant_state.read_text(encoding="ascii").strip()
+        except FileNotFoundError:
+            descendant_pid = ""
+        if descendant_pid.isdecimal() and int(descendant_pid) > 0:
+            break
         if process.poll() is not None:
             raise SystemExit(process.returncode)
         time.sleep(0.02)
-    if not descendant_state.exists():
+    else:
         process.kill()
-        raise SystemExit("blocked fake command did not create its descendant")
+        raise SystemExit("blocked fake command did not publish its descendant PID")
     if foreground:
         process.terminate()
     else:
@@ -1358,12 +1365,17 @@ printf 'fake Blackwell preflight passed\\n'
 
     def assert_recorded_pid_stopped(self, state_path: Path) -> None:
         self.assertTrue(state_path.is_file())
-        pid = int(state_path.read_text(encoding="ascii"))
+        recorded_pid = state_path.read_text(encoding="ascii").strip()
+        self.assertRegex(recorded_pid, r"^[1-9][0-9]*$")
+        pid = int(recorded_pid)
         for _ in range(100):
             stat_path = Path(f"/proc/{pid}/stat")
             if not stat_path.exists():
                 return
-            fields = stat_path.read_text(encoding="ascii").split()
+            try:
+                fields = stat_path.read_text(encoding="ascii").split()
+            except FileNotFoundError:
+                return
             if len(fields) >= 3 and fields[2] == "Z":
                 return
             time.sleep(0.01)
