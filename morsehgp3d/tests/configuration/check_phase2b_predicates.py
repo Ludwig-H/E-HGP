@@ -21,6 +21,10 @@ ORIENTATION_INTERNAL_HEADER = Path(
     "src/cuda/phase2b_orientation_filter_internal.hpp"
 )
 ORIENTATION_CUDA_SOURCE = Path("src/cuda/phase2b_orientation_filter.cu")
+POWER_INTERNAL_HEADER = Path(
+    "src/cuda/phase2b_power_bisector_filter_internal.hpp"
+)
+POWER_CUDA_SOURCE = Path("src/cuda/phase2b_power_bisector_filter.cu")
 HOST_SOURCE = Path("src/gpu/predicate_filter.cpp")
 CLI_SOURCE = Path("src/tools/gpu_predicate_replay.cpp")
 CMAKE_SOURCE = Path("CMakeLists.txt")
@@ -89,6 +93,8 @@ def load_contract(project: Path) -> ContractFiles:
         CUDA_SOURCE,
         ORIENTATION_INTERNAL_HEADER,
         ORIENTATION_CUDA_SOURCE,
+        POWER_INTERNAL_HEADER,
+        POWER_CUDA_SOURCE,
         HOST_SOURCE,
         CLI_SOURCE,
         CMAKE_SOURCE,
@@ -236,9 +242,56 @@ def validate_binary64_replay_records(header: str) -> None:
         )
 
 
+def validate_power_replay_record(header: str) -> None:
+    bodies = dict(struct_bodies(header))
+    point = bodies.get("PowerBisectorLabelPoint")
+    require(point is not None, "the public header has no PowerBisectorLabelPoint")
+    require(
+        re.search(r"std::uint32_t\s+point_id\b", point) is not None,
+        "PowerBisectorLabelPoint.point_id must be uint32",
+    )
+    require(
+        re.search(
+            r"std::array\s*<\s*std::uint64_t\s*,\s*3\s*>\s*"
+            r"coordinate_bits\b",
+            point,
+        )
+        is not None,
+        "PowerBisectorLabelPoint must preserve three binary64 coordinate words",
+    )
+    body = bodies.get("PowerBisectorFilterInput")
+    require(body is not None, "the public header has no PowerBisectorFilterInput")
+    for pattern, message in (
+        (r"std::uint64_t\s+replay_id\b", "power replay_id must be uint64"),
+        (
+            r"std::array\s*<\s*std::uint64_t\s*,\s*3\s*>\s*"
+            r"witness_numerator_bits\b",
+            "power witness must preserve three numerator words",
+        ),
+        (
+            r"std::uint64_t\s+witness_denominator_bits\b",
+            "power witness must preserve its denominator word",
+        ),
+        (r"std::uint32_t\s+cardinality\b", "power cardinality must be uint32"),
+    ):
+        require(re.search(pattern, body) is not None, message)
+    for field in ("r_points", "q_points"):
+        require(
+            re.search(
+                rf"std::array\s*<\s*PowerBisectorLabelPoint\s*,\s*"
+                rf"maximum_power_bisector_cardinality\s*>\s*{field}\b",
+                body,
+                flags=re.DOTALL,
+            )
+            is not None,
+            f"PowerBisectorFilterInput.{field} is not bounded by cardinality ten",
+        )
+
+
 def validate_public_header(header: str) -> None:
     validate_sign_enum(header)
     validate_binary64_replay_records(header)
+    validate_power_replay_record(header)
     require(
         re.search(r"std::future\s*<", without_comments(header)) is not None,
         "the public GPU predicate API does not expose asynchronous completion",
@@ -380,6 +433,8 @@ def validate_cuda_sources(
     distance_internal: str,
     orientation: str,
     orientation_internal: str,
+    power: str,
+    power_internal: str,
     public: str,
 ) -> None:
     validate_filter_cuda_source(
@@ -437,6 +492,69 @@ def validate_cuda_sources(
         is not None,
         "orientation_3d coordinates are not packed field-major for coalesced loads",
     )
+    validate_filter_cuda_source(
+        power,
+        power_internal,
+        public,
+        label="power-bisector",
+        kernel_pattern=(
+            r"__global__\s+(?:static\s+)?void\s+"
+            r"[A-Za-z_]\w*power_bisector[A-Za-z_0-9]*\s*\("
+        ),
+        interval_name="homogeneous_value",
+    )
+    power_clean = without_comments(power)
+    power_body = function_body(power_clean, "filter_power_bisector")
+    require(
+        re.search(
+            r"q_minus_r\s*=\s*subtract_intervals\s*\(\s*q\s*,\s*r\s*\)",
+            power_body,
+            flags=re.DOTALL,
+        )
+        is not None,
+        "power-bisector must use q-r to preserve the public sign convention",
+    )
+    require(
+        re.search(
+            r"a_minus_dr\s*=\s*subtract_intervals\s*\(\s*numerator\s*,\s*"
+            r"multiply_intervals\s*\(\s*denominator\s*,\s*r\s*\)\s*\)",
+            power_body,
+            flags=re.DOTALL,
+        )
+        is not None
+        and re.search(
+            r"a_minus_dq\s*=\s*subtract_intervals\s*\(\s*numerator\s*,\s*"
+            r"multiply_intervals\s*\(\s*denominator\s*,\s*q\s*\)\s*\)",
+            power_body,
+            flags=re.DOTALL,
+        )
+        is not None,
+        "power-bisector no longer evaluates A-D*r and A-D*q",
+    )
+    require(
+        re.search(
+            r"paired_sum\s*=\s*add_intervals\s*\(\s*a_minus_dr\s*,\s*"
+            r"a_minus_dq\s*\)",
+            power_body,
+            flags=re.DOTALL,
+        )
+        is not None
+        and re.search(
+            r"term\s*=\s*multiply_intervals\s*\(\s*q_minus_r\s*,\s*"
+            r"paired_sum\s*\)",
+            power_body,
+            flags=re.DOTALL,
+        )
+        is not None,
+        "power-bisector paired factorization changed",
+    )
+    require(
+        "axis_value" in power_body
+        and "cardinalities[index]" in power_body
+        and re.search(r"field\s*\*\s*count\s*\+\s*index", power_clean)
+        is not None,
+        "power-bisector does not use cardinality-bounded axis subtotals and SoA loads",
+    )
 
 
 def validate_host_source(
@@ -444,15 +562,18 @@ def validate_host_source(
     header: str,
     distance_internal: str,
     orientation_internal: str,
+    power_internal: str,
 ) -> None:
     clean = without_comments(host)
     require(PUBLIC_HEADER.name in clean, "the host path does not include its public API")
     require(
-        INTERNAL_HEADER.name in clean and ORIENTATION_INTERNAL_HEADER.name in clean,
-        "the host path does not include both private CUDA launch contracts",
+        INTERNAL_HEADER.name in clean
+        and ORIENTATION_INTERNAL_HEADER.name in clean
+        and POWER_INTERNAL_HEADER.name in clean,
+        "the host path does not include all private CUDA launch contracts",
     )
     require(
-        len(re.findall(r"std::launch::async", clean)) >= 4
+        len(re.findall(r"std::launch::async", clean)) >= 6
         and re.search(
             r"fallback_future\s*=\s*std::async\s*\(\s*"
             r"std::launch::async",
@@ -470,6 +591,19 @@ def validate_host_source(
     require(
         "decide_orientation_3d" in clean,
         "the orientation host fallback does not call the Phase 2A CPU predicate",
+    )
+    require(
+        "decide_power_bisector_side" in clean
+        and "power_witness" in clean
+        and "ExactRational::from_binary64_bits" in clean,
+        "the power-bisector host fallback does not reconstruct the exact rational witness",
+    )
+    require(
+        "denominator.sign() <= 0" in clean
+        and "denominator.denominator() != 1" in clean
+        and "common_divisor != 1" in clean
+        and "maximum_power_label_cardinality" in clean,
+        "the host path does not enforce the bounded canonical integral power witness",
     )
     require(
         clean.count("PredicateFilterPolicy::allow_adaptive") >= 2,
@@ -536,6 +670,11 @@ def validate_host_source(
         and "filter_orientations_3d_on_gpu" in clean,
         "the orientation asynchronous API is detached from the CUDA launcher",
     )
+    require(
+        "filter_power_bisectors_on_gpu" in power_internal
+        and "filter_power_bisectors_on_gpu" in clean,
+        "the power-bisector asynchronous API is detached from the CUDA launcher",
+    )
 
 
 def validate_cli(cli: str) -> None:
@@ -545,6 +684,7 @@ def validate_cli(cli: str) -> None:
         "binary64",
         "compare_squared_distances",
         "orientation_3d",
+        "power_bisector_side",
         "morsehgp3d",
     ):
         require(token in clean, f"GPU predicate replay CLI is missing {token}")
@@ -563,7 +703,12 @@ def target_body(cmake: str, command: str, target: str) -> str:
 def validate_cmake(cmake: str, cuda_module: str) -> None:
     library_body = target_body(cmake, "add_library", LIBRARY_TARGET)
     replay_body = target_body(cmake, "add_executable", REPLAY_TARGET)
-    for source in (CUDA_SOURCE, ORIENTATION_CUDA_SOURCE, HOST_SOURCE):
+    for source in (
+        CUDA_SOURCE,
+        ORIENTATION_CUDA_SOURCE,
+        POWER_CUDA_SOURCE,
+        HOST_SOURCE,
+    ):
         require(
             source.as_posix() in library_body,
             f"{LIBRARY_TARGET} does not compile {source}",
@@ -633,6 +778,8 @@ def validate_contract(files: ContractFiles) -> None:
         files.texts[INTERNAL_HEADER],
         files.texts[ORIENTATION_CUDA_SOURCE],
         files.texts[ORIENTATION_INTERNAL_HEADER],
+        files.texts[POWER_CUDA_SOURCE],
+        files.texts[POWER_INTERNAL_HEADER],
         files.texts[PUBLIC_HEADER],
     )
     validate_host_source(
@@ -640,6 +787,7 @@ def validate_contract(files: ContractFiles) -> None:
         files.texts[PUBLIC_HEADER],
         files.texts[INTERNAL_HEADER],
         files.texts[ORIENTATION_INTERNAL_HEADER],
+        files.texts[POWER_INTERNAL_HEADER],
     )
     validate_cli(files.texts[CLI_SOURCE])
     validate_cmake(files.texts[CMAKE_SOURCE], files.texts[CUDA_MODULE])
@@ -916,6 +1064,78 @@ def validate_negative_mutations(files: ContractFiles) -> int:
             ),
         ),
         (
+            "power-bisector subtraction order inverted",
+            mutate_text(
+                POWER_CUDA_SOURCE,
+                "subtract_intervals(q, r)",
+                "subtract_intervals(r, q)",
+                "power q-r order",
+            ),
+        ),
+        (
+            "power-bisector paired sum changed to difference",
+            mutate_text(
+                POWER_CUDA_SOURCE,
+                "add_intervals(a_minus_dr, a_minus_dq)",
+                "subtract_intervals(a_minus_dr, a_minus_dq)",
+                "power paired sum",
+            ),
+        ),
+        (
+            "power-bisector denominator factor removed",
+            mutate_text(
+                POWER_CUDA_SOURCE,
+                "multiply_intervals(denominator, r)",
+                "multiply_intervals(point_interval(0U), r)",
+                "power denominator factor",
+            ),
+        ),
+        (
+            "power-bisector positive certification accepts zero",
+            mutate_text(
+                POWER_CUDA_SOURCE,
+                "homogeneous_value.lower > 0.0",
+                "homogeneous_value.lower >= 0.0",
+                "strict positive power sign",
+            ),
+        ),
+        (
+            "power-bisector negative certification accepts zero",
+            mutate_text(
+                POWER_CUDA_SOURCE,
+                "homogeneous_value.upper < 0.0",
+                "homogeneous_value.upper <= 0.0",
+                "strict negative power sign",
+            ),
+        ),
+        (
+            "power-bisector positive denominator guard removed",
+            mutate_text(
+                HOST_SOURCE,
+                "denominator.sign() <= 0",
+                "denominator.sign() < 0",
+                "positive power denominator",
+            ),
+        ),
+        (
+            "power-bisector canonical witness guard removed",
+            mutate_text(
+                HOST_SOURCE,
+                "common_divisor != 1",
+                "false",
+                "canonical power witness",
+            ),
+        ),
+        (
+            "power-bisector CUDA source removed",
+            mutate_text(
+                CMAKE_SOURCE,
+                "src/cuda/phase2b_power_bisector_filter.cu",
+                "src/cuda/removed_power_bisector_filter.cu",
+                "power CUDA source",
+            ),
+        ),
+        (
             "positive-negative multiplication endpoint changed",
             mutate_text(
                 INTERVAL_HEADER,
@@ -960,9 +1180,13 @@ def main(arguments: list[str]) -> int:
                 "cuda_runtime_executed": False,
                 "cuda_target": LIBRARY_TARGET,
                 "negative_mutations": negative_mutations,
-                "predicates": ["compare_squared_distances", "orientation_3d"],
+                "predicates": [
+                    "compare_squared_distances",
+                    "orientation_3d",
+                    "power_bisector_side",
+                ],
                 "replay_target": REPLAY_TARGET,
-                "schema_version": 2,
+                "schema_version": 3,
             },
             separators=(",", ":"),
             sort_keys=True,

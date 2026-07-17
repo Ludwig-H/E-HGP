@@ -56,7 +56,14 @@ PREDICATES = {
         20_000_000_000,
         "morsehgp3d.phase2b.orientation_3d_filter.v1",
     ),
+    "power": PredicateConfiguration(
+        "power_bisector_side",
+        30_000_000_000,
+        "morsehgp3d.phase2b.power_bisector_side_filter.v1",
+    ),
 }
+
+POWER_WITNESS_DENOMINATORS = (1, 2, 3, 5, 7, 8)
 
 
 def fail(message: str) -> NoReturn:
@@ -134,15 +141,105 @@ def orientation_template(index: int) -> bytes:
     return f"orientation_3d {' '.join(words)}".encode("ascii")
 
 
+def power_template(index: int) -> bytes:
+    pattern = index % TEMPLATE_COUNT
+    cardinality = 1 + pattern % 10
+    denominator = POWER_WITNESS_DENOMINATORS[
+        (pattern // 10) % len(POWER_WITNESS_DENOMINATORS)
+    ]
+    center = (
+        (pattern * 23) % 127 - 63,
+        (pattern * 41) % 113 - 56,
+        (pattern * 59) % 109 - 54,
+    )
+    # A_x is coprime with D for D > 1, so the serialized ExactRational3 is
+    # already reduced. The resulting witness is center + (1 / D, 0, 0).
+    witness_numerators = (
+        denominator * center[0] + (1 if denominator > 1 else 0),
+        denominator * center[1],
+        denominator * center[2],
+    )
+    require(
+        math.gcd(
+            denominator,
+            math.gcd(
+                abs(witness_numerators[0]),
+                math.gcd(
+                    abs(witness_numerators[1]),
+                    abs(witness_numerators[2]),
+                ),
+            ),
+        )
+        == 1,
+        "power-bisector witness is not reduced",
+    )
+
+    common_points = tuple(
+        (
+            center[0] + slot + 2,
+            center[1] + (3 * slot) % 11 - 5,
+            center[2] + (5 * slot) % 13 - 6,
+        )
+        for slot in range(cardinality - 1)
+    )
+    near = center
+    far = (center[0] + 32, center[1] + 7, center[2] - 5)
+    points = (*common_points, near, far)
+    common_ids = tuple(range(cardinality - 1))
+    near_ids = (*common_ids, cardinality - 1)
+    far_ids = (*common_ids, cardinality)
+    r_ids, q_ids = (near_ids, far_ids) if index % 2 == 0 else (far_ids, near_ids)
+
+    def homogeneous_cost_difference() -> int:
+        coordinate_delta = tuple(
+            sum(points[point_id][axis] for point_id in r_ids)
+            - sum(points[point_id][axis] for point_id in q_ids)
+            for axis in range(3)
+        )
+        norm_delta = sum(
+            sum(coordinate * coordinate for coordinate in points[point_id])
+            for point_id in r_ids
+        ) - sum(
+            sum(coordinate * coordinate for coordinate in points[point_id])
+            for point_id in q_ids
+        )
+        return denominator * norm_delta - 2 * sum(
+            witness_numerators[axis] * coordinate_delta[axis] for axis in range(3)
+        )
+
+    homogeneous_value = homogeneous_cost_difference()
+    require(
+        homogeneous_value < 0 if index % 2 == 0 else homogeneous_value > 0,
+        "power-bisector template lost its alternating strict sign",
+    )
+    words = tuple(word for point in points for word in point_words(point))
+    command = " ".join(
+        (
+            "power_bisector_side",
+            *(str(value) for value in witness_numerators),
+            str(denominator),
+            str(len(points)),
+            *words,
+            str(cardinality),
+            *(str(point_id) for point_id in r_ids),
+            str(cardinality),
+            *(str(point_id) for point_id in q_ids),
+        )
+    )
+    return command.encode("ascii")
+
+
 def generate_batch(predicate: str, case_count: int) -> bytes:
     require(
         0 < case_count <= MAXIMUM_CASE_COUNT,
         "benchmark case count is outside the runner batch bound",
     )
     configuration = PREDICATES[predicate]
-    template_factory = (
-        distance_template if predicate == "distance" else orientation_template
-    )
+    template_factory = {
+        "distance": distance_template,
+        "orientation": orientation_template,
+        "power": power_template,
+    }[predicate]
     templates = tuple(template_factory(index) for index in range(TEMPLATE_COUNT))
     output = io.BytesIO()
     for index in range(case_count):
@@ -354,8 +451,8 @@ def main(arguments: Sequence[str] | None = None) -> int:
     parser.add_argument("--repeats", type=positive_integer, default=3)
     parser.add_argument(
         "--predicate",
-        choices=("distance", "orientation", "both"),
-        default="both",
+        choices=("distance", "orientation", "power", "both", "all"),
+        default="all",
     )
     parser.add_argument("--timeout-seconds", type=positive_float, default=120.0)
     options = parser.parse_args(arguments)
@@ -364,11 +461,12 @@ def main(arguments: Sequence[str] | None = None) -> int:
     if not os.access(options.runner, os.X_OK):
         parser.error(f"GPU predicate runner is not executable: {options.runner}")
 
-    selected = (
-        ("distance", "orientation")
-        if options.predicate == "both"
-        else (options.predicate,)
-    )
+    if options.predicate == "all":
+        selected = ("distance", "orientation", "power")
+    elif options.predicate == "both":
+        selected = ("distance", "orientation")
+    else:
+        selected = (options.predicate,)
     try:
         # Input construction is deliberately complete before the unmeasured
         # probe, and each immutable batch is reused for every measured run.

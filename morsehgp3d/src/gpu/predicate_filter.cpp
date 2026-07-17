@@ -1,10 +1,12 @@
 #include "morsehgp3d/gpu/predicate_filter.hpp"
 
 #include "morsehgp3d/exact/binary64.hpp"
+#include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
 #include "phase2b_distance_filter_internal.hpp"
 #include "phase2b_orientation_filter_internal.hpp"
+#include "phase2b_power_bisector_filter_internal.hpp"
 
 #include <array>
 #include <cstddef>
@@ -22,9 +24,16 @@ namespace {
 
 using exact::CertifiedPoint3;
 using exact::CertificationStage;
+using exact::ExactLabelMoments;
+using exact::ExactRational;
+using exact::ExactRational3;
 using exact::PredicateDecision;
 using exact::PredicateFilterPolicy;
 using exact::PredicateSign;
+
+static_assert(
+    maximum_power_bisector_cardinality ==
+    exact::maximum_power_label_cardinality);
 
 struct IndexedDecision {
   std::size_t index{0};
@@ -73,9 +82,140 @@ void validate_inputs(std::span<const Orientation3DFilterInput> inputs) {
   }
 }
 
+[[nodiscard]] bool same_canonical_point(
+    const std::array<std::uint64_t, 3>& left,
+    const std::array<std::uint64_t, 3>& right) {
+  for (std::size_t axis = 0U; axis < left.size(); ++axis) {
+    if (exact::canonicalize_binary64_bits(left[axis]) !=
+        exact::canonicalize_binary64_bits(right[axis])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void require_canonical_power_label(
+    const std::array<PowerBisectorLabelPoint,
+                     maximum_power_bisector_cardinality>& points,
+    std::size_t cardinality,
+    const char* label) {
+  bool has_previous = false;
+  std::uint32_t previous = 0U;
+  for (std::size_t index = 0U; index < cardinality; ++index) {
+    const PowerBisectorLabelPoint& point = points[index];
+    if (has_previous && point.point_id <= previous) {
+      throw std::invalid_argument(
+          std::string{"Phase 2B power-bisector "} + label +
+          " point identifiers must be sorted and unique");
+    }
+    require_finite_words(point.coordinate_bits, label);
+    previous = point.point_id;
+    has_previous = true;
+  }
+  for (std::size_t index = cardinality; index < points.size(); ++index) {
+    const PowerBisectorLabelPoint& point = points[index];
+    if (point.point_id != 0U ||
+        point.coordinate_bits != std::array<std::uint64_t, 3>{}) {
+      throw std::invalid_argument(
+          std::string{"Phase 2B power-bisector "} + label +
+          " trailing label storage must be zero initialized");
+    }
+  }
+}
+
+void validate_inputs(std::span<const PowerBisectorFilterInput> inputs) {
+  std::unordered_set<std::uint64_t> replay_ids;
+  replay_ids.reserve(inputs.size());
+  for (const PowerBisectorFilterInput& input : inputs) {
+    if (!replay_ids.insert(input.replay_id).second) {
+      throw std::invalid_argument(
+          "Phase 2B replay identifiers must be unique within a batch");
+    }
+    const std::size_t cardinality =
+        static_cast<std::size_t>(input.cardinality);
+    if (cardinality == 0U ||
+        cardinality > maximum_power_bisector_cardinality) {
+      throw std::invalid_argument(
+          "Phase 2B power-bisector cardinality must be between one and ten");
+    }
+    require_finite_words(
+        input.witness_numerator_bits, "power-bisector witness numerator");
+    std::array<ExactRational, 3> numerators{};
+    for (std::size_t axis = 0U; axis < numerators.size(); ++axis) {
+      numerators[axis] = ExactRational::from_binary64_bits(
+          input.witness_numerator_bits[axis]);
+      if (numerators[axis].denominator() != 1) {
+        throw std::invalid_argument(
+            "Phase 2B power-bisector witness numerators must be exact binary64 integers");
+      }
+    }
+    if (!exact::is_finite_binary64_bits(input.witness_denominator_bits)) {
+      throw std::invalid_argument(
+          "Phase 2B power-bisector denominator must be finite and strictly positive");
+    }
+    const ExactRational denominator = ExactRational::from_binary64_bits(
+        input.witness_denominator_bits);
+    if (denominator.sign() <= 0 || denominator.denominator() != 1) {
+      throw std::invalid_argument(
+          "Phase 2B power-bisector denominator must be a strictly positive binary64 integer");
+    }
+    exact::BigInt common_divisor = denominator.numerator();
+    for (const ExactRational& numerator : numerators) {
+      common_divisor = exact::greatest_common_divisor(
+          std::move(common_divisor), numerator.numerator());
+    }
+    if (common_divisor != 1) {
+      throw std::invalid_argument(
+          "Phase 2B power-bisector homogeneous witness must be reduced canonically");
+    }
+    require_canonical_power_label(input.r_points, cardinality, "R label");
+    require_canonical_power_label(input.q_points, cardinality, "Q label");
+    for (std::size_t r_index = 0U; r_index < cardinality; ++r_index) {
+      for (std::size_t q_index = 0U; q_index < cardinality; ++q_index) {
+        if (input.r_points[r_index].point_id ==
+                input.q_points[q_index].point_id &&
+            !same_canonical_point(
+                input.r_points[r_index].coordinate_bits,
+                input.q_points[q_index].coordinate_bits)) {
+          throw std::invalid_argument(
+              "Phase 2B power-bisector reused a point identifier with different coordinates");
+        }
+      }
+    }
+  }
+}
+
 [[nodiscard]] CertifiedPoint3 point_from_words(
     const std::array<std::uint64_t, 3>& words) {
   return CertifiedPoint3::from_binary64_bits(words);
+}
+
+[[nodiscard]] ExactRational3 power_witness(
+    const PowerBisectorFilterInput& input) {
+  const ExactRational denominator = ExactRational::from_binary64_bits(
+      input.witness_denominator_bits);
+  std::array<ExactRational, 3> coordinates{};
+  for (std::size_t axis = 0U; axis < coordinates.size(); ++axis) {
+    coordinates[axis] =
+        ExactRational::from_binary64_bits(input.witness_numerator_bits[axis]) /
+        denominator;
+  }
+  return ExactRational3{coordinates};
+}
+
+[[nodiscard]] ExactLabelMoments power_label(
+    const std::array<PowerBisectorLabelPoint,
+                     maximum_power_bisector_cardinality>& points,
+    std::size_t cardinality) {
+  std::vector<CertifiedPoint3> point_table;
+  std::vector<std::uint32_t> point_ids;
+  point_table.reserve(cardinality);
+  point_ids.reserve(cardinality);
+  for (std::size_t index = 0U; index < cardinality; ++index) {
+    point_table.push_back(point_from_words(points[index].coordinate_bits));
+    point_ids.push_back(static_cast<std::uint32_t>(index));
+  }
+  return ExactLabelMoments::from_canonical_ids(point_ids, point_table);
 }
 
 [[nodiscard]] PredicateDecision cpu_decision(
@@ -87,6 +227,16 @@ void validate_inputs(std::span<const Orientation3DFilterInput> inputs) {
       point_from_words(input.right_bits),
       nullptr,
       policy);
+}
+
+[[nodiscard]] PredicateDecision cpu_decision(
+    const PowerBisectorFilterInput& input) {
+  const std::size_t cardinality =
+      static_cast<std::size_t>(input.cardinality);
+  return exact::decide_power_bisector_side(
+      power_witness(input),
+      power_label(input.r_points, cardinality),
+      power_label(input.q_points, cardinality));
 }
 
 [[nodiscard]] PredicateDecision cpu_decision(
@@ -142,6 +292,17 @@ void record_cpu_stage(
     decisions.push_back(IndexedDecision{
         index,
         cpu_decision(inputs[index], PredicateFilterPolicy::allow_adaptive)});
+  }
+  return decisions;
+}
+
+[[nodiscard]] std::vector<IndexedDecision> resolve_unknowns(
+    const std::vector<PowerBisectorFilterInput>& inputs,
+    const std::vector<std::size_t>& unknown_indices) {
+  std::vector<IndexedDecision> decisions;
+  decisions.reserve(unknown_indices.size());
+  for (const std::size_t index : unknown_indices) {
+    decisions.push_back(IndexedDecision{index, cpu_decision(inputs[index])});
   }
   return decisions;
 }
@@ -325,6 +486,90 @@ void record_cpu_stage(
   return result;
 }
 
+[[nodiscard]] PowerBisectorBatchResult decide_batch(
+    std::vector<PowerBisectorFilterInput> inputs,
+    PowerBisectorBatchOptions options) {
+  validate_inputs(
+      std::span<const PowerBisectorFilterInput>{inputs.data(), inputs.size()});
+  const std::vector<detail::RawPowerBisectorFilterOutput> gpu_outputs =
+      detail::filter_power_bisectors_on_gpu(inputs);
+  if (gpu_outputs.size() != inputs.size()) {
+    throw std::runtime_error(
+        "the Phase 2B power-bisector GPU output cardinality changed");
+  }
+
+  PowerBisectorBatchResult result;
+  result.decisions.resize(inputs.size());
+  result.counters.gpu_inputs = static_cast<std::uint64_t>(inputs.size());
+  std::vector<std::size_t> unknown_indices;
+  unknown_indices.reserve(inputs.size());
+
+  for (std::size_t index = 0U; index < inputs.size(); ++index) {
+    const detail::RawPowerBisectorFilterOutput& output = gpu_outputs[index];
+    if (output.replay_id != inputs[index].replay_id) {
+      throw std::runtime_error(
+          "the Phase 2B power-bisector GPU changed replay identifier ordering");
+    }
+    switch (output.sign) {
+      case FilterSign::negative:
+      case FilterSign::positive:
+        ++result.counters.gpu_fp64_certified;
+        result.decisions[index] = PowerBisectorDecision{
+            output.replay_id,
+            output.sign,
+            predicate_sign_from_gpu(output.sign),
+            CertificationStage::fp64_filtered};
+        break;
+      case FilterSign::unknown:
+        ++result.counters.gpu_unknown_forwarded;
+        unknown_indices.push_back(index);
+        break;
+      default:
+        throw std::runtime_error(
+            "the Phase 2B power-bisector GPU returned an invalid tri-state");
+    }
+  }
+
+  std::future<std::vector<IndexedDecision>> fallback_future;
+  if (!unknown_indices.empty()) {
+    ++result.counters.async_fallback_batches;
+    fallback_future = std::async(
+        std::launch::async,
+        [&inputs, indices = unknown_indices] {
+          return resolve_unknowns(inputs, indices);
+        });
+  }
+
+  if (options.audit_gpu_signs) {
+    for (std::size_t index = 0U; index < inputs.size(); ++index) {
+      if (gpu_outputs[index].sign == FilterSign::unknown) {
+        continue;
+      }
+      const PredicateDecision oracle = cpu_decision(inputs[index]);
+      if (oracle.sign() != result.decisions[index].sign) {
+        throw std::runtime_error(
+            "the Phase 2B power-bisector GPU filter contradicted the CPU "
+            "multiprecision oracle");
+      }
+      ++result.counters.gpu_known_audited;
+    }
+  }
+
+  if (!unknown_indices.empty()) {
+    for (const IndexedDecision& resolved : fallback_future.get()) {
+      const std::size_t index = resolved.index;
+      result.decisions[index] = PowerBisectorDecision{
+          inputs[index].replay_id,
+          FilterSign::unknown,
+          resolved.decision.sign(),
+          resolved.decision.certification_stage()};
+      record_cpu_stage(resolved.decision, result.counters);
+    }
+  }
+  result.counters.remaining_unknown = 0U;
+  return result;
+}
+
 }  // namespace
 
 std::future<SquaredDistanceBatchResult> decide_squared_distance_batch_async(
@@ -340,6 +585,16 @@ std::future<SquaredDistanceBatchResult> decide_squared_distance_batch_async(
 std::future<Orientation3DBatchResult> decide_orientation_3d_batch_async(
     std::vector<Orientation3DFilterInput> inputs,
     Orientation3DBatchOptions options) {
+  return std::async(
+      std::launch::async,
+      [owned_inputs = std::move(inputs), options]() mutable {
+        return decide_batch(std::move(owned_inputs), options);
+      });
+}
+
+std::future<PowerBisectorBatchResult> decide_power_bisector_batch_async(
+    std::vector<PowerBisectorFilterInput> inputs,
+    PowerBisectorBatchOptions options) {
   return std::async(
       std::launch::async,
       [owned_inputs = std::move(inputs), options]() mutable {
