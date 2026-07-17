@@ -605,14 +605,12 @@ if name == "systemctl":
         if show_all or bad_dropin:
             print(f"DropInPaths={bad_dropin}")
         print(f"ExecStart={{ path={executable} ; argv[]={argv} ; }}")
-        if show_all:
-            print("ExecStartPre=")
-            print("ExecStartPost=")
-            print("ExecCondition=")
-            print("ExecStop=")
-            print("ExecStopPost=")
-            print("Environment=")
-            print("EnvironmentFiles=")
+        if unit == "containerd.service":
+            print(
+                "ExecStartPre={ path=/sbin/modprobe ; "
+                "argv[]=/sbin/modprobe overlay ; ignore_errors=yes ; }"
+            )
+        print("Environment=")
         finish()
     if action == "is-enabled":
         if "--quiet" not in arguments:

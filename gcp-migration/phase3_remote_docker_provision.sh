@@ -826,6 +826,12 @@ else:
         "ExecStart", "ExecStartPre", "ExecStartPost", "ExecCondition", "ExecStop",
         "ExecStopPost", "Environment", "EnvironmentFiles"
     }
+    omitted_when_empty = {
+        "ExecStartPre", "ExecStartPost", "ExecCondition", "ExecStop",
+        "ExecStopPost", "EnvironmentFiles"
+    }
+    for key in omitted_when_empty:
+        values.setdefault(key, "")
 if set(values) != expected:
     missing = ",".join(sorted(expected - set(values))) or "none"
     unexpected = ",".join(sorted(set(values) - expected)) or "none"
