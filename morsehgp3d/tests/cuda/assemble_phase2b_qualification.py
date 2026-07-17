@@ -148,9 +148,9 @@ def validate_power(value: dict[str, Any]) -> None:
         value,
         context="power-bisector differential",
         schema=POWER_SCHEMA,
-        cases=2077,
-        minimum_known=2065,
-        maximum_known=2071,
+        cases=2079,
+        minimum_known=2067,
+        maximum_known=2073,
         extra_keys={"exact_zeros"},
     )
     if require_integer(

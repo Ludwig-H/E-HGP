@@ -72,10 +72,10 @@ class Phase2BQualificationAssemblerTests(unittest.TestCase):
                 "schema": "morsehgp3d.phase2b.orientation_3d_filter.v1",
             },
             "power": {
-                "cases": 2077,
+                "cases": 2079,
                 "exact_zeros": 4,
-                "gpu_fp64_certified": 2065,
-                "gpu_known_audited": 2065,
+                "gpu_fp64_certified": 2067,
+                "gpu_known_audited": 2067,
                 "gpu_unknown_forwarded": 12,
                 "remaining_unknown": 0,
                 "schema": "morsehgp3d.phase2b.power_bisector_side_filter.v1",
@@ -179,13 +179,13 @@ class Phase2BQualificationAssemblerTests(unittest.TestCase):
         self.assertNotIn("vm_lifecycle", artifact)
 
     def test_rejects_power_counter_outside_qualified_range(self) -> None:
-        self.values["power"]["gpu_fp64_certified"] = 2064
-        self.values["power"]["gpu_known_audited"] = 2064
+        self.values["power"]["gpu_fp64_certified"] = 2066
+        self.values["power"]["gpu_known_audited"] = 2066
         self.values["power"]["gpu_unknown_forwarded"] = 13
         self.write_evidence()
         result = self.run_assembler()
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("[2065, 2071]", result.stderr)
+        self.assertIn("[2067, 2073]", result.stderr)
         self.assertFalse(self.output.exists())
 
     def test_rejects_missing_power_memcheck_evidence(self) -> None:

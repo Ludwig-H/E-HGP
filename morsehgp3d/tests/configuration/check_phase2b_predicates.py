@@ -555,6 +555,19 @@ def validate_cuda_sources(
         is not None,
         "power-bisector does not use cardinality-bounded axis subtotals and SoA loads",
     )
+    pairing_body = function_body(power_clean, "point_less_on_axis")
+    require(
+        "left.coordinate_bits[axis]" in pairing_body
+        and "right.coordinate_bits[axis]" in pairing_body
+        and re.search(
+            r"for\s*\([^)]*axis[^)]*\)\s*\{\s*std::sort\s*\(",
+            power_clean,
+            flags=re.DOTALL,
+        )
+        is not None
+        and "[axis](const PowerBisectorLabelPoint& left" in power_clean,
+        "power-bisector labels are not paired independently on every axis",
+    )
 
 
 def validate_host_source(
@@ -1088,6 +1101,15 @@ def validate_negative_mutations(files: ContractFiles) -> int:
                 "multiply_intervals(denominator, r)",
                 "multiply_intervals(point_interval(0U), r)",
                 "power denominator factor",
+            ),
+        ),
+        (
+            "power-bisector scalar pairing collapsed to the first axis",
+            mutate_text(
+                POWER_CUDA_SOURCE,
+                "left.coordinate_bits[axis]",
+                "left.coordinate_bits[0U]",
+                "axis-specific power pairing",
             ),
         ),
         (

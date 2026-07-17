@@ -37,7 +37,7 @@ Pour tout appariement des points des deux labels, la quadratique commune s'annul
 
 $$G=D H_{R,Q}(A/D)=\sum_{i=1}^{K}\sum_{a=1}^{3}(q_{i,a}-r_{i,a})[(A_a-D r_{i,a})+(A_a-D q_{i,a})].$$
 
-Cette écriture évite division, carrés et soustraction de deux grandes sommes de coûts. Les points de chaque label sont triés canoniquement par coordonnées puis identifiant avant l'appariement; l'égalité des cardinalités rend la somme indépendante de ce choix. Le stockage device comporte 64 champs SoA : trois numérateurs, un dénominateur et deux fois dix points tridimensionnels. Les termes sont accumulés par axe avant la somme finale afin de limiter la largeur des intervalles.
+Cette écriture évite division, carrés et soustraction de deux grandes sommes de coûts. Les coordonnées de chaque label sont triées canoniquement et appariées indépendamment sur chaque axe, avec l'identifiant comme départage; l'égalité des cardinalités rend chaque somme axiale indépendante de cette bijection. Ce choix évite qu'un ordre lexicographique tridimensionnel impose de grands termes opposés sur un autre axe. Le stockage device comporte 64 champs SoA : trois numérateurs, un dénominateur et deux fois dix points tridimensionnels. Les termes sont accumulés par axe avant la somme finale afin de limiter la largeur des intervalles.
 
 Le résultat GPU n'est connu que si l'intervalle final est strictement positif ou strictement négatif. Zéro, underflow, overflow ou intervalle contenant zéro donnent `unknown`; le témoin rationnel et les moments exacts des labels sont alors reconstruits et transmis à `decide_power_bisector_side` en multiprécision. Le mode d'audit utilise le même oracle rationnel exact pour chaque signe GPU connu. Le runner accepte désormais des lots homogènes distance, orientation ou bisecteur de puissance et refuse toute transaction qui mélange les prédicats.
 
@@ -48,7 +48,7 @@ Le résultat GPU n'est connu que si l'intervalle final est strictement positif o
 - compilation syntaxique stricte des unités hôtes : réussie;
 - différentiel distance renforcé avec lanceur GPU simulé : 2 064 cas, dont douze cas non entiers ciblant séparément soustraction, multiplication et addition dirigées; 2 061 signes connus et trois replis CPU, zéro `unknown` terminal;
 - corpus orientation : 2 070 cas relus par un oracle rationnel indépendant et par une émulation bit-à-bit des intervalles dirigés; 2 065 signes GPU obligatoires, zéro mauvais signe et zéro `unknown` terminal après replay CPU;
-- corpus bisecteur de puissance : 2 077 cas construits par un oracle direct `Fraction`, dont 2 065 signes GPU obligatoires, six cas adversariaux facultativement filtrables, six replis obligatoires et quatre zéros exacts; l'identité affine secondaire est vérifiée indépendamment pour chaque cas;
+- corpus bisecteur de puissance : 2 079 cas construits par un oracle direct `Fraction`, dont 2 067 signes GPU obligatoires, six cas adversariaux facultativement filtrables, six replis obligatoires et quatre zéros exacts; l'identité affine secondaire est vérifiée indépendamment pour chaque cas et une paire de fixtures impose le tri axial face à un overflow créé par l'ordre lexicographique;
 - test mathématique indépendant de la multiplication d'intervalles : 100 000 paires aléatoires, tous les quadrants couverts, 65 559 enveloppes finies exactes et 34 441 overflows rejetés de façon conservatrice;
 - replay CPU multiprécision de toutes les commandes distance, orientation et bisecteur de puissance : réussi.
 

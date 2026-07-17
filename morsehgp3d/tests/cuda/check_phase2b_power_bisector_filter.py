@@ -19,7 +19,7 @@ from typing import Any, NoReturn, Sequence
 SCHEMA = "morsehgp3d.phase2b.power_bisector_side_filter.v1"
 PREDICATE = "power_bisector_side"
 INTEGER_KNOWN_CASE_COUNT = 2_049
-ADVERSARIAL_REQUIRED_KNOWN_CASE_COUNT = 16
+ADVERSARIAL_REQUIRED_KNOWN_CASE_COUNT = 18
 ADVERSARIAL_OPTIONAL_CASE_COUNT = 6
 REQUIRED_GPU_KNOWN_CASE_COUNT = (
     INTEGER_KNOWN_CASE_COUNT + ADVERSARIAL_REQUIRED_KNOWN_CASE_COUNT
@@ -518,6 +518,35 @@ def make_adversarial_cases() -> list[Case]:
     require(maximum.oracle_sign == "positive", "maximum-cardinality sign changed")
     required.extend(
         (maximum, mirror_case(maximum, 1_738, "maximum-cardinality-overlap-mirrored"))
+    )
+
+    magnitude = scaled_binary64_word(1, 600)
+    negative_magnitude = scaled_binary64_word(-1, 600)
+    axis_pairing = Case(
+        1_801,
+        (0, 3, 0, 1),
+        (
+            (zero, magnitude, zero),
+            ("4000000000000000", negative_magnitude, zero),
+            ("3ff0000000000000", negative_magnitude, zero),
+            ("4008000000000000", magnitude, zero),
+        ),
+        (0, 1),
+        (2, 3),
+        "axis-wise-pairing-avoids-lexicographic-overflow",
+        "negative",
+        "fp64_filtered",
+    )
+    require(axis_pairing.oracle_value == -6, "axis-wise pairing fixture changed")
+    required.extend(
+        (
+            axis_pairing,
+            mirror_case(
+                axis_pairing,
+                1_838,
+                "axis-wise-pairing-avoids-lexicographic-overflow-mirrored",
+            ),
+        )
     )
 
     optional.extend(

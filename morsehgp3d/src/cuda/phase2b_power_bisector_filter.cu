@@ -215,17 +215,16 @@ class DeviceBuffer final {
   Value* data_{nullptr};
 };
 
-[[nodiscard]] bool point_less(
+[[nodiscard]] bool point_less_on_axis(
     const PowerBisectorLabelPoint& left,
-    const PowerBisectorLabelPoint& right) {
-  for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
-    const std::uint64_t left_key =
-        exact::binary64_total_order_key(left.coordinate_bits[axis]);
-    const std::uint64_t right_key =
-        exact::binary64_total_order_key(right.coordinate_bits[axis]);
-    if (left_key != right_key) {
-      return left_key < right_key;
-    }
+    const PowerBisectorLabelPoint& right,
+    std::size_t axis) {
+  const std::uint64_t left_key =
+      exact::binary64_total_order_key(left.coordinate_bits[axis]);
+  const std::uint64_t right_key =
+      exact::binary64_total_order_key(right.coordinate_bits[axis]);
+  if (left_key != right_key) {
+    return left_key < right_key;
   }
   return left.point_id < right.point_id;
 }
@@ -267,9 +266,19 @@ std::vector<RawPowerBisectorFilterOutput> filter_power_bisectors_on_gpu(
     for (std::size_t label = 0U; label < kLabelCount; ++label) {
       std::array<PowerBisectorLabelPoint, kMaximumCardinality> points =
           label == 0U ? inputs[index].r_points : inputs[index].q_points;
-      std::sort(points.begin(), points.begin() + cardinality, point_less);
-      for (std::size_t point = 0U; point < cardinality; ++point) {
-        for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
+      // Each coordinate sum is pairing-invariant on its own. Pairing the
+      // independently sorted scalar coordinates therefore preserves the exact
+      // polynomial while avoiding large cancelling cross-pairs imposed by a
+      // single lexicographic three-dimensional order.
+      for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
+        std::sort(
+            points.begin(),
+            points.begin() + cardinality,
+            [axis](const PowerBisectorLabelPoint& left,
+                   const PowerBisectorLabelPoint& right) {
+              return point_less_on_axis(left, right, axis);
+            });
+        for (std::size_t point = 0U; point < cardinality; ++point) {
           coordinate_bits[
               label_field(label, point, axis) * inputs.size() + index] =
               points[point].coordinate_bits[axis];
