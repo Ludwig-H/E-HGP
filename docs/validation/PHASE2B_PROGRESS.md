@@ -27,17 +27,30 @@ $$\det\left([b-a,c-a,d-a]\right)=u_0(v_1w_2-v_2w_1)-u_1(v_0w_2-v_2w_0)+u_2(v_0w_
 
 Les douze mots binary64 et l'identifiant de replay restent intacts. Les primitives d'intervalles CUDA sont désormais mutualisées entre distance et orientation. La multiplication traite les quatre quadrants de signe avec deux produits dirigés; le chemin général à huit produits n'est utilisé que lorsqu'un intervalle traverse zéro. Les deux noyaux utilisent un stockage SoA par champ, afin que chaque warp lise des coordonnées contiguës plutôt que des structures espacées.
 
-Le GPU ne publie toujours qu'un signe strictement séparé de zéro. Coplanarité, underflow, overflow ou intervalle indécis produisent `unknown`, puis `decide_orientation_3d` résout le cas sur le CPU. Le mode d'audit recalcule chaque signe GPU connu avec l'oracle multiprécision. Le runner accepte des lots homogènes distance ou orientation et refuse toute transaction mélangeant les deux prédicats.
+Le GPU ne publie toujours qu'un signe strictement séparé de zéro. Coplanarité, underflow, overflow ou intervalle indécis produisent `unknown`, puis `decide_orientation_3d` résout le cas sur le CPU. Le mode d'audit recalcule chaque signe GPU connu avec l'oracle multiprécision.
+
+## Troisième incrément : bisecteur de puissance rationnel
+
+Le troisième portage cible `power_bisector_side` pour deux labels `R` et `Q` de même cardinalité, bornée à dix. Le témoin exact est sérialisé sous la forme homogène réduite `y=A/D`, avec `D>0`; les quatre entiers doivent être exactement représentables en binary64. Une valeur entière non représentable est refusée au lieu d'être arrondie et doit être orientée vers le prédicat CPU exact avant cet appel GPU.
+
+Pour tout appariement des points des deux labels, la quadratique commune s'annule et le noyau évalue la factorisation suivante, de même signe que le prédicat public :
+
+$$G=D H_{R,Q}(A/D)=\sum_{i=1}^{K}\sum_{a=1}^{3}(q_{i,a}-r_{i,a})[(A_a-D r_{i,a})+(A_a-D q_{i,a})].$$
+
+Cette écriture évite division, carrés et soustraction de deux grandes sommes de coûts. Les points de chaque label sont triés canoniquement par coordonnées puis identifiant avant l'appariement; l'égalité des cardinalités rend la somme indépendante de ce choix. Le stockage device comporte 64 champs SoA : trois numérateurs, un dénominateur et deux fois dix points tridimensionnels. Les termes sont accumulés par axe avant la somme finale afin de limiter la largeur des intervalles.
+
+Le résultat GPU n'est connu que si l'intervalle final est strictement positif ou strictement négatif. Zéro, underflow, overflow ou intervalle contenant zéro donnent `unknown`; le témoin rationnel et les moments exacts des labels sont alors reconstruits et transmis à `decide_power_bisector_side` en multiprécision. Le mode d'audit utilise le même oracle rationnel exact pour chaque signe GPU connu. Le runner accepte désormais des lots homogènes distance, orientation ou bisecteur de puissance et refuse toute transaction qui mélange les prédicats.
 
 ## Validations locales avant qualification matérielle
 
 - workflow `cpu-release` : 28 tests sur 28 réussis, contrôle statique 2B inclus;
-- contrôle statique 2B : 28 mutations négatives rejetées, notamment les inversions des directions `rd/ru`, des extrémités de produit et des signes de cofacteurs;
+- contrôle statique 2B : 36 mutations négatives rejetées, notamment les inversions des directions `rd/ru`, des extrémités de produit, des signes de cofacteurs, du facteur `q-r` et de la réduction homogène;
 - compilation syntaxique stricte des unités hôtes : réussie;
 - différentiel distance renforcé avec lanceur GPU simulé : 2 064 cas, dont douze cas non entiers ciblant séparément soustraction, multiplication et addition dirigées; 2 061 signes connus et trois replis CPU, zéro `unknown` terminal;
 - corpus orientation : 2 070 cas relus par un oracle rationnel indépendant et par une émulation bit-à-bit des intervalles dirigés; 2 065 signes GPU obligatoires, zéro mauvais signe et zéro `unknown` terminal après replay CPU;
+- corpus bisecteur de puissance : 2 077 cas construits par un oracle direct `Fraction`, dont 2 065 signes GPU obligatoires, six cas adversariaux facultativement filtrables, six replis obligatoires et quatre zéros exacts; l'identité affine secondaire est vérifiée indépendamment pour chaque cas;
 - test mathématique indépendant de la multiplication d'intervalles : 100 000 paires aléatoires, tous les quadrants couverts, 65 559 enveloppes finies exactes et 34 441 overflows rejetés de façon conservatrice;
-- replay CPU multiprécision de toutes les commandes distance et orientation : réussi.
+- replay CPU multiprécision de toutes les commandes distance, orientation et bisecteur de puissance : réussi.
 
 Le lanceur simulé et l'émulation mathématique vérifient l'orchestration, les schémas, les compteurs, le replay et les formules. La qualification matérielle combinée ci-dessous vérifie ensuite le code device réel et mesure le chemin complet sur G4.
 
@@ -65,10 +78,25 @@ L'artefact hors dépôt est `/tmp/morsehgp3d-phase2b-16f7f5975eff6233c73cc617730
 
 La génération ciblée `2026-07-17T11:43:47.723-07:00` a été arrêtée puis relue indépendamment : état `TERMINATED`, dernier arrêt GCE `2026-07-17T11:46:22.897-07:00`. Aucune autre VM `project=e-hgp` active n'a été observée et la clé OS Login de session a été révoquée puis supprimée.
 
+## Qualification matérielle des trois prédicats du 17 juillet 2026
+
+Le commit propre et poussé `dfd9c0c72ca79baaa38d4889c2a8af564debdb08` a été compilé et exécuté sur `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`. La cible était toujours une `g4-standard-48` Spot, avec `instanceTerminationAction=STOP`, `maxRunDuration=3600` et un arrêt invité vérifié à 50 minutes. Le worker conservait une réserve de 1 800 secondes avant cet arrêt invité.
+
+Les workflows CUDA release et audit réussissent pour les trois noyaux. `cuobjdump` ne trouve que l'ELF AOT `sm_120` et aucune entrée PTX. Trois exécutions séparées de `compute-sanitizer --tool memcheck --leak-check full --error-exitcode=86`, une par prédicat, finissent avec zéro erreur.
+
+Le différentiel distance traite 2 064 cas : 2 061 signes GPU connus audités et trois replis. Le différentiel orientation traite 2 070 cas : 2 067 signes GPU connus audités et trois replis. Le nouveau différentiel de puissance traite 2 077 cas : 2 071 signes GPU connus sont tous revérifiés par l'oracle rationnel multiprécision et six cas sont transmis au CPU, dont quatre zéros exacts. Les trois campagnes finissent sans contradiction et avec `remaining_unknown=0`.
+
+Le benchmark froid de processus complet traite 262 144 cas par prédicat sur trois répétitions. Les médianes sont de 282 909 distances par seconde en 0,927 s, 246 380 orientations par seconde en 1,064 s et 118 933 bisecteurs de puissance par seconde en 2,204 s. Les meilleurs temps sont respectivement 0,921 s, 1,034 s et 2,186 s. Tous les cas de ces lots bien conditionnés sont certifiés par le GPU sans repli; ces mesures incluent parsing, contexte CUDA, allocations, transferts et sérialisation et ne représentent pas encore un débit résident.
+
+L'artefact final hors dépôt est `/tmp/morsehgp3d-phase2b-dfd9c0c72ca79baaa38d4889c2a8af564debdb08-20260717T201837Z/phase2b-dfd9c0c72ca79baaa38d4889c2a8af564debdb08.json`, de 2 773 octets et de SHA-256 `8385559d8bca8dd0a8ab12e3bf0da0ac86199800fab575b0145ea355269919df`. Il conserve `public_status=null` et `scientific_result_claimed=false`.
+
+La génération ciblée `2026-07-17T13:19:39.826-07:00` a été arrêtée puis relue indépendamment : état final `TERMINATED` certifié à `2026-07-17T20:24:18Z`. Aucune autre VM `project=e-hgp` active n'a été observée et la clé OS Login éphémère a été révoquée. Deux essais préparatoires, arrêtés et certifiés séparément, ont permis de corriger la remontée des journaux puis le point de sous-montage Docker avant cette exécution réussie.
+
 ## Travaux restant avant la porte de sortie
 
 - étendre le différentiel au corpus distance de la phase 2A et à la campagne supplémentaire requise;
-- porter le bisecteur de puissance et les expansions GPU réellement rentables;
+- porter uniquement les expansions GPU dont le gain est mesuré et conserver les autres replis exacts sur CPU;
+- introduire un contexte résident et des espaces de travail réutilisables afin de séparer le coût du noyau de celui du processus froid;
 - mesurer et publier les taux de chaque étage sans en faire une condition de correction;
 - vérifier que tout `unknown` GPU est transmis au CPU sur l'ensemble des prédicats portés.
 
