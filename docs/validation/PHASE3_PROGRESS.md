@@ -1,4 +1,4 @@
-# Avancement de la Phase 3 — environnement CUDA G4 reproductible
+# Fermeture de la Phase 3 — environnement CUDA G4 reproductible
 
 ## Cadre opérationnel
 
@@ -8,7 +8,7 @@
 - Mode : `certified` sous audit de reproductibilité; aucune promotion de statut public.
 - Porte d'entrée : satisfaite par la Phase 0, conformément au registre d'implémentation.
 
-La Phase 3 reste `in_progress`. Ce point d'avancement livre le runtime, les dépendances et le worker de qualification, tout en conservant la fermeture conditionnée à une exécution GPU réelle courte et à la certification finale de l'arrêt.
+La Phase 3 est `completed`. La qualification réelle du commit `caa15c1e686bf2a8006218bcbc111b85554fabf3` a fermé toutes les exigences de l'environnement reproductible, puis l'orchestrateur a certifié l'arrêt ciblé avant de publier l'artefact final. Cette fermeture reste strictement infrastructurelle : elle ne revendique aucun résultat scientifique et ne promeut aucun statut public.
 
 ## Enveloppe de construction gelée
 
@@ -51,7 +51,7 @@ Le runtime effectue une seule allocation `cudaMallocAsync` exactement égale au 
 | workflow `sanitizer` | 27/27 tests, 297,34 s |
 | cibles CPU réellement instrumentées à la compilation et à l'édition de liens | 9/9 |
 | mutations CUDA interdites exercées sans compilateur | 7/7 refusées |
-| scénarios de sécurité, de provisioning et de worker GCP avec doubles de commande | 117/117 |
+| scénarios de sécurité, de provisioning et de worker GCP avec doubles de commande | 120/120 |
 | validation statique du contrat de build Phase 3.1 | réussie |
 | validation statique du runtime et des dépendances Phase 3.2 | réussie |
 | politique GitHub GCP strictement en lecture seule | réussie |
@@ -79,17 +79,32 @@ Sur le commit poussé `5a7c8af`, le workflow `Repository checks` `29536006368` a
 
 Sur le commit poussé `fdaa214`, le workflow `Repository checks` `29539627373` a réussi, puis une sixième qualification protégée du repli a certifié les deux coupe-circuits pour la génération `2026-07-16T15:42:34.066-07:00`. Le preflight Blackwell a réussi. Le nouveau diagnostic a ensuite établi avant tout build ou conteneur que le client `/usr/bin/docker` était absent, que `docker.service` n'existait pas et que ni `docker.io`, ni Docker CE, ni containerd n'étaient installés; seul `nvidia-container-toolkit` 1.17.8-1 était présent. Aucun conteneur, compilation, benchmark ou artefact n'a été produit. Le trap a arrêté cette génération exacte, certifiée indépendamment `TERMINATED` à `2026-07-16T15:44:26.920-07:00`, sans autre VM E-HGP active; la clé OS Login de session a été révoquée et sa copie locale supprimée. Cette preuve motive le provisionneur opt-in décrit plus haut : elle ne justifie aucun dépôt tiers, aucun Docker Standard et aucune promotion scientifique.
 
+Le 17 juillet 2026, les qualifications protégées ont fait progresser le même chemin réel sans relâcher les gardes. Le commit `475c547` a atteint la compilation CUDA mais les diagnostics hôtes transmis à `nvcc` ont transformé les directives générées par `cudafe` en erreurs; `00d570f` a ensuite compilé le runtime CUDA avant de révéler que les en-têtes Python n'étaient pas visibles dans la portée CMake où nanobind construit sa bibliothèque. Sur `205f46c`, la liaison a exposé des conversions Python implicites interdites pour les tailles DLPack; sur `a906803`, l'audit PTX a été contaminé par la bannière de l'entrypoint de l'image au lieu de recevoir la seule sortie de `cuobjdump`; enfin, `a9235da` a atteint `compute-sanitizer`, qui comptait comme erreurs la sonde CUDA structurée volontairement invalide. Chaque génération démarrée a été arrêtée et certifiée `TERMINATED` avant la correction suivante, sans autre VM E-HGP active; aucun artefact final n'a été publié par ces tentatives échouées.
+
+Le commit poussé `caa15c1e686bf2a8006218bcbc111b85554fabf3` a limité `--report-api-errors no` à l'unité `compute-sanitizer`, afin que l'appel volontaire `cudaGetDeviceProperties(device=-1)` puisse éprouver le statut structuré attendu sans faire échouer memcheck. Cette option signifie que `compute-sanitizer` ne fournit pas, dans cette unité, une seconde détection indépendante des erreurs d'API CUDA inattendues; celles-ci restent contrôlées par le runtime, qui exige exactement le code 101 attendu, un contexte encore sain et un statut global réussi. La porte memcheck porte donc sur les accès mémoire et les fuites, avec `--leak-check full`, `--error-exitcode=86`, zéro erreur et zéro octet fui.
+
 Le même jour, les préférences `PREEMPTIBLE-CPUS-per-project-region=48` ont été accordées dans `europe-north1`, `europe-north2`, `europe-central2`, `europe-southwest1`, `europe-west1`, `europe-west2`, `europe-west3`, `europe-west4`, `europe-west6`, `europe-west8`, `europe-west9`, `europe-west10` et `europe-west12`. Les trois dernières demandes manquantes, pour Madrid, Varsovie et Stockholm, ont été approuvées immédiatement à 48 avec un usage nul. Cette préparation multi-région n'est pas une exigence G4 : `g4-standard-48` fournit 48 vCPU et un seul GPU RTX PRO 6000, et G4 Spot consomme le quota régional `PREEMPTIBLE_NVIDIA_RTX_PRO_6000_GPUS` ainsi que le quota global `GPUS_ALL_REGIONS`, sans quota CPU G4. Cloud Quotas expose l'identifiant exact `PREEMPTIBLE-NVIDIA-RTX-PRO-6000-GPUS-per-project-region`, dont la valeur effective constatée est `1` dans chaque région applicable; `GPUS-ALL-REGIONS-per-project` vaut également `1` avec un usage nul. Ces limites autorisent une G4 Spot à la fois. La visibilité de `g4-standard-48` a été relue dans `europe-north1`, `europe-west1`, `europe-west2`, `europe-west4`, `europe-west8` et `europe-west10`; les quotas CPU supplémentaires des autres régions ne prétendent pas y créer une disponibilité G4. Aucun quota GPU Standard/on-demand ou VWS n'a été demandé. Le contrôle exige aussi 100 Go d'Hyperdisk Balanced et, pour le disque à 3 600 IOPS et 290 MiB/s, seulement l'excédent de quota au-dessus de la base 3 000/140, soit 600 IOPS et 150 MiB/s.
 
-## Travaux restant avant fermeture
+## Artefact et verdict de porte
 
-- compiler les trois cibles par les workflows CMake CUDA release et audit dans l'environnement exact;
-- auditer les objets AOT `sm_120` et l'absence de PTX;
-- exécuter sur la G4 le plafond d'allocation, le DLPack sans copie, le kernel déterministe, les erreurs structurées et `compute-sanitizer`;
-- exécuter une unique session réelle autorisée, certifier la cible `TERMINATED` puis publier son artefact final.
+L'artefact final `phase3-caa15c1e686bf2a8006218bcbc111b85554fabf3.json` suit le schéma `morsehgp3d.phase3.qualification.v1`, contient 51 133 octets et porte le SHA-256 `8b1e3168e20d08b522835021c1f656bdee64bce2c70f9ae6d771b2084439c07a`. Il qualifie l'image `morsehgp3d-phase3:caa15c1e686bf2a8006218bcbc111b85554fabf3`, identifiée par `sha256:e3d96c187ca405790227e02aef1a66ca47df0820bb6b2a86b097359105956d58`, construite depuis le digest de base gelé. Le fichier reste hors du dépôt conformément au contrat de l'orchestrateur; son empreinte et les preuves de porte sont enregistrées ici.
 
-La Phase 2B demeure bloquée jusqu'à cette fermeture. Aucun résultat de benchmark, aucune sortie plausible et aucun succès de construction ne peut promouvoir `public_status=exact`.
+| critère de sortie | preuve finale | verdict |
+|---|---|---:|
+| workflows CUDA release et audit | les deux workflows ont construit les cibles gelées sur CUDA 12.9 | satisfait |
+| compilation AOT | ELF exclusivement `sm_120`, zéro entrée PTX, chargement CUDA `EAGER` et aucun NVRTC | satisfait |
+| protocoles mesurés | records `warm` et `resident`, manifeste complet par record et aucune compilation pendant les mesures | satisfait |
+| mémoire runtime | allocation asynchrone exacte de 64 MiB, une allocation et une libération, zéro octet vivant à la fin | satisfait |
+| DLPack | identité de pointeur et de périphérique, décalage nul et zéro copie | satisfait |
+| déterminisme | deux exécutions comparées bit à bit et concordantes avec l'oracle CPU sur 1 048 576 éléments | satisfait |
+| erreurs structurées | code CUDA attendu 101, opération exacte et contexte restant sain | satisfait |
+| audit mémoire | passage séparé à 4 MiB sous `compute-sanitizer`, zéro erreur memcheck et zéro fuite | satisfait |
+| cycle de vie GCP | état initial `TERMINATED`, arrêt ciblé vérifié et relecture finale `TERMINATED` | satisfait |
+
+Les quatre durées GPU enregistrées, 13 216 ns puis 10 848 ns pour le runtime et 88 192 ns puis 80 256 ns sous sanitizer, décrivent uniquement cette sonde bornée; elles ne constituent ni un benchmark de MorseHGP3D ni une porte de performance. L'artefact conserve `scientific_scope=environment_reproducibility_only`, `scientific_result_claimed=false`, `scientific_public_status=null` et aucun `public_status`.
+
+**Verdict final : porte de sortie de la Phase 3 satisfaite.** L'environnement `cuda_g4`, le profil prioritaire `hgp_reduced` et le mode `certified` sont qualifiés pour ouvrir la Phase 2B. Cette ouverture ne certifie encore aucun prédicat GPU et ne change aucun statut scientifique.
 
 ## GCP
 
-La cible principale `devpod-gpu-exploration/europe-west4-a/ehgp-blackwell-spot` et le repli strictement Spot `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a` sont tous deux certifiés `TERMINATED`. La génération connue du repli est `2026-07-16T15:42:34.066-07:00`, arrêtée à `2026-07-16T15:44:26.920-07:00`. La relecture du 16 juillet 2026 confirme `g4-standard-48`, `SPOT`, action `STOP`, `maxRunDuration=3600`, maintenance `TERMINATE`, redémarrage automatique désactivé et label `project=e-hgp`; aucune autre VM ainsi labellisée n'est active. La fonctionnalité `ai-zones-visibility` reste relue `ENABLED`.
+La cible principale `devpod-gpu-exploration/europe-west4-a/ehgp-blackwell-spot` et le repli strictement Spot `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a` sont tous deux certifiés `TERMINATED`. La qualification finale a utilisé exactement le repli `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, dont la génération a commencé à `2026-07-17T09:15:49.015-07:00`. Après le succès du worker, l'orchestrateur a exécuté l'arrêt ciblé sur cette même génération et la relecture indépendante `gcloud compute instances describe` a certifié `TERMINATED` à `2026-07-17T16:19:10Z`. La session conservait `g4-standard-48`, `SPOT`, action `STOP`, `maxRunDuration=3600`, maintenance `TERMINATE`, redémarrage automatique désactivé, arrêt invité à 45 minutes et label `project=e-hgp`. Aucune autre VM ainsi labellisée n'était active à la fermeture; la clé OS Login de session a été révoquée et sa copie locale supprimée. La fonctionnalité `ai-zones-visibility` reste relue `ENABLED`.

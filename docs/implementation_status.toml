@@ -1,11 +1,11 @@
 schema_version = 1
-updated_at = "2026-07-16"
+updated_at = "2026-07-17"
 
 [project]
 name = "MorseHGP3D"
 implementation_started = true
-current_phase = "3"
-current_track = "foundation"
+current_phase = "2B"
+current_track = "generic_core"
 status_authority = "This file is operational; mathematical authority remains in the specification and proof-status register."
 
 [conventions]
@@ -18,7 +18,7 @@ status = "blocked"
 requires_phases = ["0", "1", "2A", "2B", "3", "4", "5", "7", "8", "9", "10", "11", "18"]
 requires_gates = ["G0", "G1", "G2", "G3", "G4", "G5", "G9"]
 full_pi0_requires_phase = "12"
-blocking_reason = "La phase 3, la phase 2B et les phases suivantes ainsi que leurs portes scientifiques doivent etre fermees avant la poursuite."
+blocking_reason = "La phase 2B et les phases suivantes ainsi que leurs portes scientifiques doivent etre fermees avant la poursuite."
 
 [milestones.v1_interactive_scalable]
 status = "blocked"
@@ -64,23 +64,23 @@ blocking_reason = ""
 id = "3"
 title = "Environnement CUDA G4 reproductible"
 track = "foundation"
-status = "in_progress"
+status = "completed"
 entry_gate_satisfied = true
-exit_gate_satisfied = false
+exit_gate_satisfied = true
 depends_on = ["0"]
-evidence = ["docs/contracts/PHASE0_GATE_REVIEW.md", "docs/validation/PHASE2A_GATE_REVIEW.md", "docs/validation/PHASE3_PROGRESS.md"]
+evidence = ["docs/contracts/PHASE0_GATE_REVIEW.md", "docs/validation/PHASE2A_GATE_REVIEW.md", "caa15c1 qualification CUDA G4 reelle et arretee", "phase3-caa15c1e686bf2a8006218bcbc111b85554fabf3.json sha256:8b1e3168e20d08b522835021c1f656bdee64bce2c70f9ae6d771b2084439c07a", "docs/validation/PHASE3_PROGRESS.md"]
 blocking_reason = ""
 
 [[phases]]
 id = "2B"
 title = "Predicats exacts GPU"
 track = "generic_core"
-status = "blocked"
-entry_gate_satisfied = false
+status = "in_progress"
+entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["2A", "3"]
-evidence = []
-blocking_reason = "La phase 3 n'est pas fermee."
+evidence = ["docs/validation/PHASE2A_GATE_REVIEW.md", "docs/validation/PHASE3_PROGRESS.md"]
+blocking_reason = ""
 
 [[phases]]
 id = "4"
@@ -91,7 +91,7 @@ entry_gate_satisfied = false
 exit_gate_satisfied = false
 depends_on = ["2A", "2B", "3"]
 evidence = []
-blocking_reason = "Les phases 2B et 3 ne sont pas fermees."
+blocking_reason = "La phase 2B n'est pas fermee."
 
 [[phases]]
 id = "5"

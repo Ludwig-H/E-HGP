@@ -1022,4 +1022,4 @@ Les sept prochains lots de travail doivent être :
 
 Cette séquence donne rapidement une vérité terrain, un cas $k=1$ incontestable et une mesure réaliste de la primitive GPU. Elle évite que les choix de bibliothèque ou de layout figent prématurément un objet mathématique incomplet.
 
-La phase 2A est fermée et le jalon 17A est désormais prêt comme expérience CPU indépendante, sans déplacer la voie principale. La phase 3 est active; sa fermeture est la prochaine porte avant la phase 2B, puis la phase 4.
+Les phases 2A et 3 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. La phase 2B est active; sa fermeture est la prochaine porte avant la phase 4.
