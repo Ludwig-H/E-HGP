@@ -573,11 +573,13 @@ if name == "systemctl":
     if action == "show":
         if not state["installed"] or failure == "show":
             finish(1)
+        show_all = "--all" in arguments
         bad_dropin = "/etc/systemd/system/docker.service.d/override.conf" if failure == "metadata" else ""
         if unit == "docker.socket":
             print("LoadState=loaded")
             print("FragmentPath=/lib/systemd/system/docker.socket")
-            print(f"DropInPaths={bad_dropin}")
+            if show_all or bad_dropin:
+                print(f"DropInPaths={bad_dropin}")
             print("Listen=/run/docker.sock (Stream)")
             print("SocketUser=root")
             print("SocketGroup=docker")
@@ -595,15 +597,17 @@ if name == "systemctl":
             finish(1)
         print("LoadState=loaded")
         print(f"FragmentPath={fragment}")
-        print(f"DropInPaths={bad_dropin}")
+        if show_all or bad_dropin:
+            print(f"DropInPaths={bad_dropin}")
         print(f"ExecStart={{ path={executable} ; argv[]={argv} ; }}")
-        print("ExecStartPre=")
-        print("ExecStartPost=")
-        print("ExecCondition=")
-        print("ExecStop=")
-        print("ExecStopPost=")
-        print("Environment=")
-        print("EnvironmentFiles=")
+        if show_all:
+            print("ExecStartPre=")
+            print("ExecStartPost=")
+            print("ExecCondition=")
+            print("ExecStop=")
+            print("ExecStopPost=")
+            print("Environment=")
+            print("EnvironmentFiles=")
         finish()
     if action == "is-enabled":
         if "--quiet" not in arguments:
@@ -1038,6 +1042,7 @@ exec /usr/bin/python3 "$@"
         self.assertIn('readonly PYTHON_BIN="/usr/bin/python3.10"', source)
         self.assertEqual(6, source.count('"${PYTHON_BIN}"'))
         self.assertNotIn("/usr/bin/python3 -I", source)
+        self.assertEqual(2, source.count('"${unit}" --no-pager --all \\\n'))
 
     def test_rejects_unusable_or_wrong_version_python_before_mutation(self) -> None:
         for mode in ("broken", "wrong-version"):

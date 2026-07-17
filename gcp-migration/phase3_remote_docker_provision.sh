@@ -774,7 +774,7 @@ verify_systemd_unit() {
 
     if [[ "${role}" == "socket" ]]; then
         properties="$(bounded_probe "${SUDO_BIN}" -n -- /usr/bin/systemctl show \
-            "${unit}" --no-pager \
+            "${unit}" --no-pager --all \
             --property=LoadState \
             --property=FragmentPath \
             --property=DropInPaths \
@@ -784,7 +784,7 @@ verify_systemd_unit() {
             --property=SocketMode 2>/dev/null)" || return 1
     else
         properties="$(bounded_probe "${SUDO_BIN}" -n -- /usr/bin/systemctl show \
-            "${unit}" --no-pager \
+            "${unit}" --no-pager --all \
             --property=LoadState \
             --property=FragmentPath \
             --property=DropInPaths \
