@@ -193,6 +193,24 @@ Pour les formes et plans de 2A.8c, le corpus distingue quatre origines fermées 
 
 Si l'algorithme manipule des cellules polyédriques, chaque sommet décisif est accompagné d'un témoin combinatoire : contraintes liantes, approximation, classe de dégénérescence et intervalle d'erreur. Les tests reconstruisent le signe de toute contrainte supplémentaire à partir de ce témoin, et vérifient qu'un sommet géométriquement imprécis ne puisse jamais produire un certificat de fermeture par simple tolérance.
 
+### 5.4 Campagne de fermeture GPU de phase 2B
+
+La porte 2B est testée par deux campagnes résumables distinctes. La première rejoue exactement la graine et les racines scientifiques gelées par la phase 2A. La seconde utilise la graine indépendante `4257325f47505532` et doit produire une racine de corpus différente. Chaque campagne de production contient 10 800 000 cas de base — 3 600 000 pour chacun de `compare_squared_distances`, `orientation_3d` et `power_bisector_side` — plus 1 080 000 signes métamorphiques. L'agrégat attendu contient donc 23 760 000 signes lorsque les deux certificats sont complets. Une graine indépendante et deux racines distinctes interdisent la substitution d'un seul corpus aux deux campagnes; elles ne constituent pas une preuve de disjonction cas par cas et le certificat ne doit pas la revendiquer.
+
+Pour chaque entrée, le signe attendu de l'oracle entier-dyadique indépendant doit coïncider avec le replay CPU forcé en multiprécision. Toute transformation métamorphique doit en plus satisfaire sa relation de signe déclarée. Le chemin GPU est ensuite comparé à ces trois contrôles : un signe connu doit être un certificat FP64 strict de même signe; un `unknown` doit être compté, transmis au CPU et résolu sans `remaining_unknown`. Les compteurs par prédicat, signe, relation, étage GPU et fallback doivent fermer exactement sur le nombre de lignes.
+
+Un chunk contient des lots homogènes par prédicat et au plus 196 608 cas de base. Le checkpoint conserve les hashes des exécutables, du générateur, de la configuration et du commit propre, la chaîne contiguë des chunks et quatre racines ordonnées pour corpus, oracle, sortie CPU et sortie GPU. La suite négative couvre au minimum : reprise après un seul chunk, deuxième écrivain, chunk altéré ou orphelin, racine forgée, état complet forgé, compteur incohérent, sortie JSON non canonique, changement du dépôt ou d'un exécutable, relation métamorphique fausse, signe GPU contradictoire et témoin de puissance non représentable. Toute anomalie échoue fermé et laisse le dernier checkpoint committé inchangé.
+
+Le certificat final persiste les répartitions par transformation et par relation métamorphique. Il impose en outre l'égalité entre zéros exacts et signes nuls, la fermeture du tri-state GPU, puis le replay multiprécision de chaque ligne. Un mode de vérification en lecture seule relit une copie quiescente de tous les checkpoints, chunks, certificats et exécutables sans créer ni modifier de fichier; toute altération de l'agrégat racine doit être détectée, y compris en mode mono-campagne. Ce dernier porte `single_campaign_only` et ne peut jamais usurper la justification `independent_seed_and_distinct_corpus_root` réservée aux deux certificats compatibles.
+
+Un certificat incomplet conserve `phase_gate_closed=false` et `qualification_claimed=false`. Même deux certificats complets ne ferment la phase qu'après vérification de leurs références, de leurs racines et de l'agrégat, puis application séparée des autres obligations matérielles et opérationnelles de la porte.
+
+### 5.5 Contexte GPU résident
+
+Le contexte résident est testé sur des séquences grand-petit-grand pour les trois prédicats, puis sur leur alternance dans un même handle. Les décisions, identifiants, compteurs, audits et fallbacks doivent être identiques au chemin éphémère. Deux futures partageant un contexte sérialisent seulement leur section GPU; deux contextes distincts restent indépendants. La destruction ou le déplacement du handle après planification ne doit pas invalider la future, tandis qu'un handle déplacé refuse tout nouveau travail.
+
+Un lot vide ne crée ni stream ni allocation. Une capacité déjà suffisante ne provoque aucune nouvelle allocation et chaque sortie utile est entièrement réécrite afin de détecter un résultat résiduel. Une faute injectée empoisonne seulement le contexte concerné et toutes ses utilisations suivantes échouent fermé. La qualification réelle exécute ces séquences sous `compute-sanitizer` avec contrôle des fuites; le benchmark publie séparément le processus froid et `warm_context_e2e`, qui inclut encore validation, packing et transferts et ne doit pas être présenté comme un débit de noyau pur.
+
 ## 6. Tests de Gamma, du catalogue Gabriel et de la réduction
 
 ### 6.1 Gamma exact et événements Gabriel partiels
@@ -708,6 +726,8 @@ Tout défaut corrigé ajoute :
 ### 17.2 Campagne longue G4 manuelle
 
 Cette campagne n'est jamais déclenchée par un workflow GitHub planifié. Chaque shard exige une autorisation utilisateur explicite, un manifeste de durée prévisionnelle et les deux coupe-circuits vérifiés. Sa durée GCE est strictement inférieure à huit heures; le runner cesse de prendre du travail et checkpoint au moins trente minutes avant l'échéance, puis arrête et vérifie la VM. Une matrice trop grande est répartie sur plusieurs sessions indépendantes, chacune terminée par `TERMINATED`.
+
+La campagne de signes de phase 2B suit en plus la section 5.4 : chaque session ne commite que des chunks atomiques, reprend la chaîne de racines déjà vérifiée et peut s'arrêter entre deux transactions sans publier de certificat final. Les deux corpus de 11 880 000 signes sont achevés sur autant de sessions bornées que nécessaire; aucun shard isolé ni état `running` ne satisfait la porte.
 
 - oracle aléatoire jusqu'à $n=14$ ;
 - différentiel CPU/GPU sur au moins 1 000 nuages ;

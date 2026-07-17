@@ -79,7 +79,7 @@ status = "in_progress"
 entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["2A", "3"]
-evidence = ["docs/validation/PHASE2A_GATE_REVIEW.md", "docs/validation/PHASE3_PROGRESS.md", "6f27a68 first GPU distance-filter qualification", "phase2b-6f27a68177d21efb19f7ba4cb35ed4855ec73a90.json sha256:65bc7175ed922a2515ecbf15a1a3b3c80445581c473232bc233d0d370a36cff1", "16f7f59 combined GPU distance and orientation qualification", "phase2b-16f7f5975eff6233c73cc617730e608da3bfff69.json sha256:d15bd4e057f5d308c547964f0228ce4269d9fc5", "2b89a58 certified GPU power-bisector filter", "dfd9c0c three-predicate G4 qualification", "phase2b-dfd9c0c72ca79baaa38d4889c2a8af564debdb08.json sha256:8385559d8bca8dd0a8ab12e3bf0da0ac86199800fab575b0145ea355269919df", "docs/validation/PHASE2B_PROGRESS.md"]
+evidence = ["docs/validation/PHASE2A_GATE_REVIEW.md", "docs/validation/PHASE3_PROGRESS.md", "6f27a68 first GPU distance-filter qualification", "phase2b-6f27a68177d21efb19f7ba4cb35ed4855ec73a90.json sha256:65bc7175ed922a2515ecbf15a1a3b3c80445581c473232bc233d0d370a36cff1", "16f7f59 combined GPU distance and orientation qualification", "phase2b-16f7f5975eff6233c73cc617730e608da3bfff69.json sha256:d15bd4e057f5d308c547964f0228ce4269d9fc5", "2b89a58 certified GPU power-bisector filter", "dfd9c0c three-predicate G4 qualification", "phase2b-dfd9c0c72ca79baaa38d4889c2a8af564debdb08.json sha256:8385559d8bca8dd0a8ab12e3bf0da0ac86199800fab575b0145ea355269919df", "4cccb0d hardened phase2b campaign certificate schema", "971f2df resident GPU predicate context", "docs/validation/PHASE2B_PROGRESS.md"]
 blocking_reason = ""
 
 [[phases]]

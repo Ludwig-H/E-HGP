@@ -41,13 +41,37 @@ Cette écriture évite division, carrés et soustraction de deux grandes sommes 
 
 Le résultat GPU n'est connu que si l'intervalle final est strictement positif ou strictement négatif. Zéro, underflow, overflow ou intervalle contenant zéro donnent `unknown`; le témoin rationnel et les moments exacts des labels sont alors reconstruits et transmis à `decide_power_bisector_side` en multiprécision. Le mode d'audit utilise le même oracle rationnel exact pour chaque signe GPU connu. Le runner accepte désormais des lots homogènes distance, orientation ou bisecteur de puissance et refuse toute transaction qui mélange les prédicats.
 
+## Réduction des transferts et de la mémoire froide
+
+Les trois noyaux renvoient désormais uniquement un `FilterSign` signé d'un octet par entrée. Les identifiants de replay restent autoritatifs sur l'hôte et sont réassociés par l'index du lot; ils ne sont plus copiés vers le device ni recopiés dans une structure de sortie paddée. Cette transformation supprime un buffer, une allocation et une copie H2D par lot, puis réduit la copie D2H de 16 octets à un octet par décision, sans modifier l'API publique, les commandes de replay ni la politique de fallback.
+
+Le chemin `summary-only` ne construit plus les chaînes `replay_command`, qui n'étaient ni émises ni contrôlées dans ce mode. Le benchmark froid ne conserve plus simultanément les trois gros payloads : il construit, mesure puis libère un prédicat avant de passer au suivant. Ces changements réduisent le pic de mémoire hôte du protocole froid et ne changent aucun signe scientifique.
+
+## Contexte CUDA résident
+
+Le commit `971f2df` introduit `PredicateFilterContext`, qui conserve un stream CUDA non bloquant et trois espaces de travail à capacité maximale réutilisable : coordonnées SoA, cardinalités de labels et signes de sortie. Sa construction reste purement hôte; le runtime CUDA n'est initialisé qu'au premier lot non vide. Les trois API historiques créent un contexte éphémère compatible, tandis que les nouvelles surcharges acceptent un handle move-only dont l'état partagé reste vivant jusqu'à la résolution de toutes les futures déjà planifiées.
+
+Un mutex sérialise uniquement réservation, transferts, noyau, retour des signes et synchronisation sur un même contexte. La classification des sorties, l'audit multiprécision et le fallback CPU s'exécutent hors de cette section critique. Toute erreur CUDA ou anomalie post-GPU avant publication empoisonne ce contexte et les appels suivants échouent fermé; une validation d'entrée refusée avant le GPU ne l'empoisonne pas et un autre contexte reste indépendant. L'ordinal propriétaire est réactivé puis restauré autour de chaque section et de la destruction. Les fonctions device, les intervalles dirigés, l'ordre des opérations et la règle `unknown` vers CPU exact sont inchangés. Cette architecture doit encore recevoir sa qualification G4 de réutilisation et sa mesure chaude avant toute revendication de gain.
+
+## Campagne de fermeture résumable
+
+Le commit `f1a917fd93ccf27297f654027c065cc8f2a32466` ajoute `phase2b_predicate_campaign.py`, un runner transactionnel destiné à la porte de sortie 2B. En mode `both`, il rejoue d'abord la graine gelée de phase 2A, puis une graine indépendante de phase 2B, `4257325f47505532`. Chaque graine produit 10 800 000 cas de base, répartis également entre les trois prédicats, et 1 080 000 signes métamorphiques, soit 11 880 000 signes par corpus et 23 760 000 signes agrégés lorsque les deux campagnes sont achevées.
+
+Chaque signe est contrôlé par trois voies indépendantes : l'oracle entier-dyadique du générateur, le replay CPU forcé en multiprécision et la relation métamorphique lorsqu'elle s'applique. Le résultat GPU est le système sous test : un signe FP64 connu doit coïncider avec ces contrôles et tout `unknown` doit aboutir à une décision CPU exacte. Les racines ordonnées distinctes et la graine indépendante établissent que les deux flux canoniques ne sont pas identiques; elles ne prouvent ni ne revendiquent une disjonction cas par cas de l'ensemble complet des entrées.
+
+Les chunks sont homogènes par prédicat, bornés à 196 608 cas de base, sérialisés en JSON canonique et chaînés par quatre racines SHA-256 pour le corpus, l'oracle, le replay CPU et le replay GPU. Un verrou POSIX exclut deux écrivains; chaque chunk et manifeste est publié par écriture temporaire, `fsync`, vérification, renommage atomique et `fsync` du répertoire. Une contradiction, un fichier modifié, une racine ou un compteur incohérent, un chunk non contigu ou une sortie non canonique échoue fermé sans avancer le checkpoint.
+
+L'audit du premier schéma a montré que ses racines scientifiques étaient correctes mais que le certificat ne persistait pas le détail par métamorphisme et relation, ne rejetait pas tous les reçus orphelins et ne proposait pas de vérification finale en lecture seule. Le commit `4cccb0d` publie le schéma `1.1.0`, qui ferme ces défauts : il conserve les deux répartitions métamorphiques, impose les égalités exactes entre zéros et signes, entre sorties GPU connues et replis, puis entre total et replay CPU multiprécision; il rejette tout fichier temporaire, lien ou chunk non référencé. `--verify-only` relit sans écriture la chaîne complète, les certificats, l'agrégat, les exécutables et la provenance Git. Un agrégat isolé porte explicitement `single_campaign_only`; seule la paire complète peut porter `independent_seed_and_distinct_corpus_root`.
+
+Le replay préliminaire `1.0.0` de la graine Phase 2A sur `f1a917f` a néanmoins achevé 55 chunks : 10 800 000 cas de base et 1 080 000 métamorphismes, soit 11 880 000 signes. Les racines gelées corpus `76544b0c85c2f6602e560bd007762609e1feb080f5fe13a71ec4d0d3f31f294b` et oracle `62a4f14bc4d25971d67d7c321bdea9091d45f7a17dc37d79a292fd34cd078210` sont reproduites. Le GPU certifie 11 304 000 signes et transmet 576 000 cas au CPU; aucun signe n'est erroné et aucun inconnu ne reste. L'archive complète des reçus et les deux exécutables sont conservés sous `/tmp/morsehgp3d-phase2b-f1a917f-preliminary-evidence/`; l'archive a pour SHA-256 `1addfa61f9c842faa3f828514e9a07abbf2abd024b9bdc2acabe3bafd7832ba8`. Ce replay sert de preuve préliminaire et de mesure de bout en bout, mais son schéma insuffisant interdit de l'utiliser pour fermer la porte. Les certificats finaux `1.1.0` conservent `phase_gate_closed=false` et `qualification_claimed=false` jusqu'à la revue séparée de la porte.
+
 ## Validations locales avant qualification matérielle
 
-- workflow `cpu-release` : 28 tests sur 28 réussis, contrôle statique 2B inclus;
-- contrôle statique 2B : 36 mutations négatives rejetées, notamment les inversions des directions `rd/ru`, des extrémités de produit, des signes de cofacteurs, du facteur `q-r` et de la réduction homogène;
+- workflows `cpu-release` et `sanitizer` : 30 tests sur 30 réussis dans chacun, contrôle statique 2B, test du contexte résident et smoke de reprise de campagne inclus;
+- contrôle statique 2B : 59 mutations négatives rejetées, notamment les inversions des directions `rd/ru`, des extrémités de produit, des signes de cofacteurs, du facteur `q-r`, de la réduction homogène, de la sortie device compacte, de la mémoire `summary-only`, de l'affinité CUDA et de la réutilisation résidentielle;
 - compilation syntaxique stricte des unités hôtes : réussie;
 - différentiel distance renforcé avec lanceur GPU simulé : 2 064 cas, dont douze cas non entiers ciblant séparément soustraction, multiplication et addition dirigées; 2 061 signes connus et trois replis CPU, zéro `unknown` terminal;
-- corpus orientation : 2 070 cas relus par un oracle rationnel indépendant et par une émulation bit-à-bit des intervalles dirigés; 2 065 signes GPU obligatoires, zéro mauvais signe et zéro `unknown` terminal après replay CPU;
+- corpus orientation : 2 070 cas relus par un oracle rationnel indépendant et par une émulation bit-à-bit des intervalles dirigés; 2 067 signes GPU obligatoires, zéro mauvais signe et zéro `unknown` terminal après replay CPU;
 - corpus bisecteur de puissance : 2 079 cas construits par un oracle direct `Fraction`, dont 2 067 signes GPU obligatoires, six cas adversariaux facultativement filtrables, six replis obligatoires et quatre zéros exacts; l'identité affine secondaire est vérifiée indépendamment pour chaque cas et une paire de fixtures impose le tri axial face à un overflow créé par l'ordre lexicographique;
 - test mathématique indépendant de la multiplication d'intervalles : 100 000 paires aléatoires, tous les quadrants couverts, 65 559 enveloppes finies exactes et 34 441 overflows rejetés de façon conservatrice;
 - replay CPU multiprécision de toutes les commandes distance, orientation et bisecteur de puissance : réussi.
@@ -92,12 +116,22 @@ L'artefact final hors dépôt est `/tmp/morsehgp3d-phase2b-dfd9c0c72ca79baaa38d4
 
 La génération ciblée `2026-07-17T13:19:39.826-07:00` a été arrêtée puis relue indépendamment : état final `TERMINATED` certifié à `2026-07-17T20:24:18Z`. Aucune autre VM `project=e-hgp` active n'a été observée et la clé OS Login éphémère a été révoquée. Deux essais préparatoires, arrêtés et certifiés séparément, ont permis de corriger la remontée des journaux puis le point de sous-montage Docker avant cette exécution réussie.
 
+## Qualification matérielle de l'état `f1a917f` du 17 juillet 2026
+
+Le worker G4 a compilé et exécuté le commit propre et poussé `f1a917fd93ccf27297f654027c065cc8f2a32466` sur la même cible `g4-standard-48` Spot. Les profils CUDA release et audit, l'AOT `sm_120` sans PTX et les trois exécutions de `compute-sanitizer --tool memcheck --leak-check full` réussissent.
+
+Le différentiel distance traite 2 064 cas : 2 061 signes GPU connus et trois `unknown` transmis au CPU. Le différentiel orientation traite 2 070 cas : 2 067 signes GPU connus et trois replis. Le différentiel de puissance traite 2 079 cas : 2 073 signes GPU connus et six replis, dont quatre zéros exacts. Tous les signes GPU connus sont audités, aucun signe ne contredit l'oracle et les trois campagnes finissent avec `remaining_unknown=0`.
+
+Le benchmark froid de processus complet traite 262 144 cas par prédicat sur trois répétitions. Les médianes sont de 313 195 distances par seconde, 271 907 orientations par seconde et 129 528 bisecteurs de puissance par seconde. Les temps médians correspondants sont 0,837 s, 0,964 s et 2,024 s. Ce protocole inclut toujours parsing, création du contexte, allocations, transferts, noyau et sérialisation; il ne mesure pas un chemin résident.
+
+L'artefact worker hors dépôt est `/tmp/phase2b-f1a917fd93ccf27297f654027c065cc8f2a32466.json`, de 2 423 octets et de SHA-256 `0628657deab59c38c0b896dbe8da909e81214f76140577b2536f0b91ce5c865b`. Il conserve immuablement `public_status=null`, `scientific_result_claimed=false` et `status=worker_passed_pending_shutdown`. Après l'archivage du replay préliminaire, la génération ciblée `2026-07-17T14:08:37.248-07:00` a été arrêtée et relue avec `lastStopTimestamp=2026-07-17T14:48:27.452-07:00` : état final `TERMINATED`. Aucune autre VM `project=e-hgp` active n'a été observée; la clé OS Login éphémère a été révoquée, vérifiée absente puis supprimée. Cette qualification ne ferme pas la phase 2B.
+
 ## Travaux restant avant la porte de sortie
 
-- étendre le différentiel au corpus distance de la phase 2A et à la campagne supplémentaire requise;
+- terminer puis vérifier l'agrégat de la campagne longue : corpus gelé de phase 2A et corpus indépendant de phase 2B, avec zéro contradiction et zéro `remaining_unknown`;
 - porter uniquement les expansions GPU dont le gain est mesuré et conserver les autres replis exacts sur CPU;
-- introduire un contexte résident et des espaces de travail réutilisables afin de séparer le coût du noyau de celui du processus froid;
+- qualifier sur G4 la réutilisation du contexte résident, son empoisonnement fermé et son absence de fuite, puis séparer mesure froide et mesure chaude;
 - mesurer et publier les taux de chaque étage sans en faire une condition de correction;
 - vérifier que tout `unknown` GPU est transmis au CPU sur l'ensemble des prédicats portés.
 
-La porte de sortie 2B exigera zéro différence CPU/GPU sur le corpus de phase 2A et sur au moins dix millions de signes supplémentaires. Elle reste donc ouverte après ce premier incrément.
+La porte de sortie 2B exigera zéro différence CPU/GPU sur le corpus de phase 2A et sur au moins dix millions de signes supplémentaires. Elle reste ouverte tant que la campagne longue n'a pas publié et vérifié ses deux certificats complets et leur agrégat.
