@@ -206,6 +206,16 @@ if(TARGET morsehgp3d_replay_predicate)
       "${PROJECT_SOURCE_DIR}/.."
   )
   add_test(
+    NAME morsehgp3d.phase2b_predicate_campaign_differential
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_phase2b_predicate_campaign.py"
+      "${PROJECT_SOURCE_DIR}/tools/phase2b_predicate_campaign.py"
+      "$<TARGET_FILE:morsehgp3d_replay_predicate>"
+      --source
+      "${PROJECT_SOURCE_DIR}/.."
+  )
+  add_test(
     NAME morsehgp3d.affine_replay_differential
     COMMAND
       "${Python3_EXECUTABLE}"
