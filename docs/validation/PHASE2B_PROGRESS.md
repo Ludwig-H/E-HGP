@@ -39,7 +39,7 @@ Le GPU ne publie toujours qu'un signe strictement séparé de zéro. Coplanarit�
 - test mathématique indépendant de la multiplication d'intervalles : 100 000 paires aléatoires, tous les quadrants couverts, 65 559 enveloppes finies exactes et 34 441 overflows rejetés de façon conservatrice;
 - replay CPU multiprécision de toutes les commandes distance et orientation : réussi.
 
-Le lanceur simulé et l'émulation mathématique vérifient l'orchestration, les schémas, les compteurs, le replay et les formules. Ils ne qualifient ni le code device `orientation_3d`, ni ses performances sur G4. Cette qualification matérielle reste requise avant d'ajouter le deuxième incrément aux preuves de phase.
+Le lanceur simulé et l'émulation mathématique vérifient l'orchestration, les schémas, les compteurs, le replay et les formules. La qualification matérielle combinée ci-dessous vérifie ensuite le code device réel et mesure le chemin complet sur G4.
 
 ## Qualification matérielle du 17 juillet 2026
 
@@ -53,10 +53,22 @@ L'artefact hors dépôt est `/tmp/morsehgp3d-phase2b-6f27a68177d21efb19f7ba4cb35
 
 Après le succès, l'arrêt ciblé de la génération `2026-07-17T10:24:56.396-07:00` a été exécuté et relu indépendamment : état final `TERMINATED` à `2026-07-17T17:27:51.338224Z`. Aucune autre VM `project=e-hgp` active n'a été observée et la clé OS Login de session a été révoquée puis supprimée. Deux tentatives préparatoires avaient échoué avant compilation sur l'accès Docker et son point de montage; chacune avait déjà été arrêtée et certifiée `TERMINATED` avant la tentative suivante.
 
+## Qualification matérielle combinée du 17 juillet 2026
+
+Le commit propre et poussé `16f7f5975eff6233c73cc617730e608da3bfff69` a été compilé en profils CUDA release et audit avec NVCC 12.9.86 sur la même cible G4 Spot gardée. Le noyau distance utilise 39 registres et le noyau orientation 69 registres; `ptxas` ne signale aucun spill pour les deux. `cuobjdump` ne trouve que l'ELF AOT `sm_120` et aucune entrée PTX.
+
+Le différentiel distance traite 2 064 cas : 2 061 signes GPU connus, tous audités par l'oracle CPU multiprécision, puis trois replis attendus. Le différentiel orientation traite 2 070 cas : 2 067 signes GPU connus audités et trois replis attendus pour coplanarité, underflow et overflow. Les deux campagnes finissent avec zéro contradiction et zéro `unknown` terminal. Le replay CPU multiprécision et `compute-sanitizer --tool memcheck --leak-check full` réussissent séparément pour les deux prédicats.
+
+Le benchmark reproductible mesure un nouveau processus complet, y compris parsing, création du contexte CUDA, allocations, copies, noyau, replis éventuels et sérialisation; il ne représente donc pas un débit de noyau résident. Sur 262 144 cas et trois répétitions, la médiane atteint 313 022 comparaisons de distances par seconde en 0,837 s et 274 559 orientations par seconde en 0,955 s. Les minima chronométrés sont respectivement 0,832 s et 0,949 s. Tous les cas du benchmark sont certifiés sur le GPU sans repli.
+
+L'artefact hors dépôt est `/tmp/morsehgp3d-phase2b-16f7f5975eff6233c73cc617730e608da3bfff69-20260717T184315Z/phase2b-16f7f5975eff6233c73cc617730e608da3bfff69.json`, de 2 184 octets et de SHA-256 `d15bd4e057f5d308c5479647cda409eea1f735ab35b5c964f0228ce4269d9fc5`. Son schéma est `morsehgp3d.phase2b.predicates.qualification.v1`; il conserve `public_status=null` et `scientific_result_claimed=false`.
+
+La génération ciblée `2026-07-17T11:43:47.723-07:00` a été arrêtée puis relue indépendamment : état `TERMINATED`, dernier arrêt GCE `2026-07-17T11:46:22.897-07:00`. Aucune autre VM `project=e-hgp` active n'a été observée et la clé OS Login de session a été révoquée puis supprimée.
+
 ## Travaux restant avant la porte de sortie
 
 - étendre le différentiel au corpus distance de la phase 2A et à la campagne supplémentaire requise;
-- qualifier matériellement `orientation_3d`, puis porter le bisecteur de puissance et les expansions GPU réellement rentables;
+- porter le bisecteur de puissance et les expansions GPU réellement rentables;
 - mesurer et publier les taux de chaque étage sans en faire une condition de correction;
 - vérifier que tout `unknown` GPU est transmis au CPU sur l'ensemble des prédicats portés.
 
