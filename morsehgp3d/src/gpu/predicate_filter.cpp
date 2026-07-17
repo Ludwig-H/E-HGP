@@ -41,6 +41,29 @@ struct IndexedDecision {
       PredicateSign::zero, CertificationStage::cpu_multiprecision};
 };
 
+class PostGpuPublicationGuard final {
+ public:
+  explicit PostGpuPublicationGuard(
+      detail::PredicateFilterContextState& context) noexcept
+      : context_(context) {}
+
+  PostGpuPublicationGuard(const PostGpuPublicationGuard&) = delete;
+  PostGpuPublicationGuard& operator=(const PostGpuPublicationGuard&) = delete;
+
+  ~PostGpuPublicationGuard() {
+    if (armed_) {
+      context_.mark_poisoned();
+    }
+  }
+
+  void arm() noexcept { armed_ = true; }
+  void release() noexcept { armed_ = false; }
+
+ private:
+  detail::PredicateFilterContextState& context_;
+  bool armed_{false};
+};
+
 void require_finite_words(
     const std::array<std::uint64_t, 3>& words,
     const char* label) {
@@ -321,11 +344,16 @@ void record_cpu_stage(
 }
 
 [[nodiscard]] SquaredDistanceBatchResult decide_batch(
+    detail::PredicateFilterContextState& context,
     std::vector<SquaredDistanceFilterInput> inputs,
     SquaredDistanceBatchOptions options) {
   validate_inputs(inputs);
+  PostGpuPublicationGuard publication_guard{context};
   const std::vector<FilterSign> gpu_outputs =
-      detail::filter_squared_distance_signs_on_gpu(inputs);
+      detail::filter_squared_distance_signs_on_gpu(context, inputs);
+  if (!inputs.empty()) {
+    publication_guard.arm();
+  }
   if (gpu_outputs.size() != inputs.size()) {
     throw std::runtime_error("the Phase 2B GPU output cardinality changed");
   }
@@ -394,16 +422,22 @@ void record_cpu_stage(
     }
   }
   result.counters.remaining_unknown = 0U;
+  publication_guard.release();
   return result;
 }
 
 [[nodiscard]] Orientation3DBatchResult decide_batch(
+    detail::PredicateFilterContextState& context,
     std::vector<Orientation3DFilterInput> inputs,
     Orientation3DBatchOptions options) {
   validate_inputs(
       std::span<const Orientation3DFilterInput>{inputs.data(), inputs.size()});
+  PostGpuPublicationGuard publication_guard{context};
   const std::vector<FilterSign> gpu_outputs =
-      detail::filter_orientation_3d_signs_on_gpu(inputs);
+      detail::filter_orientation_3d_signs_on_gpu(context, inputs);
+  if (!inputs.empty()) {
+    publication_guard.arm();
+  }
   if (gpu_outputs.size() != inputs.size()) {
     throw std::runtime_error(
         "the Phase 2B orientation GPU output cardinality changed");
@@ -475,16 +509,22 @@ void record_cpu_stage(
     }
   }
   result.counters.remaining_unknown = 0U;
+  publication_guard.release();
   return result;
 }
 
 [[nodiscard]] PowerBisectorBatchResult decide_batch(
+    detail::PredicateFilterContextState& context,
     std::vector<PowerBisectorFilterInput> inputs,
     PowerBisectorBatchOptions options) {
   validate_inputs(
       std::span<const PowerBisectorFilterInput>{inputs.data(), inputs.size()});
+  PostGpuPublicationGuard publication_guard{context};
   const std::vector<FilterSign> gpu_outputs =
-      detail::filter_power_bisector_signs_on_gpu(inputs);
+      detail::filter_power_bisector_signs_on_gpu(context, inputs);
+  if (!inputs.empty()) {
+    publication_guard.arm();
+  }
   if (gpu_outputs.size() != inputs.size()) {
     throw std::runtime_error(
         "the Phase 2B power-bisector GPU output cardinality changed");
@@ -555,39 +595,96 @@ void record_cpu_stage(
     }
   }
   result.counters.remaining_unknown = 0U;
+  publication_guard.release();
   return result;
 }
 
 }  // namespace
 
+PredicateFilterContext::PredicateFilterContext()
+    : state_(std::make_shared<detail::PredicateFilterContextState>()) {}
+
+PredicateFilterContext::~PredicateFilterContext() noexcept = default;
+
+PredicateFilterContext::PredicateFilterContext(
+    PredicateFilterContext&&) noexcept = default;
+
+PredicateFilterContext& PredicateFilterContext::operator=(
+    PredicateFilterContext&&) noexcept = default;
+
+std::future<SquaredDistanceBatchResult> decide_squared_distance_batch_async(
+    PredicateFilterContext& context,
+    std::vector<SquaredDistanceFilterInput> inputs,
+    SquaredDistanceBatchOptions options) {
+  if (!context.state_) {
+    throw std::logic_error(
+        "cannot schedule work on a moved-from predicate filter context");
+  }
+  std::shared_ptr<detail::PredicateFilterContextState> state = context.state_;
+  return std::async(
+      std::launch::async,
+      [state = std::move(state), owned_inputs = std::move(inputs), options]()
+          mutable {
+        return decide_batch(*state, std::move(owned_inputs), options);
+      });
+}
+
+std::future<Orientation3DBatchResult> decide_orientation_3d_batch_async(
+    PredicateFilterContext& context,
+    std::vector<Orientation3DFilterInput> inputs,
+    Orientation3DBatchOptions options) {
+  if (!context.state_) {
+    throw std::logic_error(
+        "cannot schedule work on a moved-from predicate filter context");
+  }
+  std::shared_ptr<detail::PredicateFilterContextState> state = context.state_;
+  return std::async(
+      std::launch::async,
+      [state = std::move(state), owned_inputs = std::move(inputs), options]()
+          mutable {
+        return decide_batch(*state, std::move(owned_inputs), options);
+      });
+}
+
+std::future<PowerBisectorBatchResult> decide_power_bisector_batch_async(
+    PredicateFilterContext& context,
+    std::vector<PowerBisectorFilterInput> inputs,
+    PowerBisectorBatchOptions options) {
+  if (!context.state_) {
+    throw std::logic_error(
+        "cannot schedule work on a moved-from predicate filter context");
+  }
+  std::shared_ptr<detail::PredicateFilterContextState> state = context.state_;
+  return std::async(
+      std::launch::async,
+      [state = std::move(state), owned_inputs = std::move(inputs), options]()
+          mutable {
+        return decide_batch(*state, std::move(owned_inputs), options);
+      });
+}
+
 std::future<SquaredDistanceBatchResult> decide_squared_distance_batch_async(
     std::vector<SquaredDistanceFilterInput> inputs,
     SquaredDistanceBatchOptions options) {
-  return std::async(
-      std::launch::async,
-      [owned_inputs = std::move(inputs), options]() mutable {
-        return decide_batch(std::move(owned_inputs), options);
-      });
+  PredicateFilterContext context;
+  return decide_squared_distance_batch_async(
+      context, std::move(inputs), options);
 }
 
 std::future<Orientation3DBatchResult> decide_orientation_3d_batch_async(
     std::vector<Orientation3DFilterInput> inputs,
     Orientation3DBatchOptions options) {
-  return std::async(
-      std::launch::async,
-      [owned_inputs = std::move(inputs), options]() mutable {
-        return decide_batch(std::move(owned_inputs), options);
-      });
+  PredicateFilterContext context;
+  return decide_orientation_3d_batch_async(
+      context, std::move(inputs), options);
 }
 
 std::future<PowerBisectorBatchResult> decide_power_bisector_batch_async(
     std::vector<PowerBisectorFilterInput> inputs,
     PowerBisectorBatchOptions options) {
-  return std::async(
-      std::launch::async,
-      [owned_inputs = std::move(inputs), options]() mutable {
-        return decide_batch(std::move(owned_inputs), options);
-      });
+  PredicateFilterContext context;
+  return decide_power_bisector_batch_async(
+      context, std::move(inputs), options);
 }
 
 }  // namespace morsehgp3d::gpu

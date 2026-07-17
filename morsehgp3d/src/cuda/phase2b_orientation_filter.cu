@@ -1,5 +1,6 @@
 #include "phase2b_orientation_filter_internal.hpp"
 #include "phase2b_interval.cuh"
+#include "phase2b_predicate_context.cuh"
 
 #include <cuda_runtime.h>
 
@@ -7,8 +8,6 @@
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
-#include <string>
-#include <utility>
 #include <vector>
 
 #if !defined(__CUDACC__)
@@ -125,80 +124,10 @@ __global__ void morsehgp3d_phase2b_orientation_3d_filter_kernel(
   outputs[index] = filter_orientation_3d(coordinate_bits, count, index);
 }
 
-class CudaFailure final : public std::runtime_error {
- public:
-  CudaFailure(cudaError_t code, std::string operation)
-      : std::runtime_error(message(code, operation)) {}
-
- private:
-  [[nodiscard]] static std::string message(
-      cudaError_t code, const std::string& operation) {
-    const char* description = cudaGetErrorString(code);
-    return operation + " failed: " +
-           (description == nullptr ? std::string{"unknown CUDA error"}
-                                   : std::string{description});
-  }
-};
-
-void check_cuda(cudaError_t code, std::string operation) {
-  if (code != cudaSuccess) {
-    throw CudaFailure(code, std::move(operation));
-  }
-}
-
-class Stream final {
- public:
-  Stream() {
-    check_cuda(
-        cudaStreamCreateWithFlags(&stream_, cudaStreamNonBlocking),
-        "cudaStreamCreateWithFlags");
-  }
-
-  Stream(const Stream&) = delete;
-  Stream& operator=(const Stream&) = delete;
-
-  ~Stream() {
-    if (stream_ != nullptr) {
-      static_cast<void>(cudaStreamDestroy(stream_));
-    }
-  }
-
-  [[nodiscard]] cudaStream_t get() const noexcept { return stream_; }
-
- private:
-  cudaStream_t stream_{nullptr};
-};
-
-template <typename Value>
-class DeviceBuffer final {
- public:
-  explicit DeviceBuffer(std::size_t count) {
-    if (count > std::numeric_limits<std::size_t>::max() / sizeof(Value)) {
-      throw std::length_error("Phase 2B device allocation size overflow");
-    }
-    check_cuda(
-        cudaMalloc(reinterpret_cast<void**>(&data_), count * sizeof(Value)),
-        "cudaMalloc");
-  }
-
-  DeviceBuffer(const DeviceBuffer&) = delete;
-  DeviceBuffer& operator=(const DeviceBuffer&) = delete;
-
-  ~DeviceBuffer() {
-    if (data_ != nullptr) {
-      static_cast<void>(cudaFree(data_));
-    }
-  }
-
-  [[nodiscard]] Value* get() noexcept { return data_; }
-
- private:
-  Value* data_{nullptr};
-};
-
 }  // namespace
 
 std::vector<FilterSign> filter_orientation_3d_signs_on_gpu(
+    PredicateFilterContextState& context,
     std::span<const Orientation3DFilterInput> inputs) {
   if (inputs.empty()) {
     return {};
@@ -228,35 +157,37 @@ std::vector<FilterSign> filter_orientation_3d_signs_on_gpu(
     }
   }
 
-  Stream stream;
-  DeviceBuffer<std::uint64_t> device_coordinate_bits(coordinate_bits.size());
-  DeviceBuffer<FilterSign> device_outputs(inputs.size());
   std::vector<FilterSign> outputs(inputs.size());
 
-  check_cuda(
-      cudaMemcpyAsync(
-          device_coordinate_bits.get(),
-          coordinate_bits.data(),
-          coordinate_bits.size() * sizeof(std::uint64_t),
-          cudaMemcpyHostToDevice,
-          stream.get()),
-      "cudaMemcpyAsync orientation coordinates host-to-device");
-  morsehgp3d_phase2b_orientation_3d_filter_kernel
-      <<<static_cast<unsigned int>(block_count), kThreadsPerBlock, 0U,
-         stream.get()>>>(
-          device_coordinate_bits.get(),
-          device_outputs.get(),
-          inputs.size());
-  check_cuda(cudaGetLastError(), "Phase 2B orientation filter launch");
-  check_cuda(
-      cudaMemcpyAsync(
-          outputs.data(),
-          device_outputs.get(),
-          outputs.size() * sizeof(FilterSign),
-          cudaMemcpyDeviceToHost,
-          stream.get()),
-      "cudaMemcpyAsync orientation results device-to-host");
-  check_cuda(cudaStreamSynchronize(stream.get()), "cudaStreamSynchronize");
+  execute_predicate_filter_gpu_section(
+      context,
+      coordinate_bits.size(),
+      0U,
+      inputs.size(),
+      [&](const PredicateFilterExecutionResources& resources) {
+        check_predicate_filter_cuda(
+            cudaMemcpyAsync(
+                resources.coordinate_bits,
+                coordinate_bits.data(),
+                coordinate_bits.size() * sizeof(std::uint64_t),
+                cudaMemcpyHostToDevice,
+                resources.stream),
+            "cudaMemcpyAsync orientation coordinates host-to-device");
+        morsehgp3d_phase2b_orientation_3d_filter_kernel
+            <<<static_cast<unsigned int>(block_count), kThreadsPerBlock, 0U,
+               resources.stream>>>(
+                resources.coordinate_bits, resources.outputs, inputs.size());
+        check_predicate_filter_cuda(
+            cudaGetLastError(), "Phase 2B orientation filter launch");
+        check_predicate_filter_cuda(
+            cudaMemcpyAsync(
+                outputs.data(),
+                resources.outputs,
+                outputs.size() * sizeof(FilterSign),
+                cudaMemcpyDeviceToHost,
+                resources.stream),
+            "cudaMemcpyAsync orientation results device-to-host");
+      });
   return outputs;
 }
 

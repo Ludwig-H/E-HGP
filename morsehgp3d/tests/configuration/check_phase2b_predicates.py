@@ -15,6 +15,10 @@ from typing import Any, Callable
 
 PUBLIC_HEADER = Path("include/morsehgp3d/gpu/predicate_filter.hpp")
 INTERVAL_HEADER = Path("src/cuda/phase2b_interval.cuh")
+CONTEXT_INTERNAL_HEADER = Path(
+    "src/cuda/phase2b_predicate_context_internal.hpp"
+)
+CONTEXT_CUDA_HEADER = Path("src/cuda/phase2b_predicate_context.cuh")
 INTERNAL_HEADER = Path("src/cuda/phase2b_distance_filter_internal.hpp")
 CUDA_SOURCE = Path("src/cuda/phase2b_distance_filter.cu")
 ORIENTATION_INTERNAL_HEADER = Path(
@@ -27,12 +31,16 @@ POWER_INTERNAL_HEADER = Path(
 POWER_CUDA_SOURCE = Path("src/cuda/phase2b_power_bisector_filter.cu")
 HOST_SOURCE = Path("src/gpu/predicate_filter.cpp")
 CLI_SOURCE = Path("src/tools/gpu_predicate_replay.cpp")
+CONTEXT_HARNESS_SOURCE = Path(
+    "src/tools/gpu_predicate_context_harness.cpp"
+)
 CMAKE_SOURCE = Path("CMakeLists.txt")
 CUDA_MODULE = Path("cmake/MorseHGP3DCuda.cmake")
 PRESETS_SOURCE = Path("CMakePresets.json")
 
 LIBRARY_TARGET = "morsehgp3d_gpu_predicates"
 REPLAY_TARGET = "morsehgp3d_gpu_predicate_replay"
+CONTEXT_HARNESS_TARGET = "morsehgp3d_gpu_predicate_context_harness"
 CUDA_PRESETS = ("cuda-release", "cuda-audit")
 DIRECTED_INTRINSICS = (
     "__dsub_rd",
@@ -89,6 +97,8 @@ def load_contract(project: Path) -> ContractFiles:
     source_paths = (
         PUBLIC_HEADER,
         INTERVAL_HEADER,
+        CONTEXT_INTERNAL_HEADER,
+        CONTEXT_CUDA_HEADER,
         INTERNAL_HEADER,
         CUDA_SOURCE,
         ORIENTATION_INTERNAL_HEADER,
@@ -97,6 +107,7 @@ def load_contract(project: Path) -> ContractFiles:
         POWER_CUDA_SOURCE,
         HOST_SOURCE,
         CLI_SOURCE,
+        CONTEXT_HARNESS_SOURCE,
         CMAKE_SOURCE,
         CUDA_MODULE,
     )
@@ -144,6 +155,22 @@ def function_body(text: str, name: str) -> str:
             depth -= 1
         cursor += 1
     require(depth == 0, f"unterminated function body: {name}")
+    return clean[match.end() : cursor - 1]
+
+
+def class_body(text: str, name: str) -> str:
+    clean = without_comments(text)
+    match = re.search(rf"\bclass\s+{re.escape(name)}\b[^;{{]*\{{", clean)
+    require(match is not None, f"missing class body: {name}")
+    depth = 1
+    cursor = match.end()
+    while cursor < len(clean) and depth > 0:
+        if clean[cursor] == "{":
+            depth += 1
+        elif clean[cursor] == "}":
+            depth -= 1
+        cursor += 1
+    require(depth == 0, f"unterminated class body: {name}")
     return clean[match.end() : cursor - 1]
 
 
@@ -304,6 +331,180 @@ def validate_public_header(header: str) -> None:
         re.search(r"std::future\s*<", without_comments(header)) is not None,
         "the public GPU predicate API does not expose asynchronous completion",
     )
+    clean = without_comments(header)
+    context = class_body(clean, "PredicateFilterContext")
+    require(
+        re.search(
+            r"std::shared_ptr\s*<\s*detail::PredicateFilterContextState\s*>\s*"
+            r"state_\b",
+            context,
+        )
+        is not None,
+        "the public predicate context does not own shared asynchronous state",
+    )
+    require(
+        re.search(
+            r"PredicateFilterContext\s*\(\s*const\s+"
+            r"PredicateFilterContext\s*&\s*\)\s*=\s*delete",
+            context,
+        )
+        is not None
+        and re.search(
+            r"operator=\s*\(\s*const\s+PredicateFilterContext\s*&\s*\)\s*"
+            r"=\s*delete",
+            context,
+        )
+        is not None,
+        "the public predicate context must be non-copyable",
+    )
+    require(
+        re.search(
+            r"PredicateFilterContext\s*\(\s*PredicateFilterContext\s*&&\s*\)\s*"
+            r"noexcept",
+            context,
+        )
+        is not None
+        and re.search(
+            r"operator=\s*\(\s*PredicateFilterContext\s*&&\s*\)\s*noexcept",
+            context,
+        )
+        is not None,
+        "the public predicate context must be nothrow move-enabled",
+    )
+    for function_name in (
+        "decide_squared_distance_batch_async",
+        "decide_orientation_3d_batch_async",
+        "decide_power_bisector_batch_async",
+    ):
+        require(
+            len(
+                re.findall(
+                    rf"{re.escape(function_name)}\s*\(\s*"
+                    r"PredicateFilterContext\s*&",
+                    clean,
+                )
+            )
+            >= 2,
+            f"{function_name} has no public context overload and friendship",
+        )
+
+
+def validate_context_state(internal: str, cuda: str) -> None:
+    internal_clean = without_comments(internal)
+    state = class_body(internal_clean, "PredicateFilterContextState")
+    require(
+        "cuda_runtime" not in internal_clean
+        and "cudaStream_t" not in internal_clean,
+        "the host context state must remain linkable without the CUDA runtime",
+    )
+    require(
+        re.search(r"std::mutex\s+mutex_\b", state) is not None
+        and re.search(
+            r"std::lock_guard\s*<\s*std::mutex\s*>\s+lock\s*\{\s*mutex_\s*\}",
+            state,
+        )
+        is not None,
+        "the resident context does not serialize its GPU critical section",
+    )
+    require(
+        re.search(r"std::shared_ptr\s*<\s*void\s*>\s+cuda_resources_\b", state)
+        is not None,
+        "the host-only context has no type-erased CUDA resource lifetime",
+    )
+    require(
+        re.search(r"std::atomic\s*<\s*bool\s*>\s+poisoned_\b", state)
+        is not None
+        and re.search(
+            r"poisoned_[.]load\s*\(\s*std::memory_order_acquire\s*\)",
+            state,
+        )
+        is not None
+        and re.search(r"catch\s*\(\s*[.][.][.]\s*\)", state) is not None
+        and re.search(r"mark_poisoned\s*\(\s*\)\s*;", state) is not None
+        and re.search(
+            r"poisoned_[.]store\s*\(\s*true\s*,\s*"
+            r"std::memory_order_release\s*\)",
+            state,
+        )
+        is not None,
+        "the resident context does not fail closed after a GPU failure",
+    )
+
+    cuda_clean = without_comments(cuda)
+    require(
+        re.search(r"#\s*if\s*!\s*defined\s*\(\s*__CUDACC__\s*\)", cuda)
+        is not None,
+        "the CUDA resource contract is not guarded against host-only inclusion",
+    )
+    require(
+        len(re.findall(r"\bcudaStreamCreateWithFlags\s*\(", cuda_clean)) == 1
+        and "cudaStreamNonBlocking" in cuda_clean
+        and "cudaStreamDestroy" in cuda_clean
+        and "cudaStreamSynchronize" in cuda_clean,
+        "the resident CUDA resources do not own one reusable synchronized stream",
+    )
+    buffer = class_body(cuda_clean, "PredicateFilterDeviceBuffer")
+    require(
+        re.search(
+            r"if\s*\(\s*required_count\s*<=\s*capacity_\s*\)\s*\{\s*return\s*;",
+            buffer,
+            flags=re.DOTALL,
+        )
+        is not None
+        and "cudaMalloc" in buffer
+        and "cudaFree" in buffer
+        and re.search(r"capacity_\s*=\s*required_count", buffer) is not None,
+        "the resident device buffer does not preserve high-water capacity",
+    )
+    resources = class_body(cuda_clean, "PredicateFilterCudaResources")
+    for value_type, field in (
+        ("std::uint64_t", "coordinate_bits_"),
+        ("std::uint32_t", "cardinalities_"),
+        ("FilterSign", "outputs_"),
+    ):
+        require(
+            re.search(
+                rf"PredicateFilterDeviceBuffer\s*<\s*{re.escape(value_type)}\s*>\s*"
+                rf"{re.escape(field)}\b",
+                resources,
+            )
+            is not None,
+            f"resident CUDA resources are missing reusable {field}",
+        )
+    device_guard = class_body(cuda_clean, "PredicateFilterCudaDeviceGuard")
+    require(
+        "cudaGetDevice" in device_guard
+        and device_guard.count("cudaSetDevice") >= 2
+        and "restore_required_" in device_guard,
+        "resident execution does not activate and restore its owning CUDA device",
+    )
+    require(
+        re.search(r"cudaGetDevice\s*\(\s*&device_\s*\)", resources) is not None
+        and re.search(r"int\s+device_\s*\{\s*-1\s*\}", resources) is not None
+        and "outputs_.abandon()" in resources
+        and "cudaSetDevice(device_)" in resources
+        and "cudaStreamDestroy" in resources,
+        "resident resources do not bind destruction to their creation device",
+    )
+    require(
+        re.search(
+            r"if\s*\(\s*!\s*opaque\s*\)\s*\{\s*opaque\s*=\s*"
+            r"std::make_shared\s*<\s*PredicateFilterCudaResources\s*>",
+            cuda_clean,
+            flags=re.DOTALL,
+        )
+        is not None,
+        "CUDA resources are not initialized lazily inside the shared state",
+    )
+    execute = function_body(cuda_clean, "execute_predicate_filter_gpu_section")
+    require(
+        "state.with_gpu_section" in execute
+        and "PredicateFilterCudaDeviceGuard device_guard{cuda.device()}" in execute
+        and "cuda.reserve" in execute
+        and "cuda.synchronize()" in execute
+        and "cuda.synchronize_after_failure()" in execute,
+        "resident execution does not centralize locking, reuse and synchronization",
+    )
 
 
 def require_directed_call(body: str, call: str, expected: int = 1) -> None:
@@ -430,6 +631,44 @@ def validate_filter_cuda_source(
         INTERVAL_HEADER.name in clean,
         f"the {label} CUDA source bypasses the shared interval contract",
     )
+    require(
+        CONTEXT_CUDA_HEADER.name in clean
+        and "execute_predicate_filter_gpu_section" in clean,
+        f"the {label} CUDA source bypasses the resident execution context",
+    )
+    empty_guard = re.search(
+        r"if\s*\(\s*inputs[.]empty\s*\(\s*\)\s*\)\s*\{\s*"
+        r"return\s*\{\s*\}\s*;\s*\}",
+        clean,
+        flags=re.DOTALL,
+    )
+    execute_offset = clean.find("execute_predicate_filter_gpu_section")
+    require(
+        empty_guard is not None
+        and execute_offset >= 0
+        and empty_guard.end() < execute_offset,
+        f"an empty {label} batch may initialize CUDA resources",
+    )
+    require(
+        re.search(
+            r"PredicateFilterContextState\s*&\s*context",
+            without_comments(internal),
+        )
+        is not None,
+        f"the {label} launcher does not receive resident context state",
+    )
+    for forbidden in (
+        "cudaStreamCreateWithFlags",
+        "cudaStreamDestroy",
+        "cudaMalloc",
+        "cudaFree",
+        "class Stream",
+        "class DeviceBuffer",
+    ):
+        require(
+            forbidden not in clean,
+            f"the {label} CUDA source locally owns forbidden resource {forbidden}",
+        )
     require(
         "FilterSign" in internal and "unknown" in public,
         f"the {label} launch contract loses tri-state semantics",
@@ -612,6 +851,57 @@ def validate_host_source(
         "the host path does not include all private CUDA launch contracts",
     )
     require(
+        re.search(
+            r"PredicateFilterContext::PredicateFilterContext\s*\(\s*\)\s*"
+            r":\s*state_\s*\(\s*std::make_shared\s*<\s*"
+            r"detail::PredicateFilterContextState\s*>",
+            clean,
+            flags=re.DOTALL,
+        )
+        is not None,
+        "the public context does not construct shared host-only state",
+    )
+    require(
+        clean.count("cannot schedule work on a moved-from predicate filter context")
+        == 3
+        and len(
+            re.findall(
+                r"std::shared_ptr\s*<\s*detail::PredicateFilterContextState\s*>\s*"
+                r"state\s*=\s*context[.]state_",
+                clean,
+            )
+        )
+        == 3
+        and len(re.findall(r"decide_batch\s*\(\s*\*state\s*,", clean)) == 3,
+        "context futures do not retain and use their shared state safely",
+    )
+    require(
+        "with_gpu_section" not in clean,
+        "host validation or CPU fallback was pulled into the GPU critical section",
+    )
+    publication_guard = class_body(clean, "PostGpuPublicationGuard")
+    require(
+        "context_.mark_poisoned()" in publication_guard
+        and re.search(r"if\s*\(\s*armed_\s*\)", publication_guard) is not None,
+        "post-GPU publication failures do not poison the shared context",
+    )
+    require(
+        clean.count("PostGpuPublicationGuard publication_guard{context};") == 3
+        and clean.count("publication_guard.arm();") == 3
+        and clean.count("publication_guard.release();") == 3
+        and len(
+            re.findall(
+                r"filter_[A-Za-z0-9_]+_signs_on_gpu\s*\(\s*context\s*,\s*inputs\s*\)"
+                r"\s*;\s*if\s*\(\s*!\s*inputs[.]empty\s*\(\s*\)\s*\)\s*\{\s*"
+                r"publication_guard[.]arm\s*\(\s*\)\s*;",
+                clean,
+                flags=re.DOTALL,
+            )
+        )
+        == 3,
+        "the publication guard is not armed after every successful nonempty GPU section",
+    )
+    require(
         len(re.findall(r"std::launch::async", clean)) >= 6
         and re.search(
             r"fallback_future\s*=\s*std::async\s*\(\s*"
@@ -763,6 +1053,84 @@ def validate_cli(cli: str) -> None:
     )
 
 
+def validate_context_harness(harness: str) -> None:
+    clean = without_comments(harness)
+    for token in (
+        "PredicateFilterContext primary",
+        "PredicateFilterContext secondary",
+        "distance_batch(513U",
+        "orientation_batch(5U",
+        "power_batch(385U",
+        "distance_batch(257U",
+        "orientation_batch(321U",
+        "power_batch(289U",
+        "run_first_independent_pair",
+        "run_second_independent_pair",
+        "resident and ephemeral decisions differ",
+        "resident and ephemeral counters differ",
+        "morsehgp3d.phase2b.resident_context.v1",
+    ):
+        require(token in clean, f"resident CUDA context harness is missing {token}")
+    for function_name in (
+        "decide_squared_distance_batch_async",
+        "decide_orientation_3d_batch_async",
+        "decide_power_bisector_batch_async",
+    ):
+        require(
+            len(re.findall(rf"{re.escape(function_name)}\s*\(", clean)) >= 4,
+            f"resident harness does not compare both {function_name} paths",
+        )
+    for runner, function_name in (
+        ("run_distance", "decide_squared_distance_batch_async"),
+        ("run_orientation", "decide_orientation_3d_batch_async"),
+        ("run_power", "decide_power_bisector_batch_async"),
+    ):
+        body = function_body(clean, runner)
+        require(
+            re.search(
+                rf"{re.escape(function_name)}\s*\(\s*context\s*,\s*inputs",
+                body,
+            )
+            is not None
+            and re.search(
+                rf"{re.escape(function_name)}\s*\(\s*inputs\s*,", body
+            )
+            is not None,
+            f"{runner} does not compare resident and ephemeral execution",
+        )
+    require(
+        len(re.findall(r"BatchOptions\s+[A-Za-z_]*options\s*\{\s*true\s*\}", clean))
+        == 7
+        and "gpu_known_audited != coverage.gpu_known" in clean,
+        "resident harness does not require known-sign GPU audits",
+    )
+    require(
+        re.search(
+            r"run_distance\s*\(\s*primary\s*,\s*\{\s*\}", clean
+        )
+        is not None
+        and re.search(
+            r"run_orientation\s*\(\s*primary\s*,\s*\{\s*\}", clean
+        )
+        is not None
+        and re.search(r"run_power\s*\(\s*primary\s*,\s*\{\s*\}", clean)
+        is not None,
+        "resident harness does not exercise all empty-batch entry points",
+    )
+    require(
+        "gpu_unknown == 0U" in clean
+        and "fallback_batches == 0U" in clean
+        and "exact_zeros == 0U" in clean,
+        "resident harness does not require GPU-unknown CPU fallbacks",
+    )
+    require(
+        re.search(r"if\s*\(\s*argc\s*!=\s*1\s*\)", clean) is not None
+        and clean.count("std::cout") == 2
+        and "std::cerr" in clean,
+        "resident harness output or invocation is not deterministic",
+    )
+
+
 def target_body(cmake: str, command: str, target: str) -> str:
     match = re.search(
         rf"{re.escape(command)}\s*\(\s*{re.escape(target)}\b(?P<body>.*?)\)",
@@ -776,7 +1144,12 @@ def target_body(cmake: str, command: str, target: str) -> str:
 def validate_cmake(cmake: str, cuda_module: str) -> None:
     library_body = target_body(cmake, "add_library", LIBRARY_TARGET)
     replay_body = target_body(cmake, "add_executable", REPLAY_TARGET)
+    harness_body = target_body(
+        cmake, "add_executable", CONTEXT_HARNESS_TARGET
+    )
     for source in (
+        CONTEXT_INTERNAL_HEADER,
+        CONTEXT_CUDA_HEADER,
         CUDA_SOURCE,
         ORIENTATION_CUDA_SOURCE,
         POWER_CUDA_SOURCE,
@@ -789,6 +1162,10 @@ def validate_cmake(cmake: str, cuda_module: str) -> None:
     require(
         CLI_SOURCE.as_posix() in replay_body,
         f"{REPLAY_TARGET} does not compile {CLI_SOURCE}",
+    )
+    require(
+        CONTEXT_HARNESS_SOURCE.as_posix() in harness_body,
+        f"{CONTEXT_HARNESS_TARGET} does not compile {CONTEXT_HARNESS_SOURCE}",
     )
     require(
         re.search(
@@ -804,6 +1181,24 @@ def validate_cmake(cmake: str, cuda_module: str) -> None:
         LIBRARY_TARGET in replay_links
         or "morsehgp3d::gpu_predicates" in replay_links,
         f"{REPLAY_TARGET} is not linked to {LIBRARY_TARGET}",
+    )
+    harness_links = target_body(
+        cmake, "target_link_libraries", CONTEXT_HARNESS_TARGET
+    )
+    require(
+        LIBRARY_TARGET in harness_links
+        or "morsehgp3d::gpu_predicates" in harness_links,
+        f"{CONTEXT_HARNESS_TARGET} is not linked to {LIBRARY_TARGET}",
+    )
+    require(
+        re.search(
+            r"if\s*\(\s*MORSEHGP3D_ENABLE_CUDA\s*\).*?"
+            rf"add_executable\s*\(\s*{re.escape(CONTEXT_HARNESS_TARGET)}\b",
+            cmake,
+            flags=re.DOTALL,
+        )
+        is not None,
+        "the real resident-context harness is not gated by CUDA enablement",
     )
     combined = f"{cmake}\n{cuda_module}"
     for forbidden in ("--use_fast_math", "-use_fast_math"):
@@ -841,11 +1236,19 @@ def validate_presets(value: dict[str, Any]) -> None:
             targets.count(REPLAY_TARGET) == 1,
             f"{name} must build {REPLAY_TARGET} exactly once",
         )
+        require(
+            targets.count(CONTEXT_HARNESS_TARGET) == 1,
+            f"{name} must build {CONTEXT_HARNESS_TARGET} exactly once",
+        )
 
 
 def validate_contract(files: ContractFiles) -> None:
     validate_public_header(files.texts[PUBLIC_HEADER])
     validate_interval_header(files.texts[INTERVAL_HEADER])
+    validate_context_state(
+        files.texts[CONTEXT_INTERNAL_HEADER],
+        files.texts[CONTEXT_CUDA_HEADER],
+    )
     validate_cuda_sources(
         files.texts[CUDA_SOURCE],
         files.texts[INTERNAL_HEADER],
@@ -863,6 +1266,7 @@ def validate_contract(files: ContractFiles) -> None:
         files.texts[POWER_INTERNAL_HEADER],
     )
     validate_cli(files.texts[CLI_SOURCE])
+    validate_context_harness(files.texts[CONTEXT_HARNESS_SOURCE])
     validate_cmake(files.texts[CMAKE_SOURCE], files.texts[CUDA_MODULE])
     validate_presets(files.presets)
 
@@ -948,8 +1352,147 @@ def remove_replay_target(files: ContractFiles, preset_name: str) -> None:
     targets.remove(REPLAY_TARGET)
 
 
+def remove_context_harness_target(
+    files: ContractFiles, preset_name: str
+) -> None:
+    presets = named_presets(files.presets, "buildPresets")
+    targets = presets[preset_name].get("targets")
+    require(isinstance(targets, list), f"{preset_name} has no mutable targets")
+    require(
+        CONTEXT_HARNESS_TARGET in targets,
+        f"{preset_name} context-harness mutation target is absent",
+    )
+    targets.remove(CONTEXT_HARNESS_TARGET)
+
+
 def validate_negative_mutations(files: ContractFiles) -> int:
     mutations: list[tuple[str, Callable[[ContractFiles], None]]] = [
+        (
+            "context future state made unique",
+            mutate_text(
+                PUBLIC_HEADER,
+                "std::shared_ptr<detail::PredicateFilterContextState> state_;",
+                "std::unique_ptr<detail::PredicateFilterContextState> state_;",
+                "shared asynchronous context state",
+            ),
+        ),
+        (
+            "context made copyable",
+            mutate_text(
+                PUBLIC_HEADER,
+                "PredicateFilterContext(const PredicateFilterContext&) = delete;",
+                "PredicateFilterContext(const PredicateFilterContext&);",
+                "non-copyable context",
+            ),
+        ),
+        (
+            "context GPU mutex removed",
+            mutate_text(
+                CONTEXT_INTERNAL_HEADER,
+                "std::lock_guard<std::mutex> lock{mutex_};",
+                "static_cast<void>(mutex_);",
+                "context GPU mutex",
+            ),
+        ),
+        (
+            "context poisoning removed",
+            mutate_text(
+                CONTEXT_INTERNAL_HEADER,
+                "poisoned_.store(true, std::memory_order_release);",
+                "poisoned_.store(false, std::memory_order_release);",
+                "context poisoning",
+            ),
+        ),
+        (
+            "context creation device capture removed",
+            mutate_text(
+                CONTEXT_CUDA_HEADER,
+                "cudaGetDevice(&device_)",
+                "cudaGetDevice(nullptr)",
+                "context creation device",
+            ),
+        ),
+        (
+            "context execution device guard removed",
+            mutate_text(
+                CONTEXT_CUDA_HEADER,
+                "PredicateFilterCudaDeviceGuard device_guard{cuda.device()};",
+                "static_cast<void>(cuda.device());",
+                "context execution device guard",
+            ),
+        ),
+        (
+            "post-GPU publication poisoning removed",
+            mutate_text(
+                HOST_SOURCE,
+                "context_.mark_poisoned();",
+                "static_cast<void>(context_);",
+                "post-GPU publication poisoning",
+            ),
+        ),
+        (
+            "resident harness distance call made ephemeral",
+            mutate_text(
+                CONTEXT_HARNESS_SOURCE,
+                "decide_squared_distance_batch_async(context, inputs, options)",
+                "decide_squared_distance_batch_async(inputs, options)",
+                "resident harness context overload",
+            ),
+        ),
+        (
+            "resident harness audit disabled",
+            mutate_text(
+                CONTEXT_HARNESS_SOURCE,
+                "SquaredDistanceBatchOptions options{true}",
+                "SquaredDistanceBatchOptions options{false}",
+                "resident harness audit",
+            ),
+        ),
+        (
+            "resident capacity equality reallocates",
+            mutate_text(
+                CONTEXT_CUDA_HEADER,
+                "required_count <= capacity_",
+                "required_count < capacity_",
+                "resident high-water reuse",
+            ),
+        ),
+        (
+            "empty distance batch enters CUDA context",
+            mutate_text(
+                CUDA_SOURCE,
+                "if (inputs.empty()) {",
+                "if (false) {",
+                "empty-batch CUDA guard",
+            ),
+        ),
+        (
+            "context CUDA header removed from target",
+            mutate_text(
+                CMAKE_SOURCE,
+                CONTEXT_CUDA_HEADER.as_posix(),
+                "src/cuda/removed_phase2b_predicate_context.cuh",
+                "resident context target source",
+            ),
+        ),
+        (
+            "resident context harness source removed from target",
+            mutate_text(
+                CMAKE_SOURCE,
+                CONTEXT_HARNESS_SOURCE.as_posix(),
+                "src/tools/removed_gpu_predicate_context_harness.cpp",
+                "resident context harness target source",
+            ),
+        ),
+        (
+            "one future stops retaining shared context state",
+            mutate_text(
+                HOST_SOURCE,
+                "std::shared_ptr<detail::PredicateFilterContextState> state = context.state_;",
+                "auto* state = context.state_.get();",
+                "future context-state retention",
+            ),
+        ),
         (
             "summary-only replay commands reconstructed",
             mutate_text(
@@ -1087,8 +1630,20 @@ def validate_negative_mutations(files: ContractFiles) -> int:
             lambda candidate: remove_replay_target(candidate, "cuda-release"),
         ),
         (
+            "release preset omits resident context harness",
+            lambda candidate: remove_context_harness_target(
+                candidate, "cuda-release"
+            ),
+        ),
+        (
             "audit preset omits replay target",
             lambda candidate: remove_replay_target(candidate, "cuda-audit"),
+        ),
+        (
+            "audit preset omits resident context harness",
+            lambda candidate: remove_context_harness_target(
+                candidate, "cuda-audit"
+            ),
         ),
         (
             "addition rounding directions inverted",

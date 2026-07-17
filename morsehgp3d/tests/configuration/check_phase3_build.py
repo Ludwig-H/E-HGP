@@ -27,6 +27,7 @@ CUDA_TARGETS = [
     "morsehgp3d_phase3_runtime",
     "morsehgp3d_phase3",
     "morsehgp3d_gpu_predicate_replay",
+    "morsehgp3d_gpu_predicate_context_harness",
 ]
 CUDA_BUILD_JOBS = 8
 
@@ -422,6 +423,8 @@ def validate_sources(project: Path, repository: Path) -> None:
         "status --porcelain --untracked-files=normal",
         "morsehgp3d_phase3_runtime",
         "nanobind_add_module",
+        "src/tools/gpu_predicate_context_harness.cpp",
+        "morsehgp3d_gpu_predicate_context_harness",
     ):
         require(token in cmake, f"root CMake is missing {token}")
 
@@ -432,7 +435,11 @@ def validate_sources(project: Path, repository: Path) -> None:
             "CUDA targets must not forward host compiler options to "
             f"nvcc-generated code: {forbidden}",
         )
-    for target in ("morsehgp3d_phase3", "morsehgp3d_replay_predicate"):
+    for target in (
+        "morsehgp3d_phase3",
+        "morsehgp3d_replay_predicate",
+        "morsehgp3d_gpu_predicate_context_harness",
+    ):
         native_warning_blocks = re.findall(
             rf"target_compile_options\(\s*{target}\s+PRIVATE(.*?)\)",
             cmake,
@@ -488,6 +495,15 @@ def validate_sources(project: Path, repository: Path) -> None:
         "the CUDA compile-only target is registered as a test",
     )
     require(
+        re.search(
+            r"add_test\([^)]*\bmorsehgp3d_gpu_predicate_context_harness\b",
+            cmake + unit_cmake,
+            re.DOTALL,
+        )
+        is None,
+        "the real CUDA resident-context harness is registered in CPU CTest",
+    )
+    require(
         re.search(rf"install\([^)]*\b{CUDA_TARGETS[0]}\b", cmake, re.DOTALL) is None,
         "the CUDA compile-only target is installed",
     )
@@ -504,6 +520,7 @@ def validate_sources(project: Path, repository: Path) -> None:
         "morsehgp3d_support_tests",
         "morsehgp3d_level_order_tests",
         "morsehgp3d_expansion_tests",
+        "morsehgp3d_predicate_filter_context_tests",
     }
     sanitizer_block_match = re.search(
         r"set\(\s*_morsehgp3d_cpu_test_targets(?P<targets>.*?)\)\s*foreach",

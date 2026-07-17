@@ -228,6 +228,8 @@ if(MORSEHGP3D_ENABLE_CUDA)
   add_library(
     morsehgp3d_gpu_predicates
     STATIC
+      src/cuda/phase2b_predicate_context_internal.hpp
+      src/cuda/phase2b_predicate_context.cuh
       src/cuda/phase2b_distance_filter.cu
       src/cuda/phase2b_orientation_filter.cu
       src/cuda/phase2b_power_bisector_filter.cu
@@ -279,6 +281,25 @@ if(MORSEHGP3D_ENABLE_CUDA)
   else()
     target_compile_options(
       morsehgp3d_gpu_predicate_replay
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_predicate_context_harness
+    src/tools/gpu_predicate_context_harness.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_predicate_context_harness
+    PRIVATE morsehgp3d::gpu_predicates
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_predicate_context_harness PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_predicate_context_harness
       PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()

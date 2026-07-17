@@ -22,6 +22,22 @@ target_link_libraries(morsehgp3d_level_order_tests PRIVATE morsehgp3d::exact)
 add_executable(morsehgp3d_expansion_tests test_expansion.cpp)
 target_link_libraries(morsehgp3d_expansion_tests PRIVATE morsehgp3d::exact)
 
+find_package(Threads REQUIRED)
+add_executable(
+  morsehgp3d_predicate_filter_context_tests
+  test_predicate_filter_context.cpp
+  fake_gpu_predicate_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/predicate_filter.cpp"
+)
+target_include_directories(
+  morsehgp3d_predicate_filter_context_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_link_libraries(
+  morsehgp3d_predicate_filter_context_tests
+  PRIVATE morsehgp3d::exact Threads::Threads
+)
+
 set(
   _morsehgp3d_cpu_test_targets
   morsehgp3d_exact_types_tests
@@ -32,6 +48,7 @@ set(
   morsehgp3d_support_tests
   morsehgp3d_level_order_tests
   morsehgp3d_expansion_tests
+  morsehgp3d_predicate_filter_context_tests
 )
 foreach(_morsehgp3d_cpu_test_target IN LISTS _morsehgp3d_cpu_test_targets)
   morsehgp3d_apply_sanitizers("${_morsehgp3d_cpu_test_target}")
@@ -48,6 +65,9 @@ if(MSVC)
   target_compile_options(morsehgp3d_support_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_level_order_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_expansion_tests PRIVATE /W4 /WX)
+  target_compile_options(
+    morsehgp3d_predicate_filter_context_tests PRIVATE /W4 /WX
+  )
 else()
   target_compile_options(
     morsehgp3d_exact_types_tests
@@ -129,6 +149,16 @@ else()
       -Wsign-conversion
       -Werror
   )
+  target_compile_options(
+    morsehgp3d_predicate_filter_context_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
 endif()
 
 add_test(NAME morsehgp3d.exact_types COMMAND morsehgp3d_exact_types_tests)
@@ -138,6 +168,10 @@ add_test(NAME morsehgp3d.centers COMMAND morsehgp3d_centers_tests)
 add_test(NAME morsehgp3d.support COMMAND morsehgp3d_support_tests)
 add_test(NAME morsehgp3d.level_order COMMAND morsehgp3d_level_order_tests)
 add_test(NAME morsehgp3d.expansion COMMAND morsehgp3d_expansion_tests)
+add_test(
+  NAME morsehgp3d.predicate_filter_context
+  COMMAND morsehgp3d_predicate_filter_context_tests
+)
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
 add_test(

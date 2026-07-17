@@ -5,10 +5,15 @@
 #include <array>
 #include <cstdint>
 #include <future>
+#include <memory>
 #include <type_traits>
 #include <vector>
 
 namespace morsehgp3d::gpu {
+
+namespace detail {
+class PredicateFilterContextState;
+}  // namespace detail
 
 inline constexpr std::size_t maximum_power_bisector_cardinality = 10U;
 
@@ -185,6 +190,60 @@ struct PowerBisectorBatchOptions {
 // exact rational CPU predicate before the owning future becomes ready.
 [[nodiscard]] std::future<PowerBisectorBatchResult>
 decide_power_bisector_batch_async(
+    std::vector<PowerBisectorFilterInput> inputs,
+    PowerBisectorBatchOptions options = {});
+
+// A context keeps one CUDA stream and its device workspaces alive across
+// batches. The handle itself is move-only, while every scheduled future keeps
+// the shared internal state alive until its asynchronous work has completed.
+// Construction is host-only and does not initialize CUDA; the first non-empty
+// batch performs that initialization lazily.
+class PredicateFilterContext final {
+ public:
+  PredicateFilterContext();
+  ~PredicateFilterContext() noexcept;
+
+  PredicateFilterContext(PredicateFilterContext&&) noexcept;
+  PredicateFilterContext& operator=(PredicateFilterContext&&) noexcept;
+
+  PredicateFilterContext(const PredicateFilterContext&) = delete;
+  PredicateFilterContext& operator=(const PredicateFilterContext&) = delete;
+
+ private:
+  std::shared_ptr<detail::PredicateFilterContextState> state_;
+
+  friend std::future<SquaredDistanceBatchResult>
+  decide_squared_distance_batch_async(
+      PredicateFilterContext& context,
+      std::vector<SquaredDistanceFilterInput> inputs,
+      SquaredDistanceBatchOptions options);
+  friend std::future<Orientation3DBatchResult>
+  decide_orientation_3d_batch_async(
+      PredicateFilterContext& context,
+      std::vector<Orientation3DFilterInput> inputs,
+      Orientation3DBatchOptions options);
+  friend std::future<PowerBisectorBatchResult>
+  decide_power_bisector_batch_async(
+      PredicateFilterContext& context,
+      std::vector<PowerBisectorFilterInput> inputs,
+      PowerBisectorBatchOptions options);
+};
+
+[[nodiscard]] std::future<SquaredDistanceBatchResult>
+decide_squared_distance_batch_async(
+    PredicateFilterContext& context,
+    std::vector<SquaredDistanceFilterInput> inputs,
+    SquaredDistanceBatchOptions options = {});
+
+[[nodiscard]] std::future<Orientation3DBatchResult>
+decide_orientation_3d_batch_async(
+    PredicateFilterContext& context,
+    std::vector<Orientation3DFilterInput> inputs,
+    Orientation3DBatchOptions options = {});
+
+[[nodiscard]] std::future<PowerBisectorBatchResult>
+decide_power_bisector_batch_async(
+    PredicateFilterContext& context,
     std::vector<PowerBisectorFilterInput> inputs,
     PowerBisectorBatchOptions options = {});
 
