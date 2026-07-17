@@ -12,6 +12,7 @@ readonly CONTAINER_RESULTS="/results"
 readonly DOCKER_BIN="/usr/bin/docker"
 readonly TIMEOUT_BIN="/usr/bin/timeout"
 readonly DATE_BIN="/usr/bin/date"
+readonly TAIL_BIN="/usr/bin/tail"
 readonly WORK_DEADLINE_RESERVE_SECONDS=1800
 readonly POST_TIMEOUT_RESERVE_SECONDS=60
 readonly WORK_UNIT_KILL_AFTER_SECONDS=5
@@ -109,7 +110,8 @@ case "${OUTPUT_RAW}" in
     /*) ;;
     *) die "--output doit être un chemin absolu." ;;
 esac
-[[ -x "${TIMEOUT_BIN}" && -x "${DATE_BIN}" ]] || die "Les exécutables bornés timeout/date sont absents."
+[[ -x "${TIMEOUT_BIN}" && -x "${DATE_BIN}" && -x "${TAIL_BIN}" ]] || \
+    die "Les exécutables bornés timeout/date/tail sont absents."
 [[ -x "${DOCKER_BIN}" ]] || die "${DOCKER_BIN} est absent ou non exécutable."
 
 REPOSITORY_ROOT="$(git -C "${SCRIPT_DIR}/.." rev-parse --show-toplevel 2>/dev/null)" || \
@@ -360,9 +362,25 @@ run_container() {
     return "${run_status}"
 }
 
-readonly RELEASE_LOG="${RESULT_DIR}/cuda-release.log"
-readonly AUDIT_LOG="${RESULT_DIR}/cuda-audit.log"
-readonly CPU_BUILD_LOG="${RESULT_DIR}/cpu-replay-build.log"
+report_unit_failure() {
+    local label="$1"
+    shift
+    printf '[DIAGNOSTIC PHASE 2B] unité %s en échec.\n' "${label}" >&2
+    for log_path in "$@"; do
+        if [[ -s "${log_path}" && ! -L "${log_path}" ]]; then
+            printf '[JOURNAL PHASE 2B] %s (160 dernières lignes) :\n' \
+                "${log_path}" >&2
+            "${TAIL_BIN}" -n 160 -- "${log_path}" >&2 || true
+        fi
+    done
+}
+
+readonly RELEASE_LOG="${RESULT_DIR}/cuda-release.stdout.log"
+readonly RELEASE_ERROR_LOG="${RESULT_DIR}/cuda-release.stderr.log"
+readonly AUDIT_LOG="${RESULT_DIR}/cuda-audit.stdout.log"
+readonly AUDIT_ERROR_LOG="${RESULT_DIR}/cuda-audit.stderr.log"
+readonly CPU_BUILD_LOG="${RESULT_DIR}/cpu-replay-build.stdout.log"
+readonly CPU_BUILD_ERROR_LOG="${RESULT_DIR}/cpu-replay-build.stderr.log"
 readonly DISTANCE_SUMMARY="${RESULT_DIR}/distance-summary.json"
 readonly ORIENTATION_SUMMARY="${RESULT_DIR}/orientation-summary.json"
 readonly POWER_SUMMARY="${RESULT_DIR}/power-summary.json"
@@ -372,13 +390,21 @@ readonly PTX_LOG="${RESULT_DIR}/runner.ptx.txt"
 readonly RUNNER="${CONTAINER_BUILD}/morsehgp3d-cuda-release/morsehgp3d_gpu_predicate_replay"
 readonly CPU_REPLAY="${CONTAINER_BUILD}/morsehgp3d-cuda-release/morsehgp3d_replay_predicate"
 
-run_container cuda-release /dev/null "${RELEASE_LOG}" /usr/bin/cmake \
-    --workflow --preset cuda-release || die "Le workflow CUDA release a échoué."
-run_container cuda-audit /dev/null "${AUDIT_LOG}" /usr/bin/cmake \
-    --workflow --preset cuda-audit || die "Le workflow CUDA audit a échoué."
-run_container cpu-replay-build /dev/null "${CPU_BUILD_LOG}" /usr/bin/cmake \
-    --build --preset cuda-release --target morsehgp3d_replay_predicate --parallel 8 || \
-    die "La construction du replay CPU a échoué."
+run_container cuda-release "${RELEASE_LOG}" "${RELEASE_ERROR_LOG}" /usr/bin/cmake \
+    --workflow --preset cuda-release || {
+        report_unit_failure cuda-release "${RELEASE_LOG}" "${RELEASE_ERROR_LOG}"
+        die "Le workflow CUDA release a échoué."
+    }
+run_container cuda-audit "${AUDIT_LOG}" "${AUDIT_ERROR_LOG}" /usr/bin/cmake \
+    --workflow --preset cuda-audit || {
+        report_unit_failure cuda-audit "${AUDIT_LOG}" "${AUDIT_ERROR_LOG}"
+        die "Le workflow CUDA audit a échoué."
+    }
+run_container cpu-replay-build "${CPU_BUILD_LOG}" "${CPU_BUILD_ERROR_LOG}" /usr/bin/cmake \
+    --build --preset cuda-release --target morsehgp3d_replay_predicate --parallel 8 || {
+        report_unit_failure cpu-replay-build "${CPU_BUILD_LOG}" "${CPU_BUILD_ERROR_LOG}"
+        die "La construction du replay CPU a échoué."
+    }
 
 run_container distance-differential "${DISTANCE_SUMMARY}" \
     "${RESULT_DIR}/distance-differential.stderr.log" /usr/bin/python3 \
