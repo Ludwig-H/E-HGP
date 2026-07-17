@@ -179,7 +179,9 @@ struct ReplayRecord {
 }
 
 [[nodiscard]] ReplayRecord parse_record(
-    const std::string& line, std::size_t line_number) {
+    const std::string& line,
+    std::size_t line_number,
+    bool include_replay_command) {
   const std::vector<std::string> tokens = split_tokens(line);
   if (tokens.size() >= 2U && tokens[1] == "compare_squared_distances") {
     if (tokens.size() != 11U) {
@@ -201,9 +203,12 @@ struct ReplayRecord {
     ReplayRecord record{
         ReplayPredicate::squared_distance,
         input,
-        "compare_squared_distances"};
-    for (const std::uint64_t word : words) {
-      record.replay_command += " " + binary64_hex(word);
+        {}};
+    if (include_replay_command) {
+      record.replay_command = "compare_squared_distances";
+      for (const std::uint64_t word : words) {
+        record.replay_command += " " + binary64_hex(word);
+      }
     }
     return record;
   }
@@ -225,10 +230,12 @@ struct ReplayRecord {
       input.c_bits[axis] = words[axis + 6U];
       input.d_bits[axis] = words[axis + 9U];
     }
-    ReplayRecord record{
-        ReplayPredicate::orientation_3d, input, "orientation_3d"};
-    for (const std::uint64_t word : words) {
-      record.replay_command += " " + binary64_hex(word);
+    ReplayRecord record{ReplayPredicate::orientation_3d, input, {}};
+    if (include_replay_command) {
+      record.replay_command = "orientation_3d";
+      for (const std::uint64_t word : words) {
+        record.replay_command += " " + binary64_hex(word);
+      }
     }
     return record;
   }
@@ -324,9 +331,12 @@ struct ReplayRecord {
     ReplayRecord record{
         ReplayPredicate::power_bisector_side,
         input,
-        "power_bisector_side"};
-    for (std::size_t index = 2U; index < tokens.size(); ++index) {
-      record.replay_command += " " + tokens[index];
+        {}};
+    if (include_replay_command) {
+      record.replay_command = "power_bisector_side";
+      for (std::size_t index = 2U; index < tokens.size(); ++index) {
+        record.replay_command += " " + tokens[index];
+      }
     }
     return record;
   }
@@ -514,7 +524,7 @@ int run(bool audit_known, bool summary_only) {
     if (records.size() == kMaximumBatchSize) {
       throw std::length_error("Phase 2B batch exceeds 1048576 records");
     }
-    records.push_back(parse_record(line, line_number));
+    records.push_back(parse_record(line, line_number, !summary_only));
   }
   if (!std::cin.eof()) {
     throw std::runtime_error("Phase 2B batch input could not be read completely");

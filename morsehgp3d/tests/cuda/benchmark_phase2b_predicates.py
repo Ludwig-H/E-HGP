@@ -468,25 +468,23 @@ def main(arguments: Sequence[str] | None = None) -> int:
     else:
         selected = (options.predicate,)
     try:
-        # Input construction is deliberately complete before the unmeasured
-        # probe, and each immutable batch is reused for every measured run.
-        # Each invocation remains a cold process with a fresh CUDA context.
-        batches = {
-            predicate: generate_batch(predicate, options.cases)
-            for predicate in selected
-        }
+        # Each immutable input is constructed before its unmeasured probe,
+        # reused for every measured run, then released before the next
+        # predicate. Each invocation remains a cold process with a fresh CUDA
+        # context, and payload construction stays outside the measured scope.
         runner = options.runner.resolve()
-        results = {
-            predicate: benchmark_predicate(
+        results: dict[str, Any] = {}
+        for predicate in selected:
+            payload = generate_batch(predicate, options.cases)
+            results[predicate] = benchmark_predicate(
                 runner,
                 predicate,
-                batches[predicate],
+                payload,
                 options.cases,
                 options.repeats,
                 options.timeout_seconds,
             )
-            for predicate in selected
-        }
+            del payload
     except (AssertionError, OSError, subprocess.TimeoutExpired) as error:
         print(f"Phase 2B predicate benchmark failed: {error}", file=sys.stderr)
         return 1

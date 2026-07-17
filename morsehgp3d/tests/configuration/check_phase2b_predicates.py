@@ -744,6 +744,23 @@ def validate_cli(cli: str) -> None:
         "morsehgp3d",
     ):
         require(token in clean, f"GPU predicate replay CLI is missing {token}")
+    parse_body = function_body(clean, "parse_record")
+    require(
+        len(
+            re.findall(
+                r"if\s*\(\s*include_replay_command\s*\)",
+                parse_body,
+            )
+        )
+        == 3
+        and re.search(
+            r"parse_record\s*\(\s*line\s*,\s*line_number\s*,\s*"
+            r"!\s*summary_only\s*\)",
+            clean,
+        )
+        is not None,
+        "summary-only replay must not construct replay commands",
+    )
 
 
 def target_body(cmake: str, command: str, target: str) -> str:
@@ -933,6 +950,15 @@ def remove_replay_target(files: ContractFiles, preset_name: str) -> None:
 
 def validate_negative_mutations(files: ContractFiles) -> int:
     mutations: list[tuple[str, Callable[[ContractFiles], None]]] = [
+        (
+            "summary-only replay commands reconstructed",
+            mutate_text(
+                CLI_SOURCE,
+                "parse_record(line, line_number, !summary_only)",
+                "parse_record(line, line_number, true)",
+                "summary-only replay-command guard",
+            ),
+        ),
         (
             "unknown no longer zero",
             mutate_text_regex(
