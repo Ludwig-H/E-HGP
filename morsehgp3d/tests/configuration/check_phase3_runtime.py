@@ -154,6 +154,14 @@ def validate_dependencies_and_binding(project: Path) -> None:
         "NOT Python_INCLUDE_DIRS" in dependencies,
         "the parent-scope Python include directories are not guarded",
     )
+    require_tokens(
+        dependencies,
+        (
+            "NOT TARGET Python::Interpreter",
+            "NOT TARGET Python::Module",
+        ),
+        "parent-scope Python target guard",
+    )
 
     binding = read_text(project / "src/python/phase3_module.cpp")
     require_tokens(
@@ -187,6 +195,10 @@ def validate_dependencies_and_binding(project: Path) -> None:
         ),
         "Phase 3 Python binding",
     )
+    require(
+        binding.count('nb::arg("bytes").noconvert()') == 2,
+        "both Phase 3 byte-count bindings must reject implicit conversions",
+    )
     binding_test = read_text(project / "tests/cuda/check_phase3_binding.py")
     require(
         "std::unordered_map<DLManagedTensorVersioned*, PyObject*>" not in binding,
@@ -208,7 +220,11 @@ def validate_dependencies_and_binding(project: Path) -> None:
             "alias_capsule",
             "capsule_get_context",
             "ownership_context",
+            "expect_rejection",
             "expect_invalid_capsule_size",
+            '("4096", TypeError)',
+            "(4096.0, TypeError)",
+            "(True, TypeError)",
             "module.dlpack_zero_copy_probe(PROBE_BYTES)",
         ),
         "Phase 3 Python binding test",

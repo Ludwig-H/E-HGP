@@ -10,7 +10,7 @@ import importlib
 import json
 import pathlib
 import sys
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import NoReturn
 
 MODULE_NAME = "morsehgp3d_phase3"
@@ -113,24 +113,50 @@ def require_keys(
         fail(f"{context} has unexpected keys: {sorted(unexpected)}")
 
 
-def expect_invalid_call(module: object, value: object) -> None:
+def expect_rejection(
+    call: Callable[[object], object],
+    value: object,
+    expected_error: type[Exception],
+    context: str,
+) -> None:
     try:
-        module.dlpack_zero_copy_probe(value)
-    except (TypeError, ValueError, module.Phase3CudaError) as error:
+        call(value)
+    except expected_error as error:
         if not str(error):
-            fail(f"invalid input {value!r} produced an empty error")
+            fail(f"{context} {value!r} produced an empty error")
+    except Exception as error:
+        fail(
+            f"{context} {value!r} raised {type(error).__name__}, "
+            f"expected {expected_error.__name__}: {error}"
+        )
     else:
-        fail(f"invalid input {value!r} was accepted")
+        fail(f"{context} {value!r} was accepted")
 
 
-def expect_invalid_capsule_size(module: object, value: object) -> None:
-    try:
-        module.make_dlpack_capsule(value)
-    except (TypeError, ValueError, module.Phase3CudaError) as error:
-        if not str(error):
-            fail(f"invalid capsule input {value!r} produced an empty error")
-    else:
-        fail(f"invalid capsule input {value!r} was accepted")
+def expect_invalid_call(
+    module: object,
+    value: object,
+    expected_error: type[Exception],
+) -> None:
+    expect_rejection(
+        module.dlpack_zero_copy_probe,
+        value,
+        expected_error,
+        "invalid probe input",
+    )
+
+
+def expect_invalid_capsule_size(
+    module: object,
+    value: object,
+    expected_error: type[Exception],
+) -> None:
+    expect_rejection(
+        module.make_dlpack_capsule,
+        value,
+        expected_error,
+        "invalid capsule input",
+    )
 
 
 def validate_environment(
@@ -469,9 +495,18 @@ def main() -> int:
         environment["allocation_limit_bytes"],
         "allocation_limit_bytes",
     )
-    for invalid in (0, -1, allocation_limit + 1, "4096", None):
-        expect_invalid_call(module, invalid)
-        expect_invalid_capsule_size(module, invalid)
+    invalid_inputs: tuple[tuple[object, type[Exception]], ...] = (
+        (0, ValueError),
+        (-1, TypeError),
+        (allocation_limit + 1, ValueError),
+        ("4096", TypeError),
+        (4096.0, TypeError),
+        (True, TypeError),
+        (None, TypeError),
+    )
+    for invalid, expected_error in invalid_inputs:
+        expect_invalid_call(module, invalid, expected_error)
+        expect_invalid_capsule_size(module, invalid, expected_error)
     direct_probe = require_mapping(
         module.dlpack_zero_copy_probe(PROBE_BYTES),
         "dlpack_zero_copy_probe",

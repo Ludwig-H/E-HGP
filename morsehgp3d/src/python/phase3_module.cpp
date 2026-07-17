@@ -787,7 +787,7 @@ NB_MODULE(morsehgp3d_phase3, module) {
   module.def(
       "make_dlpack_capsule",
       &make_dlpack_capsule,
-      nb::arg("bytes"),
+      nb::arg("bytes").noconvert(),
       "Export one bounded CUDA allocation through a versioned DLPack capsule.");
   module.def(
       "consume_dlpack_capsule",
@@ -797,6 +797,6 @@ NB_MODULE(morsehgp3d_phase3, module) {
   module.def(
       "dlpack_zero_copy_probe",
       &dlpack_zero_copy_probe,
-      nb::arg("bytes"),
+      nb::arg("bytes").noconvert(),
       "Validate one bounded asynchronous CUDA allocation through an in-place DLTensor view.");
 }
