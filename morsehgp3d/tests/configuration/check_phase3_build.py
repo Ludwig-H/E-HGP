@@ -424,10 +424,23 @@ def validate_sources(project: Path, repository: Path) -> None:
     ):
         require(token in cmake, f"root CMake is missing {token}")
 
-    require(
-        "-Xcompiler=" not in cmake,
-        "CUDA targets must not forward host warning policy to nvcc-generated code",
-    )
+    cuda_host_policy = f"{cmake}\n{cuda_module}"
+    for forbidden in ("-Xcompiler", "--compiler-options"):
+        require(
+            forbidden not in cuda_host_policy,
+            "CUDA targets must not forward host compiler options to "
+            f"nvcc-generated code: {forbidden}",
+        )
+    for target in ("morsehgp3d_phase3", "morsehgp3d_replay_predicate"):
+        native_warning_blocks = re.findall(
+            rf"target_compile_options\(\s*{target}\s+PRIVATE(.*?)\)",
+            cmake,
+            re.DOTALL,
+        )
+        require(
+            any("-Werror" in block for block in native_warning_blocks),
+            f"{target} lost the strict native C++ warning policy",
+        )
 
     for token in (
         "check_language(CUDA)",
