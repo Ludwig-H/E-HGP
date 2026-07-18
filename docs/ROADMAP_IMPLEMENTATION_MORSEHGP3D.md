@@ -325,6 +325,8 @@ Aucune compilation dans une mesure `warm` ou `resident`, aucune fuite, et manife
 
 **Statut opérationnel au 18 juillet 2026 :** `in_progress`, backend `reference_cpu`, profil `hgp_reduced`, mode `certified`. La porte d'entrée est satisfaite par les phases 2A, 2B et 3 fermées; la porte de sortie reste ouverte.
 
+Le jalon de correction CUDA résident est qualifié au SHA `e5b32ac19c41bd0d7f0c5e6c47c4c2433488ea76` : le device parcourt réellement la topologie LBVH et propose une antichaîne de feuilles candidates ou de sous-arbres strictement extérieurs, puis le CPU reconstruit la couverture et recertifie rationnellement chaque rejet avant toute partition top-$k$ ou boule fermée. Ce jalon à un thread ne vaut ni chemin de production scalable, ni fermeture G2, ni promotion de statut public.
+
 ### But
 
 Construire l'unique index global utilisé par l'énumération, les rangs et les descentes.
@@ -1026,4 +1028,4 @@ Les sept prochains lots de travail doivent être :
 
 Cette séquence donne rapidement une vérité terrain, un cas $k=1$ incontestable et une mesure réaliste de la primitive GPU. Elle évite que les choix de bibliothèque ou de layout figent prématurément un objet mathématique incomplet.
 
-Les phases 2A, 2B et 3 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. La phase 4 est désormais la phase courante : l'oracle spatial brute-force exact et le premier Morton-LBVH à bornes rationnelles certifiées sont livrés sur `reference_cpu`; la référence CUDA exhaustive avec recertification CPU de tous les sites est qualifiée sur une G4 réelle au SHA `01be0f150ee35a01bc939d9240b0a5675e3ae800`; le premier filtre CUDA borné de rejet AABB strict, avec recertification rationnelle de chaque rejet, est qualifié au SHA `24e33d4fc80d2b5c687c939f8240fa50571d1951`. La porte de sortie reste ouverte jusqu'au LBVH résident, aux chemins top-$k$ et boule fermée GPU de production, puis aux certificats G2 prévus.
+Les phases 2A, 2B et 3 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. La phase 4 est désormais la phase courante : l'oracle spatial brute-force exact et le premier Morton-LBVH à bornes rationnelles certifiées sont livrés sur `reference_cpu`; la référence CUDA exhaustive avec recertification CPU de tous les sites est qualifiée sur une G4 réelle au SHA `01be0f150ee35a01bc939d9240b0a5675e3ae800`; le filtre CUDA borné de rejet AABB strict est qualifié au SHA `24e33d4fc80d2b5c687c939f8240fa50571d1951`; la première couche CUDA LBVH résidente, dont chaque couverture et chaque rejet sont recertifiés exactement sur le CPU, est qualifiée au SHA `e5b32ac19c41bd0d7f0c5e6c47c4c2433488ea76`. La porte de sortie reste ouverte jusqu'au parcours parallèle de production, à la campagne G2 complète des chemins top-$k$ et boule fermée, puis à leurs certificats prévus.

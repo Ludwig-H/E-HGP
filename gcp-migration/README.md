@@ -260,8 +260,9 @@ Après autorisation explicite, le point d'entrée Phase 3 réalise une seule ses
   --result-dir /tmp/morsehgp3d-phase3-qualification
 ```
 
-Le même worker gardé peut qualifier en plus la référence CUDA exhaustive de la
-Phase 4, sans lui attribuer de statut scientifique public :
+Le même worker gardé peut qualifier en plus la référence CUDA exhaustive et la
+couche de correction LBVH résidente de la Phase 4, sans leur attribuer de
+statut scientifique public :
 
 ```bash
 ./gcp-migration/run_phase3_qualification.sh \
@@ -270,10 +271,14 @@ Phase 4, sans lui attribuer de statut scientifique public :
   --result-dir /tmp/morsehgp3d-phase3-qualification
 ```
 
-Cette option ajoute le différentiel exact complet, un passage borné sous
-`compute-sanitizer` et l'audit AOT du replay spatial. Les deux artefacts restent
-provisoires jusqu'à la certification `TERMINATED` de la même cible et sont alors
-publiés ensemble sous `phase3-<SHA>.json` et `phase4-spatial-<SHA>.json`.
+Cette option ajoute le différentiel exact complet de la référence, le
+différentiel `Fraction` borné du LBVH résident, un passage sous
+`compute-sanitizer` et un audit AOT séparé pour chacun des deux replays. Le
+compagnon Phase 4 utilise le schéma combiné
+`morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v2`; les deux
+artefacts restent provisoires jusqu'à la certification `TERMINATED` de la même
+cible et sont alors publiés sous `phase3-<SHA>.json` et
+`phase4-spatial-<SHA>.json`.
 
 Pour la cible de capacité explicitement autorisée :
 
