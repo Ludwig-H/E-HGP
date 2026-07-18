@@ -336,7 +336,7 @@ Construire l'unique index global utilisé par l'énumération, les rangs et les 
 - Morton codes et LBVH;
 - 1-NN exact avec exclusion d'au plus $m_{\star}$ IDs;
 - top-$k$ exact et shell complet jusqu'au rang $s_{\max}$;
-- comptage intérieur d'une sphère avec rejet dès que le rang dépasse $s_{\max}$;
+- partition globale intérieur–shell–extérieur exacte; un rejet anticipé dès que le rang dépasse $s_{\max}$ reste une primitive interne explicitement incomplète et ne certifie jamais le shell global ni `RelevantGP`;
 - bornes AABB dirigées vers l'extérieur;
 - requêtes sur `CertifiedPoint3` sans matérialisation flottante non certifiée.
 

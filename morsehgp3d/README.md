@@ -2,11 +2,15 @@
 
 Ce répertoire porte la nouvelle implémentation décrite par la roadmap. `HGP-old/` reste une référence historique séparée et n'est pas importée par ce cœur.
 
-État actuel : Phase 3 en cours, backend cible `cuda_g4`, couche commune aux profils avec priorité `hgp_reduced`, mode `certified` et audit reproductible de l'environnement. Le backend `reference_cpu` est qualifié par la Phase 2A fermée; le backend CUDA ne l'est pas encore.
+État actuel : Phase 4 en cours, backend `reference_cpu`, profil prioritaire `hgp_reduced` et mode `certified`. Les Phases 2A, 2B et 3 sont fermées. Le premier oracle spatial exact sert de vérité terrain CPU; il ne ferme ni la Phase 4, ni G2, et ne produit aucun statut public `exact`.
 
 La tranche actuellement intégrée fournit :
 
 - l'interprétation exacte des coordonnées binary64 comme dyadiques;
+- le nuage de points canonique, avec normalisation réelle du zéro signé, identifiants globaux déterministes, provenance source et rejet exact des doublons;
+- les exclusions triées et bornées par le $m_{\star}$ du run, y compris le cas $m_{\star}=0$;
+- le 1-NN et le top-$k$ brute-force exacts, séparant les distances strictement inférieures du shell d'égalité complet et d'un choix canonique dérivé;
+- la partition globale exacte d'une boule fermée en intérieur, shell et extérieur, sans confondre son rang fermé avec un rang filtré par exclusions;
 - `ExactRational3` homogène et canonique;
 - `ExactLevel` non négatif, canonique et compatible avec le contrat v2;
 - le fallback `boost::multiprecision::cpp_int` qui sert d'oracle aux filtres CPU;
@@ -40,6 +44,8 @@ La tranche actuellement intégrée fournit :
 - un replay diagnostique versionné à partir des mots binary64 et des plans exacts d'entrée.
 
 L'ensemble intégré clôt les sous-lots affines 2A.4, centres 2A.5, minimalité locale 2A.6 et ordre exact 2A.7, les trois sous-lots adaptatifs 2A.8a à 2A.8c, la campagne 2A.9 et la revue 2A.10. La Phase 2A et G1 sont donc fermées. Les comparaisons de distances, orientations 3D et évaluations de `H_RQ` dont le témoin et les labels conservent leurs entrées binary64 suivent `fp64_filtered` puis `expansion`, avant `cpu_multiprecision`. La même cascade couvre les signes barycentriques de requêtes et de centres circonscrits, le côté d'une sphère définie par un support dyadique, l'ordre de niveaux dont les supports dyadiques sont conservés, puis l'orientation 2D, le côté d'un plan, la classification de trois plans et l'incidence d'un quatrième plan lorsque leurs recettes binary64 sont disponibles. Toutes les entrées arbitrairement rationnelles sans provenance restent multiprécision; aucun `BigInt` n'est converti approximativement en `double` pour inventer un filtre.
+
+La Phase 2B ferme les propositions GPU des trois prédicats seulement parce que chaque `unknown` tombe vers une décision CPU exacte et que les campagnes matérielles sont qualifiées. La Phase 4 active maintenant `morsehgp3d::spatial` sur CPU de référence. Son cutoff top-$k$ est un `ExactLevel`; la sortie conserve tous les co-minimiseurs, même lorsque leur cardinal dépasse $k$, $s_{\max}$ ou quatre. `canonical_choice_ids()` n'est qu'un représentant déterministe. `ClosedBallPartition` reste volontairement globale et sans exclusions afin que `closed_rank()` garde le sens du rang fermé d'un événement.
 
 Les deux étages flottants exigent IEEE binary64, l'arrondi au plus proche dans le FENV et MXCSR sur x86, les sous-normaux actifs et les options strictes exportées par la cible CMake. Chaque opération d'intervalle est élargie vers les deux infinis. Les expansions utilisent `TwoSum` et un résidu FMA, rejettent avant calcul tout bit de produit exact situé sous `2^-1074`, puis échouent fermées sur toute exception d'underflow, overflow ou opération invalide. Elles bornent aussi explicitement le nombre de composantes et de produits intermédiaires; atteindre une borne invalide seulement la tentative et déclenche le repli multiprécision, sans tronquer un témoin. L'environnement et les drapeaux flottants de l'appelant sont restaurés. `PredicateFilterPolicy::allow_adaptive` active la cascade complète; `allow_fp64` conserve le comportement historique FP64 puis multiprécision; `multiprecision_only` garde un chemin indépendant. Les API décisionnelles ne matérialisent leur déterminant multiprécision qu'en fallback, après les validations exactes de domaine ou de précondition. Les API riches et le replay reconstruisent en plus le témoin rationnel diagnostique même si le signe a été certifié rapidement : `certification_stage` désigne l'autorité du signe, pas le coût total du diagnostic.
 
@@ -77,7 +83,7 @@ cmake --build build/morsehgp3d --parallel
 ctest --test-dir build/morsehgp3d --output-on-failure
 ```
 
-Le target exporté est `morsehgp3d::exact`. Après `cmake --install`, un consommateur peut utiliser `find_package(MorseHGP3D CONFIG REQUIRED)` sans dépendre de chemins d'en-têtes propres à la machine de construction.
+Les targets exportés sont `morsehgp3d::exact` et `morsehgp3d::spatial`; le second propage le noyau exact. Après `cmake --install`, un consommateur peut utiliser `find_package(MorseHGP3D CONFIG REQUIRED)` sans dépendre de chemins d'en-têtes propres à la machine de construction.
 
 ### Profils reproductibles de Phase 3
 

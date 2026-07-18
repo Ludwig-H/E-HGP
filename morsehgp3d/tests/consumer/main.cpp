@@ -4,10 +4,12 @@
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
 #include "morsehgp3d/exact/support.hpp"
+#include "morsehgp3d/spatial/brute_force.hpp"
 
 #include <array>
 #include <cstdint>
 #include <iostream>
+#include <span>
 #include <vector>
 
 int main() {
@@ -222,6 +224,34 @@ int main() {
       adaptive_level_order.decision.certification_stage() !=
           CertificationStage::expansion) {
     std::cerr << "installed support-provenance cascade changed semantics\n";
+    return 1;
+  }
+
+  using morsehgp3d::spatial::CanonicalPointCloud;
+  using morsehgp3d::spatial::ExclusionSet;
+  using morsehgp3d::spatial::PointId;
+  const std::array<CertifiedPoint3, 3> spatial_points{
+      CertifiedPoint3::from_binary64(-1.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(1.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(0.0, 2.0, 0.0)};
+  const CanonicalPointCloud cloud =
+      CanonicalPointCloud::rejecting_duplicates(spatial_points);
+  const std::array<PointId, 0> no_exclusion_ids{};
+  const ExclusionSet no_exclusions = ExclusionSet::from_ids(
+      std::span<const PointId>{no_exclusion_ids}, cloud, 0U);
+  const auto nearest = morsehgp3d::spatial::brute_force_nearest(
+      cloud, ExactRational3{}, no_exclusions);
+  const auto unit_ball = morsehgp3d::spatial::brute_force_closed_ball(
+      cloud, ExactRational3{}, ExactLevel{BigInt{1}});
+  if (!nearest.shell_complete() || nearest.strict_below().size() != 0U ||
+      nearest.cutoff_shell_ids().size() != 2U ||
+      nearest.canonical_choice_ids().size() != 1U ||
+      nearest.cutoff_squared_distance() != ExactLevel{BigInt{1}} ||
+      !unit_ball.partition_complete() || unit_ball.closed_rank() != 2U ||
+      unit_ball.interior_ids().size() != 0U ||
+      unit_ball.shell_ids().size() != 2U ||
+      unit_ball.exterior_ids().size() != 1U) {
+    std::cerr << "installed spatial reference oracle changed semantics\n";
     return 1;
   }
   return 0;

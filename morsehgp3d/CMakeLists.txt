@@ -43,6 +43,8 @@ if(MORSEHGP3D_ENABLE_SANITIZERS AND MORSEHGP3D_ENABLE_CUDA)
 endif()
 
 add_library(morsehgp3d_sanitizers INTERFACE)
+add_library(morsehgp3d::sanitizers ALIAS morsehgp3d_sanitizers)
+set_target_properties(morsehgp3d_sanitizers PROPERTIES EXPORT_NAME sanitizers)
 if(MORSEHGP3D_ENABLE_SANITIZERS)
   if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
     target_compile_options(
@@ -223,6 +225,40 @@ else()
   message(FATAL_ERROR "The certified FP mode is not configured for ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
+add_library(
+  morsehgp3d_spatial
+  STATIC
+    src/cpu/spatial/point_cloud.cpp
+    src/cpu/spatial/brute_force.cpp
+)
+add_library(morsehgp3d::spatial ALIAS morsehgp3d_spatial)
+set_target_properties(
+  morsehgp3d_spatial
+  PROPERTIES
+    EXPORT_NAME spatial
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(morsehgp3d_spatial PUBLIC cxx_std_20)
+target_include_directories(
+  morsehgp3d_spatial
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_spatial
+  PUBLIC morsehgp3d::exact
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(morsehgp3d_spatial PRIVATE /W4 /WX)
+else()
+  target_compile_options(
+    morsehgp3d_spatial
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 if(MORSEHGP3D_ENABLE_CUDA)
   find_package(Threads REQUIRED)
   add_library(
@@ -333,7 +369,7 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 install(
-  TARGETS morsehgp3d_exact
+  TARGETS morsehgp3d_exact morsehgp3d_spatial morsehgp3d_sanitizers
   EXPORT MorseHGP3DTargets
 )
 if(MORSEHGP3D_BUILD_TOOLS)
