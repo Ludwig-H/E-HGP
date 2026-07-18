@@ -85,6 +85,21 @@ class Phase5K1BoruvkaGuardedWorkflowTests(unittest.TestCase):
             self.assertIn(required, script)
         self.assertNotIn("gcloud compute instances start", script)
         self.assertNotIn("gcloud compute instances stop", script)
+        self.assertIn(
+            'run_container_split_output "phase5-k1-boruvka-replay"',
+            script,
+        )
+        replay_call = script.index(
+            'run_container_split_output "phase5-k1-boruvka-replay"'
+        )
+        replay_call_end = script.index("; then", replay_call)
+        replay_call_source = script[replay_call:replay_call_end]
+        self.assertIn('"${PHASE5_K1_BORUVKA_REPLAY_LOG}"', replay_call_source)
+        self.assertIn(
+            '"${PHASE5_K1_BORUVKA_REPLAY_STDERR_LOG}"',
+            replay_call_source,
+        )
+        self.assertIn('"${PHASE5_K1_BORUVKA_REPLAY_PATH}"', replay_call_source)
 
         replay = script.index('begin_unit "phase5-k1-boruvka-replay"')
         elf = script.index('begin_unit "phase5-k1-boruvka-cuobjdump-elf"')

@@ -618,6 +618,7 @@ readonly PHASE4_LBVH_RACECHECK_LOG="${LOG_DIR}/phase4-spatial-lbvh-racecheck.log
 readonly PHASE4_LBVH_DIFFERENTIAL_SUMMARY="${RESULT_DIR}/phase4-spatial-lbvh-differential.json"
 readonly PHASE4_LBVH_MEMCHECK_SUMMARY="${RESULT_DIR}/phase4-spatial-lbvh-memcheck.json"
 readonly PHASE5_K1_BORUVKA_REPLAY_LOG="${LOG_DIR}/phase5-k1-boruvka-replay.log"
+readonly PHASE5_K1_BORUVKA_REPLAY_STDERR_LOG="${LOG_DIR}/phase5-k1-boruvka-replay.stderr.log"
 readonly PHASE5_K1_BORUVKA_ELF_LOG="${LOG_DIR}/phase5-k1-boruvka-cuobjdump-elf.log"
 readonly PHASE5_K1_BORUVKA_PTX_LOG="${LOG_DIR}/phase5-k1-boruvka-cuobjdump-ptx.log"
 readonly PHASE5_K1_BORUVKA_PTX_STDERR_LOG="${LOG_DIR}/phase5-k1-boruvka-cuobjdump-ptx.stderr.log"
@@ -1469,11 +1470,14 @@ fi
 
 if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
     begin_unit "phase5-k1-boruvka-replay"
-    if ! run_container "phase5-k1-boruvka-replay" \
+    if ! run_container_split_output "phase5-k1-boruvka-replay" \
         "${PHASE5_K1_BORUVKA_REPLAY_LOG}" \
+        "${PHASE5_K1_BORUVKA_REPLAY_STDERR_LOG}" \
         "${PHASE5_K1_BORUVKA_REPLAY_PATH}"; then
         report_failure_log "phase5-k1-boruvka-replay" \
             "${PHASE5_K1_BORUVKA_REPLAY_LOG}"
+        report_failure_log "phase5-k1-boruvka-replay-stderr" \
+            "${PHASE5_K1_BORUVKA_REPLAY_STDERR_LOG}"
         die "Le replay réel K1 Boruvka Phase 5 a échoué."
     fi
 
