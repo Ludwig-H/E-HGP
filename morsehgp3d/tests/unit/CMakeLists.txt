@@ -43,6 +43,12 @@ target_link_libraries(
   PRIVATE morsehgp3d::hierarchy
 )
 
+add_executable(morsehgp3d_hierarchy_gabriel_tests test_hierarchy_gabriel.cpp)
+target_link_libraries(
+  morsehgp3d_hierarchy_gabriel_tests
+  PRIVATE morsehgp3d::hierarchy
+)
+
 find_package(Threads REQUIRED)
 add_executable(
   morsehgp3d_predicate_filter_context_tests
@@ -178,6 +184,7 @@ set(
   morsehgp3d_spatial_lbvh_tests
   morsehgp3d_spatial_lbvh_query_dump
   morsehgp3d_hierarchy_emst_tests
+  morsehgp3d_hierarchy_gabriel_tests
   morsehgp3d_predicate_filter_context_tests
   morsehgp3d_warm_context_benchmark_host_test
   morsehgp3d_gpu_spatial_reference_context_tests
@@ -207,6 +214,7 @@ if(MSVC)
   target_compile_options(morsehgp3d_spatial_lbvh_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_spatial_lbvh_query_dump PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_hierarchy_emst_tests PRIVATE /W4 /WX)
+  target_compile_options(morsehgp3d_hierarchy_gabriel_tests PRIVATE /W4 /WX)
   target_compile_options(
     morsehgp3d_predicate_filter_context_tests PRIVATE /W4 /WX
   )
@@ -363,6 +371,16 @@ else()
       -Werror
   )
   target_compile_options(
+    morsehgp3d_hierarchy_gabriel_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
     morsehgp3d_predicate_filter_context_tests
     PRIVATE
       -Wall
@@ -454,6 +472,10 @@ add_test(NAME morsehgp3d.expansion COMMAND morsehgp3d_expansion_tests)
 add_test(NAME morsehgp3d.spatial_brute_force COMMAND morsehgp3d_spatial_tests)
 add_test(NAME morsehgp3d.spatial_lbvh COMMAND morsehgp3d_spatial_lbvh_tests)
 add_test(NAME morsehgp3d.hierarchy_emst COMMAND morsehgp3d_hierarchy_emst_tests)
+add_test(
+  NAME morsehgp3d.hierarchy_gabriel
+  COMMAND morsehgp3d_hierarchy_gabriel_tests
+)
 add_test(
   NAME morsehgp3d.predicate_filter_context
   COMMAND morsehgp3d_predicate_filter_context_tests

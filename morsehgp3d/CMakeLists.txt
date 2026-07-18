@@ -264,6 +264,7 @@ add_library(
   morsehgp3d_hierarchy
   STATIC
     src/cpu/hierarchy/emst.cpp
+    src/cpu/hierarchy/gabriel.cpp
 )
 add_library(morsehgp3d::hierarchy ALIAS morsehgp3d_hierarchy)
 set_target_properties(
