@@ -10,6 +10,8 @@ readonly EXPECTED_MAINTENANCE_POLICY="TERMINATE"
 readonly MIN_ALLOWED_RUN_SECONDS=30
 readonly MAX_ALLOWED_RUN_SECONDS=28800
 readonly START_TIMEOUT_SECONDS=300
+readonly TERMINATION_TIMESTAMP_MAX_ATTEMPTS=12
+readonly TERMINATION_TIMESTAMP_RETRY_SECONDS=5
 readonly SSH_TIMEOUT_SECONDS=300
 readonly GCLOUD_READ_TIMEOUT_SECONDS=30
 readonly GCLOUD_MUTATION_TIMEOUT_SECONDS=180
@@ -30,6 +32,7 @@ VERIFIED_LAST_START_TIMESTAMP=""
 TARGET_LAST_START_TIMESTAMP=""
 PRE_START_LAST_START_TIMESTAMP=""
 START_REQUEST_EPOCH=""
+VERIFIED_MAX_RUN_SECONDS=""
 
 die() {
     printf '[ERREUR] %s\n' "$*" >&2
@@ -267,7 +270,11 @@ verify_static_guard() {
     [[ "${machine_type}" == "${EXPECTED_MACHINE_TYPE}" ]] || return 1
     [[ "${maintenance_policy}" == "${EXPECTED_MAINTENANCE_POLICY}" ]] || return 1
     [[ "${provisioning_model}" == "${EXPECTED_PROVISIONING_MODEL}" ]] || return 1
-    VERIFIED_MAX_RUN_SECONDS="${configured_seconds}"
+    if [[ -n "${VERIFIED_MAX_RUN_SECONDS}" ]]; then
+        [[ "${configured_seconds}" == "${VERIFIED_MAX_RUN_SECONDS}" ]] || return 1
+    else
+        VERIFIED_MAX_RUN_SECONDS="${configured_seconds}"
+    fi
 }
 
 verify_running_guard() {
@@ -583,8 +590,43 @@ while ((SECONDS < deadline)); do
 done
 [[ "${status}" == "RUNNING" && -n "${TARGET_LAST_START_TIMESTAMP}" ]] || \
     fail_started_generation "La VM n’a pas atteint RUNNING dans le délai imparti."
-verify_running_guard || fail_started_generation \
-    "La garde post-démarrage g4-standard-48/SPOT/TERMINATE/STOP n’a pas pu être certifiée."
+running_guard_certified=0
+running_guard_attempt=0
+while ((running_guard_attempt < TERMINATION_TIMESTAMP_MAX_ATTEMPTS && SECONDS < deadline)); do
+    ((running_guard_attempt += 1))
+    verify_static_guard || fail_started_generation \
+        "La garde post-démarrage g4-standard-48/SPOT/TERMINATE/STOP n’a pas pu être certifiée."
+    status="$(instance_status 2>/dev/null)" || fail_started_generation \
+        "L’état GCE est devenu illisible pendant la certification post-démarrage."
+    capture_status=0
+    capture_started_generation 2>/dev/null || capture_status=$?
+    if ((capture_status == 2)); then
+        fail_started_generation \
+            "Une génération concurrente a remplacé ${TARGET_LAST_START_TIMESTAMP}; aucun arrêt non versionné n’est autorisé."
+    fi
+    ((capture_status == 0)) || fail_started_generation \
+        "La génération démarrée est devenue illisible pendant la certification post-démarrage."
+    [[ "${status}" == "RUNNING" ]] || fail_started_generation \
+        "La génération ${TARGET_LAST_START_TIMESTAMP} a quitté RUNNING pendant la certification post-démarrage."
+    termination_timestamp="$(instance_field 'terminationTimestamp')" || fail_started_generation \
+        "terminationTimestamp est devenu illisible pendant la certification post-démarrage."
+    [[ "${termination_timestamp}" != *$'\n'* && \
+        "${termination_timestamp}" != *$'\r'* ]] || fail_started_generation \
+        "terminationTimestamp est ambigu pendant la certification post-démarrage."
+    if [[ -n "${termination_timestamp}" || "${ZONE}" == *-ai* ]]; then
+        verify_running_guard || fail_started_generation \
+            "La garde post-démarrage g4-standard-48/SPOT/TERMINATE/STOP n’a pas pu être certifiée."
+        running_guard_certified=1
+        break
+    fi
+    printf '[ATTENTE] terminationTimestamp non encore matérialisé (tentative %s/%s).\n' \
+        "${running_guard_attempt}" "${TERMINATION_TIMESTAMP_MAX_ATTEMPTS}"
+    if ((running_guard_attempt < TERMINATION_TIMESTAMP_MAX_ATTEMPTS && SECONDS < deadline)); then
+        sleep "${TERMINATION_TIMESTAMP_RETRY_SECONDS}"
+    fi
+done
+((running_guard_certified == 1)) || fail_started_generation \
+    "La garde post-démarrage g4-standard-48/SPOT/TERMINATE/STOP n’a pas pu être certifiée : terminationTimestamp est resté absent."
 publish_targeted_handoff "targeted_running" || \
     die "La génération démarrée est certifiée mais son témoin ciblé n’a pas pu être publié."
 

@@ -1562,6 +1562,9 @@ while True:
     def test_missing_or_invalid_timestamp_paths_fail_closed(
         self,
     ) -> None:
+        fake_sleep = self.tmp / "sleep"
+        fake_sleep.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+        fake_sleep.chmod(0o755)
         now = datetime.now(timezone.utc)
         cases = (
             (
@@ -1625,6 +1628,38 @@ while True:
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn("garde post-démarrage", result.stdout)
                 self.assertIn("compute instances stop", self.commands())
+
+    def test_regular_zone_waits_for_late_termination_timestamp(self) -> None:
+        self.env["FAKE_MAX_RUN_SECONDS"] = "3600"
+        self.env["FAKE_GCLOUD_SCENARIO"] = "guest-success-late-termination-timestamp"
+        fake_sleep = self.tmp / "sleep"
+        fake_sleep.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+        fake_sleep.chmod(0o755)
+        handoff = self.tmp / "late-regular-zone-handoff.json"
+
+        result = self.run_script(
+            "start_and_verify.sh",
+            "--yes",
+            "--guest-shutdown-minutes",
+            "45",
+            "--handoff-file",
+            str(handoff),
+        )
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("terminationTimestamp non encore matérialisé", result.stdout)
+        self.assertIn("terminationTimestamp=", result.stdout)
+        self.assertEqual(
+            self.last_start_timestamp,
+            json.loads(handoff.read_text(encoding="utf-8"))["last_start_timestamp"],
+        )
+        stopped = self.run_script(
+            "stop_and_verify.sh",
+            "--yes",
+            "--expected-last-start-timestamp",
+            self.last_start_timestamp,
+        )
+        self.assertEqual(stopped.returncode, 0, stopped.stdout)
 
     def test_late_timestamp_cannot_shorten_the_guest_deadline(self) -> None:
         self.env["GCP_ZONE"] = "europe-west4-ai1a"
