@@ -9,7 +9,7 @@
 - porte d'entrée : satisfaite par les Phases 1 et 4 fermées;
 - porte de sortie : non satisfaite; la voie EMST GPU scalable reste à livrer et à qualifier.
 
-Les quatre premiers lots de Phase 5 livrent l'ancre EMST exacte, le catalogue exhaustif des paires, la réduction rang-deux du backend CPU, leur différentiel indépendant jusqu'à $n=14$ et la forêt hiérarchique compacte construite depuis un EMST déjà certifié. Ils ne ferment ni la Phase 5, ni la porte globale G2 du catalogue, et ne publient aucun `public_status=exact` pour une tour MorseHGP3D complète.
+Les cinq premiers jalons CPU de Phase 5 livrent l'ancre EMST exacte, le catalogue exhaustif des paires, la réduction rang-deux du backend CPU, leur différentiel indépendant jusqu'à $n=14$, la forêt hiérarchique compacte construite depuis un EMST déjà certifié et un producteur Borůvka exact sur le LBVH global. Ils ne ferment ni la Phase 5, ni la porte globale G2 du catalogue, et ne publient aucun `public_status=exact` pour une tour MorseHGP3D complète.
 
 ## Ancre mathématique
 
@@ -36,7 +36,7 @@ En présence d'ex æquo, le choix déterministe des arêtes permet le rejeu et l
 
 ## API et audit
 
-La cible installable `morsehgp3d::hierarchy` expose `build_exact_complete_graph_emst` et `build_compact_k1_forest`. Le résultat de référence complet contient :
+La cible installable `morsehgp3d::hierarchy` expose `build_exact_complete_graph_emst`, `build_compact_k1_forest`, `build_exact_lbvh_boruvka` et `verify_exact_lbvh_boruvka`. Le résultat de référence complet contient :
 
 - les arêtes complètes et les arêtes EMST avec longueur carrée et niveau HGP;
 - les feuilles et nœuds de multifusion de $T_1$;
@@ -72,6 +72,22 @@ $$\pi_0(T_{<\lambda})=\pi_0(G_{<\lambda}),\qquad \pi_0(T_{\leq\lambda})=\pi_0(G_
 
 En effet, si un chemin actif de $G$ reliait deux composantes encore séparées dans $T$, l'une de ses arêtes traverserait la coupe créée par une arête inactive du chemin de $T$. L'échange remplacerait cette dernière par une arête strictement plus légère, en contradiction avec la minimalité de $T$. Les deux partitions encadrant un lot déterminent son graphe quotient et ses multifusions; deux témoins EMST différents sous ex æquo produisent donc les mêmes nœuds, coupes et multifusions canoniques, même si leurs arêtes sélectionnées diffèrent.
 
+## Producteur Borůvka exact sur le LBVH
+
+`build_exact_lbvh_boruvka` remplace la matérialisation du graphe complet par des recherches point-vers-LBVH exactes sur l'index Morton global déjà construit. La ronde $r$ fige les composantes et leur label canonique, égal au plus petit `PointId`; elle ne modifie ces labels qu'après avoir déterminé tous les minima sortants. Pour une arête aux extrémités canoniques $u<v$, l'ordre total est
+
+$$\kappa(e)=\bigl(d^2(e),u,v\bigr).$$
+
+Chaque composante choisit son unique arête sortante minimale pour $\kappa$. Cette arête est le minimum unique de la coupe définie par la composante; la propriété de coupe l'inclut donc dans l'arbre de Kruskal canonique $T^{\star}$ construit avec le même ordre total. Par induction sur les rondes, toutes les arêtes acceptées appartiennent à $T^{\star}$, et leur ensemble dédupliqué est une forêt. Tant qu'il reste $c_r>1$ composantes, chacune est incidente à une arête choisie; aucune composante contractée n'est isolée dans cette forêt. Toute composante post-ronde contient donc au moins deux composantes pré-ronde, d'où
+
+$$c_{r+1}\leq\left\lfloor\frac{c_r}{2}\right\rfloor,$$
+
+et au plus $\lceil\log_2(n)\rceil$ rondes pour $n\geq2$. Les arêtes finales sont retriées par $\kappa$ avant leur remise à `K1CompactForest`; l'ordre des rondes Borůvka ne définit jamais les lots égaux ni les multifusions publiques.
+
+À chaque ronde, un passage postordre marque chaque nœud LBVH comme uniforme pour une composante figée ou mixte. Un sous-arbre uniforme de la composante requérante est rejeté sans évaluation de feuilles. Pour les autres nœuds, la borne exacte de distance à l'AABB ne permet un prune que lorsqu'elle est strictement supérieure au meilleur poids courant. Une égalité descend obligatoirement, car une arête de même poids peut encore gagner sur les extrémités de $\kappa$; ni epsilon ni ordre flottant ne décide ce cas.
+
+Le résultat `K1ExactBoruvkaResult` reste volontairement distinct de `K1EmstResult` : il ne matérialise ni graphe complet, ni hiérarchie, ni couverture persistante, et son `emst_witness_certified` est un certificat local, pas un `public_status`. `verify_exact_lbvh_boruvka` rejoue séparément les labels figés, minima de composantes, arêtes acceptées, contractions, poids exacts et borne de rondes depuis le nuage et l'index immuables; il ne fait confiance ni au booléen de résultat, ni aux compteurs fournis. Ce producteur et ce vérificateur forment le socle CPU de correction pour la prochaine ronde de propositions GPU stackless; ils ne qualifient encore aucun backend GPU.
+
 ## Catalogue rang-deux et décision Gabriel
 
 Pour chaque paire canonique $(u,v)$, une seconde voie reconstruit indépendamment son centre diamétral $c=(u+v)/2$, son rayon carré $a=\left\Vert u-v\right\Vert^2/4$, puis interroge tout le nuage par `brute_force_closed_ball`. La partition globale exacte sépare intérieur strict, shell complet et extérieur; aucune liste locale, exclusion de support, tolérance ou limite de visites n'intervient.
@@ -104,6 +120,8 @@ Le second test strict couvre les trois décisions de paire, une perturbation d'u
 
 Le test strict de la forêt compacte compare ses matérialisations à l'ancre complète sur le singleton, une chaîne de 32 points à niveaux tous distincts, deux fusions simultanées, une multifusion d'arité six et les $24$ permutations du carré. Il permute aussi l'ordre et l'orientation des arêtes d'entrée, ferme chaque compteur et la borne $6(n-1)$, puis rejette les arbres incomplets, cycliques ou munis de poids incohérents. Deux EMST distincts sous ex æquo sont enfin comparés sur un carré prolongé par une fusion ultérieure : les arêtes témoins diffèrent, mais l'induction par lots restitue exactement les mêmes nœuds, coupes, multifusions et poids. Les compilations GCC et Clang en avertissements stricts, le CTest ciblé Release et le même test instrumenté ASan/UBSan passent.
 
+Le test Borůvka couvre le singleton, une chaîne dont deux rondes sont nécessaires, un carré prolongé par une fusion ultérieure et ses $24$ permutations. Il compare le témoin final à Kruskal sur le graphe complet, ferme la réduction par moitié, les tags LBVH et les compteurs, puis vérifie que le rejeu ignore un booléen de certification falsifié mais rejette un poids exact altéré, un index étranger ou un nuage déplacé.
+
 ## Différentiel indépendant jusqu'à $n=14$
 
 `morsehgp3d_hierarchy_k1_dump` accepte des coordonnées binary64 brutes par un protocole versionné, canonise le nuage, construit l'ancre C++ et émet un objet JSON canonique par cas. Le document expose chaque paire avec centre, niveau, partition globale et classification, les graphes rang-deux et Gabriel, les deux arbres témoins, leurs poids, les nœuds canoniques jusqu'à la racine, les multifusions, le certificat et, pour chaque niveau exact, les coupes strictes puis fermées des cinq chemins de rejeu. Le validateur ne se contente donc pas de relire les booléens du certificat.
@@ -118,4 +136,4 @@ GCP n'a pas été utilisé pour ces lots CPU.
 
 ## Suite immédiate
 
-Le producteur CPU de référence reste non scalable parce qu'il conserve le graphe complet. La représentation de sortie compacte est désormais livrée et certifiée contre cette ancre; elle attend encore un producteur scalable de ses $n-1$ arêtes exactes. Le lot suivant introduit un Borůvka GPU sur le LBVH global, avec décisions de rejet certifiées, repli exact de tout candidat indécis, contractions déterministes et certificat CPU du témoin obtenu. Aucune promotion de phase ne précédera sa qualification scalable.
+Le producteur Borůvka CPU ne matérialise plus le graphe complet, mais son parcours séquentiel exact sert encore de référence de correction et non de voie scalable. Le lot suivant introduit une première ronde GPU stackless sur le LBVH global avec un contrat de sur-ensemble de candidats, sans troncature; les décisions indécises retombent vers le CPU exact, puis les contractions et le témoin complet sont vérifiés par le socle décrit ci-dessus. Aucune promotion de phase ne précédera la boucle GPU complète et sa qualification scalable.

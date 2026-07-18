@@ -15,6 +15,23 @@ class SpatialLbvhContext;
 }
 
 namespace morsehgp3d::spatial {
+class CanonicalPointCloud;
+class MortonLbvhIndex;
+}
+
+namespace morsehgp3d::hierarchy {
+struct K1ExactBoruvkaResult;
+struct K1BoruvkaVerification;
+[[nodiscard]] K1ExactBoruvkaResult build_exact_lbvh_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud);
+[[nodiscard]] K1BoruvkaVerification verify_exact_lbvh_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const K1ExactBoruvkaResult& result);
+}
+
+namespace morsehgp3d::spatial {
 
 struct MortonLeafRecord {
   std::uint64_t morton_code;
@@ -153,6 +170,15 @@ class MortonLbvhIndex {
       const exact::ExactRational3& query,
       const exact::ExactLevel& squared_radius,
       LbvhTraversalOrder traversal_order);
+  friend hierarchy::K1ExactBoruvkaResult
+  hierarchy::build_exact_lbvh_boruvka(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud);
+  friend hierarchy::K1BoruvkaVerification
+  hierarchy::verify_exact_lbvh_boruvka(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      const hierarchy::K1ExactBoruvkaResult& result);
   friend class gpu::SpatialLbvhContext;
 };
 
