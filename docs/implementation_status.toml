@@ -4,7 +4,7 @@ updated_at = "2026-07-18"
 [project]
 name = "MorseHGP3D"
 implementation_started = true
-current_phase = "4"
+current_phase = "5"
 current_track = "generic_core"
 status_authority = "This file is operational; mathematical authority remains in the specification and proof-status register."
 
@@ -18,7 +18,7 @@ status = "blocked"
 requires_phases = ["0", "1", "2A", "2B", "3", "4", "5", "7", "8", "9", "10", "11", "18"]
 requires_gates = ["G0", "G1", "G2", "G3", "G4", "G5", "G9"]
 full_pi0_requires_phase = "12"
-blocking_reason = "La phase 4 et les phases suivantes ainsi que leurs portes scientifiques doivent etre fermees avant la poursuite."
+blocking_reason = "La phase 5 et les phases suivantes ainsi que leurs portes scientifiques doivent etre fermees avant la poursuite."
 
 [milestones.v1_interactive_scalable]
 status = "blocked"
@@ -86,48 +86,51 @@ blocking_reason = ""
 id = "4"
 title = "Canonisation et oracle spatial"
 track = "generic_core"
-status = "in_progress"
+status = "completed"
 entry_gate_satisfied = true
-exit_gate_satisfied = false
+exit_gate_satisfied = true
 depends_on = ["2A", "2B", "3"]
 backend = "reference_cpu"
 profile = "hgp_reduced"
 mode = "certified"
-evidence = ["docs/validation/PHASE2B_GATE_REVIEW.md", "docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md", "docs/validation/PHASE4_PROGRESS.md", "morsehgp3d/tests/fixtures/spatial/relevant_gp_extra_shell_above_smax.json", "morsehgp3d/tests/fixtures/spatial/gpu_fp64_tie_split.json", "morsehgp3d/include/morsehgp3d/spatial/lbvh.hpp", "morsehgp3d/include/morsehgp3d/gpu/spatial_reference.hpp", "morsehgp3d/include/morsehgp3d/gpu/spatial_bounds.hpp", "morsehgp3d/include/morsehgp3d/gpu/spatial_lbvh.hpp", "morsehgp3d/src/gpu/spatial_lbvh.cpp", "morsehgp3d/src/tools/gpu_spatial_reference_replay.cpp", "morsehgp3d/src/tools/gpu_spatial_bounds_replay.cpp", "morsehgp3d/src/tools/gpu_spatial_lbvh_replay.cpp", "morsehgp3d/tests/unit/test_spatial_lbvh.cpp", "morsehgp3d/tests/unit/test_gpu_spatial_reference_context.cpp", "morsehgp3d/tests/unit/test_gpu_spatial_bounds_context.cpp", "morsehgp3d/tests/unit/test_gpu_spatial_lbvh_context.cpp", "morsehgp3d/tests/differential/check_spatial_lbvh.py", "morsehgp3d/tests/differential/check_spatial_gpu_reference.py", "morsehgp3d/tests/differential/check_spatial_gpu_bounds.py", "morsehgp3d/tests/differential/check_spatial_gpu_lbvh.py", "morsehgp3d/tests/configuration/check_phase4_spatial_bounds.py", "morsehgp3d/tests/configuration/check_phase4_spatial_lbvh.py", "morsehgp3d/tests/cuda/assemble_phase4_spatial_qualification.py", "tests/gcp/test_phase4_spatial_qualification.py", "24e33d4 certified CUDA AABB bound filter", "phase4-spatial-bounds-24e33d4fc80d2b5c687c939f8240fa50571d1951.json sha256:d61ffcf88f3967c8618ec04e0666391fa9592db4b5ab00ee0793cee17dc26239", "e5b32ac certified resident CUDA LBVH traversal", "phase4-spatial-e5b32ac19c41bd0d7f0c5e6c47c4c2433488ea76.json sha256:3b0147c58e3ccccd3bf531573ef371aae3c9cd67aace7f934d8ce1d6e95973ac"]
+evidence = ["docs/validation/PHASE2B_GATE_REVIEW.md", "docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md", "docs/validation/PHASE4_PROGRESS.md", "docs/validation/PHASE4_GATE_REVIEW.md", "morsehgp3d/tests/fixtures/spatial/relevant_gp_extra_shell_above_smax.json", "morsehgp3d/tests/fixtures/spatial/gpu_fp64_tie_split.json", "morsehgp3d/include/morsehgp3d/spatial/lbvh.hpp", "morsehgp3d/include/morsehgp3d/gpu/spatial_reference.hpp", "morsehgp3d/include/morsehgp3d/gpu/spatial_bounds.hpp", "morsehgp3d/include/morsehgp3d/gpu/spatial_lbvh.hpp", "morsehgp3d/src/gpu/spatial_lbvh.cpp", "morsehgp3d/src/tools/gpu_spatial_reference_replay.cpp", "morsehgp3d/src/tools/gpu_spatial_bounds_replay.cpp", "morsehgp3d/src/tools/gpu_spatial_lbvh_replay.cpp", "morsehgp3d/tests/unit/test_spatial_lbvh.cpp", "morsehgp3d/tests/unit/test_gpu_spatial_reference_context.cpp", "morsehgp3d/tests/unit/test_gpu_spatial_bounds_context.cpp", "morsehgp3d/tests/unit/test_gpu_spatial_lbvh_context.cpp", "morsehgp3d/tests/differential/check_spatial_lbvh.py", "morsehgp3d/tests/differential/check_spatial_gpu_reference.py", "morsehgp3d/tests/differential/check_spatial_gpu_bounds.py", "morsehgp3d/tests/differential/check_spatial_gpu_lbvh.py", "morsehgp3d/tests/configuration/check_phase4_spatial_bounds.py", "morsehgp3d/tests/configuration/check_phase4_spatial_lbvh.py", "morsehgp3d/tests/cuda/assemble_phase4_spatial_qualification.py", "tests/gcp/test_phase4_spatial_qualification.py", "24e33d4 certified CUDA AABB bound filter", "phase4-spatial-bounds-24e33d4fc80d2b5c687c939f8240fa50571d1951.json sha256:d61ffcf88f3967c8618ec04e0666391fa9592db4b5ab00ee0793cee17dc26239", "e5b32ac certified resident CUDA LBVH traversal", "phase4-spatial-e5b32ac19c41bd0d7f0c5e6c47c4c2433488ea76.json sha256:3b0147c58e3ccccd3bf531573ef371aae3c9cd67aace7f934d8ce1d6e95973ac", "c846ed7 certified parallel-frontier CUDA LBVH traversal", "phase4-spatial-c846ed7b253840ef6fe1f0f39f7f10c63af64b8e.json sha256:1c8794763a0ff5bcd0c24694d5b2ae2c82402f5881d8999a046bb408c2b14f65"]
 blocking_reason = ""
 
 [[phases]]
 id = "5"
 title = "Ancre k=1 et EMST"
 track = "generic_core"
-status = "blocked"
-entry_gate_satisfied = false
+status = "in_progress"
+entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["1", "4"]
-evidence = []
-blocking_reason = "La phase 4 n'est pas fermee."
+backend = "reference_cpu"
+profile = "hgp_reduced"
+mode = "certified"
+evidence = ["docs/validation/PHASE4_GATE_REVIEW.md"]
+blocking_reason = ""
 
 [[phases]]
 id = "6"
 title = "Miniballs et descentes"
 track = "full_pi0"
-status = "blocked"
-entry_gate_satisfied = false
+status = "ready"
+entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["1", "4"]
 evidence = []
-blocking_reason = "La phase 4 n'est pas fermee."
+blocking_reason = ""
 
 [[phases]]
 id = "7"
 title = "Audit de la primitive de puissance"
 track = "generic_core"
-status = "blocked"
-entry_gate_satisfied = false
+status = "ready"
+entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["2B", "4"]
 evidence = []
-blocking_reason = "L'oracle spatial de phase 4 n'est pas ferme."
+blocking_reason = ""
 
 [[phases]]
 id = "8"

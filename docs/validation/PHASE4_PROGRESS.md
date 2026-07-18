@@ -2,14 +2,14 @@
 
 ## Statut
 
-- phase : `4`, en cours;
+- phase : `4`, terminée;
 - backend : `reference_cpu`;
 - profil prioritaire : `hgp_reduced`;
 - mode : `certified`;
 - porte d'entrée : satisfaite par les Phases 2A, 2B et 3 fermées;
-- porte de sortie : ouverte; la référence GPU indépendante, le filtre borné de rejet AABB strict et la première couche de correction LBVH résidente sont qualifiés sur G4 réelle, mais le parcours parallèle de production et la campagne G2 complète restent à livrer.
+- porte de sortie : satisfaite par la [revue de porte](PHASE4_GATE_REVIEW.md); le parcours LBVH parallèle, la campagne complète de la matrice de tailles spatiale et leurs certificats G4 sont qualifiés.
 
-Les cinq premiers lots construisent la vérité terrain spatiale CPU, son premier accélérateur certifié Morton-LBVH, une référence CUDA exhaustive dont les propositions flottantes sont séparées des décisions scientifiques, une primitive CUDA bornée dont chaque rejet est recertifié exactement, puis un parcours CUDA de l'arbre résident qui publie seulement une couverture à recertifier. Ils certifient leurs propres sorties locales, mais ne produisent aucune forêt, ne ferment ni G2 ni la Phase 4 et ne promeuvent aucun `public_status` vers `exact`.
+Les six lots construisent la vérité terrain spatiale CPU, son premier accélérateur certifié Morton-LBVH, une référence CUDA exhaustive dont les propositions flottantes sont séparées des décisions scientifiques, une primitive CUDA bornée dont chaque rejet est recertifié exactement, un parcours CUDA de l'arbre résident qui publie seulement une couverture à recertifier, puis son exécution par fronts parallèles. Ils ferment la Phase 4 sans produire de forêt, sans fermer la porte globale G2 du catalogue et sans promouvoir aucun `public_status` vers `exact`.
 
 ## Contrat mathématique du top-k
 
@@ -102,9 +102,9 @@ L'installation exporte `morsehgp3d::exact`, `morsehgp3d::spatial` et la cible in
 ## Limites du lot
 
 - aucun chemin cuVS;
-- le DFS CUDA de correction utilise encore un seul thread et recopie un tampon de capacité `node_count` après chaque requête; aucune revendication de débit, de latence ou de scalabilité n'en découle;
-- aucune classification intérieure en bloc, aucun front parallèle et aucune campagne exhaustive jusqu'à $n=1\,000$ n'est encore qualifié sur le parcours résident;
-- le jalon ne ferme ni la porte G2, ni les chemins spatiaux GPU de production;
+- le parcours CUDA recopie encore un tampon de capacité `node_count` après chaque requête; aucune revendication de débit ou de latence n'en découle;
+- aucune classification intérieure en bloc n'est encore implémentée; les feuilles non rejetées restent toutefois classifiées exactement et la partition scientifique est complète;
+- le jalon ferme la Phase 4 et les primitives spatiales nécessaires, mais pas la porte globale G2 du catalogue;
 - aucun catalogue, événement critique, réduction hiérarchique ou résultat public.
 
 ## GCP
@@ -121,4 +121,8 @@ La génération `2026-07-18T09:02:51.523-07:00` a ensuite été arrêtée par `s
 
 La qualification du parcours résident a utilisé le commit propre `e5b32ac19c41bd0d7f0c5e6c47c4c2433488ea76` déjà poussé sur `origin/main` et la même cible AI, initialement `TERMINATED`. Les gardes ont relu `g4-standard-48`, `SPOT`, `instanceTerminationAction=STOP` et `maxRunDuration=3600`, puis armé l'arrêt invité à 45 minutes. Les workflows CUDA 12.9 release et audit, le différentiel de référence, le différentiel LBVH de treize cas, l'audit AOT `sm_120` sans PTX et les deux passages sous `compute-sanitizer` ont réussi. Le binaire LBVH porte le SHA-256 `e1d97a9222ffb6e733c9cf07f2a7b35c68eaeed344f524aba38b630dcff5a06c`; l'artefact conserve `scientific_public_status=null` et `scientific_result_claimed=false`.
 
-`stop_and_verify.sh` a arrêté exactement la génération `2026-07-18T10:33:28.875-07:00`; la relecture indépendante certifie `TERMINATED`, `lastStopTimestamp=2026-07-18T10:37:08.158-07:00` et une preuve finale à `2026-07-18T17:37:17Z`. L'artefact hors worktree `phase4-spatial-e5b32ac19c41bd0d7f0c5e6c47c4c2433488ea76.json` porte le SHA-256 `3b0147c58e3ccccd3bf531573ef371aae3c9cd67aace7f934d8ce1d6e95973ac`. La clé OS Login a été révoquée et sa copie privée supprimée; aucune autre VM `project=e-hgp` active n'a été observée. Cette preuve qualifie la couche de correction résidente, pas un parcours parallèle de production, et laisse la Phase 4 en cours.
+`stop_and_verify.sh` a arrêté exactement la génération `2026-07-18T10:33:28.875-07:00`; la relecture indépendante certifie `TERMINATED`, `lastStopTimestamp=2026-07-18T10:37:08.158-07:00` et une preuve finale à `2026-07-18T17:37:17Z`. L'artefact hors worktree `phase4-spatial-e5b32ac19c41bd0d7f0c5e6c47c4c2433488ea76.json` porte le SHA-256 `3b0147c58e3ccccd3bf531573ef371aae3c9cd67aace7f934d8ce1d6e95973ac`. La clé OS Login a été révoquée et sa copie privée supprimée; aucune autre VM `project=e-hgp` active n'a été observée. Cette preuve qualifie la première couche de correction résidente.
+
+La campagne de fermeture a ensuite qualifié le commit propre et poussé `c846ed7b253840ef6fe1f0f39f7f10c63af64b8e`. Le différentiel LBVH parallèle couvre 1 013 cas `Fraction`, chaque taille de 1 à 1 000, 1 013 requêtes top-$k$ et 1 013 boules fermées. Il totalise 2 019 traversées logiques, 23 331 fronts CUDA, 21 312 fronts parallèles, une largeur maximale de 570 et 73 962 sous-arbres rejetés puis recertifiés exactement. Les 20 cas bornés sous `memcheck` passent sans erreur ni fuite; `racecheck` rapporte zéro hazard, zéro erreur et zéro avertissement; l'audit AOT trouve uniquement `sm_120` et aucune entrée PTX.
+
+La génération `2026-07-18T12:18:46.848-07:00` a été arrêtée par `stop_and_verify.sh`; la relecture indépendante certifie `TERMINATED`, `lastStopTimestamp=2026-07-18T12:22:52.945-07:00` et une preuve finale à `2026-07-18T19:22:59Z`. L'artefact hors worktree `phase4-spatial-c846ed7b253840ef6fe1f0f39f7f10c63af64b8e.json` porte le SHA-256 `1c8794763a0ff5bcd0c24694d5b2ae2c82402f5881d8999a046bb408c2b14f65`. La clé OS Login a été révoquée et sa copie privée supprimée; aucune autre VM `project=e-hgp` active n'a été observée. La revue de porte ferme la Phase 4 sans attribuer de statut scientifique public à l'artefact GPU.
