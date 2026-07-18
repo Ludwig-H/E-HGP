@@ -363,7 +363,12 @@ SpatialBoundsContext::SpatialBoundsContext(
   for (const spatial::ExactDyadicAabb3& box : boxes_) {
     validate_box(box);
     packed_boxes_.push_back(detail::SpatialBoundsInputRecord{
-        box.lower_binary64_bits, box.upper_binary64_bits});
+        {box.lower_binary64_bits[0],
+         box.lower_binary64_bits[1],
+         box.lower_binary64_bits[2]},
+        {box.upper_binary64_bits[0],
+         box.upper_binary64_bits[1],
+         box.upper_binary64_bits[2]}});
   }
 }
 

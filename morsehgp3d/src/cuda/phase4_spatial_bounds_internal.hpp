@@ -22,8 +22,8 @@ inline constexpr std::uint64_t spatial_bounds_sentinel_code =
     std::numeric_limits<std::uint64_t>::max();
 
 struct SpatialBoundsInputRecord {
-  std::array<std::uint64_t, 3> lower_bits{};
-  std::array<std::uint64_t, 3> upper_bits{};
+  std::uint64_t lower_bits[3]{};
+  std::uint64_t upper_bits[3]{};
 };
 static_assert(std::is_trivially_copyable_v<SpatialBoundsInputRecord>);
 
