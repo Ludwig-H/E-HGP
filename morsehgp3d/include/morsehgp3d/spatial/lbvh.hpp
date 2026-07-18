@@ -11,6 +11,7 @@
 #include <vector>
 
 namespace morsehgp3d::gpu {
+class K1BoruvkaCandidateContext;
 class SpatialLbvhContext;
 }
 
@@ -179,6 +180,7 @@ class MortonLbvhIndex {
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
       const hierarchy::K1ExactBoruvkaResult& result);
+  friend class gpu::K1BoruvkaCandidateContext;
   friend class gpu::SpatialLbvhContext;
 };
 

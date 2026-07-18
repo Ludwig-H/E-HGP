@@ -122,6 +122,18 @@ add_executable(
   fake_gpu_spatial_bounds_launchers.cpp
   "${PROJECT_SOURCE_DIR}/src/gpu/spatial_lbvh.cpp"
 )
+add_executable(
+  morsehgp3d_gpu_k1_boruvka_context_tests
+  test_gpu_k1_boruvka_context.cpp
+  fake_gpu_k1_boruvka_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/k1_boruvka.cpp"
+)
+add_executable(
+  morsehgp3d_gpu_k1_boruvka_replay_host
+  "${PROJECT_SOURCE_DIR}/src/tools/gpu_k1_boruvka_replay.cpp"
+  fake_gpu_k1_boruvka_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/k1_boruvka.cpp"
+)
 target_include_directories(
   morsehgp3d_predicate_filter_context_tests
   PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
@@ -152,6 +164,14 @@ target_include_directories(
 )
 target_include_directories(
   morsehgp3d_gpu_spatial_lbvh_replay_host
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_include_directories(
+  morsehgp3d_gpu_k1_boruvka_context_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_include_directories(
+  morsehgp3d_gpu_k1_boruvka_replay_host
   PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
 )
 target_link_libraries(
@@ -185,6 +205,14 @@ target_link_libraries(
 target_link_libraries(
   morsehgp3d_gpu_spatial_lbvh_replay_host
   PRIVATE morsehgp3d::spatial Threads::Threads
+)
+target_link_libraries(
+  morsehgp3d_gpu_k1_boruvka_context_tests
+  PRIVATE morsehgp3d::hierarchy Threads::Threads
+)
+target_link_libraries(
+  morsehgp3d_gpu_k1_boruvka_replay_host
+  PRIVATE morsehgp3d::hierarchy Threads::Threads
 )
 target_compile_definitions(
   morsehgp3d_warm_context_benchmark_host_test
@@ -220,6 +248,8 @@ set(
   morsehgp3d_gpu_spatial_bounds_replay_host
   morsehgp3d_gpu_spatial_lbvh_context_tests
   morsehgp3d_gpu_spatial_lbvh_replay_host
+  morsehgp3d_gpu_k1_boruvka_context_tests
+  morsehgp3d_gpu_k1_boruvka_replay_host
 )
 foreach(_morsehgp3d_cpu_test_target IN LISTS _morsehgp3d_cpu_test_targets)
   morsehgp3d_apply_sanitizers("${_morsehgp3d_cpu_test_target}")
@@ -270,6 +300,12 @@ if(MSVC)
   )
   target_compile_options(
     morsehgp3d_gpu_spatial_lbvh_replay_host PRIVATE /W4 /WX
+  )
+  target_compile_options(
+    morsehgp3d_gpu_k1_boruvka_context_tests PRIVATE /W4 /WX
+  )
+  target_compile_options(
+    morsehgp3d_gpu_k1_boruvka_replay_host PRIVATE /W4 /WX
   )
 else()
   target_compile_options(
@@ -522,6 +558,26 @@ else()
       -Wsign-conversion
       -Werror
   )
+  target_compile_options(
+    morsehgp3d_gpu_k1_boruvka_context_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
+    morsehgp3d_gpu_k1_boruvka_replay_host
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
 endif()
 
 add_test(NAME morsehgp3d.exact_types COMMAND morsehgp3d_exact_types_tests)
@@ -561,6 +617,14 @@ add_test(
 add_test(
   NAME morsehgp3d.gpu_spatial_lbvh_context
   COMMAND morsehgp3d_gpu_spatial_lbvh_context_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_k1_boruvka_context
+  COMMAND morsehgp3d_gpu_k1_boruvka_context_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_k1_boruvka_replay_host
+  COMMAND morsehgp3d_gpu_k1_boruvka_replay_host
 )
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
@@ -719,6 +783,16 @@ if(TARGET morsehgp3d_gpu_spatial_lbvh_replay)
   )
   set_tests_properties(
     morsehgp3d.spatial_gpu_lbvh_differential
+    PROPERTIES TIMEOUT 300
+  )
+endif()
+if(TARGET morsehgp3d_gpu_k1_boruvka_replay)
+  add_test(
+    NAME morsehgp3d.gpu_k1_boruvka_replay
+    COMMAND morsehgp3d_gpu_k1_boruvka_replay
+  )
+  set_tests_properties(
+    morsehgp3d.gpu_k1_boruvka_replay
     PROPERTIES TIMEOUT 300
   )
 endif()

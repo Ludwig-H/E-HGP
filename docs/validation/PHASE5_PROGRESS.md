@@ -3,13 +3,14 @@
 ## Statut
 
 - phase : `5`, en cours;
-- backend : `reference_cpu`;
+- backend de proposition ciblé : `cuda_g4` (qualification matérielle en attente);
+- backend de rejeu et de décision : `reference_cpu`;
 - profil : `hgp_reduced`;
 - mode : `certified`;
 - porte d'entrée : satisfaite par les Phases 1 et 4 fermées;
 - porte de sortie : non satisfaite; la voie EMST GPU scalable reste à livrer et à qualifier.
 
-Les cinq premiers jalons CPU de Phase 5 livrent l'ancre EMST exacte, le catalogue exhaustif des paires, la réduction rang-deux du backend CPU, leur différentiel indépendant jusqu'à $n=14$, la forêt hiérarchique compacte construite depuis un EMST déjà certifié et un producteur Borůvka exact sur le LBVH global. Ils ne ferment ni la Phase 5, ni la porte globale G2 du catalogue, et ne publient aucun `public_status=exact` pour une tour MorseHGP3D complète.
+Les cinq premiers jalons CPU de Phase 5 livrent l'ancre EMST exacte, le catalogue exhaustif des paires, la réduction rang-deux du backend CPU, leur différentiel indépendant jusqu'à $n=14$, la forêt hiérarchique compacte construite depuis un EMST déjà certifié et un producteur Borůvka exact sur le LBVH global. Un premier jalon GPU ajoute désormais une ronde stackless à graine fixe qui propose un sur-ensemble sans troncature, puis fait rejouer et décider les minima par le CPU exact. Il ne contracte aucune composante. Ces jalons ne ferment ni la Phase 5, ni la porte globale G2 du catalogue, et ne publient aucun `public_status=exact` pour une tour MorseHGP3D complète.
 
 ## Ancre mathématique
 
@@ -86,7 +87,37 @@ et au plus $\lceil\log_2(n)\rceil$ rondes pour $n\geq2$. Les arêtes finales son
 
 À chaque ronde, un passage postordre marque chaque nœud LBVH comme uniforme pour une composante figée ou mixte. Un sous-arbre uniforme de la composante requérante est rejeté sans évaluation de feuilles. Pour les autres nœuds, la borne exacte de distance à l'AABB ne permet un prune que lorsqu'elle est strictement supérieure au meilleur poids courant. Une égalité descend obligatoirement, car une arête de même poids peut encore gagner sur les extrémités de $\kappa$; ni epsilon ni ordre flottant ne décide ce cas.
 
-Le résultat `K1ExactBoruvkaResult` reste volontairement distinct de `K1EmstResult` : il ne matérialise ni graphe complet, ni hiérarchie, ni couverture persistante, et son `emst_witness_certified` est un certificat local, pas un `public_status`. `verify_exact_lbvh_boruvka` rejoue séparément les labels figés, minima de composantes, arêtes acceptées, contractions, poids exacts et borne de rondes depuis le nuage et l'index immuables; il ne fait confiance ni au booléen de résultat, ni aux compteurs fournis. Ce producteur et ce vérificateur forment le socle CPU de correction pour la prochaine ronde de propositions GPU stackless; ils ne qualifient encore aucun backend GPU.
+Le résultat `K1ExactBoruvkaResult` reste volontairement distinct de `K1EmstResult` : il ne matérialise ni graphe complet, ni hiérarchie, ni couverture persistante, et son `emst_witness_certified` est un certificat local, pas un `public_status`. `verify_exact_lbvh_boruvka` rejoue séparément les labels figés, minima de composantes, arêtes acceptées, contractions, poids exacts et borne de rondes depuis le nuage et l'index immuables; il ne fait confiance ni au booléen de résultat, ni aux compteurs fournis. Ce producteur et ce vérificateur forment le socle CPU de correction pour la ronde de propositions GPU stackless; ils ne qualifient encore aucun backend GPU.
+
+## Ronde GPU à graine fixe et sur-ensemble de candidats
+
+`K1BoruvkaCandidateContext` possède son propre contexte résident et ne réutilise pas les files de la Phase 4. À l'entrée d'une ronde, les labels canoniques des composantes sont figés. Pour chaque source $q$, le CPU choisit déterministement un point $s(q)$ d'une autre composante et calcule exactement
+
+$$R_q=d^2(q,s(q)),\qquad A_q=\left\lbrace p\in X:\ell(p)\neq\ell(q),\ d^2(q,p)\leq R_q\right\rbrace.$$
+
+Le véritable minimum sortant de $q$ appartient à $A_q$, puisque $s(q)$ est lui-même une cible sortante admissible. Il suffit donc que le GPU retourne un ensemble $P_q$ vérifiant $A_q\subseteq P_q\subseteq\left\lbrace p:\ell(p)\neq\ell(q)\right\rbrace$. Après validation de cette extériorité et filtrage exact par $d^2(q,p)\leq R_q$, le minimum selon la clé totale $\kappa(e)=(d^2(e),u,v)$ est exactement le minimum sortant de $q$; le minimum des points d'une composante figée est ensuite son minimum Borůvka exact. Cette implication ne donne aucun pouvoir de décision aux distances GPU : elle réduit seulement le domaine que le CPU doit réévaluer.
+
+Le cutoff transmis au device est un majorant binary64 $U_q\geq R_q$, ou $+\infty$ lorsque le niveau exact n'est pas représentable par un nombre fini. Le LBVH immuable reçoit des cordes d'échappement left-first : la corde du fils gauche vise le fils droit, celle du fils droit hérite de la corde du parent et celle de la racine vise la sentinelle. Un passage postordre étiquette en outre chaque nœud comme uniforme pour une composante figée ou mixte.
+
+Pour une source, le noyau rejette directement un sous-arbre uniforme de sa propre composante. Sur les autres nœuds, il calcule une borne inférieure dirigée vers le bas de la distance à l'AABB et ne prune que sous l'inégalité stricte `lower > U_q`; une égalité descend. Toute borne invalide, non finie ou affectée par un dépassement provoque aussi une descente. Ces règles rendent le pruning conservateur par rapport à $A_q$, mais le certificat final ne leur fait pas confiance seules.
+
+En effet, pour toute cible $p\in A_q$ et tout nœud ancêtre $N$ de sa feuille, la borne device valide $\underline{b}(q,N)$ vérifie la chaîne
+
+$$\underline{b}(q,N)\leq b(q,N)\leq d^2(q,p)\leq R_q\leq U_q.$$
+
+Le prune strict est donc impossible sur ce chemin. Aucun ancêtre de $p$ ne peut non plus porter le tag uniforme de la composante de $q$, puisque $\ell(p)\neq\ell(q)$; les cordes left-first atteignent ainsi sa feuille, sauf borne invalide auquel cas la règle impose précisément de descendre. Le passage count inclut donc $p$, et l'identité de parcours avec emit plus le préfixe exact conserve cette inclusion dans la sortie.
+
+La capacité logique de sortie est déterminée sans troncature par deux parcours identiques : un noyau compte les candidats de chaque source, le CPU relit les comptes et construit un préfixe vérifié, puis un second noyau remplit exactement ces segments. Il y a deux lancements et deux synchronisations par ronde, sans compteur global atomique ni synchronisation par requête. La capacité physique privée peut être réutilisée entre les rondes, tandis que l'audit publie la capacité logique exacte du préfixe courant et une époque de tampon strictement croissante.
+
+Cette première construction privilégie le contrat mathématique à la scalabilité : une graine éloignée peut faire descendre presque tout l'arbre pour chaque source, avec
+
+$$\sum_{q\in X}\lvert P_q\rvert\leq n(n-1),$$
+
+et une taille atteignable en $\Theta(n^2)$. Aucun plafond silencieux ne tronque alors le sur-ensemble : un overflow de préfixe ou un échec d'allocation arrête la ronde. Des graines plus serrées et un protocole chunké certifiable restent nécessaires avant toute revendication scalable.
+
+Après le retour device, le CPU valide les offsets, segments, identifiants, composantes, doublons, comptes de passages et invariants de capacité. Il reconstruit ensuite indépendamment $A_q$ par un parcours exact du même LBVH : à une feuille, la borne AABB exacte est la distance exacte au point, et toute cible requise absente invalide la proposition. Ce rejeu établit le contrat de sur-ensemble avant toute résolution. Le CPU réévalue enfin chaque candidat, élimine ceux au-delà de $R_q$ et résout les minima par $\kappa$, d'abord par source puis par composante. Les champs `candidates` et `cpu_exact_component_minima` restent séparés; l'API ne contracte pas, ne construit pas de forêt et ne produit aucun statut public.
+
+Le cas terminal à une composante renvoie une proposition vide certifiée sans lancer de noyau. Une faute du lanceur empoisonne seulement le contexte concerné; les appels ultérieurs sur ce contexte échouent fermés, tandis qu'un autre contexte reste indépendant.
 
 ## Catalogue rang-deux et décision Gabriel
 
@@ -122,6 +153,14 @@ Le test strict de la forêt compacte compare ses matérialisations à l'ancre co
 
 Le test Borůvka couvre le singleton, une chaîne dont deux rondes sont nécessaires, un carré prolongé par une fusion ultérieure et ses $24$ permutations. Il compare le témoin final à Kruskal sur le graphe complet, ferme la réduction par moitié, les tags LBVH et les compteurs, puis vérifie que le rejeu ignore un booléen de certification falsifié mais rejette un poids exact altéré, un index étranger ou un nuage déplacé.
 
+## Vérification hôte du jalon GPU et qualification restante
+
+Le test hôte emploie un lanceur GPU simulé séparé du code de décision. Il couvre le singleton terminal sans lancement, les égalités du carré, une chaîne déjà contractée, les labels non canoniques, les objets déplacés et l'isolation de l'empoisonnement. Il injecte aussi des offsets incohérents, une cible sortante requise manquante, une cible de même composante, un identifiant hors domaine et une faute GPU; chaque corruption échoue avant de publier un minimum certifié. Le build Release strict et le CTest ciblé de ce contexte passent.
+
+L'exécutable `morsehgp3d_gpu_k1_boruvka_replay` compare sur un carré et une chaîne contractée les minima décidés après proposition GPU aux rondes correspondantes du producteur Borůvka CPU. Il exige deux passes, deux synchronisations, la capacité exacte, l'absence de troncature, le sur-ensemble certifié et la résolution CPU complète, puis émet le schéma compact `morsehgp3d.phase5.k1_boruvka_gpu_replay.v1`. Une variante hôte réutilise le faux lanceur pour valider le contrat sans matériel.
+
+La qualification matérielle demeure **en attente**. Avant de qualifier ce jalon `cuda_g4`, il faut compiler réellement les unités CUDA 12.9 en AOT `sm_120`, exécuter le replay sur la G4 gardée et le passer sous `compute-sanitizer`. Aucun résultat hôte, plausible ou moyen ne remplace cette qualification; la Phase 5 reste ouverte même après elle jusqu'à la boucle Borůvka GPU complète et sa validation scalable.
+
 ## Différentiel indépendant jusqu'à $n=14$
 
 `morsehgp3d_hierarchy_k1_dump` accepte des coordonnées binary64 brutes par un protocole versionné, canonise le nuage, construit l'ancre C++ et émet un objet JSON canonique par cas. Le document expose chaque paire avec centre, niveau, partition globale et classification, les graphes rang-deux et Gabriel, les deux arbres témoins, leurs poids, les nœuds canoniques jusqu'à la racine, les multifusions, le certificat et, pour chaque niveau exact, les coupes strictes puis fermées des cinq chemins de rejeu. Le validateur ne se contente donc pas de relire les booléens du certificat.
@@ -132,8 +171,8 @@ La campagne contient 50 nuages exacts. Elle couvre toutes les tailles de $1$ à 
 
 L'identité des arêtes témoins reste un diagnostic d'implémentation séparé. Le validateur accepte explicitement un autre arbre témoin sous ex æquo dès lors qu'il appartient au graphe certifié et conserve toutes les coupes et le poids exact; la porte scientifique repose sur ces invariants, les nœuds canoniques et les multifusions.
 
-GCP n'a pas été utilisé pour ces lots CPU.
+GCP n'a pas été utilisé pour les lots CPU ni pour la validation hôte de la première ronde GPU. La qualification G4 réelle reste explicitement en attente.
 
 ## Suite immédiate
 
-Le producteur Borůvka CPU ne matérialise plus le graphe complet, mais son parcours séquentiel exact sert encore de référence de correction et non de voie scalable. Le lot suivant introduit une première ronde GPU stackless sur le LBVH global avec un contrat de sur-ensemble de candidats, sans troncature; les décisions indécises retombent vers le CPU exact, puis les contractions et le témoin complet sont vérifiés par le socle décrit ci-dessus. Aucune promotion de phase ne précédera la boucle GPU complète et sa qualification scalable.
+Le producteur Borůvka CPU ne matérialise plus le graphe complet, mais son parcours séquentiel exact sert encore de référence de correction et non de voie scalable. La première ronde GPU stackless est implémentée avec son contrat de sur-ensemble; le prochain verrou est sa compilation et son replay réels sur G4, puis son intégration dans une boucle de rondes avec contractions CPU exactes et vérification du témoin complet. Aucune promotion de phase ne précédera cette boucle GPU complète et sa qualification scalable.
