@@ -7,7 +7,7 @@
 - profil prioritaire : `hgp_reduced`;
 - mode : `certified`;
 - porte d'entrée : satisfaite par les Phases 2A, 2B et 3 fermées;
-- porte de sortie : ouverte; la référence GPU indépendante est implémentée et validée sur émulateur bit à bit, mais sa qualification réelle G4 et les chemins spatiaux GPU de production restent à livrer.
+- porte de sortie : ouverte; la référence GPU indépendante est implémentée, validée sur émulateur bit à bit et qualifiée sur G4 réelle, mais les chemins spatiaux GPU de production restent à livrer.
 
 Les trois premiers lots construisent la vérité terrain spatiale CPU, son premier accélérateur certifié Morton-LBVH, puis une référence CUDA exhaustive dont les propositions flottantes sont séparées des décisions scientifiques. Ils certifient leurs propres partitions exactes, mais ne produisent aucune forêt, ne ferment ni G2 ni la Phase 4 et ne promeuvent aucun `public_status` vers `exact`.
 
@@ -73,13 +73,14 @@ Le différentiel LBVH ajoute 1 006 cas indépendants : six fixtures ciblées pui
 
 Le lot CUDA ajoute des faux lanceurs host-only capables de renverser la permutation, de proposer des valeurs croissantes, décroissantes, nulles ou infinies, puis d'injecter cardinalité tronquée, doublon, ID hors plage, NaN et distance négative. Toutes les propositions valides, même volontairement fausses, publient exactement la partition CPU; toute corruption post-GPU échoue fermé et empoisonne seulement son contexte. Le replay et son oracle Python `Fraction` couvrent 1 013 cas : les 1 006 cas spatiaux et sept cas GPU ciblés pour le tie exact séparé par RN-even, l'underflow signé, une distance sous-normale, l'overflow lors de l'accumulation, les frontières subnormal–normal, les coordonnées finies maximales et le rabattement diagnostique hors plage, avec toutes les tailles $1\leq n\leq1\,000$. Le résumé exige séparément les six couvertures IEEE `addition_only_overflow`, `finite_subnormal_distance`, `max_finite_query`, `normal_subnormal_tie`, `overflow_clamped_query` et `subnormal_tie`. L'émulateur de la recette binary64 reproduit aussi le digest FNV-1a ordonné par ID; les 1 013 partitions, projections et digests coïncident.
 
+La qualification G4 au SHA `01be0f150ee35a01bc939d9240b0a5675e3ae800` ferme les mêmes 1 013 cas sur le replay CUDA réel, soit 2 026 lancements pour les requêtes top-k et boule fermée. Le memcheck borné en rejoue 20, soit 40 lancements. Les deux campagnes conservent `cpu_exact_all_points`, les six couvertures IEEE et les quatre états de projection; l'artefact atteste aussi `sm_120` seulement, aucune entrée PTX, les workflows release et audit, puis `compute-sanitizer` sans erreur.
+
 La matrice locale ferme 38 tests sous GCC 13 en Release. Le nouveau contexte host-only, le replay émulé et leurs validateurs statiques passent aussi sous ASan/UBSan; le différentiel host-only ferme séparément ses 1 013 cas `Fraction`. Les validations Clang, consumers installés et différentielles sanitizer du lot CPU précédent restent inchangées.
 
 L'installation exporte `morsehgp3d::exact`, `morsehgp3d::spatial` et la cible interne de sanitizer. L'archive spatiale est PIC pour son futur lien dans un module partagé. Un package sanitizer propage ses options de lien au consumer au lieu de produire des références ASan/UBSan non résolues. Le consumer installé construit aussi un `MortonLbvhIndex`, puis confronte son 1-NN et sa boule fermée aux partitions de référence afin de détecter tout en-tête, archive ou dépendance CMake manquante.
 
 ## Limites du lot
 
-- référence GPU indépendante non encore exécutée sur une G4 réelle au SHA courant;
 - aucun chemin cuVS;
 - aucun LBVH GPU ni index résident qualifié sur G4;
 - aucune primitive bornée de rejet anticipé;
@@ -87,4 +88,8 @@ L'installation exporte `morsehgp3d::exact`, `morsehgp3d::spatial` et la cible in
 
 ## GCP
 
-GCP non utilisé avant le commit de qualification; le build CUDA exige un SHA propre et poussé avant la session G4 gardée.
+Le premier démarrage gardé du 18 juillet 2026 a ciblé `devpod-gpu-exploration/europe-west4-a/ehgp-blackwell-spot`. La cible était `TERMINATED`, `g4-standard-48`, `SPOT`, `instanceTerminationAction=STOP` et `maxRunDuration=3600`; l'API n'a toutefois pas exposé `terminationTimestamp` dans cette zone. La garde a donc échoué fermé avant tout travail GPU, puis `stop_and_verify.sh` a arrêté exactement la génération `2026-07-18T08:07:12.700-07:00`. La relecture finale donne `TERMINATED` avec `lastStopTimestamp=2026-07-18T08:08:11.558-07:00`; la clé OS Login de session a été révoquée et sa copie privée supprimée.
+
+La qualification utile a ensuite ciblé `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a` avec les mêmes gardes `g4-standard-48`, `SPOT`, `STOP` et 3 600 secondes. L'échéance GCE calculée depuis la génération `2026-07-18T08:11:23.077-07:00` a été certifiée, puis l'arrêt invité `poweroff` à 45 minutes a été armé et relu avant le preflight. Le matériel observé est une NVIDIA RTX PRO 6000 Blackwell Server Edition de compute capability 12.0, pilote 13.0.0 et 101 973 950 464 octets de VRAM; l'image qualifiée porte le digest `sha256:2cc7bed14b90cbaa188974d96463488dda612052987b642a39b0586e982d6383`.
+
+Après le worker, `stop_and_verify.sh` puis une relecture GCE indépendante ont certifié cette cible `TERMINATED`; `lastStopTimestamp=2026-07-18T08:15:19.091-07:00` et la preuve finale a été horodatée `2026-07-18T15:15:28Z`. Les artefacts hors worktree `phase3-01be0f150ee35a01bc939d9240b0a5675e3ae800.json` et `phase4-spatial-01be0f150ee35a01bc939d9240b0a5675e3ae800.json` ont alors seulement été promus vers `status=passed`; leurs SHA-256 sont respectivement `c3868af44dc435431d51cdca526fe1ad48bcc066edbd6d601458bc9176680894` et `31d6a1177a93913036ee1cc19228e89b5267d1389d57d1bdd3f42877c5270cf2`. La clé OS Login de cette session a été révoquée et supprimée localement; les deux cibles sont `TERMINATED` et aucune autre VM `project=e-hgp` active n'a été observée au passage de relais.
