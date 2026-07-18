@@ -25,6 +25,19 @@ SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
 IMAGE_ID_RE = re.compile(r"sha256:[0-9a-f]{64}\Z")
 SM_RE = re.compile(r"sm_[0-9]+")
 SANITIZER_ERROR_RE = re.compile(r"ERROR SUMMARY:\s*([0-9]+) errors")
+RACECHECK_SUMMARY_LINE_RE = re.compile(
+    r"^[ \t]*=+[ \t]*RACECHECK SUMMARY:[ \t]*"
+    r"([0-9]+) hazards? displayed[ \t]*"
+    r"\([ \t]*([0-9]+) errors?,[ \t]*([0-9]+) warnings?[ \t]*\)"
+    r"[ \t]*$",
+    re.MULTILINE,
+)
+RACECHECK_FAILURE_RE = re.compile(
+    r"Internal Sanitizer Error|Target application returned an error|"
+    r"process (?:didn't|did not) terminate successfully|"
+    r"No attachable process found|Potential [^\n]* hazard|Race reported",
+    re.IGNORECASE,
+)
 FULL_CAMPAIGN_SIZES = list(range(1, 1001))
 QUICK_CAMPAIGN_SIZES = [1, 2, 3, 4, 17, 257, 1000]
 GPU_SPECIFIC_CASE_COUNT = 7
@@ -392,6 +405,28 @@ def validate_sanitizer_log(value: str, *, label: str) -> None:
         fail(f"{label} must contain only zero-error summaries")
 
 
+def validate_racecheck_log(value: str, *, label: str) -> None:
+    summary_lines = [
+        line for line in value.splitlines() if "RACECHECK SUMMARY:" in line
+    ]
+    racecheck_summaries = [
+        tuple(int(count) for count in match.groups())
+        for match in RACECHECK_SUMMARY_LINE_RE.finditer(value)
+    ]
+    invalid = (
+        not racecheck_summaries
+        or len(summary_lines) != len(racecheck_summaries)
+        or any(summary != (0, 0, 0) for summary in racecheck_summaries)
+        or SANITIZER_ERROR_RE.search(value) is not None
+        or RACECHECK_FAILURE_RE.search(value) is not None
+    )
+    if invalid:
+        fail(
+            f"{label} must contain only zero-hazard, zero-error, "
+            "zero-warning summaries"
+        )
+
+
 def validate_binary_logs(
     logs: dict[str, str], *, label: str
 ) -> list[str]:
@@ -602,7 +637,7 @@ def main() -> int:
     lbvh_architectures = validate_binary_logs(
         lbvh_logs, label="resident LBVH replay"
     )
-    validate_sanitizer_log(
+    validate_racecheck_log(
         lbvh_racecheck_log,
         label="resident LBVH racecheck evidence",
     )

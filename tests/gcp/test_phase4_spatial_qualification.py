@@ -253,7 +253,11 @@ class Phase4SpatialQualificationAssemblerTests(unittest.TestCase):
             "========= ERROR SUMMARY: 0 errors\n", encoding="utf-8"
         )
         self.lbvh_racecheck_log.write_text(
-            "========= ERROR SUMMARY: 0 errors\n", encoding="utf-8"
+            "========= RACECHECK SUMMARY: 0 hazards displayed "
+            "(0 errors, 0 warnings)\n"
+            "========= RACECHECK SUMMARY: 0 hazards displayed "
+            "(0 errors, 0 warnings)\n",
+            encoding="utf-8",
         )
         self.lbvh_replay.write_bytes(b"resident LBVH replay")
         self.lbvh_checker.write_bytes(b"resident LBVH checker")
@@ -601,15 +605,81 @@ class Phase4SpatialQualificationAssemblerTests(unittest.TestCase):
 
     def test_lbvh_racecheck_error_is_rejected(self) -> None:
         self.lbvh_racecheck_log.write_text(
-            "========= ERROR SUMMARY: 1 errors\n", encoding="utf-8"
+            "========= RACECHECK SUMMARY: 1 hazard displayed "
+            "(1 error, 0 warnings)\n",
+            encoding="utf-8",
         )
 
         completed = self.run_assembler()
 
         self.assertNotEqual(0, completed.returncode)
         self.assertIn(
-            "resident LBVH racecheck evidence must contain only zero-error "
-            "summaries",
+            "resident LBVH racecheck evidence must contain only zero-hazard, "
+            "zero-error, zero-warning summaries",
+            completed.stdout,
+        )
+
+    def test_lbvh_racecheck_warning_is_rejected(self) -> None:
+        self.lbvh_racecheck_log.write_text(
+            "========= RACECHECK SUMMARY: 1 hazard displayed "
+            "(0 errors, 1 warning)\n",
+            encoding="utf-8",
+        )
+
+        completed = self.run_assembler()
+
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn(
+            "resident LBVH racecheck evidence must contain only zero-hazard, "
+            "zero-error, zero-warning summaries",
+            completed.stdout,
+        )
+
+    def test_memcheck_summary_cannot_replace_racecheck_summary(self) -> None:
+        self.lbvh_racecheck_log.write_text(
+            "========= ERROR SUMMARY: 0 errors\n", encoding="utf-8"
+        )
+
+        completed = self.run_assembler()
+
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn(
+            "resident LBVH racecheck evidence must contain only zero-hazard, "
+            "zero-error, zero-warning summaries",
+            completed.stdout,
+        )
+
+    def test_malformed_racecheck_summary_is_rejected(self) -> None:
+        self.lbvh_racecheck_log.write_text(
+            "========= RACECHECK SUMMARY: unknown hazards\n"
+            "========= RACECHECK SUMMARY: 0 hazards displayed "
+            "(0 errors, 0 warnings)\n",
+            encoding="utf-8",
+        )
+
+        completed = self.run_assembler()
+
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn(
+            "resident LBVH racecheck evidence must contain only zero-hazard, "
+            "zero-error, zero-warning summaries",
+            completed.stdout,
+        )
+
+    def test_racecheck_application_failure_is_rejected(self) -> None:
+        self.lbvh_racecheck_log.write_text(
+            "========= Target application returned an error\n"
+            "========= RACECHECK SUMMARY: 0 hazards displayed "
+            "(0 errors, 0 warnings)\n",
+            encoding="utf-8",
+        )
+
+        completed = self.run_assembler()
+
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn(
+            "resident LBVH racecheck evidence must contain only zero-hazard, "
+            "zero-error, zero-warning summaries",
             completed.stdout,
         )
 

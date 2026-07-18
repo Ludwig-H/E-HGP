@@ -1050,6 +1050,11 @@ if Path(command[0]).name == "compute-sanitizer":
             print("fake Phase 4 resident LBVH memcheck differential passed")
         elif tool == "racecheck":
             print("fake Phase 4 resident LBVH racecheck passed")
+            print(
+                "========= RACECHECK SUMMARY: 0 hazards displayed "
+                "(0 errors, 0 warnings)"
+            )
+            raise SystemExit(0)
         else:
             raise SystemExit("unexpected resident LBVH sanitizer tool: " + tool)
         print("========= ERROR SUMMARY: 0 errors")
@@ -1972,7 +1977,10 @@ printf 'fake Blackwell preflight passed\\n'
             lbvh_quick["campaign_result_sha256"],
         )
         self.assertEqual("passed", phase4["checks"]["lbvh_racecheck"])
-        self.assertIn("ERROR SUMMARY: 0 errors", phase4["logs"]["lbvh_racecheck"])
+        self.assertIn(
+            "RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)",
+            phase4["logs"]["lbvh_racecheck"],
+        )
         self.assertEqual(
             "non_certifying_gpu_proposals_with_cpu_exact_reference_and_"
             "parallel_frontier_lbvh_recertification",

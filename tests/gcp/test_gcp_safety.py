@@ -615,7 +615,10 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
                 "lbvh_cuobjdump_ptx": "",
                 "lbvh_cuobjdump_ptx_stderr": "No PTX file found\n",
                 "lbvh_differential": "all resident LBVH Phase 4 cases passed\n",
-                "lbvh_racecheck": "========= ERROR SUMMARY: 0 errors\n",
+                "lbvh_racecheck": (
+                    "========= RACECHECK SUMMARY: 0 hazards displayed "
+                    "(0 errors, 0 warnings)\n"
+                ),
             },
             "mode": "certified",
             "phase": "4",
@@ -2184,7 +2187,10 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
             phase4["checks"]["lbvh_memcheck_differential"]["gpu_launch_count"],
         )
         self.assertEqual("passed", phase4["checks"]["lbvh_racecheck"])
-        self.assertIn("ERROR SUMMARY: 0 errors", phase4["logs"]["lbvh_racecheck"])
+        self.assertIn(
+            "RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)",
+            phase4["logs"]["lbvh_racecheck"],
+        )
         self.assertEqual(
             {
                 "checker_sha256",
