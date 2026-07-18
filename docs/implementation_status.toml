@@ -107,7 +107,7 @@ depends_on = ["1", "4"]
 backend = "reference_cpu"
 profile = "hgp_reduced"
 mode = "certified"
-evidence = ["docs/validation/PHASE4_GATE_REVIEW.md", "docs/validation/PHASE5_PROGRESS.md", "morsehgp3d/include/morsehgp3d/hierarchy/emst.hpp", "morsehgp3d/include/morsehgp3d/hierarchy/gabriel.hpp", "morsehgp3d/src/cpu/hierarchy/emst.cpp", "morsehgp3d/src/cpu/hierarchy/gabriel.cpp", "morsehgp3d/tests/unit/test_hierarchy_emst.cpp", "morsehgp3d/tests/unit/test_hierarchy_gabriel.cpp"]
+evidence = ["docs/validation/PHASE4_GATE_REVIEW.md", "docs/validation/PHASE5_PROGRESS.md", "morsehgp3d/include/morsehgp3d/hierarchy/emst.hpp", "morsehgp3d/include/morsehgp3d/hierarchy/gabriel.hpp", "morsehgp3d/src/cpu/hierarchy/emst.cpp", "morsehgp3d/src/cpu/hierarchy/gabriel.cpp", "morsehgp3d/tests/unit/test_hierarchy_emst.cpp", "morsehgp3d/tests/unit/test_hierarchy_gabriel.cpp", "morsehgp3d/tests/unit/hierarchy_k1_dump.cpp", "morsehgp3d/tests/differential/check_hierarchy_k1.py"]
 blocking_reason = ""
 
 [[phases]]

@@ -49,6 +49,12 @@ target_link_libraries(
   PRIVATE morsehgp3d::hierarchy
 )
 
+add_executable(morsehgp3d_hierarchy_k1_dump hierarchy_k1_dump.cpp)
+target_link_libraries(
+  morsehgp3d_hierarchy_k1_dump
+  PRIVATE morsehgp3d::hierarchy
+)
+
 find_package(Threads REQUIRED)
 add_executable(
   morsehgp3d_predicate_filter_context_tests
@@ -185,6 +191,7 @@ set(
   morsehgp3d_spatial_lbvh_query_dump
   morsehgp3d_hierarchy_emst_tests
   morsehgp3d_hierarchy_gabriel_tests
+  morsehgp3d_hierarchy_k1_dump
   morsehgp3d_predicate_filter_context_tests
   morsehgp3d_warm_context_benchmark_host_test
   morsehgp3d_gpu_spatial_reference_context_tests
@@ -215,6 +222,7 @@ if(MSVC)
   target_compile_options(morsehgp3d_spatial_lbvh_query_dump PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_hierarchy_emst_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_hierarchy_gabriel_tests PRIVATE /W4 /WX)
+  target_compile_options(morsehgp3d_hierarchy_k1_dump PRIVATE /W4 /WX)
   target_compile_options(
     morsehgp3d_predicate_filter_context_tests PRIVATE /W4 /WX
   )
@@ -381,6 +389,16 @@ else()
       -Werror
   )
   target_compile_options(
+    morsehgp3d_hierarchy_k1_dump
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
     morsehgp3d_predicate_filter_context_tests
     PRIVATE
       -Wall
@@ -494,6 +512,17 @@ add_test(
 )
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
+add_test(
+  NAME morsehgp3d.hierarchy_k1_differential
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_hierarchy_k1.py"
+    "$<TARGET_FILE:morsehgp3d_hierarchy_k1_dump>"
+)
+set_tests_properties(
+  morsehgp3d.hierarchy_k1_differential
+  PROPERTIES TIMEOUT 300
+)
 add_test(
   NAME morsehgp3d.spatial_brute_force_differential
   COMMAND

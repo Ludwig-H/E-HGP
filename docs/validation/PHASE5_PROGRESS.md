@@ -7,9 +7,9 @@
 - profil : `hgp_reduced`;
 - mode : `certified`;
 - porte d'entrée : satisfaite par les Phases 1 et 4 fermées;
-- porte de sortie : non satisfaite; le différentiel indépendant jusqu'à $n=14$ et la voie EMST GPU scalable restent à livrer.
+- porte de sortie : non satisfaite; la représentation hiérarchique compacte et la voie EMST GPU scalable restent à livrer.
 
-Les deux premiers lots de Phase 5 livrent l'ancre EMST exacte, le catalogue exhaustif des paires et la réduction rang-deux du backend CPU. Ils ne ferment ni la Phase 5, ni la porte globale G2 du catalogue, et ne publient aucun `public_status=exact` pour une tour MorseHGP3D complète.
+Les trois premiers lots de Phase 5 livrent l'ancre EMST exacte, le catalogue exhaustif des paires, la réduction rang-deux du backend CPU et leur différentiel indépendant jusqu'à $n=14$. Ils ne ferment ni la Phase 5, ni la porte globale G2 du catalogue, et ne publient aucun `public_status=exact` pour une tour MorseHGP3D complète.
 
 ## Ancre mathématique
 
@@ -50,7 +50,7 @@ Le backend est volontairement quadratique : il matérialise le graphe euclidien 
 
 ## Catalogue rang-deux et décision Gabriel
 
-Pour chaque paire canonique $(u,v)$, une seconde voie reconstruit indépendamment son centre diamétral $c=(u+v)/2$, son rayon carré $a=left\Vert u-v\right\Vert^2/4$, puis interroge tout le nuage par `brute_force_closed_ball`. La partition globale exacte sépare intérieur strict, shell complet et extérieur; aucune liste locale, exclusion de support, tolérance ou limite de visites n'intervient.
+Pour chaque paire canonique $(u,v)$, une seconde voie reconstruit indépendamment son centre diamétral $c=(u+v)/2$, son rayon carré $a=\left\Vert u-v\right\Vert^2/4$, puis interroge tout le nuage par `brute_force_closed_ball`. La partition globale exacte sépare intérieur strict, shell complet et extérieur; aucune liste locale, exclusion de support, tolérance ou limite de visites n'intervient.
 
 La décision distingue trois cas :
 
@@ -74,12 +74,22 @@ La réduction rang-deux possède son propre parcours de lots. Elle fige les comp
 
 Le test C++ strict couvre le singleton, le facteur exact $3\mapsto3/4$, deux fusions disjointes dans un même lot, une multifusion d'arité six, les $24$ permutations d'un carré avec ex æquo, les poids exacts et l'accord des coupes du graphe complet avec celles de l'EMST à chaque seuil strict et fermé. Il vérifie également que les lots partitionnent le graphe complet, que chaque perte de composante égale le nombre d'arêtes sélectionnées et que la racine couvre exactement tous les `PointId`.
 
-La compilation GCC avec avertissements transformés en erreurs, le test ciblé, le profil ASan/UBSan et l'export CMake passent. Cette vérification est une non-régression du noyau; elle ne remplace pas encore le différentiel indépendant complet jusqu'à $n=14$ exigé par la porte de sortie.
+La compilation GCC avec avertissements transformés en erreurs, le test ciblé, le profil ASan/UBSan et l'export CMake passent. Le différentiel indépendant du troisième lot complète ci-dessous cette non-régression du noyau.
 
 Le second test strict couvre les trois décisions de paire, une perturbation d'un ULP de chaque côté d'un shell diamétral, deux multifusions disjointes dans le même lot, un tétraèdre régulier 3D dont les six arêtes rang-deux se contractent en une multifusion d'arité quatre, les diagonales extra-shell et les $24$ permutations d'un carré, les coupes strictes et fermées exactement au seuil, ainsi que la fixture non locale où chaque extrémité possède cinq observations plus proches que la paire Gabriel recherchée. Il ferme aussi tous les compteurs du catalogue et compare nœuds, poids et témoins à l'ancre EMST.
 
-GCP n'a pas été utilisé pour ce lot CPU.
+## Différentiel indépendant jusqu'à $n=14$
+
+`morsehgp3d_hierarchy_k1_dump` accepte des coordonnées binary64 brutes par un protocole versionné, canonise le nuage, construit l'ancre C++ et émet un objet JSON canonique par cas. Le document expose chaque paire avec centre, niveau, partition globale et classification, les graphes rang-deux et Gabriel, les deux arbres témoins, leurs poids, les nœuds canoniques jusqu'à la racine, les multifusions, le certificat et, pour chaque niveau exact, les coupes strictes puis fermées des cinq chemins de rejeu. Le validateur ne se contente donc pas de relire les booléens du certificat.
+
+`check_hierarchy_k1.py` recalcule directement chaque boule diamétrale avec `fractions.Fraction`, construit son propre graphe rang-deux et son propre quotient gelé par lots, puis utilise l'EMST stdlib indépendant de `tests/reference_emst`. L'oracle Gamma exhaustif fournit une troisième implémentation des niveaux et des coupes Gamma/Gabriel. Les sorties C++ ne fournissent aucun cutoff, candidat ou résultat intermédiaire à ces oracles.
+
+La campagne contient 50 nuages exacts. Elle couvre toutes les tailles de $1$ à $14$, les dimensions affines un à trois dès leur cardinal minimal, les trois classifications de paire, les niveaux égaux, deux multifusions simultanées, les multifusions d'arité six et huit, un carré et un tétraèdre régulier, les deux côtés d'un shell à un ULP, des fractions dyadiques, les exposants binary64 extrêmes et la fixture Gabriel absente des petites listes locales. Pour chaque cas, les centres, niveaux, arêtes, poids, coupes, nœuds et multifusions coïncident exactement entre les voies applicables. Cela exerce un oracle par graphe complet exhaustif sur chaque nuage jusqu'à $n=14$; cela ne prétend ni énumérer tous les nuages possibles, ni remplacer les campagnes statistiques ultérieures.
+
+L'identité des arêtes témoins reste un diagnostic d'implémentation séparé. Le validateur accepte explicitement un autre arbre témoin sous ex æquo dès lors qu'il appartient au graphe certifié et conserve toutes les coupes et le poids exact; la porte scientifique repose sur ces invariants, les nœuds canoniques et les multifusions.
+
+GCP n'a pas été utilisé pour ces lots CPU.
 
 ## Suite immédiate
 
-Le lot suivant doit exposer un dump canonique C++ et le comparer à l'oracle Python indépendant sur les fixtures, les dimensions affines un à trois, les égalités et les tailles bornées jusqu'à $n=14$. La voie EMST GPU scalable viendra ensuite; aucune promotion de phase ne précédera ces certificats.
+Le résultat CPU de référence n'est pas une représentation scalable : il conserve le graphe complet et chaque `K1HierarchyNode` recopie toute sa couverture en `PointId`, ce qui peut devenir quadratique sur une chaîne. Le lot suivant doit introduire une arène hiérarchique compacte à feuilles implicites, enfants CSR, niveaux factorisés et couvertures matérialisées seulement à la demande, puis prouver qu'elle rejoue les mêmes coupes et multifusions. Cette base recevra ensuite un Borůvka GPU sur le LBVH global; aucune promotion de phase ne précédera sa qualification scalable.
