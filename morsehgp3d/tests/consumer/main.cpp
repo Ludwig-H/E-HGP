@@ -5,6 +5,7 @@
 #include "morsehgp3d/exact/predicates.hpp"
 #include "morsehgp3d/exact/support.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
+#include "morsehgp3d/spatial/lbvh.hpp"
 
 #include <array>
 #include <cstdint>
@@ -243,6 +244,12 @@ int main() {
       cloud, ExactRational3{}, no_exclusions);
   const auto unit_ball = morsehgp3d::spatial::brute_force_closed_ball(
       cloud, ExactRational3{}, ExactLevel{BigInt{1}});
+  const auto spatial_index =
+      morsehgp3d::spatial::MortonLbvhIndex::build(cloud);
+  const auto accelerated_nearest = morsehgp3d::spatial::lbvh_nearest(
+      spatial_index, cloud, ExactRational3{}, no_exclusions);
+  const auto accelerated_ball = morsehgp3d::spatial::lbvh_closed_ball(
+      spatial_index, cloud, ExactRational3{}, ExactLevel{BigInt{1}});
   if (!nearest.shell_complete() || nearest.strict_below().size() != 0U ||
       nearest.cutoff_shell_ids().size() != 2U ||
       nearest.canonical_choice_ids().size() != 1U ||
@@ -250,7 +257,15 @@ int main() {
       !unit_ball.partition_complete() || unit_ball.closed_rank() != 2U ||
       unit_ball.interior_ids().size() != 0U ||
       unit_ball.shell_ids().size() != 2U ||
-      unit_ball.exterior_ids().size() != 1U) {
+      unit_ball.exterior_ids().size() != 1U || !spatial_index.ready() ||
+      !spatial_index.validated_for(cloud) ||
+      !accelerated_nearest.validated_for(cloud) ||
+      accelerated_nearest.cutoff_squared_distance() !=
+          nearest.cutoff_squared_distance() ||
+      accelerated_nearest.cutoff_shell_ids().size() != 2U ||
+      !accelerated_ball.validated_for(cloud) ||
+      accelerated_ball.closed_rank() != unit_ball.closed_rank() ||
+      accelerated_ball.shell_ids().size() != 2U) {
     std::cerr << "installed spatial reference oracle changed semantics\n";
     return 1;
   }

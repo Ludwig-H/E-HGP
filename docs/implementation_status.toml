@@ -93,7 +93,7 @@ depends_on = ["2A", "2B", "3"]
 backend = "reference_cpu"
 profile = "hgp_reduced"
 mode = "certified"
-evidence = ["docs/validation/PHASE2B_GATE_REVIEW.md", "docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md", "docs/validation/PHASE4_PROGRESS.md", "morsehgp3d/tests/fixtures/spatial/relevant_gp_extra_shell_above_smax.json"]
+evidence = ["docs/validation/PHASE2B_GATE_REVIEW.md", "docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md", "docs/validation/PHASE4_PROGRESS.md", "morsehgp3d/tests/fixtures/spatial/relevant_gp_extra_shell_above_smax.json", "morsehgp3d/include/morsehgp3d/spatial/lbvh.hpp", "morsehgp3d/tests/unit/test_spatial_lbvh.cpp", "morsehgp3d/tests/differential/check_spatial_lbvh.py"]
 blocking_reason = ""
 
 [[phases]]

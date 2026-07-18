@@ -1026,4 +1026,4 @@ Les sept prochains lots de travail doivent être :
 
 Cette séquence donne rapidement une vérité terrain, un cas $k=1$ incontestable et une mesure réaliste de la primitive GPU. Elle évite que les choix de bibliothèque ou de layout figent prématurément un objet mathématique incomplet.
 
-Les phases 2A, 2B et 3 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. La phase 4 est désormais la phase courante : elle commence par l'oracle spatial brute-force exact sur `reference_cpu`, avant tout LBVH ou chemin spatial GPU.
+Les phases 2A, 2B et 3 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. La phase 4 est désormais la phase courante : l'oracle spatial brute-force exact et le premier Morton-LBVH à bornes rationnelles certifiées sont livrés sur `reference_cpu`; la référence GPU indépendante et les chemins spatiaux GPU restent à qualifier.

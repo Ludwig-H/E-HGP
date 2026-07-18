@@ -28,6 +28,15 @@ target_link_libraries(morsehgp3d_spatial_tests PRIVATE morsehgp3d::spatial)
 add_executable(morsehgp3d_spatial_query_dump spatial_query_dump.cpp)
 target_link_libraries(morsehgp3d_spatial_query_dump PRIVATE morsehgp3d::spatial)
 
+add_executable(morsehgp3d_spatial_lbvh_tests test_spatial_lbvh.cpp)
+target_link_libraries(morsehgp3d_spatial_lbvh_tests PRIVATE morsehgp3d::spatial)
+
+add_executable(morsehgp3d_spatial_lbvh_query_dump spatial_lbvh_query_dump.cpp)
+target_link_libraries(
+  morsehgp3d_spatial_lbvh_query_dump
+  PRIVATE morsehgp3d::spatial
+)
+
 find_package(Threads REQUIRED)
 add_executable(
   morsehgp3d_predicate_filter_context_tests
@@ -76,6 +85,8 @@ set(
   morsehgp3d_expansion_tests
   morsehgp3d_spatial_tests
   morsehgp3d_spatial_query_dump
+  morsehgp3d_spatial_lbvh_tests
+  morsehgp3d_spatial_lbvh_query_dump
   morsehgp3d_predicate_filter_context_tests
   morsehgp3d_warm_context_benchmark_host_test
 )
@@ -96,6 +107,8 @@ if(MSVC)
   target_compile_options(morsehgp3d_expansion_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_spatial_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_spatial_query_dump PRIVATE /W4 /WX)
+  target_compile_options(morsehgp3d_spatial_lbvh_tests PRIVATE /W4 /WX)
+  target_compile_options(morsehgp3d_spatial_lbvh_query_dump PRIVATE /W4 /WX)
   target_compile_options(
     morsehgp3d_predicate_filter_context_tests PRIVATE /W4 /WX
   )
@@ -204,6 +217,26 @@ else()
       -Werror
   )
   target_compile_options(
+    morsehgp3d_spatial_lbvh_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
+    morsehgp3d_spatial_lbvh_query_dump
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
     morsehgp3d_predicate_filter_context_tests
     PRIVATE
       -Wall
@@ -233,6 +266,7 @@ add_test(NAME morsehgp3d.support COMMAND morsehgp3d_support_tests)
 add_test(NAME morsehgp3d.level_order COMMAND morsehgp3d_level_order_tests)
 add_test(NAME morsehgp3d.expansion COMMAND morsehgp3d_expansion_tests)
 add_test(NAME morsehgp3d.spatial_brute_force COMMAND morsehgp3d_spatial_tests)
+add_test(NAME morsehgp3d.spatial_lbvh COMMAND morsehgp3d_spatial_lbvh_tests)
 add_test(
   NAME morsehgp3d.predicate_filter_context
   COMMAND morsehgp3d_predicate_filter_context_tests
@@ -250,6 +284,17 @@ add_test(
 )
 set_tests_properties(
   morsehgp3d.spatial_brute_force_differential
+  PROPERTIES TIMEOUT 300
+)
+add_test(
+  NAME morsehgp3d.spatial_lbvh_differential
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_spatial_lbvh.py"
+    "$<TARGET_FILE:morsehgp3d_spatial_lbvh_query_dump>"
+)
+set_tests_properties(
+  morsehgp3d.spatial_lbvh_differential
   PROPERTIES TIMEOUT 300
 )
 add_test(

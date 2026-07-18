@@ -12,6 +12,9 @@ namespace morsehgp3d::spatial {
 
 using PointId = std::uint64_t;
 class ExclusionSet;
+class MortonLbvhIndex;
+class TopKPartition;
+class ClosedBallPartition;
 
 class CanonicalPointCloud {
  public:
@@ -47,6 +50,9 @@ class CanonicalPointCloud {
   std::shared_ptr<const IdentityToken> identity_;
 
   friend class ExclusionSet;
+  friend class MortonLbvhIndex;
+  friend class TopKPartition;
+  friend class ClosedBallPartition;
 };
 
 }  // namespace morsehgp3d::spatial

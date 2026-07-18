@@ -1,70 +1,97 @@
 #include "morsehgp3d/spatial/brute_force.hpp"
 
-#include "morsehgp3d/exact/rational.hpp"
+#include "exact_query.hpp"
 
 #include <algorithm>
 #include <cstddef>
 #include <span>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
 namespace morsehgp3d::spatial {
 namespace {
 
-[[nodiscard]] exact::ExactRational3 validated_query(
-    const exact::ExactRational3& query) {
-  exact::ExactRational3 validated{
-      query.numerator(0U),
-      query.numerator(1U),
-      query.numerator(2U),
-      query.denominator()};
-  if (validated != query) {
-    throw std::invalid_argument("an exact spatial query must be canonical");
-  }
-  return validated;
-}
-
-[[nodiscard]] exact::ExactLevel validated_squared_radius(
-    const exact::ExactLevel& squared_radius) {
-  exact::ExactLevel validated{
-      squared_radius.numerator(), squared_radius.denominator()};
-  if (validated != squared_radius) {
-    throw std::invalid_argument("an exact squared radius must be canonical");
-  }
-  return validated;
-}
-
-[[nodiscard]] exact::ExactLevel exact_squared_distance(
-    const exact::ExactRational3& query,
-    const exact::CertifiedPoint3& point) {
-  const exact::ExactRational3& exact_point = point.exact();
-  const exact::BigInt common_denominator =
-      query.denominator() * exact_point.denominator();
-  exact::BigInt squared_numerator = 0;
-  for (std::size_t axis = 0; axis < 3U; ++axis) {
-    const exact::BigInt difference_numerator =
-        exact_point.numerator(axis) * query.denominator() -
-        query.numerator(axis) * exact_point.denominator();
-    squared_numerator += difference_numerator * difference_numerator;
-  }
-  return exact::ExactLevel{
-      std::move(squared_numerator), common_denominator * common_denominator};
-}
-
-[[nodiscard]] bool exact_neighbor_less(
-    const ExactNeighbor& left,
-    const ExactNeighbor& right) {
-  if (left.squared_distance != right.squared_distance) {
-    return left.squared_distance < right.squared_distance;
-  }
-  return left.point_id < right.point_id;
-}
-
 [[nodiscard]] bool strictly_increasing_ids(std::span<const PointId> ids) {
   return std::adjacent_find(
              ids.begin(), ids.end(),
              [](PointId left, PointId right) { return left >= right; }) == ids.end();
+}
+
+void require_counter_margin_consistency(
+    const SpatialQueryCounters& counters) {
+  const bool has_strict_pruning =
+      counters.pruned_subtree_count != 0U ||
+      counters.bulk_interior_subtree_count != 0U;
+  if (has_strict_pruning !=
+      counters.minimum_strict_pruning_margin.has_value()) {
+    throw std::logic_error(
+        "strictly pruned spatial work requires exactly one minimum margin");
+  }
+  if (counters.minimum_strict_pruning_margin.has_value() &&
+      counters.minimum_strict_pruning_margin->numerator() <= 0) {
+    throw std::logic_error("a minimum pruning margin must be positive");
+  }
+}
+
+void require_brute_force_counters(
+    const SpatialQueryCounters& counters) {
+  if (counters.method != SpatialQueryMethod::brute_force ||
+      counters.node_visit_count != 0U ||
+      counters.internal_node_expansion_count != 0U ||
+      counters.exact_aabb_bound_evaluation_count != 0U ||
+      counters.pruned_subtree_count != 0U ||
+      counters.bulk_interior_subtree_count != 0U ||
+      counters.pruned_eligible_point_count != 0U ||
+      counters.bulk_interior_point_count != 0U ||
+      counters.minimum_strict_pruning_margin.has_value()) {
+    throw std::logic_error("invalid brute-force spatial counters");
+  }
+}
+
+void require_lbvh_counters(const SpatialQueryCounters& counters) {
+  if (counters.method != SpatialQueryMethod::morton_lbvh ||
+      counters.node_visit_count == 0U ||
+      counters.internal_node_expansion_count > counters.node_visit_count ||
+      counters.exact_aabb_bound_evaluation_count < counters.node_visit_count ||
+      counters.pruned_subtree_count > counters.node_visit_count ||
+      counters.bulk_interior_subtree_count > counters.node_visit_count ||
+      counters.pruned_subtree_count >
+          counters.node_visit_count - counters.bulk_interior_subtree_count ||
+      counters.bulk_interior_subtree_count >
+          counters.bulk_interior_point_count ||
+      counters.node_visit_count % 2U == 0U ||
+      counters.internal_node_expansion_count !=
+          (counters.node_visit_count - 1U) / 2U) {
+    throw std::logic_error("invalid Morton-LBVH spatial counters");
+  }
+  require_counter_margin_consistency(counters);
+}
+
+void require_point_ids_in_cloud(
+    std::span<const PointId> ids,
+    std::size_t point_count,
+    const char* partition_name) {
+  for (const PointId id : ids) {
+    if (!std::in_range<std::size_t>(id) ||
+        static_cast<std::size_t>(id) >= point_count) {
+      throw std::logic_error(
+          std::string{partition_name} + " contains a PointId outside its namespace");
+    }
+  }
+}
+
+void require_neighbor_ids_in_cloud(
+    std::span<const ExactNeighbor> neighbors,
+    std::size_t point_count) {
+  for (const ExactNeighbor& neighbor : neighbors) {
+    if (!std::in_range<std::size_t>(neighbor.point_id) ||
+        static_cast<std::size_t>(neighbor.point_id) >= point_count) {
+      throw std::logic_error(
+          "a strict top-k neighbor lies outside its PointId namespace");
+    }
+  }
 }
 
 void require_unique_partition_ids(
@@ -187,32 +214,65 @@ ExclusionSet& ExclusionSet::operator=(ExclusionSet&& other) noexcept {
 }
 
 TopKPartition::TopKPartition(
+    const CanonicalPointCloud& cloud,
     std::size_t requested_rank,
     exact::ExactLevel cutoff_squared_distance,
     std::vector<ExactNeighbor> strict_below,
     std::vector<PointId> cutoff_shell_ids,
     std::vector<PointId> canonical_choice_ids,
     std::size_t eligible_point_count,
-    std::size_t distance_evaluation_count)
+    SpatialQueryCounters counters)
     : complete_(true),
+      cloud_identity_(cloud.identity_),
+      point_count_(cloud.size()),
       requested_rank_(requested_rank),
       cutoff_squared_distance_(std::move(cutoff_squared_distance)),
       strict_below_(std::move(strict_below)),
       cutoff_shell_ids_(std::move(cutoff_shell_ids)),
       canonical_choice_ids_(std::move(canonical_choice_ids)),
       eligible_point_count_(eligible_point_count),
-      distance_evaluation_count_(distance_evaluation_count) {
+      counters_(std::move(counters)) {
+  if (cloud_identity_ == nullptr || point_count_ == 0U ||
+      eligible_point_count_ > point_count_) {
+    throw std::logic_error("invalid top-k point namespace");
+  }
   if (requested_rank_ == 0U || requested_rank_ > eligible_point_count_) {
     throw std::logic_error("a top-k rank must address an eligible point");
   }
-  if (distance_evaluation_count_ != eligible_point_count_) {
-    throw std::logic_error("the brute-force top-k oracle must evaluate every eligible point");
+  if (counters_.excluded_point_count != point_count_ - eligible_point_count_) {
+    throw std::logic_error("top-k exclusion counters do not close on the cloud");
+  }
+  if (counters_.method == SpatialQueryMethod::brute_force) {
+    require_brute_force_counters(counters_);
+    if (counters_.exact_point_distance_evaluation_count !=
+        eligible_point_count_) {
+      throw std::logic_error(
+          "the brute-force top-k oracle must evaluate every eligible point");
+    }
+  } else {
+    require_lbvh_counters(counters_);
+    if (counters_.bulk_interior_subtree_count != 0U ||
+        counters_.bulk_interior_point_count != 0U ||
+        counters_.exact_point_distance_evaluation_count >
+            eligible_point_count_ ||
+        counters_.pruned_eligible_point_count !=
+            eligible_point_count_ -
+                counters_.exact_point_distance_evaluation_count) {
+      throw std::logic_error(
+          "accelerated top-k counters do not partition the eligible leaves");
+    }
   }
   if (!std::is_sorted(
-          strict_below_.begin(), strict_below_.end(), exact_neighbor_less)) {
+          strict_below_.begin(), strict_below_.end(),
+          detail::exact_neighbor_less)) {
     throw std::logic_error(
         "strict top-k neighbors must be ordered by exact distance then PointId");
   }
+  require_neighbor_ids_in_cloud(strict_below_, point_count_);
+  require_point_ids_in_cloud(
+      cutoff_shell_ids_, point_count_, "the top-k cutoff shell");
+  require_point_ids_in_cloud(
+      canonical_choice_ids_, point_count_, "the canonical top-k choice");
   for (const ExactNeighbor& neighbor : strict_below_) {
     if (!(neighbor.squared_distance < cutoff_squared_distance_)) {
       throw std::logic_error("a strict top-k neighbor must be below the cutoff");
@@ -228,6 +288,11 @@ TopKPartition::TopKPartition(
   if (strict_below_.size() > eligible_point_count_ ||
       cutoff_shell_ids_.size() > eligible_point_count_ - strict_below_.size()) {
     throw std::logic_error("a top-k partition exceeds the eligible point count");
+  }
+  if (strict_below_.size() + cutoff_shell_ids_.size() >
+      counters_.exact_point_distance_evaluation_count) {
+    throw std::logic_error(
+        "a top-k certificate cites a point whose distance was not evaluated");
   }
   require_unique_partition_ids(strict_below_, cutoff_shell_ids_);
 
@@ -251,6 +316,70 @@ TopKPartition::TopKPartition(
   }
 }
 
+TopKPartition TopKPartition::from_evaluated_neighbors(
+    const CanonicalPointCloud& cloud,
+    std::size_t requested_rank,
+    std::vector<ExactNeighbor> evaluated_neighbors,
+    std::size_t eligible_point_count,
+    SpatialQueryCounters counters) {
+  if (counters.exact_point_distance_evaluation_count !=
+      evaluated_neighbors.size()) {
+    throw std::logic_error(
+        "top-k distance counters disagree with the evaluated payload");
+  }
+  if (requested_rank == 0U || requested_rank > eligible_point_count ||
+      evaluated_neighbors.size() < requested_rank) {
+    throw std::logic_error(
+        "evaluated neighbors do not determine the requested top-k cutoff");
+  }
+  using NeighborDifference = std::vector<ExactNeighbor>::difference_type;
+  if (!std::in_range<NeighborDifference>(requested_rank - 1U)) {
+    throw std::length_error("the requested rank exceeds the iterator domain");
+  }
+  const auto cutoff_position =
+      evaluated_neighbors.begin() +
+      static_cast<NeighborDifference>(requested_rank - 1U);
+  std::nth_element(
+      evaluated_neighbors.begin(), cutoff_position,
+      evaluated_neighbors.end(), detail::exact_neighbor_less);
+  const exact::ExactLevel cutoff = cutoff_position->squared_distance;
+
+  std::vector<ExactNeighbor> strict_below;
+  std::vector<PointId> cutoff_shell_ids;
+  strict_below.reserve(requested_rank - 1U);
+  for (ExactNeighbor& neighbor : evaluated_neighbors) {
+    if (neighbor.squared_distance < cutoff) {
+      strict_below.push_back(std::move(neighbor));
+    } else if (neighbor.squared_distance == cutoff) {
+      cutoff_shell_ids.push_back(neighbor.point_id);
+    }
+  }
+  std::sort(
+      strict_below.begin(), strict_below.end(), detail::exact_neighbor_less);
+  std::sort(cutoff_shell_ids.begin(), cutoff_shell_ids.end());
+
+  std::vector<PointId> canonical_choice_ids;
+  canonical_choice_ids.reserve(requested_rank);
+  for (const ExactNeighbor& neighbor : strict_below) {
+    canonical_choice_ids.push_back(neighbor.point_id);
+  }
+  const std::size_t shell_choice_count = requested_rank - strict_below.size();
+  for (std::size_t index = 0; index < shell_choice_count; ++index) {
+    canonical_choice_ids.push_back(cutoff_shell_ids[index]);
+  }
+  std::sort(canonical_choice_ids.begin(), canonical_choice_ids.end());
+
+  return TopKPartition{
+      cloud,
+      requested_rank,
+      cutoff,
+      std::move(strict_below),
+      std::move(cutoff_shell_ids),
+      std::move(canonical_choice_ids),
+      eligible_point_count,
+      std::move(counters)};
+}
+
 TopKPartition& TopKPartition::operator=(const TopKPartition& other) {
   if (this != &other) {
     TopKPartition copy{other};
@@ -261,55 +390,72 @@ TopKPartition& TopKPartition::operator=(const TopKPartition& other) {
 
 TopKPartition::TopKPartition(TopKPartition&& other) noexcept
     : complete_(std::exchange(other.complete_, false)),
+      cloud_identity_(std::move(other.cloud_identity_)),
+      point_count_(std::exchange(other.point_count_, 0U)),
       requested_rank_(other.requested_rank_),
       cutoff_squared_distance_(std::move(other.cutoff_squared_distance_)),
       strict_below_(std::move(other.strict_below_)),
       cutoff_shell_ids_(std::move(other.cutoff_shell_ids_)),
       canonical_choice_ids_(std::move(other.canonical_choice_ids_)),
       eligible_point_count_(other.eligible_point_count_),
-      distance_evaluation_count_(other.distance_evaluation_count_) {
+      counters_(std::move(other.counters_)) {
   other.requested_rank_ = 0U;
   other.eligible_point_count_ = 0U;
-  other.distance_evaluation_count_ = 0U;
+  other.counters_ = SpatialQueryCounters{};
 }
 
 TopKPartition& TopKPartition::operator=(TopKPartition&& other) noexcept {
   if (this != &other) {
     const bool incoming_complete = std::exchange(other.complete_, false);
     complete_ = false;
+    cloud_identity_ = std::move(other.cloud_identity_);
+    point_count_ = std::exchange(other.point_count_, 0U);
     requested_rank_ = other.requested_rank_;
     cutoff_squared_distance_ = std::move(other.cutoff_squared_distance_);
     strict_below_ = std::move(other.strict_below_);
     cutoff_shell_ids_ = std::move(other.cutoff_shell_ids_);
     canonical_choice_ids_ = std::move(other.canonical_choice_ids_);
     eligible_point_count_ = other.eligible_point_count_;
-    distance_evaluation_count_ = other.distance_evaluation_count_;
+    counters_ = std::move(other.counters_);
     complete_ = incoming_complete;
     other.requested_rank_ = 0U;
     other.eligible_point_count_ = 0U;
-    other.distance_evaluation_count_ = 0U;
+    other.counters_ = SpatialQueryCounters{};
   }
   return *this;
 }
 
 ClosedBallPartition::ClosedBallPartition(
+    const CanonicalPointCloud& cloud,
     exact::ExactLevel squared_radius,
     std::vector<PointId> interior_ids,
     std::vector<PointId> shell_ids,
     std::vector<PointId> exterior_ids,
-    std::size_t evaluation_count)
+    SpatialQueryCounters counters)
     : complete_(true),
+      cloud_identity_(cloud.identity_),
       squared_radius_(std::move(squared_radius)),
       interior_ids_(std::move(interior_ids)),
       shell_ids_(std::move(shell_ids)),
       exterior_ids_(std::move(exterior_ids)),
       closed_rank_(interior_ids_.size() + shell_ids_.size()),
-      evaluation_count_(evaluation_count) {
+      evaluation_count_(cloud.size()),
+      counters_(std::move(counters)) {
+  if (cloud_identity_ == nullptr || evaluation_count_ == 0U ||
+      counters_.excluded_point_count != 0U) {
+    throw std::logic_error("invalid closed-ball point namespace");
+  }
   if (!strictly_increasing_ids(interior_ids_) ||
       !strictly_increasing_ids(shell_ids_) ||
       !strictly_increasing_ids(exterior_ids_)) {
     throw std::logic_error("closed-ball partition classes must be ID-sorted and unique");
   }
+  require_point_ids_in_cloud(
+      interior_ids_, evaluation_count_, "the closed-ball interior");
+  require_point_ids_in_cloud(
+      shell_ids_, evaluation_count_, "the closed-ball shell");
+  require_point_ids_in_cloud(
+      exterior_ids_, evaluation_count_, "the closed-ball exterior");
   if (interior_ids_.size() > evaluation_count_ ||
       shell_ids_.size() > evaluation_count_ - interior_ids_.size() ||
       exterior_ids_.size() !=
@@ -317,6 +463,29 @@ ClosedBallPartition::ClosedBallPartition(
     throw std::logic_error("the closed-ball classes must partition every evaluated point");
   }
   require_unique_partition_ids(interior_ids_, shell_ids_, exterior_ids_);
+  if (counters_.method == SpatialQueryMethod::brute_force) {
+    require_brute_force_counters(counters_);
+    if (counters_.exact_point_distance_evaluation_count !=
+        evaluation_count_) {
+      throw std::logic_error(
+          "the brute-force ball must evaluate every point distance");
+    }
+  } else {
+    require_lbvh_counters(counters_);
+    if (counters_.exact_point_distance_evaluation_count > evaluation_count_ ||
+        counters_.pruned_subtree_count >
+            counters_.pruned_eligible_point_count ||
+        counters_.pruned_eligible_point_count >
+            evaluation_count_ -
+                counters_.exact_point_distance_evaluation_count ||
+        counters_.bulk_interior_point_count !=
+            evaluation_count_ -
+                counters_.exact_point_distance_evaluation_count -
+                counters_.pruned_eligible_point_count) {
+      throw std::logic_error(
+          "accelerated ball counters do not partition the point cloud");
+    }
+  }
 }
 
 ClosedBallPartition& ClosedBallPartition::operator=(
@@ -330,14 +499,17 @@ ClosedBallPartition& ClosedBallPartition::operator=(
 
 ClosedBallPartition::ClosedBallPartition(ClosedBallPartition&& other) noexcept
     : complete_(std::exchange(other.complete_, false)),
+      cloud_identity_(std::move(other.cloud_identity_)),
       squared_radius_(std::move(other.squared_radius_)),
       interior_ids_(std::move(other.interior_ids_)),
       shell_ids_(std::move(other.shell_ids_)),
       exterior_ids_(std::move(other.exterior_ids_)),
       closed_rank_(other.closed_rank_),
-      evaluation_count_(other.evaluation_count_) {
+      evaluation_count_(other.evaluation_count_),
+      counters_(std::move(other.counters_)) {
   other.closed_rank_ = 0U;
   other.evaluation_count_ = 0U;
+  other.counters_ = SpatialQueryCounters{};
 }
 
 ClosedBallPartition& ClosedBallPartition::operator=(
@@ -345,15 +517,18 @@ ClosedBallPartition& ClosedBallPartition::operator=(
   if (this != &other) {
     const bool incoming_complete = std::exchange(other.complete_, false);
     complete_ = false;
+    cloud_identity_ = std::move(other.cloud_identity_);
     squared_radius_ = std::move(other.squared_radius_);
     interior_ids_ = std::move(other.interior_ids_);
     shell_ids_ = std::move(other.shell_ids_);
     exterior_ids_ = std::move(other.exterior_ids_);
     closed_rank_ = other.closed_rank_;
     evaluation_count_ = other.evaluation_count_;
+    counters_ = std::move(other.counters_);
     complete_ = incoming_complete;
     other.closed_rank_ = 0U;
     other.evaluation_count_ = 0U;
+    other.counters_ = SpatialQueryCounters{};
   }
   return *this;
 }
@@ -374,7 +549,7 @@ TopKPartition brute_force_top_k(
   if (requested_rank == 0U || requested_rank > eligible_point_count) {
     throw std::out_of_range("the requested rank is outside the eligible point set");
   }
-  const exact::ExactRational3 canonical_query = validated_query(query);
+  const exact::ExactRational3 canonical_query = detail::validated_query(query);
 
   std::vector<ExactNeighbor> neighbors;
   neighbors.reserve(eligible_point_count);
@@ -382,50 +557,19 @@ TopKPartition brute_force_top_k(
     const PointId id = static_cast<PointId>(index);
     if (!exclusions.contains(id)) {
       neighbors.push_back(
-          ExactNeighbor{id, exact_squared_distance(canonical_query, cloud.point(id))});
+          ExactNeighbor{
+              id, detail::exact_squared_distance(canonical_query, cloud.point(id))});
     }
   }
-  using NeighborDifference = std::vector<ExactNeighbor>::difference_type;
-  if (!std::in_range<NeighborDifference>(requested_rank - 1U)) {
-    throw std::length_error("the requested rank exceeds the iterator domain");
-  }
-  const auto cutoff_position =
-      neighbors.begin() + static_cast<NeighborDifference>(requested_rank - 1U);
-  std::nth_element(
-      neighbors.begin(), cutoff_position, neighbors.end(), exact_neighbor_less);
-  const exact::ExactLevel cutoff = cutoff_position->squared_distance;
-  std::vector<ExactNeighbor> strict_below;
-  std::vector<PointId> cutoff_shell_ids;
-  strict_below.reserve(requested_rank - 1U);
-  for (ExactNeighbor& neighbor : neighbors) {
-    if (neighbor.squared_distance < cutoff) {
-      strict_below.push_back(std::move(neighbor));
-    } else if (neighbor.squared_distance == cutoff) {
-      cutoff_shell_ids.push_back(neighbor.point_id);
-    }
-  }
-  std::sort(strict_below.begin(), strict_below.end(), exact_neighbor_less);
-  std::sort(cutoff_shell_ids.begin(), cutoff_shell_ids.end());
-
-  std::vector<PointId> canonical_choice_ids;
-  canonical_choice_ids.reserve(requested_rank);
-  for (const ExactNeighbor& neighbor : strict_below) {
-    canonical_choice_ids.push_back(neighbor.point_id);
-  }
-  const std::size_t shell_choice_count = requested_rank - strict_below.size();
-  for (std::size_t index = 0; index < shell_choice_count; ++index) {
-    canonical_choice_ids.push_back(cutoff_shell_ids[index]);
-  }
-  std::sort(canonical_choice_ids.begin(), canonical_choice_ids.end());
-
-  return TopKPartition{
+  SpatialQueryCounters counters;
+  counters.excluded_point_count = exclusions.ids().size();
+  counters.exact_point_distance_evaluation_count = neighbors.size();
+  return TopKPartition::from_evaluated_neighbors(
+      cloud,
       requested_rank,
-      cutoff,
-      std::move(strict_below),
-      std::move(cutoff_shell_ids),
-      std::move(canonical_choice_ids),
+      std::move(neighbors),
       eligible_point_count,
-      neighbors.size()};
+      std::move(counters));
 }
 
 TopKPartition brute_force_nearest(
@@ -442,16 +586,16 @@ ClosedBallPartition brute_force_closed_ball(
   if (cloud.size() == 0U) {
     throw std::invalid_argument("a moved-from canonical point cloud is not queryable");
   }
-  const exact::ExactRational3 canonical_query = validated_query(query);
+  const exact::ExactRational3 canonical_query = detail::validated_query(query);
   const exact::ExactLevel canonical_squared_radius =
-      validated_squared_radius(squared_radius);
+      detail::validated_squared_radius(squared_radius);
   std::vector<PointId> interior_ids;
   std::vector<PointId> shell_ids;
   std::vector<PointId> exterior_ids;
   for (std::size_t index = 0; index < cloud.size(); ++index) {
     const PointId id = static_cast<PointId>(index);
     const exact::ExactLevel distance =
-        exact_squared_distance(canonical_query, cloud.point(id));
+        detail::exact_squared_distance(canonical_query, cloud.point(id));
     if (distance < canonical_squared_radius) {
       interior_ids.push_back(id);
     } else if (distance == canonical_squared_radius) {
@@ -460,12 +604,15 @@ ClosedBallPartition brute_force_closed_ball(
       exterior_ids.push_back(id);
     }
   }
+  SpatialQueryCounters counters;
+  counters.exact_point_distance_evaluation_count = cloud.size();
   return ClosedBallPartition{
+      cloud,
       canonical_squared_radius,
       std::move(interior_ids),
       std::move(shell_ids),
       std::move(exterior_ids),
-      cloud.size()};
+      std::move(counters)};
 }
 
 }  // namespace morsehgp3d::spatial

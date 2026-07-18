@@ -522,6 +522,8 @@ def validate_sources(project: Path, repository: Path) -> None:
         "morsehgp3d_expansion_tests",
         "morsehgp3d_spatial_tests",
         "morsehgp3d_spatial_query_dump",
+        "morsehgp3d_spatial_lbvh_tests",
+        "morsehgp3d_spatial_lbvh_query_dump",
         "morsehgp3d_predicate_filter_context_tests",
         "morsehgp3d_warm_context_benchmark_host_test",
     }
