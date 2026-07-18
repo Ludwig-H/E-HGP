@@ -34,6 +34,7 @@ RESULT_DIR="${MORSEHGP3D_PHASE3_RESULT_DIR:-${TMPDIR:-/tmp}/morsehgp3d-phase3-re
 ASSUME_YES=0
 PROVISION_DOCKER=0
 PHASE4_SPATIAL_REFERENCE=0
+PHASE5_K1_BORUVKA=0
 
 SESSION_CERTIFIED=0
 TARGET_STOP_CERTIFIED=0
@@ -42,6 +43,8 @@ LOCAL_TEMP_RESULT=""
 LOCAL_RESULT=""
 LOCAL_PHASE4_TEMP_RESULT=""
 LOCAL_PHASE4_RESULT=""
+LOCAL_PHASE5_TEMP_RESULT=""
+LOCAL_PHASE5_RESULT=""
 START_HANDOFF=""
 SESSION_LAST_START_TIMESTAMP=""
 SESSION_HANDOFF_STATUS=""
@@ -63,7 +66,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -83,6 +86,12 @@ certification TERMINATED de la génération ciblée.
 de la référence spatiale exhaustive et du LBVH résident Phase 4. Leur artefact
 compagnon commun reste provisoire jusqu'à la même certification ciblée
 TERMINATED et ne publie aucun statut scientifique.
+
+--phase5-k1-boruvka ajoute dans la même session gardée la qualification de la
+première ronde GPU Boruvka de Phase 5 : replay réel recertifié sur CPU, audit
+AOT sm_120 sans PTX, memcheck et racecheck. Son artefact compagnon reste
+provisoire jusqu'à la même certification ciblée TERMINATED et ne publie aucun
+statut scientifique.
 
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
@@ -104,6 +113,10 @@ while (($# > 0)); do
             ;;
         --phase4-spatial-reference)
             PHASE4_SPATIAL_REFERENCE=1
+            shift
+            ;;
+        --phase5-k1-boruvka)
+            PHASE5_K1_BORUVKA=1
             shift
             ;;
         --result-dir)
@@ -221,6 +234,11 @@ if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     [[ ! -e "${LOCAL_PHASE4_RESULT}" && ! -L "${LOCAL_PHASE4_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE4_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
+if ((PHASE5_K1_BORUVKA == 1)); then
+    LOCAL_PHASE5_RESULT="${RESULT_DIR}/phase5-k1-boruvka-${HEAD_SHA}.json"
+    [[ ! -e "${LOCAL_PHASE5_RESULT}" && ! -L "${LOCAL_PHASE5_RESULT}" ]] || \
+        die "L'artefact ${LOCAL_PHASE5_RESULT} existe déjà; utilisez un répertoire distinct."
+fi
 LOCAL_TEMP_RESULT="$(mktemp "${RESULT_DIR}/.phase3-${HEAD_SHA}.XXXXXXXX.partial")" || \
     die "Impossible de créer l'artefact temporaire local."
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
@@ -229,6 +247,18 @@ if ((PHASE4_SPATIAL_REFERENCE == 1)); then
         rm -f -- "${LOCAL_TEMP_RESULT}"
         LOCAL_TEMP_RESULT=""
         die "Impossible de créer l'artefact Phase 4 temporaire local."
+    fi
+fi
+if ((PHASE5_K1_BORUVKA == 1)); then
+    if ! LOCAL_PHASE5_TEMP_RESULT="$(mktemp \
+        "${RESULT_DIR}/.phase5-k1-boruvka-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        rm -f -- "${LOCAL_TEMP_RESULT}"
+        LOCAL_TEMP_RESULT=""
+        if [[ -n "${LOCAL_PHASE4_TEMP_RESULT}" ]]; then
+            rm -f -- "${LOCAL_PHASE4_TEMP_RESULT}"
+            LOCAL_PHASE4_TEMP_RESULT=""
+        fi
+        die "Impossible de créer l'artefact Phase 5 temporaire local."
     fi
 fi
 
@@ -697,6 +727,10 @@ cleanup_local_publication() {
         -e "${LOCAL_PHASE4_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE4_TEMP_RESULT}" || true
     fi
+    if [[ -n "${LOCAL_PHASE5_TEMP_RESULT}" && \
+        -e "${LOCAL_PHASE5_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_PHASE5_TEMP_RESULT}" || true
+    fi
 }
 
 on_exit() {
@@ -776,6 +810,7 @@ printf '%s\n' \
     "  arrêt invité    : ${GUEST_SHUTDOWN_MINUTES} min" \
     "  Docker hôte     : $([[ ${PROVISION_DOCKER} == 1 ]] && printf 'provisioning Ubuntu autorisé' || printf 'aucune mutation')" \
     "  replay Phase 4  : $([[ ${PHASE4_SPATIAL_REFERENCE} == 1 ]] && printf 'référence + LBVH résident activés' || printf 'désactivé')" \
+    "  replay Phase 5  : $([[ ${PHASE5_K1_BORUVKA} == 1 ]] && printf 'ronde K1 Boruvka activée' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -799,16 +834,24 @@ REMOTE_WORKDIR="$(printf '%s\n' "${mktemp_output}" | sed -n 's/^__EHGP_REMOTE_DI
 remote_repository="${REMOTE_WORKDIR}/repository"
 remote_artifact="${REMOTE_WORKDIR}/phase3-result.json"
 remote_phase4_artifact=""
+remote_phase5_artifact=""
 quoted_origin="$(shell_quote "${ORIGIN_URL}")"
 quoted_repository="$(shell_quote "${remote_repository}")"
 quoted_head="$(shell_quote "${HEAD_SHA}")"
 quoted_artifact="$(shell_quote "${remote_artifact}")"
 quoted_phase4_artifact=""
+quoted_phase5_artifact=""
 phase4_worker_option=""
+phase5_worker_option=""
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     remote_phase4_artifact="${REMOTE_WORKDIR}/phase4-spatial-result.json"
     quoted_phase4_artifact="$(shell_quote "${remote_phase4_artifact}")"
     phase4_worker_option=" --phase4-spatial-output ${quoted_phase4_artifact}"
+fi
+if ((PHASE5_K1_BORUVKA == 1)); then
+    remote_phase5_artifact="${REMOTE_WORKDIR}/phase5-k1-boruvka-result.json"
+    quoted_phase5_artifact="$(shell_quote "${remote_phase5_artifact}")"
+    phase5_worker_option=" --phase5-k1-boruvka-output ${quoted_phase5_artifact}"
 fi
 quoted_gce_deadline="$(shell_quote "${EFFECTIVE_GCE_DEADLINE_EPOCH}")"
 
@@ -826,7 +869,7 @@ if ((PROVISION_DOCKER == 1)); then
 fi
 
 remote_exec \
-    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}"
+    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}"
 
 timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
@@ -845,6 +888,19 @@ if ((PHASE4_SPATIAL_REFERENCE == 1)); then
         "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
         "${INSTANCE_NAME}:${remote_phase4_artifact}" \
         "${LOCAL_PHASE4_TEMP_RESULT}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+fi
+if ((PHASE5_K1_BORUVKA == 1)); then
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${INSTANCE_NAME}:${remote_phase5_artifact}" \
+        "${LOCAL_PHASE5_TEMP_RESULT}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --quiet \
@@ -1305,6 +1361,154 @@ if lifecycle != {
 PY
 fi
 
+if ((PHASE5_K1_BORUVKA == 1)); then
+    [[ -s "${LOCAL_PHASE5_TEMP_RESULT}" ]] || \
+        die "Artefact Phase 5 K1 Boruvka distant récupéré mais vide."
+    python3 - "${LOCAL_PHASE5_TEMP_RESULT}" "${HEAD_SHA}" \
+        "${LOCAL_TEMP_RESULT}" <<'PY'
+import hashlib
+import json
+from pathlib import Path
+import re
+import sys
+
+
+def reject_duplicates(pairs):
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            raise SystemExit(f"clé JSON Phase 5 dupliquée: {key}")
+        value[key] = item
+    return value
+
+
+path = Path(sys.argv[1])
+with path.open(encoding="utf-8") as stream:
+    value = json.load(stream, object_pairs_hook=reject_duplicates)
+phase3_path = Path(sys.argv[3])
+with phase3_path.open(encoding="utf-8") as stream:
+    phase3 = json.load(stream, object_pairs_hook=reject_duplicates)
+expected_top_keys = {
+    "backend",
+    "binary",
+    "checks",
+    "environment",
+    "git",
+    "image",
+    "logs",
+    "mode",
+    "phase",
+    "profile",
+    "provenance",
+    "schema",
+    "scientific_public_status",
+    "scientific_result_claimed",
+    "scientific_scope",
+    "status",
+    "vm_lifecycle",
+}
+if not isinstance(value, dict) or set(value) != expected_top_keys:
+    raise SystemExit("l'artefact Phase 5 K1 Boruvka ne respecte pas son schéma fermé")
+for key, expected in {
+    "backend": "cuda_g4",
+    "mode": "certified",
+    "phase": "5",
+    "profile": "hgp_reduced",
+    "schema": "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v1",
+    "scientific_scope": "gpu_candidate_superset_with_cpu_exact_resolution_only",
+    "status": "worker_passed_pending_shutdown",
+}.items():
+    if value.get(key) != expected:
+        raise SystemExit(f"champ Phase 5 K1 Boruvka invalide: {key}")
+if value.get("scientific_result_claimed") is not False:
+    raise SystemExit("la qualification Phase 5 revendique à tort un résultat scientifique")
+if value.get("scientific_public_status") is not None or "public_status" in value:
+    raise SystemExit("la qualification Phase 5 expose à tort un statut public scientifique")
+if value.get("git") != {"clean": True, "sha": sys.argv[2]}:
+    raise SystemExit("l'artefact Phase 5 ne correspond pas au SHA propre qualifié")
+image = value.get("image")
+phase3_image = phase3.get("image")
+if not isinstance(image, dict) or not isinstance(phase3_image, dict):
+    raise SystemExit("identité d'image Phase 5 absente")
+if image != {field: phase3_image.get(field) for field in ("base_ref", "id", "ref")}:
+    raise SystemExit("identité d'image Phase 5 incohérente")
+if re.fullmatch(r"sha256:[0-9a-f]{64}", str(image.get("id"))) is None:
+    raise SystemExit("digest d'image Phase 5 non canonique")
+binary = value.get("binary")
+if not isinstance(binary, dict) or set(binary) != {"replay_sha256"} or re.fullmatch(
+    r"[0-9a-f]{64}", str(binary.get("replay_sha256"))
+) is None:
+    raise SystemExit("empreinte du replay Phase 5 absente ou invalide")
+expected_replay = {
+    "candidate_count": 15,
+    "case_count": 2,
+    "count_pass_node_visit_count": 48,
+    "decision_semantics": "cpu_exact_seed_replay_and_kappa_resolution",
+    "point_count": 8,
+    "proposal_semantics": "gpu_stackless_lbvh_fixed_seed_candidate_superset",
+    "required_candidate_count": 15,
+    "schema": "morsehgp3d.phase5.k1_boruvka_gpu_replay.v1",
+    "status": "passed",
+    "strict_aabb_prune_count": 5,
+    "uniform_component_prune_count": 8,
+}
+checks = value.get("checks")
+expected_check_keys = {
+    "aot_elf_architectures",
+    "aot_ptx_entry_count",
+    "cpu_exact_resolution_complete",
+    "gpu_candidate_superset_certified",
+    "memcheck",
+    "racecheck",
+    "replay",
+}
+if not isinstance(checks, dict) or set(checks) != expected_check_keys:
+    raise SystemExit("contrôles Phase 5 absents ou ouverts")
+if checks != {
+    "aot_elf_architectures": ["sm_120"],
+    "aot_ptx_entry_count": 0,
+    "cpu_exact_resolution_complete": True,
+    "gpu_candidate_superset_certified": True,
+    "memcheck": "passed",
+    "racecheck": "passed",
+    "replay": expected_replay,
+}:
+    raise SystemExit("contrôles Phase 5 incomplets")
+environment = value.get("environment")
+if not isinstance(environment, dict) or set(environment) != {
+    "compute_capability",
+    "driver_version",
+    "gpu_name",
+    "gpu_uuid",
+    "gpu_vram_bytes",
+} or environment.get("compute_capability") != "12.0":
+    raise SystemExit("environnement Phase 5 absent ou incompatible")
+logs = value.get("logs")
+if not isinstance(logs, dict) or set(logs) != {
+    "cuobjdump_elf",
+    "cuobjdump_ptx",
+    "cuobjdump_ptx_stderr",
+    "memcheck",
+    "racecheck",
+    "replay",
+}:
+    raise SystemExit("journaux Phase 5 absents ou ouverts")
+provenance = value.get("provenance")
+expected_phase3_digest = hashlib.sha256(phase3_path.read_bytes()).hexdigest()
+if provenance != {
+    "environment_artifact_schema": "morsehgp3d.phase3.qualification.v1",
+    "environment_artifact_sha256": expected_phase3_digest,
+}:
+    raise SystemExit("provenance Phase 3 de l'artefact Phase 5 incohérente")
+if value.get("vm_lifecycle") != {
+    "guest_shutdown_guard_verified": True,
+    "stop_responsibility": "external_orchestrator",
+    "worker_mutates_gcp": False,
+}:
+    raise SystemExit("contrat de cycle de vie Phase 5 absent")
+PY
+fi
+
 if certify_target_stopped; then
     stop_status=0
 else
@@ -1316,6 +1520,7 @@ fi
 
 python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
     "${LOCAL_PHASE4_TEMP_RESULT}" "${LOCAL_PHASE4_RESULT}" \
+    "${LOCAL_PHASE5_TEMP_RESULT}" "${LOCAL_PHASE5_RESULT}" \
     "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
     "${GUEST_SHUTDOWN_MINUTES}" "${FINAL_STATUS}" \
     "${FINAL_STOP_VERIFIED_AT_UTC}" "${SESSION_LAST_START_TIMESTAMP}" <<'PY'
@@ -1329,6 +1534,10 @@ if sys.argv[3] or sys.argv[4]:
     if not sys.argv[3] or not sys.argv[4]:
         raise SystemExit("paire de publication Phase 4 incomplète")
     pairs.append((Path(sys.argv[3]), Path(sys.argv[4])))
+if sys.argv[5] or sys.argv[6]:
+    if not sys.argv[5] or not sys.argv[6]:
+        raise SystemExit("paire de publication Phase 5 incomplète")
+    pairs.append((Path(sys.argv[5]), Path(sys.argv[6])))
 
 for temporary, _ in pairs:
     with temporary.open(encoding="utf-8") as stream:
@@ -1337,18 +1546,18 @@ for temporary, _ in pairs:
     lifecycle["worker_status_before_targeted_stop"] = value["status"]
     lifecycle.update(
         {
-            "final_status": sys.argv[9],
+            "final_status": sys.argv[11],
             "final_status_readback": "gcloud_compute_instances_describe",
-            "final_status_verified_at_utc": sys.argv[10],
-            "guest_shutdown_minutes": int(sys.argv[8]),
+            "final_status_verified_at_utc": sys.argv[12],
+            "guest_shutdown_minutes": int(sys.argv[10]),
             "initial_status": "TERMINATED",
             "initial_status_basis": "start_and_verify_precondition",
-            "instance": sys.argv[7],
-            "last_start_timestamp": sys.argv[11],
-            "project": sys.argv[5],
+            "instance": sys.argv[9],
+            "last_start_timestamp": sys.argv[13],
+            "project": sys.argv[7],
             "start_handoff_schema": "e-hgp.start-handoff.v3",
             "targeted_stop_verified": True,
-            "zone": sys.argv[6],
+            "zone": sys.argv[8],
         }
     )
     value["status"] = "passed"
@@ -1383,14 +1592,22 @@ rm -f -- "${LOCAL_TEMP_RESULT}"
 if [[ -n "${LOCAL_PHASE4_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE4_TEMP_RESULT}"
 fi
+if [[ -n "${LOCAL_PHASE5_TEMP_RESULT}" ]]; then
+    rm -f -- "${LOCAL_PHASE5_TEMP_RESULT}"
+fi
 LOCAL_TEMP_RESULT=""
 LOCAL_PHASE4_TEMP_RESULT=""
+LOCAL_PHASE5_TEMP_RESULT=""
 rm -f -- "${START_HANDOFF}"
 START_HANDOFF=""
 printf '[ARTEFACT] Résultat Phase 3 publié après certification TERMINATED : %s\n' "${LOCAL_RESULT}"
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     printf '[ARTEFACT] Résultat spatial Phase 4 publié après certification TERMINATED : %s\n' \
         "${LOCAL_PHASE4_RESULT}"
+fi
+if ((PHASE5_K1_BORUVKA == 1)); then
+    printf '[ARTEFACT] Résultat K1 Boruvka Phase 5 publié après certification TERMINATED : %s\n' \
+        "${LOCAL_PHASE5_RESULT}"
 fi
 
 if ! revoke_and_remove_session_ssh_key; then
@@ -1404,4 +1621,8 @@ printf '[SUCCÈS] Qualification Phase 3 terminée; cible certifiée TERMINATED e
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     printf '[SUCCÈS] Qualification spatiale Phase 4 compagnon conservée : %s\n' \
         "${LOCAL_PHASE4_RESULT}"
+fi
+if ((PHASE5_K1_BORUVKA == 1)); then
+    printf '[SUCCÈS] Qualification K1 Boruvka Phase 5 compagnon conservée : %s\n' \
+        "${LOCAL_PHASE5_RESULT}"
 fi

@@ -715,6 +715,13 @@ add_test(
     "${PROJECT_SOURCE_DIR}"
 )
 add_test(
+  NAME morsehgp3d.phase5_k1_boruvka_qualification_configuration
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../configuration/check_phase5_k1_boruvka_qualification.py"
+    "${PROJECT_SOURCE_DIR}"
+)
+add_test(
   NAME morsehgp3d.spatial_gpu_reference_host_differential
   COMMAND
     "${Python3_EXECUTABLE}"

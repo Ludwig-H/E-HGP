@@ -8,6 +8,7 @@ readonly ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase3_qualification
 readonly PHASE4_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase4_spatial_qualification.py"
 readonly PHASE4_DIFFERENTIAL_RELATIVE="morsehgp3d/tests/differential/check_spatial_gpu_reference.py"
 readonly PHASE4_LBVH_DIFFERENTIAL_RELATIVE="morsehgp3d/tests/differential/check_spatial_gpu_lbvh.py"
+readonly PHASE5_K1_BORUVKA_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase5_k1_boruvka_qualification.py"
 readonly BASE_IMAGE_REF="nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
 readonly CONTAINER_REPOSITORY="/workspace/repository"
 readonly CONTAINER_BUILD="${CONTAINER_REPOSITORY}/build"
@@ -21,6 +22,8 @@ readonly PHASE4_DIFFERENTIAL_PATH="${CONTAINER_REPOSITORY}/${PHASE4_DIFFERENTIAL
 readonly PHASE4_LBVH_REPLAY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_spatial_lbvh_replay"
 readonly PHASE4_LBVH_REPLAY_PATH="${CONTAINER_REPOSITORY}/${PHASE4_LBVH_REPLAY_RELATIVE}"
 readonly PHASE4_LBVH_DIFFERENTIAL_PATH="${CONTAINER_REPOSITORY}/${PHASE4_LBVH_DIFFERENTIAL_RELATIVE}"
+readonly PHASE5_K1_BORUVKA_REPLAY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_replay"
+readonly PHASE5_K1_BORUVKA_REPLAY_PATH="${CONTAINER_REPOSITORY}/${PHASE5_K1_BORUVKA_REPLAY_RELATIVE}"
 readonly MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-release"
 readonly GUEST_GUARD_MIN_REMAINING_SECONDS=1800
 readonly GUEST_GUARD_MAX_REMAINING_SECONDS=2820
@@ -66,6 +69,10 @@ PHASE4_OUTPUT_RAW=""
 PHASE4_OUTPUT_PATH=""
 PHASE4_OUTPUT_PARENT=""
 PHASE4_OUTPUT_BASE=""
+PHASE5_OUTPUT_RAW=""
+PHASE5_OUTPUT_PATH=""
+PHASE5_OUTPUT_PARENT=""
+PHASE5_OUTPUT_BASE=""
 GCE_DEADLINE_RAW=""
 GCE_DEADLINE_EPOCH=0
 WORK_DEADLINE_EPOCH=0
@@ -74,6 +81,7 @@ REPOSITORY_ROOT=""
 SESSION_DIR=""
 PUBLISH_TEMP=""
 PHASE4_PUBLISH_TEMP=""
+PHASE5_PUBLISH_TEMP=""
 SESSION_CREATED=0
 DOCKER_IDENTITY=""
 BUILDX_CONFIG=""
@@ -149,7 +157,7 @@ certify_fixed_timeout() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json]
+Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json]
 
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
@@ -157,6 +165,9 @@ publie l'objet Phase 3 sans remplacement hors du worktree après les contrôles.
 L'option Phase 4 exécute en plus le replay spatial exhaustif de référence et
 le replay LBVH résident, puis publie leur compagnon provisoire commun, sans
 rollback d'un nom final. Aucun des deux artefacts ne certifie l'arrêt de la VM.
+L'option Phase 5 exécute le replay réel de la ronde K1 Boruvka, audite son ELF
+sm_120 et l'absence de PTX, puis le passe sous memcheck et racecheck. Son
+compagnon provisoire partage la même responsabilité d'arrêt externe.
 EOF
 }
 
@@ -177,6 +188,13 @@ while (($# > 0)); do
             [[ -z "${PHASE4_OUTPUT_RAW}" ]] || \
                 die "--phase4-spatial-output ne peut être fourni qu'une fois."
             PHASE4_OUTPUT_RAW="$2"
+            shift 2
+            ;;
+        --phase5-k1-boruvka-output)
+            (($# >= 2)) || die "Valeur manquante après --phase5-k1-boruvka-output."
+            [[ -z "${PHASE5_OUTPUT_RAW}" ]] || \
+                die "--phase5-k1-boruvka-output ne peut être fourni qu'une fois."
+            PHASE5_OUTPUT_RAW="$2"
             shift 2
             ;;
         --gce-deadline-epoch)
@@ -212,6 +230,15 @@ if [[ -n "${PHASE4_OUTPUT_RAW}" ]]; then
     esac
     [[ "${PHASE4_OUTPUT_RAW}" != "${OUTPUT_RAW}" ]] || \
         die "Les sorties Phase 3 et Phase 4 doivent être distinctes."
+fi
+if [[ -n "${PHASE5_OUTPUT_RAW}" ]]; then
+    case "${PHASE5_OUTPUT_RAW}" in
+        /*) ;;
+        *) die "--phase5-k1-boruvka-output doit être un chemin absolu." ;;
+    esac
+    [[ "${PHASE5_OUTPUT_RAW}" != "${OUTPUT_RAW}" && \
+        "${PHASE5_OUTPUT_RAW}" != "${PHASE4_OUTPUT_RAW}" ]] || \
+        die "Les sorties Phase 3, Phase 4 et Phase 5 doivent être distinctes."
 fi
 certify_fixed_timeout || \
     die "La chaîne fixe /usr/bin/timeout n'est pas sûre, GNU ou compatible avec les groupes/--kill-after."
@@ -272,6 +299,28 @@ if [[ -n "${PHASE4_OUTPUT_RAW}" ]]; then
     [[ ! -e "${PHASE4_OUTPUT_PATH}" && ! -L "${PHASE4_OUTPUT_PATH}" ]] || \
         die "La sortie Phase 4 doit être inexistante : ${PHASE4_OUTPUT_PATH}."
 fi
+if [[ -n "${PHASE5_OUTPUT_RAW}" ]]; then
+    PHASE5_OUTPUT_PARENT="$(dirname -- "${PHASE5_OUTPUT_RAW}")"
+    PHASE5_OUTPUT_BASE="$(basename -- "${PHASE5_OUTPUT_RAW}")"
+    [[ -n "${PHASE5_OUTPUT_BASE}" && "${PHASE5_OUTPUT_BASE}" != "." && \
+        "${PHASE5_OUTPUT_BASE}" != ".." ]] || die "Nom d'artefact Phase 5 invalide."
+    [[ -d "${PHASE5_OUTPUT_PARENT}" ]] || \
+        die "Le répertoire parent de --phase5-k1-boruvka-output doit déjà exister."
+    PHASE5_OUTPUT_PARENT="$(cd -- "${PHASE5_OUTPUT_PARENT}" && pwd -P)" || \
+        die "Parent de sortie Phase 5 illisible."
+    PHASE5_OUTPUT_PATH="${PHASE5_OUTPUT_PARENT}/${PHASE5_OUTPUT_BASE}"
+    [[ "${PHASE5_OUTPUT_PARENT}" == "${OUTPUT_PARENT}" ]] || \
+        die "Les sorties Phase 3 et Phase 5 doivent partager le même répertoire physique."
+    [[ "${PHASE5_OUTPUT_PATH}" != "${OUTPUT_PATH}" && \
+        "${PHASE5_OUTPUT_PATH}" != "${PHASE4_OUTPUT_PATH}" ]] || \
+        die "Les sorties Phase 3, Phase 4 et Phase 5 doivent être distinctes."
+    case "${PHASE5_OUTPUT_PATH}/" in
+        "${REPOSITORY_ROOT}/"*)
+            die "--phase5-k1-boruvka-output doit rester hors du worktree ${REPOSITORY_ROOT}." ;;
+    esac
+    [[ ! -e "${PHASE5_OUTPUT_PATH}" && ! -L "${PHASE5_OUTPUT_PATH}" ]] || \
+        die "La sortie Phase 5 doit être inexistante : ${PHASE5_OUTPUT_PATH}."
+fi
 
 worktree_status="$(git -C "${REPOSITORY_ROOT}" status --porcelain --untracked-files=normal)" || \
     die "Impossible de vérifier la propreté du clone Git."
@@ -288,6 +337,7 @@ readonly ASSEMBLER="${REPOSITORY_ROOT}/${ASSEMBLER_RELATIVE}"
 readonly PHASE4_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE4_ASSEMBLER_RELATIVE}"
 readonly PHASE4_DIFFERENTIAL="${REPOSITORY_ROOT}/${PHASE4_DIFFERENTIAL_RELATIVE}"
 readonly PHASE4_LBVH_DIFFERENTIAL="${REPOSITORY_ROOT}/${PHASE4_LBVH_DIFFERENTIAL_RELATIVE}"
+readonly PHASE5_K1_BORUVKA_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE5_K1_BORUVKA_ASSEMBLER_RELATIVE}"
 [[ -f "${DOCKERFILE}" && ! -L "${DOCKERFILE}" ]] || \
     die "Dockerfile Phase 3 absent ou symbolique : ${DOCKERFILE}."
 [[ "$(sed -n '1p' "${DOCKERFILE}")" == "FROM ${BASE_IMAGE_REF}" ]] || \
@@ -301,6 +351,11 @@ if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
         die "Différentiel spatial Phase 4 absent ou symbolique : ${PHASE4_DIFFERENTIAL}."
     [[ -f "${PHASE4_LBVH_DIFFERENTIAL}" && ! -L "${PHASE4_LBVH_DIFFERENTIAL}" ]] || \
         die "Différentiel LBVH résident Phase 4 absent ou symbolique : ${PHASE4_LBVH_DIFFERENTIAL}."
+fi
+if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
+    [[ -f "${PHASE5_K1_BORUVKA_ASSEMBLER}" && \
+        ! -L "${PHASE5_K1_BORUVKA_ASSEMBLER}" ]] || \
+        die "Assembleur Phase 5 absent ou symbolique : ${PHASE5_K1_BORUVKA_ASSEMBLER}."
 fi
 
 remove_container_from_cidfile() {
@@ -453,6 +508,9 @@ cleanup() {
     if [[ -n "${PHASE4_PUBLISH_TEMP}" && -f "${PHASE4_PUBLISH_TEMP}" ]]; then
         rm -f -- "${PHASE4_PUBLISH_TEMP}" || true
     fi
+    if [[ -n "${PHASE5_PUBLISH_TEMP}" && -f "${PHASE5_PUBLISH_TEMP}" ]]; then
+        rm -f -- "${PHASE5_PUBLISH_TEMP}" || true
+    fi
     if [[ -n "${SESSION_DIR}" && -n "${BUILDX_CONFIG}" && \
         "${BUILDX_CONFIG}" == "${SESSION_DIR}/buildx-config" && \
         -e "${BUILDX_CONFIG}" ]]; then
@@ -517,6 +575,12 @@ if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
         die "Impossible de réserver l'artefact Phase 4 temporaire."
     chmod 600 "${PHASE4_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
+    PHASE5_PUBLISH_TEMP="$(mktemp \
+        "${PHASE5_OUTPUT_PARENT}/.${PHASE5_OUTPUT_BASE}.XXXXXXXX.partial")" || \
+        die "Impossible de réserver l'artefact Phase 5 temporaire."
+    chmod 600 "${PHASE5_PUBLISH_TEMP}"
+fi
 
 readonly BUILD_DIR="${SESSION_DIR}/build"
 readonly LOG_DIR="${SESSION_DIR}/logs"
@@ -553,6 +617,12 @@ readonly PHASE4_LBVH_SANITIZER_LOG="${LOG_DIR}/phase4-spatial-lbvh-compute-sanit
 readonly PHASE4_LBVH_RACECHECK_LOG="${LOG_DIR}/phase4-spatial-lbvh-racecheck.log"
 readonly PHASE4_LBVH_DIFFERENTIAL_SUMMARY="${RESULT_DIR}/phase4-spatial-lbvh-differential.json"
 readonly PHASE4_LBVH_MEMCHECK_SUMMARY="${RESULT_DIR}/phase4-spatial-lbvh-memcheck.json"
+readonly PHASE5_K1_BORUVKA_REPLAY_LOG="${LOG_DIR}/phase5-k1-boruvka-replay.log"
+readonly PHASE5_K1_BORUVKA_ELF_LOG="${LOG_DIR}/phase5-k1-boruvka-cuobjdump-elf.log"
+readonly PHASE5_K1_BORUVKA_PTX_LOG="${LOG_DIR}/phase5-k1-boruvka-cuobjdump-ptx.log"
+readonly PHASE5_K1_BORUVKA_PTX_STDERR_LOG="${LOG_DIR}/phase5-k1-boruvka-cuobjdump-ptx.stderr.log"
+readonly PHASE5_K1_BORUVKA_MEMCHECK_LOG="${LOG_DIR}/phase5-k1-boruvka-memcheck.log"
+readonly PHASE5_K1_BORUVKA_RACECHECK_LOG="${LOG_DIR}/phase5-k1-boruvka-racecheck.log"
 
 mkdir -p -- "${BUILD_DIR}/.phase3-home"
 
@@ -1397,6 +1467,78 @@ if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
         die "Le memcheck LBVH résident n'a pas produit son résumé JSON."
 fi
 
+if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
+    begin_unit "phase5-k1-boruvka-replay"
+    if ! run_container "phase5-k1-boruvka-replay" \
+        "${PHASE5_K1_BORUVKA_REPLAY_LOG}" \
+        "${PHASE5_K1_BORUVKA_REPLAY_PATH}"; then
+        report_failure_log "phase5-k1-boruvka-replay" \
+            "${PHASE5_K1_BORUVKA_REPLAY_LOG}"
+        die "Le replay réel K1 Boruvka Phase 5 a échoué."
+    fi
+
+    begin_unit "phase5-k1-boruvka-cuobjdump-elf"
+    if ! run_container "phase5-k1-boruvka-cuobjdump-elf" \
+        "${PHASE5_K1_BORUVKA_ELF_LOG}" /usr/local/cuda/bin/cuobjdump \
+        -lelf "${PHASE5_K1_BORUVKA_REPLAY_PATH}"; then
+        report_failure_log "phase5-k1-boruvka-cuobjdump-elf" \
+            "${PHASE5_K1_BORUVKA_ELF_LOG}"
+        die "cuobjdump n'a pas pu lister les ELF du replay K1 Boruvka Phase 5."
+    fi
+    phase5_k1_boruvka_architectures="$(grep -Eo 'sm_[0-9]+' \
+        "${PHASE5_K1_BORUVKA_ELF_LOG}" | sort -u || true)"
+    if [[ "${phase5_k1_boruvka_architectures}" != "sm_120" ]]; then
+        report_failure_log "phase5-k1-boruvka-cuobjdump-elf" \
+            "${PHASE5_K1_BORUVKA_ELF_LOG}"
+        die "Le replay K1 Boruvka Phase 5 doit contenir uniquement un ELF sm_120; observé : ${phase5_k1_boruvka_architectures:-aucun}."
+    fi
+
+    begin_unit "phase5-k1-boruvka-cuobjdump-ptx"
+    if ! run_container_split_output "phase5-k1-boruvka-cuobjdump-ptx" \
+        "${PHASE5_K1_BORUVKA_PTX_LOG}" \
+        "${PHASE5_K1_BORUVKA_PTX_STDERR_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lptx \
+        "${PHASE5_K1_BORUVKA_REPLAY_PATH}"; then
+        report_failure_log "phase5-k1-boruvka-cuobjdump-ptx-stderr" \
+            "${PHASE5_K1_BORUVKA_PTX_STDERR_LOG}"
+        die "cuobjdump n'a pas pu auditer le PTX du replay K1 Boruvka Phase 5."
+    fi
+    if grep -q '[^[:space:]]' "${PHASE5_K1_BORUVKA_PTX_LOG}"; then
+        report_failure_log "phase5-k1-boruvka-cuobjdump-ptx" \
+            "${PHASE5_K1_BORUVKA_PTX_LOG}"
+        die "Une entrée PTX a été détectée dans le replay K1 Boruvka Phase 5."
+    fi
+
+    begin_unit "phase5-k1-boruvka-memcheck"
+    if ! run_container "phase5-k1-boruvka-memcheck" \
+        "${PHASE5_K1_BORUVKA_MEMCHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool memcheck \
+        --leak-check full \
+        --report-api-errors no \
+        --error-exitcode=86 \
+        "${PHASE5_K1_BORUVKA_REPLAY_PATH}"; then
+        report_failure_log "phase5-k1-boruvka-memcheck" \
+            "${PHASE5_K1_BORUVKA_MEMCHECK_LOG}"
+        die "Le memcheck du replay K1 Boruvka Phase 5 a échoué."
+    fi
+
+    begin_unit "phase5-k1-boruvka-racecheck"
+    if ! run_container "phase5-k1-boruvka-racecheck" \
+        "${PHASE5_K1_BORUVKA_RACECHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool racecheck \
+        --report-api-errors no \
+        --error-exitcode=86 \
+        "${PHASE5_K1_BORUVKA_REPLAY_PATH}"; then
+        report_failure_log "phase5-k1-boruvka-racecheck" \
+            "${PHASE5_K1_BORUVKA_RACECHECK_LOG}"
+        die "Le racecheck du replay K1 Boruvka Phase 5 a échoué."
+    fi
+fi
+
 [[ -s "${RUNTIME_JSONL}" ]] || die "Le runtime n'a pas produit son JSONL."
 [[ -s "${SANITIZER_JSONL}" ]] || die "Le passage memcheck n'a pas produit son JSONL."
 
@@ -1448,8 +1590,26 @@ if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
         --output "${PHASE4_PUBLISH_TEMP}"
 fi
 
+if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
+    python3 -B "${PHASE5_K1_BORUVKA_ASSEMBLER}" \
+        --git-sha "${HEAD_SHA}" \
+        --base-image-ref "${BASE_IMAGE_REF}" \
+        --image-ref "${IMAGE_REF}" \
+        --image-id "${IMAGE_ID}" \
+        --environment-artifact "${PUBLISH_TEMP}" \
+        --replay-log "${PHASE5_K1_BORUVKA_REPLAY_LOG}" \
+        --elf-log "${PHASE5_K1_BORUVKA_ELF_LOG}" \
+        --ptx-log "${PHASE5_K1_BORUVKA_PTX_LOG}" \
+        --ptx-stderr-log "${PHASE5_K1_BORUVKA_PTX_STDERR_LOG}" \
+        --memcheck-log "${PHASE5_K1_BORUVKA_MEMCHECK_LOG}" \
+        --racecheck-log "${PHASE5_K1_BORUVKA_RACECHECK_LOG}" \
+        --replay "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_replay" \
+        --output "${PHASE5_PUBLISH_TEMP}"
+fi
+
 python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
-    "${PHASE4_PUBLISH_TEMP}" "${PHASE4_OUTPUT_PATH}" <<'PY'
+    "${PHASE4_PUBLISH_TEMP}" "${PHASE4_OUTPUT_PATH}" \
+    "${PHASE5_PUBLISH_TEMP}" "${PHASE5_OUTPUT_PATH}" <<'PY'
 import json
 import os
 from pathlib import Path
@@ -1460,6 +1620,10 @@ if sys.argv[3] or sys.argv[4]:
     if not sys.argv[3] or not sys.argv[4]:
         raise SystemExit("incomplete Phase 4 publication pair")
     pairs.append((Path(sys.argv[3]), Path(sys.argv[4]), "Phase 4"))
+if sys.argv[5] or sys.argv[6]:
+    if not sys.argv[5] or not sys.argv[6]:
+        raise SystemExit("incomplete Phase 5 publication pair")
+    pairs.append((Path(sys.argv[5]), Path(sys.argv[6]), "Phase 5"))
 for temporary, _, label in pairs:
     with temporary.open(encoding="utf-8") as stream:
         value = json.load(stream)
@@ -1487,13 +1651,21 @@ rm -f -- "${PUBLISH_TEMP}"
 if [[ -n "${PHASE4_PUBLISH_TEMP}" ]]; then
     rm -f -- "${PHASE4_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE5_PUBLISH_TEMP}" ]]; then
+    rm -f -- "${PHASE5_PUBLISH_TEMP}"
+fi
 PUBLISH_TEMP=""
 PHASE4_PUBLISH_TEMP=""
+PHASE5_PUBLISH_TEMP=""
 
 printf '[SUCCÈS WORKER] Artefact Phase 3 provisoire publié sans remplacement : %s\n' \
     "${OUTPUT_PATH}"
 if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
     printf '[SUCCÈS WORKER] Compagnon Phase 4 provisoire publié sans remplacement : %s\n' \
         "${PHASE4_OUTPUT_PATH}"
+fi
+if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
+    printf '[SUCCÈS WORKER] Compagnon Phase 5 provisoire publié sans remplacement : %s\n' \
+        "${PHASE5_OUTPUT_PATH}"
 fi
 printf '[CYCLE DE VIE] Le worker invité ne ferme pas la VM; l’orchestrateur externe doit certifier TERMINATED.\n'
