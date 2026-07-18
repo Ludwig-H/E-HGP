@@ -107,7 +107,7 @@ depends_on = ["1", "4"]
 backend = "reference_cpu"
 profile = "hgp_reduced"
 mode = "certified"
-evidence = ["docs/validation/PHASE4_GATE_REVIEW.md"]
+evidence = ["docs/validation/PHASE4_GATE_REVIEW.md", "docs/validation/PHASE5_PROGRESS.md"]
 blocking_reason = ""
 
 [[phases]]

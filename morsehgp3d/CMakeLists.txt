@@ -260,6 +260,39 @@ else()
   )
 endif()
 
+add_library(
+  morsehgp3d_hierarchy
+  STATIC
+    src/cpu/hierarchy/emst.cpp
+)
+add_library(morsehgp3d::hierarchy ALIAS morsehgp3d_hierarchy)
+set_target_properties(
+  morsehgp3d_hierarchy
+  PROPERTIES
+    EXPORT_NAME hierarchy
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(morsehgp3d_hierarchy PUBLIC cxx_std_20)
+target_include_directories(
+  morsehgp3d_hierarchy
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_hierarchy
+  PUBLIC morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(morsehgp3d_hierarchy PRIVATE /W4 /WX)
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 if(MORSEHGP3D_ENABLE_CUDA)
   find_package(Threads REQUIRED)
   add_library(
@@ -514,7 +547,11 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 install(
-  TARGETS morsehgp3d_exact morsehgp3d_spatial morsehgp3d_sanitizers
+  TARGETS
+    morsehgp3d_exact
+    morsehgp3d_spatial
+    morsehgp3d_hierarchy
+    morsehgp3d_sanitizers
   EXPORT MorseHGP3DTargets
 )
 if(MORSEHGP3D_BUILD_TOOLS)

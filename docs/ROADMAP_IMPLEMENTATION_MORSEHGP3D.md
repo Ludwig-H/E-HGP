@@ -388,6 +388,10 @@ Valider la première hiérarchie avant tout ordre supérieur.
 
 Les coupes, niveaux et multifurcations des deux voies sont identiques après canonisation. Cette porte bloque toute revendication sur $k>1$.
 
+### Progression actuelle
+
+Le premier lot `reference_cpu` est livré : graphe complet euclidien exact, poids dyadiques, niveaux divisés par quatre, minima singleton, Kruskal déterministe, lots égaux figés, multifusions canoniques et rejeu strict ou fermé depuis le graphe complet ou l'EMST. La [note de progression](validation/PHASE5_PROGRESS.md) en fixe les invariants et la portée quadratique. La Phase 5 reste ouverte jusqu'au catalogue de rang deux, à la réduction Gabriel, au différentiel indépendant jusqu'à $n=14$ et à la voie GPU scalable.
+
 ## Phase 6 — Miniballs et descentes
 
 ### But
@@ -1028,4 +1032,4 @@ Les sept prochains lots de travail doivent être :
 
 Cette séquence donne rapidement une vérité terrain, un cas $k=1$ incontestable et une mesure réaliste de la primitive GPU. Elle évite que les choix de bibliothèque ou de layout figent prématurément un objet mathématique incomplet.
 
-Les phases 2A, 2B, 3 et 4 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. L'oracle spatial brute-force exact et le premier Morton-LBVH à bornes rationnelles certifiées sont livrés sur `reference_cpu`; la référence CUDA exhaustive est qualifiée au SHA `01be0f150ee35a01bc939d9240b0a5675e3ae800`; le filtre CUDA borné de rejet AABB strict l'est au SHA `24e33d4fc80d2b5c687c939f8240fa50571d1951`; le parcours LBVH résident parallèle recertifié l'est au SHA `c846ed7b253840ef6fe1f0f39f7f10c63af64b8e`. La phase 5 est désormais la phase courante sur `reference_cpu`, profil `hgp_reduced`, mode `certified`, afin de fermer l'ancre $k=1$ entre EMST, sphères de rang deux et Gamma exhaustif.
+Les phases 2A, 2B, 3 et 4 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. L'oracle spatial brute-force exact et le premier Morton-LBVH à bornes rationnelles certifiées sont livrés sur `reference_cpu`; la référence CUDA exhaustive est qualifiée au SHA `01be0f150ee35a01bc939d9240b0a5675e3ae800`; le filtre CUDA borné de rejet AABB strict l'est au SHA `24e33d4fc80d2b5c687c939f8240fa50571d1951`; le parcours LBVH résident parallèle recertifié l'est au SHA `c846ed7b253840ef6fe1f0f39f7f10c63af64b8e`. La phase 5 est la phase courante sur `reference_cpu`, profil `hgp_reduced`, mode `certified`. Son premier lot livre l'EMST exact par graphe complet et les multifusions de niveaux égaux; le catalogue des sphères de rang deux, la réduction Gabriel, leur différentiel et la voie GPU restent ouverts.
