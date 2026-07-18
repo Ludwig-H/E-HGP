@@ -7,9 +7,9 @@
 - profil prioritaire : `hgp_reduced`;
 - mode : `certified`;
 - porte d'entrée : satisfaite par les Phases 2A, 2B et 3 fermées;
-- porte de sortie : ouverte; la référence GPU indépendante est implémentée, validée sur émulateur bit à bit et qualifiée sur G4 réelle, mais les chemins spatiaux GPU de production restent à livrer.
+- porte de sortie : ouverte; la référence GPU indépendante et le filtre borné de rejet AABB strict sont qualifiés sur G4 réelle, mais le LBVH résident et les chemins spatiaux GPU de production restent à livrer.
 
-Les trois premiers lots construisent la vérité terrain spatiale CPU, son premier accélérateur certifié Morton-LBVH, puis une référence CUDA exhaustive dont les propositions flottantes sont séparées des décisions scientifiques. Ils certifient leurs propres partitions exactes, mais ne produisent aucune forêt, ne ferment ni G2 ni la Phase 4 et ne promeuvent aucun `public_status` vers `exact`.
+Les quatre premiers lots construisent la vérité terrain spatiale CPU, son premier accélérateur certifié Morton-LBVH, une référence CUDA exhaustive dont les propositions flottantes sont séparées des décisions scientifiques, puis une primitive CUDA bornée dont chaque rejet est recertifié exactement. Ils certifient leurs propres sorties locales, mais ne produisent aucune forêt, ne ferment ni G2 ni la Phase 4 et ne promeuvent aucun `public_status` vers `exact`.
 
 ## Contrat mathématique du top-k
 
@@ -36,6 +36,14 @@ Le kernel `sm_120` parcourt tous les indices par une boucle grid-stride sans pla
 La règle de publication est plus forte qu'une vérification des seuls candidats : l'hôte exige d'abord que le retour GPU soit une permutation exacte de $\left\lbrace 0,\ldots,n-1\right\rbrace$, puis appelle l'oracle CPU sur tous les sites admissibles pour le top-$k$ et sur tout $X$ pour la boule fermée. Les bits de distance GPU ne sont accessibles au chemin scientifique qu'au sein du validateur et de son hash diagnostique; ils ne déterminent ni exclusion, ni cutoff, ni égalité, ni shell, ni rang.
 
 La preuve de conservation est immédiate. Après validation de la permutation, l'ensemble réévalué exactement est précisément $X\setminus E$ pour le top-$k$ et $X$ pour la boule. La partition publiée est donc la même fonction déterministe du même multiensemble de distances exactes que la force brute CPU, indépendamment de l'ordre, des ties et des overflows de la proposition. La fixture [`gpu_fp64_tie_split.json`](../../morsehgp3d/tests/fixtures/spatial/gpu_fp64_tie_split.json) montre pourquoi une politique plus faible serait fausse : la requête exacte médiane donne deux distances égales à $2^{-106}$, alors que sa projection RN-even produit les propositions distinctes zéro et $2^{-104}$.
+
+## Filtre CUDA borné de rejet AABB strict
+
+`SpatialBoundsContext` reçoit un lot immuable de boîtes `ExactDyadicAabb3`. L'hôte valide d'abord que leurs six bornes sont des mots binary64 finis canoniques et que chaque intervalle est ordonné. Chaque coordonnée rationnelle de la requête et le cutoff carré exact sont ensuite projetés vers leurs deux binary64 adjacents par recherche binaire rationnelle. Le statut distingue `exact`, `enclosed` et `unsupported_range`; dans ce dernier cas, aucun kernel n'est lancé et toutes les boîtes retournent explicitement `unknown`.
+
+Le kernel calcule un encadrement sortant de $D_{\min}$ avec `__dsub_rd`, `__dsub_ru`, `__dmul_rd`, `__dmul_ru`, `__dadd_rd` et `__dadd_ru`, toujours sans fast-math, FMA implicite ni FTZ. Il propose `prune` seulement si la borne inférieure vérifie strictement $D_{\min}^{\mathrm{low}}>\tau^{\mathrm{high}}$, `visit` seulement si $D_{\min}^{\mathrm{high}}<\tau^{\mathrm{low}}$, et `unknown` dans tous les autres cas. Une égalité, un recouvrement, un overflow ou un intervalle non fini publie donc `unknown`; l'overflow canonique est représenté par l'intervalle diagnostique $[0,+\infty]$.
+
+L'hôte exige une permutation complète des indices de boîtes, valide chaque intervalle et chaque comparaison flottante, puis recalcule exactement $D_{\min}(B,q)$ pour toute proposition `prune`. La décision terminale n'est publiée que si la comparaison rationnelle stricte $D_{\min}(B,q)>\tau$ est confirmée; sa marge exacte positive contribue au minimum d'audit. Une contradiction, une troncature, un doublon, un indice ou un code invalide échoue fermé et empoisonne uniquement le contexte concerné. `visit` reste un indice de parcours conservateur et `unknown` impose le repli exact; cette primitive ne publie ni top-$k$, ni boule fermée, ni shell, ni rang.
 
 ## Canonisation du nuage
 
@@ -75,7 +83,9 @@ Le lot CUDA ajoute des faux lanceurs host-only capables de renverser la permutat
 
 La qualification G4 au SHA `01be0f150ee35a01bc939d9240b0a5675e3ae800` ferme les mêmes 1 013 cas sur le replay CUDA réel, soit 2 026 lancements pour les requêtes top-k et boule fermée. Le memcheck borné en rejoue 20, soit 40 lancements. Les deux campagnes conservent `cpu_exact_all_points`, les six couvertures IEEE et les quatre états de projection; l'artefact atteste aussi `sm_120` seulement, aucune entrée PTX, les workflows release et audit, puis `compute-sanitizer` sans erreur.
 
-La matrice locale ferme 38 tests sous GCC 13 en Release. Le nouveau contexte host-only, le replay émulé et leurs validateurs statiques passent aussi sous ASan/UBSan; le différentiel host-only ferme séparément ses 1 013 cas `Fraction`. Les validations Clang, consumers installés et différentielles sanitizer du lot CPU précédent restent inchangées.
+Le filtre borné ajoute un faux lanceur avec permutation inversée, `unknown`, `visit`, faux rejet et six corruptions post-GPU. Son replay borné et son oracle Python `Fraction` couvrent treize cas ciblés : égalité stricte, requête et cutoff non binary64, sous-normaux signés, carré sous-normal, boîtes dégénérées, extrema finis, overflows d'accumulation et requête ou cutoff hors plage. Le différentiel host-only et le replay G4 final au SHA `24e33d4fc80d2b5c687c939f8240fa50571d1951` publient six rejets certifiés et zéro faux rejet; les trois états d'encadrement sont observés. L'ELF est exclusivement `sm_120`, aucune section PTX n'est présente et le memcheck des treize cas rapporte zéro erreur et zéro fuite.
+
+La matrice locale compte désormais 41 tests sous GCC 13 en Release. Le nouveau contexte host-only, le replay émulé et leurs validateurs statiques passent aussi sous ASan/UBSan; les différentiels host-only ferment séparément les 1 013 cas de la référence exhaustive et les treize cas du filtre borné. Les validations Clang, consumers installés et différentielles sanitizer du lot CPU précédent restent inchangées.
 
 L'installation exporte `morsehgp3d::exact`, `morsehgp3d::spatial` et la cible interne de sanitizer. L'archive spatiale est PIC pour son futur lien dans un module partagé. Un package sanitizer propage ses options de lien au consumer au lieu de produire des références ASan/UBSan non résolues. Le consumer installé construit aussi un `MortonLbvhIndex`, puis confronte son 1-NN et sa boule fermée aux partitions de référence afin de détecter tout en-tête, archive ou dépendance CMake manquante.
 
@@ -83,7 +93,7 @@ L'installation exporte `morsehgp3d::exact`, `morsehgp3d::spatial` et la cible in
 
 - aucun chemin cuVS;
 - aucun LBVH GPU ni index résident qualifié sur G4;
-- aucune primitive bornée de rejet anticipé;
+- le filtre borné AABB n'est pas encore intégré à un parcours LBVH GPU et ne produit aucun top-$k$ ni aucune boule fermée;
 - aucun catalogue, événement critique, réduction hiérarchique ou résultat public.
 
 ## GCP
@@ -93,3 +103,7 @@ Le premier démarrage gardé du 18 juillet 2026 a ciblé `devpod-gpu-exploration
 La qualification utile a ensuite ciblé `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a` avec les mêmes gardes `g4-standard-48`, `SPOT`, `STOP` et 3 600 secondes. L'échéance GCE calculée depuis la génération `2026-07-18T08:11:23.077-07:00` a été certifiée, puis l'arrêt invité `poweroff` à 45 minutes a été armé et relu avant le preflight. Le matériel observé est une NVIDIA RTX PRO 6000 Blackwell Server Edition de compute capability 12.0, pilote 13.0.0 et 101 973 950 464 octets de VRAM; l'image qualifiée porte le digest `sha256:2cc7bed14b90cbaa188974d96463488dda612052987b642a39b0586e982d6383`.
 
 Après le worker, `stop_and_verify.sh` puis une relecture GCE indépendante ont certifié cette cible `TERMINATED`; `lastStopTimestamp=2026-07-18T08:15:19.091-07:00` et la preuve finale a été horodatée `2026-07-18T15:15:28Z`. Les artefacts hors worktree `phase3-01be0f150ee35a01bc939d9240b0a5675e3ae800.json` et `phase4-spatial-01be0f150ee35a01bc939d9240b0a5675e3ae800.json` ont alors seulement été promus vers `status=passed`; leurs SHA-256 sont respectivement `c3868af44dc435431d51cdca526fe1ad48bcc066edbd6d601458bc9176680894` et `31d6a1177a93913036ee1cc19228e89b5267d1389d57d1bdd3f42877c5270cf2`. La clé OS Login de cette session a été révoquée et supprimée localement; les deux cibles sont `TERMINATED` et aucune autre VM `project=e-hgp` active n'a été observée au passage de relais.
+
+La qualification du filtre borné a réutilisé uniquement `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, après relecture `TERMINATED`, avec `g4-standard-48`, `SPOT`, `STOP`, `maxRunDuration=3600` et arrêt invité à 30 minutes. La première compilation réelle au SHA `6001a5ef3562eba33b69c1241a8c02f3fc2c0aab` a détecté que `std::array::operator[]` n'était pas appelable depuis le device sous NVCC 12.9; aucun test scientifique n'a été revendiqué pour ce build. Le stockage interne a été remplacé par des tableaux triviaux au commit `24e33d4fc80d2b5c687c939f8240fa50571d1951`, puis le build AOT, le différentiel et le memcheck ont réussi dans la même session gardée.
+
+La génération `2026-07-18T09:02:51.523-07:00` a ensuite été arrêtée par `stop_and_verify.sh`; la relecture indépendante certifie `TERMINATED` et `lastStopTimestamp=2026-07-18T09:13:32.670-07:00`, sans autre VM `project=e-hgp` active. L'artefact hors worktree `phase4-spatial-bounds-24e33d4fc80d2b5c687c939f8240fa50571d1951.json` porte le SHA-256 `d61ffcf88f3967c8618ec04e0666391fa9592db4b5ab00ee0793cee17dc26239`. La clé OS Login a été révoquée et sa copie privée supprimée. Cette preuve qualifie uniquement le rejet AABB local; elle ne ferme ni la Phase 4 ni G2 et conserve `public_status=null`.
