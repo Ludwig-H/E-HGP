@@ -402,6 +402,66 @@ if(MORSEHGP3D_ENABLE_CUDA)
       PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()
+
+  add_library(
+    morsehgp3d_gpu_spatial_bounds
+    STATIC
+      src/cuda/phase4_spatial_bounds_internal.hpp
+      src/cuda/phase4_spatial_bounds.cu
+      src/gpu/spatial_bounds.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_spatial_bounds
+    ALIAS morsehgp3d_gpu_spatial_bounds
+  )
+  target_include_directories(
+    morsehgp3d_gpu_spatial_bounds
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_spatial_bounds
+    PUBLIC morsehgp3d::spatial
+    PRIVATE Threads::Threads
+  )
+  target_compile_features(
+    morsehgp3d_gpu_spatial_bounds
+    PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(morsehgp3d_gpu_spatial_bounds)
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_spatial_bounds
+      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/W4> $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_spatial_bounds
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_spatial_bounds_replay
+    src/tools/gpu_spatial_bounds_replay.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_spatial_bounds_replay
+    PRIVATE morsehgp3d::gpu_spatial_bounds
+  )
+  if(MSVC)
+    target_compile_options(morsehgp3d_gpu_spatial_bounds_replay PRIVATE /W4 /WX)
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_spatial_bounds_replay
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
 endif()
 
 if(MORSEHGP3D_BUILD_TOOLS)
