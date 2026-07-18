@@ -422,6 +422,7 @@ elif args[:2] == ["compute", "ssh"]:
             or "bash -s" in command
             or "<<" in command
             or "\n" in command
+            or "--ssh-flag=-n" not in args
             or not re.search(r"' -- '[1-9][0-9]*' '[0-9]+'$", command)
         ):
             print("unsafe guest guard SSH transport: " + command, file=sys.stderr)
@@ -1204,6 +1205,7 @@ while True:
         self.assertNotIn("bash -s", transport)
         self.assertNotIn("<<", transport)
         self.assertNotIn("__EHGP_GUEST_GUARD__", transport)
+        self.assertIn("--ssh-flag='-n'", source)
 
     def test_start_rejects_unusable_session_keys_before_gce_mutation(self) -> None:
         original_key = self.env["GCP_SSH_KEY_FILE"]

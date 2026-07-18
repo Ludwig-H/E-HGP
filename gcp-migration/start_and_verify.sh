@@ -628,6 +628,7 @@ while ((SECONDS < ssh_deadline)); do
         --quiet \
         --ssh-key-file="${SSH_KEY_FILE}" \
         --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --ssh-flag='-n' \
         --ssh-flag='-o ConnectTimeout=15' \
         --ssh-flag='-o BatchMode=yes' \
         --command="${guest_guard_command}" 2>&1)"; then
