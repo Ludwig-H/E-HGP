@@ -2,14 +2,14 @@
 
 ## Statut
 
-- phase : `2B`, en cours;
+- phase : `2B`, terminée;
 - backend : `cuda_g4`;
 - profil prioritaire : `hgp_reduced`;
 - mode : `certified`;
 - porte d'entrée : satisfaite par la fermeture de la phase 2A et la qualification de la phase 3;
-- porte de sortie : campagne longue satisfaite; mesure `warm_context_e2e` encore requise.
+- porte de sortie : satisfaite par les campagnes longues, la qualification résidente et la mesure `warm_context_e2e` sur G4.
 
-Ce document suit les incréments techniques de la phase 2B. Il ne promeut aucun statut scientifique public et ne ferme pas la phase avant la dernière mesure chaude.
+Ce document archive les incréments techniques de la phase 2B. La revue de porte ferme la phase et ouvre la phase 4 sur le backend `reference_cpu`, le profil `hgp_reduced` et le mode `certified`. Elle ne promeut aucun statut scientifique public, ne ferme pas la phase 4 et ne qualifie ni G2 ni un backend spatial GPU exact.
 
 ## Premier incrément : comparaison de distances carrées
 
@@ -51,7 +51,7 @@ Le chemin `summary-only` ne construit plus les chaînes `replay_command`, qui n'
 
 Le commit `971f2df` introduit `PredicateFilterContext`, qui conserve un stream CUDA non bloquant et trois espaces de travail à capacité maximale réutilisable : coordonnées SoA, cardinalités de labels et signes de sortie. Sa construction reste purement hôte; le runtime CUDA n'est initialisé qu'au premier lot non vide. Les trois API historiques créent un contexte éphémère compatible, tandis que les nouvelles surcharges acceptent un handle move-only dont l'état partagé reste vivant jusqu'à la résolution de toutes les futures déjà planifiées.
 
-Un mutex sérialise uniquement réservation, transferts, noyau, retour des signes et synchronisation sur un même contexte. La classification des sorties, l'audit multiprécision et le fallback CPU s'exécutent hors de cette section critique. Toute erreur CUDA ou anomalie post-GPU avant publication empoisonne ce contexte et les appels suivants échouent fermé; une validation d'entrée refusée avant le GPU ne l'empoisonne pas et un autre contexte reste indépendant. L'ordinal propriétaire est réactivé puis restauré autour de chaque section et de la destruction. Les fonctions device, les intervalles dirigés, l'ordre des opérations et la règle `unknown` vers CPU exact sont inchangés. Cette architecture doit encore recevoir sa qualification G4 de réutilisation et sa mesure chaude avant toute revendication de gain.
+Un mutex sérialise uniquement réservation, transferts, noyau, retour des signes et synchronisation sur un même contexte. La classification des sorties, l'audit multiprécision et le fallback CPU s'exécutent hors de cette section critique. Toute erreur CUDA ou anomalie post-GPU avant publication empoisonne ce contexte et les appels suivants échouent fermé; une validation d'entrée refusée avant le GPU ne l'empoisonne pas et un autre contexte reste indépendant. L'ordinal propriétaire est réactivé puis restauré autour de chaque section et de la destruction. Les fonctions device, les intervalles dirigés, l'ordre des opérations et la règle `unknown` vers CPU exact sont inchangés. Cette architecture a reçu sa qualification G4 de réutilisation et sa mesure chaude; celles-ci ne revendiquent aucun gain au-delà du protocole mesuré.
 
 ## Campagne de fermeture résumable
 
@@ -67,8 +67,8 @@ Le replay préliminaire `1.0.0` de la graine Phase 2A sur `f1a917f` a néanmoins
 
 ## Validations locales avant qualification matérielle
 
-- workflows `cpu-release` et `sanitizer` : 30 tests sur 30 réussis dans chacun, contrôle statique 2B, test du contexte résident et smoke de reprise de campagne inclus;
-- contrôle statique 2B : 59 mutations négatives rejetées, notamment les inversions des directions `rd/ru`, des extrémités de produit, des signes de cofacteurs, du facteur `q-r`, de la réduction homogène, de la sortie device compacte, de la mémoire `summary-only`, de l'affinité CUDA et de la réutilisation résidentielle;
+- workflows `cpu-release` et `sanitizer` : 31 tests sur 31 réussis dans chacun, contrôle statique 2B, test du contexte résident, harness chaud hôte et smoke de reprise de campagne inclus;
+- contrôle statique 2B : 63 mutations négatives rejetées, notamment les inversions des directions `rd/ru`, des extrémités de produit, des signes de cofacteurs, du facteur `q-r`, de la réduction homogène, de la sortie device compacte, de la mémoire `summary-only`, de l'affinité CUDA, de la réutilisation résidentielle et du chemin `warm_context_e2e`;
 - compilation syntaxique stricte des unités hôtes : réussie;
 - différentiel distance renforcé avec lanceur GPU simulé : 2 064 cas, dont douze cas non entiers ciblant séparément soustraction, multiplication et addition dirigées; 2 061 signes connus et trois replis CPU, zéro `unknown` terminal;
 - corpus orientation : 2 070 cas relus par un oracle rationnel indépendant et par une émulation bit-à-bit des intervalles dirigés; 2 067 signes GPU obligatoires, zéro mauvais signe et zéro `unknown` terminal après replay CPU;
@@ -134,4 +134,22 @@ Chaque corpus compte 11 304 000 signes GPU FP64 certifiés et 576 000 `unknown` 
 
 Le harness résident G4 traite 1 984 entrées, 16 lots, deux contextes, trois lots vides et les trois prédicats; il reproduit exactement le chemin éphémère. Compute Sanitizer termine avec zéro erreur et zéro fuite. Les profils CUDA release et audit compilent avec NVCC 12.9.86 pour `sm_120`, sans spill rapporté. Les archives qualifiées Phase 2A et Phase 2B valent respectivement `8fab713397e0dd5fc8462529b6f0a008ffbffaa4b9d7bfc511c88ca02a13b270` et `702e64cc2194c6e01d1faf24696e6fdee87752c1787b9a18db969380b86dd905`.
 
-La dernière génération GCP `2026-07-17T16:47:58.724-07:00` a été arrêtée et relue `TERMINATED` avec `lastStopTimestamp=2026-07-17T17:18:25.306-07:00`. Aucune autre VM E-HGP active n'a été observée et la clé OS Login a été révoquée. Les deadlines de travail précèdent les bornes GCE sûres d'environ 15 minutes 27 secondes; elles relèvent de l'exception transactionnelle documentée, car chaque unité est bornée à 240 secondes, chaque chunk est checkpointé atomiquement et vérification, copie et nettoyage restent bornés. La correction et l'exploitation sont donc qualifiées; la porte reste ouverte uniquement jusqu'à la publication séparée de `warm_context_e2e`.
+La génération GCP `2026-07-17T16:47:58.724-07:00` a été arrêtée et relue `TERMINATED` avec `lastStopTimestamp=2026-07-17T17:18:25.306-07:00`. Aucune autre VM E-HGP active n'a été observée et la clé OS Login a été révoquée. Les deadlines de travail précèdent les bornes GCE sûres d'environ 15 minutes 27 secondes; elles relèvent de l'exception transactionnelle documentée, car chaque unité est bornée à 240 secondes, chaque chunk est checkpointé atomiquement et vérification, copie et nettoyage restent bornés.
+
+## Qualification `warm_context_e2e` du 18 juillet 2026
+
+Le commit propre et poussé `9ad398b8b83c5477fb52ab7d357aff3309931d4f` a été compilé avec NVCC 12.9.86 dans l'image `sha256:e3d96c187ca405790227e02aef1a66ca47df0820bb6b2a86b097359105956d58`. La cible réelle est une NVIDIA RTX PRO 6000 Blackwell Server Edition, capacité de calcul 12.0, 97 887 MiB et pilote 580.159.03. Le binaire du harness vaut `3df18bfa8ee05d92b07acca759e276d90f2be7d33eced1eec9c577f18744b47b`.
+
+Pour chacun des trois prédicats, le protocole exécute un warmup puis 31 répétitions mesurées de 65 536 cas sur un contexte résident. Le chronomètre entoure l'API asynchrone jusqu'à `.get()` et inclut validation, packing, transferts, noyau, repli exact et synchronisation, mais exclut la génération des entrées.
+
+| prédicat | min (ns) | p50 (ns) | p95 (ns) | max (ns) | MAD (ns) |
+|---|---:|---:|---:|---:|---:|
+| distance | 105 935 481 | 107 268 960 | 108 741 671 | 108 933 220 | 676 940 |
+| orientation | 156 700 046 | 158 774 816 | 162 199 595 | 162 203 986 | 1 351 680 |
+| puissance | 179 281 734 | 180 766 484 | 182 756 654 | 184 231 713 | 527 879 |
+
+Chaque prédicat agrège exactement 2 031 616 entrées, 1 354 421 signes GPU connus et 677 195 `unknown` transmis en 31 lots au CPU. Les 677 195 replis sont aussi 677 195 zéros exacts; aucun inconnu ne reste. Distance et orientation ferment par expansions, puissance par multiprécision. Le worker brut hors dépôt a une taille de 3 392 octets et le SHA-256 `9cc5fb5673ff7dbeccd9c39fd931085a8178da09f8418163a1a7c9983c13550c`.
+
+La session utile `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a` était `SPOT`, avec `instanceTerminationAction=STOP`, `maxRunDuration=3600` et arrêt invité armé à 45 minutes. Elle a démarré à `2026-07-18T00:25:40.606-07:00`, puis l'arrêt ciblé de cette génération a été certifié à `2026-07-18T00:31:09.515-07:00`. La relecture indépendante du 18 juillet à `07:34:06Z` confirme `TERMINATED`; la clé OS Login est révoquée et absente, et aucune autre VM `project=e-hgp` active n'est observée.
+
+La preuve finale canonique `morsehgp3d/tests/campaigns/phase2b_predicates_v1/warm-context-qualification.json` fait 4 215 octets et vaut `ac59ffa0a1fde5ca14a79a62bc8579571324ab2848b5c832617ddd0fb89fe1c6`. Elle imbrique le worker et son hash, le lifecycle ciblé et le statut final, tout en conservant `public_status=null` et `scientific_result_claimed=false`. Avec la revue `docs/validation/PHASE2B_GATE_REVIEW.md`, elle ferme la Phase 2B et ouvre uniquement la Phase 4; G2 et la sortie de la Phase 4 restent ouverts.

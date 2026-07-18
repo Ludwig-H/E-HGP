@@ -4,7 +4,7 @@ updated_at = "2026-07-18"
 [project]
 name = "MorseHGP3D"
 implementation_started = true
-current_phase = "2B"
+current_phase = "4"
 current_track = "generic_core"
 status_authority = "This file is operational; mathematical authority remains in the specification and proof-status register."
 
@@ -18,7 +18,7 @@ status = "blocked"
 requires_phases = ["0", "1", "2A", "2B", "3", "4", "5", "7", "8", "9", "10", "11", "18"]
 requires_gates = ["G0", "G1", "G2", "G3", "G4", "G5", "G9"]
 full_pi0_requires_phase = "12"
-blocking_reason = "La phase 2B et les phases suivantes ainsi que leurs portes scientifiques doivent etre fermees avant la poursuite."
+blocking_reason = "La phase 4 et les phases suivantes ainsi que leurs portes scientifiques doivent etre fermees avant la poursuite."
 
 [milestones.v1_interactive_scalable]
 status = "blocked"
@@ -75,23 +75,26 @@ blocking_reason = ""
 id = "2B"
 title = "Predicats exacts GPU"
 track = "generic_core"
-status = "in_progress"
+status = "completed"
 entry_gate_satisfied = true
-exit_gate_satisfied = false
+exit_gate_satisfied = true
 depends_on = ["2A", "3"]
-evidence = ["docs/validation/PHASE2A_GATE_REVIEW.md", "docs/validation/PHASE3_PROGRESS.md", "6f27a68 first GPU distance-filter qualification", "phase2b-6f27a68177d21efb19f7ba4cb35ed4855ec73a90.json sha256:65bc7175ed922a2515ecbf15a1a3b3c80445581c473232bc233d0d370a36cff1", "16f7f59 combined GPU distance and orientation qualification", "phase2b-16f7f5975eff6233c73cc617730e608da3bfff69.json sha256:d15bd4e057f5d308c547964f0228ce4269d9fc5", "2b89a58 certified GPU power-bisector filter", "dfd9c0c three-predicate G4 qualification", "phase2b-dfd9c0c72ca79baaa38d4889c2a8af564debdb08.json sha256:8385559d8bca8dd0a8ab12e3bf0da0ac86199800fab575b0145ea355269919df", "4cccb0d hardened phase2b campaign certificate schema", "971f2df resident GPU predicate context", "39a011c qualified phase2b closure executables", "morsehgp3d/tests/campaigns/phase2b_predicates_v1/result.json sha256:98b40b566cefc63b3edf37ce98e1b13749c4b6f76b3f6c332a77fdf7898cfbda", "morsehgp3d/tests/campaigns/phase2b_predicates_v1/qualification-phase2a.json sha256:ba6442a874a29422c16e0a7888e003a3a96947ae37511d29297d24f346958539", "morsehgp3d/tests/campaigns/phase2b_predicates_v1/qualification.json sha256:efdd176dc9e78c4d1cd0004b1e800a5ee7314f6a4935a3f1e40b387d7d6226b0", "closure-phase2b.tar.gz sha256:702e64cc2194c6e01d1faf24696e6fdee87752c1787b9a18db969380b86dd905", "docs/validation/PHASE2B_PROGRESS.md"]
+evidence = ["docs/validation/PHASE2A_GATE_REVIEW.md", "docs/validation/PHASE3_PROGRESS.md", "6f27a68 first GPU distance-filter qualification", "phase2b-6f27a68177d21efb19f7ba4cb35ed4855ec73a90.json sha256:65bc7175ed922a2515ecbf15a1a3b3c80445581c473232bc233d0d370a36cff1", "16f7f59 combined GPU distance and orientation qualification", "phase2b-16f7f5975eff6233c73cc617730e608da3bfff69.json sha256:d15bd4e057f5d308c547964f0228ce4269d9fc5", "2b89a58 certified GPU power-bisector filter", "dfd9c0c three-predicate G4 qualification", "phase2b-dfd9c0c72ca79baaa38d4889c2a8af564debdb08.json sha256:8385559d8bca8dd0a8ab12e3bf0da0ac86199800fab575b0145ea355269919df", "4cccb0d hardened phase2b campaign certificate schema", "971f2df resident GPU predicate context", "39a011c qualified phase2b closure executables", "9ad398b8b83c5477fb52ab7d357aff3309931d4f qualified warm-context harness", "morsehgp3d/tests/campaigns/phase2b_predicates_v1/result.json sha256:98b40b566cefc63b3edf37ce98e1b13749c4b6f76b3f6c332a77fdf7898cfbda", "morsehgp3d/tests/campaigns/phase2b_predicates_v1/qualification-phase2a.json sha256:ba6442a874a29422c16e0a7888e003a3a96947ae37511d29297d24f346958539", "morsehgp3d/tests/campaigns/phase2b_predicates_v1/qualification.json sha256:efdd176dc9e78c4d1cd0004b1e800a5ee7314f6a4935a3f1e40b387d7d6226b0", "closure-phase2b.tar.gz sha256:702e64cc2194c6e01d1faf24696e6fdee87752c1787b9a18db969380b86dd905", "warm-context-worker.json 3392 bytes sha256:9cc5fb5673ff7dbeccd9c39fd931085a8178da09f8418163a1a7c9983c13550c", "morsehgp3d/tests/campaigns/phase2b_predicates_v1/warm-context-qualification.json 4215 bytes sha256:ac59ffa0a1fde5ca14a79a62bc8579571324ab2848b5c832617ddd0fb89fe1c6", "docs/validation/PHASE2B_PROGRESS.md", "docs/validation/PHASE2B_GATE_REVIEW.md"]
 blocking_reason = ""
 
 [[phases]]
 id = "4"
 title = "Canonisation et oracle spatial"
 track = "generic_core"
-status = "blocked"
-entry_gate_satisfied = false
+status = "in_progress"
+entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["2A", "2B", "3"]
-evidence = []
-blocking_reason = "La phase 2B n'est pas fermee."
+backend = "reference_cpu"
+profile = "hgp_reduced"
+mode = "certified"
+evidence = ["docs/validation/PHASE2B_GATE_REVIEW.md", "docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md"]
+blocking_reason = ""
 
 [[phases]]
 id = "5"
@@ -124,7 +127,7 @@ entry_gate_satisfied = false
 exit_gate_satisfied = false
 depends_on = ["2B", "4"]
 evidence = []
-blocking_reason = "Predicats GPU et oracle spatial indisponibles."
+blocking_reason = "L'oracle spatial de phase 4 n'est pas ferme."
 
 [[phases]]
 id = "8"
@@ -190,7 +193,7 @@ entry_gate_satisfied = false
 exit_gate_satisfied = false
 depends_on = ["2A", "2B", "12"]
 evidence = []
-blocking_reason = "Les phases 2B et 12 ne sont pas fermees."
+blocking_reason = "La phase 12 n'est pas fermee."
 
 [[phases]]
 id = "14"

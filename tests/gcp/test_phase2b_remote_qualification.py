@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -24,6 +25,14 @@ WARM_ASSEMBLER = (
     / "assemble_phase2b_warm_context_qualification.py"
 )
 WORKER = REPOSITORY_ROOT / "gcp-migration" / "phase2b_remote_qualification.sh"
+QUALIFIED_EVIDENCE = (
+    REPOSITORY_ROOT
+    / "morsehgp3d"
+    / "tests"
+    / "campaigns"
+    / "phase2b_predicates_v1"
+    / "warm-context-qualification.json"
+)
 GIT_SHA = "1" * 40
 IMAGE_ID = "sha256:" + "2" * 64
 
@@ -381,6 +390,58 @@ class Phase2BWorkerStaticSafetyTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("ne démarre", result.stdout)
+
+
+class Phase2BQualifiedEvidenceTests(unittest.TestCase):
+    def test_versioned_warm_context_evidence_is_closed_and_self_authenticating(
+        self,
+    ) -> None:
+        raw = QUALIFIED_EVIDENCE.read_bytes()
+        artifact = json.loads(raw)
+        canonical = (
+            json.dumps(artifact, ensure_ascii=True, separators=(",", ":"), sort_keys=True)
+            + "\n"
+        ).encode("ascii")
+        self.assertEqual(raw, canonical)
+        self.assertEqual(
+            artifact["schema"],
+            "morsehgp3d.phase2b.warm_context_qualified_evidence.v1",
+        )
+        self.assertEqual(artifact["status"], "passed")
+        self.assertIsNone(artifact["public_status"])
+        self.assertIs(artifact["scientific_result_claimed"], False)
+
+        lifecycle = artifact["vm_lifecycle"]
+        self.assertEqual(lifecycle["final_status"], "TERMINATED")
+        self.assertIs(lifecycle["targeted_stop_verified"], True)
+        self.assertEqual(lifecycle["instance"], "ehgp-blackwell-spot-ai1a")
+
+        worker = artifact["worker_artifact"]
+        worker_raw = (
+            json.dumps(worker, ensure_ascii=True, separators=(",", ":"), sort_keys=True)
+            + "\n"
+        ).encode("ascii")
+        self.assertEqual(len(worker_raw), artifact["worker_artifact_size_bytes"])
+        self.assertEqual(
+            hashlib.sha256(worker_raw).hexdigest(),
+            artifact["worker_artifact_sha256"],
+        )
+        self.assertEqual(worker["status"], "worker_passed_pending_shutdown")
+        self.assertIs(worker["cuda_runtime_executed"], True)
+        self.assertIsNone(worker["public_status"])
+
+        benchmark = worker["benchmark"]
+        self.assertEqual(benchmark["cases"], 65536)
+        self.assertEqual(benchmark["repeats"], 31)
+        self.assertEqual(benchmark["warmup_repeats"], 1)
+        for result in benchmark["results"].values():
+            counters = result["counters"]
+            self.assertEqual(len(result["samples_ns"]), 31)
+            self.assertEqual(counters["gpu_inputs"], 2031616)
+            self.assertEqual(counters["gpu_fp64_certified"], 1354421)
+            self.assertEqual(counters["gpu_unknown_forwarded"], 677195)
+            self.assertEqual(counters["async_fallback_batches"], 31)
+            self.assertEqual(counters["remaining_unknown"], 0)
 
 
 if __name__ == "__main__":

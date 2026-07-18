@@ -273,6 +273,8 @@ Zéro signe erroné. Un résultat indécis doit tomber au niveau suivant, jamais
 
 ## Phase 2B — Portage des prédicats sur GPU
 
+**Statut opérationnel au 18 juillet 2026 :** `completed`. La porte est fermée par les campagnes certifiées, la qualification du contexte résident et la preuve versionnée `warm_context_e2e`; cette fermeture ne qualifie ni G2 ni un statut public `exact`.
+
 ### Entrée
 
 La phase 2A et l'environnement CUDA de la phase 3 sont fermés.
@@ -320,6 +322,8 @@ Préparer un socle CUDA mesurable sans lancer encore l'algorithme complet.
 Aucune compilation dans une mesure `warm` ou `resident`, aucune fuite, et manifeste complet attaché à chaque résultat. La VM est `TERMINATED` après le test.
 
 ## Phase 4 — Canonisation et oracle spatial
+
+**Statut opérationnel au 18 juillet 2026 :** `in_progress`, backend `reference_cpu`, profil `hgp_reduced`, mode `certified`. La porte d'entrée est satisfaite par les phases 2A, 2B et 3 fermées; la porte de sortie reste ouverte.
 
 ### But
 
@@ -1022,4 +1026,4 @@ Les sept prochains lots de travail doivent être :
 
 Cette séquence donne rapidement une vérité terrain, un cas $k=1$ incontestable et une mesure réaliste de la primitive GPU. Elle évite que les choix de bibliothèque ou de layout figent prématurément un objet mathématique incomplet.
 
-Les phases 2A et 3 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. La campagne numérique de la phase 2B est complète; sa mesure `warm_context_e2e` est la dernière obligation avant la phase 4.
+Les phases 2A, 2B et 3 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. La phase 4 est désormais la phase courante : elle commence par l'oracle spatial brute-force exact sur `reference_cpu`, avant tout LBVH ou chemin spatial GPU.
