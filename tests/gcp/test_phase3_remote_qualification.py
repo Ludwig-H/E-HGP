@@ -38,6 +38,13 @@ PHASE4_DIFFERENTIAL_SOURCE = (
     / "differential"
     / "check_spatial_gpu_reference.py"
 )
+PHASE4_LBVH_DIFFERENTIAL_SOURCE = (
+    REPOSITORY_ROOT
+    / "morsehgp3d"
+    / "tests"
+    / "differential"
+    / "check_spatial_gpu_lbvh.py"
+)
 FAKE_SHA = "a" * 40
 FAKE_IMAGE_ID = "sha256:" + "b" * 64
 FAKE_BASE_IMAGE_REF = (
@@ -684,6 +691,48 @@ def write_phase4_summary(path: Path, quick: bool):
     }
     path.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
 
+def write_phase4_lbvh_summary(path: Path):
+    value = {
+        "all_cases_passed": True,
+        "bounded_protocol": True,
+        "case_count": 13,
+        "certified_pruned_subtree_count": 15,
+        "closed_ball_query_count": 13,
+        "cover_antichain_complete": True,
+        "cpu_exact_recertification_complete": True,
+        "decision_semantics": "cpu_exact_cover_and_leaf_recertification",
+        "directed_enclosure_coverage": [
+            "enclosed",
+            "exact",
+            "unsupported_range",
+        ],
+        "exact_partition_complete": True,
+        "gpu_launch_count": 19,
+        "point_partition_complete": True,
+        "proposal_semantics": "gpu_resident_lbvh_strict_exterior_cover",
+        "schema": "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v1",
+        "scientific_public_status": None,
+        "scientific_result_claimed": False,
+        "targeted_coverage": [
+            "addition_only_overflow",
+            "cutoff_non_binary64",
+            "cutoff_outside_binary64",
+            "exact_tie",
+            "exclusions",
+            "maximum_finite",
+            "negative_query_outside_binary64",
+            "permuted_input",
+            "query_non_binary64",
+            "query_outside_binary64",
+            "signed_subnormal",
+            "singleton",
+            "six_way_shell",
+            "tri_partition",
+        ],
+        "top_k_query_count": 13,
+    }
+    path.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
+
 def manifest():
     return {
         "aot_only": True,
@@ -891,13 +940,18 @@ if command[:3] == ["cmake", "--workflow", "--preset"]:
     if failure == "audit" and preset == "cuda-audit":
         raise SystemExit(32)
     if preset == "cuda-release":
-        replay = (
+        build = (
             volumes["/workspace/repository/build"][0]
             / "morsehgp3d-cuda-release"
-            / "morsehgp3d_gpu_spatial_reference_replay"
         )
-        replay.parent.mkdir(parents=True, exist_ok=True)
-        replay.write_bytes(b"fake Phase 4 spatial replay")
+        build.mkdir(parents=True, exist_ok=True)
+        for replay_name in (
+            "morsehgp3d_gpu_spatial_reference_replay",
+            "morsehgp3d_gpu_spatial_lbvh_replay",
+        ):
+            (build / replay_name).write_bytes(
+                ("fake Phase 4 " + replay_name).encode("ascii")
+            )
     print(f"fake {preset} workflow passed")
     raise SystemExit(0)
 
@@ -916,6 +970,14 @@ if Path(command[0]).name == "python3" and any(
     summary = command[command.index("--summary-json") + 1]
     write_phase4_summary(result_path(summary), "--quick" in command)
     print("fake Phase 4 spatial differential passed")
+    raise SystemExit(0)
+
+if Path(command[0]).name == "python3" and any(
+    Path(item).name == "check_spatial_gpu_lbvh.py" for item in command
+):
+    summary = command[command.index("--summary-json") + 1]
+    write_phase4_lbvh_summary(result_path(summary))
+    print("fake Phase 4 resident LBVH differential passed")
     raise SystemExit(0)
 
 if command[0] == "python3":
@@ -956,6 +1018,12 @@ if Path(command[0]).name == "compute-sanitizer":
         summary = command[command.index("--summary-json") + 1]
         write_phase4_summary(result_path(summary), "--quick" in command)
         print("fake Phase 4 spatial memcheck differential passed")
+        print("========= ERROR SUMMARY: 0 errors")
+        raise SystemExit(0)
+    if any(Path(item).name == "check_spatial_gpu_lbvh.py" for item in command):
+        summary = command[command.index("--summary-json") + 1]
+        write_phase4_lbvh_summary(result_path(summary))
+        print("fake Phase 4 resident LBVH memcheck differential passed")
         print("========= ERROR SUMMARY: 0 errors")
         raise SystemExit(0)
     output = command[command.index("--output") + 1]
@@ -1237,6 +1305,14 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
             / "tests"
             / "differential"
             / PHASE4_DIFFERENTIAL_SOURCE.name,
+        )
+        shutil.copy2(
+            PHASE4_LBVH_DIFFERENTIAL_SOURCE,
+            self.repository
+            / "morsehgp3d"
+            / "tests"
+            / "differential"
+            / PHASE4_LBVH_DIFFERENTIAL_SOURCE.name,
         )
         (self.repository / "containers" / "cuda12.9-sm120.Dockerfile").write_text(
             f"FROM {FAKE_BASE_IMAGE_REF}\n", encoding="utf-8"
@@ -1811,7 +1887,7 @@ printf 'fake Blackwell preflight passed\\n'
         phase4 = json.loads(phase4_artifact.read_text(encoding="utf-8"))
         self.assertEqual("worker_passed_pending_shutdown", phase3["status"])
         self.assertEqual(
-            "morsehgp3d.phase4.spatial_gpu_reference_qualification.v1",
+            "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v2",
             phase4["schema"],
         )
         self.assertEqual("worker_passed_pending_shutdown", phase4["status"])
@@ -1820,12 +1896,34 @@ printf 'fake Blackwell preflight passed\\n'
             20,
             phase4["checks"]["quick_memcheck_differential"]["case_count"],
         )
+        self.assertEqual(13, phase4["checks"]["lbvh_differential"]["case_count"])
+        self.assertEqual(
+            19,
+            phase4["checks"]["lbvh_differential"]["gpu_launch_count"],
+        )
+        self.assertEqual(
+            13,
+            phase4["checks"]["lbvh_memcheck_differential"]["case_count"],
+        )
+        self.assertEqual(
+            {
+                "checker_sha256",
+                "lbvh_checker_sha256",
+                "lbvh_replay_sha256",
+                "replay_sha256",
+            },
+            set(phase4["binary"]),
+        )
         self.assertFalse(phase4["scientific_result_claimed"])
         self.assertIsNone(phase4["scientific_public_status"])
         log = self.command_log_text()
         self.assertIn("phase4-spatial-differential", log)
         self.assertIn("phase4-spatial-cuobjdump-elf", log)
         self.assertIn("phase4-spatial-compute-sanitizer", log)
+        self.assertIn("phase4-spatial-lbvh-differential", log)
+        self.assertIn("phase4-spatial-lbvh-cuobjdump-elf", log)
+        self.assertIn("phase4-spatial-lbvh-cuobjdump-ptx", log)
+        self.assertIn("phase4-spatial-lbvh-compute-sanitizer", log)
         self.assert_no_partial_artifact()
 
     def test_symlinked_repository_build_mountpoint_is_refused(self) -> None:

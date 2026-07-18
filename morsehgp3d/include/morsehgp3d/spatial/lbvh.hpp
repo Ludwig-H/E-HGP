@@ -10,6 +10,10 @@
 #include <stdexcept>
 #include <vector>
 
+namespace morsehgp3d::gpu {
+class SpatialLbvhContext;
+}
+
 namespace morsehgp3d::spatial {
 
 struct MortonLeafRecord {
@@ -149,6 +153,7 @@ class MortonLbvhIndex {
       const exact::ExactRational3& query,
       const exact::ExactLevel& squared_radius,
       LbvhTraversalOrder traversal_order);
+  friend class gpu::SpatialLbvhContext;
 };
 
 [[nodiscard]] TopKPartition lbvh_top_k(

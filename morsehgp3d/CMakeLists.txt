@@ -409,9 +409,14 @@ if(MORSEHGP3D_ENABLE_CUDA)
       src/cuda/phase4_spatial_bounds_internal.hpp
       src/cuda/phase4_spatial_bounds.cu
       src/gpu/spatial_bounds.cpp
+      src/gpu/spatial_lbvh.cpp
   )
   add_library(
     morsehgp3d::gpu_spatial_bounds
+    ALIAS morsehgp3d_gpu_spatial_bounds
+  )
+  add_library(
+    morsehgp3d::gpu_spatial_lbvh
     ALIAS morsehgp3d_gpu_spatial_bounds
   )
   target_include_directories(
@@ -459,6 +464,23 @@ if(MORSEHGP3D_ENABLE_CUDA)
   else()
     target_compile_options(
       morsehgp3d_gpu_spatial_bounds_replay
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_spatial_lbvh_replay
+    src/tools/gpu_spatial_lbvh_replay.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_spatial_lbvh_replay
+    PRIVATE morsehgp3d::gpu_spatial_lbvh
+  )
+  if(MSVC)
+    target_compile_options(morsehgp3d_gpu_spatial_lbvh_replay PRIVATE /W4 /WX)
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_spatial_lbvh_replay
       PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()

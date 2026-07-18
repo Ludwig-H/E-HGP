@@ -12,8 +12,9 @@ import re
 from typing import Any, NoReturn
 
 
-SCHEMA = "morsehgp3d.phase4.spatial_gpu_reference_qualification.v1"
+SCHEMA = "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v2"
 SUMMARY_SCHEMA = "morsehgp3d.phase4.spatial_gpu_differential.v1"
+LBVH_SUMMARY_SCHEMA = "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v1"
 PHASE3_SCHEMA = "morsehgp3d.phase3.qualification.v1"
 BASE_IMAGE_REF = (
     "nvidia/cuda:12.9.2-devel-ubuntu24.04@"
@@ -40,6 +41,29 @@ REQUIRED_PROJECTION_COVERAGE = [
     "overflow_clamped",
     "rounded",
     "underflow",
+]
+LBVH_CASE_COUNT = 13
+LBVH_GPU_LAUNCH_COUNT = 19
+REQUIRED_LBVH_DIRECTED_ENCLOSURE_COVERAGE = [
+    "enclosed",
+    "exact",
+    "unsupported_range",
+]
+REQUIRED_LBVH_TARGETED_COVERAGE = [
+    "addition_only_overflow",
+    "cutoff_non_binary64",
+    "cutoff_outside_binary64",
+    "exact_tie",
+    "exclusions",
+    "maximum_finite",
+    "negative_query_outside_binary64",
+    "permuted_input",
+    "query_non_binary64",
+    "query_outside_binary64",
+    "signed_subnormal",
+    "singleton",
+    "six_way_shell",
+    "tri_partition",
 ]
 
 
@@ -170,6 +194,99 @@ def validate_summary(
     return value
 
 
+def validate_lbvh_summary(
+    value: dict[str, Any], *, label: str
+) -> dict[str, Any]:
+    require_exact_keys(
+        value,
+        {
+            "all_cases_passed",
+            "bounded_protocol",
+            "case_count",
+            "certified_pruned_subtree_count",
+            "closed_ball_query_count",
+            "cover_antichain_complete",
+            "cpu_exact_recertification_complete",
+            "decision_semantics",
+            "directed_enclosure_coverage",
+            "exact_partition_complete",
+            "gpu_launch_count",
+            "point_partition_complete",
+            "proposal_semantics",
+            "schema",
+            "scientific_public_status",
+            "scientific_result_claimed",
+            "targeted_coverage",
+            "top_k_query_count",
+        },
+        label,
+    )
+    if value.get("schema") != LBVH_SUMMARY_SCHEMA:
+        fail(f"{label} has the wrong schema")
+    for field in (
+        "all_cases_passed",
+        "bounded_protocol",
+        "cover_antichain_complete",
+        "cpu_exact_recertification_complete",
+        "exact_partition_complete",
+        "point_partition_complete",
+    ):
+        require_bool(value.get(field), True, f"{label}.{field}")
+    require_bool(
+        value.get("scientific_result_claimed"),
+        False,
+        f"{label}.scientific_result_claimed",
+    )
+    if value.get("scientific_public_status") is not None:
+        fail(f"{label}.scientific_public_status must be null")
+    if value.get("decision_semantics") != (
+        "cpu_exact_cover_and_leaf_recertification"
+    ):
+        fail(f"{label}.decision_semantics differs")
+    if value.get("proposal_semantics") != (
+        "gpu_resident_lbvh_strict_exterior_cover"
+    ):
+        fail(f"{label}.proposal_semantics differs")
+    if value.get("directed_enclosure_coverage") != (
+        REQUIRED_LBVH_DIRECTED_ENCLOSURE_COVERAGE
+    ):
+        fail(f"{label}.directed_enclosure_coverage is incomplete")
+    if value.get("targeted_coverage") != REQUIRED_LBVH_TARGETED_COVERAGE:
+        fail(f"{label}.targeted_coverage is incomplete")
+    for field in (
+        "case_count",
+        "closed_ball_query_count",
+        "top_k_query_count",
+    ):
+        require_integer(value.get(field), LBVH_CASE_COUNT, f"{label}.{field}")
+    require_integer(
+        value.get("gpu_launch_count"),
+        LBVH_GPU_LAUNCH_COUNT,
+        f"{label}.gpu_launch_count",
+    )
+    prunes = value.get("certified_pruned_subtree_count")
+    if type(prunes) is not int or prunes <= 0:
+        fail(f"{label}.certified_pruned_subtree_count must be positive")
+    return value
+
+
+def validate_binary_logs(
+    logs: dict[str, str], *, label: str
+) -> list[str]:
+    architectures = SM_RE.findall(logs["cuobjdump_elf"])
+    if not architectures or set(architectures) != {"sm_120"}:
+        fail(f"{label} ELF evidence must contain only sm_120")
+    if logs["cuobjdump_ptx"].strip():
+        fail(f"{label} PTX evidence must contain zero entries")
+    sanitizer_errors = [
+        int(value)
+        for value in SANITIZER_ERROR_RE.findall(logs["compute_sanitizer"])
+    ]
+    if not sanitizer_errors or any(value != 0 for value in sanitizer_errors):
+        fail(f"{label} compute-sanitizer evidence must contain only zero errors")
+    return sorted(set(architectures))
+
+
 def validate_phase3_environment(
     value: dict[str, Any],
     *,
@@ -257,6 +374,15 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--sanitizer-log", type=Path, required=True)
     parser.add_argument("--replay", type=Path, required=True)
     parser.add_argument("--checker", type=Path, required=True)
+    parser.add_argument("--lbvh-differential-summary", type=Path, required=True)
+    parser.add_argument("--lbvh-memcheck-summary", type=Path, required=True)
+    parser.add_argument("--lbvh-differential-log", type=Path, required=True)
+    parser.add_argument("--lbvh-elf-log", type=Path, required=True)
+    parser.add_argument("--lbvh-ptx-log", type=Path, required=True)
+    parser.add_argument("--lbvh-ptx-stderr-log", type=Path, required=True)
+    parser.add_argument("--lbvh-sanitizer-log", type=Path, required=True)
+    parser.add_argument("--lbvh-replay", type=Path, required=True)
+    parser.add_argument("--lbvh-checker", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     return parser.parse_args()
 
@@ -288,7 +414,21 @@ def main() -> int:
         read_json_object(args.quick_summary, "quick differential summary"),
         quick=True,
     )
-    logs = {
+    lbvh_summary = validate_lbvh_summary(
+        read_json_object(
+            args.lbvh_differential_summary,
+            "resident LBVH differential summary",
+        ),
+        label="resident LBVH differential summary",
+    )
+    lbvh_memcheck_summary = validate_lbvh_summary(
+        read_json_object(
+            args.lbvh_memcheck_summary,
+            "resident LBVH memcheck summary",
+        ),
+        label="resident LBVH memcheck summary",
+    )
+    reference_logs = {
         "compute_sanitizer": read_text(args.sanitizer_log, "compute-sanitizer log"),
         "cuobjdump_elf": read_text(args.elf_log, "cuobjdump ELF log"),
         "cuobjdump_ptx": read_text(
@@ -299,31 +439,66 @@ def main() -> int:
         ),
         "differential": read_text(args.differential_log, "differential log"),
     }
-    architectures = SM_RE.findall(logs["cuobjdump_elf"])
-    if not architectures or set(architectures) != {"sm_120"}:
-        fail("spatial replay ELF evidence must contain only sm_120")
-    if logs["cuobjdump_ptx"].strip():
-        fail("spatial replay PTX evidence must contain zero entries")
-    sanitizer_errors = [
-        int(value) for value in SANITIZER_ERROR_RE.findall(logs["compute_sanitizer"])
-    ]
-    if not sanitizer_errors or any(value != 0 for value in sanitizer_errors):
-        fail("compute-sanitizer evidence must contain only zero-error summaries")
+    lbvh_logs = {
+        "compute_sanitizer": read_text(
+            args.lbvh_sanitizer_log,
+            "resident LBVH compute-sanitizer log",
+        ),
+        "cuobjdump_elf": read_text(
+            args.lbvh_elf_log, "resident LBVH cuobjdump ELF log"
+        ),
+        "cuobjdump_ptx": read_text(
+            args.lbvh_ptx_log,
+            "resident LBVH cuobjdump PTX log",
+            allow_empty=True,
+        ),
+        "cuobjdump_ptx_stderr": read_text(
+            args.lbvh_ptx_stderr_log,
+            "resident LBVH cuobjdump PTX stderr",
+            allow_empty=True,
+        ),
+        "differential": read_text(
+            args.lbvh_differential_log,
+            "resident LBVH differential log",
+        ),
+    }
+    reference_architectures = validate_binary_logs(
+        reference_logs, label="exhaustive reference replay"
+    )
+    lbvh_architectures = validate_binary_logs(
+        lbvh_logs, label="resident LBVH replay"
+    )
 
     artifact = {
         "backend": "cuda_g4",
         "binary": {
-            "checker_sha256": sha256_file(args.checker, "differential checker"),
-            "replay_sha256": sha256_file(args.replay, "spatial replay"),
+            "checker_sha256": sha256_file(
+                args.checker, "reference differential checker"
+            ),
+            "lbvh_checker_sha256": sha256_file(
+                args.lbvh_checker, "resident LBVH differential checker"
+            ),
+            "lbvh_replay_sha256": sha256_file(
+                args.lbvh_replay, "resident LBVH replay"
+            ),
+            "replay_sha256": sha256_file(
+                args.replay, "reference spatial replay"
+            ),
         },
         "checks": {
-            "aot_elf_architectures": sorted(set(architectures)),
+            "aot_elf_architectures": reference_architectures,
             "aot_ptx_entry_count": 0,
             "compute_sanitizer": "passed",
             "cpu_exact_recertification_complete": True,
             "cuda_audit_workflow": "passed",
             "cuda_release_workflow": "passed",
             "differential": full_summary,
+            "lbvh_aot_elf_architectures": lbvh_architectures,
+            "lbvh_aot_ptx_entry_count": 0,
+            "lbvh_compute_sanitizer": "passed",
+            "lbvh_cpu_exact_recertification_complete": True,
+            "lbvh_differential": lbvh_summary,
+            "lbvh_memcheck_differential": lbvh_memcheck_summary,
             "quick_memcheck_differential": quick_summary,
         },
         "environment": {
@@ -339,7 +514,14 @@ def main() -> int:
             "id": args.image_id,
             "ref": args.image_ref,
         },
-        "logs": logs,
+        "logs": {
+            **reference_logs,
+            "lbvh_compute_sanitizer": lbvh_logs["compute_sanitizer"],
+            "lbvh_cuobjdump_elf": lbvh_logs["cuobjdump_elf"],
+            "lbvh_cuobjdump_ptx": lbvh_logs["cuobjdump_ptx"],
+            "lbvh_cuobjdump_ptx_stderr": lbvh_logs["cuobjdump_ptx_stderr"],
+            "lbvh_differential": lbvh_logs["differential"],
+        },
         "mode": "certified",
         "phase": "4",
         "profile": "hgp_reduced",
@@ -347,7 +529,7 @@ def main() -> int:
         "scientific_public_status": None,
         "scientific_result_claimed": False,
         "scientific_scope": (
-            "non_certifying_fp64_proposals_with_cpu_exact_all_points_recertification"
+            "non_certifying_gpu_proposals_with_cpu_exact_reference_and_resident_lbvh_recertification"
         ),
         "status": "worker_passed_pending_shutdown",
         "vm_lifecycle": {

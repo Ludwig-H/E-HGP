@@ -12,6 +12,8 @@
 #include <limits>
 #include <span>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 namespace morsehgp3d::gpu::test_support {
 namespace {
@@ -381,6 +383,141 @@ SpatialBoundsProposalBatch propose_strict_aabb_prunes_on_gpu(
     case test_support::FakeSpatialBoundsProposalCorruption::simulated_gpu_failure:
       throw std::logic_error(
           "the simulated spatial-bounds failure must precede publication");
+  }
+  return batch;
+}
+
+SpatialLbvhCoverBatch propose_strict_lbvh_cover_on_gpu(
+    SpatialLbvhContextState& context,
+    std::span<const SpatialLbvhNodeInputRecord> nodes,
+    std::size_t root_index,
+    const std::array<std::uint64_t, 3>& query_lower_bits,
+    const std::array<std::uint64_t, 3>& query_upper_bits,
+    std::uint64_t cutoff_lower_bits,
+    std::uint64_t cutoff_upper_bits) {
+  if (nodes.empty() || root_index >= nodes.size()) {
+    throw std::invalid_argument(
+        "the fake Phase 4 spatial-LBVH launcher requires a valid tree");
+  }
+
+  const test_support::FakeSpatialBoundsProposalPermutation permutation =
+      test_support::proposal_permutation.load(std::memory_order_relaxed);
+  const test_support::FakeSpatialBoundsProposalValues values =
+      test_support::proposal_values.load(std::memory_order_relaxed);
+  const test_support::FakeSpatialBoundsProposalCorruption corruption =
+      test_support::proposal_corruption.load(std::memory_order_relaxed);
+  if (corruption ==
+      test_support::FakeSpatialBoundsProposalCorruption::simulated_gpu_failure) {
+    throw std::runtime_error("simulated Phase 4 spatial-LBVH GPU failure");
+  }
+
+  test_support::proposal_launch_count.fetch_add(1U, std::memory_order_relaxed);
+  test_support::proposal_last_box_count.store(
+      nodes.size(), std::memory_order_relaxed);
+  test_support::store_words(
+      test_support::proposal_last_query_lower_bits, query_lower_bits);
+  test_support::store_words(
+      test_support::proposal_last_query_upper_bits, query_upper_bits);
+  test_support::store_words(
+      test_support::proposal_last_cutoff_bits,
+      std::array<std::uint64_t, 2>{
+          cutoff_lower_bits, cutoff_upper_bits});
+
+  SpatialLbvhCoverBatch batch;
+  batch.records.resize(nodes.size());
+  std::vector<std::size_t> traversal_stack{root_index};
+  while (!traversal_stack.empty()) {
+    const std::size_t node_index = traversal_stack.back();
+    traversal_stack.pop_back();
+    if (node_index >= nodes.size()) {
+      throw std::logic_error(
+          "the fake spatial-LBVH traversal reached an invalid node");
+    }
+    const SpatialLbvhNodeInputRecord& node = nodes[node_index];
+    const SpatialBoundsProposalRecord proposal = fake_record(
+        node_index,
+        node.bounds,
+        query_lower_bits,
+        query_upper_bits,
+        cutoff_lower_bits,
+        cutoff_upper_bits,
+        values);
+    const bool prune =
+        proposal.decision_code == spatial_bounds_prune_code;
+    const bool leaf =
+        node.left_child == spatial_bounds_sentinel_code &&
+        node.right_child == spatial_bounds_sentinel_code;
+    if (prune || leaf) {
+      if (batch.record_count >= batch.records.size()) {
+        throw std::logic_error(
+            "the fake spatial-LBVH cover exceeded its node capacity");
+      }
+      batch.records[batch.record_count++] = SpatialLbvhCoverRecord{
+          static_cast<std::uint64_t>(node_index),
+          proposal.lower_squared_distance_bits,
+          proposal.upper_squared_distance_bits,
+          prune ? spatial_lbvh_cover_prune_code
+                : spatial_lbvh_cover_leaf_code};
+      continue;
+    }
+    if (node.left_child == spatial_bounds_sentinel_code ||
+        node.right_child == spatial_bounds_sentinel_code ||
+        !std::in_range<std::size_t>(node.left_child) ||
+        !std::in_range<std::size_t>(node.right_child)) {
+      throw std::logic_error(
+          "the fake spatial-LBVH traversal found invalid children");
+    }
+    traversal_stack.push_back(
+        static_cast<std::size_t>(node.right_child));
+    traversal_stack.push_back(
+        static_cast<std::size_t>(node.left_child));
+  }
+  if (permutation ==
+      test_support::FakeSpatialBoundsProposalPermutation::reversed) {
+    std::reverse(
+        batch.records.begin(),
+        batch.records.begin() +
+            static_cast<std::vector<SpatialLbvhCoverRecord>::difference_type>(
+                batch.record_count));
+  }
+  batch.buffer_epoch = context.advance_epoch();
+
+  switch (corruption) {
+    case test_support::FakeSpatialBoundsProposalCorruption::none:
+      break;
+    case test_support::FakeSpatialBoundsProposalCorruption::missing_record:
+      if (batch.record_count != 0U) {
+        --batch.record_count;
+      }
+      break;
+    case test_support::FakeSpatialBoundsProposalCorruption::duplicate_box_index:
+      if (batch.record_count > 1U) {
+        batch.records[batch.record_count - 1U].node_index =
+            batch.records.front().node_index;
+      }
+      break;
+    case test_support::FakeSpatialBoundsProposalCorruption::out_of_range_box_index:
+      batch.records.front().node_index =
+          static_cast<std::uint64_t>(nodes.size());
+      break;
+    case test_support::FakeSpatialBoundsProposalCorruption::invalid_decision:
+      batch.records.front().kind = spatial_bounds_sentinel_code;
+      break;
+    case test_support::FakeSpatialBoundsProposalCorruption::false_prune: {
+      SpatialLbvhCoverRecord& record = batch.records.front();
+      record.kind = spatial_lbvh_cover_prune_code;
+      const double cutoff = std::bit_cast<double>(cutoff_upper_bits);
+      const double claimed_lower = std::nextafter(
+          cutoff, std::numeric_limits<double>::infinity());
+      record.lower_squared_distance_bits =
+          std::bit_cast<std::uint64_t>(claimed_lower);
+      record.upper_squared_distance_bits =
+          record.lower_squared_distance_bits;
+      break;
+    }
+    case test_support::FakeSpatialBoundsProposalCorruption::simulated_gpu_failure:
+      throw std::logic_error(
+          "the simulated spatial-LBVH failure must precede publication");
   }
   return batch;
 }

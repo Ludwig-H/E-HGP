@@ -497,10 +497,53 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
                 "top_k_query_count": count,
             }
 
+        def lbvh_summary():
+            return {
+                "all_cases_passed": True,
+                "bounded_protocol": True,
+                "case_count": 13,
+                "certified_pruned_subtree_count": 15,
+                "closed_ball_query_count": 13,
+                "cover_antichain_complete": True,
+                "cpu_exact_recertification_complete": True,
+                "decision_semantics": "cpu_exact_cover_and_leaf_recertification",
+                "directed_enclosure_coverage": [
+                    "enclosed",
+                    "exact",
+                    "unsupported_range",
+                ],
+                "exact_partition_complete": True,
+                "gpu_launch_count": 19,
+                "point_partition_complete": True,
+                "proposal_semantics": "gpu_resident_lbvh_strict_exterior_cover",
+                "schema": "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v1",
+                "scientific_public_status": None,
+                "scientific_result_claimed": False,
+                "targeted_coverage": [
+                    "addition_only_overflow",
+                    "cutoff_non_binary64",
+                    "cutoff_outside_binary64",
+                    "exact_tie",
+                    "exclusions",
+                    "maximum_finite",
+                    "negative_query_outside_binary64",
+                    "permuted_input",
+                    "query_non_binary64",
+                    "query_outside_binary64",
+                    "signed_subnormal",
+                    "singleton",
+                    "six_way_shell",
+                    "tri_partition",
+                ],
+                "top_k_query_count": 13,
+            }
+
         artifact = {
             "backend": "cuda_g4",
             "binary": {
                 "checker_sha256": "c" * 64,
+                "lbvh_checker_sha256": "e" * 64,
+                "lbvh_replay_sha256": "f" * 64,
                 "replay_sha256": "d" * 64,
             },
             "checks": {
@@ -511,6 +554,12 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
                 "cuda_audit_workflow": "passed",
                 "cuda_release_workflow": "passed",
                 "differential": summary("full", list(range(1, 1001))),
+                "lbvh_aot_elf_architectures": ["sm_120"],
+                "lbvh_aot_ptx_entry_count": 0,
+                "lbvh_compute_sanitizer": "passed",
+                "lbvh_cpu_exact_recertification_complete": True,
+                "lbvh_differential": lbvh_summary(),
+                "lbvh_memcheck_differential": lbvh_summary(),
                 "quick_memcheck_differential": summary(
                     "quick", [1, 2, 3, 4, 17, 257, 1000]
                 ),
@@ -534,18 +583,23 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
                 "cuobjdump_ptx": "",
                 "cuobjdump_ptx_stderr": "No PTX file found\n",
                 "differential": "all Phase 4 cases passed\n",
+                "lbvh_compute_sanitizer": "========= ERROR SUMMARY: 0 errors\n",
+                "lbvh_cuobjdump_elf": "ELF file 1: spatial-lbvh.sm_120.cubin\n",
+                "lbvh_cuobjdump_ptx": "",
+                "lbvh_cuobjdump_ptx_stderr": "No PTX file found\n",
+                "lbvh_differential": "all resident LBVH Phase 4 cases passed\n",
             },
             "mode": "certified",
             "phase": "4",
             "profile": "hgp_reduced",
             "schema": (
-                "morsehgp3d.phase4.spatial_gpu_reference_qualification.v1"
+                "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v2"
             ),
             "scientific_public_status": None,
             "scientific_result_claimed": False,
             "scientific_scope": (
-                "non_certifying_fp64_proposals_with_"
-                "cpu_exact_all_points_recertification"
+                "non_certifying_gpu_proposals_with_cpu_exact_reference_and_"
+                "resident_lbvh_recertification"
             ),
             "status": "worker_passed_pending_shutdown",
             "vm_lifecycle": {
@@ -2080,6 +2134,25 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
             self.assertEqual("TERMINATED", artifact["vm_lifecycle"]["final_status"])
             self.assertTrue(artifact["vm_lifecycle"]["targeted_stop_verified"])
         self.assertEqual("4", phase4["phase"])
+        self.assertEqual(
+            "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v2",
+            phase4["schema"],
+        )
+        self.assertEqual(1013, phase4["checks"]["differential"]["case_count"])
+        self.assertEqual(13, phase4["checks"]["lbvh_differential"]["case_count"])
+        self.assertEqual(
+            19,
+            phase4["checks"]["lbvh_memcheck_differential"]["gpu_launch_count"],
+        )
+        self.assertEqual(
+            {
+                "checker_sha256",
+                "lbvh_checker_sha256",
+                "lbvh_replay_sha256",
+                "replay_sha256",
+            },
+            set(phase4["binary"]),
+        )
         self.assertFalse(phase4["scientific_result_claimed"])
         self.assertIsNone(phase4["scientific_public_status"])
 

@@ -7,6 +7,7 @@ readonly DOCKERFILE_RELATIVE="containers/cuda12.9-sm120.Dockerfile"
 readonly ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase3_qualification.py"
 readonly PHASE4_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase4_spatial_qualification.py"
 readonly PHASE4_DIFFERENTIAL_RELATIVE="morsehgp3d/tests/differential/check_spatial_gpu_reference.py"
+readonly PHASE4_LBVH_DIFFERENTIAL_RELATIVE="morsehgp3d/tests/differential/check_spatial_gpu_lbvh.py"
 readonly BASE_IMAGE_REF="nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
 readonly CONTAINER_REPOSITORY="/workspace/repository"
 readonly CONTAINER_BUILD="${CONTAINER_REPOSITORY}/build"
@@ -17,6 +18,9 @@ readonly RUNTIME_PATH="${CONTAINER_REPOSITORY}/${RUNTIME_RELATIVE}"
 readonly PHASE4_REPLAY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_spatial_reference_replay"
 readonly PHASE4_REPLAY_PATH="${CONTAINER_REPOSITORY}/${PHASE4_REPLAY_RELATIVE}"
 readonly PHASE4_DIFFERENTIAL_PATH="${CONTAINER_REPOSITORY}/${PHASE4_DIFFERENTIAL_RELATIVE}"
+readonly PHASE4_LBVH_REPLAY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_spatial_lbvh_replay"
+readonly PHASE4_LBVH_REPLAY_PATH="${CONTAINER_REPOSITORY}/${PHASE4_LBVH_REPLAY_RELATIVE}"
+readonly PHASE4_LBVH_DIFFERENTIAL_PATH="${CONTAINER_REPOSITORY}/${PHASE4_LBVH_DIFFERENTIAL_RELATIVE}"
 readonly MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-release"
 readonly GUEST_GUARD_MIN_REMAINING_SECONDS=1800
 readonly GUEST_GUARD_MAX_REMAINING_SECONDS=2820
@@ -150,9 +154,9 @@ Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoc
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
 publie l'objet Phase 3 sans remplacement hors du worktree après les contrôles.
-L'option Phase 4 exécute en plus le replay spatial exhaustif et publie ensuite
-son compagnon provisoire, sans rollback d'un nom final. Aucun des deux
-artefacts ne certifie l'arrêt de la VM.
+L'option Phase 4 exécute en plus le replay spatial exhaustif de référence et
+le replay LBVH résident, puis publie leur compagnon provisoire commun, sans
+rollback d'un nom final. Aucun des deux artefacts ne certifie l'arrêt de la VM.
 EOF
 }
 
@@ -283,6 +287,7 @@ readonly DOCKER_CONTEXT="${REPOSITORY_ROOT}/containers"
 readonly ASSEMBLER="${REPOSITORY_ROOT}/${ASSEMBLER_RELATIVE}"
 readonly PHASE4_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE4_ASSEMBLER_RELATIVE}"
 readonly PHASE4_DIFFERENTIAL="${REPOSITORY_ROOT}/${PHASE4_DIFFERENTIAL_RELATIVE}"
+readonly PHASE4_LBVH_DIFFERENTIAL="${REPOSITORY_ROOT}/${PHASE4_LBVH_DIFFERENTIAL_RELATIVE}"
 [[ -f "${DOCKERFILE}" && ! -L "${DOCKERFILE}" ]] || \
     die "Dockerfile Phase 3 absent ou symbolique : ${DOCKERFILE}."
 [[ "$(sed -n '1p' "${DOCKERFILE}")" == "FROM ${BASE_IMAGE_REF}" ]] || \
@@ -294,6 +299,8 @@ if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
         die "Assembleur Phase 4 absent ou symbolique : ${PHASE4_ASSEMBLER}."
     [[ -f "${PHASE4_DIFFERENTIAL}" && ! -L "${PHASE4_DIFFERENTIAL}" ]] || \
         die "Différentiel spatial Phase 4 absent ou symbolique : ${PHASE4_DIFFERENTIAL}."
+    [[ -f "${PHASE4_LBVH_DIFFERENTIAL}" && ! -L "${PHASE4_LBVH_DIFFERENTIAL}" ]] || \
+        die "Différentiel LBVH résident Phase 4 absent ou symbolique : ${PHASE4_LBVH_DIFFERENTIAL}."
 fi
 
 remove_container_from_cidfile() {
@@ -538,6 +545,13 @@ readonly PHASE4_PTX_STDERR_LOG="${LOG_DIR}/phase4-spatial-cuobjdump-ptx.stderr.l
 readonly PHASE4_SANITIZER_LOG="${LOG_DIR}/phase4-spatial-compute-sanitizer.log"
 readonly PHASE4_DIFFERENTIAL_SUMMARY="${RESULT_DIR}/phase4-spatial-differential.json"
 readonly PHASE4_QUICK_SUMMARY="${RESULT_DIR}/phase4-spatial-quick.json"
+readonly PHASE4_LBVH_DIFFERENTIAL_LOG="${LOG_DIR}/phase4-spatial-lbvh-differential.log"
+readonly PHASE4_LBVH_ELF_LOG="${LOG_DIR}/phase4-spatial-lbvh-cuobjdump-elf.log"
+readonly PHASE4_LBVH_PTX_LOG="${LOG_DIR}/phase4-spatial-lbvh-cuobjdump-ptx.log"
+readonly PHASE4_LBVH_PTX_STDERR_LOG="${LOG_DIR}/phase4-spatial-lbvh-cuobjdump-ptx.stderr.log"
+readonly PHASE4_LBVH_SANITIZER_LOG="${LOG_DIR}/phase4-spatial-lbvh-compute-sanitizer.log"
+readonly PHASE4_LBVH_DIFFERENTIAL_SUMMARY="${RESULT_DIR}/phase4-spatial-lbvh-differential.json"
+readonly PHASE4_LBVH_MEMCHECK_SUMMARY="${RESULT_DIR}/phase4-spatial-lbvh-memcheck.json"
 
 mkdir -p -- "${BUILD_DIR}/.phase3-home"
 
@@ -1302,6 +1316,67 @@ if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
         die "Le différentiel spatial complet n'a pas produit son résumé JSON."
     [[ -s "${PHASE4_QUICK_SUMMARY}" ]] || \
         die "Le memcheck spatial borné n'a pas produit son résumé JSON."
+
+    begin_unit "phase4-spatial-lbvh-differential"
+    if ! run_container "phase4-spatial-lbvh-differential" \
+        "${PHASE4_LBVH_DIFFERENTIAL_LOG}" /usr/bin/python3 -B \
+        "${PHASE4_LBVH_DIFFERENTIAL_PATH}" "${PHASE4_LBVH_REPLAY_PATH}" \
+        --timeout 300 \
+        --summary-json "${CONTAINER_RESULTS}/phase4-spatial-lbvh-differential.json"; then
+        report_failure_log "phase4-spatial-lbvh-differential" \
+            "${PHASE4_LBVH_DIFFERENTIAL_LOG}"
+        die "Le différentiel LBVH résident Phase 4 a échoué."
+    fi
+
+    begin_unit "phase4-spatial-lbvh-cuobjdump-elf"
+    if ! run_container "phase4-spatial-lbvh-cuobjdump-elf" \
+        "${PHASE4_LBVH_ELF_LOG}" /usr/local/cuda/bin/cuobjdump -lelf \
+        "${PHASE4_LBVH_REPLAY_PATH}"; then
+        report_failure_log "phase4-spatial-lbvh-cuobjdump-elf" \
+            "${PHASE4_LBVH_ELF_LOG}"
+        die "cuobjdump n'a pas pu lister les ELF du replay LBVH résident."
+    fi
+    phase4_lbvh_architectures="$(grep -Eo 'sm_[0-9]+' \
+        "${PHASE4_LBVH_ELF_LOG}" | sort -u || true)"
+    if [[ "${phase4_lbvh_architectures}" != "sm_120" ]]; then
+        report_failure_log "phase4-spatial-lbvh-cuobjdump-elf" \
+            "${PHASE4_LBVH_ELF_LOG}"
+        die "Le replay LBVH résident doit contenir uniquement un ELF sm_120; observé : ${phase4_lbvh_architectures:-aucun}."
+    fi
+
+    begin_unit "phase4-spatial-lbvh-cuobjdump-ptx"
+    if ! run_container_split_output "phase4-spatial-lbvh-cuobjdump-ptx" \
+        "${PHASE4_LBVH_PTX_LOG}" "${PHASE4_LBVH_PTX_STDERR_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lptx "${PHASE4_LBVH_REPLAY_PATH}"; then
+        report_failure_log "phase4-spatial-lbvh-cuobjdump-ptx-stderr" \
+            "${PHASE4_LBVH_PTX_STDERR_LOG}"
+        die "cuobjdump n'a pas pu auditer le PTX du replay LBVH résident."
+    fi
+    if grep -q '[^[:space:]]' "${PHASE4_LBVH_PTX_LOG}"; then
+        report_failure_log "phase4-spatial-lbvh-cuobjdump-ptx" \
+            "${PHASE4_LBVH_PTX_LOG}"
+        die "Une entrée PTX a été détectée dans le replay LBVH résident."
+    fi
+
+    begin_unit "phase4-spatial-lbvh-compute-sanitizer"
+    if ! run_container "phase4-spatial-lbvh-compute-sanitizer" \
+        "${PHASE4_LBVH_SANITIZER_LOG}" /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool memcheck \
+        --leak-check full \
+        --error-exitcode=86 \
+        /usr/bin/python3 -B \
+        "${PHASE4_LBVH_DIFFERENTIAL_PATH}" "${PHASE4_LBVH_REPLAY_PATH}" \
+        --timeout 300 \
+        --summary-json "${CONTAINER_RESULTS}/phase4-spatial-lbvh-memcheck.json"; then
+        report_failure_log "phase4-spatial-lbvh-compute-sanitizer" \
+            "${PHASE4_LBVH_SANITIZER_LOG}"
+        die "Le memcheck borné du replay LBVH résident Phase 4 a échoué."
+    fi
+    [[ -s "${PHASE4_LBVH_DIFFERENTIAL_SUMMARY}" ]] || \
+        die "Le différentiel LBVH résident n'a pas produit son résumé JSON."
+    [[ -s "${PHASE4_LBVH_MEMCHECK_SUMMARY}" ]] || \
+        die "Le memcheck LBVH résident n'a pas produit son résumé JSON."
 fi
 
 [[ -s "${RUNTIME_JSONL}" ]] || die "Le runtime n'a pas produit son JSONL."
@@ -1342,6 +1417,15 @@ if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
         --sanitizer-log "${PHASE4_SANITIZER_LOG}" \
         --replay "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_spatial_reference_replay" \
         --checker "${PHASE4_DIFFERENTIAL}" \
+        --lbvh-differential-summary "${PHASE4_LBVH_DIFFERENTIAL_SUMMARY}" \
+        --lbvh-memcheck-summary "${PHASE4_LBVH_MEMCHECK_SUMMARY}" \
+        --lbvh-differential-log "${PHASE4_LBVH_DIFFERENTIAL_LOG}" \
+        --lbvh-elf-log "${PHASE4_LBVH_ELF_LOG}" \
+        --lbvh-ptx-log "${PHASE4_LBVH_PTX_LOG}" \
+        --lbvh-ptx-stderr-log "${PHASE4_LBVH_PTX_STDERR_LOG}" \
+        --lbvh-sanitizer-log "${PHASE4_LBVH_SANITIZER_LOG}" \
+        --lbvh-replay "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_spatial_lbvh_replay" \
+        --lbvh-checker "${PHASE4_LBVH_DIFFERENTIAL}" \
         --output "${PHASE4_PUBLISH_TEMP}"
 fi
 

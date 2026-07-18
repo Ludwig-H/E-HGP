@@ -13,6 +13,10 @@
 #include <stdexcept>
 #include <vector>
 
+namespace morsehgp3d::gpu {
+class SpatialLbvhContext;
+}
+
 namespace morsehgp3d::spatial {
 
 // Exclusions are part of a query, not of the canonical point cloud.  The
@@ -191,6 +195,7 @@ class TopKPartition {
       const exact::ExactRational3& query,
       const ExclusionSet& exclusions,
       LbvhTraversalOrder traversal_order);
+  friend class gpu::SpatialLbvhContext;
 
   bool complete_;
   std::shared_ptr<const CanonicalPointCloud::IdentityToken> cloud_identity_;
@@ -277,6 +282,7 @@ class ClosedBallPartition {
       const exact::ExactRational3& query,
       const exact::ExactLevel& squared_radius,
       LbvhTraversalOrder traversal_order);
+  friend class gpu::SpatialLbvhContext;
 
   bool complete_;
   std::shared_ptr<const CanonicalPointCloud::IdentityToken> cloud_identity_;

@@ -80,8 +80,9 @@ son expiration UTC fixe, puis la révoque et supprime la copie locale après la
 certification TERMINATED de la génération ciblée.
 
 --phase4-spatial-reference ajoute dans la même session gardée la qualification
-du replay spatial Phase 4. Son artefact compagnon reste provisoire jusqu'à la
-même certification ciblée TERMINATED et ne publie aucun statut scientifique.
+de la référence spatiale exhaustive et du LBVH résident Phase 4. Leur artefact
+compagnon commun reste provisoire jusqu'à la même certification ciblée
+TERMINATED et ne publie aucun statut scientifique.
 
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
@@ -774,7 +775,7 @@ printf '%s\n' \
     "  SHA             : ${HEAD_SHA}" \
     "  arrêt invité    : ${GUEST_SHUTDOWN_MINUTES} min" \
     "  Docker hôte     : $([[ ${PROVISION_DOCKER} == 1 ]] && printf 'provisioning Ubuntu autorisé' || printf 'aucune mutation')" \
-    "  replay Phase 4  : $([[ ${PHASE4_SPATIAL_REFERENCE} == 1 ]] && printf 'qualification compagnon activée' || printf 'désactivé')" \
+    "  replay Phase 4  : $([[ ${PHASE4_SPATIAL_REFERENCE} == 1 ]] && printf 'référence + LBVH résident activés' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -918,7 +919,7 @@ with path.open(encoding="utf-8") as stream:
 with Path(sys.argv[3]).open(encoding="utf-8") as stream:
     phase3 = json.load(stream)
 if not isinstance(value, dict) or value.get("schema") != (
-    "morsehgp3d.phase4.spatial_gpu_reference_qualification.v1"
+    "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v2"
 ):
     raise SystemExit("l'artefact spatial Phase 4 possède un schéma invalide")
 for key, expected in {
@@ -927,7 +928,7 @@ for key, expected in {
     "phase": "4",
     "profile": "hgp_reduced",
     "scientific_scope": (
-        "non_certifying_fp64_proposals_with_cpu_exact_all_points_recertification"
+        "non_certifying_gpu_proposals_with_cpu_exact_reference_and_resident_lbvh_recertification"
     ),
     "status": "worker_passed_pending_shutdown",
 }.items():
@@ -954,7 +955,12 @@ if re.fullmatch(r"sha256:[0-9a-f]{64}", str(image.get("id"))) is None:
 binary = value.get("binary")
 if not isinstance(binary, dict) or any(
     re.fullmatch(r"[0-9a-f]{64}", str(binary.get(field))) is None
-    for field in ("checker_sha256", "replay_sha256")
+    for field in (
+        "checker_sha256",
+        "lbvh_checker_sha256",
+        "lbvh_replay_sha256",
+        "replay_sha256",
+    )
 ):
     raise SystemExit("empreintes binaires spatiales absentes ou invalides")
 checks = value.get("checks")
@@ -966,6 +972,12 @@ expected_check_keys = {
     "cuda_audit_workflow",
     "cuda_release_workflow",
     "differential",
+    "lbvh_aot_elf_architectures",
+    "lbvh_aot_ptx_entry_count",
+    "lbvh_compute_sanitizer",
+    "lbvh_cpu_exact_recertification_complete",
+    "lbvh_differential",
+    "lbvh_memcheck_differential",
     "quick_memcheck_differential",
 }
 if not isinstance(checks, dict) or set(checks) != expected_check_keys:
@@ -977,6 +989,10 @@ for field, expected in {
     "cpu_exact_recertification_complete": True,
     "cuda_audit_workflow": "passed",
     "cuda_release_workflow": "passed",
+    "lbvh_aot_elf_architectures": ["sm_120"],
+    "lbvh_aot_ptx_entry_count": 0,
+    "lbvh_compute_sanitizer": "passed",
+    "lbvh_cpu_exact_recertification_complete": True,
 }.items():
     if checks.get(field) != expected:
         raise SystemExit(f"contrôle spatial {field} invalide")
@@ -1037,6 +1053,75 @@ for field, scope, sizes, count in (
     }
     if summary != expected_summary:
         raise SystemExit(f"résumé spatial {field} incomplet")
+required_lbvh_summary_keys = {
+    "all_cases_passed",
+    "bounded_protocol",
+    "case_count",
+    "certified_pruned_subtree_count",
+    "closed_ball_query_count",
+    "cover_antichain_complete",
+    "cpu_exact_recertification_complete",
+    "decision_semantics",
+    "directed_enclosure_coverage",
+    "exact_partition_complete",
+    "gpu_launch_count",
+    "point_partition_complete",
+    "proposal_semantics",
+    "schema",
+    "scientific_public_status",
+    "scientific_result_claimed",
+    "targeted_coverage",
+    "top_k_query_count",
+}
+required_lbvh_coverage = [
+    "addition_only_overflow",
+    "cutoff_non_binary64",
+    "cutoff_outside_binary64",
+    "exact_tie",
+    "exclusions",
+    "maximum_finite",
+    "negative_query_outside_binary64",
+    "permuted_input",
+    "query_non_binary64",
+    "query_outside_binary64",
+    "signed_subnormal",
+    "singleton",
+    "six_way_shell",
+    "tri_partition",
+]
+for field in ("lbvh_differential", "lbvh_memcheck_differential"):
+    summary = checks.get(field)
+    if not isinstance(summary, dict) or set(summary) != required_lbvh_summary_keys:
+        raise SystemExit(f"résumé LBVH résident {field} absent ou mal typé")
+    expected_scalars = {
+        "all_cases_passed": True,
+        "bounded_protocol": True,
+        "case_count": 13,
+        "closed_ball_query_count": 13,
+        "cover_antichain_complete": True,
+        "cpu_exact_recertification_complete": True,
+        "decision_semantics": "cpu_exact_cover_and_leaf_recertification",
+        "directed_enclosure_coverage": [
+            "enclosed",
+            "exact",
+            "unsupported_range",
+        ],
+        "exact_partition_complete": True,
+        "gpu_launch_count": 19,
+        "point_partition_complete": True,
+        "proposal_semantics": "gpu_resident_lbvh_strict_exterior_cover",
+        "schema": "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v1",
+        "scientific_public_status": None,
+        "scientific_result_claimed": False,
+        "targeted_coverage": required_lbvh_coverage,
+        "top_k_query_count": 13,
+    }
+    for key, expected in expected_scalars.items():
+        if summary.get(key) != expected:
+            raise SystemExit(f"résumé LBVH résident {field}.{key} invalide")
+    prunes = summary.get("certified_pruned_subtree_count")
+    if type(prunes) is not int or prunes <= 0:
+        raise SystemExit(f"résumé LBVH résident {field} sans prune certifié")
 environment = value.get("environment")
 if not isinstance(environment, dict) or environment.get("compute_capability") != "12.0":
     raise SystemExit("environnement spatial absent ou incompatible")
@@ -1047,6 +1132,11 @@ if not isinstance(logs, dict) or set(logs) != {
     "cuobjdump_ptx",
     "cuobjdump_ptx_stderr",
     "differential",
+    "lbvh_compute_sanitizer",
+    "lbvh_cuobjdump_elf",
+    "lbvh_cuobjdump_ptx",
+    "lbvh_cuobjdump_ptx_stderr",
+    "lbvh_differential",
 }:
     raise SystemExit("journaux spatiaux absents ou incomplets")
 lifecycle = value.get("vm_lifecycle")
