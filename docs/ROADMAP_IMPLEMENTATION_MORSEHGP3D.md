@@ -970,7 +970,7 @@ Tout agent qui utilise la G4 suit exactement :
 6. exiger que l'arrêt invité soit armé et lisible;
 7. lancer le preflight Blackwell;
 8. estimer temps, VRAM, RAM, scratch et sortie avant le benchmark;
-9. fixer une échéance de travail laissant au moins trente minutes avant cette borne GCE sûre pour checkpoint, copie du manifeste et arrêt;
+9. fixer une échéance de travail laissant par défaut au moins trente minutes avant cette borne GCE sûre pour checkpoint, copie du manifeste et arrêt; une marge d'au moins quinze minutes est admise uniquement pour une campagne transactionnelle reprenable dont chaque unité dure au plus 240 secondes, avec checkpoint après chaque unité et vérification, copie et nettoyage bornés par le temps restant;
 10. ne lancer aucune nouvelle unité après cette échéance et checkpoint avant l'échéance;
 11. sur succès, échec ou interruption, exécuter `stop_and_verify.sh`;
 12. exiger l'état `TERMINATED` de l'instance exactement ciblée, puis révoquer et supprimer la clé de session; transmettre la même échéance UTC absolue à chaque SSH/SCP pour interdire tout renouvellement ou réimport sans expiration; si l'arrêt reste non certifié avec sa génération, conserver la clé uniquement sous son échéance initiale pour la reprise ciblée;
@@ -1022,4 +1022,4 @@ Les sept prochains lots de travail doivent être :
 
 Cette séquence donne rapidement une vérité terrain, un cas $k=1$ incontestable et une mesure réaliste de la primitive GPU. Elle évite que les choix de bibliothèque ou de layout figent prématurément un objet mathématique incomplet.
 
-Les phases 2A et 3 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. La phase 2B est active; sa fermeture est la prochaine porte avant la phase 4.
+Les phases 2A et 3 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. La campagne numérique de la phase 2B est complète; sa mesure `warm_context_e2e` est la dernière obligation avant la phase 4.

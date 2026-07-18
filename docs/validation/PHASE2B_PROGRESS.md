@@ -7,9 +7,9 @@
 - profil prioritaire : `hgp_reduced`;
 - mode : `certified`;
 - porte d'entrée : satisfaite par la fermeture de la phase 2A et la qualification de la phase 3;
-- porte de sortie : non satisfaite.
+- porte de sortie : campagne longue satisfaite; mesure `warm_context_e2e` encore requise.
 
-Ce document suit les incréments techniques de la phase 2B. Il ne promeut aucun statut scientifique public et ne ferme pas la phase.
+Ce document suit les incréments techniques de la phase 2B. Il ne promeut aucun statut scientifique public et ne ferme pas la phase avant la dernière mesure chaude.
 
 ## Premier incrément : comparaison de distances carrées
 
@@ -126,12 +126,12 @@ Le benchmark froid de processus complet traite 262 144 cas par prédicat sur tro
 
 L'artefact worker hors dépôt est `/tmp/phase2b-f1a917fd93ccf27297f654027c065cc8f2a32466.json`, de 2 423 octets et de SHA-256 `0628657deab59c38c0b896dbe8da909e81214f76140577b2536f0b91ce5c865b`. Il conserve immuablement `public_status=null`, `scientific_result_claimed=false` et `status=worker_passed_pending_shutdown`. Après l'archivage du replay préliminaire, la génération ciblée `2026-07-17T14:08:37.248-07:00` a été arrêtée et relue avec `lastStopTimestamp=2026-07-17T14:48:27.452-07:00` : état final `TERMINATED`. Aucune autre VM `project=e-hgp` active n'a été observée; la clé OS Login éphémère a été révoquée, vérifiée absente puis supprimée. Cette qualification ne ferme pas la phase 2B.
 
-## Travaux restant avant la porte de sortie
+## Qualification de fermeture du 17 au 18 juillet 2026
 
-- terminer puis vérifier l'agrégat de la campagne longue : corpus gelé de phase 2A et corpus indépendant de phase 2B, avec zéro contradiction et zéro `remaining_unknown`;
-- porter uniquement les expansions GPU dont le gain est mesuré et conserver les autres replis exacts sur CPU;
-- qualifier sur G4 la réutilisation du contexte résident, son empoisonnement fermé et son absence de fuite, puis séparer mesure froide et mesure chaude;
-- mesurer et publier les taux de chaque étage sans en faire une condition de correction;
-- vérifier que tout `unknown` GPU est transmis au CPU sur l'ensemble des prédicats portés.
+Le commit propre `39a011c92d67b6de9ba38d60dc884b926cc36c5f` a été qualifié avec le schéma de campagne `1.1.0`. La première session a rejoué le corpus gelé Phase 2A; la seconde a repris son archive qualifiée puis produit le corpus Phase 2B avec la graine indépendante `4257325f47505532`. Chaque certificat contient 10 800 000 cas de base et 1 080 000 signes métamorphiques. L'agrégat vérifié en lecture seule contient 23 760 000 signes, zéro `wrong_sign`, zéro `remaining_unknown` et deux racines de corpus distinctes.
 
-La porte de sortie 2B exigera zéro différence CPU/GPU sur le corpus de phase 2A et sur au moins dix millions de signes supplémentaires. Elle reste ouverte tant que la campagne longue n'a pas publié et vérifié ses deux certificats complets et leur agrégat.
+Chaque corpus compte 11 304 000 signes GPU FP64 certifiés et 576 000 `unknown` transmis puis décidés par le replay CPU multiprécision. Les quatre racines ordonnées de chaque campagne, les hashes de la configuration, du générateur, du runner, du replay CPU, du replay GPU et du commit propre sont conservés. Les certificats versionnés se trouvent sous `morsehgp3d/tests/campaigns/phase2b_predicates_v1/`; l'agrégat vaut `98b40b566cefc63b3edf37ce98e1b13749c4b6f76b3f6c332a77fdf7898cfbda`.
+
+Le harness résident G4 traite 1 984 entrées, 16 lots, deux contextes, trois lots vides et les trois prédicats; il reproduit exactement le chemin éphémère. Compute Sanitizer termine avec zéro erreur et zéro fuite. Les profils CUDA release et audit compilent avec NVCC 12.9.86 pour `sm_120`, sans spill rapporté. Les archives qualifiées Phase 2A et Phase 2B valent respectivement `8fab713397e0dd5fc8462529b6f0a008ffbffaa4b9d7bfc511c88ca02a13b270` et `702e64cc2194c6e01d1faf24696e6fdee87752c1787b9a18db969380b86dd905`.
+
+La dernière génération GCP `2026-07-17T16:47:58.724-07:00` a été arrêtée et relue `TERMINATED` avec `lastStopTimestamp=2026-07-17T17:18:25.306-07:00`. Aucune autre VM E-HGP active n'a été observée et la clé OS Login a été révoquée. Les deadlines de travail précèdent les bornes GCE sûres d'environ 15 minutes 27 secondes; elles relèvent de l'exception transactionnelle documentée, car chaque unité est bornée à 240 secondes, chaque chunk est checkpointé atomiquement et vérification, copie et nettoyage restent bornés. La correction et l'exploitation sont donc qualifiées; la porte reste ouverte uniquement jusqu'à la publication séparée de `warm_context_e2e`.
