@@ -7,9 +7,9 @@
 - profil : `hgp_reduced`;
 - mode : `certified`;
 - porte d'entrée : satisfaite par les Phases 1 et 4 fermées;
-- porte de sortie : non satisfaite; la représentation hiérarchique compacte et la voie EMST GPU scalable restent à livrer.
+- porte de sortie : non satisfaite; la voie EMST GPU scalable reste à livrer et à qualifier.
 
-Les trois premiers lots de Phase 5 livrent l'ancre EMST exacte, le catalogue exhaustif des paires, la réduction rang-deux du backend CPU et leur différentiel indépendant jusqu'à $n=14$. Ils ne ferment ni la Phase 5, ni la porte globale G2 du catalogue, et ne publient aucun `public_status=exact` pour une tour MorseHGP3D complète.
+Les quatre premiers lots de Phase 5 livrent l'ancre EMST exacte, le catalogue exhaustif des paires, la réduction rang-deux du backend CPU, leur différentiel indépendant jusqu'à $n=14$ et la forêt hiérarchique compacte construite depuis un EMST déjà certifié. Ils ne ferment ni la Phase 5, ni la porte globale G2 du catalogue, et ne publient aucun `public_status=exact` pour une tour MorseHGP3D complète.
 
 ## Ancre mathématique
 
@@ -36,7 +36,7 @@ En présence d'ex æquo, le choix déterministe des arêtes permet le rejeu et l
 
 ## API et audit
 
-La cible installable `morsehgp3d::hierarchy` expose `build_exact_complete_graph_emst`. Le résultat contient :
+La cible installable `morsehgp3d::hierarchy` expose `build_exact_complete_graph_emst` et `build_compact_k1_forest`. Le résultat de référence complet contient :
 
 - les arêtes complètes et les arêtes EMST avec longueur carrée et niveau HGP;
 - les feuilles et nœuds de multifusion de $T_1$;
@@ -46,7 +46,31 @@ La cible installable `morsehgp3d::hierarchy` expose `build_exact_complete_graph_
 - des compteurs de distances, lots, redondances, événements et arités;
 - le rejeu des coupes strictes ou fermées depuis le graphe complet ou l'EMST sélectionné.
 
-Le backend est volontairement quadratique : il matérialise le graphe euclidien complet et sert d'ancre exacte CPU. Cette portée est distincte de la future voie GPU destinée à plusieurs millions de points.
+L'ancre complète est volontairement quadratique : elle matérialise le graphe euclidien complet et sert de vérité terrain exacte CPU. Cette portée est distincte de l'adaptateur compact décrit ci-dessous et de la future voie GPU destinée à plusieurs millions de points.
+
+## Forêt hiérarchique compacte
+
+`K1CompactForest` reçoit les $n-1$ arêtes d'un EMST exact déjà certifié par un producteur géométrique. L'adaptateur brut vérifie le domaine des sommets, la positivité des longueurs, la relation exacte entre longueur carrée et niveau, l'absence de boucle, cycle ou doublon, puis la connexité. Il ne peut pas déduire des seules arêtes que leurs poids sont bien les distances du nuage ni que l'arbre est minimal; ces deux propriétés sont des préconditions explicites. L'overload depuis `K1EmstResult` est la voie ancrée actuelle.
+
+Les feuilles singleton gardent les identifiants de $0$ à $n-1$ mais deviennent implicites. Les données persistantes sont limitées à cinq arènes : niveaux exacts distincts portés par l'EMST, arêtes de l'arbre, nœuds internes, références d'enfants CSR et descripteurs de lots. Ces niveaux sont exactement ceux où la partition change; contrairement à l'ancre par graphe complet, l'arène compacte ne recopie pas les lots de longueurs devenus redondants. Elle reste néanmoins interrogeable à tout seuil exact. Un nœud interne conserve son indice de niveau, sa tranche CSR, son plus petit `PointId` et la taille de sa couverture; aucun vecteur de couverture n'est stocké. Les couvertures, nœuds riches et multifusions restent matérialisables à la demande pour l'oracle et le diagnostic, mais matérialiser tous les nœuds d'une chaîne produit volontairement une sortie en $\Theta(n^2)$ et ne fait pas partie de la voie scalable.
+
+La construction trie d'abord les arêtes par niveau exact puis extrémités, fige les composantes avant chaque lot, construit le quotient du lot entier et alloue un nœud par composante connexe de ce quotient. Elle prend $O(n\log n)$ avec une entrée d'ordre arbitraire et conserve $O(n)$ enregistrements persistants. Si les $m$ nœuds internes ont les arités $a_i\geq2$, l'identité d'un arbre enraciné donne :
+
+$$\sum_{i=1}^{m}(a_i-1)=n-1,\qquad m\leq n-1,\qquad \sum_{i=1}^{m}a_i=n+m-1\leq2n-2.$$
+
+Le nombre de niveaux et de lots est au plus $n-1$. En comptant un enregistrement par arête, niveau, nœud interne, référence d'enfant et lot, les cinq arènes satisfont donc :
+
+$$\lvert E_T\rvert+\lvert L\rvert+m+\sum_{i=1}^{m}a_i+\lvert B\rvert\leq6(n-1).$$
+
+Cette borne porte sur les enregistrements principaux : elle ne compte ni les métadonnées d'allocateur, ni le nombre de limbs des entiers multiprécision. Le compteur exécutable expose la borne $6(n-1)$, sa valeur réellement occupée et `stored_coverage_point_id_count=0`.
+
+Pour la canonisation, les enfants d'une multifusion sont des composantes non vides et deux à deux disjointes du même état pré-lot. Leurs minima sont donc distincts, et l'ordre lexicographique de leurs couvertures triées est exactement l'ordre de leur plus petit `PointId`. Un seul identifiant et une seule taille remplacent ainsi la copie de chaque couverture sans modifier l'ordre public des nœuds.
+
+Enfin, si $T$ est un EMST exact du graphe euclidien complet $G$, leurs partitions coïncident de chaque côté de tout seuil :
+
+$$\pi_0(T_{<\lambda})=\pi_0(G_{<\lambda}),\qquad \pi_0(T_{\leq\lambda})=\pi_0(G_{\leq\lambda}).$$
+
+En effet, si un chemin actif de $G$ reliait deux composantes encore séparées dans $T$, l'une de ses arêtes traverserait la coupe créée par une arête inactive du chemin de $T$. L'échange remplacerait cette dernière par une arête strictement plus légère, en contradiction avec la minimalité de $T$. Les deux partitions encadrant un lot déterminent son graphe quotient et ses multifusions; deux témoins EMST différents sous ex æquo produisent donc les mêmes nœuds, coupes et multifusions canoniques, même si leurs arêtes sélectionnées diffèrent.
 
 ## Catalogue rang-deux et décision Gabriel
 
@@ -78,6 +102,8 @@ La compilation GCC avec avertissements transformés en erreurs, le test ciblé, 
 
 Le second test strict couvre les trois décisions de paire, une perturbation d'un ULP de chaque côté d'un shell diamétral, deux multifusions disjointes dans le même lot, un tétraèdre régulier 3D dont les six arêtes rang-deux se contractent en une multifusion d'arité quatre, les diagonales extra-shell et les $24$ permutations d'un carré, les coupes strictes et fermées exactement au seuil, ainsi que la fixture non locale où chaque extrémité possède cinq observations plus proches que la paire Gabriel recherchée. Il ferme aussi tous les compteurs du catalogue et compare nœuds, poids et témoins à l'ancre EMST.
 
+Le test strict de la forêt compacte compare ses matérialisations à l'ancre complète sur le singleton, une chaîne de 32 points à niveaux tous distincts, deux fusions simultanées, une multifusion d'arité six et les $24$ permutations du carré. Il permute aussi l'ordre et l'orientation des arêtes d'entrée, ferme chaque compteur et la borne $6(n-1)$, puis rejette les arbres incomplets, cycliques ou munis de poids incohérents. Deux EMST distincts sous ex æquo sont enfin comparés sur un carré prolongé par une fusion ultérieure : les arêtes témoins diffèrent, mais l'induction par lots restitue exactement les mêmes nœuds, coupes, multifusions et poids. Les compilations GCC et Clang en avertissements stricts, le CTest ciblé Release et le même test instrumenté ASan/UBSan passent.
+
 ## Différentiel indépendant jusqu'à $n=14$
 
 `morsehgp3d_hierarchy_k1_dump` accepte des coordonnées binary64 brutes par un protocole versionné, canonise le nuage, construit l'ancre C++ et émet un objet JSON canonique par cas. Le document expose chaque paire avec centre, niveau, partition globale et classification, les graphes rang-deux et Gabriel, les deux arbres témoins, leurs poids, les nœuds canoniques jusqu'à la racine, les multifusions, le certificat et, pour chaque niveau exact, les coupes strictes puis fermées des cinq chemins de rejeu. Le validateur ne se contente donc pas de relire les booléens du certificat.
@@ -92,4 +118,4 @@ GCP n'a pas été utilisé pour ces lots CPU.
 
 ## Suite immédiate
 
-Le résultat CPU de référence n'est pas une représentation scalable : il conserve le graphe complet et chaque `K1HierarchyNode` recopie toute sa couverture en `PointId`, ce qui peut devenir quadratique sur une chaîne. Le lot suivant doit introduire une arène hiérarchique compacte à feuilles implicites, enfants CSR, niveaux factorisés et couvertures matérialisées seulement à la demande, puis prouver qu'elle rejoue les mêmes coupes et multifusions. Cette base recevra ensuite un Borůvka GPU sur le LBVH global; aucune promotion de phase ne précédera sa qualification scalable.
+Le producteur CPU de référence reste non scalable parce qu'il conserve le graphe complet. La représentation de sortie compacte est désormais livrée et certifiée contre cette ancre; elle attend encore un producteur scalable de ses $n-1$ arêtes exactes. Le lot suivant introduit un Borůvka GPU sur le LBVH global, avec décisions de rejet certifiées, repli exact de tout candidat indécis, contractions déterministes et certificat CPU du témoin obtenu. Aucune promotion de phase ne précédera sa qualification scalable.
