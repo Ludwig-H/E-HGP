@@ -20,6 +20,7 @@ FAKE_GCLOUD = r"""#!/usr/bin/env python3
 import json
 import os
 from pathlib import Path
+import re
 import signal
 import sys
 import time
@@ -416,6 +417,14 @@ elif args[:2] == ["compute", "ssh"]:
         "guest-success-no-termination-timestamp",
         "timestamp-lag",
     }:
+        if (
+            not command.startswith("sudo -n bash -c 'set -euo pipefail\n")
+            or "bash -s" in command
+            or "<<" in command
+            or not re.search(r"' -- '[1-9][0-9]*' '[0-9]+'$", command)
+        ):
+            print("unsafe guest guard SSH transport: " + command, file=sys.stderr)
+            sys.exit(98)
         print("MODE=poweroff\nUSEC=9999999999999999\n__EHGP_GUEST_GUARD_VERIFIED__")
     elif scenario.startswith("qualification-"):
         if "mktemp -d /tmp/morsehgp3d-phase3.XXXXXXXX" in command:
@@ -1178,6 +1187,21 @@ while True:
         self.assertIn("[DIAGNOSTIC GARDE INVITÉE] No scheduled shutdown", result.stdout)
         self.assertIn("compute instances start", self.commands())
         self.assertIn("compute instances stop", self.commands())
+
+    def test_guest_guard_uses_direct_bash_c_without_stdin_transport(self) -> None:
+        source = (ROOT / "gcp-migration" / "start_and_verify.sh").read_text(
+            encoding="utf-8"
+        )
+        start = source.index('guest_guard_script="$(printf')
+        end = source.index("while ((SECONDS < ssh_deadline))", start)
+        transport = source[start:end]
+
+        self.assertIn('guest_guard_command="sudo -n bash -c', transport)
+        self.assertIn('readonly requested_minutes="$1"', transport)
+        self.assertIn('readonly gce_deadline_epoch="$2"', transport)
+        self.assertNotIn("bash -s", transport)
+        self.assertNotIn("<<", transport)
+        self.assertNotIn("__EHGP_GUEST_GUARD__", transport)
 
     def test_start_rejects_unusable_session_keys_before_gce_mutation(self) -> None:
         original_key = self.env["GCP_SSH_KEY_FILE"]
