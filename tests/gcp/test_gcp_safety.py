@@ -418,9 +418,10 @@ elif args[:2] == ["compute", "ssh"]:
         "timestamp-lag",
     }:
         if (
-            not command.startswith("sudo -n bash -c 'set -euo pipefail\n")
+            not command.startswith("sudo -n bash -c 'set -euo pipefail; ")
             or "bash -s" in command
             or "<<" in command
+            or "\n" in command
             or not re.search(r"' -- '[1-9][0-9]*' '[0-9]+'$", command)
         ):
             print("unsafe guest guard SSH transport: " + command, file=sys.stderr)
@@ -1197,6 +1198,7 @@ while True:
         transport = source[start:end]
 
         self.assertIn('guest_guard_command="sudo -n bash -c', transport)
+        self.assertIn("printf '%s; '", transport)
         self.assertIn('readonly requested_minutes="$1"', transport)
         self.assertIn('readonly gce_deadline_epoch="$2"', transport)
         self.assertNotIn("bash -s", transport)

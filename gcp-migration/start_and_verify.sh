@@ -592,17 +592,14 @@ printf '[GARDE-FOU INVITÉ] Armement de shutdown -P +%s via SSH.\n' "${GUEST_SHU
 ssh_deadline=$((SECONDS + SSH_TIMEOUT_SECONDS))
 guest_guard_output=""
 publickey_denials=0
-guest_guard_script="$(printf '%s\n' \
+guest_guard_script="$(printf '%s; ' \
     'set -euo pipefail' \
-    '' \
     'readonly requested_minutes="$1"' \
     'readonly gce_deadline_epoch="$2"' \
     'readonly tolerance_seconds=120' \
     'readonly scheduled_file=/run/systemd/shutdown/scheduled' \
-    '' \
     '[[ "${requested_minutes}" =~ ^[1-9][0-9]*$ ]]' \
     '[[ "${gce_deadline_epoch}" =~ ^[0-9]+$ ]]' \
-    '' \
     'shutdown -c >/dev/null 2>&1 || true' \
     'shutdown -P "+${requested_minutes}" "Coupe-circuit E-HGP"' \
     '[[ -r "${scheduled_file}" ]]' \
@@ -610,17 +607,14 @@ guest_guard_script="$(printf '%s\n' \
     'scheduled_usec="$(sed -n "s/^USEC=\\([0-9][0-9]*\\)$/\\1/p" "${scheduled_file}")"' \
     '[[ "${mode}" == "poweroff" ]]' \
     '[[ "${scheduled_usec}" =~ ^[0-9]{1,18}$ ]]' \
-    '' \
     'now_epoch="$(date +%s)"' \
     'scheduled_epoch=$((10#${scheduled_usec} / 1000000))' \
     'expected_epoch=$((now_epoch + requested_minutes * 60))' \
     'minimum_expected=$((expected_epoch - tolerance_seconds))' \
     'maximum_expected=$((expected_epoch + tolerance_seconds))' \
-    '' \
     '((scheduled_epoch > now_epoch))' \
     '((scheduled_epoch >= minimum_expected && scheduled_epoch <= maximum_expected))' \
     '((scheduled_epoch <= gce_deadline_epoch))' \
-    '' \
     'printf "MODE=%s\nUSEC=%s\n" "${mode}" "${scheduled_usec}"' \
     'printf "__EHGP_GUEST_GUARD_VERIFIED__\n"' \
 )" || die "Impossible de construire la commande du coupe-circuit invité."
