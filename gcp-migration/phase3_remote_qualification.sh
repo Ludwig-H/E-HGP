@@ -5,6 +5,8 @@ readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 readonly PREFLIGHT_SCRIPT="${SCRIPT_DIR}/blackwell_preflight.sh"
 readonly DOCKERFILE_RELATIVE="containers/cuda12.9-sm120.Dockerfile"
 readonly ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase3_qualification.py"
+readonly PHASE4_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase4_spatial_qualification.py"
+readonly PHASE4_DIFFERENTIAL_RELATIVE="morsehgp3d/tests/differential/check_spatial_gpu_reference.py"
 readonly BASE_IMAGE_REF="nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
 readonly CONTAINER_REPOSITORY="/workspace/repository"
 readonly CONTAINER_BUILD="${CONTAINER_REPOSITORY}/build"
@@ -12,6 +14,9 @@ readonly CONTAINER_SOURCE="${CONTAINER_REPOSITORY}/morsehgp3d"
 readonly CONTAINER_RESULTS="/results"
 readonly RUNTIME_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_phase3_runtime"
 readonly RUNTIME_PATH="${CONTAINER_REPOSITORY}/${RUNTIME_RELATIVE}"
+readonly PHASE4_REPLAY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_spatial_reference_replay"
+readonly PHASE4_REPLAY_PATH="${CONTAINER_REPOSITORY}/${PHASE4_REPLAY_RELATIVE}"
+readonly PHASE4_DIFFERENTIAL_PATH="${CONTAINER_REPOSITORY}/${PHASE4_DIFFERENTIAL_RELATIVE}"
 readonly MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-release"
 readonly GUEST_GUARD_MIN_REMAINING_SECONDS=1800
 readonly GUEST_GUARD_MAX_REMAINING_SECONDS=2820
@@ -53,6 +58,10 @@ OUTPUT_RAW=""
 OUTPUT_PATH=""
 OUTPUT_PARENT=""
 OUTPUT_BASE=""
+PHASE4_OUTPUT_RAW=""
+PHASE4_OUTPUT_PATH=""
+PHASE4_OUTPUT_PARENT=""
+PHASE4_OUTPUT_BASE=""
 GCE_DEADLINE_RAW=""
 GCE_DEADLINE_EPOCH=0
 WORK_DEADLINE_EPOCH=0
@@ -60,6 +69,7 @@ GUEST_SHUTDOWN_EPOCH=0
 REPOSITORY_ROOT=""
 SESSION_DIR=""
 PUBLISH_TEMP=""
+PHASE4_PUBLISH_TEMP=""
 SESSION_CREATED=0
 DOCKER_IDENTITY=""
 BUILDX_CONFIG=""
@@ -135,11 +145,14 @@ certify_fixed_timeout() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json
+Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json]
 
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
-publie un unique objet JSON atomique hors du worktree après tous les contrôles.
+publie l'objet Phase 3 sans remplacement hors du worktree après les contrôles.
+L'option Phase 4 exécute en plus le replay spatial exhaustif et publie ensuite
+son compagnon provisoire, sans rollback d'un nom final. Aucun des deux
+artefacts ne certifie l'arrêt de la VM.
 EOF
 }
 
@@ -153,6 +166,13 @@ while (($# > 0)); do
             (($# >= 2)) || die "Valeur manquante après --output."
             [[ -z "${OUTPUT_RAW}" ]] || die "--output ne peut être fourni qu'une fois."
             OUTPUT_RAW="$2"
+            shift 2
+            ;;
+        --phase4-spatial-output)
+            (($# >= 2)) || die "Valeur manquante après --phase4-spatial-output."
+            [[ -z "${PHASE4_OUTPUT_RAW}" ]] || \
+                die "--phase4-spatial-output ne peut être fourni qu'une fois."
+            PHASE4_OUTPUT_RAW="$2"
             shift 2
             ;;
         --gce-deadline-epoch)
@@ -181,6 +201,14 @@ case "${OUTPUT_RAW}" in
     /*) ;;
     *) die "--output doit être un chemin absolu." ;;
 esac
+if [[ -n "${PHASE4_OUTPUT_RAW}" ]]; then
+    case "${PHASE4_OUTPUT_RAW}" in
+        /*) ;;
+        *) die "--phase4-spatial-output doit être un chemin absolu." ;;
+    esac
+    [[ "${PHASE4_OUTPUT_RAW}" != "${OUTPUT_RAW}" ]] || \
+        die "Les sorties Phase 3 et Phase 4 doivent être distinctes."
+fi
 certify_fixed_timeout || \
     die "La chaîne fixe /usr/bin/timeout n'est pas sûre, GNU ou compatible avec les groupes/--kill-after."
 certify_fixed_executable_chain \
@@ -219,6 +247,27 @@ case "${OUTPUT_PATH}/" in
 esac
 [[ ! -e "${OUTPUT_PATH}" && ! -L "${OUTPUT_PATH}" ]] || \
     die "La sortie doit être inexistante : ${OUTPUT_PATH}."
+if [[ -n "${PHASE4_OUTPUT_RAW}" ]]; then
+    PHASE4_OUTPUT_PARENT="$(dirname -- "${PHASE4_OUTPUT_RAW}")"
+    PHASE4_OUTPUT_BASE="$(basename -- "${PHASE4_OUTPUT_RAW}")"
+    [[ -n "${PHASE4_OUTPUT_BASE}" && "${PHASE4_OUTPUT_BASE}" != "." && \
+        "${PHASE4_OUTPUT_BASE}" != ".." ]] || die "Nom d'artefact Phase 4 invalide."
+    [[ -d "${PHASE4_OUTPUT_PARENT}" ]] || \
+        die "Le répertoire parent de --phase4-spatial-output doit déjà exister."
+    PHASE4_OUTPUT_PARENT="$(cd -- "${PHASE4_OUTPUT_PARENT}" && pwd -P)" || \
+        die "Parent de sortie Phase 4 illisible."
+    PHASE4_OUTPUT_PATH="${PHASE4_OUTPUT_PARENT}/${PHASE4_OUTPUT_BASE}"
+    [[ "${PHASE4_OUTPUT_PARENT}" == "${OUTPUT_PARENT}" ]] || \
+        die "Les artefacts Phase 3 et Phase 4 doivent partager le même parent sûr."
+    [[ "${PHASE4_OUTPUT_PATH}" != "${OUTPUT_PATH}" ]] || \
+        die "Les artefacts Phase 3 et Phase 4 doivent utiliser deux noms distincts."
+    case "${PHASE4_OUTPUT_PATH}/" in
+        "${REPOSITORY_ROOT}/"*) \
+            die "--phase4-spatial-output doit rester hors du worktree ${REPOSITORY_ROOT}." ;;
+    esac
+    [[ ! -e "${PHASE4_OUTPUT_PATH}" && ! -L "${PHASE4_OUTPUT_PATH}" ]] || \
+        die "La sortie Phase 4 doit être inexistante : ${PHASE4_OUTPUT_PATH}."
+fi
 
 worktree_status="$(git -C "${REPOSITORY_ROOT}" status --porcelain --untracked-files=normal)" || \
     die "Impossible de vérifier la propreté du clone Git."
@@ -232,12 +281,20 @@ verified_sha="$(git -C "${REPOSITORY_ROOT}" rev-parse --verify "${HEAD_SHA}^{com
 readonly DOCKERFILE="${REPOSITORY_ROOT}/${DOCKERFILE_RELATIVE}"
 readonly DOCKER_CONTEXT="${REPOSITORY_ROOT}/containers"
 readonly ASSEMBLER="${REPOSITORY_ROOT}/${ASSEMBLER_RELATIVE}"
+readonly PHASE4_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE4_ASSEMBLER_RELATIVE}"
+readonly PHASE4_DIFFERENTIAL="${REPOSITORY_ROOT}/${PHASE4_DIFFERENTIAL_RELATIVE}"
 [[ -f "${DOCKERFILE}" && ! -L "${DOCKERFILE}" ]] || \
     die "Dockerfile Phase 3 absent ou symbolique : ${DOCKERFILE}."
 [[ "$(sed -n '1p' "${DOCKERFILE}")" == "FROM ${BASE_IMAGE_REF}" ]] || \
     die "Le Dockerfile Phase 3 doit partir de l'image CUDA épinglée ${BASE_IMAGE_REF}."
 [[ -f "${ASSEMBLER}" && ! -L "${ASSEMBLER}" ]] || \
     die "Assembleur Phase 3 absent ou symbolique : ${ASSEMBLER}."
+if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
+    [[ -f "${PHASE4_ASSEMBLER}" && ! -L "${PHASE4_ASSEMBLER}" ]] || \
+        die "Assembleur Phase 4 absent ou symbolique : ${PHASE4_ASSEMBLER}."
+    [[ -f "${PHASE4_DIFFERENTIAL}" && ! -L "${PHASE4_DIFFERENTIAL}" ]] || \
+        die "Différentiel spatial Phase 4 absent ou symbolique : ${PHASE4_DIFFERENTIAL}."
+fi
 
 remove_container_from_cidfile() {
     local cidfile="$1"
@@ -386,6 +443,9 @@ cleanup() {
     if [[ -n "${PUBLISH_TEMP}" && -f "${PUBLISH_TEMP}" ]]; then
         rm -f -- "${PUBLISH_TEMP}" || true
     fi
+    if [[ -n "${PHASE4_PUBLISH_TEMP}" && -f "${PHASE4_PUBLISH_TEMP}" ]]; then
+        rm -f -- "${PHASE4_PUBLISH_TEMP}" || true
+    fi
     if [[ -n "${SESSION_DIR}" && -n "${BUILDX_CONFIG}" && \
         "${BUILDX_CONFIG}" == "${SESSION_DIR}/buildx-config" && \
         -e "${BUILDX_CONFIG}" ]]; then
@@ -442,8 +502,14 @@ mkdir -p -- "${SESSION_DIR}/build" "${SESSION_DIR}/logs" "${SESSION_DIR}/results
 chmod 700 "${SESSION_DIR}/container-cids" "${BUILDX_CONFIG}"
 export BUILDX_CONFIG
 PUBLISH_TEMP="$(mktemp "${OUTPUT_PARENT}/.${OUTPUT_BASE}.XXXXXXXX.partial")" || \
-    die "Impossible de réserver l'artefact temporaire atomique."
+    die "Impossible de réserver l'artefact temporaire."
 chmod 600 "${PUBLISH_TEMP}"
+if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
+    PHASE4_PUBLISH_TEMP="$(mktemp \
+        "${PHASE4_OUTPUT_PARENT}/.${PHASE4_OUTPUT_BASE}.XXXXXXXX.partial")" || \
+        die "Impossible de réserver l'artefact Phase 4 temporaire."
+    chmod 600 "${PHASE4_PUBLISH_TEMP}"
+fi
 
 readonly BUILD_DIR="${SESSION_DIR}/build"
 readonly LOG_DIR="${SESSION_DIR}/logs"
@@ -465,6 +531,13 @@ readonly SANITIZER_LOG="${LOG_DIR}/compute-sanitizer.log"
 readonly RUNTIME_JSONL="${RESULT_DIR}/runtime.jsonl"
 readonly SANITIZER_JSONL="${RESULT_DIR}/sanitizer-runtime.jsonl"
 readonly IID_FILE="${SESSION_DIR}/docker-image.iid"
+readonly PHASE4_DIFFERENTIAL_LOG="${LOG_DIR}/phase4-spatial-differential.log"
+readonly PHASE4_ELF_LOG="${LOG_DIR}/phase4-spatial-cuobjdump-elf.log"
+readonly PHASE4_PTX_LOG="${LOG_DIR}/phase4-spatial-cuobjdump-ptx.log"
+readonly PHASE4_PTX_STDERR_LOG="${LOG_DIR}/phase4-spatial-cuobjdump-ptx.stderr.log"
+readonly PHASE4_SANITIZER_LOG="${LOG_DIR}/phase4-spatial-compute-sanitizer.log"
+readonly PHASE4_DIFFERENTIAL_SUMMARY="${RESULT_DIR}/phase4-spatial-differential.json"
+readonly PHASE4_QUICK_SUMMARY="${RESULT_DIR}/phase4-spatial-quick.json"
 
 mkdir -p -- "${BUILD_DIR}/.phase3-home"
 
@@ -1173,6 +1246,64 @@ if ! run_container "compute-sanitizer" "${SANITIZER_LOG}" compute-sanitizer \
     die "compute-sanitizer a détecté une erreur ou a échoué; voir ${SANITIZER_LOG}."
 fi
 
+if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
+    begin_unit "phase4-spatial-differential"
+    if ! run_container "phase4-spatial-differential" \
+        "${PHASE4_DIFFERENTIAL_LOG}" /usr/bin/python3 -B \
+        "${PHASE4_DIFFERENTIAL_PATH}" "${PHASE4_REPLAY_PATH}" \
+        --timeout 300 \
+        --summary-json "${CONTAINER_RESULTS}/phase4-spatial-differential.json"; then
+        report_failure_log "phase4-spatial-differential" "${PHASE4_DIFFERENTIAL_LOG}"
+        die "Le différentiel spatial Phase 4 a échoué; voir ${PHASE4_DIFFERENTIAL_LOG}."
+    fi
+
+    begin_unit "phase4-spatial-cuobjdump-elf"
+    if ! run_container "phase4-spatial-cuobjdump-elf" "${PHASE4_ELF_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lelf "${PHASE4_REPLAY_PATH}"; then
+        report_failure_log "phase4-spatial-cuobjdump-elf" "${PHASE4_ELF_LOG}"
+        die "cuobjdump n'a pas pu lister les ELF du replay spatial Phase 4."
+    fi
+    phase4_architectures="$(grep -Eo 'sm_[0-9]+' "${PHASE4_ELF_LOG}" | sort -u || true)"
+    if [[ "${phase4_architectures}" != "sm_120" ]]; then
+        report_failure_log "phase4-spatial-cuobjdump-elf" "${PHASE4_ELF_LOG}"
+        die "Le replay spatial doit contenir au moins un ELF et uniquement sm_120; observé : ${phase4_architectures:-aucun}."
+    fi
+
+    begin_unit "phase4-spatial-cuobjdump-ptx"
+    if ! run_container_split_output "phase4-spatial-cuobjdump-ptx" \
+        "${PHASE4_PTX_LOG}" "${PHASE4_PTX_STDERR_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lptx "${PHASE4_REPLAY_PATH}"; then
+        report_failure_log "phase4-spatial-cuobjdump-ptx-stderr" \
+            "${PHASE4_PTX_STDERR_LOG}"
+        die "cuobjdump n'a pas pu auditer le PTX du replay spatial Phase 4."
+    fi
+    if grep -q '[^[:space:]]' "${PHASE4_PTX_LOG}"; then
+        report_failure_log "phase4-spatial-cuobjdump-ptx" "${PHASE4_PTX_LOG}"
+        die "Une entrée PTX a été détectée dans le replay spatial Phase 4."
+    fi
+
+    begin_unit "phase4-spatial-compute-sanitizer"
+    if ! run_container "phase4-spatial-compute-sanitizer" \
+        "${PHASE4_SANITIZER_LOG}" /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool memcheck \
+        --leak-check full \
+        --error-exitcode=86 \
+        /usr/bin/python3 -B \
+        "${PHASE4_DIFFERENTIAL_PATH}" "${PHASE4_REPLAY_PATH}" \
+        --quick \
+        --timeout 300 \
+        --summary-json "${CONTAINER_RESULTS}/phase4-spatial-quick.json"; then
+        report_failure_log "phase4-spatial-compute-sanitizer" \
+            "${PHASE4_SANITIZER_LOG}"
+        die "Le memcheck borné du replay spatial Phase 4 a échoué."
+    fi
+    [[ -s "${PHASE4_DIFFERENTIAL_SUMMARY}" ]] || \
+        die "Le différentiel spatial complet n'a pas produit son résumé JSON."
+    [[ -s "${PHASE4_QUICK_SUMMARY}" ]] || \
+        die "Le memcheck spatial borné n'a pas produit son résumé JSON."
+fi
+
 [[ -s "${RUNTIME_JSONL}" ]] || die "Le runtime n'a pas produit son JSONL."
 [[ -s "${SANITIZER_JSONL}" ]] || die "Le passage memcheck n'a pas produit son JSONL."
 
@@ -1195,30 +1326,71 @@ python3 -B "${ASSEMBLER}" \
     --sanitizer-log "${SANITIZER_LOG}" \
     --output "${PUBLISH_TEMP}"
 
-python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" <<'PY'
+if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
+    python3 -B "${PHASE4_ASSEMBLER}" \
+        --git-sha "${HEAD_SHA}" \
+        --base-image-ref "${BASE_IMAGE_REF}" \
+        --image-ref "${IMAGE_REF}" \
+        --image-id "${IMAGE_ID}" \
+        --environment-artifact "${PUBLISH_TEMP}" \
+        --differential-summary "${PHASE4_DIFFERENTIAL_SUMMARY}" \
+        --quick-summary "${PHASE4_QUICK_SUMMARY}" \
+        --differential-log "${PHASE4_DIFFERENTIAL_LOG}" \
+        --elf-log "${PHASE4_ELF_LOG}" \
+        --ptx-log "${PHASE4_PTX_LOG}" \
+        --ptx-stderr-log "${PHASE4_PTX_STDERR_LOG}" \
+        --sanitizer-log "${PHASE4_SANITIZER_LOG}" \
+        --replay "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_spatial_reference_replay" \
+        --checker "${PHASE4_DIFFERENTIAL}" \
+        --output "${PHASE4_PUBLISH_TEMP}"
+fi
+
+python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
+    "${PHASE4_PUBLISH_TEMP}" "${PHASE4_OUTPUT_PATH}" <<'PY'
 import json
 import os
 from pathlib import Path
 import sys
 
-temporary = Path(sys.argv[1])
-target = Path(sys.argv[2])
-with temporary.open(encoding="utf-8") as stream:
-    value = json.load(stream)
-if not isinstance(value, dict) or value.get("status") != "worker_passed_pending_shutdown":
-    raise SystemExit("the Phase 3 worker artifact is not pending targeted shutdown")
-try:
-    os.link(temporary, target, follow_symlinks=False)
-except FileExistsError:
-    raise SystemExit(f"refusing to replace an existing artifact: {target}")
-os.unlink(temporary)
-directory_fd = os.open(target.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
-try:
-    os.fsync(directory_fd)
-finally:
-    os.close(directory_fd)
-PY
-PUBLISH_TEMP=""
+pairs = [(Path(sys.argv[1]), Path(sys.argv[2]), "Phase 3")]
+if sys.argv[3] or sys.argv[4]:
+    if not sys.argv[3] or not sys.argv[4]:
+        raise SystemExit("incomplete Phase 4 publication pair")
+    pairs.append((Path(sys.argv[3]), Path(sys.argv[4]), "Phase 4"))
+for temporary, _, label in pairs:
+    with temporary.open(encoding="utf-8") as stream:
+        value = json.load(stream)
+    if not isinstance(value, dict) or value.get("status") != "worker_passed_pending_shutdown":
+        raise SystemExit(f"the {label} worker artifact is not pending targeted shutdown")
 
-printf '[SUCCÈS WORKER] Artefact provisoire publié atomiquement : %s\n' "${OUTPUT_PATH}"
+published = []
+try:
+    for temporary, target, _ in pairs:
+        os.link(temporary, target, follow_symlinks=False)
+        published.append(str(target))
+    for parent in {target.parent for _, target, _ in pairs}:
+        directory_fd = os.open(parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+except OSError as error:
+    published_label = ",".join(published) if published else "none"
+    raise SystemExit(
+        f"worker artifact publication failed: {error}; published={published_label}"
+    )
+PY
+rm -f -- "${PUBLISH_TEMP}"
+if [[ -n "${PHASE4_PUBLISH_TEMP}" ]]; then
+    rm -f -- "${PHASE4_PUBLISH_TEMP}"
+fi
+PUBLISH_TEMP=""
+PHASE4_PUBLISH_TEMP=""
+
+printf '[SUCCÈS WORKER] Artefact Phase 3 provisoire publié sans remplacement : %s\n' \
+    "${OUTPUT_PATH}"
+if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
+    printf '[SUCCÈS WORKER] Compagnon Phase 4 provisoire publié sans remplacement : %s\n' \
+        "${PHASE4_OUTPUT_PATH}"
+fi
 printf '[CYCLE DE VIE] Le worker invité ne ferme pas la VM; l’orchestrateur externe doit certifier TERMINATED.\n'

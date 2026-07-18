@@ -260,6 +260,21 @@ Après autorisation explicite, le point d'entrée Phase 3 réalise une seule ses
   --result-dir /tmp/morsehgp3d-phase3-qualification
 ```
 
+Le même worker gardé peut qualifier en plus la référence CUDA exhaustive de la
+Phase 4, sans lui attribuer de statut scientifique public :
+
+```bash
+./gcp-migration/run_phase3_qualification.sh \
+  --yes \
+  --phase4-spatial-reference \
+  --result-dir /tmp/morsehgp3d-phase3-qualification
+```
+
+Cette option ajoute le différentiel exact complet, un passage borné sous
+`compute-sanitizer` et l'audit AOT du replay spatial. Les deux artefacts restent
+provisoires jusqu'à la certification `TERMINATED` de la même cible et sont alors
+publiés ensemble sous `phase3-<SHA>.json` et `phase4-spatial-<SHA>.json`.
+
 Pour la cible de capacité explicitement autorisée :
 
 ```bash
@@ -298,7 +313,8 @@ Pour cette qualification courte, l'orchestrateur exige après les deux gardes
 `maxRunDuration=3600` secondes exactement et la même génération. Il transmet au
 worker une échéance GCE sûre, placée 300 secondes avant l'échéance nominale. Le
 worker en retranche encore 1 800 secondes. Le preflight, la construction et
-chacune des sept unités CUDA ou d'audit sont exécutés sous le binaire fixe
+chacune des sept unités CUDA ou d'audit de base, ainsi que les unités Phase 4
+optionnelles, sont exécutés sous le binaire fixe
 `/usr/bin/timeout`, dans un groupe de processus distinct. Les chemins fixes de
 `timeout`, `date` et `sleep`, ainsi que tous leurs parents, sont certifiés root
 et non inscriptibles par le groupe ou les autres avant le premier calcul de
@@ -370,7 +386,7 @@ suivent le paquet `docker.io` pris en charge par
 et la configuration Docker prescrite par
 [NVIDIA](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/1.17.8/install-guide.html).
 
-L'artefact distant demeure provisoire avec `status=worker_passed_pending_shutdown`. L'orchestrateur le valide localement, arrête la cible, relit indépendamment l'état exact `TERMINATED`, ajoute cette preuve à `vm_lifecycle`, convertit le statut en `passed`, puis publie l'artefact final atomiquement et sans remplacement par lien dur. Un échec ou une relecture illisible de l'arrêt ne laisse aucun artefact final, mais conserve le handoff ciblé local et bloque une nouvelle session sur le même SHA jusqu'à résolution. La priorité donnée à l'arrêt signifie que le clone temporaire distant peut rester dans `/tmp` sur le disque de la VM arrêtée.
+L'artefact distant demeure provisoire avec `status=worker_passed_pending_shutdown`. L'orchestrateur le valide localement, arrête la cible, relit indépendamment l'état exact `TERMINATED`, ajoute cette preuve à `vm_lifecycle`, convertit le statut en `passed`, puis publie l'artefact final sans remplacement par lien dur. Un run Phase 3 seul effectue une publication atomique de fichier unique. Avec `--phase4-spatial-reference`, les deux noms ne sont pas présentés comme une transaction atomique impossible : Phase 3, artefact autonome, est liée en premier, puis le compagnon Phase 4. Chaque lien est atomique et sans remplacement. Si le second échoue, le premier artefact valide est conservé et le diagnostic énumère précisément les noms publiés; aucun rollback ne supprime un nom final susceptible d'avoir été remplacé concurremment. Un échec ou une relecture illisible de l'arrêt ne publie aucun artefact final, mais conserve le handoff ciblé local et bloque une nouvelle session sur le même SHA jusqu'à résolution. La priorité donnée à l'arrêt signifie que le clone temporaire distant peut rester dans `/tmp` sur le disque de la VM arrêtée.
 
 ## Cas Blackwell : « requires use of the NVIDIA open kernel modules »
 

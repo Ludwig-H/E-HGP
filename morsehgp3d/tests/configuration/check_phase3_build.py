@@ -28,6 +28,8 @@ CUDA_TARGETS = [
     "morsehgp3d_phase3",
     "morsehgp3d_gpu_predicate_replay",
     "morsehgp3d_gpu_predicate_context_harness",
+    "morsehgp3d_gpu_spatial_reference",
+    "morsehgp3d_gpu_spatial_reference_replay",
 ]
 CUDA_BUILD_JOBS = 8
 
@@ -526,6 +528,8 @@ def validate_sources(project: Path, repository: Path) -> None:
         "morsehgp3d_spatial_lbvh_query_dump",
         "morsehgp3d_predicate_filter_context_tests",
         "morsehgp3d_warm_context_benchmark_host_test",
+        "morsehgp3d_gpu_spatial_reference_context_tests",
+        "morsehgp3d_gpu_spatial_reference_replay_host",
     }
     sanitizer_block_match = re.search(
         r"set\(\s*_morsehgp3d_cpu_test_targets(?P<targets>.*?)\)\s*foreach",

@@ -1,0 +1,40 @@
+{
+  "claim_refuted": "a binary64 proposal preserves exact squared-distance ties",
+  "expected_exact_cutoff": {
+    "denominator": "81129638414606681695789005144064",
+    "numerator": "1"
+  },
+  "expected_exact_shell_ids": [
+    0,
+    1
+  ],
+  "points_binary64": [
+    [
+      "3ff0000000000000",
+      "0000000000000000",
+      "0000000000000000"
+    ],
+    [
+      "3ff0000000000001",
+      "0000000000000000",
+      "0000000000000000"
+    ]
+  ],
+  "projected_query_binary64": [
+    "3ff0000000000000",
+    "0000000000000000",
+    "0000000000000000"
+  ],
+  "proposal_squared_distance_binary64": [
+    "0000000000000000",
+    "3970000000000000"
+  ],
+  "query": {
+    "denominator": "9007199254740992",
+    "x_numerator": "9007199254740993",
+    "y_numerator": "0",
+    "z_numerator": "0"
+  },
+  "requested_rank": 1,
+  "schema": "morsehgp3d.spatial.gpu_fp64_tie_split.v1"
+}

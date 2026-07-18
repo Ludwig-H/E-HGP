@@ -8,6 +8,10 @@
 #include <span>
 #include <vector>
 
+namespace morsehgp3d::gpu {
+class SpatialReferenceContext;
+}
+
 namespace morsehgp3d::spatial {
 
 using PointId = std::uint64_t;
@@ -53,6 +57,7 @@ class CanonicalPointCloud {
   friend class MortonLbvhIndex;
   friend class TopKPartition;
   friend class ClosedBallPartition;
+  friend class gpu::SpatialReferenceContext;
 };
 
 }  // namespace morsehgp3d::spatial

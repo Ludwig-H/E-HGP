@@ -33,12 +33,15 @@ INSTANCE_NAME="${GCP_INSTANCE_NAME:-${DEFAULT_INSTANCE_NAME}}"
 RESULT_DIR="${MORSEHGP3D_PHASE3_RESULT_DIR:-${TMPDIR:-/tmp}/morsehgp3d-phase3-results}"
 ASSUME_YES=0
 PROVISION_DOCKER=0
+PHASE4_SPATIAL_REFERENCE=0
 
 SESSION_CERTIFIED=0
 TARGET_STOP_CERTIFIED=0
 REMOTE_WORKDIR=""
 LOCAL_TEMP_RESULT=""
 LOCAL_RESULT=""
+LOCAL_PHASE4_TEMP_RESULT=""
+LOCAL_PHASE4_RESULT=""
 START_HANDOFF=""
 SESSION_LAST_START_TIMESTAMP=""
 SESSION_HANDOFF_STATUS=""
@@ -60,7 +63,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -75,6 +78,10 @@ Il génère hors du dépôt une clé ED25519 de session non chiffrée, l'inscrit
 OS Login pour 70 minutes seulement, transmet explicitement à SSH/SCP la clé et
 son expiration UTC fixe, puis la révoque et supprime la copie locale après la
 certification TERMINATED de la génération ciblée.
+
+--phase4-spatial-reference ajoute dans la même session gardée la qualification
+du replay spatial Phase 4. Son artefact compagnon reste provisoire jusqu'à la
+même certification ciblée TERMINATED et ne publie aucun statut scientifique.
 
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
@@ -92,6 +99,10 @@ while (($# > 0)); do
             ;;
         --provision-docker)
             PROVISION_DOCKER=1
+            shift
+            ;;
+        --phase4-spatial-reference)
+            PHASE4_SPATIAL_REFERENCE=1
             shift
             ;;
         --result-dir)
@@ -199,13 +210,26 @@ esac
 mkdir -p -- "${RESULT_DIR}" || die "Impossible de créer le répertoire de résultat ${RESULT_DIR}."
 RESULT_DIR="$(cd -- "${RESULT_DIR}" && pwd -P)" || die "Répertoire de résultat illisible."
 LOCAL_RESULT="${RESULT_DIR}/phase3-${HEAD_SHA}.json"
-[[ ! -e "${LOCAL_RESULT}" ]] || \
+[[ ! -e "${LOCAL_RESULT}" && ! -L "${LOCAL_RESULT}" ]] || \
     die "L'artefact ${LOCAL_RESULT} existe déjà; utilisez un répertoire de résultat distinct."
 START_HANDOFF="${RESULT_DIR}/phase3-${HEAD_SHA}.start-handoff.json"
 [[ ! -e "${START_HANDOFF}" && ! -L "${START_HANDOFF}" ]] || \
     die "Le témoin de handoff existe déjà : ${START_HANDOFF}; résolvez d'abord cette session ciblée."
+if ((PHASE4_SPATIAL_REFERENCE == 1)); then
+    LOCAL_PHASE4_RESULT="${RESULT_DIR}/phase4-spatial-${HEAD_SHA}.json"
+    [[ ! -e "${LOCAL_PHASE4_RESULT}" && ! -L "${LOCAL_PHASE4_RESULT}" ]] || \
+        die "L'artefact ${LOCAL_PHASE4_RESULT} existe déjà; utilisez un répertoire distinct."
+fi
 LOCAL_TEMP_RESULT="$(mktemp "${RESULT_DIR}/.phase3-${HEAD_SHA}.XXXXXXXX.partial")" || \
     die "Impossible de créer l'artefact temporaire local."
+if ((PHASE4_SPATIAL_REFERENCE == 1)); then
+    if ! LOCAL_PHASE4_TEMP_RESULT="$(mktemp \
+        "${RESULT_DIR}/.phase4-spatial-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        rm -f -- "${LOCAL_TEMP_RESULT}"
+        LOCAL_TEMP_RESULT=""
+        die "Impossible de créer l'artefact Phase 4 temporaire local."
+    fi
+fi
 
 shell_quote() {
     printf '%q' "$1"
@@ -664,6 +688,16 @@ certify_target_stopped() {
     return 0
 }
 
+cleanup_local_publication() {
+    if [[ -n "${LOCAL_TEMP_RESULT}" && -e "${LOCAL_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_TEMP_RESULT}" || true
+    fi
+    if [[ -n "${LOCAL_PHASE4_TEMP_RESULT}" && \
+        -e "${LOCAL_PHASE4_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_PHASE4_TEMP_RESULT}" || true
+    fi
+}
+
 on_exit() {
     local original_status=$?
     local cleanup_status=0
@@ -682,9 +716,7 @@ on_exit() {
             stop_status=$?
         fi
         if ((stop_status != 0)); then
-            if [[ -n "${LOCAL_TEMP_RESULT}" && -e "${LOCAL_TEMP_RESULT}" ]]; then
-                rm -f -- "${LOCAL_TEMP_RESULT}" || true
-            fi
+            cleanup_local_publication
             if [[ -n "${START_HANDOFF}" && -e "${START_HANDOFF}" ]]; then
                 printf '[HANDOFF CONSERVÉ] Arrêt non certifié; preuve ciblée à conserver jusqu’à résolution : %s\n' \
                     "${START_HANDOFF}" >&2
@@ -693,9 +725,7 @@ on_exit() {
             exit "${stop_status}"
         fi
     fi
-    if [[ -n "${LOCAL_TEMP_RESULT}" && -e "${LOCAL_TEMP_RESULT}" ]]; then
-        rm -f -- "${LOCAL_TEMP_RESULT}" || true
-    fi
+    cleanup_local_publication
     if [[ -n "${START_HANDOFF}" && -e "${START_HANDOFF}" ]]; then
         if ((TARGET_STOP_CERTIFIED == 1)); then
             rm -f -- "${START_HANDOFF}" || true
@@ -744,6 +774,7 @@ printf '%s\n' \
     "  SHA             : ${HEAD_SHA}" \
     "  arrêt invité    : ${GUEST_SHUTDOWN_MINUTES} min" \
     "  Docker hôte     : $([[ ${PROVISION_DOCKER} == 1 ]] && printf 'provisioning Ubuntu autorisé' || printf 'aucune mutation')" \
+    "  replay Phase 4  : $([[ ${PHASE4_SPATIAL_REFERENCE} == 1 ]] && printf 'qualification compagnon activée' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -766,10 +797,18 @@ REMOTE_WORKDIR="$(printf '%s\n' "${mktemp_output}" | sed -n 's/^__EHGP_REMOTE_DI
 
 remote_repository="${REMOTE_WORKDIR}/repository"
 remote_artifact="${REMOTE_WORKDIR}/phase3-result.json"
+remote_phase4_artifact=""
 quoted_origin="$(shell_quote "${ORIGIN_URL}")"
 quoted_repository="$(shell_quote "${remote_repository}")"
 quoted_head="$(shell_quote "${HEAD_SHA}")"
 quoted_artifact="$(shell_quote "${remote_artifact}")"
+quoted_phase4_artifact=""
+phase4_worker_option=""
+if ((PHASE4_SPATIAL_REFERENCE == 1)); then
+    remote_phase4_artifact="${REMOTE_WORKDIR}/phase4-spatial-result.json"
+    quoted_phase4_artifact="$(shell_quote "${remote_phase4_artifact}")"
+    phase4_worker_option=" --phase4-spatial-output ${quoted_phase4_artifact}"
+fi
 quoted_gce_deadline="$(shell_quote "${EFFECTIVE_GCE_DEADLINE_EPOCH}")"
 
 clone_output="$(remote_exec \
@@ -786,7 +825,7 @@ if ((PROVISION_DOCKER == 1)); then
 fi
 
 remote_exec \
-    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}"
+    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}"
 
 timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
@@ -799,6 +838,20 @@ timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
     --scp-flag='-o ConnectTimeout=15' \
     --scp-flag='-o BatchMode=yes'
+
+if ((PHASE4_SPATIAL_REFERENCE == 1)); then
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${INSTANCE_NAME}:${remote_phase4_artifact}" \
+        "${LOCAL_PHASE4_TEMP_RESULT}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+fi
 
 [[ -s "${LOCAL_TEMP_RESULT}" ]] || die "Artefact distant récupéré mais vide."
 python3 - "${LOCAL_TEMP_RESULT}" "${HEAD_SHA}" <<'PY'
@@ -835,6 +888,11 @@ if git != {"clean": True, "sha": sys.argv[2]}:
 image = value.get("image")
 if not isinstance(image, dict):
     raise SystemExit("identité d'image absente de l'artefact distant")
+if image.get("base_ref") != (
+    "nvidia/cuda:12.9.2-devel-ubuntu24.04@"
+    "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
+):
+    raise SystemExit("image CUDA de base distante incohérente")
 if image.get("ref") != f"morsehgp3d-phase3:{sys.argv[2]}":
     raise SystemExit("tag d'image distant incohérent")
 if re.fullmatch(r"sha256:[0-9a-f]{64}", str(image.get("id"))) is None:
@@ -843,6 +901,163 @@ lifecycle = value.get("vm_lifecycle")
 if not isinstance(lifecycle, dict) or lifecycle.get("worker_mutates_gcp") is not False:
     raise SystemExit("contrat de cycle de vie du worker absent")
 PY
+
+if ((PHASE4_SPATIAL_REFERENCE == 1)); then
+    [[ -s "${LOCAL_PHASE4_TEMP_RESULT}" ]] || \
+        die "Artefact Phase 4 distant récupéré mais vide."
+    python3 - "${LOCAL_PHASE4_TEMP_RESULT}" "${HEAD_SHA}" \
+        "${LOCAL_TEMP_RESULT}" <<'PY'
+import json
+from pathlib import Path
+import re
+import sys
+
+path = Path(sys.argv[1])
+with path.open(encoding="utf-8") as stream:
+    value = json.load(stream)
+with Path(sys.argv[3]).open(encoding="utf-8") as stream:
+    phase3 = json.load(stream)
+if not isinstance(value, dict) or value.get("schema") != (
+    "morsehgp3d.phase4.spatial_gpu_reference_qualification.v1"
+):
+    raise SystemExit("l'artefact spatial Phase 4 possède un schéma invalide")
+for key, expected in {
+    "backend": "cuda_g4",
+    "mode": "certified",
+    "phase": "4",
+    "profile": "hgp_reduced",
+    "scientific_scope": (
+        "non_certifying_fp64_proposals_with_cpu_exact_all_points_recertification"
+    ),
+    "status": "worker_passed_pending_shutdown",
+}.items():
+    if value.get(key) != expected:
+        raise SystemExit(f"champ Phase 4 distant invalide: {key}")
+if "public_status" in value:
+    raise SystemExit("la qualification spatiale ne doit pas publier public_status")
+if value.get("scientific_result_claimed") is not False:
+    raise SystemExit("la qualification spatiale revendique à tort un résultat scientifique")
+if value.get("scientific_public_status") is not None:
+    raise SystemExit("la qualification spatiale expose un statut public scientifique")
+if value.get("git") != {"clean": True, "sha": sys.argv[2]}:
+    raise SystemExit("l'artefact spatial ne correspond pas au SHA propre qualifié")
+image = value.get("image")
+phase3_image = phase3.get("image")
+if not isinstance(image, dict) or not isinstance(phase3_image, dict):
+    raise SystemExit("identité d'image spatiale absente")
+if image != {
+    field: phase3_image.get(field) for field in ("base_ref", "id", "ref")
+}:
+    raise SystemExit("identité d'image spatiale incohérente")
+if re.fullmatch(r"sha256:[0-9a-f]{64}", str(image.get("id"))) is None:
+    raise SystemExit("digest d'image spatial non canonique")
+binary = value.get("binary")
+if not isinstance(binary, dict) or any(
+    re.fullmatch(r"[0-9a-f]{64}", str(binary.get(field))) is None
+    for field in ("checker_sha256", "replay_sha256")
+):
+    raise SystemExit("empreintes binaires spatiales absentes ou invalides")
+checks = value.get("checks")
+expected_check_keys = {
+    "aot_elf_architectures",
+    "aot_ptx_entry_count",
+    "compute_sanitizer",
+    "cpu_exact_recertification_complete",
+    "cuda_audit_workflow",
+    "cuda_release_workflow",
+    "differential",
+    "quick_memcheck_differential",
+}
+if not isinstance(checks, dict) or set(checks) != expected_check_keys:
+    raise SystemExit("contrôles spatiaux absents")
+for field, expected in {
+    "aot_elf_architectures": ["sm_120"],
+    "aot_ptx_entry_count": 0,
+    "compute_sanitizer": "passed",
+    "cpu_exact_recertification_complete": True,
+    "cuda_audit_workflow": "passed",
+    "cuda_release_workflow": "passed",
+}.items():
+    if checks.get(field) != expected:
+        raise SystemExit(f"contrôle spatial {field} invalide")
+required_summary_keys = {
+    "all_cases_passed",
+    "campaign_complete",
+    "campaign_sizes_checked",
+    "case_count",
+    "closed_ball_query_count",
+    "cpu_exact_recertification_complete",
+    "decision_semantics",
+    "gpu_launch_count",
+    "ieee_coverage",
+    "projection_coverage",
+    "proposal_semantics",
+    "schema",
+    "scope",
+    "scientific_public_status",
+    "scientific_result_claimed",
+    "top_k_query_count",
+}
+for field, scope, sizes, count in (
+    ("differential", "full", list(range(1, 1001)), 1013),
+    ("quick_memcheck_differential", "quick", [1, 2, 3, 4, 17, 257, 1000], 20),
+):
+    summary = checks.get(field)
+    if not isinstance(summary, dict) or set(summary) != required_summary_keys:
+        raise SystemExit(f"résumé spatial {field} absent ou mal typé")
+    expected_summary = {
+        "all_cases_passed": True,
+        "campaign_complete": scope == "full",
+        "campaign_sizes_checked": sizes,
+        "case_count": count,
+        "closed_ball_query_count": count,
+        "cpu_exact_recertification_complete": True,
+        "decision_semantics": "cpu_exact_all_points",
+        "gpu_launch_count": 2 * count,
+        "ieee_coverage": [
+            "addition_only_overflow",
+            "finite_subnormal_distance",
+            "max_finite_query",
+            "normal_subnormal_tie",
+            "overflow_clamped_query",
+            "subnormal_tie",
+        ],
+        "projection_coverage": [
+            "exact",
+            "overflow_clamped",
+            "rounded",
+            "underflow",
+        ],
+        "proposal_semantics": "non_certifying_fp64",
+        "schema": "morsehgp3d.phase4.spatial_gpu_differential.v1",
+        "scope": scope,
+        "scientific_public_status": None,
+        "scientific_result_claimed": False,
+        "top_k_query_count": count,
+    }
+    if summary != expected_summary:
+        raise SystemExit(f"résumé spatial {field} incomplet")
+environment = value.get("environment")
+if not isinstance(environment, dict) or environment.get("compute_capability") != "12.0":
+    raise SystemExit("environnement spatial absent ou incompatible")
+logs = value.get("logs")
+if not isinstance(logs, dict) or set(logs) != {
+    "compute_sanitizer",
+    "cuobjdump_elf",
+    "cuobjdump_ptx",
+    "cuobjdump_ptx_stderr",
+    "differential",
+}:
+    raise SystemExit("journaux spatiaux absents ou incomplets")
+lifecycle = value.get("vm_lifecycle")
+if lifecycle != {
+    "guest_shutdown_guard_verified": True,
+    "stop_responsibility": "external_orchestrator",
+    "worker_mutates_gcp": False,
+}:
+    raise SystemExit("contrat de cycle de vie spatial absent")
+PY
+fi
 
 if certify_target_stopped; then
     stop_status=0
@@ -853,7 +1068,9 @@ if ((stop_status != 0)); then
     exit "${stop_status}"
 fi
 
-python3 - "${LOCAL_TEMP_RESULT}" "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
+python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
+    "${LOCAL_PHASE4_TEMP_RESULT}" "${LOCAL_PHASE4_RESULT}" \
+    "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
     "${GUEST_SHUTDOWN_MINUTES}" "${FINAL_STATUS}" \
     "${FINAL_STOP_VERIFIED_AT_UTC}" "${SESSION_LAST_START_TIMESTAMP}" <<'PY'
 import json
@@ -861,58 +1078,74 @@ import os
 from pathlib import Path
 import sys
 
-path = Path(sys.argv[1])
-with path.open(encoding="utf-8") as stream:
-    value = json.load(stream)
-lifecycle = value["vm_lifecycle"]
-lifecycle["worker_status_before_targeted_stop"] = value["status"]
-lifecycle.update(
-    {
-        "final_status": sys.argv[6],
-        "final_status_readback": "gcloud_compute_instances_describe",
-        "final_status_verified_at_utc": sys.argv[7],
-        "guest_shutdown_minutes": int(sys.argv[5]),
-        "initial_status": "TERMINATED",
-        "initial_status_basis": "start_and_verify_precondition",
-        "instance": sys.argv[4],
-        "last_start_timestamp": sys.argv[8],
-        "project": sys.argv[2],
-        "start_handoff_schema": "e-hgp.start-handoff.v3",
-        "targeted_stop_verified": True,
-        "zone": sys.argv[3],
-    }
-)
-value["status"] = "passed"
-encoded = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-with path.open("w", encoding="utf-8", newline="\n") as stream:
-    stream.write(encoded)
-    stream.write("\n")
-    stream.flush()
-    os.fsync(stream.fileno())
-PY
+pairs = [(Path(sys.argv[1]), Path(sys.argv[2]))]
+if sys.argv[3] or sys.argv[4]:
+    if not sys.argv[3] or not sys.argv[4]:
+        raise SystemExit("paire de publication Phase 4 incomplète")
+    pairs.append((Path(sys.argv[3]), Path(sys.argv[4])))
 
-python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" <<'PY'
-import os
-from pathlib import Path
-import sys
+for temporary, _ in pairs:
+    with temporary.open(encoding="utf-8") as stream:
+        value = json.load(stream)
+    lifecycle = value["vm_lifecycle"]
+    lifecycle["worker_status_before_targeted_stop"] = value["status"]
+    lifecycle.update(
+        {
+            "final_status": sys.argv[9],
+            "final_status_readback": "gcloud_compute_instances_describe",
+            "final_status_verified_at_utc": sys.argv[10],
+            "guest_shutdown_minutes": int(sys.argv[8]),
+            "initial_status": "TERMINATED",
+            "initial_status_basis": "start_and_verify_precondition",
+            "instance": sys.argv[7],
+            "last_start_timestamp": sys.argv[11],
+            "project": sys.argv[5],
+            "start_handoff_schema": "e-hgp.start-handoff.v3",
+            "targeted_stop_verified": True,
+            "zone": sys.argv[6],
+        }
+    )
+    value["status"] = "passed"
+    encoded = json.dumps(
+        value, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    )
+    with temporary.open("w", encoding="utf-8", newline="\n") as stream:
+        stream.write(encoded)
+        stream.write("\n")
+        stream.flush()
+        os.fsync(stream.fileno())
 
-temporary = Path(sys.argv[1])
-target = Path(sys.argv[2])
+published = []
 try:
-    os.link(temporary, target, follow_symlinks=False)
-except FileExistsError:
-    raise SystemExit(f"refus de remplacer un artefact créé concurremment : {target}")
-os.unlink(temporary)
-descriptor = os.open(target.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
-try:
-    os.fsync(descriptor)
-finally:
-    os.close(descriptor)
+    for temporary, target in pairs:
+        os.link(temporary, target, follow_symlinks=False)
+        published.append(str(target))
+    for parent in {target.parent for _, target in pairs}:
+        descriptor = os.open(parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+except OSError as error:
+    published_label = ",".join(published) if published else "aucun"
+    raise SystemExit(
+        "refus de remplacer un artefact créé concurremment "
+        f"ou publication partielle : {error}; publiés={published_label}"
+    )
 PY
+rm -f -- "${LOCAL_TEMP_RESULT}"
+if [[ -n "${LOCAL_PHASE4_TEMP_RESULT}" ]]; then
+    rm -f -- "${LOCAL_PHASE4_TEMP_RESULT}"
+fi
 LOCAL_TEMP_RESULT=""
+LOCAL_PHASE4_TEMP_RESULT=""
 rm -f -- "${START_HANDOFF}"
 START_HANDOFF=""
 printf '[ARTEFACT] Résultat Phase 3 publié après certification TERMINATED : %s\n' "${LOCAL_RESULT}"
+if ((PHASE4_SPATIAL_REFERENCE == 1)); then
+    printf '[ARTEFACT] Résultat spatial Phase 4 publié après certification TERMINATED : %s\n' \
+        "${LOCAL_PHASE4_RESULT}"
+fi
 
 if ! revoke_and_remove_session_ssh_key; then
     printf '[ERREUR] Qualification calculée et cible TERMINATED, mais le nettoyage local de la clé de session a échoué.\n' >&2
@@ -922,3 +1155,7 @@ fi
 trap - EXIT HUP INT TERM
 printf '[SUCCÈS] Qualification Phase 3 terminée; cible certifiée TERMINATED et artefact conservé : %s\n' \
     "${LOCAL_RESULT}"
+if ((PHASE4_SPATIAL_REFERENCE == 1)); then
+    printf '[SUCCÈS] Qualification spatiale Phase 4 compagnon conservée : %s\n' \
+        "${LOCAL_PHASE4_RESULT}"
+fi

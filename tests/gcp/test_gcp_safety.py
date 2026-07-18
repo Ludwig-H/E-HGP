@@ -463,24 +463,116 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
         print("missing fake scp paths", file=sys.stderr)
         sys.exit(94)
     head = os.environ.get("FAKE_GIT_HEAD", "a" * 40)
-    artifact = {
-        "backend": "cuda_g4",
-        "git": {"clean": True, "sha": head},
-        "image": {
-            "base_ref": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
-            "id": "sha256:" + "b" * 64,
-            "ref": f"morsehgp3d-phase3:{head}",
-        },
-        "mode": "certified",
-        "phase": "3",
-        "profile": "hgp_reduced",
-        "schema": "morsehgp3d.phase3.qualification.v1",
-        "scientific_public_status": None,
-        "scientific_result_claimed": False,
-        "scientific_scope": "environment_reproducibility_only",
-        "status": "worker_passed_pending_shutdown",
-        "vm_lifecycle": {"worker_mutates_gcp": False},
-    }
+    if "phase4-spatial-result.json" in args[2]:
+        def summary(scope, sizes):
+            count = 6 + len(sizes) + 7
+            return {
+                "all_cases_passed": True,
+                "campaign_complete": scope == "full",
+                "campaign_sizes_checked": sizes,
+                "case_count": count,
+                "closed_ball_query_count": count,
+                "cpu_exact_recertification_complete": True,
+                "decision_semantics": "cpu_exact_all_points",
+                "gpu_launch_count": 2 * count,
+                "ieee_coverage": [
+                    "addition_only_overflow",
+                    "finite_subnormal_distance",
+                    "max_finite_query",
+                    "normal_subnormal_tie",
+                    "overflow_clamped_query",
+                    "subnormal_tie",
+                ],
+                "projection_coverage": [
+                    "exact",
+                    "overflow_clamped",
+                    "rounded",
+                    "underflow",
+                ],
+                "proposal_semantics": "non_certifying_fp64",
+                "schema": "morsehgp3d.phase4.spatial_gpu_differential.v1",
+                "scope": scope,
+                "scientific_public_status": None,
+                "scientific_result_claimed": False,
+                "top_k_query_count": count,
+            }
+
+        artifact = {
+            "backend": "cuda_g4",
+            "binary": {
+                "checker_sha256": "c" * 64,
+                "replay_sha256": "d" * 64,
+            },
+            "checks": {
+                "aot_elf_architectures": ["sm_120"],
+                "aot_ptx_entry_count": 0,
+                "compute_sanitizer": "passed",
+                "cpu_exact_recertification_complete": True,
+                "cuda_audit_workflow": "passed",
+                "cuda_release_workflow": "passed",
+                "differential": summary("full", list(range(1, 1001))),
+                "quick_memcheck_differential": summary(
+                    "quick", [1, 2, 3, 4, 17, 257, 1000]
+                ),
+            },
+            "environment": {
+                "compute_capability": "12.0",
+                "driver_version": "13.0.0",
+                "gpu_name": "fake G4",
+                "gpu_uuid": "01234567-89ab-cdef-0123-456789abcdef",
+                "gpu_vram_bytes": 100000000000,
+            },
+            "git": {"clean": True, "sha": head},
+            "image": {
+                "base_ref": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+                "id": "sha256:" + "b" * 64,
+                "ref": f"morsehgp3d-phase3:{head}",
+            },
+            "logs": {
+                "compute_sanitizer": "========= ERROR SUMMARY: 0 errors\n",
+                "cuobjdump_elf": "ELF file 1: spatial.sm_120.cubin\n",
+                "cuobjdump_ptx": "",
+                "cuobjdump_ptx_stderr": "No PTX file found\n",
+                "differential": "all Phase 4 cases passed\n",
+            },
+            "mode": "certified",
+            "phase": "4",
+            "profile": "hgp_reduced",
+            "schema": (
+                "morsehgp3d.phase4.spatial_gpu_reference_qualification.v1"
+            ),
+            "scientific_public_status": None,
+            "scientific_result_claimed": False,
+            "scientific_scope": (
+                "non_certifying_fp64_proposals_with_"
+                "cpu_exact_all_points_recertification"
+            ),
+            "status": "worker_passed_pending_shutdown",
+            "vm_lifecycle": {
+                "guest_shutdown_guard_verified": True,
+                "stop_responsibility": "external_orchestrator",
+                "worker_mutates_gcp": False,
+            },
+        }
+    else:
+        artifact = {
+            "backend": "cuda_g4",
+            "git": {"clean": True, "sha": head},
+            "image": {
+                "base_ref": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048",
+                "id": "sha256:" + "b" * 64,
+                "ref": f"morsehgp3d-phase3:{head}",
+            },
+            "mode": "certified",
+            "phase": "3",
+            "profile": "hgp_reduced",
+            "schema": "morsehgp3d.phase3.qualification.v1",
+            "scientific_public_status": None,
+            "scientific_result_claimed": False,
+            "scientific_scope": "environment_reproducibility_only",
+            "status": "worker_passed_pending_shutdown",
+            "vm_lifecycle": {"worker_mutates_gcp": False},
+        }
     if scenario == "qualification-invalid-artifact":
         artifact["git"]["sha"] = "c" * 40
     Path(args[3]).write_text(json.dumps(artifact) + "\n", encoding="utf-8")
@@ -1966,6 +2058,38 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
             "compute instances describe ehgp-blackwell-spot"
         )
         self.assertGreaterEqual(describes_before_worker, 3, commands)
+        self.assertIn("[TERMINATED]", result.stdout)
+
+    def test_phase4_spatial_companion_is_published_only_after_target_stop(
+        self,
+    ) -> None:
+        result = self.run_qualification(
+            "--yes",
+            "--phase4-spatial-reference",
+            "--result-dir",
+            str(self.results),
+        )
+
+        self.assertEqual(0, result.returncode, result.stdout)
+        phase3_path = self.results / f"phase3-{self.head}.json"
+        phase4_path = self.results / f"phase4-spatial-{self.head}.json"
+        phase3 = json.loads(phase3_path.read_text(encoding="utf-8"))
+        phase4 = json.loads(phase4_path.read_text(encoding="utf-8"))
+        for artifact in (phase3, phase4):
+            self.assertEqual("passed", artifact["status"])
+            self.assertEqual("TERMINATED", artifact["vm_lifecycle"]["final_status"])
+            self.assertTrue(artifact["vm_lifecycle"]["targeted_stop_verified"])
+        self.assertEqual("4", phase4["phase"])
+        self.assertFalse(phase4["scientific_result_claimed"])
+        self.assertIsNone(phase4["scientific_public_status"])
+
+        commands = self.gcloud_commands()
+        self.assertIn(
+            "--phase4-spatial-output "
+            "/tmp/morsehgp3d-phase3.A1b2C3d4/phase4-spatial-result.json",
+            commands,
+        )
+        self.assertEqual(2, commands.count("compute scp ehgp-blackwell-spot:"))
         self.assertIn("[TERMINATED]", result.stdout)
 
     def test_docker_provisioning_failure_never_starts_worker_and_stops_target(

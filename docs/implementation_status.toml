@@ -93,7 +93,7 @@ depends_on = ["2A", "2B", "3"]
 backend = "reference_cpu"
 profile = "hgp_reduced"
 mode = "certified"
-evidence = ["docs/validation/PHASE2B_GATE_REVIEW.md", "docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md", "docs/validation/PHASE4_PROGRESS.md", "morsehgp3d/tests/fixtures/spatial/relevant_gp_extra_shell_above_smax.json", "morsehgp3d/include/morsehgp3d/spatial/lbvh.hpp", "morsehgp3d/tests/unit/test_spatial_lbvh.cpp", "morsehgp3d/tests/differential/check_spatial_lbvh.py"]
+evidence = ["docs/validation/PHASE2B_GATE_REVIEW.md", "docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md", "docs/validation/PHASE4_PROGRESS.md", "morsehgp3d/tests/fixtures/spatial/relevant_gp_extra_shell_above_smax.json", "morsehgp3d/tests/fixtures/spatial/gpu_fp64_tie_split.json", "morsehgp3d/include/morsehgp3d/spatial/lbvh.hpp", "morsehgp3d/include/morsehgp3d/gpu/spatial_reference.hpp", "morsehgp3d/src/tools/gpu_spatial_reference_replay.cpp", "morsehgp3d/tests/unit/test_spatial_lbvh.cpp", "morsehgp3d/tests/unit/test_gpu_spatial_reference_context.cpp", "morsehgp3d/tests/differential/check_spatial_lbvh.py", "morsehgp3d/tests/differential/check_spatial_gpu_reference.py", "morsehgp3d/tests/cuda/assemble_phase4_spatial_qualification.py", "tests/gcp/test_phase4_spatial_qualification.py"]
 blocking_reason = ""
 
 [[phases]]

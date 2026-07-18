@@ -50,12 +50,32 @@ add_executable(
   fake_gpu_predicate_launchers.cpp
   "${PROJECT_SOURCE_DIR}/src/gpu/predicate_filter.cpp"
 )
+add_executable(
+  morsehgp3d_gpu_spatial_reference_context_tests
+  test_gpu_spatial_reference_context.cpp
+  fake_gpu_spatial_reference_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/spatial_reference.cpp"
+)
+add_executable(
+  morsehgp3d_gpu_spatial_reference_replay_host
+  "${PROJECT_SOURCE_DIR}/src/tools/gpu_spatial_reference_replay.cpp"
+  fake_gpu_spatial_reference_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/spatial_reference.cpp"
+)
 target_include_directories(
   morsehgp3d_predicate_filter_context_tests
   PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
 )
 target_include_directories(
   morsehgp3d_warm_context_benchmark_host_test
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_include_directories(
+  morsehgp3d_gpu_spatial_reference_context_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_include_directories(
+  morsehgp3d_gpu_spatial_reference_replay_host
   PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
 )
 target_link_libraries(
@@ -65,6 +85,14 @@ target_link_libraries(
 target_link_libraries(
   morsehgp3d_warm_context_benchmark_host_test
   PRIVATE morsehgp3d::exact Threads::Threads
+)
+target_link_libraries(
+  morsehgp3d_gpu_spatial_reference_context_tests
+  PRIVATE morsehgp3d::spatial Threads::Threads
+)
+target_link_libraries(
+  morsehgp3d_gpu_spatial_reference_replay_host
+  PRIVATE morsehgp3d::spatial Threads::Threads
 )
 target_compile_definitions(
   morsehgp3d_warm_context_benchmark_host_test
@@ -89,6 +117,8 @@ set(
   morsehgp3d_spatial_lbvh_query_dump
   morsehgp3d_predicate_filter_context_tests
   morsehgp3d_warm_context_benchmark_host_test
+  morsehgp3d_gpu_spatial_reference_context_tests
+  morsehgp3d_gpu_spatial_reference_replay_host
 )
 foreach(_morsehgp3d_cpu_test_target IN LISTS _morsehgp3d_cpu_test_targets)
   morsehgp3d_apply_sanitizers("${_morsehgp3d_cpu_test_target}")
@@ -114,6 +144,12 @@ if(MSVC)
   )
   target_compile_options(
     morsehgp3d_warm_context_benchmark_host_test PRIVATE /W4 /WX
+  )
+  target_compile_options(
+    morsehgp3d_gpu_spatial_reference_context_tests PRIVATE /W4 /WX
+  )
+  target_compile_options(
+    morsehgp3d_gpu_spatial_reference_replay_host PRIVATE /W4 /WX
   )
 else()
   target_compile_options(
@@ -256,6 +292,26 @@ else()
       -Wsign-conversion
       -Werror
   )
+  target_compile_options(
+    morsehgp3d_gpu_spatial_reference_context_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
+    morsehgp3d_gpu_spatial_reference_replay_host
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
 endif()
 
 add_test(NAME morsehgp3d.exact_types COMMAND morsehgp3d_exact_types_tests)
@@ -270,6 +326,10 @@ add_test(NAME morsehgp3d.spatial_lbvh COMMAND morsehgp3d_spatial_lbvh_tests)
 add_test(
   NAME morsehgp3d.predicate_filter_context
   COMMAND morsehgp3d_predicate_filter_context_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_spatial_reference_context
+  COMMAND morsehgp3d_gpu_spatial_reference_context_tests
 )
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
@@ -327,6 +387,37 @@ add_test(
     "${CMAKE_CURRENT_SOURCE_DIR}/../configuration/check_phase2b_predicates.py"
     "${PROJECT_SOURCE_DIR}"
 )
+add_test(
+  NAME morsehgp3d.phase4_spatial_reference_configuration
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../configuration/check_phase4_spatial_reference.py"
+    "${PROJECT_SOURCE_DIR}"
+)
+add_test(
+  NAME morsehgp3d.spatial_gpu_reference_host_differential
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_spatial_gpu_reference.py"
+    "$<TARGET_FILE:morsehgp3d_gpu_spatial_reference_replay_host>"
+)
+set_tests_properties(
+  morsehgp3d.spatial_gpu_reference_host_differential
+  PROPERTIES TIMEOUT 300
+)
+if(TARGET morsehgp3d_gpu_spatial_reference_replay)
+  add_test(
+    NAME morsehgp3d.spatial_gpu_reference_differential
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_spatial_gpu_reference.py"
+      "$<TARGET_FILE:morsehgp3d_gpu_spatial_reference_replay>"
+  )
+  set_tests_properties(
+    morsehgp3d.spatial_gpu_reference_differential
+    PROPERTIES TIMEOUT 300
+  )
+endif()
 add_test(
   NAME morsehgp3d.exact_contract_differential
   COMMAND

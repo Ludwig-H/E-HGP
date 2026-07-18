@@ -158,6 +158,8 @@ Conclusion normative : l'entropie régularise un **oracle local**, pas la défin
 | Paragram fournit une primitive de proposition pertinente | `heuristic` tant que ses sorties ne sont pas certifiées |
 | FP32 seul suffit | `false_in_general` |
 | FP32 puis filtres exacts peut conserver la sémantique | `conditional_theorem` logiciel |
+| une proposition de distances binary64 conserve les égalités exactes et peut fixer le cutoff top-$k$ | `false_in_general` | [`gpu_fp64_tie_split.json`](../../morsehgp3d/tests/fixtures/spatial/gpu_fp64_tie_split.json) : les deux distances exactes valent $2^{-106}$, tandis que la projection RN-even propose zéro et $2^{-104}$ |
+| une énumération GPU complète suivie d'une réévaluation CPU exacte de tout site admissible conserve top-$k$, shell et rang fermé | `proved_here` | le retour GPU est d'abord vérifié comme permutation de tous les `PointId`; aucune valeur proposée n'entre dans le calcul exact exhaustif qui construit la partition canonique |
 | $50\,000$ points en moins d'une seconde | `experimental_target` |
 | un million de points exacts tient toujours en VRAM | `false_in_general` |
 | diffuser cellules et incidences peut préserver l'exactitude | `conditional_theorem` | chaque objet fermé avant éviction, merge externe exact |

@@ -24,6 +24,20 @@ ASSEMBLER_SOURCE = (
     / "cuda"
     / "assemble_phase3_qualification.py"
 )
+PHASE4_ASSEMBLER_SOURCE = (
+    REPOSITORY_ROOT
+    / "morsehgp3d"
+    / "tests"
+    / "cuda"
+    / "assemble_phase4_spatial_qualification.py"
+)
+PHASE4_DIFFERENTIAL_SOURCE = (
+    REPOSITORY_ROOT
+    / "morsehgp3d"
+    / "tests"
+    / "differential"
+    / "check_spatial_gpu_reference.py"
+)
 FAKE_SHA = "a" * 40
 FAKE_IMAGE_ID = "sha256:" + "b" * 64
 FAKE_BASE_IMAGE_REF = (
@@ -635,6 +649,41 @@ def result_path(container_path: str) -> Path:
         raise SystemExit("result path is outside /results")
     return volumes["/results"][0] / container_path[len(prefix):]
 
+def write_phase4_summary(path: Path, quick: bool):
+    sizes = [1, 2, 3, 4, 17, 257, 1000] if quick else list(range(1, 1001))
+    case_count = 6 + len(sizes) + 7
+    value = {
+        "all_cases_passed": True,
+        "campaign_complete": not quick,
+        "campaign_sizes_checked": sizes,
+        "case_count": case_count,
+        "closed_ball_query_count": case_count,
+        "cpu_exact_recertification_complete": True,
+        "decision_semantics": "cpu_exact_all_points",
+        "gpu_launch_count": 2 * case_count,
+        "ieee_coverage": [
+            "addition_only_overflow",
+            "finite_subnormal_distance",
+            "max_finite_query",
+            "normal_subnormal_tie",
+            "overflow_clamped_query",
+            "subnormal_tie",
+        ],
+        "projection_coverage": [
+            "exact",
+            "overflow_clamped",
+            "rounded",
+            "underflow",
+        ],
+        "proposal_semantics": "non_certifying_fp64",
+        "schema": "morsehgp3d.phase4.spatial_gpu_differential.v1",
+        "scope": "quick" if quick else "full",
+        "scientific_public_status": None,
+        "scientific_result_claimed": False,
+        "top_k_query_count": case_count,
+    }
+    path.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
+
 def manifest():
     return {
         "aot_only": True,
@@ -841,6 +890,14 @@ if command[:3] == ["cmake", "--workflow", "--preset"]:
         raise SystemExit(31)
     if failure == "audit" and preset == "cuda-audit":
         raise SystemExit(32)
+    if preset == "cuda-release":
+        replay = (
+            volumes["/workspace/repository/build"][0]
+            / "morsehgp3d-cuda-release"
+            / "morsehgp3d_gpu_spatial_reference_replay"
+        )
+        replay.parent.mkdir(parents=True, exist_ok=True)
+        replay.write_bytes(b"fake Phase 4 spatial replay")
     print(f"fake {preset} workflow passed")
     raise SystemExit(0)
 
@@ -851,6 +908,14 @@ if command[0].endswith("/morsehgp3d_phase3_runtime"):
     ceiling = int(command[command.index("--allocation-bytes") + 1])
     write_runtime_jsonl(result_path(output), ceiling)
     print("fake Phase 3 runtime passed")
+    raise SystemExit(0)
+
+if Path(command[0]).name == "python3" and any(
+    Path(item).name == "check_spatial_gpu_reference.py" for item in command
+):
+    summary = command[command.index("--summary-json") + 1]
+    write_phase4_summary(result_path(summary), "--quick" in command)
+    print("fake Phase 4 spatial differential passed")
     raise SystemExit(0)
 
 if command[0] == "python3":
@@ -873,7 +938,7 @@ if Path(command[0]).name == "cuobjdump" and command[1:2] == ["-lptx"]:
         print("No PTX file found in morsehgp3d_phase3_runtime", file=sys.stderr)
     raise SystemExit(0)
 
-if command[0] == "compute-sanitizer":
+if Path(command[0]).name == "compute-sanitizer":
     if failure == "sanitizer":
         print("simulated memcheck error", file=sys.stderr)
         raise SystemExit(86)
@@ -887,6 +952,12 @@ if command[0] == "compute-sanitizer":
         )
         print("========= ERROR SUMMARY: 2 errors")
         raise SystemExit(86)
+    if any(Path(item).name == "check_spatial_gpu_reference.py" for item in command):
+        summary = command[command.index("--summary-json") + 1]
+        write_phase4_summary(result_path(summary), "--quick" in command)
+        print("fake Phase 4 spatial memcheck differential passed")
+        print("========= ERROR SUMMARY: 0 errors")
+        raise SystemExit(0)
     output = command[command.index("--output") + 1]
     ceiling = int(command[command.index("--allocation-bytes") + 1])
     write_runtime_jsonl(result_path(output), ceiling)
@@ -1084,6 +1155,7 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
             self.repository / "gcp-migration",
             self.repository / "containers",
             self.repository / "morsehgp3d" / "tests" / "cuda",
+            self.repository / "morsehgp3d" / "tests" / "differential",
             self.fake_bin,
             self.fake_secure_bin,
             self.buildx_plugin.parent,
@@ -1149,6 +1221,22 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
         shutil.copy2(
             ASSEMBLER_SOURCE,
             self.repository / "morsehgp3d" / "tests" / "cuda" / ASSEMBLER_SOURCE.name,
+        )
+        shutil.copy2(
+            PHASE4_ASSEMBLER_SOURCE,
+            self.repository
+            / "morsehgp3d"
+            / "tests"
+            / "cuda"
+            / PHASE4_ASSEMBLER_SOURCE.name,
+        )
+        shutil.copy2(
+            PHASE4_DIFFERENTIAL_SOURCE,
+            self.repository
+            / "morsehgp3d"
+            / "tests"
+            / "differential"
+            / PHASE4_DIFFERENTIAL_SOURCE.name,
         )
         (self.repository / "containers" / "cuda12.9-sm120.Dockerfile").write_text(
             f"FROM {FAKE_BASE_IMAGE_REF}\n", encoding="utf-8"
@@ -1699,6 +1787,46 @@ printf 'fake Blackwell preflight passed\\n'
         second, _ = self.run_worker(output=artifact)
         self.assertNotEqual(0, second.returncode)
         self.assertEqual(value, json.loads(artifact.read_text(encoding="utf-8")))
+
+    def test_optional_phase4_spatial_evidence_is_published_as_a_companion(
+        self,
+    ) -> None:
+        phase3_artifact = self.output_dir / "phase3.json"
+        phase4_artifact = self.output_dir / "phase4-spatial.json"
+        result, _ = self.run_worker(
+            arguments=[
+                "--yes",
+                "--gce-deadline-epoch",
+                str(self.gce_deadline_epoch),
+                "--output",
+                str(phase3_artifact),
+                "--phase4-spatial-output",
+                str(phase4_artifact),
+            ],
+            output=phase3_artifact,
+        )
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        phase3 = json.loads(phase3_artifact.read_text(encoding="utf-8"))
+        phase4 = json.loads(phase4_artifact.read_text(encoding="utf-8"))
+        self.assertEqual("worker_passed_pending_shutdown", phase3["status"])
+        self.assertEqual(
+            "morsehgp3d.phase4.spatial_gpu_reference_qualification.v1",
+            phase4["schema"],
+        )
+        self.assertEqual("worker_passed_pending_shutdown", phase4["status"])
+        self.assertEqual(1013, phase4["checks"]["differential"]["case_count"])
+        self.assertEqual(
+            20,
+            phase4["checks"]["quick_memcheck_differential"]["case_count"],
+        )
+        self.assertFalse(phase4["scientific_result_claimed"])
+        self.assertIsNone(phase4["scientific_public_status"])
+        log = self.command_log_text()
+        self.assertIn("phase4-spatial-differential", log)
+        self.assertIn("phase4-spatial-cuobjdump-elf", log)
+        self.assertIn("phase4-spatial-compute-sanitizer", log)
+        self.assert_no_partial_artifact()
 
     def test_symlinked_repository_build_mountpoint_is_refused(self) -> None:
         external_build = self.root / "external-build"

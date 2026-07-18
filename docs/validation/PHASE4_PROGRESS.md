@@ -7,9 +7,9 @@
 - profil prioritaire : `hgp_reduced`;
 - mode : `certified`;
 - porte d'entrée : satisfaite par les Phases 2A, 2B et 3 fermées;
-- porte de sortie : ouverte; la référence GPU indépendante et les chemins spatiaux GPU restent à livrer.
+- porte de sortie : ouverte; la référence GPU indépendante est implémentée et validée sur émulateur bit à bit, mais sa qualification réelle G4 et les chemins spatiaux GPU de production restent à livrer.
 
-Les deux premiers lots construisent la vérité terrain spatiale CPU puis son premier accélérateur certifié Morton-LBVH. Ils certifient leurs propres partitions exactes, mais ne produisent aucune forêt, ne ferment ni G2 ni la Phase 4 et ne promeuvent aucun `public_status` vers `exact`.
+Les trois premiers lots construisent la vérité terrain spatiale CPU, son premier accélérateur certifié Morton-LBVH, puis une référence CUDA exhaustive dont les propositions flottantes sont séparées des décisions scientifiques. Ils certifient leurs propres partitions exactes, mais ne produisent aucune forêt, ne ferment ni G2 ni la Phase 4 et ne promeuvent aucun `public_status` vers `exact`.
 
 ## Contrat mathématique du top-k
 
@@ -26,6 +26,16 @@ Les distances sont des `ExactLevel` calculés directement entre `ExactRational3`
 `ClosedBallPartition` classe chaque site de $X$ dans exactement une des trois listes triées `interior_ids`, `shell_ids` ou `exterior_ids`. Son rang fermé vaut $\lvert I\rvert+\lvert U\rvert$ sur le nuage global. Il n'existe volontairement aucune surcharge avec exclusions : le rang filtré d'un top-k sur $X\setminus E$ ne doit pas être confondu avec le rang fermé d'un événement de Morse.
 
 La lecture « arrêter dès que le rang dépasse $s_{\max}$ » est désormais bornée à une primitive interne incomplète. Elle ne peut produire ni partition globale, ni `shell_complete`, ni certificat `RelevantGP`. La fixture [`relevant_gp_extra_shell_above_smax.json`](../../morsehgp3d/tests/fixtures/spatial/relevant_gp_extra_shell_above_smax.json) conserve le cas minimal : deux points candidats sur l'axe x, un troisième point extérieur au candidat mais sur la même sphère, $s_{\max}=2$ et rang fermé trois. Tronquer au rang deux manquerait précisément la dégénérescence qui impose `unsupported_degeneracy`.
+
+## Référence CUDA exhaustive et recertification
+
+`SpatialReferenceContext` est lié au même jeton de namespace que le nuage canonique. Pour chaque coordonnée rationnelle de la requête, l'hôte trouve par recherche binaire exacte les deux binary64 adjacents, compare la valeur au milieu rationnel et applique la règle ties-to-even. Le rapport distingue `exact`, `rounded`, `underflow` et `overflow_clamped`; une coordonnée hors de la plage binary64 finie est rabattue visiblement vers le maximum fini du même signe pour la seule proposition. Cette projection n'est jamais présentée comme la requête scientifique et la décision CPU conserve la coordonnée rationnelle originale.
+
+Le kernel `sm_120` parcourt tous les indices par une boucle grid-stride sans plafond de visites. Pour chaque `PointId`, il applique dans l'ordre fixe soustraction, carré et accumulation avec `__dsub_rn`, `__dmul_rn` et `__dadd_rn`, sans fast-math, FMA implicite ni FTZ, puis renvoie `(PointId, proposed_squared_distance_bits)`. Un overflow vers `+inf` est une proposition diagnostique valide; un NaN, une distance négative, un ID répété, absent ou hors domaine invalide et empoisonne le contexte.
+
+La règle de publication est plus forte qu'une vérification des seuls candidats : l'hôte exige d'abord que le retour GPU soit une permutation exacte de $\left\lbrace 0,\ldots,n-1\right\rbrace$, puis appelle l'oracle CPU sur tous les sites admissibles pour le top-$k$ et sur tout $X$ pour la boule fermée. Les bits de distance GPU ne sont accessibles au chemin scientifique qu'au sein du validateur et de son hash diagnostique; ils ne déterminent ni exclusion, ni cutoff, ni égalité, ni shell, ni rang.
+
+La preuve de conservation est immédiate. Après validation de la permutation, l'ensemble réévalué exactement est précisément $X\setminus E$ pour le top-$k$ et $X$ pour la boule. La partition publiée est donc la même fonction déterministe du même multiensemble de distances exactes que la force brute CPU, indépendamment de l'ordre, des ties et des overflows de la proposition. La fixture [`gpu_fp64_tie_split.json`](../../morsehgp3d/tests/fixtures/spatial/gpu_fp64_tie_split.json) montre pourquoi une politique plus faible serait fausse : la requête exacte médiane donne deux distances égales à $2^{-106}$, alors que sa projection RN-even produit les propositions distinctes zéro et $2^{-104}$.
 
 ## Canonisation du nuage
 
@@ -61,17 +71,20 @@ Le différentiel indépendant utilise Python `Fraction`, pas les routines exacte
 
 Le différentiel LBVH ajoute 1 006 cas indépendants : six fixtures ciblées puis chaque taille $1\leq n\leq1\,000$. Les nuages sont véritablement tridimensionnels dès quatre points, les requêtes sont rationnelles, les exclusions atteignent neuf IDs et les cas ciblés exercent collisions Morton, sous-normaux, extrema binary64, shell à égalité, élagage extérieur et classification intérieure en bloc. Python `Fraction` produit seul l'attendu mathématique; les deux ordres de parcours sont comparés à cet attendu puis entre eux. La campagne vérifie aussi les identités comptables, l'existence effective des chemins accélérés et la positivité exacte de chaque marge minimale publiée.
 
-La matrice locale ferme 35 tests sous GCC 13 en Release, puis les deux tests LBVH sous Clang 18. Le test unitaire passe sous ASan/UBSan en Debug; la campagne différentielle exhaustive passe sous ASan/UBSan en Release instrumenté. Les consumers installés Release et sanitizer reconstruisent et exécutent le chemin LBVH hors de l'arbre source.
+Le lot CUDA ajoute des faux lanceurs host-only capables de renverser la permutation, de proposer des valeurs croissantes, décroissantes, nulles ou infinies, puis d'injecter cardinalité tronquée, doublon, ID hors plage, NaN et distance négative. Toutes les propositions valides, même volontairement fausses, publient exactement la partition CPU; toute corruption post-GPU échoue fermé et empoisonne seulement son contexte. Le replay et son oracle Python `Fraction` couvrent 1 013 cas : les 1 006 cas spatiaux et sept cas GPU ciblés pour le tie exact séparé par RN-even, l'underflow signé, une distance sous-normale, l'overflow lors de l'accumulation, les frontières subnormal–normal, les coordonnées finies maximales et le rabattement diagnostique hors plage, avec toutes les tailles $1\leq n\leq1\,000$. Le résumé exige séparément les six couvertures IEEE `addition_only_overflow`, `finite_subnormal_distance`, `max_finite_query`, `normal_subnormal_tie`, `overflow_clamped_query` et `subnormal_tie`. L'émulateur de la recette binary64 reproduit aussi le digest FNV-1a ordonné par ID; les 1 013 partitions, projections et digests coïncident.
+
+La matrice locale ferme 38 tests sous GCC 13 en Release. Le nouveau contexte host-only, le replay émulé et leurs validateurs statiques passent aussi sous ASan/UBSan; le différentiel host-only ferme séparément ses 1 013 cas `Fraction`. Les validations Clang, consumers installés et différentielles sanitizer du lot CPU précédent restent inchangées.
 
 L'installation exporte `morsehgp3d::exact`, `morsehgp3d::spatial` et la cible interne de sanitizer. L'archive spatiale est PIC pour son futur lien dans un module partagé. Un package sanitizer propage ses options de lien au consumer au lieu de produire des références ASan/UBSan non résolues. Le consumer installé construit aussi un `MortonLbvhIndex`, puis confronte son 1-NN et sa boule fermée aux partitions de référence afin de détecter tout en-tête, archive ou dépendance CMake manquante.
 
 ## Limites du lot
 
-- aucune force brute GPU indépendante et aucun chemin cuVS;
+- référence GPU indépendante non encore exécutée sur une G4 réelle au SHA courant;
+- aucun chemin cuVS;
 - aucun LBVH GPU ni index résident qualifié sur G4;
 - aucune primitive bornée de rejet anticipé;
 - aucun catalogue, événement critique, réduction hiérarchique ou résultat public.
 
 ## GCP
 
-GCP non utilisé pour ce lot CPU.
+GCP non utilisé avant le commit de qualification; le build CUDA exige un SHA propre et poussé avant la session G4 gardée.
