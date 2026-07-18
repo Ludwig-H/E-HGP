@@ -93,7 +93,9 @@
         "morsehgp3d_gpu_predicate_replay",
         "morsehgp3d_gpu_predicate_context_harness",
         "morsehgp3d_gpu_spatial_reference",
-        "morsehgp3d_gpu_spatial_reference_replay"
+        "morsehgp3d_gpu_spatial_reference_replay",
+        "morsehgp3d_gpu_spatial_bounds",
+        "morsehgp3d_gpu_spatial_bounds_replay"
       ],
       "jobs": 8
     },
@@ -107,7 +109,9 @@
         "morsehgp3d_gpu_predicate_replay",
         "morsehgp3d_gpu_predicate_context_harness",
         "morsehgp3d_gpu_spatial_reference",
-        "morsehgp3d_gpu_spatial_reference_replay"
+        "morsehgp3d_gpu_spatial_reference_replay",
+        "morsehgp3d_gpu_spatial_bounds",
+        "morsehgp3d_gpu_spatial_bounds_replay"
       ],
       "jobs": 8
     }
