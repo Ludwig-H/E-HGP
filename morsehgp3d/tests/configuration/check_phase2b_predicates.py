@@ -12,28 +12,19 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
-
 PUBLIC_HEADER = Path("include/morsehgp3d/gpu/predicate_filter.hpp")
 INTERVAL_HEADER = Path("src/cuda/phase2b_interval.cuh")
-CONTEXT_INTERNAL_HEADER = Path(
-    "src/cuda/phase2b_predicate_context_internal.hpp"
-)
+CONTEXT_INTERNAL_HEADER = Path("src/cuda/phase2b_predicate_context_internal.hpp")
 CONTEXT_CUDA_HEADER = Path("src/cuda/phase2b_predicate_context.cuh")
 INTERNAL_HEADER = Path("src/cuda/phase2b_distance_filter_internal.hpp")
 CUDA_SOURCE = Path("src/cuda/phase2b_distance_filter.cu")
-ORIENTATION_INTERNAL_HEADER = Path(
-    "src/cuda/phase2b_orientation_filter_internal.hpp"
-)
+ORIENTATION_INTERNAL_HEADER = Path("src/cuda/phase2b_orientation_filter_internal.hpp")
 ORIENTATION_CUDA_SOURCE = Path("src/cuda/phase2b_orientation_filter.cu")
-POWER_INTERNAL_HEADER = Path(
-    "src/cuda/phase2b_power_bisector_filter_internal.hpp"
-)
+POWER_INTERNAL_HEADER = Path("src/cuda/phase2b_power_bisector_filter_internal.hpp")
 POWER_CUDA_SOURCE = Path("src/cuda/phase2b_power_bisector_filter.cu")
 HOST_SOURCE = Path("src/gpu/predicate_filter.cpp")
 CLI_SOURCE = Path("src/tools/gpu_predicate_replay.cpp")
-CONTEXT_HARNESS_SOURCE = Path(
-    "src/tools/gpu_predicate_context_harness.cpp"
-)
+CONTEXT_HARNESS_SOURCE = Path("src/tools/gpu_predicate_context_harness.cpp")
 CMAKE_SOURCE = Path("CMakeLists.txt")
 CUDA_MODULE = Path("cmake/MorseHGP3DCuda.cmake")
 PRESETS_SOURCE = Path("CMakePresets.json")
@@ -271,8 +262,7 @@ def validate_binary64_replay_records(header: str) -> None:
             re.findall(r"std::uint64_t\s+(?!replay_id\b)[A-Za-z_]\w*", body)
         )
         require(
-            sum(int(count) for count in word_arrays) + scalar_words
-            == expected_words,
+            sum(int(count) for count in word_arrays) + scalar_words == expected_words,
             f"{name} must preserve exactly {expected_words} binary64 words",
         )
 
@@ -287,8 +277,7 @@ def validate_power_replay_record(header: str) -> None:
     )
     require(
         re.search(
-            r"std::array\s*<\s*std::uint64_t\s*,\s*3\s*>\s*"
-            r"coordinate_bits\b",
+            r"std::array\s*<\s*std::uint64_t\s*,\s*3\s*>\s*" r"coordinate_bits\b",
             point,
         )
         is not None,
@@ -393,8 +382,7 @@ def validate_context_state(internal: str, cuda: str) -> None:
     internal_clean = without_comments(internal)
     state = class_body(internal_clean, "PredicateFilterContextState")
     require(
-        "cuda_runtime" not in internal_clean
-        and "cudaStream_t" not in internal_clean,
+        "cuda_runtime" not in internal_clean and "cudaStream_t" not in internal_clean,
         "the host context state must remain linkable without the CUDA runtime",
     )
     require(
@@ -412,8 +400,7 @@ def validate_context_state(internal: str, cuda: str) -> None:
         "the host-only context has no type-erased CUDA resource lifetime",
     )
     require(
-        re.search(r"std::atomic\s*<\s*bool\s*>\s+poisoned_\b", state)
-        is not None
+        re.search(r"std::atomic\s*<\s*bool\s*>\s+poisoned_\b", state) is not None
         and re.search(
             r"poisoned_[.]load\s*\(\s*std::memory_order_acquire\s*\)",
             state,
@@ -422,8 +409,7 @@ def validate_context_state(internal: str, cuda: str) -> None:
         and re.search(r"catch\s*\(\s*[.][.][.]\s*\)", state) is not None
         and re.search(r"mark_poisoned\s*\(\s*\)\s*;", state) is not None
         and re.search(
-            r"poisoned_[.]store\s*\(\s*true\s*,\s*"
-            r"std::memory_order_release\s*\)",
+            r"poisoned_[.]store\s*\(\s*true\s*,\s*" r"std::memory_order_release\s*\)",
             state,
         )
         is not None,
@@ -432,8 +418,7 @@ def validate_context_state(internal: str, cuda: str) -> None:
 
     cuda_clean = without_comments(cuda)
     require(
-        re.search(r"#\s*if\s*!\s*defined\s*\(\s*__CUDACC__\s*\)", cuda)
-        is not None,
+        re.search(r"#\s*if\s*!\s*defined\s*\(\s*__CUDACC__\s*\)", cuda) is not None,
         "the CUDA resource contract is not guarded against host-only inclusion",
     )
     require(
@@ -637,8 +622,7 @@ def validate_filter_cuda_source(
         f"the {label} CUDA source bypasses the resident execution context",
     )
     empty_guard = re.search(
-        r"if\s*\(\s*inputs[.]empty\s*\(\s*\)\s*\)\s*\{\s*"
-        r"return\s*\{\s*\}\s*;\s*\}",
+        r"if\s*\(\s*inputs[.]empty\s*\(\s*\)\s*\)\s*\{\s*" r"return\s*\{\s*\}\s*;\s*\}",
         clean,
         flags=re.DOTALL,
     )
@@ -725,8 +709,7 @@ def validate_cuda_sources(
         "distance comparison no longer computes left squared minus right squared",
     )
     require(
-        re.search(r"field\s*\*\s*count\s*\+\s*index", distance_clean)
-        is not None,
+        re.search(r"field\s*\*\s*count\s*\+\s*index", distance_clean) is not None,
         "distance coordinates are not packed field-major for coalesced loads",
     )
     validate_filter_cuda_source(
@@ -753,8 +736,7 @@ def validate_cuda_sources(
         "orientation_3d does not evaluate u0*m0 - u1*m1 + u2*m2",
     )
     require(
-        re.search(r"field\s*\*\s*count\s*\+\s*index", orientation_clean)
-        is not None,
+        re.search(r"field\s*\*\s*count\s*\+\s*index", orientation_clean) is not None,
         "orientation_3d coordinates are not packed field-major for coalesced loads",
     )
     validate_filter_cuda_source(
@@ -805,8 +787,7 @@ def validate_cuda_sources(
         )
         is not None
         and re.search(
-            r"term\s*=\s*multiply_intervals\s*\(\s*q_minus_r\s*,\s*"
-            r"paired_sum\s*\)",
+            r"term\s*=\s*multiply_intervals\s*\(\s*q_minus_r\s*,\s*" r"paired_sum\s*\)",
             power_body,
             flags=re.DOTALL,
         )
@@ -816,8 +797,7 @@ def validate_cuda_sources(
     require(
         "axis_value" in power_body
         and "cardinalities[index]" in power_body
-        and re.search(r"field\s*\*\s*count\s*\+\s*index", power_clean)
-        is not None,
+        and re.search(r"field\s*\*\s*count\s*\+\s*index", power_clean) is not None,
         "power-bisector does not use cardinality-bounded axis subtotals and SoA loads",
     )
     pairing_body = function_body(power_clean, "point_less_on_axis")
@@ -843,7 +823,9 @@ def validate_host_source(
     power_internal: str,
 ) -> None:
     clean = without_comments(host)
-    require(PUBLIC_HEADER.name in clean, "the host path does not include its public API")
+    require(
+        PUBLIC_HEADER.name in clean, "the host path does not include its public API"
+    )
     require(
         INTERNAL_HEADER.name in clean
         and ORIENTATION_INTERNAL_HEADER.name in clean
@@ -904,8 +886,7 @@ def validate_host_source(
     require(
         len(re.findall(r"std::launch::async", clean)) >= 6
         and re.search(
-            r"fallback_future\s*=\s*std::async\s*\(\s*"
-            r"std::launch::async",
+            r"fallback_future\s*=\s*std::async\s*\(\s*" r"std::launch::async",
             clean,
             flags=re.DOTALL,
         )
@@ -960,14 +941,12 @@ def validate_host_source(
     require(
         re.search(r"if\s*\(\s*options[.]audit_gpu_signs\s*\)", clean) is not None
         and re.search(
-            r"gpu_outputs\s*\[\s*index\s*\]\s*==\s*"
-            r"FilterSign::unknown",
+            r"gpu_outputs\s*\[\s*index\s*\]\s*==\s*" r"FilterSign::unknown",
             clean,
         )
         is not None
         and re.search(
-            r"cpu_decision\s*\(.*?"
-            r"PredicateFilterPolicy::multiprecision_only\s*\)",
+            r"cpu_decision\s*\(.*?" r"PredicateFilterPolicy::multiprecision_only\s*\)",
             clean,
             flags=re.DOTALL,
         )
@@ -1092,9 +1071,7 @@ def validate_context_harness(harness: str) -> None:
                 body,
             )
             is not None
-            and re.search(
-                rf"{re.escape(function_name)}\s*\(\s*inputs\s*,", body
-            )
+            and re.search(rf"{re.escape(function_name)}\s*\(\s*inputs\s*,", body)
             is not None,
             f"{runner} does not compare resident and ephemeral execution",
         )
@@ -1105,16 +1082,10 @@ def validate_context_harness(harness: str) -> None:
         "resident harness does not require known-sign GPU audits",
     )
     require(
-        re.search(
-            r"run_distance\s*\(\s*primary\s*,\s*\{\s*\}", clean
-        )
+        re.search(r"run_distance\s*\(\s*primary\s*,\s*\{\s*\}", clean) is not None
+        and re.search(r"run_orientation\s*\(\s*primary\s*,\s*\{\s*\}", clean)
         is not None
-        and re.search(
-            r"run_orientation\s*\(\s*primary\s*,\s*\{\s*\}", clean
-        )
-        is not None
-        and re.search(r"run_power\s*\(\s*primary\s*,\s*\{\s*\}", clean)
-        is not None,
+        and re.search(r"run_power\s*\(\s*primary\s*,\s*\{\s*\}", clean) is not None,
         "resident harness does not exercise all empty-batch entry points",
     )
     require(
@@ -1124,11 +1095,114 @@ def validate_context_harness(harness: str) -> None:
         "resident harness does not require GPU-unknown CPU fallbacks",
     )
     require(
-        re.search(r"if\s*\(\s*argc\s*!=\s*1\s*\)", clean) is not None
-        and clean.count("std::cout") == 2
+        re.search(
+            r"if\s*\(\s*argc\s*==\s*1\s*\)\s*\{\s*return\s+run\s*\(\s*\)",
+            clean,
+        )
+        is not None
+        and clean.count("std::cout") == 3
         and "std::cerr" in clean,
-        "resident harness output or invocation is not deterministic",
+        "resident harness no-argument correction mode changed",
     )
+
+    benchmark = function_body(clean, "run_warm_context_benchmark")
+    measure = function_body(clean, "measure_warm_context")
+    for token in (
+        "--benchmark-warm-context-e2e",
+        "morsehgp3d.phase2b.warm_context_e2e.v1",
+        "warm_context_e2e",
+        "warm_context_case_count",
+        "warm_context_repeat_count",
+        "warm_context_warmup_repeats",
+        "min_ns",
+        "max_ns",
+        "mad_ns",
+        "p50_ns",
+        "p95_ns",
+        "samples_ns",
+        "audit_gpu_signs",
+        "gpu_unknown_to_async_cpu_exact",
+        "steady_clock_around_async_api_get_includes_",
+        "excludes_input_generation",
+    ):
+        require(token in clean, f"warm-context benchmark is missing {token}")
+    require(
+        re.search(r"MORSEHGP3D_WARM_CONTEXT_CASE_COUNT\s+65536", clean) is not None
+        and re.search(r"MORSEHGP3D_WARM_CONTEXT_REPEAT_COUNT\s+31", clean) is not None
+        and "warm_context_warmup_repeats = 1U" in clean,
+        "warm-context production cases, repeats or warmup changed",
+    )
+    require(
+        benchmark.index("distance_batch(warm_context_case_count")
+        < benchmark.index("PredicateFilterContext context")
+        and benchmark.index("orientation_batch(warm_context_case_count")
+        < benchmark.index("PredicateFilterContext context")
+        and benchmark.index("power_batch(warm_context_case_count")
+        < benchmark.index("PredicateFilterContext context"),
+        "warm-context input generation entered the measured resident scope",
+    )
+    for options in (
+        "SquaredDistanceBatchOptions distance_options{false}",
+        "Orientation3DBatchOptions orientation_options{false}",
+        "PowerBisectorBatchOptions power_options{false}",
+    ):
+        require(options in benchmark, "warm-context audit mode is not explicit")
+    for function_name, inputs, options in (
+        (
+            "decide_squared_distance_batch_async",
+            "distance_inputs",
+            "distance_options",
+        ),
+        (
+            "decide_orientation_3d_batch_async",
+            "orientation_inputs",
+            "orientation_options",
+        ),
+        (
+            "decide_power_bisector_batch_async",
+            "power_inputs",
+            "power_options",
+        ),
+    ):
+        require(
+            re.search(
+                rf"{function_name}\s*\(\s*context\s*,\s*{inputs}\s*,\s*"
+                rf"{options}\s*\)\s*[.]get\s*\(\s*\)",
+                benchmark,
+                flags=re.DOTALL,
+            )
+            is not None,
+            f"warm-context benchmark does not time resident {function_name}.get()",
+        )
+    require(
+        re.search(
+            r"steady_clock::now\s*\(\s*\)\s*;\s*"
+            r"const\s+BatchResult\s+result\s*=\s*submit\s*\(\s*\)\s*;\s*"
+            r"const\s+auto\s+stopped\s*=\s*std::chrono::steady_clock::now",
+            measure,
+            flags=re.DOTALL,
+        )
+        is not None
+        and measure.index("warmup < warm_context_warmup_repeats")
+        < measure.index("const auto started = std::chrono::steady_clock::now"),
+        "warm-context timing does not isolate measured async API completion",
+    )
+    for counter in (
+        "async_fallback_batches",
+        "cpu_expansion_certified",
+        "cpu_fp64_filtered_certified",
+        "cpu_multiprecision_certified",
+        "exact_zeros",
+        "gpu_fp64_certified",
+        "gpu_inputs",
+        "gpu_known_audited",
+        "gpu_unknown_forwarded",
+        "remaining_unknown",
+    ):
+        require(
+            counter in function_body(clean, "write_benchmark_counters"),
+            f"warm-context benchmark omits counter {counter}",
+        )
 
 
 def target_body(cmake: str, command: str, target: str) -> str:
@@ -1144,9 +1218,7 @@ def target_body(cmake: str, command: str, target: str) -> str:
 def validate_cmake(cmake: str, cuda_module: str) -> None:
     library_body = target_body(cmake, "add_library", LIBRARY_TARGET)
     replay_body = target_body(cmake, "add_executable", REPLAY_TARGET)
-    harness_body = target_body(
-        cmake, "add_executable", CONTEXT_HARNESS_TARGET
-    )
+    harness_body = target_body(cmake, "add_executable", CONTEXT_HARNESS_TARGET)
     for source in (
         CONTEXT_INTERNAL_HEADER,
         CONTEXT_CUDA_HEADER,
@@ -1178,13 +1250,10 @@ def validate_cmake(cmake: str, cuda_module: str) -> None:
     )
     replay_links = target_body(cmake, "target_link_libraries", REPLAY_TARGET)
     require(
-        LIBRARY_TARGET in replay_links
-        or "morsehgp3d::gpu_predicates" in replay_links,
+        LIBRARY_TARGET in replay_links or "morsehgp3d::gpu_predicates" in replay_links,
         f"{REPLAY_TARGET} is not linked to {LIBRARY_TARGET}",
     )
-    harness_links = target_body(
-        cmake, "target_link_libraries", CONTEXT_HARNESS_TARGET
-    )
+    harness_links = target_body(cmake, "target_link_libraries", CONTEXT_HARNESS_TARGET)
     require(
         LIBRARY_TARGET in harness_links
         or "morsehgp3d::gpu_predicates" in harness_links,
@@ -1352,9 +1421,7 @@ def remove_replay_target(files: ContractFiles, preset_name: str) -> None:
     targets.remove(REPLAY_TARGET)
 
 
-def remove_context_harness_target(
-    files: ContractFiles, preset_name: str
-) -> None:
+def remove_context_harness_target(files: ContractFiles, preset_name: str) -> None:
     presets = named_presets(files.presets, "buildPresets")
     targets = presets[preset_name].get("targets")
     require(isinstance(targets, list), f"{preset_name} has no mutable targets")
@@ -1446,6 +1513,46 @@ def validate_negative_mutations(files: ContractFiles) -> int:
                 "SquaredDistanceBatchOptions options{true}",
                 "SquaredDistanceBatchOptions options{false}",
                 "resident harness audit",
+            ),
+        ),
+        (
+            "warm-context benchmark schema renamed",
+            mutate_text(
+                CONTEXT_HARNESS_SOURCE,
+                "morsehgp3d.phase2b.warm_context_e2e.v1",
+                "morsehgp3d.phase2b.resident_core.v1",
+                "warm-context benchmark schema",
+            ),
+        ),
+        (
+            "warm-context benchmark distance call made ephemeral",
+            mutate_text_regex(
+                CONTEXT_HARNESS_SOURCE,
+                r"decide_squared_distance_batch_async\(\s*context\s*,\s*"
+                r"distance_inputs\s*,\s*distance_options\s*\)",
+                "decide_squared_distance_batch_async("
+                "distance_inputs, distance_options)",
+                "warm-context resident distance call",
+            ),
+        ),
+        (
+            "warm-context timer stops before async completion",
+            mutate_text(
+                CONTEXT_HARNESS_SOURCE,
+                "const BatchResult result = submit();\n"
+                "    const auto stopped = std::chrono::steady_clock::now();",
+                "const auto stopped = std::chrono::steady_clock::now();\n"
+                "    const BatchResult result = submit();",
+                "warm-context timing envelope",
+            ),
+        ),
+        (
+            "warm-context benchmark enables GPU-known audit",
+            mutate_text(
+                CONTEXT_HARNESS_SOURCE,
+                "SquaredDistanceBatchOptions distance_options{false}",
+                "SquaredDistanceBatchOptions distance_options{true}",
+                "warm-context audit mode",
             ),
         ),
         (
@@ -1631,9 +1738,7 @@ def validate_negative_mutations(files: ContractFiles) -> int:
         ),
         (
             "release preset omits resident context harness",
-            lambda candidate: remove_context_harness_target(
-                candidate, "cuda-release"
-            ),
+            lambda candidate: remove_context_harness_target(candidate, "cuda-release"),
         ),
         (
             "audit preset omits replay target",
@@ -1641,9 +1746,7 @@ def validate_negative_mutations(files: ContractFiles) -> int:
         ),
         (
             "audit preset omits resident context harness",
-            lambda candidate: remove_context_harness_target(
-                candidate, "cuda-audit"
-            ),
+            lambda candidate: remove_context_harness_target(candidate, "cuda-audit"),
         ),
         (
             "addition rounding directions inverted",

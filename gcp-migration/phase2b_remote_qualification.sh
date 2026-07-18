@@ -5,6 +5,7 @@ set -Eeuo pipefail
 # guarded start_and_verify.sh / stop_and_verify.sh orchestrator.
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 readonly ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase2b_qualification.py"
+readonly WARM_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase2b_warm_context_qualification.py"
 readonly CONTAINER_REPOSITORY="/workspace/repository"
 readonly CONTAINER_BUILD="${CONTAINER_REPOSITORY}/build"
 readonly CONTAINER_SOURCE="${CONTAINER_REPOSITORY}/morsehgp3d"
@@ -24,6 +25,7 @@ readonly MAX_SESSION_SECONDS=28800
 readonly CONTAINER_SESSION_LABEL="morsehgp3d.phase2b.session"
 
 ASSUME_YES=0
+WARM_CONTEXT_ONLY=0
 EXPECTED_SHA=""
 IMAGE_ID=""
 GCE_DEADLINE_RAW=""
@@ -54,12 +56,14 @@ usage() {
     cat <<'EOF'
 Usage : ./gcp-migration/phase2b_remote_qualification.sh --yes \
   --expected-sha SHA --image-id sha256:... --gce-deadline-epoch EPOCH \
-  --output /CHEMIN/ABSOLU.json
+  --output /CHEMIN/ABSOLU.json [--warm-context-only]
 
 Worker invité borné de qualification des prédicats Phase 2B. Il exige un
 checkout propre au SHA annoncé et un arrêt invité déjà programmé. Il ne crée,
 ne démarre, n'arrête et ne supprime aucune ressource GCP. L'artefact publié
 reste provisoire jusqu'à la certification externe de l'arrêt ciblé.
+Le mode --warm-context-only construit le profil CUDA release et mesure seulement
+le contexte résident final; il ne rejoue pas la campagne numérique déjà gelée.
 EOF
 }
 
@@ -67,6 +71,10 @@ while (($# > 0)); do
     case "$1" in
         --yes)
             ASSUME_YES=1
+            shift
+            ;;
+        --warm-context-only)
+            WARM_CONTEXT_ONLY=1
             shift
             ;;
         --expected-sha)
@@ -122,7 +130,10 @@ REPOSITORY_ROOT="$(cd -- "${REPOSITORY_ROOT}" && pwd -P)" || die "Racine Git ill
 [[ "${SCRIPT_DIR}" == "${REPOSITORY_ROOT}/gcp-migration" ]] || \
     die "Le worker doit être exécuté depuis le clone canonique qui le contient."
 readonly ASSEMBLER="${REPOSITORY_ROOT}/${ASSEMBLER_RELATIVE}"
+readonly WARM_ASSEMBLER="${REPOSITORY_ROOT}/${WARM_ASSEMBLER_RELATIVE}"
 [[ -f "${ASSEMBLER}" && ! -L "${ASSEMBLER}" ]] || die "Assembleur Phase 2B absent ou symbolique."
+[[ -f "${WARM_ASSEMBLER}" && ! -L "${WARM_ASSEMBLER}" ]] || \
+    die "Assembleur chaud Phase 2B absent ou symbolique."
 
 observed_sha="$(git -C "${REPOSITORY_ROOT}" rev-parse HEAD)" || die "HEAD Git illisible."
 [[ "${observed_sha}" == "${EXPECTED_SHA}" ]] || \
@@ -412,16 +423,46 @@ readonly DISTANCE_SUMMARY="${RESULT_DIR}/distance-summary.json"
 readonly ORIENTATION_SUMMARY="${RESULT_DIR}/orientation-summary.json"
 readonly POWER_SUMMARY="${RESULT_DIR}/power-summary.json"
 readonly BENCHMARK_SUMMARY="${RESULT_DIR}/benchmark-summary.json"
+readonly WARM_BENCHMARK_SUMMARY="${RESULT_DIR}/warm-context-summary.json"
+readonly WARM_GPU_INFO="${RESULT_DIR}/warm-context-gpu.csv"
+readonly WARM_NVCC_VERSION="${RESULT_DIR}/warm-context-nvcc.txt"
 readonly ELF_LOG="${RESULT_DIR}/runner.elf.txt"
 readonly PTX_LOG="${RESULT_DIR}/runner.ptx.txt"
 readonly RUNNER="${CONTAINER_BUILD}/morsehgp3d-cuda-release/morsehgp3d_gpu_predicate_replay"
 readonly CPU_REPLAY="${CONTAINER_BUILD}/morsehgp3d-cuda-release/morsehgp3d_replay_predicate"
+readonly CONTEXT_HARNESS="${CONTAINER_BUILD}/morsehgp3d-cuda-release/morsehgp3d_gpu_predicate_context_harness"
 
 run_container cuda-release "${RELEASE_LOG}" "${RELEASE_ERROR_LOG}" /usr/bin/cmake \
     --workflow --preset cuda-release || {
         report_unit_failure cuda-release "${RELEASE_LOG}" "${RELEASE_ERROR_LOG}"
         die "Le workflow CUDA release a échoué."
     }
+if ((WARM_CONTEXT_ONLY == 1)); then
+    run_container warm-context "${WARM_BENCHMARK_SUMMARY}" \
+        "${RESULT_DIR}/warm-context.stderr.log" "${CONTEXT_HARNESS}" \
+        --benchmark-warm-context-e2e || \
+        die "La mesure warm_context_e2e a échoué."
+    run_container warm-gpu-inventory "${WARM_GPU_INFO}" \
+        "${RESULT_DIR}/warm-context-gpu.stderr.log" /usr/bin/nvidia-smi \
+        --query-gpu=name,uuid,driver_version,memory.total,compute_cap \
+        --format=csv,noheader,nounits || \
+        die "L'inventaire GPU chaud a échoué."
+    run_container warm-nvcc-version "${WARM_NVCC_VERSION}" \
+        "${RESULT_DIR}/warm-context-nvcc.stderr.log" /usr/local/cuda/bin/nvcc \
+        --version || die "La version NVCC chaude est illisible."
+    run_bounded assemble-warm-artifact python3 -B "${WARM_ASSEMBLER}" \
+        --git-sha "${EXPECTED_SHA}" \
+        --image-id "${IMAGE_ID}" \
+        --benchmark-summary "${WARM_BENCHMARK_SUMMARY}" \
+        --harness "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_predicate_context_harness" \
+        --gpu-info "${WARM_GPU_INFO}" \
+        --nvcc-version "${WARM_NVCC_VERSION}" \
+        --output "${OUTPUT_PATH}" || \
+        die "L'assemblage de l'artefact chaud Phase 2B a échoué."
+    printf '[SUCCÈS WORKER PHASE 2B] Artefact chaud provisoire : %s\n' "${OUTPUT_PATH}"
+    printf '[CYCLE DE VIE] Aucune mutation GCP effectuée; l’orchestrateur doit certifier TERMINATED.\n'
+    exit 0
+fi
 run_container cuda-audit "${AUDIT_LOG}" "${AUDIT_ERROR_LOG}" /usr/bin/cmake \
     --workflow --preset cuda-audit || {
         report_unit_failure cuda-audit "${AUDIT_LOG}" "${AUDIT_ERROR_LOG}"

@@ -16,6 +16,13 @@ ASSEMBLER = (
     / "cuda"
     / "assemble_phase2b_qualification.py"
 )
+WARM_ASSEMBLER = (
+    REPOSITORY_ROOT
+    / "morsehgp3d"
+    / "tests"
+    / "cuda"
+    / "assemble_phase2b_warm_context_qualification.py"
+)
 WORKER = REPOSITORY_ROOT / "gcp-migration" / "phase2b_remote_qualification.sh"
 GIT_SHA = "1" * 40
 IMAGE_ID = "sha256:" + "2" * 64
@@ -35,6 +42,35 @@ def benchmark_record(predicate: str) -> dict[str, object]:
             "stdin_bytes_per_second": 1126.4,
         },
         "predicate": predicate,
+    }
+
+
+def warm_counter_record() -> dict[str, int]:
+    return {
+        "async_fallback_batches": 31,
+        "cpu_expansion_certified": 677195,
+        "cpu_fp64_filtered_certified": 0,
+        "cpu_multiprecision_certified": 0,
+        "exact_zeros": 677195,
+        "gpu_fp64_certified": 1354421,
+        "gpu_inputs": 2031616,
+        "gpu_known_audited": 0,
+        "gpu_unknown_forwarded": 677195,
+        "remaining_unknown": 0,
+    }
+
+
+def warm_result_record(predicate: str) -> dict[str, object]:
+    samples = list(range(1000, 1031))
+    return {
+        "counters": warm_counter_record(),
+        "mad_ns": 8,
+        "max_ns": 1030,
+        "min_ns": 1000,
+        "p50_ns": 1015,
+        "p95_ns": 1029,
+        "predicate": predicate,
+        "samples_ns": samples,
     }
 
 
@@ -204,6 +240,110 @@ class Phase2BQualificationAssemblerTests(unittest.TestCase):
         self.assertEqual(self.output.read_text(encoding="utf-8"), "sentinel\n")
 
 
+class Phase2BWarmContextAssemblerTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.root = Path(self.temporary.name)
+        self.output = self.root / "warm-qualification.json"
+        self.benchmark = self.root / "warm-benchmark.json"
+        self.gpu_info = self.root / "gpu.csv"
+        self.nvcc = self.root / "nvcc.txt"
+        self.harness = self.root / "harness"
+        self.value: dict[str, object] = {
+            "audit_gpu_signs": False,
+            "cases": 65536,
+            "fallback": "gpu_unknown_to_async_cpu_exact",
+            "repeats": 31,
+            "results": {
+                "distance": warm_result_record("compare_squared_distances"),
+                "orientation": warm_result_record("orientation_3d"),
+                "power": warm_result_record("power_bisector_side"),
+            },
+            "schema": "morsehgp3d.phase2b.warm_context_e2e.v1",
+            "scope": "warm_context_e2e",
+            "timing_scope": (
+                "steady_clock_around_async_api_get_includes_validation_packing_"
+                "transfers_kernel_fallback_synchronization_excludes_input_generation"
+            ),
+            "warmup_repeats": 1,
+        }
+        self.write_evidence()
+
+    def tearDown(self) -> None:
+        self.temporary.cleanup()
+
+    def write_evidence(self) -> None:
+        self.benchmark.write_text(
+            json.dumps(self.value, separators=(",", ":"), sort_keys=True) + "\n",
+            encoding="ascii",
+        )
+        self.gpu_info.write_text(
+            "NVIDIA RTX PRO 6000 Blackwell Server Edition, "
+            "GPU-aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee, 580.95.05, 97887, 12.0\n",
+            encoding="ascii",
+        )
+        self.nvcc.write_text(
+            "Cuda compilation tools, release 12.9, V12.9.86\n", encoding="ascii"
+        )
+        self.harness.write_bytes(b"qualified harness\n")
+        self.harness.chmod(0o755)
+
+    def run_assembler(self) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [
+                sys.executable,
+                str(WARM_ASSEMBLER),
+                "--git-sha",
+                GIT_SHA,
+                "--image-id",
+                IMAGE_ID,
+                "--benchmark-summary",
+                str(self.benchmark),
+                "--harness",
+                str(self.harness),
+                "--gpu-info",
+                str(self.gpu_info),
+                "--nvcc-version",
+                str(self.nvcc),
+                "--output",
+                str(self.output),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+    def test_valid_artifact_attests_real_gpu_counts_and_environment(self) -> None:
+        result = self.run_assembler()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        artifact = json.loads(self.output.read_text(encoding="ascii"))
+        self.assertIs(artifact["cuda_runtime_executed"], True)
+        self.assertEqual(artifact["git"], {"clean": True, "sha": GIT_SHA})
+        self.assertEqual(artifact["environment"]["compute_capability"], "12.0")
+        self.assertEqual(len(artifact["benchmark"]["results"]["power"]["samples_ns"]), 31)
+        self.assertEqual(artifact["status"], "worker_passed_pending_shutdown")
+        self.assertNotIn("vm_lifecycle", artifact)
+
+    def test_rejects_all_unknown_fake_gpu_record(self) -> None:
+        counters = self.value["results"]["distance"]["counters"]
+        counters["gpu_fp64_certified"] = 0
+        counters["gpu_unknown_forwarded"] = 2031616
+        counters["cpu_expansion_certified"] = 2031616
+        self.write_evidence()
+        result = self.run_assembler()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("gpu_fp64_certified must be 1354421", result.stderr)
+        self.assertFalse(self.output.exists())
+
+    def test_rejects_statistic_not_replayed_from_raw_samples(self) -> None:
+        self.value["results"]["orientation"]["p95_ns"] = 1030
+        self.write_evidence()
+        result = self.run_assembler()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("p95_ns does not replay", result.stderr)
+        self.assertFalse(self.output.exists())
+
+
 class Phase2BWorkerStaticSafetyTests(unittest.TestCase):
     def test_worker_is_syntactically_valid_and_non_mutating(self) -> None:
         syntax = subprocess.run(
@@ -224,7 +364,13 @@ class Phase2BWorkerStaticSafetyTests(unittest.TestCase):
         self.assertIn('rmdir -- "${REPOSITORY_BUILD_MOUNTPOINT}"', source)
         self.assertIn("readonly WORK_DEADLINE_RESERVE_SECONDS=1800", source)
         self.assertIn("--predicate all", source)
+        self.assertIn("--warm-context-only", source)
+        self.assertIn("--benchmark-warm-context-e2e", source)
         self.assertIn("worker_passed_pending_shutdown", ASSEMBLER.read_text(encoding="utf-8"))
+        self.assertIn(
+            "worker_passed_pending_shutdown",
+            WARM_ASSEMBLER.read_text(encoding="utf-8"),
+        )
 
     def test_help_does_not_require_docker_or_gcp(self) -> None:
         result = subprocess.run(

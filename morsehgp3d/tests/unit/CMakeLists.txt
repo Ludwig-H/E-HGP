@@ -29,13 +29,33 @@ add_executable(
   fake_gpu_predicate_launchers.cpp
   "${PROJECT_SOURCE_DIR}/src/gpu/predicate_filter.cpp"
 )
+add_executable(
+  morsehgp3d_warm_context_benchmark_host_test
+  "${PROJECT_SOURCE_DIR}/src/tools/gpu_predicate_context_harness.cpp"
+  fake_gpu_predicate_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/predicate_filter.cpp"
+)
 target_include_directories(
   morsehgp3d_predicate_filter_context_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_include_directories(
+  morsehgp3d_warm_context_benchmark_host_test
   PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
 )
 target_link_libraries(
   morsehgp3d_predicate_filter_context_tests
   PRIVATE morsehgp3d::exact Threads::Threads
+)
+target_link_libraries(
+  morsehgp3d_warm_context_benchmark_host_test
+  PRIVATE morsehgp3d::exact Threads::Threads
+)
+target_compile_definitions(
+  morsehgp3d_warm_context_benchmark_host_test
+  PRIVATE
+    MORSEHGP3D_WARM_CONTEXT_CASE_COUNT=9
+    MORSEHGP3D_WARM_CONTEXT_REPEAT_COUNT=3
 )
 
 set(
@@ -49,6 +69,7 @@ set(
   morsehgp3d_level_order_tests
   morsehgp3d_expansion_tests
   morsehgp3d_predicate_filter_context_tests
+  morsehgp3d_warm_context_benchmark_host_test
 )
 foreach(_morsehgp3d_cpu_test_target IN LISTS _morsehgp3d_cpu_test_targets)
   morsehgp3d_apply_sanitizers("${_morsehgp3d_cpu_test_target}")
@@ -67,6 +88,9 @@ if(MSVC)
   target_compile_options(morsehgp3d_expansion_tests PRIVATE /W4 /WX)
   target_compile_options(
     morsehgp3d_predicate_filter_context_tests PRIVATE /W4 /WX
+  )
+  target_compile_options(
+    morsehgp3d_warm_context_benchmark_host_test PRIVATE /W4 /WX
   )
 else()
   target_compile_options(
@@ -159,6 +183,16 @@ else()
       -Wsign-conversion
       -Werror
   )
+  target_compile_options(
+    morsehgp3d_warm_context_benchmark_host_test
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
 endif()
 
 add_test(NAME morsehgp3d.exact_types COMMAND morsehgp3d_exact_types_tests)
@@ -174,6 +208,13 @@ add_test(
 )
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
+add_test(
+  NAME morsehgp3d.warm_context_benchmark_host
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../configuration/check_warm_context_benchmark.py"
+    "$<TARGET_FILE:morsehgp3d_warm_context_benchmark_host_test>"
+)
 add_test(
   NAME morsehgp3d.phase3_build_configuration
   COMMAND

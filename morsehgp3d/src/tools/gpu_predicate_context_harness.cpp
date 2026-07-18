@@ -1,7 +1,9 @@
 #include "morsehgp3d/gpu/predicate_filter.hpp"
 
+#include <algorithm>
 #include <array>
 #include <bit>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
@@ -29,6 +31,22 @@ using morsehgp3d::gpu::decide_orientation_3d_batch_async;
 using morsehgp3d::gpu::decide_power_bisector_batch_async;
 using morsehgp3d::gpu::decide_squared_distance_batch_async;
 
+#ifndef MORSEHGP3D_WARM_CONTEXT_CASE_COUNT
+#define MORSEHGP3D_WARM_CONTEXT_CASE_COUNT 65536
+#endif
+
+#ifndef MORSEHGP3D_WARM_CONTEXT_REPEAT_COUNT
+#define MORSEHGP3D_WARM_CONTEXT_REPEAT_COUNT 31
+#endif
+
+constexpr std::size_t warm_context_case_count =
+    static_cast<std::size_t>(MORSEHGP3D_WARM_CONTEXT_CASE_COUNT);
+constexpr std::size_t warm_context_repeat_count =
+    static_cast<std::size_t>(MORSEHGP3D_WARM_CONTEXT_REPEAT_COUNT);
+constexpr std::size_t warm_context_warmup_repeats = 1U;
+static_assert(warm_context_case_count > 0U);
+static_assert(warm_context_repeat_count > 0U);
+
 struct Coverage {
   std::uint64_t batches{0U};
   std::uint64_t inputs{0U};
@@ -37,6 +55,29 @@ struct Coverage {
   std::uint64_t gpu_known_audited{0U};
   std::uint64_t fallback_batches{0U};
   std::uint64_t exact_zeros{0U};
+};
+
+struct BenchmarkCounters {
+  std::uint64_t async_fallback_batches{0U};
+  std::uint64_t cpu_expansion_certified{0U};
+  std::uint64_t cpu_fp64_filtered_certified{0U};
+  std::uint64_t cpu_multiprecision_certified{0U};
+  std::uint64_t exact_zeros{0U};
+  std::uint64_t gpu_fp64_certified{0U};
+  std::uint64_t gpu_inputs{0U};
+  std::uint64_t gpu_known_audited{0U};
+  std::uint64_t gpu_unknown_forwarded{0U};
+  std::uint64_t remaining_unknown{0U};
+};
+
+struct BenchmarkMeasurement {
+  BenchmarkCounters counters;
+  std::vector<std::uint64_t> samples_ns;
+  std::uint64_t mad_ns{0U};
+  std::uint64_t max_ns{0U};
+  std::uint64_t min_ns{0U};
+  std::uint64_t p50_ns{0U};
+  std::uint64_t p95_ns{0U};
 };
 
 [[noreturn]] void fail(std::string_view label, std::string_view detail) {
@@ -355,6 +396,240 @@ void require_complete_coverage(
   }
 }
 
+template <typename Counters>
+void validate_benchmark_counters(
+    const Counters& counters,
+    std::size_t expected_cases,
+    std::string_view label) {
+  const std::uint64_t expected_inputs =
+      static_cast<std::uint64_t>(expected_cases);
+  if (counters.gpu_inputs != expected_inputs) {
+    fail(label, "GPU input accounting does not match the benchmark batch");
+  }
+  if (counters.gpu_fp64_certified + counters.gpu_unknown_forwarded !=
+      counters.gpu_inputs) {
+    fail(label, "GPU tri-state accounting is not closed");
+  }
+  if (counters.cpu_fp64_filtered_certified +
+          counters.cpu_expansion_certified +
+          counters.cpu_multiprecision_certified !=
+      counters.gpu_unknown_forwarded) {
+    fail(label, "CPU fallback stage accounting is not closed");
+  }
+  if (counters.gpu_unknown_forwarded == 0U ||
+      counters.async_fallback_batches != 1U ||
+      counters.exact_zeros == 0U) {
+    fail(label, "the benchmark batch does not exercise explicit CPU fallback");
+  }
+  if (counters.gpu_known_audited != 0U) {
+    fail(label, "the warm benchmark unexpectedly enabled GPU-known auditing");
+  }
+  if (counters.remaining_unknown != 0U) {
+    fail(label, "the warm benchmark published an unknown decision");
+  }
+}
+
+void add_counter(std::uint64_t& total, std::uint64_t value) {
+  total += value;
+}
+
+template <typename Counters>
+void add_benchmark_counters(
+    BenchmarkCounters& total, const Counters& counters) {
+  add_counter(total.async_fallback_batches, counters.async_fallback_batches);
+  add_counter(
+      total.cpu_expansion_certified, counters.cpu_expansion_certified);
+  add_counter(
+      total.cpu_fp64_filtered_certified,
+      counters.cpu_fp64_filtered_certified);
+  add_counter(
+      total.cpu_multiprecision_certified,
+      counters.cpu_multiprecision_certified);
+  add_counter(total.exact_zeros, counters.exact_zeros);
+  add_counter(total.gpu_fp64_certified, counters.gpu_fp64_certified);
+  add_counter(total.gpu_inputs, counters.gpu_inputs);
+  add_counter(total.gpu_known_audited, counters.gpu_known_audited);
+  add_counter(total.gpu_unknown_forwarded, counters.gpu_unknown_forwarded);
+  add_counter(total.remaining_unknown, counters.remaining_unknown);
+}
+
+[[nodiscard]] std::uint64_t nearest_rank(
+    const std::vector<std::uint64_t>& sorted_samples,
+    std::size_t percentile) {
+  if (sorted_samples.empty() || percentile == 0U || percentile > 100U) {
+    fail("warm-context-percentile", "invalid nearest-rank request");
+  }
+  const std::size_t rank =
+      (sorted_samples.size() * percentile + 99U) / 100U;
+  return sorted_samples[rank - 1U];
+}
+
+[[nodiscard]] std::uint64_t absolute_difference(
+    std::uint64_t left, std::uint64_t right) noexcept {
+  return left >= right ? left - right : right - left;
+}
+
+template <typename BatchResult, typename Submit>
+[[nodiscard]] BenchmarkMeasurement measure_warm_context(
+    Submit&& submit, std::string_view label) {
+  for (std::size_t warmup = 0U;
+       warmup < warm_context_warmup_repeats;
+       ++warmup) {
+    const BatchResult result = submit();
+    if (result.decisions.size() != warm_context_case_count) {
+      fail(label, "warmup result cardinality changed");
+    }
+    validate_benchmark_counters(
+        result.counters, warm_context_case_count, label);
+  }
+
+  BenchmarkMeasurement measurement;
+  measurement.samples_ns.reserve(warm_context_repeat_count);
+  for (std::size_t repeat = 0U;
+       repeat < warm_context_repeat_count;
+       ++repeat) {
+    const auto started = std::chrono::steady_clock::now();
+    const BatchResult result = submit();
+    const auto stopped = std::chrono::steady_clock::now();
+    if (result.decisions.size() != warm_context_case_count) {
+      fail(label, "measured result cardinality changed");
+    }
+    validate_benchmark_counters(
+        result.counters, warm_context_case_count, label);
+    add_benchmark_counters(measurement.counters, result.counters);
+    const auto elapsed =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            stopped - started)
+            .count();
+    if (elapsed <= 0) {
+      fail(label, "steady-clock sample is not positive");
+    }
+    measurement.samples_ns.push_back(static_cast<std::uint64_t>(elapsed));
+  }
+  std::vector<std::uint64_t> sorted_samples = measurement.samples_ns;
+  std::sort(sorted_samples.begin(), sorted_samples.end());
+  measurement.min_ns = sorted_samples.front();
+  measurement.max_ns = sorted_samples.back();
+  measurement.p50_ns = nearest_rank(sorted_samples, 50U);
+  measurement.p95_ns = nearest_rank(sorted_samples, 95U);
+  std::vector<std::uint64_t> absolute_deviations;
+  absolute_deviations.reserve(sorted_samples.size());
+  for (const std::uint64_t sample : measurement.samples_ns) {
+    absolute_deviations.push_back(
+        absolute_difference(sample, measurement.p50_ns));
+  }
+  std::sort(absolute_deviations.begin(), absolute_deviations.end());
+  measurement.mad_ns = nearest_rank(absolute_deviations, 50U);
+  return measurement;
+}
+
+void write_benchmark_counters(
+    std::ostream& output, const BenchmarkCounters& counters) {
+  output
+      << "{\"async_fallback_batches\":" << counters.async_fallback_batches
+      << ",\"cpu_expansion_certified\":"
+      << counters.cpu_expansion_certified
+      << ",\"cpu_fp64_filtered_certified\":"
+      << counters.cpu_fp64_filtered_certified
+      << ",\"cpu_multiprecision_certified\":"
+      << counters.cpu_multiprecision_certified
+      << ",\"exact_zeros\":" << counters.exact_zeros
+      << ",\"gpu_fp64_certified\":" << counters.gpu_fp64_certified
+      << ",\"gpu_inputs\":" << counters.gpu_inputs
+      << ",\"gpu_known_audited\":" << counters.gpu_known_audited
+      << ",\"gpu_unknown_forwarded\":"
+      << counters.gpu_unknown_forwarded
+      << ",\"remaining_unknown\":" << counters.remaining_unknown << '}';
+}
+
+void write_benchmark_measurement(
+    std::ostream& output,
+    std::string_view predicate,
+    const BenchmarkMeasurement& measurement) {
+  output << "{\"counters\":";
+  write_benchmark_counters(output, measurement.counters);
+  output << ",\"mad_ns\":" << measurement.mad_ns
+         << ",\"max_ns\":" << measurement.max_ns
+         << ",\"min_ns\":" << measurement.min_ns
+         << ",\"p50_ns\":" << measurement.p50_ns
+         << ",\"p95_ns\":" << measurement.p95_ns
+         << ",\"predicate\":\"" << predicate << "\""
+         << ",\"samples_ns\":[";
+  for (std::size_t index = 0U;
+       index < measurement.samples_ns.size();
+       ++index) {
+    if (index != 0U) {
+      output << ',';
+    }
+    output << measurement.samples_ns[index];
+  }
+  output << "]}";
+}
+
+int run_warm_context_benchmark() {
+  // Generate immutable batches before the first warmup. Copies into the
+  // owning asynchronous API remain measured, while case generation does not.
+  const auto distance_inputs =
+      distance_batch(warm_context_case_count, 1000000000U, 101U);
+  const auto orientation_inputs =
+      orientation_batch(warm_context_case_count, 2000000000U, 103U);
+  const auto power_inputs =
+      power_batch(warm_context_case_count, 3000000000U, 107U);
+
+  PredicateFilterContext context;
+  constexpr SquaredDistanceBatchOptions distance_options{false};
+  constexpr Orientation3DBatchOptions orientation_options{false};
+  constexpr PowerBisectorBatchOptions power_options{false};
+  const BenchmarkMeasurement distance =
+      measure_warm_context<SquaredDistanceBatchResult>(
+          [&] {
+            return decide_squared_distance_batch_async(
+                       context, distance_inputs, distance_options)
+                .get();
+          },
+          "warm-context-distance");
+  const BenchmarkMeasurement orientation =
+      measure_warm_context<Orientation3DBatchResult>(
+          [&] {
+            return decide_orientation_3d_batch_async(
+                       context, orientation_inputs, orientation_options)
+                .get();
+          },
+          "warm-context-orientation");
+  const BenchmarkMeasurement power =
+      measure_warm_context<PowerBisectorBatchResult>(
+          [&] {
+            return decide_power_bisector_batch_async(
+                       context, power_inputs, power_options)
+                .get();
+          },
+          "warm-context-power");
+
+  std::ostream& output = std::cout;
+  output << "{\"audit_gpu_signs\":false,\"cases\":"
+         << warm_context_case_count
+         << ",\"fallback\":\"gpu_unknown_to_async_cpu_exact\""
+         << ",\"repeats\":" << warm_context_repeat_count
+         << ",\"results\":{\"distance\":";
+  write_benchmark_measurement(
+      output, "compare_squared_distances", distance);
+  output << ",\"orientation\":";
+  write_benchmark_measurement(output, "orientation_3d", orientation);
+  output << ",\"power\":";
+  write_benchmark_measurement(output, "power_bisector_side", power);
+  output
+      << "},\"schema\":\"morsehgp3d.phase2b.warm_context_e2e.v1\""
+      << ",\"scope\":\"warm_context_e2e\""
+      << ",\"timing_scope\":\"steady_clock_around_async_api_get_includes_"
+         "validation_packing_transfers_kernel_fallback_synchronization_"
+         "excludes_input_generation\""
+      << ",\"warmup_repeats\":" << warm_context_warmup_repeats << "}\n";
+  if (!output) {
+    throw std::runtime_error("warm resident context benchmark output failed");
+  }
+  return 0;
+}
+
 int run() {
   PredicateFilterContext primary;
   PredicateFilterContext secondary;
@@ -424,13 +699,18 @@ int run() {
 
 }  // namespace
 
-int main(int argc, char**) {
+int main(int argc, char** argv) {
   try {
-    if (argc != 1) {
-      throw std::invalid_argument(
-          "the resident context harness accepts no arguments");
+    if (argc == 1) {
+      return run();
     }
-    return run();
+    if (argc == 2 &&
+        std::string_view{argv[1]} == "--benchmark-warm-context-e2e") {
+      return run_warm_context_benchmark();
+    }
+    throw std::invalid_argument(
+        "the resident context harness accepts only "
+        "--benchmark-warm-context-e2e");
   } catch (const std::exception& error) {
     std::cerr << "Phase 2B resident context harness failed: "
               << error.what() << '\n';

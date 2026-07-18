@@ -521,6 +521,7 @@ def validate_sources(project: Path, repository: Path) -> None:
         "morsehgp3d_level_order_tests",
         "morsehgp3d_expansion_tests",
         "morsehgp3d_predicate_filter_context_tests",
+        "morsehgp3d_warm_context_benchmark_host_test",
     }
     sanitizer_block_match = re.search(
         r"set\(\s*_morsehgp3d_cpu_test_targets(?P<targets>.*?)\)\s*foreach",
