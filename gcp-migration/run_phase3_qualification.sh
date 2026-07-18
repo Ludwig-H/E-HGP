@@ -919,7 +919,7 @@ with path.open(encoding="utf-8") as stream:
 with Path(sys.argv[3]).open(encoding="utf-8") as stream:
     phase3 = json.load(stream)
 if not isinstance(value, dict) or value.get("schema") != (
-    "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v2"
+    "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v3"
 ):
     raise SystemExit("l'artefact spatial Phase 4 possède un schéma invalide")
 for key, expected in {
@@ -928,7 +928,7 @@ for key, expected in {
     "phase": "4",
     "profile": "hgp_reduced",
     "scientific_scope": (
-        "non_certifying_gpu_proposals_with_cpu_exact_reference_and_resident_lbvh_recertification"
+        "non_certifying_gpu_proposals_with_cpu_exact_reference_and_parallel_frontier_lbvh_recertification"
     ),
     "status": "worker_passed_pending_shutdown",
 }.items():
@@ -978,6 +978,7 @@ expected_check_keys = {
     "lbvh_cpu_exact_recertification_complete",
     "lbvh_differential",
     "lbvh_memcheck_differential",
+    "lbvh_racecheck",
     "quick_memcheck_differential",
 }
 if not isinstance(checks, dict) or set(checks) != expected_check_keys:
@@ -993,6 +994,7 @@ for field, expected in {
     "lbvh_aot_ptx_entry_count": 0,
     "lbvh_compute_sanitizer": "passed",
     "lbvh_cpu_exact_recertification_complete": True,
+    "lbvh_racecheck": "passed",
 }.items():
     if checks.get(field) != expected:
         raise SystemExit(f"contrôle spatial {field} invalide")
@@ -1056,20 +1058,35 @@ for field, scope, sizes, count in (
 required_lbvh_summary_keys = {
     "all_cases_passed",
     "bounded_protocol",
+    "campaign_complete",
+    "campaign_input_sha256",
+    "campaign_result_sha256",
+    "campaign_sizes_checked",
     "case_count",
     "certified_pruned_subtree_count",
+    "chunk_case_limit",
+    "chunk_count",
     "closed_ball_query_count",
     "cover_antichain_complete",
     "cpu_exact_recertification_complete",
     "decision_semantics",
     "directed_enclosure_coverage",
     "exact_partition_complete",
+    "gpu_kernel_launch_count",
     "gpu_launch_count",
+    "gpu_parallel_round_count",
+    "gpu_peak_frontier_count",
+    "gpu_processed_node_count",
+    "gpu_traversal_round_count",
+    "input_point_count",
+    "maximum_point_count",
     "point_partition_complete",
     "proposal_semantics",
     "schema",
+    "scope",
     "scientific_public_status",
     "scientific_result_claimed",
+    "targeted_case_count",
     "targeted_coverage",
     "top_k_query_count",
 }
@@ -1089,39 +1106,177 @@ required_lbvh_coverage = [
     "six_way_shell",
     "tri_partition",
 ]
-for field in ("lbvh_differential", "lbvh_memcheck_differential"):
+lbvh_summaries = {}
+for (
+    field,
+    scope,
+    campaign_complete,
+    campaign_sizes,
+    case_count,
+    gpu_launch_count,
+    input_point_count,
+    chunk_count,
+) in (
+    (
+        "lbvh_differential",
+        "full",
+        True,
+        list(range(1, 1001)),
+        1013,
+        2019,
+        500550,
+        8,
+    ),
+    (
+        "lbvh_memcheck_differential",
+        "quick",
+        False,
+        [1, 2, 3, 4, 17, 257, 1000],
+        20,
+        33,
+        1334,
+        1,
+    ),
+):
     summary = checks.get(field)
     if not isinstance(summary, dict) or set(summary) != required_lbvh_summary_keys:
         raise SystemExit(f"résumé LBVH résident {field} absent ou mal typé")
-    expected_scalars = {
-        "all_cases_passed": True,
-        "bounded_protocol": True,
-        "case_count": 13,
-        "closed_ball_query_count": 13,
-        "cover_antichain_complete": True,
-        "cpu_exact_recertification_complete": True,
-        "decision_semantics": "cpu_exact_cover_and_leaf_recertification",
-        "directed_enclosure_coverage": [
-            "enclosed",
-            "exact",
-            "unsupported_range",
-        ],
-        "exact_partition_complete": True,
-        "gpu_launch_count": 19,
-        "point_partition_complete": True,
-        "proposal_semantics": "gpu_resident_lbvh_strict_exterior_cover",
-        "schema": "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v1",
-        "scientific_public_status": None,
-        "scientific_result_claimed": False,
-        "targeted_coverage": required_lbvh_coverage,
-        "top_k_query_count": 13,
-    }
-    for key, expected in expected_scalars.items():
-        if summary.get(key) != expected:
+    if summary.get("schema") != (
+        "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v2"
+    ):
+        raise SystemExit(f"résumé LBVH résident {field}.schema invalide")
+    if summary.get("scope") != scope:
+        raise SystemExit(
+            f"résumé LBVH résident {field}.scope doit valoir {scope}"
+        )
+    for key in (
+        "all_cases_passed",
+        "bounded_protocol",
+        "cover_antichain_complete",
+        "cpu_exact_recertification_complete",
+        "exact_partition_complete",
+        "point_partition_complete",
+    ):
+        if summary.get(key) is not True:
             raise SystemExit(f"résumé LBVH résident {field}.{key} invalide")
+    if summary.get("campaign_complete") is not campaign_complete:
+        raise SystemExit(
+            f"résumé LBVH résident {field}.campaign_complete invalide"
+        )
+    if summary.get("scientific_result_claimed") is not False:
+        raise SystemExit(
+            f"résumé LBVH résident {field}.scientific_result_claimed invalide"
+        )
+    if summary.get("scientific_public_status") is not None:
+        raise SystemExit(
+            f"résumé LBVH résident {field}.scientific_public_status invalide"
+        )
+    if summary.get("decision_semantics") != (
+        "cpu_exact_cover_and_leaf_recertification"
+    ):
+        raise SystemExit(
+            f"résumé LBVH résident {field}.decision_semantics invalide"
+        )
+    if summary.get("proposal_semantics") != (
+        "gpu_resident_parallel_frontier_lbvh_strict_exterior_cover"
+    ):
+        raise SystemExit(
+            f"résumé LBVH résident {field}.proposal_semantics invalide"
+        )
+    if summary.get("directed_enclosure_coverage") != [
+        "enclosed",
+        "exact",
+        "unsupported_range",
+    ]:
+        raise SystemExit(
+            f"résumé LBVH résident {field}.directed_enclosure_coverage invalide"
+        )
+    if summary.get("targeted_coverage") != required_lbvh_coverage:
+        raise SystemExit(
+            f"résumé LBVH résident {field}.targeted_coverage invalide"
+        )
+    if summary.get("campaign_sizes_checked") != campaign_sizes:
+        raise SystemExit(
+            f"résumé LBVH résident {field}.campaign_sizes_checked invalide"
+        )
+    expected_integer_counts = {
+        "case_count": case_count,
+        "chunk_case_limit": 128,
+        "chunk_count": chunk_count,
+        "closed_ball_query_count": case_count,
+        "gpu_launch_count": gpu_launch_count,
+        "input_point_count": input_point_count,
+        "maximum_point_count": 1000,
+        "targeted_case_count": 13,
+        "top_k_query_count": case_count,
+    }
+    for key, expected in expected_integer_counts.items():
+        if type(summary.get(key)) is not int or summary[key] != expected:
+            raise SystemExit(
+                f"résumé LBVH résident {field}.{key} doit valoir {expected}"
+            )
+    for key in ("campaign_input_sha256", "campaign_result_sha256"):
+        if re.fullmatch(r"[0-9a-f]{64}", str(summary.get(key))) is None:
+            raise SystemExit(
+                f"résumé LBVH résident {field}.{key} non canonique"
+            )
     prunes = summary.get("certified_pruned_subtree_count")
     if type(prunes) is not int or prunes <= 0:
         raise SystemExit(f"résumé LBVH résident {field} sans prune certifié")
+    parallel_counts = {}
+    for key in (
+        "gpu_kernel_launch_count",
+        "gpu_parallel_round_count",
+        "gpu_peak_frontier_count",
+        "gpu_processed_node_count",
+        "gpu_traversal_round_count",
+    ):
+        count = summary.get(key)
+        if type(count) is not int or count <= 0:
+            raise SystemExit(
+                f"résumé LBVH résident {field}.{key} doit être strictement positif"
+            )
+        parallel_counts[key] = count
+    if parallel_counts["gpu_kernel_launch_count"] != parallel_counts[
+        "gpu_traversal_round_count"
+    ]:
+        raise SystemExit(
+            f"résumé LBVH résident {field}: kernels et rondes divergent"
+        )
+    if parallel_counts["gpu_parallel_round_count"] > parallel_counts[
+        "gpu_traversal_round_count"
+    ]:
+        raise SystemExit(
+            f"résumé LBVH résident {field}: trop de rondes parallèles"
+        )
+    if parallel_counts["gpu_traversal_round_count"] > parallel_counts[
+        "gpu_processed_node_count"
+    ]:
+        raise SystemExit(
+            f"résumé LBVH résident {field}: rondes supérieures aux nœuds"
+        )
+    if not 1 < parallel_counts["gpu_peak_frontier_count"] <= 1999:
+        raise SystemExit(
+            f"résumé LBVH résident {field}: pic de frontière hors bornes"
+        )
+    maximum_processed_nodes = 2 * (2 * input_point_count - case_count)
+    if not (
+        gpu_launch_count
+        <= parallel_counts["gpu_processed_node_count"]
+        <= maximum_processed_nodes
+    ):
+        raise SystemExit(
+            f"résumé LBVH résident {field}: nœuds traités hors bornes"
+        )
+    lbvh_summaries[scope] = summary
+if lbvh_summaries["full"]["campaign_input_sha256"] == lbvh_summaries[
+    "quick"
+]["campaign_input_sha256"]:
+    raise SystemExit("les racines d'entrée LBVH full et quick doivent différer")
+if lbvh_summaries["full"]["campaign_result_sha256"] == lbvh_summaries[
+    "quick"
+]["campaign_result_sha256"]:
+    raise SystemExit("les racines de résultat LBVH full et quick doivent différer")
 environment = value.get("environment")
 if not isinstance(environment, dict) or environment.get("compute_capability") != "12.0":
     raise SystemExit("environnement spatial absent ou incompatible")
@@ -1137,6 +1292,7 @@ if not isinstance(logs, dict) or set(logs) != {
     "lbvh_cuobjdump_ptx",
     "lbvh_cuobjdump_ptx_stderr",
     "lbvh_differential",
+    "lbvh_racecheck",
 }:
     raise SystemExit("journaux spatiaux absents ou incomplets")
 lifecycle = value.get("vm_lifecycle")

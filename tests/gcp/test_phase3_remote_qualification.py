@@ -691,13 +691,22 @@ def write_phase4_summary(path: Path, quick: bool):
     }
     path.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
 
-def write_phase4_lbvh_summary(path: Path):
+def write_phase4_lbvh_summary(path: Path, quick: bool):
+    sizes = [1, 2, 3, 4, 17, 257, 1000] if quick else list(range(1, 1001))
+    case_count = 20 if quick else 1013
+    gpu_launch_count = 33 if quick else 2019
     value = {
         "all_cases_passed": True,
         "bounded_protocol": True,
-        "case_count": 13,
-        "certified_pruned_subtree_count": 15,
-        "closed_ball_query_count": 13,
+        "campaign_complete": not quick,
+        "campaign_input_sha256": ("e" if quick else "c") * 64,
+        "campaign_result_sha256": ("f" if quick else "d") * 64,
+        "campaign_sizes_checked": sizes,
+        "case_count": case_count,
+        "certified_pruned_subtree_count": 15 if quick else 1000,
+        "chunk_case_limit": 128,
+        "chunk_count": 1 if quick else 8,
+        "closed_ball_query_count": case_count,
         "cover_antichain_complete": True,
         "cpu_exact_recertification_complete": True,
         "decision_semantics": "cpu_exact_cover_and_leaf_recertification",
@@ -707,12 +716,23 @@ def write_phase4_lbvh_summary(path: Path):
             "unsupported_range",
         ],
         "exact_partition_complete": True,
-        "gpu_launch_count": 19,
+        "gpu_kernel_launch_count": 200 if quick else 18171,
+        "gpu_launch_count": gpu_launch_count,
+        "gpu_parallel_round_count": 167 if quick else 16152,
+        "gpu_peak_frontier_count": 512,
+        "gpu_processed_node_count": 4000 if quick else 1500000,
+        "gpu_traversal_round_count": 200 if quick else 18171,
+        "input_point_count": 1334 if quick else 500550,
+        "maximum_point_count": 1000,
         "point_partition_complete": True,
-        "proposal_semantics": "gpu_resident_lbvh_strict_exterior_cover",
-        "schema": "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v1",
+        "proposal_semantics": (
+            "gpu_resident_parallel_frontier_lbvh_strict_exterior_cover"
+        ),
+        "schema": "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v2",
+        "scope": "quick" if quick else "full",
         "scientific_public_status": None,
         "scientific_result_claimed": False,
+        "targeted_case_count": 13,
         "targeted_coverage": [
             "addition_only_overflow",
             "cutoff_non_binary64",
@@ -729,7 +749,7 @@ def write_phase4_lbvh_summary(path: Path):
             "six_way_shell",
             "tri_partition",
         ],
-        "top_k_query_count": 13,
+        "top_k_query_count": case_count,
     }
     path.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
 
@@ -976,7 +996,7 @@ if Path(command[0]).name == "python3" and any(
     Path(item).name == "check_spatial_gpu_lbvh.py" for item in command
 ):
     summary = command[command.index("--summary-json") + 1]
-    write_phase4_lbvh_summary(result_path(summary))
+    write_phase4_lbvh_summary(result_path(summary), "--quick" in command)
     print("fake Phase 4 resident LBVH differential passed")
     raise SystemExit(0)
 
@@ -1021,9 +1041,17 @@ if Path(command[0]).name == "compute-sanitizer":
         print("========= ERROR SUMMARY: 0 errors")
         raise SystemExit(0)
     if any(Path(item).name == "check_spatial_gpu_lbvh.py" for item in command):
-        summary = command[command.index("--summary-json") + 1]
-        write_phase4_lbvh_summary(result_path(summary))
-        print("fake Phase 4 resident LBVH memcheck differential passed")
+        tool = command[command.index("--tool") + 1]
+        if tool == "memcheck":
+            summary = command[command.index("--summary-json") + 1]
+            write_phase4_lbvh_summary(
+                result_path(summary), "--quick" in command
+            )
+            print("fake Phase 4 resident LBVH memcheck differential passed")
+        elif tool == "racecheck":
+            print("fake Phase 4 resident LBVH racecheck passed")
+        else:
+            raise SystemExit("unexpected resident LBVH sanitizer tool: " + tool)
         print("========= ERROR SUMMARY: 0 errors")
         raise SystemExit(0)
     output = command[command.index("--output") + 1]
@@ -1508,7 +1536,7 @@ printf 'fake Blackwell preflight passed\\n'
             start_new_session=True,
         )
         try:
-            stdout, stderr = process.communicate(timeout=60)
+            stdout, stderr = process.communicate(timeout=90)
         except subprocess.TimeoutExpired:
             os.killpg(process.pid, signal.SIGKILL)
             process.communicate()
@@ -1887,7 +1915,7 @@ printf 'fake Blackwell preflight passed\\n'
         phase4 = json.loads(phase4_artifact.read_text(encoding="utf-8"))
         self.assertEqual("worker_passed_pending_shutdown", phase3["status"])
         self.assertEqual(
-            "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v2",
+            "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v3",
             phase4["schema"],
         )
         self.assertEqual("worker_passed_pending_shutdown", phase4["status"])
@@ -1896,14 +1924,59 @@ printf 'fake Blackwell preflight passed\\n'
             20,
             phase4["checks"]["quick_memcheck_differential"]["case_count"],
         )
-        self.assertEqual(13, phase4["checks"]["lbvh_differential"]["case_count"])
+        lbvh_full = phase4["checks"]["lbvh_differential"]
+        lbvh_quick = phase4["checks"]["lbvh_memcheck_differential"]
+        self.assertEqual("full", lbvh_full["scope"])
+        self.assertTrue(lbvh_full["campaign_complete"])
+        self.assertEqual(1013, lbvh_full["case_count"])
+        self.assertEqual(500550, lbvh_full["input_point_count"])
+        self.assertEqual(8, lbvh_full["chunk_count"])
         self.assertEqual(
-            19,
-            phase4["checks"]["lbvh_differential"]["gpu_launch_count"],
+            2019,
+            lbvh_full["gpu_launch_count"],
+        )
+        self.assertEqual(18171, lbvh_full["gpu_kernel_launch_count"])
+        self.assertEqual(18171, lbvh_full["gpu_traversal_round_count"])
+        self.assertEqual(16152, lbvh_full["gpu_parallel_round_count"])
+        self.assertEqual(512, lbvh_full["gpu_peak_frontier_count"])
+        self.assertEqual(1500000, lbvh_full["gpu_processed_node_count"])
+        self.assertEqual("quick", lbvh_quick["scope"])
+        self.assertFalse(lbvh_quick["campaign_complete"])
+        self.assertEqual(20, lbvh_quick["case_count"])
+        self.assertEqual(1334, lbvh_quick["input_point_count"])
+        self.assertEqual(1, lbvh_quick["chunk_count"])
+        self.assertEqual(33, lbvh_quick["gpu_launch_count"])
+        self.assertEqual(200, lbvh_quick["gpu_kernel_launch_count"])
+        self.assertEqual(200, lbvh_quick["gpu_traversal_round_count"])
+        self.assertEqual(167, lbvh_quick["gpu_parallel_round_count"])
+        self.assertEqual(512, lbvh_quick["gpu_peak_frontier_count"])
+        self.assertEqual(4000, lbvh_quick["gpu_processed_node_count"])
+        self.assertEqual(
+            "gpu_resident_parallel_frontier_lbvh_strict_exterior_cover",
+            lbvh_full["proposal_semantics"],
         )
         self.assertEqual(
-            13,
-            phase4["checks"]["lbvh_memcheck_differential"]["case_count"],
+            lbvh_full["proposal_semantics"],
+            lbvh_quick["proposal_semantics"],
+        )
+        self.assertRegex(lbvh_full["campaign_input_sha256"], r"^[0-9a-f]{64}$")
+        self.assertRegex(lbvh_full["campaign_result_sha256"], r"^[0-9a-f]{64}$")
+        self.assertRegex(lbvh_quick["campaign_input_sha256"], r"^[0-9a-f]{64}$")
+        self.assertRegex(lbvh_quick["campaign_result_sha256"], r"^[0-9a-f]{64}$")
+        self.assertNotEqual(
+            lbvh_full["campaign_input_sha256"],
+            lbvh_quick["campaign_input_sha256"],
+        )
+        self.assertNotEqual(
+            lbvh_full["campaign_result_sha256"],
+            lbvh_quick["campaign_result_sha256"],
+        )
+        self.assertEqual("passed", phase4["checks"]["lbvh_racecheck"])
+        self.assertIn("ERROR SUMMARY: 0 errors", phase4["logs"]["lbvh_racecheck"])
+        self.assertEqual(
+            "non_certifying_gpu_proposals_with_cpu_exact_reference_and_"
+            "parallel_frontier_lbvh_recertification",
+            phase4["scientific_scope"],
         )
         self.assertEqual(
             {
@@ -1924,6 +1997,35 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertIn("phase4-spatial-lbvh-cuobjdump-elf", log)
         self.assertIn("phase4-spatial-lbvh-cuobjdump-ptx", log)
         self.assertIn("phase4-spatial-lbvh-compute-sanitizer", log)
+        self.assertIn("phase4-spatial-lbvh-racecheck", log)
+        lbvh_checker_runs = [
+            line
+            for line in log.splitlines()
+            if line.startswith("DOCKER run ")
+            and "check_spatial_gpu_lbvh.py" in line
+        ]
+        self.assertEqual(3, len(lbvh_checker_runs))
+        full_runs = [
+            line
+            for line in lbvh_checker_runs
+            if "phase4-spatial-lbvh-differential.json" in line
+        ]
+        memcheck_runs = [
+            line
+            for line in lbvh_checker_runs
+            if "phase4-spatial-lbvh-memcheck.json" in line
+        ]
+        racecheck_runs = [
+            line for line in lbvh_checker_runs if "--tool racecheck" in line
+        ]
+        self.assertEqual(1, len(full_runs))
+        self.assertNotIn("--quick", full_runs[0])
+        self.assertEqual(1, len(memcheck_runs))
+        self.assertIn("--tool memcheck", memcheck_runs[0])
+        self.assertIn("--quick", memcheck_runs[0])
+        self.assertEqual(1, len(racecheck_runs))
+        self.assertIn("--quick", racecheck_runs[0])
+        self.assertNotIn("--summary-json", racecheck_runs[0])
         self.assert_no_partial_artifact()
 
     def test_symlinked_repository_build_mountpoint_is_refused(self) -> None:

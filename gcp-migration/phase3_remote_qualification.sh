@@ -550,6 +550,7 @@ readonly PHASE4_LBVH_ELF_LOG="${LOG_DIR}/phase4-spatial-lbvh-cuobjdump-elf.log"
 readonly PHASE4_LBVH_PTX_LOG="${LOG_DIR}/phase4-spatial-lbvh-cuobjdump-ptx.log"
 readonly PHASE4_LBVH_PTX_STDERR_LOG="${LOG_DIR}/phase4-spatial-lbvh-cuobjdump-ptx.stderr.log"
 readonly PHASE4_LBVH_SANITIZER_LOG="${LOG_DIR}/phase4-spatial-lbvh-compute-sanitizer.log"
+readonly PHASE4_LBVH_RACECHECK_LOG="${LOG_DIR}/phase4-spatial-lbvh-racecheck.log"
 readonly PHASE4_LBVH_DIFFERENTIAL_SUMMARY="${RESULT_DIR}/phase4-spatial-lbvh-differential.json"
 readonly PHASE4_LBVH_MEMCHECK_SUMMARY="${RESULT_DIR}/phase4-spatial-lbvh-memcheck.json"
 
@@ -1367,11 +1368,28 @@ if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
         --error-exitcode=86 \
         /usr/bin/python3 -B \
         "${PHASE4_LBVH_DIFFERENTIAL_PATH}" "${PHASE4_LBVH_REPLAY_PATH}" \
+        --quick \
         --timeout 300 \
         --summary-json "${CONTAINER_RESULTS}/phase4-spatial-lbvh-memcheck.json"; then
         report_failure_log "phase4-spatial-lbvh-compute-sanitizer" \
             "${PHASE4_LBVH_SANITIZER_LOG}"
         die "Le memcheck borné du replay LBVH résident Phase 4 a échoué."
+    fi
+
+    begin_unit "phase4-spatial-lbvh-racecheck"
+    if ! run_container "phase4-spatial-lbvh-racecheck" \
+        "${PHASE4_LBVH_RACECHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool racecheck \
+        --error-exitcode=86 \
+        /usr/bin/python3 -B \
+        "${PHASE4_LBVH_DIFFERENTIAL_PATH}" "${PHASE4_LBVH_REPLAY_PATH}" \
+        --quick \
+        --timeout 300; then
+        report_failure_log "phase4-spatial-lbvh-racecheck" \
+            "${PHASE4_LBVH_RACECHECK_LOG}"
+        die "Le racecheck borné du replay LBVH résident Phase 4 a échoué."
     fi
     [[ -s "${PHASE4_LBVH_DIFFERENTIAL_SUMMARY}" ]] || \
         die "Le différentiel LBVH résident n'a pas produit son résumé JSON."
@@ -1424,6 +1442,7 @@ if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
         --lbvh-ptx-log "${PHASE4_LBVH_PTX_LOG}" \
         --lbvh-ptx-stderr-log "${PHASE4_LBVH_PTX_STDERR_LOG}" \
         --lbvh-sanitizer-log "${PHASE4_LBVH_SANITIZER_LOG}" \
+        --lbvh-racecheck-log "${PHASE4_LBVH_RACECHECK_LOG}" \
         --lbvh-replay "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_spatial_lbvh_replay" \
         --lbvh-checker "${PHASE4_LBVH_DIFFERENTIAL}" \
         --output "${PHASE4_PUBLISH_TEMP}"

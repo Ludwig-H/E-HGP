@@ -497,13 +497,24 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
                 "top_k_query_count": count,
             }
 
-        def lbvh_summary():
+        def lbvh_summary(scope, sizes):
+            quick = scope == "quick"
+            count = 20 if quick else 1013
+            logical_launches = 33 if quick else 2019
+            input_points = 1334 if quick else 500550
+            chunks = 1 if quick else 8
             return {
                 "all_cases_passed": True,
                 "bounded_protocol": True,
-                "case_count": 13,
-                "certified_pruned_subtree_count": 15,
-                "closed_ball_query_count": 13,
+                "campaign_complete": not quick,
+                "campaign_input_sha256": ("3" if quick else "1") * 64,
+                "campaign_result_sha256": ("4" if quick else "2") * 64,
+                "campaign_sizes_checked": sizes,
+                "case_count": count,
+                "certified_pruned_subtree_count": 15 if quick else 1500,
+                "chunk_case_limit": 128,
+                "chunk_count": chunks,
+                "closed_ball_query_count": count,
                 "cover_antichain_complete": True,
                 "cpu_exact_recertification_complete": True,
                 "decision_semantics": "cpu_exact_cover_and_leaf_recertification",
@@ -513,12 +524,23 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
                     "unsupported_range",
                 ],
                 "exact_partition_complete": True,
-                "gpu_launch_count": 19,
+                "gpu_kernel_launch_count": 240 if quick else 12000,
+                "gpu_launch_count": logical_launches,
+                "gpu_parallel_round_count": 200 if quick else 10000,
+                "gpu_peak_frontier_count": 256 if quick else 512,
+                "gpu_processed_node_count": 4000 if quick else 1000000,
+                "gpu_traversal_round_count": 240 if quick else 12000,
+                "input_point_count": input_points,
+                "maximum_point_count": 1000,
                 "point_partition_complete": True,
-                "proposal_semantics": "gpu_resident_lbvh_strict_exterior_cover",
-                "schema": "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v1",
+                "proposal_semantics": (
+                    "gpu_resident_parallel_frontier_lbvh_strict_exterior_cover"
+                ),
+                "schema": "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v2",
+                "scope": scope,
                 "scientific_public_status": None,
                 "scientific_result_claimed": False,
+                "targeted_case_count": 13,
                 "targeted_coverage": [
                     "addition_only_overflow",
                     "cutoff_non_binary64",
@@ -535,7 +557,7 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
                     "six_way_shell",
                     "tri_partition",
                 ],
-                "top_k_query_count": 13,
+                "top_k_query_count": count,
             }
 
         artifact = {
@@ -558,8 +580,13 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
                 "lbvh_aot_ptx_entry_count": 0,
                 "lbvh_compute_sanitizer": "passed",
                 "lbvh_cpu_exact_recertification_complete": True,
-                "lbvh_differential": lbvh_summary(),
-                "lbvh_memcheck_differential": lbvh_summary(),
+                "lbvh_differential": lbvh_summary(
+                    "full", list(range(1, 1001))
+                ),
+                "lbvh_memcheck_differential": lbvh_summary(
+                    "quick", [1, 2, 3, 4, 17, 257, 1000]
+                ),
+                "lbvh_racecheck": "passed",
                 "quick_memcheck_differential": summary(
                     "quick", [1, 2, 3, 4, 17, 257, 1000]
                 ),
@@ -588,18 +615,19 @@ elif args[:2] == ["compute", "scp"] and scenario.startswith("qualification-"):
                 "lbvh_cuobjdump_ptx": "",
                 "lbvh_cuobjdump_ptx_stderr": "No PTX file found\n",
                 "lbvh_differential": "all resident LBVH Phase 4 cases passed\n",
+                "lbvh_racecheck": "========= ERROR SUMMARY: 0 errors\n",
             },
             "mode": "certified",
             "phase": "4",
             "profile": "hgp_reduced",
             "schema": (
-                "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v2"
+                "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v3"
             ),
             "scientific_public_status": None,
             "scientific_result_claimed": False,
             "scientific_scope": (
                 "non_certifying_gpu_proposals_with_cpu_exact_reference_and_"
-                "resident_lbvh_recertification"
+                "parallel_frontier_lbvh_recertification"
             ),
             "status": "worker_passed_pending_shutdown",
             "vm_lifecycle": {
@@ -2135,15 +2163,28 @@ class Phase3QualificationOrchestratorTests(unittest.TestCase):
             self.assertTrue(artifact["vm_lifecycle"]["targeted_stop_verified"])
         self.assertEqual("4", phase4["phase"])
         self.assertEqual(
-            "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v2",
+            "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v3",
             phase4["schema"],
         )
         self.assertEqual(1013, phase4["checks"]["differential"]["case_count"])
-        self.assertEqual(13, phase4["checks"]["lbvh_differential"]["case_count"])
         self.assertEqual(
-            19,
+            1013,
+            phase4["checks"]["lbvh_differential"]["case_count"],
+        )
+        self.assertEqual(
+            2019,
+            phase4["checks"]["lbvh_differential"]["gpu_launch_count"],
+        )
+        self.assertEqual(
+            20,
+            phase4["checks"]["lbvh_memcheck_differential"]["case_count"],
+        )
+        self.assertEqual(
+            33,
             phase4["checks"]["lbvh_memcheck_differential"]["gpu_launch_count"],
         )
+        self.assertEqual("passed", phase4["checks"]["lbvh_racecheck"])
+        self.assertIn("ERROR SUMMARY: 0 errors", phase4["logs"]["lbvh_racecheck"])
         self.assertEqual(
             {
                 "checker_sha256",

@@ -254,12 +254,22 @@ void write_audit(std::ostream& output, const SpatialLbvhAudit& audit) {
          << audit.excluded_candidate_point_count;
   output << ",\"gpu_candidate_leaf_count\":"
          << audit.gpu_candidate_leaf_count
+         << ",\"gpu_kernel_launch_count\":"
+         << audit.gpu_kernel_launch_count
          << ",\"gpu_launch_count\":" << audit.gpu_launch_count
          << ",\"gpu_output_capacity\":" << audit.gpu_output_capacity
          << ",\"gpu_output_cover_record_count\":"
          << audit.gpu_output_cover_record_count
+         << ",\"gpu_parallel_round_count\":"
+         << audit.gpu_parallel_round_count
+         << ",\"gpu_peak_frontier_count\":"
+         << audit.gpu_peak_frontier_count
+         << ",\"gpu_processed_node_count\":"
+         << audit.gpu_processed_node_count
          << ",\"gpu_prune_proposal_count\":"
          << audit.gpu_prune_proposal_count
+         << ",\"gpu_traversal_round_count\":"
+         << audit.gpu_traversal_round_count
          << ",\"internal_node_expansion_count\":"
          << audit.internal_node_expansion_count
          << ",\"minimum_certified_strict_margin\":";
@@ -362,7 +372,7 @@ void process_case(std::string_view line) {
   write_closed_ball(std::cout, ball.exact_partition);
   std::cout << ",\"closed_ball_audit\":";
   write_audit(std::cout, ball.audit);
-  std::cout << ",\"schema\":\"morsehgp3d.spatial_gpu_lbvh.v1\""
+  std::cout << ",\"schema\":\"morsehgp3d.spatial_gpu_lbvh.v2\""
             << ",\"top_k\":";
   write_top_k(std::cout, top.exact_partition);
   std::cout << ",\"top_k_audit\":";

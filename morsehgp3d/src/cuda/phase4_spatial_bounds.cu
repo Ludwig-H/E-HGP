@@ -276,6 +276,15 @@ class SpatialLbvhCudaResources final {
     check_cuda(
         cudaGetDevice(&device_),
         "cudaGetDevice for Phase 4 spatial-LBVH context creation");
+    cudaDeviceProp properties{};
+    check_cuda(
+        cudaGetDeviceProperties(&properties, device_),
+        "cudaGetDeviceProperties for Phase 4 spatial-LBVH context");
+    if (properties.maxGridSize[0] <= 0) {
+      throw std::runtime_error(
+          "the CUDA device exposes no one-dimensional LBVH grid");
+    }
+    maximum_grid_x_ = static_cast<unsigned int>(properties.maxGridSize[0]);
     check_cuda(
         cudaStreamCreateWithFlags(&stream_, cudaStreamNonBlocking),
         "cudaStreamCreateWithFlags for Phase 4 spatial-LBVH context");
@@ -293,9 +302,12 @@ class SpatialLbvhCudaResources final {
     }
     if (query_status != cudaSuccess ||
         (previous_device != device_ && !restore_device)) {
+      failure_code_.abandon();
+      next_frontier_count_.abandon();
       record_count_.abandon();
       records_.abandon();
-      traversal_stack_.abandon();
+      next_frontier_.abandon();
+      current_frontier_.abandon();
       nodes_.abandon();
       stream_ = nullptr;
       return;
@@ -303,9 +315,12 @@ class SpatialLbvhCudaResources final {
     if (stream_ != nullptr) {
       static_cast<void>(cudaStreamSynchronize(stream_));
     }
+    failure_code_.reset();
+    next_frontier_count_.reset();
     record_count_.reset();
     records_.reset();
-    traversal_stack_.reset();
+    next_frontier_.reset();
+    current_frontier_.reset();
     nodes_.reset();
     if (stream_ != nullptr) {
       static_cast<void>(cudaStreamDestroy(stream_));
@@ -319,8 +334,11 @@ class SpatialLbvhCudaResources final {
   void initialize_nodes(std::span<const SpatialLbvhNodeInputRecord> nodes) {
     if (node_count_ != 0U) {
       if (node_count_ != nodes.size() || nodes_.count() != nodes.size() ||
-          traversal_stack_.count() != nodes.size() ||
-          records_.count() != nodes.size() || record_count_.count() != 1U) {
+          current_frontier_.count() != nodes.size() ||
+          next_frontier_.count() != nodes.size() ||
+          records_.count() != nodes.size() || record_count_.count() != 1U ||
+          next_frontier_count_.count() != 1U ||
+          failure_code_.count() != 1U) {
         throw std::logic_error(
             "a Phase 4 spatial-LBVH context was reused with another tree");
       }
@@ -331,12 +349,18 @@ class SpatialLbvhCudaResources final {
           "a Phase 4 spatial-LBVH context requires at least one node");
     }
     nodes_.allocate(nodes.size(), "cudaMalloc Phase 4 spatial-LBVH nodes");
-    traversal_stack_.allocate(
-        nodes.size(), "cudaMalloc Phase 4 spatial-LBVH traversal stack");
+    current_frontier_.allocate(
+        nodes.size(), "cudaMalloc Phase 4 spatial-LBVH current frontier");
+    next_frontier_.allocate(
+        nodes.size(), "cudaMalloc Phase 4 spatial-LBVH next frontier");
     records_.allocate(
         nodes.size(), "cudaMalloc Phase 4 spatial-LBVH cover records");
     record_count_.allocate(
         1U, "cudaMalloc Phase 4 spatial-LBVH cover count");
+    next_frontier_count_.allocate(
+        1U, "cudaMalloc Phase 4 spatial-LBVH next-frontier count");
+    failure_code_.allocate(
+        1U, "cudaMalloc Phase 4 spatial-LBVH failure code");
     check_cuda(
         cudaMemcpyAsync(
             nodes_.get(),
@@ -354,14 +378,26 @@ class SpatialLbvhCudaResources final {
   [[nodiscard]] const SpatialLbvhNodeInputRecord* nodes() const noexcept {
     return nodes_.get();
   }
-  [[nodiscard]] std::uint64_t* traversal_stack() noexcept {
-    return traversal_stack_.get();
+  [[nodiscard]] std::uint64_t* current_frontier() noexcept {
+    return current_frontier_.get();
+  }
+  [[nodiscard]] std::uint64_t* next_frontier() noexcept {
+    return next_frontier_.get();
   }
   [[nodiscard]] SpatialLbvhCoverRecord* records() noexcept {
     return records_.get();
   }
   [[nodiscard]] std::uint64_t* record_count() noexcept {
     return record_count_.get();
+  }
+  [[nodiscard]] std::uint64_t* next_frontier_count() noexcept {
+    return next_frontier_count_.get();
+  }
+  [[nodiscard]] std::uint64_t* failure_code() noexcept {
+    return failure_code_.get();
+  }
+  [[nodiscard]] unsigned int maximum_grid_x() const noexcept {
+    return maximum_grid_x_;
   }
 
   void synchronize() {
@@ -379,11 +415,15 @@ class SpatialLbvhCudaResources final {
  private:
   int device_{-1};
   cudaStream_t stream_{nullptr};
+  unsigned int maximum_grid_x_{0U};
   std::size_t node_count_{0U};
   DeviceBuffer<SpatialLbvhNodeInputRecord> nodes_;
-  DeviceBuffer<std::uint64_t> traversal_stack_;
+  DeviceBuffer<std::uint64_t> current_frontier_;
+  DeviceBuffer<std::uint64_t> next_frontier_;
   DeviceBuffer<SpatialLbvhCoverRecord> records_;
   DeviceBuffer<std::uint64_t> record_count_;
+  DeviceBuffer<std::uint64_t> next_frontier_count_;
+  DeviceBuffer<std::uint64_t> failure_code_;
 };
 
 [[nodiscard]] SpatialLbvhCudaResources& lbvh_resources(
@@ -584,13 +624,41 @@ __global__ void morsehgp3d_phase4_spatial_bounds_kernel(
       kind};
 }
 
-__global__ void morsehgp3d_phase4_spatial_lbvh_cover_kernel(
-    const SpatialLbvhNodeInputRecord* nodes,
-    std::uint64_t* traversal_stack,
+__device__ void signal_lbvh_failure(
+    std::uint64_t* failure_code,
+    std::uint64_t code) noexcept {
+  static_assert(sizeof(std::uint64_t) == sizeof(unsigned long long));
+  static_cast<void>(atomicCAS(
+      reinterpret_cast<unsigned long long*>(failure_code),
+      0ULL,
+      static_cast<unsigned long long>(code)));
+}
+
+__device__ void append_lbvh_cover_record(
     SpatialLbvhCoverRecord* records,
     std::uint64_t* record_count,
+    std::uint64_t* failure_code,
     std::size_t node_count,
-    std::uint64_t root_index,
+    const SpatialLbvhCoverRecord& record) noexcept {
+  const unsigned long long position = atomicAdd(
+      reinterpret_cast<unsigned long long*>(record_count), 1ULL);
+  if (position >= static_cast<unsigned long long>(node_count)) {
+    signal_lbvh_failure(failure_code, UINT64_C(1));
+    return;
+  }
+  records[static_cast<std::size_t>(position)] = record;
+}
+
+__global__ void morsehgp3d_phase4_spatial_lbvh_frontier_kernel(
+    const SpatialLbvhNodeInputRecord* nodes,
+    const std::uint64_t* current_frontier,
+    std::uint64_t* next_frontier,
+    SpatialLbvhCoverRecord* records,
+    std::uint64_t* record_count,
+    std::uint64_t* next_frontier_count,
+    std::uint64_t* failure_code,
+    std::size_t node_count,
+    std::size_t current_frontier_count,
     std::uint64_t query_lower_x_bits,
     std::uint64_t query_lower_y_bits,
     std::uint64_t query_lower_z_bits,
@@ -599,10 +667,6 @@ __global__ void morsehgp3d_phase4_spatial_lbvh_cover_kernel(
     std::uint64_t query_upper_z_bits,
     std::uint64_t cutoff_lower_bits,
     std::uint64_t cutoff_upper_bits) {
-  if (blockIdx.x != 0U || threadIdx.x != 0U) {
-    return;
-  }
-
   const std::uint64_t query_lower_bits[kAxisCount]{
       query_lower_x_bits, query_lower_y_bits, query_lower_z_bits};
   const std::uint64_t query_upper_bits[kAxisCount]{
@@ -614,71 +678,85 @@ __global__ void morsehgp3d_phase4_spatial_lbvh_cover_kernel(
   const bool cutoff_valid = cutoff_bits_finite && cutoff_lower >= 0.0 &&
                             cutoff_lower <= cutoff_upper;
 
-  std::uint64_t stack_size = 1U;
-  std::uint64_t output_count = 0U;
-  traversal_stack[0] = root_index;
-  while (stack_size != 0U) {
-    const std::uint64_t node_index = traversal_stack[--stack_size];
-    if (node_index >= static_cast<std::uint64_t>(node_count) ||
-        output_count >= static_cast<std::uint64_t>(node_count)) {
-      if (output_count < static_cast<std::uint64_t>(node_count)) {
-        records[output_count++] = SpatialLbvhCoverRecord{
-            node_index,
-            UINT64_C(0),
-            kPositiveInfinityBits,
-            spatial_lbvh_cover_invalid_code};
+  const std::size_t first =
+      static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  const std::size_t stride =
+      static_cast<std::size_t>(gridDim.x) * blockDim.x;
+  std::size_t frontier_position = first;
+  while (frontier_position < current_frontier_count) {
+    const std::uint64_t node_index = current_frontier[frontier_position];
+    if (node_index >= static_cast<std::uint64_t>(node_count)) {
+      signal_lbvh_failure(failure_code, UINT64_C(2));
+      if (current_frontier_count - frontier_position <= stride) {
+        break;
       }
-      *record_count = output_count;
-      return;
+      frontier_position += stride;
+      continue;
     }
 
     const SpatialLbvhNodeInputRecord& node = nodes[node_index];
     const DirectedSquaredDistance distance = directed_squared_distance(
         node.bounds, query_lower_bits, query_upper_bits);
     if (distance.valid && cutoff_valid && distance.lower > cutoff_upper) {
-      records[output_count++] = lbvh_cover_record(
-          node_index, distance, spatial_lbvh_cover_prune_code);
-      continue;
-    }
-
-    const bool left_missing =
-        node.left_child == spatial_bounds_sentinel_code;
-    const bool right_missing =
-        node.right_child == spatial_bounds_sentinel_code;
-    if (left_missing && right_missing) {
-      const bool leaf_range_valid =
-          node.leaf_begin < node.leaf_end &&
-          node.leaf_end - node.leaf_begin == UINT64_C(1);
-      records[output_count++] = lbvh_cover_record(
-          node_index,
-          distance,
-          leaf_range_valid ? spatial_lbvh_cover_leaf_code
-                           : spatial_lbvh_cover_invalid_code);
-      if (!leaf_range_valid) {
-        *record_count = output_count;
-        return;
+      append_lbvh_cover_record(
+          records,
+          record_count,
+          failure_code,
+          node_count,
+          lbvh_cover_record(
+              node_index, distance, spatial_lbvh_cover_prune_code));
+    } else {
+      const bool left_missing =
+          node.left_child == spatial_bounds_sentinel_code;
+      const bool right_missing =
+          node.right_child == spatial_bounds_sentinel_code;
+      if (left_missing && right_missing) {
+        const bool leaf_range_valid =
+            node.leaf_begin < node.leaf_end &&
+            node.leaf_end - node.leaf_begin == UINT64_C(1);
+        if (!leaf_range_valid) {
+          signal_lbvh_failure(failure_code, UINT64_C(3));
+        } else {
+          append_lbvh_cover_record(
+              records,
+              record_count,
+              failure_code,
+              node_count,
+              lbvh_cover_record(
+                  node_index, distance, spatial_lbvh_cover_leaf_code));
+        }
+      } else {
+        const bool children_valid =
+            !left_missing && !right_missing &&
+            node.left_child < node_index && node.right_child < node_index &&
+            node.left_child != node.right_child &&
+            node.left_child < static_cast<std::uint64_t>(node_count) &&
+            node.right_child < static_cast<std::uint64_t>(node_count) &&
+            node_count >= 2U;
+        if (!children_valid) {
+          signal_lbvh_failure(failure_code, UINT64_C(4));
+        } else {
+          const unsigned long long next_position = atomicAdd(
+              reinterpret_cast<unsigned long long*>(next_frontier_count),
+              2ULL);
+          if (next_position >= static_cast<unsigned long long>(node_count) ||
+              static_cast<unsigned long long>(node_count) - next_position <
+                  UINT64_C(2)) {
+            signal_lbvh_failure(failure_code, UINT64_C(5));
+          } else {
+            next_frontier[static_cast<std::size_t>(next_position)] =
+                node.left_child;
+            next_frontier[static_cast<std::size_t>(next_position + 1U)] =
+                node.right_child;
+          }
+        }
       }
-      continue;
     }
-
-    const bool children_valid =
-        !left_missing && !right_missing &&
-        node.left_child < node_index && node.right_child < node_index &&
-        node.left_child != node.right_child &&
-        node.left_child < static_cast<std::uint64_t>(node_count) &&
-        node.right_child < static_cast<std::uint64_t>(node_count) &&
-        node_count >= 2U &&
-        stack_size <= static_cast<std::uint64_t>(node_count) - UINT64_C(2);
-    if (!children_valid) {
-      records[output_count++] = lbvh_cover_record(
-          node_index, distance, spatial_lbvh_cover_invalid_code);
-      *record_count = output_count;
-      return;
+    if (current_frontier_count - frontier_position <= stride) {
+      break;
     }
-    traversal_stack[stack_size++] = node.right_child;
-    traversal_stack[stack_size++] = node.left_child;
+    frontier_position += stride;
   }
-  *record_count = output_count;
 }
 
 }  // namespace
@@ -792,26 +870,121 @@ SpatialLbvhCoverBatch propose_strict_lbvh_cover_on_gpu(
             sizeof(std::uint64_t),
             cuda.stream()),
         "cudaMemsetAsync Phase 4 spatial-LBVH cover count");
-
-    morsehgp3d_phase4_spatial_lbvh_cover_kernel<<<1U, 1U, 0U, cuda.stream()>>>(
-        cuda.nodes(),
-        cuda.traversal_stack(),
-        cuda.records(),
-        cuda.record_count(),
-        nodes.size(),
-        static_cast<std::uint64_t>(root_index),
-        query_lower_bits[0],
-        query_lower_bits[1],
-        query_lower_bits[2],
-        query_upper_bits[0],
-        query_upper_bits[1],
-        query_upper_bits[2],
-        cutoff_lower_bits,
-        cutoff_upper_bits);
     check_cuda(
-        cudaGetLastError(), "Phase 4 spatial-LBVH cover launch");
+        cudaMemsetAsync(
+            cuda.failure_code(),
+            0,
+            sizeof(std::uint64_t),
+            cuda.stream()),
+        "cudaMemsetAsync Phase 4 spatial-LBVH failure code");
+
+    const std::uint64_t root_word = static_cast<std::uint64_t>(root_index);
+    check_cuda(
+        cudaMemcpyAsync(
+            cuda.current_frontier(),
+            &root_word,
+            sizeof(root_word),
+            cudaMemcpyHostToDevice,
+            cuda.stream()),
+        "cudaMemcpyAsync Phase 4 spatial-LBVH root host-to-device");
 
     SpatialLbvhCoverBatch batch;
+    std::uint64_t* current_frontier = cuda.current_frontier();
+    std::uint64_t* next_frontier = cuda.next_frontier();
+    std::size_t current_frontier_count = 1U;
+    while (current_frontier_count != 0U) {
+      if (current_frontier_count > nodes.size() ||
+          batch.traversal_round_count >= nodes.size() ||
+          batch.processed_node_count >
+              nodes.size() - current_frontier_count) {
+        throw std::runtime_error(
+            "the Phase 4 spatial-LBVH frontier exceeded its structural node bound");
+      }
+      ++batch.traversal_round_count;
+      ++batch.kernel_launch_count;
+      batch.processed_node_count += current_frontier_count;
+      batch.peak_frontier_count =
+          std::max(batch.peak_frontier_count, current_frontier_count);
+      if (current_frontier_count > 1U) {
+        ++batch.parallel_round_count;
+      }
+
+      check_cuda(
+          cudaMemsetAsync(
+              cuda.next_frontier_count(),
+              0,
+              sizeof(std::uint64_t),
+              cuda.stream()),
+          "cudaMemsetAsync Phase 4 spatial-LBVH next-frontier count");
+      const std::size_t required_blocks =
+          (current_frontier_count - 1U) / kThreadsPerBlock + 1U;
+      const std::size_t bounded_blocks = std::min(
+          required_blocks,
+          static_cast<std::size_t>(cuda.maximum_grid_x()));
+      if (bounded_blocks == 0U ||
+          bounded_blocks > std::numeric_limits<unsigned int>::max()) {
+        throw std::length_error(
+            "the Phase 4 spatial-LBVH CUDA grid is not representable");
+      }
+
+      morsehgp3d_phase4_spatial_lbvh_frontier_kernel
+          <<<static_cast<unsigned int>(bounded_blocks),
+             kThreadsPerBlock,
+             0U,
+             cuda.stream()>>>(
+              cuda.nodes(),
+              current_frontier,
+              next_frontier,
+              cuda.records(),
+              cuda.record_count(),
+              cuda.next_frontier_count(),
+              cuda.failure_code(),
+              nodes.size(),
+              current_frontier_count,
+              query_lower_bits[0],
+              query_lower_bits[1],
+              query_lower_bits[2],
+              query_upper_bits[0],
+              query_upper_bits[1],
+              query_upper_bits[2],
+              cutoff_lower_bits,
+              cutoff_upper_bits);
+      check_cuda(
+          cudaGetLastError(), "Phase 4 spatial-LBVH frontier launch");
+
+      std::uint64_t next_count_word = 0U;
+      std::uint64_t failure_code = 0U;
+      check_cuda(
+          cudaMemcpyAsync(
+              &next_count_word,
+              cuda.next_frontier_count(),
+              sizeof(next_count_word),
+              cudaMemcpyDeviceToHost,
+              cuda.stream()),
+          "cudaMemcpyAsync Phase 4 spatial-LBVH next-frontier count device-to-host");
+      check_cuda(
+          cudaMemcpyAsync(
+              &failure_code,
+              cuda.failure_code(),
+              sizeof(failure_code),
+              cudaMemcpyDeviceToHost,
+              cuda.stream()),
+          "cudaMemcpyAsync Phase 4 spatial-LBVH failure code device-to-host");
+      cuda.synchronize();
+      if (failure_code != 0U) {
+        throw std::runtime_error(
+            "the Phase 4 spatial-LBVH frontier kernel failed closed with code " +
+            std::to_string(failure_code));
+      }
+      if (!std::in_range<std::size_t>(next_count_word) ||
+          static_cast<std::size_t>(next_count_word) > nodes.size()) {
+        throw std::runtime_error(
+            "the Phase 4 spatial-LBVH next frontier exceeded node capacity");
+      }
+      current_frontier_count = static_cast<std::size_t>(next_count_word);
+      std::swap(current_frontier, next_frontier);
+    }
+
     batch.records.resize(nodes.size());
     std::uint64_t output_count = 0U;
     check_cuda(

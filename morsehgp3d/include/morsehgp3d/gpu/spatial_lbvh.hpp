@@ -17,12 +17,13 @@ class SpatialLbvhContextState;
 class SpatialLbvhHostState;
 }  // namespace detail
 
-// The device owns the immutable node topology, AABBs, traversal stack and
-// cover buffers.  A prune remains only a proposal until the host has rebuilt
-// the cover and checked the corresponding rational AABB bound exactly.
+// The device owns the immutable node topology, AABBs, two node-bounded
+// traversal frontiers and the cover buffer.  A prune remains only a proposal
+// until the host has rebuilt the cover and checked the corresponding rational
+// AABB bound exactly.
 struct SpatialLbvhAudit {
   static constexpr const char* proposal_semantics =
-      "gpu_resident_lbvh_strict_exterior_cover";
+      "gpu_resident_parallel_frontier_lbvh_strict_exterior_cover";
   static constexpr const char* decision_semantics =
       "cpu_exact_cover_and_leaf_recertification";
 
@@ -36,7 +37,14 @@ struct SpatialLbvhAudit {
   std::size_t gpu_output_cover_record_count{0U};
   std::size_t gpu_prune_proposal_count{0U};
   std::size_t gpu_candidate_leaf_count{0U};
+  // gpu_launch_count records one logical resident traversal.  The following
+  // counters expose the actual sequence of parallel frontier kernels.
   std::size_t gpu_launch_count{0U};
+  std::size_t gpu_kernel_launch_count{0U};
+  std::size_t gpu_traversal_round_count{0U};
+  std::size_t gpu_parallel_round_count{0U};
+  std::size_t gpu_peak_frontier_count{0U};
+  std::size_t gpu_processed_node_count{0U};
   std::size_t traversed_node_count{0U};
   std::size_t internal_node_expansion_count{0U};
   std::size_t cpu_exact_aabb_bound_evaluation_count{0U};

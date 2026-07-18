@@ -271,11 +271,12 @@ statut scientifique public :
   --result-dir /tmp/morsehgp3d-phase3-qualification
 ```
 
-Cette option ajoute le différentiel exact complet de la référence, le
-différentiel `Fraction` borné du LBVH résident, un passage sous
-`compute-sanitizer` et un audit AOT séparé pour chacun des deux replays. Le
-compagnon Phase 4 utilise le schéma combiné
-`morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v2`; les deux
+Cette option ajoute le différentiel exact complet de la référence, les 1 013
+cas `Fraction` du LBVH résident parallèle couvrant chaque taille de 1 à 1 000,
+un sous-ensemble borné distinct sous `memcheck`, un passage `racecheck` et un
+audit AOT séparé pour chacun des deux replays. Le compagnon Phase 4 utilise le
+schéma combiné
+`morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v3`; les deux
 artefacts restent provisoires jusqu'à la certification `TERMINATED` de la même
 cible et sont alors publiés sous `phase3-<SHA>.json` et
 `phase4-spatial-<SHA>.json`.

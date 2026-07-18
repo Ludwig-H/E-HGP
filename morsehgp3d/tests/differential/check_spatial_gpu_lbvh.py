@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 from fractions import Fraction
+import hashlib
 import importlib.util
 import json
 import math
@@ -14,13 +15,22 @@ import struct
 import subprocess
 import sys
 import tempfile
+import time
 from types import ModuleType
 
 
 PROTOCOL_HEADER = "morsehgp3d-spatial-gpu-lbvh-v1"
-RESULT_SCHEMA = "morsehgp3d.spatial_gpu_lbvh.v1"
-SUMMARY_SCHEMA = "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v1"
-DEFAULT_TIMEOUT_SECONDS = 120
+RESULT_SCHEMA = "morsehgp3d.spatial_gpu_lbvh.v2"
+SUMMARY_SCHEMA = "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v2"
+DEFAULT_TIMEOUT_SECONDS = 300
+CHUNK_CASE_LIMIT = 128
+PROTOCOL_MAXIMUM_POINT_COUNT = 4096
+PROTOCOL_MAXIMUM_LINE_BYTES = 1 << 20
+FULL_CAMPAIGN_SIZES = tuple(range(1, 1001))
+QUICK_CAMPAIGN_SIZES = (1, 2, 3, 4, 17, 257, 1000)
+TARGETED_CASE_COUNT = 13
+TARGETED_GPU_LAUNCH_COUNT = 19
+TARGETED_INPUT_POINT_COUNT = 50
 SIGN_BIT = 1 << 63
 EXPONENT_MASK = 0x7FF << 52
 MAXIMUM_FINITE_WORD = "7fefffffffffffff"
@@ -47,10 +57,15 @@ AUDIT_KEYS = {
     "exact_partition_complete",
     "excluded_candidate_point_count",
     "gpu_candidate_leaf_count",
+    "gpu_kernel_launch_count",
     "gpu_launch_count",
     "gpu_output_capacity",
     "gpu_output_cover_record_count",
+    "gpu_parallel_round_count",
+    "gpu_peak_frontier_count",
     "gpu_prune_proposal_count",
+    "gpu_processed_node_count",
+    "gpu_traversal_round_count",
     "internal_node_expansion_count",
     "minimum_certified_strict_margin",
     "point_partition_complete",
@@ -387,6 +402,46 @@ def all_cases(oracle: ModuleType) -> tuple[dict[str, object], ...]:
     )
 
 
+def campaign_case(oracle: ModuleType, size: int) -> dict[str, object]:
+    if size not in FULL_CAMPAIGN_SIZES:
+        raise AssertionError("a GPU-LBVH campaign size is outside 1..1000")
+    case = oracle.campaign_case(size)
+    expected = oracle.expected_scientific_result(case)
+    top_k = expected.get("top_k")
+    if not isinstance(top_k, dict):
+        raise AssertionError("the LBVH oracle omitted the campaign top-k result")
+    cutoff_record = top_k.get("cutoff_squared_distance")
+    if not isinstance(cutoff_record, dict) or set(cutoff_record) != {
+        "denominator",
+        "numerator",
+    }:
+        raise AssertionError("the LBVH oracle emitted an invalid campaign cutoff")
+    numerator = cutoff_record["numerator"]
+    denominator = cutoff_record["denominator"]
+    if not isinstance(numerator, str) or not isinstance(denominator, str):
+        raise AssertionError("the campaign cutoff fields must be decimal strings")
+    squared_radius = Fraction(int(numerator), int(denominator))
+    if squared_radius < 0 or {
+        "denominator": str(squared_radius.denominator),
+        "numerator": str(squared_radius.numerator),
+    } != cutoff_record:
+        raise AssertionError("the campaign cutoff is not a canonical exact level")
+    case["campaign_size"] = size
+    case["coverage"] = frozenset()
+    case["squared_radius"] = squared_radius
+    case["expected_top_k"] = top_k
+    return case
+
+
+def scoped_cases(
+    oracle: ModuleType, *, quick: bool
+):
+    yield from all_cases(oracle)
+    sizes = QUICK_CAMPAIGN_SIZES if quick else FULL_CAMPAIGN_SIZES
+    for size in sizes:
+        yield campaign_case(oracle, size)
+
+
 def case_protocol_line(case: dict[str, object]) -> str:
     source_points = case["source_points"]
     exclusion_ids = case["exclusion_ids"]
@@ -416,7 +471,11 @@ def case_protocol_line(case: dict[str, object]) -> str:
 def expected_scientific_result(
     case: dict[str, object], oracle: ModuleType
 ) -> dict[str, object]:
-    top_k = oracle.expected_scientific_result(case)["top_k"]
+    top_k = case.get("expected_top_k")
+    if top_k is None:
+        top_k = oracle.expected_scientific_result(case)["top_k"]
+    if not isinstance(top_k, dict):
+        raise AssertionError("invalid cached top-k oracle result")
     points = oracle.canonicalize_points(case["source_points"])
     query = oracle.query_point(case["query"])
     radius = case["squared_radius"]
@@ -579,7 +638,9 @@ def validate_audit(
     eligible_count = point_count - len(exclusions)
     query = oracle.query_point(query_components)
 
-    if audit["proposal_semantics"] != "gpu_resident_lbvh_strict_exterior_cover":
+    if audit["proposal_semantics"] != (
+        "gpu_resident_parallel_frontier_lbvh_strict_exterior_cover"
+    ):
         raise AssertionError(f"{kind} proposal semantics changed")
     if audit["decision_semantics"] != "cpu_exact_cover_and_leaf_recertification":
         raise AssertionError(f"{kind} decision semantics changed")
@@ -667,6 +728,36 @@ def validate_audit(
     digest = bits_word(audit["proposal_digest_fnv1a"], f"{kind}.digest")
     margin = audit["minimum_certified_strict_margin"]
     if supported:
+        if counts["gpu_kernel_launch_count"] == 0:
+            raise AssertionError(f"{kind} launched no traversal kernel")
+        if (
+            counts["gpu_kernel_launch_count"]
+            != counts["gpu_traversal_round_count"]
+        ):
+            raise AssertionError(f"{kind} kernel/round accounting is wrong")
+        if counts["gpu_processed_node_count"] != counts["traversed_node_count"]:
+            raise AssertionError(f"{kind} processed/traversed nodes differ")
+        if not (
+            1
+            <= counts["gpu_traversal_round_count"]
+            <= counts["gpu_processed_node_count"]
+        ):
+            raise AssertionError(f"{kind} traversal round count is impossible")
+        if not (
+            1
+            <= counts["gpu_peak_frontier_count"]
+            <= counts["gpu_processed_node_count"]
+        ):
+            raise AssertionError(f"{kind} peak frontier count is impossible")
+        if (
+            counts["gpu_parallel_round_count"]
+            > counts["gpu_traversal_round_count"]
+        ):
+            raise AssertionError(f"{kind} parallel round count is impossible")
+        if (counts["gpu_peak_frontier_count"] > 1) != (
+            counts["gpu_parallel_round_count"] > 0
+        ):
+            raise AssertionError(f"{kind} parallel frontier accounting is wrong")
         if counts["gpu_output_cover_record_count"] == 0:
             raise AssertionError(f"{kind} launched an empty cover")
         if counts["gpu_candidate_leaf_count"] != counts["candidate_point_count"]:
@@ -708,9 +799,14 @@ def validate_audit(
             "cpu_exact_aabb_bound_evaluation_count",
             "cpu_exact_prune_recertification_count",
             "gpu_candidate_leaf_count",
+            "gpu_kernel_launch_count",
             "gpu_launch_count",
             "gpu_output_cover_record_count",
+            "gpu_parallel_round_count",
+            "gpu_peak_frontier_count",
             "gpu_prune_proposal_count",
+            "gpu_processed_node_count",
+            "gpu_traversal_round_count",
             "internal_node_expansion_count",
             "traversed_node_count",
         }
@@ -873,64 +969,205 @@ def write_summary(path: Path, value: dict[str, object]) -> None:
 
 
 def run_differential(
-    executable: Path, timeout_seconds: int
+    executable: Path, timeout_seconds: int, *, quick: bool = False
 ) -> dict[str, object]:
+    deadline = time.monotonic() + timeout_seconds
+
+    def remaining_seconds() -> float:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0.0:
+            raise subprocess.TimeoutExpired(str(executable), timeout_seconds)
+        return remaining
+
     oracle = load_lbvh_oracle()
-    cases = all_cases(oracle)
-    if len(cases) > 256 or any(len(case["source_points"]) > 4096 for case in cases):
-        raise AssertionError("the differential exceeds its bounded replay protocol")
-    payload = "\n".join(
-        [PROTOCOL_HEADER, *(case_protocol_line(case) for case in cases), "end", ""]
+    expected_sizes = QUICK_CAMPAIGN_SIZES if quick else FULL_CAMPAIGN_SIZES
+    expected_case_count = TARGETED_CASE_COUNT + len(expected_sizes)
+    expected_gpu_launch_count = (
+        TARGETED_GPU_LAUNCH_COUNT + 2 * len(expected_sizes)
     )
-    completed = subprocess.run(
-        [str(executable)],
-        input=payload,
-        text=True,
-        capture_output=True,
-        timeout=timeout_seconds,
-        check=False,
-    )
-    if completed.returncode != 0:
-        raise AssertionError(
-            f"GPU-LBVH replay failed with {completed.returncode}: "
-            f"{completed.stderr.strip()}"
-        )
-    if completed.stderr:
-        raise AssertionError(f"GPU-LBVH replay wrote stderr: {completed.stderr!r}")
-    output_lines = completed.stdout.splitlines()
-    if len(output_lines) != len(cases):
-        raise AssertionError(
-            f"expected {len(cases)} GPU-LBVH results, got {len(output_lines)}"
-        )
+    expected_chunk_count = (
+        expected_case_count + CHUNK_CASE_LIMIT - 1
+    ) // CHUNK_CASE_LIMIT
+    expected_input_point_count = TARGETED_INPUT_POINT_COUNT + sum(expected_sizes)
 
     coverage: set[str] = set()
     enclosure_coverage: set[str] = set()
+    checked_sizes: set[int] = set()
     certified_prune_count = 0
+    gpu_kernel_launch_count = 0
     gpu_launch_count = 0
-    results: list[dict[str, object]] = []
-    for line, case in zip(output_lines, cases, strict=True):
-        actual = oracle.strict_json_object(line)
-        if line != oracle.canonical_json(actual):
-            raise AssertionError(f"case {case['case_id']} output is not canonical JSON")
-        try:
-            case_enclosures, case_prunes = validate_case_result(actual, case, oracle)
-        except AssertionError as error:
-            raise AssertionError(
-                f"case {case['case_id']} ({case['label']}): {error}"
-            ) from error
-        results.append(actual)
-        coverage.update(case["coverage"])
-        enclosure_coverage.update(case_enclosures)
-        certified_prune_count += case_prunes
-        for audit_key in ("top_k_audit", "closed_ball_audit"):
-            audit = actual[audit_key]
-            if not isinstance(audit, dict):
-                raise AssertionError(f"{audit_key} is not an object")
-            launches = audit["gpu_launch_count"]
-            if type(launches) is not int or launches not in (0, 1):
-                raise AssertionError(f"{audit_key} has an invalid launch count")
-            gpu_launch_count += launches
+    gpu_parallel_round_count = 0
+    gpu_peak_frontier_count = 0
+    gpu_processed_node_count = 0
+    gpu_traversal_round_count = 0
+    case_count = 0
+    chunk_count = 0
+    input_point_count = 0
+    maximum_point_count = 0
+    deterministic_pair: dict[int, dict[str, object]] = {}
+    input_hasher = hashlib.sha256(
+        b"morsehgp3d.phase4.spatial_gpu_lbvh.ordered_cases.v1\n"
+    )
+    result_hasher = hashlib.sha256(
+        b"morsehgp3d.phase4.spatial_gpu_lbvh.ordered_results.v1\n"
+    )
 
+    cases = iter(scoped_cases(oracle, quick=quick))
+    while True:
+        chunk: list[dict[str, object]] = []
+        while len(chunk) < CHUNK_CASE_LIMIT:
+            remaining_seconds()
+            try:
+                case = next(cases)
+            except StopIteration:
+                break
+            remaining_seconds()
+            chunk.append(case)
+        if not chunk:
+            break
+        if len(chunk) > CHUNK_CASE_LIMIT:
+            raise AssertionError("a GPU-LBVH chunk exceeds its case bound")
+        chunk_count += 1
+
+        protocol_lines: list[str] = []
+        for case in chunk:
+            source_points = case["source_points"]
+            if not isinstance(source_points, tuple):
+                raise AssertionError("a generated case has invalid source points")
+            point_count = len(source_points)
+            if not 1 <= point_count <= PROTOCOL_MAXIMUM_POINT_COUNT:
+                raise AssertionError("a case exceeds the bounded point protocol")
+            protocol_line = case_protocol_line(case)
+            if len(protocol_line.encode("utf-8")) > PROTOCOL_MAXIMUM_LINE_BYTES:
+                raise AssertionError("a case exceeds the bounded line protocol")
+            protocol_lines.append(protocol_line)
+            input_hasher.update(protocol_line.encode("utf-8"))
+            input_hasher.update(b"\n")
+            input_point_count += point_count
+            maximum_point_count = max(maximum_point_count, point_count)
+
+        payload = "\n".join(
+            [PROTOCOL_HEADER, *protocol_lines, "end", ""]
+        )
+        completed = subprocess.run(
+            [str(executable)],
+            input=payload,
+            text=True,
+            capture_output=True,
+            timeout=remaining_seconds(),
+            check=False,
+        )
+        if completed.returncode != 0:
+            raise AssertionError(
+                f"GPU-LBVH replay chunk {chunk_count} failed with "
+                f"{completed.returncode}: {completed.stderr.strip()}"
+            )
+        if completed.stderr:
+            raise AssertionError(
+                f"GPU-LBVH replay chunk {chunk_count} wrote stderr: "
+                f"{completed.stderr!r}"
+            )
+        output_lines = completed.stdout.splitlines()
+        if len(output_lines) != len(chunk):
+            raise AssertionError(
+                f"expected {len(chunk)} GPU-LBVH results in chunk "
+                f"{chunk_count}, got {len(output_lines)}"
+            )
+
+        for line, case in zip(output_lines, chunk, strict=True):
+            remaining_seconds()
+            actual = oracle.strict_json_object(line)
+            if line != oracle.canonical_json(actual):
+                raise AssertionError(
+                    f"case {case['case_id']} output is not canonical JSON"
+                )
+            try:
+                case_enclosures, case_prunes = validate_case_result(
+                    actual, case, oracle
+                )
+            except AssertionError as error:
+                raise AssertionError(
+                    f"case {case['case_id']} ({case['label']}): {error}"
+                ) from error
+            remaining_seconds()
+
+            result_hasher.update(line.encode("utf-8"))
+            result_hasher.update(b"\n")
+            coverage.update(case["coverage"])
+            enclosure_coverage.update(case_enclosures)
+            certified_prune_count += case_prunes
+            case_count += 1
+
+            campaign_size = case.get("campaign_size")
+            if campaign_size is not None:
+                if type(campaign_size) is not int or campaign_size not in expected_sizes:
+                    raise AssertionError("a campaign case has an unexpected size")
+                if campaign_size in checked_sizes:
+                    raise AssertionError("a campaign size was replayed twice")
+                checked_sizes.add(campaign_size)
+
+            case_id = case["case_id"]
+            if case_id in (50_002, 50_013):
+                if not isinstance(case_id, int) or case_id in deterministic_pair:
+                    raise AssertionError("the deterministic pair is not unique")
+                deterministic_pair[case_id] = actual
+
+            for audit_key in ("top_k_audit", "closed_ball_audit"):
+                audit = actual[audit_key]
+                if not isinstance(audit, dict):
+                    raise AssertionError(f"{audit_key} is not an object")
+                launches = audit["gpu_launch_count"]
+                if type(launches) is not int or launches not in (0, 1):
+                    raise AssertionError(
+                        f"{audit_key} has an invalid logical launch count"
+                    )
+                gpu_launch_count += launches
+                gpu_kernel_launch_count += require_nonnegative_integer(
+                    audit["gpu_kernel_launch_count"],
+                    f"{audit_key}.gpu_kernel_launch_count",
+                )
+                gpu_parallel_round_count += require_nonnegative_integer(
+                    audit["gpu_parallel_round_count"],
+                    f"{audit_key}.gpu_parallel_round_count",
+                )
+                gpu_peak_frontier_count = max(
+                    gpu_peak_frontier_count,
+                    require_nonnegative_integer(
+                        audit["gpu_peak_frontier_count"],
+                        f"{audit_key}.gpu_peak_frontier_count",
+                    ),
+                )
+                gpu_processed_node_count += require_nonnegative_integer(
+                    audit["gpu_processed_node_count"],
+                    f"{audit_key}.gpu_processed_node_count",
+                )
+                gpu_traversal_round_count += require_nonnegative_integer(
+                    audit["gpu_traversal_round_count"],
+                    f"{audit_key}.gpu_traversal_round_count",
+                )
+
+    expected_size_set = set(expected_sizes)
+    if case_count != expected_case_count:
+        raise AssertionError(
+            f"expected {expected_case_count} cases, got {case_count}"
+        )
+    if checked_sizes != expected_size_set:
+        missing = sorted(expected_size_set - checked_sizes)
+        unexpected = sorted(checked_sizes - expected_size_set)
+        raise AssertionError(
+            f"campaign sizes differ: missing={missing}, unexpected={unexpected}"
+        )
+    if chunk_count != expected_chunk_count:
+        raise AssertionError(
+            f"expected {expected_chunk_count} chunks, got {chunk_count}"
+        )
+    if input_point_count != expected_input_point_count:
+        raise AssertionError(
+            f"expected {expected_input_point_count} cumulative input points, "
+            f"got {input_point_count}"
+        )
+    if maximum_point_count != max(expected_sizes):
+        raise AssertionError("the campaign maximum point count is wrong")
     if coverage != REQUIRED_COVERAGE:
         raise AssertionError(f"targeted coverage differs: {sorted(coverage)}")
     if enclosure_coverage != {"enclosed", "exact", "unsupported_range"}:
@@ -939,38 +1176,66 @@ def run_differential(
         )
     if certified_prune_count == 0:
         raise AssertionError("the bounded campaign certified no strict subtree prune")
-    first = results[1]
-    repeated = results[-1]
+    if gpu_launch_count != expected_gpu_launch_count:
+        raise AssertionError(
+            f"expected {expected_gpu_launch_count} logical GPU traversals, "
+            f"got {gpu_launch_count}"
+        )
+    if gpu_kernel_launch_count != gpu_traversal_round_count:
+        raise AssertionError("aggregate kernel/round accounting differs")
+
+    first = deterministic_pair.get(50_002)
+    repeated = deterministic_pair.get(50_013)
+    if first is None or repeated is None:
+        raise AssertionError("the deterministic permutation pair is incomplete")
     for key in ("closed_ball", "closed_ball_audit", "top_k", "top_k_audit"):
         if first[key] != repeated[key]:
             raise AssertionError(f"permuted input changed deterministic {key}")
 
+    scope = "quick" if quick else "full"
     print(
         "spatial CUDA resident LBVH differential: "
-        f"{len(cases)} bounded Fraction cases passed; "
-        f"certified_subtree_prunes={certified_prune_count}, "
-        "top-k/closed-ball exact partitions and "
-        "exact/enclosed/unsupported-range audits covered"
+        f"{case_count} bounded Fraction cases passed; scope={scope}, "
+        f"chunks={chunk_count}, sizes={len(checked_sizes)}, "
+        f"logical_traversals={gpu_launch_count}, "
+        f"certified_subtree_prunes={certified_prune_count}"
     )
     return {
         "all_cases_passed": True,
         "bounded_protocol": True,
-        "case_count": len(cases),
+        "campaign_complete": not quick,
+        "campaign_input_sha256": input_hasher.hexdigest(),
+        "campaign_result_sha256": result_hasher.hexdigest(),
+        "campaign_sizes_checked": sorted(checked_sizes),
+        "case_count": case_count,
         "certified_pruned_subtree_count": certified_prune_count,
-        "closed_ball_query_count": len(cases),
+        "chunk_case_limit": CHUNK_CASE_LIMIT,
+        "chunk_count": chunk_count,
+        "closed_ball_query_count": case_count,
         "cover_antichain_complete": True,
         "cpu_exact_recertification_complete": True,
         "decision_semantics": "cpu_exact_cover_and_leaf_recertification",
         "directed_enclosure_coverage": sorted(enclosure_coverage),
         "exact_partition_complete": True,
+        "gpu_kernel_launch_count": gpu_kernel_launch_count,
         "gpu_launch_count": gpu_launch_count,
+        "gpu_parallel_round_count": gpu_parallel_round_count,
+        "gpu_peak_frontier_count": gpu_peak_frontier_count,
+        "gpu_processed_node_count": gpu_processed_node_count,
+        "gpu_traversal_round_count": gpu_traversal_round_count,
+        "input_point_count": input_point_count,
+        "maximum_point_count": maximum_point_count,
         "point_partition_complete": True,
-        "proposal_semantics": "gpu_resident_lbvh_strict_exterior_cover",
+        "proposal_semantics": (
+            "gpu_resident_parallel_frontier_lbvh_strict_exterior_cover"
+        ),
         "schema": SUMMARY_SCHEMA,
+        "scope": scope,
         "scientific_public_status": None,
         "scientific_result_claimed": False,
+        "targeted_case_count": TARGETED_CASE_COUNT,
         "targeted_coverage": sorted(coverage),
-        "top_k_query_count": len(cases),
+        "top_k_query_count": case_count,
     }
 
 
@@ -979,6 +1244,11 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("executable", type=Path)
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--summary-json", type=Path)
+    parser.add_argument(
+        "--quick",
+        action="store_true",
+        help="run the bounded sanitizer subset instead of every size 1..1000",
+    )
     return parser.parse_args()
 
 
@@ -986,7 +1256,9 @@ def main() -> int:
     arguments = parse_arguments()
     if arguments.timeout <= 0:
         raise ValueError("--timeout must be positive")
-    summary = run_differential(arguments.executable, arguments.timeout)
+    summary = run_differential(
+        arguments.executable, arguments.timeout, quick=arguments.quick
+    )
     if arguments.summary_json is not None:
         write_summary(arguments.summary_json, summary)
     return 0

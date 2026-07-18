@@ -75,6 +75,11 @@ struct SpatialLbvhCoverBatch {
   // sentinels so stale records cannot escape a smaller subsequent traversal.
   std::vector<SpatialLbvhCoverRecord> records;
   std::size_t record_count{0U};
+  std::size_t kernel_launch_count{0U};
+  std::size_t traversal_round_count{0U};
+  std::size_t parallel_round_count{0U};
+  std::size_t peak_frontier_count{0U};
+  std::size_t processed_node_count{0U};
   std::uint64_t buffer_epoch{0U};
 };
 

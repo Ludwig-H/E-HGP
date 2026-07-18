@@ -12,15 +12,16 @@ import re
 from typing import Any, NoReturn
 
 
-SCHEMA = "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v2"
+SCHEMA = "morsehgp3d.phase4.spatial_gpu_reference_and_lbvh_qualification.v3"
 SUMMARY_SCHEMA = "morsehgp3d.phase4.spatial_gpu_differential.v1"
-LBVH_SUMMARY_SCHEMA = "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v1"
+LBVH_SUMMARY_SCHEMA = "morsehgp3d.phase4.spatial_gpu_lbvh_differential.v2"
 PHASE3_SCHEMA = "morsehgp3d.phase3.qualification.v1"
 BASE_IMAGE_REF = (
     "nvidia/cuda:12.9.2-devel-ubuntu24.04@"
     "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
 )
 SHA_RE = re.compile(r"[0-9a-f]{40}\Z")
+SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
 IMAGE_ID_RE = re.compile(r"sha256:[0-9a-f]{64}\Z")
 SM_RE = re.compile(r"sm_[0-9]+")
 SANITIZER_ERROR_RE = re.compile(r"ERROR SUMMARY:\s*([0-9]+) errors")
@@ -42,8 +43,17 @@ REQUIRED_PROJECTION_COVERAGE = [
     "rounded",
     "underflow",
 ]
-LBVH_CASE_COUNT = 13
-LBVH_GPU_LAUNCH_COUNT = 19
+LBVH_TARGETED_CASE_COUNT = 13
+LBVH_CHUNK_CASE_LIMIT = 128
+LBVH_FULL_CASE_COUNT = 1013
+LBVH_FULL_GPU_LAUNCH_COUNT = 2019
+LBVH_FULL_INPUT_POINT_COUNT = 500550
+LBVH_FULL_CHUNK_COUNT = 8
+LBVH_QUICK_CASE_COUNT = 20
+LBVH_QUICK_GPU_LAUNCH_COUNT = 33
+LBVH_QUICK_INPUT_POINT_COUNT = 1334
+LBVH_QUICK_CHUNK_COUNT = 1
+LBVH_MAXIMUM_POINT_COUNT = 1000
 REQUIRED_LBVH_DIRECTED_ENCLOSURE_COVERAGE = [
     "enclosed",
     "exact",
@@ -195,27 +205,42 @@ def validate_summary(
 
 
 def validate_lbvh_summary(
-    value: dict[str, Any], *, label: str
+    value: dict[str, Any], *, quick: bool, label: str
 ) -> dict[str, Any]:
     require_exact_keys(
         value,
         {
             "all_cases_passed",
             "bounded_protocol",
+            "campaign_complete",
+            "campaign_input_sha256",
+            "campaign_result_sha256",
+            "campaign_sizes_checked",
             "case_count",
             "certified_pruned_subtree_count",
+            "chunk_case_limit",
+            "chunk_count",
             "closed_ball_query_count",
             "cover_antichain_complete",
             "cpu_exact_recertification_complete",
             "decision_semantics",
             "directed_enclosure_coverage",
             "exact_partition_complete",
+            "gpu_kernel_launch_count",
             "gpu_launch_count",
+            "gpu_parallel_round_count",
+            "gpu_peak_frontier_count",
+            "gpu_processed_node_count",
+            "gpu_traversal_round_count",
+            "input_point_count",
+            "maximum_point_count",
             "point_partition_complete",
             "proposal_semantics",
             "schema",
+            "scope",
             "scientific_public_status",
             "scientific_result_claimed",
+            "targeted_case_count",
             "targeted_coverage",
             "top_k_query_count",
         },
@@ -223,6 +248,9 @@ def validate_lbvh_summary(
     )
     if value.get("schema") != LBVH_SUMMARY_SCHEMA:
         fail(f"{label} has the wrong schema")
+    expected_scope = "quick" if quick else "full"
+    if value.get("scope") != expected_scope:
+        fail(f"{label}.scope must be {expected_scope}")
     for field in (
         "all_cases_passed",
         "bounded_protocol",
@@ -232,6 +260,11 @@ def validate_lbvh_summary(
         "point_partition_complete",
     ):
         require_bool(value.get(field), True, f"{label}.{field}")
+    require_bool(
+        value.get("campaign_complete"),
+        not quick,
+        f"{label}.campaign_complete",
+    )
     require_bool(
         value.get("scientific_result_claimed"),
         False,
@@ -244,7 +277,7 @@ def validate_lbvh_summary(
     ):
         fail(f"{label}.decision_semantics differs")
     if value.get("proposal_semantics") != (
-        "gpu_resident_lbvh_strict_exterior_cover"
+        "gpu_resident_parallel_frontier_lbvh_strict_exterior_cover"
     ):
         fail(f"{label}.proposal_semantics differs")
     if value.get("directed_enclosure_coverage") != (
@@ -253,21 +286,110 @@ def validate_lbvh_summary(
         fail(f"{label}.directed_enclosure_coverage is incomplete")
     if value.get("targeted_coverage") != REQUIRED_LBVH_TARGETED_COVERAGE:
         fail(f"{label}.targeted_coverage is incomplete")
+    expected_sizes = QUICK_CAMPAIGN_SIZES if quick else FULL_CAMPAIGN_SIZES
+    if value.get("campaign_sizes_checked") != expected_sizes:
+        fail(f"{label}.campaign_sizes_checked differs")
+    expected_case_count = LBVH_QUICK_CASE_COUNT if quick else LBVH_FULL_CASE_COUNT
+    expected_gpu_launch_count = (
+        LBVH_QUICK_GPU_LAUNCH_COUNT if quick else LBVH_FULL_GPU_LAUNCH_COUNT
+    )
+    expected_input_point_count = (
+        LBVH_QUICK_INPUT_POINT_COUNT if quick else LBVH_FULL_INPUT_POINT_COUNT
+    )
+    expected_chunk_count = (
+        LBVH_QUICK_CHUNK_COUNT if quick else LBVH_FULL_CHUNK_COUNT
+    )
     for field in (
         "case_count",
         "closed_ball_query_count",
         "top_k_query_count",
     ):
-        require_integer(value.get(field), LBVH_CASE_COUNT, f"{label}.{field}")
+        require_integer(value.get(field), expected_case_count, f"{label}.{field}")
     require_integer(
         value.get("gpu_launch_count"),
-        LBVH_GPU_LAUNCH_COUNT,
+        expected_gpu_launch_count,
         f"{label}.gpu_launch_count",
     )
+    require_integer(
+        value.get("input_point_count"),
+        expected_input_point_count,
+        f"{label}.input_point_count",
+    )
+    require_integer(
+        value.get("maximum_point_count"),
+        LBVH_MAXIMUM_POINT_COUNT,
+        f"{label}.maximum_point_count",
+    )
+    require_integer(
+        value.get("chunk_case_limit"),
+        LBVH_CHUNK_CASE_LIMIT,
+        f"{label}.chunk_case_limit",
+    )
+    require_integer(
+        value.get("chunk_count"),
+        expected_chunk_count,
+        f"{label}.chunk_count",
+    )
+    require_integer(
+        value.get("targeted_case_count"),
+        LBVH_TARGETED_CASE_COUNT,
+        f"{label}.targeted_case_count",
+    )
+    for field in ("campaign_input_sha256", "campaign_result_sha256"):
+        if not isinstance(value.get(field), str) or SHA256_RE.fullmatch(
+            value[field]
+        ) is None:
+            fail(f"{label}.{field} must be lowercase hexadecimal SHA-256")
     prunes = value.get("certified_pruned_subtree_count")
     if type(prunes) is not int or prunes <= 0:
         fail(f"{label}.certified_pruned_subtree_count must be positive")
+    parallel_counts: dict[str, int] = {}
+    for field in (
+        "gpu_kernel_launch_count",
+        "gpu_parallel_round_count",
+        "gpu_peak_frontier_count",
+        "gpu_processed_node_count",
+        "gpu_traversal_round_count",
+    ):
+        count = value.get(field)
+        if type(count) is not int or count <= 0:
+            fail(f"{label}.{field} must be a positive integer")
+        parallel_counts[field] = count
+    if parallel_counts["gpu_kernel_launch_count"] != parallel_counts[
+        "gpu_traversal_round_count"
+    ]:
+        fail(f"{label} kernel/traversal round counts differ")
+    if parallel_counts["gpu_parallel_round_count"] > parallel_counts[
+        "gpu_traversal_round_count"
+    ]:
+        fail(f"{label} parallel rounds exceed traversal rounds")
+    if parallel_counts["gpu_traversal_round_count"] > parallel_counts[
+        "gpu_processed_node_count"
+    ]:
+        fail(f"{label} traversal rounds exceed processed nodes")
+    if not 1 < parallel_counts["gpu_peak_frontier_count"] <= (
+        2 * LBVH_MAXIMUM_POINT_COUNT - 1
+    ):
+        fail(f"{label}.gpu_peak_frontier_count is outside tree bounds")
+    maximum_processed_nodes = 2 * (
+        2 * expected_input_point_count - expected_case_count
+    )
+    if not (
+        expected_gpu_launch_count
+        <= parallel_counts["gpu_processed_node_count"]
+        <= maximum_processed_nodes
+    ):
+        fail(f"{label}.gpu_processed_node_count is outside campaign bounds")
     return value
+
+
+def validate_sanitizer_log(value: str, *, label: str) -> None:
+    sanitizer_errors = [
+        int(match)
+        for match in SANITIZER_ERROR_RE.findall(value)
+    ]
+    if not sanitizer_errors or any(count != 0 for count in sanitizer_errors):
+        fail(f"{label} must contain only zero-error summaries")
 
 
 def validate_binary_logs(
@@ -278,12 +400,9 @@ def validate_binary_logs(
         fail(f"{label} ELF evidence must contain only sm_120")
     if logs["cuobjdump_ptx"].strip():
         fail(f"{label} PTX evidence must contain zero entries")
-    sanitizer_errors = [
-        int(value)
-        for value in SANITIZER_ERROR_RE.findall(logs["compute_sanitizer"])
-    ]
-    if not sanitizer_errors or any(value != 0 for value in sanitizer_errors):
-        fail(f"{label} compute-sanitizer evidence must contain only zero errors")
+    validate_sanitizer_log(
+        logs["compute_sanitizer"], label=f"{label} compute-sanitizer evidence"
+    )
     return sorted(set(architectures))
 
 
@@ -381,6 +500,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--lbvh-ptx-log", type=Path, required=True)
     parser.add_argument("--lbvh-ptx-stderr-log", type=Path, required=True)
     parser.add_argument("--lbvh-sanitizer-log", type=Path, required=True)
+    parser.add_argument("--lbvh-racecheck-log", type=Path, required=True)
     parser.add_argument("--lbvh-replay", type=Path, required=True)
     parser.add_argument("--lbvh-checker", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -419,6 +539,7 @@ def main() -> int:
             args.lbvh_differential_summary,
             "resident LBVH differential summary",
         ),
+        quick=False,
         label="resident LBVH differential summary",
     )
     lbvh_memcheck_summary = validate_lbvh_summary(
@@ -426,8 +547,17 @@ def main() -> int:
             args.lbvh_memcheck_summary,
             "resident LBVH memcheck summary",
         ),
+        quick=True,
         label="resident LBVH memcheck summary",
     )
+    if lbvh_summary["campaign_input_sha256"] == lbvh_memcheck_summary[
+        "campaign_input_sha256"
+    ]:
+        fail("resident LBVH full and quick input roots must differ")
+    if lbvh_summary["campaign_result_sha256"] == lbvh_memcheck_summary[
+        "campaign_result_sha256"
+    ]:
+        fail("resident LBVH full and quick result roots must differ")
     reference_logs = {
         "compute_sanitizer": read_text(args.sanitizer_log, "compute-sanitizer log"),
         "cuobjdump_elf": read_text(args.elf_log, "cuobjdump ELF log"),
@@ -462,11 +592,19 @@ def main() -> int:
             "resident LBVH differential log",
         ),
     }
+    lbvh_racecheck_log = read_text(
+        args.lbvh_racecheck_log,
+        "resident LBVH racecheck log",
+    )
     reference_architectures = validate_binary_logs(
         reference_logs, label="exhaustive reference replay"
     )
     lbvh_architectures = validate_binary_logs(
         lbvh_logs, label="resident LBVH replay"
+    )
+    validate_sanitizer_log(
+        lbvh_racecheck_log,
+        label="resident LBVH racecheck evidence",
     )
 
     artifact = {
@@ -499,6 +637,7 @@ def main() -> int:
             "lbvh_cpu_exact_recertification_complete": True,
             "lbvh_differential": lbvh_summary,
             "lbvh_memcheck_differential": lbvh_memcheck_summary,
+            "lbvh_racecheck": "passed",
             "quick_memcheck_differential": quick_summary,
         },
         "environment": {
@@ -521,6 +660,7 @@ def main() -> int:
             "lbvh_cuobjdump_ptx": lbvh_logs["cuobjdump_ptx"],
             "lbvh_cuobjdump_ptx_stderr": lbvh_logs["cuobjdump_ptx_stderr"],
             "lbvh_differential": lbvh_logs["differential"],
+            "lbvh_racecheck": lbvh_racecheck_log,
         },
         "mode": "certified",
         "phase": "4",
@@ -529,7 +669,7 @@ def main() -> int:
         "scientific_public_status": None,
         "scientific_result_claimed": False,
         "scientific_scope": (
-            "non_certifying_gpu_proposals_with_cpu_exact_reference_and_resident_lbvh_recertification"
+            "non_certifying_gpu_proposals_with_cpu_exact_reference_and_parallel_frontier_lbvh_recertification"
         ),
         "status": "worker_passed_pending_shutdown",
         "vm_lifecycle": {

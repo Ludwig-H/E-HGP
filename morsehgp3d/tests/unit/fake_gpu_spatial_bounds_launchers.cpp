@@ -380,6 +380,9 @@ SpatialBoundsProposalBatch propose_strict_aabb_prunes_on_gpu(
           record.lower_squared_distance_bits;
       break;
     }
+    case test_support::FakeSpatialBoundsProposalCorruption::frontier_overflow:
+      throw std::logic_error(
+          "frontier-overflow corruption applies only to spatial-LBVH batches");
     case test_support::FakeSpatialBoundsProposalCorruption::simulated_gpu_failure:
       throw std::logic_error(
           "the simulated spatial-bounds failure must precede publication");
@@ -425,52 +428,73 @@ SpatialLbvhCoverBatch propose_strict_lbvh_cover_on_gpu(
 
   SpatialLbvhCoverBatch batch;
   batch.records.resize(nodes.size());
-  std::vector<std::size_t> traversal_stack{root_index};
-  while (!traversal_stack.empty()) {
-    const std::size_t node_index = traversal_stack.back();
-    traversal_stack.pop_back();
-    if (node_index >= nodes.size()) {
+  std::vector<std::size_t> current_frontier{root_index};
+  std::vector<std::size_t> next_frontier;
+  next_frontier.reserve(nodes.size());
+  while (!current_frontier.empty()) {
+    if (batch.traversal_round_count >= nodes.size() ||
+        current_frontier.size() >
+            nodes.size() - batch.processed_node_count) {
       throw std::logic_error(
-          "the fake spatial-LBVH traversal reached an invalid node");
+          "the fake spatial-LBVH frontier exceeded its node capacity");
     }
-    const SpatialLbvhNodeInputRecord& node = nodes[node_index];
-    const SpatialBoundsProposalRecord proposal = fake_record(
-        node_index,
-        node.bounds,
-        query_lower_bits,
-        query_upper_bits,
-        cutoff_lower_bits,
-        cutoff_upper_bits,
-        values);
-    const bool prune =
-        proposal.decision_code == spatial_bounds_prune_code;
-    const bool leaf =
-        node.left_child == spatial_bounds_sentinel_code &&
-        node.right_child == spatial_bounds_sentinel_code;
-    if (prune || leaf) {
-      if (batch.record_count >= batch.records.size()) {
+    ++batch.kernel_launch_count;
+    ++batch.traversal_round_count;
+    batch.processed_node_count += current_frontier.size();
+    batch.peak_frontier_count =
+        std::max(batch.peak_frontier_count, current_frontier.size());
+    if (current_frontier.size() > 1U) {
+      ++batch.parallel_round_count;
+    }
+
+    next_frontier.clear();
+    for (const std::size_t node_index : current_frontier) {
+      if (node_index >= nodes.size()) {
         throw std::logic_error(
-            "the fake spatial-LBVH cover exceeded its node capacity");
+            "the fake spatial-LBVH traversal reached an invalid node");
       }
-      batch.records[batch.record_count++] = SpatialLbvhCoverRecord{
-          static_cast<std::uint64_t>(node_index),
-          proposal.lower_squared_distance_bits,
-          proposal.upper_squared_distance_bits,
-          prune ? spatial_lbvh_cover_prune_code
-                : spatial_lbvh_cover_leaf_code};
-      continue;
+      const SpatialLbvhNodeInputRecord& node = nodes[node_index];
+      const SpatialBoundsProposalRecord proposal = fake_record(
+          node_index,
+          node.bounds,
+          query_lower_bits,
+          query_upper_bits,
+          cutoff_lower_bits,
+          cutoff_upper_bits,
+          values);
+      const bool prune =
+          proposal.decision_code == spatial_bounds_prune_code;
+      const bool leaf =
+          node.left_child == spatial_bounds_sentinel_code &&
+          node.right_child == spatial_bounds_sentinel_code;
+      if (prune || leaf) {
+        if (batch.record_count >= batch.records.size()) {
+          throw std::logic_error(
+              "the fake spatial-LBVH cover exceeded its node capacity");
+        }
+        batch.records[batch.record_count++] = SpatialLbvhCoverRecord{
+            static_cast<std::uint64_t>(node_index),
+            proposal.lower_squared_distance_bits,
+            proposal.upper_squared_distance_bits,
+            prune ? spatial_lbvh_cover_prune_code
+                  : spatial_lbvh_cover_leaf_code};
+        continue;
+      }
+      if (node.left_child == spatial_bounds_sentinel_code ||
+          node.right_child == spatial_bounds_sentinel_code ||
+          !std::in_range<std::size_t>(node.left_child) ||
+          !std::in_range<std::size_t>(node.right_child) ||
+          nodes.size() < 2U ||
+          next_frontier.size() > nodes.size() - 2U) {
+        throw std::logic_error(
+            "the fake spatial-LBVH traversal found invalid children");
+      }
+      next_frontier.push_back(
+          static_cast<std::size_t>(node.left_child));
+      next_frontier.push_back(
+          static_cast<std::size_t>(node.right_child));
     }
-    if (node.left_child == spatial_bounds_sentinel_code ||
-        node.right_child == spatial_bounds_sentinel_code ||
-        !std::in_range<std::size_t>(node.left_child) ||
-        !std::in_range<std::size_t>(node.right_child)) {
-      throw std::logic_error(
-          "the fake spatial-LBVH traversal found invalid children");
-    }
-    traversal_stack.push_back(
-        static_cast<std::size_t>(node.right_child));
-    traversal_stack.push_back(
-        static_cast<std::size_t>(node.left_child));
+    current_frontier.swap(next_frontier);
   }
   if (permutation ==
       test_support::FakeSpatialBoundsProposalPermutation::reversed) {
@@ -515,6 +539,9 @@ SpatialLbvhCoverBatch propose_strict_lbvh_cover_on_gpu(
           record.lower_squared_distance_bits;
       break;
     }
+    case test_support::FakeSpatialBoundsProposalCorruption::frontier_overflow:
+      batch.peak_frontier_count = nodes.size() + 1U;
+      break;
     case test_support::FakeSpatialBoundsProposalCorruption::simulated_gpu_failure:
       throw std::logic_error(
           "the simulated spatial-LBVH failure must precede publication");

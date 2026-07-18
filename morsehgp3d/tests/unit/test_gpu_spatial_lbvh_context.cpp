@@ -192,6 +192,20 @@ void check_supported_audit(
           audit.unsupported_range_fallback_count == 0U,
       label + " reports one supported resident traversal");
   check(
+      audit.gpu_kernel_launch_count == audit.gpu_traversal_round_count &&
+          audit.gpu_kernel_launch_count > 0U &&
+          audit.gpu_processed_node_count == audit.traversed_node_count,
+      label + " accounts for every frontier round and processed node");
+  check(
+      audit.gpu_peak_frontier_count > 0U &&
+          audit.gpu_peak_frontier_count <=
+              audit.gpu_processed_node_count &&
+          audit.gpu_parallel_round_count <=
+              audit.gpu_traversal_round_count &&
+          ((audit.gpu_peak_frontier_count > 1U) ==
+           (audit.gpu_parallel_round_count > 0U)),
+      label + " reports coherent bounded parallel-frontier metadata");
+  check(
       audit.traversed_node_count ==
               1U + 2U * audit.internal_node_expansion_count &&
           audit.cpu_exact_aabb_bound_evaluation_count ==
@@ -573,6 +587,11 @@ void test_unsupported_range_falls_back_without_launch_or_poisoning() {
           unsupported.audit.gpu_output_capacity == 5U &&
           unsupported.audit.gpu_output_cover_record_count == 0U &&
           unsupported.audit.gpu_launch_count == 0U &&
+          unsupported.audit.gpu_kernel_launch_count == 0U &&
+          unsupported.audit.gpu_traversal_round_count == 0U &&
+          unsupported.audit.gpu_parallel_round_count == 0U &&
+          unsupported.audit.gpu_peak_frontier_count == 0U &&
+          unsupported.audit.gpu_processed_node_count == 0U &&
           unsupported.audit.traversed_node_count == 0U &&
           unsupported.audit.cpu_exact_aabb_bound_evaluation_count == 0U,
       "the unsupported enclosure never enters resident GPU traversal");
@@ -741,6 +760,116 @@ void test_false_prune_poisons_only_its_context() {
       "retrying the poisoned context cannot affect the fresh one");
 }
 
+void test_frontier_overflow_poisons_only_its_context() {
+  reset_fake_gpu_spatial_bounds();
+  const std::array<CertifiedPoint3, 3> points{
+      point(0.0), point(1.0), point(2.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(points);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  SpatialLbvhContext poisoned{index, cloud};
+  configure_fake_gpu_spatial_bounds(FakeSpatialBoundsProposalConfiguration{
+      FakeSpatialBoundsProposalPermutation::canonical,
+      FakeSpatialBoundsProposalValues::actual_interval_recipe,
+      FakeSpatialBoundsProposalCorruption::frontier_overflow});
+
+  check_throws<std::runtime_error>(
+      [&] {
+        static_cast<void>(poisoned.closed_ball(
+            cloud, origin(), ExactLevel{BigInt{1}}));
+      },
+      "frontier metadata above node capacity fails closed");
+  check(
+      fake_gpu_spatial_bounds_launch_count() == 1U,
+      "invalid frontier metadata is rejected after one proposal call");
+
+  configure_fake_gpu_spatial_bounds(FakeSpatialBoundsProposalConfiguration{});
+  check_throws<std::runtime_error>(
+      [&] {
+        static_cast<void>(poisoned.closed_ball(
+            cloud, origin(), ExactLevel{BigInt{1}}));
+      },
+      "frontier overflow poisons only its resident context");
+  check(
+      fake_gpu_spatial_bounds_launch_count() == 1U,
+      "a poisoned frontier context cannot launch again");
+
+  SpatialLbvhContext fresh{index, cloud};
+  const SpatialLbvhClosedBallResult fresh_result = fresh.closed_ball(
+      cloud, origin(), ExactLevel{BigInt{1}});
+  check_unit_ball_partition(
+      fresh_result.exact_partition,
+      cloud,
+      "a fresh context after invalid frontier metadata");
+  check_supported_audit(
+      fresh_result.audit, 3U, 2U, 2U, 1U, 1U, 1U,
+      "the fresh context after frontier overflow");
+  check(
+      fake_gpu_spatial_bounds_launch_count() == 2U,
+      "frontier overflow poisoning remains isolated from a fresh context");
+}
+
+void test_malformed_covers_and_launch_failure_poison_fail_closed() {
+  const std::array<CertifiedPoint3, 3> points{
+      point(0.0), point(1.0), point(2.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(points);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<FakeSpatialBoundsProposalCorruption, 4> corruptions{
+      FakeSpatialBoundsProposalCorruption::missing_record,
+      FakeSpatialBoundsProposalCorruption::duplicate_box_index,
+      FakeSpatialBoundsProposalCorruption::out_of_range_box_index,
+      FakeSpatialBoundsProposalCorruption::invalid_decision};
+  for (const FakeSpatialBoundsProposalCorruption corruption : corruptions) {
+    reset_fake_gpu_spatial_bounds();
+    SpatialLbvhContext poisoned{index, cloud};
+    configure_fake_gpu_spatial_bounds(FakeSpatialBoundsProposalConfiguration{
+        FakeSpatialBoundsProposalPermutation::canonical,
+        FakeSpatialBoundsProposalValues::actual_interval_recipe,
+        corruption});
+    check_throws<std::runtime_error>(
+        [&] {
+          static_cast<void>(poisoned.closed_ball(
+              cloud, origin(), ExactLevel{BigInt{1}}));
+        },
+        "a malformed terminal cover is rejected after its proposal call");
+    check(
+        fake_gpu_spatial_bounds_launch_count() == 1U,
+        "each malformed cover consumes exactly one proposal call");
+    configure_fake_gpu_spatial_bounds(FakeSpatialBoundsProposalConfiguration{});
+    check_throws<std::runtime_error>(
+        [&] {
+          static_cast<void>(poisoned.closed_ball(
+              cloud, origin(), ExactLevel{BigInt{1}}));
+        },
+        "a malformed terminal cover poisons its resident context");
+    check(
+        fake_gpu_spatial_bounds_launch_count() == 1U,
+        "a context poisoned by malformed cover metadata cannot relaunch");
+  }
+
+  reset_fake_gpu_spatial_bounds();
+  SpatialLbvhContext launch_failure{index, cloud};
+  configure_fake_gpu_spatial_bounds(FakeSpatialBoundsProposalConfiguration{
+      FakeSpatialBoundsProposalPermutation::canonical,
+      FakeSpatialBoundsProposalValues::actual_interval_recipe,
+      FakeSpatialBoundsProposalCorruption::simulated_gpu_failure});
+  check_throws<std::runtime_error>(
+      [&] {
+        static_cast<void>(launch_failure.closed_ball(
+            cloud, origin(), ExactLevel{BigInt{1}}));
+      },
+      "a traversal launch failure is converted to a fail-closed exception");
+  check(
+      fake_gpu_spatial_bounds_launch_count() == 0U,
+      "a simulated pre-publication launch failure emits no proposal count");
+  configure_fake_gpu_spatial_bounds(FakeSpatialBoundsProposalConfiguration{});
+  check_throws<std::runtime_error>(
+      [&] {
+        static_cast<void>(launch_failure.closed_ball(
+            cloud, origin(), ExactLevel{BigInt{1}}));
+      },
+      "a launch failure poisons its resident context before retry");
+}
+
 }  // namespace
 
 int main() {
@@ -750,6 +879,8 @@ int main() {
   test_unsupported_range_falls_back_without_launch_or_poisoning();
   test_move_and_point_namespace_contract();
   test_false_prune_poisons_only_its_context();
+  test_frontier_overflow_poisons_only_its_context();
+  test_malformed_covers_and_launch_failure_poison_fail_closed();
   if (failures != 0) {
     std::cerr << failures << " GPU spatial-LBVH context test(s) failed\n";
     return 1;

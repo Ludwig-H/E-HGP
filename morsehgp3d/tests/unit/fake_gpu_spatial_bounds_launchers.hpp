@@ -25,6 +25,7 @@ enum class FakeSpatialBoundsProposalCorruption : std::uint8_t {
   out_of_range_box_index,
   invalid_decision,
   false_prune,
+  frontier_overflow,
   simulated_gpu_failure,
 };
 

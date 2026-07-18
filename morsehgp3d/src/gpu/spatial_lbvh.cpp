@@ -253,13 +253,27 @@ void require_interval_contains_exact_bound(
   audit.gpu_output_capacity = batch.records.size();
   audit.gpu_output_cover_record_count = batch.record_count;
   audit.gpu_launch_count = 1U;
+  audit.gpu_kernel_launch_count = batch.kernel_launch_count;
+  audit.gpu_traversal_round_count = batch.traversal_round_count;
+  audit.gpu_parallel_round_count = batch.parallel_round_count;
+  audit.gpu_peak_frontier_count = batch.peak_frontier_count;
+  audit.gpu_processed_node_count = batch.processed_node_count;
   audit.buffer_epoch = batch.buffer_epoch;
   set_enclosure_audit(audit, query_enclosures, cutoff_enclosure);
 
   if (batch.records.size() != host.nodes.size() || batch.record_count == 0U ||
-      batch.record_count > batch.records.size()) {
+      batch.record_count > batch.records.size() ||
+      batch.kernel_launch_count == 0U ||
+      batch.kernel_launch_count != batch.traversal_round_count ||
+      batch.traversal_round_count > batch.processed_node_count ||
+      batch.processed_node_count > host.nodes.size() ||
+      batch.peak_frontier_count == 0U ||
+      batch.peak_frontier_count > batch.processed_node_count ||
+      batch.parallel_round_count > batch.traversal_round_count ||
+      ((batch.peak_frontier_count > 1U) !=
+       (batch.parallel_round_count > 0U))) {
     throw std::runtime_error(
-        "the GPU spatial-LBVH cover returned an invalid record extent");
+        "the GPU spatial-LBVH cover returned invalid frontier metadata");
   }
   for (std::size_t index = batch.record_count;
        index < batch.records.size();
@@ -338,16 +352,26 @@ void require_interval_contains_exact_bound(
 
   std::vector<unsigned char> point_class(host.point_count, 0U);
   std::vector<unsigned char> record_used(batch.record_count, 0U);
-  std::vector<std::size_t> traversal_stack{host.root_index};
+  std::vector<std::pair<std::size_t, std::size_t>> traversal_stack{
+      {host.root_index, 0U}};
+  std::vector<std::size_t> traversal_width_by_depth;
   result.candidate_point_ids.reserve(host.point_count);
   result.certified_exterior_point_ids.reserve(host.point_count);
   while (!traversal_stack.empty()) {
-    const std::size_t node_index = traversal_stack.back();
+    const auto [node_index, depth] = traversal_stack.back();
     traversal_stack.pop_back();
-    if (node_index >= host.nodes.size()) {
+    if (node_index >= host.nodes.size() || depth >= host.nodes.size()) {
       throw std::logic_error(
           "the host spatial-LBVH traversal reached an invalid node");
     }
+    if (traversal_width_by_depth.size() == depth) {
+      traversal_width_by_depth.push_back(0U);
+    }
+    if (traversal_width_by_depth.size() <= depth) {
+      throw std::logic_error(
+          "the host spatial-LBVH traversal skipped one frontier depth");
+    }
+    ++traversal_width_by_depth[depth];
     ++audit.traversed_node_count;
     const detail::SpatialLbvhNodeInputRecord& node = host.nodes[node_index];
     const exact::ExactLevel exact_bound =
@@ -437,10 +461,17 @@ void require_interval_contains_exact_bound(
           "the GPU spatial-LBVH cover exposed a cyclic topology");
     }
     ++audit.internal_node_expansion_count;
-    traversal_stack.push_back(right_child);
-    traversal_stack.push_back(left_child);
+    traversal_stack.emplace_back(right_child, depth + 1U);
+    traversal_stack.emplace_back(left_child, depth + 1U);
   }
 
+  const std::size_t exact_peak_frontier_count = *std::max_element(
+      traversal_width_by_depth.begin(), traversal_width_by_depth.end());
+  const std::size_t exact_parallel_round_count =
+      static_cast<std::size_t>(std::count_if(
+          traversal_width_by_depth.begin(),
+          traversal_width_by_depth.end(),
+          [](std::size_t width) { return width > 1U; }));
   if (std::find(record_used.begin(), record_used.end(), 0U) !=
           record_used.end() ||
       std::find(point_class.begin(), point_class.end(), 0U) !=
@@ -452,7 +483,11 @@ void require_interval_contains_exact_bound(
       audit.cpu_exact_prune_recertification_count !=
           audit.certified_pruned_subtree_count ||
       audit.certified_pruned_subtree_count !=
-          audit.gpu_prune_proposal_count) {
+          audit.gpu_prune_proposal_count ||
+      audit.gpu_processed_node_count != audit.traversed_node_count ||
+      audit.gpu_traversal_round_count != traversal_width_by_depth.size() ||
+      audit.gpu_peak_frontier_count != exact_peak_frontier_count ||
+      audit.gpu_parallel_round_count != exact_parallel_round_count) {
     throw std::runtime_error(
         "the GPU spatial-LBVH records do not form one complete antichain cover");
   }
