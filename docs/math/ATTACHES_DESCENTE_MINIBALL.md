@@ -133,7 +133,37 @@ Retirer le support essentiel $u$ donne
 
 $$\beta(F_u)<\beta(S).$$
 
-Le segment de $c$ vers $c_{F_u}$ entre immédiatement dans $\left\lbrace D_k<\beta(S)\right\rbrace$ et dans le germe local correspondant à $u$. La descente depuis $F_u$ reste dans ce sous-niveau et termine au minimum de la composante globale du bras.
+Le segment de $c$ vers $c_{F_u}$ entre immédiatement dans $\left\lbrace D_k<\beta(S)\right\rbrace$ et dans le germe local correspondant à $u$. Une chaîne 6.5 raccordée exactement depuis $F_u$ reste dans ce sous-niveau. L'identification de sa racine terminale à la composante globale du bras demeure une obligation ultérieure.
+
+### 7.1 Certificat rationnel du segment initial
+
+Posons $a=\beta(S)$ et $b_u=\beta(F_u)$. La boule critique $B(c,a)$ contient $F_u$. Si $b_u=a$, l'unicité du centre d'une miniball imposerait que $c$ soit aussi le centre de la miniball de $F_u$. Ses points actifs appartiendraient alors à $U\setminus\lbrace u\rbrace$, car $I$ est strictement intérieur. La caractérisation convexe des miniballs donnerait $c\in\mathrm{conv}(U\setminus\lbrace u\rbrace)$, ce qui contredit la coordonnée barycentrique strictement positive de $u$ dans le support affinement indépendant $U$. Ainsi $b_u<a$.
+
+Écrivons $d_u=c_{F_u}-c$, $\delta_u=\left\Vert d_u\right\Vert^2$ et $\gamma_u(t)=c+td_u$. Les centres ne peuvent pas être égaux : sinon le maximum des distances de $F_u$ en $c_{F_u}=c$ vaudrait encore $a$ à cause de $U\setminus\lbrace u\rbrace$. Donc $\delta_u>0$. Comme $g_{F_u}(c)=a$ et $g_{F_u}(c_{F_u})=b_u$, l'identité quadratique point par point donne
+
+$$D_k(\gamma_u(t))\leq g_{F_u}(\gamma_u(t))\leq(1-t)a+tb_u-t(1-t)\delta_u<a,\qquad0<t\leq1.$$
+
+Il reste à identifier le bras, pas seulement le sous-niveau. Pour tout $v\in U\setminus\lbrace u\rbrace$, la borne $\left\Vert c_{F_u}-v\right\Vert^2\leq b_u<a$ implique
+
+$$2(v-c)\mathbin{\cdot}d_u>\delta_u.$$
+
+Si $c=\sum_{v\in U}\lambda_vv$ avec tous les $\lambda_v>0$, le produit scalaire de $\sum_{v\in U}\lambda_v(v-c)=0$ par $d_u$ montre alors $(u-c)\mathbin{\cdot}d_u<0$. Le coefficient sortant exact
+
+$$B_u=2(c-u)\mathbin{\cdot}d_u$$
+
+est donc strictement positif, et
+
+$$\left\Vert\gamma_u(t)-u\right\Vert^2-a=tB_u+t^2\delta_u>0,\qquad t>0.$$
+
+Les points de $F_u$ sont simultanément strictement sous $a$. Pour conserver aussi chaque point extérieur $p\in X\setminus S$ hors du niveau sur un préfixe explicite, posons
+
+$$A_p=\left\Vert c-p\right\Vert^2-a>0,\qquad B_p=2(c-p)\mathbin{\cdot}d_u.$$
+
+Alors $\left\Vert\gamma_u(t)-p\right\Vert^2-a=A_p+tB_p+t^2\delta_u$. Si $B_p\geq0$, cette valeur reste positive sans restriction supplémentaire. Si $B_p<0$, elle est strictement positive dès que $0<t\leq\frac{A_p}{-2B_p}$. La borne rationnelle
+
+$$\tau_u=\min\left(\left\lbrace1\right\rbrace\cup\left\lbrace\frac{A_p}{-2B_p}:p\in X\setminus S,\ B_p<0\right\rbrace\right)>0$$
+
+certifie donc que, pour $0<t\leq\tau_u$, les $k$ points de $F_u$ sont exactement sous $a$, tandis que $u$ et tout $X\setminus S$ restent au-dessus. Ce préfixe identifie le germe $u$. Il n'est pas nécessaire que les points extérieurs restent dehors sur tout le segment jusqu'à $c_{F_u}$; leur entrée ultérieure ne remet pas en cause la stricte sous-niveauté du chemin entier.
 
 Si plusieurs bras terminent dans la même racine antérieure, l'événement est partiellement ou totalement redondant. La multiplicité locale est une capacité de changement, pas le nombre de classes effectivement tuées globalement.
 

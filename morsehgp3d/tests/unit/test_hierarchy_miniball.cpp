@@ -1,3 +1,4 @@
+#include "morsehgp3d/hierarchy/critical_arm.hpp"
 #include "morsehgp3d/hierarchy/miniball.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
 
@@ -7,6 +8,7 @@
 #include <exception>
 #include <initializer_list>
 #include <iostream>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -45,16 +47,31 @@ using morsehgp3d::hierarchy::ExactFacetMiniballResult;
 using morsehgp3d::hierarchy::ExactFacetMiniballScope;
 using morsehgp3d::hierarchy::ExactFacetMiniballStatus;
 using morsehgp3d::hierarchy::ExactFacetMiniballVerification;
+using morsehgp3d::hierarchy::ExactCriticalArmDescentCounters;
+using morsehgp3d::hierarchy::ExactCriticalArmDescentDecision;
+using morsehgp3d::hierarchy::ExactCriticalArmDescentResult;
+using morsehgp3d::hierarchy::ExactCriticalArmDescentScope;
+using morsehgp3d::hierarchy::ExactCriticalArmDescentVerification;
+using morsehgp3d::hierarchy::ExactCriticalArmInitialSegmentCounters;
+using morsehgp3d::hierarchy::ExactCriticalArmInitialSegmentDecision;
+using morsehgp3d::hierarchy::ExactCriticalArmInitialSegmentResult;
+using morsehgp3d::hierarchy::ExactCriticalArmInitialSegmentScope;
+using morsehgp3d::hierarchy::ExactCriticalArmInitialSegmentVerification;
+using morsehgp3d::hierarchy::ExactCriticalArmSourceDecision;
 using morsehgp3d::hierarchy::build_exact_facet_descent_arc;
 using morsehgp3d::hierarchy::build_exact_facet_descent_chain;
 using morsehgp3d::hierarchy::build_exact_facet_descent_preconditions;
 using morsehgp3d::hierarchy::build_exact_facet_descent_segment;
 using morsehgp3d::hierarchy::build_exact_facet_miniball;
+using morsehgp3d::hierarchy::build_exact_critical_arm_descent;
+using morsehgp3d::hierarchy::build_exact_critical_arm_initial_segment;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_arc;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_chain;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_preconditions;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_segment;
 using morsehgp3d::hierarchy::verify_exact_facet_miniball;
+using morsehgp3d::hierarchy::verify_exact_critical_arm_descent;
+using morsehgp3d::hierarchy::verify_exact_critical_arm_initial_segment;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ExclusionSet;
 using morsehgp3d::spatial::PointId;
@@ -110,6 +127,12 @@ template <std::size_t Size>
     std::int64_t numerator,
     std::int64_t denominator = 1) {
   return ExactLevel{BigInt{numerator}, BigInt{denominator}};
+}
+
+[[nodiscard]] ExactRational rational(
+    std::int64_t numerator,
+    std::int64_t denominator = 1) {
+  return ExactRational{BigInt{numerator}, BigInt{denominator}};
 }
 
 [[nodiscard]] bool all_certificates_close(
@@ -198,6 +221,46 @@ template <std::size_t Size>
          verification.decision_certified && verification.scope_certified &&
          verification.fresh_replay_certified &&
          verification.exact_descent_chain_decision_certified;
+}
+
+[[nodiscard]] bool all_critical_arm_initial_certificates_close(
+    const ExactCriticalArmInitialSegmentVerification& verification) {
+  return verification.input_shell_identity_certified &&
+         verification.removed_shell_point_identity_certified &&
+         verification.critical_shell_miniball_certified &&
+         verification.global_closed_ball_presence_certified &&
+         verification.global_closed_ball_certified &&
+         verification.source_facts_certified &&
+         verification.source_decision_certified &&
+         verification.arm_payload_presence_certified &&
+         verification.arm_facet_certified &&
+         verification.arm_miniball_certified &&
+         verification.analytic_segment_coefficients_certified &&
+         verification.removed_point_witnesses_certified &&
+         verification.exterior_constraint_witnesses_certified &&
+         verification.strict_local_parameter_bound_certified &&
+         verification.strict_arm_consequences_certified &&
+         verification.counters_certified &&
+         verification.decision_certified &&
+         verification.scope_certified &&
+         verification.fresh_replay_certified &&
+         verification.exact_critical_arm_initial_segment_decision_certified;
+}
+
+[[nodiscard]] bool all_critical_arm_descent_certificates_close(
+    const ExactCriticalArmDescentVerification& verification) {
+  return verification.requested_chain_budget_certified &&
+         verification.initial_segment_certified &&
+         verification.facet_chain_presence_certified &&
+         verification.facet_chain_certified &&
+         verification.initial_segment_budget_separation_certified &&
+         verification.exact_initial_to_chain_seam_certified &&
+         verification.source_open_composite_path_certified &&
+         verification.counters_certified &&
+         verification.decision_mapping_certified &&
+         verification.scope_certified &&
+         verification.fresh_replay_certified &&
+         verification.exact_critical_arm_descent_decision_certified;
 }
 
 [[nodiscard]] bool matches_ids(
@@ -2232,6 +2295,914 @@ void test_descent_chain_verifier_rejects_every_result_layer() {
       "chain verifier rejects the stopping probe of a twin cloud identity");
 }
 
+[[nodiscard]] CanonicalPointCloud critical_arm_fixture_cloud() {
+  const std::array<CertifiedPoint3, 4> input{
+      point(-2.0, 0.0),
+      point(0.0, 3.0),
+      point(2.0, 0.0),
+      point(2.0, 2.0)};
+  return canonical_cloud(input);
+}
+
+void test_critical_arm_initial_segment_exact_geometry() {
+  const ExactCriticalArmInitialSegmentResult empty;
+  check(
+      empty.source_decision ==
+              ExactCriticalArmSourceDecision::not_certified &&
+          empty.decision ==
+              ExactCriticalArmInitialSegmentDecision::not_certified &&
+          empty.scope == ExactCriticalArmInitialSegmentScope::unspecified &&
+          !empty.global_closed_ball.has_value() &&
+          !empty.arm_miniball.has_value() &&
+          !empty.initial_segment_coefficients.has_value() &&
+          !empty.strict_local_parameter_upper_bound.has_value(),
+      "default critical arm certifies neither source nor initial germ");
+
+  const CanonicalPointCloud cloud = critical_arm_fixture_cloud();
+  const std::array<PointId, 3> critical_shell{2U, 0U, 1U};
+  const PointId removed = 0U;
+  const ExactCriticalArmInitialSegmentResult result =
+      build_exact_critical_arm_initial_segment(
+          cloud, critical_shell, removed);
+  const ExactCriticalArmInitialSegmentVerification verification =
+      verify_exact_critical_arm_initial_segment(
+          cloud, critical_shell, removed, result);
+
+  check(
+      result.critical_shell_point_ids ==
+              std::vector<PointId>({0U, 1U, 2U}) &&
+          result.removed_shell_point_id == removed &&
+          result.critical_shell_miniball.center ==
+              center(0, 5, 0, 6) &&
+          result.critical_shell_miniball.squared_radius ==
+              level(169, 36) &&
+          result.critical_shell_miniball.support_point_ids ==
+              std::vector<PointId>({0U, 1U, 2U}),
+      "critical triangle reconstructs c=(0,5/6) and a=169/36");
+  check(
+      result.global_closed_ball.has_value() &&
+          result.closed_rank == 3U && result.order == 2U,
+      "complete critical sphere has closed rank three and order two");
+  if (!result.global_closed_ball.has_value()) {
+    return;
+  }
+  const auto& source_ball = *result.global_closed_ball;
+  check(
+      source_ball.validated_for(cloud) &&
+          source_ball.interior_ids().empty() &&
+          matches_ids(source_ball.shell_ids(), {0U, 1U, 2U}) &&
+          matches_ids(source_ball.exterior_ids(), {3U}),
+      "critical source partition keeps the fourth point strictly exterior");
+
+  check(
+      result.arm_facet_point_ids ==
+              std::vector<PointId>({1U, 2U}) &&
+          result.arm_miniball.has_value() &&
+          result.initial_segment_coefficients.has_value() &&
+          result.removed_point_target_squared_distance.has_value() &&
+          result.removed_point_outgoing_linear_coefficient.has_value() &&
+          result.strict_local_parameter_upper_bound.has_value(),
+      "removing point zero constructs the complete two-point arm payload");
+  if (!result.arm_miniball.has_value() ||
+      !result.initial_segment_coefficients.has_value() ||
+      !result.removed_point_target_squared_distance.has_value() ||
+      !result.removed_point_outgoing_linear_coefficient.has_value() ||
+      !result.strict_local_parameter_upper_bound.has_value()) {
+    return;
+  }
+  const auto& arm = *result.arm_miniball;
+  const auto& segment = *result.initial_segment_coefficients;
+  check(
+      arm.center == center(2, 3, 0, 2) &&
+          arm.squared_radius == level(13, 4) &&
+          arm.support_point_ids == std::vector<PointId>({1U, 2U}) &&
+          segment.source_atom_level == level(169, 36) &&
+          segment.successor_atom_level == level(13, 4) &&
+          segment.center_squared_displacement == level(13, 9),
+      "initial arm stores cF=(1,3/2), b=13/4 and delta=13/9");
+  check(
+      !segment.centers_equal &&
+          !segment.source_endpoint_strict_sublevel &&
+          segment.quadratic_max_upper_bound_certified &&
+          segment.closed_segment_nonstrict_sublevel &&
+          segment.half_open_segment_strict_sublevel &&
+          *result.removed_point_target_squared_distance ==
+              level(45, 4) &&
+          *result.removed_point_outgoing_linear_coefficient ==
+              rational(46, 9),
+      "removed point has target distance 45/4 and outgoing coefficient 46/9");
+
+  check(
+      result.negative_exterior_direction_constraints.size() == 1U,
+      "one negatively directed exterior point constrains the local germ");
+  if (result.negative_exterior_direction_constraints.size() != 1U) {
+    return;
+  }
+  const auto& exterior =
+      result.negative_exterior_direction_constraints.front();
+  check(
+      exterior.point_id == 3U &&
+          exterior.source_clearance_above_critical_level ==
+              level(2, 3) &&
+          exterior.source_outgoing_linear_coefficient ==
+              rational(-50, 9) &&
+          exterior.parameter_upper_bound == rational(3, 50) &&
+          *result.strict_local_parameter_upper_bound ==
+              rational(3, 50),
+      "exterior point has A=2/3, B=-50/9 and exact bound tau=3/50");
+
+  check(
+      result.critical_shell_is_positive_minimal_support &&
+          result.global_shell_matches_critical_shell &&
+          result.closed_rank_and_order_supported &&
+          result.critical_source_certified &&
+          result.arm_facet_cardinality_certified &&
+          result.arm_miniball_strict_decrease_certified &&
+          result.positive_center_displacement_certified &&
+          result.removed_point_outgoing_direction_certified &&
+          result.removed_point_target_outside_arm_ball_certified &&
+          result.exterior_prefix_bound_certified &&
+          result.closed_initial_segment_nonstrict_critical_sublevel &&
+          result.half_open_initial_segment_strict_critical_sublevel,
+      "every exact source, direction and local-prefix fact closes");
+  check(
+      result.counters.global_closed_ball_query_count == 1U &&
+          result.counters.
+                  global_closed_ball_distance_evaluation_count == 4U &&
+          result.counters.arm_miniball_build_count == 1U &&
+          result.counters.arm_source_distance_evaluation_count == 2U &&
+          result.counters.removed_point_target_distance_evaluation_count ==
+              1U &&
+          result.counters.
+                  removed_point_directional_coefficient_evaluation_count ==
+              1U &&
+          result.counters.exterior_point_clearance_evaluation_count == 1U &&
+          result.counters.
+                  exterior_point_directional_dot_product_evaluation_count ==
+              1U &&
+          result.counters.negative_exterior_direction_constraint_count ==
+              1U,
+      "nontrivial arm exposes its bounded exact work counters");
+  check(
+      result.source_decision ==
+              ExactCriticalArmSourceDecision::
+                  critical_source_certified &&
+          result.decision ==
+              ExactCriticalArmInitialSegmentDecision::
+                  strict_initial_arm_segment_certified &&
+          result.scope ==
+              ExactCriticalArmInitialSegmentScope::
+                  single_index_one_critical_arm_initial_germ_segment_only &&
+          std::string_view{
+              ExactCriticalArmInitialSegmentResult::proof_basis} ==
+              "exact_complete_positive_critical_shell_removed_arm_fresh_"
+              "miniball_outgoing_direction_local_exterior_bound_v1" &&
+          all_critical_arm_initial_certificates_close(verification),
+      "initial critical arm decision, scope and fresh replay close exactly");
+}
+
+void test_critical_arm_descent_budgets_exclude_initial_segment() {
+  const ExactCriticalArmDescentResult empty;
+  check(
+      empty.decision == ExactCriticalArmDescentDecision::not_certified &&
+          empty.scope == ExactCriticalArmDescentScope::unspecified &&
+          !empty.facet_descent_chain.has_value() &&
+          !empty.initial_segment_excluded_from_chain_budget &&
+          !empty.exact_initial_to_chain_seam_certified &&
+          !empty.source_open_composite_path_strict_critical_sublevel,
+      "default composite arm certifies no path or budget convention");
+
+  const CanonicalPointCloud cloud = critical_arm_fixture_cloud();
+  const std::array<PointId, 3> critical_shell{0U, 1U, 2U};
+  constexpr PointId removed = 0U;
+
+  const ExactFacetDescentChainBudget zero_budget{0U};
+  const ExactCriticalArmDescentResult zero =
+      build_exact_critical_arm_descent(
+          cloud, critical_shell, removed, zero_budget);
+  const ExactCriticalArmDescentVerification zero_verification =
+      verify_exact_critical_arm_descent(
+          cloud, critical_shell, removed, zero_budget, zero);
+  check(
+      zero.facet_descent_chain.has_value() &&
+          zero.initial_segment.decision ==
+              ExactCriticalArmInitialSegmentDecision::
+                  strict_initial_arm_segment_certified,
+      "zero chain budget still owns the dedicated initial segment");
+  if (!zero.facet_descent_chain.has_value()) {
+    return;
+  }
+  const auto& zero_chain = *zero.facet_descent_chain;
+  check(
+      zero_chain.nodes.size() == 1U &&
+          zero_chain.nodes.front().facet_point_ids ==
+              std::vector<PointId>({1U, 2U}) &&
+          zero_chain.nodes.front().center == center(2, 3, 0, 2) &&
+          zero_chain.nodes.front().squared_level == level(13, 4) &&
+          zero_chain.committed_segment_witnesses.empty() &&
+          zero_chain.stopping_probe.has_value() &&
+          zero_chain.decision ==
+              ExactFacetDescentChainDecision::
+                  certified_prefix_strict_segment_budget_exhausted,
+      "budget zero starts the 6.5 chain at F without committing its frontier");
+  check(
+      zero.initial_segment_excluded_from_chain_budget &&
+          zero.exact_initial_to_chain_seam_certified &&
+          zero.source_open_composite_path_strict_critical_sublevel &&
+          zero.counters.initial_segment_probe_count == 1U &&
+          zero.counters.certified_initial_segment_count == 1U &&
+          zero.counters.facet_chain_build_count == 1U &&
+          zero.counters.initial_to_chain_seam_replay_count == 1U &&
+          zero.counters.committed_chain_strict_segment_count == 0U &&
+          zero.counters.committed_composite_path_segment_count == 1U &&
+          zero.counters.chain_budget_terminal_count == 1U &&
+          zero.decision ==
+              ExactCriticalArmDescentDecision::
+                  certified_prefix_strict_segment_budget_exhausted &&
+          zero.scope ==
+              ExactCriticalArmDescentScope::
+                  single_index_one_critical_arm_plus_canonical_strict_chain_only &&
+          all_critical_arm_descent_certificates_close(zero_verification),
+      "zero chain budget counts exactly the initial germ outside the budget");
+
+  const ExactFacetDescentChainBudget one_budget{1U};
+  const ExactCriticalArmDescentResult one =
+      build_exact_critical_arm_descent(
+          cloud, critical_shell, removed, one_budget);
+  const ExactCriticalArmDescentVerification one_verification =
+      verify_exact_critical_arm_descent(
+          cloud, critical_shell, removed, one_budget, one);
+  check(
+      one.facet_descent_chain.has_value(),
+      "one chain budget returns the regular continuation payload");
+  if (!one.facet_descent_chain.has_value()) {
+    return;
+  }
+  const auto& one_chain = *one.facet_descent_chain;
+  check(
+      one_chain.nodes.size() == 2U &&
+          one_chain.nodes[0].facet_point_ids ==
+              std::vector<PointId>({1U, 2U}) &&
+          one_chain.nodes[1].facet_point_ids ==
+              std::vector<PointId>({1U, 3U}) &&
+          one_chain.nodes[1].center == center(2, 5, 0, 2) &&
+          one_chain.nodes[1].squared_level == level(5, 4) &&
+          one_chain.committed_segment_witnesses.size() == 1U &&
+          one_chain.decision ==
+              ExactFacetDescentChainDecision::
+                  complete_at_regular_active_facet,
+      "budget one commits F={1,2} to active facet {1,3} exactly");
+  check(
+      one.initial_segment_excluded_from_chain_budget &&
+          one.exact_initial_to_chain_seam_certified &&
+          one.source_open_composite_path_strict_critical_sublevel &&
+          one.counters.committed_chain_strict_segment_count == 1U &&
+          one.counters.committed_composite_path_segment_count == 2U &&
+          one.counters.active_terminal_count == 1U &&
+          one.counters.chain_budget_terminal_count == 0U &&
+          one.decision ==
+              ExactCriticalArmDescentDecision::
+                  complete_at_regular_active_facet &&
+          std::string_view{ExactCriticalArmDescentResult::proof_basis} ==
+              "exact_critical_arm_initial_segment_exact_seam_single_source_"
+              "canonical_facet_descent_chain_v1" &&
+          all_critical_arm_descent_certificates_close(one_verification),
+      "one budgeted chain segment closes a two-segment composite arm");
+
+  const std::array<CertifiedPoint3, 4> degenerate_input{
+      point(-3.0, 0.0),
+      point(-1.0, 0.0),
+      point(1.0, 2.0),
+      point(3.0, 0.0)};
+  const CanonicalPointCloud degenerate_cloud =
+      canonical_cloud(degenerate_input);
+  const std::array<PointId, 2> degenerate_shell{0U, 3U};
+  const ExactFacetDescentChainBudget terminal_budget{4U};
+  const ExactCriticalArmDescentResult degenerate =
+      build_exact_critical_arm_descent(
+          degenerate_cloud,
+          degenerate_shell,
+          0U,
+          terminal_budget);
+  const auto degenerate_verification = verify_exact_critical_arm_descent(
+      degenerate_cloud,
+      degenerate_shell,
+      0U,
+      terminal_budget,
+      degenerate);
+  check(
+      degenerate.initial_segment.arm_facet_point_ids ==
+              std::vector<PointId>({1U, 2U, 3U}) &&
+          degenerate.initial_segment.arm_miniball.has_value() &&
+          degenerate.facet_descent_chain.has_value(),
+      "supported critical source reaches its nonessential arm facet");
+  if (!degenerate.initial_segment.arm_miniball.has_value() ||
+      !degenerate.facet_descent_chain.has_value()) {
+    return;
+  }
+  check(
+      degenerate.initial_segment.arm_miniball->center ==
+              center(1, 0, 0) &&
+          degenerate.initial_segment.arm_miniball->squared_radius ==
+              level(4) &&
+          degenerate.facet_descent_chain->nodes.size() == 1U &&
+          degenerate.facet_descent_chain->
+              committed_segment_witnesses.empty() &&
+          degenerate.facet_descent_chain->decision ==
+              ExactFacetDescentChainDecision::
+                  certified_prefix_blocked_unsupported_degeneracy &&
+          degenerate.counters.unsupported_chain_terminal_count == 1U &&
+          degenerate.counters.
+                  committed_composite_path_segment_count == 1U &&
+          degenerate.decision ==
+              ExactCriticalArmDescentDecision::
+                  certified_prefix_blocked_unsupported_degeneracy &&
+          all_critical_arm_descent_certificates_close(
+              degenerate_verification),
+      "composite maps a nonessential arm facet to an unsupported prefix");
+}
+
+void test_critical_arm_supports_interior_and_maximum_rank() {
+  {
+    const std::array<CertifiedPoint3, 3> input{
+        point(-2.0), point(0.0), point(2.0)};
+    const CanonicalPointCloud cloud = canonical_cloud(input);
+    const std::array<PointId, 2> critical_shell{0U, 2U};
+    const ExactCriticalArmInitialSegmentResult result =
+        build_exact_critical_arm_initial_segment(
+            cloud, critical_shell, 0U);
+    const auto verification = verify_exact_critical_arm_initial_segment(
+        cloud, critical_shell, 0U, result);
+    check(
+        result.global_closed_ball.has_value() &&
+            result.arm_miniball.has_value() &&
+            result.initial_segment_coefficients.has_value(),
+        "critical event with an interior point retains every exact payload");
+    if (!result.global_closed_ball.has_value() ||
+        !result.arm_miniball.has_value() ||
+        !result.initial_segment_coefficients.has_value()) {
+      return;
+    }
+    check(
+        matches_ids(result.global_closed_ball->interior_ids(), {1U}) &&
+            matches_ids(
+                result.global_closed_ball->shell_ids(), {0U, 2U}) &&
+            result.closed_rank == 3U && result.order == 2U &&
+            result.arm_facet_point_ids ==
+                std::vector<PointId>({1U, 2U}) &&
+            result.arm_miniball->center == center(1, 0, 0) &&
+            result.arm_miniball->squared_radius == level(1),
+        "interior point joins F while the removed endpoint leaves the shell");
+    check(
+        result.initial_segment_coefficients->source_atom_level ==
+                level(4) &&
+            result.initial_segment_coefficients->successor_atom_level ==
+                level(1) &&
+            result.initial_segment_coefficients->
+                    center_squared_displacement == level(1) &&
+            result.removed_point_target_squared_distance ==
+                std::optional<ExactLevel>{level(9)} &&
+            result.removed_point_outgoing_linear_coefficient ==
+                std::optional<ExactRational>{rational(4)} &&
+            result.negative_exterior_direction_constraints.empty() &&
+            result.strict_local_parameter_upper_bound ==
+                std::optional<ExactRational>{rational(1)} &&
+            all_critical_arm_initial_certificates_close(verification),
+        "interior fixture has coefficients a=4, b=1, delta=1 and tau=1");
+  }
+
+  {
+    const std::array<CertifiedPoint3, 4> input{
+        point(-1.0, -1.0, 1.0),
+        point(-1.0, 1.0, -1.0),
+        point(1.0, -1.0, -1.0),
+        point(1.0, 1.0, 1.0)};
+    const CanonicalPointCloud cloud = canonical_cloud(input);
+    const std::array<PointId, 4> critical_shell{0U, 1U, 2U, 3U};
+    const ExactCriticalArmInitialSegmentResult result =
+        build_exact_critical_arm_initial_segment(
+            cloud, critical_shell, 0U);
+    const auto verification = verify_exact_critical_arm_initial_segment(
+        cloud, critical_shell, 0U, result);
+    check(
+        result.closed_rank == 4U && result.order == 3U &&
+            result.critical_shell_is_positive_minimal_support &&
+            result.global_shell_matches_critical_shell &&
+            result.arm_facet_point_ids ==
+                std::vector<PointId>({1U, 2U, 3U}) &&
+            result.arm_miniball.has_value() &&
+            result.initial_segment_coefficients.has_value(),
+        "positive four-point critical support constructs a tetrahedral arm");
+    if (!result.arm_miniball.has_value() ||
+        !result.initial_segment_coefficients.has_value()) {
+      return;
+    }
+    check(
+        result.critical_shell_miniball.center == center(0, 0, 0) &&
+            result.critical_shell_miniball.squared_radius == level(3) &&
+            result.arm_miniball->center == center(1, 1, -1, 3) &&
+            result.arm_miniball->squared_radius == level(8, 3) &&
+            result.initial_segment_coefficients->
+                    center_squared_displacement == level(1, 3) &&
+            result.removed_point_outgoing_linear_coefficient ==
+                std::optional<ExactRational>{rational(2)} &&
+            result.strict_local_parameter_upper_bound ==
+                std::optional<ExactRational>{rational(1)} &&
+            all_critical_arm_initial_certificates_close(verification),
+        "tetrahedral arm closes b=8/3, delta=1/3, B_u=2 and tau=1");
+  }
+
+  {
+    const std::array<CertifiedPoint3, 11> input{
+        point(-5.0),
+        point(-4.0),
+        point(-3.0),
+        point(-2.0),
+        point(-1.0),
+        point(0.0),
+        point(1.0),
+        point(2.0),
+        point(3.0),
+        point(4.0),
+        point(5.0)};
+    const CanonicalPointCloud cloud = canonical_cloud(input);
+    const std::array<PointId, 2> critical_shell{0U, 10U};
+    const ExactCriticalArmInitialSegmentResult result =
+        build_exact_critical_arm_initial_segment(
+            cloud, critical_shell, 0U);
+    const auto verification = verify_exact_critical_arm_initial_segment(
+        cloud, critical_shell, 0U, result);
+    check(
+        result.closed_rank == 11U && result.order == 10U &&
+            result.closed_rank_and_order_supported &&
+            result.arm_facet_point_ids ==
+                std::vector<PointId>(
+                    {1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U}) &&
+            result.arm_miniball.has_value() &&
+            result.initial_segment_coefficients.has_value(),
+        "closed rank eleven constructs the maximum ten-point arm facet");
+    if (!result.arm_miniball.has_value() ||
+        !result.initial_segment_coefficients.has_value()) {
+      return;
+    }
+    check(
+        result.critical_shell_miniball.center == center(0, 0, 0) &&
+            result.critical_shell_miniball.squared_radius == level(25) &&
+            result.arm_miniball->center == center(1, 0, 0, 2) &&
+            result.arm_miniball->squared_radius == level(81, 4) &&
+            result.initial_segment_coefficients->source_atom_level ==
+                level(25) &&
+            result.initial_segment_coefficients->successor_atom_level ==
+                level(81, 4) &&
+            result.initial_segment_coefficients->
+                    center_squared_displacement == level(1, 4) &&
+            result.removed_point_outgoing_linear_coefficient ==
+                std::optional<ExactRational>{rational(5)} &&
+            result.decision ==
+                ExactCriticalArmInitialSegmentDecision::
+                    strict_initial_arm_segment_certified &&
+            all_critical_arm_initial_certificates_close(verification),
+        "rank-eleven boundary closes cF=1/2, b=81/4 and delta=1/4");
+    check(
+        ExactCriticalArmInitialSegmentResult::
+                maximum_supported_closed_rank == 11U &&
+            ExactCriticalArmInitialSegmentResult::
+                maximum_supported_order == 10U,
+        "critical arm advertises the phase-six closed-rank cap");
+  }
+}
+
+void test_critical_arm_unsupported_sources_fail_closed() {
+  {
+    const std::array<CertifiedPoint3, 4> input{
+        point(-1.0, 0.0),
+        point(0.0, 1.0),
+        point(1.0, 0.0),
+        point(0.0, -1.0)};
+    const CanonicalPointCloud cloud = canonical_cloud(input);
+    const std::array<PointId, 4> nonminimal_shell{0U, 1U, 2U, 3U};
+    const ExactCriticalArmInitialSegmentResult result =
+        build_exact_critical_arm_initial_segment(
+            cloud, nonminimal_shell, 0U);
+    const auto verification = verify_exact_critical_arm_initial_segment(
+        cloud, nonminimal_shell, 0U, result);
+    check(
+        !result.critical_shell_is_positive_minimal_support &&
+            !result.global_shell_matches_critical_shell &&
+            !result.global_closed_ball.has_value() &&
+            result.source_decision ==
+                ExactCriticalArmSourceDecision::
+                    unsupported_nonminimal_or_nonpositive_shell &&
+            result.decision ==
+                ExactCriticalArmInitialSegmentDecision::
+                    no_segment_unsupported_critical_source &&
+            result.arm_facet_point_ids.empty() &&
+            !result.arm_miniball.has_value() &&
+            all_critical_arm_initial_certificates_close(verification),
+        "nonminimal four-point shell is classified exactly and emits no arm");
+
+    const ExactFacetDescentChainBudget zero_budget{0U};
+    const ExactCriticalArmDescentResult unsupported_composite =
+        build_exact_critical_arm_descent(
+            cloud, nonminimal_shell, 0U, zero_budget);
+    const auto unsupported_composite_verification =
+        verify_exact_critical_arm_descent(
+            cloud,
+            nonminimal_shell,
+            0U,
+            zero_budget,
+            unsupported_composite);
+    check(
+        unsupported_composite.initial_segment.decision ==
+                ExactCriticalArmInitialSegmentDecision::
+                    no_segment_unsupported_critical_source &&
+            !unsupported_composite.facet_descent_chain.has_value() &&
+            !unsupported_composite.
+                initial_segment_excluded_from_chain_budget &&
+            unsupported_composite.counters.
+                    source_unsupported_terminal_count == 1U &&
+            unsupported_composite.decision ==
+                ExactCriticalArmDescentDecision::
+                    no_descent_unsupported_critical_source &&
+            all_critical_arm_descent_certificates_close(
+                unsupported_composite_verification),
+        "unsupported critical source maps to no composite chain");
+
+    check_throws<std::invalid_argument>(
+        [&cloud, &nonminimal_shell]() {
+          const ExactFacetDescentChainBudget excessive{
+              ExactFacetDescentChainBudget::
+                  maximum_supported_committed_strict_segment_count + 1U};
+          static_cast<void>(build_exact_critical_arm_descent(
+              cloud, nonminimal_shell, 0U, excessive));
+        },
+        "an unsupported source cannot bypass the composite chain budget cap");
+  }
+
+  {
+    const std::array<CertifiedPoint3, 3> input{
+        point(-1.0, 0.0), point(1.0, 0.0), point(0.0, 1.0)};
+    const CanonicalPointCloud cloud = canonical_cloud(input);
+    const std::array<PointId, 2> incomplete_shell{0U, 2U};
+    const ExactCriticalArmInitialSegmentResult result =
+        build_exact_critical_arm_initial_segment(
+            cloud, incomplete_shell, 0U);
+    const auto verification = verify_exact_critical_arm_initial_segment(
+        cloud, incomplete_shell, 0U, result);
+    check(
+        result.critical_shell_is_positive_minimal_support &&
+            !result.global_shell_matches_critical_shell &&
+            result.global_closed_ball.has_value() &&
+            matches_ids(
+                result.global_closed_ball->shell_ids(), {0U, 1U, 2U}) &&
+            result.source_decision ==
+                ExactCriticalArmSourceDecision::
+                    unsupported_incomplete_global_shell &&
+            result.decision ==
+                ExactCriticalArmInitialSegmentDecision::
+                    no_segment_unsupported_critical_source &&
+            !result.arm_miniball.has_value() &&
+            all_critical_arm_initial_certificates_close(verification),
+        "omitted global shell point blocks the initial germ fail-closed");
+  }
+
+  {
+    const std::array<CertifiedPoint3, 12> input{
+        point(-6.0),
+        point(-5.0),
+        point(-4.0),
+        point(-3.0),
+        point(-2.0),
+        point(-1.0),
+        point(0.0),
+        point(1.0),
+        point(2.0),
+        point(3.0),
+        point(4.0),
+        point(5.0)};
+    const CanonicalPointCloud cloud = canonical_cloud(input);
+    const std::array<PointId, 2> critical_shell{0U, 11U};
+    const ExactCriticalArmInitialSegmentResult result =
+        build_exact_critical_arm_initial_segment(
+            cloud, critical_shell, 0U);
+    const auto verification = verify_exact_critical_arm_initial_segment(
+        cloud, critical_shell, 0U, result);
+    check(
+        result.critical_shell_is_positive_minimal_support &&
+            result.global_shell_matches_critical_shell &&
+            result.closed_rank == 12U && result.order == 11U &&
+            !result.closed_rank_and_order_supported &&
+            result.source_decision ==
+                ExactCriticalArmSourceDecision::
+                    unsupported_closed_rank_or_order &&
+            result.decision ==
+                ExactCriticalArmInitialSegmentDecision::
+                    no_segment_unsupported_critical_source &&
+            result.arm_facet_point_ids.empty() &&
+            !result.arm_miniball.has_value() &&
+            all_critical_arm_initial_certificates_close(verification),
+        "closed rank twelve is reported but never enters the bounded arm oracle");
+  }
+}
+
+void test_critical_arm_verifiers_reject_falsifications() {
+  const CanonicalPointCloud cloud = critical_arm_fixture_cloud();
+  const std::array<PointId, 3> critical_shell{0U, 1U, 2U};
+  constexpr PointId removed = 0U;
+  const ExactCriticalArmInitialSegmentResult result =
+      build_exact_critical_arm_initial_segment(
+          cloud, critical_shell, removed);
+
+  const auto rejects_initial =
+      [&cloud, &critical_shell](
+          const ExactCriticalArmInitialSegmentResult& candidate,
+          const std::string& message) {
+        const auto verification =
+            verify_exact_critical_arm_initial_segment(
+                cloud, critical_shell, removed, candidate);
+        check(
+            !verification.
+                exact_critical_arm_initial_segment_decision_certified,
+            message);
+      };
+
+  ExactCriticalArmInitialSegmentResult bad_miniball = result;
+  bad_miniball.critical_shell_miniball.squared_radius = level(5);
+  rejects_initial(
+      bad_miniball,
+      "critical-arm verifier rejects a falsified source miniball");
+
+  ExactCriticalArmInitialSegmentResult bad_partition = result;
+  bad_partition.global_closed_ball.emplace(
+      morsehgp3d::spatial::brute_force_closed_ball(
+          cloud, center(0, 5, 0, 6), level(5)));
+  rejects_initial(
+      bad_partition,
+      "critical-arm verifier rejects a falsified global partition");
+
+  ExactCriticalArmInitialSegmentResult bad_source_decision = result;
+  bad_source_decision.source_decision =
+      ExactCriticalArmSourceDecision::unsupported_incomplete_global_shell;
+  rejects_initial(
+      bad_source_decision,
+      "critical-arm verifier treats the source decision as untrusted");
+
+  ExactCriticalArmInitialSegmentResult bad_arm_facet = result;
+  bad_arm_facet.arm_facet_point_ids.front() = 0U;
+  rejects_initial(
+      bad_arm_facet,
+      "critical-arm verifier rejects a falsified arm facet");
+
+  ExactCriticalArmInitialSegmentResult bad_arm_miniball = result;
+  bad_arm_miniball.arm_miniball->squared_radius = level(3);
+  rejects_initial(
+      bad_arm_miniball,
+      "critical-arm verifier rejects a falsified arm miniball");
+
+  ExactCriticalArmInitialSegmentResult bad_coefficients = result;
+  bad_coefficients.initial_segment_coefficients->
+      center_squared_displacement = level(1);
+  rejects_initial(
+      bad_coefficients,
+      "critical-arm verifier rejects falsified initial coefficients");
+
+  ExactCriticalArmInitialSegmentResult bad_exterior = result;
+  bad_exterior.negative_exterior_direction_constraints.front().
+      source_outgoing_linear_coefficient = rational(-5);
+  rejects_initial(
+      bad_exterior,
+      "critical-arm verifier rejects a falsified exterior constraint");
+
+  ExactCriticalArmInitialSegmentResult bad_removed_witness = result;
+  bad_removed_witness.removed_point_outgoing_linear_coefficient =
+      rational(5);
+  rejects_initial(
+      bad_removed_witness,
+      "critical-arm verifier rejects a falsified removed-point witness");
+
+  ExactCriticalArmInitialSegmentResult bad_bound = result;
+  bad_bound.strict_local_parameter_upper_bound = rational(1);
+  rejects_initial(
+      bad_bound,
+      "critical-arm verifier rejects a falsified local parameter bound");
+
+  ExactCriticalArmInitialSegmentResult bad_fact = result;
+  bad_fact.removed_point_outgoing_direction_certified = false;
+  rejects_initial(
+      bad_fact,
+      "critical-arm verifier rejects a falsified outgoing-direction fact");
+
+  ExactCriticalArmInitialSegmentResult bad_counter = result;
+  ++bad_counter.counters.convex_identity_certification_count;
+  rejects_initial(
+      bad_counter,
+      "critical-arm verifier rejects falsified exact work counters");
+
+  ExactCriticalArmInitialSegmentResult bad_decision = result;
+  bad_decision.decision =
+      ExactCriticalArmInitialSegmentDecision::
+          no_segment_unsupported_critical_source;
+  rejects_initial(
+      bad_decision,
+      "critical-arm verifier treats the initial decision as untrusted");
+
+  ExactCriticalArmInitialSegmentResult bad_scope = result;
+  bad_scope.scope = ExactCriticalArmInitialSegmentScope::unspecified;
+  rejects_initial(
+      bad_scope,
+      "critical-arm verifier treats the initial scope as untrusted");
+
+  const auto wrong_removed_check = verify_exact_critical_arm_initial_segment(
+      cloud, critical_shell, 1U, result);
+  check(
+      !wrong_removed_check.removed_shell_point_identity_certified &&
+          !wrong_removed_check.
+              exact_critical_arm_initial_segment_decision_certified,
+      "critical-arm verifier rejects a different external arm label");
+
+  const CanonicalPointCloud twin_cloud = critical_arm_fixture_cloud();
+  const ExactCriticalArmInitialSegmentResult twin_result =
+      build_exact_critical_arm_initial_segment(
+          twin_cloud, critical_shell, removed);
+  const auto twin_initial_check =
+      verify_exact_critical_arm_initial_segment(
+          cloud, critical_shell, removed, twin_result);
+  check(
+      !twin_initial_check.global_closed_ball_certified &&
+          !twin_initial_check.
+              exact_critical_arm_initial_segment_decision_certified,
+      "critical-arm verifier rejects a partition from a twin cloud identity");
+
+  const ExactFacetDescentChainBudget budget{1U};
+  const ExactCriticalArmDescentResult composite =
+      build_exact_critical_arm_descent(
+          cloud, critical_shell, removed, budget);
+  const auto rejects_composite =
+      [&cloud, &critical_shell, budget](
+          const ExactCriticalArmDescentResult& candidate,
+          const std::string& message) {
+        const auto verification = verify_exact_critical_arm_descent(
+            cloud, critical_shell, removed, budget, candidate);
+        check(
+            !verification.exact_critical_arm_descent_decision_certified,
+            message);
+      };
+
+  ExactCriticalArmDescentResult bad_initial = composite;
+  bad_initial.initial_segment.removed_point_outgoing_direction_certified =
+      false;
+  rejects_composite(
+      bad_initial,
+      "composite verifier rejects a falsified embedded initial segment");
+
+  ExactCriticalArmDescentResult missing_chain = composite;
+  missing_chain.facet_descent_chain.reset();
+  rejects_composite(
+      missing_chain,
+      "composite verifier rejects an absent supported-source chain");
+
+  ExactCriticalArmDescentResult bad_chain = composite;
+  bad_chain.facet_descent_chain->nodes.front().squared_level = level(3);
+  rejects_composite(
+      bad_chain,
+      "composite verifier rejects a falsified canonical chain");
+
+  ExactCriticalArmDescentResult bad_seam = composite;
+  bad_seam.exact_initial_to_chain_seam_certified = false;
+  rejects_composite(
+      bad_seam,
+      "composite verifier rejects a falsified initial-to-chain seam");
+
+  ExactCriticalArmDescentResult bad_budget_separation = composite;
+  bad_budget_separation.initial_segment_excluded_from_chain_budget = false;
+  rejects_composite(
+      bad_budget_separation,
+      "composite verifier rejects a falsified initial-budget separation");
+
+  ExactCriticalArmDescentResult bad_path = composite;
+  bad_path.source_open_composite_path_strict_critical_sublevel = false;
+  rejects_composite(
+      bad_path,
+      "composite verifier rejects a falsified strict path fact");
+
+  ExactCriticalArmDescentResult bad_composite_counter = composite;
+  ++bad_composite_counter.counters.
+      committed_composite_path_segment_count;
+  rejects_composite(
+      bad_composite_counter,
+      "composite verifier rejects falsified aggregate counters");
+
+  ExactCriticalArmDescentResult bad_composite_decision = composite;
+  bad_composite_decision.decision =
+      ExactCriticalArmDescentDecision::
+          certified_prefix_strict_segment_budget_exhausted;
+  rejects_composite(
+      bad_composite_decision,
+      "composite verifier treats its mapped decision as untrusted");
+
+  ExactCriticalArmDescentResult bad_composite_scope = composite;
+  bad_composite_scope.scope = ExactCriticalArmDescentScope::unspecified;
+  rejects_composite(
+      bad_composite_scope,
+      "composite verifier treats its scope as untrusted");
+
+  const auto wrong_budget_check = verify_exact_critical_arm_descent(
+      cloud,
+      critical_shell,
+      removed,
+      ExactFacetDescentChainBudget{0U},
+      composite);
+  check(
+      !wrong_budget_check.requested_chain_budget_certified &&
+          !wrong_budget_check.
+              exact_critical_arm_descent_decision_certified,
+      "composite verifier rejects a different external chain budget");
+
+  const ExactCriticalArmDescentResult twin_composite =
+      build_exact_critical_arm_descent(
+          twin_cloud, critical_shell, removed, budget);
+  const auto twin_composite_check = verify_exact_critical_arm_descent(
+      cloud, critical_shell, removed, budget, twin_composite);
+  check(
+      !twin_composite_check.initial_segment_certified &&
+          !twin_composite_check.
+              exact_critical_arm_descent_decision_certified,
+      "composite verifier rejects exact payloads from a twin cloud identity");
+}
+
+void test_invalid_critical_arm_inputs_are_rejected() {
+  const std::array<CertifiedPoint3, 6> input{
+      point(-2.0, 0.0),
+      point(0.0, 3.0),
+      point(2.0, 0.0),
+      point(2.0, 2.0),
+      point(4.0, 0.0),
+      point(5.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+
+  check_throws<std::invalid_argument>(
+      [&cloud]() {
+        static_cast<void>(
+            build_exact_critical_arm_initial_segment(cloud, {}, 0U));
+      },
+      "empty critical shell is rejected");
+
+  const std::array<PointId, 1> singleton{0U};
+  check_throws<std::invalid_argument>(
+      [&cloud, &singleton]() {
+        static_cast<void>(
+            build_exact_critical_arm_initial_segment(
+                cloud, singleton, 0U));
+      },
+      "one-point critical shell is rejected");
+
+  const std::array<PointId, 5> too_large{0U, 1U, 2U, 3U, 4U};
+  check_throws<std::invalid_argument>(
+      [&cloud, &too_large]() {
+        static_cast<void>(
+            build_exact_critical_arm_initial_segment(
+                cloud, too_large, 0U));
+      },
+      "critical shell larger than four points is rejected");
+
+  const std::array<PointId, 3> duplicate{0U, 1U, 1U};
+  check_throws<std::invalid_argument>(
+      [&cloud, &duplicate]() {
+        static_cast<void>(
+            build_exact_critical_arm_initial_segment(
+                cloud, duplicate, 0U));
+      },
+      "duplicate critical-shell PointIds are rejected");
+
+  const std::array<PointId, 3> outside{0U, 1U, 6U};
+  check_throws<std::out_of_range>(
+      [&cloud, &outside]() {
+        static_cast<void>(
+            build_exact_critical_arm_initial_segment(
+                cloud, outside, 0U));
+      },
+      "critical-shell PointId outside the cloud is rejected");
+
+  const std::array<PointId, 3> valid_shell{0U, 1U, 2U};
+  check_throws<std::invalid_argument>(
+      [&cloud, &valid_shell]() {
+        static_cast<void>(
+            build_exact_critical_arm_initial_segment(
+                cloud, valid_shell, 3U));
+      },
+      "removed point outside the supplied critical shell is rejected");
+
+  check_throws<std::invalid_argument>(
+      [&cloud, &valid_shell]() {
+        const ExactFacetDescentChainBudget excessive{
+            ExactFacetDescentChainBudget::
+                maximum_supported_committed_strict_segment_count + 1U};
+        static_cast<void>(build_exact_critical_arm_descent(
+            cloud, valid_shell, 0U, excessive));
+      },
+      "critical-arm composite rejects a chain budget above its cap");
+}
+
 void test_descent_precondition_verifier_rejects_every_result_layer() {
   const std::array<CertifiedPoint3, 3> input{
       point(-1.0, 0.0, 0.0),
@@ -2531,6 +3502,12 @@ int main() {
   test_descent_chain_keeps_miniball_and_atom_seams_distinct();
   test_descent_chain_budgets_and_terminal_decisions();
   test_descent_chain_verifier_rejects_every_result_layer();
+  test_critical_arm_initial_segment_exact_geometry();
+  test_critical_arm_descent_budgets_exclude_initial_segment();
+  test_critical_arm_supports_interior_and_maximum_rank();
+  test_critical_arm_unsupported_sources_fail_closed();
+  test_critical_arm_verifiers_reject_falsifications();
+  test_invalid_critical_arm_inputs_are_rejected();
   test_descent_precondition_verifier_rejects_every_result_layer();
   test_verifier_rejects_every_result_layer();
   test_invalid_facets_are_rejected();

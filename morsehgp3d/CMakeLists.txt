@@ -264,6 +264,7 @@ add_library(
   morsehgp3d_hierarchy
   STATIC
     src/cpu/hierarchy/boruvka.cpp
+    src/cpu/hierarchy/critical_arm.cpp
     src/cpu/hierarchy/emst.cpp
     src/cpu/hierarchy/gabriel.cpp
     src/cpu/hierarchy/k1_forest.cpp

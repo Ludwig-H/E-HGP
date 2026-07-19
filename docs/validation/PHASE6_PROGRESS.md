@@ -2,15 +2,15 @@
 
 ## Statut
 
-- phase : `6`, `ready`; jalons préparatoires 6.1 à 6.5 livrés pendant que la phase 5 reste l'unique phase `in_progress`;
+- phase : `6`, `ready`; jalons préparatoires 6.1 à 6.6 validés pendant que la phase 5 reste l'unique phase `in_progress`;
 - backend : `reference_cpu`;
 - profil : `full_pi0`;
 - mode : `certified`;
-- portée courante : `single_source_canonical_strict_descent_chain_only`;
+- portée courante : `single_index_one_critical_arm_plus_canonical_strict_chain_only`;
 - porte d'entrée : satisfaite par les Phases 1 et 4 fermées;
-- porte de sortie : non satisfaite; la miniball exacte bornée, son shell global, la famille top-$k$ exacte, l'arc strict 6.3, le segment analytique individuel 6.4 et sa chaîne mono-source 6.5 sont validés; aucun germe initial, DAG multi-source, pointer-jumping, plateau, attache, forêt ou différentiel indépendant n'est construit.
+- porte de sortie : non satisfaite; la miniball exacte bornée, son shell global, la famille top-$k$ exacte, l'arc strict 6.3, le segment analytique individuel 6.4, sa chaîne mono-source 6.5 et le germe initial mono-bras 6.6 sont validés sur hôte strict; aucune fermeture multi-bras, racine, attache, DAG, pointer-jumping, plateau, forêt ou différentiel indépendant n'est construite.
 
-Ces jalons ne construisent aucune forêt et ne publient aucun `public_status`. Le premier fournit un oracle local exact pour une facette de cardinal au plus dix; le second certifie ses préconditions globales au centre; le troisième réserve le mot successeur au représentant canonique dont la miniball fraîche possède un niveau strictement inférieur; le quatrième ajoute le certificat analytique du segment de centres associé à cet arc; le cinquième relance ce constructeur et concatène une seule orbite canonique stricte. Cette chaîne n'est encore ni un germe, ni un DAG global, ni une attache.
+Ces jalons ne construisent aucune forêt et ne publient aucun `public_status`. Le premier fournit un oracle local exact pour une facette de cardinal au plus dix; le second certifie ses préconditions globales au centre; le troisième réserve le mot successeur au représentant canonique dont la miniball fraîche possède un niveau strictement inférieur; le quatrième ajoute le certificat analytique du segment de centres associé à cet arc; le cinquième relance ce constructeur et concatène une seule orbite canonique stricte. Le sixième construit en amont le segment initial d'un seul bras d'indice un et le coud à cette chaîne, sans encore identifier une racine globale, une attache ou un DAG.
 
 ## Réduction mathématique finie
 
@@ -96,6 +96,18 @@ Les décisions terminales sont `complete_at_regular_active_facet`, `certified_pr
 
 La base `exact_replayed_half_open_segments_exact_seams_strict_facet_potential_finite_orbit_v1` et la portée `single_source_canonical_strict_descent_chain_only` excluent le segment initial depuis un centre critique, la fermeture de plusieurs sources en DAG, le pointer-jumping, les plateaux, les attaches, les forêts, tout `public_status`, CUDA et G4.
 
+## Germe initial d'un bras critique 6.6
+
+`build_exact_critical_arm_initial_segment` reçoit le shell critique complet $U$ et le point $u\in U$ qui désigne le bras. Il reconstruit la miniball exacte de $U$ et exige un support positif minimal de cardinal entre deux et quatre. La classification globale doit produire une partition $S=I\cup U$ dont le shell est exactement $U$; le rang fermé doit vérifier $\lvert S\rvert\leq11$, l'ordre est $k=\lvert S\rvert-1\leq10$ et la facette du bras est $F_u=S\setminus\left\lbrace u\right\rbrace$. La limite porte sur la seule miniball fraîche de $F_u$, de cardinal au plus dix : aucune miniball de $S$ n'est construite au rang onze.
+
+Notons $c$ et $a$ le centre et le niveau critiques, $c_{F_u}$ et $b$ le centre et le niveau de la miniball du bras, puis $d=c_{F_u}-c$ et $\delta=\left\Vert d\right\Vert^2$. La positivité minimale du support interdit $c\in\mathrm{conv}(U\setminus\left\lbrace u\right\rbrace)$; l'unicité du centre de miniball impose donc $b<a$ et $\delta>0$. Le point retiré reçoit le coefficient complet $B_u=2(c-u)\mathbin{\cdot}d>0$, qui le place immédiatement à l'extérieur du niveau critique dans la direction du bras.
+
+Tout point $p\notin S$ possède une clairance exacte $A_p=\left\Vert c-p\right\Vert^2-a>0$ et un coefficient $B_p=2(c-p)\mathbin{\cdot}d$. Les coefficients non négatifs n'imposent aucune réduction locale. Pour $B_p<0$, le témoin conserve la borne conservative $A_p/(-2B_p)$; `strict_local_parameter_upper_bound` est le minimum rationnel de un et de toutes ces bornes. Il reste strictement positif et, combiné à l'enveloppe quadratique, maintient exactement $F_u$ sous $a$ sur le préfixe source-ouvert, sans prétendre que ce préfixe est maximal.
+
+`build_exact_critical_arm_descent` coud ensuite exactement $F_u$, $c_{F_u}$ et $b$ au premier nœud de 6.5. Son `ExactFacetDescentChainBudget` ne compte que les segments stricts engagés après le germe : une source prise en charge possède toujours un segment initial, même avec un budget de chaîne nul. Le compteur `committed_composite_path_segment_count` compte les segments engagés, soit le segment initial plus les segments de chaîne engagés, et exclut le `stopping_probe` non engagé. La base de preuve composite est `exact_critical_arm_initial_segment_exact_seam_single_source_canonical_facet_descent_chain_v1` et la portée `single_index_one_critical_arm_plus_canonical_strict_chain_only`.
+
+Les décisions non prises en charge distinguent shell critique non minimal ou non positif, shell global incomplet et rang fermé ou ordre hors borne. Elles conservent les témoins source atteints avant le gate mais n'émettent ni facette de bras, ni miniball de bras, ni chaîne 6.5. Elles ne diagnostiquent pas un plateau. Le germe et le composite restent mono-bras : aucune fermeture de labels, racine terminale, attache, comparaison à Gamma, jonction de bras, structure DAG, forêt ou publication de statut n'est effectuée.
+
 ## Validation hôte ciblée
 
 Le test strict couvre :
@@ -139,6 +151,10 @@ La fixture à cinq points part de $\left\lbrace0,2\right\rbrace$ et suit $\left\
 
 Les cas actif et non essentiel terminent respectivement sans segment et par préfixe non pris en charge. Une politique au-dessus de 4096 est rejetée. Les falsifications modifient budget demandé, budget effectif, forme compacte, nœuds, témoins, présence et contenu du probe, chacun des cinq faits de preuve, chacun des neuf compteurs de chaîne, chacun des six compteurs analytiques agrégés, décision, portée, politique fiable et identité d'un nuage jumeau. La cible unitaire 6.5 passe en Release strict sous GCC et Clang; le statut reste `validated_host_software`, sans oracle indépendant, CUDA, G4 ou statut public.
 
+La validation 6.6 fixe une fixture non triviale avec $U=\left\lbrace(-2,0),(0,3),(2,0)\right\rbrace$, le point retiré $(-2,0)$ et le point extérieur $(2,2)$. Les valeurs attendues sont $c=(0,5/6)$, $a=169/36$, $F_u=\left\lbrace(0,3),(2,0)\right\rbrace$, $c_{F_u}=(1,3/2)$, $b=13/4$, $\delta=13/9$, $B_u=46/9$, puis $A_p=2/3$, $B_p=-50/9$ et $\tau=3/50$. Un support critique positif à quatre points, porté par un tétraèdre, ferme séparément $(a,b,\delta,B_u)=(3,8/3,1/3,2)$. Un budget de chaîne nul conserve le segment initial et un probe 6.5 non engagé; un budget de un engage la transition $\left\lbrace1,2\right\rbrace\to\left\lbrace1,3\right\rbrace$ jusqu'au niveau $5/4$ et termine sur une facette active.
+
+Les autres validations 6.6 couvrent une source avec point intérieur, la frontière supportée rang fermé onze et ordre dix, le rejet fail-closed du rang douze, du shell global incomplet et d'un shell cosphérique non minimal, ainsi que toutes les entrées invalides. Le composite ferme séparément une source critique non prise en charge sans chaîne et une source valide dont la facette de bras est un triangle rectangle non essentiel, donc arrêtée par la branche 6.5 de dégénérescence. Un budget supérieur à 4096 est rejeté avant classification, même si la source aurait ensuite été non prise en charge. Les falsifications ciblent séparément la miniball critique, la partition globale, la décision source, la facette et la miniball de bras, les coefficients analytiques, le témoin retiré, la contrainte extérieure, $\tau$, les faits, compteurs, décisions et portées; le composite ajoute le payload initial, la présence et le contenu de la chaîne, la couture, le chemin strict, la convention budgétaire et l'identité d'un nuage jumeau. Les builds Release stricts GCC et Clang et le CTest `morsehgp3d.hierarchy_miniball` passent; 6.6 est `validated_host_software`, sans différentiel indépendant, CUDA, G4 ou `public_status`.
+
 ## Suite immédiate
 
-Le prochain jalon doit construire le segment initial de chaque bras depuis un centre critique d'indice un vers le centre de miniball de sa facette, puis raccorder cette source à 6.5 avant toute fermeture de labels, DAG, pointer-jumping ou attache. Une égalité de niveaux hors du gate strict restera `unsupported_degeneracy` tant que le quotient multivalué de plateau n'est pas démontré et implémenté. La portée courante reste strictement mono-source et ne compare encore aucune racine terminale à la composante Gamma juste sous le lot critique.
+Le jalon mathématique suivant devra fermer les labels terminaux de plusieurs bras et les comparer à la composante Gamma juste sous le lot critique avant toute attache. Une égalité de niveaux hors du gate strict restera `unsupported_degeneracy` tant que le quotient multivalué de plateau n'est pas démontré et implémenté. La portée courante reste strictement mono-bras et ne construit encore aucune racine publique, attache, structure DAG ou forêt.
