@@ -655,6 +655,10 @@ resolve_seeded_exact_external_1nn(
     ResolvedCandidate best{seed_edge(seed), source_id};
     ++audit.seed_incumbent_count;
     ++audit.point_query_count;
+    const std::size_t node_visit_count_before_query =
+        audit.cpu_node_visit_count;
+    const std::size_t exact_point_distance_count_before_query =
+        audit.cpu_exact_point_distance_evaluation_count;
     std::priority_queue<
         ExactSearchQueueEntry,
         std::vector<ExactSearchQueueEntry>,
@@ -665,6 +669,7 @@ resolve_seeded_exact_external_1nn(
     ++audit.cpu_exact_aabb_bound_evaluation_count;
     frontier.push(ExactSearchQueueEntry{
         std::move(root_bound), host.root_index});
+    std::size_t maximum_frontier_size = frontier.size();
 
     while (!frontier.empty()) {
       ExactSearchQueueEntry entry = frontier.top();
@@ -719,8 +724,23 @@ resolve_seeded_exact_external_1nn(
         ++audit.cpu_exact_aabb_bound_evaluation_count;
         frontier.push(ExactSearchQueueEntry{
             std::move(child_bound), child});
+        maximum_frontier_size = std::max(
+            maximum_frontier_size, frontier.size());
       }
     }
+
+    audit.maximum_cpu_node_visit_count_per_source = std::max(
+        audit.maximum_cpu_node_visit_count_per_source,
+        audit.cpu_node_visit_count - node_visit_count_before_query);
+    audit.maximum_cpu_exact_point_distance_evaluation_count_per_source =
+        std::max(
+            audit
+                .maximum_cpu_exact_point_distance_evaluation_count_per_source,
+            audit.cpu_exact_point_distance_evaluation_count -
+                exact_point_distance_count_before_query);
+    audit.maximum_cpu_frontier_size_per_source = std::max(
+        audit.maximum_cpu_frontier_size_per_source,
+        maximum_frontier_size);
 
     resolution.point_minima.push_back(
         K1BoruvkaPointMinimum{source_id, best.edge});

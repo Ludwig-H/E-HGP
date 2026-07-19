@@ -167,6 +167,9 @@ struct K1BoruvkaExactSearchAudit {
   std::size_t seed_incumbent_count{};
   std::size_t point_minimum_count{};
   std::size_t component_minimum_count{};
+  std::size_t maximum_cpu_node_visit_count_per_source{};
+  std::size_t maximum_cpu_exact_point_distance_evaluation_count_per_source{};
+  std::size_t maximum_cpu_frontier_size_per_source{};
   std::size_t cpu_node_visit_count{};
   std::size_t cpu_internal_node_expansion_count{};
   std::size_t cpu_exact_aabb_bound_evaluation_count{};
@@ -526,6 +529,9 @@ struct K1SeededExactBoruvkaCounters {
   std::size_t exact_point_query_count{};
   std::size_t exact_seed_incumbent_count{};
   std::size_t exact_point_minimum_count{};
+  std::size_t maximum_exact_node_visit_count_per_source{};
+  std::size_t maximum_exact_point_distance_evaluation_count_per_source{};
+  std::size_t maximum_exact_frontier_size_per_source{};
   std::size_t exact_node_visit_count{};
   std::size_t exact_internal_node_expansion_count{};
   std::size_t exact_aabb_bound_evaluation_count{};

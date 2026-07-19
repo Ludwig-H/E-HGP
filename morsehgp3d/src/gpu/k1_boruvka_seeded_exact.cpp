@@ -164,6 +164,13 @@ namespace {
          audit.seed_incumbent_count == point_count &&
          audit.point_minimum_count == point_count &&
          audit.component_minimum_count == component_count &&
+         audit.maximum_cpu_node_visit_count_per_source > 0U &&
+         audit.maximum_cpu_node_visit_count_per_source <=
+             audit.cpu_node_visit_count &&
+         audit.maximum_cpu_exact_point_distance_evaluation_count_per_source <=
+             audit.cpu_exact_point_distance_evaluation_count &&
+         audit.maximum_cpu_frontier_size_per_source > 0U &&
+         audit.maximum_cpu_frontier_size_per_source <= node_count &&
          audit.cpu_exact_aabb_bound_evaluation_count ==
              audit.cpu_node_visit_count &&
          audit.cpu_seed_leaf_distance_reuse_count <= point_count &&
@@ -317,6 +324,18 @@ recompute_counters(
             search.cpu_strict_aabb_prune_count)) {
       return std::nullopt;
     }
+    counters.maximum_exact_node_visit_count_per_source = std::max(
+        counters.maximum_exact_node_visit_count_per_source,
+        search.maximum_cpu_node_visit_count_per_source);
+    counters.maximum_exact_point_distance_evaluation_count_per_source =
+        std::max(
+            counters.
+                maximum_exact_point_distance_evaluation_count_per_source,
+            search
+                .maximum_cpu_exact_point_distance_evaluation_count_per_source);
+    counters.maximum_exact_frontier_size_per_source = std::max(
+        counters.maximum_exact_frontier_size_per_source,
+        search.maximum_cpu_frontier_size_per_source);
     counters.final_component_count = post_component_count;
   }
   return counters;

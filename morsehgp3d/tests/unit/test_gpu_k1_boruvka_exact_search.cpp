@@ -199,6 +199,14 @@ void check_round(
           audit.seed_incumbent_count == point_count &&
           audit.point_minimum_count == point_count &&
           audit.component_minimum_count == frozen_component_count &&
+          audit.maximum_cpu_node_visit_count_per_source > 0U &&
+          audit.maximum_cpu_node_visit_count_per_source <=
+              audit.cpu_node_visit_count &&
+          audit.maximum_cpu_exact_point_distance_evaluation_count_per_source <=
+              audit.cpu_exact_point_distance_evaluation_count &&
+          audit.maximum_cpu_frontier_size_per_source > 0U &&
+          audit.maximum_cpu_frontier_size_per_source <=
+              audit.resident_node_count &&
           audit.cpu_node_visit_count >= point_count &&
           audit.cpu_exact_aabb_bound_evaluation_count ==
               audit.cpu_node_visit_count &&
