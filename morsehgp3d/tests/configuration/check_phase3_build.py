@@ -35,6 +35,7 @@ CUDA_TARGETS = [
     "morsehgp3d_gpu_spatial_lbvh_replay",
     "morsehgp3d_gpu_k1_boruvka",
     "morsehgp3d_gpu_k1_boruvka_replay",
+    "morsehgp3d_gpu_k1_boruvka_full_replay",
 ]
 CUDA_BUILD_JOBS = 8
 
@@ -546,6 +547,7 @@ def validate_sources(project: Path, repository: Path) -> None:
         "morsehgp3d_gpu_spatial_lbvh_replay_host",
         "morsehgp3d_gpu_k1_boruvka_context_tests",
         "morsehgp3d_gpu_k1_boruvka_replay_host",
+        "morsehgp3d_gpu_k1_boruvka_full_replay_host",
     }
     sanitizer_block_match = re.search(
         r"set\(\s*_morsehgp3d_cpu_test_targets(?P<targets>.*?)\)\s*foreach",

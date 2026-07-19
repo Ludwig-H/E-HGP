@@ -92,7 +92,7 @@ cmake --build build/morsehgp3d --parallel
 ctest --test-dir build/morsehgp3d --output-on-failure
 ```
 
-Les targets exportés sont `morsehgp3d::exact`, `morsehgp3d::spatial` et `morsehgp3d::hierarchy`; chaque étage propage ses dépendances exactes. En configuration CUDA, la cible interne `morsehgp3d::gpu_k1_boruvka` et l'exécutable `morsehgp3d_gpu_k1_boruvka_replay` exercent la première ronde de Phase 5. Après `cmake --install`, un consommateur peut utiliser `find_package(MorseHGP3D CONFIG REQUIRED)` sans dépendre de chemins d'en-têtes propres à la machine de construction.
+Les targets exportés sont `morsehgp3d::exact`, `morsehgp3d::spatial` et `morsehgp3d::hierarchy`; chaque étage propage ses dépendances exactes. En configuration CUDA, la cible interne `morsehgp3d::gpu_k1_boruvka`, l'exécutable `morsehgp3d_gpu_k1_boruvka_replay` et le replay complet `morsehgp3d_gpu_k1_boruvka_full_replay` exercent respectivement la primitive et la boucle hybride de Phase 5. Après `cmake --install`, un consommateur peut utiliser `find_package(MorseHGP3D CONFIG REQUIRED)` sans dépendre de chemins d'en-têtes propres à la machine de construction.
 
 ### Profils reproductibles de Phase 3
 
