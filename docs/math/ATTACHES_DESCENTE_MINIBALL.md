@@ -77,21 +77,31 @@ Comme aucun point extérieur ne se trouve dans la miniball terminale fermée, le
 
 ## 6. Certificat de chemin sous-niveau
 
-Soit $F'=\mathrm{succ}(F)$ et le segment
+Soit $G=\mathrm{succ}(F)$ l'arc strict déjà certifié et le segment
 
-$$\gamma(t)=(1-t)c_F+t c_{F'},\qquad0\leq t\leq1.$$
+$$\gamma(t)=(1-t)c_F+t c_G,\qquad0\leq t\leq1.$$
 
-Au point initial,
+Posons $R=\beta(F)$, $a=g_G(c_F)=D_k(c_F)$, $b=g_G(c_G)=\beta(G)$ et $\delta=\left\Vert c_G-c_F\right\Vert^2$. Le certificat d'arc donne exactement $a\leq R$ et $b<R$; le calcul exact du déplacement donne $\delta\geq0$. Pour chaque $x\in G$, l'identité quadratique est
 
-$$g_{F'}(c_F)\leq\beta(F),$$
+$$\left\Vert\gamma(t)-x\right\Vert^2=(1-t)\left\Vert c_F-x\right\Vert^2+t\left\Vert c_G-x\right\Vert^2-t(1-t)\delta.$$
 
-et à l'arrivée $g_{F'}(c_{F'})=\beta(F')<\beta(F)$. Par convexité de $g_{F'}$,
+Le terme de déplacement est commun à tous les points, mais le maximiseur peut changer entre les deux extrémités. En prenant le maximum, on obtient donc une inégalité, pas une identité pour l'enveloppe :
 
-$$D_k(\gamma(t))\leq g_{F'}(\gamma(t))<\beta(F)$$
+$$g_G(\gamma(t))\leq q(t)=(1-t)a+tb-t(1-t)\delta.$$
 
-pour $0<t\leq1$. Le point initial peut être exactement au niveau précédent; le segment entre immédiatement dans le sous-niveau strict.
+Pour $0\leq t\leq1$,
 
-La concaténation des segments fournit un témoin géométrique de l'attache. Il suffit d'enregistrer les facettes, centres certifiés, valeurs et prédicats; les points intermédiaires n'ont pas besoin d'être échantillonnés.
+$$q(t)-R=(1-t)(a-R)+t(b-R)-t(1-t)\delta.$$
+
+Chaque terme est non positif sur le segment fermé, donc $D_k(\gamma(t))\leq g_G(\gamma(t))\leq R$ pour $0\leq t\leq1$. Pour $0<t\leq1$, le terme $t(b-R)$ est strictement négatif, donc
+
+$$D_k(\gamma(t))\leq g_G(\gamma(t))\leq q(t)<R.$$
+
+Le point initial peut satisfaire $a=R$ : le certificat universel strict porte alors sur le demi-segment $\gamma((0,1])$, tandis que le segment fermé $\gamma([0,1])$ n'est certifié que dans le sous-niveau fermé. Si $a<R$, le point initial est lui aussi strict, mais ce renforcement est enregistré séparément. Aucun échantillonnage de $t$ n'est nécessaire.
+
+Le cas $\delta=0$ est valide. L'exactitude rationnelle impose alors $c_F=c_G$ et donc $a=b$; le segment dégénère en un point déjà strict sous $R$. Rejeter systématiquement des centres égaux serait incorrect. À l'inverse, $\delta=0$ avec des centres différents ou avec $a\neq b$ est une contradiction fail-closed.
+
+Le certificat machine `exact_squared_distance_chord_identity_max_envelope_half_open_segment_v1` porte seulement sur cet arc et la portée `canonical_strict_arc_half_open_sublevel_segment_only`. Les branches active ou non prise en charge ne contiennent aucun témoin de segment. La concaténation future de plusieurs segments pourrait fournir un témoin géométrique d'attache, mais elle exige encore un rejeu de chaîne, un contrôle des coutures et une preuve de rattachement au bon germe; rien de cela n'est certifié ici.
 
 ## 7. Bras d'un point critique d'indice un
 
@@ -167,7 +177,7 @@ Pour chaque facette visitée sur les petits nuages :
 - comparer la miniball à l'énumération exhaustive des supports;
 - comparer le shell top-$k$ à la force brute;
 - vérifier exactement $\beta(F')<\beta(F)$;
-- évaluer le maximum de l'atome le long du segment par preuve convexe et par échantillonnage diagnostique;
+- vérifier la majoration exacte par $q(t)$ issue de l'identité quadratique; tout échantillonnage, notamment au milieu, reste seulement diagnostique;
 - vérifier que la racine terminale est un événement de rang $k$ du catalogue;
 - comparer l'attache à la composante de $\Gamma_k$ strictement antérieure;
 - vérifier l'absence de cycle sous toute permutation d'identifiants.

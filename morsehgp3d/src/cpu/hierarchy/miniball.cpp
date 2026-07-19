@@ -355,6 +355,18 @@ void evaluate_support(
   return left + right;
 }
 
+[[nodiscard]] exact::ExactLevel exact_center_squared_distance(
+    const exact::ExactRational3& left,
+    const exact::ExactRational3& right) {
+  exact::ExactRational squared_distance;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const exact::ExactRational delta =
+        left.coordinate(axis) - right.coordinate(axis);
+    squared_distance = squared_distance + delta * delta;
+  }
+  return exact::ExactLevel{std::move(squared_distance)};
+}
+
 [[nodiscard]] bool same_point_ids(
     std::span<const PointId> left,
     std::span<const PointId> right) {
@@ -820,6 +832,199 @@ compute_exact_facet_descent_preconditions(
          observed.counters == expected.counters;
 }
 
+[[nodiscard]] ExactFacetDescentSegmentDecision expected_segment_decision(
+    const ExactFacetDescentArcResult& source_arc) {
+  switch (source_arc.decision) {
+    case ExactFacetDescentArcDecision::strict_descent_arc_certified:
+      return ExactFacetDescentSegmentDecision::
+          strict_half_open_segment_certified;
+    case ExactFacetDescentArcDecision::
+        no_arc_already_active_at_own_center:
+      return ExactFacetDescentSegmentDecision::
+          no_segment_already_active_at_own_center;
+    case ExactFacetDescentArcDecision::no_arc_unsupported_degeneracy:
+      return ExactFacetDescentSegmentDecision::
+          no_segment_unsupported_degeneracy;
+    case ExactFacetDescentArcDecision::not_certified:
+      break;
+  }
+  throw std::logic_error(
+      "an exact descent segment requires a certified source arc decision");
+}
+
+[[nodiscard]] bool same_segment_witness(
+    const ExactFacetDescentSegmentWitness& observed,
+    const ExactFacetDescentSegmentWitness& expected) {
+  return observed.source_atom_level == expected.source_atom_level &&
+         observed.successor_atom_level == expected.successor_atom_level &&
+         observed.center_squared_displacement ==
+             expected.center_squared_displacement &&
+         observed.centers_equal == expected.centers_equal &&
+         observed.source_endpoint_strict_sublevel ==
+             expected.source_endpoint_strict_sublevel &&
+         observed.quadratic_max_upper_bound_certified ==
+             expected.quadratic_max_upper_bound_certified &&
+         observed.closed_segment_nonstrict_sublevel ==
+             expected.closed_segment_nonstrict_sublevel &&
+         observed.half_open_segment_strict_sublevel ==
+             expected.half_open_segment_strict_sublevel;
+}
+
+[[nodiscard]] ExactFacetDescentSegmentResult
+compute_exact_facet_descent_segment(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> facet_point_ids) {
+  ExactFacetDescentSegmentResult result;
+  result.source_arc = build_exact_facet_descent_arc(
+      cloud, facet_point_ids);
+  result.counters.source_arc_classification_count = 1U;
+
+  switch (result.source_arc.decision) {
+    case ExactFacetDescentArcDecision::strict_descent_arc_certified: {
+      if (!result.source_arc.successor_facet_point_ids.has_value() ||
+          !result.source_arc.successor_miniball.has_value() ||
+          !result.source_arc.source_preconditions.exact_top_k.has_value()) {
+        throw std::logic_error(
+            "a strict exact arc omitted data required by its segment witness");
+      }
+      const std::vector<PointId>& successor_facet =
+          *result.source_arc.successor_facet_point_ids;
+      if (successor_facet.empty()) {
+        throw std::logic_error(
+            "a strict exact segment requires a nonempty successor facet");
+      }
+      const ExactFacetMiniballResult& source_miniball =
+          result.source_arc.source_preconditions.facet_miniball;
+      const ExactFacetMiniballResult& successor_miniball =
+          *result.source_arc.successor_miniball;
+      const spatial::TopKPartition& source_top_k =
+          *result.source_arc.source_preconditions.exact_top_k;
+
+      exact::ExactLevel source_atom_level = exact_center_squared_distance(
+          source_miniball.center,
+          cloud.point(successor_facet.front()).exact());
+      result.counters.source_atom_distance_evaluation_count = 1U;
+      for (std::size_t index = 1U;
+           index < successor_facet.size();
+           ++index) {
+        const exact::ExactLevel point_level = exact_center_squared_distance(
+            source_miniball.center,
+            cloud.point(successor_facet[index]).exact());
+        ++result.counters.source_atom_distance_evaluation_count;
+        ++result.counters.source_atom_maximum_comparison_count;
+        if (point_level > source_atom_level) {
+          source_atom_level = point_level;
+        }
+      }
+
+      const exact::ExactLevel successor_atom_level =
+          successor_miniball.squared_radius;
+      const exact::ExactLevel center_squared_displacement =
+          exact_center_squared_distance(
+              source_miniball.center, successor_miniball.center);
+      result.counters.center_displacement_evaluation_count = 1U;
+      result.counters.exact_level_relation_count = 4U;
+
+      const exact::ExactLevel& top_k_cutoff =
+          source_top_k.cutoff_squared_distance();
+      const exact::ExactLevel& source_level =
+          source_miniball.squared_radius;
+      const bool centers_equal =
+          source_miniball.center == successor_miniball.center;
+      const bool zero_displacement =
+          center_squared_displacement == exact::ExactLevel{};
+      if (centers_equal != zero_displacement ||
+          (centers_equal &&
+           source_atom_level != successor_atom_level)) {
+        throw std::logic_error(
+            "exact descent-segment centers disagree with their displacement or atom levels");
+      }
+
+      ExactFacetDescentSegmentWitness witness;
+      witness.source_atom_level = source_atom_level;
+      witness.successor_atom_level = successor_atom_level;
+      witness.center_squared_displacement = center_squared_displacement;
+      witness.centers_equal = centers_equal;
+      witness.source_endpoint_strict_sublevel =
+          source_atom_level < source_level;
+      witness.quadratic_max_upper_bound_certified =
+          source_atom_level == top_k_cutoff &&
+          top_k_cutoff <= source_level;
+      witness.closed_segment_nonstrict_sublevel =
+          source_atom_level <= source_level &&
+          successor_atom_level <= source_level;
+      witness.half_open_segment_strict_sublevel =
+          source_atom_level <= source_level &&
+          successor_atom_level < source_level;
+      result.counters.convex_identity_certification_count = 1U;
+
+      if (source_atom_level != top_k_cutoff ||
+          top_k_cutoff > source_level ||
+          successor_atom_level >= source_level ||
+          !witness.quadratic_max_upper_bound_certified ||
+          !witness.closed_segment_nonstrict_sublevel ||
+          !witness.half_open_segment_strict_sublevel) {
+        throw std::logic_error(
+            "a strict exact arc contradicted its half-open sublevel segment identity");
+      }
+      result.segment_witness.emplace(std::move(witness));
+      break;
+    }
+    case ExactFacetDescentArcDecision::
+        no_arc_already_active_at_own_center:
+    case ExactFacetDescentArcDecision::no_arc_unsupported_degeneracy:
+      break;
+    case ExactFacetDescentArcDecision::not_certified:
+      throw std::logic_error(
+          "an exact descent segment received an uncertified arc decision");
+  }
+
+  const bool strict_branch =
+      result.source_arc.decision ==
+      ExactFacetDescentArcDecision::strict_descent_arc_certified;
+  const std::size_t successor_size = strict_branch
+      ? result.source_arc.successor_facet_point_ids->size()
+      : 0U;
+  const std::size_t expected_maximum_comparison_count =
+      successor_size == 0U ? 0U : successor_size - 1U;
+  if (result.counters.source_arc_classification_count != 1U ||
+      result.counters.source_atom_distance_evaluation_count !=
+          successor_size ||
+      result.counters.source_atom_maximum_comparison_count !=
+          expected_maximum_comparison_count ||
+      result.counters.center_displacement_evaluation_count !=
+          (strict_branch ? 1U : 0U) ||
+      result.counters.exact_level_relation_count !=
+          (strict_branch ? 4U : 0U) ||
+      result.counters.convex_identity_certification_count !=
+          (strict_branch ? 1U : 0U) ||
+      result.segment_witness.has_value() != strict_branch) {
+    throw std::logic_error(
+        "the exact descent-segment branch counters did not close");
+  }
+  return result;
+}
+
+[[nodiscard]] bool same_computed_descent_segment(
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactFacetDescentSegmentResult& observed,
+    const ExactFacetDescentSegmentResult& expected) {
+  if (!same_computed_descent_arc(
+          cloud, observed.source_arc, expected.source_arc) ||
+      observed.source_arc.decision != expected.source_arc.decision ||
+      observed.source_arc.scope != expected.source_arc.scope ||
+      observed.segment_witness.has_value() !=
+          expected.segment_witness.has_value()) {
+    return false;
+  }
+  if (expected.segment_witness.has_value() &&
+      !same_segment_witness(
+          *observed.segment_witness, *expected.segment_witness)) {
+    return false;
+  }
+  return observed.counters == expected.counters;
+}
+
 }  // namespace
 
 ExactFacetMiniballVerification verify_exact_facet_miniball(
@@ -1092,6 +1297,152 @@ ExactFacetDescentArcResult build_exact_facet_descent_arc(
   if (!verification.exact_descent_arc_decision_certified) {
     throw std::logic_error(
         "the exact facet descent arc failed its fresh replay");
+  }
+  return result;
+}
+
+ExactFacetDescentSegmentVerification verify_exact_facet_descent_segment(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> facet_point_ids,
+    const ExactFacetDescentSegmentResult& result) {
+  const ExactFacetDescentSegmentResult expected =
+      compute_exact_facet_descent_segment(cloud, facet_point_ids);
+  ExactFacetDescentSegmentVerification verification;
+
+  const ExactFacetDescentArcVerification source_verification =
+      verify_exact_facet_descent_arc(
+          cloud, facet_point_ids, result.source_arc);
+  verification.source_arc_certified =
+      source_verification.exact_descent_arc_decision_certified;
+  verification.segment_witness_presence_certified =
+      result.segment_witness.has_value() ==
+      expected.segment_witness.has_value();
+
+  if (expected.segment_witness.has_value() &&
+      result.segment_witness.has_value()) {
+    const ExactFacetDescentSegmentWitness& observed_witness =
+        *result.segment_witness;
+    const ExactFacetDescentSegmentWitness& expected_witness =
+        *expected.segment_witness;
+    verification.source_atom_level_certified =
+        observed_witness.source_atom_level ==
+        expected_witness.source_atom_level;
+    verification.successor_atom_level_certified =
+        observed_witness.successor_atom_level ==
+        expected_witness.successor_atom_level;
+    verification.center_squared_displacement_certified =
+        observed_witness.center_squared_displacement ==
+        expected_witness.center_squared_displacement;
+    verification.centers_equal_certified =
+        observed_witness.centers_equal == expected_witness.centers_equal;
+    verification.source_endpoint_strict_sublevel_certified =
+        observed_witness.source_endpoint_strict_sublevel ==
+        expected_witness.source_endpoint_strict_sublevel;
+    verification.quadratic_max_upper_bound_certified =
+        observed_witness.quadratic_max_upper_bound_certified ==
+        expected_witness.quadratic_max_upper_bound_certified;
+    verification.closed_segment_nonstrict_sublevel_certified =
+        observed_witness.closed_segment_nonstrict_sublevel ==
+        expected_witness.closed_segment_nonstrict_sublevel;
+    verification.half_open_segment_strict_sublevel_certified =
+        observed_witness.half_open_segment_strict_sublevel ==
+        expected_witness.half_open_segment_strict_sublevel;
+
+    if (!expected.source_arc.source_preconditions.exact_top_k.has_value() ||
+        !expected.source_arc.successor_miniball.has_value()) {
+      throw std::logic_error(
+          "a fresh strict segment omitted its expected arc witnesses");
+    }
+    const ExactFacetMiniballResult& expected_source_miniball =
+        expected.source_arc.source_preconditions.facet_miniball;
+    const ExactFacetMiniballResult& expected_successor_miniball =
+        *expected.source_arc.successor_miniball;
+    const exact::ExactLevel& expected_cutoff =
+        expected.source_arc.source_preconditions.exact_top_k->
+            cutoff_squared_distance();
+    const bool expected_centers_equal =
+        expected_source_miniball.center ==
+        expected_successor_miniball.center;
+    const exact::ExactLevel expected_displacement =
+        exact_center_squared_distance(
+            expected_source_miniball.center,
+            expected_successor_miniball.center);
+    verification.exact_level_relations_certified =
+        observed_witness.source_atom_level == expected_cutoff &&
+        expected_cutoff <= expected_source_miniball.squared_radius &&
+        observed_witness.successor_atom_level ==
+            expected_successor_miniball.squared_radius &&
+        observed_witness.successor_atom_level <
+            expected_source_miniball.squared_radius &&
+        observed_witness.center_squared_displacement ==
+            expected_displacement &&
+        observed_witness.centers_equal == expected_centers_equal &&
+        (observed_witness.center_squared_displacement ==
+             exact::ExactLevel{}) == observed_witness.centers_equal &&
+        (!observed_witness.centers_equal ||
+         observed_witness.source_atom_level ==
+             observed_witness.successor_atom_level) &&
+        observed_witness.source_endpoint_strict_sublevel ==
+            (observed_witness.source_atom_level <
+             expected_source_miniball.squared_radius) &&
+        observed_witness.quadratic_max_upper_bound_certified &&
+        observed_witness.closed_segment_nonstrict_sublevel &&
+        observed_witness.half_open_segment_strict_sublevel;
+  } else {
+    const bool both_absent =
+        !expected.segment_witness.has_value() &&
+        !result.segment_witness.has_value();
+    verification.source_atom_level_certified = both_absent;
+    verification.successor_atom_level_certified = both_absent;
+    verification.center_squared_displacement_certified = both_absent;
+    verification.centers_equal_certified = both_absent;
+    verification.source_endpoint_strict_sublevel_certified = both_absent;
+    verification.quadratic_max_upper_bound_certified = both_absent;
+    verification.closed_segment_nonstrict_sublevel_certified = both_absent;
+    verification.half_open_segment_strict_sublevel_certified = both_absent;
+    verification.exact_level_relations_certified = both_absent;
+  }
+
+  verification.counters_certified = result.counters == expected.counters;
+  verification.decision_certified =
+      result.decision == expected_segment_decision(expected.source_arc);
+  verification.scope_certified =
+      result.scope == ExactFacetDescentSegmentScope::
+                          canonical_strict_arc_half_open_sublevel_segment_only;
+  verification.fresh_replay_certified =
+      same_computed_descent_segment(cloud, result, expected);
+  verification.exact_descent_segment_decision_certified =
+      verification.source_arc_certified &&
+      verification.segment_witness_presence_certified &&
+      verification.source_atom_level_certified &&
+      verification.successor_atom_level_certified &&
+      verification.center_squared_displacement_certified &&
+      verification.centers_equal_certified &&
+      verification.source_endpoint_strict_sublevel_certified &&
+      verification.quadratic_max_upper_bound_certified &&
+      verification.closed_segment_nonstrict_sublevel_certified &&
+      verification.half_open_segment_strict_sublevel_certified &&
+      verification.exact_level_relations_certified &&
+      verification.counters_certified &&
+      verification.decision_certified &&
+      verification.scope_certified &&
+      verification.fresh_replay_certified;
+  return verification;
+}
+
+ExactFacetDescentSegmentResult build_exact_facet_descent_segment(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> facet_point_ids) {
+  ExactFacetDescentSegmentResult result =
+      compute_exact_facet_descent_segment(cloud, facet_point_ids);
+  result.decision = expected_segment_decision(result.source_arc);
+  result.scope = ExactFacetDescentSegmentScope::
+      canonical_strict_arc_half_open_sublevel_segment_only;
+  const ExactFacetDescentSegmentVerification verification =
+      verify_exact_facet_descent_segment(cloud, facet_point_ids, result);
+  if (!verification.exact_descent_segment_decision_certified) {
+    throw std::logic_error(
+        "the exact facet descent segment failed its fresh replay");
   }
   return result;
 }

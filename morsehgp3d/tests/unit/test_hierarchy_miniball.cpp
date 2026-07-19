@@ -1,4 +1,5 @@
 #include "morsehgp3d/hierarchy/miniball.hpp"
+#include "morsehgp3d/spatial/brute_force.hpp"
 
 #include <algorithm>
 #include <array>
@@ -19,10 +20,17 @@ using morsehgp3d::exact::BigInt;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactCenter3;
 using morsehgp3d::exact::ExactLevel;
+using morsehgp3d::exact::ExactRational;
 using morsehgp3d::hierarchy::ExactFacetDescentArcDecision;
 using morsehgp3d::hierarchy::ExactFacetDescentArcResult;
 using morsehgp3d::hierarchy::ExactFacetDescentArcScope;
 using morsehgp3d::hierarchy::ExactFacetDescentArcVerification;
+using morsehgp3d::hierarchy::ExactFacetDescentSegmentDecision;
+using morsehgp3d::hierarchy::ExactFacetDescentSegmentCounters;
+using morsehgp3d::hierarchy::ExactFacetDescentSegmentResult;
+using morsehgp3d::hierarchy::ExactFacetDescentSegmentScope;
+using morsehgp3d::hierarchy::ExactFacetDescentSegmentVerification;
+using morsehgp3d::hierarchy::ExactFacetDescentSegmentWitness;
 using morsehgp3d::hierarchy::ExactFacetDescentPreconditionDecision;
 using morsehgp3d::hierarchy::ExactFacetDescentPreconditionResult;
 using morsehgp3d::hierarchy::ExactFacetDescentPreconditionScope;
@@ -33,12 +41,16 @@ using morsehgp3d::hierarchy::ExactFacetMiniballStatus;
 using morsehgp3d::hierarchy::ExactFacetMiniballVerification;
 using morsehgp3d::hierarchy::build_exact_facet_descent_arc;
 using morsehgp3d::hierarchy::build_exact_facet_descent_preconditions;
+using morsehgp3d::hierarchy::build_exact_facet_descent_segment;
 using morsehgp3d::hierarchy::build_exact_facet_miniball;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_arc;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_preconditions;
+using morsehgp3d::hierarchy::verify_exact_facet_descent_segment;
 using morsehgp3d::hierarchy::verify_exact_facet_miniball;
 using morsehgp3d::spatial::CanonicalPointCloud;
+using morsehgp3d::spatial::ExclusionSet;
 using morsehgp3d::spatial::PointId;
+using morsehgp3d::spatial::brute_force_top_k;
 
 int failures = 0;
 
@@ -138,6 +150,25 @@ template <std::size_t Size>
          verification.decision_certified && verification.scope_certified &&
          verification.fresh_replay_certified &&
          verification.exact_descent_arc_decision_certified;
+}
+
+[[nodiscard]] bool all_descent_segment_certificates_close(
+    const ExactFacetDescentSegmentVerification& verification) {
+  return verification.source_arc_certified &&
+         verification.segment_witness_presence_certified &&
+         verification.source_atom_level_certified &&
+         verification.successor_atom_level_certified &&
+         verification.center_squared_displacement_certified &&
+         verification.centers_equal_certified &&
+         verification.source_endpoint_strict_sublevel_certified &&
+         verification.quadratic_max_upper_bound_certified &&
+         verification.closed_segment_nonstrict_sublevel_certified &&
+         verification.half_open_segment_strict_sublevel_certified &&
+         verification.exact_level_relations_certified &&
+         verification.counters_certified &&
+         verification.decision_certified && verification.scope_certified &&
+         verification.fresh_replay_certified &&
+         verification.exact_descent_segment_decision_certified;
 }
 
 [[nodiscard]] bool matches_ids(
@@ -1182,6 +1213,438 @@ void test_descent_arc_verifier_rejects_every_new_result_layer() {
       "arc verifier rejects a descending payload on an unsupported source");
 }
 
+void test_descent_segment_equal_cutoff_is_half_open_strict() {
+  const ExactFacetDescentSegmentResult empty;
+  check(
+      empty.decision == ExactFacetDescentSegmentDecision::not_certified &&
+          empty.scope == ExactFacetDescentSegmentScope::unspecified &&
+          !empty.segment_witness.has_value(),
+      "default descent segment has no witness or certified decision");
+
+  const std::array<CertifiedPoint3, 3> input{
+      point(1.0, 0.0, 0.0),
+      point(0.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{2U, 0U};
+  const ExactFacetDescentSegmentResult result =
+      build_exact_facet_descent_segment(cloud, facet);
+  const ExactFacetDescentSegmentVerification verification =
+      verify_exact_facet_descent_segment(cloud, facet, result);
+
+  check(
+      result.source_arc.decision ==
+              ExactFacetDescentArcDecision::strict_descent_arc_certified &&
+          result.source_arc.successor_facet_point_ids.has_value() &&
+          result.source_arc.successor_miniball.has_value() &&
+          result.segment_witness.has_value(),
+      "equal-cutoff strict arc emits one analytic segment witness");
+  if (!result.source_arc.successor_facet_point_ids.has_value() ||
+      !result.source_arc.successor_miniball.has_value() ||
+      !result.segment_witness.has_value()) {
+    return;
+  }
+  const auto& source =
+      result.source_arc.source_preconditions.facet_miniball;
+  const auto& successor_ids =
+      *result.source_arc.successor_facet_point_ids;
+  const auto& successor = *result.source_arc.successor_miniball;
+  const auto& witness = *result.segment_witness;
+  check(
+      source.facet_point_ids == std::vector<PointId>({0U, 2U}) &&
+          source.center == center(0, 0, 0) &&
+          source.squared_radius == level(1) &&
+          successor_ids == std::vector<PointId>({0U, 1U}) &&
+          successor.center == center(-1, 0, 0, 2) &&
+          successor.squared_radius == level(1, 4),
+      "equal-cutoff segment retains its exact source and target geometry");
+  check(
+      witness.source_atom_level == level(1) &&
+          witness.successor_atom_level == level(1, 4) &&
+          witness.center_squared_displacement == level(1, 4) &&
+          !witness.centers_equal &&
+          !witness.source_endpoint_strict_sublevel &&
+          witness.quadratic_max_upper_bound_certified &&
+          witness.closed_segment_nonstrict_sublevel &&
+          witness.half_open_segment_strict_sublevel,
+      "equal-cutoff witness distinguishes its non-strict source from the strict half-open segment");
+  check(
+      witness.source_atom_level == source.squared_radius &&
+          witness.successor_atom_level < witness.source_atom_level &&
+          witness.center_squared_displacement == level(1, 4) &&
+          result.counters.source_arc_classification_count == 1U &&
+          result.counters.source_atom_distance_evaluation_count == 2U &&
+          result.counters.source_atom_maximum_comparison_count == 1U &&
+          result.counters.center_displacement_evaluation_count == 1U &&
+          result.counters.exact_level_relation_count == 4U &&
+          result.counters.convex_identity_certification_count == 1U,
+      "equal-cutoff segment closes its exact coefficients and bounded work");
+  check(
+      result.decision == ExactFacetDescentSegmentDecision::
+                             strict_half_open_segment_certified &&
+          result.scope == ExactFacetDescentSegmentScope::
+                              canonical_strict_arc_half_open_sublevel_segment_only &&
+          std::string_view{ExactFacetDescentSegmentResult::proof_basis} ==
+              "exact_squared_distance_chord_identity_max_envelope_half_open_segment_v1" &&
+          all_descent_segment_certificates_close(verification),
+      "equal-cutoff segment decision, scope and fresh replay close exactly");
+
+  const ExclusionSet empty_exclusions = ExclusionSet::from_ids(
+      std::span<const PointId>{}, cloud, 0U);
+  const ExactRational half{BigInt{1}, BigInt{2}};
+  const ExactRational one{BigInt{1}};
+  const ExactLevel midpoint_quadratic_upper{
+      (one - half) * witness.source_atom_level.rational() +
+      half * witness.successor_atom_level.rational() -
+      half * (one - half) *
+          witness.center_squared_displacement.rational()};
+  const auto midpoint_top_k = brute_force_top_k(
+      cloud, center(-1, 0, 0, 4), 2U, empty_exclusions);
+  check(
+      midpoint_quadratic_upper == level(9, 16) &&
+          midpoint_top_k.cutoff_squared_distance() ==
+              midpoint_quadratic_upper &&
+          midpoint_top_k.strict_below().size() == 1U &&
+          midpoint_top_k.strict_below()[0].point_id == 1U &&
+          midpoint_top_k.strict_below()[0].squared_distance == level(1, 16) &&
+          matches_ids(midpoint_top_k.cutoff_shell_ids(), {0U}) &&
+          matches_ids(midpoint_top_k.canonical_choice_ids(), {0U, 1U}) &&
+          midpoint_top_k.cutoff_squared_distance() < source.squared_radius,
+      "independent midpoint diagnostic observes q one-half equal to nine sixteenths");
+}
+
+void test_descent_segment_accepts_equal_centers_below_source_level() {
+  const std::array<CertifiedPoint3, 4> input{
+      point(2.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0),
+      point(-2.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{3U, 0U};
+  const ExactFacetDescentSegmentResult result =
+      build_exact_facet_descent_segment(cloud, facet);
+  const auto verification =
+      verify_exact_facet_descent_segment(cloud, facet, result);
+
+  check(
+      result.source_arc.successor_miniball.has_value() &&
+          result.segment_witness.has_value(),
+      "same-center strict arc emits one analytic segment witness");
+  if (!result.source_arc.successor_miniball.has_value() ||
+      !result.segment_witness.has_value()) {
+    return;
+  }
+  const auto& source =
+      result.source_arc.source_preconditions.facet_miniball;
+  const auto& successor = *result.source_arc.successor_miniball;
+  const auto& witness = *result.segment_witness;
+  check(
+      source.center == center(0, 0, 0) &&
+          source.squared_radius == level(4) &&
+          successor.center == source.center &&
+          successor.squared_radius == level(1) &&
+          witness.source_atom_level == level(1) &&
+          witness.successor_atom_level == level(1) &&
+          witness.center_squared_displacement == level(0),
+      "same-center witness has a equal to b equal to one and delta zero");
+  check(
+      witness.centers_equal && witness.source_endpoint_strict_sublevel &&
+          witness.quadratic_max_upper_bound_certified &&
+          witness.closed_segment_nonstrict_sublevel &&
+          witness.half_open_segment_strict_sublevel &&
+          witness.source_atom_level < source.squared_radius &&
+          result.counters.source_arc_classification_count == 1U &&
+          result.counters.source_atom_distance_evaluation_count == 2U &&
+          result.counters.source_atom_maximum_comparison_count == 1U &&
+          result.counters.center_displacement_evaluation_count == 1U &&
+          result.counters.exact_level_relation_count == 4U &&
+          result.counters.convex_identity_certification_count == 1U &&
+          result.decision == ExactFacetDescentSegmentDecision::
+                                 strict_half_open_segment_certified &&
+          all_descent_segment_certificates_close(verification),
+      "zero-displacement segment remains strictly below the source level");
+}
+
+void test_descent_segment_omits_witness_for_active_facet() {
+  const std::array<CertifiedPoint3, 3> input{
+      point(3.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{1U, 0U};
+  const ExactFacetDescentSegmentResult result =
+      build_exact_facet_descent_segment(cloud, facet);
+  const auto verification =
+      verify_exact_facet_descent_segment(cloud, facet, result);
+
+  check(
+      result.source_arc.decision == ExactFacetDescentArcDecision::
+                                        no_arc_already_active_at_own_center &&
+          !result.segment_witness.has_value() &&
+          result.counters.source_arc_classification_count == 1U &&
+          result.counters.source_atom_distance_evaluation_count == 0U &&
+          result.counters.source_atom_maximum_comparison_count == 0U &&
+          result.counters.center_displacement_evaluation_count == 0U &&
+          result.counters.exact_level_relation_count == 0U &&
+          result.counters.convex_identity_certification_count == 0U,
+      "active source emits no segment witness or geometric work");
+  check(
+      result.decision == ExactFacetDescentSegmentDecision::
+                             no_segment_already_active_at_own_center &&
+          result.scope == ExactFacetDescentSegmentScope::
+                              canonical_strict_arc_half_open_sublevel_segment_only &&
+          all_descent_segment_certificates_close(verification),
+      "active no-segment decision closes its exact replay");
+}
+
+void test_descent_segment_omits_witness_for_unsupported_facet() {
+  const std::array<CertifiedPoint3, 4> input{
+      point(2.0, 0.0, 0.0),
+      point(1.0, 1.0, 0.0),
+      point(0.0, 2.0, 0.0),
+      point(0.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 3> facet{3U, 0U, 1U};
+  const ExactFacetDescentSegmentResult result =
+      build_exact_facet_descent_segment(cloud, facet);
+  const auto verification =
+      verify_exact_facet_descent_segment(cloud, facet, result);
+
+  check(
+      result.source_arc.decision ==
+              ExactFacetDescentArcDecision::
+                  no_arc_unsupported_degeneracy &&
+          !result.segment_witness.has_value() &&
+          result.counters.source_arc_classification_count == 1U &&
+          result.counters.source_atom_distance_evaluation_count == 0U &&
+          result.counters.source_atom_maximum_comparison_count == 0U &&
+          result.counters.center_displacement_evaluation_count == 0U &&
+          result.counters.exact_level_relation_count == 0U &&
+          result.counters.convex_identity_certification_count == 0U,
+      "unsupported source emits no segment witness or geometric work");
+  check(
+      result.decision == ExactFacetDescentSegmentDecision::
+                             no_segment_unsupported_degeneracy &&
+          all_descent_segment_certificates_close(verification),
+      "unsupported no-segment decision closes its exact replay");
+}
+
+void test_descent_segment_verifier_rejects_every_new_result_layer() {
+  const std::array<CertifiedPoint3, 3> input{
+      point(-1.0, 0.0, 0.0),
+      point(0.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{0U, 2U};
+  const ExactFacetDescentSegmentResult result =
+      build_exact_facet_descent_segment(cloud, facet);
+  check(
+      result.segment_witness.has_value(),
+      "segment falsification fixture starts from a strict witness");
+  if (!result.segment_witness.has_value()) {
+    return;
+  }
+
+  ExactFacetDescentSegmentResult bad_arc = result;
+  bad_arc.source_arc.decision =
+      ExactFacetDescentArcDecision::no_arc_already_active_at_own_center;
+  const auto arc_check =
+      verify_exact_facet_descent_segment(cloud, facet, bad_arc);
+  check(
+      !arc_check.source_arc_certified &&
+          !arc_check.exact_descent_segment_decision_certified,
+      "segment verifier rejects a falsified embedded arc");
+
+  ExactFacetDescentSegmentResult missing_witness = result;
+  missing_witness.segment_witness.reset();
+  const auto presence_check =
+      verify_exact_facet_descent_segment(cloud, facet, missing_witness);
+  check(
+      !presence_check.segment_witness_presence_certified &&
+          !presence_check.exact_descent_segment_decision_certified,
+      "strict segment verifier rejects an absent witness");
+
+  ExactFacetDescentSegmentResult bad_source_atom = result;
+  bad_source_atom.segment_witness->source_atom_level = level(1, 4);
+  const auto source_atom_check =
+      verify_exact_facet_descent_segment(cloud, facet, bad_source_atom);
+  check(
+      !source_atom_check.source_atom_level_certified &&
+          !source_atom_check.exact_descent_segment_decision_certified,
+      "segment verifier rejects a falsified source atom level");
+
+  ExactFacetDescentSegmentResult bad_successor_atom = result;
+  bad_successor_atom.segment_witness->successor_atom_level = level(1);
+  const auto successor_atom_check =
+      verify_exact_facet_descent_segment(cloud, facet, bad_successor_atom);
+  check(
+      !successor_atom_check.successor_atom_level_certified &&
+          !successor_atom_check.exact_descent_segment_decision_certified,
+      "segment verifier rejects a falsified successor atom level");
+
+  ExactFacetDescentSegmentResult bad_displacement = result;
+  bad_displacement.segment_witness->center_squared_displacement = level(0);
+  const auto displacement_check =
+      verify_exact_facet_descent_segment(cloud, facet, bad_displacement);
+  check(
+      !displacement_check.center_squared_displacement_certified &&
+          !displacement_check.exact_descent_segment_decision_certified,
+      "segment verifier rejects a falsified squared center displacement");
+
+  ExactFacetDescentSegmentResult bad_centers_equal = result;
+  bad_centers_equal.segment_witness->centers_equal = true;
+  const auto centers_equal_check =
+      verify_exact_facet_descent_segment(cloud, facet, bad_centers_equal);
+  check(
+      !centers_equal_check.centers_equal_certified &&
+          !centers_equal_check.exact_descent_segment_decision_certified,
+      "segment verifier rejects a falsified center-equality fact");
+
+  ExactFacetDescentSegmentResult bad_source_strict = result;
+  bad_source_strict.segment_witness->source_endpoint_strict_sublevel = true;
+  const auto source_strict_check =
+      verify_exact_facet_descent_segment(cloud, facet, bad_source_strict);
+  check(
+      !source_strict_check.source_endpoint_strict_sublevel_certified &&
+          !source_strict_check.exact_descent_segment_decision_certified,
+      "segment verifier rejects a falsified source-endpoint fact");
+
+  ExactFacetDescentSegmentResult bad_quadratic_bound = result;
+  bad_quadratic_bound.segment_witness->
+      quadratic_max_upper_bound_certified = false;
+  const auto quadratic_bound_check =
+      verify_exact_facet_descent_segment(cloud, facet, bad_quadratic_bound);
+  check(
+      !quadratic_bound_check.quadratic_max_upper_bound_certified &&
+          !quadratic_bound_check.exact_descent_segment_decision_certified,
+      "segment verifier rejects a falsified quadratic-envelope fact");
+
+  ExactFacetDescentSegmentResult bad_closed_segment = result;
+  bad_closed_segment.segment_witness->
+      closed_segment_nonstrict_sublevel = false;
+  const auto closed_segment_check =
+      verify_exact_facet_descent_segment(cloud, facet, bad_closed_segment);
+  check(
+      !closed_segment_check.closed_segment_nonstrict_sublevel_certified &&
+          !closed_segment_check.exact_descent_segment_decision_certified,
+      "segment verifier rejects a falsified closed-segment fact");
+
+  ExactFacetDescentSegmentResult bad_half_open_segment = result;
+  bad_half_open_segment.segment_witness->
+      half_open_segment_strict_sublevel = false;
+  const auto half_open_segment_check =
+      verify_exact_facet_descent_segment(cloud, facet, bad_half_open_segment);
+  check(
+      !half_open_segment_check.half_open_segment_strict_sublevel_certified &&
+          !half_open_segment_check.exact_descent_segment_decision_certified,
+      "segment verifier rejects a falsified half-open-segment fact");
+
+  constexpr std::array<
+      std::size_t ExactFacetDescentSegmentCounters::*, 6>
+      counter_fields{
+          &ExactFacetDescentSegmentCounters::
+              source_arc_classification_count,
+          &ExactFacetDescentSegmentCounters::
+              source_atom_distance_evaluation_count,
+          &ExactFacetDescentSegmentCounters::
+              source_atom_maximum_comparison_count,
+          &ExactFacetDescentSegmentCounters::
+              center_displacement_evaluation_count,
+          &ExactFacetDescentSegmentCounters::exact_level_relation_count,
+          &ExactFacetDescentSegmentCounters::
+              convex_identity_certification_count};
+  for (const auto counter_field : counter_fields) {
+    ExactFacetDescentSegmentResult bad_counter = result;
+    ++(bad_counter.counters.*counter_field);
+    const auto counter_check =
+        verify_exact_facet_descent_segment(cloud, facet, bad_counter);
+    check(
+        !counter_check.counters_certified &&
+            !counter_check.exact_descent_segment_decision_certified,
+        "segment verifier rejects every falsified proof counter");
+  }
+
+  ExactFacetDescentSegmentResult bad_decision = result;
+  bad_decision.decision = ExactFacetDescentSegmentDecision::
+                              no_segment_already_active_at_own_center;
+  const auto decision_check =
+      verify_exact_facet_descent_segment(cloud, facet, bad_decision);
+  check(
+      !decision_check.decision_certified &&
+          !decision_check.exact_descent_segment_decision_certified,
+      "segment verifier treats the segment decision as untrusted");
+
+  ExactFacetDescentSegmentResult bad_scope = result;
+  bad_scope.scope = ExactFacetDescentSegmentScope::unspecified;
+  const auto scope_check =
+      verify_exact_facet_descent_segment(cloud, facet, bad_scope);
+  check(
+      !scope_check.scope_certified &&
+          !scope_check.exact_descent_segment_decision_certified,
+      "segment verifier treats the half-open scope as untrusted");
+
+  const CanonicalPointCloud twin_cloud = canonical_cloud(input);
+  const ExactFacetDescentSegmentResult twin_result =
+      build_exact_facet_descent_segment(twin_cloud, facet);
+  const auto identity_check =
+      verify_exact_facet_descent_segment(cloud, facet, twin_result);
+  check(
+      !identity_check.source_arc_certified &&
+          !identity_check.exact_descent_segment_decision_certified,
+      "segment verifier rejects an arc from another cloud identity");
+
+  const std::array<CertifiedPoint3, 3> active_input{
+      point(-1.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(3.0, 0.0, 0.0)};
+  const CanonicalPointCloud active_cloud = canonical_cloud(active_input);
+  const std::array<PointId, 2> active_facet{0U, 1U};
+  ExactFacetDescentSegmentResult injected_active =
+      build_exact_facet_descent_segment(active_cloud, active_facet);
+  ExactFacetDescentSegmentWitness active_witness;
+  active_witness.source_atom_level = level(1);
+  active_witness.successor_atom_level = level(1);
+  active_witness.center_squared_displacement = level(0);
+  active_witness.centers_equal = true;
+  active_witness.closed_segment_nonstrict_sublevel = true;
+  injected_active.segment_witness.emplace(std::move(active_witness));
+  const auto injected_active_check = verify_exact_facet_descent_segment(
+      active_cloud, active_facet, injected_active);
+  check(
+      !injected_active_check.segment_witness_presence_certified &&
+          !injected_active_check.exact_descent_segment_decision_certified,
+      "segment verifier rejects an injected witness on an active source");
+
+  const std::array<CertifiedPoint3, 4> unsupported_input{
+      point(0.0, 0.0, 0.0),
+      point(0.0, 2.0, 0.0),
+      point(1.0, 1.0, 0.0),
+      point(2.0, 0.0, 0.0)};
+  const CanonicalPointCloud unsupported_cloud =
+      canonical_cloud(unsupported_input);
+  const std::array<PointId, 3> unsupported_facet{0U, 1U, 3U};
+  ExactFacetDescentSegmentResult injected_unsupported =
+      build_exact_facet_descent_segment(
+          unsupported_cloud, unsupported_facet);
+  ExactFacetDescentSegmentWitness unsupported_witness;
+  unsupported_witness.source_atom_level = level(2);
+  unsupported_witness.successor_atom_level = level(1);
+  unsupported_witness.center_squared_displacement = level(1);
+  unsupported_witness.source_endpoint_strict_sublevel = false;
+  unsupported_witness.quadratic_max_upper_bound_certified = true;
+  unsupported_witness.closed_segment_nonstrict_sublevel = true;
+  unsupported_witness.half_open_segment_strict_sublevel = true;
+  injected_unsupported.segment_witness.emplace(
+      std::move(unsupported_witness));
+  const auto injected_unsupported_check =
+      verify_exact_facet_descent_segment(
+          unsupported_cloud, unsupported_facet, injected_unsupported);
+  check(
+      !injected_unsupported_check.segment_witness_presence_certified &&
+          !injected_unsupported_check.exact_descent_segment_decision_certified,
+      "segment verifier rejects a valid-looking witness on an unsupported source");
+}
+
 void test_descent_precondition_verifier_rejects_every_result_layer() {
   const std::array<CertifiedPoint3, 3> input{
       point(-1.0, 0.0, 0.0),
@@ -1472,6 +1935,11 @@ int main() {
   test_descent_arc_omits_successor_for_active_facet();
   test_descent_arc_omits_successor_for_nonessential_facet();
   test_descent_arc_verifier_rejects_every_new_result_layer();
+  test_descent_segment_equal_cutoff_is_half_open_strict();
+  test_descent_segment_accepts_equal_centers_below_source_level();
+  test_descent_segment_omits_witness_for_active_facet();
+  test_descent_segment_omits_witness_for_unsupported_facet();
+  test_descent_segment_verifier_rejects_every_new_result_layer();
   test_descent_precondition_verifier_rejects_every_result_layer();
   test_verifier_rejects_every_result_layer();
   test_invalid_facets_are_rejected();

@@ -206,6 +206,77 @@ struct ExactFacetDescentArcVerification {
   bool exact_descent_arc_decision_certified{false};
 };
 
+enum class ExactFacetDescentSegmentDecision : std::uint8_t {
+  not_certified,
+  strict_half_open_segment_certified,
+  no_segment_already_active_at_own_center,
+  no_segment_unsupported_degeneracy,
+};
+
+enum class ExactFacetDescentSegmentScope : std::uint8_t {
+  unspecified,
+  canonical_strict_arc_half_open_sublevel_segment_only,
+};
+
+struct ExactFacetDescentSegmentWitness {
+  exact::ExactLevel source_atom_level;
+  exact::ExactLevel successor_atom_level;
+  exact::ExactLevel center_squared_displacement;
+  bool centers_equal{false};
+  bool source_endpoint_strict_sublevel{false};
+  bool quadratic_max_upper_bound_certified{false};
+  bool closed_segment_nonstrict_sublevel{false};
+  bool half_open_segment_strict_sublevel{false};
+};
+
+struct ExactFacetDescentSegmentCounters {
+  std::size_t source_arc_classification_count{};
+  std::size_t source_atom_distance_evaluation_count{};
+  std::size_t source_atom_maximum_comparison_count{};
+  std::size_t center_displacement_evaluation_count{};
+  std::size_t exact_level_relation_count{};
+  std::size_t convex_identity_certification_count{};
+
+  friend bool operator==(
+      const ExactFacetDescentSegmentCounters&,
+      const ExactFacetDescentSegmentCounters&) = default;
+};
+
+// The optional witness certifies the source-open, target-closed parameter
+// range 0 < t <= 1 for one already-certified canonical strict arc. It carries
+// no claim about a chain, DAG, attachment, hierarchy, or public status.
+struct ExactFacetDescentSegmentResult {
+  static constexpr const char* proof_basis =
+      "exact_squared_distance_chord_identity_max_envelope_half_open_segment_v1";
+
+  ExactFacetDescentArcResult source_arc;
+  std::optional<ExactFacetDescentSegmentWitness> segment_witness;
+  ExactFacetDescentSegmentCounters counters{};
+  ExactFacetDescentSegmentDecision decision{
+      ExactFacetDescentSegmentDecision::not_certified};
+  ExactFacetDescentSegmentScope scope{
+      ExactFacetDescentSegmentScope::unspecified};
+};
+
+struct ExactFacetDescentSegmentVerification {
+  bool source_arc_certified{false};
+  bool segment_witness_presence_certified{false};
+  bool source_atom_level_certified{false};
+  bool successor_atom_level_certified{false};
+  bool center_squared_displacement_certified{false};
+  bool centers_equal_certified{false};
+  bool source_endpoint_strict_sublevel_certified{false};
+  bool quadratic_max_upper_bound_certified{false};
+  bool closed_segment_nonstrict_sublevel_certified{false};
+  bool half_open_segment_strict_sublevel_certified{false};
+  bool exact_level_relations_certified{false};
+  bool counters_certified{false};
+  bool decision_certified{false};
+  bool scope_certified{false};
+  bool fresh_replay_certified{false};
+  bool exact_descent_segment_decision_certified{false};
+};
+
 // Enumerates every subset of one to four facet points. For a ten-point facet,
 // this is exactly 385 supports. Every relatively interior circumcenter is
 // classified against every facet point with exact rationals before the least
@@ -252,5 +323,21 @@ verify_exact_facet_descent_arc(
     const spatial::CanonicalPointCloud& cloud,
     std::span<const spatial::PointId> facet_point_ids,
     const ExactFacetDescentArcResult& result);
+
+// Certifies the exact squared-distance chord identity and its maximum-envelope
+// bound for the half-open segment of a strict 6.3 arc. Non-arc branches retain
+// an exact decision but carry no segment witness.
+[[nodiscard]] ExactFacetDescentSegmentResult
+build_exact_facet_descent_segment(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> facet_point_ids);
+
+// Rebuilds the complete 6.3 arc from the input facet before reconstructing all
+// exact segment coefficients; no observed witness steers the fresh replay.
+[[nodiscard]] ExactFacetDescentSegmentVerification
+verify_exact_facet_descent_segment(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> facet_point_ids,
+    const ExactFacetDescentSegmentResult& result);
 
 }  // namespace morsehgp3d::hierarchy

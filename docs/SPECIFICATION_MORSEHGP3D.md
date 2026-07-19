@@ -231,11 +231,23 @@ Dans le domaine strict, le shell interne de la facette doit coïncider avec son 
 
 Cette préclassification ne construit aucun successeur. Lorsque les préconditions strictes échouent, elle certifie seulement que la décroissance n'est pas établie; l'existence d'un arc de plateau $\beta(G)=\beta(F)$ ne peut être décidée qu'après construction de $G$ et calcul exact de sa miniball. Elle ne certifie donc encore ni segment sous-niveau, ni DAG, ni pointer-jumping, ni attache, ni forêt, ni statut public.
 
-Le jalon préparatoire d'arc choisi ne s'ouvre que pour `strict_descent_admissible`. Il pose alors $G$ égal à `canonical_choice_ids` de la partition top-$k$ déjà certifiée, vérifie $G\in\mathcal{N}_k(c_F)$ et $G\neq F$, puis recalcule intégralement la miniball de $G$. Si $d_k(c_F)$ désigne le cutoff exact, le certificat exige $\beta(G)\leq d_k(c_F)\leq\beta(F)$ et, séparément, $\beta(G)<\beta(F)$. La dernière inégalité est une comparaison rationnelle fraîche : le logiciel ne se contente pas de l'implication conditionnelle issue des préconditions.
+Le jalon préparatoire d'arc choisi ne s'ouvre que pour `strict_descent_admissible`. Il pose alors $G$ égal à `canonical_choice_ids` de la partition top-$k$ déjà certifiée, vérifie $G\in\mathcal{N}_k(c_F)$ et $G\neq F$, puis recalcule intégralement la miniball de $G$. Le certificat exige $\beta(G)\leq D_k(c_F)\leq\beta(F)$ et, séparément, $\beta(G)<\beta(F)$. La dernière inégalité est une comparaison rationnelle fraîche : le logiciel ne se contente pas de l'implication conditionnelle issue des préconditions.
 
 Les sources `already_active_at_own_center` et `unsupported_degeneracy` produisent respectivement `no_arc_already_active_at_own_center` et `no_arc_unsupported_degeneracy`; elles ne portent aucun identifiant de successeur, aucune miniball cible et aucune comparaison de niveau. Si une source `strict_descent_admissible` fraîchement rejouée produit $G=F$ ou $\beta(G)\geq\beta(F)$, l'exécution échoue fermée : elle ne requalifie pas cette contradiction en plateau pris en charge. La portée `canonical_top_k_selected_strict_level_arc_only`, fondée sur `exact_descent_preconditions_canonical_top_k_member_fresh_miniball_strict_level_v1`, ne certifie encore aucun segment, DAG, pointer-jumping, attache, forêt ou statut public.
 
-Le segment entre les centres reste dans le sous-niveau précédent. L'itération est un DAG fonctionnel vers un minimum; un pointer-jumping GPU peut en calculer les racines. Cette descente fournit un certificat d'attache pour `full_pi0` et un contrôle indépendant du flot de Gabriel.
+Le certificat préparatoire de segment rejoue 6.3 et n'émet un témoin que pour un arc strict. Pour $R=\beta(F)$, il recalcule $a=g_G(c_F)=D_k(c_F)\leq R$, lit $b=\beta(G)<R$ depuis la miniball cible et calcule $\delta=\left\Vert c_G-c_F\right\Vert^2\geq0$. Pour chaque $x\in G$ et $\gamma(t)=(1-t)c_F+t c_G$, l'identité quadratique exacte est
+
+$$\left\Vert\gamma(t)-x\right\Vert^2=(1-t)\left\Vert c_F-x\right\Vert^2+t\left\Vert c_G-x\right\Vert^2-t(1-t)\delta.$$
+
+Son passage au maximum donne seulement la borne d'enveloppe
+
+$$g_G(\gamma(t))\leq q(t)=(1-t)a+tb-t(1-t)\delta.$$
+
+L'inégalité peut être stricte parce que le point maximisant peut changer; présenter $g_G(\gamma(t))=q(t)$ comme une identité générale est interdit. La décomposition $q(t)-R=(1-t)(a-R)+t(b-R)-t(1-t)\delta$ certifie le segment fermé dans $\left\lbrace D_k\leq R\right\rbrace$ et le demi-segment $\gamma((0,1])$ dans $\left\lbrace D_k<R\right\rbrace$. Le point source peut satisfaire $a=R$. Si $\delta=0$, les centres sont exactement égaux et $a=b$; ce segment dégénéré reste valide. Les branches sans arc n'émettent aucun témoin de segment.
+
+La portée `canonical_strict_arc_half_open_sublevel_segment_only`, fondée sur `exact_squared_distance_chord_identity_max_envelope_half_open_segment_v1`, ne certifie qu'un segment isolé. Elle ne certifie ni concaténation, ni DAG, ni pointer-jumping, ni identification d'un germe, ni attache, ni forêt ou statut public.
+
+Une future concaténation de tels segments devra encore démontrer la cohérence des coutures et le rattachement au bon germe avant de former un DAG fonctionnel ou un certificat d'attache pour `full_pi0`. Un pointer-jumping GPU ne pourra intervenir qu'après cette fermeture.
 
 Les plateaux et shells dégénérés exigent un graphe de successeurs multivalué traité par composantes fortement connexes. Tant que ce quotient n'est pas prouvé et implémenté, ils déclenchent `unsupported_degeneracy` en mode exact.
 

@@ -2,15 +2,15 @@
 
 ## Statut
 
-- phase : `6`, `ready`; jalons préparatoires 6.1, 6.2 et 6.3 livrés pendant que la phase 5 reste l'unique phase `in_progress`;
+- phase : `6`, `ready`; jalons préparatoires 6.1 à 6.4 livrés pendant que la phase 5 reste l'unique phase `in_progress`;
 - backend : `reference_cpu`;
 - profil : `full_pi0`;
 - mode : `certified`;
-- portée courante : `canonical_top_k_selected_strict_level_arc_only`;
+- portée courante : `canonical_strict_arc_half_open_sublevel_segment_only`;
 - porte d'entrée : satisfaite par les Phases 1 et 4 fermées;
-- porte de sortie : non satisfaite; le miniball exact borné, son shell global et la famille top-$k$ exacte à son centre sont livrés, et 6.3 borne un arc canonique au seul niveau strict; aucun segment sous-niveau, DAG, pointer-jumping, attache ou différentiel indépendant n'est construit.
+- porte de sortie : non satisfaite; le miniball exact borné, son shell global, la famille top-$k$ exacte, l'arc strict 6.3 et le segment analytique individuel 6.4 sont validés; aucune concaténation, aucun DAG, pointer-jumping, germe, attache, forêt ou différentiel indépendant n'est construit.
 
-Ces jalons ne construisent aucune forêt et ne publient aucun `public_status`. Le premier fournit un oracle local exact pour une facette de cardinal au plus dix; le second certifie ses préconditions globales au centre; le troisième réserve le mot successeur au représentant canonique dont la miniball fraîche possède un niveau strictement inférieur. Ce dernier certificat reste un arc combinatoire de niveau, pas un chemin géométrique ni une attache.
+Ces jalons ne construisent aucune forêt et ne publient aucun `public_status`. Le premier fournit un oracle local exact pour une facette de cardinal au plus dix; le second certifie ses préconditions globales au centre; le troisième réserve le mot successeur au représentant canonique dont la miniball fraîche possède un niveau strictement inférieur; le quatrième ajoute seulement le certificat analytique du segment de centres associé à cet arc. Ce segment isolé n'est ni une chaîne, ni un germe, ni une attache.
 
 ## Réduction mathématique finie
 
@@ -59,7 +59,7 @@ Le statut de cette implication reste `conditional_theorem` : le logiciel hôte v
 
 ## Arc canonique de niveau 6.3
 
-`build_exact_facet_descent_arc` rejoue d'abord 6.2. Uniquement lorsque la décision source vaut `strict_descent_admissible`, il pose $G$ égal à `canonical_choice_ids`, conserve ces identifiants comme `successor_facet_point_ids` et construit une nouvelle `ExactFacetMiniballResult` sur cette facette. Il exige successivement que $G$ soit le choix canonique, que $G\in\mathcal{N}_k(c_F)$, que $G\neq F$, que $\beta(G)\leq d_k(c_F)$ et que $\beta(G)<\beta(F)$. Les deux dernières décisions sont exactes sur `ExactLevel`; aucune tolérance ni implication non rejouée ne remplace la comparaison.
+`build_exact_facet_descent_arc` rejoue d'abord 6.2. Uniquement lorsque la décision source vaut `strict_descent_admissible`, il pose $G$ égal à `canonical_choice_ids`, conserve ces identifiants comme `successor_facet_point_ids` et construit une nouvelle `ExactFacetMiniballResult` sur cette facette. Il exige successivement que $G$ soit le choix canonique, que $G\in\mathcal{N}_k(c_F)$, que $G\neq F$, que $\beta(G)\leq D_k(c_F)$ et que $\beta(G)<\beta(F)$. Les deux dernières décisions sont exactes sur `ExactLevel`; aucune tolérance ni implication non rejouée ne remplace la comparaison.
 
 Le résultat porte `proof_basis=exact_descent_preconditions_canonical_top_k_member_fresh_miniball_strict_level_v1` et `scope=canonical_top_k_selected_strict_level_arc_only`. Ses décisions sont :
 
@@ -71,6 +71,18 @@ Le résultat porte `proof_basis=exact_descent_preconditions_canonical_top_k_memb
 Les compteurs ordonnés sont `precondition_classification_count`, `canonical_top_k_selection_count`, `successor_miniball_build_count` et `exact_level_comparison_count`. Dans la branche stricte ils valent `(1,1,1,2)`, la dernière valeur comptant séparément la borne par le cutoff et la baisse depuis la source. `verify_exact_facet_descent_arc` reconstruit les préconditions, redérive le choix canonique depuis la partition fraîche, rejoue toute la miniball cible, compare les identifiants et les niveaux, puis ferme présence des optionnels, cinq faits, compteurs, décision, portée et identité du nuage. Une source stricte donnant $G=F$ ou $\beta(G)\geq\beta(F)$ constitue une contradiction fail-closed; elle n'est jamais rabattue sur une branche sans arc.
 
 La régularité de $G$ à son propre centre n'est pas requise pour certifier l'arc courant. Une étape ultérieure devra relancer 6.2 sur $G$ avant toute nouvelle transition. Le rejeu 6.3 utilise les mêmes primitives exactes hôtes et n'est pas un oracle logiciel indépendant.
+
+## Segment analytique individuel 6.4
+
+`build_exact_facet_descent_segment` rejoue d'abord la totalité de 6.3. La décision `strict_half_open_segment_certified` est la seule qui porte un `ExactFacetDescentSegmentWitness`; `no_segment_already_active_at_own_center` et `no_segment_unsupported_degeneracy` conservent une décision exacte sans témoin. La portée est `canonical_strict_arc_half_open_sublevel_segment_only` et la base de preuve est `exact_squared_distance_chord_identity_max_envelope_half_open_segment_v1`.
+
+Pour un arc strict certifié, posons $R=\beta(F)$, $a=g_G(c_F)=\max_{x\in G}\left\Vert c_F-x\right\Vert^2$, $b=\beta(G)$, $\delta=\left\Vert c_G-c_F\right\Vert^2$ et $\gamma(t)=(1-t)c_F+tc_G$. Le calcul recourt à tous les points de $G$ pour retrouver exactement $a=D_k(c_F)\leq R$; il exige aussi $b<R$ et $\delta\geq0$. Le témoin conserve ces trois niveaux, l'égalité éventuelle des centres, le fait que la source est ou non déjà strictement sous le niveau, ainsi que les trois faits relatifs à l'enveloppe quadratique et aux sous-niveaux fermé et demi-ouvert.
+
+Pour chaque $x\in G$, l'identité exacte est $\left\Vert\gamma(t)-x\right\Vert^2=(1-t)\left\Vert c_F-x\right\Vert^2+t\left\Vert c_G-x\right\Vert^2-t(1-t)\delta$. Le maximum des membres de gauche ne conserve pas nécessairement le même maximiseur : le certificat conclut donc seulement $g_G(\gamma(t))\leq q(t)=(1-t)a+tb-t(1-t)\delta$. Comme $D_k(\gamma(t))\leq g_G(\gamma(t))$ et $q(t)-R=(1-t)(a-R)+t(b-R)-t(1-t)\delta$, tout $t\in[0,1]$ reste dans le sous-niveau fermé et tout $t\in(0,1]$ est strictement sous $R$. Le point source peut vérifier $a=R$; aucune stricte inégalité à $t=0$ n'est revendiquée. Le cas $\delta=0$ est valide : l'arithmétique rationnelle impose alors $c_F=c_G$, puis $a=b$; le segment dégénéré reste certifié puisque $b<R$.
+
+Les six compteurs sont, dans l'ordre de l'API, le nombre de classifications d'arc source, d'évaluations des distances de $G$ en $c_F$, de comparaisons pour leur maximum, d'évaluations du déplacement des centres, de relations exactes de niveau et de certifications de l'identité convexe. Pour $\lvert G\rvert=k$, ils valent `(1,k,k-1,1,4,1)` dans la branche stricte et `(1,0,0,0,0,0)` dans les deux branches sans témoin. `verify_exact_facet_descent_segment` reconstruit l'arc, le maximum $a$, $b$, $\delta$, tous les faits, les compteurs, la décision et la portée sans laisser le témoin observé guider le rejeu.
+
+Le résultat ne certifie qu'un segment. Il ne relance pas 6.2 au sommet suivant, ne concatène pas deux segments et ne traite ni continuité aux coutures, DAG, pointer-jumping, germe, attache, forêt, `public_status`, CUDA ou G4.
 
 ## Validation hôte ciblée
 
@@ -105,6 +117,10 @@ La validation 6.3 ajoute deux arcs stricts :
 
 Les cas actif et non pris en charge de 6.2 retournent respectivement `no_arc_already_active_at_own_center` et `no_arc_unsupported_degeneracy`, sans optionnel cible et avec les compteurs `(1,0,0,0)`. Les mutations suppriment un payload strict, injectent un payload dans une branche sans arc, remplacent le choix canonique par un autre membre top-$k$, désaccordent les identifiants et la miniball cible, falsifient chacun des cinq faits et des quatre compteurs, puis changent décision, portée et identité de nuage. La cible unitaire passe en Release strict sous GCC et Clang; le statut logiciel 6.3 est `validated_host_software`, sans oracle indépendant supplémentaire.
 
+La validation 6.4 reprend ces deux arcs. `strict-arc-cutoff-equal` produit `(a,b,delta)=(1,1/4,1/4)`, une source non strictement sous $R=1$ et $q(1/2)=9/16$; la dernière valeur est seulement confrontée à une requête brute-force au milieu comme diagnostic. `strict-arc-cutoff-lower` produit `(a,b,delta)=(1,1,0)`, des centres égaux et une source strictement sous $R=4$. Les cas actif et non pris en charge gardent le témoin absent et les compteurs `(1,0,0,0,0,0)`. Les mutations ciblent l'arc source, la présence du témoin, $a$, $b$, $\delta$, chacun des cinq booléens, chacun des six compteurs, la décision, la portée et l'identité d'un nuage jumeau.
+
+La cible unitaire 6.4 passe en Release strict sous GCC et Clang et le statut logiciel devient `validated_host_software`. Aucun différentiel indépendant, CUDA ou G4 n'est revendiqué et GCP n'a pas été utilisé.
+
 ## Suite immédiate
 
-Le prochain jalon pourra certifier le segment géométrique de $c_F$ vers $c_G$ avant toute fermeture de labels, tout DAG, tout pointer-jumping ou toute attache. Une égalité de niveaux hors du gate strict restera `unsupported_degeneracy` tant que le quotient multivalué de plateau n'est pas démontré et implémenté. Aucun segment ni assemblage de plusieurs arcs n'est couvert par `canonical_top_k_selected_strict_level_arc_only`.
+Le prochain jalon devra traiter explicitement la concaténation de segments et les obligations aux coutures avant tout germe, fermeture de labels, DAG, pointer-jumping ou attache. Une égalité de niveaux hors du gate strict restera `unsupported_degeneracy` tant que le quotient multivalué de plateau n'est pas démontré et implémenté. Aucun assemblage de plusieurs arcs n'est couvert par `canonical_strict_arc_half_open_sublevel_segment_only`.
