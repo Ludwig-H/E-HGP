@@ -281,7 +281,7 @@ artefacts restent provisoires jusqu'à la certification `TERMINATED` de la même
 cible et sont alors publiés sous `phase3-<SHA>.json` et
 `phase4-spatial-<SHA>.json`.
 
-La première ronde GPU Borůvka de Phase 5 possède une option plus courte,
+La boucle GPU Borůvka complète de Phase 5 possède une option plus courte,
 indépendante de la campagne spatiale Phase 4 :
 
 ```bash
@@ -291,13 +291,17 @@ indépendante de la campagne spatiale Phase 4 :
   --result-dir /tmp/morsehgp3d-phase5-k1-boruvka
 ```
 
-Le worker exécute le replay réel à graine fixe, exige son accord avec la
-résolution CPU exacte, vérifie un ELF exclusivement `sm_120` et l'absence de
-PTX, puis lance `compute-sanitizer` en `memcheck` et `racecheck`. Le compagnon
-fermé `morsehgp3d.phase5.k1_boruvka_gpu_qualification.v1` reste au statut
+Le worker exécute le replay réel multi-ronde
+`morsehgp3d_gpu_k1_boruvka_full_replay`, exige la chaîne de propositions GPU,
+de décisions et contractions CPU exactes, le rejeu GPU indépendant et le
+témoin EMST local, puis vérifie un ELF exclusivement `sm_120`, l'absence de PTX
+et les passages `compute-sanitizer` en `memcheck` et `racecheck`. Le compagnon
+fermé `morsehgp3d.phase5.k1_boruvka_gpu_qualification.v2`, de périmètre
+`gpu_proposed_cpu_exact_full_boruvka_local_emst_witness_only`, reste au statut
 `worker_passed_pending_shutdown` jusqu'au même arrêt ciblé et devient ensuite
-`phase5-k1-boruvka-<SHA>.json`. Il ne contient aucun `public_status` et ne
-qualifie ni contraction, ni boucle Borůvka complète, ni scalabilité.
+`phase5-k1-boruvka-<SHA>.json`. Il ne contient aucun `public_status` : la
+réduction hiérarchique reste `not_performed`, et ni le chunking à mémoire
+bornée ni la scalabilité ne sont qualifiés par cet artefact.
 
 Pour la cible de capacité explicitement autorisée :
 

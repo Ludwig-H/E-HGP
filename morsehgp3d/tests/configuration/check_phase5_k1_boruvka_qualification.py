@@ -14,10 +14,10 @@ import tempfile
 from types import ModuleType
 from typing import Any, Callable
 
-QUALIFICATION_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v1"
-REPLAY_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_replay.v1"
-SCIENTIFIC_SCOPE = "gpu_candidate_superset_with_cpu_exact_resolution_only"
-STATIC_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification_static.v1"
+QUALIFICATION_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v2"
+REPLAY_SCHEMA = "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v1"
+SCIENTIFIC_SCOPE = "gpu_proposed_cpu_exact_full_boruvka_local_emst_witness_only"
+STATIC_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification_static.v2"
 SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
 EXPECTED_TOP_LEVEL_KEYS = {
     "backend",
@@ -41,8 +41,11 @@ EXPECTED_TOP_LEVEL_KEYS = {
 EXPECTED_CHECK_KEYS = {
     "aot_elf_architectures",
     "aot_ptx_entry_count",
-    "cpu_exact_resolution_complete",
-    "gpu_candidate_superset_certified",
+    "canonical_contractions_certified",
+    "cpu_exact_decision_chain_certified",
+    "gpu_multi_round_proposal_chain_certified",
+    "independent_gpu_replay_certified",
+    "local_emst_witness_certified",
     "memcheck",
     "racecheck",
     "replay",
@@ -51,9 +54,9 @@ EXPECTED_LOG_KEYS = {
     "cuobjdump_elf",
     "cuobjdump_ptx",
     "cuobjdump_ptx_stderr",
+    "full_replay",
     "memcheck",
     "racecheck",
-    "replay",
 }
 WORKER_LIFECYCLE = {
     "guest_shutdown_guard_verified": True,
@@ -140,13 +143,18 @@ def validate_static_source(assembler: str, replay: str) -> None:
             QUALIFICATION_SCHEMA,
             REPLAY_SCHEMA,
             SCIENTIFIC_SCOPE,
-            '"candidate_count": 15',
-            '"case_count": 2',
-            '"count_pass_node_visit_count": 48',
-            '"point_count": 8',
-            '"required_candidate_count": 15',
-            '"strict_aabb_prune_count": 5',
-            '"uniform_component_prune_count": 8',
+            '"component_count_path": [8, 4, 2, 1]',
+            '"component_minimum_count": 14',
+            '"gpu_candidate_count": 86',
+            '"gpu_count_pass_node_visit_count": 236',
+            '"proposal_digest_fnv1a": "88d6d04ed0c2e06b"',
+            '"proposal_digest_fnv1a": "8ba818d0f95004dd"',
+            '"proposal_digest_fnv1a": "4ca55683c3c49441"',
+            '"hgp_weight": ("8127", "4")',
+            '"squared_weight": ("8127", "1")',
+            'require_exact_keys(value, REPLAY_KEYS, label)',
+            'contains_json_key(value, "public_status")',
+            "exact_json_equal(value, EXPECTED_REPLAY)",
             'set(architectures) != {"sm_120"}',
             "if ptx_log.strip()",
             "validate_memcheck_log(memcheck_log)",
@@ -174,17 +182,23 @@ def validate_static_source(assembler: str, replay: str) -> None:
     require_tokens(
         replay,
         (
-            "run_square(summary);",
-            "run_contracted_chain(summary);",
+            '"singleton_terminal"',
+            '"chain_three_rounds"',
+            '"square_equal_length_ties"',
+            "std::array<std::size_t, 4>{8U, 4U, 2U, 1U}",
             REPLAY_SCHEMA,
+            "build_gpu_proposed_cpu_exact_k1_boruvka",
+            "verify_gpu_proposed_cpu_exact_k1_boruvka",
             "K1BoruvkaCandidateAudit::decision_semantics",
             "K1BoruvkaCandidateAudit::proposal_semantics",
             r"\"status\":\"passed\"",
-            "proposal.cpu_exact_component_minima !=",
-            "proposal.audit.candidate_superset_certified",
-            "proposal.audit.cpu_exact_resolution_complete",
+            "K1HybridScientificStatus::local_emst_witness_only",
+            "K1HybridHierarchyReductionStatus::not_performed",
+            "result.proposal_chain_certified",
+            "verification.proposal_chain_certified",
+            "verification.hierarchy_status_separation_certified",
         ),
-        "real Phase 5 K1 Boruvka replay",
+        "real Phase 5 full-loop K1 Boruvka replay",
     )
 
 
@@ -327,11 +341,13 @@ def exercise_assembler(module: ModuleType) -> None:
             "qualification lost image provenance",
         )
         binary = artifact.get("binary")
+        replay_digest = hashlib.sha256(replay_binary_path.read_bytes()).hexdigest()
         require(
             isinstance(binary, dict)
-            and set(binary) == {"replay_sha256"}
-            and SHA256_RE.fullmatch(str(binary.get("replay_sha256"))) is not None,
-            "qualification replay digest is absent",
+            and set(binary) == {"full_replay_sha256"}
+            and binary.get("full_replay_sha256") == replay_digest
+            and SHA256_RE.fullmatch(replay_digest) is not None,
+            "qualification full replay digest is absent",
         )
         checks = artifact.get("checks")
         require(
@@ -341,8 +357,11 @@ def exercise_assembler(module: ModuleType) -> None:
         expected_checks = {
             "aot_elf_architectures": ["sm_120"],
             "aot_ptx_entry_count": 0,
-            "cpu_exact_resolution_complete": True,
-            "gpu_candidate_superset_certified": True,
+            "canonical_contractions_certified": True,
+            "cpu_exact_decision_chain_certified": True,
+            "gpu_multi_round_proposal_chain_certified": True,
+            "independent_gpu_replay_certified": True,
+            "local_emst_witness_certified": True,
             "memcheck": "passed",
             "racecheck": "passed",
             "replay": module.EXPECTED_REPLAY,
@@ -352,6 +371,17 @@ def exercise_assembler(module: ModuleType) -> None:
         require(
             isinstance(logs, dict) and set(logs) == EXPECTED_LOG_KEYS,
             "qualification log schema is not closed",
+        )
+        require(
+            logs.get("full_replay")
+            == json.dumps(
+                module.EXPECTED_REPLAY,
+                ensure_ascii=True,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+            + "\n",
+            "qualification did not preserve the canonical full replay log",
         )
         require(
             artifact.get("vm_lifecycle") == WORKER_LIFECYCLE,
@@ -368,18 +398,20 @@ def exercise_assembler(module: ModuleType) -> None:
         )
 
         extra_key_replay = copy.deepcopy(module.EXPECTED_REPLAY)
-        extra_key_replay["unexpected"] = True
+        extra_key_replay["cases"][1]["rounds"][0]["audit"]["unexpected"] = True
         write_json(replay_log_path, extra_key_replay)
         require_rejected(
             lambda: module.validate_replay(replay_log_path),
-            "unexpected replay key",
+            "unexpected nested replay key",
         )
         wrong_count_replay = copy.deepcopy(module.EXPECTED_REPLAY)
-        wrong_count_replay["candidate_count"] = 14
+        wrong_count_replay["cases"][1]["rounds"][1]["audit"][
+            "candidate_count"
+        ] = 29
         write_json(replay_log_path, wrong_count_replay)
         require_rejected(
             lambda: module.validate_replay(replay_log_path),
-            "wrong replay candidate count",
+            "wrong multi-round replay candidate count",
         )
         replay_log_path.write_text(
             '{"schema":"one","schema":"two"}\n', encoding="ascii"
@@ -451,7 +483,7 @@ def exercise_assembler(module: ModuleType) -> None:
 
 def validate_project(project: Path) -> dict[str, object]:
     assembler_path = project / "tests/cuda/assemble_phase5_k1_boruvka_qualification.py"
-    replay_path = project / "src/tools/gpu_k1_boruvka_replay.cpp"
+    replay_path = project / "src/tools/gpu_k1_boruvka_full_replay.cpp"
     assembler_source = read_text(assembler_path)
     replay_source = read_text(replay_path)
     validate_static_source(assembler_source, replay_source)

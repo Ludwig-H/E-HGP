@@ -88,10 +88,11 @@ compagnon commun reste provisoire jusqu'à la même certification ciblée
 TERMINATED et ne publie aucun statut scientifique.
 
 --phase5-k1-boruvka ajoute dans la même session gardée la qualification de la
-première ronde GPU Boruvka de Phase 5 : replay réel recertifié sur CPU, audit
-AOT sm_120 sans PTX, memcheck et racecheck. Son artefact compagnon reste
-provisoire jusqu'à la même certification ciblée TERMINATED et ne publie aucun
-statut scientifique.
+boucle GPU Boruvka complète de Phase 5 : chaîne multi-ronde proposée sur GPU,
+décisions et contractions exactes sur CPU, rejeu GPU indépendant, témoin EMST
+local, audit AOT sm_120 sans PTX, memcheck et racecheck. Son artefact compagnon
+reste provisoire jusqu'à la même certification ciblée TERMINATED et ne publie
+aucun statut scientifique.
 
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
@@ -810,7 +811,7 @@ printf '%s\n' \
     "  arrêt invité    : ${GUEST_SHUTDOWN_MINUTES} min" \
     "  Docker hôte     : $([[ ${PROVISION_DOCKER} == 1 ]] && printf 'provisioning Ubuntu autorisé' || printf 'aucune mutation')" \
     "  replay Phase 4  : $([[ ${PHASE4_SPATIAL_REFERENCE} == 1 ]] && printf 'référence + LBVH résident activés' || printf 'désactivé')" \
-    "  replay Phase 5  : $([[ ${PHASE5_K1_BORUVKA} == 1 ]] && printf 'ronde K1 Boruvka activée' || printf 'désactivé')" \
+    "  replay Phase 5  : $([[ ${PHASE5_K1_BORUVKA} == 1 ]] && printf 'boucle K1 Boruvka complète activée' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -1414,8 +1415,8 @@ for key, expected in {
     "mode": "certified",
     "phase": "5",
     "profile": "hgp_reduced",
-    "schema": "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v1",
-    "scientific_scope": "gpu_candidate_superset_with_cpu_exact_resolution_only",
+    "schema": "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v2",
+    "scientific_scope": "gpu_proposed_cpu_exact_full_boruvka_local_emst_witness_only",
     "status": "worker_passed_pending_shutdown",
 }.items():
     if value.get(key) != expected:
@@ -1435,43 +1436,50 @@ if image != {field: phase3_image.get(field) for field in ("base_ref", "id", "ref
 if re.fullmatch(r"sha256:[0-9a-f]{64}", str(image.get("id"))) is None:
     raise SystemExit("digest d'image Phase 5 non canonique")
 binary = value.get("binary")
-if not isinstance(binary, dict) or set(binary) != {"replay_sha256"} or re.fullmatch(
-    r"[0-9a-f]{64}", str(binary.get("replay_sha256"))
+if not isinstance(binary, dict) or set(binary) != {"full_replay_sha256"} or re.fullmatch(
+    r"[0-9a-f]{64}", str(binary.get("full_replay_sha256"))
 ) is None:
-    raise SystemExit("empreinte du replay Phase 5 absente ou invalide")
-expected_replay = {
-    "candidate_count": 15,
-    "case_count": 2,
-    "count_pass_node_visit_count": 48,
-    "decision_semantics": "cpu_exact_seed_replay_and_kappa_resolution",
-    "point_count": 8,
-    "proposal_semantics": "gpu_stackless_lbvh_fixed_seed_candidate_superset",
-    "required_candidate_count": 15,
-    "schema": "morsehgp3d.phase5.k1_boruvka_gpu_replay.v1",
-    "status": "passed",
-    "strict_aabb_prune_count": 5,
-    "uniform_component_prune_count": 8,
-}
+    raise SystemExit("empreinte du replay complet Phase 5 absente ou invalide")
 checks = value.get("checks")
 expected_check_keys = {
     "aot_elf_architectures",
     "aot_ptx_entry_count",
-    "cpu_exact_resolution_complete",
-    "gpu_candidate_superset_certified",
+    "canonical_contractions_certified",
+    "cpu_exact_decision_chain_certified",
+    "gpu_multi_round_proposal_chain_certified",
+    "independent_gpu_replay_certified",
+    "local_emst_witness_certified",
     "memcheck",
     "racecheck",
     "replay",
 }
 if not isinstance(checks, dict) or set(checks) != expected_check_keys:
     raise SystemExit("contrôles Phase 5 absents ou ouverts")
+replay = checks.get("replay")
+if not isinstance(replay, dict):
+    raise SystemExit("replay complet Phase 5 absent")
+replay_canonical = json.dumps(
+    replay, ensure_ascii=True, sort_keys=True, separators=(",", ":")
+) + "\n"
+if hashlib.sha256(replay_canonical.encode("utf-8")).hexdigest() != (
+    "b4bd717d175c84be0c89e8602245e28b8059e350f0ce7ff33edafa2a2df30d98"
+):
+    raise SystemExit("replay complet Phase 5 différent de la fixture canonique")
+if replay.get("schema") != (
+    "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v1"
+):
+    raise SystemExit("schéma du replay complet Phase 5 invalide")
 if checks != {
     "aot_elf_architectures": ["sm_120"],
     "aot_ptx_entry_count": 0,
-    "cpu_exact_resolution_complete": True,
-    "gpu_candidate_superset_certified": True,
+    "canonical_contractions_certified": True,
+    "cpu_exact_decision_chain_certified": True,
+    "gpu_multi_round_proposal_chain_certified": True,
+    "independent_gpu_replay_certified": True,
+    "local_emst_witness_certified": True,
     "memcheck": "passed",
     "racecheck": "passed",
-    "replay": expected_replay,
+    "replay": replay,
 }:
     raise SystemExit("contrôles Phase 5 incomplets")
 environment = value.get("environment")
@@ -1488,9 +1496,9 @@ if not isinstance(logs, dict) or set(logs) != {
     "cuobjdump_elf",
     "cuobjdump_ptx",
     "cuobjdump_ptx_stderr",
+    "full_replay",
     "memcheck",
     "racecheck",
-    "replay",
 }:
     raise SystemExit("journaux Phase 5 absents ou ouverts")
 provenance = value.get("provenance")

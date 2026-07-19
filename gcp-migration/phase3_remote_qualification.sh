@@ -22,8 +22,8 @@ readonly PHASE4_DIFFERENTIAL_PATH="${CONTAINER_REPOSITORY}/${PHASE4_DIFFERENTIAL
 readonly PHASE4_LBVH_REPLAY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_spatial_lbvh_replay"
 readonly PHASE4_LBVH_REPLAY_PATH="${CONTAINER_REPOSITORY}/${PHASE4_LBVH_REPLAY_RELATIVE}"
 readonly PHASE4_LBVH_DIFFERENTIAL_PATH="${CONTAINER_REPOSITORY}/${PHASE4_LBVH_DIFFERENTIAL_RELATIVE}"
-readonly PHASE5_K1_BORUVKA_REPLAY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_replay"
-readonly PHASE5_K1_BORUVKA_REPLAY_PATH="${CONTAINER_REPOSITORY}/${PHASE5_K1_BORUVKA_REPLAY_RELATIVE}"
+readonly PHASE5_K1_BORUVKA_FULL_REPLAY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_full_replay"
+readonly PHASE5_K1_BORUVKA_FULL_REPLAY_PATH="${CONTAINER_REPOSITORY}/${PHASE5_K1_BORUVKA_FULL_REPLAY_RELATIVE}"
 readonly MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-release"
 readonly GUEST_GUARD_MIN_REMAINING_SECONDS=1800
 readonly GUEST_GUARD_MAX_REMAINING_SECONDS=2820
@@ -165,9 +165,10 @@ publie l'objet Phase 3 sans remplacement hors du worktree après les contrôles.
 L'option Phase 4 exécute en plus le replay spatial exhaustif de référence et
 le replay LBVH résident, puis publie leur compagnon provisoire commun, sans
 rollback d'un nom final. Aucun des deux artefacts ne certifie l'arrêt de la VM.
-L'option Phase 5 exécute le replay réel de la ronde K1 Boruvka, audite son ELF
-sm_120 et l'absence de PTX, puis le passe sous memcheck et racecheck. Son
-compagnon provisoire partage la même responsabilité d'arrêt externe.
+L'option Phase 5 exécute le replay réel de la boucle K1 Boruvka complète,
+audite son ELF sm_120 et l'absence de PTX, puis le passe sous memcheck et
+racecheck. Son compagnon provisoire partage la même responsabilité d'arrêt
+externe.
 EOF
 }
 
@@ -617,8 +618,8 @@ readonly PHASE4_LBVH_SANITIZER_LOG="${LOG_DIR}/phase4-spatial-lbvh-compute-sanit
 readonly PHASE4_LBVH_RACECHECK_LOG="${LOG_DIR}/phase4-spatial-lbvh-racecheck.log"
 readonly PHASE4_LBVH_DIFFERENTIAL_SUMMARY="${RESULT_DIR}/phase4-spatial-lbvh-differential.json"
 readonly PHASE4_LBVH_MEMCHECK_SUMMARY="${RESULT_DIR}/phase4-spatial-lbvh-memcheck.json"
-readonly PHASE5_K1_BORUVKA_REPLAY_LOG="${LOG_DIR}/phase5-k1-boruvka-replay.log"
-readonly PHASE5_K1_BORUVKA_REPLAY_STDERR_LOG="${LOG_DIR}/phase5-k1-boruvka-replay.stderr.log"
+readonly PHASE5_K1_BORUVKA_FULL_REPLAY_LOG="${LOG_DIR}/phase5-k1-boruvka-full-replay.log"
+readonly PHASE5_K1_BORUVKA_FULL_REPLAY_STDERR_LOG="${LOG_DIR}/phase5-k1-boruvka-full-replay.stderr.log"
 readonly PHASE5_K1_BORUVKA_ELF_LOG="${LOG_DIR}/phase5-k1-boruvka-cuobjdump-elf.log"
 readonly PHASE5_K1_BORUVKA_PTX_LOG="${LOG_DIR}/phase5-k1-boruvka-cuobjdump-ptx.log"
 readonly PHASE5_K1_BORUVKA_PTX_STDERR_LOG="${LOG_DIR}/phase5-k1-boruvka-cuobjdump-ptx.stderr.log"
@@ -1469,32 +1470,32 @@ if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
 fi
 
 if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
-    begin_unit "phase5-k1-boruvka-replay"
-    if ! run_container_split_output "phase5-k1-boruvka-replay" \
-        "${PHASE5_K1_BORUVKA_REPLAY_LOG}" \
-        "${PHASE5_K1_BORUVKA_REPLAY_STDERR_LOG}" \
-        "${PHASE5_K1_BORUVKA_REPLAY_PATH}"; then
-        report_failure_log "phase5-k1-boruvka-replay" \
-            "${PHASE5_K1_BORUVKA_REPLAY_LOG}"
-        report_failure_log "phase5-k1-boruvka-replay-stderr" \
-            "${PHASE5_K1_BORUVKA_REPLAY_STDERR_LOG}"
-        die "Le replay réel K1 Boruvka Phase 5 a échoué."
+    begin_unit "phase5-k1-boruvka-full-replay"
+    if ! run_container_split_output "phase5-k1-boruvka-full-replay" \
+        "${PHASE5_K1_BORUVKA_FULL_REPLAY_LOG}" \
+        "${PHASE5_K1_BORUVKA_FULL_REPLAY_STDERR_LOG}" \
+        "${PHASE5_K1_BORUVKA_FULL_REPLAY_PATH}"; then
+        report_failure_log "phase5-k1-boruvka-full-replay" \
+            "${PHASE5_K1_BORUVKA_FULL_REPLAY_LOG}"
+        report_failure_log "phase5-k1-boruvka-full-replay-stderr" \
+            "${PHASE5_K1_BORUVKA_FULL_REPLAY_STDERR_LOG}"
+        die "Le replay réel de la boucle K1 Boruvka complète Phase 5 a échoué."
     fi
 
     begin_unit "phase5-k1-boruvka-cuobjdump-elf"
     if ! run_container "phase5-k1-boruvka-cuobjdump-elf" \
         "${PHASE5_K1_BORUVKA_ELF_LOG}" /usr/local/cuda/bin/cuobjdump \
-        -lelf "${PHASE5_K1_BORUVKA_REPLAY_PATH}"; then
+        -lelf "${PHASE5_K1_BORUVKA_FULL_REPLAY_PATH}"; then
         report_failure_log "phase5-k1-boruvka-cuobjdump-elf" \
             "${PHASE5_K1_BORUVKA_ELF_LOG}"
-        die "cuobjdump n'a pas pu lister les ELF du replay K1 Boruvka Phase 5."
+        die "cuobjdump n'a pas pu lister les ELF du replay K1 Boruvka complet Phase 5."
     fi
     phase5_k1_boruvka_architectures="$(grep -Eo 'sm_[0-9]+' \
         "${PHASE5_K1_BORUVKA_ELF_LOG}" | sort -u || true)"
     if [[ "${phase5_k1_boruvka_architectures}" != "sm_120" ]]; then
         report_failure_log "phase5-k1-boruvka-cuobjdump-elf" \
             "${PHASE5_K1_BORUVKA_ELF_LOG}"
-        die "Le replay K1 Boruvka Phase 5 doit contenir uniquement un ELF sm_120; observé : ${phase5_k1_boruvka_architectures:-aucun}."
+        die "Le replay K1 Boruvka complet Phase 5 doit contenir uniquement un ELF sm_120; observé : ${phase5_k1_boruvka_architectures:-aucun}."
     fi
 
     begin_unit "phase5-k1-boruvka-cuobjdump-ptx"
@@ -1502,15 +1503,15 @@ if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
         "${PHASE5_K1_BORUVKA_PTX_LOG}" \
         "${PHASE5_K1_BORUVKA_PTX_STDERR_LOG}" \
         /usr/local/cuda/bin/cuobjdump -lptx \
-        "${PHASE5_K1_BORUVKA_REPLAY_PATH}"; then
+        "${PHASE5_K1_BORUVKA_FULL_REPLAY_PATH}"; then
         report_failure_log "phase5-k1-boruvka-cuobjdump-ptx-stderr" \
             "${PHASE5_K1_BORUVKA_PTX_STDERR_LOG}"
-        die "cuobjdump n'a pas pu auditer le PTX du replay K1 Boruvka Phase 5."
+        die "cuobjdump n'a pas pu auditer le PTX du replay K1 Boruvka complet Phase 5."
     fi
     if grep -q '[^[:space:]]' "${PHASE5_K1_BORUVKA_PTX_LOG}"; then
         report_failure_log "phase5-k1-boruvka-cuobjdump-ptx" \
             "${PHASE5_K1_BORUVKA_PTX_LOG}"
-        die "Une entrée PTX a été détectée dans le replay K1 Boruvka Phase 5."
+        die "Une entrée PTX a été détectée dans le replay K1 Boruvka complet Phase 5."
     fi
 
     begin_unit "phase5-k1-boruvka-memcheck"
@@ -1522,10 +1523,10 @@ if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
         --leak-check full \
         --report-api-errors no \
         --error-exitcode=86 \
-        "${PHASE5_K1_BORUVKA_REPLAY_PATH}"; then
+        "${PHASE5_K1_BORUVKA_FULL_REPLAY_PATH}"; then
         report_failure_log "phase5-k1-boruvka-memcheck" \
             "${PHASE5_K1_BORUVKA_MEMCHECK_LOG}"
-        die "Le memcheck du replay K1 Boruvka Phase 5 a échoué."
+        die "Le memcheck du replay K1 Boruvka complet Phase 5 a échoué."
     fi
 
     begin_unit "phase5-k1-boruvka-racecheck"
@@ -1536,10 +1537,10 @@ if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
         --tool racecheck \
         --report-api-errors no \
         --error-exitcode=86 \
-        "${PHASE5_K1_BORUVKA_REPLAY_PATH}"; then
+        "${PHASE5_K1_BORUVKA_FULL_REPLAY_PATH}"; then
         report_failure_log "phase5-k1-boruvka-racecheck" \
             "${PHASE5_K1_BORUVKA_RACECHECK_LOG}"
-        die "Le racecheck du replay K1 Boruvka Phase 5 a échoué."
+        die "Le racecheck du replay K1 Boruvka complet Phase 5 a échoué."
     fi
 fi
 
@@ -1601,13 +1602,13 @@ if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
         --image-ref "${IMAGE_REF}" \
         --image-id "${IMAGE_ID}" \
         --environment-artifact "${PUBLISH_TEMP}" \
-        --replay-log "${PHASE5_K1_BORUVKA_REPLAY_LOG}" \
+        --replay-log "${PHASE5_K1_BORUVKA_FULL_REPLAY_LOG}" \
         --elf-log "${PHASE5_K1_BORUVKA_ELF_LOG}" \
         --ptx-log "${PHASE5_K1_BORUVKA_PTX_LOG}" \
         --ptx-stderr-log "${PHASE5_K1_BORUVKA_PTX_STDERR_LOG}" \
         --memcheck-log "${PHASE5_K1_BORUVKA_MEMCHECK_LOG}" \
         --racecheck-log "${PHASE5_K1_BORUVKA_RACECHECK_LOG}" \
-        --replay "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_replay" \
+        --replay "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_full_replay" \
         --output "${PHASE5_PUBLISH_TEMP}"
 fi
 
