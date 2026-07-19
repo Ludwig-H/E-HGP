@@ -267,10 +267,12 @@ def minimum_enclosing_ball(
 ) -> Ball:
     """Return the exact miniball of a non-empty labelled subset.
 
-    Every affine-independent support of size at most four is tried.  Among
-    containing candidates the exact radius is minimized, then support size and
-    support label break degeneracy canonically.  This deliberately exhaustive
-    routine is independent of any future production miniball implementation.
+    Every positive affine-independent support of size at most four is tried.
+    Circumballs whose centre is on or outside the relative support boundary are
+    rejected even when they enclose the subset: they are not minimal supports.
+    Among containing candidates the exact radius is minimized, then support
+    size and support label break degeneracy canonically.  This deliberately
+    exhaustive routine is independent of the production miniball implementation.
     """
 
     normalized = normalize_points(points)
@@ -290,6 +292,9 @@ def minimum_enclosing_ball(
             try:
                 candidate = circumball(normalized, support)
             except AffineDependenceError:
+                continue
+            support_points = tuple(normalized[point_id] for point_id in support)
+            if not is_relative_interior(candidate.center, support_points):
                 continue
             if all(
                 classify(normalized[point_id], candidate) is not BallRelation.EXTERIOR

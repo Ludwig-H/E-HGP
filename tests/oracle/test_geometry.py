@@ -131,6 +131,44 @@ class ExactGeometryTests(unittest.TestCase):
         self.assertEqual(ball.squared_radius, 2)
         self.assertEqual(ball.support_ids, (0, 2))
 
+    def test_miniball_rejects_a_smaller_exterior_circumsupport(self) -> None:
+        points = [
+            (-1, 0, -2),
+            (-1, 0, 2),
+            (1, -2, 0),
+            (1, 2, 0),
+            (2, -1, 0),
+            (2, 1, 0),
+        ]
+        exterior_triple = circumball(points, [2, 3, 4])
+        self.assertEqual(exterior_triple.center, (Fraction(0),) * 3)
+        self.assertEqual(exterior_triple.squared_radius, 5)
+        exterior_support_points = [
+            points[point_id] for point_id in exterior_triple.support_ids
+        ]
+        self.assertEqual(
+            barycentric_coordinates(
+                exterior_triple.center,
+                exterior_support_points,
+            ),
+            (Fraction(5, 4), Fraction(3, 4), Fraction(-1)),
+        )
+        self.assertFalse(
+            is_relative_interior(
+                exterior_triple.center,
+                exterior_support_points,
+            )
+        )
+        exterior_classification = classify_points(points, exterior_triple)
+        self.assertEqual(exterior_classification.interior_ids, ())
+        self.assertEqual(exterior_classification.shell_ids, tuple(range(6)))
+        self.assertEqual(exterior_classification.exterior_ids, ())
+
+        ball = minimum_enclosing_ball(points)
+        self.assertEqual(ball.center, (Fraction(0),) * 3)
+        self.assertEqual(ball.squared_radius, 5)
+        self.assertEqual(ball.support_ids, (0, 1, 2, 3))
+
     def test_permutation_changes_only_support_identifiers(self) -> None:
         points = [(0, 0, 0), (4, 0, 0), (2, 3, 0), (2, 1, 0)]
         first = minimum_enclosing_ball(points)

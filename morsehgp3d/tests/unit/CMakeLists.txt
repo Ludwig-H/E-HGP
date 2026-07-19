@@ -53,6 +53,15 @@ target_link_libraries(
 )
 
 add_executable(
+  morsehgp3d_hierarchy_miniball_tests
+  test_hierarchy_miniball.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_miniball_tests
+  PRIVATE morsehgp3d::hierarchy
+)
+
+add_executable(
   morsehgp3d_hierarchy_boruvka_tests
   test_hierarchy_boruvka.cpp
 )
@@ -335,6 +344,7 @@ set(
   morsehgp3d_spatial_lbvh_query_dump
   morsehgp3d_hierarchy_emst_tests
   morsehgp3d_hierarchy_k1_forest_tests
+  morsehgp3d_hierarchy_miniball_tests
   morsehgp3d_hierarchy_boruvka_tests
   morsehgp3d_hierarchy_gabriel_tests
   morsehgp3d_hierarchy_k1_dump
@@ -377,6 +387,9 @@ if(MSVC)
   target_compile_options(morsehgp3d_hierarchy_emst_tests PRIVATE /W4 /WX)
   target_compile_options(
     morsehgp3d_hierarchy_k1_forest_tests PRIVATE /W4 /WX
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_miniball_tests PRIVATE /W4 /WX
   )
   target_compile_options(morsehgp3d_hierarchy_boruvka_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_hierarchy_gabriel_tests PRIVATE /W4 /WX)
@@ -562,6 +575,16 @@ else()
   )
   target_compile_options(
     morsehgp3d_hierarchy_k1_forest_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_miniball_tests
     PRIVATE
       -Wall
       -Wextra
@@ -775,6 +798,10 @@ add_test(NAME morsehgp3d.hierarchy_emst COMMAND morsehgp3d_hierarchy_emst_tests)
 add_test(
   NAME morsehgp3d.hierarchy_k1_forest
   COMMAND morsehgp3d_hierarchy_k1_forest_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_miniball
+  COMMAND morsehgp3d_hierarchy_miniball_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_boruvka

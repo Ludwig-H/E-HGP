@@ -357,6 +357,12 @@ Elle est vérifiée à tous les couples de seuils consécutifs de l'oracle, ains
 
 Une exécution avec $K_{\max}=10$ doit donner, après restriction, exactement le même résultat que des exécutions indépendantes avec $K_{\max}=1,2,\ldots,9$. Ce test détecte les caches inter-ordres mal invalidés et les heuristiques dont le budget dépend involontairement de l'ordre maximal.
 
+### 7.4 Miniball local et préconditions de descente
+
+Pour toute facette de cardinal $1\leq k\leq10$, l'oracle `reference_cpu` énumère exactement les sous-supports de tailles un à quatre. Les compteurs doivent égaler $\sum_{j=1}^{4}\binom{k}{j}$, donc 385 à $k=10$, et chaque support relativement intérieur doit classifier les $k$ points sans arrêt anticipé. Le rejeu compare la facette canonique, le support choisi, le centre, le rayon carré, la partition intérieur--shell, les comptes par décision, le nombre de supports optimaux, le statut et le scope.
+
+Les cas ciblés obligatoires sont le singleton, le triangle obtus, le triangle rectangle avec shell supplémentaire, le triangle aigu, un tétraèdre à support quatre, un tétraèdre réduit à une face, le carré à deux supports optimaux, six points cosphériques où un triple extérieur englobant doit être rejeté au profit d'un support positif de cardinal quatre, et dix points colinéaires. Les falsifications portent séparément sur chaque champ. Le support canonique ne rend pas la descente admissible : le test futur doit exiger séparément `boundary_point_ids==support_point_ids`, l'absence de point de $X\setminus F$ sur le shell, le top-$k$ exact et la décroissance stricte. L'oracle indépendant `reference/morsehgp3d_oracle/geometry.py::minimum_enclosing_ball` partage désormais la sémantique des supports positifs; son test à six points est obligatoire, mais le rejeu C++ frais ne remplace pas le futur raccord différentiel.
+
 ## 8. Ancrage fondamental à $k=1$
 
 À l'ordre $1$, la hiérarchie doit coïncider avec le single linkage porté par un arbre couvrant euclidien minimal. Une arête EMST $(u,v)$ de longueur carrée $\lVert u-v\rVert^2$ produit dans $L_1$ le niveau de fusion $\lVert u-v\rVert^2/4$ ; les tests vérifient explicitement ce facteur au lieu de comparer deux conventions implicites.

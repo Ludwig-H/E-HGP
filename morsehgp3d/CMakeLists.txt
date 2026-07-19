@@ -267,6 +267,7 @@ add_library(
     src/cpu/hierarchy/emst.cpp
     src/cpu/hierarchy/gabriel.cpp
     src/cpu/hierarchy/k1_forest.cpp
+    src/cpu/hierarchy/miniball.cpp
 )
 add_library(morsehgp3d::hierarchy ALIAS morsehgp3d_hierarchy)
 set_target_properties(

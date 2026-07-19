@@ -40,7 +40,7 @@ def main() -> int:
         phases = []
 
     phase_by_id: dict[str, dict[str, object]] = {}
-    in_progress = 0
+    in_progress_ids: list[str] = []
     for index, phase in enumerate(phases, start=1):
         label = f"phase entry {index}"
         if not isinstance(phase, dict):
@@ -80,7 +80,7 @@ def main() -> int:
         if status not in allowed:
             errors.append(f"{label}.status is outside conventions.allowed_status")
         if status == "in_progress":
-            in_progress += 1
+            in_progress_ids.append(phase_id)
         if status in {"ready", "in_progress", "completed"} and not phase.get(
             "entry_gate_satisfied"
         ):
@@ -93,7 +93,7 @@ def main() -> int:
         if status == "blocked" and not phase.get("blocking_reason"):
             errors.append(f"{label} is blocked without a reason")
 
-    if in_progress > 1:
+    if len(in_progress_ids) > 1:
         errors.append("at most one phase may be in_progress")
 
     known_ids = set(phase_by_id)
@@ -122,6 +122,10 @@ def main() -> int:
         current = project.get("current_phase")
         if current not in known_ids:
             errors.append("project.current_phase must reference a declared phase")
+        elif len(in_progress_ids) == 1 and current != in_progress_ids[0]:
+            errors.append(
+                "project.current_phase must equal the unique in-progress phase"
+            )
         started = project.get("implementation_started")
         if not isinstance(started, bool):
             errors.append("project.implementation_started must be a boolean")

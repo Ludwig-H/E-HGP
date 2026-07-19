@@ -536,6 +536,7 @@ def validate_sources(project: Path, repository: Path) -> None:
         "morsehgp3d_spatial_lbvh_query_dump",
         "morsehgp3d_hierarchy_emst_tests",
         "morsehgp3d_hierarchy_k1_forest_tests",
+        "morsehgp3d_hierarchy_miniball_tests",
         "morsehgp3d_hierarchy_boruvka_tests",
         "morsehgp3d_hierarchy_gabriel_tests",
         "morsehgp3d_hierarchy_k1_dump",
