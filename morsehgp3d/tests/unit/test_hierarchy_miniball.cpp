@@ -1,8 +1,10 @@
 #include "morsehgp3d/hierarchy/miniball.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <exception>
+#include <initializer_list>
 #include <iostream>
 #include <span>
 #include <stdexcept>
@@ -17,11 +19,17 @@ using morsehgp3d::exact::BigInt;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactCenter3;
 using morsehgp3d::exact::ExactLevel;
+using morsehgp3d::hierarchy::ExactFacetDescentPreconditionDecision;
+using morsehgp3d::hierarchy::ExactFacetDescentPreconditionResult;
+using morsehgp3d::hierarchy::ExactFacetDescentPreconditionScope;
+using morsehgp3d::hierarchy::ExactFacetDescentPreconditionVerification;
 using morsehgp3d::hierarchy::ExactFacetMiniballResult;
 using morsehgp3d::hierarchy::ExactFacetMiniballScope;
 using morsehgp3d::hierarchy::ExactFacetMiniballStatus;
 using morsehgp3d::hierarchy::ExactFacetMiniballVerification;
+using morsehgp3d::hierarchy::build_exact_facet_descent_preconditions;
 using morsehgp3d::hierarchy::build_exact_facet_miniball;
+using morsehgp3d::hierarchy::verify_exact_facet_descent_preconditions;
 using morsehgp3d::hierarchy::verify_exact_facet_miniball;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::PointId;
@@ -90,6 +98,30 @@ template <std::size_t Size>
          verification.local_scope_certified &&
          verification.fresh_replay_certified &&
          verification.local_exact_facet_miniball_certified;
+}
+
+[[nodiscard]] bool all_descent_precondition_certificates_close(
+    const ExactFacetDescentPreconditionVerification& verification) {
+  return verification.facet_miniball_certified &&
+         verification.global_closed_ball_identity_certified &&
+         verification.global_closed_ball_partition_certified &&
+         verification.exact_top_k_identity_certified &&
+         verification.exact_top_k_partition_certified &&
+         verification.top_k_cutoff_bound_certified &&
+         verification.local_boundary_decision_certified &&
+         verification.global_shell_decision_certified &&
+         verification.facet_top_k_membership_decision_certified &&
+         verification.counters_certified &&
+         verification.decision_certified && verification.scope_certified &&
+         verification.fresh_replay_certified &&
+         verification.exact_descent_preconditions_certified;
+}
+
+[[nodiscard]] bool matches_ids(
+    std::span<const PointId> actual,
+    std::initializer_list<PointId> expected) {
+  return actual.size() == expected.size() &&
+         std::equal(actual.begin(), actual.end(), expected.begin());
 }
 
 void test_singleton_and_default_statuses() {
@@ -353,6 +385,481 @@ void test_ten_point_bound_is_exactly_385_supports() {
       "ten-point bounded oracle closes its fresh replay");
 }
 
+void test_strict_descent_preconditions_with_equal_cutoff() {
+  const ExactFacetDescentPreconditionResult empty;
+  check(
+      empty.decision == ExactFacetDescentPreconditionDecision::not_certified &&
+          empty.scope == ExactFacetDescentPreconditionScope::unspecified &&
+          !empty.global_closed_ball.has_value() &&
+          !empty.exact_top_k.has_value(),
+      "default descent preconditions certify neither partitions nor decision");
+
+  const std::array<CertifiedPoint3, 3> input{
+      point(1.0, 0.0, 0.0),
+      point(0.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{2U, 0U};
+  const ExactFacetDescentPreconditionResult result =
+      build_exact_facet_descent_preconditions(cloud, facet);
+  const ExactFacetDescentPreconditionVerification verification =
+      verify_exact_facet_descent_preconditions(cloud, facet, result);
+
+  check(
+      result.facet_miniball.facet_point_ids ==
+              std::vector<PointId>({0U, 2U}) &&
+          result.facet_miniball.support_point_ids ==
+              std::vector<PointId>({0U, 2U}) &&
+          result.facet_miniball.boundary_point_ids ==
+              std::vector<PointId>({0U, 2U}) &&
+          result.facet_miniball.center == center(0, 0, 0) &&
+          result.facet_miniball.squared_radius == level(1) &&
+          result.facet_miniball.counters.optimal_support_count == 1U,
+      "antipodal facet has its unique exact diameter support");
+  check(
+      result.global_closed_ball.has_value() &&
+          result.exact_top_k.has_value(),
+      "strict precondition result retains both complete exact partitions");
+  if (!result.global_closed_ball.has_value() ||
+      !result.exact_top_k.has_value()) {
+    return;
+  }
+  const auto& global = *result.global_closed_ball;
+  const auto& top_k = *result.exact_top_k;
+  check(
+      global.validated_for(cloud) && global.squared_radius() == level(1) &&
+          matches_ids(global.interior_ids(), {1U}) &&
+          matches_ids(global.shell_ids(), {0U, 2U}) &&
+          global.exterior_ids().empty() && global.closed_rank() == 3U,
+      "center intruder is globally interior to the antipodal miniball");
+  check(
+      top_k.validated_for(cloud) && top_k.requested_rank() == 2U &&
+          top_k.cutoff_squared_distance() == level(1) &&
+          top_k.strict_below().size() == 1U &&
+          top_k.strict_below()[0].point_id == 1U &&
+          top_k.strict_below()[0].squared_distance == level(0) &&
+          matches_ids(top_k.cutoff_shell_ids(), {0U, 2U}) &&
+          matches_ids(top_k.canonical_choice_ids(), {0U, 1U}),
+      "top-two family keeps the intruder strict and both antipodes tied");
+  check(
+      top_k.cutoff_squared_distance() ==
+              result.facet_miniball.squared_radius &&
+          result.local_boundary_equals_support &&
+          result.global_shell_equals_local_boundary &&
+          !result.facet_is_exact_top_k_member &&
+          result.decision ==
+              ExactFacetDescentPreconditionDecision::strict_descent_admissible,
+      "facet is inactive despite cutoff equal to its miniball level");
+  check(
+      result.counters.global_closed_ball_query_count == 1U &&
+          result.counters.global_closed_ball_distance_evaluation_count == 3U &&
+          result.counters.exact_top_k_query_count == 1U &&
+          result.counters.exact_top_k_distance_evaluation_count == 3U &&
+          result.counters.total_exact_point_distance_evaluation_count == 6U &&
+          result.scope == ExactFacetDescentPreconditionScope::
+                              global_shell_and_top_k_preconditions_only &&
+          std::string_view{ExactFacetDescentPreconditionResult::proof_basis} ==
+              "exact_facet_miniball_global_closed_ball_exact_top_k_membership_v1" &&
+          all_descent_precondition_certificates_close(verification),
+      "strict precondition counters, scope and fresh replay close exactly");
+
+  const std::array<PointId, 2> diagnostic_canonical_choice{0U, 1U};
+  const ExactFacetMiniballResult diagnostic_choice_miniball =
+      build_exact_facet_miniball(cloud, diagnostic_canonical_choice);
+  check(
+      diagnostic_choice_miniball.center == center(-1, 0, 0, 2) &&
+          diagnostic_choice_miniball.squared_radius == level(1, 4) &&
+          result.facet_miniball.squared_radius == level(1),
+      "separate diagnostic canonical choice drops to one quarter without "
+      "becoming a certified successor");
+}
+
+void test_strict_descent_preconditions_below_source_level() {
+  const std::array<CertifiedPoint3, 4> input{
+      point(-2.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(2.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{3U, 0U};
+  const ExactFacetDescentPreconditionResult result =
+      build_exact_facet_descent_preconditions(cloud, facet);
+  const auto verification =
+      verify_exact_facet_descent_preconditions(cloud, facet, result);
+
+  check(
+      result.global_closed_ball.has_value() &&
+          result.exact_top_k.has_value(),
+      "strict-below-source result retains both exact partitions");
+  if (!result.global_closed_ball.has_value() ||
+      !result.exact_top_k.has_value()) {
+    return;
+  }
+  const auto& global = *result.global_closed_ball;
+  const auto& top_k = *result.exact_top_k;
+  check(
+      result.facet_miniball.center == center(0, 0, 0) &&
+          result.facet_miniball.squared_radius == level(4) &&
+          matches_ids(global.interior_ids(), {1U, 2U}) &&
+          matches_ids(global.shell_ids(), {0U, 3U}) &&
+          global.exterior_ids().empty(),
+      "two strict intruders lie inside the exact source miniball");
+  check(
+      top_k.cutoff_squared_distance() == level(1) &&
+          top_k.strict_below().empty() &&
+          matches_ids(top_k.cutoff_shell_ids(), {1U, 2U}) &&
+          matches_ids(top_k.canonical_choice_ids(), {1U, 2U}) &&
+          top_k.cutoff_squared_distance() <
+              result.facet_miniball.squared_radius,
+      "top-two cutoff is strictly below the source miniball level");
+  check(
+      result.local_boundary_equals_support &&
+          result.global_shell_equals_local_boundary &&
+          !result.facet_is_exact_top_k_member &&
+          result.decision ==
+              ExactFacetDescentPreconditionDecision::strict_descent_admissible &&
+          all_descent_precondition_certificates_close(verification),
+      "strict-lower cutoff closes the regular descent preconditions");
+}
+
+void test_external_shell_is_unsupported() {
+  const std::array<CertifiedPoint3, 4> input{
+      point(1.0, 0.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{3U, 0U};
+  const ExactFacetDescentPreconditionResult result =
+      build_exact_facet_descent_preconditions(cloud, facet);
+  const auto verification =
+      verify_exact_facet_descent_preconditions(cloud, facet, result);
+
+  check(
+      result.global_closed_ball.has_value() &&
+          result.exact_top_k.has_value(),
+      "external-shell result retains both exact partitions");
+  if (!result.global_closed_ball.has_value() ||
+      !result.exact_top_k.has_value()) {
+    return;
+  }
+  const auto& global = *result.global_closed_ball;
+  const auto& top_k = *result.exact_top_k;
+  check(
+      result.facet_miniball.support_point_ids ==
+              std::vector<PointId>({0U, 3U}) &&
+          result.facet_miniball.boundary_point_ids ==
+              std::vector<PointId>({0U, 3U}) &&
+          matches_ids(global.interior_ids(), {1U}) &&
+          matches_ids(global.shell_ids(), {0U, 2U, 3U}) &&
+          global.exterior_ids().empty(),
+      "global shell exposes the point outside the facet exactly");
+  check(
+      top_k.cutoff_squared_distance() == level(1) &&
+          top_k.strict_below().size() == 1U &&
+          top_k.strict_below()[0].point_id == 1U &&
+          matches_ids(top_k.cutoff_shell_ids(), {0U, 2U, 3U}) &&
+          matches_ids(top_k.canonical_choice_ids(), {0U, 1U}),
+      "external-shell top-two partition retains every tied point");
+  check(
+      result.local_boundary_equals_support &&
+          !result.global_shell_equals_local_boundary &&
+          !result.facet_is_exact_top_k_member &&
+          result.decision ==
+              ExactFacetDescentPreconditionDecision::unsupported_degeneracy &&
+          all_descent_precondition_certificates_close(verification),
+      "external shell fails closed before any successor is constructed");
+}
+
+void test_nonessential_internal_shell_exposes_hidden_plateau() {
+  const std::array<CertifiedPoint3, 4> input{
+      point(2.0, 0.0, 0.0),
+      point(1.0, 1.0, 0.0),
+      point(0.0, 2.0, 0.0),
+      point(0.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 3> facet{3U, 0U, 1U};
+  const ExactFacetDescentPreconditionResult result =
+      build_exact_facet_descent_preconditions(cloud, facet);
+  const auto verification =
+      verify_exact_facet_descent_preconditions(cloud, facet, result);
+
+  check(
+      result.global_closed_ball.has_value() &&
+          result.exact_top_k.has_value(),
+      "nonessential-shell result retains both exact partitions");
+  if (!result.global_closed_ball.has_value() ||
+      !result.exact_top_k.has_value()) {
+    return;
+  }
+  const auto& global = *result.global_closed_ball;
+  const auto& top_k = *result.exact_top_k;
+  check(
+      result.facet_miniball.center == center(1, 1, 0) &&
+          result.facet_miniball.squared_radius == level(2) &&
+          result.facet_miniball.support_point_ids ==
+              std::vector<PointId>({1U, 3U}) &&
+          result.facet_miniball.boundary_point_ids ==
+              std::vector<PointId>({0U, 1U, 3U}) &&
+          result.facet_miniball.counters.optimal_support_count == 1U,
+      "right triangle has one canonical support but a larger local shell");
+  check(
+      matches_ids(global.interior_ids(), {2U}) &&
+          matches_ids(global.shell_ids(), {0U, 1U, 3U}) &&
+          global.exterior_ids().empty() &&
+          top_k.cutoff_squared_distance() == level(2) &&
+          top_k.strict_below().size() == 1U &&
+          top_k.strict_below()[0].point_id == 2U &&
+          matches_ids(top_k.cutoff_shell_ids(), {0U, 1U, 3U}) &&
+          matches_ids(top_k.canonical_choice_ids(), {0U, 1U, 2U}),
+      "right-triangle intruder produces the complete tied top-three family");
+  check(
+      !result.local_boundary_equals_support &&
+          result.global_shell_equals_local_boundary &&
+          !result.facet_is_exact_top_k_member &&
+          result.decision ==
+              ExactFacetDescentPreconditionDecision::unsupported_degeneracy &&
+          all_descent_precondition_certificates_close(verification),
+      "optimal support count one is insufficient for descent essentiality");
+
+  const std::array<PointId, 3> canonical_choice{0U, 1U, 2U};
+  const std::array<PointId, 3> plateau_choice{1U, 2U, 3U};
+  const ExactFacetMiniballResult canonical_miniball =
+      build_exact_facet_miniball(cloud, canonical_choice);
+  const ExactFacetMiniballResult plateau_miniball =
+      build_exact_facet_miniball(cloud, plateau_choice);
+  check(
+      canonical_miniball.center == center(0, 1, 0) &&
+          canonical_miniball.squared_radius == level(1) &&
+          plateau_miniball.center == center(1, 1, 0) &&
+          plateau_miniball.squared_radius == level(2),
+      "canonical top-three choice drops while another exact choice preserves the plateau");
+}
+
+void test_facet_already_active_at_own_center() {
+  const std::array<CertifiedPoint3, 3> input{
+      point(3.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{1U, 0U};
+  const ExactFacetDescentPreconditionResult result =
+      build_exact_facet_descent_preconditions(cloud, facet);
+  const auto verification =
+      verify_exact_facet_descent_preconditions(cloud, facet, result);
+
+  check(
+      result.global_closed_ball.has_value() &&
+          result.exact_top_k.has_value(),
+      "active-facet result retains both exact partitions");
+  if (!result.global_closed_ball.has_value() ||
+      !result.exact_top_k.has_value()) {
+    return;
+  }
+  const auto& global = *result.global_closed_ball;
+  const auto& top_k = *result.exact_top_k;
+  check(
+      global.interior_ids().empty() &&
+          matches_ids(global.shell_ids(), {0U, 1U}) &&
+          matches_ids(global.exterior_ids(), {2U}) &&
+          top_k.strict_below().empty() &&
+          matches_ids(top_k.cutoff_shell_ids(), {0U, 1U}) &&
+          matches_ids(top_k.canonical_choice_ids(), {0U, 1U}),
+      "active antipodal facet is the unique exact top-two choice");
+  check(
+      result.local_boundary_equals_support &&
+          result.global_shell_equals_local_boundary &&
+          result.facet_is_exact_top_k_member &&
+          result.decision == ExactFacetDescentPreconditionDecision::
+                                 already_active_at_own_center &&
+          all_descent_precondition_certificates_close(verification),
+      "already-active facet terminates without a successor claim");
+}
+
+void test_top_k_family_membership_is_not_canonical_choice_equality() {
+  const std::array<CertifiedPoint3, 3> input{
+      point(1.0, 0.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(-1.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{2U, 0U};
+  const ExactFacetDescentPreconditionResult result =
+      build_exact_facet_descent_preconditions(cloud, facet);
+  const auto verification =
+      verify_exact_facet_descent_preconditions(cloud, facet, result);
+
+  check(
+      result.global_closed_ball.has_value() &&
+          result.exact_top_k.has_value(),
+      "membership discriminant retains both exact partitions");
+  if (!result.global_closed_ball.has_value() ||
+      !result.exact_top_k.has_value()) {
+    return;
+  }
+  const auto& global = *result.global_closed_ball;
+  const auto& top_k = *result.exact_top_k;
+  check(
+      global.interior_ids().empty() &&
+          matches_ids(global.shell_ids(), {0U, 1U, 2U}) &&
+          top_k.strict_below().empty() &&
+          matches_ids(top_k.cutoff_shell_ids(), {0U, 1U, 2U}) &&
+          matches_ids(top_k.canonical_choice_ids(), {0U, 1U}) &&
+          !matches_ids(top_k.canonical_choice_ids(), {0U, 2U}),
+      "canonical top-two representative differs from the antipodal facet");
+  check(
+      result.local_boundary_equals_support &&
+          !result.global_shell_equals_local_boundary &&
+          result.facet_is_exact_top_k_member &&
+          result.decision ==
+              ExactFacetDescentPreconditionDecision::unsupported_degeneracy &&
+          all_descent_precondition_certificates_close(verification),
+      "unsupported shell keeps the exact family-membership fact true");
+}
+
+void test_descent_precondition_verifier_rejects_every_result_layer() {
+  const std::array<CertifiedPoint3, 3> input{
+      point(-1.0, 0.0, 0.0),
+      point(0.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{0U, 2U};
+  const ExactFacetDescentPreconditionResult result =
+      build_exact_facet_descent_preconditions(cloud, facet);
+
+  ExactFacetDescentPreconditionResult bad_miniball = result;
+  bad_miniball.facet_miniball.squared_radius = level(2);
+  const auto miniball_check = verify_exact_facet_descent_preconditions(
+      cloud, facet, bad_miniball);
+  check(
+      !miniball_check.facet_miniball_certified &&
+          !miniball_check.fresh_replay_certified &&
+          !miniball_check.exact_descent_preconditions_certified,
+      "descent verifier rejects a falsified local miniball");
+
+  ExactFacetDescentPreconditionResult missing_global = result;
+  missing_global.global_closed_ball.reset();
+  const auto missing_global_check = verify_exact_facet_descent_preconditions(
+      cloud, facet, missing_global);
+  check(
+      !missing_global_check.global_closed_ball_identity_certified &&
+          !missing_global_check.global_closed_ball_partition_certified &&
+          !missing_global_check.exact_descent_preconditions_certified,
+      "descent verifier rejects an absent global partition");
+
+  ExactFacetDescentPreconditionResult missing_top_k = result;
+  missing_top_k.exact_top_k.reset();
+  const auto missing_top_k_check = verify_exact_facet_descent_preconditions(
+      cloud, facet, missing_top_k);
+  check(
+      !missing_top_k_check.exact_top_k_identity_certified &&
+          !missing_top_k_check.exact_top_k_partition_certified &&
+          !missing_top_k_check.exact_descent_preconditions_certified,
+      "descent verifier rejects an absent top-k partition");
+
+  const std::array<PointId, 2> other_facet{0U, 1U};
+  const ExactFacetDescentPreconditionResult other_result =
+      build_exact_facet_descent_preconditions(cloud, other_facet);
+  ExactFacetDescentPreconditionResult wrong_global_partition = result;
+  wrong_global_partition.global_closed_ball = other_result.global_closed_ball;
+  const auto wrong_global_partition_check =
+      verify_exact_facet_descent_preconditions(
+          cloud, facet, wrong_global_partition);
+  check(
+      wrong_global_partition_check.global_closed_ball_identity_certified &&
+          !wrong_global_partition_check.global_closed_ball_partition_certified &&
+          !wrong_global_partition_check.exact_descent_preconditions_certified,
+      "descent verifier separates global identity from partition contents");
+
+  ExactFacetDescentPreconditionResult wrong_top_k_partition = result;
+  wrong_top_k_partition.exact_top_k = other_result.exact_top_k;
+  const auto wrong_top_k_partition_check =
+      verify_exact_facet_descent_preconditions(
+          cloud, facet, wrong_top_k_partition);
+  check(
+      wrong_top_k_partition_check.exact_top_k_identity_certified &&
+          !wrong_top_k_partition_check.exact_top_k_partition_certified &&
+          !wrong_top_k_partition_check.exact_descent_preconditions_certified,
+      "descent verifier separates top-k identity from partition contents");
+
+  const CanonicalPointCloud twin_cloud = canonical_cloud(input);
+  const ExactFacetDescentPreconditionResult twin_result =
+      build_exact_facet_descent_preconditions(twin_cloud, facet);
+  ExactFacetDescentPreconditionResult wrong_global_identity = result;
+  wrong_global_identity.global_closed_ball = twin_result.global_closed_ball;
+  const auto wrong_global_identity_check =
+      verify_exact_facet_descent_preconditions(
+          cloud, facet, wrong_global_identity);
+  check(
+      !wrong_global_identity_check.global_closed_ball_identity_certified &&
+          !wrong_global_identity_check.exact_descent_preconditions_certified,
+      "descent verifier rejects a closed ball from another cloud identity");
+
+  ExactFacetDescentPreconditionResult wrong_top_k_identity = result;
+  wrong_top_k_identity.exact_top_k = twin_result.exact_top_k;
+  const auto wrong_top_k_identity_check =
+      verify_exact_facet_descent_preconditions(
+          cloud, facet, wrong_top_k_identity);
+  check(
+      !wrong_top_k_identity_check.exact_top_k_identity_certified &&
+          !wrong_top_k_identity_check.exact_descent_preconditions_certified,
+      "descent verifier rejects a top-k partition from another cloud identity");
+
+  ExactFacetDescentPreconditionResult bad_local_boundary = result;
+  bad_local_boundary.local_boundary_equals_support = false;
+  const auto local_boundary_check = verify_exact_facet_descent_preconditions(
+      cloud, facet, bad_local_boundary);
+  check(
+      !local_boundary_check.local_boundary_decision_certified &&
+          !local_boundary_check.exact_descent_preconditions_certified,
+      "descent verifier rejects a falsified local-boundary decision");
+
+  ExactFacetDescentPreconditionResult bad_global_shell = result;
+  bad_global_shell.global_shell_equals_local_boundary = false;
+  const auto global_shell_check = verify_exact_facet_descent_preconditions(
+      cloud, facet, bad_global_shell);
+  check(
+      !global_shell_check.global_shell_decision_certified &&
+          !global_shell_check.exact_descent_preconditions_certified,
+      "descent verifier rejects a falsified global-shell decision");
+
+  ExactFacetDescentPreconditionResult bad_membership = result;
+  bad_membership.facet_is_exact_top_k_member = true;
+  const auto membership_check = verify_exact_facet_descent_preconditions(
+      cloud, facet, bad_membership);
+  check(
+      !membership_check.facet_top_k_membership_decision_certified &&
+          !membership_check.exact_descent_preconditions_certified,
+      "descent verifier rejects a falsified exact-family membership decision");
+
+  ExactFacetDescentPreconditionResult bad_counters = result;
+  ++bad_counters.counters.total_exact_point_distance_evaluation_count;
+  const auto counter_check = verify_exact_facet_descent_preconditions(
+      cloud, facet, bad_counters);
+  check(
+      !counter_check.counters_certified &&
+          !counter_check.exact_descent_preconditions_certified,
+      "descent verifier rejects falsified aggregate counters");
+
+  ExactFacetDescentPreconditionResult bad_decision = result;
+  bad_decision.decision =
+      ExactFacetDescentPreconditionDecision::already_active_at_own_center;
+  const auto decision_check = verify_exact_facet_descent_preconditions(
+      cloud, facet, bad_decision);
+  check(
+      !decision_check.decision_certified &&
+          !decision_check.exact_descent_preconditions_certified,
+      "descent verifier treats the precondition decision as untrusted");
+
+  ExactFacetDescentPreconditionResult bad_scope = result;
+  bad_scope.scope = ExactFacetDescentPreconditionScope::unspecified;
+  const auto scope_check = verify_exact_facet_descent_preconditions(
+      cloud, facet, bad_scope);
+  check(
+      !scope_check.scope_certified &&
+          !scope_check.exact_descent_preconditions_certified,
+      "descent verifier treats the precondition scope as untrusted");
+}
+
 void test_verifier_rejects_every_result_layer() {
   const std::array<CertifiedPoint3, 4> input{
       point(-1.0, -1.0),
@@ -488,6 +995,13 @@ int main() {
   test_square_exposes_multiple_optimal_supports();
   test_smaller_exterior_circumsupport_is_rejected();
   test_ten_point_bound_is_exactly_385_supports();
+  test_strict_descent_preconditions_with_equal_cutoff();
+  test_strict_descent_preconditions_below_source_level();
+  test_external_shell_is_unsupported();
+  test_nonessential_internal_shell_exposes_hidden_plateau();
+  test_facet_already_active_at_own_center();
+  test_top_k_family_membership_is_not_canonical_choice_equality();
+  test_descent_precondition_verifier_rejects_every_result_layer();
   test_verifier_rejects_every_result_layer();
   test_invalid_facets_are_rejected();
 

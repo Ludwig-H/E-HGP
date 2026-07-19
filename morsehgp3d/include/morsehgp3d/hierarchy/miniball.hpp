@@ -2,10 +2,12 @@
 
 #include "morsehgp3d/exact/center.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
+#include "morsehgp3d/spatial/query.hpp"
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <span>
 #include <vector>
 
@@ -79,6 +81,67 @@ struct ExactFacetMiniballVerification {
   bool local_exact_facet_miniball_certified{false};
 };
 
+enum class ExactFacetDescentPreconditionDecision : std::uint8_t {
+  not_certified,
+  strict_descent_admissible,
+  already_active_at_own_center,
+  unsupported_degeneracy,
+};
+
+enum class ExactFacetDescentPreconditionScope : std::uint8_t {
+  unspecified,
+  global_shell_and_top_k_preconditions_only,
+};
+
+struct ExactFacetDescentPreconditionCounters {
+  std::size_t global_closed_ball_query_count{};
+  std::size_t global_closed_ball_distance_evaluation_count{};
+  std::size_t exact_top_k_query_count{};
+  std::size_t exact_top_k_distance_evaluation_count{};
+  std::size_t total_exact_point_distance_evaluation_count{};
+
+  friend bool operator==(
+      const ExactFacetDescentPreconditionCounters&,
+      const ExactFacetDescentPreconditionCounters&) = default;
+};
+
+// This bounded reference result classifies only the exact preconditions for
+// one facet. It neither constructs a successor nor certifies a descent arc,
+// an attachment, a hierarchy reduction, or any public status.
+struct ExactFacetDescentPreconditionResult {
+  static constexpr const char* proof_basis =
+      "exact_facet_miniball_global_closed_ball_exact_top_k_membership_v1";
+
+  ExactFacetMiniballResult facet_miniball;
+  std::optional<spatial::ClosedBallPartition> global_closed_ball;
+  std::optional<spatial::TopKPartition> exact_top_k;
+  bool local_boundary_equals_support{false};
+  bool global_shell_equals_local_boundary{false};
+  bool facet_is_exact_top_k_member{false};
+  ExactFacetDescentPreconditionCounters counters{};
+  ExactFacetDescentPreconditionDecision decision{
+      ExactFacetDescentPreconditionDecision::not_certified};
+  ExactFacetDescentPreconditionScope scope{
+      ExactFacetDescentPreconditionScope::unspecified};
+};
+
+struct ExactFacetDescentPreconditionVerification {
+  bool facet_miniball_certified{false};
+  bool global_closed_ball_identity_certified{false};
+  bool global_closed_ball_partition_certified{false};
+  bool exact_top_k_identity_certified{false};
+  bool exact_top_k_partition_certified{false};
+  bool top_k_cutoff_bound_certified{false};
+  bool local_boundary_decision_certified{false};
+  bool global_shell_decision_certified{false};
+  bool facet_top_k_membership_decision_certified{false};
+  bool counters_certified{false};
+  bool decision_certified{false};
+  bool scope_certified{false};
+  bool fresh_replay_certified{false};
+  bool exact_descent_preconditions_certified{false};
+};
+
 // Enumerates every subset of one to four facet points. For a ten-point facet,
 // this is exactly 385 supports. Every relatively interior circumcenter is
 // classified against every facet point with exact rationals before the least
@@ -94,5 +157,21 @@ struct ExactFacetMiniballVerification {
     const spatial::CanonicalPointCloud& cloud,
     std::span<const spatial::PointId> facet_point_ids,
     const ExactFacetMiniballResult& result);
+
+// Reuses the exact local miniball, then classifies its complete global closed
+// ball and the exact rank-|F| partition at its center. The top-k query is over
+// the whole cloud with an explicitly empty exclusion set.
+[[nodiscard]] ExactFacetDescentPreconditionResult
+build_exact_facet_descent_preconditions(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> facet_point_ids);
+
+// Recomputes the local miniball and both complete spatial partitions from the
+// input cloud and facet without trusting any field of the observed result.
+[[nodiscard]] ExactFacetDescentPreconditionVerification
+verify_exact_facet_descent_preconditions(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> facet_point_ids,
+    const ExactFacetDescentPreconditionResult& result);
 
 }  // namespace morsehgp3d::hierarchy
