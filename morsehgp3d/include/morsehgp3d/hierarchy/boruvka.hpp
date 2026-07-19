@@ -4,6 +4,7 @@
 #include "morsehgp3d/spatial/lbvh.hpp"
 
 #include <cstddef>
+#include <span>
 #include <vector>
 
 namespace morsehgp3d::hierarchy {
@@ -36,6 +37,30 @@ struct K1BoruvkaRound {
   friend bool operator==(const K1BoruvkaRound&, const K1BoruvkaRound&) =
       default;
 };
+
+// Pure CPU combinatorial reduction of one already-certified exact Boruvka
+// decision. The input labels are the least PointId of every frozen component;
+// component_minima keeps one witness per component. Only accepted_edges is
+// deduplicated. The post-round labels again use the least PointId.
+struct K1BoruvkaRoundContraction {
+  std::size_t pre_round_component_count{};
+  std::vector<ExactEmstEdge> accepted_edges;
+  std::vector<spatial::PointId> post_round_component_labels;
+  std::size_t post_round_component_count{};
+
+  friend bool operator==(
+      const K1BoruvkaRoundContraction&,
+      const K1BoruvkaRoundContraction&) = default;
+};
+
+// Validates the canonical frozen partition, recomputes the exact geometry of
+// every already-certified minimum, sorts/deduplicates by
+// (squared_length, u, v), rejects cycles, enforces the Boruvka halving bound
+// and returns canonical labels. This reducer does not decide kappa-minimality.
+[[nodiscard]] K1BoruvkaRoundContraction contract_exact_k1_boruvka_round(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> frozen_component_labels,
+    std::span<const K1BoruvkaComponentMinimum> component_minima);
 
 struct K1ExactBoruvkaCounters {
   std::size_t point_count{};

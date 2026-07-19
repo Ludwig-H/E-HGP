@@ -127,6 +127,7 @@ add_executable(
   test_gpu_k1_boruvka_context.cpp
   fake_gpu_k1_boruvka_launchers.cpp
   "${PROJECT_SOURCE_DIR}/src/gpu/k1_boruvka.cpp"
+  "${PROJECT_SOURCE_DIR}/src/gpu/k1_boruvka_hybrid.cpp"
 )
 add_executable(
   morsehgp3d_gpu_k1_boruvka_replay_host

@@ -1,6 +1,7 @@
 #include "fake_gpu_k1_boruvka_launchers.hpp"
 
 #include "morsehgp3d/gpu/k1_boruvka.hpp"
+#include "morsehgp3d/hierarchy/k1_forest.hpp"
 
 #include <algorithm>
 #include <array>
@@ -23,6 +24,13 @@ using morsehgp3d::exact::ExactLevel;
 using morsehgp3d::gpu::K1BoruvkaCandidate;
 using morsehgp3d::gpu::K1BoruvkaCandidateContext;
 using morsehgp3d::gpu::K1BoruvkaRoundProposal;
+using morsehgp3d::gpu::K1HybridBoruvkaResult;
+using morsehgp3d::gpu::K1HybridBoruvkaVerification;
+using morsehgp3d::gpu::K1HybridBoruvkaContractionStatus;
+using morsehgp3d::gpu::K1HybridBoruvkaDecisionStatus;
+using morsehgp3d::gpu::K1HybridHierarchyReductionStatus;
+using morsehgp3d::gpu::K1HybridScientificStatus;
+using morsehgp3d::gpu::build_gpu_proposed_cpu_exact_k1_boruvka;
 using morsehgp3d::gpu::test_support::FakeK1BoruvkaConfiguration;
 using morsehgp3d::gpu::test_support::FakeK1BoruvkaCorruption;
 using morsehgp3d::gpu::test_support::configure_fake_gpu_k1_boruvka;
@@ -30,8 +38,11 @@ using morsehgp3d::gpu::test_support::fake_gpu_k1_boruvka_last_node_count;
 using morsehgp3d::gpu::test_support::fake_gpu_k1_boruvka_last_point_count;
 using morsehgp3d::gpu::test_support::fake_gpu_k1_boruvka_launch_count;
 using morsehgp3d::gpu::test_support::reset_fake_gpu_k1_boruvka;
+using morsehgp3d::gpu::verify_gpu_proposed_cpu_exact_k1_boruvka;
 using morsehgp3d::hierarchy::K1BoruvkaComponentMinimum;
+using morsehgp3d::hierarchy::K1CompactForest;
 using morsehgp3d::hierarchy::K1ExactBoruvkaResult;
+using morsehgp3d::hierarchy::build_compact_k1_forest;
 using morsehgp3d::hierarchy::build_exact_lbvh_boruvka;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
@@ -101,6 +112,21 @@ template <std::size_t Size>
   std::sort(distinct.begin(), distinct.end());
   distinct.erase(std::unique(distinct.begin(), distinct.end()), distinct.end());
   return distinct.size();
+}
+
+[[nodiscard]] bool same_compact_forest(
+    const K1CompactForest& left,
+    const K1CompactForest& right) {
+  return left.point_count == right.point_count &&
+         left.levels == right.levels &&
+         left.selected_edges == right.selected_edges &&
+         left.merge_nodes == right.merge_nodes &&
+         left.child_ids == right.child_ids &&
+         left.equal_level_batches == right.equal_level_batches &&
+         left.root_node_id == right.root_node_id &&
+         left.total_squared_weight == right.total_squared_weight &&
+         left.total_hgp_weight == right.total_hgp_weight &&
+         left.counters == right.counters;
 }
 
 [[nodiscard]] std::span<const K1BoruvkaCandidate> candidate_segment(
@@ -248,6 +274,178 @@ void test_terminal_singleton_without_gpu_launch() {
   check(
       fake_gpu_k1_boruvka_launch_count() == 0U,
       "terminal singleton never invokes the fake launcher");
+}
+
+void test_hybrid_terminal_singleton_without_gpu_launch() {
+  reset_fake_gpu_k1_boruvka();
+  const std::array<CertifiedPoint3, 1> input{point(2.0, -1.0, 4.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+
+  const K1HybridBoruvkaResult result =
+      build_gpu_proposed_cpu_exact_k1_boruvka(index, cloud);
+  check(
+      result.point_count == 1U && result.rounds.empty() &&
+          result.emst_edges.empty() &&
+          result.total_squared_weight == ExactLevel{} &&
+          result.total_hgp_weight == ExactLevel{},
+      "hybrid singleton publishes the empty exact EMST witness");
+  check(
+      result.counters.point_count == 1U &&
+          result.counters.lbvh_node_count == 1U &&
+          result.counters.round_count == 0U &&
+          result.counters.theoretical_max_round_count == 0U &&
+          result.counters.gpu_kernel_launch_count == 0U &&
+          result.counters.gpu_synchronization_count == 0U &&
+          result.counters.first_buffer_epoch == 0U &&
+          result.counters.last_buffer_epoch == 0U &&
+          result.counters.final_component_count == 1U,
+      "hybrid singleton closes its vacuous counters without a buffer epoch");
+  check(
+      result.hierarchy_reduction_status ==
+              K1HybridHierarchyReductionStatus::not_performed &&
+          result.scientific_status ==
+              K1HybridScientificStatus::local_emst_witness_only &&
+          result.proposal_chain_certified &&
+          result.cpu_exact_decision_chain_certified &&
+          result.canonical_contraction_chain_certified &&
+          result.reference_cpu_witness_certified &&
+          result.emst_witness_certified,
+      "hybrid singleton certifies only its local witness and keeps hierarchy reduction separate");
+  check(
+      fake_gpu_k1_boruvka_launch_count() == 0U,
+      "hybrid singleton never invokes the fake launcher");
+}
+
+void test_hybrid_three_round_chain_and_falsification() {
+  reset_fake_gpu_k1_boruvka();
+  const std::array<CertifiedPoint3, 8> input{
+      point(0.0),
+      point(1.0),
+      point(10.0),
+      point(12.0),
+      point(100.0),
+      point(104.0),
+      point(120.0),
+      point(125.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const K1ExactBoruvkaResult cpu_anchor =
+      build_exact_lbvh_boruvka(index, cloud);
+
+  const K1HybridBoruvkaResult result =
+      build_gpu_proposed_cpu_exact_k1_boruvka(index, cloud);
+  check(
+      result.rounds.size() == 3U && cpu_anchor.rounds.size() == 3U,
+      "hybrid separated chain closes in three Boruvka rounds");
+  const std::array<std::size_t, 3> expected_pre{8U, 4U, 2U};
+  const std::array<std::size_t, 3> expected_post{4U, 2U, 1U};
+  const std::size_t comparable_round_count = std::min(
+      {result.rounds.size(), cpu_anchor.rounds.size(), expected_pre.size()});
+  for (std::size_t round_index = 0U;
+       round_index < comparable_round_count;
+       ++round_index) {
+    const auto& hybrid_round = result.rounds[round_index];
+    const auto& cpu_round = cpu_anchor.rounds[round_index];
+    check(
+        hybrid_round.exact_decision.round_index == cpu_round.round_index &&
+            hybrid_round.exact_decision.frozen_component_count ==
+                expected_pre[round_index] &&
+            hybrid_round.exact_decision.component_minima ==
+                cpu_round.component_minima &&
+            hybrid_round.canonical_contraction.accepted_edges ==
+                cpu_round.accepted_edges &&
+            hybrid_round.canonical_contraction
+                    .post_round_component_count == expected_post[round_index],
+        "hybrid separated chain matches the CPU exact decision and 8-to-4-to-2-to-1 contraction");
+    check(
+        hybrid_round.proposal_audit.buffer_epoch == round_index + 1U,
+        "hybrid separated chain advances one resident buffer epoch per round");
+  }
+  check(
+      result.emst_edges == cpu_anchor.emst_edges &&
+          result.total_squared_weight == cpu_anchor.total_squared_weight &&
+          result.total_hgp_weight == cpu_anchor.total_hgp_weight,
+      "hybrid separated chain publishes the exact CPU witness and weights");
+  check(
+      result.counters.round_count == 3U &&
+          result.counters.accepted_edge_count == 7U &&
+          result.counters.component_contraction_count == 7U &&
+          result.counters.gpu_kernel_launch_count == 6U &&
+          result.counters.gpu_synchronization_count == 6U &&
+          result.counters.first_buffer_epoch == 1U &&
+          result.counters.last_buffer_epoch == 3U &&
+          result.counters.final_component_count == 1U,
+      "hybrid separated chain closes its producer-only counters");
+  check(
+      fake_gpu_k1_boruvka_launch_count() == 6U,
+      "hybrid separated chain executes three producer and three verifier proposal transactions");
+
+  const K1CompactForest hybrid_forest = build_compact_k1_forest(
+      result.point_count,
+      std::span<const morsehgp3d::hierarchy::ExactEmstEdge>{
+          result.emst_edges});
+  const K1CompactForest cpu_forest = build_compact_k1_forest(
+      cpu_anchor.point_count,
+      std::span<const morsehgp3d::hierarchy::ExactEmstEdge>{
+          cpu_anchor.emst_edges});
+  check(
+      same_compact_forest(hybrid_forest, cpu_forest),
+      "hybrid separated chain induces the same canonical compact forest as the CPU witness");
+
+  const K1HybridBoruvkaVerification verification =
+      verify_gpu_proposed_cpu_exact_k1_boruvka(index, cloud, result);
+  check(
+      verification.proposal_chain_certified &&
+          verification.cpu_exact_decision_chain_certified &&
+          verification.canonical_contractions_certified &&
+          verification.round_count_bound_certified &&
+          verification.spanning_tree_certified &&
+          verification.exact_weights_certified &&
+          verification.reference_cpu_witness_certified &&
+          verification.counters_certified &&
+          verification.hierarchy_status_separation_certified &&
+          verification.emst_witness_certified &&
+          verification.reference_round_count == 3U &&
+          verification.gpu_replayed_round_count == 3U &&
+          verification.gpu_replay_kernel_launch_count == 6U &&
+          verification.gpu_replay_synchronization_count == 6U,
+      "hybrid separated chain passes the independent complete verifier");
+
+  K1HybridBoruvkaResult falsified = result;
+  falsified.rounds.at(1U).proposal_audit.no_truncation_certified = false;
+  const K1HybridBoruvkaVerification rejected =
+      verify_gpu_proposed_cpu_exact_k1_boruvka(index, cloud, falsified);
+  check(
+      !rejected.proposal_chain_certified &&
+          rejected.cpu_exact_decision_chain_certified &&
+          rejected.canonical_contractions_certified &&
+          !rejected.emst_witness_certified,
+      "hybrid verifier rejects a falsified proposal certificate without conflating exact CPU decisions");
+
+  falsified = result;
+  falsified.rounds.at(1U).decision_status =
+      K1HybridBoruvkaDecisionStatus::not_certified;
+  const K1HybridBoruvkaVerification rejected_decision =
+      verify_gpu_proposed_cpu_exact_k1_boruvka(index, cloud, falsified);
+  check(
+      rejected_decision.proposal_chain_certified &&
+          !rejected_decision.cpu_exact_decision_chain_certified &&
+          rejected_decision.canonical_contractions_certified &&
+          !rejected_decision.emst_witness_certified,
+      "hybrid verifier isolates a falsified exact-decision status");
+
+  falsified = result;
+  falsified.rounds.at(1U).contraction_status =
+      K1HybridBoruvkaContractionStatus::not_certified;
+  const K1HybridBoruvkaVerification rejected_contraction =
+      verify_gpu_proposed_cpu_exact_k1_boruvka(index, cloud, falsified);
+  check(
+      rejected_contraction.proposal_chain_certified &&
+          rejected_contraction.cpu_exact_decision_chain_certified &&
+          !rejected_contraction.canonical_contractions_certified &&
+          !rejected_contraction.emst_witness_certified,
+      "hybrid verifier isolates a falsified canonical-contraction status");
 }
 
 void test_square_ties_candidate_superset_and_threshold_equality() {
@@ -525,6 +723,8 @@ void test_corrupt_batches_and_gpu_failure_poison_context() {
 
 int main() {
   test_terminal_singleton_without_gpu_launch();
+  test_hybrid_terminal_singleton_without_gpu_launch();
+  test_hybrid_three_round_chain_and_falsification();
   test_square_ties_candidate_superset_and_threshold_equality();
   test_already_contracted_two_component_partition();
   test_invalid_namespaces_labels_and_moved_from_objects();

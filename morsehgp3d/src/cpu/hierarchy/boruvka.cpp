@@ -414,21 +414,21 @@ void validate_snapshot(
   result.counters.lbvh_node_count = snapshot.nodes.size();
   result.counters.theoretical_max_round_count =
       theoretical_maximum_round_count(point_count);
-  CanonicalDisjointSet components{point_count};
+  std::vector<spatial::PointId> component_labels(point_count);
+  for (std::size_t point_index = 0U;
+       point_index < point_count;
+       ++point_index) {
+    component_labels[point_index] = checked_point_id(point_index);
+  }
+  std::size_t component_count = point_count;
 
-  while (components.component_count() > 1U) {
+  while (component_count > 1U) {
     const std::size_t round_index = result.rounds.size();
     if (round_index >= result.counters.theoretical_max_round_count) {
       throw std::logic_error("exact Boruvka exceeded ceil(log2(n)) rounds");
     }
-    const std::size_t pre_component_count = components.component_count();
-    std::vector<spatial::PointId> frozen_labels(point_count);
-    for (std::size_t point_index = 0U;
-         point_index < point_count;
-         ++point_index) {
-      frozen_labels[point_index] =
-          checked_point_id(components.find(point_index));
-    }
+    const std::size_t pre_component_count = component_count;
+    const std::vector<spatial::PointId> frozen_labels = component_labels;
     result.counters.frozen_component_label_count += point_count;
 
     std::size_t uniform_node_count = 0U;
@@ -503,7 +503,6 @@ void validate_snapshot(
           checked_point_id(point_index),
           candidate.source_point_id,
           candidate.edge});
-      round.accepted_edges.push_back(candidate.edge);
     }
     if (round.component_minima.size() != pre_component_count) {
       throw std::logic_error(
@@ -512,37 +511,23 @@ void validate_snapshot(
     result.counters.component_minimum_count +=
         round.component_minima.size();
 
-    std::sort(
+    K1BoruvkaRoundContraction contraction =
+        contract_exact_k1_boruvka_round(
+            cloud, frozen_labels, round.component_minima);
+    round.accepted_edges = std::move(contraction.accepted_edges);
+    result.emst_edges.insert(
+        result.emst_edges.end(),
         round.accepted_edges.begin(),
-        round.accepted_edges.end(),
-        edge_less);
-    round.accepted_edges.erase(
-        std::unique(
-            round.accepted_edges.begin(), round.accepted_edges.end()),
         round.accepted_edges.end());
-    for (const ExactEmstEdge& edge : round.accepted_edges) {
-      const std::size_t u = checked_point_index(edge.u, point_count);
-      const std::size_t v = checked_point_index(edge.v, point_count);
-      if (frozen_labels[u] == frozen_labels[v] ||
-          !components.unite(u, v)) {
-        throw std::logic_error(
-            "canonical Boruvka minima formed a cycle in one round");
-      }
-      result.emst_edges.push_back(edge);
-    }
-    const std::size_t post_component_count = components.component_count();
-    if (post_component_count == 0U ||
-        post_component_count >= pre_component_count ||
-        post_component_count > pre_component_count / 2U ||
-        round.accepted_edges.size() !=
-            pre_component_count - post_component_count) {
-      throw std::logic_error(
-          "a Boruvka round violated its contraction bound");
-    }
+    const std::size_t post_component_count =
+        contraction.post_round_component_count;
     round.post_round_component_count = post_component_count;
     result.counters.accepted_edge_count += round.accepted_edges.size();
     result.counters.component_contraction_count +=
         pre_component_count - post_component_count;
+    component_labels = std::move(
+        contraction.post_round_component_labels);
+    component_count = post_component_count;
     result.rounds.push_back(std::move(round));
   }
 
@@ -564,7 +549,7 @@ void validate_snapshot(
       exact::ExactLevel{std::move(total_squared_weight)};
   result.total_hgp_weight = exact::ExactLevel{std::move(total_hgp_weight)};
   result.counters.round_count = result.rounds.size();
-  result.counters.final_component_count = components.component_count();
+  result.counters.final_component_count = component_count;
   if (result.counters.final_component_count != 1U ||
       result.counters.round_count >
           result.counters.theoretical_max_round_count ||
@@ -776,6 +761,134 @@ void validate_snapshot(
 }
 
 }  // namespace
+
+K1BoruvkaRoundContraction contract_exact_k1_boruvka_round(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> frozen_component_labels,
+    std::span<const K1BoruvkaComponentMinimum> component_minima) {
+  const std::size_t point_count = cloud.size();
+  if (point_count == 0U ||
+      frozen_component_labels.size() != point_count) {
+    throw std::invalid_argument(
+        "exact Boruvka contraction needs one frozen label per point");
+  }
+
+  std::vector<spatial::PointId> canonical_component_labels;
+  canonical_component_labels.reserve(point_count);
+  for (std::size_t point_index = 0U;
+       point_index < point_count;
+       ++point_index) {
+    const spatial::PointId label = frozen_component_labels[point_index];
+    if (!std::in_range<std::size_t>(label)) {
+      throw std::invalid_argument(
+          "a frozen Boruvka component label does not fit size_t");
+    }
+    const std::size_t label_index = static_cast<std::size_t>(label);
+    if (label_index > point_index || label_index >= point_count ||
+        frozen_component_labels[label_index] != label) {
+      throw std::invalid_argument(
+          "a frozen Boruvka component label is not its least PointId");
+    }
+    if (label_index == point_index) {
+      canonical_component_labels.push_back(label);
+    }
+  }
+  const std::size_t pre_component_count =
+      canonical_component_labels.size();
+  if (pre_component_count <= 1U ||
+      component_minima.size() != pre_component_count) {
+    throw std::invalid_argument(
+        "exact Boruvka contraction needs one minimum per nonterminal component");
+  }
+
+  CanonicalDisjointSet components{point_count};
+  for (std::size_t point_index = 0U;
+       point_index < point_count;
+       ++point_index) {
+    const std::size_t label_index = static_cast<std::size_t>(
+        frozen_component_labels[point_index]);
+    if (label_index != point_index &&
+        !components.unite(label_index, point_index)) {
+      throw std::logic_error(
+          "a frozen Boruvka partition could not be reconstructed");
+    }
+  }
+  if (components.component_count() != pre_component_count) {
+    throw std::logic_error(
+        "a frozen Boruvka partition has inconsistent component labels");
+  }
+
+  K1BoruvkaRoundContraction contraction;
+  contraction.pre_round_component_count = pre_component_count;
+  contraction.accepted_edges.reserve(component_minima.size());
+  for (std::size_t minimum_index = 0U;
+       minimum_index < component_minima.size();
+       ++minimum_index) {
+    const K1BoruvkaComponentMinimum& minimum =
+        component_minima[minimum_index];
+    if (minimum.component_label !=
+        canonical_component_labels[minimum_index]) {
+      throw std::invalid_argument(
+          "Boruvka component minima are not ordered by canonical label");
+    }
+    const ExactEmstEdge& edge = minimum.outgoing_edge;
+    if (edge.u >= edge.v ||
+        (minimum.source_point_id != edge.u &&
+         minimum.source_point_id != edge.v)) {
+      throw std::invalid_argument(
+          "a Boruvka component minimum has an invalid source or orientation");
+    }
+    const std::size_t source = checked_point_index(
+        minimum.source_point_id, point_count);
+    const std::size_t u = checked_point_index(edge.u, point_count);
+    const std::size_t v = checked_point_index(edge.v, point_count);
+    if (frozen_component_labels[source] != minimum.component_label ||
+        frozen_component_labels[u] == frozen_component_labels[v] ||
+        edge != exact_edge(cloud, edge.u, edge.v)) {
+      throw std::invalid_argument(
+          "a Boruvka component minimum violates frozen exact geometry");
+    }
+    contraction.accepted_edges.push_back(edge);
+  }
+
+  std::sort(
+      contraction.accepted_edges.begin(),
+      contraction.accepted_edges.end(),
+      edge_less);
+  contraction.accepted_edges.erase(
+      std::unique(
+          contraction.accepted_edges.begin(),
+          contraction.accepted_edges.end()),
+      contraction.accepted_edges.end());
+  for (const ExactEmstEdge& edge : contraction.accepted_edges) {
+    const std::size_t u = checked_point_index(edge.u, point_count);
+    const std::size_t v = checked_point_index(edge.v, point_count);
+    if (frozen_component_labels[u] == frozen_component_labels[v] ||
+        !components.unite(u, v)) {
+      throw std::logic_error(
+          "certified Boruvka minima formed a cycle in one frozen round");
+    }
+  }
+
+  contraction.post_round_component_count = components.component_count();
+  if (contraction.post_round_component_count == 0U ||
+      contraction.post_round_component_count >= pre_component_count ||
+      contraction.post_round_component_count > pre_component_count / 2U ||
+      contraction.accepted_edges.size() !=
+          pre_component_count - contraction.post_round_component_count) {
+    throw std::logic_error(
+        "a certified Boruvka round violated its contraction bound");
+  }
+
+  contraction.post_round_component_labels.resize(point_count);
+  for (std::size_t point_index = 0U;
+       point_index < point_count;
+       ++point_index) {
+    contraction.post_round_component_labels[point_index] =
+        checked_point_id(components.find(point_index));
+  }
+  return contraction;
+}
 
 K1ExactBoruvkaResult build_exact_lbvh_boruvka(
     const spatial::MortonLbvhIndex& index,
