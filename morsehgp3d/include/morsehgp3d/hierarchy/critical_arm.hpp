@@ -221,6 +221,103 @@ struct ExactCriticalArmDescentVerification {
   bool exact_critical_arm_descent_decision_certified{false};
 };
 
+// Closing a family means enumerating every u in the complete critical shell
+// and replaying one independent 6.6 descent for F_u. Equal terminal facet
+// labels are grouped exactly, with the removed-point provenance retained.
+// Distinct labels are deliberately not claimed to lie in distinct Gamma
+// components: that requires a separate strict pre-event Gamma closure.
+enum class ExactCriticalArmFamilyDecision : std::uint8_t {
+  not_certified,
+  no_family_unsupported_critical_source,
+  all_arms_complete_at_regular_active_facets,
+  incomplete_unsupported_degeneracy,
+  incomplete_chain_budget_exhausted,
+  incomplete_mixed_stops,
+};
+
+enum class ExactCriticalArmFamilyScope : std::uint8_t {
+  unspecified,
+  all_index_one_critical_arms_independent_canonical_strict_chains_terminal_labels_only,
+};
+
+struct ExactCriticalArmFamilyArmResult {
+  spatial::PointId removed_shell_point_id{};
+  ExactCriticalArmDescentResult descent;
+  std::optional<ExactFacetDescentChainNodeWitness> active_terminal;
+  std::optional<std::size_t> terminal_label_class_index;
+};
+
+struct ExactCriticalArmTerminalLabelClass {
+  ExactFacetDescentChainNodeWitness canonical_terminal;
+  std::vector<spatial::PointId> removed_shell_point_ids;
+
+  friend bool operator==(
+      const ExactCriticalArmTerminalLabelClass&,
+      const ExactCriticalArmTerminalLabelClass&) = default;
+};
+
+struct ExactCriticalArmFamilyCounters {
+  std::size_t requested_arm_count{};
+  std::size_t arm_descent_build_count{};
+  std::size_t shared_source_replay_comparison_count{};
+  std::size_t complete_active_arm_count{};
+  std::size_t unsupported_source_arm_count{};
+  std::size_t unsupported_chain_arm_count{};
+  std::size_t budget_exhausted_arm_count{};
+  std::size_t terminal_label_pair_comparison_count{};
+  std::size_t distinct_terminal_label_count{};
+  std::size_t committed_chain_strict_segment_count{};
+  std::size_t committed_composite_path_segment_count{};
+
+  friend bool operator==(
+      const ExactCriticalArmFamilyCounters&,
+      const ExactCriticalArmFamilyCounters&) = default;
+};
+
+// Terminal classes may describe a certified partial observation when one or
+// more arms stop early. They form the complete terminal-label partition only
+// when complete_terminal_label_partition_certified is true. Even then they
+// are identity classes of active terminal facets, never roots, attachments,
+// or connected components of the strict Gamma cut.
+struct ExactCriticalArmFamilyResult {
+  static constexpr const char* proof_basis =
+      "exact_all_index_one_critical_arms_independent_strict_chains_"
+      "terminal_facet_label_identity_partition_v1";
+
+  ExactFacetDescentChainBudget requested_per_arm_chain_budget{};
+  std::vector<spatial::PointId> critical_shell_point_ids;
+  std::vector<ExactCriticalArmFamilyArmResult> arms;
+  std::vector<ExactCriticalArmTerminalLabelClass>
+      terminal_label_classes;
+  bool every_shell_point_enumerated_once{false};
+  bool shared_critical_source_replay_certified{false};
+  bool all_supported_composite_paths_strict_below_critical_level{false};
+  bool terminal_labels_canonical{false};
+  bool complete_terminal_label_partition_certified{false};
+  ExactCriticalArmFamilyCounters counters{};
+  ExactCriticalArmFamilyDecision decision{
+      ExactCriticalArmFamilyDecision::not_certified};
+  ExactCriticalArmFamilyScope scope{
+      ExactCriticalArmFamilyScope::unspecified};
+};
+
+struct ExactCriticalArmFamilyVerification {
+  bool requested_per_arm_chain_budget_certified{false};
+  bool input_shell_identity_certified{false};
+  bool every_shell_point_enumerated_once_certified{false};
+  bool per_arm_descents_certified{false};
+  bool active_terminals_certified{false};
+  bool terminal_label_classes_certified{false};
+  bool shared_critical_source_replay_certified{false};
+  bool supported_composite_paths_certified{false};
+  bool terminal_label_partition_status_certified{false};
+  bool counters_certified{false};
+  bool decision_certified{false};
+  bool scope_certified{false};
+  bool fresh_replay_certified{false};
+  bool exact_critical_arm_family_decision_certified{false};
+};
+
 // Reconstructs the exact critical sphere from U alone, closes its global
 // shell, derives k=s-1 and F_u, then certifies the dedicated initial germ
 // segment. The input shell must contain two to four distinct valid PointIds
@@ -256,5 +353,22 @@ verify_exact_critical_arm_descent(
     spatial::PointId removed_shell_point_id,
     ExactFacetDescentChainBudget chain_budget,
     const ExactCriticalArmDescentResult& result);
+
+// Enumerates the complete canonical shell and independently replays 6.6 once
+// per removed shell point under the same trusted per-arm chain budget.
+[[nodiscard]] ExactCriticalArmFamilyResult
+build_exact_critical_arm_family_descent(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> critical_shell_point_ids,
+    ExactFacetDescentChainBudget per_arm_chain_budget);
+
+// Reconstructs the whole family and its terminal-label identity partition
+// from the external cloud, shell and common budget only.
+[[nodiscard]] ExactCriticalArmFamilyVerification
+verify_exact_critical_arm_family_descent(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> critical_shell_point_ids,
+    ExactFacetDescentChainBudget per_arm_chain_budget,
+    const ExactCriticalArmFamilyResult& result);
 
 }  // namespace morsehgp3d::hierarchy

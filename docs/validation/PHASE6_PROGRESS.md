@@ -2,15 +2,15 @@
 
 ## Statut
 
-- phase : `6`, `ready`; jalons préparatoires 6.1 à 6.6 validés pendant que la phase 5 reste l'unique phase `in_progress`;
+- phase : `6`, `ready`; jalons préparatoires 6.1 à 6.7 validés pendant que la phase 5 reste l'unique phase `in_progress`;
 - backend : `reference_cpu`;
 - profil : `full_pi0`;
 - mode : `certified`;
-- portée courante : `single_index_one_critical_arm_plus_canonical_strict_chain_only`;
+- portée courante : `all_index_one_critical_arms_independent_canonical_strict_chains_terminal_labels_only`;
 - porte d'entrée : satisfaite par les Phases 1 et 4 fermées;
-- porte de sortie : non satisfaite; la miniball exacte bornée, son shell global, la famille top-$k$ exacte, l'arc strict 6.3, le segment analytique individuel 6.4, sa chaîne mono-source 6.5 et le germe initial mono-bras 6.6 sont validés sur hôte strict; aucune fermeture multi-bras, racine, attache, DAG, pointer-jumping, plateau, forêt ou différentiel indépendant n'est construite.
+- porte de sortie : non satisfaite; la miniball exacte bornée, son shell global, la famille top-$k$ exacte, l'arc strict 6.3, le segment analytique individuel 6.4, sa chaîne mono-source 6.5, le germe initial mono-bras 6.6 et la fermeture événement-locale des labels terminaux multi-bras 6.7 sont validés sur hôte strict; aucune fermeture de composante Gamma, racine, attache, DAG, pointer-jumping, plateau, forêt ou différentiel indépendant n'est construite.
 
-Ces jalons ne construisent aucune forêt et ne publient aucun `public_status`. Le premier fournit un oracle local exact pour une facette de cardinal au plus dix; le second certifie ses préconditions globales au centre; le troisième réserve le mot successeur au représentant canonique dont la miniball fraîche possède un niveau strictement inférieur; le quatrième ajoute le certificat analytique du segment de centres associé à cet arc; le cinquième relance ce constructeur et concatène une seule orbite canonique stricte. Le sixième construit en amont le segment initial d'un seul bras d'indice un et le coud à cette chaîne, sans encore identifier une racine globale, une attache ou un DAG.
+Ces jalons ne construisent aucune forêt et ne publient aucun `public_status`. Le premier fournit un oracle local exact pour une facette de cardinal au plus dix; le second certifie ses préconditions globales au centre; le troisième réserve le mot successeur au représentant canonique dont la miniball fraîche possède un niveau strictement inférieur; le quatrième ajoute le certificat analytique du segment de centres associé à cet arc; le cinquième relance ce constructeur et concatène une seule orbite canonique stricte. Le sixième construit en amont le segment initial d'un seul bras d'indice un et le coud à cette chaîne. Le septième répète indépendamment ce contrat pour chaque bras et groupe seulement les labels terminaux strictement identiques, sans identifier une racine globale, une composante Gamma, une attache ou un DAG.
 
 ## Réduction mathématique finie
 
@@ -108,6 +108,14 @@ Tout point $p\notin S$ possède une clairance exacte $A_p=\left\Vert c-p\right\V
 
 Les décisions non prises en charge distinguent shell critique non minimal ou non positif, shell global incomplet et rang fermé ou ordre hors borne. Elles conservent les témoins source atteints avant le gate mais n'émettent ni facette de bras, ni miniball de bras, ni chaîne 6.5. Elles ne diagnostiquent pas un plateau. Le germe et le composite restent mono-bras : aucune fermeture de labels, racine terminale, attache, comparaison à Gamma, jonction de bras, structure DAG, forêt ou publication de statut n'est effectuée.
 
+## Fermeture événement-locale multi-bras 6.7
+
+`build_exact_critical_arm_family_descent` canonise le shell critique complet $U$ et appelle indépendamment 6.6 une fois pour chaque $u\in U$, sous un même budget fiable. Les copies doivent reconstruire exactement le même shell, la même miniball critique, la même partition globale, le même rang fermé, le même ordre et la même décision source. Une divergence est une contradiction interne. Le résultat conserve chaque provenance $u$, toute la descente composite et un terminal seulement lorsque 6.5 conclut `complete_at_regular_active_facet`.
+
+Les terminaux sont ordonnés par leur vecteur canonique complet de `PointId`. Deux occurrences du même vecteur doivent aussi porter exactement le même centre rationnel et le même niveau; elles forment alors une classe d'identité qui conserve tous les points retirés incidents. `complete_terminal_label_partition_certified` exige que les $\lvert U\rvert$ bras terminent activement. Une source non prise en charge retourne `no_family_unsupported_critical_source`; une dégénérescence, un budget épuisé ou leur coexistence retournent respectivement `incomplete_unsupported_degeneracy`, `incomplete_chain_budget_exhausted` ou `incomplete_mixed_stops`. Les classes déjà observées dans ces branches restent partielles.
+
+La base de preuve est `exact_all_index_one_critical_arms_independent_strict_chains_terminal_facet_label_identity_partition_v1` et la portée est `all_index_one_critical_arms_independent_canonical_strict_chains_terminal_labels_only`. Une facette terminale active n'est pas une racine globale. Deux labels distincts peuvent appartenir à la même composante de Gamma; une classe d'identité terminale n'est ni une composante de Gamma, ni une attache. Aucun DAG global, pointer-jumping, plateau, forêt, `public_status`, différentiel indépendant, CUDA ou G4 n'est certifié.
+
 ## Validation hôte ciblée
 
 Le test strict couvre :
@@ -155,6 +163,10 @@ La validation 6.6 fixe une fixture non triviale avec $U=\left\lbrace(-2,0),(0,3)
 
 Les autres validations 6.6 couvrent une source avec point intérieur, la frontière supportée rang fermé onze et ordre dix, le rejet fail-closed du rang douze, du shell global incomplet et d'un shell cosphérique non minimal, ainsi que toutes les entrées invalides. Le composite ferme séparément une source critique non prise en charge sans chaîne et une source valide dont la facette de bras est un triangle rectangle non essentiel, donc arrêtée par la branche 6.5 de dégénérescence. Un budget supérieur à 4096 est rejeté avant classification, même si la source aurait ensuite été non prise en charge. Les falsifications ciblent séparément la miniball critique, la partition globale, la décision source, la facette et la miniball de bras, les coefficients analytiques, le témoin retiré, la contrainte extérieure, $\tau$, les faits, compteurs, décisions et portées; le composite ajoute le payload initial, la présence et le contenu de la chaîne, la couture, le chemin strict, la convention budgétaire et l'identité d'un nuage jumeau. Les builds Release stricts GCC et Clang et le CTest `morsehgp3d.hierarchy_miniball` passent; 6.6 est `validated_host_software`, sans différentiel indépendant, CUDA, G4 ou `public_status`.
 
+La validation 6.7 reprend la fixture critique ternaire dans un ordre de shell permuté. Avec un budget commun nul, deux bras sont déjà actifs et le troisième reste un préfixe budgété : deux classes exactes sont observées, mais le drapeau de partition complète reste faux. Avec un budget de un, les trois bras terminent, les quatre segments composites engagés se répartissent en trois germes initiaux et une transition 6.5, et les trois labels terminaux distincts conservent leur provenance. La même sortie canonique est reconstruite depuis l'ordre canonique du shell.
+
+Le tétraèdre régulier ferme quatre bras et quatre labels actifs dès le budget zéro. Le carré cosphérique non minimal rejette les quatre bras sans classe. La fixture $(-3,0),(-2,5/2),(-1,0),(1,2),(3,0)$ avec shell critique formé des deux extrémités exerce séparément une dégénérescence avec un autre bras complet, puis, au budget zéro, `incomplete_mixed_stops` avec exactement une dégénérescence et un épuisement budgétaire. Les falsifications ciblent la provenance d'un bras, sa descente embarquée, la géométrie terminale, la provenance d'une classe, le drapeau de complétude, les compteurs, la décision, la portée, le budget externe et l'identité d'un nuage jumeau. Les builds Release stricts GCC et Clang et le CTest ciblé passent; 6.7 est `validated_host_software`, sans conclusion Gamma, attache ou statut public.
+
 ## Suite immédiate
 
-Le jalon mathématique suivant devra fermer les labels terminaux de plusieurs bras et les comparer à la composante Gamma juste sous le lot critique avant toute attache. Une égalité de niveaux hors du gate strict restera `unsupported_degeneracy` tant que le quotient multivalué de plateau n'est pas démontré et implémenté. La portée courante reste strictement mono-bras et ne construit encore aucune racine publique, attache, structure DAG ou forêt.
+Le jalon mathématique suivant 6.8 devra fermer exactement les composantes du Gamma exhaustif à la coupe ouverte $\beta<a$ et y comparer les bras et labels terminaux avant toute attache. Une égalité de niveaux hors du gate strict restera `unsupported_degeneracy` tant que le quotient multivalué de plateau n'est pas démontré et implémenté. La portée courante est multi-bras mais strictement événement-locale; elle ne construit encore aucune racine publique, attache, structure DAG ou forêt.

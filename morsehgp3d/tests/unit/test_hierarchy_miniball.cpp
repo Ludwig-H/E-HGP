@@ -52,6 +52,11 @@ using morsehgp3d::hierarchy::ExactCriticalArmDescentDecision;
 using morsehgp3d::hierarchy::ExactCriticalArmDescentResult;
 using morsehgp3d::hierarchy::ExactCriticalArmDescentScope;
 using morsehgp3d::hierarchy::ExactCriticalArmDescentVerification;
+using morsehgp3d::hierarchy::ExactCriticalArmFamilyCounters;
+using morsehgp3d::hierarchy::ExactCriticalArmFamilyDecision;
+using morsehgp3d::hierarchy::ExactCriticalArmFamilyResult;
+using morsehgp3d::hierarchy::ExactCriticalArmFamilyScope;
+using morsehgp3d::hierarchy::ExactCriticalArmFamilyVerification;
 using morsehgp3d::hierarchy::ExactCriticalArmInitialSegmentCounters;
 using morsehgp3d::hierarchy::ExactCriticalArmInitialSegmentDecision;
 using morsehgp3d::hierarchy::ExactCriticalArmInitialSegmentResult;
@@ -64,6 +69,7 @@ using morsehgp3d::hierarchy::build_exact_facet_descent_preconditions;
 using morsehgp3d::hierarchy::build_exact_facet_descent_segment;
 using morsehgp3d::hierarchy::build_exact_facet_miniball;
 using morsehgp3d::hierarchy::build_exact_critical_arm_descent;
+using morsehgp3d::hierarchy::build_exact_critical_arm_family_descent;
 using morsehgp3d::hierarchy::build_exact_critical_arm_initial_segment;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_arc;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_chain;
@@ -71,6 +77,7 @@ using morsehgp3d::hierarchy::verify_exact_facet_descent_preconditions;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_segment;
 using morsehgp3d::hierarchy::verify_exact_facet_miniball;
 using morsehgp3d::hierarchy::verify_exact_critical_arm_descent;
+using morsehgp3d::hierarchy::verify_exact_critical_arm_family_descent;
 using morsehgp3d::hierarchy::verify_exact_critical_arm_initial_segment;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ExclusionSet;
@@ -261,6 +268,24 @@ template <std::size_t Size>
          verification.scope_certified &&
          verification.fresh_replay_certified &&
          verification.exact_critical_arm_descent_decision_certified;
+}
+
+[[nodiscard]] bool all_critical_arm_family_certificates_close(
+    const ExactCriticalArmFamilyVerification& verification) {
+  return verification.requested_per_arm_chain_budget_certified &&
+         verification.input_shell_identity_certified &&
+         verification.every_shell_point_enumerated_once_certified &&
+         verification.per_arm_descents_certified &&
+         verification.active_terminals_certified &&
+         verification.terminal_label_classes_certified &&
+         verification.shared_critical_source_replay_certified &&
+         verification.supported_composite_paths_certified &&
+         verification.terminal_label_partition_status_certified &&
+         verification.counters_certified &&
+         verification.decision_certified &&
+         verification.scope_certified &&
+         verification.fresh_replay_certified &&
+         verification.exact_critical_arm_family_decision_certified;
 }
 
 [[nodiscard]] bool matches_ids(
@@ -2905,6 +2930,404 @@ void test_critical_arm_unsupported_sources_fail_closed() {
   }
 }
 
+void test_critical_arm_family_canonical_order_budgets_and_labels() {
+  const ExactCriticalArmFamilyResult empty;
+  check(
+      empty.decision == ExactCriticalArmFamilyDecision::not_certified &&
+          empty.scope == ExactCriticalArmFamilyScope::unspecified &&
+          empty.arms.empty() && empty.terminal_label_classes.empty() &&
+          !empty.every_shell_point_enumerated_once &&
+          !empty.complete_terminal_label_partition_certified,
+      "default critical-arm family certifies no terminal-label partition");
+
+  const CanonicalPointCloud cloud = critical_arm_fixture_cloud();
+  const std::array<PointId, 3> permuted_shell{2U, 0U, 1U};
+  const ExactFacetDescentChainBudget zero_budget{0U};
+  const ExactCriticalArmFamilyResult zero =
+      build_exact_critical_arm_family_descent(
+          cloud, permuted_shell, zero_budget);
+  const ExactCriticalArmFamilyVerification zero_verification =
+      verify_exact_critical_arm_family_descent(
+          cloud, permuted_shell, zero_budget, zero);
+
+  check(
+      zero.critical_shell_point_ids ==
+              std::vector<PointId>({0U, 1U, 2U}) &&
+          zero.arms.size() == 3U &&
+          zero.arms[0].removed_shell_point_id == 0U &&
+          zero.arms[1].removed_shell_point_id == 1U &&
+          zero.arms[2].removed_shell_point_id == 2U &&
+          zero.every_shell_point_enumerated_once &&
+          zero.shared_critical_source_replay_certified,
+      "family canonicalizes the shell and enumerates each arm exactly once");
+  check(
+      zero.counters.requested_arm_count == 3U &&
+          zero.counters.arm_descent_build_count == 3U &&
+          zero.counters.shared_source_replay_comparison_count == 2U &&
+          zero.counters.complete_active_arm_count == 2U &&
+          zero.counters.budget_exhausted_arm_count == 1U &&
+          zero.counters.unsupported_source_arm_count == 0U &&
+          zero.counters.unsupported_chain_arm_count == 0U &&
+          zero.counters.terminal_label_pair_comparison_count == 1U &&
+          zero.counters.distinct_terminal_label_count == 2U &&
+          zero.counters.committed_chain_strict_segment_count == 0U &&
+          zero.counters.committed_composite_path_segment_count == 3U,
+      "zero per-arm budget keeps three initial germs and two active labels");
+  check(
+      !zero.arms[0].active_terminal.has_value() &&
+          !zero.arms[0].terminal_label_class_index.has_value() &&
+          zero.arms[0].descent.decision ==
+              ExactCriticalArmDescentDecision::
+                  certified_prefix_strict_segment_budget_exhausted &&
+          zero.arms[1].terminal_label_class_index ==
+              std::optional<std::size_t>{1U} &&
+          zero.arms[2].terminal_label_class_index ==
+              std::optional<std::size_t>{0U},
+      "zero budget leaves only the unfinished arm outside label classes");
+  check(
+      zero.terminal_label_classes.size() == 2U &&
+          zero.terminal_label_classes[0].canonical_terminal.
+                  facet_point_ids ==
+              std::vector<PointId>({0U, 1U}) &&
+          zero.terminal_label_classes[0].removed_shell_point_ids ==
+              std::vector<PointId>({2U}) &&
+          zero.terminal_label_classes[1].canonical_terminal.
+                  facet_point_ids ==
+              std::vector<PointId>({0U, 2U}) &&
+          zero.terminal_label_classes[1].removed_shell_point_ids ==
+              std::vector<PointId>({1U}) &&
+          zero.terminal_labels_canonical &&
+          !zero.complete_terminal_label_partition_certified &&
+          zero.all_supported_composite_paths_strict_below_critical_level &&
+          zero.decision == ExactCriticalArmFamilyDecision::
+                               incomplete_chain_budget_exhausted &&
+          all_critical_arm_family_certificates_close(zero_verification),
+      "partial family exposes canonical facet-label identities, not components");
+
+  const ExactFacetDescentChainBudget one_budget{1U};
+  const ExactCriticalArmFamilyResult complete =
+      build_exact_critical_arm_family_descent(
+          cloud, permuted_shell, one_budget);
+  const ExactCriticalArmFamilyVerification complete_verification =
+      verify_exact_critical_arm_family_descent(
+          cloud, permuted_shell, one_budget, complete);
+  check(
+      complete.arms.size() == 3U &&
+          complete.counters.complete_active_arm_count == 3U &&
+          complete.counters.budget_exhausted_arm_count == 0U &&
+          complete.counters.committed_chain_strict_segment_count == 1U &&
+          complete.counters.committed_composite_path_segment_count == 4U &&
+          complete.counters.terminal_label_pair_comparison_count == 3U &&
+          complete.counters.distinct_terminal_label_count == 3U,
+      "one segment per arm suffices to close all three terminal labels");
+  check(
+      complete.terminal_label_classes.size() == 3U &&
+          complete.terminal_label_classes[0].canonical_terminal.
+                  facet_point_ids ==
+              std::vector<PointId>({0U, 1U}) &&
+          complete.terminal_label_classes[0].removed_shell_point_ids ==
+              std::vector<PointId>({2U}) &&
+          complete.terminal_label_classes[1].canonical_terminal.
+                  facet_point_ids ==
+              std::vector<PointId>({0U, 2U}) &&
+          complete.terminal_label_classes[1].removed_shell_point_ids ==
+              std::vector<PointId>({1U}) &&
+          complete.terminal_label_classes[2].canonical_terminal.
+                  facet_point_ids ==
+              std::vector<PointId>({1U, 3U}) &&
+          complete.terminal_label_classes[2].removed_shell_point_ids ==
+              std::vector<PointId>({0U}),
+      "complete family partitions exact terminal facet labels canonically");
+  check(
+      complete.arms[0].terminal_label_class_index ==
+              std::optional<std::size_t>{2U} &&
+          complete.arms[1].terminal_label_class_index ==
+              std::optional<std::size_t>{1U} &&
+          complete.arms[2].terminal_label_class_index ==
+              std::optional<std::size_t>{0U} &&
+          complete.terminal_labels_canonical &&
+          complete.complete_terminal_label_partition_certified &&
+          complete.all_supported_composite_paths_strict_below_critical_level &&
+          complete.decision == ExactCriticalArmFamilyDecision::
+                                   all_arms_complete_at_regular_active_facets &&
+          complete.scope == ExactCriticalArmFamilyScope::
+                                all_index_one_critical_arms_independent_canonical_strict_chains_terminal_labels_only &&
+          std::string_view{ExactCriticalArmFamilyResult::proof_basis} ==
+              "exact_all_index_one_critical_arms_independent_strict_chains_"
+              "terminal_facet_label_identity_partition_v1" &&
+          all_critical_arm_family_certificates_close(
+              complete_verification),
+      "complete family publishes only its terminal facet-label identity scope");
+
+  const std::array<PointId, 3> canonical_shell{0U, 1U, 2U};
+  const ExactCriticalArmFamilyResult canonical =
+      build_exact_critical_arm_family_descent(
+          cloud, canonical_shell, one_budget);
+  check(
+      canonical.critical_shell_point_ids ==
+              complete.critical_shell_point_ids &&
+          canonical.terminal_label_classes ==
+              complete.terminal_label_classes &&
+          canonical.counters == complete.counters &&
+          canonical.decision == complete.decision &&
+          canonical.scope == complete.scope,
+      "shell permutations preserve the canonical terminal-label partition");
+}
+
+void test_critical_arm_family_support_four_and_fail_closed_stops() {
+  {
+    const std::array<CertifiedPoint3, 4> input{
+        point(-1.0, -1.0, 1.0),
+        point(-1.0, 1.0, -1.0),
+        point(1.0, -1.0, -1.0),
+        point(1.0, 1.0, 1.0)};
+    const CanonicalPointCloud cloud = canonical_cloud(input);
+    const std::array<PointId, 4> shell{3U, 1U, 0U, 2U};
+    const ExactFacetDescentChainBudget zero_budget{0U};
+    const ExactCriticalArmFamilyResult family =
+        build_exact_critical_arm_family_descent(
+            cloud, shell, zero_budget);
+    const ExactCriticalArmFamilyVerification verification =
+        verify_exact_critical_arm_family_descent(
+            cloud, shell, zero_budget, family);
+    check(
+        family.critical_shell_point_ids ==
+                std::vector<PointId>({0U, 1U, 2U, 3U}) &&
+            family.arms.size() == 4U &&
+            family.arms.front().descent.initial_segment.
+                    critical_shell_miniball.support_point_ids ==
+                std::vector<PointId>({0U, 1U, 2U, 3U}) &&
+            family.counters.complete_active_arm_count == 4U &&
+            family.counters.terminal_label_pair_comparison_count == 6U &&
+            family.counters.distinct_terminal_label_count == 4U &&
+            family.terminal_label_classes.size() == 4U &&
+            family.complete_terminal_label_partition_certified &&
+            family.decision == ExactCriticalArmFamilyDecision::
+                                   all_arms_complete_at_regular_active_facets &&
+            all_critical_arm_family_certificates_close(verification),
+        "positive four-point support closes four active facet labels at budget zero");
+    for (std::size_t index = 0U; index < family.arms.size(); ++index) {
+      const auto& arm = family.arms[index];
+      check(
+          arm.active_terminal.has_value() &&
+              arm.active_terminal->facet_point_ids ==
+                  arm.descent.initial_segment.arm_facet_point_ids &&
+              arm.terminal_label_class_index ==
+                  std::optional<std::size_t>{3U - index},
+          "tetrahedral arm retains its removed-point label provenance");
+    }
+  }
+
+  {
+    const std::array<CertifiedPoint3, 4> input{
+        point(-1.0, 0.0),
+        point(0.0, 1.0),
+        point(1.0, 0.0),
+        point(0.0, -1.0)};
+    const CanonicalPointCloud cloud = canonical_cloud(input);
+    const std::array<PointId, 4> nonminimal_shell{0U, 1U, 2U, 3U};
+    const ExactFacetDescentChainBudget zero_budget{0U};
+    const ExactCriticalArmFamilyResult unsupported =
+        build_exact_critical_arm_family_descent(
+            cloud, nonminimal_shell, zero_budget);
+    const ExactCriticalArmFamilyVerification verification =
+        verify_exact_critical_arm_family_descent(
+            cloud,
+            nonminimal_shell,
+            zero_budget,
+            unsupported);
+    check(
+        unsupported.arms.size() == 4U &&
+            unsupported.every_shell_point_enumerated_once &&
+            unsupported.shared_critical_source_replay_certified &&
+            !unsupported.
+                all_supported_composite_paths_strict_below_critical_level &&
+            unsupported.counters.unsupported_source_arm_count == 4U &&
+            unsupported.counters.complete_active_arm_count == 0U &&
+            unsupported.counters.distinct_terminal_label_count == 0U &&
+            unsupported.terminal_label_classes.empty() &&
+            !unsupported.terminal_labels_canonical &&
+            !unsupported.complete_terminal_label_partition_certified &&
+            unsupported.decision == ExactCriticalArmFamilyDecision::
+                                        no_family_unsupported_critical_source &&
+            all_critical_arm_family_certificates_close(verification),
+        "unsupported source closes the whole family without emitting labels");
+    check(
+        std::all_of(
+            unsupported.arms.begin(),
+            unsupported.arms.end(),
+            [](const auto& arm) {
+              return !arm.active_terminal.has_value() &&
+                     !arm.terminal_label_class_index.has_value() &&
+                     !arm.descent.facet_descent_chain.has_value() &&
+                     arm.descent.decision ==
+                         ExactCriticalArmDescentDecision::
+                             no_descent_unsupported_critical_source;
+            }),
+        "unsupported family preserves one explicit fail-closed arm result per shell point");
+
+    check_throws<std::invalid_argument>(
+        [&cloud, &nonminimal_shell]() {
+          const ExactFacetDescentChainBudget excessive{
+              ExactFacetDescentChainBudget::
+                  maximum_supported_committed_strict_segment_count + 1U};
+          static_cast<void>(build_exact_critical_arm_family_descent(
+              cloud, nonminimal_shell, excessive));
+        },
+        "unsupported family cannot bypass the common chain-budget cap");
+  }
+
+  {
+    const std::array<CertifiedPoint3, 5> input{
+        point(-3.0, 0.0),
+        point(-1.0, 0.0),
+        point(1.0, 2.0),
+        point(3.0, 0.0),
+        point(-2.0, 2.5)};
+    const CanonicalPointCloud cloud = canonical_cloud(input);
+    const std::array<PointId, 2> shell{4U, 0U};
+    const ExactFacetDescentChainBudget budget{4U};
+    const ExactCriticalArmFamilyResult incomplete =
+        build_exact_critical_arm_family_descent(cloud, shell, budget);
+    const ExactCriticalArmFamilyVerification verification =
+        verify_exact_critical_arm_family_descent(
+            cloud, shell, budget, incomplete);
+    check(
+        incomplete.arms.size() == 2U &&
+            incomplete.counters.unsupported_chain_arm_count >= 1U &&
+            incomplete.counters.budget_exhausted_arm_count == 0U &&
+            incomplete.counters.complete_active_arm_count +
+                    incomplete.counters.unsupported_chain_arm_count ==
+                2U &&
+            incomplete.counters.distinct_terminal_label_count ==
+                incomplete.terminal_label_classes.size() &&
+            !incomplete.complete_terminal_label_partition_certified &&
+            incomplete.decision == ExactCriticalArmFamilyDecision::
+                                       incomplete_unsupported_degeneracy &&
+            all_critical_arm_family_certificates_close(verification),
+        "one unsupported chain stop keeps the terminal-label partition explicitly incomplete");
+
+    const ExactFacetDescentChainBudget zero_budget{0U};
+    const ExactCriticalArmFamilyResult mixed =
+        build_exact_critical_arm_family_descent(
+            cloud, shell, zero_budget);
+    const ExactCriticalArmFamilyVerification mixed_verification =
+        verify_exact_critical_arm_family_descent(
+            cloud, shell, zero_budget, mixed);
+    check(
+        mixed.counters.unsupported_chain_arm_count == 1U &&
+            mixed.counters.budget_exhausted_arm_count == 1U &&
+            mixed.counters.complete_active_arm_count == 0U &&
+            mixed.terminal_label_classes.empty() &&
+            !mixed.complete_terminal_label_partition_certified &&
+            mixed.decision ==
+                ExactCriticalArmFamilyDecision::incomplete_mixed_stops &&
+            all_critical_arm_family_certificates_close(
+                mixed_verification),
+        "zero budget distinguishes a mixed degeneracy and budget stop");
+  }
+}
+
+void test_critical_arm_family_verifier_rejects_falsifications() {
+  const CanonicalPointCloud cloud = critical_arm_fixture_cloud();
+  const std::array<PointId, 3> shell{0U, 1U, 2U};
+  const ExactFacetDescentChainBudget budget{1U};
+  const ExactCriticalArmFamilyResult family =
+      build_exact_critical_arm_family_descent(cloud, shell, budget);
+  check(
+      family.arms.size() == 3U &&
+          family.terminal_label_classes.size() == 3U,
+      "family falsification fixture has three arms and three exact labels");
+  if (family.arms.size() != 3U ||
+      family.terminal_label_classes.size() != 3U) {
+    return;
+  }
+
+  const auto rejects =
+      [&cloud, &shell, budget](
+          const ExactCriticalArmFamilyResult& candidate,
+          const std::string& message) {
+        const ExactCriticalArmFamilyVerification verification =
+            verify_exact_critical_arm_family_descent(
+                cloud, shell, budget, candidate);
+        check(
+            !verification.exact_critical_arm_family_decision_certified,
+            message);
+      };
+
+  ExactCriticalArmFamilyResult bad_arm_identity = family;
+  bad_arm_identity.arms[0].removed_shell_point_id = 1U;
+  rejects(
+      bad_arm_identity,
+      "family verifier rejects a falsified removed-point provenance");
+
+  ExactCriticalArmFamilyResult bad_embedded_descent = family;
+  bad_embedded_descent.arms[0].descent.
+      source_open_composite_path_strict_critical_sublevel = false;
+  rejects(
+      bad_embedded_descent,
+      "family verifier rejects a falsified embedded arm descent");
+
+  ExactCriticalArmFamilyResult bad_active_terminal = family;
+  bad_active_terminal.arms[0].active_terminal->squared_level = level(2);
+  rejects(
+      bad_active_terminal,
+      "family verifier rejects a falsified active terminal geometry");
+
+  ExactCriticalArmFamilyResult bad_label_class = family;
+  bad_label_class.terminal_label_classes[0].removed_shell_point_ids = {0U};
+  rejects(
+      bad_label_class,
+      "family verifier rejects a falsified terminal-label class provenance");
+
+  ExactCriticalArmFamilyResult bad_partition_status = family;
+  bad_partition_status.complete_terminal_label_partition_certified = false;
+  rejects(
+      bad_partition_status,
+      "family verifier rejects a falsified complete-label status");
+
+  ExactCriticalArmFamilyResult bad_counter = family;
+  ++bad_counter.counters.distinct_terminal_label_count;
+  rejects(bad_counter, "family verifier rejects falsified exact counters");
+
+  ExactCriticalArmFamilyResult bad_decision = family;
+  bad_decision.decision = ExactCriticalArmFamilyDecision::
+                              incomplete_chain_budget_exhausted;
+  rejects(
+      bad_decision,
+      "family verifier treats the terminal-label decision as untrusted");
+
+  ExactCriticalArmFamilyResult bad_scope = family;
+  bad_scope.scope = ExactCriticalArmFamilyScope::unspecified;
+  rejects(
+      bad_scope,
+      "family verifier treats the terminal-label-only scope as untrusted");
+
+  const ExactCriticalArmFamilyVerification wrong_budget_check =
+      verify_exact_critical_arm_family_descent(
+          cloud,
+          shell,
+          ExactFacetDescentChainBudget{0U},
+          family);
+  check(
+      !wrong_budget_check.requested_per_arm_chain_budget_certified &&
+          !wrong_budget_check.
+              exact_critical_arm_family_decision_certified,
+      "family verifier rejects a different external per-arm budget");
+
+  const CanonicalPointCloud twin_cloud = critical_arm_fixture_cloud();
+  const ExactCriticalArmFamilyResult twin_family =
+      build_exact_critical_arm_family_descent(
+          twin_cloud, shell, budget);
+  const ExactCriticalArmFamilyVerification twin_check =
+      verify_exact_critical_arm_family_descent(
+          cloud, shell, budget, twin_family);
+  check(
+      !twin_check.per_arm_descents_certified &&
+          !twin_check.exact_critical_arm_family_decision_certified,
+      "family verifier rejects exact payloads from a twin cloud identity");
+}
+
 void test_critical_arm_verifiers_reject_falsifications() {
   const CanonicalPointCloud cloud = critical_arm_fixture_cloud();
   const std::array<PointId, 3> critical_shell{0U, 1U, 2U};
@@ -3506,6 +3929,9 @@ int main() {
   test_critical_arm_descent_budgets_exclude_initial_segment();
   test_critical_arm_supports_interior_and_maximum_rank();
   test_critical_arm_unsupported_sources_fail_closed();
+  test_critical_arm_family_canonical_order_budgets_and_labels();
+  test_critical_arm_family_support_four_and_fail_closed_stops();
+  test_critical_arm_family_verifier_rejects_falsifications();
   test_critical_arm_verifiers_reject_falsifications();
   test_invalid_critical_arm_inputs_are_rejected();
   test_descent_precondition_verifier_rejects_every_result_layer();

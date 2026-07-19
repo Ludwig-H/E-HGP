@@ -588,6 +588,313 @@ compute_exact_critical_arm_descent(
   return result;
 }
 
+[[nodiscard]] bool same_facet_miniball_payload(
+    const ExactFacetMiniballResult& left,
+    const ExactFacetMiniballResult& right) {
+  return left.facet_point_ids == right.facet_point_ids &&
+         left.support_point_ids == right.support_point_ids &&
+         left.strictly_inside_point_ids ==
+             right.strictly_inside_point_ids &&
+         left.boundary_point_ids == right.boundary_point_ids &&
+         left.center == right.center &&
+         left.squared_radius == right.squared_radius &&
+         left.counters == right.counters &&
+         left.status == right.status &&
+         left.scope == right.scope;
+}
+
+[[nodiscard]] bool same_shared_critical_source(
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactCriticalArmInitialSegmentResult& left,
+    const ExactCriticalArmInitialSegmentResult& right) {
+  if (left.critical_shell_point_ids !=
+          right.critical_shell_point_ids ||
+      !same_facet_miniball_payload(
+          left.critical_shell_miniball,
+          right.critical_shell_miniball) ||
+      left.global_closed_ball.has_value() !=
+          right.global_closed_ball.has_value() ||
+      left.closed_rank != right.closed_rank ||
+      left.order != right.order ||
+      left.critical_shell_is_positive_minimal_support !=
+          right.critical_shell_is_positive_minimal_support ||
+      left.global_shell_matches_critical_shell !=
+          right.global_shell_matches_critical_shell ||
+      left.closed_rank_and_order_supported !=
+          right.closed_rank_and_order_supported ||
+      left.critical_source_certified !=
+          right.critical_source_certified ||
+      left.source_decision != right.source_decision) {
+    return false;
+  }
+  return !left.global_closed_ball.has_value() ||
+         same_closed_ball_partition(
+             cloud,
+             *left.global_closed_ball,
+             *right.global_closed_ball);
+}
+
+[[nodiscard]] bool canonical_active_terminal(
+    const ExactCriticalArmFamilyArmResult& arm) {
+  if (!arm.active_terminal.has_value() ||
+      arm.descent.decision != ExactCriticalArmDescentDecision::
+          complete_at_regular_active_facet ||
+      !arm.descent.facet_descent_chain.has_value() ||
+      arm.descent.facet_descent_chain->nodes.empty() ||
+      *arm.active_terminal !=
+          arm.descent.facet_descent_chain->nodes.back()) {
+    return false;
+  }
+  const std::vector<PointId>& facet =
+      arm.active_terminal->facet_point_ids;
+  return !facet.empty() &&
+         facet.size() == arm.descent.initial_segment.order &&
+         std::is_sorted(facet.begin(), facet.end()) &&
+         std::adjacent_find(facet.begin(), facet.end()) == facet.end() &&
+         arm.active_terminal->squared_level <
+             arm.descent.initial_segment.
+                 critical_shell_miniball.squared_radius;
+}
+
+[[nodiscard]] ExactCriticalArmFamilyResult
+compute_exact_critical_arm_family_descent(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> critical_shell_point_ids,
+    ExactFacetDescentChainBudget per_arm_chain_budget) {
+  ExactCriticalArmFamilyResult result;
+  result.requested_per_arm_chain_budget = per_arm_chain_budget;
+  if (per_arm_chain_budget.maximum_committed_strict_segment_count >
+      ExactFacetDescentChainBudget::
+          maximum_supported_committed_strict_segment_count) {
+    throw std::invalid_argument(
+        "an exact critical-arm family budget exceeds its reference cap");
+  }
+
+  const PointId validation_removed_point =
+      critical_shell_point_ids.empty()
+          ? PointId{}
+          : critical_shell_point_ids.front();
+  result.critical_shell_point_ids = canonical_critical_shell(
+      cloud,
+      critical_shell_point_ids,
+      validation_removed_point);
+  result.counters.requested_arm_count =
+      result.critical_shell_point_ids.size();
+  result.arms.reserve(result.critical_shell_point_ids.size());
+  for (const PointId removed_shell_point_id :
+       result.critical_shell_point_ids) {
+    ExactCriticalArmFamilyArmResult arm;
+    arm.removed_shell_point_id = removed_shell_point_id;
+    arm.descent = compute_exact_critical_arm_descent(
+        cloud,
+        result.critical_shell_point_ids,
+        removed_shell_point_id,
+        per_arm_chain_budget);
+    result.arms.push_back(std::move(arm));
+    ++result.counters.arm_descent_build_count;
+  }
+  result.every_shell_point_enumerated_once =
+      result.arms.size() == result.critical_shell_point_ids.size();
+  for (std::size_t index = 0U; index < result.arms.size(); ++index) {
+    result.every_shell_point_enumerated_once =
+        result.every_shell_point_enumerated_once &&
+        result.arms[index].removed_shell_point_id ==
+            result.critical_shell_point_ids[index];
+  }
+  if (!result.every_shell_point_enumerated_once ||
+      result.arms.empty()) {
+    throw std::logic_error(
+        "an exact critical-arm family did not enumerate its shell");
+  }
+
+  result.shared_critical_source_replay_certified = true;
+  const ExactCriticalArmInitialSegmentResult& shared_source =
+      result.arms.front().descent.initial_segment;
+  for (std::size_t index = 1U; index < result.arms.size(); ++index) {
+    ++result.counters.shared_source_replay_comparison_count;
+    if (!same_shared_critical_source(
+            cloud,
+            shared_source,
+            result.arms[index].descent.initial_segment)) {
+      result.shared_critical_source_replay_certified = false;
+      break;
+    }
+  }
+  if (!result.shared_critical_source_replay_certified) {
+    throw std::logic_error(
+        "independent critical arms disagree on their shared source");
+  }
+
+  const bool supported_source =
+      shared_source.source_decision ==
+          ExactCriticalArmSourceDecision::critical_source_certified;
+  result.all_supported_composite_paths_strict_below_critical_level =
+      supported_source;
+  std::vector<ExactFacetDescentChainNodeWitness> active_terminals;
+  active_terminals.reserve(result.arms.size());
+  for (ExactCriticalArmFamilyArmResult& arm : result.arms) {
+    result.counters.committed_chain_strict_segment_count +=
+        arm.descent.counters.committed_chain_strict_segment_count;
+    result.counters.committed_composite_path_segment_count +=
+        arm.descent.counters.committed_composite_path_segment_count;
+    if (arm.descent.initial_segment.source_decision !=
+        shared_source.source_decision) {
+      throw std::logic_error(
+          "independent critical arms disagree on source support");
+    }
+    switch (arm.descent.decision) {
+      case ExactCriticalArmDescentDecision::
+          no_descent_unsupported_critical_source:
+        ++result.counters.unsupported_source_arm_count;
+        break;
+      case ExactCriticalArmDescentDecision::
+          complete_at_regular_active_facet:
+        ++result.counters.complete_active_arm_count;
+        if (!arm.descent.facet_descent_chain.has_value() ||
+            arm.descent.facet_descent_chain->nodes.empty()) {
+          throw std::logic_error(
+              "a complete critical arm has no active terminal");
+        }
+        arm.active_terminal =
+            arm.descent.facet_descent_chain->nodes.back();
+        if (!canonical_active_terminal(arm)) {
+          throw std::logic_error(
+              "a complete critical arm has a noncanonical terminal");
+        }
+        active_terminals.push_back(*arm.active_terminal);
+        break;
+      case ExactCriticalArmDescentDecision::
+          certified_prefix_blocked_unsupported_degeneracy:
+        ++result.counters.unsupported_chain_arm_count;
+        break;
+      case ExactCriticalArmDescentDecision::
+          certified_prefix_strict_segment_budget_exhausted:
+        ++result.counters.budget_exhausted_arm_count;
+        break;
+      case ExactCriticalArmDescentDecision::not_certified:
+        throw std::logic_error(
+            "an exact critical-arm family contains an uncertified arm");
+    }
+    if (supported_source) {
+      result.all_supported_composite_paths_strict_below_critical_level =
+          result.
+              all_supported_composite_paths_strict_below_critical_level &&
+          arm.descent.
+              source_open_composite_path_strict_critical_sublevel;
+    }
+  }
+  if (!supported_source) {
+    if (result.counters.unsupported_source_arm_count !=
+        result.arms.size()) {
+      throw std::logic_error(
+          "an unsupported critical source produced a supported arm");
+    }
+    result.scope = ExactCriticalArmFamilyScope::
+        all_index_one_critical_arms_independent_canonical_strict_chains_terminal_labels_only;
+    result.decision = ExactCriticalArmFamilyDecision::
+        no_family_unsupported_critical_source;
+    return result;
+  }
+  if (result.counters.unsupported_source_arm_count != 0U ||
+      !result.all_supported_composite_paths_strict_below_critical_level) {
+    throw std::logic_error(
+        "a supported critical-arm family lost a strict composite path");
+  }
+
+  for (std::size_t left = 0U;
+       left < active_terminals.size();
+       ++left) {
+    for (std::size_t right = left + 1U;
+         right < active_terminals.size();
+         ++right) {
+      ++result.counters.terminal_label_pair_comparison_count;
+      if (active_terminals[left].facet_point_ids ==
+              active_terminals[right].facet_point_ids &&
+          active_terminals[left] != active_terminals[right]) {
+        throw std::logic_error(
+            "one terminal facet label has inconsistent exact geometry");
+      }
+    }
+  }
+  std::sort(
+      active_terminals.begin(),
+      active_terminals.end(),
+      [](const ExactFacetDescentChainNodeWitness& left,
+         const ExactFacetDescentChainNodeWitness& right) {
+        return left.facet_point_ids < right.facet_point_ids;
+      });
+  for (const ExactFacetDescentChainNodeWitness& terminal :
+       active_terminals) {
+    if (result.terminal_label_classes.empty() ||
+        result.terminal_label_classes.back().
+                canonical_terminal.facet_point_ids !=
+            terminal.facet_point_ids) {
+      ExactCriticalArmTerminalLabelClass label_class;
+      label_class.canonical_terminal = terminal;
+      result.terminal_label_classes.push_back(
+          std::move(label_class));
+    } else if (result.terminal_label_classes.back().canonical_terminal !=
+               terminal) {
+      throw std::logic_error(
+          "one terminal facet label has inconsistent exact geometry");
+    }
+  }
+
+  for (ExactCriticalArmFamilyArmResult& arm : result.arms) {
+    if (!arm.active_terminal.has_value()) {
+      continue;
+    }
+    const auto label_class = std::lower_bound(
+        result.terminal_label_classes.begin(),
+        result.terminal_label_classes.end(),
+        arm.active_terminal->facet_point_ids,
+        [](const ExactCriticalArmTerminalLabelClass& candidate,
+           const std::vector<PointId>& facet_point_ids) {
+          return candidate.canonical_terminal.facet_point_ids <
+                 facet_point_ids;
+        });
+    if (label_class == result.terminal_label_classes.end() ||
+        label_class->canonical_terminal.facet_point_ids !=
+            arm.active_terminal->facet_point_ids) {
+      throw std::logic_error(
+          "an active terminal is absent from its label partition");
+    }
+    arm.terminal_label_class_index = static_cast<std::size_t>(
+        label_class - result.terminal_label_classes.begin());
+    label_class->removed_shell_point_ids.push_back(
+        arm.removed_shell_point_id);
+  }
+  result.counters.distinct_terminal_label_count =
+      result.terminal_label_classes.size();
+  result.terminal_labels_canonical = !active_terminals.empty();
+  result.complete_terminal_label_partition_certified =
+      result.counters.complete_active_arm_count == result.arms.size();
+
+  const bool has_unsupported_stop =
+      result.counters.unsupported_chain_arm_count != 0U;
+  const bool has_budget_stop =
+      result.counters.budget_exhausted_arm_count != 0U;
+  if (result.complete_terminal_label_partition_certified) {
+    result.decision = ExactCriticalArmFamilyDecision::
+        all_arms_complete_at_regular_active_facets;
+  } else if (has_unsupported_stop && has_budget_stop) {
+    result.decision =
+        ExactCriticalArmFamilyDecision::incomplete_mixed_stops;
+  } else if (has_unsupported_stop) {
+    result.decision = ExactCriticalArmFamilyDecision::
+        incomplete_unsupported_degeneracy;
+  } else if (has_budget_stop) {
+    result.decision = ExactCriticalArmFamilyDecision::
+        incomplete_chain_budget_exhausted;
+  } else {
+    throw std::logic_error(
+        "an incomplete critical-arm family has no stopping reason");
+  }
+  result.scope = ExactCriticalArmFamilyScope::
+      all_index_one_critical_arms_independent_canonical_strict_chains_terminal_labels_only;
+  return result;
+}
+
 }  // namespace
 
 ExactCriticalArmInitialSegmentVerification
@@ -862,6 +1169,133 @@ ExactCriticalArmDescentResult build_exact_critical_arm_descent(
   if (!verification.exact_critical_arm_descent_decision_certified) {
     throw std::logic_error(
         "the exact critical-arm descent failed its fresh replay");
+  }
+  return result;
+}
+
+ExactCriticalArmFamilyVerification
+verify_exact_critical_arm_family_descent(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> critical_shell_point_ids,
+    ExactFacetDescentChainBudget per_arm_chain_budget,
+    const ExactCriticalArmFamilyResult& result) {
+  const ExactCriticalArmFamilyResult expected =
+      compute_exact_critical_arm_family_descent(
+          cloud,
+          critical_shell_point_ids,
+          per_arm_chain_budget);
+  ExactCriticalArmFamilyVerification verification;
+  verification.requested_per_arm_chain_budget_certified =
+      result.requested_per_arm_chain_budget ==
+          per_arm_chain_budget &&
+      result.requested_per_arm_chain_budget ==
+          expected.requested_per_arm_chain_budget;
+  verification.input_shell_identity_certified =
+      result.critical_shell_point_ids ==
+          expected.critical_shell_point_ids;
+  verification.every_shell_point_enumerated_once_certified =
+      result.every_shell_point_enumerated_once ==
+          expected.every_shell_point_enumerated_once &&
+      result.arms.size() == expected.arms.size();
+  verification.per_arm_descents_certified =
+      result.arms.size() == expected.arms.size();
+  verification.active_terminals_certified =
+      result.arms.size() == expected.arms.size();
+  if (result.arms.size() == expected.arms.size()) {
+    for (std::size_t index = 0U;
+         index < result.arms.size();
+         ++index) {
+      const ExactCriticalArmFamilyArmResult& observed_arm =
+          result.arms[index];
+      const ExactCriticalArmFamilyArmResult& expected_arm =
+          expected.arms[index];
+      const bool arm_identity_certified =
+          observed_arm.removed_shell_point_id ==
+              expected_arm.removed_shell_point_id;
+      verification.every_shell_point_enumerated_once_certified =
+          verification.
+              every_shell_point_enumerated_once_certified &&
+          arm_identity_certified;
+      const ExactCriticalArmDescentVerification arm_verification =
+          verify_exact_critical_arm_descent(
+              cloud,
+              expected.critical_shell_point_ids,
+              expected_arm.removed_shell_point_id,
+              per_arm_chain_budget,
+              observed_arm.descent);
+      verification.per_arm_descents_certified =
+          verification.per_arm_descents_certified &&
+          arm_identity_certified &&
+          arm_verification.
+              exact_critical_arm_descent_decision_certified;
+      verification.active_terminals_certified =
+          verification.active_terminals_certified &&
+          observed_arm.active_terminal ==
+              expected_arm.active_terminal &&
+          observed_arm.terminal_label_class_index ==
+              expected_arm.terminal_label_class_index;
+    }
+  }
+  verification.terminal_label_classes_certified =
+      result.terminal_label_classes ==
+          expected.terminal_label_classes;
+  verification.shared_critical_source_replay_certified =
+      result.shared_critical_source_replay_certified ==
+          expected.shared_critical_source_replay_certified;
+  verification.supported_composite_paths_certified =
+      result.
+          all_supported_composite_paths_strict_below_critical_level ==
+      expected.
+          all_supported_composite_paths_strict_below_critical_level;
+  verification.terminal_label_partition_status_certified =
+      result.terminal_labels_canonical ==
+          expected.terminal_labels_canonical &&
+      result.complete_terminal_label_partition_certified ==
+          expected.complete_terminal_label_partition_certified;
+  verification.counters_certified =
+      result.counters == expected.counters;
+  verification.decision_certified =
+      result.decision == expected.decision;
+  verification.scope_certified =
+      result.scope == ExactCriticalArmFamilyScope::
+          all_index_one_critical_arms_independent_canonical_strict_chains_terminal_labels_only &&
+      result.scope == expected.scope;
+  verification.fresh_replay_certified =
+      verification.requested_per_arm_chain_budget_certified &&
+      verification.input_shell_identity_certified &&
+      verification.every_shell_point_enumerated_once_certified &&
+      verification.per_arm_descents_certified &&
+      verification.active_terminals_certified &&
+      verification.terminal_label_classes_certified &&
+      verification.shared_critical_source_replay_certified &&
+      verification.supported_composite_paths_certified &&
+      verification.terminal_label_partition_status_certified &&
+      verification.counters_certified &&
+      verification.decision_certified &&
+      verification.scope_certified;
+  verification.exact_critical_arm_family_decision_certified =
+      verification.fresh_replay_certified;
+  return verification;
+}
+
+ExactCriticalArmFamilyResult build_exact_critical_arm_family_descent(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> critical_shell_point_ids,
+    ExactFacetDescentChainBudget per_arm_chain_budget) {
+  ExactCriticalArmFamilyResult result =
+      compute_exact_critical_arm_family_descent(
+          cloud,
+          critical_shell_point_ids,
+          per_arm_chain_budget);
+  const ExactCriticalArmFamilyVerification verification =
+      verify_exact_critical_arm_family_descent(
+          cloud,
+          critical_shell_point_ids,
+          per_arm_chain_budget,
+          result);
+  if (!verification.exact_critical_arm_family_decision_certified) {
+    throw std::logic_error(
+        "the exact critical-arm family failed its fresh replay");
   }
   return result;
 }
