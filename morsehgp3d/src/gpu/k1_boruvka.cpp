@@ -11,6 +11,7 @@
 #include <limits>
 #include <memory>
 #include <optional>
+#include <queue>
 #include <span>
 #include <stdexcept>
 #include <utility>
@@ -29,6 +30,7 @@ class K1BoruvkaCandidateHostState final {
   std::vector<std::size_t> morton_position_by_point_id;
   std::uint64_t last_buffer_epoch{};
   bool rope_topology_certified{false};
+  bool lbvh_topology_and_exact_aabbs_certified{false};
 };
 
 }  // namespace morsehgp3d::gpu::detail
@@ -583,6 +585,199 @@ struct ResolvedCandidate {
     return false;
   }
   return left.source_point_id < right.source_point_id;
+}
+
+struct ExactSearchQueueEntry {
+  exact::ExactLevel lower_bound;
+  std::size_t node_index{};
+};
+
+struct ExactSearchNearestFirst {
+  [[nodiscard]] bool operator()(
+      const ExactSearchQueueEntry& left,
+      const ExactSearchQueueEntry& right) const {
+    if (left.lower_bound != right.lower_bound) {
+      return left.lower_bound > right.lower_bound;
+    }
+    return left.node_index > right.node_index;
+  }
+};
+
+[[nodiscard]] K1BoruvkaSeededExactRoundResolution
+resolve_seeded_exact_external_1nn(
+    const detail::K1BoruvkaCandidateHostState& host,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> labels,
+    const std::vector<std::uint64_t>& tags,
+    const SeedBundle& seeds,
+    std::size_t component_count,
+    std::size_t uniform_node_count,
+    std::size_t mixed_node_count) {
+  const std::size_t point_count = host.point_count;
+  if (component_count <= 1U || seeds.public_seeds.size() != point_count ||
+      tags.size() != host.nodes.size() ||
+      seeds.status != K1BoruvkaSeedStatus::
+          bounded_morton_window_external_exact_monotone_certified ||
+      !seeds.morton_audit.complete_source_coverage_certified ||
+      !seeds.morton_audit.bounded_window_certified ||
+      !seeds.morton_audit.external_targets_recertified ||
+      !seeds.morton_audit.exact_monotone_cutoff_certified) {
+    throw std::logic_error(
+        "the exact external-1NN search requires a certified nonterminal Morton seed bundle");
+  }
+
+  K1BoruvkaSeededExactRoundResolution resolution;
+  resolution.point_minima.reserve(point_count);
+  std::vector<std::optional<ResolvedCandidate>> component_minima(
+      point_count);
+  K1BoruvkaExactSearchAudit& audit = resolution.search_audit;
+  audit.resident_point_count = point_count;
+  audit.resident_node_count = host.nodes.size();
+  audit.frozen_component_count = component_count;
+  audit.uniform_lbvh_node_count = uniform_node_count;
+  audit.mixed_lbvh_node_count = mixed_node_count;
+
+  for (std::size_t source_index = 0U;
+       source_index < point_count;
+       ++source_index) {
+    const spatial::PointId source_id = checked_point_id(source_index);
+    const spatial::PointId source_component = labels[source_index];
+    const K1BoruvkaSeed& seed = seeds.public_seeds[source_index];
+    const std::size_t seed_target_index = checked_point_index(
+        seed.target_point_id, point_count);
+    if (seed.source_point_id != source_id ||
+        labels[seed_target_index] == source_component ||
+        seed.exact_squared_cutoff == exact::ExactLevel{}) {
+      throw std::logic_error(
+          "a certified Morton incumbent is not an exact external edge");
+    }
+
+    ResolvedCandidate best{seed_edge(seed), source_id};
+    ++audit.seed_incumbent_count;
+    ++audit.point_query_count;
+    std::priority_queue<
+        ExactSearchQueueEntry,
+        std::vector<ExactSearchQueueEntry>,
+        ExactSearchNearestFirst>
+        frontier;
+    exact::ExactLevel root_bound = exact_aabb_lower_bound(
+        host.nodes[host.root_index], cloud, source_id);
+    ++audit.cpu_exact_aabb_bound_evaluation_count;
+    frontier.push(ExactSearchQueueEntry{
+        std::move(root_bound), host.root_index});
+
+    while (!frontier.empty()) {
+      ExactSearchQueueEntry entry = frontier.top();
+      frontier.pop();
+      ++audit.cpu_node_visit_count;
+      if (tags[entry.node_index] == source_component) {
+        ++audit.cpu_uniform_component_prune_count;
+        continue;
+      }
+      if (entry.lower_bound > best.edge.squared_length) {
+        ++audit.cpu_strict_aabb_prune_count;
+        continue;
+      }
+
+      const detail::K1BoruvkaNodeInputRecord& node =
+          host.nodes[entry.node_index];
+      if (node.leaf_point_id != detail::k1_boruvka_sentinel) {
+        const spatial::PointId target_id = checked_record_point_id(
+            node.leaf_point_id, point_count);
+        if (target_id == seed.target_point_id) {
+          continue;
+        }
+        hierarchy::ExactEmstEdge edge = exact_edge(
+            cloud, source_id, target_id);
+        ++audit.cpu_exact_point_distance_evaluation_count;
+        ResolvedCandidate candidate{std::move(edge), source_id};
+        if (resolved_less(candidate, best)) {
+          best = std::move(candidate);
+        }
+        continue;
+      }
+
+      ++audit.cpu_internal_node_expansion_count;
+      for (const std::uint64_t child_word : {
+               node.left_child, node.right_child}) {
+        if (!std::in_range<std::size_t>(child_word)) {
+          throw std::logic_error(
+              "an exact external-1NN child index does not fit size_t");
+        }
+        const std::size_t child = static_cast<std::size_t>(child_word);
+        if (child >= host.nodes.size()) {
+          throw std::logic_error(
+              "an exact external-1NN child is outside the LBVH");
+        }
+        if (tags[child] == source_component) {
+          ++audit.cpu_uniform_component_prune_count;
+          continue;
+        }
+        exact::ExactLevel child_bound = exact_aabb_lower_bound(
+            host.nodes[child], cloud, source_id);
+        ++audit.cpu_exact_aabb_bound_evaluation_count;
+        frontier.push(ExactSearchQueueEntry{
+            std::move(child_bound), child});
+      }
+    }
+
+    resolution.point_minima.push_back(
+        K1BoruvkaPointMinimum{source_id, best.edge});
+    const std::size_t component_index = checked_point_index(
+        source_component, point_count);
+    std::optional<ResolvedCandidate>& component_minimum =
+        component_minima[component_index];
+    if (!component_minimum.has_value() ||
+        resolved_less(best, *component_minimum)) {
+      component_minimum = std::move(best);
+    }
+  }
+
+  resolution.component_minima.reserve(component_count);
+  for (std::size_t point_index = 0U;
+       point_index < point_count;
+       ++point_index) {
+    if (labels[point_index] != checked_point_id(point_index)) {
+      continue;
+    }
+    if (!component_minima[point_index].has_value()) {
+      throw std::logic_error(
+          "an exact external-1NN search lost a frozen component");
+    }
+    const ResolvedCandidate& minimum = *component_minima[point_index];
+    resolution.component_minima.push_back(
+        hierarchy::K1BoruvkaComponentMinimum{
+            checked_point_id(point_index),
+            minimum.source_point_id,
+            minimum.edge});
+  }
+  if (resolution.point_minima.size() != point_count ||
+      resolution.component_minima.size() != component_count ||
+      audit.point_query_count != point_count ||
+      audit.seed_incumbent_count != point_count) {
+    throw std::logic_error(
+        "the exact external-1NN result does not close its source/component counts");
+  }
+
+  audit.point_minimum_count = resolution.point_minima.size();
+  audit.component_minimum_count = resolution.component_minima.size();
+  audit.frozen_labels_certified = true;
+  audit.lbvh_topology_and_exact_aabbs_certified =
+      host.lbvh_topology_and_exact_aabbs_certified;
+  audit.complete_source_seed_coverage_certified = true;
+  audit.external_seed_targets_recertified = true;
+  audit.exact_seed_cutoffs_recertified = true;
+  audit.uniform_component_prunes_certified = true;
+  audit.strict_only_aabb_pruning_certified = true;
+  audit.complete_frontier_exhaustion_certified = true;
+  audit.canonical_kappa_resolution_certified = true;
+  audit.point_minima_complete = true;
+  audit.component_minima_complete = true;
+  resolution.morton_seed_audit = seeds.morton_audit;
+  resolution.seed_status = seeds.status;
+  resolution.search_status = K1BoruvkaExactSearchStatus::
+      exact_external_1nn_branch_and_bound_certified;
+  return resolution;
 }
 
 [[nodiscard]] K1BoruvkaRoundProposal validate_and_resolve(
@@ -1296,6 +1491,7 @@ K1BoruvkaCandidateContext::K1BoruvkaCandidateContext(
         "the Phase 5 K1 Boruvka rope does not cover every LBVH node");
   }
   host_->rope_topology_certified = true;
+  host_->lbvh_topology_and_exact_aabbs_certified = true;
 }
 
 K1BoruvkaCandidateContext::~K1BoruvkaCandidateContext() noexcept = default;
@@ -1408,6 +1604,58 @@ K1BoruvkaCandidateContext::propose_round_chunked(
       frozen_component_labels,
       chunking_policy,
       &seed_policy);
+}
+
+K1BoruvkaSeededExactRoundResolution
+K1BoruvkaCandidateContext::resolve_round_exact_external_1nn(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> frozen_component_labels,
+    K1BoruvkaMortonSeedPolicy seed_policy) {
+  require_matching_cloud(cloud);
+  validate_morton_seed_policy(seed_policy);
+  const std::size_t component_count = validate_frozen_labels(
+      frozen_component_labels, host_->point_count);
+  if (component_count <= 1U) {
+    throw std::invalid_argument(
+        "the exact external-1NN resolver requires a nonterminal frozen partition");
+  }
+
+  std::size_t uniform_node_count = 0U;
+  std::size_t mixed_node_count = 0U;
+  const std::vector<std::uint64_t> tags = build_component_tags(
+      *host_,
+      frozen_component_labels,
+      uniform_node_count,
+      mixed_node_count);
+  std::vector<std::uint64_t> labels(
+      frozen_component_labels.begin(), frozen_component_labels.end());
+  return state_->with_gpu_section([&]() {
+    const detail::K1BoruvkaMortonSeedProposalBatch seed_proposals =
+        detail::propose_k1_boruvka_morton_seeds_on_gpu(
+            *state_,
+            host_->nodes,
+            host_->root_index,
+            host_->coordinate_bits,
+            host_->point_count,
+            host_->morton_point_ids,
+            labels,
+            seed_policy.window_radius);
+    const SeedBundle seeds = build_morton_refined_seeds(
+        *host_,
+        cloud,
+        frozen_component_labels,
+        seed_policy,
+        seed_proposals);
+    return resolve_seeded_exact_external_1nn(
+        *host_,
+        cloud,
+        frozen_component_labels,
+        tags,
+        seeds,
+        component_count,
+        uniform_node_count,
+        mixed_node_count);
+  });
 }
 
 K1BoruvkaChunkedRoundResolution

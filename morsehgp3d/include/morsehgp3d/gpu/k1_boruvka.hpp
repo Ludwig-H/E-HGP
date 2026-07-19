@@ -136,6 +136,81 @@ struct K1BoruvkaMortonSeedAudit {
       const K1BoruvkaMortonSeedAudit&) = default;
 };
 
+struct K1BoruvkaPointMinimum {
+  spatial::PointId source_point_id{};
+  hierarchy::ExactEmstEdge outgoing_edge{};
+
+  friend bool operator==(
+      const K1BoruvkaPointMinimum&,
+      const K1BoruvkaPointMinimum&) = default;
+};
+
+enum class K1BoruvkaExactSearchStatus : std::uint8_t {
+  not_certified,
+  exact_external_1nn_branch_and_bound_certified,
+};
+
+struct K1BoruvkaExactSearchAudit {
+  static constexpr const char* proposal_semantics =
+      "gpu_bounded_morton_seed_only";
+  static constexpr const char* decision_semantics =
+      "cpu_exact_external_1nn_lbvh_branch_and_bound";
+  static constexpr const char* proof_basis =
+      "strict_exact_point_aabb_frontier_exhaustion_v1";
+
+  std::size_t resident_point_count{};
+  std::size_t resident_node_count{};
+  std::size_t frozen_component_count{};
+  std::size_t uniform_lbvh_node_count{};
+  std::size_t mixed_lbvh_node_count{};
+  std::size_t point_query_count{};
+  std::size_t seed_incumbent_count{};
+  std::size_t point_minimum_count{};
+  std::size_t component_minimum_count{};
+  std::size_t cpu_node_visit_count{};
+  std::size_t cpu_internal_node_expansion_count{};
+  std::size_t cpu_exact_aabb_bound_evaluation_count{};
+  std::size_t cpu_exact_point_distance_evaluation_count{};
+  std::size_t cpu_uniform_component_prune_count{};
+  std::size_t cpu_strict_aabb_prune_count{};
+  bool frozen_labels_certified{false};
+  bool lbvh_topology_and_exact_aabbs_certified{false};
+  bool complete_source_seed_coverage_certified{false};
+  bool external_seed_targets_recertified{false};
+  bool exact_seed_cutoffs_recertified{false};
+  bool uniform_component_prunes_certified{false};
+  bool strict_only_aabb_pruning_certified{false};
+  bool complete_frontier_exhaustion_certified{false};
+  bool canonical_kappa_resolution_certified{false};
+  bool point_minima_complete{false};
+  bool component_minima_complete{false};
+
+  friend bool operator==(
+      const K1BoruvkaExactSearchAudit&,
+      const K1BoruvkaExactSearchAudit&) = default;
+};
+
+// The GPU contributes only one bounded Morton seed proposal per source. The
+// CPU recertifies that incumbent, exhausts an exact best-first point-to-LBVH
+// frontier, and prunes solely uniform internal nodes or nodes whose exact AABB
+// lower bound is strictly larger than the current exact edge. Equal bounds are
+// always descended so the canonical (squared_length, u, v) order is preserved.
+// The result contains one exact edge per source and one reduction per frozen
+// component; it performs neither contraction nor hierarchy publication.
+struct K1BoruvkaSeededExactRoundResolution {
+  std::vector<K1BoruvkaPointMinimum> point_minima;
+  std::vector<hierarchy::K1BoruvkaComponentMinimum> component_minima;
+  K1BoruvkaMortonSeedAudit morton_seed_audit;
+  K1BoruvkaExactSearchAudit search_audit;
+  K1BoruvkaSeedStatus seed_status{K1BoruvkaSeedStatus::not_certified};
+  K1BoruvkaExactSearchStatus search_status{
+      K1BoruvkaExactSearchStatus::not_certified};
+
+  friend bool operator==(
+      const K1BoruvkaSeededExactRoundResolution&,
+      const K1BoruvkaSeededExactRoundResolution&) = default;
+};
+
 enum class K1BoruvkaEmissionStatus : std::uint8_t {
   not_certified,
   complete_source_ranges_candidate_payload_bound_certified,
@@ -432,6 +507,12 @@ class K1BoruvkaCandidateContext final {
       const spatial::CanonicalPointCloud& cloud,
       std::span<const spatial::PointId> frozen_component_labels,
       K1BoruvkaChunkingPolicy chunking_policy,
+      K1BoruvkaMortonSeedPolicy seed_policy);
+
+  [[nodiscard]] K1BoruvkaSeededExactRoundResolution
+  resolve_round_exact_external_1nn(
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const spatial::PointId> frozen_component_labels,
       K1BoruvkaMortonSeedPolicy seed_policy);
 
   [[nodiscard]] std::size_t point_count() const noexcept;
