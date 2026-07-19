@@ -549,17 +549,36 @@ struct FreshReplay {
   return left * right;
 }
 
-[[nodiscard]] bool dual_tree_search_audit_closes(
-    const K1BoruvkaDualTreeSearchAudit& audit,
-    K1BoruvkaDualTreeSearchStatus status,
+[[nodiscard]] std::optional<std::size_t> dual_tree_node_pair_visit_bound(
+    std::size_t point_count) noexcept {
+  const std::optional<std::size_t> unordered_pairs =
+      unordered_point_pair_count(point_count);
+  if (!unordered_pairs.has_value()) {
+    return std::nullopt;
+  }
+  std::size_t terminal_block_bound = *unordered_pairs;
+  if (!add_without_overflow(terminal_block_bound, point_count) ||
+      terminal_block_bound >
+          std::numeric_limits<std::size_t>::max() / 2U + 1U) {
+    return std::nullopt;
+  }
+  return (terminal_block_bound - 1U) * 2U + 1U;
+}
+
+[[nodiscard]] bool component_dual_tree_search_audit_closes(
+    const K1BoruvkaComponentDualTreeSearchAudit& audit,
+    K1BoruvkaComponentDualTreeSearchStatus status,
     std::size_t point_count,
     std::size_t node_count,
     std::size_t lbvh_maximum_depth,
     std::size_t component_count) noexcept {
   const std::optional<std::size_t> expected_pairs =
       unordered_point_pair_count(point_count);
+  const std::optional<std::size_t> expected_node_pair_visit_bound =
+      dual_tree_node_pair_visit_bound(point_count);
   if (point_count <= 1U || component_count <= 1U ||
       component_count > point_count || !expected_pairs.has_value() ||
+      !expected_node_pair_visit_bound.has_value() ||
       audit.uniform_lbvh_node_count > node_count ||
       audit.mixed_lbvh_node_count !=
           node_count - audit.uniform_lbvh_node_count ||
@@ -583,27 +602,29 @@ struct FreshReplay {
           visited_partition, audit.cpu_node_pair_expansion_count)) {
     return false;
   }
-  std::size_t maximum_strict_decreases =
+  std::size_t maximum_component_updates =
       audit.cpu_exact_point_pair_distance_evaluation_count;
   if (!add_without_overflow(
-          maximum_strict_decreases,
+          maximum_component_updates,
           audit.cpu_exact_point_pair_distance_evaluation_count)) {
     return false;
   }
-  return status == K1BoruvkaDualTreeSearchStatus::
-                       exact_external_1nn_shared_lbvh_dual_tree_certified &&
+  return status == K1BoruvkaComponentDualTreeSearchStatus::
+                       exact_component_minima_shared_lbvh_dual_tree_certified &&
          audit.resident_point_count == point_count &&
          audit.resident_node_count == node_count &&
          audit.frozen_component_count == component_count &&
-         audit.seed_incumbent_count == point_count &&
-         audit.dynamic_incumbent_node_count == node_count &&
-         audit.point_minimum_count == point_count &&
+         audit.point_seed_count == point_count &&
+         audit.component_seed_incumbent_count == component_count &&
+         audit.component_cutoff_upper_envelope_node_count == node_count &&
          audit.component_minimum_count == component_count &&
          audit.unordered_point_pair_count == *expected_pairs &&
          audit.covered_unordered_point_pair_count == *expected_pairs &&
          audit.lbvh_maximum_depth == lbvh_maximum_depth &&
          audit.certified_depth_first_frontier_bound ==
              expected_frontier_bound &&
+         audit.certified_node_pair_visit_bound ==
+             *expected_node_pair_visit_bound &&
          audit.maximum_cpu_frontier_size > 0U &&
          audit.maximum_cpu_frontier_size <=
              audit.certified_depth_first_frontier_bound &&
@@ -611,22 +632,28 @@ struct FreshReplay {
              audit.cpu_node_pair_visit_count &&
          audit.cpu_exact_aabb_pair_bound_evaluation_count ==
              audit.cpu_node_pair_visit_count &&
+         audit.cpu_node_pair_visit_count <=
+             audit.certified_node_pair_visit_bound &&
          visited_partition == audit.cpu_node_pair_visit_count &&
-         audit.cpu_strict_incumbent_decrease_count <=
-             maximum_strict_decreases &&
+         audit.cpu_component_kappa_update_count <=
+             maximum_component_updates &&
+         audit.cpu_strict_component_cutoff_decrease_count <=
+             audit.cpu_component_kappa_update_count &&
          audit.frozen_labels_certified &&
          audit.lbvh_topology_and_exact_aabbs_certified &&
          audit.complete_source_seed_coverage_certified &&
          audit.external_seed_targets_recertified &&
          audit.exact_seed_cutoffs_recertified &&
-         audit.dynamic_incumbent_tree_certified &&
+         audit.component_seed_reduction_certified &&
+         audit.component_cutoff_upper_envelope_certified &&
          audit.canonical_unordered_pair_partition_certified &&
          audit.uniform_component_pair_prunes_certified &&
          audit.strict_only_aabb_pair_pruning_certified &&
          audit.depth_first_frontier_bound_certified &&
+         audit.node_pair_visit_bound_certified &&
          audit.complete_frontier_exhaustion_certified &&
          audit.canonical_kappa_resolution_certified &&
-         audit.point_minima_complete && audit.component_minima_complete;
+         audit.component_minima_complete;
 }
 
 [[nodiscard]] bool dual_tree_round_audits_close(
@@ -650,7 +677,7 @@ struct FreshReplay {
              round.seed_status,
              point_count,
              policy) &&
-         dual_tree_search_audit_closes(
+         component_dual_tree_search_audit_closes(
              round.dual_tree_search_audit,
              round.search_status,
              point_count,
@@ -730,7 +757,7 @@ struct DualTreeFreshReplay {
               policy)) {
         seed_chain = false;
       }
-      if (!dual_tree_search_audit_closes(
+      if (!component_dual_tree_search_audit_closes(
               observed.dual_tree_search_audit,
               observed.search_status,
               result.point_count,
@@ -750,8 +777,8 @@ struct DualTreeFreshReplay {
         decision_chain = false;
       }
 
-      K1BoruvkaSeededDualTreeRoundResolution resolution =
-          context->resolve_round_exact_external_1nn_dual_tree(
+      K1BoruvkaSeededComponentDualTreeRoundResolution resolution =
+          context->resolve_round_exact_component_minima_dual_tree(
               cloud, labels, policy);
       if (resolution.seed_status != observed.seed_status ||
           resolution.morton_seed_audit != observed.morton_seed_audit) {
@@ -1150,8 +1177,8 @@ build_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
         throw std::logic_error(
             "dual-tree exact K1 Boruvka exceeded ceil(log2(n)) rounds");
       }
-      K1BoruvkaSeededDualTreeRoundResolution resolution =
-          context.resolve_round_exact_external_1nn_dual_tree(
+      K1BoruvkaSeededComponentDualTreeRoundResolution resolution =
+          context.resolve_round_exact_component_minima_dual_tree(
               cloud, labels, seed_policy);
       hierarchy::K1BoruvkaRoundContraction contraction =
           hierarchy::contract_exact_k1_boruvka_round(
@@ -1192,7 +1219,7 @@ build_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
       result.rounds.push_back(std::move(round));
       labels = std::move(contraction.post_round_component_labels);
       component_count = contraction.post_round_component_count;
-      // Transient per-point minima and the complete pair frontier die here.
+      // The frozen component envelope and complete pair frontier die here.
     }
   }
 

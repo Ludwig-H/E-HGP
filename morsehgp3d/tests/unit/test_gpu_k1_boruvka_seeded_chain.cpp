@@ -17,8 +17,8 @@ namespace {
 
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactLevel;
+using morsehgp3d::gpu::K1BoruvkaComponentDualTreeSearchStatus;
 using morsehgp3d::gpu::K1BoruvkaExactSearchStatus;
-using morsehgp3d::gpu::K1BoruvkaDualTreeSearchStatus;
 using morsehgp3d::gpu::K1BoruvkaMortonSeedPolicy;
 using morsehgp3d::gpu::K1BoruvkaSeedStatus;
 using morsehgp3d::gpu::K1DualTreeExactBoruvkaResult;
@@ -411,8 +411,8 @@ void test_dual_tree_three_round_chain_and_falsifications() {
                 K1BoruvkaSeedStatus::
                     bounded_morton_window_external_exact_monotone_certified &&
             observed.search_status ==
-                K1BoruvkaDualTreeSearchStatus::
-                    exact_external_1nn_shared_lbvh_dual_tree_certified &&
+                K1BoruvkaComponentDualTreeSearchStatus::
+                    exact_component_minima_shared_lbvh_dual_tree_certified &&
             observed.decision_status ==
                 K1HybridBoruvkaDecisionStatus::
                     cpu_exact_kappa_minima_certified &&
@@ -436,13 +436,23 @@ void test_dual_tree_three_round_chain_and_falsifications() {
                 index.build_counters().maximum_depth &&
             audit.certified_depth_first_frontier_bound ==
                 2U * index.build_counters().maximum_depth + 1U &&
+            audit.certified_node_pair_visit_bound == 71U &&
             audit.maximum_cpu_frontier_size <=
                 audit.certified_depth_first_frontier_bound &&
+            audit.cpu_node_pair_visit_count <=
+                audit.certified_node_pair_visit_bound &&
             audit.cpu_exact_aabb_pair_bound_evaluation_count ==
                 audit.cpu_node_pair_visit_count &&
-            audit.dynamic_incumbent_tree_certified &&
+            audit.point_seed_count == 8U &&
+            audit.component_seed_incumbent_count ==
+                expected.pre_round_component_count &&
+            audit.component_cutoff_upper_envelope_node_count ==
+                index.build_counters().node_count &&
+            audit.component_seed_reduction_certified &&
+            audit.component_cutoff_upper_envelope_certified &&
             audit.canonical_unordered_pair_partition_certified &&
-            audit.depth_first_frontier_bound_certified,
+            audit.depth_first_frontier_bound_certified &&
+            audit.node_pair_visit_bound_certified,
         "each shared round closes the canonical unordered-pair partition");
   }
   check(
@@ -455,7 +465,7 @@ void test_dual_tree_three_round_chain_and_falsifications() {
           result.reference_cpu_witness_certified &&
           result.emst_witness_certified &&
           std::string_view{K1DualTreeExactBoruvkaResult::proof_basis} ==
-              "gpu_bounded_morton_seed_cpu_exact_shared_dual_tree_boruvka_v1",
+              "gpu_bounded_morton_seed_cpu_exact_direct_component_dual_tree_boruvka_v2",
       "shared builder requires fresh replay and the independent CPU witness");
 
   std::size_t launches = fake_gpu_k1_boruvka_launch_count();
@@ -493,6 +503,30 @@ void test_dual_tree_three_round_chain_and_falsifications() {
           search_check.cpu_exact_decision_chain_certified &&
           !search_check.emst_witness_certified,
       "shared coverage falsification invalidates only the traversal proof");
+
+  K1DualTreeExactBoruvkaResult bad_visit_bound = result;
+  --bad_visit_bound.rounds[0].dual_tree_search_audit.
+      certified_node_pair_visit_bound;
+  const auto visit_bound_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_visit_bound);
+  check(
+      !visit_bound_check.exact_dual_tree_chain_certified &&
+          visit_bound_check.cpu_exact_decision_chain_certified &&
+          !visit_bound_check.emst_witness_certified,
+      "shared visit-bound falsification invalidates the traversal proof");
+
+  K1DualTreeExactBoruvkaResult bad_envelope = result;
+  bad_envelope.rounds[0].dual_tree_search_audit.
+      component_cutoff_upper_envelope_certified = false;
+  const auto envelope_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_envelope);
+  check(
+      !envelope_check.exact_dual_tree_chain_certified &&
+          envelope_check.cpu_exact_decision_chain_certified &&
+          !envelope_check.emst_witness_certified,
+      "frozen component-envelope falsification invalidates only traversal");
 
   K1DualTreeExactBoruvkaResult bad_decision = result;
   bad_decision.rounds[0].exact_decision.component_minima[0] =

@@ -649,6 +649,307 @@ struct DualTreeFrontierEntry {
   std::size_t right_node_index{};
 };
 
+struct DualTreeTraversalMetadataView {
+  std::span<const exact::ExactLevel> node_squared_diagonals;
+  std::span<const std::size_t> node_leaf_counts;
+  std::span<const std::size_t> node_leaf_begins;
+  std::span<const std::size_t> node_leaf_ends;
+  std::size_t lbvh_maximum_depth{};
+};
+
+template <typename Audit, typename RelaxLeafPair>
+void traverse_exact_dual_tree_frontier(
+    const detail::K1BoruvkaCandidateHostState& host,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> labels,
+    const std::vector<std::uint64_t>& tags,
+    const DualTreeTraversalMetadataView& metadata,
+    std::span<const exact::ExactLevel> node_cutoff_upper_bounds,
+    Audit& audit,
+    RelaxLeafPair&& relax_leaf_pair) {
+  const std::size_t point_count = host.point_count;
+  const std::size_t node_count = host.nodes.size();
+  if (point_count <= 1U || labels.size() != point_count ||
+      tags.size() != node_count ||
+      metadata.node_squared_diagonals.size() != node_count ||
+      metadata.node_leaf_counts.size() != node_count ||
+      metadata.node_leaf_begins.size() != node_count ||
+      metadata.node_leaf_ends.size() != node_count ||
+      metadata.lbvh_maximum_depth == 0U ||
+      node_cutoff_upper_bounds.size() != node_count) {
+    throw std::logic_error(
+        "the exact dual-tree DFS metadata is incomplete");
+  }
+
+  std::size_t pair_factor_left = point_count;
+  std::size_t pair_factor_right = point_count - 1U;
+  if ((pair_factor_left & 1U) == 0U) {
+    pair_factor_left /= 2U;
+  } else {
+    pair_factor_right /= 2U;
+  }
+  audit.unordered_point_pair_count = checked_size_product(
+      pair_factor_left,
+      pair_factor_right,
+      "the exact dual-tree unordered point-pair bound overflowed size_t");
+  audit.lbvh_maximum_depth = metadata.lbvh_maximum_depth;
+  audit.certified_depth_first_frontier_bound = checked_size_sum(
+      checked_size_product(
+          metadata.lbvh_maximum_depth,
+          2U,
+          "the exact dual-tree DFS frontier bound overflowed size_t"),
+      1U,
+      "the exact dual-tree DFS frontier bound overflowed size_t");
+  const std::size_t maximum_terminal_count = checked_size_sum(
+      audit.unordered_point_pair_count,
+      point_count,
+      "the exact dual-tree terminal-count bound overflowed size_t");
+  audit.certified_node_pair_visit_bound = checked_size_sum(
+      checked_size_product(
+          maximum_terminal_count - 1U,
+          2U,
+          "the exact dual-tree visit bound overflowed size_t"),
+      1U,
+      "the exact dual-tree visit bound overflowed size_t");
+
+  const auto close_node_pair = [&](std::size_t first, std::size_t second) {
+    std::size_t covered_count = 0U;
+    if (first == second) {
+      std::size_t first_factor = metadata.node_leaf_counts[first];
+      std::size_t second_factor = first_factor - 1U;
+      if ((first_factor & 1U) == 0U) {
+        first_factor /= 2U;
+      } else {
+        second_factor /= 2U;
+      }
+      covered_count = checked_size_product(
+          first_factor,
+          second_factor,
+          "the exact dual-tree self-pair coverage overflowed size_t");
+    } else {
+      covered_count = checked_size_product(
+          metadata.node_leaf_counts[first],
+          metadata.node_leaf_counts[second],
+          "the exact dual-tree cross-pair coverage overflowed size_t");
+    }
+    audit.covered_unordered_point_pair_count = checked_size_sum(
+        audit.covered_unordered_point_pair_count,
+        covered_count,
+        "the exact dual-tree total pair coverage overflowed size_t");
+  };
+
+  std::vector<DualTreeFrontierEntry> frontier;
+  frontier.reserve(audit.certified_depth_first_frontier_bound);
+  const auto make_pair_entry = [&](std::size_t first, std::size_t second) {
+    if (first >= node_count || second >= node_count) {
+      throw std::logic_error(
+          "an exact dual-tree node pair is outside the LBVH");
+    }
+    if (second < first) {
+      std::swap(first, second);
+    }
+    const bool disjoint_ranges =
+        metadata.node_leaf_ends[first] <=
+            metadata.node_leaf_begins[second] ||
+        metadata.node_leaf_ends[second] <=
+            metadata.node_leaf_begins[first];
+    if (first != second && !disjoint_ranges) {
+      throw std::logic_error(
+          "an exact dual-tree pair contains overlapping leaf ranges");
+    }
+    exact::ExactLevel lower_bound = exact_aabb_pair_lower_bound(
+        host.nodes[first], host.nodes[second]);
+    audit.cpu_exact_aabb_pair_bound_evaluation_count = checked_size_sum(
+        audit.cpu_exact_aabb_pair_bound_evaluation_count,
+        1U,
+        "the exact dual-tree AABB-pair count overflowed size_t");
+    return DualTreeFrontierEntry{
+        std::move(lower_bound), first, second};
+  };
+  const auto push_pairs_near_first =
+      [&make_pair_entry, &frontier, &audit](
+          std::initializer_list<std::pair<std::size_t, std::size_t>> pairs) {
+    std::vector<DualTreeFrontierEntry> entries;
+    entries.reserve(pairs.size());
+    for (const auto& [first, second] : pairs) {
+      entries.push_back(make_pair_entry(first, second));
+    }
+    std::sort(
+        entries.begin(),
+        entries.end(),
+        [](const DualTreeFrontierEntry& left,
+           const DualTreeFrontierEntry& right) {
+          if (left.lower_bound != right.lower_bound) {
+            return left.lower_bound > right.lower_bound;
+          }
+          if (left.left_node_index != right.left_node_index) {
+            return left.left_node_index > right.left_node_index;
+          }
+          return left.right_node_index > right.right_node_index;
+        });
+    if (frontier.size() >
+            audit.certified_depth_first_frontier_bound ||
+        entries.size() >
+            audit.certified_depth_first_frontier_bound -
+                frontier.size()) {
+      throw std::logic_error(
+          "the exact dual-tree DFS frontier exceeded its depth bound");
+    }
+    frontier.insert(
+        frontier.end(),
+        std::make_move_iterator(entries.begin()),
+        std::make_move_iterator(entries.end()));
+    audit.maximum_cpu_frontier_size = std::max(
+        audit.maximum_cpu_frontier_size, frontier.size());
+  };
+  push_pairs_near_first({{host.root_index, host.root_index}});
+
+  while (!frontier.empty()) {
+    DualTreeFrontierEntry entry = std::move(frontier.back());
+    frontier.pop_back();
+    audit.cpu_node_pair_visit_count = checked_size_sum(
+        audit.cpu_node_pair_visit_count,
+        1U,
+        "the exact dual-tree node-pair visit count overflowed size_t");
+
+    const std::uint64_t left_tag = tags[entry.left_node_index];
+    const std::uint64_t right_tag = tags[entry.right_node_index];
+    if (left_tag != detail::k1_boruvka_mixed_component &&
+        left_tag == right_tag) {
+      close_node_pair(entry.left_node_index, entry.right_node_index);
+      audit.cpu_uniform_same_component_pair_prune_count = checked_size_sum(
+          audit.cpu_uniform_same_component_pair_prune_count,
+          1U,
+          "the exact dual-tree uniform prune count overflowed size_t");
+      continue;
+    }
+
+    const exact::ExactLevel& left_cutoff =
+        node_cutoff_upper_bounds[entry.left_node_index];
+    const exact::ExactLevel& right_cutoff =
+        node_cutoff_upper_bounds[entry.right_node_index];
+    const exact::ExactLevel& pair_cutoff =
+        left_cutoff < right_cutoff ? right_cutoff : left_cutoff;
+    if (entry.lower_bound > pair_cutoff) {
+      close_node_pair(entry.left_node_index, entry.right_node_index);
+      audit.cpu_strict_aabb_pair_prune_count = checked_size_sum(
+          audit.cpu_strict_aabb_pair_prune_count,
+          1U,
+          "the exact dual-tree strict prune count overflowed size_t");
+      continue;
+    }
+
+    const detail::K1BoruvkaNodeInputRecord& left_node =
+        host.nodes[entry.left_node_index];
+    const detail::K1BoruvkaNodeInputRecord& right_node =
+        host.nodes[entry.right_node_index];
+    const bool left_is_leaf =
+        left_node.leaf_point_id != detail::k1_boruvka_sentinel;
+    const bool right_is_leaf =
+        right_node.leaf_point_id != detail::k1_boruvka_sentinel;
+    if (left_is_leaf && right_is_leaf) {
+      const spatial::PointId left_id = checked_record_point_id(
+          left_node.leaf_point_id, point_count);
+      const spatial::PointId right_id = checked_record_point_id(
+          right_node.leaf_point_id, point_count);
+      if (left_id == right_id ||
+          labels[checked_point_index(left_id, point_count)] ==
+              labels[checked_point_index(right_id, point_count)]) {
+        throw std::logic_error(
+            "an exact dual-tree internal leaf pair escaped uniform pruning");
+      }
+      hierarchy::ExactEmstEdge edge = exact_edge(
+          cloud, left_id, right_id);
+      close_node_pair(entry.left_node_index, entry.right_node_index);
+      audit.cpu_exact_point_pair_distance_evaluation_count = checked_size_sum(
+          audit.cpu_exact_point_pair_distance_evaluation_count,
+          1U,
+          "the exact dual-tree point-pair count overflowed size_t");
+      relax_leaf_pair(std::move(edge), left_id, right_id);
+      continue;
+    }
+
+    audit.cpu_node_pair_expansion_count = checked_size_sum(
+        audit.cpu_node_pair_expansion_count,
+        1U,
+        "the exact dual-tree node-pair expansion count overflowed size_t");
+    if (entry.left_node_index == entry.right_node_index) {
+      if (left_is_leaf) {
+        throw std::logic_error(
+            "an exact dual-tree leaf self-pair escaped uniform pruning");
+      }
+      const std::size_t left_child =
+          static_cast<std::size_t>(left_node.left_child);
+      const std::size_t right_child =
+          static_cast<std::size_t>(left_node.right_child);
+      push_pairs_near_first({
+          {left_child, left_child},
+          {left_child, right_child},
+          {right_child, right_child}});
+      continue;
+    }
+
+    bool split_left = false;
+    if (!left_is_leaf && right_is_leaf) {
+      split_left = true;
+    } else if (left_is_leaf && !right_is_leaf) {
+      split_left = false;
+    } else if (!left_is_leaf && !right_is_leaf) {
+      const exact::ExactLevel& left_diagonal =
+          metadata.node_squared_diagonals[entry.left_node_index];
+      const exact::ExactLevel& right_diagonal =
+          metadata.node_squared_diagonals[entry.right_node_index];
+      if (left_diagonal != right_diagonal) {
+        split_left = left_diagonal > right_diagonal;
+      } else if (metadata.node_leaf_counts[entry.left_node_index] !=
+                 metadata.node_leaf_counts[entry.right_node_index]) {
+        split_left =
+            metadata.node_leaf_counts[entry.left_node_index] >
+            metadata.node_leaf_counts[entry.right_node_index];
+      } else {
+        split_left = entry.left_node_index > entry.right_node_index;
+      }
+    } else {
+      throw std::logic_error(
+          "an exact dual-tree external leaf pair was not evaluated");
+    }
+
+    if (split_left) {
+      push_pairs_near_first({
+          {static_cast<std::size_t>(left_node.left_child),
+           entry.right_node_index},
+          {static_cast<std::size_t>(left_node.right_child),
+           entry.right_node_index}});
+    } else {
+      push_pairs_near_first({
+          {entry.left_node_index,
+           static_cast<std::size_t>(right_node.left_child)},
+          {entry.left_node_index,
+           static_cast<std::size_t>(right_node.right_child)}});
+    }
+  }
+
+  if (audit.cpu_exact_aabb_pair_bound_evaluation_count !=
+          audit.cpu_node_pair_visit_count ||
+      audit.cpu_exact_point_pair_distance_evaluation_count >
+          audit.unordered_point_pair_count ||
+      audit.covered_unordered_point_pair_count !=
+          audit.unordered_point_pair_count ||
+      audit.maximum_cpu_frontier_size >
+          audit.certified_depth_first_frontier_bound ||
+      audit.cpu_node_pair_visit_count >
+          audit.certified_node_pair_visit_bound) {
+    throw std::logic_error(
+        "the exact dual-tree DFS did not close its certified bounds");
+  }
+  audit.canonical_unordered_pair_partition_certified = true;
+  audit.uniform_component_pair_prunes_certified = true;
+  audit.strict_only_aabb_pair_pruning_certified = true;
+  audit.depth_first_frontier_bound_certified = true;
+  audit.node_pair_visit_bound_certified = true;
+  audit.complete_frontier_exhaustion_certified = true;
+}
+
 [[nodiscard]] K1BoruvkaSeededExactRoundResolution
 resolve_seeded_exact_external_1nn(
     const detail::K1BoruvkaCandidateHostState& host,
@@ -987,28 +1288,6 @@ resolve_seeded_exact_external_1nn_dual_tree(
         "the exact dual-tree metadata does not cover every point");
   }
   audit.dynamic_incumbent_node_count = node_incumbent_cutoffs.size();
-  audit.lbvh_maximum_depth = node_heights[host.root_index];
-  audit.certified_depth_first_frontier_bound = checked_size_sum(
-      checked_size_product(
-          audit.lbvh_maximum_depth,
-          2U,
-          "the exact dual-tree DFS frontier bound overflowed size_t"),
-      1U,
-      "the exact dual-tree DFS frontier bound overflowed size_t");
-
-  std::size_t pair_factor_left = point_count;
-  std::size_t pair_factor_right = point_count - 1U;
-  if ((pair_factor_left & 1U) == 0U) {
-    pair_factor_left /= 2U;
-  } else {
-    pair_factor_right /= 2U;
-  }
-  const std::size_t maximum_unordered_point_pair_count =
-      checked_size_product(
-          pair_factor_left,
-          pair_factor_right,
-          "the exact dual-tree unordered point-pair bound overflowed size_t");
-  audit.unordered_point_pair_count = maximum_unordered_point_pair_count;
 
   const auto decrease_point_incumbent = [&](
       std::size_t point_index,
@@ -1047,249 +1326,44 @@ resolve_seeded_exact_external_1nn_dual_tree(
     }
   };
 
-  const auto close_node_pair = [&](std::size_t first, std::size_t second) {
-    std::size_t covered_count = 0U;
-    if (first == second) {
-      std::size_t first_factor = node_leaf_counts[first];
-      std::size_t second_factor = first_factor - 1U;
-      if ((first_factor & 1U) == 0U) {
-        first_factor /= 2U;
-      } else {
-        second_factor /= 2U;
-      }
-      covered_count = checked_size_product(
-          first_factor,
-          second_factor,
-          "the exact dual-tree self-pair coverage overflowed size_t");
-    } else {
-      covered_count = checked_size_product(
-          node_leaf_counts[first],
-          node_leaf_counts[second],
-          "the exact dual-tree cross-pair coverage overflowed size_t");
-    }
-    audit.covered_unordered_point_pair_count = checked_size_sum(
-        audit.covered_unordered_point_pair_count,
-        covered_count,
-        "the exact dual-tree total pair coverage overflowed size_t");
-  };
-
-  std::vector<DualTreeFrontierEntry> frontier;
-  frontier.reserve(audit.certified_depth_first_frontier_bound);
-  const auto make_pair_entry = [&](std::size_t first, std::size_t second) {
-    if (first >= host.nodes.size() || second >= host.nodes.size()) {
-      throw std::logic_error(
-          "an exact dual-tree node pair is outside the LBVH");
-    }
-    if (second < first) {
-      std::swap(first, second);
-    }
-    const bool disjoint_ranges =
-        node_leaf_ends[first] <= node_leaf_begins[second] ||
-        node_leaf_ends[second] <= node_leaf_begins[first];
-    if (first != second && !disjoint_ranges) {
-      throw std::logic_error(
-          "an exact dual-tree pair contains overlapping leaf ranges");
-    }
-    exact::ExactLevel lower_bound = exact_aabb_pair_lower_bound(
-        host.nodes[first], host.nodes[second]);
-    audit.cpu_exact_aabb_pair_bound_evaluation_count = checked_size_sum(
-        audit.cpu_exact_aabb_pair_bound_evaluation_count,
-        1U,
-        "the exact dual-tree AABB-pair count overflowed size_t");
-    return DualTreeFrontierEntry{
-        std::move(lower_bound), first, second};
-  };
-  const auto push_pairs_near_first =
-      [&make_pair_entry, &frontier, &audit](
-          std::initializer_list<std::pair<std::size_t, std::size_t>> pairs) {
-    std::vector<DualTreeFrontierEntry> entries;
-    entries.reserve(pairs.size());
-    for (const auto& [first, second] : pairs) {
-      entries.push_back(make_pair_entry(first, second));
-    }
-    std::sort(
-        entries.begin(),
-        entries.end(),
-        [](const DualTreeFrontierEntry& left,
-           const DualTreeFrontierEntry& right) {
-          if (left.lower_bound != right.lower_bound) {
-            return left.lower_bound > right.lower_bound;
-          }
-          if (left.left_node_index != right.left_node_index) {
-            return left.left_node_index > right.left_node_index;
-          }
-          return left.right_node_index > right.right_node_index;
-        });
-    if (frontier.size() >
-            audit.certified_depth_first_frontier_bound ||
-        entries.size() >
-            audit.certified_depth_first_frontier_bound -
-                frontier.size()) {
-      throw std::logic_error(
-          "the exact dual-tree DFS frontier exceeded its depth bound");
-    }
-    frontier.insert(
-        frontier.end(),
-        std::make_move_iterator(entries.begin()),
-        std::make_move_iterator(entries.end()));
-    audit.maximum_cpu_frontier_size = std::max(
-        audit.maximum_cpu_frontier_size, frontier.size());
-  };
-  push_pairs_near_first({{host.root_index, host.root_index}});
-
-  while (!frontier.empty()) {
-    DualTreeFrontierEntry entry = std::move(frontier.back());
-    frontier.pop_back();
-    audit.cpu_node_pair_visit_count = checked_size_sum(
-        audit.cpu_node_pair_visit_count,
-        1U,
-        "the exact dual-tree node-pair visit count overflowed size_t");
-
-    const std::uint64_t left_tag = tags[entry.left_node_index];
-    const std::uint64_t right_tag = tags[entry.right_node_index];
-    if (left_tag != detail::k1_boruvka_mixed_component &&
-        left_tag == right_tag) {
-      close_node_pair(entry.left_node_index, entry.right_node_index);
-      audit.cpu_uniform_same_component_pair_prune_count = checked_size_sum(
-          audit.cpu_uniform_same_component_pair_prune_count,
-          1U,
-          "the exact dual-tree uniform prune count overflowed size_t");
-      continue;
-    }
-
-    const exact::ExactLevel& left_cutoff =
-        node_incumbent_cutoffs[entry.left_node_index];
-    const exact::ExactLevel& right_cutoff =
-        node_incumbent_cutoffs[entry.right_node_index];
-    const exact::ExactLevel& pair_cutoff =
-        left_cutoff < right_cutoff ? right_cutoff : left_cutoff;
-    if (entry.lower_bound > pair_cutoff) {
-      close_node_pair(entry.left_node_index, entry.right_node_index);
-      audit.cpu_strict_aabb_pair_prune_count = checked_size_sum(
-          audit.cpu_strict_aabb_pair_prune_count,
-          1U,
-          "the exact dual-tree strict prune count overflowed size_t");
-      continue;
-    }
-
-    const detail::K1BoruvkaNodeInputRecord& left_node =
-        host.nodes[entry.left_node_index];
-    const detail::K1BoruvkaNodeInputRecord& right_node =
-        host.nodes[entry.right_node_index];
-    const bool left_is_leaf =
-        left_node.leaf_point_id != detail::k1_boruvka_sentinel;
-    const bool right_is_leaf =
-        right_node.leaf_point_id != detail::k1_boruvka_sentinel;
-    if (left_is_leaf && right_is_leaf) {
-      const spatial::PointId left_id = checked_record_point_id(
-          left_node.leaf_point_id, point_count);
-      const spatial::PointId right_id = checked_record_point_id(
-          right_node.leaf_point_id, point_count);
-      if (left_id == right_id ||
-          labels[checked_point_index(left_id, point_count)] ==
-              labels[checked_point_index(right_id, point_count)]) {
-        throw std::logic_error(
-            "an exact dual-tree internal leaf pair escaped uniform pruning");
-      }
-      hierarchy::ExactEmstEdge edge = exact_edge(
-          cloud, left_id, right_id);
-      close_node_pair(entry.left_node_index, entry.right_node_index);
-      audit.cpu_exact_point_pair_distance_evaluation_count = checked_size_sum(
-          audit.cpu_exact_point_pair_distance_evaluation_count,
-          1U,
-          "the exact dual-tree point-pair count overflowed size_t");
-      const std::size_t left_point_index = checked_point_index(
-          left_id, point_count);
-      const std::size_t right_point_index = checked_point_index(
-          right_id, point_count);
-      const exact::ExactLevel candidate_squared_length = edge.squared_length;
-      ResolvedCandidate left_candidate{edge, left_id};
-      if (resolved_less(left_candidate, point_best[left_point_index])) {
-        point_best[left_point_index] = std::move(left_candidate);
-        decrease_point_incumbent(
-            left_point_index, candidate_squared_length);
-      }
-      ResolvedCandidate right_candidate{std::move(edge), right_id};
-      if (resolved_less(right_candidate, point_best[right_point_index])) {
-        point_best[right_point_index] = std::move(right_candidate);
-        decrease_point_incumbent(
-            right_point_index, candidate_squared_length);
-      }
-      continue;
-    }
-
-    audit.cpu_node_pair_expansion_count = checked_size_sum(
-        audit.cpu_node_pair_expansion_count,
-        1U,
-        "the exact dual-tree node-pair expansion count overflowed size_t");
-    if (entry.left_node_index == entry.right_node_index) {
-      if (left_is_leaf) {
-        throw std::logic_error(
-            "an exact dual-tree leaf self-pair escaped uniform pruning");
-      }
-      const std::size_t left_child =
-          static_cast<std::size_t>(left_node.left_child);
-      const std::size_t right_child =
-          static_cast<std::size_t>(left_node.right_child);
-      push_pairs_near_first({
-          {left_child, left_child},
-          {left_child, right_child},
-          {right_child, right_child}});
-      continue;
-    }
-
-    bool split_left = false;
-    if (!left_is_leaf && right_is_leaf) {
-      split_left = true;
-    } else if (left_is_leaf && !right_is_leaf) {
-      split_left = false;
-    } else if (!left_is_leaf && !right_is_leaf) {
-      const exact::ExactLevel& left_diagonal =
-          node_squared_diagonals[entry.left_node_index];
-      const exact::ExactLevel& right_diagonal =
-          node_squared_diagonals[entry.right_node_index];
-      if (left_diagonal != right_diagonal) {
-        split_left = left_diagonal > right_diagonal;
-      } else if (node_leaf_counts[entry.left_node_index] !=
-                 node_leaf_counts[entry.right_node_index]) {
-        split_left = node_leaf_counts[entry.left_node_index] >
-                     node_leaf_counts[entry.right_node_index];
-      } else {
-        split_left = entry.left_node_index > entry.right_node_index;
-      }
-    } else {
-      throw std::logic_error(
-          "an exact dual-tree external leaf pair was not evaluated");
-    }
-
-    if (split_left) {
-      push_pairs_near_first({
-          {static_cast<std::size_t>(left_node.left_child),
-           entry.right_node_index},
-          {static_cast<std::size_t>(left_node.right_child),
-           entry.right_node_index}});
-    } else {
-      push_pairs_near_first({
-          {entry.left_node_index,
-           static_cast<std::size_t>(right_node.left_child)},
-          {entry.left_node_index,
-           static_cast<std::size_t>(right_node.right_child)}});
-    }
-  }
-
-  if (audit.cpu_exact_aabb_pair_bound_evaluation_count !=
-      audit.cpu_node_pair_visit_count) {
-    throw std::logic_error(
-        "the exact dual-tree frontier did not exhaust every bounded node pair");
-  }
-  if (audit.cpu_exact_point_pair_distance_evaluation_count >
-          maximum_unordered_point_pair_count ||
-      audit.covered_unordered_point_pair_count !=
-          maximum_unordered_point_pair_count) {
-    throw std::logic_error(
-        "the exact dual-tree did not partition every unordered point pair once");
-  }
-
+  const DualTreeTraversalMetadataView traversal_metadata{
+      node_squared_diagonals,
+      node_leaf_counts,
+      node_leaf_begins,
+      node_leaf_ends,
+      node_heights[host.root_index]};
+  traverse_exact_dual_tree_frontier(
+      host,
+      cloud,
+      labels,
+      tags,
+      traversal_metadata,
+      node_incumbent_cutoffs,
+      audit,
+      [&](hierarchy::ExactEmstEdge edge,
+          spatial::PointId left_id,
+          spatial::PointId right_id) {
+        const std::size_t left_point_index = checked_point_index(
+            left_id, point_count);
+        const std::size_t right_point_index = checked_point_index(
+            right_id, point_count);
+        const exact::ExactLevel candidate_squared_length =
+            edge.squared_length;
+        ResolvedCandidate left_candidate{edge, left_id};
+        if (resolved_less(
+                left_candidate, point_best[left_point_index])) {
+          point_best[left_point_index] = std::move(left_candidate);
+          decrease_point_incumbent(
+              left_point_index, candidate_squared_length);
+        }
+        ResolvedCandidate right_candidate{std::move(edge), right_id};
+        if (resolved_less(
+                right_candidate, point_best[right_point_index])) {
+          point_best[right_point_index] = std::move(right_candidate);
+          decrease_point_incumbent(
+              right_point_index, candidate_squared_length);
+        }
+      });
   std::vector<exact::ExactLevel> verified_incumbent_cutoffs(
       host.nodes.size());
   for (std::size_t node_index = 0U;
@@ -1387,6 +1461,358 @@ resolve_seeded_exact_external_1nn_dual_tree(
   resolution.seed_status = seeds.status;
   resolution.search_status = K1BoruvkaDualTreeSearchStatus::
       exact_external_1nn_shared_lbvh_dual_tree_certified;
+  return resolution;
+}
+
+[[nodiscard]] K1BoruvkaSeededComponentDualTreeRoundResolution
+resolve_seeded_exact_component_minima_dual_tree(
+    const detail::K1BoruvkaCandidateHostState& host,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> labels,
+    const std::vector<std::uint64_t>& tags,
+    const SeedBundle& seeds,
+    std::size_t component_count,
+    std::size_t uniform_node_count,
+    std::size_t mixed_node_count) {
+  const std::size_t point_count = host.point_count;
+  if (component_count <= 1U || seeds.public_seeds.size() != point_count ||
+      tags.size() != host.nodes.size() ||
+      seeds.status != K1BoruvkaSeedStatus::
+          bounded_morton_window_external_exact_monotone_certified ||
+      !seeds.morton_audit.complete_source_coverage_certified ||
+      !seeds.morton_audit.bounded_window_certified ||
+      !seeds.morton_audit.external_targets_recertified ||
+      !seeds.morton_audit.exact_monotone_cutoff_certified) {
+    throw std::logic_error(
+        "the component-direct dual-tree search requires a certified nonterminal Morton seed bundle");
+  }
+
+  K1BoruvkaSeededComponentDualTreeRoundResolution resolution;
+  K1BoruvkaComponentDualTreeSearchAudit& audit =
+      resolution.search_audit;
+  audit.resident_point_count = point_count;
+  audit.resident_node_count = host.nodes.size();
+  audit.frozen_component_count = component_count;
+  audit.uniform_lbvh_node_count = uniform_node_count;
+  audit.mixed_lbvh_node_count = mixed_node_count;
+
+  const std::size_t invalid_component_slot = component_count;
+  std::vector<std::size_t> component_slot_by_label(
+      point_count, invalid_component_slot);
+  std::vector<spatial::PointId> component_labels;
+  component_labels.reserve(component_count);
+  for (std::size_t point_index = 0U;
+       point_index < point_count;
+       ++point_index) {
+    const spatial::PointId point_id = checked_point_id(point_index);
+    if (labels[point_index] != point_id) {
+      continue;
+    }
+    component_slot_by_label[point_index] = component_labels.size();
+    component_labels.push_back(point_id);
+  }
+  if (component_labels.size() != component_count) {
+    throw std::logic_error(
+        "the component-direct dual-tree labels lost a representative");
+  }
+
+  const auto component_slot = [&](spatial::PointId component_id) {
+    const std::size_t component_index = checked_point_index(
+        component_id, point_count);
+    const std::size_t slot = component_slot_by_label[component_index];
+    if (slot >= component_count || component_labels[slot] != component_id) {
+      throw std::logic_error(
+          "the component-direct dual-tree component slot is invalid");
+    }
+    return slot;
+  };
+
+  std::vector<std::optional<ResolvedCandidate>> component_best(
+      component_count);
+  for (std::size_t source_index = 0U;
+       source_index < point_count;
+       ++source_index) {
+    const spatial::PointId source_id = checked_point_id(source_index);
+    const spatial::PointId source_component = labels[source_index];
+    const K1BoruvkaSeed& seed = seeds.public_seeds[source_index];
+    const std::size_t seed_target_index = checked_point_index(
+        seed.target_point_id, point_count);
+    if (seed.source_point_id != source_id ||
+        labels[seed_target_index] == source_component ||
+        seed.exact_squared_cutoff == exact::ExactLevel{}) {
+      throw std::logic_error(
+          "a component-direct seed is not an exact external edge");
+    }
+    const std::size_t slot = component_slot(source_component);
+    ResolvedCandidate candidate{seed_edge(seed), source_id};
+    if (!component_best[slot].has_value() ||
+        resolved_less(candidate, *component_best[slot])) {
+      component_best[slot] = std::move(candidate);
+    }
+    audit.point_seed_count = checked_size_sum(
+        audit.point_seed_count,
+        1U,
+        "the component-direct point-seed count overflowed size_t");
+  }
+
+  std::vector<exact::ExactLevel> initial_component_cutoffs;
+  initial_component_cutoffs.reserve(component_count);
+  for (const std::optional<ResolvedCandidate>& minimum : component_best) {
+    if (!minimum.has_value()) {
+      throw std::logic_error(
+          "a component-direct seed reduction lost a component");
+    }
+    initial_component_cutoffs.push_back(minimum->edge.squared_length);
+    audit.component_seed_incumbent_count = checked_size_sum(
+        audit.component_seed_incumbent_count,
+        1U,
+        "the component-direct seed-incumbent count overflowed size_t");
+  }
+
+  const std::size_t invalid_node_index = host.nodes.size();
+  std::vector<exact::ExactLevel> node_cutoff_upper_bounds(
+      host.nodes.size());
+  std::vector<exact::ExactLevel> node_squared_diagonals(host.nodes.size());
+  std::vector<std::size_t> node_leaf_counts(host.nodes.size(), 0U);
+  std::vector<std::size_t> node_heights(host.nodes.size(), 0U);
+  std::vector<std::size_t> node_leaf_begins(
+      host.nodes.size(), point_count);
+  std::vector<std::size_t> node_leaf_ends(host.nodes.size(), 0U);
+  std::vector<std::size_t> parent_by_node(
+      host.nodes.size(), invalid_node_index);
+  std::vector<std::size_t> leaf_node_by_point(
+      point_count, invalid_node_index);
+  for (std::size_t node_index = 0U;
+       node_index < host.nodes.size();
+       ++node_index) {
+    const detail::K1BoruvkaNodeInputRecord& node = host.nodes[node_index];
+    node_squared_diagonals[node_index] = exact_aabb_squared_diagonal(node);
+    if (node.leaf_point_id != detail::k1_boruvka_sentinel) {
+      const spatial::PointId point_id = checked_record_point_id(
+          node.leaf_point_id, point_count);
+      const std::size_t point_index = checked_point_index(
+          point_id, point_count);
+      const std::size_t morton_position =
+          host.morton_position_by_point_id[point_index];
+      if (morton_position >= point_count ||
+          leaf_node_by_point[point_index] != invalid_node_index) {
+        throw std::logic_error(
+            "the component-direct dual-tree leaf permutation is invalid");
+      }
+      const std::size_t slot = component_slot(labels[point_index]);
+      node_cutoff_upper_bounds[node_index] =
+          initial_component_cutoffs[slot];
+      node_leaf_counts[node_index] = 1U;
+      node_leaf_begins[node_index] = morton_position;
+      node_leaf_ends[node_index] = morton_position + 1U;
+      leaf_node_by_point[point_index] = node_index;
+      continue;
+    }
+    if (!std::in_range<std::size_t>(node.left_child) ||
+        !std::in_range<std::size_t>(node.right_child)) {
+      throw std::logic_error(
+          "a component-direct dual-tree child index does not fit size_t");
+    }
+    const std::size_t left_child =
+        static_cast<std::size_t>(node.left_child);
+    const std::size_t right_child =
+        static_cast<std::size_t>(node.right_child);
+    if (left_child >= node_index || right_child >= node_index) {
+      throw std::logic_error(
+          "the component-direct dual-tree LBVH is not in certified postorder");
+    }
+    if (parent_by_node[left_child] != invalid_node_index ||
+        parent_by_node[right_child] != invalid_node_index ||
+        !((node_leaf_ends[left_child] == node_leaf_begins[right_child]) ||
+          (node_leaf_ends[right_child] == node_leaf_begins[left_child]))) {
+      throw std::logic_error(
+          "the component-direct dual-tree child ranges do not partition the leaves");
+    }
+    parent_by_node[left_child] = node_index;
+    parent_by_node[right_child] = node_index;
+    node_cutoff_upper_bounds[node_index] =
+        node_cutoff_upper_bounds[left_child] <
+                node_cutoff_upper_bounds[right_child]
+            ? node_cutoff_upper_bounds[right_child]
+            : node_cutoff_upper_bounds[left_child];
+    node_leaf_counts[node_index] = checked_size_sum(
+        node_leaf_counts[left_child],
+        node_leaf_counts[right_child],
+        "the component-direct dual-tree leaf count overflowed size_t");
+    node_heights[node_index] = checked_size_sum(
+        std::max(node_heights[left_child], node_heights[right_child]),
+        1U,
+        "the component-direct dual-tree height overflowed size_t");
+    node_leaf_begins[node_index] = std::min(
+        node_leaf_begins[left_child], node_leaf_begins[right_child]);
+    node_leaf_ends[node_index] = std::max(
+        node_leaf_ends[left_child], node_leaf_ends[right_child]);
+  }
+  if (node_leaf_counts[host.root_index] != point_count ||
+      node_leaf_begins[host.root_index] != 0U ||
+      node_leaf_ends[host.root_index] != point_count ||
+      parent_by_node[host.root_index] != invalid_node_index ||
+      std::find(
+          leaf_node_by_point.begin(),
+          leaf_node_by_point.end(),
+          invalid_node_index) != leaf_node_by_point.end()) {
+    throw std::logic_error(
+        "the component-direct dual-tree metadata does not cover every point");
+  }
+  audit.component_cutoff_upper_envelope_node_count =
+      node_cutoff_upper_bounds.size();
+
+  const DualTreeTraversalMetadataView traversal_metadata{
+      node_squared_diagonals,
+      node_leaf_counts,
+      node_leaf_begins,
+      node_leaf_ends,
+      node_heights[host.root_index]};
+  traverse_exact_dual_tree_frontier(
+      host,
+      cloud,
+      labels,
+      tags,
+      traversal_metadata,
+      node_cutoff_upper_bounds,
+      audit,
+      [&](hierarchy::ExactEmstEdge edge,
+          spatial::PointId left_id,
+          spatial::PointId right_id) {
+        const std::size_t left_point_index = checked_point_index(
+            left_id, point_count);
+        const std::size_t right_point_index = checked_point_index(
+            right_id, point_count);
+        const std::size_t left_slot = component_slot(
+            labels[left_point_index]);
+        const std::size_t right_slot = component_slot(
+            labels[right_point_index]);
+        if (left_slot == right_slot ||
+            !component_best[left_slot].has_value() ||
+            !component_best[right_slot].has_value()) {
+          throw std::logic_error(
+              "a component-direct external pair has invalid component slots");
+        }
+        const exact::ExactLevel candidate_squared_length =
+            edge.squared_length;
+        ResolvedCandidate left_candidate{edge, left_id};
+        if (resolved_less(left_candidate, *component_best[left_slot])) {
+          if (candidate_squared_length <
+              component_best[left_slot]->edge.squared_length) {
+            audit.cpu_strict_component_cutoff_decrease_count =
+                checked_size_sum(
+                    audit.cpu_strict_component_cutoff_decrease_count,
+                    1U,
+                    "the component-direct strict-decrease count overflowed size_t");
+          }
+          component_best[left_slot] = std::move(left_candidate);
+          audit.cpu_component_kappa_update_count = checked_size_sum(
+              audit.cpu_component_kappa_update_count,
+              1U,
+              "the component-direct kappa-update count overflowed size_t");
+        }
+        ResolvedCandidate right_candidate{std::move(edge), right_id};
+        if (resolved_less(right_candidate, *component_best[right_slot])) {
+          if (candidate_squared_length <
+              component_best[right_slot]->edge.squared_length) {
+            audit.cpu_strict_component_cutoff_decrease_count =
+                checked_size_sum(
+                    audit.cpu_strict_component_cutoff_decrease_count,
+                    1U,
+                    "the component-direct strict-decrease count overflowed size_t");
+          }
+          component_best[right_slot] = std::move(right_candidate);
+          audit.cpu_component_kappa_update_count = checked_size_sum(
+              audit.cpu_component_kappa_update_count,
+              1U,
+              "the component-direct kappa-update count overflowed size_t");
+        }
+      });
+
+  std::vector<exact::ExactLevel> verified_upper_envelope(
+      host.nodes.size());
+  for (std::size_t node_index = 0U;
+       node_index < host.nodes.size();
+       ++node_index) {
+    const detail::K1BoruvkaNodeInputRecord& node = host.nodes[node_index];
+    if (node.leaf_point_id != detail::k1_boruvka_sentinel) {
+      const spatial::PointId point_id = checked_record_point_id(
+          node.leaf_point_id, point_count);
+      const std::size_t point_index = checked_point_index(
+          point_id, point_count);
+      verified_upper_envelope[node_index] = initial_component_cutoffs[
+          component_slot(labels[point_index])];
+    } else {
+      const std::size_t left_child =
+          static_cast<std::size_t>(node.left_child);
+      const std::size_t right_child =
+          static_cast<std::size_t>(node.right_child);
+      verified_upper_envelope[node_index] =
+          verified_upper_envelope[left_child] <
+                  verified_upper_envelope[right_child]
+              ? verified_upper_envelope[right_child]
+              : verified_upper_envelope[left_child];
+    }
+    if (verified_upper_envelope[node_index] !=
+        node_cutoff_upper_bounds[node_index]) {
+      throw std::logic_error(
+          "the component-direct frozen cutoff envelope changed during traversal");
+    }
+  }
+
+  resolution.component_minima.reserve(component_count);
+  for (std::size_t slot = 0U; slot < component_count; ++slot) {
+    if (!component_best[slot].has_value()) {
+      throw std::logic_error(
+          "the component-direct traversal lost a component minimum");
+    }
+    const ResolvedCandidate& minimum = *component_best[slot];
+    const std::size_t source_index = checked_point_index(
+        minimum.source_point_id, point_count);
+    if (labels[source_index] != component_labels[slot]) {
+      throw std::logic_error(
+          "a component-direct minimum has the wrong oriented source");
+    }
+    resolution.component_minima.push_back(
+        hierarchy::K1BoruvkaComponentMinimum{
+            component_labels[slot],
+            minimum.source_point_id,
+            minimum.edge});
+  }
+
+  std::size_t maximum_component_updates =
+      audit.cpu_exact_point_pair_distance_evaluation_count;
+  maximum_component_updates = checked_size_sum(
+      maximum_component_updates,
+      audit.cpu_exact_point_pair_distance_evaluation_count,
+      "the component-direct update bound overflowed size_t");
+  if (audit.point_seed_count != point_count ||
+      audit.component_seed_incumbent_count != component_count ||
+      audit.component_cutoff_upper_envelope_node_count !=
+          host.nodes.size() ||
+      resolution.component_minima.size() != component_count ||
+      audit.cpu_component_kappa_update_count > maximum_component_updates ||
+      audit.cpu_strict_component_cutoff_decrease_count >
+          audit.cpu_component_kappa_update_count) {
+    throw std::logic_error(
+        "the component-direct result does not close its certified counts");
+  }
+
+  audit.component_minimum_count = resolution.component_minima.size();
+  audit.frozen_labels_certified = true;
+  audit.lbvh_topology_and_exact_aabbs_certified =
+      host.lbvh_topology_and_exact_aabbs_certified;
+  audit.complete_source_seed_coverage_certified = true;
+  audit.external_seed_targets_recertified = true;
+  audit.exact_seed_cutoffs_recertified = true;
+  audit.component_seed_reduction_certified = true;
+  audit.component_cutoff_upper_envelope_certified = true;
+  audit.canonical_kappa_resolution_certified = true;
+  audit.component_minima_complete = true;
+  resolution.morton_seed_audit = seeds.morton_audit;
+  resolution.seed_status = seeds.status;
+  resolution.search_status = K1BoruvkaComponentDualTreeSearchStatus::
+      exact_component_minima_shared_lbvh_dual_tree_certified;
   return resolution;
 }
 
@@ -2309,6 +2735,58 @@ K1BoruvkaCandidateContext::resolve_round_exact_external_1nn_dual_tree(
         seed_policy,
         seed_proposals);
     return resolve_seeded_exact_external_1nn_dual_tree(
+        *host_,
+        cloud,
+        frozen_component_labels,
+        tags,
+        seeds,
+        component_count,
+        uniform_node_count,
+        mixed_node_count);
+  });
+}
+
+K1BoruvkaSeededComponentDualTreeRoundResolution
+K1BoruvkaCandidateContext::resolve_round_exact_component_minima_dual_tree(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> frozen_component_labels,
+    K1BoruvkaMortonSeedPolicy seed_policy) {
+  require_matching_cloud(cloud);
+  validate_morton_seed_policy(seed_policy);
+  const std::size_t component_count = validate_frozen_labels(
+      frozen_component_labels, host_->point_count);
+  if (component_count <= 1U) {
+    throw std::invalid_argument(
+        "the component-direct dual-tree resolver requires a nonterminal frozen partition");
+  }
+
+  std::size_t uniform_node_count = 0U;
+  std::size_t mixed_node_count = 0U;
+  const std::vector<std::uint64_t> tags = build_component_tags(
+      *host_,
+      frozen_component_labels,
+      uniform_node_count,
+      mixed_node_count);
+  std::vector<std::uint64_t> labels(
+      frozen_component_labels.begin(), frozen_component_labels.end());
+  return state_->with_gpu_section([&]() {
+    const detail::K1BoruvkaMortonSeedProposalBatch seed_proposals =
+        detail::propose_k1_boruvka_morton_seeds_on_gpu(
+            *state_,
+            host_->nodes,
+            host_->root_index,
+            host_->coordinate_bits,
+            host_->point_count,
+            host_->morton_point_ids,
+            labels,
+            seed_policy.window_radius);
+    const SeedBundle seeds = build_morton_refined_seeds(
+        *host_,
+        cloud,
+        frozen_component_labels,
+        seed_policy,
+        seed_proposals);
+    return resolve_seeded_exact_component_minima_dual_tree(
         *host_,
         cloud,
         frozen_component_labels,

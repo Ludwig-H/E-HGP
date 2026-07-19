@@ -227,7 +227,7 @@ struct K1BoruvkaDualTreeSearchAudit {
   static constexpr const char* decision_semantics =
       "cpu_exact_external_1nn_shared_lbvh_dual_tree";
   static constexpr const char* proof_basis =
-      "strict_exact_aabb_pair_dynamic_incumbent_bounded_dfs_exhaustion_v2";
+      "strict_exact_aabb_pair_dynamic_incumbent_bounded_dfs_exhaustion_v3";
 
   std::size_t resident_point_count{};
   std::size_t resident_node_count{};
@@ -242,6 +242,7 @@ struct K1BoruvkaDualTreeSearchAudit {
   std::size_t covered_unordered_point_pair_count{};
   std::size_t lbvh_maximum_depth{};
   std::size_t certified_depth_first_frontier_bound{};
+  std::size_t certified_node_pair_visit_bound{};
   std::size_t maximum_cpu_frontier_size{};
   std::size_t cpu_node_pair_visit_count{};
   std::size_t cpu_node_pair_expansion_count{};
@@ -261,6 +262,7 @@ struct K1BoruvkaDualTreeSearchAudit {
   bool uniform_component_pair_prunes_certified{false};
   bool strict_only_aabb_pair_pruning_certified{false};
   bool depth_first_frontier_bound_certified{false};
+  bool node_pair_visit_bound_certified{false};
   bool complete_frontier_exhaustion_certified{false};
   bool canonical_kappa_resolution_certified{false};
   bool point_minima_complete{false};
@@ -274,7 +276,8 @@ struct K1BoruvkaDualTreeSearchAudit {
 // The certified Morton proposal initializes one exact incumbent per point.
 // A shared locally-near-first depth-first traversal partitions every unordered
 // pair of LBVH leaves exactly once. Its logical stack contains at most twice
-// the certified LBVH depth plus one entry. A node pair is discarded only when
+// the certified LBVH depth plus one entry and it visits at most n(n+1)-1 node
+// pairs. A node pair is discarded only when
 // both nodes are uniform in the same component or when its exact AABB--AABB
 // lower bound is strictly larger than every current exact point incumbent
 // stored below the two nodes. Incumbents only decrease from their certified
@@ -293,6 +296,82 @@ struct K1BoruvkaSeededDualTreeRoundResolution {
   friend bool operator==(
       const K1BoruvkaSeededDualTreeRoundResolution&,
       const K1BoruvkaSeededDualTreeRoundResolution&) = default;
+};
+
+enum class K1BoruvkaComponentDualTreeSearchStatus : std::uint8_t {
+  not_certified,
+  exact_component_minima_shared_lbvh_dual_tree_certified,
+};
+
+// This audit belongs to the component-direct resolver. Point seeds are
+// recertified and reduced once, but no per-point minimum is materialized.
+struct K1BoruvkaComponentDualTreeSearchAudit {
+  static constexpr const char* proposal_semantics =
+      "gpu_bounded_morton_seed_only";
+  static constexpr const char* decision_semantics =
+      "cpu_exact_component_minima_shared_lbvh_dual_tree";
+  static constexpr const char* proof_basis =
+      "strict_exact_aabb_pair_frozen_component_seed_upper_envelope_bounded_dfs_v1";
+
+  std::size_t resident_point_count{};
+  std::size_t resident_node_count{};
+  std::size_t frozen_component_count{};
+  std::size_t uniform_lbvh_node_count{};
+  std::size_t mixed_lbvh_node_count{};
+  std::size_t point_seed_count{};
+  std::size_t component_seed_incumbent_count{};
+  std::size_t component_cutoff_upper_envelope_node_count{};
+  std::size_t component_minimum_count{};
+  std::size_t unordered_point_pair_count{};
+  std::size_t covered_unordered_point_pair_count{};
+  std::size_t lbvh_maximum_depth{};
+  std::size_t certified_depth_first_frontier_bound{};
+  std::size_t certified_node_pair_visit_bound{};
+  std::size_t maximum_cpu_frontier_size{};
+  std::size_t cpu_node_pair_visit_count{};
+  std::size_t cpu_node_pair_expansion_count{};
+  std::size_t cpu_exact_aabb_pair_bound_evaluation_count{};
+  std::size_t cpu_exact_point_pair_distance_evaluation_count{};
+  std::size_t cpu_component_kappa_update_count{};
+  std::size_t cpu_strict_component_cutoff_decrease_count{};
+  std::size_t cpu_uniform_same_component_pair_prune_count{};
+  std::size_t cpu_strict_aabb_pair_prune_count{};
+  bool frozen_labels_certified{false};
+  bool lbvh_topology_and_exact_aabbs_certified{false};
+  bool complete_source_seed_coverage_certified{false};
+  bool external_seed_targets_recertified{false};
+  bool exact_seed_cutoffs_recertified{false};
+  bool component_seed_reduction_certified{false};
+  bool component_cutoff_upper_envelope_certified{false};
+  bool canonical_unordered_pair_partition_certified{false};
+  bool uniform_component_pair_prunes_certified{false};
+  bool strict_only_aabb_pair_pruning_certified{false};
+  bool depth_first_frontier_bound_certified{false};
+  bool node_pair_visit_bound_certified{false};
+  bool complete_frontier_exhaustion_certified{false};
+  bool canonical_kappa_resolution_certified{false};
+  bool component_minima_complete{false};
+
+  friend bool operator==(
+      const K1BoruvkaComponentDualTreeSearchAudit&,
+      const K1BoruvkaComponentDualTreeSearchAudit&) = default;
+};
+
+// The frozen component-seed envelope is rebuilt for every nonterminal round.
+// It remains a conservative upper bound while component incumbents decrease.
+// Leaf pairs relax the two components directly; point minima never exist in
+// this result, and no contraction or hierarchy publication is performed.
+struct K1BoruvkaSeededComponentDualTreeRoundResolution {
+  std::vector<hierarchy::K1BoruvkaComponentMinimum> component_minima;
+  K1BoruvkaMortonSeedAudit morton_seed_audit;
+  K1BoruvkaComponentDualTreeSearchAudit search_audit;
+  K1BoruvkaSeedStatus seed_status{K1BoruvkaSeedStatus::not_certified};
+  K1BoruvkaComponentDualTreeSearchStatus search_status{
+      K1BoruvkaComponentDualTreeSearchStatus::not_certified};
+
+  friend bool operator==(
+      const K1BoruvkaSeededComponentDualTreeRoundResolution&,
+      const K1BoruvkaSeededComponentDualTreeRoundResolution&) = default;
 };
 
 enum class K1BoruvkaEmissionStatus : std::uint8_t {
@@ -678,17 +757,18 @@ struct K1SeededExactBoruvkaVerification {
   std::size_t replayed_exact_point_distance_evaluation_count{};
 };
 
-// Persistent shared-search rounds deliberately omit the transient per-point
-// minima. Only the recertified seed audit, dual-tree audit, exact component
-// decision and canonical contraction survive each round.
+// Persistent shared-search rounds decide component minima directly. Only the
+// recertified seed audit, frozen component-envelope audit, exact component
+// decision and canonical contraction survive each round; point minima and
+// dynamic ancestor updates never exist in this result.
 struct K1DualTreeExactBoruvkaRound {
   K1BoruvkaMortonSeedAudit morton_seed_audit;
-  K1BoruvkaDualTreeSearchAudit dual_tree_search_audit;
+  K1BoruvkaComponentDualTreeSearchAudit dual_tree_search_audit;
   K1HybridBoruvkaExactDecision exact_decision;
   K1HybridBoruvkaCanonicalContraction canonical_contraction;
   K1BoruvkaSeedStatus seed_status{K1BoruvkaSeedStatus::not_certified};
-  K1BoruvkaDualTreeSearchStatus search_status{
-      K1BoruvkaDualTreeSearchStatus::not_certified};
+  K1BoruvkaComponentDualTreeSearchStatus search_status{
+      K1BoruvkaComponentDualTreeSearchStatus::not_certified};
   K1HybridBoruvkaDecisionStatus decision_status{
       K1HybridBoruvkaDecisionStatus::not_certified};
   K1HybridBoruvkaContractionStatus contraction_status{
@@ -704,7 +784,7 @@ struct K1DualTreeExactBoruvkaRound {
 // minima, candidate universe or hierarchy reduction persists in this result.
 struct K1DualTreeExactBoruvkaResult {
   static constexpr const char* proof_basis =
-      "gpu_bounded_morton_seed_cpu_exact_shared_dual_tree_boruvka_v1";
+      "gpu_bounded_morton_seed_cpu_exact_direct_component_dual_tree_boruvka_v2";
 
   std::size_t point_count{};
   std::vector<K1DualTreeExactBoruvkaRound> rounds;
@@ -837,6 +917,12 @@ class K1BoruvkaCandidateContext final {
       std::span<const spatial::PointId> frozen_component_labels,
       K1BoruvkaMortonSeedPolicy seed_policy);
 
+  [[nodiscard]] K1BoruvkaSeededComponentDualTreeRoundResolution
+  resolve_round_exact_component_minima_dual_tree(
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const spatial::PointId> frozen_component_labels,
+      K1BoruvkaMortonSeedPolicy seed_policy);
+
   [[nodiscard]] std::size_t point_count() const noexcept;
   [[nodiscard]] std::size_t node_count() const noexcept;
 
@@ -936,9 +1022,10 @@ verify_gpu_seeded_cpu_exact_external_1nn_k1_boruvka(
     K1BoruvkaMortonSeedPolicy trusted_seed_policy,
     const K1SeededExactBoruvkaResult& result);
 
-// Runs every nonterminal round through the shared exact dual-tree resolver,
-// persists only component decisions, contracts on reference_cpu and certifies
-// the local EMST witness through a fresh shared replay and the CPU anchor.
+// Runs every nonterminal round through the shared exact component-direct
+// dual-tree resolver. The frozen cutoff envelope is rebuilt after every
+// contraction, only component decisions persist, and a fresh direct replay
+// plus the reference_cpu anchor certifies the local EMST witness.
 [[nodiscard]] K1DualTreeExactBoruvkaResult
 build_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
     const spatial::MortonLbvhIndex& index,
