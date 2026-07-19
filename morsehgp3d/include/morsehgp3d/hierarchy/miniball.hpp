@@ -277,6 +277,107 @@ struct ExactFacetDescentSegmentVerification {
   bool exact_descent_segment_decision_certified{false};
 };
 
+struct ExactFacetDescentChainBudget {
+  static constexpr std::size_t
+      maximum_supported_committed_strict_segment_count =
+      4096U;
+
+  std::size_t maximum_committed_strict_segment_count{};
+
+  friend bool operator==(
+      const ExactFacetDescentChainBudget&,
+      const ExactFacetDescentChainBudget&) = default;
+};
+
+enum class ExactFacetDescentChainDecision : std::uint8_t {
+  not_certified,
+  complete_at_regular_active_facet,
+  certified_prefix_blocked_unsupported_degeneracy,
+  certified_prefix_strict_segment_budget_exhausted,
+};
+
+enum class ExactFacetDescentChainScope : std::uint8_t {
+  unspecified,
+  single_source_canonical_strict_descent_chain_only,
+};
+
+struct ExactFacetDescentChainNodeWitness {
+  std::vector<spatial::PointId> facet_point_ids;
+  exact::ExactCenter3 center;
+  exact::ExactLevel squared_level;
+
+  friend bool operator==(
+      const ExactFacetDescentChainNodeWitness&,
+      const ExactFacetDescentChainNodeWitness&) = default;
+};
+
+struct ExactFacetDescentChainCounters {
+  std::size_t facet_probe_count{};
+  std::size_t strict_segment_probe_count{};
+  std::size_t committed_strict_segment_count{};
+  std::size_t visited_facet_count{};
+  std::size_t successor_cycle_lookup_count{};
+  std::size_t inter_step_seam_replay_count{};
+  std::size_t active_terminal_count{};
+  std::size_t unsupported_terminal_count{};
+  std::size_t structural_budget_stop_count{};
+  ExactFacetDescentSegmentCounters accumulated_probe_counters{};
+
+  friend bool operator==(
+      const ExactFacetDescentChainCounters&,
+      const ExactFacetDescentChainCounters&) = default;
+};
+
+// The compact nodes and aligned 6.4 witnesses certify one deterministic
+// source orbit only. A single complete stopping probe retains the point-cloud
+// identity and the exact reason for stopping without retaining O(L n) spatial
+// partitions. Unsupported and budgeted outcomes certify only their strict
+// prefix; none of the outcomes certifies a DAG, germ, attachment, hierarchy,
+// or public status.
+struct ExactFacetDescentChainResult {
+  static constexpr const char* proof_basis =
+      "exact_replayed_half_open_segments_exact_seams_strict_facet_"
+      "potential_finite_orbit_v1";
+
+  ExactFacetDescentChainBudget requested_budget{};
+  std::size_t effective_maximum_committed_strict_segment_count{};
+  std::vector<ExactFacetDescentChainNodeWitness> nodes;
+  std::vector<ExactFacetDescentSegmentWitness>
+      committed_segment_witnesses;
+  std::optional<ExactFacetDescentSegmentResult> stopping_probe;
+  bool exact_seams_certified{false};
+  bool strict_facet_potential_certified{false};
+  bool finite_strict_facet_orbit_theorem_certified{false};
+  bool closed_polyline_nonstrict_initial_sublevel{false};
+  bool source_open_polyline_strict_initial_sublevel{false};
+  ExactFacetDescentChainCounters counters{};
+  ExactFacetDescentChainDecision decision{
+      ExactFacetDescentChainDecision::not_certified};
+  ExactFacetDescentChainScope scope{
+      ExactFacetDescentChainScope::unspecified};
+};
+
+struct ExactFacetDescentChainVerification {
+  bool requested_budget_certified{false};
+  bool effective_budget_certified{false};
+  bool compact_path_shape_certified{false};
+  bool initial_facet_identity_certified{false};
+  bool compact_nodes_certified{false};
+  bool committed_segment_witnesses_certified{false};
+  bool stopping_probe_presence_certified{false};
+  bool stopping_probe_certified{false};
+  bool exact_seams_certified{false};
+  bool strict_facet_potential_certified{false};
+  bool finite_strict_facet_orbit_theorem_certified{false};
+  bool closed_polyline_nonstrict_initial_sublevel_certified{false};
+  bool source_open_polyline_strict_initial_sublevel_certified{false};
+  bool counters_certified{false};
+  bool decision_certified{false};
+  bool scope_certified{false};
+  bool fresh_replay_certified{false};
+  bool exact_descent_chain_decision_certified{false};
+};
+
 // Enumerates every subset of one to four facet points. For a ten-point facet,
 // this is exactly 385 supports. Every relatively interior circumcenter is
 // classified against every facet point with exact rationals before the least
@@ -339,5 +440,24 @@ verify_exact_facet_descent_segment(
     const spatial::CanonicalPointCloud& cloud,
     std::span<const spatial::PointId> facet_point_ids,
     const ExactFacetDescentSegmentResult& result);
+
+// Iterates the canonical 6.4 transition from one source facet until the first
+// regular active facet, unsupported degeneracy, or explicit strict-segment
+// budget frontier. The budget is external policy and zero is valid. Repeated
+// facets contradict the already-certified strict potential and fail closed.
+[[nodiscard]] ExactFacetDescentChainResult build_exact_facet_descent_chain(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> facet_point_ids,
+    ExactFacetDescentChainBudget budget);
+
+// Reconstructs the expected orbit from the cloud, initial facet, and external
+// budget only. No observed node, witness, stopping decision, or length steers
+// the fresh replay.
+[[nodiscard]] ExactFacetDescentChainVerification
+verify_exact_facet_descent_chain(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> facet_point_ids,
+    ExactFacetDescentChainBudget budget,
+    const ExactFacetDescentChainResult& result);
 
 }  // namespace morsehgp3d::hierarchy

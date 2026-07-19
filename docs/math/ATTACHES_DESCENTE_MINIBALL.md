@@ -101,7 +101,17 @@ Le point initial peut satisfaire $a=R$ : le certificat universel strict porte al
 
 Le cas $\delta=0$ est valide. L'exactitude rationnelle impose alors $c_F=c_G$ et donc $a=b$; le segment dégénère en un point déjà strict sous $R$. Rejeter systématiquement des centres égaux serait incorrect. À l'inverse, $\delta=0$ avec des centres différents ou avec $a\neq b$ est une contradiction fail-closed.
 
-Le certificat machine `exact_squared_distance_chord_identity_max_envelope_half_open_segment_v1` porte seulement sur cet arc et la portée `canonical_strict_arc_half_open_sublevel_segment_only`. Les branches active ou non prise en charge ne contiennent aucun témoin de segment. La concaténation future de plusieurs segments pourrait fournir un témoin géométrique d'attache, mais elle exige encore un rejeu de chaîne, un contrôle des coutures et une preuve de rattachement au bon germe; rien de cela n'est certifié ici.
+Le certificat machine `exact_squared_distance_chord_identity_max_envelope_half_open_segment_v1` porte seulement sur cet arc et la portée `canonical_strict_arc_half_open_sublevel_segment_only`. Les branches active ou non prise en charge ne contiennent aucun témoin de segment.
+
+### 6.1 Chaîne canonique stricte
+
+Le jalon 6.5 itère exactement ce constructeur sur une seule source. Écrivons les facettes engagées $F_0,\ldots,F_L$. Chaque transition conserve leur cardinal $k$ et rejoue la comparaison exacte $\beta(F_{i+1})<\beta(F_i)$. Deux facettes ne peuvent donc pas se répéter. Comme il existe $\binom{n}{k}$ facettes de cardinal $k$, toute orbite stricte contient au plus $\binom{n}{k}-1$ segments.
+
+La couture entre deux segments est une égalité de témoins complets : la facette, le centre rationnel et le niveau $\beta(F_{i+1})$ de la cible précédente doivent être identiques à ceux de la source fraîchement reconstruite. Cette égalité ne force pas le niveau atomique suivant $D_k(c_{F_{i+1}})$ à être égal à $\beta(F_{i+1})$; il peut lui être strictement inférieur. Le rejeu conserve donc séparément les nœuds de miniball et les coefficients analytiques de chaque segment.
+
+Posons $R_0=\beta(F_0)$. Le premier segment privé de son point source est strictement sous $R_0$. Pour $i\geq1$, le segment fermé issu de $F_i$ est contenu dans le sous-niveau de $\beta(F_i)$, lui-même strictement inférieur à $R_0$. La polyligne entière appartient donc à $\left\lbrace D_k\leq R_0\right\rbrace$ et la polyligne privée de son premier point appartient à $\left\lbrace D_k<R_0\right\rbrace$.
+
+`build_exact_facet_descent_chain` exige une politique externe explicite, dont le budget zéro est valide et dont le backend de référence borne la valeur à 4096 segments engagés. Un arrêt sur une facette régulière active certifie la fin de cette orbite. Un arrêt sur une dégénérescence non prise en charge ou sur la frontière du budget ne certifie que le préfixe strict effectivement engagé; le `stopping_probe` complet conserve la raison exacte et, dans le cas budgétaire, le prochain segment strict non engagé. Le booléen `finite_strict_facet_orbit_theorem_certified` certifie seulement l'existence de la borne combinatoire précédente; il n'affirme pas que le budget effectif couvre toutes les facettes. La base `exact_replayed_half_open_segments_exact_seams_strict_facet_potential_finite_orbit_v1` et la portée `single_source_canonical_strict_descent_chain_only` ne certifient encore ni germe initial depuis un centre critique, ni fermeture de plusieurs sources en DAG, ni attache globale, forêt ou statut public.
 
 ## 7. Bras d'un point critique d'indice un
 

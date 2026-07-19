@@ -25,6 +25,12 @@ using morsehgp3d::hierarchy::ExactFacetDescentArcDecision;
 using morsehgp3d::hierarchy::ExactFacetDescentArcResult;
 using morsehgp3d::hierarchy::ExactFacetDescentArcScope;
 using morsehgp3d::hierarchy::ExactFacetDescentArcVerification;
+using morsehgp3d::hierarchy::ExactFacetDescentChainBudget;
+using morsehgp3d::hierarchy::ExactFacetDescentChainCounters;
+using morsehgp3d::hierarchy::ExactFacetDescentChainDecision;
+using morsehgp3d::hierarchy::ExactFacetDescentChainResult;
+using morsehgp3d::hierarchy::ExactFacetDescentChainScope;
+using morsehgp3d::hierarchy::ExactFacetDescentChainVerification;
 using morsehgp3d::hierarchy::ExactFacetDescentSegmentDecision;
 using morsehgp3d::hierarchy::ExactFacetDescentSegmentCounters;
 using morsehgp3d::hierarchy::ExactFacetDescentSegmentResult;
@@ -40,10 +46,12 @@ using morsehgp3d::hierarchy::ExactFacetMiniballScope;
 using morsehgp3d::hierarchy::ExactFacetMiniballStatus;
 using morsehgp3d::hierarchy::ExactFacetMiniballVerification;
 using morsehgp3d::hierarchy::build_exact_facet_descent_arc;
+using morsehgp3d::hierarchy::build_exact_facet_descent_chain;
 using morsehgp3d::hierarchy::build_exact_facet_descent_preconditions;
 using morsehgp3d::hierarchy::build_exact_facet_descent_segment;
 using morsehgp3d::hierarchy::build_exact_facet_miniball;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_arc;
+using morsehgp3d::hierarchy::verify_exact_facet_descent_chain;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_preconditions;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_segment;
 using morsehgp3d::hierarchy::verify_exact_facet_miniball;
@@ -169,6 +177,27 @@ template <std::size_t Size>
          verification.decision_certified && verification.scope_certified &&
          verification.fresh_replay_certified &&
          verification.exact_descent_segment_decision_certified;
+}
+
+[[nodiscard]] bool all_descent_chain_certificates_close(
+    const ExactFacetDescentChainVerification& verification) {
+  return verification.requested_budget_certified &&
+         verification.effective_budget_certified &&
+         verification.compact_path_shape_certified &&
+         verification.initial_facet_identity_certified &&
+         verification.compact_nodes_certified &&
+         verification.committed_segment_witnesses_certified &&
+         verification.stopping_probe_presence_certified &&
+         verification.stopping_probe_certified &&
+         verification.exact_seams_certified &&
+         verification.strict_facet_potential_certified &&
+         verification.finite_strict_facet_orbit_theorem_certified &&
+         verification.closed_polyline_nonstrict_initial_sublevel_certified &&
+         verification.source_open_polyline_strict_initial_sublevel_certified &&
+         verification.counters_certified &&
+         verification.decision_certified && verification.scope_certified &&
+         verification.fresh_replay_certified &&
+         verification.exact_descent_chain_decision_certified;
 }
 
 [[nodiscard]] bool matches_ids(
@@ -1645,6 +1674,564 @@ void test_descent_segment_verifier_rejects_every_new_result_layer() {
       "segment verifier rejects a valid-looking witness on an unsupported source");
 }
 
+[[nodiscard]] CanonicalPointCloud descent_chain_fixture_cloud() {
+  const std::array<CertifiedPoint3, 6> input{
+      point(-5.0, -6.0),
+      point(-5.0, 5.0),
+      point(-3.0, 3.0),
+      point(3.0, 1.0),
+      point(3.0, 6.0),
+      point(4.0, 5.0)};
+  return canonical_cloud(input);
+}
+
+[[nodiscard]] CanonicalPointCloud
+descent_chain_nontrivial_atom_seam_fixture_cloud() {
+  const std::array<CertifiedPoint3, 5> input{
+      point(-3.0, -6.0),
+      point(-2.0, 6.0),
+      point(3.0, 8.0),
+      point(4.0, 8.0),
+      point(5.0, 6.0)};
+  return canonical_cloud(input);
+}
+
+void test_descent_chain_concatenates_exact_segments() {
+  const ExactFacetDescentChainResult empty;
+  check(
+      empty.decision == ExactFacetDescentChainDecision::not_certified &&
+          empty.scope == ExactFacetDescentChainScope::unspecified &&
+          empty.nodes.empty() &&
+          empty.committed_segment_witnesses.empty() &&
+          !empty.stopping_probe.has_value() &&
+          !empty.exact_seams_certified &&
+          !empty.strict_facet_potential_certified &&
+          !empty.finite_strict_facet_orbit_theorem_certified &&
+          !empty.closed_polyline_nonstrict_initial_sublevel &&
+          !empty.source_open_polyline_strict_initial_sublevel,
+      "default descent chain certifies no orbit or polyline");
+
+  const CanonicalPointCloud cloud = descent_chain_fixture_cloud();
+  const std::array<PointId, 4> facet{4U, 0U, 2U, 1U};
+  const ExactFacetDescentChainBudget budget{20U};
+  const ExactFacetDescentChainResult result =
+      build_exact_facet_descent_chain(cloud, facet, budget);
+  const ExactFacetDescentChainVerification verification =
+      verify_exact_facet_descent_chain(cloud, facet, budget, result);
+
+  check(
+      result.requested_budget == budget &&
+          result.effective_maximum_committed_strict_segment_count == 14U &&
+          result.nodes.size() == 3U &&
+          result.committed_segment_witnesses.size() == 2U &&
+          result.stopping_probe.has_value(),
+      "two-step chain closes below the exact fifteen-facet orbit bound");
+  if (result.nodes.size() != 3U ||
+      result.committed_segment_witnesses.size() != 2U ||
+      !result.stopping_probe.has_value()) {
+    return;
+  }
+
+  check(
+      result.nodes[0].facet_point_ids ==
+              std::vector<PointId>({0U, 1U, 2U, 4U}) &&
+          result.nodes[0].center == center(-1, 0, 0) &&
+          result.nodes[0].squared_level == level(52) &&
+          result.nodes[1].facet_point_ids ==
+              std::vector<PointId>({1U, 2U, 3U, 5U}) &&
+          result.nodes[1].center == center(-1, 8, 0, 2) &&
+          result.nodes[1].squared_level == level(85, 4) &&
+          result.nodes[2].facet_point_ids ==
+              std::vector<PointId>({1U, 2U, 3U, 4U}) &&
+          result.nodes[2].center == center(-3, 14, 0, 4) &&
+          result.nodes[2].squared_level == level(325, 16),
+      "two-step chain stores the exact canonical facets, centers and levels");
+
+  const ExactFacetDescentSegmentWitness& first =
+      result.committed_segment_witnesses[0];
+  const ExactFacetDescentSegmentWitness& second =
+      result.committed_segment_witnesses[1];
+  check(
+      first.source_atom_level == level(50) &&
+          first.successor_atom_level == level(85, 4) &&
+          first.center_squared_displacement == level(65, 4) &&
+          !first.centers_equal && first.source_endpoint_strict_sublevel &&
+          first.quadratic_max_upper_bound_certified &&
+          first.closed_segment_nonstrict_sublevel &&
+          first.half_open_segment_strict_sublevel &&
+          second.source_atom_level == level(85, 4) &&
+          second.successor_atom_level == level(325, 16) &&
+          second.center_squared_displacement == level(5, 16) &&
+          !second.centers_equal &&
+          !second.source_endpoint_strict_sublevel &&
+          second.quadratic_max_upper_bound_certified &&
+          second.closed_segment_nonstrict_sublevel &&
+          second.half_open_segment_strict_sublevel,
+      "aligned segment witnesses preserve both seam-side atom levels");
+  check(
+      result.nodes[1].squared_level == first.successor_atom_level &&
+          result.nodes[1].squared_level == second.source_atom_level &&
+          result.nodes[2].squared_level == second.successor_atom_level &&
+          result.nodes[2].squared_level < result.nodes[1].squared_level &&
+          result.nodes[1].squared_level < result.nodes[0].squared_level,
+      "fresh seams agree while the exact facet potential strictly decreases");
+
+  const ExactFacetDescentChainCounters& counters = result.counters;
+  check(
+      counters.facet_probe_count == 3U &&
+          counters.strict_segment_probe_count == 2U &&
+          counters.committed_strict_segment_count == 2U &&
+          counters.visited_facet_count == 3U &&
+          counters.successor_cycle_lookup_count == 2U &&
+          counters.inter_step_seam_replay_count == 2U &&
+          counters.active_terminal_count == 1U &&
+          counters.unsupported_terminal_count == 0U &&
+          counters.structural_budget_stop_count == 0U &&
+          counters.accumulated_probe_counters.
+                  source_arc_classification_count == 3U &&
+          counters.accumulated_probe_counters.
+                  source_atom_distance_evaluation_count == 8U &&
+          counters.accumulated_probe_counters.
+                  source_atom_maximum_comparison_count == 6U &&
+          counters.accumulated_probe_counters.
+                  center_displacement_evaluation_count == 2U &&
+          counters.accumulated_probe_counters.
+                  exact_level_relation_count == 8U &&
+          counters.accumulated_probe_counters.
+                  convex_identity_certification_count == 2U,
+      "two-step chain closes all probe, seam, cycle and analytic counters");
+  check(
+      result.stopping_probe->decision ==
+              ExactFacetDescentSegmentDecision::
+                  no_segment_already_active_at_own_center &&
+          !result.stopping_probe->segment_witness.has_value() &&
+          result.exact_seams_certified &&
+          result.strict_facet_potential_certified &&
+          result.finite_strict_facet_orbit_theorem_certified &&
+          result.closed_polyline_nonstrict_initial_sublevel &&
+          result.source_open_polyline_strict_initial_sublevel &&
+          result.decision == ExactFacetDescentChainDecision::
+                                 complete_at_regular_active_facet &&
+          result.scope == ExactFacetDescentChainScope::
+                              single_source_canonical_strict_descent_chain_only &&
+          std::string_view{ExactFacetDescentChainResult::proof_basis} ==
+              "exact_replayed_half_open_segments_exact_seams_strict_facet_"
+              "potential_finite_orbit_v1" &&
+          all_descent_chain_certificates_close(verification),
+      "complete chain publishes only its single-source exact polyline scope");
+}
+
+void test_descent_chain_keeps_miniball_and_atom_seams_distinct() {
+  const CanonicalPointCloud cloud =
+      descent_chain_nontrivial_atom_seam_fixture_cloud();
+  const std::array<PointId, 2> facet{0U, 2U};
+  const ExactFacetDescentChainBudget budget{2U};
+  const ExactFacetDescentChainResult result =
+      build_exact_facet_descent_chain(cloud, facet, budget);
+  const ExactFacetDescentChainVerification verification =
+      verify_exact_facet_descent_chain(cloud, facet, budget, result);
+
+  check(
+      result.nodes.size() == 3U &&
+          result.committed_segment_witnesses.size() == 2U &&
+          result.stopping_probe.has_value() &&
+          result.decision == ExactFacetDescentChainDecision::
+                                 complete_at_regular_active_facet &&
+          all_descent_chain_certificates_close(verification),
+      "nontrivial atom seam fixture closes its two-step active orbit");
+  if (result.nodes.size() != 3U ||
+      result.committed_segment_witnesses.size() != 2U) {
+    return;
+  }
+
+  const ExactFacetDescentSegmentWitness& first =
+      result.committed_segment_witnesses[0];
+  const ExactFacetDescentSegmentWitness& second =
+      result.committed_segment_witnesses[1];
+  check(
+      result.nodes[0].facet_point_ids ==
+              std::vector<PointId>({0U, 2U}) &&
+          result.nodes[0].center == center(0, 1, 0) &&
+          result.nodes[0].squared_level == level(58) &&
+          result.nodes[1].facet_point_ids ==
+              std::vector<PointId>({1U, 4U}) &&
+          result.nodes[1].center == center(3, 12, 0, 2) &&
+          result.nodes[1].squared_level == level(49, 4) &&
+          result.nodes[2].facet_point_ids ==
+              std::vector<PointId>({2U, 3U}) &&
+          result.nodes[2].center == center(7, 16, 0, 2) &&
+          result.nodes[2].squared_level == level(1, 4),
+      "nontrivial atom seam stores all exact facets, centers and miniballs");
+  check(
+      first.source_atom_level == level(50) &&
+          first.successor_atom_level == level(49, 4) &&
+          first.center_squared_displacement == level(109, 4) &&
+          first.source_endpoint_strict_sublevel &&
+          second.source_atom_level == level(41, 4) &&
+          second.successor_atom_level == level(1, 4) &&
+          second.center_squared_displacement == level(8) &&
+          second.source_endpoint_strict_sublevel,
+      "nontrivial atom seam stores the independently recomputed segment levels");
+  check(
+      result.nodes[1].squared_level == first.successor_atom_level &&
+          second.source_atom_level < result.nodes[1].squared_level &&
+          second.source_atom_level != first.successor_atom_level &&
+          result.nodes[2].squared_level == second.successor_atom_level,
+      "chain continuity uses the exact miniball seam without equating the next atom level");
+}
+
+void test_descent_chain_budgets_and_terminal_decisions() {
+  const CanonicalPointCloud cloud = descent_chain_fixture_cloud();
+  const std::array<PointId, 4> facet{0U, 1U, 2U, 4U};
+
+  const std::array<CertifiedPoint3, 1> singleton_input{
+      point(2.0, -3.0, 4.0)};
+  const CanonicalPointCloud singleton_cloud =
+      canonical_cloud(singleton_input);
+  const std::array<PointId, 1> singleton_facet{0U};
+  const ExactFacetDescentChainBudget singleton_budget{4U};
+  const ExactFacetDescentChainResult singleton =
+      build_exact_facet_descent_chain(
+          singleton_cloud, singleton_facet, singleton_budget);
+  const auto singleton_verification = verify_exact_facet_descent_chain(
+      singleton_cloud,
+      singleton_facet,
+      singleton_budget,
+      singleton);
+  check(
+      singleton.effective_maximum_committed_strict_segment_count == 0U &&
+          singleton.nodes.size() == 1U &&
+          singleton.committed_segment_witnesses.empty() &&
+          singleton.stopping_probe.has_value() &&
+          singleton.counters.facet_probe_count == 1U &&
+          singleton.counters.active_terminal_count == 1U &&
+          singleton.decision == ExactFacetDescentChainDecision::
+                                    complete_at_regular_active_facet &&
+          all_descent_chain_certificates_close(singleton_verification),
+      "n equals k equals one closes the zero structural orbit bound");
+
+  const ExactFacetDescentChainBudget zero_budget{0U};
+  const ExactFacetDescentChainResult zero =
+      build_exact_facet_descent_chain(cloud, facet, zero_budget);
+  const auto zero_verification =
+      verify_exact_facet_descent_chain(
+          cloud, facet, zero_budget, zero);
+  check(
+      zero.effective_maximum_committed_strict_segment_count == 0U &&
+          zero.nodes.size() == 1U &&
+          zero.committed_segment_witnesses.empty() &&
+          zero.stopping_probe.has_value() &&
+          zero.stopping_probe->decision ==
+              ExactFacetDescentSegmentDecision::
+                  strict_half_open_segment_certified &&
+          zero.counters.facet_probe_count == 1U &&
+          zero.counters.strict_segment_probe_count == 1U &&
+          zero.counters.committed_strict_segment_count == 0U &&
+          zero.counters.visited_facet_count == 1U &&
+          zero.counters.successor_cycle_lookup_count == 1U &&
+          zero.counters.inter_step_seam_replay_count == 0U &&
+          zero.counters.structural_budget_stop_count == 1U &&
+          zero.decision == ExactFacetDescentChainDecision::
+                               certified_prefix_strict_segment_budget_exhausted &&
+          all_descent_chain_certificates_close(zero_verification),
+      "zero budget retains one certified source and the uncommitted strict frontier");
+
+  const ExactFacetDescentChainBudget one_budget{1U};
+  const ExactFacetDescentChainResult one =
+      build_exact_facet_descent_chain(cloud, facet, one_budget);
+  const auto one_verification =
+      verify_exact_facet_descent_chain(
+          cloud, facet, one_budget, one);
+  check(
+      one.effective_maximum_committed_strict_segment_count == 1U &&
+          one.nodes.size() == 2U &&
+          one.committed_segment_witnesses.size() == 1U &&
+          one.stopping_probe.has_value() &&
+          one.stopping_probe->decision ==
+              ExactFacetDescentSegmentDecision::
+                  strict_half_open_segment_certified &&
+          one.counters.facet_probe_count == 2U &&
+          one.counters.strict_segment_probe_count == 2U &&
+          one.counters.committed_strict_segment_count == 1U &&
+          one.counters.visited_facet_count == 2U &&
+          one.counters.successor_cycle_lookup_count == 2U &&
+          one.counters.inter_step_seam_replay_count == 1U &&
+          one.counters.structural_budget_stop_count == 1U &&
+          one.decision == ExactFacetDescentChainDecision::
+                              certified_prefix_strict_segment_budget_exhausted &&
+          all_descent_chain_certificates_close(one_verification),
+      "one-segment budget commits exactly one seam before the strict frontier");
+
+  const ExactFacetDescentChainBudget exact_budget{2U};
+  const ExactFacetDescentChainResult exact =
+      build_exact_facet_descent_chain(cloud, facet, exact_budget);
+  const auto exact_verification =
+      verify_exact_facet_descent_chain(
+          cloud, facet, exact_budget, exact);
+  check(
+      exact.committed_segment_witnesses.size() == 2U &&
+          exact.counters.structural_budget_stop_count == 0U &&
+          exact.decision == ExactFacetDescentChainDecision::
+                                complete_at_regular_active_facet &&
+          all_descent_chain_certificates_close(exact_verification),
+      "terminal probe succeeds when the exact two-segment chain meets its budget");
+
+  check_throws<std::invalid_argument>(
+      [&cloud, &facet]() {
+        const ExactFacetDescentChainBudget excessive{
+            ExactFacetDescentChainBudget::
+                maximum_supported_committed_strict_segment_count + 1U};
+        static_cast<void>(
+            build_exact_facet_descent_chain(cloud, facet, excessive));
+      },
+      "reference descent chain rejects a budget above its explicit cap");
+
+  const std::array<CertifiedPoint3, 3> active_input{
+      point(-1.0, 0.0), point(1.0, 0.0), point(3.0, 0.0)};
+  const CanonicalPointCloud active_cloud = canonical_cloud(active_input);
+  const std::array<PointId, 2> active_facet{0U, 1U};
+  const ExactFacetDescentChainBudget terminal_budget{4U};
+  const ExactFacetDescentChainResult active =
+      build_exact_facet_descent_chain(
+          active_cloud, active_facet, terminal_budget);
+  const auto active_verification = verify_exact_facet_descent_chain(
+      active_cloud, active_facet, terminal_budget, active);
+  check(
+      active.effective_maximum_committed_strict_segment_count == 2U &&
+          active.nodes.size() == 1U &&
+          active.committed_segment_witnesses.empty() &&
+          active.counters.facet_probe_count == 1U &&
+          active.counters.active_terminal_count == 1U &&
+          active.counters.unsupported_terminal_count == 0U &&
+          active.counters.structural_budget_stop_count == 0U &&
+          active.decision == ExactFacetDescentChainDecision::
+                                 complete_at_regular_active_facet &&
+          all_descent_chain_certificates_close(active_verification),
+      "already-active source closes as a zero-segment complete chain");
+
+  const std::array<CertifiedPoint3, 4> unsupported_input{
+      point(0.0, 0.0),
+      point(0.0, 2.0),
+      point(1.0, 1.0),
+      point(2.0, 0.0)};
+  const CanonicalPointCloud unsupported_cloud =
+      canonical_cloud(unsupported_input);
+  const std::array<PointId, 3> unsupported_facet{0U, 1U, 3U};
+  const ExactFacetDescentChainResult unsupported =
+      build_exact_facet_descent_chain(
+          unsupported_cloud, unsupported_facet, terminal_budget);
+  const auto unsupported_verification =
+      verify_exact_facet_descent_chain(
+          unsupported_cloud,
+          unsupported_facet,
+          terminal_budget,
+          unsupported);
+  check(
+      unsupported.effective_maximum_committed_strict_segment_count == 3U &&
+          unsupported.nodes.size() == 1U &&
+          unsupported.committed_segment_witnesses.empty() &&
+          unsupported.counters.facet_probe_count == 1U &&
+          unsupported.counters.active_terminal_count == 0U &&
+          unsupported.counters.unsupported_terminal_count == 1U &&
+          unsupported.counters.structural_budget_stop_count == 0U &&
+          unsupported.decision == ExactFacetDescentChainDecision::
+                                      certified_prefix_blocked_unsupported_degeneracy &&
+          all_descent_chain_certificates_close(
+              unsupported_verification),
+      "unsupported source returns only its zero-segment certified prefix");
+}
+
+void test_descent_chain_verifier_rejects_every_result_layer() {
+  const CanonicalPointCloud cloud = descent_chain_fixture_cloud();
+  const std::array<PointId, 4> facet{0U, 1U, 2U, 4U};
+  const ExactFacetDescentChainBudget budget{20U};
+  const ExactFacetDescentChainResult result =
+      build_exact_facet_descent_chain(cloud, facet, budget);
+  check(
+      result.nodes.size() == 3U &&
+          result.committed_segment_witnesses.size() == 2U &&
+          result.stopping_probe.has_value(),
+      "chain falsification fixture starts from two segments and one terminal probe");
+  if (result.nodes.size() != 3U ||
+      result.committed_segment_witnesses.size() != 2U ||
+      !result.stopping_probe.has_value()) {
+    return;
+  }
+
+  const auto rejects =
+      [&cloud, &facet, budget](
+          const ExactFacetDescentChainResult& candidate,
+          const std::string& message) {
+        const auto verification = verify_exact_facet_descent_chain(
+            cloud, facet, budget, candidate);
+        check(
+            !verification.exact_descent_chain_decision_certified,
+            message);
+      };
+
+  ExactFacetDescentChainResult bad_requested_budget = result;
+  bad_requested_budget.requested_budget.
+      maximum_committed_strict_segment_count = 19U;
+  rejects(
+      bad_requested_budget,
+      "chain verifier rejects a falsified requested budget");
+
+  ExactFacetDescentChainResult bad_effective_budget = result;
+  ++bad_effective_budget.
+      effective_maximum_committed_strict_segment_count;
+  rejects(
+      bad_effective_budget,
+      "chain verifier rejects a falsified effective budget");
+
+  ExactFacetDescentChainResult bad_shape = result;
+  bad_shape.nodes.pop_back();
+  rejects(bad_shape, "chain verifier rejects an unaligned compact path");
+
+  ExactFacetDescentChainResult bad_initial_node = result;
+  bad_initial_node.nodes.front().facet_point_ids.front() = 5U;
+  rejects(
+      bad_initial_node,
+      "chain verifier rejects a falsified initial facet identity");
+
+  ExactFacetDescentChainResult bad_node_geometry = result;
+  bad_node_geometry.nodes[1].squared_level = level(21);
+  rejects(
+      bad_node_geometry,
+      "chain verifier rejects a falsified compact seam node");
+
+  ExactFacetDescentChainResult repeated_facet = result;
+  repeated_facet.nodes.back().facet_point_ids =
+      repeated_facet.nodes.front().facet_point_ids;
+  rejects(
+      repeated_facet,
+      "chain verifier rejects an explicitly repeated facet");
+
+  ExactFacetDescentChainResult bad_witness = result;
+  bad_witness.committed_segment_witnesses[0].source_atom_level = level(49);
+  rejects(
+      bad_witness,
+      "chain verifier rejects a falsified committed segment witness");
+
+  ExactFacetDescentChainResult missing_stopping_probe = result;
+  missing_stopping_probe.stopping_probe.reset();
+  rejects(
+      missing_stopping_probe,
+      "chain verifier rejects an absent complete stopping probe");
+
+  ExactFacetDescentChainResult bad_stopping_decision = result;
+  bad_stopping_decision.stopping_probe->decision =
+      ExactFacetDescentSegmentDecision::no_segment_unsupported_degeneracy;
+  rejects(
+      bad_stopping_decision,
+      "chain verifier rejects a falsified stopping decision");
+
+  ExactFacetDescentChainResult bad_stopping_scope = result;
+  bad_stopping_scope.stopping_probe->scope =
+      ExactFacetDescentSegmentScope::unspecified;
+  rejects(
+      bad_stopping_scope,
+      "chain verifier rejects a falsified stopping probe scope");
+
+  ExactFacetDescentChainResult bad_stopping_geometry = result;
+  bad_stopping_geometry.stopping_probe->source_arc.source_preconditions.
+      facet_miniball.center = center(0, 0, 0);
+  rejects(
+      bad_stopping_geometry,
+      "chain verifier rejects falsified geometry inside the stopping probe");
+
+  constexpr std::array<
+      bool ExactFacetDescentChainResult::*, 5>
+      proof_fields{
+          &ExactFacetDescentChainResult::exact_seams_certified,
+          &ExactFacetDescentChainResult::strict_facet_potential_certified,
+          &ExactFacetDescentChainResult::
+              finite_strict_facet_orbit_theorem_certified,
+          &ExactFacetDescentChainResult::
+              closed_polyline_nonstrict_initial_sublevel,
+          &ExactFacetDescentChainResult::
+              source_open_polyline_strict_initial_sublevel};
+  for (const auto proof_field : proof_fields) {
+    ExactFacetDescentChainResult bad_proof = result;
+    bad_proof.*proof_field = false;
+    rejects(bad_proof, "chain verifier rejects every falsified proof fact");
+  }
+
+  constexpr std::array<
+      std::size_t ExactFacetDescentChainCounters::*, 9>
+      chain_counter_fields{
+          &ExactFacetDescentChainCounters::facet_probe_count,
+          &ExactFacetDescentChainCounters::strict_segment_probe_count,
+          &ExactFacetDescentChainCounters::committed_strict_segment_count,
+          &ExactFacetDescentChainCounters::visited_facet_count,
+          &ExactFacetDescentChainCounters::successor_cycle_lookup_count,
+          &ExactFacetDescentChainCounters::inter_step_seam_replay_count,
+          &ExactFacetDescentChainCounters::active_terminal_count,
+          &ExactFacetDescentChainCounters::unsupported_terminal_count,
+          &ExactFacetDescentChainCounters::structural_budget_stop_count};
+  for (const auto counter_field : chain_counter_fields) {
+    ExactFacetDescentChainResult bad_counter = result;
+    ++(bad_counter.counters.*counter_field);
+    rejects(
+        bad_counter,
+        "chain verifier rejects every falsified orbit counter");
+  }
+
+  constexpr std::array<
+      std::size_t ExactFacetDescentSegmentCounters::*, 6>
+      aggregate_counter_fields{
+          &ExactFacetDescentSegmentCounters::
+              source_arc_classification_count,
+          &ExactFacetDescentSegmentCounters::
+              source_atom_distance_evaluation_count,
+          &ExactFacetDescentSegmentCounters::
+              source_atom_maximum_comparison_count,
+          &ExactFacetDescentSegmentCounters::
+              center_displacement_evaluation_count,
+          &ExactFacetDescentSegmentCounters::exact_level_relation_count,
+          &ExactFacetDescentSegmentCounters::
+              convex_identity_certification_count};
+  for (const auto counter_field : aggregate_counter_fields) {
+    ExactFacetDescentChainResult bad_counter = result;
+    ++(bad_counter.counters.accumulated_probe_counters.*counter_field);
+    rejects(
+        bad_counter,
+        "chain verifier rejects every falsified accumulated segment counter");
+  }
+
+  ExactFacetDescentChainResult bad_decision = result;
+  bad_decision.decision = ExactFacetDescentChainDecision::
+                              certified_prefix_strict_segment_budget_exhausted;
+  rejects(
+      bad_decision,
+      "chain verifier treats the terminal outcome as untrusted");
+
+  ExactFacetDescentChainResult bad_scope = result;
+  bad_scope.scope = ExactFacetDescentChainScope::unspecified;
+  rejects(
+      bad_scope,
+      "chain verifier treats the single-source scope as untrusted");
+
+  const auto wrong_policy = verify_exact_facet_descent_chain(
+      cloud,
+      facet,
+      ExactFacetDescentChainBudget{1U},
+      result);
+  check(
+      !wrong_policy.requested_budget_certified &&
+          !wrong_policy.exact_descent_chain_decision_certified,
+      "chain verifier never accepts a result under a different external budget");
+
+  const CanonicalPointCloud twin_cloud = descent_chain_fixture_cloud();
+  const ExactFacetDescentChainResult twin_result =
+      build_exact_facet_descent_chain(twin_cloud, facet, budget);
+  const auto identity_check = verify_exact_facet_descent_chain(
+      cloud, facet, budget, twin_result);
+  check(
+      !identity_check.stopping_probe_certified &&
+          !identity_check.exact_descent_chain_decision_certified,
+      "chain verifier rejects the stopping probe of a twin cloud identity");
+}
+
 void test_descent_precondition_verifier_rejects_every_result_layer() {
   const std::array<CertifiedPoint3, 3> input{
       point(-1.0, 0.0, 0.0),
@@ -1940,6 +2527,10 @@ int main() {
   test_descent_segment_omits_witness_for_active_facet();
   test_descent_segment_omits_witness_for_unsupported_facet();
   test_descent_segment_verifier_rejects_every_new_result_layer();
+  test_descent_chain_concatenates_exact_segments();
+  test_descent_chain_keeps_miniball_and_atom_seams_distinct();
+  test_descent_chain_budgets_and_terminal_decisions();
+  test_descent_chain_verifier_rejects_every_result_layer();
   test_descent_precondition_verifier_rejects_every_result_layer();
   test_verifier_rejects_every_result_layer();
   test_invalid_facets_are_rejected();

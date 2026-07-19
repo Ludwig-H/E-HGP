@@ -7,6 +7,8 @@
 #include <array>
 #include <cstddef>
 #include <limits>
+#include <map>
+#include <numeric>
 #include <optional>
 #include <span>
 #include <stdexcept>
@@ -353,6 +355,112 @@ void evaluate_support(
         "exact descent-precondition distance counters overflow size_t");
   }
   return left + right;
+}
+
+[[nodiscard]] std::size_t checked_chain_counter_add(
+    std::size_t left, std::size_t right) {
+  if (left > std::numeric_limits<std::size_t>::max() - right) {
+    throw std::length_error(
+        "exact descent-chain counters overflow size_t");
+  }
+  return left + right;
+}
+
+[[nodiscard]] std::size_t checked_chain_counter_multiply(
+    std::size_t left, std::size_t right) {
+  if (left != 0U &&
+      right > std::numeric_limits<std::size_t>::max() / left) {
+    throw std::length_error(
+        "exact descent-chain counters overflow size_t");
+  }
+  return left * right;
+}
+
+[[nodiscard]] std::size_t capped_binomial_coefficient(
+    std::size_t n, std::size_t k, std::size_t cap) {
+  if (k > n || cap == 0U) {
+    throw std::invalid_argument(
+        "a capped facet binomial requires k <= n and a positive cap");
+  }
+  if (cap == 1U) {
+    return cap;
+  }
+
+  k = std::min(k, n - k);
+  std::size_t value = 1U;
+  for (std::size_t index = 1U; index <= k; ++index) {
+    std::size_t numerator = n - k + index;
+    std::size_t denominator = index;
+    const std::size_t numerator_gcd =
+        std::gcd(numerator, denominator);
+    numerator /= numerator_gcd;
+    denominator /= numerator_gcd;
+    const std::size_t value_gcd = std::gcd(value, denominator);
+    value /= value_gcd;
+    denominator /= value_gcd;
+    if (denominator != 1U) {
+      throw std::logic_error(
+          "a binomial recurrence did not divide exactly");
+    }
+    if (value != 0U && numerator > (cap - 1U) / value) {
+      return cap;
+    }
+    value *= numerator;
+    if (value >= cap) {
+      return cap;
+    }
+  }
+  return value;
+}
+
+[[nodiscard]] std::size_t effective_chain_segment_budget(
+    std::size_t point_count,
+    std::size_t facet_size,
+    ExactFacetDescentChainBudget budget) {
+  if (budget.maximum_committed_strict_segment_count >
+      ExactFacetDescentChainBudget::
+          maximum_supported_committed_strict_segment_count) {
+    throw std::invalid_argument(
+        "an exact descent-chain budget exceeds its reference cap");
+  }
+  const std::size_t binomial_cap = checked_chain_counter_add(
+      budget.maximum_committed_strict_segment_count, 2U);
+  const std::size_t capped_facet_count = capped_binomial_coefficient(
+      point_count, facet_size, binomial_cap);
+  if (capped_facet_count == 0U) {
+    throw std::logic_error(
+        "an exact descent chain has no admissible source facet");
+  }
+  return std::min(
+      budget.maximum_committed_strict_segment_count,
+      capped_facet_count - 1U);
+}
+
+void accumulate_segment_counters(
+    ExactFacetDescentSegmentCounters& aggregate,
+    const ExactFacetDescentSegmentCounters& contribution) {
+  aggregate.source_arc_classification_count = checked_chain_counter_add(
+      aggregate.source_arc_classification_count,
+      contribution.source_arc_classification_count);
+  aggregate.source_atom_distance_evaluation_count =
+      checked_chain_counter_add(
+          aggregate.source_atom_distance_evaluation_count,
+          contribution.source_atom_distance_evaluation_count);
+  aggregate.source_atom_maximum_comparison_count =
+      checked_chain_counter_add(
+          aggregate.source_atom_maximum_comparison_count,
+          contribution.source_atom_maximum_comparison_count);
+  aggregate.center_displacement_evaluation_count =
+      checked_chain_counter_add(
+          aggregate.center_displacement_evaluation_count,
+          contribution.center_displacement_evaluation_count);
+  aggregate.exact_level_relation_count = checked_chain_counter_add(
+      aggregate.exact_level_relation_count,
+      contribution.exact_level_relation_count);
+  aggregate.convex_identity_certification_count =
+      checked_chain_counter_add(
+          aggregate.convex_identity_certification_count,
+          contribution.convex_identity_certification_count);
 }
 
 [[nodiscard]] exact::ExactLevel exact_center_squared_distance(
@@ -1025,6 +1133,340 @@ compute_exact_facet_descent_segment(
   return observed.counters == expected.counters;
 }
 
+[[nodiscard]] ExactFacetDescentSegmentResult
+compute_stamped_exact_facet_descent_segment(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> facet_point_ids) {
+  ExactFacetDescentSegmentResult result =
+      compute_exact_facet_descent_segment(cloud, facet_point_ids);
+  result.decision = expected_segment_decision(result.source_arc);
+  result.scope = ExactFacetDescentSegmentScope::
+      canonical_strict_arc_half_open_sublevel_segment_only;
+  return result;
+}
+
+[[nodiscard]] ExactFacetDescentChainNodeWitness chain_node_from_miniball(
+    const ExactFacetMiniballResult& miniball) {
+  ExactFacetDescentChainNodeWitness node;
+  node.facet_point_ids = miniball.facet_point_ids;
+  node.center = miniball.center;
+  node.squared_level = miniball.squared_radius;
+  return node;
+}
+
+[[nodiscard]] bool same_segment_witnesses(
+    std::span<const ExactFacetDescentSegmentWitness> observed,
+    std::span<const ExactFacetDescentSegmentWitness> expected) {
+  if (observed.size() != expected.size()) {
+    return false;
+  }
+  for (std::size_t index = 0U; index < observed.size(); ++index) {
+    if (!same_segment_witness(observed[index], expected[index])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+[[nodiscard]] ExactFacetDescentChainResult
+compute_exact_facet_descent_chain(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> facet_point_ids,
+    ExactFacetDescentChainBudget budget) {
+  ExactFacetDescentChainResult result;
+  result.requested_budget = budget;
+
+  std::vector<PointId> current_facet =
+      canonical_facet(cloud, facet_point_ids);
+  const std::size_t facet_size = current_facet.size();
+  result.effective_maximum_committed_strict_segment_count =
+      effective_chain_segment_budget(
+          cloud.size(), facet_size, budget);
+  if (result.effective_maximum_committed_strict_segment_count >
+          result.committed_segment_witnesses.max_size() ||
+      result.effective_maximum_committed_strict_segment_count >=
+          result.nodes.max_size()) {
+    throw std::length_error(
+        "an exact descent-chain budget exceeds its vector capacities");
+  }
+  result.committed_segment_witnesses.reserve(
+      result.effective_maximum_committed_strict_segment_count);
+  result.nodes.reserve(
+      result.effective_maximum_committed_strict_segment_count + 1U);
+
+  std::map<std::vector<PointId>, std::size_t> visited_facets;
+  visited_facets.emplace(current_facet, 0U);
+
+  while (!result.stopping_probe.has_value()) {
+    ExactFacetDescentSegmentResult probe =
+        compute_stamped_exact_facet_descent_segment(
+            cloud, current_facet);
+    result.counters.facet_probe_count = checked_chain_counter_add(
+        result.counters.facet_probe_count, 1U);
+    accumulate_segment_counters(
+        result.counters.accumulated_probe_counters,
+        probe.counters);
+
+    const ExactFacetMiniballResult& source_miniball =
+        probe.source_arc.source_preconditions.facet_miniball;
+    if (source_miniball.facet_point_ids != current_facet) {
+      throw std::logic_error(
+          "an exact descent-chain probe changed its source facet");
+    }
+    const ExactFacetDescentChainNodeWitness source_node =
+        chain_node_from_miniball(source_miniball);
+    if (result.nodes.empty()) {
+      result.nodes.push_back(source_node);
+    } else {
+      // A seam identifies the preceding target miniball with the freshly
+      // rebuilt source miniball. It deliberately does not equate the next
+      // source atom level a with the preceding successor atom level b.
+      if (result.nodes.back() != source_node) {
+        throw std::logic_error(
+            "two exact descent-chain segments disagree at their seam");
+      }
+      result.counters.inter_step_seam_replay_count =
+          checked_chain_counter_add(
+              result.counters.inter_step_seam_replay_count, 1U);
+    }
+
+    switch (probe.decision) {
+      case ExactFacetDescentSegmentDecision::
+          no_segment_already_active_at_own_center:
+        result.counters.active_terminal_count =
+            checked_chain_counter_add(
+                result.counters.active_terminal_count, 1U);
+        result.decision = ExactFacetDescentChainDecision::
+            complete_at_regular_active_facet;
+        result.stopping_probe.emplace(std::move(probe));
+        break;
+
+      case ExactFacetDescentSegmentDecision::
+          no_segment_unsupported_degeneracy:
+        result.counters.unsupported_terminal_count =
+            checked_chain_counter_add(
+                result.counters.unsupported_terminal_count, 1U);
+        result.decision = ExactFacetDescentChainDecision::
+            certified_prefix_blocked_unsupported_degeneracy;
+        result.stopping_probe.emplace(std::move(probe));
+        break;
+
+      case ExactFacetDescentSegmentDecision::
+          strict_half_open_segment_certified: {
+        result.counters.strict_segment_probe_count =
+            checked_chain_counter_add(
+                result.counters.strict_segment_probe_count, 1U);
+        result.counters.successor_cycle_lookup_count =
+            checked_chain_counter_add(
+                result.counters.successor_cycle_lookup_count, 1U);
+        if (!probe.segment_witness.has_value() ||
+            !probe.source_arc.successor_facet_point_ids.has_value() ||
+            !probe.source_arc.successor_miniball.has_value()) {
+          throw std::logic_error(
+              "a strict exact descent-chain probe omitted its payload");
+        }
+
+        const ExactFacetDescentChainNodeWitness target_node =
+            chain_node_from_miniball(
+                *probe.source_arc.successor_miniball);
+        if (target_node.facet_point_ids !=
+                *probe.source_arc.successor_facet_point_ids ||
+            target_node.facet_point_ids.size() != facet_size ||
+            target_node.squared_level >= source_node.squared_level ||
+            probe.segment_witness->successor_atom_level !=
+                target_node.squared_level ||
+            !probe.segment_witness->quadratic_max_upper_bound_certified ||
+            !probe.segment_witness->closed_segment_nonstrict_sublevel ||
+            !probe.segment_witness->half_open_segment_strict_sublevel) {
+          throw std::logic_error(
+              "a strict exact descent-chain probe contradicted its compact transition");
+        }
+
+        if (visited_facets.find(target_node.facet_point_ids) !=
+            visited_facets.end()) {
+          throw std::logic_error(
+              "a strict exact descent-chain facet potential repeated a facet");
+        }
+
+        if (result.committed_segment_witnesses.size() >=
+            result.effective_maximum_committed_strict_segment_count) {
+          if (result.committed_segment_witnesses.size() !=
+              result.effective_maximum_committed_strict_segment_count) {
+            throw std::logic_error(
+                "an exact descent chain exceeded its effective budget");
+          }
+          result.counters.structural_budget_stop_count =
+              checked_chain_counter_add(
+                  result.counters.structural_budget_stop_count, 1U);
+          result.decision = ExactFacetDescentChainDecision::
+              certified_prefix_strict_segment_budget_exhausted;
+          result.stopping_probe.emplace(std::move(probe));
+          break;
+        }
+
+        const std::size_t target_index = result.nodes.size();
+        const auto insertion = visited_facets.emplace(
+            target_node.facet_point_ids, target_index);
+        if (!insertion.second) {
+          throw std::logic_error(
+              "an exact descent-chain cycle check changed during insertion");
+        }
+        result.committed_segment_witnesses.push_back(
+            *probe.segment_witness);
+        result.nodes.push_back(target_node);
+        result.counters.committed_strict_segment_count =
+            checked_chain_counter_add(
+                result.counters.committed_strict_segment_count, 1U);
+        current_facet = result.nodes.back().facet_point_ids;
+        break;
+      }
+
+      case ExactFacetDescentSegmentDecision::not_certified:
+        throw std::logic_error(
+            "an exact descent chain received an uncertified segment probe");
+    }
+  }
+
+  const std::size_t committed_count =
+      result.committed_segment_witnesses.size();
+  const std::size_t expected_probe_count =
+      checked_chain_counter_add(committed_count, 1U);
+  const bool budget_stop =
+      result.decision == ExactFacetDescentChainDecision::
+          certified_prefix_strict_segment_budget_exhausted;
+  const std::size_t expected_strict_probe_count =
+      checked_chain_counter_add(committed_count, budget_stop ? 1U : 0U);
+  const std::size_t expected_node_count =
+      checked_chain_counter_add(committed_count, 1U);
+  const std::size_t expected_atom_distance_count =
+      checked_chain_counter_multiply(
+          facet_size, expected_strict_probe_count);
+  const std::size_t expected_atom_comparison_count =
+      checked_chain_counter_multiply(
+          facet_size - 1U, expected_strict_probe_count);
+  const std::size_t expected_level_relation_count =
+      checked_chain_counter_multiply(
+          4U, expected_strict_probe_count);
+  const ExactFacetDescentSegmentCounters& aggregate =
+      result.counters.accumulated_probe_counters;
+  result.counters.visited_facet_count = result.nodes.size();
+
+  bool outcome_counters_close = false;
+  if (result.stopping_probe.has_value()) {
+    switch (result.decision) {
+      case ExactFacetDescentChainDecision::
+          complete_at_regular_active_facet:
+        outcome_counters_close =
+            result.counters.active_terminal_count == 1U &&
+            result.counters.unsupported_terminal_count == 0U &&
+            result.counters.structural_budget_stop_count == 0U &&
+            result.stopping_probe->decision ==
+                ExactFacetDescentSegmentDecision::
+                    no_segment_already_active_at_own_center;
+        break;
+      case ExactFacetDescentChainDecision::
+          certified_prefix_blocked_unsupported_degeneracy:
+        outcome_counters_close =
+            result.counters.active_terminal_count == 0U &&
+            result.counters.unsupported_terminal_count == 1U &&
+            result.counters.structural_budget_stop_count == 0U &&
+            result.stopping_probe->decision ==
+                ExactFacetDescentSegmentDecision::
+                    no_segment_unsupported_degeneracy;
+        break;
+      case ExactFacetDescentChainDecision::
+          certified_prefix_strict_segment_budget_exhausted:
+        outcome_counters_close =
+            result.counters.active_terminal_count == 0U &&
+            result.counters.unsupported_terminal_count == 0U &&
+            result.counters.structural_budget_stop_count == 1U &&
+            committed_count ==
+                result.effective_maximum_committed_strict_segment_count &&
+            result.stopping_probe->decision ==
+                ExactFacetDescentSegmentDecision::
+                    strict_half_open_segment_certified;
+        break;
+      case ExactFacetDescentChainDecision::not_certified:
+        break;
+    }
+  }
+
+  if (result.nodes.size() != expected_node_count ||
+      visited_facets.size() != expected_node_count ||
+      result.counters.visited_facet_count != expected_node_count ||
+      committed_count >
+          result.effective_maximum_committed_strict_segment_count ||
+      result.counters.facet_probe_count != expected_probe_count ||
+      result.counters.strict_segment_probe_count !=
+          expected_strict_probe_count ||
+      result.counters.committed_strict_segment_count != committed_count ||
+      result.counters.inter_step_seam_replay_count != committed_count ||
+      result.counters.successor_cycle_lookup_count !=
+          expected_strict_probe_count ||
+      !outcome_counters_close ||
+      aggregate.source_arc_classification_count != expected_probe_count ||
+      aggregate.source_atom_distance_evaluation_count !=
+          expected_atom_distance_count ||
+      aggregate.source_atom_maximum_comparison_count !=
+          expected_atom_comparison_count ||
+      aggregate.center_displacement_evaluation_count !=
+          expected_strict_probe_count ||
+      aggregate.exact_level_relation_count !=
+          expected_level_relation_count ||
+      aggregate.convex_identity_certification_count !=
+          expected_strict_probe_count) {
+    throw std::logic_error(
+        "the exact descent-chain compact structure or counters did not close");
+  }
+
+  result.exact_seams_certified = true;
+  result.strict_facet_potential_certified = true;
+  result.finite_strict_facet_orbit_theorem_certified = true;
+  result.closed_polyline_nonstrict_initial_sublevel = true;
+  result.source_open_polyline_strict_initial_sublevel = true;
+  return result;
+}
+
+[[nodiscard]] bool same_computed_descent_chain(
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactFacetDescentChainResult& observed,
+    const ExactFacetDescentChainResult& expected) {
+  if (observed.requested_budget != expected.requested_budget ||
+      observed.effective_maximum_committed_strict_segment_count !=
+          expected.effective_maximum_committed_strict_segment_count ||
+      observed.nodes != expected.nodes ||
+      !same_segment_witnesses(
+          observed.committed_segment_witnesses,
+          expected.committed_segment_witnesses) ||
+      observed.stopping_probe.has_value() !=
+          expected.stopping_probe.has_value() ||
+      observed.exact_seams_certified !=
+          expected.exact_seams_certified ||
+      observed.strict_facet_potential_certified !=
+          expected.strict_facet_potential_certified ||
+      observed.finite_strict_facet_orbit_theorem_certified !=
+          expected.finite_strict_facet_orbit_theorem_certified ||
+      observed.closed_polyline_nonstrict_initial_sublevel !=
+          expected.closed_polyline_nonstrict_initial_sublevel ||
+      observed.source_open_polyline_strict_initial_sublevel !=
+          expected.source_open_polyline_strict_initial_sublevel ||
+      observed.counters != expected.counters ||
+      observed.decision != expected.decision) {
+    return false;
+  }
+  if (expected.stopping_probe.has_value() &&
+      (!same_computed_descent_segment(
+           cloud,
+           *observed.stopping_probe,
+           *expected.stopping_probe) ||
+       observed.stopping_probe->decision !=
+           expected.stopping_probe->decision ||
+       observed.stopping_probe->scope != expected.stopping_probe->scope)) {
+    return false;
+  }
+  return true;
+}
+
 }  // namespace
 
 ExactFacetMiniballVerification verify_exact_facet_miniball(
@@ -1434,15 +1876,145 @@ ExactFacetDescentSegmentResult build_exact_facet_descent_segment(
     const spatial::CanonicalPointCloud& cloud,
     std::span<const PointId> facet_point_ids) {
   ExactFacetDescentSegmentResult result =
-      compute_exact_facet_descent_segment(cloud, facet_point_ids);
-  result.decision = expected_segment_decision(result.source_arc);
-  result.scope = ExactFacetDescentSegmentScope::
-      canonical_strict_arc_half_open_sublevel_segment_only;
+      compute_stamped_exact_facet_descent_segment(
+          cloud, facet_point_ids);
   const ExactFacetDescentSegmentVerification verification =
       verify_exact_facet_descent_segment(cloud, facet_point_ids, result);
   if (!verification.exact_descent_segment_decision_certified) {
     throw std::logic_error(
         "the exact facet descent segment failed its fresh replay");
+  }
+  return result;
+}
+
+ExactFacetDescentChainVerification verify_exact_facet_descent_chain(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> facet_point_ids,
+    ExactFacetDescentChainBudget budget,
+    const ExactFacetDescentChainResult& result) {
+  const ExactFacetDescentChainResult expected =
+      compute_exact_facet_descent_chain(
+          cloud, facet_point_ids, budget);
+  ExactFacetDescentChainVerification verification;
+
+  verification.requested_budget_certified =
+      result.requested_budget == budget &&
+      result.requested_budget == expected.requested_budget;
+  verification.effective_budget_certified =
+      result.effective_maximum_committed_strict_segment_count ==
+      expected.effective_maximum_committed_strict_segment_count;
+
+  const bool observed_path_bounded =
+      result.committed_segment_witnesses.size() <=
+          ExactFacetDescentChainBudget::
+              maximum_supported_committed_strict_segment_count &&
+      result.nodes.size() <=
+          ExactFacetDescentChainBudget::
+                  maximum_supported_committed_strict_segment_count +
+              1U;
+  verification.compact_path_shape_certified =
+      observed_path_bounded && !result.nodes.empty() &&
+      result.nodes.size() ==
+          result.committed_segment_witnesses.size() + 1U &&
+      result.committed_segment_witnesses.size() <=
+          result.effective_maximum_committed_strict_segment_count;
+  verification.initial_facet_identity_certified =
+      !result.nodes.empty() && !expected.nodes.empty() &&
+      result.nodes.front().facet_point_ids ==
+          expected.nodes.front().facet_point_ids;
+  verification.compact_nodes_certified =
+      result.nodes == expected.nodes;
+  verification.committed_segment_witnesses_certified =
+      same_segment_witnesses(
+          result.committed_segment_witnesses,
+          expected.committed_segment_witnesses);
+  verification.stopping_probe_presence_certified =
+      result.stopping_probe.has_value() &&
+      expected.stopping_probe.has_value();
+
+  if (verification.stopping_probe_presence_certified &&
+      !expected.nodes.empty()) {
+    const ExactFacetDescentSegmentVerification stopping_verification =
+        verify_exact_facet_descent_segment(
+            cloud,
+            expected.nodes.back().facet_point_ids,
+            *result.stopping_probe);
+    verification.stopping_probe_certified =
+        stopping_verification.exact_descent_segment_decision_certified &&
+        same_computed_descent_segment(
+            cloud,
+            *result.stopping_probe,
+            *expected.stopping_probe) &&
+        result.stopping_probe->decision ==
+            expected.stopping_probe->decision &&
+        result.stopping_probe->scope == expected.stopping_probe->scope;
+  }
+
+  verification.exact_seams_certified =
+      result.exact_seams_certified &&
+      result.exact_seams_certified ==
+          expected.exact_seams_certified;
+  verification.strict_facet_potential_certified =
+      result.strict_facet_potential_certified &&
+      result.strict_facet_potential_certified ==
+          expected.strict_facet_potential_certified;
+  verification.finite_strict_facet_orbit_theorem_certified =
+      result.finite_strict_facet_orbit_theorem_certified &&
+      result.finite_strict_facet_orbit_theorem_certified ==
+          expected.finite_strict_facet_orbit_theorem_certified;
+  verification.closed_polyline_nonstrict_initial_sublevel_certified =
+      result.closed_polyline_nonstrict_initial_sublevel &&
+      result.closed_polyline_nonstrict_initial_sublevel ==
+          expected.closed_polyline_nonstrict_initial_sublevel;
+  verification.source_open_polyline_strict_initial_sublevel_certified =
+      result.source_open_polyline_strict_initial_sublevel &&
+      result.source_open_polyline_strict_initial_sublevel ==
+          expected.source_open_polyline_strict_initial_sublevel;
+  verification.counters_certified =
+      result.counters == expected.counters;
+  verification.decision_certified =
+      result.decision == expected.decision;
+  verification.scope_certified =
+      result.scope == ExactFacetDescentChainScope::
+                          single_source_canonical_strict_descent_chain_only;
+  verification.fresh_replay_certified =
+      same_computed_descent_chain(cloud, result, expected);
+  verification.exact_descent_chain_decision_certified =
+      verification.requested_budget_certified &&
+      verification.effective_budget_certified &&
+      verification.compact_path_shape_certified &&
+      verification.initial_facet_identity_certified &&
+      verification.compact_nodes_certified &&
+      verification.committed_segment_witnesses_certified &&
+      verification.stopping_probe_presence_certified &&
+      verification.stopping_probe_certified &&
+      verification.exact_seams_certified &&
+      verification.strict_facet_potential_certified &&
+      verification.finite_strict_facet_orbit_theorem_certified &&
+      verification.closed_polyline_nonstrict_initial_sublevel_certified &&
+      verification.source_open_polyline_strict_initial_sublevel_certified &&
+      verification.counters_certified &&
+      verification.decision_certified &&
+      verification.scope_certified &&
+      verification.fresh_replay_certified;
+  return verification;
+}
+
+ExactFacetDescentChainResult build_exact_facet_descent_chain(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> facet_point_ids,
+    ExactFacetDescentChainBudget budget) {
+  ExactFacetDescentChainResult result =
+      compute_exact_facet_descent_chain(
+          cloud, facet_point_ids, budget);
+  result.scope = ExactFacetDescentChainScope::
+      single_source_canonical_strict_descent_chain_only;
+  const ExactFacetDescentChainVerification verification =
+      verify_exact_facet_descent_chain(
+          cloud, facet_point_ids, budget, result);
+  if (!verification.exact_descent_chain_decision_certified) {
+    throw std::logic_error(
+        "the exact facet descent chain failed its fresh replay");
   }
   return result;
 }

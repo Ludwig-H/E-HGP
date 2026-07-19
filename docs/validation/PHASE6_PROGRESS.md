@@ -2,15 +2,15 @@
 
 ## Statut
 
-- phase : `6`, `ready`; jalons préparatoires 6.1 à 6.4 livrés pendant que la phase 5 reste l'unique phase `in_progress`;
+- phase : `6`, `ready`; jalons préparatoires 6.1 à 6.5 livrés pendant que la phase 5 reste l'unique phase `in_progress`;
 - backend : `reference_cpu`;
 - profil : `full_pi0`;
 - mode : `certified`;
-- portée courante : `canonical_strict_arc_half_open_sublevel_segment_only`;
+- portée courante : `single_source_canonical_strict_descent_chain_only`;
 - porte d'entrée : satisfaite par les Phases 1 et 4 fermées;
-- porte de sortie : non satisfaite; le miniball exact borné, son shell global, la famille top-$k$ exacte, l'arc strict 6.3 et le segment analytique individuel 6.4 sont validés; aucune concaténation, aucun DAG, pointer-jumping, germe, attache, forêt ou différentiel indépendant n'est construit.
+- porte de sortie : non satisfaite; la miniball exacte bornée, son shell global, la famille top-$k$ exacte, l'arc strict 6.3, le segment analytique individuel 6.4 et sa chaîne mono-source 6.5 sont validés; aucun germe initial, DAG multi-source, pointer-jumping, plateau, attache, forêt ou différentiel indépendant n'est construit.
 
-Ces jalons ne construisent aucune forêt et ne publient aucun `public_status`. Le premier fournit un oracle local exact pour une facette de cardinal au plus dix; le second certifie ses préconditions globales au centre; le troisième réserve le mot successeur au représentant canonique dont la miniball fraîche possède un niveau strictement inférieur; le quatrième ajoute seulement le certificat analytique du segment de centres associé à cet arc. Ce segment isolé n'est ni une chaîne, ni un germe, ni une attache.
+Ces jalons ne construisent aucune forêt et ne publient aucun `public_status`. Le premier fournit un oracle local exact pour une facette de cardinal au plus dix; le second certifie ses préconditions globales au centre; le troisième réserve le mot successeur au représentant canonique dont la miniball fraîche possède un niveau strictement inférieur; le quatrième ajoute le certificat analytique du segment de centres associé à cet arc; le cinquième relance ce constructeur et concatène une seule orbite canonique stricte. Cette chaîne n'est encore ni un germe, ni un DAG global, ni une attache.
 
 ## Réduction mathématique finie
 
@@ -84,6 +84,18 @@ Les six compteurs sont, dans l'ordre de l'API, le nombre de classifications d'ar
 
 Le résultat ne certifie qu'un segment. Il ne relance pas 6.2 au sommet suivant, ne concatène pas deux segments et ne traite ni continuité aux coutures, DAG, pointer-jumping, germe, attache, forêt, `public_status`, CUDA ou G4.
 
+## Chaîne canonique stricte 6.5
+
+`build_exact_facet_descent_chain` reçoit une facette source et un `ExactFacetDescentChainBudget` explicite. La politique accepte zéro et rejette toute valeur supérieure à 4096. Le budget effectif est le minimum entre la valeur demandée et la borne structurelle $\binom{n}{k}-1$, calculée avec saturation avant toute conversion en `std::size_t`. Chaque nœud compact conserve seulement la facette canonique, son centre rationnel et son niveau de miniball; les témoins 6.4 engagés sont alignés entre deux nœuds, et un unique `stopping_probe` complet conserve la prochaine décision sans dupliquer les partitions spatiales à chaque étape.
+
+À chaque transition, le constructeur relance 6.4 depuis la facette courante. Il exige que les identifiants, le centre et le niveau de la cible de l'arc coïncident exactement avec le nœud suivant, puis que $\beta(F_{i+1})<\beta(F_i)$. Cette baisse à cardinal constant interdit toute répétition de facette et borne une orbite stricte complète à $\binom{n}{k}-1$ segments. Le booléen `finite_strict_facet_orbit_theorem_certified` porte sur ce théorème; il ne signifie pas que `effective_maximum_committed_strict_segment_count` couvre tout l'univers des facettes. Le cycle set reste vérifié à l'exécution afin de fermer les invariants structurels indépendamment de cette preuve.
+
+La couture n'impose aucune égalité entre `previous.successor_atom_level` et `next.source_atom_level`. Le premier est $\beta(F_i)$, tandis que le second est $D_k(c_{F_i})$ et peut être strictement plus petit. Seuls la facette, le centre et le niveau de miniball du nœud sont identiques. Si $R_0=\beta(F_0)$, 6.4 certifie le premier segment privé de sa source strictement sous $R_0$; pour $i\geq1$, tout segment fermé issu de $F_i$ est sous $\beta(F_i)<R_0$. La polyligne complète reste donc dans $\left\lbrace D_k\leq R_0\right\rbrace$ et, après retrait de son premier point, dans $\left\lbrace D_k<R_0\right\rbrace$.
+
+Les décisions terminales sont `complete_at_regular_active_facet`, `certified_prefix_blocked_unsupported_degeneracy` et `certified_prefix_strict_segment_budget_exhausted`. Dans le dernier cas, le probe contient un segment strict entièrement certifié mais non engagé; le préfixe reste valide sans être présenté comme orbite complète. `verify_exact_facet_descent_chain` reconstruit toute la chaîne avec la politique fiable fournie séparément et compare nœuds, témoins, probe, budgets, coutures, potentiel, cinq faits de preuve, compteurs, décision, portée et identité du nuage.
+
+La base `exact_replayed_half_open_segments_exact_seams_strict_facet_potential_finite_orbit_v1` et la portée `single_source_canonical_strict_descent_chain_only` excluent le segment initial depuis un centre critique, la fermeture de plusieurs sources en DAG, le pointer-jumping, les plateaux, les attaches, les forêts, tout `public_status`, CUDA et G4.
+
 ## Validation hôte ciblée
 
 Le test strict couvre :
@@ -121,6 +133,12 @@ La validation 6.4 reprend ces deux arcs. `strict-arc-cutoff-equal` produit `(a,b
 
 La cible unitaire 6.4 passe en Release strict sous GCC et Clang et le statut logiciel devient `validated_host_software`. Aucun différentiel indépendant, CUDA ou G4 n'est revendiqué et GCP n'a pas été utilisé.
 
+La validation 6.5 ajoute deux chaînes exactes de deux segments. La fixture à six points part de la facette $\left\lbrace0,1,2,4\right\rbrace$, ferme les niveaux $52>85/4>325/16$, les témoins $(a,b,\delta)=(50,85/4,65/4)$ puis $(85/4,325/16,5/16)$, les trois probes, les deux coutures et les compteurs agrégés. Les budgets zéro et un conservent respectivement zéro et un segment engagé avec un probe strict non engagé; le budget deux atteint la facette active terminale. La borne combinatoire vaut $\binom{6}{4}-1=14$ malgré une demande de 20.
+
+La fixture à cinq points part de $\left\lbrace0,2\right\rbrace$ et suit $\left\lbrace0,2\right\rbrace\to\left\lbrace1,4\right\rbrace\to\left\lbrace2,3\right\rbrace$ aux niveaux $58>49/4>1/4$. Ses témoins valent $(50,49/4,109/4)$ puis $(41/4,1/4,8)$. Elle certifie explicitement que le niveau atomique $41/4$ du second segment est strictement inférieur au niveau de miniball $49/4$ du nœud cousu, tout en conservant l'identité exacte de la facette, du centre et de ce niveau de miniball.
+
+Les cas actif et non essentiel terminent respectivement sans segment et par préfixe non pris en charge. Une politique au-dessus de 4096 est rejetée. Les falsifications modifient budget demandé, budget effectif, forme compacte, nœuds, témoins, présence et contenu du probe, chacun des cinq faits de preuve, chacun des neuf compteurs de chaîne, chacun des six compteurs analytiques agrégés, décision, portée, politique fiable et identité d'un nuage jumeau. La cible unitaire 6.5 passe en Release strict sous GCC et Clang; le statut reste `validated_host_software`, sans oracle indépendant, CUDA, G4 ou statut public.
+
 ## Suite immédiate
 
-Le prochain jalon devra traiter explicitement la concaténation de segments et les obligations aux coutures avant tout germe, fermeture de labels, DAG, pointer-jumping ou attache. Une égalité de niveaux hors du gate strict restera `unsupported_degeneracy` tant que le quotient multivalué de plateau n'est pas démontré et implémenté. Aucun assemblage de plusieurs arcs n'est couvert par `canonical_strict_arc_half_open_sublevel_segment_only`.
+Le prochain jalon doit construire le segment initial de chaque bras depuis un centre critique d'indice un vers le centre de miniball de sa facette, puis raccorder cette source à 6.5 avant toute fermeture de labels, DAG, pointer-jumping ou attache. Une égalité de niveaux hors du gate strict restera `unsupported_degeneracy` tant que le quotient multivalué de plateau n'est pas démontré et implémenté. La portée courante reste strictement mono-source et ne compare encore aucune racine terminale à la composante Gamma juste sous le lot critique.
