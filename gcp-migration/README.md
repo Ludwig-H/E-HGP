@@ -342,6 +342,33 @@ réduction hiérarchique. Il ne devient
 `phase5-k1-boruvka-work-profile-<SHA>.json` qu'après la certification ciblée
 `TERMINATED` de la même génération.
 
+La chaîne external-1NN exacte possède elle aussi une session courte séparée,
+mutuellement exclusive de tous les autres compagnons :
+
+```bash
+./gcp-migration/run_phase3_qualification.sh \
+  --yes \
+  --phase5-k1-boruvka-exact-search-work-profile \
+  --result-dir /tmp/morsehgp3d-phase5-k1-boruvka-exact-search-work-profile
+```
+
+Le worker mesure, dans l'ordre fermé, les tailles 1 024, 4 096 et 16 384 sur
+`uniform`, `clusters` et `lattice`, avec un rayon Morton 16 et la graine
+déterministe 1. Chaque journal est validé par le contrat
+`morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v1` avant assemblage
+dans
+`morsehgp3d.phase5.k1_boruvka_exact_search_work_profile_artifact.v1`. Le
+compteur de travail additionne seulement les évaluations exactes de graines,
+de bornes AABB et de distances point--point de la chaîne productrice; le rejeu
+frais et l'ancre CPU indépendante sont exclus et restent des certificats de
+correction séparés. Le compagnon conserve `artifact_role=benchmark_only`,
+`candidate_record_count=0`, `qualification_claimed=false`,
+`scalability_claimed=false`, `scientific_result_claimed=false`,
+`scientific_public_status=null` et
+`hierarchy_reduction_status=not_performed`. Il n'est publié sous
+`phase5-k1-boruvka-exact-search-work-profile-<SHA>.json` qu'après la
+certification ciblée `TERMINATED` de la même génération.
+
 Pour la cible de capacité explicitement autorisée :
 
 ```bash
@@ -381,7 +408,8 @@ Pour cette qualification courte, l'orchestrateur exige après les deux gardes
 worker une échéance GCE sûre, placée 300 secondes avant l'échéance nominale. Le
 worker en retranche encore 1 800 secondes. Le preflight, la construction et
 chacune des sept unités CUDA ou d'audit de base, ainsi que les unités Phase 4,
-Phase 5 ou les neuf cellules optionnelles du profil Morton, sont exécutés sous le binaire fixe
+Phase 5 ou les neuf cellules optionnelles de chacun des deux profils de
+travail, sont exécutés sous le binaire fixe
 `/usr/bin/timeout`, dans un groupe de processus distinct. Les chemins fixes de
 `timeout`, `date` et `sleep`, ainsi que tous leurs parents, sont certifiés root
 et non inscriptibles par le groupe ou les autres avant le premier calcul de

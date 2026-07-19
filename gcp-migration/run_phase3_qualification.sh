@@ -36,6 +36,7 @@ PROVISION_DOCKER=0
 PHASE4_SPATIAL_REFERENCE=0
 PHASE5_K1_BORUVKA=0
 PHASE5_K1_BORUVKA_WORK_PROFILE=0
+PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE=0
 
 SESSION_CERTIFIED=0
 TARGET_STOP_CERTIFIED=0
@@ -48,6 +49,8 @@ LOCAL_PHASE5_TEMP_RESULT=""
 LOCAL_PHASE5_RESULT=""
 LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT=""
 LOCAL_PHASE5_WORK_PROFILE_RESULT=""
+LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT=""
+LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT=""
 START_HANDOFF=""
 SESSION_LAST_START_TIMESTAMP=""
 SESSION_HANDOFF_STATUS=""
@@ -69,7 +72,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -103,6 +106,12 @@ Elle est mutuellement exclusive de --phase4-spatial-reference et de
 --phase5-k1-boruvka. Son artefact benchmark-only reste provisoire jusqu'à la
 même certification ciblée TERMINATED et ne publie aucun statut scientifique.
 
+--phase5-k1-boruvka-exact-search-work-profile ajoute la campagne empirique de
+la recherche external-1NN exacte amorcée par Morton. Elle est mutuellement
+exclusive de tous les autres compagnons. Son artefact benchmark-only reste
+provisoire jusqu'à la même certification ciblée TERMINATED et ne publie aucun
+statut scientifique.
+
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
 dépôts Ubuntu déjà configurés, puis à configurer le runtime NVIDIA. Le worker
@@ -133,6 +142,10 @@ while (($# > 0)); do
             PHASE5_K1_BORUVKA_WORK_PROFILE=1
             shift
             ;;
+        --phase5-k1-boruvka-exact-search-work-profile)
+            PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE=1
+            shift
+            ;;
         --result-dir)
             (($# >= 2)) || die "Valeur manquante après --result-dir."
             RESULT_DIR="$2"
@@ -153,6 +166,11 @@ if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1 && PHASE4_SPATIAL_REFERENCE == 1)); the
 fi
 if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1 && PHASE5_K1_BORUVKA == 1)); then
     die "--phase5-k1-boruvka-work-profile est mutuellement exclusive de --phase5-k1-boruvka."
+fi
+if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 && \
+    (PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
+     PHASE5_K1_BORUVKA_WORK_PROFILE == 1))); then
+    die "--phase5-k1-boruvka-exact-search-work-profile est mutuellement exclusive de tous les autres compagnons."
 fi
 
 ((ASSUME_YES == 1)) || \
@@ -266,6 +284,12 @@ if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1)); then
         ! -L "${LOCAL_PHASE5_WORK_PROFILE_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE5_WORK_PROFILE_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
+if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
+    LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT="${RESULT_DIR}/phase5-k1-boruvka-exact-search-work-profile-${HEAD_SHA}.json"
+    [[ ! -e "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT}" && \
+        ! -L "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT}" ]] || \
+        die "L'artefact ${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT} existe déjà; utilisez un répertoire distinct."
+fi
 LOCAL_TEMP_RESULT="$(mktemp "${RESULT_DIR}/.phase3-${HEAD_SHA}.XXXXXXXX.partial")" || \
     die "Impossible de créer l'artefact temporaire local."
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
@@ -294,6 +318,14 @@ if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1)); then
         rm -f -- "${LOCAL_TEMP_RESULT}"
         LOCAL_TEMP_RESULT=""
         die "Impossible de créer l'artefact work-profile Morton Phase 5 temporaire local."
+    fi
+fi
+if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
+    if ! LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT="$(mktemp \
+        "${RESULT_DIR}/.phase5-k1-boruvka-exact-search-work-profile-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        rm -f -- "${LOCAL_TEMP_RESULT}"
+        LOCAL_TEMP_RESULT=""
+        die "Impossible de créer l'artefact work-profile exact-search Phase 5 temporaire local."
     fi
 fi
 
@@ -770,6 +802,10 @@ cleanup_local_publication() {
         -e "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}" || true
     fi
+    if [[ -n "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" && \
+        -e "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" || true
+    fi
 }
 
 on_exit() {
@@ -851,6 +887,7 @@ printf '%s\n' \
     "  replay Phase 4  : $([[ ${PHASE4_SPATIAL_REFERENCE} == 1 ]] && printf 'référence + LBVH résident activés' || printf 'désactivé')" \
     "  replay Phase 5  : $([[ ${PHASE5_K1_BORUVKA} == 1 ]] && printf 'boucle K1 Boruvka complète activée' || printf 'désactivé')" \
     "  profil Morton   : $([[ ${PHASE5_K1_BORUVKA_WORK_PROFILE} == 1 ]] && printf 'campagne work-profile activée' || printf 'désactivé')" \
+    "  profil exact-1NN: $([[ ${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE} == 1 ]] && printf 'campagne work-profile activée' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -876,6 +913,7 @@ remote_artifact="${REMOTE_WORKDIR}/phase3-result.json"
 remote_phase4_artifact=""
 remote_phase5_artifact=""
 remote_phase5_work_profile_artifact=""
+remote_phase5_exact_search_work_profile_artifact=""
 quoted_origin="$(shell_quote "${ORIGIN_URL}")"
 quoted_repository="$(shell_quote "${remote_repository}")"
 quoted_head="$(shell_quote "${HEAD_SHA}")"
@@ -883,9 +921,11 @@ quoted_artifact="$(shell_quote "${remote_artifact}")"
 quoted_phase4_artifact=""
 quoted_phase5_artifact=""
 quoted_phase5_work_profile_artifact=""
+quoted_phase5_exact_search_work_profile_artifact=""
 phase4_worker_option=""
 phase5_worker_option=""
 phase5_work_profile_worker_option=""
+phase5_exact_search_work_profile_worker_option=""
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     remote_phase4_artifact="${REMOTE_WORKDIR}/phase4-spatial-result.json"
     quoted_phase4_artifact="$(shell_quote "${remote_phase4_artifact}")"
@@ -900,6 +940,11 @@ if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1)); then
     remote_phase5_work_profile_artifact="${REMOTE_WORKDIR}/phase5-k1-boruvka-work-profile-result.json"
     quoted_phase5_work_profile_artifact="$(shell_quote "${remote_phase5_work_profile_artifact}")"
     phase5_work_profile_worker_option=" --phase5-k1-boruvka-work-profile-output ${quoted_phase5_work_profile_artifact}"
+fi
+if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
+    remote_phase5_exact_search_work_profile_artifact="${REMOTE_WORKDIR}/phase5-k1-boruvka-exact-search-work-profile-result.json"
+    quoted_phase5_exact_search_work_profile_artifact="$(shell_quote "${remote_phase5_exact_search_work_profile_artifact}")"
+    phase5_exact_search_work_profile_worker_option=" --phase5-k1-boruvka-exact-search-work-profile-output ${quoted_phase5_exact_search_work_profile_artifact}"
 fi
 quoted_gce_deadline="$(shell_quote "${EFFECTIVE_GCE_DEADLINE_EPOCH}")"
 
@@ -917,7 +962,7 @@ if ((PROVISION_DOCKER == 1)); then
 fi
 
 remote_exec \
-    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}"
+    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}"
 
 timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
@@ -962,6 +1007,19 @@ if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1)); then
         "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
         "${INSTANCE_NAME}:${remote_phase5_work_profile_artifact}" \
         "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+fi
+if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${INSTANCE_NAME}:${remote_phase5_exact_search_work_profile_artifact}" \
+        "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --quiet \
@@ -2269,6 +2327,207 @@ if value.get("vm_lifecycle") != assembler.WORKER_LIFECYCLE:
 PY
 fi
 
+if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
+    [[ -s "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" ]] || \
+        die "Artefact du profil exact-search Phase 5 distant récupéré mais vide."
+    python3 -B - "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" \
+        "${HEAD_SHA}" "${LOCAL_TEMP_RESULT}" "${REPOSITORY_ROOT}" <<'PY'
+import hashlib
+import json
+from pathlib import Path
+import re
+import sys
+
+artifact_path = Path(sys.argv[1])
+git_sha = sys.argv[2]
+phase3_path = Path(sys.argv[3])
+repository_root = Path(sys.argv[4])
+checker_directory = repository_root / "morsehgp3d" / "tests" / "configuration"
+assembler_directory = repository_root / "morsehgp3d" / "tests" / "cuda"
+
+sys.path.insert(0, str(checker_directory))
+try:
+    from check_phase5_k1_boruvka_exact_search_work_profile import (
+        ContractError,
+        SCHEMA as WORK_PROFILE_SCHEMA,
+        validate_document,
+    )
+    sys.path.insert(0, str(assembler_directory))
+    try:
+        import assemble_phase5_k1_boruvka_exact_search_work_profile as assembler
+    finally:
+        del sys.path[0]
+finally:
+    del sys.path[0]
+
+
+def fail(message):
+    raise SystemExit(message)
+
+
+def exact_keys(value, expected, label):
+    if not isinstance(value, dict) or set(value) != expected:
+        fail(f"{label} ne respecte pas son schéma fermé")
+    return value
+
+
+raw, value = assembler.read_json_object(
+    artifact_path,
+    "artefact work-profile exact-search Phase 5",
+    canonical_one_line=False,
+)
+canonical = json.dumps(
+    value, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+) + "\n"
+if raw != canonical:
+    fail("l'artefact work-profile exact-search Phase 5 n'est pas un JSON canonique sur une ligne")
+
+_, phase3 = assembler.read_json_object(
+    phase3_path,
+    "artefact d'environnement Phase 3",
+    canonical_one_line=False,
+)
+expected_top_keys = {
+    "artifact_role",
+    "backend",
+    "benchmark_status",
+    "binary",
+    "completed_measurement_count",
+    "environment",
+    "expected_measurement_count",
+    "git",
+    "hierarchy_reduction_status",
+    "image",
+    "measurements",
+    "mode",
+    "phase",
+    "profile",
+    "provenance",
+    "qualification_claimed",
+    "scalability_claimed",
+    "schema",
+    "scientific_public_status",
+    "scientific_result_claimed",
+    "scientific_scope",
+    "status",
+    "vm_lifecycle",
+}
+exact_keys(value, expected_top_keys, "artefact work-profile exact-search Phase 5")
+for key, expected in {
+    "artifact_role": "benchmark_only",
+    "backend": "cuda_g4",
+    "benchmark_status": "complete",
+    "hierarchy_reduction_status": "not_performed",
+    "mode": "benchmark",
+    "phase": "5",
+    "profile": "hgp_reduced",
+    "schema": assembler.SCHEMA,
+    "scientific_scope": assembler.SCIENTIFIC_SCOPE,
+    "status": "worker_passed_pending_shutdown",
+}.items():
+    if value.get(key) != expected:
+        fail(f"champ work-profile exact-search Phase 5 invalide: {key}")
+for key in (
+    "qualification_claimed",
+    "scalability_claimed",
+    "scientific_result_claimed",
+):
+    if value.get(key) is not False:
+        fail(f"le work-profile exact-search Phase 5 doit conserver {key}=false")
+if value.get("scientific_public_status") is not None or "public_status" in value:
+    fail("le work-profile exact-search Phase 5 expose à tort un statut public")
+if value.get("git") != {"clean": True, "sha": git_sha}:
+    fail("le work-profile exact-search Phase 5 ne correspond pas au SHA propre qualifié")
+
+phase3_image = phase3.get("image")
+image = exact_keys(value.get("image"), {"base_ref", "id", "ref"}, "identité d'image")
+if not isinstance(phase3_image, dict) or image != {
+    field: phase3_image.get(field) for field in ("base_ref", "id", "ref")
+}:
+    fail("identité d'image du work-profile exact-search Phase 5 incohérente")
+if re.fullmatch(r"sha256:[0-9a-f]{64}", str(image.get("id"))) is None:
+    fail("digest d'image du work-profile exact-search Phase 5 non canonique")
+
+manifest = assembler.validate_phase3_environment(
+    phase3,
+    git_sha=git_sha,
+    base_image_ref=image["base_ref"],
+    image_ref=image["ref"],
+    image_id=image["id"],
+)
+expected_environment = {
+    "compute_capability": "12.0",
+    "driver_version": assembler.require_nonempty_string(
+        manifest.get("cuda_driver_version_string"), "version du pilote CUDA Phase 3"
+    ),
+    "gpu_name": assembler.require_nonempty_string(
+        manifest.get("gpu_name"), "nom GPU Phase 3"
+    ),
+    "gpu_uuid": assembler.require_nonempty_string(
+        manifest.get("gpu_uuid"), "UUID GPU Phase 3"
+    ),
+    "gpu_vram_bytes": manifest.get("gpu_vram_bytes"),
+}
+if (
+    type(expected_environment["gpu_vram_bytes"]) is not int
+    or expected_environment["gpu_vram_bytes"] <= 0
+    or value.get("environment") != expected_environment
+):
+    fail("environnement du work-profile exact-search Phase 5 absent ou incohérent")
+
+binary = exact_keys(
+    value.get("binary"), {"work_profile_sha256"}, "empreinte du binaire work-profile"
+)
+if re.fullmatch(r"[0-9a-f]{64}", str(binary.get("work_profile_sha256"))) is None:
+    fail("empreinte du binaire work-profile exact-search Phase 5 invalide")
+
+expected_matrix = tuple(
+    (point_count, family)
+    for point_count in (1024, 4096, 16384)
+    for family in ("uniform", "clusters", "lattice")
+)
+measurements = value.get("measurements")
+if not isinstance(measurements, list) or len(measurements) != len(expected_matrix):
+    fail("matrice de mesures du work-profile exact-search Phase 5 incomplète")
+if (
+    value.get("completed_measurement_count") != len(expected_matrix)
+    or value.get("expected_measurement_count") != len(expected_matrix)
+):
+    fail("compteurs de mesures du work-profile exact-search Phase 5 incohérents")
+for index, (measurement, expected_case) in enumerate(
+    zip(measurements, expected_matrix, strict=True)
+):
+    point_count, family = expected_case
+    try:
+        validate_document(measurement, expected_backend="cuda_g4")
+    except ContractError as error:
+        fail(
+            f"mesure {index} du work-profile exact-search viole {WORK_PROFILE_SCHEMA}: {error}"
+        )
+    if measurement.get("point_count") != point_count:
+        fail(f"nombre de points inattendu pour la mesure exact-search {index}")
+    if measurement.get("generator") != {
+        "algorithm": "deterministic_dyadic_v1",
+        "family": family,
+        "seed": 1,
+    }:
+        fail(f"générateur inattendu pour la mesure exact-search {index}")
+    if measurement.get("policy") != {"window_radius": 16}:
+        fail(f"politique inattendue pour la mesure exact-search {index}")
+    if measurement.get("git") != {"sha": git_sha}:
+        fail(f"SHA inattendu pour la mesure exact-search {index}")
+
+expected_provenance = {
+    "environment_artifact_schema": assembler.PHASE3_SCHEMA,
+    "environment_artifact_sha256": hashlib.sha256(phase3_path.read_bytes()).hexdigest(),
+}
+if value.get("provenance") != expected_provenance:
+    fail("provenance Phase 3 du work-profile exact-search Phase 5 incohérente")
+if value.get("vm_lifecycle") != assembler.WORKER_LIFECYCLE:
+    fail("contrat de cycle de vie du work-profile exact-search Phase 5 absent")
+PY
+fi
+
 if certify_target_stopped; then
     stop_status=0
 else
@@ -2282,6 +2541,7 @@ python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
     "${LOCAL_PHASE4_TEMP_RESULT}" "${LOCAL_PHASE4_RESULT}" \
     "${LOCAL_PHASE5_TEMP_RESULT}" "${LOCAL_PHASE5_RESULT}" \
     "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}" "${LOCAL_PHASE5_WORK_PROFILE_RESULT}" \
+    "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT}" \
     "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
     "${GUEST_SHUTDOWN_MINUTES}" "${FINAL_STATUS}" \
     "${FINAL_STOP_VERIFIED_AT_UTC}" "${SESSION_LAST_START_TIMESTAMP}" <<'PY'
@@ -2304,6 +2564,10 @@ if sys.argv[7] or sys.argv[8]:
     if not sys.argv[7] or not sys.argv[8]:
         raise SystemExit("paire de publication work-profile Morton Phase 5 incomplète")
     pairs.append((Path(sys.argv[7]), Path(sys.argv[8])))
+if sys.argv[9] or sys.argv[10]:
+    if not sys.argv[9] or not sys.argv[10]:
+        raise SystemExit("paire de publication work-profile exact-search Phase 5 incomplète")
+    pairs.append((Path(sys.argv[9]), Path(sys.argv[10])))
 
 documents = []
 for temporary, _ in pairs:
@@ -2313,18 +2577,18 @@ for temporary, _ in pairs:
     lifecycle["worker_status_before_targeted_stop"] = value["status"]
     lifecycle.update(
         {
-            "final_status": sys.argv[13],
+            "final_status": sys.argv[15],
             "final_status_readback": "gcloud_compute_instances_describe",
-            "final_status_verified_at_utc": sys.argv[14],
-            "guest_shutdown_minutes": int(sys.argv[12]),
+            "final_status_verified_at_utc": sys.argv[16],
+            "guest_shutdown_minutes": int(sys.argv[14]),
             "initial_status": "TERMINATED",
             "initial_status_basis": "start_and_verify_precondition",
-            "instance": sys.argv[11],
-            "last_start_timestamp": sys.argv[15],
-            "project": sys.argv[9],
+            "instance": sys.argv[13],
+            "last_start_timestamp": sys.argv[17],
+            "project": sys.argv[11],
             "start_handoff_schema": "e-hgp.start-handoff.v3",
             "targeted_stop_verified": True,
-            "zone": sys.argv[10],
+            "zone": sys.argv[12],
         }
     )
     value["status"] = "passed"
@@ -2387,10 +2651,14 @@ fi
 if [[ -n "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}"
 fi
+if [[ -n "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" ]]; then
+    rm -f -- "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}"
+fi
 LOCAL_TEMP_RESULT=""
 LOCAL_PHASE4_TEMP_RESULT=""
 LOCAL_PHASE5_TEMP_RESULT=""
 LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT=""
+LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT=""
 rm -f -- "${START_HANDOFF}"
 START_HANDOFF=""
 printf '[ARTEFACT] Résultat Phase 3 publié après certification TERMINATED : %s\n' "${LOCAL_RESULT}"
@@ -2405,6 +2673,10 @@ fi
 if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1)); then
     printf '[ARTEFACT] Work-profile Morton Phase 5 publié après certification TERMINATED : %s\n' \
         "${LOCAL_PHASE5_WORK_PROFILE_RESULT}"
+fi
+if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
+    printf '[ARTEFACT] Work-profile exact-search Phase 5 publié après certification TERMINATED : %s\n' \
+        "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT}"
 fi
 
 if ! revoke_and_remove_session_ssh_key; then
@@ -2426,4 +2698,8 @@ fi
 if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1)); then
     printf '[SUCCÈS] Work-profile Morton Phase 5 compagnon conservé : %s\n' \
         "${LOCAL_PHASE5_WORK_PROFILE_RESULT}"
+fi
+if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
+    printf '[SUCCÈS] Work-profile exact-search Phase 5 compagnon conservé : %s\n' \
+        "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT}"
 fi

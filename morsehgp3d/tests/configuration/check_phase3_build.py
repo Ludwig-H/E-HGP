@@ -37,6 +37,7 @@ CUDA_TARGETS = [
     "morsehgp3d_gpu_k1_boruvka_replay",
     "morsehgp3d_gpu_k1_boruvka_full_replay",
     "morsehgp3d_gpu_k1_boruvka_morton_work_profile",
+    "morsehgp3d_gpu_k1_boruvka_exact_search_work_profile",
 ]
 CUDA_BUILD_JOBS = 8
 
@@ -547,6 +548,9 @@ def validate_sources(project: Path, repository: Path) -> None:
         "morsehgp3d_gpu_spatial_lbvh_context_tests",
         "morsehgp3d_gpu_spatial_lbvh_replay_host",
         "morsehgp3d_gpu_k1_boruvka_context_tests",
+        "morsehgp3d_gpu_k1_boruvka_exact_search_tests",
+        "morsehgp3d_gpu_k1_boruvka_seeded_chain_tests",
+        "morsehgp3d_gpu_k1_boruvka_exact_search_work_profile_host",
         "morsehgp3d_gpu_k1_boruvka_replay_host",
         "morsehgp3d_gpu_k1_boruvka_full_replay_host",
         "morsehgp3d_gpu_k1_boruvka_morton_work_profile_host",

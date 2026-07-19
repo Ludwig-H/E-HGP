@@ -10,6 +10,8 @@ readonly PHASE4_DIFFERENTIAL_RELATIVE="morsehgp3d/tests/differential/check_spati
 readonly PHASE4_LBVH_DIFFERENTIAL_RELATIVE="morsehgp3d/tests/differential/check_spatial_gpu_lbvh.py"
 readonly PHASE5_K1_BORUVKA_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase5_k1_boruvka_qualification.py"
 readonly PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase5_k1_boruvka_work_profile.py"
+readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase5_k1_boruvka_exact_search_work_profile.py"
+readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER_RELATIVE="morsehgp3d/tests/configuration/check_phase5_k1_boruvka_exact_search_work_profile.py"
 readonly BASE_IMAGE_REF="nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
 readonly CONTAINER_REPOSITORY="/workspace/repository"
 readonly CONTAINER_BUILD="${CONTAINER_REPOSITORY}/build"
@@ -27,6 +29,8 @@ readonly PHASE5_K1_BORUVKA_FULL_REPLAY_RELATIVE="build/morsehgp3d-cuda-release/m
 readonly PHASE5_K1_BORUVKA_FULL_REPLAY_PATH="${CONTAINER_REPOSITORY}/${PHASE5_K1_BORUVKA_FULL_REPLAY_RELATIVE}"
 readonly PHASE5_K1_BORUVKA_WORK_PROFILE_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_morton_work_profile"
 readonly PHASE5_K1_BORUVKA_WORK_PROFILE_PATH="${CONTAINER_REPOSITORY}/${PHASE5_K1_BORUVKA_WORK_PROFILE_RELATIVE}"
+readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_exact_search_work_profile"
+readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_PATH="${CONTAINER_REPOSITORY}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_RELATIVE}"
 readonly MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-release"
 readonly GUEST_GUARD_MIN_REMAINING_SECONDS=1800
 readonly GUEST_GUARD_MAX_REMAINING_SECONDS=2820
@@ -80,6 +84,10 @@ PHASE5_WORK_PROFILE_OUTPUT_RAW=""
 PHASE5_WORK_PROFILE_OUTPUT_PATH=""
 PHASE5_WORK_PROFILE_OUTPUT_PARENT=""
 PHASE5_WORK_PROFILE_OUTPUT_BASE=""
+PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW=""
+PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH=""
+PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PARENT=""
+PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_BASE=""
 GCE_DEADLINE_RAW=""
 GCE_DEADLINE_EPOCH=0
 WORK_DEADLINE_EPOCH=0
@@ -90,6 +98,7 @@ PUBLISH_TEMP=""
 PHASE4_PUBLISH_TEMP=""
 PHASE5_PUBLISH_TEMP=""
 PHASE5_WORK_PROFILE_PUBLISH_TEMP=""
+PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP=""
 SESSION_CREATED=0
 DOCKER_IDENTITY=""
 BUILDX_CONFIG=""
@@ -165,7 +174,7 @@ certify_fixed_timeout() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json]
+Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json]
 
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
@@ -181,6 +190,10 @@ externe.
 L'option de profil Morton exécute le benchmark canonique de travail K1
 Boruvka sur neuf couples taille/famille. Son artefact reste empirique,
 benchmark-only et soumis au même arrêt externe ciblé.
+L'option de profil de recherche exacte exécute séparément neuf mesures de la
+chaîne external-1NN exacte amorcée par Morton, avec W=16. Chaque journal est
+validé avant assemblage; le compagnon reste benchmark-only et ne porte aucune
+revendication de scalabilité ou de statut scientifique public.
 EOF
 }
 
@@ -216,6 +229,14 @@ while (($# > 0)); do
             [[ -z "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" ]] || \
                 die "--phase5-k1-boruvka-work-profile-output ne peut être fourni qu'une fois."
             PHASE5_WORK_PROFILE_OUTPUT_RAW="$2"
+            shift 2
+            ;;
+        --phase5-k1-boruvka-exact-search-work-profile-output)
+            (($# >= 2)) || \
+                die "Valeur manquante après --phase5-k1-boruvka-exact-search-work-profile-output."
+            [[ -z "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" ]] || \
+                die "--phase5-k1-boruvka-exact-search-work-profile-output ne peut être fourni qu'une fois."
+            PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW="$2"
             shift 2
             ;;
         --gce-deadline-epoch)
@@ -269,6 +290,18 @@ if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" ]]; then
     [[ "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" != "${OUTPUT_RAW}" && \
         "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" != "${PHASE4_OUTPUT_RAW}" && \
         "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" != "${PHASE5_OUTPUT_RAW}" ]] || \
+        die "Toutes les sorties Phase 3, Phase 4 et Phase 5 doivent être distinctes."
+fi
+if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" ]]; then
+    case "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" in
+        /*) ;;
+        *) die "--phase5-k1-boruvka-exact-search-work-profile-output doit être un chemin absolu." ;;
+    esac
+    [[ "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" != "${OUTPUT_RAW}" && \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" != "${PHASE4_OUTPUT_RAW}" && \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" != "${PHASE5_OUTPUT_RAW}" && \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" != \
+            "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" ]] || \
         die "Toutes les sorties Phase 3, Phase 4 et Phase 5 doivent être distinctes."
 fi
 certify_fixed_timeout || \
@@ -381,6 +414,41 @@ if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" ]]; then
         ! -L "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]] || \
         die "La sortie du profil de travail Phase 5 doit être inexistante : ${PHASE5_WORK_PROFILE_OUTPUT_PATH}."
 fi
+if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" ]]; then
+    PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PARENT="$(dirname -- \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}")"
+    PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_BASE="$(basename -- \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}")"
+    [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_BASE}" && \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_BASE}" != "." && \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_BASE}" != ".." ]] || \
+        die "Nom d'artefact du profil external-1NN exact Phase 5 invalide."
+    [[ -d "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PARENT}" ]] || \
+        die "Le répertoire parent de --phase5-k1-boruvka-exact-search-work-profile-output doit déjà exister."
+    PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PARENT="$(cd -- \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PARENT}" && pwd -P)" || \
+        die "Parent de sortie du profil external-1NN exact Phase 5 illisible."
+    PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH="${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PARENT}/${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_BASE}"
+    [[ "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PARENT}" == \
+        "${OUTPUT_PARENT}" ]] || \
+        die "Toutes les sorties doivent partager le même répertoire physique sûr."
+    [[ "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" != \
+            "${OUTPUT_PATH}" && \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" != \
+            "${PHASE4_OUTPUT_PATH}" && \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" != \
+            "${PHASE5_OUTPUT_PATH}" && \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" != \
+            "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]] || \
+        die "Toutes les sorties Phase 3, Phase 4 et Phase 5 doivent être distinctes."
+    case "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}/" in
+        "${REPOSITORY_ROOT}/"*)
+            die "--phase5-k1-boruvka-exact-search-work-profile-output doit rester hors du worktree ${REPOSITORY_ROOT}." ;;
+    esac
+    [[ ! -e "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" && \
+        ! -L "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]] || \
+        die "La sortie du profil external-1NN exact Phase 5 doit être inexistante : ${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}."
+fi
 
 worktree_status="$(git -C "${REPOSITORY_ROOT}" status --porcelain --untracked-files=normal)" || \
     die "Impossible de vérifier la propreté du clone Git."
@@ -399,6 +467,8 @@ readonly PHASE4_DIFFERENTIAL="${REPOSITORY_ROOT}/${PHASE4_DIFFERENTIAL_RELATIVE}
 readonly PHASE4_LBVH_DIFFERENTIAL="${REPOSITORY_ROOT}/${PHASE4_LBVH_DIFFERENTIAL_RELATIVE}"
 readonly PHASE5_K1_BORUVKA_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE5_K1_BORUVKA_ASSEMBLER_RELATIVE}"
 readonly PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER_RELATIVE}"
+readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER_RELATIVE}"
+readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER="${REPOSITORY_ROOT}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER_RELATIVE}"
 [[ -f "${DOCKERFILE}" && ! -L "${DOCKERFILE}" ]] || \
     die "Dockerfile Phase 3 absent ou symbolique : ${DOCKERFILE}."
 [[ "$(sed -n '1p' "${DOCKERFILE}")" == "FROM ${BASE_IMAGE_REF}" ]] || \
@@ -422,6 +492,14 @@ if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]]; then
     [[ -f "${PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER}" && \
         ! -L "${PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER}" ]] || \
         die "Assembleur du profil de travail Phase 5 absent ou symbolique : ${PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER}."
+fi
+if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]]; then
+    [[ -f "${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER}" && \
+        ! -L "${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER}" ]] || \
+        die "Assembleur du profil external-1NN exact Phase 5 absent ou symbolique : ${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER}."
+    [[ -f "${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER}" && \
+        ! -L "${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER}" ]] || \
+        die "Checker du profil external-1NN exact Phase 5 absent ou symbolique : ${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER}."
 fi
 
 remove_container_from_cidfile() {
@@ -581,6 +659,10 @@ cleanup() {
         -f "${PHASE5_WORK_PROFILE_PUBLISH_TEMP}" ]]; then
         rm -f -- "${PHASE5_WORK_PROFILE_PUBLISH_TEMP}" || true
     fi
+    if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}" && \
+        -f "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}" ]]; then
+        rm -f -- "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}" || true
+    fi
     if [[ -n "${SESSION_DIR}" && -n "${BUILDX_CONFIG}" && \
         "${BUILDX_CONFIG}" == "${SESSION_DIR}/buildx-config" && \
         -e "${BUILDX_CONFIG}" ]]; then
@@ -657,6 +739,12 @@ if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]]; then
         die "Impossible de réserver l'artefact temporaire du profil de travail Phase 5."
     chmod 600 "${PHASE5_WORK_PROFILE_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]]; then
+    PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP="$(mktemp \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PARENT}/.${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_BASE}.XXXXXXXX.partial")" || \
+        die "Impossible de réserver l'artefact temporaire du profil external-1NN exact Phase 5."
+    chmod 600 "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}"
+fi
 
 readonly BUILD_DIR="${SESSION_DIR}/build"
 readonly LOG_DIR="${SESSION_DIR}/logs"
@@ -701,6 +789,7 @@ readonly PHASE5_K1_BORUVKA_PTX_STDERR_LOG="${LOG_DIR}/phase5-k1-boruvka-cuobjdum
 readonly PHASE5_K1_BORUVKA_MEMCHECK_LOG="${LOG_DIR}/phase5-k1-boruvka-memcheck.log"
 readonly PHASE5_K1_BORUVKA_RACECHECK_LOG="${LOG_DIR}/phase5-k1-boruvka-racecheck.log"
 declare -a PHASE5_K1_BORUVKA_WORK_PROFILE_LOGS=()
+declare -a PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_LOGS=()
 
 mkdir -p -- "${BUILD_DIR}/.phase3-home"
 
@@ -1620,6 +1709,69 @@ if [[ -n "${PHASE5_OUTPUT_PATH}" ]]; then
     fi
 fi
 
+if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]]; then
+    begin_unit "phase5-exact-search-profile-build"
+    if ! run_container "phase5-exact-search-profile-build" \
+        "${LOG_DIR}/phase5-exact-search-profile-build.log" \
+        cmake --build "${MODULE_DIR}" \
+        --target morsehgp3d_gpu_k1_boruvka_exact_search_work_profile \
+        --parallel 4; then
+        report_failure_log "phase5-exact-search-profile-build" \
+            "${LOG_DIR}/phase5-exact-search-profile-build.log"
+        die "La cible CUDA du profil external-1NN exact Phase 5 n'a pas pu être construite."
+    fi
+    [[ -f "${BUILD_DIR}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_RELATIVE#build/}" && \
+        ! -L "${BUILD_DIR}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_RELATIVE#build/}" && \
+        -x "${BUILD_DIR}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_RELATIVE#build/}" ]] || \
+        die "Le binaire CUDA du profil external-1NN exact Phase 5 n'a pas été construit sûrement."
+    for point_count in 1024 4096 16384; do
+        for family in uniform clusters lattice; do
+            exact_search_profile_label="phase5-exact-search-profile-${point_count}-${family}"
+            exact_search_profile_log="${RESULT_DIR}/${exact_search_profile_label}.json"
+            exact_search_profile_stderr_log="${LOG_DIR}/${exact_search_profile_label}.stderr.log"
+            exact_search_profile_checker_log="${LOG_DIR}/${exact_search_profile_label}.checker.log"
+            PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_LOGS+=(
+                "${exact_search_profile_log}"
+            )
+            begin_unit "${exact_search_profile_label}"
+            if ! run_container_split_output "${exact_search_profile_label}" \
+                "${exact_search_profile_log}" \
+                "${exact_search_profile_stderr_log}" \
+                "${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_PATH}" \
+                --family "${family}" \
+                --point-count "${point_count}" \
+                --window-radius 16 \
+                --seed 1 \
+                --git-sha "${HEAD_SHA}"; then
+                report_failure_log "${exact_search_profile_label}" \
+                    "${exact_search_profile_log}"
+                report_failure_log "${exact_search_profile_label}-stderr" \
+                    "${exact_search_profile_stderr_log}"
+                die "Le profil external-1NN exact Phase 5 a échoué pour n=${point_count}, famille=${family}."
+            fi
+            [[ -s "${exact_search_profile_log}" ]] || \
+                die "Le profil external-1NN exact Phase 5 est vide pour n=${point_count}, famille=${family}."
+            begin_unit "${exact_search_profile_label}-checker"
+            if ! run_until_work_deadline "${exact_search_profile_label}-checker" \
+                python3 -B \
+                "${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER}" \
+                --profile-log "${exact_search_profile_log}" \
+                --expected-backend cuda_g4 \
+                --git-sha "${HEAD_SHA}" \
+                --family "${family}" \
+                --point-count "${point_count}" \
+                --window-radius 16 \
+                --seed 1 >"${exact_search_profile_checker_log}" 2>&1; then
+                report_failure_log "${exact_search_profile_label}-checker" \
+                    "${exact_search_profile_checker_log}"
+                die "Le checker a rejeté le profil external-1NN exact Phase 5 pour n=${point_count}, famille=${family}."
+            fi
+        done
+    done
+    [[ "${#PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_LOGS[@]}" -eq 9 ]] || \
+        die "La matrice du profil external-1NN exact Phase 5 doit contenir exactement neuf mesures."
+fi
+
 if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]]; then
     [[ -f "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_morton_work_profile" && \
         ! -L "${BUILD_DIR}/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_morton_work_profile" && \
@@ -1744,11 +1896,35 @@ if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]]; then
         "${phase5_work_profile_assembler_arguments[@]}"
 fi
 
+if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]]; then
+    declare -a phase5_exact_search_work_profile_assembler_arguments=(
+        --git-sha "${HEAD_SHA}"
+        --base-image-ref "${BASE_IMAGE_REF}"
+        --image-ref "${IMAGE_REF}"
+        --image-id "${IMAGE_ID}"
+        --environment-artifact "${PUBLISH_TEMP}"
+    )
+    for exact_search_profile_log in \
+        "${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_LOGS[@]}"; do
+        phase5_exact_search_work_profile_assembler_arguments+=(
+            --profile-log "${exact_search_profile_log}"
+        )
+    done
+    phase5_exact_search_work_profile_assembler_arguments+=(
+        --binary "${BUILD_DIR}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_RELATIVE#build/}"
+        --output "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}"
+    )
+    python3 -B "${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER}" \
+        "${phase5_exact_search_work_profile_assembler_arguments[@]}"
+fi
+
 python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE4_PUBLISH_TEMP}" "${PHASE4_OUTPUT_PATH}" \
     "${PHASE5_PUBLISH_TEMP}" "${PHASE5_OUTPUT_PATH}" \
     "${PHASE5_WORK_PROFILE_PUBLISH_TEMP}" \
-    "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" <<'PY'
+    "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" \
+    "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}" \
+    "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" <<'PY'
 import json
 import os
 from pathlib import Path
@@ -1768,6 +1944,12 @@ if sys.argv[7] or sys.argv[8]:
         raise SystemExit("incomplete Phase 5 Morton work-profile publication pair")
     pairs.append(
         (Path(sys.argv[7]), Path(sys.argv[8]), "Phase 5 Morton work profile")
+    )
+if sys.argv[9] or sys.argv[10]:
+    if not sys.argv[9] or not sys.argv[10]:
+        raise SystemExit("incomplete Phase 5 exact-search work-profile publication pair")
+    pairs.append(
+        (Path(sys.argv[9]), Path(sys.argv[10]), "Phase 5 exact-search work profile")
     )
 for temporary, _, label in pairs:
     with temporary.open(encoding="utf-8") as stream:
@@ -1802,10 +1984,14 @@ fi
 if [[ -n "${PHASE5_WORK_PROFILE_PUBLISH_TEMP}" ]]; then
     rm -f -- "${PHASE5_WORK_PROFILE_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}" ]]; then
+    rm -f -- "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}"
+fi
 PUBLISH_TEMP=""
 PHASE4_PUBLISH_TEMP=""
 PHASE5_PUBLISH_TEMP=""
 PHASE5_WORK_PROFILE_PUBLISH_TEMP=""
+PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP=""
 
 printf '[SUCCÈS WORKER] Artefact Phase 3 provisoire publié sans remplacement : %s\n' \
     "${OUTPUT_PATH}"
@@ -1820,5 +2006,9 @@ fi
 if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]]; then
     printf '[SUCCÈS WORKER] Profil de travail Morton Phase 5 provisoire publié sans remplacement : %s\n' \
         "${PHASE5_WORK_PROFILE_OUTPUT_PATH}"
+fi
+if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]]; then
+    printf '[SUCCÈS WORKER] Profil external-1NN exact Phase 5 provisoire publié sans remplacement : %s\n' \
+        "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}"
 fi
 printf '[CYCLE DE VIE] Le worker invité ne ferme pas la VM; l’orchestrateur externe doit certifier TERMINATED.\n'

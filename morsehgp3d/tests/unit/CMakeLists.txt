@@ -905,6 +905,15 @@ add_test(
     "$<TARGET_FILE:morsehgp3d_gpu_k1_boruvka_morton_work_profile_host>"
 )
 add_test(
+  NAME morsehgp3d.phase5_k1_boruvka_exact_search_work_profile_configuration
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../configuration/check_phase5_k1_boruvka_exact_search_work_profile.py"
+    "${PROJECT_SOURCE_DIR}"
+    --executable
+    "$<TARGET_FILE:morsehgp3d_gpu_k1_boruvka_exact_search_work_profile_host>"
+)
+add_test(
   NAME morsehgp3d.spatial_gpu_reference_host_differential
   COMMAND
     "${Python3_EXECUTABLE}"
