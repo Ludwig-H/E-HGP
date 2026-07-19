@@ -545,6 +545,25 @@ void test_dual_tree_three_round_chain_and_falsifications() {
           !bidirectional_seed_check.emst_witness_certified,
       "bidirectional seed falsification invalidates only traversal");
 
+  K1DualTreeExactBoruvkaResult bad_seed_counter = result;
+  auto& bad_seed_audit =
+      bad_seed_counter.rounds[0].dual_tree_search_audit;
+  if (bad_seed_audit.target_component_seed_kappa_update_count != 8U ||
+      bad_seed_audit.target_component_seed_strict_cutoff_decrease_count != 0U) {
+    bad_seed_audit.target_component_seed_kappa_update_count = 8U;
+    bad_seed_audit.target_component_seed_strict_cutoff_decrease_count = 0U;
+  } else {
+    bad_seed_audit.target_component_seed_kappa_update_count = 7U;
+  }
+  const auto seed_counter_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_seed_counter);
+  check(
+      !seed_counter_check.exact_dual_tree_chain_certified &&
+          seed_counter_check.cpu_exact_decision_chain_certified &&
+          !seed_counter_check.emst_witness_certified,
+      "plausible bidirectional counter mutation fails fresh audit equality");
+
   K1DualTreeExactBoruvkaResult bad_decision = result;
   bad_decision.rounds[0].exact_decision.component_minima[0] =
       bad_decision.rounds[0].exact_decision.component_minima[1];

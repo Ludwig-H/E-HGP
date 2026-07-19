@@ -11,8 +11,9 @@ namespace morsehgp3d::hierarchy {
 
 // The minimum is selected against labels frozen at the beginning of the
 // round. component_label is the least PointId in that frozen component and
-// source_point_id identifies the endpoint in component_label that orients the
-// outgoing-edge witness. outgoing_edge is canonical by endpoint identifier.
+// source_point_id identifies the endpoint whose frozen component is
+// component_label and that orients the outgoing-edge witness. outgoing_edge is
+// canonical by endpoint identifier.
 struct K1BoruvkaComponentMinimum {
   spatial::PointId component_label{};
   spatial::PointId source_point_id{};

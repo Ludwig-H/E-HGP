@@ -390,6 +390,7 @@ Le premier parcours self-dual partagé est maintenant certifié sur hôte : il p
 - même famille sur le parcours self-dual, avec fermeture des $\binom{n}{2}$ paires et plafonds de travail séparés;
 - fixture 3D à cinq singletons discriminant l'enveloppe max et la relaxation bidirectionnelle de la ronde directe par composante;
 - fixture 3D entière à quatre points et deux composantes forçant une diminution stricte du cutoff de $2134$ à $14$ par l'offre cible d'une graine recertifiée;
+- régression dyadique verrouillant le remapping des labels d'ordre d'entrée vers les `PointId` canoniques avant toute construction Morton;
 - jusqu'à plusieurs millions de points pour l'EMST seul.
 
 ### Porte de sortie

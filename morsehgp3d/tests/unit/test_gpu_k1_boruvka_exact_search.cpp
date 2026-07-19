@@ -648,52 +648,90 @@ void test_component_cutoff_upper_envelope_discriminant() {
       "component cutoff discriminant launches one seed proposal per resolver");
 }
 
-void test_normalized_morton_seed_hypothesis_regression() {
+void test_canonical_point_id_label_regression() {
   reset_fake_gpu_k1_boruvka();
   constexpr K1BoruvkaMortonSeedPolicy policy{1U};
-  const std::array<CertifiedPoint3, 5> points{
+  const std::array<CertifiedPoint3, 5> source_points{
       point(0.0, 0.0),
       point(9.0 / 16.0, 9.0 / 16.0),
       point(7.0 / 16.0, 7.0 / 16.0),
       point(1.0, 0.0),
       point(0.0, 1.0)};
-  const CanonicalPointCloud cloud = cloud_from(points);
+  const CanonicalPointCloud cloud = cloud_from(source_points);
   const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
-  const std::array<PointId, 5> labels{
-      PointId{0}, PointId{1}, PointId{0}, PointId{0}, PointId{0}};
-  K1BoruvkaCandidateContext context{index, cloud};
-  const auto per_source = context.resolve_round_exact_external_1nn(
-      cloud, std::span<const PointId>{labels}, policy);
-  const auto component_direct =
-      context.resolve_round_exact_component_minima_dual_tree(
-          cloud, std::span<const PointId>{labels}, policy);
-
-  check_component_dual_tree_round(
-      component_direct,
-      index,
-      cloud,
-      std::span<const PointId>{labels},
-      per_source.component_minima,
-      policy,
-      "normalized Morton seed-hypothesis regression");
   const auto leaves = index.leaves();
   check(
-      leaves.size() == 5U && leaves[0].point_id == PointId{0} &&
+      cloud.source_index(PointId{0}) == 0U &&
+          cloud.source_index(PointId{1}) == 4U &&
+          cloud.source_index(PointId{2}) == 2U &&
+          cloud.source_index(PointId{3}) == 1U &&
+          cloud.source_index(PointId{4}) == 3U &&
+          leaves.size() == 5U && leaves[0].point_id == PointId{0} &&
           leaves[1].point_id == PointId{2} &&
           leaves[2].point_id == PointId{1} &&
           leaves[3].point_id == PointId{4} &&
           leaves[4].point_id == PointId{3},
-      "the rejected seed fixture locks normalized Morton order 0-2-1-4-3");
+      "the regression locks PointId canonicalization and Morton order");
+
+  const std::array<PointId, 5> unremapped_labels{
+      PointId{0}, PointId{1}, PointId{0}, PointId{0}, PointId{0}};
+  K1BoruvkaCandidateContext context{index, cloud};
+  const auto unremapped_per_source =
+      context.resolve_round_exact_external_1nn(
+          cloud, std::span<const PointId>{unremapped_labels}, policy);
+  const auto unremapped_direct =
+      context.resolve_round_exact_component_minima_dual_tree(
+          cloud, std::span<const PointId>{unremapped_labels}, policy);
+
+  check_component_dual_tree_round(
+      unremapped_direct,
+      index,
+      cloud,
+      std::span<const PointId>{unremapped_labels},
+      unremapped_per_source.component_minima,
+      policy,
+      "unremapped source-order label regression");
   check(
-      component_direct.search_audit.target_component_seed_offer_count == 5U &&
-          component_direct.search_audit.
+      unremapped_direct.search_audit.target_component_seed_offer_count == 5U &&
+          unremapped_direct.search_audit.
                   target_component_seed_kappa_update_count == 0U &&
-          component_direct.search_audit.
+          unremapped_direct.search_audit.
                   target_component_seed_strict_cutoff_decrease_count == 0U,
-      "the rejected normalized fixture has no target-seed improvement");
+      "source-order labels do not isolate the intended canonical point");
+
+  const std::array<PointId, 5> canonical_labels{
+      PointId{0}, PointId{0}, PointId{0}, PointId{3}, PointId{0}};
+  const auto canonical_per_source = context.resolve_round_exact_external_1nn(
+      cloud, std::span<const PointId>{canonical_labels}, policy);
+  const auto canonical_direct =
+      context.resolve_round_exact_component_minima_dual_tree(
+          cloud, std::span<const PointId>{canonical_labels}, policy);
+  check_component_dual_tree_round(
+      canonical_direct,
+      index,
+      cloud,
+      std::span<const PointId>{canonical_labels},
+      canonical_per_source.component_minima,
+      policy,
+      "canonical PointId label regression");
   check(
-      fake_gpu_k1_boruvka_launch_count() == 2U,
-      "normalized Morton regression reuses recertified distances");
+      canonical_direct.component_minima.size() == 2U &&
+          canonical_direct.component_minima[1].component_label == PointId{3} &&
+          canonical_direct.component_minima[1].source_point_id == PointId{3} &&
+          canonical_direct.component_minima[1].outgoing_edge.u == PointId{2} &&
+          canonical_direct.component_minima[1].outgoing_edge.v == PointId{3} &&
+          canonical_direct.component_minima[1].outgoing_edge.squared_length ==
+              ExactLevel{BigInt{1}, BigInt{32}} &&
+          canonical_direct.search_audit.target_component_seed_offer_count ==
+              5U &&
+          canonical_direct.search_audit.
+                  target_component_seed_kappa_update_count == 2U &&
+          canonical_direct.search_audit.
+                  target_component_seed_strict_cutoff_decrease_count == 1U,
+      "canonical labels recover the strict target offer 2-to-3 at 1/32");
+  check(
+      fake_gpu_k1_boruvka_launch_count() == 4U,
+      "canonical label regression launches each exact resolver twice");
 }
 
 void test_bidirectional_component_seed_discriminant() {
@@ -1051,7 +1089,7 @@ int main() {
   test_round_chain_matches_reference();
   test_exact_kappa_tie();
   test_component_cutoff_upper_envelope_discriminant();
-  test_normalized_morton_seed_hypothesis_regression();
+  test_canonical_point_id_label_regression();
   test_bidirectional_component_seed_discriminant();
   test_morton_overlap_quadratic_lower_bound();
   test_invalid_contracts();
