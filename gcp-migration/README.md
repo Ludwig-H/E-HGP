@@ -318,6 +318,30 @@ fixtures fermées; elle ne borne ni les autres tableaux résidents, ni le volume
 logique total, ni le travail CPU exact, et ne qualifie donc pas encore la
 scalabilité de la Phase 5.
 
+Le profil de travail Morton possède une session courte séparée. Cette option
+est mutuellement exclusive de `--phase4-spatial-reference` et de
+`--phase5-k1-boruvka` afin que la matrice empirique ne soit pas confondue avec
+une qualification logicielle :
+
+```bash
+./gcp-migration/run_phase3_qualification.sh \
+  --yes \
+  --phase5-k1-boruvka-work-profile \
+  --result-dir /tmp/morsehgp3d-phase5-k1-boruvka-work-profile
+```
+
+Le worker mesure, dans l'ordre fermé, les tailles 64, 256 et 1 024 sur les
+familles `uniform`, `clusters` et `lattice`. Chaque cellule compare le fallback
+canonique aux rayons Morton 1, 4 et 16 avec un budget de `n-1` candidats et la
+graine déterministe 1. Les neuf sorties brutes sont validées par le contrat
+`morsehgp3d.phase5.k1_boruvka_morton_work_profile.v1`, puis réunies dans le
+compagnon
+`morsehgp3d.phase5.k1_boruvka_morton_work_profile_artifact.v1`. Ce compagnon
+reste `benchmark_only`, sans `public_status`, revendication de qualification ou
+réduction hiérarchique. Il ne devient
+`phase5-k1-boruvka-work-profile-<SHA>.json` qu'après la certification ciblée
+`TERMINATED` de la même génération.
+
 Pour la cible de capacité explicitement autorisée :
 
 ```bash
@@ -356,8 +380,8 @@ Pour cette qualification courte, l'orchestrateur exige après les deux gardes
 `maxRunDuration=3600` secondes exactement et la même génération. Il transmet au
 worker une échéance GCE sûre, placée 300 secondes avant l'échéance nominale. Le
 worker en retranche encore 1 800 secondes. Le preflight, la construction et
-chacune des sept unités CUDA ou d'audit de base, ainsi que les unités Phase 4
-ou Phase 5 optionnelles, sont exécutés sous le binaire fixe
+chacune des sept unités CUDA ou d'audit de base, ainsi que les unités Phase 4,
+Phase 5 ou les neuf cellules optionnelles du profil Morton, sont exécutés sous le binaire fixe
 `/usr/bin/timeout`, dans un groupe de processus distinct. Les chemins fixes de
 `timeout`, `date` et `sleep`, ainsi que tous leurs parents, sont certifiés root
 et non inscriptibles par le groupe ou les autres avant le premier calcul de
@@ -429,7 +453,7 @@ suivent le paquet `docker.io` pris en charge par
 et la configuration Docker prescrite par
 [NVIDIA](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/1.17.8/install-guide.html).
 
-L'artefact distant demeure provisoire avec `status=worker_passed_pending_shutdown`. L'orchestrateur le valide localement, arrête la cible, relit indépendamment l'état exact `TERMINATED`, ajoute cette preuve à `vm_lifecycle`, convertit le statut en `passed`, puis publie l'artefact final sans remplacement par lien dur. Un run Phase 3 seul effectue une publication atomique de fichier unique. Avec `--phase4-spatial-reference` ou `--phase5-k1-boruvka`, les noms ne sont pas présentés comme une transaction atomique impossible : Phase 3, artefact autonome, est liée en premier, puis chaque compagnon demandé. Chaque lien est atomique et sans remplacement. Si un lien compagnon échoue, les artefacts valides déjà publiés sont conservés et le diagnostic énumère précisément leurs noms; aucun rollback ne supprime un nom final susceptible d'avoir été remplacé concurremment. Un échec ou une relecture illisible de l'arrêt ne publie aucun artefact final, mais conserve le handoff ciblé local et bloque une nouvelle session sur le même SHA jusqu'à résolution. La priorité donnée à l'arrêt signifie que le clone temporaire distant peut rester dans `/tmp` sur le disque de la VM arrêtée.
+L'artefact distant demeure provisoire avec `status=worker_passed_pending_shutdown`. L'orchestrateur le valide localement, arrête la cible, relit indépendamment l'état exact `TERMINATED`, ajoute cette preuve à `vm_lifecycle`, convertit le statut en `passed`, puis publie l'artefact final sans remplacement par lien dur. Un run Phase 3 seul effectue une publication atomique de fichier unique. Avec `--phase4-spatial-reference`, `--phase5-k1-boruvka` ou `--phase5-k1-boruvka-work-profile`, les noms ne sont pas présentés comme une transaction atomique impossible : Phase 3, artefact autonome, est liée en premier, puis chaque compagnon demandé. Chaque lien est atomique et sans remplacement. Si un lien compagnon échoue, les artefacts valides déjà publiés sont conservés et le diagnostic énumère précisément leurs noms; aucun rollback ne supprime un nom final susceptible d'avoir été remplacé concurremment. Un échec ou une relecture illisible de l'arrêt ne publie aucun artefact final, mais conserve le handoff ciblé local et bloque une nouvelle session sur le même SHA jusqu'à résolution. La priorité donnée à l'arrêt signifie que le clone temporaire distant peut rester dans `/tmp` sur le disque de la VM arrêtée.
 
 ## Cas Blackwell : « requires use of the NVIDIA open kernel modules »
 

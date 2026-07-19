@@ -116,7 +116,7 @@ jobs:
           python-version: "3.12"
 
       - name: Validate the bounded GPU workers
-        run: python -m unittest tests.gcp.test_phase2b_remote_qualification tests.gcp.test_phase3_remote_qualification tests.gcp.test_phase5_k1_boruvka_qualification
+        run: python -m unittest tests.gcp.test_phase2b_remote_qualification tests.gcp.test_phase3_remote_qualification tests.gcp.test_phase5_k1_boruvka_qualification tests.gcp.test_phase5_k1_boruvka_work_profile
 
   repository:
     name: repository
