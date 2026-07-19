@@ -1555,6 +1555,42 @@ resolve_seeded_exact_component_minima_dual_tree(
         "the component-direct point-seed count overflowed size_t");
   }
 
+  for (std::size_t source_index = 0U;
+       source_index < point_count;
+       ++source_index) {
+    const K1BoruvkaSeed& seed = seeds.public_seeds[source_index];
+    const std::size_t target_index = checked_point_index(
+        seed.target_point_id, point_count);
+    const std::size_t target_slot = component_slot(labels[target_index]);
+    if (!component_best[target_slot].has_value()) {
+      throw std::logic_error(
+          "the component-direct target component has no source seed incumbent");
+    }
+    ResolvedCandidate target_candidate{
+        seed_edge(seed), seed.target_point_id};
+    audit.target_component_seed_offer_count = checked_size_sum(
+        audit.target_component_seed_offer_count,
+        1U,
+        "the component-direct target-component seed-offer count overflowed size_t");
+    if (!resolved_less(
+            target_candidate, *component_best[target_slot])) {
+      continue;
+    }
+    if (target_candidate.edge.squared_length <
+        component_best[target_slot]->edge.squared_length) {
+      audit.target_component_seed_strict_cutoff_decrease_count =
+          checked_size_sum(
+              audit.target_component_seed_strict_cutoff_decrease_count,
+              1U,
+              "the component-direct target-component strict-decrease count overflowed size_t");
+    }
+    component_best[target_slot] = std::move(target_candidate);
+    audit.target_component_seed_kappa_update_count = checked_size_sum(
+        audit.target_component_seed_kappa_update_count,
+        1U,
+        "the component-direct target-component kappa-update count overflowed size_t");
+  }
+
   std::vector<exact::ExactLevel> initial_component_cutoffs;
   initial_component_cutoffs.reserve(component_count);
   for (const std::optional<ResolvedCandidate>& minimum : component_best) {
@@ -1788,6 +1824,10 @@ resolve_seeded_exact_component_minima_dual_tree(
       "the component-direct update bound overflowed size_t");
   if (audit.point_seed_count != point_count ||
       audit.component_seed_incumbent_count != component_count ||
+      audit.target_component_seed_offer_count != point_count ||
+      audit.target_component_seed_kappa_update_count > point_count ||
+      audit.target_component_seed_strict_cutoff_decrease_count >
+          audit.target_component_seed_kappa_update_count ||
       audit.component_cutoff_upper_envelope_node_count !=
           host.nodes.size() ||
       resolution.component_minima.size() != component_count ||
@@ -1806,6 +1846,7 @@ resolve_seeded_exact_component_minima_dual_tree(
   audit.external_seed_targets_recertified = true;
   audit.exact_seed_cutoffs_recertified = true;
   audit.component_seed_reduction_certified = true;
+  audit.bidirectional_component_seed_reduction_certified = true;
   audit.component_cutoff_upper_envelope_certified = true;
   audit.canonical_kappa_resolution_certified = true;
   audit.component_minima_complete = true;

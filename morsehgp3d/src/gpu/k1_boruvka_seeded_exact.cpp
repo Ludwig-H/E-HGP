@@ -616,6 +616,10 @@ struct FreshReplay {
          audit.frozen_component_count == component_count &&
          audit.point_seed_count == point_count &&
          audit.component_seed_incumbent_count == component_count &&
+         audit.target_component_seed_offer_count == point_count &&
+         audit.target_component_seed_kappa_update_count <= point_count &&
+         audit.target_component_seed_strict_cutoff_decrease_count <=
+             audit.target_component_seed_kappa_update_count &&
          audit.component_cutoff_upper_envelope_node_count == node_count &&
          audit.component_minimum_count == component_count &&
          audit.unordered_point_pair_count == *expected_pairs &&
@@ -645,6 +649,7 @@ struct FreshReplay {
          audit.external_seed_targets_recertified &&
          audit.exact_seed_cutoffs_recertified &&
          audit.component_seed_reduction_certified &&
+         audit.bidirectional_component_seed_reduction_certified &&
          audit.component_cutoff_upper_envelope_certified &&
          audit.canonical_unordered_pair_partition_certified &&
          audit.uniform_component_pair_prunes_certified &&

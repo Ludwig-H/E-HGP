@@ -446,9 +446,14 @@ void test_dual_tree_three_round_chain_and_falsifications() {
             audit.point_seed_count == 8U &&
             audit.component_seed_incumbent_count ==
                 expected.pre_round_component_count &&
+            audit.target_component_seed_offer_count == 8U &&
+            audit.target_component_seed_kappa_update_count <= 8U &&
+            audit.target_component_seed_strict_cutoff_decrease_count <=
+                audit.target_component_seed_kappa_update_count &&
             audit.component_cutoff_upper_envelope_node_count ==
                 index.build_counters().node_count &&
             audit.component_seed_reduction_certified &&
+            audit.bidirectional_component_seed_reduction_certified &&
             audit.component_cutoff_upper_envelope_certified &&
             audit.canonical_unordered_pair_partition_certified &&
             audit.depth_first_frontier_bound_certified &&
@@ -465,7 +470,7 @@ void test_dual_tree_three_round_chain_and_falsifications() {
           result.reference_cpu_witness_certified &&
           result.emst_witness_certified &&
           std::string_view{K1DualTreeExactBoruvkaResult::proof_basis} ==
-              "gpu_bounded_morton_seed_cpu_exact_direct_component_dual_tree_boruvka_v2",
+              "gpu_bounded_morton_seed_cpu_exact_bidirectional_component_dual_tree_boruvka_v3",
       "shared builder requires fresh replay and the independent CPU witness");
 
   std::size_t launches = fake_gpu_k1_boruvka_launch_count();
@@ -527,6 +532,18 @@ void test_dual_tree_three_round_chain_and_falsifications() {
           envelope_check.cpu_exact_decision_chain_certified &&
           !envelope_check.emst_witness_certified,
       "frozen component-envelope falsification invalidates only traversal");
+
+  K1DualTreeExactBoruvkaResult bad_bidirectional_seed = result;
+  bad_bidirectional_seed.rounds[0].dual_tree_search_audit.
+      bidirectional_component_seed_reduction_certified = false;
+  const auto bidirectional_seed_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_bidirectional_seed);
+  check(
+      !bidirectional_seed_check.exact_dual_tree_chain_certified &&
+          bidirectional_seed_check.cpu_exact_decision_chain_certified &&
+          !bidirectional_seed_check.emst_witness_certified,
+      "bidirectional seed falsification invalidates only traversal");
 
   K1DualTreeExactBoruvkaResult bad_decision = result;
   bad_decision.rounds[0].exact_decision.component_minima[0] =

@@ -14,6 +14,7 @@
 #include <span>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -23,6 +24,7 @@ using morsehgp3d::exact::BigInt;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactLevel;
 using morsehgp3d::gpu::K1BoruvkaCandidateContext;
+using morsehgp3d::gpu::K1BoruvkaComponentDualTreeSearchAudit;
 using morsehgp3d::gpu::K1BoruvkaComponentDualTreeSearchStatus;
 using morsehgp3d::gpu::K1BoruvkaDualTreeSearchStatus;
 using morsehgp3d::gpu::K1BoruvkaExactSearchStatus;
@@ -406,6 +408,11 @@ void check_component_dual_tree_round(
           audit.point_seed_count == point_count &&
           audit.component_seed_incumbent_count ==
               frozen_component_count &&
+          audit.target_component_seed_offer_count == point_count &&
+          audit.target_component_seed_kappa_update_count <=
+              point_count &&
+          audit.target_component_seed_strict_cutoff_decrease_count <=
+              audit.target_component_seed_kappa_update_count &&
           audit.component_cutoff_upper_envelope_node_count ==
               audit.resident_node_count &&
           audit.component_minimum_count == frozen_component_count &&
@@ -440,12 +447,17 @@ void check_component_dual_tree_round(
                   audit.cpu_node_pair_expansion_count,
       fixture + " closes direct component work and cardinalities");
   check(
+      std::string_view{K1BoruvkaComponentDualTreeSearchAudit::proof_basis} ==
+          "strict_exact_aabb_pair_bidirectional_component_seed_frozen_upper_envelope_bounded_dfs_v2",
+      fixture + " locks the bidirectional frozen-envelope proof basis");
+  check(
       audit.frozen_labels_certified &&
           audit.lbvh_topology_and_exact_aabbs_certified &&
           audit.complete_source_seed_coverage_certified &&
           audit.external_seed_targets_recertified &&
           audit.exact_seed_cutoffs_recertified &&
           audit.component_seed_reduction_certified &&
+          audit.bidirectional_component_seed_reduction_certified &&
           audit.component_cutoff_upper_envelope_certified &&
           audit.canonical_unordered_pair_partition_certified &&
           audit.uniform_component_pair_prunes_certified &&
@@ -634,6 +646,114 @@ void test_component_cutoff_upper_envelope_discriminant() {
   check(
       fake_gpu_k1_boruvka_launch_count() == 2U,
       "component cutoff discriminant launches one seed proposal per resolver");
+}
+
+void test_normalized_morton_seed_hypothesis_regression() {
+  reset_fake_gpu_k1_boruvka();
+  constexpr K1BoruvkaMortonSeedPolicy policy{1U};
+  const std::array<CertifiedPoint3, 5> points{
+      point(0.0, 0.0),
+      point(9.0 / 16.0, 9.0 / 16.0),
+      point(7.0 / 16.0, 7.0 / 16.0),
+      point(1.0, 0.0),
+      point(0.0, 1.0)};
+  const CanonicalPointCloud cloud = cloud_from(points);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<PointId, 5> labels{
+      PointId{0}, PointId{1}, PointId{0}, PointId{0}, PointId{0}};
+  K1BoruvkaCandidateContext context{index, cloud};
+  const auto per_source = context.resolve_round_exact_external_1nn(
+      cloud, std::span<const PointId>{labels}, policy);
+  const auto component_direct =
+      context.resolve_round_exact_component_minima_dual_tree(
+          cloud, std::span<const PointId>{labels}, policy);
+
+  check_component_dual_tree_round(
+      component_direct,
+      index,
+      cloud,
+      std::span<const PointId>{labels},
+      per_source.component_minima,
+      policy,
+      "normalized Morton seed-hypothesis regression");
+  const auto leaves = index.leaves();
+  check(
+      leaves.size() == 5U && leaves[0].point_id == PointId{0} &&
+          leaves[1].point_id == PointId{2} &&
+          leaves[2].point_id == PointId{1} &&
+          leaves[3].point_id == PointId{4} &&
+          leaves[4].point_id == PointId{3},
+      "the rejected seed fixture locks normalized Morton order 0-2-1-4-3");
+  check(
+      component_direct.search_audit.target_component_seed_offer_count == 5U &&
+          component_direct.search_audit.
+                  target_component_seed_kappa_update_count == 0U &&
+          component_direct.search_audit.
+                  target_component_seed_strict_cutoff_decrease_count == 0U,
+      "the rejected normalized fixture has no target-seed improvement");
+  check(
+      fake_gpu_k1_boruvka_launch_count() == 2U,
+      "normalized Morton regression reuses recertified distances");
+}
+
+void test_bidirectional_component_seed_discriminant() {
+  reset_fake_gpu_k1_boruvka();
+  constexpr K1BoruvkaMortonSeedPolicy policy{1U};
+  // Morton order is 1-0-2-3. With W=1, component 2 first retains 3-to-0
+  // at d^2=2134; the fallback seed 1-to-2 from component 0 has d^2=14 and
+  // its target-oriented offer therefore tightens component 2 strictly.
+  const std::array<CertifiedPoint3, 4> points{
+      point(0.0, 37.0, 4.0),
+      point(1.0, 1.0, 51.0),
+      point(2.0, 3.0, 48.0),
+      point(3.0, 7.0, 39.0)};
+  const CanonicalPointCloud cloud = cloud_from(points);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<PointId, 4> labels{
+      PointId{0}, PointId{0}, PointId{2}, PointId{2}};
+  K1BoruvkaCandidateContext context{index, cloud};
+  const auto per_source = context.resolve_round_exact_external_1nn(
+      cloud, std::span<const PointId>{labels}, policy);
+  const auto component_direct =
+      context.resolve_round_exact_component_minima_dual_tree(
+          cloud, std::span<const PointId>{labels}, policy);
+
+  check_component_dual_tree_round(
+      component_direct,
+      index,
+      cloud,
+      std::span<const PointId>{labels},
+      per_source.component_minima,
+      policy,
+      "bidirectional component-seed discriminant");
+  const auto leaves = index.leaves();
+  check(
+      leaves.size() == 4U && leaves[0].point_id == PointId{1} &&
+          leaves[1].point_id == PointId{0} &&
+          leaves[2].point_id == PointId{2} &&
+          leaves[3].point_id == PointId{3},
+      "the bidirectional discriminant locks Morton order 1-0-2-3");
+  check(
+      component_direct.component_minima.size() == 2U &&
+          component_direct.component_minima[0].outgoing_edge.u == PointId{1} &&
+          component_direct.component_minima[0].outgoing_edge.v == PointId{2} &&
+          component_direct.component_minima[0].outgoing_edge.squared_length ==
+              ExactLevel{BigInt{14}} &&
+          component_direct.component_minima[1].outgoing_edge.u == PointId{1} &&
+          component_direct.component_minima[1].outgoing_edge.v == PointId{2} &&
+          component_direct.component_minima[1].outgoing_edge.squared_length ==
+              ExactLevel{BigInt{14}},
+      "the target-oriented seed 1-to-2 is feasible for both sides of the cut");
+  check(
+      component_direct.search_audit.target_component_seed_offer_count == 4U &&
+          component_direct.search_audit.
+                  target_component_seed_kappa_update_count == 1U &&
+          component_direct.search_audit.
+                  target_component_seed_strict_cutoff_decrease_count == 1U,
+      "bidirectional reduction strictly tightens one component cutoff");
+  check(
+      fake_gpu_k1_boruvka_launch_count() == 2U,
+      "bidirectional discriminant reuses recertified distances");
 }
 
 void test_morton_overlap_quadratic_lower_bound() {
@@ -931,6 +1051,8 @@ int main() {
   test_round_chain_matches_reference();
   test_exact_kappa_tie();
   test_component_cutoff_upper_envelope_discriminant();
+  test_normalized_morton_seed_hypothesis_regression();
+  test_bidirectional_component_seed_discriminant();
   test_morton_overlap_quadratic_lower_bound();
   test_invalid_contracts();
   if (failures != 0) {
