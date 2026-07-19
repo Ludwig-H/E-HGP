@@ -435,8 +435,15 @@ void test_dual_tree_three_round_chain_and_falsifications() {
                 K1BoruvkaComponentEnvelopeMode::frozen_initial &&
             audit.cpu_component_witness_leaf_update_count == 0U &&
             audit.cpu_component_witness_ancestor_update_count == 0U &&
+            audit.component_uniform_root_count == 0U &&
+            audit.component_uniform_root_leaf_coverage_count == 0U &&
+            audit.cpu_component_uniform_root_update_count == 0U &&
+            audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
+            audit.cpu_component_mixed_ancestor_update_count == 0U &&
             audit.live_component_cutoff_upper_bound_certified &&
             audit.pointwise_at_most_frozen_envelope_certified &&
+            !audit.maximal_uniform_component_roots_certified &&
+            !audit.exact_current_component_envelope_certified &&
             audit.covered_unordered_point_pair_count == 28U &&
             audit.unordered_point_pair_count == 28U &&
             audit.lbvh_maximum_depth ==
@@ -588,6 +595,43 @@ void test_dual_tree_three_round_chain_and_falsifications() {
           witness_counter_check.cpu_exact_decision_chain_certified &&
           !witness_counter_check.emst_witness_certified,
       "persistent witness-counter falsification invalidates only traversal");
+
+  K1DualTreeExactBoruvkaResult bad_uniform_root_counter = result;
+  bad_uniform_root_counter.rounds[0].dual_tree_search_audit.
+      cpu_component_uniform_root_update_count = 1U;
+  const auto uniform_root_counter_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_uniform_root_counter);
+  check(
+      !uniform_root_counter_check.exact_dual_tree_chain_certified &&
+          uniform_root_counter_check.cpu_exact_decision_chain_certified &&
+          !uniform_root_counter_check.emst_witness_certified,
+      "persistent uniform-root counter falsification invalidates traversal");
+
+  K1DualTreeExactBoruvkaResult bad_uniform_root_certificate = result;
+  bad_uniform_root_certificate.rounds[0].dual_tree_search_audit.
+      maximal_uniform_component_roots_certified = true;
+  const auto uniform_root_certificate_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_uniform_root_certificate);
+  check(
+      !uniform_root_certificate_check.exact_dual_tree_chain_certified &&
+          uniform_root_certificate_check.cpu_exact_decision_chain_certified &&
+          !uniform_root_certificate_check.emst_witness_certified,
+      "persistent uniform-root certificate falsification invalidates traversal");
+
+  K1DualTreeExactBoruvkaResult bad_current_envelope_certificate = result;
+  bad_current_envelope_certificate.rounds[0].dual_tree_search_audit.
+      exact_current_component_envelope_certified = true;
+  const auto current_envelope_certificate_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_current_envelope_certificate);
+  check(
+      !current_envelope_certificate_check.exact_dual_tree_chain_certified &&
+          current_envelope_certificate_check.
+              cpu_exact_decision_chain_certified &&
+          !current_envelope_certificate_check.emst_witness_certified,
+      "persistent exact-current certificate falsification invalidates traversal");
 
   K1DualTreeExactBoruvkaResult bad_bidirectional_seed = result;
   bad_bidirectional_seed.rounds[0].dual_tree_search_audit.

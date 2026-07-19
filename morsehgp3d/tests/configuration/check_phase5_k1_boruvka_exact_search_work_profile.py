@@ -15,6 +15,9 @@ from typing import Any, NoReturn, Sequence
 
 SCHEMA = "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v1"
 COMPARISON_SCHEMA = "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v3"
+CURRENT_COMPARISON_SCHEMA = (
+    "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v4"
+)
 STATIC_SCHEMA = "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile_static.v1"
 SCOPE = "certified_local_emst_chain_work_profile_without_scalability_claim"
 WORK_ACCOUNTING = "producer_chain_only_replay_and_reference_excluded"
@@ -67,6 +70,12 @@ RESOLVER_COMPARISON_TOTAL_KEYS = {
     "direct_sparse",
     "dynamic",
 }
+CURRENT_RESOLVER_COMPARISON_ROUND_KEYS = RESOLVER_COMPARISON_ROUND_KEYS | {
+    "direct_current"
+}
+CURRENT_RESOLVER_COMPARISON_TOTAL_KEYS = RESOLVER_COMPARISON_TOTAL_KEYS | {
+    "direct_current"
+}
 RESOLVER_COMMON_KEYS = {
     "aabb_pair_bound_evaluation_count",
     "frontier_peak",
@@ -89,6 +98,19 @@ RESOLVER_DIRECT_KEYS = RESOLVER_COMMON_KEYS | {
     "target_component_seed_kappa_update_count",
     "target_component_seed_offer_count",
     "target_component_seed_strict_cutoff_decrease_count",
+}
+RESOLVER_CURRENT_KEYS = RESOLVER_DIRECT_KEYS | {
+    "component_mixed_ancestor_recomputation_count",
+    "component_mixed_ancestor_update_count",
+    "component_uniform_root_count",
+    "component_uniform_root_leaf_coverage_count",
+    "component_uniform_root_update_count",
+}
+RESOLVER_DOMINANCE_KEYS = {
+    "aabb_pair_bound_evaluation_count",
+    "node_pair_expansion_count",
+    "node_pair_visit_count",
+    "point_pair_distance_evaluation_count",
 }
 CERTIFICATE_KEYS = {
     "bounded_morton_seed_chain",
@@ -555,10 +577,14 @@ def validate_resolver_counters(
     *,
     point_count: int,
     direct_mode: str | None,
+    component_count: int | None = None,
 ) -> dict[str, int]:
-    expected_keys = (
-        RESOLVER_DIRECT_KEYS if direct_mode is not None else RESOLVER_DYNAMIC_KEYS
-    )
+    if direct_mode == "current":
+        expected_keys = RESOLVER_CURRENT_KEYS
+    elif direct_mode is not None:
+        expected_keys = RESOLVER_DIRECT_KEYS
+    else:
+        expected_keys = RESOLVER_DYNAMIC_KEYS
     counters = exact_keys(value, expected_keys, label)
     result = {
         key: natural(item, f"{label}.{key}") for key, item in counters.items()
@@ -624,7 +650,46 @@ def validate_resolver_counters(
             == 2 * point_count - 1,
             f"{label} component envelope coverage differs",
         )
-        if direct_mode == "frozen":
+        if direct_mode == "current":
+            require(
+                component_count is not None
+                and 1 < component_count <= point_count,
+                f"{label} current component count differs",
+            )
+            require(
+                result["component_witness_leaf_update_count"] == 0
+                and result["component_witness_ancestor_update_count"] == 0,
+                f"{label} current witness updates differ",
+            )
+            root_count = result["component_uniform_root_count"]
+            strict_decreases = result["strict_component_cutoff_decrease_count"]
+            root_updates = result["component_uniform_root_update_count"]
+            mixed_recomputations = result[
+                "component_mixed_ancestor_recomputation_count"
+            ]
+            require(
+                component_count <= root_count <= point_count,
+                f"{label} current uniform-root count differs",
+            )
+            require(
+                result["component_uniform_root_leaf_coverage_count"]
+                == point_count,
+                f"{label} current uniform-root leaf coverage differs",
+            )
+            require(
+                strict_decreases <= root_updates <= strict_decreases * root_count,
+                f"{label} current uniform-root update bound differs",
+            )
+            require(
+                mixed_recomputations <= root_updates * (point_count - 1),
+                f"{label} current mixed-ancestor recomputation bound differs",
+            )
+            require(
+                result["component_mixed_ancestor_update_count"]
+                <= mixed_recomputations,
+                f"{label} current mixed-ancestor update bound differs",
+            )
+        elif direct_mode == "frozen":
             require(
                 result["component_witness_leaf_update_count"] == 0
                 and result["component_witness_ancestor_update_count"] == 0,
@@ -821,6 +886,128 @@ def validate_comparison_document(value: Any, *, expected_backend: str) -> None:
         )
 
 
+def validate_current_comparison_document(
+    value: Any, *, expected_backend: str
+) -> None:
+    document = exact_keys(value, TOP_KEYS, "current comparison work profile")
+    require(
+        document["schema"] == CURRENT_COMPARISON_SCHEMA,
+        "current comparison work profile schema differs",
+    )
+    result = exact_keys(
+        document["result"], COMPARISON_RESULT_KEYS, "current comparison result"
+    )
+    comparison_shape = exact_keys(
+        result["resolver_comparison"],
+        RESOLVER_COMPARISON_KEYS,
+        "result.resolver_comparison",
+    )
+    require(
+        isinstance(comparison_shape["rounds"], list),
+        "current comparison rounds differ",
+    )
+    for index, round_item in enumerate(comparison_shape["rounds"]):
+        exact_keys(
+            round_item,
+            CURRENT_RESOLVER_COMPARISON_ROUND_KEYS,
+            f"current resolver_comparison.rounds[{index}]",
+        )
+    exact_keys(
+        comparison_shape["totals"],
+        CURRENT_RESOLVER_COMPARISON_TOTAL_KEYS,
+        "result.resolver_comparison.totals",
+    )
+
+    # The four-way extension projects exactly to v3, which itself projects to
+    # the unchanged default v1 document.
+    projected = copy.deepcopy(document)
+    projected["schema"] = COMPARISON_SCHEMA
+    projected_comparison = projected["result"]["resolver_comparison"]
+    for round_value in projected_comparison["rounds"]:
+        require(isinstance(round_value, dict), "current comparison round differs")
+        require(
+            "direct_current" in round_value,
+            "current comparison round lost direct_current",
+        )
+        del round_value["direct_current"]
+    require(
+        isinstance(projected_comparison["totals"], dict)
+        and "direct_current" in projected_comparison["totals"],
+        "current comparison totals lost direct_current",
+    )
+    del projected_comparison["totals"]["direct_current"]
+    validate_comparison_document(projected, expected_backend=expected_backend)
+
+    point_count = natural(document["point_count"], "point_count", positive=True)
+    comparison = exact_keys(
+        result["resolver_comparison"],
+        RESOLVER_COMPARISON_KEYS,
+        "result.resolver_comparison",
+    )
+    rounds = comparison["rounds"]
+    require(isinstance(rounds, list), "current comparison rounds differ")
+    current_sums = {key: 0 for key in RESOLVER_CURRENT_KEYS}
+    for index, round_item in enumerate(rounds):
+        round_value = exact_keys(
+            round_item,
+            CURRENT_RESOLVER_COMPARISON_ROUND_KEYS,
+            f"current resolver_comparison.rounds[{index}]",
+        )
+        label = f"current resolver_comparison.rounds[{index}]"
+        component_count = natural(
+            round_value["pre_component_count"],
+            f"{label}.pre_component_count",
+            positive=True,
+        )
+        current = validate_resolver_counters(
+            round_value["direct_current"],
+            f"{label}.direct_current",
+            point_count=point_count,
+            direct_mode="current",
+            component_count=component_count,
+        )
+        for resolver in ("dynamic", "direct_frozen", "direct_sparse"):
+            other = round_value[resolver]
+            require(isinstance(other, dict), f"{label}.{resolver} differs")
+            for key in RESOLVER_DOMINANCE_KEYS:
+                require(
+                    current[key]
+                    <= natural(other[key], f"{label}.{resolver}.{key}"),
+                    f"{label} current {key} exceeds {resolver}",
+                )
+        for key in RESOLVER_CURRENT_KEYS:
+            if key == "frontier_peak":
+                current_sums[key] = max(current_sums[key], current[key])
+            else:
+                current_sums[key] += current[key]
+
+    totals = exact_keys(
+        comparison["totals"],
+        CURRENT_RESOLVER_COMPARISON_TOTAL_KEYS,
+        "result.resolver_comparison.totals",
+    )
+    total_current = exact_keys(
+        totals["direct_current"],
+        RESOLVER_CURRENT_KEYS,
+        "result.resolver_comparison.totals.direct_current",
+    )
+    for key, expected in current_sums.items():
+        require(
+            natural(total_current[key], f"totals.direct_current.{key}")
+            == expected,
+            f"total current resolver {key} differs",
+        )
+    for resolver in ("dynamic", "direct_frozen", "direct_sparse"):
+        other = totals[resolver]
+        require(isinstance(other, dict), f"totals.{resolver} differs")
+        for key in RESOLVER_DOMINANCE_KEYS:
+            require(
+                natural(total_current[key], f"totals.direct_current.{key}")
+                <= natural(other[key], f"totals.{resolver}.{key}"),
+                f"total current {key} exceeds {resolver}",
+            )
+
+
 def read_profile_log(path: Path) -> dict[str, Any]:
     require(
         path.is_file() and not path.is_symlink(), "profile log must be a regular file"
@@ -866,8 +1053,10 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
     for token in (
         SCHEMA,
         COMPARISON_SCHEMA,
+        CURRENT_COMPARISON_SCHEMA,
         SCOPE,
         "--compare-resolvers",
+        "--compare-current-envelope",
         "build_gpu_seeded_cpu_exact_external_1nn_k1_boruvka",
         "exact_operation_count_unweighted",
         "candidate_record_count",
@@ -1049,6 +1238,96 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
         "resolver comparison changed the projected v1 work profile",
     )
 
+    current_completed = subprocess.run(
+        [
+            str(executable.resolve()),
+            "--family",
+            "uniform",
+            "--point-count",
+            "12",
+            "--window-radius",
+            "2",
+            "--seed",
+            "2",
+            "--git-sha",
+            "0" * 40,
+            "--compare-current-envelope",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    require(not current_completed.stderr, "current comparison wrote stderr")
+    require(
+        current_completed.stdout.endswith("\n")
+        and current_completed.stdout.count("\n") == 1,
+        "current comparison output is not one-line JSON",
+    )
+    current_value = json.loads(
+        current_completed.stdout,
+        object_pairs_hook=reject_duplicate_json_keys,
+        parse_constant=reject_non_finite_json_constant,
+    )
+    validate_current_comparison_document(
+        current_value, expected_backend="fake_gpu"
+    )
+    current_rounds = current_value["result"]["resolver_comparison"]["rounds"]
+    require(
+        current_value["result"]["component_count_path"] == [12, 4, 1]
+        and len(current_rounds) == 2,
+        "uniform current comparison component path differs",
+    )
+    current_expected_work = {
+        "direct_current": ((72, 30, 11, 19, 12, 8), (69, 31, 4, 23, 11, 6)),
+        "direct_frozen": ((72, 30, 11, 19, 12, 8), (75, 34, 11, 19, 11, 6)),
+        "direct_sparse": ((72, 30, 11, 19, 12, 8), (75, 34, 8, 22, 11, 6)),
+        "dynamic": ((72, 30, 11, 19, 12, 8), (81, 37, 16, 17, 11, 6)),
+    }
+    for resolver, expected_rounds in current_expected_work.items():
+        for round_index, expected in enumerate(expected_rounds):
+            observed = current_rounds[round_index][resolver]
+            require(
+                tuple(observed[key] for key in fixture_keys) == expected,
+                f"uniform current comparison {resolver} work fixture differs",
+            )
+    current_specific_keys = (
+        "component_uniform_root_count",
+        "component_uniform_root_leaf_coverage_count",
+        "component_uniform_root_update_count",
+        "component_mixed_ancestor_recomputation_count",
+        "component_mixed_ancestor_update_count",
+        "strict_component_cutoff_decrease_count",
+    )
+    expected_current_specific = (
+        (12, 12, 3, 7, 6, 3),
+        (7, 12, 3, 7, 5, 2),
+    )
+    for round_index, expected in enumerate(expected_current_specific):
+        observed = current_rounds[round_index]["direct_current"]
+        require(
+            tuple(observed[key] for key in current_specific_keys) == expected,
+            "uniform current envelope-update fixture differs",
+        )
+    current_totals = current_value["result"]["resolver_comparison"]["totals"]
+    expected_current_totals = {
+        "direct_current": (141, 61, 15),
+        "direct_frozen": (147, 64, 22),
+        "direct_sparse": (147, 64, 19),
+        "dynamic": (153, 67, 27),
+    }
+    total_work_keys = (
+        "node_pair_visit_count",
+        "node_pair_expansion_count",
+        "point_pair_distance_evaluation_count",
+    )
+    for resolver, expected in expected_current_totals.items():
+        observed = current_totals[resolver]
+        require(
+            tuple(observed[key] for key in total_work_keys) == expected,
+            f"uniform current comparison {resolver} total fixture differs",
+        )
+
     mutations: list[dict[str, Any]] = []
     for key, replacement in (
         ("qualification_claimed", True),
@@ -1210,6 +1489,55 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
         sparse_totals[key] = max(values) if key == "frontier_peak" else sum(values)
     comparison_mutations.append(mutated)
 
+    current_mutations: list[dict[str, Any]] = []
+    mutated = copy.deepcopy(current_value)
+    del mutated["result"]["resolver_comparison"]["rounds"][0][
+        "direct_current"
+    ]
+    current_mutations.append(mutated)
+    mutated = copy.deepcopy(current_value)
+    mutated["result"]["resolver_comparison"]["rounds"][0]["direct_current"][
+        "component_uniform_root_leaf_coverage_count"
+    ] += 1
+    current_mutations.append(mutated)
+    mutated = copy.deepcopy(current_value)
+    current_round = mutated["result"]["resolver_comparison"]["rounds"][1][
+        "direct_current"
+    ]
+    current_round["component_uniform_root_update_count"] = (
+        current_round["strict_component_cutoff_decrease_count"]
+        * current_round["component_uniform_root_count"]
+        + 1
+    )
+    current_mutations.append(mutated)
+    mutated = copy.deepcopy(current_value)
+    current_round = mutated["result"]["resolver_comparison"]["rounds"][1][
+        "direct_current"
+    ]
+    current_round["component_mixed_ancestor_update_count"] = (
+        current_round["component_mixed_ancestor_recomputation_count"] + 1
+    )
+    current_mutations.append(mutated)
+
+    # Keep the current resolver internally coherent and its totals exact while
+    # making it exceed the sparse/frozen traversal on the second round.
+    mutated = copy.deepcopy(current_value)
+    current_comparison = mutated["result"]["resolver_comparison"]
+    current_round = current_comparison["rounds"][1]["direct_current"]
+    dynamic_round = current_comparison["rounds"][1]["dynamic"]
+    for key in RESOLVER_COMMON_KEYS:
+        current_round[key] = dynamic_round[key]
+    current_totals = current_comparison["totals"]["direct_current"]
+    for key in RESOLVER_CURRENT_KEYS:
+        values = [
+            round_value["direct_current"][key]
+            for round_value in current_comparison["rounds"]
+        ]
+        current_totals[key] = (
+            max(values) if key == "frontier_peak" else sum(values)
+        )
+    current_mutations.append(mutated)
+
     rejected = 0
     for mutation in mutations:
         try:
@@ -1225,6 +1553,15 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
             rejected += 1
         else:
             fail("a resolver-comparison negative mutation was accepted")
+    for mutation in current_mutations:
+        try:
+            validate_current_comparison_document(
+                mutation, expected_backend="fake_gpu"
+            )
+        except ContractError:
+            rejected += 1
+        else:
+            fail("a current-comparison negative mutation was accepted")
     try:
         json.loads(
             '{"schema":1,"schema":2}', object_pairs_hook=reject_duplicate_json_keys

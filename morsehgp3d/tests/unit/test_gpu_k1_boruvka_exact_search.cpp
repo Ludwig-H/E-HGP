@@ -402,6 +402,48 @@ void check_component_dual_tree_round(
   const auto& audit = result.search_audit;
   const std::size_t maximum_unordered_point_pairs =
       point_count * (point_count - 1U) / 2U;
+  const bool exact_current_envelope =
+      expected_envelope_mode == K1BoruvkaComponentEnvelopeMode::
+                                    exact_current_maximal_uniform_roots;
+  const bool envelope_update_counts_close =
+      (expected_envelope_mode ==
+               K1BoruvkaComponentEnvelopeMode::frozen_initial &&
+           audit.cpu_component_witness_leaf_update_count == 0U &&
+           audit.cpu_component_witness_ancestor_update_count == 0U &&
+           audit.component_uniform_root_count == 0U &&
+           audit.component_uniform_root_leaf_coverage_count == 0U &&
+           audit.cpu_component_uniform_root_update_count == 0U &&
+           audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
+           audit.cpu_component_mixed_ancestor_update_count == 0U) ||
+      (expected_envelope_mode ==
+               K1BoruvkaComponentEnvelopeMode::
+                   sparse_witness_path_monotone &&
+           audit.cpu_component_witness_leaf_update_count ==
+               audit.cpu_strict_component_cutoff_decrease_count &&
+           audit.cpu_component_witness_ancestor_update_count <=
+               audit.cpu_component_witness_leaf_update_count *
+                   audit.lbvh_maximum_depth &&
+           audit.component_uniform_root_count == 0U &&
+           audit.component_uniform_root_leaf_coverage_count == 0U &&
+           audit.cpu_component_uniform_root_update_count == 0U &&
+           audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
+           audit.cpu_component_mixed_ancestor_update_count == 0U) ||
+      (exact_current_envelope &&
+           audit.cpu_component_witness_leaf_update_count == 0U &&
+           audit.cpu_component_witness_ancestor_update_count == 0U &&
+           audit.component_uniform_root_count >= frozen_component_count &&
+           audit.component_uniform_root_count <= point_count &&
+           audit.component_uniform_root_leaf_coverage_count == point_count &&
+           audit.cpu_component_uniform_root_update_count >=
+               audit.cpu_strict_component_cutoff_decrease_count &&
+           audit.cpu_component_uniform_root_update_count <=
+               audit.cpu_strict_component_cutoff_decrease_count *
+                   audit.component_uniform_root_count &&
+           audit.cpu_component_mixed_ancestor_recomputation_count <=
+               audit.cpu_component_uniform_root_update_count *
+                   audit.lbvh_maximum_depth &&
+           audit.cpu_component_mixed_ancestor_update_count <=
+               audit.cpu_component_mixed_ancestor_recomputation_count);
   check(
       audit.component_envelope_mode == expected_envelope_mode &&
           audit.resident_point_count == point_count &&
@@ -441,18 +483,7 @@ void check_component_dual_tree_round(
               maximum_unordered_point_pairs &&
           audit.cpu_strict_component_cutoff_decrease_count <=
               audit.cpu_component_kappa_update_count &&
-          ((expected_envelope_mode ==
-                    K1BoruvkaComponentEnvelopeMode::frozen_initial &&
-                audit.cpu_component_witness_leaf_update_count == 0U &&
-                audit.cpu_component_witness_ancestor_update_count == 0U) ||
-           (expected_envelope_mode ==
-                    K1BoruvkaComponentEnvelopeMode::
-                        sparse_witness_path_monotone &&
-                audit.cpu_component_witness_leaf_update_count ==
-                    audit.cpu_strict_component_cutoff_decrease_count &&
-                audit.cpu_component_witness_ancestor_update_count <=
-                    audit.cpu_component_witness_leaf_update_count *
-                        audit.lbvh_maximum_depth)) &&
+          envelope_update_counts_close &&
           audit.cpu_component_kappa_update_count <=
               2U *
                   audit.cpu_exact_point_pair_distance_evaluation_count &&
@@ -464,7 +495,7 @@ void check_component_dual_tree_round(
       fixture + " closes direct component work and cardinalities");
   check(
       std::string_view{K1BoruvkaComponentDualTreeSearchAudit::proof_basis} ==
-          "strict_exact_aabb_pair_bidirectional_component_seed_certified_upper_envelope_bounded_dfs_v3",
+          "strict_exact_aabb_pair_bidirectional_component_seed_certified_upper_envelope_bounded_dfs_v4",
       fixture + " locks the certified component-envelope proof basis");
   check(
       audit.frozen_labels_certified &&
@@ -477,6 +508,10 @@ void check_component_dual_tree_round(
           audit.component_cutoff_upper_envelope_certified &&
           audit.live_component_cutoff_upper_bound_certified &&
           audit.pointwise_at_most_frozen_envelope_certified &&
+          audit.maximal_uniform_component_roots_certified ==
+              exact_current_envelope &&
+          audit.exact_current_component_envelope_certified ==
+              exact_current_envelope &&
           audit.canonical_unordered_pair_partition_certified &&
           audit.uniform_component_pair_prunes_certified &&
           audit.strict_only_aabb_pair_pruning_certified &&
@@ -640,6 +675,9 @@ void test_component_cutoff_upper_envelope_discriminant() {
   constexpr K1BoruvkaMortonSeedPolicy policy{1U};
   const auto per_source = context.resolve_round_exact_external_1nn(
       cloud, std::span<const PointId>{labels}, policy);
+  const auto dynamic =
+      context.resolve_round_exact_external_1nn_dual_tree(
+          cloud, std::span<const PointId>{labels}, policy);
   const auto component_direct =
       context.resolve_round_exact_component_minima_dual_tree(
           cloud, std::span<const PointId>{labels}, policy);
@@ -650,6 +688,22 @@ void test_component_cutoff_upper_envelope_discriminant() {
           policy,
           K1BoruvkaComponentEnvelopeMode::
               sparse_witness_path_monotone);
+  const auto component_current =
+      context.resolve_round_exact_component_minima_dual_tree(
+          cloud,
+          std::span<const PointId>{labels},
+          policy,
+          K1BoruvkaComponentEnvelopeMode::
+              exact_current_maximal_uniform_roots);
+
+  check_dual_tree_round(
+      dynamic,
+      index,
+      cloud,
+      std::span<const PointId>{labels},
+      per_source.component_minima,
+      policy,
+      "dynamic component-cutoff maximum-envelope discriminant");
 
   check_component_dual_tree_round(
       component_direct,
@@ -668,6 +722,16 @@ void test_component_cutoff_upper_envelope_discriminant() {
       policy,
       "sparse component-cutoff maximum-envelope discriminant",
       K1BoruvkaComponentEnvelopeMode::sparse_witness_path_monotone);
+  check_component_dual_tree_round(
+      component_current,
+      index,
+      cloud,
+      std::span<const PointId>{labels},
+      per_source.component_minima,
+      policy,
+      "exact-current component-cutoff maximum-envelope discriminant",
+      K1BoruvkaComponentEnvelopeMode::
+          exact_current_maximal_uniform_roots);
   check(
       component_direct.component_minima.size() == 5U &&
           component_direct.component_minima[3].outgoing_edge.u ==
@@ -698,8 +762,43 @@ void test_component_cutoff_upper_envelope_discriminant() {
                   cpu_component_witness_leaf_update_count > 0U,
       "the sparse witness envelope preserves the exact proposal audit and "
       "does no more pair work than the frozen envelope");
+  const auto no_more_pair_work = [](const auto& tighter, const auto& looser) {
+    return tighter.cpu_node_pair_visit_count <=
+               looser.cpu_node_pair_visit_count &&
+           tighter.cpu_node_pair_expansion_count <=
+               looser.cpu_node_pair_expansion_count &&
+           tighter.cpu_exact_aabb_pair_bound_evaluation_count <=
+               looser.cpu_exact_aabb_pair_bound_evaluation_count &&
+           tighter.cpu_exact_point_pair_distance_evaluation_count <=
+               looser.cpu_exact_point_pair_distance_evaluation_count;
+  };
   check(
-      fake_gpu_k1_boruvka_launch_count() == 3U,
+      component_current.component_minima ==
+              component_direct.component_minima &&
+          component_current.morton_seed_audit ==
+              component_direct.morton_seed_audit &&
+          component_current.morton_seed_audit ==
+              component_sparse.morton_seed_audit &&
+          component_current.morton_seed_audit ==
+              dynamic.morton_seed_audit &&
+          no_more_pair_work(
+              component_current.search_audit,
+              component_sparse.search_audit) &&
+          no_more_pair_work(
+              component_current.search_audit,
+              component_direct.search_audit) &&
+          no_more_pair_work(
+              component_current.search_audit,
+              dynamic.search_audit) &&
+          component_current.search_audit.component_uniform_root_count == 5U &&
+          component_current.search_audit.
+                  component_uniform_root_leaf_coverage_count == 5U &&
+          component_current.search_audit.
+                  cpu_component_uniform_root_update_count > 0U,
+      "the exact-current component envelope preserves the seed audit and "
+      "does no more pair work than sparse, frozen, or dynamic envelopes");
+  check(
+      fake_gpu_k1_boruvka_launch_count() == 5U,
       "component cutoff discriminant launches one seed proposal per resolver");
 }
 
@@ -737,6 +836,13 @@ void test_canonical_point_id_label_regression() {
   const auto unremapped_direct =
       context.resolve_round_exact_component_minima_dual_tree(
           cloud, std::span<const PointId>{unremapped_labels}, policy);
+  const auto unremapped_current =
+      context.resolve_round_exact_component_minima_dual_tree(
+          cloud,
+          std::span<const PointId>{unremapped_labels},
+          policy,
+          K1BoruvkaComponentEnvelopeMode::
+              exact_current_maximal_uniform_roots);
 
   check_component_dual_tree_round(
       unremapped_direct,
@@ -746,6 +852,16 @@ void test_canonical_point_id_label_regression() {
       unremapped_per_source.component_minima,
       policy,
       "unremapped source-order label regression");
+  check_component_dual_tree_round(
+      unremapped_current,
+      index,
+      cloud,
+      std::span<const PointId>{unremapped_labels},
+      unremapped_per_source.component_minima,
+      policy,
+      "fragmented exact-current component-root regression",
+      K1BoruvkaComponentEnvelopeMode::
+          exact_current_maximal_uniform_roots);
   check(
       unremapped_direct.search_audit.target_component_seed_offer_count == 5U &&
           unremapped_direct.search_audit.
@@ -753,6 +869,9 @@ void test_canonical_point_id_label_regression() {
           unremapped_direct.search_audit.
                   target_component_seed_strict_cutoff_decrease_count == 0U,
       "source-order labels do not isolate the intended canonical point");
+  check(
+      unremapped_current.search_audit.component_uniform_root_count > 2U,
+      "the non-singleton component has several maximal uniform roots");
 
   const std::array<PointId, 5> canonical_labels{
       PointId{0}, PointId{0}, PointId{0}, PointId{3}, PointId{0}};
@@ -785,8 +904,8 @@ void test_canonical_point_id_label_regression() {
                   target_component_seed_strict_cutoff_decrease_count == 1U,
       "canonical labels recover the strict target offer 2-to-3 at 1/32");
   check(
-      fake_gpu_k1_boruvka_launch_count() == 4U,
-      "canonical label regression launches each exact resolver twice");
+      fake_gpu_k1_boruvka_launch_count() == 5U,
+      "canonical label regression includes the fragmented current resolver");
 }
 
 void test_bidirectional_component_seed_discriminant() {

@@ -138,7 +138,9 @@ void validate_component_envelope_mode(
     K1BoruvkaComponentEnvelopeMode mode) {
   if (mode != K1BoruvkaComponentEnvelopeMode::frozen_initial &&
       mode !=
-          K1BoruvkaComponentEnvelopeMode::sparse_witness_path_monotone) {
+          K1BoruvkaComponentEnvelopeMode::sparse_witness_path_monotone &&
+      mode != K1BoruvkaComponentEnvelopeMode::
+                  exact_current_maximal_uniform_roots) {
     throw std::invalid_argument(
         "a component-direct dual-tree envelope mode is unspecified");
   }
@@ -667,14 +669,15 @@ struct DualTreeTraversalMetadataView {
   std::size_t lbvh_maximum_depth{};
 };
 
-template <typename Audit, typename RelaxLeafPair>
+template <typename Audit, typename NodeCutoff, typename RelaxLeafPair>
 void traverse_exact_dual_tree_frontier(
     const detail::K1BoruvkaCandidateHostState& host,
     const spatial::CanonicalPointCloud& cloud,
     std::span<const spatial::PointId> labels,
     const std::vector<std::uint64_t>& tags,
     const DualTreeTraversalMetadataView& metadata,
-    std::span<const exact::ExactLevel> node_cutoff_upper_bounds,
+    std::size_t node_cutoff_count,
+    NodeCutoff&& node_cutoff,
     Audit& audit,
     RelaxLeafPair&& relax_leaf_pair) {
   const std::size_t point_count = host.point_count;
@@ -686,7 +689,7 @@ void traverse_exact_dual_tree_frontier(
       metadata.node_leaf_begins.size() != node_count ||
       metadata.node_leaf_ends.size() != node_count ||
       metadata.lbvh_maximum_depth == 0U ||
-      node_cutoff_upper_bounds.size() != node_count) {
+      node_cutoff_count != node_count) {
     throw std::logic_error(
         "the exact dual-tree DFS metadata is incomplete");
   }
@@ -835,9 +838,9 @@ void traverse_exact_dual_tree_frontier(
     }
 
     const exact::ExactLevel& left_cutoff =
-        node_cutoff_upper_bounds[entry.left_node_index];
+        node_cutoff(entry.left_node_index);
     const exact::ExactLevel& right_cutoff =
-        node_cutoff_upper_bounds[entry.right_node_index];
+        node_cutoff(entry.right_node_index);
     const exact::ExactLevel& pair_cutoff =
         left_cutoff < right_cutoff ? right_cutoff : left_cutoff;
     if (entry.lower_bound > pair_cutoff) {
@@ -1372,7 +1375,10 @@ resolve_seeded_exact_external_1nn_dual_tree(
       labels,
       tags,
       traversal_metadata,
-      node_incumbent_cutoffs,
+      node_incumbent_cutoffs.size(),
+      [&](std::size_t node_index) -> const exact::ExactLevel& {
+        return node_incumbent_cutoffs[node_index];
+      },
       audit,
       [&](hierarchy::ExactEmstEdge edge,
           spatial::PointId left_id,
@@ -1526,6 +1532,9 @@ resolve_seeded_exact_component_minima_dual_tree(
   K1BoruvkaComponentDualTreeSearchAudit& audit =
       resolution.search_audit;
   audit.component_envelope_mode = envelope_mode;
+  const bool exact_current_envelope =
+      envelope_mode == K1BoruvkaComponentEnvelopeMode::
+                           exact_current_maximal_uniform_roots;
   audit.resident_point_count = point_count;
   audit.resident_node_count = host.nodes.size();
   audit.frozen_component_count = component_count;
@@ -1734,10 +1743,196 @@ resolve_seeded_exact_component_minima_dual_tree(
   audit.component_cutoff_upper_envelope_node_count =
       node_cutoff_upper_bounds.size();
 
-  const auto decrease_component_witness_path = [&](
+  struct UniformRootRange {
+    std::size_t leaf_begin{};
+    std::size_t leaf_end{};
+    std::size_t node_index{};
+    std::size_t component_slot{};
+  };
+  std::vector<std::size_t> component_uniform_root_offsets;
+  std::vector<std::size_t> component_uniform_roots;
+  if (exact_current_envelope) {
+    std::vector<std::size_t> component_uniform_root_counts(
+        component_count, 0U);
+    std::vector<UniformRootRange> uniform_root_ranges;
+    uniform_root_ranges.reserve(point_count);
+    for (std::size_t node_index = 0U;
+         node_index < host.nodes.size();
+         ++node_index) {
+      if (tags[node_index] == detail::k1_boruvka_mixed_component) {
+        continue;
+      }
+      const std::size_t parent = parent_by_node[node_index];
+      if (parent != invalid_node_index &&
+          tags[parent] == tags[node_index]) {
+        continue;
+      }
+      if (parent == invalid_node_index ||
+          tags[parent] != detail::k1_boruvka_mixed_component) {
+        throw std::logic_error(
+            "a maximal uniform component root has no mixed parent");
+      }
+      const spatial::PointId component_id = checked_record_point_id(
+          tags[node_index], point_count);
+      const std::size_t slot = component_slot(component_id);
+      component_uniform_root_counts[slot] = checked_size_sum(
+          component_uniform_root_counts[slot],
+          1U,
+          "the component uniform-root count overflowed size_t");
+      uniform_root_ranges.push_back(UniformRootRange{
+          node_leaf_begins[node_index],
+          node_leaf_ends[node_index],
+          node_index,
+          slot});
+    }
+
+    component_uniform_root_offsets.reserve(component_count + 1U);
+    component_uniform_root_offsets.push_back(0U);
+    for (const std::size_t root_count : component_uniform_root_counts) {
+      if (root_count == 0U) {
+        throw std::logic_error(
+            "a component has no maximal uniform LBVH root");
+      }
+      component_uniform_root_offsets.push_back(checked_size_sum(
+          component_uniform_root_offsets.back(),
+          root_count,
+          "the component uniform-root offsets overflowed size_t"));
+    }
+    audit.component_uniform_root_count =
+        component_uniform_root_offsets.back();
+    if (audit.component_uniform_root_count < component_count ||
+        audit.component_uniform_root_count > point_count ||
+        uniform_root_ranges.size() != audit.component_uniform_root_count) {
+      throw std::logic_error(
+          "the maximal uniform component-root count is outside its bounds");
+    }
+
+    component_uniform_roots.resize(audit.component_uniform_root_count);
+    std::vector<std::size_t> next_root_offset =
+        component_uniform_root_offsets;
+    next_root_offset.pop_back();
+    for (const UniformRootRange& range : uniform_root_ranges) {
+      const std::size_t offset = next_root_offset[range.component_slot]++;
+      component_uniform_roots[offset] = range.node_index;
+    }
+    for (std::size_t slot = 0U; slot < component_count; ++slot) {
+      if (next_root_offset[slot] !=
+          component_uniform_root_offsets[slot + 1U]) {
+        throw std::logic_error(
+            "the component uniform-root postings are incomplete");
+      }
+    }
+
+    std::sort(
+        uniform_root_ranges.begin(),
+        uniform_root_ranges.end(),
+        [](const UniformRootRange& left, const UniformRootRange& right) {
+          if (left.leaf_begin != right.leaf_begin) {
+            return left.leaf_begin < right.leaf_begin;
+          }
+          if (left.leaf_end != right.leaf_end) {
+            return left.leaf_end < right.leaf_end;
+          }
+          return left.node_index < right.node_index;
+        });
+    std::size_t covered_leaf_count = 0U;
+    for (const UniformRootRange& range : uniform_root_ranges) {
+      if (range.leaf_begin != covered_leaf_count ||
+          range.leaf_end <= range.leaf_begin ||
+          range.leaf_end > point_count) {
+        throw std::logic_error(
+            "the maximal uniform component roots do not partition the leaves");
+      }
+      covered_leaf_count = range.leaf_end;
+    }
+    if (covered_leaf_count != point_count) {
+      throw std::logic_error(
+          "the maximal uniform component roots do not cover every leaf");
+    }
+    audit.component_uniform_root_leaf_coverage_count = covered_leaf_count;
+  }
+
+  const auto node_cutoff = [&](
+      std::size_t node_index) -> const exact::ExactLevel& {
+    if (!exact_current_envelope ||
+        tags[node_index] == detail::k1_boruvka_mixed_component) {
+      return node_cutoff_upper_bounds[node_index];
+    }
+    const spatial::PointId component_id = checked_record_point_id(
+        tags[node_index], point_count);
+    const std::size_t slot = component_slot(component_id);
+    if (!component_best[slot].has_value()) {
+      throw std::logic_error(
+          "a uniform component node has no live cutoff");
+    }
+    return component_best[slot]->edge.squared_length;
+  };
+
+  std::size_t expected_component_uniform_root_updates = 0U;
+
+  const auto update_component_envelope_after_strict_decrease = [&](
       std::size_t point_index,
+      std::size_t slot,
       const exact::ExactLevel& squared_length) {
     if (envelope_mode == K1BoruvkaComponentEnvelopeMode::frozen_initial) {
+      return;
+    }
+    if (exact_current_envelope) {
+      const std::size_t root_begin = component_uniform_root_offsets[slot];
+      const std::size_t root_end = component_uniform_root_offsets[slot + 1U];
+      expected_component_uniform_root_updates = checked_size_sum(
+          expected_component_uniform_root_updates,
+          root_end - root_begin,
+          "the expected component uniform-root updates overflowed size_t");
+      for (std::size_t root_offset = root_begin;
+           root_offset < root_end;
+           ++root_offset) {
+        std::size_t node_index = component_uniform_roots[root_offset];
+        if (!(squared_length < node_cutoff_upper_bounds[node_index])) {
+          throw std::logic_error(
+              "a current component uniform root did not decrease strictly");
+        }
+        node_cutoff_upper_bounds[node_index] = squared_length;
+        audit.cpu_component_uniform_root_update_count = checked_size_sum(
+            audit.cpu_component_uniform_root_update_count,
+            1U,
+            "the component uniform-root update count overflowed size_t");
+        while (parent_by_node[node_index] != invalid_node_index) {
+          const std::size_t parent = parent_by_node[node_index];
+          if (tags[parent] != detail::k1_boruvka_mixed_component) {
+            throw std::logic_error(
+                "a component uniform-root ancestor is not mixed");
+          }
+          audit.cpu_component_mixed_ancestor_recomputation_count =
+              checked_size_sum(
+                  audit.cpu_component_mixed_ancestor_recomputation_count,
+                  1U,
+                  "the component mixed-ancestor recomputation count overflowed size_t");
+          const detail::K1BoruvkaNodeInputRecord& parent_node =
+              host.nodes[parent];
+          const std::size_t left_child =
+              static_cast<std::size_t>(parent_node.left_child);
+          const std::size_t right_child =
+              static_cast<std::size_t>(parent_node.right_child);
+          const exact::ExactLevel& left_cutoff = node_cutoff(left_child);
+          const exact::ExactLevel& right_cutoff = node_cutoff(right_child);
+          const exact::ExactLevel& refreshed =
+              left_cutoff < right_cutoff ? right_cutoff : left_cutoff;
+          if (node_cutoff_upper_bounds[parent] < refreshed) {
+            throw std::logic_error(
+                "a current component mixed ancestor increased its envelope");
+          }
+          if (node_cutoff_upper_bounds[parent] == refreshed) {
+            break;
+          }
+          node_cutoff_upper_bounds[parent] = refreshed;
+          audit.cpu_component_mixed_ancestor_update_count = checked_size_sum(
+              audit.cpu_component_mixed_ancestor_update_count,
+              1U,
+              "the component mixed-ancestor update count overflowed size_t");
+          node_index = parent;
+        }
+      }
       return;
     }
     std::size_t node_index = leaf_node_by_point[point_index];
@@ -1791,7 +1986,8 @@ resolve_seeded_exact_component_minima_dual_tree(
       labels,
       tags,
       traversal_metadata,
-      node_cutoff_upper_bounds,
+      node_cutoff_upper_bounds.size(),
+      node_cutoff,
       audit,
       [&](hierarchy::ExactEmstEdge edge,
           spatial::PointId left_id,
@@ -1814,17 +2010,21 @@ resolve_seeded_exact_component_minima_dual_tree(
             edge.squared_length;
         ResolvedCandidate left_candidate{edge, left_id};
         if (resolved_less(left_candidate, *component_best[left_slot])) {
-          if (candidate_squared_length <
-              component_best[left_slot]->edge.squared_length) {
+          const bool strict_cutoff_decrease =
+              candidate_squared_length <
+              component_best[left_slot]->edge.squared_length;
+          component_best[left_slot] = std::move(left_candidate);
+          if (strict_cutoff_decrease) {
             audit.cpu_strict_component_cutoff_decrease_count =
                 checked_size_sum(
                     audit.cpu_strict_component_cutoff_decrease_count,
                     1U,
                     "the component-direct strict-decrease count overflowed size_t");
-            decrease_component_witness_path(
-                left_point_index, candidate_squared_length);
+            update_component_envelope_after_strict_decrease(
+                left_point_index,
+                left_slot,
+                candidate_squared_length);
           }
-          component_best[left_slot] = std::move(left_candidate);
           audit.cpu_component_kappa_update_count = checked_size_sum(
               audit.cpu_component_kappa_update_count,
               1U,
@@ -1832,17 +2032,21 @@ resolve_seeded_exact_component_minima_dual_tree(
         }
         ResolvedCandidate right_candidate{std::move(edge), right_id};
         if (resolved_less(right_candidate, *component_best[right_slot])) {
-          if (candidate_squared_length <
-              component_best[right_slot]->edge.squared_length) {
+          const bool strict_cutoff_decrease =
+              candidate_squared_length <
+              component_best[right_slot]->edge.squared_length;
+          component_best[right_slot] = std::move(right_candidate);
+          if (strict_cutoff_decrease) {
             audit.cpu_strict_component_cutoff_decrease_count =
                 checked_size_sum(
                     audit.cpu_strict_component_cutoff_decrease_count,
                     1U,
                     "the component-direct strict-decrease count overflowed size_t");
-            decrease_component_witness_path(
-                right_point_index, candidate_squared_length);
+            update_component_envelope_after_strict_decrease(
+                right_point_index,
+                right_slot,
+                candidate_squared_length);
           }
-          component_best[right_slot] = std::move(right_candidate);
           audit.cpu_component_kappa_update_count = checked_size_sum(
               audit.cpu_component_kappa_update_count,
               1U,
@@ -1867,7 +2071,7 @@ resolve_seeded_exact_component_minima_dual_tree(
       const exact::ExactLevel& live_component_cutoff =
           component_best[slot]->edge.squared_length;
       const exact::ExactLevel& live_leaf_upper_bound =
-          node_cutoff_upper_bounds[node_index];
+          node_cutoff(node_index);
       const exact::ExactLevel& frozen_leaf_upper_bound =
           initial_component_cutoffs[slot];
       if (live_leaf_upper_bound < live_component_cutoff ||
@@ -1895,7 +2099,7 @@ resolve_seeded_exact_component_minima_dual_tree(
               : verified_frozen_upper_envelope[left_child];
     }
     if (verified_live_upper_envelope[node_index] !=
-            node_cutoff_upper_bounds[node_index] ||
+            node_cutoff(node_index) ||
         verified_frozen_upper_envelope[node_index] <
             verified_live_upper_envelope[node_index]) {
       throw std::logic_error(
@@ -1929,20 +2133,51 @@ resolve_seeded_exact_component_minima_dual_tree(
       maximum_component_updates,
       audit.cpu_exact_point_pair_distance_evaluation_count,
       "the component-direct update bound overflowed size_t");
-  const std::size_t maximum_witness_ancestor_updates = checked_size_product(
-      audit.cpu_component_witness_leaf_update_count,
-      audit.lbvh_maximum_depth,
-      "the component witness ancestor-update bound overflowed size_t");
+  const auto count_at_most_product = [](
+      std::size_t count, std::size_t left, std::size_t right) {
+    return left != 0U &&
+                   right > std::numeric_limits<std::size_t>::max() / left
+               ? true
+               : count <= left * right;
+  };
   const bool envelope_update_counts_closed =
       (envelope_mode == K1BoruvkaComponentEnvelopeMode::frozen_initial &&
        audit.cpu_component_witness_leaf_update_count == 0U &&
-       audit.cpu_component_witness_ancestor_update_count == 0U) ||
+       audit.cpu_component_witness_ancestor_update_count == 0U &&
+       audit.component_uniform_root_count == 0U &&
+       audit.component_uniform_root_leaf_coverage_count == 0U &&
+       audit.cpu_component_uniform_root_update_count == 0U &&
+       audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
+       audit.cpu_component_mixed_ancestor_update_count == 0U) ||
       (envelope_mode ==
            K1BoruvkaComponentEnvelopeMode::sparse_witness_path_monotone &&
        audit.cpu_component_witness_leaf_update_count ==
            audit.cpu_strict_component_cutoff_decrease_count &&
-       audit.cpu_component_witness_ancestor_update_count <=
-           maximum_witness_ancestor_updates);
+       count_at_most_product(
+           audit.cpu_component_witness_ancestor_update_count,
+           audit.cpu_component_witness_leaf_update_count,
+           audit.lbvh_maximum_depth) &&
+       audit.component_uniform_root_count == 0U &&
+       audit.component_uniform_root_leaf_coverage_count == 0U &&
+       audit.cpu_component_uniform_root_update_count == 0U &&
+       audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
+       audit.cpu_component_mixed_ancestor_update_count == 0U) ||
+      (exact_current_envelope &&
+       audit.cpu_component_witness_leaf_update_count == 0U &&
+       audit.cpu_component_witness_ancestor_update_count == 0U &&
+       audit.component_uniform_root_count >= component_count &&
+       audit.component_uniform_root_count <= point_count &&
+       audit.component_uniform_root_leaf_coverage_count == point_count &&
+       audit.cpu_component_uniform_root_update_count ==
+           expected_component_uniform_root_updates &&
+       audit.cpu_component_uniform_root_update_count >=
+           audit.cpu_strict_component_cutoff_decrease_count &&
+       count_at_most_product(
+           audit.cpu_component_mixed_ancestor_recomputation_count,
+           audit.cpu_component_uniform_root_update_count,
+           audit.lbvh_maximum_depth) &&
+       audit.cpu_component_mixed_ancestor_update_count <=
+           audit.cpu_component_mixed_ancestor_recomputation_count);
   if (audit.point_seed_count != point_count ||
       audit.component_seed_incumbent_count != component_count ||
       audit.target_component_seed_offer_count != point_count ||
@@ -1972,6 +2207,10 @@ resolve_seeded_exact_component_minima_dual_tree(
   audit.component_cutoff_upper_envelope_certified = true;
   audit.live_component_cutoff_upper_bound_certified = true;
   audit.pointwise_at_most_frozen_envelope_certified = true;
+  audit.maximal_uniform_component_roots_certified =
+      exact_current_envelope;
+  audit.exact_current_component_envelope_certified =
+      exact_current_envelope;
   audit.canonical_kappa_resolution_certified = true;
   audit.component_minima_complete = true;
   resolution.morton_seed_audit = seeds.morton_audit;
