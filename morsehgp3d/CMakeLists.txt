@@ -529,6 +529,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
       src/gpu/k1_boruvka.cpp
       src/gpu/k1_boruvka_hybrid.cpp
       src/gpu/k1_boruvka_seeded_exact.cpp
+      src/gpu/k1_boruvka_hierarchy.cpp
   )
   add_library(
     morsehgp3d::gpu_k1_boruvka

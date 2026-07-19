@@ -1,6 +1,7 @@
 #pragma once
 
 #include "morsehgp3d/hierarchy/boruvka.hpp"
+#include "morsehgp3d/hierarchy/k1_forest.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
 
 #include <cstddef>
@@ -598,6 +599,49 @@ struct K1SeededExactBoruvkaVerification {
   std::size_t replayed_exact_point_distance_evaluation_count{};
 };
 
+// This status belongs only to the explicit local k=1 adapter below. It never
+// mutates the source EMST witness and is not a MorseHGP3D public status.
+enum class K1SeededExactHierarchyReductionStatus : std::uint8_t {
+  not_certified,
+  compact_k1_forest_certified,
+};
+
+enum class K1SeededExactHierarchyScope : std::uint8_t {
+  unspecified,
+  local_k1_compact_forest_only,
+};
+
+struct K1SeededExactCompactHierarchy {
+  static constexpr const char* proof_basis =
+      "verified_exact_emst_equal_level_compact_k1_reduction_v1";
+
+  hierarchy::K1CompactForest forest;
+  K1SeededExactHierarchyReductionStatus reduction_status{
+      K1SeededExactHierarchyReductionStatus::not_certified};
+  K1SeededExactHierarchyScope scope{
+      K1SeededExactHierarchyScope::unspecified};
+};
+
+// The five persistent compact arenas are checked against both a fresh
+// reduction of the supplied witness and a second reduction of the independent
+// exact LBVH Boruvka anchor. No materialized coverage vectors or all-level cut
+// tables enter this compact-storage verifier. Its exact-search work retains
+// the separately documented complexity status of the source verifier.
+struct K1SeededExactCompactHierarchyVerification {
+  bool source_emst_witness_certified{false};
+  bool source_status_separation_certified{false};
+  bool source_tree_binding_certified{false};
+  bool exact_weights_certified{false};
+  bool equal_level_batches_certified{false};
+  bool canonical_multifusions_certified{false};
+  bool compact_topology_certified{false};
+  bool counters_certified{false};
+  bool linear_storage_certified{false};
+  bool reduction_status_certified{false};
+  bool local_scope_certified{false};
+  bool local_k1_hierarchy_certified{false};
+};
+
 class K1BoruvkaCandidateContext final {
  public:
   K1BoruvkaCandidateContext(
@@ -732,5 +776,27 @@ verify_gpu_seeded_cpu_exact_external_1nn_k1_boruvka(
     const spatial::CanonicalPointCloud& cloud,
     K1BoruvkaMortonSeedPolicy trusted_seed_policy,
     const K1SeededExactBoruvkaResult& result);
+
+// Explicitly reduces a separately recertified local EMST witness. The source
+// remains hierarchy_reduction_status=not_performed and
+// scientific_status=local_emst_witness_only; only this returned adapter owns a
+// local compact-hierarchy status.
+[[nodiscard]] K1SeededExactCompactHierarchy
+build_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
+    const K1SeededExactBoruvkaResult& source);
+
+// Treats the source, the compact arenas and all reported local statuses as
+// untrusted. The source chain is replayed before two fresh compact reductions
+// are compared with the supplied reduction.
+[[nodiscard]] K1SeededExactCompactHierarchyVerification
+verify_compact_k1_hierarchy_from_gpu_seeded_exact_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
+    const K1SeededExactBoruvkaResult& source,
+    const K1SeededExactCompactHierarchy& reduction);
 
 }  // namespace morsehgp3d::gpu

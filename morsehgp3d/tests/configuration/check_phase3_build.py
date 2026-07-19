@@ -550,6 +550,7 @@ def validate_sources(project: Path, repository: Path) -> None:
         "morsehgp3d_gpu_k1_boruvka_context_tests",
         "morsehgp3d_gpu_k1_boruvka_exact_search_tests",
         "morsehgp3d_gpu_k1_boruvka_seeded_chain_tests",
+        "morsehgp3d_gpu_k1_boruvka_hierarchy_tests",
         "morsehgp3d_gpu_k1_boruvka_exact_search_work_profile_host",
         "morsehgp3d_gpu_k1_boruvka_replay_host",
         "morsehgp3d_gpu_k1_boruvka_full_replay_host",

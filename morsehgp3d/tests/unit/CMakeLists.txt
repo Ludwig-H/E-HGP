@@ -143,6 +143,14 @@ add_executable(
   "${PROJECT_SOURCE_DIR}/src/gpu/k1_boruvka_seeded_exact.cpp"
 )
 add_executable(
+  morsehgp3d_gpu_k1_boruvka_hierarchy_tests
+  test_gpu_k1_boruvka_hierarchy.cpp
+  fake_gpu_k1_boruvka_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/k1_boruvka.cpp"
+  "${PROJECT_SOURCE_DIR}/src/gpu/k1_boruvka_seeded_exact.cpp"
+  "${PROJECT_SOURCE_DIR}/src/gpu/k1_boruvka_hierarchy.cpp"
+)
+add_executable(
   morsehgp3d_gpu_k1_boruvka_exact_search_work_profile_host
   "${PROJECT_SOURCE_DIR}/src/tools/gpu_k1_boruvka_exact_search_work_profile.cpp"
   fake_gpu_k1_boruvka_launchers.cpp
@@ -213,6 +221,10 @@ target_include_directories(
   PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
 )
 target_include_directories(
+  morsehgp3d_gpu_k1_boruvka_hierarchy_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_include_directories(
   morsehgp3d_gpu_k1_boruvka_exact_search_work_profile_host
   PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
 )
@@ -270,6 +282,10 @@ target_link_libraries(
 )
 target_link_libraries(
   morsehgp3d_gpu_k1_boruvka_seeded_chain_tests
+  PRIVATE morsehgp3d::hierarchy Threads::Threads
+)
+target_link_libraries(
+  morsehgp3d_gpu_k1_boruvka_hierarchy_tests
   PRIVATE morsehgp3d::hierarchy Threads::Threads
 )
 target_link_libraries(
@@ -333,6 +349,7 @@ set(
   morsehgp3d_gpu_k1_boruvka_context_tests
   morsehgp3d_gpu_k1_boruvka_exact_search_tests
   morsehgp3d_gpu_k1_boruvka_seeded_chain_tests
+  morsehgp3d_gpu_k1_boruvka_hierarchy_tests
   morsehgp3d_gpu_k1_boruvka_exact_search_work_profile_host
   morsehgp3d_gpu_k1_boruvka_replay_host
   morsehgp3d_gpu_k1_boruvka_full_replay_host
@@ -396,6 +413,9 @@ if(MSVC)
   )
   target_compile_options(
     morsehgp3d_gpu_k1_boruvka_seeded_chain_tests PRIVATE /W4 /WX
+  )
+  target_compile_options(
+    morsehgp3d_gpu_k1_boruvka_hierarchy_tests PRIVATE /W4 /WX
   )
   target_compile_options(
     morsehgp3d_gpu_k1_boruvka_exact_search_work_profile_host PRIVATE /W4 /WX
@@ -691,6 +711,16 @@ else()
       -Werror
   )
   target_compile_options(
+    morsehgp3d_gpu_k1_boruvka_hierarchy_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
     morsehgp3d_gpu_k1_boruvka_exact_search_work_profile_host
     PRIVATE
       -Wall
@@ -781,6 +811,10 @@ add_test(
 add_test(
   NAME morsehgp3d.gpu_k1_boruvka_seeded_chain
   COMMAND morsehgp3d_gpu_k1_boruvka_seeded_chain_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_k1_boruvka_hierarchy
+  COMMAND morsehgp3d_gpu_k1_boruvka_hierarchy_tests
 )
 add_test(
   NAME morsehgp3d.gpu_k1_boruvka_exact_search_work_profile_host
