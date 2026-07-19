@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <exception>
 #include <iostream>
 #include <optional>
@@ -18,7 +19,9 @@
 
 namespace {
 
+using morsehgp3d::exact::BigInt;
 using morsehgp3d::exact::CertifiedPoint3;
+using morsehgp3d::exact::ExactLevel;
 using morsehgp3d::gpu::K1BoruvkaCandidateContext;
 using morsehgp3d::gpu::K1BoruvkaExactSearchStatus;
 using morsehgp3d::gpu::K1BoruvkaMortonSeedPolicy;
@@ -71,6 +74,57 @@ template <std::size_t Size>
     const std::array<CertifiedPoint3, Size>& points) {
   return CanonicalPointCloud::rejecting_duplicates(
       std::span<const CertifiedPoint3>{points});
+}
+
+[[nodiscard]] CanonicalPointCloud cloud_from(
+    const std::vector<CertifiedPoint3>& points) {
+  return CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{points});
+}
+
+[[nodiscard]] std::vector<CertifiedPoint3> morton_overlap_points(
+    std::size_t scale) {
+  if (scale < 4U || scale > 16U ||
+      (scale & (scale - 1U)) != 0U) {
+    throw std::invalid_argument(
+        "the Morton-overlap scale must be 4, 8, or 16");
+  }
+  const std::size_t guard_pair_count = scale * scale;
+  const double dyadic_step =
+      1.0 / (2.0 * static_cast<double>(scale));
+  const double guard_denominator =
+      8.0 * static_cast<double>(guard_pair_count);
+  std::vector<CertifiedPoint3> points;
+  points.reserve(4U * guard_pair_count + 2U);
+  points.push_back(point(0.0, 0.0, 0.0));
+  for (std::size_t guard = 0U;
+       guard < guard_pair_count;
+       ++guard) {
+    const double x =
+        9.0 * dyadic_step +
+        static_cast<double>(guard + 1U) * dyadic_step /
+            guard_denominator;
+    points.push_back(point(x, 9.0, 9.0));
+    points.push_back(point(x, 11.0, 11.0));
+  }
+  for (std::size_t y_index = 0U;
+       y_index < scale;
+       ++y_index) {
+    for (std::size_t z_index = 0U;
+         z_index < 2U * scale;
+         ++z_index) {
+      points.push_back(point(
+          9.0 * dyadic_step + dyadic_step / 4.0,
+          9.5 + static_cast<double>(y_index) * dyadic_step,
+          9.5 + static_cast<double>(z_index) * dyadic_step));
+    }
+  }
+  constexpr double morton_span = 16777216.0;
+  points.push_back(point(
+      morton_span * dyadic_step,
+      morton_span,
+      morton_span));
+  return points;
 }
 
 [[nodiscard]] bool edge_less(
@@ -314,6 +368,148 @@ void test_exact_kappa_tie() {
       "equal distances use canonical endpoint kappa order");
 }
 
+void test_morton_overlap_quadratic_lower_bound() {
+  for (const std::size_t scale :
+       std::array<std::size_t, 3>{4U, 8U, 16U}) {
+    reset_fake_gpu_k1_boruvka();
+    const std::size_t guard_pair_count = scale * scale;
+    const std::size_t point_count = 4U * guard_pair_count + 2U;
+    const std::string fixture =
+        "Morton overlap s=" + std::to_string(scale);
+    const std::vector<CertifiedPoint3> points =
+        morton_overlap_points(scale);
+    const CanonicalPointCloud cloud = cloud_from(points);
+    const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+    const auto leaves = index.leaves();
+    const auto& build = index.build_counters();
+
+    bool canonical_source_order = cloud.size() == point_count;
+    for (std::size_t point_index = 0U;
+         canonical_source_order && point_index < cloud.size();
+         ++point_index) {
+      canonical_source_order =
+          cloud.source_index(static_cast<PointId>(point_index)) ==
+          point_index;
+    }
+    bool central_collision_order = leaves.size() == point_count;
+    if (central_collision_order) {
+      for (std::size_t position = 1U;
+           position + 1U < leaves.size();
+           ++position) {
+        central_collision_order =
+            central_collision_order &&
+            leaves[position].morton_code == std::uint64_t{7} &&
+            leaves[position].point_id == static_cast<PointId>(position);
+      }
+    }
+    constexpr std::uint64_t maximum_morton_code =
+        (std::uint64_t{1} << 63U) - std::uint64_t{1};
+    check(
+        points.size() == point_count && cloud.size() == point_count &&
+            canonical_source_order &&
+            leaves.size() == point_count &&
+            leaves.front().morton_code == std::uint64_t{0} &&
+            leaves.front().point_id == PointId{0} &&
+            leaves.back().morton_code == maximum_morton_code &&
+            leaves.back().point_id ==
+                static_cast<PointId>(point_count - 1U) &&
+            central_collision_order &&
+            build.morton_collision_group_count == 1U &&
+            build.maximum_morton_collision_size == point_count - 2U,
+        fixture + " forms one canonical n-2 Morton collision block");
+
+    std::vector<PointId> labels(point_count);
+    for (std::size_t point_index = 0U;
+         point_index < point_count;
+         ++point_index) {
+      labels[point_index] = static_cast<PointId>(point_index);
+    }
+    K1BoruvkaCandidateContext context{index, cloud};
+    constexpr K1BoruvkaMortonSeedPolicy policy{1U};
+    const auto result = context.resolve_round_exact_external_1nn(
+        cloud, std::span<const PointId>{labels}, policy);
+    if (scale == 4U) {
+      const auto reference = build_exact_lbvh_boruvka(index, cloud);
+      check(
+          !reference.rounds.empty() &&
+              result.component_minima ==
+                  reference.rounds.front().component_minima,
+          fixture + " matches the independent exact Boruvka anchor");
+    }
+
+    const std::size_t first_query = 2U * guard_pair_count + 1U;
+    const std::size_t query_end = 4U * guard_pair_count + 1U;
+    const ExactLevel expected_query_squared_length{
+        BigInt{1}, BigInt{4U * guard_pair_count}};
+    bool query_minima_are_exact =
+        result.point_minima.size() == point_count &&
+        result.component_minima.size() == point_count;
+    for (std::size_t query = first_query;
+         query_minima_are_exact && query < query_end;
+         ++query) {
+      const PointId query_id = static_cast<PointId>(query);
+      query_minima_are_exact =
+          result.point_minima[query].source_point_id == query_id &&
+          result.point_minima[query].outgoing_edge.squared_length ==
+              expected_query_squared_length &&
+          result.component_minima[query].component_label == query_id &&
+          result.component_minima[query].source_point_id == query_id &&
+          result.component_minima[query].outgoing_edge ==
+              result.point_minima[query].outgoing_edge;
+    }
+    check(
+        query_minima_are_exact,
+        fixture + " gives every grid query its exact distance d squared");
+
+    const std::size_t squared_guard_pair_count =
+        guard_pair_count * guard_pair_count;
+    const std::size_t internal_expansion_lower_bound =
+        2U * squared_guard_pair_count;
+    const std::size_t node_visit_lower_bound =
+        6U * squared_guard_pair_count;
+    const auto& audit = result.search_audit;
+    const std::size_t seed_distance_upper_bound = 2U * point_count;
+    const std::size_t aabb_upper_bound =
+        point_count * (2U * point_count - 1U);
+    const std::size_t point_distance_upper_bound =
+        point_count * (point_count - 1U);
+    const std::size_t exact_work =
+        result.morton_seed_audit.exact_seed_distance_evaluation_count +
+        audit.cpu_exact_aabb_bound_evaluation_count +
+        audit.cpu_exact_point_distance_evaluation_count;
+    check(
+        result.seed_status ==
+                K1BoruvkaSeedStatus::
+                    bounded_morton_window_external_exact_monotone_certified &&
+            result.search_status ==
+                K1BoruvkaExactSearchStatus::
+                    exact_external_1nn_branch_and_bound_certified &&
+            audit.complete_frontier_exhaustion_certified &&
+            audit.strict_only_aabb_pruning_certified &&
+            audit.canonical_kappa_resolution_certified &&
+            fake_gpu_k1_boruvka_launch_count() == 1U,
+        fixture + " keeps proposal and exact decision certificates separate");
+    check(
+        audit.cpu_internal_node_expansion_count >=
+                internal_expansion_lower_bound &&
+            audit.cpu_node_visit_count >= node_visit_lower_bound &&
+            audit.cpu_exact_aabb_bound_evaluation_count ==
+                audit.cpu_node_visit_count &&
+            audit.maximum_cpu_node_visit_count_per_source >=
+                3U * guard_pair_count,
+        fixture + " realizes the certified quadratic work lower bound");
+    check(
+        result.morton_seed_audit.exact_seed_distance_evaluation_count <=
+                seed_distance_upper_bound &&
+            audit.cpu_exact_aabb_bound_evaluation_count <=
+                aabb_upper_bound &&
+            audit.cpu_exact_point_distance_evaluation_count <=
+                point_distance_upper_bound &&
+            exact_work <= 3U * point_count * point_count,
+        fixture + " closes the general three-n-squared round-work bound");
+  }
+}
+
 void test_invalid_contracts() {
   reset_fake_gpu_k1_boruvka();
   const std::array<CertifiedPoint3, 4> points{
@@ -365,6 +561,7 @@ void test_invalid_contracts() {
 int main() {
   test_round_chain_matches_reference();
   test_exact_kappa_tie();
+  test_morton_overlap_quadratic_lower_bound();
   test_invalid_contracts();
   if (failures != 0) {
     std::cerr << failures << " exact-search test(s) failed\n";
