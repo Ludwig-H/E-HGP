@@ -115,8 +115,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Validate the bounded Phase 2B and Phase 3 workers
-        run: python -m unittest tests.gcp.test_phase2b_remote_qualification tests.gcp.test_phase3_remote_qualification
+      - name: Validate the bounded GPU workers
+        run: python -m unittest tests.gcp.test_phase2b_remote_qualification tests.gcp.test_phase3_remote_qualification tests.gcp.test_phase5_k1_boruvka_qualification
 
   repository:
     name: repository

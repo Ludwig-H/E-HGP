@@ -20,8 +20,13 @@ namespace {
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactLevel;
 using morsehgp3d::gpu::K1BoruvkaCandidateAudit;
+using morsehgp3d::gpu::K1BoruvkaChunkedEmissionAudit;
+using morsehgp3d::gpu::K1BoruvkaChunkingPolicy;
+using morsehgp3d::gpu::K1BoruvkaEmissionStatus;
+using morsehgp3d::gpu::K1HybridBoruvkaChunkedEmissionCounters;
 using morsehgp3d::gpu::K1HybridBoruvkaContractionStatus;
 using morsehgp3d::gpu::K1HybridBoruvkaDecisionStatus;
+using morsehgp3d::gpu::K1HybridBoruvkaEmissionMode;
 using morsehgp3d::gpu::K1HybridBoruvkaProposalStatus;
 using morsehgp3d::gpu::K1HybridBoruvkaResult;
 using morsehgp3d::gpu::K1HybridBoruvkaRound;
@@ -36,6 +41,7 @@ using morsehgp3d::spatial::MortonLbvhIndex;
 struct ReplayCase {
   std::string_view fixture;
   std::vector<std::size_t> expected_component_count_path;
+  K1BoruvkaChunkingPolicy trusted_chunking_policy;
   K1HybridBoruvkaResult producer;
   K1HybridBoruvkaVerification verifier;
 };
@@ -67,6 +73,29 @@ void require(bool condition, std::string_view message) {
       return "candidate_superset_certified";
   }
   throw std::logic_error{"unknown hybrid Boruvka proposal status"};
+}
+
+[[nodiscard]] const char* emission_mode_name(
+    K1HybridBoruvkaEmissionMode mode) {
+  switch (mode) {
+    case K1HybridBoruvkaEmissionMode::monolithic_round_payload:
+      return "monolithic_round_payload";
+    case K1HybridBoruvkaEmissionMode::bounded_complete_source_ranges:
+      return "bounded_complete_source_ranges";
+  }
+  throw std::logic_error{"unknown hybrid Boruvka emission mode"};
+}
+
+[[nodiscard]] const char* emission_status_name(
+    K1BoruvkaEmissionStatus status) {
+  switch (status) {
+    case K1BoruvkaEmissionStatus::not_certified:
+      return "not_certified";
+    case K1BoruvkaEmissionStatus::
+        complete_source_ranges_candidate_payload_bound_certified:
+      return "complete_source_ranges_candidate_payload_bound_certified";
+  }
+  throw std::logic_error{"unknown K1 Boruvka emission status"};
 }
 
 [[nodiscard]] const char* decision_status_name(
@@ -117,8 +146,11 @@ void require_round_contract(
     std::size_t expected_pre,
     std::size_t expected_post,
     std::size_t point_count,
-    std::size_t node_count) {
+    std::size_t node_count,
+    K1BoruvkaChunkingPolicy trusted_chunking_policy) {
   const K1BoruvkaCandidateAudit& audit = round.proposal_audit;
+  const K1BoruvkaChunkedEmissionAudit& emission =
+      round.chunked_emission_audit;
   require(
       round.proposal_status == K1HybridBoruvkaProposalStatus::
           candidate_superset_certified,
@@ -149,8 +181,11 @@ void require_round_contract(
               node_count - audit.uniform_lbvh_node_count &&
           audit.exact_seed_count == point_count &&
           audit.gpu_candidate_count == audit.gpu_output_capacity &&
-          audit.gpu_kernel_launch_count == 2U &&
-          audit.gpu_synchronization_count == 2U &&
+          audit.gpu_kernel_launch_count ==
+              emission.count_kernel_launch_count +
+                  emission.emit_kernel_launch_count &&
+          audit.gpu_synchronization_count ==
+              emission.synchronization_count &&
           audit.gpu_count_pass_node_visit_count ==
               audit.gpu_emit_pass_node_visit_count &&
           audit.cpu_required_candidate_count <=
@@ -167,6 +202,48 @@ void require_round_contract(
           audit.candidate_superset_certified &&
           audit.cpu_exact_resolution_complete,
       "a full-loop replay proposal audit does not close its certificates");
+  require(
+      round.chunked_emission_status ==
+              K1BoruvkaEmissionStatus::
+                  complete_source_ranges_candidate_payload_bound_certified &&
+          emission.logical_candidate_count == audit.gpu_candidate_count &&
+          emission.source_chunk_count > 0U &&
+          emission.peak_chunk_source_count > 0U &&
+          emission.peak_chunk_source_count <= point_count &&
+          emission.max_source_candidate_count > 0U &&
+          emission.max_source_candidate_count <=
+              emission.peak_chunk_candidate_count &&
+          emission.peak_chunk_candidate_count <=
+              trusted_chunking_policy.max_candidate_records_per_chunk &&
+          emission.candidate_record_budget ==
+              trusted_chunking_policy.max_candidate_records_per_chunk &&
+          emission.device_candidate_capacity_high_water >=
+              emission.peak_chunk_candidate_count &&
+          emission.device_candidate_capacity_high_water <=
+              trusted_chunking_policy.max_candidate_records_per_chunk &&
+          emission.host_candidate_capacity_high_water >=
+              emission.peak_chunk_candidate_count &&
+          emission.host_candidate_capacity_high_water <=
+              trusted_chunking_policy.max_candidate_records_per_chunk &&
+          emission.candidate_record_size_bytes ==
+              sizeof(morsehgp3d::gpu::K1BoruvkaCandidate) &&
+          emission.candidate_payload_peak_bytes ==
+              (emission.device_candidate_capacity_high_water +
+               emission.host_candidate_capacity_high_water) *
+                  emission.candidate_record_size_bytes &&
+          emission.candidate_payload_peak_bytes <=
+              2U * trusted_chunking_policy.max_candidate_records_per_chunk *
+                  emission.candidate_record_size_bytes &&
+          emission.count_kernel_launch_count == 1U &&
+          emission.emit_kernel_launch_count ==
+              emission.source_chunk_count &&
+          emission.synchronization_count ==
+              emission.count_kernel_launch_count +
+                  emission.emit_kernel_launch_count &&
+          emission.complete_source_partition_certified &&
+          emission.count_emit_cardinality_and_visit_count_certified &&
+          emission.candidate_payload_physical_bound_certified,
+      "a full-loop replay chunked-emission audit does not close its bounds");
 }
 
 void require_case_contract(const ReplayCase& replay_case) {
@@ -185,7 +262,12 @@ void require_case_contract(const ReplayCase& replay_case) {
               K1HybridHierarchyReductionStatus::not_performed &&
           result.scientific_status ==
               K1HybridScientificStatus::local_emst_witness_only &&
+          result.emission_mode == K1HybridBoruvkaEmissionMode::
+                                      bounded_complete_source_ranges &&
+          result.chunking_policy ==
+              replay_case.trusted_chunking_policy &&
           result.proposal_chain_certified &&
+          result.bounded_candidate_emission_chain_certified &&
           result.cpu_exact_decision_chain_certified &&
           result.canonical_contraction_chain_certified &&
           result.reference_cpu_witness_certified &&
@@ -193,7 +275,9 @@ void require_case_contract(const ReplayCase& replay_case) {
       "a full-loop replay producer certificate does not close");
   require(
       verification.index_identity_certified &&
+          verification.emission_mode_certified &&
           verification.proposal_chain_certified &&
+          verification.bounded_candidate_emission_chain_certified &&
           verification.cpu_exact_decision_chain_certified &&
           verification.canonical_contractions_certified &&
           verification.round_count_bound_certified &&
@@ -213,6 +297,42 @@ void require_case_contract(const ReplayCase& replay_case) {
           result.counters.final_component_count == 1U &&
           result.emst_edges.size() == result.point_count - 1U,
       "a full-loop replay producer tree counters do not close");
+  const K1HybridBoruvkaChunkedEmissionCounters& chunked =
+      result.chunked_emission_counters;
+  require(
+      chunked.round_count == result.rounds.size() &&
+          chunked.logical_candidate_count ==
+              result.counters.gpu_candidate_count &&
+          chunked.max_source_candidate_count <=
+              chunked.peak_chunk_candidate_count &&
+          chunked.peak_chunk_candidate_count <=
+              replay_case.trusted_chunking_policy
+                  .max_candidate_records_per_chunk &&
+          chunked.candidate_record_budget ==
+              replay_case.trusted_chunking_policy
+                  .max_candidate_records_per_chunk &&
+          chunked.device_candidate_capacity_high_water >=
+              chunked.peak_chunk_candidate_count &&
+          chunked.device_candidate_capacity_high_water <=
+              replay_case.trusted_chunking_policy
+                  .max_candidate_records_per_chunk &&
+          chunked.host_candidate_capacity_high_water >=
+              chunked.peak_chunk_candidate_count &&
+          chunked.host_candidate_capacity_high_water <=
+              replay_case.trusted_chunking_policy
+                  .max_candidate_records_per_chunk &&
+          chunked.candidate_record_size_bytes ==
+              sizeof(morsehgp3d::gpu::K1BoruvkaCandidate) &&
+          chunked.candidate_payload_peak_bytes <=
+              2U * replay_case.trusted_chunking_policy
+                       .max_candidate_records_per_chunk *
+                  chunked.candidate_record_size_bytes &&
+          chunked.count_kernel_launch_count == result.rounds.size() &&
+          chunked.emit_kernel_launch_count ==
+              chunked.source_chunk_count &&
+          chunked.synchronization_count ==
+              result.counters.gpu_synchronization_count,
+      "a full-loop replay aggregate chunked-emission audit does not close");
   require(
       verification.reference_round_count == result.rounds.size() &&
           verification.gpu_replayed_round_count == result.rounds.size() &&
@@ -223,39 +343,66 @@ void require_case_contract(const ReplayCase& replay_case) {
           verification.gpu_replay_kernel_launch_count ==
               result.counters.gpu_kernel_launch_count &&
           verification.gpu_replay_synchronization_count ==
-              result.counters.gpu_synchronization_count,
+              result.counters.gpu_synchronization_count &&
+          verification.gpu_replay_source_chunk_count ==
+              chunked.source_chunk_count &&
+          verification.gpu_replay_peak_chunk_candidate_count ==
+              chunked.peak_chunk_candidate_count &&
+          verification.gpu_replay_candidate_payload_peak_bytes ==
+              chunked.candidate_payload_peak_bytes,
       "a full-loop replay verifier counters disagree with the producer");
+  bool observed_strict_chunking = false;
   for (std::size_t round_index = 0U;
        round_index < result.rounds.size();
        ++round_index) {
+    const K1BoruvkaChunkedEmissionAudit& emission =
+        result.rounds[round_index].chunked_emission_audit;
+    observed_strict_chunking =
+        observed_strict_chunking ||
+        (emission.source_chunk_count > 1U &&
+         emission.logical_candidate_count >
+             emission.peak_chunk_candidate_count);
     require_round_contract(
         result.rounds[round_index],
         round_index,
         replay_case.expected_component_count_path[round_index],
         replay_case.expected_component_count_path[round_index + 1U],
         result.point_count,
-        result.counters.lbvh_node_count);
+        result.counters.lbvh_node_count,
+        replay_case.trusted_chunking_policy);
   }
+  require(
+      result.point_count == 1U || observed_strict_chunking,
+      "a nonterminal full-loop replay fixture did not force multiple chunks");
 }
 
 template <std::size_t PointCount, std::size_t PathSize>
 [[nodiscard]] ReplayCase run_fixture(
     std::string_view fixture,
     const std::array<CertifiedPoint3, PointCount>& input,
-    const std::array<std::size_t, PathSize>& expected_path) {
-  const CanonicalPointCloud cloud = canonical_cloud(input);
-  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
-  K1HybridBoruvkaResult producer =
-      build_gpu_proposed_cpu_exact_k1_boruvka(index, cloud);
-  K1HybridBoruvkaVerification verifier =
-      verify_gpu_proposed_cpu_exact_k1_boruvka(index, cloud, producer);
-  ReplayCase replay_case{
-      fixture,
-      std::vector<std::size_t>{expected_path.begin(), expected_path.end()},
-      std::move(producer),
-      std::move(verifier)};
-  require_case_contract(replay_case);
-  return replay_case;
+    const std::array<std::size_t, PathSize>& expected_path,
+    K1BoruvkaChunkingPolicy trusted_chunking_policy) {
+  try {
+    const CanonicalPointCloud cloud = canonical_cloud(input);
+    const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+    K1HybridBoruvkaResult producer =
+        build_gpu_proposed_cpu_exact_k1_boruvka(
+            index, cloud, trusted_chunking_policy);
+    K1HybridBoruvkaVerification verifier =
+        verify_gpu_proposed_cpu_exact_k1_boruvka(
+            index, cloud, trusted_chunking_policy, producer);
+    ReplayCase replay_case{
+        fixture,
+        std::vector<std::size_t>{expected_path.begin(), expected_path.end()},
+        trusted_chunking_policy,
+        std::move(producer),
+        std::move(verifier)};
+    require_case_contract(replay_case);
+    return replay_case;
+  } catch (const std::exception& error) {
+    throw std::runtime_error{
+        std::string{fixture} + ": " + error.what()};
+  }
 }
 
 void write_boolean(std::ostream& output, bool value) {
@@ -288,9 +435,50 @@ void write_size_array(
   output << ']';
 }
 
+void write_chunking_policy(
+    std::ostream& output, K1BoruvkaChunkingPolicy policy) {
+  output << "{\"max_candidate_records_per_chunk\":"
+         << policy.max_candidate_records_per_chunk
+         << ",\"source_partition\":\"complete_contiguous_unsplit\"}";
+}
+
+void write_chunked_emission_counters(
+    std::ostream& output,
+    const K1HybridBoruvkaChunkedEmissionCounters& counters) {
+  output << "{\"candidate_payload_peak_bytes\":"
+         << counters.candidate_payload_peak_bytes
+         << ",\"candidate_record_budget\":"
+         << counters.candidate_record_budget
+         << ",\"candidate_record_size_bytes\":"
+         << counters.candidate_record_size_bytes
+         << ",\"count_kernel_launch_count\":"
+         << counters.count_kernel_launch_count
+         << ",\"device_candidate_capacity_high_water\":"
+         << counters.device_candidate_capacity_high_water
+         << ",\"emit_kernel_launch_count\":"
+         << counters.emit_kernel_launch_count
+         << ",\"host_candidate_capacity_high_water\":"
+         << counters.host_candidate_capacity_high_water
+         << ",\"logical_candidate_count\":"
+         << counters.logical_candidate_count
+         << ",\"max_source_candidate_count\":"
+         << counters.max_source_candidate_count
+         << ",\"peak_chunk_candidate_count\":"
+         << counters.peak_chunk_candidate_count
+         << ",\"peak_chunk_source_count\":"
+         << counters.peak_chunk_source_count
+         << ",\"round_count\":" << counters.round_count
+         << ",\"source_chunk_count\":"
+         << counters.source_chunk_count
+         << ",\"synchronization_count\":"
+         << counters.synchronization_count << '}';
+}
+
 void write_producer(std::ostream& output, const K1HybridBoruvkaResult& result) {
   const auto& counters = result.counters;
-  output << "{\"certificates\":{\"canonical_contraction_chain_certified\":";
+  output << "{\"certificates\":{\"bounded_candidate_emission_chain_certified\":";
+  write_boolean(output, result.bounded_candidate_emission_chain_certified);
+  output << ",\"canonical_contraction_chain_certified\":";
   write_boolean(output, result.canonical_contraction_chain_certified);
   output << ",\"cpu_exact_decision_chain_certified\":";
   write_boolean(output, result.cpu_exact_decision_chain_certified);
@@ -300,7 +488,10 @@ void write_producer(std::ostream& output, const K1HybridBoruvkaResult& result) {
   write_boolean(output, result.proposal_chain_certified);
   output << ",\"reference_cpu_witness_certified\":";
   write_boolean(output, result.reference_cpu_witness_certified);
-  output << "},\"counters\":{\"accepted_edge_count\":"
+  output << "},\"chunked_emission_counters\":";
+  write_chunked_emission_counters(
+      output, result.chunked_emission_counters);
+  output << ",\"counters\":{\"accepted_edge_count\":"
          << counters.accepted_edge_count
          << ",\"component_contraction_count\":"
          << counters.component_contraction_count
@@ -341,7 +532,49 @@ void write_producer(std::ostream& output, const K1HybridBoruvkaResult& result) {
          << ",\"point_count\":" << counters.point_count
          << ",\"round_count\":" << counters.round_count
          << ",\"theoretical_max_round_count\":"
-         << counters.theoretical_max_round_count << "}}";
+         << counters.theoretical_max_round_count
+         << "},\"emission_mode\":\""
+         << emission_mode_name(result.emission_mode) << "\"}";
+}
+
+void write_chunked_emission_audit(
+    std::ostream& output,
+    const K1BoruvkaChunkedEmissionAudit& emission) {
+  output << "{\"candidate_payload_peak_bytes\":"
+         << emission.candidate_payload_peak_bytes
+         << ",\"candidate_record_budget\":"
+         << emission.candidate_record_budget
+         << ",\"candidate_record_size_bytes\":"
+         << emission.candidate_record_size_bytes
+         << ",\"certificates\":{\"candidate_payload_physical_bound_certified\":";
+  write_boolean(
+      output, emission.candidate_payload_physical_bound_certified);
+  output << ",\"complete_source_partition_certified\":";
+  write_boolean(output, emission.complete_source_partition_certified);
+  output << ",\"count_emit_cardinality_and_visit_count_certified\":";
+  write_boolean(
+      output,
+      emission.count_emit_cardinality_and_visit_count_certified);
+  output << "},\"count_kernel_launch_count\":"
+         << emission.count_kernel_launch_count
+         << ",\"device_candidate_capacity_high_water\":"
+         << emission.device_candidate_capacity_high_water
+         << ",\"emit_kernel_launch_count\":"
+         << emission.emit_kernel_launch_count
+         << ",\"host_candidate_capacity_high_water\":"
+         << emission.host_candidate_capacity_high_water
+         << ",\"logical_candidate_count\":"
+         << emission.logical_candidate_count
+         << ",\"max_source_candidate_count\":"
+         << emission.max_source_candidate_count
+         << ",\"peak_chunk_candidate_count\":"
+         << emission.peak_chunk_candidate_count
+         << ",\"peak_chunk_source_count\":"
+         << emission.peak_chunk_source_count
+         << ",\"source_chunk_count\":"
+         << emission.source_chunk_count
+         << ",\"synchronization_count\":"
+         << emission.synchronization_count << '}';
 }
 
 void write_round(std::ostream& output, const K1HybridBoruvkaRound& round) {
@@ -398,18 +631,28 @@ void write_round(std::ostream& output, const K1HybridBoruvkaRound& round) {
          << round.exact_decision.frozen_component_count
          << ",\"round_index\":" << round.exact_decision.round_index
          << ",\"status\":\"" << decision_status_name(round.decision_status)
-         << "\"},\"proposal_status\":\""
+         << "\"},\"emission_audit\":";
+  write_chunked_emission_audit(output, round.chunked_emission_audit);
+  output << ",\"emission_status\":\""
+         << emission_status_name(round.chunked_emission_status)
+         << "\",\"proposal_status\":\""
          << proposal_status_name(round.proposal_status) << "\"}";
 }
 
 void write_verifier(
     std::ostream& output, const K1HybridBoruvkaVerification& verification) {
-  output << "{\"certificates\":{\"canonical_contractions_certified\":";
+  output << "{\"certificates\":{\"bounded_candidate_emission_chain_certified\":";
+  write_boolean(
+      output,
+      verification.bounded_candidate_emission_chain_certified);
+  output << ",\"canonical_contractions_certified\":";
   write_boolean(output, verification.canonical_contractions_certified);
   output << ",\"counters_certified\":";
   write_boolean(output, verification.counters_certified);
   output << ",\"cpu_exact_decision_chain_certified\":";
   write_boolean(output, verification.cpu_exact_decision_chain_certified);
+  output << ",\"emission_mode_certified\":";
+  write_boolean(output, verification.emission_mode_certified);
   output << ",\"emst_witness_certified\":";
   write_boolean(output, verification.emst_witness_certified);
   output << ",\"exact_weights_certified\":";
@@ -426,8 +669,14 @@ void write_verifier(
   write_boolean(output, verification.round_count_bound_certified);
   output << ",\"spanning_tree_certified\":";
   write_boolean(output, verification.spanning_tree_certified);
-  output << "},\"counters\":{\"gpu_replay_kernel_launch_count\":"
+  output << "},\"counters\":{\"gpu_replay_candidate_payload_peak_bytes\":"
+         << verification.gpu_replay_candidate_payload_peak_bytes
+         << ",\"gpu_replay_kernel_launch_count\":"
          << verification.gpu_replay_kernel_launch_count
+         << ",\"gpu_replay_peak_chunk_candidate_count\":"
+         << verification.gpu_replay_peak_chunk_candidate_count
+         << ",\"gpu_replay_source_chunk_count\":"
+         << verification.gpu_replay_source_chunk_count
          << ",\"gpu_replay_synchronization_count\":"
          << verification.gpu_replay_synchronization_count
          << ",\"gpu_replayed_component_minimum_count\":"
@@ -462,7 +711,9 @@ void write_case(std::ostream& output, const ReplayCase& replay_case) {
     }
     write_round(output, result.rounds[round_index]);
   }
-  output << "],\"status\":\"passed\",\"verifier\":";
+  output << "],\"status\":\"passed\",\"trusted_chunking_policy\":";
+  write_chunking_policy(output, replay_case.trusted_chunking_policy);
+  output << ",\"verifier\":";
   write_verifier(output, replay_case.verifier);
   output << '}';
 }
@@ -493,17 +744,23 @@ int main() {
     cases.push_back(run_fixture(
         "singleton_terminal",
         singleton,
-        std::array<std::size_t, 1>{1U}));
+        std::array<std::size_t, 1>{1U},
+        K1BoruvkaChunkingPolicy{1U}));
     cases.push_back(run_fixture(
         "chain_three_rounds",
         chain,
-        std::array<std::size_t, 4>{8U, 4U, 2U, 1U}));
+        std::array<std::size_t, 4>{8U, 4U, 2U, 1U},
+        K1BoruvkaChunkingPolicy{7U}));
     cases.push_back(run_fixture(
         "square_equal_length_ties",
         square,
-        std::array<std::size_t, 2>{4U, 1U}));
+        std::array<std::size_t, 2>{4U, 1U},
+        K1BoruvkaChunkingPolicy{3U}));
 
-    std::cout << "{\"case_count\":" << cases.size() << ",\"cases\":[";
+    std::cout << "{\"bounded_emission_proof_basis\":\""
+              << K1HybridBoruvkaResult::bounded_emission_proof_basis
+              << "\",\"case_count\":" << cases.size()
+              << ",\"cases\":[";
     for (std::size_t case_index = 0U;
          case_index < cases.size();
          ++case_index) {
@@ -525,7 +782,7 @@ int main() {
         << ",\"proposal_backend\":\"cuda_g4\""
         << ",\"proposal_semantics\":\""
         << K1BoruvkaCandidateAudit::proposal_semantics << "\""
-        << ",\"schema\":\"morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v1\""
+        << ",\"schema\":\"morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v2\""
         << ",\"scientific_result_claimed\":false"
         << ",\"scientific_scope\":\""
         << scientific_status_name(

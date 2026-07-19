@@ -165,7 +165,8 @@ publie l'objet Phase 3 sans remplacement hors du worktree après les contrôles.
 L'option Phase 4 exécute en plus le replay spatial exhaustif de référence et
 le replay LBVH résident, puis publie leur compagnon provisoire commun, sans
 rollback d'un nom final. Aucun des deux artefacts ne certifie l'arrêt de la VM.
-L'option Phase 5 exécute le replay réel de la boucle K1 Boruvka complète,
+L'option Phase 5 exécute le replay réel de la boucle K1 Boruvka complète avec
+émission chunkée par sources contiguës non scindées sous budget de candidats,
 audite son ELF sm_120 et l'absence de PTX, puis le passe sous memcheck et
 racecheck. Son compagnon provisoire partage la même responsabilité d'arrêt
 externe.

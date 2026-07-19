@@ -11,13 +11,21 @@ from pathlib import Path
 import re
 from typing import Any, NoReturn, Sequence
 
-SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v2"
-REPLAY_SCHEMA = "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v1"
+SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v3"
+REPLAY_SCHEMA = "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v2"
 PHASE3_SCHEMA = "morsehgp3d.phase3.qualification.v1"
-SCIENTIFIC_SCOPE = "gpu_proposed_cpu_exact_full_boruvka_local_emst_witness_only"
+SCIENTIFIC_SCOPE = (
+    "gpu_proposed_bounded_candidate_emission_cpu_exact_full_boruvka_"
+    "local_emst_witness_only"
+)
 PROPOSAL_SEMANTICS = "gpu_stackless_lbvh_fixed_seed_candidate_superset"
 DECISION_SEMANTICS = "cpu_exact_seed_replay_and_kappa_resolution"
 PROOF_BASIS = "gpu_candidate_superset_cpu_exact_boruvka_v1"
+BOUNDED_EMISSION_PROOF_BASIS = (
+    "gpu_complete_source_ranges_bounded_candidate_payload_v1"
+)
+EMISSION_MODE = "bounded_complete_source_ranges"
+SOURCE_PARTITION = "complete_contiguous_unsplit"
 BASE_IMAGE_REF = (
     "nvidia/cuda:12.9.2-devel-ubuntu24.04@"
     "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
@@ -40,6 +48,7 @@ RACECHECK_FAILURE_RE = re.compile(
     re.IGNORECASE,
 )
 REPLAY_KEYS = {
+    "bounded_emission_proof_basis",
     "case_count",
     "cases",
     "decision_backend",
@@ -66,16 +75,43 @@ CASE_KEYS = {
     "producer",
     "rounds",
     "status",
+    "trusted_chunking_policy",
     "verifier",
 }
+CHUNKING_POLICY_KEYS = {
+    "max_candidate_records_per_chunk",
+    "source_partition",
+}
 LEVEL_KEYS = {"denominator", "numerator"}
-PRODUCER_KEYS = {"certificates", "counters"}
+PRODUCER_KEYS = {
+    "certificates",
+    "chunked_emission_counters",
+    "counters",
+    "emission_mode",
+}
 PRODUCER_CERTIFICATE_KEYS = {
+    "bounded_candidate_emission_chain_certified",
     "canonical_contraction_chain_certified",
     "cpu_exact_decision_chain_certified",
     "emst_witness_certified",
     "proposal_chain_certified",
     "reference_cpu_witness_certified",
+}
+CHUNKED_EMISSION_COUNTER_KEYS = {
+    "candidate_payload_peak_bytes",
+    "candidate_record_budget",
+    "candidate_record_size_bytes",
+    "count_kernel_launch_count",
+    "device_candidate_capacity_high_water",
+    "emit_kernel_launch_count",
+    "host_candidate_capacity_high_water",
+    "logical_candidate_count",
+    "max_source_candidate_count",
+    "peak_chunk_candidate_count",
+    "peak_chunk_source_count",
+    "round_count",
+    "source_chunk_count",
+    "synchronization_count",
 }
 PRODUCER_COUNTER_KEYS = {
     "accepted_edge_count",
@@ -103,7 +139,35 @@ PRODUCER_COUNTER_KEYS = {
     "round_count",
     "theoretical_max_round_count",
 }
-ROUND_KEYS = {"audit", "contraction", "decision", "proposal_status"}
+ROUND_KEYS = {
+    "audit",
+    "contraction",
+    "decision",
+    "emission_audit",
+    "emission_status",
+    "proposal_status",
+}
+EMISSION_AUDIT_KEYS = {
+    "candidate_payload_peak_bytes",
+    "candidate_record_budget",
+    "candidate_record_size_bytes",
+    "certificates",
+    "count_kernel_launch_count",
+    "device_candidate_capacity_high_water",
+    "emit_kernel_launch_count",
+    "host_candidate_capacity_high_water",
+    "logical_candidate_count",
+    "max_source_candidate_count",
+    "peak_chunk_candidate_count",
+    "peak_chunk_source_count",
+    "source_chunk_count",
+    "synchronization_count",
+}
+EMISSION_CERTIFICATE_KEYS = {
+    "candidate_payload_physical_bound_certified",
+    "complete_source_partition_certified",
+    "count_emit_cardinality_and_visit_count_certified",
+}
 AUDIT_KEYS = {
     "buffer_epoch",
     "candidate_count",
@@ -146,10 +210,12 @@ DECISION_KEYS = {
 }
 VERIFIER_KEYS = {"certificates", "counters"}
 VERIFIER_CERTIFICATE_KEYS = {
+    "bounded_candidate_emission_chain_certified",
     "canonical_contractions_certified",
     "counters_certified",
     "cpu_exact_decision_chain_certified",
     "emst_witness_certified",
+    "emission_mode_certified",
     "exact_weights_certified",
     "hierarchy_status_separation_certified",
     "index_identity_certified",
@@ -159,10 +225,13 @@ VERIFIER_CERTIFICATE_KEYS = {
     "spanning_tree_certified",
 }
 VERIFIER_COUNTER_KEYS = {
+    "gpu_replay_candidate_payload_peak_bytes",
     "gpu_replay_kernel_launch_count",
     "gpu_replay_synchronization_count",
     "gpu_replayed_component_minimum_count",
     "gpu_replayed_round_count",
+    "gpu_replay_peak_chunk_candidate_count",
+    "gpu_replay_source_chunk_count",
     "reference_component_minimum_count",
     "reference_round_count",
 }
@@ -172,11 +241,31 @@ TRUE_PRODUCER_CERTIFICATES = {
 TRUE_AUDIT_CERTIFICATES = {
     key: True for key in sorted(AUDIT_CERTIFICATE_KEYS)
 }
+TRUE_EMISSION_CERTIFICATES = {
+    key: True for key in sorted(EMISSION_CERTIFICATE_KEYS)
+}
 TRUE_VERIFIER_CERTIFICATES = {
     key: True for key in sorted(VERIFIER_CERTIFICATE_KEYS)
 }
 EXPECTED_FIXTURES = (
     {
+        "chunk_budget": 1,
+        "chunked_emission_counters": {
+            "candidate_payload_peak_bytes": 0,
+            "candidate_record_budget": 1,
+            "candidate_record_size_bytes": 16,
+            "count_kernel_launch_count": 0,
+            "device_candidate_capacity_high_water": 0,
+            "emit_kernel_launch_count": 0,
+            "host_candidate_capacity_high_water": 0,
+            "logical_candidate_count": 0,
+            "max_source_candidate_count": 0,
+            "peak_chunk_candidate_count": 0,
+            "peak_chunk_source_count": 0,
+            "round_count": 0,
+            "source_chunk_count": 0,
+            "synchronization_count": 0,
+        },
         "component_count_path": [1],
         "emst_edge_count": 0,
         "fixture": "singleton_terminal",
@@ -211,7 +300,10 @@ EXPECTED_FIXTURES = (
         "rounds": (),
         "squared_weight": ("0", "1"),
         "verifier_counters": {
+            "gpu_replay_candidate_payload_peak_bytes": 0,
             "gpu_replay_kernel_launch_count": 0,
+            "gpu_replay_peak_chunk_candidate_count": 0,
+            "gpu_replay_source_chunk_count": 0,
             "gpu_replay_synchronization_count": 0,
             "gpu_replayed_component_minimum_count": 0,
             "gpu_replayed_round_count": 0,
@@ -220,6 +312,23 @@ EXPECTED_FIXTURES = (
         },
     },
     {
+        "chunk_budget": 7,
+        "chunked_emission_counters": {
+            "candidate_payload_peak_bytes": 224,
+            "candidate_record_budget": 7,
+            "candidate_record_size_bytes": 16,
+            "count_kernel_launch_count": 3,
+            "device_candidate_capacity_high_water": 7,
+            "emit_kernel_launch_count": 16,
+            "host_candidate_capacity_high_water": 7,
+            "logical_candidate_count": 86,
+            "max_source_candidate_count": 7,
+            "peak_chunk_candidate_count": 7,
+            "peak_chunk_source_count": 4,
+            "round_count": 3,
+            "source_chunk_count": 16,
+            "synchronization_count": 19,
+        },
         "component_count_path": [8, 4, 2, 1],
         "emst_edge_count": 7,
         "fixture": "chain_three_rounds",
@@ -239,10 +348,10 @@ EXPECTED_FIXTURES = (
             "gpu_count_pass_node_visit_count": 236,
             "gpu_emit_pass_node_visit_count": 236,
             "gpu_invalid_bound_descent_count": 0,
-            "gpu_kernel_launch_count": 6,
+            "gpu_kernel_launch_count": 19,
             "gpu_output_capacity_sum": 86,
             "gpu_strict_aabb_prune_count": 20,
-            "gpu_synchronization_count": 6,
+            "gpu_synchronization_count": 19,
             "gpu_uniform_component_prune_count": 24,
             "last_buffer_epoch": 3,
             "lbvh_node_count": 15,
@@ -262,7 +371,7 @@ EXPECTED_FIXTURES = (
                     "emit_pass_node_visit_count": 92,
                     "exact_seed_count": 8,
                     "invalid_bound_descent_count": 0,
-                    "kernel_launch_count": 2,
+                    "kernel_launch_count": 7,
                     "mixed_lbvh_node_count": 7,
                     "output_capacity": 36,
                     "proposal_digest_fnv1a": "88d6d04ed0c2e06b",
@@ -270,7 +379,7 @@ EXPECTED_FIXTURES = (
                     "resident_node_count": 15,
                     "resident_point_count": 8,
                     "strict_aabb_prune_count": 6,
-                    "synchronization_count": 2,
+                    "synchronization_count": 7,
                     "uniform_component_prune_count": 8,
                 },
                 "contraction": {
@@ -284,6 +393,21 @@ EXPECTED_FIXTURES = (
                     "round_index": 0,
                     "status": "cpu_exact_kappa_minima_certified",
                 },
+                "emission_audit": {
+                    "candidate_payload_peak_bytes": 224,
+                    "candidate_record_budget": 7,
+                    "candidate_record_size_bytes": 16,
+                    "count_kernel_launch_count": 1,
+                    "device_candidate_capacity_high_water": 7,
+                    "emit_kernel_launch_count": 6,
+                    "host_candidate_capacity_high_water": 7,
+                    "logical_candidate_count": 36,
+                    "max_source_candidate_count": 7,
+                    "peak_chunk_candidate_count": 7,
+                    "peak_chunk_source_count": 3,
+                    "source_chunk_count": 6,
+                    "synchronization_count": 7,
+                },
             },
             {
                 "audit": {
@@ -295,7 +419,7 @@ EXPECTED_FIXTURES = (
                     "emit_pass_node_visit_count": 80,
                     "exact_seed_count": 8,
                     "invalid_bound_descent_count": 0,
-                    "kernel_launch_count": 2,
+                    "kernel_launch_count": 6,
                     "mixed_lbvh_node_count": 3,
                     "output_capacity": 30,
                     "proposal_digest_fnv1a": "8ba818d0f95004dd",
@@ -303,7 +427,7 @@ EXPECTED_FIXTURES = (
                     "resident_node_count": 15,
                     "resident_point_count": 8,
                     "strict_aabb_prune_count": 6,
-                    "synchronization_count": 2,
+                    "synchronization_count": 6,
                     "uniform_component_prune_count": 8,
                 },
                 "contraction": {
@@ -317,6 +441,21 @@ EXPECTED_FIXTURES = (
                     "round_index": 1,
                     "status": "cpu_exact_kappa_minima_certified",
                 },
+                "emission_audit": {
+                    "candidate_payload_peak_bytes": 208,
+                    "candidate_record_budget": 7,
+                    "candidate_record_size_bytes": 16,
+                    "count_kernel_launch_count": 1,
+                    "device_candidate_capacity_high_water": 7,
+                    "emit_kernel_launch_count": 5,
+                    "host_candidate_capacity_high_water": 6,
+                    "logical_candidate_count": 30,
+                    "max_source_candidate_count": 6,
+                    "peak_chunk_candidate_count": 6,
+                    "peak_chunk_source_count": 4,
+                    "source_chunk_count": 5,
+                    "synchronization_count": 6,
+                },
             },
             {
                 "audit": {
@@ -328,7 +467,7 @@ EXPECTED_FIXTURES = (
                     "emit_pass_node_visit_count": 64,
                     "exact_seed_count": 8,
                     "invalid_bound_descent_count": 0,
-                    "kernel_launch_count": 2,
+                    "kernel_launch_count": 6,
                     "mixed_lbvh_node_count": 1,
                     "output_capacity": 20,
                     "proposal_digest_fnv1a": "4ca55683c3c49441",
@@ -336,7 +475,7 @@ EXPECTED_FIXTURES = (
                     "resident_node_count": 15,
                     "resident_point_count": 8,
                     "strict_aabb_prune_count": 8,
-                    "synchronization_count": 2,
+                    "synchronization_count": 6,
                     "uniform_component_prune_count": 8,
                 },
                 "contraction": {
@@ -350,12 +489,30 @@ EXPECTED_FIXTURES = (
                     "round_index": 2,
                     "status": "cpu_exact_kappa_minima_certified",
                 },
+                "emission_audit": {
+                    "candidate_payload_peak_bytes": 176,
+                    "candidate_record_budget": 7,
+                    "candidate_record_size_bytes": 16,
+                    "count_kernel_launch_count": 1,
+                    "device_candidate_capacity_high_water": 7,
+                    "emit_kernel_launch_count": 5,
+                    "host_candidate_capacity_high_water": 4,
+                    "logical_candidate_count": 20,
+                    "max_source_candidate_count": 4,
+                    "peak_chunk_candidate_count": 4,
+                    "peak_chunk_source_count": 4,
+                    "source_chunk_count": 5,
+                    "synchronization_count": 6,
+                },
             },
         ),
         "squared_weight": ("8127", "1"),
         "verifier_counters": {
-            "gpu_replay_kernel_launch_count": 6,
-            "gpu_replay_synchronization_count": 6,
+            "gpu_replay_candidate_payload_peak_bytes": 224,
+            "gpu_replay_kernel_launch_count": 19,
+            "gpu_replay_peak_chunk_candidate_count": 7,
+            "gpu_replay_source_chunk_count": 16,
+            "gpu_replay_synchronization_count": 19,
             "gpu_replayed_component_minimum_count": 14,
             "gpu_replayed_round_count": 3,
             "reference_component_minimum_count": 14,
@@ -363,6 +520,23 @@ EXPECTED_FIXTURES = (
         },
     },
     {
+        "chunk_budget": 3,
+        "chunked_emission_counters": {
+            "candidate_payload_peak_bytes": 96,
+            "candidate_record_budget": 3,
+            "candidate_record_size_bytes": 16,
+            "count_kernel_launch_count": 1,
+            "device_candidate_capacity_high_water": 3,
+            "emit_kernel_launch_count": 4,
+            "host_candidate_capacity_high_water": 3,
+            "logical_candidate_count": 9,
+            "max_source_candidate_count": 3,
+            "peak_chunk_candidate_count": 3,
+            "peak_chunk_source_count": 1,
+            "round_count": 1,
+            "source_chunk_count": 4,
+            "synchronization_count": 5,
+        },
         "component_count_path": [4, 1],
         "emst_edge_count": 3,
         "fixture": "square_equal_length_ties",
@@ -382,10 +556,10 @@ EXPECTED_FIXTURES = (
             "gpu_count_pass_node_visit_count": 28,
             "gpu_emit_pass_node_visit_count": 28,
             "gpu_invalid_bound_descent_count": 0,
-            "gpu_kernel_launch_count": 2,
+            "gpu_kernel_launch_count": 5,
             "gpu_output_capacity_sum": 9,
             "gpu_strict_aabb_prune_count": 3,
-            "gpu_synchronization_count": 2,
+            "gpu_synchronization_count": 5,
             "gpu_uniform_component_prune_count": 4,
             "last_buffer_epoch": 1,
             "lbvh_node_count": 7,
@@ -405,7 +579,7 @@ EXPECTED_FIXTURES = (
                     "emit_pass_node_visit_count": 28,
                     "exact_seed_count": 4,
                     "invalid_bound_descent_count": 0,
-                    "kernel_launch_count": 2,
+                    "kernel_launch_count": 5,
                     "mixed_lbvh_node_count": 3,
                     "output_capacity": 9,
                     "proposal_digest_fnv1a": "84154a051a6fc1af",
@@ -413,7 +587,7 @@ EXPECTED_FIXTURES = (
                     "resident_node_count": 7,
                     "resident_point_count": 4,
                     "strict_aabb_prune_count": 3,
-                    "synchronization_count": 2,
+                    "synchronization_count": 5,
                     "uniform_component_prune_count": 4,
                 },
                 "contraction": {
@@ -427,12 +601,30 @@ EXPECTED_FIXTURES = (
                     "round_index": 0,
                     "status": "cpu_exact_kappa_minima_certified",
                 },
+                "emission_audit": {
+                    "candidate_payload_peak_bytes": 96,
+                    "candidate_record_budget": 3,
+                    "candidate_record_size_bytes": 16,
+                    "count_kernel_launch_count": 1,
+                    "device_candidate_capacity_high_water": 3,
+                    "emit_kernel_launch_count": 4,
+                    "host_candidate_capacity_high_water": 3,
+                    "logical_candidate_count": 9,
+                    "max_source_candidate_count": 3,
+                    "peak_chunk_candidate_count": 3,
+                    "peak_chunk_source_count": 1,
+                    "source_chunk_count": 4,
+                    "synchronization_count": 5,
+                },
             },
         ),
         "squared_weight": ("12", "1"),
         "verifier_counters": {
-            "gpu_replay_kernel_launch_count": 2,
-            "gpu_replay_synchronization_count": 2,
+            "gpu_replay_candidate_payload_peak_bytes": 96,
+            "gpu_replay_kernel_launch_count": 5,
+            "gpu_replay_peak_chunk_candidate_count": 3,
+            "gpu_replay_source_chunk_count": 4,
+            "gpu_replay_synchronization_count": 5,
             "gpu_replayed_component_minimum_count": 4,
             "gpu_replayed_round_count": 1,
             "reference_component_minimum_count": 4,
@@ -496,6 +688,181 @@ def contains_json_key(value: Any, key: str) -> bool:
     return False
 
 
+def require_natural(value: Any, label: str, *, positive: bool = False) -> int:
+    minimum = 1 if positive else 0
+    if type(value) is not int or value < minimum:
+        qualifier = "positive" if positive else "non-negative"
+        fail(f"{label} must be a {qualifier} integer")
+    return value
+
+
+def require_true_certificates(
+    value: dict[str, Any], expected: set[str], label: str
+) -> None:
+    require_exact_keys(value, expected, label)
+    if any(value.get(key) is not True for key in expected):
+        fail(f"{label} must contain only true certificates")
+
+
+def validate_chunked_emission_contract(
+    case: dict[str, Any], case_label: str
+) -> None:
+    point_count = require_natural(
+        case.get("point_count"), f"{case_label} point_count", positive=True
+    )
+    policy = case.get("trusted_chunking_policy")
+    producer = case.get("producer")
+    rounds = case.get("rounds")
+    verifier = case.get("verifier")
+    if not isinstance(policy, dict):
+        fail(f"{case_label} trusted_chunking_policy must be an object")
+    require_exact_keys(policy, CHUNKING_POLICY_KEYS, f"{case_label} policy")
+    budget = require_natural(
+        policy.get("max_candidate_records_per_chunk"),
+        f"{case_label} chunk budget",
+        positive=True,
+    )
+    if policy.get("source_partition") != SOURCE_PARTITION:
+        fail(f"{case_label} source partition differs")
+    if not isinstance(producer, dict) or not isinstance(rounds, list):
+        fail(f"{case_label} producer or rounds are absent")
+    if not isinstance(verifier, dict):
+        fail(f"{case_label} verifier is absent")
+    if producer.get("emission_mode") != EMISSION_MODE:
+        fail(f"{case_label} producer emission mode differs")
+
+    aggregate = producer.get("chunked_emission_counters")
+    if not isinstance(aggregate, dict):
+        fail(f"{case_label} chunked emission counters must be an object")
+    require_exact_keys(
+        aggregate,
+        CHUNKED_EMISSION_COUNTER_KEYS,
+        f"{case_label} chunked emission counters",
+    )
+    aggregate_values = {
+        key: require_natural(value, f"{case_label} chunked counter {key}")
+        for key, value in aggregate.items()
+    }
+    if aggregate_values["round_count"] != len(rounds):
+        fail(f"{case_label} chunked round count differs")
+    if aggregate_values["candidate_record_budget"] != budget:
+        fail(f"{case_label} aggregate chunk budget differs")
+    if aggregate_values["candidate_record_size_bytes"] != 16:
+        fail(f"{case_label} candidate record size differs")
+
+    summed = {
+        "logical_candidate_count": 0,
+        "source_chunk_count": 0,
+        "count_kernel_launch_count": 0,
+        "emit_kernel_launch_count": 0,
+        "synchronization_count": 0,
+    }
+    maxima = {
+        "peak_chunk_source_count": 0,
+        "peak_chunk_candidate_count": 0,
+        "max_source_candidate_count": 0,
+        "device_candidate_capacity_high_water": 0,
+        "host_candidate_capacity_high_water": 0,
+        "candidate_payload_peak_bytes": 0,
+    }
+    for round_index, round_value in enumerate(rounds):
+        round_label = f"{case_label} round {round_index}"
+        emission = round_value.get("emission_audit")
+        audit = round_value.get("audit")
+        if not isinstance(emission, dict):
+            fail(f"{round_label} emission audit must be an object")
+        require_exact_keys(emission, EMISSION_AUDIT_KEYS, f"{round_label} emission")
+        emission_certificates = emission.get("certificates")
+        if not isinstance(emission_certificates, dict):
+            fail(f"{round_label} emission certificates must be an object")
+        require_true_certificates(
+            emission_certificates,
+            EMISSION_CERTIFICATE_KEYS,
+            f"{round_label} emission certificates",
+        )
+        numeric = {
+            key: require_natural(value, f"{round_label} emission {key}")
+            for key, value in emission.items()
+            if key != "certificates"
+        }
+        if round_value.get("emission_status") != (
+            "complete_source_ranges_candidate_payload_bound_certified"
+        ):
+            fail(f"{round_label} emission status differs")
+        if not isinstance(audit, dict):
+            fail(f"{round_label} proposal audit must be an object")
+        if numeric["logical_candidate_count"] != audit.get("candidate_count"):
+            fail(f"{round_label} logical candidate count differs")
+        if numeric["candidate_record_budget"] != budget:
+            fail(f"{round_label} candidate budget differs")
+        if numeric["candidate_record_size_bytes"] != 16:
+            fail(f"{round_label} candidate record size differs")
+        if not (
+            0 < numeric["source_chunk_count"]
+            and 0 < numeric["peak_chunk_source_count"] <= point_count
+            and 0 < numeric["max_source_candidate_count"]
+            <= numeric["peak_chunk_candidate_count"]
+            <= budget
+            and numeric["device_candidate_capacity_high_water"]
+            >= numeric["peak_chunk_candidate_count"]
+            and numeric["device_candidate_capacity_high_water"] <= budget
+            and numeric["host_candidate_capacity_high_water"]
+            >= numeric["peak_chunk_candidate_count"]
+            and numeric["host_candidate_capacity_high_water"] <= budget
+        ):
+            fail(f"{round_label} physical chunk bounds differ")
+        expected_payload = (
+            numeric["device_candidate_capacity_high_water"]
+            + numeric["host_candidate_capacity_high_water"]
+        ) * numeric["candidate_record_size_bytes"]
+        if (
+            numeric["candidate_payload_peak_bytes"] != expected_payload
+            or expected_payload > 2 * budget * 16
+        ):
+            fail(f"{round_label} candidate payload bound differs")
+        if not (
+            numeric["count_kernel_launch_count"] == 1
+            and numeric["emit_kernel_launch_count"]
+            == numeric["source_chunk_count"]
+            and numeric["synchronization_count"]
+            == numeric["count_kernel_launch_count"]
+            + numeric["emit_kernel_launch_count"]
+            and audit.get("kernel_launch_count")
+            == numeric["synchronization_count"]
+            and audit.get("synchronization_count")
+            == numeric["synchronization_count"]
+        ):
+            fail(f"{round_label} chunk launch accounting differs")
+        for key in summed:
+            summed[key] += numeric[key]
+        for key in maxima:
+            maxima[key] = max(maxima[key], numeric[key])
+
+    for key, expected in summed.items():
+        if aggregate_values[key] != expected:
+            fail(f"{case_label} aggregate sum {key} differs")
+    for key, expected in maxima.items():
+        if aggregate_values[key] != expected:
+            fail(f"{case_label} aggregate maximum {key} differs")
+    producer_counters = producer.get("counters")
+    if not isinstance(producer_counters, dict):
+        fail(f"{case_label} producer counters are absent")
+    if aggregate_values["logical_candidate_count"] != producer_counters.get(
+        "gpu_candidate_count"
+    ):
+        fail(f"{case_label} logical and producer candidate counts differ")
+    verifier_counters = verifier.get("counters")
+    if not isinstance(verifier_counters, dict):
+        fail(f"{case_label} verifier counters are absent")
+    for verifier_key, aggregate_key in (
+        ("gpu_replay_source_chunk_count", "source_chunk_count"),
+        ("gpu_replay_peak_chunk_candidate_count", "peak_chunk_candidate_count"),
+        ("gpu_replay_candidate_payload_peak_bytes", "candidate_payload_peak_bytes"),
+    ):
+        if verifier_counters.get(verifier_key) != aggregate_values[aggregate_key]:
+            fail(f"{case_label} verifier chunk counter {verifier_key} differs")
+
+
 def expected_level(weight: tuple[str, str]) -> dict[str, str]:
     numerator, denominator = weight
     return {"denominator": denominator, "numerator": numerator}
@@ -504,10 +871,16 @@ def expected_level(weight: tuple[str, str]) -> dict[str, str]:
 def expected_round(specification: dict[str, Any]) -> dict[str, Any]:
     audit = dict(specification["audit"])
     audit["certificates"] = dict(TRUE_AUDIT_CERTIFICATES)
+    emission_audit = dict(specification["emission_audit"])
+    emission_audit["certificates"] = dict(TRUE_EMISSION_CERTIFICATES)
     return {
         "audit": audit,
         "contraction": dict(specification["contraction"]),
         "decision": dict(specification["decision"]),
+        "emission_audit": emission_audit,
+        "emission_status": (
+            "complete_source_ranges_candidate_payload_bound_certified"
+        ),
         "proposal_status": "candidate_superset_certified",
     }
 
@@ -524,13 +897,21 @@ def expected_case(specification: dict[str, Any]) -> dict[str, Any]:
         "point_count": specification["point_count"],
         "producer": {
             "certificates": dict(TRUE_PRODUCER_CERTIFICATES),
+            "chunked_emission_counters": dict(
+                specification["chunked_emission_counters"]
+            ),
             "counters": dict(specification["producer_counters"]),
+            "emission_mode": EMISSION_MODE,
         },
         "rounds": [
             expected_round(round_specification)
             for round_specification in specification["rounds"]
         ],
         "status": "passed",
+        "trusted_chunking_policy": {
+            "max_candidate_records_per_chunk": specification["chunk_budget"],
+            "source_partition": SOURCE_PARTITION,
+        },
         "verifier": {
             "certificates": dict(TRUE_VERIFIER_CERTIFICATES),
             "counters": dict(specification["verifier_counters"]),
@@ -539,6 +920,7 @@ def expected_case(specification: dict[str, Any]) -> dict[str, Any]:
 
 
 EXPECTED_REPLAY = {
+    "bounded_emission_proof_basis": BOUNDED_EMISSION_PROOF_BASIS,
     "case_count": 3,
     "cases": [expected_case(specification) for specification in EXPECTED_FIXTURES],
     "decision_backend": "reference_cpu",
@@ -619,20 +1001,33 @@ def validate_replay(path: Path) -> tuple[str, dict[str, Any]]:
                 fail(f"{case_label} {level_name} weight must be an object")
             require_exact_keys(level, LEVEL_KEYS, f"{case_label} {level_name} weight")
 
+        policy = case.get("trusted_chunking_policy")
+        if not isinstance(policy, dict):
+            fail(f"{case_label} trusted_chunking_policy must be an object")
+        require_exact_keys(policy, CHUNKING_POLICY_KEYS, f"{case_label} policy")
+
         producer = case.get("producer")
         if not isinstance(producer, dict):
             fail(f"{case_label} producer must be an object")
         require_exact_keys(producer, PRODUCER_KEYS, f"{case_label} producer")
         producer_certificates = producer.get("certificates")
+        chunked_emission_counters = producer.get("chunked_emission_counters")
         producer_counters = producer.get("counters")
         if not isinstance(producer_certificates, dict):
             fail(f"{case_label} producer certificates must be an object")
         if not isinstance(producer_counters, dict):
             fail(f"{case_label} producer counters must be an object")
-        require_exact_keys(
+        if not isinstance(chunked_emission_counters, dict):
+            fail(f"{case_label} chunked emission counters must be an object")
+        require_true_certificates(
             producer_certificates,
             PRODUCER_CERTIFICATE_KEYS,
             f"{case_label} producer certificates",
+        )
+        require_exact_keys(
+            chunked_emission_counters,
+            CHUNKED_EMISSION_COUNTER_KEYS,
+            f"{case_label} chunked emission counters",
         )
         require_exact_keys(
             producer_counters,
@@ -651,13 +1046,29 @@ def validate_replay(path: Path) -> tuple[str, dict[str, Any]]:
             audit = round_value.get("audit")
             contraction = round_value.get("contraction")
             decision = round_value.get("decision")
+            emission_audit = round_value.get("emission_audit")
             if not isinstance(audit, dict):
                 fail(f"{round_label} audit must be an object")
             if not isinstance(contraction, dict):
                 fail(f"{round_label} contraction must be an object")
             if not isinstance(decision, dict):
                 fail(f"{round_label} decision must be an object")
+            if not isinstance(emission_audit, dict):
+                fail(f"{round_label} emission audit must be an object")
             require_exact_keys(audit, AUDIT_KEYS, f"{round_label} audit")
+            require_exact_keys(
+                emission_audit,
+                EMISSION_AUDIT_KEYS,
+                f"{round_label} emission audit",
+            )
+            emission_certificates = emission_audit.get("certificates")
+            if not isinstance(emission_certificates, dict):
+                fail(f"{round_label} emission certificates must be an object")
+            require_true_certificates(
+                emission_certificates,
+                EMISSION_CERTIFICATE_KEYS,
+                f"{round_label} emission certificates",
+            )
             require_exact_keys(
                 contraction,
                 CONTRACTION_KEYS,
@@ -667,7 +1078,7 @@ def validate_replay(path: Path) -> tuple[str, dict[str, Any]]:
             audit_certificates = audit.get("certificates")
             if not isinstance(audit_certificates, dict):
                 fail(f"{round_label} audit certificates must be an object")
-            require_exact_keys(
+            require_true_certificates(
                 audit_certificates,
                 AUDIT_CERTIFICATE_KEYS,
                 f"{round_label} audit certificates",
@@ -683,7 +1094,7 @@ def validate_replay(path: Path) -> tuple[str, dict[str, Any]]:
             fail(f"{case_label} verifier certificates must be an object")
         if not isinstance(verifier_counters, dict):
             fail(f"{case_label} verifier counters must be an object")
-        require_exact_keys(
+        require_true_certificates(
             verifier_certificates,
             VERIFIER_CERTIFICATE_KEYS,
             f"{case_label} verifier certificates",
@@ -693,6 +1104,7 @@ def validate_replay(path: Path) -> tuple[str, dict[str, Any]]:
             VERIFIER_COUNTER_KEYS,
             f"{case_label} verifier counters",
         )
+        validate_chunked_emission_contract(case, case_label)
 
     if contains_json_key(value, "public_status"):
         fail(f"{label} must not contain public_status at any depth")
@@ -874,9 +1286,13 @@ def main(arguments: Sequence[str] | None = None) -> int:
         "checks": {
             "aot_elf_architectures": sorted(set(architectures)),
             "aot_ptx_entry_count": 0,
+            "bounded_candidate_emission_chain_certified": True,
+            "candidate_payload_physical_bound_certified": True,
             "canonical_contractions_certified": True,
+            "complete_source_partition_certified": True,
             "cpu_exact_decision_chain_certified": True,
             "gpu_multi_round_proposal_chain_certified": True,
+            "independent_chunked_gpu_replay_certified": True,
             "independent_gpu_replay_certified": True,
             "local_emst_witness_certified": True,
             "memcheck": "passed",

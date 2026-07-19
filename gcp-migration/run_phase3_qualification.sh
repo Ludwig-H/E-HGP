@@ -88,11 +88,12 @@ compagnon commun reste provisoire jusqu'à la même certification ciblée
 TERMINATED et ne publie aucun statut scientifique.
 
 --phase5-k1-boruvka ajoute dans la même session gardée la qualification de la
-boucle GPU Boruvka complète de Phase 5 : chaîne multi-ronde proposée sur GPU,
-décisions et contractions exactes sur CPU, rejeu GPU indépendant, témoin EMST
-local, audit AOT sm_120 sans PTX, memcheck et racecheck. Son artefact compagnon
-reste provisoire jusqu'à la même certification ciblée TERMINATED et ne publie
-aucun statut scientifique.
+boucle GPU Boruvka complète de Phase 5 : émission chunkée par sources complètes
+sous budget de candidats, chaîne multi-ronde proposée sur GPU, décisions et
+contractions exactes sur CPU, rejeu GPU chunké indépendant, témoin EMST local,
+audit AOT sm_120 sans PTX, memcheck et racecheck. Son artefact compagnon reste
+provisoire jusqu'à la même certification ciblée TERMINATED et ne publie aucun
+statut scientifique.
 
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
@@ -1415,8 +1416,11 @@ for key, expected in {
     "mode": "certified",
     "phase": "5",
     "profile": "hgp_reduced",
-    "schema": "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v2",
-    "scientific_scope": "gpu_proposed_cpu_exact_full_boruvka_local_emst_witness_only",
+    "schema": "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v3",
+    "scientific_scope": (
+        "gpu_proposed_bounded_candidate_emission_cpu_exact_full_boruvka_"
+        "local_emst_witness_only"
+    ),
     "status": "worker_passed_pending_shutdown",
 }.items():
     if value.get(key) != expected:
@@ -1444,9 +1448,13 @@ checks = value.get("checks")
 expected_check_keys = {
     "aot_elf_architectures",
     "aot_ptx_entry_count",
+    "bounded_candidate_emission_chain_certified",
+    "candidate_payload_physical_bound_certified",
     "canonical_contractions_certified",
+    "complete_source_partition_certified",
     "cpu_exact_decision_chain_certified",
     "gpu_multi_round_proposal_chain_certified",
+    "independent_chunked_gpu_replay_certified",
     "independent_gpu_replay_certified",
     "local_emst_witness_certified",
     "memcheck",
@@ -1462,19 +1470,279 @@ replay_canonical = json.dumps(
     replay, ensure_ascii=True, sort_keys=True, separators=(",", ":")
 ) + "\n"
 if hashlib.sha256(replay_canonical.encode("utf-8")).hexdigest() != (
-    "b4bd717d175c84be0c89e8602245e28b8059e350f0ce7ff33edafa2a2df30d98"
+    "9e686fc8147bf43860180f723c5005eb6bbb9277b06ca33e5521d370db56e121"
 ):
-    raise SystemExit("replay complet Phase 5 différent de la fixture canonique")
+    raise SystemExit("replay complet Phase 5 différent de la fixture v2 canonique")
 if replay.get("schema") != (
-    "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v1"
+    "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v2"
 ):
     raise SystemExit("schéma du replay complet Phase 5 invalide")
+expected_replay_keys = {
+    "bounded_emission_proof_basis",
+    "case_count",
+    "cases",
+    "decision_backend",
+    "decision_semantics",
+    "hierarchy_reduction_status",
+    "mode",
+    "phase",
+    "profile",
+    "proof_basis",
+    "proposal_backend",
+    "proposal_semantics",
+    "schema",
+    "scientific_result_claimed",
+    "scientific_scope",
+    "status",
+    "verification_proposal_backend",
+}
+if set(replay) != expected_replay_keys:
+    raise SystemExit("schéma fermé du replay Phase 5 invalide")
+for key, expected in {
+    "bounded_emission_proof_basis": (
+        "gpu_complete_source_ranges_bounded_candidate_payload_v1"
+    ),
+    "decision_backend": "reference_cpu",
+    "hierarchy_reduction_status": "not_performed",
+    "mode": "certified",
+    "phase": "5",
+    "profile": "hgp_reduced",
+    "proof_basis": "gpu_candidate_superset_cpu_exact_boruvka_v1",
+    "proposal_backend": "cuda_g4",
+    "scientific_scope": "local_emst_witness_only",
+    "status": "passed",
+    "verification_proposal_backend": "cuda_g4",
+}.items():
+    if replay.get(key) != expected:
+        raise SystemExit(f"champ replay Phase 5 invalide: {key}")
+if replay.get("scientific_result_claimed") is not False:
+    raise SystemExit("le replay Phase 5 revendique un résultat scientifique")
+cases = replay.get("cases")
+fixture_contracts = (
+    ("singleton_terminal", 1, 1, [1]),
+    ("chain_three_rounds", 8, 7, [8, 4, 2, 1]),
+    ("square_equal_length_ties", 4, 3, [4, 1]),
+)
+if replay.get("case_count") != 3 or not isinstance(cases, list) or len(cases) != 3:
+    raise SystemExit("le replay Phase 5 doit contenir trois fixtures")
+
+
+def natural(value, label, *, positive=False):
+    minimum = 1 if positive else 0
+    if type(value) is not int or value < minimum:
+        raise SystemExit(f"compteur replay invalide: {label}")
+    return value
+
+
+aggregate_keys = {
+    "candidate_payload_peak_bytes",
+    "candidate_record_budget",
+    "candidate_record_size_bytes",
+    "count_kernel_launch_count",
+    "device_candidate_capacity_high_water",
+    "emit_kernel_launch_count",
+    "host_candidate_capacity_high_water",
+    "logical_candidate_count",
+    "max_source_candidate_count",
+    "peak_chunk_candidate_count",
+    "peak_chunk_source_count",
+    "round_count",
+    "source_chunk_count",
+    "synchronization_count",
+}
+emission_keys = (aggregate_keys - {"round_count"}) | {"certificates"}
+emission_certificate_keys = {
+    "candidate_payload_physical_bound_certified",
+    "complete_source_partition_certified",
+    "count_emit_cardinality_and_visit_count_certified",
+}
+producer_certificate_keys = {
+    "bounded_candidate_emission_chain_certified",
+    "canonical_contraction_chain_certified",
+    "cpu_exact_decision_chain_certified",
+    "emst_witness_certified",
+    "proposal_chain_certified",
+    "reference_cpu_witness_certified",
+}
+verifier_certificate_keys = {
+    "bounded_candidate_emission_chain_certified",
+    "canonical_contractions_certified",
+    "counters_certified",
+    "cpu_exact_decision_chain_certified",
+    "emission_mode_certified",
+    "emst_witness_certified",
+    "exact_weights_certified",
+    "hierarchy_status_separation_certified",
+    "index_identity_certified",
+    "proposal_chain_certified",
+    "reference_cpu_witness_certified",
+    "round_count_bound_certified",
+    "spanning_tree_certified",
+}
+for case, (fixture, point_count, budget, component_path) in zip(
+    cases, fixture_contracts, strict=True
+):
+    if not isinstance(case, dict):
+        raise SystemExit(f"fixture replay absente: {fixture}")
+    policy = case.get("trusted_chunking_policy")
+    producer = case.get("producer")
+    verifier = case.get("verifier")
+    rounds = case.get("rounds")
+    if (
+        case.get("fixture") != fixture
+        or case.get("point_count") != point_count
+        or case.get("component_count_path") != component_path
+        or policy
+        != {
+            "max_candidate_records_per_chunk": budget,
+            "source_partition": "complete_contiguous_unsplit",
+        }
+        or not isinstance(producer, dict)
+        or producer.get("emission_mode") != "bounded_complete_source_ranges"
+        or not isinstance(verifier, dict)
+        or not isinstance(rounds, list)
+    ):
+        raise SystemExit(f"contrat chunké invalide pour {fixture}")
+    for label, certificates, expected_certificates in (
+        (
+            "producteur",
+            producer.get("certificates"),
+            producer_certificate_keys,
+        ),
+        (
+            "vérificateur",
+            verifier.get("certificates"),
+            verifier_certificate_keys,
+        ),
+    ):
+        if (
+            not isinstance(certificates, dict)
+            or set(certificates) != expected_certificates
+            or any(value is not True for value in certificates.values())
+        ):
+            raise SystemExit(f"certificats {label} incomplets pour {fixture}")
+    aggregate = producer.get("chunked_emission_counters")
+    producer_counters = producer.get("counters")
+    verifier_counters = verifier.get("counters")
+    if (
+        not isinstance(aggregate, dict)
+        or set(aggregate) != aggregate_keys
+        or not isinstance(producer_counters, dict)
+        or not isinstance(verifier_counters, dict)
+    ):
+        raise SystemExit(f"compteurs chunkés absents pour {fixture}")
+    aggregate = {
+        key: natural(value, f"{fixture}.{key}")
+        for key, value in aggregate.items()
+    }
+    if (
+        aggregate["round_count"] != len(rounds)
+        or aggregate["candidate_record_budget"] != budget
+        or aggregate["candidate_record_size_bytes"] != 16
+        or aggregate["logical_candidate_count"]
+        != producer_counters.get("gpu_candidate_count")
+    ):
+        raise SystemExit(f"agrégat chunké incohérent pour {fixture}")
+    sums = {
+        "logical_candidate_count": 0,
+        "source_chunk_count": 0,
+        "count_kernel_launch_count": 0,
+        "emit_kernel_launch_count": 0,
+        "synchronization_count": 0,
+    }
+    maxima = {
+        "peak_chunk_source_count": 0,
+        "peak_chunk_candidate_count": 0,
+        "max_source_candidate_count": 0,
+        "device_candidate_capacity_high_water": 0,
+        "host_candidate_capacity_high_water": 0,
+        "candidate_payload_peak_bytes": 0,
+    }
+    for round_index, round_value in enumerate(rounds):
+        if not isinstance(round_value, dict):
+            raise SystemExit(f"ronde chunkée absente: {fixture}.{round_index}")
+        emission = round_value.get("emission_audit")
+        audit = round_value.get("audit")
+        if (
+            round_value.get("emission_status")
+            != "complete_source_ranges_candidate_payload_bound_certified"
+            or not isinstance(emission, dict)
+            or set(emission) != emission_keys
+            or not isinstance(audit, dict)
+        ):
+            raise SystemExit(f"audit chunké absent: {fixture}.{round_index}")
+        emission_certificates = emission.get("certificates")
+        if (
+            not isinstance(emission_certificates, dict)
+            or set(emission_certificates) != emission_certificate_keys
+            or any(value is not True for value in emission_certificates.values())
+        ):
+            raise SystemExit(
+                f"certificats chunkés invalides: {fixture}.{round_index}"
+            )
+        numeric = {
+            key: natural(value, f"{fixture}.{round_index}.{key}")
+            for key, value in emission.items()
+            if key != "certificates"
+        }
+        payload = (
+            numeric["device_candidate_capacity_high_water"]
+            + numeric["host_candidate_capacity_high_water"]
+        ) * numeric["candidate_record_size_bytes"]
+        if not (
+            numeric["logical_candidate_count"] == audit.get("candidate_count")
+            and numeric["candidate_record_budget"] == budget
+            and numeric["candidate_record_size_bytes"] == 16
+            and 0 < numeric["source_chunk_count"]
+            and 0 < numeric["peak_chunk_source_count"] <= point_count
+            and 0 < numeric["max_source_candidate_count"]
+            <= numeric["peak_chunk_candidate_count"]
+            <= budget
+            and numeric["device_candidate_capacity_high_water"]
+            >= numeric["peak_chunk_candidate_count"]
+            and numeric["device_candidate_capacity_high_water"] <= budget
+            and numeric["host_candidate_capacity_high_water"]
+            >= numeric["peak_chunk_candidate_count"]
+            and numeric["host_candidate_capacity_high_water"] <= budget
+            and numeric["candidate_payload_peak_bytes"] == payload
+            and payload <= 2 * budget * 16
+            and numeric["count_kernel_launch_count"] == 1
+            and numeric["emit_kernel_launch_count"]
+            == numeric["source_chunk_count"]
+            and numeric["synchronization_count"]
+            == numeric["count_kernel_launch_count"]
+            + numeric["emit_kernel_launch_count"]
+            and audit.get("kernel_launch_count")
+            == numeric["synchronization_count"]
+            and audit.get("synchronization_count")
+            == numeric["synchronization_count"]
+        ):
+            raise SystemExit(f"borne chunkée invalide: {fixture}.{round_index}")
+        for key in sums:
+            sums[key] += numeric[key]
+        for key in maxima:
+            maxima[key] = max(maxima[key], numeric[key])
+    if any(aggregate[key] != expected for key, expected in sums.items()) or any(
+        aggregate[key] != expected for key, expected in maxima.items()
+    ):
+        raise SystemExit(f"agrégation des rondes chunkées invalide pour {fixture}")
+    for verifier_key, aggregate_key in (
+        ("gpu_replay_source_chunk_count", "source_chunk_count"),
+        ("gpu_replay_peak_chunk_candidate_count", "peak_chunk_candidate_count"),
+        ("gpu_replay_candidate_payload_peak_bytes", "candidate_payload_peak_bytes"),
+    ):
+        if verifier_counters.get(verifier_key) != aggregate[aggregate_key]:
+            raise SystemExit(f"rejeu chunké indépendant invalide pour {fixture}")
 if checks != {
     "aot_elf_architectures": ["sm_120"],
     "aot_ptx_entry_count": 0,
+    "bounded_candidate_emission_chain_certified": True,
+    "candidate_payload_physical_bound_certified": True,
     "canonical_contractions_certified": True,
+    "complete_source_partition_certified": True,
     "cpu_exact_decision_chain_certified": True,
     "gpu_multi_round_proposal_chain_certified": True,
+    "independent_chunked_gpu_replay_certified": True,
     "independent_gpu_replay_certified": True,
     "local_emst_witness_certified": True,
     "memcheck": "passed",
@@ -1501,6 +1769,8 @@ if not isinstance(logs, dict) or set(logs) != {
     "racecheck",
 }:
     raise SystemExit("journaux Phase 5 absents ou ouverts")
+if logs.get("full_replay") != replay_canonical:
+    raise SystemExit("journal canonique du replay Phase 5 incohérent")
 provenance = value.get("provenance")
 expected_phase3_digest = hashlib.sha256(phase3_path.read_bytes()).hexdigest()
 if provenance != {

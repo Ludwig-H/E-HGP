@@ -292,16 +292,24 @@ indépendante de la campagne spatiale Phase 4 :
 ```
 
 Le worker exécute le replay réel multi-ronde
-`morsehgp3d_gpu_k1_boruvka_full_replay`, exige la chaîne de propositions GPU,
-de décisions et contractions CPU exactes, le rejeu GPU indépendant et le
-témoin EMST local, puis vérifie un ELF exclusivement `sm_120`, l'absence de PTX
-et les passages `compute-sanitizer` en `memcheck` et `racecheck`. Le compagnon
-fermé `morsehgp3d.phase5.k1_boruvka_gpu_qualification.v2`, de périmètre
-`gpu_proposed_cpu_exact_full_boruvka_local_emst_witness_only`, reste au statut
-`worker_passed_pending_shutdown` jusqu'au même arrêt ciblé et devient ensuite
-`phase5-k1-boruvka-<SHA>.json`. Il ne contient aucun `public_status` : la
-réduction hiérarchique reste `not_performed`, et ni le chunking à mémoire
-bornée ni la scalabilité ne sont qualifiés par cet artefact.
+`morsehgp3d_gpu_k1_boruvka_full_replay`, exige l'émission GPU par sources
+contiguës complètes avec des budgets fermés de 1, 7 et 3 enregistrements pour
+les trois fixtures, la chaîne de propositions GPU, les décisions et
+contractions CPU exactes, puis un rejeu GPU chunké indépendant et le témoin
+EMST local. Les audits lient le volume logique au pic physique d'un tampon
+device et d'un tampon hôte de 16 octets par candidat, sans scinder une source
+entre deux chunks. Le worker vérifie ensuite un ELF exclusivement `sm_120`,
+l'absence de PTX et les passages `compute-sanitizer` en `memcheck` et
+`racecheck`. Le compagnon fermé
+`morsehgp3d.phase5.k1_boruvka_gpu_qualification.v3`, de périmètre
+`gpu_proposed_bounded_candidate_emission_cpu_exact_full_boruvka_local_emst_witness_only`,
+reste au statut `worker_passed_pending_shutdown` jusqu'au même arrêt ciblé et
+devient ensuite `phase5-k1-boruvka-<SHA>.json`. Il ne contient aucun
+`public_status` : la réduction hiérarchique reste `not_performed`. Cette
+qualification établit la borne physique des payloads candidats sur les
+fixtures fermées; elle ne borne ni les autres tableaux résidents, ni le volume
+logique total, ni le travail CPU exact, et ne qualifie donc pas encore la
+scalabilité de la Phase 5.
 
 Pour la cible de capacité explicitement autorisée :
 

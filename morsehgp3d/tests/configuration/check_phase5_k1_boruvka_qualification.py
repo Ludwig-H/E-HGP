@@ -14,10 +14,13 @@ import tempfile
 from types import ModuleType
 from typing import Any, Callable
 
-QUALIFICATION_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v2"
-REPLAY_SCHEMA = "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v1"
-SCIENTIFIC_SCOPE = "gpu_proposed_cpu_exact_full_boruvka_local_emst_witness_only"
-STATIC_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification_static.v2"
+QUALIFICATION_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v3"
+REPLAY_SCHEMA = "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v2"
+SCIENTIFIC_SCOPE = (
+    "gpu_proposed_bounded_candidate_emission_cpu_exact_full_boruvka_"
+    "local_emst_witness_only"
+)
+STATIC_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification_static.v3"
 SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
 EXPECTED_TOP_LEVEL_KEYS = {
     "backend",
@@ -41,9 +44,13 @@ EXPECTED_TOP_LEVEL_KEYS = {
 EXPECTED_CHECK_KEYS = {
     "aot_elf_architectures",
     "aot_ptx_entry_count",
+    "bounded_candidate_emission_chain_certified",
+    "candidate_payload_physical_bound_certified",
     "canonical_contractions_certified",
+    "complete_source_partition_certified",
     "cpu_exact_decision_chain_certified",
     "gpu_multi_round_proposal_chain_certified",
+    "independent_chunked_gpu_replay_certified",
     "independent_gpu_replay_certified",
     "local_emst_witness_certified",
     "memcheck",
@@ -142,11 +149,16 @@ def validate_static_source(assembler: str, replay: str) -> None:
         (
             QUALIFICATION_SCHEMA,
             REPLAY_SCHEMA,
-            SCIENTIFIC_SCOPE,
+            "gpu_proposed_bounded_candidate_emission_cpu_exact_full_boruvka_",
+            "local_emst_witness_only",
             '"component_count_path": [8, 4, 2, 1]',
             '"component_minimum_count": 14',
             '"gpu_candidate_count": 86',
+            '"gpu_kernel_launch_count": 19',
             '"gpu_count_pass_node_visit_count": 236',
+            '"candidate_record_budget": 7',
+            '"candidate_payload_peak_bytes": 224',
+            '"source_chunk_count": 16',
             '"proposal_digest_fnv1a": "88d6d04ed0c2e06b"',
             '"proposal_digest_fnv1a": "8ba818d0f95004dd"',
             '"proposal_digest_fnv1a": "4ca55683c3c49441"',
@@ -155,6 +167,7 @@ def validate_static_source(assembler: str, replay: str) -> None:
             'require_exact_keys(value, REPLAY_KEYS, label)',
             'contains_json_key(value, "public_status")',
             "exact_json_equal(value, EXPECTED_REPLAY)",
+            "validate_chunked_emission_contract(case, case_label)",
             'set(architectures) != {"sm_120"}',
             "if ptx_log.strip()",
             "validate_memcheck_log(memcheck_log)",
@@ -165,6 +178,10 @@ def validate_static_source(assembler: str, replay: str) -> None:
             '"environment_artifact_sha256"',
             '"scientific_result_claimed": False',
             '"scientific_public_status": None',
+            '"bounded_candidate_emission_chain_certified": True',
+            '"candidate_payload_physical_bound_certified": True',
+            '"complete_source_partition_certified": True',
+            '"independent_chunked_gpu_replay_certified": True',
         ),
         "Phase 5 qualification assembler",
     )
@@ -187,6 +204,12 @@ def validate_static_source(assembler: str, replay: str) -> None:
             '"square_equal_length_ties"',
             "std::array<std::size_t, 4>{8U, 4U, 2U, 1U}",
             REPLAY_SCHEMA,
+            "K1BoruvkaChunkingPolicy",
+            "bounded_emission_proof_basis",
+            '"bounded_complete_source_ranges"',
+            "complete_contiguous_unsplit",
+            "chunked_emission_counters",
+            "chunked_emission_audit",
             "build_gpu_proposed_cpu_exact_k1_boruvka",
             "verify_gpu_proposed_cpu_exact_k1_boruvka",
             "K1BoruvkaCandidateAudit::decision_semantics",
@@ -195,7 +218,10 @@ def validate_static_source(assembler: str, replay: str) -> None:
             "K1HybridScientificStatus::local_emst_witness_only",
             "K1HybridHierarchyReductionStatus::not_performed",
             "result.proposal_chain_certified",
+            "result.bounded_candidate_emission_chain_certified",
             "verification.proposal_chain_certified",
+            "verification.emission_mode_certified",
+            "verification.bounded_candidate_emission_chain_certified",
             "verification.hierarchy_status_separation_certified",
         ),
         "real Phase 5 full-loop K1 Boruvka replay",
@@ -357,9 +383,13 @@ def exercise_assembler(module: ModuleType) -> None:
         expected_checks = {
             "aot_elf_architectures": ["sm_120"],
             "aot_ptx_entry_count": 0,
+            "bounded_candidate_emission_chain_certified": True,
+            "candidate_payload_physical_bound_certified": True,
             "canonical_contractions_certified": True,
+            "complete_source_partition_certified": True,
             "cpu_exact_decision_chain_certified": True,
             "gpu_multi_round_proposal_chain_certified": True,
+            "independent_chunked_gpu_replay_certified": True,
             "independent_gpu_replay_certified": True,
             "local_emst_witness_certified": True,
             "memcheck": "passed",
@@ -412,6 +442,42 @@ def exercise_assembler(module: ModuleType) -> None:
         require_rejected(
             lambda: module.validate_replay(replay_log_path),
             "wrong multi-round replay candidate count",
+        )
+        wrong_budget_replay = copy.deepcopy(module.EXPECTED_REPLAY)
+        wrong_budget_replay["cases"][1]["trusted_chunking_policy"][
+            "max_candidate_records_per_chunk"
+        ] = 6
+        write_json(replay_log_path, wrong_budget_replay)
+        require_rejected(
+            lambda: module.validate_replay(replay_log_path),
+            "chunk budget below the certified atomic source",
+        )
+        wrong_payload_replay = copy.deepcopy(module.EXPECTED_REPLAY)
+        wrong_payload_replay["cases"][1]["producer"][
+            "chunked_emission_counters"
+        ]["candidate_payload_peak_bytes"] = 223
+        write_json(replay_log_path, wrong_payload_replay)
+        require_rejected(
+            lambda: module.validate_replay(replay_log_path),
+            "wrong chunk payload high-water mark",
+        )
+        false_partition_replay = copy.deepcopy(module.EXPECTED_REPLAY)
+        false_partition_replay["cases"][1]["rounds"][0]["emission_audit"][
+            "certificates"
+        ]["complete_source_partition_certified"] = False
+        write_json(replay_log_path, false_partition_replay)
+        require_rejected(
+            lambda: module.validate_replay(replay_log_path),
+            "false complete-source partition certificate",
+        )
+        wrong_replay_counter = copy.deepcopy(module.EXPECTED_REPLAY)
+        wrong_replay_counter["cases"][1]["verifier"]["counters"][
+            "gpu_replay_source_chunk_count"
+        ] = 15
+        write_json(replay_log_path, wrong_replay_counter)
+        require_rejected(
+            lambda: module.validate_replay(replay_log_path),
+            "wrong independent replay chunk count",
         )
         replay_log_path.write_text(
             '{"schema":"one","schema":"two"}\n', encoding="ascii"
@@ -495,7 +561,7 @@ def validate_project(project: Path) -> dict[str, object]:
             str(replay_path.relative_to(project)),
         ],
         "cuda_executed": False,
-        "negative_mutations": 9,
+        "negative_mutations": 13,
         "qualification_schema": QUALIFICATION_SCHEMA,
         "replay_schema": REPLAY_SCHEMA,
         "schema": STATIC_SCHEMA,

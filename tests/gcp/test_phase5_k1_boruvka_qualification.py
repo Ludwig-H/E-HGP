@@ -39,23 +39,32 @@ class Phase5K1BoruvkaGuardedWorkflowTests(unittest.TestCase):
             script,
         )
         self.assertIn(
-            "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v2",
+            "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v3",
             script,
         )
         self.assertIn(
-            "gpu_proposed_cpu_exact_full_boruvka_local_emst_witness_only",
+            "gpu_proposed_bounded_candidate_emission_cpu_exact_full_boruvka_",
+            script,
+        )
+        self.assertIn("local_emst_witness_only", script)
+        self.assertIn(
+            "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v2",
             script,
         )
         self.assertIn(
-            "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v1",
+            "9e686fc8147bf43860180f723c5005eb6bbb9277b06ca33e5521d370db56e121",
             script,
         )
         self.assertIn('"full_replay",', script)
         for required in (
             "canonical_contractions_certified",
+            "bounded_candidate_emission_chain_certified",
+            "candidate_payload_physical_bound_certified",
+            "complete_source_partition_certified",
             "cpu_exact_decision_chain_certified",
             "gpu_multi_round_proposal_chain_certified",
             "independent_gpu_replay_certified",
+            "independent_chunked_gpu_replay_certified",
             "local_emst_witness_certified",
             "full_replay_sha256",
         ):
@@ -155,17 +164,28 @@ class Phase5K1BoruvkaGuardedWorkflowTests(unittest.TestCase):
         self.assertTrue(ASSEMBLER.is_file())
         source = ASSEMBLER.read_text(encoding="utf-8")
         for required in (
-            "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v2",
-            "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v1",
-            "gpu_proposed_cpu_exact_full_boruvka_local_emst_witness_only",
+            "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v3",
+            "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v2",
+            "gpu_proposed_bounded_candidate_emission_cpu_exact_full_boruvka_",
+            "local_emst_witness_only",
             "worker_passed_pending_shutdown",
+            "gpu_complete_source_ranges_bounded_candidate_payload_v1",
+            "bounded_complete_source_ranges",
+            "complete_contiguous_unsplit",
+            "max_candidate_records_per_chunk",
+            "candidate_payload_peak_bytes",
+            "gpu_replay_source_chunk_count",
             "require_exact_keys",
             "validate_memcheck_log",
             "validate_racecheck_log",
             "canonical_contractions_certified",
+            "bounded_candidate_emission_chain_certified",
+            "candidate_payload_physical_bound_certified",
+            "complete_source_partition_certified",
             "cpu_exact_decision_chain_certified",
             "gpu_multi_round_proposal_chain_certified",
             "independent_gpu_replay_certified",
+            "independent_chunked_gpu_replay_certified",
             "local_emst_witness_certified",
             "full_replay_sha256",
         ):
