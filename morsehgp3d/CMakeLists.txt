@@ -580,6 +580,25 @@ if(MORSEHGP3D_ENABLE_CUDA)
       PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()
+
+  add_executable(
+    morsehgp3d_gpu_k1_boruvka_full_replay
+    src/tools/gpu_k1_boruvka_full_replay.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_k1_boruvka_full_replay
+    PRIVATE morsehgp3d::gpu_k1_boruvka
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_k1_boruvka_full_replay PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_k1_boruvka_full_replay
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
 endif()
 
 if(MORSEHGP3D_BUILD_TOOLS)
