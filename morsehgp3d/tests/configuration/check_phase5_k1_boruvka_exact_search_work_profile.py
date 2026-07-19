@@ -18,6 +18,9 @@ COMPARISON_SCHEMA = "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v3"
 CURRENT_COMPARISON_SCHEMA = (
     "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v4"
 )
+DEDUPLICATED_CURRENT_COMPARISON_SCHEMA = (
+    "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v5"
+)
 STATIC_SCHEMA = "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile_static.v1"
 SCOPE = "certified_local_emst_chain_work_profile_without_scalability_claim"
 WORK_ACCOUNTING = "producer_chain_only_replay_and_reference_excluded"
@@ -76,6 +79,12 @@ CURRENT_RESOLVER_COMPARISON_ROUND_KEYS = RESOLVER_COMPARISON_ROUND_KEYS | {
 CURRENT_RESOLVER_COMPARISON_TOTAL_KEYS = RESOLVER_COMPARISON_TOTAL_KEYS | {
     "direct_current"
 }
+DEDUPLICATED_CURRENT_RESOLVER_COMPARISON_ROUND_KEYS = (
+    CURRENT_RESOLVER_COMPARISON_ROUND_KEYS | {"direct_deduplicated_current"}
+)
+DEDUPLICATED_CURRENT_RESOLVER_COMPARISON_TOTAL_KEYS = (
+    CURRENT_RESOLVER_COMPARISON_TOTAL_KEYS | {"direct_deduplicated_current"}
+)
 RESOLVER_COMMON_KEYS = {
     "aabb_pair_bound_evaluation_count",
     "frontier_peak",
@@ -105,6 +114,16 @@ RESOLVER_CURRENT_KEYS = RESOLVER_DIRECT_KEYS | {
     "component_uniform_root_count",
     "component_uniform_root_leaf_coverage_count",
     "component_uniform_root_update_count",
+}
+RESOLVER_DEDUPLICATED_CURRENT_KEYS = RESOLVER_CURRENT_KEYS | {
+    "component_distinct_mixed_ancestor_count",
+    "component_duplicate_mixed_ancestor_discovery_count",
+    "component_mixed_ancestor_discovery_count",
+    "maximum_component_distinct_mixed_ancestor_count",
+}
+RESOLVER_DEDUPLICATED_CURRENT_MAX_KEYS = {
+    "frontier_peak",
+    "maximum_component_distinct_mixed_ancestor_count",
 }
 RESOLVER_DOMINANCE_KEYS = {
     "aabb_pair_bound_evaluation_count",
@@ -579,7 +598,9 @@ def validate_resolver_counters(
     direct_mode: str | None,
     component_count: int | None = None,
 ) -> dict[str, int]:
-    if direct_mode == "current":
+    if direct_mode == "deduplicated_current":
+        expected_keys = RESOLVER_DEDUPLICATED_CURRENT_KEYS
+    elif direct_mode == "current":
         expected_keys = RESOLVER_CURRENT_KEYS
     elif direct_mode is not None:
         expected_keys = RESOLVER_DIRECT_KEYS
@@ -650,7 +671,7 @@ def validate_resolver_counters(
             == 2 * point_count - 1,
             f"{label} component envelope coverage differs",
         )
-        if direct_mode == "current":
+        if direct_mode in ("current", "deduplicated_current"):
             require(
                 component_count is not None
                 and 1 < component_count <= point_count,
@@ -689,6 +710,46 @@ def validate_resolver_counters(
                 <= mixed_recomputations,
                 f"{label} current mixed-ancestor update bound differs",
             )
+            if direct_mode == "deduplicated_current":
+                discoveries = result[
+                    "component_mixed_ancestor_discovery_count"
+                ]
+                distinct = result["component_distinct_mixed_ancestor_count"]
+                duplicates = result[
+                    "component_duplicate_mixed_ancestor_discovery_count"
+                ]
+                maximum_distinct = result[
+                    "maximum_component_distinct_mixed_ancestor_count"
+                ]
+                require(
+                    duplicates == root_updates - strict_decreases,
+                    f"{label} duplicate mixed-ancestor identity differs",
+                )
+                require(
+                    discoveries == distinct + duplicates,
+                    f"{label} mixed-ancestor discovery identity differs",
+                )
+                require(
+                    root_updates <= mixed_recomputations <= distinct <= discoveries,
+                    f"{label} deduplicated mixed-ancestor chain differs",
+                )
+                require(
+                    maximum_distinct <= distinct
+                    and maximum_distinct <= point_count - 1,
+                    f"{label} maximum distinct mixed-ancestor bound differs",
+                )
+                require(
+                    discoveries <= root_updates * (point_count - 1),
+                    f"{label} mixed-ancestor discovery bound differs",
+                )
+                require(
+                    distinct <= strict_decreases * (point_count - 1),
+                    f"{label} distinct mixed-ancestor bound differs",
+                )
+                require(
+                    distinct <= strict_decreases * maximum_distinct,
+                    f"{label} maximum distinct mixed-ancestor lower bound differs",
+                )
         elif direct_mode == "frozen":
             require(
                 result["component_witness_leaf_update_count"] == 0
@@ -1008,6 +1069,194 @@ def validate_current_comparison_document(
             )
 
 
+def validate_deduplicated_current_comparison_document(
+    value: Any, *, expected_backend: str
+) -> None:
+    document = exact_keys(
+        value, TOP_KEYS, "deduplicated-current comparison work profile"
+    )
+    require(
+        document["schema"] == DEDUPLICATED_CURRENT_COMPARISON_SCHEMA,
+        "deduplicated-current comparison work profile schema differs",
+    )
+    result = exact_keys(
+        document["result"],
+        COMPARISON_RESULT_KEYS,
+        "deduplicated-current comparison result",
+    )
+    comparison_shape = exact_keys(
+        result["resolver_comparison"],
+        RESOLVER_COMPARISON_KEYS,
+        "result.resolver_comparison",
+    )
+    require(
+        isinstance(comparison_shape["rounds"], list),
+        "deduplicated-current comparison rounds differ",
+    )
+    for index, round_item in enumerate(comparison_shape["rounds"]):
+        exact_keys(
+            round_item,
+            DEDUPLICATED_CURRENT_RESOLVER_COMPARISON_ROUND_KEYS,
+            f"deduplicated-current resolver_comparison.rounds[{index}]",
+        )
+    exact_keys(
+        comparison_shape["totals"],
+        DEDUPLICATED_CURRENT_RESOLVER_COMPARISON_TOTAL_KEYS,
+        "result.resolver_comparison.totals",
+    )
+
+    # Removing only the deduplicated resolver must recover the complete v4
+    # current-envelope comparison, including its exact v3 and v1 projections.
+    projected = copy.deepcopy(document)
+    projected["schema"] = CURRENT_COMPARISON_SCHEMA
+    projected_comparison = projected["result"]["resolver_comparison"]
+    for round_value in projected_comparison["rounds"]:
+        require(
+            isinstance(round_value, dict),
+            "deduplicated-current comparison round differs",
+        )
+        require(
+            "direct_deduplicated_current" in round_value,
+            "deduplicated-current comparison round lost its resolver",
+        )
+        del round_value["direct_deduplicated_current"]
+    require(
+        isinstance(projected_comparison["totals"], dict)
+        and "direct_deduplicated_current" in projected_comparison["totals"],
+        "deduplicated-current comparison totals lost their resolver",
+    )
+    del projected_comparison["totals"]["direct_deduplicated_current"]
+    validate_current_comparison_document(
+        projected, expected_backend=expected_backend
+    )
+
+    point_count = natural(document["point_count"], "point_count", positive=True)
+    comparison = exact_keys(
+        result["resolver_comparison"],
+        RESOLVER_COMPARISON_KEYS,
+        "result.resolver_comparison",
+    )
+    rounds = comparison["rounds"]
+    require(
+        isinstance(rounds, list),
+        "deduplicated-current comparison rounds differ",
+    )
+    deduplicated_sums = {
+        key: 0 for key in RESOLVER_DEDUPLICATED_CURRENT_KEYS
+    }
+    unchanged_partition_keys = (
+        "component_kappa_update_count",
+        "component_uniform_root_count",
+        "component_uniform_root_leaf_coverage_count",
+        "component_uniform_root_update_count",
+        "strict_component_cutoff_decrease_count",
+    )
+    maintenance_keys = (
+        "component_mixed_ancestor_recomputation_count",
+        "component_mixed_ancestor_update_count",
+    )
+    for index, round_item in enumerate(rounds):
+        round_value = exact_keys(
+            round_item,
+            DEDUPLICATED_CURRENT_RESOLVER_COMPARISON_ROUND_KEYS,
+            f"deduplicated-current resolver_comparison.rounds[{index}]",
+        )
+        label = f"deduplicated-current resolver_comparison.rounds[{index}]"
+        component_count = natural(
+            round_value["pre_component_count"],
+            f"{label}.pre_component_count",
+            positive=True,
+        )
+        current = validate_resolver_counters(
+            round_value["direct_current"],
+            f"{label}.direct_current",
+            point_count=point_count,
+            direct_mode="current",
+            component_count=component_count,
+        )
+        deduplicated = validate_resolver_counters(
+            round_value["direct_deduplicated_current"],
+            f"{label}.direct_deduplicated_current",
+            point_count=point_count,
+            direct_mode="deduplicated_current",
+            component_count=component_count,
+        )
+        for key in RESOLVER_DOMINANCE_KEYS:
+            require(
+                deduplicated[key] == current[key],
+                f"{label} deduplicated-current traversal {key} differs",
+            )
+        for key in unchanged_partition_keys:
+            require(
+                deduplicated[key] == current[key],
+                f"{label} deduplicated-current partition {key} differs",
+            )
+        for key in maintenance_keys:
+            require(
+                deduplicated[key] <= current[key],
+                f"{label} deduplicated-current maintenance {key} exceeds current",
+            )
+        for key in RESOLVER_DEDUPLICATED_CURRENT_KEYS:
+            if key in RESOLVER_DEDUPLICATED_CURRENT_MAX_KEYS:
+                deduplicated_sums[key] = max(
+                    deduplicated_sums[key], deduplicated[key]
+                )
+            else:
+                deduplicated_sums[key] += deduplicated[key]
+
+    totals = exact_keys(
+        comparison["totals"],
+        DEDUPLICATED_CURRENT_RESOLVER_COMPARISON_TOTAL_KEYS,
+        "result.resolver_comparison.totals",
+    )
+    total_current = exact_keys(
+        totals["direct_current"],
+        RESOLVER_CURRENT_KEYS,
+        "result.resolver_comparison.totals.direct_current",
+    )
+    total_deduplicated = exact_keys(
+        totals["direct_deduplicated_current"],
+        RESOLVER_DEDUPLICATED_CURRENT_KEYS,
+        "result.resolver_comparison.totals.direct_deduplicated_current",
+    )
+    for key, expected in deduplicated_sums.items():
+        require(
+            natural(
+                total_deduplicated[key],
+                f"totals.direct_deduplicated_current.{key}",
+            )
+            == expected,
+            f"total deduplicated-current resolver {key} differs",
+        )
+    for key in RESOLVER_DOMINANCE_KEYS:
+        require(
+            natural(
+                total_deduplicated[key],
+                f"totals.direct_deduplicated_current.{key}",
+            )
+            == natural(total_current[key], f"totals.direct_current.{key}"),
+            f"total deduplicated-current traversal {key} differs",
+        )
+    for key in unchanged_partition_keys:
+        require(
+            natural(
+                total_deduplicated[key],
+                f"totals.direct_deduplicated_current.{key}",
+            )
+            == natural(total_current[key], f"totals.direct_current.{key}"),
+            f"total deduplicated-current partition {key} differs",
+        )
+    for key in maintenance_keys:
+        require(
+            natural(
+                total_deduplicated[key],
+                f"totals.direct_deduplicated_current.{key}",
+            )
+            <= natural(total_current[key], f"totals.direct_current.{key}"),
+            f"total deduplicated-current maintenance {key} exceeds current",
+        )
+
+
 def read_profile_log(path: Path) -> dict[str, Any]:
     require(
         path.is_file() and not path.is_symlink(), "profile log must be a regular file"
@@ -1054,9 +1303,16 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
         SCHEMA,
         COMPARISON_SCHEMA,
         CURRENT_COMPARISON_SCHEMA,
+        DEDUPLICATED_CURRENT_COMPARISON_SCHEMA,
         SCOPE,
         "--compare-resolvers",
         "--compare-current-envelope",
+        "--compare-deduplicated-current-envelope",
+        "direct_deduplicated_current",
+        "component_distinct_mixed_ancestor_count",
+        "component_duplicate_mixed_ancestor_discovery_count",
+        "component_mixed_ancestor_discovery_count",
+        "maximum_component_distinct_mixed_ancestor_count",
         "build_gpu_seeded_cpu_exact_external_1nn_k1_boruvka",
         "exact_operation_count_unweighted",
         "candidate_record_count",
@@ -1328,6 +1584,107 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
             f"uniform current comparison {resolver} total fixture differs",
         )
 
+    deduplicated_current_completed = subprocess.run(
+        [
+            str(executable.resolve()),
+            "--family",
+            "uniform",
+            "--point-count",
+            "12",
+            "--window-radius",
+            "2",
+            "--seed",
+            "2",
+            "--git-sha",
+            "0" * 40,
+            "--compare-deduplicated-current-envelope",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    require(
+        not deduplicated_current_completed.stderr,
+        "deduplicated-current comparison wrote stderr",
+    )
+    require(
+        deduplicated_current_completed.stdout.endswith("\n")
+        and deduplicated_current_completed.stdout.count("\n") == 1,
+        "deduplicated-current comparison output is not one-line JSON",
+    )
+    deduplicated_current_value = json.loads(
+        deduplicated_current_completed.stdout,
+        object_pairs_hook=reject_duplicate_json_keys,
+        parse_constant=reject_non_finite_json_constant,
+    )
+    validate_deduplicated_current_comparison_document(
+        deduplicated_current_value, expected_backend="fake_gpu"
+    )
+    deduplicated_current_rounds = deduplicated_current_value["result"][
+        "resolver_comparison"
+    ]["rounds"]
+    require(
+        deduplicated_current_value["result"]["component_count_path"]
+        == [12, 4, 1]
+        and len(deduplicated_current_rounds) == 2,
+        "uniform deduplicated-current comparison component path differs",
+    )
+
+    deduplicated_projection = copy.deepcopy(deduplicated_current_value)
+    deduplicated_projection["schema"] = CURRENT_COMPARISON_SCHEMA
+    deduplicated_projection_comparison = deduplicated_projection["result"][
+        "resolver_comparison"
+    ]
+    for round_value in deduplicated_projection_comparison["rounds"]:
+        del round_value["direct_deduplicated_current"]
+    del deduplicated_projection_comparison["totals"][
+        "direct_deduplicated_current"
+    ]
+    require(
+        deduplicated_projection == current_value,
+        "deduplicated-current comparison changed the projected v4 work profile",
+    )
+
+    deduplicated_specific_keys = (
+        "component_distinct_mixed_ancestor_count",
+        "component_duplicate_mixed_ancestor_discovery_count",
+        "component_mixed_ancestor_discovery_count",
+        "component_mixed_ancestor_recomputation_count",
+        "component_mixed_ancestor_update_count",
+        "maximum_component_distinct_mixed_ancestor_count",
+        "component_uniform_root_update_count",
+        "strict_component_cutoff_decrease_count",
+    )
+    expected_deduplicated_specific = (
+        (10, 0, 10, 7, 6, 4, 3, 3),
+        (7, 1, 8, 7, 5, 4, 3, 2),
+    )
+    for round_index, expected in enumerate(expected_deduplicated_specific):
+        observed = deduplicated_current_rounds[round_index][
+            "direct_deduplicated_current"
+        ]
+        require(
+            tuple(observed[key] for key in deduplicated_specific_keys)
+            == expected,
+            "uniform deduplicated-current envelope fixture differs",
+        )
+    deduplicated_current_totals = deduplicated_current_value["result"][
+        "resolver_comparison"
+    ]["totals"]["direct_deduplicated_current"]
+    require(
+        tuple(
+            deduplicated_current_totals[key]
+            for key in deduplicated_specific_keys
+        )
+        == (17, 1, 18, 14, 11, 4, 6, 5)
+        and tuple(
+            deduplicated_current_totals[key] for key in total_work_keys
+        )
+        == (141, 61, 15),
+        "uniform deduplicated-current total fixture differs",
+    )
+
     mutations: list[dict[str, Any]] = []
     for key, replacement in (
         ("qualification_claimed", True),
@@ -1538,6 +1895,145 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
         )
     current_mutations.append(mutated)
 
+    def refresh_deduplicated_current_totals(
+        document: dict[str, Any],
+    ) -> None:
+        comparison = document["result"]["resolver_comparison"]
+        totals = comparison["totals"]["direct_deduplicated_current"]
+        for key in RESOLVER_DEDUPLICATED_CURRENT_KEYS:
+            values = [
+                round_value["direct_deduplicated_current"][key]
+                for round_value in comparison["rounds"]
+            ]
+            totals[key] = (
+                max(values)
+                if key in RESOLVER_DEDUPLICATED_CURRENT_MAX_KEYS
+                else sum(values)
+            )
+
+    deduplicated_current_mutations: list[dict[str, Any]] = []
+    mutated = copy.deepcopy(deduplicated_current_value)
+    del mutated["result"]["resolver_comparison"]["rounds"][0][
+        "direct_deduplicated_current"
+    ]
+    deduplicated_current_mutations.append(mutated)
+
+    mutated = copy.deepcopy(deduplicated_current_value)
+    del mutated["result"]["resolver_comparison"]["rounds"][0][
+        "direct_deduplicated_current"
+    ]["component_mixed_ancestor_discovery_count"]
+    deduplicated_current_mutations.append(mutated)
+
+    mutated = copy.deepcopy(deduplicated_current_value)
+    deduplicated_round = mutated["result"]["resolver_comparison"]["rounds"][1][
+        "direct_deduplicated_current"
+    ]
+    deduplicated_round[
+        "component_duplicate_mixed_ancestor_discovery_count"
+    ] += 1
+    deduplicated_current_mutations.append(mutated)
+
+    mutated = copy.deepcopy(deduplicated_current_value)
+    deduplicated_round = mutated["result"]["resolver_comparison"]["rounds"][1][
+        "direct_deduplicated_current"
+    ]
+    deduplicated_round["component_mixed_ancestor_discovery_count"] += 1
+    deduplicated_current_mutations.append(mutated)
+
+    mutated = copy.deepcopy(deduplicated_current_value)
+    deduplicated_round = mutated["result"]["resolver_comparison"]["rounds"][0][
+        "direct_deduplicated_current"
+    ]
+    deduplicated_round["component_mixed_ancestor_recomputation_count"] = (
+        deduplicated_round["component_uniform_root_update_count"] - 1
+    )
+    deduplicated_current_mutations.append(mutated)
+
+    mutated = copy.deepcopy(deduplicated_current_value)
+    deduplicated_round = mutated["result"]["resolver_comparison"]["rounds"][0][
+        "direct_deduplicated_current"
+    ]
+    deduplicated_round["component_distinct_mixed_ancestor_count"] = (
+        deduplicated_round["component_mixed_ancestor_recomputation_count"] - 1
+    )
+    deduplicated_current_mutations.append(mutated)
+
+    mutated = copy.deepcopy(deduplicated_current_value)
+    deduplicated_round = mutated["result"]["resolver_comparison"]["rounds"][0][
+        "direct_deduplicated_current"
+    ]
+    deduplicated_round["maximum_component_distinct_mixed_ancestor_count"] = (
+        deduplicated_round["component_distinct_mixed_ancestor_count"] + 1
+    )
+    deduplicated_current_mutations.append(mutated)
+
+    # Keep both discovery identities and the chain closed while violating the
+    # strict-decrease/mixed-node bound on the fragmented second round.
+    mutated = copy.deepcopy(deduplicated_current_value)
+    deduplicated_round = mutated["result"]["resolver_comparison"]["rounds"][1][
+        "direct_deduplicated_current"
+    ]
+    deduplicated_round["component_distinct_mixed_ancestor_count"] = 23
+    deduplicated_round["component_mixed_ancestor_discovery_count"] = 24
+    deduplicated_current_mutations.append(mutated)
+
+    # Keep every other bound and identity closed while making the per-update
+    # distinct maximum exceed the number of internal LBVH nodes.
+    mutated = copy.deepcopy(deduplicated_current_value)
+    deduplicated_round = mutated["result"]["resolver_comparison"]["rounds"][0][
+        "direct_deduplicated_current"
+    ]
+    deduplicated_round["component_distinct_mixed_ancestor_count"] = 12
+    deduplicated_round["component_mixed_ancestor_discovery_count"] = 12
+    deduplicated_round["maximum_component_distinct_mixed_ancestor_count"] = 12
+    deduplicated_current_mutations.append(mutated)
+
+    mutated = copy.deepcopy(deduplicated_current_value)
+    mutated["result"]["resolver_comparison"]["totals"][
+        "direct_deduplicated_current"
+    ]["maximum_component_distinct_mixed_ancestor_count"] += 1
+    deduplicated_current_mutations.append(mutated)
+
+    mutated = copy.deepcopy(deduplicated_current_value)
+    deduplicated_round = mutated["result"]["resolver_comparison"]["rounds"][0][
+        "direct_deduplicated_current"
+    ]
+    deduplicated_round["maximum_component_distinct_mixed_ancestor_count"] = 0
+    deduplicated_current_mutations.append(mutated)
+
+    mutated = copy.deepcopy(deduplicated_current_value)
+    mutated["result"]["resolver_comparison"]["totals"][
+        "direct_deduplicated_current"
+    ]["component_distinct_mixed_ancestor_count"] += 1
+    deduplicated_current_mutations.append(mutated)
+
+    # Preserve the deduplicated resolver's internal identities and exact
+    # aggregates while changing only its traversal relative to direct_current.
+    mutated = copy.deepcopy(deduplicated_current_value)
+    comparison = mutated["result"]["resolver_comparison"]
+    deduplicated_round = comparison["rounds"][1][
+        "direct_deduplicated_current"
+    ]
+    dynamic_round = comparison["rounds"][1]["dynamic"]
+    for key in RESOLVER_COMMON_KEYS:
+        deduplicated_round[key] = dynamic_round[key]
+    refresh_deduplicated_current_totals(mutated)
+    deduplicated_current_mutations.append(mutated)
+
+    # Increasing this recomputation remains within the deduplicated chain, but
+    # must be rejected because it exceeds the baseline current maintenance.
+    mutated = copy.deepcopy(deduplicated_current_value)
+    comparison = mutated["result"]["resolver_comparison"]
+    deduplicated_round = comparison["rounds"][0][
+        "direct_deduplicated_current"
+    ]
+    current_round = comparison["rounds"][0]["direct_current"]
+    deduplicated_round["component_mixed_ancestor_recomputation_count"] = (
+        current_round["component_mixed_ancestor_recomputation_count"] + 1
+    )
+    refresh_deduplicated_current_totals(mutated)
+    deduplicated_current_mutations.append(mutated)
+
     rejected = 0
     for mutation in mutations:
         try:
@@ -1562,6 +2058,15 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
             rejected += 1
         else:
             fail("a current-comparison negative mutation was accepted")
+    for mutation in deduplicated_current_mutations:
+        try:
+            validate_deduplicated_current_comparison_document(
+                mutation, expected_backend="fake_gpu"
+            )
+        except ContractError:
+            rejected += 1
+        else:
+            fail("a deduplicated-current negative mutation was accepted")
     try:
         json.loads(
             '{"schema":1,"schema":2}', object_pairs_hook=reject_duplicate_json_keys

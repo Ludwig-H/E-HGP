@@ -140,7 +140,9 @@ void validate_component_envelope_mode(
       mode !=
           K1BoruvkaComponentEnvelopeMode::sparse_witness_path_monotone &&
       mode != K1BoruvkaComponentEnvelopeMode::
-                  exact_current_maximal_uniform_roots) {
+                  exact_current_maximal_uniform_roots &&
+      mode != K1BoruvkaComponentEnvelopeMode::
+                  exact_current_deduplicated_mixed_ancestors) {
     throw std::invalid_argument(
         "a component-direct dual-tree envelope mode is unspecified");
   }
@@ -1532,7 +1534,11 @@ resolve_seeded_exact_component_minima_dual_tree(
   K1BoruvkaComponentDualTreeSearchAudit& audit =
       resolution.search_audit;
   audit.component_envelope_mode = envelope_mode;
+  const bool deduplicated_current_envelope =
+      envelope_mode == K1BoruvkaComponentEnvelopeMode::
+                           exact_current_deduplicated_mixed_ancestors;
   const bool exact_current_envelope =
+      deduplicated_current_envelope ||
       envelope_mode == K1BoruvkaComponentEnvelopeMode::
                            exact_current_maximal_uniform_roots;
   audit.resident_point_count = point_count;
@@ -1869,6 +1875,20 @@ resolve_seeded_exact_component_minima_dual_tree(
   };
 
   std::size_t expected_component_uniform_root_updates = 0U;
+  const std::size_t deduplicated_scratch_size =
+      deduplicated_current_envelope ? host.nodes.size() : 0U;
+  std::vector<std::uint8_t> mixed_ancestor_mark(
+      deduplicated_scratch_size, 0U);
+  std::vector<std::uint8_t> mixed_ancestor_dirty(
+      deduplicated_scratch_size, 0U);
+  std::vector<std::size_t> marked_mixed_child_count(
+      deduplicated_scratch_size, 0U);
+  std::vector<std::size_t> marked_mixed_ancestors;
+  std::vector<std::size_t> ready_mixed_ancestors;
+  if (deduplicated_current_envelope) {
+    marked_mixed_ancestors.reserve(mixed_node_count);
+    ready_mixed_ancestors.reserve(mixed_node_count);
+  }
 
   const auto update_component_envelope_after_strict_decrease = [&](
       std::size_t point_index,
@@ -1897,6 +1917,9 @@ resolve_seeded_exact_component_minima_dual_tree(
             audit.cpu_component_uniform_root_update_count,
             1U,
             "the component uniform-root update count overflowed size_t");
+        if (deduplicated_current_envelope) {
+          continue;
+        }
         while (parent_by_node[node_index] != invalid_node_index) {
           const std::size_t parent = parent_by_node[node_index];
           if (tags[parent] != detail::k1_boruvka_mixed_component) {
@@ -1931,6 +1954,164 @@ resolve_seeded_exact_component_minima_dual_tree(
               1U,
               "the component mixed-ancestor update count overflowed size_t");
           node_index = parent;
+        }
+      }
+      if (deduplicated_current_envelope) {
+        marked_mixed_ancestors.clear();
+        ready_mixed_ancestors.clear();
+        for (std::size_t root_offset = root_begin;
+             root_offset < root_end;
+             ++root_offset) {
+          std::size_t node_index = component_uniform_roots[root_offset];
+          while (parent_by_node[node_index] != invalid_node_index) {
+            const std::size_t parent = parent_by_node[node_index];
+            audit.cpu_component_mixed_ancestor_discovery_count =
+                checked_size_sum(
+                    audit.cpu_component_mixed_ancestor_discovery_count,
+                    1U,
+                    "the component mixed-ancestor discovery count overflowed size_t");
+            if (mixed_ancestor_mark[parent] != 0U) {
+              audit.cpu_component_duplicate_mixed_ancestor_discovery_count =
+                  checked_size_sum(
+                      audit.cpu_component_duplicate_mixed_ancestor_discovery_count,
+                      1U,
+                      "the duplicate component mixed-ancestor discovery count overflowed size_t");
+              break;
+            }
+            if (tags[parent] != detail::k1_boruvka_mixed_component ||
+                mixed_ancestor_dirty[parent] != 0U ||
+                marked_mixed_child_count[parent] != 0U) {
+              throw std::logic_error(
+                  "a deduplicated component ancestor mark is not reusable mixed scratch");
+            }
+            mixed_ancestor_mark[parent] = 1U;
+            marked_mixed_ancestors.push_back(parent);
+            node_index = parent;
+          }
+        }
+
+        audit.cpu_component_distinct_mixed_ancestor_count = checked_size_sum(
+            audit.cpu_component_distinct_mixed_ancestor_count,
+            marked_mixed_ancestors.size(),
+            "the distinct component mixed-ancestor count overflowed size_t");
+        audit.maximum_component_distinct_mixed_ancestor_count = std::max(
+            audit.maximum_component_distinct_mixed_ancestor_count,
+            marked_mixed_ancestors.size());
+        if (mixed_ancestor_mark[host.root_index] == 0U ||
+            marked_mixed_ancestors.size() < root_end - root_begin) {
+          throw std::logic_error(
+              "the deduplicated mixed-ancestor union is not a rooted cover");
+        }
+
+        for (const std::size_t node_index : marked_mixed_ancestors) {
+          const detail::K1BoruvkaNodeInputRecord& node =
+              host.nodes[node_index];
+          if (node.leaf_point_id != detail::k1_boruvka_sentinel) {
+            throw std::logic_error(
+                "a deduplicated mixed ancestor is unexpectedly a leaf");
+          }
+          const std::size_t left_child =
+              static_cast<std::size_t>(node.left_child);
+          const std::size_t right_child =
+              static_cast<std::size_t>(node.right_child);
+          marked_mixed_child_count[node_index] =
+              static_cast<std::size_t>(mixed_ancestor_mark[left_child] != 0U) +
+              static_cast<std::size_t>(mixed_ancestor_mark[right_child] != 0U);
+          if (marked_mixed_child_count[node_index] == 0U) {
+            ready_mixed_ancestors.push_back(node_index);
+          }
+        }
+        for (std::size_t root_offset = root_begin;
+             root_offset < root_end;
+             ++root_offset) {
+          const std::size_t root = component_uniform_roots[root_offset];
+          const std::size_t parent = parent_by_node[root];
+          if (parent == invalid_node_index ||
+              mixed_ancestor_mark[parent] == 0U) {
+            throw std::logic_error(
+                "a component uniform root has no marked mixed parent");
+          }
+          if (mixed_ancestor_dirty[parent] != 0U) {
+            throw std::logic_error(
+                "two maximal uniform roots share a direct mixed parent");
+          }
+          mixed_ancestor_dirty[parent] = 1U;
+        }
+
+        std::size_t processed_mixed_ancestor_count = 0U;
+        for (std::size_t ready_offset = 0U;
+             ready_offset < ready_mixed_ancestors.size();
+             ++ready_offset) {
+          const std::size_t node_index =
+              ready_mixed_ancestors[ready_offset];
+          if (mixed_ancestor_mark[node_index] == 0U ||
+              marked_mixed_child_count[node_index] != 0U) {
+            throw std::logic_error(
+                "the deduplicated mixed-ancestor queue is not bottom-up");
+          }
+          ++processed_mixed_ancestor_count;
+          if (mixed_ancestor_dirty[node_index] != 0U) {
+            audit.cpu_component_mixed_ancestor_recomputation_count =
+                checked_size_sum(
+                    audit.cpu_component_mixed_ancestor_recomputation_count,
+                    1U,
+                    "the deduplicated component mixed-ancestor recomputation count overflowed size_t");
+            const detail::K1BoruvkaNodeInputRecord& node =
+                host.nodes[node_index];
+            const std::size_t left_child =
+                static_cast<std::size_t>(node.left_child);
+            const std::size_t right_child =
+                static_cast<std::size_t>(node.right_child);
+            const exact::ExactLevel& left_cutoff = node_cutoff(left_child);
+            const exact::ExactLevel& right_cutoff = node_cutoff(right_child);
+            const exact::ExactLevel& refreshed =
+                left_cutoff < right_cutoff ? right_cutoff : left_cutoff;
+            if (node_cutoff_upper_bounds[node_index] < refreshed) {
+              throw std::logic_error(
+                  "a deduplicated component mixed ancestor increased its envelope");
+            }
+            if (refreshed < node_cutoff_upper_bounds[node_index]) {
+              node_cutoff_upper_bounds[node_index] = refreshed;
+              audit.cpu_component_mixed_ancestor_update_count =
+                  checked_size_sum(
+                      audit.cpu_component_mixed_ancestor_update_count,
+                      1U,
+                      "the deduplicated component mixed-ancestor update count overflowed size_t");
+              const std::size_t parent = parent_by_node[node_index];
+              if (parent != invalid_node_index) {
+                if (mixed_ancestor_mark[parent] == 0U) {
+                  throw std::logic_error(
+                      "a changed deduplicated mixed ancestor has an unmarked parent");
+                }
+                mixed_ancestor_dirty[parent] = 1U;
+              }
+            }
+          }
+
+          const std::size_t parent = parent_by_node[node_index];
+          if (parent != invalid_node_index) {
+            if (mixed_ancestor_mark[parent] == 0U ||
+                marked_mixed_child_count[parent] == 0U) {
+              throw std::logic_error(
+                  "the deduplicated mixed-ancestor induced tree is incomplete");
+            }
+            --marked_mixed_child_count[parent];
+            if (marked_mixed_child_count[parent] == 0U) {
+              ready_mixed_ancestors.push_back(parent);
+            }
+          }
+        }
+        if (processed_mixed_ancestor_count != marked_mixed_ancestors.size() ||
+            ready_mixed_ancestors.size() != marked_mixed_ancestors.size() ||
+            ready_mixed_ancestors.empty() ||
+            ready_mixed_ancestors.back() != host.root_index) {
+          throw std::logic_error(
+              "the deduplicated mixed-ancestor induced tree was not exhausted once");
+        }
+        for (const std::size_t node_index : marked_mixed_ancestors) {
+          mixed_ancestor_mark[node_index] = 0U;
+          mixed_ancestor_dirty[node_index] = 0U;
+          marked_mixed_child_count[node_index] = 0U;
         }
       }
       return;
@@ -2140,6 +2321,21 @@ resolve_seeded_exact_component_minima_dual_tree(
                ? true
                : count <= left * right;
   };
+  const bool deduplicated_discovery_counts_zero =
+      audit.cpu_component_mixed_ancestor_discovery_count == 0U &&
+      audit.cpu_component_distinct_mixed_ancestor_count == 0U &&
+      audit.cpu_component_duplicate_mixed_ancestor_discovery_count == 0U &&
+      audit.maximum_component_distinct_mixed_ancestor_count == 0U;
+  const bool exact_current_root_counts_closed =
+      audit.cpu_component_witness_leaf_update_count == 0U &&
+      audit.cpu_component_witness_ancestor_update_count == 0U &&
+      audit.component_uniform_root_count >= component_count &&
+      audit.component_uniform_root_count <= point_count &&
+      audit.component_uniform_root_leaf_coverage_count == point_count &&
+      audit.cpu_component_uniform_root_update_count ==
+          expected_component_uniform_root_updates &&
+      audit.cpu_component_uniform_root_update_count >=
+          audit.cpu_strict_component_cutoff_decrease_count;
   const bool envelope_update_counts_closed =
       (envelope_mode == K1BoruvkaComponentEnvelopeMode::frozen_initial &&
        audit.cpu_component_witness_leaf_update_count == 0U &&
@@ -2148,7 +2344,8 @@ resolve_seeded_exact_component_minima_dual_tree(
        audit.component_uniform_root_leaf_coverage_count == 0U &&
        audit.cpu_component_uniform_root_update_count == 0U &&
        audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
-       audit.cpu_component_mixed_ancestor_update_count == 0U) ||
+       audit.cpu_component_mixed_ancestor_update_count == 0U &&
+       deduplicated_discovery_counts_zero) ||
       (envelope_mode ==
            K1BoruvkaComponentEnvelopeMode::sparse_witness_path_monotone &&
        audit.cpu_component_witness_leaf_update_count ==
@@ -2161,23 +2358,51 @@ resolve_seeded_exact_component_minima_dual_tree(
        audit.component_uniform_root_leaf_coverage_count == 0U &&
        audit.cpu_component_uniform_root_update_count == 0U &&
        audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
-       audit.cpu_component_mixed_ancestor_update_count == 0U) ||
-      (exact_current_envelope &&
-       audit.cpu_component_witness_leaf_update_count == 0U &&
-       audit.cpu_component_witness_ancestor_update_count == 0U &&
-       audit.component_uniform_root_count >= component_count &&
-       audit.component_uniform_root_count <= point_count &&
-       audit.component_uniform_root_leaf_coverage_count == point_count &&
-       audit.cpu_component_uniform_root_update_count ==
-           expected_component_uniform_root_updates &&
-       audit.cpu_component_uniform_root_update_count >=
-           audit.cpu_strict_component_cutoff_decrease_count &&
+       audit.cpu_component_mixed_ancestor_update_count == 0U &&
+       deduplicated_discovery_counts_zero) ||
+      (exact_current_envelope && !deduplicated_current_envelope &&
+       exact_current_root_counts_closed &&
+       deduplicated_discovery_counts_zero &&
        count_at_most_product(
            audit.cpu_component_mixed_ancestor_recomputation_count,
            audit.cpu_component_uniform_root_update_count,
            audit.lbvh_maximum_depth) &&
        audit.cpu_component_mixed_ancestor_update_count <=
-           audit.cpu_component_mixed_ancestor_recomputation_count);
+           audit.cpu_component_mixed_ancestor_recomputation_count) ||
+      (deduplicated_current_envelope &&
+       exact_current_root_counts_closed &&
+       audit.cpu_component_distinct_mixed_ancestor_count <=
+           audit.cpu_component_mixed_ancestor_discovery_count &&
+       audit.cpu_component_duplicate_mixed_ancestor_discovery_count ==
+           audit.cpu_component_mixed_ancestor_discovery_count -
+               audit.cpu_component_distinct_mixed_ancestor_count &&
+       audit.cpu_component_duplicate_mixed_ancestor_discovery_count ==
+           audit.cpu_component_uniform_root_update_count -
+               audit.cpu_strict_component_cutoff_decrease_count &&
+       audit.cpu_component_uniform_root_update_count <=
+           audit.cpu_component_mixed_ancestor_recomputation_count &&
+       audit.cpu_component_uniform_root_update_count <=
+           audit.cpu_component_distinct_mixed_ancestor_count &&
+       count_at_most_product(
+           audit.cpu_component_mixed_ancestor_discovery_count,
+           audit.cpu_component_uniform_root_update_count,
+           audit.lbvh_maximum_depth) &&
+       count_at_most_product(
+           audit.cpu_component_distinct_mixed_ancestor_count,
+           audit.cpu_strict_component_cutoff_decrease_count,
+           mixed_node_count) &&
+       count_at_most_product(
+           audit.cpu_component_distinct_mixed_ancestor_count,
+           audit.cpu_strict_component_cutoff_decrease_count,
+           audit.maximum_component_distinct_mixed_ancestor_count) &&
+       audit.cpu_component_mixed_ancestor_recomputation_count <=
+           audit.cpu_component_distinct_mixed_ancestor_count &&
+       audit.cpu_component_mixed_ancestor_update_count <=
+           audit.cpu_component_mixed_ancestor_recomputation_count &&
+       audit.maximum_component_distinct_mixed_ancestor_count <=
+           mixed_node_count &&
+       audit.maximum_component_distinct_mixed_ancestor_count <=
+           audit.cpu_component_distinct_mixed_ancestor_count);
   if (audit.point_seed_count != point_count ||
       audit.component_seed_incumbent_count != component_count ||
       audit.target_component_seed_offer_count != point_count ||
@@ -2211,6 +2436,8 @@ resolve_seeded_exact_component_minima_dual_tree(
       exact_current_envelope;
   audit.exact_current_component_envelope_certified =
       exact_current_envelope;
+  audit.deduplicated_mixed_ancestor_refresh_certified =
+      deduplicated_current_envelope;
   audit.canonical_kappa_resolution_certified = true;
   audit.component_minima_complete = true;
   resolution.morton_seed_audit = seeds.morton_audit;

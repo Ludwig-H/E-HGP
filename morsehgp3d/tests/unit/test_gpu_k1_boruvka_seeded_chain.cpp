@@ -440,10 +440,16 @@ void test_dual_tree_three_round_chain_and_falsifications() {
             audit.cpu_component_uniform_root_update_count == 0U &&
             audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
             audit.cpu_component_mixed_ancestor_update_count == 0U &&
+            audit.cpu_component_mixed_ancestor_discovery_count == 0U &&
+            audit.cpu_component_distinct_mixed_ancestor_count == 0U &&
+            audit.cpu_component_duplicate_mixed_ancestor_discovery_count ==
+                0U &&
+            audit.maximum_component_distinct_mixed_ancestor_count == 0U &&
             audit.live_component_cutoff_upper_bound_certified &&
             audit.pointwise_at_most_frozen_envelope_certified &&
             !audit.maximal_uniform_component_roots_certified &&
             !audit.exact_current_component_envelope_certified &&
+            !audit.deduplicated_mixed_ancestor_refresh_certified &&
             audit.covered_unordered_point_pair_count == 28U &&
             audit.unordered_point_pair_count == 28U &&
             audit.lbvh_maximum_depth ==
@@ -632,6 +638,30 @@ void test_dual_tree_three_round_chain_and_falsifications() {
               cpu_exact_decision_chain_certified &&
           !current_envelope_certificate_check.emst_witness_certified,
       "persistent exact-current certificate falsification invalidates traversal");
+
+  K1DualTreeExactBoruvkaResult bad_deduplicated_counter = result;
+  bad_deduplicated_counter.rounds[0].dual_tree_search_audit.
+      cpu_component_mixed_ancestor_discovery_count = 1U;
+  const auto deduplicated_counter_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_deduplicated_counter);
+  check(
+      !deduplicated_counter_check.exact_dual_tree_chain_certified &&
+          deduplicated_counter_check.cpu_exact_decision_chain_certified &&
+          !deduplicated_counter_check.emst_witness_certified,
+      "persistent deduplicated-counter falsification invalidates traversal");
+
+  K1DualTreeExactBoruvkaResult bad_deduplicated_certificate = result;
+  bad_deduplicated_certificate.rounds[0].dual_tree_search_audit.
+      deduplicated_mixed_ancestor_refresh_certified = true;
+  const auto deduplicated_certificate_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_deduplicated_certificate);
+  check(
+      !deduplicated_certificate_check.exact_dual_tree_chain_certified &&
+          deduplicated_certificate_check.cpu_exact_decision_chain_certified &&
+          !deduplicated_certificate_check.emst_witness_certified,
+      "persistent deduplicated certificate falsification invalidates traversal");
 
   K1DualTreeExactBoruvkaResult bad_bidirectional_seed = result;
   bad_bidirectional_seed.rounds[0].dual_tree_search_audit.

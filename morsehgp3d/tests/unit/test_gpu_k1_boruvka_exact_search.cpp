@@ -402,9 +402,18 @@ void check_component_dual_tree_round(
   const auto& audit = result.search_audit;
   const std::size_t maximum_unordered_point_pairs =
       point_count * (point_count - 1U) / 2U;
+  const bool deduplicated_current_envelope =
+      expected_envelope_mode == K1BoruvkaComponentEnvelopeMode::
+                                    exact_current_deduplicated_mixed_ancestors;
   const bool exact_current_envelope =
+      deduplicated_current_envelope ||
       expected_envelope_mode == K1BoruvkaComponentEnvelopeMode::
                                     exact_current_maximal_uniform_roots;
+  const bool deduplicated_counts_zero =
+      audit.cpu_component_mixed_ancestor_discovery_count == 0U &&
+      audit.cpu_component_distinct_mixed_ancestor_count == 0U &&
+      audit.cpu_component_duplicate_mixed_ancestor_discovery_count == 0U &&
+      audit.maximum_component_distinct_mixed_ancestor_count == 0U;
   const bool envelope_update_counts_close =
       (expected_envelope_mode ==
                K1BoruvkaComponentEnvelopeMode::frozen_initial &&
@@ -414,7 +423,8 @@ void check_component_dual_tree_round(
            audit.component_uniform_root_leaf_coverage_count == 0U &&
            audit.cpu_component_uniform_root_update_count == 0U &&
            audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
-           audit.cpu_component_mixed_ancestor_update_count == 0U) ||
+           audit.cpu_component_mixed_ancestor_update_count == 0U &&
+           deduplicated_counts_zero) ||
       (expected_envelope_mode ==
                K1BoruvkaComponentEnvelopeMode::
                    sparse_witness_path_monotone &&
@@ -427,8 +437,9 @@ void check_component_dual_tree_round(
            audit.component_uniform_root_leaf_coverage_count == 0U &&
            audit.cpu_component_uniform_root_update_count == 0U &&
            audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
-           audit.cpu_component_mixed_ancestor_update_count == 0U) ||
-      (exact_current_envelope &&
+           audit.cpu_component_mixed_ancestor_update_count == 0U &&
+           deduplicated_counts_zero) ||
+      (exact_current_envelope && !deduplicated_current_envelope &&
            audit.cpu_component_witness_leaf_update_count == 0U &&
            audit.cpu_component_witness_ancestor_update_count == 0U &&
            audit.component_uniform_root_count >= frozen_component_count &&
@@ -443,7 +454,37 @@ void check_component_dual_tree_round(
                audit.cpu_component_uniform_root_update_count *
                    audit.lbvh_maximum_depth &&
            audit.cpu_component_mixed_ancestor_update_count <=
-               audit.cpu_component_mixed_ancestor_recomputation_count);
+               audit.cpu_component_mixed_ancestor_recomputation_count &&
+           deduplicated_counts_zero) ||
+      (deduplicated_current_envelope &&
+           audit.cpu_component_witness_leaf_update_count == 0U &&
+           audit.cpu_component_witness_ancestor_update_count == 0U &&
+           audit.component_uniform_root_count >= frozen_component_count &&
+           audit.component_uniform_root_count <= point_count &&
+           audit.component_uniform_root_leaf_coverage_count == point_count &&
+           audit.cpu_component_uniform_root_update_count >=
+               audit.cpu_strict_component_cutoff_decrease_count &&
+           audit.cpu_component_duplicate_mixed_ancestor_discovery_count ==
+               audit.cpu_component_uniform_root_update_count -
+                   audit.cpu_strict_component_cutoff_decrease_count &&
+           audit.cpu_component_mixed_ancestor_discovery_count ==
+               audit.cpu_component_distinct_mixed_ancestor_count +
+                   audit.cpu_component_duplicate_mixed_ancestor_discovery_count &&
+           audit.cpu_component_uniform_root_update_count <=
+               audit.cpu_component_mixed_ancestor_recomputation_count &&
+           audit.cpu_component_uniform_root_update_count <=
+               audit.cpu_component_distinct_mixed_ancestor_count &&
+           audit.cpu_component_mixed_ancestor_recomputation_count <=
+               audit.cpu_component_distinct_mixed_ancestor_count &&
+           audit.cpu_component_distinct_mixed_ancestor_count <=
+               audit.cpu_strict_component_cutoff_decrease_count *
+                   audit.maximum_component_distinct_mixed_ancestor_count &&
+           audit.cpu_component_mixed_ancestor_update_count <=
+               audit.cpu_component_mixed_ancestor_recomputation_count &&
+           audit.maximum_component_distinct_mixed_ancestor_count <=
+               audit.mixed_lbvh_node_count &&
+           audit.maximum_component_distinct_mixed_ancestor_count <=
+               audit.cpu_component_distinct_mixed_ancestor_count);
   check(
       audit.component_envelope_mode == expected_envelope_mode &&
           audit.resident_point_count == point_count &&
@@ -495,7 +536,7 @@ void check_component_dual_tree_round(
       fixture + " closes direct component work and cardinalities");
   check(
       std::string_view{K1BoruvkaComponentDualTreeSearchAudit::proof_basis} ==
-          "strict_exact_aabb_pair_bidirectional_component_seed_certified_upper_envelope_bounded_dfs_v4",
+          "strict_exact_aabb_pair_bidirectional_component_seed_certified_upper_envelope_bounded_dfs_v5",
       fixture + " locks the certified component-envelope proof basis");
   check(
       audit.frozen_labels_certified &&
@@ -512,6 +553,8 @@ void check_component_dual_tree_round(
               exact_current_envelope &&
           audit.exact_current_component_envelope_certified ==
               exact_current_envelope &&
+          audit.deduplicated_mixed_ancestor_refresh_certified ==
+              deduplicated_current_envelope &&
           audit.canonical_unordered_pair_partition_certified &&
           audit.uniform_component_pair_prunes_certified &&
           audit.strict_only_aabb_pair_pruning_certified &&
@@ -695,6 +738,13 @@ void test_component_cutoff_upper_envelope_discriminant() {
           policy,
           K1BoruvkaComponentEnvelopeMode::
               exact_current_maximal_uniform_roots);
+  const auto component_deduplicated_current =
+      context.resolve_round_exact_component_minima_dual_tree(
+          cloud,
+          std::span<const PointId>{labels},
+          policy,
+          K1BoruvkaComponentEnvelopeMode::
+              exact_current_deduplicated_mixed_ancestors);
 
   check_dual_tree_round(
       dynamic,
@@ -732,6 +782,16 @@ void test_component_cutoff_upper_envelope_discriminant() {
       "exact-current component-cutoff maximum-envelope discriminant",
       K1BoruvkaComponentEnvelopeMode::
           exact_current_maximal_uniform_roots);
+  check_component_dual_tree_round(
+      component_deduplicated_current,
+      index,
+      cloud,
+      std::span<const PointId>{labels},
+      per_source.component_minima,
+      policy,
+      "deduplicated exact-current component-cutoff maximum-envelope discriminant",
+      K1BoruvkaComponentEnvelopeMode::
+          exact_current_deduplicated_mixed_ancestors);
   check(
       component_direct.component_minima.size() == 5U &&
           component_direct.component_minima[3].outgoing_edge.u ==
@@ -798,7 +858,36 @@ void test_component_cutoff_upper_envelope_discriminant() {
       "the exact-current component envelope preserves the seed audit and "
       "does no more pair work than sparse, frozen, or dynamic envelopes");
   check(
-      fake_gpu_k1_boruvka_launch_count() == 5U,
+      component_deduplicated_current.component_minima ==
+              component_current.component_minima &&
+          component_deduplicated_current.morton_seed_audit ==
+              component_current.morton_seed_audit &&
+          component_deduplicated_current.search_audit.
+                  cpu_node_pair_visit_count ==
+              component_current.search_audit.cpu_node_pair_visit_count &&
+          component_deduplicated_current.search_audit.
+                  cpu_node_pair_expansion_count ==
+              component_current.search_audit.cpu_node_pair_expansion_count &&
+          component_deduplicated_current.search_audit.
+                  cpu_exact_aabb_pair_bound_evaluation_count ==
+              component_current.search_audit.
+                  cpu_exact_aabb_pair_bound_evaluation_count &&
+          component_deduplicated_current.search_audit.
+                  cpu_exact_point_pair_distance_evaluation_count ==
+              component_current.search_audit.
+                  cpu_exact_point_pair_distance_evaluation_count &&
+          component_deduplicated_current.search_audit.
+                  cpu_component_mixed_ancestor_recomputation_count <=
+              component_current.search_audit.
+                  cpu_component_mixed_ancestor_recomputation_count &&
+          component_deduplicated_current.search_audit.
+                  cpu_component_mixed_ancestor_update_count <=
+              component_current.search_audit.
+                  cpu_component_mixed_ancestor_update_count,
+      "the deduplicated current envelope preserves traversal and does not "
+      "repeat more mixed-ancestor maintenance");
+  check(
+      fake_gpu_k1_boruvka_launch_count() == 6U,
       "component cutoff discriminant launches one seed proposal per resolver");
 }
 

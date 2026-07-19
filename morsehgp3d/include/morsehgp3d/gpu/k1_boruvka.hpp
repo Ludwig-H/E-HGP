@@ -315,6 +315,9 @@ enum class K1BoruvkaComponentEnvelopeMode : std::uint8_t {
   // Read every uniform node from its component's live cutoff and refresh the
   // cached mixed ancestors of every maximal uniform root of that component.
   exact_current_maximal_uniform_roots,
+  // Apply the same live uniform-node semantics, but deduplicate the union of
+  // mixed ancestors and refresh its dirty nodes once in bottom-up order.
+  exact_current_deduplicated_mixed_ancestors,
 };
 
 // This audit belongs to the component-direct resolver. Every recertified point
@@ -326,7 +329,7 @@ struct K1BoruvkaComponentDualTreeSearchAudit {
   static constexpr const char* decision_semantics =
       "cpu_exact_component_minima_shared_lbvh_dual_tree";
   static constexpr const char* proof_basis =
-      "strict_exact_aabb_pair_bidirectional_component_seed_certified_upper_envelope_bounded_dfs_v4";
+      "strict_exact_aabb_pair_bidirectional_component_seed_certified_upper_envelope_bounded_dfs_v5";
 
   K1BoruvkaComponentEnvelopeMode component_envelope_mode{
       K1BoruvkaComponentEnvelopeMode::unspecified};
@@ -363,6 +366,13 @@ struct K1BoruvkaComponentDualTreeSearchAudit {
   std::size_t cpu_component_uniform_root_update_count{};
   std::size_t cpu_component_mixed_ancestor_recomputation_count{};
   std::size_t cpu_component_mixed_ancestor_update_count{};
+  // The deduplicated current mode marks the union of the mixed ancestor
+  // paths of one component. A discovery counts every newly marked ancestor
+  // plus the first already marked ancestor met by each path after the first.
+  std::size_t cpu_component_mixed_ancestor_discovery_count{};
+  std::size_t cpu_component_distinct_mixed_ancestor_count{};
+  std::size_t cpu_component_duplicate_mixed_ancestor_discovery_count{};
+  std::size_t maximum_component_distinct_mixed_ancestor_count{};
   std::size_t cpu_uniform_same_component_pair_prune_count{};
   std::size_t cpu_strict_aabb_pair_prune_count{};
   bool frozen_labels_certified{false};
@@ -377,6 +387,7 @@ struct K1BoruvkaComponentDualTreeSearchAudit {
   bool pointwise_at_most_frozen_envelope_certified{false};
   bool maximal_uniform_component_roots_certified{false};
   bool exact_current_component_envelope_certified{false};
+  bool deduplicated_mixed_ancestor_refresh_certified{false};
   bool canonical_unordered_pair_partition_certified{false};
   bool uniform_component_pair_prunes_certified{false};
   bool strict_only_aabb_pair_pruning_certified{false};
@@ -395,10 +406,12 @@ struct K1BoruvkaComponentDualTreeSearchAudit {
 // nonterminal round. The frozen mode keeps it unchanged. The sparse mode
 // tightens only the witness leaf of a strict component decrease and recomputes
 // maxima on its ancestor path; every other leaf retains a historical cutoff
-// above its component's live cutoff. The exact-current mode reads uniform nodes
-// directly from the live component cutoff and refreshes mixed ancestors through
-// maximal uniform roots. Leaf pairs relax the two components directly; point
-// minima never exist here, and no contraction or hierarchy is published.
+// above its component's live cutoff. Both exact-current modes read uniform
+// nodes directly from the live component cutoff. The baseline refreshes every
+// maximal-uniform-root path separately; the deduplicated mode marks their
+// mixed-ancestor union and processes its dirty nodes once in bottom-up order.
+// Leaf pairs relax the two components directly; point minima never exist here,
+// and no contraction or hierarchy is published.
 struct K1BoruvkaSeededComponentDualTreeRoundResolution {
   std::vector<hierarchy::K1BoruvkaComponentMinimum> component_minima;
   K1BoruvkaMortonSeedAudit morton_seed_audit;

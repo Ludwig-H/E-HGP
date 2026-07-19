@@ -652,6 +652,10 @@ struct FreshReplay {
          audit.cpu_component_uniform_root_update_count == 0U &&
          audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
          audit.cpu_component_mixed_ancestor_update_count == 0U &&
+         audit.cpu_component_mixed_ancestor_discovery_count == 0U &&
+         audit.cpu_component_distinct_mixed_ancestor_count == 0U &&
+         audit.cpu_component_duplicate_mixed_ancestor_discovery_count == 0U &&
+         audit.maximum_component_distinct_mixed_ancestor_count == 0U &&
          audit.frozen_labels_certified &&
          audit.lbvh_topology_and_exact_aabbs_certified &&
          audit.complete_source_seed_coverage_certified &&
@@ -664,6 +668,7 @@ struct FreshReplay {
          audit.pointwise_at_most_frozen_envelope_certified &&
          !audit.maximal_uniform_component_roots_certified &&
          !audit.exact_current_component_envelope_certified &&
+         !audit.deduplicated_mixed_ancestor_refresh_certified &&
          audit.canonical_unordered_pair_partition_certified &&
          audit.uniform_component_pair_prunes_certified &&
          audit.strict_only_aabb_pair_pruning_certified &&

@@ -60,6 +60,8 @@ constexpr std::string_view schema_name_v3 =
     "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v3";
 constexpr std::string_view schema_name_v4 =
     "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v4";
+constexpr std::string_view schema_name_v5 =
+    "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v5";
 constexpr std::string_view scientific_scope =
     "certified_local_emst_chain_work_profile_without_scalability_claim";
 constexpr std::size_t maximum_profile_point_count = 1'000'000U;
@@ -75,6 +77,7 @@ struct Arguments {
   std::string git_sha;
   bool compare_resolvers{false};
   bool compare_current_envelope{false};
+  bool compare_deduplicated_current_envelope{false};
 };
 
 struct ResolverComparisonRound {
@@ -83,6 +86,7 @@ struct ResolverComparisonRound {
   std::size_t post_component_count{};
   K1BoruvkaDualTreeSearchAudit dynamic;
   K1BoruvkaComponentDualTreeSearchAudit direct_current;
+  K1BoruvkaComponentDualTreeSearchAudit direct_deduplicated_current;
   K1BoruvkaComponentDualTreeSearchAudit direct_frozen;
   K1BoruvkaComponentDualTreeSearchAudit direct_sparse;
 };
@@ -90,6 +94,7 @@ struct ResolverComparisonRound {
 struct ResolverComparison {
   std::vector<ResolverComparisonRound> rounds;
   bool include_current{false};
+  bool include_deduplicated_current{false};
 };
 
 [[noreturn]] void fail(std::string_view message) {
@@ -149,7 +154,8 @@ void require(bool condition, std::string_view message) {
           << "Usage: morsehgp3d_gpu_k1_boruvka_exact_search_work_profile "
              "--family uniform|clusters|lattice --point-count N "
              "--window-radius W --seed S --git-sha SHA "
-             "[--compare-resolvers|--compare-current-envelope]\n";
+             "[--compare-resolvers|--compare-current-envelope|"
+             "--compare-deduplicated-current-envelope]\n";
       std::exit(0);
     }
     if (option == "--compare-resolvers") {
@@ -165,6 +171,14 @@ void require(bool condition, std::string_view message) {
           !comparison_seen,
           "resolver comparison options are mutually exclusive");
       arguments.compare_current_envelope = true;
+      comparison_seen = true;
+      continue;
+    }
+    if (option == "--compare-deduplicated-current-envelope") {
+      require(
+          !comparison_seen,
+          "resolver comparison options are mutually exclusive");
+      arguments.compare_deduplicated_current_envelope = true;
       comparison_seen = true;
       continue;
     }
@@ -490,9 +504,63 @@ void require_direct_resolver_audit(
                ? true
                : count <= left * right;
   };
-  const bool current_mode =
+  const bool deduplicated_current_mode =
+      envelope_mode == K1BoruvkaComponentEnvelopeMode::
+                           exact_current_deduplicated_mixed_ancestors;
+  const bool exact_current_mode =
+      deduplicated_current_mode ||
       envelope_mode == K1BoruvkaComponentEnvelopeMode::
                            exact_current_maximal_uniform_roots;
+  const bool deduplicated_counts_zero =
+      audit.cpu_component_mixed_ancestor_discovery_count == 0U &&
+      audit.cpu_component_distinct_mixed_ancestor_count == 0U &&
+      audit.cpu_component_duplicate_mixed_ancestor_discovery_count == 0U &&
+      audit.maximum_component_distinct_mixed_ancestor_count == 0U;
+  const bool exact_current_root_counts_closed =
+      audit.cpu_component_witness_leaf_update_count == 0U &&
+      audit.cpu_component_witness_ancestor_update_count == 0U &&
+      audit.component_uniform_root_count >= component_count &&
+      audit.component_uniform_root_count <= point_count &&
+      audit.component_uniform_root_leaf_coverage_count == point_count &&
+      audit.cpu_component_uniform_root_update_count >=
+          audit.cpu_strict_component_cutoff_decrease_count &&
+      count_at_most_product(
+          audit.cpu_component_uniform_root_update_count,
+          audit.cpu_strict_component_cutoff_decrease_count,
+          audit.component_uniform_root_count);
+  const bool deduplicated_counts_closed =
+      audit.cpu_component_uniform_root_update_count >=
+          audit.cpu_strict_component_cutoff_decrease_count &&
+      audit.cpu_component_distinct_mixed_ancestor_count <=
+          audit.cpu_component_mixed_ancestor_discovery_count &&
+      audit.cpu_component_duplicate_mixed_ancestor_discovery_count ==
+          audit.cpu_component_mixed_ancestor_discovery_count -
+              audit.cpu_component_distinct_mixed_ancestor_count &&
+      audit.cpu_component_duplicate_mixed_ancestor_discovery_count ==
+          audit.cpu_component_uniform_root_update_count -
+              audit.cpu_strict_component_cutoff_decrease_count &&
+      count_at_most_product(
+          audit.cpu_component_mixed_ancestor_discovery_count,
+          audit.cpu_component_uniform_root_update_count,
+          audit.lbvh_maximum_depth) &&
+      count_at_most_product(
+          audit.cpu_component_distinct_mixed_ancestor_count,
+          audit.cpu_strict_component_cutoff_decrease_count,
+          audit.mixed_lbvh_node_count) &&
+      count_at_most_product(
+          audit.cpu_component_distinct_mixed_ancestor_count,
+          audit.cpu_strict_component_cutoff_decrease_count,
+          audit.maximum_component_distinct_mixed_ancestor_count) &&
+      audit.cpu_component_uniform_root_update_count <=
+          audit.cpu_component_mixed_ancestor_recomputation_count &&
+      audit.cpu_component_mixed_ancestor_recomputation_count <=
+          audit.cpu_component_distinct_mixed_ancestor_count &&
+      audit.cpu_component_mixed_ancestor_update_count <=
+          audit.cpu_component_mixed_ancestor_recomputation_count &&
+      audit.maximum_component_distinct_mixed_ancestor_count <=
+          audit.mixed_lbvh_node_count &&
+      audit.maximum_component_distinct_mixed_ancestor_count <=
+          audit.cpu_component_distinct_mixed_ancestor_count;
   const bool envelope_updates_closed =
       (envelope_mode == K1BoruvkaComponentEnvelopeMode::frozen_initial &&
        audit.cpu_component_witness_leaf_update_count == 0U &&
@@ -501,7 +569,8 @@ void require_direct_resolver_audit(
        audit.component_uniform_root_leaf_coverage_count == 0U &&
        audit.cpu_component_uniform_root_update_count == 0U &&
        audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
-       audit.cpu_component_mixed_ancestor_update_count == 0U) ||
+       audit.cpu_component_mixed_ancestor_update_count == 0U &&
+       deduplicated_counts_zero) ||
       (envelope_mode ==
            K1BoruvkaComponentEnvelopeMode::sparse_witness_path_monotone &&
        audit.cpu_component_witness_leaf_update_count ==
@@ -514,25 +583,18 @@ void require_direct_resolver_audit(
        audit.component_uniform_root_leaf_coverage_count == 0U &&
        audit.cpu_component_uniform_root_update_count == 0U &&
        audit.cpu_component_mixed_ancestor_recomputation_count == 0U &&
-       audit.cpu_component_mixed_ancestor_update_count == 0U) ||
-      (current_mode &&
-       audit.cpu_component_witness_leaf_update_count == 0U &&
-       audit.cpu_component_witness_ancestor_update_count == 0U &&
-       audit.component_uniform_root_count >= component_count &&
-       audit.component_uniform_root_count <= point_count &&
-       audit.component_uniform_root_leaf_coverage_count == point_count &&
-       audit.cpu_component_uniform_root_update_count >=
-           audit.cpu_strict_component_cutoff_decrease_count &&
-       count_at_most_product(
-           audit.cpu_component_uniform_root_update_count,
-           audit.cpu_strict_component_cutoff_decrease_count,
-           audit.component_uniform_root_count) &&
+       audit.cpu_component_mixed_ancestor_update_count == 0U &&
+       deduplicated_counts_zero) ||
+      (exact_current_mode && !deduplicated_current_mode &&
+       exact_current_root_counts_closed && deduplicated_counts_zero &&
        count_at_most_product(
            audit.cpu_component_mixed_ancestor_recomputation_count,
            audit.cpu_component_uniform_root_update_count,
            audit.lbvh_maximum_depth) &&
        audit.cpu_component_mixed_ancestor_update_count <=
-           audit.cpu_component_mixed_ancestor_recomputation_count);
+           audit.cpu_component_mixed_ancestor_recomputation_count) ||
+      (deduplicated_current_mode && exact_current_root_counts_closed &&
+       deduplicated_counts_closed);
   require(
       resolution.seed_status ==
               K1BoruvkaSeedStatus::
@@ -596,8 +658,12 @@ void require_direct_resolver_audit(
           audit.component_cutoff_upper_envelope_certified &&
           audit.live_component_cutoff_upper_bound_certified &&
           audit.pointwise_at_most_frozen_envelope_certified &&
-          audit.maximal_uniform_component_roots_certified == current_mode &&
-          audit.exact_current_component_envelope_certified == current_mode &&
+          audit.maximal_uniform_component_roots_certified ==
+              exact_current_mode &&
+          audit.exact_current_component_envelope_certified ==
+              exact_current_mode &&
+          audit.deduplicated_mixed_ancestor_refresh_certified ==
+              deduplicated_current_mode &&
           audit.canonical_unordered_pair_partition_certified &&
           audit.uniform_component_pair_prunes_certified &&
           audit.strict_only_aabb_pair_pruning_certified &&
@@ -614,9 +680,15 @@ void require_direct_resolver_audit(
     const CanonicalPointCloud& cloud,
     const Arguments& arguments,
     const K1SeededExactBoruvkaResult& reference,
-    bool include_current) {
+    bool include_current,
+    bool include_deduplicated_current) {
+  require(
+      !include_deduplicated_current || include_current,
+      "the deduplicated-current comparison requires the current baseline");
   ResolverComparison comparison;
   comparison.include_current = include_current;
+  comparison.include_deduplicated_current =
+      include_deduplicated_current;
   comparison.rounds.reserve(reference.rounds.size());
   std::vector<PointId> labels(arguments.point_count);
   for (std::size_t point_index = 0U;
@@ -663,6 +735,17 @@ void require_direct_resolver_audit(
               K1BoruvkaComponentEnvelopeMode::
                   exact_current_maximal_uniform_roots);
     }
+    K1BoruvkaSeededComponentDualTreeRoundResolution
+        direct_deduplicated_current;
+    if (include_deduplicated_current) {
+      direct_deduplicated_current =
+          context.resolve_round_exact_component_minima_dual_tree(
+              cloud,
+              std::span<const PointId>{labels},
+              policy,
+              K1BoruvkaComponentEnvelopeMode::
+                  exact_current_deduplicated_mixed_ancestors);
+    }
     require_dynamic_resolver_audit(
         dynamic, index, arguments.point_count, component_count);
     require_direct_resolver_audit(
@@ -686,12 +769,24 @@ void require_direct_resolver_audit(
           K1BoruvkaComponentEnvelopeMode::
               exact_current_maximal_uniform_roots);
     }
+    if (include_deduplicated_current) {
+      require_direct_resolver_audit(
+          direct_deduplicated_current,
+          index,
+          arguments.point_count,
+          component_count,
+          K1BoruvkaComponentEnvelopeMode::
+              exact_current_deduplicated_mixed_ancestors);
+    }
     require(
         dynamic.morton_seed_audit == expected.morton_seed_audit &&
             direct_frozen.morton_seed_audit == expected.morton_seed_audit &&
             direct_sparse.morton_seed_audit == expected.morton_seed_audit &&
             (!include_current ||
-             direct_current.morton_seed_audit == expected.morton_seed_audit),
+             direct_current.morton_seed_audit == expected.morton_seed_audit) &&
+            (!include_deduplicated_current ||
+             direct_deduplicated_current.morton_seed_audit ==
+                 expected.morton_seed_audit),
         "the compared resolvers did not consume the reference Morton seed");
     require(
         dynamic.component_minima == expected.exact_decision.component_minima &&
@@ -701,6 +796,9 @@ void require_direct_resolver_audit(
                 expected.exact_decision.component_minima &&
             (!include_current ||
              direct_current.component_minima ==
+                 expected.exact_decision.component_minima) &&
+            (!include_deduplicated_current ||
+             direct_deduplicated_current.component_minima ==
                  expected.exact_decision.component_minima),
         "the compared resolvers disagree on exact component minima");
     require(
@@ -717,6 +815,14 @@ void require_direct_resolver_audit(
                   direct_current.search_audit.unordered_point_pair_count &&
               dynamic.search_audit.covered_unordered_point_pair_count ==
                   direct_current.search_audit
+                      .covered_unordered_point_pair_count)) &&
+            (!include_deduplicated_current ||
+             (direct_current.search_audit.unordered_point_pair_count ==
+                  direct_deduplicated_current.search_audit
+                      .unordered_point_pair_count &&
+              direct_current.search_audit
+                      .covered_unordered_point_pair_count ==
+                  direct_deduplicated_current.search_audit
                       .covered_unordered_point_pair_count)),
         "the compared resolvers disagree on unordered-pair coverage");
     require(
@@ -757,6 +863,47 @@ void require_direct_resolver_audit(
                   direct_sparse.search_audit),
           "the exact-current component envelope exceeded another resolver's traversal work");
     }
+    if (include_deduplicated_current) {
+      const K1BoruvkaComponentDualTreeSearchAudit& current_audit =
+          direct_current.search_audit;
+      const K1BoruvkaComponentDualTreeSearchAudit& deduplicated_audit =
+          direct_deduplicated_current.search_audit;
+      require(
+          deduplicated_audit.cpu_node_pair_visit_count ==
+                  current_audit.cpu_node_pair_visit_count &&
+              deduplicated_audit.cpu_node_pair_expansion_count ==
+                  current_audit.cpu_node_pair_expansion_count &&
+              deduplicated_audit
+                      .cpu_exact_aabb_pair_bound_evaluation_count ==
+                  current_audit
+                      .cpu_exact_aabb_pair_bound_evaluation_count &&
+              deduplicated_audit
+                      .cpu_exact_point_pair_distance_evaluation_count ==
+                  current_audit
+                      .cpu_exact_point_pair_distance_evaluation_count &&
+              deduplicated_audit.component_uniform_root_count ==
+                  current_audit.component_uniform_root_count &&
+              deduplicated_audit.component_uniform_root_leaf_coverage_count ==
+                  current_audit
+                      .component_uniform_root_leaf_coverage_count &&
+              deduplicated_audit.cpu_component_uniform_root_update_count ==
+                  current_audit.cpu_component_uniform_root_update_count &&
+              deduplicated_audit
+                      .cpu_strict_component_cutoff_decrease_count ==
+                  current_audit
+                      .cpu_strict_component_cutoff_decrease_count &&
+              deduplicated_audit.cpu_component_kappa_update_count ==
+                  current_audit.cpu_component_kappa_update_count,
+          "the deduplicated-current resolver changed the exact-current partition or traversal");
+      require(
+          deduplicated_audit
+                  .cpu_component_mixed_ancestor_recomputation_count <=
+                  current_audit
+                      .cpu_component_mixed_ancestor_recomputation_count &&
+              deduplicated_audit.cpu_component_mixed_ancestor_update_count <=
+                  current_audit.cpu_component_mixed_ancestor_update_count,
+          "the deduplicated-current resolver exceeded baseline envelope refresh work");
+    }
 
     K1BoruvkaRoundContraction contraction =
         contract_exact_k1_boruvka_round(
@@ -787,12 +934,30 @@ void require_direct_resolver_audit(
                   contraction.post_round_component_count,
           "the exact-current comparison contraction differs from frozen direct");
     }
+    if (include_deduplicated_current) {
+      const K1BoruvkaRoundContraction deduplicated_contraction =
+          contract_exact_k1_boruvka_round(
+              cloud,
+              std::span<const PointId>{labels},
+              std::span<
+                  const morsehgp3d::hierarchy::K1BoruvkaComponentMinimum>{
+                  direct_deduplicated_current.component_minima});
+      require(
+          deduplicated_contraction.accepted_edges ==
+                  contraction.accepted_edges &&
+              deduplicated_contraction.post_round_component_labels ==
+                  contraction.post_round_component_labels &&
+              deduplicated_contraction.post_round_component_count ==
+                  contraction.post_round_component_count,
+          "the deduplicated-current comparison contraction differs from frozen direct");
+    }
     comparison.rounds.push_back(ResolverComparisonRound{
         round_index,
         component_count,
         contraction.post_round_component_count,
         dynamic.search_audit,
         direct_current.search_audit,
+        direct_deduplicated_current.search_audit,
         direct_frozen.search_audit,
         direct_sparse.search_audit});
     labels = std::move(contraction.post_round_component_labels);
@@ -975,6 +1140,58 @@ void write_current_resolver_work(
          << audit.cpu_uniform_same_component_pair_prune_count << '}';
 }
 
+void write_deduplicated_current_resolver_work(
+    std::ostream& output,
+    const K1BoruvkaComponentDualTreeSearchAudit& audit) {
+  output << "{\"aabb_pair_bound_evaluation_count\":"
+         << audit.cpu_exact_aabb_pair_bound_evaluation_count
+         << ",\"component_cutoff_upper_envelope_node_count\":"
+         << audit.component_cutoff_upper_envelope_node_count
+         << ",\"component_distinct_mixed_ancestor_count\":"
+         << audit.cpu_component_distinct_mixed_ancestor_count
+         << ",\"component_duplicate_mixed_ancestor_discovery_count\":"
+         << audit.cpu_component_duplicate_mixed_ancestor_discovery_count
+         << ",\"component_kappa_update_count\":"
+         << audit.cpu_component_kappa_update_count
+         << ",\"component_mixed_ancestor_discovery_count\":"
+         << audit.cpu_component_mixed_ancestor_discovery_count
+         << ",\"component_mixed_ancestor_recomputation_count\":"
+         << audit.cpu_component_mixed_ancestor_recomputation_count
+         << ",\"component_mixed_ancestor_update_count\":"
+         << audit.cpu_component_mixed_ancestor_update_count
+         << ",\"component_uniform_root_count\":"
+         << audit.component_uniform_root_count
+         << ",\"component_uniform_root_leaf_coverage_count\":"
+         << audit.component_uniform_root_leaf_coverage_count
+         << ",\"component_uniform_root_update_count\":"
+         << audit.cpu_component_uniform_root_update_count
+         << ",\"component_witness_ancestor_update_count\":"
+         << audit.cpu_component_witness_ancestor_update_count
+         << ",\"component_witness_leaf_update_count\":"
+         << audit.cpu_component_witness_leaf_update_count
+         << ",\"frontier_peak\":" << audit.maximum_cpu_frontier_size
+         << ",\"maximum_component_distinct_mixed_ancestor_count\":"
+         << audit.maximum_component_distinct_mixed_ancestor_count
+         << ",\"node_pair_expansion_count\":"
+         << audit.cpu_node_pair_expansion_count
+         << ",\"node_pair_visit_count\":"
+         << audit.cpu_node_pair_visit_count
+         << ",\"point_pair_distance_evaluation_count\":"
+         << audit.cpu_exact_point_pair_distance_evaluation_count
+         << ",\"strict_aabb_pair_prune_count\":"
+         << audit.cpu_strict_aabb_pair_prune_count
+         << ",\"strict_component_cutoff_decrease_count\":"
+         << audit.cpu_strict_component_cutoff_decrease_count
+         << ",\"target_component_seed_kappa_update_count\":"
+         << audit.target_component_seed_kappa_update_count
+         << ",\"target_component_seed_offer_count\":"
+         << audit.target_component_seed_offer_count
+         << ",\"target_component_seed_strict_cutoff_decrease_count\":"
+         << audit.target_component_seed_strict_cutoff_decrease_count
+         << ",\"uniform_same_component_pair_prune_count\":"
+         << audit.cpu_uniform_same_component_pair_prune_count << '}';
+}
+
 void accumulate_dynamic_resolver_work(
     K1BoruvkaDualTreeSearchAudit& totals,
     const K1BoruvkaDualTreeSearchAudit& round) {
@@ -1010,6 +1227,9 @@ void accumulate_direct_resolver_work(
     const K1BoruvkaComponentDualTreeSearchAudit& round) {
   totals.maximum_cpu_frontier_size = std::max(
       totals.maximum_cpu_frontier_size, round.maximum_cpu_frontier_size);
+  totals.maximum_component_distinct_mixed_ancestor_count = std::max(
+      totals.maximum_component_distinct_mixed_ancestor_count,
+      round.maximum_component_distinct_mixed_ancestor_count);
   totals.cpu_node_pair_visit_count = checked_sum(
       totals.cpu_node_pair_visit_count, round.cpu_node_pair_visit_count);
   totals.cpu_node_pair_expansion_count = checked_sum(
@@ -1048,6 +1268,15 @@ void accumulate_direct_resolver_work(
   totals.cpu_component_mixed_ancestor_update_count = checked_sum(
       totals.cpu_component_mixed_ancestor_update_count,
       round.cpu_component_mixed_ancestor_update_count);
+  totals.cpu_component_mixed_ancestor_discovery_count = checked_sum(
+      totals.cpu_component_mixed_ancestor_discovery_count,
+      round.cpu_component_mixed_ancestor_discovery_count);
+  totals.cpu_component_distinct_mixed_ancestor_count = checked_sum(
+      totals.cpu_component_distinct_mixed_ancestor_count,
+      round.cpu_component_distinct_mixed_ancestor_count);
+  totals.cpu_component_duplicate_mixed_ancestor_discovery_count = checked_sum(
+      totals.cpu_component_duplicate_mixed_ancestor_discovery_count,
+      round.cpu_component_duplicate_mixed_ancestor_discovery_count);
   totals.cpu_uniform_same_component_pair_prune_count = checked_sum(
       totals.cpu_uniform_same_component_pair_prune_count,
       round.cpu_uniform_same_component_pair_prune_count);
@@ -1073,6 +1302,7 @@ void write_resolver_comparison(
     const ResolverComparison& comparison) {
   K1BoruvkaDualTreeSearchAudit dynamic_totals;
   K1BoruvkaComponentDualTreeSearchAudit direct_current_totals;
+  K1BoruvkaComponentDualTreeSearchAudit direct_deduplicated_current_totals;
   K1BoruvkaComponentDualTreeSearchAudit direct_frozen_totals;
   K1BoruvkaComponentDualTreeSearchAudit direct_sparse_totals;
   output << "{\"rounds\":[";
@@ -1085,6 +1315,12 @@ void write_resolver_comparison(
     if (comparison.include_current) {
       output << "\"direct_current\":";
       write_current_resolver_work(output, round.direct_current);
+      output << ',';
+    }
+    if (comparison.include_deduplicated_current) {
+      output << "\"direct_deduplicated_current\":";
+      write_deduplicated_current_resolver_work(
+          output, round.direct_deduplicated_current);
       output << ',';
     }
     output << "\"direct_frozen\":";
@@ -1103,6 +1339,11 @@ void write_resolver_comparison(
       accumulate_direct_resolver_work(
           direct_current_totals, round.direct_current);
     }
+    if (comparison.include_deduplicated_current) {
+      accumulate_direct_resolver_work(
+          direct_deduplicated_current_totals,
+          round.direct_deduplicated_current);
+    }
     accumulate_direct_resolver_work(
         direct_frozen_totals, round.direct_frozen);
     accumulate_direct_resolver_work(
@@ -1112,6 +1353,12 @@ void write_resolver_comparison(
   if (comparison.include_current) {
     output << "\"direct_current\":";
     write_current_resolver_work(output, direct_current_totals);
+    output << ',';
+  }
+  if (comparison.include_deduplicated_current) {
+    output << "\"direct_deduplicated_current\":";
+    write_deduplicated_current_resolver_work(
+        output, direct_deduplicated_current_totals);
     output << ',';
   }
   output << "\"direct_frozen\":";
@@ -1236,7 +1483,9 @@ void write_document(
          << ",\"scalability_claimed\":false,\"schema\":\""
          << (comparison == nullptr
                  ? schema_name_v1
-                 : (comparison->include_current
+                 : (comparison->include_deduplicated_current
+                        ? schema_name_v5
+                        : comparison->include_current
                         ? schema_name_v4
                         : schema_name_v3))
          << "\",\"scientific_public_status\":null"
@@ -1266,14 +1515,21 @@ int main(int argument_count, char** argument_values) {
     ResolverComparison comparison;
     const ResolverComparison* comparison_output = nullptr;
     if (arguments.compare_resolvers ||
-        arguments.compare_current_envelope) {
+        arguments.compare_current_envelope ||
+        arguments.compare_deduplicated_current_envelope) {
+      const bool include_deduplicated_current =
+          arguments.compare_deduplicated_current_envelope;
+      const bool include_current =
+          arguments.compare_current_envelope ||
+          include_deduplicated_current;
       comparison =
           build_resolver_comparison(
               index,
               cloud,
               arguments,
               result,
-              arguments.compare_current_envelope);
+              include_current,
+              include_deduplicated_current);
       comparison_output = &comparison;
     }
     write_document(std::cout, arguments, result, comparison_output);
