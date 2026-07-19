@@ -929,8 +929,32 @@ void traverse_exact_dual_tree_frontier(
     }
   }
 
+  const std::size_t terminal_count = checked_size_sum(
+      audit.cpu_uniform_same_component_pair_prune_count,
+      checked_size_sum(
+          audit.cpu_strict_aabb_pair_prune_count,
+          audit.cpu_exact_point_pair_distance_evaluation_count,
+          "the exact dual-tree terminal partition overflowed size_t"),
+      "the exact dual-tree terminal partition overflowed size_t");
+  const std::size_t partitioned_visit_count = checked_size_sum(
+      audit.cpu_node_pair_expansion_count,
+      terminal_count,
+      "the exact dual-tree visited-pair partition overflowed size_t");
+  bool expansion_arity_closed = false;
+  if (audit.cpu_node_pair_visit_count >= 2U) {
+    const std::size_t edge_count = audit.cpu_node_pair_visit_count - 1U;
+    const std::size_t minimum_expansion_count =
+        edge_count / 3U + (edge_count % 3U == 0U ? 0U : 1U);
+    const std::size_t maximum_expansion_count =
+        (audit.cpu_node_pair_visit_count - 2U) / 2U;
+    expansion_arity_closed =
+        minimum_expansion_count <= audit.cpu_node_pair_expansion_count &&
+        audit.cpu_node_pair_expansion_count <= maximum_expansion_count;
+  }
   if (audit.cpu_exact_aabb_pair_bound_evaluation_count !=
           audit.cpu_node_pair_visit_count ||
+      partitioned_visit_count != audit.cpu_node_pair_visit_count ||
+      !expansion_arity_closed ||
       audit.cpu_exact_point_pair_distance_evaluation_count >
           audit.unordered_point_pair_count ||
       audit.covered_unordered_point_pair_count !=

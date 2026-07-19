@@ -14,6 +14,7 @@ import sys
 from typing import Any, NoReturn, Sequence
 
 SCHEMA = "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v1"
+COMPARISON_SCHEMA = "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v2"
 STATIC_SCHEMA = "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile_static.v1"
 SCOPE = "certified_local_emst_chain_work_profile_without_scalability_claim"
 WORK_ACCOUNTING = "producer_chain_only_replay_and_reference_excluded"
@@ -49,6 +50,38 @@ RESULT_KEYS = {
     "exact_weights",
     "rounds",
     "totals",
+}
+COMPARISON_RESULT_KEYS = RESULT_KEYS | {"resolver_comparison"}
+RESOLVER_COMPARISON_KEYS = {"rounds", "totals"}
+RESOLVER_COMPARISON_ROUND_KEYS = {
+    "direct",
+    "dynamic",
+    "post_component_count",
+    "pre_component_count",
+    "round_index",
+    "unordered_point_pair_count",
+}
+RESOLVER_COMPARISON_TOTAL_KEYS = {"direct", "dynamic"}
+RESOLVER_COMMON_KEYS = {
+    "aabb_pair_bound_evaluation_count",
+    "frontier_peak",
+    "node_pair_expansion_count",
+    "node_pair_visit_count",
+    "point_pair_distance_evaluation_count",
+    "strict_aabb_pair_prune_count",
+    "uniform_same_component_pair_prune_count",
+}
+RESOLVER_DYNAMIC_KEYS = RESOLVER_COMMON_KEYS | {
+    "ancestor_update_count",
+    "strict_incumbent_decrease_count",
+}
+RESOLVER_DIRECT_KEYS = RESOLVER_COMMON_KEYS | {
+    "component_cutoff_upper_envelope_node_count",
+    "component_kappa_update_count",
+    "strict_component_cutoff_decrease_count",
+    "target_component_seed_kappa_update_count",
+    "target_component_seed_offer_count",
+    "target_component_seed_strict_cutoff_decrease_count",
 }
 CERTIFICATE_KEYS = {
     "bounded_morton_seed_chain",
@@ -509,6 +542,208 @@ def validate_document(value: Any, *, expected_backend: str) -> None:
         )
 
 
+def validate_resolver_counters(
+    value: Any,
+    label: str,
+    *,
+    point_count: int,
+    direct: bool,
+) -> dict[str, int]:
+    expected_keys = RESOLVER_DIRECT_KEYS if direct else RESOLVER_DYNAMIC_KEYS
+    counters = exact_keys(value, expected_keys, label)
+    result = {
+        key: natural(item, f"{label}.{key}") for key, item in counters.items()
+    }
+    visits = result["node_pair_visit_count"]
+    expansions = result["node_pair_expansion_count"]
+    distances = result["point_pair_distance_evaluation_count"]
+    uniform_prunes = result["uniform_same_component_pair_prune_count"]
+    strict_prunes = result["strict_aabb_pair_prune_count"]
+    maximum_visits = point_count * (point_count + 1) - 1
+    maximum_frontier = 2 * point_count - 1
+    maximum_distances = point_count * (point_count - 1) // 2
+    require(
+        result["aabb_pair_bound_evaluation_count"] == visits,
+        f"{label} AABB/visit identity differs",
+    )
+    require(
+        visits == expansions + uniform_prunes + strict_prunes + distances,
+        f"{label} visited-pair partition differs",
+    )
+    require(
+        2 * expansions + 2 <= visits <= 3 * expansions + 1,
+        f"{label} expansion arity differs",
+    )
+    require(
+        0 < visits <= maximum_visits,
+        f"{label} node-pair visit bound differs",
+    )
+    require(
+        0 < result["frontier_peak"] <= maximum_frontier
+        and result["frontier_peak"] <= visits,
+        f"{label} frontier bound differs",
+    )
+    require(
+        distances <= maximum_distances,
+        f"{label} point-pair distance bound differs",
+    )
+    if direct:
+        require(
+            result["component_kappa_update_count"] <= 2 * distances,
+            f"{label} component update bound differs",
+        )
+        require(
+            result["strict_component_cutoff_decrease_count"]
+            <= result["component_kappa_update_count"],
+            f"{label} strict component decrease bound differs",
+        )
+        require(
+            result["target_component_seed_offer_count"] == point_count,
+            f"{label} target seed offer coverage differs",
+        )
+        require(
+            result["target_component_seed_kappa_update_count"] <= point_count,
+            f"{label} target seed update bound differs",
+        )
+        require(
+            result["target_component_seed_strict_cutoff_decrease_count"]
+            <= result["target_component_seed_kappa_update_count"],
+            f"{label} target seed strict decrease bound differs",
+        )
+        require(
+            result["component_cutoff_upper_envelope_node_count"]
+            == 2 * point_count - 1,
+            f"{label} component envelope coverage differs",
+        )
+    else:
+        strict_decreases = result["strict_incumbent_decrease_count"]
+        require(
+            strict_decreases <= 2 * distances,
+            f"{label} strict incumbent decrease bound differs",
+        )
+        require(
+            result["ancestor_update_count"]
+            <= strict_decreases * (point_count - 1),
+            f"{label} ancestor update bound differs",
+        )
+    return result
+
+
+def validate_comparison_document(value: Any, *, expected_backend: str) -> None:
+    document = exact_keys(value, TOP_KEYS, "comparison work profile")
+    require(
+        document["schema"] == COMPARISON_SCHEMA,
+        "comparison work profile schema differs",
+    )
+    result = exact_keys(
+        document["result"], COMPARISON_RESULT_KEYS, "comparison result"
+    )
+
+    # Projecting away the comparison extension must recover the complete v1
+    # contract. This keeps the benchmark-only G4 artifact path unchanged.
+    projected = copy.deepcopy(document)
+    projected["schema"] = SCHEMA
+    del projected["result"]["resolver_comparison"]
+    validate_document(projected, expected_backend=expected_backend)
+
+    point_count = natural(document["point_count"], "point_count", positive=True)
+    comparison = exact_keys(
+        result["resolver_comparison"],
+        RESOLVER_COMPARISON_KEYS,
+        "result.resolver_comparison",
+    )
+    rounds = comparison["rounds"]
+    base_rounds = result["rounds"]
+    require(
+        isinstance(rounds, list) and len(rounds) == len(base_rounds),
+        "resolver comparison round coverage differs",
+    )
+    dynamic_sums = {key: 0 for key in RESOLVER_DYNAMIC_KEYS}
+    direct_sums = {key: 0 for key in RESOLVER_DIRECT_KEYS}
+    for index, round_item in enumerate(rounds):
+        round_value = exact_keys(
+            round_item,
+            RESOLVER_COMPARISON_ROUND_KEYS,
+            f"resolver_comparison.rounds[{index}]",
+        )
+        label = f"resolver_comparison.rounds[{index}]"
+        require(
+            natural(round_value["round_index"], f"{label}.round_index") == index,
+            f"{label} index differs",
+        )
+        require(
+            natural(
+                round_value["pre_component_count"],
+                f"{label}.pre_component_count",
+                positive=True,
+            )
+            == base_rounds[index]["pre_component_count"]
+            and natural(
+                round_value["post_component_count"],
+                f"{label}.post_component_count",
+                positive=True,
+            )
+            == base_rounds[index]["post_component_count"],
+            f"{label} component path differs from v1",
+        )
+        require(
+            natural(
+                round_value["unordered_point_pair_count"],
+                f"{label}.unordered_point_pair_count",
+            )
+            == point_count * (point_count - 1) // 2,
+            f"{label} unordered point-pair coverage differs",
+        )
+        dynamic = validate_resolver_counters(
+            round_value["dynamic"],
+            f"{label}.dynamic",
+            point_count=point_count,
+            direct=False,
+        )
+        direct = validate_resolver_counters(
+            round_value["direct"],
+            f"{label}.direct",
+            point_count=point_count,
+            direct=True,
+        )
+        for key in RESOLVER_DYNAMIC_KEYS:
+            if key == "frontier_peak":
+                dynamic_sums[key] = max(dynamic_sums[key], dynamic[key])
+            else:
+                dynamic_sums[key] += dynamic[key]
+        for key in RESOLVER_DIRECT_KEYS:
+            if key == "frontier_peak":
+                direct_sums[key] = max(direct_sums[key], direct[key])
+            else:
+                direct_sums[key] += direct[key]
+
+    totals = exact_keys(
+        comparison["totals"],
+        RESOLVER_COMPARISON_TOTAL_KEYS,
+        "result.resolver_comparison.totals",
+    )
+    total_dynamic = exact_keys(
+        totals["dynamic"],
+        RESOLVER_DYNAMIC_KEYS,
+        "result.resolver_comparison.totals.dynamic",
+    )
+    total_direct = exact_keys(
+        totals["direct"],
+        RESOLVER_DIRECT_KEYS,
+        "result.resolver_comparison.totals.direct",
+    )
+    for key, expected in dynamic_sums.items():
+        require(
+            natural(total_dynamic[key], f"totals.dynamic.{key}") == expected,
+            f"total dynamic resolver {key} differs",
+        )
+    for key, expected in direct_sums.items():
+        require(
+            natural(total_direct[key], f"totals.direct.{key}") == expected,
+            f"total direct resolver {key} differs",
+        )
+
+
 def read_profile_log(path: Path) -> dict[str, Any]:
     require(
         path.is_file() and not path.is_symlink(), "profile log must be a regular file"
@@ -553,7 +788,9 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
     ).read_text(encoding="utf-8")
     for token in (
         SCHEMA,
+        COMPARISON_SCHEMA,
         SCOPE,
+        "--compare-resolvers",
         "build_gpu_seeded_cpu_exact_external_1nn_k1_boruvka",
         "exact_operation_count_unweighted",
         "candidate_record_count",
@@ -587,7 +824,7 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
         [
             str(executable.resolve()),
             "--family",
-            "lattice",
+            "uniform",
             "--point-count",
             "8",
             "--window-radius",
@@ -613,6 +850,90 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
         parse_constant=reject_non_finite_json_constant,
     )
     validate_document(value, expected_backend="fake_gpu")
+
+    comparison_completed = subprocess.run(
+        [
+            str(executable.resolve()),
+            "--family",
+            "uniform",
+            "--point-count",
+            "8",
+            "--window-radius",
+            "2",
+            "--seed",
+            "1",
+            "--git-sha",
+            "0" * 40,
+            "--compare-resolvers",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    require(not comparison_completed.stderr, "resolver comparison wrote stderr")
+    require(
+        comparison_completed.stdout.endswith("\n")
+        and comparison_completed.stdout.count("\n") == 1,
+        "resolver comparison output is not one-line JSON",
+    )
+    comparison_value = json.loads(
+        comparison_completed.stdout,
+        object_pairs_hook=reject_duplicate_json_keys,
+        parse_constant=reject_non_finite_json_constant,
+    )
+    validate_comparison_document(comparison_value, expected_backend="fake_gpu")
+    comparison_rounds = comparison_value["result"]["resolver_comparison"][
+        "rounds"
+    ]
+    require(
+        len(comparison_rounds) == 2,
+        "uniform resolver comparison no longer exercises multiple rounds",
+    )
+    fixture_keys = (
+        "node_pair_visit_count",
+        "node_pair_expansion_count",
+        "point_pair_distance_evaluation_count",
+        "strict_aabb_pair_prune_count",
+        "uniform_same_component_pair_prune_count",
+        "frontier_peak",
+    )
+    expected_work = {
+        "direct": ((40, 16, 6, 10, 8, 7), (27, 11, 2, 7, 7, 5)),
+        "dynamic": ((40, 16, 6, 10, 8, 7), (47, 21, 9, 10, 7, 5)),
+    }
+    for resolver in ("dynamic", "direct"):
+        for round_index, expected in enumerate(expected_work[resolver]):
+            observed = comparison_rounds[round_index][resolver]
+            require(
+                tuple(observed[key] for key in fixture_keys) == expected,
+                f"uniform {resolver} resolver work fixture differs",
+            )
+    require(
+        tuple(
+            round_value["direct"]["component_kappa_update_count"]
+            for round_value in comparison_rounds
+        )
+        == (1, 0)
+        and tuple(
+            round_value["dynamic"]["strict_incumbent_decrease_count"]
+            for round_value in comparison_rounds
+        )
+        == (1, 3)
+        and tuple(
+            round_value["dynamic"]["ancestor_update_count"]
+            for round_value in comparison_rounds
+        )
+        == (2, 6),
+        "uniform resolver-specific work fixture differs",
+    )
+    comparison_projection = copy.deepcopy(comparison_value)
+    comparison_projection["schema"] = SCHEMA
+    del comparison_projection["result"]["resolver_comparison"]
+    require(
+        comparison_projection == value,
+        "resolver comparison changed the projected v1 work profile",
+    )
 
     mutations: list[dict[str, Any]] = []
     for key, replacement in (
@@ -648,6 +969,106 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
     mutated = copy.deepcopy(value)
     mutated["result"]["totals"]["persistent_point_minimum_count"] = 1
     mutations.append(mutated)
+
+    comparison_mutations: list[dict[str, Any]] = []
+    mutated = copy.deepcopy(comparison_value)
+    del mutated["result"]["resolver_comparison"]
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    mutated["result"]["resolver_comparison"]["unexpected"] = 0
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    mutated["result"]["resolver_comparison"]["rounds"][0][
+        "post_component_count"
+    ] += 1
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    mutated["result"]["resolver_comparison"]["rounds"][0][
+        "unordered_point_pair_count"
+    ] += 1
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    mutated["result"]["resolver_comparison"]["rounds"][0]["direct"][
+        "target_component_seed_offer_count"
+    ] += 1
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    mutated["result"]["resolver_comparison"]["rounds"][0]["dynamic"][
+        "aabb_pair_bound_evaluation_count"
+    ] += 1
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    dynamic_round = mutated["result"]["resolver_comparison"]["rounds"][0][
+        "dynamic"
+    ]
+    dynamic_round["strict_incumbent_decrease_count"] = (
+        2 * dynamic_round["point_pair_distance_evaluation_count"] + 1
+    )
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    dynamic_round = mutated["result"]["resolver_comparison"]["rounds"][0][
+        "dynamic"
+    ]
+    dynamic_round["ancestor_update_count"] = (
+        dynamic_round["strict_incumbent_decrease_count"]
+        * (mutated["point_count"] - 1)
+        + 1
+    )
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    direct_round = mutated["result"]["resolver_comparison"]["rounds"][0][
+        "direct"
+    ]
+    direct_round["component_kappa_update_count"] = (
+        2 * direct_round["point_pair_distance_evaluation_count"] + 1
+    )
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    mutated["result"]["resolver_comparison"]["rounds"][0]["direct"][
+        "component_cutoff_upper_envelope_node_count"
+    ] += 1
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    impossible_dynamic = mutated["result"]["resolver_comparison"]["rounds"][0][
+        "dynamic"
+    ]
+    impossible_dynamic.update(
+        {
+            "aabb_pair_bound_evaluation_count": 2,
+            "ancestor_update_count": 0,
+            "frontier_peak": 1,
+            "node_pair_expansion_count": 1,
+            "node_pair_visit_count": 2,
+            "point_pair_distance_evaluation_count": 1,
+            "strict_aabb_pair_prune_count": 0,
+            "strict_incumbent_decrease_count": 0,
+            "uniform_same_component_pair_prune_count": 0,
+        }
+    )
+    dynamic_rounds = mutated["result"]["resolver_comparison"]["rounds"]
+    dynamic_totals = mutated["result"]["resolver_comparison"]["totals"][
+        "dynamic"
+    ]
+    for key in RESOLVER_DYNAMIC_KEYS:
+        values = [round_value["dynamic"][key] for round_value in dynamic_rounds]
+        dynamic_totals[key] = max(values) if key == "frontier_peak" else sum(values)
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    mutated["result"]["resolver_comparison"]["totals"]["dynamic"][
+        "node_pair_visit_count"
+    ] += 1
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    mutated["result"]["resolver_comparison"]["totals"]["dynamic"][
+        "frontier_peak"
+    ] += 1
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    mutated["result"]["resolver_comparison"]["totals"]["direct"][
+        "node_pair_visit_count"
+    ] += 1
+    comparison_mutations.append(mutated)
+
     rejected = 0
     for mutation in mutations:
         try:
@@ -656,6 +1077,13 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
             rejected += 1
         else:
             fail("an exact-search work-profile negative mutation was accepted")
+    for mutation in comparison_mutations:
+        try:
+            validate_comparison_document(mutation, expected_backend="fake_gpu")
+        except ContractError:
+            rejected += 1
+        else:
+            fail("a resolver-comparison negative mutation was accepted")
     try:
         json.loads(
             '{"schema":1,"schema":2}', object_pairs_hook=reject_duplicate_json_keys

@@ -15,6 +15,7 @@
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <utility>
 #include <vector>
 
 #ifndef MORSEHGP3D_EXACT_SEARCH_PROFILE_BACKEND
@@ -27,9 +28,16 @@ using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactLevel;
 using morsehgp3d::gpu::K1BoruvkaExactSearchAudit;
 using morsehgp3d::gpu::K1BoruvkaExactSearchStatus;
+using morsehgp3d::gpu::K1BoruvkaCandidateContext;
+using morsehgp3d::gpu::K1BoruvkaComponentDualTreeSearchAudit;
+using morsehgp3d::gpu::K1BoruvkaComponentDualTreeSearchStatus;
+using morsehgp3d::gpu::K1BoruvkaDualTreeSearchAudit;
+using morsehgp3d::gpu::K1BoruvkaDualTreeSearchStatus;
 using morsehgp3d::gpu::K1BoruvkaMortonSeedAudit;
 using morsehgp3d::gpu::K1BoruvkaMortonSeedPolicy;
 using morsehgp3d::gpu::K1BoruvkaSeedStatus;
+using morsehgp3d::gpu::K1BoruvkaSeededComponentDualTreeRoundResolution;
+using morsehgp3d::gpu::K1BoruvkaSeededDualTreeRoundResolution;
 using morsehgp3d::gpu::K1HybridBoruvkaContractionStatus;
 using morsehgp3d::gpu::K1HybridBoruvkaDecisionStatus;
 using morsehgp3d::gpu::K1HybridHierarchyReductionStatus;
@@ -37,14 +45,18 @@ using morsehgp3d::gpu::K1HybridScientificStatus;
 using morsehgp3d::gpu::K1SeededExactBoruvkaResult;
 using morsehgp3d::gpu::K1SeededExactBoruvkaRound;
 using morsehgp3d::gpu::build_gpu_seeded_cpu_exact_external_1nn_k1_boruvka;
+using morsehgp3d::hierarchy::K1BoruvkaRoundContraction;
+using morsehgp3d::hierarchy::contract_exact_k1_boruvka_round;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
 
 constexpr std::string_view backend_name =
     MORSEHGP3D_EXACT_SEARCH_PROFILE_BACKEND;
-constexpr std::string_view schema_name =
+constexpr std::string_view schema_name_v1 =
     "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v1";
+constexpr std::string_view schema_name_v2 =
+    "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v2";
 constexpr std::string_view scientific_scope =
     "certified_local_emst_chain_work_profile_without_scalability_claim";
 constexpr std::size_t maximum_profile_point_count = 1'000'000U;
@@ -58,6 +70,19 @@ struct Arguments {
   std::size_t window_radius{};
   std::uint64_t seed{};
   std::string git_sha;
+  bool compare_resolvers{false};
+};
+
+struct ResolverComparisonRound {
+  std::size_t round_index{};
+  std::size_t pre_component_count{};
+  std::size_t post_component_count{};
+  K1BoruvkaDualTreeSearchAudit dynamic;
+  K1BoruvkaComponentDualTreeSearchAudit direct;
+};
+
+struct ResolverComparison {
+  std::vector<ResolverComparisonRound> rounds;
 };
 
 [[noreturn]] void fail(std::string_view message) {
@@ -109,14 +134,24 @@ void require(bool condition, std::string_view message) {
   bool radius_seen = false;
   bool seed_seen = false;
   bool git_seen = false;
+  bool comparison_seen = false;
   for (int index = 1; index < count; ++index) {
     const std::string_view option{values[index]};
     if (option == "--help" || option == "-h") {
       std::cout
           << "Usage: morsehgp3d_gpu_k1_boruvka_exact_search_work_profile "
              "--family uniform|clusters|lattice --point-count N "
-             "--window-radius W --seed S --git-sha SHA\n";
+             "--window-radius W --seed S --git-sha SHA "
+             "[--compare-resolvers]\n";
       std::exit(0);
+    }
+    if (option == "--compare-resolvers") {
+      require(
+          !comparison_seen,
+          "--compare-resolvers may be supplied only once");
+      arguments.compare_resolvers = true;
+      comparison_seen = true;
+      continue;
     }
     if (index + 1 >= count) {
       fail(std::string{"missing value after "} + std::string{option});
@@ -252,6 +287,20 @@ void require(bool condition, std::string_view message) {
   return left + right;
 }
 
+[[nodiscard]] bool dual_tree_expansion_arity_closed(
+    std::size_t visit_count,
+    std::size_t expansion_count) noexcept {
+  if (visit_count < 2U) {
+    return false;
+  }
+  const std::size_t edge_count = visit_count - 1U;
+  const std::size_t minimum_expansion_count =
+      edge_count / 3U + (edge_count % 3U == 0U ? 0U : 1U);
+  const std::size_t maximum_expansion_count = (visit_count - 2U) / 2U;
+  return minimum_expansion_count <= expansion_count &&
+         expansion_count <= maximum_expansion_count;
+}
+
 void require_result_certificates(
     const K1SeededExactBoruvkaResult& result,
     const Arguments& arguments) {
@@ -311,6 +360,261 @@ void require_result_certificates(
             search.point_minima_complete && search.component_minima_complete,
         "an exact-search work-profile round lost a certificate");
   }
+}
+
+void require_dynamic_resolver_audit(
+    const K1BoruvkaSeededDualTreeRoundResolution& resolution,
+    const MortonLbvhIndex& index,
+    std::size_t point_count,
+    std::size_t component_count) {
+  const K1BoruvkaDualTreeSearchAudit& audit = resolution.search_audit;
+  const std::size_t unordered_pair_count =
+      point_count * (point_count - 1U) / 2U;
+  const std::size_t visited_partition = checked_sum(
+      audit.cpu_node_pair_expansion_count,
+      checked_sum(
+          audit.cpu_uniform_same_component_pair_prune_count,
+          checked_sum(
+              audit.cpu_strict_aabb_pair_prune_count,
+              audit.cpu_exact_point_pair_distance_evaluation_count)));
+  const std::size_t maximum_strict_decrease_count = checked_sum(
+      audit.cpu_exact_point_pair_distance_evaluation_count,
+      audit.cpu_exact_point_pair_distance_evaluation_count);
+  const bool ancestor_update_bound_representable =
+      audit.cpu_strict_incumbent_decrease_count == 0U ||
+      audit.lbvh_maximum_depth <=
+          std::numeric_limits<std::size_t>::max() /
+              audit.cpu_strict_incumbent_decrease_count;
+  require(
+      resolution.seed_status ==
+              K1BoruvkaSeedStatus::
+                  bounded_morton_window_external_exact_monotone_certified &&
+          resolution.search_status ==
+              K1BoruvkaDualTreeSearchStatus::
+                  exact_external_1nn_shared_lbvh_dual_tree_certified &&
+          audit.resident_point_count == point_count &&
+          audit.resident_node_count == index.build_counters().node_count &&
+          audit.frozen_component_count == component_count &&
+          audit.uniform_lbvh_node_count + audit.mixed_lbvh_node_count ==
+              audit.resident_node_count &&
+          audit.seed_incumbent_count == point_count &&
+          audit.dynamic_incumbent_node_count == audit.resident_node_count &&
+          resolution.point_minima.size() == point_count &&
+          resolution.component_minima.size() == component_count &&
+          audit.point_minimum_count == point_count &&
+          audit.component_minimum_count == component_count &&
+          audit.unordered_point_pair_count == unordered_pair_count &&
+          audit.covered_unordered_point_pair_count == unordered_pair_count &&
+          audit.lbvh_maximum_depth ==
+              index.build_counters().maximum_depth &&
+          audit.certified_depth_first_frontier_bound ==
+              2U * audit.lbvh_maximum_depth + 1U &&
+          audit.certified_node_pair_visit_bound ==
+              point_count * (point_count + 1U) - 1U &&
+          audit.maximum_cpu_frontier_size > 0U &&
+          audit.maximum_cpu_frontier_size <=
+              audit.certified_depth_first_frontier_bound &&
+          audit.maximum_cpu_frontier_size <=
+              audit.cpu_node_pair_visit_count &&
+          audit.cpu_exact_aabb_pair_bound_evaluation_count ==
+              audit.cpu_node_pair_visit_count &&
+          audit.cpu_exact_point_pair_distance_evaluation_count <=
+              unordered_pair_count &&
+          audit.cpu_node_pair_visit_count <=
+              audit.certified_node_pair_visit_bound &&
+          visited_partition == audit.cpu_node_pair_visit_count &&
+          dual_tree_expansion_arity_closed(
+              audit.cpu_node_pair_visit_count,
+              audit.cpu_node_pair_expansion_count) &&
+          audit.cpu_strict_incumbent_decrease_count <=
+              maximum_strict_decrease_count &&
+          ancestor_update_bound_representable &&
+          audit.cpu_incumbent_ancestor_update_count <=
+              audit.lbvh_maximum_depth *
+                  audit.cpu_strict_incumbent_decrease_count,
+      "the dynamic dual-tree comparison audit lost a work invariant");
+  require(
+      audit.frozen_labels_certified &&
+          audit.lbvh_topology_and_exact_aabbs_certified &&
+          audit.complete_source_seed_coverage_certified &&
+          audit.external_seed_targets_recertified &&
+          audit.exact_seed_cutoffs_recertified &&
+          audit.dynamic_incumbent_tree_certified &&
+          audit.canonical_unordered_pair_partition_certified &&
+          audit.uniform_component_pair_prunes_certified &&
+          audit.strict_only_aabb_pair_pruning_certified &&
+          audit.depth_first_frontier_bound_certified &&
+          audit.node_pair_visit_bound_certified &&
+          audit.complete_frontier_exhaustion_certified &&
+          audit.canonical_kappa_resolution_certified &&
+          audit.point_minima_complete && audit.component_minima_complete,
+      "the dynamic dual-tree comparison audit lost a certificate");
+}
+
+void require_direct_resolver_audit(
+    const K1BoruvkaSeededComponentDualTreeRoundResolution& resolution,
+    const MortonLbvhIndex& index,
+    std::size_t point_count,
+    std::size_t component_count) {
+  const K1BoruvkaComponentDualTreeSearchAudit& audit =
+      resolution.search_audit;
+  const std::size_t unordered_pair_count =
+      point_count * (point_count - 1U) / 2U;
+  const std::size_t visited_partition = checked_sum(
+      audit.cpu_node_pair_expansion_count,
+      checked_sum(
+          audit.cpu_uniform_same_component_pair_prune_count,
+          checked_sum(
+              audit.cpu_strict_aabb_pair_prune_count,
+              audit.cpu_exact_point_pair_distance_evaluation_count)));
+  require(
+      resolution.seed_status ==
+              K1BoruvkaSeedStatus::
+                  bounded_morton_window_external_exact_monotone_certified &&
+          resolution.search_status ==
+              K1BoruvkaComponentDualTreeSearchStatus::
+                  exact_component_minima_shared_lbvh_dual_tree_certified &&
+          audit.resident_point_count == point_count &&
+          audit.resident_node_count == index.build_counters().node_count &&
+          audit.frozen_component_count == component_count &&
+          audit.uniform_lbvh_node_count + audit.mixed_lbvh_node_count ==
+              audit.resident_node_count &&
+          audit.point_seed_count == point_count &&
+          audit.component_seed_incumbent_count == component_count &&
+          audit.target_component_seed_offer_count == point_count &&
+          audit.target_component_seed_kappa_update_count <= point_count &&
+          audit.target_component_seed_strict_cutoff_decrease_count <=
+              audit.target_component_seed_kappa_update_count &&
+          audit.component_cutoff_upper_envelope_node_count ==
+              audit.resident_node_count &&
+          resolution.component_minima.size() == component_count &&
+          audit.component_minimum_count == component_count &&
+          audit.unordered_point_pair_count == unordered_pair_count &&
+          audit.covered_unordered_point_pair_count == unordered_pair_count &&
+          audit.lbvh_maximum_depth ==
+              index.build_counters().maximum_depth &&
+          audit.certified_depth_first_frontier_bound ==
+              2U * audit.lbvh_maximum_depth + 1U &&
+          audit.certified_node_pair_visit_bound ==
+              point_count * (point_count + 1U) - 1U &&
+          audit.maximum_cpu_frontier_size > 0U &&
+          audit.maximum_cpu_frontier_size <=
+              audit.certified_depth_first_frontier_bound &&
+          audit.maximum_cpu_frontier_size <=
+              audit.cpu_node_pair_visit_count &&
+          audit.cpu_exact_aabb_pair_bound_evaluation_count ==
+              audit.cpu_node_pair_visit_count &&
+          audit.cpu_exact_point_pair_distance_evaluation_count <=
+              unordered_pair_count &&
+          audit.cpu_node_pair_visit_count <=
+              audit.certified_node_pair_visit_bound &&
+          visited_partition == audit.cpu_node_pair_visit_count &&
+          dual_tree_expansion_arity_closed(
+              audit.cpu_node_pair_visit_count,
+              audit.cpu_node_pair_expansion_count) &&
+          audit.cpu_component_kappa_update_count <=
+              2U * audit.cpu_exact_point_pair_distance_evaluation_count &&
+          audit.cpu_strict_component_cutoff_decrease_count <=
+              audit.cpu_component_kappa_update_count,
+      "the component-direct comparison audit lost a work invariant");
+  require(
+      audit.frozen_labels_certified &&
+          audit.lbvh_topology_and_exact_aabbs_certified &&
+          audit.complete_source_seed_coverage_certified &&
+          audit.external_seed_targets_recertified &&
+          audit.exact_seed_cutoffs_recertified &&
+          audit.component_seed_reduction_certified &&
+          audit.bidirectional_component_seed_reduction_certified &&
+          audit.component_cutoff_upper_envelope_certified &&
+          audit.canonical_unordered_pair_partition_certified &&
+          audit.uniform_component_pair_prunes_certified &&
+          audit.strict_only_aabb_pair_pruning_certified &&
+          audit.depth_first_frontier_bound_certified &&
+          audit.node_pair_visit_bound_certified &&
+          audit.complete_frontier_exhaustion_certified &&
+          audit.canonical_kappa_resolution_certified &&
+          audit.component_minima_complete,
+      "the component-direct comparison audit lost a certificate");
+}
+
+[[nodiscard]] ResolverComparison build_resolver_comparison(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    const Arguments& arguments,
+    const K1SeededExactBoruvkaResult& reference) {
+  ResolverComparison comparison;
+  comparison.rounds.reserve(reference.rounds.size());
+  std::vector<PointId> labels(arguments.point_count);
+  for (std::size_t point_index = 0U;
+       point_index < arguments.point_count;
+       ++point_index) {
+    labels[point_index] = static_cast<PointId>(point_index);
+  }
+
+  K1BoruvkaCandidateContext context{index, cloud};
+  std::size_t component_count = arguments.point_count;
+  const K1BoruvkaMortonSeedPolicy policy{arguments.window_radius};
+  for (std::size_t round_index = 0U;
+       round_index < reference.rounds.size();
+       ++round_index) {
+    const K1SeededExactBoruvkaRound& expected =
+        reference.rounds[round_index];
+    require(
+        expected.exact_decision.round_index == round_index &&
+            expected.exact_decision.frozen_component_count ==
+                component_count,
+        "the comparison component path differs before resolution");
+    const K1BoruvkaSeededDualTreeRoundResolution dynamic =
+        context.resolve_round_exact_external_1nn_dual_tree(
+            cloud, std::span<const PointId>{labels}, policy);
+    const K1BoruvkaSeededComponentDualTreeRoundResolution direct =
+        context.resolve_round_exact_component_minima_dual_tree(
+            cloud, std::span<const PointId>{labels}, policy);
+    require_dynamic_resolver_audit(
+        dynamic, index, arguments.point_count, component_count);
+    require_direct_resolver_audit(
+        direct, index, arguments.point_count, component_count);
+    require(
+        dynamic.morton_seed_audit == expected.morton_seed_audit &&
+            direct.morton_seed_audit == expected.morton_seed_audit,
+        "the compared resolvers did not consume the reference Morton seed");
+    require(
+        dynamic.component_minima == expected.exact_decision.component_minima &&
+            direct.component_minima == expected.exact_decision.component_minima,
+        "the compared resolvers disagree on exact component minima");
+    require(
+        dynamic.search_audit.unordered_point_pair_count ==
+                direct.search_audit.unordered_point_pair_count &&
+            dynamic.search_audit.covered_unordered_point_pair_count ==
+                direct.search_audit.covered_unordered_point_pair_count,
+        "the compared resolvers disagree on unordered-pair coverage");
+
+    K1BoruvkaRoundContraction contraction =
+        contract_exact_k1_boruvka_round(
+            cloud,
+            std::span<const PointId>{labels},
+            std::span<const morsehgp3d::hierarchy::K1BoruvkaComponentMinimum>{
+                direct.component_minima});
+    require(
+        contraction.accepted_edges ==
+                expected.canonical_contraction.accepted_edges &&
+            contraction.post_round_component_count ==
+                expected.canonical_contraction.post_round_component_count,
+        "the component-direct comparison contraction differs from reference");
+    comparison.rounds.push_back(ResolverComparisonRound{
+        round_index,
+        component_count,
+        contraction.post_round_component_count,
+        dynamic.search_audit,
+        direct.search_audit});
+    labels = std::move(contraction.post_round_component_labels);
+    component_count = contraction.post_round_component_count;
+  }
+  require(
+      component_count == 1U &&
+          comparison.rounds.size() == reference.rounds.size(),
+      "the resolver comparison did not close the exact component chain");
+  return comparison;
 }
 
 void write_boolean(std::ostream& output, bool value) {
@@ -383,10 +687,165 @@ void write_round(
          << '}';
 }
 
+void write_dynamic_resolver_work(
+    std::ostream& output,
+    const K1BoruvkaDualTreeSearchAudit& audit) {
+  output << "{\"aabb_pair_bound_evaluation_count\":"
+         << audit.cpu_exact_aabb_pair_bound_evaluation_count
+         << ",\"ancestor_update_count\":"
+         << audit.cpu_incumbent_ancestor_update_count
+         << ",\"frontier_peak\":" << audit.maximum_cpu_frontier_size
+         << ",\"node_pair_expansion_count\":"
+         << audit.cpu_node_pair_expansion_count
+         << ",\"node_pair_visit_count\":"
+         << audit.cpu_node_pair_visit_count
+         << ",\"point_pair_distance_evaluation_count\":"
+         << audit.cpu_exact_point_pair_distance_evaluation_count
+         << ",\"strict_aabb_pair_prune_count\":"
+         << audit.cpu_strict_aabb_pair_prune_count
+         << ",\"strict_incumbent_decrease_count\":"
+         << audit.cpu_strict_incumbent_decrease_count
+         << ",\"uniform_same_component_pair_prune_count\":"
+         << audit.cpu_uniform_same_component_pair_prune_count << '}';
+}
+
+void write_direct_resolver_work(
+    std::ostream& output,
+    const K1BoruvkaComponentDualTreeSearchAudit& audit) {
+  output << "{\"aabb_pair_bound_evaluation_count\":"
+         << audit.cpu_exact_aabb_pair_bound_evaluation_count
+         << ",\"component_cutoff_upper_envelope_node_count\":"
+         << audit.component_cutoff_upper_envelope_node_count
+         << ",\"component_kappa_update_count\":"
+         << audit.cpu_component_kappa_update_count
+         << ",\"frontier_peak\":" << audit.maximum_cpu_frontier_size
+         << ",\"node_pair_expansion_count\":"
+         << audit.cpu_node_pair_expansion_count
+         << ",\"node_pair_visit_count\":"
+         << audit.cpu_node_pair_visit_count
+         << ",\"point_pair_distance_evaluation_count\":"
+         << audit.cpu_exact_point_pair_distance_evaluation_count
+         << ",\"strict_aabb_pair_prune_count\":"
+         << audit.cpu_strict_aabb_pair_prune_count
+         << ",\"strict_component_cutoff_decrease_count\":"
+         << audit.cpu_strict_component_cutoff_decrease_count
+         << ",\"target_component_seed_kappa_update_count\":"
+         << audit.target_component_seed_kappa_update_count
+         << ",\"target_component_seed_offer_count\":"
+         << audit.target_component_seed_offer_count
+         << ",\"target_component_seed_strict_cutoff_decrease_count\":"
+         << audit.target_component_seed_strict_cutoff_decrease_count
+         << ",\"uniform_same_component_pair_prune_count\":"
+         << audit.cpu_uniform_same_component_pair_prune_count << '}';
+}
+
+void accumulate_dynamic_resolver_work(
+    K1BoruvkaDualTreeSearchAudit& totals,
+    const K1BoruvkaDualTreeSearchAudit& round) {
+  totals.maximum_cpu_frontier_size = std::max(
+      totals.maximum_cpu_frontier_size, round.maximum_cpu_frontier_size);
+  totals.cpu_node_pair_visit_count = checked_sum(
+      totals.cpu_node_pair_visit_count, round.cpu_node_pair_visit_count);
+  totals.cpu_node_pair_expansion_count = checked_sum(
+      totals.cpu_node_pair_expansion_count,
+      round.cpu_node_pair_expansion_count);
+  totals.cpu_exact_aabb_pair_bound_evaluation_count = checked_sum(
+      totals.cpu_exact_aabb_pair_bound_evaluation_count,
+      round.cpu_exact_aabb_pair_bound_evaluation_count);
+  totals.cpu_exact_point_pair_distance_evaluation_count = checked_sum(
+      totals.cpu_exact_point_pair_distance_evaluation_count,
+      round.cpu_exact_point_pair_distance_evaluation_count);
+  totals.cpu_strict_incumbent_decrease_count = checked_sum(
+      totals.cpu_strict_incumbent_decrease_count,
+      round.cpu_strict_incumbent_decrease_count);
+  totals.cpu_incumbent_ancestor_update_count = checked_sum(
+      totals.cpu_incumbent_ancestor_update_count,
+      round.cpu_incumbent_ancestor_update_count);
+  totals.cpu_uniform_same_component_pair_prune_count = checked_sum(
+      totals.cpu_uniform_same_component_pair_prune_count,
+      round.cpu_uniform_same_component_pair_prune_count);
+  totals.cpu_strict_aabb_pair_prune_count = checked_sum(
+      totals.cpu_strict_aabb_pair_prune_count,
+      round.cpu_strict_aabb_pair_prune_count);
+}
+
+void accumulate_direct_resolver_work(
+    K1BoruvkaComponentDualTreeSearchAudit& totals,
+    const K1BoruvkaComponentDualTreeSearchAudit& round) {
+  totals.maximum_cpu_frontier_size = std::max(
+      totals.maximum_cpu_frontier_size, round.maximum_cpu_frontier_size);
+  totals.cpu_node_pair_visit_count = checked_sum(
+      totals.cpu_node_pair_visit_count, round.cpu_node_pair_visit_count);
+  totals.cpu_node_pair_expansion_count = checked_sum(
+      totals.cpu_node_pair_expansion_count,
+      round.cpu_node_pair_expansion_count);
+  totals.cpu_exact_aabb_pair_bound_evaluation_count = checked_sum(
+      totals.cpu_exact_aabb_pair_bound_evaluation_count,
+      round.cpu_exact_aabb_pair_bound_evaluation_count);
+  totals.cpu_exact_point_pair_distance_evaluation_count = checked_sum(
+      totals.cpu_exact_point_pair_distance_evaluation_count,
+      round.cpu_exact_point_pair_distance_evaluation_count);
+  totals.cpu_component_kappa_update_count = checked_sum(
+      totals.cpu_component_kappa_update_count,
+      round.cpu_component_kappa_update_count);
+  totals.cpu_strict_component_cutoff_decrease_count = checked_sum(
+      totals.cpu_strict_component_cutoff_decrease_count,
+      round.cpu_strict_component_cutoff_decrease_count);
+  totals.cpu_uniform_same_component_pair_prune_count = checked_sum(
+      totals.cpu_uniform_same_component_pair_prune_count,
+      round.cpu_uniform_same_component_pair_prune_count);
+  totals.cpu_strict_aabb_pair_prune_count = checked_sum(
+      totals.cpu_strict_aabb_pair_prune_count,
+      round.cpu_strict_aabb_pair_prune_count);
+  totals.target_component_seed_offer_count = checked_sum(
+      totals.target_component_seed_offer_count,
+      round.target_component_seed_offer_count);
+  totals.target_component_seed_kappa_update_count = checked_sum(
+      totals.target_component_seed_kappa_update_count,
+      round.target_component_seed_kappa_update_count);
+  totals.target_component_seed_strict_cutoff_decrease_count = checked_sum(
+      totals.target_component_seed_strict_cutoff_decrease_count,
+      round.target_component_seed_strict_cutoff_decrease_count);
+  totals.component_cutoff_upper_envelope_node_count = checked_sum(
+      totals.component_cutoff_upper_envelope_node_count,
+      round.component_cutoff_upper_envelope_node_count);
+}
+
+void write_resolver_comparison(
+    std::ostream& output,
+    const ResolverComparison& comparison) {
+  K1BoruvkaDualTreeSearchAudit dynamic_totals;
+  K1BoruvkaComponentDualTreeSearchAudit direct_totals;
+  output << "{\"rounds\":[";
+  for (std::size_t index = 0U; index < comparison.rounds.size(); ++index) {
+    if (index != 0U) {
+      output << ',';
+    }
+    const ResolverComparisonRound& round = comparison.rounds[index];
+    output << "{\"direct\":";
+    write_direct_resolver_work(output, round.direct);
+    output << ",\"dynamic\":";
+    write_dynamic_resolver_work(output, round.dynamic);
+    output << ",\"post_component_count\":" << round.post_component_count
+           << ",\"pre_component_count\":" << round.pre_component_count
+           << ",\"round_index\":" << round.round_index
+           << ",\"unordered_point_pair_count\":"
+           << round.dynamic.unordered_point_pair_count << '}';
+    accumulate_dynamic_resolver_work(dynamic_totals, round.dynamic);
+    accumulate_direct_resolver_work(direct_totals, round.direct);
+  }
+  output << "],\"totals\":{\"direct\":";
+  write_direct_resolver_work(output, direct_totals);
+  output << ",\"dynamic\":";
+  write_dynamic_resolver_work(output, dynamic_totals);
+  output << "}}";
+}
+
 void write_document(
     std::ostream& output,
     const Arguments& arguments,
-    const K1SeededExactBoruvkaResult& result) {
+    const K1SeededExactBoruvkaResult& result,
+    const ResolverComparison* comparison) {
   const auto& counters = result.counters;
   const std::size_t exact_operation_count = checked_sum(
       counters.morton_exact_seed_distance_evaluation_count,
@@ -442,7 +901,12 @@ void write_document(
     }
     write_round(output, result.rounds[index]);
   }
-  output << "],\"totals\":{\"accepted_edge_count\":"
+  output << ']';
+  if (comparison != nullptr) {
+    output << ",\"resolver_comparison\":";
+    write_resolver_comparison(output, *comparison);
+  }
+  output << ",\"totals\":{\"accepted_edge_count\":"
          << counters.accepted_edge_count
          << ",\"component_minimum_count\":"
          << counters.component_minimum_count
@@ -488,7 +952,7 @@ void write_document(
          << "},\"persistent_point_minimum_count\":0"
          << ",\"round_count\":" << counters.round_count << "}}"
          << ",\"scalability_claimed\":false,\"schema\":\""
-         << schema_name
+         << (comparison == nullptr ? schema_name_v1 : schema_name_v2)
          << "\",\"scientific_public_status\":null"
          << ",\"scientific_result_claimed\":false"
          << ",\"scope\":\"" << scientific_scope
@@ -513,7 +977,14 @@ int main(int argument_count, char** argument_values) {
             cloud,
             K1BoruvkaMortonSeedPolicy{arguments.window_radius});
     require_result_certificates(result, arguments);
-    write_document(std::cout, arguments, result);
+    ResolverComparison comparison;
+    const ResolverComparison* comparison_output = nullptr;
+    if (arguments.compare_resolvers) {
+      comparison =
+          build_resolver_comparison(index, cloud, arguments, result);
+      comparison_output = &comparison;
+    }
+    write_document(std::cout, arguments, result, comparison_output);
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "morsehgp3d_gpu_k1_boruvka_exact_search_work_profile: "
