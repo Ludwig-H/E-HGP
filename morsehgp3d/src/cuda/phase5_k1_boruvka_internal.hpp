@@ -73,6 +73,7 @@ struct K1BoruvkaChunkedCandidateSummary {
   std::size_t source_chunk_count{};
   std::size_t peak_chunk_source_count{};
   std::size_t peak_chunk_candidate_count{};
+  std::size_t max_source_candidate_count{};
   std::size_t candidate_record_budget{};
   std::size_t device_candidate_capacity_high_water{};
   std::size_t host_candidate_capacity_high_water{};
@@ -86,7 +87,7 @@ struct K1BoruvkaChunkedCandidateSummary {
   std::uint64_t buffer_epoch{};
   std::uint64_t proposal_digest_fnv1a{};
   bool complete_source_partition_certified{false};
-  bool count_emit_identity_certified{false};
+  bool count_emit_cardinality_and_visit_count_certified{false};
   bool exact_capacity{false};
   bool no_truncation{false};
 };

@@ -32,6 +32,7 @@ using morsehgp3d::gpu::K1HybridBoruvkaResult;
 using morsehgp3d::gpu::K1HybridBoruvkaVerification;
 using morsehgp3d::gpu::K1HybridBoruvkaContractionStatus;
 using morsehgp3d::gpu::K1HybridBoruvkaDecisionStatus;
+using morsehgp3d::gpu::K1HybridBoruvkaEmissionMode;
 using morsehgp3d::gpu::K1HybridHierarchyReductionStatus;
 using morsehgp3d::gpu::K1HybridScientificStatus;
 using morsehgp3d::gpu::build_gpu_proposed_cpu_exact_k1_boruvka;
@@ -321,7 +322,8 @@ void test_terminal_singleton_without_gpu_launch() {
           chunked.emission_audit.candidate_record_size_bytes == 16U &&
           chunked.emission_audit.candidate_payload_peak_bytes == 0U &&
           chunked.emission_audit.complete_source_partition_certified &&
-          chunked.emission_audit.count_emit_identity_certified &&
+          chunked.emission_audit
+              .count_emit_cardinality_and_visit_count_certified &&
           chunked.emission_audit
               .candidate_payload_physical_bound_certified &&
           chunked.emission_status ==
@@ -503,6 +505,156 @@ void test_hybrid_three_round_chain_and_falsification() {
       "hybrid verifier isolates a falsified canonical-contraction status");
 }
 
+void test_chunked_hybrid_three_round_chain_and_trusted_policy() {
+  reset_fake_gpu_k1_boruvka();
+  const std::array<CertifiedPoint3, 8> input{
+      point(0.0),
+      point(1.0),
+      point(10.0),
+      point(12.0),
+      point(100.0),
+      point(104.0),
+      point(120.0),
+      point(125.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const K1ExactBoruvkaResult cpu_anchor =
+      build_exact_lbvh_boruvka(index, cloud);
+  constexpr K1BoruvkaChunkingPolicy policy{7U};
+
+  const K1HybridBoruvkaResult result =
+      build_gpu_proposed_cpu_exact_k1_boruvka(index, cloud, policy);
+  check(
+      result.emission_mode == K1HybridBoruvkaEmissionMode::
+                                  bounded_complete_source_ranges &&
+          result.chunking_policy == policy &&
+          result.bounded_candidate_emission_chain_certified &&
+          result.proposal_chain_certified &&
+          result.cpu_exact_decision_chain_certified &&
+          result.canonical_contraction_chain_certified &&
+          result.reference_cpu_witness_certified &&
+          result.emst_witness_certified,
+      "chunked hybrid chain separates and certifies bounded emission, exact decisions and contraction");
+  check(
+      result.rounds.size() == 3U &&
+          result.emst_edges == cpu_anchor.emst_edges &&
+          result.total_squared_weight == cpu_anchor.total_squared_weight &&
+          result.total_hgp_weight == cpu_anchor.total_hgp_weight,
+      "chunked hybrid chain preserves the three-round exact CPU witness");
+
+  bool observed_strict_chunking = false;
+  for (const auto& round : result.rounds) {
+    const auto& proposal = round.proposal_audit;
+    const auto& emission = round.chunked_emission_audit;
+    observed_strict_chunking =
+        observed_strict_chunking ||
+        (emission.source_chunk_count > 1U &&
+         emission.logical_candidate_count >
+             emission.peak_chunk_candidate_count);
+    check(
+        round.chunked_emission_status ==
+                K1BoruvkaEmissionStatus::
+                    complete_source_ranges_candidate_payload_bound_certified &&
+            emission.logical_candidate_count ==
+                proposal.gpu_candidate_count &&
+            emission.max_source_candidate_count > 0U &&
+            emission.max_source_candidate_count <=
+                emission.peak_chunk_candidate_count &&
+            emission.peak_chunk_candidate_count <=
+                policy.max_candidate_records_per_chunk &&
+            emission.device_candidate_capacity_high_water <=
+                policy.max_candidate_records_per_chunk &&
+            emission.host_candidate_capacity_high_water <=
+                policy.max_candidate_records_per_chunk &&
+            emission.candidate_payload_peak_bytes <=
+                2U * policy.max_candidate_records_per_chunk *
+                    emission.candidate_record_size_bytes &&
+            emission.complete_source_partition_certified &&
+            emission
+                .count_emit_cardinality_and_visit_count_certified &&
+            emission.candidate_payload_physical_bound_certified,
+        "each chunked hybrid round closes its logical, atomic-source and physical payload bounds");
+  }
+  check(
+      observed_strict_chunking,
+      "chunked hybrid chain materializes fewer candidates than its logical round volume");
+
+  const auto& chunked = result.chunked_emission_counters;
+  check(
+      chunked.round_count == result.rounds.size() &&
+          chunked.logical_candidate_count ==
+              result.counters.gpu_candidate_count &&
+          chunked.source_chunk_count > chunked.round_count &&
+          chunked.max_source_candidate_count <=
+              chunked.peak_chunk_candidate_count &&
+          chunked.peak_chunk_candidate_count <=
+              policy.max_candidate_records_per_chunk &&
+          chunked.candidate_record_budget ==
+              policy.max_candidate_records_per_chunk &&
+          chunked.candidate_record_size_bytes == 16U &&
+          chunked.count_kernel_launch_count == result.rounds.size() &&
+          chunked.emit_kernel_launch_count ==
+              chunked.source_chunk_count &&
+          chunked.synchronization_count ==
+              result.counters.gpu_synchronization_count,
+      "chunked hybrid aggregate distinguishes logical volume, atomic-source maximum and physical peak");
+
+  const K1HybridBoruvkaVerification verification =
+      verify_gpu_proposed_cpu_exact_k1_boruvka(
+          index, cloud, policy, result);
+  check(
+      verification.emission_mode_certified &&
+          verification.bounded_candidate_emission_chain_certified &&
+          verification.proposal_chain_certified &&
+          verification.cpu_exact_decision_chain_certified &&
+          verification.emst_witness_certified &&
+          verification.gpu_replay_source_chunk_count ==
+              chunked.source_chunk_count &&
+          verification.gpu_replay_peak_chunk_candidate_count ==
+              chunked.peak_chunk_candidate_count &&
+          verification.gpu_replay_candidate_payload_peak_bytes ==
+              chunked.candidate_payload_peak_bytes,
+      "trusted chunk policy drives an independent bounded replay with identical physical counters");
+
+  const std::size_t launches_before_untrusted_rejection =
+      fake_gpu_k1_boruvka_launch_count();
+  const K1HybridBoruvkaVerification missing_trusted_policy =
+      verify_gpu_proposed_cpu_exact_k1_boruvka(index, cloud, result);
+  check(
+      !missing_trusted_policy.emission_mode_certified &&
+          !missing_trusted_policy.proposal_chain_certified &&
+          !missing_trusted_policy.emst_witness_certified &&
+          fake_gpu_k1_boruvka_launch_count() ==
+              launches_before_untrusted_rejection,
+      "an untrusted serialized chunk budget cannot trigger a GPU replay allocation");
+
+  K1HybridBoruvkaResult falsified = result;
+  falsified.chunking_policy.max_candidate_records_per_chunk = 70U;
+  const K1HybridBoruvkaVerification rejected_policy =
+      verify_gpu_proposed_cpu_exact_k1_boruvka(
+          index, cloud, policy, falsified);
+  check(
+      !rejected_policy.emission_mode_certified &&
+          !rejected_policy.proposal_chain_certified &&
+          !rejected_policy.emst_witness_certified &&
+          fake_gpu_k1_boruvka_launch_count() ==
+              launches_before_untrusted_rejection,
+      "trusted verifier rejects a falsified result budget before GPU replay");
+
+  falsified = result;
+  falsified.rounds.at(1U)
+      .chunked_emission_audit
+      .candidate_payload_physical_bound_certified = false;
+  const K1HybridBoruvkaVerification rejected_emission =
+      verify_gpu_proposed_cpu_exact_k1_boruvka(
+          index, cloud, policy, falsified);
+  check(
+      !rejected_emission.emission_mode_certified &&
+          !rejected_emission.proposal_chain_certified &&
+          !rejected_emission.emst_witness_certified,
+      "chunked verifier rejects a falsified physical-emission certificate");
+}
+
 void test_square_ties_candidate_superset_and_threshold_equality() {
   reset_fake_gpu_k1_boruvka();
   const std::array<CertifiedPoint3, 4> input{
@@ -638,7 +790,7 @@ void test_chunked_round_matches_monolithic_under_two_budgets() {
             emission.synchronization_count ==
                 1U + emission.source_chunk_count &&
             emission.complete_source_partition_certified &&
-            emission.count_emit_identity_certified &&
+            emission.count_emit_cardinality_and_visit_count_certified &&
             emission.candidate_payload_physical_bound_certified &&
             chunked.emission_status ==
                 K1BoruvkaEmissionStatus::
@@ -997,6 +1149,7 @@ int main() {
   test_terminal_singleton_without_gpu_launch();
   test_hybrid_terminal_singleton_without_gpu_launch();
   test_hybrid_three_round_chain_and_falsification();
+  test_chunked_hybrid_three_round_chain_and_trusted_policy();
   test_square_ties_candidate_superset_and_threshold_equality();
   test_chunked_round_matches_monolithic_under_two_budgets();
   test_chunked_budget_and_late_failure_fail_closed();

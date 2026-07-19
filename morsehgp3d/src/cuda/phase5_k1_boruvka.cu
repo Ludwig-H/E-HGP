@@ -1314,6 +1314,9 @@ propose_k1_boruvka_candidates_chunked_on_gpu(
 
       const std::size_t source_candidate_count =
           static_cast<std::size_t>(record.candidate_count);
+      summary.max_source_candidate_count = std::max(
+          summary.max_source_candidate_count,
+          source_candidate_count);
       if (chunk_candidate_count != 0U &&
           source_candidate_count >
               candidate_record_budget - chunk_candidate_count) {
@@ -1563,7 +1566,7 @@ propose_k1_boruvka_candidates_chunked_on_gpu(
     summary.proposal_digest_fnv1a = proposal_digest;
     summary.buffer_epoch = context.advance_epoch();
     summary.complete_source_partition_certified = true;
-    summary.count_emit_identity_certified = true;
+    summary.count_emit_cardinality_and_visit_count_certified = true;
     summary.exact_capacity = true;
     summary.no_truncation = true;
     device_guard.restore();

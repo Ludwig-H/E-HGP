@@ -555,6 +555,15 @@ propose_k1_boruvka_candidates_chunked_on_gpu(
   K1BoruvkaChunkedCandidateSummary summary;
   summary.logical_candidate_count =
       static_cast<std::size_t>(global_offsets.back());
+  for (std::size_t source_index = 0U;
+       source_index < point_count;
+       ++source_index) {
+    summary.max_source_candidate_count = std::max(
+        summary.max_source_candidate_count,
+        static_cast<std::size_t>(
+            global_offsets[source_index + 1U] -
+            global_offsets[source_index]));
+  }
   summary.candidate_record_budget = candidate_record_budget;
   summary.count_pass_node_visit_count = count_counters.node_visits;
   summary.uniform_component_prune_count =
@@ -692,7 +701,7 @@ propose_k1_boruvka_candidates_chunked_on_gpu(
   }
   summary.proposal_digest_fnv1a = digest;
   summary.complete_source_partition_certified = true;
-  summary.count_emit_identity_certified = true;
+  summary.count_emit_cardinality_and_visit_count_certified = true;
   summary.exact_capacity = true;
   summary.no_truncation = true;
   summary.buffer_epoch = context.advance_epoch();

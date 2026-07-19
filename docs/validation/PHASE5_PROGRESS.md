@@ -9,9 +9,9 @@
 - profil : `hgp_reduced`;
 - mode : `certified`;
 - porte d'entrée : satisfaite par les Phases 1 et 4 fermées;
-- porte de sortie : non satisfaite; la voie EMST GPU scalable reste à livrer et à qualifier.
+- porte de sortie : non satisfaite; l'émission chunkée de la boucle complète passe sur le lanceur hôte, mais son replay CUDA réel et une voie EMST à travail scalable restent à qualifier.
 
-Les cinq premiers jalons CPU de Phase 5 livrent l'ancre EMST exacte, le catalogue exhaustif des paires, la réduction rang-deux du backend CPU, leur différentiel indépendant jusqu'à $n=14$, la forêt hiérarchique compacte construite depuis un EMST déjà certifié et un producteur Borůvka exact sur le LBVH global. La voie hybride enchaîne maintenant les rondes stackless à graine fixe dans un contexte de proposition résident, décide chaque minimum par le CPU exact, contracte canoniquement les composantes et vérifie le témoin EMST complet par un second rejeu GPU et l'ancre CPU. Cette boucle complète est qualifiée sur G4 pour un témoin EMST local. Ce jalon ne ferme ni la Phase 5, ni la porte globale G2 du catalogue, et ne publie aucun `public_status=exact` pour une tour MorseHGP3D complète; la matérialisation des candidats reste potentiellement quadratique.
+Les cinq premiers jalons CPU de Phase 5 livrent l'ancre EMST exacte, le catalogue exhaustif des paires, la réduction rang-deux du backend CPU, leur différentiel indépendant jusqu'à $n=14$, la forêt hiérarchique compacte construite depuis un EMST déjà certifié et un producteur Borůvka exact sur le LBVH global. La voie hybride enchaîne maintenant les rondes stackless à graine fixe dans un contexte de proposition résident, décide chaque minimum par le CPU exact, contracte canoniquement les composantes et vérifie le témoin EMST complet par un second rejeu GPU et l'ancre CPU. Cette boucle complète monolithique est qualifiée sur G4 pour un témoin EMST local. Son overload chunké et son rejeu frais passent sur le lanceur hôte avec un budget de payload dur. Ce jalon ne ferme ni la Phase 5, ni la porte globale G2 du catalogue, et ne publie aucun `public_status=exact` pour une tour MorseHGP3D complète; le volume logique et la recertification restent potentiellement quadratiques.
 
 ## Ancre mathématique
 
@@ -134,6 +134,26 @@ Le résultat final retrie les $n-1$ arêtes par $\kappa$, additionne exactement 
 
 `verify_gpu_proposed_cpu_exact_k1_boruvka` ne fait confiance ni aux drapeaux, ni aux statuts, ni aux audits, ni aux compteurs reçus. Il crée un second contexte GPU, rejoue les propositions depuis les labels identité, recertifie les payloads bruts éphémères et compare séparément l'audit de proposition et les minima exacts. Il reconstruit aussi l'ancre Borůvka CPU, rejoue les contractions depuis le nuage et recalcule les deux poids exacts. Ce second passage certifie que la chaîne enregistrée est reproductible par le backend courant; il ne constitue pas une attestation cryptographique de provenance historique. Les compteurs du résultat décrivent seulement la chaîne productrice, tandis que le rapport du vérificateur expose séparément ses rondes, minima, lancements et synchronisations.
 
+## Émission chunkée par sources complètes
+
+Pour une ronde aux labels figés $\ell$, la source $q$ reçoit une graine externe $s(q)$ et le rayon exact $R_q=d^2(q,s(q))$. L'ensemble que le producteur doit couvrir est
+
+$$A_q=\left\lbrace p:\ell(p)\neq\ell(q),\ d^2(q,p)\leq R_q\right\rbrace.$$
+
+Le GPU émet un sur-ensemble $P_q$ de cibles externes. La recertification CPU vérifie $A_q\subseteq P_q$, filtre exactement par $d^2(q,p)\leq R_q$, puis minimise selon $\kappa(e)=(d^2(e),u,v)$. La vraie arête minimale sortante de $q$ a un poids au plus $R_q$; elle appartient donc à $A_q$ et le minimum filtré est inchangé. Le minimum des minima des sources d'une composante est associatif et commutatif : les frontières de chunks ne modifient ni la décision, ni la contraction, à condition qu'une source ne soit jamais scindée et que les labels restent figés jusqu'à la fermeture de la ronde.
+
+L'implémentation fait un passage `count` global, partitionne ensuite l'intervalle des sources en plages contiguës complètes et exécute un passage `emit` par plage. Chaque callback synchrone valide offsets, identifiants, extériorité et doublons, recertifie $A_q$ et accumule seulement un minimum interne. Aucun minimum de composante, aucune arête et aucun nouveau label ne sont retournés avant la réussite du dernier chunk. Une faute tardive détruit l'accumulateur, n'avance pas l'époque et empoisonne le contexte.
+
+Si $c_q=\lvert P_q\rvert$, les trois quantités distinctes sont
+
+$$L_r=\sum_q c_q,\qquad H_r=\max_j\sum_{q\in Q_j}c_q,\qquad M_r=\max_q c_q.$$
+
+$L_r$ est le volume logique de la ronde et peut rester en $\Theta(n^2)$. Le budget $B$ impose $M_r\leq H_r\leq B$; si une source seule dépasse $B$, la ronde échoue sans fallback. Une copie device et une copie hôte de records de seize octets bornent le seul payload candidat simultané par $32B$ octets. Cette borne n'inclut pas le LBVH, les coordonnées, labels, tags, cutoffs, comptes, offsets, plans de chunks, témoins exacts ni limbs multiprécision.
+
+Les anciens champs `gpu_output_capacity`, `gpu_output_capacity_sum` et `peak_gpu_output_capacity` conservent l'étendue logique historique pour comparer les chemins; ils ne sont jamais interprétés comme une capacité physique en mode chunké. Les capacités device et hôte, le pic de chunk et `candidate_payload_peak_bytes` portent seuls le certificat mémoire. De même, `count_emit_cardinality_and_visit_count_certified` affirme l'égalité des cardinalités émises et des nombres de visites, pas une identité d'ensembles; la sûreté scientifique repose sur la recertification exacte de $A_q$.
+
+L'overload chunké de la boucle persiste ces audits par ronde et les agrège séparément. Son vérificateur reçoit la politique de budget comme paramètre de confiance, la compare au résultat non fiable avant toute allocation, puis rejoue toute la chaîne dans un contexte frais. La chaîne hôte $8\to4\to2\to1$ passe avec $L_r>H_r$, mêmes minima, contractions, arêtes, poids et forêt compacte que l'ancre CPU; un budget sérialisé falsifié est rejeté avant tout rejeu GPU. Cette validation est un jalon logiciel hôte. Elle ne qualifie pas encore le noyau CUDA chunké réel et ne prouve pas un travail scalable.
+
 ## Catalogue rang-deux et décision Gabriel
 
 Pour chaque paire canonique $(u,v)$, une seconde voie reconstruit indépendamment son centre diamétral $c=(u+v)/2$, son rayon carré $a=\left\Vert u-v\right\Vert^2/4$, puis interroge tout le nuage par `brute_force_closed_ball`. La partition globale exacte sépare intérieur strict, shell complet et extérieur; aucune liste locale, exclusion de support, tolérance ou limite de visites n'intervient.
@@ -194,4 +214,4 @@ GCP n'a pas été utilisé pour les lots CPU ni pour la validation hôte. La qua
 
 ## Suite immédiate
 
-Le producteur Borůvka CPU ne matérialise plus le graphe complet, mais son parcours séquentiel exact sert encore de référence de correction et non de voie scalable. La primitive GPU stackless, son contrat de sur-ensemble et leur intégration dans la boucle complète avec contractions CPU exactes et vérification du témoin sont maintenant qualifiés sur G4. Le prochain verrou est la mémoire physique bornée par des plages contiguës de sources complètes et certifiées : la proposition actuelle peut encore matérialiser un nombre quadratique de candidats. Le premier jalon chunké devra distinguer le volume logique total, le pic de candidats d'un chunk et la capacité physique simultanée, sans scinder une source ni publier de décision avant recertification du dernier chunk. Aucune promotion de phase ne précédera ce chunking certifié et sa validation à l'échelle.
+Le producteur Borůvka CPU ne matérialise plus le graphe complet, mais son parcours séquentiel exact sert encore de référence de correction et non de voie scalable. La primitive GPU stackless et la boucle monolithique sont qualifiées sur G4; la boucle chunkée complète, son budget de confiance et son rejeu indépendant passent maintenant sur le lanceur hôte. Le prochain lot doit faire évoluer le replay CUDA réel et son assembleur de qualification pour fermer les mêmes audits sous AOT `sm_120`, `memcheck` et `racecheck`. Cette qualification ne fermera toutefois pas la Phase 5 : la graine actuelle peut conserver $L_r=\Theta(n^2)$ et une recertification CPU quadratique. Le verrou suivant sera donc une graine locale plus serrée, proposée rapidement mais vérifiée exactement, avant toute campagne à grande échelle et toute promotion de phase.

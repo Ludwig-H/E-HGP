@@ -45,6 +45,8 @@ struct K1BoruvkaCandidateAudit {
   std::size_t mixed_lbvh_node_count{};
   std::size_t exact_seed_count{};
   std::size_t gpu_candidate_count{};
+  // Logical CSR extent. In chunked mode this is not an allocated capacity;
+  // physical device/host high-water marks live in the emission audit.
   std::size_t gpu_output_capacity{};
   std::size_t gpu_kernel_launch_count{};
   std::size_t gpu_synchronization_count{};
@@ -97,11 +99,17 @@ enum class K1BoruvkaEmissionStatus : std::uint8_t {
   complete_source_ranges_candidate_payload_bound_certified,
 };
 
+enum class K1HybridBoruvkaEmissionMode : std::uint8_t {
+  monolithic_round_payload,
+  bounded_complete_source_ranges,
+};
+
 struct K1BoruvkaChunkedEmissionAudit {
   std::size_t logical_candidate_count{};
   std::size_t source_chunk_count{};
   std::size_t peak_chunk_source_count{};
   std::size_t peak_chunk_candidate_count{};
+  std::size_t max_source_candidate_count{};
   std::size_t candidate_record_budget{};
   // Capacities are measured after the entry bound has released any inherited
   // oversized workspace and through the last synchronous chunk callback.
@@ -113,7 +121,7 @@ struct K1BoruvkaChunkedEmissionAudit {
   std::size_t emit_kernel_launch_count{};
   std::size_t synchronization_count{};
   bool complete_source_partition_certified{false};
-  bool count_emit_identity_certified{false};
+  bool count_emit_cardinality_and_visit_count_certified{false};
   bool candidate_payload_physical_bound_certified{false};
 
   friend bool operator==(
@@ -184,8 +192,11 @@ struct K1HybridBoruvkaCanonicalContraction {
 // canonical contraction in three disjoint payloads.
 struct K1HybridBoruvkaRound {
   K1BoruvkaCandidateAudit proposal_audit;
+  K1BoruvkaChunkedEmissionAudit chunked_emission_audit;
   K1HybridBoruvkaExactDecision exact_decision;
   K1HybridBoruvkaCanonicalContraction canonical_contraction;
+  K1BoruvkaEmissionStatus chunked_emission_status{
+      K1BoruvkaEmissionStatus::not_certified};
   K1HybridBoruvkaProposalStatus proposal_status{
       K1HybridBoruvkaProposalStatus::not_certified};
   K1HybridBoruvkaDecisionStatus decision_status{
@@ -196,6 +207,27 @@ struct K1HybridBoruvkaRound {
   friend bool operator==(
       const K1HybridBoruvkaRound&,
       const K1HybridBoruvkaRound&) = default;
+};
+
+struct K1HybridBoruvkaChunkedEmissionCounters {
+  std::size_t round_count{};
+  std::size_t logical_candidate_count{};
+  std::size_t source_chunk_count{};
+  std::size_t peak_chunk_source_count{};
+  std::size_t peak_chunk_candidate_count{};
+  std::size_t max_source_candidate_count{};
+  std::size_t candidate_record_budget{};
+  std::size_t device_candidate_capacity_high_water{};
+  std::size_t host_candidate_capacity_high_water{};
+  std::size_t candidate_record_size_bytes{};
+  std::size_t candidate_payload_peak_bytes{};
+  std::size_t count_kernel_launch_count{};
+  std::size_t emit_kernel_launch_count{};
+  std::size_t synchronization_count{};
+
+  friend bool operator==(
+      const K1HybridBoruvkaChunkedEmissionCounters&,
+      const K1HybridBoruvkaChunkedEmissionCounters&) = default;
 };
 
 // Aggregates only the producer chain persisted in rounds. The independent
@@ -210,6 +242,8 @@ struct K1HybridBoruvkaCounters {
   std::size_t accepted_edge_count{};
   std::size_t component_contraction_count{};
   std::size_t gpu_candidate_count{};
+  // Logical extents retained for comparison with the historical monolithic
+  // path. Never interpret these two fields as physical memory in chunked mode.
   std::size_t gpu_output_capacity_sum{};
   std::size_t peak_gpu_output_capacity{};
   std::size_t gpu_kernel_launch_count{};
@@ -237,6 +271,8 @@ struct K1HybridBoruvkaCounters {
 struct K1HybridBoruvkaResult {
   static constexpr const char* proof_basis =
       "gpu_candidate_superset_cpu_exact_boruvka_v1";
+  static constexpr const char* bounded_emission_proof_basis =
+      "gpu_complete_source_ranges_bounded_candidate_payload_v1";
 
   std::size_t point_count{};
   std::vector<K1HybridBoruvkaRound> rounds;
@@ -244,11 +280,16 @@ struct K1HybridBoruvkaResult {
   exact::ExactLevel total_squared_weight{};
   exact::ExactLevel total_hgp_weight{};
   K1HybridBoruvkaCounters counters{};
+  K1HybridBoruvkaChunkedEmissionCounters chunked_emission_counters{};
+  K1BoruvkaChunkingPolicy chunking_policy{};
+  K1HybridBoruvkaEmissionMode emission_mode{
+      K1HybridBoruvkaEmissionMode::monolithic_round_payload};
   K1HybridHierarchyReductionStatus hierarchy_reduction_status{
       K1HybridHierarchyReductionStatus::not_performed};
   K1HybridScientificStatus scientific_status{
       K1HybridScientificStatus::local_emst_witness_only};
   bool proposal_chain_certified{false};
+  bool bounded_candidate_emission_chain_certified{false};
   bool cpu_exact_decision_chain_certified{false};
   bool canonical_contraction_chain_certified{false};
   bool reference_cpu_witness_certified{false};
@@ -257,7 +298,9 @@ struct K1HybridBoruvkaResult {
 
 struct K1HybridBoruvkaVerification {
   bool index_identity_certified{false};
+  bool emission_mode_certified{false};
   bool proposal_chain_certified{false};
+  bool bounded_candidate_emission_chain_certified{false};
   bool cpu_exact_decision_chain_certified{false};
   bool canonical_contractions_certified{false};
   bool round_count_bound_certified{false};
@@ -273,6 +316,9 @@ struct K1HybridBoruvkaVerification {
   std::size_t gpu_replayed_component_minimum_count{};
   std::size_t gpu_replay_kernel_launch_count{};
   std::size_t gpu_replay_synchronization_count{};
+  std::size_t gpu_replay_source_chunk_count{};
+  std::size_t gpu_replay_peak_chunk_candidate_count{};
+  std::size_t gpu_replay_candidate_payload_peak_bytes{};
 };
 
 class K1BoruvkaCandidateContext final {
@@ -320,6 +366,16 @@ build_gpu_proposed_cpu_exact_k1_boruvka(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud);
 
+// Runs the same independently replayed hybrid chain while forcing every
+// proposal round through complete, contiguous source ranges whose candidate
+// payload has the supplied hard record bound. No source is split and no exact
+// component minimum is published before the final chunk is recertified.
+[[nodiscard]] K1HybridBoruvkaResult
+build_gpu_proposed_cpu_exact_k1_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaChunkingPolicy chunking_policy);
+
 // Reruns the complete GPU proposal chain in a fresh resident context, then
 // recomputes the reference CPU Boruvka witness and all backend-neutral
 // contraction/weight invariants. Result flags, per-round statuses, audits and
@@ -328,6 +384,15 @@ build_gpu_proposed_cpu_exact_k1_boruvka(
 verify_gpu_proposed_cpu_exact_k1_boruvka(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
+    const K1HybridBoruvkaResult& result);
+
+// The chunk budget is trusted caller policy, not data recovered from the
+// untrusted result. The verifier compares it before any replay allocation.
+[[nodiscard]] K1HybridBoruvkaVerification
+verify_gpu_proposed_cpu_exact_k1_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaChunkingPolicy trusted_chunking_policy,
     const K1HybridBoruvkaResult& result);
 
 }  // namespace morsehgp3d::gpu

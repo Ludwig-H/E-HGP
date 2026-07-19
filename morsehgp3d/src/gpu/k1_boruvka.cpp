@@ -744,6 +744,8 @@ class ChunkedRoundAccumulator final {
         throw std::runtime_error(
             "a nonterminal chunked GPU K1 Boruvka source has no candidate");
       }
+      max_source_candidate_count_ = std::max(
+          max_source_candidate_count_, end - begin);
 
       for (std::size_t position = begin; position < end; ++position) {
         const detail::K1BoruvkaCandidateRecord& record =
@@ -787,6 +789,8 @@ class ChunkedRoundAccumulator final {
         peak_chunk_source_count_ != summary.peak_chunk_source_count ||
         peak_chunk_candidate_count_ !=
             summary.peak_chunk_candidate_count ||
+        max_source_candidate_count_ !=
+            summary.max_source_candidate_count ||
         summary.candidate_record_budget !=
             policy_.max_candidate_records_per_chunk ||
         summary.peak_chunk_candidate_count >
@@ -807,7 +811,7 @@ class ChunkedRoundAccumulator final {
         summary.buffer_epoch == 0U ||
         summary.buffer_epoch <= host_.last_buffer_epoch ||
         !summary.complete_source_partition_certified ||
-        !summary.count_emit_identity_certified ||
+        !summary.count_emit_cardinality_and_visit_count_certified ||
         !summary.exact_capacity ||
         !summary.no_truncation) {
       throw std::runtime_error(
@@ -884,6 +888,8 @@ class ChunkedRoundAccumulator final {
     emission.peak_chunk_source_count = summary.peak_chunk_source_count;
     emission.peak_chunk_candidate_count =
         summary.peak_chunk_candidate_count;
+    emission.max_source_candidate_count =
+        summary.max_source_candidate_count;
     emission.candidate_record_budget = summary.candidate_record_budget;
     emission.device_candidate_capacity_high_water =
         summary.device_candidate_capacity_high_water;
@@ -895,7 +901,7 @@ class ChunkedRoundAccumulator final {
     emission.emit_kernel_launch_count = summary.source_chunk_count;
     emission.synchronization_count = summary.synchronization_count;
     emission.complete_source_partition_certified = true;
-    emission.count_emit_identity_certified = true;
+    emission.count_emit_cardinality_and_visit_count_certified = true;
     emission.candidate_payload_physical_bound_certified = true;
     resolution.emission_status = K1BoruvkaEmissionStatus::
         complete_source_ranges_candidate_payload_bound_certified;
@@ -998,6 +1004,7 @@ class ChunkedRoundAccumulator final {
   std::size_t source_chunk_count_{};
   std::size_t peak_chunk_source_count_{};
   std::size_t peak_chunk_candidate_count_{};
+  std::size_t max_source_candidate_count_{};
 };
 
 }  // namespace
@@ -1234,7 +1241,7 @@ K1BoruvkaCandidateContext::propose_round_chunked(
           kCandidateRecordSizeBytes,
           "the terminal chunked Phase 5 K1 Boruvka payload byte count overflowed");
       emission.complete_source_partition_certified = true;
-      emission.count_emit_identity_certified = true;
+      emission.count_emit_cardinality_and_visit_count_certified = true;
       emission.candidate_payload_physical_bound_certified = true;
       resolution.emission_status = K1BoruvkaEmissionStatus::
           complete_source_ranges_candidate_payload_bound_certified;
