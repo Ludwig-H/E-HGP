@@ -171,6 +171,7 @@ struct K1BoruvkaExactSearchAudit {
   std::size_t cpu_internal_node_expansion_count{};
   std::size_t cpu_exact_aabb_bound_evaluation_count{};
   std::size_t cpu_exact_point_distance_evaluation_count{};
+  std::size_t cpu_seed_leaf_distance_reuse_count{};
   std::size_t cpu_uniform_component_prune_count{};
   std::size_t cpu_strict_aabb_prune_count{};
   bool frozen_labels_certified{false};
@@ -479,6 +480,118 @@ struct K1HybridBoruvkaVerification {
   std::size_t gpu_replay_seed_synchronization_count{};
 };
 
+// Persistent full-chain records deliberately omit the per-source minima:
+// they are reduced immediately after each certified external-1NN search.
+// Only the bounded seed audit, exact search audit, component decision and
+// explicit canonical contraction survive the round.
+struct K1SeededExactBoruvkaRound {
+  K1BoruvkaMortonSeedAudit morton_seed_audit;
+  K1BoruvkaExactSearchAudit exact_search_audit;
+  K1HybridBoruvkaExactDecision exact_decision;
+  K1HybridBoruvkaCanonicalContraction canonical_contraction;
+  K1BoruvkaSeedStatus seed_status{K1BoruvkaSeedStatus::not_certified};
+  K1BoruvkaExactSearchStatus search_status{
+      K1BoruvkaExactSearchStatus::not_certified};
+  K1HybridBoruvkaDecisionStatus decision_status{
+      K1HybridBoruvkaDecisionStatus::not_certified};
+  K1HybridBoruvkaContractionStatus contraction_status{
+      K1HybridBoruvkaContractionStatus::not_certified};
+
+  friend bool operator==(
+      const K1SeededExactBoruvkaRound&,
+      const K1SeededExactBoruvkaRound&) = default;
+};
+
+struct K1SeededExactBoruvkaCounters {
+  std::size_t point_count{};
+  std::size_t lbvh_node_count{};
+  std::size_t round_count{};
+  std::size_t theoretical_max_round_count{};
+  std::size_t frozen_component_label_count{};
+  std::size_t component_minimum_count{};
+  std::size_t accepted_edge_count{};
+  std::size_t component_contraction_count{};
+  std::size_t uniform_lbvh_node_tag_count{};
+  std::size_t mixed_lbvh_node_tag_count{};
+  std::size_t morton_seed_source_count{};
+  std::size_t morton_inspected_neighbor_count{};
+  std::size_t morton_external_neighbor_count{};
+  std::size_t morton_floating_proposal_count{};
+  std::size_t morton_exact_selected_proposal_count{};
+  std::size_t morton_exact_strict_improvement_count{};
+  std::size_t morton_exact_fallback_count{};
+  std::size_t morton_exact_seed_distance_evaluation_count{};
+  std::size_t morton_gpu_kernel_launch_count{};
+  std::size_t morton_gpu_synchronization_count{};
+  std::size_t exact_point_query_count{};
+  std::size_t exact_seed_incumbent_count{};
+  std::size_t exact_point_minimum_count{};
+  std::size_t exact_node_visit_count{};
+  std::size_t exact_internal_node_expansion_count{};
+  std::size_t exact_aabb_bound_evaluation_count{};
+  std::size_t exact_point_distance_evaluation_count{};
+  std::size_t exact_seed_leaf_distance_reuse_count{};
+  std::size_t exact_uniform_component_prune_count{};
+  std::size_t exact_strict_aabb_prune_count{};
+  std::size_t final_component_count{};
+
+  friend bool operator==(
+      const K1SeededExactBoruvkaCounters&,
+      const K1SeededExactBoruvkaCounters&) = default;
+};
+
+// Local exact EMST witness only. No candidate universe is materialized and no
+// hierarchy reduction or MorseHGP3D public status is performed by this API.
+struct K1SeededExactBoruvkaResult {
+  static constexpr const char* proof_basis =
+      "gpu_bounded_morton_seed_cpu_exact_external_1nn_boruvka_v1";
+
+  std::size_t point_count{};
+  std::vector<K1SeededExactBoruvkaRound> rounds;
+  std::vector<hierarchy::ExactEmstEdge> emst_edges;
+  exact::ExactLevel total_squared_weight{};
+  exact::ExactLevel total_hgp_weight{};
+  K1SeededExactBoruvkaCounters counters{};
+  K1BoruvkaMortonSeedPolicy morton_seed_policy{};
+  K1HybridHierarchyReductionStatus hierarchy_reduction_status{
+      K1HybridHierarchyReductionStatus::not_performed};
+  K1HybridScientificStatus scientific_status{
+      K1HybridScientificStatus::local_emst_witness_only};
+  bool bounded_morton_seed_chain_certified{false};
+  bool exact_external_1nn_chain_certified{false};
+  bool cpu_exact_decision_chain_certified{false};
+  bool canonical_contraction_chain_certified{false};
+  bool fresh_replay_certified{false};
+  bool reference_cpu_witness_certified{false};
+  bool emst_witness_certified{false};
+};
+
+struct K1SeededExactBoruvkaVerification {
+  bool index_identity_certified{false};
+  bool trusted_seed_policy_certified{false};
+  bool bounded_morton_seed_chain_certified{false};
+  bool exact_external_1nn_chain_certified{false};
+  bool cpu_exact_decision_chain_certified{false};
+  bool canonical_contractions_certified{false};
+  bool fresh_replay_certified{false};
+  bool round_count_bound_certified{false};
+  bool spanning_tree_certified{false};
+  bool exact_weights_certified{false};
+  bool reference_cpu_witness_certified{false};
+  bool counters_certified{false};
+  bool hierarchy_status_separation_certified{false};
+  bool emst_witness_certified{false};
+  std::size_t reference_round_count{};
+  std::size_t reference_component_minimum_count{};
+  std::size_t replayed_round_count{};
+  std::size_t replayed_component_minimum_count{};
+  std::size_t replayed_seed_kernel_launch_count{};
+  std::size_t replayed_seed_synchronization_count{};
+  std::size_t replayed_exact_node_visit_count{};
+  std::size_t replayed_exact_aabb_bound_evaluation_count{};
+  std::size_t replayed_exact_point_distance_evaluation_count{};
+};
+
 class K1BoruvkaCandidateContext final {
  public:
   K1BoruvkaCandidateContext(
@@ -592,5 +705,26 @@ verify_gpu_proposed_cpu_exact_k1_boruvka(
     K1BoruvkaChunkingPolicy trusted_chunking_policy,
     K1BoruvkaMortonSeedPolicy trusted_seed_policy,
     const K1HybridBoruvkaResult& result);
+
+// Runs every nonterminal round through one bounded GPU Morton seed proposal
+// per source followed by an exact CPU point-to-LBVH branch-and-bound. Point
+// minima are reduced before the canonical CPU contraction and are not kept in
+// the persistent result. A fresh seeded search chain and the independent CPU
+// Boruvka anchor must both agree before the local EMST witness is certified.
+[[nodiscard]] K1SeededExactBoruvkaResult
+build_gpu_seeded_cpu_exact_external_1nn_k1_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaMortonSeedPolicy seed_policy);
+
+// The trusted seed radius is supplied separately from the untrusted result.
+// Verification reruns every GPU seed proposal and exact CPU search in a fresh
+// resident context before comparing contractions, weights and the CPU anchor.
+[[nodiscard]] K1SeededExactBoruvkaVerification
+verify_gpu_seeded_cpu_exact_external_1nn_k1_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
+    const K1SeededExactBoruvkaResult& result);
 
 }  // namespace morsehgp3d::gpu

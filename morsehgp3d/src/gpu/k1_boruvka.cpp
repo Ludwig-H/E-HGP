@@ -685,6 +685,7 @@ resolve_seeded_exact_external_1nn(
         const spatial::PointId target_id = checked_record_point_id(
             node.leaf_point_id, point_count);
         if (target_id == seed.target_point_id) {
+          ++audit.cpu_seed_leaf_distance_reuse_count;
           continue;
         }
         hierarchy::ExactEmstEdge edge = exact_edge(

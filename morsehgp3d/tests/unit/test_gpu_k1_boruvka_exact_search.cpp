@@ -201,7 +201,13 @@ void check_round(
           audit.component_minimum_count == frozen_component_count &&
           audit.cpu_node_visit_count >= point_count &&
           audit.cpu_exact_aabb_bound_evaluation_count ==
-              audit.cpu_node_visit_count,
+              audit.cpu_node_visit_count &&
+          audit.cpu_seed_leaf_distance_reuse_count <= point_count &&
+          audit.cpu_node_visit_count ==
+              audit.cpu_strict_aabb_prune_count +
+                  audit.cpu_internal_node_expansion_count +
+                  audit.cpu_exact_point_distance_evaluation_count +
+                  audit.cpu_seed_leaf_distance_reuse_count,
       fixture + " closes exact-search work and cardinalities");
   check(
       audit.frozen_labels_certified &&
