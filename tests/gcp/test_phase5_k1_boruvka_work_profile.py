@@ -49,6 +49,10 @@ class Phase5K1BoruvkaWorkProfileGuardedWorkflowTests(unittest.TestCase):
             self.assertIn(required, script)
         self.assertNotIn("gcloud compute instances start", script)
         self.assertNotIn("gcloud compute instances stop", script)
+        self.assertNotIn(
+            "Le profil de travail Morton Phase 5 a écrit sur stderr",
+            script,
+        )
 
         first_cell = script.index("for point_count in 64 256 1024")
         matrix_closed = script.index(

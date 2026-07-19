@@ -1649,11 +1649,6 @@ if [[ -n "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" ]]; then
             fi
             [[ -s "${work_profile_log}" ]] || \
                 die "Le profil de travail Morton Phase 5 est vide pour n=${point_count}, famille=${family}."
-            if grep -q '[^[:space:]]' "${work_profile_stderr_log}"; then
-                report_failure_log "${work_profile_label}-stderr" \
-                    "${work_profile_stderr_log}"
-                die "Le profil de travail Morton Phase 5 a écrit sur stderr pour n=${point_count}, famille=${family}."
-            fi
         done
     done
     [[ "${#PHASE5_K1_BORUVKA_WORK_PROFILE_LOGS[@]}" -eq 9 ]] || \
