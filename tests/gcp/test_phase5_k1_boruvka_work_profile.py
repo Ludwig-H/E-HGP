@@ -3,8 +3,12 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 import subprocess
+import sys
+import tempfile
 import unittest
 
 
@@ -84,6 +88,8 @@ class Phase5K1BoruvkaWorkProfileGuardedWorkflowTests(unittest.TestCase):
             "hierarchy_reduction_status",
             "scientific_public_status",
             "certify_target_stopped",
+            "final_phase3_sha256 = hashlib.sha256",
+            'provenance["environment_artifact_sha256"] = final_phase3_sha256',
         ):
             self.assertIn(required, script)
 
@@ -105,6 +111,82 @@ class Phase5K1BoruvkaWorkProfileGuardedWorkflowTests(unittest.TestCase):
         self.assertLess(transfer, validation)
         self.assertLess(validation, targeted_stop)
         self.assertLess(targeted_stop, final_publication)
+
+    def test_finalizer_rebinds_companion_to_published_phase3(self) -> None:
+        script = RUNNER.read_text(encoding="utf-8")
+        anchor = script.index("final_phase3_sha256 = hashlib.sha256")
+        code_begin = script.rindex("<<'PY'\n", 0, anchor) + len("<<'PY'\n")
+        code_end = script.index("\nPY\n", anchor)
+        finalizer = script[code_begin:code_end]
+
+        with tempfile.TemporaryDirectory(prefix="phase5-profile-finalizer-") as raw:
+            directory = Path(raw)
+            phase3_temporary = directory / "phase3.partial"
+            phase3_final = directory / "phase3.json"
+            companion_temporary = directory / "profile.partial"
+            companion_final = directory / "profile.json"
+            phase3_temporary.write_text(
+                json.dumps(
+                    {
+                        "status": "worker_passed_pending_shutdown",
+                        "vm_lifecycle": {},
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            companion_temporary.write_text(
+                json.dumps(
+                    {
+                        "provenance": {
+                            "environment_artifact_schema": (
+                                "morsehgp3d.phase3.qualification.v1"
+                            ),
+                            "environment_artifact_sha256": "0" * 64,
+                        },
+                        "status": "worker_passed_pending_shutdown",
+                        "vm_lifecycle": {},
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    finalizer,
+                    str(phase3_temporary),
+                    str(phase3_final),
+                    "",
+                    "",
+                    "",
+                    "",
+                    str(companion_temporary),
+                    str(companion_final),
+                    "project",
+                    "zone",
+                    "instance",
+                    "45",
+                    "TERMINATED",
+                    "2026-07-19T09:09:39Z",
+                    "2026-07-19T02:02:31.682-07:00",
+                ],
+                cwd=ROOT,
+                check=True,
+            )
+            phase3_bytes = phase3_final.read_bytes()
+            companion = json.loads(companion_final.read_text(encoding="utf-8"))
+            self.assertEqual(
+                companion["provenance"]["environment_artifact_sha256"],
+                hashlib.sha256(phase3_bytes).hexdigest(),
+            )
+            self.assertEqual(companion["status"], "passed")
+            self.assertTrue(companion["vm_lifecycle"]["targeted_stop_verified"])
 
     def test_assembler_stays_empirical_and_fail_closed(self) -> None:
         source = ASSEMBLER.read_text(encoding="utf-8")

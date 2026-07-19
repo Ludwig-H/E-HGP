@@ -2285,6 +2285,7 @@ python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
     "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
     "${GUEST_SHUTDOWN_MINUTES}" "${FINAL_STATUS}" \
     "${FINAL_STOP_VERIFIED_AT_UTC}" "${SESSION_LAST_START_TIMESTAMP}" <<'PY'
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -2304,6 +2305,7 @@ if sys.argv[7] or sys.argv[8]:
         raise SystemExit("paire de publication work-profile Morton Phase 5 incomplète")
     pairs.append((Path(sys.argv[7]), Path(sys.argv[8])))
 
+documents = []
 for temporary, _ in pairs:
     with temporary.open(encoding="utf-8") as stream:
         value = json.load(stream)
@@ -2326,14 +2328,36 @@ for temporary, _ in pairs:
         }
     )
     value["status"] = "passed"
-    encoded = json.dumps(
+    documents.append(value)
+
+
+def encode_document(value):
+    return json.dumps(
         value, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-    )
-    with temporary.open("w", encoding="utf-8", newline="\n") as stream:
+    ) + "\n"
+
+
+def rewrite_temporary(path, encoded):
+    with path.open("w", encoding="utf-8", newline="\n") as stream:
         stream.write(encoded)
-        stream.write("\n")
         stream.flush()
         os.fsync(stream.fileno())
+
+
+phase3_encoded = encode_document(documents[0])
+rewrite_temporary(pairs[0][0], phase3_encoded)
+final_phase3_sha256 = hashlib.sha256(phase3_encoded.encode("utf-8")).hexdigest()
+for index in range(1, len(documents)):
+    provenance = documents[index].get("provenance")
+    if (
+        not isinstance(provenance, dict)
+        or provenance.get("environment_artifact_schema")
+        != "morsehgp3d.phase3.qualification.v1"
+        or "environment_artifact_sha256" not in provenance
+    ):
+        raise SystemExit("provenance Phase 3 du compagnon absente avant publication")
+    provenance["environment_artifact_sha256"] = final_phase3_sha256
+    rewrite_temporary(pairs[index][0], encode_document(documents[index]))
 
 published = []
 try:
