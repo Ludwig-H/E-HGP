@@ -42,6 +42,27 @@ static_assert(
     sizeof(K1BoruvkaCandidateRecord) == 2U * sizeof(std::uint64_t));
 static_assert(std::is_trivially_copyable_v<K1BoruvkaCandidateRecord>);
 
+struct K1BoruvkaMortonSeedProposalRecord {
+  std::uint64_t target_point_id{k1_boruvka_sentinel};
+  std::uint64_t inspected_neighbor_count{};
+  std::uint64_t external_neighbor_count{};
+  std::uint64_t failure_code{};
+};
+static_assert(std::is_standard_layout_v<K1BoruvkaMortonSeedProposalRecord>);
+static_assert(std::is_trivially_copyable_v<K1BoruvkaMortonSeedProposalRecord>);
+
+struct K1BoruvkaMortonSeedProposalBatch {
+  std::vector<K1BoruvkaMortonSeedProposalRecord> records;
+  std::size_t window_radius{};
+  std::size_t inspected_neighbor_count{};
+  std::size_t external_neighbor_count{};
+  std::size_t proposed_seed_count{};
+  std::size_t kernel_launch_count{};
+  std::size_t synchronization_count{};
+  bool complete_source_coverage{false};
+  bool bounded_window{false};
+};
+
 struct K1BoruvkaCandidateBatch {
   std::vector<std::uint64_t> candidate_offsets;
   std::vector<K1BoruvkaCandidateRecord> records;
@@ -165,6 +186,17 @@ class K1BoruvkaCandidateContextState final {
 [[nodiscard]] std::size_t enforce_k1_boruvka_candidate_budget_on_gpu(
     K1BoruvkaCandidateContextState& context,
     std::size_t candidate_record_budget);
+
+[[nodiscard]] K1BoruvkaMortonSeedProposalBatch
+propose_k1_boruvka_morton_seeds_on_gpu(
+    K1BoruvkaCandidateContextState& context,
+    std::span<const K1BoruvkaNodeInputRecord> nodes,
+    std::size_t root_index,
+    std::span<const std::uint64_t> coordinate_bits,
+    std::size_t point_count,
+    std::span<const std::uint64_t> morton_point_ids,
+    std::span<const std::uint64_t> frozen_component_labels,
+    std::size_t window_radius);
 
 [[nodiscard]] K1BoruvkaCandidateBatch propose_k1_boruvka_candidates_on_gpu(
     K1BoruvkaCandidateContextState& context,

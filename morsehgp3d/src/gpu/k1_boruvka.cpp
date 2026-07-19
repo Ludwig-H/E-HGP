@@ -25,6 +25,8 @@ class K1BoruvkaCandidateHostState final {
   std::size_t root_index{};
   std::vector<K1BoruvkaNodeInputRecord> nodes;
   std::vector<std::uint64_t> coordinate_bits;
+  std::vector<std::uint64_t> morton_point_ids;
+  std::vector<std::size_t> morton_position_by_point_id;
   std::uint64_t last_buffer_epoch{};
   bool rope_topology_certified{false};
 };
@@ -114,6 +116,18 @@ void validate_chunking_policy(K1BoruvkaChunkingPolicy policy) {
       policy.max_candidate_records_per_chunk,
       kCandidatePayloadCopies * kCandidateRecordSizeBytes,
       "the Phase 5 K1 Boruvka candidate chunk byte budget overflows size_t");
+}
+
+void validate_morton_seed_policy(K1BoruvkaMortonSeedPolicy policy) {
+  if (policy.window_radius == 0U) {
+    throw std::invalid_argument(
+        "a Phase 5 K1 Boruvka Morton seed window must be nonzero");
+  }
+  if (policy.window_radius >
+      std::numeric_limits<std::size_t>::max() / 2U) {
+    throw std::invalid_argument(
+        "the Phase 5 K1 Boruvka Morton seed inspection bound overflows size_t");
+  }
 }
 
 [[nodiscard]] exact::ExactLevel exact_squared_distance(
@@ -319,9 +333,11 @@ void validate_chunking_policy(K1BoruvkaChunkingPolicy policy) {
 struct SeedBundle {
   std::vector<K1BoruvkaSeed> public_seeds;
   std::vector<std::uint64_t> upper_bits;
+  K1BoruvkaMortonSeedAudit morton_audit;
+  K1BoruvkaSeedStatus status{K1BoruvkaSeedStatus::not_certified};
 };
 
-[[nodiscard]] SeedBundle build_seeds(
+[[nodiscard]] SeedBundle build_canonical_fallback_seeds(
     const spatial::CanonicalPointCloud& cloud,
     std::span<const spatial::PointId> labels) {
   const std::size_t point_count = cloud.size();
@@ -359,6 +375,164 @@ struct SeedBundle {
     bundle.public_seeds.push_back(
         K1BoruvkaSeed{source_id, target_id, std::move(cutoff)});
   }
+  return bundle;
+}
+
+[[nodiscard]] hierarchy::ExactEmstEdge seed_edge(
+    const K1BoruvkaSeed& seed) {
+  const spatial::PointId u =
+      std::min(seed.source_point_id, seed.target_point_id);
+  const spatial::PointId v =
+      std::max(seed.source_point_id, seed.target_point_id);
+  return hierarchy::ExactEmstEdge{
+      u,
+      v,
+      seed.exact_squared_cutoff,
+      merge_level(seed.exact_squared_cutoff)};
+}
+
+[[nodiscard]] SeedBundle build_morton_refined_seeds(
+    const detail::K1BoruvkaCandidateHostState& host,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> labels,
+    K1BoruvkaMortonSeedPolicy policy,
+    const detail::K1BoruvkaMortonSeedProposalBatch& batch) {
+  validate_morton_seed_policy(policy);
+  const std::size_t point_count = host.point_count;
+  if (host.morton_point_ids.size() != point_count ||
+      host.morton_position_by_point_id.size() != point_count ||
+      batch.records.size() != point_count ||
+      batch.window_radius != policy.window_radius ||
+      batch.kernel_launch_count != 1U ||
+      batch.synchronization_count != 1U ||
+      !batch.complete_source_coverage || !batch.bounded_window) {
+    throw std::runtime_error(
+        "the GPU Morton seed proposal has invalid global metadata");
+  }
+
+  SeedBundle bundle = build_canonical_fallback_seeds(cloud, labels);
+  K1BoruvkaMortonSeedAudit& audit = bundle.morton_audit;
+  audit.source_count = point_count;
+  audit.window_radius = policy.window_radius;
+  audit.neighbor_inspection_budget_per_source = std::min(
+      point_count - 1U, 2U * policy.window_radius);
+  audit.exact_seed_distance_evaluation_count = point_count;
+  audit.gpu_kernel_launch_count = batch.kernel_launch_count;
+  audit.gpu_synchronization_count = batch.synchronization_count;
+
+  std::size_t inspected_total = 0U;
+  std::size_t external_total = 0U;
+  std::size_t proposed_total = 0U;
+  for (std::size_t source_index = 0U;
+       source_index < point_count;
+       ++source_index) {
+    const detail::K1BoruvkaMortonSeedProposalRecord& record =
+        batch.records[source_index];
+    const std::size_t morton_position =
+        host.morton_position_by_point_id[source_index];
+    if (morton_position >= point_count) {
+      throw std::logic_error(
+          "the Phase 5 K1 Boruvka Morton inverse permutation is invalid");
+    }
+    const std::size_t expected_left =
+        std::min(policy.window_radius, morton_position);
+    const std::size_t expected_right = std::min(
+        policy.window_radius, point_count - 1U - morton_position);
+    const std::size_t expected_inspected =
+        expected_left + expected_right;
+    if (record.failure_code != 0U ||
+        record.inspected_neighbor_count != expected_inspected ||
+        record.external_neighbor_count >
+            record.inspected_neighbor_count) {
+      throw std::runtime_error(
+          "a GPU Morton seed record violates its bounded source window");
+    }
+    inspected_total = checked_size_sum(
+        inspected_total,
+        static_cast<std::size_t>(record.inspected_neighbor_count),
+        "the Phase 5 K1 Boruvka Morton inspection total overflowed");
+    external_total = checked_size_sum(
+        external_total,
+        static_cast<std::size_t>(record.external_neighbor_count),
+        "the Phase 5 K1 Boruvka Morton external-neighbor total overflowed");
+    audit.maximum_inspected_neighbor_count_per_source = std::max(
+        audit.maximum_inspected_neighbor_count_per_source,
+        static_cast<std::size_t>(record.inspected_neighbor_count));
+
+    const bool has_proposal =
+        record.target_point_id != detail::k1_boruvka_sentinel;
+    if (has_proposal != (record.external_neighbor_count != 0U)) {
+      throw std::runtime_error(
+          "a GPU Morton seed record disagrees with its external-neighbor count");
+    }
+    if (!has_proposal) {
+      continue;
+    }
+    proposed_total = checked_size_sum(
+        proposed_total,
+        1U,
+        "the Phase 5 K1 Boruvka Morton proposal total overflowed");
+    const spatial::PointId target_id = checked_record_point_id(
+        record.target_point_id, point_count);
+    const std::size_t target_index =
+        checked_point_index(target_id, point_count);
+    const std::size_t target_morton_position =
+        host.morton_position_by_point_id[target_index];
+    const std::size_t morton_separation =
+        morton_position > target_morton_position
+            ? morton_position - target_morton_position
+            : target_morton_position - morton_position;
+    if (labels[target_index] == labels[source_index] ||
+        morton_separation == 0U ||
+        morton_separation > policy.window_radius) {
+      throw std::runtime_error(
+          "a GPU Morton seed target is internal or outside its trusted window");
+    }
+
+    K1BoruvkaSeed& fallback = bundle.public_seeds[source_index];
+    if (target_id == fallback.target_point_id) {
+      continue;
+    }
+    hierarchy::ExactEmstEdge proposed_edge = exact_edge(
+        cloud, checked_point_id(source_index), target_id);
+    audit.exact_seed_distance_evaluation_count = checked_size_sum(
+        audit.exact_seed_distance_evaluation_count,
+        1U,
+        "the Phase 5 K1 Boruvka exact seed evaluation count overflowed");
+    const hierarchy::ExactEmstEdge fallback_edge = seed_edge(fallback);
+    if (edge_less(proposed_edge, fallback_edge)) {
+      const bool strict_improvement =
+          proposed_edge.squared_length < fallback_edge.squared_length;
+      fallback.target_point_id = target_id;
+      fallback.exact_squared_cutoff = proposed_edge.squared_length;
+      bundle.upper_bits[source_index] =
+          exact_upper_binary64_bits(fallback.exact_squared_cutoff);
+      ++audit.exact_selected_proposal_count;
+      if (strict_improvement) {
+        ++audit.exact_strict_improvement_count;
+      }
+    }
+  }
+
+  if (inspected_total != batch.inspected_neighbor_count ||
+      external_total != batch.external_neighbor_count ||
+      proposed_total != batch.proposed_seed_count ||
+      audit.maximum_inspected_neighbor_count_per_source >
+          audit.neighbor_inspection_budget_per_source) {
+    throw std::runtime_error(
+        "the GPU Morton seed proposal counters do not close");
+  }
+  audit.inspected_neighbor_count = inspected_total;
+  audit.external_neighbor_count = external_total;
+  audit.floating_proposal_count = proposed_total;
+  audit.exact_fallback_count =
+      point_count - audit.exact_selected_proposal_count;
+  audit.complete_source_coverage_certified = true;
+  audit.bounded_window_certified = true;
+  audit.external_targets_recertified = true;
+  audit.exact_monotone_cutoff_certified = true;
+  bundle.status = K1BoruvkaSeedStatus::
+      bounded_morton_window_external_exact_monotone_certified;
   return bundle;
 }
 
@@ -1023,6 +1197,9 @@ K1BoruvkaCandidateContext::K1BoruvkaCandidateContext(
   host_->root_index = index.root_index_;
   host_->nodes.reserve(index.nodes_.size());
   host_->coordinate_bits.resize(host_->point_count * 3U);
+  host_->morton_point_ids.reserve(host_->point_count);
+  host_->morton_position_by_point_id.assign(
+      host_->point_count, host_->point_count);
   for (std::size_t point_index = 0U;
        point_index < host_->point_count;
        ++point_index) {
@@ -1032,6 +1209,31 @@ K1BoruvkaCandidateContext::K1BoruvkaCandidateContext(
       host_->coordinate_bits[axis * host_->point_count + point_index] =
           bits[axis];
     }
+  }
+  for (std::size_t morton_position = 0U;
+       morton_position < index.leaves_.size();
+       ++morton_position) {
+    const spatial::PointId point_id =
+        index.leaves_[morton_position].point_id;
+    const std::size_t point_index =
+        checked_point_index(point_id, host_->point_count);
+    if (host_->morton_position_by_point_id[point_index] !=
+        host_->point_count) {
+      throw std::logic_error(
+          "the Phase 5 K1 Boruvka Morton order repeats a PointId");
+    }
+    host_->morton_point_ids.push_back(
+        static_cast<std::uint64_t>(point_id));
+    host_->morton_position_by_point_id[point_index] = morton_position;
+  }
+  if (host_->morton_point_ids.size() != host_->point_count ||
+      std::find(
+          host_->morton_position_by_point_id.begin(),
+          host_->morton_position_by_point_id.end(),
+          host_->point_count) !=
+          host_->morton_position_by_point_id.end()) {
+    throw std::logic_error(
+        "the Phase 5 K1 Boruvka Morton order is not a complete permutation");
   }
 
   for (const auto& node : index.nodes_) {
@@ -1157,7 +1359,8 @@ K1BoruvkaRoundProposal K1BoruvkaCandidateContext::propose_round(
     });
   }
 
-  SeedBundle seeds = build_seeds(cloud, frozen_component_labels);
+  SeedBundle seeds = build_canonical_fallback_seeds(
+      cloud, frozen_component_labels);
   std::vector<std::uint64_t> labels(
       frozen_component_labels.begin(), frozen_component_labels.end());
   return state_->with_gpu_section([&]() {
@@ -1189,8 +1392,35 @@ K1BoruvkaCandidateContext::propose_round_chunked(
     const spatial::CanonicalPointCloud& cloud,
     std::span<const spatial::PointId> frozen_component_labels,
     K1BoruvkaChunkingPolicy policy) {
+  return propose_round_chunked_impl(
+      cloud, frozen_component_labels, policy, nullptr);
+}
+
+K1BoruvkaChunkedRoundResolution
+K1BoruvkaCandidateContext::propose_round_chunked(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> frozen_component_labels,
+    K1BoruvkaChunkingPolicy chunking_policy,
+    K1BoruvkaMortonSeedPolicy seed_policy) {
+  validate_morton_seed_policy(seed_policy);
+  return propose_round_chunked_impl(
+      cloud,
+      frozen_component_labels,
+      chunking_policy,
+      &seed_policy);
+}
+
+K1BoruvkaChunkedRoundResolution
+K1BoruvkaCandidateContext::propose_round_chunked_impl(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> frozen_component_labels,
+    K1BoruvkaChunkingPolicy policy,
+    const K1BoruvkaMortonSeedPolicy* seed_policy) {
   require_matching_cloud(cloud);
   validate_chunking_policy(policy);
+  if (seed_policy != nullptr) {
+    validate_morton_seed_policy(*seed_policy);
+  }
   const std::size_t component_count = validate_frozen_labels(
       frozen_component_labels, host_->point_count);
 
@@ -1249,10 +1479,31 @@ K1BoruvkaCandidateContext::propose_round_chunked(
     });
   }
 
-  SeedBundle seeds = build_seeds(cloud, frozen_component_labels);
   std::vector<std::uint64_t> labels(
       frozen_component_labels.begin(), frozen_component_labels.end());
   return state_->with_gpu_section([&]() {
+    SeedBundle seeds;
+    if (seed_policy == nullptr) {
+      seeds = build_canonical_fallback_seeds(
+          cloud, frozen_component_labels);
+    } else {
+      const detail::K1BoruvkaMortonSeedProposalBatch seed_proposals =
+          detail::propose_k1_boruvka_morton_seeds_on_gpu(
+              *state_,
+              host_->nodes,
+              host_->root_index,
+              host_->coordinate_bits,
+              host_->point_count,
+              host_->morton_point_ids,
+              labels,
+              seed_policy->window_radius);
+      seeds = build_morton_refined_seeds(
+          *host_,
+          cloud,
+          frozen_component_labels,
+          *seed_policy,
+          seed_proposals);
+    }
     ChunkedRoundAccumulator accumulator{
         *host_,
         cloud,
@@ -1279,7 +1530,11 @@ K1BoruvkaCandidateContext::propose_round_chunked(
             seeds.upper_bits,
             policy.max_candidate_records_per_chunk,
             consume_chunk);
-    return accumulator.finish(summary);
+    K1BoruvkaChunkedRoundResolution resolution =
+        accumulator.finish(summary);
+    resolution.morton_seed_audit = seeds.morton_audit;
+    resolution.seed_status = seeds.status;
+    return resolution;
   });
 }
 

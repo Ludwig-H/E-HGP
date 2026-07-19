@@ -64,6 +64,15 @@ enum class TraversalFailure : std::uint64_t {
   count_emit_divergence = 12U,
 };
 
+enum class MortonSeedFailure : std::uint64_t {
+  none = 0U,
+  source_point_id_out_of_range = 1U,
+  source_label_out_of_range = 2U,
+  neighbor_point_id_out_of_range = 3U,
+  neighbor_label_out_of_range = 4U,
+  distance_not_orderable = 5U,
+};
+
 struct K1BoruvkaCountRecord {
   std::uint64_t candidate_count{};
   std::uint64_t node_visit_count{};
@@ -247,6 +256,8 @@ class K1BoruvkaCudaResources final {
     }
     if (query_status != cudaSuccess ||
         (previous_device != device_ && !restore_device)) {
+      morton_seed_records_.abandon();
+      morton_point_ids_.abandon();
       candidates_.abandon();
       emit_records_.abandon();
       count_records_.abandon();
@@ -262,6 +273,8 @@ class K1BoruvkaCudaResources final {
     if (stream_ != nullptr) {
       static_cast<void>(cudaStreamSynchronize(stream_));
     }
+    morton_seed_records_.reset();
+    morton_point_ids_.reset();
     candidates_.reset();
     emit_records_.reset();
     count_records_.reset();
@@ -311,7 +324,6 @@ class K1BoruvkaCudaResources final {
         point_count, "cudaMalloc Phase 5 K1 Boruvka count records");
     emit_records_.reserve(
         point_count, "cudaMalloc Phase 5 K1 Boruvka emit records");
-
     check_cuda(
         cudaMemcpyAsync(
             nodes_.get(),
@@ -336,10 +348,8 @@ class K1BoruvkaCudaResources final {
     initialized_ = true;
   }
 
-  void update_round_inputs(
-      std::span<const std::uint64_t> frozen_component_labels,
-      std::span<const std::uint64_t> node_component_tags,
-      std::span<const std::uint64_t> seed_cutoff_upper_bits) {
+  void update_frozen_labels(
+      std::span<const std::uint64_t> frozen_component_labels) {
     check_cuda(
         cudaMemcpyAsync(
             frozen_labels_.get(),
@@ -348,6 +358,35 @@ class K1BoruvkaCudaResources final {
             cudaMemcpyHostToDevice,
             stream_),
         "cudaMemcpyAsync Phase 5 K1 Boruvka frozen labels host-to-device");
+  }
+
+  void update_morton_point_ids(
+      std::span<const std::uint64_t> morton_point_ids) {
+    if (!initialized_ || morton_point_ids.size() != point_count_) {
+      throw std::logic_error(
+          "a Phase 5 K1 Boruvka Morton workspace has inconsistent static inputs");
+    }
+    morton_point_ids_.reserve(
+        morton_point_ids.size(),
+        "cudaMalloc Phase 5 K1 Boruvka Morton point IDs");
+    morton_seed_records_.reserve(
+        morton_point_ids.size(),
+        "cudaMalloc Phase 5 K1 Boruvka Morton seed records");
+    check_cuda(
+        cudaMemcpyAsync(
+            morton_point_ids_.get(),
+            morton_point_ids.data(),
+            morton_point_ids.size() * sizeof(std::uint64_t),
+            cudaMemcpyHostToDevice,
+            stream_),
+        "cudaMemcpyAsync Phase 5 K1 Boruvka Morton point IDs host-to-device");
+  }
+
+  void update_round_inputs(
+      std::span<const std::uint64_t> frozen_component_labels,
+      std::span<const std::uint64_t> node_component_tags,
+      std::span<const std::uint64_t> seed_cutoff_upper_bits) {
+    update_frozen_labels(frozen_component_labels);
     check_cuda(
         cudaMemcpyAsync(
             node_tags_.get(),
@@ -413,6 +452,13 @@ class K1BoruvkaCudaResources final {
   [[nodiscard]] const std::uint64_t* seed_cutoffs() const noexcept {
     return seed_cutoffs_.get();
   }
+  [[nodiscard]] const std::uint64_t* morton_point_ids() const noexcept {
+    return morton_point_ids_.get();
+  }
+  [[nodiscard]] K1BoruvkaMortonSeedProposalRecord*
+  morton_seed_records() noexcept {
+    return morton_seed_records_.get();
+  }
   [[nodiscard]] std::uint64_t* offsets() noexcept { return offsets_.get(); }
   [[nodiscard]] K1BoruvkaCountRecord* count_records() noexcept {
     return count_records_.get();
@@ -457,6 +503,8 @@ class K1BoruvkaCudaResources final {
   DeviceBuffer<K1BoruvkaCountRecord> count_records_;
   DeviceBuffer<K1BoruvkaEmitRecord> emit_records_;
   DeviceBuffer<K1BoruvkaCandidateRecord> candidates_;
+  DeviceBuffer<std::uint64_t> morton_point_ids_;
+  DeviceBuffer<K1BoruvkaMortonSeedProposalRecord> morton_seed_records_;
 };
 
 [[nodiscard]] K1BoruvkaCudaResources& resources(
@@ -846,6 +894,141 @@ __global__ void morsehgp3d_phase5_k1_boruvka_emit_chunk_kernel(
   }
 }
 
+[[nodiscard]] __device__ bool inspect_morton_seed_neighbor(
+    const std::uint64_t* coordinate_bits,
+    std::size_t point_count,
+    const std::uint64_t* frozen_component_labels,
+    const std::uint64_t* morton_point_ids,
+    std::size_t neighbor_position,
+    std::uint64_t source_point_id,
+    std::uint64_t source_label,
+    double& best_squared_distance,
+    K1BoruvkaMortonSeedProposalRecord& output) noexcept {
+  const std::uint64_t target_point_id =
+      morton_point_ids[neighbor_position];
+  if (target_point_id >= static_cast<std::uint64_t>(point_count)) {
+    output.failure_code = static_cast<std::uint64_t>(
+        MortonSeedFailure::neighbor_point_id_out_of_range);
+    return false;
+  }
+  ++output.inspected_neighbor_count;
+
+  const std::uint64_t target_label =
+      frozen_component_labels[static_cast<std::size_t>(target_point_id)];
+  if (target_label >= static_cast<std::uint64_t>(point_count)) {
+    output.failure_code = static_cast<std::uint64_t>(
+        MortonSeedFailure::neighbor_label_out_of_range);
+    return false;
+  }
+  if (target_label == source_label) {
+    return true;
+  }
+  ++output.external_neighbor_count;
+
+  double squared_distance = 0.0;
+  for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
+    const std::size_t coordinate_offset = axis * point_count;
+    const double source_coordinate = value_from_bits(
+        coordinate_bits[
+            coordinate_offset + static_cast<std::size_t>(source_point_id)]);
+    const double target_coordinate = value_from_bits(
+        coordinate_bits[
+            coordinate_offset + static_cast<std::size_t>(target_point_id)]);
+    const double difference =
+        __dsub_rn(source_coordinate, target_coordinate);
+    const double squared_difference = __dmul_rn(difference, difference);
+    squared_distance = __dadd_rn(squared_distance, squared_difference);
+  }
+  if (squared_distance != squared_distance || squared_distance < 0.0) {
+    output.failure_code = static_cast<std::uint64_t>(
+        MortonSeedFailure::distance_not_orderable);
+    return false;
+  }
+
+  if (output.target_point_id == k1_boruvka_sentinel ||
+      squared_distance < best_squared_distance ||
+      (squared_distance == best_squared_distance &&
+       target_point_id < output.target_point_id)) {
+    best_squared_distance = squared_distance;
+    output.target_point_id = target_point_id;
+  }
+  return true;
+}
+
+__global__ void morsehgp3d_phase5_k1_boruvka_morton_seed_kernel(
+    const std::uint64_t* coordinate_bits,
+    std::size_t point_count,
+    const std::uint64_t* frozen_component_labels,
+    const std::uint64_t* morton_point_ids,
+    std::size_t window_radius,
+    K1BoruvkaMortonSeedProposalRecord* records) {
+  const std::size_t morton_position =
+      static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (morton_position >= point_count) {
+    return;
+  }
+
+  K1BoruvkaMortonSeedProposalRecord output;
+  const std::uint64_t source_point_id =
+      morton_point_ids[morton_position];
+  const std::size_t output_index =
+      source_point_id < static_cast<std::uint64_t>(point_count)
+          ? static_cast<std::size_t>(source_point_id)
+          : morton_position;
+  if (source_point_id >= static_cast<std::uint64_t>(point_count)) {
+    output.failure_code = static_cast<std::uint64_t>(
+        MortonSeedFailure::source_point_id_out_of_range);
+    records[output_index] = output;
+    return;
+  }
+
+  const std::uint64_t source_label =
+      frozen_component_labels[static_cast<std::size_t>(source_point_id)];
+  if (source_label >= static_cast<std::uint64_t>(point_count)) {
+    output.failure_code = static_cast<std::uint64_t>(
+        MortonSeedFailure::source_label_out_of_range);
+  } else {
+    double best_squared_distance = 0.0;
+    const std::size_t left_count =
+        window_radius < morton_position ? window_radius : morton_position;
+    const std::size_t right_available =
+        point_count - 1U - morton_position;
+    const std::size_t right_count =
+        window_radius < right_available ? window_radius : right_available;
+    for (std::size_t offset = 1U; offset <= left_count; ++offset) {
+      if (!inspect_morton_seed_neighbor(
+              coordinate_bits,
+              point_count,
+              frozen_component_labels,
+              morton_point_ids,
+              morton_position - offset,
+              source_point_id,
+              source_label,
+              best_squared_distance,
+              output)) {
+        break;
+      }
+    }
+    if (output.failure_code == 0U) {
+      for (std::size_t offset = 1U; offset <= right_count; ++offset) {
+        if (!inspect_morton_seed_neighbor(
+                coordinate_bits,
+                point_count,
+                frozen_component_labels,
+                morton_point_ids,
+                morton_position + offset,
+                source_point_id,
+                source_label,
+                best_squared_distance,
+                output)) {
+          break;
+        }
+      }
+    }
+  }
+  records[output_index] = output;
+}
+
 [[nodiscard]] std::size_t checked_add(
     std::size_t total,
     std::uint64_t increment,
@@ -917,6 +1100,19 @@ void validate_chunked_arguments(
   return static_cast<unsigned int>(bounded_blocks);
 }
 
+[[nodiscard]] unsigned int morton_seed_launch_block_count(
+    std::size_t point_count,
+    unsigned int maximum_grid_x) {
+  const std::size_t required_blocks =
+      (point_count - 1U) / kThreadsPerBlock + 1U;
+  if (required_blocks == 0U ||
+      required_blocks > static_cast<std::size_t>(maximum_grid_x)) {
+    throw std::length_error(
+        "the Phase 5 K1 Boruvka Morton seed grid cannot assign one thread per position");
+  }
+  return static_cast<unsigned int>(required_blocks);
+}
+
 void validate_inputs(
     std::span<const K1BoruvkaNodeInputRecord> nodes,
     std::size_t root_index,
@@ -972,6 +1168,84 @@ void validate_inputs(
   }
 }
 
+void validate_morton_seed_inputs(
+    std::span<const K1BoruvkaNodeInputRecord> nodes,
+    std::size_t root_index,
+    std::span<const std::uint64_t> coordinate_bits,
+    std::size_t point_count,
+    std::span<const std::uint64_t> morton_point_ids,
+    std::span<const std::uint64_t> frozen_component_labels,
+    std::size_t window_radius) {
+  if (point_count == 0U || nodes.empty() || root_index >= nodes.size()) {
+    throw std::invalid_argument(
+        "a Phase 5 K1 Boruvka Morton seed proposal requires a valid nonempty LBVH");
+  }
+  if (point_count > std::numeric_limits<std::uint64_t>::max() ||
+      nodes.size() > std::numeric_limits<std::uint64_t>::max()) {
+    throw std::length_error(
+        "a Phase 5 K1 Boruvka Morton seed size is not representable on the device");
+  }
+  if (point_count == std::numeric_limits<std::size_t>::max() ||
+      point_count > std::numeric_limits<std::size_t>::max() / kAxisCount ||
+      point_count > std::numeric_limits<std::size_t>::max() /
+          sizeof(K1BoruvkaMortonSeedProposalRecord)) {
+    throw std::length_error(
+        "a Phase 5 K1 Boruvka Morton seed allocation size overflows");
+  }
+  if (coordinate_bits.size() != point_count * kAxisCount ||
+      morton_point_ids.size() != point_count ||
+      frozen_component_labels.size() != point_count) {
+    throw std::invalid_argument(
+        "a Phase 5 K1 Boruvka Morton seed input span has an inconsistent size");
+  }
+  if (nodes[root_index].escape != k1_boruvka_sentinel) {
+    throw std::invalid_argument(
+        "the Phase 5 K1 Boruvka root escape must be the sentinel");
+  }
+  if (window_radius == 0U) {
+    throw std::invalid_argument(
+        "the Phase 5 K1 Boruvka Morton seed window radius must be positive");
+  }
+  if (window_radius >
+      std::numeric_limits<std::size_t>::max() / 2U) {
+    throw std::length_error(
+        "the Phase 5 K1 Boruvka Morton seed two-sided window overflows");
+  }
+
+  for (const std::uint64_t bits : coordinate_bits) {
+    if (!finite_bits(bits)) {
+      throw std::invalid_argument(
+          "Phase 5 K1 Boruvka Morton seed coordinates must be finite binary64 values");
+    }
+  }
+  for (const std::uint64_t label : frozen_component_labels) {
+    if (label >= static_cast<std::uint64_t>(point_count)) {
+      throw std::invalid_argument(
+          "a Phase 5 K1 Boruvka Morton seed component label is out of range");
+    }
+  }
+
+  std::vector<unsigned char> point_id_seen(point_count, 0U);
+  for (const std::uint64_t point_id : morton_point_ids) {
+    if (point_id >= static_cast<std::uint64_t>(point_count)) {
+      throw std::invalid_argument(
+          "a Phase 5 K1 Boruvka Morton point ID is out of range");
+    }
+    unsigned char& seen =
+        point_id_seen[static_cast<std::size_t>(point_id)];
+    if (seen != 0U) {
+      throw std::invalid_argument(
+          "the Phase 5 K1 Boruvka Morton order is not a permutation");
+    }
+    seen = 1U;
+  }
+  if (std::find(point_id_seen.begin(), point_id_seen.end(), 0U) !=
+      point_id_seen.end()) {
+    throw std::invalid_argument(
+        "the Phase 5 K1 Boruvka Morton order does not cover every point ID");
+  }
+}
+
 }  // namespace
 
 std::size_t enforce_k1_boruvka_candidate_budget_on_gpu(
@@ -997,6 +1271,215 @@ std::size_t enforce_k1_boruvka_candidate_budget_on_gpu(
     context.set_candidate_capacity_hint(capacity);
     device_guard.restore();
     return capacity;
+  } catch (...) {
+    cuda.synchronize_after_failure();
+    throw;
+  }
+}
+
+K1BoruvkaMortonSeedProposalBatch
+propose_k1_boruvka_morton_seeds_on_gpu(
+    K1BoruvkaCandidateContextState& context,
+    std::span<const K1BoruvkaNodeInputRecord> nodes,
+    std::size_t root_index,
+    std::span<const std::uint64_t> coordinate_bits,
+    std::size_t point_count,
+    std::span<const std::uint64_t> morton_point_ids,
+    std::span<const std::uint64_t> frozen_component_labels,
+    std::size_t window_radius) {
+  validate_morton_seed_inputs(
+      nodes,
+      root_index,
+      coordinate_bits,
+      point_count,
+      morton_point_ids,
+      frozen_component_labels,
+      window_radius);
+
+  K1BoruvkaCudaResources& cuda = resources(context);
+  DeviceGuard device_guard{cuda.device()};
+  try {
+    const unsigned int block_count = morton_seed_launch_block_count(
+        point_count, cuda.maximum_grid_x());
+    cuda.initialize_static_inputs(
+        nodes, root_index, coordinate_bits, point_count);
+    cuda.update_frozen_labels(frozen_component_labels);
+    cuda.update_morton_point_ids(morton_point_ids);
+    check_cuda(
+        cudaMemsetAsync(
+            cuda.morton_seed_records(),
+            0xff,
+            point_count * sizeof(K1BoruvkaMortonSeedProposalRecord),
+            cuda.stream()),
+        "cudaMemsetAsync Phase 5 K1 Boruvka Morton seed records");
+
+    morsehgp3d_phase5_k1_boruvka_morton_seed_kernel
+        <<<block_count, kThreadsPerBlock, 0U, cuda.stream()>>>(
+            cuda.coordinate_bits(),
+            point_count,
+            cuda.frozen_labels(),
+            cuda.morton_point_ids(),
+            window_radius,
+            cuda.morton_seed_records());
+    check_cuda(
+        cudaGetLastError(),
+        "Phase 5 K1 Boruvka Morton seed proposal launch");
+
+    K1BoruvkaMortonSeedProposalBatch batch;
+    batch.records.resize(point_count);
+    batch.window_radius = window_radius;
+    batch.kernel_launch_count = 1U;
+    batch.synchronization_count = 1U;
+    check_cuda(
+        cudaMemcpyAsync(
+            batch.records.data(),
+            cuda.morton_seed_records(),
+            point_count * sizeof(K1BoruvkaMortonSeedProposalRecord),
+            cudaMemcpyDeviceToHost,
+            cuda.stream()),
+        "cudaMemcpyAsync Phase 5 K1 Boruvka Morton seed records device-to-host");
+    cuda.synchronize();
+
+    const std::size_t per_source_inspection_bound = std::min(
+        point_count - 1U, 2U * window_radius);
+    std::vector<std::size_t> morton_position_by_point_id(
+        point_count, point_count);
+    for (std::size_t morton_position = 0U;
+         morton_position < point_count;
+         ++morton_position) {
+      morton_position_by_point_id[static_cast<std::size_t>(
+          morton_point_ids[morton_position])] = morton_position;
+    }
+    std::vector<std::size_t> active_label_counts(point_count, 0U);
+    std::size_t active_begin = 0U;
+    std::size_t active_end = std::min(window_radius, point_count - 1U);
+    for (std::size_t position = active_begin;
+         position <= active_end;
+         ++position) {
+      const std::size_t point_index = static_cast<std::size_t>(
+          morton_point_ids[position]);
+      ++active_label_counts[static_cast<std::size_t>(
+          frozen_component_labels[point_index])];
+    }
+    std::size_t maximum_inspected_neighbor_count = 0U;
+    for (std::size_t morton_position = 0U;
+         morton_position < point_count;
+         ++morton_position) {
+      const std::size_t expected_begin =
+          morton_position > window_radius
+              ? morton_position - window_radius
+              : 0U;
+      const std::size_t expected_end = std::min(
+          point_count - 1U,
+          window_radius > point_count - 1U - morton_position
+              ? point_count - 1U
+              : morton_position + window_radius);
+      while (active_begin < expected_begin) {
+        const std::size_t retired_point = static_cast<std::size_t>(
+            morton_point_ids[active_begin]);
+        std::size_t& retired_count = active_label_counts[
+            static_cast<std::size_t>(
+                frozen_component_labels[retired_point])];
+        if (retired_count == 0U) {
+          throw std::logic_error(
+              "the Phase 5 K1 Boruvka Morton host window underflowed");
+        }
+        --retired_count;
+        ++active_begin;
+      }
+      while (active_end < expected_end) {
+        ++active_end;
+        const std::size_t admitted_point = static_cast<std::size_t>(
+            morton_point_ids[active_end]);
+        ++active_label_counts[static_cast<std::size_t>(
+            frozen_component_labels[admitted_point])];
+      }
+      if (active_begin != expected_begin || active_end != expected_end) {
+        throw std::logic_error(
+            "the Phase 5 K1 Boruvka Morton host window did not advance monotonically");
+      }
+
+      const std::size_t source_index = static_cast<std::size_t>(
+          morton_point_ids[morton_position]);
+      const K1BoruvkaMortonSeedProposalRecord& record =
+          batch.records[source_index];
+      if (record.failure_code != 0U) {
+        throw std::runtime_error(
+            "the Phase 5 K1 Boruvka Morton seed kernel failed closed for source " +
+            std::to_string(source_index) + " with code " +
+            std::to_string(record.failure_code));
+      }
+
+      const std::size_t left_count =
+          std::min(window_radius, morton_position);
+      const std::size_t right_count = std::min(
+          window_radius, point_count - 1U - morton_position);
+      const std::size_t expected_inspected = left_count + right_count;
+      const std::size_t source_label = static_cast<std::size_t>(
+          frozen_component_labels[source_index]);
+      const std::size_t same_component_including_source =
+          active_label_counts[source_label];
+      if (same_component_including_source == 0U ||
+          same_component_including_source > expected_inspected + 1U) {
+        throw std::logic_error(
+            "the Phase 5 K1 Boruvka Morton host window lost its source");
+      }
+      const std::size_t expected_external =
+          expected_inspected - (same_component_including_source - 1U);
+
+      const bool has_proposal =
+          record.target_point_id != k1_boruvka_sentinel;
+      bool valid_proposed_target = !has_proposal;
+      if (has_proposal &&
+          record.target_point_id < static_cast<std::uint64_t>(point_count)) {
+        const std::size_t target_index = static_cast<std::size_t>(
+            record.target_point_id);
+        const std::size_t target_position =
+            morton_position_by_point_id[target_index];
+        const std::size_t separation =
+            morton_position > target_position
+                ? morton_position - target_position
+                : target_position - morton_position;
+        valid_proposed_target =
+            separation != 0U && separation <= window_radius &&
+            frozen_component_labels[target_index] !=
+                frozen_component_labels[source_index];
+      }
+      if (record.inspected_neighbor_count !=
+              static_cast<std::uint64_t>(expected_inspected) ||
+          record.external_neighbor_count !=
+              static_cast<std::uint64_t>(expected_external) ||
+          expected_inspected > per_source_inspection_bound ||
+          has_proposal != (expected_external != 0U) ||
+          !valid_proposed_target) {
+        throw std::runtime_error(
+            "a Phase 5 K1 Boruvka Morton seed record violates its trusted source window");
+      }
+
+      batch.inspected_neighbor_count = checked_add(
+          batch.inspected_neighbor_count,
+          record.inspected_neighbor_count,
+          "the Phase 5 K1 Boruvka Morton inspection total overflowed");
+      batch.external_neighbor_count = checked_add(
+          batch.external_neighbor_count,
+          record.external_neighbor_count,
+          "the Phase 5 K1 Boruvka Morton external-neighbor total overflowed");
+      maximum_inspected_neighbor_count = std::max(
+          maximum_inspected_neighbor_count, expected_inspected);
+      if (has_proposal) {
+        ++batch.proposed_seed_count;
+      }
+    }
+
+    if (maximum_inspected_neighbor_count >
+        per_source_inspection_bound) {
+      throw std::runtime_error(
+          "the Phase 5 K1 Boruvka Morton seed proposal exceeded its two-sided window bound");
+    }
+    batch.complete_source_coverage = true;
+    batch.bounded_window = true;
+    device_guard.restore();
+    return batch;
   } catch (...) {
     cuda.synchronize_after_failure();
     throw;

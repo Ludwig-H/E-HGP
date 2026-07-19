@@ -94,6 +94,48 @@ struct K1BoruvkaChunkingPolicy {
       const K1BoruvkaChunkingPolicy&) = default;
 };
 
+struct K1BoruvkaMortonSeedPolicy {
+  std::size_t window_radius{};
+
+  friend bool operator==(
+      const K1BoruvkaMortonSeedPolicy&,
+      const K1BoruvkaMortonSeedPolicy&) = default;
+};
+
+enum class K1BoruvkaSeedMode : std::uint8_t {
+  canonical_external_fallback,
+  gpu_morton_window_cpu_exact_monotone,
+};
+
+enum class K1BoruvkaSeedStatus : std::uint8_t {
+  not_certified,
+  bounded_morton_window_external_exact_monotone_certified,
+};
+
+struct K1BoruvkaMortonSeedAudit {
+  std::size_t source_count{};
+  std::size_t window_radius{};
+  std::size_t neighbor_inspection_budget_per_source{};
+  std::size_t maximum_inspected_neighbor_count_per_source{};
+  std::size_t inspected_neighbor_count{};
+  std::size_t external_neighbor_count{};
+  std::size_t floating_proposal_count{};
+  std::size_t exact_selected_proposal_count{};
+  std::size_t exact_strict_improvement_count{};
+  std::size_t exact_fallback_count{};
+  std::size_t exact_seed_distance_evaluation_count{};
+  std::size_t gpu_kernel_launch_count{};
+  std::size_t gpu_synchronization_count{};
+  bool complete_source_coverage_certified{false};
+  bool bounded_window_certified{false};
+  bool external_targets_recertified{false};
+  bool exact_monotone_cutoff_certified{false};
+
+  friend bool operator==(
+      const K1BoruvkaMortonSeedAudit&,
+      const K1BoruvkaMortonSeedAudit&) = default;
+};
+
 enum class K1BoruvkaEmissionStatus : std::uint8_t {
   not_certified,
   complete_source_ranges_candidate_payload_bound_certified,
@@ -137,8 +179,11 @@ struct K1BoruvkaChunkedRoundResolution {
       cpu_exact_component_minima;
   K1BoruvkaCandidateAudit proposal_audit;
   K1BoruvkaChunkedEmissionAudit emission_audit;
+  K1BoruvkaMortonSeedAudit morton_seed_audit;
   K1BoruvkaEmissionStatus emission_status{
       K1BoruvkaEmissionStatus::not_certified};
+  K1BoruvkaSeedStatus seed_status{
+      K1BoruvkaSeedStatus::not_certified};
 
   friend bool operator==(
       const K1BoruvkaChunkedRoundResolution&,
@@ -193,10 +238,13 @@ struct K1HybridBoruvkaCanonicalContraction {
 struct K1HybridBoruvkaRound {
   K1BoruvkaCandidateAudit proposal_audit;
   K1BoruvkaChunkedEmissionAudit chunked_emission_audit;
+  K1BoruvkaMortonSeedAudit morton_seed_audit;
   K1HybridBoruvkaExactDecision exact_decision;
   K1HybridBoruvkaCanonicalContraction canonical_contraction;
   K1BoruvkaEmissionStatus chunked_emission_status{
       K1BoruvkaEmissionStatus::not_certified};
+  K1BoruvkaSeedStatus seed_status{
+      K1BoruvkaSeedStatus::not_certified};
   K1HybridBoruvkaProposalStatus proposal_status{
       K1HybridBoruvkaProposalStatus::not_certified};
   K1HybridBoruvkaDecisionStatus decision_status{
@@ -228,6 +276,27 @@ struct K1HybridBoruvkaChunkedEmissionCounters {
   friend bool operator==(
       const K1HybridBoruvkaChunkedEmissionCounters&,
       const K1HybridBoruvkaChunkedEmissionCounters&) = default;
+};
+
+struct K1HybridBoruvkaMortonSeedCounters {
+  std::size_t round_count{};
+  std::size_t source_count{};
+  std::size_t window_radius{};
+  std::size_t neighbor_inspection_budget_per_source{};
+  std::size_t maximum_inspected_neighbor_count_per_source{};
+  std::size_t inspected_neighbor_count{};
+  std::size_t external_neighbor_count{};
+  std::size_t floating_proposal_count{};
+  std::size_t exact_selected_proposal_count{};
+  std::size_t exact_strict_improvement_count{};
+  std::size_t exact_fallback_count{};
+  std::size_t exact_seed_distance_evaluation_count{};
+  std::size_t gpu_kernel_launch_count{};
+  std::size_t gpu_synchronization_count{};
+
+  friend bool operator==(
+      const K1HybridBoruvkaMortonSeedCounters&,
+      const K1HybridBoruvkaMortonSeedCounters&) = default;
 };
 
 // Aggregates only the producer chain persisted in rounds. The independent
@@ -273,6 +342,8 @@ struct K1HybridBoruvkaResult {
       "gpu_candidate_superset_cpu_exact_boruvka_v1";
   static constexpr const char* bounded_emission_proof_basis =
       "gpu_complete_source_ranges_bounded_candidate_payload_v1";
+  static constexpr const char* monotone_seed_proof_basis =
+      "gpu_bounded_morton_seed_cpu_exact_monotone_cutoff_v1";
 
   std::size_t point_count{};
   std::vector<K1HybridBoruvkaRound> rounds;
@@ -281,15 +352,20 @@ struct K1HybridBoruvkaResult {
   exact::ExactLevel total_hgp_weight{};
   K1HybridBoruvkaCounters counters{};
   K1HybridBoruvkaChunkedEmissionCounters chunked_emission_counters{};
+  K1HybridBoruvkaMortonSeedCounters morton_seed_counters{};
   K1BoruvkaChunkingPolicy chunking_policy{};
+  K1BoruvkaMortonSeedPolicy morton_seed_policy{};
   K1HybridBoruvkaEmissionMode emission_mode{
       K1HybridBoruvkaEmissionMode::monolithic_round_payload};
+  K1BoruvkaSeedMode seed_mode{
+      K1BoruvkaSeedMode::canonical_external_fallback};
   K1HybridHierarchyReductionStatus hierarchy_reduction_status{
       K1HybridHierarchyReductionStatus::not_performed};
   K1HybridScientificStatus scientific_status{
       K1HybridScientificStatus::local_emst_witness_only};
   bool proposal_chain_certified{false};
   bool bounded_candidate_emission_chain_certified{false};
+  bool bounded_morton_seed_chain_certified{false};
   bool cpu_exact_decision_chain_certified{false};
   bool canonical_contraction_chain_certified{false};
   bool reference_cpu_witness_certified{false};
@@ -299,8 +375,10 @@ struct K1HybridBoruvkaResult {
 struct K1HybridBoruvkaVerification {
   bool index_identity_certified{false};
   bool emission_mode_certified{false};
+  bool seed_mode_certified{false};
   bool proposal_chain_certified{false};
   bool bounded_candidate_emission_chain_certified{false};
+  bool bounded_morton_seed_chain_certified{false};
   bool cpu_exact_decision_chain_certified{false};
   bool canonical_contractions_certified{false};
   bool round_count_bound_certified{false};
@@ -319,6 +397,11 @@ struct K1HybridBoruvkaVerification {
   std::size_t gpu_replay_source_chunk_count{};
   std::size_t gpu_replay_peak_chunk_candidate_count{};
   std::size_t gpu_replay_candidate_payload_peak_bytes{};
+  std::size_t gpu_replay_seed_inspected_neighbor_count{};
+  std::size_t gpu_replay_seed_selected_proposal_count{};
+  std::size_t gpu_replay_seed_strict_improvement_count{};
+  std::size_t gpu_replay_seed_kernel_launch_count{};
+  std::size_t gpu_replay_seed_synchronization_count{};
 };
 
 class K1BoruvkaCandidateContext final {
@@ -345,12 +428,25 @@ class K1BoruvkaCandidateContext final {
       std::span<const spatial::PointId> frozen_component_labels,
       K1BoruvkaChunkingPolicy policy);
 
+  [[nodiscard]] K1BoruvkaChunkedRoundResolution propose_round_chunked(
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const spatial::PointId> frozen_component_labels,
+      K1BoruvkaChunkingPolicy chunking_policy,
+      K1BoruvkaMortonSeedPolicy seed_policy);
+
   [[nodiscard]] std::size_t point_count() const noexcept;
   [[nodiscard]] std::size_t node_count() const noexcept;
 
  private:
   void require_matching_cloud(
       const spatial::CanonicalPointCloud& cloud) const;
+
+  [[nodiscard]] K1BoruvkaChunkedRoundResolution
+  propose_round_chunked_impl(
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const spatial::PointId> frozen_component_labels,
+      K1BoruvkaChunkingPolicy chunking_policy,
+      const K1BoruvkaMortonSeedPolicy* seed_policy);
 
   std::shared_ptr<detail::K1BoruvkaCandidateContextState> state_;
   std::unique_ptr<detail::K1BoruvkaCandidateHostState> host_;
@@ -376,6 +472,17 @@ build_gpu_proposed_cpu_exact_k1_boruvka(
     const spatial::CanonicalPointCloud& cloud,
     K1BoruvkaChunkingPolicy chunking_policy);
 
+// Adds a bounded floating Morton-neighborhood heuristic for each seed. The
+// certificate relies only on the returned PointId being recertified as an
+// external target inside the trusted window; reference_cpu selects it only
+// when its exact canonical edge key improves the canonical fallback key.
+[[nodiscard]] K1HybridBoruvkaResult
+build_gpu_proposed_cpu_exact_k1_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaChunkingPolicy chunking_policy,
+    K1BoruvkaMortonSeedPolicy seed_policy);
+
 // Reruns the complete GPU proposal chain in a fresh resident context, then
 // recomputes the reference CPU Boruvka witness and all backend-neutral
 // contraction/weight invariants. Result flags, per-round statuses, audits and
@@ -393,6 +500,16 @@ verify_gpu_proposed_cpu_exact_k1_boruvka(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     K1BoruvkaChunkingPolicy trusted_chunking_policy,
+    const K1HybridBoruvkaResult& result);
+
+// Both policies are trusted caller inputs and are checked before the fresh
+// GPU replay. Neither bound is recovered only from the untrusted result.
+[[nodiscard]] K1HybridBoruvkaVerification
+verify_gpu_proposed_cpu_exact_k1_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaChunkingPolicy trusted_chunking_policy,
+    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
     const K1HybridBoruvkaResult& result);
 
 }  // namespace morsehgp3d::gpu

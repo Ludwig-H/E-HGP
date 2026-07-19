@@ -79,6 +79,83 @@ constexpr std::size_t kChunkedCandidatePayloadCopies = 2U;
                  bytes_per_budget_record;
 }
 
+[[nodiscard]] bool valid_morton_seed_policy(
+    K1BoruvkaMortonSeedPolicy policy) noexcept {
+  return policy.window_radius != 0U &&
+         policy.window_radius <=
+             std::numeric_limits<std::size_t>::max() / 2U;
+}
+
+[[nodiscard]] std::optional<std::size_t> expected_morton_inspections(
+    std::size_t point_count,
+    K1BoruvkaMortonSeedPolicy policy) noexcept {
+  if (!valid_morton_seed_policy(policy)) {
+    return std::nullopt;
+  }
+  if (point_count <= 1U) {
+    return 0U;
+  }
+  const std::size_t effective_radius =
+      std::min(policy.window_radius, point_count - 1U);
+  std::size_t factor = point_count - 1U;
+  if (!add_without_overflow(
+          factor, point_count - effective_radius) ||
+      (effective_radius != 0U &&
+       factor > std::numeric_limits<std::size_t>::max() /
+                    effective_radius)) {
+    return std::nullopt;
+  }
+  return effective_radius * factor;
+}
+
+[[nodiscard]] bool morton_seed_audit_closes(
+    const K1HybridBoruvkaRound& hybrid_round,
+    std::size_t point_count,
+    K1BoruvkaMortonSeedPolicy policy) noexcept {
+  const K1BoruvkaMortonSeedAudit& audit =
+      hybrid_round.morton_seed_audit;
+  const std::optional<std::size_t> expected_inspections =
+      expected_morton_inspections(point_count, policy);
+  if (point_count <= 1U || !expected_inspections.has_value()) {
+    return false;
+  }
+  std::size_t maximum_exact_seed_evaluations = point_count;
+  if (!add_without_overflow(
+          maximum_exact_seed_evaluations,
+          audit.floating_proposal_count)) {
+    return false;
+  }
+  const std::size_t inspection_budget_per_source = std::min(
+      point_count - 1U, 2U * policy.window_radius);
+  return hybrid_round.seed_status ==
+             K1BoruvkaSeedStatus::
+                 bounded_morton_window_external_exact_monotone_certified &&
+         audit.source_count == point_count &&
+         audit.window_radius == policy.window_radius &&
+         audit.neighbor_inspection_budget_per_source ==
+             inspection_budget_per_source &&
+         audit.maximum_inspected_neighbor_count_per_source <=
+             inspection_budget_per_source &&
+         audit.inspected_neighbor_count == *expected_inspections &&
+         audit.external_neighbor_count <= audit.inspected_neighbor_count &&
+         audit.floating_proposal_count <= point_count &&
+         audit.exact_selected_proposal_count <=
+             audit.floating_proposal_count &&
+         audit.exact_strict_improvement_count <=
+             audit.exact_selected_proposal_count &&
+         audit.exact_fallback_count ==
+             point_count - audit.exact_selected_proposal_count &&
+         audit.exact_seed_distance_evaluation_count >= point_count &&
+         audit.exact_seed_distance_evaluation_count <=
+             maximum_exact_seed_evaluations &&
+         audit.gpu_kernel_launch_count == 1U &&
+         audit.gpu_synchronization_count == 1U &&
+         audit.complete_source_coverage_certified &&
+         audit.bounded_window_certified &&
+         audit.external_targets_recertified &&
+         audit.exact_monotone_cutoff_certified;
+}
+
 [[nodiscard]] bool chunked_emission_audit_closes(
     const K1HybridBoruvkaRound& hybrid_round,
     std::size_t point_count,
@@ -155,7 +232,9 @@ constexpr std::size_t kChunkedCandidatePayloadCopies = 2U;
     std::size_t node_count,
     std::uint64_t expected_epoch,
     K1HybridBoruvkaEmissionMode emission_mode,
-    K1BoruvkaChunkingPolicy chunking_policy) noexcept {
+    K1BoruvkaChunkingPolicy chunking_policy,
+    K1BoruvkaSeedMode seed_mode,
+    K1BoruvkaMortonSeedPolicy seed_policy) noexcept {
   const K1BoruvkaCandidateAudit& audit = hybrid_round.proposal_audit;
   const bool common_contract =
       hybrid_round.proposal_status ==
@@ -181,18 +260,38 @@ constexpr std::size_t kChunkedCandidatePayloadCopies = 2U;
   if (!common_contract) {
     return false;
   }
+  bool emission_closes = false;
   switch (emission_mode) {
     case K1HybridBoruvkaEmissionMode::monolithic_round_payload:
-      return chunking_policy.max_candidate_records_per_chunk == 0U &&
-             hybrid_round.chunked_emission_status ==
-                 K1BoruvkaEmissionStatus::not_certified &&
-             hybrid_round.chunked_emission_audit ==
-                 K1BoruvkaChunkedEmissionAudit{} &&
-             audit.gpu_kernel_launch_count == 2U &&
-             audit.gpu_synchronization_count == 2U;
+      emission_closes =
+          chunking_policy.max_candidate_records_per_chunk == 0U &&
+          hybrid_round.chunked_emission_status ==
+              K1BoruvkaEmissionStatus::not_certified &&
+          hybrid_round.chunked_emission_audit ==
+              K1BoruvkaChunkedEmissionAudit{} &&
+          audit.gpu_kernel_launch_count == 2U &&
+          audit.gpu_synchronization_count == 2U;
+      break;
     case K1HybridBoruvkaEmissionMode::bounded_complete_source_ranges:
-      return chunked_emission_audit_closes(
+      emission_closes = chunked_emission_audit_closes(
           hybrid_round, point_count, chunking_policy);
+      break;
+  }
+  if (!emission_closes) {
+    return false;
+  }
+  switch (seed_mode) {
+    case K1BoruvkaSeedMode::canonical_external_fallback:
+      return seed_policy.window_radius == 0U &&
+             hybrid_round.seed_status ==
+                 K1BoruvkaSeedStatus::not_certified &&
+             hybrid_round.morton_seed_audit ==
+                 K1BoruvkaMortonSeedAudit{};
+    case K1BoruvkaSeedMode::gpu_morton_window_cpu_exact_monotone:
+      return emission_mode == K1HybridBoruvkaEmissionMode::
+                                  bounded_complete_source_ranges &&
+             morton_seed_audit_closes(
+                 hybrid_round, point_count, seed_policy);
   }
   return false;
 }
@@ -424,6 +523,80 @@ recompute_chunked_emission_counters(
   return counters;
 }
 
+[[nodiscard]] std::optional<K1HybridBoruvkaMortonSeedCounters>
+recompute_morton_seed_counters(
+    const K1HybridBoruvkaResult& result) noexcept {
+  K1HybridBoruvkaMortonSeedCounters counters;
+  switch (result.seed_mode) {
+    case K1BoruvkaSeedMode::canonical_external_fallback:
+      if (result.morton_seed_policy.window_radius != 0U) {
+        return std::nullopt;
+      }
+      for (const K1HybridBoruvkaRound& round : result.rounds) {
+        if (round.seed_status != K1BoruvkaSeedStatus::not_certified ||
+            round.morton_seed_audit != K1BoruvkaMortonSeedAudit{}) {
+          return std::nullopt;
+        }
+      }
+      return counters;
+    case K1BoruvkaSeedMode::gpu_morton_window_cpu_exact_monotone:
+      break;
+  }
+
+  if (!valid_morton_seed_policy(result.morton_seed_policy)) {
+    return std::nullopt;
+  }
+  counters.window_radius = result.morton_seed_policy.window_radius;
+  counters.neighbor_inspection_budget_per_source =
+      result.point_count <= 1U
+          ? 0U
+          : std::min(
+                result.point_count - 1U,
+                2U * result.morton_seed_policy.window_radius);
+  for (const K1HybridBoruvkaRound& round : result.rounds) {
+    if (!morton_seed_audit_closes(
+            round, result.point_count, result.morton_seed_policy)) {
+      return std::nullopt;
+    }
+    const K1BoruvkaMortonSeedAudit& audit = round.morton_seed_audit;
+    if (!add_without_overflow(counters.round_count, 1U) ||
+        !add_without_overflow(counters.source_count, audit.source_count) ||
+        !add_without_overflow(
+            counters.inspected_neighbor_count,
+            audit.inspected_neighbor_count) ||
+        !add_without_overflow(
+            counters.external_neighbor_count,
+            audit.external_neighbor_count) ||
+        !add_without_overflow(
+            counters.floating_proposal_count,
+            audit.floating_proposal_count) ||
+        !add_without_overflow(
+            counters.exact_selected_proposal_count,
+            audit.exact_selected_proposal_count) ||
+        !add_without_overflow(
+            counters.exact_strict_improvement_count,
+            audit.exact_strict_improvement_count) ||
+        !add_without_overflow(
+            counters.exact_fallback_count,
+            audit.exact_fallback_count) ||
+        !add_without_overflow(
+            counters.exact_seed_distance_evaluation_count,
+            audit.exact_seed_distance_evaluation_count) ||
+        !add_without_overflow(
+            counters.gpu_kernel_launch_count,
+            audit.gpu_kernel_launch_count) ||
+        !add_without_overflow(
+            counters.gpu_synchronization_count,
+            audit.gpu_synchronization_count)) {
+      return std::nullopt;
+    }
+    counters.maximum_inspected_neighbor_count_per_source = std::max(
+        counters.maximum_inspected_neighbor_count_per_source,
+        audit.maximum_inspected_neighbor_count_per_source);
+  }
+  return counters;
+}
+
 [[nodiscard]] bool replay_canonical_contractions(
     const spatial::CanonicalPointCloud& cloud,
     const K1HybridBoruvkaResult& result) {
@@ -479,8 +652,10 @@ recompute_chunked_emission_counters(
 
 struct K1HybridGpuReplay {
   bool emission_mode_certified{false};
+  bool seed_mode_certified{false};
   bool proposal_chain_certified{false};
   bool bounded_candidate_emission_chain_certified{false};
+  bool bounded_morton_seed_chain_certified{false};
   bool exact_decision_chain_certified{false};
   std::size_t round_count{};
   std::size_t component_minimum_count{};
@@ -489,13 +664,19 @@ struct K1HybridGpuReplay {
   std::size_t source_chunk_count{};
   std::size_t peak_chunk_candidate_count{};
   std::size_t candidate_payload_peak_bytes{};
+  std::size_t seed_inspected_neighbor_count{};
+  std::size_t seed_selected_proposal_count{};
+  std::size_t seed_strict_improvement_count{};
+  std::size_t seed_kernel_launch_count{};
+  std::size_t seed_synchronization_count{};
 };
 
 [[nodiscard]] K1HybridGpuReplay replay_gpu_proposal_chain(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     const K1HybridBoruvkaResult& result,
-    std::optional<K1BoruvkaChunkingPolicy> trusted_chunking_policy) {
+    std::optional<K1BoruvkaChunkingPolicy> trusted_chunking_policy,
+    std::optional<K1BoruvkaMortonSeedPolicy> trusted_seed_policy) {
   K1HybridGpuReplay replay;
   if (result.point_count != cloud.size() || result.point_count == 0U) {
     return replay;
@@ -511,14 +692,29 @@ struct K1HybridGpuReplay {
       (bounded_emission && trusted_chunking_policy.has_value() &&
        valid_chunking_policy(*trusted_chunking_policy) &&
        result.chunking_policy == *trusted_chunking_policy);
-  if (!valid_emission_mode) {
+  const bool bounded_morton_seed =
+      result.seed_mode ==
+      K1BoruvkaSeedMode::gpu_morton_window_cpu_exact_monotone;
+  const bool valid_seed_mode =
+      (result.seed_mode ==
+           K1BoruvkaSeedMode::canonical_external_fallback &&
+       !trusted_seed_policy.has_value() &&
+       result.morton_seed_policy.window_radius == 0U) ||
+      (bounded_morton_seed && trusted_seed_policy.has_value() &&
+       valid_morton_seed_policy(*trusted_seed_policy) &&
+       result.morton_seed_policy == *trusted_seed_policy &&
+       bounded_emission);
+  if (!valid_emission_mode || !valid_seed_mode) {
     return replay;
   }
   if (result.point_count == 1U) {
     replay.emission_mode_certified = result.rounds.empty();
+    replay.seed_mode_certified = result.rounds.empty();
     replay.proposal_chain_certified = result.rounds.empty();
     replay.bounded_candidate_emission_chain_certified =
         bounded_emission && result.rounds.empty();
+    replay.bounded_morton_seed_chain_certified =
+        bounded_morton_seed && result.rounds.empty();
     replay.exact_decision_chain_certified = result.rounds.empty();
     return replay;
   }
@@ -531,12 +727,14 @@ struct K1HybridGpuReplay {
   }
   std::size_t component_count = result.point_count;
   bool emission_chain = true;
+  bool seed_chain = true;
   bool proposal_chain = true;
   bool decision_chain = true;
   try {
     K1BoruvkaCandidateContext context{index, cloud};
     for (const K1HybridBoruvkaRound& hybrid_round : result.rounds) {
       if (component_count <= 1U) {
+        seed_chain = false;
         proposal_chain = false;
         decision_chain = false;
         break;
@@ -544,16 +742,27 @@ struct K1HybridGpuReplay {
 
       K1BoruvkaCandidateAudit proposal_audit;
       K1BoruvkaChunkedEmissionAudit chunked_emission_audit;
+      K1BoruvkaMortonSeedAudit morton_seed_audit;
       K1BoruvkaEmissionStatus chunked_emission_status =
           K1BoruvkaEmissionStatus::not_certified;
+      K1BoruvkaSeedStatus seed_status =
+          K1BoruvkaSeedStatus::not_certified;
       std::vector<hierarchy::K1BoruvkaComponentMinimum> component_minima;
       if (bounded_emission) {
         K1BoruvkaChunkedRoundResolution proposal =
-            context.propose_round_chunked(
-                cloud, labels, *trusted_chunking_policy);
+            bounded_morton_seed
+                ? context.propose_round_chunked(
+                      cloud,
+                      labels,
+                      *trusted_chunking_policy,
+                      *trusted_seed_policy)
+                : context.propose_round_chunked(
+                      cloud, labels, *trusted_chunking_policy);
         proposal_audit = proposal.proposal_audit;
         chunked_emission_audit = proposal.emission_audit;
         chunked_emission_status = proposal.emission_status;
+        morton_seed_audit = proposal.morton_seed_audit;
+        seed_status = proposal.seed_status;
         component_minima = std::move(
             proposal.cpu_exact_component_minima);
       } else {
@@ -577,6 +786,11 @@ struct K1HybridGpuReplay {
         emission_chain = false;
         proposal_chain = false;
       }
+      if (morton_seed_audit != hybrid_round.morton_seed_audit ||
+          seed_status != hybrid_round.seed_status) {
+        seed_chain = false;
+        proposal_chain = false;
+      }
       if (!same_decision_audit(
               proposal_audit, hybrid_round.proposal_audit) ||
           component_minima !=
@@ -596,8 +810,25 @@ struct K1HybridGpuReplay {
           (bounded_emission &&
            !add_without_overflow(
                replay.source_chunk_count,
-               chunked_emission_audit.source_chunk_count))) {
+               chunked_emission_audit.source_chunk_count)) ||
+          (bounded_morton_seed &&
+           (!add_without_overflow(
+                replay.seed_inspected_neighbor_count,
+                morton_seed_audit.inspected_neighbor_count) ||
+            !add_without_overflow(
+                replay.seed_selected_proposal_count,
+                morton_seed_audit.exact_selected_proposal_count) ||
+            !add_without_overflow(
+                replay.seed_strict_improvement_count,
+                morton_seed_audit.exact_strict_improvement_count) ||
+            !add_without_overflow(
+                replay.seed_kernel_launch_count,
+                morton_seed_audit.gpu_kernel_launch_count) ||
+            !add_without_overflow(
+                replay.seed_synchronization_count,
+                morton_seed_audit.gpu_synchronization_count)))) {
         emission_chain = false;
+        seed_chain = false;
         proposal_chain = false;
         decision_chain = false;
         break;
@@ -625,10 +856,16 @@ struct K1HybridGpuReplay {
   }
   replay.emission_mode_certified =
       emission_chain && component_count == 1U;
+  replay.seed_mode_certified =
+      seed_chain && component_count == 1U;
   replay.proposal_chain_certified =
-      emission_chain && proposal_chain && component_count == 1U;
+      emission_chain && seed_chain && proposal_chain &&
+      component_count == 1U;
   replay.bounded_candidate_emission_chain_certified =
       bounded_emission && emission_chain && proposal_chain &&
+      component_count == 1U;
+  replay.bounded_morton_seed_chain_certified =
+      bounded_morton_seed && seed_chain && proposal_chain &&
       component_count == 1U;
   replay.exact_decision_chain_certified =
       decision_chain && component_count == 1U;
@@ -642,7 +879,8 @@ namespace {
 [[nodiscard]] K1HybridBoruvkaResult build_hybrid_k1_boruvka(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
-    std::optional<K1BoruvkaChunkingPolicy> chunking_policy) {
+    std::optional<K1BoruvkaChunkingPolicy> chunking_policy,
+    std::optional<K1BoruvkaMortonSeedPolicy> seed_policy) {
   if (!index.validated_for(cloud)) {
     throw std::invalid_argument(
         "hybrid K1 Boruvka requires a ready LBVH for the same point namespace");
@@ -658,6 +896,17 @@ namespace {
     result.emission_mode = K1HybridBoruvkaEmissionMode::
         bounded_complete_source_ranges;
     result.chunking_policy = *chunking_policy;
+  }
+  if (seed_policy.has_value()) {
+    if (!chunking_policy.has_value() ||
+        !valid_morton_seed_policy(*seed_policy)) {
+      throw std::invalid_argument(
+          "hybrid K1 Boruvka Morton seeds require bounded emission and a "
+          "finite nonzero window radius");
+    }
+    result.seed_mode =
+        K1BoruvkaSeedMode::gpu_morton_window_cpu_exact_monotone;
+    result.morton_seed_policy = *seed_policy;
   }
 
   std::vector<spatial::PointId> component_labels(point_count);
@@ -681,16 +930,27 @@ namespace {
       }
       K1BoruvkaCandidateAudit proposal_audit;
       K1BoruvkaChunkedEmissionAudit chunked_emission_audit;
+      K1BoruvkaMortonSeedAudit morton_seed_audit;
       K1BoruvkaEmissionStatus chunked_emission_status =
           K1BoruvkaEmissionStatus::not_certified;
+      K1BoruvkaSeedStatus seed_status =
+          K1BoruvkaSeedStatus::not_certified;
       std::vector<hierarchy::K1BoruvkaComponentMinimum> component_minima;
       if (chunking_policy.has_value()) {
         K1BoruvkaChunkedRoundResolution proposal =
-            context.propose_round_chunked(
-                cloud, component_labels, *chunking_policy);
+            seed_policy.has_value()
+                ? context.propose_round_chunked(
+                      cloud,
+                      component_labels,
+                      *chunking_policy,
+                      *seed_policy)
+                : context.propose_round_chunked(
+                      cloud, component_labels, *chunking_policy);
         proposal_audit = proposal.proposal_audit;
         chunked_emission_audit = proposal.emission_audit;
         chunked_emission_status = proposal.emission_status;
+        morton_seed_audit = proposal.morton_seed_audit;
+        seed_status = proposal.seed_status;
         component_minima = std::move(
             proposal.cpu_exact_component_minima);
       } else {
@@ -714,8 +974,10 @@ namespace {
       hybrid_round.proposal_audit = proposal_audit;
       hybrid_round.chunked_emission_audit =
           chunked_emission_audit;
+      hybrid_round.morton_seed_audit = morton_seed_audit;
       hybrid_round.chunked_emission_status =
           chunked_emission_status;
+      hybrid_round.seed_status = seed_status;
       hybrid_round.exact_decision.round_index = round_index;
       hybrid_round.exact_decision.frozen_component_count =
           component_count;
@@ -781,13 +1043,27 @@ namespace {
         "the hybrid K1 Boruvka chunked-emission counters do not close");
   }
   result.chunked_emission_counters = *chunked_counters;
+  const std::optional<K1HybridBoruvkaMortonSeedCounters> seed_counters =
+      recompute_morton_seed_counters(result);
+  if (!seed_counters.has_value()) {
+    throw std::logic_error(
+        "the hybrid K1 Boruvka Morton-seed counters do not close");
+  }
+  result.morton_seed_counters = *seed_counters;
 
   const K1HybridBoruvkaVerification verification =
-      chunking_policy.has_value()
+      seed_policy.has_value()
           ? verify_gpu_proposed_cpu_exact_k1_boruvka(
-                index, cloud, *chunking_policy, result)
-          : verify_gpu_proposed_cpu_exact_k1_boruvka(
-                index, cloud, result);
+                index,
+                cloud,
+                *chunking_policy,
+                *seed_policy,
+                result)
+          : chunking_policy.has_value()
+                ? verify_gpu_proposed_cpu_exact_k1_boruvka(
+                      index, cloud, *chunking_policy, result)
+                : verify_gpu_proposed_cpu_exact_k1_boruvka(
+                      index, cloud, result);
   if (!verification.emst_witness_certified) {
     throw std::logic_error(
         "the hybrid K1 Boruvka witness failed its independent replay");
@@ -796,6 +1072,8 @@ namespace {
       verification.proposal_chain_certified;
   result.bounded_candidate_emission_chain_certified =
       verification.bounded_candidate_emission_chain_certified;
+  result.bounded_morton_seed_chain_certified =
+      verification.bounded_morton_seed_chain_certified;
   result.cpu_exact_decision_chain_certified =
       verification.cpu_exact_decision_chain_certified;
   result.canonical_contraction_chain_certified =
@@ -811,14 +1089,25 @@ namespace {
 K1HybridBoruvkaResult build_gpu_proposed_cpu_exact_k1_boruvka(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud) {
-  return build_hybrid_k1_boruvka(index, cloud, std::nullopt);
+  return build_hybrid_k1_boruvka(
+      index, cloud, std::nullopt, std::nullopt);
 }
 
 K1HybridBoruvkaResult build_gpu_proposed_cpu_exact_k1_boruvka(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     K1BoruvkaChunkingPolicy chunking_policy) {
-  return build_hybrid_k1_boruvka(index, cloud, chunking_policy);
+  return build_hybrid_k1_boruvka(
+      index, cloud, chunking_policy, std::nullopt);
+}
+
+K1HybridBoruvkaResult build_gpu_proposed_cpu_exact_k1_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaChunkingPolicy chunking_policy,
+    K1BoruvkaMortonSeedPolicy seed_policy) {
+  return build_hybrid_k1_boruvka(
+      index, cloud, chunking_policy, seed_policy);
 }
 
 namespace {
@@ -827,6 +1116,7 @@ namespace {
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     std::optional<K1BoruvkaChunkingPolicy> trusted_chunking_policy,
+    std::optional<K1BoruvkaMortonSeedPolicy> trusted_seed_policy,
     const K1HybridBoruvkaResult& result) {
   if (!index.validated_for(cloud)) {
     throw std::invalid_argument(
@@ -840,7 +1130,7 @@ namespace {
   verification.reference_component_minimum_count =
       expected.counters.component_minimum_count;
 
-  const bool trusted_policy_matches =
+  const bool trusted_emission_policy_matches =
       (result.emission_mode ==
            K1HybridBoruvkaEmissionMode::monolithic_round_payload &&
        !trusted_chunking_policy.has_value() &&
@@ -850,15 +1140,33 @@ namespace {
        trusted_chunking_policy.has_value() &&
        valid_chunking_policy(*trusted_chunking_policy) &&
        result.chunking_policy == *trusted_chunking_policy);
-  const K1BoruvkaChunkingPolicy checked_policy =
+  const bool trusted_seed_policy_matches =
+      (result.seed_mode ==
+           K1BoruvkaSeedMode::canonical_external_fallback &&
+       !trusted_seed_policy.has_value() &&
+       result.morton_seed_policy.window_radius == 0U) ||
+      (result.seed_mode ==
+           K1BoruvkaSeedMode::gpu_morton_window_cpu_exact_monotone &&
+       result.emission_mode ==
+           K1HybridBoruvkaEmissionMode::bounded_complete_source_ranges &&
+       trusted_seed_policy.has_value() &&
+       valid_morton_seed_policy(*trusted_seed_policy) &&
+       result.morton_seed_policy == *trusted_seed_policy);
+  const K1BoruvkaChunkingPolicy checked_chunking_policy =
       trusted_chunking_policy.value_or(K1BoruvkaChunkingPolicy{});
+  const K1BoruvkaMortonSeedPolicy checked_seed_policy =
+      trusted_seed_policy.value_or(K1BoruvkaMortonSeedPolicy{});
 
   const std::optional<K1HybridBoruvkaChunkedEmissionCounters>
       recomputed_chunked_counters =
           recompute_chunked_emission_counters(result);
-  bool proposal_chain = trusted_policy_matches &&
+  const std::optional<K1HybridBoruvkaMortonSeedCounters>
+      recomputed_seed_counters = recompute_morton_seed_counters(result);
+  bool proposal_chain = trusted_emission_policy_matches &&
+                        trusted_seed_policy_matches &&
                         result.point_count == cloud.size() &&
-                        recomputed_chunked_counters.has_value();
+                        recomputed_chunked_counters.has_value() &&
+                        recomputed_seed_counters.has_value();
   for (std::size_t round_index = 0U;
        round_index < result.rounds.size();
        ++round_index) {
@@ -869,24 +1177,41 @@ namespace {
             expected.counters.lbvh_node_count,
             static_cast<std::uint64_t>(round_index) + std::uint64_t{1},
             result.emission_mode,
-            checked_policy)) {
+            checked_chunking_policy,
+            result.seed_mode,
+            checked_seed_policy)) {
       proposal_chain = false;
     }
   }
   const K1HybridGpuReplay gpu_replay =
       replay_gpu_proposal_chain(
-          index, cloud, result, trusted_chunking_policy);
+          index,
+          cloud,
+          result,
+          trusted_chunking_policy,
+          trusted_seed_policy);
   verification.emission_mode_certified =
-      trusted_policy_matches && recomputed_chunked_counters.has_value() &&
+      trusted_emission_policy_matches &&
+      recomputed_chunked_counters.has_value() &&
       *recomputed_chunked_counters == result.chunked_emission_counters &&
       gpu_replay.emission_mode_certified;
+  verification.seed_mode_certified =
+      trusted_seed_policy_matches && recomputed_seed_counters.has_value() &&
+      *recomputed_seed_counters == result.morton_seed_counters &&
+      gpu_replay.seed_mode_certified;
   verification.bounded_candidate_emission_chain_certified =
       result.emission_mode ==
           K1HybridBoruvkaEmissionMode::bounded_complete_source_ranges &&
       verification.emission_mode_certified &&
       gpu_replay.bounded_candidate_emission_chain_certified;
+  verification.bounded_morton_seed_chain_certified =
+      result.seed_mode ==
+          K1BoruvkaSeedMode::gpu_morton_window_cpu_exact_monotone &&
+      verification.seed_mode_certified &&
+      gpu_replay.bounded_morton_seed_chain_certified;
   verification.proposal_chain_certified =
-      verification.emission_mode_certified && proposal_chain &&
+      verification.emission_mode_certified &&
+      verification.seed_mode_certified && proposal_chain &&
       gpu_replay.proposal_chain_certified;
   verification.gpu_replayed_round_count = gpu_replay.round_count;
   verification.gpu_replayed_component_minimum_count =
@@ -901,6 +1226,16 @@ namespace {
       gpu_replay.peak_chunk_candidate_count;
   verification.gpu_replay_candidate_payload_peak_bytes =
       gpu_replay.candidate_payload_peak_bytes;
+  verification.gpu_replay_seed_inspected_neighbor_count =
+      gpu_replay.seed_inspected_neighbor_count;
+  verification.gpu_replay_seed_selected_proposal_count =
+      gpu_replay.seed_selected_proposal_count;
+  verification.gpu_replay_seed_strict_improvement_count =
+      gpu_replay.seed_strict_improvement_count;
+  verification.gpu_replay_seed_kernel_launch_count =
+      gpu_replay.seed_kernel_launch_count;
+  verification.gpu_replay_seed_synchronization_count =
+      gpu_replay.seed_synchronization_count;
 
   bool exact_decisions =
       result.point_count == expected.point_count &&
@@ -950,6 +1285,8 @@ namespace {
       recomputed.has_value() && *recomputed == result.counters &&
       recomputed_chunked_counters.has_value() &&
       *recomputed_chunked_counters == result.chunked_emission_counters &&
+      recomputed_seed_counters.has_value() &&
+      *recomputed_seed_counters == result.morton_seed_counters &&
       result.point_count != 0U &&
       recomputed->final_component_count == 1U &&
       recomputed->accepted_edge_count == result.point_count - 1U &&
@@ -962,6 +1299,7 @@ namespace {
   verification.emst_witness_certified =
       verification.index_identity_certified &&
       verification.emission_mode_certified &&
+      verification.seed_mode_certified &&
       verification.proposal_chain_certified &&
       verification.cpu_exact_decision_chain_certified &&
       verification.canonical_contractions_certified &&
@@ -981,7 +1319,8 @@ verify_gpu_proposed_cpu_exact_k1_boruvka(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     const K1HybridBoruvkaResult& result) {
-  return verify_hybrid_k1_boruvka(index, cloud, std::nullopt, result);
+  return verify_hybrid_k1_boruvka(
+      index, cloud, std::nullopt, std::nullopt, result);
 }
 
 K1HybridBoruvkaVerification
@@ -991,7 +1330,26 @@ verify_gpu_proposed_cpu_exact_k1_boruvka(
     K1BoruvkaChunkingPolicy trusted_chunking_policy,
     const K1HybridBoruvkaResult& result) {
   return verify_hybrid_k1_boruvka(
-      index, cloud, trusted_chunking_policy, result);
+      index,
+      cloud,
+      trusted_chunking_policy,
+      std::nullopt,
+      result);
+}
+
+K1HybridBoruvkaVerification
+verify_gpu_proposed_cpu_exact_k1_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaChunkingPolicy trusted_chunking_policy,
+    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
+    const K1HybridBoruvkaResult& result) {
+  return verify_hybrid_k1_boruvka(
+      index,
+      cloud,
+      trusted_chunking_policy,
+      trusted_seed_policy,
+      result);
 }
 
 }  // namespace morsehgp3d::gpu

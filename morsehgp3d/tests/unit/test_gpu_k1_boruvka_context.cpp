@@ -27,7 +27,10 @@ using morsehgp3d::gpu::K1BoruvkaCandidateContext;
 using morsehgp3d::gpu::K1BoruvkaChunkedRoundResolution;
 using morsehgp3d::gpu::K1BoruvkaChunkingPolicy;
 using morsehgp3d::gpu::K1BoruvkaEmissionStatus;
+using morsehgp3d::gpu::K1BoruvkaMortonSeedPolicy;
 using morsehgp3d::gpu::K1BoruvkaRoundProposal;
+using morsehgp3d::gpu::K1BoruvkaSeedMode;
+using morsehgp3d::gpu::K1BoruvkaSeedStatus;
 using morsehgp3d::gpu::K1HybridBoruvkaResult;
 using morsehgp3d::gpu::K1HybridBoruvkaVerification;
 using morsehgp3d::gpu::K1HybridBoruvkaContractionStatus;
@@ -655,6 +658,146 @@ void test_chunked_hybrid_three_round_chain_and_trusted_policy() {
       "chunked verifier rejects a falsified physical-emission certificate");
 }
 
+void test_morton_seed_exact_monotone_cutoff_reduces_logical_volume() {
+  reset_fake_gpu_k1_boruvka();
+  const std::array<CertifiedPoint3, 8> input{
+      point(0.0),
+      point(1.0),
+      point(10.0),
+      point(12.0),
+      point(100.0),
+      point(104.0),
+      point(120.0),
+      point(125.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  constexpr K1BoruvkaChunkingPolicy chunking_policy{7U};
+  constexpr K1BoruvkaMortonSeedPolicy seed_policy{1U};
+
+  const K1HybridBoruvkaResult fixed =
+      build_gpu_proposed_cpu_exact_k1_boruvka(
+          index, cloud, chunking_policy);
+  const K1HybridBoruvkaResult refined =
+      build_gpu_proposed_cpu_exact_k1_boruvka(
+          index, cloud, chunking_policy, seed_policy);
+
+  check(
+      refined.seed_mode ==
+              K1BoruvkaSeedMode::gpu_morton_window_cpu_exact_monotone &&
+          refined.morton_seed_policy == seed_policy &&
+          refined.bounded_morton_seed_chain_certified &&
+          refined.bounded_candidate_emission_chain_certified &&
+          refined.proposal_chain_certified &&
+          refined.cpu_exact_decision_chain_certified &&
+          refined.emst_witness_certified,
+      "Morton seeds separate bounded floating proposals from the exact monotone cutoff chain");
+  check(
+      refined.emst_edges == fixed.emst_edges &&
+          refined.total_squared_weight == fixed.total_squared_weight &&
+          refined.total_hgp_weight == fixed.total_hgp_weight &&
+          refined.rounds.size() == fixed.rounds.size(),
+      "Morton seed refinement preserves the fixed-seed exact EMST witness");
+
+  constexpr std::array<std::size_t, 3> expected_candidates{
+      8U, 16U, 17U};
+  constexpr std::array<std::size_t, 3> expected_external{
+      14U, 6U, 2U};
+  constexpr std::array<std::size_t, 3> expected_proposals{
+      8U, 6U, 2U};
+  constexpr std::array<std::size_t, 3> expected_selected{
+      6U, 4U, 1U};
+  constexpr std::array<std::size_t, 3> expected_exact_evaluations{
+      14U, 13U, 9U};
+  const std::size_t comparable_round_count = std::min(
+      refined.rounds.size(), expected_candidates.size());
+  for (std::size_t round_index = 0U;
+       round_index < comparable_round_count;
+       ++round_index) {
+    const auto& round = refined.rounds[round_index];
+    const auto& seed = round.morton_seed_audit;
+    check(
+        round.seed_status ==
+                K1BoruvkaSeedStatus::
+                    bounded_morton_window_external_exact_monotone_certified &&
+            seed.source_count == input.size() &&
+            seed.window_radius == seed_policy.window_radius &&
+            seed.neighbor_inspection_budget_per_source == 2U &&
+            seed.maximum_inspected_neighbor_count_per_source == 2U &&
+            seed.inspected_neighbor_count == 14U &&
+            seed.external_neighbor_count == expected_external[round_index] &&
+            seed.floating_proposal_count ==
+                expected_proposals[round_index] &&
+            seed.exact_selected_proposal_count ==
+                expected_selected[round_index] &&
+            seed.exact_strict_improvement_count ==
+                expected_selected[round_index] &&
+            seed.exact_fallback_count ==
+                input.size() - expected_selected[round_index] &&
+            seed.exact_seed_distance_evaluation_count ==
+                expected_exact_evaluations[round_index] &&
+            seed.gpu_kernel_launch_count == 1U &&
+            seed.gpu_synchronization_count == 1U &&
+            seed.complete_source_coverage_certified &&
+            seed.bounded_window_certified &&
+            seed.external_targets_recertified &&
+            seed.exact_monotone_cutoff_certified &&
+            round.proposal_audit.gpu_candidate_count ==
+                expected_candidates[round_index],
+        "each Morton seed round closes its bounded proposal, exact recertification and reduced candidate volume");
+  }
+
+  const auto& seeds = refined.morton_seed_counters;
+  check(
+      fixed.chunked_emission_counters.logical_candidate_count == 86U &&
+          refined.chunked_emission_counters.logical_candidate_count == 41U &&
+          seeds.round_count == 3U && seeds.source_count == 24U &&
+          seeds.window_radius == 1U &&
+          seeds.neighbor_inspection_budget_per_source == 2U &&
+          seeds.maximum_inspected_neighbor_count_per_source == 2U &&
+          seeds.inspected_neighbor_count == 42U &&
+          seeds.external_neighbor_count == 22U &&
+          seeds.floating_proposal_count == 16U &&
+          seeds.exact_selected_proposal_count == 11U &&
+          seeds.exact_strict_improvement_count == 11U &&
+          seeds.exact_fallback_count == 13U &&
+          seeds.exact_seed_distance_evaluation_count == 36U &&
+          seeds.gpu_kernel_launch_count == 3U &&
+          seeds.gpu_synchronization_count == 3U,
+      "radius-one Morton seeds reduce logical candidates from 86 to 41 under a closed O(nW) seed audit");
+
+  const K1HybridBoruvkaVerification verification =
+      verify_gpu_proposed_cpu_exact_k1_boruvka(
+          index, cloud, chunking_policy, seed_policy, refined);
+  check(
+      verification.emission_mode_certified &&
+          verification.seed_mode_certified &&
+          verification.bounded_candidate_emission_chain_certified &&
+          verification.bounded_morton_seed_chain_certified &&
+          verification.proposal_chain_certified &&
+          verification.cpu_exact_decision_chain_certified &&
+          verification.counters_certified &&
+          verification.emst_witness_certified &&
+          verification.gpu_replay_seed_inspected_neighbor_count == 42U &&
+          verification.gpu_replay_seed_selected_proposal_count == 11U &&
+          verification.gpu_replay_seed_strict_improvement_count == 11U &&
+          verification.gpu_replay_seed_kernel_launch_count == 3U &&
+          verification.gpu_replay_seed_synchronization_count == 3U,
+      "trusted chunk and Morton policies drive an identical fresh GPU proposal replay");
+
+  const std::size_t launches_before_missing_policy =
+      fake_gpu_k1_boruvka_launch_count();
+  const K1HybridBoruvkaVerification missing_seed_policy =
+      verify_gpu_proposed_cpu_exact_k1_boruvka(
+          index, cloud, chunking_policy, refined);
+  check(
+      !missing_seed_policy.seed_mode_certified &&
+          !missing_seed_policy.proposal_chain_certified &&
+          !missing_seed_policy.emst_witness_certified &&
+          fake_gpu_k1_boruvka_launch_count() ==
+              launches_before_missing_policy,
+      "an untrusted serialized Morton radius cannot trigger a fresh GPU replay");
+}
+
 void test_square_ties_candidate_superset_and_threshold_equality() {
   reset_fake_gpu_k1_boruvka();
   const std::array<CertifiedPoint3, 4> input{
@@ -980,7 +1123,7 @@ void test_invalid_namespaces_labels_and_moved_from_objects() {
   const std::size_t overflowing_payload_budget =
       std::numeric_limits<std::size_t>::max() / 32U + 1U;
   check_throws<std::length_error>(
-      [&context, &cloud, &labels, overflowing_payload_budget]() {
+      [&context, &cloud, &labels]() {
         static_cast<void>(context.propose_round_chunked(
             cloud,
             std::span<const PointId>{labels},
@@ -1150,6 +1293,7 @@ int main() {
   test_hybrid_terminal_singleton_without_gpu_launch();
   test_hybrid_three_round_chain_and_falsification();
   test_chunked_hybrid_three_round_chain_and_trusted_policy();
+  test_morton_seed_exact_monotone_cutoff_reduces_logical_volume();
   test_square_ties_candidate_superset_and_threshold_equality();
   test_chunked_round_matches_monolithic_under_two_budgets();
   test_chunked_budget_and_late_failure_fail_closed();

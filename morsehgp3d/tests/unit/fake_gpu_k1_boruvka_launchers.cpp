@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <atomic>
 #include <bit>
+#include <cfenv>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -310,7 +311,186 @@ void remove_first_source_segment(K1BoruvkaCandidateBatch& batch) {
   batch.output_capacity = batch.records.size();
 }
 
+[[nodiscard]] double morton_seed_squared_distance(
+    std::span<const std::uint64_t> coordinate_bits,
+    std::size_t point_count,
+    std::size_t source_index,
+    std::size_t target_index) {
+  volatile double squared_distance = 0.0;
+  for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
+    const double source = std::bit_cast<double>(
+        coordinate_bits[axis * point_count + source_index]);
+    const double target = std::bit_cast<double>(
+        coordinate_bits[axis * point_count + target_index]);
+    if (!std::isfinite(source) || !std::isfinite(target)) {
+      throw std::logic_error(
+          "the fake Phase 5 Morton seed input is not finite");
+    }
+    const volatile double difference = source - target;
+    const volatile double squared = difference * difference;
+    const volatile double next = squared_distance + squared;
+    if (std::isnan(difference) || std::isnan(squared) ||
+        std::isnan(next) || squared < 0.0 || next < 0.0) {
+      throw std::logic_error(
+          "the fake Phase 5 Morton seed distance is invalid");
+    }
+    squared_distance = next;
+  }
+  return squared_distance;
+}
+
+void checked_add_seed_count(
+    std::size_t& total, std::uint64_t increment, const char* message) {
+  if (!std::in_range<std::size_t>(increment) ||
+      static_cast<std::size_t>(increment) >
+          std::numeric_limits<std::size_t>::max() - total) {
+    throw std::overflow_error(message);
+  }
+  total += static_cast<std::size_t>(increment);
+}
+
 }  // namespace
+
+K1BoruvkaMortonSeedProposalBatch
+propose_k1_boruvka_morton_seeds_on_gpu(
+    K1BoruvkaCandidateContextState& context,
+    std::span<const K1BoruvkaNodeInputRecord> nodes,
+    std::size_t root_index,
+    std::span<const std::uint64_t> coordinate_bits,
+    std::size_t point_count,
+    std::span<const std::uint64_t> morton_point_ids,
+    std::span<const std::uint64_t> frozen_component_labels,
+    std::size_t window_radius) {
+  static_cast<void>(context);
+  if (point_count == 0U || nodes.empty() || root_index >= nodes.size() ||
+      point_count > std::numeric_limits<std::size_t>::max() / kAxisCount ||
+      coordinate_bits.size() != point_count * kAxisCount ||
+      morton_point_ids.size() != point_count ||
+      frozen_component_labels.size() != point_count ||
+      window_radius == 0U ||
+      window_radius > std::numeric_limits<std::size_t>::max() / 2U) {
+    throw std::invalid_argument(
+        "invalid fake Phase 5 Morton seed proposal input");
+  }
+  if (std::fegetround() != FE_TONEAREST) {
+    throw std::runtime_error(
+        "the fake Phase 5 Morton seed proposal requires round-to-nearest");
+  }
+
+  std::vector<std::size_t> morton_positions(
+      point_count, std::numeric_limits<std::size_t>::max());
+  for (std::size_t position = 0U; position < point_count; ++position) {
+    const std::size_t point_index = checked_index(
+        morton_point_ids[position], point_count,
+        "the fake Phase 5 Morton order has an invalid PointId");
+    if (morton_positions[point_index] !=
+        std::numeric_limits<std::size_t>::max()) {
+      throw std::logic_error(
+          "the fake Phase 5 Morton order is not a permutation");
+    }
+    morton_positions[point_index] = position;
+  }
+  for (const std::uint64_t label : frozen_component_labels) {
+    static_cast<void>(checked_index(
+        label, point_count,
+        "the fake Phase 5 Morton seed has an invalid component label"));
+  }
+  for (const std::uint64_t bits : coordinate_bits) {
+    if (!std::isfinite(std::bit_cast<double>(bits))) {
+      throw std::logic_error(
+          "the fake Phase 5 Morton seed input is not finite");
+    }
+  }
+
+  test_support::proposal_launch_count.fetch_add(
+      1U, std::memory_order_relaxed);
+  test_support::proposal_last_point_count.store(
+      point_count, std::memory_order_relaxed);
+  test_support::proposal_last_node_count.store(
+      nodes.size(), std::memory_order_relaxed);
+
+  K1BoruvkaMortonSeedProposalBatch batch;
+  batch.records.resize(point_count);
+  batch.window_radius = window_radius;
+  for (std::size_t source_index = 0U;
+       source_index < point_count;
+       ++source_index) {
+    K1BoruvkaMortonSeedProposalRecord& record =
+        batch.records[source_index];
+    const std::size_t source_position = morton_positions[source_index];
+    const std::size_t lower =
+        source_position > window_radius
+            ? source_position - window_radius
+            : 0U;
+    const std::size_t upper = std::min(
+        point_count - 1U,
+        window_radius > point_count - 1U - source_position
+            ? point_count - 1U
+            : source_position + window_radius);
+
+    double best_distance = std::numeric_limits<double>::infinity();
+    for (std::size_t position = lower; position <= upper; ++position) {
+      if (position == source_position) {
+        continue;
+      }
+      if (record.inspected_neighbor_count ==
+          std::numeric_limits<std::uint64_t>::max()) {
+        throw std::overflow_error(
+            "the fake Phase 5 Morton inspected-neighbor count overflowed");
+      }
+      ++record.inspected_neighbor_count;
+
+      const std::size_t target_index = checked_index(
+          morton_point_ids[position], point_count,
+          "the fake Phase 5 Morton order changed after validation");
+      if (frozen_component_labels[target_index] ==
+          frozen_component_labels[source_index]) {
+        continue;
+      }
+      if (record.external_neighbor_count ==
+          std::numeric_limits<std::uint64_t>::max()) {
+        throw std::overflow_error(
+            "the fake Phase 5 Morton external-neighbor count overflowed");
+      }
+      ++record.external_neighbor_count;
+
+      const double distance = morton_seed_squared_distance(
+          coordinate_bits, point_count, source_index, target_index);
+      const std::uint64_t target_id =
+          static_cast<std::uint64_t>(target_index);
+      if (record.target_point_id == k1_boruvka_sentinel ||
+          distance < best_distance ||
+          (distance == best_distance &&
+           target_id < record.target_point_id)) {
+        best_distance = distance;
+        record.target_point_id = target_id;
+      }
+    }
+
+    checked_add_seed_count(
+        batch.inspected_neighbor_count,
+        record.inspected_neighbor_count,
+        "the fake Phase 5 Morton inspected-neighbor total overflowed");
+    checked_add_seed_count(
+        batch.external_neighbor_count,
+        record.external_neighbor_count,
+        "the fake Phase 5 Morton external-neighbor total overflowed");
+    if (record.target_point_id != k1_boruvka_sentinel) {
+      if (batch.proposed_seed_count ==
+          std::numeric_limits<std::size_t>::max()) {
+        throw std::overflow_error(
+            "the fake Phase 5 Morton proposed-seed count overflowed");
+      }
+      ++batch.proposed_seed_count;
+    }
+  }
+
+  batch.kernel_launch_count = 1U;
+  batch.synchronization_count = 1U;
+  batch.complete_source_coverage = true;
+  batch.bounded_window = true;
+  return batch;
+}
 
 K1BoruvkaCandidateBatch propose_k1_boruvka_candidates_on_gpu(
     K1BoruvkaCandidateContextState& context,
