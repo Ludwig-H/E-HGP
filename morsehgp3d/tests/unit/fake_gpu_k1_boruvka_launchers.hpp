@@ -11,6 +11,7 @@ enum class FakeK1BoruvkaCorruption : std::uint8_t {
   missing_outgoing_candidate,
   same_component_target,
   out_of_range_target,
+  missing_late_chunk_candidate,
   simulated_gpu_failure,
 };
 
@@ -23,6 +24,12 @@ void configure_fake_gpu_k1_boruvka(
 void reset_fake_gpu_k1_boruvka() noexcept;
 
 [[nodiscard]] std::size_t fake_gpu_k1_boruvka_launch_count() noexcept;
+[[nodiscard]] std::size_t
+fake_gpu_k1_boruvka_chunk_callback_count() noexcept;
+[[nodiscard]] std::size_t
+fake_gpu_k1_boruvka_epoch_advance_count() noexcept;
+[[nodiscard]] std::size_t
+fake_gpu_k1_boruvka_budget_enforcement_count() noexcept;
 [[nodiscard]] std::size_t fake_gpu_k1_boruvka_last_point_count() noexcept;
 [[nodiscard]] std::size_t fake_gpu_k1_boruvka_last_node_count() noexcept;
 

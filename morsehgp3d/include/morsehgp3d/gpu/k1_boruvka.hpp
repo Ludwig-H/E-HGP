@@ -57,6 +57,8 @@ struct K1BoruvkaCandidateAudit {
   std::size_t cpu_required_candidate_count{};
   std::size_t cpu_exact_candidate_distance_evaluation_count{};
   std::uint64_t buffer_epoch{};
+  // Deterministic producer/replay diagnostic; no exactness certificate relies
+  // on collision resistance or on trusting this digest alone.
   std::uint64_t proposal_digest_fnv1a{};
   bool frozen_labels_certified{false};
   bool rope_topology_certified{false};
@@ -80,6 +82,59 @@ struct K1BoruvkaRoundProposal {
   std::vector<hierarchy::K1BoruvkaComponentMinimum>
       cpu_exact_component_minima;
   K1BoruvkaCandidateAudit audit;
+};
+
+struct K1BoruvkaChunkingPolicy {
+  std::size_t max_candidate_records_per_chunk{};
+
+  friend bool operator==(
+      const K1BoruvkaChunkingPolicy&,
+      const K1BoruvkaChunkingPolicy&) = default;
+};
+
+enum class K1BoruvkaEmissionStatus : std::uint8_t {
+  not_certified,
+  complete_source_ranges_candidate_payload_bound_certified,
+};
+
+struct K1BoruvkaChunkedEmissionAudit {
+  std::size_t logical_candidate_count{};
+  std::size_t source_chunk_count{};
+  std::size_t peak_chunk_source_count{};
+  std::size_t peak_chunk_candidate_count{};
+  std::size_t candidate_record_budget{};
+  // Capacities are measured after the entry bound has released any inherited
+  // oversized workspace and through the last synchronous chunk callback.
+  std::size_t device_candidate_capacity_high_water{};
+  std::size_t host_candidate_capacity_high_water{};
+  std::size_t candidate_record_size_bytes{};
+  std::size_t candidate_payload_peak_bytes{};
+  std::size_t count_kernel_launch_count{};
+  std::size_t emit_kernel_launch_count{};
+  std::size_t synchronization_count{};
+  bool complete_source_partition_certified{false};
+  bool count_emit_identity_certified{false};
+  bool candidate_payload_physical_bound_certified{false};
+
+  friend bool operator==(
+      const K1BoruvkaChunkedEmissionAudit&,
+      const K1BoruvkaChunkedEmissionAudit&) = default;
+};
+
+// A chunk callback is resolved immediately on reference_cpu. Candidate
+// records, source-relative offsets and fixed seeds never enter this result.
+// No hierarchy reduction or public MorseHGP3D status is performed here.
+struct K1BoruvkaChunkedRoundResolution {
+  std::vector<hierarchy::K1BoruvkaComponentMinimum>
+      cpu_exact_component_minima;
+  K1BoruvkaCandidateAudit proposal_audit;
+  K1BoruvkaChunkedEmissionAudit emission_audit;
+  K1BoruvkaEmissionStatus emission_status{
+      K1BoruvkaEmissionStatus::not_certified};
+
+  friend bool operator==(
+      const K1BoruvkaChunkedRoundResolution&,
+      const K1BoruvkaChunkedRoundResolution&) = default;
 };
 
 enum class K1HybridBoruvkaProposalStatus : std::uint8_t {
@@ -238,6 +293,11 @@ class K1BoruvkaCandidateContext final {
   [[nodiscard]] K1BoruvkaRoundProposal propose_round(
       const spatial::CanonicalPointCloud& cloud,
       std::span<const spatial::PointId> frozen_component_labels);
+
+  [[nodiscard]] K1BoruvkaChunkedRoundResolution propose_round_chunked(
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const spatial::PointId> frozen_component_labels,
+      K1BoruvkaChunkingPolicy policy);
 
   [[nodiscard]] std::size_t point_count() const noexcept;
   [[nodiscard]] std::size_t node_count() const noexcept;

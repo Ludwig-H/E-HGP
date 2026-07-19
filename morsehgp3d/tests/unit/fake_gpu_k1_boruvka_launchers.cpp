@@ -20,6 +20,9 @@ namespace {
 std::atomic<FakeK1BoruvkaCorruption> proposal_corruption{
     FakeK1BoruvkaCorruption::none};
 std::atomic<std::size_t> proposal_launch_count{0U};
+std::atomic<std::size_t> proposal_chunk_callback_count{0U};
+std::atomic<std::size_t> proposal_epoch_advance_count{0U};
+std::atomic<std::size_t> proposal_budget_enforcement_count{0U};
 std::atomic<std::size_t> proposal_last_point_count{0U};
 std::atomic<std::size_t> proposal_last_node_count{0U};
 
@@ -34,12 +37,27 @@ void configure_fake_gpu_k1_boruvka(
 void reset_fake_gpu_k1_boruvka() noexcept {
   configure_fake_gpu_k1_boruvka(FakeK1BoruvkaConfiguration{});
   proposal_launch_count.store(0U, std::memory_order_relaxed);
+  proposal_chunk_callback_count.store(0U, std::memory_order_relaxed);
+  proposal_epoch_advance_count.store(0U, std::memory_order_relaxed);
+  proposal_budget_enforcement_count.store(0U, std::memory_order_relaxed);
   proposal_last_point_count.store(0U, std::memory_order_relaxed);
   proposal_last_node_count.store(0U, std::memory_order_relaxed);
 }
 
 std::size_t fake_gpu_k1_boruvka_launch_count() noexcept {
   return proposal_launch_count.load(std::memory_order_relaxed);
+}
+
+std::size_t fake_gpu_k1_boruvka_chunk_callback_count() noexcept {
+  return proposal_chunk_callback_count.load(std::memory_order_relaxed);
+}
+
+std::size_t fake_gpu_k1_boruvka_epoch_advance_count() noexcept {
+  return proposal_epoch_advance_count.load(std::memory_order_relaxed);
+}
+
+std::size_t fake_gpu_k1_boruvka_budget_enforcement_count() noexcept {
+  return proposal_budget_enforcement_count.load(std::memory_order_relaxed);
 }
 
 std::size_t fake_gpu_k1_boruvka_last_point_count() noexcept {
@@ -56,6 +74,8 @@ namespace morsehgp3d::gpu::detail {
 namespace {
 
 constexpr std::size_t kAxisCount = 3U;
+constexpr std::uint64_t kFnvOffsetBasis = UINT64_C(14695981039346656037);
+constexpr std::uint64_t kFnvPrime = UINT64_C(1099511628211);
 
 struct DirectedLowerBound {
   double value{};
@@ -68,6 +88,13 @@ struct TraversalCounters {
   std::size_t strict_aabb_prunes{};
   std::size_t invalid_bound_descents{};
 };
+
+void hash_word(std::uint64_t& digest, std::uint64_t word) noexcept {
+  for (unsigned int shift = 0U; shift < 64U; shift += 8U) {
+    digest ^= (word >> shift) & UINT64_C(0xff);
+    digest *= kFnvPrime;
+  }
+}
 
 [[nodiscard]] double subtract_down_nonnegative(
     double left, double right, bool& valid) {
@@ -397,9 +424,14 @@ K1BoruvkaCandidateBatch propose_k1_boruvka_candidates_on_gpu(
   batch.exact_capacity = true;
   batch.no_truncation = true;
   batch.buffer_epoch = context.advance_epoch();
+  context.set_candidate_capacity_hint(std::max(
+      context.candidate_capacity_hint(), batch.records.size()));
+  test_support::proposal_epoch_advance_count.fetch_add(
+      1U, std::memory_order_relaxed);
 
   switch (corruption) {
     case test_support::FakeK1BoruvkaCorruption::none:
+    case test_support::FakeK1BoruvkaCorruption::missing_late_chunk_candidate:
       break;
     case test_support::FakeK1BoruvkaCorruption::offset_count_mismatch:
       ++batch.candidate_offsets.back();
@@ -428,6 +460,245 @@ K1BoruvkaCandidateBatch propose_k1_boruvka_candidates_on_gpu(
           "the simulated Phase 5 failure must precede publication");
   }
   return batch;
+}
+
+std::size_t enforce_k1_boruvka_candidate_budget_on_gpu(
+    K1BoruvkaCandidateContextState& context,
+    std::size_t candidate_record_budget) {
+  if (candidate_record_budget == 0U) {
+    throw std::invalid_argument(
+        "the fake Phase 5 candidate budget must be positive");
+  }
+  test_support::proposal_budget_enforcement_count.fetch_add(
+      1U, std::memory_order_relaxed);
+  if (context.candidate_capacity_hint() > candidate_record_budget) {
+    context.set_candidate_capacity_hint(0U);
+  }
+  return context.candidate_capacity_hint();
+}
+
+K1BoruvkaChunkedCandidateSummary
+propose_k1_boruvka_candidates_chunked_on_gpu(
+    K1BoruvkaCandidateContextState& context,
+    std::span<const K1BoruvkaNodeInputRecord> nodes,
+    std::size_t root_index,
+    std::span<const std::uint64_t> coordinate_bits,
+    std::size_t point_count,
+    std::span<const std::uint64_t> frozen_component_labels,
+    std::span<const std::uint64_t> node_component_tags,
+    std::span<const std::uint64_t> seed_cutoff_upper_bits,
+    std::size_t candidate_record_budget,
+    const K1BoruvkaCandidateChunkConsumer& consume_chunk) {
+  if (point_count == 0U || nodes.empty() || root_index >= nodes.size() ||
+      point_count > std::numeric_limits<std::size_t>::max() / kAxisCount ||
+      coordinate_bits.size() != point_count * kAxisCount ||
+      frozen_component_labels.size() != point_count ||
+      node_component_tags.size() != nodes.size() ||
+      seed_cutoff_upper_bits.size() != point_count ||
+      candidate_record_budget == 0U || !consume_chunk) {
+    throw std::invalid_argument(
+        "invalid fake Phase 5 chunked K1 Boruvka proposal input");
+  }
+
+  const test_support::FakeK1BoruvkaCorruption corruption =
+      test_support::proposal_corruption.load(std::memory_order_relaxed);
+  if (corruption ==
+      test_support::FakeK1BoruvkaCorruption::simulated_gpu_failure) {
+    throw std::runtime_error(
+        "simulated Phase 5 chunked K1 Boruvka GPU failure");
+  }
+
+  if (context.candidate_capacity_hint() > candidate_record_budget) {
+    context.set_candidate_capacity_hint(0U);
+  }
+
+  test_support::proposal_launch_count.fetch_add(1U, std::memory_order_relaxed);
+  test_support::proposal_last_point_count.store(
+      point_count, std::memory_order_relaxed);
+  test_support::proposal_last_node_count.store(
+      nodes.size(), std::memory_order_relaxed);
+
+  std::vector<std::uint64_t> global_offsets(point_count + 1U, 0U);
+  TraversalCounters count_counters;
+  for (std::size_t source_index = 0U;
+       source_index < point_count;
+       ++source_index) {
+    const std::size_t count = traverse_source(
+        nodes,
+        root_index,
+        coordinate_bits,
+        point_count,
+        frozen_component_labels,
+        node_component_tags,
+        seed_cutoff_upper_bits,
+        source_index,
+        count_counters,
+        [](const K1BoruvkaCandidateRecord&) {});
+    if (count > candidate_record_budget) {
+      throw std::invalid_argument(
+          "the fake Phase 5 candidate budget cannot hold one complete source");
+    }
+    const std::uint64_t previous = global_offsets[source_index];
+    if (count > static_cast<std::size_t>(
+                    std::numeric_limits<std::uint64_t>::max() - previous)) {
+      throw std::overflow_error(
+          "the fake Phase 5 chunked candidate count exceeds uint64_t");
+    }
+    global_offsets[source_index + 1U] =
+        previous + static_cast<std::uint64_t>(count);
+  }
+  if (!std::in_range<std::size_t>(global_offsets.back())) {
+    throw std::overflow_error(
+        "the fake Phase 5 logical candidate count exceeds size_t");
+  }
+
+  K1BoruvkaChunkedCandidateSummary summary;
+  summary.logical_candidate_count =
+      static_cast<std::size_t>(global_offsets.back());
+  summary.candidate_record_budget = candidate_record_budget;
+  summary.count_pass_node_visit_count = count_counters.node_visits;
+  summary.uniform_component_prune_count =
+      count_counters.uniform_component_prunes;
+  summary.strict_aabb_prune_count = count_counters.strict_aabb_prunes;
+  summary.invalid_bound_descent_count =
+      count_counters.invalid_bound_descents;
+
+  std::uint64_t digest = kFnvOffsetBasis;
+  for (const std::uint64_t offset : global_offsets) {
+    hash_word(digest, offset);
+  }
+
+  TraversalCounters emit_counters;
+  std::vector<std::uint64_t> chunk_offsets;
+  std::vector<K1BoruvkaCandidateRecord> chunk_records;
+  std::size_t source_begin = 0U;
+  bool late_corruption_applied = false;
+  while (source_begin < point_count) {
+    std::size_t source_end = source_begin;
+    std::size_t chunk_candidate_count = 0U;
+    while (source_end < point_count) {
+      const std::size_t source_count = static_cast<std::size_t>(
+          global_offsets[source_end + 1U] - global_offsets[source_end]);
+      if (source_count > candidate_record_budget - chunk_candidate_count) {
+        break;
+      }
+      chunk_candidate_count += source_count;
+      ++source_end;
+    }
+    if (source_end == source_begin) {
+      throw std::logic_error(
+          "the fake Phase 5 greedy chunk planner made no progress");
+    }
+
+    chunk_offsets.clear();
+    chunk_records.clear();
+    chunk_offsets.reserve(source_end - source_begin + 1U);
+    chunk_records.reserve(chunk_candidate_count);
+    chunk_offsets.push_back(0U);
+    for (std::size_t source_index = source_begin;
+         source_index < source_end;
+         ++source_index) {
+      const std::size_t segment_begin = chunk_records.size();
+      const std::size_t emitted = traverse_source(
+          nodes,
+          root_index,
+          coordinate_bits,
+          point_count,
+          frozen_component_labels,
+          node_component_tags,
+          seed_cutoff_upper_bits,
+          source_index,
+          emit_counters,
+          [&chunk_records](const K1BoruvkaCandidateRecord& record) {
+            chunk_records.push_back(record);
+          });
+      const std::size_t expected = static_cast<std::size_t>(
+          global_offsets[source_index + 1U] -
+          global_offsets[source_index]);
+      if (segment_begin != chunk_offsets.back() || emitted != expected ||
+          chunk_records.size() - segment_begin != expected) {
+        throw std::logic_error(
+            "the fake Phase 5 chunked count and emit passes disagree");
+      }
+      chunk_offsets.push_back(
+          static_cast<std::uint64_t>(chunk_records.size()));
+    }
+    if (chunk_records.size() != chunk_candidate_count) {
+      throw std::logic_error(
+          "the fake Phase 5 chunked emit pass missed its exact capacity");
+    }
+
+    const bool corrupt_this_chunk =
+        corruption == test_support::FakeK1BoruvkaCorruption::
+                          missing_late_chunk_candidate &&
+        source_begin != 0U && !late_corruption_applied;
+    if (corrupt_this_chunk) {
+      if (chunk_records.empty()) {
+        throw std::logic_error(
+            "late chunk corruption needs a nonempty candidate payload");
+      }
+      chunk_records.pop_back();
+      late_corruption_applied = true;
+    }
+
+    test_support::proposal_chunk_callback_count.fetch_add(
+        1U, std::memory_order_relaxed);
+    consume_chunk(K1BoruvkaCandidateChunkView{
+        source_begin,
+        source_end,
+        std::span<const std::uint64_t>{chunk_offsets},
+        std::span<const K1BoruvkaCandidateRecord>{chunk_records}});
+    if (corrupt_this_chunk) {
+      throw std::runtime_error(
+          "simulated Phase 5 late chunk candidate loss");
+    }
+
+    for (const K1BoruvkaCandidateRecord& record : chunk_records) {
+      hash_word(digest, record.source_point_id);
+      hash_word(digest, record.target_point_id);
+    }
+    ++summary.source_chunk_count;
+    summary.peak_chunk_source_count = std::max(
+        summary.peak_chunk_source_count, source_end - source_begin);
+    summary.peak_chunk_candidate_count = std::max(
+        summary.peak_chunk_candidate_count, chunk_candidate_count);
+    summary.device_candidate_capacity_high_water = std::max(
+        summary.device_candidate_capacity_high_water,
+        chunk_candidate_count);
+    summary.host_candidate_capacity_high_water = std::max(
+        summary.host_candidate_capacity_high_water,
+        chunk_candidate_count);
+    source_begin = source_end;
+  }
+
+  context.set_candidate_capacity_hint(std::max(
+      context.candidate_capacity_hint(),
+      summary.peak_chunk_candidate_count));
+  summary.device_candidate_capacity_high_water =
+      context.candidate_capacity_hint();
+
+  summary.kernel_launch_count = 1U + summary.source_chunk_count;
+  summary.synchronization_count = summary.kernel_launch_count;
+  summary.emit_pass_node_visit_count = emit_counters.node_visits;
+  if (emit_counters.node_visits != count_counters.node_visits ||
+      emit_counters.uniform_component_prunes !=
+          count_counters.uniform_component_prunes ||
+      emit_counters.strict_aabb_prunes !=
+          count_counters.strict_aabb_prunes ||
+      emit_counters.invalid_bound_descents !=
+          count_counters.invalid_bound_descents) {
+    throw std::logic_error(
+        "the fake Phase 5 chunked traversal counters disagree");
+  }
+  summary.proposal_digest_fnv1a = digest;
+  summary.complete_source_partition_certified = true;
+  summary.count_emit_identity_certified = true;
+  summary.exact_capacity = true;
+  summary.no_truncation = true;
+  summary.buffer_epoch = context.advance_epoch();
+  test_support::proposal_epoch_advance_count.fetch_add(
+      1U, std::memory_order_relaxed);
+  return summary;
 }
 
 }  // namespace morsehgp3d::gpu::detail

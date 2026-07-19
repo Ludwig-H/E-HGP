@@ -44,6 +44,9 @@ constexpr std::uint64_t kSignMask = UINT64_C(0x8000000000000000);
 constexpr std::uint64_t kExponentMask = UINT64_C(0x7ff0000000000000);
 constexpr std::uint64_t kPositiveInfinityBits =
     UINT64_C(0x7ff0000000000000);
+constexpr std::uint64_t kFnvOffsetBasis =
+    UINT64_C(14695981039346656037);
+constexpr std::uint64_t kFnvPrime = UINT64_C(1099511628211);
 
 enum class TraversalFailure : std::uint64_t {
   none = 0U,
@@ -144,6 +147,16 @@ class DeviceBuffer final {
       data_ = nullptr;
       capacity_ = 0U;
     }
+  }
+
+  void release(const char* operation) {
+    if (data_ == nullptr) {
+      capacity_ = 0U;
+      return;
+    }
+    check_cuda(cudaFree(data_), operation);
+    data_ = nullptr;
+    capacity_ = 0U;
   }
 
   // If the owning device can no longer be selected, leaking is safer than
@@ -358,6 +371,28 @@ class K1BoruvkaCudaResources final {
         candidate_count, "cudaMalloc Phase 5 K1 Boruvka candidates");
   }
 
+  void prepare_chunked_candidates(
+      std::size_t required_count,
+      std::size_t candidate_record_budget) {
+    if (required_count > candidate_record_budget) {
+      throw std::length_error(
+          "the Phase 5 K1 Boruvka chunk exceeds its candidate budget");
+    }
+    if (candidates_.capacity() > candidate_record_budget ||
+        candidates_.capacity() < required_count) {
+      candidates_.release(
+          "cudaFree Phase 5 K1 Boruvka candidates before bounded replacement");
+      candidates_.reserve(
+          required_count,
+          "cudaMalloc bounded Phase 5 K1 Boruvka candidates");
+    }
+    if (candidates_.capacity() < required_count ||
+        candidates_.capacity() > candidate_record_budget) {
+      throw std::runtime_error(
+          "the Phase 5 K1 Boruvka candidate workspace violates its hard budget");
+    }
+  }
+
   [[nodiscard]] int device() const noexcept { return device_; }
   [[nodiscard]] cudaStream_t stream() const noexcept { return stream_; }
   [[nodiscard]] unsigned int maximum_grid_x() const noexcept {
@@ -536,7 +571,8 @@ template <bool EmitCandidates>
     const std::uint64_t* candidate_offsets,
     std::size_t candidate_capacity,
     K1BoruvkaCandidateRecord* candidates,
-    std::size_t source_index) noexcept {
+    std::size_t source_index,
+    std::size_t candidate_offset_index) noexcept {
   K1BoruvkaCountRecord output;
   const std::uint64_t source_label =
       frozen_component_labels[source_index];
@@ -549,8 +585,8 @@ template <bool EmitCandidates>
   std::uint64_t segment_begin = 0U;
   std::uint64_t segment_end = 0U;
   if constexpr (EmitCandidates) {
-    segment_begin = candidate_offsets[source_index];
-    segment_end = candidate_offsets[source_index + 1U];
+    segment_begin = candidate_offsets[candidate_offset_index];
+    segment_end = candidate_offsets[candidate_offset_index + 1U];
     if (segment_begin > segment_end ||
         segment_end > static_cast<std::uint64_t>(candidate_capacity)) {
       output.failure_code = static_cast<std::uint64_t>(
@@ -708,6 +744,7 @@ __global__ void morsehgp3d_phase5_k1_boruvka_count_kernel(
         nullptr,
         0U,
         nullptr,
+        source_index,
         source_index);
     if (point_count - source_index <= stride) {
       break;
@@ -747,6 +784,7 @@ __global__ void morsehgp3d_phase5_k1_boruvka_emit_kernel(
         candidate_offsets,
         candidate_capacity,
         candidates,
+        source_index,
         source_index);
     emit_records[source_index] = K1BoruvkaEmitRecord{
         traversal.candidate_count,
@@ -756,6 +794,55 @@ __global__ void morsehgp3d_phase5_k1_boruvka_emit_kernel(
       break;
     }
     source_index += stride;
+  }
+}
+
+__global__ void morsehgp3d_phase5_k1_boruvka_emit_chunk_kernel(
+    const K1BoruvkaNodeInputRecord* nodes,
+    std::size_t node_count,
+    std::size_t root_index,
+    const std::uint64_t* coordinate_bits,
+    std::size_t point_count,
+    const std::uint64_t* frozen_component_labels,
+    const std::uint64_t* node_component_tags,
+    const std::uint64_t* seed_cutoff_upper_bits,
+    const std::uint64_t* candidate_offsets,
+    std::size_t candidate_capacity,
+    K1BoruvkaCandidateRecord* candidates,
+    K1BoruvkaEmitRecord* emit_records,
+    std::size_t source_begin,
+    std::size_t source_end) {
+  const std::size_t relative_first =
+      static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  const std::size_t stride =
+      static_cast<std::size_t>(gridDim.x) * blockDim.x;
+  const std::size_t source_count = source_end - source_begin;
+  std::size_t relative_source_index = relative_first;
+  while (relative_source_index < source_count) {
+    const std::size_t source_index =
+        source_begin + relative_source_index;
+    const K1BoruvkaCountRecord traversal = traverse_source<true>(
+        nodes,
+        node_count,
+        root_index,
+        coordinate_bits,
+        point_count,
+        frozen_component_labels,
+        node_component_tags,
+        seed_cutoff_upper_bits,
+        candidate_offsets,
+        candidate_capacity,
+        candidates,
+        source_index,
+        relative_source_index);
+    emit_records[relative_source_index] = K1BoruvkaEmitRecord{
+        traversal.candidate_count,
+        traversal.node_visit_count,
+        traversal.failure_code};
+    if (source_count - relative_source_index <= stride) {
+      break;
+    }
+    relative_source_index += stride;
   }
 }
 
@@ -769,6 +856,50 @@ __global__ void morsehgp3d_phase5_k1_boruvka_emit_kernel(
     throw std::length_error(description);
   }
   return total + static_cast<std::size_t>(increment);
+}
+
+struct K1BoruvkaCandidateChunkPlan {
+  std::size_t source_begin{};
+  std::size_t source_end{};
+  std::size_t candidate_count{};
+};
+
+void hash_word(std::uint64_t& digest, std::uint64_t word) noexcept {
+  for (unsigned int shift = 0U; shift < 64U; shift += 8U) {
+    digest ^= (word >> shift) & UINT64_C(0xff);
+    digest *= kFnvPrime;
+  }
+}
+
+void validate_candidate_record_budget(
+    std::size_t candidate_record_budget) {
+  if (candidate_record_budget == 0U) {
+    throw std::invalid_argument(
+        "the Phase 5 K1 Boruvka candidate record budget must be positive");
+  }
+  constexpr std::size_t simultaneous_record_bytes =
+      2U * sizeof(K1BoruvkaCandidateRecord);
+  if (candidate_record_budget >
+      std::numeric_limits<std::size_t>::max() /
+          simultaneous_record_bytes) {
+    throw std::length_error(
+        "the Phase 5 K1 Boruvka simultaneous chunk payload size overflows");
+  }
+  if (candidate_record_budget > static_cast<std::size_t>(
+          std::numeric_limits<std::uint64_t>::max())) {
+    throw std::length_error(
+        "the Phase 5 K1 Boruvka candidate budget is not uint64-representable");
+  }
+}
+
+void validate_chunked_arguments(
+    std::size_t candidate_record_budget,
+    const K1BoruvkaCandidateChunkConsumer& consume_chunk) {
+  validate_candidate_record_budget(candidate_record_budget);
+  if (!consume_chunk) {
+    throw std::invalid_argument(
+        "the Phase 5 K1 Boruvka chunk consumer must be callable");
+  }
 }
 
 [[nodiscard]] unsigned int launch_block_count(
@@ -842,6 +973,35 @@ void validate_inputs(
 }
 
 }  // namespace
+
+std::size_t enforce_k1_boruvka_candidate_budget_on_gpu(
+    K1BoruvkaCandidateContextState& context,
+    std::size_t candidate_record_budget) {
+  validate_candidate_record_budget(candidate_record_budget);
+  std::shared_ptr<void>& opaque = context.cuda_resources();
+  if (!opaque) {
+    context.set_candidate_capacity_hint(0U);
+    return 0U;
+  }
+
+  K1BoruvkaCudaResources& cuda =
+      *static_cast<K1BoruvkaCudaResources*>(opaque.get());
+  DeviceGuard device_guard{cuda.device()};
+  try {
+    cuda.prepare_chunked_candidates(0U, candidate_record_budget);
+    const std::size_t capacity = cuda.candidate_capacity();
+    if (capacity > candidate_record_budget) {
+      throw std::runtime_error(
+          "the Phase 5 K1 Boruvka resident candidate workspace exceeds its enforced budget");
+    }
+    context.set_candidate_capacity_hint(capacity);
+    device_guard.restore();
+    return capacity;
+  } catch (...) {
+    cuda.synchronize_after_failure();
+    throw;
+  }
+}
 
 K1BoruvkaCandidateBatch propose_k1_boruvka_candidates_on_gpu(
     K1BoruvkaCandidateContextState& context,
@@ -947,6 +1107,7 @@ K1BoruvkaCandidateBatch propose_k1_boruvka_candidates_on_gpu(
     }
 
     cuda.reserve_candidates(candidate_count);
+    context.set_candidate_capacity_hint(cuda.candidate_capacity());
     check_cuda(
         cudaMemcpyAsync(
             cuda.offsets(),
@@ -1028,6 +1189,385 @@ K1BoruvkaCandidateBatch propose_k1_boruvka_candidates_on_gpu(
     batch.buffer_epoch = context.advance_epoch();
     device_guard.restore();
     return batch;
+  } catch (...) {
+    cuda.synchronize_after_failure();
+    throw;
+  }
+}
+
+K1BoruvkaChunkedCandidateSummary
+propose_k1_boruvka_candidates_chunked_on_gpu(
+    K1BoruvkaCandidateContextState& context,
+    std::span<const K1BoruvkaNodeInputRecord> nodes,
+    std::size_t root_index,
+    std::span<const std::uint64_t> coordinate_bits,
+    std::size_t point_count,
+    std::span<const std::uint64_t> frozen_component_labels,
+    std::span<const std::uint64_t> node_component_tags,
+    std::span<const std::uint64_t> seed_cutoff_upper_bits,
+    std::size_t candidate_record_budget,
+    const K1BoruvkaCandidateChunkConsumer& consume_chunk) {
+  validate_inputs(
+      nodes,
+      root_index,
+      coordinate_bits,
+      point_count,
+      frozen_component_labels,
+      node_component_tags,
+      seed_cutoff_upper_bits);
+  validate_chunked_arguments(candidate_record_budget, consume_chunk);
+
+  K1BoruvkaCudaResources& cuda = resources(context);
+  DeviceGuard device_guard{cuda.device()};
+  try {
+    cuda.initialize_static_inputs(
+        nodes, root_index, coordinate_bits, point_count);
+    // Establish the hard candidate bound before the global count pass: a
+    // prior monolithic round may otherwise leave an oversized payload
+    // resident while the chunk plan is being computed.
+    cuda.prepare_chunked_candidates(0U, candidate_record_budget);
+    context.set_candidate_capacity_hint(cuda.candidate_capacity());
+    cuda.update_round_inputs(
+        frozen_component_labels,
+        node_component_tags,
+        seed_cutoff_upper_bits);
+
+    const unsigned int count_block_count =
+        launch_block_count(point_count, cuda.maximum_grid_x());
+    morsehgp3d_phase5_k1_boruvka_count_kernel
+        <<<count_block_count, kThreadsPerBlock, 0U, cuda.stream()>>>(
+            cuda.nodes(),
+            nodes.size(),
+            root_index,
+            cuda.coordinate_bits(),
+            point_count,
+            cuda.frozen_labels(),
+            cuda.node_tags(),
+            cuda.seed_cutoffs(),
+            cuda.count_records());
+    check_cuda(
+        cudaGetLastError(),
+        "Phase 5 K1 Boruvka chunked count-pass launch");
+
+    std::vector<K1BoruvkaCountRecord> count_records(point_count);
+    check_cuda(
+        cudaMemcpyAsync(
+            count_records.data(),
+            cuda.count_records(),
+            point_count * sizeof(K1BoruvkaCountRecord),
+            cudaMemcpyDeviceToHost,
+            cuda.stream()),
+        "cudaMemcpyAsync Phase 5 K1 Boruvka chunked counts device-to-host");
+    cuda.synchronize();
+
+    K1BoruvkaChunkedCandidateSummary summary;
+    summary.candidate_record_budget = candidate_record_budget;
+    summary.kernel_launch_count = 1U;
+    summary.synchronization_count = 1U;
+
+    std::vector<K1BoruvkaCandidateChunkPlan> chunk_plan;
+    chunk_plan.reserve(point_count);
+    std::size_t chunk_source_begin = 0U;
+    std::size_t chunk_candidate_count = 0U;
+    std::uint64_t proposal_digest = kFnvOffsetBasis;
+    hash_word(proposal_digest, 0U);
+
+    const auto finish_chunk = [&](std::size_t source_end) {
+      if (source_end <= chunk_source_begin || chunk_candidate_count == 0U) {
+        throw std::logic_error(
+            "the Phase 5 K1 Boruvka chunk planner produced an empty chunk");
+      }
+      chunk_plan.push_back(K1BoruvkaCandidateChunkPlan{
+          chunk_source_begin, source_end, chunk_candidate_count});
+      summary.peak_chunk_source_count = std::max(
+          summary.peak_chunk_source_count,
+          source_end - chunk_source_begin);
+      summary.peak_chunk_candidate_count = std::max(
+          summary.peak_chunk_candidate_count,
+          chunk_candidate_count);
+    };
+
+    for (std::size_t source_index = 0U;
+         source_index < point_count;
+         ++source_index) {
+      const K1BoruvkaCountRecord& record = count_records[source_index];
+      if (record.failure_code != 0U) {
+        throw std::runtime_error(
+            "the Phase 5 K1 Boruvka chunked count pass failed closed for source " +
+            std::to_string(source_index) + " with code " +
+            std::to_string(record.failure_code));
+      }
+      if (record.node_visit_count > nodes.size() ||
+          record.candidate_count > point_count) {
+        throw std::runtime_error(
+            "the Phase 5 K1 Boruvka chunked count pass exceeded a structural bound");
+      }
+      if (record.candidate_count == 0U) {
+        throw std::runtime_error(
+            "the Phase 5 K1 Boruvka chunked count pass found no candidate for a source");
+      }
+      if (record.candidate_count >
+          static_cast<std::uint64_t>(candidate_record_budget)) {
+        throw std::invalid_argument(
+            "one Phase 5 K1 Boruvka source exceeds the candidate record budget");
+      }
+
+      const std::size_t source_candidate_count =
+          static_cast<std::size_t>(record.candidate_count);
+      if (chunk_candidate_count != 0U &&
+          source_candidate_count >
+              candidate_record_budget - chunk_candidate_count) {
+        finish_chunk(source_index);
+        chunk_source_begin = source_index;
+        chunk_candidate_count = 0U;
+      }
+      chunk_candidate_count += source_candidate_count;
+
+      summary.logical_candidate_count = checked_add(
+          summary.logical_candidate_count,
+          record.candidate_count,
+          "the Phase 5 K1 Boruvka logical candidate count overflowed");
+      if (summary.logical_candidate_count >
+          std::numeric_limits<std::uint64_t>::max()) {
+        throw std::length_error(
+            "the Phase 5 K1 Boruvka global candidate offset is not uint64-representable");
+      }
+      hash_word(
+          proposal_digest,
+          static_cast<std::uint64_t>(summary.logical_candidate_count));
+      summary.count_pass_node_visit_count = checked_add(
+          summary.count_pass_node_visit_count,
+          record.node_visit_count,
+          "the Phase 5 K1 Boruvka chunked count-pass visit total overflowed");
+      summary.uniform_component_prune_count = checked_add(
+          summary.uniform_component_prune_count,
+          record.uniform_component_prune_count,
+          "the Phase 5 K1 Boruvka chunked uniform-prune total overflowed");
+      summary.strict_aabb_prune_count = checked_add(
+          summary.strict_aabb_prune_count,
+          record.strict_aabb_prune_count,
+          "the Phase 5 K1 Boruvka chunked AABB-prune total overflowed");
+      summary.invalid_bound_descent_count = checked_add(
+          summary.invalid_bound_descent_count,
+          record.invalid_bound_descent_count,
+          "the Phase 5 K1 Boruvka chunked invalid-bound total overflowed");
+    }
+    finish_chunk(point_count);
+
+    summary.source_chunk_count = chunk_plan.size();
+    if (summary.source_chunk_count == 0U ||
+        summary.source_chunk_count > point_count) {
+      throw std::logic_error(
+          "the Phase 5 K1 Boruvka chunk plan has an invalid cardinality");
+    }
+    summary.kernel_launch_count += summary.source_chunk_count;
+    summary.synchronization_count += summary.source_chunk_count;
+
+    std::size_t next_source = 0U;
+    std::size_t planned_candidate_count = 0U;
+    for (const K1BoruvkaCandidateChunkPlan& chunk : chunk_plan) {
+      if (chunk.source_begin != next_source ||
+          chunk.source_end <= chunk.source_begin ||
+          chunk.source_end > point_count ||
+          chunk.candidate_count == 0U ||
+          chunk.candidate_count > candidate_record_budget) {
+        throw std::logic_error(
+            "the Phase 5 K1 Boruvka chunk plan is not a complete bounded partition");
+      }
+      next_source = chunk.source_end;
+      planned_candidate_count = checked_add(
+          planned_candidate_count,
+          static_cast<std::uint64_t>(chunk.candidate_count),
+          "the Phase 5 K1 Boruvka planned candidate count overflowed");
+    }
+    if (next_source != point_count ||
+        planned_candidate_count != summary.logical_candidate_count) {
+      throw std::logic_error(
+          "the Phase 5 K1 Boruvka chunk plan does not cover the logical proposal");
+    }
+
+    cuda.prepare_chunked_candidates(
+        summary.peak_chunk_candidate_count,
+        candidate_record_budget);
+    context.set_candidate_capacity_hint(cuda.candidate_capacity());
+    summary.device_candidate_capacity_high_water =
+        cuda.candidate_capacity();
+    summary.host_candidate_capacity_high_water =
+        summary.peak_chunk_candidate_count;
+    if (summary.device_candidate_capacity_high_water <
+            summary.peak_chunk_candidate_count ||
+        summary.device_candidate_capacity_high_water >
+            candidate_record_budget ||
+        summary.host_candidate_capacity_high_water >
+            candidate_record_budget) {
+      throw std::runtime_error(
+          "the Phase 5 K1 Boruvka chunk buffers violate their hard budget");
+    }
+
+    std::vector<std::uint64_t> relative_offsets(
+        summary.peak_chunk_source_count + 1U, 0U);
+    std::vector<K1BoruvkaEmitRecord> emit_records(
+        summary.peak_chunk_source_count);
+    std::unique_ptr<K1BoruvkaCandidateRecord[]> host_candidates =
+        std::make_unique<K1BoruvkaCandidateRecord[]>(
+            summary.peak_chunk_candidate_count);
+
+    std::size_t consumed_source_count = 0U;
+    std::size_t consumed_candidate_count = 0U;
+    for (const K1BoruvkaCandidateChunkPlan& chunk : chunk_plan) {
+      const std::size_t chunk_source_count =
+          chunk.source_end - chunk.source_begin;
+      relative_offsets[0] = 0U;
+      std::size_t relative_candidate_count = 0U;
+      for (std::size_t relative_source_index = 0U;
+           relative_source_index < chunk_source_count;
+           ++relative_source_index) {
+        const std::size_t source_index =
+            chunk.source_begin + relative_source_index;
+        relative_candidate_count = checked_add(
+            relative_candidate_count,
+            count_records[source_index].candidate_count,
+            "the Phase 5 K1 Boruvka relative candidate offset overflowed");
+        if (relative_candidate_count > candidate_record_budget ||
+            relative_candidate_count >
+                std::numeric_limits<std::uint64_t>::max()) {
+          throw std::length_error(
+              "the Phase 5 K1 Boruvka relative candidate offset is not representable");
+        }
+        relative_offsets[relative_source_index + 1U] =
+            static_cast<std::uint64_t>(relative_candidate_count);
+      }
+      if (relative_candidate_count != chunk.candidate_count) {
+        throw std::logic_error(
+            "the Phase 5 K1 Boruvka relative offsets differ from the chunk plan");
+      }
+
+      check_cuda(
+          cudaMemcpyAsync(
+              cuda.offsets(),
+              relative_offsets.data(),
+              (chunk_source_count + 1U) * sizeof(std::uint64_t),
+              cudaMemcpyHostToDevice,
+              cuda.stream()),
+          "cudaMemcpyAsync Phase 5 K1 Boruvka relative offsets host-to-device");
+
+      const unsigned int emit_block_count = launch_block_count(
+          chunk_source_count, cuda.maximum_grid_x());
+      morsehgp3d_phase5_k1_boruvka_emit_chunk_kernel
+          <<<emit_block_count, kThreadsPerBlock, 0U, cuda.stream()>>>(
+              cuda.nodes(),
+              nodes.size(),
+              root_index,
+              cuda.coordinate_bits(),
+              point_count,
+              cuda.frozen_labels(),
+              cuda.node_tags(),
+              cuda.seed_cutoffs(),
+              cuda.offsets(),
+              chunk.candidate_count,
+              cuda.candidates(),
+              cuda.emit_records(),
+              chunk.source_begin,
+              chunk.source_end);
+      check_cuda(
+          cudaGetLastError(),
+          "Phase 5 K1 Boruvka chunked emit-pass launch");
+
+      check_cuda(
+          cudaMemcpyAsync(
+              host_candidates.get(),
+              cuda.candidates(),
+              chunk.candidate_count * sizeof(K1BoruvkaCandidateRecord),
+              cudaMemcpyDeviceToHost,
+              cuda.stream()),
+          "cudaMemcpyAsync Phase 5 K1 Boruvka chunk candidates device-to-host");
+      check_cuda(
+          cudaMemcpyAsync(
+              emit_records.data(),
+              cuda.emit_records(),
+              chunk_source_count * sizeof(K1BoruvkaEmitRecord),
+              cudaMemcpyDeviceToHost,
+              cuda.stream()),
+          "cudaMemcpyAsync Phase 5 K1 Boruvka chunk emit records device-to-host");
+      cuda.synchronize();
+
+      for (std::size_t relative_source_index = 0U;
+           relative_source_index < chunk_source_count;
+           ++relative_source_index) {
+        const std::size_t source_index =
+            chunk.source_begin + relative_source_index;
+        const K1BoruvkaEmitRecord& emitted =
+            emit_records[relative_source_index];
+        const K1BoruvkaCountRecord& counted = count_records[source_index];
+        if (emitted.failure_code != 0U) {
+          throw std::runtime_error(
+              "the Phase 5 K1 Boruvka chunked emit pass failed closed for source " +
+              std::to_string(source_index) + " with code " +
+              std::to_string(emitted.failure_code));
+        }
+        if (emitted.emitted_count != counted.candidate_count ||
+            emitted.node_visit_count != counted.node_visit_count) {
+          throw std::runtime_error(
+              "the Phase 5 K1 Boruvka chunked count and emit traversals diverged");
+        }
+        summary.emit_pass_node_visit_count = checked_add(
+            summary.emit_pass_node_visit_count,
+            emitted.node_visit_count,
+            "the Phase 5 K1 Boruvka chunked emit-pass visit total overflowed");
+
+        const std::size_t record_begin = static_cast<std::size_t>(
+            relative_offsets[relative_source_index]);
+        const std::size_t record_end = static_cast<std::size_t>(
+            relative_offsets[relative_source_index + 1U]);
+        for (std::size_t record_index = record_begin;
+             record_index < record_end;
+             ++record_index) {
+          if (host_candidates[record_index].source_point_id !=
+              static_cast<std::uint64_t>(source_index)) {
+            throw std::runtime_error(
+                "the Phase 5 K1 Boruvka chunk emitted a candidate for another source");
+          }
+        }
+      }
+
+      for (std::size_t record_index = 0U;
+           record_index < chunk.candidate_count;
+           ++record_index) {
+        hash_word(
+            proposal_digest,
+            host_candidates[record_index].source_point_id);
+        hash_word(
+            proposal_digest,
+            host_candidates[record_index].target_point_id);
+      }
+
+      consume_chunk(K1BoruvkaCandidateChunkView{
+          chunk.source_begin,
+          chunk.source_end,
+          std::span<const std::uint64_t>{
+              relative_offsets.data(), chunk_source_count + 1U},
+          std::span<const K1BoruvkaCandidateRecord>{
+              host_candidates.get(), chunk.candidate_count}});
+      consumed_source_count += chunk_source_count;
+      consumed_candidate_count += chunk.candidate_count;
+    }
+
+    if (consumed_source_count != point_count ||
+        consumed_candidate_count != summary.logical_candidate_count ||
+        summary.emit_pass_node_visit_count !=
+            summary.count_pass_node_visit_count) {
+      throw std::runtime_error(
+          "the Phase 5 K1 Boruvka chunk stream did not close its global counts");
+    }
+
+    summary.proposal_digest_fnv1a = proposal_digest;
+    summary.buffer_epoch = context.advance_epoch();
+    summary.complete_source_partition_certified = true;
+    summary.count_emit_identity_certified = true;
+    summary.exact_capacity = true;
+    summary.no_truncation = true;
+    device_guard.restore();
+    return summary;
   } catch (...) {
     cuda.synchronize_after_failure();
     throw;

@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <exception>
 #include <iostream>
+#include <limits>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -23,6 +24,9 @@ using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactLevel;
 using morsehgp3d::gpu::K1BoruvkaCandidate;
 using morsehgp3d::gpu::K1BoruvkaCandidateContext;
+using morsehgp3d::gpu::K1BoruvkaChunkedRoundResolution;
+using morsehgp3d::gpu::K1BoruvkaChunkingPolicy;
+using morsehgp3d::gpu::K1BoruvkaEmissionStatus;
 using morsehgp3d::gpu::K1BoruvkaRoundProposal;
 using morsehgp3d::gpu::K1HybridBoruvkaResult;
 using morsehgp3d::gpu::K1HybridBoruvkaVerification;
@@ -34,6 +38,12 @@ using morsehgp3d::gpu::build_gpu_proposed_cpu_exact_k1_boruvka;
 using morsehgp3d::gpu::test_support::FakeK1BoruvkaConfiguration;
 using morsehgp3d::gpu::test_support::FakeK1BoruvkaCorruption;
 using morsehgp3d::gpu::test_support::configure_fake_gpu_k1_boruvka;
+using morsehgp3d::gpu::test_support::
+    fake_gpu_k1_boruvka_chunk_callback_count;
+using morsehgp3d::gpu::test_support::
+    fake_gpu_k1_boruvka_epoch_advance_count;
+using morsehgp3d::gpu::test_support::
+    fake_gpu_k1_boruvka_budget_enforcement_count;
 using morsehgp3d::gpu::test_support::fake_gpu_k1_boruvka_last_node_count;
 using morsehgp3d::gpu::test_support::fake_gpu_k1_boruvka_last_point_count;
 using morsehgp3d::gpu::test_support::fake_gpu_k1_boruvka_launch_count;
@@ -158,6 +168,20 @@ template <std::size_t Size>
       });
 }
 
+[[nodiscard]] std::size_t maximum_candidate_segment_size(
+    const K1BoruvkaRoundProposal& proposal) {
+  std::size_t maximum = 0U;
+  for (std::size_t source_index = 0U;
+       source_index + 1U < proposal.candidate_offsets.size();
+       ++source_index) {
+    maximum = std::max(
+        maximum,
+        proposal.candidate_offsets[source_index + 1U] -
+            proposal.candidate_offsets[source_index]);
+  }
+  return maximum;
+}
+
 [[nodiscard]] PointId other_endpoint(
     const K1BoruvkaComponentMinimum& minimum) {
   return minimum.outgoing_edge.u == minimum.source_point_id
@@ -274,6 +298,37 @@ void test_terminal_singleton_without_gpu_launch() {
   check(
       fake_gpu_k1_boruvka_launch_count() == 0U,
       "terminal singleton never invokes the fake launcher");
+
+  const K1BoruvkaChunkedRoundResolution chunked =
+      context.propose_round_chunked(
+          cloud,
+          std::span<const PointId>{labels},
+          K1BoruvkaChunkingPolicy{1U});
+  check(
+      chunked.cpu_exact_component_minima.empty() &&
+          chunked.proposal_audit.gpu_candidate_count == 0U &&
+          chunked.proposal_audit.gpu_kernel_launch_count == 0U &&
+          chunked.proposal_audit.buffer_epoch == 0U &&
+          chunked.proposal_audit.proposal_digest_fnv1a ==
+              proposal.audit.proposal_digest_fnv1a &&
+          chunked.proposal_audit.candidate_superset_certified &&
+          chunked.proposal_audit.cpu_exact_resolution_complete,
+      "terminal chunked singleton publishes the same vacuous proposal certificate");
+  check(
+      chunked.emission_audit.logical_candidate_count == 0U &&
+          chunked.emission_audit.source_chunk_count == 0U &&
+          chunked.emission_audit.candidate_record_budget == 1U &&
+          chunked.emission_audit.candidate_record_size_bytes == 16U &&
+          chunked.emission_audit.candidate_payload_peak_bytes == 0U &&
+          chunked.emission_audit.complete_source_partition_certified &&
+          chunked.emission_audit.count_emit_identity_certified &&
+          chunked.emission_audit
+              .candidate_payload_physical_bound_certified &&
+          chunked.emission_status ==
+              K1BoruvkaEmissionStatus::
+                  complete_source_ranges_candidate_payload_bound_certified &&
+          fake_gpu_k1_boruvka_launch_count() == 0U,
+      "terminal chunked singleton certifies an empty bounded stream without GPU work");
 }
 
 void test_hybrid_terminal_singleton_without_gpu_launch() {
@@ -502,6 +557,205 @@ void test_square_ties_candidate_superset_and_threshold_equality() {
       "square proposal is deterministic across resident buffer epochs");
 }
 
+void test_chunked_round_matches_monolithic_under_two_budgets() {
+  reset_fake_gpu_k1_boruvka();
+  const std::array<CertifiedPoint3, 4> input{
+      point(-1.0, -1.0),
+      point(-1.0, 1.0),
+      point(1.0, -1.0),
+      point(1.0, 1.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<PointId, 4> labels{
+      PointId{0}, PointId{1}, PointId{2}, PointId{3}};
+
+  K1BoruvkaCandidateContext monolithic_context{index, cloud};
+  const K1BoruvkaRoundProposal monolithic =
+      monolithic_context.propose_round(
+          cloud, std::span<const PointId>{labels});
+  const std::size_t maximum_source_count =
+      maximum_candidate_segment_size(monolithic);
+  check(
+      maximum_source_count > 0U &&
+          maximum_source_count + 1U < monolithic.candidates.size(),
+      "square fixture exposes two distinct bounded chunk budgets");
+  const std::array<std::size_t, 2> budgets{
+      maximum_source_count, monolithic.candidates.size() - 1U};
+
+  for (const std::size_t budget : budgets) {
+    const std::size_t callbacks_before =
+        fake_gpu_k1_boruvka_chunk_callback_count();
+    K1BoruvkaCandidateContext chunked_context{index, cloud};
+    const K1BoruvkaChunkedRoundResolution chunked =
+        chunked_context.propose_round_chunked(
+            cloud,
+            std::span<const PointId>{labels},
+            K1BoruvkaChunkingPolicy{budget});
+    const auto& proposal = chunked.proposal_audit;
+    const auto& emission = chunked.emission_audit;
+
+    check(
+        chunked.cpu_exact_component_minima ==
+                monolithic.cpu_exact_component_minima &&
+            proposal.proposal_digest_fnv1a ==
+                monolithic.audit.proposal_digest_fnv1a,
+        "chunked square preserves exact minima and the monolithic global digest");
+    check(
+        proposal.gpu_candidate_count == monolithic.candidates.size() &&
+            proposal.gpu_output_capacity == monolithic.candidates.size() &&
+            proposal.gpu_kernel_launch_count ==
+                emission.count_kernel_launch_count +
+                    emission.emit_kernel_launch_count &&
+            proposal.gpu_synchronization_count ==
+                emission.synchronization_count &&
+            proposal.gpu_count_pass_node_visit_count ==
+                proposal.gpu_emit_pass_node_visit_count &&
+            proposal.buffer_epoch == 1U &&
+            proposal.candidate_superset_certified &&
+            proposal.cpu_exact_resolution_complete,
+        "chunked square closes its logical proposal counters");
+    check(
+        emission.logical_candidate_count == monolithic.candidates.size() &&
+            emission.source_chunk_count > 1U &&
+            emission.peak_chunk_candidate_count <
+                emission.logical_candidate_count &&
+            emission.peak_chunk_candidate_count <= budget &&
+            emission.device_candidate_capacity_high_water ==
+                emission.peak_chunk_candidate_count &&
+            emission.host_candidate_capacity_high_water ==
+                emission.peak_chunk_candidate_count,
+        "chunked square keeps physical candidate capacities below the logical output");
+    check(
+        emission.candidate_record_budget == budget &&
+            emission.candidate_record_size_bytes == 16U &&
+            emission.candidate_payload_peak_bytes ==
+                (emission.device_candidate_capacity_high_water +
+                 emission.host_candidate_capacity_high_water) *
+                    emission.candidate_record_size_bytes &&
+            emission.count_kernel_launch_count == 1U &&
+            emission.emit_kernel_launch_count ==
+                emission.source_chunk_count &&
+            emission.synchronization_count ==
+                1U + emission.source_chunk_count &&
+            emission.complete_source_partition_certified &&
+            emission.count_emit_identity_certified &&
+            emission.candidate_payload_physical_bound_certified &&
+            chunked.emission_status ==
+                K1BoruvkaEmissionStatus::
+                    complete_source_ranges_candidate_payload_bound_certified,
+        "chunked square publishes a closed bounded-payload certificate");
+    check(
+        fake_gpu_k1_boruvka_chunk_callback_count() ==
+            callbacks_before + emission.source_chunk_count,
+        "chunked fake consumes each complete source range synchronously");
+  }
+}
+
+void test_chunked_budget_and_late_failure_fail_closed() {
+  const std::array<CertifiedPoint3, 4> input{
+      point(-1.0, -1.0),
+      point(-1.0, 1.0),
+      point(1.0, -1.0),
+      point(1.0, 1.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<PointId, 4> labels{
+      PointId{0}, PointId{1}, PointId{2}, PointId{3}};
+
+  reset_fake_gpu_k1_boruvka();
+  K1BoruvkaCandidateContext oracle_context{index, cloud};
+  const K1BoruvkaRoundProposal oracle = oracle_context.propose_round(
+      cloud, std::span<const PointId>{labels});
+  const std::size_t maximum_source_count =
+      maximum_candidate_segment_size(oracle);
+  check(
+      maximum_source_count > 1U,
+      "chunk budget rejection fixture has a multi-candidate source");
+
+  const std::array<PointId, 4> terminal_labels{
+      PointId{0}, PointId{0}, PointId{0}, PointId{0}};
+  const K1BoruvkaChunkedRoundResolution bounded_terminal =
+      oracle_context.propose_round_chunked(
+          cloud,
+          std::span<const PointId>{terminal_labels},
+          K1BoruvkaChunkingPolicy{maximum_source_count});
+  check(
+      oracle.candidates.size() > maximum_source_count &&
+          fake_gpu_k1_boruvka_budget_enforcement_count() == 1U &&
+          bounded_terminal.emission_audit
+                  .device_candidate_capacity_high_water == 0U &&
+          bounded_terminal.emission_audit.candidate_payload_peak_bytes == 0U &&
+          bounded_terminal.emission_audit
+              .candidate_payload_physical_bound_certified,
+      "terminal chunked round trims an inherited monolithic candidate buffer before certification");
+
+  reset_fake_gpu_k1_boruvka();
+  K1BoruvkaCandidateContext undersized{index, cloud};
+  check_throws<std::invalid_argument>(
+      [&undersized, &cloud, &labels, maximum_source_count]() {
+        static_cast<void>(undersized.propose_round_chunked(
+            cloud,
+            std::span<const PointId>{labels},
+            K1BoruvkaChunkingPolicy{maximum_source_count - 1U}));
+      },
+      "chunk budget below one complete source is rejected");
+  check(
+      fake_gpu_k1_boruvka_launch_count() == 1U &&
+          fake_gpu_k1_boruvka_chunk_callback_count() == 0U &&
+          fake_gpu_k1_boruvka_epoch_advance_count() == 0U,
+      "undersized chunk budget fails after count but before callback or epoch");
+
+  reset_fake_gpu_k1_boruvka();
+  K1BoruvkaCandidateContext failed{index, cloud};
+  configure_fake_gpu_k1_boruvka(FakeK1BoruvkaConfiguration{
+      FakeK1BoruvkaCorruption::missing_late_chunk_candidate});
+  check_throws<std::runtime_error>(
+      [&failed, &cloud, &labels, maximum_source_count]() {
+        static_cast<void>(failed.propose_round_chunked(
+            cloud,
+            std::span<const PointId>{labels},
+            K1BoruvkaChunkingPolicy{maximum_source_count}));
+      },
+      "a missing candidate in a later chunk returns no partial resolution");
+  const std::size_t callbacks_after_failure =
+      fake_gpu_k1_boruvka_chunk_callback_count();
+  check(
+      fake_gpu_k1_boruvka_launch_count() == 1U &&
+          callbacks_after_failure > 1U &&
+          fake_gpu_k1_boruvka_epoch_advance_count() == 0U,
+      "late chunk corruption follows a consumed chunk but never publishes an epoch");
+
+  configure_fake_gpu_k1_boruvka(FakeK1BoruvkaConfiguration{});
+  check_throws<std::runtime_error>(
+      [&failed, &cloud, &labels, maximum_source_count]() {
+        static_cast<void>(failed.propose_round_chunked(
+            cloud,
+            std::span<const PointId>{labels},
+            K1BoruvkaChunkingPolicy{maximum_source_count}));
+      },
+      "late chunk failure poisons its resident context");
+  check(
+      fake_gpu_k1_boruvka_launch_count() == 1U &&
+          fake_gpu_k1_boruvka_chunk_callback_count() ==
+              callbacks_after_failure,
+      "poisoned chunk context cannot relaunch or invoke another callback");
+
+  K1BoruvkaCandidateContext fresh{index, cloud};
+  const K1BoruvkaChunkedRoundResolution recovered =
+      fresh.propose_round_chunked(
+          cloud,
+          std::span<const PointId>{labels},
+          K1BoruvkaChunkingPolicy{maximum_source_count});
+  check(
+      recovered.emission_status ==
+              K1BoruvkaEmissionStatus::
+                  complete_source_ranges_candidate_payload_bound_certified &&
+          recovered.proposal_audit.buffer_epoch == 1U &&
+          fake_gpu_k1_boruvka_launch_count() == 2U &&
+          fake_gpu_k1_boruvka_epoch_advance_count() == 1U,
+      "late chunk poisoning remains isolated from a fresh context");
+}
+
 void test_already_contracted_two_component_partition() {
   reset_fake_gpu_k1_boruvka();
   const std::array<CertifiedPoint3, 4> input{
@@ -563,6 +817,24 @@ void test_invalid_namespaces_labels_and_moved_from_objects() {
             other_identity, std::span<const PointId>{labels}));
       },
       "context rejects a query cloud from another namespace");
+  check_throws<std::invalid_argument>(
+      [&context, &cloud, &labels]() {
+        static_cast<void>(context.propose_round_chunked(
+            cloud,
+            std::span<const PointId>{labels},
+            K1BoruvkaChunkingPolicy{0U}));
+      },
+      "chunked context rejects a zero candidate-record budget");
+  const std::size_t overflowing_payload_budget =
+      std::numeric_limits<std::size_t>::max() / 32U + 1U;
+  check_throws<std::length_error>(
+      [&context, &cloud, &labels, overflowing_payload_budget]() {
+        static_cast<void>(context.propose_round_chunked(
+            cloud,
+            std::span<const PointId>{labels},
+            K1BoruvkaChunkingPolicy{overflowing_payload_budget}));
+      },
+      "chunked context rejects a two-copy candidate payload byte overflow");
   check_throws<std::invalid_argument>(
       [&context, &cloud, &labels]() {
         static_cast<void>(context.propose_round(
@@ -726,6 +998,8 @@ int main() {
   test_hybrid_terminal_singleton_without_gpu_launch();
   test_hybrid_three_round_chain_and_falsification();
   test_square_ties_candidate_superset_and_threshold_equality();
+  test_chunked_round_matches_monolithic_under_two_budgets();
+  test_chunked_budget_and_late_failure_fail_closed();
   test_already_contracted_two_component_partition();
   test_invalid_namespaces_labels_and_moved_from_objects();
   test_corrupt_batches_and_gpu_failure_poison_context();

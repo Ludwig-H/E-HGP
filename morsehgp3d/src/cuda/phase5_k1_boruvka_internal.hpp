@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <memory>
 #include <mutex>
@@ -57,6 +58,42 @@ struct K1BoruvkaCandidateBatch {
   bool no_truncation{false};
 };
 
+// The spans are valid only for the duration of the synchronous consumer
+// call. Offsets are relative to records and cover complete, contiguous source
+// ranges; neither payload may be retained by the candidate context.
+struct K1BoruvkaCandidateChunkView {
+  std::size_t source_begin{};
+  std::size_t source_end{};
+  std::span<const std::uint64_t> candidate_offsets;
+  std::span<const K1BoruvkaCandidateRecord> records;
+};
+
+struct K1BoruvkaChunkedCandidateSummary {
+  std::size_t logical_candidate_count{};
+  std::size_t source_chunk_count{};
+  std::size_t peak_chunk_source_count{};
+  std::size_t peak_chunk_candidate_count{};
+  std::size_t candidate_record_budget{};
+  std::size_t device_candidate_capacity_high_water{};
+  std::size_t host_candidate_capacity_high_water{};
+  std::size_t kernel_launch_count{};
+  std::size_t synchronization_count{};
+  std::size_t count_pass_node_visit_count{};
+  std::size_t emit_pass_node_visit_count{};
+  std::size_t uniform_component_prune_count{};
+  std::size_t strict_aabb_prune_count{};
+  std::size_t invalid_bound_descent_count{};
+  std::uint64_t buffer_epoch{};
+  std::uint64_t proposal_digest_fnv1a{};
+  bool complete_source_partition_certified{false};
+  bool count_emit_identity_certified{false};
+  bool exact_capacity{false};
+  bool no_truncation{false};
+};
+
+using K1BoruvkaCandidateChunkConsumer =
+    std::function<void(const K1BoruvkaCandidateChunkView&)>;
+
 class K1BoruvkaCandidateContextState final {
  public:
   K1BoruvkaCandidateContextState() = default;
@@ -98,6 +135,14 @@ class K1BoruvkaCandidateContextState final {
     return ++epoch_;
   }
 
+  [[nodiscard]] std::size_t candidate_capacity_hint() const noexcept {
+    return candidate_capacity_hint_;
+  }
+
+  void set_candidate_capacity_hint(std::size_t capacity) noexcept {
+    candidate_capacity_hint_ = capacity;
+  }
+
  private:
   void require_healthy() const {
     if (poisoned_.load(std::memory_order_acquire)) {
@@ -110,7 +155,15 @@ class K1BoruvkaCandidateContextState final {
   std::shared_ptr<void> cuda_resources_;
   std::atomic<bool> poisoned_{false};
   std::uint64_t epoch_{};
+  std::size_t candidate_capacity_hint_{};
 };
+
+// Enforce the post-trim resident candidate-workspace bound without launching
+// a proposal kernel. The returned capacity is the device capacity that remains
+// resident after enforcement and is part of the physical payload audit.
+[[nodiscard]] std::size_t enforce_k1_boruvka_candidate_budget_on_gpu(
+    K1BoruvkaCandidateContextState& context,
+    std::size_t candidate_record_budget);
 
 [[nodiscard]] K1BoruvkaCandidateBatch propose_k1_boruvka_candidates_on_gpu(
     K1BoruvkaCandidateContextState& context,
@@ -121,5 +174,18 @@ class K1BoruvkaCandidateContextState final {
     std::span<const std::uint64_t> frozen_component_labels,
     std::span<const std::uint64_t> node_component_tags,
     std::span<const std::uint64_t> seed_cutoff_upper_bits);
+
+[[nodiscard]] K1BoruvkaChunkedCandidateSummary
+propose_k1_boruvka_candidates_chunked_on_gpu(
+    K1BoruvkaCandidateContextState& context,
+    std::span<const K1BoruvkaNodeInputRecord> nodes,
+    std::size_t root_index,
+    std::span<const std::uint64_t> coordinate_bits,
+    std::size_t point_count,
+    std::span<const std::uint64_t> frozen_component_labels,
+    std::span<const std::uint64_t> node_component_tags,
+    std::span<const std::uint64_t> seed_cutoff_upper_bits,
+    std::size_t candidate_record_budget,
+    const K1BoruvkaCandidateChunkConsumer& consume_chunk);
 
 }  // namespace morsehgp3d::gpu::detail
