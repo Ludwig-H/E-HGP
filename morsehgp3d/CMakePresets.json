@@ -99,7 +99,8 @@
         "morsehgp3d_gpu_spatial_lbvh_replay",
         "morsehgp3d_gpu_k1_boruvka",
         "morsehgp3d_gpu_k1_boruvka_replay",
-        "morsehgp3d_gpu_k1_boruvka_full_replay"
+        "morsehgp3d_gpu_k1_boruvka_full_replay",
+        "morsehgp3d_gpu_k1_boruvka_morton_work_profile"
       ],
       "jobs": 8
     },
@@ -119,7 +120,8 @@
         "morsehgp3d_gpu_spatial_lbvh_replay",
         "morsehgp3d_gpu_k1_boruvka",
         "morsehgp3d_gpu_k1_boruvka_replay",
-        "morsehgp3d_gpu_k1_boruvka_full_replay"
+        "morsehgp3d_gpu_k1_boruvka_full_replay",
+        "morsehgp3d_gpu_k1_boruvka_morton_work_profile"
       ],
       "jobs": 8
     }
