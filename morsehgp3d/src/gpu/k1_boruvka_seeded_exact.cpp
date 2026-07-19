@@ -611,6 +611,8 @@ struct FreshReplay {
   }
   return status == K1BoruvkaComponentDualTreeSearchStatus::
                        exact_component_minima_shared_lbvh_dual_tree_certified &&
+         audit.component_envelope_mode ==
+             K1BoruvkaComponentEnvelopeMode::frozen_initial &&
          audit.resident_point_count == point_count &&
          audit.resident_node_count == node_count &&
          audit.frozen_component_count == component_count &&
@@ -643,6 +645,8 @@ struct FreshReplay {
              maximum_component_updates &&
          audit.cpu_strict_component_cutoff_decrease_count <=
              audit.cpu_component_kappa_update_count &&
+         audit.cpu_component_witness_leaf_update_count == 0U &&
+         audit.cpu_component_witness_ancestor_update_count == 0U &&
          audit.frozen_labels_certified &&
          audit.lbvh_topology_and_exact_aabbs_certified &&
          audit.complete_source_seed_coverage_certified &&
@@ -651,6 +655,8 @@ struct FreshReplay {
          audit.component_seed_reduction_certified &&
          audit.bidirectional_component_seed_reduction_certified &&
          audit.component_cutoff_upper_envelope_certified &&
+         audit.live_component_cutoff_upper_bound_certified &&
+         audit.pointwise_at_most_frozen_envelope_certified &&
          audit.canonical_unordered_pair_partition_certified &&
          audit.uniform_component_pair_prunes_certified &&
          audit.strict_only_aabb_pair_pruning_certified &&
@@ -784,7 +790,10 @@ struct DualTreeFreshReplay {
 
       K1BoruvkaSeededComponentDualTreeRoundResolution resolution =
           context->resolve_round_exact_component_minima_dual_tree(
-              cloud, labels, policy);
+              cloud,
+              labels,
+              policy,
+              K1BoruvkaComponentEnvelopeMode::frozen_initial);
       if (resolution.seed_status != observed.seed_status ||
           resolution.morton_seed_audit != observed.morton_seed_audit) {
         seed_chain = false;
@@ -1184,7 +1193,10 @@ build_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
       }
       K1BoruvkaSeededComponentDualTreeRoundResolution resolution =
           context.resolve_round_exact_component_minima_dual_tree(
-              cloud, labels, seed_policy);
+              cloud,
+              labels,
+              seed_policy,
+              K1BoruvkaComponentEnvelopeMode::frozen_initial);
       hierarchy::K1BoruvkaRoundContraction contraction =
           hierarchy::contract_exact_k1_boruvka_round(
               cloud, labels, resolution.component_minima);

@@ -18,6 +18,7 @@ namespace {
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactLevel;
 using morsehgp3d::gpu::K1BoruvkaComponentDualTreeSearchStatus;
+using morsehgp3d::gpu::K1BoruvkaComponentEnvelopeMode;
 using morsehgp3d::gpu::K1BoruvkaExactSearchStatus;
 using morsehgp3d::gpu::K1BoruvkaMortonSeedPolicy;
 using morsehgp3d::gpu::K1BoruvkaSeedStatus;
@@ -430,7 +431,13 @@ void test_dual_tree_three_round_chain_and_falsifications() {
         "each shared round matches the independent CPU anchor");
     const auto& audit = observed.dual_tree_search_audit;
     check(
-        audit.covered_unordered_point_pair_count == 28U &&
+        audit.component_envelope_mode ==
+                K1BoruvkaComponentEnvelopeMode::frozen_initial &&
+            audit.cpu_component_witness_leaf_update_count == 0U &&
+            audit.cpu_component_witness_ancestor_update_count == 0U &&
+            audit.live_component_cutoff_upper_bound_certified &&
+            audit.pointwise_at_most_frozen_envelope_certified &&
+            audit.covered_unordered_point_pair_count == 28U &&
             audit.unordered_point_pair_count == 28U &&
             audit.lbvh_maximum_depth ==
                 index.build_counters().maximum_depth &&
@@ -470,7 +477,7 @@ void test_dual_tree_three_round_chain_and_falsifications() {
           result.reference_cpu_witness_certified &&
           result.emst_witness_certified &&
           std::string_view{K1DualTreeExactBoruvkaResult::proof_basis} ==
-              "gpu_bounded_morton_seed_cpu_exact_bidirectional_component_dual_tree_boruvka_v3",
+              "gpu_bounded_morton_seed_cpu_exact_bidirectional_component_dual_tree_boruvka_v4",
       "shared builder requires fresh replay and the independent CPU witness");
 
   std::size_t launches = fake_gpu_k1_boruvka_launch_count();
@@ -532,6 +539,55 @@ void test_dual_tree_three_round_chain_and_falsifications() {
           envelope_check.cpu_exact_decision_chain_certified &&
           !envelope_check.emst_witness_certified,
       "frozen component-envelope falsification invalidates only traversal");
+
+  K1DualTreeExactBoruvkaResult bad_envelope_mode = result;
+  bad_envelope_mode.rounds[0].dual_tree_search_audit.
+      component_envelope_mode =
+      K1BoruvkaComponentEnvelopeMode::sparse_witness_path_monotone;
+  const auto envelope_mode_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_envelope_mode);
+  check(
+      !envelope_mode_check.exact_dual_tree_chain_certified &&
+          envelope_mode_check.cpu_exact_decision_chain_certified &&
+          !envelope_mode_check.emst_witness_certified,
+      "non-frozen persistent envelope mode invalidates only traversal");
+
+  K1DualTreeExactBoruvkaResult bad_live_envelope = result;
+  bad_live_envelope.rounds[0].dual_tree_search_audit.
+      live_component_cutoff_upper_bound_certified = false;
+  const auto live_envelope_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_live_envelope);
+  check(
+      !live_envelope_check.exact_dual_tree_chain_certified &&
+          live_envelope_check.cpu_exact_decision_chain_certified &&
+          !live_envelope_check.emst_witness_certified,
+      "live component-cutoff falsification invalidates only traversal");
+
+  K1DualTreeExactBoruvkaResult bad_pointwise_envelope = result;
+  bad_pointwise_envelope.rounds[0].dual_tree_search_audit.
+      pointwise_at_most_frozen_envelope_certified = false;
+  const auto pointwise_envelope_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_pointwise_envelope);
+  check(
+      !pointwise_envelope_check.exact_dual_tree_chain_certified &&
+          pointwise_envelope_check.cpu_exact_decision_chain_certified &&
+          !pointwise_envelope_check.emst_witness_certified,
+      "pointwise frozen-envelope falsification invalidates only traversal");
+
+  K1DualTreeExactBoruvkaResult bad_witness_counter = result;
+  bad_witness_counter.rounds[0].dual_tree_search_audit.
+      cpu_component_witness_leaf_update_count = 1U;
+  const auto witness_counter_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_witness_counter);
+  check(
+      !witness_counter_check.exact_dual_tree_chain_certified &&
+          witness_counter_check.cpu_exact_decision_chain_certified &&
+          !witness_counter_check.emst_witness_certified,
+      "persistent witness-counter falsification invalidates only traversal");
 
   K1DualTreeExactBoruvkaResult bad_bidirectional_seed = result;
   bad_bidirectional_seed.rounds[0].dual_tree_search_audit.

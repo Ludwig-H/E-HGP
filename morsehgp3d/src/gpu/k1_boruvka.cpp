@@ -134,6 +134,16 @@ void validate_morton_seed_policy(K1BoruvkaMortonSeedPolicy policy) {
   }
 }
 
+void validate_component_envelope_mode(
+    K1BoruvkaComponentEnvelopeMode mode) {
+  if (mode != K1BoruvkaComponentEnvelopeMode::frozen_initial &&
+      mode !=
+          K1BoruvkaComponentEnvelopeMode::sparse_witness_path_monotone) {
+    throw std::invalid_argument(
+        "a component-direct dual-tree envelope mode is unspecified");
+  }
+}
+
 [[nodiscard]] exact::ExactLevel exact_squared_distance(
     const spatial::CanonicalPointCloud& cloud,
     spatial::PointId left_id,
@@ -1497,7 +1507,8 @@ resolve_seeded_exact_component_minima_dual_tree(
     const SeedBundle& seeds,
     std::size_t component_count,
     std::size_t uniform_node_count,
-    std::size_t mixed_node_count) {
+    std::size_t mixed_node_count,
+    K1BoruvkaComponentEnvelopeMode envelope_mode) {
   const std::size_t point_count = host.point_count;
   if (component_count <= 1U || seeds.public_seeds.size() != point_count ||
       tags.size() != host.nodes.size() ||
@@ -1514,6 +1525,7 @@ resolve_seeded_exact_component_minima_dual_tree(
   K1BoruvkaSeededComponentDualTreeRoundResolution resolution;
   K1BoruvkaComponentDualTreeSearchAudit& audit =
       resolution.search_audit;
+  audit.component_envelope_mode = envelope_mode;
   audit.resident_point_count = point_count;
   audit.resident_node_count = host.nodes.size();
   audit.frozen_component_count = component_count;
@@ -1722,6 +1734,51 @@ resolve_seeded_exact_component_minima_dual_tree(
   audit.component_cutoff_upper_envelope_node_count =
       node_cutoff_upper_bounds.size();
 
+  const auto decrease_component_witness_path = [&](
+      std::size_t point_index,
+      const exact::ExactLevel& squared_length) {
+    if (envelope_mode == K1BoruvkaComponentEnvelopeMode::frozen_initial) {
+      return;
+    }
+    std::size_t node_index = leaf_node_by_point[point_index];
+    if (!(squared_length < node_cutoff_upper_bounds[node_index])) {
+      throw std::logic_error(
+          "a sparse component witness leaf did not decrease strictly");
+    }
+    node_cutoff_upper_bounds[node_index] = squared_length;
+    audit.cpu_component_witness_leaf_update_count = checked_size_sum(
+        audit.cpu_component_witness_leaf_update_count,
+        1U,
+        "the component witness-leaf update count overflowed size_t");
+    while (parent_by_node[node_index] != invalid_node_index) {
+      const std::size_t parent = parent_by_node[node_index];
+      const detail::K1BoruvkaNodeInputRecord& parent_node =
+          host.nodes[parent];
+      const std::size_t left_child =
+          static_cast<std::size_t>(parent_node.left_child);
+      const std::size_t right_child =
+          static_cast<std::size_t>(parent_node.right_child);
+      const exact::ExactLevel& refreshed =
+          node_cutoff_upper_bounds[left_child] <
+                  node_cutoff_upper_bounds[right_child]
+              ? node_cutoff_upper_bounds[right_child]
+              : node_cutoff_upper_bounds[left_child];
+      if (node_cutoff_upper_bounds[parent] < refreshed) {
+        throw std::logic_error(
+            "a sparse component witness path increased its upper envelope");
+      }
+      if (node_cutoff_upper_bounds[parent] == refreshed) {
+        break;
+      }
+      node_cutoff_upper_bounds[parent] = refreshed;
+      audit.cpu_component_witness_ancestor_update_count = checked_size_sum(
+          audit.cpu_component_witness_ancestor_update_count,
+          1U,
+          "the component witness ancestor-update count overflowed size_t");
+      node_index = parent;
+    }
+  };
+
   const DualTreeTraversalMetadataView traversal_metadata{
       node_squared_diagonals,
       node_leaf_counts,
@@ -1764,6 +1821,8 @@ resolve_seeded_exact_component_minima_dual_tree(
                     audit.cpu_strict_component_cutoff_decrease_count,
                     1U,
                     "the component-direct strict-decrease count overflowed size_t");
+            decrease_component_witness_path(
+                left_point_index, candidate_squared_length);
           }
           component_best[left_slot] = std::move(left_candidate);
           audit.cpu_component_kappa_update_count = checked_size_sum(
@@ -1780,6 +1839,8 @@ resolve_seeded_exact_component_minima_dual_tree(
                     audit.cpu_strict_component_cutoff_decrease_count,
                     1U,
                     "the component-direct strict-decrease count overflowed size_t");
+            decrease_component_witness_path(
+                right_point_index, candidate_squared_length);
           }
           component_best[right_slot] = std::move(right_candidate);
           audit.cpu_component_kappa_update_count = checked_size_sum(
@@ -1789,7 +1850,9 @@ resolve_seeded_exact_component_minima_dual_tree(
         }
       });
 
-  std::vector<exact::ExactLevel> verified_upper_envelope(
+  std::vector<exact::ExactLevel> verified_live_upper_envelope(
+      host.nodes.size());
+  std::vector<exact::ExactLevel> verified_frozen_upper_envelope(
       host.nodes.size());
   for (std::size_t node_index = 0U;
        node_index < host.nodes.size();
@@ -1800,23 +1863,43 @@ resolve_seeded_exact_component_minima_dual_tree(
           node.leaf_point_id, point_count);
       const std::size_t point_index = checked_point_index(
           point_id, point_count);
-      verified_upper_envelope[node_index] = initial_component_cutoffs[
-          component_slot(labels[point_index])];
+      const std::size_t slot = component_slot(labels[point_index]);
+      const exact::ExactLevel& live_component_cutoff =
+          component_best[slot]->edge.squared_length;
+      const exact::ExactLevel& live_leaf_upper_bound =
+          node_cutoff_upper_bounds[node_index];
+      const exact::ExactLevel& frozen_leaf_upper_bound =
+          initial_component_cutoffs[slot];
+      if (live_leaf_upper_bound < live_component_cutoff ||
+          frozen_leaf_upper_bound < live_leaf_upper_bound) {
+        throw std::logic_error(
+            "a component witness leaf is not a live cutoff upper bound");
+      }
+      verified_live_upper_envelope[node_index] = live_leaf_upper_bound;
+      verified_frozen_upper_envelope[node_index] =
+          frozen_leaf_upper_bound;
     } else {
       const std::size_t left_child =
           static_cast<std::size_t>(node.left_child);
       const std::size_t right_child =
           static_cast<std::size_t>(node.right_child);
-      verified_upper_envelope[node_index] =
-          verified_upper_envelope[left_child] <
-                  verified_upper_envelope[right_child]
-              ? verified_upper_envelope[right_child]
-              : verified_upper_envelope[left_child];
+      verified_live_upper_envelope[node_index] =
+          verified_live_upper_envelope[left_child] <
+                  verified_live_upper_envelope[right_child]
+              ? verified_live_upper_envelope[right_child]
+              : verified_live_upper_envelope[left_child];
+      verified_frozen_upper_envelope[node_index] =
+          verified_frozen_upper_envelope[left_child] <
+                  verified_frozen_upper_envelope[right_child]
+              ? verified_frozen_upper_envelope[right_child]
+              : verified_frozen_upper_envelope[left_child];
     }
-    if (verified_upper_envelope[node_index] !=
-        node_cutoff_upper_bounds[node_index]) {
+    if (verified_live_upper_envelope[node_index] !=
+            node_cutoff_upper_bounds[node_index] ||
+        verified_frozen_upper_envelope[node_index] <
+            verified_live_upper_envelope[node_index]) {
       throw std::logic_error(
-          "the component-direct frozen cutoff envelope changed during traversal");
+          "the component-direct live cutoff envelope lost its certified bounds");
     }
   }
 
@@ -1846,6 +1929,20 @@ resolve_seeded_exact_component_minima_dual_tree(
       maximum_component_updates,
       audit.cpu_exact_point_pair_distance_evaluation_count,
       "the component-direct update bound overflowed size_t");
+  const std::size_t maximum_witness_ancestor_updates = checked_size_product(
+      audit.cpu_component_witness_leaf_update_count,
+      audit.lbvh_maximum_depth,
+      "the component witness ancestor-update bound overflowed size_t");
+  const bool envelope_update_counts_closed =
+      (envelope_mode == K1BoruvkaComponentEnvelopeMode::frozen_initial &&
+       audit.cpu_component_witness_leaf_update_count == 0U &&
+       audit.cpu_component_witness_ancestor_update_count == 0U) ||
+      (envelope_mode ==
+           K1BoruvkaComponentEnvelopeMode::sparse_witness_path_monotone &&
+       audit.cpu_component_witness_leaf_update_count ==
+           audit.cpu_strict_component_cutoff_decrease_count &&
+       audit.cpu_component_witness_ancestor_update_count <=
+           maximum_witness_ancestor_updates);
   if (audit.point_seed_count != point_count ||
       audit.component_seed_incumbent_count != component_count ||
       audit.target_component_seed_offer_count != point_count ||
@@ -1857,7 +1954,8 @@ resolve_seeded_exact_component_minima_dual_tree(
       resolution.component_minima.size() != component_count ||
       audit.cpu_component_kappa_update_count > maximum_component_updates ||
       audit.cpu_strict_component_cutoff_decrease_count >
-          audit.cpu_component_kappa_update_count) {
+          audit.cpu_component_kappa_update_count ||
+      !envelope_update_counts_closed) {
     throw std::logic_error(
         "the component-direct result does not close its certified counts");
   }
@@ -1872,6 +1970,8 @@ resolve_seeded_exact_component_minima_dual_tree(
   audit.component_seed_reduction_certified = true;
   audit.bidirectional_component_seed_reduction_certified = true;
   audit.component_cutoff_upper_envelope_certified = true;
+  audit.live_component_cutoff_upper_bound_certified = true;
+  audit.pointwise_at_most_frozen_envelope_certified = true;
   audit.canonical_kappa_resolution_certified = true;
   audit.component_minima_complete = true;
   resolution.morton_seed_audit = seeds.morton_audit;
@@ -2815,9 +2915,11 @@ K1BoruvkaSeededComponentDualTreeRoundResolution
 K1BoruvkaCandidateContext::resolve_round_exact_component_minima_dual_tree(
     const spatial::CanonicalPointCloud& cloud,
     std::span<const spatial::PointId> frozen_component_labels,
-    K1BoruvkaMortonSeedPolicy seed_policy) {
+    K1BoruvkaMortonSeedPolicy seed_policy,
+    K1BoruvkaComponentEnvelopeMode envelope_mode) {
   require_matching_cloud(cloud);
   validate_morton_seed_policy(seed_policy);
+  validate_component_envelope_mode(envelope_mode);
   const std::size_t component_count = validate_frozen_labels(
       frozen_component_labels, host_->point_count);
   if (component_count <= 1U) {
@@ -2859,7 +2961,8 @@ K1BoruvkaCandidateContext::resolve_round_exact_component_minima_dual_tree(
         seeds,
         component_count,
         uniform_node_count,
-        mixed_node_count);
+        mixed_node_count,
+        envelope_mode);
   });
 }
 

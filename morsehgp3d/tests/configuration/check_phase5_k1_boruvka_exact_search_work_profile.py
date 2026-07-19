@@ -14,7 +14,7 @@ import sys
 from typing import Any, NoReturn, Sequence
 
 SCHEMA = "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v1"
-COMPARISON_SCHEMA = "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v2"
+COMPARISON_SCHEMA = "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile.v3"
 STATIC_SCHEMA = "morsehgp3d.phase5.k1_boruvka_exact_search_work_profile_static.v1"
 SCOPE = "certified_local_emst_chain_work_profile_without_scalability_claim"
 WORK_ACCOUNTING = "producer_chain_only_replay_and_reference_excluded"
@@ -54,14 +54,19 @@ RESULT_KEYS = {
 COMPARISON_RESULT_KEYS = RESULT_KEYS | {"resolver_comparison"}
 RESOLVER_COMPARISON_KEYS = {"rounds", "totals"}
 RESOLVER_COMPARISON_ROUND_KEYS = {
-    "direct",
+    "direct_frozen",
+    "direct_sparse",
     "dynamic",
     "post_component_count",
     "pre_component_count",
     "round_index",
     "unordered_point_pair_count",
 }
-RESOLVER_COMPARISON_TOTAL_KEYS = {"direct", "dynamic"}
+RESOLVER_COMPARISON_TOTAL_KEYS = {
+    "direct_frozen",
+    "direct_sparse",
+    "dynamic",
+}
 RESOLVER_COMMON_KEYS = {
     "aabb_pair_bound_evaluation_count",
     "frontier_peak",
@@ -78,6 +83,8 @@ RESOLVER_DYNAMIC_KEYS = RESOLVER_COMMON_KEYS | {
 RESOLVER_DIRECT_KEYS = RESOLVER_COMMON_KEYS | {
     "component_cutoff_upper_envelope_node_count",
     "component_kappa_update_count",
+    "component_witness_ancestor_update_count",
+    "component_witness_leaf_update_count",
     "strict_component_cutoff_decrease_count",
     "target_component_seed_kappa_update_count",
     "target_component_seed_offer_count",
@@ -547,9 +554,11 @@ def validate_resolver_counters(
     label: str,
     *,
     point_count: int,
-    direct: bool,
+    direct_mode: str | None,
 ) -> dict[str, int]:
-    expected_keys = RESOLVER_DIRECT_KEYS if direct else RESOLVER_DYNAMIC_KEYS
+    expected_keys = (
+        RESOLVER_DIRECT_KEYS if direct_mode is not None else RESOLVER_DYNAMIC_KEYS
+    )
     counters = exact_keys(value, expected_keys, label)
     result = {
         key: natural(item, f"{label}.{key}") for key, item in counters.items()
@@ -587,7 +596,7 @@ def validate_resolver_counters(
         distances <= maximum_distances,
         f"{label} point-pair distance bound differs",
     )
-    if direct:
+    if direct_mode is not None:
         require(
             result["component_kappa_update_count"] <= 2 * distances,
             f"{label} component update bound differs",
@@ -615,6 +624,28 @@ def validate_resolver_counters(
             == 2 * point_count - 1,
             f"{label} component envelope coverage differs",
         )
+        if direct_mode == "frozen":
+            require(
+                result["component_witness_leaf_update_count"] == 0
+                and result["component_witness_ancestor_update_count"] == 0,
+                f"{label} frozen witness updates differ",
+            )
+        else:
+            require(
+                direct_mode == "sparse",
+                f"{label} direct envelope mode differs",
+            )
+            require(
+                result["component_witness_leaf_update_count"]
+                == result["strict_component_cutoff_decrease_count"],
+                f"{label} sparse witness leaf updates differ",
+            )
+            require(
+                result["component_witness_ancestor_update_count"]
+                <= result["component_witness_leaf_update_count"]
+                * (point_count - 1),
+                f"{label} sparse witness ancestor update bound differs",
+            )
     else:
         strict_decreases = result["strict_incumbent_decrease_count"]
         require(
@@ -659,7 +690,8 @@ def validate_comparison_document(value: Any, *, expected_backend: str) -> None:
         "resolver comparison round coverage differs",
     )
     dynamic_sums = {key: 0 for key in RESOLVER_DYNAMIC_KEYS}
-    direct_sums = {key: 0 for key in RESOLVER_DIRECT_KEYS}
+    direct_frozen_sums = {key: 0 for key in RESOLVER_DIRECT_KEYS}
+    direct_sparse_sums = {key: 0 for key in RESOLVER_DIRECT_KEYS}
     for index, round_item in enumerate(rounds):
         round_value = exact_keys(
             round_item,
@@ -698,14 +730,30 @@ def validate_comparison_document(value: Any, *, expected_backend: str) -> None:
             round_value["dynamic"],
             f"{label}.dynamic",
             point_count=point_count,
-            direct=False,
+            direct_mode=None,
         )
-        direct = validate_resolver_counters(
-            round_value["direct"],
-            f"{label}.direct",
+        direct_frozen = validate_resolver_counters(
+            round_value["direct_frozen"],
+            f"{label}.direct_frozen",
             point_count=point_count,
-            direct=True,
+            direct_mode="frozen",
         )
+        direct_sparse = validate_resolver_counters(
+            round_value["direct_sparse"],
+            f"{label}.direct_sparse",
+            point_count=point_count,
+            direct_mode="sparse",
+        )
+        for key in (
+            "node_pair_visit_count",
+            "node_pair_expansion_count",
+            "aabb_pair_bound_evaluation_count",
+            "point_pair_distance_evaluation_count",
+        ):
+            require(
+                direct_sparse[key] <= direct_frozen[key],
+                f"{label} sparse direct {key} exceeds frozen direct",
+            )
         for key in RESOLVER_DYNAMIC_KEYS:
             if key == "frontier_peak":
                 dynamic_sums[key] = max(dynamic_sums[key], dynamic[key])
@@ -713,9 +761,15 @@ def validate_comparison_document(value: Any, *, expected_backend: str) -> None:
                 dynamic_sums[key] += dynamic[key]
         for key in RESOLVER_DIRECT_KEYS:
             if key == "frontier_peak":
-                direct_sums[key] = max(direct_sums[key], direct[key])
+                direct_frozen_sums[key] = max(
+                    direct_frozen_sums[key], direct_frozen[key]
+                )
+                direct_sparse_sums[key] = max(
+                    direct_sparse_sums[key], direct_sparse[key]
+                )
             else:
-                direct_sums[key] += direct[key]
+                direct_frozen_sums[key] += direct_frozen[key]
+                direct_sparse_sums[key] += direct_sparse[key]
 
     totals = exact_keys(
         comparison["totals"],
@@ -727,20 +781,43 @@ def validate_comparison_document(value: Any, *, expected_backend: str) -> None:
         RESOLVER_DYNAMIC_KEYS,
         "result.resolver_comparison.totals.dynamic",
     )
-    total_direct = exact_keys(
-        totals["direct"],
+    total_direct_frozen = exact_keys(
+        totals["direct_frozen"],
         RESOLVER_DIRECT_KEYS,
-        "result.resolver_comparison.totals.direct",
+        "result.resolver_comparison.totals.direct_frozen",
+    )
+    total_direct_sparse = exact_keys(
+        totals["direct_sparse"],
+        RESOLVER_DIRECT_KEYS,
+        "result.resolver_comparison.totals.direct_sparse",
     )
     for key, expected in dynamic_sums.items():
         require(
             natural(total_dynamic[key], f"totals.dynamic.{key}") == expected,
             f"total dynamic resolver {key} differs",
         )
-    for key, expected in direct_sums.items():
+    for key, expected in direct_frozen_sums.items():
         require(
-            natural(total_direct[key], f"totals.direct.{key}") == expected,
-            f"total direct resolver {key} differs",
+            natural(total_direct_frozen[key], f"totals.direct_frozen.{key}")
+            == expected,
+            f"total frozen direct resolver {key} differs",
+        )
+    for key, expected in direct_sparse_sums.items():
+        require(
+            natural(total_direct_sparse[key], f"totals.direct_sparse.{key}")
+            == expected,
+            f"total sparse direct resolver {key} differs",
+        )
+    for key in (
+        "node_pair_visit_count",
+        "node_pair_expansion_count",
+        "aabb_pair_bound_evaluation_count",
+        "point_pair_distance_evaluation_count",
+    ):
+        require(
+            natural(total_direct_sparse[key], f"totals.direct_sparse.{key}")
+            <= natural(total_direct_frozen[key], f"totals.direct_frozen.{key}"),
+            f"total sparse direct {key} exceeds frozen direct",
         )
 
 
@@ -826,7 +903,7 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
             "--family",
             "uniform",
             "--point-count",
-            "8",
+            "12",
             "--window-radius",
             "2",
             "--seed",
@@ -857,7 +934,7 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
             "--family",
             "uniform",
             "--point-count",
-            "8",
+            "12",
             "--window-radius",
             "2",
             "--seed",
@@ -899,10 +976,11 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
         "frontier_peak",
     )
     expected_work = {
-        "direct": ((40, 16, 6, 10, 8, 7), (27, 11, 2, 7, 7, 5)),
-        "dynamic": ((40, 16, 6, 10, 8, 7), (47, 21, 9, 10, 7, 5)),
+        "direct_frozen": ((92, 40, 14, 26, 12, 10), (38, 17, 3, 13, 5, 9)),
+        "direct_sparse": ((86, 37, 10, 27, 12, 10), (38, 17, 3, 13, 5, 9)),
+        "dynamic": ((86, 37, 10, 27, 12, 10), (62, 29, 11, 16, 6, 9)),
     }
-    for resolver in ("dynamic", "direct"):
+    for resolver in ("dynamic", "direct_frozen", "direct_sparse"):
         for round_index, expected in enumerate(expected_work[resolver]):
             observed = comparison_rounds[round_index][resolver]
             require(
@@ -911,21 +989,57 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
             )
     require(
         tuple(
-            round_value["direct"]["component_kappa_update_count"]
+            round_value["direct_frozen"]["component_kappa_update_count"]
             for round_value in comparison_rounds
         )
-        == (1, 0)
+        == (3, 1)
+        and tuple(
+            round_value["direct_sparse"]["component_kappa_update_count"]
+            for round_value in comparison_rounds
+        )
+        == (3, 1)
+        and tuple(
+            round_value["direct_frozen"]["component_witness_leaf_update_count"]
+            for round_value in comparison_rounds
+        )
+        == (0, 0)
+        and tuple(
+            round_value["direct_sparse"]["component_witness_leaf_update_count"]
+            for round_value in comparison_rounds
+        )
+        == (3, 1)
+        and tuple(
+            round_value["direct_sparse"][
+                "component_witness_ancestor_update_count"
+            ]
+            for round_value in comparison_rounds
+        )
+        == (4, 0)
         and tuple(
             round_value["dynamic"]["strict_incumbent_decrease_count"]
             for round_value in comparison_rounds
         )
-        == (1, 3)
+        == (3, 8)
         and tuple(
             round_value["dynamic"]["ancestor_update_count"]
             for round_value in comparison_rounds
         )
-        == (2, 6),
+        == (4, 11),
         "uniform resolver-specific work fixture differs",
+    )
+    comparison_totals = comparison_value["result"]["resolver_comparison"][
+        "totals"
+    ]
+    frozen_totals = comparison_totals["direct_frozen"]
+    sparse_totals = comparison_totals["direct_sparse"]
+    require(
+        sparse_totals["node_pair_visit_count"]
+        < frozen_totals["node_pair_visit_count"]
+        and sparse_totals["node_pair_expansion_count"]
+        < frozen_totals["node_pair_expansion_count"]
+        and sparse_totals["point_pair_distance_evaluation_count"]
+        < frozen_totals["point_pair_distance_evaluation_count"],
+        "uniform sparse resolver no longer strictly improves total direct work",
     )
     comparison_projection = copy.deepcopy(comparison_value)
     comparison_projection["schema"] = SCHEMA
@@ -988,7 +1102,7 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
     ] += 1
     comparison_mutations.append(mutated)
     mutated = copy.deepcopy(comparison_value)
-    mutated["result"]["resolver_comparison"]["rounds"][0]["direct"][
+    mutated["result"]["resolver_comparison"]["rounds"][0]["direct_frozen"][
         "target_component_seed_offer_count"
     ] += 1
     comparison_mutations.append(mutated)
@@ -1017,14 +1131,14 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
     comparison_mutations.append(mutated)
     mutated = copy.deepcopy(comparison_value)
     direct_round = mutated["result"]["resolver_comparison"]["rounds"][0][
-        "direct"
+        "direct_sparse"
     ]
     direct_round["component_kappa_update_count"] = (
         2 * direct_round["point_pair_distance_evaluation_count"] + 1
     )
     comparison_mutations.append(mutated)
     mutated = copy.deepcopy(comparison_value)
-    mutated["result"]["resolver_comparison"]["rounds"][0]["direct"][
+    mutated["result"]["resolver_comparison"]["rounds"][0]["direct_frozen"][
         "component_cutoff_upper_envelope_node_count"
     ] += 1
     comparison_mutations.append(mutated)
@@ -1064,9 +1178,36 @@ def static_check(project: Path, executable: Path | None) -> tuple[bool, int]:
     ] += 1
     comparison_mutations.append(mutated)
     mutated = copy.deepcopy(comparison_value)
-    mutated["result"]["resolver_comparison"]["totals"]["direct"][
+    mutated["result"]["resolver_comparison"]["totals"]["direct_frozen"][
         "node_pair_visit_count"
     ] += 1
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    mutated["result"]["resolver_comparison"]["rounds"][0]["direct_frozen"][
+        "component_witness_leaf_update_count"
+    ] = 1
+    comparison_mutations.append(mutated)
+    mutated = copy.deepcopy(comparison_value)
+    mutated["result"]["resolver_comparison"]["rounds"][0]["direct_sparse"][
+        "component_witness_leaf_update_count"
+    ] += 1
+    comparison_mutations.append(mutated)
+
+    # Preserve every per-resolver identity and aggregate while making the
+    # sparse traversal strictly larger than the frozen traversal.
+    mutated = copy.deepcopy(comparison_value)
+    comparison = mutated["result"]["resolver_comparison"]
+    sparse_round = comparison["rounds"][1]["direct_sparse"]
+    dynamic_round = comparison["rounds"][1]["dynamic"]
+    for key in RESOLVER_COMMON_KEYS:
+        sparse_round[key] = dynamic_round[key]
+    sparse_totals = comparison["totals"]["direct_sparse"]
+    for key in RESOLVER_DIRECT_KEYS:
+        values = [
+            round_value["direct_sparse"][key]
+            for round_value in comparison["rounds"]
+        ]
+        sparse_totals[key] = max(values) if key == "frontier_peak" else sum(values)
     comparison_mutations.append(mutated)
 
     rejected = 0

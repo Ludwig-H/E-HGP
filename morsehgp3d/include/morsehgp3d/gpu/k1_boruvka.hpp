@@ -303,8 +303,19 @@ enum class K1BoruvkaComponentDualTreeSearchStatus : std::uint8_t {
   exact_component_minima_shared_lbvh_dual_tree_certified,
 };
 
+enum class K1BoruvkaComponentEnvelopeMode : std::uint8_t {
+  unspecified,
+  // Reuse the bidirectionally reduced seed cutoff at every point of a
+  // component for the whole round.
+  frozen_initial,
+  // On a strict component-cutoff decrease, tighten the endpoint leaf that
+  // witnessed it and refresh only that leaf-to-root maximum path. Other leaves
+  // remain conservative historical upper bounds.
+  sparse_witness_path_monotone,
+};
+
 // This audit belongs to the component-direct resolver. Every recertified point
-// seed is offered to both incident components before the frozen envelope is
+// seed is offered to both incident components before the initial envelope is
 // built, but no per-point minimum is materialized.
 struct K1BoruvkaComponentDualTreeSearchAudit {
   static constexpr const char* proposal_semantics =
@@ -312,8 +323,10 @@ struct K1BoruvkaComponentDualTreeSearchAudit {
   static constexpr const char* decision_semantics =
       "cpu_exact_component_minima_shared_lbvh_dual_tree";
   static constexpr const char* proof_basis =
-      "strict_exact_aabb_pair_bidirectional_component_seed_frozen_upper_envelope_bounded_dfs_v2";
+      "strict_exact_aabb_pair_bidirectional_component_seed_certified_upper_envelope_bounded_dfs_v3";
 
+  K1BoruvkaComponentEnvelopeMode component_envelope_mode{
+      K1BoruvkaComponentEnvelopeMode::unspecified};
   std::size_t resident_point_count{};
   std::size_t resident_node_count{};
   std::size_t frozen_component_count{};
@@ -340,6 +353,8 @@ struct K1BoruvkaComponentDualTreeSearchAudit {
   std::size_t cpu_exact_point_pair_distance_evaluation_count{};
   std::size_t cpu_component_kappa_update_count{};
   std::size_t cpu_strict_component_cutoff_decrease_count{};
+  std::size_t cpu_component_witness_leaf_update_count{};
+  std::size_t cpu_component_witness_ancestor_update_count{};
   std::size_t cpu_uniform_same_component_pair_prune_count{};
   std::size_t cpu_strict_aabb_pair_prune_count{};
   bool frozen_labels_certified{false};
@@ -350,6 +365,8 @@ struct K1BoruvkaComponentDualTreeSearchAudit {
   bool component_seed_reduction_certified{false};
   bool bidirectional_component_seed_reduction_certified{false};
   bool component_cutoff_upper_envelope_certified{false};
+  bool live_component_cutoff_upper_bound_certified{false};
+  bool pointwise_at_most_frozen_envelope_certified{false};
   bool canonical_unordered_pair_partition_certified{false};
   bool uniform_component_pair_prunes_certified{false};
   bool strict_only_aabb_pair_pruning_certified{false};
@@ -364,10 +381,13 @@ struct K1BoruvkaComponentDualTreeSearchAudit {
       const K1BoruvkaComponentDualTreeSearchAudit&) = default;
 };
 
-// The bidirectionally seeded frozen component envelope is rebuilt for every
-// nonterminal round. It remains a conservative upper bound while component
-// incumbents decrease. Leaf pairs relax the two components directly; point
-// minima never exist here, and no contraction or hierarchy is published.
+// The bidirectionally seeded component envelope is rebuilt for every
+// nonterminal round. The frozen mode keeps it unchanged. The sparse mode
+// tightens only the witness leaf of a strict component decrease and recomputes
+// maxima on its ancestor path; every other leaf retains a historical cutoff
+// above its component's live cutoff. Leaf pairs relax the two components
+// directly; point minima never exist here, and no contraction or hierarchy is
+// published.
 struct K1BoruvkaSeededComponentDualTreeRoundResolution {
   std::vector<hierarchy::K1BoruvkaComponentMinimum> component_minima;
   K1BoruvkaMortonSeedAudit morton_seed_audit;
@@ -766,9 +786,9 @@ struct K1SeededExactBoruvkaVerification {
 
 // Persistent shared-search rounds decide component minima directly after
 // offering each recertified seed to both incident components. Only the seed
-// audit, frozen component-envelope audit, exact component decision and
-// canonical contraction survive; point minima and dynamic ancestor updates do
-// not exist in this result.
+// audit, explicitly frozen component-envelope audit, exact component decision
+// and canonical contraction survive; point minima do not exist and sparse
+// witness updates are certified zero in this result.
 struct K1DualTreeExactBoruvkaRound {
   K1BoruvkaMortonSeedAudit morton_seed_audit;
   K1BoruvkaComponentDualTreeSearchAudit dual_tree_search_audit;
@@ -792,7 +812,7 @@ struct K1DualTreeExactBoruvkaRound {
 // minima, candidate universe or hierarchy reduction persists in this result.
 struct K1DualTreeExactBoruvkaResult {
   static constexpr const char* proof_basis =
-      "gpu_bounded_morton_seed_cpu_exact_bidirectional_component_dual_tree_boruvka_v3";
+      "gpu_bounded_morton_seed_cpu_exact_bidirectional_component_dual_tree_boruvka_v4";
 
   std::size_t point_count{};
   std::vector<K1DualTreeExactBoruvkaRound> rounds;
@@ -929,7 +949,9 @@ class K1BoruvkaCandidateContext final {
   resolve_round_exact_component_minima_dual_tree(
       const spatial::CanonicalPointCloud& cloud,
       std::span<const spatial::PointId> frozen_component_labels,
-      K1BoruvkaMortonSeedPolicy seed_policy);
+      K1BoruvkaMortonSeedPolicy seed_policy,
+      K1BoruvkaComponentEnvelopeMode envelope_mode =
+          K1BoruvkaComponentEnvelopeMode::frozen_initial);
 
   [[nodiscard]] std::size_t point_count() const noexcept;
   [[nodiscard]] std::size_t node_count() const noexcept;
