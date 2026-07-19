@@ -18,17 +18,22 @@ namespace {
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactLevel;
 using morsehgp3d::gpu::K1BoruvkaExactSearchStatus;
+using morsehgp3d::gpu::K1BoruvkaDualTreeSearchStatus;
 using morsehgp3d::gpu::K1BoruvkaMortonSeedPolicy;
 using morsehgp3d::gpu::K1BoruvkaSeedStatus;
+using morsehgp3d::gpu::K1DualTreeExactBoruvkaResult;
+using morsehgp3d::gpu::K1DualTreeExactBoruvkaVerification;
 using morsehgp3d::gpu::K1HybridBoruvkaContractionStatus;
 using morsehgp3d::gpu::K1HybridBoruvkaDecisionStatus;
 using morsehgp3d::gpu::K1HybridHierarchyReductionStatus;
 using morsehgp3d::gpu::K1HybridScientificStatus;
 using morsehgp3d::gpu::K1SeededExactBoruvkaResult;
 using morsehgp3d::gpu::K1SeededExactBoruvkaVerification;
+using morsehgp3d::gpu::build_gpu_seeded_cpu_exact_dual_tree_k1_boruvka;
 using morsehgp3d::gpu::build_gpu_seeded_cpu_exact_external_1nn_k1_boruvka;
 using morsehgp3d::gpu::test_support::fake_gpu_k1_boruvka_launch_count;
 using morsehgp3d::gpu::test_support::reset_fake_gpu_k1_boruvka;
+using morsehgp3d::gpu::verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka;
 using morsehgp3d::gpu::verify_gpu_seeded_cpu_exact_external_1nn_k1_boruvka;
 using morsehgp3d::hierarchy::K1ExactBoruvkaResult;
 using morsehgp3d::hierarchy::build_exact_lbvh_boruvka;
@@ -335,12 +340,185 @@ void test_invalid_policy_fails_before_gpu() {
       "invalid seeded policy fails before GPU proposal");
 }
 
+void test_dual_tree_singleton_is_vacuously_certified() {
+  reset_fake_gpu_k1_boruvka();
+  const std::array<CertifiedPoint3, 1> input{point(7.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  constexpr K1BoruvkaMortonSeedPolicy policy{1U};
+  const K1DualTreeExactBoruvkaResult result =
+      build_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy);
+
+  check(
+      result.rounds.empty() && result.emst_edges.empty() &&
+          result.total_squared_weight == ExactLevel{} &&
+          result.total_hgp_weight == ExactLevel{} &&
+          result.bounded_morton_seed_chain_certified &&
+          result.exact_dual_tree_chain_certified &&
+          result.component_minima_only_persistence_certified &&
+          result.cpu_exact_decision_chain_certified &&
+          result.canonical_contraction_chain_certified &&
+          result.fresh_replay_certified &&
+          result.reference_cpu_witness_certified &&
+          result.emst_witness_certified,
+      "singleton shared chain closes every certificate vacuously");
+  check(
+      result.hierarchy_reduction_status ==
+              K1HybridHierarchyReductionStatus::not_performed &&
+          result.scientific_status ==
+              K1HybridScientificStatus::local_emst_witness_only &&
+          fake_gpu_k1_boruvka_launch_count() == 0U,
+      "singleton shared chain stays local and launch-free");
+
+  const K1DualTreeExactBoruvkaVerification verification =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, result);
+  check(
+      verification.emst_witness_certified &&
+          verification.replayed_round_count == 0U &&
+          fake_gpu_k1_boruvka_launch_count() == 0U,
+      "singleton explicit shared replay remains launch-free");
+}
+
+void test_dual_tree_three_round_chain_and_falsifications() {
+  const std::array<CertifiedPoint3, 8> input = chain_points();
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const K1ExactBoruvkaResult reference =
+      build_exact_lbvh_boruvka(index, cloud);
+  constexpr K1BoruvkaMortonSeedPolicy policy{1U};
+  reset_fake_gpu_k1_boruvka();
+  const K1DualTreeExactBoruvkaResult result =
+      build_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy);
+
+  check(
+      result.rounds.size() == 3U &&
+          result.rounds.size() == reference.rounds.size() &&
+          result.emst_edges == reference.emst_edges &&
+          result.total_squared_weight == reference.total_squared_weight &&
+          result.total_hgp_weight == reference.total_hgp_weight &&
+          fake_gpu_k1_boruvka_launch_count() == 6U,
+      "shared chain reproduces the 8-to-4-to-2-to-1 CPU EMST");
+  for (std::size_t round_index = 0U;
+       round_index < result.rounds.size();
+       ++round_index) {
+    const auto& observed = result.rounds[round_index];
+    const auto& expected = reference.rounds[round_index];
+    check(
+        observed.seed_status ==
+                K1BoruvkaSeedStatus::
+                    bounded_morton_window_external_exact_monotone_certified &&
+            observed.search_status ==
+                K1BoruvkaDualTreeSearchStatus::
+                    exact_external_1nn_shared_lbvh_dual_tree_certified &&
+            observed.decision_status ==
+                K1HybridBoruvkaDecisionStatus::
+                    cpu_exact_kappa_minima_certified &&
+            observed.contraction_status ==
+                K1HybridBoruvkaContractionStatus::
+                    cpu_exact_canonical_contraction_certified,
+        "each shared round separates seed, search, decision and contraction");
+    check(
+        observed.exact_decision.component_minima ==
+                expected.component_minima &&
+            observed.canonical_contraction.accepted_edges ==
+                expected.accepted_edges &&
+            observed.canonical_contraction.post_round_component_count ==
+                expected.post_round_component_count,
+        "each shared round matches the independent CPU anchor");
+    const auto& audit = observed.dual_tree_search_audit;
+    check(
+        audit.covered_unordered_point_pair_count == 28U &&
+            audit.unordered_point_pair_count == 28U &&
+            audit.cpu_exact_aabb_pair_bound_evaluation_count ==
+                audit.cpu_node_pair_visit_count &&
+            audit.dynamic_incumbent_tree_certified &&
+            audit.canonical_unordered_pair_partition_certified,
+        "each shared round closes the canonical unordered-pair partition");
+  }
+  check(
+      result.bounded_morton_seed_chain_certified &&
+          result.exact_dual_tree_chain_certified &&
+          result.component_minima_only_persistence_certified &&
+          result.cpu_exact_decision_chain_certified &&
+          result.canonical_contraction_chain_certified &&
+          result.fresh_replay_certified &&
+          result.reference_cpu_witness_certified &&
+          result.emst_witness_certified &&
+          std::string_view{K1DualTreeExactBoruvkaResult::proof_basis} ==
+              "gpu_bounded_morton_seed_cpu_exact_shared_dual_tree_boruvka_v1",
+      "shared builder requires fresh replay and the independent CPU witness");
+
+  std::size_t launches = fake_gpu_k1_boruvka_launch_count();
+  const K1DualTreeExactBoruvkaVerification explicit_replay =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, result);
+  check(
+      explicit_replay.emst_witness_certified &&
+          explicit_replay.replayed_round_count == 3U &&
+          explicit_replay.replayed_component_minimum_count == 14U &&
+          explicit_replay.replayed_seed_kernel_launch_count == 3U &&
+          explicit_replay.replayed_node_pair_visit_count ==
+              explicit_replay.replayed_aabb_pair_bound_evaluation_count &&
+          fake_gpu_k1_boruvka_launch_count() == launches + 3U,
+      "explicit verifier rebuilds every shared round in a fresh context");
+
+  launches = fake_gpu_k1_boruvka_launch_count();
+  const auto wrong_policy =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, K1BoruvkaMortonSeedPolicy{2U}, result);
+  check(
+      !wrong_policy.trusted_seed_policy_certified &&
+          !wrong_policy.emst_witness_certified &&
+          fake_gpu_k1_boruvka_launch_count() == launches,
+      "mismatched trusted shared policy fails before GPU replay");
+
+  K1DualTreeExactBoruvkaResult bad_search = result;
+  ++bad_search.rounds[0].dual_tree_search_audit.
+      covered_unordered_point_pair_count;
+  const auto search_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_search);
+  check(
+      !search_check.exact_dual_tree_chain_certified &&
+          search_check.cpu_exact_decision_chain_certified &&
+          !search_check.emst_witness_certified,
+      "shared coverage falsification invalidates only the traversal proof");
+
+  K1DualTreeExactBoruvkaResult bad_decision = result;
+  bad_decision.rounds[0].exact_decision.component_minima[0] =
+      bad_decision.rounds[0].exact_decision.component_minima[1];
+  const auto decision_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_decision);
+  check(
+      decision_check.exact_dual_tree_chain_certified &&
+          !decision_check.cpu_exact_decision_chain_certified &&
+          !decision_check.emst_witness_certified,
+      "persisted component-minimum falsification fails independently");
+
+  K1DualTreeExactBoruvkaResult bad_status = result;
+  bad_status.hierarchy_reduction_status =
+      static_cast<K1HybridHierarchyReductionStatus>(255U);
+  const auto status_check =
+      verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+          index, cloud, policy, bad_status);
+  check(
+      !status_check.hierarchy_status_separation_certified &&
+          !status_check.emst_witness_certified,
+      "local shared witness cannot claim a hierarchy reduction");
+}
+
 }  // namespace
 
 int main() {
   test_singleton_is_vacuously_certified();
   test_three_round_chain_and_falsifications();
   test_invalid_policy_fails_before_gpu();
+  test_dual_tree_singleton_is_vacuously_certified();
+  test_dual_tree_three_round_chain_and_falsifications();
 
   if (failures != 0) {
     std::cerr << failures << " seeded exact chain test(s) failed\n";

@@ -673,6 +673,80 @@ struct K1SeededExactBoruvkaVerification {
   std::size_t replayed_exact_point_distance_evaluation_count{};
 };
 
+// Persistent shared-search rounds deliberately omit the transient per-point
+// minima. Only the recertified seed audit, dual-tree audit, exact component
+// decision and canonical contraction survive each round.
+struct K1DualTreeExactBoruvkaRound {
+  K1BoruvkaMortonSeedAudit morton_seed_audit;
+  K1BoruvkaDualTreeSearchAudit dual_tree_search_audit;
+  K1HybridBoruvkaExactDecision exact_decision;
+  K1HybridBoruvkaCanonicalContraction canonical_contraction;
+  K1BoruvkaSeedStatus seed_status{K1BoruvkaSeedStatus::not_certified};
+  K1BoruvkaDualTreeSearchStatus search_status{
+      K1BoruvkaDualTreeSearchStatus::not_certified};
+  K1HybridBoruvkaDecisionStatus decision_status{
+      K1HybridBoruvkaDecisionStatus::not_certified};
+  K1HybridBoruvkaContractionStatus contraction_status{
+      K1HybridBoruvkaContractionStatus::not_certified};
+
+  friend bool operator==(
+      const K1DualTreeExactBoruvkaRound&,
+      const K1DualTreeExactBoruvkaRound&) = default;
+};
+
+// Local exact EMST witness only. A fresh shared traversal and the independent
+// reference_cpu Boruvka anchor must both agree before certification. No point
+// minima, candidate universe or hierarchy reduction persists in this result.
+struct K1DualTreeExactBoruvkaResult {
+  static constexpr const char* proof_basis =
+      "gpu_bounded_morton_seed_cpu_exact_shared_dual_tree_boruvka_v1";
+
+  std::size_t point_count{};
+  std::vector<K1DualTreeExactBoruvkaRound> rounds;
+  std::vector<hierarchy::ExactEmstEdge> emst_edges;
+  exact::ExactLevel total_squared_weight{};
+  exact::ExactLevel total_hgp_weight{};
+  K1BoruvkaMortonSeedPolicy morton_seed_policy{};
+  K1HybridHierarchyReductionStatus hierarchy_reduction_status{
+      K1HybridHierarchyReductionStatus::not_performed};
+  K1HybridScientificStatus scientific_status{
+      K1HybridScientificStatus::local_emst_witness_only};
+  bool bounded_morton_seed_chain_certified{false};
+  bool exact_dual_tree_chain_certified{false};
+  bool component_minima_only_persistence_certified{false};
+  bool cpu_exact_decision_chain_certified{false};
+  bool canonical_contraction_chain_certified{false};
+  bool fresh_replay_certified{false};
+  bool reference_cpu_witness_certified{false};
+  bool emst_witness_certified{false};
+};
+
+struct K1DualTreeExactBoruvkaVerification {
+  bool index_identity_certified{false};
+  bool trusted_seed_policy_certified{false};
+  bool bounded_morton_seed_chain_certified{false};
+  bool exact_dual_tree_chain_certified{false};
+  bool component_minima_only_persistence_certified{false};
+  bool cpu_exact_decision_chain_certified{false};
+  bool canonical_contractions_certified{false};
+  bool fresh_replay_certified{false};
+  bool round_count_bound_certified{false};
+  bool spanning_tree_certified{false};
+  bool exact_weights_certified{false};
+  bool reference_cpu_witness_certified{false};
+  bool hierarchy_status_separation_certified{false};
+  bool emst_witness_certified{false};
+  std::size_t reference_round_count{};
+  std::size_t reference_component_minimum_count{};
+  std::size_t replayed_round_count{};
+  std::size_t replayed_component_minimum_count{};
+  std::size_t replayed_seed_kernel_launch_count{};
+  std::size_t replayed_seed_synchronization_count{};
+  std::size_t replayed_node_pair_visit_count{};
+  std::size_t replayed_aabb_pair_bound_evaluation_count{};
+  std::size_t replayed_point_pair_distance_evaluation_count{};
+};
+
 // This status belongs only to the explicit local k=1 adapter below. It never
 // mutates the source EMST witness and is not a MorseHGP3D public status.
 enum class K1SeededExactHierarchyReductionStatus : std::uint8_t {
@@ -856,6 +930,25 @@ verify_gpu_seeded_cpu_exact_external_1nn_k1_boruvka(
     const spatial::CanonicalPointCloud& cloud,
     K1BoruvkaMortonSeedPolicy trusted_seed_policy,
     const K1SeededExactBoruvkaResult& result);
+
+// Runs every nonterminal round through the shared exact dual-tree resolver,
+// persists only component decisions, contracts on reference_cpu and certifies
+// the local EMST witness through a fresh shared replay and the CPU anchor.
+[[nodiscard]] K1DualTreeExactBoruvkaResult
+build_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaMortonSeedPolicy seed_policy);
+
+// The trusted seed radius is supplied separately from the untrusted result.
+// Every shared round is rerun in a new resident context before contractions,
+// weights and the independent reference_cpu witness are compared.
+[[nodiscard]] K1DualTreeExactBoruvkaVerification
+verify_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    K1BoruvkaMortonSeedPolicy trusted_seed_policy,
+    const K1DualTreeExactBoruvkaResult& result);
 
 // Explicitly reduces a separately recertified local EMST witness. The source
 // remains hierarchy_reduction_status=not_performed and
