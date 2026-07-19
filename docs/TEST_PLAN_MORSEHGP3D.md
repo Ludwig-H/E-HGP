@@ -376,6 +376,8 @@ En l'absence d'ex æquo, on compare les arêtes de l'EMST et leurs poids. En pr�
 
 Un désaccord à $k=1$ bloque immédiatement tout benchmark de production.
 
+Le profil de travail séparé de la voie external-1NN exacte mesure par ronde les évaluations exactes de graines, les bornes point--AABB, les distances point--point, les visites de nœuds et les pics par source. Son checker exige l'identité entre bornes AABB et visites, la partition exacte des visites entre élagages stricts, expansions, distances et réutilisation de graine, les sommes inter-rondes, la réduction au moins par moitié des composantes et zéro record candidat persistant. Une matrice G4 ne change aucun statut de phase : son artefact reste `benchmark_only`, sans revendication de qualification, de scalabilité, de résultat scientifique ou de réduction hiérarchique.
+
 ## 9. Générateurs de données
 
 Chaque générateur possède une version, une graine, des paramètres sérialisés et un hash du nuage produit. Les coordonnées brutes des grands jeux ne sont pas commitées si elles sont régénérables.
