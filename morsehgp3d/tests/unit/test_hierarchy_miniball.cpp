@@ -19,6 +19,10 @@ using morsehgp3d::exact::BigInt;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactCenter3;
 using morsehgp3d::exact::ExactLevel;
+using morsehgp3d::hierarchy::ExactFacetDescentArcDecision;
+using morsehgp3d::hierarchy::ExactFacetDescentArcResult;
+using morsehgp3d::hierarchy::ExactFacetDescentArcScope;
+using morsehgp3d::hierarchy::ExactFacetDescentArcVerification;
 using morsehgp3d::hierarchy::ExactFacetDescentPreconditionDecision;
 using morsehgp3d::hierarchy::ExactFacetDescentPreconditionResult;
 using morsehgp3d::hierarchy::ExactFacetDescentPreconditionScope;
@@ -27,8 +31,10 @@ using morsehgp3d::hierarchy::ExactFacetMiniballResult;
 using morsehgp3d::hierarchy::ExactFacetMiniballScope;
 using morsehgp3d::hierarchy::ExactFacetMiniballStatus;
 using morsehgp3d::hierarchy::ExactFacetMiniballVerification;
+using morsehgp3d::hierarchy::build_exact_facet_descent_arc;
 using morsehgp3d::hierarchy::build_exact_facet_descent_preconditions;
 using morsehgp3d::hierarchy::build_exact_facet_miniball;
+using morsehgp3d::hierarchy::verify_exact_facet_descent_arc;
 using morsehgp3d::hierarchy::verify_exact_facet_descent_preconditions;
 using morsehgp3d::hierarchy::verify_exact_facet_miniball;
 using morsehgp3d::spatial::CanonicalPointCloud;
@@ -115,6 +121,23 @@ template <std::size_t Size>
          verification.decision_certified && verification.scope_certified &&
          verification.fresh_replay_certified &&
          verification.exact_descent_preconditions_certified;
+}
+
+[[nodiscard]] bool all_descent_arc_certificates_close(
+    const ExactFacetDescentArcVerification& verification) {
+  return verification.source_preconditions_certified &&
+         verification.successor_payload_presence_certified &&
+         verification.successor_facet_certified &&
+         verification.successor_miniball_certified &&
+         verification.successor_is_canonical_top_k_choice_certified &&
+         verification.successor_is_exact_top_k_member_certified &&
+         verification.successor_differs_from_source_certified &&
+         verification.successor_level_within_top_k_cutoff_certified &&
+         verification.strict_level_decrease_certified &&
+         verification.counters_certified &&
+         verification.decision_certified && verification.scope_certified &&
+         verification.fresh_replay_certified &&
+         verification.exact_descent_arc_decision_certified;
 }
 
 [[nodiscard]] bool matches_ids(
@@ -716,6 +739,449 @@ void test_top_k_family_membership_is_not_canonical_choice_equality() {
       "unsupported shell keeps the exact family-membership fact true");
 }
 
+void test_strict_descent_arc_with_equal_source_cutoff() {
+  const ExactFacetDescentArcResult empty;
+  check(
+      empty.decision == ExactFacetDescentArcDecision::not_certified &&
+          empty.scope == ExactFacetDescentArcScope::unspecified &&
+          !empty.successor_facet_point_ids.has_value() &&
+          !empty.successor_miniball.has_value(),
+      "default descent arc has neither a successor nor a certified decision");
+
+  const std::array<CertifiedPoint3, 3> input{
+      point(1.0, 0.0, 0.0),
+      point(0.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{2U, 0U};
+  const ExactFacetDescentArcResult result =
+      build_exact_facet_descent_arc(cloud, facet);
+  const ExactFacetDescentArcVerification verification =
+      verify_exact_facet_descent_arc(cloud, facet, result);
+
+  check(
+      result.source_preconditions.decision ==
+              ExactFacetDescentPreconditionDecision::
+                  strict_descent_admissible &&
+          result.source_preconditions.exact_top_k.has_value() &&
+          result.successor_facet_point_ids.has_value() &&
+          result.successor_miniball.has_value(),
+      "strict equal-cutoff branch emits exactly one chosen successor payload");
+  if (!result.source_preconditions.exact_top_k.has_value() ||
+      !result.successor_facet_point_ids.has_value() ||
+      !result.successor_miniball.has_value()) {
+    return;
+  }
+  const auto& source = result.source_preconditions.facet_miniball;
+  const auto& source_top_k = *result.source_preconditions.exact_top_k;
+  const auto& successor_ids = *result.successor_facet_point_ids;
+  const auto& successor = *result.successor_miniball;
+  check(
+      source.facet_point_ids == std::vector<PointId>({0U, 2U}) &&
+          source.center == center(0, 0, 0) &&
+          source.squared_radius == level(1) &&
+          source_top_k.cutoff_squared_distance() == level(1) &&
+          source_top_k.strict_below().size() == 1U &&
+          source_top_k.strict_below()[0].point_id == 1U &&
+          source_top_k.strict_below()[0].squared_distance == level(0),
+      "equal-cutoff source has one strict intruder at its exact center");
+  check(
+      matches_ids(source_top_k.cutoff_shell_ids(), {0U, 2U}) &&
+          matches_ids(source_top_k.canonical_choice_ids(), {0U, 1U}) &&
+          successor_ids == std::vector<PointId>({0U, 1U}),
+      "chosen successor is the explicit canonical member of the top-two family");
+  check(
+      successor.facet_point_ids == std::vector<PointId>({0U, 1U}) &&
+          successor.support_point_ids == std::vector<PointId>({0U, 1U}) &&
+          successor.boundary_point_ids == std::vector<PointId>({0U, 1U}) &&
+          successor.strictly_inside_point_ids.empty() &&
+          successor.center == center(-1, 0, 0, 2) &&
+          successor.squared_radius == level(1, 4) &&
+          successor.counters.optimal_support_count == 1U,
+      "chosen equal-cutoff successor has exact midpoint and quarter level");
+  check(
+      successor.squared_radius < source_top_k.cutoff_squared_distance() &&
+          source_top_k.cutoff_squared_distance() == source.squared_radius &&
+          result.successor_is_canonical_top_k_choice &&
+          result.successor_is_exact_top_k_member &&
+          result.successor_differs_from_source &&
+          result.successor_level_within_top_k_cutoff &&
+          result.strict_level_decrease,
+      "fresh minimization supplies strictness when the source cutoff is equal");
+  check(
+      result.counters.precondition_classification_count == 1U &&
+          result.counters.canonical_top_k_selection_count == 1U &&
+          result.counters.successor_miniball_build_count == 1U &&
+          result.counters.exact_level_comparison_count == 2U &&
+          result.decision ==
+              ExactFacetDescentArcDecision::strict_descent_arc_certified &&
+          result.scope == ExactFacetDescentArcScope::
+                              canonical_top_k_selected_strict_level_arc_only &&
+          std::string_view{ExactFacetDescentArcResult::proof_basis} ==
+              "exact_descent_preconditions_canonical_top_k_member_fresh_miniball_strict_level_v1" &&
+          all_descent_arc_certificates_close(verification),
+      "equal-cutoff arc counters, decision, scope and replay close exactly");
+
+  const ExactFacetDescentPreconditionResult successor_preconditions =
+      build_exact_facet_descent_preconditions(
+          cloud, std::span<const PointId>{successor_ids});
+  check(
+      successor_preconditions.decision == ExactFacetDescentPreconditionDecision::
+                                              already_active_at_own_center &&
+          successor_preconditions.facet_is_exact_top_k_member &&
+          successor_preconditions.global_closed_ball.has_value() &&
+          matches_ids(
+              successor_preconditions.global_closed_ball->shell_ids(),
+              {0U, 1U}),
+      "chosen successor independently reclassifies as an active terminal facet");
+}
+
+void test_strict_descent_arc_with_lower_source_cutoff() {
+  const std::array<CertifiedPoint3, 4> input{
+      point(2.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0),
+      point(-2.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{3U, 0U};
+  const ExactFacetDescentArcResult result =
+      build_exact_facet_descent_arc(cloud, facet);
+  const auto verification =
+      verify_exact_facet_descent_arc(cloud, facet, result);
+
+  check(
+      result.source_preconditions.exact_top_k.has_value() &&
+          result.successor_facet_point_ids.has_value() &&
+          result.successor_miniball.has_value(),
+      "strict lower-cutoff branch emits its chosen successor payload");
+  if (!result.source_preconditions.exact_top_k.has_value() ||
+      !result.successor_facet_point_ids.has_value() ||
+      !result.successor_miniball.has_value()) {
+    return;
+  }
+  const auto& source = result.source_preconditions.facet_miniball;
+  const auto& source_top_k = *result.source_preconditions.exact_top_k;
+  const auto& successor_ids = *result.successor_facet_point_ids;
+  const auto& successor = *result.successor_miniball;
+  check(
+      source.facet_point_ids == std::vector<PointId>({0U, 3U}) &&
+          source.center == center(0, 0, 0) &&
+          source.squared_radius == level(4) &&
+          source_top_k.strict_below().empty() &&
+          source_top_k.cutoff_squared_distance() == level(1) &&
+          matches_ids(source_top_k.cutoff_shell_ids(), {1U, 2U}) &&
+          matches_ids(source_top_k.canonical_choice_ids(), {1U, 2U}),
+      "lower-cutoff source separates the inner antipodal pair exactly");
+  check(
+      successor_ids == std::vector<PointId>({1U, 2U}) &&
+          successor.facet_point_ids == std::vector<PointId>({1U, 2U}) &&
+          successor.support_point_ids == std::vector<PointId>({1U, 2U}) &&
+          successor.center == center(0, 0, 0) &&
+          successor.squared_radius == level(1),
+      "lower-cutoff successor has the same center and a strictly lower level");
+  check(
+      successor.center == source.center &&
+          successor.squared_radius ==
+              source_top_k.cutoff_squared_distance() &&
+          successor.squared_radius < source.squared_radius &&
+          result.successor_is_canonical_top_k_choice &&
+          result.successor_is_exact_top_k_member &&
+          result.successor_differs_from_source &&
+          result.successor_level_within_top_k_cutoff &&
+          result.strict_level_decrease &&
+          result.counters.precondition_classification_count == 1U &&
+          result.counters.canonical_top_k_selection_count == 1U &&
+          result.counters.successor_miniball_build_count == 1U &&
+          result.counters.exact_level_comparison_count == 2U &&
+          result.decision ==
+              ExactFacetDescentArcDecision::strict_descent_arc_certified &&
+          all_descent_arc_certificates_close(verification),
+      "cutoff strictness certifies a level arc without requiring center motion");
+
+  const ExactFacetDescentPreconditionResult successor_preconditions =
+      build_exact_facet_descent_preconditions(
+          cloud, std::span<const PointId>{successor_ids});
+  check(
+      successor_preconditions.decision == ExactFacetDescentPreconditionDecision::
+                                              already_active_at_own_center &&
+          successor_preconditions.facet_is_exact_top_k_member,
+      "same-center successor independently closes as an active terminal facet");
+}
+
+void test_descent_arc_omits_successor_for_active_facet() {
+  const std::array<CertifiedPoint3, 3> input{
+      point(3.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(-1.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{1U, 0U};
+  const ExactFacetDescentArcResult result =
+      build_exact_facet_descent_arc(cloud, facet);
+  const auto verification =
+      verify_exact_facet_descent_arc(cloud, facet, result);
+
+  check(
+      result.source_preconditions.decision ==
+              ExactFacetDescentPreconditionDecision::
+                  already_active_at_own_center &&
+          result.source_preconditions.facet_is_exact_top_k_member &&
+          !result.successor_facet_point_ids.has_value() &&
+          !result.successor_miniball.has_value(),
+      "already-active source emits no self-loop successor payload");
+  check(
+      !result.successor_is_canonical_top_k_choice &&
+          !result.successor_is_exact_top_k_member &&
+          !result.successor_differs_from_source &&
+          !result.successor_level_within_top_k_cutoff &&
+          !result.strict_level_decrease &&
+          result.counters.precondition_classification_count == 1U &&
+          result.counters.canonical_top_k_selection_count == 0U &&
+          result.counters.successor_miniball_build_count == 0U &&
+          result.counters.exact_level_comparison_count == 0U &&
+          result.decision == ExactFacetDescentArcDecision::
+                                 no_arc_already_active_at_own_center &&
+          result.scope == ExactFacetDescentArcScope::
+                              canonical_top_k_selected_strict_level_arc_only &&
+          all_descent_arc_certificates_close(verification),
+      "active no-arc branch closes with zero successor work");
+}
+
+void test_descent_arc_omits_successor_for_nonessential_facet() {
+  const std::array<CertifiedPoint3, 4> input{
+      point(2.0, 0.0, 0.0),
+      point(1.0, 1.0, 0.0),
+      point(0.0, 2.0, 0.0),
+      point(0.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 3> facet{3U, 0U, 1U};
+  const ExactFacetDescentArcResult result =
+      build_exact_facet_descent_arc(cloud, facet);
+  const auto verification =
+      verify_exact_facet_descent_arc(cloud, facet, result);
+
+  check(
+      result.source_preconditions.decision ==
+              ExactFacetDescentPreconditionDecision::
+                  unsupported_degeneracy &&
+          !result.source_preconditions.local_boundary_equals_support &&
+          !result.successor_facet_point_ids.has_value() &&
+          !result.successor_miniball.has_value(),
+      "nonessential source emits no chosen successor payload");
+  check(
+      !result.successor_is_canonical_top_k_choice &&
+          !result.successor_is_exact_top_k_member &&
+          !result.successor_differs_from_source &&
+          !result.successor_level_within_top_k_cutoff &&
+          !result.strict_level_decrease &&
+          result.counters.precondition_classification_count == 1U &&
+          result.counters.canonical_top_k_selection_count == 0U &&
+          result.counters.successor_miniball_build_count == 0U &&
+          result.counters.exact_level_comparison_count == 0U &&
+          result.decision == ExactFacetDescentArcDecision::
+                                 no_arc_unsupported_degeneracy &&
+          all_descent_arc_certificates_close(verification),
+      "unsupported no-arc branch closes with zero successor work");
+
+  const std::array<PointId, 3> diagnostic_canonical_choice{0U, 1U, 2U};
+  const std::array<PointId, 3> diagnostic_plateau_choice{1U, 2U, 3U};
+  const ExactFacetMiniballResult canonical_miniball =
+      build_exact_facet_miniball(cloud, diagnostic_canonical_choice);
+  const ExactFacetMiniballResult plateau_miniball =
+      build_exact_facet_miniball(cloud, diagnostic_plateau_choice);
+  check(
+      canonical_miniball.center == center(0, 1, 0) &&
+          canonical_miniball.squared_radius == level(1) &&
+          plateau_miniball.center == center(1, 1, 0) &&
+          plateau_miniball.squared_radius == level(2),
+      "unsupported branch suppresses a descending canonical choice beside a plateau choice");
+}
+
+void test_descent_arc_verifier_rejects_every_new_result_layer() {
+  const std::array<CertifiedPoint3, 3> input{
+      point(-1.0, 0.0, 0.0),
+      point(0.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const std::array<PointId, 2> facet{0U, 2U};
+  const ExactFacetDescentArcResult result =
+      build_exact_facet_descent_arc(cloud, facet);
+
+  ExactFacetDescentArcResult bad_preconditions = result;
+  bad_preconditions.source_preconditions.decision =
+      ExactFacetDescentPreconditionDecision::already_active_at_own_center;
+  const auto precondition_check =
+      verify_exact_facet_descent_arc(cloud, facet, bad_preconditions);
+  check(
+      !precondition_check.source_preconditions_certified &&
+          !precondition_check.exact_descent_arc_decision_certified,
+      "arc verifier rejects falsified embedded source preconditions");
+
+  ExactFacetDescentArcResult missing_successor_facet = result;
+  missing_successor_facet.successor_facet_point_ids.reset();
+  const auto missing_successor_facet_check =
+      verify_exact_facet_descent_arc(cloud, facet, missing_successor_facet);
+  check(
+      !missing_successor_facet_check.successor_payload_presence_certified &&
+          !missing_successor_facet_check.exact_descent_arc_decision_certified,
+      "strict arc verifier rejects an absent successor facet");
+
+  ExactFacetDescentArcResult missing_successor_miniball = result;
+  missing_successor_miniball.successor_miniball.reset();
+  const auto missing_successor_miniball_check =
+      verify_exact_facet_descent_arc(cloud, facet, missing_successor_miniball);
+  check(
+      !missing_successor_miniball_check.successor_payload_presence_certified &&
+          !missing_successor_miniball_check.exact_descent_arc_decision_certified,
+      "strict arc verifier rejects an absent successor miniball");
+
+  const std::array<PointId, 2> alternate_member{1U, 2U};
+  ExactFacetDescentArcResult noncanonical_member = result;
+  noncanonical_member.successor_facet_point_ids =
+      std::vector<PointId>{1U, 2U};
+  noncanonical_member.successor_miniball =
+      build_exact_facet_miniball(cloud, alternate_member);
+  const auto noncanonical_member_check =
+      verify_exact_facet_descent_arc(cloud, facet, noncanonical_member);
+  check(
+      !noncanonical_member_check.successor_facet_certified &&
+          !noncanonical_member_check.exact_descent_arc_decision_certified,
+      "arc verifier rejects another mathematically valid but noncanonical top-k member");
+
+  ExactFacetDescentArcResult mismatched_miniball = result;
+  mismatched_miniball.successor_miniball =
+      build_exact_facet_miniball(cloud, alternate_member);
+  const auto mismatched_miniball_check =
+      verify_exact_facet_descent_arc(cloud, facet, mismatched_miniball);
+  check(
+      !mismatched_miniball_check.successor_miniball_certified &&
+          !mismatched_miniball_check.exact_descent_arc_decision_certified,
+      "arc verifier rejects a successor facet-miniball identity mismatch");
+
+  ExactFacetDescentArcResult bad_canonical_fact = result;
+  bad_canonical_fact.successor_is_canonical_top_k_choice = false;
+  const auto canonical_fact_check =
+      verify_exact_facet_descent_arc(cloud, facet, bad_canonical_fact);
+  check(
+      !canonical_fact_check.successor_is_canonical_top_k_choice_certified &&
+          !canonical_fact_check.exact_descent_arc_decision_certified,
+      "arc verifier rejects a falsified canonical-choice fact");
+
+  ExactFacetDescentArcResult bad_member_fact = result;
+  bad_member_fact.successor_is_exact_top_k_member = false;
+  const auto member_fact_check =
+      verify_exact_facet_descent_arc(cloud, facet, bad_member_fact);
+  check(
+      !member_fact_check.successor_is_exact_top_k_member_certified &&
+          !member_fact_check.exact_descent_arc_decision_certified,
+      "arc verifier rejects a falsified top-k-membership fact");
+
+  ExactFacetDescentArcResult bad_difference_fact = result;
+  bad_difference_fact.successor_differs_from_source = false;
+  const auto difference_fact_check =
+      verify_exact_facet_descent_arc(cloud, facet, bad_difference_fact);
+  check(
+      !difference_fact_check.successor_differs_from_source_certified &&
+          !difference_fact_check.exact_descent_arc_decision_certified,
+      "arc verifier rejects a falsified successor-difference fact");
+
+  ExactFacetDescentArcResult bad_cutoff_fact = result;
+  bad_cutoff_fact.successor_level_within_top_k_cutoff = false;
+  const auto cutoff_fact_check =
+      verify_exact_facet_descent_arc(cloud, facet, bad_cutoff_fact);
+  check(
+      !cutoff_fact_check.successor_level_within_top_k_cutoff_certified &&
+          !cutoff_fact_check.exact_descent_arc_decision_certified,
+      "arc verifier rejects a falsified successor-cutoff fact");
+
+  ExactFacetDescentArcResult bad_decrease_fact = result;
+  bad_decrease_fact.strict_level_decrease = false;
+  const auto decrease_fact_check =
+      verify_exact_facet_descent_arc(cloud, facet, bad_decrease_fact);
+  check(
+      !decrease_fact_check.strict_level_decrease_certified &&
+          !decrease_fact_check.exact_descent_arc_decision_certified,
+      "arc verifier rejects a falsified strict-level fact");
+
+  ExactFacetDescentArcResult bad_counters = result;
+  ++bad_counters.counters.exact_level_comparison_count;
+  const auto counter_check =
+      verify_exact_facet_descent_arc(cloud, facet, bad_counters);
+  check(
+      !counter_check.counters_certified &&
+          !counter_check.exact_descent_arc_decision_certified,
+      "arc verifier rejects falsified strict-arc counters");
+
+  ExactFacetDescentArcResult bad_decision = result;
+  bad_decision.decision =
+      ExactFacetDescentArcDecision::no_arc_already_active_at_own_center;
+  const auto decision_check =
+      verify_exact_facet_descent_arc(cloud, facet, bad_decision);
+  check(
+      !decision_check.decision_certified &&
+          !decision_check.exact_descent_arc_decision_certified,
+      "arc verifier treats the arc decision as untrusted");
+
+  ExactFacetDescentArcResult bad_scope = result;
+  bad_scope.scope = ExactFacetDescentArcScope::unspecified;
+  const auto scope_check =
+      verify_exact_facet_descent_arc(cloud, facet, bad_scope);
+  check(
+      !scope_check.scope_certified &&
+          !scope_check.exact_descent_arc_decision_certified,
+      "arc verifier treats the strict-level-only scope as untrusted");
+
+  const CanonicalPointCloud twin_cloud = canonical_cloud(input);
+  const ExactFacetDescentArcResult twin_result =
+      build_exact_facet_descent_arc(twin_cloud, facet);
+  const auto cloud_identity_check =
+      verify_exact_facet_descent_arc(cloud, facet, twin_result);
+  check(
+      !cloud_identity_check.source_preconditions_certified &&
+          !cloud_identity_check.exact_descent_arc_decision_certified,
+      "arc verifier rejects embedded partitions from another cloud identity");
+
+  const std::array<CertifiedPoint3, 3> active_input{
+      point(-1.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(3.0, 0.0, 0.0)};
+  const CanonicalPointCloud active_cloud = canonical_cloud(active_input);
+  const std::array<PointId, 2> active_facet{0U, 1U};
+  ExactFacetDescentArcResult injected_active =
+      build_exact_facet_descent_arc(active_cloud, active_facet);
+  injected_active.successor_facet_point_ids =
+      std::vector<PointId>{0U, 1U};
+  injected_active.successor_miniball =
+      build_exact_facet_miniball(active_cloud, active_facet);
+  const auto injected_active_check = verify_exact_facet_descent_arc(
+      active_cloud, active_facet, injected_active);
+  check(
+      !injected_active_check.successor_payload_presence_certified &&
+          !injected_active_check.exact_descent_arc_decision_certified,
+      "arc verifier rejects an injected self-loop on an already-active facet");
+
+  const std::array<CertifiedPoint3, 4> unsupported_input{
+      point(0.0, 0.0, 0.0),
+      point(0.0, 2.0, 0.0),
+      point(1.0, 1.0, 0.0),
+      point(2.0, 0.0, 0.0)};
+  const CanonicalPointCloud unsupported_cloud =
+      canonical_cloud(unsupported_input);
+  const std::array<PointId, 3> unsupported_facet{0U, 1U, 3U};
+  const std::array<PointId, 3> unsupported_canonical_choice{0U, 1U, 2U};
+  ExactFacetDescentArcResult injected_unsupported =
+      build_exact_facet_descent_arc(unsupported_cloud, unsupported_facet);
+  injected_unsupported.successor_facet_point_ids =
+      std::vector<PointId>{0U, 1U, 2U};
+  injected_unsupported.successor_miniball = build_exact_facet_miniball(
+      unsupported_cloud, unsupported_canonical_choice);
+  const auto injected_unsupported_check = verify_exact_facet_descent_arc(
+      unsupported_cloud, unsupported_facet, injected_unsupported);
+  check(
+      !injected_unsupported_check.successor_payload_presence_certified &&
+          !injected_unsupported_check.exact_descent_arc_decision_certified,
+      "arc verifier rejects a descending payload on an unsupported source");
+}
+
 void test_descent_precondition_verifier_rejects_every_result_layer() {
   const std::array<CertifiedPoint3, 3> input{
       point(-1.0, 0.0, 0.0),
@@ -1001,6 +1467,11 @@ int main() {
   test_nonessential_internal_shell_exposes_hidden_plateau();
   test_facet_already_active_at_own_center();
   test_top_k_family_membership_is_not_canonical_choice_equality();
+  test_strict_descent_arc_with_equal_source_cutoff();
+  test_strict_descent_arc_with_lower_source_cutoff();
+  test_descent_arc_omits_successor_for_active_facet();
+  test_descent_arc_omits_successor_for_nonessential_facet();
+  test_descent_arc_verifier_rejects_every_new_result_layer();
   test_descent_precondition_verifier_rejects_every_result_layer();
   test_verifier_rejects_every_result_layer();
   test_invalid_facets_are_rejected();

@@ -661,6 +661,165 @@ compute_exact_facet_descent_preconditions(
          observed.counters == expected.counters;
 }
 
+[[nodiscard]] ExactFacetDescentArcDecision expected_arc_decision(
+    const ExactFacetDescentPreconditionResult& source_preconditions) {
+  switch (source_preconditions.decision) {
+    case ExactFacetDescentPreconditionDecision::strict_descent_admissible:
+      return ExactFacetDescentArcDecision::strict_descent_arc_certified;
+    case ExactFacetDescentPreconditionDecision::
+        already_active_at_own_center:
+      return ExactFacetDescentArcDecision::
+          no_arc_already_active_at_own_center;
+    case ExactFacetDescentPreconditionDecision::unsupported_degeneracy:
+      return ExactFacetDescentArcDecision::
+          no_arc_unsupported_degeneracy;
+    case ExactFacetDescentPreconditionDecision::not_certified:
+      break;
+  }
+  throw std::logic_error(
+      "an exact descent arc requires certified source preconditions");
+}
+
+[[nodiscard]] ExactFacetDescentArcResult compute_exact_facet_descent_arc(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> facet_point_ids) {
+  ExactFacetDescentArcResult result;
+  result.source_preconditions =
+      build_exact_facet_descent_preconditions(cloud, facet_point_ids);
+  result.counters.precondition_classification_count = 1U;
+
+  switch (result.source_preconditions.decision) {
+    case ExactFacetDescentPreconditionDecision::strict_descent_admissible: {
+      if (!result.source_preconditions.exact_top_k.has_value() ||
+          !result.source_preconditions.exact_top_k->shell_complete() ||
+          !result.source_preconditions.exact_top_k->validated_for(cloud)) {
+        throw std::logic_error(
+            "strict descent preconditions omitted their exact top-k partition");
+      }
+      const spatial::TopKPartition& source_top_k =
+          *result.source_preconditions.exact_top_k;
+      const std::span<const PointId> source_facet{
+          result.source_preconditions.facet_miniball.facet_point_ids};
+      std::vector<PointId> successor_facet{
+          source_top_k.canonical_choice_ids().begin(),
+          source_top_k.canonical_choice_ids().end()};
+      if (successor_facet.size() != source_facet.size()) {
+        throw std::logic_error(
+            "the canonical top-k successor changed the facet cardinality");
+      }
+
+      result.successor_is_canonical_top_k_choice = same_point_ids(
+          successor_facet, source_top_k.canonical_choice_ids());
+      const std::vector<PointId> strict_ids =
+          sorted_strict_top_k_ids(source_top_k);
+      result.successor_is_exact_top_k_member = facet_is_top_k_member(
+          successor_facet, strict_ids, source_top_k.cutoff_shell_ids());
+      result.successor_differs_from_source =
+          !same_point_ids(successor_facet, source_facet);
+      result.counters.canonical_top_k_selection_count = 1U;
+
+      ExactFacetMiniballResult successor_miniball =
+          build_exact_facet_miniball(cloud, successor_facet);
+      result.counters.successor_miniball_build_count = 1U;
+      const bool successor_miniball_matches_choice = same_point_ids(
+          successor_miniball.facet_point_ids, successor_facet);
+      result.successor_level_within_top_k_cutoff =
+          successor_miniball.squared_radius <=
+          source_top_k.cutoff_squared_distance();
+      result.strict_level_decrease =
+          successor_miniball.squared_radius <
+          result.source_preconditions.facet_miniball.squared_radius;
+      result.counters.exact_level_comparison_count = 2U;
+
+      if (!result.successor_is_canonical_top_k_choice ||
+          !result.successor_is_exact_top_k_member ||
+          !result.successor_differs_from_source ||
+          !successor_miniball_matches_choice ||
+          !result.successor_level_within_top_k_cutoff ||
+          !result.strict_level_decrease) {
+        throw std::logic_error(
+            "strict descent preconditions contradicted their canonical exact successor");
+      }
+      result.successor_facet_point_ids.emplace(
+          std::move(successor_facet));
+      result.successor_miniball.emplace(
+          std::move(successor_miniball));
+      break;
+    }
+    case ExactFacetDescentPreconditionDecision::
+        already_active_at_own_center:
+    case ExactFacetDescentPreconditionDecision::unsupported_degeneracy:
+      break;
+    case ExactFacetDescentPreconditionDecision::not_certified:
+      throw std::logic_error(
+          "an exact descent arc received uncertified source preconditions");
+  }
+
+  const bool strict_branch =
+      result.source_preconditions.decision ==
+      ExactFacetDescentPreconditionDecision::strict_descent_admissible;
+  if (result.counters.precondition_classification_count != 1U ||
+      result.counters.canonical_top_k_selection_count !=
+          (strict_branch ? 1U : 0U) ||
+      result.counters.successor_miniball_build_count !=
+          (strict_branch ? 1U : 0U) ||
+      result.counters.exact_level_comparison_count !=
+          (strict_branch ? 2U : 0U) ||
+      result.successor_facet_point_ids.has_value() != strict_branch ||
+      result.successor_miniball.has_value() != strict_branch) {
+    throw std::logic_error(
+        "the exact descent-arc branch counters did not close");
+  }
+  return result;
+}
+
+[[nodiscard]] bool same_computed_descent_arc(
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactFacetDescentArcResult& observed,
+    const ExactFacetDescentArcResult& expected) {
+  if (!same_computed_descent_preconditions(
+          cloud,
+          observed.source_preconditions,
+          expected.source_preconditions) ||
+      observed.source_preconditions.decision !=
+          expected.source_preconditions.decision ||
+      observed.source_preconditions.scope !=
+          expected.source_preconditions.scope ||
+      observed.successor_facet_point_ids.has_value() !=
+          expected.successor_facet_point_ids.has_value() ||
+      observed.successor_miniball.has_value() !=
+          expected.successor_miniball.has_value()) {
+    return false;
+  }
+  if (expected.successor_facet_point_ids.has_value() &&
+      !same_point_ids(
+          *observed.successor_facet_point_ids,
+          *expected.successor_facet_point_ids)) {
+    return false;
+  }
+  if (expected.successor_miniball.has_value() &&
+      (!same_computed_miniball(
+           *observed.successor_miniball,
+           *expected.successor_miniball) ||
+       observed.successor_miniball->status !=
+           expected.successor_miniball->status ||
+       observed.successor_miniball->scope !=
+           expected.successor_miniball->scope)) {
+    return false;
+  }
+  return observed.successor_is_canonical_top_k_choice ==
+             expected.successor_is_canonical_top_k_choice &&
+         observed.successor_is_exact_top_k_member ==
+             expected.successor_is_exact_top_k_member &&
+         observed.successor_differs_from_source ==
+             expected.successor_differs_from_source &&
+         observed.successor_level_within_top_k_cutoff ==
+             expected.successor_level_within_top_k_cutoff &&
+         observed.strict_level_decrease ==
+             expected.strict_level_decrease &&
+         observed.counters == expected.counters;
+}
+
 }  // namespace
 
 ExactFacetMiniballVerification verify_exact_facet_miniball(
@@ -820,6 +979,119 @@ build_exact_facet_descent_preconditions(
   if (!verification.exact_descent_preconditions_certified) {
     throw std::logic_error(
         "the exact facet descent preconditions failed their fresh replay");
+  }
+  return result;
+}
+
+ExactFacetDescentArcVerification verify_exact_facet_descent_arc(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> facet_point_ids,
+    const ExactFacetDescentArcResult& result) {
+  const ExactFacetDescentArcResult expected =
+      compute_exact_facet_descent_arc(cloud, facet_point_ids);
+  ExactFacetDescentArcVerification verification;
+
+  const ExactFacetDescentPreconditionVerification source_verification =
+      verify_exact_facet_descent_preconditions(
+          cloud, facet_point_ids, result.source_preconditions);
+  verification.source_preconditions_certified =
+      source_verification.exact_descent_preconditions_certified;
+
+  verification.successor_payload_presence_certified =
+      result.successor_facet_point_ids.has_value() ==
+          expected.successor_facet_point_ids.has_value() &&
+      result.successor_miniball.has_value() ==
+          expected.successor_miniball.has_value() &&
+      result.successor_facet_point_ids.has_value() ==
+          result.successor_miniball.has_value();
+
+  if (expected.successor_facet_point_ids.has_value()) {
+    verification.successor_facet_certified =
+        result.successor_facet_point_ids.has_value() &&
+        same_point_ids(
+            *result.successor_facet_point_ids,
+            *expected.successor_facet_point_ids);
+  } else {
+    verification.successor_facet_certified =
+        !result.successor_facet_point_ids.has_value();
+  }
+
+  if (expected.successor_miniball.has_value() &&
+      expected.successor_facet_point_ids.has_value() &&
+      result.successor_miniball.has_value()) {
+    const ExactFacetMiniballVerification successor_verification =
+        verify_exact_facet_miniball(
+            cloud,
+            *expected.successor_facet_point_ids,
+            *result.successor_miniball);
+    verification.successor_miniball_certified =
+        successor_verification.local_exact_facet_miniball_certified &&
+        same_computed_miniball(
+            *result.successor_miniball,
+            *expected.successor_miniball) &&
+        result.successor_miniball->status ==
+            expected.successor_miniball->status &&
+        result.successor_miniball->scope ==
+            expected.successor_miniball->scope;
+  } else {
+    verification.successor_miniball_certified =
+        !expected.successor_miniball.has_value() &&
+        !result.successor_miniball.has_value();
+  }
+
+  verification.successor_is_canonical_top_k_choice_certified =
+      result.successor_is_canonical_top_k_choice ==
+      expected.successor_is_canonical_top_k_choice;
+  verification.successor_is_exact_top_k_member_certified =
+      result.successor_is_exact_top_k_member ==
+      expected.successor_is_exact_top_k_member;
+  verification.successor_differs_from_source_certified =
+      result.successor_differs_from_source ==
+      expected.successor_differs_from_source;
+  verification.successor_level_within_top_k_cutoff_certified =
+      result.successor_level_within_top_k_cutoff ==
+      expected.successor_level_within_top_k_cutoff;
+  verification.strict_level_decrease_certified =
+      result.strict_level_decrease == expected.strict_level_decrease;
+  verification.counters_certified = result.counters == expected.counters;
+  verification.decision_certified =
+      result.decision == expected_arc_decision(
+                             expected.source_preconditions);
+  verification.scope_certified =
+      result.scope == ExactFacetDescentArcScope::
+                          canonical_top_k_selected_strict_level_arc_only;
+  verification.fresh_replay_certified =
+      same_computed_descent_arc(cloud, result, expected);
+  verification.exact_descent_arc_decision_certified =
+      verification.source_preconditions_certified &&
+      verification.successor_payload_presence_certified &&
+      verification.successor_facet_certified &&
+      verification.successor_miniball_certified &&
+      verification.successor_is_canonical_top_k_choice_certified &&
+      verification.successor_is_exact_top_k_member_certified &&
+      verification.successor_differs_from_source_certified &&
+      verification.successor_level_within_top_k_cutoff_certified &&
+      verification.strict_level_decrease_certified &&
+      verification.counters_certified &&
+      verification.decision_certified &&
+      verification.scope_certified &&
+      verification.fresh_replay_certified;
+  return verification;
+}
+
+ExactFacetDescentArcResult build_exact_facet_descent_arc(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> facet_point_ids) {
+  ExactFacetDescentArcResult result =
+      compute_exact_facet_descent_arc(cloud, facet_point_ids);
+  result.decision = expected_arc_decision(result.source_preconditions);
+  result.scope = ExactFacetDescentArcScope::
+      canonical_top_k_selected_strict_level_arc_only;
+  const ExactFacetDescentArcVerification verification =
+      verify_exact_facet_descent_arc(cloud, facet_point_ids, result);
+  if (!verification.exact_descent_arc_decision_certified) {
+    throw std::logic_error(
+        "the exact facet descent arc failed its fresh replay");
   }
   return result;
 }

@@ -142,6 +142,70 @@ struct ExactFacetDescentPreconditionVerification {
   bool exact_descent_preconditions_certified{false};
 };
 
+enum class ExactFacetDescentArcDecision : std::uint8_t {
+  not_certified,
+  strict_descent_arc_certified,
+  no_arc_already_active_at_own_center,
+  no_arc_unsupported_degeneracy,
+};
+
+enum class ExactFacetDescentArcScope : std::uint8_t {
+  unspecified,
+  canonical_top_k_selected_strict_level_arc_only,
+};
+
+struct ExactFacetDescentArcCounters {
+  std::size_t precondition_classification_count{};
+  std::size_t canonical_top_k_selection_count{};
+  std::size_t successor_miniball_build_count{};
+  std::size_t exact_level_comparison_count{};
+
+  friend bool operator==(
+      const ExactFacetDescentArcCounters&,
+      const ExactFacetDescentArcCounters&) = default;
+};
+
+// A strict result selects exactly the canonical member already exposed by the
+// complete top-k partition, then freshly constructs and compares its exact
+// miniball. Non-strict branches carry no successor payload. This result does
+// not certify a geometric segment, a DAG, an attachment, or any public status.
+struct ExactFacetDescentArcResult {
+  static constexpr const char* proof_basis =
+      "exact_descent_preconditions_canonical_top_k_member_fresh_miniball_strict_level_v1";
+
+  ExactFacetDescentPreconditionResult source_preconditions;
+  std::optional<std::vector<spatial::PointId>>
+      successor_facet_point_ids;
+  std::optional<ExactFacetMiniballResult> successor_miniball;
+  bool successor_is_canonical_top_k_choice{false};
+  bool successor_is_exact_top_k_member{false};
+  bool successor_differs_from_source{false};
+  bool successor_level_within_top_k_cutoff{false};
+  bool strict_level_decrease{false};
+  ExactFacetDescentArcCounters counters{};
+  ExactFacetDescentArcDecision decision{
+      ExactFacetDescentArcDecision::not_certified};
+  ExactFacetDescentArcScope scope{
+      ExactFacetDescentArcScope::unspecified};
+};
+
+struct ExactFacetDescentArcVerification {
+  bool source_preconditions_certified{false};
+  bool successor_payload_presence_certified{false};
+  bool successor_facet_certified{false};
+  bool successor_miniball_certified{false};
+  bool successor_is_canonical_top_k_choice_certified{false};
+  bool successor_is_exact_top_k_member_certified{false};
+  bool successor_differs_from_source_certified{false};
+  bool successor_level_within_top_k_cutoff_certified{false};
+  bool strict_level_decrease_certified{false};
+  bool counters_certified{false};
+  bool decision_certified{false};
+  bool scope_certified{false};
+  bool fresh_replay_certified{false};
+  bool exact_descent_arc_decision_certified{false};
+};
+
 // Enumerates every subset of one to four facet points. For a ten-point facet,
 // this is exactly 385 supports. Every relatively interior circumcenter is
 // classified against every facet point with exact rationals before the least
@@ -173,5 +237,20 @@ verify_exact_facet_descent_preconditions(
     const spatial::CanonicalPointCloud& cloud,
     std::span<const spatial::PointId> facet_point_ids,
     const ExactFacetDescentPreconditionResult& result);
+
+// Selects and certifies one canonical strict-level arc only when the embedded
+// 6.2 preconditions are strictly admissible. Active and unsupported facets
+// produce exact no-arc decisions with empty successor optionals.
+[[nodiscard]] ExactFacetDescentArcResult build_exact_facet_descent_arc(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> facet_point_ids);
+
+// Replays 6.2 and derives the expected canonical successor from the fresh
+// top-k partition before checking the observed successor and its miniball.
+[[nodiscard]] ExactFacetDescentArcVerification
+verify_exact_facet_descent_arc(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> facet_point_ids,
+    const ExactFacetDescentArcResult& result);
 
 }  // namespace morsehgp3d::hierarchy
