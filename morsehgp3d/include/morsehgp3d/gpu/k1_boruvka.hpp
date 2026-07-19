@@ -227,7 +227,7 @@ struct K1BoruvkaDualTreeSearchAudit {
   static constexpr const char* decision_semantics =
       "cpu_exact_external_1nn_shared_lbvh_dual_tree";
   static constexpr const char* proof_basis =
-      "strict_exact_aabb_pair_dynamic_incumbent_frontier_exhaustion_v1";
+      "strict_exact_aabb_pair_dynamic_incumbent_bounded_dfs_exhaustion_v2";
 
   std::size_t resident_point_count{};
   std::size_t resident_node_count{};
@@ -240,6 +240,8 @@ struct K1BoruvkaDualTreeSearchAudit {
   std::size_t component_minimum_count{};
   std::size_t unordered_point_pair_count{};
   std::size_t covered_unordered_point_pair_count{};
+  std::size_t lbvh_maximum_depth{};
+  std::size_t certified_depth_first_frontier_bound{};
   std::size_t maximum_cpu_frontier_size{};
   std::size_t cpu_node_pair_visit_count{};
   std::size_t cpu_node_pair_expansion_count{};
@@ -258,6 +260,7 @@ struct K1BoruvkaDualTreeSearchAudit {
   bool canonical_unordered_pair_partition_certified{false};
   bool uniform_component_pair_prunes_certified{false};
   bool strict_only_aabb_pair_pruning_certified{false};
+  bool depth_first_frontier_bound_certified{false};
   bool complete_frontier_exhaustion_certified{false};
   bool canonical_kappa_resolution_certified{false};
   bool point_minima_complete{false};
@@ -269,13 +272,15 @@ struct K1BoruvkaDualTreeSearchAudit {
 };
 
 // The certified Morton proposal initializes one exact incumbent per point.
-// A shared best-first traversal partitions every unordered pair of LBVH leaves
-// exactly once. A node pair is discarded only when both nodes are uniform in
-// the same component or when its exact AABB--AABB lower bound is strictly
-// larger than every current exact point incumbent stored below the two nodes.
-// Incumbents only decrease from their certified seeds and equal bounds are
-// always descended. The result preserves exact point and component minima; it
-// performs neither contraction nor hierarchy publication.
+// A shared locally-near-first depth-first traversal partitions every unordered
+// pair of LBVH leaves exactly once. Its logical stack contains at most twice
+// the certified LBVH depth plus one entry. A node pair is discarded only when
+// both nodes are uniform in the same component or when its exact AABB--AABB
+// lower bound is strictly larger than every current exact point incumbent
+// stored below the two nodes. Incumbents only decrease from their certified
+// seeds and equal bounds are always descended. The result preserves exact
+// point and component minima; it performs neither contraction nor hierarchy
+// publication.
 struct K1BoruvkaSeededDualTreeRoundResolution {
   std::vector<K1BoruvkaPointMinimum> point_minima;
   std::vector<hierarchy::K1BoruvkaComponentMinimum> component_minima;

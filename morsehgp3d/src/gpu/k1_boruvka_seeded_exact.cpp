@@ -554,6 +554,7 @@ struct FreshReplay {
     K1BoruvkaDualTreeSearchStatus status,
     std::size_t point_count,
     std::size_t node_count,
+    std::size_t lbvh_maximum_depth,
     std::size_t component_count) noexcept {
   const std::optional<std::size_t> expected_pairs =
       unordered_point_pair_count(point_count);
@@ -562,10 +563,15 @@ struct FreshReplay {
       audit.uniform_lbvh_node_count > node_count ||
       audit.mixed_lbvh_node_count !=
           node_count - audit.uniform_lbvh_node_count ||
+      lbvh_maximum_depth == 0U ||
+      lbvh_maximum_depth >
+          (std::numeric_limits<std::size_t>::max() - 1U) / 2U ||
       audit.cpu_exact_point_pair_distance_evaluation_count >
           *expected_pairs) {
     return false;
   }
+  const std::size_t expected_frontier_bound =
+      lbvh_maximum_depth * 2U + 1U;
   std::size_t visited_partition =
       audit.cpu_uniform_same_component_pair_prune_count;
   if (!add_without_overflow(
@@ -595,7 +601,12 @@ struct FreshReplay {
          audit.component_minimum_count == component_count &&
          audit.unordered_point_pair_count == *expected_pairs &&
          audit.covered_unordered_point_pair_count == *expected_pairs &&
+         audit.lbvh_maximum_depth == lbvh_maximum_depth &&
+         audit.certified_depth_first_frontier_bound ==
+             expected_frontier_bound &&
          audit.maximum_cpu_frontier_size > 0U &&
+         audit.maximum_cpu_frontier_size <=
+             audit.certified_depth_first_frontier_bound &&
          audit.maximum_cpu_frontier_size <=
              audit.cpu_node_pair_visit_count &&
          audit.cpu_exact_aabb_pair_bound_evaluation_count ==
@@ -612,6 +623,7 @@ struct FreshReplay {
          audit.canonical_unordered_pair_partition_certified &&
          audit.uniform_component_pair_prunes_certified &&
          audit.strict_only_aabb_pair_pruning_certified &&
+         audit.depth_first_frontier_bound_certified &&
          audit.complete_frontier_exhaustion_certified &&
          audit.canonical_kappa_resolution_certified &&
          audit.point_minima_complete && audit.component_minima_complete;
@@ -622,6 +634,7 @@ struct FreshReplay {
     std::size_t round_index,
     std::size_t point_count,
     std::size_t node_count,
+    std::size_t lbvh_maximum_depth,
     std::size_t component_count,
     K1BoruvkaMortonSeedPolicy policy) noexcept {
   const std::size_t post_component_count =
@@ -642,6 +655,7 @@ struct FreshReplay {
              round.search_status,
              point_count,
              node_count,
+             lbvh_maximum_depth,
              component_count) &&
          round.decision_status ==
              K1HybridBoruvkaDecisionStatus::
@@ -721,6 +735,7 @@ struct DualTreeFreshReplay {
               observed.search_status,
               result.point_count,
               index.build_counters().node_count,
+              index.build_counters().maximum_depth,
               component_count)) {
         search_chain = false;
       }
@@ -1168,6 +1183,7 @@ build_gpu_seeded_cpu_exact_dual_tree_k1_boruvka(
               round_index,
               point_count,
               index.build_counters().node_count,
+              index.build_counters().maximum_depth,
               component_count,
               seed_policy)) {
         throw std::logic_error(

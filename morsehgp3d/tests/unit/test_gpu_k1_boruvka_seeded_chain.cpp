@@ -432,10 +432,17 @@ void test_dual_tree_three_round_chain_and_falsifications() {
     check(
         audit.covered_unordered_point_pair_count == 28U &&
             audit.unordered_point_pair_count == 28U &&
+            audit.lbvh_maximum_depth ==
+                index.build_counters().maximum_depth &&
+            audit.certified_depth_first_frontier_bound ==
+                2U * index.build_counters().maximum_depth + 1U &&
+            audit.maximum_cpu_frontier_size <=
+                audit.certified_depth_first_frontier_bound &&
             audit.cpu_exact_aabb_pair_bound_evaluation_count ==
                 audit.cpu_node_pair_visit_count &&
             audit.dynamic_incumbent_tree_certified &&
-            audit.canonical_unordered_pair_partition_certified,
+            audit.canonical_unordered_pair_partition_certified &&
+            audit.depth_first_frontier_bound_certified,
         "each shared round closes the canonical unordered-pair partition");
   }
   check(

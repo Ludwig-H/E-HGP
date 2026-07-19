@@ -328,7 +328,13 @@ void check_dual_tree_round(
               maximum_unordered_point_pairs &&
           audit.covered_unordered_point_pair_count ==
               maximum_unordered_point_pairs &&
+          audit.lbvh_maximum_depth ==
+              index.build_counters().maximum_depth &&
+          audit.certified_depth_first_frontier_bound ==
+              2U * index.build_counters().maximum_depth + 1U &&
           audit.maximum_cpu_frontier_size > 0U &&
+          audit.maximum_cpu_frontier_size <=
+              audit.certified_depth_first_frontier_bound &&
           audit.maximum_cpu_frontier_size <=
               audit.cpu_node_pair_visit_count &&
           audit.cpu_exact_aabb_pair_bound_evaluation_count ==
@@ -351,6 +357,7 @@ void check_dual_tree_round(
           audit.canonical_unordered_pair_partition_certified &&
           audit.uniform_component_pair_prunes_certified &&
           audit.strict_only_aabb_pair_pruning_certified &&
+          audit.depth_first_frontier_bound_certified &&
           audit.complete_frontier_exhaustion_certified &&
           audit.canonical_kappa_resolution_certified &&
           audit.point_minima_complete && audit.component_minima_complete,
@@ -631,12 +638,19 @@ void test_morton_overlap_quadratic_lower_bound() {
             dual_audit.dynamic_incumbent_tree_certified &&
             dual_audit.canonical_unordered_pair_partition_certified &&
             dual_audit.strict_only_aabb_pair_pruning_certified &&
+            dual_audit.depth_first_frontier_bound_certified &&
             dual_audit.complete_frontier_exhaustion_certified &&
             dual_audit.canonical_kappa_resolution_certified &&
             dual_audit.unordered_point_pair_count ==
                 maximum_unordered_point_pairs &&
             dual_audit.covered_unordered_point_pair_count ==
                 maximum_unordered_point_pairs &&
+            dual_audit.lbvh_maximum_depth ==
+                index.build_counters().maximum_depth &&
+            dual_audit.certified_depth_first_frontier_bound ==
+                2U * index.build_counters().maximum_depth + 1U &&
+            dual_audit.maximum_cpu_frontier_size <=
+                dual_audit.certified_depth_first_frontier_bound &&
             dual_audit.cpu_strict_incumbent_decrease_count > 0U &&
             dual_audit.cpu_incumbent_ancestor_update_count > 0U &&
             dual_audit.cpu_exact_aabb_pair_bound_evaluation_count ==
