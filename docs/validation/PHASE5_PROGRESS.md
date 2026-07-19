@@ -3,7 +3,7 @@
 ## Statut
 
 - phase : `5`, en cours;
-- backend de proposition ciblé : `cuda_g4` (qualification matérielle en attente);
+- backend de proposition ciblé : `cuda_g4` (première ronde à graine fixe qualifiée sur G4);
 - backend de rejeu et de décision : `reference_cpu`;
 - profil : `hgp_reduced`;
 - mode : `certified`;
@@ -159,7 +159,7 @@ Le test hôte emploie un lanceur GPU simulé séparé du code de décision. Il c
 
 L'exécutable `morsehgp3d_gpu_k1_boruvka_replay` compare sur un carré et une chaîne contractée les minima décidés après proposition GPU aux rondes correspondantes du producteur Borůvka CPU. Il exige deux passes, deux synchronisations, la capacité exacte, l'absence de troncature, le sur-ensemble certifié et la résolution CPU complète, puis émet le schéma compact `morsehgp3d.phase5.k1_boruvka_gpu_replay.v1`. Une variante hôte réutilise le faux lanceur pour valider le contrat sans matériel.
 
-La qualification matérielle demeure **en attente**. Avant de qualifier ce jalon `cuda_g4`, il faut compiler réellement les unités CUDA 12.9 en AOT `sm_120`, exécuter le replay sur la G4 gardée et le passer sous `compute-sanitizer`. Aucun résultat hôte, plausible ou moyen ne remplace cette qualification; la Phase 5 reste ouverte même après elle jusqu'à la boucle Borůvka GPU complète et sa validation scalable.
+La première ronde est qualifiée matériellement au SHA `9f29ffcb9ba8ca66f3cfc7c0c9285c34cbeee70e`. Sur la cible gardée `europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, le replay réel ferme les deux fixtures et leurs 15 candidats requis, l'audit AOT ne trouve qu'un ELF `sm_120` et aucune entrée PTX, puis `compute-sanitizer` passe en `memcheck` et `racecheck`. L'artefact `phase5-k1-boruvka-9f29ffcb9ba8ca66f3cfc7c0c9285c34cbeee70e.json`, de SHA-256 `cf6e58e6f35b3fbbc1d1357b0504072b6db28240858b195ae3002e0dc6b5b74e`, n'est publié qu'après la relecture indépendante `TERMINATED` de la génération ciblée. Son champ `scientific_scope=gpu_candidate_superset_with_cpu_exact_resolution_only`, son absence de `public_status` et `scientific_result_claimed=false` interdisent d'en déduire une contraction, une forêt complète ou une scalabilité.
 
 ## Différentiel indépendant jusqu'à $n=14$
 
@@ -171,8 +171,8 @@ La campagne contient 50 nuages exacts. Elle couvre toutes les tailles de $1$ à 
 
 L'identité des arêtes témoins reste un diagnostic d'implémentation séparé. Le validateur accepte explicitement un autre arbre témoin sous ex æquo dès lors qu'il appartient au graphe certifié et conserve toutes les coupes et le poids exact; la porte scientifique repose sur ces invariants, les nœuds canoniques et les multifusions.
 
-GCP n'a pas été utilisé pour les lots CPU ni pour la validation hôte de la première ronde GPU. La qualification G4 réelle reste explicitement en attente.
+GCP n'a pas été utilisé pour les lots CPU ni pour la validation hôte. La qualification réelle de la première ronde GPU a utilisé une seule G4 Spot gardée; la génération `2026-07-18T16:58:02.206-07:00` a été arrêtée puis relue `TERMINATED`, et aucune autre VM `project=e-hgp` active n'a été observée au passage de relais.
 
 ## Suite immédiate
 
-Le producteur Borůvka CPU ne matérialise plus le graphe complet, mais son parcours séquentiel exact sert encore de référence de correction et non de voie scalable. La première ronde GPU stackless est implémentée avec son contrat de sur-ensemble; le prochain verrou est sa compilation et son replay réels sur G4, puis son intégration dans une boucle de rondes avec contractions CPU exactes et vérification du témoin complet. Aucune promotion de phase ne précédera cette boucle GPU complète et sa qualification scalable.
+Le producteur Borůvka CPU ne matérialise plus le graphe complet, mais son parcours séquentiel exact sert encore de référence de correction et non de voie scalable. La première ronde GPU stackless et son contrat de sur-ensemble sont maintenant qualifiés sur G4; le prochain verrou est leur intégration dans une boucle de rondes avec contractions CPU exactes et vérification du témoin complet. Cette boucle devra ensuite borner la mémoire physique par des plages de sources complètes et certifiées, car la proposition actuelle peut encore matérialiser un nombre quadratique de candidats. Aucune promotion de phase ne précédera cette boucle GPU complète et sa qualification scalable.
