@@ -294,15 +294,22 @@ indépendante de la campagne spatiale Phase 4 :
 Le worker exécute le replay réel multi-ronde
 `morsehgp3d_gpu_k1_boruvka_full_replay`, exige l'émission GPU par sources
 contiguës complètes avec des budgets fermés de 1, 7 et 3 enregistrements pour
-les trois fixtures, la chaîne de propositions GPU, les décisions et
-contractions CPU exactes, puis un rejeu GPU chunké indépendant et le témoin
-EMST local. Les audits lient le volume logique au pic physique d'un tampon
+les trois fixtures historiques, puis une quatrième chaîne de budget 7 avec
+une fenêtre Morton de rayon 1. Cette dernière recertifie la cible externe sur
+CPU, choisit le cutoff exact seulement s'il améliore le fallback canonique et
+ferme la réduction de 86 à 41 candidats logiques et de 16 à 9 chunks sans
+modifier décisions, contractions, EMST ou poids. Le replay exige la chaîne de
+propositions GPU, les décisions et contractions CPU exactes, puis des rejeux
+GPU chunké et Morton indépendants et le témoin EMST local. Les audits lient le
+volume logique au pic physique d'un tampon
 device et d'un tampon hôte de 16 octets par candidat, sans scinder une source
-entre deux chunks. Le worker vérifie ensuite un ELF exclusivement `sm_120`,
+entre deux chunks. Le document canonique suit le schéma
+`morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v3`. Le worker vérifie
+ensuite un ELF exclusivement `sm_120`,
 l'absence de PTX et les passages `compute-sanitizer` en `memcheck` et
 `racecheck`. Le compagnon fermé
-`morsehgp3d.phase5.k1_boruvka_gpu_qualification.v3`, de périmètre
-`gpu_proposed_bounded_candidate_emission_cpu_exact_full_boruvka_local_emst_witness_only`,
+`morsehgp3d.phase5.k1_boruvka_gpu_qualification.v4`, de périmètre
+`gpu_proposed_bounded_morton_seed_bounded_candidate_emission_cpu_exact_full_boruvka_local_emst_witness_only`,
 reste au statut `worker_passed_pending_shutdown` jusqu'au même arrêt ciblé et
 devient ensuite `phase5-k1-boruvka-<SHA>.json`. Il ne contient aucun
 `public_status` : la réduction hiérarchique reste `not_performed`. Cette

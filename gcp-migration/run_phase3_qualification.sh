@@ -1416,9 +1416,10 @@ for key, expected in {
     "mode": "certified",
     "phase": "5",
     "profile": "hgp_reduced",
-    "schema": "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v3",
+    "schema": "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v4",
     "scientific_scope": (
-        "gpu_proposed_bounded_candidate_emission_cpu_exact_full_boruvka_"
+        "gpu_proposed_bounded_morton_seed_bounded_candidate_emission_"
+        "cpu_exact_full_boruvka_"
         "local_emst_witness_only"
     ),
     "status": "worker_passed_pending_shutdown",
@@ -1449,13 +1450,19 @@ expected_check_keys = {
     "aot_elf_architectures",
     "aot_ptx_entry_count",
     "bounded_candidate_emission_chain_certified",
+    "bounded_morton_seed_chain_certified",
+    "bounded_morton_window_certified",
     "candidate_payload_physical_bound_certified",
     "canonical_contractions_certified",
+    "complete_source_seed_coverage_certified",
     "complete_source_partition_certified",
+    "cpu_exact_monotone_seed_cutoff_certified",
     "cpu_exact_decision_chain_certified",
+    "external_seed_targets_recertified",
     "gpu_multi_round_proposal_chain_certified",
     "independent_chunked_gpu_replay_certified",
     "independent_gpu_replay_certified",
+    "independent_morton_seed_gpu_replay_certified",
     "local_emst_witness_certified",
     "memcheck",
     "racecheck",
@@ -1470,11 +1477,11 @@ replay_canonical = json.dumps(
     replay, ensure_ascii=True, sort_keys=True, separators=(",", ":")
 ) + "\n"
 if hashlib.sha256(replay_canonical.encode("utf-8")).hexdigest() != (
-    "9e686fc8147bf43860180f723c5005eb6bbb9277b06ca33e5521d370db56e121"
+    "d30760c4cd19743f4587dac6024cdf86b9d3a5a450f2923e811ab74be61edf71"
 ):
-    raise SystemExit("replay complet Phase 5 différent de la fixture v2 canonique")
+    raise SystemExit("replay complet Phase 5 différent de la fixture v3 canonique")
 if replay.get("schema") != (
-    "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v2"
+    "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v3"
 ):
     raise SystemExit("schéma du replay complet Phase 5 invalide")
 expected_replay_keys = {
@@ -1485,6 +1492,7 @@ expected_replay_keys = {
     "decision_semantics",
     "hierarchy_reduction_status",
     "mode",
+    "monotone_seed_proof_basis",
     "phase",
     "profile",
     "proof_basis",
@@ -1501,6 +1509,9 @@ if set(replay) != expected_replay_keys:
 for key, expected in {
     "bounded_emission_proof_basis": (
         "gpu_complete_source_ranges_bounded_candidate_payload_v1"
+    ),
+    "monotone_seed_proof_basis": (
+        "gpu_bounded_morton_seed_cpu_exact_monotone_cutoff_v1"
     ),
     "decision_backend": "reference_cpu",
     "hierarchy_reduction_status": "not_performed",
@@ -1519,12 +1530,13 @@ if replay.get("scientific_result_claimed") is not False:
     raise SystemExit("le replay Phase 5 revendique un résultat scientifique")
 cases = replay.get("cases")
 fixture_contracts = (
-    ("singleton_terminal", 1, 1, [1]),
-    ("chain_three_rounds", 8, 7, [8, 4, 2, 1]),
-    ("square_equal_length_ties", 4, 3, [4, 1]),
+    ("singleton_terminal", 1, 1, [1], None),
+    ("chain_three_rounds", 8, 7, [8, 4, 2, 1], None),
+    ("square_equal_length_ties", 4, 3, [4, 1], None),
+    ("chain_three_rounds_morton_seed", 8, 7, [8, 4, 2, 1], 1),
 )
-if replay.get("case_count") != 3 or not isinstance(cases, list) or len(cases) != 3:
-    raise SystemExit("le replay Phase 5 doit contenir trois fixtures")
+if replay.get("case_count") != 4 or not isinstance(cases, list) or len(cases) != 4:
+    raise SystemExit("le replay Phase 5 doit contenir quatre fixtures")
 
 
 def natural(value, label, *, positive=False):
@@ -1558,6 +1570,7 @@ emission_certificate_keys = {
 }
 producer_certificate_keys = {
     "bounded_candidate_emission_chain_certified",
+    "bounded_morton_seed_chain_certified",
     "canonical_contraction_chain_certified",
     "cpu_exact_decision_chain_certified",
     "emst_witness_certified",
@@ -1566,6 +1579,7 @@ producer_certificate_keys = {
 }
 verifier_certificate_keys = {
     "bounded_candidate_emission_chain_certified",
+    "bounded_morton_seed_chain_certified",
     "canonical_contractions_certified",
     "counters_certified",
     "cpu_exact_decision_chain_certified",
@@ -1577,9 +1591,35 @@ verifier_certificate_keys = {
     "proposal_chain_certified",
     "reference_cpu_witness_certified",
     "round_count_bound_certified",
+    "seed_mode_certified",
     "spanning_tree_certified",
 }
-for case, (fixture, point_count, budget, component_path) in zip(
+morton_seed_counter_keys = {
+    "exact_fallback_count",
+    "exact_seed_distance_evaluation_count",
+    "exact_selected_proposal_count",
+    "exact_strict_improvement_count",
+    "external_neighbor_count",
+    "floating_proposal_count",
+    "gpu_kernel_launch_count",
+    "gpu_synchronization_count",
+    "inspected_neighbor_count",
+    "maximum_inspected_neighbor_count_per_source",
+    "neighbor_inspection_budget_per_source",
+    "round_count",
+    "source_count",
+    "window_radius",
+}
+morton_seed_audit_keys = (
+    morton_seed_counter_keys - {"round_count"}
+) | {"certificates"}
+morton_seed_certificate_keys = {
+    "bounded_window_certified",
+    "complete_source_coverage_certified",
+    "exact_monotone_cutoff_certified",
+    "external_targets_recertified",
+}
+for case, (fixture, point_count, budget, component_path, seed_radius) in zip(
     cases, fixture_contracts, strict=True
 ):
     if not isinstance(case, dict):
@@ -1588,6 +1628,16 @@ for case, (fixture, point_count, budget, component_path) in zip(
     producer = case.get("producer")
     verifier = case.get("verifier")
     rounds = case.get("rounds")
+    adaptive_seed = seed_radius is not None
+    trusted_seed_policy = case.get("trusted_morton_seed_policy")
+    expected_trusted_seed_policy = (
+        {"window_radius": seed_radius} if adaptive_seed else None
+    )
+    expected_seed_mode = (
+        "gpu_morton_window_cpu_exact_monotone"
+        if adaptive_seed
+        else "canonical_external_fallback"
+    )
     if (
         case.get("fixture") != fixture
         or case.get("point_count") != point_count
@@ -1597,40 +1647,72 @@ for case, (fixture, point_count, budget, component_path) in zip(
             "max_candidate_records_per_chunk": budget,
             "source_partition": "complete_contiguous_unsplit",
         }
+        or trusted_seed_policy != expected_trusted_seed_policy
         or not isinstance(producer, dict)
         or producer.get("emission_mode") != "bounded_complete_source_ranges"
+        or producer.get("seed_mode") != expected_seed_mode
+        or producer.get("morton_seed_policy")
+        != {"window_radius": seed_radius if adaptive_seed else 0}
         or not isinstance(verifier, dict)
         or not isinstance(rounds, list)
     ):
         raise SystemExit(f"contrat chunké invalide pour {fixture}")
-    for label, certificates, expected_certificates in (
-        (
-            "producteur",
-            producer.get("certificates"),
-            producer_certificate_keys,
-        ),
-        (
-            "vérificateur",
-            verifier.get("certificates"),
-            verifier_certificate_keys,
-        ),
+    for label, certificates, expected_certificates, mode_key in (
+        ("producteur", producer.get("certificates"), producer_certificate_keys,
+         "bounded_morton_seed_chain_certified"),
+        ("vérificateur", verifier.get("certificates"), verifier_certificate_keys,
+         "bounded_morton_seed_chain_certified"),
     ):
         if (
             not isinstance(certificates, dict)
             or set(certificates) != expected_certificates
-            or any(value is not True for value in certificates.values())
+            or certificates.get(mode_key) is not adaptive_seed
+            or any(
+                certificate is not True
+                for key, certificate in certificates.items()
+                if key != mode_key
+            )
         ):
             raise SystemExit(f"certificats {label} incomplets pour {fixture}")
     aggregate = producer.get("chunked_emission_counters")
+    seed_aggregate = producer.get("morton_seed_counters")
     producer_counters = producer.get("counters")
     verifier_counters = verifier.get("counters")
     if (
         not isinstance(aggregate, dict)
         or set(aggregate) != aggregate_keys
+        or not isinstance(seed_aggregate, dict)
+        or set(seed_aggregate) != morton_seed_counter_keys
         or not isinstance(producer_counters, dict)
         or not isinstance(verifier_counters, dict)
     ):
         raise SystemExit(f"compteurs chunkés absents pour {fixture}")
+    seed_aggregate = {
+        key: natural(value, f"{fixture}.seed.{key}")
+        for key, value in seed_aggregate.items()
+    }
+    expected_comparison = None
+    if adaptive_seed:
+        expected_comparison = {
+            "baseline": {
+                "logical_candidate_count": 86,
+                "seed_mode": "canonical_external_fallback",
+                "source_chunk_count": 16,
+            },
+            "certificates": {
+                "canonical_contractions_unchanged": True,
+                "emst_edges_unchanged": True,
+                "exact_decisions_unchanged": True,
+                "exact_weights_unchanged": True,
+            },
+            "refined": {
+                "logical_candidate_count": 41,
+                "seed_mode": "gpu_morton_window_cpu_exact_monotone",
+                "source_chunk_count": 9,
+            },
+        }
+    if case.get("morton_seed_comparison") != expected_comparison:
+        raise SystemExit(f"comparaison Morton invalide pour {fixture}")
     aggregate = {
         key: natural(value, f"{fixture}.{key}")
         for key, value in aggregate.items()
@@ -1658,6 +1740,19 @@ for case, (fixture, point_count, budget, component_path) in zip(
         "host_candidate_capacity_high_water": 0,
         "candidate_payload_peak_bytes": 0,
     }
+    seed_sums = {
+        "source_count": 0,
+        "inspected_neighbor_count": 0,
+        "external_neighbor_count": 0,
+        "floating_proposal_count": 0,
+        "exact_selected_proposal_count": 0,
+        "exact_strict_improvement_count": 0,
+        "exact_fallback_count": 0,
+        "exact_seed_distance_evaluation_count": 0,
+        "gpu_kernel_launch_count": 0,
+        "gpu_synchronization_count": 0,
+    }
+    seed_maximum_inspected = 0
     for round_index, round_value in enumerate(rounds):
         if not isinstance(round_value, dict):
             raise SystemExit(f"ronde chunkée absente: {fixture}.{round_index}")
@@ -1718,6 +1813,84 @@ for case, (fixture, point_count, budget, component_path) in zip(
             == numeric["synchronization_count"]
         ):
             raise SystemExit(f"borne chunkée invalide: {fixture}.{round_index}")
+        seed_audit = round_value.get("morton_seed_audit")
+        if not isinstance(seed_audit, dict) or set(seed_audit) != (
+            morton_seed_audit_keys
+        ):
+            raise SystemExit(f"audit de graine absent: {fixture}.{round_index}")
+        seed_certificates = seed_audit.get("certificates")
+        if (
+            not isinstance(seed_certificates, dict)
+            or set(seed_certificates) != morton_seed_certificate_keys
+            or any(
+                certificate is not adaptive_seed
+                for certificate in seed_certificates.values()
+            )
+        ):
+            raise SystemExit(
+                f"certificats de graine invalides: {fixture}.{round_index}"
+            )
+        seed_numeric = {
+            key: natural(value, f"{fixture}.{round_index}.seed.{key}")
+            for key, value in seed_audit.items()
+            if key != "certificates"
+        }
+        if not adaptive_seed:
+            if (
+                round_value.get("seed_status") != "not_certified"
+                or any(seed_numeric.values())
+            ):
+                raise SystemExit(
+                    f"fallback de graine invalide: {fixture}.{round_index}"
+                )
+        else:
+            effective_radius = min(seed_radius, point_count - 1)
+            inspection_budget = min(point_count - 1, 2 * seed_radius)
+            expected_inspections = effective_radius * (
+                2 * point_count - effective_radius - 1
+            )
+            if not (
+                round_value.get("seed_status")
+                == "bounded_morton_window_external_exact_monotone_certified"
+                and seed_numeric["source_count"] == point_count
+                and seed_numeric["window_radius"] == seed_radius
+                and seed_numeric["neighbor_inspection_budget_per_source"]
+                == inspection_budget
+                and seed_numeric[
+                    "maximum_inspected_neighbor_count_per_source"
+                ]
+                <= inspection_budget
+                and seed_numeric["inspected_neighbor_count"]
+                == expected_inspections
+                and seed_numeric["external_neighbor_count"]
+                <= seed_numeric["inspected_neighbor_count"]
+                and seed_numeric["floating_proposal_count"]
+                <= min(
+                    seed_numeric["source_count"],
+                    seed_numeric["external_neighbor_count"],
+                )
+                and seed_numeric["exact_strict_improvement_count"]
+                <= seed_numeric["exact_selected_proposal_count"]
+                <= seed_numeric["floating_proposal_count"]
+                and seed_numeric["exact_fallback_count"]
+                + seed_numeric["exact_selected_proposal_count"]
+                == seed_numeric["source_count"]
+                and seed_numeric["source_count"]
+                <= seed_numeric["exact_seed_distance_evaluation_count"]
+                <= seed_numeric["source_count"]
+                + seed_numeric["floating_proposal_count"]
+                and seed_numeric["gpu_kernel_launch_count"] == 1
+                and seed_numeric["gpu_synchronization_count"] == 1
+            ):
+                raise SystemExit(
+                    f"borne de graine invalide: {fixture}.{round_index}"
+                )
+        for key in seed_sums:
+            seed_sums[key] += seed_numeric[key]
+        seed_maximum_inspected = max(
+            seed_maximum_inspected,
+            seed_numeric["maximum_inspected_neighbor_count_per_source"],
+        )
         for key in sums:
             sums[key] += numeric[key]
         for key in maxima:
@@ -1726,6 +1899,26 @@ for case, (fixture, point_count, budget, component_path) in zip(
         aggregate[key] != expected for key, expected in maxima.items()
     ):
         raise SystemExit(f"agrégation des rondes chunkées invalide pour {fixture}")
+    if not adaptive_seed:
+        if any(seed_aggregate.values()):
+            raise SystemExit(f"agrégat de fallback invalide pour {fixture}")
+    else:
+        inspection_budget = min(point_count - 1, 2 * seed_radius)
+        if (
+            seed_aggregate["round_count"] != len(rounds)
+            or seed_aggregate["window_radius"] != seed_radius
+            or seed_aggregate["neighbor_inspection_budget_per_source"]
+            != inspection_budget
+            or seed_aggregate[
+                "maximum_inspected_neighbor_count_per_source"
+            ]
+            != seed_maximum_inspected
+            or any(
+                seed_aggregate[key] != expected
+                for key, expected in seed_sums.items()
+            )
+        ):
+            raise SystemExit(f"agrégat de graine invalide pour {fixture}")
     for verifier_key, aggregate_key in (
         ("gpu_replay_source_chunk_count", "source_chunk_count"),
         ("gpu_replay_peak_chunk_candidate_count", "peak_chunk_candidate_count"),
@@ -1733,17 +1926,32 @@ for case, (fixture, point_count, budget, component_path) in zip(
     ):
         if verifier_counters.get(verifier_key) != aggregate[aggregate_key]:
             raise SystemExit(f"rejeu chunké indépendant invalide pour {fixture}")
+    for verifier_key, aggregate_key in (
+        ("gpu_replay_seed_inspected_neighbor_count", "inspected_neighbor_count"),
+        ("gpu_replay_seed_selected_proposal_count", "exact_selected_proposal_count"),
+        ("gpu_replay_seed_strict_improvement_count", "exact_strict_improvement_count"),
+        ("gpu_replay_seed_kernel_launch_count", "gpu_kernel_launch_count"),
+        ("gpu_replay_seed_synchronization_count", "gpu_synchronization_count"),
+    ):
+        if verifier_counters.get(verifier_key) != seed_aggregate[aggregate_key]:
+            raise SystemExit(f"rejeu de graine indépendant invalide pour {fixture}")
 if checks != {
     "aot_elf_architectures": ["sm_120"],
     "aot_ptx_entry_count": 0,
     "bounded_candidate_emission_chain_certified": True,
+    "bounded_morton_seed_chain_certified": True,
+    "bounded_morton_window_certified": True,
     "candidate_payload_physical_bound_certified": True,
     "canonical_contractions_certified": True,
+    "complete_source_seed_coverage_certified": True,
     "complete_source_partition_certified": True,
+    "cpu_exact_monotone_seed_cutoff_certified": True,
     "cpu_exact_decision_chain_certified": True,
+    "external_seed_targets_recertified": True,
     "gpu_multi_round_proposal_chain_certified": True,
     "independent_chunked_gpu_replay_certified": True,
     "independent_gpu_replay_certified": True,
+    "independent_morton_seed_gpu_replay_certified": True,
     "local_emst_witness_certified": True,
     "memcheck": "passed",
     "racecheck": "passed",

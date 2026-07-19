@@ -11,12 +11,12 @@ from pathlib import Path
 import re
 from typing import Any, NoReturn, Sequence
 
-SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v3"
-REPLAY_SCHEMA = "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v2"
+SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v4"
+REPLAY_SCHEMA = "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v3"
 PHASE3_SCHEMA = "morsehgp3d.phase3.qualification.v1"
 SCIENTIFIC_SCOPE = (
-    "gpu_proposed_bounded_candidate_emission_cpu_exact_full_boruvka_"
-    "local_emst_witness_only"
+    "gpu_proposed_bounded_morton_seed_bounded_candidate_emission_"
+    "cpu_exact_full_boruvka_local_emst_witness_only"
 )
 PROPOSAL_SEMANTICS = "gpu_stackless_lbvh_fixed_seed_candidate_superset"
 DECISION_SEMANTICS = "cpu_exact_seed_replay_and_kappa_resolution"
@@ -24,8 +24,16 @@ PROOF_BASIS = "gpu_candidate_superset_cpu_exact_boruvka_v1"
 BOUNDED_EMISSION_PROOF_BASIS = (
     "gpu_complete_source_ranges_bounded_candidate_payload_v1"
 )
+MONOTONE_SEED_PROOF_BASIS = (
+    "gpu_bounded_morton_seed_cpu_exact_monotone_cutoff_v1"
+)
 EMISSION_MODE = "bounded_complete_source_ranges"
 SOURCE_PARTITION = "complete_contiguous_unsplit"
+CANONICAL_SEED_MODE = "canonical_external_fallback"
+MORTON_SEED_MODE = "gpu_morton_window_cpu_exact_monotone"
+MORTON_SEED_STATUS = (
+    "bounded_morton_window_external_exact_monotone_certified"
+)
 BASE_IMAGE_REF = (
     "nvidia/cuda:12.9.2-devel-ubuntu24.04@"
     "sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
@@ -55,6 +63,7 @@ REPLAY_KEYS = {
     "decision_semantics",
     "hierarchy_reduction_status",
     "mode",
+    "monotone_seed_proof_basis",
     "phase",
     "profile",
     "proof_basis",
@@ -71,11 +80,13 @@ CASE_KEYS = {
     "emst_edge_count",
     "exact_weights",
     "fixture",
+    "morton_seed_comparison",
     "point_count",
     "producer",
     "rounds",
     "status",
     "trusted_chunking_policy",
+    "trusted_morton_seed_policy",
     "verifier",
 }
 CHUNKING_POLICY_KEYS = {
@@ -88,9 +99,13 @@ PRODUCER_KEYS = {
     "chunked_emission_counters",
     "counters",
     "emission_mode",
+    "morton_seed_counters",
+    "morton_seed_policy",
+    "seed_mode",
 }
 PRODUCER_CERTIFICATE_KEYS = {
     "bounded_candidate_emission_chain_certified",
+    "bounded_morton_seed_chain_certified",
     "canonical_contraction_chain_certified",
     "cpu_exact_decision_chain_certified",
     "emst_witness_certified",
@@ -145,7 +160,9 @@ ROUND_KEYS = {
     "decision",
     "emission_audit",
     "emission_status",
+    "morton_seed_audit",
     "proposal_status",
+    "seed_status",
 }
 EMISSION_AUDIT_KEYS = {
     "candidate_payload_peak_bytes",
@@ -211,6 +228,7 @@ DECISION_KEYS = {
 VERIFIER_KEYS = {"certificates", "counters"}
 VERIFIER_CERTIFICATE_KEYS = {
     "bounded_candidate_emission_chain_certified",
+    "bounded_morton_seed_chain_certified",
     "canonical_contractions_certified",
     "counters_certified",
     "cpu_exact_decision_chain_certified",
@@ -222,6 +240,7 @@ VERIFIER_CERTIFICATE_KEYS = {
     "proposal_chain_certified",
     "reference_cpu_witness_certified",
     "round_count_bound_certified",
+    "seed_mode_certified",
     "spanning_tree_certified",
 }
 VERIFIER_COUNTER_KEYS = {
@@ -231,9 +250,51 @@ VERIFIER_COUNTER_KEYS = {
     "gpu_replayed_component_minimum_count",
     "gpu_replayed_round_count",
     "gpu_replay_peak_chunk_candidate_count",
+    "gpu_replay_seed_inspected_neighbor_count",
+    "gpu_replay_seed_kernel_launch_count",
+    "gpu_replay_seed_selected_proposal_count",
+    "gpu_replay_seed_strict_improvement_count",
+    "gpu_replay_seed_synchronization_count",
     "gpu_replay_source_chunk_count",
     "reference_component_minimum_count",
     "reference_round_count",
+}
+MORTON_SEED_POLICY_KEYS = {"window_radius"}
+MORTON_SEED_COUNTER_KEYS = {
+    "exact_fallback_count",
+    "exact_seed_distance_evaluation_count",
+    "exact_selected_proposal_count",
+    "exact_strict_improvement_count",
+    "external_neighbor_count",
+    "floating_proposal_count",
+    "gpu_kernel_launch_count",
+    "gpu_synchronization_count",
+    "inspected_neighbor_count",
+    "maximum_inspected_neighbor_count_per_source",
+    "neighbor_inspection_budget_per_source",
+    "round_count",
+    "source_count",
+    "window_radius",
+}
+MORTON_SEED_AUDIT_COUNTER_KEYS = MORTON_SEED_COUNTER_KEYS - {"round_count"}
+MORTON_SEED_AUDIT_KEYS = MORTON_SEED_AUDIT_COUNTER_KEYS | {"certificates"}
+MORTON_SEED_CERTIFICATE_KEYS = {
+    "bounded_window_certified",
+    "complete_source_coverage_certified",
+    "exact_monotone_cutoff_certified",
+    "external_targets_recertified",
+}
+MORTON_SEED_COMPARISON_KEYS = {"baseline", "certificates", "refined"}
+MORTON_SEED_COMPARISON_COUNTER_KEYS = {
+    "logical_candidate_count",
+    "seed_mode",
+    "source_chunk_count",
+}
+MORTON_SEED_COMPARISON_CERTIFICATE_KEYS = {
+    "canonical_contractions_unchanged",
+    "emst_edges_unchanged",
+    "exact_decisions_unchanged",
+    "exact_weights_unchanged",
 }
 TRUE_PRODUCER_CERTIFICATES = {
     key: True for key in sorted(PRODUCER_CERTIFICATE_KEYS)
@@ -246,6 +307,18 @@ TRUE_EMISSION_CERTIFICATES = {
 }
 TRUE_VERIFIER_CERTIFICATES = {
     key: True for key in sorted(VERIFIER_CERTIFICATE_KEYS)
+}
+TRUE_MORTON_SEED_CERTIFICATES = {
+    key: True for key in sorted(MORTON_SEED_CERTIFICATE_KEYS)
+}
+FALSE_MORTON_SEED_CERTIFICATES = {
+    key: False for key in sorted(MORTON_SEED_CERTIFICATE_KEYS)
+}
+ZERO_MORTON_SEED_COUNTERS = {
+    key: 0 for key in sorted(MORTON_SEED_COUNTER_KEYS)
+}
+ZERO_MORTON_SEED_AUDIT = {
+    key: 0 for key in sorted(MORTON_SEED_AUDIT_COUNTER_KEYS)
 }
 EXPECTED_FIXTURES = (
     {
@@ -704,6 +777,292 @@ def require_true_certificates(
         fail(f"{label} must contain only true certificates")
 
 
+def require_expected_certificates(
+    value: dict[str, Any], expected: dict[str, bool], label: str
+) -> None:
+    require_exact_keys(value, set(expected), label)
+    if any(type(item) is not bool for item in value.values()):
+        fail(f"{label} must contain only boolean certificates")
+    if not exact_json_equal(value, expected):
+        fail(f"{label} differ from the seed-mode contract")
+
+
+def validate_morton_seed_comparison(
+    comparison: Any,
+    *,
+    aggregate_emission: dict[str, Any],
+    case_label: str,
+    seed_mode: str,
+) -> None:
+    if seed_mode == CANONICAL_SEED_MODE:
+        if comparison is not None:
+            fail(f"{case_label} canonical seed comparison must be null")
+        return
+    if not isinstance(comparison, dict):
+        fail(f"{case_label} Morton seed comparison must be an object")
+    require_exact_keys(
+        comparison, MORTON_SEED_COMPARISON_KEYS, f"{case_label} seed comparison"
+    )
+    baseline = comparison.get("baseline")
+    refined = comparison.get("refined")
+    certificates = comparison.get("certificates")
+    if not isinstance(baseline, dict) or not isinstance(refined, dict):
+        fail(f"{case_label} Morton seed comparison counters must be objects")
+    if not isinstance(certificates, dict):
+        fail(f"{case_label} Morton seed comparison certificates must be an object")
+    require_exact_keys(
+        baseline,
+        MORTON_SEED_COMPARISON_COUNTER_KEYS,
+        f"{case_label} baseline seed comparison",
+    )
+    require_exact_keys(
+        refined,
+        MORTON_SEED_COMPARISON_COUNTER_KEYS,
+        f"{case_label} refined seed comparison",
+    )
+    require_true_certificates(
+        certificates,
+        MORTON_SEED_COMPARISON_CERTIFICATE_KEYS,
+        f"{case_label} Morton seed comparison certificates",
+    )
+    expected_baseline = {
+        "logical_candidate_count": 86,
+        "seed_mode": CANONICAL_SEED_MODE,
+        "source_chunk_count": 16,
+    }
+    expected_refined = {
+        "logical_candidate_count": 41,
+        "seed_mode": MORTON_SEED_MODE,
+        "source_chunk_count": 9,
+    }
+    if not exact_json_equal(baseline, expected_baseline):
+        fail(f"{case_label} Morton baseline must close at 86 candidates / 16 chunks")
+    if not exact_json_equal(refined, expected_refined):
+        fail(f"{case_label} Morton refinement must close at 41 candidates / 9 chunks")
+    if (
+        refined["logical_candidate_count"]
+        != aggregate_emission.get("logical_candidate_count")
+        or refined["source_chunk_count"]
+        != aggregate_emission.get("source_chunk_count")
+    ):
+        fail(f"{case_label} Morton comparison does not bind producer counters")
+
+
+def validate_morton_seed_contract(case: dict[str, Any], case_label: str) -> None:
+    point_count = require_natural(
+        case.get("point_count"), f"{case_label} point_count", positive=True
+    )
+    producer = case.get("producer")
+    verifier = case.get("verifier")
+    rounds = case.get("rounds")
+    if (
+        not isinstance(producer, dict)
+        or not isinstance(verifier, dict)
+        or not isinstance(rounds, list)
+    ):
+        fail(f"{case_label} Morton seed producer, verifier, or rounds are absent")
+    seed_mode = producer.get("seed_mode")
+    if seed_mode not in {CANONICAL_SEED_MODE, MORTON_SEED_MODE}:
+        fail(f"{case_label} seed mode differs")
+
+    producer_policy = producer.get("morton_seed_policy")
+    trusted_policy = case.get("trusted_morton_seed_policy")
+    aggregate = producer.get("morton_seed_counters")
+    if not isinstance(producer_policy, dict):
+        fail(f"{case_label} producer Morton seed policy must be an object")
+    require_exact_keys(
+        producer_policy, MORTON_SEED_POLICY_KEYS, f"{case_label} seed policy"
+    )
+    if not isinstance(aggregate, dict):
+        fail(f"{case_label} Morton seed counters must be an object")
+    require_exact_keys(
+        aggregate, MORTON_SEED_COUNTER_KEYS, f"{case_label} Morton seed counters"
+    )
+    aggregate_values = {
+        key: require_natural(value, f"{case_label} Morton seed counter {key}")
+        for key, value in aggregate.items()
+    }
+    radius = require_natural(
+        producer_policy.get("window_radius"),
+        f"{case_label} Morton seed window radius",
+    )
+
+    producer_certificates = producer.get("certificates")
+    verifier_certificates = verifier.get("certificates")
+    if not isinstance(producer_certificates, dict):
+        fail(f"{case_label} producer certificates must be an object")
+    if not isinstance(verifier_certificates, dict):
+        fail(f"{case_label} verifier certificates must be an object")
+    expected_producer_certificates = dict(TRUE_PRODUCER_CERTIFICATES)
+    expected_verifier_certificates = dict(TRUE_VERIFIER_CERTIFICATES)
+    seed_certified = seed_mode == MORTON_SEED_MODE
+    expected_producer_certificates["bounded_morton_seed_chain_certified"] = (
+        seed_certified
+    )
+    expected_verifier_certificates["bounded_morton_seed_chain_certified"] = (
+        seed_certified
+    )
+    require_expected_certificates(
+        producer_certificates,
+        expected_producer_certificates,
+        f"{case_label} producer certificates",
+    )
+    require_expected_certificates(
+        verifier_certificates,
+        expected_verifier_certificates,
+        f"{case_label} verifier certificates",
+    )
+
+    verifier_counters = verifier.get("counters")
+    if not isinstance(verifier_counters, dict):
+        fail(f"{case_label} verifier counters must be an object")
+    replay_seed_mapping = (
+        ("gpu_replay_seed_inspected_neighbor_count", "inspected_neighbor_count"),
+        ("gpu_replay_seed_kernel_launch_count", "gpu_kernel_launch_count"),
+        (
+            "gpu_replay_seed_selected_proposal_count",
+            "exact_selected_proposal_count",
+        ),
+        (
+            "gpu_replay_seed_strict_improvement_count",
+            "exact_strict_improvement_count",
+        ),
+        ("gpu_replay_seed_synchronization_count", "gpu_synchronization_count"),
+    )
+    for verifier_key, aggregate_key in replay_seed_mapping:
+        if verifier_counters.get(verifier_key) != aggregate_values[aggregate_key]:
+            fail(f"{case_label} verifier Morton seed counter {verifier_key} differs")
+
+    if seed_mode == CANONICAL_SEED_MODE:
+        if trusted_policy is not None or radius != 0:
+            fail(f"{case_label} canonical seed policy must be null and zero")
+        if any(aggregate_values.values()):
+            fail(f"{case_label} canonical seed counters must all be zero")
+        for round_index, round_value in enumerate(rounds):
+            round_label = f"{case_label} round {round_index}"
+            seed_audit = round_value.get("morton_seed_audit")
+            if not isinstance(seed_audit, dict):
+                fail(f"{round_label} Morton seed audit must be an object")
+            require_exact_keys(seed_audit, MORTON_SEED_AUDIT_KEYS, round_label)
+            certificates = seed_audit.get("certificates")
+            if not isinstance(certificates, dict):
+                fail(f"{round_label} Morton seed certificates must be an object")
+            require_expected_certificates(
+                certificates,
+                FALSE_MORTON_SEED_CERTIFICATES,
+                f"{round_label} Morton seed certificates",
+            )
+            if any(
+                seed_audit.get(key) != 0 for key in MORTON_SEED_AUDIT_COUNTER_KEYS
+            ):
+                fail(f"{round_label} canonical Morton seed audit must be zero")
+            if round_value.get("seed_status") != "not_certified":
+                fail(f"{round_label} canonical seed status differs")
+        validate_morton_seed_comparison(
+            case.get("morton_seed_comparison"),
+            aggregate_emission=producer["chunked_emission_counters"],
+            case_label=case_label,
+            seed_mode=seed_mode,
+        )
+        return
+
+    if not isinstance(trusted_policy, dict):
+        fail(f"{case_label} trusted Morton seed policy must be an object")
+    require_exact_keys(
+        trusted_policy,
+        MORTON_SEED_POLICY_KEYS,
+        f"{case_label} trusted Morton seed policy",
+    )
+    trusted_radius = require_natural(
+        trusted_policy.get("window_radius"),
+        f"{case_label} trusted Morton seed window radius",
+        positive=True,
+    )
+    if radius != trusted_radius or aggregate_values["window_radius"] != radius:
+        fail(f"{case_label} Morton seed policy identities differ")
+    expected_budget = 2 * radius
+    expected_inspected = min(radius, point_count - 1) * (
+        2 * point_count - min(radius, point_count - 1) - 1
+    )
+    summed_keys = MORTON_SEED_AUDIT_COUNTER_KEYS - {
+        "maximum_inspected_neighbor_count_per_source",
+        "neighbor_inspection_budget_per_source",
+        "window_radius",
+    }
+    summed = {key: 0 for key in summed_keys}
+    maxima = {
+        "maximum_inspected_neighbor_count_per_source": 0,
+        "neighbor_inspection_budget_per_source": 0,
+    }
+    for round_index, round_value in enumerate(rounds):
+        round_label = f"{case_label} round {round_index}"
+        seed_audit = round_value.get("morton_seed_audit")
+        if not isinstance(seed_audit, dict):
+            fail(f"{round_label} Morton seed audit must be an object")
+        require_exact_keys(seed_audit, MORTON_SEED_AUDIT_KEYS, round_label)
+        certificates = seed_audit.get("certificates")
+        if not isinstance(certificates, dict):
+            fail(f"{round_label} Morton seed certificates must be an object")
+        require_true_certificates(
+            certificates,
+            MORTON_SEED_CERTIFICATE_KEYS,
+            f"{round_label} Morton seed certificates",
+        )
+        numeric = {
+            key: require_natural(seed_audit.get(key), f"{round_label} seed {key}")
+            for key in MORTON_SEED_AUDIT_COUNTER_KEYS
+        }
+        if round_value.get("seed_status") != MORTON_SEED_STATUS:
+            fail(f"{round_label} Morton seed status differs")
+        if not (
+            numeric["source_count"] == point_count
+            and numeric["window_radius"] == radius
+            and numeric["neighbor_inspection_budget_per_source"]
+            == expected_budget
+            and numeric["maximum_inspected_neighbor_count_per_source"]
+            <= expected_budget
+            and numeric["inspected_neighbor_count"] == expected_inspected
+            and numeric["external_neighbor_count"]
+            <= numeric["inspected_neighbor_count"]
+            and numeric["floating_proposal_count"]
+            <= numeric["external_neighbor_count"]
+            and numeric["floating_proposal_count"] <= point_count
+            and numeric["exact_selected_proposal_count"]
+            <= numeric["floating_proposal_count"]
+            and numeric["exact_strict_improvement_count"]
+            <= numeric["exact_selected_proposal_count"]
+            and numeric["exact_fallback_count"]
+            + numeric["exact_selected_proposal_count"]
+            == point_count
+            and point_count
+            <= numeric["exact_seed_distance_evaluation_count"]
+            <= point_count + numeric["floating_proposal_count"]
+            and numeric["exact_selected_proposal_count"]
+            <= numeric["exact_seed_distance_evaluation_count"] - point_count
+            and numeric["gpu_kernel_launch_count"] == 1
+            and numeric["gpu_synchronization_count"] == 1
+        ):
+            fail(f"{round_label} Morton seed accounting differs")
+        for key in summed:
+            summed[key] += numeric[key]
+        for key in maxima:
+            maxima[key] = max(maxima[key], numeric[key])
+    if aggregate_values["round_count"] != len(rounds):
+        fail(f"{case_label} aggregate Morton seed round count differs")
+    for key, expected in summed.items():
+        if aggregate_values[key] != expected:
+            fail(f"{case_label} aggregate Morton seed sum {key} differs")
+    for key, expected in maxima.items():
+        if aggregate_values[key] != expected:
+            fail(f"{case_label} aggregate Morton seed maximum {key} differs")
+    validate_morton_seed_comparison(
+        case.get("morton_seed_comparison"),
+        aggregate_emission=producer["chunked_emission_counters"],
+        case_label=case_label,
+        seed_mode=seed_mode,
+    )
+
+
 def validate_chunked_emission_contract(
     case: dict[str, Any], case_label: str
 ) -> None:
@@ -868,11 +1227,21 @@ def expected_level(weight: tuple[str, str]) -> dict[str, str]:
     return {"denominator": denominator, "numerator": numerator}
 
 
-def expected_round(specification: dict[str, Any]) -> dict[str, Any]:
+def expected_round(
+    specification: dict[str, Any], *, seed_mode: str
+) -> dict[str, Any]:
     audit = dict(specification["audit"])
     audit["certificates"] = dict(TRUE_AUDIT_CERTIFICATES)
     emission_audit = dict(specification["emission_audit"])
     emission_audit["certificates"] = dict(TRUE_EMISSION_CERTIFICATES)
+    morton_seed_audit = dict(
+        specification.get("morton_seed_audit", ZERO_MORTON_SEED_AUDIT)
+    )
+    morton_seed_audit["certificates"] = dict(
+        TRUE_MORTON_SEED_CERTIFICATES
+        if seed_mode == MORTON_SEED_MODE
+        else FALSE_MORTON_SEED_CERTIFICATES
+    )
     return {
         "audit": audit,
         "contraction": dict(specification["contraction"]),
@@ -881,11 +1250,34 @@ def expected_round(specification: dict[str, Any]) -> dict[str, Any]:
         "emission_status": (
             "complete_source_ranges_candidate_payload_bound_certified"
         ),
+        "morton_seed_audit": morton_seed_audit,
         "proposal_status": "candidate_superset_certified",
+        "seed_status": (
+            MORTON_SEED_STATUS
+            if seed_mode == MORTON_SEED_MODE
+            else "not_certified"
+        ),
     }
 
 
 def expected_case(specification: dict[str, Any]) -> dict[str, Any]:
+    seed_mode = specification.get("seed_mode", CANONICAL_SEED_MODE)
+    producer_certificates = dict(TRUE_PRODUCER_CERTIFICATES)
+    producer_certificates["bounded_morton_seed_chain_certified"] = (
+        seed_mode == MORTON_SEED_MODE
+    )
+    verifier_certificates = dict(TRUE_VERIFIER_CERTIFICATES)
+    verifier_certificates["bounded_morton_seed_chain_certified"] = (
+        seed_mode == MORTON_SEED_MODE
+    )
+    verifier_counters = {
+        "gpu_replay_seed_inspected_neighbor_count": 0,
+        "gpu_replay_seed_kernel_launch_count": 0,
+        "gpu_replay_seed_selected_proposal_count": 0,
+        "gpu_replay_seed_strict_improvement_count": 0,
+        "gpu_replay_seed_synchronization_count": 0,
+        **specification["verifier_counters"],
+    }
     return {
         "component_count_path": list(specification["component_count_path"]),
         "emst_edge_count": specification["emst_edge_count"],
@@ -894,17 +1286,27 @@ def expected_case(specification: dict[str, Any]) -> dict[str, Any]:
             "squared": expected_level(specification["squared_weight"]),
         },
         "fixture": specification["fixture"],
+        "morton_seed_comparison": specification.get("morton_seed_comparison"),
         "point_count": specification["point_count"],
         "producer": {
-            "certificates": dict(TRUE_PRODUCER_CERTIFICATES),
+            "certificates": producer_certificates,
             "chunked_emission_counters": dict(
                 specification["chunked_emission_counters"]
             ),
             "counters": dict(specification["producer_counters"]),
             "emission_mode": EMISSION_MODE,
+            "morton_seed_counters": dict(
+                specification.get(
+                    "morton_seed_counters", ZERO_MORTON_SEED_COUNTERS
+                )
+            ),
+            "morton_seed_policy": {
+                "window_radius": specification.get("seed_window_radius", 0)
+            },
+            "seed_mode": seed_mode,
         },
         "rounds": [
-            expected_round(round_specification)
+            expected_round(round_specification, seed_mode=seed_mode)
             for round_specification in specification["rounds"]
         ],
         "status": "passed",
@@ -912,21 +1314,274 @@ def expected_case(specification: dict[str, Any]) -> dict[str, Any]:
             "max_candidate_records_per_chunk": specification["chunk_budget"],
             "source_partition": SOURCE_PARTITION,
         },
+        "trusted_morton_seed_policy": (
+            {"window_radius": specification["seed_window_radius"]}
+            if seed_mode == MORTON_SEED_MODE
+            else None
+        ),
         "verifier": {
-            "certificates": dict(TRUE_VERIFIER_CERTIFICATES),
-            "counters": dict(specification["verifier_counters"]),
+            "certificates": verifier_certificates,
+            "counters": verifier_counters,
         },
     }
 
 
+def expected_morton_seed_case() -> dict[str, Any]:
+    case = expected_case(EXPECTED_FIXTURES[1])
+    case["fixture"] = "chain_three_rounds_morton_seed"
+    case["morton_seed_comparison"] = {
+        "baseline": {
+            "logical_candidate_count": 86,
+            "seed_mode": CANONICAL_SEED_MODE,
+            "source_chunk_count": 16,
+        },
+        "certificates": {
+            key: True for key in sorted(MORTON_SEED_COMPARISON_CERTIFICATE_KEYS)
+        },
+        "refined": {
+            "logical_candidate_count": 41,
+            "seed_mode": MORTON_SEED_MODE,
+            "source_chunk_count": 9,
+        },
+    }
+    case["trusted_morton_seed_policy"] = {"window_radius": 1}
+
+    producer = case["producer"]
+    producer["certificates"]["bounded_morton_seed_chain_certified"] = True
+    producer["chunked_emission_counters"] = {
+        "candidate_payload_peak_bytes": 224,
+        "candidate_record_budget": 7,
+        "candidate_record_size_bytes": 16,
+        "count_kernel_launch_count": 3,
+        "device_candidate_capacity_high_water": 7,
+        "emit_kernel_launch_count": 9,
+        "host_candidate_capacity_high_water": 7,
+        "logical_candidate_count": 41,
+        "max_source_candidate_count": 6,
+        "peak_chunk_candidate_count": 7,
+        "peak_chunk_source_count": 7,
+        "round_count": 3,
+        "source_chunk_count": 9,
+        "synchronization_count": 12,
+    }
+    producer["counters"].update(
+        {
+            "cpu_exact_aabb_bound_evaluation_count": 160,
+            "cpu_exact_candidate_distance_evaluation_count": 41,
+            "cpu_required_candidate_count": 41,
+            "gpu_candidate_count": 41,
+            "gpu_count_pass_node_visit_count": 184,
+            "gpu_emit_pass_node_visit_count": 184,
+            "gpu_kernel_launch_count": 12,
+            "gpu_output_capacity_sum": 41,
+            "gpu_strict_aabb_prune_count": 39,
+            "gpu_synchronization_count": 12,
+            "peak_gpu_output_capacity": 17,
+        }
+    )
+    producer["morton_seed_counters"] = {
+        "exact_fallback_count": 13,
+        "exact_seed_distance_evaluation_count": 36,
+        "exact_selected_proposal_count": 11,
+        "exact_strict_improvement_count": 11,
+        "external_neighbor_count": 22,
+        "floating_proposal_count": 16,
+        "gpu_kernel_launch_count": 3,
+        "gpu_synchronization_count": 3,
+        "inspected_neighbor_count": 42,
+        "maximum_inspected_neighbor_count_per_source": 2,
+        "neighbor_inspection_budget_per_source": 2,
+        "round_count": 3,
+        "source_count": 24,
+        "window_radius": 1,
+    }
+    producer["morton_seed_policy"] = {"window_radius": 1}
+    producer["seed_mode"] = MORTON_SEED_MODE
+
+    round_audit_updates = (
+        {
+            "candidate_count": 8,
+            "count_pass_node_visit_count": 56,
+            "cpu_exact_aabb_bound_evaluation_count": 48,
+            "cpu_exact_candidate_distance_evaluation_count": 8,
+            "emit_pass_node_visit_count": 56,
+            "kernel_launch_count": 3,
+            "output_capacity": 8,
+            "proposal_digest_fnv1a": "028191f9d06c374d",
+            "required_candidate_count": 8,
+            "strict_aabb_prune_count": 16,
+            "synchronization_count": 3,
+        },
+        {
+            "candidate_count": 16,
+            "count_pass_node_visit_count": 66,
+            "cpu_exact_aabb_bound_evaluation_count": 58,
+            "cpu_exact_candidate_distance_evaluation_count": 16,
+            "emit_pass_node_visit_count": 66,
+            "kernel_launch_count": 4,
+            "output_capacity": 16,
+            "proposal_digest_fnv1a": "436a2d2c18ed11df",
+            "required_candidate_count": 16,
+            "strict_aabb_prune_count": 13,
+            "synchronization_count": 4,
+        },
+        {
+            "candidate_count": 17,
+            "count_pass_node_visit_count": 62,
+            "cpu_exact_aabb_bound_evaluation_count": 54,
+            "cpu_exact_candidate_distance_evaluation_count": 17,
+            "emit_pass_node_visit_count": 62,
+            "kernel_launch_count": 5,
+            "output_capacity": 17,
+            "proposal_digest_fnv1a": "0691f0ec29352576",
+            "required_candidate_count": 17,
+            "strict_aabb_prune_count": 10,
+            "synchronization_count": 5,
+        },
+    )
+    round_emission_audits = (
+        {
+            "candidate_payload_peak_bytes": 224,
+            "candidate_record_budget": 7,
+            "candidate_record_size_bytes": 16,
+            "count_kernel_launch_count": 1,
+            "device_candidate_capacity_high_water": 7,
+            "emit_kernel_launch_count": 2,
+            "host_candidate_capacity_high_water": 7,
+            "logical_candidate_count": 8,
+            "max_source_candidate_count": 1,
+            "peak_chunk_candidate_count": 7,
+            "peak_chunk_source_count": 7,
+            "source_chunk_count": 2,
+            "synchronization_count": 3,
+        },
+        {
+            "candidate_payload_peak_bytes": 208,
+            "candidate_record_budget": 7,
+            "candidate_record_size_bytes": 16,
+            "count_kernel_launch_count": 1,
+            "device_candidate_capacity_high_water": 7,
+            "emit_kernel_launch_count": 3,
+            "host_candidate_capacity_high_water": 6,
+            "logical_candidate_count": 16,
+            "max_source_candidate_count": 6,
+            "peak_chunk_candidate_count": 6,
+            "peak_chunk_source_count": 4,
+            "source_chunk_count": 3,
+            "synchronization_count": 4,
+        },
+        {
+            "candidate_payload_peak_bytes": 192,
+            "candidate_record_budget": 7,
+            "candidate_record_size_bytes": 16,
+            "count_kernel_launch_count": 1,
+            "device_candidate_capacity_high_water": 7,
+            "emit_kernel_launch_count": 4,
+            "host_candidate_capacity_high_water": 5,
+            "logical_candidate_count": 17,
+            "max_source_candidate_count": 4,
+            "peak_chunk_candidate_count": 5,
+            "peak_chunk_source_count": 5,
+            "source_chunk_count": 4,
+            "synchronization_count": 5,
+        },
+    )
+    round_seed_audits = (
+        {
+            "exact_fallback_count": 2,
+            "exact_seed_distance_evaluation_count": 14,
+            "exact_selected_proposal_count": 6,
+            "exact_strict_improvement_count": 6,
+            "external_neighbor_count": 14,
+            "floating_proposal_count": 8,
+            "gpu_kernel_launch_count": 1,
+            "gpu_synchronization_count": 1,
+            "inspected_neighbor_count": 14,
+            "maximum_inspected_neighbor_count_per_source": 2,
+            "neighbor_inspection_budget_per_source": 2,
+            "source_count": 8,
+            "window_radius": 1,
+        },
+        {
+            "exact_fallback_count": 4,
+            "exact_seed_distance_evaluation_count": 13,
+            "exact_selected_proposal_count": 4,
+            "exact_strict_improvement_count": 4,
+            "external_neighbor_count": 6,
+            "floating_proposal_count": 6,
+            "gpu_kernel_launch_count": 1,
+            "gpu_synchronization_count": 1,
+            "inspected_neighbor_count": 14,
+            "maximum_inspected_neighbor_count_per_source": 2,
+            "neighbor_inspection_budget_per_source": 2,
+            "source_count": 8,
+            "window_radius": 1,
+        },
+        {
+            "exact_fallback_count": 7,
+            "exact_seed_distance_evaluation_count": 9,
+            "exact_selected_proposal_count": 1,
+            "exact_strict_improvement_count": 1,
+            "external_neighbor_count": 2,
+            "floating_proposal_count": 2,
+            "gpu_kernel_launch_count": 1,
+            "gpu_synchronization_count": 1,
+            "inspected_neighbor_count": 14,
+            "maximum_inspected_neighbor_count_per_source": 2,
+            "neighbor_inspection_budget_per_source": 2,
+            "source_count": 8,
+            "window_radius": 1,
+        },
+    )
+    for round_value, audit_updates, emission, seed_audit in zip(
+        case["rounds"],
+        round_audit_updates,
+        round_emission_audits,
+        round_seed_audits,
+        strict=True,
+    ):
+        round_value["audit"].update(audit_updates)
+        round_value["emission_audit"] = {
+            **emission,
+            "certificates": dict(TRUE_EMISSION_CERTIFICATES),
+        }
+        round_value["morton_seed_audit"] = {
+            **seed_audit,
+            "certificates": dict(TRUE_MORTON_SEED_CERTIFICATES),
+        }
+        round_value["seed_status"] = MORTON_SEED_STATUS
+
+    verifier = case["verifier"]
+    verifier["certificates"]["bounded_morton_seed_chain_certified"] = True
+    verifier["counters"].update(
+        {
+            "gpu_replay_candidate_payload_peak_bytes": 224,
+            "gpu_replay_kernel_launch_count": 12,
+            "gpu_replay_peak_chunk_candidate_count": 7,
+            "gpu_replay_seed_inspected_neighbor_count": 42,
+            "gpu_replay_seed_kernel_launch_count": 3,
+            "gpu_replay_seed_selected_proposal_count": 11,
+            "gpu_replay_seed_strict_improvement_count": 11,
+            "gpu_replay_seed_synchronization_count": 3,
+            "gpu_replay_source_chunk_count": 9,
+            "gpu_replay_synchronization_count": 12,
+        }
+    )
+    return case
+
+
 EXPECTED_REPLAY = {
     "bounded_emission_proof_basis": BOUNDED_EMISSION_PROOF_BASIS,
-    "case_count": 3,
-    "cases": [expected_case(specification) for specification in EXPECTED_FIXTURES],
+    "case_count": 4,
+    "cases": [
+        *(expected_case(specification) for specification in EXPECTED_FIXTURES),
+        expected_morton_seed_case(),
+    ],
     "decision_backend": "reference_cpu",
     "decision_semantics": DECISION_SEMANTICS,
     "hierarchy_reduction_status": "not_performed",
     "mode": "certified",
+    "monotone_seed_proof_basis": MONOTONE_SEED_PROOF_BASIS,
     "phase": "5",
     "profile": "hgp_reduced",
     "proof_basis": PROOF_BASIS,
@@ -984,8 +1639,8 @@ def validate_replay(path: Path) -> tuple[str, dict[str, Any]]:
         fail(f"{label} must be canonical one-line JSON")
     require_exact_keys(value, REPLAY_KEYS, label)
     cases = value.get("cases")
-    if not isinstance(cases, list) or len(cases) != len(EXPECTED_FIXTURES):
-        fail(f"{label} must contain exactly the three closed fixtures")
+    if not isinstance(cases, list) or len(cases) != 4:
+        fail(f"{label} must contain exactly the four closed fixtures")
     for case_index, case in enumerate(cases):
         case_label = f"{label} case {case_index}"
         if not isinstance(case, dict):
@@ -1012,6 +1667,8 @@ def validate_replay(path: Path) -> tuple[str, dict[str, Any]]:
         require_exact_keys(producer, PRODUCER_KEYS, f"{case_label} producer")
         producer_certificates = producer.get("certificates")
         chunked_emission_counters = producer.get("chunked_emission_counters")
+        morton_seed_counters = producer.get("morton_seed_counters")
+        morton_seed_policy = producer.get("morton_seed_policy")
         producer_counters = producer.get("counters")
         if not isinstance(producer_certificates, dict):
             fail(f"{case_label} producer certificates must be an object")
@@ -1019,11 +1676,10 @@ def validate_replay(path: Path) -> tuple[str, dict[str, Any]]:
             fail(f"{case_label} producer counters must be an object")
         if not isinstance(chunked_emission_counters, dict):
             fail(f"{case_label} chunked emission counters must be an object")
-        require_true_certificates(
-            producer_certificates,
-            PRODUCER_CERTIFICATE_KEYS,
-            f"{case_label} producer certificates",
-        )
+        if not isinstance(morton_seed_counters, dict):
+            fail(f"{case_label} Morton seed counters must be an object")
+        if not isinstance(morton_seed_policy, dict):
+            fail(f"{case_label} Morton seed policy must be an object")
         require_exact_keys(
             chunked_emission_counters,
             CHUNKED_EMISSION_COUNTER_KEYS,
@@ -1033,6 +1689,16 @@ def validate_replay(path: Path) -> tuple[str, dict[str, Any]]:
             producer_counters,
             PRODUCER_COUNTER_KEYS,
             f"{case_label} producer counters",
+        )
+        require_exact_keys(
+            morton_seed_counters,
+            MORTON_SEED_COUNTER_KEYS,
+            f"{case_label} Morton seed counters",
+        )
+        require_exact_keys(
+            morton_seed_policy,
+            MORTON_SEED_POLICY_KEYS,
+            f"{case_label} Morton seed policy",
         )
 
         rounds = case.get("rounds")
@@ -1047,6 +1713,7 @@ def validate_replay(path: Path) -> tuple[str, dict[str, Any]]:
             contraction = round_value.get("contraction")
             decision = round_value.get("decision")
             emission_audit = round_value.get("emission_audit")
+            morton_seed_audit = round_value.get("morton_seed_audit")
             if not isinstance(audit, dict):
                 fail(f"{round_label} audit must be an object")
             if not isinstance(contraction, dict):
@@ -1055,11 +1722,18 @@ def validate_replay(path: Path) -> tuple[str, dict[str, Any]]:
                 fail(f"{round_label} decision must be an object")
             if not isinstance(emission_audit, dict):
                 fail(f"{round_label} emission audit must be an object")
+            if not isinstance(morton_seed_audit, dict):
+                fail(f"{round_label} Morton seed audit must be an object")
             require_exact_keys(audit, AUDIT_KEYS, f"{round_label} audit")
             require_exact_keys(
                 emission_audit,
                 EMISSION_AUDIT_KEYS,
                 f"{round_label} emission audit",
+            )
+            require_exact_keys(
+                morton_seed_audit,
+                MORTON_SEED_AUDIT_KEYS,
+                f"{round_label} Morton seed audit",
             )
             emission_certificates = emission_audit.get("certificates")
             if not isinstance(emission_certificates, dict):
@@ -1094,17 +1768,13 @@ def validate_replay(path: Path) -> tuple[str, dict[str, Any]]:
             fail(f"{case_label} verifier certificates must be an object")
         if not isinstance(verifier_counters, dict):
             fail(f"{case_label} verifier counters must be an object")
-        require_true_certificates(
-            verifier_certificates,
-            VERIFIER_CERTIFICATE_KEYS,
-            f"{case_label} verifier certificates",
-        )
         require_exact_keys(
             verifier_counters,
             VERIFIER_COUNTER_KEYS,
             f"{case_label} verifier counters",
         )
         validate_chunked_emission_contract(case, case_label)
+        validate_morton_seed_contract(case, case_label)
 
     if contains_json_key(value, "public_status"):
         fail(f"{label} must not contain public_status at any depth")
@@ -1287,13 +1957,19 @@ def main(arguments: Sequence[str] | None = None) -> int:
             "aot_elf_architectures": sorted(set(architectures)),
             "aot_ptx_entry_count": 0,
             "bounded_candidate_emission_chain_certified": True,
+            "bounded_morton_seed_chain_certified": True,
+            "bounded_morton_window_certified": True,
             "candidate_payload_physical_bound_certified": True,
             "canonical_contractions_certified": True,
+            "complete_source_seed_coverage_certified": True,
             "complete_source_partition_certified": True,
+            "cpu_exact_monotone_seed_cutoff_certified": True,
             "cpu_exact_decision_chain_certified": True,
+            "external_seed_targets_recertified": True,
             "gpu_multi_round_proposal_chain_certified": True,
             "independent_chunked_gpu_replay_certified": True,
             "independent_gpu_replay_certified": True,
+            "independent_morton_seed_gpu_replay_certified": True,
             "local_emst_witness_certified": True,
             "memcheck": "passed",
             "racecheck": "passed",

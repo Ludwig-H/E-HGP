@@ -14,13 +14,14 @@ import tempfile
 from types import ModuleType
 from typing import Any, Callable
 
-QUALIFICATION_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v3"
-REPLAY_SCHEMA = "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v2"
+QUALIFICATION_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification.v4"
+REPLAY_SCHEMA = "morsehgp3d.phase5.k1_boruvka_full_loop_gpu_replay.v3"
 SCIENTIFIC_SCOPE = (
-    "gpu_proposed_bounded_candidate_emission_cpu_exact_full_boruvka_"
+    "gpu_proposed_bounded_morton_seed_bounded_candidate_emission_"
+    "cpu_exact_full_boruvka_"
     "local_emst_witness_only"
 )
-STATIC_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification_static.v3"
+STATIC_SCHEMA = "morsehgp3d.phase5.k1_boruvka_gpu_qualification_static.v4"
 SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
 EXPECTED_TOP_LEVEL_KEYS = {
     "backend",
@@ -45,13 +46,19 @@ EXPECTED_CHECK_KEYS = {
     "aot_elf_architectures",
     "aot_ptx_entry_count",
     "bounded_candidate_emission_chain_certified",
+    "bounded_morton_seed_chain_certified",
+    "bounded_morton_window_certified",
     "candidate_payload_physical_bound_certified",
     "canonical_contractions_certified",
     "complete_source_partition_certified",
+    "complete_source_seed_coverage_certified",
+    "cpu_exact_monotone_seed_cutoff_certified",
     "cpu_exact_decision_chain_certified",
+    "external_seed_targets_recertified",
     "gpu_multi_round_proposal_chain_certified",
     "independent_chunked_gpu_replay_certified",
     "independent_gpu_replay_certified",
+    "independent_morton_seed_gpu_replay_certified",
     "local_emst_witness_certified",
     "memcheck",
     "racecheck",
@@ -149,8 +156,11 @@ def validate_static_source(assembler: str, replay: str) -> None:
         (
             QUALIFICATION_SCHEMA,
             REPLAY_SCHEMA,
-            "gpu_proposed_bounded_candidate_emission_cpu_exact_full_boruvka_",
+            "gpu_proposed_bounded_morton_seed_bounded_candidate_emission_",
+            "cpu_exact_full_boruvka_",
             "local_emst_witness_only",
+            "gpu_bounded_morton_seed_cpu_exact_monotone_cutoff_v1",
+            '"case_count": 4',
             '"component_count_path": [8, 4, 2, 1]',
             '"component_minimum_count": 14',
             '"gpu_candidate_count": 86',
@@ -164,6 +174,17 @@ def validate_static_source(assembler: str, replay: str) -> None:
             '"proposal_digest_fnv1a": "4ca55683c3c49441"',
             '"hgp_weight": ("8127", "4")',
             '"squared_weight": ("8127", "1")',
+            'case["fixture"] = "chain_three_rounds_morton_seed"',
+            '"logical_candidate_count": 41',
+            '"source_chunk_count": 9',
+            '"window_radius": 1',
+            '"inspected_neighbor_count": 42',
+            '"external_neighbor_count": 22',
+            '"floating_proposal_count": 16',
+            '"exact_selected_proposal_count": 11',
+            '"exact_strict_improvement_count": 11',
+            '"exact_fallback_count": 13',
+            '"exact_seed_distance_evaluation_count": 36',
             'require_exact_keys(value, REPLAY_KEYS, label)',
             'contains_json_key(value, "public_status")',
             "exact_json_equal(value, EXPECTED_REPLAY)",
@@ -182,6 +203,12 @@ def validate_static_source(assembler: str, replay: str) -> None:
             '"candidate_payload_physical_bound_certified": True',
             '"complete_source_partition_certified": True',
             '"independent_chunked_gpu_replay_certified": True',
+            '"bounded_morton_seed_chain_certified": True',
+            '"bounded_morton_window_certified": True',
+            '"complete_source_seed_coverage_certified": True',
+            '"cpu_exact_monotone_seed_cutoff_certified": True',
+            '"external_seed_targets_recertified": True',
+            '"independent_morton_seed_gpu_replay_certified": True',
         ),
         "Phase 5 qualification assembler",
     )
@@ -202,16 +229,33 @@ def validate_static_source(assembler: str, replay: str) -> None:
             '"singleton_terminal"',
             '"chain_three_rounds"',
             '"square_equal_length_ties"',
+            '"chain_three_rounds_morton_seed"',
             "std::array<std::size_t, 4>{8U, 4U, 2U, 1U}",
             REPLAY_SCHEMA,
             "K1BoruvkaChunkingPolicy",
+            "K1BoruvkaMortonSeedPolicy",
+            "K1BoruvkaMortonSeedPolicy{1U}",
+            "cases.reserve(4U)",
             "bounded_emission_proof_basis",
+            "monotone_seed_proof_basis",
             '"bounded_complete_source_ranges"',
             "complete_contiguous_unsplit",
             "chunked_emission_counters",
             "chunked_emission_audit",
             "build_gpu_proposed_cpu_exact_k1_boruvka",
             "verify_gpu_proposed_cpu_exact_k1_boruvka",
+            "trusted_morton_seed_policy.has_value()",
+            "*trusted_morton_seed_policy",
+            "close_morton_seed_comparison",
+            "comparison.refined_logical_candidate_count == 41U",
+            "comparison.refined_source_chunk_count == 9U",
+            "seeds.inspected_neighbor_count == 42U",
+            "seeds.external_neighbor_count == 22U",
+            "seeds.floating_proposal_count == 16U",
+            "seeds.exact_selected_proposal_count == 11U",
+            "seeds.exact_strict_improvement_count == 11U",
+            "seeds.exact_fallback_count == 13U",
+            "seeds.exact_seed_distance_evaluation_count == 36U",
             "K1BoruvkaCandidateAudit::decision_semantics",
             "K1BoruvkaCandidateAudit::proposal_semantics",
             r"\"status\":\"passed\"",
@@ -219,12 +263,36 @@ def validate_static_source(assembler: str, replay: str) -> None:
             "K1HybridHierarchyReductionStatus::not_performed",
             "result.proposal_chain_certified",
             "result.bounded_candidate_emission_chain_certified",
+            "result.bounded_morton_seed_chain_certified",
             "verification.proposal_chain_certified",
             "verification.emission_mode_certified",
+            "verification.seed_mode_certified",
             "verification.bounded_candidate_emission_chain_certified",
+            "verification.bounded_morton_seed_chain_certified",
             "verification.hierarchy_status_separation_certified",
         ),
         "real Phase 5 full-loop K1 Boruvka replay",
+    )
+    require(
+        re.search(
+            r"build_gpu_proposed_cpu_exact_k1_boruvka\(\s*index,\s*cloud,"
+            r"\s*trusted_chunking_policy,\s*\*trusted_morton_seed_policy\s*\)",
+            replay,
+            re.DOTALL,
+        )
+        is not None,
+        "real Phase 5 replay does not call the two-policy producer overload",
+    )
+    require(
+        re.search(
+            r"verify_gpu_proposed_cpu_exact_k1_boruvka\(\s*index,\s*cloud,"
+            r"\s*trusted_chunking_policy,\s*\*trusted_morton_seed_policy,"
+            r"\s*producer\s*\)",
+            replay,
+            re.DOTALL,
+        )
+        is not None,
+        "real Phase 5 replay does not call the two-policy verifier overload",
     )
 
 
@@ -384,13 +452,19 @@ def exercise_assembler(module: ModuleType) -> None:
             "aot_elf_architectures": ["sm_120"],
             "aot_ptx_entry_count": 0,
             "bounded_candidate_emission_chain_certified": True,
+            "bounded_morton_seed_chain_certified": True,
+            "bounded_morton_window_certified": True,
             "candidate_payload_physical_bound_certified": True,
             "canonical_contractions_certified": True,
             "complete_source_partition_certified": True,
+            "complete_source_seed_coverage_certified": True,
             "cpu_exact_decision_chain_certified": True,
+            "cpu_exact_monotone_seed_cutoff_certified": True,
+            "external_seed_targets_recertified": True,
             "gpu_multi_round_proposal_chain_certified": True,
             "independent_chunked_gpu_replay_certified": True,
             "independent_gpu_replay_certified": True,
+            "independent_morton_seed_gpu_replay_certified": True,
             "local_emst_witness_certified": True,
             "memcheck": "passed",
             "racecheck": "passed",
@@ -479,6 +553,80 @@ def exercise_assembler(module: ModuleType) -> None:
             lambda: module.validate_replay(replay_log_path),
             "wrong independent replay chunk count",
         )
+
+        wrong_seed_policy = copy.deepcopy(module.EXPECTED_REPLAY)
+        wrong_seed_policy["cases"][3]["trusted_morton_seed_policy"][
+            "window_radius"
+        ] = 2
+        write_json(replay_log_path, wrong_seed_policy)
+        require_rejected(
+            lambda: module.validate_replay(replay_log_path),
+            "wrong trusted Morton seed window radius",
+        )
+        false_seed_chain = copy.deepcopy(module.EXPECTED_REPLAY)
+        false_seed_chain["cases"][3]["producer"]["certificates"][
+            "bounded_morton_seed_chain_certified"
+        ] = False
+        write_json(replay_log_path, false_seed_chain)
+        require_rejected(
+            lambda: module.validate_replay(replay_log_path),
+            "false producer Morton seed chain certificate",
+        )
+        wrong_seed_inspection = copy.deepcopy(module.EXPECTED_REPLAY)
+        wrong_seed_inspection["cases"][3]["rounds"][0]["morton_seed_audit"][
+            "inspected_neighbor_count"
+        ] = 13
+        write_json(replay_log_path, wrong_seed_inspection)
+        require_rejected(
+            lambda: module.validate_replay(replay_log_path),
+            "wrong bounded Morton seed inspection count",
+        )
+        false_monotone_cutoff = copy.deepcopy(module.EXPECTED_REPLAY)
+        false_monotone_cutoff["cases"][3]["rounds"][0]["morton_seed_audit"][
+            "certificates"
+        ]["exact_monotone_cutoff_certified"] = False
+        write_json(replay_log_path, false_monotone_cutoff)
+        require_rejected(
+            lambda: module.validate_replay(replay_log_path),
+            "false exact monotone seed cutoff certificate",
+        )
+        wrong_seed_replay_counter = copy.deepcopy(module.EXPECTED_REPLAY)
+        wrong_seed_replay_counter["cases"][3]["verifier"]["counters"][
+            "gpu_replay_seed_selected_proposal_count"
+        ] = 10
+        write_json(replay_log_path, wrong_seed_replay_counter)
+        require_rejected(
+            lambda: module.validate_replay(replay_log_path),
+            "wrong independent replay Morton seed selection count",
+        )
+        false_seed_mode = copy.deepcopy(module.EXPECTED_REPLAY)
+        false_seed_mode["cases"][3]["verifier"]["certificates"][
+            "seed_mode_certified"
+        ] = False
+        write_json(replay_log_path, false_seed_mode)
+        require_rejected(
+            lambda: module.validate_replay(replay_log_path),
+            "false independent Morton seed mode certificate",
+        )
+        wrong_seed_comparison_volume = copy.deepcopy(module.EXPECTED_REPLAY)
+        wrong_seed_comparison_volume["cases"][3]["morton_seed_comparison"][
+            "refined"
+        ]["logical_candidate_count"] = 42
+        write_json(replay_log_path, wrong_seed_comparison_volume)
+        require_rejected(
+            lambda: module.validate_replay(replay_log_path),
+            "wrong Morton seed comparison candidate volume",
+        )
+        false_seed_comparison_invariance = copy.deepcopy(module.EXPECTED_REPLAY)
+        false_seed_comparison_invariance["cases"][3]["morton_seed_comparison"][
+            "certificates"
+        ]["exact_decisions_unchanged"] = False
+        write_json(replay_log_path, false_seed_comparison_invariance)
+        require_rejected(
+            lambda: module.validate_replay(replay_log_path),
+            "false Morton seed comparison exact-decision invariance",
+        )
+
         replay_log_path.write_text(
             '{"schema":"one","schema":"two"}\n', encoding="ascii"
         )
@@ -561,7 +709,7 @@ def validate_project(project: Path) -> dict[str, object]:
             str(replay_path.relative_to(project)),
         ],
         "cuda_executed": False,
-        "negative_mutations": 13,
+        "negative_mutations": 21,
         "qualification_schema": QUALIFICATION_SCHEMA,
         "replay_schema": REPLAY_SCHEMA,
         "schema": STATIC_SCHEMA,
