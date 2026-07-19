@@ -216,6 +216,80 @@ struct K1BoruvkaSeededExactRoundResolution {
       const K1BoruvkaSeededExactRoundResolution&) = default;
 };
 
+enum class K1BoruvkaDualTreeSearchStatus : std::uint8_t {
+  not_certified,
+  exact_external_1nn_shared_lbvh_dual_tree_certified,
+};
+
+struct K1BoruvkaDualTreeSearchAudit {
+  static constexpr const char* proposal_semantics =
+      "gpu_bounded_morton_seed_only";
+  static constexpr const char* decision_semantics =
+      "cpu_exact_external_1nn_shared_lbvh_dual_tree";
+  static constexpr const char* proof_basis =
+      "strict_exact_aabb_pair_dynamic_incumbent_frontier_exhaustion_v1";
+
+  std::size_t resident_point_count{};
+  std::size_t resident_node_count{};
+  std::size_t frozen_component_count{};
+  std::size_t uniform_lbvh_node_count{};
+  std::size_t mixed_lbvh_node_count{};
+  std::size_t seed_incumbent_count{};
+  std::size_t dynamic_incumbent_node_count{};
+  std::size_t point_minimum_count{};
+  std::size_t component_minimum_count{};
+  std::size_t unordered_point_pair_count{};
+  std::size_t covered_unordered_point_pair_count{};
+  std::size_t maximum_cpu_frontier_size{};
+  std::size_t cpu_node_pair_visit_count{};
+  std::size_t cpu_node_pair_expansion_count{};
+  std::size_t cpu_exact_aabb_pair_bound_evaluation_count{};
+  std::size_t cpu_exact_point_pair_distance_evaluation_count{};
+  std::size_t cpu_strict_incumbent_decrease_count{};
+  std::size_t cpu_incumbent_ancestor_update_count{};
+  std::size_t cpu_uniform_same_component_pair_prune_count{};
+  std::size_t cpu_strict_aabb_pair_prune_count{};
+  bool frozen_labels_certified{false};
+  bool lbvh_topology_and_exact_aabbs_certified{false};
+  bool complete_source_seed_coverage_certified{false};
+  bool external_seed_targets_recertified{false};
+  bool exact_seed_cutoffs_recertified{false};
+  bool dynamic_incumbent_tree_certified{false};
+  bool canonical_unordered_pair_partition_certified{false};
+  bool uniform_component_pair_prunes_certified{false};
+  bool strict_only_aabb_pair_pruning_certified{false};
+  bool complete_frontier_exhaustion_certified{false};
+  bool canonical_kappa_resolution_certified{false};
+  bool point_minima_complete{false};
+  bool component_minima_complete{false};
+
+  friend bool operator==(
+      const K1BoruvkaDualTreeSearchAudit&,
+      const K1BoruvkaDualTreeSearchAudit&) = default;
+};
+
+// The certified Morton proposal initializes one exact incumbent per point.
+// A shared best-first traversal partitions every unordered pair of LBVH leaves
+// exactly once. A node pair is discarded only when both nodes are uniform in
+// the same component or when its exact AABB--AABB lower bound is strictly
+// larger than every current exact point incumbent stored below the two nodes.
+// Incumbents only decrease from their certified seeds and equal bounds are
+// always descended. The result preserves exact point and component minima; it
+// performs neither contraction nor hierarchy publication.
+struct K1BoruvkaSeededDualTreeRoundResolution {
+  std::vector<K1BoruvkaPointMinimum> point_minima;
+  std::vector<hierarchy::K1BoruvkaComponentMinimum> component_minima;
+  K1BoruvkaMortonSeedAudit morton_seed_audit;
+  K1BoruvkaDualTreeSearchAudit search_audit;
+  K1BoruvkaSeedStatus seed_status{K1BoruvkaSeedStatus::not_certified};
+  K1BoruvkaDualTreeSearchStatus search_status{
+      K1BoruvkaDualTreeSearchStatus::not_certified};
+
+  friend bool operator==(
+      const K1BoruvkaSeededDualTreeRoundResolution&,
+      const K1BoruvkaSeededDualTreeRoundResolution&) = default;
+};
+
 enum class K1BoruvkaEmissionStatus : std::uint8_t {
   not_certified,
   complete_source_ranges_candidate_payload_bound_certified,
@@ -674,6 +748,12 @@ class K1BoruvkaCandidateContext final {
 
   [[nodiscard]] K1BoruvkaSeededExactRoundResolution
   resolve_round_exact_external_1nn(
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const spatial::PointId> frozen_component_labels,
+      K1BoruvkaMortonSeedPolicy seed_policy);
+
+  [[nodiscard]] K1BoruvkaSeededDualTreeRoundResolution
+  resolve_round_exact_external_1nn_dual_tree(
       const spatial::CanonicalPointCloud& cloud,
       std::span<const spatial::PointId> frozen_component_labels,
       K1BoruvkaMortonSeedPolicy seed_policy);
