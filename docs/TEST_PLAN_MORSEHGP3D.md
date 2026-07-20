@@ -247,6 +247,14 @@ Les fixtures obligatoires couvrent : un coupeur omis puis ajouté; une contraint
 
 La propriété de réparation vérifie séparément qu'après ajout simultané de tous les identifiants retournés, aucune contrainte propre omise ne peut devenir active : le nouveau polytope est inclus dans l'ancien, où chacune était strictement négative. Une étape suivante matérialise ce rebuild unique et compare sa cellule finale à l'oracle complet. Aucun test 7.4 ne compile CUDA, ne qualifie Paragram ou ne change un statut public.
 
+### 5.10 Matérialisation atomique du jalon 7.5
+
+`repair_exact_bounded_power_cell_subset_closure` doit appeler le décideur 7.4 une seule fois, puis construire au plus une cellule supplémentaire. Une amorce déjà fermée non vide conserve une construction et aucun lot; une amorce vide par demi-espaces propres conserve une construction, aucun scan et aucun lot. Un cas contenant simultanément un violateur et une incidence active exige deux constructions, un scan, zéro post-scan et un lot dont les identifiants sont triés. Dans la fixture où ce lot complète exactement $K$, la cellule réparée est égale structurellement à l'oracle exact construit avec toute la table, sans utiliser cet oracle pour prendre la décision. Si une amorce fermée omet des contraintes strictement redondantes ou des ties, seule sa projection normalisée — décision, sommets exacts et incidences propres actives — peut être comparée; l'égalité brute des métadonnées est alors interdite.
+
+Les constantes omises sont testées séparément : `owner_dominates` et `coincident_tie` restent dans l'audit initial sans rejoindre l'amorce fermée, tandis que `competitor_dominates` rejoint le lot et produit `repaired_complete_empty`. Un `competitor_dominates` déjà semé relève au contraire de `already_complete_empty`. Le wrapper couvre aussi la permutation de $K$; les dimensions basses, plans coïncidents, tangence, permutation de $J$, sur-amorce et orientation réciproque restent les fixtures du décideur 7.4 partagé et ne sont pas dupliquées artificiellement dans 7.5.
+
+Les deux préflights échouent chacun juste sous leur besoin : budget 7.4 insuffisant, puis budget de reconstruction complète insuffisant. Dans les deux cas les compteurs de construction et de scan valent zéro, `initial_closure`, `repaired_cell` et la cellule finale sont absents. Les exigences atteignent exactement les caps conservatifs 506 triplets et sommets cumulés et 6358 incidences cumulées pour $f=7,c=6$. À l'inverse, $J=K$ accepte un budget de seconde construction nul. Les cinq décisions sérialisables et l'enum invalide complètent les tests propres à 7.5; les IDs et boîtes invalides restent verrouillés sur le préflight partagé par les tests 7.4. Aucun test 7.5 ne compile CUDA ou ne promeut un statut public.
+
 ## 6. Tests de Gamma, du catalogue Gabriel et de la réduction
 
 ### 6.1 Gamma exact et événements Gabriel partiels

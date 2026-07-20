@@ -616,6 +616,14 @@ Avec $f=\lvert K\rvert\leq7$, $c=\lvert J\rvert$ et $T_c=\binom{6+c}{3}$, le sca
 
 L'audit d'architecture ferme en parallèle la bifurcation 7.3. L'export Paragram serait local mais recopierait un scratch de chunk non durable dont chaque sommet ne garde que trois plans; il ne fournirait toujours pas les incidences dégénérées complètes. Surtout, le stream courant, les erreurs et la propriété des allocations traversent `pwr_bvh.cu`, les appels CUDA bruts et `cuBQL::gpuBuilder`; les guesses ne valident pas encore leurs valeurs et Paragram ne clippe pas les parents génériques requis par les phases 8–9. Ce seuil déclenche le repli prévu : la série à deux patchs est gelée comme comparateur et source optionnelle d'identifiants, tandis qu'une primitive H-polytope interne est sélectionnée pour le produit. La porte de sortie de la phase 7 reste fermée jusqu'à son implémentation CUDA et sa qualification courte.
 
+### Jalon 7.5 — matérialisation atomique de la réparation
+
+`repair_exact_bounded_power_cell_subset_closure` compose le décideur 7.4 sans en modifier le contrat. Avant la première construction, il valide les deux budgets imbriqués et réserve le coût d'une cellule finale utilisant tous les concurrents dès que $K\setminus J$ est non vide. Une insuffisance retourne donc les exigences et l'amorce canonique, mais aucune cellule initiale ou réparée. Si 7.4 décide l'amorce complète ou vide, sa première cellule est finale. Sinon tous les identifiants requis sont ajoutés simultanément, puis la cellule est reconstruite exactement une fois; aucun second scan n'est effectué.
+
+Avec $T_k=\binom{6+k}{3}$, une branche réparée vérifie $c\leq6$ et $f\leq7$. Elle effectue au plus deux constructions, $T_c+T_f\leq220+286=506$ triplets et sommets conservatifs, et $(6+c)T_c+(6+f)T_f\leq2640+3718=6358$ incidences conservatives. Le scan unique reste borné par 360 évaluations. Lorsqu'elles sont omises, les constantes `owner_dominates` et les ties coïncidents restent seulement audités; un `competitor_dominates` omis est ajouté et rend la reconstruction vide. Un tel identifiant déjà présent dans $J$ prouve au contraire l'amorce vide sans seconde construction. Le résultat distingue amorce déjà complète, amorce déjà vide, réparation non vide, réparation vide et budget insuffisant. Les identifiants fermés demeurent une sur-amorce sémantique sûre, jamais une revendication d'adjacency exacte.
+
+Ce jalon ferme la composition hôte bornée, pas la Phase 7 : la primitive H-polytope générique, son chemin CUDA, le faux lanceur, NVCC, G4 et la fermeture d'un diagramme global restent à livrer. Aucun `public_status` n'est modifié.
+
 ### But
 
 Choisir la primitive GPU sans lui déléguer la certification.

@@ -321,8 +321,8 @@ struct ExactPowerCellSubsetClosureResult {
 // competitor list with all proper active incidences; coincident ties are
 // counted separately because they do not define a boundary plane.  Candidate
 // ids are canonicalized but must be unique.  An authentic over-seed relative
-// to the active faces
-// (for example a symmetrized adjacency) is valid.  The first omitted violation
+// to the active faces (for example a symmetrized adjacency) is valid.  The
+// first omitted violation
 // or active incidence is deterministic in PointId, then prefers a violation
 // over a zero incidence for that id, then uses vertex order.  All required
 // additions are returned canonically so one subsequent rebuild can apply them
@@ -334,5 +334,111 @@ certify_exact_bounded_power_cell_subset_closure(
     const ExactDyadicAabb3& clipping_box,
     std::span<const PointId> candidate_competitor_ids,
     ExactPowerCellSubsetClosureBudget budget = {});
+
+enum class ExactPowerCellSubsetRepairDecision : std::uint8_t {
+  already_complete_nonempty,
+  already_complete_empty,
+  repaired_complete_nonempty,
+  repaired_complete_empty,
+  insufficient_budget,
+};
+
+[[nodiscard]] std::string_view to_string(
+    ExactPowerCellSubsetRepairDecision decision);
+
+struct ExactPowerCellSubsetRepairBudget {
+  static constexpr std::size_t
+      trusted_maximum_exact_cell_construction_count = 2U;
+  static constexpr std::size_t
+      trusted_maximum_cumulative_plane_triple_count = 506U;
+  static constexpr std::size_t trusted_maximum_cumulative_vertex_count =
+      506U;
+  static constexpr std::size_t trusted_maximum_cumulative_incidence_count =
+      6358U;
+
+  static_assert(trusted_maximum_cumulative_plane_triple_count == 220U + 286U);
+  static_assert(
+      trusted_maximum_cumulative_vertex_count ==
+      trusted_maximum_cumulative_plane_triple_count);
+  static_assert(
+      trusted_maximum_cumulative_incidence_count ==
+      12U * 220U + 13U * 286U);
+
+  ExactPowerCellSubsetClosureBudget subset_closure_budget{};
+  ExactPowerCellReferenceBudget repaired_cell_budget{};
+};
+
+struct ExactPowerCellSubsetRepairRequirements {
+  ExactPowerCellSubsetClosureRequirements subset_closure_requirements;
+  std::optional<ExactPowerCellReferenceRequirements>
+      conservative_repaired_cell_requirements;
+  std::size_t conservative_exact_cell_construction_count{0U};
+  std::size_t conservative_omitted_scan_pass_count{0U};
+  std::size_t conservative_cumulative_plane_triple_count{0U};
+  std::size_t conservative_cumulative_vertex_count{0U};
+  std::size_t conservative_cumulative_incidence_count{0U};
+
+  friend bool operator==(
+      const ExactPowerCellSubsetRepairRequirements&,
+      const ExactPowerCellSubsetRepairRequirements&) = default;
+};
+
+struct ExactPowerCellSubsetRepairAudit {
+  std::size_t exact_cell_construction_count{0U};
+  std::size_t omitted_constraint_scan_pass_count{0U};
+  std::size_t post_repair_omitted_constraint_scan_pass_count{0U};
+  std::size_t simultaneous_repair_batch_count{0U};
+  std::size_t simultaneously_added_competitor_count{0U};
+
+  friend bool operator==(
+      const ExactPowerCellSubsetRepairAudit&,
+      const ExactPowerCellSubsetRepairAudit&) = default;
+};
+
+struct ExactPowerCellSubsetRepairResult {
+  ExactPowerCellSubsetRepairDecision decision{
+      ExactPowerCellSubsetRepairDecision::insufficient_budget};
+  ExactPowerCellSubsetRepairRequirements requirements;
+  ExactPowerCellSubsetRepairAudit audit;
+  std::vector<PointId> canonical_initial_candidate_competitor_ids;
+  std::vector<PointId> canonical_closed_candidate_competitor_ids;
+  std::optional<ExactPowerCellSubsetClosureResult> initial_closure;
+  std::optional<ExactPowerCellReferenceResult> repaired_cell;
+
+  [[nodiscard]] const ExactPowerCellReferenceResult* final_cell()
+      const & noexcept {
+    if (repaired_cell.has_value()) {
+      return &*repaired_cell;
+    }
+    if (decision ==
+            ExactPowerCellSubsetRepairDecision::already_complete_nonempty ||
+        decision ==
+            ExactPowerCellSubsetRepairDecision::already_complete_empty) {
+      return initial_closure.has_value()
+                 ? &initial_closure->candidate_cell
+                 : nullptr;
+    }
+    return nullptr;
+  }
+  [[nodiscard]] const ExactPowerCellReferenceResult* final_cell()
+      const && = delete;
+
+  friend bool operator==(
+      const ExactPowerCellSubsetRepairResult&,
+      const ExactPowerCellSubsetRepairResult&) = default;
+};
+
+// Materializes the complete simultaneous addition set certified above.  The
+// preflight reserves a full second cell whenever an omitted competitor exists,
+// so insufficient budgets return before the seed cell is built.  An incomplete
+// seed is rebuilt exactly once and never rescanned: every still-omitted proper
+// constraint was already strictly negative on the larger seed polytope.
+[[nodiscard]] ExactPowerCellSubsetRepairResult
+repair_exact_bounded_power_cell_subset_closure(
+    const Binary64WeightedSite3& owner,
+    std::span<const Binary64WeightedSite3> complete_competitors,
+    const ExactDyadicAabb3& clipping_box,
+    std::span<const PointId> candidate_competitor_ids,
+    ExactPowerCellSubsetRepairBudget budget = {});
 
 }  // namespace morsehgp3d::spatial

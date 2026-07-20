@@ -32,6 +32,9 @@ using morsehgp3d::spatial::ExactPowerCellReferenceResult;
 using morsehgp3d::spatial::ExactPowerCellSubsetClosureBudget;
 using morsehgp3d::spatial::ExactPowerCellSubsetClosureDecision;
 using morsehgp3d::spatial::ExactPowerCellSubsetClosureWitnessKind;
+using morsehgp3d::spatial::ExactPowerCellSubsetRepairBudget;
+using morsehgp3d::spatial::ExactPowerCellSubsetRepairDecision;
+using morsehgp3d::spatial::ExactPowerCellSubsetRepairResult;
 using morsehgp3d::spatial::PointId;
 using morsehgp3d::spatial::PowerBisectorConstraintKind;
 using morsehgp3d::spatial::build_exact_bounded_power_cell_reference;
@@ -39,6 +42,17 @@ using morsehgp3d::spatial::certify_exact_bounded_power_cell_subset_closure;
 using morsehgp3d::spatial::exact_power_difference_affine_form;
 using morsehgp3d::spatial::exact_power_distance;
 using morsehgp3d::spatial::make_exact_power_bisector_constraint;
+using morsehgp3d::spatial::repair_exact_bounded_power_cell_subset_closure;
+
+template <typename Result>
+concept HasRvalueFinalCell = requires(Result&& result) {
+  std::move(result).final_cell();
+};
+
+static_assert(!HasRvalueFinalCell<ExactPowerCellSubsetRepairResult>);
+static_assert(requires(const ExactPowerCellSubsetRepairResult& result) {
+  result.final_cell();
+});
 
 int failures = 0;
 
@@ -1117,6 +1131,339 @@ void test_subset_closure_preflight_and_id_contracts() {
       "a noncanonical binary64 box word is validated before the budget gate");
 }
 
+void test_subset_repair_completed_paths_and_final_cell() {
+  const Binary64WeightedSite3 owner = site(0U, 0.0, 0.0, 0.0);
+  const ExactDyadicAabb3 clipping_box =
+      box(-2.0, -2.0, -2.0, 2.0, 2.0, 2.0);
+
+  const std::array<Binary64WeightedSite3, 1> far_complete{
+      site(7U, 10.0, 0.0, 0.0)};
+  const auto already_nonempty =
+      repair_exact_bounded_power_cell_subset_closure(
+          owner,
+          far_complete,
+          clipping_box,
+          std::span<const PointId>{});
+  const ExactPowerCellReferenceResult* nonempty_final =
+      already_nonempty.final_cell();
+  check(
+      already_nonempty.decision ==
+              ExactPowerCellSubsetRepairDecision::
+                  already_complete_nonempty &&
+          already_nonempty.initial_closure.has_value() &&
+          already_nonempty.initial_closure->decision ==
+              ExactPowerCellSubsetClosureDecision::complete_nonempty &&
+          already_nonempty.initial_closure->required_candidate_additions
+              .empty() &&
+          !already_nonempty.repaired_cell.has_value() &&
+          already_nonempty.canonical_initial_candidate_competitor_ids
+              .empty() &&
+          already_nonempty.canonical_closed_candidate_competitor_ids
+              .empty() &&
+          already_nonempty.audit.exact_cell_construction_count == 1U &&
+          already_nonempty.audit.omitted_constraint_scan_pass_count == 1U &&
+          already_nonempty.audit
+                  .post_repair_omitted_constraint_scan_pass_count == 0U &&
+          already_nonempty.audit.simultaneous_repair_batch_count == 0U &&
+          nonempty_final != nullptr &&
+          nonempty_final ==
+              &already_nonempty.initial_closure->candidate_cell &&
+          nonempty_final->decision ==
+              ExactPowerCellReferenceDecision::complete_nonempty,
+      "a strictly redundant omitted competitor leaves a nonempty seed "
+      "already closed and final_cell selects that seed");
+
+  const std::array<Binary64WeightedSite3, 1> dominating_complete{
+      site(3U, 0.0, 0.0, 0.0, 2.0)};
+  const std::array<PointId, 1> dominating_candidate{3U};
+  ExactPowerCellSubsetRepairBudget unused_repair_budget;
+  unused_repair_budget.repaired_cell_budget.maximum_site_count = 0U;
+  unused_repair_budget.repaired_cell_budget.maximum_constraint_count = 0U;
+  unused_repair_budget.repaired_cell_budget.maximum_plane_triple_count = 0U;
+  unused_repair_budget.repaired_cell_budget.maximum_vertex_count = 0U;
+  unused_repair_budget.repaired_cell_budget.maximum_incidence_count = 0U;
+  const auto already_empty =
+      repair_exact_bounded_power_cell_subset_closure(
+          owner,
+          dominating_complete,
+          clipping_box,
+          dominating_candidate,
+          unused_repair_budget);
+  const ExactPowerCellReferenceResult* empty_final = already_empty.final_cell();
+  check(
+      already_empty.decision ==
+              ExactPowerCellSubsetRepairDecision::already_complete_empty &&
+          already_empty.initial_closure.has_value() &&
+          already_empty.initial_closure->decision ==
+              ExactPowerCellSubsetClosureDecision::complete_empty &&
+          !already_empty.repaired_cell.has_value() &&
+          already_empty.canonical_initial_candidate_competitor_ids ==
+              std::vector<PointId>{3U} &&
+          already_empty.canonical_closed_candidate_competitor_ids ==
+              std::vector<PointId>{3U} &&
+          !already_empty.requirements.conservative_repaired_cell_requirements
+               .has_value() &&
+          already_empty.requirements
+                  .conservative_exact_cell_construction_count == 1U &&
+          already_empty.requirements
+                  .conservative_omitted_scan_pass_count == 0U &&
+          already_empty.audit.exact_cell_construction_count == 1U &&
+          already_empty.audit.omitted_constraint_scan_pass_count == 0U &&
+          empty_final != nullptr &&
+          empty_final == &already_empty.initial_closure->candidate_cell &&
+          empty_final->decision ==
+              ExactPowerCellReferenceDecision::complete_empty,
+      "when f equals c an empty seed is complete and a zero second-build "
+      "budget is irrelevant");
+}
+
+void test_subset_repair_simultaneous_batch_constants_and_permutation() {
+  const Binary64WeightedSite3 owner = site(0U, 0.0, 0.0, 0.0);
+  const ExactDyadicAabb3 clipping_box =
+      box(-2.0, -2.0, -2.0, 2.0, 2.0, 2.0);
+  const std::array<Binary64WeightedSite3, 2> complete_competitors{
+      site(2U, 2.0, 0.0, 0.0),
+      site(4U, 0.0, 4.0, 0.0)};
+  const auto repaired = repair_exact_bounded_power_cell_subset_closure(
+      owner,
+      complete_competitors,
+      clipping_box,
+      std::span<const PointId>{});
+  const auto complete_oracle = build_exact_bounded_power_cell_reference(
+      owner, complete_competitors, clipping_box);
+  const ExactPowerCellReferenceResult* repaired_final = repaired.final_cell();
+  check(
+      repaired.decision ==
+              ExactPowerCellSubsetRepairDecision::
+                  repaired_complete_nonempty &&
+          repaired.initial_closure.has_value() &&
+          repaired.initial_closure->decision ==
+              ExactPowerCellSubsetClosureDecision::incomplete &&
+          repaired.initial_closure->required_candidate_additions ==
+              std::vector<PointId>({2U, 4U}) &&
+          repaired.initial_closure->audit.omitted_violating_halfspace_count ==
+              1U &&
+          repaired.initial_closure->audit
+                  .omitted_missing_active_incidence_count == 1U &&
+          repaired.canonical_closed_candidate_competitor_ids ==
+              std::vector<PointId>({2U, 4U}) &&
+          repaired.repaired_cell.has_value() &&
+          repaired.audit.exact_cell_construction_count == 2U &&
+          repaired.audit.omitted_constraint_scan_pass_count == 1U &&
+          repaired.audit.post_repair_omitted_constraint_scan_pass_count ==
+              0U &&
+          repaired.audit.simultaneous_repair_batch_count == 1U &&
+          repaired.audit.simultaneously_added_competitor_count == 2U &&
+          repaired_final != nullptr &&
+          repaired_final == &*repaired.repaired_cell &&
+          *repaired_final == complete_oracle,
+      "one simultaneous batch repairs a violator and a missing active "
+      "incidence, with no post-repair scan, to the complete exact oracle");
+
+  std::array<Binary64WeightedSite3, 2> reversed = complete_competitors;
+  std::reverse(reversed.begin(), reversed.end());
+  const auto replay = repair_exact_bounded_power_cell_subset_closure(
+      owner, reversed, clipping_box, std::span<const PointId>{});
+  check(
+      replay == repaired,
+      "complete-table permutations preserve the canonical simultaneous "
+      "repair result");
+
+  const std::array<Binary64WeightedSite3, 2> redundant_constants{
+      site(1U, 0.0, 0.0, 0.0, -2.0),
+      site(2U, 0.0, 0.0, 0.0)};
+  const auto constants = repair_exact_bounded_power_cell_subset_closure(
+      owner,
+      redundant_constants,
+      clipping_box,
+      std::span<const PointId>{});
+  check(
+      constants.decision ==
+              ExactPowerCellSubsetRepairDecision::
+                  already_complete_nonempty &&
+          constants.initial_closure.has_value() &&
+          constants.initial_closure->audit.omitted_owner_dominates_count ==
+              1U &&
+          constants.initial_closure->audit.omitted_coincident_tie_count ==
+              1U &&
+          constants.initial_closure->required_candidate_additions.empty() &&
+          constants.canonical_closed_candidate_competitor_ids.empty() &&
+          constants.audit.exact_cell_construction_count == 1U &&
+          constants.audit.simultaneous_repair_batch_count == 0U &&
+          !constants.repaired_cell.has_value(),
+      "owner-dominates and coincident-tie constraints are audited but never "
+      "added to a repair batch");
+
+  const std::array<Binary64WeightedSite3, 1> infeasible_constant{
+      site(3U, 0.0, 0.0, 0.0, 2.0)};
+  const auto repaired_empty =
+      repair_exact_bounded_power_cell_subset_closure(
+          owner,
+          infeasible_constant,
+          clipping_box,
+          std::span<const PointId>{});
+  const ExactPowerCellReferenceResult* repaired_empty_final =
+      repaired_empty.final_cell();
+  check(
+      repaired_empty.decision ==
+              ExactPowerCellSubsetRepairDecision::repaired_complete_empty &&
+          repaired_empty.initial_closure.has_value() &&
+          repaired_empty.initial_closure->required_candidate_additions ==
+              std::vector<PointId>{3U} &&
+          repaired_empty.initial_closure->audit
+                  .omitted_competitor_dominates_count == 1U &&
+          repaired_empty.canonical_closed_candidate_competitor_ids ==
+              std::vector<PointId>{3U} &&
+          repaired_empty.audit.exact_cell_construction_count == 2U &&
+          repaired_empty.audit.omitted_constraint_scan_pass_count == 1U &&
+          repaired_empty.audit
+                  .post_repair_omitted_constraint_scan_pass_count == 0U &&
+          repaired_empty.audit.simultaneous_repair_batch_count == 1U &&
+          repaired_empty.audit.simultaneously_added_competitor_count == 1U &&
+          repaired_empty_final != nullptr &&
+          repaired_empty_final->decision ==
+              ExactPowerCellReferenceDecision::complete_empty,
+      "an omitted competitor-dominates constant is added once and the "
+      "rebuilt cell is exactly empty");
+}
+
+void test_subset_repair_atomic_preflight_and_derived_maxima() {
+  const Binary64WeightedSite3 owner = site(0U, 0.0, 0.0, 0.0);
+  const ExactDyadicAabb3 clipping_box =
+      box(-2.0, -2.0, -2.0, 2.0, 2.0, 2.0);
+  const std::array<Binary64WeightedSite3, 2> complete_competitors{
+      site(2U, 2.0, 0.0, 0.0),
+      site(7U, 10.0, 0.0, 0.0)};
+  const std::array<PointId, 1> candidate{7U};
+
+  ExactPowerCellSubsetRepairBudget short_closure;
+  short_closure.subset_closure_budget
+      .maximum_omitted_vertex_test_count = 34U;
+  const auto closure_insufficient =
+      repair_exact_bounded_power_cell_subset_closure(
+          owner,
+          complete_competitors,
+          clipping_box,
+          candidate,
+          short_closure);
+  check(
+      closure_insufficient.decision ==
+              ExactPowerCellSubsetRepairDecision::insufficient_budget &&
+          closure_insufficient.requirements.subset_closure_requirements
+                  .conservative_omitted_vertex_test_count == 35U &&
+          !closure_insufficient.initial_closure.has_value() &&
+          !closure_insufficient.repaired_cell.has_value() &&
+          closure_insufficient.audit.exact_cell_construction_count == 0U &&
+          closure_insufficient.audit.omitted_constraint_scan_pass_count ==
+              0U &&
+          closure_insufficient.audit.simultaneous_repair_batch_count == 0U &&
+          closure_insufficient.final_cell() == nullptr,
+      "a one-below closure budget fails atomically before any optional "
+      "payload, scan, or cell construction");
+
+  ExactPowerCellSubsetRepairBudget short_rebuild;
+  short_rebuild.repaired_cell_budget.maximum_plane_triple_count = 55U;
+  const auto rebuild_insufficient =
+      repair_exact_bounded_power_cell_subset_closure(
+          owner,
+          complete_competitors,
+          clipping_box,
+          candidate,
+          short_rebuild);
+  check(
+      rebuild_insufficient.decision ==
+              ExactPowerCellSubsetRepairDecision::insufficient_budget &&
+          rebuild_insufficient.requirements
+                  .conservative_repaired_cell_requirements.has_value() &&
+          rebuild_insufficient.requirements
+                  .conservative_repaired_cell_requirements
+                  ->conservative_plane_triple_count == 56U &&
+          !rebuild_insufficient.initial_closure.has_value() &&
+          !rebuild_insufficient.repaired_cell.has_value() &&
+          rebuild_insufficient.audit.exact_cell_construction_count == 0U &&
+          rebuild_insufficient.audit.omitted_constraint_scan_pass_count ==
+              0U &&
+          rebuild_insufficient.audit.simultaneous_repair_batch_count == 0U &&
+          rebuild_insufficient.final_cell() == nullptr,
+      "a one-below rebuild budget also fails before constructing the seed "
+      "cell");
+
+  const std::array<Binary64WeightedSite3, 7> seven_competitors{
+      site(1U, 1.0, 0.0, 0.0),
+      site(2U, 2.0, 0.0, 0.0),
+      site(3U, 3.0, 0.0, 0.0),
+      site(4U, 4.0, 0.0, 0.0),
+      site(5U, 5.0, 0.0, 0.0),
+      site(6U, 6.0, 0.0, 0.0),
+      site(7U, 7.0, 0.0, 0.0)};
+  const std::array<PointId, 6> six_candidates{6U, 5U, 4U, 3U, 2U, 1U};
+  const auto derived_maximum =
+      repair_exact_bounded_power_cell_subset_closure(
+          owner,
+          seven_competitors,
+          clipping_box,
+          six_candidates);
+  check(
+      ExactPowerCellSubsetRepairBudget::
+              trusted_maximum_cumulative_plane_triple_count == 506U &&
+          ExactPowerCellSubsetRepairBudget::
+                  trusted_maximum_cumulative_vertex_count == 506U &&
+          ExactPowerCellSubsetRepairBudget::
+                  trusted_maximum_cumulative_incidence_count == 6358U &&
+          derived_maximum.requirements.subset_closure_requirements
+                  .candidate_cell_requirements
+                  .conservative_plane_triple_count == 220U &&
+          derived_maximum.requirements.subset_closure_requirements
+                  .candidate_cell_requirements
+                  .conservative_incidence_count == 2640U &&
+          derived_maximum.requirements
+                  .conservative_repaired_cell_requirements.has_value() &&
+          derived_maximum.requirements
+                  .conservative_repaired_cell_requirements
+                  ->conservative_plane_triple_count == 286U &&
+          derived_maximum.requirements
+                  .conservative_repaired_cell_requirements
+                  ->conservative_incidence_count == 3718U &&
+          derived_maximum.requirements
+                  .conservative_exact_cell_construction_count == 2U &&
+          derived_maximum.requirements
+                  .conservative_omitted_scan_pass_count == 1U &&
+          derived_maximum.requirements
+                  .conservative_cumulative_plane_triple_count == 506U &&
+          derived_maximum.requirements
+                  .conservative_cumulative_vertex_count == 506U &&
+          derived_maximum.requirements
+                  .conservative_cumulative_incidence_count == 6358U,
+      "the f=7, c=6 preflight derives the trusted 220+286 and "
+      "2640+3718 cumulative maxima");
+}
+
+void test_subset_repair_to_string_contract() {
+  check(
+      morsehgp3d::spatial::to_string(
+          ExactPowerCellSubsetRepairDecision::already_complete_nonempty) ==
+              "already_complete_nonempty" &&
+          morsehgp3d::spatial::to_string(
+              ExactPowerCellSubsetRepairDecision::already_complete_empty) ==
+              "already_complete_empty" &&
+          morsehgp3d::spatial::to_string(
+              ExactPowerCellSubsetRepairDecision::repaired_complete_nonempty) ==
+              "repaired_complete_nonempty" &&
+          morsehgp3d::spatial::to_string(
+              ExactPowerCellSubsetRepairDecision::repaired_complete_empty) ==
+              "repaired_complete_empty" &&
+          morsehgp3d::spatial::to_string(
+              ExactPowerCellSubsetRepairDecision::insufficient_budget) ==
+              "insufficient_budget",
+      "every subset-repair decision has a stable diagnostic spelling");
+  check_throws<std::invalid_argument>(
+      [] {
+        static_cast<void>(morsehgp3d::spatial::to_string(
+            static_cast<ExactPowerCellSubsetRepairDecision>(255U)));
+      },
+      "an invalid subset-repair decision cannot be serialized");
+}
+
 void test_subset_closure_to_string_contract() {
   check(
       morsehgp3d::spatial::to_string(
@@ -1174,6 +1521,10 @@ int main() {
   test_subset_closure_symmetrized_id_orientation();
   test_subset_closure_empty_and_constant_constraints();
   test_subset_closure_preflight_and_id_contracts();
+  test_subset_repair_completed_paths_and_final_cell();
+  test_subset_repair_simultaneous_batch_constants_and_permutation();
+  test_subset_repair_atomic_preflight_and_derived_maxima();
+  test_subset_repair_to_string_contract();
   test_subset_closure_to_string_contract();
   if (failures != 0) {
     std::cerr << failures << " power-cell reference checks failed\n";

@@ -534,6 +534,14 @@ Le contrat borné `exact_semantic_subset_power_cell_closure_n8_v1` exige que $K_
 
 Ce certificat décide uniquement une cellule locale bornée et ses incidences propres actives sur le domaine $n\leq8$; les ties coïncidents sont comptés séparément, car ils ne définissent aucun plan frontière. Il ne certifie ni le parcours Paragram, ni un diagramme global, ni que $\Omega$ contient strictement $\mathrm{conv}(X)$, ni un catalogue, une attache, `RelevantGP` ou un statut public MorseHGP3D.
 
+### 13.3 Réparation simultanée matérialisée
+
+Le contrat `exact_semantic_subset_power_cell_single_repair_n8_v1` applique le lot calculé en 13.2 sans boucle de fermeture. Lorsque $K_i\setminus J$ est non vide, son préflight doit couvrir simultanément la construction de $H_i(J)$, le scan omis et une seconde construction conservative utilisant tout $K_i$; une insuffisance précède donc toute géométrie. Lorsque $J=K_i$, aucun budget de seconde construction n'est requis. Les entrées invalides et tout budget supérieur aux caps de confiance restent rejetés avant cette décision.
+
+Une décision `incomplete` de 13.2 produit $J'=J\cup A$, où $A$ contient simultanément chaque identifiant requis. Le contrat construit $H_i(J')$ exactement une fois et ne rescane aucune contrainte omise. Cette absence de rescan est certifiée par l'inclusion $H_i(J')\subseteq H_i(J)$ : toute contrainte propre encore omise était strictement négative sur le membre de droite et le reste sur le membre de gauche. Au plus deux cellules exactes, un passage de scan et un lot de réparation sont donc observables dans l'audit; le compteur de post-scan vaut toujours zéro.
+
+Pour $f=\lvert K_i\rvert\leq7$ et $c=\lvert J\rvert$, une branche réparée vérifie $c\leq6$, au plus 506 triplets et sommets conservatifs cumulés, au plus 6358 incidences conservatives cumulées et au plus 360 évaluations omises. La cellule finale est celle de l'amorce si elle était déjà complète ou vide, sinon la cellule reconstruite. Les identifiants de $J'$ peuvent contenir des contraintes devenues redondantes; ils ferment les incidences propres actives, mais ne publient ni facettes exactes seules, ni adjacency intercellulaire.
+
 ## 14. Axes d'exécution
 
 Le backend, le profil, le mode et le statut sont orthogonaux :

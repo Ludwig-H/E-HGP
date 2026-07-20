@@ -80,6 +80,14 @@ Les tests hôte ciblés passent en 0,03 s sous GCC strict et en 0,02 s sous Clan
 
 La seconde question, celle de l'intégration produit, franchit le seuil d'abandon fixé en 7.3. Le choix du stream, les erreurs asynchrones, les allocations et libérations brutes traversent `pwr_bvh.cu` et `cuBQL::gpuBuilder`; les valeurs des guesses ne sont pas intégralement bornées avant lecture GPU; l'API ne clippe que des cellules site-centriques alors que les phases 8–9 exigent des parents H-polytope génériques. La série Paragram reste donc gelée à deux patchs comme comparateur de débit et source optionnelle de graines sémantiques. MorseHGP3D sélectionne une primitive H-polytope interne, fondée d'abord sur l'énumération bornée des triplets et les retombées exactes, puis seulement sur un fast path incrémental si le profil l'exige.
 
+## Jalon 7.5 — reconstruction simultanée bornée
+
+`repair_exact_bounded_power_cell_subset_closure` matérialise désormais le lot 7.4. Son préflight authentifie la même table et la même amorce, couvre le premier polytope, le scan et, lorsqu'un concurrent est omis, une seconde cellule conservative contenant jusqu'à tous les concurrents. Un budget juste insuffisant s'arrête donc avec zéro construction, zéro scan et aucun payload géométrique. Une amorce déjà complète ou déjà vide s'arrête après la première construction; une amorce incomplète reçoit tous ses ajouts en un seul lot et une unique reconstruction.
+
+Le résultat expose séparément la fermeture initiale et la cellule reconstruite optionnelle. Son audit borne la branche réparée à deux constructions, un passage de scan, zéro post-scan et un lot. Pour $f=7,c=6$, les exigences conservatives cumulées atteignent exactement 506 triplets et sommets et 6358 incidences; le scan propre à 7.4 reste plafonné à 360. Le non-rescan n'est pas une heuristique d'arrêt : il suit du fait que les contraintes encore omises étaient strictement négatives sur le polytope initial et le restent sur son sous-polytope reconstruit.
+
+Les tests hôte ciblés comparent la cellule finale au build exact utilisant toute la table, couvrent les sorties vide et non vide, les constantes et ties, les budgets atomiques, les caps cumulés et l'absence de seconde construction lorsque $J=K$. Cette composition reste locale et bornée; la primitive H-polytope générique, le chemin CUDA, NVCC, G4 et tout statut public restent ouverts.
+
 ## Convention analytique des poids
 
 Pour le site $p_i$ de poids $w_i$, la puissance utilisée par l'audit est
