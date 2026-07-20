@@ -160,6 +160,15 @@ target_link_libraries(
   PRIVATE morsehgp3d::hierarchy
 )
 
+add_executable(
+  morsehgp3d_hierarchy_critical_catalog_typed_gamma_root_overlay_tests
+  test_hierarchy_critical_catalog_typed_gamma_root_overlay.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_critical_catalog_typed_gamma_root_overlay_tests
+  PRIVATE morsehgp3d::hierarchy
+)
+
 add_executable(morsehgp3d_hierarchy_gamma_dump hierarchy_gamma_dump.cpp)
 target_link_libraries(
   morsehgp3d_hierarchy_gamma_dump
@@ -470,6 +479,7 @@ set(
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_typed_gamma_journal_tests
+  morsehgp3d_hierarchy_critical_catalog_typed_gamma_root_overlay_tests
   morsehgp3d_hierarchy_gamma_dump
   morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_dump
   morsehgp3d_hierarchy_boruvka_tests
@@ -552,6 +562,10 @@ if(MSVC)
   )
   target_compile_options(
     morsehgp3d_hierarchy_critical_catalog_typed_gamma_journal_tests
+    PRIVATE /W4 /WX
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_critical_catalog_typed_gamma_root_overlay_tests
     PRIVATE /W4 /WX
   )
   target_compile_options(morsehgp3d_hierarchy_gamma_dump PRIVATE /W4 /WX)
@@ -872,6 +886,16 @@ else()
       -Werror
   )
   target_compile_options(
+    morsehgp3d_hierarchy_critical_catalog_typed_gamma_root_overlay_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
     morsehgp3d_hierarchy_gamma_dump
     PRIVATE
       -Wall
@@ -1144,6 +1168,11 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_critical_catalog_typed_gamma_journal
   COMMAND morsehgp3d_hierarchy_critical_catalog_typed_gamma_journal_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_critical_catalog_typed_gamma_root_overlay
+  COMMAND
+    morsehgp3d_hierarchy_critical_catalog_typed_gamma_root_overlay_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_boruvka
