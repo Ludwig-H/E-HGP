@@ -209,7 +209,19 @@ class GammaHierarchyTests(unittest.TestCase):
             )
             forest = build_merge_forest(filtration, "hgp_reduced")
 
-            for level in filtration.critical_levels:
+            critical_levels = tuple(filtration.critical_levels)
+            interval_levels = tuple(
+                (left + right) / 2
+                for left, right in zip(critical_levels, critical_levels[1:])
+            )
+            queried_levels = (
+                (critical_levels[0] - 1,)
+                + critical_levels
+                + interval_levels
+                + (critical_levels[-1] + 1,)
+            )
+
+            for level in queried_levels:
                 for closed in (False, True):
                     with self.subTest(order=order, level=level, closed=closed):
                         gamma_cut = filtration.cut(level, closed=closed)
