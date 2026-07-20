@@ -205,6 +205,25 @@ target_link_libraries(
   PRIVATE morsehgp3d::hierarchy
 )
 
+add_executable(
+  morsehgp3d_hierarchy_morse_gamma_partition_sweep_tests
+  test_hierarchy_morse_gamma_partition_sweep.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_morse_gamma_partition_sweep_tests
+  PRIVATE morsehgp3d::hierarchy
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_morse_gamma_partition_sweep_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_morse_gamma_partition_sweep_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 if(MSVC)
   target_compile_options(
     morsehgp3d_contract_canonical_id_tests PRIVATE /W4 /WX
@@ -539,6 +558,7 @@ set(
   morsehgp3d_hierarchy_critical_catalog_typed_gamma_arm_root_composition_tests
   morsehgp3d_hierarchy_critical_catalog_typed_gamma_arm_root_path_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_typed_gamma_durable_arm_key_catalog_tests
+  morsehgp3d_hierarchy_morse_gamma_partition_sweep_tests
   morsehgp3d_hierarchy_gamma_dump
   morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_dump
   morsehgp3d_hierarchy_boruvka_tests
@@ -1282,6 +1302,10 @@ add_test(
     morsehgp3d.hierarchy_critical_catalog_typed_gamma_durable_arm_key_catalog
   COMMAND
     morsehgp3d_hierarchy_critical_catalog_typed_gamma_durable_arm_key_catalog_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_morse_gamma_partition_sweep
+  COMMAND morsehgp3d_hierarchy_morse_gamma_partition_sweep_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_boruvka

@@ -310,6 +310,7 @@ add_library(
     src/cpu/hierarchy/emst.cpp
     src/cpu/hierarchy/gamma.cpp
     src/cpu/hierarchy/gamma_transition.cpp
+    src/cpu/hierarchy/morse_gamma_partition_sweep.cpp
     src/cpu/hierarchy/reduced_gamma_batch.cpp
     src/cpu/hierarchy/reduced_gamma_cut.cpp
     src/cpu/hierarchy/reduced_gamma_history.cpp
