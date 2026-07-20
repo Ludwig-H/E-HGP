@@ -221,6 +221,16 @@ Le préflight utilise la borne conservatrice déjà prouvée $\lvert\mathcal{A}\
 
 La base `exact_fresh_typed_critical_arm_target_indices_composed_with_recertified_target_root_bindings_v1` prouve uniquement cette composition fonctionnelle bornée. Les chemins 6.7 restent transitoires : aucun candidat n'est encore un `Attachment` rejouable au sens de M.1, et aucun identifiant durable, morphisme vertical, transaction de forêt `full_pi0`, DAG global, pointer-jumping, quotient de plateau, forêt multi-ordre ou `public_status` n'est produit.
 
+### 7.6 Overlay interne des chemins rejouables
+
+Le jalon 6.21 reconstruit le catalogue 6.12 une seule fois, puis exactement une famille 6.7 par selle du journal 6.18 recertifié. Pour chaque candidat 6.20, la clé `(catalog_event_index, order, removed_shell_point_id)` sélectionne un unique bras frais. Sa classe terminale doit être identique à celle du journal, ses facettes initiale et terminale doivent appartenir au témoin externe `full_pi0`, et sa disposition 6.19 ainsi que son éventuelle racine locale sont recopiées sans reclassification. Deux bras qui partagent une cible ou une racine conservent deux chemins distincts.
+
+Le payload retenu est compact mais analytiquement rejouable : centre et niveau critiques, témoin du segment initial, distance et coefficient sortant du point retiré, borne locale, contraintes extérieures négatives, nœuds exacts de la chaîne et témoins des segments engagés. Il conserve séparément le niveau de l'atome source et le niveau miniball de chaque facette. Les coutures exactes, la stricte sous-niveauté source-ouverte et le terminal actif régulier sont contrôlés avant le commit atomique. Le catalogue, les partitions globales, les miniballs exhaustives et le `stopping_probe` restent transitoires.
+
+Avec $E=\sum_{s=2}^{\min(4,k+1,n)}\binom{n}{s}$, $A=4E$ et un budget par bras $B\leq4096$, les capacités conservatives sont $A\leq5824$ chemins, $AB\leq23855104$ segments de chaîne, $A(B+1)\leq23860928$ segments composites, $kA(B+1)\leq238609280$ références de `PointId` et $A(n-k-1)\leq64064$ contraintes extérieures. Ces bornes sont dérivées avant toute recertification géométrique et tous les plafonds imbriqués 6.20 sont contrôlés au préalable.
+
+La base `exact_fresh_event_local_typed_critical_arm_strict_descent_paths_replayed_and_linked_to_full_pi0_targets_with_separate_local_reduced_dispositions_v1` ne certifie que cet overlay interne mono-ordre borné. Le chemin atteint une facette de la composante stricte; le `root_node_id` réduit local n'est pas son extrémité géométrique. Aucun enregistrement n'est encore une `Attachment` publique : H5, O3, M.1, les identifiants durables, l'indépendance générale des choix, l'attache verticale, la transaction de forêt `full_pi0`, le DAG global, les plateaux, la forêt multi-ordre et tout `public_status` restent ouverts.
+
 ## 8. DAG fonctionnel et GPU
 
 Pour toutes les facettes actives requises par le catalogue, on peut calculer les successeurs en parallèle. Sous les hypothèses strictes, les arcs non stationnaires diminuent $\beta$; le graphe est un DAG fonctionnel orienté vers les minima.

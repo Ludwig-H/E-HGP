@@ -227,6 +227,10 @@ struct ExactFacetDescentSegmentWitness {
   bool quadratic_max_upper_bound_certified{false};
   bool closed_segment_nonstrict_sublevel{false};
   bool half_open_segment_strict_sublevel{false};
+
+  friend bool operator==(
+      const ExactFacetDescentSegmentWitness&,
+      const ExactFacetDescentSegmentWitness&) = default;
 };
 
 struct ExactFacetDescentSegmentCounters {

@@ -154,6 +154,11 @@ struct ExactCriticalCatalogTypedGammaArmRootCompositionVerification {
       default;
 };
 
+// Checks every nested scalar cap without starting geometry.  Later bounded
+// overlays reuse this fail-closed entry point before their own preflight.
+void validate_exact_critical_catalog_typed_gamma_arm_root_composition_budget_caps(
+    const ExactCriticalCatalogTypedGammaArmRootCompositionBudget& budget);
+
 [[nodiscard]] ExactCriticalCatalogTypedGammaArmRootCompositionResult
 build_exact_critical_catalog_typed_gamma_arm_root_composition(
     const spatial::CanonicalPointCloud& cloud,

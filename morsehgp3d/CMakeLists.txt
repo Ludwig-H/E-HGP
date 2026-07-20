@@ -271,6 +271,7 @@ add_library(
     src/cpu/hierarchy/critical_catalog_reduced_gamma_overlay.cpp
     src/cpu/hierarchy/critical_catalog_typed_gamma_journal.cpp
     src/cpu/hierarchy/critical_catalog_typed_gamma_arm_root_composition.cpp
+    src/cpu/hierarchy/critical_catalog_typed_gamma_arm_root_path_overlay.cpp
     src/cpu/hierarchy/critical_catalog_typed_gamma_root_overlay.cpp
     src/cpu/hierarchy/critical_event_gamma_overlay.cpp
     src/cpu/hierarchy/emst.cpp
