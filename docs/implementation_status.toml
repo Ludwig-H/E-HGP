@@ -360,7 +360,17 @@ status = "ready"
 entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["2B", "4"]
-evidence = []
+backend = "cuda"
+profile = "generic_core"
+mode = "benchmark_only"
+milestone_semantics = "pinned_upstream_power_primitive_source_audit_and_bounded_reference_cpu_cell_oracle_contract_without_primitive_selection_or_public_status"
+phase7_1_source_pin = "paragram_cadf96c854d27c8234d5b64749b8998e3d1af7f8_cubql_d18c5fa1a5c98665d13484841ae65774da7751e8_apache_2_0"
+phase7_1_source_audit = "documented_direct_adapter_rejected_adjacency_status_only_no_vertices_binding_planes_or_incidences_and_silent_capacity_64_bvh_stack_eviction_without_completeness_status"
+phase7_1_decision = "minimal_pinned_fork_candidate_not_selected_internal_primitive_fallback_open"
+phase7_1_cpu_oracle_contract = "implemented_and_validated_host_reference_cpu_bounded_n8_explicit_dyadic_box_power_distance_minus_weight_at_most_13_planes_286_triples_286_vertices_3718_incidences_with_exact_lower_dimensional_and_empty_cells"
+phase7_1_public_status = "not_claimed_proposal_and_local_exact_decision_remain_distinct"
+phase7_1_evidence = ["docs/validation/PHASE7_PRIMITIVE_AUDIT.md", "docs/references/paragram_source_pin.toml", "tools/check_paragram_source_pin.py", "morsehgp3d/include/morsehgp3d/spatial/power_cell_reference.hpp", "morsehgp3d/src/cpu/spatial/power_cell_reference.cpp", "morsehgp3d/tests/unit/test_power_cell_reference.cpp", "docs/SPECIFICATION_MORSEHGP3D.md", "docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md", "docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md", "docs/TEST_PLAN_MORSEHGP3D.md", "Paragram public output is adjacency offsets and per-site status only", "fixed plane and vertex capacities are 64 and the power BVH traversal stack capacity is 64", "bounded stack eviction is not represented by the public status tensor", "direct adapter rejected; minimal pinned fork remains a candidate but is not selected", "bounded exact host oracle covers ordinary weighted coincident empty and dimensions two one and zero fixtures plus canonical permutation and five one-below preflights", "Release strict GCC and Clang targeted builds and CTests pass", "no Paragram build differential sanitizer benchmark CUDA G4 or public-status claim", "GCP not used"]
+evidence = ["docs/validation/PHASE7_PRIMITIVE_AUDIT.md", "docs/references/paragram_source_pin.toml", "tools/check_paragram_source_pin.py", "morsehgp3d/include/morsehgp3d/spatial/power_cell_reference.hpp", "morsehgp3d/src/cpu/spatial/power_cell_reference.cpp", "morsehgp3d/tests/unit/test_power_cell_reference.cpp"]
 blocking_reason = ""
 
 [[phases]]

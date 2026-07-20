@@ -1,0 +1,130 @@
+schema_version = 1
+checked_on = "2026-07-20"
+purpose = "MorseHGP3D phase 7.1 offline-auditable Paragram source pin"
+
+[upstream]
+name = "Paragram"
+repository_url = "https://github.com/zenseact/paragram.git"
+commit = "cadf96c854d27c8234d5b64749b8998e3d1af7f8"
+tree = "ad17c2eff4c5beec43330f597ee5d6616b62d32d"
+license_spdx = "Apache-2.0"
+license_path = "LICENSE"
+
+[policy]
+worktree_must_be_clean = true
+regular_file_inventory_complete = true
+
+[[submodule]]
+path = "paragram/external/cubql"
+url = "https://github.com/NVIDIA/cuBQL.git"
+gitlink = "d18c5fa1a5c98665d13484841ae65774da7751e8"
+
+[[audited_file]]
+path = ".gitignore"
+bytes = 105
+sha256 = "8bef106baea75f3ddeb5ed54ba3ba6d23e7ed70a80c5c99dc91d1e2e36d5e949"
+
+[[audited_file]]
+path = ".gitmodules"
+bytes = 113
+sha256 = "d8132a44ccdff0b68c96759b082f1f63013bfabed08949367db631b35a5707a7"
+
+[[audited_file]]
+path = "LICENSE"
+bytes = 11356
+sha256 = "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1"
+
+[[audited_file]]
+path = "MANIFEST.in"
+bytes = 179
+sha256 = "879807827259abf6ed6cb9c9752a26b14c60262a415a11a42840e6285cf038dc"
+
+[[audited_file]]
+path = "README.md"
+bytes = 3914
+sha256 = "f6627d954ce58e6ccd15cfd582ff7e211aa4ab3a285da85eae353309f8ec5492"
+
+[[audited_file]]
+path = "paragram/__init__.py"
+bytes = 132
+sha256 = "3d396b7bccdfa19c175dba3bbd32aefc5fa332bdf7c60b4af963db73abcabe13"
+
+[[audited_file]]
+path = "paragram/_api.py"
+bytes = 4487
+sha256 = "088afe02c1c15a4de64e36bd994f13e077bd6bb79624717b83c20c0d19596790"
+
+[[audited_file]]
+path = "paragram/_backend.py"
+bytes = 6289
+sha256 = "ca958254850259c56bf93247d9be41af7fbf0e35ac9cbfcc91a23b7885f03e72"
+
+[[audited_file]]
+path = "paragram/csrc/ext.cpp"
+bytes = 965
+sha256 = "2d26c44f8a4f583f91cc59770ea1fd402cc2a4f5eeff60b691f4f858bb1928fe"
+
+[[audited_file]]
+path = "paragram/csrc/laguerre/adjacency.cuh"
+bytes = 5186
+sha256 = "682fb73351a3636ecf7defc7cdaf8269a875f7d38632ac72d4f48223919636e2"
+
+[[audited_file]]
+path = "paragram/csrc/laguerre/chunking.h"
+bytes = 1590
+sha256 = "01b62cef827292af7bd79a4bb37a9388e5855217c7f60df9d4fd162e6d94555c"
+
+[[audited_file]]
+path = "paragram/csrc/laguerre/faster_convex_cell.cuh"
+bytes = 22175
+sha256 = "1ccbbee36d5ae24ff1097ec06e9d0ab26483ce9c67f547f0a96f22cf53e6561e"
+
+[[audited_file]]
+path = "paragram/csrc/laguerre/laguerre.h"
+bytes = 1189
+sha256 = "aef0d6e47df21dd01643c624c1070eff8d06ae4d2608be3d2072eb7a4077077f"
+
+[[audited_file]]
+path = "paragram/csrc/laguerre/laguerre_ultra.cu"
+bytes = 19204
+sha256 = "439e208448fc2174df3a734d9c84734e66c2bb9f53071ca009fdd84ae8fa7170"
+
+[[audited_file]]
+path = "paragram/csrc/laguerre/pwr_bvh.cu"
+bytes = 14837
+sha256 = "8e811371363035242455e265640a89668db46883faf72d392e300fbcd5487cd9"
+
+[[audited_file]]
+path = "paragram/csrc/laguerre/pwr_bvh.cuh"
+bytes = 17142
+sha256 = "d4d8de7513c6ef13ff0dde18e8b65a940b12daf5de41519ed10788b11abdb146"
+
+[[audited_file]]
+path = "paragram/csrc/laguerre/voronoi_bvh.cuh"
+bytes = 9398
+sha256 = "183393669bb14a922bba8f546d043ceeb0a007419865f33acc6587a6e359d53e"
+
+[[audited_file]]
+path = "paragram/csrc/laguerre/voronoi_convex_cell.cuh"
+bytes = 18664
+sha256 = "7bed6bb343b91706c813891a1e42ac52cb96e02fb2e2575afd6ae0fbc06958ce"
+
+[[audited_file]]
+path = "paragram/csrc/laguerre/voronoi_ultra.cu"
+bytes = 14890
+sha256 = "81383197616ba898288726fa354e4a0eb3e44f25c4b010fcf160c19d8448c27f"
+
+[[audited_file]]
+path = "paragram/csrc/utils/cuda_helpers.h"
+bytes = 3110
+sha256 = "1ebbf0e91b02cc7256b68e3b510e441ec6694ddac39ec904c73ad3ac713a6b77"
+
+[[audited_file]]
+path = "paragram/cuda/__init__.py"
+bytes = 348
+sha256 = "7eb899864475c42553347617327c0bcd2cc8c7dff49cee981edf43f74cf5ca97"
+
+[[audited_file]]
+path = "pyproject.toml"
+bytes = 969
+sha256 = "cf1993ec00eabc645030c708c34d50491927a80ac960c2d48970619a3a46bd71"

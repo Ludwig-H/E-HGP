@@ -586,6 +586,12 @@ La base est `exact_catalog_minima_and_strict_arm_terminal_hyperkruskal_partition
 
 ## Phase 7 — Audit de la primitive de puissance
 
+### Jalon 7.1 — source figée et contrat de falsification borné
+
+L'[audit dédié](validation/PHASE7_PRIMITIVE_AUDIT.md) fige Paragram au commit `cadf96c854d27c8234d5b64749b8998e3d1af7f8`, son gitlink cuBQL au commit `d18c5fa1a5c98665d13484841ae65774da7751e8` et la licence Apache-2.0. L'adaptateur direct est rejeté : la surface amont retourne seulement adjacency, offsets et statuts, tandis que le parcours BVH à pile 64 peut évincer silencieusement une entrée et que ni sommets, ni plans liants, ni incidences ne sont exposés. Un fork minimal reste candidat sans être choisi; une primitive interne demeure le repli.
+
+Avant tout benchmark long, `build_exact_bounded_power_cell_reference` implémente un oracle `reference_cpu` borné à $n\leq8$. Il adopte $\delta_i(y)=\left\Vert y-p_i\right\Vert^2-w_i$, la cellule $\Phi_{ij}(y)=\delta_i(y)-\delta_j(y)\leq0$ dans une boîte dyadique explicite et au plus treize plans par cellule. Ses plafonds conservateurs sont 286 triplets de plans, 286 sommets rationnels et 3718 incidences sommet--plan. Les tests exacts couvrent notamment le cube, les poids signés, les sites confondus, une cellule vide par demi-espaces propres incompatibles et les dimensions deux, un et zéro. Cet oracle distingue la proposition flottante de la décision exacte locale et ne publie aucun statut MorseHGP3D.
+
 ### But
 
 Choisir la primitive GPU sans lui déléguer la certification.

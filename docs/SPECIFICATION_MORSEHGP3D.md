@@ -506,6 +506,16 @@ $$m_{\star}=s_{\max}-2\leq K_{\mathrm{eff}}-1.$$
 
 En effet, un événement utile de rayon strictement positif possède $\lvert U\rvert\geq2$ et $s\leq s_{\max}$. L'énumérateur ferme les parents $C_0$ à $C_{m_{\star}}$. À la profondeur finale, il construit et ferme encore les morceaux $P(I,u)$ nécessaires aux intersections de sites extérieurs, puis extrait leurs strates; il ne les réunit pas en cellules $C_{m_{\star}+1}$ et ne les propage pas. Si $n\geq K_{\mathrm{eff}}+1$, alors $m_{\star}=K_{\mathrm{eff}}-1$; en particulier, pour $n>10$ et $K_{\mathrm{eff}}=10$, $m_{\star}=9$ et aucun $C_{10}$ ou $C_{11}$ n'est construit. Au bord $n=K_{\mathrm{eff}}\geq2$, on a au contraire $m_{\star}=n-2$, car le rang $n+1$ est impossible. Si $s_{\max}=1$, le rang un de rayon nul est injecté directement et aucune cascade n'est lancée.
 
+### 13.1 Contrat borné d'audit d'une primitive pondérée
+
+La Phase 7 compare les primitives de proposition avec la convention $\delta_i(y)=\left\Vert y-p_i\right\Vert^2-w_i$. Pour deux sites pondérés, la contrainte de la cellule de $i$ face à $j$ est $\Phi_{ij}(y)=\delta_i(y)-\delta_j(y)=2(p_j-p_i)\mathbin{\cdot}y+\left\Vert p_i\right\Vert^2-\left\Vert p_j\right\Vert^2-w_i+w_j\leq0$. Cette orientation impose qu'augmenter $w_i$ agrandit la cellule de $i$ et qu'une translation commune des poids ne change pas le diagramme.
+
+L'oracle d'audit initial reçoit une boîte dyadique explicite $\Omega$ et se limite à $n\leq8$. Une cellule possède alors au plus $P=6+(n-1)\leq13$ plans. L'énumération exhaustive des triplets borne le travail à $\binom{13}{3}=286$ intersections candidates, 286 sommets rationnels après filtrage au maximum et $13\times286=3718$ tests d'incidence. Ces plafonds dimensionnent un oracle local de falsification; ils ne modifient ni le backend exact v2 ni le domaine de publication.
+
+L'implémentation `build_exact_bounded_power_cell_reference` trie les concurrents par identifiant, classifie exactement les sites confondus, énumère les intersections de rang trois avec les primitives rationnelles existantes, filtre toutes les inégalités puis reconstruit la liste complète des plans actifs de chaque sommet. Les décisions `complete_nonempty` et `complete_empty` décrivent uniquement le polyèdre local fermé, y compris ses cas de dimension inférieure; elles ne certifient ni position générale, ni complétude d'une proposition externe, ni diagramme global.
+
+Une primitive GPU externe reste une source de propositions flottantes tant que tous ses plans actifs, sommets, incidences, overflows et abandons de parcours ne sont pas exposés puis recertifiés. Une adjacency plausible ou un statut local de succès ne ferme pas une cellule et ne peut produire aucun `public_status=exact`.
+
 ## 14. Axes d'exécution
 
 Le backend, le profil, le mode et le statut sont orthogonaux :

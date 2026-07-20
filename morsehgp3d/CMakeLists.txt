@@ -263,6 +263,7 @@ add_library(
     src/cpu/spatial/point_cloud.cpp
     src/cpu/spatial/brute_force.cpp
     src/cpu/spatial/lbvh.cpp
+    src/cpu/spatial/power_cell_reference.cpp
 )
 add_library(morsehgp3d::spatial ALIAS morsehgp3d_spatial)
 set_target_properties(

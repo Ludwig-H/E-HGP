@@ -1,0 +1,86 @@
+# Audit Phase 7 — primitive de puissance
+
+## Statut du jalon 7.1
+
+- phase : `7`, `ready`; la phase 5 reste l'unique phase `in_progress`;
+- backend : `cuda` pour la primitive candidate, `reference_cpu` pour l'oracle borné;
+- profile : `generic_core`;
+- mode : `benchmark_only`;
+- porte d'entrée : satisfaite par les phases 2B et 4 fermées;
+- porte de sortie : non satisfaite;
+- statut public : aucun; ce jalon ne produit ni catalogue, ni forêt, ni résultat MorseHGP3D;
+- GCP : non utilisé.
+
+Le jalon 7.1 fige la provenance amont, la convention analytique des poids et la taille du premier oracle indépendant. Il ne choisit pas encore entre un fork minimal et une primitive interne.
+
+## Provenance figée
+
+| composant | référence auditée | rôle |
+|---|---|---|
+| Paragram | dépôt `https://github.com/zenseact/paragram.git`, commit `cadf96c854d27c8234d5b64749b8998e3d1af7f8` | primitive CUDA de proposition |
+| cuBQL | gitlink `paragram/external/cubql`, commit `d18c5fa1a5c98665d13484841ae65774da7751e8` | BVH amont |
+| licence Paragram | Apache-2.0 au commit figé | autorise un fork sous respect des notices et du journal des modifications |
+
+Le manifeste [`paragram_source_pin.toml`](../references/paragram_source_pin.toml) et le checker `tools/check_paragram_source_pin.py` vérifient cette identité sans sélectionner la primitive pour le produit. Toute mesure future doit enregistrer ces deux commits, le mode fast math, la configuration de chunking et le matériel.
+
+## Résultat de l'audit amont
+
+La surface publique retourne l'adjacence CSR, ses offsets et un statut par site. Elle ne retourne ni les sommets des cellules, ni leurs plans liants, ni les incidences sommet--plan nécessaires au rejeu exact. Le noyau emploie des capacités fixes de 64 plans et 64 sommets; les statuts non nuls distinguent notamment les overflows de plans ou de sommets, la cellule vide, le rayon de sécurité non atteint et une frontière incohérente.
+
+Ces statuts ne ferment pas toute perte. Le parcours du BVH de puissance conserve une pile de 64 entrées et, lorsqu'elle est pleine, évince silencieusement l'entrée la plus éloignée si une entrée plus proche arrive. Cette éviction ne possède pas de statut de complétude. Le succès d'une cellule ne prouve donc pas que tous les coupeurs pertinents ont été visités. Le chunking borne la mémoire d'exécution mais ne transforme pas cette proposition en certificat.
+
+La compilation active `-use_fast_math` par défaut et `NO_FAST_MATH=1` le désactive. La boîte amont est l'AABB flottante du BVH paddée par la constante `1.0f`; elle n'est ni la boîte dyadique explicite ni le témoin de padding exigés par le contrat MorseHGP3D.
+
+## Décision d'architecture
+
+L'adaptateur direct de la surface amont est rejeté. Il ne peut fournir les objets requis pour reconstruire et fermer une cellule, et un statut `success` ne couvre pas l'éviction de pile du BVH.
+
+Un fork minimal épinglé reste candidat, sans être choisi. Pour devenir évaluable, il devra au minimum :
+
+1. recevoir la boîte dyadique explicite de l'appelant sans padding caché;
+2. exposer les sommets proposés, les plans actifs et leur provenance site ou face de boîte;
+3. exposer les incidences sommet--plan avant compactage de l'adjacence;
+4. transformer toute éviction du parcours, tout overflow et toute frontière incohérente en statut fail-closed;
+5. conserver deux builds identifiables, avec et sans fast math;
+6. documenter les modifications et notices Apache-2.0.
+
+La primitive interne reste le repli si ces modifications deviennent plus complexes qu'un clipper spécialisé et rejouable.
+
+## Convention analytique des poids
+
+Pour le site $p_i$ de poids $w_i$, la puissance utilisée par l'audit est
+
+$$\delta_i(y)=\left\Vert y-p_i\right\Vert^2-w_i.$$
+
+La cellule de $i$ dans une boîte dyadique explicite $\Omega$ est définie par $\Phi_{ij}(y)=\delta_i(y)-\delta_j(y)\leq0$ pour tout $j\neq i$, soit
+
+$$\Phi_{ij}(y)=2(p_j-p_i)\mathbin{\cdot}y+\left\Vert p_i\right\Vert^2-\left\Vert p_j\right\Vert^2-w_i+w_j.$$
+
+Un poids $w_i$ plus grand agrandit donc la cellule de $i$, et ajouter la même constante à tous les poids ne change aucune cellule. Les cas analytiques du jalon doivent vérifier ces deux conséquences avant toute comparaison de débit.
+
+## Oracle hôte borné implémenté
+
+Le premier oracle est volontairement limité à $1\leq n\leq8$. Pour une cellule, il reçoit les sites et poids dyadiques exacts ainsi que les six demi-espaces d'une boîte $\Omega$ explicite. Il construit au plus
+
+$$P=6+(n-1)\leq13$$
+
+plans. Il énumère les triplets de plans, rejette exactement les rangs inférieurs à trois, calcule l'intersection rationnelle unique des autres, teste toutes les contraintes puis déduplique les sommets rationnels. Les capacités conservatives sont
+
+$$\binom{13}{3}=286\ \text{triplets},\qquad V\leq286\ \text{sommets},\qquad PV\leq13\times286=3718\ \text{incidences}.$$
+
+Ces bornes dimensionnent un falsificateur court; elles ne sont pas une revendication de complexité scalable. `build_exact_bounded_power_cell_reference` réutilise les formes affines, plans et intersections rationnelles existants, trie les concurrents par identifiant et reconstruit toutes les incidences actives. Ses décisions complètes portent sur le polyèdre local fermé, y compris les sites confondus et les cellules de dimension inférieure; elles ne sont pas un certificat de position générale.
+
+Les tests hôte ferment le cube symétrique, la couture avec le bisecteur singleton non pondéré, les poids signés et leur translation commune, les sites confondus, une cellule vide par contraintes propres incompatibles, les dimensions deux, un et zéro, la permutation canonique, les cinq budgets juste insuffisants et les entrées hors contrat. Les targets et CTests ciblés passent sous GCC et Clang stricts en moins de 0,02 s chacun. Aucun différentiel Paragram, sanitizer, benchmark, CUDA ou G4 n'en découle.
+
+## Frontière proposition--certification
+
+- Paragram, avec ou sans fast math, émet seulement une proposition flottante d'adjacence ou de géométrie future;
+- un statut amont non nul interdit d'accepter la proposition de la cellule concernée sans recertification;
+- un statut amont nul ne certifie pas sa complétude;
+- l'oracle hôte borné décide exactement sa propre cellule locale et sert de comparateur indépendant;
+- seule une recertification ultérieure de tous les plans requis, sommets et incidences pourra fermer une cellule du pipeline;
+- aucun accord moyen, benchmark ou différentiel borné ne crée un `public_status=exact`.
+
+## Prochaine décision
+
+Le jalon suivant réalise les trois coutures minimales du fork candidat : overflow de pile fail-closed, boîte explicite et export des plans, sommets et incidences. Il compare ensuite les propositions avec et sans fast math à l'oracle désormais disponible. Une expérience G4 courte ne devient utile qu'après ces coutures. La phase 7 restera `ready` jusqu'au choix documenté entre fork minimal et primitive interne et jusqu'à l'enregistrement des mesures requises.
