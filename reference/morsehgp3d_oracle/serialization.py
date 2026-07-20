@@ -556,6 +556,10 @@ def _serialize_shared_result(
             deltas = [
                 _coverage_delta(delta, batch_id, node_ids)
                 for delta in batch.coverage_deltas
+                # The current public v2 contract treats coverage as a sparse
+                # growth log.  The internal exact forest still retains empty
+                # deltas so a redundant incidence is not erased from replay.
+                if not delta.fully_redundant
             ]
             deltas.sort(key=lambda record: record["root_node_id"])
             coverage_by_order[batch.order].extend(deltas)

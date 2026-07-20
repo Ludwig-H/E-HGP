@@ -272,6 +272,7 @@ add_library(
     src/cpu/hierarchy/gamma.cpp
     src/cpu/hierarchy/gamma_transition.cpp
     src/cpu/hierarchy/reduced_gamma_batch.cpp
+    src/cpu/hierarchy/reduced_gamma_history.cpp
     src/cpu/hierarchy/gabriel.cpp
     src/cpu/hierarchy/k1_forest.cpp
     src/cpu/hierarchy/miniball.cpp

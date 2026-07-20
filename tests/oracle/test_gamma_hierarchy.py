@@ -342,6 +342,24 @@ class GammaHierarchyTests(unittest.TestCase):
         )
         self.assertEqual(_covered_sets(reduced.cut(Fraction(13, 2))), ((0, 1, 2, 3, 4),))
 
+    def test_reduced_profile_keeps_a_fully_redundant_batch_delta(self) -> None:
+        points = [(0, 0, 0), (4, 0, 0), (1, 3, 0), (1, 1, 0)]
+        filtration = build_gamma_filtration(
+            points, 2, ball_fn=_independent_planar_miniball
+        )
+        reduced = build_merge_forest(filtration, "hgp_reduced")
+        batch = next(batch for batch in reduced.batches if batch.squared_level == 5)
+
+        self.assertEqual(batch.relation_simplex_point_ids, ((0, 1, 2),))
+        self.assertFalse(batch.created_node_ids)
+        self.assertEqual(len(batch.pre_components), 1)
+        self.assertEqual(batch.pre_components, batch.post_components)
+        self.assertEqual(len(batch.coverage_deltas), 1)
+        self.assertEqual(batch.coverage_deltas[0].added_facet_point_ids, ())
+        self.assertEqual(batch.coverage_deltas[0].added_point_ids, ())
+        self.assertTrue(batch.coverage_deltas[0].fully_redundant)
+        self.assertIn(batch.coverage_deltas[0], reduced.coverage_log)
+
     def test_gabriel_partial_forest_is_separate_from_exact_gamma(self) -> None:
         points = [
             (0, 0, 0),

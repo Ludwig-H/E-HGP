@@ -50,13 +50,22 @@ class ForestComponent:
 
 @dataclass(frozen=True)
 class CoverageDelta:
-    """Facets and observations first added to one root by a complete batch."""
+    """Facets and observations first added to one root by a complete batch.
+
+    Empty deltas remain explicit: the batch can carry a redundant incidence or
+    a genuine merge even when its parent roots already cover every facet and
+    point in the resulting component.
+    """
 
     order: int
     squared_level: Fraction
     root_id: str
     added_facet_point_ids: tuple[PointLabel, ...]
     added_point_ids: PointLabel
+
+    @property
+    def fully_redundant(self) -> bool:
+        return not self.added_facet_point_ids and not self.added_point_ids
 
 
 @dataclass(frozen=True)
@@ -440,16 +449,15 @@ def _build_relation_forest(
                 del components[old_root]
             components[root_id] = _MutableComponent(all_facets, covered)
             added_points = tuple(sorted(covered - previously_covered))
-            if new_facets or added_points:
-                delta = CoverageDelta(
-                    order=order,
-                    squared_level=level,
-                    root_id=root_id,
-                    added_facet_point_ids=new_facets,
-                    added_point_ids=added_points,
-                )
-                batch_deltas.append(delta)
-                coverage_log.append(delta)
+            delta = CoverageDelta(
+                order=order,
+                squared_level=level,
+                root_id=root_id,
+                added_facet_point_ids=new_facets,
+                added_point_ids=added_points,
+            )
+            batch_deltas.append(delta)
+            coverage_log.append(delta)
             activated_facets.extend(new_facets)
 
         post_components = tuple(
