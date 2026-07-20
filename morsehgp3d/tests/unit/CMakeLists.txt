@@ -973,6 +973,18 @@ set_tests_properties(
   morsehgp3d.hierarchy_gamma_differential
   PROPERTIES TIMEOUT 300
 )
+
+add_test(
+  NAME morsehgp3d.hierarchy_gamma_transition_differential
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_hierarchy_gamma_transition.py"
+    "$<TARGET_FILE:morsehgp3d_hierarchy_gamma_dump>"
+)
+set_tests_properties(
+  morsehgp3d.hierarchy_gamma_transition_differential
+  PROPERTIES TIMEOUT 60
+)
 add_test(
   NAME morsehgp3d.hierarchy_k1_differential
   COMMAND
