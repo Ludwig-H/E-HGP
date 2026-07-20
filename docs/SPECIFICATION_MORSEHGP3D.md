@@ -518,6 +518,10 @@ Une primitive GPU externe reste une source de propositions flottantes tant que t
 
 Pour le candidat Paragram épinglé, un débordement de pile de parcours est une erreur de cellule distincte et ne constitue jamais un pruning. Les codes historiques 0 à 5 restent stables et le code 6 désigne `traversal_stack_overflow`. Toute branche dont la borne ne prouve pas une exclusion stricte, y compris une marge exactement nulle, doit rester dans le parcours ou produire ce statut si la pile est pleine. Toute cellule de statut non nul a une ligne CSR vide et aucune arête publiée ne peut la prendre pour extrémité. Ce contrat ne couvre pas encore les fautes CUDA asynchrones, le choix du stream, la boîte de l'appelant ou l'export géométrique; il ne renforce donc pas le sens de `success` au-delà d'une proposition locale.
 
+Le contrat candidat de boîte est `closed_aabb_f32_lower_upper_xyz_v1`. L'appelant fournit sur CPU six mots IEEE-754 binary32 dans l'ordre canonique $(l_x,l_y,l_z,u_x,u_y,u_z)$, sous forme d'un tensor `float32` de forme $(2,3)$. Toutes les valeurs sont finies et $l_d<u_d$ pour chaque axe. La frontière native répète cette validation avant toute activité GPU. Les plans du clipper reprennent ces six valeurs sans boîte dérivée, epsilon, `nextafter` ou padding implicite, et les rayons initiaux sont reconstruits depuis la cellule effectivement initialisée. Un futur artefact de run enregistre les six mots hexadécimaux, l'arbre final de la série et les SHA-256 ordonnés des patchs; une sérialisation décimale seule n'est pas une provenance suffisante.
+
+Ce contrat ne vérifie pas que les sites appartiennent à la boîte. Il ne qualifie pas non plus les extrêmes finis sur GPU et ne transforme pas les sommes de carrés binary32 des rayons en majorants certifiés à arrondi dirigé. Tant que ces rayons, le stream courant, les erreurs CUDA asynchrones et la géométrie complète ne sont pas traités, `success` reste `proposal_only`.
+
 ## 14. Axes d'exécution
 
 Le backend, le profil, le mode et le statut sont orthogonaux :

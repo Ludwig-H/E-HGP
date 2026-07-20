@@ -9,7 +9,8 @@ Paragram est distribué sous licence Apache-2.0. Cette série ne change pas cett
 licence ni le gitlink cuBQL. Elle journalise séparément les modifications
 MorseHGP3D : statut explicite de débordement de pile BVH, arrêt fail-closed des
 parcours concernés et quarantaine bidirectionnelle de l'adjacence des cellules
-en erreur. Le patch reste un candidat d'évaluation; il n'est pas intégré au
+en erreur, puis boîte fermée binary32 explicitement fournie par l'appelant sans
+padding caché. La série reste un candidat d'évaluation; elle n'est pas intégrée au
 produit et ne confère aucun statut exact à une sortie Paragram.
 
 La série doit être consommée atomiquement dans l'ordre de `series.toml`. Sa
@@ -20,7 +21,8 @@ python tools/check_paragram_patch_series.py /chemin/vers/paragram
 ```
 
 Le checker vérifie le pin source, les empreintes, les chemins, les arbres Git
-avant et après application et les invariants structuraux du correctif. Il ne
-compile pas CUDA. La boîte explicite de l'appelant, l'export des plans, sommets
-et incidences, les différentiels exacts et la qualification G4 restent hors de
-ce jalon.
+avant et après application et les invariants structuraux des deux correctifs.
+Il ne compile pas CUDA. Les tests CPU de l'API AABB sont courts et indépendants
+du binding. L'arrondi dirigé des rayons de pruning, le stream PyTorch courant,
+la propagation des fautes CUDA asynchrones, l'export des plans, sommets et
+incidences, les différentiels exacts et la qualification G4 restent ouverts.

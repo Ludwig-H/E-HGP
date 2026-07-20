@@ -58,6 +58,18 @@ Le manifeste `series.toml` impose l'application complète du patch, son SHA-256 
 
 Cette validation est structurelle et hors ligne. Le patch n'a pas encore été compilé avec NVCC ou PyTorch, aucun overflow forcé n'a été observé sur GPU et le statut 0 reste une proposition flottante. Il ne corrige pas encore l'emploi amont du stream CUDA par défaut ni les retours ignorés de certaines synchronisations; une faute CUDA asynchrone n'est donc pas couverte par la garantie ciblée de débordement sémantique. La boîte vient encore de l'amont et aucun plan, sommet ou incidence n'est exporté. Le jalon 7.2 ne satisfait donc ni la porte de sortie de la phase 7, ni celle de la phase 8.
 
+## Jalon 7.3 — boîte explicite sans marge cachée
+
+Le patch `0002-explicit-caller-aabb.patch`, de SHA-256 `07a2d798f8cf74064c13503062cfd7a1a4a2bc67a8f73bec24084a7178416215`, s'applique après 7.2 et produit l'arbre candidat `732b1c2f9f42aa452a3282483ec9a8d947000497`. Les deux API exigent désormais `bounds` comme argument keyword-only. La valeur est un tensor CPU `float32` de forme `(2,3)`, fini et strictement ordonné sur chaque axe. Une vue non contiguë est copiée sans conversion et conserve les six mots binary32.
+
+La frontière C++ répète ces contrôles avant toute activité GPU. Les appels directs valident aussi les points, poids et guesses, leur co-présence, dtype, rang et identité de device avant `.contiguous()`. Un `CUDAGuard` fixe ensuite le device des points pour la durée de l'appel et restaure le précédent au retour; il ne sélectionne pas encore le stream PyTorch courant.
+
+Les six composantes de `world_bounds` viennent uniquement de la boîte validée. Les deux cellules suppriment `CUBE_EPSILON` et construisent exactement leurs six plans de boîte. Les noyaux ne copient plus la racine BVH et ne lui ajoutent plus `1.0f`; leur `BoxRadii` initial est calculé depuis `cell.lower_bound` et `cell.upper_bound` immédiatement après `CCInit`, au lieu du huituple fixe `1e10`.
+
+Les 18 tests CPU d'interface passent en 1,50 s. Ils couvrent notamment la conservation bit à bit, les valeurs non finies, les largeurs nulles ou inversées sur les trois axes, les zéros signés et la signature publique. Le header hôte passe aussi une vérification syntaxique Clang; deux avertissements C++20 proviennent des headers PyTorch, pas du candidat. Le checker hors ligne rejoue les deux patchs séquentiellement, reproduit l'arbre final et rejette quatre mutations ciblées de l'AABB ou du device guard.
+
+La portée demeure bornée : les sites ne sont pas vérifiés dans la boîte, les extrêmes finis sont seulement acceptés par l'entrée, les sommes de carrés binary32 de `BoxRadii` ne sont pas encore des majorants à arrondi dirigé, le stream courant et les erreurs CUDA asynchrones restent ouverts, et aucun plan, sommet ou incidence n'est exporté. Aucune compilation NVCC, aucun binding CUDA réel, aucun G4 et aucun statut public ne découlent de 7.3.
+
 ## Convention analytique des poids
 
 Pour le site $p_i$ de poids $w_i$, la puissance utilisée par l'audit est
@@ -95,4 +107,4 @@ Les tests hôte ferment le cube symétrique, la couture avec le bisecteur single
 
 ## Prochaine décision
 
-Le jalon suivant traite d'abord la boîte dyadique explicite, puis chiffre séparément l'export des plans, sommets et incidences. Si ces deux coutures restent locales, le fork candidat sera compilé avec une capacité de pile forcée à un et confronté à l'oracle avec et sans fast math. Si elles propagent une refonte au-delà de l'API, des noyaux de cellules et du compactage borné, le fork sera abandonné au profit d'un clipper interne spécialisé. Une expérience G4 courte ne devient utile qu'après le contrôle structurel, la compilation et l'exposition de la géométrie. La phase 7 restera `ready` jusqu'à ce choix documenté et à l'enregistrement des mesures requises.
+Le jalon suivant chiffre séparément l'export des plans, sommets et incidences sans l'implémenter d'avance. Il doit aussi décider si les rayons dirigés, le stream courant et la propagation d'erreurs peuvent rester hors de cuBQL. Si ces coutures restent locales, le fork candidat sera compilé avec une capacité de pile forcée à un et confronté à l'oracle avec et sans fast math. Si elles propagent une refonte dans le builder cuBQL ou exigent une seconde représentation géométrique non rejouable, le fork sera abandonné au profit d'un clipper interne spécialisé. Une expérience G4 courte ne devient utile qu'après cette décision, la compilation et l'exposition de la géométrie. La phase 7 restera `ready` jusqu'au choix documenté et à l'enregistrement des mesures requises.

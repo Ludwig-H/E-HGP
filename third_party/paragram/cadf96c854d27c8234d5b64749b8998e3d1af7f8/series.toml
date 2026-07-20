@@ -3,7 +3,7 @@ source_pin_manifest = "docs/references/paragram_source_pin.toml"
 repository_url = "https://github.com/zenseact/paragram.git"
 base_commit = "cadf96c854d27c8234d5b64749b8998e3d1af7f8"
 base_tree = "ad17c2eff4c5beec43330f597ee5d6616b62d32d"
-final_tree = "591ed6a3257ecd0be8544ba129e08c081ed4eb80"
+final_tree = "732b1c2f9f42aa452a3282483ec9a8d947000497"
 complete_series_required = true
 public_status = "proposal_only"
 cuda_compile_status = "not_run"
@@ -54,4 +54,54 @@ limitations = [
   "upstream_default_stream_usage_and_asynchronous_cuda_fault_propagation_are_not_patched_or_validated",
   "no_explicit_caller_box_or_geometry_export_yet",
   "status_zero_remains_a_floating_proposal_not_a_certificate",
+]
+
+[[patches]]
+order = 2
+id = "explicit_closed_aabb_f32_v1"
+path = "third_party/paragram/cadf96c854d27c8234d5b64749b8998e3d1af7f8/0002-explicit-caller-aabb.patch"
+bytes = 28863
+sha256 = "07a2d798f8cf74064c13503062cfd7a1a4a2bc67a8f73bec24084a7178416215"
+pre_tree = "591ed6a3257ecd0be8544ba129e08c081ed4eb80"
+post_tree = "732b1c2f9f42aa452a3282483ec9a8d947000497"
+touched_paths = [
+  "README.md",
+  "paragram/_api.py",
+  "paragram/csrc/ext.cpp",
+  "paragram/csrc/laguerre/faster_convex_cell.cuh",
+  "paragram/csrc/laguerre/laguerre.h",
+  "paragram/csrc/laguerre/laguerre_ultra.cu",
+  "paragram/csrc/laguerre/voronoi_convex_cell.cuh",
+  "paragram/csrc/laguerre/voronoi_ultra.cu",
+  "tests/test_explicit_bounds.py",
+]
+added_paths = ["tests/test_explicit_bounds.py"]
+modified_paths = [
+  "README.md",
+  "paragram/_api.py",
+  "paragram/csrc/ext.cpp",
+  "paragram/csrc/laguerre/faster_convex_cell.cuh",
+  "paragram/csrc/laguerre/laguerre.h",
+  "paragram/csrc/laguerre/laguerre_ultra.cu",
+  "paragram/csrc/laguerre/voronoi_convex_cell.cuh",
+  "paragram/csrc/laguerre/voronoi_ultra.cu",
+]
+deleted_paths = []
+semantic_contract = [
+  "python_bounds_is_required_keyword_only_cpu_float32_shape_2x3_finite_and_strictly_ordered",
+  "python_validation_preserves_the_six_binary32_words_and_passes_bounds_to_both_bindings",
+  "cpp_revalidates_bounds_before_any_gpu_tensor_contiguity_allocation_or_launch",
+  "weighted_and_unweighted_world_bounds_are_built_only_from_the_six_validated_caller_values",
+  "convex_cell_box_planes_use_exact_caller_coordinates_without_epsilon_or_padding",
+  "initial_box_radii_are_derived_from_the_initialized_cell_bounds_in_both_kernels",
+  "no_implicit_point_derived_or_fixed_radius_box_fallback_remains",
+]
+limitations = [
+  "not_compiled_with_nvcc_or_pytorch_cuda_in_this_milestone",
+  "input_sites_are_not_required_or_checked_to_lie_inside_the_explicit_box",
+  "upstream_default_stream_usage_and_asynchronous_cuda_fault_propagation_remain_unpatched",
+  "no_geometry_plane_vertex_or_incidence_export_yet",
+  "status_zero_remains_a_floating_proposal_not_a_certificate",
+  "box_radius_rounding_is_not_yet_a_certified_outward_bound",
+  "finite_extreme_bounds_are_ingress_valid_only_and_not_gpu_qualified",
 ]

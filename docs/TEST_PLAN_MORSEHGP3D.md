@@ -231,6 +231,14 @@ Après application, le contrôle structurel exige une ABI entière unique avec l
 
 La fixture CPU minimale emploie quatre lignes brutes dont les statuts sont succès, overflow de pile, succès et overflow de plans. Seule l'arête entre les deux cellules saines doit subsister, et les deux lignes fautives doivent être vides. Ce modèle valide le contrat de quarantaine, pas l'exécution CUDA. Une étape ultérieure compilera deux extensions identifiables, dont une avec capacité de pile égale à un pour forcer l'erreur sur les chemins ordinaires et pondérés. Elle devra aussi exécuter tout le pipeline sur le stream PyTorch courant et propager les erreurs de lancement et d'exécution avant le compactage CSR. Jusqu'à cette compilation et au différentiel géométrique, `cuda_compile_status=not_run` et toute sortie reste `proposal_only`.
 
+### 5.8 Boîte explicite du jalon 7.3
+
+La série complète doit appliquer le patch AABB après le patch fail-closed et reproduire l'arbre final déclaré. Le checker structurel exige `bounds` obligatoire et keyword-only dans les deux API Python, sa transmission aux deux bindings et sa revalidation native avant contiguïté, allocation ou lancement GPU. Les points, poids et guesses directs sont validés avant copie, leurs devices doivent coïncider et le `CUDAGuard` doit précéder toute activité CUDA.
+
+Les tests CPU de l'API couvrent une vue non contiguë dont les six mots binary32 restent identiques, les extrêmes finis au seul niveau de l'entrée, les mauvais conteneur, dtype, device et forme, NaN, les deux infinis, égalité et inversion sur chaque axe, les zéros signés et l'obligation keyword-only. Ils n'importent pas le binding CUDA. Le checker exige en outre les six affectations de `world_bounds`, l'absence de boîte issue de la racine BVH et de padding `1.0f`, l'absence de `CUBE_EPSILON` dans les deux initialiseurs, la suppression des rayons initiaux fixes et leur reconstruction après `CCInit`.
+
+Ces tests ne qualifient ni les valeurs extrêmes sur GPU, ni l'arrondi extérieur des rayons de pruning, ni le stream PyTorch courant, ni les erreurs asynchrones, ni l'inclusion des sites dans la boîte. Une future exécution enregistre les six mots dans l'ordre `lx,ly,lz,ux,uy,uz`, l'arbre Paragram final et les SHA-256 ordonnés de la série. Aucun statut exact n'est promu par un test d'interface ou un accord différentiel.
+
 ## 6. Tests de Gamma, du catalogue Gabriel et de la réduction
 
 ### 6.1 Gamma exact et événements Gabriel partiels

@@ -598,6 +598,14 @@ Une série atomique reproductible part du commit Paragram figé et produit l'arb
 
 Le manifeste de série fixe le patch, sa taille, son SHA-256, ses chemins et chaque arbre Git. Le checker hors réseau valide d'abord la provenance 7.1, applique toute la série dans un worktree temporaire, rejoue ces arbres et contrôle les invariants structurels ainsi qu'une fixture hôte de quarantaine. Ce jalon ne compile pas encore CUDA, ne fournit ni boîte explicite de l'appelant, ni géométrie de cellule et ne change aucun statut public. Le jalon 7.3 mesure d'abord l'ampleur de ces deux coutures restantes : si elles cessent d'être locales, la voie saine est la primitive interne plutôt que l'accumulation de patchs amont.
 
+### Jalon 7.3 — boîte fermée binary32 explicite
+
+Le second patch de la série impose `bounds` comme argument keyword-only des deux API Python et comme tensor CPU `float32` de forme `(2,3)` à la frontière native. Les six valeurs doivent être finies et chaque borne basse strictement inférieure à la borne haute. Les validations Python et C++ précèdent toute activité GPU; le binding natif vérifie aussi les devices, types et formes des autres tenseurs avant leur contiguïté, puis un `CUDAGuard` fixe et restaure le device des points.
+
+Les six plans initiaux utilisent bit pour bit les coordonnées de l'appelant. La boîte dérivée de la racine BVH, le padding `1.0f`, `CUBE_EPSILON` et le rayon initial fixe `1e10` disparaissent; chaque rayon initial vient des bornes de la cellule après `CCInit`. La série à deux patchs aboutit à l'arbre candidat `732b1c2f9f42aa452a3282483ec9a8d947000497`, et 18 tests CPU valident l'interface en moins de trois secondes.
+
+Ce résultat reste une proposition : l'inclusion des sites dans la boîte n'est pas vérifiée, les extrêmes finis ne sont qualifiés qu'à l'entrée, les rayons binary32 ne sont pas encore des majorants à arrondi dirigé, le stream PyTorch courant et les fautes CUDA asynchrones restent ouverts, et aucune géométrie n'est exportée. Le jalon suivant chiffre donc l'export des plans, sommets et incidences avant tout nouveau patch profond. Si cet export ou la correction runtime traverse cuBQL, la feuille de route choisit la primitive interne.
+
 ### But
 
 Choisir la primitive GPU sans lui déléguer la certification.

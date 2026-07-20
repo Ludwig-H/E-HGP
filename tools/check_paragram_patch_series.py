@@ -10,6 +10,7 @@ tree escapes that temporary quarantine.
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import os
 import re
@@ -58,23 +59,57 @@ PATCH_KEYS = {
     "semantic_contract",
     "limitations",
 }
-EXPECTED_SEMANTIC_CONTRACT = (
-    "historical_status_codes_0_through_5_unchanged_and_traversal_stack_overflow_is_6",
-    "weighted_and_unweighted_status_abi_is_one_shared_int32_enum",
-    "bounded_box_traversals_return_a_typed_outcome",
-    "every_full_stack_push_returns_stack_overflow_without_eviction_or_replacement",
-    "every_non_strictly_excluded_far_branch_is_retained_including_zero_margin_tangencies",
-    "a_preexisting_cell_error_wins_else_stack_overflow_maps_to_status_6",
-    "nonzero_status_cells_write_no_raw_adjacency",
-    "csr_gather_keeps_an_edge_only_when_both_endpoint_statuses_are_success",
-)
-EXPECTED_LIMITATIONS = (
-    "not_compiled_with_nvcc_or_pytorch_in_this_milestone",
-    "upstream_default_stream_usage_and_asynchronous_cuda_fault_propagation_"
-    "are_not_patched_or_validated",
-    "no_explicit_caller_box_or_geometry_export_yet",
-    "status_zero_remains_a_floating_proposal_not_a_certificate",
-)
+PATCH_CONTRACTS = {
+    "fail_closed_bvh_stack_and_adjacency_v1": (
+        (
+            "historical_status_codes_0_through_5_unchanged_and_"
+            "traversal_stack_overflow_is_6",
+            "weighted_and_unweighted_status_abi_is_one_shared_int32_enum",
+            "bounded_box_traversals_return_a_typed_outcome",
+            "every_full_stack_push_returns_stack_overflow_without_eviction_or_"
+            "replacement",
+            "every_non_strictly_excluded_far_branch_is_retained_including_zero_"
+            "margin_tangencies",
+            "a_preexisting_cell_error_wins_else_stack_overflow_maps_to_status_6",
+            "nonzero_status_cells_write_no_raw_adjacency",
+            "csr_gather_keeps_an_edge_only_when_both_endpoint_statuses_are_success",
+        ),
+        (
+            "not_compiled_with_nvcc_or_pytorch_in_this_milestone",
+            "upstream_default_stream_usage_and_asynchronous_cuda_fault_"
+            "propagation_are_not_patched_or_validated",
+            "no_explicit_caller_box_or_geometry_export_yet",
+            "status_zero_remains_a_floating_proposal_not_a_certificate",
+        ),
+    ),
+    "explicit_closed_aabb_f32_v1": (
+        (
+            "python_bounds_is_required_keyword_only_cpu_float32_shape_2x3_finite_"
+            "and_strictly_ordered",
+            "python_validation_preserves_the_six_binary32_words_and_passes_bounds_"
+            "to_both_bindings",
+            "cpp_revalidates_bounds_before_any_gpu_tensor_contiguity_allocation_or_"
+            "launch",
+            "weighted_and_unweighted_world_bounds_are_built_only_from_the_six_"
+            "validated_caller_values",
+            "convex_cell_box_planes_use_exact_caller_coordinates_without_epsilon_"
+            "or_padding",
+            "initial_box_radii_are_derived_from_the_initialized_cell_bounds_in_"
+            "both_kernels",
+            "no_implicit_point_derived_or_fixed_radius_box_fallback_remains",
+        ),
+        (
+            "not_compiled_with_nvcc_or_pytorch_cuda_in_this_milestone",
+            "input_sites_are_not_required_or_checked_to_lie_inside_the_explicit_box",
+            "upstream_default_stream_usage_and_asynchronous_cuda_fault_"
+            "propagation_remain_unpatched",
+            "no_geometry_plane_vertex_or_incidence_export_yet",
+            "status_zero_remains_a_floating_proposal_not_a_certificate",
+            "box_radius_rounding_is_not_yet_a_certified_outward_bound",
+            "finite_extreme_bounds_are_ingress_valid_only_and_not_gpu_qualified",
+        ),
+    ),
+}
 STATUS_VALUES = (
     ("success", 0),
     ("plane_overflow", 1),
@@ -659,17 +694,24 @@ def parse_series(series_path: Path) -> SeriesSpec:
                 f"{label}.touched_paths must equal added + modified + deleted paths"
             )
 
+        expected_contract = PATCH_CONTRACTS.get(identifier)
+        if expected_contract is None:
+            errors.append(f"{label}.id has no registered exact contract: {identifier}")
+            expected_semantics = None
+            expected_limitations = None
+        else:
+            expected_semantics, expected_limitations = expected_contract
         string_list(
             raw_patch.get("semantic_contract"),
             f"{label}.semantic_contract",
             errors,
-            exact=EXPECTED_SEMANTIC_CONTRACT,
+            exact=expected_semantics,
         )
         string_list(
             raw_patch.get("limitations"),
             f"{label}.limitations",
             errors,
-            exact=EXPECTED_LIMITATIONS,
+            exact=expected_limitations,
         )
 
         raw_entries: tuple[RawPatchEntry, ...] = ()
@@ -728,6 +770,14 @@ def parse_series(series_path: Path) -> SeriesSpec:
         errors.append(f"undeclared patch file: {undeclared.relative_to(ROOT)}")
     for missing in sorted(resolved_declared - actual_patch_paths):
         errors.append(f"declared patch absent from directory inventory: {missing}")
+
+    expected_patch_ids = tuple(PATCH_CONTRACTS)
+    observed_patch_ids = tuple(patch.identifier for patch in patches)
+    if observed_patch_ids != expected_patch_ids:
+        errors.append(
+            "series patch ids/order must be exactly "
+            f"{expected_patch_ids!r}, got {observed_patch_ids!r}"
+        )
 
     if patches:
         if patches[0].pre_tree != base_tree:
@@ -1015,7 +1065,7 @@ def enum_names(compact: str, declaration: str) -> tuple[str, ...]:
     return tuple(item for item in body[1:-1].split(",") if item)
 
 
-def read_cpp(quarantine: Path, relative: str) -> str:
+def read_utf8(quarantine: Path, relative: str) -> str:
     path = quarantine.joinpath(*PurePosixPath(relative).parts)
     if path.is_symlink() or not path.is_file():
         raise ValidationFailure(f"patched semantic source is missing: {relative}")
@@ -1023,6 +1073,40 @@ def read_cpp(quarantine: Path, relative: str) -> str:
         return path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:
         raise ValidationFailure(f"cannot read patched semantic source {relative}: {exc}") from exc
+
+
+def read_cpp(quarantine: Path, relative: str) -> str:
+    return read_utf8(quarantine, relative)
+
+
+def python_function(module: ast.Module, name: str, relative: str) -> ast.FunctionDef:
+    matches = [
+        node
+        for node in module.body
+        if isinstance(node, ast.FunctionDef) and node.name == name
+    ]
+    if len(matches) != 1:
+        raise ValidationFailure(
+            f"{relative} must define exactly one Python function {name}, "
+            f"got {len(matches)}"
+        )
+    return matches[0]
+
+
+def parsed_python(quarantine: Path, relative: str) -> tuple[str, ast.Module]:
+    source = read_utf8(quarantine, relative)
+    try:
+        return source, ast.parse(source, filename=relative)
+    except SyntaxError as exc:
+        raise ValidationFailure(f"patched Python source is invalid: {relative}: {exc}") from exc
+
+
+def python_call_name(call: ast.Call) -> str | None:
+    if isinstance(call.func, ast.Name):
+        return call.func.id
+    if isinstance(call.func, ast.Attribute):
+        return call.func.attr
+    return None
 
 
 def validate_status_abi(quarantine: Path) -> None:
@@ -1233,11 +1317,451 @@ def validate_csr_quarantine(quarantine: Path) -> None:
     quarantine_cpu_fixture()
 
 
+def validate_python_explicit_bounds(quarantine: Path) -> None:
+    relative = "paragram/_api.py"
+    _, module = parsed_python(quarantine, relative)
+    validator = python_function(module, "_validate_bounds", relative)
+    validator_compact = re.sub(r"\s+", "", ast.unparse(validator))
+    required_validator_fragments = (
+        "def_validate_bounds(bounds:torch.Tensor)->torch.Tensor:",
+        "ifnotisinstance(bounds,torch.Tensor):",
+        "ifbounds.device.type!='cpu':",
+        "ifbounds.dtype!=torch.float32:",
+        "ifbounds.shape!=(2,3):",
+        "bounds=bounds.contiguous()",
+        "ifnotbool(torch.isfinite(bounds).all().item()):",
+        "ifnotbool((bounds[0]<bounds[1]).all().item()):",
+        "returnbounds",
+    )
+    for fragment in required_validator_fragments:
+        if fragment not in validator_compact:
+            raise ValidationFailure(
+                f"{relative} explicit-bounds validator lacks {fragment!r}"
+            )
+    if any(isinstance(node, ast.BinOp) for node in ast.walk(validator)):
+        raise ValidationFailure(
+            f"{relative} explicit-bounds validator must not alter the six binary32 words"
+        )
+
+    public_functions = (
+        (
+            "power_diagram",
+            ("points", "weights"),
+            "build_laguerre_voronoi_ultra",
+            ("points", "weights", "bounds"),
+        ),
+        (
+            "voronoi_diagram",
+            ("points",),
+            "build_voronoi_ultra",
+            ("points", "bounds"),
+        ),
+    )
+    for function_name, positional_names, binding_name, binding_arguments in public_functions:
+        function = python_function(module, function_name, relative)
+        observed_positional = tuple(argument.arg for argument in function.args.args)
+        if observed_positional[: len(positional_names)] != positional_names:
+            raise ValidationFailure(
+                f"{relative}:{function_name} changes its required positional prefix"
+            )
+        keyword_names = tuple(argument.arg for argument in function.args.kwonlyargs)
+        if keyword_names.count("bounds") != 1:
+            raise ValidationFailure(
+                f"{relative}:{function_name} must expose one keyword-only bounds"
+            )
+        bounds_index = keyword_names.index("bounds")
+        if function.args.kw_defaults[bounds_index] is not None:
+            raise ValidationFailure(
+                f"{relative}:{function_name} bounds must have no default"
+            )
+        if "bounds" in observed_positional:
+            raise ValidationFailure(
+                f"{relative}:{function_name} bounds must not be positional"
+            )
+
+        validations = [
+            node
+            for node in ast.walk(function)
+            if isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+            and node.targets[0].id == "bounds"
+            and isinstance(node.value, ast.Call)
+            and python_call_name(node.value) == "_validate_bounds"
+            and len(node.value.args) == 1
+            and isinstance(node.value.args[0], ast.Name)
+            and node.value.args[0].id == "bounds"
+        ]
+        if len(validations) != 1:
+            raise ValidationFailure(
+                f"{relative}:{function_name} must rebind exactly one validated bounds"
+            )
+        binding_calls = [
+            node
+            for node in ast.walk(function)
+            if isinstance(node, ast.Call) and python_call_name(node) == binding_name
+        ]
+        if len(binding_calls) != 1:
+            raise ValidationFailure(
+                f"{relative}:{function_name} must call exactly one {binding_name}"
+            )
+        binding_call = binding_calls[0]
+        observed_arguments = tuple(
+            argument.id if isinstance(argument, ast.Name) else ""
+            for argument in binding_call.args[: len(binding_arguments)]
+        )
+        if observed_arguments != binding_arguments:
+            raise ValidationFailure(
+                f"{relative}:{function_name} does not pass validated bounds "
+                f"to {binding_name}: got {observed_arguments!r}"
+            )
+        if validations[0].lineno >= binding_call.lineno:
+            raise ValidationFailure(
+                f"{relative}:{function_name} calls its binding before bounds validation"
+            )
+
+    extension = compact_cpp(read_cpp(quarantine, "paragram/csrc/ext.cpp"))
+    binding_fragments = (
+        'py::arg("points"),py::arg("weights"),py::arg("bounds")',
+        'py::arg("points"),py::arg("bounds")',
+    )
+    for fragment in binding_fragments:
+        if extension.count(fragment) != 1:
+            raise ValidationFailure(
+                "paragram/csrc/ext.cpp must expose bounds once in each binding "
+                f"at the declared argument position: {fragment}"
+            )
+
+
+def validate_explicit_bounds_evidence_files(quarantine: Path) -> None:
+    readme = read_utf8(quarantine, "README.md").lower()
+    readme_fragments = (
+        "`bounds` is mandatory",
+        "finite cpu `torch.float32` tensor",
+        "shape `(2, 3)`",
+        "strictly smaller than its upper coordinate",
+        "without automatic padding",
+    )
+    for fragment in readme_fragments:
+        if fragment not in readme:
+            raise ValidationFailure(
+                f"README.md lacks explicit closed-box evidence: {fragment!r}"
+            )
+
+    relative = "tests/test_explicit_bounds.py"
+    tests_source, tests_module = parsed_python(quarantine, relative)
+    test_names = {
+        node.name
+        for node in tests_module.body
+        if isinstance(node, ast.FunctionDef) and node.name.startswith("test_")
+    }
+    required_tests = {
+        "test_valid_noncontiguous_bounds_preserve_binary32_words",
+        "test_finite_extreme_bounds_pass_ingress_validation_only",
+        "test_bounds_reject_wrong_container_dtype_shape_or_device",
+        "test_bounds_reject_nonfinite_values",
+        "test_bounds_reject_zero_or_negative_width",
+        "test_bounds_reject_signed_zero_width",
+        "test_public_bounds_parameter_is_required_and_keyword_only",
+    }
+    if not required_tests <= test_names:
+        raise ValidationFailure(
+            f"{relative} misses tests: {sorted(required_tests - test_names)!r}"
+        )
+    compact_tests = re.sub(r"\s+", "", tests_source)
+    binary32_witnesses = (
+        "validated.view(torch.int32)",
+        "bounds.contiguous().view(torch.int32)",
+        "inspect.signature(function).parameters[\"bounds\"]",
+        "inspect.Parameter.KEYWORD_ONLY",
+        "inspect.Parameter.empty",
+    )
+    for witness in binary32_witnesses:
+        if re.sub(r"\s+", "", witness) not in compact_tests:
+            raise ValidationFailure(
+                f"{relative} lacks structural witness {witness!r}"
+            )
+
+
+def validate_cpp_explicit_bounds(quarantine: Path) -> None:
+    header_relative = "paragram/csrc/laguerre/laguerre.h"
+    header = compact_cpp(read_cpp(quarantine, header_relative))
+    struct_fragment = (
+        "structClosedAabbF32{std::array<float,3>lower;"
+        "std::array<float,3>upper;};"
+    )
+    if struct_fragment not in header:
+        raise ValidationFailure(
+            f"{header_relative} lacks the six-scalar ClosedAabbF32 value type"
+        )
+    validator = named_function_body(header, "validate_closed_aabb_f32")
+    validator_checks = (
+        "bounds_in.defined()",
+        "bounds_in.device().type()==at::kCPU",
+        "bounds_in.scalar_type()==at::kFloat",
+        "bounds_in.dim()==2&&bounds_in.size(0)==2&&bounds_in.size(1)==3",
+        "torch::Tensorbounds=bounds_in.contiguous();",
+        "constfloat*values=bounds.data_ptr<float>();",
+        "std::isfinite(lower)&&std::isfinite(upper)",
+        "lower<upper",
+        "result.lower[axis]=lower;",
+        "result.upper[axis]=upper;",
+        "returnresult;",
+    )
+    for fragment in validator_checks:
+        if fragment not in validator:
+            raise ValidationFailure(
+                f"{header_relative} C++ bounds validation lacks {fragment!r}"
+            )
+    contiguous_position = validator.find("bounds_in.contiguous()")
+    pre_contiguous_checks = (
+        "bounds_in.defined()",
+        "bounds_in.device().type()==at::kCPU",
+        "bounds_in.scalar_type()==at::kFloat",
+        "bounds_in.dim()==2&&bounds_in.size(0)==2&&bounds_in.size(1)==3",
+    )
+    if contiguous_position < 0 or any(
+        validator.find(check) < 0 or validator.find(check) >= contiguous_position
+        for check in pre_contiguous_checks
+    ):
+        raise ValidationFailure(
+            f"{header_relative} reads/contiguizes bounds before CPU type/shape validation"
+        )
+    declaration_fragments = (
+        "build_laguerre_voronoi_ultra(torch::Tensorpoints_in,"
+        "torch::Tensorweights_in,torch::Tensorbounds_in,",
+        "build_voronoi_ultra(torch::Tensorpoints_in,torch::Tensorbounds_in,",
+    )
+    for fragment in declaration_fragments:
+        if fragment not in header:
+            raise ValidationFailure(
+                f"{header_relative} does not propagate bounds in declaration {fragment!r}"
+            )
+
+    cases = (
+        (
+            "paragram/csrc/laguerre/laguerre_ultra.cu",
+            "build_laguerre_voronoi_ultra",
+            "compute_bvh_power_diagram_kernel",
+            "pwr_bvh",
+        ),
+        (
+            "paragram/csrc/laguerre/voronoi_ultra.cu",
+            "build_voronoi_ultra",
+            "compute_bvh_voronoi_kernel",
+            "voronoi_bvh",
+        ),
+    )
+    assignments = (
+        "world_bounds.lower.x=explicit_bounds.lower[0];",
+        "world_bounds.lower.y=explicit_bounds.lower[1];",
+        "world_bounds.lower.z=explicit_bounds.lower[2];",
+        "world_bounds.upper.x=explicit_bounds.upper[0];",
+        "world_bounds.upper.y=explicit_bounds.upper[1];",
+        "world_bounds.upper.z=explicit_bounds.upper[2];",
+    )
+    for relative, builder_name, kernel_name, namespace in cases:
+        compact = compact_cpp(read_cpp(quarantine, relative))
+        if "#include<c10/cuda/CUDAGuard.h>" not in compact:
+            raise ValidationFailure(
+                f"{relative} lacks the direct-binding CUDA device guard include"
+            )
+        builder = named_function_body(compact, builder_name)
+        validation = (
+            "ClosedAabbF32explicit_bounds=validate_closed_aabb_f32(bounds_in);"
+        )
+        validation_position = builder.find(validation)
+        if validation_position < 0:
+            raise ValidationFailure(
+                f"{relative}:{builder_name} does not revalidate bounds in C++"
+            )
+        guard = "c10::cuda::CUDAGuarddevice_guard(points_in.device());"
+        guard_position = builder.find(guard)
+        if guard_position < 0 or builder.count(guard) != 1:
+            raise ValidationFailure(
+                f"{relative}:{builder_name} must install one points-device CUDAGuard"
+            )
+        if validation_position >= guard_position:
+            raise ValidationFailure(
+                f"{relative}:{builder_name} installs CUDAGuard before bounds validation"
+            )
+        metadata_checks = [
+            "points_in.defined()",
+            "points_in.device().type()==at::kCUDA",
+            "points_in.scalar_type()==at::kFloat",
+            "points_in.dim()==2&&points_in.size(1)==3",
+            "initial_guesses_in.has_value()=="
+            "initial_guesses_offsets_in.has_value()",
+            "initial_guesses_in->defined()",
+            "initial_guesses_offsets_in->defined()",
+            "initial_guesses_in->device()==points_in.device()",
+            "initial_guesses_offsets_in->device()==points_in.device()",
+            "initial_guesses_in->scalar_type()==at::kInt",
+            "initial_guesses_offsets_in->scalar_type()==at::kInt",
+            "initial_guesses_in->dim()==1",
+            "initial_guesses_offsets_in->dim()==1&&"
+            "initial_guesses_offsets_in->size(0)==num_points+1",
+        ]
+        if builder_name == "build_laguerre_voronoi_ultra":
+            metadata_checks.extend(
+                (
+                    "weights_in.defined()",
+                    "weights_in.device().type()==at::kCUDA",
+                    "weights_in.device()==points_in.device()",
+                    "weights_in.scalar_type()==at::kFloat",
+                    "weights_in.dim()==2&&weights_in.size(1)==1",
+                    "weights_in.size(0)==num_points",
+                )
+            )
+        for check in metadata_checks:
+            check_position = builder.find(check)
+            if check_position < 0 or check_position >= guard_position:
+                raise ValidationFailure(
+                    f"{relative}:{builder_name} lacks pre-guard metadata/device "
+                    f"validation {check!r}"
+                )
+        torch_checks = [
+            match.start()
+            for match in re.finditer(re.escape("TORCH_CHECK("), builder)
+        ]
+        if not torch_checks or any(position >= guard_position for position in torch_checks):
+            raise ValidationFailure(
+                f"{relative}:{builder_name} has missing or post-guard TORCH_CHECK metadata"
+            )
+
+        later_gpu_operations = (
+            ".contiguous()",
+            "torch::empty(",
+            "torch::full(",
+            "torch::zeros(",
+            "cudaMalloc(",
+            "<<<",
+        )
+        for operation in later_gpu_operations:
+            operation_positions = [
+                match.start()
+                for match in re.finditer(re.escape(operation), builder)
+            ]
+            if any(position < guard_position for position in operation_positions):
+                raise ValidationFailure(
+                    f"{relative}:{builder_name} performs {operation!r} before "
+                    "metadata validation and CUDAGuard"
+                )
+        if builder.count("cuBQL::box_t<float,3>world_bounds;") != 1:
+            raise ValidationFailure(
+                f"{relative}:{builder_name} must create one explicit world_bounds"
+            )
+        for assignment in assignments:
+            if builder.count(assignment) != 1:
+                raise ValidationFailure(
+                    f"{relative}:{builder_name} must assign exactly one {assignment}"
+                )
+        launch = (
+            f"{kernel_name}<<<launch_blocks,CELL_BLOCK_STRIDE>>>("
+            "num_points,world_bounds,"
+        )
+        if builder.count(launch) != 1:
+            raise ValidationFailure(
+                f"{relative}:{builder_name} does not pass the exact world_bounds "
+                "to its kernel"
+            )
+
+        kernel = named_function_body(compact, kernel_name)
+        if (
+            f"{kernel_name}(intnum_points,cuBQL::box_t<float,3>world_bounds,"
+            not in compact
+        ):
+            raise ValidationFailure(
+                f"{relative}:{kernel_name} does not receive world_bounds by value"
+            )
+        cell_init = "cell.CCInit(idx,points,&local_status,min_bound,max_bound);"
+        radii = (
+            f"{namespace}::BoxRadiiinitial_box_radii("
+            "cell.lower_bound,cell.upper_bound);"
+        )
+        if kernel.count(cell_init) != 1 or kernel.count(radii) != 1:
+            raise ValidationFailure(
+                f"{relative}:{kernel_name} must derive one BoxRadii from initialized "
+                "cell bounds"
+            )
+        if kernel.find(cell_init) >= kernel.find(radii):
+            raise ValidationFailure(
+                f"{relative}:{kernel_name} derives BoxRadii before CCInit"
+            )
+        kernel_bounds = (
+            "float3min_bound=make_float3(world_bounds.lower.x,"
+            "world_bounds.lower.y,world_bounds.lower.z);",
+            "float3max_bound=make_float3(world_bounds.upper.x,"
+            "world_bounds.upper.y,world_bounds.upper.z);",
+        )
+        for fragment in kernel_bounds:
+            if kernel.count(fragment) != 1:
+                raise ValidationFailure(
+                    f"{relative}:{kernel_name} does not unpack caller bounds exactly"
+                )
+        forbidden_fallbacks = (
+            "root_bounds",
+            "bvh.nodes[0].bounds",
+            "initial_box_radii{",
+            "1e10",
+        )
+        for forbidden in forbidden_fallbacks:
+            if forbidden in compact:
+                raise ValidationFailure(
+                    f"{relative} retains implicit/fixed box fallback {forbidden!r}"
+                )
+        if re.search(r"cudaMemcpy\(&[^,]*(?:root|world)_bounds", compact):
+            raise ValidationFailure(
+                f"{relative} copies implicit root/world bounds from CUDA"
+            )
+
+
+def validate_convex_cells_use_exact_bounds(quarantine: Path) -> None:
+    relatives = (
+        "paragram/csrc/laguerre/faster_convex_cell.cuh",
+        "paragram/csrc/laguerre/voronoi_convex_cell.cuh",
+    )
+    assignments = (
+        "floatconstvmin_x=bbox_min.x;",
+        "floatconstvmax_x=bbox_max.x;",
+        "floatconstvmin_y=bbox_min.y;",
+        "floatconstvmax_y=bbox_max.y;",
+        "floatconstvmin_z=bbox_min.z;",
+        "floatconstvmax_z=bbox_max.z;",
+    )
+    planes = (
+        "CCSetPlane(0,1.0,0.0,0.0,-vmin_x);",
+        "CCSetPlane(1,-1.0,0.0,0.0,vmax_x);",
+        "CCSetPlane(2,0.0,1.0,0.0,-vmin_y);",
+        "CCSetPlane(3,0.0,-1.0,0.0,vmax_y);",
+        "CCSetPlane(4,0.0,0.0,1.0,-vmin_z);",
+        "CCSetPlane(5,0.0,0.0,-1.0,vmax_z);",
+    )
+    for relative in relatives:
+        compact = compact_cpp(read_cpp(quarantine, relative))
+        if "CUBE_EPSILON" in compact:
+            raise ValidationFailure(f"{relative} retains hidden CUBE_EPSILON padding")
+        initializer = named_function_body(compact, "CCInit")
+        for fragment in (*assignments, *planes):
+            if initializer.count(fragment) != 1:
+                raise ValidationFailure(
+                    f"{relative}:CCInit must contain exactly one {fragment}"
+                )
+        if re.search(r"bbox_(?:min|max)\.[xyz][+-]", initializer):
+            raise ValidationFailure(
+                f"{relative}:CCInit pads a caller-provided bbox coordinate"
+            )
+
+
 def validate_semantics(quarantine: Path) -> None:
     validate_status_abi(quarantine)
     validate_stack_semantics(quarantine)
     validate_status_priority_and_raw_adjacency(quarantine)
     validate_csr_quarantine(quarantine)
+    validate_python_explicit_bounds(quarantine)
+    validate_cpp_explicit_bounds(quarantine)
+    validate_convex_cells_use_exact_bounds(quarantine)
+    validate_explicit_bounds_evidence_files(quarantine)
 
 
 def apply_and_validate(
@@ -1268,16 +1792,6 @@ def apply_and_validate(
             )
         base_entries = tree_entries(quarantine, initial_tree)
 
-        patch_arguments = [str(patch.path) for patch in series.patches]
-        git(
-            quarantine,
-            "apply",
-            "--index",
-            "--check",
-            "--whitespace=error-all",
-            *patch_arguments,
-        )
-
         current_tree = initial_tree
         current_entries = base_entries
         for patch in series.patches:
@@ -1287,6 +1801,14 @@ def apply_and_validate(
                     f"expected {patch.pre_tree}, got {current_tree}"
                 )
             validate_raw_entries_against_trees(patch, current_entries)
+            git(
+                quarantine,
+                "apply",
+                "--index",
+                "--check",
+                "--whitespace=error-all",
+                str(patch.path),
+            )
             git(
                 quarantine,
                 "apply",
@@ -1396,7 +1918,8 @@ def main() -> int:
     print(
         "Validated offline Paragram patch series: "
         f"{len(series.patches)} {patch_word}, base {series.base_tree}, "
-        f"final {series.final_tree}, CPU quarantine edge 0-2 only; "
+        f"final {series.final_tree}, CPU quarantine edge 0-2 only, "
+        "explicit closed AABB structure validated; "
         "proposal_only, CUDA not run."
     )
     return 0
