@@ -23,6 +23,11 @@ python tools/check_paragram_patch_series.py /chemin/vers/paragram
 Le checker vérifie le pin source, les empreintes, les chemins, les arbres Git
 avant et après application et les invariants structuraux des deux correctifs.
 Il ne compile pas CUDA. Les tests CPU de l'API AABB sont courts et indépendants
-du binding. L'arrondi dirigé des rayons de pruning, le stream PyTorch courant,
-la propagation des fautes CUDA asynchrones, l'export des plans, sommets et
-incidences, les différentiels exacts et la qualification G4 restent ouverts.
+du binding.
+
+Le jalon MorseHGP3D 7.4 gèle cette série à deux patchs. La correction complète
+du stream et des fautes traverse le builder cuBQL, tandis que les phases 8–9
+exigent un clipper H-polytope plus général que l'API site-centrique. Paragram
+reste un comparateur épinglé et peut proposer des identifiants de concurrents;
+leur fermeture est rejouée exactement dans MorseHGP3D. Aucun patch d'export
+géométrique, différentiel CUDA ou statut produit n'est revendiqué ici.

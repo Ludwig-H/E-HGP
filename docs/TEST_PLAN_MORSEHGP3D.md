@@ -239,6 +239,14 @@ Les tests CPU de l'API couvrent une vue non contiguë dont les six mots binary32
 
 Ces tests ne qualifient ni les valeurs extrêmes sur GPU, ni l'arrondi extérieur des rayons de pruning, ni le stream PyTorch courant, ni les erreurs asynchrones, ni l'inclusion des sites dans la boîte. Une future exécution enregistre les six mots dans l'ordre `lx,ly,lz,ux,uy,uz`, l'arbre Paragram final et les SHA-256 ordonnés de la série. Aucun statut exact n'est promu par un test d'interface ou un accord différentiel.
 
+### 5.9 Fermeture sémantique du jalon 7.4
+
+Le test atomique reçoit la table complète $K$, une amorce $J$ et la boîte, puis vérifie que chaque identifiant de $J$ est unique et appartient à $K$. Il reconstruit exactement $H_i(J)$ avant de scanner toutes les contraintes omises sur tous ses sommets. Le résultat incomplet retourne en un seul lot trié chaque `violating_halfspace`, chaque `missing_active_incidence` et chaque `competitor_dominates`; une contrainte propre strictement négative sur tous les sommets n'est pas ajoutée. Le premier témoin reste déterministe par `PointId`, privilégie une violation sur une égalité pour ce même identifiant, puis suit l'ordre canonique des sommets.
+
+Les fixtures obligatoires couvrent : un coupeur omis puis ajouté; une contrainte authentique strictement redondante; une contrainte égale à une face de boîte; un lot simultané contenant un violateur et une incidence active; une cellule de dimension basse; les trois classifications de sites coïncidents; une cellule candidate déjà vide; l'invariance aux permutations; un doublon et un identifiant inconnu; une boîte invalide non masquée par le budget; le plafond conservateur exact de 360 scans et les budgets cellule et scan juste insuffisants.
+
+La propriété de réparation vérifie séparément qu'après ajout simultané de tous les identifiants retournés, aucune contrainte propre omise ne peut devenir active : le nouveau polytope est inclus dans l'ancien, où chacune était strictement négative. Une étape suivante matérialise ce rebuild unique et compare sa cellule finale à l'oracle complet. Aucun test 7.4 ne compile CUDA, ne qualifie Paragram ou ne change un statut public.
+
 ## 6. Tests de Gamma, du catalogue Gabriel et de la réduction
 
 ### 6.1 Gamma exact et événements Gabriel partiels

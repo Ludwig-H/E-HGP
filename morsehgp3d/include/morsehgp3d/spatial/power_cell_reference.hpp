@@ -233,4 +233,106 @@ build_exact_bounded_power_cell_reference(
     const ExactDyadicAabb3& clipping_box,
     ExactPowerCellReferenceBudget budget = {});
 
+enum class ExactPowerCellSubsetClosureDecision : std::uint8_t {
+  complete_nonempty,
+  complete_empty,
+  incomplete,
+  insufficient_budget,
+};
+
+[[nodiscard]] std::string_view to_string(
+    ExactPowerCellSubsetClosureDecision decision);
+
+struct ExactPowerCellSubsetClosureBudget {
+  // The maximum is attained with seven complete competitors and four
+  // candidate competitors: (7 - 4) * choose(6 + 4, 3) = 360.
+  static constexpr std::size_t trusted_maximum_omitted_vertex_test_count =
+      360U;
+
+  ExactPowerCellReferenceBudget candidate_cell_budget{};
+  std::size_t maximum_omitted_vertex_test_count{
+      trusted_maximum_omitted_vertex_test_count};
+};
+
+struct ExactPowerCellSubsetClosureRequirements {
+  std::size_t complete_site_count{0U};
+  std::size_t candidate_competitor_count{0U};
+  std::size_t omitted_competitor_count{0U};
+  ExactPowerCellReferenceRequirements candidate_cell_requirements;
+  std::size_t conservative_omitted_vertex_test_count{0U};
+
+  friend bool operator==(
+      const ExactPowerCellSubsetClosureRequirements&,
+      const ExactPowerCellSubsetClosureRequirements&) = default;
+};
+
+struct ExactPowerCellSubsetClosureAudit {
+  std::size_t classified_omitted_constraint_count{0U};
+  std::size_t omitted_proper_halfspace_count{0U};
+  std::size_t omitted_violating_halfspace_count{0U};
+  std::size_t omitted_missing_active_incidence_count{0U};
+  std::size_t omitted_owner_dominates_count{0U};
+  std::size_t omitted_competitor_dominates_count{0U};
+  std::size_t omitted_coincident_tie_count{0U};
+  std::size_t exact_omitted_vertex_test_count{0U};
+
+  friend bool operator==(
+      const ExactPowerCellSubsetClosureAudit&,
+      const ExactPowerCellSubsetClosureAudit&) = default;
+};
+
+enum class ExactPowerCellSubsetClosureWitnessKind : std::uint8_t {
+  violating_halfspace,
+  missing_active_incidence,
+  competitor_dominates,
+};
+
+[[nodiscard]] std::string_view to_string(
+    ExactPowerCellSubsetClosureWitnessKind kind);
+
+struct ExactPowerCellSubsetClosureWitness {
+  PointId omitted_competitor_id;
+  PowerBisectorConstraintKind constraint_kind;
+  ExactPowerCellSubsetClosureWitnessKind witness_kind;
+  std::optional<std::size_t> candidate_vertex_index;
+
+  friend bool operator==(
+      const ExactPowerCellSubsetClosureWitness&,
+      const ExactPowerCellSubsetClosureWitness&) = default;
+};
+
+struct ExactPowerCellSubsetClosureResult {
+  ExactPowerCellSubsetClosureDecision decision{
+      ExactPowerCellSubsetClosureDecision::insufficient_budget};
+  ExactPowerCellSubsetClosureRequirements requirements;
+  ExactPowerCellSubsetClosureAudit audit;
+  std::vector<PointId> canonical_candidate_competitor_ids;
+  std::vector<PointId> required_candidate_additions;
+  ExactPowerCellReferenceResult candidate_cell;
+  std::optional<ExactPowerCellSubsetClosureWitness> first_omitted_witness;
+
+  friend bool operator==(
+      const ExactPowerCellSubsetClosureResult&,
+      const ExactPowerCellSubsetClosureResult&) = default;
+};
+
+// Certifies whether the exact bounded cell H(J), built from a supplied subset
+// J of authentic competitor ids, already equals the cell for the complete
+// competitor list with all proper active incidences; coincident ties are
+// counted separately because they do not define a boundary plane.  Candidate
+// ids are canonicalized but must be unique.  An authentic over-seed relative
+// to the active faces
+// (for example a symmetrized adjacency) is valid.  The first omitted violation
+// or active incidence is deterministic in PointId, then prefers a violation
+// over a zero incidence for that id, then uses vertex order.  All required
+// additions are returned canonically so one subsequent rebuild can apply them
+// together.
+[[nodiscard]] ExactPowerCellSubsetClosureResult
+certify_exact_bounded_power_cell_subset_closure(
+    const Binary64WeightedSite3& owner,
+    std::span<const Binary64WeightedSite3> complete_competitors,
+    const ExactDyadicAabb3& clipping_box,
+    std::span<const PointId> candidate_competitor_ids,
+    ExactPowerCellSubsetClosureBudget budget = {});
+
 }  // namespace morsehgp3d::spatial

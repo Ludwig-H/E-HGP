@@ -64,6 +64,24 @@ void validate_budget(const ExactPowerCellReferenceBudget& budget) {
   return result;
 }
 
+struct ValidatedClippingBox {
+  std::array<ExactRational, 3> lower;
+  std::array<ExactRational, 3> upper;
+};
+
+[[nodiscard]] ValidatedClippingBox validate_clipping_box(
+    const ExactDyadicAabb3& box) {
+  ValidatedClippingBox result{
+      validate_box(box, true), validate_box(box, false)};
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    if (result.lower[axis] >= result.upper[axis]) {
+      throw std::invalid_argument(
+          "the Phase 7 clipping box must have positive extent on every axis");
+    }
+  }
+  return result;
+}
+
 [[nodiscard]] ExactAffineForm3 axis_form(
     std::size_t axis,
     const ExactRational& coefficient,
@@ -299,6 +317,34 @@ std::string_view to_string(ExactPowerCellReferenceDecision decision) {
   throw std::invalid_argument("a power-cell reference decision is invalid");
 }
 
+std::string_view to_string(ExactPowerCellSubsetClosureDecision decision) {
+  switch (decision) {
+    case ExactPowerCellSubsetClosureDecision::complete_nonempty:
+      return "complete_nonempty";
+    case ExactPowerCellSubsetClosureDecision::complete_empty:
+      return "complete_empty";
+    case ExactPowerCellSubsetClosureDecision::incomplete:
+      return "incomplete";
+    case ExactPowerCellSubsetClosureDecision::insufficient_budget:
+      return "insufficient_budget";
+  }
+  throw std::invalid_argument(
+      "a power-cell subset-closure decision is invalid");
+}
+
+std::string_view to_string(ExactPowerCellSubsetClosureWitnessKind kind) {
+  switch (kind) {
+    case ExactPowerCellSubsetClosureWitnessKind::violating_halfspace:
+      return "violating_halfspace";
+    case ExactPowerCellSubsetClosureWitnessKind::missing_active_incidence:
+      return "missing_active_incidence";
+    case ExactPowerCellSubsetClosureWitnessKind::competitor_dominates:
+      return "competitor_dominates";
+  }
+  throw std::invalid_argument(
+      "a power-cell subset-closure witness kind is invalid");
+}
+
 ExactPowerCellReferenceResult build_exact_bounded_power_cell_reference(
     const Binary64WeightedSite3& owner,
     std::span<const Binary64WeightedSite3> competitors,
@@ -311,16 +357,8 @@ ExactPowerCellReferenceResult build_exact_bounded_power_cell_reference(
         "the bounded Phase 7 reference oracle accepts at most eight sites");
   }
 
-  const std::array<ExactRational, 3> lower =
-      validate_box(clipping_box, true);
-  const std::array<ExactRational, 3> upper =
-      validate_box(clipping_box, false);
-  for (std::size_t axis = 0U; axis < 3U; ++axis) {
-    if (lower[axis] >= upper[axis]) {
-      throw std::invalid_argument(
-          "the Phase 7 clipping box must have positive extent on every axis");
-    }
-  }
+  const ValidatedClippingBox validated_box =
+      validate_clipping_box(clipping_box);
 
   std::vector<const Binary64WeightedSite3*> ordered_competitors;
   ordered_competitors.reserve(competitors.size());
@@ -369,14 +407,14 @@ ExactPowerCellReferenceResult build_exact_bounded_power_cell_reference(
         axis_form(
             axis,
             ExactRational{exact::BigInt{-1}},
-            lower[axis])));
+            validated_box.lower[axis])));
     result.boundary_planes.push_back(boundary_plane(
         upper_kinds[axis],
         std::nullopt,
         axis_form(
             axis,
             ExactRational{exact::BigInt{1}},
-            -upper[axis])));
+            -validated_box.upper[axis])));
   }
 
   bool cell_is_empty = false;
@@ -466,6 +504,214 @@ ExactPowerCellReferenceResult build_exact_bounded_power_cell_reference(
                         ? ExactPowerCellReferenceDecision::complete_empty
                         : ExactPowerCellReferenceDecision::complete_nonempty;
   validate_completed_result(result);
+  return result;
+}
+
+ExactPowerCellSubsetClosureResult
+certify_exact_bounded_power_cell_subset_closure(
+    const Binary64WeightedSite3& owner,
+    std::span<const Binary64WeightedSite3> complete_competitors,
+    const ExactDyadicAabb3& clipping_box,
+    std::span<const PointId> candidate_competitor_ids,
+    ExactPowerCellSubsetClosureBudget budget) {
+  validate_budget(budget.candidate_cell_budget);
+  if (budget.maximum_omitted_vertex_test_count >
+      ExactPowerCellSubsetClosureBudget::
+          trusted_maximum_omitted_vertex_test_count) {
+    throw std::invalid_argument(
+        "a Phase 7 subset-closure scan budget exceeds its trusted cap");
+  }
+  if (complete_competitors.size() >
+      ExactPowerCellReferenceBudget::trusted_maximum_site_count - 1U) {
+    throw std::invalid_argument(
+        "the bounded Phase 7 subset closure accepts at most eight sites");
+  }
+  static_cast<void>(validate_clipping_box(clipping_box));
+
+  std::map<PointId, const Binary64WeightedSite3*> complete_by_id;
+  for (const Binary64WeightedSite3& competitor : complete_competitors) {
+    if (competitor.point_id() == owner.point_id() ||
+        !complete_by_id.emplace(competitor.point_id(), &competitor).second) {
+      throw std::invalid_argument(
+          "power-cell subset-closure site ids must be pairwise distinct");
+    }
+  }
+
+  if (candidate_competitor_ids.size() > complete_competitors.size()) {
+    throw std::invalid_argument(
+        "a power-cell candidate list cannot exceed the complete competitor "
+        "table");
+  }
+
+  ExactPowerCellSubsetClosureResult result;
+  result.canonical_candidate_competitor_ids.assign(
+      candidate_competitor_ids.begin(), candidate_competitor_ids.end());
+  std::sort(
+      result.canonical_candidate_competitor_ids.begin(),
+      result.canonical_candidate_competitor_ids.end());
+  if (std::adjacent_find(
+          result.canonical_candidate_competitor_ids.begin(),
+          result.canonical_candidate_competitor_ids.end()) !=
+      result.canonical_candidate_competitor_ids.end()) {
+    throw std::invalid_argument(
+        "power-cell candidate competitor ids must be unique");
+  }
+  for (const PointId candidate_id :
+       result.canonical_candidate_competitor_ids) {
+    if (!complete_by_id.contains(candidate_id)) {
+      throw std::invalid_argument(
+          "every power-cell candidate id must name an authentic competitor");
+    }
+  }
+
+  const std::size_t candidate_count =
+      result.canonical_candidate_competitor_ids.size();
+  const std::size_t omitted_count =
+      complete_competitors.size() - candidate_count;
+  result.requirements = ExactPowerCellSubsetClosureRequirements{
+      complete_competitors.size() + 1U,
+      candidate_count,
+      omitted_count,
+      requirements_for(candidate_count),
+      0U};
+  result.requirements.conservative_omitted_vertex_test_count =
+      omitted_count *
+      result.requirements.candidate_cell_requirements
+          .conservative_vertex_count;
+  if (result.requirements.conservative_omitted_vertex_test_count >
+      ExactPowerCellSubsetClosureBudget::
+          trusted_maximum_omitted_vertex_test_count) {
+    throw std::logic_error(
+        "the Phase 7 subset-closure scan requirement exceeded its proof cap");
+  }
+  if (!budget_covers(
+          budget.candidate_cell_budget,
+          result.requirements.candidate_cell_requirements) ||
+      budget.maximum_omitted_vertex_test_count <
+          result.requirements.conservative_omitted_vertex_test_count) {
+    return result;
+  }
+
+  std::vector<Binary64WeightedSite3> candidate_competitors;
+  candidate_competitors.reserve(candidate_count);
+  for (const PointId candidate_id :
+       result.canonical_candidate_competitor_ids) {
+    candidate_competitors.push_back(*complete_by_id.at(candidate_id));
+  }
+  result.candidate_cell = build_exact_bounded_power_cell_reference(
+      owner,
+      candidate_competitors,
+      clipping_box,
+      budget.candidate_cell_budget);
+  if (result.candidate_cell.decision ==
+      ExactPowerCellReferenceDecision::insufficient_budget) {
+    throw std::logic_error(
+        "a covered subset-closure preflight produced an insufficient cell");
+  }
+  if (result.candidate_cell.decision ==
+      ExactPowerCellReferenceDecision::complete_empty) {
+    result.decision = ExactPowerCellSubsetClosureDecision::complete_empty;
+    return result;
+  }
+
+  result.required_candidate_additions.reserve(omitted_count);
+  const auto record_required_addition =
+      [&result](PointId competitor_id,
+                PowerBisectorConstraintKind constraint_kind,
+                ExactPowerCellSubsetClosureWitnessKind witness_kind,
+                std::optional<std::size_t> candidate_vertex_index) {
+        result.required_candidate_additions.push_back(competitor_id);
+        if (!result.first_omitted_witness.has_value()) {
+          result.first_omitted_witness = ExactPowerCellSubsetClosureWitness{
+              competitor_id,
+              constraint_kind,
+              witness_kind,
+              candidate_vertex_index};
+        }
+      };
+  for (const auto& [competitor_id, competitor] : complete_by_id) {
+    if (std::binary_search(
+            result.canonical_candidate_competitor_ids.begin(),
+            result.canonical_candidate_competitor_ids.end(),
+            competitor_id)) {
+      continue;
+    }
+    const ExactPowerBisectorConstraint constraint =
+        make_exact_power_bisector_constraint(owner, *competitor);
+    ++result.audit.classified_omitted_constraint_count;
+    switch (constraint.kind) {
+      case PowerBisectorConstraintKind::proper_halfspace:
+        ++result.audit.omitted_proper_halfspace_count;
+        {
+          std::optional<std::size_t> first_violating_vertex_index;
+          std::optional<std::size_t> first_active_vertex_index;
+          for (std::size_t vertex_index = 0U;
+               vertex_index < result.candidate_cell.vertices.size();
+               ++vertex_index) {
+            ++result.audit.exact_omitted_vertex_test_count;
+            if (result.audit.exact_omitted_vertex_test_count >
+                result.requirements.conservative_omitted_vertex_test_count) {
+              throw std::logic_error(
+                  "the Phase 7 subset-closure scan exceeded its preflight "
+                  "contract");
+            }
+            const int sign =
+                constraint.owner_minus_competitor
+                    .evaluate(
+                        result.candidate_cell.vertices[vertex_index].position)
+                    .sign();
+            if (sign > 0 &&
+                !first_violating_vertex_index.has_value()) {
+              first_violating_vertex_index = vertex_index;
+            }
+            if (sign == 0 && !first_active_vertex_index.has_value()) {
+              first_active_vertex_index = vertex_index;
+            }
+          }
+          if (first_violating_vertex_index.has_value()) {
+            ++result.audit.omitted_violating_halfspace_count;
+            record_required_addition(
+                competitor_id,
+                constraint.kind,
+                ExactPowerCellSubsetClosureWitnessKind::violating_halfspace,
+                first_violating_vertex_index);
+          } else if (first_active_vertex_index.has_value()) {
+            ++result.audit.omitted_missing_active_incidence_count;
+            record_required_addition(
+                competitor_id,
+                constraint.kind,
+                ExactPowerCellSubsetClosureWitnessKind::
+                    missing_active_incidence,
+                first_active_vertex_index);
+          }
+        }
+        break;
+      case PowerBisectorConstraintKind::owner_dominates:
+        ++result.audit.omitted_owner_dominates_count;
+        break;
+      case PowerBisectorConstraintKind::coincident_tie:
+        ++result.audit.omitted_coincident_tie_count;
+        break;
+      case PowerBisectorConstraintKind::competitor_dominates:
+        ++result.audit.omitted_competitor_dominates_count;
+        record_required_addition(
+            competitor_id,
+            constraint.kind,
+            ExactPowerCellSubsetClosureWitnessKind::competitor_dominates,
+            std::nullopt);
+        break;
+    }
+  }
+  if (result.audit.classified_omitted_constraint_count != omitted_count ||
+      result.audit.exact_omitted_vertex_test_count >
+          result.requirements.conservative_omitted_vertex_test_count ||
+      result.required_candidate_additions.size() > omitted_count) {
+    throw std::logic_error(
+        "the Phase 7 subset-closure scan exceeded its preflight contract");
+  }
+  result.decision = result.required_candidate_additions.empty()
+                        ? ExactPowerCellSubsetClosureDecision::complete_nonempty
+                        : ExactPowerCellSubsetClosureDecision::incomplete;
   return result;
 }
 
