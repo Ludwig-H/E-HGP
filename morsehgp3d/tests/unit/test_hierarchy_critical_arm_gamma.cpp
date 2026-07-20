@@ -115,6 +115,16 @@ template <std::size_t Size>
   return canonical_cloud(input);
 }
 
+[[nodiscard]] CanonicalPointCloud shared_terminal_fixture_cloud() {
+  const std::array<CertifiedPoint3, 5> input{
+      point(-8.0, 1.0),
+      point(-5.0, -7.0),
+      point(-3.0, -8.0),
+      point(4.0, 8.0),
+      point(5.0, -7.0)};
+  return canonical_cloud(input);
+}
+
 [[nodiscard]] ExactCriticalArmGammaResult complete_bridge_result(
     const CanonicalPointCloud& cloud) {
   const std::array<PointId, 3> shell{3U, 0U, 2U};
@@ -253,6 +263,76 @@ void test_complete_family_is_grouped_by_strict_gamma_component() {
               "exhaustive_open_gamma_component_classification_v1" &&
           all_certificates_close(verification),
       "the complete bridge closes only its bounded pre-event component scope");
+}
+
+void test_two_arms_share_one_terminal_label_and_one_gamma_source() {
+  const CanonicalPointCloud cloud = shared_terminal_fixture_cloud();
+  const std::array<PointId, 3> shell{3U, 1U, 2U};
+  const ExactFacetDescentChainBudget arm_budget{2U};
+  const ExactStrictGammaBudget gamma_budget{10U, 5U, 15U};
+  const ExactCriticalArmGammaResult result =
+      build_exact_critical_arm_gamma_component_classification(
+          cloud,
+          shell,
+          arm_budget,
+          gamma_budget);
+  const ExactCriticalArmGammaVerification verification =
+      verify_exact_critical_arm_gamma_component_classification(
+          cloud,
+          shell,
+          arm_budget,
+          gamma_budget,
+          result);
+
+  const std::vector<PointId> shared_terminal{0U, 1U, 2U};
+  const std::vector<PointId> other_terminal{0U, 1U, 3U};
+  check(
+      result.order == 3U &&
+          result.critical_squared_level == level(25925, 338) &&
+          result.arm_family.arms.size() == 3U &&
+          result.arm_family.terminal_label_classes.size() == 2U &&
+          result.terminal_class_classifications.size() == 2U &&
+          result.arm_classifications.size() == 3U &&
+          result.strict_gamma.has_value() &&
+          result.strict_gamma->source_facet_point_ids.size() == 2U &&
+          result.counters.strict_gamma_source_facet_count == 2U &&
+          result.counters.same_terminal_label_arm_coalescence_count == 1U &&
+          result.counters.incident_component_count == 2U &&
+          result.counters.
+                  distinct_terminal_label_component_coalescence_count == 0U &&
+          all_certificates_close(verification),
+      "the shared-terminal fixture closes three arms with only two Gamma sources");
+
+  check(
+      result.terminal_class_classifications[0]
+              .terminal_facet_point_ids == shared_terminal &&
+          result.terminal_class_classifications[0]
+              .removed_shell_point_ids ==
+              std::vector<PointId>({1U, 3U}) &&
+          result.terminal_class_classifications[1]
+              .terminal_facet_point_ids == other_terminal &&
+          result.terminal_class_classifications[1]
+              .removed_shell_point_ids ==
+              std::vector<PointId>({2U}) &&
+          result.arm_family.terminal_label_classes[0]
+                  .canonical_terminal.squared_level ==
+              level(53, 2) &&
+          result.arm_family.terminal_label_classes[1]
+                  .canonical_terminal.squared_level ==
+              level(153, 2),
+      "the common terminal keeps both removed-shell provenances and exact geometry");
+
+  check(
+      result.arm_classifications[0].removed_shell_point_id == 1U &&
+          result.arm_classifications[0].terminal_label_class_index == 0U &&
+          result.arm_classifications[1].removed_shell_point_id == 2U &&
+          result.arm_classifications[1].terminal_label_class_index == 1U &&
+          result.arm_classifications[2].removed_shell_point_id == 3U &&
+          result.arm_classifications[2].terminal_label_class_index == 0U &&
+          result.arm_classifications[0].strict_gamma_component_index ==
+              result.arm_classifications[2]
+                  .strict_gamma_component_index,
+      "both coalesced arms project through the same label class and Gamma component");
 }
 
 void test_incomplete_family_and_gamma_budget_fail_closed() {
@@ -594,6 +674,7 @@ void test_verifier_rejects_every_composed_layer() {
 
 int main() {
   test_complete_family_is_grouped_by_strict_gamma_component();
+  test_two_arms_share_one_terminal_label_and_one_gamma_source();
   test_incomplete_family_and_gamma_budget_fail_closed();
   test_unsupported_source_never_enters_gamma();
   test_invalid_inputs_are_rejected();
