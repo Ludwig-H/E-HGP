@@ -363,6 +363,16 @@ Avec $F=\binom{n}{k}$, $C=\binom{n}{k+1}$, $L=F+C$, $E=\sum_{s=2}^{\min(4,k+1,n)
 
 La base `exact_fresh_typed_full_pi0_target_families_reconciled_with_frozen_pre_batch_local_reduced_gamma_roots_v1` et la portée `bounded_n14_k10_single_order_full_pi0_target_families_to_frozen_pre_batch_local_hgp_reduced_roots_with_explicit_isolated_singletons_only` certifient uniquement ce raccord pré-lot mono-ordre borné. Elles ne rendent pas les identifiants locaux durables ou publics, ne publient aucun `Attachment`, ne ferment ni M.1, ni la verticalité, ni une transaction de forêt `full_pi0`, ni le DAG global, le pointer-jumping, les plateaux ou la forêt multi-ordre, et ne produisent aucun résultat CUDA/G4, aucune revendication de scalabilité ni aucun `public_status`.
 
+Le jalon 6.20 compose enfin, sans nouvelle géométrie, chaque bras typé du journal externe 6.18 avec la liaison de sa cible dans l'overlay externe 6.19. `build_exact_critical_catalog_typed_gamma_arm_root_composition` reçoit ces deux sources, le nuage, l'ordre et un budget qui embarque exactement celui de 6.19. Toute l'arborescence des capacités imbriquées est validée avant le préflight propre et avant le rejeu frais de l'overlay, lequel recertifie transitivement le journal. Une couture discordante, une source rejetée ou une source incomplète ne publie aucun candidat.
+
+Notons $\tau$ l'application totale bras--cible certifiée par 6.18 et $\rho$ l'application totale cible--racine locale ou singleton omis certifiée par 6.19. La nouvelle couche matérialise seulement leur composition :
+
+$$\tau:\mathcal{A}\to\mathcal{T},\qquad \rho:\mathcal{T}\to\mathcal{R}_{\mathrm{local}}\sqcup\lbrace \bot_{\mathrm{singleton}}\rbrace,\qquad \chi=\rho\circ\tau.$$
+
+Il existe exactement un candidat dense par bras, sous la clé événement-locale `(catalog_event_index, order, removed_shell_point_id)`. Plusieurs bras peuvent avoir la même cible, la même liaison et la même racine; ils restent néanmoins des candidats distincts. Le témoin `full_pi0` demeure dans le journal externe, tandis que la disposition et l'éventuel `root_node_id` local `hgp_reduced` sont copiés de la liaison externe sans reclassification. Avec $E=\sum_{s=2}^{\min(4,k+1,n)}\binom{n}{s}$ et $A=4E$, une seule capacité propre $A\leq5824$ suffit. Les candidats et compteurs sont préparés hors résultat puis committés ensemble.
+
+La base `exact_fresh_typed_critical_arm_target_indices_composed_with_recertified_target_root_bindings_v1` et la portée `bounded_n14_k10_single_order_event_local_typed_critical_arms_to_strict_full_pi0_targets_and_frozen_pre_batch_local_hgp_reduced_root_or_explicit_omitted_singleton_candidates_only` certifient uniquement cette composition relationnelle interne. Aucun chemin de descente n'est recopié ou rendu rejouable; aucun objet `Attachment`, identifiant durable ou public, certificat M.1, morphisme vertical, transaction de forêt `full_pi0`, DAG global, pointer-jumping, plateau, forêt multi-ordre ou `public_status` n'en découle.
+
 Les plateaux et shells dégénérés exigent un graphe de successeurs multivalué traité par composantes fortement connexes. Tant que ce quotient n'est pas prouvé et implémenté, ils déclenchent `unsupported_degeneracy` en mode exact.
 
 ### 9.4 Premier niveau d'incidence

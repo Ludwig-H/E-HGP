@@ -211,6 +211,16 @@ Les dix capacités propres sont donc $A$, $2R$, $2F$, $2kF$, $LF$, $kLF$, $EF$, 
 
 La base `exact_fresh_typed_full_pi0_target_families_reconciled_with_frozen_pre_batch_local_reduced_gamma_roots_v1` prouve ce raccord local mono-ordre sous la portée `bounded_n14_k10_single_order_full_pi0_target_families_to_frozen_pre_batch_local_hgp_reduced_roots_with_explicit_isolated_singletons_only`. Les `root_node_id` restent locaux au journal externe recertifié. Ce résultat ne construit aucun `Attachment` public, identifiant durable ou public, morphisme vertical, certificat M.1, transaction de forêt `full_pi0`, DAG global, quotient de plateau, pointer-jumping, forêt multi-ordre ou `public_status`.
 
+### 7.5 Composition bras--cible--racine événement-locale
+
+Soient $\mathcal{A}$ l'arène dense des bras 6.18, $\mathcal{T}$ celle de ses cibles strictes et $\mathcal{B}$ celle des liaisons 6.19. La certification 6.18 donne une fonction totale $\tau:\mathcal{A}\to\mathcal{T}$; la certification 6.19 donne une bijection d'indices entre $\mathcal{T}$ et $\mathcal{B}$, puis une fonction totale $\rho:\mathcal{T}\to\mathcal{R}_{\mathrm{local}}\sqcup\lbrace \bot_{\mathrm{singleton}}\rbrace$. Le jalon 6.20 matérialise donc la fonction totale $\chi=\rho\circ\tau$ sans nouvel argument géométrique.
+
+Cette composition n'est pas injective : deux bras, deux classes ou deux selles simultanées peuvent partager une cible, donc une liaison et une racine. L'arène de sortie reste indexée par les bras et contient exactement $\lvert\mathcal{A}\rvert$ candidats; aucune déduplication par cible ou racine n'est permise. Chaque candidat recopie seulement l'indice du bras, sa clé événement-locale, l'indice de cible, l'indice de liaison, la disposition et l'éventuel identifiant de racine locale. L'autorité `full_pi0` reste le témoin externe 6.18 et l'annotation `hgp_reduced` reste la liaison externe 6.19.
+
+Le préflight utilise la borne conservatrice déjà prouvée $\lvert\mathcal{A}\rvert\leq A=4\sum_{s=2}^{\min(4,k+1,n)}\binom{n}{s}\leq5824$. Une seule capacité propre couvre l'arène de candidats. Les plafonds 6.18 et 6.19 correspondants sont liés statiquement au même maximum; tous les sous-budgets sont validés récursivement avant ce préflight. Après rejeu frais de 6.19, la construction vérifie pour chaque bras sa selle, sa classe terminale, sa cible, la liaison dense, le lot et le groupe historiques, puis prépare toute l'arène avant un commit unique.
+
+La base `exact_fresh_typed_critical_arm_target_indices_composed_with_recertified_target_root_bindings_v1` prouve uniquement cette composition fonctionnelle bornée. Les chemins 6.7 restent transitoires : aucun candidat n'est encore un `Attachment` rejouable au sens de M.1, et aucun identifiant durable, morphisme vertical, transaction de forêt `full_pi0`, DAG global, pointer-jumping, quotient de plateau, forêt multi-ordre ou `public_status` n'est produit.
+
 ## 8. DAG fonctionnel et GPU
 
 Pour toutes les facettes actives requises par le catalogue, on peut calculer les successeurs en parallèle. Sous les hypothèses strictes, les arcs non stationnaires diminuent $\beta$; le graphe est un DAG fonctionnel orienté vers les minima.
