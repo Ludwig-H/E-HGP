@@ -142,9 +142,27 @@ target_link_libraries(
   PRIVATE morsehgp3d::hierarchy
 )
 
+add_executable(
+  morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
+  test_hierarchy_critical_catalog_arm_gamma_overlay.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
+  PRIVATE morsehgp3d::hierarchy
+)
+
 add_executable(morsehgp3d_hierarchy_gamma_dump hierarchy_gamma_dump.cpp)
 target_link_libraries(
   morsehgp3d_hierarchy_gamma_dump
+  PRIVATE morsehgp3d::hierarchy
+)
+
+add_executable(
+  morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_dump
+  hierarchy_critical_catalog_arm_gamma_overlay_dump.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_dump
   PRIVATE morsehgp3d::hierarchy
 )
 
@@ -441,7 +459,9 @@ set(
   morsehgp3d_hierarchy_critical_event_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_tests
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
+  morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
   morsehgp3d_hierarchy_gamma_dump
+  morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_dump
   morsehgp3d_hierarchy_boruvka_tests
   morsehgp3d_hierarchy_gabriel_tests
   morsehgp3d_hierarchy_k1_dump
@@ -516,7 +536,15 @@ if(MSVC)
     morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
     PRIVATE /W4 /WX
   )
+  target_compile_options(
+    morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
+    PRIVATE /W4 /WX
+  )
   target_compile_options(morsehgp3d_hierarchy_gamma_dump PRIVATE /W4 /WX)
+  target_compile_options(
+    morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_dump
+    PRIVATE /W4 /WX
+  )
   target_compile_options(morsehgp3d_hierarchy_boruvka_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_hierarchy_gabriel_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_hierarchy_k1_dump PRIVATE /W4 /WX)
@@ -810,7 +838,27 @@ else()
       -Werror
   )
   target_compile_options(
+    morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
     morsehgp3d_hierarchy_gamma_dump
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_dump
     PRIVATE
       -Wall
       -Wextra
@@ -1066,6 +1114,10 @@ add_test(
   COMMAND morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_critical_catalog_arm_gamma_overlay
+  COMMAND morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_boruvka
   COMMAND morsehgp3d_hierarchy_boruvka_tests
 )
@@ -1147,6 +1199,17 @@ add_test(
 set_tests_properties(
   morsehgp3d.hierarchy_gamma_transition_differential
   PROPERTIES TIMEOUT 60
+)
+add_test(
+  NAME morsehgp3d.hierarchy_critical_catalog_arm_gamma_overlay_differential
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_hierarchy_critical_catalog_arm_gamma_overlay.py"
+    "$<TARGET_FILE:morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_dump>"
+)
+set_tests_properties(
+  morsehgp3d.hierarchy_critical_catalog_arm_gamma_overlay_differential
+  PROPERTIES TIMEOUT 300
 )
 add_test(
   NAME morsehgp3d.hierarchy_k1_differential

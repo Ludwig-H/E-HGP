@@ -167,6 +167,16 @@ certifie donc que, pour $0<t\leq\tau_u$, les $k$ points de $F_u$ sont exactement
 
 Si plusieurs bras terminent dans la même racine antérieure, l'événement est partiellement ou totalement redondant. La multiplicité locale est une capacité de changement, pas le nombre de classes effectivement tuées globalement.
 
+### 7.2 Raccord exhaustif borné au Gamma strict
+
+Fixons un ordre $2\leq k<n\leq14$, $k\leq10$, et supposons le catalogue critique exhaustif 6.12 sans dégénérescence extra-shell pertinente. Les références `saddle_order=k` de ses lots H0 sont alors exactement les événements d'indice un utiles de cet ordre. Pour chacun d'eux, supposons en outre la famille 6.7 complète : elle énumère une fois chaque $u\in U$ et conserve le chemin strict depuis $F_u=S\setminus\lbrace u\rbrace$ jusqu'à sa facette terminale régulière $T_u$.
+
+Au niveau critique exact $a$, le lot 6.13 reconstruit transitoirement la coupe exhaustive $\Gamma_k^{<a}$ avant toute mutation égale. Le chemin 6.7 est contenu dans $\left\lbrace D_k<a\right\rbrace$; la correspondance ouverte entre les composantes de ce sous-niveau et celles de $\Gamma_k^{<a}$ impose donc que $F_u$ et $T_u$ appartiennent à la même composante stricte. Le raccord machine doit néanmoins vérifier explicitement les deux appartenances et l'égalité de leurs indices, puis vérifier que cette composante figure dans l'unique groupe simultané contenant la coface critique fermée $S$. Tester seulement l'appartenance de $T_u$ à une composante quelconque du groupe serait insuffisant, car un même groupe peut absorber plusieurs composantes pré-lot.
+
+La cible sémantique est le témoin complet de la composante `full_pi0`, c'est-à-dire sa famille canonique de facettes. La classification 6.13 `prior_nontrivial_reduced_root` ou `omitted_isolated_facet` est une annotation séparée : une composante stricte isolée reste une cible valide d'un bras même si `hgp_reduced` ne la matérialise pas comme racine antérieure. De même, le rôle Morse « selle » ne décide jamais si le groupe réduit est une naissance, une continuation ou une multifusion. Plusieurs triples distincts `(event, order, removed_shell_id)` peuvent légitimement partager le même témoin cible.
+
+Avec $E=\sum_{s=2}^{\min(4,k+1,n)}\binom{n}{s}$, $A=4E$ et $F=\binom{n}{k}$, un préflight conservateur borne séparément les familles et les lots par $E\leq1456$, puis séparément les bras et les composantes ciblées par $A\leq5824$, les références de facettes de composantes sur tous les lots par $EF\leq4996992$ et toutes les références ponctuelles stockées, représentants canoniques compris, par $k(EF+A)=kE(F+4)\leq35025536$. Sous un budget de chaîne $L\leq4096$, les segments engagés après les germes initiaux sont bornés par $AL\leq23855104$. Ces bornes ferment un raccord de référence mono-ordre; elles ne constituent ni une revendication de scalabilité, ni une forêt `full_pi0`, ni la preuve M.1, ni une certification publique des `Attachment` du schéma v2.
+
 ## 8. DAG fonctionnel et GPU
 
 Pour toutes les facettes actives requises par le catalogue, on peut calculer les successeurs en parallèle. Sous les hypothèses strictes, les arcs non stationnaires diminuent $\beta$; le graphe est un DAG fonctionnel orienté vers les minima.
