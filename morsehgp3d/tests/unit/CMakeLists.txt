@@ -89,6 +89,15 @@ target_link_libraries(
 )
 
 add_executable(
+  morsehgp3d_hierarchy_reduced_gamma_batch_tests
+  test_hierarchy_reduced_gamma_batch.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_reduced_gamma_batch_tests
+  PRIVATE morsehgp3d::hierarchy
+)
+
+add_executable(
   morsehgp3d_hierarchy_critical_event_gamma_overlay_tests
   test_hierarchy_critical_event_gamma_overlay.cpp
 )
@@ -399,6 +408,7 @@ set(
   morsehgp3d_hierarchy_gamma_tests
   morsehgp3d_hierarchy_critical_arm_gamma_tests
   morsehgp3d_hierarchy_gamma_transition_tests
+  morsehgp3d_hierarchy_reduced_gamma_batch_tests
   morsehgp3d_hierarchy_critical_event_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_tests
   morsehgp3d_hierarchy_gamma_dump
@@ -456,6 +466,9 @@ if(MSVC)
   )
   target_compile_options(
     morsehgp3d_hierarchy_gamma_transition_tests PRIVATE /W4 /WX
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_reduced_gamma_batch_tests PRIVATE /W4 /WX
   )
   target_compile_options(
     morsehgp3d_hierarchy_critical_event_gamma_overlay_tests PRIVATE /W4 /WX
@@ -688,6 +701,16 @@ else()
   )
   target_compile_options(
     morsehgp3d_hierarchy_gamma_transition_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_reduced_gamma_batch_tests
     PRIVATE
       -Wall
       -Wextra
@@ -947,6 +970,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_gamma_transition
   COMMAND morsehgp3d_hierarchy_gamma_transition_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_reduced_gamma_batch
+  COMMAND morsehgp3d_hierarchy_reduced_gamma_batch_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_critical_event_gamma_overlay
