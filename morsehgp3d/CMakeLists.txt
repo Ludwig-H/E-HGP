@@ -268,6 +268,7 @@ add_library(
     src/cpu/hierarchy/critical_arm_gamma.cpp
     src/cpu/hierarchy/emst.cpp
     src/cpu/hierarchy/gamma.cpp
+    src/cpu/hierarchy/gamma_transition.cpp
     src/cpu/hierarchy/gabriel.cpp
     src/cpu/hierarchy/k1_forest.cpp
     src/cpu/hierarchy/miniball.cpp

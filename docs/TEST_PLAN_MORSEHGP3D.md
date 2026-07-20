@@ -429,6 +429,16 @@ Le rejeu falsifie séparément les deux budgets stockés et externes, le shell s
 
 La fixture à cinq points de 6.7 est aussi rejouée intégralement par 6.9 avec le budget Gamma minimal $(10,5,15)$. Ses trois bras produisent deux sources Gamma, deux composantes incidentes et les indices de composante par bras $(0,1,0)$; la classe commune conserve la provenance $[1,3]$, `same_terminal_label_arm_coalescence_count` vaut un et `distinct_terminal_label_component_coalescence_count` vaut zéro. Elle distingue donc une coalescence exacte de labels de la coalescence Gamma de labels distincts déjà exercée par la première fixture 6.9.
 
+### 7.7 Transition Gamma ouverte--fermée bornée 6.10
+
+Le jalon 6.10 appelle `build_exact_gamma_equal_level_transition` puis son vérificateur frais avec le nuage, l'ordre, le niveau exact et le budget fiable. Le test exige l'identité du catalogue strict embarqué avec 6.8, les catalogues exhaustifs $\beta=a$, la coupe fermée $\beta\leq a$, la projection de chaque composante stricte et la partition canonique des changements en groupes. Chaque incidence d'une coface égale doit porter exactement l'un des deux témoins exclusifs : indice de composante stricte ou facette nouvellement active.
+
+Les fixtures positives couvrent : une facette égale isolée donnant $q=0$; une coface redondante dans une seule composante stricte donnant $q=1$; une facette nouvelle et une coface égale réunissant deux composantes strictes donnant $q=2$; deux cofaces égales chevauchantes qui doivent former un unique groupe $q=5$, jamais deux contractions séquentielles; un niveau sans aucune égalité, qui conserve la coupe et n'émet aucun groupe; et un nuage à dix points qui porte simultanément trois groupes déconnectés $q=0$, $q=1$ et $q=2$. Les catégories restent diagnostiques et ne sont jamais comparées à des racines publiques.
+
+Le bord colinéaire $n=11$, $k=10$, $a=25$ exige deux facettes strictes de niveau $81/4$, neuf facettes égales, une coface égale, onze incidences et un groupe $q=2$. Son témoin de suppression choisit le premier maximiseur lexicographique $[0,1,2,3,4,5,6,7,8,10]$, omet le point neuf et vérifie la distance carrée 16. Les plafonds $n=14$ sont exercés sans géométrie par un budget nul : $(3003,3432,20592)$ à $k=6$ et $(3432,3003,21021)$ à $k=7$; $n=15$ est rejeté.
+
+Chacune des trois dimensions du préflight est rendue juste insuffisante et doit produire zéro catalogue égal, zéro composante fermée et zéro groupe. Les falsifications modifient budget et entrées externes, coupe stricte embarquée, facette et coface égales, témoin taille onze, incidence tokenisée, composante fermée, projection stricte--fermée, groupe, fait, compteur, décision, portée et identité d'un nuage jumeau. Les builds Release stricts GCC et Clang et le CTest `morsehgp3d.hierarchy_gamma_transition` ferment la validation hôte; aucun différentiel indépendant, CUDA, G4, benchmark, statut public ou revendication de scalabilité n'en découle.
+
 ## 8. Ancrage fondamental à $k=1$
 
 À l'ordre $1$, la hiérarchie doit coïncider avec le single linkage porté par un arbre couvrant euclidien minimal. Une arête EMST $(u,v)$ de longueur carrée $\lVert u-v\rVert^2$ produit dans $L_1$ le niveau de fusion $\lVert u-v\rVert^2/4$ ; les tests vérifient explicitement ce facteur au lieu de comparer deux conventions implicites.
