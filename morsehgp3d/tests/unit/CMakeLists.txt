@@ -62,6 +62,21 @@ target_link_libraries(
 )
 
 add_executable(
+  morsehgp3d_hierarchy_gamma_tests
+  test_hierarchy_gamma.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_gamma_tests
+  PRIVATE morsehgp3d::hierarchy
+)
+
+add_executable(morsehgp3d_hierarchy_gamma_dump hierarchy_gamma_dump.cpp)
+target_link_libraries(
+  morsehgp3d_hierarchy_gamma_dump
+  PRIVATE morsehgp3d::hierarchy
+)
+
+add_executable(
   morsehgp3d_hierarchy_boruvka_tests
   test_hierarchy_boruvka.cpp
 )
@@ -345,6 +360,8 @@ set(
   morsehgp3d_hierarchy_emst_tests
   morsehgp3d_hierarchy_k1_forest_tests
   morsehgp3d_hierarchy_miniball_tests
+  morsehgp3d_hierarchy_gamma_tests
+  morsehgp3d_hierarchy_gamma_dump
   morsehgp3d_hierarchy_boruvka_tests
   morsehgp3d_hierarchy_gabriel_tests
   morsehgp3d_hierarchy_k1_dump
@@ -391,6 +408,10 @@ if(MSVC)
   target_compile_options(
     morsehgp3d_hierarchy_miniball_tests PRIVATE /W4 /WX
   )
+  target_compile_options(
+    morsehgp3d_hierarchy_gamma_tests PRIVATE /W4 /WX
+  )
+  target_compile_options(morsehgp3d_hierarchy_gamma_dump PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_hierarchy_boruvka_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_hierarchy_gabriel_tests PRIVATE /W4 /WX)
   target_compile_options(morsehgp3d_hierarchy_k1_dump PRIVATE /W4 /WX)
@@ -585,6 +606,26 @@ else()
   )
   target_compile_options(
     morsehgp3d_hierarchy_miniball_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_gamma_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_gamma_dump
     PRIVATE
       -Wall
       -Wextra
@@ -804,6 +845,10 @@ add_test(
   COMMAND morsehgp3d_hierarchy_miniball_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_gamma
+  COMMAND morsehgp3d_hierarchy_gamma_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_boruvka
   COMMAND morsehgp3d_hierarchy_boruvka_tests
 )
@@ -863,6 +908,17 @@ add_test(
 )
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
+add_test(
+  NAME morsehgp3d.hierarchy_gamma_differential
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_hierarchy_gamma.py"
+    "$<TARGET_FILE:morsehgp3d_hierarchy_gamma_dump>"
+)
+set_tests_properties(
+  morsehgp3d.hierarchy_gamma_differential
+  PROPERTIES TIMEOUT 300
+)
 add_test(
   NAME morsehgp3d.hierarchy_k1_differential
   COMMAND
