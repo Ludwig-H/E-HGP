@@ -113,24 +113,8 @@ void validate_domain(
         "the typed Gamma arm-root path overlay requires 3<=n<=14, "
         "2<=k<n and k<=10");
   }
-  validate_exact_critical_catalog_typed_gamma_arm_root_composition_budget_caps(
-      budget.arm_root_composition_budget);
-  if (budget.maximum_path_record_count >
-          PathBudget::maximum_supported_path_record_count ||
-      budget.maximum_committed_chain_segment_count >
-          PathBudget::
-              maximum_supported_committed_chain_segment_count ||
-      budget.maximum_composite_path_segment_count >
-          PathBudget::
-              maximum_supported_composite_path_segment_count ||
-      budget.maximum_chain_node_point_id_reference_count >
-          PathBudget::
-              maximum_supported_chain_node_point_id_reference_count ||
-      budget.maximum_exterior_constraint_count >
-          PathBudget::maximum_supported_exterior_constraint_count) {
-    throw std::invalid_argument(
-        "a typed Gamma arm-root path capacity exceeds its bounded cap");
-  }
+  validate_exact_critical_catalog_typed_gamma_arm_root_path_overlay_budget_caps(
+      budget);
 }
 
 void derive_preflight(
@@ -763,6 +747,28 @@ void derive_preflight(
 }
 
 }  // namespace
+
+void validate_exact_critical_catalog_typed_gamma_arm_root_path_overlay_budget_caps(
+    const PathBudget& budget) {
+  validate_exact_critical_catalog_typed_gamma_arm_root_composition_budget_caps(
+      budget.arm_root_composition_budget);
+  if (budget.maximum_path_record_count >
+          PathBudget::maximum_supported_path_record_count ||
+      budget.maximum_committed_chain_segment_count >
+          PathBudget::
+              maximum_supported_committed_chain_segment_count ||
+      budget.maximum_composite_path_segment_count >
+          PathBudget::
+              maximum_supported_composite_path_segment_count ||
+      budget.maximum_chain_node_point_id_reference_count >
+          PathBudget::
+              maximum_supported_chain_node_point_id_reference_count ||
+      budget.maximum_exterior_constraint_count >
+          PathBudget::maximum_supported_exterior_constraint_count) {
+    throw std::invalid_argument(
+        "a typed Gamma arm-root path capacity exceeds its bounded cap");
+  }
+}
 
 ExactCriticalCatalogTypedGammaArmRootPathOverlayVerification
 verify_exact_critical_catalog_typed_gamma_arm_root_path_overlay(

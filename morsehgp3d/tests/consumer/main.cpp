@@ -1,3 +1,4 @@
+#include "morsehgp3d/contract/canonical_id.hpp"
 #include "morsehgp3d/exact/center.hpp"
 #include "morsehgp3d/exact/level.hpp"
 #include "morsehgp3d/exact/level_order.hpp"
@@ -29,6 +30,15 @@ int main() {
   using morsehgp3d::exact::PredicateSign;
   using morsehgp3d::exact::SpherePointLocation;
   using morsehgp3d::exact::ThreePlaneIntersectionKind;
+
+  const auto installed_input_id =
+      morsehgp3d::contract::canonical_v2_id_from_canonical_json_unchecked(
+          "Input", "[]");
+  if (installed_input_id.to_lower_hex() !=
+      "9acfc97d93e6b378a936c94c9c63a3b8263358ba1d19092d3b6f51c9fd2053b5") {
+    std::cerr << "installed canonical v2 identifier changed semantics\n";
+    return 1;
+  }
 
   if (!morsehgp3d::exact::fp64_filter_environment_supported()) {
     std::cerr << "installed target did not preserve the strict FP64 environment\n";

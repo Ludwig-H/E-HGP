@@ -7,7 +7,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(MorseHGP3D CONFIG REQUIRED)
 
 add_executable(morsehgp3d_consumer main.cpp)
-target_link_libraries(morsehgp3d_consumer PRIVATE morsehgp3d::spatial)
+target_link_libraries(
+  morsehgp3d_consumer
+  PRIVATE morsehgp3d::contract morsehgp3d::spatial
+)
 
 include(CTest)
 if(BUILD_TESTING)

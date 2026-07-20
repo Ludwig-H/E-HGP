@@ -204,6 +204,11 @@ struct ExactCriticalCatalogTypedGammaArmRootPathOverlayVerification {
       default;
 };
 
+// Checks the complete nested 6.20 budget and all five path-arena caps without
+// starting source verification or geometry.  Later overlays reuse this seam.
+void validate_exact_critical_catalog_typed_gamma_arm_root_path_overlay_budget_caps(
+    const ExactCriticalCatalogTypedGammaArmRootPathOverlayBudget& budget);
+
 [[nodiscard]] ExactCriticalCatalogTypedGammaArmRootPathOverlayResult
 build_exact_critical_catalog_typed_gamma_arm_root_path_overlay(
     const spatial::CanonicalPointCloud& cloud,

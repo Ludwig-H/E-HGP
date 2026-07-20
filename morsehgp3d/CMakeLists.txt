@@ -195,6 +195,38 @@ endif()
 
 find_package(Boost 1.74 REQUIRED CONFIG COMPONENTS headers)
 
+add_library(
+  morsehgp3d_contract
+  STATIC
+    src/cpu/contract/canonical_id.cpp
+)
+add_library(morsehgp3d::contract ALIAS morsehgp3d_contract)
+set_target_properties(
+  morsehgp3d_contract
+  PROPERTIES
+    EXPORT_NAME contract
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(morsehgp3d_contract PUBLIC cxx_std_20)
+target_include_directories(
+  morsehgp3d_contract
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_contract
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(morsehgp3d_contract PRIVATE /W4 /WX)
+else()
+  target_compile_options(
+    morsehgp3d_contract
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 add_library(morsehgp3d_exact INTERFACE)
 add_library(morsehgp3d::exact ALIAS morsehgp3d_exact)
 set_target_properties(morsehgp3d_exact PROPERTIES EXPORT_NAME exact)
@@ -270,6 +302,7 @@ add_library(
     src/cpu/hierarchy/critical_catalog_arm_gamma_overlay.cpp
     src/cpu/hierarchy/critical_catalog_reduced_gamma_overlay.cpp
     src/cpu/hierarchy/critical_catalog_typed_gamma_journal.cpp
+    src/cpu/hierarchy/critical_catalog_typed_gamma_durable_arm_key_catalog.cpp
     src/cpu/hierarchy/critical_catalog_typed_gamma_arm_root_composition.cpp
     src/cpu/hierarchy/critical_catalog_typed_gamma_arm_root_path_overlay.cpp
     src/cpu/hierarchy/critical_catalog_typed_gamma_root_overlay.cpp
@@ -300,7 +333,7 @@ target_include_directories(
 )
 target_link_libraries(
   morsehgp3d_hierarchy
-  PUBLIC morsehgp3d::spatial
+  PUBLIC morsehgp3d::contract morsehgp3d::spatial
   PRIVATE morsehgp3d::sanitizers
 )
 if(MSVC)
@@ -694,6 +727,7 @@ include(CMakePackageConfigHelpers)
 
 install(
   TARGETS
+    morsehgp3d_contract
     morsehgp3d_exact
     morsehgp3d_spatial
     morsehgp3d_hierarchy
