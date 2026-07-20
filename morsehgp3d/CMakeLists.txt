@@ -265,6 +265,7 @@ add_library(
   STATIC
     src/cpu/hierarchy/boruvka.cpp
     src/cpu/hierarchy/critical_arm.cpp
+    src/cpu/hierarchy/critical_arm_gamma.cpp
     src/cpu/hierarchy/emst.cpp
     src/cpu/hierarchy/gamma.cpp
     src/cpu/hierarchy/gabriel.cpp
