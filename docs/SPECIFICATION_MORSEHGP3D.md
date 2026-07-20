@@ -516,6 +516,8 @@ L'implémentation `build_exact_bounded_power_cell_reference` trie les concurrent
 
 Une primitive GPU externe reste une source de propositions flottantes tant que tous ses plans actifs, sommets, incidences, overflows et abandons de parcours ne sont pas exposés puis recertifiés. Une adjacency plausible ou un statut local de succès ne ferme pas une cellule et ne peut produire aucun `public_status=exact`.
 
+Pour le candidat Paragram épinglé, un débordement de pile de parcours est une erreur de cellule distincte et ne constitue jamais un pruning. Les codes historiques 0 à 5 restent stables et le code 6 désigne `traversal_stack_overflow`. Toute branche dont la borne ne prouve pas une exclusion stricte, y compris une marge exactement nulle, doit rester dans le parcours ou produire ce statut si la pile est pleine. Toute cellule de statut non nul a une ligne CSR vide et aucune arête publiée ne peut la prendre pour extrémité. Ce contrat ne couvre pas encore les fautes CUDA asynchrones, le choix du stream, la boîte de l'appelant ou l'export géométrique; il ne renforce donc pas le sens de `success` au-delà d'une proposition locale.
+
 ## 14. Axes d'exécution
 
 Le backend, le profil, le mode et le statut sont orthogonaux :

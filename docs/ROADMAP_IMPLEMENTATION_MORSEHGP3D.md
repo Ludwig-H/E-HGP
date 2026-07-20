@@ -592,6 +592,12 @@ L'[audit dédié](validation/PHASE7_PRIMITIVE_AUDIT.md) fige Paragram au commit 
 
 Avant tout benchmark long, `build_exact_bounded_power_cell_reference` implémente un oracle `reference_cpu` borné à $n\leq8$. Il adopte $\delta_i(y)=\left\Vert y-p_i\right\Vert^2-w_i$, la cellule $\Phi_{ij}(y)=\delta_i(y)-\delta_j(y)\leq0$ dans une boîte dyadique explicite et au plus treize plans par cellule. Ses plafonds conservateurs sont 286 triplets de plans, 286 sommets rationnels et 3718 incidences sommet--plan. Les tests exacts couvrent notamment le cube, les poids signés, les sites confondus, une cellule vide par demi-espaces propres incompatibles et les dimensions deux, un et zéro. Cet oracle distingue la proposition flottante de la décision exacte locale et ne publie aucun statut MorseHGP3D.
 
+### Jalon 7.2 — parcours BVH fail-closed et quarantaine CSR
+
+Une série atomique reproductible part du commit Paragram figé et produit l'arbre candidat `591ed6a3257ecd0be8544ba129e08c081ed4eb80`. Elle remplace l'éviction silencieuse des piles de parcours ordinaires et pondérés par le statut explicite `traversal_stack_overflow=6`, sans renuméroter les statuts historiques, et conserve les branches de marge nulle qui ne sont pas strictement exclues. Une cellule en erreur n'écrit aucune adjacency brute et le compactage ne conserve que les arêtes dont les deux extrémités ont le statut `success`; la symétrisation ne peut donc pas réintroduire une cellule fautive.
+
+Le manifeste de série fixe le patch, sa taille, son SHA-256, ses chemins et chaque arbre Git. Le checker hors réseau valide d'abord la provenance 7.1, applique toute la série dans un worktree temporaire, rejoue ces arbres et contrôle les invariants structurels ainsi qu'une fixture hôte de quarantaine. Ce jalon ne compile pas encore CUDA, ne fournit ni boîte explicite de l'appelant, ni géométrie de cellule et ne change aucun statut public. Le jalon 7.3 mesure d'abord l'ampleur de ces deux coutures restantes : si elles cessent d'être locales, la voie saine est la primitive interne plutôt que l'accumulation de patchs amont.
+
 ### But
 
 Choisir la primitive GPU sans lui déléguer la certification.

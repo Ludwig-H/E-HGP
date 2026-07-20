@@ -1,0 +1,702 @@
+diff --git a/paragram/csrc/laguerre/adjacency.cuh b/paragram/csrc/laguerre/adjacency.cuh
+index 9a9ec700124bcf5047d513d939af897c564b23ea..00c4266fbe4746bfc8ffb70b1608590c26dcf3c9 100644
+--- a/paragram/csrc/laguerre/adjacency.cuh
++++ b/paragram/csrc/laguerre/adjacency.cuh
+@@ -1,3 +1,5 @@
++#include "status.cuh"
++
+ #include <cuda_runtime.h>
+ #include <tuple>
+ 
+@@ -7,6 +9,7 @@ namespace laguerre
+ static __global__ void gather_adjacency_kernel(int P,
+                                         int num_points,
+                                         const int *__restrict__ neighbor_data,
++                                        const int *__restrict__ cell_status,
+                                         int *__restrict__ adjacency,
+                                         int *__restrict__ offsets,
+                                         int *__restrict__ adjacency_sizes,
+@@ -18,8 +21,14 @@ static __global__ void gather_adjacency_kernel(int P,
+         s_count = 0;
+     __syncthreads();
+ 
+-    // Neighbors are in num_active x P array
++    // Neighbors are in num_active x P array. Do not return early here: every
++    // thread must reach both block barriers below.
++    int source = blockIdx.x;
+     int neighbor = neighbor_data[blockIdx.x * P + threadIdx.x];
++    bool valid_neighbor = neighbor >= 0 && neighbor < num_points &&
++                          cell_status[source] == success && cell_status[neighbor] == success;
++    if (!valid_neighbor)
++        neighbor = -1;
+ 
+     // Get number of neighbors for this cell
+     int n = -1;
+@@ -158,4 +167,4 @@ static __global__ void populate_symmetric_adjacency(int num_points,
+     }
+ }
+ 
+-} // namespace laguerre
+\ No newline at end of file
++} // namespace laguerre
+diff --git a/paragram/csrc/laguerre/faster_convex_cell.cuh b/paragram/csrc/laguerre/faster_convex_cell.cuh
+index f1eaf804434892884fd7eb50eb34e48b5f110d1b..e446bc74c2ac9a41783c0d4a35613c327ef89582 100644
+--- a/paragram/csrc/laguerre/faster_convex_cell.cuh
++++ b/paragram/csrc/laguerre/faster_convex_cell.cuh
+@@ -1,5 +1,7 @@
+ #pragma once
+ 
++#include "status.cuh"
++
+ #include <cuda_runtime.h>
+ #include <device_launch_parameters.h>
+ #include <math.h>
+@@ -120,18 +122,6 @@ __device__ inline void swapUChar3(uchar3 &a, uchar3 &b)
+     b = t;
+ }
+ 
+-// Status Enum (simplified)
+-enum Status
+-{
+-    success = 0,
+-    plane_overflow,
+-    vertex_overflow,
+-    empty_cell,
+-    security_radius_not_reached,
+-    inconsistent_boundary,
+-    max_status_num,
+-};
+-
+ // ConvexCell Struct
+ // Uses block-relative addressing for coalesced memory access
+ // Memory layout: array[block_base + slot * CELL_BLOCK_STRIDE + local_tid]
+@@ -624,4 +614,4 @@ struct ConvexCell
+     }
+ };
+ 
+-} // namespace laguerre
+\ No newline at end of file
++} // namespace laguerre
+diff --git a/paragram/csrc/laguerre/laguerre.h b/paragram/csrc/laguerre/laguerre.h
+index a9fdfe8263e2b6a05c4579f6eeda32de03469638..03887d80cfb57f306a78c6fc1fe5a52f148d2021 100644
+--- a/paragram/csrc/laguerre/laguerre.h
++++ b/paragram/csrc/laguerre/laguerre.h
+@@ -8,7 +8,9 @@ namespace laguerre
+ {
+ 
+ // Returns (adjacency, adjacency_offsets, status)
+-// status is per-point: 0=success, other values indicate errors
++// status is per-point: 0=success, 1=plane overflow, 2=vertex overflow,
++// 3=empty cell, 4=security radius not reached, 5=inconsistent boundary,
++// 6=BVH traversal stack overflow. Any nonzero status invalidates the cell.
+ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor>
+ build_laguerre_voronoi_ultra(torch::Tensor points_in,
+                              torch::Tensor weights_in,
+@@ -27,4 +29,4 @@ build_voronoi_ultra(torch::Tensor points_in,
+                     std::optional<torch::Tensor> initial_guesses_offsets = std::nullopt,
+                     int leaf_size = -1);
+ 
+-} // namespace laguerre
+\ No newline at end of file
++} // namespace laguerre
+diff --git a/paragram/csrc/laguerre/laguerre_ultra.cu b/paragram/csrc/laguerre/laguerre_ultra.cu
+index 896dd65132dfde2215eff313f3d1e5848e5b59e7..0128acddeba48d87fa081f935f933dc53838381b 100644
+--- a/paragram/csrc/laguerre/laguerre_ultra.cu
++++ b/paragram/csrc/laguerre/laguerre_ultra.cu
+@@ -155,27 +155,36 @@ __global__ void compute_bvh_power_diagram_kernel(
+     };
+ 
+     // Initial search radius: infinity
+-    bool traversal_success = pwr_bvh::shrinking_power_box_query(leafBoxLambda, nodeLambda, bvh, p, initial_box_radii);
++    pwr_bvh::TraversalOutcome traversal_outcome =
++        pwr_bvh::shrinking_power_box_query(leafBoxLambda, nodeLambda, bvh, p, initial_box_radii);
+ 
+-    Status final_status = traversal_success ? local_status : security_radius_not_reached;
++    Status final_status = local_status;
++    if (final_status == success)
++    {
++        if (traversal_outcome == pwr_bvh::TraversalOutcome::stack_overflow)
++            final_status = traversal_stack_overflow;
++        else if (traversal_outcome != pwr_bvh::TraversalOutcome::complete)
++            final_status = security_radius_not_reached;
++    }
+ 
+-    // Write output
+-    // if (final_status == success)
+-    //{
+-    for (int v = 0; v < cell.nb_vertex; ++v)
++    // A partial cell must not contribute adjacency or contaminate another row
++    // during the later symmetrization pass.
++    if (final_status == success)
+     {
+-        uchar3 vertex = *cell.CCVertex(v);
+-        for (int i = 0; i < 3; ++i)
++        for (int v = 0; v < cell.nb_vertex; ++v)
+         {
+-            int plane = cell.CCIthPlane(v, i);
+-            int neigh = *cell.CCPlaneNeighbour(plane);
+-            if (neigh >= 0)
++            uchar3 vertex = *cell.CCVertex(v);
++            for (int i = 0; i < 3; ++i)
+             {
+-                neighbors[idx * MAX_PLANES + plane] = neigh;
++                int plane = cell.CCIthPlane(v, i);
++                int neigh = *cell.CCPlaneNeighbour(plane);
++                if (neigh >= 0)
++                {
++                    neighbors[idx * MAX_PLANES + plane] = neigh;
++                }
+             }
+         }
+     }
+-    //}
+ 
+     status[idx] = final_status;
+ }
+@@ -387,6 +396,7 @@ build_laguerre_voronoi_ultra(torch::Tensor points_in,
+     gather_adjacency_kernel<<<num_points, MAX_PLANES>>>(MAX_PLANES,
+                                                         num_points,
+                                                         neighbors.data_ptr<int>(),
++                                                        status.data_ptr<int>(),
+                                                         tmp_adjacency.data_ptr<int>(),
+                                                         unsorted_adj_offsets.data_ptr<int>(),
+                                                         tmp_adjacency_sizes.data_ptr<int>(),
+diff --git a/paragram/csrc/laguerre/pwr_bvh.cuh b/paragram/csrc/laguerre/pwr_bvh.cuh
+index d6eaedb89b189edf22fe2b446c42f70641389121..24a17e4da8696073fcec43fec841af6c07f0e339 100644
+--- a/paragram/csrc/laguerre/pwr_bvh.cuh
++++ b/paragram/csrc/laguerre/pwr_bvh.cuh
+@@ -215,171 +215,23 @@ get_directional_safety_radius(BoxRadii seed_radii, // Radii from seed point to i
+     return fmaxf(m03, m47);
+ }
+ 
+-struct StackEntry
+-{
+-    uint32_t idx;
+-    float dist;
+-};
+-
+-struct SortedStack
+-{
+-    StackEntry *stack;
+-    int maxCandidates;
+-    int numFound;
+-    float sqrDistMax;
+-};
+-
+-inline __device__ void insert_linear(SortedStack &stack, StackEntry newCandidate)
+-{
+-    int insertPos;
+-    if (stack.numFound < stack.maxCandidates)
+-    {
+-        insertPos = stack.numFound++;
+-    }
+-    else
+-    {
+-        if (newCandidate.dist >= stack.sqrDistMax)
+-            return;
+-        insertPos = stack.maxCandidates - 1;
+-    }
+-    while (insertPos > 0 && stack.stack[insertPos - 1].dist > newCandidate.dist)
+-    {
+-        stack.stack[insertPos] = stack.stack[insertPos - 1];
+-        --insertPos;
+-    }
+-    stack.stack[insertPos] = newCandidate;
+-    if (stack.numFound == stack.maxCandidates)
+-        stack.sqrDistMax = stack.stack[stack.maxCandidates - 1].dist;
+-}
++#ifndef PARAGRAM_TRAVERSAL_STACK_CAPACITY
++#define PARAGRAM_TRAVERSAL_STACK_CAPACITY 64
++#endif
+ 
+-inline __device__ StackEntry pop(SortedStack &stack)
+-{
+-    if (stack.numFound == 0)
+-        return {0, INFINITY};
+-    StackEntry result = stack.stack[0];
+-    --stack.numFound;
+-    int insertPos = 0;
+-    while (insertPos < stack.numFound)
+-    {
+-        stack.stack[insertPos] = stack.stack[insertPos + 1];
+-        ++insertPos;
+-    }
+-    return result;
+-}
++static_assert(PARAGRAM_TRAVERSAL_STACK_CAPACITY > 0);
+ 
+-/*! performs a 'shrinking radius (leaf-)query' with custom node evaluation. */
+-template <typename T, int D, typename LeafLambda, typename NodeLambda>
+-inline __device__ bool shrinking_power_radius_query(const LeafLambda &lambdaToExecuteForEachCandidateLeaf,
+-                                                    const NodeLambda &lambdaToExecuteForEachCandidateNode,
+-                                                    BinaryPwrBVH<T, D> bvh,
+-                                                    float sqrMaxSearchRadius)
++enum class TraversalOutcome : unsigned char
+ {
+-    float sqrCullDist = sqrMaxSearchRadius;
+-
+-    const int stackSize = 64;
+-    StackEntry traversalStack[stackSize];
+-    SortedStack stack;
+-    stack.stack = traversalStack;
+-    stack.maxCandidates = stackSize;
+-    stack.numFound = 0;
+-    stack.sqrDistMax = INFINITY;
+-
+-    // Start with root
+-    // Check if empty
+-    if (bvh.numNodes == 0)
+-        return false;
+-
+-    typename BinaryPwrBVH<T, D>::node_t::Admin node = bvh.nodes[0].admin;
+-
+-    // ------------------------------------------------------------------
+-    // traverse until there's nothing left to traverse:
+-    // ------------------------------------------------------------------
+-    while (true)
+-    {
+-
+-        // ------------------------------------------------------------------
+-        // traverse INNER nodes downward
+-        // ------------------------------------------------------------------
+-        while (true)
+-        {
+-            if (node.count != 0)
+-                // Leaf node
+-                break;
+-
+-            uint32_t n0Idx = (uint32_t)node.offset + 0;
+-            uint32_t n1Idx = (uint32_t)node.offset + 1;
+-            const auto &n0 = bvh.nodes[n0Idx];
+-            const auto &n1 = bvh.nodes[n1Idx];
+-
+-            float d0 = lambdaToExecuteForEachCandidateNode(n0);
+-            float d1 = lambdaToExecuteForEachCandidateNode(n1);
+-
+-            if (fminf(d0, d1) >= sqrCullDist)
+-            {
+-                // both children are too far away; this is a dead end
+-                node.count = 0; // Mark as processed/invalid for the loop break
+-                break;
+-            }
+-
+-            uint32_t farID;
+-            if (d0 < d1)
+-            {
+-                // go left side, possibly push right side
+-                node = n0.admin;
+-                farID = n1Idx;
+-            }
+-            else
+-            {
+-                // go right side, possibly push left side
+-                node = n1.admin;
+-                farID = n0Idx;
+-            }
+-
+-            float farChildDist = fmaxf(d0, d1);
+-            if (farChildDist < sqrCullDist)
+-            {
+-                // if (stackPtr >= traversalStack + stackSize)
+-                // {
+-                //     // Stack overflow
+-                //     return false;
+-                // }
+-                insert_linear(stack, {farID, farChildDist});
+-            }
+-        }
+-
+-        if (node.count != 0)
+-        {
+-            // Valid leaf: call lambda
+-            float leafResult = lambdaToExecuteForEachCandidateLeaf(bvh.primIDs + node.offset, node.count);
+-            if (leafResult < 0.f)
+-                return true; // Early exit requested
+-            sqrCullDist = fminf(sqrCullDist, leafResult);
+-        }
+-
+-        // ------------------------------------------------------------------
+-        // pop next un-traversed node from stack
+-        // ------------------------------------------------------------------
+-        while (true)
+-        {
+-            if (stack.numFound == 0)
+-                return false;
+-
+-            StackEntry fromStack = pop(stack);
+-
+-            if (fromStack.dist <= sqrCullDist)
+-            {
+-                node = bvh.nodes[fromStack.idx].admin;
+-                break; // Found a valid node to traverse
+-            }
+-            // Discard, too far now
+-        }
+-    }
+-    return false;
+-}
++    complete,
++    empty_bvh,
++    cell_aborted,
++    stack_overflow,
++};
+ 
+-// Push a node onto the bounded traversal stack. On overflow, evict the FARTHEST
+-// entry if the incoming node is nearer (bounded best-first). 
+-__device__ inline void pwr_stack_push(uint32_t *stack_idx, float *stack_dist, int &stack_top,
++// A full traversal stack is not a pruning decision.  Fail closed instead of
++// evicting a node whose subtree may still contain a clipping site.
++__device__ inline bool pwr_stack_push(uint32_t *stack_idx, float *stack_dist, int &stack_top,
+                                       int cap, uint32_t idx, float dist)
+ {
+     if (stack_top < cap)
+@@ -387,40 +239,25 @@ __device__ inline void pwr_stack_push(uint32_t *stack_idx, float *stack_dist, in
+         stack_idx[stack_top] = idx;
+         stack_dist[stack_top] = dist;
+         stack_top++;
+-        return;
+-    }
+-    // Full: replace the farthest entry if this one is nearer.
+-    int far_pos = 0;
+-    float far_dist = stack_dist[0];
+-    for (int i = 1; i < cap; i++)
+-    {
+-        if (stack_dist[i] > far_dist)
+-        {
+-            far_dist = stack_dist[i];
+-            far_pos = i;
+-        }
+-    }
+-    if (dist < far_dist)
+-    {
+-        stack_idx[far_pos] = idx;
+-        stack_dist[far_pos] = dist;
++        return true;
+     }
++    return false;
+ }
+ 
+ template <typename T, int D, typename LeafLambda, typename NodeLambda>
+-inline __device__ bool shrinking_power_box_query(const LeafLambda &lambdaToExecuteForEachCandidateLeaf,
+-                                                 const NodeLambda &lambdaToExecuteForEachCandidateNode,
+-                                                 BinaryPwrBVH<T, D> bvh,
+-                                                 float3 seed_point,
+-                                                 pwr_bvh::BoxRadii seed_radii)
++inline __device__ TraversalOutcome shrinking_power_box_query(const LeafLambda &lambdaToExecuteForEachCandidateLeaf,
++                                                             const NodeLambda &lambdaToExecuteForEachCandidateNode,
++                                                             BinaryPwrBVH<T, D> bvh,
++                                                             float3 seed_point,
++                                                             pwr_bvh::BoxRadii seed_radii)
+ {
+-    const int stackSize = 64;  // bounded best-first stack; overflow evicts farthest (pwr_stack_push)
++    const int stackSize = PARAGRAM_TRAVERSAL_STACK_CAPACITY;
+     uint32_t stack_idx[stackSize];
+     float stack_dist[stackSize];
+     int stack_top = 0;
+ 
+     if (bvh.numNodes == 0)
+-        return false;
++        return TraversalOutcome::empty_bvh;
+ 
+     typename BinaryPwrBVH<T, D>::node_t::Admin node = bvh.nodes[0].admin;
+ 
+@@ -439,12 +276,14 @@ inline __device__ bool shrinking_power_box_query(const LeafLambda &lambdaToExecu
+         if (d0 < d1)
+         {
+             node = n0.admin;
+-            pwr_stack_push(stack_idx, stack_dist, stack_top, stackSize, n1Idx, d1);
++            if (!pwr_stack_push(stack_idx, stack_dist, stack_top, stackSize, n1Idx, d1))
++                return TraversalOutcome::stack_overflow;
+         }
+         else
+         {
+             node = n1.admin;
+-            pwr_stack_push(stack_idx, stack_dist, stack_top, stackSize, n0Idx, d0);
++            if (!pwr_stack_push(stack_idx, stack_dist, stack_top, stackSize, n0Idx, d0))
++                return TraversalOutcome::stack_overflow;
+         }
+     }
+ #endif
+@@ -489,9 +328,10 @@ inline __device__ bool shrinking_power_box_query(const LeafLambda &lambdaToExecu
+                 farDist = d0;
+             }
+ 
+-            if (fmaxf(diff0, diff1) < 0.f)
++            if (fmaxf(diff0, diff1) <= 0.f)
+             {
+-                pwr_stack_push(stack_idx, stack_dist, stack_top, stackSize, farIdx, farDist);
++                if (!pwr_stack_push(stack_idx, stack_dist, stack_top, stackSize, farIdx, farDist))
++                    return TraversalOutcome::stack_overflow;
+             }
+         }
+ 
+@@ -499,7 +339,7 @@ inline __device__ bool shrinking_power_box_query(const LeafLambda &lambdaToExecu
+         {
+             seed_radii = lambdaToExecuteForEachCandidateLeaf(bvh.primIDs + node.offset, node.count);
+             if (!seed_radii.is_valid())
+-                return true;
++                return TraversalOutcome::cell_aborted;
+         }
+ 
+         // Pop nearest valid node from stack (min-extraction)
+@@ -543,9 +383,9 @@ inline __device__ bool shrinking_power_box_query(const LeafLambda &lambdaToExecu
+             // Pruned — continue to next nearest
+         }
+         if (!found)
+-            return true; // Stack empty, done
++            return TraversalOutcome::complete; // Stack empty, done
+     }
+-    return false;
++    return TraversalOutcome::empty_bvh;
+ }
+ 
+-} // namespace pwr_bvh
+\ No newline at end of file
++} // namespace pwr_bvh
+diff --git a/paragram/csrc/laguerre/status.cuh b/paragram/csrc/laguerre/status.cuh
+new file mode 100644
+index 0000000000000000000000000000000000000000..f54939d26fc9abb7f9e6225c16728cf59161c00d
+--- /dev/null
++++ b/paragram/csrc/laguerre/status.cuh
+@@ -0,0 +1,21 @@
++#pragma once
++
++namespace laguerre
++{
++
++// Stable int32 ABI shared by the weighted and unweighted kernels.
++enum Status : int
++{
++    success = 0,
++    plane_overflow = 1,
++    vertex_overflow = 2,
++    empty_cell = 3,
++    security_radius_not_reached = 4,
++    inconsistent_boundary = 5,
++    traversal_stack_overflow = 6,
++    max_status_num = 7,
++};
++
++static_assert(sizeof(Status) == sizeof(int));
++
++} // namespace laguerre
+diff --git a/paragram/csrc/laguerre/voronoi_bvh.cuh b/paragram/csrc/laguerre/voronoi_bvh.cuh
+index 23d4a24bcec15738fd0e36142dfde6a6e1e22af4..f0503bb5670576077753d6d94e6416e4466ca0aa 100644
+--- a/paragram/csrc/laguerre/voronoi_bvh.cuh
++++ b/paragram/csrc/laguerre/voronoi_bvh.cuh
+@@ -111,7 +111,21 @@ get_directional_safety_radius(BoxRadii seed_radii, float3 seed_point, VecType bo
+     return fmaxf(m03, m47);
+ }
+ 
+-__device__ inline void voronoi_stack_push(uint32_t *stack_idx,
++#ifndef PARAGRAM_TRAVERSAL_STACK_CAPACITY
++#define PARAGRAM_TRAVERSAL_STACK_CAPACITY 64
++#endif
++
++static_assert(PARAGRAM_TRAVERSAL_STACK_CAPACITY > 0);
++
++enum class TraversalOutcome : unsigned char
++{
++    complete,
++    empty_bvh,
++    cell_aborted,
++    stack_overflow,
++};
++
++__device__ inline bool voronoi_stack_push(uint32_t *stack_idx,
+                                           float *stack_dist,
+                                           int &stack_top,
+                                           int cap,
+@@ -123,24 +137,9 @@ __device__ inline void voronoi_stack_push(uint32_t *stack_idx,
+         stack_idx[stack_top] = idx;
+         stack_dist[stack_top] = dist;
+         stack_top++;
+-        return;
+-    }
+-
+-    int far_pos = 0;
+-    float far_dist = stack_dist[0];
+-    for (int i = 1; i < cap; i++)
+-    {
+-        if (stack_dist[i] > far_dist)
+-        {
+-            far_dist = stack_dist[i];
+-            far_pos = i;
+-        }
+-    }
+-    if (dist < far_dist)
+-    {
+-        stack_idx[far_pos] = idx;
+-        stack_dist[far_pos] = dist;
++        return true;
+     }
++    return false;
+ }
+ 
+ // ******************************************************************
+@@ -152,19 +151,20 @@ __device__ inline void voronoi_stack_push(uint32_t *stack_idx,
+ // ******************************************************************
+ 
+ template <typename LeafLambda, typename NodeLambda>
+-inline __device__ bool shrinking_voronoi_box_query(const LeafLambda &lambdaToExecuteForEachCandidateLeaf,
+-                                                   const NodeLambda &lambdaToExecuteForEachCandidateNode,
+-                                                   cuBQL::BinaryBVH<float, 3> bvh,
+-                                                   float3 seed_point,
+-                                                   voronoi_bvh::BoxRadii seed_radii)
++inline __device__ TraversalOutcome shrinking_voronoi_box_query(
++    const LeafLambda &lambdaToExecuteForEachCandidateLeaf,
++    const NodeLambda &lambdaToExecuteForEachCandidateNode,
++    cuBQL::BinaryBVH<float, 3> bvh,
++    float3 seed_point,
++    voronoi_bvh::BoxRadii seed_radii)
+ {
+-    const int stackSize = 64;
++    const int stackSize = PARAGRAM_TRAVERSAL_STACK_CAPACITY;
+     uint32_t stack_idx[stackSize];
+     float stack_dist[stackSize];
+     int stack_top = 0;
+ 
+     if (bvh.numNodes == 0)
+-        return false;
++        return TraversalOutcome::empty_bvh;
+ 
+     auto node = bvh.nodes[0].admin;
+ 
+@@ -183,12 +183,14 @@ inline __device__ bool shrinking_voronoi_box_query(const LeafLambda &lambdaToExe
+         if (d0 < d1)
+         {
+             node = n0.admin;
+-            voronoi_stack_push(stack_idx, stack_dist, stack_top, stackSize, n1Idx, d1);
++            if (!voronoi_stack_push(stack_idx, stack_dist, stack_top, stackSize, n1Idx, d1))
++                return TraversalOutcome::stack_overflow;
+         }
+         else
+         {
+             node = n1.admin;
+-            voronoi_stack_push(stack_idx, stack_dist, stack_top, stackSize, n0Idx, d0);
++            if (!voronoi_stack_push(stack_idx, stack_dist, stack_top, stackSize, n0Idx, d0))
++                return TraversalOutcome::stack_overflow;
+         }
+     }
+ #endif
+@@ -233,9 +235,10 @@ inline __device__ bool shrinking_voronoi_box_query(const LeafLambda &lambdaToExe
+                 farDist = d0;
+             }
+ 
+-            if (fmaxf(diff0, diff1) < 0.f)
++            if (fmaxf(diff0, diff1) <= 0.f)
+             {
+-                voronoi_stack_push(stack_idx, stack_dist, stack_top, stackSize, farIdx, farDist);
++                if (!voronoi_stack_push(stack_idx, stack_dist, stack_top, stackSize, farIdx, farDist))
++                    return TraversalOutcome::stack_overflow;
+             }
+         }
+ 
+@@ -243,7 +246,7 @@ inline __device__ bool shrinking_voronoi_box_query(const LeafLambda &lambdaToExe
+         {
+             seed_radii = lambdaToExecuteForEachCandidateLeaf(bvh.primIDs + node.offset, node.count);
+             if (!seed_radii.is_valid())
+-                return true;
++                return TraversalOutcome::cell_aborted;
+         }
+ 
+         // Pop nearest valid node from stack (min-extraction)
+@@ -287,9 +290,9 @@ inline __device__ bool shrinking_voronoi_box_query(const LeafLambda &lambdaToExe
+             // Pruned — continue to next nearest
+         }
+         if (!found)
+-            return true; // Stack empty, done
++            return TraversalOutcome::complete; // Stack empty, done
+     }
+-    return false;
++    return TraversalOutcome::empty_bvh;
+ }
+ 
+ } // namespace voronoi_bvh
+diff --git a/paragram/csrc/laguerre/voronoi_convex_cell.cuh b/paragram/csrc/laguerre/voronoi_convex_cell.cuh
+index acac5bceb8f782c45827120ba1c39b1294e73aa2..e167e06c64c844c4c2a28aebad5ef7bd75a84c51 100644
+--- a/paragram/csrc/laguerre/voronoi_convex_cell.cuh
++++ b/paragram/csrc/laguerre/voronoi_convex_cell.cuh
+@@ -4,6 +4,8 @@
+ //   - CCComputeBisectorPlane: removed weight terms (standard perpendicular bisector)
+ //   - CCIsPointTooFar: simplified to pure squared distance check
+ 
++#include "status.cuh"
++
+ #include <cuda_runtime.h>
+ #include <device_launch_parameters.h>
+ #include <math.h>
+@@ -113,17 +115,6 @@ __device__ inline void swapUChar3(uchar3 &a, uchar3 &b)
+     b = t;
+ }
+ 
+-enum Status
+-{
+-    success = 0,
+-    plane_overflow,
+-    vertex_overflow,
+-    empty_cell,
+-    security_radius_not_reached,
+-    inconsistent_boundary,
+-    max_status_num,
+-};
+-
+ struct ConvexCell
+ {
+     float4 voro_seed;
+diff --git a/paragram/csrc/laguerre/voronoi_ultra.cu b/paragram/csrc/laguerre/voronoi_ultra.cu
+index c040b664bacad77150e7779764b8fc435d17de4b..76a6eed5165a1139b2fbc300dc33dedd0089e0f9 100644
+--- a/paragram/csrc/laguerre/voronoi_ultra.cu
++++ b/paragram/csrc/laguerre/voronoi_ultra.cu
+@@ -118,21 +118,33 @@ __global__ void compute_bvh_voronoi_kernel(
+         return bounds;
+     };
+ 
+-    bool traversal_success = voronoi_bvh::shrinking_voronoi_box_query(leafBoxLambda, nodeLambda, bvh, p, initial_box_radii);
++    voronoi_bvh::TraversalOutcome traversal_outcome =
++        voronoi_bvh::shrinking_voronoi_box_query(leafBoxLambda, nodeLambda, bvh, p, initial_box_radii);
+ 
+-    Status final_status = traversal_success ? local_status : security_radius_not_reached;
++    Status final_status = local_status;
++    if (final_status == success)
++    {
++        if (traversal_outcome == voronoi_bvh::TraversalOutcome::stack_overflow)
++            final_status = traversal_stack_overflow;
++        else if (traversal_outcome != voronoi_bvh::TraversalOutcome::complete)
++            final_status = security_radius_not_reached;
++    }
+ 
+-    // Write output
+-    for (int v = 0; v < cell.nb_vertex; ++v)
++    // A partial cell must not contribute adjacency or contaminate another row
++    // during the later symmetrization pass.
++    if (final_status == success)
+     {
+-        uchar3 vertex = *cell.CCVertex(v);
+-        for (int i = 0; i < 3; ++i)
++        for (int v = 0; v < cell.nb_vertex; ++v)
+         {
+-            int plane = cell.CCIthPlane(v, i);
+-            int neigh = *cell.CCPlaneNeighbour(plane);
+-            if (neigh >= 0)
++            uchar3 vertex = *cell.CCVertex(v);
++            for (int i = 0; i < 3; ++i)
+             {
+-                neighbors[idx * MAX_PLANES + plane] = neigh;
++                int plane = cell.CCIthPlane(v, i);
++                int neigh = *cell.CCPlaneNeighbour(plane);
++                if (neigh >= 0)
++                {
++                    neighbors[idx * MAX_PLANES + plane] = neigh;
++                }
+             }
+         }
+     }
+@@ -326,6 +338,7 @@ build_voronoi_ultra(torch::Tensor points_in,
+     gather_adjacency_kernel<<<num_points, MAX_PLANES>>>(MAX_PLANES,
+                                                         num_points,
+                                                         neighbors.data_ptr<int>(),
++                                                        status.data_ptr<int>(),
+                                                         tmp_adjacency.data_ptr<int>(),
+                                                         unsorted_adj_offsets.data_ptr<int>(),
+                                                         tmp_adjacency_sizes.data_ptr<int>(),

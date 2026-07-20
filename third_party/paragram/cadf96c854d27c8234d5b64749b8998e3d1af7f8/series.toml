@@ -1,0 +1,57 @@
+schema_version = 1
+source_pin_manifest = "docs/references/paragram_source_pin.toml"
+repository_url = "https://github.com/zenseact/paragram.git"
+base_commit = "cadf96c854d27c8234d5b64749b8998e3d1af7f8"
+base_tree = "ad17c2eff4c5beec43330f597ee5d6616b62d32d"
+final_tree = "591ed6a3257ecd0be8544ba129e08c081ed4eb80"
+complete_series_required = true
+public_status = "proposal_only"
+cuda_compile_status = "not_run"
+
+[[patches]]
+order = 1
+id = "fail_closed_bvh_stack_and_adjacency_v1"
+path = "third_party/paragram/cadf96c854d27c8234d5b64749b8998e3d1af7f8/0001-fail-closed-bvh-stack.patch"
+bytes = 26724
+sha256 = "e80e330918a748d969a745671b2aa5604473a5180ecb5243d10d84558789c6eb"
+pre_tree = "ad17c2eff4c5beec43330f597ee5d6616b62d32d"
+post_tree = "591ed6a3257ecd0be8544ba129e08c081ed4eb80"
+touched_paths = [
+  "paragram/csrc/laguerre/adjacency.cuh",
+  "paragram/csrc/laguerre/faster_convex_cell.cuh",
+  "paragram/csrc/laguerre/laguerre.h",
+  "paragram/csrc/laguerre/laguerre_ultra.cu",
+  "paragram/csrc/laguerre/pwr_bvh.cuh",
+  "paragram/csrc/laguerre/status.cuh",
+  "paragram/csrc/laguerre/voronoi_bvh.cuh",
+  "paragram/csrc/laguerre/voronoi_convex_cell.cuh",
+  "paragram/csrc/laguerre/voronoi_ultra.cu",
+]
+added_paths = ["paragram/csrc/laguerre/status.cuh"]
+modified_paths = [
+  "paragram/csrc/laguerre/adjacency.cuh",
+  "paragram/csrc/laguerre/faster_convex_cell.cuh",
+  "paragram/csrc/laguerre/laguerre.h",
+  "paragram/csrc/laguerre/laguerre_ultra.cu",
+  "paragram/csrc/laguerre/pwr_bvh.cuh",
+  "paragram/csrc/laguerre/voronoi_bvh.cuh",
+  "paragram/csrc/laguerre/voronoi_convex_cell.cuh",
+  "paragram/csrc/laguerre/voronoi_ultra.cu",
+]
+deleted_paths = []
+semantic_contract = [
+  "historical_status_codes_0_through_5_unchanged_and_traversal_stack_overflow_is_6",
+  "weighted_and_unweighted_status_abi_is_one_shared_int32_enum",
+  "bounded_box_traversals_return_a_typed_outcome",
+  "every_full_stack_push_returns_stack_overflow_without_eviction_or_replacement",
+  "every_non_strictly_excluded_far_branch_is_retained_including_zero_margin_tangencies",
+  "a_preexisting_cell_error_wins_else_stack_overflow_maps_to_status_6",
+  "nonzero_status_cells_write_no_raw_adjacency",
+  "csr_gather_keeps_an_edge_only_when_both_endpoint_statuses_are_success",
+]
+limitations = [
+  "not_compiled_with_nvcc_or_pytorch_in_this_milestone",
+  "upstream_default_stream_usage_and_asynchronous_cuda_fault_propagation_are_not_patched_or_validated",
+  "no_explicit_caller_box_or_geometry_export_yet",
+  "status_zero_remains_a_floating_proposal_not_a_certificate",
+]

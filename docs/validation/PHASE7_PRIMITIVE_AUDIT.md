@@ -46,6 +46,18 @@ Un fork minimal épinglé reste candidat, sans être choisi. Pour devenir évalu
 
 La primitive interne reste le repli si ces modifications deviennent plus complexes qu'un clipper spécialisé et rejouable.
 
+## Jalon 7.2 — série candidate fail-closed
+
+Le deuxième jalon ne sélectionne toujours pas Paragram. Il isole le plus petit correctif qui retire l'impasse identifiée en 7.1 : une pile BVH pleine ne doit jamais devenir une décision implicite de pruning. La série atomique est conservée sous [`third_party/paragram`](../../third_party/paragram/cadf96c854d27c8234d5b64749b8998e3d1af7f8/README.md). Elle part exactement de l'arbre `ad17c2eff4c5beec43330f597ee5d6616b62d32d` et produit l'arbre candidat `591ed6a3257ecd0be8544ba129e08c081ed4eb80`.
+
+Le patch conserve les codes historiques de statut 0 à 5, partage une seule ABI `Status : int` entre cellules ordinaires et pondérées, puis réserve le code 6 à `traversal_stack_overflow`. Les parcours de boîte retournent désormais un résultat typé. Chaque tentative de push sur une pile pleine arrête la cellule avec ce statut, sans éviction ni remplacement; toute branche lointaine dont la marge vaut exactement zéro est conservée comme non strictement exclue; le helper de rayon inutilisé qui possédait une autre omission bornée est supprimé. Une erreur géométrique déjà acquise reste prioritaire.
+
+Une cellule de statut non nul n'écrit plus d'adjacence brute. Le compactage CSR conserve ensuite une arête uniquement si sa source et sa destination sont toutes deux en succès. Cette vérification bidirectionnelle précède la symétrisation et n'ajoute aucun retour anticipé autour des barrières CUDA du bloc. Ainsi une cellule fautive ne peut ni publier sa ligne, ni être réintroduite comme destination par une cellule saine.
+
+Le manifeste `series.toml` impose l'application complète du patch, son SHA-256 `e80e330918a748d969a745671b2aa5604473a5180ecb5243d10d84558789c6eb`, sa taille, ses neuf chemins autorisés et les arbres Git avant et après. `tools/check_paragram_patch_series.py` repart d'un checkout local validé par le pin 7.1, applique la série dans un index et un worktree temporaires sans réseau, puis contrôle les actions de fichiers, les arbres, la licence, le gitlink cuBQL et les invariants structuraux fail-closed. Sa fixture hôte de quarantaine ne conserve que l'arête entre deux cellules saines lorsque les autres extrémités portent des statuts d'erreur. Les essais négatifs courts refusent un checkout sale, les renames, binaires, changements de mode et octets NUL, une configuration Git injectée et le retour de l'une ou l'autre tangence à une comparaison stricte.
+
+Cette validation est structurelle et hors ligne. Le patch n'a pas encore été compilé avec NVCC ou PyTorch, aucun overflow forcé n'a été observé sur GPU et le statut 0 reste une proposition flottante. Il ne corrige pas encore l'emploi amont du stream CUDA par défaut ni les retours ignorés de certaines synchronisations; une faute CUDA asynchrone n'est donc pas couverte par la garantie ciblée de débordement sémantique. La boîte vient encore de l'amont et aucun plan, sommet ou incidence n'est exporté. Le jalon 7.2 ne satisfait donc ni la porte de sortie de la phase 7, ni celle de la phase 8.
+
 ## Convention analytique des poids
 
 Pour le site $p_i$ de poids $w_i$, la puissance utilisée par l'audit est
@@ -83,4 +95,4 @@ Les tests hôte ferment le cube symétrique, la couture avec le bisecteur single
 
 ## Prochaine décision
 
-Le jalon suivant réalise les trois coutures minimales du fork candidat : overflow de pile fail-closed, boîte explicite et export des plans, sommets et incidences. Il compare ensuite les propositions avec et sans fast math à l'oracle désormais disponible. Une expérience G4 courte ne devient utile qu'après ces coutures. La phase 7 restera `ready` jusqu'au choix documenté entre fork minimal et primitive interne et jusqu'à l'enregistrement des mesures requises.
+Le jalon suivant traite d'abord la boîte dyadique explicite, puis chiffre séparément l'export des plans, sommets et incidences. Si ces deux coutures restent locales, le fork candidat sera compilé avec une capacité de pile forcée à un et confronté à l'oracle avec et sans fast math. Si elles propagent une refonte au-delà de l'API, des noyaux de cellules et du compactage borné, le fork sera abandonné au profit d'un clipper interne spécialisé. Une expérience G4 courte ne devient utile qu'après le contrôle structurel, la compilation et l'exposition de la géométrie. La phase 7 restera `ready` jusqu'à ce choix documenté et à l'enregistrement des mesures requises.

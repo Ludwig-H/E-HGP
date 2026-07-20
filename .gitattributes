@@ -1,2 +1,3 @@
 *.pdf binary
 *.ipynb -diff
+*.patch -whitespace

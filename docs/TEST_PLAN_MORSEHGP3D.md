@@ -223,6 +223,14 @@ La validation hôte courante couvre : couture avec le prédicat de bisecteur sin
 
 Le différentiel futur traite séparément Paragram avec fast math, Paragram avec `NO_FAST_MATH=1` et l'oracle exact. Toute sortie amont est une proposition : un statut non nul, un overflow ou une éviction de parcours interdit de l'accepter sans recertification; un statut nul ne la certifie pas. Le test ne compare une géométrie amont qu'après exposition des sommets, plans et incidences par le candidat fork ou la primitive interne. Les builds et CTests ciblés de l'oracle doivent passer sous GCC et Clang stricts; aucun benchmark long ni aucune session G4 ne sont requis à ce jalon.
 
+### 5.7 Série fail-closed du jalon 7.2
+
+Le checker de série exige un checkout 7.1 propre, le manifeste `complete_series_required`, des ordres contigus, des chemins normalisés sous le dépôt, la taille et le SHA-256 exacts de chaque patch, puis les arbres Git exacts avant et après chaque application. Il refuse les renommages, copies, binaires, changements de mode, liens symboliques et actions non déclarées. Il ne lance ni clone, ni fetch, ni initialisation de sous-module et réutilise uniquement les objets du checkout local dans un dépôt temporaire.
+
+Après application, le contrôle structurel exige une ABI entière unique avec les codes historiques 0 à 5 inchangés et `traversal_stack_overflow=6`; un résultat de parcours typé; trois push contrôlés dans chacun des deux parcours de boîte; l'absence du remplacement silencieux et du helper de rayon abandonné; la priorité à l'erreur géométrique déjà acquise; l'absence d'adjacence brute pour tout statut non nul; et le filtrage des deux extrémités avant symétrisation. Le corps du gather ne peut avoir aucun retour anticipé, car tous les threads doivent traverser ses barrières.
+
+La fixture CPU minimale emploie quatre lignes brutes dont les statuts sont succès, overflow de pile, succès et overflow de plans. Seule l'arête entre les deux cellules saines doit subsister, et les deux lignes fautives doivent être vides. Ce modèle valide le contrat de quarantaine, pas l'exécution CUDA. Une étape ultérieure compilera deux extensions identifiables, dont une avec capacité de pile égale à un pour forcer l'erreur sur les chemins ordinaires et pondérés. Elle devra aussi exécuter tout le pipeline sur le stream PyTorch courant et propager les erreurs de lancement et d'exécution avant le compactage CSR. Jusqu'à cette compilation et au différentiel géométrique, `cuda_compile_status=not_run` et toute sortie reste `proposal_only`.
+
 ## 6. Tests de Gamma, du catalogue Gabriel et de la réduction
 
 ### 6.1 Gamma exact et événements Gabriel partiels
