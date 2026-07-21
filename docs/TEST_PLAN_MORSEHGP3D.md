@@ -321,6 +321,10 @@ Pour $m<m_{\star}$, les fragments provenant de parents ou chunks différents ne 
 
 La boîte $\Omega$ est testée sur des centres critiques situés sur les six faces, les douze arêtes et les huit sommets de l'AABB non paddée. Le padding dyadique doit les placer strictement à l'intérieur; seules les faces du padding portent le bit artificiel et elles ne produisent aucun événement.
 
+Le jalon 8.1 teste séparément le constructeur de boîte avant toute fermeture de diagramme. La matrice courte couvre singleton et zéros signés, axes constants, nuages colinéaires ou coplanaires, sous-normaux autour de zéro, frontière de binade, extrema ex æquo avec témoin au plus petit `PointId`, permutations d'entrée et accord bit à bit avec l'AABB racine du LBVH. Les mots immédiatement intérieurs aux deux extrema finis doivent réussir avec une face égale à l'extremum; le plus grand fini négatif comme minimum ou le plus grand fini positif comme maximum doit produire `unsupported_finite_binary64_range`, tous les masques affectés et aucun payload.
+
+Le vérificateur frais rejette les mutations indépendantes d'une face, d'un extremum, d'un témoin, d'une marge, d'un compteur, d'un booléen de portée, d'un masque, de la décision et du nuage source. Une réussite alimente `build_exact_bounded_h_polytope_reference` sans demi-espace sémantique : le résultat attendu est un $C_0$ tridimensionnel complet, huit sommets et exactement six faces artificielles sans identifiant de contrainte. Ces tests restent ciblés sous GCC et Clang stricts; ils ne remplacent pas les futurs différentiels cellule par cellule de la Phase 8.
+
 ### 6.4 Multiplicité de Morse et nombre de bras
 
 Pour un événement de support frontal $U$ et d'indice $\mu$, l'oracle enregistre la multiplicité de Reani–Bobrowski $\Delta=\binom{\lvert U\rvert-1}{\mu}$. À l'indice un, il construit les $\lvert U\rvert$ bras et vérifie que le lot tue au plus $\lvert U\rvert-1$ classes de $H_0$. Les fixtures obligatoires couvrent :

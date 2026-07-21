@@ -162,6 +162,14 @@ Le statut d'une exécution est distinct : `exact`, `conditional`, `budget_exhaus
 | overflow | file secondaire ou arrêt explicite, jamais troncature |
 | environnement FTZ ou DAZ | filtre FP64 désactivé et fallback exact obligatoire |
 
+### Certificat de boîte de Phase 8
+
+| affirmation | statut | justification et limite |
+|---|---|---|
+| le prédécesseur fini immédiat d'un minimum binary64 et le successeur fini immédiat d'un maximum binary64 donnent six marges dyadiques strictement positives | `proved_here` | l'ordre des mots canoniques est strictement monotone sur chaque signe, avec recanonisation de zéro; seules les deux sorties vers une infinité n'ont pas de voisin fini et provoquent un échec explicite |
+| si chaque face paddée est strictement extérieure aux extrema de $X$, alors $\mathrm{conv}(X)\subset\mathrm{int}(\Omega)$ | `proved_here` | chaque site satisfait les six inégalités strictes et l'intérieur d'un produit de trois intervalles ouverts est convexe; aucune hypothèse de dimension affine ou de position générale n'intervient |
+| `build_strictly_padded_dyadic_aabb` décide et certifie ce contrat sur un nuage canonique | `validated_host_software` | scan exact avec témoins déterministes, voisins calculés sans flottants, six marges rationnelles, vérificateur frais et échec sans payload aux limites finies; tests ciblés GCC et Clang stricts sur dégénérescences, mutations, accord LBVH et base H-polytope, sans fermeture de cellule, CUDA, GCP ni statut public |
+
 Les recettes binary64 de 2A.8c sont évaluées directement comme polynômes homogènes. Si une recette produit une ligne affine brute $\widetilde{r}_i$ et que le plan exact stocke sa primitive orientée $r_i=\lambda_i\widetilde{r}_i$ avec $\lambda_i>0$, cette réduction conserve tous les signes scientifiques utilisés. Pour l'orientation 2D, $n=\lambda\widetilde{n}$ donne $\mathrm{sign}\left(n\mathbin{\cdot}((b-a)\mathbin{\times}(c-a))\right)=\mathrm{sign}\left(\widetilde{n}\mathbin{\cdot}((b-a)\mathbin{\times}(c-a))\right)$. Pour trois plans, la multiplication indépendante des lignes par des facteurs strictement positifs conserve les rangs normal et augmenté; dans l'ordre canonique des plans, elle conserve aussi le signe du déterminant des normales. Enfin, si $N$ est la matrice des trois normales liantes, $p$ leur unique intersection, $f_4$ la quatrième forme et $H$ le déterminant homogène des quatre lignes affines, alors $H=\det(N)f_4(p)$; ainsi $\mathrm{sign}(f_4(p))=\mathrm{sign}(\det(N))\mathrm{sign}(H)$ sans division flottante. Ces identités justifient les filtres, mais chaque objet riche reste revérifié par le témoin rationnel exact.
 
 Une expansion flottante certifie un signe lorsqu'une borne d'erreur l'exclut de zéro; elle ne représente pas une division exacte. Tout centre ou niveau ambigu est matérialisé par le fallback big-int ou rationnel. Une erreur de signe invalide le certificat entier, même si la partition finale semble plausible.

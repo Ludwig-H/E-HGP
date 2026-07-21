@@ -1,5 +1,7 @@
 #include "morsehgp3d/spatial/lbvh.hpp"
 
+#include "morsehgp3d/spatial/point_cloud_aabb.hpp"
+
 #include "exact_query.hpp"
 
 #include <algorithm>
@@ -172,17 +174,12 @@ MortonLbvhIndex MortonLbvhIndex::build(const CanonicalPointCloud& cloud) {
   index.leaves_.reserve(point_count);
   index.leaf_position_by_point_id_.assign(point_count, invalid_node_index);
 
-  std::array<PointId, 3> lower_point_ids{};
-  std::array<PointId, 3> upper_point_ids{};
-  for (std::size_t point_index = 1U; point_index < point_count; ++point_index) {
-    const PointId point_id = static_cast<PointId>(point_index);
-    for (std::size_t axis = 0U; axis < 3U; ++axis) {
-      lower_point_ids[axis] = lower_witness(
-          cloud, lower_point_ids[axis], point_id, axis);
-      upper_point_ids[axis] = upper_witness(
-          cloud, upper_point_ids[axis], point_id, axis);
-    }
-  }
+  const ExactPointCloudAabb3 exact_point_bounds =
+      build_exact_point_cloud_aabb(cloud);
+  const std::array<PointId, 3>& lower_point_ids =
+      exact_point_bounds.lower_witness_point_ids;
+  const std::array<PointId, 3>& upper_point_ids =
+      exact_point_bounds.upper_witness_point_ids;
 
   std::array<exact::ExactRational, 3> lower_coordinates{};
   std::array<exact::ExactRational, 3> upper_coordinates{};
@@ -244,12 +241,12 @@ MortonLbvhIndex MortonLbvhIndex::build(const CanonicalPointCloud& cloud) {
   index.build_counters_.maximum_morton_collision_size = maximum_collision_size;
 
   const Node& root = index.nodes_[index.root_index_];
-  for (std::size_t axis = 0U; axis < 3U; ++axis) {
-    index.root_aabb_.lower_binary64_bits[axis] =
-        cloud.point(root.lower_point_ids[axis]).canonical_input_bits()[axis];
-    index.root_aabb_.upper_binary64_bits[axis] =
-        cloud.point(root.upper_point_ids[axis]).canonical_input_bits()[axis];
+  if (root.lower_point_ids != exact_point_bounds.lower_witness_point_ids ||
+      root.upper_point_ids != exact_point_bounds.upper_witness_point_ids) {
+    throw std::logic_error(
+        "the Morton LBVH root disagrees with the exact point-cloud extrema");
   }
+  index.root_aabb_ = exact_point_bounds.bounds;
   index.validate_structure(cloud);
   index.structure_complete_ = true;
   return index;

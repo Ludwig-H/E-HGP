@@ -261,6 +261,7 @@ add_library(
   morsehgp3d_spatial
   STATIC
     src/cpu/spatial/point_cloud.cpp
+    src/cpu/spatial/point_cloud_aabb.cpp
     src/cpu/spatial/brute_force.cpp
     src/cpu/spatial/h_polytope_reference.cpp
     src/cpu/spatial/lbvh.cpp

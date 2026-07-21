@@ -692,6 +692,18 @@ Satisfaite par les Phases 1, 4 et 7 fermées. La Phase 7 a sélectionné puis qu
 
 Fermer exactement le diagramme ordinaire dans la boîte $\Omega$ et éprouver le lemme de séparation aux sommets.
 
+### Jalon 8.1 — boîte dyadique strictement paddée
+
+Le backend `reference_cpu` expose désormais `build_exact_point_cloud_aabb`, `build_strictly_padded_dyadic_aabb` et leur vérificateur frais. Le premier scan calcule exactement les six extrema binary64 du nuage canonique, conserve le plus petit `PointId` parmi les témoins ex æquo et publie les comptes fermés $3n$ évaluations de coordonnées et $6(n-1)$ comparaisons d'extrema. Le LBVH consomme cette même primitive puis exige que ses témoins racine reconstruits par l'arbre coïncident; il n'existe donc plus deux scans globaux concurrents.
+
+Pour chaque axe $d$, si $a_d=\min_i x_{i,d}$ et $b_d=\max_i x_{i,d}$, le constructeur prend les voisins binary64 finis immédiats $\ell_d=\mathrm{pred64}(a_d)$ et $u_d=\mathrm{succ64}(b_d)$. Ces voisins sont calculés uniquement sur les mots IEEE, sans opération flottante, `nextafter`, epsilon, mode d'arrondi, FTZ ni DAZ. Les six marges exactes $a_d-\ell_d$ et $u_d-b_d$ sont enregistrées comme rationnels strictement positifs dans le schéma `morsehgp3d.phase8.strictly_padded_dyadic_aabb.v1`.
+
+Si un minimum vaut le plus grand binary64 fini négatif ou si un maximum vaut le plus grand binary64 fini positif, le voisin extérieur serait infini. Le résultat devient alors `unsupported_finite_binary64_range`, rapporte simultanément tous les axes concernés et ne publie ni certificat ni boîte partielle. Aucun clamp n'est permis.
+
+Le vérificateur reconstruit les extrema, témoins, voisins, marges et comptes depuis le nuage, puis rescane toutes les inégalités strictes. Comme chaque site vérifie $\ell_d<x_{i,d}<u_d$ et que l'intérieur d'une boîte est convexe, il certifie $X\subset\mathrm{int}(\Omega)$ puis $\mathrm{conv}(X)\subset\mathrm{int}(\Omega)$ sans hypothèse de dimension affine. Les singletons, axes constants et nuages colinéaires ou coplanaires sont donc couverts. Une boîte réussie initialise aussi le H-polytope de base à huit sommets et six faces artificielles distinctes.
+
+Les tests ciblés GCC et Clang stricts couvrent zéro signé, sous-normaux, frontière de binade, extrema ex æquo, permutation, mots voisins des deux limites finies, échec simultané sur deux faces, mutations du certificat, mauvais nuage, entrée déplacée, accord LBVH et base $C_0$. Ce jalon ne ferme encore aucune cellule ordinaire, ne construit aucun `CatalogCertificate` et ne change aucun statut public. GCP n'est pas utilisé.
+
 ### Travaux
 
 - définir $\Omega$ comme une AABB dyadique **strictement paddée** autour de l'AABB exacte de $X$; chaque face doit être strictement extérieure à $\mathrm{conv}(X)$;
