@@ -85,6 +85,25 @@ else()
   )
 endif()
 
+add_executable(
+  morsehgp3d_ordinary_cell_closure_tests
+  test_ordinary_cell_closure.cpp
+)
+target_link_libraries(
+  morsehgp3d_ordinary_cell_closure_tests
+  PRIVATE morsehgp3d::spatial
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_ordinary_cell_closure_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_ordinary_cell_closure_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 add_executable(morsehgp3d_spatial_query_dump spatial_query_dump.cpp)
 target_link_libraries(morsehgp3d_spatial_query_dump PRIVATE morsehgp3d::spatial)
 
@@ -615,6 +634,7 @@ set(
   morsehgp3d_power_cell_reference_tests
   morsehgp3d_h_polytope_reference_tests
   morsehgp3d_point_cloud_aabb_tests
+  morsehgp3d_ordinary_cell_closure_tests
   morsehgp3d_spatial_query_dump
   morsehgp3d_spatial_lbvh_tests
   morsehgp3d_spatial_lbvh_query_dump
@@ -1312,6 +1332,10 @@ add_test(
 add_test(
   NAME morsehgp3d.point_cloud_aabb
   COMMAND morsehgp3d_point_cloud_aabb_tests
+)
+add_test(
+  NAME morsehgp3d.ordinary_cell_closure
+  COMMAND morsehgp3d_ordinary_cell_closure_tests
 )
 add_test(NAME morsehgp3d.spatial_lbvh COMMAND morsehgp3d_spatial_lbvh_tests)
 add_test(NAME morsehgp3d.hierarchy_emst COMMAND morsehgp3d_hierarchy_emst_tests)

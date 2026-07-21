@@ -704,6 +704,18 @@ Le vérificateur reconstruit les extrema, témoins, voisins, marges et comptes d
 
 Les tests ciblés GCC et Clang stricts couvrent zéro signé, sous-normaux, frontière de binade, extrema ex æquo, permutation, mots voisins des deux limites finies, échec simultané sur deux faces, mutations du certificat, mauvais nuage, entrée déplacée, accord LBVH et base $C_0$. Ce jalon ne ferme encore aucune cellule ordinaire, ne construit aucun `CatalogCertificate` et ne change aucun statut public. GCP n'est pas utilisé.
 
+### Jalon 8.2 — fermeture monotone d'une cellule ordinaire bornée
+
+Le backend `reference_cpu` expose désormais `build_exact_bounded_ordinary_cell_closure` et son vérificateur frais pour une cellule de Voronoï ordinaire unique sur un nuage canonique de un à huit sites. La cellule candidate $H_i(J)$ est reconstruite depuis la boîte 8.1 et les concurrents authentiques de l'amorce; une amorce vide reçoit le plus petit `PointId` extérieur lorsque celui-ci existe, avec provenance séparée de l'amorce demandée et de l'amorce effective.
+
+À chaque ronde, le 1-NN exact global est interrogé à tous les sommets rationnels, sans exclusion. Le transcript conserve le shell complet $S(z)$ et jamais seulement son représentant canonique. Le lot gelé $A_t=(\bigcup_{z} S(z))\setminus(J_t\cup\left\lbrace i\right\rbrace)$ est trié, dédupliqué et ajouté simultanément après le scan entier. L'absence du propriétaire dans le shell signale une violation stricte; sa présence avec un concurrent omis signale une égalité active manquante. Toute ronde non terminale agrandit donc strictement $J_t$ et la boucle termine après un nombre fini de sites.
+
+Une file vide certifie simultanément l'absence de violation et la réconciliation de toutes les égalités actives. En effet, la différence de deux distances carrées est affine : si une contrainte omise avait un maximum positif ou nul sur le polytope final, ce maximum serait atteint à un sommet et son concurrent apparaîtrait dans un shell requis. Le propriétaire est strictement dans la boîte et satisfait strictement chaque bisecteur d'un site canonique distinct; la cellule ordinaire est donc non vide et tridimensionnelle. Le vérificateur reconstruit tout le transcript, contrôle la croissance monotone, recalcule les shells, puis compare sommets et incidences actives à une cellule oracle bâtie avec tous les concurrents; les plans strictement redondants de la sur-amorce ne sont pas confondus avec des adjacences.
+
+Le préflight borné `bounded_n8_single_ordinary_cell_only` réserve le pire chemin après germe : au plus 7 constructions, 966 triplets et sommets conservatifs, 10822 incidences conservatives, 966 requêtes, 7728 distances exactes et entrées de shell, 7 tests de faisabilité stricte et 6 ajouts. Toute capacité juste insuffisante renvoie `insufficient_budget` sans cellule ni ronde; une capacité supérieure au plafond de confiance est rejetée. Les fixtures courtes ferment singleton, germe de repli, violation issue d'une mauvaise amorce, trois révélations successives, concurrent strictement redondant omis, égalité tangentielle, shells de face/arête/sommet, permutation, budgets et mutations sous GCC et Clang stricts.
+
+Ce jalon est local : il ne construit pas toutes les cellules, ne réconcilie pas encore les incidences réciproques entre propriétaires, n'extrait aucun événement et ne ferme ni la Phase 8 ni `closed_parent_orders[1]`. GCP n'est pas utilisé.
+
 ### Travaux
 
 - définir $\Omega$ comme une AABB dyadique **strictement paddée** autour de l'AABB exacte de $X$; chaque face doit être strictement extérieure à $\mathrm{conv}(X)$;
@@ -724,7 +736,7 @@ Les tests ciblés GCC et Clang stricts couvrent zéro signé, sous-normaux, fron
 
 - cellule par cellule contre CGAL ou oracle demi-espaces;
 - insertion volontairement mauvaise d'un seul site initial;
-- site caché gagnant seulement dans l'intérieur provisoire;
+- site absent de l'amorce, révélé comme gagnant à un sommet exact provisoire; le cas « violateur uniquement intérieur sans sommet violateur » est impossible pour une différence affine et ne constitue pas une fixture valide;
 - ties sur face, arête et sommet;
 - ordres de colonnes aléatoires;
 - aucun événement issu de $\partial\Omega$.
