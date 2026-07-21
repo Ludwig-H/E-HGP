@@ -56,7 +56,17 @@ Le préflight d'une paire feuille réserve conservativement un record et jusqu'�
 
 Une sortie `complete` exige la frontière vide, les partitions et prunes exacts, toutes les paires survivantes classifiées et l'identité de couverture fermée. Une requête rejetée dès que son cap d'intérieurs stricts est dépassé ne termine volontairement pas son shell; l'assertion publique porte donc précisément sur la complétude des shells encore pertinents pour le rang. Toute frontière non vide retourne `budget_exhausted`; elle ne certifie jamais l'absence d'autres supports. Le vérificateur reconstruit un résultat neuf depuis le nuage, le LBVH, $K_{\max}$ et le budget fiables, puis compare toutes les sorties, frontières, audits et assertions.
 
-La frontière résiduelle de 9.1-RCPU est un reçu auditable seulement. L'API ne permet pas encore de la réinjecter comme checkpoint lié au nuage et au LBVH. La reprise transactionnelle, le hash de liaison et le sink de chunks restent explicitement ouverts en 9.3; aucune affirmation de streaming 10 M+ n'est faite par ce premier lot.
+La projection historique `remaining_frontier` de 9.1-RCPU reste un reçu auditable seulement. L'API monolithique ne la réinjecte pas; le jalon séparé 9.3a ci-dessous porte désormais la reprise.
+
+## Jalon 9.3a-RCPU livré
+
+Le manifeste compact encode par SHA-256 incrémental, sans chaîne temporaire proportionnelle au nuage, les trois mots binary64 de chaque `PointId` canonique. Un second digest couvre l'image sémantique du LBVH utilisée par le parcours : toutes ses feuilles et tous ses nœuds, leurs plages, extrema, enfants, codes Morton, racine, AABB racine et compteurs de construction. Le digest sémantique lie en plus $K_{\max}$, $K_{\mathrm{eff}}$, $s_{\max}$, le backend `reference_cpu`, le profil `hgp_reduced`, le mode `certified`, le schéma, la version de parcours et la base de preuve, y compris l'exclusion sûre par paire-ancre réelle. Le budget de chunk n'appartient pas à cette identité et peut changer à la reprise.
+
+Le checkpoint conserve la frontière complète et au plus un produit actif, toujours égal au dos de cette frontière afin que sa couverture ne soit jamais comptée deux fois. Trois états sont possibles : recherche témoin, expansion du produit, classification feuille. Une recherche interrompue conserve sa pile DFS, les reçus stricts déjà acceptés, leur cardinalité exacte et, si nécessaire, un nœud interne déjà décidé dont l'expansion attend une capacité supérieure. La reprise ne recharge ni la visite du produit, ni un nœud témoin déjà décidé; elle refuse aussi un budget auxiliaire inférieur à la pile et au nœud d'expansion différée conservés dans le checkpoint en mémoire. Les reçus actifs sont recertifiés par la borne rationnelle $\max\phi<0$, par leur antichaîne et par leur disjonction des plages supports et des autres unités actives. Les liens minimaux entre curseur et audit sont revérifiés, ainsi que les identités exactes des partitions de bornes $\phi$, ancre et boule fermée.
+
+Chaque appel retourne un candidat logique préparé en mémoire contenant les records du seul chunk, leur ordre inter-types et le checkpoint suivant. Les structures restent mutables; toute altération échoue toutefois au rejeu. Le chunk porte le digest exact de son checkpoint source; la chaîne de sortie applique SHA-256 record par record dans l'ordre déterministe du parcours et son digest terminal ne dépend donc pas du découpage. Si un sink abandonne le candidat avant publication, l'ancien checkpoint reste inchangé et un retry avec le même budget reproduit la même valeur canonique et les mêmes digests. Le vérificateur local recalcule le manifeste depuis les autorités, le checksum du checkpoint, les plages LBVH, les reçus actifs, les identités obligatoires de l'audit cumulatif et la transition relative entière. Il ne rejoue pas tout l'historique des compteurs et ne prétend pas établir la provenance de sa source. Le vérificateur de run reconstruit au contraire le checkpoint initial depuis le nuage, le LBVH et $K_{\max}$ fiables, puis rejoue chaque chunk dans l'ordre jusqu'au terminal.
+
+Cette portée est volontairement `in_memory_reinjectable_checkpoint_and_prepared_transition_candidate_only`. Elle ne contient aucun codec binaire, aucune limite de décodage hostile, aucun temporaire, `fsync`, renommage atomique ou checkpoint Hyperdisk. Elle ne certifie donc ni reprise après perte de processus ou de VM, ni streaming 10 M+, ni débit. Le chemin chaud recalcule encore le manifeste en $O(n)$ par chunk; la validation locale des antichaînes est quadratique dans les tailles de frontières, et le vérificateur de run de commodité conserve puis rejoue tous les chunks. Un contexte d'autorité persistant, des validations linéaires ou quasi linéaires et un vérificateur incrémental `verify_next` sont obligatoires avant les essais à 50 000 points et le chemin massif.
 
 ## Structures globales évitées
 
@@ -80,17 +90,29 @@ Le test ciblé `morsehgp3d.hierarchy_pair_support_stream` couvre :
 - accord bidirectionnel avec un différentiel brute-force séparé des paires et `brute_force_closed_ball` à $n=14$ pour $K_{\max}\in\left\lbrace 1,4,9,10\right\rbrace$;
 - mutations du budget, d'un centre, d'un compte de shell, d'un audit, d'une plage de frontière, du statut et des assertions d'architecture et de réduction.
 
+Pour 9.3a, il couvre en plus :
+
+- l'identité des records, de l'audit cumulatif et du digest terminal entre un chunk résident et des chunks limités à une unité de travail;
+- une interruption au milieu d'une recherche témoin à $n=14$, avec reçu strict interne et expansion différée réellement conservés dans le checkpoint en mémoire, suivie d'une reprise sans double compte;
+- chacun des sept motifs d'arrêt, repris vers exactement le même audit terminal que le run résident;
+- l'idempotence d'un chunk abandonné avant publication et la valeur préparée limitée à un record sur le triangle rectangle;
+- l'acceptation d'un nuage et d'un LBVH reconstruits depuis une permutation d'entrée, puis le rejet après rehash d'une mutation de coordonnée, de $K_{\max}$, du schéma, d'une plage Morton, d'une identité obligatoire de l'audit, d'un état actif, d'un reçu dupliqué, ancêtre–descendant, superposé au support ou à la pile active, et d'un nœud feuille présenté comme expansion différée;
+- l'ancrage positif depuis l'état initial et les rejets d'un préfixe incomplet, d'un chunk supprimé, réordonné ou dupliqué, d'un digest source ou ordre typé muté et d'un terminal localement intègre mais sans filiation;
+- les vecteurs SHA-256 usuels et aux frontières 55, 56, 63, 64 et 65 octets, puis les digests dorés du manifeste, des checkpoints initial et mi-curseur, de la chaîne mixte et du terminal v1;
+- le singleton déjà terminal, dont une reprise vide n'avance pas la séquence.
+
 Le test et sa bibliothèque passent en Release avec les avertissements stricts sous GCC 13.3 et Clang 18.1. Un smoke hostile colinéaire limité à $n\leq256$ observe 24 301 visites témoins et environ 111 ms au dernier point après les courts-circuits sûrs; ce diagnostic ne ferme aucun exposant ni SLO. Aucun benchmark long et aucune ressource GCP ne sont nécessaires pour cette validation CPU.
 
 ## Limites et ordre de poursuite
 
 Le prochain travail ne doit pas élargir l'oracle de cellules. L'ordre utile est :
 
-1. rendre la frontière et le curseur témoin réellement reprenables, liés à un manifeste compact du nuage/LBVH, avec sink de chunks transactionnel;
-2. ajouter les reçus bornés nécessaires à la proposition `cuda_g4` P1 et leur recertification CPU exacte;
-3. mesurer seulement ensuite les compteurs de croissance sur 12 500, 25 000 et 50 000 sites, sans prétendre fermer le SLO;
-4. généraliser la frontière aux supports trois et quatre sans liste $L$-NN excluante;
-5. avant la qualification finale, remplacer la canonisation exacte eager et la construction LBVH CPU par des coordonnées binary64 SoA, exact paresseux et Morton/radix/LBVH device;
-6. pour 10 M+, persister deux frontières bornées, des chunks externes et des checkpoints, sans conserver les événements cumulés en mémoire.
+1. introduire un contexte d'autorité persistant qui calcule le manifeste une fois, un vérificateur ancré incrémental et des contrôles de frontière non quadratiques;
+2. ajouter un codec borné et un sink durable temporaire--synchronisation--renommage, puis tester crash avant et après publication;
+3. ajouter les reçus terminaux bornés nécessaires à la proposition `cuda_g4` P1 et leur recertification CPU exacte;
+4. mesurer seulement ensuite les compteurs de croissance sur 12 500, 25 000 et 50 000 sites, sans prétendre fermer le SLO;
+5. généraliser la frontière aux supports trois et quatre sans liste $L$-NN excluante;
+6. avant la qualification finale, remplacer la canonisation exacte eager et la construction LBVH CPU par des coordonnées binary64 SoA, exact paresseux et Morton/radix/LBVH device;
+7. pour 10 M+, persister deux frontières bornées et des chunks externes, sans conserver les événements cumulés ni les chunks de vérification en mémoire.
 
 La Phase 9 reste `in_progress`. Ce jalon ne ferme ni la complétude supports 2–4, ni la Phase 9, ni une forêt Morse, ni un statut public. GCP non utilisé.

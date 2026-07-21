@@ -1,5 +1,6 @@
 #pragma once
 
+#include "morsehgp3d/contract/canonical_id.hpp"
 #include "morsehgp3d/exact/center.hpp"
 #include "morsehgp3d/spatial/aabb.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
@@ -8,12 +9,21 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <optional>
+#include <span>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::size_t pair_support_maximum_requested_order = 10U;
+inline constexpr std::uint32_t pair_support_checkpoint_schema_version = 1U;
+inline constexpr std::uint32_t pair_support_traversal_version = 1U;
+inline constexpr std::string_view pair_support_checkpoint_proof_basis =
+    "exact_self_dual_unordered_pair_partition_strict_phi_"
+    "safe_real_anchor_noninterior_exclusion_resumable_witness_cursor_"
+    "sparse_closed_ball_v1";
 
 // Exact maximum of (x-u).(x-v) over query_box x first_support_box x
 // second_support_box.  Endpoint selectors are 0 for lower and 1 for upper;
@@ -107,6 +117,65 @@ static_assert(std::is_trivially_copyable_v<ExactPairSupportFrontierEntry>);
 static_assert(std::is_standard_layout_v<spatial::ExactDyadicAabb3>);
 static_assert(std::is_trivially_copyable_v<spatial::ExactDyadicAabb3>);
 
+// One LBVH node plus its immutable Morton interval.  Repeating the interval in
+// the checkpoint makes stale or corrupted node indices fail closed before a
+// resumed geometric decision is attempted.
+struct ExactPairSupportWitnessNodeEntry {
+  std::uint64_t node_index{};
+  std::uint64_t leaf_begin{};
+  std::uint64_t leaf_end{};
+
+  friend bool operator==(
+      const ExactPairSupportWitnessNodeEntry&,
+      const ExactPairSupportWitnessNodeEntry&) = default;
+};
+
+static_assert(std::is_standard_layout_v<ExactPairSupportWitnessNodeEntry>);
+static_assert(std::is_trivially_copyable_v<ExactPairSupportWitnessNodeEntry>);
+
+enum class ExactPairSupportPendingStage : std::uint8_t {
+  rank_search,
+  expand_product,
+  classify_leaf,
+};
+
+// Cursor for the only support product whose product visit has been charged but
+// whose transition has not yet finished.  Strict-witness receipts form a
+// disjoint antichain; deferred_expansion_node records a node already decided
+// once whose two children could not fit the current auxiliary-frontier cap.
+struct ExactPairSupportPendingProduct {
+  ExactPairSupportFrontierEntry product{};
+  ExactPairSupportPendingStage stage{
+      ExactPairSupportPendingStage::rank_search};
+  bool rank_search_started{false};
+  std::vector<ExactPairSupportWitnessNodeEntry> witness_frontier;
+  std::vector<ExactPairSupportWitnessNodeEntry> strict_witness_receipts;
+  std::optional<ExactPairSupportWitnessNodeEntry> deferred_expansion_node;
+  std::size_t strict_witness_point_count{};
+
+  friend bool operator==(
+      const ExactPairSupportPendingProduct&,
+      const ExactPairSupportPendingProduct&) = default;
+};
+
+struct ExactPairSupportCheckpointManifest {
+  std::uint32_t schema_version{pair_support_checkpoint_schema_version};
+  std::uint32_t traversal_version{pair_support_traversal_version};
+  std::size_t point_count{};
+  std::size_t lbvh_node_count{};
+  std::size_t lbvh_leaf_count{};
+  std::size_t requested_maximum_order{};
+  std::size_t effective_maximum_order{};
+  std::size_t maximum_relevant_closed_rank{};
+  contract::CanonicalId canonical_cloud_digest{};
+  contract::CanonicalId lbvh_digest{};
+  contract::CanonicalId semantic_digest{};
+
+  friend bool operator==(
+      const ExactPairSupportCheckpointManifest&,
+      const ExactPairSupportCheckpointManifest&) = default;
+};
+
 struct ExactPairSupportEvent {
   std::array<spatial::PointId, 2> support_ids{};
   exact::ExactCenter3 center{};
@@ -191,6 +260,33 @@ struct ExactPairSupportStreamAudit {
       const ExactPairSupportStreamAudit&) = default;
 };
 
+struct ExactPairSupportCheckpoint {
+  ExactPairSupportCheckpointManifest manifest{};
+  std::uint64_t next_chunk_sequence{};
+  // Logical prefix represented by this in-memory state.  These fields do not
+  // imply that an external sink has durably published the records.
+  std::size_t output_record_count{};
+  contract::CanonicalId output_chain_digest{};
+  std::vector<ExactPairSupportFrontierEntry> frontier;
+  std::optional<ExactPairSupportPendingProduct> pending_product;
+  ExactPairSupportStreamAudit cumulative_audit{};
+  contract::CanonicalId checkpoint_digest{};
+
+  // Local terminal predicate only.  Scientific lineage is established by
+  // verify_exact_pair_support_stream_run(), not by this predicate or digest.
+  [[nodiscard]] bool complete() const noexcept {
+    return frontier.empty() && !pending_product.has_value() &&
+           cumulative_audit.pair_partition_accounting_certified &&
+           cumulative_audit.remaining_frontier_pair_count == 0U &&
+           cumulative_audit.resolved_pair_count ==
+               cumulative_audit.total_pair_count;
+  }
+
+  friend bool operator==(
+      const ExactPairSupportCheckpoint&,
+      const ExactPairSupportCheckpoint&) = default;
+};
+
 struct ExactPairSupportStreamResult {
   ExactPairSupportRequirements requirements{};
   ExactPairSupportStreamBudget budget{};
@@ -244,6 +340,141 @@ struct ExactPairSupportStreamResult {
     const spatial::CanonicalPointCloud& cloud,
     std::size_t requested_maximum_order,
     const ExactPairSupportStreamBudget& budget);
+
+// 9.3a-RCPU transition-preparation API.  A chunk contains only records emitted
+// since the supplied trusted checkpoint.  The returned records and
+// next_checkpoint form one mutable logical candidate for a future external
+// atomic commit; no durable sink operation is performed here.  Discarding or
+// mutating the value leaves the input checkpoint valid, so a sink can retry
+// deterministically and fresh replay rejects altered candidates.
+struct ExactPairSupportStreamChunk {
+  ExactPairSupportCheckpointManifest manifest{};
+  ExactPairSupportStreamBudget budget{};
+  std::uint64_t chunk_sequence{};
+  std::size_t first_output_record_index{};
+  contract::CanonicalId source_checkpoint_digest{};
+  contract::CanonicalId previous_output_chain_digest{};
+  contract::CanonicalId output_chain_digest{};
+  ExactPairSupportStreamStatus status{
+      ExactPairSupportStreamStatus::budget_exhausted};
+  ExactPairSupportStopReason stop_reason{
+      ExactPairSupportStopReason::work_unit_limit};
+  std::vector<ExactPairSupportEvent> events;
+  std::vector<ExactPairSupportExtraShellDiagnostic>
+      relevant_extra_shell_diagnostics;
+  enum class RecordKind : std::uint8_t {
+    event,
+    relevant_extra_shell_diagnostic,
+  };
+  // Traversal order across the two typed record vectors.  Consumers advance
+  // the matching vector for each kind, so the output hash chain is replayable.
+  std::vector<RecordKind> record_order;
+  ExactPairSupportStreamAudit cumulative_audit_before{};
+  ExactPairSupportStreamAudit cumulative_audit_after{};
+  ExactPairSupportCheckpoint next_checkpoint{};
+  bool candidate_prepared{false};
+  bool no_forbidden_global_structure_materialized{false};
+  bool hierarchy_reduction_performed{false};
+
+  // Completion relative to the supplied source checkpoint.  This is not a
+  // durable publication or an independently anchored lineage claim.
+  [[nodiscard]] bool relative_stream_complete() const noexcept {
+    return candidate_prepared &&
+           status == ExactPairSupportStreamStatus::complete &&
+           stop_reason == ExactPairSupportStopReason::none &&
+           next_checkpoint.complete() &&
+           no_forbidden_global_structure_materialized &&
+           !hierarchy_reduction_performed;
+  }
+
+  friend bool operator==(
+      const ExactPairSupportStreamChunk&,
+      const ExactPairSupportStreamChunk&) = default;
+};
+
+[[nodiscard]] ExactPairSupportCheckpointManifest
+make_exact_pair_support_checkpoint_manifest(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order);
+
+[[nodiscard]] ExactPairSupportCheckpoint
+make_initial_exact_pair_support_checkpoint(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order);
+
+// Deterministic, unkeyed payload checksum.  This supports codecs and hostile
+// mutation tests; it provides integrity only, never source provenance.
+[[nodiscard]] contract::CanonicalId
+compute_exact_pair_support_checkpoint_digest(
+    const ExactPairSupportCheckpoint& checkpoint);
+
+struct ExactPairSupportCheckpointVerification {
+  bool manifest_matches_authorities{false};
+  bool checksum_matches_payload{false};
+  bool frontier_locally_valid{false};
+  bool pending_product_locally_valid{false};
+  // Necessary identities derivable from the current cursor, not a replay of
+  // every historical telemetry counter or a proof of source provenance.
+  bool required_audit_identities_hold{false};
+  // Integrity only: this does not prove descent from the initial checkpoint.
+  bool integrity_verified{false};
+};
+
+[[nodiscard]] ExactPairSupportCheckpointVerification
+verify_exact_pair_support_checkpoint(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactPairSupportCheckpoint& checkpoint);
+
+[[nodiscard]] ExactPairSupportStreamChunk build_exact_pair_support_stream_chunk(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& checkpoint);
+
+struct ExactPairSupportStreamChunkVerification {
+  bool source_checkpoint_integrity_verified{false};
+  bool requested_budget_certified{false};
+  bool prepared_transition_chain_matches{false};
+  bool records_individually_exact{false};
+  bool next_checkpoint_integrity_verified{false};
+  bool fresh_replay_certified{false};
+  // Exact relative transition from the supplied source checkpoint.  Source
+  // provenance is established only by the anchored run verifier below.
+  bool chunk_transition_verified{false};
+};
+
+[[nodiscard]] ExactPairSupportStreamChunkVerification
+verify_exact_pair_support_stream_chunk(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& source_checkpoint,
+    const ExactPairSupportStreamChunk& observed);
+
+struct ExactPairSupportStreamRunVerification {
+  bool initial_checkpoint_reconstructed{false};
+  std::size_t verified_chunk_count{};
+  bool every_transition_verified{false};
+  bool terminal_checkpoint_reached{false};
+  bool anchored_run_certified{false};
+};
+
+// Reconstructs the initial checkpoint from the external cloud/LBVH/K
+// authorities, then verifies every observed transition in order.  This is the
+// scientific lineage check; local checkpoint integrity alone is insufficient.
+[[nodiscard]] ExactPairSupportStreamRunVerification
+verify_exact_pair_support_stream_run(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    std::span<const ExactPairSupportStreamBudget> chunk_budgets,
+    std::span<const ExactPairSupportStreamChunk> chunks);
 
 struct ExactPairSupportStreamVerification {
   bool requested_budget_certified{false};

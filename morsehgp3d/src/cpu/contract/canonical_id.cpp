@@ -5,10 +5,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <vector>
 
 namespace morsehgp3d::contract {
 namespace {
@@ -42,115 +42,144 @@ constexpr std::array<std::uint32_t, 64U> round_constants{
       "a CanonicalId must contain lowercase hexadecimal digits only");
 }
 
-[[nodiscard]] std::array<std::uint8_t, CanonicalId::byte_count> sha256(
-    std::string_view material) {
-  if (material.size() >
+}  // namespace
+
+CanonicalSha256Builder::CanonicalSha256Builder() noexcept
+    : state_{
+          0x6a09e667U,
+          0xbb67ae85U,
+          0x3c6ef372U,
+          0xa54ff53aU,
+          0x510e527fU,
+          0x9b05688cU,
+          0x1f83d9abU,
+          0x5be0cd19U} {}
+
+void CanonicalSha256Builder::compress_buffer() {
+  std::array<std::uint32_t, 64U> schedule{};
+  for (std::size_t word = 0U; word < 16U; ++word) {
+    const std::size_t offset = word * 4U;
+    schedule[word] =
+        (static_cast<std::uint32_t>(buffer_[offset]) << 24U) |
+        (static_cast<std::uint32_t>(buffer_[offset + 1U]) << 16U) |
+        (static_cast<std::uint32_t>(buffer_[offset + 2U]) << 8U) |
+        static_cast<std::uint32_t>(buffer_[offset + 3U]);
+  }
+  for (std::size_t word = 16U; word < schedule.size(); ++word) {
+    const std::uint32_t previous_15 = schedule[word - 15U];
+    const std::uint32_t previous_2 = schedule[word - 2U];
+    const std::uint32_t sigma0 =
+        std::rotr(previous_15, 7) ^ std::rotr(previous_15, 18) ^
+        (previous_15 >> 3U);
+    const std::uint32_t sigma1 =
+        std::rotr(previous_2, 17) ^ std::rotr(previous_2, 19) ^
+        (previous_2 >> 10U);
+    schedule[word] = schedule[word - 16U] + sigma0 +
+                     schedule[word - 7U] + sigma1;
+  }
+
+  std::uint32_t a = state_[0];
+  std::uint32_t b = state_[1];
+  std::uint32_t c = state_[2];
+  std::uint32_t d = state_[3];
+  std::uint32_t e = state_[4];
+  std::uint32_t f = state_[5];
+  std::uint32_t g = state_[6];
+  std::uint32_t h = state_[7];
+  for (std::size_t round = 0U; round < schedule.size(); ++round) {
+    const std::uint32_t sum1 =
+        std::rotr(e, 6) ^ std::rotr(e, 11) ^ std::rotr(e, 25);
+    const std::uint32_t choice = (e & f) ^ ((~e) & g);
+    const std::uint32_t temporary1 =
+        h + sum1 + choice + round_constants[round] + schedule[round];
+    const std::uint32_t sum0 =
+        std::rotr(a, 2) ^ std::rotr(a, 13) ^ std::rotr(a, 22);
+    const std::uint32_t majority = (a & b) ^ (a & c) ^ (b & c);
+    const std::uint32_t temporary2 = sum0 + majority;
+    h = g;
+    g = f;
+    f = e;
+    e = d + temporary1;
+    d = c;
+    c = b;
+    b = a;
+    a = temporary1 + temporary2;
+  }
+  state_[0] += a;
+  state_[1] += b;
+  state_[2] += c;
+  state_[3] += d;
+  state_[4] += e;
+  state_[5] += f;
+  state_[6] += g;
+  state_[7] += h;
+  buffered_byte_count_ = 0U;
+}
+
+void CanonicalSha256Builder::update(std::span<const std::uint8_t> bytes) {
+  if (finalized_) {
+    throw std::logic_error("a finalized SHA-256 builder cannot be updated");
+  }
+  if (bytes.size() >
       static_cast<std::size_t>(
-          std::numeric_limits<std::uint64_t>::max() / 8U)) {
+          std::numeric_limits<std::uint64_t>::max() - total_byte_count_)) {
+    throw std::length_error("the SHA-256 input byte length overflows uint64");
+  }
+  if (total_byte_count_ + static_cast<std::uint64_t>(bytes.size()) >
+      std::numeric_limits<std::uint64_t>::max() / 8U) {
     throw std::length_error("the SHA-256 input bit length overflows uint64");
   }
-  const std::uint64_t bit_length =
-      static_cast<std::uint64_t>(material.size()) * std::uint64_t{8U};
-  std::vector<std::uint8_t> padded;
-  if (material.size() >
-      std::numeric_limits<std::size_t>::max() - 72U) {
-    throw std::length_error("the padded SHA-256 input size overflows");
+  total_byte_count_ += static_cast<std::uint64_t>(bytes.size());
+  for (const std::uint8_t byte : bytes) {
+    buffer_[buffered_byte_count_] = byte;
+    ++buffered_byte_count_;
+    if (buffered_byte_count_ == buffer_.size()) {
+      compress_buffer();
+    }
   }
-  padded.reserve(material.size() + 72U);
-  for (const char character : material) {
-    padded.push_back(static_cast<std::uint8_t>(
-        static_cast<unsigned char>(character)));
+}
+
+void CanonicalSha256Builder::update(std::string_view text) {
+  const auto* data = reinterpret_cast<const std::uint8_t*>(text.data());
+  update(std::span<const std::uint8_t>{data, text.size()});
+}
+
+CanonicalId CanonicalSha256Builder::finalize() {
+  if (finalized_) {
+    throw std::logic_error("a SHA-256 builder can be finalized only once");
   }
-  padded.push_back(std::uint8_t{0x80U});
-  while (padded.size() % 64U != 56U) {
-    padded.push_back(std::uint8_t{0U});
+  finalized_ = true;
+  const std::uint64_t bit_length = total_byte_count_ * std::uint64_t{8U};
+  buffer_[buffered_byte_count_] = std::uint8_t{0x80U};
+  ++buffered_byte_count_;
+  if (buffered_byte_count_ > 56U) {
+    while (buffered_byte_count_ < buffer_.size()) {
+      buffer_[buffered_byte_count_] = std::uint8_t{0U};
+      ++buffered_byte_count_;
+    }
+    compress_buffer();
+  }
+  while (buffered_byte_count_ < 56U) {
+    buffer_[buffered_byte_count_] = std::uint8_t{0U};
+    ++buffered_byte_count_;
   }
   for (std::size_t byte = 0U; byte < 8U; ++byte) {
     const std::size_t shift = (7U - byte) * 8U;
-    padded.push_back(static_cast<std::uint8_t>(bit_length >> shift));
+    buffer_[56U + byte] = static_cast<std::uint8_t>(bit_length >> shift);
   }
-
-  std::array<std::uint32_t, 8U> state{
-      0x6a09e667U,
-      0xbb67ae85U,
-      0x3c6ef372U,
-      0xa54ff53aU,
-      0x510e527fU,
-      0x9b05688cU,
-      0x1f83d9abU,
-      0x5be0cd19U};
-  for (std::size_t block = 0U; block < padded.size(); block += 64U) {
-    std::array<std::uint32_t, 64U> schedule{};
-    for (std::size_t word = 0U; word < 16U; ++word) {
-      const std::size_t offset = block + word * 4U;
-      schedule[word] =
-          (static_cast<std::uint32_t>(padded[offset]) << 24U) |
-          (static_cast<std::uint32_t>(padded[offset + 1U]) << 16U) |
-          (static_cast<std::uint32_t>(padded[offset + 2U]) << 8U) |
-          static_cast<std::uint32_t>(padded[offset + 3U]);
-    }
-    for (std::size_t word = 16U; word < schedule.size(); ++word) {
-      const std::uint32_t previous_15 = schedule[word - 15U];
-      const std::uint32_t previous_2 = schedule[word - 2U];
-      const std::uint32_t sigma0 =
-          std::rotr(previous_15, 7) ^ std::rotr(previous_15, 18) ^
-          (previous_15 >> 3U);
-      const std::uint32_t sigma1 =
-          std::rotr(previous_2, 17) ^ std::rotr(previous_2, 19) ^
-          (previous_2 >> 10U);
-      schedule[word] = schedule[word - 16U] + sigma0 +
-                       schedule[word - 7U] + sigma1;
-    }
-
-    std::uint32_t a = state[0];
-    std::uint32_t b = state[1];
-    std::uint32_t c = state[2];
-    std::uint32_t d = state[3];
-    std::uint32_t e = state[4];
-    std::uint32_t f = state[5];
-    std::uint32_t g = state[6];
-    std::uint32_t h = state[7];
-    for (std::size_t round = 0U; round < schedule.size(); ++round) {
-      const std::uint32_t sum1 =
-          std::rotr(e, 6) ^ std::rotr(e, 11) ^ std::rotr(e, 25);
-      const std::uint32_t choice = (e & f) ^ ((~e) & g);
-      const std::uint32_t temporary1 =
-          h + sum1 + choice + round_constants[round] + schedule[round];
-      const std::uint32_t sum0 =
-          std::rotr(a, 2) ^ std::rotr(a, 13) ^ std::rotr(a, 22);
-      const std::uint32_t majority = (a & b) ^ (a & c) ^ (b & c);
-      const std::uint32_t temporary2 = sum0 + majority;
-      h = g;
-      g = f;
-      f = e;
-      e = d + temporary1;
-      d = c;
-      c = b;
-      b = a;
-      a = temporary1 + temporary2;
-    }
-    state[0] += a;
-    state[1] += b;
-    state[2] += c;
-    state[3] += d;
-    state[4] += e;
-    state[5] += f;
-    state[6] += g;
-    state[7] += h;
-  }
+  buffered_byte_count_ = buffer_.size();
+  compress_buffer();
 
   std::array<std::uint8_t, CanonicalId::byte_count> digest{};
-  for (std::size_t word = 0U; word < state.size(); ++word) {
+  for (std::size_t word = 0U; word < state_.size(); ++word) {
     for (std::size_t byte = 0U; byte < 4U; ++byte) {
       const std::size_t shift = (3U - byte) * 8U;
       digest[word * 4U + byte] =
-          static_cast<std::uint8_t>(state[word] >> shift);
+          static_cast<std::uint8_t>(state_[word] >> shift);
     }
   }
-  return digest;
+  return CanonicalId{digest};
 }
-
-}  // namespace
 
 CanonicalId CanonicalId::from_lower_hex(std::string_view text) {
   if (text.size() != lower_hex_character_count) {
@@ -185,21 +214,12 @@ CanonicalId canonical_v2_id_from_canonical_json_unchecked(
     throw std::invalid_argument(
         "a v2 canonical record type must be a nonempty path component");
   }
-  std::string material{"MorseHGP3D/v2/"};
-  if (record_type.size() >
-          std::numeric_limits<std::size_t>::max() - material.size() - 1U ||
-      canonical_projection_json.size() >
-          std::numeric_limits<std::size_t>::max() - material.size() -
-              record_type.size() - 1U) {
-    throw std::length_error("the v2 canonical identifier material overflows");
-  }
-  material.reserve(
-      material.size() + record_type.size() + 1U +
-      canonical_projection_json.size());
-  material.append(record_type);
-  material.push_back('/');
-  material.append(canonical_projection_json);
-  return CanonicalId{sha256(material)};
+  CanonicalSha256Builder builder;
+  builder.update("MorseHGP3D/v2/");
+  builder.update(record_type);
+  builder.update("/");
+  builder.update(canonical_projection_json);
+  return builder.finalize();
 }
 
 }  // namespace morsehgp3d::contract

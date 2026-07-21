@@ -4,6 +4,7 @@
 #include <compare>
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <string>
 #include <string_view>
 
@@ -33,6 +34,27 @@ class CanonicalId {
 
  private:
   std::array<std::uint8_t, byte_count> bytes_{};
+};
+
+// Incremental SHA-256 for bounded-memory canonical manifests.  The builder is
+// deliberately byte-oriented: callers own the versioned, endian-stable record
+// encoding and must provide their own domain separator.
+class CanonicalSha256Builder {
+ public:
+  CanonicalSha256Builder() noexcept;
+
+  void update(std::span<const std::uint8_t> bytes);
+  void update(std::string_view text);
+  [[nodiscard]] CanonicalId finalize();
+
+ private:
+  void compress_buffer();
+
+  std::array<std::uint32_t, 8U> state_{};
+  std::array<std::uint8_t, 64U> buffer_{};
+  std::size_t buffered_byte_count_{0U};
+  std::uint64_t total_byte_count_{0U};
+  bool finalized_{false};
 };
 
 // Hashes exactly
