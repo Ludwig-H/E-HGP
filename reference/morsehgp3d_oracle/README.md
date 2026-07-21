@@ -1,6 +1,10 @@
-# Oracle exhaustif CPU de phase 1
+# Oracles exhaustifs CPU de référence
 
 Ce paquet constitue une voie de référence indépendante du backend de production. Il énumère directement tous les sous-ensembles de points nécessaires aux objets de phase 1 et n'importe aucun code CUDA ou MorseHGP3D de production.
+
+Le module `ordinary_diagram` fournit aussi l'oracle différentiel de Phase 8.4. Pour chaque sous-ensemble non vide $Q$ d'au plus huit sites, il construit directement l'intersection ordinaire clippée $K_Q$ par égalités d'équidistance, inégalités nearest, RREF rationnelle et énumération exhaustive des frontières actives. Les singletons donnent les cellules; les autres sous-ensembles donnent les contacts sans consommer les shells ou incidences du producteur. Cette voie valide seulement le domaine borné et ne modifie pas les certificats de phase 1 décrits ci-dessous.
+
+L'atlas ne doit pas être étendu en implémentation générale de Voronoï. Pour une baseline plus large, la politique du dépôt impose d'évaluer d'abord Geogram ou une bibliothèque mature équivalente via un adaptateur épinglé; la baseline reste non autoritative et séparée du chemin GPU tant qu'un rejeu exact ne l'a pas certifiée.
 
 ## Complétude sans cascade de cellules
 

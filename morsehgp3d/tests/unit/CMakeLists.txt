@@ -123,6 +123,25 @@ else()
   )
 endif()
 
+add_executable(
+  morsehgp3d_ordinary_diagram_closure_dump
+  ordinary_diagram_closure_dump.cpp
+)
+target_link_libraries(
+  morsehgp3d_ordinary_diagram_closure_dump
+  PRIVATE morsehgp3d::spatial
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_ordinary_diagram_closure_dump PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_ordinary_diagram_closure_dump
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 add_executable(morsehgp3d_spatial_query_dump spatial_query_dump.cpp)
 target_link_libraries(morsehgp3d_spatial_query_dump PRIVATE morsehgp3d::spatial)
 
@@ -655,6 +674,7 @@ set(
   morsehgp3d_point_cloud_aabb_tests
   morsehgp3d_ordinary_cell_closure_tests
   morsehgp3d_ordinary_diagram_closure_tests
+  morsehgp3d_ordinary_diagram_closure_dump
   morsehgp3d_spatial_query_dump
   morsehgp3d_spatial_lbvh_tests
   morsehgp3d_spatial_lbvh_query_dump
@@ -1510,6 +1530,18 @@ add_test(
 )
 
 find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
+add_test(
+  NAME morsehgp3d.ordinary_diagram_closure_differential
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_ordinary_diagram_closure.py"
+    "$<TARGET_FILE:morsehgp3d_ordinary_diagram_closure_dump>"
+)
+set_tests_properties(
+  morsehgp3d.ordinary_diagram_closure_differential
+  PROPERTIES TIMEOUT 45
+)
+
 add_test(
   NAME morsehgp3d.hierarchy_gamma_differential
   COMMAND

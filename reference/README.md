@@ -1,8 +1,12 @@
-# Oracle CPU exhaustif de MorseHGP3D
+# Oracles CPU exhaustifs de MorseHGP3D
 
-Ce répertoire contient l'oracle indépendant de la phase 1. Il énumère directement les sous-ensembles et cofaces utiles, calcule leurs miniballs en arithmétique rationnelle, construit les filtrations Gamma et Gabriel, puis rejoue les forêts et les applications verticales à chaque coupe exacte.
+Ce répertoire contient les oracles indépendants de petite taille. Le chemin historique de phase 1 énumère directement les sous-ensembles et cofaces utiles, calcule leurs miniballs en arithmétique rationnelle, construit les filtrations Gamma et Gabriel, puis rejoue les forêts et les applications verticales à chaque coupe exacte. Le module `ordinary_diagram` ajoute l'atlas affine borné de Phase 8 pour confronter le diagramme ordinaire de production à une construction algorithmique indépendante.
 
 Cet oracle est une vérité terrain de petite taille, pas un backend de production. Son coût est exponentiel : la suite courante vise les nuages jusqu'à douze points et réserve quatorze points à des cas sélectionnés ou nocturnes. Aucun module de `HGP-old`, aucun noyau CUDA et aucun futur code de réduction de production n'est importé.
+
+L'atlas 8.4 possède sa propre borne plus stricte $n\leq8$. Il décode directement les mots binary64, construit chaque intersection de cellules $K_Q$ par RREF et énumération de frontières en `fractions.Fraction`, puis compare seulement une projection sémantique du producteur C++. Il n'importe aucune primitive géométrique de production et ne confère aucun statut public.
+
+Cette implémentation est gelée comme oracle de preuve borné. Toute baseline de Voronoï plus large doit d'abord évaluer un adaptateur versionné vers Geogram ou une bibliothèque mature équivalente au lieu d'étendre ce module; aucune de ces voies de test ne remplace le chemin produit GPU ni sa recertification exacte.
 
 ## Garanties et profils
 

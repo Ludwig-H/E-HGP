@@ -1,7 +1,7 @@
 # Progression Phase 8 — boîte, cellule et diagramme ordinaire borné
 
 > [!IMPORTANT]
-> Phase `8`, backend `reference_cpu`, profil `generic_core`, mode `certified`. La porte d'entrée est satisfaite par les Phases 1, 4 et 7 fermées. Les jalons 8.1, 8.2 et 8.3 certifient respectivement la boîte de clipping, la fermeture d'une cellule ordinaire et le diagramme ordinaire clippé entier avec ses strates naturelles réciproques, toujours dans le domaine borné à huit sites. Ils ne ferment ni la Phase 8, ni le catalogue Morse, ni aucun statut public.
+> Phase `8`, backends `reference_cpu` et `reference_python`, profil `generic_core`, mode `certified`. La porte d'entrée est satisfaite par les Phases 1, 4 et 7 fermées. Les jalons 8.1 à 8.4 certifient la boîte de clipping, la fermeture mono-cellule, le diagramme ordinaire clippé entier et son accord avec un atlas affine indépendant, toujours dans le domaine borné à huit sites. Ils ne ferment ni la Phase 8, ni le catalogue Morse, ni aucun statut public.
 
 ## Jalon 8.1 — décision d'architecture
 
@@ -112,9 +112,21 @@ La matrice 8.3 couvre :
 - mutations du manifeste, de chaque couche de cellule, des occurrences, shells, contacts, masques, audits, claims et du nuage fiable;
 - liaison exacte au nuage même pour un reçu d'insuffisance.
 
+## Jalon 8.4 — atlas affine indépendant
+
+L'oracle `reference_python` décode localement les mots binary64 et construit directement chaque intersection non vide $K_Q$ par RREF rationnelle, inégalités nearest et faces de boîte. Il n'importe aucune primitive de production. Les singletons reconstruisent les cellules; les sous-ensembles non singleton reconstruisent les contacts avant tout accès à la projection du producteur. Compacité, paramétrisation affine et énumération de toutes les familles de frontières indépendantes donnent un contrôle exhaustif dans la portée `bounded_n8_independent_affine_subset_oracle_only`.
+
+Le dump C++ exige d'abord la vérification fraîche complète de 8.3, puis sérialise seulement manifeste, boîte, claims et projection sémantique. Le comparateur refuse JSON non canonique, clés ou objets dupliqués, identifiants hors plage et incohérences géométriques avant de confronter positions rationnelles, cellules, sommets, distances, shells, propriétaires, masques, contacts, carriers, dimensions, rangs, témoins et kinds.
+
+Le batch réel utilise un unique sous-processus et seize cas fixes : cardinalités un à huit, zéros signés, sous-normaux, paire oblique, contact porté par la boîte, collinéarité, carré exact et perturbations d'un ULP, tétraèdre avec ou sans centre, courbe des moments, shell sept, cube exact et perturbé, puis trois permutations. Il passe avec les producteurs GCC et Clang stricts. Les six tests unitaires couvrent aussi les neuf caps exacts, chaque insuffisance atomique et tout dépassement de confiance; `tools/check_oracle_independence.py` confirme l'absence d'import de production.
+
+## Décision de réutilisation et de débit
+
+Cet atlas est gelé à huit sites et ne sera pas étendu en moteur de Voronoï général. Toute future baseline plus large doit d'abord évaluer un adaptateur épinglé vers Geogram ou une bibliothèque mature équivalente; elle restera une comparaison non autoritative jusqu'au rejeu exact. Le chemin produit reste GPU-first, avec proposition massive sur `cuda_g4`, recertification exacte côté hôte, cible p95 inférieure à une seconde autour de 50 000 points pour `K_max<=10`, puis streaming transactionnel et budgeté à dix millions de points ou davantage.
+
 ## Limites et suite saine
 
-La Phase 8 reste `ready` et sa porte de sortie reste ouverte. Le prochain jalon sain doit confronter 8.3 à un oracle différentiel indépendant sur tout le domaine $n\leq8$, puis définir l'extraction certifiée des supports naturels en excluant explicitement les contacts artificiels et les quotients. Il ne faut pas élargir $n$, brancher CUDA ou ouvrir les événements Morse avant ce contrôle indépendant. Le rejeu imbriqué actuel reconstruit plusieurs fois les mêmes cellules; cette dette est admise uniquement dans le petit domaine de preuve.
+La Phase 8 reste `ready` et sa porte de sortie reste ouverte. Le prochain jalon sain doit définir l'extraction certifiée des supports naturels en excluant explicitement les contacts artificiels et les quotients, puis produire le `CatalogCertificate` d'ordre un et fermer `closed_parent_orders[1]` seulement si toutes les files sont vides et sans overflow. Il ne faut ni élargir l'atlas rationnel, ni confondre ce contrôle borné avec le chemin de débit. Le rejeu imbriqué actuel demeure une dette admise uniquement dans le petit domaine de preuve.
 
 Aucun `CatalogCertificate`, événement Morse, hiérarchie, `closed_parent_orders[1]`, mesure de débit ou `public_status=exact` n'est produit ici. Les propositions CUDA qualifiées en Phase 7 restent disponibles pour un futur accélérateur, mais ne participent à aucune décision 8.3.
 

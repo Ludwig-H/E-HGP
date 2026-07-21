@@ -728,6 +728,26 @@ Au plafond $n=8$, le préflight couvre 8 cellules, 56 constructions, 7728 triple
 
 Les fixtures courtes ferment diagrammes singleton, collinéaire sparse, paire, triangle, tétraèdre, carré cocirculaire et cube cosphérique; elles séparent aussi une arête naturelle d'un shell trois entièrement porté par une face de boîte. GCC et Clang stricts passent. Ce différentiel utilise encore les mêmes primitives rationnelles internes que le producteur : le jalon certifie `bounded_n8` et les incidences réciproques, mais ne ferme ni la Phase 8, ni `closed_parent_orders[1]`, ni un `CatalogCertificate` ou un statut public. GCP n'est pas utilisé.
 
+### Jalon 8.4 — oracle différentiel par atlas affine
+
+La dette d'indépendance de 8.3 est fermée par un oracle `reference_python` fondé uniquement sur les mots binary64 canoniques, `fractions.Fraction` et les six faces de $\Omega$. Le module de référence n'importe aucun code de production. Le dump C++ appelle 8.3, exige son rejeu certifié, puis expose seulement une projection sémantique; il n'entre jamais dans le calcul de l'oracle.
+
+Pour chaque sous-ensemble non vide $Q$, l'oracle choisit $q_0=\min Q$, pose $\Delta_{q_0p}(z)=\left\Vert z-x_{q_0}\right\Vert^2-\left\Vert z-x_p\right\Vert^2$ et construit directement $K_Q=\left\lbrace z\in\Omega:\Delta_{q_0q}(z)=0\ \forall q\in Q,\ \Delta_{q_0p}(z)\leq0\ \forall p\notin Q\right\rbrace$. Une RREF rationnelle indépendante produit soit une incohérence, soit une paramétrisation $z=z_0+Bt$ de dimension $d\leq3$. L'oracle tire les inégalités dans cet espace, énumère tous les $d$-uplets de frontières indépendantes, résout exactement, rejoue toutes les formes et déduplique les sommets.
+
+La boîte rend chaque $K_Q$ compact. S'il est non vide, il possède un sommet, et tout sommet possède $d$ normales actives indépendantes; l'énumération est donc complète sans boucle convergente. Les singletons reconstruisent les cellules et leurs occurrences. Les sous-ensembles de cardinal au moins deux reconstruisent les contacts directement, sans employer l'identité sommets-shells de 8.3; cette identité devient au contraire un invariant différentiel à vérifier. Le shell frais au barycentre, le rang affine, la dimension et le masque commun donnent ensuite carrier, quotient, strate naturelle ou support artificiel.
+
+Au plafond $n=8$, le préflight indépendant couvre 255 sous-ensembles, 769 lignes d'égalité, 2546 inégalités, 13349 systèmes candidats, 142982 rejeux de formes et 108768 évaluations de distances conservatives. Il réserve aussi au plus 2288 références de cellule et sommets globaux, 11061 références contact–sommet, 18304 entrées de shell globales, 247 contacts et témoins, 1016 identifiants de requête et 1976 identifiants de carrier. Une insuffisance ne publie aucun objet géométrique et une capacité au-dessus de la confiance est refusée.
+
+Le différentiel compare par valeurs rationnelles, indépendamment de l'ordre et des indices : sommets de chaque cellule, sommets globaux, shells, propriétaires, masques, contacts, carriers, rangs, dimensions, témoins et kinds. La matrice courte couvre chaque cardinal de un à huit, zéros signés et sous-normaux, paire oblique, collinéarité, support boîte, carré exact puis perturbé d'un ULP, tétraèdre avec et sans site central, courbe des moments, shell sept, cube cosphérique, cube perturbé et permutations. Toute contradiction doit devenir une fixture permanente avant de poursuivre.
+
+Ce jalon contrôle la projection topologique exacte de 8.3 dans `bounded_n8`; il ne recertifie pas ses rondes, amorces, compteurs procéduraux ou budgets internes. Il ne ferme ni extraction Morse, ni `RelevantGP`, ni catalogue, ni hiérarchie, ni `closed_parent_orders[1]`, ni statut public. GCP n'est pas utilisé.
+
+### Décision de réutilisation et de performance
+
+L'atlas `Fraction` de 8.4 est désormais gelé comme oracle de preuve `n<=8`; il ne doit pas devenir une bibliothèque de Voronoï générale ni entrer dans le chemin utilisateur. Avant toute nouvelle baseline de Voronoï, extension de domaine de test ou primitive CPU spécialisée, l'agent doit d'abord évaluer un adaptateur épinglé vers Geogram ou une bibliothèque mature équivalente, avec version, licence, options numériques et projection sémantique documentées. Une telle bibliothèque reste une baseline ou une source de propositions tant que ses sorties ne sont pas recertifiées par les contrats exacts du dépôt.
+
+Le chemin produit reste GPU-first : génération et filtrage massifs sur `cuda_g4`, décisions combinatoires ambiguës rejouées exactement sur l'hôte, transferts et matérialisation strictement budgetés. Les choix des Phases 8 à 13 doivent préserver les deux cibles de produit : p95 `warm_e2e` inférieur à une seconde pour environ 50 000 points et `K_max<=10` sur les familles favorables préenregistrées, puis streaming transactionnel pour dix millions de points ou davantage avec sortie exacte lorsque le certificat reste sparse et arrêt budgétaire honnête sinon. Aucun élargissement d'un oracle de test CPU ne doit retarder ou remplacer cette voie.
+
 ### Travaux
 
 - définir $\Omega$ comme une AABB dyadique **strictement paddée** autour de l'AABB exacte de $X$; chaque face doit être strictement extérieure à $\mathrm{conv}(X)$;

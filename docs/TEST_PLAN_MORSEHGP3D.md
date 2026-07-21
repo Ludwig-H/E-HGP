@@ -345,6 +345,20 @@ Le vérificateur rejette aussi cellule manquante, propriétaire local altéré, 
 
 La réussite certifie seulement `bounded_n8_all_ordinary_cells_auditable_contacts_and_reciprocal_natural_strata_only`. Elle ne ferme ni la Phase 8, ni `closed_parent_orders[1]`, ni l'extraction des supports, `RelevantGP`, un catalogue ou un statut public.
 
+Le jalon 8.4 ajoute un oracle Python `Fraction` indépendant. Son contrôle d'architecture doit rester couvert par `tools/check_oracle_independence.py`; le module n'importe aucune primitive C++, aucun paquet géométrique tiers et aucun backend de production. Le décodage des mots binary64, les différences de distances, la RREF, les systèmes actifs, les rangs et les barycentres sont réimplémentés localement.
+
+Pour tout sous-ensemble non vide $Q$, le test construit directement son $K_Q$ par égalités d'équidistance, inégalités nearest et boîte, puis énumère les frontières dans l'espace affine réduit. Les singletons sont comparés aux cellules finales normalisées. Les contacts non singleton sont comparés aux positions référencées par 8.3 sans passer par ses indices. Avant toute conversion en dictionnaire, le test rejette les doublons de cellules, sommets, requêtes et positions afin qu'une collision ne masque jamais un payload amputé.
+
+La campagne batch obligatoire comprend : singleton avec zéro signé et sous-normal; paire oblique; triple porté par la boîte; quatre sites collinéaires; carré cocirculaire; carré avec un sommet déplacé vers le prédécesseur puis le successeur binary64; tétraèdre; tétraèdre avec site central; six points d'une courbe des moments; cube privé d'un sommet; cube exact; cube avec un coin déplacé d'un ULP. Trois permutations fixes contrôlent la canonisation sans comparer les indices source.
+
+Le comparateur exige l'égalité exacte des sommets de chaque cellule, des sommets globaux, distances nearest, shells, propriétaires, masques, contacts, carriers, dimensions, rangs, témoins et kinds. Le carré et le cube perturbés interdisent toute fusion tolérante; la chaîne collinéaire interdit l'expansion abusive au power-set; le site central doit détruire les incidences du tétraèdre vide; le ET des masques distingue une strate seulement tronquée d'un contact entièrement porté par la boîte.
+
+Les caps 8.4 sont exercés par le test unitaire de l'oracle : valeurs exactes, chacune juste insuffisante avec payload géométrique vide, puis juste au-dessus de la confiance avec rejet. À $n=8$, ils couvrent 255 sous-ensembles, 769 égalités, 2546 inégalités, 13349 systèmes, 142982 formes, 108768 distances, 2288 références de cellule, 11061 références de contact et 247 témoins. Le CTest différentiel emploie un seul subprocess, un timeout de 45 secondes et aucune campagne aléatoire longue.
+
+La réussite valide uniquement `bounded_n8_independent_affine_subset_oracle_only` et l'accord sémantique de 8.3. Elle ne valide pas les rondes, amorces, compteurs de travail ou budgets de 8.3, CUDA, $n>8$, les supports Morse, `RelevantGP`, le catalogue, `closed_parent_orders[1]` ou un statut public.
+
+L'atlas `Fraction` est gelé à cette portée. Avant d'ajouter un autre oracle de Voronoï ou d'étendre cette baseline au-delà de huit sites, le plan de test doit comparer explicitement l'option d'un adaptateur Geogram épinglé : version et licence fixées, configuration reproductible, canonisation des identifiants, cas dégénérés et projection exacte à recertifier. Une baseline externe peut détecter des désaccords et mesurer le coût, mais ne décide jamais seule un statut exact. Aucun test de cet oracle CPU ne compte comme mesure du chemin chaud; les portes produit restent le p95 inférieur à une seconde à 50 000 points et `K_max<=10`, puis l'absence d'OOM et la reprise transactionnelle à dix millions de points ou davantage.
+
 ### 6.4 Multiplicité de Morse et nombre de bras
 
 Pour un événement de support frontal $U$ et d'indice $\mu$, l'oracle enregistre la multiplicité de Reani–Bobrowski $\Delta=\binom{\lvert U\rvert-1}{\mu}$. À l'indice un, il construit les $\lvert U\rvert$ bras et vérifie que le lot tue au plus $\lvert U\rvert-1$ classes de $H_0$. Les fixtures obligatoires couvrent :
