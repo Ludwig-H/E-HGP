@@ -12,6 +12,7 @@ readonly PHASE5_K1_BORUVKA_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_ph
 readonly PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase5_k1_boruvka_work_profile.py"
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase5_k1_boruvka_exact_search_work_profile.py"
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER_RELATIVE="morsehgp3d/tests/configuration/check_phase5_k1_boruvka_exact_search_work_profile.py"
+readonly PHASE7_H_POLYTOPE_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase7_h_polytope_qualification.py"
 readonly BASE_IMAGE_REF="nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
 readonly CONTAINER_REPOSITORY="/workspace/repository"
 readonly CONTAINER_BUILD="${CONTAINER_REPOSITORY}/build"
@@ -31,6 +32,8 @@ readonly PHASE5_K1_BORUVKA_WORK_PROFILE_RELATIVE="build/morsehgp3d-cuda-release/
 readonly PHASE5_K1_BORUVKA_WORK_PROFILE_PATH="${CONTAINER_REPOSITORY}/${PHASE5_K1_BORUVKA_WORK_PROFILE_RELATIVE}"
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_k1_boruvka_exact_search_work_profile"
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_PATH="${CONTAINER_REPOSITORY}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_RELATIVE}"
+readonly PHASE7_H_POLYTOPE_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_h_polytope_proposal_qualification"
+readonly PHASE7_H_POLYTOPE_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE7_H_POLYTOPE_BINARY_RELATIVE}"
 readonly MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-release"
 readonly GUEST_GUARD_MIN_REMAINING_SECONDS=1800
 readonly GUEST_GUARD_MAX_REMAINING_SECONDS=2820
@@ -88,6 +91,10 @@ PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW=""
 PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH=""
 PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PARENT=""
 PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_BASE=""
+PHASE7_H_POLYTOPE_OUTPUT_RAW=""
+PHASE7_H_POLYTOPE_OUTPUT_PATH=""
+PHASE7_H_POLYTOPE_OUTPUT_PARENT=""
+PHASE7_H_POLYTOPE_OUTPUT_BASE=""
 GCE_DEADLINE_RAW=""
 GCE_DEADLINE_EPOCH=0
 WORK_DEADLINE_EPOCH=0
@@ -99,6 +106,7 @@ PHASE4_PUBLISH_TEMP=""
 PHASE5_PUBLISH_TEMP=""
 PHASE5_WORK_PROFILE_PUBLISH_TEMP=""
 PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP=""
+PHASE7_H_POLYTOPE_PUBLISH_TEMP=""
 SESSION_CREATED=0
 DOCKER_IDENTITY=""
 BUILDX_CONFIG=""
@@ -174,7 +182,7 @@ certify_fixed_timeout() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json]
+Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json]
 
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
@@ -194,6 +202,10 @@ L'option de profil de recherche exacte exécute séparément neuf mesures de la
 chaîne external-1NN exacte amorcée par Morton, avec W=16. Chaque journal est
 validé avant assemblage; le compagnon reste benchmark-only et ne porte aucune
 revendication de scalabilité ou de statut scientifique public.
+L'option H-polytope Phase 7 exécute la qualification analytique CUDA du
+transcript de propositions, audite son ELF sm_120 et l'absence de PTX, puis
+le passe sous memcheck et racecheck. Son compagnon reste provisoire,
+benchmark-only et soumis à la fermeture externe ciblée de la VM.
 EOF
 }
 
@@ -237,6 +249,14 @@ while (($# > 0)); do
             [[ -z "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" ]] || \
                 die "--phase5-k1-boruvka-exact-search-work-profile-output ne peut être fourni qu'une fois."
             PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW="$2"
+            shift 2
+            ;;
+        --phase7-h-polytope-output)
+            (($# >= 2)) || \
+                die "Valeur manquante après --phase7-h-polytope-output."
+            [[ -z "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" ]] || \
+                die "--phase7-h-polytope-output ne peut être fourni qu'une fois."
+            PHASE7_H_POLYTOPE_OUTPUT_RAW="$2"
             shift 2
             ;;
         --gce-deadline-epoch)
@@ -303,6 +323,20 @@ if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" ]]; then
         "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" != \
             "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" ]] || \
         die "Toutes les sorties Phase 3, Phase 4 et Phase 5 doivent être distinctes."
+fi
+if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" ]]; then
+    case "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" in
+        /*) ;;
+        *) die "--phase7-h-polytope-output doit être un chemin absolu." ;;
+    esac
+    [[ "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" != "${OUTPUT_RAW}" && \
+        "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" != "${PHASE4_OUTPUT_RAW}" && \
+        "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" != "${PHASE5_OUTPUT_RAW}" && \
+        "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" != \
+            "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" && \
+        "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" != \
+            "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" ]] || \
+        die "La sortie H-polytope Phase 7 doit être distincte de toutes les autres sorties."
 fi
 certify_fixed_timeout || \
     die "La chaîne fixe /usr/bin/timeout n'est pas sûre, GNU ou compatible avec les groupes/--kill-after."
@@ -449,6 +483,39 @@ if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" ]]; then
         ! -L "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]] || \
         die "La sortie du profil external-1NN exact Phase 5 doit être inexistante : ${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}."
 fi
+if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" ]]; then
+    PHASE7_H_POLYTOPE_OUTPUT_PARENT="$(dirname -- \
+        "${PHASE7_H_POLYTOPE_OUTPUT_RAW}")"
+    PHASE7_H_POLYTOPE_OUTPUT_BASE="$(basename -- \
+        "${PHASE7_H_POLYTOPE_OUTPUT_RAW}")"
+    [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_BASE}" && \
+        "${PHASE7_H_POLYTOPE_OUTPUT_BASE}" != "." && \
+        "${PHASE7_H_POLYTOPE_OUTPUT_BASE}" != ".." ]] || \
+        die "Nom d'artefact H-polytope Phase 7 invalide."
+    [[ -d "${PHASE7_H_POLYTOPE_OUTPUT_PARENT}" ]] || \
+        die "Le répertoire parent de --phase7-h-polytope-output doit déjà exister."
+    PHASE7_H_POLYTOPE_OUTPUT_PARENT="$(cd -- \
+        "${PHASE7_H_POLYTOPE_OUTPUT_PARENT}" && pwd -P)" || \
+        die "Parent de sortie H-polytope Phase 7 illisible."
+    PHASE7_H_POLYTOPE_OUTPUT_PATH="${PHASE7_H_POLYTOPE_OUTPUT_PARENT}/${PHASE7_H_POLYTOPE_OUTPUT_BASE}"
+    [[ "${PHASE7_H_POLYTOPE_OUTPUT_PARENT}" == "${OUTPUT_PARENT}" ]] || \
+        die "Toutes les sorties doivent partager le même répertoire physique sûr."
+    [[ "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" != "${OUTPUT_PATH}" && \
+        "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" != "${PHASE4_OUTPUT_PATH}" && \
+        "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" != "${PHASE5_OUTPUT_PATH}" && \
+        "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" != \
+            "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" && \
+        "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" != \
+            "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]] || \
+        die "La sortie H-polytope Phase 7 doit être distincte de toutes les autres sorties."
+    case "${PHASE7_H_POLYTOPE_OUTPUT_PATH}/" in
+        "${REPOSITORY_ROOT}/"*)
+            die "--phase7-h-polytope-output doit rester hors du worktree ${REPOSITORY_ROOT}." ;;
+    esac
+    [[ ! -e "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" && \
+        ! -L "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" ]] || \
+        die "La sortie H-polytope Phase 7 doit être inexistante : ${PHASE7_H_POLYTOPE_OUTPUT_PATH}."
+fi
 
 worktree_status="$(git -C "${REPOSITORY_ROOT}" status --porcelain --untracked-files=normal)" || \
     die "Impossible de vérifier la propreté du clone Git."
@@ -469,6 +536,7 @@ readonly PHASE5_K1_BORUVKA_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE5_K1_BORUVKA_ASS
 readonly PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER_RELATIVE}"
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER_RELATIVE}"
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER="${REPOSITORY_ROOT}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER_RELATIVE}"
+readonly PHASE7_H_POLYTOPE_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE7_H_POLYTOPE_ASSEMBLER_RELATIVE}"
 [[ -f "${DOCKERFILE}" && ! -L "${DOCKERFILE}" ]] || \
     die "Dockerfile Phase 3 absent ou symbolique : ${DOCKERFILE}."
 [[ "$(sed -n '1p' "${DOCKERFILE}")" == "FROM ${BASE_IMAGE_REF}" ]] || \
@@ -500,6 +568,11 @@ if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]]; then
     [[ -f "${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER}" && \
         ! -L "${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER}" ]] || \
         die "Checker du profil external-1NN exact Phase 5 absent ou symbolique : ${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER}."
+fi
+if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" ]]; then
+    [[ -f "${PHASE7_H_POLYTOPE_ASSEMBLER}" && \
+        ! -L "${PHASE7_H_POLYTOPE_ASSEMBLER}" ]] || \
+        die "Assembleur H-polytope Phase 7 absent ou symbolique : ${PHASE7_H_POLYTOPE_ASSEMBLER}."
 fi
 
 remove_container_from_cidfile() {
@@ -663,6 +736,10 @@ cleanup() {
         -f "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}" ]]; then
         rm -f -- "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}" || true
     fi
+    if [[ -n "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" && \
+        -f "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" ]]; then
+        rm -f -- "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" || true
+    fi
     if [[ -n "${SESSION_DIR}" && -n "${BUILDX_CONFIG}" && \
         "${BUILDX_CONFIG}" == "${SESSION_DIR}/buildx-config" && \
         -e "${BUILDX_CONFIG}" ]]; then
@@ -745,6 +822,16 @@ if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]]; then
         die "Impossible de réserver l'artefact temporaire du profil external-1NN exact Phase 5."
     chmod 600 "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" ]]; then
+    PHASE7_H_POLYTOPE_PUBLISH_TEMP="$(mktemp \
+        "${PHASE7_H_POLYTOPE_OUTPUT_PARENT}/.${PHASE7_H_POLYTOPE_OUTPUT_BASE}.XXXXXXXX.partial")" || \
+        die "Impossible de réserver l'artefact temporaire H-polytope Phase 7."
+    rm -f -- "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" || \
+        die "Impossible de libérer le nom temporaire H-polytope Phase 7."
+    [[ ! -e "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" && \
+        ! -L "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" ]] || \
+        die "Le nom temporaire H-polytope Phase 7 reste occupé."
+fi
 
 readonly BUILD_DIR="${SESSION_DIR}/build"
 readonly LOG_DIR="${SESSION_DIR}/logs"
@@ -788,6 +875,13 @@ readonly PHASE5_K1_BORUVKA_PTX_LOG="${LOG_DIR}/phase5-k1-boruvka-cuobjdump-ptx.l
 readonly PHASE5_K1_BORUVKA_PTX_STDERR_LOG="${LOG_DIR}/phase5-k1-boruvka-cuobjdump-ptx.stderr.log"
 readonly PHASE5_K1_BORUVKA_MEMCHECK_LOG="${LOG_DIR}/phase5-k1-boruvka-memcheck.log"
 readonly PHASE5_K1_BORUVKA_RACECHECK_LOG="${LOG_DIR}/phase5-k1-boruvka-racecheck.log"
+readonly PHASE7_H_POLYTOPE_QUALIFICATION_LOG="${RESULT_DIR}/phase7-h-polytope-qualification.json"
+readonly PHASE7_H_POLYTOPE_QUALIFICATION_STDERR_LOG="${LOG_DIR}/phase7-h-polytope-qualification.stderr.log"
+readonly PHASE7_H_POLYTOPE_ELF_LOG="${LOG_DIR}/phase7-h-polytope-cuobjdump-elf.log"
+readonly PHASE7_H_POLYTOPE_PTX_LOG="${LOG_DIR}/phase7-h-polytope-cuobjdump-ptx.log"
+readonly PHASE7_H_POLYTOPE_PTX_STDERR_LOG="${LOG_DIR}/phase7-h-polytope-cuobjdump-ptx.stderr.log"
+readonly PHASE7_H_POLYTOPE_MEMCHECK_LOG="${LOG_DIR}/phase7-h-polytope-memcheck.log"
+readonly PHASE7_H_POLYTOPE_RACECHECK_LOG="${LOG_DIR}/phase7-h-polytope-racecheck.log"
 declare -a PHASE5_K1_BORUVKA_WORK_PROFILE_LOGS=()
 declare -a PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_LOGS=()
 
@@ -1498,6 +1592,103 @@ if ! run_container "compute-sanitizer" "${SANITIZER_LOG}" compute-sanitizer \
     die "compute-sanitizer a détecté une erreur ou a échoué; voir ${SANITIZER_LOG}."
 fi
 
+if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" ]]; then
+    [[ -f "${BUILD_DIR}/${PHASE7_H_POLYTOPE_BINARY_RELATIVE#build/}" && \
+        ! -L "${BUILD_DIR}/${PHASE7_H_POLYTOPE_BINARY_RELATIVE#build/}" && \
+        -x "${BUILD_DIR}/${PHASE7_H_POLYTOPE_BINARY_RELATIVE#build/}" ]] || \
+        die "Le binaire CUDA H-polytope Phase 7 n'a pas été construit sûrement."
+
+    begin_unit "phase7-h-polytope-qualification"
+    if ! run_container_split_output "phase7-h-polytope-qualification" \
+        "${PHASE7_H_POLYTOPE_QUALIFICATION_LOG}" \
+        "${PHASE7_H_POLYTOPE_QUALIFICATION_STDERR_LOG}" \
+        "${PHASE7_H_POLYTOPE_BINARY_PATH}"; then
+        report_failure_log "phase7-h-polytope-qualification" \
+            "${PHASE7_H_POLYTOPE_QUALIFICATION_LOG}"
+        report_failure_log "phase7-h-polytope-qualification-stderr" \
+            "${PHASE7_H_POLYTOPE_QUALIFICATION_STDERR_LOG}"
+        die "La qualification analytique CUDA H-polytope Phase 7 a échoué."
+    fi
+    if ! python3 -B - "${PHASE7_H_POLYTOPE_QUALIFICATION_LOG}" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+lines = Path(sys.argv[1]).read_text(encoding="utf-8").splitlines()
+if len(lines) != 1 or not lines[0].strip():
+    raise SystemExit("qualification stdout must contain exactly one JSON line")
+value = json.loads(lines[0])
+if not isinstance(value, dict):
+    raise SystemExit("qualification stdout JSON must be an object")
+PY
+    then
+        report_failure_log "phase7-h-polytope-qualification" \
+            "${PHASE7_H_POLYTOPE_QUALIFICATION_LOG}"
+        die "La sortie de qualification H-polytope Phase 7 n'est pas exactement un objet JSON."
+    fi
+
+    begin_unit "phase7-h-polytope-cuobjdump-elf"
+    if ! run_container "phase7-h-polytope-cuobjdump-elf" \
+        "${PHASE7_H_POLYTOPE_ELF_LOG}" /usr/local/cuda/bin/cuobjdump \
+        -lelf "${PHASE7_H_POLYTOPE_BINARY_PATH}"; then
+        report_failure_log "phase7-h-polytope-cuobjdump-elf" \
+            "${PHASE7_H_POLYTOPE_ELF_LOG}"
+        die "cuobjdump n'a pas pu lister les ELF du binaire H-polytope Phase 7."
+    fi
+    phase7_h_polytope_architectures="$(grep -Eo 'sm_[0-9]+' \
+        "${PHASE7_H_POLYTOPE_ELF_LOG}" | sort -u || true)"
+    if [[ "${phase7_h_polytope_architectures}" != "sm_120" ]]; then
+        report_failure_log "phase7-h-polytope-cuobjdump-elf" \
+            "${PHASE7_H_POLYTOPE_ELF_LOG}"
+        die "Le binaire H-polytope Phase 7 doit contenir uniquement un ELF sm_120; observé : ${phase7_h_polytope_architectures:-aucun}."
+    fi
+
+    begin_unit "phase7-h-polytope-cuobjdump-ptx"
+    if ! run_container_split_output "phase7-h-polytope-cuobjdump-ptx" \
+        "${PHASE7_H_POLYTOPE_PTX_LOG}" \
+        "${PHASE7_H_POLYTOPE_PTX_STDERR_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lptx \
+        "${PHASE7_H_POLYTOPE_BINARY_PATH}"; then
+        report_failure_log "phase7-h-polytope-cuobjdump-ptx-stderr" \
+            "${PHASE7_H_POLYTOPE_PTX_STDERR_LOG}"
+        die "cuobjdump n'a pas pu auditer le PTX du binaire H-polytope Phase 7."
+    fi
+    if grep -q '[^[:space:]]' "${PHASE7_H_POLYTOPE_PTX_LOG}"; then
+        report_failure_log "phase7-h-polytope-cuobjdump-ptx" \
+            "${PHASE7_H_POLYTOPE_PTX_LOG}"
+        die "Une entrée PTX a été détectée dans le binaire H-polytope Phase 7."
+    fi
+
+    begin_unit "phase7-h-polytope-memcheck"
+    if ! run_container "phase7-h-polytope-memcheck" \
+        "${PHASE7_H_POLYTOPE_MEMCHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool memcheck \
+        --leak-check full \
+        --report-api-errors no \
+        --error-exitcode=86 \
+        "${PHASE7_H_POLYTOPE_BINARY_PATH}"; then
+        report_failure_log "phase7-h-polytope-memcheck" \
+            "${PHASE7_H_POLYTOPE_MEMCHECK_LOG}"
+        die "Le memcheck du binaire H-polytope Phase 7 a échoué."
+    fi
+
+    begin_unit "phase7-h-polytope-racecheck"
+    if ! run_container "phase7-h-polytope-racecheck" \
+        "${PHASE7_H_POLYTOPE_RACECHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool racecheck \
+        --report-api-errors no \
+        --error-exitcode=86 \
+        "${PHASE7_H_POLYTOPE_BINARY_PATH}"; then
+        report_failure_log "phase7-h-polytope-racecheck" \
+            "${PHASE7_H_POLYTOPE_RACECHECK_LOG}"
+        die "Le racecheck du binaire H-polytope Phase 7 a échoué."
+    fi
+fi
+
 if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
     begin_unit "phase4-spatial-differential"
     if ! run_container "phase4-spatial-differential" \
@@ -1918,16 +2109,36 @@ if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]]; then
         "${phase5_exact_search_work_profile_assembler_arguments[@]}"
 fi
 
+if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" ]]; then
+    python3 -B "${PHASE7_H_POLYTOPE_ASSEMBLER}" \
+        --git-sha "${HEAD_SHA}" \
+        --base-image-ref "${BASE_IMAGE_REF}" \
+        --image-ref "${IMAGE_REF}" \
+        --image-id "${IMAGE_ID}" \
+        --environment-artifact "${PUBLISH_TEMP}" \
+        --qualification-log "${PHASE7_H_POLYTOPE_QUALIFICATION_LOG}" \
+        --elf-log "${PHASE7_H_POLYTOPE_ELF_LOG}" \
+        --ptx-log "${PHASE7_H_POLYTOPE_PTX_LOG}" \
+        --ptx-stderr-log "${PHASE7_H_POLYTOPE_PTX_STDERR_LOG}" \
+        --memcheck-log "${PHASE7_H_POLYTOPE_MEMCHECK_LOG}" \
+        --racecheck-log "${PHASE7_H_POLYTOPE_RACECHECK_LOG}" \
+        --binary "${BUILD_DIR}/${PHASE7_H_POLYTOPE_BINARY_RELATIVE#build/}" \
+        --output "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}"
+fi
+
 python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE4_PUBLISH_TEMP}" "${PHASE4_OUTPUT_PATH}" \
     "${PHASE5_PUBLISH_TEMP}" "${PHASE5_OUTPUT_PATH}" \
     "${PHASE5_WORK_PROFILE_PUBLISH_TEMP}" \
     "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" \
     "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}" \
-    "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" <<'PY'
+    "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" \
+    "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" \
+    "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" <<'PY'
 import json
 import os
 from pathlib import Path
+import stat
 import sys
 
 pairs = [(Path(sys.argv[1]), Path(sys.argv[2]), "Phase 3")]
@@ -1951,6 +2162,12 @@ if sys.argv[9] or sys.argv[10]:
     pairs.append(
         (Path(sys.argv[9]), Path(sys.argv[10]), "Phase 5 exact-search work profile")
     )
+if sys.argv[11] or sys.argv[12]:
+    if not sys.argv[11] or not sys.argv[12]:
+        raise SystemExit("incomplete Phase 7 H-polytope publication pair")
+    pairs.append(
+        (Path(sys.argv[11]), Path(sys.argv[12]), "Phase 7 H-polytope")
+    )
 for temporary, _, label in pairs:
     with temporary.open(encoding="utf-8") as stream:
         value = json.load(stream)
@@ -1959,9 +2176,9 @@ for temporary, _, label in pairs:
 
 published = []
 try:
-    for temporary, target, _ in pairs:
+    for temporary, target, label in pairs:
         os.link(temporary, target, follow_symlinks=False)
-        published.append(str(target))
+        published.append((temporary, target, label))
     for parent in {target.parent for _, target, _ in pairs}:
         directory_fd = os.open(parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
         try:
@@ -1969,9 +2186,27 @@ try:
         finally:
             os.close(directory_fd)
 except OSError as error:
-    published_label = ",".join(published) if published else "none"
+    rollback_failures = []
+    for temporary, target, label in reversed(published):
+        try:
+            source_stat = os.stat(temporary, follow_symlinks=False)
+            target_stat = os.stat(target, follow_symlinks=False)
+            if (
+                not stat.S_ISREG(source_stat.st_mode)
+                or not stat.S_ISREG(target_stat.st_mode)
+                or (source_stat.st_dev, source_stat.st_ino)
+                != (target_stat.st_dev, target_stat.st_ino)
+            ):
+                rollback_failures.append(f"{label}:identity-changed")
+                continue
+            os.unlink(target)
+        except OSError as rollback_error:
+            rollback_failures.append(f"{label}:{rollback_error}")
+    published_label = ",".join(str(target) for _, target, _ in published) or "none"
+    rollback_label = ",".join(rollback_failures) or "complete"
     raise SystemExit(
-        f"worker artifact publication failed: {error}; published={published_label}"
+        f"worker artifact publication failed: {error}; published={published_label}; "
+        f"rollback={rollback_label}"
     )
 PY
 rm -f -- "${PUBLISH_TEMP}"
@@ -1987,11 +2222,15 @@ fi
 if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}" ]]; then
     rm -f -- "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" ]]; then
+    rm -f -- "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}"
+fi
 PUBLISH_TEMP=""
 PHASE4_PUBLISH_TEMP=""
 PHASE5_PUBLISH_TEMP=""
 PHASE5_WORK_PROFILE_PUBLISH_TEMP=""
 PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP=""
+PHASE7_H_POLYTOPE_PUBLISH_TEMP=""
 
 printf '[SUCCÈS WORKER] Artefact Phase 3 provisoire publié sans remplacement : %s\n' \
     "${OUTPUT_PATH}"
@@ -2010,5 +2249,9 @@ fi
 if [[ -n "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" ]]; then
     printf '[SUCCÈS WORKER] Profil external-1NN exact Phase 5 provisoire publié sans remplacement : %s\n' \
         "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}"
+fi
+if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" ]]; then
+    printf '[SUCCÈS WORKER] Compagnon H-polytope Phase 7 provisoire publié sans remplacement : %s\n' \
+        "${PHASE7_H_POLYTOPE_OUTPUT_PATH}"
 fi
 printf '[CYCLE DE VIE] Le worker invité ne ferme pas la VM; l’orchestrateur externe doit certifier TERMINATED.\n'

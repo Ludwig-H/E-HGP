@@ -24,6 +24,12 @@ CUDA_SOURCE = Path("src/cuda/phase7_h_polytope_proposal.cu")
 FAKE_HEADER = Path("tests/unit/fake_gpu_h_polytope_proposal_launchers.hpp")
 FAKE_SOURCE = Path("tests/unit/fake_gpu_h_polytope_proposal_launchers.cpp")
 UNIT_TEST_SOURCE = Path("tests/unit/test_gpu_h_polytope_proposal_context.cpp")
+QUALIFICATION_SOURCE = Path("src/tools/gpu_h_polytope_proposal_qualification.cpp")
+QUALIFICATION_ASSEMBLER = Path(
+    "tests/cuda/assemble_phase7_h_polytope_qualification.py"
+)
+REMOTE_QUALIFICATION_WORKER = Path("gcp-migration/phase3_remote_qualification.sh")
+GUARDED_QUALIFICATION_RUNNER = Path("gcp-migration/run_phase3_qualification.sh")
 CMAKE_SOURCE = Path("CMakeLists.txt")
 CUDA_POLICY = Path("cmake/MorseHGP3DCuda.cmake")
 PRESETS_SOURCE = Path("CMakePresets.json")
@@ -1137,6 +1143,105 @@ def validate_cmake(cmake: str, cuda_policy: str, presets: dict[str, Any]) -> Non
         require(forbidden not in serialized, f"CUDA presets contain forbidden {forbidden}")
 
 
+def validate_qualification_evidence(harness: str, assembler: str) -> None:
+    require_tokens(
+        harness,
+        (
+            "morsehgp3d.phase7.h_polytope_cuda_qualification.v1",
+            "HPolytopeProposalContext context{unit_box(), 55U}",
+            "require_qualification_result(first, 1U)",
+            "require_qualification_result(second, 2U)",
+            "normalized_first.audit.buffer_epoch = 0U",
+            "normalized_second.audit.buffer_epoch = 0U",
+            "normalized_first == normalized_second",
+            r'\"exact_cpu_recertification\":true',
+            r'\"deterministic\":true',
+        ),
+        "Phase 7.8 analytic qualification harness",
+    )
+    require_tokens(
+        assembler,
+        (
+            'SCHEMA = "morsehgp3d.phase7.h_polytope_cuda_g4_qualification.v1"',
+            'PROPOSAL_SEMANTICS = "proposal_only_exhaustive_plane_triple_transcript"',
+            'DECISION_SEMANTICS = "reference_cpu_exact_all_constraints"',
+            '"cuda_audit_workflow": "passed"',
+            '"cuda_release_workflow": "passed"',
+            '"aot_ptx_entry_count": 0',
+            '"memcheck": "passed"',
+            '"racecheck": "passed"',
+            '"mode": "benchmark_only"',
+            '"scientific_result_claimed": False',
+            '"scientific_public_status": None',
+            '"status": "worker_passed_pending_shutdown"',
+            "write_exclusive_atomic(args.output, artifact)",
+        ),
+        "Phase 7.8 guarded G4 evidence assembler",
+    )
+    for forbidden in (
+        '"scientific_result_claimed": True',
+        '"global_status_published": true',
+        '"public_status": "exact"',
+    ):
+        require(
+            forbidden not in assembler,
+            f"Phase 7.8 evidence assembler overstates {forbidden!r}",
+        )
+
+
+def validate_guarded_qualification_route(worker: str, runner: str) -> None:
+    require_tokens(
+        worker,
+        (
+            "--phase7-h-polytope-output",
+            "morsehgp3d_gpu_h_polytope_proposal_qualification",
+            'begin_unit "phase7-h-polytope-qualification"',
+            'begin_unit "phase7-h-polytope-cuobjdump-elf"',
+            'begin_unit "phase7-h-polytope-cuobjdump-ptx"',
+            'begin_unit "phase7-h-polytope-memcheck"',
+            'begin_unit "phase7-h-polytope-racecheck"',
+            "--target-processes all",
+            "--leak-check full",
+            "--error-exitcode=86",
+            "assemble_phase7_h_polytope_qualification.py",
+            'rm -f -- "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}"',
+            "rollback_failures = []",
+        ),
+        "guarded Phase 7.8 remote worker route",
+    )
+    require_tokens(
+        runner,
+        (
+            "--phase7-h-polytope",
+            'phase7-h-polytope-${HEAD_SHA}.json',
+            "--phase7-h-polytope-output",
+            "morsehgp3d.phase7.h_polytope_cuda_g4_qualification.v1",
+            "proposal_only_exhaustive_plane_triple_transcript",
+            "reference_cpu_exact_all_constraints",
+            "ERROR SUMMARY:",
+            "RACECHECK SUMMARY:",
+            "if certify_target_stopped; then",
+            'value["status"] = "passed"',
+            "rollback_failures = []",
+            "Qualification H-polytope Phase 7 publiée après certification TERMINATED",
+        ),
+        "guarded Phase 7.8 local runner route",
+    )
+    validation_position = runner.find(
+        '"morsehgp3d.phase7.h_polytope_cuda_g4_qualification.v1"'
+    )
+    stop_position = runner.find("if certify_target_stopped; then", validation_position)
+    passed_position = runner.find('value["status"] = "passed"', stop_position)
+    publication_position = runner.find(
+        "Qualification H-polytope Phase 7 publiée après certification TERMINATED",
+        passed_position,
+    )
+    require(
+        0 <= validation_position < stop_position < passed_position < publication_position,
+        "Phase 7.8 artifact validation, targeted stop, finalization and publication order is open",
+    )
+
+
 def expect_text_rejected(
     validator: Callable[[str], None],
     text: str,
@@ -1165,6 +1270,8 @@ def validate_mutation_sensitivity(
     cmake: str,
     cuda_policy: str,
     presets: dict[str, Any],
+    qualification_harness: str,
+    qualification_assembler: str,
 ) -> None:
     expect_text_rejected(
         validate_public_api,
@@ -1285,6 +1392,24 @@ def validate_mutation_sensitivity(
         "src/cuda/phase7_h_polytope_proposal.cpp",
         "CUDA translation unit removed from target",
     )
+    expect_text_rejected(
+        lambda candidate: validate_qualification_evidence(
+            candidate, qualification_assembler
+        ),
+        qualification_harness,
+        "normalized_second.audit.buffer_epoch = 0U",
+        "normalized_second.audit.buffer_epoch = 2U",
+        "cross-epoch normalization removal",
+    )
+    expect_text_rejected(
+        lambda candidate: validate_qualification_evidence(
+            qualification_harness, candidate
+        ),
+        qualification_assembler,
+        'SCHEMA = "morsehgp3d.phase7.h_polytope_cuda_g4_qualification.v1"',
+        'SCHEMA = "morsehgp3d.phase7.h_polytope_cuda_g4_qualification.v2"',
+        "guarded qualification schema drift",
+    )
     mutated_presets = copy.deepcopy(presets)
     builds = named_presets(mutated_presets.get("buildPresets"), "mutated buildPresets")
     targets = builds["cuda-release"].get("targets")
@@ -1307,6 +1432,10 @@ def validate_project(project: Path) -> dict[str, object]:
         "fake_header": project / FAKE_HEADER,
         "fake_source": project / FAKE_SOURCE,
         "unit_test": project / UNIT_TEST_SOURCE,
+        "qualification_harness": project / QUALIFICATION_SOURCE,
+        "qualification_assembler": project / QUALIFICATION_ASSEMBLER,
+        "remote_worker": project.parent / REMOTE_QUALIFICATION_WORKER,
+        "guarded_runner": project.parent / GUARDED_QUALIFICATION_RUNNER,
         "cmake": project / CMAKE_SOURCE,
         "cuda_policy": project / CUDA_POLICY,
         "presets": project / PRESETS_SOURCE,
@@ -1324,6 +1453,12 @@ def validate_project(project: Path) -> dict[str, object]:
     validate_fake(texts["fake_header"], texts["fake_source"], texts["unit_test"])
     validate_cuda_kernel(texts["kernel"], texts["interval"])
     validate_cmake(texts["cmake"], texts["cuda_policy"], presets)
+    validate_qualification_evidence(
+        texts["qualification_harness"], texts["qualification_assembler"]
+    )
+    validate_guarded_qualification_route(
+        texts["remote_worker"], texts["guarded_runner"]
+    )
     validate_mutation_sensitivity(
         texts["public"],
         texts["internal"],
@@ -1336,10 +1471,17 @@ def validate_project(project: Path) -> dict[str, object]:
         texts["cmake"],
         texts["cuda_policy"],
         presets,
+        texts["qualification_harness"],
+        texts["qualification_assembler"],
     )
     return {
         "checked_artifacts": sorted(
-            str(path.relative_to(project)) for path in paths.values()
+            str(
+                path.relative_to(
+                    project if path.is_relative_to(project) else project.parent
+                )
+            )
+            for path in paths.values()
         ),
         "cuda_executed": False,
         "cuda_target": CUDA_TARGET,

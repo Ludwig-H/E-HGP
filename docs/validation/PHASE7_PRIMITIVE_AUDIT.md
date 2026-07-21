@@ -118,6 +118,8 @@ Le checker statique et le smoke via faux launcher sont verts; ASan/UBSan ferme �
 
 Ce défaut d'intégration n'est pas une contradiction mathématique. Les quatre stockages de transfert sont maintenant des tableaux natifs `std::uint64_t[N]`; leurs tailles, layouts et offsets sont vérifiés à la compilation, et quatre mutations du checker interdisent leur retour vers `std::array`. La qualification release et audit, l'absence de PTX, l'exécution analytique, `memcheck` et `racecheck` restent explicitement non acquises. La source et ce correctif ne suffisent ni à fermer la Phase 7, ni à ouvrir la Phase 8.
 
+La nouvelle route de qualification corrige aussi un angle mort du workflow : auparavant, les presets construisaient le binaire 7.8 mais seuls le runtime Phase 3 et ses outils étaient exécutés. Le compagnon optionnel cible désormais exactement l'exécutable H-polytope pour le run, l'audit ELF/PTX, `memcheck` et `racecheck`. Son artefact ferme séparément sémantique de proposition et sémantique de décision, reparcourt les journaux au worker puis à l'orchestrateur, et n'est finalisé qu'après l'arrêt ciblé. Les tests locaux couvrent l'assembleur, les mutations d'évidence et le parcours worker; aucune nouvelle preuve G4 n'est revendiquée avant la prochaine session gardée.
+
 ## Convention analytique des poids
 
 Pour le site $p_i$ de poids $w_i$, la puissance utilisée par l'audit est

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import signal
@@ -44,6 +45,13 @@ PHASE4_LBVH_DIFFERENTIAL_SOURCE = (
     / "tests"
     / "differential"
     / "check_spatial_gpu_lbvh.py"
+)
+PHASE7_H_POLYTOPE_ASSEMBLER_SOURCE = (
+    REPOSITORY_ROOT
+    / "morsehgp3d"
+    / "tests"
+    / "cuda"
+    / "assemble_phase7_h_polytope_qualification.py"
 )
 FAKE_SHA = "a" * 40
 FAKE_IMAGE_ID = "sha256:" + "b" * 64
@@ -972,6 +980,11 @@ if command[:3] == ["cmake", "--workflow", "--preset"]:
             (build / replay_name).write_bytes(
                 ("fake Phase 4 " + replay_name).encode("ascii")
             )
+        phase7_binary = (
+            build / "morsehgp3d_gpu_h_polytope_proposal_qualification"
+        )
+        phase7_binary.write_bytes(b"fake Phase 7 H-polytope qualification")
+        phase7_binary.chmod(0o755)
     print(f"fake {preset} workflow passed")
     raise SystemExit(0)
 
@@ -982,6 +995,25 @@ if command[0].endswith("/morsehgp3d_phase3_runtime"):
     ceiling = int(command[command.index("--allocation-bytes") + 1])
     write_runtime_jsonl(result_path(output), ceiling)
     print("fake Phase 3 runtime passed")
+    raise SystemExit(0)
+
+if command[0].endswith("/morsehgp3d_gpu_h_polytope_proposal_qualification"):
+    qualification = {
+        "cell_count": 4,
+        "deterministic": True,
+        "exact_cpu_recertification": True,
+        "first_epoch": 1,
+        "proposal_digest_fnv1a": 123456789,
+        "record_count": 55,
+        "schema": "morsehgp3d.phase7.h_polytope_cuda_qualification.v1",
+        "second_epoch": 2,
+        "strict_reject_count": 4,
+        "survivor_count": 16,
+        "unknown_count": 35,
+    }
+    print(json.dumps(qualification, sort_keys=True))
+    if failure == "phase7_duplicate_json":
+        print(json.dumps(qualification, sort_keys=True))
     raise SystemExit(0)
 
 if Path(command[0]).name == "python3" and any(
@@ -1034,6 +1066,24 @@ if Path(command[0]).name == "compute-sanitizer":
         )
         print("========= ERROR SUMMARY: 2 errors")
         raise SystemExit(86)
+    if any(
+        Path(item).name
+        == "morsehgp3d_gpu_h_polytope_proposal_qualification"
+        for item in command
+    ):
+        tool = command[command.index("--tool") + 1]
+        if tool == "memcheck":
+            print("fake Phase 7 H-polytope memcheck passed")
+            print("========= ERROR SUMMARY: 0 errors")
+        elif tool == "racecheck":
+            print("fake Phase 7 H-polytope racecheck passed")
+            print(
+                "========= RACECHECK SUMMARY: 0 hazards displayed "
+                "(0 errors, 0 warnings)"
+            )
+        else:
+            raise SystemExit("unexpected Phase 7 sanitizer tool: " + tool)
+        raise SystemExit(0)
     if any(Path(item).name == "check_spatial_gpu_reference.py" for item in command):
         summary = command[command.index("--summary-json") + 1]
         write_phase4_summary(result_path(summary), "--quick" in command)
@@ -1330,6 +1380,14 @@ class Phase3RemoteQualificationTests(unittest.TestCase):
             / "tests"
             / "cuda"
             / PHASE4_ASSEMBLER_SOURCE.name,
+        )
+        shutil.copy2(
+            PHASE7_H_POLYTOPE_ASSEMBLER_SOURCE,
+            self.repository
+            / "morsehgp3d"
+            / "tests"
+            / "cuda"
+            / PHASE7_H_POLYTOPE_ASSEMBLER_SOURCE.name,
         )
         shutil.copy2(
             PHASE4_DIFFERENTIAL_SOURCE,
@@ -2034,6 +2092,182 @@ printf 'fake Blackwell preflight passed\\n'
         self.assertEqual(1, len(racecheck_runs))
         self.assertIn("--quick", racecheck_runs[0])
         self.assertNotIn("--summary-json", racecheck_runs[0])
+        self.assert_no_partial_artifact()
+
+    def test_optional_phase7_h_polytope_evidence_is_published_as_a_companion(
+        self,
+    ) -> None:
+        phase3_artifact = self.output_dir / "phase3-h-polytope.json"
+        phase7_artifact = self.output_dir / "phase7-h-polytope.json"
+        result, _ = self.run_worker(
+            arguments=[
+                "--yes",
+                "--gce-deadline-epoch",
+                str(self.gce_deadline_epoch),
+                "--output",
+                str(phase3_artifact),
+                "--phase7-h-polytope-output",
+                str(phase7_artifact),
+            ],
+            output=phase3_artifact,
+        )
+
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        phase3_payload = phase3_artifact.read_bytes()
+        phase7 = json.loads(phase7_artifact.read_text(encoding="utf-8"))
+        self.assertEqual(
+            "morsehgp3d.phase7.h_polytope_cuda_g4_qualification.v1",
+            phase7["schema"],
+        )
+        self.assertEqual("worker_passed_pending_shutdown", phase7["status"])
+        self.assertEqual("7", phase7["phase"])
+        self.assertEqual("cuda_g4", phase7["backend"])
+        self.assertEqual("generic_core", phase7["profile"])
+        self.assertEqual("benchmark_only", phase7["mode"])
+        self.assertEqual(
+            "proposal_only_h_polytope_transcript", phase7["scientific_scope"]
+        )
+        self.assertEqual(
+            "proposal_only_exhaustive_plane_triple_transcript",
+            phase7["proposal_semantics"],
+        )
+        self.assertEqual(
+            "reference_cpu_exact_all_constraints",
+            phase7["decision_semantics"],
+        )
+        self.assertFalse(phase7["scientific_result_claimed"])
+        self.assertIsNone(phase7["scientific_public_status"])
+        self.assertEqual(FAKE_SHA, phase7["git"]["sha"])
+        self.assertEqual(FAKE_IMAGE_ID, phase7["image"]["id"])
+        self.assertEqual(
+            {
+                "guest_shutdown_guard_verified": True,
+                "stop_responsibility": "external_orchestrator",
+                "worker_mutates_gcp": False,
+            },
+            phase7["vm_lifecycle"],
+        )
+
+        checks = phase7["checks"]
+        self.assertEqual(["sm_120"], checks["aot_elf_architectures"])
+        self.assertEqual(0, checks["aot_ptx_entry_count"])
+        self.assertEqual("passed", checks["cuda_release_workflow"])
+        self.assertEqual("passed", checks["cuda_audit_workflow"])
+        self.assertEqual("passed", checks["memcheck"])
+        self.assertEqual("passed", checks["racecheck"])
+        self.assertEqual(
+            {
+                "cell_count": 4,
+                "deterministic": True,
+                "exact_cpu_recertification": True,
+                "first_epoch": 1,
+                "proposal_digest_fnv1a": 123456789,
+                "record_count": 55,
+                "schema": "morsehgp3d.phase7.h_polytope_cuda_qualification.v1",
+                "second_epoch": 2,
+                "strict_reject_count": 4,
+                "survivor_count": 16,
+                "unknown_count": 35,
+            },
+            checks["qualification"],
+        )
+        self.assertEqual("", phase7["logs"]["cuobjdump_ptx"])
+        self.assertIn(
+            "ERROR SUMMARY: 0 errors", phase7["logs"]["memcheck"]
+        )
+        self.assertIn(
+            "RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)",
+            phase7["logs"]["racecheck"],
+        )
+        self.assertEqual(set(phase7["logs"]), set(phase7["log_sha256"]))
+        for name, payload in phase7["logs"].items():
+            self.assertEqual(
+                hashlib.sha256(payload.encode("utf-8")).hexdigest(),
+                phase7["log_sha256"][name],
+            )
+        self.assertEqual(
+            hashlib.sha256(phase3_payload).hexdigest(),
+            phase7["provenance"]["environment_artifact_sha256"],
+        )
+        self.assertEqual(
+            "morsehgp3d.phase3.qualification.v1",
+            phase7["provenance"]["environment_artifact_schema"],
+        )
+        self.assertEqual(
+            hashlib.sha256(
+                b"fake Phase 7 H-polytope qualification"
+            ).hexdigest(),
+            phase7["binary"]["qualification_sha256"],
+        )
+
+        log = self.command_log_text()
+        binary_path = (
+            "/workspace/repository/build/morsehgp3d-cuda-release/"
+            "morsehgp3d_gpu_h_polytope_proposal_qualification"
+        )
+        phase7_runs = [
+            line
+            for line in log.splitlines()
+            if line.startswith("DOCKER run ") and binary_path in line
+        ]
+        self.assertEqual(5, len(phase7_runs))
+        self.assertTrue(
+            any(f"--entrypoint {binary_path}" in line for line in phase7_runs)
+        )
+        self.assertTrue(
+            any("cuobjdump -lelf " + binary_path in line for line in phase7_runs)
+        )
+        self.assertTrue(
+            any(
+                "--entrypoint /usr/local/cuda/bin/cuobjdump" in line
+                and "-lptx " + binary_path in line
+                for line in phase7_runs
+            )
+        )
+        self.assertTrue(
+            any(
+                "--target-processes all --tool memcheck --leak-check full "
+                "--report-api-errors no "
+                "--error-exitcode=86 "
+                + binary_path
+                in line
+                for line in phase7_runs
+            )
+        )
+        self.assertTrue(
+            any(
+                "--target-processes all --tool racecheck --report-api-errors no "
+                "--error-exitcode=86 "
+                + binary_path
+                in line
+                for line in phase7_runs
+            )
+        )
+        self.assert_no_partial_artifact()
+
+    def test_phase7_h_polytope_rejects_multiple_qualification_json_objects(
+        self,
+    ) -> None:
+        phase3_artifact = self.output_dir / "phase3-h-polytope-invalid.json"
+        phase7_artifact = self.output_dir / "phase7-h-polytope-invalid.json"
+        result, _ = self.run_worker(
+            arguments=[
+                "--yes",
+                "--gce-deadline-epoch",
+                str(self.gce_deadline_epoch),
+                "--output",
+                str(phase3_artifact),
+                "--phase7-h-polytope-output",
+                str(phase7_artifact),
+            ],
+            failure="phase7_duplicate_json",
+            output=phase3_artifact,
+        )
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("exactement un objet JSON", result.stderr)
+        self.assertFalse(phase3_artifact.exists())
+        self.assertFalse(phase7_artifact.exists())
         self.assert_no_partial_artifact()
 
     def test_symlinked_repository_build_mountpoint_is_refused(self) -> None:

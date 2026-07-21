@@ -277,7 +277,7 @@ Le checker statique relit l'API, l'ABI POD, le wrapper exact, le faux lanceur, l
 
 L'exécutable réel utilise quatre cellules dans un ordre non canonique : cube, coupe axiale, constante positive vide et second cube hors capacité. La capacité 55 doit produire deux lignes réussies de 20 et 35 slots, puis deux lignes vides de statuts distincts; inconnu, rejet et survivant doivent tous apparaître. Deux appels sur le même contexte exigent les epochs 1 et 2 et des résultats bit à bit identiques après neutralisation de l'epoch. Chaque résultat exact est comparé au noyau 7.6.
 
-La porte G4 reste courte : compilation release et audit AOT, exécution analytique, contrôle sans PTX, `compute-sanitizer --tool memcheck` puis `--tool racecheck`. La fixture $B=61$ reste un préflight de taille et n'est pas exécutée géométriquement. Un échec de compilation ou de runtime laisse 7.8 non qualifié et ne modifie aucun statut scientifique.
+La porte G4 reste courte : compilation release et audit AOT, exécution analytique, contrôle sans PTX, `compute-sanitizer --tool memcheck` puis `--tool racecheck`. Le compagnon doit reparcourir les résumés sanitizer, fermer les empreintes des journaux et du binaire, lier l'image et le SHA, puis rester `worker_passed_pending_shutdown`; il ne devient `passed` et n'est publié qu'après relecture indépendante de la cible exacte en `TERMINATED`. Une collision de publication doit retirer les liens déjà créés par la transaction. La fixture $B=61$ reste un préflight de taille et n'est pas exécutée géométriquement. Un échec de compilation, runtime, sanitizer ou fermeture de session laisse 7.8 non qualifié et ne modifie aucun statut scientifique.
 
 ## 6. Tests de Gamma, du catalogue Gabriel et de la réduction
 

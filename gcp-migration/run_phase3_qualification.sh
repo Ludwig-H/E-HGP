@@ -37,6 +37,7 @@ PHASE4_SPATIAL_REFERENCE=0
 PHASE5_K1_BORUVKA=0
 PHASE5_K1_BORUVKA_WORK_PROFILE=0
 PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE=0
+PHASE7_H_POLYTOPE=0
 
 SESSION_CERTIFIED=0
 TARGET_STOP_CERTIFIED=0
@@ -51,6 +52,8 @@ LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT=""
 LOCAL_PHASE5_WORK_PROFILE_RESULT=""
 LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT=""
 LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT=""
+LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT=""
+LOCAL_PHASE7_H_POLYTOPE_RESULT=""
 START_HANDOFF=""
 SESSION_LAST_START_TIMESTAMP=""
 SESSION_HANDOFF_STATUS=""
@@ -72,7 +75,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -112,6 +115,11 @@ exclusive de tous les autres compagnons. Son artefact benchmark-only reste
 provisoire jusqu'à la même certification ciblée TERMINATED et ne publie aucun
 statut scientifique.
 
+--phase7-h-polytope ajoute la qualification CUDA G4 de la proposition
+H-polytope de Phase 7.8. Son artefact compagnon reste provisoire jusqu'à la
+même certification ciblée TERMINATED; il reste en mode benchmark_only et
+ne publie aucun statut scientifique.
+
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
 dépôts Ubuntu déjà configurés, puis à configurer le runtime NVIDIA. Le worker
@@ -146,6 +154,10 @@ while (($# > 0)); do
             PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE=1
             shift
             ;;
+        --phase7-h-polytope)
+            PHASE7_H_POLYTOPE=1
+            shift
+            ;;
         --result-dir)
             (($# >= 2)) || die "Valeur manquante après --result-dir."
             RESULT_DIR="$2"
@@ -169,7 +181,7 @@ if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1 && PHASE5_K1_BORUVKA == 1)); then
 fi
 if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 && \
     (PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
-     PHASE5_K1_BORUVKA_WORK_PROFILE == 1))); then
+     PHASE5_K1_BORUVKA_WORK_PROFILE == 1 || PHASE7_H_POLYTOPE == 1))); then
     die "--phase5-k1-boruvka-exact-search-work-profile est mutuellement exclusive de tous les autres compagnons."
 fi
 
@@ -290,6 +302,12 @@ if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
         ! -L "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
+if ((PHASE7_H_POLYTOPE == 1)); then
+    LOCAL_PHASE7_H_POLYTOPE_RESULT="${RESULT_DIR}/phase7-h-polytope-${HEAD_SHA}.json"
+    [[ ! -e "${LOCAL_PHASE7_H_POLYTOPE_RESULT}" && \
+        ! -L "${LOCAL_PHASE7_H_POLYTOPE_RESULT}" ]] || \
+        die "L'artefact ${LOCAL_PHASE7_H_POLYTOPE_RESULT} existe déjà; utilisez un répertoire distinct."
+fi
 LOCAL_TEMP_RESULT="$(mktemp "${RESULT_DIR}/.phase3-${HEAD_SHA}.XXXXXXXX.partial")" || \
     die "Impossible de créer l'artefact temporaire local."
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
@@ -326,6 +344,30 @@ if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
         rm -f -- "${LOCAL_TEMP_RESULT}"
         LOCAL_TEMP_RESULT=""
         die "Impossible de créer l'artefact work-profile exact-search Phase 5 temporaire local."
+    fi
+fi
+if ((PHASE7_H_POLYTOPE == 1)); then
+    if ! LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT="$(mktemp \
+        "${RESULT_DIR}/.phase7-h-polytope-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        rm -f -- "${LOCAL_TEMP_RESULT}"
+        LOCAL_TEMP_RESULT=""
+        if [[ -n "${LOCAL_PHASE4_TEMP_RESULT}" ]]; then
+            rm -f -- "${LOCAL_PHASE4_TEMP_RESULT}"
+            LOCAL_PHASE4_TEMP_RESULT=""
+        fi
+        if [[ -n "${LOCAL_PHASE5_TEMP_RESULT}" ]]; then
+            rm -f -- "${LOCAL_PHASE5_TEMP_RESULT}"
+            LOCAL_PHASE5_TEMP_RESULT=""
+        fi
+        if [[ -n "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}" ]]; then
+            rm -f -- "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}"
+            LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT=""
+        fi
+        if [[ -n "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" ]]; then
+            rm -f -- "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}"
+            LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT=""
+        fi
+        die "Impossible de créer l'artefact H-polytope Phase 7 temporaire local."
     fi
 fi
 
@@ -806,6 +848,10 @@ cleanup_local_publication() {
         -e "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" || true
     fi
+    if [[ -n "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" && \
+        -e "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" || true
+    fi
 }
 
 on_exit() {
@@ -888,6 +934,7 @@ printf '%s\n' \
     "  replay Phase 5  : $([[ ${PHASE5_K1_BORUVKA} == 1 ]] && printf 'boucle K1 Boruvka complète activée' || printf 'désactivé')" \
     "  profil Morton   : $([[ ${PHASE5_K1_BORUVKA_WORK_PROFILE} == 1 ]] && printf 'campagne work-profile activée' || printf 'désactivé')" \
     "  profil exact-1NN: $([[ ${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE} == 1 ]] && printf 'campagne work-profile activée' || printf 'désactivé')" \
+    "  replay H-polytope: $([[ ${PHASE7_H_POLYTOPE} == 1 ]] && printf 'qualification CUDA G4 Phase 7.8 activée' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -914,6 +961,7 @@ remote_phase4_artifact=""
 remote_phase5_artifact=""
 remote_phase5_work_profile_artifact=""
 remote_phase5_exact_search_work_profile_artifact=""
+remote_phase7_h_polytope_artifact=""
 quoted_origin="$(shell_quote "${ORIGIN_URL}")"
 quoted_repository="$(shell_quote "${remote_repository}")"
 quoted_head="$(shell_quote "${HEAD_SHA}")"
@@ -922,10 +970,12 @@ quoted_phase4_artifact=""
 quoted_phase5_artifact=""
 quoted_phase5_work_profile_artifact=""
 quoted_phase5_exact_search_work_profile_artifact=""
+quoted_phase7_h_polytope_artifact=""
 phase4_worker_option=""
 phase5_worker_option=""
 phase5_work_profile_worker_option=""
 phase5_exact_search_work_profile_worker_option=""
+phase7_h_polytope_worker_option=""
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     remote_phase4_artifact="${REMOTE_WORKDIR}/phase4-spatial-result.json"
     quoted_phase4_artifact="$(shell_quote "${remote_phase4_artifact}")"
@@ -946,6 +996,11 @@ if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
     quoted_phase5_exact_search_work_profile_artifact="$(shell_quote "${remote_phase5_exact_search_work_profile_artifact}")"
     phase5_exact_search_work_profile_worker_option=" --phase5-k1-boruvka-exact-search-work-profile-output ${quoted_phase5_exact_search_work_profile_artifact}"
 fi
+if ((PHASE7_H_POLYTOPE == 1)); then
+    remote_phase7_h_polytope_artifact="${REMOTE_WORKDIR}/phase7-h-polytope-result.json"
+    quoted_phase7_h_polytope_artifact="$(shell_quote "${remote_phase7_h_polytope_artifact}")"
+    phase7_h_polytope_worker_option=" --phase7-h-polytope-output ${quoted_phase7_h_polytope_artifact}"
+fi
 quoted_gce_deadline="$(shell_quote "${EFFECTIVE_GCE_DEADLINE_EPOCH}")"
 
 clone_output="$(remote_exec \
@@ -962,7 +1017,7 @@ if ((PROVISION_DOCKER == 1)); then
 fi
 
 remote_exec \
-    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}"
+    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}"
 
 timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
@@ -1020,6 +1075,19 @@ if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
         "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
         "${INSTANCE_NAME}:${remote_phase5_exact_search_work_profile_artifact}" \
         "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+fi
+if ((PHASE7_H_POLYTOPE == 1)); then
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${INSTANCE_NAME}:${remote_phase7_h_polytope_artifact}" \
+        "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --quiet \
@@ -2528,6 +2596,275 @@ if value.get("vm_lifecycle") != assembler.WORKER_LIFECYCLE:
 PY
 fi
 
+if ((PHASE7_H_POLYTOPE == 1)); then
+    [[ -s "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" ]] || \
+        die "Artefact H-polytope Phase 7 distant récupéré mais vide."
+    python3 - "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" \
+        "${HEAD_SHA}" "${LOCAL_TEMP_RESULT}" <<'PY'
+import hashlib
+import json
+from pathlib import Path
+import re
+import sys
+
+artifact_path = Path(sys.argv[1])
+git_sha = sys.argv[2]
+phase3_path = Path(sys.argv[3])
+
+
+def fail(message):
+    raise SystemExit(message)
+
+
+def exact_object(value, keys, label):
+    if not isinstance(value, dict) or set(value) != keys:
+        fail(f"{label} ne respecte pas son schéma fermé")
+    return value
+
+
+raw = artifact_path.read_text(encoding="utf-8")
+try:
+    value = json.loads(raw)
+except json.JSONDecodeError as error:
+    fail(f"artefact H-polytope Phase 7 JSON invalide: {error}")
+canonical = json.dumps(
+    value, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+) + "\n"
+if raw != canonical:
+    fail("l'artefact H-polytope Phase 7 n'est pas un JSON canonique sur une ligne")
+
+with phase3_path.open(encoding="utf-8") as stream:
+    phase3 = json.load(stream)
+
+expected_top_keys = {
+    "backend",
+    "binary",
+    "checks",
+    "decision_semantics",
+    "git",
+    "image",
+    "log_sha256",
+    "logs",
+    "mode",
+    "phase",
+    "profile",
+    "proposal_semantics",
+    "provenance",
+    "schema",
+    "scientific_public_status",
+    "scientific_result_claimed",
+    "scientific_scope",
+    "status",
+    "vm_lifecycle",
+}
+exact_object(value, expected_top_keys, "artefact H-polytope Phase 7")
+for key, expected in {
+    "backend": "cuda_g4",
+    "mode": "benchmark_only",
+    "phase": "7",
+    "profile": "generic_core",
+    "schema": "morsehgp3d.phase7.h_polytope_cuda_g4_qualification.v1",
+    "scientific_scope": "proposal_only_h_polytope_transcript",
+    "status": "worker_passed_pending_shutdown",
+    "decision_semantics": "reference_cpu_exact_all_constraints",
+    "proposal_semantics": "proposal_only_exhaustive_plane_triple_transcript",
+}.items():
+    if value.get(key) != expected:
+        fail(f"champ H-polytope Phase 7 invalide: {key}")
+if value.get("scientific_result_claimed") is not False:
+    fail("la qualification H-polytope Phase 7 revendique à tort un résultat scientifique")
+if value.get("scientific_public_status") is not None:
+    fail("la qualification H-polytope Phase 7 expose à tort un statut public")
+if value.get("git") != {"clean": True, "sha": git_sha}:
+    fail("la qualification H-polytope Phase 7 ne correspond pas au SHA propre qualifié")
+
+phase3_image = phase3.get("image")
+image = exact_object(value.get("image"), {"base_ref", "id", "ref"}, "identité d'image")
+if not isinstance(phase3_image, dict) or image != {
+    field: phase3_image.get(field) for field in ("base_ref", "id", "ref")
+}:
+    fail("identité d'image H-polytope Phase 7 incohérente")
+if re.fullmatch(r"sha256:[0-9a-f]{64}", str(image.get("id"))) is None:
+    fail("digest d'image H-polytope Phase 7 non canonique")
+
+binary = exact_object(
+    value.get("binary"), {"qualification_sha256"}, "empreinte du binaire H-polytope"
+)
+if re.fullmatch(r"[0-9a-f]{64}", str(binary.get("qualification_sha256"))) is None:
+    fail("empreinte du binaire H-polytope Phase 7 invalide")
+
+expected_provenance = {
+    "environment_artifact_schema": "morsehgp3d.phase3.qualification.v1",
+    "environment_artifact_sha256": hashlib.sha256(phase3_path.read_bytes()).hexdigest(),
+}
+if value.get("provenance") != expected_provenance:
+    fail("provenance Phase 3 de la qualification H-polytope Phase 7 incohérente")
+phase3_checks = phase3.get("checks")
+if not isinstance(phase3_checks, dict) or any(
+    phase3_checks.get(workflow) != "passed"
+    for workflow in ("cuda_audit_workflow", "cuda_release_workflow")
+):
+    fail("workflows CUDA Phase 3 non certifiés avant qualification H-polytope")
+expected_lifecycle = {
+    "guest_shutdown_guard_verified": True,
+    "stop_responsibility": "external_orchestrator",
+    "worker_mutates_gcp": False,
+}
+if phase3.get("vm_lifecycle") != expected_lifecycle:
+    fail("contrat de cycle de vie Phase 3 inattendu")
+if value.get("vm_lifecycle") != expected_lifecycle:
+    fail("contrat de cycle de vie H-polytope Phase 7 absent")
+
+checks = exact_object(
+    value.get("checks"),
+    {
+        "aot_elf_architectures",
+        "aot_ptx_entry_count",
+        "cuda_audit_workflow",
+        "cuda_release_workflow",
+        "memcheck",
+        "qualification",
+        "racecheck",
+    },
+    "contrôles H-polytope Phase 7",
+)
+for key, expected in {
+    "aot_elf_architectures": ["sm_120"],
+    "aot_ptx_entry_count": 0,
+    "cuda_audit_workflow": "passed",
+    "cuda_release_workflow": "passed",
+    "memcheck": "passed",
+    "racecheck": "passed",
+}.items():
+    if checks.get(key) != expected:
+        fail(f"contrôle H-polytope Phase 7 invalide: {key}")
+
+qualification = exact_object(
+    checks.get("qualification"),
+    {
+        "cell_count",
+        "deterministic",
+        "exact_cpu_recertification",
+        "first_epoch",
+        "proposal_digest_fnv1a",
+        "record_count",
+        "schema",
+        "second_epoch",
+        "strict_reject_count",
+        "survivor_count",
+        "unknown_count",
+    },
+    "résumé analytique H-polytope Phase 7",
+)
+for key, expected in {
+    "cell_count": 4,
+    "deterministic": True,
+    "exact_cpu_recertification": True,
+    "first_epoch": 1,
+    "record_count": 55,
+    "schema": "morsehgp3d.phase7.h_polytope_cuda_qualification.v1",
+    "second_epoch": 2,
+}.items():
+    if qualification.get(key) != expected:
+        fail(f"résumé analytique H-polytope Phase 7 invalide: {key}")
+counts = []
+for key in ("unknown_count", "strict_reject_count", "survivor_count"):
+    count = qualification.get(key)
+    if type(count) is not int or count <= 0:
+        fail(f"compteur analytique H-polytope Phase 7 invalide: {key}")
+    counts.append(count)
+if sum(counts) != 55:
+    fail("partition analytique H-polytope Phase 7 non fermée")
+digest = qualification.get("proposal_digest_fnv1a")
+if type(digest) is not int or not 0 <= digest <= (1 << 64) - 1:
+    fail("digest FNV-1a H-polytope Phase 7 invalide")
+
+log_keys = {
+    "cuobjdump_elf",
+    "cuobjdump_ptx",
+    "cuobjdump_ptx_stderr",
+    "memcheck",
+    "qualification",
+    "racecheck",
+}
+logs = exact_object(value.get("logs"), log_keys, "journaux H-polytope Phase 7")
+log_sha256 = exact_object(
+    value.get("log_sha256"), log_keys, "empreintes des journaux H-polytope Phase 7"
+)
+for key in log_keys:
+    if not isinstance(logs.get(key), str):
+        fail(f"journal H-polytope Phase 7 invalide: {key}")
+    expected_hash = hashlib.sha256(logs[key].encode("utf-8")).hexdigest()
+    if log_sha256.get(key) != expected_hash:
+        fail(f"empreinte du journal H-polytope Phase 7 incohérente: {key}")
+for key in ("cuobjdump_elf", "memcheck", "qualification", "racecheck"):
+    if not logs[key]:
+        fail(f"journal H-polytope Phase 7 vide: {key}")
+sanitizer_failure = re.compile(
+    r"Internal Sanitizer Error|Target application returned an error|"
+    r"process (?:didn't|did not) terminate successfully|"
+    r"No attachable process found|Program hit cudaError|Segmentation fault|"
+    r"Invalid (?:__global__|__shared__|__local__) (?:read|write)|"
+    r"Misaligned address|=========\s+(?:ERROR|FATAL):",
+    re.IGNORECASE,
+)
+memcheck_summary_lines = [
+    line for line in logs["memcheck"].splitlines() if "ERROR SUMMARY:" in line
+]
+memcheck_summaries = [
+    int(count)
+    for count in re.findall(r"ERROR SUMMARY:\s*([0-9]+) errors?", logs["memcheck"])
+]
+if (
+    not memcheck_summaries
+    or len(memcheck_summary_lines) != len(memcheck_summaries)
+    or any(count != 0 for count in memcheck_summaries)
+    or sanitizer_failure.search(logs["memcheck"]) is not None
+):
+    fail("journal memcheck H-polytope Phase 7 contradictoire ou non nul")
+racecheck_summary_lines = [
+    line for line in logs["racecheck"].splitlines()
+    if "RACECHECK SUMMARY:" in line
+]
+racecheck_summaries = [
+    tuple(int(count) for count in match.groups())
+    for match in re.finditer(
+        r"^[ \t]*=+[ \t]*RACECHECK SUMMARY:[ \t]*"
+        r"([0-9]+) hazards? displayed[ \t]*"
+        r"\([ \t]*([0-9]+) errors?,[ \t]*([0-9]+) warnings?[ \t]*\)"
+        r"[ \t]*$",
+        logs["racecheck"],
+        re.MULTILINE,
+    )
+]
+if (
+    not racecheck_summaries
+    or len(racecheck_summary_lines) != len(racecheck_summaries)
+    or any(summary != (0, 0, 0) for summary in racecheck_summaries)
+    or re.search(r"ERROR SUMMARY:\s*[0-9]+ errors?", logs["racecheck"])
+    is not None
+    or re.search(r"Potential [^\n]* hazard|Race reported", logs["racecheck"], re.I)
+    is not None
+    or sanitizer_failure.search(logs["racecheck"]) is not None
+):
+    fail("journal racecheck H-polytope Phase 7 contradictoire ou non nul")
+elf_architectures = re.findall(r"\bsm_[A-Za-z0-9_]+\b", logs["cuobjdump_elf"])
+if not elf_architectures or set(elf_architectures) != {"sm_120"}:
+    fail("journal ELF H-polytope Phase 7 incompatible avec le contrôle sm_120")
+if logs["cuobjdump_ptx"].strip():
+    fail("journal PTX H-polytope Phase 7 non vide malgré le contrôle AOT")
+qualification_lines = logs["qualification"].splitlines()
+if len(qualification_lines) != 1:
+    fail("journal analytique H-polytope Phase 7 ambigu")
+try:
+    logged_qualification = json.loads(qualification_lines[0])
+except json.JSONDecodeError as error:
+    fail(f"journal analytique H-polytope Phase 7 invalide: {error}")
+if logged_qualification != qualification:
+    fail("journal et résumé analytique H-polytope Phase 7 divergent")
+PY
+fi
+
 if certify_target_stopped; then
     stop_status=0
 else
@@ -2542,6 +2879,7 @@ python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
     "${LOCAL_PHASE5_TEMP_RESULT}" "${LOCAL_PHASE5_RESULT}" \
     "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}" "${LOCAL_PHASE5_WORK_PROFILE_RESULT}" \
     "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT}" \
+    "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" "${LOCAL_PHASE7_H_POLYTOPE_RESULT}" \
     "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
     "${GUEST_SHUTDOWN_MINUTES}" "${FINAL_STATUS}" \
     "${FINAL_STOP_VERIFIED_AT_UTC}" "${SESSION_LAST_START_TIMESTAMP}" <<'PY'
@@ -2549,6 +2887,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import stat
 import sys
 
 pairs = [(Path(sys.argv[1]), Path(sys.argv[2]))]
@@ -2568,6 +2907,10 @@ if sys.argv[9] or sys.argv[10]:
     if not sys.argv[9] or not sys.argv[10]:
         raise SystemExit("paire de publication work-profile exact-search Phase 5 incomplète")
     pairs.append((Path(sys.argv[9]), Path(sys.argv[10])))
+if sys.argv[11] or sys.argv[12]:
+    if not sys.argv[11] or not sys.argv[12]:
+        raise SystemExit("paire de publication H-polytope Phase 7 incomplète")
+    pairs.append((Path(sys.argv[11]), Path(sys.argv[12])))
 
 documents = []
 for temporary, _ in pairs:
@@ -2577,18 +2920,18 @@ for temporary, _ in pairs:
     lifecycle["worker_status_before_targeted_stop"] = value["status"]
     lifecycle.update(
         {
-            "final_status": sys.argv[15],
+            "final_status": sys.argv[17],
             "final_status_readback": "gcloud_compute_instances_describe",
-            "final_status_verified_at_utc": sys.argv[16],
-            "guest_shutdown_minutes": int(sys.argv[14]),
+            "final_status_verified_at_utc": sys.argv[18],
+            "guest_shutdown_minutes": int(sys.argv[16]),
             "initial_status": "TERMINATED",
             "initial_status_basis": "start_and_verify_precondition",
-            "instance": sys.argv[13],
-            "last_start_timestamp": sys.argv[17],
-            "project": sys.argv[11],
+            "instance": sys.argv[15],
+            "last_start_timestamp": sys.argv[19],
+            "project": sys.argv[13],
             "start_handoff_schema": "e-hgp.start-handoff.v3",
             "targeted_stop_verified": True,
-            "zone": sys.argv[12],
+            "zone": sys.argv[14],
         }
     )
     value["status"] = "passed"
@@ -2627,7 +2970,7 @@ published = []
 try:
     for temporary, target in pairs:
         os.link(temporary, target, follow_symlinks=False)
-        published.append(str(target))
+        published.append((temporary, target))
     for parent in {target.parent for _, target in pairs}:
         descriptor = os.open(parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
         try:
@@ -2635,10 +2978,28 @@ try:
         finally:
             os.close(descriptor)
 except OSError as error:
-    published_label = ",".join(published) if published else "aucun"
+    rollback_failures = []
+    for temporary, target in reversed(published):
+        try:
+            source_stat = os.stat(temporary, follow_symlinks=False)
+            target_stat = os.stat(target, follow_symlinks=False)
+            if (
+                not stat.S_ISREG(source_stat.st_mode)
+                or not stat.S_ISREG(target_stat.st_mode)
+                or (source_stat.st_dev, source_stat.st_ino)
+                != (target_stat.st_dev, target_stat.st_ino)
+            ):
+                rollback_failures.append(f"{target}:identity-changed")
+                continue
+            os.unlink(target)
+        except OSError as rollback_error:
+            rollback_failures.append(f"{target}:{rollback_error}")
+    published_label = ",".join(str(target) for _, target in published) or "aucun"
+    rollback_label = ",".join(rollback_failures) or "complet"
     raise SystemExit(
         "refus de remplacer un artefact créé concurremment "
-        f"ou publication partielle : {error}; publiés={published_label}"
+        f"ou publication partielle : {error}; publiés={published_label}; "
+        f"rollback={rollback_label}"
     )
 PY
 rm -f -- "${LOCAL_TEMP_RESULT}"
@@ -2654,11 +3015,15 @@ fi
 if [[ -n "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}"
 fi
+if [[ -n "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" ]]; then
+    rm -f -- "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}"
+fi
 LOCAL_TEMP_RESULT=""
 LOCAL_PHASE4_TEMP_RESULT=""
 LOCAL_PHASE5_TEMP_RESULT=""
 LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT=""
 LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT=""
+LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT=""
 rm -f -- "${START_HANDOFF}"
 START_HANDOFF=""
 printf '[ARTEFACT] Résultat Phase 3 publié après certification TERMINATED : %s\n' "${LOCAL_RESULT}"
@@ -2677,6 +3042,10 @@ fi
 if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
     printf '[ARTEFACT] Work-profile exact-search Phase 5 publié après certification TERMINATED : %s\n' \
         "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT}"
+fi
+if ((PHASE7_H_POLYTOPE == 1)); then
+    printf '[ARTEFACT] Qualification H-polytope Phase 7 publiée après certification TERMINATED : %s\n' \
+        "${LOCAL_PHASE7_H_POLYTOPE_RESULT}"
 fi
 
 if ! revoke_and_remove_session_ssh_key; then
@@ -2702,4 +3071,8 @@ fi
 if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1)); then
     printf '[SUCCÈS] Work-profile exact-search Phase 5 compagnon conservé : %s\n' \
         "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT}"
+fi
+if ((PHASE7_H_POLYTOPE == 1)); then
+    printf '[SUCCÈS] Qualification H-polytope Phase 7 compagnon conservée : %s\n' \
+        "${LOCAL_PHASE7_H_POLYTOPE_RESULT}"
 fi
