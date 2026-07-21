@@ -255,6 +255,14 @@ Les constantes omises sont testées séparément : `owner_dominates` et `coincid
 
 Les deux préflights échouent chacun juste sous leur besoin : budget 7.4 insuffisant, puis budget de reconstruction complète insuffisant. Dans les deux cas les compteurs de construction et de scan valent zéro, `initial_closure`, `repaired_cell` et la cellule finale sont absents. Les exigences atteignent exactement les caps conservatifs 506 triplets et sommets cumulés et 6358 incidences cumulées pour $f=7,c=6$. À l'inverse, $J=K$ accepte un budget de seconde construction nul. Les cinq décisions sérialisables et l'enum invalide complètent les tests propres à 7.5; les IDs et boîtes invalides restent verrouillés sur le préflight partagé par les tests 7.4. Aucun test 7.5 ne compile CUDA ou ne promeut un statut public.
 
+### 5.11 Noyau H-polytope générique du jalon 7.6
+
+La boîte seule doit produire exactement huit sommets, 20 triplets, 24 incidences et la dimension affine trois. Une coupe propre oblique ou axiale vérifie l'orientation $h\leq0$, puis deux identifiants distincts portant le même plan doivent rester deux frontières et deux incidences sémantiques sur chaque sommet actif. Des paires de demi-espaces opposés ferment successivement des polytopes de dimensions deux, un et zéro. Deux contraintes propres incompatibles et une constante positive donnent séparément une décision vide; les constantes négative et identiquement nulle restent classifiées sans plan.
+
+La permutation de l'ordre d'insertion, y compris entre contraintes de rôles parent et clip, doit conserver le résultat canonique lorsque les mêmes tuples d'entrée sont fournis. Les tests rejettent un identifiant composite dupliqué, les enums domaine et rôle invalides, une boîte plate ou non canonique même sous budget insuffisant, plus tout budget supérieur aux caps. Chaque capacité — entrées, frontières, triplets, évaluations de faisabilité, sommets et incidences — passe à son exigence exacte et échoue juste en dessous sans payload géométrique.
+
+Le préflight maximal construit 55 contraintes simples avec IDs uniques et vérifie les exigences $B=61$, 35990 triplets, 2195390 tests de faisabilité, 35990 sommets conservatifs et 2195390 incidences sans lancer cette géométrie. Les tests de non-régression 7.1–7.5 repassent ensuite par l'adaptateur puissance et doivent rester structurellement identiques. GCC et Clang stricts suffisent à ce jalon; aucun benchmark long, faux lanceur, NVCC, G4 ou statut public n'en découle.
+
 ## 6. Tests de Gamma, du catalogue Gabriel et de la réduction
 
 ### 6.1 Gamma exact et événements Gabriel partiels

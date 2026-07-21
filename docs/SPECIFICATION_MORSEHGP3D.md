@@ -542,6 +542,16 @@ Une décision `incomplete` de 13.2 produit $J'=J\cup A$, où $A$ contient simult
 
 Pour $f=\lvert K_i\rvert\leq7$ et $c=\lvert J\rvert$, une branche réparée vérifie $c\leq6$, au plus 506 triplets et sommets conservatifs cumulés, au plus 6358 incidences conservatives cumulées et au plus 360 évaluations omises. La cellule finale est celle de l'amorce si elle était déjà complète ou vide, sinon la cellule reconstruite. Les identifiants de $J'$ peuvent contenir des contraintes devenues redondantes; ils ferment les incidences propres actives, mais ne publient ni facettes exactes seules, ni adjacency intercellulaire.
 
+### 13.4 Noyau exact H-représenté
+
+Pour un ensemble fini $A$ de contraintes affines orientées, le noyau générique décide $P(A)=\Omega\cap\bigcap_{a\in A}\left\lbrace y:h_a(y)\leq0\right\rbrace$. La boîte dyadique $\Omega$ est explicite, non vide et compacte. Une contrainte possède un domaine d'identité parmi `generic_affine`, `power_owner_competitor`, `canonical_parent_cross_pair` et `restricted_piece_pair`, deux mots opaques ordonnables, puis un rôle `parent_constraint` ou `new_clip`. L'identité est sémantique et indépendante de la géométrie : deux IDs peuvent porter le même plan, tandis qu'un ID dupliqué est invalide.
+
+Une forme propre fournit un plan orienté. Une constante strictement négative est partout satisfaite, une constante strictement positive rend $P(A)$ vide et une forme identiquement nulle est globalement active sans définir de frontière géométrique. Les six plans de boîte sont toujours distingués des contraintes d'entrée et marqués par leur kind artificiel. Les contraintes et frontières propres sont canonisées par identité, jamais par coefficient flottant.
+
+Si aucune constante positive n'intervient, chaque sommet de $P(A)$ est l'intersection de trois plans actifs à normales indépendantes, y compris lorsque $P(A)$ est de dimension zéro, un ou deux dans $\mathbb{R}^{3}$. Réciproquement, toute intersection unique de trois plans qui satisfait toutes les formes appartient à $P(A)$ et est un sommet. L'énumération exhaustive des triplets, la déduplication rationnelle et le scan zéro de chaque frontière reconstruisent donc exactement les sommets et toutes les incidences propres actives. Le rang exact des différences entre sommets donne la dimension affine. Comme tout polytope compact non vide possède un sommet, l'absence finale de sommet certifie la vacuité.
+
+Sur le domaine de référence $n\leq14$, un morceau $P(I,u)$ complet emploie au plus $m(14-m)+(14-m-1)\leq55$ contraintes sémantiques. Avec les six faces de boîte, le contrat `exact_bounded_h_polytope_n14_restricted_piece_capacity_v1` borne séparément 35990 triplets, 2195390 évaluations de faisabilité, 35990 sommets conservatifs et 2195390 tests d'incidence. Ces bornes ne sont pas des maxima polyédriques serrés. Elles ne certifient que la H-représentation fournie et n'impliquent ni complétude du parent, ni complétude des colonnes, ni `canonical_children_complete`, ni statut public.
+
 ## 14. Axes d'exécution
 
 Le backend, le profil, le mode et le statut sont orthogonaux :

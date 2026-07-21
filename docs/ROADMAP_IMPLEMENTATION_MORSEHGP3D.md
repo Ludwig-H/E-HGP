@@ -624,6 +624,22 @@ Avec $T_k=\binom{6+k}{3}$, une branche réparée vérifie $c\leq6$ et $f\leq7$. 
 
 Ce jalon ferme la composition hôte bornée, pas la Phase 7 : la primitive H-polytope générique, son chemin CUDA, le faux lanceur, NVCC, G4 et la fermeture d'un diagramme global restent à livrer. Aucun `public_status` n'est modifié.
 
+### Jalon 7.6 — oracle H-polytope générique borné
+
+Le backend `reference_cpu` expose `build_exact_bounded_h_polytope_reference` pour une boîte dyadique explicite et une liste arbitraire de formes affines orientées $h_a\leq0$. Chaque contrainte porte un identifiant composite canonique — domaine et deux mots — ainsi que le rôle `parent_constraint` ou `new_clip`. Deux identifiants distincts restent deux incidences sémantiques même s'ils définissent le même plan. Les six faces artificielles de la boîte conservent des kinds séparés. Les constantes négatives, positives et identiquement nulles deviennent respectivement `redundant_strict`, `infeasible` et `identically_active`; seules les formes propres créent un plan frontière.
+
+Après validation des caps, de la boîte, des enums et de l'unicité des identifiants, le cœur trie les contraintes, énumère tous les triplets de plans propres, teste exactement leur faisabilité, déduplique les sommets rationnels, reconstruit toutes les incidences et calcule la dimension affine de zéro à trois. Le budget distingue triplets, évaluations de faisabilité, sommets uniques et tests d'incidence finale. Une insuffisance ne publie aucune contrainte classifiée, frontière ou géométrie. `power_cell_reference` devient un adaptateur de ce cœur sans changer ses API, budgets, audits ni résultats 7.1–7.5.
+
+Le cap hôte couvre un morceau restreint complet sur le domaine oracle $n\leq14$. Pour un parent d'intérieur $I$, le parent fournit au plus $m(14-m)$ contraintes croisées et le diagramme restreint ajoute au plus $14-m-1$ clips, donc $(m+1)(14-m)-1\leq55$ contraintes sémantiques. Avec la boîte, $B\leq61$, d'où $\binom{61}{3}=35990$ triplets et sommets conservatifs, puis $61\times35990=2195390$ tests conservatifs de faisabilité ou d'incidence. Ces plafonds volontairement non serrés dimensionnent un falsificateur; ils ne deviennent jamais un plafond silencieux du produit.
+
+Le certificat porte seulement sur l'intersection de la H-représentation fournie. Il ne prouve ni que le parent est complet, ni `canonical_children_complete`, ni `RelevantGP`, ni un diagramme global. La Phase 7 reste `ready` et la Phase 8 reste bloquée.
+
+### Trajectoire saine 7.7–7.8
+
+Le jalon 7.7 figera une surface batchée de propositions, ses offsets, identifiants, rôles, capacités et statuts d'échec, puis la soumettra à un faux lanceur capable d'injecter triplet manquant, incidence forgée, non-fini, overflow et faute asynchrone. Aucune TU CUDA ne sera ouverte avant que toute corruption échoue fermée et qu'une cellule fautive n'émette aucun payload exploitable.
+
+Le jalon 7.8 implémentera ensuite la proposition CUDA interne avec stream et allocations possédés, compteurs exhaustifs, filtres à intervalles dirigés et fallback exact. Une qualification G4 courte couvrira les cas analytiques, permutations, overflow forcé, `memcheck` et `racecheck`; fast math restera diagnostique s'il invalide les enveloppes. La Phase 7 ne pourra devenir `completed`, ni la Phase 8 devenir `ready`, avant cette qualification.
+
 ### But
 
 Choisir la primitive GPU sans lui déléguer la certification.

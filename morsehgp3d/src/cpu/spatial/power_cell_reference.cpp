@@ -1,6 +1,7 @@
 #include "morsehgp3d/spatial/power_cell_reference.hpp"
 
 #include "morsehgp3d/exact/binary64.hpp"
+#include "morsehgp3d/spatial/h_polytope_reference.hpp"
 
 #include <algorithm>
 #include <array>
@@ -10,7 +11,6 @@
 #include <optional>
 #include <span>
 #include <stdexcept>
-#include <string>
 #include <utility>
 #include <vector>
 
@@ -19,11 +19,8 @@ namespace {
 
 using exact::AffineFormKind;
 using exact::ExactAffineForm3;
-using exact::ExactPlane3;
 using exact::ExactRational;
 using exact::ExactRational3;
-using exact::ThreePlaneIntersection;
-using exact::ThreePlaneIntersectionKind;
 
 [[nodiscard]] std::size_t plane_triple_count(std::size_t plane_count) {
   if (plane_count < 3U) {
@@ -80,59 +77,6 @@ struct ValidatedClippingBox {
     }
   }
   return result;
-}
-
-[[nodiscard]] ExactAffineForm3 axis_form(
-    std::size_t axis,
-    const ExactRational& coefficient,
-    const ExactRational& offset) {
-  std::array<ExactRational, 4> coefficients{};
-  coefficients[axis] = coefficient;
-  coefficients[3U] = offset;
-  return ExactAffineForm3::from_rational_coefficients(
-      std::move(coefficients));
-}
-
-[[nodiscard]] ExactPowerCellBoundaryPlane boundary_plane(
-    PowerCellBoundaryKind kind,
-    std::optional<PointId> competitor_id,
-    ExactAffineForm3 form) {
-  return ExactPowerCellBoundaryPlane{
-      kind,
-      competitor_id,
-      form,
-      ExactPlane3::from_affine_form(form)};
-}
-
-[[nodiscard]] std::string point_key(const ExactRational3& point) {
-  return point.coordinate(0U).canonical_key() + ":" +
-         point.coordinate(1U).canonical_key() + ":" +
-         point.coordinate(2U).canonical_key();
-}
-
-[[nodiscard]] bool point_less(
-    const ExactRational3& left,
-    const ExactRational3& right) {
-  for (std::size_t axis = 0U; axis < 3U; ++axis) {
-    if (left.coordinate(axis) < right.coordinate(axis)) {
-      return true;
-    }
-    if (left.coordinate(axis) > right.coordinate(axis)) {
-      return false;
-    }
-  }
-  return false;
-}
-
-[[nodiscard]] bool is_feasible(
-    const ExactRational3& point,
-    std::span<const ExactPowerCellBoundaryPlane> boundaries) {
-  return std::all_of(
-      boundaries.begin(),
-      boundaries.end(),
-      [&point](const ExactPowerCellBoundaryPlane& boundary) {
-        return boundary.owner_halfspace_form.evaluate(point).sign() <= 0;
-      });
 }
 
 [[nodiscard]] ExactPowerCellReferenceRequirements requirements_for(
@@ -541,8 +485,7 @@ ExactPowerCellReferenceResult build_exact_bounded_power_cell_reference(
         "the bounded Phase 7 reference oracle accepts at most eight sites");
   }
 
-  const ValidatedClippingBox validated_box =
-      validate_clipping_box(clipping_box);
+  static_cast<void>(validate_clipping_box(clipping_box));
 
   std::vector<const Binary64WeightedSite3*> ordered_competitors;
   ordered_competitors.reserve(competitors.size());
@@ -574,119 +517,154 @@ ExactPowerCellReferenceResult build_exact_bounded_power_cell_reference(
     return result;
   }
 
-  result.pairwise_constraints.reserve(competitors.size());
-  result.boundary_planes.reserve(competitors.size() + 6U);
-  const std::array<PowerCellBoundaryKind, 3> lower_kinds{
-      PowerCellBoundaryKind::box_lower_x,
-      PowerCellBoundaryKind::box_lower_y,
-      PowerCellBoundaryKind::box_lower_z};
-  const std::array<PowerCellBoundaryKind, 3> upper_kinds{
-      PowerCellBoundaryKind::box_upper_x,
-      PowerCellBoundaryKind::box_upper_y,
-      PowerCellBoundaryKind::box_upper_z};
-  for (std::size_t axis = 0U; axis < 3U; ++axis) {
-    result.boundary_planes.push_back(boundary_plane(
-        lower_kinds[axis],
-        std::nullopt,
-        axis_form(
-            axis,
-            ExactRational{exact::BigInt{-1}},
-            validated_box.lower[axis])));
-    result.boundary_planes.push_back(boundary_plane(
-        upper_kinds[axis],
-        std::nullopt,
-        axis_form(
-            axis,
-            ExactRational{exact::BigInt{1}},
-            -validated_box.upper[axis])));
+  std::vector<ExactHPolytopeHalfspace3> halfspaces;
+  halfspaces.reserve(competitors.size());
+  for (const Binary64WeightedSite3* competitor : ordered_competitors) {
+    halfspaces.push_back(ExactHPolytopeHalfspace3{
+        HPolytopeConstraintId{
+            HPolytopeConstraintDomain::power_owner_competitor,
+            owner.point_id(),
+            competitor->point_id()},
+        ExactHPolytopeHalfspaceRole::parent_constraint,
+        exact_power_difference_affine_form(owner, *competitor)});
   }
 
-  bool cell_is_empty = false;
-  for (const Binary64WeightedSite3* competitor : ordered_competitors) {
-    ExactPowerBisectorConstraint constraint =
-        make_exact_power_bisector_constraint(owner, *competitor);
-    switch (constraint.kind) {
-      case PowerBisectorConstraintKind::proper_halfspace:
+  const ExactBoundedHPolytopeReferenceResult core =
+      build_exact_bounded_h_polytope_reference(
+          halfspaces, clipping_box);
+  if (core.decision ==
+      ExactBoundedHPolytopeReferenceDecision::insufficient_budget) {
+    throw std::logic_error(
+        "a covered Phase 7 power-cell preflight produced an insufficient "
+        "H-polytope result");
+  }
+
+  result.pairwise_constraints.reserve(core.classified_halfspaces.size());
+  for (const ExactClassifiedHPolytopeHalfspace3& classified :
+       core.classified_halfspaces) {
+    if (classified.constraint_id.domain !=
+            HPolytopeConstraintDomain::power_owner_competitor ||
+        classified.constraint_id.first != owner.point_id() ||
+        classified.role != ExactHPolytopeHalfspaceRole::parent_constraint ||
+        classified.constraint_id.second >
+            CanonicalPointCloud::max_point_id) {
+      throw std::logic_error(
+          "the H-polytope core changed a power-cell constraint identity");
+    }
+    PowerBisectorConstraintKind kind;
+    switch (classified.kind) {
+      case ExactHPolytopeHalfspaceKind::proper_halfspace:
+        kind = PowerBisectorConstraintKind::proper_halfspace;
         ++result.audit.proper_bisector_count;
-        result.boundary_planes.push_back(boundary_plane(
-            PowerCellBoundaryKind::power_bisector,
-            competitor->point_id(),
-            constraint.owner_minus_competitor));
         break;
-      case PowerBisectorConstraintKind::owner_dominates:
+      case ExactHPolytopeHalfspaceKind::redundant_strict:
+        kind = PowerBisectorConstraintKind::owner_dominates;
         ++result.audit.redundant_constraint_count;
         break;
-      case PowerBisectorConstraintKind::coincident_tie:
+      case ExactHPolytopeHalfspaceKind::infeasible:
+        kind = PowerBisectorConstraintKind::competitor_dominates;
+        ++result.audit.infeasible_constraint_count;
+        break;
+      case ExactHPolytopeHalfspaceKind::identically_active:
+        kind = PowerBisectorConstraintKind::coincident_tie;
         ++result.audit.redundant_constraint_count;
         result.audit.has_coincident_tie = true;
         break;
-      case PowerBisectorConstraintKind::competitor_dominates:
-        ++result.audit.infeasible_constraint_count;
-        cell_is_empty = true;
+      default:
+        throw std::logic_error(
+            "the H-polytope core produced an invalid halfspace kind");
+    }
+    result.pairwise_constraints.push_back(ExactPowerBisectorConstraint{
+        owner.point_id(),
+        static_cast<PointId>(classified.constraint_id.second),
+        kind,
+        classified.retained_nonpositive_form,
+        classified.plane});
+  }
+
+  result.boundary_planes.reserve(core.boundary_planes.size());
+  for (const ExactHPolytopeBoundaryPlane& boundary :
+       core.boundary_planes) {
+    PowerCellBoundaryKind kind;
+    std::optional<PointId> competitor_id;
+    switch (boundary.kind) {
+      case ExactHPolytopeBoundaryKind::box_lower_x:
+        kind = PowerCellBoundaryKind::box_lower_x;
         break;
-    }
-    result.pairwise_constraints.push_back(std::move(constraint));
-  }
-
-  if (cell_is_empty) {
-    result.decision = ExactPowerCellReferenceDecision::complete_empty;
-    validate_completed_result(result);
-    return result;
-  }
-
-  std::map<std::string, ExactRational3> feasible_points;
-  const std::size_t boundary_count = result.boundary_planes.size();
-  for (std::size_t first_index = 0U; first_index < boundary_count;
-       ++first_index) {
-    for (std::size_t second_index = first_index + 1U;
-         second_index < boundary_count;
-         ++second_index) {
-      for (std::size_t third_index = second_index + 1U;
-           third_index < boundary_count;
-           ++third_index) {
-        ++result.audit.enumerated_plane_triple_count;
-        const ThreePlaneIntersection intersection = exact::intersect_three_planes(
-            result.boundary_planes[first_index].plane,
-            result.boundary_planes[second_index].plane,
-            result.boundary_planes[third_index].plane);
-        if (intersection.kind() != ThreePlaneIntersectionKind::unique ||
-            !is_feasible(*intersection.point(), result.boundary_planes)) {
-          continue;
+      case ExactHPolytopeBoundaryKind::box_upper_x:
+        kind = PowerCellBoundaryKind::box_upper_x;
+        break;
+      case ExactHPolytopeBoundaryKind::box_lower_y:
+        kind = PowerCellBoundaryKind::box_lower_y;
+        break;
+      case ExactHPolytopeBoundaryKind::box_upper_y:
+        kind = PowerCellBoundaryKind::box_upper_y;
+        break;
+      case ExactHPolytopeBoundaryKind::box_lower_z:
+        kind = PowerCellBoundaryKind::box_lower_z;
+        break;
+      case ExactHPolytopeBoundaryKind::box_upper_z:
+        kind = PowerCellBoundaryKind::box_upper_z;
+        break;
+      case ExactHPolytopeBoundaryKind::input_halfspace:
+        kind = PowerCellBoundaryKind::power_bisector;
+        if (!boundary.constraint_id.has_value() ||
+            boundary.constraint_id->domain !=
+                HPolytopeConstraintDomain::power_owner_competitor ||
+            boundary.constraint_id->first != owner.point_id() ||
+            boundary.constraint_id->second >
+                CanonicalPointCloud::max_point_id) {
+          throw std::logic_error(
+              "the H-polytope core changed a power-cell boundary identity");
         }
-        feasible_points.emplace(
-            point_key(*intersection.point()), *intersection.point());
-      }
+        competitor_id =
+            static_cast<PointId>(boundary.constraint_id->second);
+        break;
+      default:
+        throw std::logic_error(
+            "the H-polytope core produced an invalid boundary kind");
     }
+    if (boundary.kind != ExactHPolytopeBoundaryKind::input_halfspace &&
+        boundary.constraint_id.has_value()) {
+      throw std::logic_error(
+          "the H-polytope core attached an id to a box boundary");
+    }
+    result.boundary_planes.push_back(ExactPowerCellBoundaryPlane{
+        kind,
+        competitor_id,
+        boundary.retained_nonpositive_form,
+        boundary.plane});
   }
 
-  result.vertices.reserve(feasible_points.size());
-  for (auto& [key, point] : feasible_points) {
-    static_cast<void>(key);
-    result.vertices.push_back(ExactPowerCellVertex{std::move(point), {}});
-  }
-  std::sort(
-      result.vertices.begin(),
-      result.vertices.end(),
-      [](const ExactPowerCellVertex& left, const ExactPowerCellVertex& right) {
-        return point_less(left.position, right.position);
-      });
-  for (ExactPowerCellVertex& vertex : result.vertices) {
-    vertex.active_boundary_plane_indices.reserve(boundary_count);
-    for (std::size_t boundary_index = 0U; boundary_index < boundary_count;
-         ++boundary_index) {
-      if (result.boundary_planes[boundary_index]
-              .owner_halfspace_form.evaluate(vertex.position)
-              .is_zero()) {
-        vertex.active_boundary_plane_indices.push_back(boundary_index);
+  result.vertices.reserve(core.vertices.size());
+  for (const ExactHPolytopeVertex& vertex : core.vertices) {
+    for (const std::size_t boundary_index :
+         vertex.active_boundary_plane_indices) {
+      if (boundary_index >= core.boundary_planes.size()) {
+        throw std::logic_error(
+            "the H-polytope core produced an invalid power-cell incidence");
       }
     }
-    result.audit.active_incidence_count +=
-        vertex.active_boundary_plane_indices.size();
+    result.vertices.push_back(ExactPowerCellVertex{
+        vertex.position, vertex.active_boundary_plane_indices});
   }
-  result.audit.unique_feasible_vertex_count = result.vertices.size();
-  result.decision = result.vertices.empty()
-                        ? ExactPowerCellReferenceDecision::complete_empty
-                        : ExactPowerCellReferenceDecision::complete_nonempty;
+
+  result.audit.enumerated_plane_triple_count =
+      core.audit.enumerated_plane_triple_count;
+  result.audit.unique_feasible_vertex_count =
+      core.audit.unique_feasible_vertex_count;
+  result.audit.active_incidence_count = core.audit.active_incidence_count;
+  switch (core.decision) {
+    case ExactBoundedHPolytopeReferenceDecision::complete_nonempty:
+      result.decision = ExactPowerCellReferenceDecision::complete_nonempty;
+      break;
+    case ExactBoundedHPolytopeReferenceDecision::complete_empty:
+      result.decision = ExactPowerCellReferenceDecision::complete_empty;
+      break;
+    case ExactBoundedHPolytopeReferenceDecision::insufficient_budget:
+      throw std::logic_error(
+          "an insufficient H-polytope result escaped the power-cell check");
+  }
   validate_completed_result(result);
   return result;
 }

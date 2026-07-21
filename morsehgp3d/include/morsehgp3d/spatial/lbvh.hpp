@@ -1,5 +1,6 @@
 #pragma once
 
+#include "morsehgp3d/spatial/aabb.hpp"
 #include "morsehgp3d/spatial/query.hpp"
 
 #include <array>
@@ -39,18 +40,6 @@ struct MortonLeafRecord {
   PointId point_id;
 
   friend bool operator==(const MortonLeafRecord&, const MortonLeafRecord&) = default;
-};
-
-// Bounds are selected input dyadics, not rounded arithmetic results.  Their
-// closed intervals therefore enclose every descendant exactly, with zero
-// inward error even at the finite binary64 extrema.
-struct ExactDyadicAabb3 {
-  std::array<std::uint64_t, 3> lower_binary64_bits;
-  std::array<std::uint64_t, 3> upper_binary64_bits;
-
-  friend bool operator==(
-      const ExactDyadicAabb3&,
-      const ExactDyadicAabb3&) = default;
 };
 
 struct MortonLbvhBuildCounters {

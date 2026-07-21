@@ -262,6 +262,7 @@ add_library(
   STATIC
     src/cpu/spatial/point_cloud.cpp
     src/cpu/spatial/brute_force.cpp
+    src/cpu/spatial/h_polytope_reference.cpp
     src/cpu/spatial/lbvh.cpp
     src/cpu/spatial/power_cell_reference.cpp
 )

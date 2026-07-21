@@ -2,7 +2,7 @@
 
 #include "morsehgp3d/exact/plane.hpp"
 #include "morsehgp3d/exact/point.hpp"
-#include "morsehgp3d/spatial/lbvh.hpp"
+#include "morsehgp3d/spatial/aabb.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
 
 #include <array>

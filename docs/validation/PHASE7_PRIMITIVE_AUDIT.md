@@ -88,6 +88,16 @@ Le résultat expose séparément la fermeture initiale et la cellule reconstruit
 
 Les tests hôte ciblés comparent la cellule finale au build exact utilisant toute la table, couvrent les sorties vide et non vide, les constantes et ties, les budgets atomiques, les caps cumulés et l'absence de seconde construction lorsque $J=K$. Cette composition reste locale et bornée; la primitive H-polytope générique, le chemin CUDA, NVCC, G4 et tout statut public restent ouverts.
 
+## Jalon 7.6 — cœur H-polytope indépendant des sites
+
+Le code de référence possède désormais un cœur qui reçoit directement une H-représentation $h_a\leq0$ et une boîte dyadique compacte. L'identité composite sépare quatre domaines — affine générique, puissance propriétaire--concurrent, paire croisée de parent et paire de morceau restreint — et deux rôles — contrainte du parent ou nouveau clip. Elle est triée indépendamment des coefficients. Les contraintes géométriquement confondues conservent donc leurs provenances et toutes leurs incidences, tandis qu'un ID dupliqué échoue avant géométrie.
+
+Le choix de capacité a été corrigé après audit. Un parent canonique seul demanderait au plus 49 contraintes croisées pour $n\leq14$, mais un morceau $P(I,u)$ ajoute jusqu'à $14-m-1$ colonnes au parent de taille $m(14-m)$. Le maximum $(m+1)(14-m)-1$ vaut 55, soit 61 frontières avec la boîte. L'oracle préflighte donc séparément 35990 triplets, 2195390 évaluations de faisabilité, 35990 sommets conservatifs et 2195390 incidences conservatives. La fixture de cap s'arrête au préflight afin de ne pas transformer ce contrôle en benchmark long.
+
+L'algorithme classe d'abord les formes à normale nulle, puis énumère chaque triplet propre, teste toutes les inégalités rationnelles, déduplique les points, reconstruit toutes les incidences et calcule la dimension affine. Les sorties insuffisantes restent sans payload. L'AABB exacte a été déplacée dans un header spatial indépendant du LBVH, et l'oracle de puissance délègue sa géométrie à ce cœur en conservant son contrat historique.
+
+Cette extraction résout la limite site-centrique qui condamnait Paragram, mais ne ferme toujours pas la Phase 7. Le cœur certifie seulement les contraintes reçues; il ne certifie ni leur complétude, ni un parent Morse, ni `canonical_children_complete`. Le faux lanceur batché, la proposition CUDA interne et la qualification G4 courte restent les jalons 7.7 et 7.8.
+
 ## Convention analytique des poids
 
 Pour le site $p_i$ de poids $w_i$, la puissance utilisée par l'audit est
