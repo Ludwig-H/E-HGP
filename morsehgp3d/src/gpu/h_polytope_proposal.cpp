@@ -196,7 +196,7 @@ void hash_word(std::uint64_t& digest, std::uint64_t word) noexcept {
 }
 
 [[nodiscard]] bool all_zero(
-    const std::array<std::uint64_t, 3>& words) noexcept {
+    const std::uint64_t (&words)[3]) noexcept {
   return words[0U] == 0U && words[1U] == 0U && words[2U] == 0U;
 }
 

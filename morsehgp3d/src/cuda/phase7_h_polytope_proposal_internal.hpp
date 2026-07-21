@@ -1,6 +1,5 @@
 #pragma once
 
-#include <array>
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
@@ -47,12 +46,24 @@ struct HPolytopeProposalInputCell {
   std::uint64_t force_interval_fallback{0U};
 };
 static_assert(std::is_trivially_copyable_v<HPolytopeProposalInputCell>);
+static_assert(std::is_standard_layout_v<HPolytopeProposalInputCell>);
+static_assert(
+    sizeof(HPolytopeProposalInputCell) == 5U * sizeof(std::uint64_t));
 
 struct HPolytopeProposalInputBoundary {
-  std::array<std::uint64_t, 4> coefficient_lower_bits{};
-  std::array<std::uint64_t, 4> coefficient_upper_bits{};
+  // Keep CUDA transfer storage as language-level arrays: nvcc 12.9 must be
+  // able to index these words in device code without invoking a host-only
+  // standard-library accessor.
+  std::uint64_t coefficient_lower_bits[4]{};
+  std::uint64_t coefficient_upper_bits[4]{};
 };
 static_assert(std::is_trivially_copyable_v<HPolytopeProposalInputBoundary>);
+static_assert(std::is_standard_layout_v<HPolytopeProposalInputBoundary>);
+static_assert(
+    sizeof(HPolytopeProposalInputBoundary) == 8U * sizeof(std::uint64_t));
+static_assert(
+    offsetof(HPolytopeProposalInputBoundary, coefficient_upper_bits) ==
+    4U * sizeof(std::uint64_t));
 
 struct HPolytopeProposalDeviceRecord {
   // A default-initialized record is the required all-zero tail sentinel.
@@ -65,10 +76,19 @@ struct HPolytopeProposalDeviceRecord {
   std::uint64_t status_code{0U};
   std::uint64_t strict_reject_boundary_witness{0U};
   std::uint64_t could_be_active_boundary_mask{0U};
-  std::array<std::uint64_t, 3> coordinate_lower_bits{};
-  std::array<std::uint64_t, 3> coordinate_upper_bits{};
+  std::uint64_t coordinate_lower_bits[3]{};
+  std::uint64_t coordinate_upper_bits[3]{};
 };
 static_assert(std::is_trivially_copyable_v<HPolytopeProposalDeviceRecord>);
+static_assert(std::is_standard_layout_v<HPolytopeProposalDeviceRecord>);
+static_assert(
+    sizeof(HPolytopeProposalDeviceRecord) == 15U * sizeof(std::uint64_t));
+static_assert(
+    offsetof(HPolytopeProposalDeviceRecord, coordinate_lower_bits) ==
+    9U * sizeof(std::uint64_t));
+static_assert(
+    offsetof(HPolytopeProposalDeviceRecord, coordinate_upper_bits) ==
+    12U * sizeof(std::uint64_t));
 
 struct HPolytopeProposalDeviceBatch {
   std::vector<std::uint64_t> cell_ids;

@@ -209,33 +209,44 @@ def _validate_pod_record(
     internal: str,
     marker: str,
     scalar_fields: tuple[str, ...],
-    array_fields: tuple[tuple[str, int], ...],
+    raw_array_fields: tuple[tuple[str, int], ...],
 ) -> None:
     block = without_comments(extract_braced_block(internal, marker, marker))
     for field in scalar_fields:
         require(
-            re.search(rf"std::uint64_t\s+{re.escape(field)}\b", block) is not None,
+            re.search(
+                rf"std::uint64_t\s+{re.escape(field)}\b(?!\s*\[)", block
+            )
+            is not None,
             f"{marker} is missing uint64 field {field}",
         )
-    for field, count in array_fields:
+    for field, count in raw_array_fields:
         require(
             re.search(
-                rf"std::array\s*<\s*std::uint64_t\s*,\s*{count}U?\s*>\s*"
-                rf"{re.escape(field)}\b",
+                rf"std::uint64_t\s+{re.escape(field)}\s*"
+                rf"\[\s*{count}U?\s*\]\s*\{{\s*\}}\s*;",
                 block,
             )
             is not None,
-            f"{marker} is missing {count}-word field {field}",
+            f"{marker} is missing raw uint64_t[{count}] field {field}",
         )
     require(
-        len(re.findall(r"std::uint64_t\s+[A-Za-z_]\w*", block))
+        len(
+            re.findall(
+                r"std::uint64_t\s+[A-Za-z_]\w*\b(?!\s*\[)", block
+            )
+        )
         == len(scalar_fields),
         f"{marker} changed its scalar-word ABI",
     )
     require(
-        len(re.findall(r"std::array\s*<\s*std::uint64_t\s*,", block))
-        == len(array_fields),
-        f"{marker} changed its array-word ABI",
+        len(re.findall(r"std::uint64_t\s+[A-Za-z_]\w*\s*\[", block))
+        == len(raw_array_fields),
+        f"{marker} changed its raw-array word ABI",
+    )
+    require(
+        re.search(r"std::array\s*<\s*std::uint64_t\s*,", block) is None,
+        f"{marker} must not use host-only std::array accessors in CUDA POD records",
     )
     for forbidden in (
         "std::vector",
@@ -321,6 +332,38 @@ def validate_internal_contract(internal: str) -> None:
         internal.count("std::is_trivially_copyable_v<HPolytopeProposal") == 3,
         "all three Phase 7 transfer records must remain trivially copyable",
     )
+    require(
+        internal.count("std::is_standard_layout_v<HPolytopeProposal") == 3,
+        "all three Phase 7 transfer records must remain standard-layout",
+    )
+    for record, word_count in (
+        ("HPolytopeProposalInputCell", 5),
+        ("HPolytopeProposalInputBoundary", 8),
+        ("HPolytopeProposalDeviceRecord", 15),
+    ):
+        require(
+            re.search(
+                rf"sizeof\s*\(\s*{record}\s*\)\s*==\s*{word_count}U?\s*\*\s*"
+                r"sizeof\s*\(\s*std::uint64_t\s*\)",
+                internal,
+            )
+            is not None,
+            f"{record} no longer has its exact transfer-word size assertion",
+        )
+    for record, field, word_offset in (
+        ("HPolytopeProposalInputBoundary", "coefficient_upper_bits", 4),
+        ("HPolytopeProposalDeviceRecord", "coordinate_lower_bits", 9),
+        ("HPolytopeProposalDeviceRecord", "coordinate_upper_bits", 12),
+    ):
+        require(
+            re.search(
+                rf"offsetof\s*\(\s*{record}\s*,\s*{field}\s*\)\s*==\s*"
+                rf"{word_offset}U?\s*\*\s*sizeof\s*\(\s*std::uint64_t\s*\)",
+                internal,
+            )
+            is not None,
+            f"{record}.{field} lost its transfer-word offset assertion",
+        )
     state = extract_braced_block(
         internal,
         "class HPolytopeProposalContextState final",
@@ -1136,6 +1179,40 @@ def validate_mutation_sensitivity(
         "std::uint64_t status_code{0U}",
         "std::uint32_t status_code{0U}",
         "device record ABI narrowing",
+    )
+    for field, count in (
+        ("coefficient_lower_bits", 4),
+        ("coefficient_upper_bits", 4),
+        ("coordinate_lower_bits", 3),
+        ("coordinate_upper_bits", 3),
+    ):
+        expect_text_rejected(
+            validate_internal_contract,
+            internal,
+            f"std::uint64_t {field}[{count}]{{}};",
+            f"std::array<std::uint64_t, {count}> {field}{{}};",
+            f"device raw-array field {field} regressed to std::array",
+        )
+    expect_text_rejected(
+        validate_internal_contract,
+        internal,
+        "std::is_standard_layout_v<HPolytopeProposalInputBoundary>",
+        "std::is_standard_layout_v<std::uint64_t>",
+        "device transfer standard-layout assertion removed",
+    )
+    expect_text_rejected(
+        validate_internal_contract,
+        internal,
+        "sizeof(HPolytopeProposalDeviceRecord) == 15U * sizeof(std::uint64_t)",
+        "sizeof(HPolytopeProposalDeviceRecord) == 14U * sizeof(std::uint64_t)",
+        "device record transfer size changed",
+    )
+    expect_text_rejected(
+        validate_internal_contract,
+        internal,
+        "offsetof(HPolytopeProposalDeviceRecord, coordinate_lower_bits) ==",
+        "offsetof(HPolytopeProposalDeviceRecord, coordinate_upper_bits) ==",
+        "device record transfer offset changed",
     )
     expect_text_rejected(
         validate_host,
