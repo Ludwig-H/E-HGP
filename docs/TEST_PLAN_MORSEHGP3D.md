@@ -333,6 +333,18 @@ Les caps exacts du pire chemin après germe sont testés à leur valeur puis un 
 
 Ces tests ferment seulement `bounded_n8_single_ordinary_cell_only`. Ils ne valident pas l'ensemble des cellules, les incidences réciproques, un catalogue, `closed_parent_orders[1]` ou un statut public.
 
+Le jalon 8.3 construit ensuite toutes les cellules pour $1\leq n\leq8$ avec amorces vides canoniques et exige la bijection entre le shell complet de chaque sommet global et ses occurrences propriétaires. La somme des tailles de shells globaux doit donc égaler le nombre total de sommets dans les cellules finales. Les contacts $K_Q$ sont générés seulement lorsque leur liste de sommets $V_Q$ est non vide, puis leur shell carrier est recertifié au barycentre rationnel de $V_Q$.
+
+La matrice géométrique minimale comprend : singleton sans contact; quatre sites collinéaires avec exactement trois faces adjacentes et aucune paire non adjacente; paire avec une face réciproque; triangle avec trois faces et une arête; tétraèdre avec six faces, quatre arêtes et un sommet; carré cocirculaire avec quatre faces, une unique arête de shell quatre, deux diagonales et quatre triples classés `noncanonical_quotient_contact`; cube cosphérique avec douze faces, six arêtes de shell quatre et un unique sommet de shell huit. Le carré interdit les fausses faces diagonales et le cube toute triangulation de la dégénérescence.
+
+Une fixture portée par la boîte emploie $B=2^{52}$ et les sites $(-2,B+1,0)$, $(2,B+1,0)$ et $(-1,B+2,0)$. Leur contact de shell trois est la droite $x=0,y=B$, entièrement contenue dans la face artificielle basse en $y$ puisque $\mathrm{pred64}(B+1)=B$; il doit devenir `box_supported_contact` de masque 4, jamais `natural_edge`. Les extrémités artificielles ordinaires d'une vraie strate dont l'intérieur relatif quitte la boîte ne suffisent pas à la rendre artificielle : le test porte sur le ET commun des masques.
+
+Le pire cas cube contrôle les 21 dimensions du budget à leur valeur, juste en dessous puis juste au-dessus : cellules, constructions, triplets, sommets, incidences, requêtes, distances, shells locaux, tests stricts, nombre de lots, total ajouté, taille maximale d'un lot, occurrences, sommets globaux, shells globaux, contacts, identifiants de requête et de carrier, références de sommets, requêtes et distances de témoins. Une insuffisance laisse cellules, sommets, contacts et audit vides. Le manifeste exact est testé avec deux nuages de même cardinal et de même certificat de boîte mais un point intérieur différent; le reçu insuffisant du premier doit être rejeté sur le second.
+
+Le vérificateur rejette aussi cellule manquante, propriétaire local altéré, manifeste, occurrence ou shell hors plage, indice de sommet hostile, faux kind facial, bit artificiel, claim, audit, boîte et nuage. L'invariance à une permutation d'entrée est testée sur le carré. GCC et Clang stricts suffisent à ce jalon court; aucun benchmark de débit ne remplace le futur différentiel indépendant.
+
+La réussite certifie seulement `bounded_n8_all_ordinary_cells_auditable_contacts_and_reciprocal_natural_strata_only`. Elle ne ferme ni la Phase 8, ni `closed_parent_orders[1]`, ni l'extraction des supports, `RelevantGP`, un catalogue ou un statut public.
+
 ### 6.4 Multiplicité de Morse et nombre de bras
 
 Pour un événement de support frontal $U$ et d'indice $\mu$, l'oracle enregistre la multiplicité de Reani–Bobrowski $\Delta=\binom{\lvert U\rvert-1}{\mu}$. À l'indice un, il construit les $\lvert U\rvert$ bras et vérifie que le lot tue au plus $\lvert U\rvert-1$ classes de $H_0$. Les fixtures obligatoires couvrent :

@@ -716,6 +716,18 @@ Le préflight borné `bounded_n8_single_ordinary_cell_only` réserve le pire che
 
 Ce jalon est local : il ne construit pas toutes les cellules, ne réconcilie pas encore les incidences réciproques entre propriétaires, n'extrait aucun événement et ne ferme ni la Phase 8 ni `closed_parent_orders[1]`. GCP n'est pas utilisé.
 
+### Jalon 8.3 — diagramme ordinaire borné et strates réciproques
+
+Le contrat `morsehgp3d.phase8.exact_bounded_ordinary_diagram_closure.v1` applique transactionnellement 8.2 à chaque propriétaire d'un nuage canonique de un à huit sites, avec amorce vide et germe extérieur déterministe. Un manifeste des mots binary64 canoniques lie aussi les décisions `insufficient_budget` au nuage exact, même lorsque deux nuages partagent la même boîte. Aucun payload de cellule, sommet ou contact n'est publié si un seul plafond global manque.
+
+Les sommets finaux sont fusionnés par position rationnelle. Pour tout sommet global $v$, les occurrences de cellules doivent être en bijection exacte avec son shell co-1-NN complet $N(v)$; cette identité réconcilie tous les propriétaires sans déduire une adjacency d'un plan redondant. Pour chaque sous-ensemble $Q$ d'au moins deux sites, le contact commun est $K_Q=\bigcap_{i\in Q}C_i=\left\lbrace y\in\Omega:Q\subseteq N(y)\right\rbrace$, et ses sommets sont exactement les sommets globaux dont le shell contient $Q$.
+
+Le barycentre rationnel positif de ces sommets appartient à l'intérieur relatif de $K_Q$. Son shell frais $S_Q$ est aussi l'intersection des shells aux sommets. Le contact devient une strate canonique seulement lorsque $Q=S_Q$; sinon il reste `noncanonical_quotient_contact`. Cette règle transforme le carré cocirculaire en une seule arête de shell quatre et le cube cosphérique en un seul sommet de shell huit, sans faces diagonales ni triangulation arbitraire. Une strate canonique non portée par la boîte vérifie $\dim(K_Q)+\dim_{\mathrm{aff}}(S_Q)=3$ : rang un pour une face, deux pour une arête et trois pour un sommet. Le ET des masques artificiels distingue les contacts entièrement portés par $\partial\Omega$, qui restent `box_supported_contact` et ne deviennent jamais événements.
+
+Au plafond $n=8$, le préflight couvre 8 cellules, 56 constructions, 7728 triplets, sommets conservatifs et requêtes locales, 86576 incidences conservatives, 61824 distances et entrées de shell, 48 lots non terminaux, 48 ajouts au total et une taille de lot au plus 6. La projection finale réserve 2288 occurrences, 247 contacts, 565136 références contact–sommet, puis 247 requêtes de barycentre et 1976 distances. Les 21 plafonds sont testés juste en dessous et juste au-dessus de leur confiance.
+
+Les fixtures courtes ferment diagrammes singleton, collinéaire sparse, paire, triangle, tétraèdre, carré cocirculaire et cube cosphérique; elles séparent aussi une arête naturelle d'un shell trois entièrement porté par une face de boîte. GCC et Clang stricts passent. Ce différentiel utilise encore les mêmes primitives rationnelles internes que le producteur : le jalon certifie `bounded_n8` et les incidences réciproques, mais ne ferme ni la Phase 8, ni `closed_parent_orders[1]`, ni un `CatalogCertificate` ou un statut public. GCP n'est pas utilisé.
+
 ### Travaux
 
 - définir $\Omega$ comme une AABB dyadique **strictement paddée** autour de l'AABB exacte de $X$; chaque face doit être strictement extérieure à $\mathrm{conv}(X)$;

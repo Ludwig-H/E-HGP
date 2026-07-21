@@ -266,6 +266,7 @@ add_library(
     src/cpu/spatial/h_polytope_reference.cpp
     src/cpu/spatial/lbvh.cpp
     src/cpu/spatial/ordinary_cell_closure.cpp
+    src/cpu/spatial/ordinary_diagram_closure.cpp
     src/cpu/spatial/power_cell_reference.cpp
 )
 add_library(morsehgp3d::spatial ALIAS morsehgp3d_spatial)
