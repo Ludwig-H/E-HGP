@@ -1,6 +1,7 @@
 #include "morsehgp3d/gpu/spatial_lbvh.hpp"
 
 #include "phase4_spatial_bounds_internal.hpp"
+#include "rational_binary64_enclosure.hpp"
 
 #include "../cpu/spatial/exact_query.hpp"
 #include "morsehgp3d/exact/binary64.hpp"
@@ -37,87 +38,17 @@ namespace {
 using exact::ExactRational;
 using exact::ExactRational3;
 
-constexpr std::uint64_t kPositiveMaximumFiniteBits =
-    UINT64_C(0x7fefffffffffffff);
-constexpr std::uint64_t kPositiveInfinityBits =
-    UINT64_C(0x7ff0000000000000);
-constexpr std::uint64_t kSignBit = UINT64_C(0x8000000000000000);
-constexpr std::uint64_t kExponentMask = UINT64_C(0x7ff0000000000000);
-constexpr std::uint64_t kFractionMask = UINT64_C(0x000fffffffffffff);
 constexpr std::uint64_t kFnvOffsetBasis = UINT64_C(14695981039346656037);
 constexpr std::uint64_t kFnvPrime = UINT64_C(1099511628211);
 constexpr std::size_t kInvalidIndex = std::numeric_limits<std::size_t>::max();
 
-struct DirectedEnclosure {
-  std::uint64_t lower_bits{0U};
-  std::uint64_t upper_bits{0U};
-  DirectedEnclosureStatus status{DirectedEnclosureStatus::exact};
-};
-
-[[nodiscard]] ExactRational positive_binary64_rational(std::uint64_t bits) {
-  if (bits > kPositiveMaximumFiniteBits) {
-    throw std::logic_error(
-        "an LBVH enclosure search produced a non-finite binary64 word");
-  }
-  return ExactRational::from_binary64_bits(bits);
-}
-
-[[nodiscard]] DirectedEnclosure enclose_nonnegative_rational(
-    const ExactRational& value) {
-  if (value.sign() < 0) {
-    throw std::logic_error(
-        "an LBVH nonnegative enclosure received a negative rational");
-  }
-  const ExactRational maximum =
-      positive_binary64_rational(kPositiveMaximumFiniteBits);
-  if (value > maximum) {
-    return DirectedEnclosure{
-        kPositiveMaximumFiniteBits,
-        kPositiveMaximumFiniteBits,
-        DirectedEnclosureStatus::unsupported_range};
-  }
-
-  std::uint64_t lower_bits = 0U;
-  std::uint64_t upper_search_bits = kPositiveMaximumFiniteBits;
-  while (lower_bits < upper_search_bits) {
-    const std::uint64_t midpoint_bits =
-        lower_bits + (upper_search_bits - lower_bits + 1U) / 2U;
-    if (positive_binary64_rational(midpoint_bits) <= value) {
-      lower_bits = midpoint_bits;
-    } else {
-      upper_search_bits = midpoint_bits - 1U;
-    }
-  }
-  if (positive_binary64_rational(lower_bits) == value) {
-    return DirectedEnclosure{
-        lower_bits, lower_bits, DirectedEnclosureStatus::exact};
-  }
-  if (lower_bits == kPositiveMaximumFiniteBits) {
-    throw std::logic_error(
-        "a finite LBVH enclosure has no representable upper endpoint");
-  }
-  return DirectedEnclosure{
-      lower_bits, lower_bits + 1U, DirectedEnclosureStatus::enclosed};
-}
-
-[[nodiscard]] DirectedEnclosure enclose_rational(
-    const ExactRational& value) {
-  if (value.sign() >= 0) {
-    return enclose_nonnegative_rational(value);
-  }
-  const DirectedEnclosure magnitude = enclose_nonnegative_rational(-value);
-  if (magnitude.status == DirectedEnclosureStatus::unsupported_range) {
-    return DirectedEnclosure{
-        kSignBit | kPositiveMaximumFiniteBits,
-        kSignBit | kPositiveMaximumFiniteBits,
-        DirectedEnclosureStatus::unsupported_range};
-  }
-  const std::uint64_t lower_bits =
-      magnitude.upper_bits == 0U ? 0U : kSignBit | magnitude.upper_bits;
-  const std::uint64_t upper_bits =
-      magnitude.lower_bits == 0U ? 0U : kSignBit | magnitude.lower_bits;
-  return DirectedEnclosure{lower_bits, upper_bits, magnitude.status};
-}
+using detail::DirectedEnclosure;
+using detail::enclose_nonnegative_rational;
+using detail::enclose_rational;
+using detail::kExponentMask;
+using detail::kFractionMask;
+using detail::kPositiveInfinityBits;
+using detail::kSignBit;
 
 [[nodiscard]] bool enclosure_supported(
     const std::array<DirectedEnclosure, 3>& query_enclosures,

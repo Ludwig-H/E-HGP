@@ -294,6 +294,50 @@ void test_unsupported_range_falls_back_without_launch_or_poisoning() {
       "a pre-GPU unsupported range does not poison or advance the context");
 }
 
+void test_nondyadic_inputs_receive_adjacent_outward_enclosures() {
+  reset_fake_gpu_spatial_bounds();
+  const std::array<ExactDyadicAabb3, 1> boxes{point_box(0.0)};
+  SpatialBoundsContext context{std::span<const ExactDyadicAabb3>{boxes}};
+  configure_fake_gpu_spatial_bounds(FakeSpatialBoundsProposalConfiguration{
+      FakeSpatialBoundsProposalPermutation::canonical,
+      FakeSpatialBoundsProposalValues::all_unknown,
+      FakeSpatialBoundsProposalCorruption::none});
+
+  const ExactRational3 query{
+      BigInt{1}, BigInt{-1}, BigInt{0}, BigInt{3}};
+  const auto result = context.classify_strict_prune(
+      query, ExactLevel{BigInt{1}, BigInt{3}});
+  check(
+      result.audit.query_lower_bits ==
+              std::array<std::uint64_t, 3>{
+                  UINT64_C(0x3fd5555555555555),
+                  UINT64_C(0xbfd5555555555556),
+                  0U} &&
+          result.audit.query_upper_bits ==
+              std::array<std::uint64_t, 3>{
+                  UINT64_C(0x3fd5555555555556),
+                  UINT64_C(0xbfd5555555555555),
+                  0U},
+      "positive and negative one third receive adjacent outward endpoints");
+  check(
+      result.audit.query_enclosure ==
+              std::array<DirectedEnclosureStatus, 3>{
+                  DirectedEnclosureStatus::enclosed,
+                  DirectedEnclosureStatus::enclosed,
+                  DirectedEnclosureStatus::exact} &&
+          result.audit.cutoff_lower_bits ==
+              UINT64_C(0x3fd5555555555555) &&
+          result.audit.cutoff_upper_bits ==
+              UINT64_C(0x3fd5555555555556) &&
+          result.audit.cutoff_enclosure == DirectedEnclosureStatus::enclosed,
+      "the audit distinguishes nondyadic intervals from exact zero");
+  check(
+      result.decisions == decisions({SpatialBoundsDecision::unknown}) &&
+          result.audit.gpu_launch_count == 1U &&
+          result.audit.unsupported_range_fallback_count == 0U,
+      "supported nondyadic enclosures retain the ordinary proposal path");
+}
+
 void test_post_gpu_corruption_poisons_only_its_context() {
   const std::array<ExactDyadicAabb3, 2> boxes{
       point_box(1.0), point_box(2.0)};
@@ -393,6 +437,7 @@ int main() {
   test_valid_prunes_have_exact_positive_margins();
   test_equality_never_prunes_and_permutation_is_canonicalized();
   test_unsupported_range_falls_back_without_launch_or_poisoning();
+  test_nondyadic_inputs_receive_adjacent_outward_enclosures();
   test_post_gpu_corruption_poisons_only_its_context();
   if (failures != 0) {
     std::cerr << failures << " GPU spatial-bounds context test(s) failed\n";

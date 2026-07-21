@@ -98,6 +98,16 @@ L'algorithme classe d'abord les formes à normale nulle, puis énumère chaque t
 
 Cette extraction résout la limite site-centrique qui condamnait Paragram, mais ne ferme toujours pas la Phase 7. Le cœur certifie seulement les contraintes reçues; il ne certifie ni leur complétude, ni un parent Morse, ni `canonical_children_complete`. Le faux lanceur batché, la proposition CUDA interne et la qualification G4 courte restent les jalons 7.7 et 7.8.
 
+## Jalon 7.7 — faux lanceur avant CUDA
+
+Le protocole batch ne demande pas au GPU de sélectionner les sommets. Après canonisation du CSR exact, chaque cellule projetable réserve directement un slot par ordinal parmi les $\binom{B}{3}$ triplets de ses frontières propres. Ce choix rend une omission observable sans croire un compteur global : les offsets, le triplet du slot, l'epoch et les sentinelles sont tous authentifiés. Une capacité insuffisante ou une projection hors domaine ne tronque jamais la ligne; la cellule entière revient à 7.6 avec une plage GPU vide.
+
+L'audit mathématique a écarté un premier contrat trop fort où le masque flottant aurait dû égaler les incidences. Le masque publié signifie désormais `could_be_active` : les incidences exactes en sont un sous-ensemble obligatoire, mais ses faux positifs sont licites. De même, un déterminant dont l'intervalle contient zéro reste inconnu; il ne devient pas un verdict de singularité. Les seuls records sont inconnu, rejet proposé avec témoin ou survivant proposé avec intervalles de coordonnées.
+
+Le wrapper hôte construit indépendamment chaque polytope avec 7.6, puis rejoue les propositions sur les plans rationnels. Il exige la violation exacte du témoin d'un rejet, la faisabilité et l'inclusion exacte dans les intervalles d'un survivant, et la présence de chaque incidence exacte dans son masque. Une constante positive classifiée exactement force un fallback à ligne vide, puisque cette preuve de vacuité n'est pas un plan GPU. Les injections du faux lanceur couvrent omission de slot ou d'incidence, bit hors domaine, non-fini, faux rejet, mauvais offset, epoch répétée ou doublement avancée, sentinelle et faute asynchrone; ces corruptions empoisonnent le contexte sans sortie. Les fallbacks prudents restent auditables et non empoisonnants.
+
+L'enclosure rationnelle vers binary64 est partagée avec les chemins Phase 4 plutôt que dupliquée une troisième fois. Aucun fichier `.cu` n'est ajouté par 7.7; NVCC, G4, `memcheck`, `racecheck`, le débit et tout statut public restent ouverts. La Phase 7 demeure `ready`.
+
 ## Convention analytique des poids
 
 Pour le site $p_i$ de poids $w_i$, la puissance utilisée par l'audit est

@@ -263,6 +263,14 @@ La permutation de l'ordre d'insertion, y compris entre contraintes de rôles par
 
 Le préflight maximal construit 55 contraintes simples avec IDs uniques et vérifie les exigences $B=61$, 35990 triplets, 2195390 tests de faisabilité, 35990 sommets conservatifs et 2195390 incidences sans lancer cette géométrie. Les tests de non-régression 7.1–7.5 repassent ensuite par l'adaptateur puissance et doivent rester structurellement identiques. GCC et Clang stricts suffisent à ce jalon; aucun benchmark long, faux lanceur, NVCC, G4 ou statut public n'en découle.
 
+### 5.12 Faux lanceur du transcript H-polytope 7.7
+
+Deux cellules fournies dans l'ordre inverse de leurs identifiants et des contraintes fournies dans des ordres différents doivent produire le même CSR canonique et le même digest. Pour chaque ligne réussie à $B$ frontières, le faux lanceur réécrit exactement $\binom{B}{3}$ slots à l'epoch courant, et la position de chaque slot doit correspondre à son ordinal combinadique. Le cube, une coupe axiale, une coupe oblique, une cellule de dimension basse avec incidences multiples et une cellule vide sont tous comparés au résultat 7.6 construit indépendamment. La recette saine exerce les trois statuts de record : inconnu exact, rejet avec témoin recertifié et survivant dont les intervalles contiennent le sommet rationnel.
+
+Le masque `could_be_active` est testé comme sur-ensemble. Un faux positif dans le domaine reste accepté; l'effacement d'une incidence exacte, un bit au-delà de $B$, un triplet absent ou dupliqué, un mauvais ordinal, une epoch répétée ou avancée deux fois, une sentinelle résiduelle dans le préfixe, une écriture dans la queue, un offset ou ID de cellule falsifié, un intervalle non fini et un faux témoin de rejet doivent tous échouer sans résultat puis empoisonner le contexte. Une faute asynchrone simulée suit le même chemin. Les fallbacks prudents `interval_unknown`, `capacity_exhausted` et `unsupported_projection` gardent au contraire la décision CPU exacte et une ligne GPU vide. Une constante positive exacte partage un batch avec une cellule saine : elle doit produire `complete_empty` par 7.6, un fallback d'intervalle vide et aucun empoisonnement; l'identifiant `UINT64_MAX` reste licite.
+
+Les prévalidations couvrent offsets d'entrée, IDs de cellule dupliqués, IDs de contrainte dupliqués, domaine ou rôle invalide, boîte non canonique, segment de 56 contraintes, débordement de sommes et budget exact juste insuffisant. Elles précèdent le lancement et ne doivent pas empoisonner le contexte. La capacité n'est jamais testée par une géométrie maximale : la fixture de cap vérifie seulement les besoins $B=61$ et 35990 slots avant fallback. GCC et Clang stricts exécutent le target hôte; aucune TU `.cu`, compilation NVCC, session G4 ou promotion publique n'appartient à 7.7.
+
 ## 6. Tests de Gamma, du catalogue Gabriel et de la réduction
 
 ### 6.1 Gamma exact et événements Gabriel partiels

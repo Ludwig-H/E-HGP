@@ -39,6 +39,7 @@ def validate(root: Path) -> None:
     header = read_text(root / "include/morsehgp3d/gpu/spatial_bounds.hpp")
     internal = read_text(root / "src/cuda/phase4_spatial_bounds_internal.hpp")
     host = read_text(root / "src/gpu/spatial_bounds.cpp")
+    enclosure = read_text(root / "src/gpu/rational_binary64_enclosure.hpp")
     kernel = read_text(root / "src/cuda/phase4_spatial_bounds.cu")
     replay = read_text(root / "src/tools/gpu_spatial_bounds_replay.cpp")
     cmake = read_text(root / "CMakeLists.txt")
@@ -95,12 +96,30 @@ def validate(root: Path) -> None:
     )
 
     require_tokens(
-        host,
+        enclosure,
         (
+            '#include "morsehgp3d/gpu/spatial_bounds.hpp"',
+            "struct DirectedEnclosure",
+            "std::uint64_t lower_bits",
+            "std::uint64_t upper_bits",
+            "DirectedEnclosureStatus status",
             "enclose_nonnegative_rational",
             "enclose_rational",
             "positive_binary64_rational(midpoint_bits) <= value",
             "DirectedEnclosureStatus::unsupported_range",
+            "DirectedEnclosureStatus::enclosed",
+            "kSignBit | magnitude.upper_bits",
+            "kSignBit | magnitude.lower_bits",
+        ),
+        "shared rational-to-binary64 enclosure",
+    )
+    require_tokens(
+        host,
+        (
+            '#include "rational_binary64_enclosure.hpp"',
+            "using detail::DirectedEnclosure",
+            "using detail::enclose_nonnegative_rational",
+            "using detail::enclose_rational",
             "validate_box",
             "exact_minimum_squared_distance",
             "validate_and_recertify",
@@ -119,6 +138,10 @@ def validate(root: Path) -> None:
             "detail::propose_strict_aabb_prunes_on_gpu",
         ),
         "spatial-bounds host",
+    )
+    require(
+        "struct DirectedEnclosure" not in host,
+        "the spatial-bounds host duplicates the shared enclosure record",
     )
     require_order(
         host,

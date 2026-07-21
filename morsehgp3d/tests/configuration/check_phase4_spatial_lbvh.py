@@ -428,13 +428,14 @@ def validate_host_cover(host: str) -> None:
         (
             '#include "morsehgp3d/gpu/spatial_lbvh.hpp"',
             '#include "phase4_spatial_bounds_internal.hpp"',
+            '#include "rational_binary64_enclosure.hpp"',
             "class SpatialLbvhHostState final",
             "std::shared_ptr<const void> cloud_identity",
             "std::vector<SpatialLbvhNodeInputRecord> nodes",
             "std::vector<spatial::PointId> leaf_point_ids",
-            "enclose_nonnegative_rational",
-            "enclose_rational",
-            "DirectedEnclosureStatus::unsupported_range",
+            "using detail::DirectedEnclosure",
+            "using detail::enclose_nonnegative_rational",
+            "using detail::enclose_rational",
             "exact_minimum_squared_distance",
             "require_interval_contains_exact_bound",
             "SpatialLbvhCoverResult unsupported_cover(",
@@ -493,6 +494,10 @@ def validate_host_cover(host: str) -> None:
             "detail::propose_strict_lbvh_cover_on_gpu(",
         ),
         "resident spatial-LBVH host cover",
+    )
+    require(
+        "struct DirectedEnclosure" not in host,
+        "the resident spatial-LBVH host duplicates the shared enclosure record",
     )
 
     unsupported = extract_braced_block(
@@ -698,6 +703,27 @@ def validate_host_queries(host: str) -> None:
     require_tokens(nearest, ("return top_k(", "1U", "exclusions"), "resident 1-NN")
 
 
+def validate_shared_enclosure(enclosure: str) -> None:
+    require_tokens(
+        enclosure,
+        (
+            '#include "morsehgp3d/gpu/spatial_bounds.hpp"',
+            "struct DirectedEnclosure",
+            "std::uint64_t lower_bits",
+            "std::uint64_t upper_bits",
+            "DirectedEnclosureStatus status",
+            "enclose_nonnegative_rational",
+            "enclose_rational",
+            "positive_binary64_rational(midpoint_bits) <= value",
+            "DirectedEnclosureStatus::unsupported_range",
+            "DirectedEnclosureStatus::enclosed",
+            "kSignBit | magnitude.upper_bits",
+            "kSignBit | magnitude.lower_bits",
+        ),
+        "shared rational-to-binary64 enclosure",
+    )
+
+
 def validate_query_friend(query_header: str) -> None:
     require_tokens(
         query_header,
@@ -817,6 +843,7 @@ def validate_project(project: Path) -> dict[str, object]:
         "api": project / "include/morsehgp3d/gpu/spatial_lbvh.hpp",
         "query": project / "include/morsehgp3d/spatial/query.hpp",
         "host": project / "src/gpu/spatial_lbvh.cpp",
+        "enclosure": project / "src/gpu/rational_binary64_enclosure.hpp",
         "internal": project / "src/cuda/phase4_spatial_bounds_internal.hpp",
         "kernel": project / "src/cuda/phase4_spatial_bounds.cu",
         "replay": project / "src/tools/gpu_spatial_lbvh_replay.cpp",
@@ -835,6 +862,7 @@ def validate_project(project: Path) -> dict[str, object]:
     validate_public_api(texts["api"])
     validate_internal_contract(texts["internal"])
     validate_cuda_kernel(texts["kernel"], texts["cuda_policy"])
+    validate_shared_enclosure(texts["enclosure"])
     validate_host_cover(texts["host"])
     validate_host_queries(texts["host"])
     validate_query_friend(texts["query"])
@@ -843,6 +871,7 @@ def validate_project(project: Path) -> dict[str, object]:
         {
             "resident LBVH API": texts["api"],
             "resident LBVH host": texts["host"],
+            "shared rational-to-binary64 enclosure": texts["enclosure"],
             "resident LBVH internal state": texts["internal"],
             "resident LBVH CUDA traversal": texts["kernel"],
         }

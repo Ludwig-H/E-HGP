@@ -634,11 +634,19 @@ Le cap hôte couvre un morceau restreint complet sur le domaine oracle $n\leq14$
 
 Le certificat porte seulement sur l'intersection de la H-représentation fournie. Il ne prouve ni que le parent est complet, ni `canonical_children_complete`, ni `RelevantGP`, ni un diagramme global. La Phase 7 reste `ready` et la Phase 8 reste bloquée.
 
-### Trajectoire saine 7.7–7.8
+### Jalon 7.7 — transcript batché de triplets proposé
 
-Le jalon 7.7 figera une surface batchée de propositions, ses offsets, identifiants, rôles, capacités et statuts d'échec, puis la soumettra à un faux lanceur capable d'injecter triplet manquant, incidence forgée, non-fini, overflow et faute asynchrone. Aucune TU CUDA ne sera ouverte avant que toute corruption échoue fermée et qu'une cellule fautive n'émette aucun payload exploitable.
+Le backend hôte `fake_gpu` fige la frontière du futur kernel sans lui déléguer de géométrie. Un contexte lié à une boîte commune reçoit un CSR exact — identifiants de cellules, offsets et demi-espaces avec IDs composites et rôles — puis canonise les cellules par identifiant. Tous les budgets 7.6 et toute l'arithmétique des offsets sont préflightés avant géométrie ou lancement. La capacité physique porte des records de proposition et ne crée aucun plafond global arbitraire du nombre de cellules; une cellule qui ne tient pas entière bascule vers le cœur exact avec une ligne GPU vide.
 
-Le jalon 7.8 implémentera ensuite la proposition CUDA interne avec stream et allocations possédés, compteurs exhaustifs, filtres à intervalles dirigés et fallback exact. Une qualification G4 courte couvrira les cas analytiques, permutations, overflow forcé, `memcheck` et `racecheck`; fast math restera diagnostique s'il invalide les enveloppes. La Phase 7 ne pourra devenir `completed`, ni la Phase 8 devenir `ready`, avant cette qualification.
+Pour les $B\leq61$ frontières propres d'une cellule, l'ordre local reste les six faces de boîte puis les contraintes triées par ID. Le transcript réussi contient exactement $T(B)=\binom{B}{3}$ slots, un par triplet $i<j<k$, avec epoch courant. Un slot vaut `unknown_requires_cpu_exact`, `proposed_strict_reject` avec une frontière témoin, ou `proposed_survivor` avec trois intervalles binary64 finis et un masque `could_be_active`. Ce masque est seulement un sur-ensemble : toute incidence exacte doit y figurer, mais un faux positif reste une proposition licite. Un déterminant flottant contenant zéro ne prouve jamais la singularité et impose `unknown_requires_cpu_exact`.
+
+L'hôte reconstruit dans tous les cas la décision locale depuis les formes exactes avec 7.6. Une constante strictement positive, qui prouve la vacuité sans engendrer de plan, force avant lancement un fallback d'intervalle à ligne vide. Pour les autres cellules, l'hôte rejoue chaque ordinal : un rejet exige une intersection exacte unique et une violation strictement positive de sa frontière témoin; un survivant exige une intersection exacte unique et faisable contenue dans les intervalles; toute incidence exacte doit appartenir au masque proposé. Taille, offsets, ordinals, avance d'exactement une epoch, sentinelles et queue de capacité sont vérifiés avant publication. Triplet manquant, incidence exacte omise, bit hors domaine, non-fini, faux rejet ou faute asynchrone invalident toute la transaction et empoisonnent le contexte. Les fallbacks de capacité, d'intervalle ou de projection restent au contraire des résultats exacts CPU sans payload GPU pour la cellule.
+
+Ce jalon n'ouvre aucune TU `.cu`, ne compile pas NVCC et ne qualifie pas G4. Le transcript reste `proposal_only`; seul le résultat `reference_cpu` porte `complete_nonempty` ou `complete_empty`, localement et sans `public_status`. La Phase 7 reste `ready` et la Phase 8 reste bloquée.
+
+### Trajectoire saine 7.8
+
+Le jalon 7.8 implémentera la même ABI dans une proposition CUDA interne avec stream et allocations possédés, écritures directes par ordinal combinadique, intervalles dirigés et fallback exact. Une qualification G4 courte couvrira les cas analytiques, permutations, overflow forcé, `memcheck` et `racecheck`; fast math restera diagnostique s'il invalide les enveloppes. La Phase 7 ne pourra devenir `completed`, ni la Phase 8 devenir `ready`, avant cette qualification.
 
 ### But
 

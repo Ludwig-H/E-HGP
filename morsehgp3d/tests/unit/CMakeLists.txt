@@ -333,6 +333,22 @@ add_executable(
   "${PROJECT_SOURCE_DIR}/src/gpu/spatial_reference.cpp"
 )
 add_executable(
+  morsehgp3d_gpu_h_polytope_proposal_context_tests
+  test_gpu_h_polytope_proposal_context.cpp
+  fake_gpu_h_polytope_proposal_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/h_polytope_proposal.cpp"
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_h_polytope_proposal_context_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_h_polytope_proposal_context_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+add_executable(
   morsehgp3d_gpu_spatial_reference_replay_host
   "${PROJECT_SOURCE_DIR}/src/tools/gpu_spatial_reference_replay.cpp"
   fake_gpu_spatial_reference_launchers.cpp
@@ -429,6 +445,10 @@ target_include_directories(
   PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
 )
 target_include_directories(
+  morsehgp3d_gpu_h_polytope_proposal_context_tests
+  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+)
+target_include_directories(
   morsehgp3d_gpu_spatial_reference_replay_host
   PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
 )
@@ -490,6 +510,10 @@ target_link_libraries(
 )
 target_link_libraries(
   morsehgp3d_gpu_spatial_reference_context_tests
+  PRIVATE morsehgp3d::spatial Threads::Threads
+)
+target_link_libraries(
+  morsehgp3d_gpu_h_polytope_proposal_context_tests
   PRIVATE morsehgp3d::spatial Threads::Threads
 )
 target_link_libraries(
@@ -603,6 +627,7 @@ set(
   morsehgp3d_predicate_filter_context_tests
   morsehgp3d_warm_context_benchmark_host_test
   morsehgp3d_gpu_spatial_reference_context_tests
+  morsehgp3d_gpu_h_polytope_proposal_context_tests
   morsehgp3d_gpu_spatial_reference_replay_host
   morsehgp3d_gpu_spatial_bounds_context_tests
   morsehgp3d_gpu_spatial_bounds_replay_host
@@ -1366,6 +1391,10 @@ add_test(
 add_test(
   NAME morsehgp3d.gpu_spatial_reference_context
   COMMAND morsehgp3d_gpu_spatial_reference_context_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_h_polytope_proposal_context
+  COMMAND morsehgp3d_gpu_h_polytope_proposal_context_tests
 )
 add_test(
   NAME morsehgp3d.gpu_spatial_bounds_context
