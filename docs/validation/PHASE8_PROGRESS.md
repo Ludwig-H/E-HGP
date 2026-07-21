@@ -1,7 +1,7 @@
-# Progression Phase 8 — boîte, cellule et diagramme ordinaire borné
+# Progression Phase 8 — boîte, diagramme ordinaire et supports de profondeur zéro
 
 > [!IMPORTANT]
-> Phase `8`, backends `reference_cpu` et `reference_python`, profil `generic_core`, mode `certified`. La porte d'entrée est satisfaite par les Phases 1, 4 et 7 fermées. Les jalons 8.1 à 8.4 certifient la boîte de clipping, la fermeture mono-cellule, le diagramme ordinaire clippé entier et son accord avec un atlas affine indépendant, toujours dans le domaine borné à huit sites. Ils ne ferment ni la Phase 8, ni le catalogue Morse, ni aucun statut public.
+> Phase `8`, backends `reference_cpu` et `reference_python`, profil `generic_core`, mode `certified`. La porte d'entrée est satisfaite par les Phases 1, 4 et 7 fermées. Les jalons 8.1 à 8.5 certifient la boîte de clipping, la fermeture mono-cellule, le diagramme ordinaire clippé entier, son accord avec un atlas affine indépendant et l'extraction de ses supports naturels de profondeur zéro, toujours dans le domaine borné à huit sites. Ils ne ferment ni la Phase 8, ni le catalogue Morse H0, ni aucun statut public.
 
 ## Jalon 8.1 — décision d'architecture
 
@@ -120,15 +120,27 @@ Le dump C++ exige d'abord la vérification fraîche complète de 8.3, puis séri
 
 Le batch réel utilise un unique sous-processus et seize cas fixes : cardinalités un à huit, zéros signés, sous-normaux, paire oblique, contact porté par la boîte, collinéarité, carré exact et perturbations d'un ULP, tétraèdre avec ou sans centre, courbe des moments, shell sept, cube exact et perturbé, puis trois permutations. Il passe avec les producteurs GCC et Clang stricts. Les six tests unitaires couvrent aussi les neuf caps exacts, chaque insuffisance atomique et tout dépassement de confiance; `tools/check_oracle_independence.py` confirme l'absence d'import de production.
 
+## Jalon 8.5 — extraction naturelle de profondeur zéro
+
+Le backend `reference_cpu` expose `build_exact_bounded_depth_zero_natural_supports` et son vérificateur frais. Après préflight, il exige un diagramme 8.3 complet et fraîchement certifié, puis parcourt seulement les carriers naturels. Tous leurs sous-supports de tailles deux à quatre sont proposés, triés et dédupliqués; les quotients et contacts de boîte restent auditables dans la source sans jamais devenir des supports émis. Le header du producteur ne dépend pas du catalogue critique exhaustif.
+
+Pour chaque candidat, le centre circonscrit, le niveau et les barycentriques sont recalculés exactement depuis les sites. Seuls les supports minimaux déclenchent une partition globale de boule fermée. Un intérieur strict non vide est différé. À intérieur vide, un shell plus grand devient un diagnostic pertinent selon le rang du support, même lorsque le rang fermé du shell dépasse la fenêtre; un shell égal au support est accepté seulement dans la fenêtre. Les tailles deux, trois et quatre doivent pointer respectivement vers une face, une arête et un sommet naturels de dimensions deux, un et zéro.
+
+La preuve de complétude de ce seul étage part de tout support minimal à intérieur strict vide : son centre appartient à l'intérieur de la boîte et au contact de son shell global. Ce contact est un carrier naturel, donc l'énumération exhaustive de ses sous-supports retrouve le support. Elle ne couvre pas les profondeurs positives et l'absence de diagnostic 8.5 ne prouve pas `RelevantGP` global.
+
+Les six capacités au plafond `n=8` valent 247 contacts source, 4704 propositions brutes, 13440 références brutes, 154 supports uniques, 504 références uniques et 1232 classifications. Les six insuffisances sont testées sans construire le diagramme du cube et précèdent toute copie ou vérification de source. Une source hostile n'est copiée dans aucun reçu; même une source qui affirme `complete` est rejetée si son transcript frais diffère.
+
+La suite ciblée passe en Release strict sous GCC et Clang. Elle couvre singleton vide, tétraèdre régulier pour les trois tailles, fenêtre `K_max=1`, pentagone cocirculaire de shell cinq, seuil triangle à un ULP, support porté par la boîte, permutation, budgets et falsification de chaque couche. Le catalogue exhaustif confirme dans les deux sens les supports acceptés et diagnostics sur le pentagone, uniquement comme oracle de test. Les exécutions directes finales prennent environ 3,1 secondes sous chaque toolchain dans l'environnement courant; les CTests ciblés passent aussi.
+
 ## Décision de réutilisation et de débit
 
-Cet atlas est gelé à huit sites et ne sera pas étendu en moteur de Voronoï général. Toute future baseline plus large doit d'abord évaluer un adaptateur épinglé vers Geogram ou une bibliothèque mature équivalente; elle restera une comparaison non autoritative jusqu'au rejeu exact. Le chemin produit reste GPU-first, avec proposition massive sur `cuda_g4`, recertification exacte côté hôte, cible p95 inférieure à une seconde autour de 50 000 points pour `K_max<=10`, puis streaming transactionnel et budgeté à dix millions de points ou davantage.
+Cet atlas est gelé à huit sites et ne sera pas étendu en moteur de Voronoï général. Toute future baseline plus large doit d'abord évaluer un adaptateur épinglé vers Geogram ou une bibliothèque mature équivalente; elle restera une comparaison non autoritative jusqu'au rejeu exact. Le chemin produit reste GPU-first, avec proposition massive sur `cuda_g4`, recertification exacte côté hôte, cible p95 inférieure à une seconde autour de 50 000 points pour $K_{\max}\leq10$, puis streaming transactionnel et budgeté à dix millions de points ou davantage.
 
 ## Limites et suite saine
 
-La Phase 8 reste `ready` et sa porte de sortie reste ouverte. Le prochain jalon sain doit définir l'extraction certifiée des supports naturels en excluant explicitement les contacts artificiels et les quotients, puis produire le `CatalogCertificate` d'ordre un et fermer `closed_parent_orders[1]` seulement si toutes les files sont vides et sans overflow. Il ne faut ni élargir l'atlas rationnel, ni confondre ce contrôle borné avec le chemin de débit. Le rejeu imbriqué actuel demeure une dette admise uniquement dans le petit domaine de preuve.
+La Phase 8 reste `ready` et sa porte de sortie reste ouverte. Le jalon 8.6 doit maintenant injecter séparément les minima singleton de rayon nul, bâtir les lots H0 d'ordre un, produire le `CatalogCertificate` et fermer `closed_parent_orders[1]` seulement si le diagramme, l'extraction et toutes les files sont complets sans overflow ni diagnostic bloquant. Il ne faut ni élargir l'atlas rationnel, ni confondre ce contrôle borné avec le chemin de débit. Le rejeu imbriqué actuel demeure une dette admise uniquement dans le petit domaine de preuve.
 
-Aucun `CatalogCertificate`, événement Morse, hiérarchie, `closed_parent_orders[1]`, mesure de débit ou `public_status=exact` n'est produit ici. Les propositions CUDA qualifiées en Phase 7 restent disponibles pour un futur accélérateur, mais ne participent à aucune décision 8.3.
+Aucun `CatalogCertificate`, lot H0, événement Morse public, hiérarchie, `closed_parent_orders[1]`, mesure de débit ou `public_status=exact` n'est produit ici. Les propositions CUDA qualifiées en Phase 7 restent disponibles pour un futur accélérateur, mais ne participent encore à aucune décision 8.3 ou 8.5.
 
 ## GCP
 

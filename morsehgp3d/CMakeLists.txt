@@ -304,6 +304,7 @@ add_library(
     src/cpu/hierarchy/critical_arm.cpp
     src/cpu/hierarchy/critical_arm_gamma.cpp
     src/cpu/hierarchy/critical_catalog.cpp
+    src/cpu/hierarchy/depth_zero_natural_support.cpp
     src/cpu/hierarchy/critical_catalog_arm_gamma_overlay.cpp
     src/cpu/hierarchy/critical_catalog_reduced_gamma_overlay.cpp
     src/cpu/hierarchy/critical_catalog_typed_gamma_journal.cpp

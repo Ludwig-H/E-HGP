@@ -251,6 +251,25 @@ target_link_libraries(
 )
 
 add_executable(
+  morsehgp3d_depth_zero_natural_support_tests
+  test_depth_zero_natural_support.cpp
+)
+target_link_libraries(
+  morsehgp3d_depth_zero_natural_support_tests
+  PRIVATE morsehgp3d::hierarchy
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_depth_zero_natural_support_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_depth_zero_natural_support_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
   test_hierarchy_critical_catalog_reduced_gamma_overlay.cpp
 )
@@ -689,6 +708,7 @@ set(
   morsehgp3d_hierarchy_reduced_gamma_cut_tests
   morsehgp3d_hierarchy_critical_event_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_tests
+  morsehgp3d_depth_zero_natural_support_tests
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_typed_gamma_journal_tests
@@ -1422,6 +1442,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_critical_catalog
   COMMAND morsehgp3d_hierarchy_critical_catalog_tests
+)
+add_test(
+  NAME morsehgp3d.depth_zero_natural_support
+  COMMAND morsehgp3d_depth_zero_natural_support_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_critical_catalog_reduced_gamma_overlay

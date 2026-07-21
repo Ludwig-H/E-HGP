@@ -1,6 +1,6 @@
 # Feuille de route d'implémentation de MorseHGP3D
 
-> **Mission.** Construire un backend 3D hiérarchique, certifiable et GPU-friendly pour $1\leq k\leq10$, rapide sur quelques milliers à quelques dizaines de milliers de points et capable de traiter plusieurs millions de points par streaming. Cette feuille de route est écrite comme un protocole exécutable par de futurs agents ChatGPT.
+> **Mission.** Construire un backend 3D hiérarchique, certifiable et GPU-first pour $1\leq k\leq10$, avec deux régimes produit non négociables : p95 `warm_e2e` strictement inférieur à une seconde autour de 50 000 points pour $K_{\max}\leq10$ sur les familles favorables enregistrées; puis streaming transactionnel, reprenable et honnêtement budgeté à dix millions de points ou davantage. Cette feuille de route est écrite comme un protocole exécutable par de futurs agents ChatGPT.
 
 ## 1. Règles de conduite pour tout agent
 
@@ -742,11 +742,27 @@ Le différentiel compare par valeurs rationnelles, indépendamment de l'ordre et
 
 Ce jalon contrôle la projection topologique exacte de 8.3 dans `bounded_n8`; il ne recertifie pas ses rondes, amorces, compteurs procéduraux ou budgets internes. Il ne ferme ni extraction Morse, ni `RelevantGP`, ni catalogue, ni hiérarchie, ni `closed_parent_orders[1]`, ni statut public. GCP n'est pas utilisé.
 
+### Jalon 8.5 — supports naturels de profondeur zéro
+
+Le contrat `morsehgp3d.phase8.exact_bounded_depth_zero_natural_supports.v1` consomme un diagramme 8.3 complet et fraîchement vérifié, puis énumère les sous-supports de deux à quatre sites de chaque carrier `natural_face`, `natural_edge` ou `natural_vertex`. Les contacts `noncanonical_quotient_contact` et `box_supported_contact` ne sont jamais des sources d'émission. Le producteur ne dépend pas du catalogue critique exhaustif : ce dernier reste exclusivement un oracle de test borné.
+
+La complétude utile vient du centre lui-même. Si un support minimal $U$, avec $2\leq\lvert U\rvert\leq4$, a un intérieur strict vide et un shell global complet $S$, son centre appartient à $\mathrm{conv}(U)$, donc à l'intérieur de la boîte, ainsi qu'à $K_S$. Le contact de carrier $S$ est donc non vide, canonique et non porté par une face commune de boîte; c'est une strate naturelle, et l'énumération de tous ses sous-supports retrouve nécessairement $U$. Cette preuve couvre tous les supports critiques de profondeur zéro dans la portée bornée, pas tous les supports rejetés possibles et pas les profondeurs positives.
+
+Chaque proposition dédupliquée recalcule exactement son centre circonscrit, son niveau et ses barycentriques avant une nouvelle partition globale de boule fermée. La priorité est fixe : dépendance affine, centre sur frontière ou extérieur; puis, pour un support minimal, intérieur strict non vide différé; ensuite extra-shell $S\neq U$ diagnostiqué selon le rang de pertinence $\lvert I\rvert+\lvert U\rvert$; enfin support au-dessus de la fenêtre ou support accepté. À profondeur zéro, $I=\varnothing$ avant le test extra-shell, donc la pertinence dépend de $\lvert U\rvert$, jamais du rang fermé observé $\lvert S\rvert$. Un extra-shell pertinent reste bloquant même lorsque son shell complet dépasse $s_{\max}$.
+
+Un support accepté vérifie $S=U$ et $\lvert U\rvert\leq s_{\max}$, puis une réciprocité exacte avec son contact naturel : taille deux, `natural_face`, dimension deux et rang affine un; taille trois, `natural_edge`, dimension un et rang deux; taille quatre, `natural_vertex`, dimension zéro et rang trois. Les diagnostics extra-shell pertinents sont agrégés par centre, niveau, shell et carrier exacts. Le résultat distingue candidats proposés, supports acceptés et diagnostics; il ne transforme jamais le barycentre d'un contact en centre critique.
+
+Le préflight transactionnel porte six capacités. À $n=8$, leurs plafonds de confiance sont 247 contacts source, 4704 propositions brutes, 13440 références brutes de `PointId`, 154 supports uniques, 504 références uniques et 1232 classifications point–boule. Une insuffisance précède tout rejeu du diagramme et publie seulement identité, boîte, exigences et budget; une source incomplète ou non certifiée arrête ensuite l'extraction avant toute proposition. Le vérificateur reconstruit chaque couche depuis le nuage, la boîte, la source, $K_{\max}$ et le budget fiables.
+
+La suite courte passe sous GCC et Clang stricts. Elle couvre le singleton, le tétraèdre régulier et ses trois strates, un pentagone cocirculaire de shell cinq avec quotients explicites, la frontière exacte d'un triangle à un ULP, un contact porté par la boîte, les six budgets au plafond $n=8$ sans construire le diagramme du cube, les mutations hostiles et l'invariance par permutation. Le catalogue exhaustif 6.12 confirme uniquement côté test, dans les deux sens, les supports acceptés et les diagnostics de profondeur zéro.
+
+Ce jalon ne produit aucun singleton de rayon nul dans le catalogue H0, lot H0, événement public, `CatalogCertificate`, `closed_parent_orders[1]` ou `public_status`. L'absence de diagnostic à profondeur zéro ne prouve pas `RelevantGP` global. La Phase 8 reste `ready`; le jalon 8.6 devra ajouter séparément les singletons H0, construire le catalogue H0 d'ordre un et fermer l'ordre parent seulement après réconciliation de toutes les files. GCP n'est pas utilisé.
+
 ### Décision de réutilisation et de performance
 
 L'atlas `Fraction` de 8.4 est désormais gelé comme oracle de preuve `n<=8`; il ne doit pas devenir une bibliothèque de Voronoï générale ni entrer dans le chemin utilisateur. Avant toute nouvelle baseline de Voronoï, extension de domaine de test ou primitive CPU spécialisée, l'agent doit d'abord évaluer un adaptateur épinglé vers Geogram ou une bibliothèque mature équivalente, avec version, licence, options numériques et projection sémantique documentées. Une telle bibliothèque reste une baseline ou une source de propositions tant que ses sorties ne sont pas recertifiées par les contrats exacts du dépôt.
 
-Le chemin produit reste GPU-first : génération et filtrage massifs sur `cuda_g4`, décisions combinatoires ambiguës rejouées exactement sur l'hôte, transferts et matérialisation strictement budgetés. Les choix des Phases 8 à 13 doivent préserver les deux cibles de produit : p95 `warm_e2e` inférieur à une seconde pour environ 50 000 points et `K_max<=10` sur les familles favorables préenregistrées, puis streaming transactionnel pour dix millions de points ou davantage avec sortie exacte lorsque le certificat reste sparse et arrêt budgétaire honnête sinon. Aucun élargissement d'un oracle de test CPU ne doit retarder ou remplacer cette voie.
+Le chemin produit reste GPU-first : génération et filtrage massifs sur `cuda_g4`, décisions combinatoires ambiguës rejouées exactement sur l'hôte, transferts et matérialisation strictement budgetés. Les choix des Phases 8 à 13 doivent préserver les deux cibles de produit : p95 `warm_e2e` inférieur à une seconde pour environ 50 000 points et $K_{\max}\leq10$ sur les familles favorables préenregistrées, puis streaming transactionnel pour dix millions de points ou davantage avec sortie exacte lorsque le certificat reste sparse et arrêt budgétaire honnête sinon. Aucun élargissement d'un oracle de test CPU ne doit retarder ou remplacer cette voie.
 
 ### Travaux
 

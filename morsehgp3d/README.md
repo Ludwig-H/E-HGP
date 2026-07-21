@@ -2,7 +2,9 @@
 
 Ce répertoire porte la nouvelle implémentation décrite par la roadmap. `HGP-old/` reste une référence historique séparée et n'est pas importée par ce cœur.
 
-État actuel : Phase 5 en cours, backend de proposition `cuda_g4`, backend de rejeu et de décision `reference_cpu`, profil prioritaire `hgp_reduced` et mode `certified`. Les Phases 2A, 2B, 3 et 4 sont fermées. L'oracle spatial exact et son accélérateur Morton-LBVH certifié servent de vérité terrain; ils ferment la précondition spatiale de la Phase 5, sans fermer la porte globale G2 du catalogue et sans produire de statut public `exact`. Les propositions GPU à graine fixe, chunkées et Morton sont qualifiées sur G4; la nouvelle chaîne self-dual reste pour l'instant certifiée seulement sur hôte.
+État actuel : la Phase 5 reste en cours en parallèle, la Phase 7 est fermée et la Phase 8 est `ready`, avec `reference_cpu`, profil `generic_core` et mode `certified` pour les décisions exactes; `cuda_g4` demeure le backend de proposition à accélérer. Les jalons 8.1 à 8.5 ferment sur le domaine borné la boîte, la cellule, le diagramme ordinaire, son différentiel indépendant et les supports naturels de profondeur zéro. Ils ne produisent encore ni catalogue H0 d'ordre un, ni `closed_parent_orders[1]`, ni statut public `exact`.
+
+Deux régimes produit orientent le cœur : p95 `warm_e2e` inférieur à une seconde autour de 50 000 points pour $K_{\max}\leq10$, puis streaming transactionnel reprenable à dix millions de points ou davantage. La voie produit est GPU-first avec rejeu exact côté hôte. Avant d'étendre un oracle Voronoï maison, les tests doivent évaluer un adaptateur Geogram épinglé ou une bibliothèque mature équivalente; cette baseline ne devient jamais une autorité sans recertification.
 
 La tranche actuellement intégrée fournit :
 

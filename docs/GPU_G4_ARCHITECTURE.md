@@ -60,7 +60,7 @@ Dyadique en entrée ne signifie pas dyadique après résolution d'un support de 
 ```text
 PointsSoA
     x[n], y[n], z[n]              # type d'entrée conservé
-    site_id[n]                    # uint32 jusqu'à plusieurs millions
+    site_id[n]                    # uint32 pour dix millions de points et davantage
     multiplicity[n]               # option future
     morton_code[n]                # uint64
 ```
@@ -228,9 +228,9 @@ Le protocole distingue :
 
 Le SLO produit principal est `warm_e2e` : runtime et allocateur initialisés, mais validation, transfert H2D, construction du LBVH, calcul et matérialisation de la sortie inclus.
 
-## 10. Streaming jusqu'à plusieurs millions
+## 10. Streaming transactionnel à dix millions de points et davantage
 
-Les points et le LBVH peuvent rester résidents longtemps; les cellules et incidences sont le risque dominant. Le premier mode scalable diffuse ces objets :
+Lorsque la mémoire le permet, les points et le LBVH restent résidents; à dix millions de points ou davantage, les cellules et incidences sont le risque dominant et doivent être diffusées transactionnellement. Le premier mode scalable traite ces objets par lots bornés :
 
 1. sélectionner un lot de parents selon le budget mémoire;
 2. construire et fermer chaque morceau contre le LBVH global;
@@ -332,7 +332,7 @@ Sur `g4-standard-48`, protocole `warm_e2e`, $K_{\max}=10$, nuages volumiques ré
 |---:|---:|
 | $1\,000$ | $25$ ms |
 | $10\,000$ | $200$ ms |
-| $50\,000$ | $1$ s |
+| $50\,000$ | $<1$ s |
 | $100\,000$ | $3$ s |
 | $1$ million | $60$ s si le certificat reste sparse |
 | $10$ millions | $10$ min si le certificat reste sparse |
@@ -349,6 +349,7 @@ Optionnelles et isolées :
 - cuVS brute force comme différentiel top-$k$;
 - ArborX ou l'algorithme EMST GPU comme référence $k=1$;
 - CGAL comme oracle de test après audit de licence;
+- Geogram via un adaptateur versionné comme baseline Voronoï CPU de test; ses sorties ne deviennent jamais une autorité exacte sans rejeu par les contrats du dépôt;
 - RMM si ses mesures dépassent `cudaMallocAsync`.
 
 Chaque dépendance optionnelle doit pouvoir être désactivée sans modifier la définition mathématique.

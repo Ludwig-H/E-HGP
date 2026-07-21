@@ -6,6 +6,8 @@ Le module `ordinary_diagram` fournit aussi l'oracle différentiel de Phase 8.4. 
 
 L'atlas ne doit pas être étendu en implémentation générale de Voronoï. Pour une baseline plus large, la politique du dépôt impose d'évaluer d'abord Geogram ou une bibliothèque mature équivalente via un adaptateur épinglé; la baseline reste non autoritative et séparée du chemin GPU tant qu'un rejeu exact ne l'a pas certifiée.
 
+Le chemin produit vise explicitement moins d'une seconde en p95 `warm_e2e` autour de 50 000 points avec $K_{\max}\leq10$, puis dix millions de points ou davantage en streaming transactionnel. Le catalogue exhaustif de ce paquet peut servir d'oracle bidirectionnel à 8.5, uniquement dans les tests.
+
 ## Complétude sans cascade de cellules
 
 En dimension 3, tout support minimal d'une miniball contient au plus quatre points. Le catalogue de référence parcourt donc tous les supports de cardinal 1 à 4, rejette exactement les supports affinement dépendants ou non bien centrés, puis classe tous les points par rapport à chaque boule retenue. Ce parcours exhaustif remplace, pour ce backend seulement, la découverte par raffinement de cellules restreintes.
