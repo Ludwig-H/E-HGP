@@ -644,9 +644,13 @@ L'hôte reconstruit dans tous les cas la décision locale depuis les formes exac
 
 Ce jalon n'ouvre aucune TU `.cu`, ne compile pas NVCC et ne qualifie pas G4. Le transcript reste `proposal_only`; seul le résultat `reference_cpu` porte `complete_nonempty` ou `complete_empty`, localement et sans `public_status`. La Phase 7 reste `ready` et la Phase 8 reste bloquée.
 
-### Trajectoire saine 7.8
+### Jalon 7.8 — proposition CUDA AOT conservative
 
-Le jalon 7.8 implémentera la même ABI dans une proposition CUDA interne avec stream et allocations possédés, écritures directes par ordinal combinadique, intervalles dirigés et fallback exact. Une qualification G4 courte couvrira les cas analytiques, permutations, overflow forcé, `memcheck` et `racecheck`; fast math restera diagnostique s'il invalide les enveloppes. La Phase 7 ne pourra devenir `completed`, ni la Phase 8 devenir `ready`, avant cette qualification.
+La TU interne `phase7_h_polytope_proposal.cu` matérialise l'ABI 7.7 sans changer sa sémantique. Le contexte possède un stream non bloquant et des buffers persistants; avant chaque kernel, toute la capacité physique des records est remise à zéro. Le plan hôte affecte seulement des lignes complètes dans l'ordre canonique, puis chaque thread écrit directement le slot de son ordinal combinadique, sans compteur atomique d'émission. Les cellules hors projection, à constante positive ou hors capacité gardent une ligne vide.
+
+Les coefficients binary64 sont des enclosures dirigées des rationnels. Addition, soustraction et multiplication réutilisent la primitive d'intervalles 2B; la division évalue les quatre couples d'extrémités avec arrondis inférieur et supérieur. Le déterminant de Cramer contenant zéro, une opération non finie ou une faisabilité indécidable donnent `unknown_requires_cpu_exact`. Seule une borne inférieure strictement positive propose un rejet; un survivant exige une borne supérieure non positive pour chaque frontière. Le masque conserve tous les intervalles contenant zéro et les trois plans générateurs, puis l'hôte applique encore le rejeu exact 7.7.
+
+Le target AOT et un exécutable analytique court sont câblés dans les presets CUDA release et audit. Le checker statique interdit fast math, FMA, tolérances, stream par défaut, émission atomique et verdict exact GPU; il vérifie aussi CUDA 12.9, `sm_120`, les arrondis dirigés, la queue nulle et l'ordre synchronisation–epoch. À ce checkpoint, le poste local n'a pas NVCC : la compilation et l'exécution G4, `memcheck`, `racecheck` et l'absence de PTX restent donc la porte suivante. La Phase 7 reste `ready` et la Phase 8 reste bloquée.
 
 ### But
 

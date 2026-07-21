@@ -108,6 +108,14 @@ Le wrapper hôte construit indépendamment chaque polytope avec 7.6, puis rejoue
 
 L'enclosure rationnelle vers binary64 est partagée avec les chemins Phase 4 plutôt que dupliquée une troisième fois. Aucun fichier `.cu` n'est ajouté par 7.7; NVCC, G4, `memcheck`, `racecheck`, le débit et tout statut public restent ouverts. La Phase 7 demeure `ready`.
 
+## Jalon 7.8 — source CUDA sans délégation de preuve
+
+La proposition réelle suit exactement les statuts du faux lanceur. La planification hôte réserve des lignes complètes; le device n'utilise aucun compteur d'émission et écrit le record de chaque triplet à son ordinal. Le stream, les cellules, frontières, offsets, records et code d'échec appartiennent au contexte. La capacité entière est remise à zéro et recopiée, afin que la validation 7.7 authentifie aussi sa queue.
+
+L'audit mathématique relit Cramer en intervalles. Un déterminant séparé de zéro enferme une intersection unique; les divisions dirigées enferment alors ses coordonnées. Une borne inférieure strictement positive d'une forme est un témoin valide d'infaisabilité, tandis que la faisabilité proposée exige toutes les bornes supérieures non positives. Toute indécision devient `unknown`. Ce filtre peut perdre des rejets et des survivants, jamais fabriquer une décision scientifique : le résultat demeure celui du rejeu rationnel 7.6.
+
+Le checker statique et le smoke via faux launcher sont verts; ASan/UBSan ferme également le wrapper hôte. La compilation NVCC 12.9 et la qualification G4 restent explicitement non acquises à ce checkpoint. La source ne suffit ni à fermer la Phase 7, ni à ouvrir la Phase 8.
+
 ## Convention analytique des poids
 
 Pour le site $p_i$ de poids $w_i$, la puissance utilisée par l'audit est

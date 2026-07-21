@@ -574,6 +574,70 @@ if(MORSEHGP3D_ENABLE_CUDA)
   endif()
 
   add_library(
+    morsehgp3d_gpu_h_polytope_proposal
+    STATIC
+      src/cuda/phase7_h_polytope_proposal_internal.hpp
+      src/cuda/phase7_h_polytope_proposal.cu
+      src/gpu/rational_binary64_enclosure.hpp
+      src/gpu/h_polytope_proposal.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_h_polytope_proposal
+    ALIAS morsehgp3d_gpu_h_polytope_proposal
+  )
+  target_include_directories(
+    morsehgp3d_gpu_h_polytope_proposal
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_h_polytope_proposal
+    PUBLIC morsehgp3d::spatial
+    PRIVATE Threads::Threads
+  )
+  target_compile_features(
+    morsehgp3d_gpu_h_polytope_proposal
+    PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(morsehgp3d_gpu_h_polytope_proposal)
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_h_polytope_proposal
+      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/W4> $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_h_polytope_proposal
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_h_polytope_proposal_qualification
+    src/tools/gpu_h_polytope_proposal_qualification.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_h_polytope_proposal_qualification
+    PRIVATE morsehgp3d::gpu_h_polytope_proposal
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_h_polytope_proposal_qualification
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_h_polytope_proposal_qualification
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
+  add_library(
     morsehgp3d_gpu_k1_boruvka
     STATIC
       src/cuda/phase5_k1_boruvka_internal.hpp

@@ -562,6 +562,14 @@ Le résultat scientifique est reconstruit indépendamment avec le noyau 13.4. Po
 
 Une cellule en fallback de capacité, d'intervalle ou de projection possède une plage de transcript vide et utilise entièrement 13.4. En particulier, une constante strictement positive classifiée sur l'hôte force le fallback d'intervalle, car sa preuve exacte de vacuité n'apparaît dans aucun plan transmis. Une corruption de taille, offset, ordinal, epoch, sentinelle, masque, intervalle ou témoin invalide la transaction entière et empoisonne le contexte; chaque lancement doit avancer l'epoch résidente d'exactement une unité. Une capacité physique insuffisante ne tronque jamais une cellule. Le transcript est `proposal_only`; il ne change ni la réduction hiérarchique ni le statut public.
 
+### 13.6 Filtre CUDA par intervalles dirigés
+
+Le device reçoit, pour chaque coefficient rationnel, un intervalle binary64 fermé qui le contient. Toutes les opérations intermédiaires emploient des arrondis dirigés; aucun epsilon, fast math, FMA implicite ou flush-to-zero n'est admis. Pour trois plans, Cramer produit un intervalle de déterminant. S'il contient zéro, le record est inconnu. Sinon, chaque coordonnée est obtenue par une division d'intervalles dont le dénominateur garde un signe strict; une extrémité non finie invalide seulement la proposition.
+
+Chaque forme frontière est ensuite évaluée sur la boîte de coordonnées proposée. Une borne inférieure strictement positive suffit à proposer cette frontière comme témoin de rejet. Un survivant n'est proposé que si toutes les bornes supérieures sont non positives. Son masque `could_be_active` contient les trois plans générateurs et toute frontière dont l'évaluation contient zéro. Ces implications sont unidirectionnelles : le device ne conclut jamais à la singularité exacte, à la faisabilité exacte, à la vacuité, à la dimension ou à l'incidence exacte.
+
+La planification hôte valide d'abord les IDs croissants, le CSR contigu, $6\leq B\leq61$, les flags et les enclosures finies canoniques. Elle attribue une plage seulement si la ligne complète tient dans la capacité. Le kernel met à zéro la capacité entière, écrit chaque slot à son adresse directe et laisse la queue nulle. Après copie retour de toute la capacité et synchronisation du stream possédé, l'epoch avance une seule fois; toute faute CUDA ou structurelle empoisonne le contexte avant publication.
+
 ## 14. Axes d'exécution
 
 Le backend, le profil, le mode et le statut sont orthogonaux :

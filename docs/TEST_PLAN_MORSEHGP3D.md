@@ -271,6 +271,14 @@ Le masque `could_be_active` est testé comme sur-ensemble. Un faux positif dans 
 
 Les prévalidations couvrent offsets d'entrée, IDs de cellule dupliqués, IDs de contrainte dupliqués, domaine ou rôle invalide, boîte non canonique, segment de 56 contraintes, débordement de sommes et budget exact juste insuffisant. Elles précèdent le lancement et ne doivent pas empoisonner le contexte. La capacité n'est jamais testée par une géométrie maximale : la fixture de cap vérifie seulement les besoins $B=61$ et 35990 slots avant fallback. GCC et Clang stricts exécutent le target hôte; aucune TU `.cu`, compilation NVCC, session G4 ou promotion publique n'appartient à 7.7.
 
+### 5.13 Source CUDA et qualification courte 7.8
+
+Le checker statique relit l'API, l'ABI POD, le wrapper exact, le faux lanceur, la primitive d'intervalles 2B, la TU CUDA, CMake et les presets. Des mutations négatives doivent détecter la suppression d'un arrondi dirigé, du zéro intégral de capacité, du stream non défaut, de la garde CUDA 12.9, de l'écriture directe par ordinal ou du target dans un preset. Il refuse epsilon, tolérance, `nextafter`, fast math, FMA, racine, puissance, émission par `atomicAdd` et tout verdict exact ou public dans la TU.
+
+L'exécutable réel utilise quatre cellules dans un ordre non canonique : cube, coupe axiale, constante positive vide et second cube hors capacité. La capacité 55 doit produire deux lignes réussies de 20 et 35 slots, puis deux lignes vides de statuts distincts; inconnu, rejet et survivant doivent tous apparaître. Deux appels sur le même contexte exigent les epochs 1 et 2 et des résultats bit à bit identiques après neutralisation de l'epoch. Chaque résultat exact est comparé au noyau 7.6.
+
+La porte G4 reste courte : compilation release et audit AOT, exécution analytique, contrôle sans PTX, `compute-sanitizer --tool memcheck` puis `--tool racecheck`. La fixture $B=61$ reste un préflight de taille et n'est pas exécutée géométriquement. Un échec de compilation ou de runtime laisse 7.8 non qualifié et ne modifie aucun statut scientifique.
+
 ## 6. Tests de Gamma, du catalogue Gabriel et de la réduction
 
 ### 6.1 Gamma exact et événements Gabriel partiels
