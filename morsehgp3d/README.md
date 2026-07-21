@@ -2,7 +2,7 @@
 
 Ce répertoire porte la nouvelle implémentation décrite par la roadmap. `HGP-old/` reste une référence historique séparée et n'est pas importée par ce cœur.
 
-État actuel : la Phase 5 reste en cours en parallèle, la Phase 7 est fermée et la Phase 8 est `ready`, avec `reference_cpu`, profil `generic_core` et mode `certified` pour les décisions exactes; `cuda_g4` demeure le backend de proposition à accélérer. Les jalons 8.1 à 8.5 ferment sur le domaine borné la boîte, la cellule, le diagramme ordinaire, son différentiel indépendant et les supports naturels de profondeur zéro. Ils ne produisent encore ni catalogue H0 d'ordre un, ni `closed_parent_orders[1]`, ni statut public `exact`.
+État actuel : la Phase 5 reste une ancre $k=1$ ouverte à l'état `ready`, la Phase 7 est fermée, les jalons cellulaires 8.1 à 8.5 sont gelés comme oracles bornés et la Phase 9 est `in_progress`. Son premier jalon `reference_cpu` livre le branch-and-bound exact et budgété des supports de taille deux, avec layout destiné à `cuda_g4`; les checkpoints réinjectables, les tailles trois et quatre et le journal Morse restent à fermer. Aucun statut public `exact` n'en découle encore.
 
 Deux régimes produit orientent le cœur : p95 `warm_e2e` inférieur à une seconde autour de 50 000 points pour $K_{\max}\leq10$, puis streaming transactionnel reprenable à dix millions de points ou davantage. La voie produit est GPU-first avec rejeu exact côté hôte. Avant d'étendre un oracle Voronoï maison, les tests doivent évaluer un adaptateur Geogram épinglé ou une bibliothèque mature équivalente; cette baseline ne devient jamais une autorité sans recertification.
 
@@ -15,6 +15,7 @@ La tranche actuellement intégrée fournit :
 - la partition globale exacte d'une boule fermée en intérieur, shell et extérieur, sans confondre son rang fermé avec un rang filtré par exclusions;
 - un index Morton-LBVH déterministe à 63 bits, avec collisions résolues par `PointId` et AABB formées d'extrema dyadiques exacts;
 - le 1-NN, le top-$k$ et la boule fermée accélérés par élagages AABB stricts, avec shells complets, marges rationnelles positives et comptabilité séparée des distances réellement évaluées;
+- le flux direct exact des supports-paires par self-produit LBVH, avec prunes de rang par borne $\phi$ stricte, classification fermée sparse limitée à neuf intérieurs utiles, shell supplémentaire compté sans matérialisation globale, budgets transactionnels, frontière résiduelle et rejeu frais;
 - l'ancre $k=1$ `reference_cpu` par graphe euclidien complet exact, avec niveaux EMST divisés par quatre, minima singleton, lots de longueurs égales figés, multifusions canoniques, poids exacts et coupes strictes ou fermées;
 - la forêt $k=1$ compacte construite depuis un EMST géométriquement certifié, avec feuilles implicites, niveaux d'événements factorisés, enfants CSR, aucune couverture persistante et cinq arènes bornées par $6(n-1)$ enregistrements;
 - le producteur Borůvka CPU exact sur le LBVH global, avec labels de composantes figés, minima sortants ordonnés par poids exact et extrémités, prune AABB strict, contractions par plus petit `PointId` et vérificateur de rejeu séparé;
@@ -95,7 +96,7 @@ cmake --build build/morsehgp3d --parallel
 ctest --test-dir build/morsehgp3d --output-on-failure
 ```
 
-Les targets exportés sont `morsehgp3d::exact`, `morsehgp3d::spatial` et `morsehgp3d::hierarchy`; chaque étage propage ses dépendances exactes. En configuration CUDA, la cible interne `morsehgp3d::gpu_k1_boruvka`, l'exécutable `morsehgp3d_gpu_k1_boruvka_replay` et le replay complet `morsehgp3d_gpu_k1_boruvka_full_replay` exercent respectivement la primitive et la boucle hybride de Phase 5. Après `cmake --install`, un consommateur peut utiliser `find_package(MorseHGP3D CONFIG REQUIRED)` sans dépendre de chemins d'en-têtes propres à la machine de construction.
+Les targets exportés sont `morsehgp3d::exact`, `morsehgp3d::spatial`, `morsehgp3d::pair_support` et `morsehgp3d::hierarchy`; la cible dédiée aux supports-paires reste séparée de l'archive historique qui contient Gamma, et chaque étage propage ses dépendances exactes. En configuration CUDA, la cible interne `morsehgp3d::gpu_k1_boruvka`, l'exécutable `morsehgp3d_gpu_k1_boruvka_replay` et le replay complet `morsehgp3d_gpu_k1_boruvka_full_replay` exercent respectivement la primitive et la boucle hybride de Phase 5. Après `cmake --install`, un consommateur peut utiliser `find_package(MorseHGP3D CONFIG REQUIRED)` sans dépendre de chemins d'en-têtes propres à la machine de construction.
 
 ### Profils reproductibles de Phase 3
 

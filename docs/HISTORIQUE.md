@@ -20,11 +20,15 @@ La piste grande dimension, anciennement nommée `HomogeneousLensTower`, n'est pa
 
 ## Décision actuelle
 
-La voie exacte de référence active est :
+La relecture intégrale, le 21 juillet 2026, des Parties I et II du manuscrit a recentré l'architecture sur son idée la plus importante : comme Single-Linkage n'a besoin que d'un MST et non de tout le graphe géométrique, MorseHGP3D doit calculer le certificat hiérarchique utile sans construire l'objet ambiant beaucoup plus gros de `HGP-old`.
+
+La voie de vérité bornée reste :
 
 $$\text{prédicats exacts}\longrightarrow\Gamma\text{ exhaustif}\longrightarrow\text{hyper-Kruskal par lots}\longrightarrow\text{tour ordre–échelle}.$$
 
-La voie accélérée construit un catalogue critique peu profond et un flot de Gabriel, mais conserve une sémantique `partial_refinement` tant que toutes les incidences silencieuses ne sont pas localisées par certificat. Son énumération adapte l'algorithme incrémental des ordres à une primitive de diagramme de puissance GPU, sous forme de raffinements de Voronoï restreints. Elle ne matérialise ni mosaïque de Delaunay d'ordre supérieur, ni rhomboid tiling.
+Elle sert uniquement d'oracle pour $n\leq14$. La voie produit explore directement, par branch-and-bound LBVH et filtres GPU, les supports critiques de tailles deux à quatre dont le rang est utile, puis réduit leur flux en journal Morse. Elle interdit les arènes binomiales, les cellules top-$m$, Gamma global et toute reconstruction implicite de la mosaïque de Delaunay d'ordre $K$. Une frontière inachevée reste `budgeted` et n'affirme aucune absence.
+
+La réduction reste `partial_refinement` tant que la preuve M.1 et les gateways silencieux ne sont pas fermés. Le contre-exemple exact à cinq points interdit d'assimiler le flot Gabriel brut au graphe Gamma complet. Voronoï et puissance ne sont plus des étapes produit : Geogram est la baseline privilégiée lorsqu'un test CPU en a besoin, et Paragram ou la primitive interne ne fournissent que des propositions GPU.
 
 L'audit du 15 juillet 2026 a ajouté la [tour globale de boules saturées](math/TOUR_BOULES_SATUREES.md) comme piste de recherche. Sa représentation de Čech/Gamma par saturés et forêt d'intersections est mathématiquement exacte, mais son énumération brute de tous les supports de tailles un à quatre n'est pas une voie scalable au régime produit. Elle devient donc un futur oracle CPU borné et une source de raffinements partiels, sans remplacer l'architecture principale. Le même audit a corrigé la fenêtre critique de Morse en $\lvert I\rvert<k\leq\lvert I\rvert+\lvert U\rvert$ et l'a figée dans `morse-rank-window-regression-v1`.
 

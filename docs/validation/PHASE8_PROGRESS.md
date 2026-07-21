@@ -3,6 +3,9 @@
 > [!IMPORTANT]
 > Phase `8`, backends `reference_cpu` et `reference_python`, profil `generic_core`, mode `certified`. La porte d'entrée est satisfaite par les Phases 1, 4 et 7 fermées. Les jalons 8.1 à 8.5 certifient la boîte de clipping, la fermeture mono-cellule, le diagramme ordinaire clippé entier, son accord avec un atlas affine indépendant et l'extraction de ses supports naturels de profondeur zéro, toujours dans le domaine borné à huit sites. Ils ne ferment ni la Phase 8, ni le catalogue Morse H0, ni aucun statut public.
 
+> [!IMPORTANT]
+> Depuis la relecture des Parties I–II du manuscrit le 21 juillet 2026, cette phase est gelée comme oracle cellulaire borné. Étendre ses cellules top-$m$ reconstruirait la combinatoire de la mosaïque d'ordre $K$ que MorseHGP3D doit éviter. La voie produit est désormais le flux direct LBVH/GPU de Phase 9; les acquis 8.1–8.5 restent des différentiels et des témoins locaux.
+
 ## Jalon 8.1 — décision d'architecture
 
 Le premier jalon de Phase 8 reste entièrement sur l'hôte. Le problème est un scan exact linéaire et ne bénéficie ni d'un transcript GPU ni d'un benchmark long. Une primitive commune calcule désormais l'AABB exacte des sites; le LBVH l'utilise pour ses extrema globaux et vérifie que les témoins recomposés par l'arbre coïncident avec elle.
@@ -138,7 +141,7 @@ Cet atlas est gelé à huit sites et ne sera pas étendu en moteur de Voronoï g
 
 ## Limites et suite saine
 
-La Phase 8 reste `ready` et sa porte de sortie reste ouverte. Le jalon 8.6 doit maintenant injecter séparément les minima singleton de rayon nul, bâtir les lots H0 d'ordre un, produire le `CatalogCertificate` et fermer `closed_parent_orders[1]` seulement si le diagramme, l'extraction et toutes les files sont complets sans overflow ni diagnostic bloquant. Il ne faut ni élargir l'atlas rationnel, ni confondre ce contrôle borné avec le chemin de débit. Le rejeu imbriqué actuel demeure une dette admise uniquement dans le petit domaine de preuve.
+La Phase 8 reste `ready` et sa porte de sortie reste ouverte, mais 8.6 n'est plus le prochain jalon produit. Il demeure un éventuel complément d'oracle borné : injecter séparément les minima singleton de rayon nul, bâtir les lots H0 d'ordre un, produire le `CatalogCertificate` et fermer `closed_parent_orders[1]` seulement si le diagramme, l'extraction et toutes les files sont complets sans overflow ni diagnostic bloquant. Le chantier actif passe à la Phase 9. Il ne faut ni élargir l'atlas rationnel, ni confondre ce contrôle borné avec le chemin de débit. Le rejeu imbriqué actuel demeure une dette admise uniquement dans le petit domaine de preuve.
 
 Aucun `CatalogCertificate`, lot H0, événement Morse public, hiérarchie, `closed_parent_orders[1]`, mesure de débit ou `public_status=exact` n'est produit ici. Les propositions CUDA qualifiées en Phase 7 restent disponibles pour un futur accélérateur, mais ne participent encore à aucune décision 8.3 ou 8.5.
 

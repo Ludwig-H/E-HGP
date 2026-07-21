@@ -6,15 +6,16 @@ Deux cas d'usage gouvernent toutes les décisions : p95 `warm_e2e` inférieur à
 
 ## Parcours recommandé
 
-1. Lire la [spécification MorseHGP3D](SPECIFICATION_MORSEHGP3D.md) pour fixer l'objet et les deux profils de sortie.
-2. Lire la [définition HGP 3D](math/DEFINITION_HGP_3D.md) pour relier les multicovertures aux K-polyèdres du manuscrit.
-3. Lire le [catalogue critique 3D](math/CATALOGUE_CRITIQUE_3D.md) pour la caractérisation Morse et l'énumération sans mosaïque matérialisée.
-4. Lire l'[audit de la tour globale de boules saturées](math/TOUR_BOULES_SATUREES.md) pour distinguer cette représentation exacte de la voie Morse tronquée et de ses limites pratiques.
-5. Consulter les [attaches par miniball](math/ATTACHES_DESCENTE_MINIBALL.md) pour le profil complet et le contrôle croisé.
-6. Vérifier le [registre des preuves et heuristiques](math/STATUT_PREUVES_ET_HEURISTIQUES.md).
-7. Lire l'[architecture GPU G4](GPU_G4_ARCHITECTURE.md), puis la [feuille de route d'implémentation](ROADMAP_IMPLEMENTATION_MORSEHGP3D.md).
-8. Utiliser le [plan de tests](TEST_PLAN_MORSEHGP3D.md) comme contrat de réception et le [registre des phases](implementation_status.toml) comme état opérationnel.
-9. Consulter les [contrats de données de phase 0](contracts/README.md) avant de produire ou de consommer un certificat sérialisé.
+1. Lire obligatoirement les Parties I et II du [manuscrit de thèse](references/MANUSCRIT_THESE_HAUSEUX.pdf), pages PDF 35 à 134, pour garder la requête hiérarchique — et non la mosaïque d'ordre supérieur — comme objet algorithmique.
+2. Lire la [spécification MorseHGP3D](SPECIFICATION_MORSEHGP3D.md) pour fixer l'objet et les deux profils de sortie.
+3. Lire la [définition HGP 3D](math/DEFINITION_HGP_3D.md) pour relier les multicovertures aux K-polyèdres du manuscrit.
+4. Lire le [catalogue critique 3D](math/CATALOGUE_CRITIQUE_3D.md) pour la caractérisation Morse et l'énumération sans mosaïque matérialisée.
+5. Lire l'[audit de la tour globale de boules saturées](math/TOUR_BOULES_SATUREES.md) pour distinguer cette représentation exacte de la voie Morse tronquée et de ses limites pratiques.
+6. Consulter les [attaches par miniball](math/ATTACHES_DESCENTE_MINIBALL.md) pour le profil complet et le contrôle croisé.
+7. Vérifier le [registre des preuves et heuristiques](math/STATUT_PREUVES_ET_HEURISTIQUES.md).
+8. Lire l'[architecture GPU G4](GPU_G4_ARCHITECTURE.md), puis la [feuille de route d'implémentation](ROADMAP_IMPLEMENTATION_MORSEHGP3D.md).
+9. Utiliser le [plan de tests](TEST_PLAN_MORSEHGP3D.md) comme contrat de réception et le [registre des phases](implementation_status.toml) comme état opérationnel.
+10. Consulter les [contrats de données de phase 0](contracts/README.md) avant de produire ou de consommer un certificat sérialisé.
 
 ## Sources fondatrices
 
@@ -25,7 +26,7 @@ Le [manuscrit de thèse](references/MANUSCRIT_THESE_HAUSEUX.pdf) est la source n
 - la nécessité de Gabriel pour les simplexes séparants;
 - la revendication de préservation des K-polyèdres non triviaux par le K-graphe de Gabriel et un K-arbre minimum couvrant, désormais contredite en général par une fixture exacte du dépôt.
 
-La théorie de Morse de la distance K-NN fournit la caractérisation locale des centres critiques et de leur indice. Les articles sur les mosaïques d'ordre supérieur guident l'énumération, mais la structure combinatoire complète n'est pas matérialisée. L'article GPU sur les diagrammes de puissance guide la primitive de clipping, sans être utilisé comme certificat numérique. Le [répertoire des références](references/README.md) distingue les PDF locaux des liens externes et documente les licences.
+La théorie de Morse de la distance K-NN fournit la caractérisation locale des centres critiques et de leur indice. Les articles sur les mosaïques d'ordre supérieur guident l'énumération, mais la structure combinatoire complète n'est pas matérialisée. L'article GPU sur les diagrammes de puissance guide une baseline de proposition pour l'oracle cellulaire borné; il n'est ni un certificat numérique, ni la primitive du chemin produit direct. Le [répertoire des références](references/README.md) distingue les PDF locaux des liens externes et documente les licences.
 
 ## Contrats scientifiques
 

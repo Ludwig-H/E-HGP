@@ -44,7 +44,8 @@
 
 ### Développement MorseHGP3D / MorseHGP3D Development
 
-- Avant toute implémentation, lire `docs/SPECIFICATION_MORSEHGP3D.md`, `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`, `docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md` et `docs/TEST_PLAN_MORSEHGP3D.md`.
+- Avant toute implémentation, lire les deux premières parties de `docs/references/MANUSCRIT_THESE_HAUSEUX.pdf` — Partie I, pages PDF 35 à 76, puis Partie II, pages PDF 77 à 134 — ainsi que `docs/SPECIFICATION_MORSEHGP3D.md`, `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md`, `docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md` et `docs/TEST_PLAN_MORSEHGP3D.md`.
+- Garder comme invariant d'architecture que MorseHGP3D doit alléger fortement `HGP-old` : calculer la hiérarchie utile sans matérialiser la mosaïque de Delaunay d'ordre supérieur. Tout nouveau jalon doit expliquer quelles structures globales, cellules, cofaces ou incidences il évite de construire et pourquoi son coût intermédiaire reste compatible avec les cibles produit. Un oracle exhaustif borné peut falsifier ou recertifier le chemin produit, mais ne doit jamais devenir son architecture par défaut ni être réimplémenté sous un autre nom.
 - Annoncer la phase, le `backend`, le `profile` et le `mode`; ne pas commencer si la porte d'entrée de la phase n'est pas documentée comme satisfaite.
 - Mettre à jour `docs/implementation_status.toml` dans le même commit que toute ouverture ou fermeture de phase, puis exécuter `python tools/check_implementation_status.py`.
 - Un benchmark, un accord moyen ou une sortie plausible ne peut jamais promouvoir `public_status=exact`; seuls les certificats et oracles prévus le peuvent.

@@ -5,17 +5,25 @@
 
 ## 1. Verdict d'architecture
 
-La bonne voie 3D n'est pas de lisser la hiérarchie puis d'espérer retrouver ses fusions. Elle consiste à exploiter trois propriétés propres à la dimension fixée et à $K_{\max}=10$ :
+La bonne voie 3D n'est ni de lisser la hiérarchie puis d'espérer retrouver ses fusions, ni de reconstruire sous un autre nom la mosaïque de Delaunay d'ordre $K$ utilisée par `HGP-old`. Elle consiste à exploiter trois propriétés propres à la dimension fixée et à $K_{\max}=10$ :
 
 1. les changements de $H_0$ sont portés par des sphères critiques de rang fermé au plus onze;
 2. leur support minimal contient au plus quatre observations en position générale;
 3. les événements d'indice un sont exactement les simplexes de Gabriel utiles au graphe de facettes du manuscrit.
 
-MorseHGP3D exact est donc défini par la chaîne de référence
+Les Parties I et II du manuscrit donnent le principe directeur : Single-Linkage répond à sa requête avec un certificat sparse de type MST au lieu de conserver tout le graphe géométrique ou toute la filtration de Čech. MorseHGP3D doit obtenir le même allègement conceptuel vis-à-vis de `HGP-old` : calculer le certificat Morse minimal de la hiérarchie demandée, et non l'objet ambiant beaucoup plus gros dont elle peut être déduite.
 
-$$\text{raffinement restreint certifié}\longrightarrow\text{catalogue critique}\longrightarrow\Gamma\text{ exhaustif}\longrightarrow\text{hyper-Kruskal gradué}.$$
+La chaîne de vérité, volontairement bornée aux petits nuages, est
 
-Le flot de Gabriel, les descentes par miniball, la DTM, l'entropie et les voisinages approchés restent des voies de proposition, de connectivité positive ou de compression. Aucun ne remplace Gamma exhaustif dans la base exacte v2 sans une nouvelle preuve couvrant les incidences silencieuses.
+$$\text{oracle de supports}\longrightarrow\text{catalogue critique}\longrightarrow\Gamma\text{ exhaustif}\longrightarrow\text{hyper-Kruskal gradué}.$$
+
+Cette chaîne définit et falsifie l'objet mathématique; elle n'est pas le chemin produit. Les supports et `Gamma` exhaustifs sont plafonnés au domaine de référence $n\leq14$; l'atlas cellulaire qui ferme les parents top-$m$ reste séparément gelé à $n\leq8$. Le chemin produit ciblé est
+
+$$\text{LBVH}\longrightarrow\text{branch-and-bound des supports }2\text{--}4\longrightarrow\text{flux d'événements}\longrightarrow\text{attaches de Morse}\longrightarrow\text{lots atomiques}.$$
+
+Il est interdit d'y allouer un tableau indexé par $\binom{n}{k}$, de conserver toutes les cellules top-$m$, de construire toutes les cofaces de Gamma ou de persister une mosaïque d'ordre supérieur. Les seuls états durables autorisés sont les points et leur index spatial, une frontière de travail explicitement budgetée, les événements et attaches effectivement produits, les lots triés et les sorties demandées. Une cellule ou un polytope local est un témoin temporaire évincé après certification.
+
+Chaque sous-arbre de candidats omis doit porter un certificat d'exclusion rejouable. Une frontière non épuisée donne un résultat `budgeted` sans assertion d'absence. Le flot de Gabriel brut, les descentes par miniball, la DTM, l'entropie et les voisinages approchés restent des voies de proposition, de connectivité positive ou de compression. Le flux direct ne remplace Gamma exhaustif dans une base exacte qu'après preuve de complétude des événements et des attaches, notamment des incidences silencieuses mises en évidence par le contre-exemple à cinq points.
 
 Une seconde représentation combinatoire est désormais démontrée sur le papier : la [tour globale de boules saturées](math/TOUR_BOULES_SATUREES.md) engendre exactement le complexe de Čech, puis les composantes de Gamma, au moyen de simplexes implicites et d'une forêt d'intersections seuillée. Elle constitue une voie candidate indépendante, non un backend ni une base de preuve du contrat v2. Son prototype, sa persistance et son éventuelle migration contractuelle suivent une piste de recherche séparée; la chaîne active ci-dessus et la cible $K_{\max}=10$ restent inchangées.
 
@@ -138,6 +146,20 @@ CriticalEvent
 ```
 
 Le centre approché n'est jamais l'identité d'un événement. L'identité canonique est formée par le shell complet, l'ensemble intérieur, le support minimal et les témoins exacts.
+
+### 5.1 Énumérateur produit direct
+
+Le target produit initialise le self-produit de la racine LBVH et le partitionne sans duplication en supports non ordonnés de tailles deux, trois et quatre. Pour les paires, un état support est soit diagonal $(A,A)$, soit formé de deux plages Morton disjointes; $(A,A)$ se développe exactement en $(L,L)$, $(L,R)$ et $(R,R)$, et une feuille diagonale est supprimée.
+
+Pour trois AABB dyadiques $A$, $B$ et $C$, le maximum continu exact de $\phi(x,u,v)=(x-u)\mathbin{\cdot}(x-v)$ se sépare par axe :
+
+$$M(A,B,C)=\sum_{d=1}^{3}\max_{x_d\in\lbrace c_d^{-},c_d^{+}\rbrace,\ u_d\in\lbrace a_d^{-},a_d^{+}\rbrace,\ v_d\in\lbrace b_d^{-},b_d^{+}\rbrace}(x_d-u_d)(x_d-v_d).$$
+
+Chaque maximum unidimensionnel teste les huit triplets d'extrémités indépendamment; il ne doit pas être remplacé par huit coins tridimensionnels corrélés. Si $M(A,B,C)<0$, tous les points de $C$ sont strictement intérieurs à toutes les boules diamétrales du produit $A\times B$. Un certificat de rang agrège seulement une antichaîne canonique de plages témoins deux à deux disjointes et disjointes des plages supports. Lorsque la cardinalité de leur union atteint $s_{\max}-1$, chaque paire possède un rang fermé au moins $s_{\max}+1$ et le produit est exclu.
+
+Une unité de frontière se termine exclusivement par un prune exact rejouable, une classification globale d'une feuille ou l'émission transactionnelle de tous ses enfants qui en forment une partition. Une recherche de témoins inachevée ne prouve rien. La complétude des paires exige une frontière vide, puis reste séparée de celle des supports trois et quatre et de celle des attaches. Une interruption conserve la frontière et les événements déjà certifiés, avec un statut budgétaire sans assertion d'absence.
+
+La classification d'une paire feuille est une requête fermée sparse, pas une matérialisation de la partition globale. Une borne minimum strictement supérieure au rayon compte un sous-arbre extérieur sans identifiants; une borne maximum strictement inférieure compte un sous-arbre intérieur et rejette dès que le compteur dépasse $s_{\max}-2$; une égalité descend. Une paire pertinente conserve au plus neuf identifiants intérieurs. Le shell est compté complètement, mais un diagnostic dégénéré ne conserve que son cardinal et le plus petit identifiant extra-support. Le budget des références `PointId` est distinct de celui des records. La frontière résiduelle de 9.1-RCPU est seulement un reçu auditable; elle ne devient un checkpoint réinjectable lié au nuage et au LBVH qu'en 9.3.
 
 ## 6. Équivalence entre événements et simplexes de Gabriel
 
@@ -460,7 +482,9 @@ Les égalités de niveaux entre événements distincts sont prises en charge par
 
 Le mode exact échoue explicitement lorsqu'un cas non couvert est détecté, lorsque `relevant_gp_complete` est faux ou inconnu, ou lorsqu'un shell pertinent n'est pas complet. Une perturbation symbolique peut servir de diagnostic, mais son résultat porte le statut `perturbed`, pas `exact` pour l'entrée originale.
 
-## 13. Énumération sans mosaïque matérialisée
+## 13. Oracle cellulaire borné, hors chemin produit
+
+Cette section conserve la construction exacte des Phases 7–8 comme oracle de preuve et de différentiel jusqu'à huit sites. La fermeture de tous les parents top-$m$ reconstruirait à grande échelle l'essentiel de la combinatoire que MorseHGP3D cherche précisément à éviter; aucun type, budget ni certificat de cette section n'est donc requis par le target produit de Phase 9.
 
 Pour $I\subseteq X$, $\lvert I\rvert=m$, définissons la cellule top-$m$
 
@@ -476,7 +500,7 @@ $$C_{m+1}(Q)=\bigcup_{u\in Q}P(Q\setminus\lbrace u\rbrace,u)$$
 
 adapte l'algorithme incrémental des ordres à une primitive de diagramme de puissance GPU. Les intersections de deux, trois ou quatre cellules extérieures donnent les supports critiques de même cardinal; le rang est ensuite compté globalement.
 
-Les morceaux issus de parents différents servent à découvrir les labels non vides, mais leur union n'est pas la représentation certifiée de la cellule enfant. Après tri et déduplication d'un label $Q$, $p=\lvert Q\rvert$, la v2 reconstruira obligatoirement le polytope canonique
+Dans cet oracle, les morceaux issus de parents différents servent à découvrir les labels non vides, mais leur union n'est pas la représentation certifiée de la cellule enfant. Après tri et déduplication d'un label $Q$, $p=\lvert Q\rvert$, le contrat cellulaire reconstruit obligatoirement le polytope canonique
 
 $$C_p(Q)\cap\Omega=\Omega\cap\bigcap_{q\in Q,\ v\notin Q}\left\lbrace y:\left\Vert y-q\right\Vert^2\leq\left\Vert y-v\right\Vert^2\right\rbrace.$$
 
@@ -486,7 +510,7 @@ $$Q_{\max}(z)=\arg\max_{q\in Q}\left\Vert z-q\right\Vert^2,\qquad V_{\min}(z)=\a
 
 Notons $d_{\max}(z)$ et $d_{\min}(z)$ leurs valeurs communes. Si $d_{\max}(z)<d_{\min}(z)$, toutes les contraintes croisées sont strictes au sommet. Si $d_{\max}(z)=d_{\min}(z)$, toutes les paires de $Q_{\max}(z)\times V_{\min}(z)$ sont insérées ou enregistrées comme incidences actives, même sans violation. Si $d_{\max}(z)>d_{\min}(z)$, toutes ces paires violatrices sont ajoutées, puis la cellule est reclippée. Chaque différence étant affine, la validation de tous les sommets certifie toutes les contraintes sur le polytope; la fermeture exige en plus que toutes les paires actives à égalité aient été réconciliées. La déduplication du seul label $Q$ ne suffit pas; `canonical_children_complete` exige cette reconstruction fermée pour chaque enfant.
 
-Un complexe de fragments qui conserverait des coutures internes est une optimisation future. Une vraie strate naturelle pourrait croiser une couture; prouver sa propagation sans perte ni double compte reste une `proof_obligation`. Ce format n'est pas autorisé dans le chemin exact de la v2.
+Un complexe de fragments qui conserverait des coutures internes ne certifierait pas cet oracle. Une vraie strate naturelle pourrait croiser une couture; prouver sa propagation sans perte ni double compte reste une `proof_obligation` locale au contrat cellulaire et ne motive pas son extension au chemin produit.
 
 Le calcul est restreint à une boîte tridimensionnelle exacte $\Omega$ telle que
 
@@ -544,11 +568,11 @@ Un support n'est accepté que si $I_U=\varnothing$, $S_U=U$ et $\lvert U\rvert\l
 
 Les six caps de confiance au plafond $n=8$ sont 247 contacts source, 4704 propositions, 13440 références brutes de sites, 154 supports uniques, 504 références uniques et 1232 classifications globales. Le préflight précède le rejeu du diagramme et toute géométrie d'extraction. Le résultat sépare explicitement proposition flottante éventuelle en amont, décision exacte recertifiée, réduction future et statut public; ce jalon ne contient lui-même aucune proposition flottante et ne publie aucune réduction hiérarchique.
 
-Cette portée n'injecte pas les singletons de rayon nul et ne produit ni lot H0, ni événement Morse public, ni `CatalogCertificate`, ni `closed_parent_orders[1]`. L'absence d'extra-shell pertinent à profondeur zéro n'implique pas `RelevantGP` aux profondeurs suivantes. Le catalogue exhaustif de petits nuages peut servir d'oracle dans les tests, mais il est interdit dans le producteur. L'accélération produit devra remplacer l'énumération bornée par des carriers et classifications proposés sur `cuda_g4`, puis conserver la même recertification exacte côté hôte.
+Cette portée n'injecte pas les singletons de rayon nul et ne produit ni lot H0, ni événement Morse public, ni `CatalogCertificate`, ni `closed_parent_orders[1]`. L'absence d'extra-shell pertinent à profondeur zéro n'implique pas `RelevantGP` aux profondeurs suivantes. Le catalogue exhaustif de petits nuages peut servir d'oracle dans les tests, mais il est interdit dans le producteur. L'accélération produit parcourt directement les supports deux à quatre par produits de nœuds LBVH sur `cuda_g4`, puis recertifie exactement prunes et feuilles sans demander de carrier cellulaire.
 
-La complétude globale suit alors par induction. La base est $C_0(\varnothing)\cap\Omega=\Omega$. Si tous les parents canoniques de profondeur $m$ et leurs diagrammes restreints sont fermés, l'identité de raffinement émet exactement tous les labels non vides de profondeur $m+1$; la reconstruction canonique les transforme en parents exacts. Cette induction est le corollaire D.4 du [catalogue critique](math/CATALOGUE_CRITIQUE_3D.md) et s'arrête aux parents $C_{m_{\star}}$; à la dernière profondeur, seuls les morceaux nécessaires aux strates sont fermés.
+La complétude globale de l'oracle cellulaire suit alors par induction. La base est $C_0(\varnothing)\cap\Omega=\Omega$. Si tous les parents canoniques de profondeur $m$ et leurs diagrammes restreints sont fermés, l'identité de raffinement émet exactement tous les labels non vides de profondeur $m+1$; la reconstruction canonique les transforme en parents exacts. Cette induction est le corollaire D.4 du [catalogue critique](math/CATALOGUE_CRITIQUE_3D.md) et s'arrête aux parents $C_{m_{\star}}$; à la dernière profondeur, seuls les morceaux nécessaires aux strates sont fermés.
 
-Cette procédure garde le pire cas combinatoire de la géométrie 3D. Elle remplace une construction monolithique par des cellules indépendantes, fermables, diffusables et adaptées au GPU; elle ne transforme pas une sortie quadratique en sortie linéaire.
+Cette procédure garde le pire cas combinatoire de la géométrie 3D. Elle remplace une construction monolithique par des cellules indépendantes, mais ne transforme pas une sortie quadratique en sortie linéaire et reste donc gelée comme oracle.
 
 Pour $n\geq2$, la profondeur géométrique maximale utile est
 
@@ -727,7 +751,7 @@ La spécification est satisfaite lorsque :
 5. toute permutation des observations ne change que les identifiants canoniques;
 6. tout lot égal produit la même multifurcation quel que soit l'ordonnancement GPU;
 7. chaque carré ordre–échelle commute;
-8. aucun statut `exact` n'est émis lorsqu'une fermeture, une cellule enfant canonique, une attache, `relevant_gp_complete` ou une dégénérescence reste indécise;
+8. aucun statut `exact` n'est émis lorsqu'un prune, une frontière, une classification feuille, une attache, `relevant_gp_complete` ou une dégénérescence reste indécis; lorsqu'un oracle cellulaire est invoqué, sa propre fermeture doit également être complète;
 9. une sortie budgétée vérifie la propriété de raffinement unilatéral et n'expose jamais sa `partial_forest` comme une forêt HGP exacte.
 
 La [feuille de route](ROADMAP_IMPLEMENTATION_MORSEHGP3D.md) transforme ces conditions en phases d'implémentation; le [plan de tests](TEST_PLAN_MORSEHGP3D.md) les rend falsifiables.

@@ -9,13 +9,13 @@ La cible initiale est `g4-standard-48` : un GPU NVIDIA RTX PRO 6000 Blackwell Se
 Conséquences :
 
 - architecture mono-GPU d'abord;
-- propositions massivement FP32 et sensibles à la bande passante;
+- propositions géométriques FP32 seulement lorsqu'elles sont explicitement `proposal_only`; les prunes de Phase 9 utilisent au minimum des intervalles FP64 dirigés avant rejeu exact;
 - décisions filtrées, sans supposer un débit FP64 de datacenter;
 - 76,8 Go au plus alloués par le cœur, soit 80 % de la VRAM;
 - mémoire hôte utilisée pour les runs triés, checkpoints et fallbacks;
 - aucun benchmark mesuré pendant une compilation JIT.
 
-Les Tensor Cores ne sont pas au centre du problème. Les opérations dominantes sont clipping, parcours BVH, tris, réductions, prédicats et union–find.
+Les Tensor Cores ne sont pas au centre du problème. Les opérations dominantes sont parcours de produits BVH, bornes de boîtes, compactions, tris, prédicats et union–find.
 
 ## 2. Couches logicielles
 
@@ -27,22 +27,22 @@ C++20 orchestration
     états, budgets, checkpoints, files CPU de fallback
 
 CUDA core
-    LBVH, diagrammes restreints, rangs, miniballs, tris, hyper-Kruskal
+    LBVH, branch-and-bound supports 2/3/4, rangs, tris, lots DSU
 
 Exact predicates
     filtres FP64, expansions GPU, multiprécision CPU
 
 Reference backend
-    oracle exhaustif CPU indépendant
+    supports/Gamma exhaustifs CPU bornés, indépendants du target produit
 ```
 
-PyTorch ne doit pas être une dépendance obligatoire du cœur. Une intégration optionnelle peut accepter un tenseur CUDA via DLPack sans copie. La liaison Python utilisera nanobind ou pybind11 et ne créera jamais un objet Python par cellule ou événement.
+PyTorch ne doit pas être une dépendance obligatoire du cœur. Une intégration optionnelle peut accepter un tenseur CUDA via DLPack sans copie. La liaison Python utilisera nanobind ou pybind11 et ne créera jamais un objet Python par support ou événement.
 
 ## 3. Sémantique des précisions
 
 | étage | usage | pouvoir de décision |
 |---|---|---|
-| FP32 | coordonnées de proposition, Morton, clipping approché, ordre de priorité | aucun si marge non certifiée |
+| FP32 | coordonnées de proposition, Morton, bornes approchées, ordre de priorité | aucun si marge non certifiée |
 | FP64 filtré | évaluation avec borne d'erreur | décision si l'intervalle exclut zéro |
 | expansions GPU | signes de déterminants, formes affines et produits croisés ambigus | décision exacte du signe |
 | multiprécision CPU | cas rares, égalités et diagnostic | décision exacte finale |
@@ -67,47 +67,38 @@ PointsSoA
 
 Les AABB du LBVH utilisent des bornes sûres. Les coordonnées réordonnées gardent une table de permutation vers les identifiants canoniques.
 
-### 4.2 Labels géométriques et hiérarchiques
+### 4.2 Frontières de supports et journal hiérarchique
 
-Pour $n\geq1$, poser $K_{\mathrm{eff}}=\min(K_{\max},n)$ et $s_{\max}=\min(K_{\mathrm{eff}}+1,n)$. Si $s_{\max}\geq2$, la profondeur générique vaut $m_{\star}=s_{\max}-2$; si $s_{\max}=1$, les minima de rayon nul suffisent et aucune cellule n'est raffinée. Le lemme d'arrêt $H_0$ distingue donc trois tailles : intérieur $m\leq m_{\star}$, facette $k\leq K_{\mathrm{eff}}$ et ensemble fermé $s\leq s_{\max}$. Les maxima neuf, dix et onze ne valent que pour $K_{\max}=10$ et $n\geq11$.
-
-```text
-TopCellLabelArena[m <= m_star]
-    ids[count][m]
-    hash[count]
-    parent_offsets[count + 1]
-    status[count]
-
-CanonicalChildArena[q <= m_star + 1]
-    ids[count][q]
-    terminal[count]
-    certificate_handle[count]
-
-FacetLabelArena[k <= K_eff]
-    ids[count][k]
-
-ClosedEventSetArena[s <= s_max]
-    ids[count][s]
-```
-
-Chaque label est trié et stocké à stride fixe dans son arène. Un hash 64 ou 128 bits accélère le tri, mais toute collision est résolue par comparaison du label complet.
-
-### 4.3 Cellules et morceaux
-
-Les polyèdres sont stockés dans des arènes CSR : plans, sommets approchés, plans liants et incidences. Aucun `new` par cellule. Les fast paths ont des capacités explicites par classe de complexité; tout dépassement va dans une file d'overflow, jamais dans une troncature.
+Pour $n\geq1$, poser $K_{\mathrm{eff}}=\min(K_{\max},n)$ et $s_{\max}=\min(K_{\mathrm{eff}}+1,n)$. Le chemin produit utilise $s_{\max}$ uniquement comme seuil de rang : il ne crée aucun univers de labels de cardinal $k$, aucune couche top-$m$ et aucune coface Gamma. Une seule exploration des supports alimente tous les ordres demandés.
 
 ```text
-CellArena
-    cell_offsets
-    plane_ids
-    vertex_offsets
-    approximate_xyz
-    binding_plane_ids
-    artificial_boundary_bits
-    closure_status
+SupportFrontierSoA
+    node_id_0[capacity] ... node_id_3[capacity]
+    support_size[capacity]
+    traversal_state[capacity]
+    guaranteed_interior_count[capacity]
+    replay_parent[capacity]
+
+LeafSupportSoA
+    point_id_0[count] ... point_id_3[count]
+    support_size[count]
+    proposal_flags[count]
+
+MorseJournalSoA
+    event_kind[count]
+    exact_level_handle[count]
+    support_ids[count][4]
+    closed_rank[count]
+    attachment_offsets[count + 1]
 ```
 
-La v1 ne recolle pas les fragments géométriques issus de parents différents. Après déduplication d'un label enfant $Q$, elle reconstruit une unique cellule canonique depuis la boîte strictement paddée $\Omega$. Les fragments émettent seulement un `FragmentHint` composé d'un label, de strates candidates et de contraintes $Q\times(X\setminus Q)$ globalement sûres. Ces amorces peuvent accélérer le clipping, mais ne participent jamais au certificat de complétude.
+Les files sont bornées par capacité et traitées en deux passes count/emit ou par scans segmentés. Une saturation conserve la frontière non traitée dans `PartialScope` et retourne `budget_exhausted`; elle ne tronque jamais silencieusement. Les tuples feuilles et événements sont triés par clé totale avant déduplication. Un hash accélère le tri, mais toute collision est résolue par les identifiants complets.
+
+### 4.3 Témoins géométriques éphémères
+
+Une boule, un polytope local ou une cellule de Voronoï peut être construit comme témoin temporaire d'un candidat ou dans un test différentiel, puis doit être évincé après classification. Il n'existe pas de `CellArena` produit, pas de couture globale et pas de reconstruction canonique de chaque label enfant.
+
+Geogram, Paragram ou la primitive H-polytope interne peuvent fournir des propositions et des oracles de test. Si Voronoï n'est nécessaire qu'à un différentiel, l'adaptateur Geogram est préféré à une nouvelle implémentation. Aucun de ces moteurs ne décide seul un prune, une complétude ou un statut public.
 
 ### 4.4 Événements
 
@@ -126,7 +117,7 @@ Les forêts, DSU, ancres et lots sont des tableaux d'identifiants compacts. Les 
 Un seul allocateur device est autorisé : `cudaMallocAsync` ou RMM après benchmark, jamais les deux en concurrence. Le planificateur réserve :
 
 - 20 % de VRAM au runtime, aux bibliothèques et aux fallbacks;
-- deux arènes alternées pour clipping et compaction;
+- deux arènes alternées pour frontières et compaction;
 - un buffer de tri dimensionné par la primitive CCCL/CUB;
 - une réserve d'urgence qui permet de sérialiser un checkpoint avant arrêt budgétaire.
 
@@ -150,37 +141,37 @@ La garde disque est transactionnelle. Avant toute écriture, elle démontre que 
 
 ## 6. Index spatial global
 
-Un Morton sort suivi d'un LBVH est construit une fois. Il sert à :
+L'implémentation actuelle construit le Morton/LBVH récursivement sur CPU, puis les contextes CUDA des Phases 4–5 chargent un snapshot immuable. Cette voie suffit au premier noyau de Phase 9, mais pas à la qualification `warm_e2e` ni au régime 10 M+. Le target doit construire sur device les codes Morton, le radix sort stable, la topologie et les AABB bottom-up, puis vérifier son manifeste contre la référence.
 
-- proposer les sites voisins d'une cellule;
-- calculer le plus proche voisin exact hors d'un petit label $I$;
-- calculer le top-$k$ et le shell complet;
-- compter l'intérieur d'une sphère avec arrêt dès que le rang dépasse $s_{\max}$;
-- certifier l'absence de point dans une miniball de Gabriel.
+L'index construit une fois sert à :
 
-Une requête warp-coopérative maintient un petit heap de taille $K_{\mathrm{eff}}+2$. L'exclusion de $m_{\star}$ identifiants au plus est faite dans des registres ou une petite table partagée. Les AABB ne sont élaguées que lorsque leur borne inférieure certifiée dépasse strictement le seuil courant.
+- ordonner canoniquement les points et exposer des AABB SoA;
+- parcourir les produits auto-duaux de deux, trois ou quatre nœuds supports;
+- compter par sous-arbre des témoins garantis strictement intérieurs à toutes les boules d'un produit;
+- arrêter un comptage dès que le rang utile est dépassé;
+- proposer le rang et le shell global d'un support feuille, puis laisser `reference_cpu` ou la cascade exacte les décider;
+- proposer les voisins utiles aux descentes et attaches sans leur donner de pouvoir d'exclusion.
 
-Une recherche approchée peut fournir le seuil initial; le parcours global reste obligatoire en mode exact.
+Pour les paires, une requête warp-coopérative borne $\phi(x,u,v)=(x-u)\mathbin{\cdot}(x-v)$ sur trois AABB. Une borne supérieure strictement négative compte le sous-arbre témoin entier; zéro impose une descente. Les témoins comptés forment une antichaîne de plages Morton deux à deux disjointes et disjointes des supports, afin qu'aucun point ne soit compté deux fois. Pour les triplets et quadruplets, les filtres de dépendance, barycentriques et d'in-sphère obéissent au même contrat proposition--rejeu exact.
 
-## 7. Primitive de diagramme de puissance
+Une recherche approchée ou une petite liste locale peut prioriser la frontière; le parcours global et la fermeture de sa frontière restent obligatoires en mode exact.
 
-Le moteur doit accepter de nombreux problèmes indépendants : un domaine convexe parent, une liste initiale de sites et une liste d'exclusions. Il retourne les cellules restreintes, leurs sommets, les plans liants et les incidences.
+## 7. Voronoï et puissance : propositions et tests seulement
 
-Le projet [Paragram](https://github.com/zenseact/paragram), code associé à Taveira et al., est une base de comparaison pertinente : clipping GPU, culling directionnel, BVH et chunking. Il devra être épinglé au commit audité, testé sans fast math et enveloppé par notre couche de fermeture. Son adjacency CSR et ses flottants ne suffisent pas au certificat E-HGP.
+Le chemin produit n'a pas besoin de construire un diagramme de Voronoï ou de puissance global. Ces moteurs restent utiles pour proposer des supports, visualiser et bâtir des différentiels bornés.
+
+Pour un oracle Voronoï CPU de test, Geogram est préféré à une réimplémentation locale. Le projet [Paragram](https://github.com/zenseact/paragram), code associé à Taveira et al., reste la comparaison GPU pertinente pour clipping, culling directionnel, BVH et chunking. Leurs adjacences et flottants ne suffisent pas au certificat E-HGP.
 
 Plan d'intégration :
 
-1. benchmarker la version amont sans modification;
-2. vérifier les conventions de poids sur des cellules analytiques;
-3. exposer sommets, plans liants et statuts d'overflow;
+1. adapter Geogram pour les tests CPU qui demandent réellement Voronoï;
+2. benchmarker Paragram sans modification pour les seules propositions GPU pertinentes;
+3. vérifier les conventions de poids sur des cellules analytiques;
 4. compiler une variante d'audit sans fast math;
-5. ajouter l'oracle exact aux sommets;
-6. comparer chaque cellule aux oracles CPU;
-7. décider ensuite entre adaptateur, fork minimal ou réimplémentation.
+5. comparer les supports proposés au flux direct et à l'oracle exhaustif borné;
+6. conserver l'adaptateur optionnel seulement s'il réduit le temps de développement ou le travail GPU mesuré.
 
 Le cœur E-HGP ne dépendra pas du statut `success` du moteur externe pour publier `exact`.
-
-Pour un label enfant dédupliqué $Q$, la fermeture de référence repart toujours de $\Omega$. Elle clippe par une amorce de contraintes cross $Q\times(X\setminus Q)$, puis, à chaque sommet provisoire, calcule exactement le ou les plus éloignés de $Q$ et le 1-NN avec co-ties dans $X\setminus Q$. Toute inégalité violée ou égale manquante est ajoutée et la cellule est reclippée. Seule une file vide produit `CanonicalCellCertificate`; aucune union flottante de fragments ne peut produire ce certificat.
 
 ## 8. Noyaux CUDA
 
@@ -188,18 +179,18 @@ Pour un label enfant dédupliqué $Q$, la fermeture de référence repart toujou
 |---|---|---|
 | validation et doublons | thread par point puis radix sort | sites canoniques |
 | Morton et LBVH | primitives CCCL/CUB | index global |
-| proposition de sites | warp ou bloc par parent | file initiale |
-| clipping restreint | bloc par cellule | polyèdre provisoire |
-| fermeture aux sommets | warp par sommet | violateurs et co-minimiseurs |
-| déduplication des labels | radix sort par ordre | enfants uniques |
-| réconciliation des incidences | sort-reduce | strates globales |
-| reconstruction canonique | bloc par label enfant | cellule unique, violateurs, co-ties |
-| centre support 2/3/4 | warp par strate | témoin de centre et barycentriques |
-| rang et shell | warp par candidat | événement accepté ou rejeté |
+| expansion auto-duale des supports | warp par unité de frontière | produits enfants canoniques |
+| borne diamétrale support deux | warp par produit et nœuds témoins | prune proposé ou descente |
+| bornes supports trois/quatre | warp ou bloc par produit | prune proposé ou descente |
+| compaction de frontière | scan et sélection | prochaine frontière bornée |
+| centre support 2/3/4 | warp par tuple feuille | centre et barycentriques proposés |
+| rang et shell | warp par support feuille | événement, diagnostic ou rejet proposé |
+| rejeu exact de tous les prunes certifiants | lots CPU bornés | décisions certifiées |
+| déduplication des événements | radix sort et comparaison complète | flux canonique |
 | miniball $k\leq K_{\mathrm{eff}}$ | warp par facette | centre, rayon et support |
 | successeur top-$k$ | warp par centre | arc de descente |
 | comparaison de niveaux | filtre puis file exacte | lots exacts |
-| hyper-Kruskal | bloc par lot | nœuds de fusion et DSU |
+| quotient de lot | bloc par niveau | nœuds de fusion et DSU |
 | bras de Morse | warp par événement | racines antérieures, classes tuées |
 | morphismes verticaux | tableaux compacts | ancres et images |
 | coupe | kernels CSR | composantes et couverture |
@@ -208,14 +199,14 @@ CCCL/CUB fournit radix sort, scan, sélection, réduction et tri segmenté. Les 
 
 ## 9. Ordonnancement faible latence jusqu'à 50 000 points
 
-Après le transfert initial, le chemin de faible latence garde points, LBVH, cellules, catalogue et DSU sur le device :
+Après le transfert initial, le chemin de faible latence garde points, LBVH, deux frontières alternées, flux d'événements et DSU sur le device :
 
 1. validation et index une seule fois;
-2. fermeture ordre par ordre, avec réutilisation des buffers;
-3. extraction des événements dès qu'une cellule est fermée;
-4. tri du catalogue sur GPU;
-5. réduction des $K_{\mathrm{eff}}$ tranches sans copie hôte;
-6. vérification des ancres;
+2. expansion count/emit de la frontière auto-duale, d'abord pour les supports deux puis pour trois et quatre;
+3. prunes proposés par intervalles GPU, compaction immédiate des produits ambigus et mise en lots de tous les prunes qui pourraient contribuer à une sortie certifiée;
+4. classification des tuples feuilles, puis tri et déduplication du flux partagé;
+5. construction du journal Morse et réduction des $K_{\mathrm{eff}}$ tranches sans copie hôte;
+6. vérification des gateways et des ancres;
 7. copie finale compacte seulement.
 
 Les séquences de kernels stabilisées sont capturées dans des CUDA Graphs. Les compteurs et files restent sur device; une synchronisation hôte n'est autorisée qu'à une frontière de phase, une décision de budget ou un fallback réel.
@@ -230,18 +221,18 @@ Le SLO produit principal est `warm_e2e` : runtime et allocateur initialisés, ma
 
 ## 10. Streaming transactionnel à dix millions de points et davantage
 
-Lorsque la mémoire le permet, les points et le LBVH restent résidents; à dix millions de points ou davantage, les cellules et incidences sont le risque dominant et doivent être diffusées transactionnellement. Le premier mode scalable traite ces objets par lots bornés :
+Lorsque la mémoire le permet, les points et le LBVH restent résidents; à dix millions de points ou davantage, les frontières, événements et attaches sont diffusés transactionnellement. Le premier mode scalable traite ces objets par lots bornés :
 
-1. sélectionner un lot de parents selon le budget mémoire;
-2. construire et fermer chaque morceau contre le LBVH global;
-3. extraire événements et signatures d'incidence;
-4. écrire des runs de labels, contraintes sûres et événements triés et checksummés en mémoire hôte, sur Titanium SSD ou sur Hyperdisk selon leur durée de vie;
-5. libérer définitivement la géométrie fermée;
-6. reprendre jusqu'à fermeture de l'ordre;
-7. fusionner les runs, dédupliquer les labels et reconstruire chaque cellule canonique indépendamment du chunk d'origine;
-8. checkpoint avant l'ordre suivant.
+1. sélectionner un segment canonique de frontière selon les budgets mémoire et temps;
+2. produire ses propositions de prune, les reçus de leur recertification exacte, ses descendants ambigus et ses tuples feuilles contre le LBVH global;
+3. classifier les feuilles et émettre événements, diagnostics et compteurs;
+4. écrire des runs triés et checksummés de descendants, événements et replays exacts en mémoire hôte, sur Titanium SSD ou sur Hyperdisk selon leur durée de vie;
+5. publier atomiquement le manifeste du segment, puis libérer ses buffers device;
+6. fusionner et dédupliquer les runs de la génération;
+7. reprendre jusqu'à frontière vide ou arrêt budgétaire;
+8. réduire le flux complet en journal Morse, lui-même streamé par lots de niveaux égaux.
 
-Une cellule peut être évincée seulement si son certificat est indépendant des futures propositions : à chaque sommet, le plus éloigné dans $Q$ a été comparé exactement au 1-NN dans $X\setminus Q$, tous les violateurs et co-ties ont été ajoutés, et la file est vide. Une profondeur ne devient fermée qu'après déduplication globale des labels et fermeture de toutes leurs cellules canoniques. Le complexe de fragments et ses coutures restent une optimisation future derrière preuve et différentiel; ils ne font pas partie du chemin exact v1.
+Une unité de frontière peut être évincée seulement après publication atomique de l'une de ses deux issues : prune exact rejouable, ou liste complète de descendants/feuilles. Le run d'événements n'affirme la complétude qu'après frontière vide pour chacune des tailles deux, trois et quatre. Aucune cellule top-$m$, coface Gamma ou couture géométrique n'apparaît dans ce protocole.
 
 Le véritable out-of-core des **points** est différé. Il demandera une partition Morton, un répertoire global d'AABB et le chargement best-first de chunks jusqu'à certification. Un halo spatial fixe n'est pas exact.
 
@@ -250,11 +241,10 @@ Le véritable out-of-core des **points** est différé. Il demandera une partiti
 Un checkpoint atomique contient :
 
 - hash des points canoniques et de la configuration;
-- ordre et ronde de fermeture;
-- labels parents fermés et file restante;
-- runs triés et empreintes;
-- catalogue partiel avec statut par événement;
-- `PartialScope`, cellules canoniques fermées et labels encore attendus;
+- taille de support, génération et segment courant de la frontière;
+- unités de frontière committées, runs descendants et empreintes;
+- flux d'événements committé avec statut par événement;
+- `PartialScope`, tailles complètes, frontière restante et replays exacts encore attendus;
 - état DSU uniquement si tous les lots antérieurs sont fermés;
 - arène `ExactLevel` canonique et état des comparaisons différées;
 - versions CUDA, pilote, binaire et format.
@@ -301,18 +291,20 @@ cut = result.cut(k=7, squared_level=a, membership="points")
 
 `require_exact=True` lève une erreur structurée lorsque le profil ne peut être certifié. L'exception contient le checkpoint, la raison, les compteurs et les instructions de reprise; elle ne retourne pas silencieusement une forêt conditionnelle.
 
-La combinaison `mode="budgeted", forest_semantics="partial_refinement"` est incompatible avec `require_exact=True`. Elle peut restituer les événements individuellement certifiés, les profondeurs et ordres fermés, les cellules canoniques closes et les loci dégénérés dans `PartialScope`; elle porte nécessairement `public_status="conditional"` ou `public_status="budget_exhausted"`. Une réponse d'événements seuls omet `forest_semantics` et fournit `PartialScope`.
+La combinaison `mode="budgeted", forest_semantics="partial_refinement"` est incompatible avec `require_exact=True`. Elle peut restituer les événements individuellement certifiés, les tailles de support closes, les préfixes de journal fermés et les loci dégénérés dans `PartialScope`; elle porte nécessairement `public_status="conditional"` ou `public_status="budget_exhausted"`. Une réponse d'événements seuls omet `forest_semantics` et fournit `PartialScope`.
 
 ## 14. Instrumentation obligatoire
 
-Les plages NVTX séparent : validation, LBVH, chaque ordre de raffinement, fermeture, extraction, rang, tri, réduction, attaches, morphismes et sérialisation. Les métriques comprennent :
+Les plages NVTX séparent : validation, LBVH, expansion par taille de support, bornes, compaction, rejeu exact, classification feuille, tri, réduction, attaches, morphismes et sérialisation. Les métriques comprennent :
 
 - temps GPU et mur par phase et par ordre;
 - H2D et D2H séparés;
 - pic VRAM et mémoire hôte;
-- cellules, plans, sommets et colonnes par ordre;
+- unités de frontière lues, prunées, descendues et réémises par taille de support;
+- pics de frontière, tuples feuilles et octets de runs;
 - visites BVH par type de requête;
-- overflows et reclippings;
+- produits prunés par bon centrage, rang ou dépendance et produits ambigus;
+- saturations de capacité et replays exacts;
 - prédicats FP64, expansions et CPU;
 - événements par rang et taille de support;
 - taille des lots et unions redondantes;

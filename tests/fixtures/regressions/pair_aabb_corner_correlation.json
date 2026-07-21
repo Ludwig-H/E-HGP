@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "kind": "pair-aabb-corner-correlation-regression-v1",
+  "fixture_id": "pair-aabb-corner-correlation-regression-v1",
+  "description": "Artificial independent AABB corners can make max phi nonnegative even though one real query point is strictly interior to every diametral ball of every real support pair.",
+  "query_point": [0, 0, 0],
+  "first_support_points": [[2, 1, 0], [1, 2, 0]],
+  "second_support_points": [[1, -3, 0], [-3, 1, 0]],
+  "expected": {
+    "real_pair_phi_values": [-1, -5, -5, -1],
+    "all_real_pair_phi_strictly_negative": true,
+    "first_support_aabb": [[1, 1, 0], [2, 2, 0]],
+    "second_support_aabb": [[-3, -3, 0], [1, 1, 0]],
+    "artificial_corner_phi_maximum": 4,
+    "forbidden_inference": "nonnegative_maximum_over_independent_support_aabb_corners_implies_no_universal_real_pair_witness"
+  }
+}

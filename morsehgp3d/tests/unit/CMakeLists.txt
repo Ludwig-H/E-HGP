@@ -270,6 +270,25 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_pair_support_stream_tests
+  test_hierarchy_pair_support_stream.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_pair_support_stream_tests
+  PRIVATE morsehgp3d::pair_support
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_pair_support_stream_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_pair_support_stream_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
   test_hierarchy_critical_catalog_reduced_gamma_overlay.cpp
 )
@@ -709,6 +728,7 @@ set(
   morsehgp3d_hierarchy_critical_event_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_tests
   morsehgp3d_depth_zero_natural_support_tests
+  morsehgp3d_hierarchy_pair_support_stream_tests
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_typed_gamma_journal_tests
@@ -1448,6 +1468,10 @@ add_test(
   COMMAND morsehgp3d_depth_zero_natural_support_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_pair_support_stream
+  COMMAND morsehgp3d_hierarchy_pair_support_stream_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_critical_catalog_reduced_gamma_overlay
   COMMAND morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
 )
@@ -1692,6 +1716,32 @@ add_test(
     "${Python3_EXECUTABLE}"
     "${CMAKE_CURRENT_SOURCE_DIR}/../configuration/check_phase7_h_polytope_proposal.py"
     "${PROJECT_SOURCE_DIR}"
+)
+set(
+  _morsehgp3d_phase9_pair_support_configuration_command
+  "${Python3_EXECUTABLE}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../configuration/check_phase9_pair_support.py"
+  "${PROJECT_SOURCE_DIR}"
+)
+if(CMAKE_NM AND NOT MSVC)
+  list(
+    APPEND _morsehgp3d_phase9_pair_support_configuration_command
+    --binary
+    "$<TARGET_FILE:morsehgp3d_hierarchy_pair_support_stream_tests>"
+    --nm
+    "${CMAKE_NM}"
+  )
+endif()
+add_test(
+  NAME morsehgp3d.phase9_pair_support_configuration
+  COMMAND ${_morsehgp3d_phase9_pair_support_configuration_command}
+)
+unset(_morsehgp3d_phase9_pair_support_configuration_command)
+add_test(
+  NAME morsehgp3d.phase9_pair_aabb_corner_correlation
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${PROJECT_SOURCE_DIR}/../tests/oracle/test_pair_aabb_corner_correlation.py"
 )
 add_test(
   NAME morsehgp3d.phase5_k1_boruvka_qualification_configuration

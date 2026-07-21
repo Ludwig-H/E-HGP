@@ -59,7 +59,7 @@ Cette matrice sépare l'apport effectivement réutilisé de ce que la source ne 
 | Prokopenko et al. | ancre GPU indépendante pour l'EMST et la tranche $k=1$ | ne généralise pas directement les interactions d'ordre supérieur |
 | approches sparse, DTM et witnessed k-distance | baselines, priorités de candidats et modes approximatifs comparatifs | elles changent ou approchent la filtration et ne prouvent pas la tour HGP dure |
 
-La décision architecturale principale résulte de cette intersection : reprendre l'induction sur les ordres, mais reconstruire seulement les cellules peu profondes utiles à $H_0$; utiliser une primitive de puissance comme moteur de proposition et fermer chaque décision par un oracle global exact; reconstruire enfin la hiérarchie avec Gamma exhaustif sur la référence et une future réduction d'incidences seulement après preuve. La [tour globale de boules saturées](../math/TOUR_BOULES_SATUREES.md) est une piste indépendante dont les théorèmes sont élémentaires et internes au dépôt; Corbet et al. en motivent le contexte multicoverture, pas la correction algorithmique.
+La décision architecturale principale résulte de cette intersection : conserver l'induction sur les ordres comme sémantique, mais énumérer directement les supports critiques et leurs attaches par un flux LBVH/GPU sensible à $H_0$, sans reconstruire les cellules top-$m$ ni la mosaïque de Delaunay d'ordre $K$. Une primitive de puissance peut proposer ou servir aux tests; chaque exclusion et chaque attache du chemin produit doit être fermée par un certificat exact. Gamma exhaustif et la [tour globale de boules saturées](../math/TOUR_BOULES_SATUREES.md) restent des oracles bornés indépendants, pas des architectures de production.
 
 ## Intégrité et mise à jour
 

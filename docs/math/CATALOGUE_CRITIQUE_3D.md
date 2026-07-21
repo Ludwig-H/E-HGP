@@ -1,6 +1,6 @@
-# Catalogue critique 3D par raffinement de Voronoï restreint
+# Catalogue critique 3D et oracle cellulaire borné
 
-> **Résultat principal.** Pour $K_{\max}=10$, le calcul de $H_0$ ne requiert que les sphères bien centrées de rang fermé au plus onze. Elles peuvent être énumérées par une suite de raffinements de cellules top-$m$ au moyen d'une primitive de diagramme de puissance GPU, puis certifiées par séparation exacte aux sommets. Aucune mosaïque de Delaunay d'ordre supérieur ni aucun rhomboid tiling n'est matérialisé.
+> **Résultat principal.** Pour $K_{\max}=10$, le calcul de $H_0$ ne requiert que les sphères bien centrées de rang fermé au plus onze. Le raffinement de cellules top-$m$ décrit ci-dessous prouve une voie d'énumération complète et fournit un oracle borné, mais il ferme l'univers cellulaire jusqu'à $m_{\star}$ et n'est donc plus l'architecture produit. Celle-ci parcourt directement les supports deux à quatre par branch-and-bound LBVH/GPU et ne matérialise ni mosaïque de Delaunay d'ordre supérieur, ni atlas top-$m$, ni Gamma global.
 
 Cette borne porte sur les événements de Morse qui peuvent changer immédiatement $H_0$. Elle ne borne pas les générateurs de la [tour globale de boules saturées](TOUR_BOULES_SATUREES.md), laquelle encode aussi les incidences latentes de Čech et peut exiger des saturés de rang jusqu'à $n$. Les deux constructions sont complémentaires et aucune ne réfute la borne de l'autre.
 
@@ -77,6 +77,9 @@ Prenons deux points $u,v$ dont la boule diamétrale est vide. Ajoutons arbitrair
 Une stratégie ANN, UMAP, CAGRA ou liste locale peut donc proposer des supports, mais jamais certifier seule la complétude. Le mécanisme exact doit posséder un oracle global de violation.
 
 ## 5. Cellules top-$m$
+
+> [!IMPORTANT]
+> Les Sections 5 à 13 documentent une construction exacte conservée pour la preuve, les petites fixtures et les différentiels. Elles ne doivent pas être étendues à 50 000 ou dix millions de points et ne sont pas une dépendance du flux direct de Phase 9.
 
 Pour $I\subseteq X$, $\lvert I\rvert=m$, la cellule top-$m$ est
 

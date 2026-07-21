@@ -16,11 +16,11 @@ Les six documents de ce dossier forment un ensemble normatif.
 Posons $K_{\mathrm{eff}}=\min(K_{\max},n)$, $s_{\max}=\min(K_{\mathrm{eff}}+1,n)$ et, si $s_{\max}\geq2$, $m_{\star}=s_{\max}-2$. Alors :
 
 1. injecter directement les événements ponctuels de rang un; si $s_{\max}=1$, arrêter la cascade géométrique;
-2. fermer les parents top-$m$ pour $0\leq m\leq m_{\star}$ par raffinements restreints et reconstruire canoniquement chaque enfant avant propagation;
-3. extraire les supports bien centrés de tailles deux à quatre, terminer leur shell et compter leur rang fermé global;
+2. parcourir directement les supports de tailles deux à quatre par produits de nœuds LBVH, bornes exactes et frontières budgetées, sans fermer les parents top-$m$;
+3. terminer exactement le shell et le rang fermé global des supports feuilles survivants; garder le raffinement cellulaire seulement comme oracle borné;
 4. réutiliser chaque sphère de rang $s$ comme minimum de $D_s$ et point d'indice un de $D_{s-1}$, avec multiplicité locale $\binom{\lvert U\rvert-1}{\mu}$;
 5. convertir les événements de rang $k+1$ en hyperarêtes multifurquées du K-graphe de Gabriel, utilisables comme sous-flot positif;
-6. pour `hgp_reduced` exact, réduire toutes les cofaces Gamma par lots de niveau exact, conserver les incidences silencieuses et garder les feuilles singleton explicites à $k=1$;
+6. pour `hgp_reduced`, réduire le flux en journal Morse par lots de niveau exact, conserver les gateways silencieux et garder les feuilles singleton explicites à $k=1$; Gamma exhaustif reste l'oracle de petits nuages;
 7. pour `full_pi0`, attacher tous les bras par descentes certifiées; cette reconstruction reste l'obligation de preuve M.1 et ne publie pas encore le statut `exact`;
 8. construire les morphismes réduits par `locate_reduced_root`, utiliser les ancres naissance–selle seulement pour $2\leq s\leq K_{\mathrm{eff}}$ dans `full_pi0` ou comme contrôle lorsqu'une source réduite existe, puis vérifier toute la naturalité ordre–échelle.
 
@@ -28,7 +28,7 @@ Posons $K_{\mathrm{eff}}=\min(K_{\max},n)$, $s_{\max}=\min(K_{\mathrm{eff}}+1,n)
 
 Le flot de Gabriel brut ne préserve pas toujours les K-polyèdres non triviaux : une coface non-Gabriel peut attacher silencieusement une facette réutilisée plus tard. Le chemin exact v2 réduit Gamma exhaustif; la [complétion en incidences silencieuses](INCIDENCES_SILENCIEUSES_GAMMA.md) explique le défaut et prouve une correction combinatoire lorsque toutes les cofaces sont connues. Le profil complet exige en plus un argument de Morse et des attaches globales.
 
-La primitive GPU de diagramme de puissance est un accélérateur géométrique. La complétude vient de la fermeture par oracle global, de la reconstruction canonique des enfants et des prédicats exacts. Une simple déduplication des fragments ne certifie pas leurs coutures. DTM, entropie et ANN sont des propositions seulement.
+Le flux direct LBVH est la primitive produit GPU. Sa complétude vient de la partition exacte des produits de supports, des prunes rejoués, des classifications feuilles globales et des frontières vides. Voronoï et puissance servent aux propositions ou aux tests; Geogram est préféré lorsqu'une baseline CPU suffit. DTM, entropie et ANN sont des propositions seulement.
 
 ## Convention de lecture
 

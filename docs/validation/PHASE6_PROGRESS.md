@@ -2,7 +2,7 @@
 
 ## Statut
 
-- phase : `6`, `ready`; jalons préparatoires 6.1 à 6.22 et falsificateur interne 6.23 déployés sur hôte pendant que la phase 5 reste l'unique phase `in_progress`;
+- phase : `6`, `ready`; jalons préparatoires 6.1 à 6.22 et falsificateur interne 6.23 déployés sur hôte; cette mention est historique, le registre courant place aussi la phase 5 à `ready` et la phase 9 à `in_progress`;
 - backend : `reference_cpu`;
 - profil : `full_pi0`;
 - mode : `certified`;
@@ -373,4 +373,4 @@ La base est `exact_catalog_minima_and_strict_arm_terminal_hyperkruskal_partition
 
 ## Point d'arrêt de la voie locale et pivot Phase 7
 
-Le sweep 6.23 fixe le critère d'arrêt de la série locale 6.x. À la première discordance Morse--Gamma, le cas devient une fixture minimale permanente, le registre des preuves est mis à jour et aucune optimisation ni publication n'est poursuivie avant diagnostic mathématique. Si la campagne ciblée ne trouve pas de contradiction, un nouveau wrapper local n'est pas ajouté par inertie : la feuille de route pivote vers la Phase 7 et l'audit de la primitive de puissance, préalable au catalogue global des Phases 8 et 9. Les `event_id` et tuples de bras restent disponibles pour la reprise ultérieure de H5, mais les `Attachment`, les identifiants durables de racines, O3, O4, M.1, `attachments_complete_by_order`, la verticalité et la forêt multi-ordre demeurent explicitement ouverts.
+Le sweep 6.23 fixe le critère d'arrêt de la série locale 6.x. À la première discordance Morse--Gamma, le cas devient une fixture minimale permanente, le registre des preuves est mis à jour et aucune optimisation ni publication n'est poursuivie avant diagnostic mathématique. Historiquement, l'absence de contradiction a fait pivoter la feuille de route vers la Phase 7 et l'audit de puissance, préalable à l'oracle cellulaire borné de Phase 8. Le pivot du 21 juillet 2026 a ensuite séparé la Phase 9 : son chemin produit parcourt directement le LBVH et ne dépend d'aucun catalogue cellulaire. Les `event_id` et tuples de bras restent disponibles pour la reprise ultérieure de H5, mais les `Attachment`, les identifiants durables de racines, O3, O4, M.1, `attachments_complete_by_order`, la verticalité et la forêt multi-ordre demeurent explicitement ouverts.

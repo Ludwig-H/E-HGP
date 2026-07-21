@@ -298,6 +298,39 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_pair_support
+  STATIC
+    src/cpu/hierarchy/pair_support_stream.cpp
+)
+add_library(morsehgp3d::pair_support ALIAS morsehgp3d_pair_support)
+set_target_properties(
+  morsehgp3d_pair_support
+  PROPERTIES
+    EXPORT_NAME pair_support
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(morsehgp3d_pair_support PUBLIC cxx_std_20)
+target_include_directories(
+  morsehgp3d_pair_support
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_pair_support
+  PUBLIC morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(morsehgp3d_pair_support PRIVATE /W4 /WX)
+else()
+  target_compile_options(
+    morsehgp3d_pair_support
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_hierarchy
   STATIC
     src/cpu/hierarchy/boruvka.cpp
@@ -801,6 +834,7 @@ install(
     morsehgp3d_contract
     morsehgp3d_exact
     morsehgp3d_spatial
+    morsehgp3d_pair_support
     morsehgp3d_hierarchy
     morsehgp3d_sanitizers
   EXPORT MorseHGP3DTargets

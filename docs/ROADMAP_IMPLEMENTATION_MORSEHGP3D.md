@@ -1,17 +1,18 @@
 # Feuille de route d'implémentation de MorseHGP3D
 
-> **Mission.** Construire un backend 3D hiérarchique, certifiable et GPU-first pour $1\leq k\leq10$, avec deux régimes produit non négociables : p95 `warm_e2e` strictement inférieur à une seconde autour de 50 000 points pour $K_{\max}\leq10$ sur les familles favorables enregistrées; puis streaming transactionnel, reprenable et honnêtement budgeté à dix millions de points ou davantage. Cette feuille de route est écrite comme un protocole exécutable par de futurs agents ChatGPT.
+> **Mission.** Construire un backend 3D hiérarchique, certifiable et GPU-first pour $1\leq k\leq10$, beaucoup plus léger que `HGP-old` : la hiérarchie utile doit être obtenue sans matérialiser, ni reconstituer sous forme de cellules top-$m$, la mosaïque de Delaunay d'ordre $K$. Deux régimes produit sont non négociables : p95 `warm_e2e` strictement inférieur à une seconde autour de 50 000 points pour $K_{\max}\leq10$ sur les familles favorables enregistrées; puis streaming transactionnel, reprenable et honnêtement budgeté à dix millions de points ou davantage. Cette feuille de route est écrite comme un protocole exécutable par de futurs agents ChatGPT.
 
 ## 1. Règles de conduite pour tout agent
 
 Avant toute modification, l'agent doit lire :
 
 1. [`AGENTS.md`](../AGENTS.md), notamment les règles Git et GCP;
-2. la [spécification](SPECIFICATION_MORSEHGP3D.md);
-3. le [registre des preuves](math/STATUT_PREUVES_ET_HEURISTIQUES.md);
-4. le [registre d'implémentation](implementation_status.toml), qui désigne la phase réellement ouverte;
-5. la phase courante de cette feuille de route;
-6. les tests et artefacts produits par les phases antérieures.
+2. les parties I et II du [manuscrit de thèse](references/MANUSCRIT_THESE_HAUSEUX.pdf), pages PDF 35 à 134;
+3. la [spécification](SPECIFICATION_MORSEHGP3D.md);
+4. le [registre des preuves](math/STATUT_PREUVES_ET_HEURISTIQUES.md);
+5. le [registre d'implémentation](implementation_status.toml), qui désigne la phase réellement ouverte;
+6. la phase courante de cette feuille de route;
+7. les tests et artefacts produits par les phases antérieures.
 
 À chaque intervention, il doit :
 
@@ -23,6 +24,8 @@ Avant toute modification, l'agent doit lire :
 - refuser toute troncature silencieuse;
 - exécuter les validations proportionnées au risque;
 - publier les compteurs, versions et hypothèses;
+- publier le nombre de labels, cellules, cofaces et incidences évités aussi explicitement que le nombre d'événements produits;
+- refuser dans le chemin produit toute arène dimensionnée par $\binom{n}{k}$, toute fermeture de tous les parents top-$m$ et tout Gamma global;
 - faire un commit cohérent sur la branche courante, sans créer de branche sans accord explicite;
 - ne jamais laisser une VM GCP active au moment du compte rendu final.
 
@@ -66,17 +69,16 @@ lorsque $n\geq2$; pour $n=1$, aucun raffinement n'est lancé. Ainsi $K_{\max}=1$
 
 Le développement suit cet ordre :
 
-1. backend `reference_cpu`, Gamma exhaustif et profil `hgp_reduced` exact sur petits $n$, avec `full_pi0` séparément conditionnel;
-2. flot Gabriel positif sur `cuda_g4`, explicitement `partial_refinement`, toujours comparé à Gamma aux tailles accessibles;
-3. recherche et preuve d'une réduction complétée en incidences avant toute promotion exacte du backend GPU;
-4. morphismes verticaux exacts de la référence et partiels de la voie accélérée;
-5. après la phase 11, ouvrir en parallèle la piste topologique 12–13 (`full_pi0` puis dégénérescences) et la piste produit 14–16 (latence puis streaming de la voie réduite au statut effectivement prouvé);
-6. réunir seulement les jalons dont les portes propres sont fermées;
-7. étendre ensuite les dégénérescences du profil réduit ou complet sans bloquer l'autre piste;
-8. après fermeture de la phase 2A, ouvrir sans bloquer la voie principale la phase 17A de tour saturée comme oracle exact borné; ses variantes scalables restent conditionnelles;
-9. après migration contractuelle dédiée seulement, mode `budgeted` sensible à $H_0$ pour toute sous-famille de générateurs dont l'exhaustivité n'est pas certifiée.
+1. conserver Gamma exhaustif et l'ancienne réduction comme **oracles bornés** sur petits $n$; ils définissent et testent la vérité de référence mais ne prescrivent aucune structure produit;
+2. produire directement, sur `reference_cpu` puis `cuda_g4`, le flux de supports de tailles deux à quatre dont le rang fermé est au plus $s_{\max}$, par LBVH, bornes exactes et files de travail bornées;
+3. réduire ce flux en journal Morse minimal (`RootBirth`, `AtomicUnionBatch`, `GatewayAttach`, ancrages verticaux) et fermer l'obligation M.1 ainsi que les incidences silencieuses avant toute promotion `public_status=exact`;
+4. construire les morphismes verticaux à partir du journal, sans matérialiser les cellules top-$m$ ni les cofaces de Gamma;
+5. instrumenter la latence et la mémoire dès le premier flux direct utilisable : les essais courts à 12 500, 25 000 et 50 000 points guident l'architecture sans attendre la fermeture de toutes les preuves;
+6. ouvrir ensuite en parallèle la piste topologique (`full_pi0` et dégénérescences) et la piste produit (latence, puis streaming), chacune au statut effectivement prouvé;
+7. réunir seulement les jalons dont les portes propres sont fermées et conserver les sorties partielles sous un contrat `PartialScope` sans assertion d'absence;
+8. garder la tour saturée et toute reconstruction de mosaïque comme oracles exacts bornés, jamais comme dépendances de la voie 50 k ou 10 M+.
 
-Le profil réduit arrive avant le profil complet parce que Gamma exhaustif en donne une définition directement testable sur petits nuages. Le K-graphe de Gabriel brut n'en est plus une réalisation exacte autorisée. Le profil complet demeure l'objectif final, avec un statut séparé tant que ses attaches ne sont pas toutes certifiées.
+Le profil réduit arrive avant le profil complet parce que les oracles exhaustifs en donnent une définition directement testable sur petits nuages. La voie produit ne doit toutefois jamais matérialiser leur univers combinatoire : Gamma, la mosaïque de Delaunay d'ordre $K$, les cellules top-$m$ et le K-graphe de Gabriel brut restent des instruments de comparaison. Le profil complet demeure un objectif distinct, avec un statut séparé tant que ses attaches ne sont pas toutes certifiées.
 
 ## 4. Arborescence logicielle cible
 
@@ -420,7 +422,7 @@ Le work-profile external-1NN conserve le mode par défaut v1 et `--compare-resol
 
 ## Phase 6 — Miniballs et descentes
 
-Statut opérationnel : `ready`; backend préparatoire `reference_cpu`, profil d'autorité `full_pi0` projeté vers `hgp_reduced`, mode `certified`, portée `bounded_n14_k10_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only`. La phase 5 reste l'unique phase `in_progress`; la porte d'entrée de la phase 6 est néanmoins satisfaite par les Phases 1 et 4 fermées. Les jalons préparatoires 6.1 à 6.6 certifient la miniball locale, son shell global, la famille top-$k$, l'arc canonique strict, son segment analytique, une chaîne issue d'une seule facette, puis le germe initial exact d'un bras critique d'indice un et son raccord. Le jalon 6.7 ferme tous les bras d'un même événement en classes d'identité de facettes terminales; 6.8 construit indépendamment la coupe exhaustive strictement ouverte de Gamma; 6.9 raccorde une famille complète à ses composantes strictement antérieures; 6.10 ferme la transition exhaustive et simultanée de $\Gamma_k^{<a}$ vers $\Gamma_k^{\leq a}$; 6.11 superpose les seules provenances événementielles fournies et complètes aux groupes qui les contiennent; 6.12 construit le catalogue critique exhaustif borné et ses lots H0; 6.13 projette chaque transition 6.10 vers la sémantique locale `hgp_reduced`; 6.14 déroule tous les niveaux exacts d'un ordre fixé dans un journal compact; 6.15 rejoue une coupe ouverte ou fermée depuis un préfixe entier de ce journal. Le jalon 6.16 reconstruit fraîchement 6.12 et 6.14 depuis le même nuage puis raccorde exhaustivement chaque rôle H0 à son slot Gamma fermé par niveau et `closed_point_ids`; 6.17 reconstruit ensuite toutes les familles de bras de toutes les selles d'un ordre et certifie leur composante stricte `full_pi0` par double lookup des facettes initiale et terminale, en gardant les annotations `hgp_reduced` séparées. Le jalon 6.18 réconcilie ces deux sources fraîchement vérifiées dans un unique journal mono-ordre typé. Le jalon 6.19 recertifie ce journal externe, rejoue son histoire une fois sur des snapshots atomiques et raccorde chaque cible non triviale à l'unique racine réduite locale pré-lot de même famille complète; une cible singleton est au contraire certifiée absente de toutes les racines et explicitement omise. Le kind réduit n'est contrôlé qu'après cette décision. Le jalon 6.20 compose ensuite chaque bras avec cette liaison sans nouvelle géométrie et sans dédupliquer les bras partageant une cible. Le jalon 6.21 reconstruit le catalogue puis une famille 6.7 par selle et conserve un chemin strict compact, exact et rejouable pour chaque candidat 6.20, avec sa cible `full_pi0` externe et sa disposition réduite séparée. Le jalon 6.22 calcule les vrais `event_id` v2 par projection scientifique complète et SHA-256 séparé par domaine, puis agrège canoniquement exactement un tuple durable `(event_id, order, removed_shell_id)` par chemin 6.21. Le jalon 6.23 rompt volontairement cette dépendance décisionnelle à Gamma : il construit d'abord une généalogie candidate depuis les seuls minima du catalogue et les terminaux complets 6.7, contracte ensemble toutes les selles d'un même niveau, puis utilise Gamma uniquement comme oracle postérieur à tous ses niveaux d'activation. L'objet reste un falsificateur interne : aucun `attachment_id`, `Attachment`, `target_node_id`, lot public, fermeture de H5, O3 ou M.1, attache verticale, DAG global ou forêt multi-ordre n'est publié, et aucun `public_status` n'est modifié.
+Statut historique à la livraison du jalon 6.23 : `ready`; backend préparatoire `reference_cpu`, profil d'autorité `full_pi0` projeté vers `hgp_reduced`, mode `certified`, portée `bounded_n14_k10_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only`. À cette date la phase 5 était l'unique phase `in_progress`; le registre courant place désormais les Phases 5 et 6 à `ready` et la Phase 9 à `in_progress`. Les jalons préparatoires 6.1 à 6.6 certifient la miniball locale, son shell global, la famille top-$k$, l'arc canonique strict, son segment analytique, une chaîne issue d'une seule facette, puis le germe initial exact d'un bras critique d'indice un et son raccord. Le jalon 6.7 ferme tous les bras d'un même événement en classes d'identité de facettes terminales; 6.8 construit indépendamment la coupe exhaustive strictement ouverte de Gamma; 6.9 raccorde une famille complète à ses composantes strictement antérieures; 6.10 ferme la transition exhaustive et simultanée de $\Gamma_k^{<a}$ vers $\Gamma_k^{\leq a}$; 6.11 superpose les seules provenances événementielles fournies et complètes aux groupes qui les contiennent; 6.12 construit le catalogue critique exhaustif borné et ses lots H0; 6.13 projette chaque transition 6.10 vers la sémantique locale `hgp_reduced`; 6.14 déroule tous les niveaux exacts d'un ordre fixé dans un journal compact; 6.15 rejoue une coupe ouverte ou fermée depuis un préfixe entier de ce journal. Le jalon 6.16 reconstruit fraîchement 6.12 et 6.14 depuis le même nuage puis raccorde exhaustivement chaque rôle H0 à son slot Gamma fermé par niveau et `closed_point_ids`; 6.17 reconstruit ensuite toutes les familles de bras de toutes les selles d'un ordre et certifie leur composante stricte `full_pi0` par double lookup des facettes initiale et terminale, en gardant les annotations `hgp_reduced` séparées. Le jalon 6.18 réconcilie ces deux sources fraîchement vérifiées dans un unique journal mono-ordre typé. Le jalon 6.19 recertifie ce journal externe, rejoue son histoire une fois sur des snapshots atomiques et raccorde chaque cible non triviale à l'unique racine réduite locale pré-lot de même famille complète; une cible singleton est au contraire certifiée absente de toutes les racines et explicitement omise. Le kind réduit n'est contrôlé qu'après cette décision. Le jalon 6.20 compose ensuite chaque bras avec cette liaison sans nouvelle géométrie et sans dédupliquer les bras partageant une cible. Le jalon 6.21 reconstruit le catalogue puis une famille 6.7 par selle et conserve un chemin strict compact, exact et rejouable pour chaque candidat 6.20, avec sa cible `full_pi0` externe et sa disposition réduite séparée. Le jalon 6.22 calcule les vrais `event_id` v2 par projection scientifique complète et SHA-256 séparé par domaine, puis agrège canoniquement exactement un tuple durable `(event_id, order, removed_shell_id)` par chemin 6.21. Le jalon 6.23 rompt volontairement cette dépendance décisionnelle à Gamma : il construit d'abord une généalogie candidate depuis les seuls minima du catalogue et les terminaux complets 6.7, contracte ensemble toutes les selles d'un même niveau, puis utilise Gamma uniquement comme oracle postérieur à tous ses niveaux d'activation. L'objet reste un falsificateur interne : aucun `attachment_id`, `Attachment`, `target_node_id`, lot public, fermeture de H5, O3 ou M.1, attache verticale, DAG global ou forêt multi-ordre n'est publié, et aucun `public_status` n'est modifié.
 
 ### But
 
@@ -582,7 +584,7 @@ Avec $F=\binom{n}{k}$, $C=\binom{n}{k+1}$, $E=\sum_{s=2}^{\min(4,k+1,n)}\binom{n
 
 Gamma ne démarre qu'après la fermeture complète de cette généalogie. Une histoire 6.14 fraîche fournit tous les niveaux d'activation de facettes et de cofaces, y compris ceux qui ne portent aucun événement Morse. À chacun de ces niveaux, une transition 6.10 fraîche sert exclusivement d'oracle postérieur : la projection des facettes de naissance actives doit donner une bijection entre racines Morse et composantes Gamma, séparément à la coupe stricte et à la coupe fermée. Un niveau résiduel sans lot Morse peut ajouter une incidence silencieuse $q=1$, mais il ne peut ni fusionner deux racines Morse ni créer une composante Gamma dépourvue de naissance cataloguée. Toute discordance produit un témoin minimal indiquant niveau, coupe, naissance, racine ou composante fautive; elle ne répare jamais la généalogie en recopiant la décision Gamma.
 
-La base est `exact_catalog_minima_and_strict_arm_terminal_hyperkruskal_partition_sweep_with_posterior_exhaustive_gamma_oracle_v1` et la portée `bounded_n14_k10_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only`. Même un accord sur toutes les fixtures bornées reste un falsificateur logiciel, pas une preuve de O1, O3, O4 ou M.1 et pas une transaction publique `full_pi0`. Une contradiction devient une fixture minimale permanente et met à jour le registre des preuves avant toute optimisation. En l'absence de contradiction dans la campagne ciblée, la feuille de route cesse d'empiler des wrappers locaux de Phase 6 et pivote vers la Phase 7, l'audit de la primitive de puissance nécessaire aux phases de catalogue global; les identifiants publics, H5, M.1, la verticalité et la forêt multi-ordre demeurent des chantiers ultérieurs distincts.
+La base est `exact_catalog_minima_and_strict_arm_terminal_hyperkruskal_partition_sweep_with_posterior_exhaustive_gamma_oracle_v1` et la portée `bounded_n14_k10_single_order_morse_minimum_saddle_partition_sweep_compared_to_exhaustive_gamma_at_every_activation_level_only`. Même un accord sur toutes les fixtures bornées reste un falsificateur logiciel, pas une preuve de O1, O3, O4 ou M.1 et pas une transaction publique `full_pi0`. Une contradiction devient une fixture minimale permanente et met à jour le registre des preuves avant toute optimisation. Historiquement, l'absence de contradiction a arrêté l'empilement des wrappers locaux et ouvert la Phase 7 pour l'oracle cellulaire de Phase 8. Le pivot du 21 juillet 2026 a séparé la Phase 9 en voie directe LBVH sans catalogue de puissance; les identifiants publics, H5, M.1, la verticalité et la forêt multi-ordre demeurent des chantiers ultérieurs distincts.
 
 ## Phase 7 — Audit de la primitive de puissance
 
@@ -794,94 +796,96 @@ Le chemin produit reste GPU-first : génération et filtrage massifs sur `cuda_g
 
 Toutes les cellules et incidences sont identiques à l'oracle sur petits cas. `closed_parent_orders[1]` n'est vrai que file vide et sans overflow.
 
-## Phase 9 — Raffinement incrémental jusqu'au rang effectif
+## Phase 9 — Flux direct de supports $H_0$ sans mosaïque
+
+### Porte d'entrée
+
+Satisfaite par les Phases 1, 2A, 4 et 7. L'oracle exhaustif, les prédicats exacts, le LBVH et le contrat GPU proposition--recertification existent déjà. La fermeture globale de la Phase 8 n'est pas une dépendance : ses jalons bornés restent un différentiel de profondeur zéro.
 
 ### But
 
-Implémenter l'identité $C_{m+1}=\bigcup P(I,u)$ une profondeur intérieure à la fois.
+Énumérer directement les sphères critiques bien centrées de supports deux, trois et quatre et de rang fermé au plus $s_{\max}$, sans construire les cellules top-$m$, la mosaïque de Delaunay d'ordre $K$, les $\binom{n}{k}$ facettes ou Gamma. Un seul flux partagé alimente tous les ordres $1\leq k\leq K_{\mathrm{eff}}$.
 
-Le lemme d'arrêt $H_0$ est impératif : pour un événement générique utile de support $U$ avec $\lvert U\rvert\geq2$ et de rang fermé $s\leq s_{\max}$, l'intérieur vérifie $m=\lvert I\rvert=s-\lvert U\rvert\leq m_{\star}$. Il faut fermer les parents $C_0$ à $C_{m_{\star}}$. À la dernière profondeur, on ferme les morceaux $P(I,u)$ et toutes les strates de leur diagramme restreint, mais on ne reconstruit aucun enfant $C_{m_{\star}+1}(Q)$ : un tel parent n'est nécessaire à aucun événement utile. Les facettes et ensembles fermés vivent dans leurs arènes hiérarchiques, distinctes des labels parents.
+Les oracles exhaustifs de supports et de Gamma restent mathématiquement valides jusqu'à $n\leq14$. La voie cellulaire D.1--D.4, qui ferme les parents top-$m$ et reconstruit l'essentiel de la combinatoire de la mosaïque sous une forme streamée, est séparément gelée à $n\leq8$ et ne constitue plus le chemin produit.
 
-### Travaux par ordre $m$
+### 9.0 — image LBVH résidente puis construction device
 
-1. charger les parents $C_m(I)$ fermés;
-2. construire les diagrammes ordinaires de $X\setminus I$ restreints;
-3. fermer chaque morceau aux sommets, réconcilier toutes les incidences naturelles du diagramme restreint et en extraire labels, strates candidates et contraintes globalement sûres;
-4. si $m<m_{\star}$, émettre les enfants $Q=I\cup\lbrace u\rbrace$, trier et dédupliquer leurs labels sans unir leurs fragments géométriques;
-5. si $m<m_{\star}$, reconstruire chaque cellule enfant canonique $C_{m+1}(Q)$ depuis la boîte paddée $\Omega$ et un sous-ensemble sûr de contraintes $Q\times(X\setminus Q)$;
-6. à chaque sommet provisoire d'un tel enfant, comparer exactement le plus éloigné dans $Q$ au 1-NN dans $X\setminus Q$, enregistrer toutes les égalités actives, ajouter tous les violateurs, puis reclipper jusqu'à file vide;
-7. si $m<m_{\star}$, programmer les cellules canoniques fermées comme parents de la profondeur suivante; si $m=m_{\star}$, ne créer aucune cellule enfant et conserver les morceaux fermés comme témoins terminaux des strates;
-8. dédupliquer les strates candidates par clé exacte et les valider contre le diagramme restreint fermé, son parent canonique et l'oracle global de rang;
-9. extraire les supports 2, 3 et 4, compter le rang et dédupliquer les événements;
-10. checkpoint et publier les compteurs.
+Le premier noyau supports-deux peut réutiliser l'index CPU certifié et charger son snapshot sur le GPU, comme les Phases 4–5. Ce choix accélère l'apprentissage du nouveau parcours sans prétendre fermer le SLO : le dépôt ne possède pas encore de constructeur Morton/LBVH CUDA, seulement des consommateurs CUDA d'un arbre construit récursivement sur CPU.
 
-Les supports de taille un ont déjà été injectés en phase 5 et ne sont jamais recherchés dans les strates du raffinement.
+Avant la qualification finale à 50 000 points et obligatoirement avant le chemin 10 M+, ajouter Morton SoA, radix sort stable device, topologie LBVH parallèle et réduction bottom-up des AABB, avec manifeste déterministe et vérification contre l'index de référence. Ajouter aussi `DeviceScan`, les deux frontières persistantes et leur capture CUDA Graph. Le temps `warm_e2e` inclut cette construction; mesurer seulement un noyau sur snapshot résident reste diagnostique.
 
-### Jalons internes
+### 9.1 — paires : branch-and-bound exact sur LBVH
 
-- profondeur $m=0$ : sphères vides et premières selles $k=1$;
-- profondeur $m=1$ : événements avec un point strictement intérieur;
-- profondeur $m=3$ : validation des trois codimensions et première mesure de croissance;
-- profondeur $m=5$ : répétition stable et streaming de cellules;
-- profondeur $m=m_{\star}$ : supports de taille deux et rang $s_{\max}$, puis catalogue $H_0$ générique complet; pour $K_{\max}=10$ et $n\geq11$, $m_{\star}=9$ et $s_{\max}=11$.
+Pour une paire $(u,v)$ et un point $x$, l'appartenance stricte à la boule diamétrale équivaut à $\phi(x,u,v)<0$, avec $\phi(x,u,v)=(x-u)\mathbin{\cdot}(x-v)$. Pour trois boîtes dyadiques $A,B,C$, le maximum exact de $\phi$ est la somme, axe par axe, des maxima aux huit choix d'extrémités : la fonction est convexe en $x$ et affine séparément en $u$ et $v$. Si ce maximum est strictement négatif, tous les points de $C$ sont intérieurs à toutes les boules des paires de $A\times B$.
 
-### Compteurs
+Un parcours self-dual de paires de nœuds LBVH compte ainsi une antichaîne canonique de sous-arbres intérieurs garantis. Leurs plages Morton sont deux à deux disjointes et disjointes des deux plages supports; le compteur porte sur la cardinalité de leur union, jamais sur une somme de nœuds éventuellement chevauchants. Dès que ce compte atteint $s_{\max}-1$, toutes les paires du produit ont plus de $s_{\max}-2$ points intérieurs et le produit entier est éliminé. Sinon le plus grand nœud support est scindé; aux feuilles, la paire est recertifiée par centre, niveau, shell et rang globaux. Le nombre de paires terminales reste au plus quadratique, mais leur parcours témoin ou une classification globale naïve peut porter le travail brut jusqu'à $\Theta(n^3)$; aucune borne sous-cubique n'est revendiquée sans amortissement supplémentaire.
 
-Pour chaque $m$, publier $M_m$ parents, $P_m$ morceaux, $V_m$ sommets, $J_m$ colonnes, $R_m$ reclippings, $O_m$ overflows, $C_{m,s}$ événements et pic VRAM.
+Le jalon hôte `9.1-RCPU` livre désormais cette partition self-duale, la borne $\phi$ exacte, les prunes strictes, les budgets transactionnels et un rejeu frais. Sa requête terminale n'appelle pas la partition globale existante : elle compte les extérieurs par sous-arbres, conserve au plus $s_{\max}-2\leq9$ intérieurs et remplace tout shell supplémentaire potentiellement massif par son cardinal exact et un seul témoin canonique. La frontière résiduelle reste pour l'instant un reçu auditable non réinjectable; le checkpoint lié au nuage/LBVH et le sink transactionnel appartiennent toujours à 9.3. Ce lot ne produit ni forêt, ni statut public, ni complétude pour les supports trois et quatre; voir `docs/validation/PHASE9_PROGRESS.md`.
 
-### Tests
+Le backend `cuda_g4` évalue des intervalles dirigés et produit une proposition de prune ou de descente; le backend `reference_cpu` recertifie tout prune exact utilisé par une sortie certifiée. Les deux passes count/emit utilisent une frontière bornée et aucun append global non borné.
 
-- catalogue complet contre l'oracle $n\leq14$;
-- aucun événement supplémentaire;
-- chaque événement possède centre, support, shell et rang identiques;
-- invariance à l'ordre des parents et des propositions;
-- comparaison ancrée–cascade barycentrique sur petites tailles;
-- fermeture avec propositions locales volontairement incomplètes;
-- pour $m<m_{\star}$, même label enfant découvert depuis deux, trois puis plusieurs parents ou chunks, avec reconstruction canonique identique à l'oracle;
-- à $m=m_{\star}$, absence vérifiée de toute allocation ou propagation d'un $C_{m_{\star}+1}$, avec catalogue final identique à l'oracle;
-- amorces de contraintes volontairement différentes, y compris l'amorce vide, donnant la même cellule fermée;
-- tentative d'union géométrique des fragments désactivée dans la v2 et testée seulement comme prototype futur différentiel.
+Le premier incrément CUDA `9.1-CUDA-P1` reçoit un batch borné de produits $(A,B)$ canoniques fourni par le pilote CPU et le snapshot LBVH validé. Un warp parcourt l'arbre témoin $C$ par corde `escape` et conserve au plus $T=s_{\max}-1\leq10$ reçus $(C,\overline{M})$. Une proposition de prune n'est acceptée qu'après recalcul rationnel exact de chaque reçu, vérification de l'antichaîne, des disjonctions et de la cardinalité de l'union. Le jalon P2 remplace ensuite ces sorties fixes par count/`DeviceScan`/emit, deux frontières device et CUDA Graph; P1 ne revendique ni le SLO ni la construction LBVH device.
 
-### Portes go/no-go
+### 9.2 — triangles et tétraèdres
 
-Après les profondeurs $\min(3,m_{\star})$, $\min(5,m_{\star})$ et $m_{\star}$, estimer l'exposant de croissance sur Poisson volumique. Si les intermédiaires deviennent nettement superlinéaires dans le régime favorable, suspendre les micro-optimisations et ouvrir la phase 17. Une configuration adversariale superlinéaire n'est pas un échec de correction.
+Généraliser la même frontière aux triplets et quadruplets. Les filtres GPU utilisent les déterminants de dépendance affine, de barycentriques et d'in-sphère sur boîtes. Un prune n'est certifiant que si une borne exacte démontre soit l'impossibilité du bon centrage, soit au moins $s_{\max}-\lvert U\rvert+1$ points strictement intérieurs pour tous les supports du produit. Toute boîte ambiguë est scindée jusqu'aux feuilles; aucune liste $L$-NN fixe ne possède un pouvoir d'exclusion.
 
-## Phase 10 — Catalogue, Gamma et réduction candidate
+### 9.3 — flux, reprise et certificat
+
+Le flux persiste seulement des `CriticalEvent`, diagnostics de dégénérescence, compteurs et frontières de reprise. Chaque chunk est lié au nuage canonique, au LBVH, à $K_{\mathrm{eff}}$, aux règles de parcours et à un checksum. Un checkpoint n'est publié qu'entre deux unités de frontière; la reprise rejoue le dernier chunk non committé. `complete=true` exige une frontière vide, tous les prunes recertifiés, tous les candidats feuilles classifiés, tous les shells finis et aucun overflow ou signe inconnu.
+
+### Invariants structurels
+
+- aucune allocation de taille $\binom{n}{k}$ ou $\binom{n}{k+1}$;
+- aucune arène de cellules ou de parents top-$m$;
+- aucun Gamma global dans la cible produit;
+- mémoire résidente bornée par points, LBVH, frontières/chunks, fallback exact et sortie;
+- les nombres de produits prunés, supports feuilles, événements, octets et pics de frontière sont obligatoires;
+- une frontière non vide retourne `budget_exhausted` ou `conditional`, jamais `exact`.
+
+### Tests et portes courtes
+
+- égalité complète avec le catalogue exhaustif pour $n\leq14$, dont permutations et contre-exemples permanents;
+- chaque prune est falsifié par mutation indépendante de sa borne, de ses plages Morton et de son compte intérieur;
+- les certificats qui répètent un nœud témoin, mélangent ancêtre et descendant ou recouvrent une plage support sont rejetés;
+- paires longues absentes de listes $L$-NN mais conservées par le parcours;
+- exécution chunkée identique octet par octet à l'exécution résidente;
+- smoke de croissance à 12 500, 25 000 et 50 000 points sur deux familles volumiques, sans campagne longue : deux exposants consécutifs supérieurs à 1,35 sur la frontière, les tests de boîtes ou les feuilles déclenchent un no-go architectural;
+- démonstration de reprise et d'absence d'OOM sur un flux synthétique dépassant la mémoire de sortie.
+
+### Porte de sortie
+
+Le catalogue direct complet égale l'oracle $n\leq14$ et aucun objet interdit n'est alloué. Le prototype 50 000 points publie ses compteurs et son temps dès le support deux; la phase ne prétend pas que les supports trois et quatre auront le même régime avant mesure. La complétude des trois tailles ferme seulement la base interne du flux; une taille inachevée reste explicitement `budgeted`. Elle ne modifie pas le `public_status` du contrat v2 actuel, dont la source exacte reste `gamma_exhaustive_reference`; son remplacement exige une migration contractuelle versionnée après le journal, la tour verticale et la preuve M.1.
+
+## Phase 10 — Journal Morse et réduction directe
 
 ### But
 
-Livrer `hgp_reduced` exact sur le backend CPU de référence et une voie Gabriel GPU honnêtement partielle.
+Consommer le flux de Phase 9 pour construire directement une généalogie $H_0$ compacte. Gamma exhaustif reste un oracle $n\leq14$ et n'entre jamais dans le binaire ni dans la mémoire du chemin produit.
 
 ### Travaux
 
-- construire Gamma exhaustif avec tous ses sommets, cofaces et incidences sur `reference_cpu`;
-- convertir chaque événement de rang $k+1$ en label Gabriel $S=I\cup U$ pour la voie accélérée;
-- émettre ses $k+1$ facettes et son hyperarête positive;
-- vérifier le critère Gabriel par le rang sans l'assimiler à une preuve d'exhaustivité;
+- injecter les naissances de rang $k$ et les selles de rang $k+1$ depuis le flux partagé;
+- construire les au plus quatre bras de chaque selle et les attacher aux racines du snapshot strict pré-lot;
 - trier les niveaux par filtre puis comparateur exact;
-- construire les lots;
-- implémenter hyper-Kruskal déterministe;
-- traiter $q=0$ comme naissance réduite, $q=1$ comme croissance et $q\geq2$ comme multifusion;
-- activer toutes les facettes du lot et conserver les `coverage_delta`;
-- ne supprimer comme redondante qu'une hyperarête sans facette ni couverture nouvelle;
-- restituer les unions de points recouvrantes;
-- produire la forêt pour chaque $k$.
+- résoudre chaque niveau comme un hypergraphe quotient, sans binariser les multifusions;
+- persister seulement `RootBirth`, `AtomicUnionBatch`, `GatewayAttach`, les enfants et, si demandé, `CoverageDelta`;
+- conserver les gateways silencieux nécessaires à une fusion future; la fixture à cinq points interdit de les confondre avec des no-op;
+- réutiliser le sweep Morse 6.23 comme falsificateur interne, puis retirer son historique Gamma du chemin produit;
+- produire les forêts horizontales de chaque ordre et les runs externes nécessaires au streaming.
 
 ### Tests
 
-- Gamma exhaustif contre oracle de phase 1;
-- flot Gabriel contre Gamma comme sous-relation positive;
+- journal direct contre Gamma exhaustif seulement pour $n\leq14$;
 - fixture `gabriel-point-set-counterexample-5-points-v1`, avec désaccord exact attendu et sérialisé;
-- composantes avant et après chaque lot;
-- même résultat clique, étoile et hyperarête;
-- événements redondants;
+- composantes avant et après chaque lot et attache silencieuse réutilisée plus tard;
 - multifusions et niveaux égaux;
 - recouvrements de points;
 - EMST pour $k=1$.
 
 ### Porte de sortie
 
-Pour tous les petits cas et toutes les coupes, `hgp_reduced` sur `reference_cpu` coïncide avec la réduction de Gamma exhaustif et utilise `gamma_exhaustive_reference`. La voie Gabriel utilise `gabriel_positive_connectivity`, reste `partial_refinement` et ne peut fermer cette phase comme backend exact. Une réduction accélérée exacte exige une preuve nouvelle couvrant les incidences silencieuses.
+Pour tous les petits cas et toutes les coupes, le journal direct coïncide avec Gamma exhaustif. Tant que M.1 ou une génération complète équivalente des gateways silencieux n'est pas prouvée, le journal reste `partial_refinement`; l'accord expérimental ne le promeut jamais. Une fois la preuve et ses certificats fermés, Gamma peut devenir uniquement un oracle de régression dans une migration contractuelle versionnée; la fermeture de cette phase seule ne change aucun `public_status` v2.
 
 ## Phase 11 — Tour verticale
 
@@ -1008,8 +1012,9 @@ Atteindre ou réfuter proprement la cible de moins d'une seconde en protocole `w
 
 ### Préconditions
 
-- profil `hgp_reduced` certifié;
-- prédicats et catalogues corrects;
+- pour la **qualification finale**, profil `hgp_reduced` certifié par le flux direct et le journal des Phases 9--11;
+- pour les **smokes architecturaux non promotionnels**, premier sous-flux direct disponible, avec tailles de support et portée explicitement incomplètes; ces mesures commencent en Phase 9 et ne publient jamais `exact`;
+- prédicats et flux direct corrects dans leur portée annoncée;
 - aucun JIT;
 - runtime et allocateur initialisés, mais nuage encore en mémoire hôte;
 - instrumentation NVTX complète.
@@ -1018,7 +1023,7 @@ Atteindre ou réfuter proprement la cible de moins d'une seconde en protocole `w
 
 - fusion de kernels sans fusionner proposition et certification;
 - CUDA Graphs;
-- classes de cellules par complexité;
+- classes d'unités de frontière par complexité;
 - double buffering;
 - culling directionnel;
 - cache de violateurs;
@@ -1047,13 +1052,13 @@ Atteindre ou réfuter proprement la cible de moins d'une seconde en protocole `w
 
 ### Porte de sortie
 
-Objectif principal : $n=50\,000$, $K_{\max}=10$, p95 `warm_e2e` inférieur à une seconde sur famille volumique préenregistrée, statut `exact` et pic inférieur à 80 % de VRAM. Cette mesure inclut validation, transfert, LBVH, calcul et matérialisation du résultat; `resident_core` reste diagnostique. Si la cible échoue, publier la phase dominante et la courbe de croissance; ne pas modifier le contrat.
+Objectif principal : $n=50\,000$, $K_{\max}=10$, p95 `warm_e2e` inférieur à une seconde sur famille volumique préenregistrée, portée entièrement certifiée et pic inférieur à 80 % de VRAM. Cette mesure inclut validation, transfert, LBVH, calcul et matérialisation du résultat; `resident_core` reste diagnostique. Elle ne peut porter le statut public `exact` qu'après la migration contractuelle versionnée prévue à la sortie des Phases 9--11 et de M.1; un benchmark ne réalise jamais cette promotion. Si la cible échoue, publier la phase dominante et la courbe de croissance; ne pas modifier le contrat.
 
-## Phase 15 — Streaming à un million
+## Phase 15 — Streaming à dix millions et davantage
 
 ### But
 
-Traiter un catalogue plus grand que les arènes résidentes sans changer le résultat.
+Traiter un flux d'événements, d'attaches et de frontières plus grand que les arènes résidentes sans reconstruire la mosaïque et sans changer le résultat dans la portée certifiée.
 
 ### Travaux
 
@@ -1061,8 +1066,8 @@ Traiter un catalogue plus grand que les arènes résidentes sans changer le rés
 - sur G4, Hyperdisk Balanced pour le boot et les checkpoints durables, et jusqu'à quatre Titanium SSD pour le scratch éphémère rapide;
 - instantané `BudgetSnapshot` avant chaque lot, run, merge et sérialisation;
 - fermeture complète avant éviction;
-- signatures d'incidence triables;
-- labels et contraintes sûres sérialisés avant éviction; aucun état de couture géométrique n'est requis;
+- signatures d'événement et d'attache triables;
+- événements certifiés, gateways, états DSU et frontières de reprise sérialisés avant éviction; aucun atlas de cellules ni état de couture de mosaïque n'est requis;
 - runs checksummés;
 - merge externe déterministe;
 - sorties mémoire-mappées;
@@ -1081,11 +1086,11 @@ Traiter un catalogue plus grand que les arènes résidentes sans changer le rés
 - limites exactes de chaque budget à un octet près et sortie `budget_exhausted` reproductible;
 - kill entre écriture, `fsync`, renommage et publication du manifeste;
 - reprise avec version incompatible refusée;
-- un million de points sans OOM.
+- dix millions de points sans OOM lorsque le certificat reste sparse, avec arrêt budgétaire transactionnel sinon.
 
 ### Porte de sortie
 
-Résultats octet par octet identiques entre résident et streaming. Reprise déterministe après interruption. Objectif indicatif : un million en moins de 60 secondes lorsque le certificat reste sparse.
+Résultats octet par octet identiques entre résident et streaming. Reprise déterministe après interruption. Le jalon intermédiaire d'un million valide le mécanisme; la cible produit est dix millions ou davantage lorsque le certificat reste sparse.
 
 ## Phase 16 — Plusieurs millions et campagne scientifique
 
@@ -1121,7 +1126,7 @@ Courbes de complexité avec intervalles, seuils de passage au streaming et taxon
 
 ### Position dans le programme
 
-Cette piste est parallèle et non bloquante. Sa première sous-phase s'ouvre seulement après fermeture des phases 1 et 2A; elle ne remplace ni le raffinement top-$m$ des phases 8–10, ni la preuve Morse M.1 de la phase 12. Elle exploite les théorèmes S.1–S.6 de l'[audit des boules saturées](math/TOUR_BOULES_SATUREES.md) comme représentation combinatoire directe de Čech et Gamma.
+Cette piste est parallèle et non bloquante. Sa première sous-phase s'ouvre seulement après fermeture des phases 1 et 2A; elle ne remplace ni le flux direct des phases 9–10, ni la preuve Morse M.1 de la phase 12. Toute matérialisation de Čech ou Gamma y reste un oracle borné et n'entre pas dans le chemin produit. Elle exploite les théorèmes S.1–S.6 de l'[audit des boules saturées](math/TOUR_BOULES_SATUREES.md) comme représentation combinatoire de comparaison.
 
 Le prototype reste `backend=reference_cpu`. Tant qu'aucune migration de schéma n'active une base de preuve dédiée, il s'exécute comme oracle de recherche et ne publie pas `public_status=exact`, même si ses objets internes sont calculés exhaustivement.
 
@@ -1219,7 +1224,7 @@ La validation de 17A ouvre un jalon **oracle interne exact borné**, sans fermer
 
 ### Jalon `v1-interactive-scalable`
 
-Il dépend de `v1-correctness` et exige en plus : G6 atteint à 50 000 points, G7 atteint à un million, au moins trois exécutions génériques sparse avec `forest_semantics=exact, public_status=exact` à trois millions sans OOM et avec reprise vérifiée, et une réponse contrôlée à dix millions. Cette dernière porte soit `forest_semantics=exact, public_status=exact` si le certificat reste sparse, soit `mode=budgeted, forest_semantics=partial_refinement` avec `public_status=conditional` ou `public_status=budget_exhausted`, checkpoint et diagnostic complet. Seul `public_status=exact` valide le SLO conditionnel de dix minutes.
+Il dépend de `v1-correctness`, de la Phase 12 fermant M.1 et d'une migration contractuelle versionnée qui active la base de preuve exacte du flux direct. Il exige en plus : G6 atteint à 50 000 points, G7 atteint à un million, et la preuve dédiée `three_sparse_3m_exact_runs` constituée d'au moins trois exécutions génériques sparse avec `forest_semantics=exact, public_status=exact` à trois millions sans OOM et avec reprise vérifiée. Aucun statut limité ne satisfait G7b. Une réponse contrôlée à dix millions est également obligatoire : elle porte soit `forest_semantics=exact, public_status=exact` si le certificat reste sparse, soit `mode=budgeted, forest_semantics=partial_refinement` avec `public_status=conditional` ou `public_status=budget_exhausted`, checkpoint et diagnostic complet. Seul `public_status=exact` valide le SLO conditionnel de dix minutes.
 
 ## 6. Matrice de dépendances
 
@@ -1234,14 +1239,14 @@ Il dépend de `v1-correctness` et exige en plus : G6 atteint à 50 000 points, G
 | 5 | 1–4 | revendications hiérarchiques GPU |
 | 6 | 1–4 | 12 |
 | 7 | 2B–4 | 8–9 |
-| 8 | 1–4, 7 | 9 |
-| 9 | 8 | 10 et baseline comparative de 17C |
-| 10 | 5, 9 | 11, 14–16 |
+| 8 | 1–4, 7 | oracle borné de profondeur zéro, non bloquant pour le flux produit |
+| 9 | 1, 2A, 4, 7 | 10 et baseline comparative de 17C |
+| 10 | 5, 9 | 11 et promotion exacte; les prototypes 14–15 peuvent mesurer plus tôt un statut conditionnel |
 | 11 | 10 | tour réduite publiable |
 | 12 | 1, 6, 9–11 | piste topologique complète |
 | 13 | 2A–2B, 12 | domaine non générique de la piste topologique |
 | 14 | 10–11 | piste produit, SLO 50k |
-| 15 | 9–11 | piste produit, million exact |
+| 15 | 9–11 | piste produit, mécanisme validé à un million puis cible 10 M+ certifiée ou arrêt budgétaire honnête |
 | 16 | 14–15 | domaine pratique |
 | 17 | 1 et 2A pour 17A; 4 pour 17B; 9 pour 17C | piste de référence puis décision scalable, sans bloquer la voie principale |
 | 18 | phases livrées | release |
@@ -1336,9 +1341,9 @@ Les sept prochains lots de travail doivent être :
 
 Cette séquence donne rapidement une vérité terrain, un cas $k=1$ incontestable et une mesure réaliste de la primitive GPU. Elle évite que les choix de bibliothèque ou de layout figent prématurément un objet mathématique incomplet.
 
-Les phases 2A, 2B, 3 et 4 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. L'oracle spatial brute-force exact et le premier Morton-LBVH à bornes rationnelles certifiées sont livrés sur `reference_cpu`; la référence CUDA exhaustive est qualifiée au SHA `01be0f150ee35a01bc939d9240b0a5675e3ae800`; le filtre CUDA borné de rejet AABB strict l'est au SHA `24e33d4fc80d2b5c687c939d9240fa50571d1951`; le parcours LBVH résident parallèle recertifié l'est au SHA `c846ed7b253840ef6fe1f0f39f7f10c63af64b8e`. La phase 5 est la phase courante, avec `cuda_g4` comme producteur de candidats et backend du rejeu indépendant, `reference_cpu` pour la recertification, la décision, la contraction et la réduction compacte locale, le profil `hgp_reduced` et le mode `certified`. Ses cinq premiers jalons CPU livrent l'EMST exact, le catalogue global rang-deux/Gabriel, leur réduction, le différentiel indépendant à $n=14$, la forêt compacte à stockage linéaire et le producteur Borůvka exact vérifié sur le LBVH. La primitive GPU à graine fixe est qualifiée sur G4 au SHA `9f29ffcb9ba8ca66f3cfc7c0c9285c34cbeee70e`; la boucle hybride monolithique, son contexte producteur résident, son rejeu GPU indépendant et ses contractions CPU exactes le sont au SHA `c199651d86e861eb755357986d036889839578d4`; l'intégration chunkée de toutes les rondes, son budget de confiance, sa borne physique du payload candidat et son rejeu frais le sont au SHA `6d944132d2f7d261a934a1864788c2fb7a81831f`; la graine Morton bornée, sa recertification exacte monotone, ses audits et son rejeu indépendant le sont au SHA `7c4933b678cbc6d9860e33596522ab971c0c5df5`. Le benchmark Morton final au SHA propre `4cbdb2bb7f0fb9decc9ede1c9a313727cb8b93ed` établit empiriquement que la fenêtre fixe conserve un travail quadratique sur `uniform` et `clusters`; elle reste un initialiseur de cutoff. La recherche external-1NN exacte élimine ensuite le payload candidat et son benchmark G4 au SHA `a81d8e50e4655a2f1b6acad74bbffddbc98ff0ba`, étendu à 16 384 points, observe un dernier exposant entre $1.090$ et $1.240$ avec un maximum de 235 visites par source. Ce résultat reste empirique et `benchmark_only`. La réduction explicite locale du témoin recertifié en `K1CompactForest` est maintenant implémentée et vérifiée sous GCC et Clang stricts, sans modifier le statut du témoin source ni publier la tour globale. L'obstruction quadratique ferme négativement la preuve scalable pour la frontière indépendante par source actuelle. Le parcours self-dual alternatif est certifié sur hôte, neutralise ce témoin, borne sa pile par $2H+1$ et ses visites par $n(n+1)-1$; sa chaîne offre chaque graine recertifiée aux deux composantes incidentes, décide directement les minima par composante, reconstruit l'enveloppe après chaque contraction et exige un rejeu frais sans minima ponctuels. Le mode courant dédupliqué traite l'union des ancêtres mixtes une fois en ordre bottom-up et borne sa maintenance linéairement par baisse, sans borner le travail total; le work-profile hôte v5 est validé et se projette exactement vers v4, v3 et v1. La chaîne persistante reste `frozen_initial` sous son contrat v4, et aucune qualification CUDA/G4 ou modification de statut public n'en découle. Une amélioration globale sous-quadratique reste ouverte avec le passage au-delà de l'ancre $k=1$. En préparation de la Phase 6, toujours `ready`, les jalons 6.1 à 6.22 sont validés sur hôte avec `reference_cpu/certified`, `full_pi0` comme autorité Gamma et projection explicite vers `hgp_reduced`; 6.7 ferme les labels terminaux des $\lvert U\rvert$ bras, 6.8 construit la coupe Gamma strictement ouverte bornée, 6.9 raccorde les classes terminales complètes aux composantes pré-événement, 6.10 contracte exhaustivement et simultanément toutes les facettes et cofaces du niveau exact, 6.11 superpose les seules provenances événementielles fournies et complètes aux groupes exhaustifs, 6.12 construit le catalogue critique exhaustif borné et ses lots H0, 6.13 projette chaque transition vers la sémantique locale `hgp_reduced`, 6.14 déroule les niveaux d'un ordre dans un journal compact et 6.15 en rejoue les coupes; 6.16 raccorde les rôles H0 à l'histoire, 6.17 raccorde tous les bras catalogués aux cibles strictes `full_pi0`, 6.18 factorise ces objets dans un journal typé, 6.19 relie chaque cible à sa racine locale pré-lot ou à son singleton omis et 6.20 compose cette liaison avec chaque bras. Le jalon 6.21 reconstruit enfin un chemin strict compact et rejouable par candidat, sans dédupliquer les cibles ou racines partagées. Sa portée courante est `bounded_n14_k10_single_order_event_local_typed_critical_arms_with_replayable_strict_descent_paths_linked_to_external_full_pi0_targets_and_separate_frozen_pre_batch_local_hgp_reduced_root_or_omitted_singleton_dispositions_only` : les `Attachment`, identifiants publics ou durables, H5, O3, M.1, le DAG global, le pointer-jumping, les plateaux, l'attache verticale, la transaction de forêt `full_pi0`, la forêt multi-ordre et tout `public_status` restent ouverts.
+Les phases 2A, 2B, 3 et 4 sont fermées et le jalon 17A reste prêt comme expérience CPU indépendante, sans déplacer la voie principale. L'oracle spatial brute-force exact et le premier Morton-LBVH à bornes rationnelles certifiées sont livrés sur `reference_cpu`; la référence CUDA exhaustive est qualifiée au SHA `01be0f150ee35a01bc939d9240b0a5675e3ae800`; le filtre CUDA borné de rejet AABB strict l'est au SHA `24e33d4fc80d2b5c687c939d9240fa50571d1951`; le parcours LBVH résident parallèle recertifié l'est au SHA `c846ed7b253840ef6fe1f0f39f7f10c63af64b8e`. La phase 9 est la phase courante avec `reference_cpu`, le profil `hgp_reduced` et le mode `certified` pour le flux direct de supports-paires. La phase 5 demeure à l'état `ready` comme ancre $k=1$ ouverte; ses backends historiques restent `cuda_g4` pour les propositions et `reference_cpu` pour la recertification, la décision et la contraction. Ses cinq premiers jalons CPU livrent l'EMST exact, le catalogue global rang-deux/Gabriel, leur réduction, le différentiel indépendant à $n=14$, la forêt compacte à stockage linéaire et le producteur Borůvka exact vérifié sur le LBVH. La primitive GPU à graine fixe est qualifiée sur G4 au SHA `9f29ffcb9ba8ca66f3cfc7c0c9285c34cbeee70e`; la boucle hybride monolithique, son contexte producteur résident, son rejeu GPU indépendant et ses contractions CPU exactes le sont au SHA `c199651d86e861eb755357986d036889839578d4`; l'intégration chunkée de toutes les rondes, son budget de confiance, sa borne physique du payload candidat et son rejeu frais le sont au SHA `6d944132d2f7d261a934a1864788c2fb7a81831f`; la graine Morton bornée, sa recertification exacte monotone, ses audits et son rejeu indépendant le sont au SHA `7c4933b678cbc6d9860e33596522ab971c0c5df5`. Le benchmark Morton final au SHA propre `4cbdb2bb7f0fb9decc9ede1c9a313727cb8b93ed` établit empiriquement que la fenêtre fixe conserve un travail quadratique sur `uniform` et `clusters`; elle reste un initialiseur de cutoff. La recherche external-1NN exacte élimine ensuite le payload candidat et son benchmark G4 au SHA `a81d8e50e4655a2f1b6acad74bbffddbc98ff0ba`, étendu à 16 384 points, observe un dernier exposant entre $1.090$ et $1.240$ avec un maximum de 235 visites par source. Ce résultat reste empirique et `benchmark_only`. La réduction explicite locale du témoin recertifié en `K1CompactForest` est maintenant implémentée et vérifiée sous GCC et Clang stricts, sans modifier le statut du témoin source ni publier la tour globale. L'obstruction quadratique ferme négativement la preuve scalable pour la frontière indépendante par source actuelle. Le parcours self-dual alternatif est certifié sur hôte, neutralise ce témoin, borne sa pile par $2H+1$ et ses visites par $n(n+1)-1$; sa chaîne offre chaque graine recertifiée aux deux composantes incidentes, décide directement les minima par composante, reconstruit l'enveloppe après chaque contraction et exige un rejeu frais sans minima ponctuels. Le mode courant dédupliqué traite l'union des ancêtres mixtes une fois en ordre bottom-up et borne sa maintenance linéairement par baisse, sans borner le travail total; le work-profile hôte v5 est validé et se projette exactement vers v4, v3 et v1. La chaîne persistante reste `frozen_initial` sous son contrat v4, et aucune qualification CUDA/G4 ou modification de statut public n'en découle. Une amélioration globale sous-quadratique reste ouverte avec le passage au-delà de l'ancre $k=1$. En préparation de la Phase 6, toujours `ready`, les jalons 6.1 à 6.22 sont validés sur hôte avec `reference_cpu/certified`, `full_pi0` comme autorité Gamma et projection explicite vers `hgp_reduced`; 6.7 ferme les labels terminaux des $\lvert U\rvert$ bras, 6.8 construit la coupe Gamma strictement ouverte bornée, 6.9 raccorde les classes terminales complètes aux composantes pré-événement, 6.10 contracte exhaustivement et simultanément toutes les facettes et cofaces du niveau exact, 6.11 superpose les seules provenances événementielles fournies et complètes aux groupes exhaustifs, 6.12 construit le catalogue critique exhaustif borné et ses lots H0, 6.13 projette chaque transition vers la sémantique locale `hgp_reduced`, 6.14 déroule les niveaux d'un ordre dans un journal compact et 6.15 en rejoue les coupes; 6.16 raccorde les rôles H0 à l'histoire, 6.17 raccorde tous les bras catalogués aux cibles strictes `full_pi0`, 6.18 factorise ces objets dans un journal typé, 6.19 relie chaque cible à sa racine locale pré-lot ou à son singleton omis et 6.20 compose cette liaison avec chaque bras. Le jalon 6.21 reconstruit enfin un chemin strict compact et rejouable par candidat, sans dédupliquer les cibles ou racines partagées. Sa portée courante est `bounded_n14_k10_single_order_event_local_typed_critical_arms_with_replayable_strict_descent_paths_linked_to_external_full_pi0_targets_and_separate_frozen_pre_batch_local_hgp_reduced_root_or_omitted_singleton_dispositions_only` : les `Attachment`, identifiants publics ou durables, H5, O3, M.1, le DAG global, le pointer-jumping, les plateaux, l'attache verticale, la transaction de forêt `full_pi0`, la forêt multi-ordre et tout `public_status` restent ouverts.
 
-Le jalon 6.18 prolonge cette progression sans changer l'état des phases : Phase 6 reste `ready`, Phase 5 reste seule `in_progress`, et le chemin demeure `reference_cpu/full_pi0` projeté vers `hgp_reduced/certified`. Validé sur hôte strict sous GCC et Clang, il conserve une unique histoire mono-ordre 6.14 et y joint exhaustivement les quatre sémantiques de labels, les selles, classes terminales, bras et cibles strictes `full_pi0`, tandis que les deux overlays sources restent transitoires et que leurs annotations réduites restent non autoritatives. La portée courante devient `bounded_n14_k10_single_order_exhaustive_gamma_groups_typed_catalog_h0_roles_and_strict_full_pi0_arm_targets_with_separate_hgp_reduced_effect_annotations_only`; le lien cible--racine, les objets `Attachment`, les identifiants durables ou publics, l'attache verticale, M.1, le DAG global, le pointer-jumping, les plateaux, la forêt multi-ordre et tout `public_status` restent ouverts.
+À la date historique du jalon 6.18, la Phase 6 restait `ready` et la Phase 5 seule `in_progress`; le chemin demeurait `reference_cpu/full_pi0` projeté vers `hgp_reduced/certified`. Le registre courant a depuis placé la Phase 5 à `ready` et ouvert la Phase 9. Validé sur hôte strict sous GCC et Clang, il conserve une unique histoire mono-ordre 6.14 et y joint exhaustivement les quatre sémantiques de labels, les selles, classes terminales, bras et cibles strictes `full_pi0`, tandis que les deux overlays sources restent transitoires et que leurs annotations réduites restent non autoritatives. La portée courante devient `bounded_n14_k10_single_order_exhaustive_gamma_groups_typed_catalog_h0_roles_and_strict_full_pi0_arm_targets_with_separate_hgp_reduced_effect_annotations_only`; le lien cible--racine, les objets `Attachment`, les identifiants durables ou publics, l'attache verticale, M.1, le DAG global, le pointer-jumping, les plateaux, la forêt multi-ordre et tout `public_status` restent ouverts.
 
 Le jalon 6.19 ferme maintenant ce lien cible--racine local sans changer l'état des phases. Le journal 6.18 reste externe et fraîchement recertifié; chaque cible `full_pi0` rejoint par égalité de famille complète l'unique racine `hgp_reduced` du snapshot pré-lot, ou devient un singleton explicitement omis. Les dix capacités, leur balayage exhaustif de domaine, l'affectation exactement-une-fois, les préparations bornées et le commit simultané sont validés sur hôte strict sous GCC et Clang. La portée courante devient `bounded_n14_k10_single_order_full_pi0_target_families_to_frozen_pre_batch_local_hgp_reduced_roots_with_explicit_isolated_singletons_only`; les identifiants restent locaux et aucun `Attachment`, identifiant durable ou public, attache verticale, certificat M.1, transaction de forêt `full_pi0`, DAG global, pointer-jumping, plateau, forêt multi-ordre ou `public_status` n'est encore publié.
 
