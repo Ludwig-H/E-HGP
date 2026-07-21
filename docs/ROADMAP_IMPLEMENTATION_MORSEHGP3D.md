@@ -652,7 +652,7 @@ Les coefficients binary64 sont des enclosures dirigées des rationnels. Addition
 
 Le target AOT et un exécutable analytique court sont câblés dans les presets CUDA release et audit. Le checker statique interdit fast math, FMA, tolérances, stream par défaut, émission atomique et verdict exact GPU; il vérifie aussi CUDA 12.9, `sm_120`, les arrondis dirigés, la queue nulle et l'ordre synchronisation–epoch. Une première compilation `cuda-release` gardée sur G4 a atteint NVCC 12.9.86 puis échoué fermée avant tout exécutable : les quatre `std::array` du POD interne appelaient un `operator[]` hôte depuis le device. L'ABI de transfert emploie désormais des tableaux natifs `std::uint64_t[N]`, avec tailles et offsets vérifiés, et le checker rejette toute régression vers `std::array`.
 
-Le workflow gardé possède maintenant un compagnon 7.8 dédié. Sur un même SHA propre, il construit release et audit, exécute le binaire analytique release, exige uniquement un ELF `sm_120` sans PTX, puis lance `memcheck` et `racecheck`. L'assembleur distingue explicitement `proposal_only_exhaustive_plane_triple_transcript` de `reference_cpu_exact_all_constraints`, ferme les comptes, epochs, empreintes et journaux, et garde l'artefact provisoire jusqu'à la certification ciblée `TERMINATED`. Cette route est validée localement mais n'a pas encore été exécutée sur G4; sa requalification réelle reste donc la porte suivante. La Phase 7 reste `ready` et la Phase 8 reste bloquée.
+Le workflow gardé possède maintenant un compagnon 7.8 dédié. Sur un même SHA propre, il construit release et audit, exécute le binaire analytique release, exige uniquement un ELF `sm_120` sans PTX, puis lance `memcheck` et `racecheck`. L'assembleur distingue explicitement `proposal_only_exhaustive_plane_triple_transcript` de `reference_cpu_exact_all_constraints`, ferme les comptes, epochs, empreintes et journaux, et garde l'artefact provisoire jusqu'à la certification ciblée `TERMINATED`. La qualification réelle du SHA `39670649e1af1b999c5be7d580650a2792a09008` ferme cette route : les deux builds CUDA 12.9 passent, l'ELF ne contient que `sm_120` et aucune PTX, l'exécution analytique produit 55 records sur quatre cellules puis les recertifie exactement sur CPU, les deux epochs sont déterministes, et `memcheck` comme `racecheck` passent. L'artefact `phase7-h-polytope-39670649e1af1b999c5be7d580650a2792a09008.json` porte le SHA-256 `7894bc6bd7dbce3bddb1f5405d345d8f8ffe321d0be2949908355dfe130cabca` et la cible exacte a été relue `TERMINATED`. Cette preuve qualifie le backend de proposition, pas un diagramme global : la Phase 7 est `completed`, la Phase 8 devient `ready` et aucun statut public n'est promu.
 
 ### But
 
@@ -683,6 +683,10 @@ Choisir la primitive GPU sans lui déléguer la certification.
 Choisir entre : adaptateur amont, fork minimal épinglé ou primitive interne. Le choix repose sur les sommets accessibles, la maîtrise de l'overflow, le coût sans fast math et la facilité de rejouer les cellules. Aucun statut exact à cette phase.
 
 ## Phase 8 — Raffinement ancré $0\to1$
+
+### Porte d'entrée
+
+Satisfaite par les Phases 1, 4 et 7 fermées. La Phase 7 a sélectionné puis qualifié la primitive H-polytope interne comme backend de proposition; la Phase 4 fournit l'oracle spatial exact et la Phase 1 l'oracle exhaustif de comparaison. La Phase 8 démarre en `ready` avec `backend=reference_cpu`, `profile=generic_core` et `mode=certified`; le chemin `cuda_g4` reste une accélération de proposition recertifiée et ne décide jamais seul la fermeture d'une cellule.
 
 ### But
 
