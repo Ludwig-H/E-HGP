@@ -80,9 +80,21 @@ La pile témoin, l'éventuelle expansion différée et les reçus stricts sont p
 
 Cette amélioration borne seulement l'authentification et la validation du curseur. Elle ne rend pas sous-quadratique le parcours géométrique des paires, ne fournit ni codec hostile ni stockage durable et ne justifie encore aucun essai de SLO ou de 10 M+.
 
+## Jalon 9.3c-RCPU livré
+
+Le codec v1 projette chaque `ExactPairSupportStreamChunk`, checkpoint successeur inclus, dans une enveloppe binaire canonique. Le magic fixe, la version, le kind, les flags, la longueur et tous les entiers du payload ont une représentation big-endian indépendante de l'ABI; les identifiants occupent 32 octets, les booléens et enums ont des tags fermés et les rationnels sont reconstruits depuis leur texte canonique. Un SHA-256 séparé par domaine ferme l'intégrité wire seulement. Une mutation suivie d'un recalcul de ce checksum peut encore être acceptée par le codec; elle doit toujours échouer au rejeu scientifique si elle modifie la transition.
+
+Les limites du codec appartiennent à l'appelant et doivent être finies. Elles couvrent les octets totaux, la frontière, la somme pile--reçus--expansion différée, les records, les références `PointId`, un texte exact et leur somme. Le décodeur contrôle le compte, sa contribution minimale aux octets restants et les quotas agrégés avant chaque `reserve`; il contrôle la longueur exacte avant de construire une chaîne ou un `BigInt`. Les troncatures, octets terminaux, versions futures, kinds et flags inconnus, tags invalides, longueurs impossibles, rationnels non canoniques et checksums divergents échouent fermés. L'encodeur reçoit un chunk C++ fiable et construit sa chaîne rationnelle avant d'en contrôler la longueur; il matérialise aussi le payload puis le wire, avec un pic de deux buffers proportionnel au cap. Ce choix simple ferme 9.3c mais devra devenir streamé avant de prétendre servir une frontière 10 M+ volumineuse.
+
+Le sink Unix reçoit un budget de chunk fixe et fiable; le budget encodé doit lui être exactement égal et ne pilote jamais le rejeu. Il ouvre un répertoire dédié avec `O_NOFOLLOW`, garde un verrou `flock` mono-écrivain, applique le quota dès l'inventaire, ouvre les finals avec `O_NONBLOCK`, exige les fichiers `pair-support-%020d.p9c` consécutifs depuis zéro et rejoue chacun depuis l'ancre initiale. Un seul chunk décodé est vivant à la fois. Un fichier final tronqué, corrompu, non régulier, non contigu, post-terminal ou de fausse filiation bloque la reprise; il n'est ni ignoré ni supprimé. Seul `.pair-support-%020d.tmp` à la séquence suivante est non autoritatif et nettoyable.
+
+Pour publier, le sink encode et appelle `prepare_next`, qui recalcule le checkpoint attendu sans avancer le checkpoint fiable. Il crée ensuite le temporaire en mode create-only, boucle sur les écritures partielles et `EINTR`, exécute `fdatasync`, relit chaque octet, renomme dans le même répertoire et exécute `fsync` sur ce répertoire. Alors seulement `commit_prepared` déplace sans exception le checkpoint attendu. Abandonner un jeton avant renommage laisse l'état retentable; un jeton étranger, réutilisé ou préparé à une époque antérieure empoisonne le vérificateur. Une transition non terminale sans augmentation du travail est refusée afin qu'une suite de no-op ne consomme pas indéfiniment le quota de fichiers.
+
+Les quatre points de crash appellent réellement `_Exit` dans un processus enfant. Après `temporary_file_written` ou `temporary_file_synchronized`, la reprise retrouve l'ancien checkpoint, supprime le temporaire et reproduit le même bundle byte pour byte. Après `transition_renamed` ou `directory_synchronized`, elle rejoue exactement un final et une seconde réouverture n'ajoute rien. Cette observation vaut pour la perte du processus sur le filesystem Unix local testé avec `flock`. Elle ne mesure ni coupure d'alimentation, ni disparition de VM, ni Hyperdisk, ni filesystem réseau, et ne certifie pas la disponibilité des octets après un sinistre matériel. Surtout, sans `HEAD` fiable, un suffixe final supprimé ou restauré à un ancien snapshot est indistinguable d'un run légitimement arrêté à ce préfixe : 9.3c n'est pas anti-rollback.
+
 ## Structures globales évitées
 
-La cible dédiée `morsehgp3d_pair_support` contient la seule unité de traduction du producteur et dépend du LBVH, des points exacts et des prédicats de support; elle est séparée de l'archive historique `morsehgp3d_hierarchy` qui contient Gamma. Elle ne construit ni cellule top-$m$, ni coface, ni incidence de mosaïque d'ordre supérieur, ni Gamma global, ni arène de taille $\binom{n}{k}$. Sa mémoire résidente propre est bornée par la frontière active, deux parcours auxiliaires non simultanés, les records budgetés et les petits témoins de rang.
+La cible dédiée `morsehgp3d_pair_support` contient la seule unité de traduction du producteur et dépend du LBVH, des points exacts et des prédicats de support; `morsehgp3d_pair_support_codec` ne dépend que de ce flux et `morsehgp3d_pair_support_durable` ne dépend que du codec. Toutes trois sont séparées de l'archive historique `morsehgp3d_hierarchy` qui contient Gamma. Elles ne construisent ni cellule top-$m$, ni coface, ni incidence de mosaïque d'ordre supérieur, ni Gamma global, ni arène de taille $\binom{n}{k}$. La mémoire du producteur reste bornée par la frontière active, deux parcours auxiliaires non simultanés, les records budgetés et les petits témoins de rang; la reprise durable y ajoute un bundle borné et un seul chunk décodé, jamais l'historique.
 
 Le reçu statique du jalon publie les quatre zéros architecturaux `persistent_top_m_cell_count=0`, `global_gamma_coface_count=0`, `global_gamma_incidence_count=0` et `materialized_pair_arena_count=0`. Ils décrivent la cible et ses sources; le booléen de résultat homonyme reste une assertion rejouée, pas à lui seul une preuve d'absence.
 
@@ -122,17 +134,27 @@ Pour 9.3b, le même target couvre en plus :
 - le singleton ancré sans chunk et le rejet d'un no-op terminal redondant;
 - le checker statique v2, qui exige le contexte, `verify_next`, les deux algorithmes quasi linéaires, l'absence d'un vecteur de chunks dans le vérificateur et l'absence de rescan direct du manifeste sur le chemin mis en cache.
 
-Le test et sa bibliothèque passent en Release avec les avertissements stricts sous GCC 13.3 et Clang 18.1. Un smoke hostile colinéaire limité à $n\leq256$ observe 24 301 visites témoins et environ 111 ms au dernier point après les courts-circuits sûrs; ce diagnostic ne ferme aucun exposant ni SLO. Aucun benchmark long et aucune ressource GCP ne sont nécessaires pour cette validation CPU.
+Pour 9.3c, deux targets courts couvrent en plus :
+
+- round-trip complet, réencodage unique et digest doré du wire v1;
+- troncation à chaque préfixe, magic, version, kind, flags, longueur, checksum et EOF exact;
+- compte dans le cap mais impossible dans les octets restants, `UINT64_MAX`, quotas de records, frontière, auxiliaires, références `PointId` et textes exacts, tags booléens ou enums invalides et rationnel non canonique;
+- préparation à deux phases, abandon sans avance, commit unique et rejet d'un jeton périmé;
+- publication multi-chunk jusqu'au terminal, reprise avec mêmes digests et zéro historique, verrou concurrent, symlinks, FIFO non bloquant, trou de séquence et finals tronqués ou corrompus;
+- quatre pertes de processus réelles et retry byte-identique autour du renommage;
+- le checker statique v3, qui inspecte les trois cibles isolées, le codec borné, la couture `prepare_next`--`commit_prepared`, les primitives Unix de publication et les quatre zéros architecturaux.
+
+Les quatre CTests ciblés flux, codec, durabilité et checker v3 passent finalement en Release avec les avertissements stricts sous GCC 13.3 en 2,44 s et Clang 18.1 en 2,05 s, puis sous ASan/UBSan GCC en 10,17 s. Un smoke hostile colinéaire antérieur limité à $n\leq256$ observait 24 301 visites témoins et environ 111 ms au dernier point après les courts-circuits sûrs; ce diagnostic ne ferme aucun exposant ni SLO. Aucun benchmark long et aucune ressource GCP ne sont nécessaires pour cette validation CPU.
 
 ## Limites et ordre de poursuite
 
 Le prochain travail ne doit pas élargir l'oracle de cellules. L'ordre utile est désormais :
 
-1. ajouter un codec borné et un sink durable temporaire--synchronisation--renommage, puis tester crash avant et après publication;
+1. remplacer les deux buffers payload--wire par un encodeur/décodeur streamé et ajouter un `HEAD` compact autoritatif ou une attente externe équivalente pour distinguer création, reprise, suffixe orphelin et rollback, sans modifier les digests scientifiques;
 2. ajouter les reçus terminaux bornés nécessaires à la proposition `cuda_g4` P1 et leur recertification CPU exacte;
 3. mesurer seulement ensuite les compteurs de croissance sur 12 500, 25 000 et 50 000 sites, sans prétendre fermer le SLO;
 4. généraliser la frontière aux supports trois et quatre sans liste $L$-NN excluante;
 5. avant la qualification finale, remplacer la canonisation exacte eager et la construction LBVH CPU par des coordonnées binary64 SoA, exact paresseux et Morton/radix/LBVH device;
-6. pour 10 M+, persister deux frontières bornées et des chunks externes, sans conserver les événements cumulés ni les chunks de vérification en mémoire.
+6. pour 10 M+, persister deux frontières bornées et des chunks externes, sans conserver les événements cumulés ni les chunks de vérification en mémoire, puis qualifier le protocole de stockage réellement choisi au-delà de la seule perte de processus.
 
 La Phase 9 reste `in_progress`. Ce jalon ne ferme ni la complétude supports 2–4, ni la Phase 9, ni une forêt Morse, ni un statut public. GCP non utilisé.

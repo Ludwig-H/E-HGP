@@ -2662,21 +2662,62 @@ ExactPairSupportIncrementalVerifier::ExactPairSupportIncrementalVerifier(
   status_.retained_chunk_count = 0U;
 }
 
-ExactPairSupportStreamChunkVerification
-ExactPairSupportIncrementalVerifier::verify_next(
+ExactPairSupportIncrementalVerifier::PreparedNext::PreparedNext(
+    ExactPairSupportIncrementalVerifier* owner,
+    std::uint64_t source_epoch,
+    std::size_t next_verified_chunk_count,
+    ExactPairSupportStreamChunkVerification verification,
+    ExactPairSupportCheckpoint trusted_next) noexcept
+    : owner_(owner),
+      source_epoch_(source_epoch),
+      next_verified_chunk_count_(next_verified_chunk_count),
+      verification_(verification),
+      trusted_next_(std::move(trusted_next)),
+      valid_(true) {
+  static_assert(
+      std::is_nothrow_move_constructible_v<ExactPairSupportCheckpoint>);
+}
+
+ExactPairSupportIncrementalVerifier::PreparedNext::PreparedNext(
+    PreparedNext&& other) noexcept
+    : owner_(std::exchange(other.owner_, nullptr)),
+      source_epoch_(other.source_epoch_),
+      next_verified_chunk_count_(other.next_verified_chunk_count_),
+      verification_(other.verification_),
+      trusted_next_(std::move(other.trusted_next_)),
+      valid_(std::exchange(other.valid_, false)) {}
+
+ExactPairSupportIncrementalVerifier::PreparedNext&
+ExactPairSupportIncrementalVerifier::PreparedNext::operator=(
+    PreparedNext&& other) noexcept {
+  if (this != &other) {
+    owner_ = std::exchange(other.owner_, nullptr);
+    source_epoch_ = other.source_epoch_;
+    next_verified_chunk_count_ = other.next_verified_chunk_count_;
+    verification_ = other.verification_;
+    trusted_next_ = std::move(other.trusted_next_);
+    valid_ = std::exchange(other.valid_, false);
+  }
+  return *this;
+}
+
+void ExactPairSupportIncrementalVerifier::poison() noexcept {
+  status_.every_transition_verified = false;
+  status_.anchored_prefix_certified = false;
+  status_.anchored_run_certified = false;
+  status_.failed_closed = true;
+}
+
+ExactPairSupportIncrementalVerifier::PreparedNext
+ExactPairSupportIncrementalVerifier::prepare_next(
     const ExactPairSupportStreamBudget& chunk_budget,
     const ExactPairSupportStreamChunk& observed) {
-  const auto poison = [this]() noexcept {
-    status_.every_transition_verified = false;
-    status_.anchored_prefix_certified = false;
-    status_.anchored_run_certified = false;
-    status_.failed_closed = true;
-  };
   if (status_.failed_closed ||
       !status_.initial_checkpoint_reconstructed ||
-      status_.terminal_checkpoint_reached) {
+      status_.terminal_checkpoint_reached ||
+      epoch_ == std::numeric_limits<std::uint64_t>::max()) {
     poison();
-    return ExactPairSupportStreamChunkVerification{};
+    return PreparedNext{};
   }
 
   ExactPairSupportCheckpoint trusted_next;
@@ -2696,7 +2737,7 @@ ExactPairSupportIncrementalVerifier::verify_next(
   }
   if (!verification.chunk_transition_verified) {
     poison();
-    return verification;
+    return PreparedNext{verification};
   }
 
   std::size_t verified_chunk_count = 0U;
@@ -2709,15 +2750,50 @@ ExactPairSupportIncrementalVerifier::verify_next(
     poison();
     throw;
   }
+  return PreparedNext{
+      this,
+      epoch_,
+      verified_chunk_count,
+      verification,
+      std::move(trusted_next)};
+}
+
+bool ExactPairSupportIncrementalVerifier::commit_prepared(
+    PreparedNext&& prepared) noexcept {
+  if (!prepared.valid_ || prepared.owner_ != this ||
+      prepared.source_epoch_ != epoch_ || status_.failed_closed ||
+      status_.terminal_checkpoint_reached ||
+      !prepared.verification_.chunk_transition_verified) {
+    poison();
+    prepared.valid_ = false;
+    prepared.owner_ = nullptr;
+    return false;
+  }
+
   static_assert(
       std::is_nothrow_move_assignable_v<ExactPairSupportCheckpoint>);
-  trusted_checkpoint_ = std::move(trusted_next);
-  status_.verified_chunk_count = verified_chunk_count;
+  trusted_checkpoint_ = std::move(prepared.trusted_next_);
+  status_.verified_chunk_count = prepared.next_verified_chunk_count_;
   status_.terminal_checkpoint_reached = trusted_checkpoint_.complete();
   status_.anchored_prefix_certified = true;
-  status_.anchored_run_certified =
-      status_.terminal_checkpoint_reached;
+  status_.anchored_run_certified = status_.terminal_checkpoint_reached;
   status_.retained_chunk_count = 0U;
+  ++epoch_;
+  prepared.valid_ = false;
+  prepared.owner_ = nullptr;
+  return true;
+}
+
+ExactPairSupportStreamChunkVerification
+ExactPairSupportIncrementalVerifier::verify_next(
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportStreamChunk& observed) {
+  PreparedNext prepared = prepare_next(chunk_budget, observed);
+  ExactPairSupportStreamChunkVerification verification =
+      prepared.verification();
+  if (prepared.prepared() && !commit_prepared(std::move(prepared))) {
+    verification.chunk_transition_verified = false;
+  }
   return verification;
 }
 

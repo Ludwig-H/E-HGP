@@ -51,6 +51,18 @@ def validate(
         project / "include/morsehgp3d/hierarchy/pair_support_stream.hpp"
     )
     source = read_text(project / "src/cpu/hierarchy/pair_support_stream.cpp")
+    codec_header = read_text(
+        project / "include/morsehgp3d/hierarchy/pair_support_stream_codec.hpp"
+    )
+    codec_source = read_text(
+        project / "src/cpu/hierarchy/pair_support_stream_codec.cpp"
+    )
+    durable_header = read_text(
+        project / "include/morsehgp3d/hierarchy/pair_support_stream_durable.hpp"
+    )
+    durable_source = read_text(
+        project / "src/cpu/hierarchy/pair_support_stream_durable.cpp"
+    )
 
     pair_target = parenthesized_block(
         cmake, "add_library(\n  morsehgp3d_pair_support"
@@ -74,6 +86,50 @@ def validate(
         "the pair target must not link the historical Gamma archive",
     )
 
+    codec_target = parenthesized_block(
+        cmake, "add_library(\n  morsehgp3d_pair_support_codec"
+    )
+    require(
+        codec_target.count(
+            "src/cpu/hierarchy/pair_support_stream_codec.cpp"
+        )
+        == 1,
+        "the codec target must contain exactly its canonical codec source",
+    )
+    codec_links = parenthesized_block(
+        cmake, "target_link_libraries(\n  morsehgp3d_pair_support_codec"
+    )
+    require(
+        "PUBLIC morsehgp3d::pair_support" in codec_links,
+        "the codec target must depend on the direct pair stream",
+    )
+    require(
+        "morsehgp3d::hierarchy" not in codec_links,
+        "the codec target must not link the historical Gamma archive",
+    )
+
+    durable_target = parenthesized_block(
+        cmake, "add_library(\n    morsehgp3d_pair_support_durable"
+    )
+    require(
+        durable_target.count(
+            "src/cpu/hierarchy/pair_support_stream_durable.cpp"
+        )
+        == 1,
+        "the durable target must contain exactly its POSIX sink source",
+    )
+    durable_links = parenthesized_block(
+        cmake, "target_link_libraries(\n    morsehgp3d_pair_support_durable"
+    )
+    require(
+        "PUBLIC morsehgp3d::pair_support_codec" in durable_links,
+        "the durable target must depend on the bounded codec",
+    )
+    require(
+        "morsehgp3d::hierarchy" not in durable_links,
+        "the durable target must not link the historical Gamma archive",
+    )
+
     hierarchy_target = parenthesized_block(
         cmake, "add_library(\n  morsehgp3d_hierarchy"
     )
@@ -82,7 +138,16 @@ def validate(
         "the direct pair source leaked back into the Gamma archive",
     )
 
-    combined = header + "\n" + source
+    combined = "\n".join(
+        (
+            header,
+            source,
+            codec_header,
+            codec_source,
+            durable_header,
+            durable_source,
+        )
+    )
     for forbidden in (
         "hierarchy/gamma.hpp",
         "critical_catalog",
@@ -106,6 +171,9 @@ def validate(
         "no_forbidden_global_structure_materialized = true",
         "class ExactPairSupportAuthorityContext",
         "class ExactPairSupportIncrementalVerifier",
+        "class PreparedNext",
+        "prepare_next(",
+        "commit_prepared(",
         "verify_next(",
         "quasi_linear_structure_validation_certified",
         "product_rectangles_are_disjoint",
@@ -123,7 +191,9 @@ def validate(
         require(required in combined, f"missing bounded-stream token {required!r}")
 
     verifier_start = header.find("class ExactPairSupportIncrementalVerifier")
-    verifier_end = header.find("\n};", verifier_start)
+    verifier_end = header.find(
+        "struct ExactPairSupportStreamRunVerification", verifier_start
+    )
     require(
         verifier_start >= 0 and verifier_end > verifier_start,
         "cannot isolate the incremental verifier declaration",
@@ -142,13 +212,62 @@ def validate(
         "the instrumented manifest builder must be called only by its cold wrapper and the authority constructor",
     )
     require(
-        "trusted_checkpoint_ = std::move(trusted_next);" in source,
-        "verify_next must advance with the freshly replayed expected checkpoint",
+        "trusted_checkpoint_ = std::move(prepared.trusted_next_);" in source,
+        "commit_prepared must advance with the freshly replayed expected checkpoint",
     )
     require(
         "trusted_checkpoint_ = observed.next_checkpoint" not in source,
         "verify_next must never trust an observed checkpoint directly",
     )
+    require(
+        "std::vector<ExactPairSupportStreamChunk" not in durable_source,
+        "the durable sink must not retain decoded chunk history",
+    )
+    for forbidden_codec_token in (
+        "sizeof(ExactPairSupport",
+        "std::memcpy",
+    ):
+        require(
+            forbidden_codec_token not in codec_source,
+            f"the codec contains raw-layout token {forbidden_codec_token!r}",
+        )
+    for required_codec_token in (
+        "maximum_encoded_byte_count",
+        "maximum_frontier_entry_count",
+        "maximum_auxiliary_entry_count",
+        "maximum_record_count",
+        "maximum_point_id_reference_count",
+        "maximum_exact_text_byte_count",
+        "maximum_total_exact_text_byte_count",
+        "ExactPairSupportStreamDecodeDecision",
+        "checksum_mismatch",
+        "trailing_bytes",
+    ):
+        require(
+            required_codec_token in codec_header + codec_source,
+            f"missing bounded-codec token {required_codec_token!r}",
+        )
+    for required_durable_token in (
+        "O_NOFOLLOW",
+        "O_NONBLOCK",
+        "fdatasync",
+        "renameat",
+        "fsync(directory.get())",
+        "flock",
+        "prepare_next(",
+        "commit_prepared(",
+        "maximum_simultaneously_decoded_chunk_count = 1U",
+        "inventory_directory(\n        directory.get(), config.maximum_committed_transition_count)",
+        "retained_chunk_history_count = 0U",
+        "persistent_top_m_cell_count = 0U",
+        "global_gamma_coface_count = 0U",
+        "global_gamma_incidence_count = 0U",
+        "materialized_pair_arena_count = 0U",
+    ):
+        require(
+            required_durable_token in durable_header + durable_source,
+            f"missing durable-publication token {required_durable_token!r}",
+        )
     event_start = source.find("struct ProductRectangleSweepEvent")
     event_end = source.find("\n  };", event_start)
     require(
@@ -198,20 +317,31 @@ def validate(
         binary_symbol_gate = True
 
     return {
-        "schema": "morsehgp3d.phase9.pair_support_static.v2",
-        "target": "morsehgp3d_pair_support",
+        "schema": "morsehgp3d.phase9.pair_support_static.v3",
+        "targets": [
+            "morsehgp3d_pair_support",
+            "morsehgp3d_pair_support_codec",
+            "morsehgp3d_pair_support_durable",
+        ],
         "persistent_top_m_cell_count": 0,
         "global_gamma_coface_count": 0,
         "global_gamma_incidence_count": 0,
         "materialized_pair_arena_count": 0,
         "persistent_authority_context": True,
         "incremental_verify_next": True,
+        "two_phase_durable_verification": True,
+        "bounded_canonical_codec": True,
+        "unix_atomic_publication": True,
         "quasi_linear_checkpoint_validation": True,
         "binary_symbol_gate": binary_symbol_gate,
         "checked_artifacts": [
             "CMakeLists.txt",
             "include/morsehgp3d/hierarchy/pair_support_stream.hpp",
             "src/cpu/hierarchy/pair_support_stream.cpp",
+            "include/morsehgp3d/hierarchy/pair_support_stream_codec.hpp",
+            "src/cpu/hierarchy/pair_support_stream_codec.cpp",
+            "include/morsehgp3d/hierarchy/pair_support_stream_durable.hpp",
+            "src/cpu/hierarchy/pair_support_stream_durable.cpp",
         ],
     }
 

@@ -289,6 +289,40 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_pair_support_stream_codec_tests
+  test_hierarchy_pair_support_stream_codec.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_pair_support_stream_codec_tests
+  PRIVATE morsehgp3d::pair_support_codec
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_pair_support_stream_codec_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_pair_support_stream_codec_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+if(UNIX)
+  add_executable(
+    morsehgp3d_hierarchy_pair_support_stream_durable_tests
+    test_hierarchy_pair_support_stream_durable.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_hierarchy_pair_support_stream_durable_tests
+    PRIVATE morsehgp3d::pair_support_durable
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_pair_support_stream_durable_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
   test_hierarchy_critical_catalog_reduced_gamma_overlay.cpp
 )
@@ -729,6 +763,7 @@ set(
   morsehgp3d_hierarchy_critical_catalog_tests
   morsehgp3d_depth_zero_natural_support_tests
   morsehgp3d_hierarchy_pair_support_stream_tests
+  morsehgp3d_hierarchy_pair_support_stream_codec_tests
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_typed_gamma_journal_tests
@@ -760,6 +795,12 @@ set(
   morsehgp3d_gpu_k1_boruvka_full_replay_host
   morsehgp3d_gpu_k1_boruvka_morton_work_profile_host
 )
+if(UNIX)
+  list(
+    APPEND _morsehgp3d_cpu_test_targets
+    morsehgp3d_hierarchy_pair_support_stream_durable_tests
+  )
+endif()
 foreach(_morsehgp3d_cpu_test_target IN LISTS _morsehgp3d_cpu_test_targets)
   morsehgp3d_apply_sanitizers("${_morsehgp3d_cpu_test_target}")
 endforeach()
@@ -1472,6 +1513,16 @@ add_test(
   COMMAND morsehgp3d_hierarchy_pair_support_stream_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_pair_support_stream_codec
+  COMMAND morsehgp3d_hierarchy_pair_support_stream_codec_tests
+)
+if(UNIX)
+  add_test(
+    NAME morsehgp3d.hierarchy_pair_support_stream_durable
+    COMMAND morsehgp3d_hierarchy_pair_support_stream_durable_tests
+  )
+endif()
+add_test(
   NAME morsehgp3d.hierarchy_critical_catalog_reduced_gamma_overlay
   COMMAND morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
 )
@@ -1724,13 +1775,25 @@ set(
   "${PROJECT_SOURCE_DIR}"
 )
 if(CMAKE_NM AND NOT MSVC)
+  if(UNIX)
+    set(
+      _morsehgp3d_phase9_pair_support_symbol_binary
+      "$<TARGET_FILE:morsehgp3d_hierarchy_pair_support_stream_durable_tests>"
+    )
+  else()
+    set(
+      _morsehgp3d_phase9_pair_support_symbol_binary
+      "$<TARGET_FILE:morsehgp3d_hierarchy_pair_support_stream_tests>"
+    )
+  endif()
   list(
     APPEND _morsehgp3d_phase9_pair_support_configuration_command
     --binary
-    "$<TARGET_FILE:morsehgp3d_hierarchy_pair_support_stream_tests>"
+    "${_morsehgp3d_phase9_pair_support_symbol_binary}"
     --nm
     "${CMAKE_NM}"
   )
+  unset(_morsehgp3d_phase9_pair_support_symbol_binary)
 endif()
 add_test(
   NAME morsehgp3d.phase9_pair_support_configuration

@@ -906,6 +906,47 @@ void test_persistent_authority_and_incremental_verifier() {
   ExactPairSupportStreamBudget unit_budget = unlimited_budget();
   unit_budget.maximum_work_unit_count = 1U;
   unit_budget.maximum_emitted_record_count = 1U;
+
+  ExactPairSupportIncrementalVerifier two_phase{authority};
+  const ExactPairSupportCheckpoint two_phase_source =
+      two_phase.trusted_checkpoint();
+  const ExactPairSupportStreamChunk two_phase_first =
+      build_exact_pair_support_stream_chunk(
+          authority, unit_budget, two_phase_source);
+  {
+    auto discarded = two_phase.prepare_next(
+        unit_budget, two_phase_first);
+    check(
+        discarded.prepared() &&
+            discarded.verification().chunk_transition_verified &&
+            two_phase.trusted_checkpoint() == two_phase_source &&
+            two_phase.status().verified_chunk_count == 0U &&
+            !two_phase.status().failed_closed,
+        "a prepared transition is certified without advancing the durable trusted checkpoint");
+  }
+  auto committed = two_phase.prepare_next(unit_budget, two_phase_first);
+  check(
+      committed.prepared() &&
+          two_phase.commit_prepared(std::move(committed)) &&
+          two_phase.trusted_checkpoint() ==
+              two_phase_first.next_checkpoint &&
+          two_phase.status().verified_chunk_count == 1U &&
+          !two_phase.status().failed_closed,
+      "a freshly prepared transition advances exactly once through a noexcept memory commit");
+
+  ExactPairSupportIncrementalVerifier stale_token_verifier{authority};
+  auto first_token = stale_token_verifier.prepare_next(
+      unit_budget, two_phase_first);
+  auto stale_token = stale_token_verifier.prepare_next(
+      unit_budget, two_phase_first);
+  check(
+      stale_token_verifier.commit_prepared(std::move(first_token)) &&
+          !stale_token_verifier.commit_prepared(std::move(stale_token)) &&
+          stale_token_verifier.status().failed_closed &&
+          stale_token_verifier.trusted_checkpoint() ==
+              two_phase_first.next_checkpoint,
+      "a second token prepared against an old epoch fails closed without double advancement");
+
   ExactPairSupportIncrementalVerifier verifier{authority};
   std::vector<ExactPairSupportEvent> events;
   std::vector<ExactPairSupportExtraShellDiagnostic> diagnostics;

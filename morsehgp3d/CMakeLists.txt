@@ -331,6 +331,74 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_pair_support_codec
+  STATIC
+    src/cpu/hierarchy/pair_support_stream_codec.cpp
+)
+add_library(
+  morsehgp3d::pair_support_codec ALIAS morsehgp3d_pair_support_codec
+)
+set_target_properties(
+  morsehgp3d_pair_support_codec
+  PROPERTIES
+    EXPORT_NAME pair_support_codec
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(morsehgp3d_pair_support_codec PUBLIC cxx_std_20)
+target_include_directories(
+  morsehgp3d_pair_support_codec
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_pair_support_codec
+  PUBLIC morsehgp3d::pair_support
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(morsehgp3d_pair_support_codec PRIVATE /W4 /WX)
+else()
+  target_compile_options(
+    morsehgp3d_pair_support_codec
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+if(UNIX)
+  add_library(
+    morsehgp3d_pair_support_durable
+    STATIC
+      src/cpu/hierarchy/pair_support_stream_durable.cpp
+  )
+  add_library(
+    morsehgp3d::pair_support_durable ALIAS morsehgp3d_pair_support_durable
+  )
+  set_target_properties(
+    morsehgp3d_pair_support_durable
+    PROPERTIES
+      EXPORT_NAME pair_support_durable
+      POSITION_INDEPENDENT_CODE ON
+  )
+  target_compile_features(morsehgp3d_pair_support_durable PUBLIC cxx_std_20)
+  target_include_directories(
+    morsehgp3d_pair_support_durable
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:include>
+  )
+  target_link_libraries(
+    morsehgp3d_pair_support_durable
+    PUBLIC morsehgp3d::pair_support_codec
+    PRIVATE morsehgp3d::sanitizers
+  )
+  target_compile_options(
+    morsehgp3d_pair_support_durable
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_hierarchy
   STATIC
     src/cpu/hierarchy/boruvka.cpp
@@ -835,10 +903,17 @@ install(
     morsehgp3d_exact
     morsehgp3d_spatial
     morsehgp3d_pair_support
+    morsehgp3d_pair_support_codec
     morsehgp3d_hierarchy
     morsehgp3d_sanitizers
   EXPORT MorseHGP3DTargets
 )
+if(UNIX)
+  install(
+    TARGETS morsehgp3d_pair_support_durable
+    EXPORT MorseHGP3DTargets
+  )
+endif()
 if(MORSEHGP3D_BUILD_TOOLS)
   install(TARGETS morsehgp3d_replay_predicate RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
   install(

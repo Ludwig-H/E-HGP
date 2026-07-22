@@ -599,6 +599,44 @@ struct ExactPairSupportIncrementalVerifierStatus {
 // verifier, so a caller cannot skip a failed transition.
 class ExactPairSupportIncrementalVerifier {
  public:
+  class PreparedNext {
+   public:
+    PreparedNext(const PreparedNext&) = delete;
+    PreparedNext& operator=(const PreparedNext&) = delete;
+    PreparedNext(PreparedNext&& other) noexcept;
+    PreparedNext& operator=(PreparedNext&& other) noexcept;
+    ~PreparedNext() = default;
+
+    [[nodiscard]] const ExactPairSupportStreamChunkVerification& verification()
+        const noexcept {
+      return verification_;
+    }
+    [[nodiscard]] bool prepared() const noexcept {
+      return valid_ && verification_.chunk_transition_verified;
+    }
+
+   private:
+    PreparedNext(
+        ExactPairSupportIncrementalVerifier* owner,
+        std::uint64_t source_epoch,
+        std::size_t next_verified_chunk_count,
+        ExactPairSupportStreamChunkVerification verification,
+        ExactPairSupportCheckpoint trusted_next) noexcept;
+    explicit PreparedNext(
+        ExactPairSupportStreamChunkVerification verification) noexcept
+        : verification_(verification) {}
+    PreparedNext() noexcept = default;
+
+    ExactPairSupportIncrementalVerifier* owner_{};
+    std::uint64_t source_epoch_{};
+    std::size_t next_verified_chunk_count_{};
+    ExactPairSupportStreamChunkVerification verification_{};
+    ExactPairSupportCheckpoint trusted_next_{};
+    bool valid_{false};
+
+    friend class ExactPairSupportIncrementalVerifier;
+  };
+
   explicit ExactPairSupportIncrementalVerifier(
       const ExactPairSupportAuthorityContext& authority);
   explicit ExactPairSupportIncrementalVerifier(
@@ -615,6 +653,19 @@ class ExactPairSupportIncrementalVerifier {
   ExactPairSupportIncrementalVerifier& operator=(
       ExactPairSupportIncrementalVerifier&&) = delete;
 
+  // Replays and certifies one relative transition without advancing the
+  // trusted checkpoint.  A durable sink commits the returned token only after
+  // its rename and directory synchronization have succeeded.  Discarding a
+  // valid token is side-effect free and permits a deterministic retry.
+  [[nodiscard]] PreparedNext prepare_next(
+      const ExactPairSupportStreamBudget& chunk_budget,
+      const ExactPairSupportStreamChunk& observed);
+
+  // Noexcept memory commit for a token prepared against the current epoch.
+  // A stale, foreign, invalid or reused token fails closed.
+  [[nodiscard]] bool commit_prepared(PreparedNext&& prepared) noexcept;
+
+  // Convenience path for non-durable consumers.
   [[nodiscard]] ExactPairSupportStreamChunkVerification verify_next(
       const ExactPairSupportStreamBudget& chunk_budget,
       const ExactPairSupportStreamChunk& observed);
@@ -629,11 +680,14 @@ class ExactPairSupportIncrementalVerifier {
   }
 
  private:
+  void poison() noexcept;
+
   // Private cache copy: callers need only keep the immutable cloud and LBVH
   // alive, not the context object used to construct this verifier.
   ExactPairSupportAuthorityContext authority_;
   ExactPairSupportCheckpoint trusted_checkpoint_{};
   ExactPairSupportIncrementalVerifierStatus status_{};
+  std::uint64_t epoch_{};
 };
 
 struct ExactPairSupportStreamRunVerification {
