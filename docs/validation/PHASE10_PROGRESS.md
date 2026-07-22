@@ -1,7 +1,7 @@
 # Progression Phase 10 — journal Morse et réduction directe
 
 > [!IMPORTANT]
-> Incrément préparatoire de Phase `10`, backend `reference_cpu`, profil `hgp_reduced`, mode `certified`, sémantique publique interne `partial_refinement`. Son ouverture formelle attend encore la qualification G4 de Phase 9; le second prérequis est déjà satisfait par le seul jalon local de Phase 5 `compact_k1_forest_certified/local_k1_compact_forest_only`, tandis que la Phase 5 globale reste `ready`.
+> Phase `10` formellement ouverte, backend `reference_cpu`, profil `hgp_reduced`, mode `certified`, sémantique interne `partial_refinement`. Sa porte d'entrée est satisfaite par la fermeture de la Phase 9, qualification G4 comprise, et par le seul jalon local de Phase 5 `compact_k1_forest_certified/local_k1_compact_forest_only`; la Phase 5 globale reste `ready`.
 
 ## Incrément 10.1-RCPU livré
 
@@ -19,7 +19,7 @@ Cette borne est proportionnelle aux sorties utiles. Le target ne lie pas l'archi
 
 ## Échec fermé et validation courte
 
-Une façade non terminale, un nuage dont l'un des deux digests domain-separated diverge, un payload localement incohérent ou un diagnostic extra-shell pertinent retourne une décision explicite et trois vecteurs vides. Le vérificateur reconstruit projections, rôles et lots depuis le nuage et la façade externes; aucun champ du résultat observé ne pilote ce rejeu.
+Une façade non terminale, un nuage dont l'un des deux digests domain-separated diverge, un payload localement incohérent ou un diagnostic extra-shell pertinent retourne une décision explicite et trois vecteurs vides. Le vérificateur reconstruit projections, rôles et lots depuis le nuage et la façade externes; aucun champ du résultat observé ne pilote ce rejeu. Cette certification reste relative à la façade terminale fournie comme autorité externe : ce premier incrément ne rejoue pas lui-même la géométrie de Phase 9.
 
 Le test ciblé strict passe en 0,02 seconde environ. Sur le tétraèdre régulier, les quatre singletons et onze événements directs donnent 15 projections, 26 rôles et sept lots. Les falsifications d'autorité, de rôle et de clé de lot sont rejetées; le carré cocirculaire exerce l'arrêt sur extra-shell.
 
@@ -27,4 +27,4 @@ Le test ciblé strict passe en 0,02 seconde environ. Sur le tétraèdre régulie
 
 Ce journal ne constitue pas encore une généalogie H0. Il reste à construire les bras de selle, résoudre les multifusions de même niveau, attacher les racines du snapshot strict pré-lot et conserver les gateways silencieux nécessaires aux événements futurs. Le contre-exemple permanent à cinq points et la preuve M.1 restent les portes scientifiques. Aucun `public_status` n'est publié et Gamma exhaustif demeure l'oracle borné jusqu'à $n\leq14$.
 
-GCP n'a pas été utilisé pour cet incrément CPU.
+GCP n'a pas été utilisé pour cet incrément CPU. La session G4 consignée dans la revue de porte appartient exclusivement à la qualification de fermeture de la Phase 9.

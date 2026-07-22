@@ -1,7 +1,7 @@
 # Progression Phase 9 — flux direct de supports H0
 
 > [!IMPORTANT]
-> Phase `9`, backend `reference_cpu`, profil `hgp_reduced`, mode `certified` pour les jalons CPU. La porte d'entrée est satisfaite par les Phases 1, 2A, 4 et 7. Les flux directs couvrent désormais séparément les paires et les supports de tailles trois--quatre; chaque voie possède son checkpoint réinjectable propre, mais elles ne produisent encore aucune forêt, aucune réduction hiérarchique, aucun protocole commun d'arité deux à quatre et aucun `public_status`.
+> Phase `9` fermée, backend de proposition `cuda_g4`, backend de décision `reference_cpu`, profil `hgp_reduced`, mode `certified`. La porte d'entrée était satisfaite par les Phases 1, 2A, 4 et 7. La façade terminale rejoue fraîchement les voies paires et trois--quatre, puis normalise leurs événements d'arités deux à quatre; les checkpoints et digests d'autorité restent séparés. Cette fermeture porte sur la base interne du flux : elle ne produit encore aucune forêt, aucune réduction hiérarchique et aucun `public_status`.
 
 ## Décision d'architecture après relecture du manuscrit
 
@@ -9,7 +9,7 @@ Les Parties I et II du manuscrit ont été relues avant l'implémentation. Elles
 
 Le contre-exemple exact permanent à la réduction de Gabriel interdit toutefois de confondre un catalogue local de sphères critiques avec la hiérarchie publique complète. Le chemin retenu est donc : supports directs maintenant, journal Morse avec incidences silencieuses en Phase 10, puis preuve verticale et fermeture de M.1 avant toute promotion publique.
 
-La Phase 5 reste une ancre $k=1$ non fermée et repasse à l'état `ready`. La Phase 8 est gelée comme oracle cellulaire $n\leq8$. La Phase 9 devient le chantier actif parce qu'elle ne dépend ni de la fermeture globale de 5, ni de l'extension de l'atlas top-$m$ de 8.
+La Phase 5 reste une ancre $k=1$ non fermée à l'état `ready`. La Phase 8 est gelée comme oracle cellulaire $n\leq8$. La Phase 9 a pu être fermée sans dépendre de la fermeture globale de 5 ni de l'extension de l'atlas top-$m$ de 8; la Phase 10 devient le chantier actif sur la seule dépendance locale `compact_k1_forest_certified/local_k1_compact_forest_only`.
 
 ## Jalon 9.1-RCPU livré
 
@@ -136,6 +136,24 @@ Le chemin fd conserve le wire chunk v1 et son domaine SHA. Un compteur rejoue le
 
 La limite individuelle exacte par défaut passe à 2048 octets pour la voie paire. La preuve binary64 donne au plus 958 octets par coordonnée de milieu et 1914 par rayon carré 3D; avant `.str()`, un préfiltre de bit-length rejette tout majorant dépassant le cap effectif de plus de deux octets, puis la longueur réelle doit respecter ce cap. Cette amélioration ne supprime ni le champ exact courant et ses temporaires de conversion/normalisation, ni les `BigInt`, ni les vecteurs du chunk décodé, et la borne n'est pas réutilisable telle quelle pour les supports trois et quatre. Aucun résultat 10 M+, SLO ou statut public n'en découle.
 
+## Jalon 9.4-RCPU — façade terminale d'arités deux à quatre
+
+`build_exact_direct_support_terminal_facade` ne juxtapose pas deux payloads présumés compatibles. Il reconstruit fraîchement les autorités paire et supérieure depuis le nuage, exige la terminaison des deux runs et vérifie séparément leurs digests domain-separated. Il normalise ensuite uniquement les événements terminaux et les diagnostics extra-shell des supports deux, trois et quatre. Une frontière résiduelle ou une source incohérente produit un échec fermé et zéro payload; un diagnostic extra-shell rang-pertinent reste au contraire explicitement conservé et bloque ensuite le journal de Phase 10 sans payload.
+
+La façade ne persiste ni checkpoint commun, ni forêt, ni cellule, coface ou incidence Gamma. Sa sortie est proportionnelle aux événements utiles. Le différentiel direct couvre chaque taille $n=1,\ldots,14$, puis une permutation d'entrée inversée à $n=14$; les événements normalisés coïncident avec l'oracle exhaustif borné dans ces cas. Cet accord recertifie la base interne de Phase 9, sans modifier le statut scientifique public.
+
+## Jalon 9.1-CUDA-P1 — proposition G4 qualifiée
+
+Le premier chemin GPU de Phase 9 traite un batch borné de triplets canoniques $(A,B,C)$ et un snapshot AABB/plages LBVH résident. Le noyau calcule une borne binary64 arrondie vers l'extérieur du maximum continu de $\phi(x,u,v)=(x-u)\mathbin{\cdot}(x-v)$ sur les trois boîtes. Il ne propose `strict_interior` que pour une borne supérieure finie strictement négative; l'hôte recalcule alors le maximum rationnel exact avant d'émettre un reçu utilisable :
+
+$$\overline{M}_{\mathrm{GPU}}\geq M(A,B,C),\qquad \overline{M}_{\mathrm{GPU}}<0,\qquad M_{\mathrm{CPU}}=M(A,B,C)\leq\overline{M}_{\mathrm{GPU}}<0.$$
+
+Le commit propre et poussé `976c1c6723760e9d1632f139e3cad238a40b1cb8` a été qualifié réellement sur G4. L'artefact `phase9-pair-support-phi-976c1c6723760e9d1632f139e3cad238a40b1cb8.json` porte le SHA-256 `f8d6b573c8178c1951d1817daa609ed7a5bd08bd9760d19e2199f151da6b06cc`; son artefact d'environnement Phase 3 porte `eeef5b3c8f6b57f646c882661b1b34999d3b76082301ad4450409cb1084401df` et le binaire qualifié `947c680440d3d9cc1a69d0048fa352c649112bd2bbfef6a398df1d15f19a52d6`.
+
+La fixture produit une proposition stricte et une descente, puis répète le transcript aux epochs 1 et 2. La recertification CPU exacte, `memcheck` et `racecheck` passent. Le binaire contient uniquement l'ELF AOT `sm_120`, sans entrée PTX. L'artefact conserve `global_support_product_prune_published=false`, `scientific_result_claimed=false` et `scientific_public_status=null` : le GPU accélère une proposition locale, jamais la décision scientifique.
+
+La session gardée a ciblé `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`. Son dernier démarrage est `2026-07-22T07:51:44.652-07:00`, son arrêt ciblé est horodaté `2026-07-22T07:55:55.202-07:00` et la relecture du `2026-07-22T14:56:04Z` certifie l'état final `TERMINATED`.
+
 ## Structures globales évitées
 
 La cible dédiée `morsehgp3d_pair_support` contient la seule unité de traduction du producteur pair et dépend du LBVH, des points exacts et des prédicats de support; `morsehgp3d_pair_support_codec` ne dépend que de ce flux et `morsehgp3d_pair_support_durable` ne dépend que du codec. La cible séparée `morsehgp3d_higher_support` contient seulement l'évaluateur de produits et le producteur groupé des arités trois--quatre; elle dépend directement de la couche spatiale et du SHA-256 canonique, non du wire pair. Toutes restent séparées de l'archive historique `morsehgp3d_hierarchy` qui contient Gamma. Elles ne construisent ni cellule top-$m$, ni coface, ni incidence de mosaïque d'ordre supérieur, ni Gamma global, ni arène de taille $\binom{n}{k}$. La mémoire de chaque producteur reste bornée par sa frontière active, ses parcours auxiliaires, les records budgetés et les petits témoins de rang; la session supérieure ne retient qu'un checkpoint, tandis que la reprise durable paire ajoute un seul chunk décodé, un buffer I/O de 64 Kio et les temporaires exacts capés, jamais un wire de transition complet ni l'historique.
@@ -226,18 +244,24 @@ Pour 9.2b, le seul target de flux supérieur couvre en plus :
 
 La validation finale 9.3e exécute trois CTests ciblés codec, durabilité et checker v5 : GCC Release strict passe en 0,43 s et Clang Release strict en 0,39 s; le test durable GCC ASan/UBSan passe en 0,25 s. Un smoke hostile colinéaire antérieur limité à $n\leq256$ observait 24 301 visites témoins et environ 111 ms au dernier point après les courts-circuits sûrs; ce diagnostic ne ferme aucun exposant ni SLO. Aucun benchmark long et aucune ressource GCP ne sont nécessaires pour cette validation CPU.
 
-La validation finale 9.2a exécute seulement les trois CTests produit, flux et régression rationnelle : GCC 13.3 Release strict passe en 2,06 s et Clang 18.1 Release strict en 1,82 s. Le checker architectural v6 passe séparément. La validation 9.2b ajoute uniquement le test de flux supérieur ciblé : la dernière exécution concurrente passe en 2,91 s sous GCC Release strict et 2,83 s sous Clang 18.1 Release strict; le checker source v7 passe aussi. Elle ne lance aucune campagne de croissance. Ces temps ne constituent ni un benchmark de débit, ni une mesure du SLO. Aucun test long, CUDA ou GCP n'a été lancé.
+La validation finale 9.2a exécute seulement les trois CTests produit, flux et régression rationnelle : GCC 13.3 Release strict passe en 2,06 s et Clang 18.1 Release strict en 1,82 s; le checker architectural v6 passe séparément. La validation 9.2b ajoute uniquement le test de flux supérieur ciblé : la dernière exécution concurrente passe en 2,91 s sous GCC Release strict et 2,83 s sous Clang 18.1 Release strict; le checker source v7 passe aussi. Ces validations hôtes historiques n'ont lancé aucune campagne longue. Leurs temps ne constituent ni un benchmark de débit, ni une mesure du SLO; la qualification CUDA réelle de fermeture est documentée séparément ci-dessus.
+
+## Validation de fermeture
+
+- La façade terminale couvre les supports d'arités deux, trois et quatre et refuse tout préfixe incomplet.
+- Le différentiel exact couvre $n=1,\ldots,14$, puis la permutation inversée à $n=14$.
+- Le smoke CPU borné `phase9-pair-smoke-2ed620b.json`, SHA-256 `28d4aed28474766e4ddfc4d127b950aac5de6b51f985129673c99e9761cc1247`, exerce 12 500, 25 000 et 50 000 points sur deux familles. Chacun des six runs est explicitement `budget_exhausted` après 20 000 unités de travail; il ne certifie ni complétude, ni débit, ni SLO.
+- Le checker architectural confirme l'absence de mosaïque, Gamma, arène de paires ou arène combinatoire de supports supérieurs dans le chemin direct.
+- La qualification G4 ferme l'exécution logicielle réelle du seul filtre pair P1, avec proposition flottante et décision exacte nettement séparées.
 
 ## Limites et ordre de poursuite
 
-Le prochain travail ne doit pas élargir l'oracle de cellules. L'ordre utile est désormais :
+La fermeture conserve explicitement les dettes suivantes :
 
-1. définir le wire compact supérieur avec un schéma distinct, les caps rationnels propres aux triangles et tétraèdres, les caps de reçus et de profondeur avant allocation, puis ancrer une reprise durable sans jamais promouvoir un checkpoint décodé sur sa seule intégrité locale;
-2. resserrer les produits tétraédriques ambigus par puissance de la face opposée, puis orientation et in-sphère lorsque leur signe est certifié, sans utiliser les coins supports comme oracle;
-3. ajouter les reçus terminaux bornés nécessaires à la proposition `cuda_g4` P1 et leur recertification CPU exacte;
-4. mesurer seulement ensuite les compteurs de croissance sur 12 500, 25 000 et 50 000 sites, sans prétendre fermer le SLO;
-5. remplacer progressivement `.canonical_key()` et le parse décimal par un formateur--parseur exact borné par blocs, en conservant le wire pair v1 et un schéma d'arité supérieure distinct;
-6. avant la qualification finale, remplacer la canonisation exacte eager et la construction LBVH CPU par des coordonnées binary64 SoA, exact paresseux et Morton/radix/LBVH device;
-7. pour 10 M+, persister deux frontières bornées et des chunks externes, sans conserver les événements cumulés ni les chunks de vérification en mémoire, puis qualifier le protocole de stockage réellement choisi au-delà de la seule perte de processus.
+1. CUDA P1 traite seulement un batch borné de triplets; il n'effectue ni parcours témoin par escape, ni agrégation d'antichaîne, ni prune global de produit;
+2. il n'existe encore ni LBVH construit sur device, ni count/`DeviceScan`/emit, ni doubles frontières device, ni CUDA Graph;
+3. les supports trois et quatre restent décidés sur CPU; aucune voie GPU d'arité trois--quatre n'est qualifiée;
+4. le smoke 50 000 points reste `budget_exhausted`; aucun SLO inférieur à la seconde et aucune capacité 10 M+ ne sont établis;
+5. aucune forêt Morse, aucun certificat M.1, aucun protocole complet de gateways silencieux et aucun `public_status=exact` ne découlent de cette phase.
 
-La Phase 9 reste `in_progress`. Les runs terminaux recertifient séparément la complétude de leurs tailles de support, mais ce jalon ne ferme ni un checkpoint commun supports 2–4, ni la Phase 9, ni une forêt Morse, ni un statut public. GCP non utilisé.
+**Verdict : la porte de sortie interne de la Phase 9 est satisfaite et la phase est `completed`.** Les runs terminaux recertifient la complétude des tailles de support sur le domaine borné, la façade les expose sans structure globale interdite et le filtre pair P1 est exécuté réellement sur G4 avec décision CPU exacte. Cette fermeture ouvre la Phase 10 en `partial_refinement`; elle ne ferme aucune des dettes de performance, de forêt ou de statut public énumérées ci-dessus.
