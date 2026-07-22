@@ -1,5 +1,6 @@
 #pragma once
 
+#include "morsehgp3d/contract/canonical_id.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
 
 #include <array>
@@ -192,6 +193,31 @@ struct ExactDirectSparsePositiveFacetLocatorCounters {
   friend bool operator==(
       const ExactDirectSparsePositiveFacetLocatorCounters&,
       const ExactDirectSparsePositiveFacetLocatorCounters&) = default;
+};
+
+// Allocation-free identity of one committed locator snapshot.  One inserted
+// key is one unique durable facet binding; binding_count also includes
+// compatible duplicate binding requests.  committed_batch_count is the
+// monotone commit clock, so even a committed empty batch changes the stamp.
+// committed_history_digest is a domain-separated SHA-256 chain over the
+// canonical semantic delta of every accepted batch.  Under the standard
+// no-collision assumption, it distinguishes live locators with equal
+// authorities and counters but different committed keys, unions or witnesses
+// without rescanning the complete durable state.  A stamp is not a
+// synchronization primitive: callers must exclude apply_batch while reading
+// or using a locator snapshot.
+struct ExactDirectSparsePositiveFacetLocatorSnapshotStamp {
+  std::uint32_t schema_version{};
+  std::uint64_t external_authority_id{};
+  std::size_t committed_batch_count{};
+  std::size_t inserted_key_count{};
+  std::size_t component_union_count{};
+  std::size_t binding_count{};
+  contract::CanonicalId committed_history_digest{};
+
+  friend bool operator==(
+      const ExactDirectSparsePositiveFacetLocatorSnapshotStamp&,
+      const ExactDirectSparsePositiveFacetLocatorSnapshotStamp&) = default;
 };
 
 enum class ExactDirectSparsePositiveFacetLocatorInitializationDecision
@@ -400,6 +426,7 @@ struct ExactDirectSparsePositiveFacetLocatorStateView {
   std::span<const ExactDirectSparseCommittedUnionRecord> committed_unions;
   std::span<const ExactDirectSparseCommittedBatchRecord> committed_batches;
   ExactDirectSparsePositiveFacetLocatorCounters counters{};
+  contract::CanonicalId committed_history_digest{};
   bool budget_preflight_certified{false};
   bool empty_table_initialized{false};
   bool dense_component_handles_initialized{false};
@@ -430,6 +457,7 @@ struct ExactDirectSparsePositiveFacetLocatorStructuralVerification {
   bool dense_handle_dsu_replay_certified{false};
   bool union_witness_structure_certified{false};
   bool historical_batch_assertions_and_counters_well_formed{false};
+  bool committed_history_digest_freshly_replayed{false};
   bool internal_fact_fields_match_contract{false};
   bool decision_and_scope_certified{false};
   bool external_authority_replayed_by_locator{false};
@@ -459,6 +487,9 @@ class ExactDirectSparsePositiveFacetLocator {
       direct_sparse_positive_facet_locator_proof_basis;
 
   [[nodiscard]] bool certified_positive_locator() const noexcept;
+
+  [[nodiscard]] ExactDirectSparsePositiveFacetLocatorSnapshotStamp
+  snapshot_stamp() const noexcept;
 
   [[nodiscard]] ExactDirectSparsePositiveFacetBatchResult apply_batch(
       std::span<const ExactDirectSparseFacetQuery> queries,
@@ -521,6 +552,9 @@ class ExactDirectSparsePositiveFacetLocator {
     return scope_;
   }
 
+  // The returned spans are non-owning and may be invalidated by apply_batch.
+  // The caller must keep this locator immutable, with external synchronization
+  // against writers, until every consumer of the view has returned.
   [[nodiscard]] ExactDirectSparsePositiveFacetLocatorStateView state_view()
       const noexcept;
 
@@ -548,6 +582,7 @@ class ExactDirectSparsePositiveFacetLocator {
   std::vector<ExactDirectSparseCommittedUnionRecord> committed_unions_;
   std::vector<ExactDirectSparseCommittedBatchRecord> committed_batches_;
   ExactDirectSparsePositiveFacetLocatorCounters counters_{};
+  contract::CanonicalId committed_history_digest_{};
   bool budget_preflight_certified_{false};
   bool empty_table_initialized_{false};
   bool dense_component_handles_initialized_{false};
@@ -592,6 +627,8 @@ verify_exact_direct_sparse_positive_facet_probe(
 // Uses O(committed bindings + committed key points + dense handles) temporary
 // scratch.  It freshly verifies the durable structure, not historical query
 // payloads, and therefore reports stored batch assertions only as well formed.
+// observed contains non-owning spans; their backing locator must remain
+// immutable for the whole call, with external synchronization against writers.
 [[nodiscard]] ExactDirectSparsePositiveFacetLocatorStructuralVerification
 verify_exact_direct_sparse_positive_facet_locator_structure(
     std::size_t trusted_component_handle_count,

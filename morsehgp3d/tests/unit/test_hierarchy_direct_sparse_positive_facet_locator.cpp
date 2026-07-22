@@ -8,11 +8,13 @@
 #include <limits>
 #include <span>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace {
 
 using namespace morsehgp3d::hierarchy;
+using morsehgp3d::contract::CanonicalId;
 using PointId = morsehgp3d::spatial::PointId;
 
 constexpr std::uint64_t authority_id = UINT64_C(0x51a7);
@@ -103,6 +105,265 @@ void check_initialization_budget_and_external_scope() {
               ExactDirectSparsePositiveFacetLocatorInitializationDecision::
                   no_locator_external_authority_rejected,
       "a locator without an external replay authority is rejected");
+}
+
+void check_snapshot_stamp_tracks_only_committed_state() {
+  static_assert(
+      std::is_trivially_copyable_v<
+          ExactDirectSparsePositiveFacetLocatorSnapshotStamp>);
+
+  auto locator = make_locator();
+  const auto initial = locator.snapshot_stamp();
+  const CanonicalId initial_digest = initial.committed_history_digest;
+  check(
+      initial == ExactDirectSparsePositiveFacetLocatorSnapshotStamp{
+                     direct_sparse_positive_facet_locator_schema_version,
+                     authority_id,
+                     0U,
+                     0U,
+                     0U,
+                     0U,
+                     initial_digest} &&
+          locator.state_view().committed_history_digest == initial_digest,
+      "the initial snapshot stamp exposes its schema, authority and canonical history digest with zero committed work");
+
+  const ExactDirectSparseFacetKey facet = key({1U, 4U, 9U});
+  const std::array<ExactDirectSparseFacetBinding, 1U> invalid_bindings{{
+      {0U, facet, 2U, {authority_id, 0U}},
+  }};
+  const auto invalid = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      invalid_bindings);
+  check(
+      invalid.decision ==
+              ExactDirectSparsePositiveFacetBatchDecision::
+                  no_positive_locator_external_witness_rejected &&
+          locator.snapshot_stamp() == initial &&
+          locator.snapshot_stamp().committed_history_digest == initial_digest,
+      "a rejected batch leaves every snapshot field and its history digest unchanged");
+
+  const auto empty_commit = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      std::span<const ExactDirectSparseFacetBinding>{});
+  const auto after_empty = locator.snapshot_stamp();
+  check(
+      empty_commit.certified_committed_batch() &&
+          after_empty ==
+              ExactDirectSparsePositiveFacetLocatorSnapshotStamp{
+                  direct_sparse_positive_facet_locator_schema_version,
+                  authority_id,
+                  1U,
+                  0U,
+                  0U,
+                  0U,
+                  after_empty.committed_history_digest} &&
+          after_empty.committed_history_digest != initial_digest &&
+          after_empty.committed_history_digest ==
+              locator.state_view().committed_history_digest &&
+          !(after_empty == initial),
+      "a committed empty batch advances both the snapshot commit clock and its canonical history digest");
+
+  const std::array<ExactDirectSparseFacetBinding, 1U> first_binding{{
+      {0U, facet, 2U, witness(100U)},
+  }};
+  const auto inserted = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      first_binding);
+  const auto after_insert = locator.snapshot_stamp();
+  check(
+      inserted.certified_committed_batch() &&
+          after_insert.committed_batch_count == 2U &&
+          after_insert.inserted_key_count == 1U &&
+          after_insert.component_union_count == 0U &&
+          after_insert.binding_count == 1U &&
+          after_insert.committed_history_digest !=
+              after_empty.committed_history_digest,
+      "a new durable facet advances its counts and canonical history digest");
+
+  const std::array<ExactDirectSparseComponentUnion, 1U> component_union{{
+      {0U, 0U, 1U, witness(101U)},
+  }};
+  const auto united = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      component_union,
+      std::span<const ExactDirectSparseFacetBinding>{});
+  const auto after_union = locator.snapshot_stamp();
+  check(
+      united.certified_committed_batch() &&
+          after_union.committed_batch_count == 3U &&
+          after_union.inserted_key_count == 1U &&
+          after_union.component_union_count == 1U &&
+          after_union.binding_count == 1U &&
+          after_union.committed_history_digest !=
+              after_insert.committed_history_digest,
+      "a committed component union advances its operation count, commit clock and canonical history digest");
+
+  const std::array<ExactDirectSparseFacetBinding, 1U>
+      compatible_duplicate{{
+          {0U, facet, 2U, witness(102U)},
+      }};
+  const auto duplicate = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      compatible_duplicate);
+  const auto after_duplicate = locator.snapshot_stamp();
+  check(
+      duplicate.certified_committed_batch() &&
+          duplicate.counters.compatible_duplicate_binding_count == 1U &&
+          after_duplicate.committed_batch_count == 4U &&
+          after_duplicate.inserted_key_count == 1U &&
+          after_duplicate.component_union_count == 1U &&
+          after_duplicate.binding_count == 2U &&
+          after_duplicate.committed_history_digest !=
+              after_union.committed_history_digest,
+      "a compatible duplicate advances the binding-request count and history digest without inventing a second key");
+
+  const std::array<ExactDirectSparseFacetBinding, 1U>
+      incompatible_duplicate{{
+          {0U, facet, 3U, witness(103U)},
+      }};
+  const auto contradiction = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      incompatible_duplicate);
+  check(
+      contradiction.decision ==
+              ExactDirectSparsePositiveFacetBatchDecision::
+                  contradiction_incompatible_exact_facet_binding &&
+          locator.snapshot_stamp() == after_duplicate &&
+          locator.snapshot_stamp().committed_history_digest ==
+              after_duplicate.committed_history_digest,
+      "a rejected contradiction cannot advance any snapshot stamp field or its digest");
+}
+
+void check_snapshot_digest_determinism_and_state_divergence() {
+  auto canonical = make_locator();
+  auto replayed = make_locator();
+  auto different_key = make_locator();
+  auto different_witness = make_locator();
+
+  check(
+      canonical.snapshot_stamp() == replayed.snapshot_stamp(),
+      "identically configured empty locators start with the same history digest");
+
+  const std::array<ExactDirectSparseFacetBinding, 1U> canonical_binding{{
+      {0U, key({1U, 4U, 9U}), 2U, witness(110U)},
+  }};
+  const std::array<ExactDirectSparseFacetBinding, 1U> different_key_binding{{
+      {0U, key({1U, 4U, 10U}), 2U, witness(110U)},
+  }};
+  const std::array<ExactDirectSparseFacetBinding, 1U>
+      different_witness_binding{{
+          {0U, key({1U, 4U, 9U}), 2U, witness(111U)},
+      }};
+  const auto canonical_commit = canonical.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      canonical_binding);
+  const auto replayed_commit = replayed.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      canonical_binding);
+  const auto different_key_commit = different_key.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      different_key_binding);
+  const auto different_witness_commit = different_witness.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      different_witness_binding);
+  const auto canonical_stamp = canonical.snapshot_stamp();
+  const auto replayed_stamp = replayed.snapshot_stamp();
+  const auto different_key_stamp = different_key.snapshot_stamp();
+  const auto different_witness_stamp = different_witness.snapshot_stamp();
+  check(
+      canonical_commit.certified_committed_batch() &&
+          replayed_commit.certified_committed_batch() &&
+          different_key_commit.certified_committed_batch() &&
+          different_witness_commit.certified_committed_batch() &&
+          canonical_stamp == replayed_stamp,
+      "replaying the same canonical batch on equal locators produces the same complete snapshot stamp");
+  check(
+      canonical_stamp.committed_batch_count ==
+              different_key_stamp.committed_batch_count &&
+          canonical_stamp.inserted_key_count ==
+              different_key_stamp.inserted_key_count &&
+          canonical_stamp.component_union_count ==
+              different_key_stamp.component_union_count &&
+          canonical_stamp.binding_count == different_key_stamp.binding_count &&
+          canonical_stamp.committed_history_digest !=
+              different_key_stamp.committed_history_digest &&
+          canonical_stamp.committed_history_digest !=
+              different_witness_stamp.committed_history_digest,
+      "equal authorities and counters cannot alias snapshots with different committed keys or witnesses");
+
+  auto first_union = make_locator();
+  auto different_union = make_locator();
+  const std::array<ExactDirectSparseComponentUnion, 1U> canonical_union{{
+      {0U, 0U, 1U, witness(112U)},
+  }};
+  const std::array<ExactDirectSparseComponentUnion, 1U> other_union{{
+      {0U, 0U, 2U, witness(112U)},
+  }};
+  const auto first_union_commit = first_union.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      canonical_union,
+      std::span<const ExactDirectSparseFacetBinding>{});
+  const auto different_union_commit = different_union.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      other_union,
+      std::span<const ExactDirectSparseFacetBinding>{});
+  const auto first_union_stamp = first_union.snapshot_stamp();
+  const auto different_union_stamp = different_union.snapshot_stamp();
+  check(
+      first_union_commit.certified_committed_batch() &&
+          different_union_commit.certified_committed_batch() &&
+          first_union_stamp.committed_batch_count ==
+              different_union_stamp.committed_batch_count &&
+          first_union_stamp.component_union_count ==
+              different_union_stamp.component_union_count &&
+          first_union_stamp.committed_history_digest !=
+              different_union_stamp.committed_history_digest,
+      "equal snapshot counters cannot alias different committed union histories");
+}
+
+void check_snapshot_digest_golden_vectors() {
+  auto locator = make_locator();
+  check(
+      locator.snapshot_stamp().committed_history_digest.to_lower_hex() ==
+          "d9b8a4e4b287a77411799dccdeea986565af78a80b26c8e36179852bcb5151a8",
+      "the initial snapshot digest matches the independent Python SHA-256 v1 vector");
+
+  const auto empty_commit = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      std::span<const ExactDirectSparseFacetBinding>{});
+  check(
+      empty_commit.certified_committed_batch() &&
+          locator.snapshot_stamp()
+                  .committed_history_digest.to_lower_hex() ==
+              "d920fbef1978e49e8bb78b0c4ead161fd2b4b963ed91b19389d8a634a67b9929",
+      "the committed-empty snapshot digest matches the independent Python SHA-256 v1 vector");
+
+  const std::array<ExactDirectSparseComponentUnion, 1U> component_union{{
+      {0U, 1U, 2U, witness(200U)},
+  }};
+  const std::array<ExactDirectSparseFacetBinding, 1U> binding{{
+      {0U, key({1U, 4U, 9U}), 2U, witness(201U)},
+  }};
+  const auto mixed_commit = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      component_union,
+      binding);
+  check(
+      mixed_commit.certified_committed_batch() &&
+          locator.snapshot_stamp()
+                  .committed_history_digest.to_lower_hex() ==
+              "7976b55326f90d08889f09071245c0853e703a5e54c326b061f490cccf1b2a9f",
+      "the empty-union-binding digest chain matches the independent Python SHA-256 v1 vector");
 }
 
 void check_strict_snapshot_and_unresolved_miss() {
@@ -736,6 +997,7 @@ void check_fresh_durable_structure_verifier_and_mutations() {
           verified.union_witness_structure_certified &&
           verified
               .historical_batch_assertions_and_counters_well_formed &&
+          verified.committed_history_digest_freshly_replayed &&
           verified.internal_fact_fields_match_contract &&
           verified.decision_and_scope_certified &&
           !verified.external_authority_replayed_by_locator &&
@@ -747,6 +1009,46 @@ void check_fresh_durable_structure_verifier_and_mutations() {
           verified.key_point_scan_count ==
               locator.key_point_arena().size(),
       "fresh structural verification replays the DSU and audits every flat key while leaving caller authority unreplayed");
+
+  auto corrupted_digest_view = locator.state_view();
+  auto corrupted_digest_bytes =
+      corrupted_digest_view.committed_history_digest.bytes();
+  corrupted_digest_bytes[0U] ^= UINT8_C(1);
+  corrupted_digest_view.committed_history_digest =
+      CanonicalId{corrupted_digest_bytes};
+  const auto digest_rejected =
+      verify_exact_direct_sparse_positive_facet_locator_structure(
+          8U, locator.budget(), locator.config(), corrupted_digest_view);
+  check(
+      digest_rejected
+          .historical_batch_assertions_and_counters_well_formed &&
+          !digest_rejected.committed_history_digest_freshly_replayed &&
+          !digest_rejected.fresh_durable_structure_verification_certified &&
+          !digest_rejected.result_certified,
+      "fresh structural verification rejects a corrupted state-view history digest after replaying otherwise valid history");
+
+  std::vector<ExactDirectSparsePositiveFacetSlot> mutated_witness_slots =
+      locator.slots();
+  for (ExactDirectSparsePositiveFacetSlot& slot : mutated_witness_slots) {
+    if (slot.occupied) {
+      ++slot.binding_witness.replay_token;
+      break;
+    }
+  }
+  auto mutated_witness_view = locator.state_view();
+  mutated_witness_view.slots =
+      std::span<const ExactDirectSparsePositiveFacetSlot>{
+          mutated_witness_slots};
+  const auto witness_rejected =
+      verify_exact_direct_sparse_positive_facet_locator_structure(
+          8U, locator.budget(), locator.config(), mutated_witness_view);
+  check(
+      witness_rejected
+          .historical_batch_assertions_and_counters_well_formed &&
+          !witness_rejected.committed_history_digest_freshly_replayed &&
+          !witness_rejected.fresh_durable_structure_verification_certified &&
+          !witness_rejected.result_certified,
+      "fresh digest replay rejects a structurally valid but mutated durable binding witness");
 
   std::vector<ExactDirectSparsePositiveFacetSlot> mutated_slots =
       locator.slots();
@@ -920,6 +1222,9 @@ void check_fresh_durable_structure_verifier_and_mutations() {
 
 int main() {
   check_initialization_budget_and_external_scope();
+  check_snapshot_stamp_tracks_only_committed_state();
+  check_snapshot_digest_determinism_and_state_divergence();
+  check_snapshot_digest_golden_vectors();
   check_strict_snapshot_and_unresolved_miss();
   check_forced_fingerprint_collision_and_full_rank_keys();
   check_union_indirection_without_key_rewrite();

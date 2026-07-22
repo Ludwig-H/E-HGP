@@ -7,7 +7,7 @@ Phase 10, backend `reference_cpu`, profil `hgp_reduced`, mode `certified`, séma
 Ce jalon sépare strictement deux couches :
 
 - **A — socle combinatoire 10.5a** : un dictionnaire positif sparse, relatif à des assertions externes de l'appelant, retrouve une clé connue et résout son handle dans l'état engagé avant l'appel;
-- **B — descente géométrique 10.5b** : une recherche top-k locale budgétée produit un unique saut strict certifié lorsqu'une facette n'est pas encore connue, puis résout seulement une cible déjà présente dans le même locator `const`. La fermeture transitive reste ouverte pour 10.5c.
+- **B — descente géométrique 10.5b** : une recherche top-k locale budgétée produit un unique saut strict certifié lorsqu'une facette n'est pas encore connue, puis résout seulement une cible déjà présente dans le même locator `const`. La fermeture bornée transitive est désormais livrée séparément par 10.5c dans [FERMETURE_DESCENTE_FACETTE_SPARSE_PHASE10.md](FERMETURE_DESCENTE_FACETTE_SPARSE_PHASE10.md).
 
 Le socle A ne construit aucune facette absente, ne décide aucune naissance, continuation ou multifusion d'ordre supérieur et ne transforme jamais une absence en isolation. Il ne matérialise ni coupe Gamma, ni cellule, ni coface globale, ni incidence globale, ni mosaïque de Delaunay d'ordre supérieur.
 
@@ -25,7 +25,7 @@ Une liaison proposée est un triplet logique
 
 $$b=(\kappa(F),h,w),$$
 
-où $h$ est un `component_handle` stable et $w$ contient seulement un `external_authority_id` et un `replay_token` non nuls. Le locator vérifie la forme et la concordance de ces deux entiers; il ne possède ni l'autorité externe, ni un identifiant externe de snapshot, ni la géométrie permettant de prouver que $F$ appartient à la composante de $h$. L'appelant doit conserver puis rejouer cette autorité avant d'interpréter sémantiquement un hit.
+où $h$ est un `component_handle` stable et $w$ contient seulement un `external_authority_id` et un `replay_token` non nuls. Le locator vérifie la forme et la concordance de ces deux entiers; il ne possède ni l'autorité externe, ni un identifiant externe de snapshot, ni la géométrie permettant de prouver que $F$ appartient à la composante de $h$. Son digest interne engage uniquement l'état sémantique committé du dictionnaire. L'appelant doit conserver puis rejouer l'autorité externe avant d'interpréter sémantiquement un hit.
 
 Le locator est **positif** et **relatif** : son domaine est exactement l'ensemble des clés munies d'au moins une liaison acceptée sous cette hypothèse d'appelant. Il n'affirme ni la vérité de ces liaisons, ni que ce domaine contient toutes les facettes actives, toutes les facettes d'une composante ou toutes les gateways nécessaires à la hiérarchie.
 
@@ -60,11 +60,13 @@ Un appel séquentiel suit le protocole suivant.
 2. **Localisation.** Toutes les requêtes consultent exclusivement la table et le DSU engagés avant l'appel.
 3. **DSU candidat.** Les parents sont copiés, puis toutes les unions explicites sont appliquées à cette copie.
 4. **Compatibilité et staging.** Les doublons sont comparés dans le DSU candidat post-unions; les seules clés nouvelles sont conservées dans des arènes privées. Une liaison courante reste invisible aux requêtes du même appel.
-5. **Commit.** Si et seulement si tout le lot est accepté et toutes les capacités durables suffisent, parents, unions, clés nouvelles et agrégat de lot sont engagés. Sinon, le contenu logique antérieur reste inchangé.
+5. **Commit.** Si et seulement si tout le lot est accepté et toutes les capacités durables suffisent, parents, unions, clés nouvelles, agrégat de lot et prochain digest de snapshot sont engagés. Sinon, le contenu logique antérieur et son digest restent inchangés.
 
 Une union explicite du lot peut donc rendre compatibles deux liaisons qui ne l'étaient pas dans l'état pré-appel. Sa vérité reste une assertion externe indépendante à rejouer par l'appelant. Après toutes ces unions, une même clé visant encore deux classes distinctes provoque le rejet transactionnel complet.
 
 Cette propriété fournit la visibilité pré-lot nécessaire seulement si l'appelant place effectivement tout le niveau HGP simultané dans un même appel. Le noyau n'est pas une MVCC et n'offre aucune synchronisation entre threads; « atomique » signifie ici tout-ou-rien logique pour un appel séquentiel.
+
+L'appelant doit sérialiser tous les `apply_batch` visant une même instance et exclure extérieurement toute mutation pendant chaque `snapshot_stamp`, `state_view`, sonde, construction ou vérification qui lit cette instance. Une référence `const` ne constitue ni un verrou ni un snapshot. Le stamp est uniquement un garde de mutation **séquentielle** : il peut faire refuser un état modifié par un commit achevé entre deux observations correctement sérialisées, mais il n'est jamais un détecteur sûr d'un writer concurrent. Faire chevaucher `apply_batch` avec une de ces lectures sort du contrat certifié et peut constituer une data race.
 
 ## A.5 Résultats d'une requête
 
@@ -121,16 +123,19 @@ Ces résultats prouvent la correction **interne et relative** du socle. Ils ne p
 
 ## A.8 Vérification structurelle fraîche
 
-`verify_exact_direct_sparse_positive_facet_locator_structure` reçoit séparément les paramètres de construction fiables et une vue non propriétaire de l'état observé. Il rejette les tailles de spans dépassant ces paramètres avant tout scan ou scratch dépendant de l'image. Il vérifie ensuite :
+`verify_exact_direct_sparse_positive_facet_locator_structure` reçoit séparément les paramètres de construction fiables et une vue non propriétaire de l'état observé. Les `span` de `ExactDirectSparsePositiveFacetLocatorStateView` empruntent les stockages des slots, points de clés, parents de composantes, unions et lots committés; ils n'en prolongent pas la durée de vie. Une mutation ou réallocation de ces stockages peut invalider la vue. Pour une vue issue d'un locator vivant, l'appelant doit donc conserver ce locator en vie et interdire tout `apply_batch` depuis la création de la vue jusqu'au retour du vérificateur. Pour une image durable décodée, son propriétaire doit de même garantir la durée de vie et l'immuabilité de tous les buffers pendant la vérification. Le vérificateur n'acquiert lui-même aucun verrou.
+
+Sous cette précondition, il rejette les tailles de spans dépassant les paramètres fiables avant tout scan ou scratch dépendant de l'image. Il vérifie ensuite :
 
 - la couverture sans trou ni recouvrement de l'arène plate de clés;
 - la forme canonique, l'empreinte recalculée et la retrouvabilité de chaque clé complète;
 - les indices, handles et jetons non nuls des unions durables;
 - le DSU final par rejeu de ces unions;
 - les partitions et plafonds des compteurs agrégés par lot;
+- la chaîne SHA-256 séparée par domaine depuis l'état initial, puis chaque lot, union et nouvelle liaison dans son ordre durable;
 - les faits structurels, la décision d'initialisation et la portée relative.
 
-Il ne rejoue ni l'autorité externe, ni les anciens payloads de requêtes ou de doublons, qui ne sont pas conservés. Les booléens historiques sont donc seulement exigés et leurs agrégats rendus cohérents; ils ne deviennent pas des preuves fraîches de la transaction passée. Le scratch temporaire est $O(L+KL+H)$, sans seconde sortie durable.
+Il ne rejoue ni l'autorité externe, ni les anciens payloads de requêtes ou de doublons, qui ne sont pas conservés. Les booléens historiques sont donc seulement exigés et leurs agrégats rendus cohérents; ils ne deviennent pas des preuves fraîches de la transaction passée. En revanche, les deltas sémantiques durables sont engagés par le digest : schéma, budget, configuration et handles dans l'état initial, puis index, compteurs, faits, unions, clés complètes, handles et témoins des nouvelles liaisons pour chaque commit. Sous l'hypothèse standard d'absence de collision SHA-256 sur les transcriptions canoniques considérées, deux contenus différents de mêmes autorité et compteurs ne partagent pas le même stamp. Sans cette hypothèse, le rejeu déterministe reste vérifiable mais le digest n'est pas une preuve mathématique d'injectivité. La valeur SHA-256 tout-zéro est une valeur de digest valide et n'a aucun rôle de sentinelle. Le scratch temporaire est $O(L+KL+H)$, sans seconde sortie durable.
 
 ## A.9 Bornes réelles du noyau de référence
 
@@ -240,13 +245,11 @@ Cette comparaison directe de miniballs suffit à certifier le saut et peut accep
 
 La tentative top-k vérifie avant chaque opération des plafonds distincts pour les visites de nœuds, expansions internes, évaluations exactes de bornes AABB, distances exactes aux points, taille de frontière, meilleurs voisins retenus et identifiants du shell. `budget_exhausted` n'expose aucun `TopKPartition` scientifique partiel et ne mute ni locator ni journal.
 
-La sonde `const` du locator budgète séparément les slots visités et les sauts DSU. Son résultat conserve la clé interrogée et un vérificateur frais rejoue la sonde depuis le locator, la clé, le témoin et le budget fiables. Employer `apply_batch` avec des unions et insertions vides copierait encore les $H$ parents et engagerait un lot; ce n'est ni une lecture ni un chemin acceptable pour 10 M+.
+La sonde `const` du locator budgète séparément les slots visités et les sauts DSU. Son résultat conserve la clé interrogée et un vérificateur frais rejoue la sonde depuis le locator, la clé, le témoin et le budget fiables. Cette lecture `const` reste soumise à l'exclusion externe de A.4 : aucun `apply_batch` ne peut chevaucher la sonde ou son rejeu. Employer `apply_batch` avec des unions et insertions vides copierait encore les $H$ parents et engagerait un lot; ce n'est ni une lecture ni un chemin acceptable pour 10 M+.
 
-La preuve complète du pas source-ouvert, la différence entre $\beta(F)\leq a$ et $\beta(F)<a$, ainsi que les deux fixtures permanentes sont consignées dans `docs/math/DESCENTE_FACETTE_SPARSE_PHASE10.md`. Les dettes suivantes restent :
+La preuve complète du pas source-ouvert, la différence entre $\beta(F)\leq a$ et $\beta(F)<a$, ainsi que les deux fixtures permanentes sont consignées dans `docs/math/DESCENTE_FACETTE_SPARSE_PHASE10.md`. 10.5c ferme désormais, dans sa portée multi-source bornée, les dettes historiques de témoin rejouable, budget de fermeture, suffixes partagés et miniballs réemployées. Les dettes suivantes restent :
 
-- conserver un témoin d'arc rejouable et un budget de fermeture; un arc individuellement vrai ne prouve pas que la descente atteint une liaison connue;
 - traiter ou refuser explicitement les plateaux, supports non essentiels et shells dégénérés;
-- partager les suffixes de descentes sans persister les partitions top-k ni dupliquer les miniballs déjà certifiées;
 - prouver que les descentes et les gateways positives suffisent à toutes les attaches nécessaires au profil `hgp_reduced`;
 - maintenir `unresolved` après épuisement de budget, sans naissance ni isolation implicite.
 
@@ -271,13 +274,15 @@ Pour les nuages de 10 000 000 de points ou davantage, l'absence de terme $\binom
 | miss donnant exclusivement `unresolved` | proved_here et validated_host_software |
 | conflit post-unions d'une clé exacte vers deux composantes incompatibles | contradiction_permanente |
 | état sans terme combinatoire $\binom{n}{k}$, mais préalloué en $M$ | proved_here |
-| vérification structurelle fraîche sans rejeu externe ou historique | validated_host_software |
+| vérification structurelle fraîche sans rejeu externe ou historique | validated_host_software sous durée de vie et immuabilité externes de la vue non propriétaire |
+| rejeu déterministe de la chaîne SHA-256 depuis l'état durable | proved_here et validated_host_software |
+| divergence du stamp pour deux transcriptions canoniques distinctes | conditional_theorem sous l'hypothèse standard d'absence de collision SHA-256; la valeur tout-zéro reste valide |
 | implémentation hôte dédiée du socle 10.5a | validated_host_software |
 | lemme top-k-only de descente stricte | conditional_theorem |
 | LBVH top-k-only à sept plafonds, sans partition partielle | proved_here et validated_host_software |
 | pas strict source-ouvert 10.5b avec rejeu frais | proved_here et validated_host_software |
 | résolution positive du pas 10.5b | conditional_on_caller_external_replay |
-| fermeture transitive et partage des suffixes 10.5c | proof_obligation |
+| fermeture transitive bornée et partage des suffixes 10.5c | proved_here et validated_host_software dans la portée relative fournie, sous gel externe du locator pendant chaque construction et vérification |
 | fermeture des gateways silencieux non directs | proof_obligation |
 | M.1 et exactitude `full_pi0` | proof_obligation |
 | exactitude publique de la hiérarchie d'ordre supérieur | not_claimed |

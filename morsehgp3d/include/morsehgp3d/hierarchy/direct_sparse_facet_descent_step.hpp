@@ -79,9 +79,11 @@ enum class ExactDirectSparseFacetDescentStepScope : std::uint8_t {
 struct ExactDirectSparseFacetDescentStepCounters {
   std::size_t source_locator_probe_count{};
   std::size_t source_miniball_build_count{};
+  std::size_t source_miniball_reuse_count{};
   std::size_t top_k_query_count{};
   std::size_t canonical_successor_selection_count{};
   std::size_t successor_miniball_build_count{};
+  std::size_t successor_miniball_reuse_count{};
   std::size_t successor_source_distance_evaluation_count{};
   std::size_t successor_source_maximum_comparison_count{};
   std::size_t center_displacement_evaluation_count{};
@@ -169,9 +171,11 @@ struct ExactDirectSparseFacetDescentStepResult {
   bool input_shape_certified{false};
   bool source_probe_used_const_pre_call_locator{false};
   bool source_miniball_freshly_certified{false};
+  bool source_miniball_reused_from_certified_input{false};
   bool complete_top_k_partition_certified{false};
   bool complete_top_k_shell_consumed_transiently{false};
   bool successor_miniball_freshly_certified{false};
+  bool successor_miniball_reused_from_certified_lookup{false};
   bool exact_level_relations_certified{false};
   bool strict_half_open_segment_certified{false};
   bool successor_probe_used_same_const_pre_call_locator{false};

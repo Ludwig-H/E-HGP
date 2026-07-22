@@ -1,5 +1,7 @@
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_step.hpp"
 
+#include "direct_sparse_facet_descent_step_detail.hpp"
+
 #include "morsehgp3d/hierarchy/facet_miniball.hpp"
 
 #include <algorithm>
@@ -76,16 +78,75 @@ void require_valid_traversal_order(
 }
 
 [[nodiscard]] bool certified_local_miniball(
+    const spatial::CanonicalPointCloud& cloud,
     const ExactFacetMiniballResult& miniball,
     const ExactDirectSparseFacetKey& key) {
-  return miniball.status ==
-             ExactFacetMiniballStatus::exact_facet_miniball_certified &&
-         miniball.scope ==
-             ExactFacetMiniballScope::local_facet_miniball_only &&
-         key_matches_ids(key, miniball.facet_point_ids) &&
-         miniball.counters.facet_point_count == key.point_count &&
-         miniball.counters.enumerated_support_count <=
-             ExactFacetMiniballResult::maximum_enumerated_support_count;
+  if (miniball.status !=
+          ExactFacetMiniballStatus::exact_facet_miniball_certified ||
+      miniball.scope !=
+          ExactFacetMiniballScope::local_facet_miniball_only ||
+      !key_matches_ids(key, miniball.facet_point_ids) ||
+      miniball.counters.facet_point_count != key.point_count ||
+      miniball.counters.enumerated_support_count >
+          ExactFacetMiniballResult::maximum_enumerated_support_count) {
+    return false;
+  }
+
+  const std::span<const PointId> point_ids = used_point_ids(key);
+  exact::ExactLevel maximum_level = exact_squared_distance(
+      miniball.center, cloud.point(point_ids.front()).exact());
+  for (std::size_t index = 1U; index < point_ids.size(); ++index) {
+    const exact::ExactLevel point_level = exact_squared_distance(
+        miniball.center, cloud.point(point_ids[index]).exact());
+    if (point_level > maximum_level) {
+      maximum_level = point_level;
+    }
+  }
+  return maximum_level == miniball.squared_radius;
+}
+
+[[nodiscard]] bool source_miniball_acquisition_certified(
+    const ExactDirectSparseFacetDescentStepResult& result) noexcept {
+  const bool exactly_one_acquisition =
+      (result.counters.source_miniball_build_count == 1U &&
+       result.counters.source_miniball_reuse_count == 0U) ||
+      (result.counters.source_miniball_build_count == 0U &&
+       result.counters.source_miniball_reuse_count == 1U);
+  return exactly_one_acquisition &&
+         result.source_miniball_freshly_certified ==
+             (result.counters.source_miniball_build_count == 1U) &&
+         result.source_miniball_reused_from_certified_input ==
+             (result.counters.source_miniball_reuse_count == 1U);
+}
+
+[[nodiscard]] bool successor_miniball_acquisition_certified(
+    const ExactDirectSparseFacetDescentStepResult& result) noexcept {
+  const bool exactly_one_acquisition =
+      (result.counters.successor_miniball_build_count == 1U &&
+       result.counters.successor_miniball_reuse_count == 0U) ||
+      (result.counters.successor_miniball_build_count == 0U &&
+       result.counters.successor_miniball_reuse_count == 1U);
+  return exactly_one_acquisition &&
+         result.successor_miniball_freshly_certified ==
+             (result.counters.successor_miniball_build_count == 1U) &&
+         result.successor_miniball_reused_from_certified_lookup ==
+             (result.counters.successor_miniball_reuse_count == 1U);
+}
+
+[[nodiscard]] bool no_source_miniball_acquisition(
+    const ExactDirectSparseFacetDescentStepResult& result) noexcept {
+  return result.counters.source_miniball_build_count == 0U &&
+         result.counters.source_miniball_reuse_count == 0U &&
+         !result.source_miniball_freshly_certified &&
+         !result.source_miniball_reused_from_certified_input;
+}
+
+[[nodiscard]] bool no_successor_miniball_acquisition(
+    const ExactDirectSparseFacetDescentStepResult& result) noexcept {
+  return result.counters.successor_miniball_build_count == 0U &&
+         result.counters.successor_miniball_reuse_count == 0U &&
+         !result.successor_miniball_freshly_certified &&
+         !result.successor_miniball_reused_from_certified_lookup;
 }
 
 void initialize_closed_scope(
@@ -171,19 +232,17 @@ void initialize_closed_scope(
          witness.closed_segment_strict_below_closed_batch_level ==
              (witness.top_k_cutoff_squared_level <
               result.closed_batch_squared_level) &&
-         result.source_miniball_freshly_certified &&
+         source_miniball_acquisition_certified(result) &&
          result.complete_top_k_partition_certified &&
          result.complete_top_k_shell_consumed_transiently &&
-         result.successor_miniball_freshly_certified &&
+         successor_miniball_acquisition_certified(result) &&
          result.exact_level_relations_certified &&
          result.strict_half_open_segment_certified &&
          result.complete_top_k_query_counters.has_value() &&
          result.top_k_audit.traversal_complete &&
          result.top_k_stop_reason == spatial::ExactLbvhTopKStopReason::none &&
-         result.counters.source_miniball_build_count == 1U &&
          result.counters.top_k_query_count == 1U &&
          result.counters.canonical_successor_selection_count == 1U &&
-         result.counters.successor_miniball_build_count == 1U &&
          result.counters.successor_source_distance_evaluation_count ==
              witness.source_facet_key.point_count &&
          result.counters.successor_source_maximum_comparison_count + 1U ==
@@ -223,10 +282,10 @@ certified_relative_positive_resolution() const noexcept {
            !successor_locator_probe.has_value() &&
            !strict_step_witness.has_value() &&
            !complete_top_k_query_counters.has_value() &&
-           counters.source_miniball_build_count == 0U &&
+           no_source_miniball_acquisition(*this) &&
            counters.top_k_query_count == 0U &&
            counters.canonical_successor_selection_count == 0U &&
-           counters.successor_miniball_build_count == 0U &&
+           no_successor_miniball_acquisition(*this) &&
            counters.successor_locator_probe_count == 0U;
   }
   if (decision == ExactDirectSparseFacetDescentStepDecision::
@@ -256,22 +315,21 @@ certified_unresolved_without_isolation() const noexcept {
   switch (decision) {
     case ExactDirectSparseFacetDescentStepDecision::
         complete_unresolved_source_above_closed_batch_level:
-      return source_miniball_freshly_certified &&
-             counters.source_miniball_build_count == 1U &&
+      return source_miniball_acquisition_certified(*this) &&
              counters.top_k_query_count == 0U &&
              top_k_stop_reason == spatial::ExactLbvhTopKStopReason::none &&
              !complete_top_k_query_counters.has_value() &&
              !strict_step_witness.has_value() &&
-             !successor_locator_probe.has_value();
+             !successor_locator_probe.has_value() &&
+             no_successor_miniball_acquisition(*this);
     case ExactDirectSparseFacetDescentStepDecision::
         complete_unresolved_source_is_canonical_top_k_choice:
-      return source_miniball_freshly_certified &&
+      return source_miniball_acquisition_certified(*this) &&
              complete_top_k_partition_certified &&
              complete_top_k_shell_consumed_transiently &&
-             counters.source_miniball_build_count == 1U &&
              counters.top_k_query_count == 1U &&
              counters.canonical_successor_selection_count == 1U &&
-             counters.successor_miniball_build_count == 0U &&
+             no_successor_miniball_acquisition(*this) &&
              complete_top_k_query_counters.has_value() &&
              top_k_audit.traversal_complete &&
              top_k_stop_reason == spatial::ExactLbvhTopKStopReason::none &&
@@ -279,14 +337,12 @@ certified_unresolved_without_isolation() const noexcept {
              !successor_locator_probe.has_value();
     case ExactDirectSparseFacetDescentStepDecision::
         complete_unresolved_non_strict_canonical_successor:
-      return source_miniball_freshly_certified &&
+      return source_miniball_acquisition_certified(*this) &&
              complete_top_k_partition_certified &&
              complete_top_k_shell_consumed_transiently &&
-             successor_miniball_freshly_certified &&
-             counters.source_miniball_build_count == 1U &&
+             successor_miniball_acquisition_certified(*this) &&
              counters.top_k_query_count == 1U &&
              counters.canonical_successor_selection_count == 1U &&
-             counters.successor_miniball_build_count == 1U &&
              complete_top_k_query_counters.has_value() &&
              top_k_audit.traversal_complete &&
              top_k_stop_reason == spatial::ExactLbvhTopKStopReason::none &&
@@ -316,16 +372,16 @@ bool ExactDirectSparseFacetDescentStepResult::certified_budget_exhaustion()
     case ExactDirectSparseFacetDescentStepDecision::
         no_resolution_source_locator_probe_budget_exhausted:
       return source_locator_probe.certified_budget_exhaustion() &&
-             counters.source_miniball_build_count == 0U &&
+             no_source_miniball_acquisition(*this) &&
              counters.top_k_query_count == 0U &&
              !complete_top_k_query_counters.has_value() &&
              !strict_step_witness.has_value() &&
-             !successor_locator_probe.has_value();
+             !successor_locator_probe.has_value() &&
+             no_successor_miniball_acquisition(*this);
     case ExactDirectSparseFacetDescentStepDecision::
         no_resolution_top_k_budget_exhausted:
       return source_locator_probe.certified_unresolved_miss() &&
-             source_miniball_freshly_certified &&
-             counters.source_miniball_build_count == 1U &&
+             source_miniball_acquisition_certified(*this) &&
              counters.top_k_query_count == 1U &&
              top_k_stop_reason != spatial::ExactLbvhTopKStopReason::none &&
              ((top_k_stop_reason == spatial::ExactLbvhTopKStopReason::
@@ -333,7 +389,8 @@ bool ExactDirectSparseFacetDescentStepResult::certified_budget_exhaustion()
               top_k_audit.traversal_complete) &&
              !complete_top_k_query_counters.has_value() &&
              !strict_step_witness.has_value() &&
-             !successor_locator_probe.has_value();
+             !successor_locator_probe.has_value() &&
+             no_successor_miniball_acquisition(*this);
     case ExactDirectSparseFacetDescentStepDecision::
         no_resolution_successor_locator_probe_budget_exhausted:
       return source_locator_probe.certified_unresolved_miss() &&
@@ -361,20 +418,19 @@ certified_fail_closed_contradiction() const noexcept {
   switch (decision) {
     case ExactDirectSparseFacetDescentStepDecision::
         contradiction_top_k_cutoff_above_source_miniball:
-      return source_miniball_freshly_certified &&
+      return source_miniball_acquisition_certified(*this) &&
              complete_top_k_partition_certified &&
-             counters.successor_miniball_build_count == 0U;
+             no_successor_miniball_acquisition(*this);
     case ExactDirectSparseFacetDescentStepDecision::
         contradiction_successor_miniball_above_top_k_cutoff:
-      return source_miniball_freshly_certified &&
+      return source_miniball_acquisition_certified(*this) &&
              complete_top_k_partition_certified &&
-             successor_miniball_freshly_certified &&
-             counters.successor_miniball_build_count == 1U;
+             successor_miniball_acquisition_certified(*this);
     case ExactDirectSparseFacetDescentStepDecision::
         contradiction_successor_source_atom_cutoff_mismatch:
-      return source_miniball_freshly_certified &&
+      return source_miniball_acquisition_certified(*this) &&
              complete_top_k_partition_certified &&
-             successor_miniball_freshly_certified &&
+             successor_miniball_acquisition_certified(*this) &&
              counters.successor_source_distance_evaluation_count ==
                  source_facet_key.point_count;
     default:
@@ -390,8 +446,8 @@ certified_partial_refinement_outcome() const noexcept {
          certified_fail_closed_contradiction();
 }
 
-ExactDirectSparseFacetDescentStepResult
-build_exact_direct_sparse_facet_descent_step(
+detail::ExactDirectSparseFacetDescentStepTransient
+detail::build_exact_direct_sparse_facet_descent_step_transient(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     std::span<const PointId> source_facet_point_ids,
@@ -399,7 +455,10 @@ build_exact_direct_sparse_facet_descent_step(
     const ExactDirectSparseFacetWitness& locator_query_witness,
     const ExactDirectSparsePositiveFacetLocator& locator,
     const ExactDirectSparseFacetDescentStepBudget& budget,
-    spatial::LbvhTraversalOrder traversal_order) {
+    spatial::LbvhTraversalOrder traversal_order,
+    const ExactFacetMiniballResult* certified_source_miniball,
+    ExactDirectSparseCertifiedFacetMiniballLookup
+        certified_miniball_lookup) {
   require_valid_traversal_order(traversal_order);
   if (!index.validated_for(cloud)) {
     throw std::invalid_argument(
@@ -417,7 +476,8 @@ build_exact_direct_sparse_facet_descent_step(
         "a direct sparse descent step requires a matching non-null locator witness");
   }
 
-  ExactDirectSparseFacetDescentStepResult result;
+  ExactDirectSparseFacetDescentStepTransient transient;
+  ExactDirectSparseFacetDescentStepResult& result = transient.result;
   result.requested_budget = budget;
   result.traversal_order = traversal_order;
   result.closed_batch_squared_level = closed_batch_squared_level;
@@ -438,7 +498,7 @@ build_exact_direct_sparse_facet_descent_step(
         ExactDirectSparseFacetDescentStepDisposition::budget_exhausted;
     result.decision = ExactDirectSparseFacetDescentStepDecision::
         no_resolution_source_locator_probe_budget_exhausted;
-    return result;
+    return transient;
   }
   if (result.source_locator_probe.certified_positive_hit()) {
     result.resolved_component_handle =
@@ -449,30 +509,46 @@ build_exact_direct_sparse_facet_descent_step(
         ExactDirectSparseFacetDescentStepDisposition::relative_positive;
     result.decision = ExactDirectSparseFacetDescentStepDecision::
         complete_relative_source_positive_hit;
-    return result;
+    return transient;
   }
   if (!result.source_locator_probe.certified_unresolved_miss()) {
     throw std::logic_error(
         "a valid const source probe returned no certified disposition");
   }
 
-  const ExactFacetMiniballResult source_miniball =
-      build_exact_facet_miniball(
-          cloud, used_point_ids(result.source_facet_key));
-  result.counters.source_miniball_build_count = 1U;
-  result.source_miniball_freshly_certified =
-      certified_local_miniball(source_miniball, result.source_facet_key);
-  if (!result.source_miniball_freshly_certified) {
-    throw std::logic_error(
-        "the exact source-facet miniball did not close locally");
+  const ExactFacetMiniballResult* source_miniball_pointer =
+      certified_source_miniball;
+  if (source_miniball_pointer == nullptr) {
+    transient.newly_built_source_miniball.emplace(
+        build_exact_facet_miniball(
+            cloud, used_point_ids(result.source_facet_key)));
+    source_miniball_pointer =
+        &*transient.newly_built_source_miniball;
+    result.counters.source_miniball_build_count = 1U;
+    result.source_miniball_freshly_certified = certified_local_miniball(
+        cloud, *source_miniball_pointer, result.source_facet_key);
+    if (!result.source_miniball_freshly_certified) {
+      throw std::logic_error(
+          "the exact source-facet miniball did not close locally");
+    }
+  } else {
+    if (!certified_local_miniball(
+            cloud, *source_miniball_pointer, result.source_facet_key)) {
+      throw std::invalid_argument(
+          "a reused source miniball does not match its full key, exact center and exact level");
+    }
+    result.counters.source_miniball_reuse_count = 1U;
+    result.source_miniball_reused_from_certified_input = true;
   }
+  const ExactFacetMiniballResult& source_miniball =
+      *source_miniball_pointer;
   ++result.counters.exact_level_relation_count;
   if (source_miniball.squared_radius > closed_batch_squared_level) {
     result.disposition =
         ExactDirectSparseFacetDescentStepDisposition::unresolved;
     result.decision = ExactDirectSparseFacetDescentStepDecision::
         complete_unresolved_source_above_closed_batch_level;
-    return result;
+    return transient;
   }
 
   const spatial::ExclusionSet empty_exclusions =
@@ -495,7 +571,7 @@ build_exact_direct_sparse_facet_descent_step(
         ExactDirectSparseFacetDescentStepDisposition::budget_exhausted;
     result.decision = ExactDirectSparseFacetDescentStepDecision::
         no_resolution_top_k_budget_exhausted;
-    return result;
+    return transient;
   }
 
   const spatial::TopKPartition& top_k = top_k_result.partition();
@@ -518,7 +594,7 @@ build_exact_direct_sparse_facet_descent_step(
         ExactDirectSparseFacetDescentStepDisposition::contradiction;
     result.decision = ExactDirectSparseFacetDescentStepDecision::
         contradiction_top_k_cutoff_above_source_miniball;
-    return result;
+    return transient;
   }
 
   const ExactDirectSparseFacetKey successor_key =
@@ -529,18 +605,34 @@ build_exact_direct_sparse_facet_descent_step(
         ExactDirectSparseFacetDescentStepDisposition::unresolved;
     result.decision = ExactDirectSparseFacetDescentStepDecision::
         complete_unresolved_source_is_canonical_top_k_choice;
-    return result;
+    return transient;
   }
 
-  const ExactFacetMiniballResult successor_miniball =
-      build_exact_facet_miniball(cloud, used_point_ids(successor_key));
-  result.counters.successor_miniball_build_count = 1U;
-  result.successor_miniball_freshly_certified =
-      certified_local_miniball(successor_miniball, successor_key);
-  if (!result.successor_miniball_freshly_certified) {
-    throw std::logic_error(
-        "the exact successor-facet miniball did not close locally");
+  const ExactFacetMiniballResult* successor_miniball_pointer =
+      certified_miniball_lookup(successor_key);
+  if (successor_miniball_pointer == nullptr) {
+    transient.newly_built_successor_miniball.emplace(
+        build_exact_facet_miniball(cloud, used_point_ids(successor_key)));
+    successor_miniball_pointer =
+        &*transient.newly_built_successor_miniball;
+    result.counters.successor_miniball_build_count = 1U;
+    result.successor_miniball_freshly_certified = certified_local_miniball(
+        cloud, *successor_miniball_pointer, successor_key);
+    if (!result.successor_miniball_freshly_certified) {
+      throw std::logic_error(
+          "the exact successor-facet miniball did not close locally");
+    }
+  } else {
+    if (!certified_local_miniball(
+            cloud, *successor_miniball_pointer, successor_key)) {
+      throw std::logic_error(
+          "the certified miniball lookup returned a mismatched full key, exact center or exact level");
+    }
+    result.counters.successor_miniball_reuse_count = 1U;
+    result.successor_miniball_reused_from_certified_lookup = true;
   }
+  const ExactFacetMiniballResult& successor_miniball =
+      *successor_miniball_pointer;
   result.counters.exact_level_relation_count += 2U;
   if (successor_miniball.squared_radius >
       top_k.cutoff_squared_distance()) {
@@ -548,7 +640,7 @@ build_exact_direct_sparse_facet_descent_step(
         ExactDirectSparseFacetDescentStepDisposition::contradiction;
     result.decision = ExactDirectSparseFacetDescentStepDecision::
         contradiction_successor_miniball_above_top_k_cutoff;
-    return result;
+    return transient;
   }
   if (successor_miniball.squared_radius >=
       source_miniball.squared_radius) {
@@ -556,7 +648,7 @@ build_exact_direct_sparse_facet_descent_step(
         ExactDirectSparseFacetDescentStepDisposition::unresolved;
     result.decision = ExactDirectSparseFacetDescentStepDecision::
         complete_unresolved_non_strict_canonical_successor;
-    return result;
+    return transient;
   }
 
   const std::span<const PointId> successor_ids = used_point_ids(successor_key);
@@ -582,7 +674,7 @@ build_exact_direct_sparse_facet_descent_step(
         ExactDirectSparseFacetDescentStepDisposition::contradiction;
     result.decision = ExactDirectSparseFacetDescentStepDecision::
         contradiction_successor_source_atom_cutoff_mismatch;
-    return result;
+    return transient;
   }
 
   ExactDirectSparseFacetDescentStepWitness strict_witness;
@@ -632,14 +724,14 @@ build_exact_direct_sparse_facet_descent_step(
         ExactDirectSparseFacetDescentStepDisposition::budget_exhausted;
     result.decision = ExactDirectSparseFacetDescentStepDecision::
         no_resolution_successor_locator_probe_budget_exhausted;
-    return result;
+    return transient;
   }
   if (result.successor_locator_probe->certified_unresolved_miss()) {
     result.disposition =
         ExactDirectSparseFacetDescentStepDisposition::unresolved;
     result.decision = ExactDirectSparseFacetDescentStepDecision::
         complete_unresolved_strict_successor_not_bound;
-    return result;
+    return transient;
   }
   if (!result.successor_locator_probe->certified_positive_hit()) {
     throw std::logic_error(
@@ -653,7 +745,30 @@ build_exact_direct_sparse_facet_descent_step(
       ExactDirectSparseFacetDescentStepDisposition::relative_positive;
   result.decision = ExactDirectSparseFacetDescentStepDecision::
       complete_relative_strict_successor_positive_hit;
-  return result;
+  return transient;
+}
+
+ExactDirectSparseFacetDescentStepResult
+build_exact_direct_sparse_facet_descent_step(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> source_facet_point_ids,
+    const exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetDescentStepBudget& budget,
+    spatial::LbvhTraversalOrder traversal_order) {
+  detail::ExactDirectSparseFacetDescentStepTransient transient =
+      detail::build_exact_direct_sparse_facet_descent_step_transient(
+          index,
+          cloud,
+          source_facet_point_ids,
+          closed_batch_squared_level,
+          locator_query_witness,
+          locator,
+          budget,
+          traversal_order);
+  return std::move(transient.result);
 }
 
 ExactDirectSparseFacetDescentStepVerification

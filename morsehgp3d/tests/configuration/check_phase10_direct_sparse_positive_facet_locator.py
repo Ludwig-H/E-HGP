@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 from pathlib import Path
 
@@ -51,6 +52,10 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         project
         / "src/cpu/hierarchy/direct_sparse_positive_facet_locator.cpp"
     )
+    unit_test = read_text(
+        project
+        / "tests/unit/test_hierarchy_direct_sparse_positive_facet_locator.cpp"
+    )
 
     target = parenthesized_block(
         cmake,
@@ -69,8 +74,12 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "morsehgp3d_direct_sparse_positive_facet_locator",
     )
     require(
+        "PUBLIC morsehgp3d::contract" in links,
+        "the locator public digest ABI must link the canonical contract",
+    )
+    require(
         "PRIVATE morsehgp3d::sanitizers" in links,
-        "the isolated target must link only the sanitizer policy",
+        "the isolated target must retain the sanitizer policy",
     )
     for forbidden_dependency in (
         "morsehgp3d::hierarchy",
@@ -97,6 +106,8 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "committed_binding_index",
         "ExactDirectSparseCommittedBatchRecord",
         "ExactDirectSparsePositiveFacetLocatorStateView",
+        "committed_history_digest",
+        "committed_history_digest_freshly_replayed",
         "external_authority_replayed_by_locator",
         "verify_exact_direct_sparse_positive_facet_locator_structure(",
     ):
@@ -125,6 +136,12 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "contradiction_incompatible_exact_facet_binding",
         "first_empty_committed_slot(",
         "committed_batches_.push_back(",
+        "locator_snapshot_initial_digest_domain",
+        "locator_snapshot_chain_digest_domain",
+        "initial_locator_snapshot_digest(",
+        "LocatorSnapshotChainDigestBuilder",
+        "committed_history_digest_ = next_snapshot_digest",
+        "replayed_history_digest == observed.committed_history_digest",
         "verification.external_authority_replayed_by_locator = false",
         "if (!verification.trusted_construction_parameters_certified ||",
         "verification.table_slot_scan_count = observed.slots.size()",
@@ -149,6 +166,47 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         0 <= query_position < union_position < binding_position < commit_position,
         "queries, candidate unions, compatibility checks and commit are misordered",
     )
+    next_digest_position = source.find(
+        "const contract::CanonicalId next_snapshot_digest", binding_position
+    )
+    digest_commit_position = source.find(
+        "committed_history_digest_ = next_snapshot_digest", commit_position
+    )
+    batch_record_commit_position = source.find(
+        "committed_batches_.push_back(candidate_batch_record)", commit_position
+    )
+    counter_commit_position = source.find(
+        "counters_ = *next_counters", batch_record_commit_position
+    )
+    require(
+        0
+        <= binding_position
+        < next_digest_position
+        < commit_position
+        < batch_record_commit_position
+        < counter_commit_position
+        < digest_commit_position,
+        "the next canonical snapshot digest must be finalized before mutation and "
+        "committed after the accepted batch record and aggregate counters",
+    )
+
+    for required_test_contract in (
+        "check_snapshot_digest_determinism_and_state_divergence",
+        "check_snapshot_digest_golden_vectors",
+        "d9b8a4e4b287a77411799dccdeea986565af78a80b26c8e36179852bcb5151a8",
+        "7976b55326f90d08889f09071245c0853e703a5e54c326b061f490cccf1b2a9f",
+        "different_key_stamp.committed_history_digest",
+        "different_witness_stamp.committed_history_digest",
+        "different_union_stamp.committed_history_digest",
+        "corrupted_digest_view.committed_history_digest",
+        "mutated_witness_view.slots",
+        "committed_history_digest_freshly_replayed",
+    ):
+        require(
+            required_test_contract in unit_test,
+            "the short locator unit suite is missing digest fixture "
+            f"{required_test_contract!r}",
+        )
 
     lowered = (header + "\n" + source).lower()
     for forbidden in (
@@ -166,6 +224,16 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
             forbidden not in lowered,
             f"the isolated locator contains forbidden path {forbidden!r}",
         )
+    require(
+        re.search(
+            r"committed_history_digest_\s*!=\s*"
+            r"contract::CanonicalId\s*\{\s*\}",
+            source,
+        )
+        is None,
+        "an all-zero SHA-256 value is valid and must not be used as an "
+        "initialization sentinel",
+    )
 
     if binary is not None or nm is not None:
         require(binary is not None and nm is not None, "--binary and --nm pair")

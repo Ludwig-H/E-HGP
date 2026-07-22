@@ -1,9 +1,11 @@
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_locator.hpp"
 
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <numeric>
 #include <optional>
+#include <string_view>
 #include <utility>
 
 namespace morsehgp3d::hierarchy {
@@ -308,6 +310,138 @@ struct PendingBinding {
   ExactDirectSparseFacetWitness witness{};
 };
 
+constexpr std::string_view locator_snapshot_initial_digest_domain =
+    "MorseHGP3D/phase10/direct-sparse-positive-facet-locator/"
+    "snapshot-initial/v1/sha256/";
+constexpr std::string_view locator_snapshot_chain_digest_domain =
+    "MorseHGP3D/phase10/direct-sparse-positive-facet-locator/"
+    "snapshot-chain/v1/sha256/";
+
+void digest_u64(
+    contract::CanonicalSha256Builder& builder,
+    std::uint64_t value) {
+  std::array<std::uint8_t, 8U> encoded{};
+  for (std::size_t index = 0U; index < encoded.size(); ++index) {
+    const std::size_t shift = 8U * (encoded.size() - index - 1U);
+    encoded[index] = static_cast<std::uint8_t>(value >> shift);
+  }
+  builder.update(encoded);
+}
+
+void digest_size(
+    contract::CanonicalSha256Builder& builder,
+    std::size_t value) {
+  static_assert(sizeof(std::size_t) <= sizeof(std::uint64_t));
+  digest_u64(builder, static_cast<std::uint64_t>(value));
+}
+
+void digest_identifier(
+    contract::CanonicalSha256Builder& builder,
+    const contract::CanonicalId& identifier) {
+  builder.update(identifier.bytes());
+}
+
+void digest_witness(
+    contract::CanonicalSha256Builder& builder,
+    const ExactDirectSparseFacetWitness& witness) {
+  digest_u64(builder, witness.external_authority_id);
+  digest_u64(builder, witness.replay_token);
+}
+
+void digest_budget(
+    contract::CanonicalSha256Builder& builder,
+    const ExactDirectSparsePositiveFacetLocatorBudget& budget) {
+  digest_size(builder, budget.maximum_component_handle_count);
+  digest_size(builder, budget.maximum_committed_binding_count);
+  digest_size(builder, budget.maximum_committed_key_point_count);
+  digest_size(builder, budget.maximum_committed_union_count);
+  digest_size(builder, budget.maximum_committed_batch_count);
+  digest_size(builder, budget.maximum_batch_query_count);
+  digest_size(builder, budget.maximum_batch_union_count);
+  digest_size(builder, budget.maximum_batch_binding_count);
+  digest_size(builder, budget.maximum_batch_key_point_count);
+  digest_size(builder, budget.maximum_table_slot_count);
+  digest_size(builder, budget.maximum_batch_scratch_slot_count);
+}
+
+void digest_batch_counters(
+    contract::CanonicalSha256Builder& builder,
+    const ExactDirectSparsePositiveFacetBatchCounters& counters) {
+  digest_size(builder, counters.query_count);
+  digest_size(builder, counters.positive_lookup_count);
+  digest_size(builder, counters.unresolved_lookup_count);
+  digest_size(builder, counters.union_request_count);
+  digest_size(builder, counters.binding_request_count);
+  digest_size(builder, counters.inserted_binding_count);
+  digest_size(builder, counters.compatible_duplicate_binding_count);
+  digest_size(builder, counters.batch_input_key_point_count);
+  digest_size(builder, counters.inserted_key_point_count);
+  digest_size(builder, counters.full_key_comparison_count);
+  digest_size(builder, counters.equal_fingerprint_distinct_key_count);
+}
+
+[[nodiscard]] contract::CanonicalId initial_locator_snapshot_digest(
+    std::size_t component_handle_count,
+    const ExactDirectSparsePositiveFacetLocatorBudget& budget,
+    const ExactDirectSparsePositiveFacetLocatorConfig& config) {
+  contract::CanonicalSha256Builder builder;
+  builder.update(locator_snapshot_initial_digest_domain);
+  digest_u64(
+      builder, direct_sparse_positive_facet_locator_schema_version);
+  digest_budget(builder, budget);
+  digest_u64(builder, config.external_authority_id);
+  digest_u64(builder, config.fingerprint_mask);
+  digest_size(builder, component_handle_count);
+  return builder.finalize();
+}
+
+class LocatorSnapshotChainDigestBuilder {
+ public:
+  LocatorSnapshotChainDigestBuilder(
+      const contract::CanonicalId& previous,
+      const ExactDirectSparseCommittedBatchRecord& batch) {
+    builder_.update(locator_snapshot_chain_digest_domain);
+    digest_identifier(builder_, previous);
+    digest_size(builder_, batch.committed_batch_index);
+    digest_batch_counters(builder_, batch.counters);
+    digest_u64(builder_, batch.input_shape_certified ? 1U : 0U);
+    digest_u64(
+        builder_, batch.input_witness_structure_certified ? 1U : 0U);
+    digest_u64(
+        builder_, batch.strict_pre_batch_snapshot_certified ? 1U : 0U);
+    digest_u64(
+        builder_, batch.sequential_atomic_commit_certified ? 1U : 0U);
+  }
+
+  void component_union(
+      ExactDirectSparseComponentHandle left_handle,
+      ExactDirectSparseComponentHandle right_handle,
+      const ExactDirectSparseFacetWitness& witness) {
+    digest_size(builder_, left_handle);
+    digest_size(builder_, right_handle);
+    digest_witness(builder_, witness);
+  }
+
+  void binding(
+      const ExactDirectSparseFacetKey& key,
+      ExactDirectSparseComponentHandle component_handle,
+      const ExactDirectSparseFacetWitness& witness) {
+    digest_size(builder_, key.point_count);
+    for (std::size_t index = 0U; index < key.point_count; ++index) {
+      digest_u64(builder_, key.point_ids[index]);
+    }
+    digest_size(builder_, component_handle);
+    digest_witness(builder_, witness);
+  }
+
+  [[nodiscard]] contract::CanonicalId finalize() {
+    return builder_.finalize();
+  }
+
+ private:
+  contract::CanonicalSha256Builder builder_;
+};
+
 struct PendingSearchResult {
   std::optional<std::size_t> pending_index;
   std::size_t full_key_comparison_count{};
@@ -591,6 +725,18 @@ bool ExactDirectSparsePositiveFacetLocator::certified_positive_locator()
                        positive_bindings_relative_to_caller_asserted_external_authority_only;
 }
 
+ExactDirectSparsePositiveFacetLocatorSnapshotStamp
+ExactDirectSparsePositiveFacetLocator::snapshot_stamp() const noexcept {
+  return {
+      schema_version_,
+      config_.external_authority_id,
+      counters_.committed_batch_count,
+      counters_.inserted_binding_count,
+      counters_.union_request_count,
+      counters_.binding_request_count,
+      committed_history_digest_};
+}
+
 ExactDirectSparsePositiveFacetProbeResult
 ExactDirectSparsePositiveFacetLocator::probe_positive_facet(
     const ExactDirectSparseFacetKey& key,
@@ -799,6 +945,8 @@ build_exact_direct_sparse_positive_facet_locator(
   locator.flat_durable_key_arena_initialized_ = true;
   locator.positive_bindings_only_ = true;
   locator.full_key_comparison_required_ = true;
+  locator.committed_history_digest_ = initial_locator_snapshot_digest(
+      component_handle_count, budget, config);
   locator.initialization_decision_ =
       ExactDirectSparsePositiveFacetLocatorInitializationDecision::
           complete_certified_empty_sparse_positive_locator;
@@ -820,6 +968,7 @@ ExactDirectSparsePositiveFacetLocator::state_view() const noexcept {
       committed_unions_,
       committed_batches_,
       counters_,
+      committed_history_digest_,
       budget_preflight_certified_,
       empty_table_initialized_,
       dense_component_handles_initialized_,
@@ -891,6 +1040,8 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
       occupied_slot_count, std::uint8_t{0U});
   std::vector<std::size_t> binding_key_point_counts(
       occupied_slot_count, 0U);
+  std::vector<const ExactDirectSparsePositiveFacetSlot*>
+      binding_slots_by_index(occupied_slot_count, nullptr);
   std::vector<std::uint8_t> seen_key_points(
       observed.key_point_arena.size(), std::uint8_t{0U});
   bool table_and_arena_valid = verification.capacity_requirements_certified &&
@@ -928,6 +1079,7 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
     seen_binding_indices[slot.committed_binding_index] = 1U;
     binding_key_point_counts[slot.committed_binding_index] =
         slot.key_point_count;
+    binding_slots_by_index[slot.committed_binding_index] = &slot;
 
     ExactDirectSparseFacetKey reconstructed_key;
     reconstructed_key.point_count = slot.key_point_count;
@@ -1024,6 +1176,11 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
 
   ExactDirectSparsePositiveFacetLocatorCounters replayed_counters;
   std::size_t replayed_binding_prefix = 0U;
+  std::size_t replayed_union_prefix = 0U;
+  contract::CanonicalId replayed_history_digest =
+      initial_locator_snapshot_digest(
+          trusted_component_handle_count, trusted_budget, trusted_config);
+  bool history_digest_valid = true;
   bool batch_records_valid =
       observed.committed_batches.size() <=
       trusted_budget.maximum_committed_batch_count;
@@ -1056,6 +1213,8 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
     const auto next_binding_prefix = checked_add(
         replayed_binding_prefix,
         record.counters.inserted_binding_count);
+    const auto next_union_prefix = checked_add(
+        replayed_union_prefix, record.counters.union_request_count);
     std::optional<std::size_t> observed_inserted_key_point_count{0U};
     if (!next_binding_prefix.has_value() ||
         *next_binding_prefix > binding_key_point_counts.size()) {
@@ -1107,6 +1266,8 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
          replayed_binding_prefix == 0U &&
          record.counters.inserted_binding_count == 0U) ||
         !next_binding_prefix.has_value() ||
+        !next_union_prefix.has_value() ||
+        *next_union_prefix > observed.committed_unions.size() ||
         !observed_inserted_key_point_count.has_value() ||
         record.counters.inserted_key_point_count !=
             *observed_inserted_key_point_count ||
@@ -1117,8 +1278,46 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
         !record.strict_pre_batch_snapshot_certified ||
         !record.sequential_atomic_commit_certified) {
       batch_records_valid = false;
+      history_digest_valid = false;
       continue;
     }
+
+    LocatorSnapshotChainDigestBuilder snapshot_digest_builder(
+        replayed_history_digest, record);
+    for (std::size_t union_index = replayed_union_prefix;
+         union_index < *next_union_prefix;
+         ++union_index) {
+      const ExactDirectSparseCommittedUnionRecord& component_union =
+          observed.committed_unions[union_index];
+      snapshot_digest_builder.component_union(
+          component_union.left_handle,
+          component_union.right_handle,
+          component_union.witness);
+    }
+    for (std::size_t binding_index = replayed_binding_prefix;
+         binding_index < *next_binding_prefix;
+         ++binding_index) {
+      const ExactDirectSparsePositiveFacetSlot* const slot =
+          binding_slots_by_index[binding_index];
+      if (slot == nullptr ||
+          slot->key_point_offset > observed.key_point_arena.size() ||
+          slot->key_point_count >
+              observed.key_point_arena.size() - slot->key_point_offset) {
+        history_digest_valid = false;
+        continue;
+      }
+      ExactDirectSparseFacetKey key;
+      key.point_count = slot->key_point_count;
+      for (std::size_t point_index = 0U;
+           point_index < slot->key_point_count;
+           ++point_index) {
+        key.point_ids[point_index] =
+            observed.key_point_arena[slot->key_point_offset + point_index];
+      }
+      snapshot_digest_builder.binding(
+          key, slot->component_handle, slot->binding_witness);
+    }
+    replayed_history_digest = snapshot_digest_builder.finalize();
     const auto next = updated_counters(replayed_counters, record.counters);
     if (!next.has_value()) {
       batch_records_valid = false;
@@ -1126,16 +1325,21 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
     }
     replayed_counters = *next;
     replayed_binding_prefix = *next_binding_prefix;
+    replayed_union_prefix = *next_union_prefix;
   }
   verification.batch_record_scan_count = observed.committed_batches.size();
   verification.historical_batch_assertions_and_counters_well_formed =
       batch_records_valid && replayed_counters == observed.counters &&
       observed.counters.union_request_count ==
           observed.committed_unions.size() &&
+      replayed_union_prefix == observed.committed_unions.size() &&
       observed.counters.inserted_binding_count == occupied_slot_count &&
       replayed_binding_prefix == occupied_slot_count &&
       observed.counters.committed_key_point_count ==
           observed.key_point_arena.size();
+  verification.committed_history_digest_freshly_replayed =
+      history_digest_valid && batch_records_valid &&
+      replayed_history_digest == observed.committed_history_digest;
 
   verification.internal_fact_fields_match_contract =
       observed.budget_preflight_certified &&
@@ -1162,6 +1366,7 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
       verification.dense_handle_dsu_replay_certified &&
       verification.union_witness_structure_certified &&
       verification.historical_batch_assertions_and_counters_well_formed &&
+      verification.committed_history_digest_freshly_replayed &&
       verification.internal_fact_fields_match_contract &&
       verification.decision_and_scope_certified &&
       verification
@@ -1382,8 +1587,14 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
       counters_.inserted_binding_count, pending.size());
   const auto committed_key_point_total = checked_add(
       key_point_arena_.size(), result.counters.inserted_key_point_count);
+  const auto committed_union_total = checked_add(
+      committed_unions_.size(), unions.size());
+  const auto committed_batch_total = checked_add(
+      committed_batches_.size(), 1U);
   if (!committed_binding_total.has_value() ||
-      !committed_key_point_total.has_value()) {
+      !committed_key_point_total.has_value() ||
+      !committed_union_total.has_value() ||
+      !committed_batch_total.has_value()) {
     result.decision = ExactDirectSparsePositiveFacetBatchDecision::
         no_positive_locator_capacity_overflow;
     return result;
@@ -1404,11 +1615,32 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
     return result;
   }
 
+  const ExactDirectSparseCommittedBatchRecord candidate_batch_record{
+      counters_.committed_batch_count,
+      result.counters,
+      true,
+      true,
+      true,
+      true};
+  LocatorSnapshotChainDigestBuilder snapshot_digest_builder(
+      committed_history_digest_, candidate_batch_record);
+  for (const ExactDirectSparseComponentUnion& component_union : unions) {
+    snapshot_digest_builder.component_union(
+        component_union.left_handle,
+        component_union.right_handle,
+        component_union.witness);
+  }
+  for (const PendingBinding& binding : pending) {
+    snapshot_digest_builder.binding(
+        binding.key, binding.component_handle, binding.witness);
+  }
+  const contract::CanonicalId next_snapshot_digest =
+      snapshot_digest_builder.finalize();
+
   // Every fallible allocation happens before the first logical state change.
   key_point_arena_.reserve(*committed_key_point_total);
-  committed_unions_.reserve(
-      committed_unions_.size() + unions.size());
-  committed_batches_.reserve(committed_batches_.size() + 1U);
+  committed_unions_.reserve(*committed_union_total);
+  committed_batches_.reserve(*committed_batch_total);
   std::copy(
       candidate_parents.begin(),
       candidate_parents.end(),
@@ -1439,14 +1671,9 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
             static_cast<std::ptrdiff_t>(binding.key.point_count));
     ++pending_index;
   }
-  committed_batches_.push_back(ExactDirectSparseCommittedBatchRecord{
-      counters_.committed_batch_count,
-      result.counters,
-      true,
-      true,
-      true,
-      true});
+  committed_batches_.push_back(candidate_batch_record);
   counters_ = *next_counters;
+  committed_history_digest_ = next_snapshot_digest;
 
   result.atomic_commit_performed = true;
   result.locator_state_mutated = true;

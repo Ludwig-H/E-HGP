@@ -1,5 +1,7 @@
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_step.hpp"
 
+#include "../../src/cpu/hierarchy/direct_sparse_facet_descent_step_detail.hpp"
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -11,6 +13,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -31,12 +34,14 @@ using morsehgp3d::hierarchy::ExactDirectSparseFacetDescentStepVerification;
 using morsehgp3d::hierarchy::ExactDirectSparseFacetDescentStepWitness;
 using morsehgp3d::hierarchy::ExactDirectSparseFacetKey;
 using morsehgp3d::hierarchy::ExactDirectSparseFacetWitness;
+using morsehgp3d::hierarchy::ExactFacetMiniballResult;
 using morsehgp3d::hierarchy::ExactDirectSparsePositiveFacetLocator;
 using morsehgp3d::hierarchy::ExactDirectSparsePositiveFacetLocatorBudget;
 using morsehgp3d::hierarchy::ExactDirectSparsePositiveFacetLocatorConfig;
 using morsehgp3d::hierarchy::ExactDirectSparsePositiveFacetProbeBudget;
 using morsehgp3d::hierarchy::build_exact_direct_sparse_facet_descent_step;
 using morsehgp3d::hierarchy::build_exact_direct_sparse_positive_facet_locator;
+using morsehgp3d::hierarchy::build_exact_facet_miniball;
 using morsehgp3d::hierarchy::verify_exact_direct_sparse_facet_descent_step;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ExactLbvhTopKAudit;
@@ -48,6 +53,27 @@ using morsehgp3d::spatial::PointId;
 
 constexpr std::uint64_t authority_id = UINT64_C(0x105b);
 int failures = 0;
+
+static_assert(
+    std::is_trivially_copyable_v<morsehgp3d::hierarchy::detail::
+                                     ExactDirectSparseCertifiedFacetMiniballLookup>);
+
+struct SingleCertifiedMiniballLookup {
+  ExactDirectSparseFacetKey key{};
+  const ExactFacetMiniballResult* miniball{};
+  mutable std::size_t lookup_count{};
+  mutable ExactDirectSparseFacetKey last_requested_key{};
+};
+
+[[nodiscard]] const ExactFacetMiniballResult* find_single_miniball(
+    const void* context,
+    const ExactDirectSparseFacetKey& requested_key) noexcept {
+  const auto& lookup =
+      *static_cast<const SingleCertifiedMiniballLookup*>(context);
+  ++lookup.lookup_count;
+  lookup.last_requested_key = requested_key;
+  return requested_key == lookup.key ? lookup.miniball : nullptr;
+}
 
 void check(bool condition, const std::string& message) {
   if (!condition) {
@@ -260,6 +286,138 @@ void check_closed_partial_scope(
           !result.hierarchy_attachment_published &&
           !result.public_status_claimed && result.partial_refinement_only,
       context + " remains a side-effect-free partial refinement");
+}
+
+void test_transient_miniball_reuse_kernel() {
+  const CanonicalPointCloud cloud = ac_de_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<PointId, 2U> source{1U, 3U};
+  const std::array<PointId, 2U> successor{0U, 4U};
+  const ExactDirectSparseFacetKey successor_key = key({0U, 4U});
+  const ExactFacetMiniballResult source_miniball =
+      build_exact_facet_miniball(cloud, source);
+  const ExactFacetMiniballResult successor_miniball =
+      build_exact_facet_miniball(cloud, successor);
+  const ExactDirectSparsePositiveFacetLocator locator = make_locator();
+  const ExactDirectSparseFacetDescentStepBudget budget =
+      generous_step_budget();
+  SingleCertifiedMiniballLookup lookup{
+      successor_key, &successor_miniball, 0U, {}};
+
+  const auto cached = morsehgp3d::hierarchy::detail::
+      build_exact_direct_sparse_facet_descent_step_transient(
+          index,
+          cloud,
+          source,
+          level(33, 2),
+          witness(901U),
+          locator,
+          budget,
+          LbvhTraversalOrder::near_first,
+          &source_miniball,
+          {&lookup, &find_single_miniball});
+  check(
+      cached.result.certified_unresolved_without_isolation() &&
+          cached.result.decision ==
+              ExactDirectSparseFacetDescentStepDecision::
+                  complete_unresolved_strict_successor_not_bound &&
+          cached.result.counters.source_miniball_build_count == 0U &&
+          cached.result.counters.source_miniball_reuse_count == 1U &&
+          cached.result.counters.successor_miniball_build_count == 0U &&
+          cached.result.counters.successor_miniball_reuse_count == 1U &&
+          !cached.result.source_miniball_freshly_certified &&
+          cached.result.source_miniball_reused_from_certified_input &&
+          !cached.result.successor_miniball_freshly_certified &&
+          cached.result.successor_miniball_reused_from_certified_lookup &&
+          !cached.newly_built_source_miniball.has_value() &&
+          !cached.newly_built_successor_miniball.has_value(),
+      "the transient core reuses exactly one certified source and successor miniball without rebuilding either");
+  check(
+      lookup.lookup_count == 1U &&
+          lookup.last_requested_key == successor_key,
+      "the allocation-free callback is consulted once with the complete canonical successor key");
+
+  auto double_acquisition = cached.result;
+  double_acquisition.counters.source_miniball_build_count = 1U;
+  double_acquisition.source_miniball_freshly_certified = true;
+  auto double_successor_acquisition = cached.result;
+  double_successor_acquisition.counters.successor_miniball_build_count = 1U;
+  double_successor_acquisition.successor_miniball_freshly_certified = true;
+  check(
+      !double_acquisition.certified_partial_refinement_outcome() &&
+          !double_successor_acquisition
+               .certified_partial_refinement_outcome(),
+      "a result claiming both a build and a reuse violates each exactly-one miniball acquisition invariant");
+
+  const auto cache_miss = morsehgp3d::hierarchy::detail::
+      build_exact_direct_sparse_facet_descent_step_transient(
+          index,
+          cloud,
+          source,
+          level(33, 2),
+          witness(902U),
+          locator,
+          budget,
+          LbvhTraversalOrder::near_first,
+          &source_miniball);
+  check(
+      cache_miss.result.certified_unresolved_without_isolation() &&
+          cache_miss.result.counters.source_miniball_build_count == 0U &&
+          cache_miss.result.counters.source_miniball_reuse_count == 1U &&
+          cache_miss.result.counters.successor_miniball_build_count == 1U &&
+          cache_miss.result.counters.successor_miniball_reuse_count == 0U &&
+          !cache_miss.newly_built_source_miniball.has_value() &&
+          cache_miss.newly_built_successor_miniball.has_value() &&
+          cache_miss.newly_built_successor_miniball->facet_point_ids ==
+              std::vector<PointId>(successor.begin(), successor.end()),
+      "a successor cache miss builds exactly once and returns the new certified miniball to its caller");
+
+  const ExactDirectSparseFacetDescentStepResult public_result =
+      build_exact_direct_sparse_facet_descent_step(
+          index,
+          cloud,
+          source,
+          level(33, 2),
+          witness(903U),
+          locator,
+          budget,
+          LbvhTraversalOrder::near_first);
+  check(
+      public_result.certified_unresolved_without_isolation() &&
+          public_result.counters.source_miniball_build_count == 1U &&
+          public_result.counters.source_miniball_reuse_count == 0U &&
+          public_result.counters.successor_miniball_build_count == 1U &&
+          public_result.counters.successor_miniball_reuse_count == 0U &&
+          public_result.source_miniball_freshly_certified &&
+          !public_result.source_miniball_reused_from_certified_input &&
+          public_result.successor_miniball_freshly_certified &&
+          !public_result.successor_miniball_reused_from_certified_lookup,
+      "the public wrapper preserves its fresh-build-only 10.5b behavior");
+
+  ExactFacetMiniballResult corrupted_successor = successor_miniball;
+  corrupted_successor.center = center(0, 0, 0);
+  SingleCertifiedMiniballLookup corrupted_lookup{
+      successor_key, &corrupted_successor, 0U, {}};
+  bool corrupted_cache_rejected = false;
+  try {
+    static_cast<void>(morsehgp3d::hierarchy::detail::
+        build_exact_direct_sparse_facet_descent_step_transient(
+            index,
+            cloud,
+            source,
+            level(33, 2),
+            witness(904U),
+            locator,
+            budget,
+            LbvhTraversalOrder::near_first,
+            &source_miniball,
+            {&corrupted_lookup, &find_single_miniball}));
+  } catch (const std::logic_error&) {
+    corrupted_cache_rejected = true;
+  }
+  check(
+      corrupted_cache_rejected && corrupted_lookup.lookup_count == 1U,
+      "a cache hit whose exact center and level do not match the complete key fails closed before reuse");
 }
 
 void test_equal_level_ac_to_de_closed_segment() {
@@ -907,6 +1065,7 @@ void test_contract_metadata() {
 
 int main() {
   test_contract_metadata();
+  test_transient_miniball_reuse_kernel();
   test_equal_level_ac_to_de_closed_segment();
   test_equal_level_lr_to_lp_source_open_segment();
   test_source_hit_missing_target_and_above_batch();

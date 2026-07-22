@@ -586,6 +586,7 @@ target_include_directories(
 )
 target_link_libraries(
   morsehgp3d_direct_sparse_positive_facet_locator
+  PUBLIC morsehgp3d::contract
   PRIVATE morsehgp3d::sanitizers
 )
 if(MSVC)
@@ -638,6 +639,46 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_direct_sparse_facet_descent_step
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_sparse_facet_descent_closure
+  STATIC
+    src/cpu/hierarchy/direct_sparse_facet_descent_closure.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_facet_descent_closure
+  ALIAS morsehgp3d_direct_sparse_facet_descent_closure
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_facet_descent_closure
+  PROPERTIES
+    EXPORT_NAME direct_sparse_facet_descent_closure
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_facet_descent_closure PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_facet_descent_closure
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_facet_descent_closure
+  PUBLIC morsehgp3d::direct_sparse_facet_descent_step
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_facet_descent_closure PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_facet_descent_closure
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -1387,6 +1428,7 @@ install(
     morsehgp3d_direct_closed_saddle_incidence_journal
     morsehgp3d_direct_sparse_positive_facet_locator
     morsehgp3d_direct_sparse_facet_descent_step
+    morsehgp3d_direct_sparse_facet_descent_closure
     morsehgp3d_direct_frozen_root_quotient
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_pair_support_codec
