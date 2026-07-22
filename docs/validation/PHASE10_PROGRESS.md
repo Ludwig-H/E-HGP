@@ -33,6 +33,26 @@ $$\text{stockage}_{10.3}\leq2n+5J_1-2.$$
 
 Le scratch logique préflighté comprend deux arènes de taille $n$ et au plus $11B_{\max}$ entrées pour le plus gros lot; il reste $O(n+B_{\max})$. Le vérificateur final rejoue la construction et compare chaque record au fil de l'eau sans seconde arène persistante de forêt. Le target `morsehgp3d_direct_k1_forest_journal` ne lie publiquement que 10.2. Les fixtures courtes couvrent la paire binaire, la multifusion ternaire de deux selles égales, la continuation $q=1$, un parent post-lot falsifié, un nœud de continuation inventé, un journal 10.2 falsifié et un budget diminué d'une unité. Le test fonctionnel et le contrôle statique passent ensemble en moins de 0,25 seconde.
 
+## Incrément 10.4-RCPU livré — incidences fermées directes et quotient gelé étroit
+
+Pour une selle directe $S=I\cup U$ au niveau $a=\beta(S)=\beta(U)$, 10.2 couvre déjà les suppressions du support. Pour chaque $x\in I$, les inclusions $U\subseteq S\setminus\lbrace x\rbrace\subseteq S$ donnent exactement :
+
+$$\beta(S\setminus\lbrace x\rbrace)=a.$$
+
+`ExactDirectClosedSaddleIncidenceJournalResult` réutilise donc sans copie les $A$ bras stricts de 10.2 et ajoute seulement une famille par selle et une graine `removed_interior_point_id` par facette égale. Les deux familles de suppressions sont disjointes, exhaustives et contiennent ensemble $k+1$ facettes. Chaque facette égale est reconstruite à la demande dans dix `PointId` au plus; aucun miniball n'est recalculé.
+
+Si $J$ est le nombre de selles et $P=\sum_e\lvert I_e\rvert$, alors $P\leq9J$ et l'ajout vérifie :
+
+$$J+P\leq10J\leq10E.$$
+
+Avec les étages 10.1 et 10.2, le stockage logique est borné par $3n+20E$. Le préflight dérive $J$, $A$ et $P$ depuis la façade terminale avant le rejeu streaming de 10.2 et avant les réservations. Le vérificateur final compare familles, partitions et graines sans seconde sortie $O(J+P)$. Le target isolé ne lie ni Gamma, ni miniball, ni archive historique et ne matérialise aucune facette, cellule, coface globale ou mosaïque d'ordre supérieur.
+
+La fixture collinéaire $x_i=(i-5,0,0)$, $0\leq i\leq10$, exerce directement la frontière produit : la selle diamétrale d'ordre dix a deux bras stricts de niveau $81/4$ et neuf suppressions intérieures de niveau 25. Toute la chaîne Phase 9 vers 10.4 reste sous la seconde sur la machine de développement. La fixture obtuse ferme la partition 2 + 1, et les mutations de graine ainsi que le budget diminué d'une unité échouent atomiquement.
+
+Le noyau autonome `direct_frozen_root_quotient` calcule en parallèle la fermeture d'équivalence canonique d'hyperarêtes CSR sur des racines externes déjà certifiées. Il conserve explicitement les groupes d'arité un et utilise des arènes plates bornées par $E_q+G_q+R_q\leq2E_q+H_q$ en sortie et $3H_q+E_q$ en scratch. Cette primitive n'est pas encore le quotient HGP supérieur : elle ne porte ni facette latente, ni endpoint égal, ni bras `unresolved`, ne vérifie pas l'autorité du snapshot externe et ne produit aucune `RootBirth`, union publique ou mutation globale.
+
+La preuve, les limites gateway et le cas maximal sont consignés dans [INCIDENCES_FERMEES_SELLES_DIRECTES_PHASE10.md](../math/INCIDENCES_FERMEES_SELLES_DIRECTES_PHASE10.md).
+
 ## Borne de stockage propre à 10.1 et objets évités
 
 Si $n$ est le nombre de sites et $E$ le nombre d'événements directs terminaux, le journal 10.1 conserve exactement $n+E$ projections, au plus $n+2E$ rôles et au plus $n+2E$ lots. Son audit certifie donc la borne logique suivante :
@@ -49,6 +69,6 @@ Le test ciblé strict passe en 0,02 seconde environ. Sur le tétraèdre régulie
 
 ## Limites et suite
 
-La généalogie H0 est désormais fermée seulement à l'ordre un. Pour $k\geq2$, il reste à descendre ou localiser chaque facette dans l'état strict pré-lot, intégrer les suppressions intérieures qui naissent au niveau égal et conserver les gateways silencieux nécessaires aux événements futurs. Une absence dans le dictionnaire de facettes doit rester `unresolved`; elle ne certifie jamais une composante isolée. Le contre-exemple permanent à cinq points et la preuve M.1 restent les portes scientifiques. Aucun `public_status` n'est publié et Gamma exhaustif demeure l'oracle borné jusqu'à $n\leq14$.
+La généalogie H0 est désormais fermée seulement à l'ordre un, tandis que l'alphabet local des suppressions est fermé pour chaque selle directe jusqu'à $K=10$. Pour $k\geq2$, il reste à descendre ou localiser chaque facette dans l'état strict pré-lot, représenter les facettes latentes dans le quotient et conserver les gateways silencieux non directs nécessaires aux événements futurs. Une absence dans le dictionnaire de facettes doit rester `unresolved`; elle ne certifie jamais une composante isolée. Le contre-exemple permanent à cinq points et la preuve M.1 restent les portes scientifiques. Aucun `public_status` n'est publié et Gamma exhaustif demeure l'oracle borné jusqu'à $n\leq14$.
 
 GCP n'a pas été utilisé pour ces incréments CPU. La session G4 consignée dans la revue de porte appartient exclusivement à la qualification de fermeture de la Phase 9.
