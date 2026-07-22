@@ -597,7 +597,13 @@ struct ReadFile {
   struct stat metadata {};
 };
 
-[[nodiscard]] ReadFile read_bounded_regular_file(
+struct OpenedReadFile {
+  UniqueFileDescriptor descriptor;
+  struct stat metadata {};
+  std::size_t byte_count{};
+};
+
+[[nodiscard]] OpenedReadFile open_bounded_regular_file(
     int directory_fd,
     const std::string& name,
     std::size_t maximum_file_byte_count,
@@ -611,26 +617,57 @@ struct ReadFile {
   if (!descriptor.valid()) {
     throw_last_system_error(std::string{"cannot open "} + std::string{role});
   }
-  ReadFile read;
-  read.metadata = descriptor_metadata(descriptor.get(), role);
+  const struct stat metadata = descriptor_metadata(descriptor.get(), role);
   require_regular_file_with_links(
-      read.metadata, expected_link_count, role);
-  if (read.metadata.st_size < 0) {
+      metadata, expected_link_count, role);
+  if (metadata.st_size < 0) {
     throw std::runtime_error(std::string{role} + " has negative size");
   }
   const std::uintmax_t unsigned_size =
-      static_cast<std::uintmax_t>(read.metadata.st_size);
+      static_cast<std::uintmax_t>(metadata.st_size);
   if (unsigned_size > maximum_file_byte_count ||
       unsigned_size > std::numeric_limits<std::size_t>::max()) {
     throw std::runtime_error(
         std::string{role} + " exceeds its byte cap");
   }
   const std::size_t size = static_cast<std::size_t>(unsigned_size);
-  read.bytes.resize(size);
+  return OpenedReadFile{
+      std::move(descriptor), metadata, size};
+}
+
+void require_opened_file_unchanged(
+    const OpenedReadFile& opened,
+    std::string_view role) {
+  const struct stat after = descriptor_metadata(
+      opened.descriptor.get(), role);
+  if (!same_inode(opened.metadata, after) ||
+      after.st_size != opened.metadata.st_size ||
+      after.st_nlink != opened.metadata.st_nlink ||
+      !S_ISREG(after.st_mode)) {
+    throw std::runtime_error(
+        std::string{role} + " changed during reading");
+  }
+}
+
+[[nodiscard]] ReadFile read_bounded_regular_file(
+    int directory_fd,
+    const std::string& name,
+    std::size_t maximum_file_byte_count,
+    nlink_t expected_link_count,
+    std::string_view role) {
+  OpenedReadFile opened = open_bounded_regular_file(
+      directory_fd,
+      name,
+      maximum_file_byte_count,
+      expected_link_count,
+      role);
+  ReadFile read;
+  read.metadata = opened.metadata;
+  read.bytes.resize(opened.byte_count);
   std::size_t offset = 0U;
   while (offset < read.bytes.size()) {
     const ssize_t count = ::pread(
-        descriptor.get(),
+        opened.descriptor.get(),
         read.bytes.data() + offset,
         read.bytes.size() - offset,
         static_cast<off_t>(offset));
@@ -649,14 +686,7 @@ struct ReadFile {
         static_cast<std::size_t>(count),
         "a durable pair-support read offset overflows size_t");
   }
-  const struct stat after = descriptor_metadata(descriptor.get(), role);
-  if (!same_inode(read.metadata, after) ||
-      after.st_size != read.metadata.st_size ||
-      after.st_nlink != read.metadata.st_nlink ||
-      !S_ISREG(after.st_mode)) {
-    throw std::runtime_error(
-        std::string{role} + " changed during reading");
-  }
+  require_opened_file_unchanged(opened, role);
   return read;
 }
 
@@ -708,7 +738,9 @@ void verify_written_bytes(
     throw std::runtime_error(
         std::string{role} + " has an unexpected size after writing");
   }
-  std::array<std::uint8_t, 64U * 1024U> buffer{};
+  // This helper is reserved for the fixed 142-byte HEAD wire.  Transition
+  // chunks use the receipt-based fd codec and its separate 64-KiB scratch.
+  std::array<std::uint8_t, head_wire_byte_count> buffer{};
   std::size_t offset = 0U;
   while (offset < expected.size()) {
     const std::size_t requested =
@@ -1098,7 +1130,7 @@ struct ExactPairSupportDurableSink::Impl {
     }
   }
 
-  [[nodiscard]] ReadFile read_transition(
+  [[nodiscard]] OpenedReadFile read_transition(
       std::uint64_t sequence,
       std::size_t current_total,
       std::size_t maximum_total,
@@ -1112,13 +1144,13 @@ struct ExactPairSupportDurableSink::Impl {
     const std::size_t maximum_file_byte_count = std::min(
         config.codec_limits.maximum_encoded_byte_count,
         remaining_total);
-    ReadFile read = read_bounded_regular_file(
+    OpenedReadFile read = open_bounded_regular_file(
         directory.get(),
         sequence_file_name(sequence, false),
         maximum_file_byte_count,
         expected_link_count,
         role);
-    if (read.bytes.size() > remaining_total) {
+    if (read.byte_count > remaining_total) {
       throw std::runtime_error(
           "the durable pair-support transition prefix exceeds its total byte cap");
     }
@@ -1126,16 +1158,25 @@ struct ExactPairSupportDurableSink::Impl {
   }
 
   [[nodiscard]] ExactPairSupportStreamChunk decode_transition(
-      const ReadFile& read,
+      const OpenedReadFile& read,
       std::string_view role) {
     durable_status.maximum_simultaneously_decoded_chunk_count = 1U;
+    ExactPairSupportStreamCodecLimits effective_limits =
+        config.codec_limits;
+    effective_limits.maximum_encoded_byte_count = std::min(
+        effective_limits.maximum_encoded_byte_count,
+        read.byte_count);
     ExactPairSupportStreamDecodeResult decoded =
-        decode_exact_pair_support_stream_chunk(
-            read.bytes, config.codec_limits);
+        decode_exact_pair_support_stream_chunk_from_fd(
+            read.descriptor.get(), effective_limits);
+    durable_status.maximum_codec_io_buffer_byte_count =
+        pair_support_stream_fd_buffer_byte_count;
+    durable_status.streaming_fd_codec_used = true;
     if (!decoded.accepted()) {
       throw std::runtime_error(
           std::string{role} + " has invalid encoding");
     }
+    require_opened_file_unchanged(read, role);
     if (decoded.chunk->budget != config.fixed_chunk_budget ||
         !transition_makes_progress(*decoded.chunk)) {
       throw std::runtime_error(
@@ -1215,7 +1256,7 @@ struct ExactPairSupportDurableSink::Impl {
       const std::uint64_t sequence = checked_u64(
           committed_count,
           "the durable pair-support orphan sequence does not fit uint64");
-      const ReadFile read = read_transition(
+      const OpenedReadFile read = read_transition(
           sequence,
           committed_bytes,
           config.maximum_total_encoded_byte_count,
@@ -1226,7 +1267,7 @@ struct ExactPairSupportDurableSink::Impl {
         throw std::runtime_error(
             "the transition final and temporary are not the same link-window inode");
       }
-      orphan_byte_count = read.bytes.size();
+      orphan_byte_count = read.byte_count;
       orphan_chunk = decode_transition(
           read,
           "the uncommitted durable pair-support transition orphan");
@@ -1368,7 +1409,7 @@ struct ExactPairSupportDurableSink::Impl {
     verify_external_anchor_at_current_prefix();
 
     for (std::size_t sequence = 0U; sequence < head_count; ++sequence) {
-      const ReadFile read = read_transition(
+      const OpenedReadFile read = read_transition(
           checked_u64(
               sequence,
               "a recovered durable pair-support sequence does not fit uint64"),
@@ -1387,7 +1428,7 @@ struct ExactPairSupportDurableSink::Impl {
       }
       total_encoded_byte_count = checked_add(
           total_encoded_byte_count,
-          read.bytes.size(),
+          read.byte_count,
           "the durable pair-support byte count overflows size_t");
       committed_transition_count = checked_add(
           committed_transition_count,
@@ -1505,36 +1546,10 @@ struct ExactPairSupportDurableSink::Impl {
         effective_codec_limits.maximum_encoded_byte_count,
         remaining_total_encoded_byte_count);
 
-    std::vector<std::uint8_t> encoded;
-    try {
-      encoded = encode_exact_pair_support_stream_chunk(
-          observed, effective_codec_limits);
-    } catch (const std::invalid_argument&) {
-      result.decision = ExactPairSupportDurablePublishDecision::
-          codec_limit_rejected;
-      return result;
-    } catch (const std::length_error&) {
-      result.decision = ExactPairSupportDurablePublishDecision::
-          codec_limit_rejected;
-      return result;
-    } catch (const std::overflow_error&) {
-      result.decision = ExactPairSupportDurablePublishDecision::
-          codec_limit_rejected;
-      return result;
-    }
-    if (encoded.size() > remaining_total_encoded_byte_count) {
-      result.decision = ExactPairSupportDurablePublishDecision::
-          codec_limit_rejected;
-      return result;
-    }
     const std::size_t next_committed_transition_count = checked_add(
         committed_transition_count,
         1U,
         "the durable pair-support committed count overflows size_t");
-    const std::size_t next_total_encoded_byte_count = checked_add(
-        total_encoded_byte_count,
-        encoded.size(),
-        "the durable pair-support encoded byte count overflows size_t");
 
     auto prepared = verifier.prepare_next(
         config.fixed_chunk_budget, observed);
@@ -1562,14 +1577,9 @@ struct ExactPairSupportDurableSink::Impl {
     }
     const std::string final_name = sequence_file_name(sequence, false);
     const std::string temporary_name = sequence_file_name(sequence, true);
-    const HeadRecord next_head{
-        run_contract_digest,
-        next_sequence,
-        checked_u64(
-            next_total_encoded_byte_count,
-            "the durable pair-support successor byte count does not fit uint64"),
-        prepared.trusted_next_checkpoint().checkpoint_digest};
-    const auto encoded_head = encode_head(next_head);
+    std::size_t next_total_encoded_byte_count = 0U;
+    HeadRecord next_head;
+    std::array<std::uint8_t, head_wire_byte_count> encoded_head{};
 
     UniqueFileDescriptor transition_temporary;
     UniqueFileDescriptor head_temporary;
@@ -1584,7 +1594,82 @@ struct ExactPairSupportDurableSink::Impl {
           temporary_name,
           "a durable pair-support transition temporary");
       transition_temporary_present = true;
-      write_all(transition_temporary.get(), encoded);
+      ExactPairSupportStreamFdWireReceipt transition_receipt;
+      try {
+        transition_receipt = encode_exact_pair_support_stream_chunk_to_fd(
+            transition_temporary.get(), observed, effective_codec_limits);
+        durable_status.maximum_codec_io_buffer_byte_count =
+            pair_support_stream_fd_buffer_byte_count;
+        durable_status.streaming_fd_codec_used = true;
+      } catch (const std::invalid_argument&) {
+        transition_temporary = UniqueFileDescriptor{};
+        int cleanup_error = 0;
+        if (cleanup_failed_publication(
+                temporary_name,
+                final_name,
+                true,
+                false,
+                false,
+                cleanup_error)) {
+          result.decision = ExactPairSupportDurablePublishDecision::
+              codec_limit_rejected;
+          return result;
+        }
+        throw_system_error(
+            cleanup_error,
+            "cannot clean a codec-rejected durable pair-support temporary");
+      } catch (const std::length_error&) {
+        transition_temporary = UniqueFileDescriptor{};
+        int cleanup_error = 0;
+        if (cleanup_failed_publication(
+                temporary_name,
+                final_name,
+                true,
+                false,
+                false,
+                cleanup_error)) {
+          result.decision = ExactPairSupportDurablePublishDecision::
+              codec_limit_rejected;
+          return result;
+        }
+        throw_system_error(
+            cleanup_error,
+            "cannot clean a codec-rejected durable pair-support temporary");
+      } catch (const std::overflow_error&) {
+        transition_temporary = UniqueFileDescriptor{};
+        int cleanup_error = 0;
+        if (cleanup_failed_publication(
+                temporary_name,
+                final_name,
+                true,
+                false,
+                false,
+                cleanup_error)) {
+          result.decision = ExactPairSupportDurablePublishDecision::
+              codec_limit_rejected;
+          return result;
+        }
+        throw_system_error(
+            cleanup_error,
+            "cannot clean a codec-rejected durable pair-support temporary");
+      }
+      if (transition_receipt.encoded_byte_count >
+          remaining_total_encoded_byte_count) {
+        throw std::logic_error(
+            "the fd codec exceeded its tightened durable byte cap");
+      }
+      next_total_encoded_byte_count = checked_add(
+          total_encoded_byte_count,
+          transition_receipt.encoded_byte_count,
+          "the durable pair-support encoded byte count overflows size_t");
+      next_head = HeadRecord{
+          run_contract_digest,
+          next_sequence,
+          checked_u64(
+              next_total_encoded_byte_count,
+              "the durable pair-support successor byte count does not fit uint64"),
+          prepared.trusted_next_checkpoint().checkpoint_digest};
+      encoded_head = encode_head(next_head);
       notify(
           options,
           ExactPairSupportDurablePublishStage::
@@ -1593,14 +1678,26 @@ struct ExactPairSupportDurableSink::Impl {
         throw_last_system_error(
             "cannot synchronize a durable pair-support transition temporary");
       }
-      verify_written_bytes(
-          transition_temporary.get(),
-          encoded,
-          "a durable pair-support transition temporary");
+      const auto require_verified_transition_receipt = [&]() {
+        const ExactPairSupportStreamFdWireVerificationResult
+            wire_verification =
+                verify_exact_pair_support_stream_chunk_fd_wire(
+                    transition_temporary.get(),
+                    effective_codec_limits,
+                    transition_receipt);
+        if (!wire_verification.accepted()) {
+          throw std::runtime_error(
+              "a durable pair-support transition temporary failed bounded fd readback");
+        }
+      };
+      require_verified_transition_receipt();
       notify(
           options,
           ExactPairSupportDurablePublishStage::
               transition_temporary_file_synchronized);
+      if (options.observer != nullptr) {
+        require_verified_transition_receipt();
+      }
 
       if (::linkat(
               directory.get(),
@@ -1616,6 +1713,9 @@ struct ExactPairSupportDurableSink::Impl {
           options,
           ExactPairSupportDurablePublishStage::
               transition_final_link_created);
+      if (options.observer != nullptr) {
+        require_verified_transition_receipt();
+      }
       const struct stat linked_temporary = named_metadata(
           directory.get(),
           temporary_name,
@@ -1624,6 +1724,13 @@ struct ExactPairSupportDurableSink::Impl {
           directory.get(),
           final_name,
           "the linked durable pair-support transition final");
+      const struct stat linked_descriptor = descriptor_metadata(
+          transition_temporary.get(),
+          "the linked durable pair-support transition descriptor");
+      require_regular_file_with_links(
+          linked_descriptor,
+          2,
+          "the linked durable pair-support transition descriptor");
       require_regular_file_with_links(
           linked_temporary,
           2,
@@ -1632,27 +1739,45 @@ struct ExactPairSupportDurableSink::Impl {
           linked_final,
           2,
           "the linked durable pair-support transition final");
-      if (!same_inode(linked_temporary, linked_final)) {
+      if (!same_inode(linked_descriptor, linked_temporary) ||
+          !same_inode(linked_descriptor, linked_final)) {
         throw std::runtime_error(
-            "the no-replace transition publication did not preserve one inode");
+            "the no-replace transition publication did not preserve the verified descriptor inode");
       }
       if (::unlinkat(directory.get(), temporary_name.c_str(), 0) != 0) {
         throw_last_system_error(
             "cannot remove a published durable pair-support transition temporary link");
       }
       transition_temporary_present = false;
+      const auto require_verified_transition_final = [&]() {
+        const struct stat descriptor_state = descriptor_metadata(
+            transition_temporary.get(),
+            "the verified durable pair-support transition descriptor");
+        const struct stat named_state = named_metadata(
+            directory.get(),
+            final_name,
+            "the verified durable pair-support transition final");
+        require_regular_file_with_links(
+            descriptor_state,
+            1,
+            "the verified durable pair-support transition descriptor");
+        require_regular_file_with_links(
+            named_state,
+            1,
+            "the verified durable pair-support transition final");
+        if (!same_inode(descriptor_state, named_state)) {
+          throw std::runtime_error(
+              "the durable pair-support transition final no longer identifies its verified descriptor");
+        }
+        if (options.observer != nullptr) {
+          require_verified_transition_receipt();
+        }
+      };
       notify(
           options,
           ExactPairSupportDurablePublishStage::
               transition_temporary_link_removed);
-      const struct stat final_metadata = named_metadata(
-          directory.get(),
-          final_name,
-          "the durable pair-support transition final");
-      require_regular_file_with_links(
-          final_metadata,
-          1,
-          "the durable pair-support transition final");
+      require_verified_transition_final();
       if (::fsync(directory.get()) != 0) {
         throw_last_system_error(
             "cannot synchronize a published durable pair-support transition");
@@ -1661,6 +1786,7 @@ struct ExactPairSupportDurableSink::Impl {
           options,
           ExactPairSupportDurablePublishStage::
               transition_directory_synchronized);
+      require_verified_transition_final();
 
       head_temporary = create_temporary_file(
           directory.get(),
@@ -1684,7 +1810,33 @@ struct ExactPairSupportDurableSink::Impl {
           options,
           ExactPairSupportDurablePublishStage::
               head_temporary_file_synchronized);
+      if (options.observer != nullptr) {
+        verify_written_bytes(
+            head_temporary.get(),
+            encoded_head,
+            "the observer-visible durable pair-support HEAD temporary");
+      }
 
+      const struct stat verified_head_descriptor = descriptor_metadata(
+          head_temporary.get(),
+          "the verified durable pair-support HEAD descriptor");
+      const struct stat verified_head_name = named_metadata(
+          directory.get(),
+          std::string{head_temporary_file_name},
+          "the verified durable pair-support HEAD temporary name");
+      require_regular_file_with_links(
+          verified_head_descriptor,
+          1,
+          "the verified durable pair-support HEAD descriptor");
+      require_regular_file_with_links(
+          verified_head_name,
+          1,
+          "the verified durable pair-support HEAD temporary name");
+      if (!same_inode(verified_head_descriptor, verified_head_name)) {
+        throw std::runtime_error(
+            "the durable pair-support HEAD temporary name no longer identifies its verified descriptor");
+      }
+      require_verified_transition_final();
       integrity_failure = true;
       if (read_head_file(directory.get()) != authoritative_head) {
         throw std::runtime_error(
@@ -1701,9 +1853,32 @@ struct ExactPairSupportDurableSink::Impl {
       }
       head_temporary_present = false;
       head_replaced = true;
+      const auto require_verified_publication = [&]() {
+        const struct stat published_head = named_metadata(
+            directory.get(),
+            std::string{head_file_name},
+            "the published durable pair-support HEAD");
+        require_regular_file_with_links(
+            published_head,
+            1,
+            "the published durable pair-support HEAD");
+        if (!same_inode(verified_head_descriptor, published_head)) {
+          throw std::runtime_error(
+              "the published durable pair-support HEAD is not the verified descriptor inode");
+        }
+        if (options.observer != nullptr) {
+          verify_written_bytes(
+              head_temporary.get(),
+              encoded_head,
+              "the observer-visible published durable pair-support HEAD");
+        }
+        require_verified_transition_final();
+      };
+      require_verified_publication();
       notify(
           options,
           ExactPairSupportDurablePublishStage::head_replaced);
+      require_verified_publication();
       if (::fsync(directory.get()) != 0) {
         throw_last_system_error(
             "cannot synchronize the authoritative durable pair-support HEAD");
@@ -1712,6 +1887,7 @@ struct ExactPairSupportDurableSink::Impl {
           options,
           ExactPairSupportDurablePublishStage::
               head_directory_synchronized);
+      require_verified_publication();
     } catch (const std::system_error& error) {
       result.system_error_number = error.code().value();
       transition_temporary = UniqueFileDescriptor{};

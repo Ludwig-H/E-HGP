@@ -94,6 +94,8 @@ struct ExactPairSupportDurableStatus {
   std::size_t committed_transition_count{};
   std::size_t total_encoded_byte_count{};
   std::size_t maximum_simultaneously_decoded_chunk_count{};
+  std::size_t maximum_codec_io_buffer_byte_count{};
+  std::size_t materialized_transition_wire_byte_count{};
   std::size_t removed_uncommitted_temporary_file_count{};
   std::size_t removed_uncommitted_final_file_count{};
   ExactPairSupportDurableExternalPrefixAnchor current_prefix_anchor{};
@@ -101,6 +103,7 @@ struct ExactPairSupportDurableStatus {
   bool authoritative_head_certified{false};
   bool external_prefix_anchor_supplied{false};
   bool external_prefix_anchor_verified{false};
+  bool streaming_fd_codec_used{false};
   bool anchored_prefix_certified{false};
   bool anchored_run_certified{false};
   bool terminal_checkpoint_reached{false};

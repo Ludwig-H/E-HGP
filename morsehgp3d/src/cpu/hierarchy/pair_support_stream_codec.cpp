@@ -2,6 +2,7 @@
 
 #include "morsehgp3d/contract/canonical_id.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -12,6 +13,14 @@
 #include <string_view>
 #include <utility>
 #include <vector>
+
+#if defined(__unix__) || defined(__APPLE__)
+#include <cerrno>
+#include <fcntl.h>
+#include <system_error>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 
 namespace morsehgp3d::hierarchy {
 namespace {
@@ -114,22 +123,37 @@ void require_finite_limits(
   return static_cast<std::uint64_t>(value);
 }
 
+[[nodiscard]] bool checksum_input_fits_sha256(
+    std::size_t wire_without_checksum_byte_count) noexcept {
+  constexpr std::uint64_t maximum_sha256_byte_count =
+      std::numeric_limits<std::uint64_t>::max() / 8U;
+  if (chunk_checksum_domain.size() > maximum_sha256_byte_count) {
+    return false;
+  }
+  return wire_without_checksum_byte_count <=
+         maximum_sha256_byte_count - chunk_checksum_domain.size();
+}
+
+void require_checksum_input_fits_sha256(
+    std::size_t wire_without_checksum_byte_count) {
+  if (!checksum_input_fits_sha256(wire_without_checksum_byte_count)) {
+    throw std::length_error(
+        "the pair-support checksum input exceeds the SHA-256 bit-length limit");
+  }
+}
+
 class ByteWriter {
  public:
-  ByteWriter(
-      std::size_t maximum_byte_count,
-      std::size_t reserved_trailing_byte_count = 0U)
-      : maximum_byte_count_(maximum_byte_count),
-        reserved_trailing_byte_count_(reserved_trailing_byte_count) {
-    if (reserved_trailing_byte_count_ > maximum_byte_count_) {
-      throw std::length_error(
-          "the pair-support wire representation exceeds its byte limit");
-    }
-  }
+  explicit ByteWriter(std::size_t maximum_byte_count)
+      : maximum_byte_count_(maximum_byte_count) {}
+
+  virtual ~ByteWriter() = default;
+
+  ByteWriter(const ByteWriter&) = delete;
+  ByteWriter& operator=(const ByteWriter&) = delete;
 
   void byte(std::uint8_t value) {
-    require_capacity(1U);
-    bytes_.push_back(value);
+    bytes(std::span<const std::uint8_t>{&value, 1U});
   }
 
   void boolean(bool value) {
@@ -137,17 +161,21 @@ class ByteWriter {
   }
 
   void u32(std::uint32_t value) {
+    std::array<std::uint8_t, 4U> encoded{};
     for (std::size_t index = 0U; index < 4U; ++index) {
       const std::size_t shift = (3U - index) * 8U;
-      byte(static_cast<std::uint8_t>(value >> shift));
+      encoded[index] = static_cast<std::uint8_t>(value >> shift);
     }
+    bytes(encoded);
   }
 
   void u64(std::uint64_t value) {
+    std::array<std::uint8_t, 8U> encoded{};
     for (std::size_t index = 0U; index < 8U; ++index) {
       const std::size_t shift = (7U - index) * 8U;
-      byte(static_cast<std::uint8_t>(value >> shift));
+      encoded[index] = static_cast<std::uint8_t>(value >> shift);
     }
+    bytes(encoded);
   }
 
   void size(std::size_t value) {
@@ -157,7 +185,8 @@ class ByteWriter {
 
   void bytes(std::span<const std::uint8_t> values) {
     require_capacity(values.size());
-    bytes_.insert(bytes_.end(), values.begin(), values.end());
+    append(values);
+    byte_count_ += values.size();
   }
 
   void identifier(const contract::CanonicalId& identifier) {
@@ -165,60 +194,57 @@ class ByteWriter {
   }
 
   [[nodiscard]] std::size_t byte_count() const noexcept {
-    return bytes_.size();
+    return byte_count_;
   }
 
-  void overwrite_u64(std::size_t offset, std::uint64_t value) {
-    if (offset > bytes_.size() || bytes_.size() - offset < 8U) {
-      throw std::logic_error(
-          "a pair-support wire uint64 backpatch is out of range");
-    }
-    for (std::size_t index = 0U; index < 8U; ++index) {
-      const std::size_t shift = (7U - index) * 8U;
-      bytes_[offset + index] =
-          static_cast<std::uint8_t>(value >> shift);
-    }
-  }
-
-  void append_reserved_identifier(
-      const contract::CanonicalId& identifier) {
-    if (reserved_trailing_byte_count_ !=
-        contract::CanonicalId::byte_count) {
-      throw std::logic_error(
-          "the pair-support checksum reservation is inconsistent");
-    }
-    reserved_trailing_byte_count_ = 0U;
-    bytes(identifier.bytes());
-  }
-
-  [[nodiscard]] const std::vector<std::uint8_t>& data() const noexcept {
-    return bytes_;
-  }
-
-  [[nodiscard]] std::vector<std::uint8_t> release() && {
-    return std::move(bytes_);
-  }
+ protected:
+  virtual void append(std::span<const std::uint8_t> values) = 0;
 
  private:
   void require_capacity(std::size_t additional_byte_count) const {
-    if (reserved_trailing_byte_count_ > maximum_byte_count_ ||
-        bytes_.size() >
-            maximum_byte_count_ - reserved_trailing_byte_count_ ||
-        additional_byte_count >
-            maximum_byte_count_ - reserved_trailing_byte_count_ -
-                bytes_.size()) {
+    if (byte_count_ > maximum_byte_count_ ||
+        additional_byte_count > maximum_byte_count_ - byte_count_) {
       throw std::length_error(
           "the pair-support wire representation exceeds its byte limit");
     }
   }
 
   std::size_t maximum_byte_count_{};
-  std::size_t reserved_trailing_byte_count_{};
-  std::vector<std::uint8_t> bytes_;
+  std::size_t byte_count_{};
+};
+
+class CountWriter final : public ByteWriter {
+ public:
+  explicit CountWriter(std::size_t maximum_byte_count)
+      : ByteWriter(maximum_byte_count) {}
+
+ private:
+  void append(std::span<const std::uint8_t>) override {}
+};
+
+class VectorWriter final : public ByteWriter {
+ public:
+  VectorWriter(
+      std::vector<std::uint8_t>& output,
+      std::size_t maximum_byte_count,
+      contract::CanonicalSha256Builder& checksum_builder)
+      : ByteWriter(maximum_byte_count),
+        output_(output),
+        checksum_builder_(checksum_builder) {}
+
+ private:
+  void append(std::span<const std::uint8_t> values) override {
+    checksum_builder_.update(values);
+    output_.insert(output_.end(), values.begin(), values.end());
+  }
+
+  std::vector<std::uint8_t>& output_;
+  contract::CanonicalSha256Builder& checksum_builder_;
 };
 
 [[nodiscard]] contract::CanonicalId wire_checksum(
     std::span<const std::uint8_t> wire_without_checksum) {
+  require_checksum_input_fits_sha256(wire_without_checksum.size());
   contract::CanonicalSha256Builder builder;
   builder.update(chunk_checksum_domain);
   builder.update(wire_without_checksum);
@@ -282,6 +308,78 @@ class ByteWriter {
       return 2U;
   }
   throw std::invalid_argument("invalid pair-support record kind");
+}
+
+[[nodiscard]] bool add_within_limit(
+    std::size_t value,
+    std::size_t limit,
+    std::size_t& total) noexcept {
+  if (total > limit || value > limit - total) {
+    return false;
+  }
+  total += value;
+  return true;
+}
+
+[[nodiscard]] bool add_decimal_digit_upper_bound(
+    const exact::BigInt& value,
+    std::size_t limit,
+    std::size_t& total) {
+  if (value == 0) {
+    return add_within_limit(1U, limit, total);
+  }
+  const exact::BigInt magnitude = value < 0 ? -value : value;
+  const std::size_t most_significant_bit =
+      boost::multiprecision::msb(magnitude);
+  if (most_significant_bit == std::numeric_limits<std::size_t>::max()) {
+    return false;
+  }
+  const std::size_t bit_count = most_significant_bit + 1U;
+
+  // 30103 / 100000 is a strict upper approximation of log10(2).
+  // Splitting the product avoids overflow; the remainder product is < 2^32.
+  constexpr std::size_t numerator = 30103U;
+  constexpr std::size_t denominator = 100000U;
+  const std::size_t quotient = bit_count / denominator;
+  const std::size_t remainder = bit_count % denominator;
+  if (quotient > std::numeric_limits<std::size_t>::max() / numerator) {
+    return false;
+  }
+  const std::size_t whole = quotient * numerator;
+  const std::size_t remainder_product = remainder * numerator;
+  const std::size_t fractional =
+      remainder_product / denominator +
+      (remainder_product % denominator == 0U ? 0U : 1U);
+  if (whole > std::numeric_limits<std::size_t>::max() - fractional) {
+    return false;
+  }
+  return add_within_limit(whole + fractional, limit, total);
+}
+
+[[nodiscard]] bool canonical_rational_allocation_is_bounded(
+    const exact::ExactRational& value,
+    std::size_t exact_text_byte_limit) {
+  // The bit-length estimate is an upper bound but can differ by one decimal
+  // digit for each integer.  Consequently canonical_key() is called only when
+  // its result is guaranteed not to exceed the effective cap by more than two
+  // bytes; the exact post-check still rejects every byte above the public cap.
+  const std::size_t tolerated_limit =
+      exact_text_byte_limit > std::numeric_limits<std::size_t>::max() - 2U
+          ? exact_text_byte_limit
+          : exact_text_byte_limit + 2U;
+  std::size_t upper_byte_count = 0U;
+  if (value.numerator() < 0 &&
+      !add_within_limit(1U, tolerated_limit, upper_byte_count)) {
+    return false;
+  }
+  if (!add_decimal_digit_upper_bound(
+          value.numerator(), tolerated_limit, upper_byte_count) ||
+      !add_within_limit(1U, tolerated_limit, upper_byte_count) ||
+      !add_decimal_digit_upper_bound(
+          value.denominator(), tolerated_limit, upper_byte_count)) {
+    return false;
+  }
+  return true;
 }
 
 class PayloadEncoder {
@@ -387,6 +485,19 @@ class PayloadEncoder {
         reinterpret_cast<const std::uint8_t*>(text.data()), text.size()});
   }
 
+  void encode_exact_rational(const exact::ExactRational& value) {
+    const std::size_t remaining_total_limit =
+        limits_.maximum_total_exact_text_byte_count -
+        total_exact_text_byte_count_;
+    const std::size_t effective_limit = std::min(
+        limits_.maximum_exact_text_byte_count, remaining_total_limit);
+    if (!canonical_rational_allocation_is_bounded(value, effective_limit)) {
+      throw std::length_error(
+          "one exact text exceeds its pair-support codec limit");
+    }
+    encode_exact_text(value.canonical_key());
+  }
+
   void encode_manifest(
       const ExactPairSupportCheckpointManifest& manifest) {
     writer_.u32(manifest.schema_version);
@@ -436,12 +547,12 @@ class PayloadEncoder {
 
   void encode_center(const exact::ExactCenter3& center) {
     for (std::size_t axis = 0U; axis < 3U; ++axis) {
-      encode_exact_text(center.coordinate(axis).canonical_key());
+      encode_exact_rational(center.coordinate(axis));
     }
   }
 
   void encode_level(const exact::ExactLevel& level) {
-    encode_exact_text(level.canonical_key());
+    encode_exact_rational(level.rational());
   }
 
   void encode_event(const ExactPairSupportEvent& event) {
@@ -555,9 +666,10 @@ struct DecodeFailure {
   throw DecodeFailure{decision};
 }
 
-class ByteReader {
+class SpanByteReader {
  public:
-  explicit ByteReader(std::span<const std::uint8_t> bytes) : bytes_(bytes) {}
+  explicit SpanByteReader(std::span<const std::uint8_t> bytes)
+      : bytes_(bytes) {}
 
   [[nodiscard]] std::uint8_t byte() {
     if (position_ == bytes_.size()) {
@@ -605,14 +717,15 @@ class ByteReader {
     return static_cast<std::size_t>(value);
   }
 
-  [[nodiscard]] std::span<const std::uint8_t> bytes(std::size_t count) {
+  [[nodiscard]] std::string_view exact_text(std::size_t count) {
     if (count > bytes_.size() - position_) {
       fail_decode(DecodeDecision::truncated);
     }
     const std::span<const std::uint8_t> result =
         bytes_.subspan(position_, count);
     position_ += count;
-    return result;
+    return std::string_view{
+        reinterpret_cast<const char*>(result.data()), result.size()};
   }
 
   [[nodiscard]] contract::CanonicalId identifier() {
@@ -699,12 +812,13 @@ class ByteReader {
   }
 }
 
+template <typename Reader>
 class PayloadDecoder {
  public:
   PayloadDecoder(
-      std::span<const std::uint8_t> payload,
+      Reader& reader,
       const ExactPairSupportStreamCodecLimits& limits)
-      : limits_(limits), reader_(payload) {}
+      : limits_(limits), reader_(reader) {}
 
   [[nodiscard]] ExactPairSupportStreamChunk decode() {
     ExactPairSupportStreamChunk chunk;
@@ -814,9 +928,7 @@ class PayloadDecoder {
       fail_decode(DecodeDecision::exact_text_limit_exceeded);
     }
     total_exact_text_byte_count_ += byte_count;
-    const std::span<const std::uint8_t> bytes = reader_.bytes(byte_count);
-    return std::string_view{
-        reinterpret_cast<const char*>(bytes.data()), bytes.size()};
+    return reader_.exact_text(byte_count);
   }
 
   [[nodiscard]] exact::ExactRational decode_exact_rational() {
@@ -1035,12 +1147,435 @@ class PayloadDecoder {
   }
 
   const ExactPairSupportStreamCodecLimits& limits_;
-  ByteReader reader_;
+  Reader& reader_;
   std::size_t auxiliary_entry_count_{};
   std::size_t decoded_record_count_{};
   std::size_t point_id_reference_count_{};
   std::size_t total_exact_text_byte_count_{};
 };
+
+[[nodiscard]] std::size_t count_payload_bytes(
+    const ExactPairSupportStreamChunk& chunk,
+    const ExactPairSupportStreamCodecLimits& limits) {
+  constexpr std::size_t envelope_overhead =
+      chunk_header_byte_count + chunk_checksum_byte_count;
+  if (limits.maximum_encoded_byte_count < envelope_overhead) {
+    throw std::length_error(
+        "the pair-support wire representation exceeds its byte limit");
+  }
+  CountWriter counter{limits.maximum_encoded_byte_count - envelope_overhead};
+  PayloadEncoder payload_encoder{limits, counter};
+  payload_encoder.encode(chunk);
+  return counter.byte_count();
+}
+
+void encode_envelope_header(
+    ByteWriter& writer,
+    std::size_t payload_byte_count) {
+  writer.bytes(chunk_magic);
+  writer.u32(pair_support_stream_chunk_codec_version);
+  writer.byte(chunk_wire_kind);
+  writer.byte(chunk_wire_flags);
+  writer.u64(checked_u64_for_encode(
+      payload_byte_count,
+      "the pair-support payload size does not fit uint64"));
+}
+
+void encode_counted_payload(
+    ByteWriter& writer,
+    const ExactPairSupportStreamChunk& chunk,
+    const ExactPairSupportStreamCodecLimits& limits,
+    std::size_t payload_byte_count) {
+  const std::size_t payload_offset = writer.byte_count();
+  PayloadEncoder payload_encoder{limits, writer};
+  payload_encoder.encode(chunk);
+  if (writer.byte_count() - payload_offset != payload_byte_count) {
+    throw std::logic_error(
+        "the counted pair-support payload changed during encoding");
+  }
+}
+
+[[nodiscard]] bool equal_checksum(
+    const contract::CanonicalId& expected,
+    std::span<const std::uint8_t> observed) noexcept {
+  if (observed.size() != contract::CanonicalId::byte_count) {
+    return false;
+  }
+  std::uint8_t difference = 0U;
+  for (std::size_t index = 0U; index < observed.size(); ++index) {
+    difference = static_cast<std::uint8_t>(
+        difference |
+        static_cast<std::uint8_t>(
+            expected.bytes()[index] ^ observed[index]));
+  }
+  return difference == 0U;
+}
+
+#if defined(__unix__) || defined(__APPLE__)
+
+[[noreturn]] void throw_last_system_error(std::string_view message) {
+  throw std::system_error(errno, std::generic_category(), std::string{message});
+}
+
+[[nodiscard]] off_t checked_file_offset(std::size_t offset) {
+  if constexpr (
+      std::numeric_limits<off_t>::max() <
+      std::numeric_limits<std::size_t>::max()) {
+    if (offset > static_cast<std::size_t>(
+                     std::numeric_limits<off_t>::max())) {
+      throw std::length_error(
+          "a pair-support wire offset does not fit off_t");
+    }
+  }
+  return static_cast<off_t>(offset);
+}
+
+void positional_write_all(
+    int descriptor,
+    std::span<const std::uint8_t> values,
+    std::size_t offset) {
+  std::size_t written = 0U;
+  while (written < values.size()) {
+    const std::size_t absolute_offset = checked_add_for_encode(
+        offset,
+        written,
+        "a pair-support fd write offset overflows size_t");
+    const ssize_t count = ::pwrite(
+        descriptor,
+        values.data() + written,
+        values.size() - written,
+        checked_file_offset(absolute_offset));
+    if (count < 0) {
+      if (errno == EINTR) {
+        continue;
+      }
+      throw_last_system_error("cannot write the pair-support wire");
+    }
+    if (count == 0) {
+      throw std::runtime_error(
+          "a pair-support positional write made no progress");
+    }
+    written = checked_add_for_encode(
+        written,
+        static_cast<std::size_t>(count),
+        "a pair-support fd write count overflows size_t");
+  }
+}
+
+class BufferedFdWriter final : public ByteWriter {
+ public:
+  BufferedFdWriter(
+      int descriptor,
+      std::size_t maximum_byte_count,
+      contract::CanonicalSha256Builder& checksum_builder)
+      : ByteWriter(maximum_byte_count),
+        descriptor_(descriptor),
+        checksum_builder_(checksum_builder) {}
+
+  ~BufferedFdWriter() override = default;
+
+  void flush() {
+    if (buffered_byte_count_ == 0U) {
+      return;
+    }
+    positional_write_all(
+        descriptor_,
+        std::span<const std::uint8_t>{buffer_}.first(buffered_byte_count_),
+        file_offset_);
+    file_offset_ = checked_add_for_encode(
+        file_offset_,
+        buffered_byte_count_,
+        "a pair-support fd writer offset overflows size_t");
+    buffered_byte_count_ = 0U;
+  }
+
+  void append_unhashed_checksum(const contract::CanonicalId& checksum) {
+    flush();
+    positional_write_all(descriptor_, checksum.bytes(), file_offset_);
+    file_offset_ = checked_add_for_encode(
+        file_offset_,
+        checksum.bytes().size(),
+        "a pair-support fd checksum offset overflows size_t");
+  }
+
+  [[nodiscard]] std::size_t file_byte_count() const noexcept {
+    return file_offset_ + buffered_byte_count_;
+  }
+
+ private:
+  void append(std::span<const std::uint8_t> values) override {
+    checksum_builder_.update(values);
+    std::size_t copied = 0U;
+    while (copied < values.size()) {
+      if (buffered_byte_count_ == buffer_.size()) {
+        flush();
+      }
+      const std::size_t count = std::min(
+          buffer_.size() - buffered_byte_count_, values.size() - copied);
+      std::copy_n(
+          values.begin() + static_cast<std::ptrdiff_t>(copied),
+          count,
+          buffer_.begin() +
+              static_cast<std::ptrdiff_t>(buffered_byte_count_));
+      copied += count;
+      buffered_byte_count_ += count;
+    }
+  }
+
+  int descriptor_{};
+  contract::CanonicalSha256Builder& checksum_builder_;
+  std::array<std::uint8_t, pair_support_stream_fd_buffer_byte_count> buffer_{};
+  std::size_t file_offset_{};
+  std::size_t buffered_byte_count_{};
+};
+
+[[nodiscard]] bool fd_has_unsupported_status_flags(int flags) noexcept {
+  bool unsupported = (flags & O_APPEND) != 0;
+#ifdef O_DIRECT
+  unsupported = unsupported || (flags & O_DIRECT) != 0;
+#endif
+  return unsupported;
+}
+
+[[nodiscard]] ssize_t positional_read_probe(int descriptor) noexcept {
+  std::uint8_t byte{};
+  for (;;) {
+    const ssize_t count = ::pread(descriptor, &byte, 1U, off_t{0});
+    if (count < 0 && errno == EINTR) {
+      continue;
+    }
+    return count;
+  }
+}
+
+[[nodiscard]] struct stat require_empty_output_descriptor(int descriptor) {
+  const int flags = ::fcntl(descriptor, F_GETFL);
+  if (flags < 0) {
+    throw_last_system_error("cannot inspect the pair-support output fd");
+  }
+  if ((flags & O_ACCMODE) != O_RDWR ||
+      fd_has_unsupported_status_flags(flags)) {
+    throw std::invalid_argument(
+        "the pair-support output fd must be O_RDWR without O_APPEND/O_DIRECT");
+  }
+  struct stat metadata {};
+  if (::fstat(descriptor, &metadata) != 0) {
+    throw_last_system_error("cannot inspect the pair-support output file");
+  }
+  if (!S_ISREG(metadata.st_mode) || metadata.st_size != 0) {
+    throw std::invalid_argument(
+        "the pair-support output fd must name an empty regular file");
+  }
+  if (positional_read_probe(descriptor) != 0) {
+    throw std::invalid_argument(
+        "the pair-support output fd must be seekable and empty");
+  }
+  return metadata;
+}
+
+[[nodiscard]] bool same_file_image_metadata(
+    const struct stat& left,
+    const struct stat& right) noexcept {
+  return S_ISREG(right.st_mode) && left.st_dev == right.st_dev &&
+         left.st_ino == right.st_ino && left.st_size == right.st_size;
+}
+
+[[nodiscard]] bool metadata_size_equals(
+    const struct stat& metadata,
+    std::size_t size) noexcept {
+  return metadata.st_size >= 0 &&
+         static_cast<std::uintmax_t>(metadata.st_size) == size;
+}
+
+[[nodiscard]] bool inspect_read_descriptor(
+    int descriptor,
+    struct stat& metadata) noexcept {
+  const int flags = ::fcntl(descriptor, F_GETFL);
+  if (flags < 0 || (flags & O_ACCMODE) == O_WRONLY ||
+      fd_has_unsupported_status_flags(flags) ||
+      ::fstat(descriptor, &metadata) != 0 ||
+      !S_ISREG(metadata.st_mode) || metadata.st_size < 0) {
+    return false;
+  }
+  return positional_read_probe(descriptor) >= 0;
+}
+
+void positional_read_exact_for_decode(
+    int descriptor,
+    std::span<std::uint8_t> output,
+    std::size_t offset) {
+  std::size_t read_count = 0U;
+  while (read_count < output.size()) {
+    const std::size_t absolute_offset = offset + read_count;
+    if (absolute_offset < offset) {
+      fail_decode(DecodeDecision::numeric_overflow);
+    }
+    off_t file_offset{};
+    try {
+      file_offset = checked_file_offset(absolute_offset);
+    } catch (const std::length_error&) {
+      fail_decode(DecodeDecision::numeric_overflow);
+    }
+    const ssize_t count = ::pread(
+        descriptor,
+        output.data() + read_count,
+        output.size() - read_count,
+        file_offset);
+    if (count < 0) {
+      if (errno == EINTR) {
+        continue;
+      }
+      fail_decode(DecodeDecision::file_io_error);
+    }
+    if (count == 0) {
+      fail_decode(DecodeDecision::file_changed);
+    }
+    read_count += static_cast<std::size_t>(count);
+  }
+}
+
+class FdByteReader {
+ public:
+  FdByteReader(
+      int descriptor,
+      std::size_t file_offset,
+      std::size_t byte_count,
+      contract::CanonicalSha256Builder& checksum_builder,
+      std::span<std::uint8_t> scratch)
+      : descriptor_(descriptor),
+        initial_file_offset_(file_offset),
+        byte_count_(byte_count),
+        checksum_builder_(checksum_builder),
+        buffer_(scratch) {
+    if (buffer_.size() != pair_support_stream_fd_buffer_byte_count) {
+      throw std::logic_error(
+          "the pair-support fd reader scratch must be exactly 64 KiB");
+    }
+  }
+
+  [[nodiscard]] std::uint8_t byte() {
+    std::uint8_t value{};
+    read_into(std::span<std::uint8_t>{&value, 1U});
+    return value;
+  }
+
+  [[nodiscard]] bool boolean() {
+    const std::uint8_t value = byte();
+    if (value > 1U) {
+      fail_decode(DecodeDecision::invalid_boolean);
+    }
+    return value == 1U;
+  }
+
+  [[nodiscard]] std::uint32_t u32() {
+    std::array<std::uint8_t, 4U> encoded{};
+    read_into(encoded);
+    std::uint32_t value = 0U;
+    for (const std::uint8_t byte_value : encoded) {
+      value = static_cast<std::uint32_t>(
+          (value << 8U) | static_cast<std::uint32_t>(byte_value));
+    }
+    return value;
+  }
+
+  [[nodiscard]] std::uint64_t u64() {
+    std::array<std::uint8_t, 8U> encoded{};
+    read_into(encoded);
+    std::uint64_t value = 0U;
+    for (const std::uint8_t byte_value : encoded) {
+      value = (value << 8U) | static_cast<std::uint64_t>(byte_value);
+    }
+    return value;
+  }
+
+  [[nodiscard]] std::size_t size() {
+    const std::uint64_t value = u64();
+    if constexpr (
+        std::numeric_limits<std::size_t>::max() <
+        std::numeric_limits<std::uint64_t>::max()) {
+      if (value > std::numeric_limits<std::size_t>::max()) {
+        fail_decode(DecodeDecision::numeric_overflow);
+      }
+    }
+    return static_cast<std::size_t>(value);
+  }
+
+  [[nodiscard]] contract::CanonicalId identifier() {
+    std::array<std::uint8_t, contract::CanonicalId::byte_count> value{};
+    read_into(value);
+    return contract::CanonicalId{value};
+  }
+
+  [[nodiscard]] std::string_view exact_text(std::size_t count) {
+    if (count > remaining()) {
+      fail_decode(DecodeDecision::truncated);
+    }
+    exact_text_.resize(count);
+    read_into(std::span<std::uint8_t>{
+        reinterpret_cast<std::uint8_t*>(exact_text_.data()),
+        exact_text_.size()});
+    return exact_text_;
+  }
+
+  [[nodiscard]] bool empty() const noexcept {
+    return position_ == byte_count_;
+  }
+
+  [[nodiscard]] std::size_t remaining() const noexcept {
+    return byte_count_ - position_;
+  }
+
+ private:
+  void refill() {
+    if (position_ == byte_count_) {
+      fail_decode(DecodeDecision::truncated);
+    }
+    const std::size_t count = std::min(buffer_.size(), remaining());
+    positional_read_exact_for_decode(
+        descriptor_,
+        buffer_.first(count),
+        initial_file_offset_ + position_);
+    buffered_position_ = 0U;
+    buffered_byte_count_ = count;
+  }
+
+  void read_into(std::span<std::uint8_t> output) {
+    if (output.size() > remaining()) {
+      fail_decode(DecodeDecision::truncated);
+    }
+    std::size_t copied = 0U;
+    while (copied < output.size()) {
+      if (buffered_position_ == buffered_byte_count_) {
+        refill();
+      }
+      const std::size_t count = std::min(
+          buffered_byte_count_ - buffered_position_,
+          output.size() - copied);
+      std::copy_n(
+          buffer_.begin() +
+              static_cast<std::ptrdiff_t>(buffered_position_),
+          count,
+          output.begin() + static_cast<std::ptrdiff_t>(copied));
+      checksum_builder_.update(std::span<const std::uint8_t>{
+          output.data() + copied, count});
+      buffered_position_ += count;
+      position_ += count;
+      copied += count;
+    }
+  }
+
+  int descriptor_{};
+  std::size_t initial_file_offset_{};
+  std::size_t byte_count_{};
+  contract::CanonicalSha256Builder& checksum_builder_;
+  std::size_t position_{};
+  std::span<std::uint8_t> buffer_;
+  std::size_t buffered_position_{};
+  std::size_t buffered_byte_count_{};
+  std::string exact_text_;
+};
+
+#endif
 
 #undef MORSEHGP3D_FOR_EACH_PAIR_SUPPORT_AUDIT_FIELD
 
@@ -1050,33 +1585,38 @@ std::vector<std::uint8_t> encode_exact_pair_support_stream_chunk(
     const ExactPairSupportStreamChunk& chunk,
     const ExactPairSupportStreamCodecLimits& limits) {
   require_finite_limits(limits);
-  constexpr std::size_t minimum_wire_byte_count =
-      chunk_header_byte_count + chunk_checksum_byte_count;
-  if (limits.maximum_encoded_byte_count < minimum_wire_byte_count) {
+  const std::size_t payload_byte_count =
+      count_payload_bytes(chunk, limits);
+  const std::size_t checksum_offset = checked_add_for_encode(
+      chunk_header_byte_count,
+      payload_byte_count,
+      "the pair-support wire size overflows size_t");
+  const std::size_t total_byte_count = checked_add_for_encode(
+      checksum_offset,
+      chunk_checksum_byte_count,
+      "the pair-support wire size overflows size_t");
+  if (total_byte_count > limits.maximum_encoded_byte_count) {
     throw std::length_error(
         "the pair-support wire representation exceeds its byte limit");
   }
+  require_checksum_input_fits_sha256(checksum_offset);
 
-  ByteWriter wire{
-      limits.maximum_encoded_byte_count, chunk_checksum_byte_count};
-  wire.bytes(chunk_magic);
-  wire.u32(pair_support_stream_chunk_codec_version);
-  wire.byte(chunk_wire_kind);
-  wire.byte(chunk_wire_flags);
-  const std::size_t payload_length_offset = wire.byte_count();
-  wire.u64(0U);
-  const std::size_t payload_offset = wire.byte_count();
-  PayloadEncoder payload_encoder{limits, wire};
-  payload_encoder.encode(chunk);
-  const std::size_t payload_byte_count = wire.byte_count() - payload_offset;
-  wire.overwrite_u64(
-      payload_length_offset,
-      checked_u64_for_encode(
-          payload_byte_count,
-          "the pair-support payload size does not fit uint64"));
-  const contract::CanonicalId checksum = wire_checksum(wire.data());
-  wire.append_reserved_identifier(checksum);
-  return std::move(wire).release();
+  std::vector<std::uint8_t> encoded;
+  encoded.reserve(total_byte_count);
+  contract::CanonicalSha256Builder checksum_builder;
+  checksum_builder.update(chunk_checksum_domain);
+  VectorWriter writer{encoded, checksum_offset, checksum_builder};
+  encode_envelope_header(writer, payload_byte_count);
+  encode_counted_payload(
+      writer, chunk, limits, payload_byte_count);
+  if (writer.byte_count() != checksum_offset) {
+    throw std::logic_error(
+        "the pair-support wire size changed after counting");
+  }
+  const contract::CanonicalId checksum = checksum_builder.finalize();
+  encoded.insert(
+      encoded.end(), checksum.bytes().begin(), checksum.bytes().end());
+  return encoded;
 }
 
 ExactPairSupportStreamDecodeResult decode_exact_pair_support_stream_chunk(
@@ -1093,7 +1633,7 @@ ExactPairSupportStreamDecodeResult decode_exact_pair_support_stream_chunk(
         chunk_header_byte_count + chunk_checksum_byte_count) {
       fail_decode(DecodeDecision::truncated);
     }
-    ByteReader envelope{encoded};
+    SpanByteReader envelope{encoded};
     for (const std::uint8_t expected : chunk_magic) {
       if (envelope.byte() != expected) {
         fail_decode(DecodeDecision::invalid_magic);
@@ -1137,26 +1677,20 @@ ExactPairSupportStreamDecodeResult decode_exact_pair_support_stream_chunk(
 
     const std::size_t checksum_offset =
         chunk_header_byte_count + payload_byte_count;
+    if (!checksum_input_fits_sha256(checksum_offset)) {
+      fail_decode(DecodeDecision::numeric_overflow);
+    }
     const contract::CanonicalId expected_checksum =
         wire_checksum(encoded.first(checksum_offset));
     const std::span<const std::uint8_t> observed_checksum =
         encoded.subspan(checksum_offset, chunk_checksum_byte_count);
-    std::uint8_t checksum_difference = 0U;
-    for (std::size_t index = 0U;
-         index < chunk_checksum_byte_count;
-         ++index) {
-      checksum_difference = static_cast<std::uint8_t>(
-          checksum_difference |
-          static_cast<std::uint8_t>(
-              expected_checksum.bytes()[index] ^ observed_checksum[index]));
-    }
-    if (checksum_difference != 0U) {
+    if (!equal_checksum(expected_checksum, observed_checksum)) {
       fail_decode(DecodeDecision::checksum_mismatch);
     }
 
-    PayloadDecoder decoder{
-        encoded.subspan(chunk_header_byte_count, payload_byte_count),
-        limits};
+    SpanByteReader payload_reader{encoded.subspan(
+        chunk_header_byte_count, payload_byte_count)};
+    PayloadDecoder decoder{payload_reader, limits};
     ExactPairSupportStreamChunk chunk = decoder.decode();
     return ExactPairSupportStreamDecodeResult{
         DecodeDecision::accepted, std::move(chunk)};
@@ -1165,5 +1699,299 @@ ExactPairSupportStreamDecodeResult decode_exact_pair_support_stream_chunk(
         failure.decision, std::nullopt};
   }
 }
+
+#if defined(__unix__) || defined(__APPLE__)
+
+ExactPairSupportStreamFdWireReceipt
+encode_exact_pair_support_stream_chunk_to_fd(
+    int descriptor,
+    const ExactPairSupportStreamChunk& chunk,
+    const ExactPairSupportStreamCodecLimits& limits) {
+  require_finite_limits(limits);
+  const struct stat before = require_empty_output_descriptor(descriptor);
+  const std::size_t payload_byte_count =
+      count_payload_bytes(chunk, limits);
+  const std::size_t checksum_offset = checked_add_for_encode(
+      chunk_header_byte_count,
+      payload_byte_count,
+      "the pair-support wire size overflows size_t");
+  const std::size_t total_byte_count = checked_add_for_encode(
+      checksum_offset,
+      chunk_checksum_byte_count,
+      "the pair-support wire size overflows size_t");
+  if (total_byte_count > limits.maximum_encoded_byte_count) {
+    throw std::length_error(
+        "the pair-support wire representation exceeds its byte limit");
+  }
+  require_checksum_input_fits_sha256(checksum_offset);
+
+  contract::CanonicalSha256Builder checksum_builder;
+  checksum_builder.update(chunk_checksum_domain);
+  BufferedFdWriter writer{
+      descriptor, checksum_offset, checksum_builder};
+  encode_envelope_header(writer, payload_byte_count);
+  encode_counted_payload(
+      writer, chunk, limits, payload_byte_count);
+  if (writer.byte_count() != checksum_offset) {
+    throw std::logic_error(
+        "the pair-support fd wire size changed after counting");
+  }
+  writer.flush();
+  const contract::CanonicalId checksum = checksum_builder.finalize();
+  writer.append_unhashed_checksum(checksum);
+  if (writer.file_byte_count() != total_byte_count) {
+    throw std::logic_error(
+        "the pair-support fd writer produced an inconsistent size");
+  }
+
+  struct stat after {};
+  if (::fstat(descriptor, &after) != 0) {
+    throw_last_system_error("cannot inspect the encoded pair-support file");
+  }
+  if (!S_ISREG(after.st_mode) || before.st_dev != after.st_dev ||
+      before.st_ino != after.st_ino ||
+      !metadata_size_equals(after, total_byte_count)) {
+    throw std::runtime_error(
+        "the pair-support output file changed during encoding");
+  }
+  return ExactPairSupportStreamFdWireReceipt{
+      total_byte_count, checksum};
+}
+
+namespace {
+
+[[nodiscard]] ExactPairSupportStreamFdWireVerificationResult
+verify_fd_wire_with_scratch(
+    int descriptor,
+    const ExactPairSupportStreamCodecLimits& limits,
+    std::optional<ExactPairSupportStreamFdWireReceipt> expected_receipt,
+    std::span<std::uint8_t> scratch) {
+  require_finite_limits(limits);
+  if (scratch.size() != pair_support_stream_fd_buffer_byte_count) {
+    throw std::logic_error(
+        "the pair-support fd verifier scratch must be exactly 64 KiB");
+  }
+  try {
+    struct stat before {};
+    if (!inspect_read_descriptor(descriptor, before)) {
+      fail_decode(DecodeDecision::invalid_file_descriptor);
+    }
+    const std::uintmax_t unsigned_file_size =
+        static_cast<std::uintmax_t>(before.st_size);
+    if (unsigned_file_size > std::numeric_limits<std::size_t>::max()) {
+      fail_decode(DecodeDecision::numeric_overflow);
+    }
+    const std::size_t file_size =
+        static_cast<std::size_t>(unsigned_file_size);
+    if (file_size > limits.maximum_encoded_byte_count) {
+      fail_decode(DecodeDecision::encoded_byte_limit_exceeded);
+    }
+    if (file_size <
+        chunk_header_byte_count + chunk_checksum_byte_count) {
+      fail_decode(DecodeDecision::truncated);
+    }
+
+    std::array<std::uint8_t, chunk_header_byte_count> header{};
+    positional_read_exact_for_decode(descriptor, header, 0U);
+    SpanByteReader envelope{header};
+    for (const std::uint8_t expected : chunk_magic) {
+      if (envelope.byte() != expected) {
+        fail_decode(DecodeDecision::invalid_magic);
+      }
+    }
+    if (envelope.u32() != pair_support_stream_chunk_codec_version) {
+      fail_decode(DecodeDecision::unsupported_version);
+    }
+    if (envelope.byte() != chunk_wire_kind) {
+      fail_decode(DecodeDecision::unsupported_kind);
+    }
+    if (envelope.byte() != chunk_wire_flags) {
+      fail_decode(DecodeDecision::unsupported_flags);
+    }
+    const std::uint64_t payload_byte_count_u64 = envelope.u64();
+    if constexpr (
+        std::numeric_limits<std::size_t>::max() <
+        std::numeric_limits<std::uint64_t>::max()) {
+      if (payload_byte_count_u64 >
+          std::numeric_limits<std::size_t>::max()) {
+        fail_decode(DecodeDecision::numeric_overflow);
+      }
+    }
+    const std::size_t payload_byte_count =
+        static_cast<std::size_t>(payload_byte_count_u64);
+    const std::size_t maximum_payload_byte_count =
+        std::numeric_limits<std::size_t>::max() -
+        chunk_header_byte_count - chunk_checksum_byte_count;
+    if (payload_byte_count > maximum_payload_byte_count) {
+      fail_decode(DecodeDecision::numeric_overflow);
+    }
+    const std::size_t checksum_offset =
+        chunk_header_byte_count + payload_byte_count;
+    const std::size_t expected_total_byte_count =
+        checksum_offset + chunk_checksum_byte_count;
+    if (expected_total_byte_count > file_size) {
+      fail_decode(DecodeDecision::payload_length_mismatch);
+    }
+    if (expected_total_byte_count < file_size) {
+      fail_decode(DecodeDecision::trailing_bytes);
+    }
+    if (!checksum_input_fits_sha256(checksum_offset)) {
+      fail_decode(DecodeDecision::numeric_overflow);
+    }
+
+    contract::CanonicalSha256Builder checksum_builder;
+    checksum_builder.update(chunk_checksum_domain);
+    std::size_t offset = 0U;
+    while (offset < checksum_offset) {
+      const std::size_t count =
+          std::min(scratch.size(), checksum_offset - offset);
+      positional_read_exact_for_decode(
+          descriptor, scratch.first(count), offset);
+      checksum_builder.update(
+          std::span<const std::uint8_t>{scratch}.first(count));
+      offset += count;
+    }
+    std::array<std::uint8_t, chunk_checksum_byte_count>
+        observed_checksum_bytes{};
+    positional_read_exact_for_decode(
+        descriptor, observed_checksum_bytes, checksum_offset);
+
+    struct stat after {};
+    if (::fstat(descriptor, &after) != 0) {
+      fail_decode(DecodeDecision::file_io_error);
+    }
+    if (!same_file_image_metadata(before, after)) {
+      fail_decode(DecodeDecision::file_changed);
+    }
+    const contract::CanonicalId computed_checksum =
+        checksum_builder.finalize();
+    if (!equal_checksum(
+            computed_checksum, observed_checksum_bytes)) {
+      fail_decode(DecodeDecision::checksum_mismatch);
+    }
+    const contract::CanonicalId observed_checksum{
+        observed_checksum_bytes};
+    const ExactPairSupportStreamFdWireReceipt receipt{
+        file_size, observed_checksum};
+    if (expected_receipt.has_value() &&
+        *expected_receipt != receipt) {
+      fail_decode(DecodeDecision::receipt_mismatch);
+    }
+    return ExactPairSupportStreamFdWireVerificationResult{
+        DecodeDecision::accepted, receipt};
+  } catch (const DecodeFailure& failure) {
+    return ExactPairSupportStreamFdWireVerificationResult{
+        failure.decision, std::nullopt};
+  }
+}
+
+}  // namespace
+
+ExactPairSupportStreamFdWireVerificationResult
+verify_exact_pair_support_stream_chunk_fd_wire(
+    int descriptor,
+    const ExactPairSupportStreamCodecLimits& limits,
+    std::optional<ExactPairSupportStreamFdWireReceipt> expected_receipt) {
+  std::array<std::uint8_t, pair_support_stream_fd_buffer_byte_count>
+      scratch{};
+  return verify_fd_wire_with_scratch(
+      descriptor, limits, std::move(expected_receipt), scratch);
+}
+
+ExactPairSupportStreamDecodeResult
+decode_exact_pair_support_stream_chunk_from_fd(
+    int descriptor,
+    const ExactPairSupportStreamCodecLimits& limits,
+    std::optional<ExactPairSupportStreamFdWireReceipt> expected_receipt) {
+  std::array<std::uint8_t, pair_support_stream_fd_buffer_byte_count>
+      scratch{};
+  const ExactPairSupportStreamFdWireVerificationResult first_verification =
+      verify_fd_wire_with_scratch(
+          descriptor,
+          limits,
+          std::move(expected_receipt),
+          scratch);
+  if (!first_verification.accepted()) {
+    return ExactPairSupportStreamDecodeResult{
+        first_verification.decision, std::nullopt};
+  }
+  const ExactPairSupportStreamFdWireReceipt receipt =
+      *first_verification.receipt;
+  const std::size_t payload_byte_count =
+      receipt.encoded_byte_count -
+      chunk_header_byte_count - chunk_checksum_byte_count;
+  try {
+    std::array<std::uint8_t, chunk_header_byte_count> parsed_header{};
+    positional_read_exact_for_decode(
+        descriptor, parsed_header, 0U);
+    SpanByteReader envelope{parsed_header};
+    for (const std::uint8_t expected : chunk_magic) {
+      if (envelope.byte() != expected) {
+        fail_decode(DecodeDecision::invalid_magic);
+      }
+    }
+    if (envelope.u32() != pair_support_stream_chunk_codec_version) {
+      fail_decode(DecodeDecision::unsupported_version);
+    }
+    if (envelope.byte() != chunk_wire_kind) {
+      fail_decode(DecodeDecision::unsupported_kind);
+    }
+    if (envelope.byte() != chunk_wire_flags) {
+      fail_decode(DecodeDecision::unsupported_flags);
+    }
+    if (envelope.u64() != payload_byte_count) {
+      fail_decode(DecodeDecision::receipt_mismatch);
+    }
+
+    ExactPairSupportStreamChunk chunk;
+    {
+      // The parser borrows the same physical 64-KiB window as both checksum
+      // passes.  It retains no resident I/O array of its own.
+      contract::CanonicalSha256Builder parsed_checksum_builder;
+      parsed_checksum_builder.update(chunk_checksum_domain);
+      parsed_checksum_builder.update(parsed_header);
+      FdByteReader payload_reader{
+          descriptor,
+          chunk_header_byte_count,
+          payload_byte_count,
+          parsed_checksum_builder,
+          scratch};
+      PayloadDecoder decoder{payload_reader, limits};
+      chunk = decoder.decode();
+      std::array<std::uint8_t, chunk_checksum_byte_count>
+          parsed_checksum_bytes{};
+      positional_read_exact_for_decode(
+          descriptor,
+          parsed_checksum_bytes,
+          chunk_header_byte_count + payload_byte_count);
+      const contract::CanonicalId parsed_checksum =
+          parsed_checksum_builder.finalize();
+      if (!equal_checksum(parsed_checksum, parsed_checksum_bytes)) {
+        return ExactPairSupportStreamDecodeResult{
+            DecodeDecision::checksum_mismatch, std::nullopt};
+      }
+      if (receipt.checksum !=
+          contract::CanonicalId{parsed_checksum_bytes}) {
+        return ExactPairSupportStreamDecodeResult{
+            DecodeDecision::receipt_mismatch, std::nullopt};
+      }
+    }
+    const ExactPairSupportStreamFdWireVerificationResult
+        second_verification =
+            verify_fd_wire_with_scratch(
+                descriptor, limits, receipt, scratch);
+    if (!second_verification.accepted()) {
+      return ExactPairSupportStreamDecodeResult{
+          second_verification.decision, std::nullopt};
+    }
+    return ExactPairSupportStreamDecodeResult{
+        DecodeDecision::accepted, std::move(chunk)};
+  } catch (const DecodeFailure& failure) {
+    return ExactPairSupportStreamDecodeResult{
+        failure.decision, std::nullopt};
+  }
+}
+
+#endif
 
 }  // namespace morsehgp3d::hierarchy

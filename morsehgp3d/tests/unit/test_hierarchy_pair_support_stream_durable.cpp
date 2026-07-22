@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <limits>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -30,6 +31,7 @@ using morsehgp3d::hierarchy::ExactPairSupportDurableConfig;
 using morsehgp3d::hierarchy::ExactPairSupportDurableExternalPrefixAnchor;
 using morsehgp3d::hierarchy::ExactPairSupportDurablePublishDecision;
 using morsehgp3d::hierarchy::ExactPairSupportDurablePublishOptions;
+using morsehgp3d::hierarchy::ExactPairSupportDurablePublishResult;
 using morsehgp3d::hierarchy::ExactPairSupportDurablePublishStage;
 using morsehgp3d::hierarchy::ExactPairSupportDurableSink;
 using morsehgp3d::hierarchy::ExactPairSupportIncrementalVerifier;
@@ -39,6 +41,7 @@ using morsehgp3d::hierarchy::ExactPairSupportStreamCodecLimits;
 using morsehgp3d::hierarchy::build_exact_pair_support_stream_chunk;
 using morsehgp3d::hierarchy::decode_exact_pair_support_stream_chunk;
 using morsehgp3d::hierarchy::encode_exact_pair_support_stream_chunk;
+using morsehgp3d::hierarchy::pair_support_stream_fd_buffer_byte_count;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
 
@@ -213,6 +216,63 @@ struct DirectoryCounts {
 [[nodiscard]] std::filesystem::path first_final_path(
     const std::filesystem::path& directory) {
   return directory / "pair-support-00000000000000000000.p9c";
+}
+
+[[nodiscard]] std::filesystem::path first_temporary_path(
+    const std::filesystem::path& directory) {
+  return directory / ".pair-support-00000000000000000000.tmp";
+}
+
+[[nodiscard]] std::vector<std::uint8_t> read_file_bytes(
+    const std::filesystem::path& path) {
+  const int descriptor = ::open(
+      path.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
+  if (descriptor < 0) {
+    throw std::system_error(
+        errno, std::generic_category(), "cannot open durable byte fixture");
+  }
+  struct stat metadata {};
+  if (::fstat(descriptor, &metadata) != 0 ||
+      !S_ISREG(metadata.st_mode) || metadata.st_size < 0) {
+    const int error_number = errno;
+    static_cast<void>(::close(descriptor));
+    throw std::system_error(
+        error_number,
+        std::generic_category(),
+        "cannot inspect durable byte fixture");
+  }
+  const std::uintmax_t unsigned_size =
+      static_cast<std::uintmax_t>(metadata.st_size);
+  if (unsigned_size > std::numeric_limits<std::size_t>::max()) {
+    static_cast<void>(::close(descriptor));
+    throw std::runtime_error("durable byte fixture is not addressable");
+  }
+  std::vector<std::uint8_t> bytes(static_cast<std::size_t>(unsigned_size));
+  std::size_t offset = 0U;
+  while (offset < bytes.size()) {
+    const ssize_t count = ::pread(
+        descriptor,
+        bytes.data() + offset,
+        bytes.size() - offset,
+        static_cast<off_t>(offset));
+    if (count < 0 && errno == EINTR) {
+      continue;
+    }
+    if (count <= 0) {
+      const int error_number = count < 0 ? errno : EIO;
+      static_cast<void>(::close(descriptor));
+      throw std::system_error(
+          error_number,
+          std::generic_category(),
+          "cannot read durable byte fixture");
+    }
+    offset += static_cast<std::size_t>(count);
+  }
+  if (::close(descriptor) != 0) {
+    throw std::system_error(
+        errno, std::generic_category(), "cannot close durable byte fixture");
+  }
+  return bytes;
 }
 
 void seed_one_transition(
@@ -464,11 +524,15 @@ void test_publication_recovery_and_lock() {
             sink.status().anchored_run_certified &&
             sink.status().terminal_checkpoint_reached &&
             sink.status().retained_chunk_history_count == 0U &&
+            sink.status().maximum_codec_io_buffer_byte_count ==
+                pair_support_stream_fd_buffer_byte_count &&
+            sink.status().materialized_transition_wire_byte_count == 0U &&
+            sink.status().streaming_fd_codec_used &&
             sink.status().persistent_top_m_cell_count == 0U &&
             sink.status().global_gamma_coface_count == 0U &&
             sink.status().global_gamma_incidence_count == 0U &&
             sink.status().materialized_pair_arena_count == 0U,
-        "bounded transitions reach an anchored terminal checkpoint without a retained chunk or global-cell arena");
+        "bounded fd transitions reach an anchored terminal checkpoint without a materialized wire, retained chunk or global-cell arena");
   }
 
   {
@@ -482,6 +546,11 @@ void test_publication_recovery_and_lock() {
             recovered.status().total_encoded_byte_count ==
                 published.encoded_byte_count &&
             recovered.status().authoritative_head_certified &&
+            recovered.status().maximum_codec_io_buffer_byte_count ==
+                pair_support_stream_fd_buffer_byte_count &&
+            recovered.status().materialized_transition_wire_byte_count ==
+                0U &&
+            recovered.status().streaming_fd_codec_used &&
             recovered.status()
                     .current_prefix_anchor.committed_transition_count ==
                 published.transition_count &&
@@ -698,6 +767,311 @@ void exit_at_publish_stage(
       *static_cast<const ExactPairSupportDurablePublishStage*>(state);
   if (observed == requested) {
     std::_Exit(crash_exit_code(observed));
+  }
+}
+
+struct ReplaceNamedInodeContext {
+  std::string path;
+  ExactPairSupportDurablePublishStage requested_stage{};
+  bool replaced{false};
+};
+
+void replace_named_inode(
+    ExactPairSupportDurablePublishStage observed,
+    void* state) noexcept {
+  auto& context = *static_cast<ReplaceNamedInodeContext*>(state);
+  if (observed != context.requested_stage ||
+      ::unlink(context.path.c_str()) != 0) {
+    return;
+  }
+  const int descriptor = ::open(
+      context.path.c_str(),
+      O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW,
+      0600);
+  if (descriptor < 0) {
+    return;
+  }
+  constexpr std::array<std::uint8_t, 4U> replacement{
+      0xdeU, 0xadU, 0xbeU, 0xefU};
+  bool success = ::write(
+                     descriptor,
+                     replacement.data(),
+                     replacement.size()) ==
+                 static_cast<ssize_t>(replacement.size());
+  success = success && ::fdatasync(descriptor) == 0;
+  success = ::close(descriptor) == 0 && success;
+  context.replaced = success;
+}
+
+struct CorruptNamedTemporaryContext {
+  std::string path;
+  bool corrupted{false};
+};
+
+void corrupt_named_transition_temporary(
+    ExactPairSupportDurablePublishStage observed,
+    void* state) noexcept {
+  if (observed != ExactPairSupportDurablePublishStage::
+                      transition_temporary_file_written) {
+    return;
+  }
+  auto& context = *static_cast<CorruptNamedTemporaryContext*>(state);
+  const int descriptor = ::open(
+      context.path.c_str(), O_RDWR | O_CLOEXEC | O_NOFOLLOW);
+  if (descriptor < 0) {
+    return;
+  }
+  std::uint8_t byte{};
+  bool success = ::pread(descriptor, &byte, 1U, 0) == 1;
+  byte = static_cast<std::uint8_t>(byte ^ std::uint8_t{0x80U});
+  success = success && ::pwrite(descriptor, &byte, 1U, 0) == 1;
+  success = success && ::fdatasync(descriptor) == 0;
+  success = ::close(descriptor) == 0 && success;
+  context.corrupted = success;
+}
+
+struct CorruptNamedFileInPlaceContext {
+  std::string path;
+  ExactPairSupportDurablePublishStage requested_stage{};
+  bool corrupted_in_place{false};
+};
+
+void corrupt_named_file_in_place(
+    ExactPairSupportDurablePublishStage observed,
+    void* state) noexcept {
+  auto& context = *static_cast<CorruptNamedFileInPlaceContext*>(state);
+  if (observed != context.requested_stage) {
+    return;
+  }
+  const int descriptor = ::open(
+      context.path.c_str(), O_RDWR | O_CLOEXEC | O_NOFOLLOW);
+  if (descriptor < 0) {
+    return;
+  }
+  struct stat before {};
+  struct stat after {};
+  std::uint8_t byte{};
+  bool success = ::fstat(descriptor, &before) == 0 && before.st_size > 0 &&
+                 ::pread(descriptor, &byte, 1U, 0) == 1;
+  byte = static_cast<std::uint8_t>(byte ^ std::uint8_t{0x80U});
+  success = success && ::pwrite(descriptor, &byte, 1U, 0) == 1;
+  success = success && ::fdatasync(descriptor) == 0;
+  success = success && ::fstat(descriptor, &after) == 0;
+  success = ::close(descriptor) == 0 && success;
+  context.corrupted_in_place =
+      success && before.st_dev == after.st_dev &&
+      before.st_ino == after.st_ino && before.st_size == after.st_size;
+}
+
+void check_pre_head_publication_rejected(
+    bool fixture_applied,
+    const ExactPairSupportDurablePublishResult& result,
+    const ExactPairSupportDurableSink& sink,
+    const ExactPairSupportCheckpoint& initial,
+    const std::vector<std::uint8_t>& initial_head,
+    const std::filesystem::path& directory,
+    const std::string& message) {
+  check(
+      fixture_applied &&
+          result.decision == ExactPairSupportDurablePublishDecision::
+                                 indeterminate_io_failure_reopen_required &&
+          !result.trusted_checkpoint_advanced &&
+          result.committed_transition_count == 0U &&
+          result.current_prefix_anchor.committed_transition_count == 0U &&
+          sink.status().failed_closed &&
+          sink.status().committed_transition_count == 0U &&
+          sink.trusted_checkpoint() == initial &&
+          read_file_bytes(directory / "HEAD") == initial_head,
+      message);
+}
+
+void test_streaming_temporary_races_fail_closed() {
+  const CanonicalPointCloud cloud = triangle_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactPairSupportAuthorityContext authority(index, cloud, 1U);
+  const ExactPairSupportDurableConfig config = durable_config();
+  TemporaryWorkspace workspace;
+
+  {
+    const std::filesystem::path directory =
+        workspace.make_directory("replace-transition-temporary");
+    auto sink = ExactPairSupportDurableSink::create_new(
+        directory, authority, config);
+    const ExactPairSupportCheckpoint initial = sink.trusted_checkpoint();
+    const std::vector<std::uint8_t> initial_head =
+        read_file_bytes(directory / "HEAD");
+    const ExactPairSupportStreamChunk first =
+        build_exact_pair_support_stream_chunk(
+            authority, config.fixed_chunk_budget, initial);
+    ReplaceNamedInodeContext context{
+        first_temporary_path(directory).string(),
+        ExactPairSupportDurablePublishStage::
+            transition_temporary_file_synchronized};
+    const ExactPairSupportDurablePublishResult result = sink.publish_next(
+        first,
+        ExactPairSupportDurablePublishOptions{
+            replace_named_inode, &context});
+    check_pre_head_publication_rejected(
+        context.replaced,
+        result,
+        sink,
+        initial,
+        initial_head,
+        directory,
+        "a substituted transition temporary inode is never linked and committed under the authenticated fd receipt");
+  }
+
+  {
+    const std::filesystem::path directory =
+        workspace.make_directory("replace-head-temporary");
+    auto sink = ExactPairSupportDurableSink::create_new(
+        directory, authority, config);
+    const ExactPairSupportCheckpoint initial = sink.trusted_checkpoint();
+    const std::vector<std::uint8_t> initial_head =
+        read_file_bytes(directory / "HEAD");
+    const ExactPairSupportStreamChunk first =
+        build_exact_pair_support_stream_chunk(
+            authority, config.fixed_chunk_budget, initial);
+    ReplaceNamedInodeContext context{
+        (directory / ".HEAD.tmp").string(),
+        ExactPairSupportDurablePublishStage::
+            head_temporary_file_synchronized};
+    const ExactPairSupportDurablePublishResult result = sink.publish_next(
+        first,
+        ExactPairSupportDurablePublishOptions{
+            replace_named_inode, &context});
+    check_pre_head_publication_rejected(
+        context.replaced,
+        result,
+        sink,
+        initial,
+        initial_head,
+        directory,
+        "a substituted HEAD temporary inode never replaces the authenticated authoritative HEAD");
+  }
+
+  {
+    const std::filesystem::path directory =
+        workspace.make_directory("corrupt-transition-readback");
+    auto sink = ExactPairSupportDurableSink::create_new(
+        directory, authority, config);
+    const ExactPairSupportCheckpoint initial = sink.trusted_checkpoint();
+    const std::vector<std::uint8_t> initial_head =
+        read_file_bytes(directory / "HEAD");
+    const ExactPairSupportStreamChunk first =
+        build_exact_pair_support_stream_chunk(
+            authority, config.fixed_chunk_budget, initial);
+    CorruptNamedTemporaryContext context{
+        first_temporary_path(directory).string()};
+    const ExactPairSupportDurablePublishResult result = sink.publish_next(
+        first,
+        ExactPairSupportDurablePublishOptions{
+            corrupt_named_transition_temporary, &context});
+    check_pre_head_publication_rejected(
+        context.corrupted,
+        result,
+        sink,
+        initial,
+        initial_head,
+        directory,
+        "post-encode transition corruption fails bounded readback without advancing HEAD or memory");
+  }
+
+  {
+    const std::filesystem::path directory =
+        workspace.make_directory("corrupt-transition-after-sync");
+    auto sink = ExactPairSupportDurableSink::create_new(
+        directory, authority, config);
+    const ExactPairSupportCheckpoint initial = sink.trusted_checkpoint();
+    const std::vector<std::uint8_t> initial_head =
+        read_file_bytes(directory / "HEAD");
+    const ExactPairSupportStreamChunk first =
+        build_exact_pair_support_stream_chunk(
+            authority, config.fixed_chunk_budget, initial);
+    CorruptNamedFileInPlaceContext context{
+        first_temporary_path(directory).string(),
+        ExactPairSupportDurablePublishStage::
+            transition_temporary_file_synchronized};
+    const ExactPairSupportDurablePublishResult result = sink.publish_next(
+        first,
+        ExactPairSupportDurablePublishOptions{
+            corrupt_named_file_in_place, &context});
+    check_pre_head_publication_rejected(
+        context.corrupted_in_place,
+        result,
+        sink,
+        initial,
+        initial_head,
+        directory,
+        "an in-place same-inode transition mutation after synchronization is reauthenticated before publication");
+  }
+
+  {
+    const std::filesystem::path directory =
+        workspace.make_directory("corrupt-head-after-replace");
+    auto sink = ExactPairSupportDurableSink::create_new(
+        directory, authority, config);
+    const ExactPairSupportCheckpoint initial = sink.trusted_checkpoint();
+    const ExactPairSupportStreamChunk first =
+        build_exact_pair_support_stream_chunk(
+            authority, config.fixed_chunk_budget, initial);
+    CorruptNamedFileInPlaceContext context{
+        (directory / "HEAD").string(),
+        ExactPairSupportDurablePublishStage::head_replaced};
+    const ExactPairSupportDurablePublishResult result = sink.publish_next(
+        first,
+        ExactPairSupportDurablePublishOptions{
+            corrupt_named_file_in_place, &context});
+    check(
+        context.corrupted_in_place &&
+            result.decision == ExactPairSupportDurablePublishDecision::
+                                   indeterminate_io_failure_reopen_required &&
+            !result.trusted_checkpoint_advanced &&
+            result.committed_transition_count == 0U &&
+            result.current_prefix_anchor.committed_transition_count == 0U &&
+            sink.status().failed_closed &&
+            !sink.status().authoritative_head_certified &&
+            sink.status().committed_transition_count == 0U &&
+            sink.trusted_checkpoint() == initial,
+        "an in-place same-inode HEAD mutation after replacement cannot advance memory and fails closed for reopen");
+  }
+
+  {
+    const std::filesystem::path directory =
+        workspace.make_directory("partial-transition-temporary");
+    {
+      auto initialized = ExactPairSupportDurableSink::create_new(
+          directory, authority, config);
+      static_cast<void>(initialized);
+    }
+    const std::filesystem::path temporary = first_temporary_path(directory);
+    const int descriptor = ::open(
+        temporary.c_str(),
+        O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW,
+        0600);
+    constexpr std::array<std::uint8_t, 3U> partial{0x4dU, 0x48U, 0x47U};
+    if (descriptor < 0) {
+      throw std::runtime_error(
+          "cannot create the partial transition temporary fixture");
+    }
+    bool partial_written =
+        ::write(descriptor, partial.data(), partial.size()) ==
+            static_cast<ssize_t>(partial.size()) &&
+        ::fdatasync(descriptor) == 0;
+    partial_written = ::close(descriptor) == 0 && partial_written;
+    if (!partial_written) {
+      throw std::runtime_error(
+          "cannot create the partial transition temporary fixture");
+    }
+    auto recovered = ExactPairSupportDurableSink::open_existing(
+        directory, authority, config);
+    check(
+        recovered.status().authoritative_head_certified &&
+            recovered.status().committed_transition_count == 0U &&
+            recovered.status().removed_uncommitted_temporary_file_count ==
+                1U &&
+            !std::filesystem::exists(temporary),
+        "recovery removes a bounded partial streaming temporary without interpreting it as a committed transition");
   }
 }
 
@@ -973,6 +1347,7 @@ int main() {
     test_explicit_create_open_and_external_anchor();
     test_publication_recovery_and_lock();
     test_hostile_files_and_symlinks();
+    test_streaming_temporary_races_fail_closed();
     test_transition_publication_is_no_replace();
     test_head_integrity_loss_requires_reopen();
     test_real_process_loss_at_each_publish_stage();

@@ -283,9 +283,11 @@ def validate(
         "std::vector<std::uint8_t> encode_exact_pair_support_stream_chunk(",
     )
     require(
-        chunk_encoder.count("ByteWriter wire{") == 1
-        and "PayloadEncoder payload_encoder{limits, wire};" in chunk_encoder,
-        "the chunk encoder must write its envelope and payload through one ByteWriter",
+        chunk_encoder.count("VectorWriter writer{") == 1
+        and "encode_envelope_header(writer, payload_byte_count);"
+        in chunk_encoder
+        and "encode_counted_payload(" in chunk_encoder,
+        "the vector chunk encoder must write its envelope and payload through one writer",
     )
     for forbidden_codec_token in (
         "sizeof(ExactPairSupport",
@@ -308,11 +310,41 @@ def validate(
         "ExactPairSupportStreamDecodeDecision",
         "checksum_mismatch",
         "trailing_bytes",
+        "pair_support_stream_fd_buffer_byte_count",
+        "pair_support_stream_default_maximum_exact_text_byte_count = 2048U",
+        "encode_exact_pair_support_stream_chunk_to_fd(",
+        "verify_exact_pair_support_stream_chunk_fd_wire(",
+        "decode_exact_pair_support_stream_chunk_from_fd(",
+        "verify_fd_wire_with_scratch(",
+        "class CountWriter",
+        "class BufferedFdWriter",
+        "canonical_rational_allocation_is_bounded",
     ):
         require(
             required_codec_token in codec_header + codec_source,
             f"missing bounded-codec token {required_codec_token!r}",
         )
+
+    fd_reader_block = braced_block(codec_source, "class FdByteReader")
+    require(
+        "std::span<std::uint8_t> buffer_;" in fd_reader_block
+        and "std::array<std::uint8_t, pair_support_stream_fd_buffer_byte_count>"
+        not in fd_reader_block,
+        "the fd payload reader must borrow rather than own the 64-KiB scratch",
+    )
+    fd_decoder_block = braced_block(
+        codec_source,
+        "decode_exact_pair_support_stream_chunk_from_fd(",
+    )
+    require(
+        fd_decoder_block.count(
+            "std::array<std::uint8_t, pair_support_stream_fd_buffer_byte_count>"
+        )
+        == 1
+        and fd_decoder_block.count("verify_fd_wire_with_scratch(") == 2
+        and "FdByteReader payload_reader{" in fd_decoder_block,
+        "fd decode must reuse one physical 64-KiB scratch across both checksum passes and parsing",
+    )
 
     for required_factory_token in (
         "static ExactPairSupportDurableSink create_new(",
@@ -376,6 +408,9 @@ def validate(
         "global_gamma_coface_count = 0U",
         "global_gamma_incidence_count = 0U",
         "materialized_pair_arena_count = 0U",
+        "maximum_codec_io_buffer_byte_count =",
+        "materialized_transition_wire_byte_count",
+        "streaming_fd_codec_used = true",
     ):
         require(
             required_durable_token in durable_header + durable_source,
@@ -444,6 +479,40 @@ def validate(
         "publication must tighten count and total-byte caps before encoding",
     )
     require(
+        "encode_exact_pair_support_stream_chunk(\n" not in publish_block,
+        "the durable publication path must not materialize a vector wire",
+    )
+    require_tokens_in_order(
+        publish_block,
+        (
+            "encode_exact_pair_support_stream_chunk_to_fd(",
+            "transition_temporary_file_written",
+            "::fdatasync(transition_temporary.get())",
+            "verify_exact_pair_support_stream_chunk_fd_wire(",
+            "transition_temporary_file_synchronized",
+            "::linkat(",
+        ),
+        "durable fd publication is not encode -> sync -> bounded readback -> link",
+    )
+    for required_publication_identity_token in (
+        "same_inode(linked_descriptor, linked_temporary)",
+        "same_inode(linked_descriptor, linked_final)",
+        "same_inode(verified_head_descriptor, verified_head_name)",
+        "same_inode(verified_head_descriptor, published_head)",
+        "require_verified_transition_receipt();",
+        "the observer-visible published durable pair-support HEAD",
+    ):
+        require(
+            required_publication_identity_token in publish_block,
+            "durable fd publication is missing descriptor/name/content binding "
+            + repr(required_publication_identity_token),
+        )
+    require(
+        publish_block.count("require_verified_transition_receipt();") >= 2
+        and publish_block.count("require_verified_publication();") >= 3,
+        "observer-visible durability boundaries must be reauthenticated before in-memory commit",
+    )
+    require(
         publish_block.count("::linkat(") == 1
         and publish_block.count("::renameat(") == 1
         and publish_block.count("verifier.commit_prepared(") == 1,
@@ -497,7 +566,7 @@ def validate(
         "recovery is not bounded and certified by authoritative HEAD",
     )
     read_transition_block = braced_block(
-        durable_source, "[[nodiscard]] ReadFile read_transition("
+        durable_source, "[[nodiscard]] OpenedReadFile read_transition("
     )
     require_tokens_in_order(
         read_transition_block,
@@ -506,10 +575,20 @@ def validate(
             "maximum_file_byte_count = std::min(",
             "config.codec_limits.maximum_encoded_byte_count",
             "remaining_total",
-            "read_bounded_regular_file(",
+            "open_bounded_regular_file(",
             "maximum_file_byte_count",
         ),
         "recovery must tighten the file allocation cap to the HEAD byte remainder",
+    )
+    decode_transition_block = braced_block(
+        durable_source,
+        "[[nodiscard]] ExactPairSupportStreamChunk decode_transition(",
+    )
+    require(
+        "decode_exact_pair_support_stream_chunk_from_fd("
+        in decode_transition_block
+        and "read.bytes" not in decode_transition_block,
+        "durable recovery must decode directly from the bounded descriptor",
     )
     inventory_validation = braced_block(
         durable_source, "void validate_inventory_against_head("
@@ -572,7 +651,7 @@ def validate(
         binary_symbol_gate = True
 
     return {
-        "schema": "morsehgp3d.phase9.pair_support_static.v4",
+        "schema": "morsehgp3d.phase9.pair_support_static.v5",
         "targets": [
             "morsehgp3d_pair_support",
             "morsehgp3d_pair_support_codec",
@@ -587,6 +666,10 @@ def validate(
         "two_phase_durable_verification": True,
         "bounded_canonical_codec": True,
         "single_buffer_chunk_encoding": True,
+        "fixed_buffer_fd_encoding": True,
+        "two_pass_fd_decoding": True,
+        "materialized_transition_wire_byte_count": 0,
+        "pair_binary64_exact_text_byte_cap": 2048,
         "explicit_create_and_open": True,
         "authoritative_local_head": True,
         "external_prefix_anchor": True,
