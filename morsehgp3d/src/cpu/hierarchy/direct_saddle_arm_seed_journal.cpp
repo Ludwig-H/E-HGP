@@ -640,4 +640,235 @@ verify_exact_direct_saddle_arm_seed_journal(
   return verification;
 }
 
+ExactDirectSaddleArmSeedStreamingVerification
+verify_exact_direct_saddle_arm_seed_journal_streaming(
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& source_journal,
+    const ExactDirectSaddleArmSeedBudget& trusted_budget,
+    const ExactDirectSaddleArmSeedJournalResult& observed) {
+  ExactDirectSaddleArmSeedStreamingVerification verification;
+  const ExactDirectMorseEventJournalStreamingVerification source_verification =
+      verify_exact_direct_morse_event_journal_streaming(
+          cloud, source_facade, source_journal);
+  verification.source_journal_certified =
+      source_verification.result_certified &&
+      source_journal.certified_partial_refinement();
+
+  const auto replay_bound = checked_linear_bound(
+      3U, cloud.size(), 5U, source_facade.events.size());
+  const auto added_bound =
+      checked_multiply(5U, source_facade.events.size());
+  const auto combined_bound = checked_linear_bound(
+      3U, cloud.size(), 10U, source_facade.events.size());
+  if (!replay_bound.has_value() || !added_bound.has_value() ||
+      !combined_bound.has_value()) {
+    return verification;
+  }
+
+  std::size_t required_roles = cloud.size();
+  std::size_t required_families = 0U;
+  std::size_t required_arms = 0U;
+  for (const ExactDirectSupportEvent& event : source_facade.events) {
+    const std::size_t support_size =
+        static_cast<std::size_t>(event.support_size);
+    if (support_size < 2U || support_size > 4U) {
+      return verification;
+    }
+    if (event.birth_order.has_value()) {
+      const auto next = checked_add(required_roles, 1U);
+      if (!next.has_value()) {
+        return verification;
+      }
+      required_roles = *next;
+    }
+    if (event.saddle_order.has_value()) {
+      const auto next_roles = checked_add(required_roles, 1U);
+      const auto next_families = checked_add(required_families, 1U);
+      const auto next_arms = checked_add(required_arms, support_size);
+      if (!next_roles.has_value() || !next_families.has_value() ||
+          !next_arms.has_value()) {
+        return verification;
+      }
+      required_roles = *next_roles;
+      required_families = *next_families;
+      required_arms = *next_arms;
+    }
+  }
+
+  const bool budget_sufficient =
+      *replay_bound <=
+          trusted_budget.maximum_source_journal_replay_entry_count &&
+      required_roles <= trusted_budget.maximum_role_scan_count &&
+      required_families <= trusted_budget.maximum_saddle_family_count &&
+      required_arms <= trusted_budget.maximum_arm_seed_count;
+  verification.requirements_certified =
+      observed.schema_version ==
+          direct_saddle_arm_seed_journal_schema_version &&
+      observed.requested_budget == trusted_budget &&
+      observed.point_count == cloud.size() &&
+      observed.source_direct_event_count == source_facade.events.size() &&
+      observed.required_source_journal_replay_entry_count == *replay_bound &&
+      observed.required_role_scan_count == required_roles &&
+      observed.required_saddle_family_count == required_families &&
+      observed.required_arm_seed_count == required_arms &&
+      observed.logical_added_storage_entry_limit == *added_bound &&
+      observed.combined_logical_storage_entry_limit == *combined_bound &&
+      observed.source_pair_canonical_cloud_digest ==
+          source_facade.certificate.pair_canonical_cloud_digest &&
+      observed.source_higher_canonical_cloud_digest ==
+          source_facade.certificate.higher_canonical_cloud_digest &&
+      observed.source_pair_semantic_digest ==
+          source_facade.certificate.pair_semantic_digest &&
+      observed.source_higher_semantic_digest ==
+          source_facade.certificate.higher_semantic_digest &&
+      budget_sufficient;
+
+  std::size_t family_index = 0U;
+  std::size_t seed_index = 0U;
+  bool families_match = true;
+  bool seeds_match = true;
+  bool facets_match = true;
+  try {
+    for (const ExactDirectMorseH0RoleRecord& role :
+         source_journal.role_records) {
+      if (role.role != ExactDirectMorseH0Role::saddle) {
+        continue;
+      }
+      if (role.batch_index >= source_journal.batches.size() ||
+          role.event_projection_index >=
+              source_journal.event_projections.size()) {
+        families_match = false;
+        seeds_match = false;
+        facets_match = false;
+        break;
+      }
+      const ExactDirectMorseH0Batch& batch =
+          source_journal.batches[role.batch_index];
+      const ExactDirectMorseEventProjection& projection =
+          source_journal.event_projections[role.event_projection_index];
+      if (projection.source_index >= source_facade.events.size()) {
+        families_match = false;
+        seeds_match = false;
+        facets_match = false;
+        break;
+      }
+      const ExactDirectSupportEvent& event =
+          source_facade.events[projection.source_index];
+      if (!source_join_matches(role, batch, projection, event)) {
+        families_match = false;
+        seeds_match = false;
+        facets_match = false;
+        break;
+      }
+
+      ExactDirectSaddleArmFamilyRecord expected_family;
+      expected_family.family_index = family_index;
+      expected_family.source_event_index = event.event_index;
+      expected_family.journal_event_projection_index =
+          projection.event_projection_index;
+      expected_family.journal_role_record_index = role.role_record_index;
+      expected_family.journal_batch_index = batch.batch_index;
+      expected_family.order = batch.order;
+      expected_family.critical_squared_level = batch.squared_level;
+      expected_family.arm_seed_offset = seed_index;
+      expected_family.arm_seed_count =
+          static_cast<std::size_t>(event.support_size);
+      expected_family.source_event_arm_identity_digest =
+          source_event_arm_identity_digest(event);
+      ++verification.source_family_scan_count;
+      if (family_index >= observed.families.size() ||
+          observed.families[family_index] != expected_family) {
+        families_match = false;
+      }
+
+      for (std::size_t support_index = 0U;
+           support_index < expected_family.arm_seed_count;
+           ++support_index) {
+        const ExactDirectSaddleArmSeedRecord expected_seed{
+            seed_index,
+            family_index,
+            event.support_ids[support_index]};
+        ++verification.source_arm_seed_scan_count;
+        if (seed_index >= observed.arm_seeds.size() ||
+            observed.arm_seeds[seed_index] != expected_seed) {
+          seeds_match = false;
+        } else {
+          const ExactDirectSaddleArmFacet expected_facet =
+              reconstruct_facet(
+                  event, expected_seed.removed_support_point_id);
+          const ExactDirectSaddleArmFacet observed_facet =
+              reconstruct_exact_direct_saddle_arm_facet(
+                  source_facade, observed, seed_index);
+          if (expected_facet != observed_facet ||
+              expected_facet.point_count != expected_family.order) {
+            facets_match = false;
+          }
+        }
+        ++seed_index;
+      }
+      ++family_index;
+    }
+  } catch (const std::logic_error&) {
+    families_match = false;
+    seeds_match = false;
+    facets_match = false;
+  }
+
+  verification.family_records_certified =
+      families_match && family_index == required_families &&
+      observed.families.size() == required_families;
+  verification.arm_seed_records_certified =
+      seeds_match && seed_index == required_arms &&
+      observed.arm_seeds.size() == required_arms;
+  verification.factorized_facets_certified =
+      facets_match && verification.family_records_certified &&
+      verification.arm_seed_records_certified;
+
+  const auto added_count = checked_add(required_families, required_arms);
+  const auto combined_count = added_count.has_value()
+      ? checked_add(
+            source_journal.logical_linear_storage_entry_count,
+            *added_count)
+      : std::nullopt;
+  verification.result_facts_certified =
+      added_count.has_value() && combined_count.has_value() &&
+      observed.logical_added_storage_entry_count ==
+          *added_count &&
+      observed.combined_logical_storage_entry_count == *combined_count &&
+      observed.budget_preflight_certified &&
+      observed.source_journal_freshly_replayed &&
+      observed.source_facade_join_certified &&
+      observed.every_saddle_role_projected_once &&
+      observed.every_support_point_has_one_arm_seed &&
+      observed.arm_seed_order_is_canonical &&
+      observed.factorized_facets_reconstruct_exactly &&
+      observed.source_relative_strict_miniball_drop_theorem_applies &&
+      observed.output_linear_in_direct_events &&
+      observed.no_forbidden_global_structure_materialized &&
+      !observed.facets_materialized_in_journal &&
+      !observed.miniballs_or_global_partitions_computed &&
+      !observed.hierarchy_reduction_performed &&
+      !observed.forest_or_gateway_attach_performed &&
+      !observed.public_status_claimed && observed.partial_refinement_only;
+  verification.decision_and_scope_certified =
+      observed.decision == ExactDirectSaddleArmSeedDecision::
+                               complete_certified_factorized_arm_seeds &&
+      observed.scope == ExactDirectSaddleArmSeedScope::
+                            terminal_direct_saddle_deleted_facets_only;
+  verification.constant_auxiliary_record_storage_certified = true;
+  verification.fresh_streaming_replay_certified =
+      verification.requirements_certified &&
+      verification.family_records_certified &&
+      verification.arm_seed_records_certified &&
+      verification.factorized_facets_certified &&
+      verification.result_facts_certified &&
+      verification.decision_and_scope_certified;
+  verification.result_certified =
+      verification.source_journal_certified &&
+      verification.fresh_streaming_replay_certified &&
+      observed.certified_partial_refinement();
+  return verification;
+}
+
 }  // namespace morsehgp3d::hierarchy

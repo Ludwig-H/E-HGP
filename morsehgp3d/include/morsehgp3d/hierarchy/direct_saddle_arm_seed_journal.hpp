@@ -207,4 +207,35 @@ verify_exact_direct_saddle_arm_seed_journal(
     const ExactDirectSaddleArmSeedBudget& budget,
     const ExactDirectSaddleArmSeedJournalResult& observed);
 
+// Validates the complete seed journal in place.  The Phase-10.1 source is
+// itself replayed by its constant-record verifier; expected family and seed
+// records are then compared one at a time, without constructing a second
+// O(J+A) payload.
+struct ExactDirectSaddleArmSeedStreamingVerification {
+  std::size_t source_family_scan_count{};
+  std::size_t source_arm_seed_scan_count{};
+  bool source_journal_certified{false};
+  bool requirements_certified{false};
+  bool family_records_certified{false};
+  bool arm_seed_records_certified{false};
+  bool factorized_facets_certified{false};
+  bool result_facts_certified{false};
+  bool decision_and_scope_certified{false};
+  bool constant_auxiliary_record_storage_certified{false};
+  bool fresh_streaming_replay_certified{false};
+  bool result_certified{false};
+
+  friend bool operator==(
+      const ExactDirectSaddleArmSeedStreamingVerification&,
+      const ExactDirectSaddleArmSeedStreamingVerification&) = default;
+};
+
+[[nodiscard]] ExactDirectSaddleArmSeedStreamingVerification
+verify_exact_direct_saddle_arm_seed_journal_streaming(
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& source_journal,
+    const ExactDirectSaddleArmSeedBudget& trusted_budget,
+    const ExactDirectSaddleArmSeedJournalResult& observed);
+
 }  // namespace morsehgp3d::hierarchy

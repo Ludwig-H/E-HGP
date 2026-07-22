@@ -21,6 +21,18 @@ $$\text{stockage}_{\mathrm{logique}}\leq3n+10E.$$
 
 Le target `morsehgp3d_direct_saddle_arm_seed_journal` ne lie que le journal direct et ses autorités transitives. Le rejeu source contrôle les deux digests du nuage en deux passes séquentielles, puis valide projections, rôles et lots sur place, sans second journal ni tri. La reconstruction publique vérifie les autorités du nuage et un digest local d'événement. Un contrôle source et symboles interdit l'archive historique, miniball, `critical_arm`, Gamma, cellules, cofaces et mosaïque. Le tétraèdre régulier donne 11 familles et 28 graines; la fixture obtuse vérifie que $I$ appartient à chaque bras; les deux selles miroir simultanées conservent six provenances même lorsque deux graines reconstruisent la même facette. Les tests ciblés et statiques passent en moins de 0,2 seconde.
 
+## Incrément 10.3-RCPU livré — forêt directe exacte d'ordre un
+
+À l'ordre un, tout rôle selle a rang fermé deux. Il impose $I=\varnothing$, un support $U=\lbrace u,v\rbrace$ et deux bras singletons. La racine stricte de chaque bras est donc obtenue directement par le DSU courant, sans descente géométrique. Si la boule diamétrale fermée d'une paire contient un troisième site, les deux cordes passant par ce site sont strictement plus courtes; une descente finie montre que les paires directes engendrent exactement les mêmes composantes filtrées que le graphe complet et la forêt EMST. La preuve complète est consignée dans [FORET_DIRECTE_K1_PHASE10.md](../math/FORET_DIRECTE_K1_PHASE10.md).
+
+`ExactDirectK1ForestJournalResult` maintient un DSU global, mais construit un second DSU transitoire sur les seules racines touchées par le niveau courant. Toutes les liaisons `ArmRootBinding` sont calculées sur le snapshot strict avant toute mutation. Chaque composante du quotient devient ensuite soit une multifusion unique pour $q\geq2$, soit une continuation explicite sans nœud pour $q=1$. Les feuilles `RootBirth` sont implicites, les enfants des multifusions sont aplatis et aucun `cut` complet n'est matérialisé par niveau.
+
+Pour $J_1$ selles d'ordre un, le résultat stocke $2J_1$ liaisons, $J_1$ selles, au plus $J_1$ groupes, au plus $2n-2$ enfants et au plus $J_1$ lots. L'ajout vérifie donc :
+
+$$\text{stockage}_{10.3}\leq2n+5J_1-2.$$
+
+Le scratch logique préflighté comprend deux arènes de taille $n$ et au plus $11B_{\max}$ entrées pour le plus gros lot; il reste $O(n+B_{\max})$. Le vérificateur final rejoue la construction et compare chaque record au fil de l'eau sans seconde arène persistante de forêt. Le target `morsehgp3d_direct_k1_forest_journal` ne lie publiquement que 10.2. Les fixtures courtes couvrent la paire binaire, la multifusion ternaire de deux selles égales, la continuation $q=1$, un parent post-lot falsifié, un nœud de continuation inventé, un journal 10.2 falsifié et un budget diminué d'une unité. Le test fonctionnel et le contrôle statique passent ensemble en moins de 0,25 seconde.
+
 ## Borne de stockage propre à 10.1 et objets évités
 
 Si $n$ est le nombre de sites et $E$ le nombre d'événements directs terminaux, le journal 10.1 conserve exactement $n+E$ projections, au plus $n+2E$ rôles et au plus $n+2E$ lots. Son audit certifie donc la borne logique suivante :
@@ -37,6 +49,6 @@ Le test ciblé strict passe en 0,02 seconde environ. Sur le tétraèdre régulie
 
 ## Limites et suite
 
-Les graines certifient les facettes initiales et leur décroissance stricte, pas encore une généalogie H0. Il reste à descendre ou localiser chaque graine dans l'état strict pré-lot, attacher ses racines, résoudre simultanément les multifusions comme hypergraphes quotients et conserver les gateways silencieux nécessaires aux événements futurs. Le contre-exemple permanent à cinq points et la preuve M.1 restent les portes scientifiques. Aucun `public_status` n'est publié et Gamma exhaustif demeure l'oracle borné jusqu'à $n\leq14$.
+La généalogie H0 est désormais fermée seulement à l'ordre un. Pour $k\geq2$, il reste à descendre ou localiser chaque facette dans l'état strict pré-lot, intégrer les suppressions intérieures qui naissent au niveau égal et conserver les gateways silencieux nécessaires aux événements futurs. Une absence dans le dictionnaire de facettes doit rester `unresolved`; elle ne certifie jamais une composante isolée. Le contre-exemple permanent à cinq points et la preuve M.1 restent les portes scientifiques. Aucun `public_status` n'est publié et Gamma exhaustif demeure l'oracle borné jusqu'à $n\leq14$.
 
 GCP n'a pas été utilisé pour ces incréments CPU. La session G4 consignée dans la revue de porte appartient exclusivement à la qualification de fermeture de la Phase 9.
