@@ -53,6 +53,18 @@ Le noyau autonome `direct_frozen_root_quotient` calcule en parallèle la fermetu
 
 La preuve, les limites gateway et le cas maximal sont consignés dans [INCIDENCES_FERMEES_SELLES_DIRECTES_PHASE10.md](../math/INCIDENCES_FERMEES_SELLES_DIRECTES_PHASE10.md).
 
+## Incrément 10.5a-RCPU livré — locator positif sparse relatif
+
+`ExactDirectSparsePositiveFacetLocator` stocke seulement les clés positives fournies par l'appelant. Une clé contient son cardinal et au plus dix `PointId`; le stockage durable sépare une table ouverte de $2M+1$ slots et une arène plate de références. L'empreinte masquée n'est jamais une autorité : le test force toutes les collisions et la décision compare toujours la clé complète.
+
+Chaque appel localise d'abord toutes les requêtes dans l'état pré-appel. Il copie ensuite le DSU, applique les unions explicites, vérifie dans cet état candidat la compatibilité des doublons et engage seulement alors parents, journal d'unions, clés nouvelles et agrégat de lot. Le handle stocké n'est jamais réécrit; sa racine est résolue au lookup suivant. Un miss n'a pas de handle et signifie exclusivement `unresolved`. Le conflit permanent d'une clé exacte vers deux racines encore distinctes rejette tout le lot, y compris une union indépendante; inversement, une union explicite peut rendre le doublon compatible sans seconde clé durable.
+
+La certification reste relative à l'autorité affirmée par l'appelant. Le noyau valide seulement l'identifiant concordant et les tokens non nuls; il ne rejoue ni cette autorité ni la géométrie. Le vérificateur structurel reçoit les capacités fiables, échoue avant scan sur une image surdimensionnée, recouvre l'arène, recalcule empreintes et emplacements, rejoue les unions et contrôle les agrégats. Les anciens payloads n'étant pas persistés, leurs booléens historiques restent des assertions bien formées et ne sont pas recertifiés.
+
+Pour une capacité $M$, $L$ clés, $H$ handles, $U$ unions et $T$ lots, l'état vaut $O(M+KL+H+U+T)$ et le scratch courant $O(Q+KB+H)$. Le target autonome ne lie que la politique de sanitizers et ne contient ni Gamma, miniball, cellules, cofaces, Delaunay, `std::map` ou `std::unordered_map`. Le test fonctionnel et le checker statique/symbolique passent ensemble en 0,31 seconde. La table préallouée, la copie du DSU par lot et les pires cas linéaires gardent ce noyau hors qualification 50 k sous la seconde et 10 M+.
+
+Le prochain incrément 10.5b doit d'abord ajouter une sonde locator `const` et budgétée, car un `apply_batch` vide copie encore le DSU et engage un lot. Il doit ensuite rendre le top-k LBVH existant interruptible, isoler la miniball de facette et certifier au plus un saut en reconstruisant $G$ puis en exigeant $\beta(G)<\beta(F)$. Un épuisement de budget ou une cible non liée reste `unresolved` sans mutation.
+
 ## Borne de stockage propre à 10.1 et objets évités
 
 Si $n$ est le nombre de sites et $E$ le nombre d'événements directs terminaux, le journal 10.1 conserve exactement $n+E$ projections, au plus $n+2E$ rôles et au plus $n+2E$ lots. Son audit certifie donc la borne logique suivante :
@@ -69,6 +81,6 @@ Le test ciblé strict passe en 0,02 seconde environ. Sur le tétraèdre régulie
 
 ## Limites et suite
 
-La généalogie H0 est désormais fermée seulement à l'ordre un, tandis que l'alphabet local des suppressions est fermé pour chaque selle directe jusqu'à $K=10$. Pour $k\geq2$, il reste à descendre ou localiser chaque facette dans l'état strict pré-lot, représenter les facettes latentes dans le quotient et conserver les gateways silencieux non directs nécessaires aux événements futurs. Une absence dans le dictionnaire de facettes doit rester `unresolved`; elle ne certifie jamais une composante isolée. Le contre-exemple permanent à cinq points et la preuve M.1 restent les portes scientifiques. Aucun `public_status` n'est publié et Gamma exhaustif demeure l'oracle borné jusqu'à $n\leq14$.
+La généalogie H0 est désormais fermée seulement à l'ordre un, tandis que l'alphabet local des suppressions est fermé pour chaque selle directe jusqu'à $K=10$ et que le domaine positif déjà fourni peut être localisé sans confusion de clés. Pour $k\geq2$, il reste à descendre vers ce domaine, représenter les facettes latentes dans le quotient et conserver les gateways silencieux non directs nécessaires aux événements futurs. Une absence dans le dictionnaire de facettes reste `unresolved`; elle ne certifie jamais une composante isolée. Le contre-exemple permanent à cinq points et la preuve M.1 restent les portes scientifiques. Aucun `public_status` n'est publié et Gamma exhaustif demeure l'oracle borné jusqu'à $n\leq14$.
 
 GCP n'a pas été utilisé pour ces incréments CPU. La session G4 consignée dans la revue de porte appartient exclusivement à la qualification de fermeture de la Phase 9.
