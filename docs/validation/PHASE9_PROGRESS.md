@@ -66,7 +66,19 @@ Le checkpoint conserve la frontière complète et au plus un produit actif, touj
 
 Chaque appel retourne un candidat logique préparé en mémoire contenant les records du seul chunk, leur ordre inter-types et le checkpoint suivant. Les structures restent mutables; toute altération échoue toutefois au rejeu. Le chunk porte le digest exact de son checkpoint source; la chaîne de sortie applique SHA-256 record par record dans l'ordre déterministe du parcours et son digest terminal ne dépend donc pas du découpage. Si un sink abandonne le candidat avant publication, l'ancien checkpoint reste inchangé et un retry avec le même budget reproduit la même valeur canonique et les mêmes digests. Le vérificateur local recalcule le manifeste depuis les autorités, le checksum du checkpoint, les plages LBVH, les reçus actifs, les identités obligatoires de l'audit cumulatif et la transition relative entière. Il ne rejoue pas tout l'historique des compteurs et ne prétend pas établir la provenance de sa source. Le vérificateur de run reconstruit au contraire le checkpoint initial depuis le nuage, le LBVH et $K_{\max}$ fiables, puis rejoue chaque chunk dans l'ordre jusqu'au terminal.
 
-Cette portée est volontairement `in_memory_reinjectable_checkpoint_and_prepared_transition_candidate_only`. Elle ne contient aucun codec binaire, aucune limite de décodage hostile, aucun temporaire, `fsync`, renommage atomique ou checkpoint Hyperdisk. Elle ne certifie donc ni reprise après perte de processus ou de VM, ni streaming 10 M+, ni débit. Le chemin chaud recalcule encore le manifeste en $O(n)$ par chunk; la validation locale des antichaînes est quadratique dans les tailles de frontières, et le vérificateur de run de commodité conserve puis rejoue tous les chunks. Un contexte d'autorité persistant, des validations linéaires ou quasi linéaires et un vérificateur incrémental `verify_next` sont obligatoires avant les essais à 50 000 points et le chemin massif.
+Cette portée est volontairement `in_memory_reinjectable_checkpoint_and_prepared_transition_candidate_only`. Elle ne contient aucun codec binaire, aucune limite de décodage hostile, aucun temporaire, `fsync`, renommage atomique ou checkpoint Hyperdisk. Elle ne certifie donc ni reprise après perte de processus ou de VM, ni streaming 10 M+, ni débit. À la livraison de 9.3a, le chemin chaud recalculait encore le manifeste en $O(n)$ par chunk, la validation locale des antichaînes était quadratique dans les tailles de frontières et le vérificateur de run de commodité imposait à l'appelant de conserver tous les chunks. Le jalon 9.3b ci-dessous ferme ces trois dettes sans changer le schéma scientifique du checkpoint.
+
+## Jalon 9.3b-RCPU livré
+
+`ExactPairSupportAuthorityContext` authentifie le nuage canonique et l'image sémantique du LBVH une fois à sa construction. Son audit instrumente exactement une construction de manifeste, un point haché par point canonique, une feuille hachée par feuille LBVH et un nœud haché par nœud LBVH. Les surcharges de production, de vérification locale et de rejeu de chunk utilisent ensuite le manifeste mis en cache. Les anciennes signatures restent des adaptateurs froids qui créent un contexte temporaire; elles ne doivent pas être utilisées dans une boucle de chunks. Les constructeurs rejettent les nuages et LBVH temporaires.
+
+La validation de la frontière ne compare plus tous les produits deux à deux. Un self-produit devient un rectangle de plages Morton et un produit croisé devient ses deux orientations. Le sweep trie les entrées et sorties sur la première coordonnée, traite les sorties avant les entrées à coordonnée égale pour respecter les intervalles semi-ouverts, puis compare seulement le prédécesseur et le successeur en seconde coordonnée. Tant que le préfixe est valide, les intervalles actifs sont disjoints; ces deux voisins suffisent donc à détecter le premier recouvrement. Pour $F$ produits, le coût est $O(F\log F)$ et la mémoire transitoire $O(F)$, avec au plus deux rectangles et quatre événements indexés compacts par produit source, puis deux tests de voisinage par rectangle.
+
+La pile témoin, l'éventuelle expansion différée et les reçus stricts sont projetés dans un seul tableau léger d'intervalles sans modifier leur ordre persistant. Après un tri, chaque intervalle est comparé au maximum de fin du préfixe; les doublons, recouvrements et couples ancêtre–descendant sont donc rejetés en $O(M\log M)$ pour $M$ entrées et $M-1$ comparaisons adjacentes. Chaque reçu garde séparément sa recertification rationnelle $\max\phi<0$, sa disjonction des supports et sa contribution exacte au cardinal.
+
+`ExactPairSupportIncrementalVerifier` copie le cache d'autorité, reconstruit son checkpoint initial, puis `verify_next` rejoue exactement une transition depuis le seul checkpoint fiable sans revalider cette source privée. Une transition valide avance avec le checkpoint attendu fraîchement recalculé, jamais avec une structure observée non vérifiée. Une transition invalide, exceptionnelle ou post-terminale laisse le checkpoint inchangé, empoisonne définitivement le vérificateur et interdit de sauter l'erreur. L'état retient zéro chunk antérieur; le vérificateur historique de run est désormais un adaptateur sur cette induction. Le singleton reste un run ancré vide. Le schéma, la base de preuve, le manifeste et tous les digests dorés v1 sont inchangés. Le type C++ hôte de résultat de validation gagne toutefois des compteurs : à ce stade pré-public 0.1, aucune stabilité ABI binaire n'est revendiquée pour cette structure.
+
+Cette amélioration borne seulement l'authentification et la validation du curseur. Elle ne rend pas sous-quadratique le parcours géométrique des paires, ne fournit ni codec hostile ni stockage durable et ne justifie encore aucun essai de SLO ou de 10 M+.
 
 ## Structures globales évitées
 
@@ -101,18 +113,26 @@ Pour 9.3a, il couvre en plus :
 - les vecteurs SHA-256 usuels et aux frontières 55, 56, 63, 64 et 65 octets, puis les digests dorés du manifeste, des checkpoints initial et mi-curseur, de la chaîne mixte et du terminal v1;
 - le singleton déjà terminal, dont une reprise vide n'avance pas la séquence.
 
+Pour 9.3b, le même target couvre en plus :
+
+- un contexte persistant dont l'audit compte exactement un manifeste, chaque point, chaque feuille et chaque nœud une fois;
+- plusieurs dizaines de chunks à une unité, vérifiés en ligne sans tableau de chunks, avec mêmes records, ordre typé, audit et digest terminal que le chunk résident;
+- les bornes exactes des compteurs du sweep de rectangles et du tri d'intervalles, y compris un curseur contenant des reçus stricts réellement persistés;
+- l'avancement par le checkpoint attendu, zéro chunk retenu, l'empoisonnement sans avance après mutation du digest source, le rejet explicite du chunk successeur qui tenterait de sauter cette transition et l'empoisonnement sur une exception de rejeu;
+- le singleton ancré sans chunk et le rejet d'un no-op terminal redondant;
+- le checker statique v2, qui exige le contexte, `verify_next`, les deux algorithmes quasi linéaires, l'absence d'un vecteur de chunks dans le vérificateur et l'absence de rescan direct du manifeste sur le chemin mis en cache.
+
 Le test et sa bibliothèque passent en Release avec les avertissements stricts sous GCC 13.3 et Clang 18.1. Un smoke hostile colinéaire limité à $n\leq256$ observe 24 301 visites témoins et environ 111 ms au dernier point après les courts-circuits sûrs; ce diagnostic ne ferme aucun exposant ni SLO. Aucun benchmark long et aucune ressource GCP ne sont nécessaires pour cette validation CPU.
 
 ## Limites et ordre de poursuite
 
-Le prochain travail ne doit pas élargir l'oracle de cellules. L'ordre utile est :
+Le prochain travail ne doit pas élargir l'oracle de cellules. L'ordre utile est désormais :
 
-1. introduire un contexte d'autorité persistant qui calcule le manifeste une fois, un vérificateur ancré incrémental et des contrôles de frontière non quadratiques;
-2. ajouter un codec borné et un sink durable temporaire--synchronisation--renommage, puis tester crash avant et après publication;
-3. ajouter les reçus terminaux bornés nécessaires à la proposition `cuda_g4` P1 et leur recertification CPU exacte;
-4. mesurer seulement ensuite les compteurs de croissance sur 12 500, 25 000 et 50 000 sites, sans prétendre fermer le SLO;
-5. généraliser la frontière aux supports trois et quatre sans liste $L$-NN excluante;
-6. avant la qualification finale, remplacer la canonisation exacte eager et la construction LBVH CPU par des coordonnées binary64 SoA, exact paresseux et Morton/radix/LBVH device;
-7. pour 10 M+, persister deux frontières bornées et des chunks externes, sans conserver les événements cumulés ni les chunks de vérification en mémoire.
+1. ajouter un codec borné et un sink durable temporaire--synchronisation--renommage, puis tester crash avant et après publication;
+2. ajouter les reçus terminaux bornés nécessaires à la proposition `cuda_g4` P1 et leur recertification CPU exacte;
+3. mesurer seulement ensuite les compteurs de croissance sur 12 500, 25 000 et 50 000 sites, sans prétendre fermer le SLO;
+4. généraliser la frontière aux supports trois et quatre sans liste $L$-NN excluante;
+5. avant la qualification finale, remplacer la canonisation exacte eager et la construction LBVH CPU par des coordonnées binary64 SoA, exact paresseux et Morton/radix/LBVH device;
+6. pour 10 M+, persister deux frontières bornées et des chunks externes, sans conserver les événements cumulés ni les chunks de vérification en mémoire.
 
 La Phase 9 reste `in_progress`. Ce jalon ne ferme ni la complétude supports 2–4, ni la Phase 9, ni une forêt Morse, ni un statut public. GCP non utilisé.

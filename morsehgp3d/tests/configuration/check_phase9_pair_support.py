@@ -104,8 +104,63 @@ def validate(
         "maximum_emitted_point_id_reference_count",
         "ExactPairSupportStreamStatus::budget_exhausted",
         "no_forbidden_global_structure_materialized = true",
+        "class ExactPairSupportAuthorityContext",
+        "class ExactPairSupportIncrementalVerifier",
+        "verify_next(",
+        "quasi_linear_structure_validation_certified",
+        "product_rectangles_are_disjoint",
+        "witness_intervals_are_disjoint",
+        "std::map<std::uint64_t, ActiveProductRectangle>",
+        "manifest_for_with_audit",
+        "audit->canonical_cloud_point_hash_count = checked_add",
+        "source_checkpoint_already_trusted ||",
+        "ExactPairSupportAuthorityContext&&) = delete",
+        "spatial::MortonLbvhIndex&&,",
+        "spatial::CanonicalPointCloud&&,",
+        "ExactPairSupportAuthorityContext authority_;",
+        "catch (...) {\n    poison();",
     ):
         require(required in combined, f"missing bounded-stream token {required!r}")
+
+    verifier_start = header.find("class ExactPairSupportIncrementalVerifier")
+    verifier_end = header.find("\n};", verifier_start)
+    require(
+        verifier_start >= 0 and verifier_end > verifier_start,
+        "cannot isolate the incremental verifier declaration",
+    )
+    verifier_declaration = header[verifier_start:verifier_end]
+    require(
+        "std::vector<ExactPairSupportStreamChunk" not in verifier_declaration,
+        "the incremental verifier must not retain prior chunks",
+    )
+    require(
+        source.count("manifest_for(") == 2,
+        "the cached-manifest path must have only one definition and one cold constructor call",
+    )
+    require(
+        source.count("manifest_for_with_audit(") == 3,
+        "the instrumented manifest builder must be called only by its cold wrapper and the authority constructor",
+    )
+    require(
+        "trusted_checkpoint_ = std::move(trusted_next);" in source,
+        "verify_next must advance with the freshly replayed expected checkpoint",
+    )
+    require(
+        "trusted_checkpoint_ = observed.next_checkpoint" not in source,
+        "verify_next must never trust an observed checkpoint directly",
+    )
+    event_start = source.find("struct ProductRectangleSweepEvent")
+    event_end = source.find("\n  };", event_start)
+    require(
+        event_start >= 0 and event_end > event_start,
+        "cannot isolate the compact rectangle sweep event",
+    )
+    event_declaration = source[event_start:event_end]
+    require(
+        "std::size_t rectangle_index" in event_declaration
+        and "ProductRectangle rectangle" not in event_declaration,
+        "rectangle sweep events must retain only a compact rectangle index",
+    )
 
     binary_symbol_gate = False
     if binary is not None or nm_executable is not None:
@@ -143,12 +198,15 @@ def validate(
         binary_symbol_gate = True
 
     return {
-        "schema": "morsehgp3d.phase9.pair_support_static.v1",
+        "schema": "morsehgp3d.phase9.pair_support_static.v2",
         "target": "morsehgp3d_pair_support",
         "persistent_top_m_cell_count": 0,
         "global_gamma_coface_count": 0,
         "global_gamma_incidence_count": 0,
         "materialized_pair_arena_count": 0,
+        "persistent_authority_context": True,
+        "incremental_verify_next": True,
+        "quasi_linear_checkpoint_validation": True,
         "binary_symbol_gate": binary_symbol_gate,
         "checked_artifacts": [
             "CMakeLists.txt",

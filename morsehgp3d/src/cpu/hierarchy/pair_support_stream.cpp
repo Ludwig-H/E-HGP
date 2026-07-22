@@ -7,12 +7,15 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <limits>
+#include <map>
 #include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -544,6 +547,16 @@ class ExactPairSupportStreamBuilder {
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
       std::size_t requested_maximum_order) {
+    return manifest_for_with_audit(
+        index, cloud, requested_maximum_order, nullptr);
+  }
+
+  [[nodiscard]] static ExactPairSupportCheckpointManifest
+  manifest_for_with_audit(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::size_t requested_maximum_order,
+      ExactPairSupportAuthorityContextAudit* audit) {
     if (!index.validated_for(cloud)) {
       throw std::invalid_argument(
           "a pair-support manifest requires the supplied cloud's Morton LBVH");
@@ -552,6 +565,13 @@ class ExactPairSupportStreamBuilder {
         requested_maximum_order > pair_support_maximum_requested_order) {
       throw std::invalid_argument(
           "a pair-support manifest requires a nonempty cloud and 1<=Kmax<=10");
+    }
+    if (audit != nullptr) {
+      audit->manifest_build_count = checked_add(
+          audit->manifest_build_count,
+          1U,
+          "the pair-support manifest build count overflows size_t");
+      audit->manifest_cached = false;
     }
     ExactPairSupportCheckpointManifest manifest;
     manifest.point_count = cloud.size();
@@ -580,6 +600,12 @@ class ExactPairSupportStreamBuilder {
       for (const std::uint64_t word : bits) {
         cloud_writer.u64(word);
       }
+      if (audit != nullptr) {
+        audit->canonical_cloud_point_hash_count = checked_add(
+            audit->canonical_cloud_point_hash_count,
+            1U,
+            "the pair-support manifest point hash count overflows size_t");
+      }
     }
     manifest.canonical_cloud_digest = cloud_writer.finalize();
 
@@ -604,6 +630,12 @@ class ExactPairSupportStreamBuilder {
     for (const spatial::MortonLeafRecord& leaf : index.leaves_) {
       lbvh_writer.u64(leaf.morton_code);
       lbvh_writer.u64(leaf.point_id);
+      if (audit != nullptr) {
+        audit->lbvh_leaf_hash_count = checked_add(
+            audit->lbvh_leaf_hash_count,
+            1U,
+            "the pair-support manifest leaf hash count overflows size_t");
+      }
     }
     for (const Node& current : index.nodes_) {
       for (const PointId point_id : current.lower_point_ids) {
@@ -621,6 +653,12 @@ class ExactPairSupportStreamBuilder {
       }
       lbvh_writer.size(current.leaf_begin);
       lbvh_writer.size(current.leaf_end);
+      if (audit != nullptr) {
+        audit->lbvh_node_hash_count = checked_add(
+            audit->lbvh_node_hash_count,
+            1U,
+            "the pair-support manifest node hash count overflows size_t");
+      }
     }
     manifest.lbvh_digest = lbvh_writer.finalize();
 
@@ -642,6 +680,9 @@ class ExactPairSupportStreamBuilder {
     semantic_writer.identifier(manifest.canonical_cloud_digest);
     semantic_writer.identifier(manifest.lbvh_digest);
     manifest.semantic_digest = semantic_writer.finalize();
+    if (audit != nullptr) {
+      audit->manifest_cached = true;
+    }
     return manifest;
   }
 
@@ -650,6 +691,7 @@ class ExactPairSupportStreamBuilder {
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
       std::size_t requested_maximum_order,
+      const ExactPairSupportCheckpointManifest& authority_manifest,
       const ExactPairSupportCheckpoint& checkpoint) {
     const std::size_t maximum = std::numeric_limits<std::size_t>::max();
     ExactPairSupportStreamBuilder validator{
@@ -665,7 +707,7 @@ class ExactPairSupportStreamBuilder {
             maximum,
             maximum}};
     return validator.checkpoint_verification(
-        requested_maximum_order, checkpoint);
+        authority_manifest, checkpoint);
   }
 
  private:
@@ -690,53 +732,157 @@ class ExactPairSupportStreamBuilder {
     std::size_t exterior_count{};
   };
 
-  [[nodiscard]] static bool ranges_intersect(
-      std::uint64_t first_begin,
-      std::uint64_t first_end,
-      std::uint64_t second_begin,
-      std::uint64_t second_end) noexcept {
-    return first_begin < second_end && second_begin < first_end;
-  }
+  struct ProductRectangle {
+    std::uint64_t x_begin{};
+    std::uint64_t x_end{};
+    std::uint64_t y_begin{};
+    std::uint64_t y_end{};
+  };
 
-  [[nodiscard]] static bool witness_ranges_intersect(
-      const ExactPairSupportWitnessNodeEntry& first,
-      const ExactPairSupportWitnessNodeEntry& second) noexcept {
-    return ranges_intersect(
-        first.leaf_begin,
-        first.leaf_end,
-        second.leaf_begin,
-        second.leaf_end);
-  }
+  struct ProductRectangleSweepEvent {
+    std::uint64_t x{};
+    std::size_t rectangle_index{};
+    bool is_start{false};
+  };
 
-  [[nodiscard]] static bool product_domains_overlap(
-      const ExactPairSupportFrontierEntry& first,
-      const ExactPairSupportFrontierEntry& second) noexcept {
-    if (first == second) {
-      return true;
+  struct ActiveProductRectangle {
+    std::uint64_t y_end{};
+    std::size_t rectangle_index{};
+  };
+
+  struct WitnessInterval {
+    std::uint64_t begin{};
+    std::uint64_t end{};
+  };
+
+  [[nodiscard]] static bool product_rectangles_are_disjoint(
+      const std::vector<ProductRectangle>& rectangles,
+      ExactPairSupportCheckpointVerification::ValidationAudit& audit) {
+    std::vector<ProductRectangleSweepEvent> events;
+    events.reserve(checked_multiply(
+        rectangles.size(),
+        2U,
+        "the pair-support rectangle sweep event count overflows size_t"));
+    for (std::size_t rectangle_index = 0U;
+         rectangle_index < rectangles.size();
+         ++rectangle_index) {
+      const ProductRectangle& rectangle = rectangles[rectangle_index];
+      if (rectangle.x_begin >= rectangle.x_end ||
+          rectangle.y_begin >= rectangle.y_end) {
+        return false;
+      }
+      events.push_back(ProductRectangleSweepEvent{
+          rectangle.x_begin, rectangle_index, true});
+      events.push_back(ProductRectangleSweepEvent{
+          rectangle.x_end, rectangle_index, false});
     }
-    const bool direct =
-        ranges_intersect(
-            first.first_leaf_begin,
-            first.first_leaf_end,
-            second.first_leaf_begin,
-            second.first_leaf_end) &&
-        ranges_intersect(
-            first.second_leaf_begin,
-            first.second_leaf_end,
-            second.second_leaf_begin,
-            second.second_leaf_end);
-    const bool swapped =
-        ranges_intersect(
-            first.first_leaf_begin,
-            first.first_leaf_end,
-            second.second_leaf_begin,
-            second.second_leaf_end) &&
-        ranges_intersect(
-            first.second_leaf_begin,
-            first.second_leaf_end,
-            second.first_leaf_begin,
-            second.first_leaf_end);
-    return direct || swapped;
+    std::sort(
+        events.begin(),
+        events.end(),
+        [&rectangles](const ProductRectangleSweepEvent& left,
+                      const ProductRectangleSweepEvent& right) {
+          if (left.x != right.x) {
+            return left.x < right.x;
+          }
+          // Half-open rectangles that only touch at x are disjoint.
+          if (left.is_start != right.is_start) {
+            return !left.is_start;
+          }
+          const ProductRectangle& left_rectangle =
+              rectangles[left.rectangle_index];
+          const ProductRectangle& right_rectangle =
+              rectangles[right.rectangle_index];
+          if (left_rectangle.y_begin != right_rectangle.y_begin) {
+            return left_rectangle.y_begin < right_rectangle.y_begin;
+          }
+          return left.rectangle_index < right.rectangle_index;
+        });
+
+    // Until the first contradiction, active y intervals are disjoint.  This
+    // makes predecessor/successor checks sufficient and keeps the sweep
+    // O(F log F) with O(F) transient storage.
+    std::map<std::uint64_t, ActiveProductRectangle> active;
+    for (const ProductRectangleSweepEvent& event : events) {
+      audit.frontier_active_set_operation_count = checked_add(
+          audit.frontier_active_set_operation_count,
+          1U,
+          "the checkpoint frontier active-set operation count overflows size_t");
+      const ProductRectangle& rectangle =
+          rectangles[event.rectangle_index];
+      if (!event.is_start) {
+        const auto found = active.find(rectangle.y_begin);
+        if (found == active.end() ||
+            found->second.y_end != rectangle.y_end ||
+            found->second.rectangle_index != event.rectangle_index) {
+          return false;
+        }
+        active.erase(found);
+        continue;
+      }
+
+      const auto successor = active.lower_bound(rectangle.y_begin);
+      if (successor != active.end()) {
+        audit.frontier_neighbor_test_count = checked_add(
+            audit.frontier_neighbor_test_count,
+            1U,
+            "the checkpoint frontier neighbor count overflows size_t");
+        if (successor->first < rectangle.y_end) {
+          return false;
+        }
+      }
+      if (successor != active.begin()) {
+        audit.frontier_neighbor_test_count = checked_add(
+            audit.frontier_neighbor_test_count,
+            1U,
+            "the checkpoint frontier neighbor count overflows size_t");
+        const auto predecessor = std::prev(successor);
+        if (predecessor->second.y_end > rectangle.y_begin) {
+          return false;
+        }
+      }
+      const auto [inserted, unique] = active.emplace(
+          rectangle.y_begin,
+          ActiveProductRectangle{
+              rectangle.y_end, event.rectangle_index});
+      static_cast<void>(inserted);
+      if (!unique) {
+        return false;
+      }
+    }
+    return active.empty();
+  }
+
+  [[nodiscard]] static bool witness_intervals_are_disjoint(
+      std::vector<WitnessInterval> intervals,
+      ExactPairSupportCheckpointVerification::ValidationAudit& audit) {
+    std::sort(
+        intervals.begin(),
+        intervals.end(),
+        [](const WitnessInterval& left, const WitnessInterval& right) {
+          if (left.begin != right.begin) {
+            return left.begin < right.begin;
+          }
+          return left.end < right.end;
+        });
+    bool initialized = false;
+    std::uint64_t maximum_end = 0U;
+    for (const WitnessInterval& interval : intervals) {
+      if (interval.begin >= interval.end) {
+        return false;
+      }
+      if (initialized) {
+        audit.witness_adjacent_interval_test_count = checked_add(
+            audit.witness_adjacent_interval_test_count,
+            1U,
+            "the checkpoint witness adjacency count overflows size_t");
+        if (interval.begin < maximum_end) {
+          return false;
+        }
+      }
+      initialized = true;
+      maximum_end = std::max(maximum_end, interval.end);
+    }
+    return true;
   }
 
   [[nodiscard]] ExactPairSupportStreamAudit audit_snapshot() const {
@@ -763,12 +909,11 @@ class ExactPairSupportStreamBuilder {
 
   [[nodiscard]] ExactPairSupportCheckpointVerification
   checkpoint_verification(
-      std::size_t requested_maximum_order,
+      const ExactPairSupportCheckpointManifest& authority_manifest,
       const ExactPairSupportCheckpoint& checkpoint) const {
     ExactPairSupportCheckpointVerification verification;
     verification.manifest_matches_authorities =
-        checkpoint.manifest ==
-        manifest_for(index_, cloud_, requested_maximum_order);
+        checkpoint.manifest == authority_manifest;
     verification.checksum_matches_payload =
         checkpoint.checkpoint_digest == checkpoint_digest(checkpoint);
     if (!verification.manifest_matches_authorities ||
@@ -779,22 +924,49 @@ class ExactPairSupportStreamBuilder {
     std::size_t remaining_pair_count = 0U;
     bool frontier_valid = true;
     try {
+      std::vector<ProductRectangle> rectangles;
+      rectangles.reserve(checked_multiply(
+          checkpoint.frontier.size(),
+          2U,
+          "the checkpoint frontier rectangle count overflows size_t"));
       for (std::size_t index = 0U;
            index < checkpoint.frontier.size();
            ++index) {
-        static_cast<void>(entry_nodes(checkpoint.frontier[index]));
+        const ExactPairSupportFrontierEntry& entry =
+            checkpoint.frontier[index];
+        static_cast<void>(entry_nodes(entry));
+        verification.validation_audit.frontier_entry_validation_count =
+            checked_add(
+                verification.validation_audit
+                    .frontier_entry_validation_count,
+                1U,
+                "the checkpoint frontier validation count overflows size_t");
         remaining_pair_count = checked_add(
             remaining_pair_count,
-            entry_pair_count(checkpoint.frontier[index]),
+            entry_pair_count(entry),
             "the checkpoint frontier pair count overflows size_t");
-        for (std::size_t previous = 0U; previous < index; ++previous) {
-          if (product_domains_overlap(
-                  checkpoint.frontier[previous],
-                  checkpoint.frontier[index])) {
-            frontier_valid = false;
-          }
+        rectangles.push_back(ProductRectangle{
+            entry.first_leaf_begin,
+            entry.first_leaf_end,
+            entry.second_leaf_begin,
+            entry.second_leaf_end});
+        if (entry.self_product == 0U) {
+          rectangles.push_back(ProductRectangle{
+              entry.second_leaf_begin,
+              entry.second_leaf_end,
+              entry.first_leaf_begin,
+              entry.first_leaf_end});
         }
       }
+      verification.validation_audit.frontier_rectangle_count =
+          rectangles.size();
+      verification.validation_audit.frontier_sweep_event_count =
+          checked_multiply(
+              rectangles.size(),
+              2U,
+              "the checkpoint frontier sweep count overflows size_t");
+      frontier_valid = product_rectangles_are_disjoint(
+          rectangles, verification.validation_audit);
     } catch (const std::exception&) {
       frontier_valid = false;
     }
@@ -846,6 +1018,17 @@ class ExactPairSupportStreamBuilder {
               pending_active_witness_entry_count = active_entries.size();
               pending_strict_receipt_count =
                   pending.strict_witness_receipts.size();
+              verification.validation_audit
+                  .active_witness_entry_validation_count =
+                  active_entries.size();
+              verification.validation_audit
+                  .strict_witness_receipt_validation_count =
+                  pending.strict_witness_receipts.size();
+              std::vector<WitnessInterval> witness_intervals;
+              witness_intervals.reserve(checked_add(
+                  active_entries.size(),
+                  pending.strict_witness_receipts.size(),
+                  "the checkpoint witness interval count overflows size_t"));
               std::size_t receipt_point_count = 0U;
               const spatial::ExactDyadicAabb3 first_box =
                   node_box(first_node_index);
@@ -859,6 +1042,13 @@ class ExactPairSupportStreamBuilder {
                 const std::size_t receipt_node_index =
                     witness_node_index(receipt);
                 const Node& receipt_node = node(receipt_node_index);
+                verification.validation_audit
+                    .strict_receipt_geometry_recertification_count =
+                    checked_add(
+                        verification.validation_audit
+                            .strict_receipt_geometry_recertification_count,
+                        1U,
+                        "the checkpoint receipt recertification count overflows size_t");
                 if (node_range_intersects(receipt_node, first) ||
                     node_range_intersects(receipt_node, second) ||
                     exact_diametral_phi_aabb_maximum(
@@ -872,36 +1062,21 @@ class ExactPairSupportStreamBuilder {
                     receipt_point_count,
                     receipt_node.leaf_end - receipt_node.leaf_begin,
                     "the checkpoint witness receipt count overflows size_t");
-                for (std::size_t previous = 0U;
-                     previous < receipt_index;
-                     ++previous) {
-                  if (witness_ranges_intersect(
-                          pending.strict_witness_receipts[previous],
-                          receipt)) {
-                    pending_valid = false;
-                  }
-                }
-                for (const ExactPairSupportWitnessNodeEntry& active :
-                     active_entries) {
-                  if (witness_ranges_intersect(receipt, active)) {
-                    pending_valid = false;
-                  }
-                }
+                witness_intervals.push_back(WitnessInterval{
+                    receipt.leaf_begin, receipt.leaf_end});
               }
-              for (std::size_t active_index = 0U;
-                   active_index < active_entries.size();
-                   ++active_index) {
-                static_cast<void>(witness_node_index(
-                    active_entries[active_index]));
-                for (std::size_t previous = 0U;
-                     previous < active_index;
-                     ++previous) {
-                  if (witness_ranges_intersect(
-                          active_entries[previous],
-                          active_entries[active_index])) {
-                    pending_valid = false;
-                  }
-                }
+              for (const ExactPairSupportWitnessNodeEntry& active :
+                   active_entries) {
+                static_cast<void>(witness_node_index(active));
+                witness_intervals.push_back(WitnessInterval{
+                    active.leaf_begin, active.leaf_end});
+              }
+              verification.validation_audit.witness_interval_count =
+                  witness_intervals.size();
+              if (!witness_intervals_are_disjoint(
+                      std::move(witness_intervals),
+                      verification.validation_audit)) {
+                pending_valid = false;
               }
               const std::size_t witness_threshold =
                   checkpoint.manifest.maximum_relevant_closed_rank - 1U;
@@ -1064,12 +1239,46 @@ class ExactPairSupportStreamBuilder {
       audit_valid = false;
     }
     verification.required_audit_identities_hold = audit_valid;
+    verification.quasi_linear_structure_validation_certified =
+        verification.frontier_locally_valid &&
+        verification.pending_product_locally_valid &&
+        verification.validation_audit.frontier_sweep_event_count ==
+            checked_multiply(
+                verification.validation_audit.frontier_rectangle_count,
+                2U,
+                "the checkpoint certified sweep count overflows size_t") &&
+        verification.validation_audit
+                .frontier_active_set_operation_count ==
+            verification.validation_audit.frontier_sweep_event_count &&
+        verification.validation_audit.frontier_neighbor_test_count <=
+            checked_multiply(
+                verification.validation_audit.frontier_rectangle_count,
+                2U,
+                "the checkpoint certified neighbor count overflows size_t") &&
+        verification.validation_audit.witness_interval_count ==
+            checked_add(
+                verification.validation_audit
+                    .active_witness_entry_validation_count,
+                verification.validation_audit
+                    .strict_witness_receipt_validation_count,
+                "the checkpoint certified witness count overflows size_t") &&
+        verification.validation_audit
+                .witness_adjacent_interval_test_count ==
+            (verification.validation_audit.witness_interval_count == 0U
+                 ? 0U
+                 : verification.validation_audit.witness_interval_count -
+                       1U) &&
+        verification.validation_audit
+                .strict_receipt_geometry_recertification_count ==
+            verification.validation_audit
+                .strict_witness_receipt_validation_count;
     verification.integrity_verified =
         verification.manifest_matches_authorities &&
         verification.checksum_matches_payload &&
         verification.frontier_locally_valid &&
         verification.pending_product_locally_valid &&
-        verification.required_audit_identities_hold;
+        verification.required_audit_identities_hold &&
+        verification.quasi_linear_structure_validation_certified;
     return verification;
   }
 
@@ -2180,17 +2389,32 @@ make_exact_pair_support_checkpoint_manifest(
       index, cloud, requested_maximum_order);
 }
 
+ExactPairSupportAuthorityContext::ExactPairSupportAuthorityContext(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order)
+    : index_(&index),
+      cloud_(&cloud),
+      requested_maximum_order_(requested_maximum_order) {
+  manifest_ = ExactPairSupportStreamBuilder::manifest_for_with_audit(
+      index, cloud, requested_maximum_order, &audit_);
+}
+
 ExactPairSupportCheckpoint make_initial_exact_pair_support_checkpoint(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     std::size_t requested_maximum_order) {
-  const ExactPairSupportCheckpointManifest manifest =
-      make_exact_pair_support_checkpoint_manifest(
-          index, cloud, requested_maximum_order);
+  const ExactPairSupportAuthorityContext authority{
+      index, cloud, requested_maximum_order};
+  return make_initial_exact_pair_support_checkpoint(authority);
+}
+
+ExactPairSupportCheckpoint make_initial_exact_pair_support_checkpoint(
+    const ExactPairSupportAuthorityContext& authority) {
   ExactPairSupportStreamBuilder builder{
-      index,
-      cloud,
-      requested_maximum_order,
+      authority.index(),
+      authority.cloud(),
+      authority.requested_maximum_order(),
       ExactPairSupportStreamBudget{
           0U,
           1U,
@@ -2199,7 +2423,7 @@ ExactPairSupportCheckpoint make_initial_exact_pair_support_checkpoint(
           0U,
           0U,
           0U}};
-  return builder.snapshot_checkpoint(manifest, 0U);
+  return builder.snapshot_checkpoint(authority.manifest(), 0U);
 }
 
 contract::CanonicalId compute_exact_pair_support_checkpoint_digest(
@@ -2212,24 +2436,31 @@ ExactPairSupportCheckpointVerification verify_exact_pair_support_checkpoint(
     const spatial::CanonicalPointCloud& cloud,
     std::size_t requested_maximum_order,
     const ExactPairSupportCheckpoint& checkpoint) {
-  return ExactPairSupportStreamBuilder::verify_checkpoint_for(
-      index, cloud, requested_maximum_order, checkpoint);
+  const ExactPairSupportAuthorityContext authority{
+      index, cloud, requested_maximum_order};
+  return verify_exact_pair_support_checkpoint(authority, checkpoint);
 }
 
-ExactPairSupportStreamChunk build_exact_pair_support_stream_chunk(
+ExactPairSupportCheckpointVerification verify_exact_pair_support_checkpoint(
+    const ExactPairSupportAuthorityContext& authority,
+    const ExactPairSupportCheckpoint& checkpoint) {
+  return ExactPairSupportStreamBuilder::verify_checkpoint_for(
+      authority.index(),
+      authority.cloud(),
+      authority.requested_maximum_order(),
+      authority.manifest(),
+      checkpoint);
+}
+
+namespace {
+
+[[nodiscard]] ExactPairSupportStreamChunk
+build_exact_pair_support_stream_chunk_after_source_verification(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     std::size_t requested_maximum_order,
     const ExactPairSupportStreamBudget& chunk_budget,
     const ExactPairSupportCheckpoint& checkpoint) {
-  const ExactPairSupportCheckpointVerification source_verification =
-      verify_exact_pair_support_checkpoint(
-          index, cloud, requested_maximum_order, checkpoint);
-  if (!source_verification.integrity_verified) {
-    throw std::invalid_argument(
-        "a pair-support chunk requires an integrity-verified trusted source checkpoint");
-  }
-
   ExactPairSupportStreamChunk chunk;
   chunk.manifest = checkpoint.manifest;
   chunk.budget = chunk_budget;
@@ -2280,6 +2511,38 @@ ExactPairSupportStreamChunk build_exact_pair_support_stream_chunk(
   return chunk;
 }
 
+}  // namespace
+
+ExactPairSupportStreamChunk build_exact_pair_support_stream_chunk(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& checkpoint) {
+  const ExactPairSupportAuthorityContext authority{
+      index, cloud, requested_maximum_order};
+  return build_exact_pair_support_stream_chunk(
+      authority, chunk_budget, checkpoint);
+}
+
+ExactPairSupportStreamChunk build_exact_pair_support_stream_chunk(
+    const ExactPairSupportAuthorityContext& authority,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& checkpoint) {
+  const ExactPairSupportCheckpointVerification source_verification =
+      verify_exact_pair_support_checkpoint(authority, checkpoint);
+  if (!source_verification.integrity_verified) {
+    throw std::invalid_argument(
+        "a pair-support chunk requires an integrity-verified trusted source checkpoint");
+  }
+  return build_exact_pair_support_stream_chunk_after_source_verification(
+      authority.index(),
+      authority.cloud(),
+      authority.requested_maximum_order(),
+      chunk_budget,
+      checkpoint);
+}
+
 ExactPairSupportStreamChunkVerification verify_exact_pair_support_stream_chunk(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
@@ -2287,24 +2550,37 @@ ExactPairSupportStreamChunkVerification verify_exact_pair_support_stream_chunk(
     const ExactPairSupportStreamBudget& chunk_budget,
     const ExactPairSupportCheckpoint& source_checkpoint,
     const ExactPairSupportStreamChunk& observed) {
+  const ExactPairSupportAuthorityContext authority{
+      index, cloud, requested_maximum_order};
+  return verify_exact_pair_support_stream_chunk(
+      authority, chunk_budget, source_checkpoint, observed);
+}
+
+namespace {
+
+[[nodiscard]] ExactPairSupportStreamChunkVerification
+verify_exact_pair_support_stream_chunk_with_trusted_next(
+    const ExactPairSupportAuthorityContext& authority,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& source_checkpoint,
+    const ExactPairSupportStreamChunk& observed,
+    bool source_checkpoint_already_trusted,
+    ExactPairSupportCheckpoint* trusted_next_checkpoint) {
   ExactPairSupportStreamChunkVerification verification;
   verification.source_checkpoint_integrity_verified =
-      verify_exact_pair_support_checkpoint(
-          index,
-          cloud,
-          requested_maximum_order,
-          source_checkpoint)
+      source_checkpoint_already_trusted ||
+      verify_exact_pair_support_checkpoint(authority, source_checkpoint)
           .integrity_verified;
   verification.requested_budget_certified =
       observed.budget == chunk_budget;
   if (!verification.source_checkpoint_integrity_verified) {
     return verification;
   }
-  const ExactPairSupportStreamChunk expected =
-      build_exact_pair_support_stream_chunk(
-          index,
-          cloud,
-          requested_maximum_order,
+  ExactPairSupportStreamChunk expected =
+      build_exact_pair_support_stream_chunk_after_source_verification(
+          authority.index(),
+          authority.cloud(),
+          authority.requested_maximum_order(),
           chunk_budget,
           source_checkpoint);
   verification.prepared_transition_chain_matches =
@@ -2327,10 +2603,7 @@ ExactPairSupportStreamChunkVerification verify_exact_pair_support_stream_chunk(
   verification.next_checkpoint_integrity_verified =
       observed.next_checkpoint == expected.next_checkpoint &&
       verify_exact_pair_support_checkpoint(
-          index,
-          cloud,
-          requested_maximum_order,
-          observed.next_checkpoint)
+          authority, observed.next_checkpoint)
           .integrity_verified;
   verification.fresh_replay_certified = observed == expected;
   verification.chunk_transition_verified =
@@ -2340,6 +2613,111 @@ ExactPairSupportStreamChunkVerification verify_exact_pair_support_stream_chunk(
       verification.records_individually_exact &&
       verification.next_checkpoint_integrity_verified &&
       verification.fresh_replay_certified;
+  if (verification.chunk_transition_verified &&
+      trusted_next_checkpoint != nullptr) {
+    static_assert(
+        std::is_nothrow_move_assignable_v<ExactPairSupportCheckpoint>);
+    *trusted_next_checkpoint = std::move(expected.next_checkpoint);
+  }
+  return verification;
+}
+
+}  // namespace
+
+ExactPairSupportStreamChunkVerification verify_exact_pair_support_stream_chunk(
+    const ExactPairSupportAuthorityContext& authority,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& source_checkpoint,
+    const ExactPairSupportStreamChunk& observed) {
+  return verify_exact_pair_support_stream_chunk_with_trusted_next(
+      authority,
+      chunk_budget,
+      source_checkpoint,
+      observed,
+      false,
+      nullptr);
+}
+
+ExactPairSupportIncrementalVerifier::ExactPairSupportIncrementalVerifier(
+    const ExactPairSupportAuthorityContext& authority)
+    : authority_(authority),
+      trusted_checkpoint_(
+          make_initial_exact_pair_support_checkpoint(authority_)) {
+  status_.initial_checkpoint_reconstructed =
+      verify_exact_pair_support_checkpoint(
+          authority_, trusted_checkpoint_)
+          .integrity_verified;
+  status_.every_transition_verified =
+      status_.initial_checkpoint_reconstructed;
+  status_.terminal_checkpoint_reached =
+      status_.initial_checkpoint_reconstructed &&
+      trusted_checkpoint_.complete();
+  status_.anchored_prefix_certified =
+      status_.initial_checkpoint_reconstructed;
+  status_.anchored_run_certified =
+      status_.anchored_prefix_certified &&
+      status_.terminal_checkpoint_reached;
+  status_.failed_closed =
+      !status_.initial_checkpoint_reconstructed;
+  status_.retained_chunk_count = 0U;
+}
+
+ExactPairSupportStreamChunkVerification
+ExactPairSupportIncrementalVerifier::verify_next(
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportStreamChunk& observed) {
+  const auto poison = [this]() noexcept {
+    status_.every_transition_verified = false;
+    status_.anchored_prefix_certified = false;
+    status_.anchored_run_certified = false;
+    status_.failed_closed = true;
+  };
+  if (status_.failed_closed ||
+      !status_.initial_checkpoint_reconstructed ||
+      status_.terminal_checkpoint_reached) {
+    poison();
+    return ExactPairSupportStreamChunkVerification{};
+  }
+
+  ExactPairSupportCheckpoint trusted_next;
+  ExactPairSupportStreamChunkVerification verification;
+  try {
+    verification =
+        verify_exact_pair_support_stream_chunk_with_trusted_next(
+            authority_,
+            chunk_budget,
+            trusted_checkpoint_,
+            observed,
+            true,
+            &trusted_next);
+  } catch (...) {
+    poison();
+    throw;
+  }
+  if (!verification.chunk_transition_verified) {
+    poison();
+    return verification;
+  }
+
+  std::size_t verified_chunk_count = 0U;
+  try {
+    verified_chunk_count = checked_add(
+        status_.verified_chunk_count,
+        1U,
+        "the incremental pair-support verified chunk count overflows size_t");
+  } catch (...) {
+    poison();
+    throw;
+  }
+  static_assert(
+      std::is_nothrow_move_assignable_v<ExactPairSupportCheckpoint>);
+  trusted_checkpoint_ = std::move(trusted_next);
+  status_.verified_chunk_count = verified_chunk_count;
+  status_.terminal_checkpoint_reached = trusted_checkpoint_.complete();
+  status_.anchored_prefix_certified = true;
+  status_.anchored_run_certified =
+      status_.terminal_checkpoint_reached;
+  status_.retained_chunk_count = 0U;
   return verification;
 }
 
@@ -2354,50 +2732,39 @@ ExactPairSupportStreamRunVerification verify_exact_pair_support_stream_run(
     return verification;
   }
 
-  ExactPairSupportCheckpoint trusted_checkpoint =
-      make_initial_exact_pair_support_checkpoint(
-          index, cloud, requested_maximum_order);
-  verification.initial_checkpoint_reconstructed =
-      verify_exact_pair_support_checkpoint(
-          index,
-          cloud,
-          requested_maximum_order,
-          trusted_checkpoint)
-          .integrity_verified;
-  if (!verification.initial_checkpoint_reconstructed) {
-    return verification;
-  }
-
-  verification.every_transition_verified = true;
+  const ExactPairSupportAuthorityContext authority{
+      index, cloud, requested_maximum_order};
+  ExactPairSupportIncrementalVerifier incremental{authority};
   for (std::size_t chunk_index = 0U;
        chunk_index < chunks.size();
        ++chunk_index) {
-    if (trusted_checkpoint.complete()) {
-      verification.every_transition_verified = false;
-      return verification;
-    }
     const ExactPairSupportStreamChunkVerification transition =
-        verify_exact_pair_support_stream_chunk(
-            index,
-            cloud,
-            requested_maximum_order,
+        incremental.verify_next(
             chunk_budgets[chunk_index],
-            trusted_checkpoint,
             chunks[chunk_index]);
     if (!transition.chunk_transition_verified) {
-      verification.every_transition_verified = false;
-      return verification;
+      break;
     }
-    trusted_checkpoint = chunks[chunk_index].next_checkpoint;
-    ++verification.verified_chunk_count;
   }
 
-  verification.terminal_checkpoint_reached = trusted_checkpoint.complete();
+  const ExactPairSupportIncrementalVerifierStatus& status =
+      incremental.status();
+  verification.initial_checkpoint_reconstructed =
+      status.initial_checkpoint_reconstructed;
+  verification.verified_chunk_count = status.verified_chunk_count;
+  verification.every_transition_verified =
+      status.every_transition_verified &&
+      status.verified_chunk_count == chunks.size();
+  verification.terminal_checkpoint_reached =
+      status.terminal_checkpoint_reached;
   verification.anchored_run_certified =
       verification.initial_checkpoint_reconstructed &&
       verification.every_transition_verified &&
       verification.verified_chunk_count == chunks.size() &&
-      verification.terminal_checkpoint_reached;
+      verification.terminal_checkpoint_reached &&
+      status.anchored_run_certified &&
+      !status.failed_closed &&
+      status.retained_chunk_count == 0U;
   return verification;
 }
 

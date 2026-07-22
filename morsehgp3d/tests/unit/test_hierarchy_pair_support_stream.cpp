@@ -14,6 +14,7 @@
 #include <span>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -25,7 +26,10 @@ using morsehgp3d::exact::ExactRational;
 using morsehgp3d::exact::ExactRational3;
 using morsehgp3d::hierarchy::ExactPairSupportEvent;
 using morsehgp3d::hierarchy::ExactPairSupportExtraShellDiagnostic;
+using morsehgp3d::hierarchy::ExactPairSupportAuthorityContext;
 using morsehgp3d::hierarchy::ExactPairSupportCheckpoint;
+using morsehgp3d::hierarchy::ExactPairSupportCheckpointVerification;
+using morsehgp3d::hierarchy::ExactPairSupportIncrementalVerifier;
 using morsehgp3d::hierarchy::ExactPairSupportPendingStage;
 using morsehgp3d::hierarchy::ExactPairSupportPendingProduct;
 using morsehgp3d::hierarchy::ExactPairSupportWitnessNodeEntry;
@@ -50,6 +54,33 @@ using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ExactDyadicAabb3;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
+
+static_assert(!std::is_constructible_v<
+              ExactPairSupportAuthorityContext,
+              MortonLbvhIndex&&,
+              const CanonicalPointCloud&,
+              std::size_t>);
+static_assert(!std::is_constructible_v<
+              ExactPairSupportAuthorityContext,
+              const MortonLbvhIndex&,
+              CanonicalPointCloud&&,
+              std::size_t>);
+static_assert(!std::is_constructible_v<
+              ExactPairSupportAuthorityContext,
+              const MortonLbvhIndex&&,
+              const CanonicalPointCloud&,
+              std::size_t>);
+static_assert(!std::is_constructible_v<
+              ExactPairSupportAuthorityContext,
+              const MortonLbvhIndex&,
+              const CanonicalPointCloud&&,
+              std::size_t>);
+static_assert(!std::is_constructible_v<
+              ExactPairSupportIncrementalVerifier,
+              ExactPairSupportAuthorityContext&&>);
+static_assert(!std::is_constructible_v<
+              ExactPairSupportIncrementalVerifier,
+              const ExactPairSupportAuthorityContext&&>);
 
 int failures = 0;
 
@@ -128,6 +159,56 @@ void check_throws(Function&& function, const std::string& message) {
          verification.next_checkpoint_integrity_verified &&
          verification.fresh_replay_certified &&
          verification.chunk_transition_verified;
+}
+
+void check_quasi_linear_checkpoint_validation(
+    const ExactPairSupportAuthorityContext& authority,
+    const ExactPairSupportCheckpoint& checkpoint,
+    const std::string& message) {
+  const ExactPairSupportCheckpointVerification verification =
+      verify_exact_pair_support_checkpoint(authority, checkpoint);
+  std::size_t rectangle_count = 0U;
+  for (const auto& entry : checkpoint.frontier) {
+    rectangle_count += entry.self_product == 0U ? 2U : 1U;
+  }
+  std::size_t active_witness_count = 0U;
+  std::size_t strict_receipt_count = 0U;
+  if (checkpoint.pending_product.has_value() &&
+      checkpoint.pending_product->stage ==
+          ExactPairSupportPendingStage::rank_search) {
+    active_witness_count =
+        checkpoint.pending_product->witness_frontier.size() +
+        (checkpoint.pending_product->deferred_expansion_node.has_value()
+             ? 1U
+             : 0U);
+    strict_receipt_count =
+        checkpoint.pending_product->strict_witness_receipts.size();
+  }
+  const std::size_t witness_interval_count =
+      active_witness_count + strict_receipt_count;
+  const auto& audit = verification.validation_audit;
+  check(
+      verification.integrity_verified &&
+          verification.quasi_linear_structure_validation_certified &&
+          audit.frontier_entry_validation_count ==
+              checkpoint.frontier.size() &&
+          audit.frontier_rectangle_count == rectangle_count &&
+          audit.frontier_sweep_event_count == 2U * rectangle_count &&
+          audit.frontier_active_set_operation_count ==
+              audit.frontier_sweep_event_count &&
+          audit.frontier_neighbor_test_count <= 2U * rectangle_count &&
+          audit.active_witness_entry_validation_count ==
+              active_witness_count &&
+          audit.strict_witness_receipt_validation_count ==
+              strict_receipt_count &&
+          audit.witness_interval_count == witness_interval_count &&
+          audit.witness_adjacent_interval_test_count ==
+              (witness_interval_count == 0U
+                   ? 0U
+                   : witness_interval_count - 1U) &&
+          audit.strict_receipt_geometry_recertification_count ==
+              strict_receipt_count,
+      message);
 }
 
 struct ChunkedPairRun {
@@ -760,6 +841,220 @@ void test_resumable_chunks_match_resident_stream() {
           long_pair->interior_ids == std::vector<PointId>{1U, 2U} &&
           long_pair->closed_rank == 4U,
       "the resumable stream retains the nonlocal long pair and its exact rank");
+}
+
+void test_persistent_authority_and_incremental_verifier() {
+  std::vector<CertifiedPoint3> points;
+  points.reserve(14U);
+  for (std::size_t point_index = 0U; point_index < 14U; ++point_index) {
+    const double x = static_cast<double>(point_index) - 7.0;
+    const double y =
+        static_cast<double>((point_index * point_index + 3U) % 17U) - 8.0;
+    const double z = static_cast<double>(
+                         (point_index * point_index * point_index + 5U) %
+                         19U) -
+                     9.0;
+    points.push_back(point(x, y, z));
+  }
+  const CanonicalPointCloud cloud = cloud_from(points);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactPairSupportAuthorityContext authority{index, cloud, 10U};
+  check(
+      authority.audit().manifest_cached &&
+          authority.audit().manifest_build_count == 1U &&
+          authority.audit().canonical_cloud_point_hash_count ==
+              cloud.size() &&
+          authority.audit().lbvh_leaf_hash_count ==
+              authority.manifest().lbvh_leaf_count &&
+          authority.audit().lbvh_node_hash_count ==
+              authority.manifest().lbvh_node_count,
+      "the persistent pair-support authority hashes the cloud and LBVH exactly once");
+
+  const ExactPairSupportCheckpoint initial =
+      make_initial_exact_pair_support_checkpoint(authority);
+  check_quasi_linear_checkpoint_validation(
+      authority,
+      initial,
+      "the authority-backed initial checkpoint uses bounded sweep validation");
+  const ExactPairSupportStreamChunk resident =
+      build_exact_pair_support_stream_chunk(
+          authority, unlimited_budget(), initial);
+
+  std::optional<ExactPairSupportIncrementalVerifier>
+      verifier_after_context_destruction;
+  {
+    const ExactPairSupportAuthorityContext short_lived_authority{
+        index, cloud, 10U};
+    verifier_after_context_destruction.emplace(short_lived_authority);
+  }
+  ExactPairSupportStreamBudget short_context_budget = unlimited_budget();
+  short_context_budget.maximum_work_unit_count = 1U;
+  short_context_budget.maximum_emitted_record_count = 1U;
+  const ExactPairSupportStreamChunk first_after_context_destruction =
+      build_exact_pair_support_stream_chunk(
+          authority,
+          short_context_budget,
+          verifier_after_context_destruction->trusted_checkpoint());
+  check(
+      verifier_after_context_destruction
+          ->verify_next(
+              first_after_context_destruction.budget,
+              first_after_context_destruction)
+          .chunk_transition_verified,
+      "the incremental verifier owns its authority cache after the construction context is destroyed");
+
+  ExactPairSupportStreamBudget unit_budget = unlimited_budget();
+  unit_budget.maximum_work_unit_count = 1U;
+  unit_budget.maximum_emitted_record_count = 1U;
+  ExactPairSupportIncrementalVerifier verifier{authority};
+  std::vector<ExactPairSupportEvent> events;
+  std::vector<ExactPairSupportExtraShellDiagnostic> diagnostics;
+  std::vector<ExactPairSupportStreamChunk::RecordKind> record_order;
+  std::size_t chunk_count = 0U;
+  bool observed_active_rank_cursor = false;
+  bool observed_strict_receipt = false;
+  while (!verifier.status().terminal_checkpoint_reached) {
+    if (chunk_count >= 100000U) {
+      throw std::logic_error(
+          "the incremental pair-support fixture exceeded its progress bound");
+    }
+    check_quasi_linear_checkpoint_validation(
+        authority,
+        verifier.trusted_checkpoint(),
+        "each incremental source checkpoint uses quasi-linear structural validation");
+    const ExactPairSupportStreamChunk chunk =
+        build_exact_pair_support_stream_chunk(
+            authority, unit_budget, verifier.trusted_checkpoint());
+    const ExactPairSupportStreamChunkVerification transition =
+        verifier.verify_next(unit_budget, chunk);
+    check(
+        chunk_verification_closes(transition) &&
+            verifier.status().anchored_prefix_certified &&
+            !verifier.status().failed_closed &&
+            verifier.status().retained_chunk_count == 0U,
+        "verify_next advances one anchored transition without retaining its chunk");
+    events.insert(events.end(), chunk.events.begin(), chunk.events.end());
+    diagnostics.insert(
+        diagnostics.end(),
+        chunk.relevant_extra_shell_diagnostics.begin(),
+        chunk.relevant_extra_shell_diagnostics.end());
+    record_order.insert(
+        record_order.end(),
+        chunk.record_order.begin(),
+        chunk.record_order.end());
+    if (verifier.trusted_checkpoint().pending_product.has_value() &&
+        verifier.trusted_checkpoint().pending_product->stage ==
+            ExactPairSupportPendingStage::rank_search) {
+      observed_active_rank_cursor =
+          observed_active_rank_cursor ||
+          verifier.trusted_checkpoint()
+              .pending_product->rank_search_started;
+      observed_strict_receipt =
+          observed_strict_receipt ||
+          !verifier.trusted_checkpoint()
+               .pending_product->strict_witness_receipts.empty();
+    }
+    ++chunk_count;
+  }
+  check_quasi_linear_checkpoint_validation(
+      authority,
+      verifier.trusted_checkpoint(),
+      "the terminal incremental checkpoint keeps the quasi-linear validation certificate");
+  check(
+      chunk_count > 20U && observed_active_rank_cursor &&
+          observed_strict_receipt,
+      "the incremental fixture spans many chunks and persists an active strict-witness cursor");
+  check(
+      verifier.status().verified_chunk_count == chunk_count &&
+          verifier.status().every_transition_verified &&
+          verifier.status().terminal_checkpoint_reached &&
+          verifier.status().anchored_run_certified &&
+          verifier.status().retained_chunk_count == 0U,
+      "the incremental verifier closes an anchored terminal run while retaining no chunk history");
+  check(
+      events == resident.events &&
+          diagnostics == resident.relevant_extra_shell_diagnostics &&
+          record_order == resident.record_order &&
+          verifier.trusted_checkpoint().cumulative_audit ==
+              resident.next_checkpoint.cumulative_audit &&
+          verifier.trusted_checkpoint().output_chain_digest ==
+              resident.next_checkpoint.output_chain_digest,
+      "the incremental stream reproduces the resident records, audit, and output digest");
+  check(
+      authority.audit().manifest_build_count == 1U,
+      "all incremental production and verification calls reuse one authority manifest");
+
+  ExactPairSupportIncrementalVerifier poisoned{authority};
+  const ExactPairSupportCheckpoint trusted_before =
+      poisoned.trusted_checkpoint();
+  const ExactPairSupportStreamChunk valid_first =
+      build_exact_pair_support_stream_chunk(
+          authority, unit_budget, trusted_before);
+  ExactPairSupportStreamChunk mutated_first = valid_first;
+  mutated_first.source_checkpoint_digest = {};
+  check(
+      !poisoned.verify_next(unit_budget, mutated_first)
+           .chunk_transition_verified &&
+          poisoned.status().failed_closed &&
+          !poisoned.status().anchored_prefix_certified &&
+          poisoned.status().verified_chunk_count == 0U &&
+          poisoned.status().retained_chunk_count == 0U &&
+          poisoned.trusted_checkpoint() == trusted_before,
+      "a rejected incremental transition poisons the verifier without advancing its trusted checkpoint");
+  check(
+      !poisoned.verify_next(unit_budget, valid_first)
+           .chunk_transition_verified &&
+          poisoned.trusted_checkpoint() == trusted_before,
+      "a poisoned incremental verifier cannot later accept a retry of the rejected transition");
+  const ExactPairSupportStreamChunk skipped_successor =
+      build_exact_pair_support_stream_chunk(
+          authority,
+          unit_budget,
+          valid_first.next_checkpoint);
+  check(
+      !poisoned.verify_next(unit_budget, skipped_successor)
+           .chunk_transition_verified &&
+          poisoned.trusted_checkpoint() == trusted_before,
+      "a poisoned incremental verifier cannot skip the rejected transition by presenting its successor");
+
+  ExactPairSupportIncrementalVerifier exceptional{authority};
+  ExactPairSupportStreamBudget undersized_budget = unit_budget;
+  undersized_budget.maximum_frontier_entry_count = 0U;
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(
+            exceptional.verify_next(undersized_budget, valid_first));
+      },
+      "an incremental replay propagates an invalid persisted-frontier capacity");
+  check(
+      exceptional.status().failed_closed &&
+          !exceptional.status().anchored_prefix_certified &&
+          exceptional.status().verified_chunk_count == 0U &&
+          exceptional.status().retained_chunk_count == 0U &&
+          exceptional.trusted_checkpoint() == trusted_before,
+      "an exceptional incremental replay poisons without advancing its trusted checkpoint");
+
+  const CanonicalPointCloud singleton = cloud_from({point(0.0)});
+  const MortonLbvhIndex singleton_index = MortonLbvhIndex::build(singleton);
+  const ExactPairSupportAuthorityContext singleton_authority{
+      singleton_index, singleton, 10U};
+  ExactPairSupportIncrementalVerifier singleton_verifier{
+      singleton_authority};
+  const ExactPairSupportStreamChunk redundant_terminal =
+      build_exact_pair_support_stream_chunk(
+          singleton_authority,
+          ExactPairSupportStreamBudget{},
+          singleton_verifier.trusted_checkpoint());
+  check(
+      singleton_verifier.status().anchored_run_certified &&
+          singleton_verifier.status().verified_chunk_count == 0U &&
+          singleton_verifier.status().retained_chunk_count == 0U &&
+          !singleton_verifier
+               .verify_next(
+                   ExactPairSupportStreamBudget{}, redundant_terminal)
+               .chunk_transition_verified &&
+          singleton_verifier.status().failed_closed,
+      "the incremental singleton run is canonically empty and rejects a redundant no-op chunk");
 }
 
 void test_every_prepared_stop_resumes_without_recount() {
@@ -1673,6 +1968,7 @@ int main() {
   test_real_anchor_shell_equality_exclusion();
   test_transactional_budgets();
   test_resumable_chunks_match_resident_stream();
+  test_persistent_authority_and_incremental_verifier();
   test_every_prepared_stop_resumes_without_recount();
   test_resume_inside_rank_witness_search();
   test_pending_witness_checkpoint_invariants();

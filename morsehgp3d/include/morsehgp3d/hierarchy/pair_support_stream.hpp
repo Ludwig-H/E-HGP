@@ -176,6 +176,83 @@ struct ExactPairSupportCheckpointManifest {
       const ExactPairSupportCheckpointManifest&) = default;
 };
 
+// 9.3b-RCPU authority cache.  The referenced cloud and LBVH must outlive the
+// context and must not be moved while it is in use.  Construction authenticates
+// and hashes both authorities exactly once; chunk production and verification
+// then reuse the cached manifest instead of rescanning O(n) data.
+struct ExactPairSupportAuthorityContextAudit {
+  std::size_t manifest_build_count{};
+  std::size_t canonical_cloud_point_hash_count{};
+  std::size_t lbvh_leaf_hash_count{};
+  std::size_t lbvh_node_hash_count{};
+  bool manifest_cached{false};
+
+  friend bool operator==(
+      const ExactPairSupportAuthorityContextAudit&,
+      const ExactPairSupportAuthorityContextAudit&) = default;
+};
+
+class ExactPairSupportAuthorityContext {
+ public:
+  ExactPairSupportAuthorityContext(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::size_t requested_maximum_order);
+  ExactPairSupportAuthorityContext(
+      spatial::MortonLbvhIndex&&,
+      const spatial::CanonicalPointCloud&,
+      std::size_t) = delete;
+  ExactPairSupportAuthorityContext(
+      const spatial::MortonLbvhIndex&&,
+      const spatial::CanonicalPointCloud&,
+      std::size_t) = delete;
+  ExactPairSupportAuthorityContext(
+      const spatial::MortonLbvhIndex&,
+      spatial::CanonicalPointCloud&&,
+      std::size_t) = delete;
+  ExactPairSupportAuthorityContext(
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&&,
+      std::size_t) = delete;
+
+  ExactPairSupportAuthorityContext& operator=(
+      const ExactPairSupportAuthorityContext&) = delete;
+  ExactPairSupportAuthorityContext(
+      ExactPairSupportAuthorityContext&&) = delete;
+  ExactPairSupportAuthorityContext& operator=(
+      ExactPairSupportAuthorityContext&&) = delete;
+
+  [[nodiscard]] const spatial::MortonLbvhIndex& index() const noexcept {
+    return *index_;
+  }
+  [[nodiscard]] const spatial::CanonicalPointCloud& cloud() const noexcept {
+    return *cloud_;
+  }
+  [[nodiscard]] std::size_t requested_maximum_order() const noexcept {
+    return requested_maximum_order_;
+  }
+  [[nodiscard]] const ExactPairSupportCheckpointManifest& manifest()
+      const noexcept {
+    return manifest_;
+  }
+  [[nodiscard]] const ExactPairSupportAuthorityContextAudit& audit()
+      const noexcept {
+    return audit_;
+  }
+
+ private:
+  ExactPairSupportAuthorityContext(
+      const ExactPairSupportAuthorityContext&) = default;
+
+  const spatial::MortonLbvhIndex* index_{};
+  const spatial::CanonicalPointCloud* cloud_{};
+  std::size_t requested_maximum_order_{};
+  ExactPairSupportCheckpointManifest manifest_{};
+  ExactPairSupportAuthorityContextAudit audit_{};
+
+  friend class ExactPairSupportIncrementalVerifier;
+};
+
 struct ExactPairSupportEvent {
   std::array<spatial::PointId, 2> support_ids{};
   exact::ExactCenter3 center{};
@@ -404,6 +481,10 @@ make_initial_exact_pair_support_checkpoint(
     const spatial::CanonicalPointCloud& cloud,
     std::size_t requested_maximum_order);
 
+[[nodiscard]] ExactPairSupportCheckpoint
+make_initial_exact_pair_support_checkpoint(
+    const ExactPairSupportAuthorityContext& authority);
+
 // Deterministic, unkeyed payload checksum.  This supports codecs and hostile
 // mutation tests; it provides integrity only, never source provenance.
 [[nodiscard]] contract::CanonicalId
@@ -411,6 +492,22 @@ compute_exact_pair_support_checkpoint_digest(
     const ExactPairSupportCheckpoint& checkpoint);
 
 struct ExactPairSupportCheckpointVerification {
+  struct ValidationAudit {
+    std::size_t frontier_entry_validation_count{};
+    std::size_t frontier_rectangle_count{};
+    std::size_t frontier_sweep_event_count{};
+    std::size_t frontier_active_set_operation_count{};
+    std::size_t frontier_neighbor_test_count{};
+    std::size_t active_witness_entry_validation_count{};
+    std::size_t strict_witness_receipt_validation_count{};
+    std::size_t witness_interval_count{};
+    std::size_t witness_adjacent_interval_test_count{};
+    std::size_t strict_receipt_geometry_recertification_count{};
+
+    friend bool operator==(
+        const ValidationAudit&,
+        const ValidationAudit&) = default;
+  };
   bool manifest_matches_authorities{false};
   bool checksum_matches_payload{false};
   bool frontier_locally_valid{false};
@@ -420,6 +517,12 @@ struct ExactPairSupportCheckpointVerification {
   bool required_audit_identities_hold{false};
   // Integrity only: this does not prove descent from the initial checkpoint.
   bool integrity_verified{false};
+  // Appended after the original v1 aggregate fields so existing source-level
+  // aggregate initializers keep their positional meaning.
+  ValidationAudit validation_audit{};
+  // Frontier products are checked by a rectangle sweep and witness ranges by
+  // one interval sort.  No pairwise frontier/receipt comparison is performed.
+  bool quasi_linear_structure_validation_certified{false};
 };
 
 [[nodiscard]] ExactPairSupportCheckpointVerification
@@ -429,10 +532,20 @@ verify_exact_pair_support_checkpoint(
     std::size_t requested_maximum_order,
     const ExactPairSupportCheckpoint& checkpoint);
 
+[[nodiscard]] ExactPairSupportCheckpointVerification
+verify_exact_pair_support_checkpoint(
+    const ExactPairSupportAuthorityContext& authority,
+    const ExactPairSupportCheckpoint& checkpoint);
+
 [[nodiscard]] ExactPairSupportStreamChunk build_exact_pair_support_stream_chunk(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     std::size_t requested_maximum_order,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& checkpoint);
+
+[[nodiscard]] ExactPairSupportStreamChunk build_exact_pair_support_stream_chunk(
+    const ExactPairSupportAuthorityContext& authority,
     const ExactPairSupportStreamBudget& chunk_budget,
     const ExactPairSupportCheckpoint& checkpoint);
 
@@ -456,6 +569,72 @@ verify_exact_pair_support_stream_chunk(
     const ExactPairSupportStreamBudget& chunk_budget,
     const ExactPairSupportCheckpoint& source_checkpoint,
     const ExactPairSupportStreamChunk& observed);
+
+[[nodiscard]] ExactPairSupportStreamChunkVerification
+verify_exact_pair_support_stream_chunk(
+    const ExactPairSupportAuthorityContext& authority,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& source_checkpoint,
+    const ExactPairSupportStreamChunk& observed);
+
+struct ExactPairSupportIncrementalVerifierStatus {
+  bool initial_checkpoint_reconstructed{false};
+  std::size_t verified_chunk_count{};
+  bool every_transition_verified{false};
+  bool terminal_checkpoint_reached{false};
+  bool anchored_prefix_certified{false};
+  bool anchored_run_certified{false};
+  bool failed_closed{false};
+  // The verifier retains only trusted_checkpoint(), never prior chunks.
+  std::size_t retained_chunk_count{};
+
+  friend bool operator==(
+      const ExactPairSupportIncrementalVerifierStatus&,
+      const ExactPairSupportIncrementalVerifierStatus&) = default;
+};
+
+// Stateful anchored verifier for streaming consumers.  verify_next() checks
+// exactly one candidate against the current trusted checkpoint and advances
+// only after success.  Any rejected or post-terminal candidate poisons the
+// verifier, so a caller cannot skip a failed transition.
+class ExactPairSupportIncrementalVerifier {
+ public:
+  explicit ExactPairSupportIncrementalVerifier(
+      const ExactPairSupportAuthorityContext& authority);
+  explicit ExactPairSupportIncrementalVerifier(
+      ExactPairSupportAuthorityContext&&) = delete;
+  explicit ExactPairSupportIncrementalVerifier(
+      const ExactPairSupportAuthorityContext&&) = delete;
+
+  ExactPairSupportIncrementalVerifier(
+      const ExactPairSupportIncrementalVerifier&) = delete;
+  ExactPairSupportIncrementalVerifier& operator=(
+      const ExactPairSupportIncrementalVerifier&) = delete;
+  ExactPairSupportIncrementalVerifier(
+      ExactPairSupportIncrementalVerifier&&) = delete;
+  ExactPairSupportIncrementalVerifier& operator=(
+      ExactPairSupportIncrementalVerifier&&) = delete;
+
+  [[nodiscard]] ExactPairSupportStreamChunkVerification verify_next(
+      const ExactPairSupportStreamBudget& chunk_budget,
+      const ExactPairSupportStreamChunk& observed);
+
+  [[nodiscard]] const ExactPairSupportCheckpoint& trusted_checkpoint()
+      const noexcept {
+    return trusted_checkpoint_;
+  }
+  [[nodiscard]] const ExactPairSupportIncrementalVerifierStatus& status()
+      const noexcept {
+    return status_;
+  }
+
+ private:
+  // Private cache copy: callers need only keep the immutable cloud and LBVH
+  // alive, not the context object used to construct this verifier.
+  ExactPairSupportAuthorityContext authority_;
+  ExactPairSupportCheckpoint trusted_checkpoint_{};
+  ExactPairSupportIncrementalVerifierStatus status_{};
+};
 
 struct ExactPairSupportStreamRunVerification {
   bool initial_checkpoint_reconstructed{false};
