@@ -447,6 +447,46 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_saddle_arm_seed_journal
+  STATIC
+    src/cpu/hierarchy/direct_saddle_arm_seed_journal.cpp
+)
+add_library(
+  morsehgp3d::direct_saddle_arm_seed_journal
+  ALIAS morsehgp3d_direct_saddle_arm_seed_journal
+)
+set_target_properties(
+  morsehgp3d_direct_saddle_arm_seed_journal
+  PROPERTIES
+    EXPORT_NAME direct_saddle_arm_seed_journal
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_saddle_arm_seed_journal PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_saddle_arm_seed_journal
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_saddle_arm_seed_journal
+  PUBLIC morsehgp3d::direct_morse_event_journal
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_saddle_arm_seed_journal PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_saddle_arm_seed_journal
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_pair_support_codec
   STATIC
     src/cpu/hierarchy/pair_support_stream_codec.cpp
@@ -1104,6 +1144,7 @@ install(
     morsehgp3d_higher_support
     morsehgp3d_direct_support_terminal
     morsehgp3d_direct_morse_event_journal
+    morsehgp3d_direct_saddle_arm_seed_journal
     morsehgp3d_pair_support_codec
     morsehgp3d_hierarchy
     morsehgp3d_sanitizers

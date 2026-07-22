@@ -9,9 +9,21 @@
 
 Les rôles sont triés par ordre, niveau exact, index de projection puis type. Chaque clé `(ordre, niveau exact)` produit un lot contigu qui compte séparément naissances et selles. Aucun ordre artificiel d'exécution entre rôles de même lot n'est encore revendiqué : la résolution par hypergraphe quotient appartient au prochain incrément.
 
-## Borne de stockage et objets évités
+## Incrément 10.2-RCPU livré — graines de bras factorisées
 
-Si $n$ est le nombre de sites et $E$ le nombre d'événements directs terminaux, le journal conserve exactement $n+E$ projections, au plus $n+2E$ rôles et au plus $n+2E$ lots. Son audit certifie donc la borne logique suivante :
+Pour chaque rôle selle issu d'un événement direct $S=I\cup U$ de rang fermé $s$, `ExactDirectSaddleArmSeedJournalResult` émet une famille d'ordre $k=s-1$ et exactement une graine `(événement, u)` pour chaque $u\in U$. La facette $F_u=S\setminus\lbrace u\rbrace$ n'est pas conservée : elle est reconstruite à la demande, triée, dans un tableau fixe de dix `PointId`.
+
+La preuve 10.2.1 établit que le support positif minimal $U$ rend chaque point essentiel. Comme les points de $I$ sont strictement intérieurs, supprimer $u$ force donc $\beta(F_u)<\beta(S)$. Cette conclusion est exacte relativement à la façade terminale de Phase 9 fournie comme autorité externe; aucun calcul miniball ni scan géométrique global par bras n'est répété dans le chemin produit. Le document [BRAS_SELLE_DIRECTS_PHASE10.md](../math/BRAS_SELLE_DIRECTS_PHASE10.md) donne la preuve et les préconditions.
+
+Le budget est contrôlé avant le rejeu du journal source et avant toute allocation de sortie. Si $J$ désigne le nombre de selles et $A$ le nombre de graines, alors $J\leq E$ et $A\leq4J$, donc l'étage ajoute au plus $J+A\leq5E$ entrées. En coexistence avec 10.1, la borne devient :
+
+$$\text{stockage}_{\mathrm{logique}}\leq3n+10E.$$
+
+Le target `morsehgp3d_direct_saddle_arm_seed_journal` ne lie que le journal direct et ses autorités transitives. Le rejeu source contrôle les deux digests du nuage en deux passes séquentielles, puis valide projections, rôles et lots sur place, sans second journal ni tri. La reconstruction publique vérifie les autorités du nuage et un digest local d'événement. Un contrôle source et symboles interdit l'archive historique, miniball, `critical_arm`, Gamma, cellules, cofaces et mosaïque. Le tétraèdre régulier donne 11 familles et 28 graines; la fixture obtuse vérifie que $I$ appartient à chaque bras; les deux selles miroir simultanées conservent six provenances même lorsque deux graines reconstruisent la même facette. Les tests ciblés et statiques passent en moins de 0,2 seconde.
+
+## Borne de stockage propre à 10.1 et objets évités
+
+Si $n$ est le nombre de sites et $E$ le nombre d'événements directs terminaux, le journal 10.1 conserve exactement $n+E$ projections, au plus $n+2E$ rôles et au plus $n+2E$ lots. Son audit certifie donc la borne logique suivante :
 
 $$\text{stockage}_{\mathrm{logique}}\leq3n+5E.$$
 
@@ -25,6 +37,6 @@ Le test ciblé strict passe en 0,02 seconde environ. Sur le tétraèdre régulie
 
 ## Limites et suite
 
-Ce journal ne constitue pas encore une généalogie H0. Il reste à construire les bras de selle, résoudre les multifusions de même niveau, attacher les racines du snapshot strict pré-lot et conserver les gateways silencieux nécessaires aux événements futurs. Le contre-exemple permanent à cinq points et la preuve M.1 restent les portes scientifiques. Aucun `public_status` n'est publié et Gamma exhaustif demeure l'oracle borné jusqu'à $n\leq14$.
+Les graines certifient les facettes initiales et leur décroissance stricte, pas encore une généalogie H0. Il reste à descendre ou localiser chaque graine dans l'état strict pré-lot, attacher ses racines, résoudre simultanément les multifusions comme hypergraphes quotients et conserver les gateways silencieux nécessaires aux événements futurs. Le contre-exemple permanent à cinq points et la preuve M.1 restent les portes scientifiques. Aucun `public_status` n'est publié et Gamma exhaustif demeure l'oracle borné jusqu'à $n\leq14$.
 
-GCP n'a pas été utilisé pour cet incrément CPU. La session G4 consignée dans la revue de porte appartient exclusivement à la qualification de fermeture de la Phase 9.
+GCP n'a pas été utilisé pour ces incréments CPU. La session G4 consignée dans la revue de porte appartient exclusivement à la qualification de fermeture de la Phase 9.

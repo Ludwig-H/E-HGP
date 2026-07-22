@@ -190,4 +190,35 @@ verify_exact_direct_morse_event_journal(
     const ExactDirectSupportTerminalFacade& source_facade,
     const ExactDirectMorseEventJournalResult& observed);
 
+// Validates the same complete source-relative contract without constructing
+// a second projection/role/batch payload.  Exact cloud digests are replayed,
+// then the canonical projections and the sorted role set are checked in
+// place.  The input journal remains the only O(n+E) journal allocation.
+struct ExactDirectMorseEventJournalStreamingVerification {
+  std::size_t canonical_cloud_digest_pass_count{};
+  std::size_t event_projection_scan_count{};
+  std::size_t role_record_scan_count{};
+  std::size_t batch_scan_count{};
+  bool source_facade_terminal_certified{false};
+  bool source_authorities_accepted{false};
+  bool event_projections_certified{false};
+  bool role_records_certified{false};
+  bool batches_certified{false};
+  bool result_facts_certified{false};
+  bool decision_and_scope_certified{false};
+  bool constant_auxiliary_record_storage_certified{false};
+  bool fresh_streaming_replay_certified{false};
+  bool result_certified{false};
+
+  friend bool operator==(
+      const ExactDirectMorseEventJournalStreamingVerification&,
+      const ExactDirectMorseEventJournalStreamingVerification&) = default;
+};
+
+[[nodiscard]] ExactDirectMorseEventJournalStreamingVerification
+verify_exact_direct_morse_event_journal_streaming(
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& observed);
+
 }  // namespace morsehgp3d::hierarchy

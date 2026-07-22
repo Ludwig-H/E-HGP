@@ -902,6 +902,10 @@ Consommer le flux de Phase 9 pour construire directement une généalogie $H_0$ 
 - réutiliser le sweep Morse 6.23 comme falsificateur interne, puis retirer son historique Gamma du chemin produit;
 - produire les forêts horizontales de chaque ordre et les runs externes nécessaires au streaming.
 
+### État du déploiement au 22 juillet 2026
+
+Les incréments 10.1 et 10.2 sont livrés en `partial_refinement`. Le premier projette les naissances et selles dans des lots exacts avec une borne $3n+5E$. Le second applique le théorème du support positif minimal : pour chaque selle $S=I\cup U$, il conserve exactement les graines $(S,u)$, $u\in U$, dont les facettes $F_u=S\setminus\lbrace u\rbrace$ vérifient $\beta(F_u)<\beta(S)$. Les facettes sont reconstruites dans un scratch de dix identifiants et ne sont pas stockées; l'ajout vaut au plus $5E$, soit $3n+10E$ pour les deux étages. Le rejeu 10.1 est streaming, sans seconde arène ni tri, et les reconstructions sont liées aux digests d'autorité. Le target isolé n'appelle ni miniball, ni scan géométrique global par bras, ni archive Gamma. L'attachement aux racines strictes pré-lot, la résolution de l'hypergraphe quotient et les gateways silencieux forment le prochain jalon.
+
 ### Tests
 
 - journal direct contre Gamma exhaustif seulement pour $n\leq14$;

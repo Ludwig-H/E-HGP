@@ -446,6 +446,71 @@ void build_payload(
   return left_copy == right_copy;
 }
 
+[[nodiscard]] bool batch_key_less(
+    const ExactDirectMorseH0Batch& left,
+    const ExactDirectMorseH0Batch& right) {
+  return left.order < right.order ||
+         (left.order == right.order &&
+          left.squared_level < right.squared_level);
+}
+
+[[nodiscard]] bool projection_role_less(
+    const ExactDirectMorseH0RoleRecord& left,
+    const ExactDirectMorseH0RoleRecord& right) {
+  return std::tie(left.event_projection_index, left.role) <
+         std::tie(right.event_projection_index, right.role);
+}
+
+[[nodiscard]] bool role_matches_projection_and_batch(
+    const ExactDirectMorseH0RoleRecord& role,
+    const ExactDirectMorseH0Batch& batch,
+    const ExactDirectMorseEventProjection& projection) {
+  if (role.role == ExactDirectMorseH0Role::birth) {
+    return projection.birth_order.has_value() &&
+           batch.order == *projection.birth_order &&
+           batch.squared_level == projection.squared_level;
+  }
+  if (role.role == ExactDirectMorseH0Role::saddle) {
+    return projection.saddle_order.has_value() &&
+           batch.order == *projection.saddle_order &&
+           batch.squared_level == projection.squared_level;
+  }
+  return false;
+}
+
+[[nodiscard]] bool singleton_projection_matches(
+    const ExactDirectMorseEventProjection& observed,
+    std::size_t point_index) {
+  ExactDirectMorseEventProjection expected;
+  expected.event_projection_index = point_index;
+  expected.source = ExactDirectMorseEventSource::canonical_singleton;
+  expected.source_index = point_index;
+  expected.support_size = 1U;
+  expected.support_ids[0] = static_cast<spatial::PointId>(point_index);
+  expected.squared_level = exact::ExactLevel{};
+  expected.closed_rank = 1U;
+  expected.birth_order = 1U;
+  return observed == expected;
+}
+
+[[nodiscard]] bool direct_projection_matches(
+    const ExactDirectMorseEventProjection& observed,
+    const ExactDirectSupportEvent& source,
+    std::size_t projection_index) {
+  ExactDirectMorseEventProjection expected;
+  expected.event_projection_index = projection_index;
+  expected.source =
+      ExactDirectMorseEventSource::direct_support_terminal_event;
+  expected.source_index = source.event_index;
+  expected.support_size = source.support_size;
+  expected.support_ids = source.support_ids;
+  expected.squared_level = source.squared_level;
+  expected.closed_rank = source.closed_rank;
+  expected.birth_order = source.birth_order;
+  expected.saddle_order = source.saddle_order;
+  return observed == expected;
+}
+
 }  // namespace
 
 bool ExactDirectMorseEventJournalResult::certified_partial_refinement()
@@ -572,6 +637,253 @@ verify_exact_direct_morse_event_journal(
       verification.result_facts_certified &&
       verification.decision_and_scope_certified &&
       verification.fresh_projection_replay_certified;
+  return verification;
+}
+
+ExactDirectMorseEventJournalStreamingVerification
+verify_exact_direct_morse_event_journal_streaming(
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& observed) {
+  ExactDirectMorseEventJournalStreamingVerification verification;
+  verification.source_facade_terminal_certified =
+      source_facade.terminal_catalog_certified();
+  if (!verification.source_facade_terminal_certified) {
+    return verification;
+  }
+
+  const bool cloud_authorities_match =
+      source_cloud_authorities_match(cloud, source_facade);
+  if (cloud_authorities_match) {
+    verification.canonical_cloud_digest_pass_count = 2U;
+  }
+  const bool source_payload_consistent =
+      source_payload_is_locally_consistent(source_facade);
+  const bool no_extra_shell =
+      source_facade.relevant_extra_shell_diagnostics.empty();
+  verification.source_authorities_accepted =
+      cloud_authorities_match && source_payload_consistent && no_extra_shell;
+  if (!verification.source_authorities_accepted) {
+    return verification;
+  }
+
+  try {
+    const std::size_t expected_projection_count = checked_add(
+        cloud.size(),
+        source_facade.events.size(),
+        "the streaming direct Morse projection count overflows size_t");
+    bool projections_match =
+        observed.event_projections.size() == expected_projection_count;
+    if (projections_match) {
+      for (std::size_t point_index = 0U; point_index < cloud.size();
+           ++point_index) {
+        ++verification.event_projection_scan_count;
+        if (!singleton_projection_matches(
+                observed.event_projections[point_index], point_index)) {
+          projections_match = false;
+          break;
+        }
+      }
+    }
+    if (projections_match) {
+      for (std::size_t event_index = 0U;
+           event_index < source_facade.events.size();
+           ++event_index) {
+        ++verification.event_projection_scan_count;
+        const std::size_t projection_index =
+            checked_add(
+                cloud.size(),
+                event_index,
+                "the streaming direct Morse projection index overflows size_t");
+        if (!direct_projection_matches(
+                observed.event_projections[projection_index],
+                source_facade.events[event_index],
+                projection_index)) {
+          projections_match = false;
+          break;
+        }
+      }
+    }
+    verification.event_projections_certified = projections_match;
+    if (!verification.event_projections_certified) {
+      return verification;
+    }
+
+    std::size_t expected_role_count = cloud.size();
+    for (const ExactDirectSupportEvent& event : source_facade.events) {
+      if (event.birth_order.has_value()) {
+        expected_role_count = checked_add(
+            expected_role_count,
+            1U,
+            "the streaming direct Morse role count overflows size_t");
+      }
+      if (event.saddle_order.has_value()) {
+        expected_role_count = checked_add(
+            expected_role_count,
+            1U,
+            "the streaming direct Morse role count overflows size_t");
+      }
+    }
+
+    bool batches_match = !observed.batches.empty();
+    bool roles_match =
+        observed.role_records.size() == expected_role_count;
+    std::size_t expected_role_offset = 0U;
+    for (std::size_t batch_index = 0U;
+         batches_match && roles_match &&
+         batch_index < observed.batches.size();
+         ++batch_index) {
+      ++verification.batch_scan_count;
+      const ExactDirectMorseH0Batch& batch =
+          observed.batches[batch_index];
+      if (batch.batch_index != batch_index ||
+          batch.role_record_offset != expected_role_offset ||
+          batch.role_record_count == 0U ||
+          batch.role_record_count >
+              observed.role_records.size() - expected_role_offset ||
+          (batch_index != 0U &&
+           !batch_key_less(observed.batches[batch_index - 1U], batch))) {
+        batches_match = false;
+        break;
+      }
+
+      std::size_t birth_count = 0U;
+      std::size_t saddle_count = 0U;
+      for (std::size_t local_index = 0U;
+           local_index < batch.role_record_count;
+           ++local_index) {
+        const std::size_t role_index = checked_add(
+            expected_role_offset,
+            local_index,
+            "the streaming direct Morse role index overflows size_t");
+        ++verification.role_record_scan_count;
+        const ExactDirectMorseH0RoleRecord& role =
+            observed.role_records[role_index];
+        if (role.role_record_index != role_index ||
+            role.batch_index != batch_index ||
+            role.event_projection_index >=
+                observed.event_projections.size() ||
+            (local_index != 0U &&
+             !projection_role_less(
+                 observed.role_records[role_index - 1U], role)) ||
+            !role_matches_projection_and_batch(
+                role,
+                batch,
+                observed.event_projections[
+                    role.event_projection_index])) {
+          roles_match = false;
+          break;
+        }
+        if (role.role == ExactDirectMorseH0Role::birth) {
+          ++birth_count;
+        } else if (role.role == ExactDirectMorseH0Role::saddle) {
+          ++saddle_count;
+        } else {
+          roles_match = false;
+          break;
+        }
+      }
+      if (!roles_match || birth_count != batch.birth_role_count ||
+          saddle_count != batch.saddle_role_count ||
+          birth_count + saddle_count != batch.role_record_count) {
+        batches_match = false;
+        break;
+      }
+      expected_role_offset = checked_add(
+          expected_role_offset,
+          batch.role_record_count,
+          "the streaming direct Morse role offset overflows size_t");
+    }
+    roles_match = roles_match &&
+                  expected_role_offset == observed.role_records.size();
+    batches_match = batches_match && roles_match;
+    verification.role_records_certified = roles_match;
+    verification.batches_certified = batches_match;
+    if (!verification.role_records_certified ||
+        !verification.batches_certified) {
+      return verification;
+    }
+
+    const std::size_t expected_logical_count = checked_add(
+        checked_add(
+            expected_projection_count,
+            expected_role_count,
+            "the streaming direct Morse storage count overflows size_t"),
+        observed.batches.size(),
+        "the streaming direct Morse storage count overflows size_t");
+    const std::size_t expected_logical_limit = checked_add(
+        checked_multiply(
+            3U,
+            cloud.size(),
+            "the streaming direct Morse storage bound overflows size_t"),
+        checked_multiply(
+            5U,
+            source_facade.events.size(),
+            "the streaming direct Morse storage bound overflows size_t"),
+        "the streaming direct Morse storage bound overflows size_t");
+    verification.result_facts_certified =
+        observed.schema_version ==
+            direct_morse_event_journal_schema_version &&
+        observed.point_count == cloud.size() &&
+        observed.requested_maximum_order ==
+            source_facade.certificate.requirements
+                .requested_maximum_order &&
+        observed.effective_maximum_order ==
+            source_facade.certificate.requirements
+                .effective_maximum_order &&
+        observed.source_direct_event_count ==
+            source_facade.events.size() &&
+        observed.singleton_event_count == cloud.size() &&
+        observed.event_projection_count == expected_projection_count &&
+        observed.role_record_count == expected_role_count &&
+        observed.batch_count == observed.batches.size() &&
+        observed.logical_linear_storage_entry_count ==
+            expected_logical_count &&
+        observed.logical_linear_storage_entry_limit ==
+            expected_logical_limit &&
+        observed.source_pair_semantic_digest ==
+            source_facade.certificate.pair_semantic_digest &&
+        observed.source_higher_semantic_digest ==
+            source_facade.certificate.higher_semantic_digest &&
+        observed.source_facade_terminal_certified &&
+        observed.source_cloud_authorities_match &&
+        observed.source_facade_payload_locally_consistent &&
+        observed.no_relevant_extra_shell_diagnostics &&
+        observed.canonical_singleton_births_complete &&
+        observed.direct_h0_roles_projected_exactly_once &&
+        observed.batch_keys_strictly_increasing &&
+        observed.role_records_canonical_and_partitioned &&
+        observed.output_linear_in_singletons_and_direct_events &&
+        observed.no_forbidden_global_structure_materialized &&
+        !observed.hierarchy_reduction_performed &&
+        !observed.forest_or_gateway_attach_performed &&
+        !observed.public_status_claimed &&
+        observed.partial_refinement_only &&
+        observed.certified_partial_refinement();
+    verification.decision_and_scope_certified =
+        observed.decision == ExactDirectMorseEventJournalDecision::
+                                 complete_certified_partial_refinement &&
+        observed.scope == ExactDirectMorseEventJournalScope::
+                              canonical_singletons_and_terminal_direct_supports_h0_roles_only;
+    verification.constant_auxiliary_record_storage_certified = true;
+    verification.fresh_streaming_replay_certified =
+        verification.event_projection_scan_count ==
+            expected_projection_count &&
+        verification.role_record_scan_count == expected_role_count &&
+        verification.batch_scan_count == observed.batches.size();
+    verification.result_certified =
+        verification.source_facade_terminal_certified &&
+        verification.source_authorities_accepted &&
+        verification.event_projections_certified &&
+        verification.role_records_certified &&
+        verification.batches_certified &&
+        verification.result_facts_certified &&
+        verification.decision_and_scope_certified &&
+        verification.constant_auxiliary_record_storage_certified &&
+        verification.fresh_streaming_replay_certified;
+  } catch (const std::overflow_error&) {
+    return verification;
+  }
   return verification;
 }
 
