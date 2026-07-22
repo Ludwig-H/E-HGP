@@ -327,6 +327,28 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_support_differential_tests
+  test_hierarchy_direct_support_differential.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_support_differential_tests
+  PRIVATE
+    morsehgp3d::pair_support
+    morsehgp3d::higher_support
+    morsehgp3d::hierarchy
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_support_differential_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_support_differential_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_pair_support_stream_codec_tests
   test_hierarchy_pair_support_stream_codec.cpp
 )
@@ -803,6 +825,7 @@ set(
   morsehgp3d_hierarchy_pair_support_stream_tests
   morsehgp3d_hierarchy_higher_support_product_tests
   morsehgp3d_hierarchy_higher_support_stream_tests
+  morsehgp3d_hierarchy_direct_support_differential_tests
   morsehgp3d_hierarchy_pair_support_stream_codec_tests
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
@@ -1559,6 +1582,11 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_higher_support_stream
   COMMAND morsehgp3d_hierarchy_higher_support_stream_tests
+)
+
+add_test(
+  NAME morsehgp3d.hierarchy_direct_support_differential
+  COMMAND morsehgp3d_hierarchy_direct_support_differential_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_pair_support_stream_codec
