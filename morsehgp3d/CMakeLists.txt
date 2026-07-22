@@ -919,6 +919,26 @@ if(MORSEHGP3D_BUILD_TOOLS)
       PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()
+
+  add_executable(
+    morsehgp3d_direct_pair_support_smoke
+    src/tools/direct_pair_support_smoke.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_direct_pair_support_smoke
+    PRIVATE morsehgp3d::pair_support
+  )
+  morsehgp3d_apply_sanitizers(morsehgp3d_direct_pair_support_smoke)
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_direct_pair_support_smoke PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_direct_pair_support_smoke
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
 endif()
 
 if(MORSEHGP3D_BUILD_TESTS)
@@ -950,7 +970,12 @@ if(UNIX)
   )
 endif()
 if(MORSEHGP3D_BUILD_TOOLS)
-  install(TARGETS morsehgp3d_replay_predicate RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+  install(
+    TARGETS
+      morsehgp3d_replay_predicate
+      morsehgp3d_direct_pair_support_smoke
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+  )
   install(
     PROGRAMS tools/replay_predicate.py
     TYPE BIN
