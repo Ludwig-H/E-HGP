@@ -331,6 +331,40 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_higher_support
+  STATIC
+    src/cpu/hierarchy/higher_support_product.cpp
+    src/cpu/hierarchy/higher_support_stream.cpp
+)
+add_library(morsehgp3d::higher_support ALIAS morsehgp3d_higher_support)
+set_target_properties(
+  morsehgp3d_higher_support
+  PROPERTIES
+    EXPORT_NAME higher_support
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(morsehgp3d_higher_support PUBLIC cxx_std_20)
+target_include_directories(
+  morsehgp3d_higher_support
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_higher_support
+  PUBLIC morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(morsehgp3d_higher_support PRIVATE /W4 /WX)
+else()
+  target_compile_options(
+    morsehgp3d_higher_support
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_pair_support_codec
   STATIC
     src/cpu/hierarchy/pair_support_stream_codec.cpp
@@ -903,6 +937,7 @@ install(
     morsehgp3d_exact
     morsehgp3d_spatial
     morsehgp3d_pair_support
+    morsehgp3d_higher_support
     morsehgp3d_pair_support_codec
     morsehgp3d_hierarchy
     morsehgp3d_sanitizers

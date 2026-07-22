@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the static no-mosaic contract of the Phase 9 pair target."""
+"""Validate the static no-mosaic contract of the direct Phase 9 targets."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 class ContractError(ValueError):
-    """A Phase 9 pair-target invariant was violated."""
+    """A direct Phase 9 target invariant was violated."""
 
 
 def require(condition: bool, message: str) -> None:
@@ -112,6 +112,18 @@ def validate(
     durable_source = read_text(
         project / "src/cpu/hierarchy/pair_support_stream_durable.cpp"
     )
+    higher_product_header = read_text(
+        project / "include/morsehgp3d/hierarchy/higher_support_product.hpp"
+    )
+    higher_product_source = read_text(
+        project / "src/cpu/hierarchy/higher_support_product.cpp"
+    )
+    higher_stream_header = read_text(
+        project / "include/morsehgp3d/hierarchy/higher_support_stream.hpp"
+    )
+    higher_stream_source = read_text(
+        project / "src/cpu/hierarchy/higher_support_stream.cpp"
+    )
 
     pair_target = parenthesized_block(
         cmake, "add_library(\n  morsehgp3d_pair_support"
@@ -179,12 +191,55 @@ def validate(
         "the durable target must not link the historical Gamma archive",
     )
 
+    higher_target = parenthesized_block(
+        cmake, "add_library(\n  morsehgp3d_higher_support"
+    )
+    require(
+        higher_target.count(
+            "src/cpu/hierarchy/higher_support_product.cpp"
+        )
+        == 1
+        and higher_target.count(
+            "src/cpu/hierarchy/higher_support_stream.cpp"
+        )
+        == 1,
+        "the higher-support target must contain exactly its product and direct stream sources",
+    )
+    require(
+        "pair_support_stream" not in higher_target,
+        "the higher-support target must remain independent of the pair checkpoint wire",
+    )
+    require(
+        "gamma" not in higher_target.lower(),
+        "the higher-support target contains Gamma",
+    )
+    require(
+        "ordinary" not in higher_target.lower(),
+        "the higher-support target contains cells",
+    )
+    higher_links = parenthesized_block(
+        cmake, "target_link_libraries(\n  morsehgp3d_higher_support"
+    )
+    require(
+        "PUBLIC morsehgp3d::spatial" in higher_links,
+        "the higher-support target must depend on the certified spatial layer",
+    )
+    require(
+        "morsehgp3d::hierarchy" not in higher_links,
+        "the higher-support target must not link the historical Gamma archive",
+    )
+
     hierarchy_target = parenthesized_block(
         cmake, "add_library(\n  morsehgp3d_hierarchy"
     )
     require(
         "pair_support_stream.cpp" not in hierarchy_target,
         "the direct pair source leaked back into the Gamma archive",
+    )
+    require(
+        "higher_support_product.cpp" not in hierarchy_target
+        and "higher_support_stream.cpp" not in hierarchy_target,
+        "the direct higher-support sources leaked back into the Gamma archive",
     )
 
     combined = "\n".join(
@@ -239,6 +294,60 @@ def validate(
         "catch (...) {\n    poison();",
     ):
         require(required in combined, f"missing bounded-stream token {required!r}")
+
+    higher_combined = "\n".join(
+        (
+            higher_product_header,
+            higher_product_source,
+            higher_stream_header,
+            higher_stream_source,
+        )
+    )
+    for forbidden in (
+        "hierarchy/gamma.hpp",
+        "critical_catalog",
+        "ordinary_cell",
+        "ordinary_diagram",
+        "depth_zero_natural_support",
+        "lbvh_closed_ball(",
+        "std::vector<std::array<spatial::PointId, 3>>",
+        "std::vector<std::array<spatial::PointId, 4>>",
+        "std::vector<std::array<PointId, 3>>",
+        "std::vector<std::array<PointId, 4>>",
+    ):
+        require(
+            forbidden not in higher_combined,
+            f"the direct higher-support implementation contains forbidden token {forbidden!r}",
+        )
+    for required in (
+        "struct ExactHigherSupportNodeGroup",
+        "std::uint8_t multiplicity",
+        "struct ExactHigherSupportFrontierEntry",
+        "exact::BigInt total_support_count",
+        "exact::BigInt remaining_frontier_support_count",
+        "exact_higher_support_candidate_universe_size(",
+        "exact_binomial(",
+        "child_coverage != entry_support_count(entry)",
+        "exact_higher_support_product_aabb_analysis(",
+        "query_strictly_inside_every_independent_sphere_certified()",
+        "maximum_frontier_entry_count",
+        "maximum_auxiliary_frontier_entry_count",
+        "remaining_frontier",
+        "ExactHigherSupportStreamStatus::budget_exhausted",
+        "analyze_circumcenter_support(",
+        "minimum_squared_distance_to_node(",
+        "maximum_squared_distance_to_node(",
+        "canonical_extra_shell_witness_id",
+        "grouped_partition_accounting_certified",
+        "no_forbidden_global_structure_materialized = true",
+        "hierarchy_reduction_performed = false",
+        "verify_exact_higher_support_stream(",
+        "verification.fresh_replay_certified = observed == expected",
+    ):
+        require(
+            required in higher_combined,
+            f"missing bounded higher-support token {required!r}",
+        )
 
     verifier_start = header.find("class ExactPairSupportIncrementalVerifier")
     verifier_end = header.find(
@@ -651,9 +760,10 @@ def validate(
         binary_symbol_gate = True
 
     return {
-        "schema": "morsehgp3d.phase9.pair_support_static.v5",
+        "schema": "morsehgp3d.phase9.direct_support_static.v6",
         "targets": [
             "morsehgp3d_pair_support",
+            "morsehgp3d_higher_support",
             "morsehgp3d_pair_support_codec",
             "morsehgp3d_pair_support_durable",
         ],
@@ -661,6 +771,9 @@ def validate(
         "global_gamma_coface_count": 0,
         "global_gamma_incidence_count": 0,
         "materialized_pair_arena_count": 0,
+        "materialized_higher_support_arena_count": 0,
+        "higher_support_grouped_bigint_frontier": True,
+        "higher_support_fresh_replay": True,
         "persistent_authority_context": True,
         "incremental_verify_next": True,
         "two_phase_durable_verification": True,
@@ -687,6 +800,10 @@ def validate(
             "src/cpu/hierarchy/pair_support_stream_codec.cpp",
             "include/morsehgp3d/hierarchy/pair_support_stream_durable.hpp",
             "src/cpu/hierarchy/pair_support_stream_durable.cpp",
+            "include/morsehgp3d/hierarchy/higher_support_product.hpp",
+            "src/cpu/hierarchy/higher_support_product.cpp",
+            "include/morsehgp3d/hierarchy/higher_support_stream.hpp",
+            "src/cpu/hierarchy/higher_support_stream.cpp",
         ],
     }
 
@@ -712,7 +829,7 @@ def main(arguments: list[str]) -> int:
             Path(arguments[1]).resolve(), binary, nm_executable
         )
     except ContractError as error:
-        print(f"Phase 9 pair-target contract failed: {error}", file=sys.stderr)
+        print(f"Phase 9 direct-target contract failed: {error}", file=sys.stderr)
         return 1
     print(json.dumps(result, separators=(",", ":"), sort_keys=True))
     return 0

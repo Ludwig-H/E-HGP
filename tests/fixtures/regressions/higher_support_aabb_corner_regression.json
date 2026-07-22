@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "kind": "higher-support-aabb-corner-regression-v1",
+  "fixture_id": "higher-support-aabb-corner-regression-v1",
+  "description": "Support-box corner samples can agree while an interior support has the opposite well-centering or query-power verdict; only a universal polynomial enclosure may prune.",
+  "fixed_support_points": [[-1, 0, 0], [1, 0, 0]],
+  "moving_support": ["t", 2, 0],
+  "well_centering_case": {
+    "t_interval": [-2, 2],
+    "corner_well_centered": [false, false],
+    "interior_t": 0,
+    "interior_well_centered": true,
+    "forbidden_inference": "all_support_box_corners_non_well_centered_implies_no_well_centered_support_in_the_box_product"
+  },
+  "query_power_case": {
+    "t_interval": ["-1/2", "1/2"],
+    "query_point": [0, "33/16", 0],
+    "power_polynomial": "41/256-(33/32)*t^2",
+    "corner_powers": ["-25/256", "-25/256"],
+    "interior_t": 0,
+    "interior_power": "41/256",
+    "forbidden_inference": "all_support_box_corner_spheres_contain_the_query_implies_every_support_sphere_contains_the_query"
+  }
+}

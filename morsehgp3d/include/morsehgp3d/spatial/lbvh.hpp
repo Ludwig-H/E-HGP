@@ -22,6 +22,7 @@ class MortonLbvhIndex;
 }
 
 namespace morsehgp3d::hierarchy {
+class ExactHigherSupportStreamBuilder;
 class ExactPairSupportStreamBuilder;
 struct K1ExactBoruvkaResult;
 struct K1BoruvkaVerification;
@@ -171,6 +172,7 @@ class MortonLbvhIndex {
       const spatial::CanonicalPointCloud& cloud,
       const hierarchy::K1ExactBoruvkaResult& result);
   friend class hierarchy::ExactPairSupportStreamBuilder;
+  friend class hierarchy::ExactHigherSupportStreamBuilder;
   friend class gpu::K1BoruvkaCandidateContext;
   friend class gpu::SpatialLbvhContext;
 };

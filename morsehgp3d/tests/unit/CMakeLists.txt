@@ -289,6 +289,44 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_higher_support_product_tests
+  test_higher_support_product.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_higher_support_product_tests
+  PRIVATE morsehgp3d::higher_support
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_higher_support_product_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_higher_support_product_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_higher_support_stream_tests
+  test_hierarchy_higher_support_stream.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_higher_support_stream_tests
+  PRIVATE morsehgp3d::higher_support
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_higher_support_stream_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_higher_support_stream_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_pair_support_stream_codec_tests
   test_hierarchy_pair_support_stream_codec.cpp
 )
@@ -763,6 +801,8 @@ set(
   morsehgp3d_hierarchy_critical_catalog_tests
   morsehgp3d_depth_zero_natural_support_tests
   morsehgp3d_hierarchy_pair_support_stream_tests
+  morsehgp3d_hierarchy_higher_support_product_tests
+  morsehgp3d_hierarchy_higher_support_stream_tests
   morsehgp3d_hierarchy_pair_support_stream_codec_tests
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
@@ -1513,6 +1553,14 @@ add_test(
   COMMAND morsehgp3d_hierarchy_pair_support_stream_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_higher_support_product
+  COMMAND morsehgp3d_hierarchy_higher_support_product_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_higher_support_stream
+  COMMAND morsehgp3d_hierarchy_higher_support_stream_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_pair_support_stream_codec
   COMMAND morsehgp3d_hierarchy_pair_support_stream_codec_tests
 )
@@ -1805,6 +1853,12 @@ add_test(
   COMMAND
     "${Python3_EXECUTABLE}"
     "${PROJECT_SOURCE_DIR}/../tests/oracle/test_pair_aabb_corner_correlation.py"
+)
+add_test(
+  NAME morsehgp3d.phase9_higher_support_aabb_corner_regression
+  COMMAND
+    "${Python3_EXECUTABLE}"
+    "${PROJECT_SOURCE_DIR}/../tests/oracle/test_higher_support_aabb_corner_regression.py"
 )
 add_test(
   NAME morsehgp3d.phase5_k1_boruvka_qualification_configuration
