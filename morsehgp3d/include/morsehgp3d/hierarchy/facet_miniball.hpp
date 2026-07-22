@@ -64,6 +64,10 @@ struct ExactFacetMiniballResult {
   ExactFacetMiniballStatus status{
       ExactFacetMiniballStatus::not_certified};
   ExactFacetMiniballScope scope{ExactFacetMiniballScope::unspecified};
+
+  friend bool operator==(
+      const ExactFacetMiniballResult&,
+      const ExactFacetMiniballResult&) = default;
 };
 
 struct ExactFacetMiniballVerification {

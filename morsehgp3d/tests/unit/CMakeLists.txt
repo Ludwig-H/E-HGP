@@ -486,6 +486,25 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_sparse_first_incidence_tests
+  test_hierarchy_direct_sparse_first_incidence.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_sparse_first_incidence_tests
+  PRIVATE morsehgp3d::direct_sparse_first_incidence
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_first_incidence_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_first_incidence_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_frozen_root_quotient_tests
   test_hierarchy_direct_frozen_root_quotient.cpp
 )
@@ -1034,6 +1053,7 @@ set(
   morsehgp3d_hierarchy_direct_sparse_positive_facet_locator_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_step_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_closure_tests
+  morsehgp3d_hierarchy_direct_sparse_first_incidence_tests
   morsehgp3d_hierarchy_direct_frozen_root_quotient_tests
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
   morsehgp3d_hierarchy_pair_support_stream_codec_tests
@@ -1829,6 +1849,10 @@ add_test(
   COMMAND morsehgp3d_hierarchy_direct_sparse_facet_descent_closure_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_direct_sparse_first_incidence
+  COMMAND morsehgp3d_hierarchy_direct_sparse_first_incidence_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_direct_frozen_root_quotient
   COMMAND morsehgp3d_hierarchy_direct_frozen_root_quotient_tests
 )
@@ -2247,6 +2271,30 @@ add_test(
 )
 unset(
   _morsehgp3d_phase10_direct_sparse_facet_descent_closure_configuration_command
+)
+set(
+  _morsehgp3d_phase10_direct_sparse_first_incidence_configuration_command
+  "${Python3_EXECUTABLE}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../configuration/check_phase10_direct_sparse_first_incidence.py"
+  "${PROJECT_SOURCE_DIR}"
+)
+if(CMAKE_NM AND NOT MSVC)
+  list(
+    APPEND
+    _morsehgp3d_phase10_direct_sparse_first_incidence_configuration_command
+    --binary
+    "$<TARGET_FILE:morsehgp3d_direct_sparse_first_incidence>"
+    --nm
+    "${CMAKE_NM}"
+  )
+endif()
+add_test(
+  NAME morsehgp3d.phase10_direct_sparse_first_incidence_configuration
+  COMMAND
+    ${_morsehgp3d_phase10_direct_sparse_first_incidence_configuration_command}
+)
+unset(
+  _morsehgp3d_phase10_direct_sparse_first_incidence_configuration_command
 )
 set(
   _morsehgp3d_phase10_direct_frozen_root_quotient_configuration_command

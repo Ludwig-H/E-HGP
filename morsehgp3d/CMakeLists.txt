@@ -684,6 +684,49 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_sparse_first_incidence
+  STATIC
+    src/cpu/hierarchy/direct_sparse_first_incidence.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_first_incidence
+  ALIAS morsehgp3d_direct_sparse_first_incidence
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_first_incidence
+  PROPERTIES
+    EXPORT_NAME direct_sparse_first_incidence
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_first_incidence PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_first_incidence
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_first_incidence
+  PUBLIC
+    morsehgp3d::direct_sparse_positive_facet_locator
+    morsehgp3d::facet_miniball
+    morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_first_incidence PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_first_incidence
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_frozen_root_quotient
   STATIC
     src/cpu/hierarchy/direct_frozen_root_quotient.cpp
@@ -1429,6 +1472,7 @@ install(
     morsehgp3d_direct_sparse_positive_facet_locator
     morsehgp3d_direct_sparse_facet_descent_step
     morsehgp3d_direct_sparse_facet_descent_closure
+    morsehgp3d_direct_sparse_first_incidence
     morsehgp3d_direct_frozen_root_quotient
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_pair_support_codec
