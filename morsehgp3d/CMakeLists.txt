@@ -352,7 +352,7 @@ target_include_directories(
 )
 target_link_libraries(
   morsehgp3d_higher_support
-  PUBLIC morsehgp3d::spatial
+  PUBLIC morsehgp3d::spatial morsehgp3d::contract
   PRIVATE morsehgp3d::sanitizers
 )
 if(MSVC)

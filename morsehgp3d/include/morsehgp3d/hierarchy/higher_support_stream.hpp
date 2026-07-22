@@ -2,12 +2,15 @@
 
 #include "morsehgp3d/exact/center.hpp"
 #include "morsehgp3d/exact/integer.hpp"
+#include "morsehgp3d/contract/canonical_id.hpp"
 #include "morsehgp3d/hierarchy/higher_support_product.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <optional>
+#include <span>
 #include <string_view>
 #include <type_traits>
 #include <vector>
@@ -15,9 +18,11 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::size_t higher_support_maximum_requested_order = 10U;
+inline constexpr std::uint32_t higher_support_checkpoint_schema_version = 2U;
+inline constexpr std::uint32_t higher_support_traversal_version = 1U;
 inline constexpr std::string_view higher_support_stream_proof_basis =
     "exact_grouped_multiplicity_lbvh_support_partition_"
-    "universal_gram_cramer_rank_receipts_sparse_closed_ball_v1";
+    "universal_gram_cramer_rank_receipts_sparse_closed_ball_anchored_v2";
 
 enum class ExactHigherSupportStreamStatus : std::uint8_t {
   complete,
@@ -153,6 +158,128 @@ struct ExactHigherSupportPruneCertificate {
       const ExactHigherSupportPruneCertificate&) = default;
 };
 
+enum class ExactHigherSupportPendingStage : std::uint8_t {
+  analyze_product,
+  rank_search,
+  emit_well_prune,
+  emit_rank_prune,
+  expand_product,
+  classify_leaf,
+};
+
+// The active product remains the back of the main frontier.  Its product
+// visit has already been charged.  During rank_search, rank_frontier and
+// strict_interior_receipts form one disjoint antichain of immutable Morton
+// ranges.  Exact universal power certificates are recomputed, never persisted
+// in the checkpoint cursor.
+struct ExactHigherSupportPendingProduct {
+  ExactHigherSupportFrontierEntry product{};
+  ExactHigherSupportPendingStage stage{
+      ExactHigherSupportPendingStage::analyze_product};
+  bool rank_search_started{false};
+  bool leaf_analysis_started{false};
+  std::vector<ExactHigherSupportNodeReceipt> rank_frontier;
+  // Only immutable node receipts persist.  Their exact power analyses are
+  // deterministically recomputed from the authority when the prune is emitted
+  // or the checkpoint is verified.
+  std::vector<ExactHigherSupportNodeReceipt> strict_interior_receipts;
+  exact::BigInt certified_strict_interior_point_count{0};
+
+  friend bool operator==(
+      const ExactHigherSupportPendingProduct&,
+      const ExactHigherSupportPendingProduct&) = default;
+};
+
+struct ExactHigherSupportCheckpointManifest {
+  std::uint32_t schema_version{higher_support_checkpoint_schema_version};
+  std::uint32_t traversal_version{higher_support_traversal_version};
+  std::size_t point_count{};
+  std::size_t lbvh_node_count{};
+  std::size_t lbvh_leaf_count{};
+  std::size_t requested_maximum_order{};
+  std::size_t effective_maximum_order{};
+  std::size_t maximum_relevant_closed_rank{};
+  contract::CanonicalId canonical_cloud_digest{};
+  contract::CanonicalId lbvh_digest{};
+  contract::CanonicalId semantic_digest{};
+
+  friend bool operator==(
+      const ExactHigherSupportCheckpointManifest&,
+      const ExactHigherSupportCheckpointManifest&) = default;
+};
+
+struct ExactHigherSupportAuthorityContextAudit {
+  std::size_t manifest_build_count{};
+  std::size_t canonical_cloud_point_hash_count{};
+  std::size_t lbvh_leaf_hash_count{};
+  std::size_t lbvh_node_hash_count{};
+  bool manifest_cached{false};
+
+  friend bool operator==(
+      const ExactHigherSupportAuthorityContextAudit&,
+      const ExactHigherSupportAuthorityContextAudit&) = default;
+};
+
+// The cloud and LBVH must outlive this immutable authority cache.  It keeps
+// O(n) manifest hashing out of the per-chunk hot path.
+class ExactHigherSupportAuthorityContext {
+ public:
+  ExactHigherSupportAuthorityContext(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::size_t requested_maximum_order);
+  ExactHigherSupportAuthorityContext(
+      spatial::MortonLbvhIndex&&,
+      const spatial::CanonicalPointCloud&,
+      std::size_t) = delete;
+  ExactHigherSupportAuthorityContext(
+      const spatial::MortonLbvhIndex&&,
+      const spatial::CanonicalPointCloud&,
+      std::size_t) = delete;
+  ExactHigherSupportAuthorityContext(
+      const spatial::MortonLbvhIndex&,
+      spatial::CanonicalPointCloud&&,
+      std::size_t) = delete;
+  ExactHigherSupportAuthorityContext(
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&&,
+      std::size_t) = delete;
+
+  ExactHigherSupportAuthorityContext(
+      const ExactHigherSupportAuthorityContext&) = default;
+  ExactHigherSupportAuthorityContext& operator=(
+      const ExactHigherSupportAuthorityContext&) = delete;
+  ExactHigherSupportAuthorityContext(
+      ExactHigherSupportAuthorityContext&&) = delete;
+  ExactHigherSupportAuthorityContext& operator=(
+      ExactHigherSupportAuthorityContext&&) = delete;
+
+  [[nodiscard]] const spatial::MortonLbvhIndex& index() const noexcept {
+    return *index_;
+  }
+  [[nodiscard]] const spatial::CanonicalPointCloud& cloud() const noexcept {
+    return *cloud_;
+  }
+  [[nodiscard]] std::size_t requested_maximum_order() const noexcept {
+    return requested_maximum_order_;
+  }
+  [[nodiscard]] const ExactHigherSupportCheckpointManifest& manifest()
+      const noexcept {
+    return manifest_;
+  }
+  [[nodiscard]] const ExactHigherSupportAuthorityContextAudit& audit()
+      const noexcept {
+    return audit_;
+  }
+
+ private:
+  const spatial::MortonLbvhIndex* index_{};
+  const spatial::CanonicalPointCloud* cloud_{};
+  std::size_t requested_maximum_order_{};
+  ExactHigherSupportCheckpointManifest manifest_{};
+  ExactHigherSupportAuthorityContextAudit audit_{};
+};
+
 struct ExactHigherSupportEvent {
   std::uint8_t support_size{};
   // Only the first support_size entries are meaningful and are sorted by
@@ -272,6 +399,143 @@ struct ExactHigherSupportStreamResult {
       const ExactHigherSupportStreamResult&) = default;
 };
 
+struct ExactHigherSupportCheckpoint {
+  ExactHigherSupportCheckpointManifest manifest{};
+  std::uint64_t next_chunk_sequence{};
+  std::size_t output_record_count{};
+  contract::CanonicalId output_chain_digest{};
+  std::vector<ExactHigherSupportFrontierEntry> frontier;
+  std::optional<ExactHigherSupportPendingProduct> pending_product;
+  ExactHigherSupportStreamAudit cumulative_audit{};
+  contract::CanonicalId checkpoint_digest{};
+
+  // This is only a local shape/audit predicate.  Scientific completeness
+  // requires either an ExactHigherSupportAnchoredSession commit chain or
+  // verify_exact_higher_support_stream_run from the canonical roots.
+  [[nodiscard]] bool locally_complete() const {
+    return frontier.empty() && !pending_product.has_value() &&
+           cumulative_audit.grouped_partition_accounting_certified &&
+           cumulative_audit.remaining_frontier_support_count == 0 &&
+           cumulative_audit.resolved_support_count ==
+               cumulative_audit.total_support_count;
+  }
+
+  friend bool operator==(
+      const ExactHigherSupportCheckpoint&,
+      const ExactHigherSupportCheckpoint&) = default;
+};
+
+struct ExactHigherSupportStreamChunk {
+  ExactHigherSupportCheckpointManifest manifest{};
+  ExactHigherSupportStreamBudget budget{};
+  std::uint64_t chunk_sequence{};
+  std::size_t first_output_record_index{};
+  contract::CanonicalId source_checkpoint_digest{};
+  contract::CanonicalId previous_output_chain_digest{};
+  contract::CanonicalId output_chain_digest{};
+  ExactHigherSupportStreamStatus status{
+      ExactHigherSupportStreamStatus::budget_exhausted};
+  ExactHigherSupportStopReason stop_reason{
+      ExactHigherSupportStopReason::work_unit_limit};
+  std::vector<ExactHigherSupportEvent> events;
+  std::vector<ExactHigherSupportExtraShellDiagnostic>
+      relevant_extra_shell_diagnostics;
+  std::vector<ExactHigherSupportPruneCertificate> prune_certificates;
+  enum class RecordKind : std::uint8_t {
+    event,
+    relevant_extra_shell_diagnostic,
+    prune_certificate,
+  };
+  std::vector<RecordKind> record_order;
+  ExactHigherSupportStreamAudit cumulative_audit_before{};
+  ExactHigherSupportStreamAudit cumulative_audit_after{};
+  ExactHigherSupportCheckpoint next_checkpoint{};
+  bool candidate_prepared{false};
+  bool no_forbidden_global_structure_materialized{false};
+  bool hierarchy_reduction_performed{false};
+
+  [[nodiscard]] bool relative_stream_complete() const {
+    return candidate_prepared &&
+           status == ExactHigherSupportStreamStatus::complete &&
+           stop_reason == ExactHigherSupportStopReason::none &&
+           next_checkpoint.locally_complete() &&
+           no_forbidden_global_structure_materialized &&
+           !hierarchy_reduction_performed;
+  }
+
+  friend bool operator==(
+      const ExactHigherSupportStreamChunk&,
+      const ExactHigherSupportStreamChunk&) = default;
+};
+
+struct ExactHigherSupportCheckpointVerification {
+  bool manifest_matches_authorities{false};
+  bool checksum_matches_payload{false};
+  bool frontier_locally_valid{false};
+  bool pending_product_locally_valid{false};
+  bool pending_receipts_recertified{false};
+  bool required_audit_identities_hold{false};
+  bool local_integrity_verified{false};
+};
+
+struct ExactHigherSupportStreamChunkVerification {
+  bool source_checkpoint_local_integrity_verified{false};
+  bool source_checkpoint_anchored{false};
+  bool requested_budget_certified{false};
+  bool prepared_transition_chain_matches{false};
+  bool records_individually_exact{false};
+  bool next_checkpoint_local_integrity_verified{false};
+  bool next_checkpoint_anchored{false};
+  bool fresh_replay_certified{false};
+  bool chunk_transition_verified{false};
+};
+
+// In-memory provenance authority.  A raw checkpoint can prove local integrity
+// but cannot prove that its frontier is reachable from the canonical roots.
+// This session owns that root anchor, prepares retryable transitions without
+// advancing it, and advances only after an exact replay of the supplied
+// candidate.  Durable recovery needs a separately authenticated protocol.
+class ExactHigherSupportAnchoredSession {
+ public:
+  explicit ExactHigherSupportAnchoredSession(
+      const ExactHigherSupportAuthorityContext& authority);
+
+  ExactHigherSupportAnchoredSession(
+      const ExactHigherSupportAnchoredSession&) = delete;
+  ExactHigherSupportAnchoredSession& operator=(
+      const ExactHigherSupportAnchoredSession&) = delete;
+  ExactHigherSupportAnchoredSession(
+      ExactHigherSupportAnchoredSession&&) = delete;
+  ExactHigherSupportAnchoredSession& operator=(
+      ExactHigherSupportAnchoredSession&&) = delete;
+
+  [[nodiscard]] const ExactHigherSupportCheckpoint& trusted_checkpoint()
+      const noexcept {
+    return trusted_checkpoint_;
+  }
+
+  [[nodiscard]] ExactHigherSupportStreamChunk prepare_next(
+      const ExactHigherSupportStreamBudget& chunk_budget,
+      const ExactHigherSupportCheckpoint& reinjected_source) const;
+
+  [[nodiscard]] ExactHigherSupportStreamChunkVerification commit_prepared(
+      const ExactHigherSupportStreamBudget& chunk_budget,
+      const ExactHigherSupportCheckpoint& reinjected_source,
+      const ExactHigherSupportStreamChunk& candidate);
+
+ private:
+  ExactHigherSupportAuthorityContext authority_;
+  ExactHigherSupportCheckpoint trusted_checkpoint_{};
+};
+
+struct ExactHigherSupportStreamRunVerification {
+  bool initial_checkpoint_reconstructed{false};
+  std::size_t verified_chunk_count{};
+  bool every_transition_verified{false};
+  bool terminal_checkpoint_reached{false};
+  bool anchored_run_certified{false};
+};
+
 // Exact for every size_t point count, including the 10M product target.
 [[nodiscard]] exact::BigInt exact_higher_support_candidate_universe_size(
     std::size_t point_count);
@@ -282,6 +546,46 @@ build_exact_higher_support_stream(
     const spatial::CanonicalPointCloud& cloud,
     std::size_t requested_maximum_order,
     const ExactHigherSupportStreamBudget& budget);
+
+[[nodiscard]] ExactHigherSupportCheckpointManifest
+make_exact_higher_support_checkpoint_manifest(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order);
+
+[[nodiscard]] ExactHigherSupportCheckpoint
+make_initial_exact_higher_support_checkpoint(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order);
+
+[[nodiscard]] ExactHigherSupportCheckpoint
+make_initial_exact_higher_support_checkpoint(
+    const ExactHigherSupportAuthorityContext& authority);
+
+[[nodiscard]] contract::CanonicalId
+compute_exact_higher_support_checkpoint_digest(
+    const ExactHigherSupportCheckpoint& checkpoint);
+
+[[nodiscard]] ExactHigherSupportCheckpointVerification
+verify_exact_higher_support_checkpoint(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactHigherSupportCheckpoint& checkpoint);
+
+[[nodiscard]] ExactHigherSupportCheckpointVerification
+verify_exact_higher_support_checkpoint(
+    const ExactHigherSupportAuthorityContext& authority,
+    const ExactHigherSupportCheckpoint& checkpoint);
+
+[[nodiscard]] ExactHigherSupportStreamRunVerification
+verify_exact_higher_support_stream_run(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    std::span<const ExactHigherSupportStreamBudget> chunk_budgets,
+    std::span<const ExactHigherSupportStreamChunk> chunks);
 
 struct ExactHigherSupportStreamVerification {
   bool requested_budget_certified{false};

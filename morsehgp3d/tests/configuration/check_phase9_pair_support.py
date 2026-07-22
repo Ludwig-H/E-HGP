@@ -225,6 +225,10 @@ def validate(
         "the higher-support target must depend on the certified spatial layer",
     )
     require(
+        "morsehgp3d::contract" in higher_links,
+        "the higher-support checkpoint must depend on canonical SHA-256",
+    )
+    require(
         "morsehgp3d::hierarchy" not in higher_links,
         "the higher-support target must not link the historical Gamma archive",
     )
@@ -341,6 +345,32 @@ def validate(
         "grouped_partition_accounting_certified",
         "no_forbidden_global_structure_materialized = true",
         "hierarchy_reduction_performed = false",
+        "struct ExactHigherSupportPendingProduct",
+        "struct ExactHigherSupportCheckpointManifest",
+        "class ExactHigherSupportAuthorityContext",
+        "struct ExactHigherSupportCheckpoint",
+        "struct ExactHigherSupportStreamChunk",
+        "std::vector<ExactHigherSupportNodeReceipt> rank_frontier",
+        "std::vector<ExactHigherSupportNodeReceipt> strict_interior_receipts",
+        "source_checkpoint_digest",
+        "output_chain_digest",
+        "make_initial_exact_higher_support_checkpoint(",
+        "class ExactHigherSupportAnchoredSession",
+        "ExactHigherSupportAnchoredSession::prepare_next(",
+        "ExactHigherSupportAnchoredSession::commit_prepared(",
+        "build_exact_higher_support_stream_chunk_after_source_verification(",
+        "verify_exact_higher_support_checkpoint(",
+        "verify_exact_higher_support_stream_chunk_from_trusted_source(",
+        "verify_exact_higher_support_stream_run(",
+        "checkpoint.output_record_count == audit.emitted_record_count",
+        "pending_product_->product != frontier_.back()",
+        "reinjected_source != trusted_checkpoint_",
+        "source_checkpoint_anchored",
+        "freshly_replayed_next",
+        "output-record-chain/v2/prune",
+        "receipt_payload_within_caps",
+        "pending.strict_interior_receipts.size() <=",
+        "pending.rank_frontier.size() <= maximum_rank_frontier_size",
         "verify_exact_higher_support_stream(",
         "verification.fresh_replay_certified = observed == expected",
     ):
@@ -348,6 +378,11 @@ def validate(
             required in higher_combined,
             f"missing bounded higher-support token {required!r}",
         )
+
+    require(
+        "append_product_analysis(" not in higher_stream_source,
+        "the compact higher output chain must recompute interval analyses",
+    )
 
     verifier_start = header.find("class ExactPairSupportIncrementalVerifier")
     verifier_end = header.find(
@@ -760,7 +795,7 @@ def validate(
         binary_symbol_gate = True
 
     return {
-        "schema": "morsehgp3d.phase9.direct_support_static.v6",
+        "schema": "morsehgp3d.phase9.direct_support_static.v7",
         "targets": [
             "morsehgp3d_pair_support",
             "morsehgp3d_higher_support",
@@ -774,6 +809,9 @@ def validate(
         "materialized_higher_support_arena_count": 0,
         "higher_support_grouped_bigint_frontier": True,
         "higher_support_fresh_replay": True,
+        "higher_support_reinjectable_checkpoint": True,
+        "higher_support_anchored_in_memory_session": True,
+        "higher_support_three_kind_output_chain": True,
         "persistent_authority_context": True,
         "incremental_verify_next": True,
         "two_phase_durable_verification": True,

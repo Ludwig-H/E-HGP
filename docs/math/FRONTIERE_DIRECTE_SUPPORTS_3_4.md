@@ -101,3 +101,27 @@ La même famille avec $t\in[-1/2,1/2]$ et $x=(0,33/16,0)$ possède la puissance 
 $$\left\Vert x-c(t)\right\Vert^2-\beta(U(t))=\frac{41}{256}-\frac{33}{32}t^2.$$
 
 Elle vaut $-25/256$ aux deux extrémités mais $41/256>0$ au centre. Tester seulement les sphères des coins supports certifierait donc faussement que $x$ est toujours intérieur. Le test C++ exige que l'intervalle polynomial complet reste ambigu, tandis que l'oracle Python recalcule indépendamment les cinq valeurs rationnelles. Toute future borne Bernstein, Taylor, McCormick ou GPU doit conserver cette fixture.
+
+## 9. Induction exacte de reprise
+
+Pour une frontière canonique $F$, notons $\mathcal{U}(e)$ la famille de supports représentée par l'entrée $e$, $c(e)=\lvert\mathcal{U}(e)\rvert$ son cardinal exact et $C(F)=\sum_{e\in F}c(e)$. Aux racines, les familles d'arités trois et quatre sont disjointes et donnent exactement l'univers visé :
+
+$$\bigsqcup_{e\in F_0}\mathcal{U}(e)=\binom{P}{3}\sqcup\binom{P}{4},\qquad C(F_0)=\binom{n}{3}+\binom{n}{4}.$$
+
+Une expansion remplace une entrée $e$ par ses enfants $E(e)$. L'unicité de $a=\lvert U\cap L\rvert$ démontrée en section 2 donne une vraie partition, pas seulement une égalité numérique :
+
+$$\mathcal{U}(e)=\bigsqcup_{f\in E(e)}\mathcal{U}(f),\qquad c(e)=\sum_{f\in E(e)}c(f).$$
+
+Un prune certifié ou une classification feuille retire au contraire $e$ et ajoute exactement $c(e)$ au compte résolu. Une interruption au milieu de l'analyse ne retire rien : le produit actif reste égal au dos de la frontière et sa famille est donc comptée une seule fois. Si $R_j$ est le compte résolu après une transition ancrée et $F_j$ sa frontière, l'induction conserve
+
+$$R_j+C(F_j)=\binom{n}{3}+\binom{n}{4}.$$
+
+Cette identité est nécessaire mais non suffisante à elle seule. Pour $n=4$, cinq copies de la racine tétraédrique ont la même somme cinq que les quatre triangles et l'unique tétraèdre, tout en dupliquant un support et en omettant les quatre autres. Un checksum recalculé, des groupes localement valides et l'égalité précédente ne peuvent donc pas établir la provenance d'une frontière arbitraire.
+
+L'autorité en mémoire est par conséquent une induction d'états et non une propriété isolée du payload. La session construit $F_0$, conserve un unique checkpoint fiable $Q_j$, exige que la source réinjectée lui soit exactement égale, puis recalcule la transition déterministe $T_{b_j}$ pilotée par le budget fiable $b_j$. Le commit autorisé est exclusivement
+
+$$Q_{j+1}=T_{b_j}(Q_j).$$
+
+Le candidat mutable n'est jamais la source de $Q_{j+1}$. Un échec conserve $Q_j$; un retry reproduit le même candidat; un état terminal n'a aucun successeur no-op. Cette règle ferme simultanément les duplications, omissions, raccourcis de curseur et doubles charges, car toute altération doit alors contredire au moins une transition rejouée depuis les racines.
+
+Le checkpoint persiste seulement les groupes, l'étape active, les reçus de nœuds, les comptes et les digests. Les analyses Gram--Cramer et de puissance sont des champs dérivés recalculés. La chaîne de sortie engage la projection minimale d'un prune — produit, raison, comptes et reçus ordonnés — plutôt que le texte potentiellement volumineux de ces analyses. Le rejeu exact compare néanmoins le certificat riche entier. Cette séparation prépare un wire supérieur compact sans confondre engagement de la revendication, recertification géométrique et provenance ancrée.
