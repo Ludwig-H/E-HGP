@@ -27,6 +27,7 @@ using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::hierarchy::ExactPairSupportAuthorityContext;
 using morsehgp3d::hierarchy::ExactPairSupportCheckpoint;
 using morsehgp3d::hierarchy::ExactPairSupportDurableConfig;
+using morsehgp3d::hierarchy::ExactPairSupportDurableExternalPrefixAnchor;
 using morsehgp3d::hierarchy::ExactPairSupportDurablePublishDecision;
 using morsehgp3d::hierarchy::ExactPairSupportDurablePublishOptions;
 using morsehgp3d::hierarchy::ExactPairSupportDurablePublishStage;
@@ -218,7 +219,8 @@ void seed_one_transition(
     const std::filesystem::path& directory,
     const ExactPairSupportAuthorityContext& authority,
     const ExactPairSupportDurableConfig& config) {
-  ExactPairSupportDurableSink sink(directory, authority, config);
+  auto sink = ExactPairSupportDurableSink::create_new(
+      directory, authority, config);
   const ExactPairSupportStreamChunk first =
       build_exact_pair_support_stream_chunk(
           authority, config.fixed_chunk_budget, sink.trusted_checkpoint());
@@ -271,6 +273,165 @@ void truncate_last_byte(const std::filesystem::path& path) {
   }
 }
 
+void test_explicit_create_open_and_external_anchor() {
+  const CanonicalPointCloud cloud = triangle_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactPairSupportAuthorityContext authority(index, cloud, 1U);
+  const ExactPairSupportDurableConfig config = durable_config();
+  TemporaryWorkspace workspace;
+  const std::filesystem::path directory = workspace.make_directory("modes");
+
+  {
+    const std::filesystem::path source_directory =
+        workspace.make_directory("initial-head-source");
+    {
+      auto source = ExactPairSupportDurableSink::create_new(
+          source_directory, authority, config);
+      static_cast<void>(source);
+    }
+    const std::filesystem::path interrupted_directory =
+        workspace.make_directory("initial-head-interrupted");
+    std::filesystem::copy_file(
+        source_directory / "HEAD",
+        interrupted_directory / ".HEAD.tmp");
+    auto resumed_create = ExactPairSupportDurableSink::create_new(
+        interrupted_directory, authority, config);
+    check(
+        resumed_create.status().authoritative_head_certified &&
+            resumed_create.status().committed_transition_count == 0U &&
+            resumed_create.status()
+                    .removed_uncommitted_temporary_file_count == 1U &&
+            std::filesystem::exists(interrupted_directory / "HEAD") &&
+            !std::filesystem::exists(
+                interrupted_directory / ".HEAD.tmp"),
+        "create_new resumes an interrupted full HEAD0 temporary before its no-replace link");
+  }
+
+  check_throws(
+      [&] {
+        auto missing = ExactPairSupportDurableSink::open_existing(
+            directory, authority, config);
+        static_cast<void>(missing);
+      },
+      "open_existing never interprets a missing HEAD as an empty run");
+
+  ExactPairSupportDurableExternalPrefixAnchor first_anchor;
+  {
+    auto created = ExactPairSupportDurableSink::create_new(
+        directory, authority, config);
+    check(
+        created.status().authoritative_head_certified &&
+            created.status()
+                    .current_prefix_anchor.committed_transition_count == 0U &&
+            created.status().current_prefix_anchor.checkpoint_digest ==
+                created.trusted_checkpoint().checkpoint_digest,
+        "create_new publishes a certified HEAD for the reconstructed initial checkpoint");
+    const ExactPairSupportStreamChunk first =
+        build_exact_pair_support_stream_chunk(
+            authority,
+            config.fixed_chunk_budget,
+            created.trusted_checkpoint());
+    const auto published = created.publish_next(first);
+    first_anchor = published.current_prefix_anchor;
+    check(
+        published.decision ==
+                ExactPairSupportDurablePublishDecision::durably_published &&
+            first_anchor.committed_transition_count == 1U &&
+            first_anchor.checkpoint_digest ==
+                first.next_checkpoint.checkpoint_digest,
+        "a durable publication returns the compact prefix anchor for the caller to persist externally");
+  }
+
+  check_throws(
+      [&] {
+        auto duplicate = ExactPairSupportDurableSink::create_new(
+            directory, authority, config);
+        static_cast<void>(duplicate);
+      },
+      "create_new refuses an existing authoritative HEAD");
+
+  ExactPairSupportDurableConfig wrong_budget = config;
+  ++wrong_budget.fixed_chunk_budget.maximum_work_unit_count;
+  check_throws(
+      [&] {
+        auto wrong_contract = ExactPairSupportDurableSink::open_existing(
+            directory, authority, wrong_budget);
+        static_cast<void>(wrong_contract);
+      },
+      "HEAD binds the externally supplied fixed replay budget into the run contract");
+
+  {
+    auto continued = ExactPairSupportDurableSink::open_existing(
+        directory, authority, config, first_anchor);
+    const ExactPairSupportStreamChunk second =
+        build_exact_pair_support_stream_chunk(
+            authority,
+            config.fixed_chunk_budget,
+            continued.trusted_checkpoint());
+    const auto published = continued.publish_next(second);
+    check(
+        continued.status().external_prefix_anchor_verified &&
+            published.decision ==
+                ExactPairSupportDurablePublishDecision::durably_published &&
+            published.current_prefix_anchor.committed_transition_count == 2U,
+        "an externally anchored prefix can advance by one further certified transition");
+  }
+
+  {
+    auto newer_local = ExactPairSupportDurableSink::open_existing(
+        directory, authority, config, first_anchor);
+    check(
+        newer_local.status().external_prefix_anchor_supplied &&
+            newer_local.status().external_prefix_anchor_verified &&
+            newer_local.status().committed_transition_count == 2U,
+        "a local HEAD newer than the monotone external anchor is accepted only after replay crosses the exact anchored checkpoint");
+  }
+
+  ExactPairSupportDurableExternalPrefixAnchor future_anchor = first_anchor;
+  future_anchor.committed_transition_count = 3U;
+  check_throws(
+      [&] {
+        auto rolled_back = ExactPairSupportDurableSink::open_existing(
+            directory, authority, config, future_anchor);
+        static_cast<void>(rolled_back);
+      },
+      "a local HEAD older than the externally acknowledged prefix is rejected as rollback or data loss");
+
+  ExactPairSupportDurableExternalPrefixAnchor false_anchor = first_anchor;
+  false_anchor.checkpoint_digest = {};
+  check_throws(
+      [&] {
+        auto false_lineage = ExactPairSupportDurableSink::open_existing(
+            directory, authority, config, false_anchor);
+        static_cast<void>(false_lineage);
+      },
+      "an external anchor at an existing count must match the exact replayed checkpoint digest");
+
+  {
+    TemporaryWorkspace link_window_workspace;
+    const std::filesystem::path link_window_directory =
+        link_window_workspace.make_directory("initial-link-window");
+    {
+      auto initialized = ExactPairSupportDurableSink::create_new(
+          link_window_directory, authority, config);
+      static_cast<void>(initialized);
+    }
+    std::filesystem::create_hard_link(
+        link_window_directory / "HEAD",
+        link_window_directory / ".HEAD.tmp");
+    auto recovered = ExactPairSupportDurableSink::open_existing(
+        link_window_directory, authority, config);
+    check(
+        recovered.status().authoritative_head_certified &&
+            recovered.status().committed_transition_count == 0U &&
+            recovered.status().removed_uncommitted_temporary_file_count ==
+                1U &&
+            !std::filesystem::exists(
+                link_window_directory / ".HEAD.tmp"),
+        "open_existing normalizes the two-link HEAD0 publication window after validating one inode and one canonical HEAD");
+  }
+}
+
 void test_publication_recovery_and_lock() {
   const CanonicalPointCloud cloud = triangle_cloud();
   const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
@@ -281,16 +442,19 @@ void test_publication_recovery_and_lock() {
 
   PublishedSummary published;
   {
-    ExactPairSupportDurableSink sink(directory, authority, config);
+    auto sink = ExactPairSupportDurableSink::create_new(
+        directory, authority, config);
     check(
         sink.status().writer_lock_acquired &&
+            sink.status().authoritative_head_certified &&
             sink.status().anchored_prefix_certified &&
             sink.status().committed_transition_count == 0U,
         "a new durable sink owns the writer lock and the anchored empty prefix");
     check_throws(
         [&] {
-          ExactPairSupportDurableSink concurrent(
+          auto concurrent = ExactPairSupportDurableSink::open_existing(
               directory, authority, config);
+          static_cast<void>(concurrent);
         },
         "a concurrent durable writer lock is refused");
     published = publish_to_terminal(sink, authority, config);
@@ -308,7 +472,8 @@ void test_publication_recovery_and_lock() {
   }
 
   {
-    ExactPairSupportDurableSink recovered(directory, authority, config);
+    auto recovered = ExactPairSupportDurableSink::open_existing(
+        directory, authority, config);
     check(
         recovered.status().recovered_transition_count ==
                 published.transition_count &&
@@ -316,6 +481,10 @@ void test_publication_recovery_and_lock() {
                 published.transition_count &&
             recovered.status().total_encoded_byte_count ==
                 published.encoded_byte_count &&
+            recovered.status().authoritative_head_certified &&
+            recovered.status()
+                    .current_prefix_anchor.committed_transition_count ==
+                published.transition_count &&
             recovered.status().anchored_run_certified &&
             recovered.trusted_checkpoint().checkpoint_digest ==
                 published.terminal_checkpoint.checkpoint_digest &&
@@ -334,13 +503,73 @@ void test_hostile_files_and_symlinks() {
   {
     TemporaryWorkspace workspace;
     const std::filesystem::path directory =
+        workspace.make_directory("missing-committed");
+    seed_one_transition(directory, authority, config);
+    if (!std::filesystem::remove(first_final_path(directory))) {
+      throw std::runtime_error("cannot remove the committed fixture");
+    }
+    check_throws(
+        [&] {
+          auto rejected = ExactPairSupportDurableSink::open_existing(
+              directory, authority, config);
+          static_cast<void>(rejected);
+        },
+        "HEAD makes deletion of an already committed suffix detectable");
+  }
+
+  {
+    TemporaryWorkspace workspace;
+    const std::filesystem::path directory =
+        workspace.make_directory("invalid-orphan");
+    {
+      auto initialized = ExactPairSupportDurableSink::create_new(
+          directory, authority, config);
+      static_cast<void>(initialized);
+    }
+    std::filesystem::copy_file(
+        directory / "HEAD", first_final_path(directory));
+    check_throws(
+        [&] {
+          auto rejected = ExactPairSupportDurableSink::open_existing(
+              directory, authority, config);
+          static_cast<void>(rejected);
+        },
+        "a final beyond HEAD is validated before it can be classified as an uncommitted orphan");
+    check(
+        std::filesystem::exists(first_final_path(directory)),
+        "an invalid orphan is preserved on fail-closed recovery");
+  }
+
+  {
+    TemporaryWorkspace workspace;
+    const std::filesystem::path directory =
+        workspace.make_directory("corrupt-head");
+    {
+      auto initialized = ExactPairSupportDurableSink::create_new(
+          directory, authority, config);
+      static_cast<void>(initialized);
+    }
+    corrupt_first_byte(directory / "HEAD");
+    check_throws(
+        [&] {
+          auto rejected = ExactPairSupportDurableSink::open_existing(
+              directory, authority, config);
+          static_cast<void>(rejected);
+        },
+        "a corrupted authoritative HEAD is rejected before replay or cleanup");
+  }
+
+  {
+    TemporaryWorkspace workspace;
+    const std::filesystem::path directory =
         workspace.make_directory("corrupt");
     seed_one_transition(directory, authority, config);
     corrupt_first_byte(first_final_path(directory));
     check_throws(
         [&] {
-          ExactPairSupportDurableSink rejected(
+          auto rejected = ExactPairSupportDurableSink::open_existing(
               directory, authority, config);
+          static_cast<void>(rejected);
         },
         "a corrupted committed transition is rejected during anchored recovery");
   }
@@ -353,8 +582,9 @@ void test_hostile_files_and_symlinks() {
     truncate_last_byte(first_final_path(directory));
     check_throws(
         [&] {
-          ExactPairSupportDurableSink rejected(
+          auto rejected = ExactPairSupportDurableSink::open_existing(
               directory, authority, config);
+          static_cast<void>(rejected);
         },
         "a truncated committed transition is rejected during bounded decoding");
   }
@@ -368,8 +598,9 @@ void test_hostile_files_and_symlinks() {
         directory / "pair-support-00000000000000000001.p9c");
     check_throws(
         [&] {
-          ExactPairSupportDurableSink rejected(
+          auto rejected = ExactPairSupportDurableSink::open_existing(
               directory, authority, config);
+          static_cast<void>(rejected);
         },
         "a committed transition sequence with a missing zero prefix is rejected before replay");
   }
@@ -377,6 +608,11 @@ void test_hostile_files_and_symlinks() {
   {
     TemporaryWorkspace workspace;
     const std::filesystem::path directory = workspace.make_directory("fifo");
+    {
+      auto initialized = ExactPairSupportDurableSink::create_new(
+          directory, authority, config);
+      static_cast<void>(initialized);
+    }
     if (::mkfifo(first_final_path(directory).c_str(), 0600) != 0) {
       throw std::system_error(
           errno, std::generic_category(), "cannot create FIFO fixture");
@@ -389,8 +625,9 @@ void test_hostile_files_and_symlinks() {
     if (child == 0) {
       static_cast<void>(::alarm(2U));
       try {
-        ExactPairSupportDurableSink rejected(
+        auto rejected = ExactPairSupportDurableSink::open_existing(
             directory, authority, config);
+        static_cast<void>(rejected);
       } catch (...) {
         std::_Exit(0);
       }
@@ -414,7 +651,9 @@ void test_hostile_files_and_symlinks() {
     std::filesystem::create_directory_symlink(actual, link);
     check_throws(
         [&] {
-          ExactPairSupportDurableSink rejected(link, authority, config);
+          auto rejected = ExactPairSupportDurableSink::open_existing(
+              link, authority, config);
+          static_cast<void>(rejected);
         },
         "a symlink supplied as the dedicated directory is rejected");
   }
@@ -423,6 +662,11 @@ void test_hostile_files_and_symlinks() {
     TemporaryWorkspace workspace;
     const std::filesystem::path directory =
         workspace.make_directory("final-link");
+    {
+      auto initialized = ExactPairSupportDurableSink::create_new(
+          directory, authority, config);
+      static_cast<void>(initialized);
+    }
     const std::filesystem::path target = workspace.root() / "outside";
     {
       const int descriptor = ::open(
@@ -434,8 +678,9 @@ void test_hostile_files_and_symlinks() {
     std::filesystem::create_symlink(target, first_final_path(directory));
     check_throws(
         [&] {
-          ExactPairSupportDurableSink rejected(
+          auto rejected = ExactPairSupportDurableSink::open_existing(
               directory, authority, config);
+          static_cast<void>(rejected);
         },
         "a symlink at a committed transition name is rejected without following it");
   }
@@ -456,12 +701,125 @@ void exit_at_publish_stage(
   }
 }
 
-[[nodiscard]] bool is_before_rename(
+struct CompetingFinalContext {
+  std::string path;
+  bool created{false};
+};
+
+void create_competing_final(
+    ExactPairSupportDurablePublishStage observed,
+    void* state) noexcept {
+  if (observed != ExactPairSupportDurablePublishStage::
+                      transition_temporary_file_synchronized) {
+    return;
+  }
+  auto& context = *static_cast<CompetingFinalContext*>(state);
+  const int descriptor = ::open(
+      context.path.c_str(),
+      O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW,
+      0600);
+  if (descriptor < 0) {
+    return;
+  }
+  const std::uint8_t sentinel = 0x5aU;
+  const bool written = ::write(descriptor, &sentinel, 1U) == 1;
+  const bool synchronized = written && ::fdatasync(descriptor) == 0;
+  const bool closed = ::close(descriptor) == 0;
+  context.created = synchronized && closed;
+}
+
+void test_transition_publication_is_no_replace() {
+  const CanonicalPointCloud cloud = triangle_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactPairSupportAuthorityContext authority(index, cloud, 1U);
+  const ExactPairSupportDurableConfig config = durable_config();
+  TemporaryWorkspace workspace;
+  const std::filesystem::path directory =
+      workspace.make_directory("no-replace");
+  auto sink = ExactPairSupportDurableSink::create_new(
+      directory, authority, config);
+  const ExactPairSupportCheckpoint initial = sink.trusted_checkpoint();
+  const ExactPairSupportStreamChunk first =
+      build_exact_pair_support_stream_chunk(
+          authority, config.fixed_chunk_budget, initial);
+  CompetingFinalContext context{first_final_path(directory).string()};
+  const auto result = sink.publish_next(
+      first,
+      ExactPairSupportDurablePublishOptions{
+          create_competing_final, &context});
+
+  std::uint8_t observed{};
+  const int descriptor = ::open(
+      context.path.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
+  const bool sentinel_preserved =
+      descriptor >= 0 && ::read(descriptor, &observed, 1U) == 1 &&
+      observed == 0x5aU;
+  if (descriptor >= 0) {
+    static_cast<void>(::close(descriptor));
+  }
+  check(
+      context.created && sentinel_preserved &&
+          result.decision !=
+              ExactPairSupportDurablePublishDecision::durably_published &&
+          !result.trusted_checkpoint_advanced &&
+          sink.trusted_checkpoint() == initial,
+      "the no-replace chunk publication preserves a target introduced after precheck and never advances HEAD or memory");
+}
+
+struct RemoveHeadContext {
+  std::string path;
+  bool removed{false};
+};
+
+void remove_head_before_integrity_check(
+    ExactPairSupportDurablePublishStage observed,
+    void* state) noexcept {
+  if (observed != ExactPairSupportDurablePublishStage::
+                      head_temporary_file_synchronized) {
+    return;
+  }
+  auto& context = *static_cast<RemoveHeadContext*>(state);
+  context.removed = ::unlink(context.path.c_str()) == 0;
+}
+
+void test_head_integrity_loss_requires_reopen() {
+  const CanonicalPointCloud cloud = triangle_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactPairSupportAuthorityContext authority(index, cloud, 1U);
+  const ExactPairSupportDurableConfig config = durable_config();
+  TemporaryWorkspace workspace;
+  const std::filesystem::path directory =
+      workspace.make_directory("head-integrity-loss");
+  auto sink = ExactPairSupportDurableSink::create_new(
+      directory, authority, config);
+  const ExactPairSupportCheckpoint initial = sink.trusted_checkpoint();
+  const ExactPairSupportStreamChunk first =
+      build_exact_pair_support_stream_chunk(
+          authority, config.fixed_chunk_budget, initial);
+  RemoveHeadContext context{(directory / "HEAD").string()};
+  const auto result = sink.publish_next(
+      first,
+      ExactPairSupportDurablePublishOptions{
+          remove_head_before_integrity_check, &context});
+
+  check(
+      context.removed &&
+          result.decision == ExactPairSupportDurablePublishDecision::
+                                 indeterminate_io_failure_reopen_required &&
+          !result.trusted_checkpoint_advanced &&
+          !sink.status().authoritative_head_certified &&
+          sink.status().failed_closed &&
+          std::filesystem::exists(first_final_path(directory)) &&
+          std::filesystem::exists(directory / ".HEAD.tmp") &&
+          sink.trusted_checkpoint() == initial,
+      "a missing HEAD at the pre-replacement integrity read preserves evidence, invalidates local authority and requires reopen");
+}
+
+[[nodiscard]] bool is_before_head_replace(
     ExactPairSupportDurablePublishStage stage) noexcept {
-  return stage ==
-             ExactPairSupportDurablePublishStage::temporary_file_written ||
-         stage == ExactPairSupportDurablePublishStage::
-                      temporary_file_synchronized;
+  return stage != ExactPairSupportDurablePublishStage::head_replaced &&
+         stage !=
+             ExactPairSupportDurablePublishStage::head_directory_synchronized;
 }
 
 void test_real_process_loss_at_each_publish_stage() {
@@ -478,10 +836,11 @@ void test_real_process_loss_at_each_publish_stage() {
   const std::vector<std::uint8_t> canonical_encoding =
       encode_exact_pair_support_stream_chunk(first, config.codec_limits);
   const std::array<ExactPairSupportDurablePublishStage, 4U> stages{
-      ExactPairSupportDurablePublishStage::temporary_file_written,
-      ExactPairSupportDurablePublishStage::temporary_file_synchronized,
-      ExactPairSupportDurablePublishStage::transition_renamed,
-      ExactPairSupportDurablePublishStage::directory_synchronized};
+      ExactPairSupportDurablePublishStage::
+          transition_temporary_file_synchronized,
+      ExactPairSupportDurablePublishStage::transition_final_link_created,
+      ExactPairSupportDurablePublishStage::head_temporary_file_synchronized,
+      ExactPairSupportDurablePublishStage::head_replaced};
 
   for (const ExactPairSupportDurablePublishStage stage : stages) {
     TemporaryWorkspace workspace;
@@ -494,7 +853,8 @@ void test_real_process_loss_at_each_publish_stage() {
     }
     if (child == 0) {
       try {
-        ExactPairSupportDurableSink sink(directory, authority, config);
+        auto sink = ExactPairSupportDurableSink::create_new(
+            directory, authority, config);
         ExactPairSupportDurablePublishStage requested = stage;
         const ExactPairSupportDurablePublishOptions options{
             exit_at_publish_stage, &requested};
@@ -516,22 +876,31 @@ void test_real_process_loss_at_each_publish_stage() {
         "the child process exits at the requested durable publication boundary");
 
     {
-      ExactPairSupportDurableSink recovered(directory, authority, config);
-      const bool before_rename = is_before_rename(stage);
+      auto recovered = ExactPairSupportDurableSink::open_existing(
+          directory, authority, config);
+      const bool before_head_replace = is_before_head_replace(stage);
       const DirectoryCounts after_recovery =
           count_transition_files(directory);
       check(
           after_recovery.temporary == 0U &&
+              after_recovery.final ==
+                  (before_head_replace ? 0U : 1U) &&
               recovered.status().committed_transition_count ==
-                  (before_rename ? 0U : 1U) &&
-              recovered.status().removed_uncommitted_temporary_file_count ==
-                  (before_rename ? 1U : 0U) &&
+                  (before_head_replace ? 0U : 1U) &&
+              recovered.status().removed_uncommitted_final_file_count ==
+                  ((stage == ExactPairSupportDurablePublishStage::
+                                  transition_final_link_created ||
+                            stage == ExactPairSupportDurablePublishStage::
+                                         head_temporary_file_synchronized)
+                       ? 1U
+                       : 0U) &&
               recovered.trusted_checkpoint().checkpoint_digest ==
-                  (before_rename ? initial.checkpoint_digest
-                                 : first.next_checkpoint.checkpoint_digest),
-          "recovery selects exactly the old state before rename and the new state after rename while removing only an uncommitted temporary");
+                  (before_head_replace
+                       ? initial.checkpoint_digest
+                       : first.next_checkpoint.checkpoint_digest),
+          "HEAD selects exactly the old state before replacement and the new state after replacement while recovery removes only validated uncommitted files");
 
-      if (before_rename) {
+      if (before_head_replace) {
         const ExactPairSupportStreamChunk retried =
             build_exact_pair_support_stream_chunk(
                 authority,
@@ -553,7 +922,8 @@ void test_real_process_loss_at_each_publish_stage() {
     }
 
     {
-      ExactPairSupportDurableSink reopened(directory, authority, config);
+      auto reopened = ExactPairSupportDurableSink::open_existing(
+          directory, authority, config);
       const DirectoryCounts final_counts =
           count_transition_files(directory);
       check(
@@ -600,8 +970,11 @@ void test_wire_integrity_is_not_scientific_provenance() {
 
 int main() {
   try {
+    test_explicit_create_open_and_external_anchor();
     test_publication_recovery_and_lock();
     test_hostile_files_and_symlinks();
+    test_transition_publication_is_no_replace();
+    test_head_integrity_loss_requires_reopen();
     test_real_process_loss_at_each_publish_stage();
     test_wire_integrity_is_not_scientific_provenance();
   } catch (const std::exception& error) {

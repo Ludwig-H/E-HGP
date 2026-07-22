@@ -116,8 +116,16 @@ void require_finite_limits(
 
 class ByteWriter {
  public:
-  explicit ByteWriter(std::size_t maximum_byte_count)
-      : maximum_byte_count_(maximum_byte_count) {}
+  ByteWriter(
+      std::size_t maximum_byte_count,
+      std::size_t reserved_trailing_byte_count = 0U)
+      : maximum_byte_count_(maximum_byte_count),
+        reserved_trailing_byte_count_(reserved_trailing_byte_count) {
+    if (reserved_trailing_byte_count_ > maximum_byte_count_) {
+      throw std::length_error(
+          "the pair-support wire representation exceeds its byte limit");
+    }
+  }
 
   void byte(std::uint8_t value) {
     require_capacity(1U);
@@ -156,6 +164,33 @@ class ByteWriter {
     bytes(identifier.bytes());
   }
 
+  [[nodiscard]] std::size_t byte_count() const noexcept {
+    return bytes_.size();
+  }
+
+  void overwrite_u64(std::size_t offset, std::uint64_t value) {
+    if (offset > bytes_.size() || bytes_.size() - offset < 8U) {
+      throw std::logic_error(
+          "a pair-support wire uint64 backpatch is out of range");
+    }
+    for (std::size_t index = 0U; index < 8U; ++index) {
+      const std::size_t shift = (7U - index) * 8U;
+      bytes_[offset + index] =
+          static_cast<std::uint8_t>(value >> shift);
+    }
+  }
+
+  void append_reserved_identifier(
+      const contract::CanonicalId& identifier) {
+    if (reserved_trailing_byte_count_ !=
+        contract::CanonicalId::byte_count) {
+      throw std::logic_error(
+          "the pair-support checksum reservation is inconsistent");
+    }
+    reserved_trailing_byte_count_ = 0U;
+    bytes(identifier.bytes());
+  }
+
   [[nodiscard]] const std::vector<std::uint8_t>& data() const noexcept {
     return bytes_;
   }
@@ -166,13 +201,19 @@ class ByteWriter {
 
  private:
   void require_capacity(std::size_t additional_byte_count) const {
-    if (additional_byte_count > maximum_byte_count_ - bytes_.size()) {
+    if (reserved_trailing_byte_count_ > maximum_byte_count_ ||
+        bytes_.size() >
+            maximum_byte_count_ - reserved_trailing_byte_count_ ||
+        additional_byte_count >
+            maximum_byte_count_ - reserved_trailing_byte_count_ -
+                bytes_.size()) {
       throw std::length_error(
           "the pair-support wire representation exceeds its byte limit");
     }
   }
 
   std::size_t maximum_byte_count_{};
+  std::size_t reserved_trailing_byte_count_{};
   std::vector<std::uint8_t> bytes_;
 };
 
@@ -245,12 +286,12 @@ class ByteWriter {
 
 class PayloadEncoder {
  public:
-  explicit PayloadEncoder(
-      const ExactPairSupportStreamCodecLimits& limits)
-      : limits_(limits), writer_(limits.maximum_encoded_byte_count) {}
+  PayloadEncoder(
+      const ExactPairSupportStreamCodecLimits& limits,
+      ByteWriter& writer)
+      : limits_(limits), writer_(writer) {}
 
-  [[nodiscard]] std::vector<std::uint8_t> encode(
-      const ExactPairSupportStreamChunk& chunk) {
+  void encode(const ExactPairSupportStreamChunk& chunk) {
     encode_manifest(chunk.manifest);
     encode_budget(chunk.budget);
     writer_.u64(chunk.chunk_sequence);
@@ -294,7 +335,6 @@ class PayloadEncoder {
     writer_.boolean(chunk.candidate_prepared);
     writer_.boolean(chunk.no_forbidden_global_structure_materialized);
     writer_.boolean(chunk.hierarchy_reduction_performed);
-    return std::move(writer_).release();
   }
 
  private:
@@ -501,7 +541,7 @@ class PayloadEncoder {
   }
 
   const ExactPairSupportStreamCodecLimits& limits_;
-  ByteWriter writer_;
+  ByteWriter& writer_;
   std::size_t auxiliary_entry_count_{};
   std::size_t point_id_reference_count_{};
   std::size_t total_exact_text_byte_count_{};
@@ -1010,31 +1050,32 @@ std::vector<std::uint8_t> encode_exact_pair_support_stream_chunk(
     const ExactPairSupportStreamChunk& chunk,
     const ExactPairSupportStreamCodecLimits& limits) {
   require_finite_limits(limits);
-  PayloadEncoder payload_encoder{limits};
-  const std::vector<std::uint8_t> payload = payload_encoder.encode(chunk);
-  const std::size_t header_and_payload_byte_count = checked_add_for_encode(
-      chunk_header_byte_count,
-      payload.size(),
-      "the pair-support wire byte count overflows size_t");
-  const std::size_t total_byte_count = checked_add_for_encode(
-      header_and_payload_byte_count,
-      chunk_checksum_byte_count,
-      "the pair-support wire byte count overflows size_t");
-  if (total_byte_count > limits.maximum_encoded_byte_count) {
+  constexpr std::size_t minimum_wire_byte_count =
+      chunk_header_byte_count + chunk_checksum_byte_count;
+  if (limits.maximum_encoded_byte_count < minimum_wire_byte_count) {
     throw std::length_error(
         "the pair-support wire representation exceeds its byte limit");
   }
 
-  ByteWriter wire{limits.maximum_encoded_byte_count};
+  ByteWriter wire{
+      limits.maximum_encoded_byte_count, chunk_checksum_byte_count};
   wire.bytes(chunk_magic);
   wire.u32(pair_support_stream_chunk_codec_version);
   wire.byte(chunk_wire_kind);
   wire.byte(chunk_wire_flags);
-  wire.u64(checked_u64_for_encode(
-      payload.size(), "the pair-support payload size does not fit uint64"));
-  wire.bytes(payload);
+  const std::size_t payload_length_offset = wire.byte_count();
+  wire.u64(0U);
+  const std::size_t payload_offset = wire.byte_count();
+  PayloadEncoder payload_encoder{limits, wire};
+  payload_encoder.encode(chunk);
+  const std::size_t payload_byte_count = wire.byte_count() - payload_offset;
+  wire.overwrite_u64(
+      payload_length_offset,
+      checked_u64_for_encode(
+          payload_byte_count,
+          "the pair-support payload size does not fit uint64"));
   const contract::CanonicalId checksum = wire_checksum(wire.data());
-  wire.identifier(checksum);
+  wire.append_reserved_identifier(checksum);
   return std::move(wire).release();
 }
 

@@ -614,6 +614,13 @@ class ExactPairSupportIncrementalVerifier {
     [[nodiscard]] bool prepared() const noexcept {
       return valid_ && verification_.chunk_transition_verified;
     }
+    // This is the checkpoint freshly reconstructed by exact replay, not the
+    // mutable checkpoint carried by the observed chunk.  Durable metadata
+    // must derive its scientific digest from this value before commit.
+    [[nodiscard]] const ExactPairSupportCheckpoint& trusted_next_checkpoint()
+        const noexcept {
+      return trusted_next_;
+    }
 
    private:
     PreparedNext(

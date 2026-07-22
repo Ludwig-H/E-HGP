@@ -622,15 +622,32 @@ void test_hostile_payload_and_limits() {
 void test_encode_rejects_invalid_or_unbounded_inputs() {
   const ExactPairSupportStreamChunk chunk = fixture_chunk();
   const ExactPairSupportStreamCodecLimits limits = fixture_limits();
+  const std::vector<std::uint8_t> expected_wire =
+      encode_exact_pair_support_stream_chunk(chunk, limits);
 
   ExactPairSupportStreamCodecLimits constrained = limits;
-  constrained.maximum_encoded_byte_count = 64U;
+  constrained.maximum_encoded_byte_count = expected_wire.size();
+  check(
+      encode_exact_pair_support_stream_chunk(chunk, constrained) ==
+          expected_wire,
+      "encoding accepts an exact total wire-byte cap");
+
+  constrained.maximum_encoded_byte_count = expected_wire.size() - 1U;
   check_throws<std::length_error>(
       [&] {
         static_cast<void>(
             encode_exact_pair_support_stream_chunk(chunk, constrained));
       },
-      "encoding fails before exceeding the external byte cap");
+      "encoding rejects a cap one byte below the complete wire");
+
+  constrained.maximum_encoded_byte_count =
+      wire_header_byte_count + wire_checksum_byte_count - 1U;
+  check_throws<std::length_error>(
+      [&] {
+        static_cast<void>(
+            encode_exact_pair_support_stream_chunk(chunk, constrained));
+      },
+      "encoding rejects a 61-byte cap before reserved-tail arithmetic");
 
   constrained = limits;
   constrained.maximum_record_count = 1U;
