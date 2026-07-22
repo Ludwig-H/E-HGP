@@ -13,6 +13,7 @@ readonly PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER_RELATIVE="morsehgp3d/tests/cud
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase5_k1_boruvka_exact_search_work_profile.py"
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER_RELATIVE="morsehgp3d/tests/configuration/check_phase5_k1_boruvka_exact_search_work_profile.py"
 readonly PHASE7_H_POLYTOPE_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase7_h_polytope_qualification.py"
+readonly PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER_RELATIVE="morsehgp3d/tests/cuda/assemble_phase9_pair_support_phi_qualification.py"
 readonly BASE_IMAGE_REF="nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:420850a3fd665171b3f1fd08946c51d50468d732a46d6c42345ea04444755048"
 readonly CONTAINER_REPOSITORY="/workspace/repository"
 readonly CONTAINER_BUILD="${CONTAINER_REPOSITORY}/build"
@@ -34,6 +35,8 @@ readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_RELATIVE="build/morsehgp3d-
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_PATH="${CONTAINER_REPOSITORY}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_RELATIVE}"
 readonly PHASE7_H_POLYTOPE_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_h_polytope_proposal_qualification"
 readonly PHASE7_H_POLYTOPE_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE7_H_POLYTOPE_BINARY_RELATIVE}"
+readonly PHASE9_PAIR_SUPPORT_PHI_BINARY_RELATIVE="build/morsehgp3d-cuda-release/morsehgp3d_gpu_pair_support_phi_qualification"
+readonly PHASE9_PAIR_SUPPORT_PHI_BINARY_PATH="${CONTAINER_REPOSITORY}/${PHASE9_PAIR_SUPPORT_PHI_BINARY_RELATIVE}"
 readonly MODULE_DIR="${CONTAINER_BUILD}/morsehgp3d-cuda-release"
 readonly GUEST_GUARD_MIN_REMAINING_SECONDS=1800
 readonly GUEST_GUARD_MAX_REMAINING_SECONDS=2820
@@ -95,6 +98,10 @@ PHASE7_H_POLYTOPE_OUTPUT_RAW=""
 PHASE7_H_POLYTOPE_OUTPUT_PATH=""
 PHASE7_H_POLYTOPE_OUTPUT_PARENT=""
 PHASE7_H_POLYTOPE_OUTPUT_BASE=""
+PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW=""
+PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH=""
+PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PARENT=""
+PHASE9_PAIR_SUPPORT_PHI_OUTPUT_BASE=""
 GCE_DEADLINE_RAW=""
 GCE_DEADLINE_EPOCH=0
 WORK_DEADLINE_EPOCH=0
@@ -107,6 +114,7 @@ PHASE5_PUBLISH_TEMP=""
 PHASE5_WORK_PROFILE_PUBLISH_TEMP=""
 PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP=""
 PHASE7_H_POLYTOPE_PUBLISH_TEMP=""
+PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP=""
 SESSION_CREATED=0
 DOCKER_IDENTITY=""
 BUILDX_CONFIG=""
@@ -182,7 +190,7 @@ certify_fixed_timeout() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json]
+Usage : ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch EPOCH --output /CHEMIN/ABSOLU.json [--phase4-spatial-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-work-profile-output /CHEMIN/ABSOLU.json] [--phase5-k1-boruvka-exact-search-work-profile-output /CHEMIN/ABSOLU.json] [--phase7-h-polytope-output /CHEMIN/ABSOLU.json] [--phase9-pair-support-phi-output /CHEMIN/ABSOLU.json]
 
 Worker invité non interactif de qualification de l'environnement CUDA Phase 3.
 Il exige un arrêt invité déjà planifié, ne pilote jamais le cycle de vie GCP et
@@ -206,6 +214,11 @@ L'option H-polytope Phase 7 exécute la qualification analytique CUDA du
 transcript de propositions, audite son ELF sm_120 et l'absence de PTX, puis
 le passe sous memcheck et racecheck. Son compagnon reste provisoire,
 benchmark-only et soumis à la fermeture externe ciblée de la VM.
+L'option pair-support Phi Phase 9 construit et exécute le lot CUDA borné,
+audite son ELF AOT sm_120 sans PTX, le passe sous memcheck et racecheck, puis
+exige une proposition stricte et une descente aux epochs 1 et 2. La décision
+stricte est recertifiée exactement sur CPU; le compagnon reste non scientifique,
+sans statut public ni publication d'un produit global de supports.
 EOF
 }
 
@@ -257,6 +270,14 @@ while (($# > 0)); do
             [[ -z "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" ]] || \
                 die "--phase7-h-polytope-output ne peut être fourni qu'une fois."
             PHASE7_H_POLYTOPE_OUTPUT_RAW="$2"
+            shift 2
+            ;;
+        --phase9-pair-support-phi-output)
+            (($# >= 2)) || \
+                die "Valeur manquante après --phase9-pair-support-phi-output."
+            [[ -z "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" ]] || \
+                die "--phase9-pair-support-phi-output ne peut être fourni qu'une fois."
+            PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW="$2"
             shift 2
             ;;
         --gce-deadline-epoch)
@@ -337,6 +358,22 @@ if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" ]]; then
         "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" != \
             "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" ]] || \
         die "La sortie H-polytope Phase 7 doit être distincte de toutes les autres sorties."
+fi
+if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" ]]; then
+    case "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" in
+        /*) ;;
+        *) die "--phase9-pair-support-phi-output doit être un chemin absolu." ;;
+    esac
+    [[ "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" != "${OUTPUT_RAW}" && \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" != "${PHASE4_OUTPUT_RAW}" && \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" != "${PHASE5_OUTPUT_RAW}" && \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" != \
+            "${PHASE5_WORK_PROFILE_OUTPUT_RAW}" && \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" != \
+            "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_RAW}" && \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" != \
+            "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" ]] || \
+        die "La sortie pair-support Phi Phase 9 doit être distincte de toutes les autres sorties."
 fi
 certify_fixed_timeout || \
     die "La chaîne fixe /usr/bin/timeout n'est pas sûre, GNU ou compatible avec les groupes/--kill-after."
@@ -516,6 +553,41 @@ if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_RAW}" ]]; then
         ! -L "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" ]] || \
         die "La sortie H-polytope Phase 7 doit être inexistante : ${PHASE7_H_POLYTOPE_OUTPUT_PATH}."
 fi
+if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}" ]]; then
+    PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PARENT="$(dirname -- \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}")"
+    PHASE9_PAIR_SUPPORT_PHI_OUTPUT_BASE="$(basename -- \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_RAW}")"
+    [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_BASE}" && \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_BASE}" != "." && \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_BASE}" != ".." ]] || \
+        die "Nom d'artefact pair-support Phi Phase 9 invalide."
+    [[ -d "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PARENT}" ]] || \
+        die "Le répertoire parent de --phase9-pair-support-phi-output doit déjà exister."
+    PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PARENT="$(cd -- \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PARENT}" && pwd -P)" || \
+        die "Parent de sortie pair-support Phi Phase 9 illisible."
+    PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH="${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PARENT}/${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_BASE}"
+    [[ "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PARENT}" == "${OUTPUT_PARENT}" ]] || \
+        die "Toutes les sorties doivent partager le même répertoire physique sûr."
+    [[ "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" != "${OUTPUT_PATH}" && \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" != "${PHASE4_OUTPUT_PATH}" && \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" != "${PHASE5_OUTPUT_PATH}" && \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" != \
+            "${PHASE5_WORK_PROFILE_OUTPUT_PATH}" && \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" != \
+            "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" && \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" != \
+            "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" ]] || \
+        die "La sortie pair-support Phi Phase 9 doit être distincte de toutes les autres sorties."
+    case "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}/" in
+        "${REPOSITORY_ROOT}/"*)
+            die "--phase9-pair-support-phi-output doit rester hors du worktree ${REPOSITORY_ROOT}." ;;
+    esac
+    [[ ! -e "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" && \
+        ! -L "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" ]] || \
+        die "La sortie pair-support Phi Phase 9 doit être inexistante : ${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}."
+fi
 
 worktree_status="$(git -C "${REPOSITORY_ROOT}" status --porcelain --untracked-files=normal)" || \
     die "Impossible de vérifier la propreté du clone Git."
@@ -537,6 +609,7 @@ readonly PHASE5_K1_BORUVKA_WORK_PROFILE_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE5_K
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_ASSEMBLER_RELATIVE}"
 readonly PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER="${REPOSITORY_ROOT}/${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_CHECKER_RELATIVE}"
 readonly PHASE7_H_POLYTOPE_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE7_H_POLYTOPE_ASSEMBLER_RELATIVE}"
+readonly PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER="${REPOSITORY_ROOT}/${PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER_RELATIVE}"
 [[ -f "${DOCKERFILE}" && ! -L "${DOCKERFILE}" ]] || \
     die "Dockerfile Phase 3 absent ou symbolique : ${DOCKERFILE}."
 [[ "$(sed -n '1p' "${DOCKERFILE}")" == "FROM ${BASE_IMAGE_REF}" ]] || \
@@ -573,6 +646,11 @@ if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" ]]; then
     [[ -f "${PHASE7_H_POLYTOPE_ASSEMBLER}" && \
         ! -L "${PHASE7_H_POLYTOPE_ASSEMBLER}" ]] || \
         die "Assembleur H-polytope Phase 7 absent ou symbolique : ${PHASE7_H_POLYTOPE_ASSEMBLER}."
+fi
+if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" ]]; then
+    [[ -f "${PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER}" && \
+        ! -L "${PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER}" ]] || \
+        die "Assembleur pair-support Phi Phase 9 absent ou symbolique : ${PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER}."
 fi
 
 remove_container_from_cidfile() {
@@ -740,6 +818,10 @@ cleanup() {
         -f "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" ]]; then
         rm -f -- "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" || true
     fi
+    if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" && \
+        -f "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" ]]; then
+        rm -f -- "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" || true
+    fi
     if [[ -n "${SESSION_DIR}" && -n "${BUILDX_CONFIG}" && \
         "${BUILDX_CONFIG}" == "${SESSION_DIR}/buildx-config" && \
         -e "${BUILDX_CONFIG}" ]]; then
@@ -832,6 +914,16 @@ if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" ]]; then
         ! -L "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" ]] || \
         die "Le nom temporaire H-polytope Phase 7 reste occupé."
 fi
+if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" ]]; then
+    PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP="$(mktemp \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PARENT}/.${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_BASE}.XXXXXXXX.partial")" || \
+        die "Impossible de réserver l'artefact temporaire pair-support Phi Phase 9."
+    rm -f -- "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" || \
+        die "Impossible de libérer le nom temporaire pair-support Phi Phase 9."
+    [[ ! -e "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" && \
+        ! -L "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" ]] || \
+        die "Le nom temporaire pair-support Phi Phase 9 reste occupé."
+fi
 
 readonly BUILD_DIR="${SESSION_DIR}/build"
 readonly LOG_DIR="${SESSION_DIR}/logs"
@@ -882,6 +974,14 @@ readonly PHASE7_H_POLYTOPE_PTX_LOG="${LOG_DIR}/phase7-h-polytope-cuobjdump-ptx.l
 readonly PHASE7_H_POLYTOPE_PTX_STDERR_LOG="${LOG_DIR}/phase7-h-polytope-cuobjdump-ptx.stderr.log"
 readonly PHASE7_H_POLYTOPE_MEMCHECK_LOG="${LOG_DIR}/phase7-h-polytope-memcheck.log"
 readonly PHASE7_H_POLYTOPE_RACECHECK_LOG="${LOG_DIR}/phase7-h-polytope-racecheck.log"
+readonly PHASE9_PAIR_SUPPORT_PHI_QUALIFICATION_LOG="${RESULT_DIR}/phase9-pair-support-phi-qualification.json"
+readonly PHASE9_PAIR_SUPPORT_PHI_QUALIFICATION_STDERR_LOG="${LOG_DIR}/phase9-pair-support-phi-qualification.stderr.log"
+readonly PHASE9_PAIR_SUPPORT_PHI_BUILD_LOG="${LOG_DIR}/phase9-pair-support-phi-build.log"
+readonly PHASE9_PAIR_SUPPORT_PHI_ELF_LOG="${LOG_DIR}/phase9-pair-support-phi-cuobjdump-elf.log"
+readonly PHASE9_PAIR_SUPPORT_PHI_PTX_LOG="${LOG_DIR}/phase9-pair-support-phi-cuobjdump-ptx.log"
+readonly PHASE9_PAIR_SUPPORT_PHI_PTX_STDERR_LOG="${LOG_DIR}/phase9-pair-support-phi-cuobjdump-ptx.stderr.log"
+readonly PHASE9_PAIR_SUPPORT_PHI_MEMCHECK_LOG="${LOG_DIR}/phase9-pair-support-phi-memcheck.log"
+readonly PHASE9_PAIR_SUPPORT_PHI_RACECHECK_LOG="${LOG_DIR}/phase9-pair-support-phi-racecheck.log"
 declare -a PHASE5_K1_BORUVKA_WORK_PROFILE_LOGS=()
 declare -a PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE_LOGS=()
 
@@ -1689,6 +1789,142 @@ PY
     fi
 fi
 
+if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" ]]; then
+    begin_unit "phase9-pair-support-phi-build"
+    if ! run_container "phase9-pair-support-phi-build" \
+        "${PHASE9_PAIR_SUPPORT_PHI_BUILD_LOG}" \
+        cmake --build "${MODULE_DIR}" \
+        --target morsehgp3d_gpu_pair_support_phi_qualification \
+        --parallel 4; then
+        report_failure_log "phase9-pair-support-phi-build" \
+            "${PHASE9_PAIR_SUPPORT_PHI_BUILD_LOG}"
+        die "La cible CUDA pair-support Phi Phase 9 n'a pas pu être construite."
+    fi
+    [[ -f "${BUILD_DIR}/${PHASE9_PAIR_SUPPORT_PHI_BINARY_RELATIVE#build/}" && \
+        ! -L "${BUILD_DIR}/${PHASE9_PAIR_SUPPORT_PHI_BINARY_RELATIVE#build/}" && \
+        -x "${BUILD_DIR}/${PHASE9_PAIR_SUPPORT_PHI_BINARY_RELATIVE#build/}" ]] || \
+        die "Le binaire CUDA pair-support Phi Phase 9 n'a pas été construit sûrement."
+
+    begin_unit "phase9-pair-support-phi-qualification"
+    if ! run_container_split_output "phase9-pair-support-phi-qualification" \
+        "${PHASE9_PAIR_SUPPORT_PHI_QUALIFICATION_LOG}" \
+        "${PHASE9_PAIR_SUPPORT_PHI_QUALIFICATION_STDERR_LOG}" \
+        "${PHASE9_PAIR_SUPPORT_PHI_BINARY_PATH}"; then
+        report_failure_log "phase9-pair-support-phi-qualification" \
+            "${PHASE9_PAIR_SUPPORT_PHI_QUALIFICATION_LOG}"
+        report_failure_log "phase9-pair-support-phi-qualification-stderr" \
+            "${PHASE9_PAIR_SUPPORT_PHI_QUALIFICATION_STDERR_LOG}"
+        die "La qualification CUDA pair-support Phi Phase 9 a échoué."
+    fi
+    if ! python3 -B - "${PHASE9_PAIR_SUPPORT_PHI_QUALIFICATION_LOG}" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+raw = Path(sys.argv[1]).read_text(encoding="utf-8")
+lines = raw.splitlines()
+if len(lines) != 1 or not lines[0]:
+    raise SystemExit("qualification stdout must contain exactly one JSON line")
+value = json.loads(lines[0])
+expected_keys = {
+    "backend", "certified_receipt_count", "decision_semantics", "descend_count",
+    "deterministic", "first_epoch", "global_support_product_prune_published",
+    "mode", "node_count", "phase", "profile", "proposal_digest_fnv1a",
+    "proposal_semantics", "public_status", "schema", "second_epoch",
+    "strict_interior_count",
+}
+if not isinstance(value, dict) or set(value) != expected_keys:
+    raise SystemExit("qualification stdout JSON does not respect its closed schema")
+for key, expected in {
+    "backend": "cuda_g4",
+    "certified_receipt_count": 1,
+    "descend_count": 1,
+    "deterministic": True,
+    "first_epoch": 1,
+    "global_support_product_prune_published": False,
+    "mode": "certified",
+    "node_count": 5,
+    "phase": "9",
+    "profile": "hgp_reduced",
+    "public_status": None,
+    "schema": "morsehgp3d.phase9.pair_support_phi_cuda_qualification.v1",
+    "second_epoch": 2,
+    "strict_interior_count": 1,
+}.items():
+    if value.get(key) != expected:
+        raise SystemExit(f"qualification field {key} differs")
+canonical = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n"
+if raw != canonical:
+    raise SystemExit("qualification stdout must be canonical JSON")
+PY
+    then
+        report_failure_log "phase9-pair-support-phi-qualification" \
+            "${PHASE9_PAIR_SUPPORT_PHI_QUALIFICATION_LOG}"
+        die "La sortie pair-support Phi Phase 9 ne ferme pas les comptes strict=1, descend=1, epochs=1/2."
+    fi
+
+    begin_unit "phase9-pair-support-phi-cuobjdump-elf"
+    if ! run_container "phase9-pair-support-phi-cuobjdump-elf" \
+        "${PHASE9_PAIR_SUPPORT_PHI_ELF_LOG}" /usr/local/cuda/bin/cuobjdump \
+        -lelf "${PHASE9_PAIR_SUPPORT_PHI_BINARY_PATH}"; then
+        report_failure_log "phase9-pair-support-phi-cuobjdump-elf" \
+            "${PHASE9_PAIR_SUPPORT_PHI_ELF_LOG}"
+        die "cuobjdump n'a pas pu lister les ELF pair-support Phi Phase 9."
+    fi
+    phase9_pair_support_phi_architectures="$(grep -Eo 'sm_[0-9]+' \
+        "${PHASE9_PAIR_SUPPORT_PHI_ELF_LOG}" | sort -u || true)"
+    if [[ "${phase9_pair_support_phi_architectures}" != "sm_120" ]]; then
+        report_failure_log "phase9-pair-support-phi-cuobjdump-elf" \
+            "${PHASE9_PAIR_SUPPORT_PHI_ELF_LOG}"
+        die "Le binaire pair-support Phi Phase 9 doit contenir uniquement un ELF sm_120; observé : ${phase9_pair_support_phi_architectures:-aucun}."
+    fi
+
+    begin_unit "phase9-pair-support-phi-cuobjdump-ptx"
+    if ! run_container_split_output "phase9-pair-support-phi-cuobjdump-ptx" \
+        "${PHASE9_PAIR_SUPPORT_PHI_PTX_LOG}" \
+        "${PHASE9_PAIR_SUPPORT_PHI_PTX_STDERR_LOG}" \
+        /usr/local/cuda/bin/cuobjdump -lptx \
+        "${PHASE9_PAIR_SUPPORT_PHI_BINARY_PATH}"; then
+        report_failure_log "phase9-pair-support-phi-cuobjdump-ptx-stderr" \
+            "${PHASE9_PAIR_SUPPORT_PHI_PTX_STDERR_LOG}"
+        die "cuobjdump n'a pas pu auditer le PTX pair-support Phi Phase 9."
+    fi
+    if grep -q '[^[:space:]]' "${PHASE9_PAIR_SUPPORT_PHI_PTX_LOG}"; then
+        report_failure_log "phase9-pair-support-phi-cuobjdump-ptx" \
+            "${PHASE9_PAIR_SUPPORT_PHI_PTX_LOG}"
+        die "Une entrée PTX a été détectée dans le binaire pair-support Phi Phase 9."
+    fi
+
+    begin_unit "phase9-pair-support-phi-memcheck"
+    if ! run_container "phase9-pair-support-phi-memcheck" \
+        "${PHASE9_PAIR_SUPPORT_PHI_MEMCHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool memcheck \
+        --leak-check full \
+        --report-api-errors no \
+        --error-exitcode=86 \
+        "${PHASE9_PAIR_SUPPORT_PHI_BINARY_PATH}"; then
+        report_failure_log "phase9-pair-support-phi-memcheck" \
+            "${PHASE9_PAIR_SUPPORT_PHI_MEMCHECK_LOG}"
+        die "Le memcheck pair-support Phi Phase 9 a échoué."
+    fi
+
+    begin_unit "phase9-pair-support-phi-racecheck"
+    if ! run_container "phase9-pair-support-phi-racecheck" \
+        "${PHASE9_PAIR_SUPPORT_PHI_RACECHECK_LOG}" \
+        /usr/local/cuda/bin/compute-sanitizer \
+        --target-processes all \
+        --tool racecheck \
+        --report-api-errors no \
+        --error-exitcode=86 \
+        "${PHASE9_PAIR_SUPPORT_PHI_BINARY_PATH}"; then
+        report_failure_log "phase9-pair-support-phi-racecheck" \
+            "${PHASE9_PAIR_SUPPORT_PHI_RACECHECK_LOG}"
+        die "Le racecheck pair-support Phi Phase 9 a échoué."
+    fi
+fi
+
 if [[ -n "${PHASE4_OUTPUT_PATH}" ]]; then
     begin_unit "phase4-spatial-differential"
     if ! run_container "phase4-spatial-differential" \
@@ -2126,6 +2362,23 @@ if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" ]]; then
         --output "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}"
 fi
 
+if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" ]]; then
+    python3 -B "${PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER}" \
+        --git-sha "${HEAD_SHA}" \
+        --base-image-ref "${BASE_IMAGE_REF}" \
+        --image-ref "${IMAGE_REF}" \
+        --image-id "${IMAGE_ID}" \
+        --environment-artifact "${PUBLISH_TEMP}" \
+        --qualification-log "${PHASE9_PAIR_SUPPORT_PHI_QUALIFICATION_LOG}" \
+        --elf-log "${PHASE9_PAIR_SUPPORT_PHI_ELF_LOG}" \
+        --ptx-log "${PHASE9_PAIR_SUPPORT_PHI_PTX_LOG}" \
+        --ptx-stderr-log "${PHASE9_PAIR_SUPPORT_PHI_PTX_STDERR_LOG}" \
+        --memcheck-log "${PHASE9_PAIR_SUPPORT_PHI_MEMCHECK_LOG}" \
+        --racecheck-log "${PHASE9_PAIR_SUPPORT_PHI_RACECHECK_LOG}" \
+        --binary "${BUILD_DIR}/${PHASE9_PAIR_SUPPORT_PHI_BINARY_RELATIVE#build/}" \
+        --output "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}"
+fi
+
 python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE4_PUBLISH_TEMP}" "${PHASE4_OUTPUT_PATH}" \
     "${PHASE5_PUBLISH_TEMP}" "${PHASE5_OUTPUT_PATH}" \
@@ -2134,7 +2387,9 @@ python3 - "${PUBLISH_TEMP}" "${OUTPUT_PATH}" \
     "${PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP}" \
     "${PHASE5_EXACT_SEARCH_WORK_PROFILE_OUTPUT_PATH}" \
     "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" \
-    "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" <<'PY'
+    "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" \
+    "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" \
+    "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" <<'PY'
 import json
 import os
 from pathlib import Path
@@ -2167,6 +2422,12 @@ if sys.argv[11] or sys.argv[12]:
         raise SystemExit("incomplete Phase 7 H-polytope publication pair")
     pairs.append(
         (Path(sys.argv[11]), Path(sys.argv[12]), "Phase 7 H-polytope")
+    )
+if sys.argv[13] or sys.argv[14]:
+    if not sys.argv[13] or not sys.argv[14]:
+        raise SystemExit("incomplete Phase 9 pair-support Phi publication pair")
+    pairs.append(
+        (Path(sys.argv[13]), Path(sys.argv[14]), "Phase 9 pair-support Phi")
     )
 for temporary, _, label in pairs:
     with temporary.open(encoding="utf-8") as stream:
@@ -2225,12 +2486,16 @@ fi
 if [[ -n "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}" ]]; then
     rm -f -- "${PHASE7_H_POLYTOPE_PUBLISH_TEMP}"
 fi
+if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}" ]]; then
+    rm -f -- "${PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP}"
+fi
 PUBLISH_TEMP=""
 PHASE4_PUBLISH_TEMP=""
 PHASE5_PUBLISH_TEMP=""
 PHASE5_WORK_PROFILE_PUBLISH_TEMP=""
 PHASE5_EXACT_SEARCH_WORK_PROFILE_PUBLISH_TEMP=""
 PHASE7_H_POLYTOPE_PUBLISH_TEMP=""
+PHASE9_PAIR_SUPPORT_PHI_PUBLISH_TEMP=""
 
 printf '[SUCCÈS WORKER] Artefact Phase 3 provisoire publié sans remplacement : %s\n' \
     "${OUTPUT_PATH}"
@@ -2253,5 +2518,9 @@ fi
 if [[ -n "${PHASE7_H_POLYTOPE_OUTPUT_PATH}" ]]; then
     printf '[SUCCÈS WORKER] Compagnon H-polytope Phase 7 provisoire publié sans remplacement : %s\n' \
         "${PHASE7_H_POLYTOPE_OUTPUT_PATH}"
+fi
+if [[ -n "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}" ]]; then
+    printf '[SUCCÈS WORKER] Compagnon pair-support Phi Phase 9 provisoire publié sans remplacement : %s\n' \
+        "${PHASE9_PAIR_SUPPORT_PHI_OUTPUT_PATH}"
 fi
 printf '[CYCLE DE VIE] Le worker invité ne ferme pas la VM; l’orchestrateur externe doit certifier TERMINATED.\n'

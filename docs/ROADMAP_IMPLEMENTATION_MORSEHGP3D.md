@@ -824,7 +824,11 @@ Le jalon hôte `9.1-RCPU` livre désormais cette partition self-duale, la borne 
 
 Le backend `cuda_g4` évalue des intervalles dirigés et produit une proposition de prune ou de descente; le backend `reference_cpu` recertifie tout prune exact utilisé par une sortie certifiée. Les deux passes count/emit utilisent une frontière bornée et aucun append global non borné.
 
-Le premier incrément CUDA `9.1-CUDA-P1` reçoit un batch borné de produits $(A,B)$ canoniques fourni par le pilote CPU et le snapshot LBVH validé. Un warp parcourt l'arbre témoin $C$ par corde `escape` et conserve au plus $T=s_{\max}-1\leq10$ reçus $(C,\overline{M})$. Une proposition de prune n'est acceptée qu'après recalcul rationnel exact de chaque reçu, vérification de l'antichaîne, des disjonctions et de la cardinalité de l'union. Le jalon P2 remplace ensuite ces sorties fixes par count/`DeviceScan`/emit, deux frontières device et CUDA Graph; P1 ne revendique ni le SLO ni la construction LBVH device.
+Le premier incrément CUDA `9.1-CUDA-P1` reçoit un batch borné de triplets canoniques $(A,B,C)$ fourni par le pilote CPU et un snapshot AABB/plages du LBVH validé puis résident. Un thread traite un triplet par la formule exacte aux extrémités, mais chaque opération binary64 est arrondie vers l'extérieur; le transcript GPU ne propose `strict_interior` que si sa borne supérieure finie est strictement négative. L'hôte exige une permutation complète des requêtes, des identités inchangées, une epoch fraîche et une queue sentinelle intacte, puis recalcule rationnellement $M(A,B,C)$ avant de produire l'unique reçu de nœud utilisable. Une proposition n'est donc jamais une décision scientifique :
+
+$$\overline{M}_{\mathrm{GPU}}\geq M(A,B,C),\qquad \overline{M}_{\mathrm{GPU}}<0,\qquad M_{\mathrm{CPU}}=M(A,B,C)\leq\overline{M}_{\mathrm{GPU}}<0.$$
+
+P1 ne parcourt pas encore l'arbre témoin, n'agrège aucune antichaîne et ne publie aucun prune global de produit. Le jalon P2 doit intégrer ces reçus au seuil de rang, puis ajouter count/`DeviceScan`/emit, deux frontières device et CUDA Graph. La construction Morton/LBVH device, les supports trois--quatre CUDA, le SLO et la voie 10 M+ restent aux Phases 14--15.
 
 ### 9.2 — triangles et tétraèdres
 
@@ -875,7 +879,13 @@ Le sous-jalon `9.3e-RCPU` supprime le vecteur wire du chemin durable sans créer
 
 Le catalogue direct complet égale l'oracle $n\leq14$ et aucun objet interdit n'est alloué. Le prototype 50 000 points publie ses compteurs et son temps dès le support deux; la phase ne prétend pas que les supports trois et quatre auront le même régime avant mesure. La complétude des trois tailles ferme seulement la base interne du flux; une taille inachevée reste explicitement `budgeted`. Elle ne modifie pas le `public_status` du contrat v2 actuel, dont la source exacte reste `gamma_exhaustive_reference`; son remplacement exige une migration contractuelle versionnée après le journal, la tour verticale et la preuve M.1.
 
+Évaluation préparatoire du 22 juillet 2026 : la base hôte est fermée. Les arités deux à quatre terminales, fraîchement rejouées, coïncident avec l'oracle borné jusqu'à $n=14$; le checker statique ne trouve ni mosaïque, ni Gamma, ni arène combinatoire. Le smoke 12 500--50 000 points est publié comme diagnostic `budget_exhausted`, sans SLO. La fermeture formelle attend encore la qualification réelle de `9.1-CUDA-P1` sur G4 avec recertification CPU; celle-ci ne fermera aucune des dettes P2, 50 k complète ou 10 M+ énumérées ci-dessus et ne publiera aucun statut exact externe.
+
 ## Phase 10 — Journal Morse et réduction directe
+
+### Porte d'entrée
+
+Satisfaite par la fermeture de la Phase 9 et par le jalon local de Phase 5 `compact_k1_forest_certified/local_k1_compact_forest_only`. Cette dépendance de jalon ne ferme pas la Phase 5 globale : sa voie scalable générale reste `ready`. La preuve M.1 et la génération complète des `GatewayAttach` silencieux sont des obligations de sortie de la Phase 10, pas des préconditions pour ouvrir son journal `partial_refinement`.
 
 ### But
 

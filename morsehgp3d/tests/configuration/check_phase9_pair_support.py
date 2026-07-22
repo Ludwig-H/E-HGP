@@ -137,6 +137,87 @@ def validate(
     gpu_phi_cuda = read_text(
         project / "src/cuda/phase9_pair_support_phi.cu"
     )
+    phase9_gcp_assembler = read_text(
+        project / "tests/cuda/assemble_phase9_pair_support_phi_qualification.py"
+    )
+    phase3_orchestrator = read_text(
+        project.parent / "gcp-migration/run_phase3_qualification.sh"
+    )
+    phase3_worker = read_text(
+        project.parent / "gcp-migration/phase3_remote_qualification.sh"
+    )
+
+    for marker in (
+        '--phase9-pair-support-phi-output',
+        'begin_unit "phase9-pair-support-phi-build"',
+        '--target morsehgp3d_gpu_pair_support_phi_qualification',
+        'begin_unit "phase9-pair-support-phi-qualification"',
+        'begin_unit "phase9-pair-support-phi-cuobjdump-elf"',
+        'begin_unit "phase9-pair-support-phi-cuobjdump-ptx"',
+        'begin_unit "phase9-pair-support-phi-memcheck"',
+        'begin_unit "phase9-pair-support-phi-racecheck"',
+        '"strict_interior_count": 1',
+        '"descend_count": 1',
+        '"first_epoch": 1',
+        '"second_epoch": 2',
+        'PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER',
+    ):
+        require(
+            marker in phase3_worker,
+            f"the guarded Phase 9 worker is missing {marker!r}",
+        )
+    require_tokens_in_order(
+        phase3_worker,
+        (
+            'read_guest_shutdown_guard ||',
+            'begin_unit "phase9-pair-support-phi-build"',
+            'begin_unit "phase9-pair-support-phi-qualification"',
+            'begin_unit "phase9-pair-support-phi-cuobjdump-elf"',
+            'begin_unit "phase9-pair-support-phi-cuobjdump-ptx"',
+            'begin_unit "phase9-pair-support-phi-memcheck"',
+            'begin_unit "phase9-pair-support-phi-racecheck"',
+            'python3 -B "${PHASE9_PAIR_SUPPORT_PHI_ASSEMBLER}"',
+        ),
+        "the guarded Phase 9 worker does not certify guard -> build -> execute -> AOT -> sanitizers -> assembly",
+    )
+    for marker in (
+        '--phase9-pair-support-phi',
+        'phase9-pair-support-phi-${HEAD_SHA}.json',
+        '--phase9-pair-support-phi-output',
+        'LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT',
+        'assembler.SCHEMA',
+        'if certify_target_stopped; then',
+        '"targeted_stop_verified": True',
+    ):
+        require(
+            marker in phase3_orchestrator,
+            f"the guarded Phase 9 orchestrator is missing {marker!r}",
+        )
+    require_tokens_in_order(
+        phase3_orchestrator,
+        (
+            'gcloud compute scp',
+            'if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then\n    [[ -s',
+            'if certify_target_stopped; then',
+            'python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}"',
+            'Qualification pair-support Phi Phase 9 publiée après certification TERMINATED',
+        ),
+        "the Phase 9 artifact is not validate -> targeted stop -> no-replace publish",
+    )
+    for marker in (
+        'SCHEMA = "morsehgp3d.phase9.pair_support_phi_cuda_g4_qualification.v1"',
+        '"strict_interior_count": 1',
+        '"descend_count": 1',
+        '"first_epoch": 1',
+        '"second_epoch": 2',
+        '"cpu_exact_recertification": "passed"',
+        '"scientific_result_claimed": False',
+        '"scientific_public_status": None',
+    ):
+        require(
+            marker in phase9_gcp_assembler,
+            f"the Phase 9 G4 assembler is missing {marker!r}",
+        )
 
     pair_target = parenthesized_block(
         cmake, "add_library(\n  morsehgp3d_pair_support"
@@ -953,6 +1034,9 @@ def validate(
             "include/morsehgp3d/gpu/pair_support_phi.hpp",
             "src/gpu/pair_support_phi.cpp",
             "src/cuda/phase9_pair_support_phi.cu",
+            "tests/cuda/assemble_phase9_pair_support_phi_qualification.py",
+            "../gcp-migration/run_phase3_qualification.sh",
+            "../gcp-migration/phase3_remote_qualification.sh",
         ],
     }
 

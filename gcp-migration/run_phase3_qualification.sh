@@ -38,6 +38,7 @@ PHASE5_K1_BORUVKA=0
 PHASE5_K1_BORUVKA_WORK_PROFILE=0
 PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE=0
 PHASE7_H_POLYTOPE=0
+PHASE9_PAIR_SUPPORT_PHI=0
 
 SESSION_CERTIFIED=0
 TARGET_STOP_CERTIFIED=0
@@ -54,6 +55,8 @@ LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT=""
 LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT=""
 LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT=""
 LOCAL_PHASE7_H_POLYTOPE_RESULT=""
+LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT=""
+LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT=""
 START_HANDOFF=""
 SESSION_LAST_START_TIMESTAMP=""
 SESSION_HANDOFF_STATUS=""
@@ -75,7 +78,7 @@ die() {
 
 usage() {
     cat <<'EOF'
-Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--result-dir RÉPERTOIRE]
+Usage : ./gcp-migration/run_phase3_qualification.sh --yes [--provision-docker] [--phase4-spatial-reference] [--phase5-k1-boruvka] [--phase5-k1-boruvka-work-profile] [--phase5-k1-boruvka-exact-search-work-profile] [--phase7-h-polytope] [--phase9-pair-support-phi] [--result-dir RÉPERTOIRE]
 
 Orchestre une qualification réelle de Phase 3, déjà explicitement autorisée,
 sur l'un des deux couples G4 E-HGP explicitement admis. L'arrêt invité est armé pour 45 minutes après la
@@ -120,6 +123,13 @@ H-polytope de Phase 7.8. Son artefact compagnon reste provisoire jusqu'à la
 même certification ciblée TERMINATED; il reste en mode benchmark_only et
 ne publie aucun statut scientifique.
 
+--phase9-pair-support-phi ajoute la qualification CUDA G4 du lot Phi borné
+sur supports de taille deux. Elle exige une proposition stricte et une
+descente aux epochs 1 et 2, avec recertification exacte CPU de la décision
+stricte, audit AOT sm_120 sans PTX, memcheck et racecheck. Son artefact reste
+provisoire jusqu'à la certification ciblée TERMINATED, non scientifique et
+sans statut public.
+
 --provision-docker autorise, après certification des deux coupe-circuits, le
 provisionneur invité séparé à installer docker.io et docker-buildx depuis les
 dépôts Ubuntu déjà configurés, puis à configurer le runtime NVIDIA. Le worker
@@ -158,6 +168,10 @@ while (($# > 0)); do
             PHASE7_H_POLYTOPE=1
             shift
             ;;
+        --phase9-pair-support-phi)
+            PHASE9_PAIR_SUPPORT_PHI=1
+            shift
+            ;;
         --result-dir)
             (($# >= 2)) || die "Valeur manquante après --result-dir."
             RESULT_DIR="$2"
@@ -181,7 +195,8 @@ if ((PHASE5_K1_BORUVKA_WORK_PROFILE == 1 && PHASE5_K1_BORUVKA == 1)); then
 fi
 if ((PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE == 1 && \
     (PHASE4_SPATIAL_REFERENCE == 1 || PHASE5_K1_BORUVKA == 1 || \
-     PHASE5_K1_BORUVKA_WORK_PROFILE == 1 || PHASE7_H_POLYTOPE == 1))); then
+     PHASE5_K1_BORUVKA_WORK_PROFILE == 1 || PHASE7_H_POLYTOPE == 1 || \
+     PHASE9_PAIR_SUPPORT_PHI == 1))); then
     die "--phase5-k1-boruvka-exact-search-work-profile est mutuellement exclusive de tous les autres compagnons."
 fi
 
@@ -308,6 +323,12 @@ if ((PHASE7_H_POLYTOPE == 1)); then
         ! -L "${LOCAL_PHASE7_H_POLYTOPE_RESULT}" ]] || \
         die "L'artefact ${LOCAL_PHASE7_H_POLYTOPE_RESULT} existe déjà; utilisez un répertoire distinct."
 fi
+if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
+    LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT="${RESULT_DIR}/phase9-pair-support-phi-${HEAD_SHA}.json"
+    [[ ! -e "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT}" && \
+        ! -L "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT}" ]] || \
+        die "L'artefact ${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT} existe déjà; utilisez un répertoire distinct."
+fi
 LOCAL_TEMP_RESULT="$(mktemp "${RESULT_DIR}/.phase3-${HEAD_SHA}.XXXXXXXX.partial")" || \
     die "Impossible de créer l'artefact temporaire local."
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
@@ -368,6 +389,34 @@ if ((PHASE7_H_POLYTOPE == 1)); then
             LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT=""
         fi
         die "Impossible de créer l'artefact H-polytope Phase 7 temporaire local."
+    fi
+fi
+if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
+    if ! LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT="$(mktemp \
+        "${RESULT_DIR}/.phase9-pair-support-phi-${HEAD_SHA}.XXXXXXXX.partial")"; then
+        rm -f -- "${LOCAL_TEMP_RESULT}"
+        LOCAL_TEMP_RESULT=""
+        if [[ -n "${LOCAL_PHASE4_TEMP_RESULT}" ]]; then
+            rm -f -- "${LOCAL_PHASE4_TEMP_RESULT}"
+            LOCAL_PHASE4_TEMP_RESULT=""
+        fi
+        if [[ -n "${LOCAL_PHASE5_TEMP_RESULT}" ]]; then
+            rm -f -- "${LOCAL_PHASE5_TEMP_RESULT}"
+            LOCAL_PHASE5_TEMP_RESULT=""
+        fi
+        if [[ -n "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}" ]]; then
+            rm -f -- "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}"
+            LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT=""
+        fi
+        if [[ -n "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" ]]; then
+            rm -f -- "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}"
+            LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT=""
+        fi
+        if [[ -n "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" ]]; then
+            rm -f -- "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}"
+            LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT=""
+        fi
+        die "Impossible de créer l'artefact pair-support Phi Phase 9 temporaire local."
     fi
 fi
 
@@ -852,6 +901,10 @@ cleanup_local_publication() {
         -e "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" ]]; then
         rm -f -- "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" || true
     fi
+    if [[ -n "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" && \
+        -e "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" ]]; then
+        rm -f -- "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" || true
+    fi
 }
 
 on_exit() {
@@ -935,6 +988,7 @@ printf '%s\n' \
     "  profil Morton   : $([[ ${PHASE5_K1_BORUVKA_WORK_PROFILE} == 1 ]] && printf 'campagne work-profile activée' || printf 'désactivé')" \
     "  profil exact-1NN: $([[ ${PHASE5_K1_BORUVKA_EXACT_SEARCH_WORK_PROFILE} == 1 ]] && printf 'campagne work-profile activée' || printf 'désactivé')" \
     "  replay H-polytope: $([[ ${PHASE7_H_POLYTOPE} == 1 ]] && printf 'qualification CUDA G4 Phase 7.8 activée' || printf 'désactivé')" \
+    "  replay Phi Phase 9: $([[ ${PHASE9_PAIR_SUPPORT_PHI} == 1 ]] && printf 'qualification CUDA G4 + recertification CPU activée' || printf 'désactivé')" \
     "  clé SSH         : ED25519 OS Login, TTL ${SSH_KEY_TTL}" \
     "  résultat local  : ${LOCAL_RESULT}"
 
@@ -962,6 +1016,7 @@ remote_phase5_artifact=""
 remote_phase5_work_profile_artifact=""
 remote_phase5_exact_search_work_profile_artifact=""
 remote_phase7_h_polytope_artifact=""
+remote_phase9_pair_support_phi_artifact=""
 quoted_origin="$(shell_quote "${ORIGIN_URL}")"
 quoted_repository="$(shell_quote "${remote_repository}")"
 quoted_head="$(shell_quote "${HEAD_SHA}")"
@@ -971,11 +1026,13 @@ quoted_phase5_artifact=""
 quoted_phase5_work_profile_artifact=""
 quoted_phase5_exact_search_work_profile_artifact=""
 quoted_phase7_h_polytope_artifact=""
+quoted_phase9_pair_support_phi_artifact=""
 phase4_worker_option=""
 phase5_worker_option=""
 phase5_work_profile_worker_option=""
 phase5_exact_search_work_profile_worker_option=""
 phase7_h_polytope_worker_option=""
+phase9_pair_support_phi_worker_option=""
 if ((PHASE4_SPATIAL_REFERENCE == 1)); then
     remote_phase4_artifact="${REMOTE_WORKDIR}/phase4-spatial-result.json"
     quoted_phase4_artifact="$(shell_quote "${remote_phase4_artifact}")"
@@ -1001,6 +1058,11 @@ if ((PHASE7_H_POLYTOPE == 1)); then
     quoted_phase7_h_polytope_artifact="$(shell_quote "${remote_phase7_h_polytope_artifact}")"
     phase7_h_polytope_worker_option=" --phase7-h-polytope-output ${quoted_phase7_h_polytope_artifact}"
 fi
+if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
+    remote_phase9_pair_support_phi_artifact="${REMOTE_WORKDIR}/phase9-pair-support-phi-result.json"
+    quoted_phase9_pair_support_phi_artifact="$(shell_quote "${remote_phase9_pair_support_phi_artifact}")"
+    phase9_pair_support_phi_worker_option=" --phase9-pair-support-phi-output ${quoted_phase9_pair_support_phi_artifact}"
+fi
 quoted_gce_deadline="$(shell_quote "${EFFECTIVE_GCE_DEADLINE_EPOCH}")"
 
 clone_output="$(remote_exec \
@@ -1017,7 +1079,7 @@ if ((PROVISION_DOCKER == 1)); then
 fi
 
 remote_exec \
-    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}"
+    "test -x ${quoted_repository}/gcp-migration/phase3_remote_qualification.sh && cd ${quoted_repository} && ./gcp-migration/phase3_remote_qualification.sh --yes --gce-deadline-epoch ${quoted_gce_deadline} --output ${quoted_artifact}${phase4_worker_option}${phase5_worker_option}${phase5_work_profile_worker_option}${phase5_exact_search_work_profile_worker_option}${phase7_h_polytope_worker_option}${phase9_pair_support_phi_worker_option}"
 
 timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
     "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
@@ -1088,6 +1150,19 @@ if ((PHASE7_H_POLYTOPE == 1)); then
         "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
         "${INSTANCE_NAME}:${remote_phase7_h_polytope_artifact}" \
         "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" \
+        --project="${PROJECT_ID}" \
+        --zone="${ZONE}" \
+        --quiet \
+        --ssh-key-file="${SSH_KEY_FILE}" \
+        --ssh-key-expiration="${SSH_KEY_EXPIRATION_UTC}" \
+        --scp-flag='-o ConnectTimeout=15' \
+        --scp-flag='-o BatchMode=yes'
+fi
+if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
+    timeout --kill-after="${GCLOUD_KILL_AFTER_SECONDS}s" \
+        "${GCLOUD_TRANSFER_TIMEOUT_SECONDS}s" gcloud compute scp \
+        "${INSTANCE_NAME}:${remote_phase9_pair_support_phi_artifact}" \
+        "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" \
         --project="${PROJECT_ID}" \
         --zone="${ZONE}" \
         --quiet \
@@ -2865,6 +2940,164 @@ if logged_qualification != qualification:
 PY
 fi
 
+if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
+    [[ -s "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" ]] || \
+        die "Artefact pair-support Phi Phase 9 distant récupéré mais vide."
+    python3 - "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" \
+        "${HEAD_SHA}" "${LOCAL_TEMP_RESULT}" \
+        "${REPOSITORY_ROOT}/morsehgp3d/tests/cuda" <<'PY'
+import hashlib
+import json
+from pathlib import Path
+import re
+import sys
+
+artifact_path = Path(sys.argv[1])
+git_sha = sys.argv[2]
+phase3_path = Path(sys.argv[3])
+sys.path.insert(0, sys.argv[4])
+
+import assemble_phase9_pair_support_phi_qualification as assembler
+
+
+def fail(message):
+    raise SystemExit(message)
+
+
+def exact_object(value, keys, label):
+    if not isinstance(value, dict) or set(value) != keys:
+        fail(f"{label} ne respecte pas son schéma fermé")
+    return value
+
+
+raw = artifact_path.read_text(encoding="utf-8")
+try:
+    value = json.loads(raw)
+except json.JSONDecodeError as error:
+    fail(f"artefact pair-support Phi Phase 9 JSON invalide: {error}")
+canonical = json.dumps(
+    value, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+) + "\n"
+if raw != canonical:
+    fail("l'artefact pair-support Phi Phase 9 n'est pas un JSON canonique sur une ligne")
+
+with phase3_path.open(encoding="utf-8") as stream:
+    phase3 = json.load(stream)
+
+expected_top_keys = {
+    "backend", "binary", "checks", "decision_semantics", "git", "image",
+    "log_sha256", "logs", "mode", "phase", "profile", "proposal_semantics",
+    "provenance", "schema", "scientific_public_status",
+    "scientific_result_claimed", "scientific_scope", "status", "vm_lifecycle",
+}
+exact_object(value, expected_top_keys, "artefact pair-support Phi Phase 9")
+for key, expected in {
+    "backend": "cuda_g4",
+    "decision_semantics": assembler.DECISION_SEMANTICS,
+    "mode": "certified",
+    "phase": "9",
+    "profile": "hgp_reduced",
+    "proposal_semantics": assembler.PROPOSAL_SEMANTICS,
+    "schema": assembler.SCHEMA,
+    "scientific_scope": assembler.SCIENTIFIC_SCOPE,
+    "status": "worker_passed_pending_shutdown",
+}.items():
+    if value.get(key) != expected:
+        fail(f"champ pair-support Phi Phase 9 invalide: {key}")
+if value.get("scientific_result_claimed") is not False:
+    fail("la qualification pair-support Phi Phase 9 revendique à tort un résultat scientifique")
+if value.get("scientific_public_status") is not None or "public_status" in value:
+    fail("la qualification pair-support Phi Phase 9 expose à tort un statut public")
+if value.get("git") != {"clean": True, "sha": git_sha}:
+    fail("la qualification pair-support Phi Phase 9 ne correspond pas au SHA propre")
+
+phase3_image = phase3.get("image")
+image = exact_object(value.get("image"), {"base_ref", "id", "ref"}, "identité d'image")
+if not isinstance(phase3_image, dict) or image != {
+    field: phase3_image.get(field) for field in ("base_ref", "id", "ref")
+}:
+    fail("identité d'image pair-support Phi Phase 9 incohérente")
+if re.fullmatch(r"sha256:[0-9a-f]{64}", str(image.get("id"))) is None:
+    fail("digest d'image pair-support Phi Phase 9 non canonique")
+
+binary = exact_object(
+    value.get("binary"), {"qualification_sha256"}, "empreinte du binaire Phase 9"
+)
+if re.fullmatch(r"[0-9a-f]{64}", str(binary.get("qualification_sha256"))) is None:
+    fail("empreinte du binaire pair-support Phi Phase 9 invalide")
+
+expected_provenance = {
+    "environment_artifact_schema": assembler.PHASE3_SCHEMA,
+    "environment_artifact_sha256": hashlib.sha256(phase3_path.read_bytes()).hexdigest(),
+}
+if value.get("provenance") != expected_provenance:
+    fail("provenance Phase 3 de la qualification pair-support Phi incohérente")
+phase3_checks = phase3.get("checks")
+if not isinstance(phase3_checks, dict) or any(
+    phase3_checks.get(workflow) != "passed"
+    for workflow in ("cuda_audit_workflow", "cuda_release_workflow")
+):
+    fail("workflows CUDA Phase 3 non certifiés avant qualification Phase 9")
+if phase3.get("vm_lifecycle") != assembler.WORKER_LIFECYCLE:
+    fail("contrat de cycle de vie Phase 3 inattendu")
+if value.get("vm_lifecycle") != assembler.WORKER_LIFECYCLE:
+    fail("contrat de cycle de vie pair-support Phi Phase 9 absent")
+
+checks = exact_object(
+    value.get("checks"),
+    {
+        "aot_elf_architectures", "aot_ptx_entry_count",
+        "cpu_exact_recertification", "cuda_audit_workflow",
+        "cuda_release_workflow", "memcheck", "qualification", "racecheck",
+    },
+    "contrôles pair-support Phi Phase 9",
+)
+for key, expected in {
+    "aot_elf_architectures": ["sm_120"],
+    "aot_ptx_entry_count": 0,
+    "cpu_exact_recertification": "passed",
+    "cuda_audit_workflow": "passed",
+    "cuda_release_workflow": "passed",
+    "memcheck": "passed",
+    "racecheck": "passed",
+}.items():
+    if checks.get(key) != expected:
+        fail(f"contrôle pair-support Phi Phase 9 invalide: {key}")
+qualification = assembler.validate_qualification(
+    exact_object(
+        checks.get("qualification"),
+        assembler.QUALIFICATION_KEYS,
+        "résumé pair-support Phi Phase 9",
+    )
+)
+
+log_keys = {
+    "cuobjdump_elf", "cuobjdump_ptx", "cuobjdump_ptx_stderr", "memcheck",
+    "qualification", "racecheck",
+}
+logs = exact_object(value.get("logs"), log_keys, "journaux pair-support Phi Phase 9")
+log_sha256 = exact_object(
+    value.get("log_sha256"), log_keys, "empreintes des journaux Phase 9"
+)
+for key in log_keys:
+    if not isinstance(logs.get(key), str):
+        fail(f"journal pair-support Phi Phase 9 invalide: {key}")
+    expected_hash = hashlib.sha256(logs[key].encode("utf-8")).hexdigest()
+    if log_sha256.get(key) != expected_hash:
+        fail(f"empreinte du journal pair-support Phi Phase 9 incohérente: {key}")
+assembler.validate_elf_log(logs["cuobjdump_elf"])
+if logs["cuobjdump_ptx"].strip():
+    fail("journal PTX pair-support Phi Phase 9 non vide malgré le contrôle AOT")
+assembler.validate_memcheck_log(logs["memcheck"])
+assembler.validate_racecheck_log(logs["racecheck"])
+qualification_raw = json.dumps(
+    qualification, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+) + "\n"
+if logs["qualification"] != qualification_raw:
+    fail("journal et résumé pair-support Phi Phase 9 divergent")
+PY
+fi
+
 if certify_target_stopped; then
     stop_status=0
 else
@@ -2880,6 +3113,7 @@ python3 - "${LOCAL_TEMP_RESULT}" "${LOCAL_RESULT}" \
     "${LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT}" "${LOCAL_PHASE5_WORK_PROFILE_RESULT}" \
     "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT}" "${LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_RESULT}" \
     "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" "${LOCAL_PHASE7_H_POLYTOPE_RESULT}" \
+    "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT}" \
     "${PROJECT_ID}" "${ZONE}" "${INSTANCE_NAME}" \
     "${GUEST_SHUTDOWN_MINUTES}" "${FINAL_STATUS}" \
     "${FINAL_STOP_VERIFIED_AT_UTC}" "${SESSION_LAST_START_TIMESTAMP}" <<'PY'
@@ -2911,6 +3145,10 @@ if sys.argv[11] or sys.argv[12]:
     if not sys.argv[11] or not sys.argv[12]:
         raise SystemExit("paire de publication H-polytope Phase 7 incomplète")
     pairs.append((Path(sys.argv[11]), Path(sys.argv[12])))
+if sys.argv[13] or sys.argv[14]:
+    if not sys.argv[13] or not sys.argv[14]:
+        raise SystemExit("paire de publication pair-support Phi Phase 9 incomplète")
+    pairs.append((Path(sys.argv[13]), Path(sys.argv[14])))
 
 documents = []
 for temporary, _ in pairs:
@@ -2920,18 +3158,18 @@ for temporary, _ in pairs:
     lifecycle["worker_status_before_targeted_stop"] = value["status"]
     lifecycle.update(
         {
-            "final_status": sys.argv[17],
+            "final_status": sys.argv[19],
             "final_status_readback": "gcloud_compute_instances_describe",
-            "final_status_verified_at_utc": sys.argv[18],
-            "guest_shutdown_minutes": int(sys.argv[16]),
+            "final_status_verified_at_utc": sys.argv[20],
+            "guest_shutdown_minutes": int(sys.argv[18]),
             "initial_status": "TERMINATED",
             "initial_status_basis": "start_and_verify_precondition",
-            "instance": sys.argv[15],
-            "last_start_timestamp": sys.argv[19],
-            "project": sys.argv[13],
+            "instance": sys.argv[17],
+            "last_start_timestamp": sys.argv[21],
+            "project": sys.argv[15],
             "start_handoff_schema": "e-hgp.start-handoff.v3",
             "targeted_stop_verified": True,
-            "zone": sys.argv[14],
+            "zone": sys.argv[16],
         }
     )
     value["status"] = "passed"
@@ -3018,12 +3256,16 @@ fi
 if [[ -n "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}" ]]; then
     rm -f -- "${LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT}"
 fi
+if [[ -n "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}" ]]; then
+    rm -f -- "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT}"
+fi
 LOCAL_TEMP_RESULT=""
 LOCAL_PHASE4_TEMP_RESULT=""
 LOCAL_PHASE5_TEMP_RESULT=""
 LOCAL_PHASE5_WORK_PROFILE_TEMP_RESULT=""
 LOCAL_PHASE5_EXACT_SEARCH_WORK_PROFILE_TEMP_RESULT=""
 LOCAL_PHASE7_H_POLYTOPE_TEMP_RESULT=""
+LOCAL_PHASE9_PAIR_SUPPORT_PHI_TEMP_RESULT=""
 rm -f -- "${START_HANDOFF}"
 START_HANDOFF=""
 printf '[ARTEFACT] Résultat Phase 3 publié après certification TERMINATED : %s\n' "${LOCAL_RESULT}"
@@ -3046,6 +3288,10 @@ fi
 if ((PHASE7_H_POLYTOPE == 1)); then
     printf '[ARTEFACT] Qualification H-polytope Phase 7 publiée après certification TERMINATED : %s\n' \
         "${LOCAL_PHASE7_H_POLYTOPE_RESULT}"
+fi
+if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
+    printf '[ARTEFACT] Qualification pair-support Phi Phase 9 publiée après certification TERMINATED : %s\n' \
+        "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT}"
 fi
 
 if ! revoke_and_remove_session_ssh_key; then
@@ -3075,4 +3321,8 @@ fi
 if ((PHASE7_H_POLYTOPE == 1)); then
     printf '[SUCCÈS] Qualification H-polytope Phase 7 compagnon conservée : %s\n' \
         "${LOCAL_PHASE7_H_POLYTOPE_RESULT}"
+fi
+if ((PHASE9_PAIR_SUPPORT_PHI == 1)); then
+    printf '[SUCCÈS] Qualification pair-support Phi Phase 9 compagnon conservée : %s\n' \
+        "${LOCAL_PHASE9_PAIR_SUPPORT_PHI_RESULT}"
 fi
