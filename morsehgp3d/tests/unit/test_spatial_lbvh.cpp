@@ -26,6 +26,11 @@ using morsehgp3d::exact::ExactRational3;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ClosedBallPartition;
 using morsehgp3d::spatial::ExactNeighbor;
+using morsehgp3d::spatial::ExactBudgetedLbvhTopKResult;
+using morsehgp3d::spatial::ExactLbvhTopKBudget;
+using morsehgp3d::spatial::ExactLbvhTopKAudit;
+using morsehgp3d::spatial::ExactLbvhTopKStatus;
+using morsehgp3d::spatial::ExactLbvhTopKStopReason;
 using morsehgp3d::spatial::ExclusionSet;
 using morsehgp3d::spatial::LbvhTraversalOrder;
 using morsehgp3d::spatial::MortonLbvhIndex;
@@ -39,11 +44,16 @@ using morsehgp3d::spatial::brute_force_top_k;
 using morsehgp3d::spatial::lbvh_closed_ball;
 using morsehgp3d::spatial::lbvh_nearest;
 using morsehgp3d::spatial::lbvh_top_k;
+using morsehgp3d::spatial::lbvh_top_k_budgeted;
 
 static_assert(!std::is_copy_constructible_v<MortonLbvhIndex>);
 static_assert(!std::is_copy_assignable_v<MortonLbvhIndex>);
 static_assert(std::is_nothrow_move_constructible_v<MortonLbvhIndex>);
 static_assert(std::is_nothrow_move_assignable_v<MortonLbvhIndex>);
+static_assert(
+    std::is_nothrow_move_constructible_v<ExactBudgetedLbvhTopKResult>);
+static_assert(
+    std::is_nothrow_move_assignable_v<ExactBudgetedLbvhTopKResult>);
 
 int failures = 0;
 
@@ -159,6 +169,73 @@ void check_top_matches(
   check(
       actual.eligible_point_count() == reference.eligible_point_count(),
       message + " preserves the eligible population");
+}
+
+void check_budgeted_top_matches(
+    const ExactBudgetedLbvhTopKResult& actual,
+    const TopKPartition& reference,
+    const ExactLbvhTopKBudget& budget,
+    const std::string& message) {
+  check(actual.complete(), message + " is complete");
+  check(
+      actual.status() == ExactLbvhTopKStatus::complete &&
+          actual.stop_reason() == ExactLbvhTopKStopReason::none,
+      message + " reports no exhaustion");
+  check(
+      actual.requested_budget() == budget,
+      message + " preserves the requested budget");
+  const auto& audit = actual.audit();
+  check(audit.traversal_complete, message + " completed its traversal");
+  check(
+      audit.node_visit_count <= budget.maximum_node_visit_count &&
+          audit.internal_node_expansion_count <=
+              budget.maximum_internal_node_expansion_count &&
+          audit.exact_aabb_bound_evaluation_count <=
+              budget.maximum_exact_aabb_bound_evaluation_count &&
+          audit.exact_point_distance_evaluation_count <=
+              budget.maximum_exact_point_distance_evaluation_count &&
+          audit.peak_frontier_entry_count <=
+              budget.maximum_frontier_entry_count &&
+          audit.peak_best_neighbor_entry_count <=
+              budget.maximum_best_neighbor_entry_count &&
+          audit.peak_retained_cutoff_shell_entry_count <=
+              budget.maximum_cutoff_shell_entry_count,
+      message + " respects every deterministic budget");
+  check_top_matches(actual.partition(), reference, message + " partition");
+}
+
+void check_budgeted_top_exhaustion(
+    const ExactBudgetedLbvhTopKResult& actual,
+    const ExactLbvhTopKBudget& budget,
+    ExactLbvhTopKStopReason expected_stop_reason,
+    const std::string& message) {
+  check(
+      !actual.complete() &&
+          actual.status() == ExactLbvhTopKStatus::budget_exhausted &&
+          actual.stop_reason() == expected_stop_reason,
+      message + " reports the expected fail-closed exhaustion");
+  check(
+      actual.requested_budget() == budget,
+      message + " preserves the exhausted budget");
+  const ExactLbvhTopKAudit& audit = actual.audit();
+  check(
+      audit.node_visit_count <= budget.maximum_node_visit_count &&
+          audit.internal_node_expansion_count <=
+              budget.maximum_internal_node_expansion_count &&
+          audit.exact_aabb_bound_evaluation_count <=
+              budget.maximum_exact_aabb_bound_evaluation_count &&
+          audit.exact_point_distance_evaluation_count <=
+              budget.maximum_exact_point_distance_evaluation_count &&
+          audit.peak_frontier_entry_count <=
+              budget.maximum_frontier_entry_count &&
+          audit.peak_best_neighbor_entry_count <=
+              budget.maximum_best_neighbor_entry_count &&
+          audit.peak_retained_cutoff_shell_entry_count <=
+              budget.maximum_cutoff_shell_entry_count,
+      message + " never crosses any requested cap");
+  check_throws<std::logic_error>(
+      [&actual] { static_cast<void>(actual.partition()); },
+      message + " publishes no partial top-k partition");
 }
 
 void check_ball_matches(
@@ -664,6 +741,397 @@ void test_strict_pruning_bulk_classification_and_exclusions() {
       "LBVH closed-ball rejects an invalid traversal-order value");
 }
 
+void test_budgeted_top_k_exactness_and_fail_closed_limits() {
+  const std::array<CertifiedPoint3, 6> equality_input{
+      point(-1.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(0.0, -1.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, 0.0, -1.0),
+      point(0.0, 0.0, 1.0)};
+  const CanonicalPointCloud equality_cloud = canonical_cloud(equality_input);
+  const ExclusionSet equality_exclusions =
+      empty_exclusions(equality_cloud);
+  const MortonLbvhIndex equality_index =
+      MortonLbvhIndex::build(equality_cloud);
+  const TopKPartition equality_reference = brute_force_top_k(
+      equality_cloud, origin(), 3U, equality_exclusions);
+  const ExactLbvhTopKBudget generous_budget{
+      4096U,
+      4096U,
+      4096U,
+      4096U,
+      128U,
+      3U,
+      6U};
+
+  for (const LbvhTraversalOrder order : {
+           LbvhTraversalOrder::near_first,
+           LbvhTraversalOrder::far_first}) {
+    const TopKPartition legacy = lbvh_top_k(
+        equality_index,
+        equality_cloud,
+        origin(),
+        3U,
+        equality_exclusions,
+        order);
+    const ExactBudgetedLbvhTopKResult first = lbvh_top_k_budgeted(
+        equality_index,
+        equality_cloud,
+        origin(),
+        3U,
+        equality_exclusions,
+        generous_budget,
+        order);
+    const ExactBudgetedLbvhTopKResult repeated = lbvh_top_k_budgeted(
+        equality_index,
+        equality_cloud,
+        origin(),
+        3U,
+        equality_exclusions,
+        generous_budget,
+        order);
+    check_budgeted_top_matches(
+        first, equality_reference, generous_budget,
+        "the budgeted six-way equality query");
+    check_top_matches(
+        first.partition(), legacy,
+        "the budgeted/legacy six-way equality query");
+    check(
+        first.audit() == repeated.audit(),
+        "identical budgeted traversals have deterministic audits");
+    check(
+        first.partition().distance_evaluation_count() == 6U &&
+            first.partition().query_counters().pruned_subtree_count == 0U,
+        "budgeted top-k never prunes an AABB bound equal to the cutoff");
+    ExactBudgetedLbvhTopKResult move_source = first;
+    ExactBudgetedLbvhTopKResult move_target = std::move(move_source);
+    check_top_matches(
+        move_target.partition(), equality_reference,
+        "the moved budgeted equality query");
+    check(
+        !move_source.complete() &&
+            move_source.status() ==
+                ExactLbvhTopKStatus::not_certified &&
+            move_source.stop_reason() == ExactLbvhTopKStopReason::none &&
+            !move_source.audit().traversal_complete,
+        "a moved-from budgeted result is explicitly not certified");
+    check_throws<std::logic_error>(
+        [&move_source] { static_cast<void>(move_source.partition()); },
+        "a moved-from budgeted result exposes no stale partition");
+    self_move_assign(move_target);
+    check_top_matches(
+        move_target.partition(), equality_reference,
+        "a self-moved budgeted equality query");
+
+    const ExactLbvhTopKAudit& complete_audit = first.audit();
+    check(
+        complete_audit.node_visit_count != 0U &&
+            complete_audit.internal_node_expansion_count != 0U &&
+            complete_audit.exact_aabb_bound_evaluation_count != 0U &&
+            complete_audit.exact_point_distance_evaluation_count != 0U &&
+            complete_audit.peak_frontier_entry_count != 0U &&
+            complete_audit.peak_best_neighbor_entry_count != 0U &&
+            complete_audit.peak_retained_cutoff_shell_entry_count != 0U,
+        "the six-way equality fixture exercises every top-k budget dimension");
+    const ExactLbvhTopKBudget exact_budget{
+        complete_audit.node_visit_count,
+        complete_audit.internal_node_expansion_count,
+        complete_audit.exact_aabb_bound_evaluation_count,
+        complete_audit.exact_point_distance_evaluation_count,
+        complete_audit.peak_frontier_entry_count,
+        complete_audit.peak_best_neighbor_entry_count,
+        complete_audit.peak_retained_cutoff_shell_entry_count};
+    const ExactBudgetedLbvhTopKResult exact = lbvh_top_k_budgeted(
+        equality_index,
+        equality_cloud,
+        origin(),
+        3U,
+        equality_exclusions,
+        exact_budget,
+        order);
+    check_budgeted_top_matches(
+        exact, equality_reference, exact_budget,
+        "the all-seven-exact-boundary budgeted equality query");
+
+    ExactLbvhTopKBudget short_node_visit_budget = exact_budget;
+    --short_node_visit_budget.maximum_node_visit_count;
+    const ExactBudgetedLbvhTopKResult short_node_visit = lbvh_top_k_budgeted(
+        equality_index,
+        equality_cloud,
+        origin(),
+        3U,
+        equality_exclusions,
+        short_node_visit_budget,
+        order);
+    check_budgeted_top_exhaustion(
+        short_node_visit,
+        short_node_visit_budget,
+        ExactLbvhTopKStopReason::node_visit_limit,
+        "the one-short node-visit budget");
+    check(
+        !short_node_visit.audit().traversal_complete &&
+            short_node_visit.audit().node_visit_count ==
+                short_node_visit_budget.maximum_node_visit_count,
+        "one missing node visit exhausts before the final frontier pop");
+
+    ExactLbvhTopKBudget short_expansion_budget = exact_budget;
+    --short_expansion_budget.maximum_internal_node_expansion_count;
+    const ExactBudgetedLbvhTopKResult short_expansion = lbvh_top_k_budgeted(
+        equality_index,
+        equality_cloud,
+        origin(),
+        3U,
+        equality_exclusions,
+        short_expansion_budget,
+        order);
+    check_budgeted_top_exhaustion(
+        short_expansion,
+        short_expansion_budget,
+        ExactLbvhTopKStopReason::internal_node_expansion_limit,
+        "the one-short internal-expansion budget");
+    check(
+        !short_expansion.audit().traversal_complete &&
+            short_expansion.audit().internal_node_expansion_count ==
+                short_expansion_budget.maximum_internal_node_expansion_count,
+        "one missing internal expansion exhausts before child publication");
+
+    ExactLbvhTopKBudget short_aabb_budget = exact_budget;
+    --short_aabb_budget.maximum_exact_aabb_bound_evaluation_count;
+    const ExactBudgetedLbvhTopKResult short_aabb = lbvh_top_k_budgeted(
+        equality_index,
+        equality_cloud,
+        origin(),
+        3U,
+        equality_exclusions,
+        short_aabb_budget,
+        order);
+    check_budgeted_top_exhaustion(
+        short_aabb,
+        short_aabb_budget,
+        ExactLbvhTopKStopReason::exact_aabb_bound_evaluation_limit,
+        "the one-short exact-AABB budget");
+    check(
+        !short_aabb.audit().traversal_complete,
+        "one missing exact AABB evaluation exhausts before a child-bound pair");
+
+    ExactLbvhTopKBudget short_distance_budget = exact_budget;
+    --short_distance_budget.maximum_exact_point_distance_evaluation_count;
+    const ExactBudgetedLbvhTopKResult short_distance = lbvh_top_k_budgeted(
+        equality_index,
+        equality_cloud,
+        origin(),
+        3U,
+        equality_exclusions,
+        short_distance_budget,
+        order);
+    check_budgeted_top_exhaustion(
+        short_distance,
+        short_distance_budget,
+        ExactLbvhTopKStopReason::exact_point_distance_evaluation_limit,
+        "the one-short exact-distance budget");
+    check(
+        !short_distance.audit().traversal_complete &&
+            short_distance.audit().exact_point_distance_evaluation_count ==
+                short_distance_budget
+                    .maximum_exact_point_distance_evaluation_count,
+        "one missing exact point distance exhausts before leaf evaluation");
+
+    ExactLbvhTopKBudget short_frontier_budget = exact_budget;
+    --short_frontier_budget.maximum_frontier_entry_count;
+    const ExactBudgetedLbvhTopKResult short_frontier =
+        lbvh_top_k_budgeted(
+            equality_index,
+            equality_cloud,
+            origin(),
+            3U,
+            equality_exclusions,
+            short_frontier_budget,
+            order);
+    check_budgeted_top_exhaustion(
+        short_frontier,
+        short_frontier_budget,
+        ExactLbvhTopKStopReason::frontier_entry_limit,
+        "the one-short frontier budget");
+    check(
+        !short_frontier.audit().traversal_complete &&
+            short_frontier.audit().peak_frontier_entry_count <=
+                short_frontier_budget.maximum_frontier_entry_count,
+        "one missing frontier entry exhausts before queue growth");
+
+    ExactLbvhTopKBudget short_best_neighbor_budget = exact_budget;
+    --short_best_neighbor_budget.maximum_best_neighbor_entry_count;
+    const ExactBudgetedLbvhTopKResult short_best_neighbor =
+        lbvh_top_k_budgeted(
+            equality_index,
+            equality_cloud,
+            origin(),
+            3U,
+            equality_exclusions,
+            short_best_neighbor_budget,
+            order);
+    check_budgeted_top_exhaustion(
+        short_best_neighbor,
+        short_best_neighbor_budget,
+        ExactLbvhTopKStopReason::best_neighbor_entry_limit,
+        "the one-short best-neighbor budget");
+    check(
+        !short_best_neighbor.audit().traversal_complete &&
+            short_best_neighbor.audit().node_visit_count == 0U &&
+            short_best_neighbor.audit().peak_best_neighbor_entry_count == 0U,
+        "one missing best-neighbor slot exhausts before traversal allocation");
+
+    ExactLbvhTopKBudget short_shell_budget = exact_budget;
+    --short_shell_budget.maximum_cutoff_shell_entry_count;
+    const ExactBudgetedLbvhTopKResult short_shell = lbvh_top_k_budgeted(
+        equality_index,
+        equality_cloud,
+        origin(),
+        3U,
+        equality_exclusions,
+        short_shell_budget,
+        order);
+    check_budgeted_top_exhaustion(
+        short_shell,
+        short_shell_budget,
+        ExactLbvhTopKStopReason::cutoff_shell_entry_limit,
+        "the one-short cutoff-shell budget");
+    check(
+        short_shell.audit().traversal_complete &&
+            short_shell.audit().peak_retained_cutoff_shell_entry_count ==
+                short_shell_budget.maximum_cutoff_shell_entry_count &&
+            short_shell.audit().provisional_cutoff_shell_overflow_count != 0U,
+        "a final shell overflow exhausts only after the complete traversal");
+  }
+
+  const ExactLbvhTopKBudget zero_budget{};
+  const ExactBudgetedLbvhTopKResult zero = lbvh_top_k_budgeted(
+      equality_index,
+      equality_cloud,
+      origin(),
+      3U,
+      equality_exclusions,
+      zero_budget);
+  check_budgeted_top_exhaustion(
+      zero,
+      zero_budget,
+      ExactLbvhTopKStopReason::best_neighbor_entry_limit,
+      "the all-zero budget");
+  check(
+      zero.audit().node_visit_count == 0U &&
+          zero.audit().internal_node_expansion_count == 0U &&
+          zero.audit().exact_aabb_bound_evaluation_count == 0U &&
+          zero.audit().exact_point_distance_evaluation_count == 0U &&
+          zero.audit().peak_frontier_entry_count == 0U &&
+          zero.audit().peak_best_neighbor_entry_count == 0U &&
+          zero.audit().peak_retained_cutoff_shell_entry_count == 0U &&
+          !zero.audit().traversal_complete,
+      "a zero budget fails closed before any bounded query operation");
+
+  const std::array<CertifiedPoint3, 13> temporary_overflow_input{
+      point(-3.0, 0.0, 0.0),
+      point(3.0, 0.0, 0.0),
+      point(0.0, -3.0, 0.0),
+      point(0.0, 3.0, 0.0),
+      point(0.0, 0.0, -3.0),
+      point(0.0, 0.0, 3.0),
+      point(-2.0, 0.0, 0.0),
+      point(2.0, 0.0, 0.0),
+      point(0.0, -2.0, 0.0),
+      point(0.0, 2.0, 0.0),
+      point(0.0, 0.0, -2.0),
+      point(0.0, 0.0, 2.0),
+      point(0.0, 0.0, 0.0)};
+  const CanonicalPointCloud temporary_overflow_cloud =
+      canonical_cloud(temporary_overflow_input);
+  const ExclusionSet temporary_overflow_exclusions =
+      empty_exclusions(temporary_overflow_cloud);
+  const MortonLbvhIndex temporary_overflow_index =
+      MortonLbvhIndex::build(temporary_overflow_cloud);
+  const TopKPartition temporary_overflow_reference = brute_force_top_k(
+      temporary_overflow_cloud,
+      origin(),
+      1U,
+      temporary_overflow_exclusions);
+  const ExactLbvhTopKBudget temporary_overflow_budget{
+      4096U,
+      4096U,
+      4096U,
+      4096U,
+      128U,
+      1U,
+      1U};
+  const ExactBudgetedLbvhTopKResult temporary_overflow =
+      lbvh_top_k_budgeted(
+          temporary_overflow_index,
+          temporary_overflow_cloud,
+          origin(),
+          1U,
+          temporary_overflow_exclusions,
+          temporary_overflow_budget,
+          LbvhTraversalOrder::far_first);
+  check_budgeted_top_matches(
+      temporary_overflow,
+      temporary_overflow_reference,
+      temporary_overflow_budget,
+      "the temporary-shell-overflow query");
+  check(
+      temporary_overflow.audit().provisional_cutoff_decrease_count >= 2U &&
+          temporary_overflow.audit()
+                  .provisional_cutoff_shell_overflow_count !=
+              0U,
+      "successive cutoff decreases cancel earlier provisional shell overflows");
+
+  constexpr std::size_t line_point_count = 64U;
+  const CanonicalPointCloud line_cloud =
+      nonnegative_line_cloud(line_point_count);
+  const MortonLbvhIndex line_index = MortonLbvhIndex::build(line_cloud);
+  const std::array<PointId, 3> excluded_ids{
+      PointId{10}, PointId{0}, PointId{1}};
+  const ExclusionSet line_exclusions = ExclusionSet::from_ids(
+      std::span<const PointId>{excluded_ids}, line_cloud, 3U);
+  const TopKPartition line_reference =
+      brute_force_top_k(line_cloud, origin(), 2U, line_exclusions);
+  const ExactLbvhTopKBudget line_budget{
+      4096U,
+      4096U,
+      4096U,
+      4096U,
+      128U,
+      2U,
+      1U};
+  const ExactBudgetedLbvhTopKResult line = lbvh_top_k_budgeted(
+      line_index,
+      line_cloud,
+      origin(),
+      2U,
+      line_exclusions,
+      line_budget,
+      LbvhTraversalOrder::near_first);
+  check_budgeted_top_matches(
+      line, line_reference, line_budget,
+      "the budgeted excluded and strictly pruned line query");
+  check(
+      line.partition().query_counters().pruned_subtree_count != 0U &&
+          line.partition().distance_evaluation_count() +
+                  line.partition().query_counters().pruned_eligible_point_count ==
+              line.partition().eligible_point_count(),
+      "a complete budgeted query accounts for every eligible leaf");
+
+  check_throws<std::out_of_range>(
+      [&equality_index, &equality_cloud, &equality_exclusions,
+       &generous_budget] {
+        static_cast<void>(lbvh_top_k_budgeted(
+            equality_index,
+            equality_cloud,
+            origin(),
+            0U,
+            equality_exclusions,
+            generous_budget));
+      },
+      "budgeted LBVH top-k rejects rank zero before traversal");
+}
+
 void test_namespace_binding_and_move_fail_closed() {
   const std::array<CertifiedPoint3, 4> input{
       point(-2.0, 0.0, 1.0),
@@ -765,6 +1233,7 @@ int main() {
   test_finite_extrema_remain_exact();
   test_bound_equality_never_prunes_complete_shells();
   test_strict_pruning_bulk_classification_and_exclusions();
+  test_budgeted_top_k_exactness_and_fail_closed_limits();
   test_namespace_binding_and_move_fail_closed();
 
   if (failures != 0) {

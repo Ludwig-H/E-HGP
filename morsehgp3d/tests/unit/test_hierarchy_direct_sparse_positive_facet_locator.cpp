@@ -381,6 +381,318 @@ void check_shape_witness_and_durable_budget_rejections() {
       "durable key-point capacity is checked after exact duplicate analysis and before atomic commit");
 }
 
+void check_const_budgeted_probe() {
+  auto locator = make_locator(0U);
+  const ExactDirectSparseFacetKey collision_key =
+      key({1U, 3U, 5U, 7U});
+  const ExactDirectSparseFacetKey target_key =
+      key({2U, 4U, 6U, 8U});
+  const ExactDirectSparseFacetKey missing_key =
+      key({9U, 10U, 11U, 12U});
+  const std::array<ExactDirectSparseFacetBinding, 2U> bindings{{
+      {0U, collision_key, 2U, witness(90U)},
+      {1U, target_key, 5U, witness(91U)},
+  }};
+  check(
+      locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              std::span<const ExactDirectSparseComponentUnion>{},
+              bindings)
+          .certified_committed_batch(),
+      "the const-probe fixture stores two deliberately colliding keys");
+  const std::array<ExactDirectSparseComponentUnion, 1U> unions{{
+      {0U, 5U, 1U, witness(92U)},
+  }};
+  check(
+      locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              unions,
+              std::span<const ExactDirectSparseFacetBinding>{})
+          .certified_committed_batch(),
+      "the const-probe fixture redirects the target handle through one DSU parent edge");
+
+  const ExactDirectSparsePositiveFacetLocator durable_state_before = locator;
+  const ExactDirectSparsePositiveFacetLocatorCounters counters_before =
+      locator.counters();
+  const std::size_t committed_batch_count_before =
+      locator.committed_batches().size();
+  const auto* const slots_data_before = locator.slots().data();
+  const auto* const key_arena_data_before =
+      locator.key_point_arena().data();
+  const auto* const parents_data_before =
+      locator.component_parents().data();
+  const auto* const unions_data_before = locator.committed_unions().data();
+  const auto* const batches_data_before = locator.committed_batches().data();
+  const std::size_t slots_capacity_before = locator.slots().capacity();
+  const std::size_t key_arena_capacity_before =
+      locator.key_point_arena().capacity();
+  const std::size_t parents_capacity_before =
+      locator.component_parents().capacity();
+  const std::size_t unions_capacity_before =
+      locator.committed_unions().capacity();
+  const std::size_t batches_capacity_before =
+      locator.committed_batches().capacity();
+  const auto& read_only_locator =
+      static_cast<const ExactDirectSparsePositiveFacetLocator&>(locator);
+
+  const auto hit = read_only_locator.probe_positive_facet(
+      target_key, witness(93U), {2U, 1U});
+  check(
+      hit.certified_positive_hit() &&
+          hit.query_key == target_key &&
+          hit.disposition ==
+              ExactDirectSparsePositiveFacetProbeDisposition::positive &&
+          hit.component_handle_present && hit.component_handle == 1U &&
+          hit.source_binding_witness_present &&
+          hit.source_binding_witness == witness(91U) &&
+          hit.slot_visit_count == 2U &&
+          hit.component_parent_hop_count == 1U &&
+          hit.full_key_comparison_count == 2U &&
+          hit.equal_fingerprint_distinct_key_count == 1U &&
+          !hit.locator_state_mutated && !hit.batch_committed,
+      "a const probe compares complete colliding keys and follows the committed union under separate exact budgets");
+  const auto hit_verified =
+      verify_exact_direct_sparse_positive_facet_probe(
+          read_only_locator,
+          target_key,
+          witness(93U),
+          {2U, 1U},
+          hit);
+  check(
+      hit_verified.locator_certified_at_entry &&
+          hit_verified.query_key_bound_to_observed_result &&
+          hit_verified.query_witness_bound_to_observed_result &&
+          hit_verified.budget_bound_to_observed_result &&
+          hit_verified.outcome_contract_certified &&
+          hit_verified.exact_fresh_probe_replay_certified &&
+          hit_verified.no_locator_mutation_or_batch_commit &&
+          !hit_verified.external_authority_replayed_by_locator &&
+          hit_verified.relative_external_authority_scope_preserved &&
+          hit_verified.result_certified,
+      "the public fresh verifier binds a positive result to the exact locator, key, witness and budget without claiming external-authority replay");
+
+  const auto slot_exhausted = read_only_locator.probe_positive_facet(
+      target_key, witness(94U), {1U, 1U});
+  check(
+      slot_exhausted.certified_budget_exhaustion() &&
+          slot_exhausted.query_key == target_key &&
+          slot_exhausted.slot_visit_budget_exhausted &&
+          !slot_exhausted.component_parent_hop_budget_exhausted &&
+          slot_exhausted.slot_visit_count == 1U &&
+          slot_exhausted.full_key_comparison_count == 1U &&
+          slot_exhausted.equal_fingerprint_distinct_key_count == 1U &&
+          !slot_exhausted.slot_search_completed &&
+          slot_exhausted.disposition ==
+              ExactDirectSparsePositiveFacetProbeDisposition::
+                  budget_exhausted &&
+          !slot_exhausted.component_handle_present &&
+          slot_exhausted.component_handle == 0U &&
+          slot_exhausted.source_binding_witness ==
+              ExactDirectSparseFacetWitness{} &&
+          !slot_exhausted.missing_facet_means_isolated,
+      "one slot visit is just insufficient for the second colliding key and is reported as budget exhaustion, never as absence");
+
+  const auto parent_exhausted = read_only_locator.probe_positive_facet(
+      target_key, witness(95U), {2U, 0U});
+  check(
+      parent_exhausted.certified_budget_exhaustion() &&
+          parent_exhausted.query_key == target_key &&
+          !parent_exhausted.slot_visit_budget_exhausted &&
+          parent_exhausted.component_parent_hop_budget_exhausted &&
+          parent_exhausted.slot_search_completed &&
+          !parent_exhausted.component_find_completed &&
+          parent_exhausted.component_parent_hop_count == 0U &&
+          parent_exhausted.full_key_comparison_count == 2U &&
+          parent_exhausted.equal_fingerprint_distinct_key_count == 1U &&
+          parent_exhausted.disposition ==
+              ExactDirectSparsePositiveFacetProbeDisposition::
+                  budget_exhausted &&
+          !parent_exhausted.component_handle_present &&
+          parent_exhausted.component_handle == 0U &&
+          !parent_exhausted.source_binding_witness_present &&
+          parent_exhausted.source_binding_witness ==
+              ExactDirectSparseFacetWitness{},
+      "zero parent hops is just insufficient after the full key hit and cannot produce a partial positive answer");
+
+  const auto miss = read_only_locator.probe_positive_facet(
+      missing_key, witness(96U), {3U, 0U});
+  check(
+      miss.certified_unresolved_miss() &&
+          miss.query_key == missing_key &&
+          miss.disposition ==
+              ExactDirectSparsePositiveFacetProbeDisposition::unresolved &&
+          miss.slot_visit_count == 3U &&
+          miss.full_key_comparison_count == 2U &&
+          miss.equal_fingerprint_distinct_key_count == 2U &&
+          miss.slot_search_completed && !miss.component_find_completed &&
+          !miss.component_handle_present &&
+          !miss.missing_facet_means_isolated &&
+          !miss.total_facet_authority_claimed,
+      "only the visited empty terminator certifies a complete unresolved miss across forced collisions");
+
+  const auto miss_verified =
+      verify_exact_direct_sparse_positive_facet_probe(
+          read_only_locator,
+          missing_key,
+          witness(96U),
+          {3U, 0U},
+          miss);
+  const auto slot_exhausted_verified =
+      verify_exact_direct_sparse_positive_facet_probe(
+          read_only_locator,
+          target_key,
+          witness(94U),
+          {1U, 1U},
+          slot_exhausted);
+  const auto parent_exhausted_verified =
+      verify_exact_direct_sparse_positive_facet_probe(
+          read_only_locator,
+          target_key,
+          witness(95U),
+          {2U, 0U},
+          parent_exhausted);
+  check(
+      miss_verified.result_certified &&
+          slot_exhausted_verified.result_certified &&
+          parent_exhausted_verified.result_certified &&
+          !miss_verified.external_authority_replayed_by_locator &&
+          !slot_exhausted_verified.external_authority_replayed_by_locator &&
+          !parent_exhausted_verified.external_authority_replayed_by_locator,
+      "fresh replay certifies complete misses and both fail-closed exhaustion modes only inside the relative locator domain");
+
+  auto mutated_key_result = hit;
+  mutated_key_result.query_key = collision_key;
+  const auto mutated_key_rejected =
+      verify_exact_direct_sparse_positive_facet_probe(
+          read_only_locator,
+          target_key,
+          witness(93U),
+          {2U, 1U},
+          mutated_key_result);
+  check(
+      mutated_key_result.certified_positive_hit() &&
+          !mutated_key_rejected.query_key_bound_to_observed_result &&
+          !mutated_key_rejected.exact_fresh_probe_replay_certified &&
+          !mutated_key_rejected.result_certified,
+      "a canonical but substituted observed query key requires and fails the locator-bound fresh replay");
+
+  auto mutated_audit_result = hit;
+  ++mutated_audit_result.full_key_comparison_count;
+  const auto mutated_audit_rejected =
+      verify_exact_direct_sparse_positive_facet_probe(
+          read_only_locator,
+          target_key,
+          witness(93U),
+          {2U, 1U},
+          mutated_audit_result);
+  check(
+      !mutated_audit_result.certified_positive_hit() &&
+          !mutated_audit_rejected.outcome_contract_certified &&
+          !mutated_audit_rejected.exact_fresh_probe_replay_certified &&
+          !mutated_audit_rejected.result_certified,
+      "the exact hit relation full comparisons equals collision mismatches plus one rejects a mutated audit");
+
+  auto mutated_miss_audit_result = miss;
+  ++mutated_miss_audit_result.full_key_comparison_count;
+  const auto mutated_miss_audit_rejected =
+      verify_exact_direct_sparse_positive_facet_probe(
+          read_only_locator,
+          missing_key,
+          witness(96U),
+          {3U, 0U},
+          mutated_miss_audit_result);
+  check(
+      !mutated_miss_audit_result.certified_unresolved_miss() &&
+          !mutated_miss_audit_rejected.outcome_contract_certified &&
+          !mutated_miss_audit_rejected.result_certified,
+      "the exact complete-miss relation full comparisons equals collision mismatches rejects a mutated audit");
+
+  auto mutated_exhaustion_audit_result = slot_exhausted;
+  ++mutated_exhaustion_audit_result.full_key_comparison_count;
+  const auto mutated_exhaustion_audit_rejected =
+      verify_exact_direct_sparse_positive_facet_probe(
+          read_only_locator,
+          target_key,
+          witness(94U),
+          {1U, 1U},
+          mutated_exhaustion_audit_result);
+  check(
+      !mutated_exhaustion_audit_result.certified_budget_exhaustion() &&
+          !mutated_exhaustion_audit_rejected.outcome_contract_certified &&
+          !mutated_exhaustion_audit_rejected.result_certified,
+      "a slot-budget exhaustion keeps the exact miss-prefix counter relation and rejects a mutated audit");
+
+  auto mutated_handle_result = hit;
+  mutated_handle_result.component_handle = 7U;
+  const auto mutated_handle_rejected =
+      verify_exact_direct_sparse_positive_facet_probe(
+          read_only_locator,
+          target_key,
+          witness(93U),
+          {2U, 1U},
+          mutated_handle_result);
+  check(
+      mutated_handle_result.certified_positive_hit() &&
+          !mutated_handle_rejected.exact_fresh_probe_replay_certified &&
+          !mutated_handle_rejected.result_certified,
+      "a well-shaped but substituted component handle is rejected by fresh replay against the locator DSU");
+
+  auto leaked_exhaustion_result = parent_exhausted;
+  leaked_exhaustion_result.component_handle = 7U;
+  const auto leaked_exhaustion_rejected =
+      verify_exact_direct_sparse_positive_facet_probe(
+          read_only_locator,
+          target_key,
+          witness(95U),
+          {2U, 0U},
+          leaked_exhaustion_result);
+  check(
+      !leaked_exhaustion_result.certified_budget_exhaustion() &&
+          !leaked_exhaustion_rejected.outcome_contract_certified &&
+          !leaked_exhaustion_rejected.result_certified,
+      "an exhausted parent traversal rejects even a hidden component-handle payload");
+
+  ExactDirectSparseFacetKey malformed = target_key;
+  malformed.point_ids[9U] = 99U;
+  const auto malformed_rejected = read_only_locator.probe_positive_facet(
+      malformed, witness(97U), {3U, 1U});
+  const auto witness_rejected = read_only_locator.probe_positive_facet(
+      target_key, {authority_id, 0U}, {3U, 1U});
+  check(
+      malformed_rejected.decision ==
+              ExactDirectSparsePositiveFacetProbeDecision::
+                  no_positive_locator_input_shape_rejected &&
+          malformed_rejected.slot_visit_count == 0U &&
+          witness_rejected.decision ==
+              ExactDirectSparsePositiveFacetProbeDecision::
+                  no_positive_locator_external_witness_rejected &&
+          witness_rejected.slot_visit_count == 0U,
+      "the const probe validates its canonical key and external witness before spending either work budget");
+
+  check(
+      locator == durable_state_before &&
+          locator.counters() == counters_before &&
+          locator.committed_batches().size() ==
+              committed_batch_count_before &&
+          locator.slots().data() == slots_data_before &&
+          locator.key_point_arena().data() == key_arena_data_before &&
+          locator.component_parents().data() == parents_data_before &&
+          locator.committed_unions().data() == unions_data_before &&
+          locator.committed_batches().data() == batches_data_before &&
+          locator.slots().capacity() == slots_capacity_before &&
+          locator.key_point_arena().capacity() ==
+              key_arena_capacity_before &&
+          locator.component_parents().capacity() ==
+              parents_capacity_before &&
+          locator.committed_unions().capacity() ==
+              unions_capacity_before &&
+          locator.committed_batches().capacity() ==
+              batches_capacity_before,
+      "all successful, missing, rejected and exhausted const probes leave every durable value, counter, batch and arena identity unchanged");
+}
+
 void check_fresh_durable_structure_verifier_and_mutations() {
   auto locator = make_locator(0U);
   const ExactDirectSparseFacetKey first = key({1U, 5U, 9U});
@@ -614,6 +926,7 @@ int main() {
   check_incompatible_duplicate_is_atomic_contradiction();
   check_explicit_union_makes_duplicate_compatible();
   check_shape_witness_and_durable_budget_rejections();
+  check_const_budgeted_probe();
   check_fresh_durable_structure_verifier_and_mutations();
   if (failures != 0) {
     std::cerr << failures << " direct sparse positive facet test(s) failed\n";

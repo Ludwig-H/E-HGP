@@ -1,4 +1,4 @@
-# Locator positif sparse et descente top-k locale — Phase 10.5a
+# Locator positif sparse et descente top-k locale — Phases 10.5a et 10.5b
 
 ## Portée et statut
 
@@ -7,7 +7,7 @@ Phase 10, backend `reference_cpu`, profil `hgp_reduced`, mode `certified`, séma
 Ce jalon sépare strictement deux couches :
 
 - **A — socle combinatoire 10.5a** : un dictionnaire positif sparse, relatif à des assertions externes de l'appelant, retrouve une clé connue et résout son handle dans l'état engagé avant l'appel;
-- **B — descente géométrique 10.5b** : une recherche top-k locale devra produire de nouvelles facettes strictement descendantes lorsqu'une facette n'est pas encore connue. Son théorème est seulement conditionnel et son implémentation complète reste ouverte.
+- **B — descente géométrique 10.5b** : une recherche top-k locale budgétée produit un unique saut strict certifié lorsqu'une facette n'est pas encore connue, puis résout seulement une cible déjà présente dans le même locator `const`. La fermeture transitive reste ouverte pour 10.5c.
 
 Le socle A ne construit aucune facette absente, ne décide aucune naissance, continuation ou multifusion d'ordre supérieur et ne transforme jamais une absence en isolation. Il ne matérialise ni coupe Gamma, ni cellule, ni coface globale, ni incidence globale, ni mosaïque de Delaunay d'ordre supérieur.
 
@@ -160,11 +160,11 @@ Aucun terme ne dépend de $\binom{n}{k}$. Le noyau exclut en particulier :
 
 ---
 
-# Partie B — couche géométrique top-k-only encore ouverte
+# Partie B — pas géométrique top-k-only livré par 10.5b
 
 ## B.1 Objet
 
-Sur un `unresolved`, la prochaine couche pourra tenter une descente géométrique depuis la facette $F$ vers une facette canonique $G$ de niveau strictement inférieur, puis réinterroger le locator. Cette couche ne fait pas partie de la preuve A et ne doit pas être utilisée pour publier une attache avant certification de chaque arc et de son rejeu.
+Sur un `unresolved`, la couche 10.5b tente une descente géométrique depuis la facette $F$ vers une facette canonique $G$ de niveau strictement inférieur, puis réinterroge le locator. Cette couche ne fait pas partie de la preuve A et ne publie aucune attache : son éventuel hit reste une résolution positive relative à l'autorité externe de l'appelant.
 
 Soit $F\subseteq X$, $\lvert F\rvert=k\leq10$. Une miniball locale exacte fournit son centre $c_F$, son niveau $\beta(F)$, son intérieur local $I_F$ et sa frontière locale $U_F^{\partial}$. Elle fournit séparément un support positif minimal $U_F\subseteq U_F^{\partial}$.
 
@@ -176,7 +176,7 @@ La complétude signifie que tous les points strictement sous le cutoff et tous l
 
 ## B.2 Lemme top-k-only
 
-> **Statut : `conditional_theorem`.** L'énoncé ci-dessous doit encore être confronté au formalisme existant, implémenté avec un contrat versionné, rejoué fraîchement et falsifié par l'oracle borné avant de devenir une base de décision du chemin produit.
+> **Statut : `conditional_theorem` explicatif.** Le chemin 10.5b ne dépend pas des hypothèses régulières ci-dessous : il compare directement deux miniballs fraîches et n'accepte que $\beta(G)<\beta(F)$. Le lemme n'est donc pas promu en autorité de décision.
 
 ### Énoncé conditionnel
 
@@ -222,11 +222,11 @@ Dans la branche stricte, la borne sur $G$ suffit. Dans la branche égale, compar
 
 Cette économie ne supprime pas l'obligation d'exclusion. Un nœud LBVH non développé doit porter une borne exacte prouvant que tous ses points sont strictement au-delà du cutoff. Une égalité force la descente ou un certificat de shell; une frontière non épuisée laisse la requête `unresolved`.
 
-## B.4 Tranche 10.5b recommandée
+## B.4 Tranche 10.5b livrée
 
-`spatial::lbvh_top_k` existe déjà et son shell est complet : le parcours ne coupe un nœud que lorsque sa borne inférieure exacte est strictement supérieure au cutoff courant, jamais en cas d'égalité. En revanche, l'API est synchrone, non interruptible et non budgétée; son pire cas, son tableau de voisins évalués et un shell dégénéré restent linéaires en $n$. Le booléen `shell_complete()` reflète cette construction, mais n'est pas un certificat autonome : le consommateur certifié doit rejouer la requête depuis le nuage, le centre, le rang et le LBVH fiables.
+`spatial::lbvh_top_k_budgeted` conserve le parcours exact qui ne coupe un nœud que lorsque sa borne inférieure est strictement supérieure au cutoff courant. Il vérifie sept plafonds avant les opérations correspondantes et ne publie un `TopKPartition` que lorsque le parcours et le shell final sont complets. Son pire cas, sa frontière et un shell dégénéré restent linéaires en $n$; l'API est une tentative bornée, pas un checkpoint reprenable ni une annulation coopérative.
 
-La première tranche 10.5b doit rester un saut unique :
+La première tranche 10.5b reste un saut unique :
 
 1. sonder $F$ dans le locator pré-lot par une API `const` budgétée;
 2. sur miss, construire et vérifier fraîchement la miniball locale de $F$;
@@ -238,18 +238,15 @@ La première tranche 10.5b doit rester un saut unique :
 
 Cette comparaison directe de miniballs suffit à certifier le saut et peut accepter prudemment plus de cas que le lemme régulier B.2. Le lemme reste utile pour expliquer les branches, mais il n'a pas besoin d'être promu en autorité de décision. Le témoin de segment conserve le cutoff au centre source et $\beta(G)$ au centre cible; aucun vecteur global de boule fermée extérieure n'est nécessaire.
 
-La tentative top-k doit vérifier avant chaque opération des plafonds distincts pour les visites de nœuds, expansions internes, évaluations exactes de bornes AABB, distances exactes aux points, taille de frontière, voisins évalués et identifiants du shell. `budget_exhausted` ou `cancelled` ne doit exposer aucun `TopKPartition` scientifique partiel et ne doit muter ni locator ni journal.
+La tentative top-k vérifie avant chaque opération des plafonds distincts pour les visites de nœuds, expansions internes, évaluations exactes de bornes AABB, distances exactes aux points, taille de frontière, meilleurs voisins retenus et identifiants du shell. `budget_exhausted` n'expose aucun `TopKPartition` scientifique partiel et ne mute ni locator ni journal.
 
-Une sonde `const` du locator est également obligatoire. Employer `apply_batch` avec des unions et insertions vides copierait encore les $H$ parents et engagerait un lot; ce n'est ni une lecture ni un chemin acceptable pour 10 M+. La sonde doit budgéter séparément les slots visités et les sauts DSU, puis rendre `unresolved` si elle ne termine pas.
+La sonde `const` du locator budgète séparément les slots visités et les sauts DSU. Son résultat conserve la clé interrogée et un vérificateur frais rejoue la sonde depuis le locator, la clé, le témoin et le budget fiables. Employer `apply_batch` avec des unions et insertions vides copierait encore les $H$ parents et engagerait un lot; ce n'est ni une lecture ni un chemin acceptable pour 10 M+.
 
-Les autres dettes restent :
+La preuve complète du pas source-ouvert, la différence entre $\beta(F)\leq a$ et $\beta(F)<a$, ainsi que les deux fixtures permanentes sont consignées dans `docs/math/DESCENTE_FACETTE_SPARSE_PHASE10.md`. Les dettes suivantes restent :
 
-- isoler la miniball de facette dans un target étroit, sans l'archive `hierarchy` complète;
-- certifier le cutoff, le choix canonique, le strict set complet et l'absence de tout extra-shell sans vecteur global d'extérieur;
-- rejouer fraîchement miniball, clé source, requête, choix cible et comparaison de niveaux depuis les autorités;
-- distinguer une proposition flottante d'une décision multiprécision certifiée;
 - conserver un témoin d'arc rejouable et un budget de fermeture; un arc individuellement vrai ne prouve pas que la descente atteint une liaison connue;
 - traiter ou refuser explicitement les plateaux, supports non essentiels et shells dégénérés;
+- partager les suffixes de descentes sans persister les partitions top-k ni dupliquer les miniballs déjà certifiées;
 - prouver que les descentes et les gateways positives suffisent à toutes les attaches nécessaires au profil `hgp_reduced`;
 - maintenir `unresolved` après épuisement de budget, sans naissance ni isolation implicite.
 
@@ -259,7 +256,7 @@ L'oracle Gamma exhaustif borné peut falsifier ces arcs et leurs cibles sur de p
 
 ## Cibles produit et limites honnêtes
 
-Pour le cas interactif autour de 50 000 points et $K\leq10$, le socle possède des clés de largeur fixe et n'alloue rien en fonction du nombre de points extérieurs. Toutefois, un probe peut visiter $O(M)$ slots et suivre $O(H)$ parents; ces propriétés ne suffisent donc pas encore à une réponse sous la seconde, et aucun SLO n'est atteint ni revendiqué par ce jalon.
+Pour le cas interactif autour de 50 000 points et $K\leq10$, le socle possède des clés de largeur fixe et le pas ne matérialise aucun vecteur global de points extérieurs. Toutefois, un probe peut visiter $O(M)$ slots, suivre $O(H)$ parents et une tentative top-k complète peut visiter $O(n)$ points ou nœuds; ces propriétés ne suffisent donc pas encore à une réponse sous la seconde, et aucun SLO n'est atteint ni revendiqué par ce jalon.
 
 Pour les nuages de 10 000 000 de points ou davantage, l'absence de terme $\binom{n}{k}$ est acquise, mais la table résidente est provisionnée à la capacité $M$ et chaque lot copie les $H$ parents. À cela s'ajoutent le coût d'une frontière LBVH ambiguë, d'un shell massif et de longues descentes. Le noyau de référence prépare l'interface sparse; il n'est pas qualifié 10 M+.
 
@@ -277,7 +274,10 @@ Pour les nuages de 10 000 000 de points ou davantage, l'absence de terme $\binom
 | vérification structurelle fraîche sans rejeu externe ou historique | validated_host_software |
 | implémentation hôte dédiée du socle 10.5a | validated_host_software |
 | lemme top-k-only de descente stricte | conditional_theorem |
-| LBVH top-k-only budgété avec preuve de complétude et rejeu | proof_obligation |
+| LBVH top-k-only à sept plafonds, sans partition partielle | proved_here et validated_host_software |
+| pas strict source-ouvert 10.5b avec rejeu frais | proved_here et validated_host_software |
+| résolution positive du pas 10.5b | conditional_on_caller_external_replay |
+| fermeture transitive et partage des suffixes 10.5c | proof_obligation |
 | fermeture des gateways silencieux non directs | proof_obligation |
 | M.1 et exactitude `full_pi0` | proof_obligation |
 | exactitude publique de la hiérarchie d'ordre supérieur | not_claimed |

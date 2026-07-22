@@ -286,6 +286,105 @@ struct ExactDirectSparsePositiveFacetBatchResult {
       const ExactDirectSparsePositiveFacetBatchResult&) = default;
 };
 
+// A probe has its own strict work budget and never enters the transactional
+// batch path.  A slot visit is one inspected durable hash-table slot.  A
+// component-parent hop is one traversed DSU parent edge after a complete key
+// match.  In particular, a zero parent-hop budget can still resolve a binding
+// whose original handle is already a root.
+struct ExactDirectSparsePositiveFacetProbeBudget {
+  std::size_t maximum_slot_visit_count{};
+  std::size_t maximum_component_parent_hop_count{};
+
+  friend bool operator==(
+      const ExactDirectSparsePositiveFacetProbeBudget&,
+      const ExactDirectSparsePositiveFacetProbeBudget&) = default;
+};
+
+enum class ExactDirectSparsePositiveFacetProbeDisposition : std::uint8_t {
+  not_certified,
+  budget_exhausted,
+  unresolved,
+  positive,
+};
+
+enum class ExactDirectSparsePositiveFacetProbeDecision : std::uint8_t {
+  not_certified,
+  no_positive_locator_not_initialized,
+  no_positive_locator_input_shape_rejected,
+  no_positive_locator_external_witness_rejected,
+  no_positive_locator_slot_visit_budget_exhausted,
+  no_positive_locator_component_parent_hop_budget_exhausted,
+  complete_certified_unresolved_miss,
+  complete_certified_positive_hit,
+};
+
+// A budget exhaustion is deliberately not an unresolved miss: unresolved is
+// returned only after an empty terminator (or the entire table) has been
+// inspected.  Likewise, positive is returned only after both the full facet
+// key comparison and the parent-chain traversal have completed.
+struct ExactDirectSparsePositiveFacetProbeResult {
+  std::uint32_t schema_version{
+      direct_sparse_positive_facet_locator_schema_version};
+  ExactDirectSparsePositiveFacetProbeBudget budget{};
+  ExactDirectSparseFacetKey query_key{};
+  std::size_t slot_visit_count{};
+  std::size_t component_parent_hop_count{};
+  std::size_t full_key_comparison_count{};
+  std::size_t equal_fingerprint_distinct_key_count{};
+  ExactDirectSparseComponentHandle component_handle{};
+  ExactDirectSparseFacetWitness query_witness{};
+  ExactDirectSparseFacetWitness source_binding_witness{};
+  bool locator_certified_at_entry{false};
+  bool input_shape_certified{false};
+  bool query_witness_non_null_and_authority_matched{false};
+  bool every_fingerprint_candidate_compared_by_full_key{false};
+  bool slot_search_completed{false};
+  bool component_find_completed{false};
+  bool component_handle_present{false};
+  bool source_binding_witness_present{false};
+  bool slot_visit_budget_exhausted{false};
+  bool component_parent_hop_budget_exhausted{false};
+  bool locator_state_mutated{false};
+  bool batch_committed{false};
+  bool missing_facet_means_isolated{false};
+  bool total_facet_authority_claimed{false};
+  ExactDirectSparsePositiveFacetProbeDisposition disposition{
+      ExactDirectSparsePositiveFacetProbeDisposition::not_certified};
+  ExactDirectSparsePositiveFacetProbeDecision decision{
+      ExactDirectSparsePositiveFacetProbeDecision::not_certified};
+  ExactDirectSparsePositiveFacetLocatorScope scope{
+      ExactDirectSparsePositiveFacetLocatorScope::unspecified};
+
+  [[nodiscard]] bool certified_positive_hit() const noexcept;
+  [[nodiscard]] bool certified_unresolved_miss() const noexcept;
+  [[nodiscard]] bool certified_budget_exhaustion() const noexcept;
+
+  friend bool operator==(
+      const ExactDirectSparsePositiveFacetProbeResult&,
+      const ExactDirectSparsePositiveFacetProbeResult&) = default;
+};
+
+// Replays one const probe from the supplied live locator and trusted call
+// inputs.  Equality with that fresh result binds the observed key, witness,
+// budget, counters and optional positive payload to the exact locator state.
+// The locator still does not replay the caller-owned external authority.
+struct ExactDirectSparsePositiveFacetProbeVerification {
+  bool locator_certified_at_entry{false};
+  bool query_key_bound_to_observed_result{false};
+  bool query_witness_bound_to_observed_result{false};
+  bool budget_bound_to_observed_result{false};
+  bool outcome_contract_certified{false};
+  bool exact_fresh_probe_replay_certified{false};
+  bool no_locator_mutation_or_batch_commit{false};
+  bool external_authority_replayed_by_locator{false};
+  bool relative_external_authority_scope_preserved{false};
+  bool result_certified{false};
+
+  friend bool operator==(
+      const ExactDirectSparsePositiveFacetProbeVerification&,
+      const ExactDirectSparsePositiveFacetProbeVerification&) = default;
+};
+
 // Non-owning observation used by the fresh verifier.  It can also describe a
 // decoded durable image; verification does not trust the producer object.
 struct ExactDirectSparsePositiveFacetLocatorStateView {
@@ -365,6 +464,14 @@ class ExactDirectSparsePositiveFacetLocator {
       std::span<const ExactDirectSparseFacetQuery> queries,
       std::span<const ExactDirectSparseComponentUnion> unions,
       std::span<const ExactDirectSparseFacetBinding> bindings);
+
+  // Read-only, allocation-free lookup of one durable positive binding.  It
+  // neither updates aggregate counters nor appends a committed batch record.
+  [[nodiscard]] ExactDirectSparsePositiveFacetProbeResult
+  probe_positive_facet(
+      const ExactDirectSparseFacetKey& key,
+      const ExactDirectSparseFacetWitness& witness,
+      const ExactDirectSparsePositiveFacetProbeBudget& budget) const noexcept;
 
   [[nodiscard]] const ExactDirectSparsePositiveFacetLocatorBudget& budget()
       const noexcept {
@@ -466,6 +573,18 @@ build_exact_direct_sparse_positive_facet_locator(
     std::size_t component_handle_count,
     const ExactDirectSparsePositiveFacetLocatorBudget& budget,
     const ExactDirectSparsePositiveFacetLocatorConfig& config);
+
+// Freshly re-executes the allocation-free probe.  result_certified covers only
+// the locator's relative positive domain; external witness semantics remain a
+// caller-owned proof obligation and external_authority_replayed_by_locator is
+// therefore always false.
+[[nodiscard]] ExactDirectSparsePositiveFacetProbeVerification
+verify_exact_direct_sparse_positive_facet_probe(
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetKey& key,
+    const ExactDirectSparseFacetWitness& witness,
+    const ExactDirectSparsePositiveFacetProbeBudget& budget,
+    const ExactDirectSparsePositiveFacetProbeResult& observed) noexcept;
 
 // Replays only the locator's internal durable contract.  Witness identifiers
 // and tokens are checked structurally, but the caller-owned external authority

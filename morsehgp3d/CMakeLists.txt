@@ -265,6 +265,7 @@ add_library(
     src/cpu/spatial/brute_force.cpp
     src/cpu/spatial/h_polytope_reference.cpp
     src/cpu/spatial/lbvh.cpp
+    src/cpu/spatial/lbvh_budgeted_top_k.cpp
     src/cpu/spatial/ordinary_cell_closure.cpp
     src/cpu/spatial/ordinary_diagram_closure.cpp
     src/cpu/spatial/power_cell_reference.cpp
@@ -293,6 +294,39 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_spatial
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_facet_miniball
+  STATIC
+    src/cpu/hierarchy/facet_miniball.cpp
+)
+add_library(morsehgp3d::facet_miniball ALIAS morsehgp3d_facet_miniball)
+set_target_properties(
+  morsehgp3d_facet_miniball
+  PROPERTIES
+    EXPORT_NAME facet_miniball
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(morsehgp3d_facet_miniball PUBLIC cxx_std_20)
+target_include_directories(
+  morsehgp3d_facet_miniball
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_facet_miniball
+  PUBLIC morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(morsehgp3d_facet_miniball PRIVATE /W4 /WX)
+else()
+  target_compile_options(
+    morsehgp3d_facet_miniball
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -566,6 +600,49 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_sparse_facet_descent_step
+  STATIC
+    src/cpu/hierarchy/direct_sparse_facet_descent_step.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_facet_descent_step
+  ALIAS morsehgp3d_direct_sparse_facet_descent_step
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_facet_descent_step
+  PROPERTIES
+    EXPORT_NAME direct_sparse_facet_descent_step
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_facet_descent_step PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_facet_descent_step
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_facet_descent_step
+  PUBLIC
+    morsehgp3d::direct_sparse_positive_facet_locator
+    morsehgp3d::facet_miniball
+    morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_facet_descent_step PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_facet_descent_step
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_frozen_root_quotient
   STATIC
     src/cpu/hierarchy/direct_frozen_root_quotient.cpp
@@ -755,7 +832,10 @@ target_include_directories(
 )
 target_link_libraries(
   morsehgp3d_hierarchy
-  PUBLIC morsehgp3d::contract morsehgp3d::spatial
+  PUBLIC
+    morsehgp3d::contract
+    morsehgp3d::facet_miniball
+    morsehgp3d::spatial
   PRIVATE morsehgp3d::sanitizers
 )
 if(MSVC)
@@ -1298,6 +1378,7 @@ install(
     morsehgp3d_contract
     morsehgp3d_exact
     morsehgp3d_spatial
+    morsehgp3d_facet_miniball
     morsehgp3d_pair_support
     morsehgp3d_higher_support
     morsehgp3d_direct_support_terminal
@@ -1305,6 +1386,7 @@ install(
     morsehgp3d_direct_saddle_arm_seed_journal
     morsehgp3d_direct_closed_saddle_incidence_journal
     morsehgp3d_direct_sparse_positive_facet_locator
+    morsehgp3d_direct_sparse_facet_descent_step
     morsehgp3d_direct_frozen_root_quotient
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_pair_support_codec

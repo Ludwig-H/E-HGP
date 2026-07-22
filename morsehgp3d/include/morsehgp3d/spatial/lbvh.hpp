@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <vector>
@@ -60,6 +61,116 @@ struct MortonLbvhBuildCounters {
 enum class LbvhTraversalOrder : std::uint8_t {
   near_first,
   far_first,
+};
+
+enum class ExactLbvhTopKStatus : std::uint8_t {
+  not_certified,
+  complete,
+  budget_exhausted,
+};
+
+enum class ExactLbvhTopKStopReason : std::uint8_t {
+  none,
+  node_visit_limit,
+  internal_node_expansion_limit,
+  exact_aabb_bound_evaluation_limit,
+  exact_point_distance_evaluation_limit,
+  frontier_entry_limit,
+  best_neighbor_entry_limit,
+  cutoff_shell_entry_limit,
+};
+
+// Every cap is checked before the corresponding operation or allocation.
+// The shell cap bounds retained PointIds at the current exact cutoff; an
+// overflowing provisional shell is discarded only if that cutoff later
+// decreases, and is a terminal exhaustion otherwise.
+// If several zero/short caps block the same transition, the deterministic
+// priority is best-neighbor, frontier, then root AABB during preflight, and
+// internal expansion, frontier, then child AABBs at an internal node.
+struct ExactLbvhTopKBudget {
+  std::size_t maximum_node_visit_count{};
+  std::size_t maximum_internal_node_expansion_count{};
+  std::size_t maximum_exact_aabb_bound_evaluation_count{};
+  std::size_t maximum_exact_point_distance_evaluation_count{};
+  std::size_t maximum_frontier_entry_count{};
+  std::size_t maximum_best_neighbor_entry_count{};
+  std::size_t maximum_cutoff_shell_entry_count{};
+
+  friend bool operator==(
+      const ExactLbvhTopKBudget&,
+      const ExactLbvhTopKBudget&) = default;
+};
+
+// Operational audit only: an exhausted result intentionally exposes neither a
+// cutoff nor any shell PointId.  Retained shell storage never exceeds the
+// requested cap, including while a provisional shell has overflowed.
+struct ExactLbvhTopKAudit {
+  std::size_t node_visit_count{};
+  std::size_t internal_node_expansion_count{};
+  std::size_t exact_aabb_bound_evaluation_count{};
+  std::size_t exact_point_distance_evaluation_count{};
+  std::size_t peak_frontier_entry_count{};
+  std::size_t peak_best_neighbor_entry_count{};
+  std::size_t peak_retained_cutoff_shell_entry_count{};
+  std::size_t provisional_cutoff_decrease_count{};
+  std::size_t provisional_cutoff_shell_overflow_count{};
+  bool traversal_complete{false};
+
+  friend bool operator==(
+      const ExactLbvhTopKAudit&,
+      const ExactLbvhTopKAudit&) = default;
+};
+
+class ExactBudgetedLbvhTopKResult {
+ public:
+  ExactBudgetedLbvhTopKResult(const ExactBudgetedLbvhTopKResult&) = default;
+  ExactBudgetedLbvhTopKResult& operator=(
+      const ExactBudgetedLbvhTopKResult&) = default;
+  ExactBudgetedLbvhTopKResult(
+      ExactBudgetedLbvhTopKResult&& other) noexcept;
+  ExactBudgetedLbvhTopKResult& operator=(
+      ExactBudgetedLbvhTopKResult&& other) noexcept;
+
+  [[nodiscard]] ExactLbvhTopKStatus status() const noexcept {
+    return status_;
+  }
+  [[nodiscard]] ExactLbvhTopKStopReason stop_reason() const noexcept {
+    return stop_reason_;
+  }
+  [[nodiscard]] bool complete() const noexcept {
+    return status_ == ExactLbvhTopKStatus::complete;
+  }
+  [[nodiscard]] const ExactLbvhTopKBudget& requested_budget() const noexcept {
+    return requested_budget_;
+  }
+  [[nodiscard]] const ExactLbvhTopKAudit& audit() const noexcept {
+    return audit_;
+  }
+  [[nodiscard]] const TopKPartition& partition() const &;
+  [[nodiscard]] const TopKPartition& partition() const && = delete;
+
+ private:
+  ExactBudgetedLbvhTopKResult(
+      ExactLbvhTopKStatus status,
+      ExactLbvhTopKStopReason stop_reason,
+      ExactLbvhTopKBudget requested_budget,
+      ExactLbvhTopKAudit audit,
+      std::optional<TopKPartition> partition);
+
+  ExactLbvhTopKStatus status_{ExactLbvhTopKStatus::not_certified};
+  ExactLbvhTopKStopReason stop_reason_{ExactLbvhTopKStopReason::none};
+  ExactLbvhTopKBudget requested_budget_{};
+  ExactLbvhTopKAudit audit_{};
+  std::optional<TopKPartition> partition_;
+
+  friend ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
+      const MortonLbvhIndex& index,
+      const CanonicalPointCloud& cloud,
+      const exact::ExactRational3& query,
+      std::size_t requested_rank,
+      const ExclusionSet& exclusions,
+      ExactLbvhTopKBudget budget,
+      LbvhTraversalOrder traversal_order);
 };
 
 class MortonLbvhIndex {
@@ -157,6 +268,14 @@ class MortonLbvhIndex {
       std::size_t requested_rank,
       const ExclusionSet& exclusions,
       LbvhTraversalOrder traversal_order);
+  friend ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
+      const MortonLbvhIndex& index,
+      const CanonicalPointCloud& cloud,
+      const exact::ExactRational3& query,
+      std::size_t requested_rank,
+      const ExclusionSet& exclusions,
+      ExactLbvhTopKBudget budget,
+      LbvhTraversalOrder traversal_order);
   friend ClosedBallPartition lbvh_closed_ball(
       const MortonLbvhIndex& index,
       const CanonicalPointCloud& cloud,
@@ -192,6 +311,19 @@ class MortonLbvhIndex {
     const CanonicalPointCloud& cloud,
     const exact::ExactRational3& query,
     const ExclusionSet& exclusions,
+    LbvhTraversalOrder traversal_order = LbvhTraversalOrder::near_first);
+
+// No scientific partition is present on exhaustion.  In particular, a
+// provisional cutoff or a prefix of its equality shell is never published.
+// Complete results are exact and use strict AABB pruning only, so a bound equal
+// to the current cutoff is always descended.
+[[nodiscard]] ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    const exact::ExactRational3& query,
+    std::size_t requested_rank,
+    const ExclusionSet& exclusions,
+    ExactLbvhTopKBudget budget,
     LbvhTraversalOrder traversal_order = LbvhTraversalOrder::near_first);
 
 [[nodiscard]] ClosedBallPartition lbvh_closed_ball(

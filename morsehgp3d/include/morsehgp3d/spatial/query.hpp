@@ -101,6 +101,8 @@ struct SpatialQueryCounters {
 
 class MortonLbvhIndex;
 enum class LbvhTraversalOrder : std::uint8_t;
+struct ExactLbvhTopKBudget;
+class ExactBudgetedLbvhTopKResult;
 class TopKPartition;
 class ClosedBallPartition;
 
@@ -194,6 +196,14 @@ class TopKPartition {
       const CanonicalPointCloud& cloud,
       const exact::ExactRational3& query,
       const ExclusionSet& exclusions,
+      LbvhTraversalOrder traversal_order);
+  friend ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
+      const MortonLbvhIndex& index,
+      const CanonicalPointCloud& cloud,
+      const exact::ExactRational3& query,
+      std::size_t requested_rank,
+      const ExclusionSet& exclusions,
+      ExactLbvhTopKBudget budget,
       LbvhTraversalOrder traversal_order);
   friend class gpu::SpatialLbvhContext;
 

@@ -448,6 +448,118 @@ bool ExactDirectSparsePositiveFacetBatchResult::certified_committed_batch()
                       positive_bindings_relative_to_caller_asserted_external_authority_only;
 }
 
+bool ExactDirectSparsePositiveFacetProbeResult::certified_positive_hit()
+    const noexcept {
+  return schema_version ==
+             direct_sparse_positive_facet_locator_schema_version &&
+         canonical_key_shape(query_key) && slot_visit_count > 0U &&
+         slot_visit_count <= budget.maximum_slot_visit_count &&
+         component_parent_hop_count <=
+             budget.maximum_component_parent_hop_count &&
+         full_key_comparison_count > 0U &&
+         equal_fingerprint_distinct_key_count ==
+             full_key_comparison_count - 1U &&
+         locator_certified_at_entry && input_shape_certified &&
+         query_witness_non_null_and_authority_matched &&
+         query_witness.external_authority_id != 0U &&
+         query_witness.replay_token != 0U &&
+         every_fingerprint_candidate_compared_by_full_key &&
+         slot_search_completed && component_find_completed &&
+         component_handle_present && source_binding_witness_present &&
+         source_binding_witness.external_authority_id ==
+             query_witness.external_authority_id &&
+         source_binding_witness.replay_token != 0U &&
+         !slot_visit_budget_exhausted &&
+         !component_parent_hop_budget_exhausted &&
+         !locator_state_mutated && !batch_committed &&
+         !missing_facet_means_isolated &&
+         !total_facet_authority_claimed &&
+         disposition ==
+             ExactDirectSparsePositiveFacetProbeDisposition::positive &&
+         decision == ExactDirectSparsePositiveFacetProbeDecision::
+                         complete_certified_positive_hit &&
+         scope == ExactDirectSparsePositiveFacetLocatorScope::
+                      positive_bindings_relative_to_caller_asserted_external_authority_only;
+}
+
+bool ExactDirectSparsePositiveFacetProbeResult::certified_unresolved_miss()
+    const noexcept {
+  return schema_version ==
+             direct_sparse_positive_facet_locator_schema_version &&
+         canonical_key_shape(query_key) && slot_visit_count > 0U &&
+         slot_visit_count <= budget.maximum_slot_visit_count &&
+         component_parent_hop_count == 0U &&
+         equal_fingerprint_distinct_key_count ==
+             full_key_comparison_count &&
+         locator_certified_at_entry && input_shape_certified &&
+         query_witness_non_null_and_authority_matched &&
+         query_witness.external_authority_id != 0U &&
+         query_witness.replay_token != 0U &&
+         every_fingerprint_candidate_compared_by_full_key &&
+         slot_search_completed && !component_find_completed &&
+         !component_handle_present && !source_binding_witness_present &&
+         component_handle == ExactDirectSparseComponentHandle{} &&
+         source_binding_witness == ExactDirectSparseFacetWitness{} &&
+         !slot_visit_budget_exhausted &&
+         !component_parent_hop_budget_exhausted &&
+         !locator_state_mutated && !batch_committed &&
+         !missing_facet_means_isolated &&
+         !total_facet_authority_claimed &&
+         disposition ==
+             ExactDirectSparsePositiveFacetProbeDisposition::unresolved &&
+         decision == ExactDirectSparsePositiveFacetProbeDecision::
+                         complete_certified_unresolved_miss &&
+         scope == ExactDirectSparsePositiveFacetLocatorScope::
+                      positive_bindings_relative_to_caller_asserted_external_authority_only;
+}
+
+bool ExactDirectSparsePositiveFacetProbeResult::certified_budget_exhaustion()
+    const noexcept {
+  const bool slot_budget_exhausted =
+      slot_visit_budget_exhausted &&
+      !component_parent_hop_budget_exhausted &&
+      !slot_search_completed && !component_find_completed &&
+      slot_visit_count == budget.maximum_slot_visit_count &&
+      component_parent_hop_count == 0U &&
+      full_key_comparison_count ==
+          equal_fingerprint_distinct_key_count &&
+      decision == ExactDirectSparsePositiveFacetProbeDecision::
+                      no_positive_locator_slot_visit_budget_exhausted;
+  const bool parent_budget_exhausted =
+      !slot_visit_budget_exhausted &&
+      component_parent_hop_budget_exhausted &&
+      slot_search_completed && !component_find_completed &&
+      slot_visit_count > 0U && full_key_comparison_count > 0U &&
+      equal_fingerprint_distinct_key_count ==
+          full_key_comparison_count - 1U &&
+      component_parent_hop_count ==
+          budget.maximum_component_parent_hop_count &&
+      decision == ExactDirectSparsePositiveFacetProbeDecision::
+                      no_positive_locator_component_parent_hop_budget_exhausted;
+  return schema_version ==
+             direct_sparse_positive_facet_locator_schema_version &&
+         canonical_key_shape(query_key) &&
+         slot_visit_count <= budget.maximum_slot_visit_count &&
+         component_parent_hop_count <=
+             budget.maximum_component_parent_hop_count &&
+         locator_certified_at_entry && input_shape_certified &&
+         query_witness_non_null_and_authority_matched &&
+         query_witness.external_authority_id != 0U &&
+         query_witness.replay_token != 0U &&
+         every_fingerprint_candidate_compared_by_full_key &&
+         !component_handle_present && !source_binding_witness_present &&
+         component_handle == ExactDirectSparseComponentHandle{} &&
+         source_binding_witness == ExactDirectSparseFacetWitness{} &&
+         !locator_state_mutated && !batch_committed &&
+         !missing_facet_means_isolated &&
+         !total_facet_authority_claimed &&
+         disposition == ExactDirectSparsePositiveFacetProbeDisposition::
+                            budget_exhausted &&
+         (slot_budget_exhausted || parent_budget_exhausted) &&
+         scope == ExactDirectSparsePositiveFacetLocatorScope::
+                      positive_bindings_relative_to_caller_asserted_external_authority_only;
+}
+
 bool ExactDirectSparsePositiveFacetLocator::certified_positive_locator()
     const noexcept {
   return schema_version_ ==
@@ -477,6 +589,159 @@ bool ExactDirectSparsePositiveFacetLocator::certified_positive_locator()
                  complete_certified_empty_sparse_positive_locator &&
          scope_ == ExactDirectSparsePositiveFacetLocatorScope::
                        positive_bindings_relative_to_caller_asserted_external_authority_only;
+}
+
+ExactDirectSparsePositiveFacetProbeResult
+ExactDirectSparsePositiveFacetLocator::probe_positive_facet(
+    const ExactDirectSparseFacetKey& key,
+    const ExactDirectSparseFacetWitness& witness,
+    const ExactDirectSparsePositiveFacetProbeBudget& budget) const noexcept {
+  ExactDirectSparsePositiveFacetProbeResult result;
+  result.budget = budget;
+  result.query_key = key;
+  result.query_witness = witness;
+  result.scope = scope_;
+  if (!certified_positive_locator()) {
+    result.decision = ExactDirectSparsePositiveFacetProbeDecision::
+        no_positive_locator_not_initialized;
+    return result;
+  }
+  result.locator_certified_at_entry = true;
+  if (!canonical_key_shape(key)) {
+    result.decision = ExactDirectSparsePositiveFacetProbeDecision::
+        no_positive_locator_input_shape_rejected;
+    return result;
+  }
+  result.input_shape_certified = true;
+  if (!witness_matches_authority(
+          witness, config_.external_authority_id)) {
+    result.decision = ExactDirectSparsePositiveFacetProbeDecision::
+        no_positive_locator_external_witness_rejected;
+    return result;
+  }
+  result.query_witness_non_null_and_authority_matched = true;
+  result.every_fingerprint_candidate_compared_by_full_key = true;
+
+  const std::uint64_t fingerprint =
+      key_fingerprint(key, config_.fingerprint_mask);
+  std::size_t slot_index =
+      static_cast<std::size_t>(fingerprint % slots_.size());
+  std::optional<std::size_t> matching_slot;
+  for (std::size_t probe = 0U; probe < slots_.size(); ++probe) {
+    if (result.slot_visit_count >= budget.maximum_slot_visit_count) {
+      result.slot_visit_budget_exhausted = true;
+      result.disposition =
+          ExactDirectSparsePositiveFacetProbeDisposition::budget_exhausted;
+      result.decision = ExactDirectSparsePositiveFacetProbeDecision::
+          no_positive_locator_slot_visit_budget_exhausted;
+      return result;
+    }
+    const ExactDirectSparsePositiveFacetSlot& slot = slots_[slot_index];
+    ++result.slot_visit_count;
+    if (!slot.occupied) {
+      result.slot_search_completed = true;
+      result.disposition =
+          ExactDirectSparsePositiveFacetProbeDisposition::unresolved;
+      result.decision = ExactDirectSparsePositiveFacetProbeDecision::
+          complete_certified_unresolved_miss;
+      return result;
+    }
+    if (slot.fingerprint == fingerprint) {
+      ++result.full_key_comparison_count;
+      if (complete_key_matches_arena(slot, key, key_point_arena_)) {
+        matching_slot = slot_index;
+        break;
+      }
+      ++result.equal_fingerprint_distinct_key_count;
+    }
+    slot_index = (slot_index + 1U) % slots_.size();
+  }
+
+  if (!matching_slot.has_value()) {
+    result.slot_search_completed = true;
+    result.disposition =
+        ExactDirectSparsePositiveFacetProbeDisposition::unresolved;
+    result.decision = ExactDirectSparsePositiveFacetProbeDecision::
+        complete_certified_unresolved_miss;
+    return result;
+  }
+  result.slot_search_completed = true;
+
+  const ExactDirectSparsePositiveFacetSlot& slot =
+      slots_[*matching_slot];
+  ExactDirectSparseComponentHandle component_handle = slot.component_handle;
+  while (component_parents_[component_handle] != component_handle) {
+    if (result.component_parent_hop_count >=
+        budget.maximum_component_parent_hop_count) {
+      result.component_parent_hop_budget_exhausted = true;
+      result.disposition =
+          ExactDirectSparsePositiveFacetProbeDisposition::budget_exhausted;
+      result.decision = ExactDirectSparsePositiveFacetProbeDecision::
+          no_positive_locator_component_parent_hop_budget_exhausted;
+      return result;
+    }
+    component_handle = component_parents_[component_handle];
+    ++result.component_parent_hop_count;
+  }
+
+  result.component_find_completed = true;
+  result.component_handle = component_handle;
+  result.source_binding_witness = slot.binding_witness;
+  result.component_handle_present = true;
+  result.source_binding_witness_present = true;
+  result.disposition =
+      ExactDirectSparsePositiveFacetProbeDisposition::positive;
+  result.decision = ExactDirectSparsePositiveFacetProbeDecision::
+      complete_certified_positive_hit;
+  return result;
+}
+
+ExactDirectSparsePositiveFacetProbeVerification
+verify_exact_direct_sparse_positive_facet_probe(
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetKey& key,
+    const ExactDirectSparseFacetWitness& witness,
+    const ExactDirectSparsePositiveFacetProbeBudget& budget,
+    const ExactDirectSparsePositiveFacetProbeResult& observed) noexcept {
+  ExactDirectSparsePositiveFacetProbeVerification verification;
+  verification.locator_certified_at_entry =
+      locator.certified_positive_locator();
+  verification.query_key_bound_to_observed_result =
+      observed.query_key == key;
+  verification.query_witness_bound_to_observed_result =
+      observed.query_witness == witness;
+  verification.budget_bound_to_observed_result =
+      observed.budget == budget;
+
+  const ExactDirectSparsePositiveFacetProbeResult replayed =
+      locator.probe_positive_facet(key, witness, budget);
+  verification.outcome_contract_certified =
+      observed.certified_positive_hit() ||
+      observed.certified_unresolved_miss() ||
+      observed.certified_budget_exhaustion();
+  verification.exact_fresh_probe_replay_certified =
+      replayed == observed;
+  verification.no_locator_mutation_or_batch_commit =
+      !observed.locator_state_mutated && !observed.batch_committed &&
+      !replayed.locator_state_mutated && !replayed.batch_committed;
+  verification.external_authority_replayed_by_locator = false;
+  verification.relative_external_authority_scope_preserved =
+      locator.scope() == ExactDirectSparsePositiveFacetLocatorScope::
+                             positive_bindings_relative_to_caller_asserted_external_authority_only &&
+      observed.scope == locator.scope() &&
+      !observed.total_facet_authority_claimed &&
+      !observed.missing_facet_means_isolated;
+  verification.result_certified =
+      verification.locator_certified_at_entry &&
+      verification.query_key_bound_to_observed_result &&
+      verification.query_witness_bound_to_observed_result &&
+      verification.budget_bound_to_observed_result &&
+      verification.outcome_contract_certified &&
+      verification.exact_fresh_probe_replay_certified &&
+      verification.no_locator_mutation_or_batch_commit &&
+      !verification.external_authority_replayed_by_locator &&
+      verification.relative_external_authority_scope_preserved;
+  return verification;
 }
 
 ExactDirectSparsePositiveFacetLocator
