@@ -727,6 +727,48 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_sparse_gateway_candidate_journal
+  STATIC
+    src/cpu/hierarchy/direct_sparse_gateway_candidate_journal.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_gateway_candidate_journal
+  ALIAS morsehgp3d_direct_sparse_gateway_candidate_journal
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_gateway_candidate_journal
+  PROPERTIES
+    EXPORT_NAME direct_sparse_gateway_candidate_journal
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_gateway_candidate_journal PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_gateway_candidate_journal
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_gateway_candidate_journal
+  PUBLIC
+    morsehgp3d::direct_sparse_first_incidence
+    morsehgp3d::direct_closed_saddle_incidence_journal
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_gateway_candidate_journal PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_gateway_candidate_journal
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_frozen_root_quotient
   STATIC
     src/cpu/hierarchy/direct_frozen_root_quotient.cpp
@@ -1473,6 +1515,7 @@ install(
     morsehgp3d_direct_sparse_facet_descent_step
     morsehgp3d_direct_sparse_facet_descent_closure
     morsehgp3d_direct_sparse_first_incidence
+    morsehgp3d_direct_sparse_gateway_candidate_journal
     morsehgp3d_direct_frozen_root_quotient
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_pair_support_codec

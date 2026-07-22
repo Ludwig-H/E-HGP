@@ -25,6 +25,22 @@ from .exact import (
     normalize_scalar,
     squared_distance,
 )
+from .direct_gateway_differential import (
+    DifferentialBoundary,
+    DifferentialDecision,
+    DifferentialEvidenceStatus,
+    DifferentialMismatch,
+    DifferentialPathElementKind,
+    DifferentialProvenance,
+    DifferentialStage,
+    DifferentialVerdict,
+    DirectGatewayGammaCheckpoint,
+    DirectGatewayGammaDifferentialResult,
+    DirectGatewayGammaPathElement,
+    DirectGatewayGammaWitness,
+    build_direct_gateway_gamma_differential,
+    verify_direct_gateway_gamma_differential,
+)
 from .gamma import (
     GabrielHyperedge,
     GammaBatch,
@@ -102,7 +118,6 @@ from .serialization import (
     serialize_oracle_result,
 )
 
-
 __all__ = [
     "AffineDependenceError",
     "Ball",
@@ -118,6 +133,18 @@ __all__ = [
     "CriticalCatalog",
     "CriticalSphere",
     "DuplicatePointError",
+    "DifferentialBoundary",
+    "DifferentialDecision",
+    "DifferentialEvidenceStatus",
+    "DifferentialMismatch",
+    "DifferentialPathElementKind",
+    "DifferentialProvenance",
+    "DifferentialStage",
+    "DifferentialVerdict",
+    "DirectGatewayGammaCheckpoint",
+    "DirectGatewayGammaDifferentialResult",
+    "DirectGatewayGammaPathElement",
+    "DirectGatewayGammaWitness",
     "ExactInputError",
     "ForestBatch",
     "ForestComponent",
@@ -154,6 +181,7 @@ __all__ = [
     "barycentric_coordinates",
     "binary64_bits",
     "build_critical_catalog",
+    "build_direct_gateway_gamma_differential",
     "build_exhaustive_hierarchy",
     "build_gabriel_partial_forest",
     "build_gabriel_hyperedges",
@@ -187,4 +215,5 @@ __all__ = [
     "serialize_oracle_cuts",
     "serialize_oracle_result",
     "squared_distance",
+    "verify_direct_gateway_gamma_differential",
 ]

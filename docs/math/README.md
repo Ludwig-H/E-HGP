@@ -11,6 +11,10 @@ Les six documents de ce dossier forment un ensemble normatif.
 | [Tour globale de boules saturées](TOUR_BOULES_SATUREES.md) | comment représenter exactement toutes les incidences par saturés, et pourquoi la voie brute reste-t-elle non scalable ? |
 | [Preuves et heuristiques](STATUT_PREUVES_ET_HEURISTIQUES.md) | quelles affirmations sont démontrées, conditionnelles, ouvertes ou fausses en général ? |
 
+La note de déploiement [Premières incidences des facettes directes réutilisées](PREMIERES_INCIDENCES_FACETTES_DIRECTES_PHASE10.md) fixe le contrat borné 10.7-RCPU. Elle complète les notes de Phase 10 sans rejoindre le noyau normatif ci-dessus et sans prétendre que les seules facettes issues des selles directes forment un ensemble globalement complet de gateways.
+
+Le [différentiel borné des gateways directs](DIFFERENTIEL_GATEWAYS_DIRECTS_PHASE10.md) valide le falsificateur 10.8-ORACLE sous statut `open_bounded_evidence_only` : Gamma y reste transitoire, limité à $n\leq14$ et totalement exclu du chemin produit.
+
 ## Résumé de la construction
 
 Posons $K_{\mathrm{eff}}=\min(K_{\max},n)$, $s_{\max}=\min(K_{\mathrm{eff}}+1,n)$ et, si $s_{\max}\geq2$, $m_{\star}=s_{\max}-2$. Alors :

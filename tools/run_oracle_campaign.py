@@ -664,8 +664,21 @@ def _check_reduced_gamma_batches(
             context=context,
         )
         expected_coverage_records = []
+        # The internal forest contract keeps exactly one delta for every
+        # batch-touched reduced root, including a fully redundant empty delta.
+        # Only the public sparse serializer filters those empty records.
+        touched_facets = {
+            tuple(facet.point_ids) for facet in gamma_batch.facet_births
+        }
+        touched_facets.update(
+            tuple(facet)
+            for coface in gamma_batch.cofaces
+            for facet in coface.facet_point_ids
+        )
         for post_component in forest_batch.post_components:
             post_facet_set = set(post_component.facet_point_ids)
+            if post_facet_set.isdisjoint(touched_facets):
+                continue
             prior_components = tuple(
                 component
                 for component in forest_batch.pre_components
@@ -685,10 +698,9 @@ def _check_reduced_gamma_batches(
             added_points = tuple(
                 sorted(set(post_component.covered_point_ids) - prior_points)
             )
-            if added_facets or added_points:
-                expected_coverage_records.append(
-                    (post_component.root_id, added_facets, added_points)
-                )
+            expected_coverage_records.append(
+                (post_component.root_id, added_facets, added_points)
+            )
         _require_equal(
             "reduced_gamma_batch_coverage_deltas",
             tuple(sorted(expected_coverage_records)),
