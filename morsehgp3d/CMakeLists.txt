@@ -365,6 +365,48 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_support_terminal
+  STATIC
+    src/cpu/hierarchy/direct_support_terminal.cpp
+)
+add_library(
+  morsehgp3d::direct_support_terminal
+  ALIAS morsehgp3d_direct_support_terminal
+)
+set_target_properties(
+  morsehgp3d_direct_support_terminal
+  PROPERTIES
+    EXPORT_NAME direct_support_terminal
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_support_terminal PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_support_terminal
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_support_terminal
+  PUBLIC
+    morsehgp3d::pair_support
+    morsehgp3d::higher_support
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_support_terminal PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_support_terminal
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_pair_support_codec
   STATIC
     src/cpu/hierarchy/pair_support_stream_codec.cpp
@@ -777,6 +819,68 @@ if(MORSEHGP3D_ENABLE_CUDA)
   endif()
 
   add_library(
+    morsehgp3d_gpu_pair_support_phi
+    STATIC
+      src/cuda/phase9_pair_support_phi_internal.hpp
+      src/cuda/phase9_pair_support_phi.cu
+      src/gpu/pair_support_phi.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_pair_support_phi
+    ALIAS morsehgp3d_gpu_pair_support_phi
+  )
+  target_include_directories(
+    morsehgp3d_gpu_pair_support_phi
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_pair_support_phi
+    PUBLIC morsehgp3d::pair_support
+    PRIVATE Threads::Threads
+  )
+  target_compile_features(
+    morsehgp3d_gpu_pair_support_phi
+    PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(morsehgp3d_gpu_pair_support_phi)
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_pair_support_phi
+      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/W4> $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_pair_support_phi
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_pair_support_phi_qualification
+    src/tools/gpu_pair_support_phi_qualification.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_pair_support_phi_qualification
+    PRIVATE morsehgp3d::gpu_pair_support_phi
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_pair_support_phi_qualification PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_pair_support_phi_qualification
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
+  add_library(
     morsehgp3d_gpu_k1_boruvka
     STATIC
       src/cuda/phase5_k1_boruvka_internal.hpp
@@ -958,6 +1062,7 @@ install(
     morsehgp3d_spatial
     morsehgp3d_pair_support
     morsehgp3d_higher_support
+    morsehgp3d_direct_support_terminal
     morsehgp3d_pair_support_codec
     morsehgp3d_hierarchy
     morsehgp3d_sanitizers

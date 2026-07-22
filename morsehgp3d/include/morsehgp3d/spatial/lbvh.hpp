@@ -13,6 +13,7 @@
 
 namespace morsehgp3d::gpu {
 class K1BoruvkaCandidateContext;
+class PairSupportPhiContext;
 class SpatialLbvhContext;
 }
 
@@ -174,6 +175,7 @@ class MortonLbvhIndex {
   friend class hierarchy::ExactPairSupportStreamBuilder;
   friend class hierarchy::ExactHigherSupportStreamBuilder;
   friend class gpu::K1BoruvkaCandidateContext;
+  friend class gpu::PairSupportPhiContext;
   friend class gpu::SpatialLbvhContext;
 };
 

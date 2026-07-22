@@ -349,6 +349,25 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_support_terminal_tests
+  test_hierarchy_direct_support_terminal.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_support_terminal_tests
+  PRIVATE morsehgp3d::direct_support_terminal
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_support_terminal_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_support_terminal_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_pair_support_stream_codec_tests
   test_hierarchy_pair_support_stream_codec.cpp
 )
@@ -551,6 +570,32 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_gpu_h_polytope_proposal_context_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+add_executable(
+  morsehgp3d_gpu_pair_support_phi_context_tests
+  test_gpu_pair_support_phi_context.cpp
+  fake_gpu_pair_support_phi_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/pair_support_phi.cpp"
+)
+target_include_directories(
+  morsehgp3d_gpu_pair_support_phi_context_tests
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/cuda"
+    "${PROJECT_SOURCE_DIR}/src/gpu"
+)
+target_link_libraries(
+  morsehgp3d_gpu_pair_support_phi_context_tests
+  PRIVATE morsehgp3d::pair_support Threads::Threads
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_pair_support_phi_context_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_pair_support_phi_context_tests
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -826,6 +871,7 @@ set(
   morsehgp3d_hierarchy_higher_support_product_tests
   morsehgp3d_hierarchy_higher_support_stream_tests
   morsehgp3d_hierarchy_direct_support_differential_tests
+  morsehgp3d_hierarchy_direct_support_terminal_tests
   morsehgp3d_hierarchy_pair_support_stream_codec_tests
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
@@ -844,6 +890,7 @@ set(
   morsehgp3d_warm_context_benchmark_host_test
   morsehgp3d_gpu_spatial_reference_context_tests
   morsehgp3d_gpu_h_polytope_proposal_context_tests
+  morsehgp3d_gpu_pair_support_phi_context_tests
   morsehgp3d_gpu_spatial_reference_replay_host
   morsehgp3d_gpu_spatial_bounds_context_tests
   morsehgp3d_gpu_spatial_bounds_replay_host
@@ -1588,6 +1635,11 @@ add_test(
   NAME morsehgp3d.hierarchy_direct_support_differential
   COMMAND morsehgp3d_hierarchy_direct_support_differential_tests
 )
+
+add_test(
+  NAME morsehgp3d.hierarchy_direct_support_terminal
+  COMMAND morsehgp3d_hierarchy_direct_support_terminal_tests
+)
 add_test(
   NAME morsehgp3d.hierarchy_pair_support_stream_codec
   COMMAND morsehgp3d_hierarchy_pair_support_stream_codec_tests
@@ -1660,6 +1712,10 @@ add_test(
 add_test(
   NAME morsehgp3d.gpu_h_polytope_proposal_context
   COMMAND morsehgp3d_gpu_h_polytope_proposal_context_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_pair_support_phi_context
+  COMMAND morsehgp3d_gpu_pair_support_phi_context_tests
 )
 add_test(
   NAME morsehgp3d.gpu_spatial_bounds_context

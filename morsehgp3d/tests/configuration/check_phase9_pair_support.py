@@ -124,6 +124,19 @@ def validate(
     higher_stream_source = read_text(
         project / "src/cpu/hierarchy/higher_support_stream.cpp"
     )
+    terminal_header = read_text(
+        project / "include/morsehgp3d/hierarchy/direct_support_terminal.hpp"
+    )
+    terminal_source = read_text(
+        project / "src/cpu/hierarchy/direct_support_terminal.cpp"
+    )
+    gpu_phi_header = read_text(
+        project / "include/morsehgp3d/gpu/pair_support_phi.hpp"
+    )
+    gpu_phi_source = read_text(project / "src/gpu/pair_support_phi.cpp")
+    gpu_phi_cuda = read_text(
+        project / "src/cuda/phase9_pair_support_phi.cu"
+    )
 
     pair_target = parenthesized_block(
         cmake, "add_library(\n  morsehgp3d_pair_support"
@@ -231,6 +244,49 @@ def validate(
     require(
         "morsehgp3d::hierarchy" not in higher_links,
         "the higher-support target must not link the historical Gamma archive",
+    )
+
+    terminal_target = parenthesized_block(
+        cmake, "add_library(\n  morsehgp3d_direct_support_terminal"
+    )
+    require(
+        terminal_target.count(
+            "src/cpu/hierarchy/direct_support_terminal.cpp"
+        )
+        == 1,
+        "the terminal facade target must contain exactly its composition source",
+    )
+    terminal_links = parenthesized_block(
+        cmake, "target_link_libraries(\n  morsehgp3d_direct_support_terminal"
+    )
+    require(
+        "morsehgp3d::pair_support" in terminal_links
+        and "morsehgp3d::higher_support" in terminal_links,
+        "the terminal facade must compose both direct support lanes",
+    )
+    require(
+        "morsehgp3d::hierarchy" not in terminal_links,
+        "the terminal facade must not link the historical Gamma archive",
+    )
+
+    gpu_phi_target = parenthesized_block(
+        cmake, "add_library(\n    morsehgp3d_gpu_pair_support_phi"
+    )
+    require(
+        gpu_phi_target.count("src/cuda/phase9_pair_support_phi.cu") == 1
+        and gpu_phi_target.count("src/gpu/pair_support_phi.cpp") == 1,
+        "the CUDA phi target must contain one proposal kernel and one host recertifier",
+    )
+    gpu_phi_links = parenthesized_block(
+        cmake, "target_link_libraries(\n    morsehgp3d_gpu_pair_support_phi"
+    )
+    require(
+        "PUBLIC morsehgp3d::pair_support" in gpu_phi_links,
+        "the CUDA phi target must depend on the certified pair-support layer",
+    )
+    require(
+        "morsehgp3d::hierarchy" not in gpu_phi_links,
+        "the CUDA phi target must not link the historical Gamma archive",
     )
 
     hierarchy_target = parenthesized_block(
@@ -383,6 +439,52 @@ def validate(
         "append_product_analysis(" not in higher_stream_source,
         "the compact higher output chain must recompute interval analyses",
     )
+
+    terminal_combined = terminal_header + "\n" + terminal_source
+    gpu_phi_combined = gpu_phi_header + "\n" + gpu_phi_source + "\n" + gpu_phi_cuda
+    for forbidden in (
+        "hierarchy/gamma.hpp",
+        "critical_catalog",
+        "ordinary_cell",
+        "ordinary_diagram",
+        "depth_zero_natural_support",
+    ):
+        require(
+            forbidden not in terminal_combined.lower(),
+            f"the terminal facade contains forbidden token {forbidden!r}",
+        )
+        require(
+            forbidden not in gpu_phi_combined.lower(),
+            f"the CUDA phi path contains forbidden token {forbidden!r}",
+        )
+    for required in (
+        "pair_canonical_cloud_digest",
+        "higher_canonical_cloud_digest",
+        "direct_support_catalog_arities_two_through_four_only",
+        "fresh_exact_pair_v1_and_grouped_higher_v2_replay_terminal_",
+        "common_durable_checkpoint_certified{false}",
+        "hierarchy_or_forest_certified{false}",
+        "public_status_claimed{false}",
+    ):
+        require(
+            required in terminal_combined,
+            f"missing terminal composition token {required!r}",
+        )
+    for required in (
+        "cuda_outward_binary64_diametral_phi_upper_bound_proposal_only",
+        "cpu_exact_dyadic_aabb_phi_recertified_strict_witness_receipt_only",
+        "exact_diametral_phi_aabb_maximum(",
+        "exact_receipt.maximum_phi > proposed_upper",
+        "exact_receipt.maximum_phi.sign() >= 0",
+        "global_support_product_prune_published = false",
+        "public_status_published = false",
+        "maximum_query_count",
+        "__CUDA_ARCH__ != 1200",
+    ):
+        require(
+            required in gpu_phi_combined,
+            f"missing CUDA proposal/CPU recertification token {required!r}",
+        )
 
     verifier_start = header.find("class ExactPairSupportIncrementalVerifier")
     verifier_end = header.find(
@@ -795,12 +897,14 @@ def validate(
         binary_symbol_gate = True
 
     return {
-        "schema": "morsehgp3d.phase9.direct_support_static.v7",
+        "schema": "morsehgp3d.phase9.direct_support_static.v8",
         "targets": [
             "morsehgp3d_pair_support",
             "morsehgp3d_higher_support",
             "morsehgp3d_pair_support_codec",
             "morsehgp3d_pair_support_durable",
+            "morsehgp3d_direct_support_terminal",
+            "morsehgp3d_gpu_pair_support_phi",
         ],
         "persistent_top_m_cell_count": 0,
         "global_gamma_coface_count": 0,
@@ -812,6 +916,8 @@ def validate(
         "higher_support_reinjectable_checkpoint": True,
         "higher_support_anchored_in_memory_session": True,
         "higher_support_three_kind_output_chain": True,
+        "terminal_direct_support_facade": True,
+        "cuda_phi_proposal_cpu_exact_recertification": True,
         "persistent_authority_context": True,
         "incremental_verify_next": True,
         "two_phase_durable_verification": True,
@@ -842,6 +948,11 @@ def validate(
             "src/cpu/hierarchy/higher_support_product.cpp",
             "include/morsehgp3d/hierarchy/higher_support_stream.hpp",
             "src/cpu/hierarchy/higher_support_stream.cpp",
+            "include/morsehgp3d/hierarchy/direct_support_terminal.hpp",
+            "src/cpu/hierarchy/direct_support_terminal.cpp",
+            "include/morsehgp3d/gpu/pair_support_phi.hpp",
+            "src/gpu/pair_support_phi.cpp",
+            "src/cuda/phase9_pair_support_phi.cu",
         ],
     }
 
