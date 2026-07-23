@@ -36,10 +36,18 @@ La fermeture est enfermée dans une portée transitoire. Avant que le résultat 
 
 Cette tranche est commune au résident 50 k et au streaming 10 M+, mais elle ne qualifie encore ni leur temps, ni leur volume. Le profil massif devra évacuer le delta compact vers un run durable avant de poursuivre. Aucune structure globale évitée par l'architecture n'a été réintroduite.
 
+## Incrément 14E livré — couture canonique et incumbent exact
+
+14D déduplique déjà les clés complètes de ses bras. Il appelle désormais 10.5c par une vue strictement croissante de ces clés, avec identités implicites, au lieu de reconstruire des records de graines, de les recopier, de les trier puis de recopier et dédupliquer une seconde fois leurs clés. L'entrée générale 10.5c demeure inchangée pour les appelants qui fournissent des identités désordonnées ou des clés répétées, et les deux entrées produisent le même résultat scientifique sur le sous-cas canonique distinct.
+
+L'audit LP64 mesure 96 octets par record de graine et 88 octets par clé. La voie 14D supprime donc deux populations de records et une population interne de clés, soit $280D$ octets, trois allocations et deux tris redondants pour $D$ clés distinctes. Le gain vaut environ 13,4 Mio pour 50 000 clés et 280 Mio au plafond actuel de $2^{20}$ graines. Il ne borne pas les limbs rationnels, les tables de mémoïsation ou le scratch top-$K$ et n'est donc pas une qualification mémoire globale.
+
+Le socle spatial accepte aussi des incumbents top-$K$ facultatifs. Ils sont validés, leurs distances sont recalculées exactement et imputées au budget total, puis ils ne servent qu'à initialiser la borne de la traversée exacte. Une bonne proposition peut augmenter l'élagage strict; une proposition adversariale conserve exactement la même partition. La coquille d'égalité reste complète. Le transcript par lot, les classes de difficulté observées et le producteur GPU restent à brancher; aucun compteur ou digest de proposition ne devient une décision scientifique.
+
 ## Priorités de développement
 
-1. séparer les propositions GPU de leur rejeu CPU exact et ajouter les classes de difficulté observée;
-2. réutiliser les capacités de scratch sans conserver de graphe ou d'objet scientifique entre lots;
+1. brancher un transcript borné de propositions GPU sur l'incumbent exact 14E et garder son audit séparé du delta certifié;
+2. réutiliser les capacités restantes de scratch sans conserver de graphe ou d'objet scientifique entre lots;
 3. ajouter l'instrumentation `warm_e2e` après ces réductions structurelles;
 4. rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
 
@@ -55,9 +63,11 @@ Pour 14C, les deux CTests ciblés passent sous GCC Release strict en 0,16 second
 
 Pour 14D, l'unique CTest ciblé passe sous GCC Release strict en 0,02 seconde et sous Clang Release strict en 0,03 seconde. Il couvre une session à deux lots avec un seul ancrage 14C, un lot vide, le rejet inconditionnel d'un cap 10.5c hors plafond, les douze bras du tétraèdre dédupliqués en quatre clés, deux lanes de supports deux et trois partageant une fermeture, les caps insuffisants de onze bras et trois clés sans delta ni avancement, les retries, un stamp locator périmé, le retry sous le nouveau stamp, une traversée streaming de deux chunks, les mutations d'indice et de compteur du delta et un plan falsifié rejeté à l'ouverture. L'audit conserve zéro nœud après chaque fermeture. L'installation, l'export de `direct_sparse_facet_descent_batch_executor` et le consumer externe passent 1/1 avec appel réel du prédicat non-inline. Aucun benchmark, GPU, sanitizer, oracle long, test massif ou GCP n'est lancé.
 
+Pour 14E, les trois CTests ciblés passent sous GCC Release strict en 0,24 seconde et sous Clang Release strict en 0,15 seconde sur le dernier rejeu. Ils comparent bit à bit l'entrée canonique et l'API générale 10.5c sur une vraie chaîne à arêtes strictes, rejettent les vues non croissantes, dupliquées, de cardinal mixte ou invalides, puis font traverser à 14D la descente exacte `AC` vers le terminal positif `DE` sans retenir son graphe. Le test spatial séparé compare la voie sans incumbent, une bonne proposition, une heap partiellement initialisée et une proposition adversariale, exerce le cap exact juste insuffisant, les identifiants invalides, répétés ou exclus, et une coquille à six égalités qu'aucun prune non strict ne peut tronquer. L'installation, l'export et le consumer externe passent 1/1 en appelant réellement les deux nouveaux symboles. Aucun benchmark, kernel GPU, test massif ou GCP n'est lancé.
+
 Une falsification coordonnée pourrait encore redistribuer des compteurs entre chunks 14A ou lanes 14C tout en conservant leurs agrégats. Les payloads compacts ne contiennent volontairement ni détail ni digest par lot; un vérificateur frais contre 10.1--10.2 est donc requis avant persistance ou exécution industrielle. Cette dette P2 est compatible avec `architecture_only`, mais devra être fermée avant toute qualification.
 
-Deux dettes P2 propres à 14D restent explicites : l'API documente mais n'interdit pas encore statiquement les autorités temporaires dont les pointeurs deviendraient pendants, et la fixture d'intégration pré-lie les terminaux positifs, donc n'exerce pas une fermeture à arête stricte non nulle dans l'exécuteur lui-même. Les tests 10.5c couvrent séparément ces arêtes; une fixture 14D courte devra composer les deux niveaux avant qualification.
+La dette d'intégration à arête stricte non nulle de 14D est fermée par la fixture `AC` vers `DE`. La dette P2 restante est l'API qui documente mais n'interdit pas encore statiquement les autorités temporaires dont les pointeurs deviendraient pendants.
 
 ## GCP
 

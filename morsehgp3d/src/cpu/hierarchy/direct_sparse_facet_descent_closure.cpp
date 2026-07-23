@@ -1469,35 +1469,71 @@ certified_partial_refinement_outcome() const noexcept {
          certified_fail_closed_contradiction();
 }
 
-ExactDirectSparseFacetDescentClosureResult
-build_exact_direct_sparse_facet_descent_closure(
-    const spatial::MortonLbvhIndex& index,
-    const spatial::CanonicalPointCloud& cloud,
-    std::span<const ExactDirectSparseFacetDescentClosureSeed> seeds,
+namespace {
+
+struct CanonicalClosureSeedInput {
+  std::span<const ExactDirectSparseFacetKey> distinct_keys;
+  std::span<const ExactDirectSparseFacetDescentClosureSeed>
+      ordered_seed_records;
+  bool implicit_distinct_seed_identities{false};
+
+  [[nodiscard]] std::size_t seed_count() const noexcept {
+    return implicit_distinct_seed_identities ? distinct_keys.size()
+                                             : ordered_seed_records.size();
+  }
+
+  [[nodiscard]] std::size_t seed_index(std::size_t index) const noexcept {
+    return implicit_distinct_seed_identities
+               ? index
+               : ordered_seed_records[index].seed_index;
+  }
+
+  [[nodiscard]] const ExactDirectSparseFacetKey& seed_key(
+      std::size_t index) const noexcept {
+    return implicit_distinct_seed_identities
+               ? distinct_keys[index]
+               : ordered_seed_records[index].source_facet_key;
+  }
+};
+
+void finish_closure_snapshot(
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    ExactDirectSparseFacetDescentClosureResult& result) {
+  checked_increment_counter(result.counters.locator_snapshot_check_count);
+  if (locator.snapshot_stamp() != result.locator_snapshot_stamp) {
+    throw std::runtime_error(
+        "the positive-facet locator changed before closure publication");
+  }
+  result.common_locator_snapshot_certified = true;
+  result.every_memo_fingerprint_candidate_compared_by_full_key = true;
+  result.no_half_edge_published = true;
+  result.no_top_k_partition_or_shell_persisted = true;
+}
+
+void finish_closure_preflight_budget_exhaustion(
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    ExactDirectSparseFacetDescentClosureResult& result) {
+  result.disposition =
+      ExactDirectSparseFacetDescentClosureDisposition::budget_exhausted;
+  result.decision = ExactDirectSparseFacetDescentClosureDecision::
+      no_closure_preflight_budget_exhausted;
+  result.every_distinct_evaluated_key_called_step_core_once = true;
+  result.cached_miniballs_reused_at_exact_seams = true;
+  result.strict_functional_graph_certified = true;
+  result.exact_level_acyclicity_certified = true;
+  result.edge_node_terminal_identity_certified = true;
+  finish_closure_snapshot(locator, result);
+}
+
+[[nodiscard]] ExactDirectSparseFacetDescentClosureResult
+initialize_closure_build_result(
+    std::size_t input_seed_reference_count,
     const exact::ExactLevel& closed_batch_squared_level,
     const ExactDirectSparseFacetWitness& locator_query_witness,
     const ExactDirectSparsePositiveFacetLocator& locator,
     const ExactDirectSparseFacetDescentClosureBudget& budget,
     const ExactDirectSparseFacetDescentClosureConfig& config,
     spatial::LbvhTraversalOrder traversal_order) {
-  require_valid_traversal_order(traversal_order);
-  require_budget_within_confidence(budget);
-  if (!index.validated_for(cloud)) {
-    throw std::invalid_argument(
-        "a direct sparse descent closure requires a matching LBVH authority");
-  }
-  if (!locator.certified_positive_locator()) {
-    throw std::invalid_argument(
-        "a direct sparse descent closure requires a certified locator");
-  }
-  if (locator_query_witness.external_authority_id == 0U ||
-      locator_query_witness.external_authority_id !=
-          locator.config().external_authority_id ||
-      locator_query_witness.replay_token == 0U) {
-    throw std::invalid_argument(
-        "a direct sparse descent closure requires one matching locator witness");
-  }
-
   ExactDirectSparseFacetDescentClosureResult result;
   result.config = config;
   result.requested_budget = budget;
@@ -1506,100 +1542,38 @@ build_exact_direct_sparse_facet_descent_closure(
   result.locator_query_witness = locator_query_witness;
   result.locator_snapshot_stamp = locator.snapshot_stamp();
   result.counters.locator_snapshot_check_count = 1U;
-  result.counters.input_seed_reference_count = seeds.size();
+  result.counters.input_seed_reference_count = input_seed_reference_count;
   result.required_memo_slot_count =
       required_memo_slot_count(budget.maximum_node_count);
   result.trusted_authorities_certified = true;
   result.budget_preflight_completed = true;
   initialize_closed_scope(result);
+  return result;
+}
 
-  const auto finish_snapshot = [&locator](
-                                   ExactDirectSparseFacetDescentClosureResult&
-                                       output) {
-    checked_increment_counter(
-        output.counters.locator_snapshot_check_count);
-    if (locator.snapshot_stamp() != output.locator_snapshot_stamp) {
-      throw std::runtime_error(
-          "the positive-facet locator changed before closure publication");
-    }
-    output.common_locator_snapshot_certified = true;
-    output.every_memo_fingerprint_candidate_compared_by_full_key = true;
-    output.no_half_edge_published = true;
-    output.no_top_k_partition_or_shell_persisted = true;
-  };
-
-  if (seeds.size() > budget.maximum_seed_count ||
-      result.required_memo_slot_count > budget.maximum_memo_slot_count) {
-    result.disposition =
-        ExactDirectSparseFacetDescentClosureDisposition::budget_exhausted;
-    result.decision = ExactDirectSparseFacetDescentClosureDecision::
-        no_closure_preflight_budget_exhausted;
-    result.every_distinct_evaluated_key_called_step_core_once = true;
-    result.cached_miniballs_reused_at_exact_seams = true;
-    result.strict_functional_graph_certified = true;
-    result.exact_level_acyclicity_certified = true;
-    result.edge_node_terminal_identity_certified = true;
-    finish_snapshot(result);
-    return result;
-  }
-  std::vector<ExactDirectSparseFacetDescentClosureSeed> ordered_seeds(
-      seeds.begin(), seeds.end());
-  std::sort(
-      ordered_seeds.begin(),
-      ordered_seeds.end(),
-      [](const ExactDirectSparseFacetDescentClosureSeed& left,
-         const ExactDirectSparseFacetDescentClosureSeed& right) {
-        return left.seed_index < right.seed_index;
-      });
-  for (std::size_t index_in_order = 0U;
-       index_in_order < ordered_seeds.size();
-       ++index_in_order) {
-    if (ordered_seeds[index_in_order].seed_index != index_in_order ||
-        !valid_facet_key(
-            cloud, ordered_seeds[index_in_order].source_facet_key)) {
-      throw std::invalid_argument(
-          "closure seeds require contiguous identities and canonical full keys");
-    }
-    if (index_in_order == 0U) {
-      result.common_facet_cardinality =
-          ordered_seeds[index_in_order].source_facet_key.point_count;
-    } else if (ordered_seeds[index_in_order].source_facet_key.point_count !=
-               result.common_facet_cardinality) {
-      throw std::invalid_argument(
-          "all direct sparse descent-closure seeds need one fixed order");
-    }
-  }
-  result.input_shape_certified = true;
-
-  std::vector<ExactDirectSparseFacetKey> distinct_keys;
-  distinct_keys.reserve(ordered_seeds.size());
-  for (const ExactDirectSparseFacetDescentClosureSeed& seed : ordered_seeds) {
-    distinct_keys.push_back(seed.source_facet_key);
-  }
-  std::sort(distinct_keys.begin(), distinct_keys.end(), facet_key_less);
-  distinct_keys.erase(
-      std::unique(distinct_keys.begin(), distinct_keys.end()),
-      distinct_keys.end());
-  result.counters.distinct_seed_key_count = distinct_keys.size();
+[[nodiscard]] ExactDirectSparseFacetDescentClosureResult
+build_closure_from_canonical_seed_input(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const CanonicalClosureSeedInput& input,
+    const exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetDescentClosureBudget& budget,
+    const ExactDirectSparseFacetDescentClosureConfig& config,
+    spatial::LbvhTraversalOrder traversal_order,
+    ExactDirectSparseFacetDescentClosureResult result) {
+  result.counters.distinct_seed_key_count = input.distinct_keys.size();
   result.counters.duplicate_seed_key_reference_count =
-      ordered_seeds.size() - distinct_keys.size();
+      input.seed_count() - input.distinct_keys.size();
 
-  if (distinct_keys.size() > budget.maximum_node_count) {
-    result.disposition =
-        ExactDirectSparseFacetDescentClosureDisposition::budget_exhausted;
-    result.decision = ExactDirectSparseFacetDescentClosureDecision::
-        no_closure_preflight_budget_exhausted;
-    result.every_distinct_evaluated_key_called_step_core_once = true;
-    result.cached_miniballs_reused_at_exact_seams = true;
-    result.strict_functional_graph_certified = true;
-    result.exact_level_acyclicity_certified = true;
-    result.edge_node_terminal_identity_certified = true;
-    finish_snapshot(result);
+  if (input.distinct_keys.size() > budget.maximum_node_count) {
+    finish_closure_preflight_budget_exhaustion(locator, result);
     return result;
   }
   result.budget_preflight_satisfied = true;
 
-  if (ordered_seeds.empty()) {
+  if (input.seed_count() == 0U) {
     result.all_seed_references_processed = true;
     result.every_distinct_evaluated_key_called_step_core_once = true;
     result.cached_miniballs_reused_at_exact_seams = true;
@@ -1610,7 +1584,7 @@ build_exact_direct_sparse_facet_descent_closure(
         ExactDirectSparseFacetDescentClosureDisposition::relative_positive;
     result.decision = ExactDirectSparseFacetDescentClosureDecision::
         complete_empty_seed_set;
-    finish_snapshot(result);
+    finish_closure_snapshot(locator, result);
     return result;
   }
 
@@ -1624,10 +1598,10 @@ build_exact_direct_sparse_facet_descent_closure(
       config,
       traversal_order,
       result);
-  builder.intern_seed_roots(distinct_keys);
+  builder.intern_seed_roots(input.distinct_keys);
 
   PathBuildStatus global_status = PathBuildStatus::complete;
-  for (const ExactDirectSparseFacetKey& key : distinct_keys) {
+  for (const ExactDirectSparseFacetKey& key : input.distinct_keys) {
     global_status = builder.process_root(key);
     if (global_status != PathBuildStatus::complete) {
       break;
@@ -1649,7 +1623,7 @@ build_exact_direct_sparse_facet_descent_closure(
                                 contradiction_certified_local_step
                           : ExactDirectSparseFacetDescentClosureDecision::
                                 contradiction_cycle_or_incompatible_shared_target;
-    finish_snapshot(result);
+    finish_closure_snapshot(locator, result);
     return result;
   }
   if (global_status != PathBuildStatus::complete) {
@@ -1657,8 +1631,11 @@ build_exact_direct_sparse_facet_descent_closure(
   }
 
   std::vector<std::size_t> reference_count_per_node(result.nodes.size(), 0U);
-  for (const ExactDirectSparseFacetDescentClosureSeed& seed : ordered_seeds) {
-    const MemoSearchResult root = builder.find_node(seed.source_facet_key);
+  for (std::size_t input_index = 0U;
+       input_index < input.seed_count();
+       ++input_index) {
+    const ExactDirectSparseFacetKey& seed_key = input.seed_key(input_index);
+    const MemoSearchResult root = builder.find_node(seed_key);
     if (!root.found ||
         builder.visit_states()[root.node_index] != MemoVisitState::closed) {
       continue;
@@ -1666,15 +1643,14 @@ build_exact_direct_sparse_facet_descent_closure(
     const bool reused = builder.node_created_as_successor(root.node_index) ||
                         reference_count_per_node[root.node_index] != 0U;
     if (reused) {
-      checked_increment_counter(
-          result.counters.memoized_seed_reuse_count);
+      checked_increment_counter(result.counters.memoized_seed_reuse_count);
     }
     checked_increment_counter(reference_count_per_node[root.node_index]);
     const ExactDirectSparseFacetDescentNode& root_node =
         result.nodes[root.node_index];
     result.seed_projections.push_back(
-        {seed.seed_index,
-         seed.source_facet_key,
+        {input.seed_index(input_index),
+         seed_key,
          root.node_index,
          root_node.terminal_node_index,
          root_node.closure_disposition,
@@ -1721,8 +1697,197 @@ build_exact_direct_sparse_facet_descent_closure(
       throw std::logic_error("a contradiction escaped its fail-closed path");
   }
 
-  finish_snapshot(result);
+  finish_closure_snapshot(locator, result);
   return result;
+}
+
+void require_closure_build_authorities(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetDescentClosureBudget& budget,
+    spatial::LbvhTraversalOrder traversal_order) {
+  require_valid_traversal_order(traversal_order);
+  require_budget_within_confidence(budget);
+  if (!index.validated_for(cloud)) {
+    throw std::invalid_argument(
+        "a direct sparse descent closure requires a matching LBVH authority");
+  }
+  if (!locator.certified_positive_locator()) {
+    throw std::invalid_argument(
+        "a direct sparse descent closure requires a certified locator");
+  }
+  if (locator_query_witness.external_authority_id == 0U ||
+      locator_query_witness.external_authority_id !=
+          locator.config().external_authority_id ||
+      locator_query_witness.replay_token == 0U) {
+    throw std::invalid_argument(
+        "a direct sparse descent closure requires one matching locator witness");
+  }
+}
+
+}  // namespace
+
+ExactDirectSparseFacetDescentClosureResult
+build_exact_direct_sparse_facet_descent_closure(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const ExactDirectSparseFacetDescentClosureSeed> seeds,
+    const exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetDescentClosureBudget& budget,
+    const ExactDirectSparseFacetDescentClosureConfig& config,
+    spatial::LbvhTraversalOrder traversal_order) {
+  require_closure_build_authorities(
+      index,
+      cloud,
+      locator_query_witness,
+      locator,
+      budget,
+      traversal_order);
+  ExactDirectSparseFacetDescentClosureResult result =
+      initialize_closure_build_result(
+          seeds.size(),
+          closed_batch_squared_level,
+          locator_query_witness,
+          locator,
+          budget,
+          config,
+          traversal_order);
+
+  if (seeds.size() > budget.maximum_seed_count ||
+      result.required_memo_slot_count > budget.maximum_memo_slot_count) {
+    finish_closure_preflight_budget_exhaustion(locator, result);
+    return result;
+  }
+  std::vector<ExactDirectSparseFacetDescentClosureSeed> ordered_seeds(
+      seeds.begin(), seeds.end());
+  std::sort(
+      ordered_seeds.begin(),
+      ordered_seeds.end(),
+      [](const ExactDirectSparseFacetDescentClosureSeed& left,
+         const ExactDirectSparseFacetDescentClosureSeed& right) {
+        return left.seed_index < right.seed_index;
+      });
+  for (std::size_t index_in_order = 0U;
+       index_in_order < ordered_seeds.size();
+       ++index_in_order) {
+    if (ordered_seeds[index_in_order].seed_index != index_in_order ||
+        !valid_facet_key(
+            cloud, ordered_seeds[index_in_order].source_facet_key)) {
+      throw std::invalid_argument(
+          "closure seeds require contiguous identities and canonical full keys");
+    }
+    if (index_in_order == 0U) {
+      result.common_facet_cardinality =
+          ordered_seeds[index_in_order].source_facet_key.point_count;
+    } else if (ordered_seeds[index_in_order].source_facet_key.point_count !=
+               result.common_facet_cardinality) {
+      throw std::invalid_argument(
+          "all direct sparse descent-closure seeds need one fixed order");
+    }
+  }
+  result.input_shape_certified = true;
+
+  std::vector<ExactDirectSparseFacetKey> distinct_keys;
+  distinct_keys.reserve(ordered_seeds.size());
+  for (const ExactDirectSparseFacetDescentClosureSeed& seed : ordered_seeds) {
+    distinct_keys.push_back(seed.source_facet_key);
+  }
+  std::sort(distinct_keys.begin(), distinct_keys.end(), facet_key_less);
+  distinct_keys.erase(
+      std::unique(distinct_keys.begin(), distinct_keys.end()),
+      distinct_keys.end());
+  return build_closure_from_canonical_seed_input(
+      index,
+      cloud,
+      CanonicalClosureSeedInput{
+          std::span<const ExactDirectSparseFacetKey>{distinct_keys},
+          std::span<const ExactDirectSparseFacetDescentClosureSeed>{
+              ordered_seeds},
+          false},
+      closed_batch_squared_level,
+      locator_query_witness,
+      locator,
+      budget,
+      config,
+      traversal_order,
+      std::move(result));
+}
+
+ExactDirectSparseFacetDescentClosureResult
+build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const ExactDirectSparseFacetKey> canonical_distinct_keys,
+    const exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetDescentClosureBudget& budget,
+    const ExactDirectSparseFacetDescentClosureConfig& config,
+    spatial::LbvhTraversalOrder traversal_order) {
+  require_closure_build_authorities(
+      index,
+      cloud,
+      locator_query_witness,
+      locator,
+      budget,
+      traversal_order);
+  ExactDirectSparseFacetDescentClosureResult result =
+      initialize_closure_build_result(
+          canonical_distinct_keys.size(),
+          closed_batch_squared_level,
+          locator_query_witness,
+          locator,
+          budget,
+          config,
+          traversal_order);
+
+  if (canonical_distinct_keys.size() > budget.maximum_seed_count ||
+      result.required_memo_slot_count > budget.maximum_memo_slot_count) {
+    finish_closure_preflight_budget_exhaustion(locator, result);
+    return result;
+  }
+  for (std::size_t key_index = 0U;
+       key_index < canonical_distinct_keys.size();
+       ++key_index) {
+    const ExactDirectSparseFacetKey& key =
+        canonical_distinct_keys[key_index];
+    if (!valid_facet_key(cloud, key)) {
+      throw std::invalid_argument(
+          "canonical distinct closure keys require valid complete facet keys");
+    }
+    if (key_index == 0U) {
+      result.common_facet_cardinality = key.point_count;
+      continue;
+    }
+    if (key.point_count != result.common_facet_cardinality) {
+      throw std::invalid_argument(
+          "all canonical distinct closure keys need one fixed order");
+    }
+    if (!facet_key_less(canonical_distinct_keys[key_index - 1U], key)) {
+      throw std::invalid_argument(
+          "canonical distinct closure keys must be strictly increasing");
+    }
+  }
+  result.input_shape_certified = true;
+
+  return build_closure_from_canonical_seed_input(
+      index,
+      cloud,
+      CanonicalClosureSeedInput{
+          canonical_distinct_keys,
+          std::span<const ExactDirectSparseFacetDescentClosureSeed>{},
+          true},
+      closed_batch_squared_level,
+      locator_query_witness,
+      locator,
+      budget,
+      config,
+      traversal_order,
+      std::move(result));
 }
 
 ExactDirectSparseFacetDescentClosureVerification

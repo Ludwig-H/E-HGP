@@ -5,6 +5,7 @@
 #include <limits>
 #include <new>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <utility>
 
@@ -272,19 +273,11 @@ summarize_closure(
   // projection returned below survives its destruction.
   return [&]() {
     CompactClosureProjection projection;
-    std::vector<ExactDirectSparseFacetDescentClosureSeed> closure_seeds;
-    closure_seeds.reserve(distinct_keys.size());
-    for (std::size_t key_index = 0U;
-         key_index < distinct_keys.size();
-         ++key_index) {
-      closure_seeds.push_back({key_index, distinct_keys[key_index]});
-    }
-
     const ExactDirectSparseFacetDescentClosureResult closure =
-        build_exact_direct_sparse_facet_descent_closure(
+        build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
             index,
             cloud,
-            closure_seeds,
+            std::span<const ExactDirectSparseFacetKey>{distinct_keys},
             closed_batch_squared_level,
             locator_query_witness,
             locator,

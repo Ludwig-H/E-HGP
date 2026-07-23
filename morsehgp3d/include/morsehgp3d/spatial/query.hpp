@@ -205,6 +205,15 @@ class TopKPartition {
       const ExclusionSet& exclusions,
       ExactLbvhTopKBudget budget,
       LbvhTraversalOrder traversal_order);
+  friend ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
+      const MortonLbvhIndex& index,
+      const CanonicalPointCloud& cloud,
+      const exact::ExactRational3& query,
+      std::size_t requested_rank,
+      const ExclusionSet& exclusions,
+      std::span<const PointId> incumbent_point_ids,
+      ExactLbvhTopKBudget budget,
+      LbvhTraversalOrder traversal_order);
   friend class gpu::SpatialLbvhContext;
 
   bool complete_;

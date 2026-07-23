@@ -80,6 +80,16 @@ Le stockage logique du delta vaut $O(KD+A)$. Le scratch de sélection vaut $O(KA
 
 Le profil résident peut conserver une seule session et un seul plan pour tout le nuage de 50 k points. Le profil streaming utilise le même moteur séquentiel et doit évacuer chaque delta avant le lot suivant; les runs et checkpoints durables restent à implémenter. Cette discipline supprime l'accumulation du graphe 10.5c, mais ne borne encore ni les visites top-$K$, ni les rationnels, ni le temps GPU, ni le p95.
 
+## Incrément 14E — vue canonique et borne incumbent
+
+La sélection 14D produit déjà un tableau strictement croissant de $D$ clés complètes distinctes. Le nouveau point d'entrée 10.5c reçoit cette vue non propriétaire, vérifie clé par clé le domaine, le cardinal commun et l'ordre strict, puis utilise la position comme identité de graine. Il ne construit donc ni les $D$ records `ClosureSeed`, ni leur copie triée, ni le second tableau de clés distinctes. L'entrée historique conserve ces populations seulement lorsqu'elle doit réellement remettre en ordre des identités ou dédupliquer des clés.
+
+Sur l'ABI LP64 auditée, un record de graine occupe 96 octets et une clé 88 octets. Le pic de la voie 14D perd donc $96D+96D+88D=280D$ octets. Les deux populations initiales encore vivantes sont les $A$ bras sélectionnés et les $D$ clés que 14D doit posséder pour sa jointure. Nœuds, arêtes, caches de miniballs et tables de mémoïsation restent transitoires et constituent des optimisations ultérieures distinctes.
+
+Le top-$K$ LBVH borné possède parallèlement une surcharge à incumbents. Une proposition fournit au plus le rang demandé en `PointId`; le CPU vérifie domaine, unicité et exclusions, recalcule exactement toutes leurs distances et les impute au même budget que les autres feuilles. Les voisins ainsi certifiés initialisent seulement une borne supérieure. Toute boîte de borne strictement supérieure peut être élaguée; une égalité est toujours descendue. Les feuilles incumbentes déjà évaluées ne sont ni réévaluées ni recomptées dans les sous-arbres élagués, de sorte que la partition des points éligibles reste exacte.
+
+Ce socle rend possible un transcript GPU compact par clé sans lui donner d'autorité scientifique. Le transcript et son audit devront rester séparés du delta 14D; une clé absente ou une proposition mauvaise déclenchera simplement la traversée exacte normale. Aucun producteur GPU, aucune classe de difficulté observée et aucune qualification de performance ne font encore partie de 14E.
+
 ## Goulots restant à traiter en Phase 14
 
 Trois coûts dominants restent visibles après 14D :

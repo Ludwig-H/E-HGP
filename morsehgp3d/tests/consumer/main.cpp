@@ -281,6 +281,18 @@ int main() {
       spatial_index, cloud, ExactRational3{}, no_exclusions);
   const auto accelerated_ball = morsehgp3d::spatial::lbvh_closed_ball(
       spatial_index, cloud, ExactRational3{}, ExactLevel{BigInt{1}});
+  const std::array<PointId, 1U> installed_incumbent_ids{PointId{0U}};
+  const morsehgp3d::spatial::ExactLbvhTopKBudget installed_top_k_budget{
+      32U, 32U, 32U, 32U, 8U, 1U, 3U};
+  const auto incumbent_nearest =
+      morsehgp3d::spatial::lbvh_top_k_budgeted(
+          spatial_index,
+          cloud,
+          ExactRational3{},
+          1U,
+          no_exclusions,
+          std::span<const PointId>{installed_incumbent_ids},
+          installed_top_k_budget);
   if (!nearest.shell_complete() || nearest.strict_below().size() != 0U ||
       nearest.cutoff_shell_ids().size() != 2U ||
       nearest.canonical_choice_ids().size() != 1U ||
@@ -296,7 +308,14 @@ int main() {
       accelerated_nearest.cutoff_shell_ids().size() != 2U ||
       !accelerated_ball.validated_for(cloud) ||
       accelerated_ball.closed_rank() != unit_ball.closed_rank() ||
-      accelerated_ball.shell_ids().size() != 2U) {
+      accelerated_ball.shell_ids().size() != 2U ||
+      !incumbent_nearest.complete() ||
+      incumbent_nearest.partition().cutoff_squared_distance() !=
+          nearest.cutoff_squared_distance() ||
+      incumbent_nearest.audit().supplied_incumbent_point_count != 1U ||
+      incumbent_nearest.audit()
+              .exact_incumbent_distance_evaluation_count !=
+          1U) {
     std::cerr << "installed spatial reference oracle changed semantics\n";
     return 1;
   }
@@ -320,6 +339,25 @@ int main() {
       empty_prefix_sweep.counters.locator_snapshot_check_count != 2U ||
       !empty_prefix_sweep.resolutions.empty()) {
     std::cerr << "installed positive-facet prefix sweep changed semantics\n";
+    return 1;
+  }
+  const morsehgp3d::hierarchy::
+      ExactDirectSparseFacetDescentClosureBudget empty_closure_budget{
+          0U, 0U, 0U, 1U, {}};
+  const auto empty_canonical_closure = morsehgp3d::hierarchy::
+      build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
+          spatial_index,
+          cloud,
+          std::span<const morsehgp3d::hierarchy::
+              ExactDirectSparseFacetKey>{},
+          ExactLevel{BigInt{0}},
+          {UINT64_C(0x51a7), UINT64_C(0x1002)},
+          locator,
+          empty_closure_budget);
+  if (!empty_canonical_closure
+           .certified_complete_relative_positive_closure() ||
+      empty_canonical_closure.counters.input_seed_reference_count != 0U) {
+    std::cerr << "installed canonical closure entry changed semantics\n";
     return 1;
   }
 

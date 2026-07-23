@@ -801,6 +801,10 @@ void test_budgeted_top_k_exactness_and_fail_closed_limits() {
         first.audit() == repeated.audit(),
         "identical budgeted traversals have deterministic audits");
     check(
+        first.audit().supplied_incumbent_point_count == 0U &&
+            first.audit().exact_incumbent_distance_evaluation_count == 0U,
+        "the historical budgeted path records no supplied incumbents");
+    check(
         first.partition().distance_evaluation_count() == 6U &&
             first.partition().query_counters().pruned_subtree_count == 0U,
         "budgeted top-k never prunes an AABB bound equal to the cutoff");
@@ -1132,6 +1136,253 @@ void test_budgeted_top_k_exactness_and_fail_closed_limits() {
       "budgeted LBVH top-k rejects rank zero before traversal");
 }
 
+void test_budgeted_top_k_exact_incumbent_seeding() {
+  constexpr std::size_t line_point_count = 64U;
+  const CanonicalPointCloud line_cloud =
+      nonnegative_line_cloud(line_point_count);
+  const MortonLbvhIndex line_index =
+      MortonLbvhIndex::build(line_cloud);
+  const ExclusionSet no_exclusions =
+      empty_exclusions(line_cloud);
+  const TopKPartition line_reference = brute_force_top_k(
+      line_cloud, origin(), 2U, no_exclusions);
+  const ExactLbvhTopKBudget generous_budget{
+      4096U,
+      4096U,
+      4096U,
+      4096U,
+      128U,
+      2U,
+      2U};
+
+  const ExactBudgetedLbvhTopKResult unseeded =
+      lbvh_top_k_budgeted(
+          line_index,
+          line_cloud,
+          origin(),
+          2U,
+          no_exclusions,
+          generous_budget,
+          LbvhTraversalOrder::far_first);
+  const std::array<PointId, 2> exact_incumbents{
+      PointId{0}, PointId{1}};
+  const ExactBudgetedLbvhTopKResult well_seeded =
+      lbvh_top_k_budgeted(
+          line_index,
+          line_cloud,
+          origin(),
+          2U,
+          no_exclusions,
+          std::span<const PointId>{exact_incumbents},
+          generous_budget,
+          LbvhTraversalOrder::far_first);
+  check_budgeted_top_matches(
+      well_seeded,
+      line_reference,
+      generous_budget,
+      "the exactly seeded line query");
+  check(
+      well_seeded.audit().supplied_incumbent_point_count == 2U &&
+          well_seeded.audit()
+                  .exact_incumbent_distance_evaluation_count ==
+              2U &&
+          well_seeded.audit().exact_point_distance_evaluation_count == 2U &&
+          well_seeded.partition().query_counters()
+                  .pruned_eligible_point_count ==
+              line_point_count - 2U,
+      "good incumbents are re-evaluated once and initialize exact pruning");
+  check(
+      well_seeded.audit().node_visit_count <
+          unseeded.audit().node_visit_count,
+      "good incumbents reduce far-first traversal without changing its certificate");
+
+  ExactLbvhTopKBudget short_incumbent_budget = generous_budget;
+  short_incumbent_budget.maximum_exact_point_distance_evaluation_count = 1U;
+  const ExactBudgetedLbvhTopKResult short_incumbent =
+      lbvh_top_k_budgeted(
+          line_index,
+          line_cloud,
+          origin(),
+          2U,
+          no_exclusions,
+          std::span<const PointId>{exact_incumbents},
+          short_incumbent_budget,
+          LbvhTraversalOrder::far_first);
+  check_budgeted_top_exhaustion(
+      short_incumbent,
+      short_incumbent_budget,
+      ExactLbvhTopKStopReason::exact_point_distance_evaluation_limit,
+      "the one-short exact incumbent-distance budget");
+  check(
+      short_incumbent.audit().supplied_incumbent_point_count == 2U &&
+          short_incumbent.audit()
+                  .exact_incumbent_distance_evaluation_count ==
+              0U &&
+          short_incumbent.audit().exact_point_distance_evaluation_count == 0U &&
+          short_incumbent.audit().node_visit_count == 0U,
+      "an insufficient incumbent-distance cap fails before partial replay");
+
+  const std::array<PointId, 2> adversarial_incumbents{
+      PointId{62}, PointId{63}};
+  const ExactBudgetedLbvhTopKResult adversarially_seeded =
+      lbvh_top_k_budgeted(
+          line_index,
+          line_cloud,
+          origin(),
+          2U,
+          no_exclusions,
+          std::span<const PointId>{adversarial_incumbents},
+          generous_budget,
+          LbvhTraversalOrder::far_first);
+  check_budgeted_top_matches(
+      adversarially_seeded,
+      line_reference,
+      generous_budget,
+      "the adversarially seeded line query");
+  check(
+      adversarially_seeded.audit().supplied_incumbent_point_count == 2U &&
+          adversarially_seeded.audit()
+                  .exact_incumbent_distance_evaluation_count ==
+              2U &&
+          adversarially_seeded.audit().provisional_cutoff_decrease_count !=
+              0U,
+      "adversarial incumbents remain non-authoritative exact heap seeds");
+
+  const std::array<PointId, 1> excluded_ids{PointId{0}};
+  const ExclusionSet exclusions = ExclusionSet::from_ids(
+      std::span<const PointId>{excluded_ids}, line_cloud, 1U);
+  const std::array<PointId, 3> too_many{
+      PointId{0}, PointId{1}, PointId{2}};
+  const std::array<PointId, 2> repeated{
+      PointId{1}, PointId{1}};
+  const std::array<PointId, 1> outside{
+      static_cast<PointId>(line_point_count)};
+  check_throws<std::invalid_argument>(
+      [&line_index, &line_cloud, &no_exclusions, &too_many,
+       &generous_budget] {
+        static_cast<void>(lbvh_top_k_budgeted(
+            line_index,
+            line_cloud,
+            origin(),
+            2U,
+            no_exclusions,
+            std::span<const PointId>{too_many},
+            generous_budget));
+      },
+      "a seeded query rejects more incumbents than its rank");
+  check_throws<std::invalid_argument>(
+      [&line_index, &line_cloud, &no_exclusions, &repeated,
+       &generous_budget] {
+        static_cast<void>(lbvh_top_k_budgeted(
+            line_index,
+            line_cloud,
+            origin(),
+            2U,
+            no_exclusions,
+            std::span<const PointId>{repeated},
+            generous_budget));
+      },
+      "a seeded query rejects repeated incumbents");
+  check_throws<std::out_of_range>(
+      [&line_index, &line_cloud, &no_exclusions, &outside,
+       &generous_budget] {
+        static_cast<void>(lbvh_top_k_budgeted(
+            line_index,
+            line_cloud,
+            origin(),
+            2U,
+            no_exclusions,
+            std::span<const PointId>{outside},
+            generous_budget));
+      },
+      "a seeded query rejects an incumbent outside the PointId domain");
+  check_throws<std::invalid_argument>(
+      [&line_index, &line_cloud, &exclusions, &excluded_ids,
+       &generous_budget] {
+        static_cast<void>(lbvh_top_k_budgeted(
+            line_index,
+            line_cloud,
+            origin(),
+            2U,
+            exclusions,
+            std::span<const PointId>{excluded_ids},
+            generous_budget));
+      },
+      "a seeded query rejects an excluded incumbent");
+
+  const std::array<CertifiedPoint3, 6> equality_input{
+      point(-1.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(0.0, -1.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, 0.0, -1.0),
+      point(0.0, 0.0, 1.0)};
+  const CanonicalPointCloud equality_cloud =
+      canonical_cloud(equality_input);
+  const MortonLbvhIndex equality_index =
+      MortonLbvhIndex::build(equality_cloud);
+  const ExclusionSet equality_exclusions =
+      empty_exclusions(equality_cloud);
+  const TopKPartition equality_reference = brute_force_top_k(
+      equality_cloud, origin(), 3U, equality_exclusions);
+  const std::array<PointId, 3> equality_incumbents{
+      PointId{0}, PointId{2}, PointId{5}};
+  const ExactLbvhTopKBudget equality_budget{
+      4096U,
+      4096U,
+      4096U,
+      4096U,
+      128U,
+      3U,
+      6U};
+  const ExactBudgetedLbvhTopKResult equality =
+      lbvh_top_k_budgeted(
+          equality_index,
+          equality_cloud,
+          origin(),
+          3U,
+          equality_exclusions,
+          std::span<const PointId>{equality_incumbents},
+          equality_budget,
+          LbvhTraversalOrder::far_first);
+  check_budgeted_top_matches(
+      equality,
+      equality_reference,
+      equality_budget,
+      "the seeded six-way equality query");
+  const std::array<PointId, 1> partial_equality_incumbent{PointId{5}};
+  const ExactBudgetedLbvhTopKResult partial_equality =
+      lbvh_top_k_budgeted(
+          equality_index,
+          equality_cloud,
+          origin(),
+          3U,
+          equality_exclusions,
+          std::span<const PointId>{partial_equality_incumbent},
+          equality_budget,
+          LbvhTraversalOrder::far_first);
+  check_budgeted_top_matches(
+      partial_equality,
+      equality_reference,
+      equality_budget,
+      "the partially seeded six-way equality query");
+  check(
+      equality.audit().exact_incumbent_distance_evaluation_count == 3U &&
+          equality.audit().exact_point_distance_evaluation_count == 6U &&
+          equality.partition().cutoff_shell_ids().size() == 6U &&
+          equality.partition().query_counters().pruned_subtree_count == 0U &&
+          partial_equality.audit().supplied_incumbent_point_count == 1U &&
+          partial_equality.audit()
+                  .exact_incumbent_distance_evaluation_count ==
+              1U &&
+          partial_equality.audit().exact_point_distance_evaluation_count ==
+              6U &&
+          partial_equality.partition().query_counters()
+                  .pruned_eligible_point_count ==
+              0U,
+      "full and partial incumbent heaps preserve every member of an equal cutoff shell");
+}
+
 void test_namespace_binding_and_move_fail_closed() {
   const std::array<CertifiedPoint3, 4> input{
       point(-2.0, 0.0, 1.0),
@@ -1234,6 +1485,7 @@ int main() {
   test_bound_equality_never_prunes_complete_shells();
   test_strict_pruning_bulk_classification_and_exclusions();
   test_budgeted_top_k_exactness_and_fail_closed_limits();
+  test_budgeted_top_k_exact_incumbent_seeding();
   test_namespace_binding_and_move_fail_closed();
 
   if (failures != 0) {

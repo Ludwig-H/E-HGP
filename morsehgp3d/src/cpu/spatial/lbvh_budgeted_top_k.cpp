@@ -139,6 +139,13 @@ ExactBudgetedLbvhTopKResult::ExactBudgetedLbvhTopKResult(
           requested_budget_.maximum_cutoff_shell_entry_count) {
     throw std::logic_error("a budgeted LBVH top-k audit exceeds its budget");
   }
+  if (audit_.exact_incumbent_distance_evaluation_count >
+          audit_.supplied_incumbent_point_count ||
+      audit_.exact_incumbent_distance_evaluation_count >
+          audit_.exact_point_distance_evaluation_count) {
+    throw std::logic_error(
+        "a budgeted LBVH top-k incumbent audit is inconsistent");
+  }
   switch (status_) {
     case ExactLbvhTopKStatus::not_certified:
       throw std::logic_error(
@@ -153,7 +160,9 @@ ExactBudgetedLbvhTopKResult::ExactBudgetedLbvhTopKResult(
       {
         const SpatialQueryCounters& counters =
             partition_->query_counters();
-        if (audit_.node_visit_count != counters.node_visit_count ||
+        if (audit_.exact_incumbent_distance_evaluation_count !=
+                audit_.supplied_incumbent_point_count ||
+            audit_.node_visit_count != counters.node_visit_count ||
             audit_.internal_node_expansion_count !=
                 counters.internal_node_expansion_count ||
             audit_.exact_aabb_bound_evaluation_count !=
@@ -229,6 +238,26 @@ ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
     const ExclusionSet& exclusions,
     ExactLbvhTopKBudget budget,
     LbvhTraversalOrder traversal_order) {
+  return lbvh_top_k_budgeted(
+      index,
+      cloud,
+      query,
+      requested_rank,
+      exclusions,
+      std::span<const PointId>{},
+      budget,
+      traversal_order);
+}
+
+ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    const exact::ExactRational3& query,
+    std::size_t requested_rank,
+    const ExclusionSet& exclusions,
+    std::span<const PointId> incumbent_point_ids,
+    ExactLbvhTopKBudget budget,
+    LbvhTraversalOrder traversal_order) {
   if (!index.validated_for(cloud)) {
     throw std::invalid_argument(
         "the Morton LBVH belongs to a different canonical point namespace");
@@ -244,10 +273,39 @@ ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
     throw std::out_of_range(
         "the requested rank is outside the eligible point set");
   }
+  if (incumbent_point_ids.size() > requested_rank) {
+    throw std::invalid_argument(
+        "the incumbent set exceeds the requested rank");
+  }
+  for (std::size_t incumbent_index = 0U;
+       incumbent_index < incumbent_point_ids.size();
+       ++incumbent_index) {
+    const PointId point_id = incumbent_point_ids[incumbent_index];
+    if (!std::in_range<std::size_t>(point_id) ||
+        static_cast<std::size_t>(point_id) >= cloud.size()) {
+      throw std::out_of_range(
+          "an incumbent PointId is outside the point cloud");
+    }
+    if (exclusions.contains(point_id)) {
+      throw std::invalid_argument(
+          "an incumbent PointId cannot also be excluded");
+    }
+    if (std::find(
+            incumbent_point_ids.begin(),
+            incumbent_point_ids.begin() +
+                static_cast<std::ptrdiff_t>(incumbent_index),
+            point_id) !=
+        incumbent_point_ids.begin() +
+            static_cast<std::ptrdiff_t>(incumbent_index)) {
+      throw std::invalid_argument(
+          "the incumbent set cannot repeat a PointId");
+    }
+  }
   const exact::ExactRational3 canonical_query =
       detail::validated_query(query);
 
   ExactLbvhTopKAudit audit;
+  audit.supplied_incumbent_point_count = incumbent_point_ids.size();
   const auto exhausted = [&budget, &audit](
                              ExactLbvhTopKStopReason stop_reason) {
     return ExactBudgetedLbvhTopKResult{
@@ -269,6 +327,11 @@ ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
     return exhausted(
         ExactLbvhTopKStopReason::exact_aabb_bound_evaluation_limit);
   }
+  if (incumbent_point_ids.size() >
+      budget.maximum_exact_point_distance_evaluation_count) {
+    return exhausted(
+        ExactLbvhTopKStopReason::exact_point_distance_evaluation_limit);
+  }
 
   std::vector<BudgetedNodeQueueEntry> frontier_storage;
   frontier_storage.reserve(std::min(
@@ -280,6 +343,20 @@ ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
       nodes_to_visit{
           BudgetedNodeQueueCompare{traversal_order},
           std::move(frontier_storage)};
+  std::vector<PointId> canonical_incumbent_ids{
+      incumbent_point_ids.begin(), incumbent_point_ids.end()};
+  std::sort(
+      canonical_incumbent_ids.begin(), canonical_incumbent_ids.end());
+  std::vector<std::size_t> incumbent_leaf_positions;
+  incumbent_leaf_positions.reserve(canonical_incumbent_ids.size());
+  for (const PointId point_id : canonical_incumbent_ids) {
+    incumbent_leaf_positions.push_back(
+        index.leaf_position_by_point_id_[
+            static_cast<std::size_t>(point_id)]);
+  }
+  std::sort(
+      incumbent_leaf_positions.begin(), incumbent_leaf_positions.end());
+
   std::vector<ExactNeighbor> best_neighbors;
   best_neighbors.reserve(requested_rank);
   ProvisionalCutoffShell cutoff_shell{
@@ -291,6 +368,26 @@ ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
   counters.method = SpatialQueryMethod::morton_lbvh;
   counters.excluded_point_count = exclusions.ids().size();
 
+  const BudgetedWorstNeighborFirst best_compare;
+  for (const PointId point_id : canonical_incumbent_ids) {
+    best_neighbors.push_back(ExactNeighbor{
+        point_id,
+        detail::exact_squared_distance(
+            canonical_query, cloud.point(point_id))});
+    ++counters.exact_point_distance_evaluation_count;
+    ++audit.exact_point_distance_evaluation_count;
+    ++audit.exact_incumbent_distance_evaluation_count;
+    audit.peak_best_neighbor_entry_count = std::max(
+        audit.peak_best_neighbor_entry_count,
+        best_neighbors.size());
+    std::push_heap(
+        best_neighbors.begin(), best_neighbors.end(), best_compare);
+  }
+  if (best_neighbors.size() == requested_rank) {
+    cutoff_shell.rebuild(
+        best_neighbors, best_neighbors.front().squared_distance);
+  }
+
   exact::ExactLevel root_bound = index.minimum_squared_distance_to_node(
       cloud, index.root_index_, canonical_query);
   ++counters.exact_aabb_bound_evaluation_count;
@@ -299,7 +396,29 @@ ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
       BudgetedNodeQueueEntry{std::move(root_bound), index.root_index_});
   audit.peak_frontier_entry_count = 1U;
 
-  const BudgetedWorstNeighborFirst best_compare;
+  const auto unseeded_eligible_count_in_node =
+      [&index, &exclusions, &incumbent_leaf_positions](
+          const MortonLbvhIndex::Node& node) {
+        const auto incumbent_begin = std::lower_bound(
+            incumbent_leaf_positions.begin(),
+            incumbent_leaf_positions.end(),
+            node.leaf_begin);
+        const auto incumbent_end = std::lower_bound(
+            incumbent_begin,
+            incumbent_leaf_positions.end(),
+            node.leaf_end);
+        const std::size_t incumbent_count =
+            static_cast<std::size_t>(
+                std::distance(incumbent_begin, incumbent_end));
+        const std::size_t eligible_count =
+            index.eligible_count_in_node(node, exclusions);
+        if (incumbent_count > eligible_count) {
+          throw std::logic_error(
+              "incumbent leaves exceed an LBVH node's eligible population");
+        }
+        return eligible_count - incumbent_count;
+      };
+
   while (!nodes_to_visit.empty()) {
     if (audit.node_visit_count >= budget.maximum_node_visit_count) {
       return exhausted(ExactLbvhTopKStopReason::node_visit_limit);
@@ -317,8 +436,8 @@ ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
           best_neighbors.front().squared_distance);
       ++counters.pruned_subtree_count;
       counters.pruned_eligible_point_count +=
-          index.eligible_count_in_node(
-              index.nodes_[entry.node_index], exclusions);
+          unseeded_eligible_count_in_node(
+              index.nodes_[entry.node_index]);
       continue;
     }
 
@@ -326,6 +445,12 @@ ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
     if (node.is_leaf()) {
       const PointId point_id = index.leaves_[node.leaf_begin].point_id;
       if (exclusions.contains(point_id)) {
+        continue;
+      }
+      if (std::binary_search(
+              canonical_incumbent_ids.begin(),
+              canonical_incumbent_ids.end(),
+              point_id)) {
         continue;
       }
       if (audit.exact_point_distance_evaluation_count >=

@@ -625,6 +625,14 @@ Dans un lot, les lanes ne sont jamais exécutées comme transactions scientifiqu
 
 Cette exécution ne matérialise ni l'univers des facettes, ni Gamma, ni cofaces ou incidences globales, ni cellules, ni mosaïque de Delaunay d'ordre supérieur. Elle reste relative à l'autorité externe du locator et à l'obligation de fidélité globale des carriers, avec `deployment_status=architecture_only` et `public_status=not_claimed`. Elle ne qualifie ni le SLO 50 k, ni le régime 10 M+.
 
+### 9.19 Couture canonique et incumbents non décisionnels
+
+Lorsqu'un appelant possède déjà des clés de facettes valides, de cardinal commun, distinctes et strictement croissantes, 10.5c doit accepter leur vue directement et poser `seed_index=i`. Cette voie doit produire le même résultat que l'API générale alimentée par les records `(i,key_i)`, sans matérialiser ni trier ces records et sans recopier les clés pour les dédupliquer. Après les préflights d'autorité et de capacité communs à 10.5c, une vue non croissante, dupliquée, de cardinal mixte ou hors domaine est invalide avant toute exécution de fermeture. Si la capacité est simultanément insuffisante, son diagnostic fail-closed prévaut et ne publie aucun graphe.
+
+Une requête top-$K$ bornée peut recevoir des incumbents non scientifiques. Chaque identifiant est contrôlé et chaque distance est recalculée exactement sous le budget total avant d'initialiser la heap. Un incumbent ne certifie ni son rang, ni la complétude de la coquille, ni un successeur de descente. La traversée LBVH exacte continue jusqu'à fermeture, élague seulement sur inégalité stricte et descend toute borne égale au cutoff. Une proposition valide mais arbitrairement mauvaise doit donc conserver la partition canonique; elle ne peut modifier que le travail.
+
+Les futurs epochs, digests, classes de difficulté et compteurs GPU appartiennent à un audit opérationnel séparé. Ils ne participent ni à l'égalité du delta 14D, ni au commit scientifique. 14E ne revendique aucune exécution GPU, latence, capacité massive ou promotion publique.
+
 ## 10. Événements simultanés
 
 Des centres distincts peuvent avoir exactement le même niveau. Une exécution séquentielle créerait des bifurcations binaires artificielles et pourrait changer les morphismes verticaux.

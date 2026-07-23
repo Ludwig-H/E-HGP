@@ -315,6 +315,118 @@ void test_chain_and_shared_seed_suffix() {
       {},
       LbvhTraversalOrder::near_first,
       "the F0-to-F1-to-F2 closure");
+  const std::array<ExactDirectSparseFacetKey, 2U> canonical_distinct_keys{
+      fixture.f0,
+      fixture.f1,
+  };
+  const auto canonical_view_result =
+      build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
+          fixture.index,
+          fixture.cloud,
+          canonical_distinct_keys,
+          level(52),
+          fixture.query_witness,
+          fixture.locator,
+          fixture.budget,
+          {},
+          LbvhTraversalOrder::near_first);
+  check(
+      canonical_view_result == result &&
+          canonical_view_result.counters.strict_edge_count == 2U &&
+          canonical_view_result.edges.size() == 2U,
+      "the allocation-lean canonical distinct-key view exactly matches the general seed API on a nonzero strict chain");
+
+  const auto canonical_view_rejected =
+      [&fixture](std::span<const ExactDirectSparseFacetKey> keys) {
+        try {
+          static_cast<void>(
+              build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
+                  fixture.index,
+                  fixture.cloud,
+                  keys,
+                  level(52),
+                  fixture.query_witness,
+                  fixture.locator,
+                  fixture.budget));
+        } catch (const std::invalid_argument&) {
+          return true;
+        }
+        return false;
+      };
+  const std::array<ExactDirectSparseFacetKey, 2U> reversed_keys{
+      fixture.f1,
+      fixture.f0,
+  };
+  const std::array<ExactDirectSparseFacetKey, 2U> duplicate_keys{
+      fixture.f0,
+      fixture.f0,
+  };
+  const std::array<ExactDirectSparseFacetKey, 2U> mixed_cardinality_keys{
+      key({0U, 1U}),
+      fixture.f0,
+  };
+  ExactDirectSparseFacetKey invalid_key = fixture.f0;
+  invalid_key.point_ids.back() = 7U;
+  const std::array<ExactDirectSparseFacetKey, 1U> invalid_keys{invalid_key};
+  check(
+      canonical_view_rejected(reversed_keys) &&
+          canonical_view_rejected(duplicate_keys) &&
+          canonical_view_rejected(mixed_cardinality_keys) &&
+          canonical_view_rejected(invalid_keys),
+      "the canonical distinct-key entry rejects nonincreasing, duplicate, mixed-cardinality and invalid views before closure execution");
+
+  const auto general_far = build_exact_direct_sparse_facet_descent_closure(
+      fixture.index,
+      fixture.cloud,
+      fixture.seeds,
+      level(52),
+      fixture.query_witness,
+      fixture.locator,
+      fixture.budget,
+      {},
+      LbvhTraversalOrder::far_first);
+  const auto canonical_view_far =
+      build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
+          fixture.index,
+          fixture.cloud,
+          canonical_distinct_keys,
+          level(52),
+          fixture.query_witness,
+          fixture.locator,
+          fixture.budget,
+          {},
+          LbvhTraversalOrder::far_first);
+  check(
+      canonical_view_far == general_far &&
+          canonical_view_far.counters.strict_edge_count == 2U,
+      "the canonical distinct-key view also exactly matches the general API under far-first traversal");
+  const ExactDirectSparseFacetDescentClosureConfig collision_config{0U};
+  const auto general_collision =
+      build_exact_direct_sparse_facet_descent_closure(
+          fixture.index,
+          fixture.cloud,
+          fixture.seeds,
+          level(52),
+          fixture.query_witness,
+          fixture.locator,
+          fixture.budget,
+          collision_config);
+  const auto canonical_view_collision =
+      build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
+          fixture.index,
+          fixture.cloud,
+          canonical_distinct_keys,
+          level(52),
+          fixture.query_witness,
+          fixture.locator,
+          fixture.budget,
+          collision_config);
+  check(
+      canonical_view_collision == general_collision &&
+          canonical_view_collision.counters
+                  .equal_fingerprint_distinct_key_count !=
+              0U,
+      "the canonical distinct-key view preserves full-key authority under forced fingerprint collisions");
 
   check(
       result.certified_complete_relative_positive_closure() &&

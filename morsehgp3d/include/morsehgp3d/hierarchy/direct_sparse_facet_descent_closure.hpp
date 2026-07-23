@@ -331,6 +331,28 @@ build_exact_direct_sparse_facet_descent_closure(
     spatial::LbvhTraversalOrder traversal_order =
         spatial::LbvhTraversalOrder::near_first);
 
+// Allocation-lean entry point for an upstream executor that already owns the
+// canonical distinct source keys.  The keys must have one common cardinality
+// and be strictly increasing by complete-key order.  Their durable identities
+// are their positions [0, keys.size()).  Shape and order are checked without
+// materializing ClosureSeed records, sorting another seed array or copying a
+// second distinct-key array.  The returned scientific result is exactly the
+// one produced by the general entry point for seeds {i, keys[i]}.  As in the
+// general entry point, an insufficient seed or memo preflight wins before
+// input-shape validation and publishes no graph.
+[[nodiscard]] ExactDirectSparseFacetDescentClosureResult
+build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const ExactDirectSparseFacetKey> canonical_distinct_keys,
+    const exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetDescentClosureBudget& budget,
+    const ExactDirectSparseFacetDescentClosureConfig& config = {},
+    spatial::LbvhTraversalOrder traversal_order =
+        spatial::LbvhTraversalOrder::near_first);
+
 // The same external locator freeze is required throughout fresh replay.
 [[nodiscard]] ExactDirectSparseFacetDescentClosureVerification
 verify_exact_direct_sparse_facet_descent_closure(

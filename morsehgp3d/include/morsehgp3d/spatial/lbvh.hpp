@@ -87,7 +87,8 @@ enum class ExactLbvhTopKStopReason : std::uint8_t {
 // decreases, and is a terminal exhaustion otherwise.
 // If several zero/short caps block the same transition, the deterministic
 // priority is best-neighbor, frontier, then root AABB during preflight, and
-// internal expansion, frontier, then child AABBs at an internal node.
+// then incumbent distance when proposals are supplied.  At an internal node,
+// the priority is internal expansion, frontier, then child AABBs.
 struct ExactLbvhTopKBudget {
   std::size_t maximum_node_visit_count{};
   std::size_t maximum_internal_node_expansion_count{};
@@ -110,6 +111,8 @@ struct ExactLbvhTopKAudit {
   std::size_t internal_node_expansion_count{};
   std::size_t exact_aabb_bound_evaluation_count{};
   std::size_t exact_point_distance_evaluation_count{};
+  std::size_t supplied_incumbent_point_count{};
+  std::size_t exact_incumbent_distance_evaluation_count{};
   std::size_t peak_frontier_entry_count{};
   std::size_t peak_best_neighbor_entry_count{};
   std::size_t peak_retained_cutoff_shell_entry_count{};
@@ -170,6 +173,15 @@ class ExactBudgetedLbvhTopKResult {
       const exact::ExactRational3& query,
       std::size_t requested_rank,
       const ExclusionSet& exclusions,
+      ExactLbvhTopKBudget budget,
+      LbvhTraversalOrder traversal_order);
+  friend ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
+      const MortonLbvhIndex& index,
+      const CanonicalPointCloud& cloud,
+      const exact::ExactRational3& query,
+      std::size_t requested_rank,
+      const ExclusionSet& exclusions,
+      std::span<const PointId> incumbent_point_ids,
       ExactLbvhTopKBudget budget,
       LbvhTraversalOrder traversal_order);
 };
@@ -277,6 +289,15 @@ class MortonLbvhIndex {
       const ExclusionSet& exclusions,
       ExactLbvhTopKBudget budget,
       LbvhTraversalOrder traversal_order);
+  friend ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
+      const MortonLbvhIndex& index,
+      const CanonicalPointCloud& cloud,
+      const exact::ExactRational3& query,
+      std::size_t requested_rank,
+      const ExclusionSet& exclusions,
+      std::span<const PointId> incumbent_point_ids,
+      ExactLbvhTopKBudget budget,
+      LbvhTraversalOrder traversal_order);
   friend ClosedBallPartition lbvh_closed_ball(
       const MortonLbvhIndex& index,
       const CanonicalPointCloud& cloud,
@@ -325,6 +346,19 @@ class MortonLbvhIndex {
     const exact::ExactRational3& query,
     std::size_t requested_rank,
     const ExclusionSet& exclusions,
+    ExactLbvhTopKBudget budget,
+    LbvhTraversalOrder traversal_order = LbvhTraversalOrder::near_first);
+
+// Incumbents are bounded proposal data, not trusted distances.  Every supplied
+// PointId is validated and re-evaluated exactly, then only seeds the same
+// strict-pruning traversal and complete-cutoff-shell construction used above.
+[[nodiscard]] ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    const exact::ExactRational3& query,
+    std::size_t requested_rank,
+    const ExclusionSet& exclusions,
+    std::span<const PointId> incumbent_point_ids,
     ExactLbvhTopKBudget budget,
     LbvhTraversalOrder traversal_order = LbvhTraversalOrder::near_first);
 

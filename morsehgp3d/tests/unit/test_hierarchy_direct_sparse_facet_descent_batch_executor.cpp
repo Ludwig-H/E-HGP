@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <span>
 #include <stdexcept>
@@ -129,6 +130,18 @@ struct Scenario {
   return make_scenario(canonical_cloud(points), 5U);
 }
 
+[[nodiscard]] Scenario ac_to_de_order_two_scenario() {
+  // Input labels A, B, C, D, E canonicalize to D=0, A=1, B=2, C=3, E=4.
+  const std::array<CertifiedPoint3, 5U> points{
+      point(0.0, 0.0, 7.0),
+      point(0.0, 9.0, 6.0),
+      point(1.0, 4.0, 0.0),
+      point(0.0, 0.0, 1.0),
+      point(4.0, 1.0, 2.0),
+  };
+  return make_scenario(canonical_cloud(points), 2U);
+}
+
 [[nodiscard]] ExactDirectMorseIndustrialPlanConfig plan_config(
     ExactDirectMorseIndustrialPolicy policy =
         ExactDirectMorseIndustrialPolicy::interactive_resident_50k,
@@ -246,6 +259,16 @@ execution_budget() {
     }
   }
   return left.point_count < right.point_count;
+}
+
+[[nodiscard]] ExactDirectSparseFacetKey two_point_key(
+    PointId first,
+    PointId second) {
+  ExactDirectSparseFacetKey key;
+  key.point_ids[0U] = first;
+  key.point_ids[1U] = second;
+  key.point_count = 2U;
+  return key;
 }
 
 [[nodiscard]] ExactDirectSparseFacetKey facet_key(
@@ -720,6 +743,100 @@ void test_mixed_lanes_feed_one_shared_closure() {
       "the mixed-lane batch reuses the one anchored plan and releases every closure before the next batch");
 }
 
+void test_canonical_key_view_executes_nonzero_strict_edge() {
+  const Scenario scenario = ac_to_de_order_two_scenario();
+  const auto observed_plan = build_plan(scenario);
+  const ExactDirectSparseFacetKey ac = two_point_key(1U, 3U);
+  const ExactDirectSparseFacetKey de = two_point_key(0U, 4U);
+
+  std::vector<ExactDirectSparseFacetKey> positive_keys =
+      all_distinct_arm_keys(scenario);
+  positive_keys.erase(
+      std::remove(positive_keys.begin(), positive_keys.end(), ac),
+      positive_keys.end());
+  positive_keys.push_back(de);
+  std::sort(positive_keys.begin(), positive_keys.end(), key_less);
+  positive_keys.erase(
+      std::unique(positive_keys.begin(), positive_keys.end()),
+      positive_keys.end());
+  const auto de_position =
+      std::lower_bound(positive_keys.begin(), positive_keys.end(), de, key_less);
+  check(
+      observed_plan.complete_architecture_plan() &&
+          de_position != positive_keys.end() && *de_position == de,
+      "the E5 14D fixture owns one complete plan and one pre-bound DE carrier");
+  if (!observed_plan.complete_architecture_plan() ||
+      de_position == positive_keys.end() || *de_position != de) {
+    return;
+  }
+  const std::size_t de_handle =
+      static_cast<std::size_t>(
+          std::distance(positive_keys.begin(), de_position));
+
+  ExactDirectSparsePositiveFacetLocator locator =
+      make_locator(positive_keys.size());
+  bind_positive_keys(locator, positive_keys);
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      source_seed_budget(),
+      scenario.seed_journal,
+      plan_config(),
+      plan_budget(),
+      observed_plan,
+      locator);
+
+  bool strict_ac_edge_observed = false;
+  while (!executor.complete()) {
+    const std::size_t batch_index = executor.next_source_batch_index();
+    const auto batch_witness = query_witness(
+        UINT64_C(3000) + static_cast<std::uint64_t>(batch_index));
+    const auto prepared = executor.prepare_next(
+        batch_witness, execution_budget(), closure_budget());
+    check(
+        prepared.complete_architecture_execution(),
+        "every E5 prefix lot remains complete when all arm keys except AC are pre-bound");
+    if (!prepared.complete_architecture_execution()) {
+      break;
+    }
+
+    const auto ac_resolution = std::find_if(
+        prepared.resolved_keys.begin(),
+        prepared.resolved_keys.end(),
+        [&ac](
+            const ExactDirectSparseFacetDescentBatchResolvedKey& resolved) {
+          return resolved.source_facet_key == ac;
+        });
+    if (ac_resolution != prepared.resolved_keys.end()) {
+      strict_ac_edge_observed =
+          prepared.closure_summary.transient_edge_count != 0U &&
+          prepared.closure_summary.counters.strict_edge_count != 0U &&
+          prepared.closure_summary.counters.successor_positive_hit_count !=
+              0U &&
+          ac_resolution->resolved_component_handle == de_handle &&
+          prepared.transient_closure_released_before_delta_publication &&
+          !prepared.closure_graph_persisted;
+    }
+
+    const auto accepted = executor.commit_prepared(
+        batch_witness, execution_budget(), closure_budget(), prepared);
+    check(
+        accepted.result_certified && accepted.session_advanced,
+        "the E5 strict-edge lot and its prefixes replay exactly through the anchored session");
+    if (!accepted.session_advanced) {
+      break;
+    }
+  }
+  check(
+      strict_ac_edge_observed && executor.complete() &&
+          executor.audit().maximum_transient_closure_node_count >= 2U &&
+          executor.audit().retained_closure_node_count == 0U &&
+          !executor.audit().closure_graph_retained_between_batches,
+      "14D feeds AC through the canonical distinct-key view to a nonzero strict edge ending at DE, then releases the graph");
+}
+
 void test_falsified_plan_is_rejected_at_session_open() {
   const Scenario scenario = regular_tetrahedron_order_one_scenario();
   auto falsified_plan = build_plan(scenario);
@@ -761,6 +878,7 @@ int main() {
   test_anchored_multibatch_retries_and_transient_closure_release();
   test_streaming_session_advances_across_chunk_boundaries();
   test_mixed_lanes_feed_one_shared_closure();
+  test_canonical_key_view_executes_nonzero_strict_edge();
   test_falsified_plan_is_rejected_at_session_open();
 
   if (failures != 0) {

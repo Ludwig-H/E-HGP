@@ -1167,6 +1167,16 @@ Le graphe, les arêtes, les projections de graines, les miniballs et la mémoïs
 
 14D est commun au profil résident et au profil streaming, mais ne suffit pas à les qualifier : le premier doit encore recevoir la voie de propositions GPU et le protocole `warm_e2e`; le second doit évacuer les deltas vers des runs et checkpoints durables au lieu de les accumuler. Aucune facette absente, Gamma, coface globale, cellule ou mosaïque de Delaunay d'ordre supérieur n'est construite, et aucune revendication 50 k, 10 M+ ou `public_status=exact` n'est faite.
 
+### Couture canonique de fermeture 14E
+
+L'exécuteur 14D possède déjà les $D$ clés initiales distinctes dans l'ordre canonique. La nouvelle entrée `build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys` consomme directement cette vue, vérifie sans allocation la validité, le cardinal commun et l'ordre strict des clés, puis attribue implicitement `seed_index=i`. L'API générale 10.5c reste disponible pour les graines désordonnées ou dupliquées et produit exactement le même résultat scientifique.
+
+Sur ABI LP64, la voie précédente conservait pendant la fermeture un tableau 14D de $D$ clés, puis $D$ records de graines de 96 octets, une copie triée de ces records et un second tableau de clés de 88 octets. La couture directe supprime les trois dernières populations, soit $280D$ octets au pic, trois allocations, un tri d'identités et un tri-déduplication déjà effectués. Ce chiffre ABI-spécifique doit être remesuré ailleurs; la borne logique du delta reste $O(KD+A)$ et aucun graphe ne survit au lot.
+
+La primitive top-$K$ bornée accepte en outre une vue facultative d'incumbents. Chaque `PointId` est contrôlé puis sa distance est recalculée exactement sous le cap existant; les incumbents initialisent seulement la heap et sa borne supérieure. La traversée LBVH reste complète, l'élagage reste strict et une borne égale descend toujours pour fermer toute la coquille. Cette primitive ne constitue pas encore un transcript de lot ni une voie GPU qualifiée : elle est la couture CPU exacte sur laquelle 14F branchera les propositions.
+
+14E ne change aucune décision 10.5c, ne matérialise ni facette supplémentaire, ni coface globale, ni Gamma, ni cellule, ni mosaïque de Delaunay d'ordre supérieur, et ne qualifie ni temps ni volume.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;
