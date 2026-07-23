@@ -1187,6 +1187,18 @@ L'enveloppe 10.5c de 14F revalide atomiquement le lot, le niveau exact, le stamp
 
 Ce premier raccord 14F reste hôte et n'est pas encore branché à la préparation/validation du curseur 14D. Il ne contient ni producteur CUDA, ni epoch GPU, ni digest de buffer, ni classe de difficulté utilisée par l'ordonnanceur et ne qualifie ni `warm_e2e`, ni 50 k, ni 10 M+. Le transcript sparse vaut $O(KR)$ pour $R\leq D$ records proposés et n'introduit aucune facette absente, coface globale, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur.
 
+### Préparation synchrone 14G
+
+`prepare_next_with_top_k_proposal_transcript` raccorde le transcript 14F au curseur ancré 14D sans modifier `commit_prepared`. L'exécuteur joint d'abord le plan, le chunk, le lot et les lanes, contrôle les caps de sélection, reconstruit les bras puis les $D$ clés canoniques distinctes; il ne consomme le transcript qu'après ces préflights. Un cap insuffisant garde donc la priorité et ne publie ni audit propositionnel, ni delta.
+
+La consommation reste synchrone sous le snapshot locator gelé. Un transcript périmé ou invalide donne une enveloppe de rejet atomique avec zéro fermeture, zéro delta et un curseur inchangé. Le raccourci scientifique du lot vide reste sans fermeture dans le delta 14D, mais un transcript explicitement fourni y est tout de même revalidé et son audit séparé enregistre une construction de fermeture vide. Sur succès, l'enveloppe conserve seulement le delta scientifique 14D inchangé et l'audit scalaire 14F; elle ne possède aucun record, candidat, graphe, partition ou coquille.
+
+Le transcript peut être détruit dès le retour de la préparation. Le commit historique reçoit uniquement le delta, reconstruit le lot courant par la voie exacte non amorcée et exige l'égalité complète avant d'avancer. Les propositions vides, utiles ou adversariales peuvent donc modifier le travail observé, jamais l'autorité du commit. Une préparation complète ne certifie toutefois pas que ce rejeu sans proposition tient sous les mêmes caps : un budget situé entre les travaux amorcé et non amorcé peut encore bloquer l'avancement sans compromettre la sûreté. Fermer cette dette de vivacité sans donner d'autorité à l'audit est le prochain verrou transactionnel.
+
+Le delta logique vaut $O(KD+A)$, le scratch de sélection formé par `SelectedArm` et les clés distinctes vaut $O(KA+KD)$, et le transcript fourni par l'appelant vaut $O(KR)$ avec $R\leq D$. Ces objets peuvent coexister avec l'unique fermeture 10.5c transitoire; 14G ne qualifie donc aucun pic mémoire global.
+
+14G reste hôte, `architecture_only` et `public_status=not_claimed`. Il n'apporte encore ni producteur CUDA, ni epoch ou digest de buffer, ni scheduler de difficulté, ni arène réutilisable, ni protocole `warm_e2e`, ni runs/checkpoints durables, et ne qualifie ni 50 k sous la seconde, ni 10 M+.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;

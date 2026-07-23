@@ -52,16 +52,26 @@ Chaque requête 14F utilise la facette source $F$ comme baseline exacte et une p
 
 La fermeture scientifique et l'audit opérationnel sont deux payloads distincts. L'audit compte les lignes utilisées ou absentes, les fallbacks dynamiques, les tailles de pools, les distances, visites, expansions, bornes, élagages, scans complets et épuisements. Le graphe ne retient ni transcript, ni candidat, ni partition top-$K$, ni coquille. Les entrées historiques de 10.5c restent non amorcées.
 
-Ce raccord ne fait encore partie ni de `prepare_next`, ni de `commit_prepared` dans la session 14D. Il ne lance aucun kernel GPU et ne possède ni epoch, ni digest de contexte, ni scheduler par difficulté. Il ne qualifie ni le p95 50 k, ni la capacité 10 M+, ni un statut public.
+Pris isolément, ce raccord ne modifie ni `prepare_next`, ni `commit_prepared` dans la session 14D. Il ne lance aucun kernel GPU et ne possède ni epoch, ni digest de contexte, ni scheduler par difficulté. Il ne qualifie ni le p95 50 k, ni la capacité 10 M+, ni un statut public.
 
 La validation courte finale du 23 juillet 2026 passe les trois CTests transcript, spatial et fermeture sous GCC Release en 0,18 s et sous Clang 18 Release en 0,13 s. Le garde statique 10.5c passe également. L'installation/export puis le consumer externe passent 1/1 avec des appels réels au constructeur de transcript, au pool exact $F\cup P$ et à l'enveloppe vide de fermeture. Aucun benchmark, test massif, sanitizer, GPU ou GCP n'a été lancé.
 
+## Incrément 14G livré — préparation propositionnelle sans autorité de commit
+
+La nouvelle entrée de session prépare le lot courant avec un transcript 14F après les jointures, caps 14D, reconstructions de bras et clés canoniques. Elle garde donc la priorité des diagnostics structurels et de capacité. Le lot vide revalide lui aussi tout transcript explicite, bien que son delta scientifique conserve le raccourci historique sans fermeture.
+
+Un rejet de transcript produit zéro fermeture, zéro delta et zéro avancement. Un succès retourne le delta 14D complet et l'audit de consommation dans deux champs distincts; ni le résultat ni la session ne retiennent record, candidat, partition, coquille ou graphe. Le transcript peut ensuite être détruit. `commit_prepared` demeure inchangé et sans paramètre propositionnel : il rejoue exactement le lot courant par la voie historique non amorcée, compare le delta entier et ignore par construction l'audit opérationnel. Une préparation complète ne certifie pas que ce rejeu tient sous les mêmes caps; cette dette de vivacité reste ouverte.
+
+Sur E5, les transcripts vide, utile `AC` vers les points de `DE` et adversarial produisent le même delta champ par champ, tandis que leurs tailles de pools restent visibles dans l'audit séparé. Un mauvais indice de lot rejette avant fermeture. Le scratch de sélection reste $O(KA+KD)$, le transcript fourni par l'appelant vaut $O(KR)$ avec $R\leq D$, et le delta vaut $O(KD+A)$; ils peuvent coexister avec la fermeture transitoire, donc aucun pic mémoire global n'est qualifié. 14G ne ferme encore ni le doublon du rejeu exact, ni le pic des clés de bras.
+
+14G reste `reference_cpu`, `hgp_reduced`, scientifique `certified`, déploiement `architecture_only` et `public_status=not_claimed`. Aucun producteur CUDA, epoch, digest, scheduler de difficulté, scratch réutilisable, protocole `warm_e2e`, run durable ou checkpoint n'est ajouté.
+
 ## Priorités de développement
 
-1. raccorder le transcript 14F à la préparation et au rejeu du lot courant dans la session 14D, puis seulement à un producteur GPU borné;
-2. réutiliser les capacités restantes de scratch sans conserver de graphe ou d'objet scientifique entre lots;
-3. ajouter l'instrumentation `warm_e2e` après ces réductions structurelles;
-4. rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
+1. fermer la vivacité préparation--commit sous budget sans donner d'autorité scientifique au transcript;
+2. brancher ensuite un producteur GPU borné sur cette frontière;
+3. réutiliser les capacités restantes de scratch sans conserver de graphe ou d'objet scientifique entre lots;
+4. ajouter l'instrumentation `warm_e2e`, puis rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 
@@ -76,6 +86,8 @@ Pour 14C, les deux CTests ciblés passent sous GCC Release strict en 0,16 second
 Pour 14D, l'unique CTest ciblé passe sous GCC Release strict en 0,02 seconde et sous Clang Release strict en 0,03 seconde. Il couvre une session à deux lots avec un seul ancrage 14C, un lot vide, le rejet inconditionnel d'un cap 10.5c hors plafond, les douze bras du tétraèdre dédupliqués en quatre clés, deux lanes de supports deux et trois partageant une fermeture, les caps insuffisants de onze bras et trois clés sans delta ni avancement, les retries, un stamp locator périmé, le retry sous le nouveau stamp, une traversée streaming de deux chunks, les mutations d'indice et de compteur du delta et un plan falsifié rejeté à l'ouverture. L'audit conserve zéro nœud après chaque fermeture. L'installation, l'export de `direct_sparse_facet_descent_batch_executor` et le consumer externe passent 1/1 avec appel réel du prédicat non-inline. Aucun benchmark, GPU, sanitizer, oracle long, test massif ou GCP n'est lancé.
 
 Pour 14E, les trois CTests ciblés passent sous GCC Release strict en 0,24 seconde et sous Clang Release strict en 0,15 seconde sur le dernier rejeu. Ils comparent bit à bit l'entrée canonique et l'API générale 10.5c sur une vraie chaîne à arêtes strictes, rejettent les vues non croissantes, dupliquées, de cardinal mixte ou invalides, puis font traverser à 14D la descente exacte `AC` vers le terminal positif `DE` sans retenir son graphe. Le test spatial séparé compare la voie sans incumbent, une bonne proposition, une heap partiellement initialisée et une proposition adversariale, exerce le cap exact juste insuffisant, les identifiants invalides, répétés ou exclus, et une coquille à six égalités qu'aucun prune non strict ne peut tronquer. L'installation, l'export et le consumer externe passent 1/1 en appelant réellement les deux nouveaux symboles. Aucun benchmark, kernel GPU, test massif ou GCP n'est lancé.
+
+Pour 14G, l'unique CTest ciblé passe sous GCC Release strict en 0,05 seconde et sous Clang 18 Release strict en 0,04 seconde. Il couvre la priorité du cap de clés avant transcript, la revalidation du lot vide, le rejet atomique d'un mauvais lot, les préparations E5 vide, utile et adversariale avec égalité complète du delta, la conservation arithmétique de l'audit, la destruction des payloads avant commit et le rejeu historique non amorcé sous caps généreux. Le garde statique 10.5c et le checker des statuts passent. L'installation/export puis le consumer externe passent 1/1 en 0,01 seconde; le consumer appelle le nouveau prédicat non inline sur une enveloppe vide, tandis que la méthode de préparation réelle reste couverte par le CTest unitaire. Aucun benchmark, sanitizer, GPU, oracle long, test massif ou GCP n'est lancé.
 
 Une falsification coordonnée pourrait encore redistribuer des compteurs entre chunks 14A ou lanes 14C tout en conservant leurs agrégats. Les payloads compacts ne contiennent volontairement ni détail ni digest par lot; un vérificateur frais contre 10.1--10.2 est donc requis avant persistance ou exécution industrielle. Cette dette P2 est compatible avec `architecture_only`, mais devra être fermée avant toute qualification.
 

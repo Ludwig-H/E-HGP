@@ -668,7 +668,9 @@ add_executable(
 )
 target_link_libraries(
   morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_executor_tests
-  PRIVATE morsehgp3d::direct_sparse_facet_descent_batch_executor
+  PRIVATE
+    morsehgp3d::direct_sparse_facet_descent_batch_executor
+    morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
 )
 if(MSVC)
   target_compile_options(

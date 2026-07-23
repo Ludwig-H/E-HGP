@@ -5,8 +5,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <initializer_list>
 #include <iterator>
 #include <limits>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -271,6 +273,53 @@ execution_budget() {
   return key;
 }
 
+[[nodiscard]] ExactDirectSparseFacetTopKProposalRecord proposal_record(
+    const ExactDirectSparseFacetKey& source_facet_key,
+    std::initializer_list<PointId> candidate_point_ids) {
+  ExactDirectSparseFacetTopKProposalRecord record;
+  record.source_facet_key = source_facet_key;
+  record.candidate_point_count = candidate_point_ids.size();
+  std::copy(
+      candidate_point_ids.begin(),
+      candidate_point_ids.end(),
+      record.candidate_point_ids.begin());
+  return record;
+}
+
+[[nodiscard]] ExactDirectSparseFacetTopKProposalTranscriptBudget
+proposal_transcript_budget(
+    std::span<const ExactDirectSparseFacetTopKProposalRecord> records) {
+  std::size_t facet_key_point_reference_count = 0U;
+  std::size_t candidate_point_reference_count = 0U;
+  for (const auto& record : records) {
+    facet_key_point_reference_count +=
+        record.source_facet_key.point_count;
+    candidate_point_reference_count += record.candidate_point_count;
+  }
+  return {
+      records.size(),
+      facet_key_point_reference_count,
+      candidate_point_reference_count,
+      records.size() * sizeof(ExactDirectSparseFacetTopKProposalRecord),
+      records.size() + facet_key_point_reference_count +
+          candidate_point_reference_count,
+  };
+}
+
+[[nodiscard]] ExactDirectSparseFacetTopKProposalTranscriptResult
+proposal_transcript(
+    std::size_t source_batch_index,
+    const morsehgp3d::exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    std::span<const ExactDirectSparseFacetTopKProposalRecord> records) {
+  return build_exact_direct_sparse_facet_top_k_proposal_transcript(
+      {source_batch_index,
+       closed_batch_squared_level,
+       locator.snapshot_stamp()},
+      records,
+      proposal_transcript_budget(records));
+}
+
 [[nodiscard]] ExactDirectSparseFacetKey facet_key(
     const ExactDirectSaddleArmFacet& facet) {
   ExactDirectSparseFacetKey key;
@@ -429,8 +478,40 @@ void test_anchored_multibatch_retries_and_transient_closure_release() {
 
   const auto retried_first =
       executor.prepare_next(first_witness, execution_caps, closure_caps);
-  const auto accepted_first = executor.commit_prepared(
-      first_witness, execution_caps, closure_caps, retried_first);
+  const std::array<ExactDirectSparseFacetTopKProposalRecord, 0U>
+      empty_proposal_records{};
+  const auto empty_first_transcript = proposal_transcript(
+      0U,
+      retried_first.closed_batch_squared_level,
+      locator,
+      empty_proposal_records);
+  const auto proposal_retried_first =
+      executor.prepare_next_with_top_k_proposal_transcript(
+          first_witness,
+          execution_caps,
+          closure_caps,
+          empty_first_transcript);
+  check(
+      proposal_retried_first.complete_architecture_preparation() &&
+          proposal_retried_first.certified_outcome() &&
+          proposal_retried_first.scientific_delta.has_value() &&
+          *proposal_retried_first.scientific_delta == retried_first &&
+          proposal_retried_first.proposal_consumption_audit.has_value() &&
+          proposal_retried_first.proposal_consumption_audit
+                  ->closure_build_count == 1U &&
+          proposal_retried_first.proposal_consumption_audit
+                  ->top_k_query_count == 0U &&
+          executor.next_source_batch_index() == 0U,
+      "an explicit empty transcript is revalidated on the empty batch while preserving the historical zero-closure delta");
+  const ExactDirectSparseFacetDescentBatchExecutionVerification
+      accepted_first =
+          proposal_retried_first.scientific_delta.has_value()
+              ? executor.commit_prepared(
+                    first_witness,
+                    execution_caps,
+                    closure_caps,
+                    *proposal_retried_first.scientific_delta)
+              : ExactDirectSparseFacetDescentBatchExecutionVerification{};
   check(
       accepted_first.result_certified &&
           accepted_first.session_advanced &&
@@ -481,6 +562,33 @@ void test_anchored_multibatch_retries_and_transient_closure_release() {
           resolved_key_exhausted.resolved_keys.empty() &&
           executor.next_source_batch_index() == 1U,
       "a resolved-key cap of three rejects four distinct keys before closure or partial delta");
+  const auto preflight_transcript = proposal_transcript(
+      1U,
+      resolved_key_exhausted.closed_batch_squared_level,
+      locator,
+      empty_proposal_records);
+  const auto proposal_preflight_rejection =
+      executor.prepare_next_with_top_k_proposal_transcript(
+          query_witness(UINT64_C(6)),
+          one_resolved_key_short,
+          closure_caps,
+          preflight_transcript);
+  check(
+      proposal_preflight_rejection.decision ==
+              ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+                  no_preparation_batch_diagnostic_before_proposal_consumption &&
+          proposal_preflight_rejection.batch_execution_decision ==
+              ExactDirectSparseFacetDescentBatchExecutionDecision::
+                  no_execution_batch_budget_exhausted &&
+          proposal_preflight_rejection.batch_diagnostic.has_value() &&
+          proposal_preflight_rejection.batch_diagnostic->decision ==
+              ExactDirectSparseFacetDescentBatchExecutionDecision::
+                  no_execution_batch_budget_exhausted &&
+          !proposal_preflight_rejection
+               .proposal_consumption_audit.has_value() &&
+          !proposal_preflight_rejection.scientific_delta.has_value() &&
+          executor.next_source_batch_index() == 1U,
+      "the resolved-key cap keeps priority over transcript validation and publishes neither proposal audit nor delta");
   const auto resolved_key_exhausted_replay = executor.commit_prepared(
       query_witness(UINT64_C(6)),
       one_resolved_key_short,
@@ -551,15 +659,21 @@ void test_anchored_multibatch_retries_and_transient_closure_release() {
       accepted.result_certified && accepted.session_advanced &&
           executor.complete() &&
           audit.source_plan_verification_count == 1U &&
-          audit.prepare_attempt_count == 5U &&
+          audit.prepare_attempt_count == 7U &&
           audit.fresh_batch_replay_count == 5U &&
           audit.accepted_batch_count == 2U &&
           audit.rejected_batch_replay_count == 3U &&
           audit.transient_closure_build_count == 2U &&
           audit.maximum_transient_closure_node_count == 4U &&
           audit.retained_closure_node_count == 0U &&
+          audit.proposal_prepare_attempt_count == 2U &&
+          audit.proposal_consumption_attempt_count == 1U &&
+          audit.proposal_transcript_rejection_count == 0U &&
+          audit.proposal_exact_closure_call_count == 1U &&
+          audit.retained_proposal_record_count == 0U &&
           !audit.full_source_plan_replayed_per_batch &&
-          !audit.closure_graph_retained_between_batches,
+          !audit.closure_graph_retained_between_batches &&
+          !audit.proposal_payload_or_audit_retained_between_calls,
       "the two-batch session verifies its source once and retains no closure graph across retries or batches");
 }
 
@@ -789,6 +903,7 @@ void test_canonical_key_view_executes_nonzero_strict_edge() {
       locator);
 
   bool strict_ac_edge_observed = false;
+  bool proposal_preparation_seam_observed = false;
   while (!executor.complete()) {
     const std::size_t batch_index = executor.next_source_batch_index();
     const auto batch_witness = query_witness(
@@ -809,19 +924,148 @@ void test_canonical_key_view_executes_nonzero_strict_edge() {
             const ExactDirectSparseFacetDescentBatchResolvedKey& resolved) {
           return resolved.source_facet_key == ac;
         });
+    std::optional<ExactDirectSparseFacetDescentBatchExecutionResult>
+        proposal_commit_delta;
     if (ac_resolution != prepared.resolved_keys.end()) {
       strict_ac_edge_observed =
-          prepared.closure_summary.transient_edge_count != 0U &&
-          prepared.closure_summary.counters.strict_edge_count != 0U &&
-          prepared.closure_summary.counters.successor_positive_hit_count !=
-              0U &&
-          ac_resolution->resolved_component_handle == de_handle &&
-          prepared.transient_closure_released_before_delta_publication &&
-          !prepared.closure_graph_persisted;
+          strict_ac_edge_observed ||
+          (prepared.closure_summary.transient_edge_count != 0U &&
+           prepared.closure_summary.counters.strict_edge_count != 0U &&
+           prepared.closure_summary.counters
+                   .successor_positive_hit_count != 0U &&
+           ac_resolution->resolved_component_handle == de_handle &&
+           prepared.transient_closure_released_before_delta_publication &&
+           !prepared.closure_graph_persisted);
+
+      {
+        const std::array<ExactDirectSparseFacetTopKProposalRecord, 0U>
+            empty_records{};
+        const std::array<ExactDirectSparseFacetTopKProposalRecord, 1U>
+            useful_records{proposal_record(ac, {0U, 4U})};
+        const std::array<ExactDirectSparseFacetTopKProposalRecord, 1U>
+            adversarial_records{proposal_record(ac, {2U})};
+        const auto empty_transcript = proposal_transcript(
+            batch_index,
+            prepared.closed_batch_squared_level,
+            locator,
+            empty_records);
+        const auto useful_transcript = proposal_transcript(
+            batch_index,
+            prepared.closed_batch_squared_level,
+            locator,
+            useful_records);
+        const auto adversarial_transcript = proposal_transcript(
+            batch_index,
+            prepared.closed_batch_squared_level,
+            locator,
+            adversarial_records);
+        auto stale_transcript = useful_transcript;
+        ++stale_transcript.metadata.source_batch_index;
+
+        const auto stale =
+            executor.prepare_next_with_top_k_proposal_transcript(
+                batch_witness,
+                execution_budget(),
+                closure_budget(),
+                stale_transcript);
+        const auto empty =
+            executor.prepare_next_with_top_k_proposal_transcript(
+                batch_witness,
+                execution_budget(),
+                closure_budget(),
+                empty_transcript);
+        const auto useful =
+            executor.prepare_next_with_top_k_proposal_transcript(
+                batch_witness,
+                execution_budget(),
+                closure_budget(),
+                useful_transcript);
+        const auto adversarial =
+            executor.prepare_next_with_top_k_proposal_transcript(
+                batch_witness,
+                execution_budget(),
+                closure_budget(),
+                adversarial_transcript);
+
+        check(
+            stale.certified_atomic_transcript_rejection() &&
+                stale.certified_outcome() &&
+                !stale.scientific_delta.has_value() &&
+                stale.proposal_consumption_audit.has_value() &&
+                stale.proposal_consumption_audit->closure_build_count == 0U &&
+                executor.next_source_batch_index() == batch_index,
+            "a stale 14G transcript is rejected atomically before closure and leaves the anchored cursor unchanged");
+        check(
+            empty.complete_architecture_preparation() &&
+                useful.complete_architecture_preparation() &&
+                adversarial.complete_architecture_preparation() &&
+                empty.scientific_delta.has_value() &&
+                useful.scientific_delta.has_value() &&
+                adversarial.scientific_delta.has_value() &&
+                *empty.scientific_delta == prepared &&
+                *useful.scientific_delta == prepared &&
+                *adversarial.scientific_delta == prepared &&
+                executor.next_source_batch_index() == batch_index,
+            "empty, useful and adversarial transcripts preserve the complete historical 14D delta field for field");
+        auto falsified_audit = useful;
+        if (falsified_audit.proposal_consumption_audit.has_value()) {
+          ++falsified_audit.proposal_consumption_audit
+                ->proposal_point_reference_count;
+        }
+        check(
+            !falsified_audit.complete_architecture_preparation(),
+            "the 14G predicate rejects a falsified proposal-pool conservation count");
+
+        if (empty.proposal_consumption_audit.has_value() &&
+            useful.proposal_consumption_audit.has_value() &&
+            adversarial.proposal_consumption_audit.has_value()) {
+          const auto& empty_audit =
+              *empty.proposal_consumption_audit;
+          const auto& useful_audit =
+              *useful.proposal_consumption_audit;
+          const auto& adversarial_audit =
+              *adversarial.proposal_consumption_audit;
+          check(
+              empty_audit.top_k_query_count == 1U &&
+                  empty_audit.nonempty_proposal_hit_query_count == 0U &&
+                  empty_audit
+                          .missing_initial_record_fallback_query_count == 1U &&
+                  empty_audit.baseline_facet_point_reference_count == 2U &&
+                  empty_audit.proposal_point_reference_count == 0U &&
+                  empty_audit.union_point_reference_count == 2U &&
+                  useful_audit.top_k_query_count == 1U &&
+                  useful_audit.nonempty_proposal_hit_query_count == 1U &&
+                  useful_audit.baseline_facet_point_reference_count == 2U &&
+                  useful_audit.proposal_point_reference_count == 2U &&
+                  useful_audit.union_point_reference_count == 4U &&
+                  useful_audit.deduplicated_point_reference_count == 0U &&
+                  adversarial_audit.top_k_query_count == 1U &&
+                  adversarial_audit.nonempty_proposal_hit_query_count == 1U &&
+                  adversarial_audit
+                          .baseline_facet_point_reference_count == 2U &&
+                  adversarial_audit.proposal_point_reference_count == 1U &&
+                  adversarial_audit.union_point_reference_count == 3U &&
+                  adversarial_audit
+                          .deduplicated_point_reference_count == 0U,
+              "14G keeps proposal quality visible only in the separate exact-work audit");
+        }
+        if (useful.scientific_delta.has_value()) {
+          proposal_commit_delta = *useful.scientific_delta;
+          proposal_preparation_seam_observed = true;
+        }
+      }
     }
 
+    const ExactDirectSparseFacetDescentBatchExecutionResult&
+        delta_for_unseeded_commit =
+            proposal_commit_delta.has_value()
+                ? *proposal_commit_delta
+                : prepared;
     const auto accepted = executor.commit_prepared(
-        batch_witness, execution_budget(), closure_budget(), prepared);
+        batch_witness,
+        execution_budget(),
+        closure_budget(),
+        delta_for_unseeded_commit);
     check(
         accepted.result_certified && accepted.session_advanced,
         "the E5 strict-edge lot and its prefixes replay exactly through the anchored session");
@@ -830,11 +1074,19 @@ void test_canonical_key_view_executes_nonzero_strict_edge() {
     }
   }
   check(
-      strict_ac_edge_observed && executor.complete() &&
+      strict_ac_edge_observed && proposal_preparation_seam_observed &&
+          executor.complete() &&
           executor.audit().maximum_transient_closure_node_count >= 2U &&
           executor.audit().retained_closure_node_count == 0U &&
-          !executor.audit().closure_graph_retained_between_batches,
-      "14D feeds AC through the canonical distinct-key view to a nonzero strict edge ending at DE, then releases the graph");
+          executor.audit().proposal_prepare_attempt_count == 4U &&
+          executor.audit().proposal_consumption_attempt_count == 4U &&
+          executor.audit().proposal_transcript_rejection_count == 1U &&
+          executor.audit().proposal_exact_closure_call_count == 3U &&
+          executor.audit().retained_proposal_record_count == 0U &&
+          !executor.audit().closure_graph_retained_between_batches &&
+          !executor.audit()
+               .proposal_payload_or_audit_retained_between_calls,
+      "14G prepares AC to DE through transient proposals, destroys their payloads, then commits the unchanged delta by the unseeded exact replay");
 }
 
 void test_falsified_plan_is_rejected_at_session_open() {

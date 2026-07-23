@@ -30,6 +30,29 @@ inline constexpr std::string_view
         "one_fresh_14c_session_anchor_canonical_batch_cursor_stable_family_"
         "selection_distinct_full_key_shared_10_5c_closure_compact_arm_join_"
         "and_transient_graph_release_before_delta_publication_v1";
+inline constexpr std::uint32_t
+    direct_sparse_facet_descent_batch_top_k_proposal_preparation_schema_version =
+        1U;
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_top_k_proposal_preparation_backend =
+        "reference_cpu";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_top_k_proposal_preparation_profile =
+        "hgp_reduced";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_top_k_proposal_preparation_mode =
+        "certified";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_top_k_proposal_preparation_deployment_status =
+        "architecture_only";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_top_k_proposal_preparation_public_status =
+        "not_claimed";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_top_k_proposal_preparation_proof_basis =
+        "batch_caps_and_canonical_keys_before_synchronous_transcript_"
+        "revalidation_exact_source_facet_baseline_separate_operational_audit_"
+        "transcript_release_before_unseeded_exact_commit_replay_v1";
 
 // The closure owns a separate budget.  These caps cover every population
 // retained while selecting one exact batch and every record that survives in
@@ -216,6 +239,100 @@ struct ExactDirectSparseFacetDescentBatchExecutionResult {
       const ExactDirectSparseFacetDescentBatchExecutionResult&) = default;
 };
 
+enum class
+    ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision
+    : std::uint8_t {
+  not_prepared,
+  no_preparation_batch_diagnostic_before_proposal_consumption,
+  no_preparation_batch_diagnostic_during_proposal_consumption,
+  no_preparation_transcript_rejected_before_closure,
+  no_preparation_batch_diagnostic_after_exact_proposal_consumption,
+  complete_architecture_only_scientific_delta_with_separate_proposal_audit,
+};
+
+enum class ExactDirectSparseFacetDescentBatchTopKProposalPreparationScope
+    : std::uint8_t {
+  unspecified,
+  one_synchronous_non_authoritative_proposal_preparation_before_unseeded_exact_commit_replay_only,
+};
+
+// The transcript is consumed synchronously and never enters this envelope.
+// A complete result owns the unchanged 14D scientific delta and a separate
+// scalar operational audit.  commit_prepared() remains proposal-independent:
+// after this call returns, callers may destroy the transcript and pass only
+// scientific_delta to the historical exact replay.  Preparation success does
+// not promise that this unseeded replay fits the same operational budget.
+struct ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult {
+  static constexpr std::string_view backend =
+      direct_sparse_facet_descent_batch_top_k_proposal_preparation_backend;
+  static constexpr std::string_view profile =
+      direct_sparse_facet_descent_batch_top_k_proposal_preparation_profile;
+  static constexpr std::string_view mode =
+      direct_sparse_facet_descent_batch_top_k_proposal_preparation_mode;
+  static constexpr std::string_view deployment_status =
+      direct_sparse_facet_descent_batch_top_k_proposal_preparation_deployment_status;
+  static constexpr std::string_view public_status =
+      direct_sparse_facet_descent_batch_top_k_proposal_preparation_public_status;
+  static constexpr std::string_view proof_basis =
+      direct_sparse_facet_descent_batch_top_k_proposal_preparation_proof_basis;
+
+  std::uint32_t schema_version{
+      direct_sparse_facet_descent_batch_top_k_proposal_preparation_schema_version};
+  std::size_t source_batch_index{};
+  exact::ExactLevel closed_batch_squared_level{};
+  ExactDirectSparsePositiveFacetLocatorSnapshotStamp locator_snapshot_stamp{};
+  ExactDirectSparseFacetDescentBatchExecutionDecision
+      batch_execution_decision{
+          ExactDirectSparseFacetDescentBatchExecutionDecision::not_executed};
+  ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision
+      proposal_consumption_decision{
+          ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision::
+              not_validated};
+  std::optional<ExactDirectSparseFacetDescentBatchExecutionResult>
+      scientific_delta;
+  std::optional<ExactDirectSparseFacetDescentBatchExecutionResult>
+      batch_diagnostic;
+  std::optional<
+      ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit>
+      proposal_consumption_audit;
+
+  bool transcript_consumption_requested{false};
+  bool batch_preflight_completed_before_proposal_consumption{false};
+  bool transcript_validation_completed_synchronously{false};
+  bool exact_proposal_consumption_certified{false};
+  bool atomic_transcript_rejection_certified{false};
+  bool no_closure_constructed_on_transcript_rejection{false};
+  bool scientific_delta_separated_from_proposal_audit{false};
+  bool no_transcript_record_candidate_partition_or_shell_persisted{false};
+  bool no_proposal_payload_or_audit_retained_by_session{false};
+  bool preparation_left_session_cursor_unchanged{false};
+  bool standard_commit_replays_unseeded_exact_path{false};
+  bool operational_audit_has_no_scientific_authority{false};
+  bool unseeded_commit_readiness_claimed{false};
+  bool scientific_commit_performed{false};
+  bool locator_state_mutated{false};
+  bool hierarchy_reduction_or_attachment_published{false};
+  bool gpu_execution_qualified{false};
+  bool sub_second_latency_claimed{false};
+  bool ten_million_point_capacity_claimed{false};
+  bool public_status_claimed{false};
+  ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision decision{
+      ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+          not_prepared};
+  ExactDirectSparseFacetDescentBatchTopKProposalPreparationScope scope{
+      ExactDirectSparseFacetDescentBatchTopKProposalPreparationScope::
+          unspecified};
+
+  [[nodiscard]] bool complete_architecture_preparation() const noexcept;
+  [[nodiscard]] bool certified_atomic_transcript_rejection() const noexcept;
+  [[nodiscard]] bool certified_outcome() const noexcept;
+
+  friend bool operator==(
+      const ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult&,
+      const ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult&) =
+      default;
+};
+
 struct ExactDirectSparseFacetDescentBatchExecutionVerification {
   bool observed_storage_within_budget{false};
   bool anchored_source_plan_reused_without_full_replay{false};
@@ -245,9 +362,18 @@ struct ExactDirectSparseFacetDescentBatchExecutionSessionAudit {
   std::size_t transient_closure_build_count{};
   std::size_t maximum_transient_closure_node_count{};
   std::size_t retained_closure_node_count{};
+  std::size_t proposal_prepare_attempt_count{};
+  std::size_t proposal_consumption_attempt_count{};
+  std::size_t proposal_transcript_rejection_count{};
+  // Counts exact proposal-consuming closure entry calls, including an empty
+  // validation call.  transient_closure_build_count above counts only shared
+  // nonempty scientific closures represented by 14D batch deltas.
+  std::size_t proposal_exact_closure_call_count{};
+  std::size_t retained_proposal_record_count{};
   bool source_plan_owned_by_session{false};
   bool full_source_plan_replayed_per_batch{false};
   bool closure_graph_retained_between_batches{false};
+  bool proposal_payload_or_audit_retained_between_calls{false};
 
   friend bool operator==(
       const ExactDirectSparseFacetDescentBatchExecutionSessionAudit&,
@@ -309,6 +435,21 @@ class ExactDirectSparseFacetDescentAnchoredBatchExecutor {
       const ExactDirectSparseFacetDescentBatchExecutionBudget&
           execution_budget,
       const ExactDirectSparseFacetDescentClosureBudget& closure_budget);
+
+  // The transcript and every external authority must remain immutable for
+  // this synchronous call.  Success returns a scientific delta that may be
+  // passed to the historical unseeded commit after the transcript has been
+  // destroyed.  That independent replay can still exhaust a tighter budget:
+  // this preparation does not certify unseeded commit readiness.  Rejection
+  // returns no delta and never advances the cursor.
+  [[nodiscard]]
+  ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult
+  prepare_next_with_top_k_proposal_transcript(
+      const ExactDirectSparseFacetWitness& locator_query_witness,
+      const ExactDirectSparseFacetDescentBatchExecutionBudget&
+          execution_budget,
+      const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
+      const ExactDirectSparseFacetTopKProposalTranscriptResult& transcript);
 
   // Replays only the current exact batch.  A complete equal delta advances
   // the execution cursor; it does not claim or perform the later quotient,

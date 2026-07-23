@@ -100,7 +100,19 @@ Les appels historiques restent non amorcés. L'enveloppe 14F, elle, utilise touj
 
 Le stockage du transcript est $O(KR)$ et sa durée de vie est celle du lot. Il ne crée aucune facette absente, coface, incidence globale, cellule, Gamma ou mosaïque d'ordre supérieur. Le producteur CUDA, son epoch et son digest, le raccord à la session ancrée 14D, les classes de difficulté, les arènes réutilisables, `warm_e2e` et les runs durables restent ouverts.
 
-## Goulots restant à traiter en Phase 14
+## Incrément 14G — préparation propositionnelle, commit non amorcé
+
+La session 14D expose désormais une préparation explicite avec transcript. Son ordre est fermé : jointure du plan, du chunk, du lot et des lanes; préflight des populations 14D; reconstruction stable des $A$ bras; tri-déduplication des $D$ clés; puis seulement revalidation 14F. Un dépassement de cap ne lit donc pas le transcript. Un transcript explicitement fourni sur un lot vide n'est pas ignoré : la fermeture vide sert à sa validation et à son audit, puis disparaît tandis que le delta conserve exactement le raccourci historique sans fermeture.
+
+La sortie est une enveloppe de durée courte. Un succès contient d'une part le delta scientifique 14D, d'autre part l'audit scalaire de consommation; un rejet de transcript contient seulement l'audit de rejet et aucun delta. Aucun record, candidat, pool, partition, coquille, nœud ou graphe n'entre dans l'enveloppe ou dans la session. Le curseur reste immobile pendant toutes les préparations.
+
+Le commit n'a volontairement pas de paramètre transcript. Une fois la préparation terminée, le producteur et son payload peuvent être détruits; `commit_prepared` reconstruit le même lot par la voie canonique historique, sans incumbent externe, puis compare le delta entier. Ce rejeu coûte encore une seconde exécution exacte du lot, mais il empêche qu'un epoch, digest, compteur GPU ou audit futur devienne une autorité scientifique par simple égalité structurelle. Il crée aussi une dette de vivacité : une préparation accélérée peut tenir sous un budget où le rejeu non amorcé s'épuise, auquel cas le curseur reste correctement fermé mais ne peut pas avancer sous les mêmes caps.
+
+Le delta logique reste $O(KD+A)$ et le transcript sparse fourni par l'appelant $O(KR)$ pour $R\leq D$. `SelectedArm` conserve encore une clé complète par bras pendant que les clés distinctes sont construites, soit un scratch de sélection $O(KA+KD)$. Ces trois populations peuvent coexister avec l'unique fermeture locale; aucun pic mémoire global n'est donc qualifié. L'internement des clés lors de la reconstruction et les capacités réutilisables restent des optimisations séparées.
+
+14G ne construit toujours aucune facette absente, coface, incidence globale, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Il ne qualifie ni producteur CUDA, ni SLO 50 k, ni capacité 10 M+, ni statut public.
+
+## Goulots restant à traiter après 14G
 
 Trois coûts dominants restent visibles après 14D :
 
@@ -108,7 +120,7 @@ Trois coûts dominants restent visibles après 14D :
 - les constructions de miniballs et les fallbacks rationnels, à regrouper par cardinal et difficulté;
 - la capacité réutilisable des scratchs et le rejeu exact du lot courant, qui ne doivent pas dupliquer durablement les grandes arènes dans le protocole `warm_e2e`.
 
-La priorité de développement devient donc : raccorder le transcript recertifié à la session 14D puis à un producteur GPU borné, réutiliser des capacités de scratch sans conserver d'objet scientifique, puis instrumenter `warm_e2e`. Les runs et checkpoints compacts viennent ensuite pour le profil 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
+La priorité de développement devient donc : fermer la vivacité préparation--commit sans donner d'autorité aux propositions, puis brancher un producteur GPU borné sur cette frontière, réutiliser des capacités de scratch sans conserver d'objet scientifique et instrumenter `warm_e2e`. Les runs et checkpoints compacts viennent ensuite pour le profil 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
 
 ## Planification sans promotion
 

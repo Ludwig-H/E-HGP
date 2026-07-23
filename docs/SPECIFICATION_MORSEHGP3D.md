@@ -643,6 +643,18 @@ Pour chaque requête exacte, la facette source complète $F$ fournit une baselin
 
 La sortie sépare une fermeture scientifique 10.5c inchangée d'un audit opérationnel. L'audit peut conserver des comptes exacts de pools, distances, visites, expansions, bornes, élagages et épuisements, mais aucun record de transcript, candidat, `TopKPartition` ou shell. Les API historiques 10.5c restent non amorcées. Ce raccord hôte n'est pas encore le protocole transactionnel de préparation/commit de 14D et ne promeut aucun statut de déploiement ou statut public.
 
+### 9.21 Préparation propositionnelle et commit exact séparés
+
+L'entrée 14G `prepare_next_with_top_k_proposal_transcript` est une préparation synchrone du lot courant. Elle doit achever les jointures du plan 14C, les préflights des caps 14D, la reconstruction stable des bras et la déduplication canonique des clés avant de consulter le transcript. Un diagnostic antérieur à cette frontière ne consomme aucun record et ne publie aucun audit propositionnel. Même lorsque le lot ne possède aucune clé, un transcript explicitement fourni doit être revalidé; son audit opérationnel de fermeture vide reste séparé du delta historique vide.
+
+Un rejet atomique du transcript publie `scientific_delta=nullopt`, conserve `closure_build_count=0` et n'avance aucun curseur. Un succès publie une enveloppe contenant le delta 14D complet et l'audit 14F dans deux champs séparés. L'enveloppe et la session ne peuvent conserver ni record, candidat, partition, coquille ou graphe de fermeture. Le transcript est une vue non propriétaire immutable et sérialisée pendant l'appel, qui ne survit pas au retour. Les clés distinctes sont locales à la préparation; le nuage, l'index et le locator restent au contraire des autorités de session dont la durée de vie couvre tous les appels.
+
+Pour toute préparation complète, une proposition peut modifier le travail exact observé, jamais les clés, carriers, témoins, jointures ou décisions scientifiques. Sous un budget fixe, elle peut néanmoins ajouter jusqu'à $K$ distances exactes par requête et transformer un succès potentiel en diagnostic sans delta ni avancement.
+
+`commit_prepared` ne possède aucune surcharge propositionnelle. Après le retour de la préparation, le transcript peut être détruit et seul le delta scientifique est transmis au commit. Celui-ci reconstruit le lot courant par l'entrée historique non amorcée et exige l'égalité complète du `ExactDirectSparseFacetDescentBatchExecutionResult`; aucune décision ou aucun compteur de l'audit propositionnel ne participe à cette égalité, à la certification du commit ou à l'avancement du curseur. Réciproquement, une préparation complète ne certifie pas la vivacité de ce rejeu sous les mêmes caps : si la proposition a évité un travail auquel le budget ne suffit pas, le commit reste fermé et le curseur n'avance pas.
+
+Ce raccord ne change ni le statut `architecture_only`, ni `public_status=not_claimed`. Il ne certifie aucun producteur CUDA, epoch, digest, scheduler de difficulté, réemploi de scratch, protocole `warm_e2e`, SLO 50 k ou capacité 10 M+.
+
 ## 10. Événements simultanés
 
 Des centres distincts peuvent avoir exactement le même niveau. Une exécution séquentielle créerait des bifurcations binaires artificielles et pourrait changer les morphismes verticaux.

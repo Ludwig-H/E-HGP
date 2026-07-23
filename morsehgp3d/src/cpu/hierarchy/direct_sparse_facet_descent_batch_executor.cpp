@@ -47,7 +47,25 @@ struct CompactClosureProjection {
   ExactDirectSparseFacetDescentBatchClosureSummary summary{};
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp locator_snapshot_stamp{};
   std::vector<ExactDirectSparseFacetDescentBatchResolvedKey> resolved_keys;
+  std::size_t closure_build_count{};
   std::optional<BuildFailure> failure;
+};
+
+struct ProposalPreparationEvidence {
+  std::optional<
+      ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit>
+      consumption_audit;
+  ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision
+      consumption_decision{
+          ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision::
+              not_validated};
+  bool consumption_attempted{false};
+  bool validation_completed_before_closure{false};
+  bool exact_consumption_certified{false};
+  bool atomic_rejection_certified{false};
+  bool no_closure_constructed_on_rejection{false};
+  bool scientific_closure_separated_from_consumption_audit{false};
+  bool no_transcript_or_top_k_payload_persisted_in_closure{false};
 };
 
 [[nodiscard]] std::optional<std::size_t> checked_add(
@@ -67,6 +85,183 @@ struct CompactClosureProjection {
     return std::nullopt;
   }
   return left * right;
+}
+
+[[nodiscard]] bool known_atomic_transcript_rejection_decision(
+    ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision
+        decision) noexcept {
+  using Decision =
+      ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision;
+  switch (decision) {
+    case Decision::no_closure_transcript_not_complete:
+    case Decision::no_closure_metadata_mismatch:
+    case Decision::no_closure_canonical_seed_shape_rejected:
+    case Decision::no_closure_record_key_not_in_seed_domain:
+    case Decision::no_closure_candidate_point_domain_rejected:
+      return true;
+    case Decision::not_validated:
+    case Decision::complete_exact_closure_with_proposal_consumption_audit:
+      return false;
+  }
+  return false;
+}
+
+[[nodiscard]] bool proposal_rejection_audit_has_no_exact_work(
+    const ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit&
+        audit) noexcept {
+  const bool no_stop_reason_count = std::all_of(
+      audit.top_k_stop_reason_counts.begin(),
+      audit.top_k_stop_reason_counts.end(),
+      [](std::size_t count) { return count == 0U; });
+  return audit.closure_build_count == 0U &&
+         audit.top_k_query_count == 0U &&
+         audit.nonempty_proposal_hit_query_count == 0U &&
+         audit.missing_initial_record_fallback_query_count == 0U &&
+         audit.explicit_empty_record_fallback_query_count == 0U &&
+         audit.dynamic_successor_fallback_query_count == 0U &&
+         audit.baseline_facet_point_reference_count == 0U &&
+         audit.proposal_point_reference_count == 0U &&
+         audit.union_point_reference_count == 0U &&
+         audit.deduplicated_point_reference_count == 0U &&
+         audit.exact_seed_distance_evaluation_count == 0U &&
+         audit.exact_point_distance_evaluation_count == 0U &&
+         audit.node_visit_count == 0U &&
+         audit.internal_node_expansion_count == 0U &&
+         audit.exact_aabb_bound_evaluation_count == 0U &&
+         audit.pruned_subtree_count == 0U &&
+         audit.pruned_eligible_point_count == 0U &&
+         audit.traversal_complete_query_count == 0U &&
+         audit.complete_query_count == 0U &&
+         audit.full_scan_query_count == 0U &&
+         audit.strict_pruning_query_count == 0U &&
+         audit.exhausted_query_count == 0U &&
+         no_stop_reason_count;
+}
+
+[[nodiscard]] bool proposal_consumption_audit_consistent_with_delta(
+    const ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit&
+        audit,
+    const ExactDirectSparseFacetDescentBatchExecutionResult& delta) noexcept {
+  std::optional<std::size_t> classified_query_count = checked_add(
+      audit.nonempty_proposal_hit_query_count,
+      audit.missing_initial_record_fallback_query_count);
+  if (!classified_query_count.has_value()) {
+    return false;
+  }
+  classified_query_count = checked_add(
+      *classified_query_count,
+      audit.explicit_empty_record_fallback_query_count);
+  if (!classified_query_count.has_value()) {
+    return false;
+  }
+  classified_query_count = checked_add(
+      *classified_query_count,
+      audit.dynamic_successor_fallback_query_count);
+  const std::optional<std::size_t> combined_pool_reference_count =
+      checked_add(
+          audit.baseline_facet_point_reference_count,
+          audit.proposal_point_reference_count);
+  const std::optional<std::size_t> complete_classification_count =
+      checked_add(
+          audit.full_scan_query_count,
+          audit.strict_pruning_query_count);
+  const std::optional<std::size_t> terminal_query_count =
+      checked_add(
+          audit.complete_query_count,
+          audit.exhausted_query_count);
+  const std::optional<std::size_t> expected_baseline_reference_count =
+      checked_multiply(
+          audit.top_k_query_count,
+          delta.source_facet_cardinality);
+  const std::optional<std::size_t> maximum_transcript_candidate_count =
+      checked_multiply(
+          audit.transcript_record_count,
+          delta.source_facet_cardinality);
+  const auto& top_k_budget =
+      delta.requested_closure_budget.step_budget.top_k_query;
+  const std::optional<std::size_t> maximum_node_visit_count =
+      checked_multiply(
+          audit.top_k_query_count,
+          top_k_budget.maximum_node_visit_count);
+  const std::optional<std::size_t>
+      maximum_internal_node_expansion_count = checked_multiply(
+          audit.top_k_query_count,
+          top_k_budget.maximum_internal_node_expansion_count);
+  const std::optional<std::size_t>
+      maximum_exact_aabb_bound_evaluation_count = checked_multiply(
+          audit.top_k_query_count,
+          top_k_budget.maximum_exact_aabb_bound_evaluation_count);
+  const std::optional<std::size_t>
+      maximum_exact_point_distance_evaluation_count = checked_multiply(
+          audit.top_k_query_count,
+          top_k_budget.maximum_exact_point_distance_evaluation_count);
+  if (!classified_query_count.has_value() ||
+      !combined_pool_reference_count.has_value() ||
+      !complete_classification_count.has_value() ||
+      !terminal_query_count.has_value() ||
+      !expected_baseline_reference_count.has_value() ||
+      !maximum_transcript_candidate_count.has_value() ||
+      !maximum_node_visit_count.has_value() ||
+      !maximum_internal_node_expansion_count.has_value() ||
+      !maximum_exact_aabb_bound_evaluation_count.has_value() ||
+      !maximum_exact_point_distance_evaluation_count.has_value() ||
+      audit.deduplicated_point_reference_count >
+          *combined_pool_reference_count) {
+    return false;
+  }
+
+  std::size_t stop_reason_count = 0U;
+  for (const std::size_t count : audit.top_k_stop_reason_counts) {
+    const std::optional<std::size_t> next =
+        checked_add(stop_reason_count, count);
+    if (!next.has_value()) {
+      return false;
+    }
+    stop_reason_count = *next;
+  }
+  const std::size_t no_stop_reason_index = static_cast<std::size_t>(
+      spatial::ExactLbvhTopKStopReason::none);
+  if (no_stop_reason_index >=
+      audit.top_k_stop_reason_counts.size()) {
+    return false;
+  }
+
+  const std::size_t expected_union_point_reference_count =
+      *combined_pool_reference_count -
+      audit.deduplicated_point_reference_count;
+  return audit.canonical_seed_key_count ==
+             delta.required_resolved_key_count &&
+         audit.transcript_record_count <=
+             audit.canonical_seed_key_count &&
+         audit.transcript_candidate_point_reference_count <=
+             *maximum_transcript_candidate_count &&
+         audit.nonempty_proposal_hit_query_count <=
+             audit.transcript_record_count &&
+         audit.proposal_point_reference_count <=
+             audit.transcript_candidate_point_reference_count &&
+         *classified_query_count == audit.top_k_query_count &&
+         stop_reason_count == audit.top_k_query_count &&
+         *terminal_query_count == audit.top_k_query_count &&
+         audit.top_k_stop_reason_counts[no_stop_reason_index] ==
+             audit.complete_query_count &&
+         *complete_classification_count == audit.complete_query_count &&
+         audit.traversal_complete_query_count <=
+             audit.top_k_query_count &&
+         audit.union_point_reference_count ==
+             expected_union_point_reference_count &&
+         audit.baseline_facet_point_reference_count ==
+             *expected_baseline_reference_count &&
+         audit.exact_seed_distance_evaluation_count <=
+             audit.union_point_reference_count &&
+         audit.exact_point_distance_evaluation_count >=
+             audit.exact_seed_distance_evaluation_count &&
+         audit.node_visit_count <= *maximum_node_visit_count &&
+         audit.internal_node_expansion_count <=
+             *maximum_internal_node_expansion_count &&
+         audit.exact_aabb_bound_evaluation_count <=
+             *maximum_exact_aabb_bound_evaluation_count &&
+         audit.exact_point_distance_evaluation_count <=
+             *maximum_exact_point_distance_evaluation_count;
 }
 
 [[nodiscard]] bool key_less(
@@ -263,27 +458,87 @@ summarize_closure(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     const std::vector<ExactDirectSparseFacetKey>& distinct_keys,
+    std::size_t source_batch_index,
     const exact::ExactLevel& closed_batch_squared_level,
     const ExactDirectSparseFacetWitness& locator_query_witness,
     const ExactDirectSparsePositiveFacetLocator& locator,
     const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
     const ExactDirectSparseFacetDescentClosureConfig& closure_config,
-    spatial::LbvhTraversalOrder traversal_order) {
+    spatial::LbvhTraversalOrder traversal_order,
+    const ExactDirectSparseFacetTopKProposalTranscriptResult*
+        proposal_transcript,
+    ProposalPreparationEvidence* proposal_evidence) {
   // The closure object is scoped inside this lambda.  Only the compact
-  // projection returned below survives its destruction.
+  // projection and, on the proposal path, a key-free scalar audit survive its
+  // destruction.
   return [&]() {
     CompactClosureProjection projection;
-    const ExactDirectSparseFacetDescentClosureResult closure =
-        build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
-            index,
-            cloud,
-            std::span<const ExactDirectSparseFacetKey>{distinct_keys},
-            closed_batch_squared_level,
-            locator_query_witness,
-            locator,
-            closure_budget,
-            closure_config,
-            traversal_order);
+    ExactDirectSparseFacetDescentClosureResult closure;
+    if (proposal_transcript == nullptr) {
+      closure =
+          build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
+              index,
+              cloud,
+              std::span<const ExactDirectSparseFacetKey>{distinct_keys},
+              closed_batch_squared_level,
+              locator_query_witness,
+              locator,
+              closure_budget,
+              closure_config,
+              traversal_order);
+      projection.closure_build_count = 1U;
+    } else {
+      if (proposal_evidence == nullptr) {
+        throw std::logic_error(
+            "proposal consumption requires a separate preparation audit");
+      }
+      proposal_evidence->consumption_attempted = true;
+      ExactDirectSparseFacetDescentClosureTopKProposalConsumptionResult
+          wrapped =
+              build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys_with_top_k_proposal_transcript(
+                  index,
+                  cloud,
+                  std::span<const ExactDirectSparseFacetKey>{distinct_keys},
+                  source_batch_index,
+                  closed_batch_squared_level,
+                  locator_query_witness,
+                  locator,
+                  *proposal_transcript,
+                  closure_budget,
+                  closure_config,
+                  traversal_order);
+      proposal_evidence->consumption_audit =
+          wrapped.consumption_audit;
+      proposal_evidence->consumption_decision = wrapped.decision;
+      proposal_evidence->validation_completed_before_closure =
+          wrapped.validation_completed_before_closure;
+      proposal_evidence->exact_consumption_certified =
+          wrapped.certified_exact_consumption_outcome();
+      proposal_evidence->atomic_rejection_certified =
+          wrapped.certified_atomic_rejection();
+      proposal_evidence->no_closure_constructed_on_rejection =
+          wrapped.no_closure_constructed_on_rejection;
+      proposal_evidence
+          ->scientific_closure_separated_from_consumption_audit =
+          wrapped.scientific_closure_separated_from_consumption_audit;
+      proposal_evidence
+          ->no_transcript_or_top_k_payload_persisted_in_closure =
+          wrapped.no_transcript_or_top_k_payload_persisted_in_closure;
+      projection.locator_snapshot_stamp =
+          wrapped.consumption_audit.locator_snapshot_stamp;
+      projection.closure_build_count =
+          wrapped.consumption_audit.closure_build_count;
+      if (wrapped.certified_atomic_rejection()) {
+        projection.failure = BuildFailure::shared_closure_rejected;
+        return projection;
+      }
+      if (!wrapped.certified_exact_consumption_outcome() ||
+          !wrapped.scientific_closure.has_value()) {
+        throw std::logic_error(
+            "proposal consumption produced no certified exact closure");
+      }
+      closure = std::move(*wrapped.scientific_closure);
+    }
     projection.summary = summarize_closure(closure);
     projection.locator_snapshot_stamp = closure.locator_snapshot_stamp;
 
@@ -564,7 +819,18 @@ build_batch_execution(
     const ExactDirectSparseFacetDescentBatchExecutionBudget& execution_budget,
     const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
     const ExactDirectSparseFacetDescentClosureConfig& closure_config,
-    spatial::LbvhTraversalOrder traversal_order) {
+    spatial::LbvhTraversalOrder traversal_order,
+    const ExactDirectSparseFacetTopKProposalTranscriptResult*
+        proposal_transcript,
+    ProposalPreparationEvidence* proposal_evidence) {
+  if ((proposal_transcript == nullptr) !=
+      (proposal_evidence == nullptr)) {
+    throw std::invalid_argument(
+        "a proposal transcript and its separate audit sink must be supplied together");
+  }
+  if (proposal_evidence != nullptr) {
+    *proposal_evidence = ProposalPreparationEvidence{};
+  }
   require_execution_budget_within_confidence(execution_budget);
   require_closure_budget_within_confidence(closure_budget);
   require_valid_traversal_order(traversal_order);
@@ -826,6 +1092,34 @@ build_batch_execution(
     result.batch_budget_preflight_satisfied = true;
 
     if (distinct_keys.empty()) {
+      if (proposal_transcript != nullptr) {
+        CompactClosureProjection closure_projection =
+            build_compact_closure_projection(
+                index,
+                cloud,
+                distinct_keys,
+                cursor.source_batch_index,
+                source_batch.squared_level,
+                locator_query_witness,
+                locator,
+                closure_budget,
+                closure_config,
+                traversal_order,
+                proposal_transcript,
+                proposal_evidence);
+        result.locator_snapshot_stamp =
+            closure_projection.locator_snapshot_stamp;
+        result.transient_closure_released_before_delta_publication = true;
+        if (closure_projection.failure.has_value()) {
+          return fail(
+              std::move(result), *closure_projection.failure);
+        }
+        if (!closure_projection.resolved_keys.empty()) {
+          return fail(
+              std::move(result),
+              BuildFailure::shared_closure_contradiction);
+        }
+      }
       result.closure_summary.disposition =
           ExactDirectSparseFacetDescentClosureDisposition::
               relative_positive;
@@ -834,27 +1128,38 @@ build_batch_execution(
               complete_empty_seed_set;
       result.closure_summary.complete_relative_positive = true;
       result.closure_summary.graph_payload_persisted = false;
-      result.locator_snapshot_stamp = locator.snapshot_stamp();
+      if (proposal_transcript == nullptr) {
+        result.locator_snapshot_stamp = locator.snapshot_stamp();
+      }
       result.one_shared_closure_and_memo_built_or_empty_batch = true;
-      result.common_frozen_locator_snapshot_certified = true;
+      result.common_frozen_locator_snapshot_certified =
+          locator.snapshot_stamp() == result.locator_snapshot_stamp;
       result.shared_closure_complete_relative_positive = true;
       result.transient_closure_released_before_delta_publication = true;
+      if (!result.common_frozen_locator_snapshot_certified) {
+        throw std::runtime_error(
+            "the locator changed after empty proposal consumption");
+      }
     } else {
       CompactClosureProjection closure_projection =
           build_compact_closure_projection(
               index,
               cloud,
               distinct_keys,
+              cursor.source_batch_index,
               source_batch.squared_level,
               locator_query_witness,
               locator,
               closure_budget,
               closure_config,
-              traversal_order);
+              traversal_order,
+              proposal_transcript,
+              proposal_evidence);
       result.closure_summary = closure_projection.summary;
       result.locator_snapshot_stamp =
           closure_projection.locator_snapshot_stamp;
-      result.counters.shared_closure_build_count = 1U;
+      result.counters.shared_closure_build_count =
+          closure_projection.closure_build_count;
       result.transient_closure_released_before_delta_publication = true;
       if (closure_projection.failure.has_value()) {
         return fail(
@@ -1004,6 +1309,155 @@ complete_architecture_execution() const noexcept {
          architecture_execution_payload_shape_is_consistent(*this);
 }
 
+bool ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult::
+    complete_architecture_preparation() const noexcept {
+  if (!scientific_delta.has_value() ||
+      batch_diagnostic.has_value() ||
+      !proposal_consumption_audit.has_value()) {
+    return false;
+  }
+  const ExactDirectSparseFacetDescentBatchExecutionResult& delta =
+      *scientific_delta;
+  const ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit&
+      proposal_audit = *proposal_consumption_audit;
+  return schema_version ==
+             direct_sparse_facet_descent_batch_top_k_proposal_preparation_schema_version &&
+         source_batch_index == delta.source_batch_index &&
+         source_batch_index == proposal_audit.source_batch_index &&
+         closed_batch_squared_level ==
+             delta.closed_batch_squared_level &&
+         closed_batch_squared_level ==
+             proposal_audit.closed_batch_squared_level &&
+         locator_snapshot_stamp == delta.locator_snapshot_stamp &&
+         locator_snapshot_stamp ==
+             proposal_audit.locator_snapshot_stamp &&
+         batch_execution_decision == delta.decision &&
+         batch_execution_decision ==
+             ExactDirectSparseFacetDescentBatchExecutionDecision::
+                 complete_architecture_only_relative_positive_batch_delta &&
+         proposal_consumption_decision ==
+             ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision::
+                 complete_exact_closure_with_proposal_consumption_audit &&
+         delta.complete_architecture_execution() &&
+         proposal_audit.schema_version ==
+             direct_sparse_facet_descent_closure_top_k_proposal_consumption_schema_version &&
+         proposal_audit.closed_batch_squared_level ==
+             delta.closed_batch_squared_level &&
+         proposal_audit.locator_snapshot_stamp ==
+             delta.locator_snapshot_stamp &&
+         proposal_audit.canonical_seed_key_count ==
+             delta.required_resolved_key_count &&
+         proposal_audit.closure_build_count == 1U &&
+         proposal_audit.top_k_query_count ==
+             delta.closure_summary.counters.aggregate_step_counters
+                 .top_k_query_count &&
+         proposal_consumption_audit_consistent_with_delta(
+             proposal_audit, delta) &&
+         proposal_audit.transcript_complete_revalidated &&
+         proposal_audit
+             .metadata_matches_requested_batch_level_and_live_locator &&
+         proposal_audit.canonical_seed_keys_revalidated &&
+         proposal_audit.record_keys_are_canonical_seed_subset &&
+         proposal_audit.candidate_point_domains_revalidated &&
+         proposal_audit.locator_snapshot_stable_during_atomic_validation &&
+         proposal_audit
+             .every_top_k_query_used_exact_source_facet_baseline &&
+         proposal_audit.nonempty_records_passed_only_as_proposals &&
+         proposal_audit
+             .empty_missing_and_dynamic_fallbacks_used_empty_proposal_pool &&
+         proposal_audit.exact_pool_and_spatial_work_accounted &&
+         !proposal_audit.transcript_payload_persisted &&
+         !proposal_audit.top_k_partition_or_shell_persisted &&
+         !proposal_audit.scientific_decision_taken_from_proposal &&
+         !proposal_audit.locator_state_mutated &&
+         !proposal_audit.public_status_claimed &&
+         transcript_consumption_requested &&
+         batch_preflight_completed_before_proposal_consumption &&
+         transcript_validation_completed_synchronously &&
+         exact_proposal_consumption_certified &&
+         !atomic_transcript_rejection_certified &&
+         !no_closure_constructed_on_transcript_rejection &&
+         scientific_delta_separated_from_proposal_audit &&
+         no_transcript_record_candidate_partition_or_shell_persisted &&
+         no_proposal_payload_or_audit_retained_by_session &&
+         preparation_left_session_cursor_unchanged &&
+         standard_commit_replays_unseeded_exact_path &&
+         operational_audit_has_no_scientific_authority &&
+         !unseeded_commit_readiness_claimed &&
+         !scientific_commit_performed && !locator_state_mutated &&
+         !hierarchy_reduction_or_attachment_published &&
+         !gpu_execution_qualified && !sub_second_latency_claimed &&
+         !ten_million_point_capacity_claimed &&
+         !public_status_claimed &&
+         decision ==
+             ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+                 complete_architecture_only_scientific_delta_with_separate_proposal_audit &&
+         scope ==
+             ExactDirectSparseFacetDescentBatchTopKProposalPreparationScope::
+                 one_synchronous_non_authoritative_proposal_preparation_before_unseeded_exact_commit_replay_only;
+}
+
+bool ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult::
+    certified_atomic_transcript_rejection() const noexcept {
+  if (scientific_delta.has_value() ||
+      batch_diagnostic.has_value() ||
+      !proposal_consumption_audit.has_value()) {
+    return false;
+  }
+  const ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit&
+      proposal_audit = *proposal_consumption_audit;
+  return schema_version ==
+             direct_sparse_facet_descent_batch_top_k_proposal_preparation_schema_version &&
+         source_batch_index == proposal_audit.source_batch_index &&
+         closed_batch_squared_level ==
+             proposal_audit.closed_batch_squared_level &&
+         locator_snapshot_stamp ==
+             proposal_audit.locator_snapshot_stamp &&
+         batch_execution_decision ==
+             ExactDirectSparseFacetDescentBatchExecutionDecision::
+                 no_execution_shared_closure_rejected &&
+         known_atomic_transcript_rejection_decision(
+             proposal_consumption_decision) &&
+         proposal_audit.schema_version ==
+             direct_sparse_facet_descent_closure_top_k_proposal_consumption_schema_version &&
+         proposal_rejection_audit_has_no_exact_work(proposal_audit) &&
+         !proposal_audit.transcript_payload_persisted &&
+         !proposal_audit.top_k_partition_or_shell_persisted &&
+         !proposal_audit.scientific_decision_taken_from_proposal &&
+         !proposal_audit.locator_state_mutated &&
+         !proposal_audit.public_status_claimed &&
+         transcript_consumption_requested &&
+         batch_preflight_completed_before_proposal_consumption &&
+         transcript_validation_completed_synchronously &&
+         !exact_proposal_consumption_certified &&
+         atomic_transcript_rejection_certified &&
+         no_closure_constructed_on_transcript_rejection &&
+         !scientific_delta_separated_from_proposal_audit &&
+         no_transcript_record_candidate_partition_or_shell_persisted &&
+         no_proposal_payload_or_audit_retained_by_session &&
+         preparation_left_session_cursor_unchanged &&
+         standard_commit_replays_unseeded_exact_path &&
+         operational_audit_has_no_scientific_authority &&
+         !unseeded_commit_readiness_claimed &&
+         !scientific_commit_performed && !locator_state_mutated &&
+         !hierarchy_reduction_or_attachment_published &&
+         !gpu_execution_qualified && !sub_second_latency_claimed &&
+         !ten_million_point_capacity_claimed &&
+         !public_status_claimed &&
+         decision ==
+             ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+                 no_preparation_transcript_rejected_before_closure &&
+         scope ==
+             ExactDirectSparseFacetDescentBatchTopKProposalPreparationScope::
+                 one_synchronous_non_authoritative_proposal_preparation_before_unseeded_exact_commit_replay_only;
+}
+
+bool ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult::
+    certified_outcome() const noexcept {
+  return complete_architecture_preparation() ||
+         certified_atomic_transcript_rejection();
+}
+
 ExactDirectSparseFacetDescentAnchoredBatchExecutor::
     ExactDirectSparseFacetDescentAnchoredBatchExecutor(
         const spatial::MortonLbvhIndex& index,
@@ -1056,6 +1510,7 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::
   audit_.source_plan_owned_by_session = true;
   audit_.full_source_plan_replayed_per_batch = false;
   audit_.closure_graph_retained_between_batches = false;
+  audit_.proposal_payload_or_audit_retained_between_calls = false;
 }
 
 bool ExactDirectSparseFacetDescentAnchoredBatchExecutor::complete()
@@ -1094,9 +1549,157 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::prepare_next(
           execution_budget,
           closure_budget,
           closure_config_,
-          traversal_order_);
+          traversal_order_,
+          nullptr,
+          nullptr);
   increment_audit_counter(audit_.prepare_attempt_count);
   account_transient_work(result, audit_);
+  return result;
+}
+
+ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::
+    prepare_next_with_top_k_proposal_transcript(
+        const ExactDirectSparseFacetWitness& locator_query_witness,
+        const ExactDirectSparseFacetDescentBatchExecutionBudget&
+            execution_budget,
+        const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
+        const ExactDirectSparseFacetTopKProposalTranscriptResult&
+            transcript) {
+  if (complete()) {
+    throw std::logic_error(
+        "a complete anchored batch executor has no next batch");
+  }
+  const BatchCursor cursor{
+      next_source_batch_index_,
+      next_source_chunk_index_,
+      next_source_lane_index_,
+      next_source_family_index_,
+      next_source_arm_seed_index_};
+  ProposalPreparationEvidence proposal_evidence;
+  ExactDirectSparseFacetDescentBatchExecutionResult batch_execution =
+      build_batch_execution(
+          *index_,
+          *cloud_,
+          *source_facade_,
+          *source_event_journal_,
+          *source_arm_seed_journal_,
+          source_plan_,
+          cursor,
+          locator_query_witness,
+          *locator_,
+          execution_budget,
+          closure_budget,
+          closure_config_,
+          traversal_order_,
+          &transcript,
+          &proposal_evidence);
+  increment_audit_counter(audit_.prepare_attempt_count);
+  increment_audit_counter(audit_.proposal_prepare_attempt_count);
+  account_transient_work(batch_execution, audit_);
+
+  ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult result;
+  result.source_batch_index = cursor.source_batch_index;
+  result.closed_batch_squared_level =
+      batch_execution.closed_batch_squared_level;
+  result.locator_snapshot_stamp =
+      batch_execution.locator_snapshot_stamp;
+  result.batch_execution_decision = batch_execution.decision;
+  result.transcript_consumption_requested = true;
+  result.batch_preflight_completed_before_proposal_consumption =
+      proposal_evidence.consumption_attempted &&
+      batch_execution.batch_budget_preflight_completed &&
+      batch_execution.batch_budget_preflight_satisfied;
+  result.transcript_validation_completed_synchronously =
+      proposal_evidence.validation_completed_before_closure;
+  result.exact_proposal_consumption_certified =
+      proposal_evidence.exact_consumption_certified;
+  result.atomic_transcript_rejection_certified =
+      proposal_evidence.atomic_rejection_certified;
+  result.no_closure_constructed_on_transcript_rejection =
+      proposal_evidence.no_closure_constructed_on_rejection;
+  result.scientific_delta_separated_from_proposal_audit =
+      proposal_evidence
+          .scientific_closure_separated_from_consumption_audit;
+  result.no_transcript_record_candidate_partition_or_shell_persisted =
+      proposal_evidence
+          .no_transcript_or_top_k_payload_persisted_in_closure &&
+      (!proposal_evidence.consumption_audit.has_value() ||
+       (!proposal_evidence.consumption_audit
+             ->transcript_payload_persisted &&
+        !proposal_evidence.consumption_audit
+             ->top_k_partition_or_shell_persisted));
+  result.no_proposal_payload_or_audit_retained_by_session = true;
+  result.standard_commit_replays_unseeded_exact_path = true;
+  result.operational_audit_has_no_scientific_authority = true;
+  result.unseeded_commit_readiness_claimed = false;
+  result.scientific_commit_performed = false;
+  result.locator_state_mutated = false;
+  result.hierarchy_reduction_or_attachment_published = false;
+  result.gpu_execution_qualified = false;
+  result.sub_second_latency_claimed = false;
+  result.ten_million_point_capacity_claimed = false;
+  result.public_status_claimed = false;
+  result.scope =
+      ExactDirectSparseFacetDescentBatchTopKProposalPreparationScope::
+          one_synchronous_non_authoritative_proposal_preparation_before_unseeded_exact_commit_replay_only;
+
+  if (proposal_evidence.consumption_attempted) {
+    increment_audit_counter(audit_.proposal_consumption_attempt_count);
+    if (proposal_evidence.consumption_audit.has_value()) {
+      const std::optional<std::size_t> next_proposal_closure_call_count =
+          checked_add(
+              audit_.proposal_exact_closure_call_count,
+              proposal_evidence.consumption_audit
+                  ->closure_build_count);
+      if (!next_proposal_closure_call_count.has_value()) {
+        throw std::overflow_error(
+            "an anchored proposal-closure audit counter overflows size_t");
+      }
+      audit_.proposal_exact_closure_call_count =
+          *next_proposal_closure_call_count;
+    }
+    result.proposal_consumption_decision =
+        proposal_evidence.consumption_decision;
+    result.proposal_consumption_audit =
+        std::move(proposal_evidence.consumption_audit);
+    if (proposal_evidence.atomic_rejection_certified) {
+      increment_audit_counter(audit_.proposal_transcript_rejection_count);
+      result.decision =
+          ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+              no_preparation_transcript_rejected_before_closure;
+    } else if (proposal_evidence.exact_consumption_certified &&
+               batch_execution.complete_architecture_execution()) {
+      result.scientific_delta.emplace(std::move(batch_execution));
+      result.decision =
+          ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+              complete_architecture_only_scientific_delta_with_separate_proposal_audit;
+    } else if (proposal_evidence.exact_consumption_certified) {
+      result.batch_diagnostic.emplace(std::move(batch_execution));
+      result.decision =
+          ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+              no_preparation_batch_diagnostic_after_exact_proposal_consumption;
+    } else {
+      result.batch_diagnostic.emplace(std::move(batch_execution));
+      result.decision =
+          ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+              no_preparation_batch_diagnostic_during_proposal_consumption;
+    }
+  } else {
+    result.batch_diagnostic.emplace(std::move(batch_execution));
+    result.decision =
+        ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+            no_preparation_batch_diagnostic_before_proposal_consumption;
+  }
+
+  audit_.retained_proposal_record_count = 0U;
+  audit_.proposal_payload_or_audit_retained_between_calls = false;
+  result.preparation_left_session_cursor_unchanged =
+      next_source_batch_index_ == cursor.source_batch_index &&
+      next_source_chunk_index_ == cursor.source_chunk_index &&
+      next_source_lane_index_ == cursor.source_lane_index &&
+      next_source_family_index_ == cursor.source_family_index &&
+      next_source_arm_seed_index_ == cursor.source_arm_seed_index;
   return result;
 }
 
@@ -1141,7 +1744,9 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::commit_prepared(
           execution_budget,
           closure_budget,
           closure_config_,
-          traversal_order_);
+          traversal_order_,
+          nullptr,
+          nullptr);
   increment_audit_counter(audit_.fresh_batch_replay_count);
   account_transient_work(expected, audit_);
 
