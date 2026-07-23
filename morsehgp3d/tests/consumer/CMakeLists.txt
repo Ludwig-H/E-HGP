@@ -12,6 +12,7 @@ target_link_libraries(
   PRIVATE
     morsehgp3d::contract
     morsehgp3d::spatial
+    morsehgp3d::direct_sparse_facet_descent_batch_executor
     morsehgp3d::direct_sparse_facet_descent_batch_plan
     morsehgp3d::direct_sparse_gateway_historical_quotient
     morsehgp3d::direct_sparse_positive_facet_prefix_sweep

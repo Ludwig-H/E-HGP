@@ -68,17 +68,27 @@ Les lanes ne sont pas des transactions scientifiques indépendantes. Toutes cell
 
 Le prédicat `complete_architecture_plan()` vérifie seulement la forme et les agrégats du payload compact. Une redistribution coordonnée des comptes pourrait conserver cette forme; `fresh_reconstruction_required_before_execution=true` impose donc `verify_exact_direct_sparse_facet_descent_batch_plan` avant toute exécution ou persistance. Le plan ne borne pas encore les successeurs découverts par la fermeture commune, la profondeur LBVH, la difficulté des rationnels, les octets de scratch combinés avec 14A ou le temps GPU. Il ne qualifie ni le SLO 50 k, ni le profil 10 M+.
 
-Cet incrément prépare un seul futur exécuteur pour les deux profils : résident, toutes les lanes restent dans l'unique chunk; streaming, elles restent dans le chunk de leur lot indivisible. Il ne construit aucune facette absente, incidence Gamma, coface globale, cellule ou mosaïque de Delaunay d'ordre supérieur.
+Cet incrément prépare l'exécuteur 14D commun aux deux profils : résident, toutes les lanes restent dans l'unique chunk; streaming, elles restent dans le chunk de leur lot indivisible. Il ne construit aucune facette absente, incidence Gamma, coface globale, cellule ou mosaïque de Delaunay d'ordre supérieur.
+
+## Incrément 14D — exécuteur ancré et fermeture transitoire
+
+`ExactDirectSparseFacetDescentAnchoredBatchExecutor` ouvre une session en reconstruisant et comparant exactement le plan 14C une seule fois. Il possède ensuite cette reconstruction fraîche et un curseur canonique; aucun appel par lot ne rejoue 14A ou le flux complet 10.1--10.2. Les références vers le nuage, le LBVH, la façade et les journaux restent vivantes et immuables, tandis que le locator est gelé séparément pendant chaque préparation et vérification. Ces autorités doivent être des lvalues dont la durée de vie couvre la session; l'API n'interdit pas encore statiquement un temporaire.
+
+Pour un lot comportant $A$ bras, la sélection parcourt une fois ses familles, reconstruit les facettes à la demande et trie les clés complètes afin d'obtenir $D\leq A$ graines distinctes. Une unique fermeture 10.5c partage le snapshot et la mémoïsation entre toutes les lanes. Sa portée lexicale se termine avant la publication : seuls survivent $D$ records clé--carrier--témoin et $A$ jointures compactes par `arm_seed_index`. Aucun `node_index`, `terminal_node_index`, graphe, arête, projection de graine ou miniball transitoire n'entre dans le delta.
+
+Le stockage logique du delta vaut $O(KD+A)$. Le scratch de sélection vaut $O(KA+KD)$ en plus de l'unique fermeture locale; il ne s'additionne jamais aux fermetures des lots antérieurs. Le vérificateur rejoue seulement le lot courant sous le même plan ancré. Une égalité complète avance le curseur d'exécution, sans effectuer le quotient, les unions du locator ou le commit de hiérarchie; un diagnostic ou un stamp périmé conserve le lot rejouable.
+
+Le profil résident peut conserver une seule session et un seul plan pour tout le nuage de 50 k points. Le profil streaming utilise le même moteur séquentiel et doit évacuer chaque delta avant le lot suivant; les runs et checkpoints durables restent à implémenter. Cette discipline supprime l'accumulation du graphe 10.5c, mais ne borne encore ni les visites top-$K$, ni les rationnels, ni le temps GPU, ni le p95.
 
 ## Goulots restant à traiter en Phase 14
 
-Trois coûts dominants restent visibles après cette réduction :
+Trois coûts dominants restent visibles après 14D :
 
 - les traversées exactes top-$K$ par clé distincte, encore linéaires au pire cas;
 - les constructions de miniballs et les fallbacks rationnels, à regrouper par cardinal et difficulté;
-- le rejeu frais, qui ne doit pas dupliquer durablement les grandes arènes dans le protocole `warm_e2e`.
+- la capacité réutilisable des scratchs et le rejeu exact du lot courant, qui ne doivent pas dupliquer durablement les grandes arènes dans le protocole `warm_e2e`.
 
-La priorité de développement devient donc : exécuteur commun sélection--fermeture--jointure des lanes 14C, qualification GPU des propositions avec rejeu CPU exact, durées de vie d'arènes explicites, puis instrumentation. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces trois coûts.
+La priorité de développement devient donc : séparer les propositions GPU de leur rejeu CPU exact, réutiliser des capacités de scratch sans conserver d'objet scientifique, puis instrumenter `warm_e2e`. Les runs et checkpoints compacts viennent ensuite pour le profil 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
 
 ## Planification sans promotion
 

@@ -5,6 +5,7 @@
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
 #include "morsehgp3d/exact/support.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_facet_descent_batch_executor.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_batch_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_gateway_historical_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
@@ -24,6 +25,17 @@ int main() {
   static_assert(
       morsehgp3d::hierarchy::
           direct_sparse_facet_descent_batch_plan_schema_version == 1U);
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_sparse_facet_descent_batch_executor_schema_version == 1U);
+  using BatchExecutionResult = morsehgp3d::hierarchy::
+      ExactDirectSparseFacetDescentBatchExecutionResult;
+  const BatchExecutionResult installed_batch_execution_probe;
+  if (installed_batch_execution_probe.complete_architecture_execution()) {
+    std::cerr
+        << "installed batch-execution predicate accepted an empty result\n";
+    return 1;
+  }
   using morsehgp3d::exact::BigInt;
   using morsehgp3d::exact::CertifiedPoint3;
   using morsehgp3d::exact::CircumcenterKind;

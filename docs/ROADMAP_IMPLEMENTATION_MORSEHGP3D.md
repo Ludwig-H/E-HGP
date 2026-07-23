@@ -1159,6 +1159,14 @@ Pour une facette de cardinal $k\leq10$, le nombre de supports locaux examinés p
 
 Le prédicat interne reste un contrôle de forme; le résultat exige un rejeu frais avant exécution ou persistance. 14C est `architecture_only`, ne matérialise ni clés de lanes, ni facettes absentes, ni Gamma, cofaces globales, cellules ou mosaïque de Delaunay d'ordre supérieur, et ne qualifie ni 50 k sous la seconde, ni 10 M+.
 
+### Exécuteur ancré 14D
+
+`ExactDirectSparseFacetDescentAnchoredBatchExecutor` reconstruit et compare 14C une seule fois à l'ouverture de la session, conserve ce plan frais comme autorité et avance ensuite dans l'ordre canonique des lots. Pour chaque lot, il sélectionne les familles et les bras en une passe stable, reconstruit les seules clés réellement demandées, déduplique les $D\leq A$ clés complètes des $A$ bras, puis appelle une unique fermeture 10.5c sous un snapshot locator gelé. Les terminaux positifs sont immédiatement projetés vers un tableau compact clé--carrier--témoin et chaque `arm_seed_index` rejoint l'indice de sa clé résolue.
+
+Le graphe, les arêtes, les projections de graines, les miniballs et la mémoïsation de 10.5c restent dans la portée locale de l'appel et sont détruits avant publication du delta. Le payload persistant d'un lot est donc $O(KD+A)$; il ne contient aucun indice de nœud transitoire. Un rejeu frais du seul lot courant compare exactement le delta avant d'avancer le curseur d'exécution. Cet avancement n'est ni le commit du quotient, ni une mutation du locator, ni une publication de hiérarchie.
+
+14D est commun au profil résident et au profil streaming, mais ne suffit pas à les qualifier : le premier doit encore recevoir la voie de propositions GPU et le protocole `warm_e2e`; le second doit évacuer les deltas vers des runs et checkpoints durables au lieu de les accumuler. Aucune facette absente, Gamma, coface globale, cellule ou mosaïque de Delaunay d'ordre supérieur n'est construite, et aucune revendication 50 k, 10 M+ ou `public_status=exact` n'est faite.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;

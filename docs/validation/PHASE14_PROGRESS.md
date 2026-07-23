@@ -28,13 +28,20 @@ Le plan impose un snapshot locator pré-lot commun, une sélection stable unique
 
 `complete_architecture_plan()` est explicitement un contrôle de forme. `fresh_reconstruction_required_before_execution=true` exige le vérificateur frais avant exécution ou persistance. Le plan reste `architecture_only`, `public_status=not_claimed`, sans revendication 50 k ou 10 M+.
 
+## Incrément 14D livré — exécuteur ancré et delta compact
+
+Le nouvel exécuteur reconstruit et compare 14C une seule fois à l'ouverture, possède ce plan frais et avance par un curseur canonique. Pour chaque lot, il sélectionne toutes les lanes en une passe stable, reconstruit les seules facettes demandées, déduplique leurs clés complètes et lance une unique fermeture 10.5c sous un snapshot locator gelé. Les bras rejoignent ensuite les carriers résolus par leur `arm_seed_index`.
+
+La fermeture est enfermée dans une portée transitoire. Avant que le résultat ne soit publié, ses nœuds, arêtes, projections, miniballs et tables de mémoïsation sont détruits; seuls restent les $D$ couples clé--carrier--témoin et les $A$ jointures, soit un delta logique $O(KD+A)$. Le rejeu de commit reconstruit seulement le lot courant, jamais 14A ni l'ensemble du plan 14C. Il avance le curseur d'exécution si et seulement si le delta complet et le stamp sont identiques; il ne mute ni locator, ni quotient, ni forêt.
+
+Cette tranche est commune au résident 50 k et au streaming 10 M+, mais elle ne qualifie encore ni leur temps, ni leur volume. Le profil massif devra évacuer le delta compact vers un run durable avant de poursuivre. Aucune structure globale évitée par l'architecture n'a été réintroduite.
+
 ## Priorités de développement
 
-1. exécuter la sélection, la fermeture partagée et la jointure des lanes 14C dans une tranche commune aux deux profils;
-2. séparer les propositions GPU de leur rejeu CPU exact et ajouter les classes de difficulté observée;
-3. rendre explicites les durées de vie des arènes du rejeu frais;
-4. ajouter l'instrumentation `warm_e2e` seulement après ces réductions structurelles;
-5. rendre les chunks et checkpoints durables avant toute campagne massive.
+1. séparer les propositions GPU de leur rejeu CPU exact et ajouter les classes de difficulté observée;
+2. réutiliser les capacités de scratch sans conserver de graphe ou d'objet scientifique entre lots;
+3. ajouter l'instrumentation `warm_e2e` après ces réductions structurelles;
+4. rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 
@@ -46,7 +53,11 @@ Pour 14B, la cible locator compile avec les avertissements stricts et son unique
 
 Pour 14C, les deux CTests ciblés passent sous GCC Release strict en 0,16 seconde et sous Clang Release strict en 0,14 seconde. Ils couvrent le plan vide sans selle, les trois lanes du tétraèdre, les plafonds de chunks, lanes, lancements et examens juste insuffisants, l'absence de chunk source partiel après rejet, la tuile nulle, plusieurs chunks, deux lanes de supports distincts dans un même batch avec barrière commune, une lane falsifiée et le bord collinéaire $K=10$ à 3080 examens initiaux. Le CTest forêt séparé exerce la vraie fixture E5 tridimensionnelle, sa liaison `AC` vers la composante de `DE`, l'identité causale de cette racine avec la continuation exacte `ABC` et le rejeu frais. L'installation, l'export de la cible et le consumer externe passent 1/1. Aucun benchmark, GPU, sanitizer ou oracle long n'est lancé.
 
+Pour 14D, l'unique CTest ciblé passe sous GCC Release strict en 0,02 seconde et sous Clang Release strict en 0,03 seconde. Il couvre une session à deux lots avec un seul ancrage 14C, un lot vide, le rejet inconditionnel d'un cap 10.5c hors plafond, les douze bras du tétraèdre dédupliqués en quatre clés, deux lanes de supports deux et trois partageant une fermeture, les caps insuffisants de onze bras et trois clés sans delta ni avancement, les retries, un stamp locator périmé, le retry sous le nouveau stamp, une traversée streaming de deux chunks, les mutations d'indice et de compteur du delta et un plan falsifié rejeté à l'ouverture. L'audit conserve zéro nœud après chaque fermeture. L'installation, l'export de `direct_sparse_facet_descent_batch_executor` et le consumer externe passent 1/1 avec appel réel du prédicat non-inline. Aucun benchmark, GPU, sanitizer, oracle long, test massif ou GCP n'est lancé.
+
 Une falsification coordonnée pourrait encore redistribuer des compteurs entre chunks 14A ou lanes 14C tout en conservant leurs agrégats. Les payloads compacts ne contiennent volontairement ni détail ni digest par lot; un vérificateur frais contre 10.1--10.2 est donc requis avant persistance ou exécution industrielle. Cette dette P2 est compatible avec `architecture_only`, mais devra être fermée avant toute qualification.
+
+Deux dettes P2 propres à 14D restent explicites : l'API documente mais n'interdit pas encore statiquement les autorités temporaires dont les pointeurs deviendraient pendants, et la fixture d'intégration pré-lie les terminaux positifs, donc n'exerce pas une fermeture à arête stricte non nulle dans l'exécuteur lui-même. Les tests 10.5c couvrent séparément ces arêtes; une fixture 14D courte devra composer les deux niveaux avant qualification.
 
 ## GCP
 

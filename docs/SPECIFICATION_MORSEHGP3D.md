@@ -617,6 +617,14 @@ La transaction du lot suit donc l'ordre `snapshot`, `descentes`, `quotient carri
 
 Une condition supplémentaire demeure ouverte : avant chaque lot, les carriers paresseux doivent correspondre bijectivement aux composantes pertinentes de la coupe stricte de Gamma. La Proposition 6 et le Théorème 5 du manuscrit ne prouvent pas cette fidélité pour le flot Gabriel brut, comme l'établit E5. La descente enrichie compose bien localement `AC` avec la composante de `DE` avant la continuation `ABC`, mais seule une induction globale sur toutes les attaches silencieuses pourra promouvoir cette propriété. La Phase 10 est donc fermée comme jalon logiciel `conditional_h0_candidate`; Phase 14 peut optimiser cette machine en `architecture_only`, sans revendiquer une sémantique horizontale exacte.
 
+### 9.18 Exécution industrielle ancrée des descentes
+
+L'exécuteur 14D ouvre une session en reconstruisant une seule fois le plan 14C depuis les autorités 10.1--10.2, puis en exigeant son égalité exacte avec le plan observé. Son curseur est séquentiel et canonique : un échec de budget, de fermeture, de stamp ou de rejeu ne l'avance jamais. Les autorités sources restent vivantes et immuables pendant la session; le locator est gelé pendant chaque préparation et chaque vérification.
+
+Dans un lot, les lanes ne sont jamais exécutées comme transactions scientifiques séparées. Leurs familles sont sélectionnées une fois, leurs bras gardent l'identité durable `arm_seed_index`, leurs clés complètes sont dédupliquées et une seule fermeture 10.5c résout toutes les clés distinctes sous le même snapshot. Le graphe de fermeture est projeté vers un delta $O(KD+A)$ puis détruit avant le retour. Le delta ne contient aucun indice dans l'arène transitoire et l'avancement du curseur certifie uniquement le rejeu architectural; le quotient, les unions locator et la réduction de hiérarchie restent une barrière ultérieure atomique.
+
+Cette exécution ne matérialise ni l'univers des facettes, ni Gamma, ni cofaces ou incidences globales, ni cellules, ni mosaïque de Delaunay d'ordre supérieur. Elle reste relative à l'autorité externe du locator et à l'obligation de fidélité globale des carriers, avec `deployment_status=architecture_only` et `public_status=not_claimed`. Elle ne qualifie ni le SLO 50 k, ni le régime 10 M+.
+
 ## 10. Événements simultanés
 
 Des centres distincts peuvent avoir exactement le même niveau. Une exécution séquentielle créerait des bifurcations binaires artificielles et pourrait changer les morphismes verticaux.

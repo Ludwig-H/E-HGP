@@ -1218,6 +1218,48 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_sparse_facet_descent_batch_executor
+  STATIC
+    src/cpu/hierarchy/direct_sparse_facet_descent_batch_executor.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_facet_descent_batch_executor
+  ALIAS morsehgp3d_direct_sparse_facet_descent_batch_executor
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_facet_descent_batch_executor
+  PROPERTIES
+    EXPORT_NAME direct_sparse_facet_descent_batch_executor
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_facet_descent_batch_executor PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_facet_descent_batch_executor
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_facet_descent_batch_executor
+  PUBLIC
+    morsehgp3d::direct_sparse_facet_descent_batch_plan
+    morsehgp3d::direct_sparse_facet_descent_closure
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_facet_descent_batch_executor PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_facet_descent_batch_executor
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_pair_support_codec
   STATIC
     src/cpu/hierarchy/pair_support_stream_codec.cpp
@@ -1897,6 +1939,7 @@ install(
     morsehgp3d_direct_morse_forest_journal
     morsehgp3d_direct_morse_industrial_plan
     morsehgp3d_direct_sparse_facet_descent_batch_plan
+    morsehgp3d_direct_sparse_facet_descent_batch_executor
     morsehgp3d_pair_support_codec
     morsehgp3d_hierarchy
     morsehgp3d_sanitizers
