@@ -1,4 +1,4 @@
-#include "morsehgp3d/hierarchy/direct_sparse_gateway_temporal_resolution.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_gateway_historical_quotient.hpp"
 
 #include <algorithm>
 #include <array>
@@ -292,6 +292,27 @@ generous_temporal_resolution_budget() {
   const std::size_t maximum = std::numeric_limits<std::size_t>::max();
   return {
       maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+  };
+}
+
+[[nodiscard]] ExactDirectSparseGatewayHistoricalQuotientBudget
+generous_historical_quotient_budget() {
+  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
+  return {
       maximum,
       maximum,
       maximum,
@@ -1763,11 +1784,30 @@ void test_historical_gateway_temporal_resolution(
           LbvhTraversalOrder::near_first);
   check(
       empty_localization.certified_partial_refinement() &&
-          !empty_localization.localized_facet_tokens.empty(),
-      "10.13 fixture first exposes at least one latent deletion token");
-  if (empty_localization.localized_facet_tokens.empty()) {
+          empty_localization.localized_facet_tokens.size() >= 2U,
+      "10.13 fixture first exposes at least two latent deletion tokens");
+  if (empty_localization.localized_facet_tokens.size() < 2U) {
     return;
   }
+
+  const auto initially_positive_token =
+      empty_localization.localized_facet_tokens[0U];
+  const std::array<ExactDirectSparseFacetBinding, 1U> initial_binding{{
+      {
+          0U,
+          initially_positive_token.facet_key,
+          3U,
+          {locator_authority_id, UINT64_C(0x10d13002)},
+      },
+  }};
+  check(
+      locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              std::span<const ExactDirectSparseComponentUnion>{},
+              initial_binding)
+          .certified_committed_batch(),
+      "10.14 fixture publishes one known root before every source capture");
 
   const auto source_identity =
       compute_exact_direct_sparse_gateway_candidate_scientific_identity(
@@ -1794,13 +1834,13 @@ void test_historical_gateway_temporal_resolution(
   }
 
   const auto selected_token =
-      empty_localization.localized_facet_tokens.front();
+      empty_localization.localized_facet_tokens[1U];
   const std::array<ExactDirectSparseFacetBinding, 1U> binding{{
       {
           0U,
           selected_token.facet_key,
           3U,
-          {locator_authority_id, UINT64_C(0x10d13002)},
+          {locator_authority_id, UINT64_C(0x10d13003)},
       },
   }};
   check(
@@ -1810,7 +1850,7 @@ void test_historical_gateway_temporal_resolution(
               std::span<const ExactDirectSparseComponentUnion>{},
               binding)
           .certified_committed_batch(),
-      "10.13 fixture commits one selected facet only after every source capture");
+      "10.13 fixture commits one second facet only after every source capture");
   const ExactDirectSparseGatewayClockAuthoritySealBudget seal_budget{
       maximum,
       maximum,
@@ -1869,6 +1909,10 @@ void test_historical_gateway_temporal_resolution(
           !result.missing_facet_means_isolated &&
           !result.quotient_root_union_or_forest_mutated,
       "10.13 publishes exactly two read-only sparse arenas");
+  check(
+      result.counters.historical_positive_count > 0U &&
+          result.counters.historical_latent_count > 0U,
+      "the shared 10.13 fixture carries both historical roots and latent facets");
 
   std::set<std::pair<std::size_t, std::size_t>> expected_pairs;
   for (const auto& projection : final_localization.deletion_projections) {
@@ -1888,7 +1932,7 @@ void test_historical_gateway_temporal_resolution(
         selected_token.localized_facet_token_index) {
       selected_historical_latent =
           selected_historical_latent ||
-          (resolution.strict_pre_locator_prefix_count == 0U &&
+          (resolution.strict_pre_locator_prefix_count == 1U &&
            resolution.disposition ==
                ExactDirectSparseGatewayTemporalDisposition::
                    latent_unresolved &&
@@ -1900,6 +1944,121 @@ void test_historical_gateway_temporal_resolution(
           result.final_latent_implies_historical_latent &&
           result.historical_positive_implies_final_positive_with_same_witness,
       "10.13 preserves a historical latent token despite its later positive binding");
+
+  const auto historical_quotient_budget =
+      generous_historical_quotient_budget();
+  const auto historical_quotient =
+      build_exact_direct_sparse_gateway_historical_quotient(
+          fixture.source,
+          final_localization,
+          result,
+          historical_quotient_budget);
+  check(
+      historical_quotient.certified_partial_refinement() &&
+          historical_quotient.batches.size() ==
+              fixture.source.batches.size() &&
+          historical_quotient.candidate_to_component.size() ==
+              fixture.source.gateway_candidates.size() &&
+          !historical_quotient.components.empty() &&
+          !historical_quotient.component_root_ids.empty() &&
+          !historical_quotient.component_latent_resolution_indices.empty() &&
+          historical_quotient.shared_latent_facets_join_candidate_hyperedges &&
+          historical_quotient.closure_strictly_batch_local &&
+          historical_quotient.latent_only_components_preserved_as_unresolved &&
+          !historical_quotient.latent_facet_means_isolated &&
+          !historical_quotient.locator_root_union_or_forest_mutated &&
+          !historical_quotient.gateway_attach_published,
+      "10.14 closes typed historical incidences without mutating a root or publishing an attach");
+
+  bool latent_only_pair_found = false;
+  for (std::size_t first_index = 0U;
+       first_index < historical_quotient.candidate_to_component.size();
+       ++first_index) {
+    const auto& first =
+        historical_quotient.candidate_to_component[first_index];
+    if (first.historical_positive_projection_count != 0U) {
+      continue;
+    }
+    std::set<std::size_t> first_latent_resolutions;
+    for (std::size_t offset = 0U;
+         offset < first.deletion_projection_count;
+         ++offset) {
+      const auto& projection =
+          result.projection_to_resolution
+              [first.deletion_projection_offset + offset];
+      const auto& resolution =
+          result.temporal_resolutions
+              [projection.temporal_resolution_index];
+      if (resolution.disposition ==
+          ExactDirectSparseGatewayTemporalDisposition::
+              latent_unresolved) {
+        first_latent_resolutions.insert(
+            projection.temporal_resolution_index);
+      }
+    }
+    for (std::size_t second_index = first_index + 1U;
+         second_index <
+         historical_quotient.candidate_to_component.size();
+         ++second_index) {
+      const auto& second =
+          historical_quotient.candidate_to_component[second_index];
+      if (second.source_batch_index != first.source_batch_index ||
+          second.historical_component_index !=
+              first.historical_component_index ||
+          second.historical_positive_projection_count != 0U) {
+        continue;
+      }
+      for (std::size_t offset = 0U;
+           offset < second.deletion_projection_count;
+           ++offset) {
+        const auto& projection =
+            result.projection_to_resolution
+                [second.deletion_projection_offset + offset];
+        if (first_latent_resolutions.contains(
+                projection.temporal_resolution_index)) {
+          latent_only_pair_found = true;
+          break;
+        }
+      }
+      if (latent_only_pair_found) {
+        break;
+      }
+    }
+    if (latent_only_pair_found) {
+      break;
+    }
+  }
+  check(
+      latent_only_pair_found &&
+          historical_quotient.counters.latent_only_component_count > 0U,
+      "10.14 joins two candidates solely through a shared historical latent facet and preserves their latent-only component");
+
+  bool two_batches_observed = false;
+  bool all_cross_batch_components_separated = true;
+  for (std::size_t first_index = 0U;
+       first_index < historical_quotient.candidate_to_component.size();
+       ++first_index) {
+    for (std::size_t second_index = first_index + 1U;
+         second_index <
+         historical_quotient.candidate_to_component.size();
+         ++second_index) {
+      const auto& first =
+          historical_quotient.candidate_to_component[first_index];
+      const auto& second =
+          historical_quotient.candidate_to_component[second_index];
+      if (first.source_batch_index != second.source_batch_index) {
+        two_batches_observed = true;
+        all_cross_batch_components_separated =
+            all_cross_batch_components_separated &&
+            first.historical_component_index !=
+                second.historical_component_index;
+      }
+    }
+  }
+  check(
+      two_batches_observed && all_cross_batch_components_separated,
+      "10.14 keeps candidate closure separated across two source batches");
+
   auto malformed_result = result;
   ++malformed_result.temporal_resolutions.front()
         .projection_reference_count;
@@ -1970,6 +2129,48 @@ void test_historical_gateway_temporal_resolution(
           verified.in_memory_replay_only &&
           !verified.crash_durable,
       "10.13 fresh verification composes localization, AUTH and one prefix sweep while retaining external premises");
+
+  const auto quotient_verified =
+      verify_exact_direct_sparse_gateway_historical_quotient(
+          authorities,
+          temporal_budget,
+          prefix_sweep_budget,
+          result,
+          historical_quotient_budget,
+          historical_quotient);
+  check(
+      quotient_verified.result_certified &&
+          quotient_verified.temporal_resolution_freshly_replayed &&
+          quotient_verified.expected_result_freshly_reconstructed &&
+          quotient_verified.observed_result_recursively_equal &&
+          quotient_verified.batch_local_typed_closure_freshly_replayed &&
+          quotient_verified.external_clock_authority_replayed &&
+          !quotient_verified.external_binding_authority_replayed &&
+          quotient_verified
+              .conditional_on_caller_external_binding_authority_replay &&
+          quotient_verified
+              .conditional_on_caller_strict_pre_lot_orchestration &&
+          quotient_verified
+              .conditional_on_caller_external_freeze_synchronization &&
+          quotient_verified.in_memory_replay_only &&
+          !quotient_verified.crash_durable,
+      "10.14 fresh verification replays 10.13 and the batch-local typed closure while retaining external premises");
+
+  auto mutated_quotient = historical_quotient;
+  ++mutated_quotient.candidate_to_component.front()
+        .historical_component_index;
+  const auto mutated_quotient_verification =
+      verify_exact_direct_sparse_gateway_historical_quotient(
+          authorities,
+          temporal_budget,
+          prefix_sweep_budget,
+          result,
+          historical_quotient_budget,
+          mutated_quotient);
+  check(
+      !mutated_quotient_verification.observed_result_recursively_equal &&
+          !mutated_quotient_verification.result_certified,
+      "10.14 fresh verification rejects one mutated candidate-to-component binding");
 }
 
 }  // namespace
