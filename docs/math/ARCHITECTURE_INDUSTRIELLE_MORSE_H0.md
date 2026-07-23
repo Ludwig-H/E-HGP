@@ -112,15 +112,23 @@ Le delta logique reste $O(KD+A)$ et le transcript sparse fourni par l'appelant $
 
 14G ne construit toujours aucune facette absente, coface, incidence globale, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Il ne qualifie ni producteur CUDA, ni SLO 50 k, ni capacité 10 M+, ni statut public.
 
-## Goulots restant à traiter après 14G
+## Incrément 14H — ticket scellé et commit sans rejeu
+
+14H remplace le passage public d'un delta mutable par une capacité créée uniquement à l'intérieur de la préparation exacte. Ce ticket non copiable possède le delta $O(KD+A)$, un sceau de session partagé, l'epoch, le curseur source complet, le curseur successeur déjà validé et le stamp locator. Il appartient à l'appelant; la session ne retient aucun état préparé. Un déplacement neutralise la source et toute tentative de commit consomme la destination, qu'elle réussisse ou non.
+
+Le commit compare seulement le sceau, l'epoch, cinq indices source et le stamp vivant, puis affecte cinq indices successeurs prévalidés. Il ne parcourt pas le delta, ne relance aucun top-$K$, miniball ou 10.5c et ne lit ni transcript ni audit. Sa complexité est donc constante dans les tailles $A$, $D$ et $K$. L'audit peut être détaché et détruit avant commit; s'il reste présent, il est déplacé séparément sans devenir une autorité. Le chemin historique à rejeu frais est conservé pour le diagnostic et incrémente le même epoch.
+
+Le ticket est une preuve de provenance exacte locale au processus, pas un certificat durable ni un replay indépendant. Son bénéfice précis est la vivacité : après émission d'un ticket courant, aucun second budget géométrique ne peut bloquer son avancement. Le scheduler devra limiter le nombre de tickets simultanément détenus par l'appelant; 14H ne qualifie pas ce pic. Il ne réalise toujours ni transaction locator, ni quotient, ni réduction hiérarchique, et ne construit aucune structure globale interdite.
+
+## Goulots restant à traiter après 14H
 
 Trois coûts dominants restent visibles après 14D :
 
 - les traversées exactes top-$K$ par clé distincte, encore linéaires au pire cas;
 - les constructions de miniballs et les fallbacks rationnels, à regrouper par cardinal et difficulté;
-- la capacité réutilisable des scratchs et le rejeu exact du lot courant, qui ne doivent pas dupliquer durablement les grandes arènes dans le protocole `warm_e2e`.
+- la capacité réutilisable des scratchs et le pic des tickets détenus par l'appelant, qui ne doivent pas dupliquer durablement les grandes arènes dans le protocole `warm_e2e`.
 
-La priorité de développement devient donc : fermer la vivacité préparation--commit sans donner d'autorité aux propositions, puis brancher un producteur GPU borné sur cette frontière, réutiliser des capacités de scratch sans conserver d'objet scientifique et instrumenter `warm_e2e`. Les runs et checkpoints compacts viennent ensuite pour le profil 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
+La priorité de développement devient donc : brancher un producteur GPU borné sur la frontière désormais scellée, réutiliser des capacités de scratch sans conserver d'objet scientifique et instrumenter `warm_e2e`. Les runs et checkpoints compacts viennent ensuite pour le profil 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
 
 ## Planification sans promotion
 

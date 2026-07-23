@@ -7,6 +7,7 @@
 #include <optional>
 #include <span>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 namespace morsehgp3d::hierarchy {
@@ -35,6 +36,69 @@ struct BatchCursor {
   std::size_t source_family_index{};
   std::size_t source_arm_seed_index{};
 };
+
+[[nodiscard]] bool same_cursor(
+    const BatchCursor& left,
+    const BatchCursor& right) noexcept {
+  return left.source_batch_index == right.source_batch_index &&
+         left.source_chunk_index == right.source_chunk_index &&
+         left.source_lane_index == right.source_lane_index &&
+         left.source_family_index == right.source_family_index &&
+         left.source_arm_seed_index == right.source_arm_seed_index;
+}
+
+[[nodiscard]] std::optional<BatchCursor> prevalidated_successor_cursor(
+    const ExactDirectMorseEventJournalResult& source_event_journal,
+    const ExactDirectSaddleArmSeedJournalResult& source_arm_seed_journal,
+    const ExactDirectSparseFacetDescentBatchPlanResult& source_plan,
+    const BatchCursor& source_cursor,
+    const ExactDirectSparseFacetDescentBatchExecutionResult& delta) noexcept {
+  if (source_cursor.source_batch_index >=
+          source_event_journal.batches.size() ||
+      delta.source_batch_index != source_cursor.source_batch_index ||
+      !delta.source_chunk_index.has_value() ||
+      *delta.source_chunk_index != source_cursor.source_chunk_index ||
+      delta.source_lane_begin_index != source_cursor.source_lane_index ||
+      delta.source_family_begin_index != source_cursor.source_family_index ||
+      delta.source_arm_seed_begin_index !=
+          source_cursor.source_arm_seed_index) {
+    return std::nullopt;
+  }
+
+  const std::size_t successor_batch_index =
+      source_cursor.source_batch_index + 1U;
+  std::size_t successor_chunk_index =
+      source_cursor.source_chunk_index;
+  while (successor_chunk_index <
+             source_plan.source_industrial_plan.chunks.size() &&
+         successor_batch_index >=
+             source_plan.source_industrial_plan
+                 .chunks[successor_chunk_index]
+                 .source_batch_end_index) {
+    ++successor_chunk_index;
+  }
+  const bool terminal =
+      successor_batch_index == source_event_journal.batches.size();
+  if ((terminal &&
+       (delta.source_lane_end_index != source_plan.lanes.size() ||
+        delta.source_family_end_index !=
+            source_arm_seed_journal.families.size() ||
+        delta.source_arm_seed_end_index !=
+            source_arm_seed_journal.arm_seeds.size() ||
+        successor_chunk_index !=
+            source_plan.source_industrial_plan.chunks.size())) ||
+      (!terminal &&
+       successor_chunk_index >=
+           source_plan.source_industrial_plan.chunks.size())) {
+    return std::nullopt;
+  }
+  return BatchCursor{
+      successor_batch_index,
+      successor_chunk_index,
+      delta.source_lane_end_index,
+      delta.source_family_end_index,
+      delta.source_arm_seed_end_index};
+}
 
 struct SelectedArm {
   std::size_t arm_seed_index{};
@@ -1458,6 +1522,135 @@ bool ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult::
          certified_atomic_transcript_rejection();
 }
 
+bool ExactDirectSparseFacetDescentBatchSealedCommitVerification::
+    certified_cursor_advance() const noexcept {
+  return schema_version ==
+             direct_sparse_facet_descent_batch_sealed_commit_schema_version &&
+         ticket_was_valid_and_unconsumed &&
+         shared_session_seal_matches && source_epoch_matches &&
+         full_source_cursor_matches && locator_snapshot_matches &&
+         exact_scientific_delta_provenance_minted_before_commit &&
+         prevalidated_successor_cursor_used &&
+         !independent_geometry_replay_performed &&
+         !closure_budget_consumed_during_commit &&
+         !transcript_present_during_commit &&
+         !operational_audit_read_for_commit_authority &&
+         !locator_or_hierarchy_state_mutated &&
+         !forbidden_global_structure_materialized &&
+         !scale_or_public_status_claimed &&
+         scientific_delta_moved_to_commit_result && ticket_consumed &&
+         session_advanced && result_certified &&
+         decision ==
+             ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+                 complete_architecture_only_sealed_exact_delta_cursor_advance &&
+         scope ==
+             ExactDirectSparseFacetDescentBatchSealedCommitScope::
+                 one_in_process_exact_preparation_provenance_cursor_advance_before_hierarchy_commit_only;
+}
+
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::PreparedTopKProposalBatch::
+    PreparedTopKProposalBatch(
+        std::shared_ptr<const std::byte> session_seal,
+        std::size_t source_epoch,
+        std::size_t source_batch_index,
+        std::size_t source_chunk_index,
+        std::size_t source_lane_index,
+        std::size_t source_family_index,
+        std::size_t source_arm_seed_index,
+        std::size_t successor_batch_index,
+        std::size_t successor_chunk_index,
+        std::size_t successor_lane_index,
+        std::size_t successor_family_index,
+        std::size_t successor_arm_seed_index,
+        ExactDirectSparsePositiveFacetLocatorSnapshotStamp
+            locator_snapshot_stamp,
+        ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult
+            preparation) noexcept
+    : session_seal_(std::move(session_seal)),
+      source_epoch_(source_epoch),
+      source_batch_index_(source_batch_index),
+      source_chunk_index_(source_chunk_index),
+      source_lane_index_(source_lane_index),
+      source_family_index_(source_family_index),
+      source_arm_seed_index_(source_arm_seed_index),
+      successor_batch_index_(successor_batch_index),
+      successor_chunk_index_(successor_chunk_index),
+      successor_lane_index_(successor_lane_index),
+      successor_family_index_(successor_family_index),
+      successor_arm_seed_index_(successor_arm_seed_index),
+      locator_snapshot_stamp_(std::move(locator_snapshot_stamp)),
+      preparation_(std::move(preparation)),
+      exact_scientific_delta_provenance_minted_(true),
+      valid_(true) {
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult>);
+}
+
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::PreparedTopKProposalBatch::
+    PreparedTopKProposalBatch(PreparedTopKProposalBatch&& other) noexcept
+    : session_seal_(std::move(other.session_seal_)),
+      source_epoch_(other.source_epoch_),
+      source_batch_index_(other.source_batch_index_),
+      source_chunk_index_(other.source_chunk_index_),
+      source_lane_index_(other.source_lane_index_),
+      source_family_index_(other.source_family_index_),
+      source_arm_seed_index_(other.source_arm_seed_index_),
+      successor_batch_index_(other.successor_batch_index_),
+      successor_chunk_index_(other.successor_chunk_index_),
+      successor_lane_index_(other.successor_lane_index_),
+      successor_family_index_(other.successor_family_index_),
+      successor_arm_seed_index_(other.successor_arm_seed_index_),
+      locator_snapshot_stamp_(std::move(other.locator_snapshot_stamp_)),
+      preparation_(std::move(other.preparation_)),
+      exact_scientific_delta_provenance_minted_(
+          std::exchange(
+              other.exact_scientific_delta_provenance_minted_,
+              false)),
+      valid_(std::exchange(other.valid_, false)),
+      consumed_(other.consumed_) {
+  other.consumed_ = true;
+}
+
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::PreparedTopKProposalBatch&
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::PreparedTopKProposalBatch::
+operator=(PreparedTopKProposalBatch&& other) noexcept {
+  if (this != &other) {
+    session_seal_ = std::move(other.session_seal_);
+    source_epoch_ = other.source_epoch_;
+    source_batch_index_ = other.source_batch_index_;
+    source_chunk_index_ = other.source_chunk_index_;
+    source_lane_index_ = other.source_lane_index_;
+    source_family_index_ = other.source_family_index_;
+    source_arm_seed_index_ = other.source_arm_seed_index_;
+    successor_batch_index_ = other.successor_batch_index_;
+    successor_chunk_index_ = other.successor_chunk_index_;
+    successor_lane_index_ = other.successor_lane_index_;
+    successor_family_index_ = other.successor_family_index_;
+    successor_arm_seed_index_ = other.successor_arm_seed_index_;
+    locator_snapshot_stamp_ =
+        std::move(other.locator_snapshot_stamp_);
+    preparation_ = std::move(other.preparation_);
+    exact_scientific_delta_provenance_minted_ =
+        std::exchange(
+            other.exact_scientific_delta_provenance_minted_,
+            false);
+    valid_ = std::exchange(other.valid_, false);
+    consumed_ = other.consumed_;
+    other.consumed_ = true;
+  }
+  return *this;
+}
+
+std::optional<
+    ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit>
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::PreparedTopKProposalBatch::
+    take_operational_audit() noexcept {
+  return std::exchange(
+      preparation_.proposal_consumption_audit,
+      std::nullopt);
+}
+
 ExactDirectSparseFacetDescentAnchoredBatchExecutor::
     ExactDirectSparseFacetDescentAnchoredBatchExecutor(
         const spatial::MortonLbvhIndex& index,
@@ -1483,7 +1676,9 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::
       plan_budget_(plan_budget),
       locator_(&locator),
       closure_config_(closure_config),
-      traversal_order_(traversal_order) {
+      traversal_order_(traversal_order),
+      session_seal_(
+          std::make_shared<const std::byte>(std::byte{0U})) {
   require_valid_traversal_order(traversal_order_);
   if (!index_->validated_for(*cloud_)) {
     throw std::invalid_argument(
@@ -1511,6 +1706,7 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::
   audit_.full_source_plan_replayed_per_batch = false;
   audit_.closure_graph_retained_between_batches = false;
   audit_.proposal_payload_or_audit_retained_between_calls = false;
+  audit_.sealed_ticket_or_delta_retained_by_session = false;
 }
 
 bool ExactDirectSparseFacetDescentAnchoredBatchExecutor::complete()
@@ -1703,6 +1899,236 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::
   return result;
 }
 
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::
+    PreparedTopKProposalBatch
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::
+    prepare_next_sealed_with_top_k_proposal_transcript(
+        const ExactDirectSparseFacetWitness& locator_query_witness,
+        const ExactDirectSparseFacetDescentBatchExecutionBudget&
+            execution_budget,
+        const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
+        const ExactDirectSparseFacetTopKProposalTranscriptResult&
+            transcript) {
+  const BatchCursor source_cursor{
+      next_source_batch_index_,
+      next_source_chunk_index_,
+      next_source_lane_index_,
+      next_source_family_index_,
+      next_source_arm_seed_index_};
+  ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult
+      preparation = prepare_next_with_top_k_proposal_transcript(
+          locator_query_witness,
+          execution_budget,
+          closure_budget,
+          transcript);
+  increment_audit_counter(audit_.sealed_ticket_prepare_attempt_count);
+  audit_.sealed_ticket_or_delta_retained_by_session = false;
+
+  if (!preparation.complete_architecture_preparation() ||
+      !preparation.scientific_delta.has_value()) {
+    return PreparedTopKProposalBatch{std::move(preparation)};
+  }
+  const std::optional<BatchCursor> successor_cursor =
+      prevalidated_successor_cursor(
+          *source_event_journal_,
+          *source_arm_seed_journal_,
+          source_plan_,
+          source_cursor,
+          *preparation.scientific_delta);
+  if (!successor_cursor.has_value()) {
+    return PreparedTopKProposalBatch{std::move(preparation)};
+  }
+
+  increment_audit_counter(audit_.sealed_ticket_issued_count);
+  return PreparedTopKProposalBatch{
+      session_seal_,
+      source_epoch_,
+      source_cursor.source_batch_index,
+      source_cursor.source_chunk_index,
+      source_cursor.source_lane_index,
+      source_cursor.source_family_index,
+      source_cursor.source_arm_seed_index,
+      successor_cursor->source_batch_index,
+      successor_cursor->source_chunk_index,
+      successor_cursor->source_lane_index,
+      successor_cursor->source_family_index,
+      successor_cursor->source_arm_seed_index,
+      preparation.scientific_delta->locator_snapshot_stamp,
+      std::move(preparation)};
+}
+
+ExactDirectSparseFacetDescentBatchSealedCommitResult
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::
+    commit_prepared_ticket(
+        PreparedTopKProposalBatch&& prepared) noexcept {
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          ExactDirectSparseFacetDescentBatchExecutionResult>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit>);
+
+  ExactDirectSparseFacetDescentBatchSealedCommitResult result;
+  auto& verification = result.verification;
+  verification.source_batch_index = prepared.source_batch_index_;
+  verification.successor_batch_index =
+      prepared.successor_batch_index_;
+  verification.scope =
+      ExactDirectSparseFacetDescentBatchSealedCommitScope::
+          one_in_process_exact_preparation_provenance_cursor_advance_before_hierarchy_commit_only;
+  verification.ticket_was_valid_and_unconsumed =
+      prepared.valid_ && !prepared.consumed_;
+  verification.shared_session_seal_matches =
+      verification.ticket_was_valid_and_unconsumed &&
+      prepared.session_seal_ &&
+      prepared.session_seal_ == session_seal_;
+  verification.source_epoch_matches =
+      verification.shared_session_seal_matches &&
+      prepared.source_epoch_ == source_epoch_;
+  const BatchCursor live_cursor{
+      next_source_batch_index_,
+      next_source_chunk_index_,
+      next_source_lane_index_,
+      next_source_family_index_,
+      next_source_arm_seed_index_};
+  const BatchCursor ticket_source_cursor{
+      prepared.source_batch_index_,
+      prepared.source_chunk_index_,
+      prepared.source_lane_index_,
+      prepared.source_family_index_,
+      prepared.source_arm_seed_index_};
+  verification.full_source_cursor_matches =
+      verification.source_epoch_matches &&
+      same_cursor(live_cursor, ticket_source_cursor) &&
+      !complete();
+  verification.locator_snapshot_matches =
+      verification.full_source_cursor_matches &&
+      locator_->snapshot_stamp() ==
+          prepared.locator_snapshot_stamp_;
+  verification
+      .exact_scientific_delta_provenance_minted_before_commit =
+      verification.locator_snapshot_matches &&
+      prepared.exact_scientific_delta_provenance_minted_ &&
+      prepared.preparation_.scientific_delta.has_value();
+
+  const auto consume_ticket = [&prepared, &verification]() noexcept {
+    prepared.session_seal_.reset();
+    prepared.exact_scientific_delta_provenance_minted_ = false;
+    prepared.valid_ = false;
+    prepared.consumed_ = true;
+    verification.ticket_consumed = true;
+  };
+  const auto reject_ticket =
+      [this, &verification, &consume_ticket](
+          ExactDirectSparseFacetDescentBatchSealedCommitDecision
+              decision) noexcept {
+        if (audit_.sealed_ticket_rejected_commit_count !=
+            std::numeric_limits<std::size_t>::max()) {
+          ++audit_.sealed_ticket_rejected_commit_count;
+        } else {
+          decision =
+              ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+                  no_commit_audit_capacity_exhausted;
+        }
+        verification.decision = decision;
+        consume_ticket();
+      };
+
+  if (audit_.sealed_ticket_commit_attempt_count ==
+      std::numeric_limits<std::size_t>::max()) {
+    verification.decision =
+        ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+            no_commit_audit_capacity_exhausted;
+    consume_ticket();
+    return result;
+  }
+  ++audit_.sealed_ticket_commit_attempt_count;
+
+  if (!verification.ticket_was_valid_and_unconsumed) {
+    reject_ticket(
+        ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+            no_commit_invalid_moved_or_consumed_ticket);
+    return result;
+  }
+  if (!verification.shared_session_seal_matches) {
+    reject_ticket(
+        ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+            no_commit_foreign_session);
+    return result;
+  }
+  if (!verification.source_epoch_matches ||
+      !verification.full_source_cursor_matches) {
+    reject_ticket(
+        ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+            no_commit_stale_epoch_or_cursor);
+    return result;
+  }
+  if (!verification.locator_snapshot_matches) {
+    reject_ticket(
+        ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+            no_commit_locator_snapshot_changed);
+    return result;
+  }
+  if (!verification
+           .exact_scientific_delta_provenance_minted_before_commit) {
+    reject_ticket(
+        ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+            no_commit_invalid_moved_or_consumed_ticket);
+    return result;
+  }
+  if (audit_.accepted_batch_count ==
+          std::numeric_limits<std::size_t>::max() ||
+      audit_.sealed_ticket_accepted_commit_count ==
+          std::numeric_limits<std::size_t>::max() ||
+      audit_.sealed_ticket_exact_replay_avoided_count ==
+          std::numeric_limits<std::size_t>::max() ||
+      source_epoch_ == std::numeric_limits<std::size_t>::max()) {
+    reject_ticket(
+        ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+            no_commit_audit_capacity_exhausted);
+    return result;
+  }
+
+  result.scientific_delta.emplace(
+      std::move(*prepared.preparation_.scientific_delta));
+  prepared.preparation_.scientific_delta.reset();
+  if (prepared.preparation_.proposal_consumption_audit.has_value()) {
+    result.operational_audit.emplace(
+        std::move(
+            *prepared.preparation_.proposal_consumption_audit));
+    prepared.preparation_.proposal_consumption_audit.reset();
+  }
+
+  next_source_batch_index_ = prepared.successor_batch_index_;
+  next_source_chunk_index_ = prepared.successor_chunk_index_;
+  next_source_lane_index_ = prepared.successor_lane_index_;
+  next_source_family_index_ = prepared.successor_family_index_;
+  next_source_arm_seed_index_ =
+      prepared.successor_arm_seed_index_;
+  ++source_epoch_;
+  ++audit_.accepted_batch_count;
+  ++audit_.sealed_ticket_accepted_commit_count;
+  ++audit_.sealed_ticket_exact_replay_avoided_count;
+  audit_.sealed_ticket_or_delta_retained_by_session = false;
+
+  verification.prevalidated_successor_cursor_used = true;
+  verification.independent_geometry_replay_performed = false;
+  verification.closure_budget_consumed_during_commit = false;
+  verification.transcript_present_during_commit = false;
+  verification.operational_audit_read_for_commit_authority = false;
+  verification.locator_or_hierarchy_state_mutated = false;
+  verification.forbidden_global_structure_materialized = false;
+  verification.scale_or_public_status_claimed = false;
+  verification.scientific_delta_moved_to_commit_result = true;
+  verification.session_advanced = true;
+  verification.result_certified = true;
+  verification.decision =
+      ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+          complete_architecture_only_sealed_exact_delta_cursor_advance;
+  consume_ticket();
+  return result;
+}
+
 ExactDirectSparseFacetDescentBatchExecutionVerification
 ExactDirectSparseFacetDescentAnchoredBatchExecutor::commit_prepared(
     const ExactDirectSparseFacetWitness& locator_query_witness,
@@ -1790,41 +2216,28 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::commit_prepared(
     return verification;
   }
 
-  const std::size_t advanced_batch_index =
-      next_source_batch_index_ + 1U;
-  std::size_t advanced_chunk_index = next_source_chunk_index_;
-  while (advanced_chunk_index <
-             source_plan_.source_industrial_plan.chunks.size() &&
-         advanced_batch_index >=
-             source_plan_.source_industrial_plan
-                 .chunks[advanced_chunk_index]
-                 .source_batch_end_index) {
-    ++advanced_chunk_index;
-  }
-  const bool terminal = advanced_batch_index ==
-                        source_event_journal_->batches.size();
-  if ((terminal &&
-       (expected.source_lane_end_index != source_plan_.lanes.size() ||
-        expected.source_family_end_index !=
-            source_arm_seed_journal_->families.size() ||
-        expected.source_arm_seed_end_index !=
-            source_arm_seed_journal_->arm_seeds.size() ||
-        advanced_chunk_index !=
-            source_plan_.source_industrial_plan.chunks.size())) ||
-      (!terminal &&
-       advanced_chunk_index >=
-           source_plan_.source_industrial_plan.chunks.size())) {
+  const std::optional<BatchCursor> successor_cursor =
+      prevalidated_successor_cursor(
+          *source_event_journal_,
+          *source_arm_seed_journal_,
+          source_plan_,
+          cursor,
+          expected);
+  if (!successor_cursor.has_value() ||
+      source_epoch_ == std::numeric_limits<std::size_t>::max()) {
     increment_audit_counter(audit_.rejected_batch_replay_count);
     verification.result_certified = false;
     return verification;
   }
 
-  next_source_batch_index_ = advanced_batch_index;
-  next_source_chunk_index_ = advanced_chunk_index;
-  next_source_lane_index_ = expected.source_lane_end_index;
-  next_source_family_index_ = expected.source_family_end_index;
-  next_source_arm_seed_index_ = expected.source_arm_seed_end_index;
   increment_audit_counter(audit_.accepted_batch_count);
+  next_source_batch_index_ = successor_cursor->source_batch_index;
+  next_source_chunk_index_ = successor_cursor->source_chunk_index;
+  next_source_lane_index_ = successor_cursor->source_lane_index;
+  next_source_family_index_ = successor_cursor->source_family_index;
+  next_source_arm_seed_index_ =
+      successor_cursor->source_arm_seed_index;
+  ++source_epoch_;
   verification.session_advanced = true;
   return verification;
 }

@@ -66,12 +66,24 @@ Sur E5, les transcripts vide, utile `AC` vers les points de `DE` et adversarial 
 
 14G reste `reference_cpu`, `hgp_reduced`, scientifique `certified`, déploiement `architecture_only` et `public_status=not_claimed`. Aucun producteur CUDA, epoch, digest, scheduler de difficulté, scratch réutilisable, protocole `warm_e2e`, run durable ou checkpoint n'est ajouté.
 
+## Incrément 14H livré — ticket scellé et vivacité du commit
+
+La session peut désormais émettre directement une capacité privée depuis une préparation 14G complète. `PreparedTopKProposalBatch` est non constructible par l'appelant, non copiable, déplaçable sans exception et à usage unique. Il possède le delta exact, un sceau partagé propre à la session, l'epoch, les cinq indices du curseur source, les cinq indices du successeur prévalidé et le stamp locator. Une source déplacée devient invalide; aucune copie publique ou mutation de l'enveloppe 14G ne peut fabriquer un ticket.
+
+`commit_prepared_ticket` consomme toute tentative. Un ticket invalide, étranger, périmé, déplacé, réutilisé ou lié à un ancien stamp ne publie aucun delta et n'avance pas. Un succès déplace le delta, affecte le curseur successeur et incrémente l'epoch sans appeler top-$K$, 10.5b, 10.5c, sans lire le transcript ou l'audit et sans parcourir le payload. Le commit historique reste disponible et incrémente le même epoch, ce qui invalide les tickets frères ou spéculatifs antérieurs.
+
+L'audit opérationnel peut être extrait, modifié et détruit avant commit sans effet sur la capacité. S'il reste attaché, il est déplacé séparément dans le résultat. La session ne retient aucun ticket ou delta; chaque ticket encore vivant appartient à l'appelant et ajoute au plus le delta compact $O(KD+A)$ déjà produit. L'ordonnanceur industriel devra donc plafonner les tickets simultanés.
+
+La fixture de vivacité prolonge E5 par une petite coquille élagable. Elle choisit une descente stricte exacte, mesure une dimension LBVH strictement réduite par le successeur proposé, puis fixe le cap à ce travail utile. La préparation amorcée termine et scelle un delta, tandis que la préparation non amorcée puis le commit historique s'épuisent sans avancer. Après destruction du transcript et de l'audit détaché, le commit scellé avance exactement une fois sans incrémenter les compteurs de rejeu, de fermeture ou de graphe transitoire.
+
+14H ferme cette dette de vivacité seulement dans le processus vivant et sous gel sérialisé des autorités. Il n'est pas un rejeu indépendant, ne survit pas à un crash et n'engage ni locator, ni quotient, ni hiérarchie. Il reste `reference_cpu`, `hgp_reduced`, scientifique `certified`, déploiement `architecture_only` et `public_status=not_claimed`, sans qualification 50 k ou 10 M+.
+
 ## Priorités de développement
 
-1. fermer la vivacité préparation--commit sous budget sans donner d'autorité scientifique au transcript;
-2. brancher ensuite un producteur GPU borné sur cette frontière;
-3. réutiliser les capacités restantes de scratch sans conserver de graphe ou d'objet scientifique entre lots;
-4. ajouter l'instrumentation `warm_e2e`, puis rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
+1. brancher un producteur GPU borné sur la frontière scellée;
+2. réutiliser les capacités restantes de scratch et plafonner les tickets appelant sans conserver de graphe entre lots;
+3. ajouter l'instrumentation `warm_e2e`;
+4. rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 
@@ -89,10 +101,14 @@ Pour 14E, les trois CTests ciblés passent sous GCC Release strict en 0,24 secon
 
 Pour 14G, l'unique CTest ciblé passe sous GCC Release strict en 0,05 seconde et sous Clang 18 Release strict en 0,04 seconde. Il couvre la priorité du cap de clés avant transcript, la revalidation du lot vide, le rejet atomique d'un mauvais lot, les préparations E5 vide, utile et adversariale avec égalité complète du delta, la conservation arithmétique de l'audit, la destruction des payloads avant commit et le rejeu historique non amorcé sous caps généreux. Le garde statique 10.5c et le checker des statuts passent. L'installation/export puis le consumer externe passent 1/1 en 0,01 seconde; le consumer appelle le nouveau prédicat non inline sur une enveloppe vide, tandis que la méthode de préparation réelle reste couverte par le CTest unitaire. Aucun benchmark, sanitizer, GPU, oracle long, test massif ou GCP n'est lancé.
 
+Pour 14H, le même CTest ciblé passe sous GCC Release strict en 2,82 secondes et sous Clang 18 Release strict en 2,29 secondes sur le rejeu séquentiel final. Il couvre les traits non forgeables et move-only, les rejets invalide, étranger, périmé, déplacé, réutilisé et stamp muté, l'invalidation par un commit historique, le détachement puis la destruction de l'audit et le témoin discriminant sous cap serré. Ce témoin fait réussir la préparation proposée, échouer la voie non amorcée et son commit historique, puis réussir le commit scellé sans nouveau rejeu ou appel de fermeture. Le garde statique 10.5c, le checker des statuts et l'installation/export avec consumer externe passent; aucun benchmark long, sanitizer, oracle combinatoire ou test massif n'est lancé.
+
 Une falsification coordonnée pourrait encore redistribuer des compteurs entre chunks 14A ou lanes 14C tout en conservant leurs agrégats. Les payloads compacts ne contiennent volontairement ni détail ni digest par lot; un vérificateur frais contre 10.1--10.2 est donc requis avant persistance ou exécution industrielle. Cette dette P2 est compatible avec `architecture_only`, mais devra être fermée avant toute qualification.
 
 La dette d'intégration à arête stricte non nulle de 14D est fermée par la fixture `AC` vers `DE`. La dette P2 restante est l'API qui documente mais n'interdit pas encore statiquement les autorités temporaires dont les pointeurs deviendraient pendants.
 
 ## GCP
 
-GCP non utilisé.
+Une première session réelle a rejoué le SHA propre `1da826996d00a829d5a832b11615f97c01b2cf53` sur la cible gardée `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, modèle `g4-standard-48`, provisioning `SPOT`, `instanceTerminationAction=STOP` et double coupe-circuit. Le CTest 14G passe en 0,03 seconde. Le différentiel spatial GPU passe en 28,74 secondes sur une RTX PRO 6000 Blackwell, pilote 580.159.03, CUDA 12.9 et code AOT réel `sm_120`. Cette exécution qualifie uniquement le replay matériel de ces tests, pas le SLO 50 k ou le volume 10 M+.
+
+La tentative initiale `europe-west4-a/ehgp-blackwell-spot` a échoué fermée avant tout test parce que GCE ne publiait pas le champ d'échéance attendu par le script gardé. La génération exacte démarrée a été arrêtée et certifiée `TERMINATED`. La cible de repli `ehgp-blackwell-spot-ai1a` a elle aussi été arrêtée par `stop_and_verify.sh` avec son `lastStartTimestamp` exact et relue `TERMINATED`; aucune VM de cette session n'est restée active.

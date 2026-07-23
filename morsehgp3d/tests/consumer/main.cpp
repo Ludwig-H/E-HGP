@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <iostream>
 #include <span>
+#include <type_traits>
 #include <vector>
 
 int main() {
@@ -33,6 +34,17 @@ int main() {
       morsehgp3d::hierarchy::
           direct_sparse_facet_descent_batch_top_k_proposal_preparation_schema_version ==
       1U);
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_sparse_facet_descent_batch_sealed_commit_schema_version ==
+      1U);
+  using SealedPreparedBatch = morsehgp3d::hierarchy::
+      ExactDirectSparseFacetDescentAnchoredBatchExecutor::
+          PreparedTopKProposalBatch;
+  static_assert(!std::is_default_constructible_v<SealedPreparedBatch>);
+  static_assert(!std::is_copy_constructible_v<SealedPreparedBatch>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<SealedPreparedBatch>);
   using BatchExecutionResult = morsehgp3d::hierarchy::
       ExactDirectSparseFacetDescentBatchExecutionResult;
   const BatchExecutionResult installed_batch_execution_probe;
@@ -47,6 +59,14 @@ int main() {
   if (installed_proposal_preparation_probe.certified_outcome()) {
     std::cerr
         << "installed proposal-preparation predicate accepted an empty result\n";
+    return 1;
+  }
+  using SealedCommitVerification = morsehgp3d::hierarchy::
+      ExactDirectSparseFacetDescentBatchSealedCommitVerification;
+  const SealedCommitVerification installed_sealed_commit_probe;
+  if (installed_sealed_commit_probe.certified_cursor_advance()) {
+    std::cerr
+        << "installed sealed-commit predicate accepted an empty result\n";
     return 1;
   }
   using morsehgp3d::exact::BigInt;

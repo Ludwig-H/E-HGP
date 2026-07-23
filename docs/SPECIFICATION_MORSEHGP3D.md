@@ -655,6 +655,20 @@ Pour toute préparation complète, une proposition peut modifier le travail exac
 
 Ce raccord ne change ni le statut `architecture_only`, ni `public_status=not_claimed`. Il ne certifie aucun producteur CUDA, epoch, digest, scheduler de difficulté, réemploi de scratch, protocole `warm_e2e`, SLO 50 k ou capacité 10 M+.
 
+### 9.22 Capacité scellée de commit sans rejeu
+
+L'entrée 14H `prepare_next_sealed_with_top_k_proposal_transcript` ne doit émettre une capacité valide qu'à l'intérieur de l'exécuteur, immédiatement après une préparation 14G complète possédant son delta scientifique. Le ticket est non constructible par l'appelant, non copiable, déplaçable sans exception et à usage unique. Il possède en privé le delta, un sceau partagé propre à la durée de vie logique de la session, l'epoch source, les cinq indices du curseur source, les cinq indices du curseur successeur prévalidé et le stamp locator. Tout déplacement rend la source invalide et consommée. Aucune vue mutable du delta n'est exposée.
+
+La préparation prévalide le successeur avec les mêmes règles de frontière de chunk et de terminaison que le commit historique. Elle ne scelle jamais un diagnostic, un rejet de transcript ou un delta incomplet. L'audit propositionnel reste un objet opérationnel séparable : l'appelant peut le retirer, le modifier ou le détruire sans modifier la capacité scientifique. La session ne conserve aucun ticket, delta, transcript, audit, pool, partition, coquille ou graphe entre les appels.
+
+`commit_prepared_ticket` doit être sérialisé avec tous les autres appels de la session et exécuté sous un locator gelé. Il consomme toute tentative puis vérifie, dans cet ordre logique, la validité du ticket, le sceau de session, l'epoch et le curseur source complets, le stamp locator et la capacité des compteurs. Un échec ne publie aucun delta et n'avance aucun indice. Un succès déplace le delta vers le résultat, affecte le successeur prévalidé et incrémente l'epoch exactement une fois.
+
+Le commit scellé ne doit appeler aucun constructeur ou vérificateur géométrique, ne doit parcourir ou comparer aucun champ vectoriel du delta, ne doit recalculer aucun digest et ne reçoit ni budget, ni transcript, ni audit. Il n'exécute donc ni top-$K$, ni 10.5b, ni 10.5c et son travail est constant dans les cardinalités du delta. L'audit éventuellement encore attaché peut être déplacé vers le résultat, mais aucun de ses champs ne sert d'autorité. L'absence de rejeu indépendant doit être publiée explicitement : la certification porte sur la provenance privée de la préparation CPU exacte, pas sur une recertification fraîche.
+
+Une préparation scellée complète garantit seulement que son commit courant ne sera pas bloqué par un nouvel épuisement géométrique. Elle ne garantit ni l'émission du ticket, ni sa validité après une mutation du locator ou un autre avancement de session, ni la reprise après perte du processus. Le commit ne mute ni locator, ni quotient, ni hiérarchie. Le chemin historique à rejeu frais reste disponible et tout avancement par l'un ou l'autre chemin invalide les tickets frères par changement d'epoch.
+
+Ce raccord reste `architecture_only` avec `public_status=not_claimed`. Il ne qualifie aucun producteur CUDA, epoch ou digest GPU, ordonnanceur, plafond de tickets détenus par l'appelant, protocole `warm_e2e`, SLO 50 k ou capacité 10 M+.
+
 ## 10. Événements simultanés
 
 Des centres distincts peuvent avoir exactement le même niveau. Une exécution séquentielle créerait des bifurcations binaires artificielles et pourrait changer les morphismes verticaux.

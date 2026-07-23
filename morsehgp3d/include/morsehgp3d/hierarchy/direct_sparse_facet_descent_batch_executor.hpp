@@ -5,8 +5,10 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace morsehgp3d::hierarchy {
@@ -53,6 +55,25 @@ inline constexpr std::string_view
         "batch_caps_and_canonical_keys_before_synchronous_transcript_"
         "revalidation_exact_source_facet_baseline_separate_operational_audit_"
         "transcript_release_before_unseeded_exact_commit_replay_v1";
+inline constexpr std::uint32_t
+    direct_sparse_facet_descent_batch_sealed_commit_schema_version = 1U;
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_sealed_commit_backend = "reference_cpu";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_sealed_commit_profile = "hgp_reduced";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_sealed_commit_mode = "certified";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_sealed_commit_deployment_status =
+        "architecture_only";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_sealed_commit_public_status =
+        "not_claimed";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_sealed_commit_proof_basis =
+        "private_move_only_exact_delta_provenance_shared_session_seal_epoch_"
+        "full_source_and_successor_cursor_frozen_locator_stamp_single_use_"
+        "advance_without_transcript_audit_or_second_geometry_replay_v1";
 
 // The closure owns a separate budget.  These caps cover every population
 // retained while selecting one exact batch and every record that survives in
@@ -353,6 +374,86 @@ struct ExactDirectSparseFacetDescentBatchExecutionVerification {
       default;
 };
 
+enum class ExactDirectSparseFacetDescentBatchSealedCommitDecision
+    : std::uint8_t {
+  not_committed,
+  no_commit_invalid_moved_or_consumed_ticket,
+  no_commit_foreign_session,
+  no_commit_stale_epoch_or_cursor,
+  no_commit_locator_snapshot_changed,
+  no_commit_audit_capacity_exhausted,
+  complete_architecture_only_sealed_exact_delta_cursor_advance,
+};
+
+enum class ExactDirectSparseFacetDescentBatchSealedCommitScope
+    : std::uint8_t {
+  unspecified,
+  one_in_process_exact_preparation_provenance_cursor_advance_before_hierarchy_commit_only,
+};
+
+struct ExactDirectSparseFacetDescentBatchSealedCommitVerification {
+  static constexpr std::string_view backend =
+      direct_sparse_facet_descent_batch_sealed_commit_backend;
+  static constexpr std::string_view profile =
+      direct_sparse_facet_descent_batch_sealed_commit_profile;
+  static constexpr std::string_view mode =
+      direct_sparse_facet_descent_batch_sealed_commit_mode;
+  static constexpr std::string_view deployment_status =
+      direct_sparse_facet_descent_batch_sealed_commit_deployment_status;
+  static constexpr std::string_view public_status =
+      direct_sparse_facet_descent_batch_sealed_commit_public_status;
+  static constexpr std::string_view proof_basis =
+      direct_sparse_facet_descent_batch_sealed_commit_proof_basis;
+
+  std::uint32_t schema_version{
+      direct_sparse_facet_descent_batch_sealed_commit_schema_version};
+  std::size_t source_batch_index{};
+  std::size_t successor_batch_index{};
+  bool ticket_was_valid_and_unconsumed{false};
+  bool shared_session_seal_matches{false};
+  bool source_epoch_matches{false};
+  bool full_source_cursor_matches{false};
+  bool locator_snapshot_matches{false};
+  bool exact_scientific_delta_provenance_minted_before_commit{false};
+  bool prevalidated_successor_cursor_used{false};
+  bool independent_geometry_replay_performed{false};
+  bool closure_budget_consumed_during_commit{false};
+  bool transcript_present_during_commit{false};
+  bool operational_audit_read_for_commit_authority{false};
+  bool locator_or_hierarchy_state_mutated{false};
+  bool forbidden_global_structure_materialized{false};
+  bool scale_or_public_status_claimed{false};
+  bool scientific_delta_moved_to_commit_result{false};
+  bool ticket_consumed{false};
+  bool session_advanced{false};
+  bool result_certified{false};
+  ExactDirectSparseFacetDescentBatchSealedCommitDecision decision{
+      ExactDirectSparseFacetDescentBatchSealedCommitDecision::not_committed};
+  ExactDirectSparseFacetDescentBatchSealedCommitScope scope{
+      ExactDirectSparseFacetDescentBatchSealedCommitScope::unspecified};
+
+  [[nodiscard]] bool certified_cursor_advance() const noexcept;
+
+  friend bool operator==(
+      const ExactDirectSparseFacetDescentBatchSealedCommitVerification&,
+      const ExactDirectSparseFacetDescentBatchSealedCommitVerification&) =
+      default;
+};
+
+struct ExactDirectSparseFacetDescentBatchSealedCommitResult {
+  ExactDirectSparseFacetDescentBatchSealedCommitVerification verification{};
+  std::optional<ExactDirectSparseFacetDescentBatchExecutionResult>
+      scientific_delta;
+  std::optional<
+      ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit>
+      operational_audit;
+
+  [[nodiscard]] bool certified_cursor_advance() const noexcept {
+    return verification.certified_cursor_advance() &&
+           scientific_delta.has_value();
+  }
+};
+
 struct ExactDirectSparseFacetDescentBatchExecutionSessionAudit {
   std::size_t source_plan_verification_count{};
   std::size_t prepare_attempt_count{};
@@ -370,10 +471,17 @@ struct ExactDirectSparseFacetDescentBatchExecutionSessionAudit {
   // nonempty scientific closures represented by 14D batch deltas.
   std::size_t proposal_exact_closure_call_count{};
   std::size_t retained_proposal_record_count{};
+  std::size_t sealed_ticket_prepare_attempt_count{};
+  std::size_t sealed_ticket_issued_count{};
+  std::size_t sealed_ticket_commit_attempt_count{};
+  std::size_t sealed_ticket_accepted_commit_count{};
+  std::size_t sealed_ticket_rejected_commit_count{};
+  std::size_t sealed_ticket_exact_replay_avoided_count{};
   bool source_plan_owned_by_session{false};
   bool full_source_plan_replayed_per_batch{false};
   bool closure_graph_retained_between_batches{false};
   bool proposal_payload_or_audit_retained_between_calls{false};
+  bool sealed_ticket_or_delta_retained_by_session{false};
 
   friend bool operator==(
       const ExactDirectSparseFacetDescentBatchExecutionSessionAudit&,
@@ -385,11 +493,94 @@ struct ExactDirectSparseFacetDescentBatchExecutionSessionAudit {
 // rebuilds and compares that plan exactly once, then owns the fresh copy; the
 // observed plan need not outlive construction.  Every other external source
 // must remain alive and immutable for the session.  The locator may change
-// only between calls and must be externally frozen during prepare_next() and
-// commit_prepared().  The session is not internally synchronized: callers
-// serialize all of its methods.
+// only between calls and must be externally frozen during every preparation
+// and commit call, including the sealed-ticket APIs.  The session is not
+// internally synchronized: callers serialize all of its methods.
 class ExactDirectSparseFacetDescentAnchoredBatchExecutor {
  public:
+  class PreparedTopKProposalBatch {
+   public:
+    PreparedTopKProposalBatch(const PreparedTopKProposalBatch&) = delete;
+    PreparedTopKProposalBatch& operator=(
+        const PreparedTopKProposalBatch&) = delete;
+    PreparedTopKProposalBatch(PreparedTopKProposalBatch&& other) noexcept;
+    PreparedTopKProposalBatch& operator=(
+        PreparedTopKProposalBatch&& other) noexcept;
+    ~PreparedTopKProposalBatch() = default;
+
+    [[nodiscard]]
+    const ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult&
+    preparation() const noexcept {
+      return preparation_;
+    }
+    [[nodiscard]]
+    const ExactDirectSparseFacetDescentBatchExecutionResult*
+    scientific_delta() const noexcept {
+      return preparation_.scientific_delta
+                     .has_value()
+                 ? &*preparation_.scientific_delta
+                 : nullptr;
+    }
+    [[nodiscard]] bool prepared() const noexcept {
+      return valid_ && exact_scientific_delta_provenance_minted_;
+    }
+    [[nodiscard]] bool consumed() const noexcept {
+      return consumed_;
+    }
+    // The audit is caller-owned operational evidence.  Removing, mutating or
+    // destroying it cannot affect the already minted private commit
+    // capability.
+    [[nodiscard]] std::optional<
+        ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit>
+    take_operational_audit() noexcept;
+
+   private:
+    PreparedTopKProposalBatch(
+        std::shared_ptr<const std::byte> session_seal,
+        std::size_t source_epoch,
+        std::size_t source_batch_index,
+        std::size_t source_chunk_index,
+        std::size_t source_lane_index,
+        std::size_t source_family_index,
+        std::size_t source_arm_seed_index,
+        std::size_t successor_batch_index,
+        std::size_t successor_chunk_index,
+        std::size_t successor_lane_index,
+        std::size_t successor_family_index,
+        std::size_t successor_arm_seed_index,
+        ExactDirectSparsePositiveFacetLocatorSnapshotStamp
+            locator_snapshot_stamp,
+        ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult
+            preparation) noexcept;
+    explicit PreparedTopKProposalBatch(
+        ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult
+            preparation) noexcept
+        : preparation_(std::move(preparation)) {}
+    PreparedTopKProposalBatch() noexcept = default;
+
+    std::shared_ptr<const std::byte> session_seal_;
+    std::size_t source_epoch_{};
+    std::size_t source_batch_index_{};
+    std::size_t source_chunk_index_{};
+    std::size_t source_lane_index_{};
+    std::size_t source_family_index_{};
+    std::size_t source_arm_seed_index_{};
+    std::size_t successor_batch_index_{};
+    std::size_t successor_chunk_index_{};
+    std::size_t successor_lane_index_{};
+    std::size_t successor_family_index_{};
+    std::size_t successor_arm_seed_index_{};
+    ExactDirectSparsePositiveFacetLocatorSnapshotStamp
+        locator_snapshot_stamp_{};
+    ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult
+        preparation_{};
+    bool exact_scientific_delta_provenance_minted_{false};
+    bool valid_{false};
+    bool consumed_{false};
+
+    friend class ExactDirectSparseFacetDescentAnchoredBatchExecutor;
+  };
+
   ExactDirectSparseFacetDescentAnchoredBatchExecutor(
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
@@ -451,6 +642,24 @@ class ExactDirectSparseFacetDescentAnchoredBatchExecutor {
       const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
       const ExactDirectSparseFacetTopKProposalTranscriptResult& transcript);
 
+  // Mints a single-use capability directly from one complete exact 14G
+  // preparation.  The ticket owns the compact scientific delta; neither the
+  // executor nor the ticket stores transcript records.  Its separate audit
+  // may be removed and destroyed before commit.
+  [[nodiscard]] PreparedTopKProposalBatch
+  prepare_next_sealed_with_top_k_proposal_transcript(
+      const ExactDirectSparseFacetWitness& locator_query_witness,
+      const ExactDirectSparseFacetDescentBatchExecutionBudget&
+          execution_budget,
+      const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
+      const ExactDirectSparseFacetTopKProposalTranscriptResult& transcript);
+
+  // Consumes only the private capability.  A current ticket advances to its
+  // prevalidated successor cursor without top-k, 10.5b, 10.5c, transcript,
+  // proposal-audit authority, closure budget or independent geometry replay.
+  [[nodiscard]] ExactDirectSparseFacetDescentBatchSealedCommitResult
+  commit_prepared_ticket(PreparedTopKProposalBatch&& prepared) noexcept;
+
   // Replays only the current exact batch.  A complete equal delta advances
   // the execution cursor; it does not claim or perform the later quotient,
   // locator transaction or hierarchy commit.
@@ -476,6 +685,8 @@ class ExactDirectSparseFacetDescentAnchoredBatchExecutor {
   ExactDirectSparseFacetDescentClosureConfig closure_config_{};
   spatial::LbvhTraversalOrder traversal_order_{
       spatial::LbvhTraversalOrder::near_first};
+  std::shared_ptr<const std::byte> session_seal_;
+  std::size_t source_epoch_{};
   std::size_t next_source_batch_index_{};
   std::size_t next_source_chunk_index_{};
   std::size_t next_source_lane_index_{};

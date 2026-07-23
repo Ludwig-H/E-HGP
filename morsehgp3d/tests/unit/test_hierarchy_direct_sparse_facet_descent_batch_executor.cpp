@@ -12,6 +12,7 @@
 #include <span>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -26,6 +27,15 @@ using morsehgp3d::spatial::PointId;
 
 constexpr std::uint64_t authority_id = UINT64_C(0x14D);
 int failures = 0;
+
+using SealedPreparedBatch =
+    ExactDirectSparseFacetDescentAnchoredBatchExecutor::
+        PreparedTopKProposalBatch;
+static_assert(!std::is_default_constructible_v<SealedPreparedBatch>);
+static_assert(!std::is_copy_constructible_v<SealedPreparedBatch>);
+static_assert(!std::is_copy_assignable_v<SealedPreparedBatch>);
+static_assert(std::is_nothrow_move_constructible_v<SealedPreparedBatch>);
+static_assert(std::is_nothrow_move_assignable_v<SealedPreparedBatch>);
 
 void check(bool condition, const std::string& message) {
   if (!condition) {
@@ -142,6 +152,24 @@ struct Scenario {
       point(4.0, 1.0, 2.0),
   };
   return make_scenario(canonical_cloud(points), 2U);
+}
+
+[[nodiscard]] Scenario order_two_with_prunable_shell_scenario() {
+  std::vector<CertifiedPoint3> points{
+      point(0.0, 0.0, 7.0),
+      point(0.0, 9.0, 6.0),
+      point(1.0, 4.0, 0.0),
+      point(0.0, 0.0, 1.0),
+      point(4.0, 1.0, 2.0),
+      point(4.20, 3.20, 4.30),
+      point(4.38, 2.60, 4.00),
+      point(4.30, 2.90, 4.15),
+      point(4.46, 2.30, 3.85),
+  };
+  return make_scenario(
+      CanonicalPointCloud::rejecting_duplicates(
+          std::span<const CertifiedPoint3>{points}),
+      2U);
 }
 
 [[nodiscard]] ExactDirectMorseIndustrialPlanConfig plan_config(
@@ -282,6 +310,19 @@ execution_budget() {
   std::copy(
       candidate_point_ids.begin(),
       candidate_point_ids.end(),
+      record.candidate_point_ids.begin());
+  return record;
+}
+
+[[nodiscard]] ExactDirectSparseFacetTopKProposalRecord proposal_record(
+    const ExactDirectSparseFacetKey& source_facet_key,
+    const ExactDirectSparseFacetKey& candidate_key) {
+  ExactDirectSparseFacetTopKProposalRecord record;
+  record.source_facet_key = source_facet_key;
+  record.candidate_point_count = candidate_key.point_count;
+  std::copy_n(
+      candidate_key.point_ids.begin(),
+      candidate_key.point_count,
       record.candidate_point_ids.begin());
   return record;
 }
@@ -1089,6 +1130,585 @@ void test_canonical_key_view_executes_nonzero_strict_edge() {
       "14G prepares AC to DE through transient proposals, destroys their payloads, then commits the unchanged delta by the unseeded exact replay");
 }
 
+void test_sealed_ticket_identity_stamp_epoch_and_single_use() {
+  const Scenario scenario = regular_tetrahedron_order_one_scenario();
+  const auto observed_plan = build_plan(scenario);
+  ExactDirectSparsePositiveFacetLocator locator =
+      make_locator(scenario.cloud.size());
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor first_executor(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      source_seed_budget(),
+      scenario.seed_journal,
+      plan_config(),
+      plan_budget(),
+      observed_plan,
+      locator);
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor second_executor(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      source_seed_budget(),
+      scenario.seed_journal,
+      plan_config(),
+      plan_budget(),
+      observed_plan,
+      locator);
+  const auto witness = query_witness(UINT64_C(14'800));
+  const auto baseline = first_executor.prepare_next(
+      witness, execution_budget(), closure_budget());
+  const std::array<ExactDirectSparseFacetTopKProposalRecord, 0U>
+      empty_records{};
+  const auto transcript = proposal_transcript(
+      0U,
+      baseline.closed_batch_squared_level,
+      locator,
+      empty_records);
+
+  auto stale_transcript = transcript;
+  ++stale_transcript.metadata.source_batch_index;
+  auto invalid_ticket =
+      first_executor.prepare_next_sealed_with_top_k_proposal_transcript(
+          witness,
+          execution_budget(),
+          closure_budget(),
+          stale_transcript);
+  check(
+      !invalid_ticket.prepared() &&
+          invalid_ticket.preparation()
+              .certified_atomic_transcript_rejection(),
+      "14H exposes an inspectable diagnostic but mints no capability for a rejected transcript");
+  const auto invalid_commit =
+      first_executor.commit_prepared_ticket(
+          std::move(invalid_ticket));
+  check(
+      invalid_commit.verification.decision ==
+              ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+                  no_commit_invalid_moved_or_consumed_ticket &&
+          invalid_commit.verification.ticket_consumed &&
+          !invalid_commit.verification.session_advanced &&
+          !invalid_commit.scientific_delta.has_value() &&
+          first_executor.next_source_batch_index() == 0U,
+      "an invalid diagnostic ticket is consumed without publishing a delta or moving the cursor");
+
+  auto locator_stale_ticket =
+      first_executor.prepare_next_sealed_with_top_k_proposal_transcript(
+          witness,
+          execution_budget(),
+          closure_budget(),
+          transcript);
+  check(
+      locator_stale_ticket.prepared(),
+      "the empty first exact batch mints one sealed capability");
+  const auto empty_locator_commit = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      std::span<const ExactDirectSparseFacetBinding>{});
+  check(
+      empty_locator_commit.certified_committed_batch(),
+      "the sealed-ticket fixture advances the locator stamp externally");
+  const auto locator_rejection =
+      first_executor.commit_prepared_ticket(
+          std::move(locator_stale_ticket));
+  check(
+      locator_rejection.verification.decision ==
+              ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+                  no_commit_locator_snapshot_changed &&
+          locator_rejection.verification.ticket_consumed &&
+          !locator_rejection.verification.session_advanced &&
+          first_executor.next_source_batch_index() == 0U,
+      "a locator mutation consumes and rejects a sealed ticket before cursor advancement");
+
+  const auto current_transcript = proposal_transcript(
+      0U,
+      baseline.closed_batch_squared_level,
+      locator,
+      empty_records);
+  auto first_ticket =
+      first_executor.prepare_next_sealed_with_top_k_proposal_transcript(
+          witness,
+          execution_budget(),
+          closure_budget(),
+          current_transcript);
+  auto sibling_ticket =
+      first_executor.prepare_next_sealed_with_top_k_proposal_transcript(
+          witness,
+          execution_budget(),
+          closure_budget(),
+          current_transcript);
+  auto foreign_ticket =
+      first_executor.prepare_next_sealed_with_top_k_proposal_transcript(
+          witness,
+          execution_budget(),
+          closure_budget(),
+          current_transcript);
+  check(
+      first_ticket.prepared() && sibling_ticket.prepared() &&
+          foreign_ticket.prepared(),
+      "several caller-owned tickets may be prepared speculatively at one unchanged epoch");
+
+  const auto foreign_rejection =
+      second_executor.commit_prepared_ticket(
+          std::move(foreign_ticket));
+  check(
+      foreign_rejection.verification.decision ==
+              ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+                  no_commit_foreign_session &&
+          foreign_rejection.verification.ticket_consumed &&
+          !foreign_rejection.verification.session_advanced &&
+          first_executor.next_source_batch_index() == 0U &&
+          second_executor.next_source_batch_index() == 0U,
+      "a shared seal rejects a foreign ticket even when both sessions have identical cursors and locator stamps");
+
+  SealedPreparedBatch moved_ticket = std::move(first_ticket);
+  check(
+      !first_ticket.prepared() && first_ticket.consumed() &&
+          moved_ticket.prepared() && !moved_ticket.consumed(),
+      "moving a sealed ticket explicitly invalidates its source and preserves one destination capability");
+  const auto accepted =
+      first_executor.commit_prepared_ticket(std::move(moved_ticket));
+  check(
+      accepted.certified_cursor_advance() &&
+          accepted.verification.source_batch_index == 0U &&
+          accepted.verification.successor_batch_index == 1U &&
+          accepted.operational_audit.has_value() &&
+          first_executor.next_source_batch_index() == 1U,
+      "one current moved ticket transfers its exact delta and advances the full prevalidated cursor once");
+
+  const auto stale_sibling =
+      first_executor.commit_prepared_ticket(
+          std::move(sibling_ticket));
+  const auto reused =
+      first_executor.commit_prepared_ticket(
+          std::move(moved_ticket));
+  check(
+      stale_sibling.verification.decision ==
+              ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+                  no_commit_stale_epoch_or_cursor &&
+          reused.verification.decision ==
+              ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+                  no_commit_invalid_moved_or_consumed_ticket &&
+          !stale_sibling.verification.session_advanced &&
+          !reused.verification.session_advanced &&
+          first_executor.next_source_batch_index() == 1U &&
+          first_executor.audit()
+                  .sealed_ticket_accepted_commit_count == 1U &&
+          first_executor.audit()
+                  .sealed_ticket_exact_replay_avoided_count == 1U &&
+          first_executor.audit()
+                  .sealed_ticket_or_delta_retained_by_session == false,
+      "the accepted epoch invalidates its sibling and the consumed capability cannot advance twice");
+
+  const auto second_baseline = second_executor.prepare_next(
+      witness, execution_budget(), closure_budget());
+  auto replay_stale_ticket =
+      second_executor.prepare_next_sealed_with_top_k_proposal_transcript(
+          witness,
+          execution_budget(),
+          closure_budget(),
+          current_transcript);
+  const auto replay_accepted = second_executor.commit_prepared(
+      witness,
+      execution_budget(),
+      closure_budget(),
+      second_baseline);
+  const auto replay_stale_rejection =
+      second_executor.commit_prepared_ticket(
+          std::move(replay_stale_ticket));
+  check(
+      replay_accepted.result_certified &&
+          replay_accepted.session_advanced &&
+          replay_stale_rejection.verification.decision ==
+              ExactDirectSparseFacetDescentBatchSealedCommitDecision::
+                  no_commit_stale_epoch_or_cursor &&
+          !replay_stale_rejection.verification.session_advanced &&
+          second_executor.next_source_batch_index() == 1U,
+      "the historical exact replay also advances the epoch and invalidates every speculative ticket at the old cursor");
+}
+
+void test_sealed_ticket_closes_proposal_to_commit_budget_liveness() {
+  const Scenario scenario =
+      order_two_with_prunable_shell_scenario();
+  const std::vector<ExactDirectSparseFacetKey> all_arm_keys =
+      all_distinct_arm_keys(scenario);
+  struct CandidateDescent {
+    ExactDirectSparseFacetKey source_key{};
+    ExactDirectSparseFacetKey successor_key{};
+    std::size_t source_batch_index{};
+    std::size_t unseeded_node_visit_count{};
+  };
+  std::optional<CandidateDescent> candidate_descent;
+  const ExactDirectSparsePositiveFacetLocator discovery_locator =
+      make_locator(
+          std::max<std::size_t>(scenario.cloud.size(), 1U));
+  for (const auto& arm_seed : scenario.seed_journal.arm_seeds) {
+    const auto facet =
+        reconstruct_exact_direct_saddle_arm_facet(
+            scenario.facade,
+            scenario.seed_journal,
+            arm_seed.arm_seed_index);
+    const auto& family =
+        scenario.seed_journal.families[arm_seed.family_index];
+    const auto step =
+        build_exact_direct_sparse_facet_descent_step(
+            scenario.index,
+            scenario.cloud,
+            std::span<const PointId>{
+                facet.point_ids.data(), facet.point_count},
+            family.critical_squared_level,
+            query_witness(
+                UINT64_C(14'900) +
+                static_cast<std::uint64_t>(
+                    arm_seed.arm_seed_index)),
+            discovery_locator,
+            step_budget(),
+            morsehgp3d::spatial::LbvhTraversalOrder::far_first);
+    if (!step.certified_unresolved_without_isolation() ||
+        step.decision !=
+            ExactDirectSparseFacetDescentStepDecision::
+                complete_unresolved_strict_successor_not_bound ||
+        !step.strict_step_witness.has_value()) {
+      continue;
+    }
+    if (!candidate_descent.has_value() ||
+        step.top_k_audit.node_visit_count >
+            candidate_descent->unseeded_node_visit_count) {
+      candidate_descent = CandidateDescent{
+          facet_key(facet),
+          step.strict_step_witness->successor_facet_key,
+          family.journal_batch_index,
+          step.top_k_audit.node_visit_count};
+    }
+  }
+  check(
+      candidate_descent.has_value(),
+      "the prunable-shell fixture exposes at least one exact strict arm descent");
+  if (!candidate_descent.has_value()) {
+    return;
+  }
+
+  std::vector<ExactDirectSparseFacetKey> positive_keys =
+      all_arm_keys;
+  positive_keys.erase(
+      std::remove(
+          positive_keys.begin(),
+          positive_keys.end(),
+          candidate_descent->source_key),
+      positive_keys.end());
+  positive_keys.push_back(candidate_descent->successor_key);
+  std::sort(positive_keys.begin(), positive_keys.end(), key_less);
+  positive_keys.erase(
+      std::unique(positive_keys.begin(), positive_keys.end()),
+      positive_keys.end());
+
+  auto industrial_config = plan_config(
+      ExactDirectMorseIndustrialPolicy::interactive_resident_50k,
+      4096U);
+  industrial_config.chunk_budget.maximum_bytes = 100'000'000U;
+  industrial_config.chunk_budget.maximum_birth_count = 4096U;
+  industrial_config.chunk_budget.maximum_saddle_count = 4096U;
+  industrial_config.chunk_budget.maximum_arm_count = 16'384U;
+  industrial_config.chunk_budget.maximum_descent_node_count =
+      16'384U;
+  auto trusted_plan_budget = plan_budget();
+  trusted_plan_budget.maximum_source_chunk_count = 64U;
+  trusted_plan_budget.maximum_source_batch_count = 4096U;
+  trusted_plan_budget.maximum_source_family_count = 4096U;
+  trusted_plan_budget.maximum_source_arm_seed_count = 16'384U;
+  trusted_plan_budget.maximum_lane_count = 12'288U;
+  trusted_plan_budget.maximum_initial_seed_launch_count = 12'288U;
+  trusted_plan_budget
+      .maximum_initial_seed_standalone_step_support_examination_count =
+      1'000'000U;
+  const auto observed_plan =
+      build_exact_direct_sparse_facet_descent_batch_plan(
+          scenario.cloud,
+          scenario.facade,
+          scenario.event_journal,
+          source_seed_budget(),
+          scenario.seed_journal,
+          industrial_config,
+          trusted_plan_budget);
+  check(
+      observed_plan.complete_architecture_plan(),
+      "the prunable-shell liveness fixture admits one bounded exact 14C plan");
+  if (!observed_plan.complete_architecture_plan()) {
+    return;
+  }
+
+  ExactDirectSparsePositiveFacetLocator locator =
+      make_locator(positive_keys.size());
+  bind_positive_keys(locator, positive_keys);
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      source_seed_budget(),
+      scenario.seed_journal,
+      industrial_config,
+      trusted_plan_budget,
+      observed_plan,
+      locator,
+      {},
+      morsehgp3d::spatial::LbvhTraversalOrder::far_first);
+
+  bool liveness_gap_closed = false;
+  while (!executor.complete()) {
+    const std::size_t batch_index =
+        executor.next_source_batch_index();
+    const auto witness = query_witness(
+        UINT64_C(15'000) +
+        static_cast<std::uint64_t>(batch_index));
+    const auto baseline = executor.prepare_next(
+        witness, execution_budget(), closure_budget());
+    check(
+        baseline.complete_architecture_execution(),
+        "the prunable-shell prefix remains exact under generous caps");
+    if (!baseline.complete_architecture_execution()) {
+      break;
+    }
+    const auto source_resolution =
+        batch_index == candidate_descent->source_batch_index
+            ? std::find_if(
+                  baseline.resolved_keys.begin(),
+                  baseline.resolved_keys.end(),
+                  [&candidate_descent](
+                      const ExactDirectSparseFacetDescentBatchResolvedKey&
+                          resolved) {
+                    return resolved.source_facet_key ==
+                           candidate_descent->source_key;
+                  })
+            : baseline.resolved_keys.end();
+    if (source_resolution == baseline.resolved_keys.end()) {
+      const auto accepted = executor.commit_prepared(
+          witness,
+          execution_budget(),
+          closure_budget(),
+          baseline);
+      check(
+          accepted.result_certified && accepted.session_advanced,
+          "each prefix before the selected strict lot advances by the historical exact path");
+      if (!accepted.session_advanced) {
+        break;
+      }
+      continue;
+    }
+
+    const std::array<ExactDirectSparseFacetTopKProposalRecord, 0U>
+        empty_records{};
+    const std::array<ExactDirectSparseFacetTopKProposalRecord, 1U>
+        useful_records{proposal_record(
+            candidate_descent->source_key,
+            candidate_descent->successor_key)};
+    const auto empty_transcript = proposal_transcript(
+        batch_index,
+        baseline.closed_batch_squared_level,
+        locator,
+        empty_records);
+    const auto useful_transcript = proposal_transcript(
+        batch_index,
+        baseline.closed_batch_squared_level,
+        locator,
+        useful_records);
+    const auto empty_preparation =
+        executor.prepare_next_with_top_k_proposal_transcript(
+            witness,
+            execution_budget(),
+            closure_budget(),
+            empty_transcript);
+    const auto useful_preparation =
+        executor.prepare_next_with_top_k_proposal_transcript(
+            witness,
+            execution_budget(),
+            closure_budget(),
+            useful_transcript);
+    check(
+        empty_preparation.complete_architecture_preparation() &&
+            useful_preparation.complete_architecture_preparation() &&
+            empty_preparation.proposal_consumption_audit.has_value() &&
+            useful_preparation.proposal_consumption_audit.has_value() &&
+            useful_preparation.scientific_delta.has_value() &&
+            *useful_preparation.scientific_delta == baseline,
+        "the prunable-shell empty and exact-successor proposals retain one identical scientific delta");
+    if (!empty_preparation.proposal_consumption_audit.has_value() ||
+        !useful_preparation.proposal_consumption_audit.has_value() ||
+        !useful_preparation.scientific_delta.has_value()) {
+      break;
+    }
+    const auto& empty_audit =
+        *empty_preparation.proposal_consumption_audit;
+    const auto& useful_audit =
+        *useful_preparation.proposal_consumption_audit;
+    enum class TightWorkCap : std::uint8_t {
+      none,
+      node_visit,
+      internal_expansion,
+      aabb_evaluation,
+      point_distance,
+    };
+    TightWorkCap tight_work_cap = TightWorkCap::none;
+    std::size_t tight_work_limit = 0U;
+    if (useful_audit.node_visit_count <
+        empty_audit.node_visit_count) {
+      tight_work_cap = TightWorkCap::node_visit;
+      tight_work_limit = useful_audit.node_visit_count;
+    } else if (
+        useful_audit.internal_node_expansion_count <
+        empty_audit.internal_node_expansion_count) {
+      tight_work_cap = TightWorkCap::internal_expansion;
+      tight_work_limit =
+          useful_audit.internal_node_expansion_count;
+    } else if (
+        useful_audit.exact_aabb_bound_evaluation_count <
+        empty_audit.exact_aabb_bound_evaluation_count) {
+      tight_work_cap = TightWorkCap::aabb_evaluation;
+      tight_work_limit =
+          useful_audit.exact_aabb_bound_evaluation_count;
+    } else if (
+        useful_audit.exact_point_distance_evaluation_count <
+        empty_audit.exact_point_distance_evaluation_count) {
+      tight_work_cap = TightWorkCap::point_distance;
+      tight_work_limit =
+          useful_audit.exact_point_distance_evaluation_count;
+    }
+    check(
+        useful_audit.top_k_query_count == 1U &&
+            tight_work_cap != TightWorkCap::none,
+        "the exact successor incumbent strictly reduces one far-first LBVH work dimension before the liveness cap is chosen");
+    if (useful_audit.top_k_query_count != 1U ||
+        tight_work_cap == TightWorkCap::none) {
+      break;
+    }
+
+    auto tight_closure_budget = closure_budget();
+    switch (tight_work_cap) {
+      case TightWorkCap::node_visit:
+        tight_closure_budget.step_budget.top_k_query
+            .maximum_node_visit_count = tight_work_limit;
+        break;
+      case TightWorkCap::internal_expansion:
+        tight_closure_budget.step_budget.top_k_query
+            .maximum_internal_node_expansion_count =
+            tight_work_limit;
+        break;
+      case TightWorkCap::aabb_evaluation:
+        tight_closure_budget.step_budget.top_k_query
+            .maximum_exact_aabb_bound_evaluation_count =
+            tight_work_limit;
+        break;
+      case TightWorkCap::point_distance:
+        tight_closure_budget.step_budget.top_k_query
+            .maximum_exact_point_distance_evaluation_count =
+            tight_work_limit;
+        break;
+      case TightWorkCap::none:
+        break;
+    }
+    const auto tight_useful_reference =
+        executor.prepare_next_with_top_k_proposal_transcript(
+            witness,
+            execution_budget(),
+            tight_closure_budget,
+            useful_transcript);
+    check(
+        tight_useful_reference.complete_architecture_preparation() &&
+            tight_useful_reference.scientific_delta.has_value(),
+        "the useful proposal remains exact at the selected tight work cap");
+    if (!tight_useful_reference.scientific_delta.has_value()) {
+      break;
+    }
+    SealedPreparedBatch ticket = [&]() {
+      const auto transient_transcript = proposal_transcript(
+          batch_index,
+          baseline.closed_batch_squared_level,
+          locator,
+          useful_records);
+      return executor
+          .prepare_next_sealed_with_top_k_proposal_transcript(
+              witness,
+              execution_budget(),
+              tight_closure_budget,
+              transient_transcript);
+    }();
+    check(
+        ticket.prepared() && ticket.scientific_delta() != nullptr,
+        "the useful proposal mints a complete ticket at the tight exact visit cap");
+    if (!ticket.prepared() || ticket.scientific_delta() == nullptr) {
+      break;
+    }
+
+    const auto unseeded_under_same_cap = executor.prepare_next(
+        witness, execution_budget(), tight_closure_budget);
+    check(
+        !unseeded_under_same_cap.complete_architecture_execution() &&
+            unseeded_under_same_cap.decision ==
+                ExactDirectSparseFacetDescentBatchExecutionDecision::
+                    no_execution_shared_closure_budget_exhausted,
+        "the same tight cap exhausts the historical unseeded exact preparation");
+    if (unseeded_under_same_cap.complete_architecture_execution()) {
+      break;
+    }
+    const auto replay_rejection = executor.commit_prepared(
+        witness,
+        execution_budget(),
+        tight_closure_budget,
+        *ticket.scientific_delta());
+    check(
+        replay_rejection.exact_batch_execution_freshly_replayed &&
+            !replay_rejection.result_certified &&
+            !replay_rejection.session_advanced &&
+            executor.next_source_batch_index() == batch_index,
+        "the historical commit reproduces the unseeded exhaustion and cannot advance under the tight cap");
+
+    auto detached_audit = ticket.take_operational_audit();
+    check(
+        detached_audit.has_value() && ticket.prepared() &&
+            !ticket.preparation()
+                 .proposal_consumption_audit.has_value(),
+        "the caller can detach the operational audit while the private exact capability remains valid");
+    if (detached_audit.has_value()) {
+      ++detached_audit->proposal_point_reference_count;
+    }
+    detached_audit.reset();
+
+    const std::size_t replay_count_before =
+        executor.audit().fresh_batch_replay_count;
+    const std::size_t closure_call_count_before =
+        executor.audit().proposal_exact_closure_call_count;
+    const std::size_t transient_closure_count_before =
+        executor.audit().transient_closure_build_count;
+    const auto sealed_commit =
+        executor.commit_prepared_ticket(std::move(ticket));
+    const bool sealed_commit_closed_gap =
+        sealed_commit.certified_cursor_advance() &&
+            sealed_commit.scientific_delta.has_value() &&
+            *sealed_commit.scientific_delta ==
+                *tight_useful_reference.scientific_delta &&
+            !sealed_commit.operational_audit.has_value() &&
+            executor.next_source_batch_index() == batch_index + 1U &&
+            executor.audit().fresh_batch_replay_count ==
+                replay_count_before &&
+            executor.audit().proposal_exact_closure_call_count ==
+                closure_call_count_before &&
+            executor.audit().transient_closure_build_count ==
+                transient_closure_count_before &&
+            executor.audit()
+                    .sealed_ticket_exact_replay_avoided_count == 1U;
+    check(
+        sealed_commit_closed_gap,
+        "the sealed commit ignores the destroyed audit, performs zero second closure or replay, and advances once under the same cap");
+    liveness_gap_closed = sealed_commit_closed_gap;
+    break;
+  }
+  check(
+      liveness_gap_closed,
+      "14H permanently exercises one proposal-success versus unseeded-exhaustion liveness gap");
+}
+
 void test_falsified_plan_is_rejected_at_session_open() {
   const Scenario scenario = regular_tetrahedron_order_one_scenario();
   auto falsified_plan = build_plan(scenario);
@@ -1131,6 +1751,8 @@ int main() {
   test_streaming_session_advances_across_chunk_boundaries();
   test_mixed_lanes_feed_one_shared_closure();
   test_canonical_key_view_executes_nonzero_strict_edge();
+  test_sealed_ticket_identity_stamp_epoch_and_single_use();
+  test_sealed_ticket_closes_proposal_to_commit_budget_liveness();
   test_falsified_plan_is_rejected_at_session_open();
 
   if (failures != 0) {

@@ -1199,6 +1199,16 @@ Le delta logique vaut $O(KD+A)$, le scratch de sélection formé par `SelectedAr
 
 14G reste hôte, `architecture_only` et `public_status=not_claimed`. Il n'apporte encore ni producteur CUDA, ni epoch ou digest de buffer, ni scheduler de difficulté, ni arène réutilisable, ni protocole `warm_e2e`, ni runs/checkpoints durables, et ne qualifie ni 50 k sous la seconde, ni 10 M+.
 
+### Ticket scellé de commit 14H
+
+`prepare_next_sealed_with_top_k_proposal_transcript` transforme uniquement une préparation 14G complète en capacité privée, non copiable et à usage unique. Le ticket possède le delta exact compact, une identité de session partagée non réutilisable, l'epoch courant, le curseur source complet, son successeur déjà validé et le stamp locator observé. Son constructeur est privé, ses vues scientifiques sont constantes et son déplacement neutralise explicitement la source; aucun résultat public 14G modifié ne peut fabriquer cette autorité.
+
+`commit_prepared_ticket` consomme le ticket même en cas de rejet. Il exige le même sceau de session, le même epoch, les cinq composantes du curseur source et le même stamp locator vivant, puis affecte le curseur successeur prévalidé. Il ne relance ni top-$K$, ni 10.5b, ni 10.5c, ne consulte ni transcript ni audit pour décider, ne recalcule aucun digest et ne parcourt pas le delta. Le commit est donc constant dans la taille du payload préparé et ne peut plus épuiser le budget géométrique qui a déjà produit le ticket. Le chemin historique à rejeu frais reste disponible et invalide tout ticket spéculatif antérieur en avançant lui aussi l'epoch.
+
+L'autorité de 14H est une provenance exacte locale au processus, pas un nouveau vérificateur indépendant. Une mutation du locator, un autre commit, un ticket étranger, déplacé ou réutilisé ferme l'opération sans avancement. L'audit opérationnel peut être extrait, modifié ou détruit avant le commit; s'il reste attaché, il est seulement déplacé vers le résultat. La session ne retient ni ticket, ni delta, ni record, ni candidat, ni fermeture. Les tickets simultanément conservés restent en revanche de la mémoire appartenant à l'appelant et devront être plafonnés par le futur ordonnanceur.
+
+14H ferme la dette de vivacité préparation--commit sous un même cap, mais avance seulement le curseur architectural 14D. Il ne mute ni locator, ni quotient, ni hiérarchie, ne survit pas à une perte de processus et ne construit toujours aucune facette absente, coface ou incidence globale, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Son statut reste `reference_cpu / hgp_reduced / certified`, déploiement `architecture_only`, `public_status=not_claimed`, sans qualification du producteur CUDA, du SLO 50 k ou du régime 10 M+.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;
