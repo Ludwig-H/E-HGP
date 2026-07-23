@@ -15,6 +15,8 @@ La note de déploiement [Premières incidences des facettes directes réutilisé
 
 Le [différentiel borné des gateways directs](DIFFERENTIEL_GATEWAYS_DIRECTS_PHASE10.md) valide le falsificateur 10.8-ORACLE sous statut `open_bounded_evidence_only` : Gamma y reste transitoire, limité à $n\leq14$ et totalement exclu du chemin produit.
 
+La [localisation sparse des candidats de gateways](LOCALISATION_CANDIDATS_GATEWAYS_PHASE10.md) fixe le contrat produit 10.9-RCPU : suppressions transitoires factorisées, déduplication par clé complète, hits relatifs ou misses latents dans un locator gelé, sans prétention d'alignement avec les états pré-lot.
+
 ## Résumé de la construction
 
 Posons $K_{\mathrm{eff}}=\min(K_{\max},n)$, $s_{\max}=\min(K_{\mathrm{eff}}+1,n)$ et, si $s_{\max}\geq2$, $m_{\star}=s_{\max}-2$. Alors :
