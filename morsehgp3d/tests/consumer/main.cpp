@@ -5,6 +5,7 @@
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
 #include "morsehgp3d/exact/support.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_facet_descent_batch_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_gateway_historical_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
@@ -20,6 +21,9 @@ int main() {
   static_assert(
       morsehgp3d::hierarchy::
           direct_sparse_gateway_historical_quotient_schema_version == 1U);
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_sparse_facet_descent_batch_plan_schema_version == 1U);
   using morsehgp3d::exact::BigInt;
   using morsehgp3d::exact::CertifiedPoint3;
   using morsehgp3d::exact::CircumcenterKind;

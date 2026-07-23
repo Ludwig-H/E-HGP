@@ -29,14 +29,18 @@ inline constexpr std::string_view
     direct_sparse_facet_descent_step_proof_basis =
         "bounded_complete_lbvh_top_k_canonical_successor_fresh_exact_"
         "miniballs_strict_half_open_segment_relative_positive_locator_v1";
+inline constexpr std::size_t
+    direct_sparse_facet_descent_step_maximum_fresh_miniball_enumeration_count =
+        4U;
 
 // The two locator probes are separate because a source miss can finish with a
 // strict geometric successor whose lookup has a different operational budget.
 // The local miniballs need no n-dependent budget: a facet contains at most ten
 // points and one enumeration examines at most 385 supports.  Each certified
-// builder performs a fresh replay, so a two-miniball step executes at most four
-// such enumerations.  The only global operation is the explicitly bounded LBVH
-// query.
+// builder performs a fresh replay, so a two-miniball step executes at most
+// direct_sparse_facet_descent_step_maximum_fresh_miniball_enumeration_count
+// such enumerations.  The only global operation is the explicitly bounded
+// LBVH query.
 struct ExactDirectSparseFacetDescentStepBudget {
   ExactDirectSparsePositiveFacetProbeBudget source_locator_probe{};
   spatial::ExactLbvhTopKBudget top_k_query{};

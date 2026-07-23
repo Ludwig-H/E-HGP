@@ -885,7 +885,7 @@ Le catalogue direct complet égale l'oracle $n\leq14$ et aucun objet interdit n'
 
 ### Porte d'entrée
 
-Satisfaite par la fermeture de la Phase 9 et par le jalon local de Phase 5 `compact_k1_forest_certified/local_k1_compact_forest_only`. Cette dépendance de jalon ne ferme pas la Phase 5 globale : sa voie scalable générale reste `ready`. Le recul mathématique du 23 juillet 2026 retire la complétude des gateways silencieux de la porte produit : les Théorèmes 4--5 et la Proposition 6 du manuscrit autorisent le remplacement de Gamma par le graphe des simplexes de Gabriel pour les composantes non triviales. La chaîne conserve leurs seuls bras stricts, leurs carriers complets et le quotient atomique des racines réduites optionnelles. La preuve M.1 reste explicitement différée à la Phase 12 après construction de la tour réduite.
+Satisfaite par la fermeture de la Phase 9 et par le jalon local de Phase 5 `compact_k1_forest_certified/local_k1_compact_forest_only`. Cette dépendance de jalon ne ferme pas la Phase 5 globale : sa voie scalable générale reste `ready`. Le recul mathématique du 23 juillet 2026 retire la complétude des gateways silencieux de la porte produit, mais ne permet pas d'invoquer les Théorèmes 4--5 et la Proposition 6 pour remplacer Gamma par le graphe Gabriel brut : E5 réfute cette implication. La chaîne candidate conserve le catalogue Gabriel, ses bras stricts, leurs descentes vers les carriers complets et le quotient atomique des racines réduites optionnelles. Sa fidélité globale à Gamma est une obligation horizontale distincte; M.1 reste explicitement différée à la Phase 12 après construction de la tour réduite.
 
 ### But
 
@@ -903,7 +903,7 @@ Consommer le flux de Phase 9 pour construire directement une généalogie $H_0$ 
 - réutiliser le sweep Morse 6.23 comme falsificateur interne, puis retirer son historique Gamma du chemin produit;
 - produire les forêts horizontales de chaque ordre et les runs externes nécessaires au streaming.
 
-La décision normative et son théorème conditionnel sont consignés dans [REDUCTION_MORSE_H0_PHASE10.md](math/REDUCTION_MORSE_H0_PHASE10.md). Les jalons 10.6--10.15 de première incidence et de gateways restent disponibles comme audits renforcés facultatifs. Ils certifient notamment les premières promotions des minima latents mais ne découvrent pas les selles tardives et ne remplacent donc jamais le catalogue direct. Ils ne pilotent plus le chemin produit, ne sont plus une porte de fermeture et ne sont pas réimplémentés sous une autre forme.
+La décision candidate, l'induction conditionnelle et l'obligation de fidélité des carriers sont consignées dans [REDUCTION_MORSE_H0_PHASE10.md](math/REDUCTION_MORSE_H0_PHASE10.md). Les jalons 10.6--10.15 de première incidence et de gateways restent disponibles comme audits renforcés facultatifs. Ils certifient notamment les premières promotions des minima latents mais ne découvrent pas les selles tardives et ne remplacent donc jamais le catalogue direct. Ils ne pilotent plus le chemin produit, ne sont plus une porte de fermeture et ne sont pas réimplémentés sous une autre forme.
 
 ### État du déploiement au 23 juillet 2026
 
@@ -983,7 +983,7 @@ Sur l'ABI LP64 courante, les tailles logiques sont 24 octets par triplet trié, 
 
 Cette réduction concerne le builder produit. Le fresh verifier conserve volontairement les requêtes et le résultat du sweep dans `BuildArtifacts`, puis reconstruit le sweep pour sa preuve imbriquée; il ne bénéficie donc pas de la borne de pic acquise ici. Comme `warm_e2e` devra inclure la validation fraîche, ces artefacts devront être streamés avant toute qualification SLO. 10.15 ne crée aucune structure globale, ne modifie aucun résultat scientifique et ne qualifie ni 50 k sous la seconde ni 10 M+.
 
-Les incréments 10.6--10.15 restent `partial_refinement`, sans statut public, mais leur ancienne tentative de compléter un sous-univers historique de gateways est désormais non normative. La chaîne produit reprend directement 10.1, 10.2, 10.5a et 10.5c : pour chaque lot, elle localise au plus quatre bras stricts par simplexe de Gabriel dans le snapshot gelé, exige un terminal positif issu d'un minimum strictement antérieur, ferme l'hypergraphe des carriers, puis compte les seules racines réduites. À l'ordre au moins deux, un minimum isolé n'est pas une naissance réduite; $q_R=0$ crée une naissance, $q_R=1$ continue et $q_R\geq2$ fusionne. Tous les carriers du groupe sont unis avant l'insertion des minima courants. Les facettes intérieures égales et les niveaux non Gabriel ne sont ni des bras, ni des parents de forêt. M.1 demeure une obligation de la Phase 12 et aucune qualification SLO 50 k ou 10 M+ ne découle de cette réduction.
+Les incréments 10.6--10.15 restent `partial_refinement`, sans statut public, mais leur ancienne tentative de compléter un sous-univers historique de gateways est désormais non normative. La chaîne candidate reprend directement 10.1, 10.2, 10.5a et 10.5c : pour chaque lot, elle localise au plus quatre bras stricts par simplexe de Gabriel dans le snapshot gelé, exige un terminal positif issu d'un minimum strictement antérieur, ferme l'hypergraphe des carriers, puis compte les seules racines réduites. À l'ordre au moins deux, un minimum isolé n'est pas une naissance réduite; $q_R=0$ crée une naissance, $q_R=1$ continue et $q_R\geq2$ fusionne. Tous les carriers du groupe sont unis avant l'insertion des minima courants. Les facettes intérieures égales et les niveaux non Gabriel ne sont ni des bras, ni des parents de forêt, mais leur ancienne information d'attache doit être récupérée par la descente; la surjectivité de cette récupération reste à prouver. M.1 demeure une obligation de la Phase 12 et aucune qualification SLO 50 k ou 10 M+ ne découle de cette réduction.
 
 ### Tests
 
@@ -996,15 +996,16 @@ Les incréments 10.6--10.15 restent `partial_refinement`, sans statut public, ma
 - CLOCK 10.11 sur l'identité de tous les champs et des cinq arènes 10.7, les vecteurs canoniques et les formules $194+75R+313D+66C+48S+8I+E$ et $136+92S$, chaque cap exact puis moins-un, un `ExactLevel` hostile arrêté par son cap binaire, des préfixes non monotones ou répétés, lots omis ou dupliqués, commit vide, suffixe corrompu après le plus grand préfixe, stamp final périmé, schémas, autorités, tokens, digests et rehashs hostiles, digest nul avec présence explicite, source ou locator étranger, gel et immutabilité complets; aucune campagne ne peut reclasser la conclusion conditionnelle en rejeu d'autorité, décision de quotient, statut public ou qualification SLO;
 - AUTH 10.12 sur une capture source chronologiquement non monotone mais une horloge locator non décroissante, deux captures au même stamp, un commit vide, le rejet atomique d'un lot dupliqué et d'un préfixe décroissant, le scellement unique, l'interdiction de capture après scellement, les caps exacts puis moins-un, l'immutabilité des autorités et les faits explicites `in_memory_replay_only=true`, `crash_durable=false`;
 - composantes avant et après chaque lot et attache silencieuse réutilisée plus tard;
+- vraie fixture E5 tridimensionnelle : `AC` atteint la composante du minimum `DE`, puis `ABC` reste une continuation $q_R=1$ au niveau $83886/3563$;
 - multifusions et niveaux égaux;
 - recouvrements de points;
 - EMST pour $k=1$.
 
 ### Porte de sortie
 
-La porte locale est satisfaite lorsque le flux direct rejoué fournit tous les minima et tous les simplexes de Gabriel de sa portée, que chaque bras strict est certifié vers un carrier strictement antérieur sous un snapshot commun, que les minima isolés d'ordre au moins deux restent sans nœud, que chaque lot égal applique $q_R=0,1,\geq2$ avant mutation et que le journal compact conserve minima, liaisons, naissances réduites, continuations, multifusions, enfants et racines finales. Toute terminaison non positive, autorité divergente ou capacité insuffisante doit échouer sans action scientifique.
+La porte logicielle locale est satisfaite lorsque le flux direct rejoué fournit tous les minima et tous les simplexes de Gabriel de sa portée, que chaque bras strict est certifié vers un carrier strictement antérieur sous un snapshot commun, que les minima isolés d'ordre au moins deux restent sans nœud, que chaque lot égal applique $q_R=0,1,\geq2$ avant mutation et que le journal compact conserve minima, liaisons, naissances réduites, continuations, multifusions, enfants et racines finales. Toute terminaison non positive, autorité divergente ou capacité insuffisante doit échouer sans action scientifique.
 
-Le sweep 6.23 et Gamma exhaustif restent des falsificateurs bornés : toute contradiction devient une fixture permanente, mais leur accord ne promeut jamais le journal. La fermeture de Phase 10 certifie la réduction Morse horizontale conditionnelle dans le domaine direct annoncé; elle ne démontre ni M.1, ni `full_pi0`, ni la tour verticale, et ne change aucun `public_status` v2.
+Le sweep 6.23 et Gamma exhaustif restent des falsificateurs bornés : toute contradiction devient une fixture permanente, mais leur accord ne promeut jamais le journal. La Phase 10 est fermée administrativement comme implémentation candidate conditionnelle afin d'ouvrir Phase 14 en `architecture_only`; la fidélité globale des carriers reste `proof_obligation`. Cette fermeture ne démontre ni `full_pi0`, ni M.1, ni la tour verticale, et ne change aucun `public_status` v2.
 
 ## Phase 11 — Tour verticale
 
@@ -1148,7 +1149,15 @@ Ce socle est `architecture_only` et `public_status=not_claimed` : accepter un pl
 
 Le locator remplace la copie de ses $H$ parents par un journal de rollback réservé à $U_b$ handles et utilisé par les seules $W_b$ unions effectives. Les lookups précèdent toujours la première écriture, les doublons voient le DSU post-unions, un succès conserve $W_b$ écritures et un rejet en restaure exactement $W_b$ en ordre inverse. Les diagnostics de travail restent hors du digest durable et une garde statique interdit le retour du clone dense. Le scratch de lot devient $O(Q+KB+U_b)$; aucun handle non touché n'est parcouru.
 
-Cet incrément ferme le premier goulot commun aux profils 50 k et 10 M+ sans prétendre qualifier l'un ou l'autre. Les prochains travaux portent directement sur le batch GPU des descentes exactes, puis les durées de vie des arènes et l'instrumentation.
+Cet incrément ferme le premier goulot commun aux profils 50 k et 10 M+ sans prétendre qualifier l'un ou l'autre. L'incrément suivant structure les descentes par lanes exactes avant leur exécution GPU, puis viendront les durées de vie des arènes et l'instrumentation.
+
+### Lanes de descente 14C
+
+Le planificateur `ExactDirectSparseFacetDescentBatchPlanResult` rejoue 14A sous un plafond explicite de chunks, contrôlé avant toute rétention supplémentaire et avec effacement du préfixe transitoire en cas de dépassement, puis divise chaque lot exact en au plus trois lanes selon le cardinal deux, trois ou quatre du support positif. Chaque lane reste dans son chunk et son lot, référence seulement les intervalles candidats de 10.2 et reçoit une tuile bornée de graines. Toutes les lanes d'un lot doivent utiliser le même snapshot locator, une seule sélection stable, une fermeture 10.5c commune avec une mémoïsation commune, puis une jointure par `arm_seed_index` avant le quotient.
+
+Pour une facette de cardinal $k\leq10$, le nombre de supports locaux examinés par passe est $N_k=\sum_{j=1}^{\min(4,k)}\binom{k}{j}\leq385$. Quatre passes fraîches donnent une borne initiale autonome de $4rN_k$ pour une famille de support $r$. Le cas frontière $K=10$ avec support deux, neuf intérieurs et deux bras vaut 3080 examens. Cette borne ne couvre pas les successeurs de la fermeture partagée, la difficulté LBVH ou rationnelle, les octets combinés avec 14A ou un temps GPU.
+
+Le prédicat interne reste un contrôle de forme; le résultat exige un rejeu frais avant exécution ou persistance. 14C est `architecture_only`, ne matérialise ni clés de lanes, ni facettes absentes, ni Gamma, cofaces globales, cellules ou mosaïque de Delaunay d'ordre supérieur, et ne qualifie ni 50 k sous la seconde, ni 10 M+.
 
 ### Optimisations autorisées
 

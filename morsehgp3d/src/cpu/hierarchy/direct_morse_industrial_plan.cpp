@@ -3,6 +3,7 @@
 #include <limits>
 #include <new>
 #include <optional>
+#include <stdexcept>
 
 namespace morsehgp3d::hierarchy {
 namespace {
@@ -488,19 +489,26 @@ bool ExactDirectMorseIndustrialPlanResult::complete_architecture_plan()
 }
 
 ExactDirectMorseIndustrialPlanResult
-build_exact_direct_morse_industrial_plan(
+build_exact_direct_morse_industrial_plan_with_chunk_count_cap(
     const spatial::CanonicalPointCloud& cloud,
     const ExactDirectSupportTerminalFacade& source_facade,
     const ExactDirectMorseEventJournalResult& source_event_journal,
     const ExactDirectSaddleArmSeedBudget& trusted_arm_seed_budget,
     const ExactDirectSaddleArmSeedJournalResult& source_arm_seed_journal,
-    const ExactDirectMorseIndustrialPlanConfig& config) {
+    const ExactDirectMorseIndustrialPlanConfig& config,
+    std::size_t maximum_output_chunk_count) {
   ExactDirectMorseIndustrialPlanResult result;
   result.requested_config = config;
   result.point_count = cloud.size();
   result.scope = ExactDirectMorseIndustrialPlanScope::
       certified_10_1_10_2_batch_resource_projection_only;
   result.atomic_rejection_publishes_no_chunks = true;
+
+  if (maximum_output_chunk_count == 0U) {
+    result.decision = ExactDirectMorseIndustrialPlanDecision::
+        no_plan_chunk_count_budget_exhausted;
+    return result;
+  }
 
   switch (config.policy) {
     case ExactDirectMorseIndustrialPolicy::automatic:
@@ -595,6 +603,12 @@ build_exact_direct_morse_industrial_plan(
          resident_fits)) {
       result.selected_policy = ExactDirectMorseIndustrialPolicy::
           interactive_resident_50k;
+      if (result.chunks.size() >= maximum_output_chunk_count) {
+        result.decision = ExactDirectMorseIndustrialPlanDecision::
+            no_plan_chunk_count_budget_exhausted;
+        clear_chunks(result);
+        return result;
+      }
       if (!append_chunk(
               result,
               0U,
@@ -669,6 +683,12 @@ build_exact_direct_morse_industrial_plan(
 
       const auto current_bytes = estimated_chunk_bytes(
           current, config.memory_model, true);
+      if (result.chunks.size() >= maximum_output_chunk_count) {
+        result.decision = ExactDirectMorseIndustrialPlanDecision::
+            no_plan_chunk_count_budget_exhausted;
+        clear_chunks(result);
+        return result;
+      }
       if (!current_bytes.has_value() ||
           !append_chunk(
               result,
@@ -720,6 +740,12 @@ build_exact_direct_morse_industrial_plan(
 
     const auto final_bytes =
         estimated_chunk_bytes(current, config.memory_model, true);
+    if (result.chunks.size() >= maximum_output_chunk_count) {
+      result.decision = ExactDirectMorseIndustrialPlanDecision::
+          no_plan_chunk_count_budget_exhausted;
+      clear_chunks(result);
+      return result;
+    }
     if (!final_bytes.has_value() ||
         !append_chunk(
             result,
@@ -753,7 +779,31 @@ build_exact_direct_morse_industrial_plan(
     result.decision = ExactDirectMorseIndustrialPlanDecision::
         no_plan_allocation_failed;
     return result;
+  } catch (const std::length_error&) {
+    clear_chunks(result);
+    result.decision = ExactDirectMorseIndustrialPlanDecision::
+        no_plan_capacity_overflow;
+    return result;
   }
+}
+
+ExactDirectMorseIndustrialPlanResult
+build_exact_direct_morse_industrial_plan(
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& source_event_journal,
+    const ExactDirectSaddleArmSeedBudget& trusted_arm_seed_budget,
+    const ExactDirectSaddleArmSeedJournalResult&
+        source_arm_seed_journal,
+    const ExactDirectMorseIndustrialPlanConfig& config) {
+  return build_exact_direct_morse_industrial_plan_with_chunk_count_cap(
+      cloud,
+      source_facade,
+      source_event_journal,
+      trusted_arm_seed_budget,
+      source_arm_seed_journal,
+      config,
+      std::numeric_limits<std::size_t>::max());
 }
 
 }  // namespace morsehgp3d::hierarchy

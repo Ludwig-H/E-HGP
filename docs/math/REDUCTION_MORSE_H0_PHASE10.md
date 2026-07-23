@@ -2,7 +2,7 @@
 
 ## Décision corrigée
 
-Phase 10, backend `reference_cpu`, profil `hgp_reduced`, mode `certified`, statut interne `conditional_exact_h0` et `public_status=not_claimed`.
+Phase 10, backend `reference_cpu`, profil `hgp_reduced`, mode `certified`, statut interne `conditional_h0_candidate` et `public_status=not_claimed`. Sa fermeture est administrative et logicielle : elle autorise l'architecture de Phase 14, mais ne transforme pas l'obligation de fidélité globale ci-dessous en théorème.
 
 Les minima directs et les racines réduites sont deux objets différents. Pour $k\geq2$, une facette minimale isolée est un **carrier latent** de la composante complète; elle n'est pas un nœud de `hgp_reduced`. Un groupe de simplexes de Gabriel crée ou conserve une racine réduite selon le nombre $q_R$ de composantes strictes non triviales absorbées :
 
@@ -24,9 +24,9 @@ $$\beta(F_u)<\beta(S)=a.$$
 
 Les suppressions $S\setminus\lbrace x\rbrace$ avec $x\in I$ restent au niveau $a$. Elles ne sont ni des bras stricts, ni des composantes pré-lot. De plus, l'union des bras stricts contient déjà tous les points de $S$ puisque $\lvert U\rvert\geq2$.
 
-Le Théorème 4 et la Proposition 6 du manuscrit établissent que les simplexes non Gabriel peuvent être retirés sans modifier les $k$-polyèdres non triviaux : leurs facettes strictes sont déjà reliées sous le niveau courant et les facettes égales n'ajoutent aucun point couvert. La chaîne produit doit donc énumérer complètement les simplexes de Gabriel, pas Gamma ni toutes ses cofaces. Ce catalogue direct est l'autorité de toutes les selles : les requêtes de première incidence $\lambda(F)$ et leurs co-minimiseurs $M(F)$ certifient la première promotion des minima latents, mais ne découvrent pas les selles tardives dont tous les bras appartiennent déjà à des racines non triviales. E5 en fournit une à son niveau de multifusion.
+Le Théorème 4 justifie le rôle séparateur des simplexes de Gabriel, mais la Proposition 6 et le Théorème 5 du manuscrit ne peuvent pas justifier à eux seuls la suppression de toutes les incidences non Gabriel : la fixture exacte E5 les contredit pour le graphe élagué brut. Une facette peut être attachée silencieusement par une coface non Gabriel, puis être réutilisée par une selle Gabriel tardive. La chaîne candidate énumère donc les simplexes de Gabriel sans matérialiser Gamma, mais récupère l'information d'attache par la descente stricte de chaque bras vers un carrier antérieur. Les requêtes de première incidence $\lambda(F)$ et leurs co-minimiseurs $M(F)$ restent des audits de promotion; elles ne remplacent ni le catalogue des selles tardives, ni la preuve globale que les carriers paresseux représentent toutes les composantes strictes de Gamma.
 
-Une facette stricte encore isolée ne peut pas devenir non triviale pour la première fois par une coface non Gabriel dans le domaine régulier. Soient $F$ cette facette et $Q=F\cup\lbrace x\rbrace$ une coface de première incidence. Si un intrus strict $z$ appartient à la miniball de $Q$, deux cas sont possibles : si $x$ n'est pas essentiel, alors $\beta(F)=\beta(Q)$, contrairement à la stricte antériorité de $F$; si $x$ est essentiel, alors $\beta(F\cup\lbrace z\rbrace)<\beta(Q)$, contrairement à la minimalité de cette première incidence. Ainsi, toute première promotion d'un carrier isolé est portée par un simplexe de Gabriel. Un groupe purement résiduel peut étendre une racine existante, mais ne crée aucun nœud.
+Une facette stricte encore isolée ne peut pas devenir non triviale pour la première fois par une coface non Gabriel dans le domaine régulier. Soient $F$ cette facette et $Q=F\cup\lbrace x\rbrace$ une coface de première incidence. Si un intrus strict $z$ appartient à la miniball de $Q$, deux cas sont possibles : si $x$ n'est pas essentiel, alors $\beta(F)=\beta(Q)$, contrairement à la stricte antériorité de $F$; si $x$ est essentiel, alors $\beta(F\cup\lbrace z\rbrace)<\beta(Q)$, contrairement à la minimalité de cette première incidence. Ainsi, toute première promotion d'un carrier isolé est portée par un simplexe de Gabriel. Ce lemme local ne prouve toutefois pas que toutes les attaches silencieuses déjà survenues sont fidèlement représentées lorsqu'une selle tardive réutilise leur facette.
 
 Cette conclusion utilise la position générale, un support essentiel unique et l'absence de shell extérieur. Par exemple, un plateau cosphérique peut activer simultanément facettes et cofaces sans événement de rang intermédiaire; il appartient à la Phase 13 et doit échouer fermé en Phase 10.
 
@@ -61,29 +61,31 @@ Pour un lot exact $(k,a)$ :
 
 Les hyperarêtes du quotient portent les composantes complètes, pas seulement les racines publiques. Les sommets $L$ ne sont surtout pas supprimés avant la fermeture transitive : deux selles peuvent partager uniquement un carrier latent et appartenir au même groupe. La fixture miroir 6.18 impose alors une naissance commune $q_R=0$, et non deux naissances séquentialisées. Les facettes isolées absorbées ne deviennent jamais des enfants.
 
-## Théorème conditionnel
+## Obligation horizontale de fidélité des carriers
 
-**Théorème.** Fixons un ordre $k$ dans le domaine générique et supposons :
+**Proposition conditionnelle, non close.** Fixons un ordre $k$ dans le domaine générique et supposons :
 
 1. la façade terminale de Phase 9 énumère complètement les simplexes de Gabriel pertinents, y compris les selles tardives, et leurs minima directs;
 2. chaque simplexe fournit exactement les bras $F_u$ pour $u\in U$;
-3. 10.5c associe chaque bras à son unique carrier complet strictement antérieur;
+3. avant chaque lot $(k,a)$, les carriers actifs sont en bijection avec les composantes pertinentes de la coupe stricte de Gamma, et 10.5c associe chaque bras au carrier de sa composante;
 4. le snapshot des carriers et de leurs éventuelles racines réduites reste gelé pendant tout le lot;
 5. toutes les hyperarêtes du même niveau sont quotientées avant mutation;
 6. la porte de régularité exclut supports multiples, shells extérieurs et plateaux non résolus;
 7. chaque cas dégénéré, autorité divergente ou budget épuisé échoue fermé.
 
-Alors la règle $q_R=0,1,\geq2$ ci-dessus produit la même généalogie de composantes non triviales, vues comme ensembles de points, que le $k$-graphe de Gabriel et donc que les $k$-polyèdres de Čech dans la portée du Théorème 5 du manuscrit.
+Alors la règle $q_R=0,1,\geq2$ ci-dessus produit la même généalogie de composantes non triviales, vues comme ensembles de points, que Gamma et donc que les composantes de Čech dans le domaine annoncé.
 
-### Preuve
+### Induction conditionnelle
 
-La fermeture stricte place chaque bras dans son unique composante complète pré-lot. Les hyperarêtes de carriers reconstruisent donc les contractions simultanées imposées par les simplexes de Gabriel. L'ordre physique est sans effet puisque le quotient est la fermeture transitive d'une relation symétrique sur un snapshot commun.
+Par l'hypothèse de fidélité, la fermeture stricte place chaque bras dans sa composante complète pré-lot. Les hyperarêtes de carriers reconstruisent donc les contractions simultanées imposées par les simplexes de Gabriel. L'ordre physique est sans effet puisque le quotient est la fermeture transitive d'une relation symétrique sur un snapshot commun.
 
 À l'ordre $k\geq2$, une composante à une seule facette ne porte pas de racine réduite. Un groupe sans racine antérieure crée la première composante non triviale et donc une naissance réduite. Un groupe à une racine conserve cette composante. Un groupe à plusieurs racines fusionne exactement ces composantes; les carriers isolés absorbés n'ajoutent aucun parent mais leurs points sont déjà contenus dans l'union des bras stricts.
 
-Les simplexes non Gabriel ne changent pas les ensembles de points des composantes non triviales par la Proposition 6. Le lemme de première incidence ci-dessus interdit en outre qu'un groupe purement résiduel promeuve un carrier isolé : hors d'un groupe déjà représenté par une selle directe, il ne peut être qu'une continuation avec $q_R=1$. Une incidence résiduelle appartenant à un groupe catalogué n'apporte aucune racine supplémentaire au-delà des bras directs. Ces groupes peuvent transporter une facette égale ou modifier un delta de couverture, mais ne créent aucun nœud supplémentaire dans cette généalogie. Ils restent donc nécessaires à un audit de couverture détaillé, pas au journal minimal des nœuds. L'induction sur les niveaux exacts donne le résultat. $\square$
+Une coface non Gabriel régulière est une attache silencieuse $q=1$ sans nouveau point couvert; elle ne crée donc aucun nœud réduit, mais peut modifier l'appartenance future d'une facette. Une coface Gabriel contracte les carriers de ses bras stricts, et les suppressions intérieures égales n'ajoutent aucun point au-delà de l'union de ces bras. La fermeture transitive du lot traite les niveaux égaux sur un snapshot commun. Sous l'hypothèse de fidélité, ces trois faits préservent l'invariant par induction sur les niveaux exacts.
 
-Le théorème ne certifie pas la famille complète des facettes d'une composante, `full_pi0`, les deltas de couverture détaillés, M.1, la tour verticale ou un statut public exact.
+Le point non démontré est précisément la surjectivité inductive suivante : tous les carriers terminaux appartenant à une même composante stricte de Gamma doivent déjà être unis au même représentant, même lorsque le chemin de Gamma a utilisé auparavant des cofaces non Gabriel non matérialisées. De façon équivalente, le graphe sparse des minima et selles enrichi par les descentes doit être un certificat $H_0$ complet. E5 vérifie localement le cas discriminant `AC` vers la composante de `DE`, puis la continuation `ABC` au niveau $83886/3563$; ce témoin logiciel ne clôt pas la propriété globale.
+
+La proposition conditionnelle ne certifie pas la famille complète des facettes d'une composante, `full_pi0`, les deltas de couverture détaillés, M.1, la tour verticale ou un statut public exact.
 
 ## Échec fermé
 

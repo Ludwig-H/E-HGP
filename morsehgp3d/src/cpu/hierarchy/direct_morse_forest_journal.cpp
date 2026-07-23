@@ -959,8 +959,8 @@ void clear_payload(ExactDirectMorseForestJournalResult& result) noexcept {
 
 }  // namespace
 
-bool ExactDirectMorseForestJournalResult::certified_conditional_exact_h0()
-    const noexcept {
+bool ExactDirectMorseForestJournalResult::
+    certified_conditional_h0_candidate() const noexcept {
   return schema_version == direct_morse_forest_journal_schema_version &&
          decision == ExactDirectMorseForestDecision::
                          complete_conditional_exact_direct_morse_forest &&
@@ -1014,6 +1014,11 @@ bool ExactDirectMorseForestJournalResult::certified_conditional_exact_h0()
          final_locator_stamp.committed_batch_count == batches.size();
 }
 
+bool ExactDirectMorseForestJournalResult::certified_conditional_exact_h0()
+    const noexcept {
+  return certified_conditional_h0_candidate();
+}
+
 bool ExactDirectMorseForestJournalResult::certified_atomic_failure()
     const noexcept {
   return schema_version == direct_morse_forest_journal_schema_version &&
@@ -1029,7 +1034,8 @@ bool ExactDirectMorseForestJournalResult::certified_atomic_failure()
 }
 
 bool ExactDirectMorseForestJournalResult::certified_outcome() const noexcept {
-  return certified_conditional_exact_h0() || certified_atomic_failure();
+  return certified_conditional_h0_candidate() ||
+         certified_atomic_failure();
 }
 
 ExactDirectMorseForestJournalResult
@@ -2130,7 +2136,7 @@ build_exact_direct_morse_forest_journal(
     result.no_partial_scientific_payload_published = true;
     result.decision = ExactDirectMorseForestDecision::
         complete_conditional_exact_direct_morse_forest;
-    if (!result.certified_conditional_exact_h0()) {
+    if (!result.certified_conditional_h0_candidate()) {
       throw std::logic_error(
           "a complete direct Morse forest failed its compact contract");
     }

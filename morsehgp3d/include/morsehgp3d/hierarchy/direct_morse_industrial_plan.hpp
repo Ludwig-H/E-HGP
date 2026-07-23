@@ -124,6 +124,8 @@ enum class ExactDirectMorseIndustrialPlanDecision : std::uint8_t {
   no_plan_resident_requirements_not_met,
   no_plan_atomic_batch_exceeds_chunk_budget,
   complete_architecture_only_plan,
+  // Appended to preserve every schema-v1 decision ordinal.
+  no_plan_chunk_count_budget_exhausted,
 };
 
 enum class ExactDirectMorseIndustrialPlanScope : std::uint8_t {
@@ -197,5 +199,19 @@ build_exact_direct_morse_industrial_plan(
     const ExactDirectSaddleArmSeedBudget& trusted_arm_seed_budget,
     const ExactDirectSaddleArmSeedJournalResult& source_arm_seed_journal,
     const ExactDirectMorseIndustrialPlanConfig& config);
+
+// This construction-level cap is checked before every chunk publication.
+// The returned scientific payload stays schema-identical to the unbounded
+// overload; callers that persist or execute it must retain their own cap as
+// part of the enclosing authority.
+[[nodiscard]] ExactDirectMorseIndustrialPlanResult
+build_exact_direct_morse_industrial_plan_with_chunk_count_cap(
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& source_event_journal,
+    const ExactDirectSaddleArmSeedBudget& trusted_arm_seed_budget,
+    const ExactDirectSaddleArmSeedJournalResult& source_arm_seed_journal,
+    const ExactDirectMorseIndustrialPlanConfig& config,
+    std::size_t maximum_output_chunk_count);
 
 }  // namespace morsehgp3d::hierarchy

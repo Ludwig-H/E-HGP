@@ -22,7 +22,7 @@ inline constexpr std::string_view direct_morse_forest_journal_mode =
     "certified";
 inline constexpr std::string_view
     direct_morse_forest_journal_refinement_status =
-        "conditional_exact_h0";
+        "conditional_h0_candidate";
 inline constexpr std::string_view direct_morse_forest_journal_public_status =
     "not_claimed";
 inline constexpr std::string_view direct_morse_forest_journal_proof_basis =
@@ -31,7 +31,8 @@ inline constexpr std::string_view direct_morse_forest_journal_proof_basis =
     "arm_terminals_"
     "typed_frozen_r_root_or_l_latent_carrier_hyperedges_deduplicated_"
     "before_transitive_full_component_quotient_qr_counts_only_r_"
-    "then_atomic_all_carrier_union_and_minimum_binding_commits_v2";
+    "then_atomic_all_carrier_union_and_minimum_binding_commits_"
+    "conditional_on_lazy_carrier_component_faithfulness_v3";
 
 using ExactDirectMorseForestNodeId = std::uint64_t;
 
@@ -344,12 +345,18 @@ struct ExactDirectMorseForestJournalResult {
   bool higher_order_delaunay_materialized{false};
   bool forbidden_global_structure_materialized{false};
   bool public_status_claimed{false};
+  // Legacy schema-v2 field name: true means the payload is only a
+  // conditionally evaluated H0 candidate, while the separate global Morse
+  // obligation remains explicitly unreplayed above.
   bool conditional_exact_h0_only{true};
   ExactDirectMorseForestDecision decision{
       ExactDirectMorseForestDecision::not_certified};
   ExactDirectMorseForestScope scope{
       ExactDirectMorseForestScope::unspecified};
 
+  [[nodiscard]] bool certified_conditional_h0_candidate() const noexcept;
+  // Compatibility alias for schema-v2 callers.  It does not claim that the
+  // lazy-carrier faithfulness obligation has been proved or replayed.
   [[nodiscard]] bool certified_conditional_exact_h0() const noexcept;
   [[nodiscard]] bool certified_atomic_failure() const noexcept;
   [[nodiscard]] bool certified_outcome() const noexcept;

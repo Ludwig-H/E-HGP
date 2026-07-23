@@ -54,6 +54,22 @@ Un succès conserve ces $W_b$ écritures et abandonne le journal. Tout rejet pos
 
 Le scratch transactionnel passe ainsi de $O(H)$ à $O(U_b)$, avec exactement $W_b$ écritures sur succès et $2W_b$ sur rollback. Aucun parcours des handles non touchés, aucune facette, coface, cellule, incidence Gamma ou mosaïque d'ordre supérieur n'est introduit. Ce gain concerne directement les petits lots interactifs et les chunks massifs; il ne borne pas la profondeur des chaînes DSU et ne qualifie à lui seul aucun SLO.
 
+## Incrément 14C — lanes structurelles des descentes
+
+`ExactDirectSparseFacetDescentBatchPlanResult` rejoue fraîchement 14A avec le plafond de chunks fourni, puis classe, à l'intérieur de chaque lot exact et de son chunk propriétaire, les familles de selles selon le cardinal deux, trois ou quatre de leur support positif. Le plafond est testé avant chaque rétention de chunk et tout dépassement efface le préfixe transitoire : aucun plan source partiel n'entre dans 14C. Il existe donc au plus trois lanes par lot. Une lane conserve uniquement les intervalles candidats du journal 10.2, le cardinal de facette, le cardinal de support, le nombre d'intérieurs et des compteurs de travail; elle ne copie aucune clé, facette, permutation de bras ou valeur exacte.
+
+Pour une facette de cardinal $k\leq10$, une construction locale autonome examine au plus $N_k$ supports candidats par passe, avec :
+
+$$N_k=\sum_{j=1}^{\min(4,k)}\binom{k}{j}\leq385.$$
+
+Le rejeu frais de 10.5b effectue au plus quatre passes par graine initiale. Une famille de support $r\in\lbrace2,3,4\rbrace$ possède exactement $r$ bras et reçoit donc la borne autonome $4rN_k$. Le plan additionne cette borne sans supposer les réemplois de la fermeture commune, puis découpe les graines en lancements d'au plus `maximum_initial_seed_work_item_count_per_launch`. Au bord $K=10$, une famille de support deux et neuf intérieurs porte ainsi deux graines et au plus $2\times4\times385=3080$ examens initiaux.
+
+Les lanes ne sont pas des transactions scientifiques indépendantes. Toutes celles d'un lot doivent lire le même snapshot locator gelé, sélectionner leurs familles une seule fois dans un scratch stable, alimenter une unique fermeture 10.5c et partager sa mémoïsation; les résultats reviennent par `arm_seed_index` avant le quotient atomique. Cette contrainte évite de recalculer les suffixes partagés et interdit de couper un niveau égal entre kernels ou checkpoints.
+
+Le prédicat `complete_architecture_plan()` vérifie seulement la forme et les agrégats du payload compact. Une redistribution coordonnée des comptes pourrait conserver cette forme; `fresh_reconstruction_required_before_execution=true` impose donc `verify_exact_direct_sparse_facet_descent_batch_plan` avant toute exécution ou persistance. Le plan ne borne pas encore les successeurs découverts par la fermeture commune, la profondeur LBVH, la difficulté des rationnels, les octets de scratch combinés avec 14A ou le temps GPU. Il ne qualifie ni le SLO 50 k, ni le profil 10 M+.
+
+Cet incrément prépare un seul futur exécuteur pour les deux profils : résident, toutes les lanes restent dans l'unique chunk; streaming, elles restent dans le chunk de leur lot indivisible. Il ne construit aucune facette absente, incidence Gamma, coface globale, cellule ou mosaïque de Delaunay d'ordre supérieur.
+
 ## Goulots restant à traiter en Phase 14
 
 Trois coûts dominants restent visibles après cette réduction :
@@ -62,7 +78,7 @@ Trois coûts dominants restent visibles après cette réduction :
 - les constructions de miniballs et les fallbacks rationnels, à regrouper par cardinal et difficulté;
 - le rejeu frais, qui ne doit pas dupliquer durablement les grandes arènes dans le protocole `warm_e2e`.
 
-La priorité de développement devient donc : batch GPU des descentes, durées de vie d'arènes explicites, puis instrumentation. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces trois coûts.
+La priorité de développement devient donc : exécuteur commun sélection--fermeture--jointure des lanes 14C, qualification GPU des propositions avec rejeu CPU exact, durées de vie d'arènes explicites, puis instrumentation. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces trois coûts.
 
 ## Planification sans promotion
 
