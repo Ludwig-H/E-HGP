@@ -599,6 +599,14 @@ Le fresh verifier rejoue 10.13 depuis ses autorités, reconstruit la clôture ty
 
 Ce jalon ne matérialise ni Gamma, ni catalogue global de facettes ou cofaces, ni cellule, ni clé persistante de coface à onze points, ni mosaïque de Delaunay d'ordre supérieur. La complétude des gateways silencieux non directs et l'intégration atomique au quotient HGP restent ouvertes; 10.14 demeure donc `partial_refinement`, `public_status=not_claimed`, sans promotion `exact`, M.1, SLO 50 k ou qualification 10 M+. Voir [QUOTIENT_GATEWAYS_HISTORIQUES_PHASE10.md](math/QUOTIENT_GATEWAYS_HISTORIQUES_PHASE10.md).
 
+### 9.16 Réduction du pic de durée de vie 10.15-LIFE
+
+10.15-LIFE modifie seulement l'ordonnancement mémoire interne de 10.13-TRES. Après le heapsort, les $Q$ records `temporal_resolutions` sont préconstruits depuis les groupes contigus avec leur indice, préfixe, token et multiplicité; le mapping des $P$ projections et les requêtes 10.10 sont produits dans la même passe. L'allocation $24P$ des triplets `sorted` est ensuite réellement libérée par échange avec un vecteur vide avant le sweep. Les réponses historiques enrichissent en place les records préconstruits.
+
+Sous LP64, les coûts par entrée sont 24 octets pour le triplet de tri, 16 pour le mapping final, 104 pour une requête, 48 pour une réponse du sweep, 72 pour une résolution finale et 8 pour un parent DSU. Avec $H$ handles, le pic builder passe de $\max(40P+224Q,40P+152Q+8H)$ à $\max(40P+176Q,16P+224Q+8H)$ octets, tandis que la sortie reste $16P+72Q$. Le scénario illustratif $P=Q=H=10\,000\,000$ économise 160 Mo, mais $P=n$ n'est pas garanti : seule la borne $P\leq11C$ est disponible et le cas $C=n$, $P=11C$ reste trop lourd pour qualifier la voie 10 M+.
+
+Aucun schéma, champ, compteur, budget, décision, portée, ordre canonique ou résultat scientifique ne change. Le même sweep est appelé une fois avec les mêmes requêtes et les arènes locales restent non publiées jusqu'au succès atomique. Le fresh verifier conserve encore `BuildArtifacts` et demeure un chantier de streaming séparé. Gamma, catalogues globaux, snapshots ou DSU par lot, cellules, cofaces persistantes de largeur onze, mosaïque de Delaunay d'ordre supérieur, quotient, forêt et attaches restent absents. Voir [DUREES_VIE_RESOLUTION_TEMPORELLE_PHASE10.md](math/DUREES_VIE_RESOLUTION_TEMPORELLE_PHASE10.md).
+
 ## 10. Événements simultanés
 
 Des centres distincts peuvent avoir exactement le même niveau. Une exécution séquentielle créerait des bifurcations binaires artificielles et pourrait changer les morphismes verticaux.

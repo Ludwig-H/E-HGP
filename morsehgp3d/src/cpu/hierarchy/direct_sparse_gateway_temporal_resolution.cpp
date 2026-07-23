@@ -577,7 +577,9 @@ class BoundedComparator {
     std::vector<ExactDirectSparsePositiveFacetPrefixQuery> queries;
     std::vector<ExactDirectSparseGatewayProjectionToTemporalResolution>
         projection_map(localization.deletion_projections.size());
+    std::vector<ExactDirectSparseGatewayTemporalResolution> resolutions;
     queries.reserve(unique_count);
+    resolutions.reserve(unique_count);
     std::size_t current_resolution = 0U;
     for (std::size_t index = 0U; index < sorted.size(); ++index) {
       if (index == 0U || !same_pair(sorted[index - 1U], sorted[index])) {
@@ -587,17 +589,32 @@ class BoundedComparator {
              sorted[index].prefix,
              localization.localized_facet_tokens[sorted[index].token]
                  .facet_key});
+        ExactDirectSparseGatewayTemporalResolution resolution;
+        resolution.temporal_resolution_index = current_resolution;
+        resolution.strict_pre_locator_prefix_count = sorted[index].prefix;
+        resolution.localized_facet_token_index = sorted[index].token;
+        resolutions.push_back(resolution);
       }
       projection_map[sorted[index].projection] =
           {sorted[index].projection, current_resolution};
-      if (!increment(result.counters.projection_scan_count)) {
+      if (!increment(
+              resolutions[current_resolution]
+                  .projection_reference_count) ||
+          !increment(result.counters.projection_scan_count)) {
         return fail(
             std::move(result), BuildFailure::capacity_overflow, locator);
       }
     }
     result.pairs_deduplicated_only_by_prefix_and_token = true;
     result.one_prefix_query_per_distinct_pair =
-        queries.size() == unique_count;
+        queries.size() == unique_count &&
+        resolutions.size() == unique_count;
+
+    // All information needed after the prefix sweep now lives in the compact
+    // Q-sized query and result arenas.  Release the P-sized sort arena before
+    // the sweep allocates its own Q-sized resolutions so the two large
+    // transients never coexist at the product-path peak.
+    std::vector<PrefixTokenProjection>{}.swap(sorted);
 
     auto prefix_sweep =
         build_exact_direct_sparse_positive_facet_prefix_sweep(
@@ -616,32 +633,21 @@ class BoundedComparator {
     }
     result.prefix_sweep_completed = true;
 
-    std::vector<ExactDirectSparseGatewayTemporalResolution> resolutions;
-    resolutions.reserve(unique_count);
-    std::size_t sorted_cursor = 0U;
     for (std::size_t index = 0U; index < unique_count; ++index) {
       const auto& query = queries[index];
       const auto& historical = prefix_sweep.resolutions[index];
-      const std::size_t token_index = sorted[sorted_cursor].token;
-      const PrefixTokenProjection unique_pair = sorted[sorted_cursor];
-      const std::size_t group_begin = sorted_cursor;
-      do {
-        ++sorted_cursor;
-      } while (
-          sorted_cursor < sorted.size() &&
-          same_pair(unique_pair, sorted[sorted_cursor]));
+      auto& resolution = resolutions[index];
+      const std::size_t token_index =
+          resolution.localized_facet_token_index;
       const auto& token =
           localization.localized_facet_tokens[token_index];
-      ExactDirectSparseGatewayTemporalResolution resolution;
-      resolution.temporal_resolution_index = index;
-      resolution.strict_pre_locator_prefix_count =
-          query.committed_batch_prefix_count;
-      resolution.localized_facet_token_index = token_index;
-      resolution.projection_reference_count =
-          sorted_cursor - group_begin;
       if (historical.query_index != index ||
           historical.committed_batch_prefix_count !=
-              query.committed_batch_prefix_count) {
+              query.committed_batch_prefix_count ||
+          resolution.temporal_resolution_index != index ||
+          resolution.strict_pre_locator_prefix_count !=
+              query.committed_batch_prefix_count ||
+          resolution.projection_reference_count == 0U) {
         return fail(
             std::move(result),
             BuildFailure::append_only_contradiction,
@@ -743,7 +749,6 @@ class BoundedComparator {
               locator);
         }
       }
-      resolutions.push_back(resolution);
       if (!increment(result.counters.resolution_scan_count)) {
         return fail(
             std::move(result), BuildFailure::capacity_overflow, locator);
