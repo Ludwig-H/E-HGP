@@ -5,6 +5,7 @@
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
 #include "morsehgp3d/exact/support.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_gateway_clock.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
@@ -300,6 +301,39 @@ int main() {
       empty_prefix_sweep.counters.locator_snapshot_check_count != 2U ||
       !empty_prefix_sweep.resolutions.empty()) {
     std::cerr << "installed positive-facet prefix sweep changed semantics\n";
+    return 1;
+  }
+
+  const morsehgp3d::hierarchy::
+      ExactDirectSparseGatewayCandidateJournalResult empty_gateway_source{};
+  const morsehgp3d::hierarchy::
+      ExactDirectSparseGatewayCandidateScientificIdentityBudget
+          identity_budget{0U, 0U, 0U, 0U, 0U, 0U, 0U, 194U};
+  const auto source_identity = morsehgp3d::hierarchy::
+      compute_exact_direct_sparse_gateway_candidate_scientific_identity(
+          empty_gateway_source, identity_budget);
+  if (!source_identity.certified_identity() ||
+      source_identity.arena_record_scan_count != 0U ||
+      source_identity.required_exact_level_decimal_byte_count != 0U ||
+      source_identity.required_digest_payload_byte_count != 194U) {
+    std::cerr << "installed gateway source identity changed semantics\n";
+    return 1;
+  }
+
+  morsehgp3d::hierarchy::ExactDirectSparseGatewayClockCertificate
+      empty_clock_certificate;
+  empty_clock_certificate.authority_id = UINT64_C(0x51a7);
+  empty_clock_certificate.replay_token = UINT64_C(0x1002);
+  empty_clock_certificate.source_scientific_identity_digest =
+      source_identity.scientific_identity_digest;
+  empty_clock_certificate.final_locator_stamp = locator.snapshot_stamp();
+  const auto clock_digest = morsehgp3d::hierarchy::
+      compute_exact_direct_sparse_gateway_clock_certificate_digest(
+          empty_clock_certificate, {0U, 136U});
+  if (!clock_digest.certified_digest() ||
+      clock_digest.boundary_scan_count != 0U ||
+      clock_digest.required_digest_payload_byte_count != 136U) {
+    std::cerr << "installed gateway clock digest changed semantics\n";
     return 1;
   }
   return 0;
