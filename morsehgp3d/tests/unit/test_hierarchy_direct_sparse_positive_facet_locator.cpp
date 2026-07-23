@@ -9,6 +9,7 @@
 #include <span>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -60,6 +61,26 @@ void check(bool condition, const std::string& message) {
   };
 }
 
+[[nodiscard]]
+ExactDirectSparsePositiveFacetLocatorStructuralVerificationBudget
+generous_structural_verification_budget() {
+  return {
+      128U,
+      1024U,
+      16U,
+      64U,
+      64U,
+      64U,
+      1024U,
+      128U,
+      16U,
+      8192U,
+      8192U,
+      8192U,
+      8192U,
+  };
+}
+
 [[nodiscard]] ExactDirectSparsePositiveFacetLocator make_locator(
     std::uint64_t fingerprint_mask =
         std::numeric_limits<std::uint64_t>::max()) {
@@ -67,6 +88,20 @@ void check(bool condition, const std::string& message) {
       8U,
       generous_budget(),
       {authority_id, fingerprint_mask});
+}
+
+[[nodiscard]] ExactDirectSparsePositiveFacetLocatorStructuralVerification
+verify_structure(
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparsePositiveFacetLocatorStateView& observed,
+    const ExactDirectSparsePositiveFacetLocatorStructuralVerificationBudget&
+        budget = generous_structural_verification_budget()) {
+  return verify_exact_direct_sparse_positive_facet_locator_structure(
+      locator.component_parents().size(),
+      locator.budget(),
+      locator.config(),
+      budget,
+      observed);
 }
 
 void check_initialization_budget_and_external_scope() {
@@ -446,6 +481,54 @@ void check_forced_fingerprint_collision_and_full_rank_keys() {
           found.counters.full_key_comparison_count >= 2U &&
           found.counters.equal_fingerprint_distinct_key_count >= 1U,
       "a zero test mask forces equal fingerprints but complete key comparison preserves both answers");
+}
+
+void check_public_fingerprint_is_bounded_and_canonical() {
+  static_assert(noexcept(fingerprint_exact_direct_sparse_facet_key(
+      ExactDirectSparseFacetKey{}, std::uint64_t{})));
+
+  auto locator = make_locator();
+  const ExactDirectSparseFacetKey canonical_key = key({1U, 4U, 9U});
+  const std::array<ExactDirectSparseFacetBinding, 1U> binding{{
+      {0U, canonical_key, 2U, witness(34U)},
+  }};
+  check(
+      locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              std::span<const ExactDirectSparseComponentUnion>{},
+              binding)
+          .certified_committed_batch(),
+      "the public-fingerprint fixture stores one canonical key");
+
+  const std::uint64_t complete_fingerprint =
+      fingerprint_exact_direct_sparse_facet_key(
+          canonical_key, std::numeric_limits<std::uint64_t>::max());
+  constexpr std::uint64_t narrow_mask = UINT64_C(0x0000ffff00ffff00);
+  bool stored_fingerprint_matches = false;
+  for (const ExactDirectSparsePositiveFacetSlot& slot : locator.slots()) {
+    if (slot.occupied) {
+      stored_fingerprint_matches =
+          slot.fingerprint == complete_fingerprint;
+      break;
+    }
+  }
+
+  ExactDirectSparseFacetKey malformed_key = canonical_key;
+  malformed_key.point_count = std::numeric_limits<std::size_t>::max();
+  const std::uint64_t malformed_fingerprint =
+      fingerprint_exact_direct_sparse_facet_key(
+          malformed_key, std::numeric_limits<std::uint64_t>::max());
+  check(
+      stored_fingerprint_matches &&
+          fingerprint_exact_direct_sparse_facet_key(
+              canonical_key, narrow_mask) ==
+              (complete_fingerprint & narrow_mask) &&
+          malformed_fingerprint ==
+              fingerprint_exact_direct_sparse_facet_key(
+                  malformed_key,
+                  std::numeric_limits<std::uint64_t>::max()),
+      "the public fingerprint preserves canonical table identity, applies the mask last and bounds reads for an invalid point count");
 }
 
 void check_union_indirection_without_key_rewrite() {
@@ -973,8 +1056,9 @@ void check_fresh_durable_structure_verifier_and_mutations() {
   const std::array<ExactDirectSparseFacetQuery, 1U> queries{{
       {0U, first, witness(82U)},
   }};
-  const std::array<ExactDirectSparseComponentUnion, 1U> unions{{
+  const std::array<ExactDirectSparseComponentUnion, 2U> unions{{
       {0U, 3U, 1U, witness(83U)},
+      {1U, 3U, 0U, witness(89U)},
   }};
   check(
       locator
@@ -985,14 +1069,18 @@ void check_fresh_durable_structure_verifier_and_mutations() {
           .certified_committed_batch(),
       "the structural-verifier fixture stores one witnessed union and query batch");
 
-  const auto verified =
-      verify_exact_direct_sparse_positive_facet_locator_structure(
-          8U, locator.budget(), locator.config(), locator.state_view());
+  const auto verified = verify_structure(locator, locator.state_view());
   check(
       verified.trusted_construction_parameters_certified &&
           verified.capacity_requirements_certified &&
+          verified.scratch_requirement_arithmetic_certified &&
+          verified.budget_preflight_certified &&
+          !verified.budget_exhausted &&
+          !verified.structure_contract_rejected &&
           verified.flat_table_and_key_arena_certified &&
           verified.every_fingerprint_recomputed_and_full_key_located &&
+          verified
+              .committed_slot_insertion_chronology_freshly_replayed &&
           verified.dense_handle_dsu_replay_certified &&
           verified.union_witness_structure_certified &&
           verified
@@ -1005,10 +1093,224 @@ void check_fresh_durable_structure_verifier_and_mutations() {
               .bounded_temporary_scratch_without_second_durable_output &&
           verified.fresh_durable_structure_verification_certified &&
           verified.result_certified &&
+          verified.decision ==
+              ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision::
+                  complete_certified_durable_structure_verification &&
           verified.table_slot_scan_count == locator.slots().size() &&
           verified.key_point_scan_count ==
-              locator.key_point_arena().size(),
+              locator.key_point_arena().size() &&
+          verified.union_record_scan_count == unions.size() &&
+          verified.batch_record_scan_count ==
+              locator.committed_batches().size() &&
+          verified.fingerprint_search_slot_visit_count > 0U &&
+          verified.insertion_chronology_slot_visit_count > 0U &&
+          verified.union_parent_hop_count > 0U,
       "fresh structural verification replays the DSU and audits every flat key while leaving caller authority unreplayed");
+
+  auto exact_verification_budget = generous_structural_verification_budget();
+  exact_verification_budget.maximum_table_slot_count =
+      verified.required_table_slot_count;
+  exact_verification_budget.maximum_key_point_count =
+      verified.required_key_point_count;
+  exact_verification_budget.maximum_component_parent_count =
+      verified.required_component_parent_count;
+  exact_verification_budget.maximum_union_record_count =
+      verified.required_union_record_count;
+  exact_verification_budget.maximum_batch_record_count =
+      verified.required_batch_record_count;
+  exact_verification_budget.maximum_binding_scratch_entry_count =
+      verified.required_binding_scratch_entry_count;
+  exact_verification_budget.maximum_key_point_scratch_entry_count =
+      verified.required_key_point_scratch_entry_count;
+  exact_verification_budget.maximum_table_slot_scratch_entry_count =
+      verified.required_table_slot_scratch_entry_count;
+  exact_verification_budget.maximum_component_parent_scratch_entry_count =
+      verified.required_component_parent_scratch_entry_count;
+  exact_verification_budget.maximum_temporary_scratch_byte_count =
+      verified.required_temporary_scratch_byte_count;
+  exact_verification_budget.maximum_fingerprint_search_slot_visit_count =
+      verified.fingerprint_search_slot_visit_count;
+  exact_verification_budget
+      .maximum_insertion_chronology_slot_visit_count =
+      verified.insertion_chronology_slot_visit_count;
+  exact_verification_budget.maximum_union_parent_hop_count =
+      verified.union_parent_hop_count;
+  const auto exactly_budgeted =
+      verify_structure(locator, locator.state_view(), exact_verification_budget);
+  check(
+      exactly_budgeted.result_certified &&
+          exactly_budgeted.requested_budget == exact_verification_budget &&
+          exactly_budgeted.required_temporary_scratch_byte_count ==
+              verified.required_temporary_scratch_byte_count &&
+          exactly_budgeted.fingerprint_search_slot_visit_count ==
+              verified.fingerprint_search_slot_visit_count &&
+          exactly_budgeted.insertion_chronology_slot_visit_count ==
+              verified.insertion_chronology_slot_visit_count &&
+          exactly_budgeted.union_parent_hop_count ==
+              verified.union_parent_hop_count,
+      "the exact structural size, scratch and three variable-work caps certify without slack");
+
+  auto fingerprint_less_one = exact_verification_budget;
+  --fingerprint_less_one.maximum_fingerprint_search_slot_visit_count;
+  const auto fingerprint_exhausted =
+      verify_structure(locator, locator.state_view(), fingerprint_less_one);
+  check(
+      fingerprint_exhausted.budget_preflight_certified &&
+          fingerprint_exhausted.budget_exhausted &&
+          fingerprint_exhausted.fingerprint_search_budget_exhausted &&
+          !fingerprint_exhausted.insertion_chronology_budget_exhausted &&
+          !fingerprint_exhausted.union_parent_hop_budget_exhausted &&
+          !fingerprint_exhausted.structure_contract_rejected &&
+          fingerprint_exhausted.fingerprint_search_slot_visit_count ==
+              fingerprint_less_one
+                  .maximum_fingerprint_search_slot_visit_count &&
+          fingerprint_exhausted.insertion_chronology_slot_visit_count == 0U &&
+          fingerprint_exhausted.union_parent_hop_count == 0U &&
+          fingerprint_exhausted.decision ==
+              ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision::
+                  no_verification_fingerprint_search_budget_exhausted &&
+          !fingerprint_exhausted.result_certified,
+      "one fewer cumulative fingerprint-search visit stops verification before chronology");
+
+  auto chronology_less_one = exact_verification_budget;
+  --chronology_less_one.maximum_insertion_chronology_slot_visit_count;
+  const auto chronology_exhausted =
+      verify_structure(locator, locator.state_view(), chronology_less_one);
+  check(
+      chronology_exhausted.budget_exhausted &&
+          !chronology_exhausted.fingerprint_search_budget_exhausted &&
+          chronology_exhausted.insertion_chronology_budget_exhausted &&
+          !chronology_exhausted.union_parent_hop_budget_exhausted &&
+          chronology_exhausted
+              .every_fingerprint_recomputed_and_full_key_located &&
+          chronology_exhausted.insertion_chronology_slot_visit_count ==
+              chronology_less_one
+                  .maximum_insertion_chronology_slot_visit_count &&
+          chronology_exhausted.union_parent_hop_count == 0U &&
+          chronology_exhausted.decision ==
+              ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision::
+                  no_verification_insertion_chronology_budget_exhausted &&
+          !chronology_exhausted.result_certified,
+      "one fewer cumulative chronology visit stops verification before DSU replay");
+
+  auto union_hop_less_one = exact_verification_budget;
+  --union_hop_less_one.maximum_union_parent_hop_count;
+  const auto union_hop_exhausted =
+      verify_structure(locator, locator.state_view(), union_hop_less_one);
+  check(
+      union_hop_exhausted.budget_exhausted &&
+          !union_hop_exhausted.fingerprint_search_budget_exhausted &&
+          !union_hop_exhausted.insertion_chronology_budget_exhausted &&
+          union_hop_exhausted.union_parent_hop_budget_exhausted &&
+          union_hop_exhausted
+              .committed_slot_insertion_chronology_freshly_replayed &&
+          union_hop_exhausted.union_parent_hop_count ==
+              union_hop_less_one.maximum_union_parent_hop_count &&
+          union_hop_exhausted.decision ==
+              ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision::
+                  no_verification_union_parent_hop_budget_exhausted &&
+          !union_hop_exhausted.result_certified,
+      "one fewer cumulative union-parent hop stops verification during DSU replay");
+
+  auto table_size_less_one = exact_verification_budget;
+  --table_size_less_one.maximum_table_slot_count;
+  const auto table_size_exhausted =
+      verify_structure(locator, locator.state_view(), table_size_less_one);
+  check(
+      table_size_exhausted.scratch_requirement_arithmetic_certified &&
+          !table_size_exhausted.budget_preflight_certified &&
+          table_size_exhausted.budget_exhausted &&
+          !table_size_exhausted.structure_contract_rejected &&
+          table_size_exhausted.table_slot_scan_count == 0U &&
+          table_size_exhausted.fingerprint_search_slot_visit_count == 0U &&
+          table_size_exhausted.decision ==
+              ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision::
+                  no_verification_budget_preflight_exhausted,
+      "an insufficient durable-size cap rejects before table scans or scratch allocation");
+
+  auto scratch_population_less_one = exact_verification_budget;
+  --scratch_population_less_one.maximum_binding_scratch_entry_count;
+  const auto scratch_population_exhausted = verify_structure(
+      locator, locator.state_view(), scratch_population_less_one);
+  check(
+      !scratch_population_exhausted.budget_preflight_certified &&
+          scratch_population_exhausted.budget_exhausted &&
+          scratch_population_exhausted.table_slot_scan_count == 0U &&
+          scratch_population_exhausted.key_point_scan_count == 0U &&
+          !scratch_population_exhausted
+               .bounded_temporary_scratch_without_second_durable_output &&
+          scratch_population_exhausted.decision ==
+              ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision::
+                  no_verification_budget_preflight_exhausted,
+      "an insufficient scratch-population cap rejects before every variable scan and allocation");
+
+  auto scratch_bytes_less_one = exact_verification_budget;
+  --scratch_bytes_less_one.maximum_temporary_scratch_byte_count;
+  const auto scratch_bytes_exhausted =
+      verify_structure(locator, locator.state_view(), scratch_bytes_less_one);
+  check(
+      !scratch_bytes_exhausted.budget_preflight_certified &&
+          scratch_bytes_exhausted.budget_exhausted &&
+          scratch_bytes_exhausted.required_temporary_scratch_byte_count ==
+              verified.required_temporary_scratch_byte_count &&
+          scratch_bytes_exhausted.table_slot_scan_count == 0U &&
+          scratch_bytes_exhausted.decision ==
+              ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision::
+                  no_verification_budget_preflight_exhausted,
+      "one fewer exact scratch payload byte rejects before allocation");
+
+  auto chronology_locator = make_locator(0U);
+  const ExactDirectSparseFacetKey chronology_first = key({20U, 21U, 22U});
+  const ExactDirectSparseFacetKey chronology_second = key({30U, 31U, 32U});
+  const std::array<ExactDirectSparseFacetBinding, 2U>
+      chronological_bindings{{
+          {0U, chronology_first, 5U, witness(87U)},
+          {1U, chronology_second, 6U, witness(88U)},
+      }};
+  check(
+      chronology_locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              std::span<const ExactDirectSparseComponentUnion>{},
+              chronological_bindings)
+          .certified_committed_batch(),
+      "the hostile chronology fixture stores an ordered forced-collision cluster");
+  std::vector<ExactDirectSparsePositiveFacetSlot> chronology_slots =
+      chronology_locator.slots();
+  check(
+      chronology_slots.size() >= 2U && chronology_slots[0U].occupied &&
+          chronology_slots[1U].occupied,
+      "the zero fingerprint mask places the hostile fixture in the first two physical slots");
+  if (chronology_slots.size() >= 2U) {
+    std::swap(chronology_slots[0U], chronology_slots[1U]);
+  }
+  auto chronology_view = chronology_locator.state_view();
+  chronology_view.slots =
+      std::span<const ExactDirectSparsePositiveFacetSlot>{chronology_slots};
+  const auto chronology_rejected =
+      verify_structure(chronology_locator, chronology_view);
+  check(
+      chronology_rejected.trusted_construction_parameters_certified &&
+          chronology_rejected.capacity_requirements_certified &&
+          chronology_rejected.flat_table_and_key_arena_certified &&
+          chronology_rejected
+              .every_fingerprint_recomputed_and_full_key_located &&
+          !chronology_rejected
+               .committed_slot_insertion_chronology_freshly_replayed &&
+          chronology_rejected.dense_handle_dsu_replay_certified &&
+          chronology_rejected.union_witness_structure_certified &&
+          chronology_rejected
+              .historical_batch_assertions_and_counters_well_formed &&
+          chronology_rejected.committed_history_digest_freshly_replayed &&
+          chronology_rejected.internal_fact_fields_match_contract &&
+          chronology_rejected.decision_and_scope_certified &&
+          !chronology_rejected.external_authority_replayed_by_locator &&
+          chronology_rejected
+              .bounded_temporary_scratch_without_second_durable_output &&
+          !chronology_rejected
+               .fresh_durable_structure_verification_certified &&
+          !chronology_rejected.result_certified,
+      "a digest-consistent forced-collision cluster with swapped physical insertion chronology is rejected by the new fact alone");
 
   auto corrupted_digest_view = locator.state_view();
   auto corrupted_digest_bytes =
@@ -1017,8 +1319,7 @@ void check_fresh_durable_structure_verifier_and_mutations() {
   corrupted_digest_view.committed_history_digest =
       CanonicalId{corrupted_digest_bytes};
   const auto digest_rejected =
-      verify_exact_direct_sparse_positive_facet_locator_structure(
-          8U, locator.budget(), locator.config(), corrupted_digest_view);
+      verify_structure(locator, corrupted_digest_view);
   check(
       digest_rejected
           .historical_batch_assertions_and_counters_well_formed &&
@@ -1040,8 +1341,7 @@ void check_fresh_durable_structure_verifier_and_mutations() {
       std::span<const ExactDirectSparsePositiveFacetSlot>{
           mutated_witness_slots};
   const auto witness_rejected =
-      verify_exact_direct_sparse_positive_facet_locator_structure(
-          8U, locator.budget(), locator.config(), mutated_witness_view);
+      verify_structure(locator, mutated_witness_view);
   check(
       witness_rejected
           .historical_batch_assertions_and_counters_well_formed &&
@@ -1061,9 +1361,7 @@ void check_fresh_durable_structure_verifier_and_mutations() {
   auto mutated_slot_view = locator.state_view();
   mutated_slot_view.slots =
       std::span<const ExactDirectSparsePositiveFacetSlot>{mutated_slots};
-  const auto slot_rejected =
-      verify_exact_direct_sparse_positive_facet_locator_structure(
-          8U, locator.budget(), locator.config(), mutated_slot_view);
+  const auto slot_rejected = verify_structure(locator, mutated_slot_view);
   check(
       !slot_rejected.every_fingerprint_recomputed_and_full_key_located &&
           !slot_rejected.fresh_durable_structure_verification_certified &&
@@ -1077,8 +1375,7 @@ void check_fresh_durable_structure_verifier_and_mutations() {
   mutated_parent_view.component_parents =
       std::span<const ExactDirectSparseComponentHandle>{mutated_parents};
   const auto parent_rejected =
-      verify_exact_direct_sparse_positive_facet_locator_structure(
-          8U, locator.budget(), locator.config(), mutated_parent_view);
+      verify_structure(locator, mutated_parent_view);
   check(
       !parent_rejected.dense_handle_dsu_replay_certified &&
           !parent_rejected.result_certified,
@@ -1092,27 +1389,62 @@ void check_fresh_durable_structure_verifier_and_mutations() {
   mutated_batch_view.committed_batches =
       std::span<const ExactDirectSparseCommittedBatchRecord>{mutated_batches};
   const auto batch_rejected =
-      verify_exact_direct_sparse_positive_facet_locator_structure(
-          8U, locator.budget(), locator.config(), mutated_batch_view);
+      verify_structure(locator, mutated_batch_view);
   check(
       !batch_rejected
            .historical_batch_assertions_and_counters_well_formed &&
           !batch_rejected.result_certified,
       "structural verification rejects an historical counter beyond its trusted per-batch cap");
 
+  std::vector<ExactDirectSparseCommittedBatchRecord> hostile_batches(
+      locator.budget().maximum_committed_batch_count,
+      locator.committed_batches().front());
+  for (std::size_t index = 0U; index < hostile_batches.size(); ++index) {
+    hostile_batches[index].committed_batch_index = index;
+    hostile_batches[index].input_shape_certified = false;
+  }
+  auto hostile_batch_view = locator.state_view();
+  hostile_batch_view.committed_batches =
+      std::span<const ExactDirectSparseCommittedBatchRecord>{hostile_batches};
+  const auto hostile_batch_rejected =
+      verify_structure(locator, hostile_batch_view);
+  check(
+      hostile_batch_rejected.structure_contract_rejected &&
+          !hostile_batch_rejected.budget_exhausted &&
+          hostile_batch_rejected.batch_record_scan_count == 1U &&
+          hostile_batch_rejected.decision ==
+              ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision::
+                  no_verification_durable_structure_rejected &&
+          !hostile_batch_rejected.result_certified,
+      "the first malformed batch record fails before any later record can rescan the same binding prefix");
+
   std::vector<ExactDirectSparsePositiveFacetSlot> oversized_slots(
       locator.slots().size() + 1U);
   auto oversized_view = locator.state_view();
   oversized_view.slots =
       std::span<const ExactDirectSparsePositiveFacetSlot>{oversized_slots};
-  const auto oversized_rejected =
-      verify_exact_direct_sparse_positive_facet_locator_structure(
-          8U, locator.budget(), locator.config(), oversized_view);
+  const auto oversized_rejected = verify_structure(locator, oversized_view);
   check(
       !oversized_rejected.capacity_requirements_certified &&
           oversized_rejected.table_slot_scan_count == 0U &&
           !oversized_rejected.result_certified,
       "untrusted span sizes fail before scans or scratch allocations derived from them");
+
+  auto oversized_binding_counter_view = locator.state_view();
+  oversized_binding_counter_view.counters.inserted_binding_count =
+      locator.budget().maximum_committed_binding_count + 1U;
+  const auto oversized_binding_counter_rejected =
+      verify_structure(locator, oversized_binding_counter_view);
+  check(
+      !oversized_binding_counter_rejected.capacity_requirements_certified &&
+          oversized_binding_counter_rejected.structure_contract_rejected &&
+          !oversized_binding_counter_rejected.budget_exhausted &&
+          oversized_binding_counter_rejected.table_slot_scan_count == 0U &&
+          oversized_binding_counter_rejected.decision ==
+              ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision::
+                  no_verification_capacity_requirements_rejected &&
+          !oversized_binding_counter_rejected.result_certified,
+      "an untrusted binding counter above the construction cap fails before sizing or allocating its scratch");
 
   auto empty_domain = make_locator();
   const std::array<ExactDirectSparseFacetQuery, 1U> empty_query{{
@@ -1137,11 +1469,7 @@ void check_fresh_durable_structure_verifier_and_mutations() {
   forged_hit_view.counters.positive_lookup_count = 1U;
   forged_hit_view.counters.unresolved_lookup_count = 0U;
   const auto forged_hit_rejected =
-      verify_exact_direct_sparse_positive_facet_locator_structure(
-          8U,
-          empty_domain.budget(),
-          empty_domain.config(),
-          forged_hit_view);
+      verify_structure(empty_domain, forged_hit_view);
   check(
       !forged_hit_rejected
            .historical_batch_assertions_and_counters_well_formed &&
@@ -1162,11 +1490,7 @@ void check_fresh_durable_structure_verifier_and_mutations() {
   forged_duplicate_view.counters.compatible_duplicate_binding_count = 1U;
   forged_duplicate_view.counters.full_key_comparison_count = 1U;
   const auto forged_duplicate_rejected =
-      verify_exact_direct_sparse_positive_facet_locator_structure(
-          8U,
-          empty_domain.budget(),
-          empty_domain.config(),
-          forged_duplicate_view);
+      verify_structure(empty_domain, forged_duplicate_view);
   check(
       !forged_duplicate_rejected
            .historical_batch_assertions_and_counters_well_formed &&
@@ -1206,11 +1530,7 @@ void check_fresh_durable_structure_verifier_and_mutations() {
           forged_comparison_batches};
   forged_comparison_view.counters.full_key_comparison_count = 0U;
   const auto forged_comparison_rejected =
-      verify_exact_direct_sparse_positive_facet_locator_structure(
-          8U,
-          comparison_lower_bound.budget(),
-          comparison_lower_bound.config(),
-          forged_comparison_view);
+      verify_structure(comparison_lower_bound, forged_comparison_view);
   check(
       !forged_comparison_rejected
            .historical_batch_assertions_and_counters_well_formed &&
@@ -1227,6 +1547,7 @@ int main() {
   check_snapshot_digest_golden_vectors();
   check_strict_snapshot_and_unresolved_miss();
   check_forced_fingerprint_collision_and_full_rank_keys();
+  check_public_fingerprint_is_bounded_and_canonical();
   check_union_indirection_without_key_rewrite();
   check_incompatible_duplicate_is_atomic_contradiction();
   check_explicit_union_makes_duplicate_compatible();

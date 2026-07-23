@@ -123,19 +123,22 @@ Ces résultats prouvent la correction **interne et relative** du socle. Ils ne p
 
 ## A.8 Vérification structurelle fraîche
 
-`verify_exact_direct_sparse_positive_facet_locator_structure` reçoit séparément les paramètres de construction fiables et une vue non propriétaire de l'état observé. Les `span` de `ExactDirectSparsePositiveFacetLocatorStateView` empruntent les stockages des slots, points de clés, parents de composantes, unions et lots committés; ils n'en prolongent pas la durée de vie. Une mutation ou réallocation de ces stockages peut invalider la vue. Pour une vue issue d'un locator vivant, l'appelant doit donc conserver ce locator en vie et interdire tout `apply_batch` depuis la création de la vue jusqu'au retour du vérificateur. Pour une image durable décodée, son propriétaire doit de même garantir la durée de vie et l'immuabilité de tous les buffers pendant la vérification. Le vérificateur n'acquiert lui-même aucun verrou.
+`verify_exact_direct_sparse_positive_facet_locator_structure` reçoit séparément les paramètres de construction fiables, un budget de vérification explicite et une vue non propriétaire de l'état observé. Les `span` de `ExactDirectSparsePositiveFacetLocatorStateView` empruntent les stockages des slots, points de clés, parents de composantes, unions et lots committés; ils n'en prolongent pas la durée de vie. Une mutation ou réallocation de ces stockages peut invalider la vue. Pour une vue issue d'un locator vivant, l'appelant doit donc conserver ce locator en vie et interdire tout `apply_batch` depuis la création de la vue jusqu'au retour du vérificateur. Pour une image durable décodée, son propriétaire doit de même garantir la durée de vie et l'immuabilité de tous les buffers pendant la vérification. Le vérificateur n'acquiert lui-même aucun verrou.
 
-Sous cette précondition, il rejette les tailles de spans dépassant les paramètres fiables avant tout scan ou scratch dépendant de l'image. Il vérifie ensuite :
+Sous cette précondition, il rejette d'abord les tailles de spans dépassant les paramètres fiables, calcule avec arithmétique vérifiée le payload exact de quatre familles de scratch, puis confronte toutes les populations et tous les scratchs à leurs caps avant tout scan ou allocation variable. Il vérifie ensuite :
 
 - la couverture sans trou ni recouvrement de l'arène plate de clés;
 - la forme canonique, l'empreinte recalculée et la retrouvabilité de chaque clé complète;
+- l'ordre physique d'insertion de la table, rejoué par indice de liaison committée jusqu'au premier slot libre historique;
 - les indices, handles et jetons non nuls des unions durables;
 - le DSU final par rejeu de ces unions;
 - les partitions et plafonds des compteurs agrégés par lot;
 - la chaîne SHA-256 séparée par domaine depuis l'état initial, puis chaque lot, union et nouvelle liaison dans son ordre durable;
 - les faits structurels, la décision d'initialisation et la portée relative.
 
-Il ne rejoue ni l'autorité externe, ni les anciens payloads de requêtes ou de doublons, qui ne sont pas conservés. Les booléens historiques sont donc seulement exigés et leurs agrégats rendus cohérents; ils ne deviennent pas des preuves fraîches de la transaction passée. En revanche, les deltas sémantiques durables sont engagés par le digest : schéma, budget, configuration et handles dans l'état initial, puis index, compteurs, faits, unions, clés complètes, handles et témoins des nouvelles liaisons pour chaque commit. Sous l'hypothèse standard d'absence de collision SHA-256 sur les transcriptions canoniques considérées, deux contenus différents de mêmes autorité et compteurs ne partagent pas le même stamp. Sans cette hypothèse, le rejeu déterministe reste vérifiable mais le digest n'est pas une preuve mathématique d'injectivité. La valeur SHA-256 tout-zéro est une valeur de digest valide et n'a aucun rôle de sentinelle. Le scratch temporaire est $O(L+KL+H)$, sans seconde sortie durable.
+Les recherches de fingerprint, le rejeu de la chronologie physique et les sauts de parents du DSU ont trois compteurs cumulatifs et trois caps distincts. Un cap atteint avant l'opération suivante retourne la décision d'épuisement correspondante, sans certifier un préfixe et sans classer l'image comme corrompue. Le résultat expose le budget demandé, les tailles et octets requis, les compteurs effectivement consommés et la décision terminale.
+
+Il ne rejoue ni l'autorité externe, ni les anciens payloads de requêtes ou de doublons, qui ne sont pas conservés. Les booléens historiques sont donc seulement exigés et leurs agrégats rendus cohérents; ils ne deviennent pas des preuves fraîches de la transaction passée. En revanche, les deltas sémantiques durables sont engagés par le digest : schéma, budget, configuration et handles dans l'état initial, puis index, compteurs, faits, unions, clés complètes, handles et témoins des nouvelles liaisons pour chaque commit. Sous l'hypothèse standard d'absence de collision SHA-256 sur les transcriptions canoniques considérées, deux contenus différents de mêmes autorité et compteurs ne partagent pas le même stamp. Sans cette hypothèse, le rejeu déterministe reste vérifiable mais le digest n'est pas une preuve mathématique d'injectivité. La valeur SHA-256 tout-zéro est une valeur de digest valide et n'a aucun rôle de sentinelle. Le scratch temporaire est $O(M+L+KL+H)$, dont un octet par slot pour rejouer la chronologie d'insertion, sans seconde sortie durable.
 
 ## A.9 Bornes réelles du noyau de référence
 
@@ -153,7 +156,7 @@ Le DSU actuel n'emploie ni rang ni compression de chemin, et le hash ouvert n'a 
 
 $$O\bigl(H+Q(KM+H)+U_bH+B(K(M+B)+H)\bigr).$$
 
-Le vérificateur structurel peut lui-même atteindre $O(KLM+UH)$, puisqu'il retrouve fraîchement chacune des $L$ clés et rejoue toutes les unions. Ces bornes ne qualifient pas le temps attendu du mélangeur; elles garantissent seulement que la correction ne dépend pas de sa qualité.
+Pour le vérificateur structurel, notons $F$ les visites cumulées lors de la retrouvabilité des fingerprints, $A$ les visites du rejeu chronologique et $J$ les sauts de parents du DSU. Son travail est $O(M+KL+H+U+T+F+A+J)$ et son scratch $O(M+L+KL+H)$; chacune de ces populations, les octets de scratch, $F$, $A$ et $J$ sont explicitement bornés. Sans ces caps, on aurait $F=O(LM)$, $A=O(LM)$ et $J=O(UH)$ au pire. Ces bornes ne qualifient pas le temps attendu du mélangeur; elles garantissent seulement que la correction ne dépend pas de sa qualité.
 
 Aucun terme ne dépend de $\binom{n}{k}$. Le noyau exclut en particulier :
 

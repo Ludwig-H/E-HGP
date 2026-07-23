@@ -50,6 +50,14 @@ struct ExactDirectSparseFacetKey {
       const ExactDirectSparseFacetKey&) = default;
 };
 
+// Deterministic table fingerprint.  Canonical keys retain the locator's
+// historical fingerprint exactly.  Invalid point_count values are tolerated:
+// at most the fixed key storage is read, but callers must still validate shape
+// before using the fingerprint as evidence about a facet.
+[[nodiscard]] std::uint64_t fingerprint_exact_direct_sparse_facet_key(
+    const ExactDirectSparseFacetKey& key,
+    std::uint64_t fingerprint_mask) noexcept;
+
 // The locator never establishes external geometric authority.  A non-zero
 // replay token names one record in the caller-owned authority identified at
 // locator construction.  The caller is responsible for retaining that
@@ -445,15 +453,79 @@ struct ExactDirectSparsePositiveFacetLocatorStateView {
       ExactDirectSparsePositiveFacetLocatorScope::unspecified};
 };
 
+// All durable population caps and scratch caps are checked before any
+// variable scan or allocation.  maximum_temporary_scratch_byte_count covers
+// the exact vector payload bytes requested by the verifier; allocator metadata
+// is neither retained nor reported.  The final three caps bound cumulative
+// data-dependent work and stop replay at the first unavailable unit of work.
+struct ExactDirectSparsePositiveFacetLocatorStructuralVerificationBudget {
+  std::size_t maximum_table_slot_count{};
+  std::size_t maximum_key_point_count{};
+  std::size_t maximum_component_parent_count{};
+  std::size_t maximum_union_record_count{};
+  std::size_t maximum_batch_record_count{};
+  std::size_t maximum_binding_scratch_entry_count{};
+  std::size_t maximum_key_point_scratch_entry_count{};
+  std::size_t maximum_table_slot_scratch_entry_count{};
+  std::size_t maximum_component_parent_scratch_entry_count{};
+  std::size_t maximum_temporary_scratch_byte_count{};
+  std::size_t maximum_fingerprint_search_slot_visit_count{};
+  std::size_t maximum_insertion_chronology_slot_visit_count{};
+  std::size_t maximum_union_parent_hop_count{};
+
+  friend bool operator==(
+      const ExactDirectSparsePositiveFacetLocatorStructuralVerificationBudget&,
+      const ExactDirectSparsePositiveFacetLocatorStructuralVerificationBudget&)
+      = default;
+};
+
+enum class
+    ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision
+    : std::uint8_t {
+  not_certified,
+  no_verification_trusted_contract_rejected,
+  no_verification_capacity_requirements_rejected,
+  no_verification_scratch_requirement_overflow,
+  no_verification_budget_preflight_exhausted,
+  no_verification_fingerprint_search_budget_exhausted,
+  no_verification_insertion_chronology_budget_exhausted,
+  no_verification_union_parent_hop_budget_exhausted,
+  no_verification_durable_structure_rejected,
+  complete_certified_durable_structure_verification,
+};
+
 struct ExactDirectSparsePositiveFacetLocatorStructuralVerification {
+  ExactDirectSparsePositiveFacetLocatorStructuralVerificationBudget
+      requested_budget{};
+  std::size_t required_table_slot_count{};
+  std::size_t required_key_point_count{};
+  std::size_t required_component_parent_count{};
+  std::size_t required_union_record_count{};
+  std::size_t required_batch_record_count{};
+  std::size_t required_binding_scratch_entry_count{};
+  std::size_t required_key_point_scratch_entry_count{};
+  std::size_t required_table_slot_scratch_entry_count{};
+  std::size_t required_component_parent_scratch_entry_count{};
+  std::size_t required_temporary_scratch_byte_count{};
   std::size_t table_slot_scan_count{};
   std::size_t key_point_scan_count{};
   std::size_t union_record_scan_count{};
   std::size_t batch_record_scan_count{};
+  std::size_t fingerprint_search_slot_visit_count{};
+  std::size_t insertion_chronology_slot_visit_count{};
+  std::size_t union_parent_hop_count{};
   bool trusted_construction_parameters_certified{false};
   bool capacity_requirements_certified{false};
+  bool scratch_requirement_arithmetic_certified{false};
+  bool budget_preflight_certified{false};
+  bool fingerprint_search_budget_exhausted{false};
+  bool insertion_chronology_budget_exhausted{false};
+  bool union_parent_hop_budget_exhausted{false};
+  bool budget_exhausted{false};
+  bool structure_contract_rejected{false};
   bool flat_table_and_key_arena_certified{false};
   bool every_fingerprint_recomputed_and_full_key_located{false};
+  bool committed_slot_insertion_chronology_freshly_replayed{false};
   bool dense_handle_dsu_replay_certified{false};
   bool union_witness_structure_certified{false};
   bool historical_batch_assertions_and_counters_well_formed{false};
@@ -464,6 +536,10 @@ struct ExactDirectSparsePositiveFacetLocatorStructuralVerification {
   bool bounded_temporary_scratch_without_second_durable_output{false};
   bool fresh_durable_structure_verification_certified{false};
   bool result_certified{false};
+  ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision
+      decision{
+          ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision::
+              not_certified};
 
   friend bool operator==(
       const ExactDirectSparsePositiveFacetLocatorStructuralVerification&,
@@ -624,9 +700,11 @@ verify_exact_direct_sparse_positive_facet_probe(
 // Replays only the locator's internal durable contract.  Witness identifiers
 // and tokens are checked structurally, but the caller-owned external authority
 // is deliberately not replayed by this kernel.
-// Uses O(committed bindings + committed key points + dense handles) temporary
-// scratch.  It freshly verifies the durable structure, not historical query
-// payloads, and therefore reports stored batch assertions only as well formed.
+// Uses O(table slots + committed bindings + committed key points + dense
+// handles) temporary scratch, including one byte per table slot for insertion
+// chronology.  It freshly verifies the durable structure, not historical
+// query payloads, and therefore reports stored batch assertions only as well
+// formed.
 // observed contains non-owning spans; their backing locator must remain
 // immutable for the whole call, with external synchronization against writers.
 [[nodiscard]] ExactDirectSparsePositiveFacetLocatorStructuralVerification
@@ -634,6 +712,8 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
     std::size_t trusted_component_handle_count,
     const ExactDirectSparsePositiveFacetLocatorBudget& trusted_budget,
     const ExactDirectSparsePositiveFacetLocatorConfig& trusted_config,
+    const ExactDirectSparsePositiveFacetLocatorStructuralVerificationBudget&
+        verification_budget,
     const ExactDirectSparsePositiveFacetLocatorStateView& observed);
 
 }  // namespace morsehgp3d::hierarchy

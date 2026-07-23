@@ -446,6 +446,26 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_sparse_positive_facet_prefix_sweep_tests
+  test_hierarchy_direct_sparse_positive_facet_prefix_sweep.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_sparse_positive_facet_prefix_sweep_tests
+  PRIVATE morsehgp3d::direct_sparse_positive_facet_prefix_sweep
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_positive_facet_prefix_sweep_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_positive_facet_prefix_sweep_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_sparse_facet_descent_step_tests
   test_hierarchy_direct_sparse_facet_descent_step.cpp
 )
@@ -1091,6 +1111,7 @@ set(
   morsehgp3d_hierarchy_direct_saddle_arm_seed_journal_tests
   morsehgp3d_hierarchy_direct_closed_saddle_incidence_journal_tests
   morsehgp3d_hierarchy_direct_sparse_positive_facet_locator_tests
+  morsehgp3d_hierarchy_direct_sparse_positive_facet_prefix_sweep_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_step_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_closure_tests
   morsehgp3d_hierarchy_direct_sparse_first_incidence_tests
@@ -1883,6 +1904,10 @@ add_test(
   COMMAND morsehgp3d_hierarchy_direct_sparse_positive_facet_locator_tests
 )
 add_test(
+  NAME morsehgp3d.hierarchy_direct_sparse_positive_facet_prefix_sweep
+  COMMAND morsehgp3d_hierarchy_direct_sparse_positive_facet_prefix_sweep_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_facet_descent_step
   COMMAND morsehgp3d_hierarchy_direct_sparse_facet_descent_step_tests
 )
@@ -2273,6 +2298,30 @@ add_test(
 )
 unset(
   _morsehgp3d_phase10_direct_sparse_positive_facet_locator_configuration_command
+)
+set(
+  _morsehgp3d_phase10_direct_sparse_positive_facet_prefix_sweep_configuration_command
+  "${Python3_EXECUTABLE}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../configuration/check_phase10_direct_sparse_positive_facet_prefix_sweep.py"
+  "${PROJECT_SOURCE_DIR}"
+)
+if(CMAKE_NM AND NOT MSVC)
+  list(
+    APPEND
+    _morsehgp3d_phase10_direct_sparse_positive_facet_prefix_sweep_configuration_command
+    --binary
+    "$<TARGET_FILE:morsehgp3d_direct_sparse_positive_facet_prefix_sweep>"
+    --nm
+    "${CMAKE_NM}"
+  )
+endif()
+add_test(
+  NAME morsehgp3d.phase10_direct_sparse_positive_facet_prefix_sweep_configuration
+  COMMAND
+    ${_morsehgp3d_phase10_direct_sparse_positive_facet_prefix_sweep_configuration_command}
+)
+unset(
+  _morsehgp3d_phase10_direct_sparse_positive_facet_prefix_sweep_configuration_command
 )
 set(
   _morsehgp3d_phase10_direct_sparse_facet_descent_step_configuration_command

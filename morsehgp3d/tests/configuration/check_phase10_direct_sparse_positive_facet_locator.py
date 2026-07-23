@@ -41,20 +41,42 @@ def parenthesized_block(text: str, marker: str) -> str:
     raise ContractError(f"unterminated CMake block after {marker!r}")
 
 
+def strip_cpp_comments_and_literals(text: str) -> str:
+    pattern = re.compile(
+        r"//[^\n]*|/\*.*?\*/|R\"([^ ()\\\t\r\n]*)\(.*?\)\1\"|"
+        r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'',
+        re.S,
+    )
+    return pattern.sub(" ", text)
+
+
+def braced_block(text: str, marker: str, context: str) -> str:
+    require(text.count(marker) == 1, f"expected one {context} marker")
+    start = text.find(marker)
+    opening = text.find("{", start + len(marker))
+    require(opening >= 0, f"the {context} has no opening brace")
+    depth = 0
+    for index in range(opening, len(text)):
+        if text[index] == "{":
+            depth += 1
+        elif text[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start : index + 1]
+    raise ContractError(f"unterminated {context}")
+
+
 def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
     cmake = read_text(project / "CMakeLists.txt")
     header = read_text(
-        project
-        / "include/morsehgp3d/hierarchy/"
+        project / "include/morsehgp3d/hierarchy/"
         "direct_sparse_positive_facet_locator.hpp"
     )
     source = read_text(
-        project
-        / "src/cpu/hierarchy/direct_sparse_positive_facet_locator.cpp"
+        project / "src/cpu/hierarchy/direct_sparse_positive_facet_locator.cpp"
     )
     unit_test = read_text(
-        project
-        / "tests/unit/test_hierarchy_direct_sparse_positive_facet_locator.cpp"
+        project / "tests/unit/test_hierarchy_direct_sparse_positive_facet_locator.cpp"
     )
 
     target = parenthesized_block(
@@ -62,16 +84,12 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "add_library(\n  morsehgp3d_direct_sparse_positive_facet_locator",
     )
     require(
-        target.count(
-            "src/cpu/hierarchy/direct_sparse_positive_facet_locator.cpp"
-        )
-        == 1,
+        target.count("src/cpu/hierarchy/direct_sparse_positive_facet_locator.cpp") == 1,
         "the target must contain exactly its isolated source",
     )
     links = parenthesized_block(
         cmake,
-        "target_link_libraries(\n  "
-        "morsehgp3d_direct_sparse_positive_facet_locator",
+        "target_link_libraries(\n  " "morsehgp3d_direct_sparse_positive_facet_locator",
     )
     require(
         "PUBLIC morsehgp3d::contract" in links,
@@ -103,15 +121,61 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "maximum_committed_batch_count",
         "maximum_batch_scratch_slot_count",
         "fingerprint_mask",
+        "fingerprint_exact_direct_sparse_facet_key(",
         "committed_binding_index",
         "ExactDirectSparseCommittedBatchRecord",
         "ExactDirectSparsePositiveFacetLocatorStateView",
+        "ExactDirectSparsePositiveFacetLocatorStructuralVerificationBudget",
+        "maximum_table_slot_count",
+        "maximum_key_point_count",
+        "maximum_component_parent_count",
+        "maximum_union_record_count",
+        "maximum_batch_record_count",
+        "maximum_binding_scratch_entry_count",
+        "maximum_key_point_scratch_entry_count",
+        "maximum_table_slot_scratch_entry_count",
+        "maximum_component_parent_scratch_entry_count",
+        "maximum_temporary_scratch_byte_count",
+        "maximum_fingerprint_search_slot_visit_count",
+        "maximum_insertion_chronology_slot_visit_count",
+        "maximum_union_parent_hop_count",
+        "required_temporary_scratch_byte_count",
+        "fingerprint_search_slot_visit_count",
+        "insertion_chronology_slot_visit_count",
+        "union_parent_hop_count",
+        "scratch_requirement_arithmetic_certified",
+        "budget_preflight_certified",
+        "fingerprint_search_budget_exhausted",
+        "insertion_chronology_budget_exhausted",
+        "union_parent_hop_budget_exhausted",
+        "budget_exhausted",
+        "structure_contract_rejected",
+        "ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision",
+        "no_verification_budget_preflight_exhausted",
+        "no_verification_fingerprint_search_budget_exhausted",
+        "no_verification_insertion_chronology_budget_exhausted",
+        "no_verification_union_parent_hop_budget_exhausted",
+        "complete_certified_durable_structure_verification",
         "committed_history_digest",
         "committed_history_digest_freshly_replayed",
+        "committed_slot_insertion_chronology_freshly_replayed",
         "external_authority_replayed_by_locator",
         "verify_exact_direct_sparse_positive_facet_locator_structure(",
     ):
         require(required in header, f"the public contract is missing {required!r}")
+    require(
+        re.search(
+            r"verify_exact_direct_sparse_positive_facet_locator_structure\s*\("
+            r"[^;]*trusted_config\s*,\s*const\s+"
+            r"ExactDirectSparsePositiveFacetLocatorStructuralVerificationBudget&"
+            r"[^;]*verification_budget\s*,\s*const\s+"
+            r"ExactDirectSparsePositiveFacetLocatorStateView&\s+observed\s*\)",
+            header,
+            re.S,
+        )
+        is not None,
+        "the explicit structural budget must precede the observed state view",
+    )
     for forbidden_shape in (
         "std::vector<std::vector",
         "std::map<",
@@ -128,8 +192,24 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "complete_key_matches_arena(",
         "complete_keys_match(",
         "slot.fingerprint == fingerprint",
-        "key_fingerprint(query.key, config_.fingerprint_mask)",
-        "key_fingerprint(binding.key, config_.fingerprint_mask)",
+        "fingerprint_exact_direct_sparse_facet_key(",
+        "structural_verification_scratch_byte_count(",
+        "checked_multiply(entry_count, entry_size)",
+        "checked_add(total, *bytes)",
+        "search_committed_slots(",
+        "maximum_slot_visit_count",
+        "result.slot_visit_budget_exhausted = true",
+        "std::vector<std::uint8_t> replayed_slot_occupancy",
+        "verification.budget_preflight_certified =",
+        "verification.required_temporary_scratch_byte_count",
+        "observed.counters.inserted_binding_count <=",
+        "trusted_budget.maximum_committed_binding_count",
+        "verification.fingerprint_search_slot_visit_count",
+        "verification.insertion_chronology_slot_visit_count",
+        "verification.union_parent_hop_count",
+        "find_component_for_structure(",
+        "unite_components_for_structure(",
+        "verification.committed_slot_insertion_chronology_freshly_replayed",
         "std::vector<ExactDirectSparseComponentHandle> candidate_parents",
         "result.lookups_use_strict_pre_batch_snapshot = true",
         "result.current_batch_bindings_hidden_from_lookups = true",
@@ -143,10 +223,175 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "committed_history_digest_ = next_snapshot_digest",
         "replayed_history_digest == observed.committed_history_digest",
         "verification.external_authority_replayed_by_locator = false",
-        "if (!verification.trusted_construction_parameters_certified ||",
-        "verification.table_slot_scan_count = observed.slots.size()",
+        "if (!verification.budget_preflight_certified)",
+        "no_verification_budget_preflight_exhausted",
+        "no_verification_fingerprint_search_budget_exhausted",
+        "no_verification_insertion_chronology_budget_exhausted",
+        "no_verification_union_parent_hop_budget_exhausted",
+        "reject_malformed_durable_history",
+        "verification.fingerprint_search_slot_visit_count <=",
+        "verification.insertion_chronology_slot_visit_count <=",
+        "verification.union_parent_hop_count <=",
     ):
         require(required in source, f"the implementation is missing {required!r}")
+
+    code = strip_cpp_comments_and_literals(source)
+    primary_position = code.find(
+        "verify_exact_direct_sparse_positive_facet_locator_structure("
+    )
+    verification_budget_position = code.find("verification_budget", primary_position)
+    observed_position = code.find(
+        "const ExactDirectSparsePositiveFacetLocatorStateView& observed",
+        primary_position,
+    )
+    scratch_requirement_position = code.find(
+        "const auto required_scratch_bytes", observed_position
+    )
+    preflight_assignment_position = code.find(
+        "verification.budget_preflight_certified =", observed_position
+    )
+    preflight_rejection_position = code.find(
+        "if (!verification.budget_preflight_certified)",
+        preflight_assignment_position,
+    )
+    preflight_return_position = code.find(
+        "return verification;", preflight_rejection_position
+    )
+    first_scratch_allocation_position = code.find("std::vector<", observed_position)
+    first_variable_scan_position = code.find("for (", observed_position)
+    require(
+        0
+        <= primary_position
+        < verification_budget_position
+        < observed_position
+        < scratch_requirement_position
+        < preflight_assignment_position
+        < preflight_rejection_position
+        < preflight_return_position
+        < min(first_scratch_allocation_position, first_variable_scan_position),
+        "the explicit budget and exact scratch preflight must precede every "
+        "scratch allocation and variable scan",
+    )
+
+    batch_replay_position = code.find(
+        "for (std::size_t index = 0U;",
+        code.find("contract::CanonicalId replayed_history_digest", observed_position),
+    )
+    scalar_batch_guard_position = code.find(
+        "if (record.committed_batch_index != index ||", batch_replay_position
+    )
+    scalar_batch_rejection_position = code.find(
+        "reject_malformed_durable_history();", scalar_batch_guard_position
+    )
+    scalar_batch_return_position = code.find(
+        "return verification;", scalar_batch_rejection_position
+    )
+    first_batch_binding_scan_position = code.find(
+        "for (std::size_t binding_index = replayed_binding_prefix;",
+        scalar_batch_return_position,
+    )
+    updated_counters_position = code.find(
+        "const auto next = updated_counters(", first_batch_binding_scan_position
+    )
+    history_digest_position = code.find(
+        "LocatorSnapshotChainDigestBuilder snapshot_digest_builder(",
+        updated_counters_position,
+    )
+    batch_replay_end_position = code.find(
+        "verification.historical_batch_assertions_and_counters_well_formed =",
+        history_digest_position,
+    )
+    require(
+        0
+        <= batch_replay_position
+        < scalar_batch_guard_position
+        < scalar_batch_rejection_position
+        < scalar_batch_return_position
+        < first_batch_binding_scan_position
+        < updated_counters_position
+        < history_digest_position
+        < batch_replay_end_position,
+        "each durable batch must validate scalar fields and prefix bounds "
+        "fail-fast before its first binding scan, then validate aggregate "
+        "counter arithmetic before digest replay",
+    )
+    require(
+        "continue;" not in code[batch_replay_position:batch_replay_end_position],
+        "malformed durable history must return at its first contradiction "
+        "instead of rescanning an unchanged prefix in later records",
+    )
+
+    exhaustion_contracts = (
+        (
+            "if (!verification.budget_preflight_certified)",
+            (
+                "verification.budget_exhausted = true",
+                "no_verification_budget_preflight_exhausted",
+                "return verification",
+            ),
+            "structural preflight exhaustion",
+        ),
+        (
+            "if (located.slot_visit_budget_exhausted)",
+            (
+                "verification.fingerprint_search_budget_exhausted = true",
+                "verification.budget_exhausted = true",
+                "no_verification_fingerprint_search_budget_exhausted",
+                "return verification",
+            ),
+            "cumulative fingerprint-search exhaustion",
+        ),
+        (
+            "if (verification.insertion_chronology_slot_visit_count >=",
+            (
+                "verification.insertion_chronology_budget_exhausted = true",
+                "verification.budget_exhausted = true",
+                "no_verification_insertion_chronology_budget_exhausted",
+                "return verification",
+            ),
+            "cumulative insertion-chronology exhaustion",
+        ),
+        (
+            "if (replay_status == StructuralUnionReplayStatus::budget_exhausted)",
+            (
+                "verification.union_parent_hop_budget_exhausted = true",
+                "verification.budget_exhausted = true",
+                "no_verification_union_parent_hop_budget_exhausted",
+                "return verification",
+            ),
+            "cumulative union-parent exhaustion",
+        ),
+    )
+    for marker, required_contract, context in exhaustion_contracts:
+        block = braced_block(code, marker, context)
+        for required in required_contract:
+            require(required in block, f"the {context} is missing {required!r}")
+
+    search_guard_position = code.find(
+        "if (result.slot_visit_count >= maximum_slot_visit_count)"
+    )
+    search_access_position = code.find(
+        "const ExactDirectSparsePositiveFacetSlot& slot = slots[slot_index]",
+        search_guard_position,
+    )
+    chronology_guard_position = code.find(
+        "if (verification.insertion_chronology_slot_visit_count >="
+    )
+    chronology_access_position = code.find(
+        "replayed_slot_occupancy[replayed_slot_index]",
+        chronology_guard_position,
+    )
+    union_guard_position = code.find(
+        "if (parent_hop_count >= maximum_parent_hop_count)"
+    )
+    union_hop_position = code.find("handle = parents[handle]", union_guard_position)
+    require(
+        0 <= search_guard_position < search_access_position
+        and 0 <= chronology_guard_position < chronology_access_position
+        and 0 <= union_guard_position < union_hop_position,
+        "each data-dependent operation must consume budget before its slot or "
+        "parent access",
+    )
 
     query_position = source.find(
         "for (const ExactDirectSparseFacetQuery& query : queries)"
@@ -201,6 +446,25 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "corrupted_digest_view.committed_history_digest",
         "mutated_witness_view.slots",
         "committed_history_digest_freshly_replayed",
+        "check_public_fingerprint_is_bounded_and_canonical",
+        "committed_slot_insertion_chronology_freshly_replayed",
+        "chronology_rejected",
+        "generous_structural_verification_budget",
+        "exact_verification_budget",
+        "exactly_budgeted",
+        "maximum_fingerprint_search_slot_visit_count",
+        "fingerprint_less_one",
+        "no_verification_fingerprint_search_budget_exhausted",
+        "maximum_insertion_chronology_slot_visit_count",
+        "chronology_less_one",
+        "no_verification_insertion_chronology_budget_exhausted",
+        "maximum_union_parent_hop_count",
+        "union_hop_less_one",
+        "no_verification_union_parent_hop_budget_exhausted",
+        "table_size_less_one",
+        "scratch_population_less_one",
+        "scratch_bytes_less_one",
+        "table_slot_scan_count == 0U",
     ):
         require(
             required_test_contract in unit_test,
@@ -226,8 +490,7 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         )
     require(
         re.search(
-            r"committed_history_digest_\s*!=\s*"
-            r"contract::CanonicalId\s*\{\s*\}",
+            r"committed_history_digest_\s*!=\s*" r"contract::CanonicalId\s*\{\s*\}",
             source,
         )
         is None,

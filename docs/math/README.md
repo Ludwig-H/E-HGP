@@ -17,6 +17,8 @@ Le [différentiel borné des gateways directs](DIFFERENTIEL_GATEWAYS_DIRECTS_PHA
 
 La [localisation sparse des candidats de gateways](LOCALISATION_CANDIDATS_GATEWAYS_PHASE10.md) fixe le contrat produit 10.9-RCPU : suppressions transitoires factorisées, déduplication par clé complète, hits relatifs ou misses latents dans un locator gelé, sans prétention d'alignement avec les états pré-lot.
 
+La [sonde par préfixes du locator positif](SONDE_PREFIXE_LOCATOR_POSITIF_PHASE10.md) fixe le contrat 10.10-RCPU : rejeu monotone de l'horloge interne des commits 10.5a, recherche historique exacte dans la table finale et racines DSU historiques, sans confondre cette horloge avec les lots sources 10.7.
+
 ## Résumé de la construction
 
 Posons $K_{\mathrm{eff}}=\min(K_{\max},n)$, $s_{\max}=\min(K_{\mathrm{eff}}+1,n)$ et, si $s_{\max}\geq2$, $m_{\star}=s_{\max}-2$. Alors :

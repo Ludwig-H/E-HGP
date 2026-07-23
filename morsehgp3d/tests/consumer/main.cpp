@@ -5,6 +5,7 @@
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
 #include "morsehgp3d/exact/support.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
 
@@ -277,6 +278,28 @@ int main() {
       accelerated_ball.closed_rank() != unit_ball.closed_rank() ||
       accelerated_ball.shell_ids().size() != 2U) {
     std::cerr << "installed spatial reference oracle changed semantics\n";
+    return 1;
+  }
+
+  const morsehgp3d::hierarchy::ExactDirectSparsePositiveFacetLocatorBudget
+      locator_budget{0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 1U, 1U};
+  const auto locator = morsehgp3d::hierarchy::
+      build_exact_direct_sparse_positive_facet_locator(
+          0U, locator_budget, {UINT64_C(0x51a7), UINT64_C(0xffff)});
+  const morsehgp3d::hierarchy::
+      ExactDirectSparsePositiveFacetPrefixSweepBudget sweep_budget{
+          0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, {0U, 0U}};
+  const auto empty_prefix_sweep = morsehgp3d::hierarchy::
+      build_exact_direct_sparse_positive_facet_prefix_sweep(
+          std::span<const morsehgp3d::hierarchy::
+              ExactDirectSparsePositiveFacetPrefixQuery>{},
+          {UINT64_C(0x51a7), UINT64_C(0x1001)},
+          locator,
+          sweep_budget);
+  if (!empty_prefix_sweep.certified_partial_refinement() ||
+      empty_prefix_sweep.counters.locator_snapshot_check_count != 2U ||
+      !empty_prefix_sweep.resolutions.empty()) {
+    std::cerr << "installed positive-facet prefix sweep changed semantics\n";
     return 1;
   }
   return 0;

@@ -601,6 +601,46 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_sparse_positive_facet_prefix_sweep
+  STATIC
+    src/cpu/hierarchy/direct_sparse_positive_facet_prefix_sweep.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_positive_facet_prefix_sweep
+  ALIAS morsehgp3d_direct_sparse_positive_facet_prefix_sweep
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_positive_facet_prefix_sweep
+  PROPERTIES
+    EXPORT_NAME direct_sparse_positive_facet_prefix_sweep
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_positive_facet_prefix_sweep PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_positive_facet_prefix_sweep
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_positive_facet_prefix_sweep
+  PUBLIC morsehgp3d::direct_sparse_positive_facet_locator
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_positive_facet_prefix_sweep PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_positive_facet_prefix_sweep
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_sparse_facet_descent_step
   STATIC
     src/cpu/hierarchy/direct_sparse_facet_descent_step.cpp
@@ -1554,6 +1594,7 @@ install(
     morsehgp3d_direct_saddle_arm_seed_journal
     morsehgp3d_direct_closed_saddle_incidence_journal
     morsehgp3d_direct_sparse_positive_facet_locator
+    morsehgp3d_direct_sparse_positive_facet_prefix_sweep
     morsehgp3d_direct_sparse_facet_descent_step
     morsehgp3d_direct_sparse_facet_descent_closure
     morsehgp3d_direct_sparse_first_incidence
