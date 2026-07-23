@@ -31,6 +31,29 @@ inline constexpr std::string_view
         "facet_key_"
         "pre_batch_state_sequential_atomic_commit_v1";
 
+inline constexpr std::uint32_t
+    direct_sparse_positive_facet_locator_prefix_stamp_sweep_schema_version =
+        1U;
+inline constexpr std::string_view
+    direct_sparse_positive_facet_locator_prefix_stamp_sweep_backend =
+        "reference_cpu";
+inline constexpr std::string_view
+    direct_sparse_positive_facet_locator_prefix_stamp_sweep_profile =
+        "hgp_reduced";
+inline constexpr std::string_view
+    direct_sparse_positive_facet_locator_prefix_stamp_sweep_mode =
+        "certified";
+inline constexpr std::string_view
+    direct_sparse_positive_facet_locator_prefix_stamp_sweep_refinement_status =
+        "partial_refinement";
+inline constexpr std::string_view
+    direct_sparse_positive_facet_locator_prefix_stamp_sweep_public_status =
+        "not_claimed";
+inline constexpr std::string_view
+    direct_sparse_positive_facet_locator_prefix_stamp_sweep_proof_basis =
+        "shared_canonical_digest_transition_two_pass_monotone_committed_"
+        "batch_prefix_stamp_sweep_v1";
+
 inline constexpr std::size_t
     direct_sparse_positive_facet_maximum_point_count = 10U;
 
@@ -226,6 +249,137 @@ struct ExactDirectSparsePositiveFacetLocatorSnapshotStamp {
   friend bool operator==(
       const ExactDirectSparsePositiveFacetLocatorSnapshotStamp&,
       const ExactDirectSparsePositiveFacetLocatorSnapshotStamp&) = default;
+};
+
+// Prefix requests are supplied as nondecreasing committed-batch counts.  The
+// eight caps cover every variable input, scan, replay and the single scratch
+// vector.  maximum_batch_record_scan_count must cover the preflight and the
+// digest replay, hence exactly twice the greatest requested prefix.
+struct ExactDirectSparsePositiveFacetLocatorPrefixStampSweepBudget {
+  std::size_t maximum_prefix_request_count{};
+  std::size_t maximum_batch_record_scan_count{};
+  std::size_t maximum_table_slot_scan_count{};
+  std::size_t maximum_binding_slot_index_scratch_count{};
+  std::size_t maximum_union_record_replay_count{};
+  std::size_t maximum_binding_record_replay_count{};
+  std::size_t maximum_key_point_replay_count{};
+  std::size_t maximum_temporary_scratch_byte_count{};
+
+  friend bool operator==(
+      const ExactDirectSparsePositiveFacetLocatorPrefixStampSweepBudget&,
+      const ExactDirectSparsePositiveFacetLocatorPrefixStampSweepBudget&) =
+      default;
+};
+
+struct ExactDirectSparsePositiveFacetLocatorPrefixStampSweepCounters {
+  std::size_t prefix_request_scan_count{};
+  std::size_t batch_record_scan_count{};
+  std::size_t table_slot_scan_count{};
+  std::size_t union_record_replay_count{};
+  std::size_t binding_record_replay_count{};
+  std::size_t key_point_replay_count{};
+  std::size_t emitted_stamp_count{};
+  std::size_t locator_snapshot_check_count{};
+
+  friend bool operator==(
+      const ExactDirectSparsePositiveFacetLocatorPrefixStampSweepCounters&,
+      const ExactDirectSparsePositiveFacetLocatorPrefixStampSweepCounters&) =
+      default;
+};
+
+enum class ExactDirectSparsePositiveFacetLocatorPrefixStampSweepDecision
+    : std::uint8_t {
+  not_certified,
+  no_prefix_stamp_locator_not_certified,
+  no_prefix_stamp_capacity_overflow,
+  no_prefix_stamp_budget_exhausted,
+  no_prefix_stamp_input_shape_rejected,
+  no_prefix_stamp_locator_history_rejected,
+  complete_certified_locator_prefix_stamps,
+};
+
+enum class ExactDirectSparsePositiveFacetLocatorPrefixStampSweepScope
+    : std::uint8_t {
+  unspecified,
+  locator_internal_committed_batch_prefix_stamps_relative_to_frozen_history_only,
+};
+
+struct ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult {
+  static constexpr std::string_view backend =
+      direct_sparse_positive_facet_locator_prefix_stamp_sweep_backend;
+  static constexpr std::string_view profile =
+      direct_sparse_positive_facet_locator_prefix_stamp_sweep_profile;
+  static constexpr std::string_view mode =
+      direct_sparse_positive_facet_locator_prefix_stamp_sweep_mode;
+  static constexpr std::string_view refinement_status =
+      direct_sparse_positive_facet_locator_prefix_stamp_sweep_refinement_status;
+  static constexpr std::string_view public_status =
+      direct_sparse_positive_facet_locator_prefix_stamp_sweep_public_status;
+  static constexpr std::string_view proof_basis =
+      direct_sparse_positive_facet_locator_prefix_stamp_sweep_proof_basis;
+
+  std::uint32_t schema_version{
+      direct_sparse_positive_facet_locator_prefix_stamp_sweep_schema_version};
+  ExactDirectSparsePositiveFacetLocatorPrefixStampSweepBudget requested_budget{};
+  ExactDirectSparsePositiveFacetLocatorSnapshotStamp locator_snapshot_stamp{};
+  std::size_t prefix_request_count{};
+  std::size_t required_committed_batch_prefix_count{};
+  std::size_t required_batch_record_scan_count{};
+  std::size_t required_table_slot_scan_count{};
+  std::size_t required_active_binding_prefix_count{};
+  std::size_t required_union_record_replay_count{};
+  std::size_t required_key_point_replay_count{};
+  std::size_t required_temporary_scratch_byte_count{};
+  std::vector<ExactDirectSparsePositiveFacetLocatorSnapshotStamp> prefix_stamps;
+  ExactDirectSparsePositiveFacetLocatorPrefixStampSweepCounters counters{};
+
+  bool locator_certified_at_entry{false};
+  bool prefix_requests_nondecreasing_and_in_history{false};
+  bool budget_preflight_certified{false};
+  bool active_binding_slots_indexed_once{false};
+  bool every_requested_batch_preflighted_and_replayed_once{false};
+  bool every_union_binding_and_key_point_replayed_once{false};
+  bool every_requested_prefix_stamp_emitted_once{false};
+  bool final_prefix_matches_live_locator_when_requested{false};
+  bool common_frozen_locator_snapshot_certified{false};
+  bool no_partial_scientific_payload_published{false};
+  bool locator_state_mutated{false};
+  bool locator_batch_committed{false};
+  bool external_authority_replayed_by_locator{false};
+  bool forbidden_global_structure_materialized{false};
+  bool public_status_claimed{false};
+  bool partial_refinement_only{false};
+  ExactDirectSparsePositiveFacetLocatorPrefixStampSweepDecision decision{
+      ExactDirectSparsePositiveFacetLocatorPrefixStampSweepDecision::
+          not_certified};
+  ExactDirectSparsePositiveFacetLocatorPrefixStampSweepScope scope{
+      ExactDirectSparsePositiveFacetLocatorPrefixStampSweepScope::unspecified};
+
+  [[nodiscard]] bool certified_partial_refinement() const noexcept;
+  [[nodiscard]] bool certified_atomic_failure() const noexcept;
+  [[nodiscard]] bool certified_outcome() const noexcept;
+
+  friend bool operator==(
+      const ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult&,
+      const ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult&) =
+      default;
+};
+
+struct ExactDirectSparsePositiveFacetLocatorPrefixStampSweepVerification {
+  bool observed_storage_within_budget{false};
+  bool locator_snapshot_matches_observed_build{false};
+  bool expected_sweep_freshly_rebuilt{false};
+  bool counters_and_stamps_freshly_replayed{false};
+  bool no_locator_mutation_or_batch_commit{false};
+  bool external_authority_replayed_by_locator{false};
+  bool no_forbidden_global_structure_materialized{false};
+  bool fresh_replay_certified{false};
+  bool result_certified{false};
+
+  friend bool operator==(
+      const ExactDirectSparsePositiveFacetLocatorPrefixStampSweepVerification&,
+      const ExactDirectSparsePositiveFacetLocatorPrefixStampSweepVerification&)
+      = default;
 };
 
 enum class ExactDirectSparsePositiveFacetLocatorInitializationDecision
@@ -684,6 +838,32 @@ build_exact_direct_sparse_positive_facet_locator(
     std::size_t component_handle_count,
     const ExactDirectSparsePositiveFacetLocatorBudget& budget,
     const ExactDirectSparsePositiveFacetLocatorConfig& config);
+
+// Reconstructs every requested internal locator stamp with one bounded
+// preflight and one chronological digest replay.  The request span must be
+// nondecreasing.  The locator and every arena it owns must remain externally
+// frozen throughout the call; snapshot comparisons are not synchronization.
+[[nodiscard]]
+ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult
+build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+    std::span<const std::size_t>
+        nondecreasing_committed_batch_prefix_counts,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparsePositiveFacetLocatorPrefixStampSweepBudget& budget);
+
+// Freshly rebuilds the same read-only sweep from the supplied live locator and
+// compares it recursively.  This binds an observed result to the frozen live
+// object but deliberately does not replace the full structural verifier above
+// when a decoded or otherwise hostile durable image is a scientific input.
+[[nodiscard]]
+ExactDirectSparsePositiveFacetLocatorPrefixStampSweepVerification
+verify_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+    std::span<const std::size_t>
+        nondecreasing_committed_batch_prefix_counts,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparsePositiveFacetLocatorPrefixStampSweepBudget& budget,
+    const ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult&
+        observed);
 
 // Freshly re-executes the allocation-free probe.  result_certified covers only
 // the locator's relative positive domain; external witness semantics remain a

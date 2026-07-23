@@ -1,5 +1,6 @@
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_locator.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -88,6 +89,145 @@ generous_structural_verification_budget() {
       8U,
       generous_budget(),
       {authority_id, fingerprint_mask});
+}
+
+[[nodiscard]]
+ExactDirectSparsePositiveFacetLocatorPrefixStampSweepBudget
+generous_prefix_stamp_sweep_budget() {
+  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
+  return {
+      64U,
+      128U,
+      128U,
+      64U,
+      64U,
+      64U,
+      640U,
+      maximum,
+  };
+}
+
+[[nodiscard]]
+ExactDirectSparsePositiveFacetLocatorPrefixStampSweepBudget
+exact_prefix_stamp_sweep_budget() {
+  return {
+      9U,
+      12U,
+      65U,
+      3U,
+      4U,
+      3U,
+      12U,
+      3U * sizeof(std::size_t),
+  };
+}
+
+struct PrefixStampSixCommitFixture {
+  ExactDirectSparsePositiveFacetLocator locator;
+  std::array<ExactDirectSparsePositiveFacetLocatorSnapshotStamp, 7U>
+      live_snapshot_stamps{};
+};
+
+[[nodiscard]] PrefixStampSixCommitFixture
+make_prefix_stamp_six_commit_locator() {
+  PrefixStampSixCommitFixture fixture{make_locator(0U), {}};
+  ExactDirectSparsePositiveFacetLocator& locator = fixture.locator;
+  fixture.live_snapshot_stamps[0U] = locator.snapshot_stamp();
+  const ExactDirectSparseFacetKey facet_a = key({1U, 3U, 5U, 7U});
+  const ExactDirectSparseFacetKey facet_b = key({2U, 4U, 6U, 8U});
+  const ExactDirectSparseFacetKey facet_c = key({9U, 10U, 11U, 12U});
+
+  const std::array<ExactDirectSparseFacetBinding, 1U> first_binding{{
+      {0U, facet_a, 5U, witness(300U)},
+  }};
+  check(
+      locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              std::span<const ExactDirectSparseComponentUnion>{},
+              first_binding)
+          .certified_committed_batch(),
+      "prefix-stamp batch 0 inserts A");
+  fixture.live_snapshot_stamps[1U] = locator.snapshot_stamp();
+  check(
+      locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              std::span<const ExactDirectSparseComponentUnion>{},
+              std::span<const ExactDirectSparseFacetBinding>{})
+          .certified_committed_batch(),
+      "prefix-stamp batch 1 is empty");
+  fixture.live_snapshot_stamps[2U] = locator.snapshot_stamp();
+
+  const std::array<ExactDirectSparseComponentUnion, 1U> first_union{{
+      {0U, 5U, 4U, witness(301U)},
+  }};
+  const std::array<ExactDirectSparseFacetBinding, 1U> second_binding{{
+      {0U, facet_b, 2U, witness(302U)},
+  }};
+  check(
+      locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              first_union,
+              second_binding)
+          .certified_committed_batch(),
+      "prefix-stamp batch 2 unions A and inserts B");
+  fixture.live_snapshot_stamps[3U] = locator.snapshot_stamp();
+
+  const std::array<ExactDirectSparseComponentUnion, 1U> second_union{{
+      {0U, 4U, 1U, witness(303U)},
+  }};
+  const std::array<ExactDirectSparseFacetBinding, 1U>
+      compatible_duplicate{{
+          {0U, facet_a, 1U, witness(304U)},
+      }};
+  const auto duplicate = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      second_union,
+      compatible_duplicate);
+  check(
+      duplicate.certified_committed_batch() &&
+          duplicate.counters.inserted_binding_count == 0U &&
+          duplicate.counters.compatible_duplicate_binding_count == 1U,
+      "prefix-stamp batch 3 commits one compatible duplicate");
+  fixture.live_snapshot_stamps[4U] = locator.snapshot_stamp();
+
+  const std::array<ExactDirectSparseComponentUnion, 1U> redundant_union{{
+      {0U, 5U, 1U, witness(305U)},
+  }};
+  const std::array<ExactDirectSparseFacetBinding, 1U> third_binding{{
+      {0U, facet_c, 3U, witness(306U)},
+  }};
+  check(
+      locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              redundant_union,
+              third_binding)
+          .certified_committed_batch(),
+      "prefix-stamp batch 4 records a redundant union and inserts C");
+  fixture.live_snapshot_stamps[5U] = locator.snapshot_stamp();
+
+  const std::array<ExactDirectSparseComponentUnion, 1U> final_union{{
+      {0U, 2U, 1U, witness(307U)},
+  }};
+  check(
+      locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              final_union,
+              std::span<const ExactDirectSparseFacetBinding>{})
+          .certified_committed_batch(),
+      "prefix-stamp batch 5 unions B into the final root");
+  fixture.live_snapshot_stamps[6U] = locator.snapshot_stamp();
+  check(
+      locator.committed_batches().size() == 6U &&
+          locator.committed_unions().size() == 4U &&
+          locator.counters().inserted_binding_count == 3U &&
+          locator.counters().binding_request_count == 4U,
+      "the prefix-stamp fixture has six commits, four unions, three keys and four binding requests");
+  return fixture;
 }
 
 [[nodiscard]] ExactDirectSparsePositiveFacetLocatorStructuralVerification
@@ -1037,6 +1177,406 @@ void check_const_budgeted_probe() {
       "all successful, missing, rejected and exhausted const probes leave every durable value, counter, batch and arena identity unchanged");
 }
 
+void check_prefix_stamp_sweep_and_exact_budgets() {
+  static_assert(
+      ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult::backend ==
+          "reference_cpu" &&
+      ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult::profile ==
+          "hgp_reduced" &&
+      ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult::mode ==
+          "certified" &&
+      ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult::
+              refinement_status ==
+          "partial_refinement" &&
+      ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult::
+              public_status ==
+          "not_claimed");
+
+  auto fixture = make_prefix_stamp_six_commit_locator();
+  auto& locator = fixture.locator;
+  const std::array<std::size_t, 9U> repeated_prefixes{
+      0U, 0U, 1U, 2U, 2U, 3U, 4U, 5U, 6U};
+  const auto exact =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          repeated_prefixes, locator, exact_prefix_stamp_sweep_budget());
+  check(
+      exact.certified_partial_refinement() &&
+          exact.prefix_stamps.size() == repeated_prefixes.size() &&
+          exact.required_committed_batch_prefix_count == 6U &&
+          exact.required_batch_record_scan_count == 12U &&
+          exact.required_table_slot_scan_count == locator.slots().size() &&
+          exact.required_active_binding_prefix_count == 3U &&
+          exact.required_union_record_replay_count == 4U &&
+          exact.required_key_point_replay_count == 12U &&
+          exact.required_temporary_scratch_byte_count ==
+              3U * sizeof(std::size_t) &&
+          exact.counters.batch_record_scan_count == 12U &&
+          exact.counters.table_slot_scan_count == locator.slots().size() &&
+          exact.counters.union_record_replay_count == 4U &&
+          exact.counters.binding_record_replay_count == 3U &&
+          exact.counters.key_point_replay_count == 12U &&
+          exact.counters.emitted_stamp_count == repeated_prefixes.size() &&
+          exact.counters.locator_snapshot_check_count == 2U,
+      "the prefix-stamp sweep performs exactly two batch scans, one conditional table scan and one replay of each active durable delta");
+  check(
+      exact.prefix_stamps[0U] == exact.prefix_stamps[1U] &&
+          exact.prefix_stamps[3U] == exact.prefix_stamps[4U] &&
+          exact.prefix_stamps[0U].committed_batch_count == 0U &&
+          exact.prefix_stamps[2U].committed_batch_count == 1U &&
+          exact.prefix_stamps[3U].committed_batch_count == 2U &&
+          exact.prefix_stamps[5U].committed_batch_count == 3U &&
+          exact.prefix_stamps[6U].committed_batch_count == 4U &&
+          exact.prefix_stamps[7U].committed_batch_count == 5U &&
+          exact.prefix_stamps[8U].committed_batch_count == 6U,
+      "repeated nondecreasing prefix requests preserve their exact input order in the output");
+  bool historical_stamps_match_live_commits = true;
+  for (std::size_t request_index = 0U;
+       request_index < repeated_prefixes.size();
+       ++request_index) {
+    historical_stamps_match_live_commits =
+        historical_stamps_match_live_commits &&
+        exact.prefix_stamps[request_index] ==
+            fixture.live_snapshot_stamps[repeated_prefixes[request_index]];
+  }
+  check(
+      historical_stamps_match_live_commits,
+      "every reconstructed prefix stamp equals the independent live snapshot "
+      "captured at that commit boundary");
+  check(
+      exact.prefix_stamps[2U].inserted_key_count == 1U &&
+          exact.prefix_stamps[2U].component_union_count == 0U &&
+          exact.prefix_stamps[2U].binding_count == 1U &&
+          exact.prefix_stamps[3U].inserted_key_count == 1U &&
+          exact.prefix_stamps[3U].component_union_count == 0U &&
+          exact.prefix_stamps[3U].binding_count == 1U &&
+          exact.prefix_stamps[2U].committed_history_digest !=
+              exact.prefix_stamps[3U].committed_history_digest,
+      "an empty committed batch preserves semantic counters but advances the exact history stamp");
+  check(
+      exact.prefix_stamps[5U].inserted_key_count == 2U &&
+          exact.prefix_stamps[5U].component_union_count == 1U &&
+          exact.prefix_stamps[5U].binding_count == 2U &&
+          exact.prefix_stamps[6U].inserted_key_count == 2U &&
+          exact.prefix_stamps[6U].component_union_count == 2U &&
+          exact.prefix_stamps[6U].binding_count == 3U &&
+          exact.prefix_stamps[5U].committed_history_digest !=
+              exact.prefix_stamps[6U].committed_history_digest,
+      "a compatible duplicate advances the binding-request count and digest without inserting another key");
+  check(
+      exact.locator_snapshot_stamp == locator.snapshot_stamp() &&
+          exact.prefix_stamps.back() == exact.locator_snapshot_stamp &&
+          exact.prefix_stamps.back() == locator.snapshot_stamp() &&
+          exact.final_prefix_matches_live_locator_when_requested &&
+          exact.common_frozen_locator_snapshot_certified,
+      "a B=T sweep compares its final reconstructed stamp exactly with both the entry and exit live snapshots");
+  check(
+      verify_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          repeated_prefixes,
+          locator,
+          exact_prefix_stamp_sweep_budget(),
+          exact)
+          .result_certified,
+      "fresh replay certifies the exact six-commit prefix-stamp sweep");
+
+  const auto check_budget_failure = [&](
+                                        const auto& reduced_budget,
+                                        const std::string& context) {
+    const auto failed =
+        build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+            repeated_prefixes, locator, reduced_budget);
+    check(
+        failed.certified_atomic_failure() && failed.prefix_stamps.empty() &&
+            failed.no_partial_scientific_payload_published &&
+            failed.decision ==
+                ExactDirectSparsePositiveFacetLocatorPrefixStampSweepDecision::
+                    no_prefix_stamp_budget_exhausted,
+        context);
+  };
+  auto prefix_request_less_one = exact_prefix_stamp_sweep_budget();
+  --prefix_request_less_one.maximum_prefix_request_count;
+  check_budget_failure(
+      prefix_request_less_one,
+      "the prefix-request cap fails atomically at exact minus one");
+  auto batch_scan_less_one = exact_prefix_stamp_sweep_budget();
+  --batch_scan_less_one.maximum_batch_record_scan_count;
+  check_budget_failure(
+      batch_scan_less_one,
+      "the exact 2B batch-scan cap fails atomically at minus one");
+  auto table_scan_less_one = exact_prefix_stamp_sweep_budget();
+  --table_scan_less_one.maximum_table_slot_scan_count;
+  check_budget_failure(
+      table_scan_less_one,
+      "the conditional table-scan cap fails atomically at exact minus one");
+  auto binding_scratch_less_one = exact_prefix_stamp_sweep_budget();
+  --binding_scratch_less_one.maximum_binding_slot_index_scratch_count;
+  check_budget_failure(
+      binding_scratch_less_one,
+      "the unique binding-index scratch cap fails atomically at minus one");
+  auto union_replay_less_one = exact_prefix_stamp_sweep_budget();
+  --union_replay_less_one.maximum_union_record_replay_count;
+  check_budget_failure(
+      union_replay_less_one,
+      "the union replay cap fails atomically at exact minus one");
+  auto binding_replay_less_one = exact_prefix_stamp_sweep_budget();
+  --binding_replay_less_one.maximum_binding_record_replay_count;
+  check_budget_failure(
+      binding_replay_less_one,
+      "the binding replay cap fails atomically at exact minus one");
+  auto key_point_replay_less_one = exact_prefix_stamp_sweep_budget();
+  --key_point_replay_less_one.maximum_key_point_replay_count;
+  check_budget_failure(
+      key_point_replay_less_one,
+      "the key-point replay cap fails atomically at exact minus one");
+  auto scratch_bytes_less_one = exact_prefix_stamp_sweep_budget();
+  --scratch_bytes_less_one.maximum_temporary_scratch_byte_count;
+  check_budget_failure(
+      scratch_bytes_less_one,
+      "the exact I_B*sizeof(size_t) scratch-byte cap fails atomically at minus one");
+}
+
+void check_prefix_stamp_sweep_empty_invalid_stale_and_mutations() {
+  auto fixture = make_prefix_stamp_six_commit_locator();
+  auto& locator = fixture.locator;
+  const auto generous = generous_prefix_stamp_sweep_budget();
+  const auto locator_before_read_only_sweeps = locator;
+  const auto* slots_data_before = locator.slots().data();
+  const auto* key_arena_data_before = locator.key_point_arena().data();
+  const auto* parents_data_before = locator.component_parents().data();
+  const auto* unions_data_before = locator.committed_unions().data();
+  const auto* batches_data_before = locator.committed_batches().data();
+  const std::size_t slots_capacity_before = locator.slots().capacity();
+  const std::size_t key_arena_capacity_before =
+      locator.key_point_arena().capacity();
+  const std::size_t parents_capacity_before =
+      locator.component_parents().capacity();
+  const std::size_t unions_capacity_before =
+      locator.committed_unions().capacity();
+  const std::size_t batches_capacity_before =
+      locator.committed_batches().capacity();
+  const auto empty =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          std::span<const std::size_t>{}, locator, generous);
+  check(
+      empty.certified_partial_refinement() && empty.prefix_stamps.empty() &&
+          empty.required_committed_batch_prefix_count == 0U &&
+          empty.required_batch_record_scan_count == 0U &&
+          empty.required_table_slot_scan_count == 0U &&
+          empty.required_active_binding_prefix_count == 0U &&
+          empty.required_temporary_scratch_byte_count == 0U &&
+          empty.counters.batch_record_scan_count == 0U &&
+          empty.counters.table_slot_scan_count == 0U &&
+          empty.counters.locator_snapshot_check_count == 2U,
+      "an empty request succeeds without a history, table or binding-scratch scan");
+
+  const std::array<std::size_t, 3U> zero_prefixes{0U, 0U, 0U};
+  const auto zero =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          zero_prefixes, locator, generous);
+  check(
+      zero.certified_partial_refinement() && zero.prefix_stamps.size() == 3U &&
+          zero.prefix_stamps[0U] == zero.prefix_stamps[1U] &&
+          zero.prefix_stamps[1U] == zero.prefix_stamps[2U] &&
+          zero.required_table_slot_scan_count == 0U &&
+          zero.counters.table_slot_scan_count == 0U &&
+          zero.required_temporary_scratch_byte_count == 0U,
+      "repeated zero prefixes emit ordered initial stamps without scanning the populated final table");
+
+  auto empty_locator = make_locator(0U);
+  const std::array<std::size_t, 1U> initial_prefix{0U};
+  const auto initial =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          initial_prefix, empty_locator, generous);
+  check(
+      initial.certified_partial_refinement() &&
+          initial.prefix_stamps.size() == 1U &&
+          initial.prefix_stamps[0U] == empty_locator.snapshot_stamp() &&
+          initial.required_table_slot_scan_count == 0U,
+      "the initial prefix of an empty locator is its exact current snapshot without a table scan");
+
+  const std::array<std::size_t, 3U> decreasing{0U, 2U, 1U};
+  const auto decreasing_rejected =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          decreasing, locator, generous);
+  check(
+      decreasing_rejected.certified_atomic_failure() &&
+          decreasing_rejected.decision ==
+              ExactDirectSparsePositiveFacetLocatorPrefixStampSweepDecision::
+                  no_prefix_stamp_input_shape_rejected &&
+          decreasing_rejected.prefix_stamps.empty(),
+      "a decreasing prefix sequence is rejected atomically");
+  const std::array<std::size_t, 1U> beyond_history{7U};
+  const auto beyond_rejected =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          beyond_history, locator, generous);
+  check(
+      beyond_rejected.certified_atomic_failure() &&
+          beyond_rejected.decision ==
+              ExactDirectSparsePositiveFacetLocatorPrefixStampSweepDecision::
+                  no_prefix_stamp_input_shape_rejected &&
+          beyond_rejected.prefix_stamps.empty(),
+      "a prefix beyond the durable commit history is rejected atomically");
+
+  const ExactDirectSparsePositiveFacetLocator uninitialized_locator;
+  const auto uninitialized_rejected =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          initial_prefix, uninitialized_locator, generous);
+  check(
+      uninitialized_rejected.certified_atomic_failure() &&
+          uninitialized_rejected.decision ==
+              ExactDirectSparsePositiveFacetLocatorPrefixStampSweepDecision::
+                  no_prefix_stamp_locator_not_certified &&
+          uninitialized_rejected.prefix_stamps.empty(),
+      "an uninitialized locator is rejected before any prefix history is read");
+
+  auto overflow_locator = locator;
+  auto& overflow_batches =
+      const_cast<std::vector<ExactDirectSparseCommittedBatchRecord>&>(
+          overflow_locator.committed_batches());
+  overflow_batches[0U].counters.inserted_binding_count =
+      std::numeric_limits<std::size_t>::max();
+  overflow_batches[1U].counters.inserted_binding_count = 1U;
+  const std::array<std::size_t, 1U> overflow_prefix{2U};
+  const auto overflow_rejected =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          overflow_prefix, overflow_locator, generous);
+  check(
+      overflow_rejected.certified_atomic_failure() &&
+          overflow_rejected.decision ==
+              ExactDirectSparsePositiveFacetLocatorPrefixStampSweepDecision::
+                  no_prefix_stamp_capacity_overflow &&
+          overflow_rejected.prefix_stamps.empty(),
+      "prefix requirement arithmetic overflow stays distinct from malformed history and publishes no stamp");
+
+  auto non_dense_locator = locator;
+  auto& non_dense_batches =
+      const_cast<std::vector<ExactDirectSparseCommittedBatchRecord>&>(
+          non_dense_locator.committed_batches());
+  non_dense_batches[1U].committed_batch_index = 2U;
+  const auto non_dense_rejected =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          overflow_prefix, non_dense_locator, generous);
+  check(
+      non_dense_rejected.certified_atomic_failure() &&
+          non_dense_rejected.decision ==
+              ExactDirectSparsePositiveFacetLocatorPrefixStampSweepDecision::
+                  no_prefix_stamp_locator_history_rejected &&
+          non_dense_rejected.prefix_stamps.empty(),
+      "a non-dense durable batch index is rejected as malformed history");
+
+  auto malformed_locator = locator;
+  auto& malformed_batches =
+      const_cast<std::vector<ExactDirectSparseCommittedBatchRecord>&>(
+          malformed_locator.committed_batches());
+  malformed_batches[2U].counters.inserted_key_point_count = 3U;
+  const std::array<std::size_t, 1U> malformed_prefix{3U};
+  const auto malformed_rejected =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          malformed_prefix, malformed_locator, generous);
+  check(
+      malformed_rejected.certified_atomic_failure() &&
+          malformed_rejected.decision ==
+              ExactDirectSparsePositiveFacetLocatorPrefixStampSweepDecision::
+                  no_prefix_stamp_locator_history_rejected &&
+          malformed_rejected.prefix_stamps.empty(),
+      "a malformed durable batch history is rejected without publishing a prefix stamp");
+
+  auto extra_final_slot_locator = locator;
+  auto& extra_final_slots =
+      const_cast<std::vector<ExactDirectSparsePositiveFacetSlot>&>(
+          extra_final_slot_locator.slots());
+  const auto free_slot = std::find_if(
+      extra_final_slots.begin(),
+      extra_final_slots.end(),
+      [](const ExactDirectSparsePositiveFacetSlot& slot) {
+        return !slot.occupied;
+      });
+  check(
+      free_slot != extra_final_slots.end(),
+      "the final-history falsification has one free physical slot");
+  if (free_slot != extra_final_slots.end()) {
+    *free_slot = {
+        0U,
+        3U,
+        0U,
+        4U,
+        0U,
+        witness(399U),
+        true,
+    };
+  }
+  const std::array<std::size_t, 1U> final_prefix{6U};
+  const auto extra_final_slot_rejected =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          final_prefix, extra_final_slot_locator, generous);
+  check(
+      extra_final_slot_rejected.certified_atomic_failure() &&
+          extra_final_slot_rejected.decision ==
+              ExactDirectSparsePositiveFacetLocatorPrefixStampSweepDecision::
+                  no_prefix_stamp_locator_history_rejected &&
+          extra_final_slot_rejected.prefix_stamps.empty(),
+      "a B=T replay rejects an occupied slot beyond the exact active binding prefix");
+
+  const std::array<std::size_t, 4U> observed_prefixes{0U, 2U, 4U, 6U};
+  const auto observed =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          observed_prefixes, locator, generous);
+  auto mutated_stamp = observed;
+  ++mutated_stamp.prefix_stamps[1U].inserted_key_count;
+  check(
+      !verify_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+           observed_prefixes, locator, generous, mutated_stamp)
+           .result_certified,
+      "fresh replay rejects a mutated historical snapshot stamp");
+  auto mutated_counter = observed;
+  ++mutated_counter.counters.batch_record_scan_count;
+  check(
+      !verify_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+           observed_prefixes, locator, generous, mutated_counter)
+           .result_certified,
+      "fresh replay rejects a mutated sweep counter");
+  auto invented_global = observed;
+  invented_global.forbidden_global_structure_materialized = true;
+  check(
+      !verify_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+           observed_prefixes, locator, generous, invented_global)
+           .result_certified,
+      "fresh replay rejects an invented forbidden-global-structure claim");
+
+  check(
+      locator == locator_before_read_only_sweeps &&
+          locator.slots().data() == slots_data_before &&
+          locator.key_point_arena().data() == key_arena_data_before &&
+          locator.component_parents().data() == parents_data_before &&
+          locator.committed_unions().data() == unions_data_before &&
+          locator.committed_batches().data() == batches_data_before &&
+          locator.slots().capacity() == slots_capacity_before &&
+          locator.key_point_arena().capacity() ==
+              key_arena_capacity_before &&
+          locator.component_parents().capacity() ==
+              parents_capacity_before &&
+          locator.committed_unions().capacity() ==
+              unions_capacity_before &&
+          locator.committed_batches().capacity() ==
+              batches_capacity_before,
+      "all successful, rejected, exhausted and freshly verified prefix-stamp sweeps preserve every durable locator value, address and capacity");
+
+  check(
+      locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              std::span<const ExactDirectSparseComponentUnion>{},
+              std::span<const ExactDirectSparseFacetBinding>{})
+          .certified_committed_batch(),
+      "the stale prefix-stamp fixture appends one empty commit");
+  const auto stale_verification =
+      verify_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          observed_prefixes, locator, generous, observed);
+  check(
+      !stale_verification.locator_snapshot_matches_observed_build &&
+          !stale_verification.result_certified,
+      "an appended empty commit makes the previously observed prefix-stamp sweep stale even when earlier logical states are unchanged");
+}
+
 void check_fresh_durable_structure_verifier_and_mutations() {
   auto locator = make_locator(0U);
   const ExactDirectSparseFacetKey first = key({1U, 5U, 9U});
@@ -1553,6 +2093,8 @@ int main() {
   check_explicit_union_makes_duplicate_compatible();
   check_shape_witness_and_durable_budget_rejections();
   check_const_budgeted_probe();
+  check_prefix_stamp_sweep_and_exact_budgets();
+  check_prefix_stamp_sweep_empty_invalid_stale_and_mutations();
   check_fresh_durable_structure_verifier_and_mutations();
   if (failures != 0) {
     std::cerr << failures << " direct sparse positive facet test(s) failed\n";

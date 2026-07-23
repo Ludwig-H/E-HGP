@@ -19,6 +19,8 @@ La [localisation sparse des candidats de gateways](LOCALISATION_CANDIDATS_GATEWA
 
 La [sonde par préfixes du locator positif](SONDE_PREFIXE_LOCATOR_POSITIF_PHASE10.md) fixe le contrat 10.10-RCPU : rejeu monotone de l'horloge interne des commits 10.5a, recherche historique exacte dans la table finale et racines DSU historiques, sans confondre cette horloge avec les lots sources 10.7.
 
+Le [raccord des horloges sparse](RACCORD_HORLOGES_SPARSE_PHASE10.md) isole le sous-jalon 10.11-PSTAMP : une API strictement en lecture seule reconstruit les stamps des préfixes historiques du locator avec la transition canonique de chaîne 10.5a partagée. Ces identités internes préparent un futur certificat temporel, mais ne prouvent aucun alignement entre un lot source 10.7 et un préfixe du locator.
+
 ## Résumé de la construction
 
 Posons $K_{\mathrm{eff}}=\min(K_{\max},n)$, $s_{\max}=\min(K_{\mathrm{eff}}+1,n)$ et, si $s_{\max}\geq2$, $m_{\star}=s_{\max}-2$. Alors :

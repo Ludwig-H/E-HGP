@@ -161,6 +161,31 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "committed_slot_insertion_chronology_freshly_replayed",
         "external_authority_replayed_by_locator",
         "verify_exact_direct_sparse_positive_facet_locator_structure(",
+        "direct_sparse_positive_facet_locator_prefix_stamp_sweep_backend",
+        '"reference_cpu"',
+        '"hgp_reduced"',
+        '"certified"',
+        '"partial_refinement"',
+        '"not_claimed"',
+        "ExactDirectSparsePositiveFacetLocatorPrefixStampSweepBudget",
+        "maximum_prefix_request_count",
+        "maximum_batch_record_scan_count",
+        "maximum_table_slot_scan_count",
+        "maximum_binding_slot_index_scratch_count",
+        "maximum_union_record_replay_count",
+        "maximum_binding_record_replay_count",
+        "maximum_key_point_replay_count",
+        "ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult",
+        "required_table_slot_scan_count",
+        "required_temporary_scratch_byte_count",
+        "prefix_request_count",
+        "no_prefix_stamp_budget_exhausted",
+        "no_prefix_stamp_input_shape_rejected",
+        "no_prefix_stamp_locator_history_rejected",
+        "complete_certified_locator_prefix_stamps",
+        "locator_internal_committed_batch_prefix_stamps_relative_to_frozen_history_only",
+        "build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(",
+        "verify_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(",
     ):
         require(required in header, f"the public contract is missing {required!r}")
     require(
@@ -221,7 +246,7 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "initial_locator_snapshot_digest(",
         "LocatorSnapshotChainDigestBuilder",
         "committed_history_digest_ = next_snapshot_digest",
-        "replayed_history_digest == observed.committed_history_digest",
+        "history_cursor.history_digest == observed.committed_history_digest",
         "verification.external_authority_replayed_by_locator = false",
         "if (!verification.budget_preflight_certified)",
         "no_verification_budget_preflight_exhausted",
@@ -232,8 +257,30 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "verification.fingerprint_search_slot_visit_count <=",
         "verification.insertion_chronology_slot_visit_count <=",
         "verification.union_parent_hop_count <=",
+        "make_locator_snapshot_stamp(",
+        "replay_locator_history_digest_transition(",
+        "std::vector<std::size_t> binding_slot_indices_by_index(",
+        "active_binding_prefix_count == 0U ? 0U : state.slots.size()",
+        "result.required_temporary_scratch_byte_count",
+        "prefix_stamps.back() != result.locator_snapshot_stamp",
+        "locator.snapshot_stamp() == result.locator_snapshot_stamp",
+        "no_prefix_stamp_locator_history_rejected",
     ):
         require(required in source, f"the implementation is missing {required!r}")
+    require(
+        re.search(
+            r"checked_multiply\s*\(\s*2U\s*,\s*"
+            r"result\.required_committed_batch_prefix_count\s*\)",
+            source,
+        )
+        is not None,
+        "the prefix sweep must preflight exactly two batch-record scans per "
+        "active batch",
+    )
+    require(
+        "source_prefix_request_count" not in header + source,
+        "the public prefix request count must use its canonical field name",
+    )
 
     code = strip_cpp_comments_and_literals(source)
     primary_position = code.find(
@@ -273,53 +320,195 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "scratch allocation and variable scan",
     )
 
-    batch_replay_position = code.find(
-        "for (std::size_t index = 0U;",
-        code.find("contract::CanonicalId replayed_history_digest", observed_position),
+    history_transition = braced_block(
+        code,
+        "[[nodiscard]] LocatorHistoryTransitionStatus\n"
+        "replay_locator_history_digest_transition(",
+        "shared locator history digest transition",
     )
-    scalar_batch_guard_position = code.find(
-        "if (record.committed_batch_index != index ||", batch_replay_position
+    require(
+        code.count("replay_locator_history_digest_transition(") == 3,
+        "the common history transition must have exactly one definition and "
+        "one call from each read-only verifier",
     )
-    scalar_batch_rejection_position = code.find(
-        "reject_malformed_durable_history();", scalar_batch_guard_position
+    require(
+        source.count("locator_snapshot_initial_digest_domain") == 2
+        and source.count("locator_snapshot_chain_digest_domain") == 2
+        and source.count("class LocatorSnapshotChainDigestBuilder") == 1,
+        "locator snapshot serialization must retain exactly one initial domain, "
+        "one chain domain and one digest-builder implementation",
     )
-    scalar_batch_return_position = code.find(
-        "return verification;", scalar_batch_rejection_position
+    scalar_guard_position = history_transition.find(
+        "if (record.committed_batch_index != expected_batch_index ||"
     )
-    first_batch_binding_scan_position = code.find(
-        "for (std::size_t binding_index = replayed_binding_prefix;",
-        scalar_batch_return_position,
+    scalar_rejection_position = history_transition.find(
+        "return LocatorHistoryTransitionStatus::malformed_history;",
+        scalar_guard_position,
     )
-    updated_counters_position = code.find(
-        "const auto next = updated_counters(", first_batch_binding_scan_position
+    aggregate_position = history_transition.find(
+        "const auto next_counters = updated_counters(", scalar_rejection_position
     )
-    history_digest_position = code.find(
+    aggregate_rejection_position = history_transition.find(
+        "return LocatorHistoryTransitionStatus::capacity_overflow;",
+        aggregate_position,
+    )
+    digest_position = history_transition.find(
         "LocatorSnapshotChainDigestBuilder snapshot_digest_builder(",
-        updated_counters_position,
+        aggregate_rejection_position,
     )
-    batch_replay_end_position = code.find(
-        "verification.historical_batch_assertions_and_counters_well_formed =",
-        history_digest_position,
+    first_binding_scan_position = history_transition.find(
+        "for (std::size_t binding_index = cursor.binding_prefix;", digest_position
     )
     require(
         0
-        <= batch_replay_position
-        < scalar_batch_guard_position
-        < scalar_batch_rejection_position
-        < scalar_batch_return_position
-        < first_batch_binding_scan_position
-        < updated_counters_position
-        < history_digest_position
-        < batch_replay_end_position,
-        "each durable batch must validate scalar fields and prefix bounds "
-        "fail-fast before its first binding scan, then validate aggregate "
-        "counter arithmetic before digest replay",
+        <= scalar_guard_position
+        < scalar_rejection_position
+        < aggregate_position
+        < aggregate_rejection_position
+        < digest_position
+        < first_binding_scan_position,
+        "the shared transition must reject scalar fields and prefix bounds "
+        "fail-fast, validate aggregate counter arithmetic, then replay the "
+        "canonical digest before scanning bindings",
+    )
+    for scalar_contract in (
+        "*query_partition != record.counters.query_count",
+        "*binding_partition != record.counters.binding_request_count",
+        "record.counters.full_key_comparison_count <",
+        "record.counters.query_count > trusted_budget.maximum_batch_query_count",
+        "record.counters.union_request_count >",
+        "trusted_budget.maximum_batch_union_count",
+        "record.counters.binding_request_count >",
+        "trusted_budget.maximum_batch_binding_count",
+        "record.counters.batch_input_key_point_count >",
+        "trusted_budget.maximum_batch_key_point_count",
+        "*next_binding_prefix > binding_slot_indices_by_index.size()",
+        "*next_union_prefix > committed_unions.size()",
+        "!record.input_shape_certified",
+        "!record.input_witness_structure_certified",
+        "!record.strict_pre_batch_snapshot_certified",
+        "!record.sequential_atomic_commit_certified",
+    ):
+        require(
+            scalar_contract in history_transition,
+            "the shared fail-fast transition is missing " f"{scalar_contract!r}",
+        )
+    for transition_contract in (
+        "snapshot_digest_builder.component_union(",
+        "snapshot_digest_builder.binding(",
+        "observed_inserted_key_point_count !=",
+        "record.counters.inserted_key_point_count",
+        "cursor.counters = *next_counters",
+        "cursor.binding_prefix = *next_binding_prefix",
+        "cursor.union_prefix = *next_union_prefix",
+        "cursor.history_digest = snapshot_digest_builder.finalize()",
+    ):
+        require(
+            transition_contract in history_transition,
+            "the shared canonical transition is missing " f"{transition_contract!r}",
+        )
+    require(
+        "continue;" not in history_transition,
+        "malformed durable history must return at its first contradiction",
+    )
+
+    structural_verifier = braced_block(
+        code,
+        "ExactDirectSparsePositiveFacetLocatorStructuralVerification\n"
+        "verify_exact_direct_sparse_positive_facet_locator_structure(",
+        "structural verifier",
+    )
+    prefix_sweep = braced_block(
+        code,
+        "ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult\n"
+        "build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(",
+        "prefix-stamp sweep",
     )
     require(
-        "continue;" not in code[batch_replay_position:batch_replay_end_position],
-        "malformed durable history must return at its first contradiction "
-        "instead of rescanning an unchanged prefix in later records",
+        structural_verifier.count("replay_locator_history_digest_transition(") == 1
+        and prefix_sweep.count("replay_locator_history_digest_transition(") == 1,
+        "both read-only history consumers must call the one common transition",
     )
+
+    preflight_complete_position = prefix_sweep.find(
+        "result.budget_preflight_certified = true"
+    )
+    binding_scratch_position = prefix_sweep.find("std::vector<std::size_t>")
+    stamp_output_position = prefix_sweep.find(
+        "std::vector<ExactDirectSparsePositiveFacetLocatorSnapshotStamp>"
+    )
+    require(
+        0
+        <= preflight_complete_position
+        < binding_scratch_position
+        < stamp_output_position,
+        "all eight exact caps must pass before the unique binding-index scratch "
+        "and prefix output are allocated",
+    )
+    require(
+        prefix_sweep.count("std::vector<std::size_t>") == 1,
+        "the prefix sweep must allocate exactly one binding-index scratch vector",
+    )
+    require(
+        prefix_sweep.count("batch_index < result.required_committed_batch_prefix_count")
+        == 2,
+        "the prefix sweep must scan the active batch prefix exactly twice",
+    )
+    for cap in (
+        "maximum_prefix_request_count",
+        "maximum_batch_record_scan_count",
+        "maximum_table_slot_scan_count",
+        "maximum_binding_slot_index_scratch_count",
+        "maximum_union_record_replay_count",
+        "maximum_binding_record_replay_count",
+        "maximum_key_point_replay_count",
+        "maximum_temporary_scratch_byte_count",
+    ):
+        require(
+            prefix_sweep.find(cap) < preflight_complete_position,
+            f"the {cap} cap must be checked atomically before allocation",
+        )
+    for exact_cost_contract in (
+        "active_binding_prefix_count == 0U ? 0U : state.slots.size()",
+        "active_binding_prefix_count, sizeof(std::size_t)",
+        "replaying_final_history",
+        "state.counters.inserted_binding_count",
+        "state.counters.union_request_count",
+        "state.counters.committed_key_point_count",
+        "slot.committed_binding_index >= active_binding_prefix_count",
+        "prefix_stamps.back() != result.locator_snapshot_stamp",
+        "locator.snapshot_stamp() == result.locator_snapshot_stamp",
+    ):
+        require(
+            exact_cost_contract in prefix_sweep,
+            "the exact prefix sweep is missing " f"{exact_cost_contract!r}",
+        )
+    table_guard_position = prefix_sweep.find("if (active_binding_prefix_count != 0U)")
+    table_scan_position = prefix_sweep.find(
+        "for (std::size_t slot_index = 0U;", table_guard_position
+    )
+    require(
+        0 <= table_guard_position < table_scan_position,
+        "the table may be scanned only when the active binding prefix is nonempty",
+    )
+    lowered_prefix_sweep = prefix_sweep.lower()
+    for forbidden_prefix_path in (
+        "apply_batch",
+        "unite_components",
+        "find_component",
+        "candidate_parents",
+        "component_parents[",
+        "std::map",
+        "unordered",
+        "gamma",
+        "delaunay",
+        "quotient",
+        "gatewayattach",
+    ):
+        require(
+            forbidden_prefix_path not in lowered_prefix_sweep,
+            "the prefix sweep contains forbidden path " f"{forbidden_prefix_path!r}",
+        )
 
     exhaustion_contracts = (
         (
@@ -465,12 +654,53 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "scratch_population_less_one",
         "scratch_bytes_less_one",
         "table_slot_scan_count == 0U",
+        "check_prefix_stamp_sweep_and_exact_budgets",
+        "check_prefix_stamp_sweep_empty_invalid_stale_and_mutations",
+        "PrefixStampSixCommitFixture",
+        "live_snapshot_stamps",
+        "historical_stamps_match_live_commits",
+        "repeated_prefixes",
+        "prefix_stamps.back() == exact.locator_snapshot_stamp",
+        "prefix_request_less_one",
+        "batch_scan_less_one",
+        "table_scan_less_one",
+        "binding_scratch_less_one",
+        "union_replay_less_one",
+        "binding_replay_less_one",
+        "key_point_replay_less_one",
+        "extra_final_slot_rejected",
+        "malformed_rejected",
+        "stale_verification",
     ):
         require(
             required_test_contract in unit_test,
             "the short locator unit suite is missing digest fixture "
             f"{required_test_contract!r}",
         )
+    require(
+        len(
+            re.findall(
+                r"fixture\.live_snapshot_stamps\[\dU\]\s*=\s*"
+                r"locator\.snapshot_stamp\(\)",
+                unit_test,
+            )
+        )
+        == 7,
+        "the six-commit fixture must capture the initial live snapshot and one "
+        "independent live snapshot after every commit",
+    )
+    require(
+        re.search(
+            r"exact\.prefix_stamps\[request_index\]\s*==\s*"
+            r"fixture\.live_snapshot_stamps\["
+            r"repeated_prefixes\[request_index\]\]",
+            unit_test,
+            re.S,
+        )
+        is not None,
+        "every repeated prefix output must be checked against its independently "
+        "captured live commit snapshot",
+    )
 
     lowered = (header + "\n" + source).lower()
     for forbidden in (
