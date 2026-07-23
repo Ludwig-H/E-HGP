@@ -90,6 +90,16 @@ Le top-$K$ LBVH borné possède parallèlement une surcharge à incumbents. Une 
 
 Ce socle rend possible un transcript GPU compact par clé sans lui donner d'autorité scientifique. Le transcript et son audit devront rester séparés du delta 14D; une clé absente ou une proposition mauvaise déclenchera simplement la traversée exacte normale. Aucun producteur GPU, aucune classe de difficulté observée et aucune qualification de performance ne font encore partie de 14E.
 
+## Incrément 14F — transcript sparse et baseline exacte
+
+Le transcript hôte 14F conserve seulement $R\leq D$ lignes proposées, triées par clé complète, avec au plus $K$ identifiants par ligne. Il ne transporte ni centre, ni distance, ni cutoff, ni verdict de prune ou de successeur. Ses caps physiques et logiques sont contrôlés avant copie; la revalidation au point d'usage lie ensuite le payload au lot, au niveau exact, au stamp locator, aux clés canoniques initiales et au namespace du nuage avant toute construction de fermeture.
+
+La baseline exacte d'une clé est sa facette source complète $F$. Au centre de sa miniball, les $K$ points de $F$ fournissent un cutoff au plus égal à $\beta(F)$. Pour une proposition $P$, le CPU évalue une fois chaque point de $U=F\cup P$, avec $K\leq\lvert U\rvert\leq2K$, et réduit exactement cette population aux $K$ meilleurs voisins pour initialiser la heap. Puisque $F\subseteq U$, le cutoff de $U$ n'est jamais pire que celui de $F$. Les points écartés de la heap mais égaux au cutoff restent dans la coquille, et toute borne LBVH égale est descendue.
+
+Les appels historiques restent non amorcés. L'enveloppe 14F, elle, utilise toujours $F$ : un record présent ajoute $P$, tandis qu'une absence, une ligne vide ou un successeur dynamique utilise $P=\varnothing$. La forêt scientifique ne retient aucun record ou audit top-$K$; un objet séparé agrège seulement les comptes exacts observés. Ainsi un producteur futur peut échouer vers des lignes absentes ou vides sans créer de nouvelle sémantique.
+
+Le stockage du transcript est $O(KR)$ et sa durée de vie est celle du lot. Il ne crée aucune facette absente, coface, incidence globale, cellule, Gamma ou mosaïque d'ordre supérieur. Le producteur CUDA, son epoch et son digest, le raccord à la session ancrée 14D, les classes de difficulté, les arènes réutilisables, `warm_e2e` et les runs durables restent ouverts.
+
 ## Goulots restant à traiter en Phase 14
 
 Trois coûts dominants restent visibles après 14D :
@@ -98,7 +108,7 @@ Trois coûts dominants restent visibles après 14D :
 - les constructions de miniballs et les fallbacks rationnels, à regrouper par cardinal et difficulté;
 - la capacité réutilisable des scratchs et le rejeu exact du lot courant, qui ne doivent pas dupliquer durablement les grandes arènes dans le protocole `warm_e2e`.
 
-La priorité de développement devient donc : séparer les propositions GPU de leur rejeu CPU exact, réutiliser des capacités de scratch sans conserver d'objet scientifique, puis instrumenter `warm_e2e`. Les runs et checkpoints compacts viennent ensuite pour le profil 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
+La priorité de développement devient donc : raccorder le transcript recertifié à la session 14D puis à un producteur GPU borné, réutiliser des capacités de scratch sans conserver d'objet scientifique, puis instrumenter `warm_e2e`. Les runs et checkpoints compacts viennent ensuite pour le profil 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
 
 ## Planification sans promotion
 

@@ -446,8 +446,8 @@ certified_partial_refinement_outcome() const noexcept {
          certified_fail_closed_contradiction();
 }
 
-detail::ExactDirectSparseFacetDescentStepTransient
-detail::build_exact_direct_sparse_facet_descent_step_transient(
+static detail::ExactDirectSparseFacetDescentStepTransient
+build_exact_direct_sparse_facet_descent_step_transient_implementation(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
     std::span<const PointId> source_facet_point_ids,
@@ -457,8 +457,10 @@ detail::build_exact_direct_sparse_facet_descent_step_transient(
     const ExactDirectSparseFacetDescentStepBudget& budget,
     spatial::LbvhTraversalOrder traversal_order,
     const ExactFacetMiniballResult* certified_source_miniball,
-    ExactDirectSparseCertifiedFacetMiniballLookup
-        certified_miniball_lookup) {
+    detail::ExactDirectSparseCertifiedFacetMiniballLookup
+        certified_miniball_lookup,
+    bool use_source_facet_top_k_baseline,
+    std::span<const PointId> top_k_proposal_point_ids) {
   require_valid_traversal_order(traversal_order);
   if (!index.validated_for(cloud)) {
     throw std::invalid_argument(
@@ -476,7 +478,7 @@ detail::build_exact_direct_sparse_facet_descent_step_transient(
         "a direct sparse descent step requires a matching non-null locator witness");
   }
 
-  ExactDirectSparseFacetDescentStepTransient transient;
+  detail::ExactDirectSparseFacetDescentStepTransient transient;
   ExactDirectSparseFacetDescentStepResult& result = transient.result;
   result.requested_budget = budget;
   result.traversal_order = traversal_order;
@@ -555,14 +557,25 @@ detail::build_exact_direct_sparse_facet_descent_step_transient(
       spatial::ExclusionSet::from_ids(
           std::span<const PointId>{}, cloud, 0U);
   spatial::ExactBudgetedLbvhTopKResult top_k_result =
-      spatial::lbvh_top_k_budgeted(
-          index,
-          cloud,
-          source_miniball.center,
-          result.source_facet_key.point_count,
-          empty_exclusions,
-          budget.top_k_query,
-          traversal_order);
+      use_source_facet_top_k_baseline
+          ? spatial::lbvh_top_k_budgeted(
+                index,
+                cloud,
+                source_miniball.center,
+                result.source_facet_key.point_count,
+                empty_exclusions,
+                used_point_ids(result.source_facet_key),
+                top_k_proposal_point_ids,
+                budget.top_k_query,
+                traversal_order)
+          : spatial::lbvh_top_k_budgeted(
+                index,
+                cloud,
+                source_miniball.center,
+                result.source_facet_key.point_count,
+                empty_exclusions,
+                budget.top_k_query,
+                traversal_order);
   result.counters.top_k_query_count = 1U;
   result.top_k_audit = top_k_result.audit();
   result.top_k_stop_reason = top_k_result.stop_reason();
@@ -746,6 +759,64 @@ detail::build_exact_direct_sparse_facet_descent_step_transient(
   result.decision = ExactDirectSparseFacetDescentStepDecision::
       complete_relative_strict_successor_positive_hit;
   return transient;
+}
+
+detail::ExactDirectSparseFacetDescentStepTransient
+detail::build_exact_direct_sparse_facet_descent_step_transient(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> source_facet_point_ids,
+    const exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetDescentStepBudget& budget,
+    spatial::LbvhTraversalOrder traversal_order,
+    const ExactFacetMiniballResult* certified_source_miniball,
+    ExactDirectSparseCertifiedFacetMiniballLookup
+        certified_miniball_lookup) {
+  return build_exact_direct_sparse_facet_descent_step_transient_implementation(
+      index,
+      cloud,
+      source_facet_point_ids,
+      closed_batch_squared_level,
+      locator_query_witness,
+      locator,
+      budget,
+      traversal_order,
+      certified_source_miniball,
+      certified_miniball_lookup,
+      false,
+      {});
+}
+
+detail::ExactDirectSparseFacetDescentStepTransient
+detail::
+build_exact_direct_sparse_facet_descent_step_transient_with_top_k_proposal(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const PointId> source_facet_point_ids,
+    const exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetDescentStepBudget& budget,
+    spatial::LbvhTraversalOrder traversal_order,
+    const ExactFacetMiniballResult* certified_source_miniball,
+    ExactDirectSparseCertifiedFacetMiniballLookup
+        certified_miniball_lookup,
+    std::span<const PointId> proposal_point_ids) {
+  return build_exact_direct_sparse_facet_descent_step_transient_implementation(
+      index,
+      cloud,
+      source_facet_point_ids,
+      closed_batch_squared_level,
+      locator_query_witness,
+      locator,
+      budget,
+      traversal_order,
+      certified_source_miniball,
+      certified_miniball_lookup,
+      true,
+      proposal_point_ids);
 }
 
 ExactDirectSparseFacetDescentStepResult

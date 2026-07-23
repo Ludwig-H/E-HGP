@@ -1,7 +1,9 @@
 #pragma once
 
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_step.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_facet_top_k_proposal_transcript.hpp"
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -291,6 +293,159 @@ struct ExactDirectSparseFacetDescentClosureResult {
       const ExactDirectSparseFacetDescentClosureResult&) = default;
 };
 
+inline constexpr std::uint32_t
+    direct_sparse_facet_descent_closure_top_k_proposal_consumption_schema_version =
+        1U;
+inline constexpr std::string_view
+    direct_sparse_facet_descent_closure_top_k_proposal_consumption_backend =
+        "reference_cpu";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_closure_top_k_proposal_consumption_profile =
+        "hgp_reduced";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_closure_top_k_proposal_consumption_mode =
+        "certified";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_closure_top_k_proposal_consumption_deployment_status =
+        "architecture_only";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_closure_top_k_proposal_consumption_public_status =
+        "not_claimed";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_closure_top_k_proposal_consumption_proof_basis =
+        "externally_frozen_transcript_and_key_spans_atomic_revalidation_"
+        "exact_source_facet_baseline_"
+        "proposal_pool_only_strict_pruning_complete_top_k_replay_"
+        "scientific_closure_and_operational_audit_separation_v1";
+
+inline constexpr std::size_t
+    direct_sparse_facet_descent_closure_top_k_stop_reason_count = 8U;
+
+enum class
+    ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision
+    : std::uint8_t {
+  not_validated,
+  no_closure_transcript_not_complete,
+  no_closure_metadata_mismatch,
+  no_closure_canonical_seed_shape_rejected,
+  no_closure_record_key_not_in_seed_domain,
+  no_closure_candidate_point_domain_rejected,
+  complete_exact_closure_with_proposal_consumption_audit,
+};
+
+enum class ExactDirectSparseFacetDescentClosureTopKProposalConsumptionScope
+    : std::uint8_t {
+  unspecified,
+  exact_source_facet_baseline_and_non_authoritative_proposal_pool_only,
+};
+
+// This is operational evidence about the exact top-k calls made while
+// constructing one closure.  It owns no key, candidate list, partition or
+// equality shell.  A "full scan" is a complete query whose exact spatial
+// counters report no pruned eligible point.
+struct ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit {
+  std::uint32_t schema_version{
+      direct_sparse_facet_descent_closure_top_k_proposal_consumption_schema_version};
+  std::size_t source_batch_index{};
+  exact::ExactLevel closed_batch_squared_level{};
+  ExactDirectSparsePositiveFacetLocatorSnapshotStamp
+      locator_snapshot_stamp{};
+  std::size_t canonical_seed_key_count{};
+  std::size_t transcript_record_count{};
+  std::size_t transcript_candidate_point_reference_count{};
+  std::size_t closure_build_count{};
+  std::size_t top_k_query_count{};
+  std::size_t nonempty_proposal_hit_query_count{};
+  std::size_t missing_initial_record_fallback_query_count{};
+  std::size_t explicit_empty_record_fallback_query_count{};
+  std::size_t dynamic_successor_fallback_query_count{};
+  std::size_t baseline_facet_point_reference_count{};
+  std::size_t proposal_point_reference_count{};
+  std::size_t union_point_reference_count{};
+  std::size_t deduplicated_point_reference_count{};
+  std::size_t exact_seed_distance_evaluation_count{};
+  std::size_t exact_point_distance_evaluation_count{};
+  std::size_t node_visit_count{};
+  std::size_t internal_node_expansion_count{};
+  std::size_t exact_aabb_bound_evaluation_count{};
+  std::size_t pruned_subtree_count{};
+  std::size_t pruned_eligible_point_count{};
+  std::size_t traversal_complete_query_count{};
+  std::size_t complete_query_count{};
+  std::size_t full_scan_query_count{};
+  std::size_t strict_pruning_query_count{};
+  std::size_t exhausted_query_count{};
+  std::array<
+      std::size_t,
+      direct_sparse_facet_descent_closure_top_k_stop_reason_count>
+      top_k_stop_reason_counts{};
+  bool transcript_complete_revalidated{false};
+  bool metadata_matches_requested_batch_level_and_live_locator{false};
+  bool canonical_seed_keys_revalidated{false};
+  bool record_keys_are_canonical_seed_subset{false};
+  bool candidate_point_domains_revalidated{false};
+  bool locator_snapshot_stable_during_atomic_validation{false};
+  bool every_top_k_query_used_exact_source_facet_baseline{false};
+  bool nonempty_records_passed_only_as_proposals{false};
+  bool empty_missing_and_dynamic_fallbacks_used_empty_proposal_pool{false};
+  bool exact_pool_and_spatial_work_accounted{false};
+  bool transcript_payload_persisted{false};
+  bool top_k_partition_or_shell_persisted{false};
+  bool scientific_decision_taken_from_proposal{false};
+  bool locator_state_mutated{false};
+  bool public_status_claimed{false};
+
+  friend bool operator==(
+      const ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit&,
+      const ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit&) =
+      default;
+};
+
+// Rejection keeps scientific_closure empty.  Success keeps the unmodified
+// 10.5c scientific closure in one arena and the exact proposal-consumption
+// audit above in another; neither arena retains transcript records.
+struct ExactDirectSparseFacetDescentClosureTopKProposalConsumptionResult {
+  static constexpr std::string_view backend =
+      direct_sparse_facet_descent_closure_top_k_proposal_consumption_backend;
+  static constexpr std::string_view profile =
+      direct_sparse_facet_descent_closure_top_k_proposal_consumption_profile;
+  static constexpr std::string_view mode =
+      direct_sparse_facet_descent_closure_top_k_proposal_consumption_mode;
+  static constexpr std::string_view deployment_status =
+      direct_sparse_facet_descent_closure_top_k_proposal_consumption_deployment_status;
+  static constexpr std::string_view public_status =
+      direct_sparse_facet_descent_closure_top_k_proposal_consumption_public_status;
+  static constexpr std::string_view proof_basis =
+      direct_sparse_facet_descent_closure_top_k_proposal_consumption_proof_basis;
+
+  std::uint32_t schema_version{
+      direct_sparse_facet_descent_closure_top_k_proposal_consumption_schema_version};
+  std::optional<ExactDirectSparseFacetDescentClosureResult>
+      scientific_closure;
+  ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit
+      consumption_audit{};
+  bool validation_completed_before_closure{false};
+  bool no_closure_constructed_on_rejection{false};
+  bool scientific_closure_separated_from_consumption_audit{false};
+  bool no_transcript_or_top_k_payload_persisted_in_closure{false};
+  ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision
+      decision{
+          ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision::
+              not_validated};
+  ExactDirectSparseFacetDescentClosureTopKProposalConsumptionScope scope{
+      ExactDirectSparseFacetDescentClosureTopKProposalConsumptionScope::
+          unspecified};
+
+  [[nodiscard]] bool certified_atomic_rejection() const noexcept;
+  [[nodiscard]] bool certified_exact_consumption_outcome() const noexcept;
+  [[nodiscard]] bool certified_outcome() const noexcept;
+
+  friend bool operator==(
+      const ExactDirectSparseFacetDescentClosureTopKProposalConsumptionResult&,
+      const ExactDirectSparseFacetDescentClosureTopKProposalConsumptionResult&) =
+      default;
+};
+
 struct ExactDirectSparseFacetDescentClosureVerification {
   bool trusted_inputs_certified{false};
   bool observed_storage_within_budget{false};
@@ -348,6 +503,30 @@ build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
     const exact::ExactLevel& closed_batch_squared_level,
     const ExactDirectSparseFacetWitness& locator_query_witness,
     const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetDescentClosureBudget& budget,
+    const ExactDirectSparseFacetDescentClosureConfig& config = {},
+    spatial::LbvhTraversalOrder traversal_order =
+        spatial::LbvhTraversalOrder::near_first);
+
+// Proposal-consuming wrapper for the allocation-lean canonical-key entry.
+// The transcript is fully revalidated before any ClosureBuilder exists.
+// Every exact top-k query is initialized by its complete source facet F.
+// A nonempty matching record adds P; an explicit empty record, a missing
+// initial record, or a dynamically discovered successor uses F with P empty.
+// Historical closure entry points above remain unseeded.  The transcript and
+// canonical-key spans must remain immutable and externally synchronized until
+// this synchronous call returns.
+[[nodiscard]]
+ExactDirectSparseFacetDescentClosureTopKProposalConsumptionResult
+build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys_with_top_k_proposal_transcript(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const ExactDirectSparseFacetKey> canonical_distinct_keys,
+    std::size_t source_batch_index,
+    const exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetTopKProposalTranscriptResult& transcript,
     const ExactDirectSparseFacetDescentClosureBudget& budget,
     const ExactDirectSparseFacetDescentClosureConfig& config = {},
     spatial::LbvhTraversalOrder traversal_order =

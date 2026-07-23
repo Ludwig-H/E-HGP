@@ -1177,6 +1177,16 @@ La primitive top-$K$ bornée accepte en outre une vue facultative d'incumbents. 
 
 14E ne change aucune décision 10.5c, ne matérialise ni facette supplémentaire, ni coface globale, ni Gamma, ni cellule, ni mosaïque de Delaunay d'ordre supérieur, et ne qualifie ni temps ni volume.
 
+### Transcript borné et pool exact 14F
+
+Le contrat `direct_sparse_facet_top_k_proposal_transcript` reçoit un ensemble sparse de records triés strictement par clé complète. Chaque record porte de zéro à $K$ `PointId` distincts et aucune distance, aucun cutoff ni verdict géométrique. Cinq caps bornent avant copie le nombre de records, les références des clés, les candidats, les octets physiques et les entrées logiques. Toute forme invalide ou tout cap insuffisant laisse le payload vide; le domaine du nuage et les exclusions restent volontairement non certifiés jusqu'au point d'usage exact.
+
+Pour une facette source $F$ de cardinal $K$ et une proposition $P$ d'au plus $K$ identifiants, la nouvelle primitive spatiale évalue exactement l'union dédupliquée $U=F\cup P$. Elle préflighte les $\lvert U\rvert\leq2K$ distances avant la première évaluation, conserve seulement les $K$ meilleurs couples distance--identifiant dans la heap, mais reconstruit la coquille avec tous les éléments de $U$ au cutoff. Comme $F\subseteq U$, le cutoff initial de $U$ n'est jamais supérieur à celui fourni par $F$; une proposition adversariale peut coûter jusqu'à $K$ distances exactes supplémentaires, mais elle ne peut ni dégrader cette borne géométrique, ni changer la partition finale. L'élagage demeure strict et toute égalité descend.
+
+L'enveloppe 10.5c de 14F revalide atomiquement le lot, le niveau exact, le stamp locator vivant, les clés initiales, l'inclusion des clés de records et le domaine de chaque candidat avant de créer un `ClosureBuilder`. Un rejet ne construit aucune fermeture. Sur succès, chaque requête top-$K$ utilise $F$ comme baseline; un record non vide ajoute $P$, tandis qu'un record vide, une clé initiale absente ou toute clé d'abord atteinte comme successeur dynamique utilise $P=\varnothing$, même si cette clé possède aussi un record de seed. La fermeture scientifique demeure le résultat 10.5c habituel; un audit séparé compte les hits, fallbacks, tailles de pools, distances, visites, bornes AABB, élagages, scans complets et causes d'épuisement sans conserver transcript, partition ou coquille.
+
+Ce premier raccord 14F reste hôte et n'est pas encore branché à la préparation/validation du curseur 14D. Il ne contient ni producteur CUDA, ni epoch GPU, ni digest de buffer, ni classe de difficulté utilisée par l'ordonnanceur et ne qualifie ni `warm_e2e`, ni 50 k, ni 10 M+. Le transcript sparse vaut $O(KR)$ pour $R\leq D$ records proposés et n'introduit aucune facette absente, coface globale, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;

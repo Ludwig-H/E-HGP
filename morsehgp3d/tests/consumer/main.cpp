@@ -7,6 +7,7 @@
 #include "morsehgp3d/exact/support.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_batch_executor.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_batch_plan.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_facet_top_k_proposal_transcript.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_gateway_historical_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
@@ -293,6 +294,17 @@ int main() {
           no_exclusions,
           std::span<const PointId>{installed_incumbent_ids},
           installed_top_k_budget);
+  const std::array<PointId, 1U> installed_proposal_ids{PointId{1U}};
+  const auto pooled_nearest =
+      morsehgp3d::spatial::lbvh_top_k_budgeted(
+          spatial_index,
+          cloud,
+          ExactRational3{},
+          1U,
+          no_exclusions,
+          std::span<const PointId>{installed_incumbent_ids},
+          std::span<const PointId>{installed_proposal_ids},
+          installed_top_k_budget);
   if (!nearest.shell_complete() || nearest.strict_below().size() != 0U ||
       nearest.cutoff_shell_ids().size() != 2U ||
       nearest.canonical_choice_ids().size() != 1U ||
@@ -315,7 +327,14 @@ int main() {
       incumbent_nearest.audit().supplied_incumbent_point_count != 1U ||
       incumbent_nearest.audit()
               .exact_incumbent_distance_evaluation_count !=
-          1U) {
+          1U ||
+      !pooled_nearest.complete() ||
+      pooled_nearest.partition().cutoff_squared_distance() !=
+          nearest.cutoff_squared_distance() ||
+      pooled_nearest.partition().cutoff_shell_ids().size() != 2U ||
+      pooled_nearest.audit().supplied_incumbent_point_count != 2U ||
+      pooled_nearest.audit().exact_incumbent_distance_evaluation_count !=
+          2U) {
     std::cerr << "installed spatial reference oracle changed semantics\n";
     return 1;
   }
@@ -354,9 +373,40 @@ int main() {
           {UINT64_C(0x51a7), UINT64_C(0x1002)},
           locator,
           empty_closure_budget);
+  const morsehgp3d::hierarchy::
+      ExactDirectSparseFacetTopKProposalTranscriptMetadata
+          empty_transcript_metadata{
+              0U, ExactLevel{BigInt{0}}, locator.snapshot_stamp()};
+  const morsehgp3d::hierarchy::
+      ExactDirectSparseFacetTopKProposalTranscriptBudget
+          empty_transcript_budget{};
+  const auto empty_transcript = morsehgp3d::hierarchy::
+      build_exact_direct_sparse_facet_top_k_proposal_transcript(
+          empty_transcript_metadata,
+          std::span<const morsehgp3d::hierarchy::
+              ExactDirectSparseFacetTopKProposalRecord>{},
+          empty_transcript_budget);
+  const auto empty_proposal_closure = morsehgp3d::hierarchy::
+      build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys_with_top_k_proposal_transcript(
+          spatial_index,
+          cloud,
+          std::span<const morsehgp3d::hierarchy::
+              ExactDirectSparseFacetKey>{},
+          0U,
+          ExactLevel{BigInt{0}},
+          {UINT64_C(0x51a7), UINT64_C(0x1002)},
+          locator,
+          empty_transcript,
+          empty_closure_budget);
   if (!empty_canonical_closure
            .certified_complete_relative_positive_closure() ||
-      empty_canonical_closure.counters.input_seed_reference_count != 0U) {
+      empty_canonical_closure.counters.input_seed_reference_count != 0U ||
+      !empty_transcript.complete_proposal_transcript() ||
+      !empty_proposal_closure.certified_exact_consumption_outcome() ||
+      !empty_proposal_closure.scientific_closure.has_value() ||
+      !empty_proposal_closure.scientific_closure
+           ->certified_complete_relative_positive_closure() ||
+      empty_proposal_closure.consumption_audit.top_k_query_count != 0U) {
     std::cerr << "installed canonical closure entry changed semantics\n";
     return 1;
   }

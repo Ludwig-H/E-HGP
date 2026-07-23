@@ -52,4 +52,25 @@ build_exact_direct_sparse_facet_descent_step_transient(
     ExactDirectSparseCertifiedFacetMiniballLookup
         certified_miniball_lookup = {});
 
+// Phase 14F proposal seam.  Unlike the historical entry point above, this
+// always seeds top-k with the complete source facet F, including when the
+// proposal P is empty.  The spatial core validates F and P, evaluates every
+// distinct PointId in F union P exactly once, keeps only the exact best K as
+// its provisional heap and still completes the strict-pruning traversal and
+// equality shell.  The proposal therefore cannot replace the known F bound.
+[[nodiscard]] ExactDirectSparseFacetDescentStepTransient
+build_exact_direct_sparse_facet_descent_step_transient_with_top_k_proposal(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const spatial::PointId> source_facet_point_ids,
+    const exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetDescentStepBudget& budget,
+    spatial::LbvhTraversalOrder traversal_order,
+    const ExactFacetMiniballResult* certified_source_miniball,
+    ExactDirectSparseCertifiedFacetMiniballLookup
+        certified_miniball_lookup,
+    std::span<const spatial::PointId> proposal_point_ids);
+
 }  // namespace morsehgp3d::hierarchy::detail

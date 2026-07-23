@@ -214,6 +214,7 @@ class TopKPartition {
       std::span<const PointId> incumbent_point_ids,
       ExactLbvhTopKBudget budget,
       LbvhTraversalOrder traversal_order);
+  friend class ExactBudgetedLbvhTopKResult;
   friend class gpu::SpatialLbvhContext;
 
   bool complete_;

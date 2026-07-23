@@ -201,6 +201,13 @@ void check_budgeted_top_matches(
           audit.peak_retained_cutoff_shell_entry_count <=
               budget.maximum_cutoff_shell_entry_count,
       message + " respects every deterministic budget");
+  check(
+      audit.pruned_subtree_count ==
+              actual.partition().query_counters().pruned_subtree_count &&
+          audit.pruned_eligible_point_count ==
+              actual.partition().query_counters()
+                  .pruned_eligible_point_count,
+      message + " preserves pruning work in its operational audit");
   check_top_matches(actual.partition(), reference, message + " partition");
 }
 
@@ -1122,6 +1129,54 @@ void test_budgeted_top_k_exactness_and_fail_closed_limits() {
               line.partition().eligible_point_count(),
       "a complete budgeted query accounts for every eligible leaf");
 
+  std::vector<CertifiedPoint3> pruned_overflow_points{
+      point(-1.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0)};
+  for (std::size_t point_index = 0U; point_index < 32U; ++point_index) {
+    pruned_overflow_points.push_back(
+        point(32.0 + static_cast<double>(point_index), 0.0, 0.0));
+  }
+  const CanonicalPointCloud pruned_overflow_cloud =
+      canonical_cloud(pruned_overflow_points);
+  const MortonLbvhIndex pruned_overflow_index =
+      MortonLbvhIndex::build(pruned_overflow_cloud);
+  const ExclusionSet pruned_overflow_exclusions =
+      empty_exclusions(pruned_overflow_cloud);
+  const ExactLbvhTopKBudget pruned_overflow_budget{
+      4096U,
+      4096U,
+      4096U,
+      4096U,
+      128U,
+      1U,
+      1U};
+  const ExactBudgetedLbvhTopKResult pruned_overflow =
+      lbvh_top_k_budgeted(
+          pruned_overflow_index,
+          pruned_overflow_cloud,
+          origin(),
+          1U,
+          pruned_overflow_exclusions,
+          pruned_overflow_budget,
+          LbvhTraversalOrder::near_first);
+  check_budgeted_top_exhaustion(
+      pruned_overflow,
+      pruned_overflow_budget,
+      ExactLbvhTopKStopReason::cutoff_shell_entry_limit,
+      "the strictly pruned final-shell-overflow query");
+  check(
+      pruned_overflow.audit().traversal_complete &&
+          pruned_overflow.audit().pruned_subtree_count != 0U &&
+          pruned_overflow.audit().pruned_eligible_point_count != 0U &&
+          pruned_overflow.audit()
+                  .provisional_cutoff_shell_overflow_count !=
+              0U &&
+          pruned_overflow.audit().exact_point_distance_evaluation_count +
+                  pruned_overflow.audit().pruned_eligible_point_count ==
+              pruned_overflow_cloud.size(),
+      "an exhausted shell result preserves its strict-pruning audit "
+      "without publishing a partition");
+
   check_throws<std::out_of_range>(
       [&equality_index, &equality_cloud, &equality_exclusions,
        &generous_budget] {
@@ -1383,6 +1438,255 @@ void test_budgeted_top_k_exact_incumbent_seeding() {
       "full and partial incumbent heaps preserve every member of an equal cutoff shell");
 }
 
+void test_budgeted_top_k_baseline_proposal_union() {
+  constexpr std::size_t line_point_count = 64U;
+  const CanonicalPointCloud line_cloud =
+      nonnegative_line_cloud(line_point_count);
+  const MortonLbvhIndex line_index =
+      MortonLbvhIndex::build(line_cloud);
+  const ExclusionSet no_exclusions =
+      empty_exclusions(line_cloud);
+  const TopKPartition line_reference = brute_force_top_k(
+      line_cloud, origin(), 2U, no_exclusions);
+  const ExactLbvhTopKBudget line_budget{
+      4096U,
+      4096U,
+      4096U,
+      4096U,
+      128U,
+      2U,
+      2U};
+  const std::array<PointId, 2> exact_baseline{
+      PointId{0}, PointId{1}};
+  const std::array<PointId, 0> empty_proposal{};
+  const std::array<PointId, 2> adversarial_proposal{
+      PointId{62}, PointId{63}};
+
+  const ExactBudgetedLbvhTopKResult baseline_only =
+      lbvh_top_k_budgeted(
+          line_index,
+          line_cloud,
+          origin(),
+          2U,
+          no_exclusions,
+          std::span<const PointId>{exact_baseline},
+          std::span<const PointId>{empty_proposal},
+          line_budget,
+          LbvhTraversalOrder::far_first);
+  const ExactBudgetedLbvhTopKResult adversarial_union =
+      lbvh_top_k_budgeted(
+          line_index,
+          line_cloud,
+          origin(),
+          2U,
+          no_exclusions,
+          std::span<const PointId>{exact_baseline},
+          std::span<const PointId>{adversarial_proposal},
+          line_budget,
+          LbvhTraversalOrder::far_first);
+  check_budgeted_top_matches(
+      baseline_only,
+      line_reference,
+      line_budget,
+      "the exact baseline-only query");
+  check_budgeted_top_matches(
+      adversarial_union,
+      line_reference,
+      line_budget,
+      "the exact baseline plus adversarial proposal query");
+  check(
+      baseline_only.audit().node_visit_count ==
+              adversarial_union.audit().node_visit_count &&
+          baseline_only.audit().internal_node_expansion_count ==
+              adversarial_union.audit()
+                  .internal_node_expansion_count &&
+          baseline_only.audit().exact_aabb_bound_evaluation_count ==
+              adversarial_union.audit()
+                  .exact_aabb_bound_evaluation_count &&
+          adversarial_union.audit().supplied_incumbent_point_count == 4U &&
+          adversarial_union.audit()
+                  .exact_incumbent_distance_evaluation_count ==
+              4U &&
+          adversarial_union.audit().peak_best_neighbor_entry_count == 2U &&
+          adversarial_union.partition().query_counters()
+                  .pruned_eligible_point_count ==
+              line_point_count - 4U,
+      "an adversarial proposal cannot worsen the exact baseline cutoff "
+      "or grow the K-neighbor heap");
+
+  const std::array<PointId, 2> overlapping_proposal{
+      PointId{1}, PointId{62}};
+  const ExactBudgetedLbvhTopKResult overlapping_union =
+      lbvh_top_k_budgeted(
+          line_index,
+          line_cloud,
+          origin(),
+          2U,
+          no_exclusions,
+          std::span<const PointId>{exact_baseline},
+          std::span<const PointId>{overlapping_proposal},
+          line_budget,
+          LbvhTraversalOrder::far_first);
+  check_budgeted_top_matches(
+      overlapping_union,
+      line_reference,
+      line_budget,
+      "the overlapping baseline/proposal union");
+  check(
+      overlapping_union.audit().supplied_incumbent_point_count == 3U &&
+          overlapping_union.audit()
+                  .exact_incumbent_distance_evaluation_count ==
+              3U,
+      "an F/P overlap is evaluated exactly once");
+
+  ExactLbvhTopKBudget short_union_budget = line_budget;
+  short_union_budget.maximum_exact_point_distance_evaluation_count = 3U;
+  const ExactBudgetedLbvhTopKResult short_union =
+      lbvh_top_k_budgeted(
+          line_index,
+          line_cloud,
+          origin(),
+          2U,
+          no_exclusions,
+          std::span<const PointId>{exact_baseline},
+          std::span<const PointId>{adversarial_proposal},
+          short_union_budget,
+          LbvhTraversalOrder::far_first);
+  check_budgeted_top_exhaustion(
+      short_union,
+      short_union_budget,
+      ExactLbvhTopKStopReason::exact_point_distance_evaluation_limit,
+      "the one-short F-union-P exact-distance budget");
+  check(
+      short_union.audit().supplied_incumbent_point_count == 4U &&
+          short_union.audit()
+                  .exact_incumbent_distance_evaluation_count ==
+              0U &&
+          short_union.audit().exact_point_distance_evaluation_count == 0U &&
+          short_union.audit().node_visit_count == 0U,
+      "an F-union-P cap below its distinct cardinality fails before "
+      "partial evaluation");
+
+  const std::array<PointId, 1> short_baseline{PointId{0}};
+  const std::array<PointId, 2> repeated_baseline{
+      PointId{0}, PointId{0}};
+  const std::array<PointId, 2> repeated_proposal{
+      PointId{62}, PointId{62}};
+  const std::array<PointId, 3> oversized_proposal{
+      PointId{2}, PointId{3}, PointId{4}};
+  check_throws<std::invalid_argument>(
+      [&line_index, &line_cloud, &no_exclusions, &short_baseline,
+       &empty_proposal, &line_budget] {
+        static_cast<void>(lbvh_top_k_budgeted(
+            line_index,
+            line_cloud,
+            origin(),
+            2U,
+            no_exclusions,
+            std::span<const PointId>{short_baseline},
+            std::span<const PointId>{empty_proposal},
+            line_budget));
+      },
+      "an exact baseline shorter than K is rejected");
+  check_throws<std::invalid_argument>(
+      [&line_index, &line_cloud, &no_exclusions, &repeated_baseline,
+       &empty_proposal, &line_budget] {
+        static_cast<void>(lbvh_top_k_budgeted(
+            line_index,
+            line_cloud,
+            origin(),
+            2U,
+            no_exclusions,
+            std::span<const PointId>{repeated_baseline},
+            std::span<const PointId>{empty_proposal},
+            line_budget));
+      },
+      "a repeated exact-baseline PointId is rejected");
+  check_throws<std::invalid_argument>(
+      [&line_index, &line_cloud, &no_exclusions, &exact_baseline,
+       &repeated_proposal, &line_budget] {
+        static_cast<void>(lbvh_top_k_budgeted(
+            line_index,
+            line_cloud,
+            origin(),
+            2U,
+            no_exclusions,
+            std::span<const PointId>{exact_baseline},
+            std::span<const PointId>{repeated_proposal},
+            line_budget));
+      },
+      "a repeated proposal PointId is rejected");
+  check_throws<std::invalid_argument>(
+      [&line_index, &line_cloud, &no_exclusions, &exact_baseline,
+       &oversized_proposal, &line_budget] {
+        static_cast<void>(lbvh_top_k_budgeted(
+            line_index,
+            line_cloud,
+            origin(),
+            2U,
+            no_exclusions,
+            std::span<const PointId>{exact_baseline},
+            std::span<const PointId>{oversized_proposal},
+            line_budget));
+      },
+      "a proposal longer than K is rejected");
+
+  const std::array<CertifiedPoint3, 6> equality_input{
+      point(-1.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(0.0, -1.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(0.0, 0.0, -1.0),
+      point(0.0, 0.0, 1.0)};
+  const CanonicalPointCloud equality_cloud =
+      canonical_cloud(equality_input);
+  const MortonLbvhIndex equality_index =
+      MortonLbvhIndex::build(equality_cloud);
+  const ExclusionSet equality_exclusions =
+      empty_exclusions(equality_cloud);
+  const TopKPartition equality_reference = brute_force_top_k(
+      equality_cloud, origin(), 3U, equality_exclusions);
+  const std::array<PointId, 3> equality_baseline{
+      PointId{0}, PointId{1}, PointId{2}};
+  const std::array<PointId, 3> equality_proposal{
+      PointId{3}, PointId{4}, PointId{5}};
+  const ExactLbvhTopKBudget equality_budget{
+      4096U,
+      4096U,
+      4096U,
+      4096U,
+      128U,
+      3U,
+      6U};
+  const ExactBudgetedLbvhTopKResult equality_union =
+      lbvh_top_k_budgeted(
+          equality_index,
+          equality_cloud,
+          origin(),
+          3U,
+          equality_exclusions,
+          std::span<const PointId>{equality_baseline},
+          std::span<const PointId>{equality_proposal},
+          equality_budget,
+          LbvhTraversalOrder::far_first);
+  check_budgeted_top_matches(
+      equality_union,
+      equality_reference,
+      equality_budget,
+      "the six-way F-union-P equality query");
+  check(
+      equality_union.audit().supplied_incumbent_point_count == 6U &&
+          equality_union.audit()
+                  .exact_incumbent_distance_evaluation_count ==
+              6U &&
+          equality_union.audit().peak_best_neighbor_entry_count == 3U &&
+          equality_union.partition().cutoff_shell_ids().size() == 6U &&
+          equality_union.partition().query_counters()
+                  .pruned_subtree_count ==
+              0U,
+      "the initial F-union-P heap retains every member of its exact cutoff shell");
+}
+
 void test_namespace_binding_and_move_fail_closed() {
   const std::array<CertifiedPoint3, 4> input{
       point(-2.0, 0.0, 1.0),
@@ -1486,6 +1790,7 @@ int main() {
   test_strict_pruning_bulk_classification_and_exclusions();
   test_budgeted_top_k_exactness_and_fail_closed_limits();
   test_budgeted_top_k_exact_incumbent_seeding();
+  test_budgeted_top_k_baseline_proposal_union();
   test_namespace_binding_and_move_fail_closed();
 
   if (failures != 0) {

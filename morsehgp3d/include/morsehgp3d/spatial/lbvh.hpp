@@ -87,7 +87,7 @@ enum class ExactLbvhTopKStopReason : std::uint8_t {
 // decreases, and is a terminal exhaustion otherwise.
 // If several zero/short caps block the same transition, the deterministic
 // priority is best-neighbor, frontier, then root AABB during preflight, and
-// then incumbent distance when proposals are supplied.  At an internal node,
+// then exact seed distance when seeds are supplied.  At an internal node,
 // the priority is internal expansion, frontier, then child AABBs.
 struct ExactLbvhTopKBudget {
   std::size_t maximum_node_visit_count{};
@@ -113,6 +113,8 @@ struct ExactLbvhTopKAudit {
   std::size_t exact_point_distance_evaluation_count{};
   std::size_t supplied_incumbent_point_count{};
   std::size_t exact_incumbent_distance_evaluation_count{};
+  std::size_t pruned_subtree_count{};
+  std::size_t pruned_eligible_point_count{};
   std::size_t peak_frontier_entry_count{};
   std::size_t peak_best_neighbor_entry_count{};
   std::size_t peak_retained_cutoff_shell_entry_count{};
@@ -160,6 +162,16 @@ class ExactBudgetedLbvhTopKResult {
       ExactLbvhTopKBudget requested_budget,
       ExactLbvhTopKAudit audit,
       std::optional<TopKPartition> partition);
+  [[nodiscard]] static ExactBudgetedLbvhTopKResult run_with_exact_seeds(
+      const MortonLbvhIndex& index,
+      const CanonicalPointCloud& cloud,
+      const exact::ExactRational3& query,
+      std::size_t requested_rank,
+      const ExclusionSet& exclusions,
+      std::span<const PointId> seed_point_ids,
+      std::span<const PointId> additional_seed_point_ids,
+      ExactLbvhTopKBudget budget,
+      LbvhTraversalOrder traversal_order);
 
   ExactLbvhTopKStatus status_{ExactLbvhTopKStatus::not_certified};
   ExactLbvhTopKStopReason stop_reason_{ExactLbvhTopKStopReason::none};
@@ -182,6 +194,16 @@ class ExactBudgetedLbvhTopKResult {
       std::size_t requested_rank,
       const ExclusionSet& exclusions,
       std::span<const PointId> incumbent_point_ids,
+      ExactLbvhTopKBudget budget,
+      LbvhTraversalOrder traversal_order);
+  friend ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
+      const MortonLbvhIndex& index,
+      const CanonicalPointCloud& cloud,
+      const exact::ExactRational3& query,
+      std::size_t requested_rank,
+      const ExclusionSet& exclusions,
+      std::span<const PointId> baseline_point_ids,
+      std::span<const PointId> proposal_point_ids,
       ExactLbvhTopKBudget budget,
       LbvhTraversalOrder traversal_order);
 };
@@ -316,6 +338,7 @@ class MortonLbvhIndex {
   friend class hierarchy::ExactPairSupportStreamBuilder;
   friend class hierarchy::ExactHigherSupportStreamBuilder;
   friend class hierarchy::ExactDirectSparseFirstIncidenceBuilder;
+  friend class ExactBudgetedLbvhTopKResult;
   friend class gpu::K1BoruvkaCandidateContext;
   friend class gpu::PairSupportPhiContext;
   friend class gpu::SpatialLbvhContext;
@@ -359,6 +382,21 @@ class MortonLbvhIndex {
     std::size_t requested_rank,
     const ExclusionSet& exclusions,
     std::span<const PointId> incumbent_point_ids,
+    ExactLbvhTopKBudget budget,
+    LbvhTraversalOrder traversal_order = LbvhTraversalOrder::near_first);
+
+// The baseline must contain exactly requested_rank distinct eligible PointIds,
+// and the proposal is also internally distinct.  The two sets may overlap.
+// Exact replay evaluates every ID in their union once, retains only its best K
+// neighbors, and cannot initialize a worse cutoff than the baseline.
+[[nodiscard]] ExactBudgetedLbvhTopKResult lbvh_top_k_budgeted(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    const exact::ExactRational3& query,
+    std::size_t requested_rank,
+    const ExclusionSet& exclusions,
+    std::span<const PointId> baseline_point_ids,
+    std::span<const PointId> proposal_point_ids,
     ExactLbvhTopKBudget budget,
     LbvhTraversalOrder traversal_order = LbvhTraversalOrder::near_first);
 

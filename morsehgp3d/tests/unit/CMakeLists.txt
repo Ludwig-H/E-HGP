@@ -683,6 +683,26 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_sparse_facet_top_k_proposal_transcript_tests
+  test_hierarchy_direct_sparse_facet_top_k_proposal_transcript.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_sparse_facet_top_k_proposal_transcript_tests
+  PRIVATE morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_facet_top_k_proposal_transcript_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_sparse_facet_top_k_proposal_transcript_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_pair_support_stream_codec_tests
   test_hierarchy_pair_support_stream_codec.cpp
 )
@@ -1203,6 +1223,7 @@ set(
   morsehgp3d_hierarchy_direct_morse_forest_journal_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_plan_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_executor_tests
+  morsehgp3d_hierarchy_direct_sparse_facet_top_k_proposal_transcript_tests
   morsehgp3d_hierarchy_pair_support_stream_codec_tests
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
@@ -2034,6 +2055,11 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_facet_descent_batch_executor
   COMMAND morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_executor_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_sparse_facet_top_k_proposal_transcript
+  COMMAND
+    morsehgp3d_hierarchy_direct_sparse_facet_top_k_proposal_transcript_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_pair_support_stream_codec

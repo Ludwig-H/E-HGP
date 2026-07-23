@@ -44,9 +44,21 @@ L'audit LP64 mesure 96 octets par record de graine et 88 octets par clé. La voi
 
 Le socle spatial accepte aussi des incumbents top-$K$ facultatifs. Ils sont validés, leurs distances sont recalculées exactement et imputées au budget total, puis ils ne servent qu'à initialiser la borne de la traversée exacte. Une bonne proposition peut augmenter l'élagage strict; une proposition adversariale conserve exactement la même partition. La coquille d'égalité reste complète. Le transcript par lot, les classes de difficulté observées et le producteur GPU restent à brancher; aucun compteur ou digest de proposition ne devient une décision scientifique.
 
+## Incrément 14F livré — transcript sparse et consommation exacte
+
+Le nouveau transcript hôte conserve un ensemble sparse de records triés par clé complète, chacun contenant au plus $K$ identifiants proposés. Il ne porte aucune distance ou décision. Les populations de records, références de clés, candidats, octets et entrées logiques sont préflightées avant copie; toute erreur conserve un payload vide. Le domaine des candidats est volontairement différé jusqu'à l'enveloppe de fermeture, qui revalide aussi le lot, le niveau exact, le stamp locator et l'inclusion des clés avant de créer un seul nœud 10.5c.
+
+Chaque requête 14F utilise la facette source $F$ comme baseline exacte et une proposition facultative $P$. L'union $F\cup P$ contient au plus $2K$ identifiants distincts, dont les distances sont imputées une seule fois au budget. La heap reste de taille $K$, mais la coquille initiale conserve tous les co-minimiseurs. Une proposition adversariale ne peut pas produire un cutoff pire que $F$, et la traversée exacte continue avec prune strict et descente à égalité.
+
+La fermeture scientifique et l'audit opérationnel sont deux payloads distincts. L'audit compte les lignes utilisées ou absentes, les fallbacks dynamiques, les tailles de pools, les distances, visites, expansions, bornes, élagages, scans complets et épuisements. Le graphe ne retient ni transcript, ni candidat, ni partition top-$K$, ni coquille. Les entrées historiques de 10.5c restent non amorcées.
+
+Ce raccord ne fait encore partie ni de `prepare_next`, ni de `commit_prepared` dans la session 14D. Il ne lance aucun kernel GPU et ne possède ni epoch, ni digest de contexte, ni scheduler par difficulté. Il ne qualifie ni le p95 50 k, ni la capacité 10 M+, ni un statut public.
+
+La validation courte finale du 23 juillet 2026 passe les trois CTests transcript, spatial et fermeture sous GCC Release en 0,18 s et sous Clang 18 Release en 0,13 s. Le garde statique 10.5c passe également. L'installation/export puis le consumer externe passent 1/1 avec des appels réels au constructeur de transcript, au pool exact $F\cup P$ et à l'enveloppe vide de fermeture. Aucun benchmark, test massif, sanitizer, GPU ou GCP n'a été lancé.
+
 ## Priorités de développement
 
-1. brancher un transcript borné de propositions GPU sur l'incumbent exact 14E et garder son audit séparé du delta certifié;
+1. raccorder le transcript 14F à la préparation et au rejeu du lot courant dans la session 14D, puis seulement à un producteur GPU borné;
 2. réutiliser les capacités restantes de scratch sans conserver de graphe ou d'objet scientifique entre lots;
 3. ajouter l'instrumentation `warm_e2e` après ces réductions structurelles;
 4. rendre les deltas, chunks et checkpoints durables avant toute campagne massive.

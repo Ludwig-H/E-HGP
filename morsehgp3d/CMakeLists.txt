@@ -684,6 +684,48 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_sparse_facet_top_k_proposal_transcript
+  STATIC
+    src/cpu/hierarchy/direct_sparse_facet_top_k_proposal_transcript.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
+  ALIAS morsehgp3d_direct_sparse_facet_top_k_proposal_transcript
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_facet_top_k_proposal_transcript
+  PROPERTIES
+    EXPORT_NAME direct_sparse_facet_top_k_proposal_transcript
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_facet_top_k_proposal_transcript PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_facet_top_k_proposal_transcript
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_facet_top_k_proposal_transcript
+  PUBLIC
+    morsehgp3d::direct_sparse_positive_facet_locator
+    morsehgp3d::exact
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_facet_top_k_proposal_transcript PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_facet_top_k_proposal_transcript
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_sparse_facet_descent_closure
   STATIC
     src/cpu/hierarchy/direct_sparse_facet_descent_closure.cpp
@@ -1940,6 +1982,7 @@ install(
     morsehgp3d_direct_morse_industrial_plan
     morsehgp3d_direct_sparse_facet_descent_batch_plan
     morsehgp3d_direct_sparse_facet_descent_batch_executor
+    morsehgp3d_direct_sparse_facet_top_k_proposal_transcript
     morsehgp3d_pair_support_codec
     morsehgp3d_hierarchy
     morsehgp3d_sanitizers

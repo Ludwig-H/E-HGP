@@ -633,6 +633,16 @@ Une requête top-$K$ bornée peut recevoir des incumbents non scientifiques. Cha
 
 Les futurs epochs, digests, classes de difficulté et compteurs GPU appartiennent à un audit opérationnel séparé. Ils ne participent ni à l'égalité du delta 14D, ni au commit scientifique. 14E ne revendique aucune exécution GPU, latence, capacité massive ou promotion publique.
 
+### 9.20 Transcript de propositions top-K recertifié
+
+Un transcript 14F est un payload `proposal_only` borné et sparse, ordonné strictement par clé complète. Un record contient au plus $K$ `PointId` distincts et ne contient aucune distance ou décision scientifique. La validation structurelle complète et tous les préflights de capacité précèdent la copie du payload; un rejet ne publie aucun préfixe. Le caller garde le span source immutable et sérialise ses writers pendant validation et copie, qui ne constituent pas un mécanisme de synchronisation. Cette première version lie le transcript à `source_batch_index`, au niveau fermé exact et au stamp complet du locator. Elle ne possède encore ni epoch de contexte GPU, ni digest de buffer et ne prétend pas être une sortie CUDA.
+
+Au point d'usage, les clés canoniques distinctes du lot sont revalidées contre le nuage, chaque clé de record doit appartenir à cet ensemble et chaque candidat doit appartenir au namespace de points vivant. Toute incohérence rejette atomiquement l'enveloppe avant la construction de 10.5c. Le locator doit conserver le même stamp pendant cette validation et pendant la fermeture. Une clé sans record, un record vide ou un successeur découvert dynamiquement n'est pas une erreur et utilise une proposition vide.
+
+Pour chaque requête exacte, la facette source complète $F$ fournit une baseline de cardinal $K$ et le transcript fournit $P$ avec $\lvert P\rvert\leq K$. Les doublons internes sont interdits, le recouvrement entre $F$ et $P$ est dédupliqué, et chaque identifiant de $F\cup P$ est évalué exactement une fois sous le budget spatial existant. La heap ne dépasse jamais $K$ entrées. Tous les co-minimiseurs de l'union au cutoff initial alimentent la coquille, puis le parcours LBVH exact descend les bornes égales et ne prune que strictement. La proposition ne certifie ni rang, ni cutoff, ni successeur, ni baisse stricte, ni carrier.
+
+La sortie sépare une fermeture scientifique 10.5c inchangée d'un audit opérationnel. L'audit peut conserver des comptes exacts de pools, distances, visites, expansions, bornes, élagages et épuisements, mais aucun record de transcript, candidat, `TopKPartition` ou shell. Les API historiques 10.5c restent non amorcées. Ce raccord hôte n'est pas encore le protocole transactionnel de préparation/commit de 14D et ne promeut aucun statut de déploiement ou statut public.
+
 ## 10. Événements simultanés
 
 Des centres distincts peuvent avoir exactement le même niveau. Une exécution séquentielle créerait des bifurcations binaires artificielles et pourrait changer les morphismes verticaux.

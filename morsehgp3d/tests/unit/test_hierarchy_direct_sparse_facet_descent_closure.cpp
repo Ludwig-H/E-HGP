@@ -25,6 +25,18 @@ using morsehgp3d::spatial::LbvhTraversalOrder;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
 
+using ProposalConsumptionDecision =
+    ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision;
+using ProposalConsumptionResult =
+    ExactDirectSparseFacetDescentClosureTopKProposalConsumptionResult;
+using ProposalRecord = ExactDirectSparseFacetTopKProposalRecord;
+using ProposalTranscriptBudget =
+    ExactDirectSparseFacetTopKProposalTranscriptBudget;
+using ProposalTranscriptMetadata =
+    ExactDirectSparseFacetTopKProposalTranscriptMetadata;
+using ProposalTranscriptResult =
+    ExactDirectSparseFacetTopKProposalTranscriptResult;
+
 constexpr std::uint64_t authority_id = UINT64_C(0x105c);
 int failures = 0;
 
@@ -133,6 +145,155 @@ generous_closure_budget() {
       33U,
       generous_step_budget(),
   };
+}
+
+[[nodiscard]] ProposalRecord proposal_record(
+    const ExactDirectSparseFacetKey& source_facet_key,
+    std::initializer_list<PointId> candidate_point_ids) {
+  ProposalRecord result;
+  result.source_facet_key = source_facet_key;
+  result.candidate_point_count = candidate_point_ids.size();
+  std::copy(
+      candidate_point_ids.begin(),
+      candidate_point_ids.end(),
+      result.candidate_point_ids.begin());
+  return result;
+}
+
+[[nodiscard]] ProposalTranscriptBudget exact_proposal_transcript_budget(
+    std::span<const ProposalRecord> records) {
+  std::size_t facet_key_point_reference_count = 0U;
+  std::size_t candidate_point_reference_count = 0U;
+  for (const ProposalRecord& record : records) {
+    facet_key_point_reference_count +=
+        record.source_facet_key.point_count;
+    candidate_point_reference_count += record.candidate_point_count;
+  }
+  return {
+      records.size(),
+      facet_key_point_reference_count,
+      candidate_point_reference_count,
+      records.size() * sizeof(ProposalRecord),
+      records.size() + facet_key_point_reference_count +
+          candidate_point_reference_count,
+  };
+}
+
+[[nodiscard]] ProposalTranscriptResult proposal_transcript(
+    std::size_t source_batch_index,
+    const ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    std::span<const ProposalRecord> records) {
+  // Keep this target isolated behind the closure public library.  The
+  // transcript target tests its builder separately; these fixtures materialize
+  // a complete payload so that the closure must independently revalidate it.
+  ProposalTranscriptResult result;
+  result.metadata = ProposalTranscriptMetadata{
+      source_batch_index,
+      closed_batch_squared_level,
+      locator.snapshot_stamp(),
+  };
+  result.requested_budget = exact_proposal_transcript_budget(records);
+  result.input_proposal_record_count = records.size();
+  result.required_facet_key_point_reference_count =
+      result.requested_budget.maximum_facet_key_point_reference_count;
+  result.required_candidate_point_reference_count =
+      result.requested_budget.maximum_candidate_point_reference_count;
+  result.required_payload_byte_count =
+      result.requested_budget.maximum_payload_byte_count;
+  result.required_logical_storage_entry_count =
+      result.requested_budget.maximum_logical_storage_entry_count;
+  result.facet_cardinality =
+      records.empty() ? 0U : records.front().source_facet_key.point_count;
+  result.published_payload_byte_count =
+      result.required_payload_byte_count;
+  result.published_logical_storage_entry_count =
+      result.required_logical_storage_entry_count;
+  result.proposal_records.assign(records.begin(), records.end());
+  result.metadata_shape_validated = true;
+  result.budget_preflight_completed = true;
+  result.budget_preflight_satisfied = true;
+  result.every_full_key_validated = true;
+  result.homogeneous_facet_cardinality_validated = true;
+  result.records_strictly_sorted_by_full_key = true;
+  result.full_keys_unique = true;
+  result.candidate_counts_within_k = true;
+  result.candidate_point_ids_distinct = true;
+  result.unused_candidate_slots_zero = true;
+  result.input_validation_atomic = true;
+  result.payload_published_only_after_full_validation = true;
+  result.no_partial_proposal_payload_published = true;
+  result.proposal_only = true;
+  result.decision =
+      records.empty()
+          ? ExactDirectSparseFacetTopKProposalTranscriptDecision::
+                complete_empty_proposal_transcript
+          : ExactDirectSparseFacetTopKProposalTranscriptDecision::
+                complete_validated_proposal_transcript;
+  result.scope = ExactDirectSparseFacetTopKProposalTranscriptScope::
+      bounded_structurally_validated_incumbent_proposals_by_full_facet_key_only;
+  return result;
+}
+
+[[nodiscard]] ProposalConsumptionResult build_proposal_closure(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::span<const ExactDirectSparseFacetKey> canonical_distinct_keys,
+    std::size_t source_batch_index,
+    const ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparseFacetWitness& query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ProposalTranscriptResult& transcript,
+    const ExactDirectSparseFacetDescentClosureBudget& budget) {
+  return build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys_with_top_k_proposal_transcript(
+      index,
+      cloud,
+      canonical_distinct_keys,
+      source_batch_index,
+      closed_batch_squared_level,
+      query_witness,
+      locator,
+      transcript,
+      budget);
+}
+
+[[nodiscard]] bool same_scientific_closure_graph(
+    const ExactDirectSparseFacetDescentClosureResult& left,
+    const ExactDirectSparseFacetDescentClosureResult& right) {
+  return left.closed_batch_squared_level ==
+             right.closed_batch_squared_level &&
+         left.locator_query_witness == right.locator_query_witness &&
+         left.locator_snapshot_stamp == right.locator_snapshot_stamp &&
+         left.common_facet_cardinality == right.common_facet_cardinality &&
+         left.nodes == right.nodes && left.edges == right.edges &&
+         left.seed_projections == right.seed_projections &&
+         left.contradiction_witness == right.contradiction_witness &&
+         left.disposition == right.disposition &&
+         left.decision == right.decision && left.scope == right.scope;
+}
+
+void check_atomic_proposal_rejection(
+    const ProposalConsumptionResult& result,
+    ProposalConsumptionDecision expected_decision,
+    const ExactDirectSparsePositiveFacetLocatorSnapshotStamp&
+        expected_locator_stamp,
+    const std::string& context) {
+  check(
+      result.decision == expected_decision &&
+          result.certified_atomic_rejection() &&
+          result.certified_outcome() &&
+          !result.scientific_closure.has_value() &&
+          result.validation_completed_before_closure &&
+          result.no_closure_constructed_on_rejection &&
+          result.no_transcript_or_top_k_payload_persisted_in_closure &&
+          result.consumption_audit.closure_build_count == 0U &&
+          result.consumption_audit.locator_snapshot_stamp ==
+              expected_locator_stamp &&
+          !result.consumption_audit.transcript_payload_persisted &&
+          !result.consumption_audit.top_k_partition_or_shell_persisted &&
+          !result.consumption_audit.scientific_decision_taken_from_proposal &&
+          !result.consumption_audit.locator_state_mutated,
+      context);
 }
 
 [[nodiscard]] bool fresh_verification_closes(
@@ -301,6 +462,471 @@ struct ChainFixture {
         "the six sorted fixture points preserve canonical ids 0 through 5");
   }
 };
+
+void test_top_k_proposal_chain_consumption_and_fallbacks() {
+  ChainFixture fixture;
+  constexpr std::size_t source_batch_index = 17U;
+  const ExactLevel closed_level = level(52);
+  const std::array<ExactDirectSparseFacetKey, 1U> canonical_keys{
+      fixture.f0,
+  };
+  const std::array<ProposalRecord, 0U> empty_records{};
+  const std::array<ProposalRecord, 1U> useful_records{
+      proposal_record(fixture.f0, {3U, 5U}),
+  };
+  const std::array<ProposalRecord, 1U> adversarial_records{
+      proposal_record(fixture.f0, {0U, 4U}),
+  };
+
+  const ProposalTranscriptResult empty_transcript = proposal_transcript(
+      source_batch_index,
+      closed_level,
+      fixture.locator,
+      empty_records);
+  const ProposalTranscriptResult useful_transcript = proposal_transcript(
+      source_batch_index,
+      closed_level,
+      fixture.locator,
+      useful_records);
+  const ProposalTranscriptResult adversarial_transcript =
+      proposal_transcript(
+          source_batch_index,
+          closed_level,
+          fixture.locator,
+          adversarial_records);
+  const ProposalConsumptionResult baseline = build_proposal_closure(
+      fixture.index,
+      fixture.cloud,
+      canonical_keys,
+      source_batch_index,
+      closed_level,
+      fixture.query_witness,
+      fixture.locator,
+      empty_transcript,
+      fixture.budget);
+  const ProposalConsumptionResult useful = build_proposal_closure(
+      fixture.index,
+      fixture.cloud,
+      canonical_keys,
+      source_batch_index,
+      closed_level,
+      fixture.query_witness,
+      fixture.locator,
+      useful_transcript,
+      fixture.budget);
+  const ProposalConsumptionResult adversarial = build_proposal_closure(
+      fixture.index,
+      fixture.cloud,
+      canonical_keys,
+      source_batch_index,
+      closed_level,
+      fixture.query_witness,
+      fixture.locator,
+      adversarial_transcript,
+      fixture.budget);
+
+  check(
+      baseline.certified_exact_consumption_outcome() &&
+          useful.certified_exact_consumption_outcome() &&
+          adversarial.certified_exact_consumption_outcome() &&
+          baseline.scientific_closure.has_value() &&
+          useful.scientific_closure.has_value() &&
+          adversarial.scientific_closure.has_value(),
+      "complete empty, useful and adversarial 14F transcripts all produce certified exact closures");
+  if (!baseline.scientific_closure.has_value() ||
+      !useful.scientific_closure.has_value() ||
+      !adversarial.scientific_closure.has_value()) {
+    return;
+  }
+
+  check(
+      same_scientific_closure_graph(
+          *baseline.scientific_closure,
+          *useful.scientific_closure) &&
+          same_scientific_closure_graph(
+              *baseline.scientific_closure,
+              *adversarial.scientific_closure) &&
+          baseline.scientific_closure->nodes.size() == 3U &&
+          baseline.scientific_closure->edges.size() == 2U &&
+          baseline.scientific_closure
+              ->certified_complete_relative_positive_closure(),
+      "proposal quality changes only operational work, never the exact F0-to-F1-to-F2 scientific graph");
+
+  const auto& empty_audit = baseline.consumption_audit;
+  const auto& useful_audit = useful.consumption_audit;
+  const auto& adversarial_audit = adversarial.consumption_audit;
+  check(
+      empty_audit.canonical_seed_key_count == 1U &&
+          empty_audit.transcript_record_count == 0U &&
+          empty_audit.top_k_query_count == 2U &&
+          empty_audit.nonempty_proposal_hit_query_count == 0U &&
+          empty_audit.missing_initial_record_fallback_query_count == 1U &&
+          empty_audit.dynamic_successor_fallback_query_count == 1U &&
+          empty_audit.baseline_facet_point_reference_count == 8U &&
+          empty_audit.proposal_point_reference_count == 0U &&
+          empty_audit.union_point_reference_count == 8U &&
+          empty_audit.deduplicated_point_reference_count == 0U,
+      "the empty baseline accounts for two exact four-point facets and both missing-root and dynamic-successor fallbacks");
+  check(
+      useful_audit.transcript_record_count == 1U &&
+          useful_audit.transcript_candidate_point_reference_count == 2U &&
+          useful_audit.top_k_query_count == 2U &&
+          useful_audit.nonempty_proposal_hit_query_count == 1U &&
+          useful_audit.missing_initial_record_fallback_query_count == 0U &&
+          useful_audit.explicit_empty_record_fallback_query_count == 0U &&
+          useful_audit.dynamic_successor_fallback_query_count == 1U &&
+          useful_audit.baseline_facet_point_reference_count == 8U &&
+          useful_audit.proposal_point_reference_count == 2U &&
+          useful_audit.union_point_reference_count == 10U &&
+          useful_audit.deduplicated_point_reference_count == 0U,
+      "the sparse useful transcript feeds only the initial F0 query while the discovered F1 successor falls back to its exact facet");
+  check(
+      adversarial_audit.transcript_record_count == 1U &&
+          adversarial_audit.top_k_query_count == 2U &&
+          adversarial_audit.nonempty_proposal_hit_query_count == 1U &&
+          adversarial_audit.dynamic_successor_fallback_query_count == 1U &&
+          adversarial_audit.baseline_facet_point_reference_count == 8U &&
+          adversarial_audit.proposal_point_reference_count == 2U &&
+          adversarial_audit.union_point_reference_count == 8U &&
+          adversarial_audit.deduplicated_point_reference_count == 2U,
+      "the adversarial source-only proposal is fully deduplicated from F without gaining scientific authority");
+
+  const auto audit_has_closed_separation =
+      [](const ProposalConsumptionResult& result) {
+        const auto& audit = result.consumption_audit;
+        return result.no_transcript_or_top_k_payload_persisted_in_closure &&
+               result.scientific_closure.has_value() &&
+               result.scientific_closure
+                   ->no_top_k_partition_or_shell_persisted &&
+               audit.transcript_complete_revalidated &&
+               audit.metadata_matches_requested_batch_level_and_live_locator &&
+               audit.canonical_seed_keys_revalidated &&
+               audit.record_keys_are_canonical_seed_subset &&
+               audit.candidate_point_domains_revalidated &&
+               audit.locator_snapshot_stable_during_atomic_validation &&
+               audit.every_top_k_query_used_exact_source_facet_baseline &&
+               audit.nonempty_records_passed_only_as_proposals &&
+               audit
+                   .empty_missing_and_dynamic_fallbacks_used_empty_proposal_pool &&
+               audit.exact_pool_and_spatial_work_accounted &&
+               audit.exact_seed_distance_evaluation_count <=
+                   audit.union_point_reference_count &&
+               !audit.transcript_payload_persisted &&
+               !audit.top_k_partition_or_shell_persisted &&
+               !audit.scientific_decision_taken_from_proposal &&
+               !audit.locator_state_mutated;
+      };
+  check(
+      audit_has_closed_separation(baseline) &&
+          audit_has_closed_separation(useful) &&
+          audit_has_closed_separation(adversarial),
+      "every 14F outcome separates the exact scientific closure from proposal, partition and shell payloads");
+}
+
+void test_top_k_proposal_preinterned_seed_reached_as_dynamic_successor() {
+  ChainFixture fixture;
+  constexpr std::size_t source_batch_index = 19U;
+  const ExactLevel closed_level = level(52);
+  const std::array<ExactDirectSparseFacetKey, 2U> canonical_keys{
+      fixture.f0,
+      fixture.f1,
+  };
+  const std::array<ProposalRecord, 1U> root_only_records{
+      proposal_record(fixture.f0, {3U, 5U}),
+  };
+  const std::array<ProposalRecord, 2U> root_and_f1_records{
+      proposal_record(fixture.f0, {3U, 5U}),
+      proposal_record(fixture.f1, {0U, 4U}),
+  };
+  const ProposalTranscriptResult root_only_transcript =
+      proposal_transcript(
+          source_batch_index,
+          closed_level,
+          fixture.locator,
+          root_only_records);
+  const ProposalTranscriptResult root_and_f1_transcript =
+      proposal_transcript(
+          source_batch_index,
+          closed_level,
+          fixture.locator,
+          root_and_f1_records);
+  const ProposalConsumptionResult baseline = build_proposal_closure(
+      fixture.index,
+      fixture.cloud,
+      canonical_keys,
+      source_batch_index,
+      closed_level,
+      fixture.query_witness,
+      fixture.locator,
+      root_only_transcript,
+      fixture.budget);
+  const ProposalConsumptionResult with_f1_record =
+      build_proposal_closure(
+          fixture.index,
+          fixture.cloud,
+          canonical_keys,
+          source_batch_index,
+          closed_level,
+          fixture.query_witness,
+          fixture.locator,
+          root_and_f1_transcript,
+          fixture.budget);
+
+  check(
+      baseline.certified_exact_consumption_outcome() &&
+          with_f1_record.certified_exact_consumption_outcome() &&
+          baseline.scientific_closure.has_value() &&
+          with_f1_record.scientific_closure.has_value(),
+      "the preinterned F1 dynamic-successor regression produces two certified exact closures");
+  if (!baseline.scientific_closure.has_value() ||
+      !with_f1_record.scientific_closure.has_value()) {
+    return;
+  }
+
+  const auto& audit = with_f1_record.consumption_audit;
+  check(
+      audit.transcript_record_count == 2U &&
+          audit.transcript_candidate_point_reference_count == 4U &&
+          audit.top_k_query_count == 2U &&
+          audit.nonempty_proposal_hit_query_count == 1U &&
+          audit.missing_initial_record_fallback_query_count == 0U &&
+          audit.explicit_empty_record_fallback_query_count == 0U &&
+          audit.dynamic_successor_fallback_query_count == 1U &&
+          audit.baseline_facet_point_reference_count == 8U &&
+          audit.proposal_point_reference_count == 2U &&
+          audit.union_point_reference_count == 10U &&
+          audit.deduplicated_point_reference_count == 0U,
+      "F1 ignores its retained nonempty record when first reached dynamically from F0");
+  check(
+      same_scientific_closure_graph(
+          *baseline.scientific_closure,
+          *with_f1_record.scientific_closure) &&
+          baseline.scientific_closure->nodes.size() == 3U &&
+          baseline.scientific_closure->edges.size() == 2U &&
+          baseline.consumption_audit
+                  .dynamic_successor_fallback_query_count ==
+              1U &&
+          baseline.consumption_audit.proposal_point_reference_count ==
+              audit.proposal_point_reference_count &&
+          with_f1_record
+              .no_transcript_or_top_k_payload_persisted_in_closure &&
+          !audit.transcript_payload_persisted &&
+          !audit.top_k_partition_or_shell_persisted &&
+          !audit.scientific_decision_taken_from_proposal,
+      "the unused P(F1) changes neither the exact graph nor the persisted closure payload");
+}
+
+void test_top_k_proposal_atomic_rejections() {
+  ChainFixture fixture;
+  constexpr std::size_t source_batch_index = 23U;
+  const ExactLevel closed_level = level(52);
+  const auto entry_stamp = fixture.locator.snapshot_stamp();
+  const std::array<ExactDirectSparseFacetKey, 1U> canonical_keys{
+      fixture.f0,
+  };
+  const std::array<ProposalRecord, 1U> valid_records{
+      proposal_record(fixture.f0, {3U, 5U}),
+  };
+  const ProposalTranscriptResult valid_transcript = proposal_transcript(
+      source_batch_index,
+      closed_level,
+      fixture.locator,
+      valid_records);
+  const ProposalConsumptionResult stale_batch = build_proposal_closure(
+      fixture.index,
+      fixture.cloud,
+      canonical_keys,
+      source_batch_index + 1U,
+      closed_level,
+      fixture.query_witness,
+      fixture.locator,
+      valid_transcript,
+      fixture.budget);
+  check_atomic_proposal_rejection(
+      stale_batch,
+      ProposalConsumptionDecision::no_closure_metadata_mismatch,
+      entry_stamp,
+      "a stale transcript batch rejects atomically before constructing a closure");
+
+  const ProposalConsumptionResult stale_level = build_proposal_closure(
+      fixture.index,
+      fixture.cloud,
+      canonical_keys,
+      source_batch_index,
+      level(51),
+      fixture.query_witness,
+      fixture.locator,
+      valid_transcript,
+      fixture.budget);
+  check_atomic_proposal_rejection(
+      stale_level,
+      ProposalConsumptionDecision::no_closure_metadata_mismatch,
+      entry_stamp,
+      "a stale transcript level rejects atomically before constructing a closure");
+
+  ProposalTranscriptResult stale_stamp_transcript = valid_transcript;
+  ++stale_stamp_transcript.metadata.locator_snapshot_stamp
+        .committed_batch_count;
+  const ProposalConsumptionResult stale_stamp = build_proposal_closure(
+      fixture.index,
+      fixture.cloud,
+      canonical_keys,
+      source_batch_index,
+      closed_level,
+      fixture.query_witness,
+      fixture.locator,
+      stale_stamp_transcript,
+      fixture.budget);
+  check_atomic_proposal_rejection(
+      stale_stamp,
+      ProposalConsumptionDecision::no_closure_metadata_mismatch,
+      entry_stamp,
+      "a stale locator stamp rejects atomically before constructing a closure");
+  check(
+      stale_batch.consumption_audit.transcript_complete_revalidated &&
+          stale_level.consumption_audit.transcript_complete_revalidated &&
+          stale_stamp.consumption_audit.transcript_complete_revalidated &&
+          !stale_batch.consumption_audit
+               .metadata_matches_requested_batch_level_and_live_locator &&
+          !stale_level.consumption_audit
+               .metadata_matches_requested_batch_level_and_live_locator &&
+          !stale_stamp.consumption_audit
+               .metadata_matches_requested_batch_level_and_live_locator,
+      "batch, level and locator-stamp freshness are checked only after full transcript revalidation");
+
+  const std::array<ProposalRecord, 1U> outside_seed_records{
+      proposal_record(fixture.f1, {0U}),
+  };
+  const ProposalTranscriptResult outside_seed_transcript =
+      proposal_transcript(
+          source_batch_index,
+          closed_level,
+          fixture.locator,
+          outside_seed_records);
+  const ProposalConsumptionResult outside_seed = build_proposal_closure(
+      fixture.index,
+      fixture.cloud,
+      canonical_keys,
+      source_batch_index,
+      closed_level,
+      fixture.query_witness,
+      fixture.locator,
+      outside_seed_transcript,
+      fixture.budget);
+  check_atomic_proposal_rejection(
+      outside_seed,
+      ProposalConsumptionDecision::
+          no_closure_record_key_not_in_seed_domain,
+      entry_stamp,
+      "a proposal record outside the canonical initial seed domain rejects atomically");
+  check(
+      outside_seed.consumption_audit.canonical_seed_keys_revalidated &&
+          !outside_seed.consumption_audit
+               .record_keys_are_canonical_seed_subset,
+      "the outside-record rejection identifies the exact full-key subset boundary");
+
+  const PointId outside_cloud =
+      static_cast<PointId>(fixture.cloud.size());
+  const std::array<ProposalRecord, 1U> outside_domain_records{
+      proposal_record(fixture.f0, {outside_cloud}),
+  };
+  const ProposalTranscriptResult outside_domain_transcript =
+      proposal_transcript(
+          source_batch_index,
+          closed_level,
+          fixture.locator,
+          outside_domain_records);
+  const ProposalConsumptionResult outside_domain = build_proposal_closure(
+      fixture.index,
+      fixture.cloud,
+      canonical_keys,
+      source_batch_index,
+      closed_level,
+      fixture.query_witness,
+      fixture.locator,
+      outside_domain_transcript,
+      fixture.budget);
+  check_atomic_proposal_rejection(
+      outside_domain,
+      ProposalConsumptionDecision::
+          no_closure_candidate_point_domain_rejected,
+      entry_stamp,
+      "an out-of-cloud proposed candidate rejects atomically");
+  check(
+      outside_domain.consumption_audit
+              .record_keys_are_canonical_seed_subset &&
+          !outside_domain.consumption_audit
+               .candidate_point_domains_revalidated,
+      "candidate-domain rejection occurs after exact record-key membership");
+
+  ProposalTranscriptResult incomplete_transcript = valid_transcript;
+  incomplete_transcript.proposal_records.clear();
+  incomplete_transcript.published_payload_byte_count = 0U;
+  incomplete_transcript.published_logical_storage_entry_count = 0U;
+  incomplete_transcript.payload_published_only_after_full_validation = false;
+  incomplete_transcript.decision =
+      ExactDirectSparseFacetTopKProposalTranscriptDecision::
+          no_transcript_budget_exhausted;
+  const ProposalConsumptionResult incomplete = build_proposal_closure(
+      fixture.index,
+      fixture.cloud,
+      canonical_keys,
+      source_batch_index,
+      closed_level,
+      fixture.query_witness,
+      fixture.locator,
+      incomplete_transcript,
+      fixture.budget);
+  check_atomic_proposal_rejection(
+      incomplete,
+      ProposalConsumptionDecision::no_closure_transcript_not_complete,
+      entry_stamp,
+      "an incomplete bounded transcript rejects atomically");
+
+  ProposalTranscriptResult mutated_transcript = valid_transcript;
+  --mutated_transcript.published_payload_byte_count;
+  const ProposalConsumptionResult mutated = build_proposal_closure(
+      fixture.index,
+      fixture.cloud,
+      canonical_keys,
+      source_batch_index,
+      closed_level,
+      fixture.query_witness,
+      fixture.locator,
+      mutated_transcript,
+      fixture.budget);
+  check_atomic_proposal_rejection(
+      mutated,
+      ProposalConsumptionDecision::no_closure_transcript_not_complete,
+      entry_stamp,
+      "a post-validation transcript payload mutation rejects atomically");
+
+  ProposalTranscriptResult narrowed_record_cap = valid_transcript;
+  narrowed_record_cap.requested_budget.maximum_proposal_record_count = 0U;
+  const ProposalConsumptionResult narrowed_cap = build_proposal_closure(
+      fixture.index,
+      fixture.cloud,
+      canonical_keys,
+      source_batch_index,
+      closed_level,
+      fixture.query_witness,
+      fixture.locator,
+      narrowed_record_cap,
+      fixture.budget);
+  check_atomic_proposal_rejection(
+      narrowed_cap,
+      ProposalConsumptionDecision::no_closure_transcript_not_complete,
+      entry_stamp,
+      "a narrowed retained record cap rejects before transcript replay");
+  check(
+      !incomplete.consumption_audit.transcript_complete_revalidated &&
+          !mutated.consumption_audit.transcript_complete_revalidated &&
+          !narrowed_cap.consumption_audit
+               .transcript_complete_revalidated &&
+          fixture.locator.snapshot_stamp() == entry_stamp,
+      "incomplete, mutated and narrowed-cap transcripts publish no graph "
+      "and leave the locator frozen");
+}
 
 void test_chain_and_shared_seed_suffix() {
   ChainFixture fixture;
@@ -598,6 +1224,121 @@ void test_five_point_ac_to_de_relative_positive_closure() {
           edge.strict_step_witness.successor_facet_squared_level ==
               level(9, 2),
       "the AC-to-DE edge retains the exact 33/2, 31/2 and 9/2 descent seam");
+}
+
+void test_top_k_proposal_ac_to_de_exact_carrier_invariance() {
+  const CanonicalPointCloud cloud = ac_de_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactDirectSparseFacetKey ac = key({1U, 3U});
+  const ExactDirectSparseFacetKey de = key({0U, 4U});
+  ExactDirectSparsePositiveFacetLocator locator = make_locator();
+  seed_binding(locator, de, 3U, 101U);
+  constexpr std::size_t source_batch_index = 29U;
+  const ExactLevel closed_level = level(33, 2);
+  const ExactDirectSparseFacetWitness query_witness = witness(9251U);
+  const std::array<ExactDirectSparseFacetKey, 1U> canonical_keys{ac};
+  const std::array<ProposalRecord, 1U> exact_de_records{
+      proposal_record(ac, {0U, 4U}),
+  };
+  const std::array<ProposalRecord, 1U> adversarial_records{
+      proposal_record(ac, {2U}),
+  };
+  const ProposalTranscriptResult exact_de_transcript =
+      proposal_transcript(
+          source_batch_index,
+          closed_level,
+          locator,
+          exact_de_records);
+  const ProposalTranscriptResult adversarial_transcript =
+      proposal_transcript(
+          source_batch_index,
+          closed_level,
+          locator,
+          adversarial_records);
+  const ProposalConsumptionResult exact_de = build_proposal_closure(
+      index,
+      cloud,
+      canonical_keys,
+      source_batch_index,
+      closed_level,
+      query_witness,
+      locator,
+      exact_de_transcript,
+      generous_closure_budget());
+  const ProposalConsumptionResult adversarial = build_proposal_closure(
+      index,
+      cloud,
+      canonical_keys,
+      source_batch_index,
+      closed_level,
+      query_witness,
+      locator,
+      adversarial_transcript,
+      generous_closure_budget());
+
+  check(
+      exact_de.certified_exact_consumption_outcome() &&
+          adversarial.certified_exact_consumption_outcome() &&
+          exact_de.scientific_closure.has_value() &&
+          adversarial.scientific_closure.has_value(),
+      "both the exact DE proposal and a valid adversarial proposal produce certified AC closures");
+  if (!exact_de.scientific_closure.has_value() ||
+      !adversarial.scientific_closure.has_value()) {
+    return;
+  }
+  check(
+      same_scientific_closure_graph(
+          *exact_de.scientific_closure,
+          *adversarial.scientific_closure) &&
+          exact_de.scientific_closure->nodes.size() == 2U &&
+          exact_de.scientific_closure->edges.size() == 1U &&
+          exact_de.scientific_closure
+              ->certified_complete_relative_positive_closure(),
+      "good P={DE} and adversarial P retain the identical exact AC-to-DE scientific edge");
+
+  const auto* const exact_de_carrier =
+      find_node(*exact_de.scientific_closure, de);
+  const auto* const adversarial_carrier =
+      find_node(*adversarial.scientific_closure, de);
+  check(
+      exact_de_carrier != nullptr &&
+          adversarial_carrier != nullptr &&
+          exact_de_carrier->kind ==
+              ExactDirectSparseFacetDescentNodeKind::
+                  positive_locator_terminal &&
+          exact_de_carrier->resolved_component_handle ==
+              std::optional<ExactDirectSparseComponentHandle>{3U} &&
+          exact_de_carrier->resolved_binding_witness ==
+              std::optional<ExactDirectSparseFacetWitness>{witness(101U)} &&
+          *exact_de_carrier == *adversarial_carrier,
+      "proposal quality cannot change the exact DE carrier or its caller-owned positive binding");
+
+  const auto& exact_de_audit = exact_de.consumption_audit;
+  const auto& adversarial_audit = adversarial.consumption_audit;
+  check(
+      exact_de_audit.top_k_query_count == 1U &&
+          exact_de_audit.nonempty_proposal_hit_query_count == 1U &&
+          exact_de_audit.baseline_facet_point_reference_count == 2U &&
+          exact_de_audit.proposal_point_reference_count == 2U &&
+          exact_de_audit.union_point_reference_count == 4U &&
+          exact_de_audit.deduplicated_point_reference_count == 0U &&
+          adversarial_audit.top_k_query_count == 1U &&
+          adversarial_audit.nonempty_proposal_hit_query_count == 1U &&
+          adversarial_audit.baseline_facet_point_reference_count == 2U &&
+          adversarial_audit.proposal_point_reference_count == 1U &&
+          adversarial_audit.union_point_reference_count == 3U &&
+          adversarial_audit.deduplicated_point_reference_count == 0U,
+      "AC audits exact F union P work separately for the good DE and wrong-point proposals");
+  check(
+      exact_de.no_transcript_or_top_k_payload_persisted_in_closure &&
+          adversarial.no_transcript_or_top_k_payload_persisted_in_closure &&
+          !exact_de_audit.transcript_payload_persisted &&
+          !adversarial_audit.transcript_payload_persisted &&
+          !exact_de_audit.top_k_partition_or_shell_persisted &&
+          !adversarial_audit.top_k_partition_or_shell_persisted &&
+          !exact_de_audit.scientific_decision_taken_from_proposal &&
+          !adversarial_audit.scientific_decision_taken_from_proposal,
+      "neither AC proposal survives nor becomes a scientific decision");
 }
 
 void test_order_traversal_collisions_and_duplicates() {
@@ -1504,8 +2245,12 @@ void test_contract_metadata() {
 
 int main() {
   test_contract_metadata();
+  test_top_k_proposal_chain_consumption_and_fallbacks();
+  test_top_k_proposal_preinterned_seed_reached_as_dynamic_successor();
+  test_top_k_proposal_atomic_rejections();
   test_chain_and_shared_seed_suffix();
   test_five_point_ac_to_de_relative_positive_closure();
+  test_top_k_proposal_ac_to_de_exact_carrier_invariance();
   test_order_traversal_collisions_and_duplicates();
   test_source_positive_and_non_strict_terminals();
   test_source_probe_top_k_budget_and_above_batch_terminals();

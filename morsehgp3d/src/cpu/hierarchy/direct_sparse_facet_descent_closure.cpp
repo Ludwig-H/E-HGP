@@ -126,6 +126,18 @@ void require_valid_traversal_order(
   return true;
 }
 
+[[nodiscard]] bool try_multiply_size(
+    std::size_t left,
+    std::size_t right,
+    std::size_t& product) noexcept {
+  if (left != 0U &&
+      right > std::numeric_limits<std::size_t>::max() / left) {
+    return false;
+  }
+  product = left * right;
+  return true;
+}
+
 [[nodiscard]] bool try_increment_size(std::size_t& value) noexcept {
   if (value == std::numeric_limits<std::size_t>::max()) {
     return false;
@@ -407,6 +419,184 @@ void initialize_closed_scope(
       bounded_multi_source_memoized_strict_functional_forest_relative_positive_sink_propagation_only;
 }
 
+enum class ProposalSelectionKind : std::uint8_t {
+  nonempty_record_hit,
+  missing_initial_record_fallback,
+  explicit_empty_record_fallback,
+  dynamic_successor_fallback,
+};
+
+struct ProposalSelection {
+  std::span<const PointId> proposal_point_ids;
+  ProposalSelectionKind kind{
+      ProposalSelectionKind::missing_initial_record_fallback};
+};
+
+class TopKProposalConsumptionContext {
+ public:
+  TopKProposalConsumptionContext(
+      std::span<const ExactDirectSparseFacetTopKProposalRecord> records,
+      ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit&
+          audit)
+      : records_(records), audit_(audit) {}
+
+  [[nodiscard]] ProposalSelection select(
+      const ExactDirectSparseFacetKey& key,
+      bool dynamic_successor) const noexcept {
+    if (dynamic_successor) {
+      return {
+          {},
+          ProposalSelectionKind::dynamic_successor_fallback};
+    }
+    const auto found = std::lower_bound(
+        records_.begin(),
+        records_.end(),
+        key,
+        [](const ExactDirectSparseFacetTopKProposalRecord& record,
+           const ExactDirectSparseFacetKey& searched_key) {
+          return facet_key_less(record.source_facet_key, searched_key);
+        });
+    if (found != records_.end() && found->source_facet_key == key) {
+      const std::span<const PointId> candidates{
+          found->candidate_point_ids};
+      if (found->candidate_point_count != 0U) {
+        return {
+            candidates.first(found->candidate_point_count),
+            ProposalSelectionKind::nonempty_record_hit};
+      }
+      return {
+          {},
+          ProposalSelectionKind::explicit_empty_record_fallback};
+    }
+    return {
+        {},
+        ProposalSelectionKind::missing_initial_record_fallback};
+  }
+
+  void observe_exact_top_k_call(
+      const ExactDirectSparseFacetKey& source_key,
+      const ProposalSelection& selection,
+      const ExactDirectSparseFacetDescentStepResult& step) {
+    if (step.counters.top_k_query_count == 0U) {
+      return;
+    }
+    if (step.counters.top_k_query_count != 1U) {
+      throw std::logic_error(
+          "one proposal-consuming step issued more than one top-k query");
+    }
+    checked_increment_counter(audit_.top_k_query_count);
+    switch (selection.kind) {
+      case ProposalSelectionKind::nonempty_record_hit:
+        checked_increment_counter(
+            audit_.nonempty_proposal_hit_query_count);
+        break;
+      case ProposalSelectionKind::missing_initial_record_fallback:
+        checked_increment_counter(
+            audit_.missing_initial_record_fallback_query_count);
+        break;
+      case ProposalSelectionKind::explicit_empty_record_fallback:
+        checked_increment_counter(
+            audit_.explicit_empty_record_fallback_query_count);
+        break;
+      case ProposalSelectionKind::dynamic_successor_fallback:
+        checked_increment_counter(
+            audit_.dynamic_successor_fallback_query_count);
+        break;
+    }
+
+    const std::span<const PointId> baseline = used_point_ids(source_key);
+    std::size_t overlap_count = 0U;
+    for (const PointId candidate : selection.proposal_point_ids) {
+      if (std::binary_search(
+              baseline.begin(), baseline.end(), candidate)) {
+        checked_increment_counter(overlap_count);
+      }
+    }
+    const std::size_t combined_count = checked_size_sum(
+        baseline.size(), selection.proposal_point_ids.size());
+    if (overlap_count > combined_count) {
+      throw std::logic_error(
+          "a proposal overlap exceeds its exact point pool");
+    }
+    const std::size_t union_count = combined_count - overlap_count;
+    checked_add_counter(
+        audit_.baseline_facet_point_reference_count, baseline.size());
+    checked_add_counter(
+        audit_.proposal_point_reference_count,
+        selection.proposal_point_ids.size());
+    checked_add_counter(
+        audit_.union_point_reference_count, union_count);
+    checked_add_counter(
+        audit_.deduplicated_point_reference_count, overlap_count);
+
+    const spatial::ExactLbvhTopKAudit& top_k = step.top_k_audit;
+    if (top_k.supplied_incumbent_point_count != union_count ||
+        top_k.exact_incumbent_distance_evaluation_count > union_count) {
+      throw std::logic_error(
+          "the exact seeded top-k audit disagrees with F union P");
+    }
+    checked_add_counter(
+        audit_.exact_seed_distance_evaluation_count,
+        top_k.exact_incumbent_distance_evaluation_count);
+    checked_add_counter(
+        audit_.exact_point_distance_evaluation_count,
+        top_k.exact_point_distance_evaluation_count);
+    checked_add_counter(
+        audit_.node_visit_count, top_k.node_visit_count);
+    checked_add_counter(
+        audit_.internal_node_expansion_count,
+        top_k.internal_node_expansion_count);
+    checked_add_counter(
+        audit_.exact_aabb_bound_evaluation_count,
+        top_k.exact_aabb_bound_evaluation_count);
+    checked_add_counter(
+        audit_.pruned_subtree_count,
+        top_k.pruned_subtree_count);
+    checked_add_counter(
+        audit_.pruned_eligible_point_count,
+        top_k.pruned_eligible_point_count);
+    if (top_k.traversal_complete) {
+      checked_increment_counter(
+          audit_.traversal_complete_query_count);
+    }
+
+    const std::size_t stop_reason_index =
+        static_cast<std::size_t>(step.top_k_stop_reason);
+    if (stop_reason_index >= audit_.top_k_stop_reason_counts.size()) {
+      throw std::logic_error(
+          "a top-k stop reason is outside the consumption histogram");
+    }
+    checked_increment_counter(
+        audit_.top_k_stop_reason_counts[stop_reason_index]);
+
+    if (step.complete_top_k_query_counters.has_value()) {
+      if (step.top_k_stop_reason != spatial::ExactLbvhTopKStopReason::none) {
+        throw std::logic_error(
+            "a complete exact top-k query retained an exhaustion reason");
+      }
+      checked_increment_counter(audit_.complete_query_count);
+      const spatial::SpatialQueryCounters& counters =
+          *step.complete_top_k_query_counters;
+      if (counters.pruned_eligible_point_count == 0U) {
+        checked_increment_counter(audit_.full_scan_query_count);
+      } else {
+        checked_increment_counter(
+            audit_.strict_pruning_query_count);
+      }
+      return;
+    }
+    if (step.top_k_stop_reason == spatial::ExactLbvhTopKStopReason::none) {
+      throw std::logic_error(
+          "an incomplete exact top-k query retained no exhaustion reason");
+    }
+    checked_increment_counter(audit_.exhausted_query_count);
+  }
+
+ private:
+  std::span<const ExactDirectSparseFacetTopKProposalRecord> records_;
+  ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit& audit_;
+};
+
 class ClosureBuilder {
  public:
   ClosureBuilder(
@@ -418,7 +608,8 @@ class ClosureBuilder {
       const ExactDirectSparseFacetDescentClosureBudget& budget,
       const ExactDirectSparseFacetDescentClosureConfig& config,
       spatial::LbvhTraversalOrder traversal_order,
-      ExactDirectSparseFacetDescentClosureResult& result)
+      ExactDirectSparseFacetDescentClosureResult& result,
+      TopKProposalConsumptionContext* proposal_consumption)
       : index_(index),
         cloud_(cloud),
         closed_batch_squared_level_(closed_batch_squared_level),
@@ -428,6 +619,7 @@ class ClosureBuilder {
         config_(config),
         traversal_order_(traversal_order),
         result_(result),
+        proposal_consumption_(proposal_consumption),
         memo_slots_(result.required_memo_slot_count),
         successor_miniball_slots_(result.required_memo_slot_count) {
     const std::size_t initial_reserve_count = checked_size_sum(
@@ -514,18 +706,39 @@ class ClosureBuilder {
               result_.nodes[current_index].facet_key);
       const detail::ExactDirectSparseCertifiedFacetMiniballLookup lookup{
           this, &ClosureBuilder::find_cached_miniball_callback};
+      const ProposalSelection proposal_selection =
+          proposal_consumption_ == nullptr
+              ? ProposalSelection{}
+              : proposal_consumption_->select(
+                    result_.nodes[current_index].facet_key,
+                    node_created_as_successor_[current_index] != 0U);
       detail::ExactDirectSparseFacetDescentStepTransient computation =
-          detail::build_exact_direct_sparse_facet_descent_step_transient(
-              index_,
-              cloud_,
-              used_point_ids(result_.nodes[current_index].facet_key),
-              closed_batch_squared_level_,
-              locator_query_witness_,
-              locator_,
-              budget_.step_budget,
-              traversal_order_,
-              prepared_source,
-              lookup);
+          proposal_consumption_ == nullptr
+              ? detail::build_exact_direct_sparse_facet_descent_step_transient(
+                    index_,
+                    cloud_,
+                    used_point_ids(result_.nodes[current_index].facet_key),
+                    closed_batch_squared_level_,
+                    locator_query_witness_,
+                    locator_,
+                    budget_.step_budget,
+                    traversal_order_,
+                    prepared_source,
+                    lookup)
+              : detail::
+                    build_exact_direct_sparse_facet_descent_step_transient_with_top_k_proposal(
+                        index_,
+                        cloud_,
+                        used_point_ids(
+                            result_.nodes[current_index].facet_key),
+                        closed_batch_squared_level_,
+                        locator_query_witness_,
+                        locator_,
+                        budget_.step_budget,
+                        traversal_order_,
+                        prepared_source,
+                        lookup,
+                        proposal_selection.proposal_point_ids);
       require_cache_counter_integrity();
       checked_increment_counter(
           result_.counters.evaluated_step_source_count);
@@ -540,6 +753,12 @@ class ClosureBuilder {
       if (!step.certified_partial_refinement_outcome()) {
         throw std::logic_error(
             "the 10.5b core returned no certified local disposition");
+      }
+      if (proposal_consumption_ != nullptr) {
+        proposal_consumption_->observe_exact_top_k_call(
+            result_.nodes[current_index].facet_key,
+            proposal_selection,
+            step);
       }
       accumulate_step(step);
       ExactDirectSparseFacetDescentNode& current =
@@ -1198,6 +1417,7 @@ class ClosureBuilder {
   const ExactDirectSparseFacetDescentClosureConfig& config_;
   spatial::LbvhTraversalOrder traversal_order_;
   ExactDirectSparseFacetDescentClosureResult& result_;
+  TopKProposalConsumptionContext* proposal_consumption_;
   std::vector<MemoSlot> memo_slots_;
   std::vector<std::optional<ExactFacetMiniballResult>> cached_miniballs_;
   std::vector<SuccessorMiniballSlot> successor_miniball_slots_;
@@ -1562,7 +1782,8 @@ build_closure_from_canonical_seed_input(
     const ExactDirectSparseFacetDescentClosureBudget& budget,
     const ExactDirectSparseFacetDescentClosureConfig& config,
     spatial::LbvhTraversalOrder traversal_order,
-    ExactDirectSparseFacetDescentClosureResult result) {
+    ExactDirectSparseFacetDescentClosureResult result,
+    TopKProposalConsumptionContext* proposal_consumption) {
   result.counters.distinct_seed_key_count = input.distinct_keys.size();
   result.counters.duplicate_seed_key_reference_count =
       input.seed_count() - input.distinct_keys.size();
@@ -1597,7 +1818,8 @@ build_closure_from_canonical_seed_input(
       budget,
       config,
       traversal_order,
-      result);
+      result,
+      proposal_consumption);
   builder.intern_seed_roots(input.distinct_keys);
 
   PathBuildStatus global_status = PathBuildStatus::complete;
@@ -1701,6 +1923,352 @@ build_closure_from_canonical_seed_input(
   return result;
 }
 
+[[nodiscard]] bool transcript_key_shape(
+    const ExactDirectSparseFacetKey& key) noexcept {
+  if (key.point_count == 0U ||
+      key.point_count > direct_sparse_positive_facet_maximum_point_count) {
+    return false;
+  }
+  for (std::size_t point_index = 0U;
+       point_index < key.point_count;
+       ++point_index) {
+    if (point_index != 0U &&
+        key.point_ids[point_index - 1U] >= key.point_ids[point_index]) {
+      return false;
+    }
+  }
+  return std::all_of(
+      key.point_ids.begin() +
+          static_cast<std::ptrdiff_t>(key.point_count),
+      key.point_ids.end(),
+      [](PointId point_id) { return point_id == 0U; });
+}
+
+[[nodiscard]] bool transcript_candidates_shape(
+    const ExactDirectSparseFacetTopKProposalRecord& record) noexcept {
+  if (record.candidate_point_count >
+          record.source_facet_key.point_count ||
+      record.candidate_point_count >
+          record.candidate_point_ids.size()) {
+    return false;
+  }
+  for (std::size_t right = 0U;
+       right < record.candidate_point_count;
+       ++right) {
+    for (std::size_t left = 0U; left < right; ++left) {
+      if (record.candidate_point_ids[left] ==
+          record.candidate_point_ids[right]) {
+        return false;
+      }
+    }
+  }
+  return std::all_of(
+      record.candidate_point_ids.begin() +
+          static_cast<std::ptrdiff_t>(record.candidate_point_count),
+      record.candidate_point_ids.end(),
+      [](PointId point_id) { return point_id == 0U; });
+}
+
+[[nodiscard]] bool complete_transcript_revalidated(
+    const ExactDirectSparseFacetTopKProposalTranscriptResult& transcript,
+    std::size_t& candidate_point_reference_count) noexcept {
+  using TranscriptDecision =
+      ExactDirectSparseFacetTopKProposalTranscriptDecision;
+  using TranscriptScope =
+      ExactDirectSparseFacetTopKProposalTranscriptScope;
+
+  const bool empty = transcript.proposal_records.empty();
+  const bool decision_matches =
+      transcript.decision ==
+          (empty
+               ? TranscriptDecision::complete_empty_proposal_transcript
+               : TranscriptDecision::complete_validated_proposal_transcript);
+  if (transcript.schema_version !=
+          direct_sparse_facet_top_k_proposal_transcript_schema_version ||
+      !decision_matches ||
+      transcript.metadata.locator_snapshot_stamp.schema_version !=
+          direct_sparse_positive_facet_locator_schema_version ||
+      transcript.metadata.locator_snapshot_stamp.external_authority_id ==
+          0U ||
+      transcript.input_proposal_record_count !=
+          transcript.proposal_records.size() ||
+      !transcript.metadata_shape_validated ||
+      !transcript.budget_preflight_completed ||
+      !transcript.budget_preflight_satisfied ||
+      !transcript.every_full_key_validated ||
+      !transcript.homogeneous_facet_cardinality_validated ||
+      !transcript.records_strictly_sorted_by_full_key ||
+      !transcript.full_keys_unique ||
+      !transcript.candidate_counts_within_k ||
+      !transcript.candidate_point_ids_distinct ||
+      !transcript.unused_candidate_slots_zero ||
+      !transcript.input_validation_atomic ||
+      !transcript.payload_published_only_after_full_validation ||
+      !transcript.no_partial_proposal_payload_published ||
+      transcript.candidate_point_domain_validated ||
+      transcript.candidate_exclusions_validated ||
+      transcript.exact_top_k_partition_certified ||
+      transcript.scientific_decision_published ||
+      transcript.locator_state_mutated ||
+      transcript.hierarchy_reduction_or_attachment_published ||
+      transcript.forbidden_global_structure_materialized ||
+      transcript.public_status_claimed || !transcript.proposal_only ||
+      transcript.scope !=
+          TranscriptScope::
+              bounded_structurally_validated_incumbent_proposals_by_full_facet_key_only) {
+    return false;
+  }
+
+  const auto& budget = transcript.requested_budget;
+  if (transcript.proposal_records.size() >
+          budget.maximum_proposal_record_count ||
+      transcript.proposal_records.size() >
+          direct_sparse_facet_descent_closure_maximum_seed_count) {
+    return false;
+  }
+
+  std::size_t key_point_reference_count = 0U;
+  std::size_t observed_candidate_point_reference_count = 0U;
+  std::size_t facet_cardinality = 0U;
+  for (std::size_t record_index = 0U;
+       record_index < transcript.proposal_records.size();
+       ++record_index) {
+    const ExactDirectSparseFacetTopKProposalRecord& record =
+        transcript.proposal_records[record_index];
+    if (!transcript_key_shape(record.source_facet_key) ||
+        !transcript_candidates_shape(record)) {
+      return false;
+    }
+    if (record_index == 0U) {
+      facet_cardinality = record.source_facet_key.point_count;
+    } else if (
+        record.source_facet_key.point_count != facet_cardinality ||
+        !facet_key_less(
+            transcript.proposal_records[record_index - 1U]
+                .source_facet_key,
+            record.source_facet_key)) {
+      return false;
+    }
+    if (!try_add_size(
+            key_point_reference_count,
+            record.source_facet_key.point_count,
+            key_point_reference_count) ||
+        !try_add_size(
+            observed_candidate_point_reference_count,
+            record.candidate_point_count,
+            observed_candidate_point_reference_count)) {
+      return false;
+    }
+  }
+
+  std::size_t payload_byte_count = 0U;
+  std::size_t logical_storage_entry_count = 0U;
+  if (!try_multiply_size(
+          transcript.proposal_records.size(),
+          sizeof(ExactDirectSparseFacetTopKProposalRecord),
+          payload_byte_count) ||
+      !try_add_size(
+          transcript.proposal_records.size(),
+          key_point_reference_count,
+          logical_storage_entry_count) ||
+      !try_add_size(
+          logical_storage_entry_count,
+          observed_candidate_point_reference_count,
+          logical_storage_entry_count)) {
+    return false;
+  }
+
+  if (key_point_reference_count >
+          budget.maximum_facet_key_point_reference_count ||
+      observed_candidate_point_reference_count >
+          budget.maximum_candidate_point_reference_count ||
+      payload_byte_count > budget.maximum_payload_byte_count ||
+      logical_storage_entry_count >
+          budget.maximum_logical_storage_entry_count ||
+      transcript.required_facet_key_point_reference_count !=
+          key_point_reference_count ||
+      transcript.required_candidate_point_reference_count !=
+          observed_candidate_point_reference_count ||
+      transcript.required_payload_byte_count != payload_byte_count ||
+      transcript.required_logical_storage_entry_count !=
+          logical_storage_entry_count ||
+      transcript.facet_cardinality != facet_cardinality ||
+      transcript.published_payload_byte_count != payload_byte_count ||
+      transcript.published_logical_storage_entry_count !=
+          logical_storage_entry_count) {
+    return false;
+  }
+  candidate_point_reference_count =
+      observed_candidate_point_reference_count;
+  return true;
+}
+
+[[nodiscard]] bool canonical_distinct_seed_shape_revalidated(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const ExactDirectSparseFacetKey> keys) noexcept {
+  if (keys.size() >
+      direct_sparse_facet_descent_closure_maximum_seed_count) {
+    return false;
+  }
+  std::size_t common_cardinality = 0U;
+  for (std::size_t key_index = 0U; key_index < keys.size(); ++key_index) {
+    if (!valid_facet_key(cloud, keys[key_index])) {
+      return false;
+    }
+    if (key_index == 0U) {
+      common_cardinality = keys[key_index].point_count;
+      continue;
+    }
+    if (keys[key_index].point_count != common_cardinality ||
+        !facet_key_less(keys[key_index - 1U], keys[key_index])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+[[nodiscard]] bool transcript_keys_are_seed_subset(
+    std::span<const ExactDirectSparseFacetKey> canonical_seed_keys,
+    std::span<const ExactDirectSparseFacetTopKProposalRecord> records)
+    noexcept {
+  std::size_t seed_index = 0U;
+  for (const ExactDirectSparseFacetTopKProposalRecord& record : records) {
+    while (seed_index < canonical_seed_keys.size() &&
+           facet_key_less(
+               canonical_seed_keys[seed_index],
+               record.source_facet_key)) {
+      ++seed_index;
+    }
+    if (seed_index == canonical_seed_keys.size() ||
+        canonical_seed_keys[seed_index] != record.source_facet_key) {
+      return false;
+    }
+    ++seed_index;
+  }
+  return true;
+}
+
+[[nodiscard]] bool transcript_candidate_domains_revalidated(
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const ExactDirectSparseFacetTopKProposalRecord> records)
+    noexcept {
+  for (const ExactDirectSparseFacetTopKProposalRecord& record : records) {
+    for (std::size_t candidate_index = 0U;
+         candidate_index < record.candidate_point_count;
+         ++candidate_index) {
+      const PointId point_id = record.candidate_point_ids[candidate_index];
+      if (!std::in_range<std::size_t>(point_id) ||
+          static_cast<std::size_t>(point_id) >= cloud.size()) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+[[nodiscard]] bool consumption_audit_well_formed(
+    const ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit&
+        audit,
+    const ExactDirectSparseFacetDescentClosureResult& closure) noexcept {
+  std::size_t classified_query_count = 0U;
+  std::size_t combined_pool_reference_count = 0U;
+  std::size_t stop_reason_count = 0U;
+  if (!try_add_size(
+          audit.nonempty_proposal_hit_query_count,
+          audit.missing_initial_record_fallback_query_count,
+          classified_query_count) ||
+      !try_add_size(
+          classified_query_count,
+          audit.explicit_empty_record_fallback_query_count,
+          classified_query_count) ||
+      !try_add_size(
+          classified_query_count,
+          audit.dynamic_successor_fallback_query_count,
+          classified_query_count) ||
+      !try_add_size(
+          audit.baseline_facet_point_reference_count,
+          audit.proposal_point_reference_count,
+          combined_pool_reference_count)) {
+    return false;
+  }
+  for (const std::size_t count : audit.top_k_stop_reason_counts) {
+    if (!try_add_size(stop_reason_count, count, stop_reason_count)) {
+      return false;
+    }
+  }
+  if (audit.deduplicated_point_reference_count >
+      combined_pool_reference_count) {
+    return false;
+  }
+  const std::size_t expected_union_point_reference_count =
+      combined_pool_reference_count -
+      audit.deduplicated_point_reference_count;
+  const std::size_t no_stop_reason_index = static_cast<std::size_t>(
+      spatial::ExactLbvhTopKStopReason::none);
+  if (no_stop_reason_index >= audit.top_k_stop_reason_counts.size()) {
+    return false;
+  }
+  std::size_t complete_classification_count = 0U;
+  if (!try_add_size(
+          audit.full_scan_query_count,
+          audit.strict_pruning_query_count,
+          complete_classification_count)) {
+    return false;
+  }
+  std::size_t terminal_query_count = 0U;
+  if (!try_add_size(
+          audit.complete_query_count,
+          audit.exhausted_query_count,
+          terminal_query_count)) {
+    return false;
+  }
+  std::size_t expected_baseline_reference_count = 0U;
+  if (!try_multiply_size(
+          audit.top_k_query_count,
+          closure.common_facet_cardinality,
+          expected_baseline_reference_count)) {
+    return false;
+  }
+  return audit.schema_version ==
+             direct_sparse_facet_descent_closure_top_k_proposal_consumption_schema_version &&
+         audit.closure_build_count == 1U &&
+         audit.canonical_seed_key_count ==
+             closure.counters.input_seed_reference_count &&
+         classified_query_count == audit.top_k_query_count &&
+         stop_reason_count == audit.top_k_query_count &&
+         terminal_query_count == audit.top_k_query_count &&
+         audit.top_k_stop_reason_counts[no_stop_reason_index] ==
+             audit.complete_query_count &&
+         complete_classification_count == audit.complete_query_count &&
+         audit.traversal_complete_query_count <= audit.top_k_query_count &&
+         audit.union_point_reference_count ==
+             expected_union_point_reference_count &&
+         audit.baseline_facet_point_reference_count ==
+             expected_baseline_reference_count &&
+         audit.exact_seed_distance_evaluation_count <=
+             audit.union_point_reference_count &&
+         audit.exact_point_distance_evaluation_count >=
+             audit.exact_seed_distance_evaluation_count &&
+         audit.top_k_query_count ==
+             closure.counters.aggregate_step_counters.top_k_query_count &&
+         audit.locator_snapshot_stamp == closure.locator_snapshot_stamp &&
+         audit.transcript_complete_revalidated &&
+         audit.metadata_matches_requested_batch_level_and_live_locator &&
+         audit.canonical_seed_keys_revalidated &&
+         audit.record_keys_are_canonical_seed_subset &&
+         audit.candidate_point_domains_revalidated &&
+         audit.locator_snapshot_stable_during_atomic_validation &&
+         audit.every_top_k_query_used_exact_source_facet_baseline &&
+         audit.nonempty_records_passed_only_as_proposals &&
+         audit
+             .empty_missing_and_dynamic_fallbacks_used_empty_proposal_pool &&
+         audit.exact_pool_and_spatial_work_accounted &&
+         !audit.transcript_payload_persisted &&
+         !audit.top_k_partition_or_shell_persisted &&
+         !audit.scientific_decision_taken_from_proposal &&
+         !audit.locator_state_mutated && !audit.public_status_claimed;
+}
+
 void require_closure_build_authorities(
     const spatial::MortonLbvhIndex& index,
     const spatial::CanonicalPointCloud& cloud,
@@ -1728,6 +2296,61 @@ void require_closure_build_authorities(
 }
 
 }  // namespace
+
+bool ExactDirectSparseFacetDescentClosureTopKProposalConsumptionResult::
+    certified_atomic_rejection() const noexcept {
+  using Decision =
+      ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision;
+  const bool rejected =
+      decision == Decision::no_closure_transcript_not_complete ||
+      decision == Decision::no_closure_metadata_mismatch ||
+      decision == Decision::no_closure_canonical_seed_shape_rejected ||
+      decision == Decision::no_closure_record_key_not_in_seed_domain ||
+      decision == Decision::no_closure_candidate_point_domain_rejected;
+  return schema_version ==
+             direct_sparse_facet_descent_closure_top_k_proposal_consumption_schema_version &&
+         rejected && !scientific_closure.has_value() &&
+         validation_completed_before_closure &&
+         no_closure_constructed_on_rejection &&
+         !scientific_closure_separated_from_consumption_audit &&
+         no_transcript_or_top_k_payload_persisted_in_closure &&
+         consumption_audit.closure_build_count == 0U &&
+         !consumption_audit.transcript_payload_persisted &&
+         !consumption_audit.top_k_partition_or_shell_persisted &&
+         !consumption_audit.scientific_decision_taken_from_proposal &&
+         !consumption_audit.locator_state_mutated &&
+         !consumption_audit.public_status_claimed &&
+         scope ==
+             ExactDirectSparseFacetDescentClosureTopKProposalConsumptionScope::
+                 exact_source_facet_baseline_and_non_authoritative_proposal_pool_only;
+}
+
+bool ExactDirectSparseFacetDescentClosureTopKProposalConsumptionResult::
+    certified_exact_consumption_outcome() const noexcept {
+  return schema_version ==
+             direct_sparse_facet_descent_closure_top_k_proposal_consumption_schema_version &&
+         decision ==
+             ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision::
+                 complete_exact_closure_with_proposal_consumption_audit &&
+         scientific_closure.has_value() &&
+         scientific_closure->certified_partial_refinement_outcome() &&
+         validation_completed_before_closure &&
+         !no_closure_constructed_on_rejection &&
+         scientific_closure_separated_from_consumption_audit &&
+         no_transcript_or_top_k_payload_persisted_in_closure &&
+         scientific_closure->no_top_k_partition_or_shell_persisted &&
+         consumption_audit_well_formed(
+             consumption_audit, *scientific_closure) &&
+         scope ==
+             ExactDirectSparseFacetDescentClosureTopKProposalConsumptionScope::
+                 exact_source_facet_baseline_and_non_authoritative_proposal_pool_only;
+}
+
+bool ExactDirectSparseFacetDescentClosureTopKProposalConsumptionResult::
+    certified_outcome() const noexcept {
+  return certified_atomic_rejection() ||
+         certified_exact_consumption_outcome();
+}
 
 ExactDirectSparseFacetDescentClosureResult
 build_exact_direct_sparse_facet_descent_closure(
@@ -1814,7 +2437,8 @@ build_exact_direct_sparse_facet_descent_closure(
       budget,
       config,
       traversal_order,
-      std::move(result));
+      std::move(result),
+      nullptr);
 }
 
 ExactDirectSparseFacetDescentClosureResult
@@ -1887,7 +2511,184 @@ build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
       budget,
       config,
       traversal_order,
-      std::move(result));
+      std::move(result),
+      nullptr);
+}
+
+ExactDirectSparseFacetDescentClosureTopKProposalConsumptionResult
+build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys_with_top_k_proposal_transcript(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::span<const ExactDirectSparseFacetKey> canonical_distinct_keys,
+    std::size_t source_batch_index,
+    const exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetTopKProposalTranscriptResult& transcript,
+    const ExactDirectSparseFacetDescentClosureBudget& budget,
+    const ExactDirectSparseFacetDescentClosureConfig& config,
+    spatial::LbvhTraversalOrder traversal_order) {
+  require_closure_build_authorities(
+      index,
+      cloud,
+      locator_query_witness,
+      locator,
+      budget,
+      traversal_order);
+
+  using ConsumptionDecision =
+      ExactDirectSparseFacetDescentClosureTopKProposalConsumptionDecision;
+  using ConsumptionResult =
+      ExactDirectSparseFacetDescentClosureTopKProposalConsumptionResult;
+  ConsumptionResult wrapped;
+  wrapped.scope =
+      ExactDirectSparseFacetDescentClosureTopKProposalConsumptionScope::
+          exact_source_facet_baseline_and_non_authoritative_proposal_pool_only;
+  wrapped.no_transcript_or_top_k_payload_persisted_in_closure = true;
+  wrapped.consumption_audit.source_batch_index = source_batch_index;
+  wrapped.consumption_audit.closed_batch_squared_level =
+      closed_batch_squared_level;
+  wrapped.consumption_audit.canonical_seed_key_count =
+      canonical_distinct_keys.size();
+  wrapped.consumption_audit.transcript_record_count =
+      transcript.proposal_records.size();
+  const ExactDirectSparsePositiveFacetLocatorSnapshotStamp entry_stamp =
+      locator.snapshot_stamp();
+  wrapped.consumption_audit.locator_snapshot_stamp = entry_stamp;
+
+  const auto reject = [&wrapped](ConsumptionDecision decision) {
+    wrapped.scientific_closure.reset();
+    wrapped.validation_completed_before_closure = true;
+    wrapped.no_closure_constructed_on_rejection = true;
+    wrapped.scientific_closure_separated_from_consumption_audit = false;
+    wrapped.consumption_audit.closure_build_count = 0U;
+    wrapped.decision = decision;
+    return wrapped;
+  };
+
+  std::size_t transcript_candidate_point_reference_count = 0U;
+  wrapped.consumption_audit.transcript_complete_revalidated =
+      complete_transcript_revalidated(
+          transcript, transcript_candidate_point_reference_count);
+  if (!wrapped.consumption_audit.transcript_complete_revalidated) {
+    return reject(
+        ConsumptionDecision::no_closure_transcript_not_complete);
+  }
+  wrapped.consumption_audit.transcript_candidate_point_reference_count =
+      transcript_candidate_point_reference_count;
+
+  wrapped.consumption_audit
+      .metadata_matches_requested_batch_level_and_live_locator =
+      transcript.metadata.source_batch_index == source_batch_index &&
+      transcript.metadata.closed_batch_squared_level ==
+          closed_batch_squared_level &&
+      transcript.metadata.locator_snapshot_stamp == entry_stamp;
+  if (!wrapped.consumption_audit
+           .metadata_matches_requested_batch_level_and_live_locator) {
+    return reject(ConsumptionDecision::no_closure_metadata_mismatch);
+  }
+
+  wrapped.consumption_audit.canonical_seed_keys_revalidated =
+      canonical_distinct_seed_shape_revalidated(
+          cloud, canonical_distinct_keys);
+  if (!wrapped.consumption_audit.canonical_seed_keys_revalidated) {
+    return reject(
+        ConsumptionDecision::no_closure_canonical_seed_shape_rejected);
+  }
+
+  wrapped.consumption_audit.record_keys_are_canonical_seed_subset =
+      transcript_keys_are_seed_subset(
+          canonical_distinct_keys,
+          std::span<
+              const ExactDirectSparseFacetTopKProposalRecord>{
+              transcript.proposal_records});
+  if (!wrapped.consumption_audit.record_keys_are_canonical_seed_subset) {
+    return reject(
+        ConsumptionDecision::no_closure_record_key_not_in_seed_domain);
+  }
+
+  wrapped.consumption_audit.candidate_point_domains_revalidated =
+      transcript_candidate_domains_revalidated(
+          cloud,
+          std::span<
+              const ExactDirectSparseFacetTopKProposalRecord>{
+              transcript.proposal_records});
+  if (!wrapped.consumption_audit.candidate_point_domains_revalidated) {
+    return reject(
+        ConsumptionDecision::no_closure_candidate_point_domain_rejected);
+  }
+
+  wrapped.consumption_audit
+      .locator_snapshot_stable_during_atomic_validation =
+      locator.snapshot_stamp() == entry_stamp;
+  if (!wrapped.consumption_audit
+           .locator_snapshot_stable_during_atomic_validation) {
+    return reject(ConsumptionDecision::no_closure_metadata_mismatch);
+  }
+  wrapped.validation_completed_before_closure = true;
+
+  ExactDirectSparseFacetDescentClosureResult closure =
+      initialize_closure_build_result(
+          canonical_distinct_keys.size(),
+          closed_batch_squared_level,
+          locator_query_witness,
+          locator,
+          budget,
+          config,
+          traversal_order);
+  if (closure.locator_snapshot_stamp != entry_stamp) {
+    return reject(ConsumptionDecision::no_closure_metadata_mismatch);
+  }
+  if (!canonical_distinct_keys.empty()) {
+    closure.common_facet_cardinality =
+        canonical_distinct_keys.front().point_count;
+  }
+  closure.input_shape_certified = true;
+
+  TopKProposalConsumptionContext proposal_consumption{
+      std::span<const ExactDirectSparseFacetTopKProposalRecord>{
+          transcript.proposal_records},
+      wrapped.consumption_audit};
+  if (canonical_distinct_keys.size() > budget.maximum_seed_count ||
+      closure.required_memo_slot_count > budget.maximum_memo_slot_count) {
+    finish_closure_preflight_budget_exhaustion(locator, closure);
+  } else {
+    closure = build_closure_from_canonical_seed_input(
+        index,
+        cloud,
+        CanonicalClosureSeedInput{
+            canonical_distinct_keys,
+            std::span<
+                const ExactDirectSparseFacetDescentClosureSeed>{},
+            true},
+        closed_batch_squared_level,
+        locator_query_witness,
+        locator,
+        budget,
+        config,
+        traversal_order,
+        std::move(closure),
+        &proposal_consumption);
+  }
+
+  wrapped.consumption_audit.closure_build_count = 1U;
+  wrapped.consumption_audit
+      .every_top_k_query_used_exact_source_facet_baseline = true;
+  wrapped.consumption_audit
+      .nonempty_records_passed_only_as_proposals = true;
+  wrapped.consumption_audit
+      .empty_missing_and_dynamic_fallbacks_used_empty_proposal_pool = true;
+  wrapped.consumption_audit.exact_pool_and_spatial_work_accounted = true;
+  wrapped.scientific_closure.emplace(std::move(closure));
+  wrapped.no_closure_constructed_on_rejection = false;
+  wrapped.scientific_closure_separated_from_consumption_audit = true;
+  wrapped.decision = ConsumptionDecision::
+      complete_exact_closure_with_proposal_consumption_audit;
+  if (!wrapped.certified_exact_consumption_outcome()) {
+    throw std::logic_error(
+        "a proposal-consuming closure failed its separated exact audit");
+  }
+  return wrapped;
 }
 
 ExactDirectSparseFacetDescentClosureVerification
