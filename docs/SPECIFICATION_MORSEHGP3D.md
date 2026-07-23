@@ -607,6 +607,14 @@ Sous LP64, les coûts par entrée sont 24 octets pour le triplet de tri, 16 pour
 
 Aucun schéma, champ, compteur, budget, décision, portée, ordre canonique ou résultat scientifique ne change. Le même sweep est appelé une fois avec les mêmes requêtes et les arènes locales restent non publiées jusqu'au succès atomique. Le fresh verifier conserve encore `BuildArtifacts` et demeure un chantier de streaming séparé. Gamma, catalogues globaux, snapshots ou DSU par lot, cellules, cofaces persistantes de largeur onze, mosaïque de Delaunay d'ordre supérieur, quotient, forêt et attaches restent absents. Voir [DUREES_VIE_RESOLUTION_TEMPORELLE_PHASE10.md](math/DUREES_VIE_RESOLUTION_TEMPORELLE_PHASE10.md).
 
+### 9.17 Chaîne normative de réduction Morse horizontale
+
+La chaîne produit de Phase 10 ne dépend pas de 10.6--10.15. Elle consomme le catalogue complet des minima et simplexes de Gabriel 10.1, puis les seules graines strictes 10.2. Pour un lot $(k,a)$, elle reconstruit au plus quatre bras par simplexe catalogué, exécute une fermeture 10.5c commune contre le locator strict pré-lot et exige que chaque terminal positif soit lié à un minimum direct d'ordre $k$ et de niveau strictement inférieur à $a$. Les premières incidences $\lambda(F)$ et leurs co-minimiseurs $M(F)$ certifient les promotions initiales des minima latents; ils ne remplacent pas le catalogue, car une selle tardive peut relier uniquement des racines déjà non triviales.
+
+Les handles terminaux sont des carriers de composantes complètes. À l'ordre un, chaque singleton porte immédiatement une racine réduite; pour $k\geq2$, un minimum isolé reste latent et ne possède aucun nœud public. Chaque carrier gelé devient un sommet $R(r)$ s'il porte une racine réduite antérieure ou $L(h)$ s'il reste latent. Toutes les hyperarêtes du lot sont fermées transitivement sur l'union disjointe $R\sqcup L$ avant de compter les seuls identifiants $r$. Le cardinal $q_R=0$ crée une naissance réduite sans enfant, $q_R=1$ conserve l'unique racine et $q_R\geq2$ crée une multifusion unique. Tous les carriers du groupe sont ensuite unis, y compris ceux encore latents. Supprimer les $L$ avant la fermeture casserait les ponts entre selles simultanées.
+
+La transaction du lot suit donc l'ordre `snapshot`, `descentes`, `quotient carriers`, `classification q_R`, `commit unions et minima`. Aucun graphe de descente n'est conservé après projection vers les liaisons bras--carrier. Les minima du niveau courant sont ajoutés seulement après la résolution et ne peuvent être visés par les bras stricts du même lot. Les suppressions intérieures de niveau égal, premières incidences, co-minimiseurs et gateways historiques restent des audits facultatifs; ils ne deviennent ni racines, ni actions de forêt. Le contrat est conditionnel à la complétude du flux de Gabriel et des terminaisons bras--carrier, reste `public_status=not_claimed` et ne ferme pas M.1. Voir [REDUCTION_MORSE_H0_PHASE10.md](math/REDUCTION_MORSE_H0_PHASE10.md).
+
 ## 10. Événements simultanés
 
 Des centres distincts peuvent avoir exactement le même niveau. Une exécution séquentielle créerait des bifurcations binaires artificielles et pourrait changer les morphismes verticaux.
@@ -614,10 +622,10 @@ Des centres distincts peuvent avoir exactement le même niveau. Une exécution s
 Pour chaque ordre $k$ et niveau exact $a$ :
 
 1. figer les composantes de niveau strictement inférieur;
-2. distinguer les racines des bras stricts et toutes les facettes à activer dans le lot;
+2. distinguer les carriers des bras stricts, leurs racines réduites optionnelles et les minima du lot;
 3. remplacer chaque hyperarête par une étoile sans effectuer immédiatement les unions;
-4. calculer les composantes de l'hypergraphe du lot sur les racines figées;
-5. créer une naissance si $q=0$, aucun nœud si $q=1$, ou une multifusion si $q\geq2$;
+4. calculer les composantes de l'hypergraphe du lot sur les sommets typés $R(r)$ et $L(h)$ figés;
+5. compter seulement les racines réduites antérieures : créer une naissance si $q_R=0$, aucun nœud si $q_R=1$, ou une multifusion si $q_R\geq2$; un minimum isolé d'ordre au moins deux n'est jamais une naissance réduite;
 6. effectuer ensuite les unions;
 7. enregistrer les `coverage_delta` et, pour les rangs $2\leq s\leq K_{\mathrm{eff}}$, poser les ancres verticales après l'état fermé du lot.
 

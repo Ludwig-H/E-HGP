@@ -622,6 +622,27 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_morse_forest_journal_tests
+  test_hierarchy_direct_morse_forest_journal.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_forest_journal_tests
+  PRIVATE
+    morsehgp3d::direct_morse_forest_journal
+    morsehgp3d::direct_morse_industrial_plan
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_forest_journal_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_forest_journal_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_pair_support_stream_codec_tests
   test_hierarchy_pair_support_stream_codec.cpp
 )
@@ -1139,6 +1160,7 @@ set(
   morsehgp3d_hierarchy_direct_sparse_gateway_clock_tests
   morsehgp3d_hierarchy_direct_frozen_root_quotient_tests
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
+  morsehgp3d_hierarchy_direct_morse_forest_journal_tests
   morsehgp3d_hierarchy_pair_support_stream_codec_tests
   morsehgp3d_hierarchy_critical_catalog_reduced_gamma_overlay_tests
   morsehgp3d_hierarchy_critical_catalog_arm_gamma_overlay_tests
@@ -1958,6 +1980,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_k1_forest_journal
   COMMAND morsehgp3d_hierarchy_direct_k1_forest_journal_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_forest_journal
+  COMMAND morsehgp3d_hierarchy_direct_morse_forest_journal_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_pair_support_stream_codec

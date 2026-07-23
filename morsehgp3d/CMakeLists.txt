@@ -1095,6 +1095,89 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_morse_forest_journal
+  STATIC
+    src/cpu/hierarchy/direct_morse_forest_journal.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_forest_journal
+  ALIAS morsehgp3d_direct_morse_forest_journal
+)
+set_target_properties(
+  morsehgp3d_direct_morse_forest_journal
+  PROPERTIES
+    EXPORT_NAME direct_morse_forest_journal
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_forest_journal PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_forest_journal
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_forest_journal
+  PUBLIC
+    morsehgp3d::direct_frozen_root_quotient
+    morsehgp3d::direct_saddle_arm_seed_journal
+    morsehgp3d::direct_sparse_facet_descent_closure
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_journal PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_journal
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
+  morsehgp3d_direct_morse_industrial_plan
+  STATIC
+    src/cpu/hierarchy/direct_morse_industrial_plan.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_industrial_plan
+  ALIAS morsehgp3d_direct_morse_industrial_plan
+)
+set_target_properties(
+  morsehgp3d_direct_morse_industrial_plan
+  PROPERTIES
+    EXPORT_NAME direct_morse_industrial_plan
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_industrial_plan PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_industrial_plan
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_industrial_plan
+  PUBLIC morsehgp3d::direct_saddle_arm_seed_journal
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_industrial_plan PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_industrial_plan
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_pair_support_codec
   STATIC
     src/cpu/hierarchy/pair_support_stream_codec.cpp
@@ -1771,6 +1854,8 @@ install(
     morsehgp3d_direct_sparse_gateway_historical_quotient
     morsehgp3d_direct_frozen_root_quotient
     morsehgp3d_direct_k1_forest_journal
+    morsehgp3d_direct_morse_forest_journal
+    morsehgp3d_direct_morse_industrial_plan
     morsehgp3d_pair_support_codec
     morsehgp3d_hierarchy
     morsehgp3d_sanitizers

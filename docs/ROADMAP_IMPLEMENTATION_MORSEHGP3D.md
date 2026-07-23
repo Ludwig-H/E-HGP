@@ -885,7 +885,7 @@ Le catalogue direct complet égale l'oracle $n\leq14$ et aucun objet interdit n'
 
 ### Porte d'entrée
 
-Satisfaite par la fermeture de la Phase 9 et par le jalon local de Phase 5 `compact_k1_forest_certified/local_k1_compact_forest_only`. Cette dépendance de jalon ne ferme pas la Phase 5 globale : sa voie scalable générale reste `ready`. La génération complète des gateways silencieux est une obligation de sortie de la Phase 10; la preuve M.1 est explicitement différée à la Phase 12 après construction de la tour réduite. Aucune des deux n'était une précondition pour ouvrir le journal `partial_refinement`.
+Satisfaite par la fermeture de la Phase 9 et par le jalon local de Phase 5 `compact_k1_forest_certified/local_k1_compact_forest_only`. Cette dépendance de jalon ne ferme pas la Phase 5 globale : sa voie scalable générale reste `ready`. Le recul mathématique du 23 juillet 2026 retire la complétude des gateways silencieux de la porte produit : les Théorèmes 4--5 et la Proposition 6 du manuscrit autorisent le remplacement de Gamma par le graphe des simplexes de Gabriel pour les composantes non triviales. La chaîne conserve leurs seuls bras stricts, leurs carriers complets et le quotient atomique des racines réduites optionnelles. La preuve M.1 reste explicitement différée à la Phase 12 après construction de la tour réduite.
 
 ### But
 
@@ -893,14 +893,17 @@ Consommer le flux de Phase 9 pour construire directement une généalogie $H_0$ 
 
 ### Travaux
 
-- injecter les naissances de rang $k$ et les selles de rang $k+1$ depuis le flux partagé;
-- construire les au plus quatre bras de chaque selle et les attacher aux racines du snapshot strict pré-lot;
+- injecter les minima de rang $k$ et le catalogue complet des simplexes de Gabriel de rang $k+1$, y compris les selles tardives, depuis le flux partagé;
+- construire les au plus quatre bras de chaque simplexe et les attacher aux carriers du snapshot strict pré-lot;
 - trier les niveaux par filtre puis comparateur exact;
-- résoudre chaque niveau comme un hypergraphe quotient, sans binariser les multifusions;
-- persister seulement `RootBirth`, `AtomicUnionBatch`, `GatewayAttach`, les enfants et, si demandé, `CoverageDelta`;
-- conserver les gateways silencieux nécessaires à une fusion future; la fixture à cinq points interdit de les confondre avec des no-op;
+- résoudre chaque niveau comme un hypergraphe quotient sur les sommets typés $R(r)$ et $L(h)$ des carriers, sans retirer les carriers latents avant la fermeture transitive, puis compter seulement les racines réduites non nulles;
+- garder les minima d'ordre au moins deux latents jusqu'à leur première composante non triviale;
+- persister seulement les minima, les liaisons bras--carrier, les lots atomiques, les enfants et les racines finales par ordre;
+- traverser à la demande les facettes silencieuses lorsqu'une descente stricte les rencontre, sans les cataloguer ni en faire des événements $H_0$;
 - réutiliser le sweep Morse 6.23 comme falsificateur interne, puis retirer son historique Gamma du chemin produit;
 - produire les forêts horizontales de chaque ordre et les runs externes nécessaires au streaming.
+
+La décision normative et son théorème conditionnel sont consignés dans [REDUCTION_MORSE_H0_PHASE10.md](math/REDUCTION_MORSE_H0_PHASE10.md). Les jalons 10.6--10.15 de première incidence et de gateways restent disponibles comme audits renforcés facultatifs. Ils certifient notamment les premières promotions des minima latents mais ne découvrent pas les selles tardives et ne remplacent donc jamais le catalogue direct. Ils ne pilotent plus le chemin produit, ne sont plus une porte de fermeture et ne sont pas réimplémentés sous une autre forme.
 
 ### État du déploiement au 23 juillet 2026
 
@@ -980,7 +983,7 @@ Sur l'ABI LP64 courante, les tailles logiques sont 24 octets par triplet trié, 
 
 Cette réduction concerne le builder produit. Le fresh verifier conserve volontairement les requêtes et le résultat du sweep dans `BuildArtifacts`, puis reconstruit le sweep pour sa preuve imbriquée; il ne bénéficie donc pas de la borne de pic acquise ici. Comme `warm_e2e` devra inclure la validation fraîche, ces artefacts devront être streamés avant toute qualification SLO. 10.15 ne crée aucune structure globale, ne modifie aucun résultat scientifique et ne qualifie ni 50 k sous la seconde ni 10 M+.
 
-La Phase 10 reste `partial_refinement`, `in_progress`, avec porte de sortie fausse et aucun statut public. 10.5c ferme des chaînes strictes seulement pour les graines fournies et relativement au domaine positif déjà présent; 10.7 propose toutes les facettes réutilisées par le seul flux direct et leurs premières incidences, mais ne prouve pas que ce sous-univers contient toutes les facettes-portes nécessaires. 10.9 localise ces seules propositions, 10.10 résout des clés aux préfixes internes, 10.11-PSTAMP reconstruit l'identité de ces préfixes, 10.11-CLOCK les lie conditionnellement aux lots 10.7, 10.12-AUTH rejoue cette autorité seulement en mémoire, 10.13-TRES résout les tokens à ces préfixes, 10.14-QPROP en projette la clôture batch-locale sur les racines connues et 10.15-LIFE réduit le pic transitoire du builder TRES. La complétude globale des gateways silencieux non directs, la composition durable de l'autorité, la mutation atomique du locator et de la forêt à partir de cette proposition, les actions hiérarchiques et M.1 restent ouvertes; M.1 demeure une obligation de la Phase 12. Les jalons ne fournissent ni checkpoint, ni reprise durable, ni annulation coopérative, et aucune qualification SLO 50 k ou 10 M+ n'en découle. Voir [AUTORITE_HORLOGE_SPARSE_PHASE10.md](math/AUTORITE_HORLOGE_SPARSE_PHASE10.md), [RESOLUTION_TEMPORELLE_GATEWAYS_PHASE10.md](math/RESOLUTION_TEMPORELLE_GATEWAYS_PHASE10.md), [QUOTIENT_GATEWAYS_HISTORIQUES_PHASE10.md](math/QUOTIENT_GATEWAYS_HISTORIQUES_PHASE10.md) et [DUREES_VIE_RESOLUTION_TEMPORELLE_PHASE10.md](math/DUREES_VIE_RESOLUTION_TEMPORELLE_PHASE10.md).
+Les incréments 10.6--10.15 restent `partial_refinement`, sans statut public, mais leur ancienne tentative de compléter un sous-univers historique de gateways est désormais non normative. La chaîne produit reprend directement 10.1, 10.2, 10.5a et 10.5c : pour chaque lot, elle localise au plus quatre bras stricts par simplexe de Gabriel dans le snapshot gelé, exige un terminal positif issu d'un minimum strictement antérieur, ferme l'hypergraphe des carriers, puis compte les seules racines réduites. À l'ordre au moins deux, un minimum isolé n'est pas une naissance réduite; $q_R=0$ crée une naissance, $q_R=1$ continue et $q_R\geq2$ fusionne. Tous les carriers du groupe sont unis avant l'insertion des minima courants. Les facettes intérieures égales et les niveaux non Gabriel ne sont ni des bras, ni des parents de forêt. M.1 demeure une obligation de la Phase 12 et aucune qualification SLO 50 k ou 10 M+ ne découle de cette réduction.
 
 ### Tests
 
@@ -999,7 +1002,9 @@ La Phase 10 reste `partial_refinement`, `in_progress`, avec porte de sortie faus
 
 ### Porte de sortie
 
-Pour tous les petits cas et toutes les coupes, le journal direct doit coïncider avec Gamma exhaustif, et la génération produit des gateways silencieux requise par le profil réduit doit être certifiée complète. Cette porte peut fermer la Phase 10 en `partial_refinement` sans prétendre démontrer M.1 : elle doit seulement produire les hypothèses et certificats machine que la Phase 12 utilisera pour cette preuve. M.1 demeure donc une obligation de la Phase 12, après la tour réduite de Phase 11, ce qui évite toute dépendance circulaire 10--11--12. L'accord expérimental ne promeut jamais le journal; même fermée, la Phase 10 ne change aucun `public_status` v2 et Gamma reste un oracle de régression jusqu'à une migration contractuelle versionnée.
+La porte locale est satisfaite lorsque le flux direct rejoué fournit tous les minima et tous les simplexes de Gabriel de sa portée, que chaque bras strict est certifié vers un carrier strictement antérieur sous un snapshot commun, que les minima isolés d'ordre au moins deux restent sans nœud, que chaque lot égal applique $q_R=0,1,\geq2$ avant mutation et que le journal compact conserve minima, liaisons, naissances réduites, continuations, multifusions, enfants et racines finales. Toute terminaison non positive, autorité divergente ou capacité insuffisante doit échouer sans action scientifique.
+
+Le sweep 6.23 et Gamma exhaustif restent des falsificateurs bornés : toute contradiction devient une fixture permanente, mais leur accord ne promeut jamais le journal. La fermeture de Phase 10 certifie la réduction Morse horizontale conditionnelle dans le domaine direct annoncé; elle ne démontre ni M.1, ni `full_pi0`, ni la tour verticale, et ne change aucun `public_status` v2.
 
 ## Phase 11 — Tour verticale
 
@@ -1127,11 +1132,17 @@ Atteindre ou réfuter proprement la cible de moins d'une seconde en protocole `w
 ### Préconditions
 
 - pour la **qualification finale**, profil `hgp_reduced` certifié par le flux direct et le journal des Phases 9--11;
-- pour les **smokes architecturaux non promotionnels**, premier sous-flux direct disponible, avec tailles de support et portée explicitement incomplètes; ces mesures commencent en Phase 9 et ne publient jamais `exact`;
+- pour l'**architecture industrielle non promotionnelle**, Phase 10 fermée sur sa réduction Morse horizontale conditionnelle; la Phase 11 et M.1 restent obligatoires avant toute qualification finale;
 - prédicats et flux direct corrects dans leur portée annoncée;
 - aucun JIT;
 - runtime et allocateur initialisés, mais nuage encore en mémoire hôte;
 - instrumentation NVTX complète.
+
+### Socle industriel 14A
+
+Le même moteur scientifique sert les deux régimes. Pour 50 k, le plan résident exige que tous les lots, le locator, les descentes et la forêt tiennent dans une seule enveloppe. Pour 10 M+, le plan streaming coupe seulement entre des lots exacts complets et pose une frontière de run/checkpoint après chaque chunk. Le planificateur compte les minima, simplexes de Gabriel, bras, références de clés et bornes conservatives de nœuds et enfants depuis 10.1--10.2, puis applique un modèle mémoire explicite et une réserve de descentes fournie par l'appelant.
+
+Ce socle est `architecture_only` et `public_status=not_claimed` : accepter un plan ne mesure ni latence, ni débit, et ne qualifie aucun volume. La décision complète, les structures évitées et les goulots prioritaires sont dans [ARCHITECTURE_INDUSTRIELLE_MORSE_H0.md](math/ARCHITECTURE_INDUSTRIELLE_MORSE_H0.md).
 
 ### Optimisations autorisées
 
