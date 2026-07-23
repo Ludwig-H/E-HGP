@@ -448,6 +448,11 @@ struct ExactDirectSparsePositiveFacetBatchResult {
   std::size_t candidate_batch_index{};
   std::vector<ExactDirectSparseFacetLookupResult> lookups;
   ExactDirectSparsePositiveFacetBatchCounters counters{};
+  // Ephemeral execution diagnostics.  They are intentionally absent from
+  // the durable batch counters and the canonical history digest.
+  std::size_t component_parent_transaction_write_count{};
+  std::size_t component_parent_rollback_write_count{};
+  std::size_t peak_component_parent_journal_entry_count{};
   bool budget_preflight_certified{false};
   bool input_shape_certified{false};
   bool every_input_witness_non_null_and_authority_matched{false};

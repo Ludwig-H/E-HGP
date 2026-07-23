@@ -759,9 +759,12 @@ void check_incompatible_duplicate_is_atomic_contradiction() {
       rejected.decision == ExactDirectSparsePositiveFacetBatchDecision::
                                contradiction_incompatible_exact_facet_binding &&
           rejected.contradiction_detected &&
+          rejected.component_parent_transaction_write_count == 1U &&
+          rejected.component_parent_rollback_write_count == 1U &&
+          rejected.peak_component_parent_journal_entry_count == 1U &&
           !rejected.atomic_commit_performed &&
           !rejected.locator_state_mutated && locator == before,
-      "an exact duplicate bound to incompatible post-union handles rejects the whole batch without committing even unrelated unions");
+      "an exact duplicate bound to incompatible post-union handles rolls back its one sparse parent write and rejects the whole batch");
 }
 
 void check_explicit_union_makes_duplicate_compatible() {
@@ -793,11 +796,15 @@ void check_explicit_union_makes_duplicate_compatible() {
           accepted.lookups[0].pre_batch_component_handle == 0U &&
           accepted.counters.inserted_binding_count == 0U &&
           accepted.counters.compatible_duplicate_binding_count == 1U &&
+          accepted.component_parent_transaction_write_count == 1U &&
+          accepted.component_parent_rollback_write_count == 0U &&
+          accepted.peak_component_parent_journal_entry_count == 1U &&
           accepted.explicit_unions_applied_before_binding_compatibility &&
           locator.key_point_arena() == arena_before &&
+          locator.component_parents()[1U] == 0U &&
           locator.counters().inserted_binding_count == 1U &&
           locator.counters().compatible_duplicate_binding_count == 1U,
-      "an explicit same-batch union makes an exact duplicate compatible without duplicating its key arena slice");
+      "an explicit same-batch union commits one journaled parent write and makes the duplicate compatible");
 }
 
 void check_shape_witness_and_durable_budget_rejections() {

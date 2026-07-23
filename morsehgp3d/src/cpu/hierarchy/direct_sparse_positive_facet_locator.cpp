@@ -152,16 +152,75 @@ structural_verification_scratch_byte_count(
   return handle;
 }
 
-void unite_components(
-    std::vector<ExactDirectSparseComponentHandle>& parents,
-    ExactDirectSparseComponentHandle left,
-    ExactDirectSparseComponentHandle right) {
-  left = find_component(parents, left);
-  right = find_component(parents, right);
-  if (left != right) {
-    parents[std::max(left, right)] = std::min(left, right);
+// A batch changes at most one root parent per effective union.  Because this
+// DSU deliberately performs no path compression, recording that root is
+// sufficient to restore the exact pre-batch parent arena in reverse order.
+// The journal is bounded by the already-certified union-request count.
+class SparseComponentParentTransaction {
+ public:
+  SparseComponentParentTransaction(
+      std::vector<ExactDirectSparseComponentHandle>& parents,
+      std::size_t maximum_union_request_count)
+      : parents_(parents) {
+    changed_roots_.reserve(maximum_union_request_count);
   }
-}
+
+  SparseComponentParentTransaction(
+      const SparseComponentParentTransaction&) = delete;
+  SparseComponentParentTransaction& operator=(
+      const SparseComponentParentTransaction&) = delete;
+
+  ~SparseComponentParentTransaction() noexcept {
+    static_cast<void>(rollback());
+  }
+
+  [[nodiscard]] ExactDirectSparseComponentHandle find(
+      ExactDirectSparseComponentHandle handle) const {
+    return find_component(parents_, handle);
+  }
+
+  void unite(
+      ExactDirectSparseComponentHandle left,
+      ExactDirectSparseComponentHandle right) {
+    left = find(left);
+    right = find(right);
+    if (left == right) {
+      return;
+    }
+    const ExactDirectSparseComponentHandle child_root =
+        std::max(left, right);
+    const ExactDirectSparseComponentHandle parent_root =
+        std::min(left, right);
+    changed_roots_.push_back(child_root);
+    parents_[child_root] = parent_root;
+  }
+
+  [[nodiscard]] std::size_t write_count() const noexcept {
+    return changed_roots_.size();
+  }
+
+  [[nodiscard]] std::size_t rollback() noexcept {
+    if (!active_) {
+      return 0U;
+    }
+    for (auto changed_root = changed_roots_.rbegin();
+         changed_root != changed_roots_.rend();
+         ++changed_root) {
+      parents_[*changed_root] = *changed_root;
+    }
+    active_ = false;
+    return changed_roots_.size();
+  }
+
+  void commit() noexcept {
+    active_ = false;
+  }
+
+ private:
+  std::vector<ExactDirectSparseComponentHandle>& parents_;
+  std::vector<ExactDirectSparseComponentHandle> changed_roots_;
+  bool active_{true};
+};
 
 enum class StructuralUnionReplayStatus : std::uint8_t {
   complete,
@@ -967,6 +1026,11 @@ bool ExactDirectSparsePositiveFacetBatchResult::certified_committed_batch()
          every_fingerprint_candidate_compared_by_full_key &&
          explicit_unions_applied_before_binding_compatibility &&
          exact_duplicate_bindings_compatible_after_explicit_unions &&
+         component_parent_transaction_write_count ==
+             peak_component_parent_journal_entry_count &&
+         component_parent_transaction_write_count <=
+             counters.union_request_count &&
+         component_parent_rollback_write_count == 0U &&
          atomic_commit_performed && locator_state_mutated &&
          !contradiction_detected && !missing_facet_means_isolated &&
          !total_facet_authority_claimed &&
@@ -2287,21 +2351,30 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
           });
   result.every_fingerprint_candidate_compared_by_full_key = true;
 
-  std::vector<ExactDirectSparseComponentHandle> candidate_parents =
-      component_parents_;
+  SparseComponentParentTransaction candidate_components(
+      component_parents_, unions.size());
   for (const ExactDirectSparseComponentUnion& component_union : unions) {
-    unite_components(
-        candidate_parents,
+    candidate_components.unite(
         component_union.left_handle,
         component_union.right_handle);
   }
+  result.component_parent_transaction_write_count =
+      candidate_components.write_count();
+  result.peak_component_parent_journal_entry_count =
+      candidate_components.write_count();
   result.explicit_unions_applied_before_binding_compatibility = true;
+
+  const auto rollback_candidate_components = [&]() noexcept {
+    result.component_parent_rollback_write_count =
+        candidate_components.rollback();
+  };
 
   const auto actual_scratch_capacity = probing_slot_capacity(bindings.size());
   if (!actual_scratch_capacity.has_value() ||
       *actual_scratch_capacity > required_batch_scratch_slot_capacity_) {
     result.decision = ExactDirectSparsePositiveFacetBatchDecision::
         no_positive_locator_capacity_overflow;
+    rollback_candidate_components();
     return result;
   }
   const std::size_t empty = std::numeric_limits<std::size_t>::max();
@@ -2322,16 +2395,18 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
             committed.equal_fingerprint_distinct_key_count)) {
       result.decision = ExactDirectSparsePositiveFacetBatchDecision::
           no_positive_locator_capacity_overflow;
+      rollback_candidate_components();
       return result;
     }
     if (committed.matching_slot.has_value()) {
       const ExactDirectSparsePositiveFacetSlot& slot =
           slots_[*committed.matching_slot];
-      if (find_component(candidate_parents, slot.component_handle) !=
-          find_component(candidate_parents, binding.component_handle)) {
+      if (candidate_components.find(slot.component_handle) !=
+          candidate_components.find(binding.component_handle)) {
         result.contradiction_detected = true;
         result.decision = ExactDirectSparsePositiveFacetBatchDecision::
             contradiction_incompatible_exact_facet_binding;
+        rollback_candidate_components();
         return result;
       }
       ++result.counters.compatible_duplicate_binding_count;
@@ -2346,15 +2421,17 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
             staged.equal_fingerprint_distinct_key_count)) {
       result.decision = ExactDirectSparsePositiveFacetBatchDecision::
           no_positive_locator_capacity_overflow;
+      rollback_candidate_components();
       return result;
     }
     if (staged.pending_index.has_value()) {
       const PendingBinding& previous = pending[*staged.pending_index];
-      if (find_component(candidate_parents, previous.component_handle) !=
-          find_component(candidate_parents, binding.component_handle)) {
+      if (candidate_components.find(previous.component_handle) !=
+          candidate_components.find(binding.component_handle)) {
         result.contradiction_detected = true;
         result.decision = ExactDirectSparsePositiveFacetBatchDecision::
             contradiction_incompatible_exact_facet_binding;
+        rollback_candidate_components();
         return result;
       }
       ++result.counters.compatible_duplicate_binding_count;
@@ -2378,6 +2455,7 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
     if (!next.has_value()) {
       result.decision = ExactDirectSparsePositiveFacetBatchDecision::
           no_positive_locator_capacity_overflow;
+      rollback_candidate_components();
       return result;
     }
     result.counters.inserted_key_point_count = *next;
@@ -2397,6 +2475,7 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
       !committed_batch_total.has_value()) {
     result.decision = ExactDirectSparsePositiveFacetBatchDecision::
         no_positive_locator_capacity_overflow;
+    rollback_candidate_components();
     return result;
   }
   if (*committed_binding_total >
@@ -2405,6 +2484,7 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
           budget_.maximum_committed_key_point_count) {
     result.decision = ExactDirectSparsePositiveFacetBatchDecision::
         no_positive_locator_budget_exhausted;
+    rollback_candidate_components();
     return result;
   }
 
@@ -2412,6 +2492,7 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
   if (!next_counters.has_value()) {
     result.decision = ExactDirectSparsePositiveFacetBatchDecision::
         no_positive_locator_capacity_overflow;
+    rollback_candidate_components();
     return result;
   }
 
@@ -2437,14 +2518,11 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
   const contract::CanonicalId next_snapshot_digest =
       snapshot_digest_builder.finalize();
 
-  // Every fallible allocation happens before the first logical state change.
+  // Candidate parent writes remain guarded by the rollback journal.  Every
+  // fallible durable allocation happens before the first irreversible change.
   key_point_arena_.reserve(*committed_key_point_total);
   committed_unions_.reserve(*committed_union_total);
   committed_batches_.reserve(*committed_batch_total);
-  std::copy(
-      candidate_parents.begin(),
-      candidate_parents.end(),
-      component_parents_.begin());
   for (const ExactDirectSparseComponentUnion& component_union : unions) {
     committed_unions_.push_back(ExactDirectSparseCommittedUnionRecord{
         committed_unions_.size(),
@@ -2474,6 +2552,7 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
   committed_batches_.push_back(candidate_batch_record);
   counters_ = *next_counters;
   committed_history_digest_ = next_snapshot_digest;
+  candidate_components.commit();
 
   result.atomic_commit_performed = true;
   result.locator_state_mutated = true;

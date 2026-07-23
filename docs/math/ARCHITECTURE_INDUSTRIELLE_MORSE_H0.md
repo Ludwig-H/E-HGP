@@ -44,16 +44,25 @@ Pour 10 000 000 points ou davantage, un chunk est une suite de lots exacts compl
 
 Le flux de supports de Phase 9, les descentes et la réduction peuvent employer des budgets différents, mais une saturation doit conserver le lot courant intact pour reprise. Le merge externe porte sur les identités canoniques des lots et des actions, pas sur des cellules géométriques. Aucun atlas, aucune couture de mosaïque et aucun historique Gamma n'est nécessaire.
 
-## Goulots à traiter en Phase 14
+## Incrément 14B — transaction DSU sparse
 
-Quatre coûts dominants restent visibles après la réduction mathématique :
+Le locator 10.5a ne clone plus ses $H$ parents à chaque lot. Après les requêtes strictement pré-lot, il réserve un journal de $U_b$ handles pour $U_b$ demandes d'union. Une union effective journalise sa racine réorientée avant l'unique écriture de parent; le DSU reste sans compression de chemin. Si $W_b$ unions changent réellement une racine, alors
+
+$$W_b\leq\min(U_b,H-1)\quad\text{pour }H>0.$$
+
+Un succès conserve ces $W_b$ écritures et abandonne le journal. Tout rejet post-unions restaure exactement les $W_b$ racines en ordre inverse. Les requêtes restent strictement pré-lot, les doublons voient toutes les unions du lot, et schéma, digest canonique comme vérificateur structurel restent inchangés. Les trois compteurs de travail du résultat de lot sont éphémères et exclus de l'histoire durable.
+
+Le scratch transactionnel passe ainsi de $O(H)$ à $O(U_b)$, avec exactement $W_b$ écritures sur succès et $2W_b$ sur rollback. Aucun parcours des handles non touchés, aucune facette, coface, cellule, incidence Gamma ou mosaïque d'ordre supérieur n'est introduit. Ce gain concerne directement les petits lots interactifs et les chunks massifs; il ne borne pas la profondeur des chaînes DSU et ne qualifie à lui seul aucun SLO.
+
+## Goulots restant à traiter en Phase 14
+
+Trois coûts dominants restent visibles après cette réduction :
 
 - les traversées exactes top-$K$ par clé distincte, encore linéaires au pire cas;
 - les constructions de miniballs et les fallbacks rationnels, à regrouper par cardinal et difficulté;
-- la transaction du locator 10.5a, dont l'implémentation de référence copie encore tous les parents DSU avant un lot;
 - le rejeu frais, qui ne doit pas dupliquer durablement les grandes arènes dans le protocole `warm_e2e`.
 
-La priorité de développement est donc : DSU transactionnelle sparse, batch GPU des descentes, durées de vie d'arènes explicites, puis instrumentation. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces quatre coûts.
+La priorité de développement devient donc : batch GPU des descentes, durées de vie d'arènes explicites, puis instrumentation. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces trois coûts.
 
 ## Planification sans promotion
 

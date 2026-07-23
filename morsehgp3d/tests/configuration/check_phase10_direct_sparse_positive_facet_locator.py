@@ -120,6 +120,9 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "maximum_committed_union_count",
         "maximum_committed_batch_count",
         "maximum_batch_scratch_slot_count",
+        "component_parent_transaction_write_count",
+        "component_parent_rollback_write_count",
+        "peak_component_parent_journal_entry_count",
         "fingerprint_mask",
         "fingerprint_exact_direct_sparse_facet_key(",
         "committed_binding_index",
@@ -235,7 +238,11 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "find_component_for_structure(",
         "unite_components_for_structure(",
         "verification.committed_slot_insertion_chronology_freshly_replayed",
-        "std::vector<ExactDirectSparseComponentHandle> candidate_parents",
+        "class SparseComponentParentTransaction",
+        "changed_roots_.reserve(maximum_union_request_count)",
+        "parents_[child_root] = parent_root",
+        "parents_[*changed_root] = *changed_root",
+        "candidate_components.commit()",
         "result.lookups_use_strict_pre_batch_snapshot = true",
         "result.current_batch_bindings_hidden_from_lookups = true",
         "contradiction_incompatible_exact_facet_binding",
@@ -424,6 +431,47 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(",
         "prefix-stamp sweep",
     )
+    sparse_parent_transaction = braced_block(
+        code,
+        "class SparseComponentParentTransaction",
+        "sparse component-parent transaction",
+    )
+    apply_batch = braced_block(
+        code,
+        "ExactDirectSparsePositiveFacetBatchResult\n"
+        "ExactDirectSparsePositiveFacetLocator::apply_batch(",
+        "locator batch transaction",
+    )
+    reserve_position = sparse_parent_transaction.find(
+        "changed_roots_.reserve(maximum_union_request_count)"
+    )
+    journal_position = sparse_parent_transaction.find(
+        "changed_roots_.push_back(child_root)"
+    )
+    parent_write_position = sparse_parent_transaction.find(
+        "parents_[child_root] = parent_root"
+    )
+    require(
+        0 <= reserve_position < journal_position < parent_write_position,
+        "the sparse parent journal must be fully reserved and record a root "
+        "before changing its parent",
+    )
+    require(
+        "parents_[*changed_root] = *changed_root" in sparse_parent_transaction
+        and "static_cast<void>(rollback())" in sparse_parent_transaction,
+        "the sparse parent transaction must restore every changed root and "
+        "rollback on every non-commit exit",
+    )
+    for forbidden_dense_transaction in (
+        "candidate_parents",
+        "std::copy(",
+        "component_parents_.begin()",
+    ):
+        require(
+            forbidden_dense_transaction not in apply_batch,
+            "apply_batch contains a forbidden dense parent transaction "
+            f"{forbidden_dense_transaction!r}",
+        )
     require(
         structural_verifier.count("replay_locator_history_digest_transition(") == 1
         and prefix_sweep.count("replay_locator_history_digest_transition(") == 1,
@@ -586,42 +634,45 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "for (const ExactDirectSparseFacetQuery& query : queries)"
     )
     union_position = source.find(
-        "std::vector<ExactDirectSparseComponentHandle> candidate_parents"
+        "SparseComponentParentTransaction candidate_components"
     )
     binding_position = source.find(
         "for (const ExactDirectSparseFacetBinding& binding : bindings)",
         union_position,
     )
-    commit_position = source.find(
-        "std::copy(\n      candidate_parents.begin()",
-        binding_position,
-    )
-    require(
-        0 <= query_position < union_position < binding_position < commit_position,
-        "queries, candidate unions, compatibility checks and commit are misordered",
-    )
     next_digest_position = source.find(
         "const contract::CanonicalId next_snapshot_digest", binding_position
     )
-    digest_commit_position = source.find(
-        "committed_history_digest_ = next_snapshot_digest", commit_position
+    durable_commit_position = source.find(
+        "committed_unions_.push_back(", next_digest_position
     )
     batch_record_commit_position = source.find(
-        "committed_batches_.push_back(candidate_batch_record)", commit_position
+        "committed_batches_.push_back(candidate_batch_record)",
+        durable_commit_position,
     )
     counter_commit_position = source.find(
         "counters_ = *next_counters", batch_record_commit_position
     )
+    digest_commit_position = source.find(
+        "committed_history_digest_ = next_snapshot_digest",
+        counter_commit_position,
+    )
+    transaction_commit_position = source.find(
+        "candidate_components.commit()", digest_commit_position
+    )
     require(
         0
-        <= binding_position
+        <= query_position
+        < union_position
+        < binding_position
         < next_digest_position
-        < commit_position
+        < durable_commit_position
         < batch_record_commit_position
         < counter_commit_position
-        < digest_commit_position,
-        "the next canonical snapshot digest must be finalized before mutation and "
-        "committed after the accepted batch record and aggregate counters",
+        < digest_commit_position
+        < transaction_commit_position,
+        "queries, sparse candidate unions, compatibility checks, digest "
+        "preparation and the irreversible commit are misordered",
     )
 
     for required_test_contract in (
@@ -671,6 +722,10 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "extra_final_slot_rejected",
         "malformed_rejected",
         "stale_verification",
+        "component_parent_transaction_write_count == 1U",
+        "component_parent_rollback_write_count == 1U",
+        "component_parent_rollback_write_count == 0U",
+        "peak_component_parent_journal_entry_count == 1U",
     ):
         require(
             required_test_contract in unit_test,

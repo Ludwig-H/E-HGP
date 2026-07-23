@@ -58,9 +58,9 @@ Un appel séquentiel suit le protocole suivant.
 
 1. **Préflight.** Les formes, indices denses, jetons externes et plafonds du lot sont vérifiés avant toute mutation logique.
 2. **Localisation.** Toutes les requêtes consultent exclusivement la table et le DSU engagés avant l'appel.
-3. **DSU candidat.** Les parents sont copiés, puis toutes les unions explicites sont appliquées à cette copie.
+3. **DSU candidat sparse.** Après réservation d'un journal borné par le nombre de demandes d'union, chaque union effective enregistre sa racine réorientée puis modifie le parent correspondant, sans compression de chemin et sans copie des autres parents.
 4. **Compatibilité et staging.** Les doublons sont comparés dans le DSU candidat post-unions; les seules clés nouvelles sont conservées dans des arènes privées. Une liaison courante reste invisible aux requêtes du même appel.
-5. **Commit.** Si et seulement si tout le lot est accepté et toutes les capacités durables suffisent, parents, unions, clés nouvelles, agrégat de lot et prochain digest de snapshot sont engagés. Sinon, le contenu logique antérieur et son digest restent inchangés.
+5. **Commit ou rollback.** Si et seulement si tout le lot est accepté et toutes les capacités durables suffisent, les parents déjà modifiés, unions, clés nouvelles, agrégat de lot et prochain digest de snapshot sont engagés. Sinon, le journal restaure les racines en ordre inverse et le contenu logique antérieur comme son digest restent inchangés.
 
 Une union explicite du lot peut donc rendre compatibles deux liaisons qui ne l'étaient pas dans l'état pré-appel. Sa vérité reste une assertion externe indépendante à rejouer par l'appelant. Après toutes ces unions, une même clé visant encore deux classes distinctes provoque le rejet transactionnel complet.
 
@@ -117,7 +117,7 @@ Sous l'hypothèse externe que les unions sont valides, leur suite conserve la va
 
 Toutes les localisations réussies pendant un appel proviennent de l'état engagé avant cet appel.
 
-**Preuve.** Par construction, la boucle de requêtes précède la copie mutée du DSU et ne consulte jamais l'arène de staging. Une liaison ou une union courante ne peut donc influencer aucun lookup du même appel. $\square$
+**Preuve.** Par construction, la boucle de requêtes précède la première écriture transactionnelle du DSU et ne consulte jamais l'arène de staging. Une liaison ou une union courante ne peut donc influencer aucun lookup du même appel. $\square$
 
 Ces résultats prouvent la correction **interne et relative** du socle. Ils ne prouvent ni l'autorité externe, ni la complétude du domaine, ni la correction d'une action HGP lorsque certains endpoints restent `unresolved`.
 
@@ -142,7 +142,7 @@ Il ne rejoue ni l'autorité externe, ni les anciens payloads de requêtes ou de 
 
 ## A.9 Bornes réelles du noyau de référence
 
-Notons $M$ la capacité configurée de clés, $L\leq M$ le nombre de clés distinctes engagées, $H$ le nombre de handles, $U$ le nombre d'unions durables, $T$ le nombre de lots engagés, $B$ le nombre de demandes de liaison du lot courant et $Q$ son nombre de requêtes. Comme $K\leq10$, une clé complète occupe au plus dix `PointId` plus un cardinal fixe.
+Notons $M$ la capacité configurée de clés, $L\leq M$ le nombre de clés distinctes engagées, $H$ le nombre de handles, $U$ le nombre d'unions durables, $T$ le nombre de lots engagés, $B$ le nombre de demandes de liaison du lot courant, $Q$ son nombre de requêtes, $U_b$ ses demandes d'union et $W_b$ ses unions effectives. Comme $K\leq10$, une clé complète occupe au plus dix `PointId` plus un cardinal fixe.
 
 La table est préallouée à $2M+1$ slots. L'état durable occupe donc
 
@@ -150,11 +150,15 @@ $$O(M+KL+H+U+T).$$
 
 Le scratch d'un lot occupe
 
-$$O(Q+KB+H).$$
+$$O(Q+KB+U_b).$$
 
-Le DSU actuel n'emploie ni rang ni compression de chemin, et le hash ouvert n'a pas de repli radix. En notant $U_b$ les unions du lot, une borne pessimiste explicite est
+Le DSU actuel n'emploie ni rang ni compression de chemin, et le hash ouvert n'a pas de repli radix. Chaque union effective attache la plus grande racine à la plus petite. Une racine réorientée ne redevient donc jamais racine dans le même lot, d'où
 
-$$O\bigl(H+Q(KM+H)+U_bH+B(K(M+B)+H)\bigr).$$
+$$W_b\leq\min(U_b,H-1)\quad\text{pour }H>0.$$
+
+Le journal réserve $U_b$ handles et en utilise exactement $W_b$. Un succès effectue exactement $W_b$ écritures de parents et aucune écriture de rollback; un rejet post-unions effectue exactement $W_b$ écritures aller puis $W_b$ écritures retour. Aucun scan des $H$ parents n'est nécessaire. Une borne pessimiste explicite du travail reste
+
+$$O\bigl(Q(KM+H)+U_bH+B(K(M+B)+H)+U_b\bigr).$$
 
 Pour le vérificateur structurel, notons $F$ les visites cumulées lors de la retrouvabilité des fingerprints, $A$ les visites du rejeu chronologique et $J$ les sauts de parents du DSU. Son travail est $O(M+KL+H+U+T+F+A+J)$ et son scratch $O(M+L+KL+H)$; chacune de ces populations, les octets de scratch, $F$, $A$ et $J$ sont explicitement bornés. Sans ces caps, on aurait $F=O(LM)$, $A=O(LM)$ et $J=O(UH)$ au pire. Ces bornes ne qualifient pas le temps attendu du mélangeur; elles garantissent seulement que la correction ne dépend pas de sa qualité.
 
@@ -248,7 +252,7 @@ Cette comparaison directe de miniballs suffit à certifier le saut et peut accep
 
 La tentative top-k vérifie avant chaque opération des plafonds distincts pour les visites de nœuds, expansions internes, évaluations exactes de bornes AABB, distances exactes aux points, taille de frontière, meilleurs voisins retenus et identifiants du shell. `budget_exhausted` n'expose aucun `TopKPartition` scientifique partiel et ne mute ni locator ni journal.
 
-La sonde `const` du locator budgète séparément les slots visités et les sauts DSU. Son résultat conserve la clé interrogée et un vérificateur frais rejoue la sonde depuis le locator, la clé, le témoin et le budget fiables. Cette lecture `const` reste soumise à l'exclusion externe de A.4 : aucun `apply_batch` ne peut chevaucher la sonde ou son rejeu. Employer `apply_batch` avec des unions et insertions vides copierait encore les $H$ parents et engagerait un lot; ce n'est ni une lecture ni un chemin acceptable pour 10 M+.
+La sonde `const` du locator budgète séparément les slots visités et les sauts DSU. Son résultat conserve la clé interrogée et un vérificateur frais rejoue la sonde depuis le locator, la clé, le témoin et le budget fiables. Cette lecture `const` reste soumise à l'exclusion externe de A.4 : aucun `apply_batch` ne peut chevaucher la sonde ou son rejeu. Un `apply_batch` vide n'effectue désormais aucun scan des $H$ parents, mais engage toujours un lot; il ne remplace donc pas cette API de lecture.
 
 La preuve complète du pas source-ouvert, la différence entre $\beta(F)\leq a$ et $\beta(F)<a$, ainsi que les deux fixtures permanentes sont consignées dans `docs/math/DESCENTE_FACETTE_SPARSE_PHASE10.md`. 10.5c ferme désormais, dans sa portée multi-source bornée, les dettes historiques de témoin rejouable, budget de fermeture, suffixes partagés et miniballs réemployées. Les dettes suivantes restent :
 
@@ -264,7 +268,7 @@ L'oracle Gamma exhaustif borné peut falsifier ces arcs et leurs cibles sur de p
 
 Pour le cas interactif autour de 50 000 points et $K\leq10$, le socle possède des clés de largeur fixe et le pas ne matérialise aucun vecteur global de points extérieurs. Toutefois, un probe peut visiter $O(M)$ slots, suivre $O(H)$ parents et une tentative top-k complète peut visiter $O(n)$ points ou nœuds; ces propriétés ne suffisent donc pas encore à une réponse sous la seconde, et aucun SLO n'est atteint ni revendiqué par ce jalon.
 
-Pour les nuages de 10 000 000 de points ou davantage, l'absence de terme $\binom{n}{k}$ est acquise, mais la table résidente est provisionnée à la capacité $M$ et chaque lot copie les $H$ parents. À cela s'ajoutent le coût d'une frontière LBVH ambiguë, d'un shell massif et de longues descentes. Le noyau de référence prépare l'interface sparse; il n'est pas qualifié 10 M+.
+Pour les nuages de 10 000 000 de points ou davantage, l'absence de terme $\binom{n}{k}$ est acquise et la transaction n'a plus de terme systématique en $H$. La table résidente reste toutefois provisionnée à la capacité $M$; une chaîne DSU, une frontière LBVH ambiguë, un shell massif ou une longue descente peuvent encore être linéaires. Le noyau de référence prépare l'interface sparse; il n'est pas qualifié 10 M+.
 
 ## Tableau des statuts
 
