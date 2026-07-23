@@ -175,6 +175,16 @@ La capture coûte $O(1)$ et le stockage comme le rejeu propres coûtent $O(S)$. 
 
 La validation volontairement courte compile et exécute le test CLOCK+AUTH sous GCC Release en 0,22 seconde puis sous Clang Release en 0,20 seconde; l'installation, l'export CMake et le consumer externe passent 1/1 en 0,01 seconde. La fixture couvre l'ordre source `1,0,2,...`, un commit vide, deux captures au même stamp, un doublon atomique, un préfixe décroissant, le scellement unique, une capture après scellement, une ancre de digest étrangère, les caps supérieurs exacts puis un moins-un, les prémisses résiduelles et l'immutabilité des autorités. Aucun benchmark long, sanitizer, GPU ou GCP n'a été exécuté.
 
+## Incrément 10.13-TRES validé — résolution historique sparse des gateways
+
+10.13-TRES conserve `backend=reference_cpu`, `profile=hgp_reduced`, `mode=certified`, `partial_refinement` et `public_status=not_claimed`. Pour chaque projection 10.9, il associe le token localisé au préfixe strict pré-lot de son lot source. Le couple `(préfixe, token)` est la seule clé de déduplication correcte : deux états du même token séparés temporellement restent distincts.
+
+Le builder borne les scans, comparaisons, entrées et octets avant les allocations correspondantes, trie déterministiquement les triplets et appelle une fois le sweep historique 10.10. Il publie deux arènes plates seulement, sans clé ni `PointId` copié : une référence par projection et une résolution par couple distinct. Le prédicat auto-contenu vérifie indices, ordre, plages, multiplicité des références, dispositions, payloads et compteurs. Le fresh verifier rejoue localisation, AUTH/CLOCK et sweep, puis compare récursivement la reconstruction.
+
+Une fixture ciblée capture tous les lots avant toute insertion, lie ensuite une facette et scelle l'autorité. Elle confirme que le token final positif était historiquement latent et qu'aucune absence ne devient isolation. La compilation stricte du target et le CTest GCC Release CLOCK+AUTH+TRES passent en moins de 0,4 seconde. L'installation, l'export CMake et le consumer externe passent 1/1 en au plus 0,01 seconde. Aucun produit de caps, benchmark long, sanitizer, GPU ou GCP n'a été lancé.
+
+Le coût propre est $O(S+P\log P+KP+KQ)$ avec $Q\leq P\leq11C$, le stockage scientifique $O(P+Q)$ et le scratch propre $O(P+Q)$, en plus de l'unique DSU transitoire 10.10. Aucun snapshot ou DSU par lot, Gamma, catalogue global, cellule, coface globale, mosaïque de Delaunay d'ordre supérieur, quotient, forêt ou `GatewayAttach` n'est construit. L'autorité des témoins, le gel synchronisé, la discipline pré-lot, la durabilité, la complétude globale, M.1 et les deux SLO produit restent ouverts.
+
 ## Borne de stockage propre à 10.1 et objets évités
 
 Si $n$ est le nombre de sites et $E$ le nombre d'événements directs terminaux, le journal 10.1 conserve exactement $n+E$ projections, au plus $n+2E$ rôles et au plus $n+2E$ lots. Son audit certifie donc la borne logique suivante :

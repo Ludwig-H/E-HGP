@@ -577,6 +577,14 @@ Une capture reçoit seulement `source_batch_index` et le locator vivant. Elle li
 
 Le coût propre est $O(S)$ en temps de rejeu et en stockage, avec une capture en $O(1)$. Aucun snapshot complet du locator, parent DSU par lot, Gamma, cellule, coface globale, mosaïque de Delaunay d'ordre supérieur, quotient, racine, forêt ou `GatewayAttach` n'est matérialisé. Le contrat impose `in_memory_replay_only=true` et `crash_durable=false`; codec hostile, WAL, `fsync`, publication atomique, récupération et anti-rollback constituent un futur jalon distinct. Phase 10 reste `partial_refinement`, `public_status=not_claimed`, et ni le SLO 50 k ni la voie 10 M+ ne sont qualifiés. Voir [AUTORITE_HORLOGE_SPARSE_PHASE10.md](math/AUTORITE_HORLOGE_SPARSE_PHASE10.md).
 
+### 9.14 Résolution historique des tokens 10.13-TRES
+
+Pour chaque projection 10.9 d'indice $j$, 10.13-TRES croise le token localisé $t_j$ avec le préfixe strict pré-lot $p_{s_j}$ engagé par AUTH pour son lot source. La clé de déduplication est exactement $\kappa_j=(p_{s_j},t_j)$ : le token seul est insuffisant, puisqu'une même facette peut être latente avant un lot puis positive dans le snapshot final. Avec $P$ projections et $Q$ couples distincts, $Q\leq P\leq11C$.
+
+Le builder préflighte les populations et octets, heapsort les triplets `(préfixe, token, projection)`, puis appelle 10.10 exactement une fois sur les $Q$ requêtes monotones. Il publie seulement deux arènes : $P$ références projection-vers-résolution et $Q$ résolutions portant préfixe, indice du token, multiplicité, disposition et éventuel payload historique. Aucune clé ni aucun `PointId` n'est copié dans ces arènes. Un hit historique implique le hit final avec le même témoin, mais sa racine peut avoir changé par union; un token latent final est nécessairement latent dans le passé; un hit final peut avoir été latent.
+
+Le fresh verifier rejoue 10.9, AUTH/CLOCK, le builder et le sweep 10.10 structurellement vérifié, puis exige l'égalité récursive de la sortie. Il lève l'autorité temporelle en mémoire, mais conserve les prémisses de discipline pré-lot, de gel externe et d'autorité scientifique des témoins : `external_binding_authority_replayed=false`. Le coût propre est $O(S+P\log P+KP+KQ)$, le stockage scientifique $O(P+Q)$ et le scratch propre $O(P+Q)$, en plus d'une seule DSU transitoire 10.10. Aucun snapshot ou DSU par lot, Gamma, catalogue global, cellule, mosaïque de Delaunay d'ordre supérieur, quotient, forêt ou attache n'est construit. Voir [RESOLUTION_TEMPORELLE_GATEWAYS_PHASE10.md](math/RESOLUTION_TEMPORELLE_GATEWAYS_PHASE10.md).
+
 ## 10. Événements simultanés
 
 Des centres distincts peuvent avoir exactement le même niveau. Une exécution séquentielle créerait des bifurcations binaires artificielles et pourrait changer les morphismes verticaux.

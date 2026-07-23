@@ -5,7 +5,7 @@
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
 #include "morsehgp3d/exact/support.hpp"
-#include "morsehgp3d/hierarchy/direct_sparse_gateway_clock_authority.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_gateway_temporal_resolution.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
@@ -17,6 +17,9 @@
 #include <vector>
 
 int main() {
+  static_assert(
+      morsehgp3d::hierarchy::
+          direct_sparse_gateway_temporal_resolution_schema_version == 1U);
   using morsehgp3d::exact::BigInt;
   using morsehgp3d::exact::CertifiedPoint3;
   using morsehgp3d::exact::CircumcenterKind;

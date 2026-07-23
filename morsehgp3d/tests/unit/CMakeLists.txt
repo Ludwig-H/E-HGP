@@ -570,7 +570,7 @@ add_executable(
 )
 target_link_libraries(
   morsehgp3d_hierarchy_direct_sparse_gateway_clock_tests
-  PRIVATE morsehgp3d::direct_sparse_gateway_clock_authority
+  PRIVATE morsehgp3d::direct_sparse_gateway_temporal_resolution
 )
 if(MSVC)
   target_compile_options(

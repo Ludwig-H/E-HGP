@@ -1,4 +1,4 @@
-#include "morsehgp3d/hierarchy/direct_sparse_gateway_clock_authority.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_gateway_temporal_resolution.hpp"
 
 #include <algorithm>
 #include <array>
@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <set>
 #include <span>
 #include <string>
 #include <type_traits>
@@ -252,6 +253,60 @@ generous_identity_budget() {
 generous_digest_budget() {
   const std::size_t maximum = std::numeric_limits<std::size_t>::max();
   return {maximum, maximum};
+}
+
+[[nodiscard]] ExactDirectSparseGatewayCandidateLocalizationBudget
+generous_localization_budget() {
+  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
+  return {
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      {maximum, maximum},
+  };
+}
+
+[[nodiscard]] ExactDirectSparsePositiveFacetPrefixSweepBudget
+generous_prefix_sweep_budget() {
+  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
+  return {
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      {maximum, maximum},
+  };
+}
+
+[[nodiscard]] ExactDirectSparseGatewayTemporalResolutionBudget
+generous_temporal_resolution_budget() {
+  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
+  return {
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+  };
 }
 
 [[nodiscard]] ExactDirectSparseFacetKey facet_key(
@@ -1676,6 +1731,247 @@ void test_in_memory_clock_authority_replay(const SourceFixture& fixture) {
   }
 }
 
+void test_historical_gateway_temporal_resolution(
+    const SourceFixture& fixture) {
+  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
+  const auto localization_budget = generous_localization_budget();
+  const auto prefix_sweep_budget = generous_prefix_sweep_budget();
+  const auto temporal_budget = generous_temporal_resolution_budget();
+  const ExactDirectSparseFacetWitness query_witness{
+      locator_authority_id, UINT64_C(0x10d13001)};
+  const auto trusted_locator_budget = locator_budget();
+  const ExactDirectSparsePositiveFacetLocatorConfig locator_config{
+      locator_authority_id, ~UINT64_C(0)};
+  auto locator = build_exact_direct_sparse_positive_facet_locator(
+      8U, trusted_locator_budget, locator_config);
+
+  const auto empty_localization =
+      build_exact_direct_sparse_gateway_candidate_localization(
+          fixture.index,
+          fixture.cloud,
+          fixture.sources.facade,
+          fixture.sources.event_journal,
+          fixture.sources.arm_budget,
+          fixture.sources.arm_journal,
+          fixture.sources.incidence_budget,
+          fixture.sources.incidence_journal,
+          fixture.source_budget,
+          fixture.source,
+          query_witness,
+          locator,
+          localization_budget,
+          LbvhTraversalOrder::near_first);
+  check(
+      empty_localization.certified_partial_refinement() &&
+          !empty_localization.localized_facet_tokens.empty(),
+      "10.13 fixture first exposes at least one latent deletion token");
+  if (empty_localization.localized_facet_tokens.empty()) {
+    return;
+  }
+
+  const auto source_identity =
+      compute_exact_direct_sparse_gateway_candidate_scientific_identity(
+          fixture.source, generous_identity_budget());
+  const ExactDirectSparseGatewayClockAuthorityJournalBudget authority_budget{
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+  };
+  auto authority = build_exact_direct_sparse_gateway_clock_authority_journal(
+      clock_authority_id + 10U,
+      clock_replay_token + 10U,
+      source_identity,
+      locator,
+      authority_budget);
+  for (std::size_t source_batch_index = 0U;
+       source_batch_index < fixture.source.batches.size();
+       ++source_batch_index) {
+    check(
+        authority.capture_source_batch(source_batch_index, locator)
+            .certified_capture(),
+        "10.13 captures every source batch at its strict pre-lot prefix");
+  }
+
+  const auto selected_token =
+      empty_localization.localized_facet_tokens.front();
+  const std::array<ExactDirectSparseFacetBinding, 1U> binding{{
+      {
+          0U,
+          selected_token.facet_key,
+          3U,
+          {locator_authority_id, UINT64_C(0x10d13002)},
+      },
+  }};
+  check(
+      locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              std::span<const ExactDirectSparseComponentUnion>{},
+              binding)
+          .certified_committed_batch(),
+      "10.13 fixture commits one selected facet only after every source capture");
+  const ExactDirectSparseGatewayClockAuthoritySealBudget seal_budget{
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      generous_identity_budget(),
+      generous_digest_budget(),
+  };
+  check(
+      authority
+          .seal_clock_certificate(fixture.source, locator, seal_budget)
+          .certified_seal(),
+      "10.13 seals the source-to-prefix authority after the later binding");
+
+  const auto final_localization =
+      build_exact_direct_sparse_gateway_candidate_localization(
+          fixture.index,
+          fixture.cloud,
+          fixture.sources.facade,
+          fixture.sources.event_journal,
+          fixture.sources.arm_budget,
+          fixture.sources.arm_journal,
+          fixture.sources.incidence_budget,
+          fixture.sources.incidence_journal,
+          fixture.source_budget,
+          fixture.source,
+          query_witness,
+          locator,
+          localization_budget,
+          LbvhTraversalOrder::near_first);
+  check(
+      final_localization.certified_partial_refinement() &&
+          final_localization
+                  .localized_facet_tokens
+                      [selected_token.localized_facet_token_index]
+                  .disposition ==
+              ExactDirectSparseGatewayFacetLocalizationDisposition::
+                  relative_positive,
+      "the selected token is positive only in the final locator snapshot");
+
+  const auto result =
+      build_exact_direct_sparse_gateway_temporal_resolution(
+          fixture.source,
+          final_localization,
+          authority,
+          locator,
+          temporal_budget,
+          prefix_sweep_budget);
+  check(
+      result.certified_partial_refinement() &&
+          result.projection_to_resolution.size() ==
+              final_localization.deletion_projections.size() &&
+          !result.temporal_resolutions.empty() &&
+          result
+              .two_scientific_output_arenas_without_copied_facet_keys &&
+          !result.missing_facet_means_isolated &&
+          !result.quotient_root_union_or_forest_mutated,
+      "10.13 publishes exactly two read-only sparse arenas");
+
+  std::set<std::pair<std::size_t, std::size_t>> expected_pairs;
+  for (const auto& projection : final_localization.deletion_projections) {
+    const std::size_t prefix =
+        authority.sealed_certificate()
+            .boundaries[projection.source_batch_index]
+            .strict_pre_locator_prefix_count;
+    expected_pairs.emplace(prefix, projection.localized_facet_token_index);
+  }
+  check(
+      result.temporal_resolutions.size() == expected_pairs.size(),
+      "10.13 deduplicates by the exact (source prefix, localized token) pair");
+
+  bool selected_historical_latent = false;
+  for (const auto& resolution : result.temporal_resolutions) {
+    if (resolution.localized_facet_token_index ==
+        selected_token.localized_facet_token_index) {
+      selected_historical_latent =
+          selected_historical_latent ||
+          (resolution.strict_pre_locator_prefix_count == 0U &&
+           resolution.disposition ==
+               ExactDirectSparseGatewayTemporalDisposition::
+                   latent_unresolved &&
+           !resolution.positive_payload_present);
+    }
+  }
+  check(
+      selected_historical_latent &&
+          result.final_latent_implies_historical_latent &&
+          result.historical_positive_implies_final_positive_with_same_witness,
+      "10.13 preserves a historical latent token despite its later positive binding");
+  auto malformed_result = result;
+  ++malformed_result.temporal_resolutions.front()
+        .projection_reference_count;
+  check(
+      !malformed_result.certified_partial_refinement(),
+      "10.13 self-contained validation rejects an inconsistent reference total");
+
+  const ExactDirectSparseGatewayClockAuthorityExternalSealAnchor
+      external_seal_anchor{
+          authority.authority_id(),
+          authority.session_id(),
+          authority.seal_digest(),
+      };
+  const ExactDirectSparseGatewayClockAuthorityVerificationBudget
+      authority_verification_budget{
+          maximum,
+          maximum,
+          maximum,
+          maximum,
+          maximum,
+          generous_clock_budget(locator),
+      };
+  const auto structure_budget = exact_structure_budget(locator);
+  ExactDirectSparseGatewayTemporalResolutionAuthorityBundle authorities;
+  authorities.index = &fixture.index;
+  authorities.cloud = &fixture.cloud;
+  authorities.source_facade = &fixture.sources.facade;
+  authorities.source_journal = &fixture.sources.event_journal;
+  authorities.source_arm_budget = &fixture.sources.arm_budget;
+  authorities.source_arm_journal = &fixture.sources.arm_journal;
+  authorities.source_incidence_budget = &fixture.sources.incidence_budget;
+  authorities.source_incidence_journal =
+      &fixture.sources.incidence_journal;
+  authorities.source_gateway_budget = &fixture.source_budget;
+  authorities.source_gateway_journal = &fixture.source;
+  authorities.traversal_order = LbvhTraversalOrder::near_first;
+  authorities.locator_query_witness = &query_witness;
+  authorities.locator_budget = &trusted_locator_budget;
+  authorities.locator_config = &locator_config;
+  authorities.locator = &locator;
+  authorities.trusted_component_handle_count = 8U;
+  authorities.localization_budget = &localization_budget;
+  authorities.observed_localization = &final_localization;
+  authorities.external_seal_anchor = &external_seal_anchor;
+  authorities.authority_journal_budget = &authority_budget;
+  authorities.observed_authority = &authority;
+  authorities.authority_verification_budget =
+      &authority_verification_budget;
+  authorities.prefix_locator_structure_budget = &structure_budget;
+  const auto verified =
+      verify_exact_direct_sparse_gateway_temporal_resolution(
+          authorities,
+          temporal_budget,
+          prefix_sweep_budget,
+          result);
+  check(
+      verified.result_certified &&
+          verified.localization_freshly_replayed &&
+          verified.clock_authority_freshly_replayed &&
+          verified.prefix_sweep_freshly_replayed &&
+          verified.nested_verifiers_replayed &&
+          verified.external_clock_authority_replayed &&
+          !verified.external_binding_authority_replayed &&
+          verified
+              .conditional_on_caller_external_binding_authority_replay &&
+          verified.conditional_on_caller_strict_pre_lot_orchestration &&
+          verified.conditional_on_caller_external_freeze_synchronization &&
+          verified.in_memory_replay_only &&
+          !verified.crash_durable,
+      "10.13 fresh verification composes localization, AUTH and one prefix sweep while retaining external premises");
+}
+
 }  // namespace
 
 int main() {
@@ -1685,6 +1981,7 @@ int main() {
   test_empty_source_batches_keep_locator_clock_conditional();
   test_conditional_clock_mapping_mutations_and_caps(fixture);
   test_in_memory_clock_authority_replay(fixture);
+  test_historical_gateway_temporal_resolution(fixture);
   if (failures != 0) {
     std::cerr << failures << " direct sparse gateway clock test(s) failed\n";
     return 1;
