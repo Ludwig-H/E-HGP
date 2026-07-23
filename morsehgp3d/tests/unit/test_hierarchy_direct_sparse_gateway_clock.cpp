@@ -1,4 +1,4 @@
-#include "morsehgp3d/hierarchy/direct_sparse_gateway_clock.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_gateway_clock_authority.hpp"
 
 #include <algorithm>
 #include <array>
@@ -8,6 +8,7 @@
 #include <limits>
 #include <span>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -23,6 +24,12 @@ using morsehgp3d::spatial::PointId;
 constexpr std::uint64_t locator_authority_id = UINT64_C(0x10ca70a);
 constexpr std::uint64_t clock_authority_id = UINT64_C(0xc10c0001);
 constexpr std::uint64_t clock_replay_token = UINT64_C(0xc10c0002);
+static_assert(
+    !std::is_copy_constructible_v<
+        ExactDirectSparseGatewayClockAuthorityJournal>);
+static_assert(
+    std::is_nothrow_move_constructible_v<
+        ExactDirectSparseGatewayClockAuthorityJournal>);
 int failures = 0;
 
 void check(bool condition, const std::string& message) {
@@ -1464,6 +1471,211 @@ void test_conditional_clock_mapping_mutations_and_caps(
       "full locator structure replay rejects a corrupt suffix beyond max(p_s)=2 before PSTAMP");
 }
 
+void test_in_memory_clock_authority_replay(const SourceFixture& fixture) {
+  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
+  const ExactDirectSparseGatewayClockAuthorityJournalBudget authority_budget{
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+  };
+  const auto source_identity =
+      compute_exact_direct_sparse_gateway_candidate_scientific_identity(
+          fixture.source, generous_identity_budget());
+  check(
+      source_identity.certified_identity(),
+      "AUTH fixture binds one certified 10.7 scientific identity before capture");
+  auto locator = build_exact_direct_sparse_positive_facet_locator(
+      8U, locator_budget(), {locator_authority_id, ~UINT64_C(0)});
+  auto authority = build_exact_direct_sparse_gateway_clock_authority_journal(
+      clock_authority_id,
+      clock_replay_token,
+      source_identity,
+      locator,
+      authority_budget);
+  check(
+      authority.certified_initialized_authority() &&
+          authority.capture_records().empty() &&
+          !authority.certificate_present(),
+      "AUTH opens one preallocated in-memory authority");
+  const auto source_before = fixture.source;
+  const auto locator_before_capture = locator;
+
+  const auto first = authority.capture_source_batch(1U, locator);
+  check(
+      first.certified_capture() &&
+          first.committed_record.chronological_index == 0U &&
+          first.committed_record.source_batch_index == 1U &&
+          first.committed_record.locator_snapshot_stamp
+                  .committed_batch_count == 0U,
+      "AUTH captures source batch one first at the live zero prefix");
+
+  const auto records_before_duplicate = authority.capture_records();
+  const auto chain_before_duplicate =
+      authority.current_capture_chain_digest();
+  const auto duplicate = authority.capture_source_batch(1U, locator);
+  check(
+      duplicate.certified_atomic_failure() &&
+          authority.capture_records() == records_before_duplicate &&
+          authority.current_capture_chain_digest() ==
+              chain_before_duplicate,
+      "AUTH rejects a duplicate source batch without advancing its chain");
+
+  check(
+      locator
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              std::span<const ExactDirectSparseComponentUnion>{},
+              std::span<const ExactDirectSparseFacetBinding>{})
+          .certified_committed_batch(),
+      "AUTH fixture inserts one explicit empty locator commit");
+  const auto second = authority.capture_source_batch(0U, locator);
+  const auto records_before_decreasing_capture = authority.capture_records();
+  const auto decreasing =
+      authority.capture_source_batch(2U, locator_before_capture);
+  check(
+      decreasing.certified_atomic_failure() &&
+          authority.capture_records() == records_before_decreasing_capture,
+      "AUTH rejects a chronologically decreasing live locator prefix");
+  const auto third = authority.capture_source_batch(2U, locator);
+  check(
+      second.certified_capture() && third.certified_capture() &&
+          second.committed_record.locator_snapshot_stamp
+                  .committed_batch_count == 1U &&
+          third.committed_record.locator_snapshot_stamp ==
+              second.committed_record.locator_snapshot_stamp,
+      "AUTH records a nonmonotone source order and equal live prefix stamps");
+  for (std::size_t source_batch_index = 3U;
+       source_batch_index < fixture.source.batches.size();
+       ++source_batch_index) {
+    check(
+        authority.capture_source_batch(source_batch_index, locator)
+            .certified_capture(),
+        "AUTH captures every remaining source batch exactly once");
+  }
+
+  const ExactDirectSparseGatewayClockAuthoritySealBudget seal_budget{
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      generous_identity_budget(),
+      generous_digest_budget(),
+  };
+  const auto seal =
+      authority.seal_clock_certificate(fixture.source, locator, seal_budget);
+  check(
+      seal.certified_seal() && authority.certified_sealed_once() &&
+          authority.sealed_certificate().boundaries.size() ==
+              fixture.source.batches.size() &&
+          authority.sealed_certificate().boundaries[0U]
+                  .strict_pre_locator_prefix_count == 1U &&
+          authority.sealed_certificate().boundaries[1U]
+                  .strict_pre_locator_prefix_count == 0U,
+      "AUTH seals exactly one CLOCK certificate reindexed by source batch (decision " +
+          std::to_string(static_cast<unsigned>(seal.decision)) + ")");
+
+  const auto records_after_seal = authority.capture_records();
+  const auto certificate_after_seal = authority.sealed_certificate();
+  const auto capture_after_seal =
+      authority.capture_source_batch(0U, locator);
+  check(
+      capture_after_seal.certified_atomic_failure() &&
+          authority.capture_records() == records_after_seal &&
+          authority.sealed_certificate() == certificate_after_seal,
+      "AUTH is immutable after its one successful seal");
+
+  const ExactDirectSparseGatewayClockAuthorityVerificationBudget
+      verification_budget{
+          maximum,
+          maximum,
+          maximum,
+          maximum,
+          maximum,
+          generous_clock_budget(locator),
+      };
+  const ExactDirectSparseGatewayClockAuthorityExternalSealAnchor
+      external_seal_anchor{
+          clock_authority_id,
+          clock_replay_token,
+          authority.seal_digest(),
+      };
+  const auto verify_authority =
+      [&](const ExactDirectSparseGatewayClockAuthorityExternalSealAnchor&
+              anchor,
+          const ExactDirectSparseGatewayClockAuthorityVerificationBudget&
+              budget) {
+        return verify_exact_direct_sparse_gateway_clock_authority_journal(
+            fixture.index,
+            fixture.cloud,
+            fixture.sources.facade,
+            fixture.sources.event_journal,
+            fixture.sources.arm_budget,
+            fixture.sources.arm_journal,
+            fixture.sources.incidence_budget,
+            fixture.sources.incidence_journal,
+            fixture.source_budget,
+            LbvhTraversalOrder::near_first,
+            fixture.source,
+            8U,
+            locator_budget(),
+            {locator_authority_id, ~UINT64_C(0)},
+            locator,
+            anchor,
+            authority_budget,
+            authority,
+            budget);
+      };
+  const auto locator_before_verification = locator;
+  const auto verified =
+      verify_authority(external_seal_anchor, verification_budget);
+  check(
+      verified.certified_external_clock_binding() &&
+          verified.external_clock_authority_replayed &&
+          !verified.conditional_on_caller_clock_authority_replay &&
+          verified.conditional_on_caller_strict_pre_lot_orchestration &&
+          !verified.external_freeze_synchronization_replayed &&
+          verified.conditional_on_caller_external_freeze_synchronization &&
+          verified.in_memory_replay_only && !verified.crash_durable &&
+          verified.clock_verification
+              .certified_conditional_clock_binding(),
+      "AUTH fresh replay discharges CLOCK's external in-memory authority only");
+  check(
+      fixture.source == source_before && locator == locator_before_verification &&
+          locator_before_capture.snapshot_stamp().committed_batch_count == 0U,
+      "AUTH replay leaves the source and live locator immutable");
+  auto foreign_anchor = external_seal_anchor;
+  foreign_anchor.expected_seal_digest =
+      flipped_id(foreign_anchor.expected_seal_digest);
+  check(
+      !verify_authority(foreign_anchor, verification_budget)
+           .certified_external_clock_binding(),
+      "AUTH rejects a divergent caller-owned final seal anchor");
+
+  auto tight_budget = verification_budget;
+  tight_budget.maximum_capture_record_count =
+      verified.required_capture_record_count;
+  tight_budget.maximum_capture_record_scan_count =
+      verified.required_capture_record_scan_count;
+  tight_budget.maximum_source_presence_entry_count =
+      verified.required_source_presence_entry_count;
+  tight_budget.maximum_source_presence_scan_count =
+      verified.required_source_presence_scan_count;
+  tight_budget.maximum_temporary_scratch_byte_count =
+      verified.required_temporary_scratch_byte_count;
+  check(
+      verify_authority(external_seal_anchor, tight_budget)
+          .certified_external_clock_binding(),
+      "AUTH fresh replay passes at its exact top-level caps");
+  if (tight_budget.maximum_capture_record_scan_count > 0U) {
+    --tight_budget.maximum_capture_record_scan_count;
+    check(
+        !verify_authority(external_seal_anchor, tight_budget)
+             .certified_external_clock_binding(),
+        "AUTH fresh replay fails closed at one representative exact-minus-one cap");
+  }
+}
+
 }  // namespace
 
 int main() {
@@ -1472,6 +1684,7 @@ int main() {
   test_certificate_digest_layout_and_golden();
   test_empty_source_batches_keep_locator_clock_conditional();
   test_conditional_clock_mapping_mutations_and_caps(fixture);
+  test_in_memory_clock_authority_replay(fixture);
   if (failures != 0) {
     std::cerr << failures << " direct sparse gateway clock test(s) failed\n";
     return 1;

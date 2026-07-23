@@ -893,6 +893,46 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_sparse_gateway_clock_authority
+  STATIC
+    src/cpu/hierarchy/direct_sparse_gateway_clock_authority.cpp
+)
+add_library(
+  morsehgp3d::direct_sparse_gateway_clock_authority
+  ALIAS morsehgp3d_direct_sparse_gateway_clock_authority
+)
+set_target_properties(
+  morsehgp3d_direct_sparse_gateway_clock_authority
+  PROPERTIES
+    EXPORT_NAME direct_sparse_gateway_clock_authority
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_sparse_gateway_clock_authority PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_sparse_gateway_clock_authority
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_sparse_gateway_clock_authority
+  PUBLIC morsehgp3d::direct_sparse_gateway_clock
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_sparse_gateway_clock_authority PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_sparse_gateway_clock_authority
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_frozen_root_quotient
   STATIC
     src/cpu/hierarchy/direct_frozen_root_quotient.cpp
@@ -1643,6 +1683,7 @@ install(
     morsehgp3d_direct_sparse_gateway_candidate_journal
     morsehgp3d_direct_sparse_gateway_candidate_localization
     morsehgp3d_direct_sparse_gateway_clock
+    morsehgp3d_direct_sparse_gateway_clock_authority
     morsehgp3d_direct_frozen_root_quotient
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_pair_support_codec

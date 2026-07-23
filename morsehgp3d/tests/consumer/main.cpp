@@ -5,7 +5,7 @@
 #include "morsehgp3d/exact/label.hpp"
 #include "morsehgp3d/exact/predicates.hpp"
 #include "morsehgp3d/exact/support.hpp"
-#include "morsehgp3d/hierarchy/direct_sparse_gateway_clock.hpp"
+#include "morsehgp3d/hierarchy/direct_sparse_gateway_clock_authority.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
@@ -334,6 +334,25 @@ int main() {
       clock_digest.boundary_scan_count != 0U ||
       clock_digest.required_digest_payload_byte_count != 136U) {
     std::cerr << "installed gateway clock digest changed semantics\n";
+    return 1;
+  }
+
+  auto empty_clock_authority = morsehgp3d::hierarchy::
+      build_exact_direct_sparse_gateway_clock_authority_journal(
+          UINT64_C(0xa071),
+          UINT64_C(0x1003),
+          source_identity,
+          locator,
+          {0U, 0U, 0U, 0U});
+  const auto empty_authority_seal =
+      empty_clock_authority.seal_clock_certificate(
+          empty_gateway_source,
+          locator,
+          {0U, 0U, 0U, 0U, identity_budget, {0U, 136U}});
+  if (!empty_clock_authority.certified_initialized_authority() ||
+      !empty_authority_seal.certified_seal() ||
+      !empty_clock_authority.certified_sealed_once()) {
+    std::cerr << "installed in-memory clock authority changed semantics\n";
     return 1;
   }
   return 0;
