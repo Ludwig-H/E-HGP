@@ -662,6 +662,40 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_morse_budget_tests
+  test_hierarchy_direct_morse_budget.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_budget_tests
+  PRIVATE morsehgp3d::direct_morse_budget
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_budget_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_budget_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+if(UNIX)
+  add_executable(
+    morsehgp3d_hierarchy_atomic_linear_run_store_tests
+    test_hierarchy_atomic_linear_run_store.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_hierarchy_atomic_linear_run_store_tests
+    PRIVATE morsehgp3d::atomic_linear_run_store
+  )
+  target_compile_options(
+    morsehgp3d_hierarchy_atomic_linear_run_store_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_plan_tests
   test_hierarchy_direct_sparse_facet_descent_batch_plan.cpp
 )
@@ -1286,6 +1320,7 @@ set(
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_vertical_journal_tests
+  morsehgp3d_hierarchy_direct_morse_budget_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_plan_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_executor_tests
   morsehgp3d_hierarchy_direct_sparse_facet_top_k_proposal_transcript_tests
@@ -1325,6 +1360,7 @@ set(
 if(UNIX)
   list(
     APPEND _morsehgp3d_cpu_test_targets
+    morsehgp3d_hierarchy_atomic_linear_run_store_tests
     morsehgp3d_hierarchy_pair_support_stream_durable_tests
   )
 endif()
@@ -2117,6 +2153,16 @@ add_test(
   NAME morsehgp3d.hierarchy_direct_morse_vertical_journal
   COMMAND morsehgp3d_hierarchy_direct_morse_vertical_journal_tests
 )
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_budget
+  COMMAND morsehgp3d_hierarchy_direct_morse_budget_tests
+)
+if(UNIX)
+  add_test(
+    NAME morsehgp3d.hierarchy_atomic_linear_run_store
+    COMMAND morsehgp3d_hierarchy_atomic_linear_run_store_tests
+  )
+endif()
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_facet_descent_batch_plan
   COMMAND morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_plan_tests

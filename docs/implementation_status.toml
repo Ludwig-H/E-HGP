@@ -4,7 +4,7 @@ updated_at = "2026-07-24"
 [project]
 name = "MorseHGP3D"
 implementation_started = true
-current_phase = "14"
+current_phase = "15"
 current_track = "performance"
 status_authority = "This file is operational; mathematical authority remains in the specification and proof-status register."
 
@@ -904,7 +904,7 @@ blocking_reason = "La phase 12 n'est pas fermee."
 id = "14"
 title = "Latence 50 000 points"
 track = "performance"
-status = "in_progress"
+status = "ready"
 entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["10"]
@@ -1014,11 +1014,23 @@ twelfth_increment_evidence = ["morsehgp3d/include/morsehgp3d/hierarchy/direct_sp
 id = "15"
 title = "Streaming a dix millions et davantage"
 track = "performance"
-status = "ready"
+status = "in_progress"
 entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["9", "10", "11"]
-evidence = ["docs/validation/PHASE9_GATE_REVIEW.md", "docs/validation/PHASE10_GATE_REVIEW.md", "docs/validation/PHASE11_GATE_REVIEW.md"]
+backend = "reference_cpu"
+profile = "hgp_reduced"
+mode = "budgeted"
+deployment_status = "architecture_only"
+public_status = "not_claimed"
+first_increment = "implemented_five_axis_integer_budget_snapshots_and_mandatory_recertified_bounded_atomic_linear_run_store"
+first_increment_status = "validated_host_software_architecture_only"
+first_increment_semantics = "reference_cpu_hgp_reduced_budgeted_complete_14A_chunk_contract_over_generic_payload_store_with_application_recertifier_as_only_scientific_authority"
+first_increment_bounds = "four_u64_byte_axes_device_host_scratch_output_one_u64_monotonic_nanosecond_axis_scratch_temporary_plus_worst_merge_plus_checkpoint_plus_safety_reserves_time_operation_plus_checkpoint_reserves_deterministic_refusal_order_bounded_payload_and_transition_counts_sizes_total_bytes_and_batch_span_zero_retained_transition_history"
+first_increment_scope = "internal_budget_accounting_and_local_UNIX_single_writer_process_loss_transport_only_no_direct_14A_or_14L_executor_binding_no_serialized_14H_ticket_locator_DSU_quotient_forest_global_facet_coface_incidence_gamma_cell_or_higher_order_Delaunay_mosaic_no_power_loss_network_filesystem_10M_SLO_or_public_status_claim"
+first_increment_validation = "passed_two_targeted_strict_GCC_release_CTests_two_of_two_in_0_02_seconds_covering_six_budget_boundaries_five_axes_exact_plus_or_minus_one_all_checked_addition_overflows_clock_regression_digest_mutation_two_synthetic_transitions_reopen_recertification_wire_limits_corruption_contract_limit_and_external_anchor_mismatch_nine_publication_boundaries_orphan_cleanup_missing_old_HEAD_before_rename_fail_closed_and_post_HEAD_indeterminate_reopen_required_no_benchmark_massive_test_or_GCP"
+first_increment_known_limit = "store_payload_is_generic_and_the_required_application_recertifier_is_not_yet_bound_to_real_14A_chunks_or_14D_deltas_no_materialized_locator_DSU_or_forest_checkpoint_recovery_replays_the_linear_prefix_public_v2_BudgetSnapshot_cannot_losslessly_represent_reserved_nanoseconds_no_merge_mmap_Hyperdisk_Titanium_SSD_1M_10M_or_SLO_qualification"
+evidence = ["docs/validation/PHASE9_GATE_REVIEW.md", "docs/validation/PHASE10_GATE_REVIEW.md", "docs/validation/PHASE11_GATE_REVIEW.md", "docs/validation/PHASE15_PROGRESS.md", "morsehgp3d/include/morsehgp3d/hierarchy/direct_morse_budget.hpp", "morsehgp3d/src/cpu/hierarchy/direct_morse_budget.cpp", "morsehgp3d/tests/unit/test_hierarchy_direct_morse_budget.cpp", "morsehgp3d/include/morsehgp3d/hierarchy/atomic_linear_run_store.hpp", "morsehgp3d/src/cpu/hierarchy/atomic_linear_run_store.cpp", "morsehgp3d/tests/unit/test_hierarchy_atomic_linear_run_store.cpp", "morsehgp3d/CMakeLists.txt", "morsehgp3d/tests/unit/CMakeLists.txt"]
 blocking_reason = ""
 
 [[phases]]

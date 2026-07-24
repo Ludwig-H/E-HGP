@@ -1260,6 +1260,78 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_morse_budget
+  STATIC
+    src/cpu/hierarchy/direct_morse_budget.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_budget
+  ALIAS morsehgp3d_direct_morse_budget
+)
+set_target_properties(
+  morsehgp3d_direct_morse_budget
+  PROPERTIES
+    EXPORT_NAME direct_morse_budget
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(morsehgp3d_direct_morse_budget PUBLIC cxx_std_20)
+target_include_directories(
+  morsehgp3d_direct_morse_budget
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_budget
+  PUBLIC morsehgp3d::contract
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(morsehgp3d_direct_morse_budget PRIVATE /W4 /WX)
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_budget
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+if(UNIX)
+  add_library(
+    morsehgp3d_atomic_linear_run_store
+    STATIC
+      src/cpu/hierarchy/atomic_linear_run_store.cpp
+  )
+  add_library(
+    morsehgp3d::atomic_linear_run_store
+    ALIAS morsehgp3d_atomic_linear_run_store
+  )
+  set_target_properties(
+    morsehgp3d_atomic_linear_run_store
+    PROPERTIES
+      EXPORT_NAME atomic_linear_run_store
+      POSITION_INDEPENDENT_CODE ON
+  )
+  target_compile_features(
+    morsehgp3d_atomic_linear_run_store PUBLIC cxx_std_20
+  )
+  target_include_directories(
+    morsehgp3d_atomic_linear_run_store
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:include>
+  )
+  target_link_libraries(
+    morsehgp3d_atomic_linear_run_store
+    PUBLIC morsehgp3d::contract
+    PRIVATE morsehgp3d::sanitizers
+  )
+  target_compile_options(
+    morsehgp3d_atomic_linear_run_store
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_sparse_facet_descent_batch_plan
   STATIC
     src/cpu/hierarchy/direct_sparse_facet_descent_batch_plan.cpp
@@ -2099,6 +2171,7 @@ install(
     morsehgp3d_direct_morse_forest_journal
     morsehgp3d_direct_morse_vertical_journal
     morsehgp3d_direct_morse_industrial_plan
+    morsehgp3d_direct_morse_budget
     morsehgp3d_direct_sparse_facet_descent_batch_plan
     morsehgp3d_direct_sparse_facet_descent_batch_executor
     morsehgp3d_direct_sparse_facet_top_k_proposal_transcript
@@ -2109,7 +2182,9 @@ install(
 )
 if(UNIX)
   install(
-    TARGETS morsehgp3d_pair_support_durable
+    TARGETS
+      morsehgp3d_pair_support_durable
+      morsehgp3d_atomic_linear_run_store
     EXPORT MorseHGP3DTargets
   )
 endif()

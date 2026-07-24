@@ -977,6 +977,18 @@ Cette garantie unilatérale ne certifie pas les nœuds de la forêt comme évén
 
 Le certificat de run expose au minimum la fermeture de chaque ordre, les dégénérescences, les fallbacks numériques, les budgets, les compteurs de sortie et le profil réellement calculé.
 
+### 14.1 Frontière durable interne de Phase 15A implémentée
+
+L'implémentation 15A du premier contrat durable du profil streaming est `reference_cpu / hgp_reduced / budgeted / architecture_only`. Une transaction porte exactement un chunk 14A complet et tous les deltas compacts de ses lots ordre--niveau; aucune sous-partie de lot, aucun chunk de transport 14L et aucun préfixe de chunk 14A n'est publiable.
+
+La comptabilité interne contient cinq dimensions indépendantes : device, hôte, scratch et sortie en octets, puis temps monotone en nanosecondes. Chaque dimension conserve limite, consommation, réserve et reliquat avec arithmétique entière contrôlée. La réserve de temps couvre au minimum la recertification obligatoire et la fermeture durable et ne peut être prêtée au calcul courant.
+
+Cette représentation n'est pas sérialisable fidèlement dans le schéma v2 : `BudgetPolicy.time_budget_s` et les champs temporels de `BudgetSnapshot` sont exprimés en secondes, tandis que `BudgetSnapshot` n'a aucun champ de temps réservé. Il est interdit d'arrondir les nanosecondes, de rabattre la réserve dans le reliquat ou de publier un objet v2 qui omet cette information. 15A reste interne jusqu'à une migration contractuelle.
+
+Tout run durable doit être recertifié par un callback explicite avant publication et à la réouverture. Le callback reconstruit 14A depuis les autorités amont, rejoue le chunk complet et atteste l'absence de capacité locale au processus; checksum, manifeste, audit et budget persisté ne sont pas des preuves scientifiques. Une absence, une exception ou un refus conserve l'ancien état.
+
+Le seul protocole 15A admis est un namespace verrouillé sur filesystem Unix local : recertification de l'image canonique avant écriture, temporaire dans le même répertoire, `fdatasync`, relecture et comparaison des octets, hard-link atomique vers un nom final immuable avec contrôle d'inode, `fsync` du répertoire, puis remplacement atomique et synchronisé de `HEAD`. `HEAD` est le point de linéarisation; un final non référencé ne fait pas partie du préfixe et une faute postérieure au remplacement impose une réouverture avant toute nouvelle action. Aucun ticket 14H, locator, DSU ou forêt n'est checkpointé. Le contrat ne revendique ni reprise en place, ni capacité 10 M+, ni SLO, ni `public_status=exact`.
+
 ## 15. Limites de complexité
 
 Une liste fixe de voisins par observation n'est pas complète : une paire de Gabriel peut avoir une boule diamétrale vide tout en étant absente d'une liste $L$-NN arbitrairement longue, en plaçant de nombreux points juste à l'extérieur de cette boule près d'une extrémité.

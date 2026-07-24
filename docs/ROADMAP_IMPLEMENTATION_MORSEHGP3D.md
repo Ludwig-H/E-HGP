@@ -1304,9 +1304,19 @@ Objectif principal : $n=50\,000$, $K_{\max}=10$, p95 `warm_e2e` inférieur à un
 
 Traiter un flux d'événements, d'attaches et de frontières plus grand que les arènes résidentes sans reconstruire la mosaïque et sans changer le résultat dans la portée certifiée.
 
+### Tranche 15A — budget et store atomique implémentés
+
+15A est implémenté sous `backend=reference_cpu`, `profile=hgp_reduced`, `mode=budgeted`, `deployment_status=architecture_only` et `public_status=not_claimed`. Son unité durable est un chunk 14A complet : tous ses lots ordre--niveau et leurs deltas compacts sont recertifiés et publiés ensemble, ou aucun ne l'est. Les chunks de callback 14L restent des découpages de transport éphémères et ne sont jamais des checkpoints.
+
+Le snapshot interne conserve séparément les budgets device, hôte, scratch et sortie en octets, puis le budget temps en nanosecondes monotones, chacun avec limite, consommation, réserve et reliquat. La réserve temporelle exacte n'a pas de projection fidèle dans le `BudgetSnapshot` public v2, qui exprime le temps en secondes et ne possède aucun champ réservé; 15A interdit donc arrondi, omission de la réserve et sérialisation publique v2 avant migration explicite.
+
+`ExactDirectMorseBudgetTracker` ferme la comptabilité entière des cinq axes et `AtomicLinearRunStore` implémente le protocole Unix local. Un callback de recertification sans voie par défaut reconstruit 14A et rejoue l'unité complète avant toute écriture. Le store garde l'ancien état, recertifie l'image canonique, écrit et synchronise un temporaire, relit ses octets, crée le final immuable par hard-link avec contrôles d'inode, synchronise le répertoire, puis publie et synchronise le manifeste par renommage. Un fichier final non référencé reste non committé. Cette tranche ne sérialise ni ticket 14H, ni locator, ni DSU, ni forêt et ne revendique ni reprise scientifique en place, ni 10 M+, ni SLO, ni statut public. Le contrat détaillé est consigné dans la [note de progression](validation/PHASE15_PROGRESS.md).
+
+Les deux targets compilent en GCC Release strict et leurs CTests ciblés passent 2/2 en 0,02 seconde. Cette validation est uniquement logicielle et locale; elle ne mesure aucun volume produit.
+
 ### Travaux
 
-- planificateur de lots selon cinq budgets typés en octets ou secondes : device, RAM hôte, scratch, sortie et temps;
+- planificateur de lots selon cinq budgets typés : device, RAM hôte, scratch et sortie en octets, temps interne en nanosecondes monotones avec réserve non prêtable;
 - sur G4, Hyperdisk Balanced pour le boot et les checkpoints durables, et jusqu'à quatre Titanium SSD pour le scratch éphémère rapide;
 - instantané `BudgetSnapshot` avant chaque lot, run, merge et sérialisation;
 - fermeture complète avant éviction;

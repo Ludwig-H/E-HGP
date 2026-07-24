@@ -1182,6 +1182,18 @@ Sur G4, les manifestes n'acceptent que Hyperdisk pour le stockage persistant et 
 
 Pour chaque run et merge, la suite force une panne après création du temporaire, après écriture, après synchronisation, après renommage et avant publication du manifeste. L'ancien état reste lisible jusqu'à validation atomique du nouveau. Si l'espace ne couvre pas simultanément ancien état, temporaire, merge, checkpoint et marge, aucune nouvelle écriture ne commence et le résultat vaut `budget_exhausted` depuis le dernier checkpoint durable.
 
+### 14.7 Validation courte de Phase 15A
+
+Le socle 15A est testé sur une petite fixture à deux transitions synthétiques. Le test d'intégration suivant devra les remplacer par au moins deux vrais chunks 14A et plusieurs lots par chunk afin d'établir qu'un chunk 14A complet est l'unique unité durable, qu'un préfixe de ce chunk et les chunks de callback 14L sont refusés, et qu'un crash oblige à recalculer l'unité inachevée depuis le dernier `HEAD`.
+
+Une table non cartésienne exerce séparément les cinq budgets internes juste sous, exactement sur et juste au-dessus du besoin. Les quatre budgets d'espace utilisent l'octet; le temps utilise la nanoseconde monotone et vérifie que `reserved_ns` n'est jamais prêté. Une garde de contrat doit refuser toute projection de cette réserve vers `BudgetSnapshot` v2, même si les secondes arrondies semblent identiques.
+
+Le callback de recertification est obligatoire avant publication et à la réouverture. Les cas absent, refus, exception et delta falsifié doivent tous conserver l'ancien `HEAD`. Les points de panne se limitent aux frontières Unix structurantes : avant et après `fdatasync`, après la création du hard-link final immuable, puis avant et après le remplacement de `HEAD`; temporaires et finals orphelins ne sont jamais promus par recherche du plus long préfixe.
+
+Le test inspecte enfin le format pour garantir l'absence de ticket 14H, checkpoint locator, parents DSU et forêt. Cette tranche n'exécute aucun benchmark, nuage massif, sanitizer, CUDA ou GCP et ne teste ni le SLO 50 k, ni 10 M+, ni un statut public.
+
+La validation 15A active compile les deux targets en GCC Release strict et passe les CTests budget et store 2/2 en 0,02 seconde. Elle ferme le budget et le transport générique, pas leur raccord au vrai chunk 14A ni les portes de volume ou de performance.
+
 ## 15. Compteurs obligatoires
 
 Chaque exécution émet un enregistrement structuré, versionné, comprenant au minimum :
