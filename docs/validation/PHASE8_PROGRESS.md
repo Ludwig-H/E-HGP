@@ -137,7 +137,7 @@ La suite ciblée passe en Release strict sous GCC et Clang. Elle couvre singleto
 
 ## Décision de réutilisation et de débit
 
-Cet atlas est gelé à huit sites et ne sera pas étendu en moteur de Voronoï général. Toute future baseline plus large doit d'abord évaluer un adaptateur épinglé vers Geogram ou une bibliothèque mature équivalente; elle restera une comparaison non autoritative jusqu'au rejeu exact. Le chemin produit reste GPU-first, avec proposition massive sur `cuda_g4`, recertification exacte côté hôte, cible p95 inférieure à une seconde autour de 50 000 points pour $K_{\max}\leq10$, puis streaming transactionnel et budgeté à dix millions de points ou davantage.
+Cet atlas est gelé à huit sites et ne sera pas étendu en moteur de Voronoï général. Toute future baseline plus large doit d'abord évaluer un adaptateur épinglé vers Geogram ou une bibliothèque mature équivalente; elle restera une comparaison non autoritative jusqu'au rejeu exact. Le chemin produit reste GPU-first, avec proposition massive sur `cuda_g4`, recertification exacte côté hôte, cible principale de passage complet avec p95 `warm_e2e` strictement inférieur à 100 ms autour de 50 000 points pour $K_{\max}\leq10$, objectif secondaire strictement inférieur à une seconde sur le même protocole, puis streaming transactionnel et budgeté à dix millions de points ou davantage.
 
 ## Limites et suite saine
 

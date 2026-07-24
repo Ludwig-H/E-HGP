@@ -4,7 +4,7 @@ Ce répertoire porte la nouvelle implémentation décrite par la roadmap. `HGP-o
 
 État actuel : la Phase 5 reste une ancre $k=1$ ouverte à l'état `ready`, la Phase 7 est fermée, les jalons cellulaires 8.1 à 8.5 sont gelés comme oracles bornés et la Phase 9 est `in_progress`. Son premier jalon `reference_cpu` livre le branch-and-bound exact et budgété des supports de taille deux, avec layout destiné à `cuda_g4`; les checkpoints réinjectables, les tailles trois et quatre et le journal Morse restent à fermer. Aucun statut public `exact` n'en découle encore.
 
-Deux régimes produit orientent le cœur : p95 `warm_e2e` inférieur à une seconde autour de 50 000 points pour $K_{\max}\leq10$, puis streaming transactionnel reprenable à dix millions de points ou davantage. La voie produit est GPU-first avec rejeu exact côté hôte. Avant d'étendre un oracle Voronoï maison, les tests doivent évaluer un adaptateur Geogram épinglé ou une bibliothèque mature équivalente; cette baseline ne devient jamais une autorité sans recertification.
+Deux régimes produit orientent le cœur : passage complet d'environ 50 000 points pour $K_{\max}\leq10$ avec un p95 `warm_e2e` strictement inférieur à 100 ms comme objectif principal et strictement inférieur à une seconde comme objectif secondaire, puis streaming transactionnel reprenable à dix millions de points ou davantage. La voie produit est GPU-first avec rejeu exact côté hôte. Avant d'étendre un oracle Voronoï maison, les tests doivent évaluer un adaptateur Geogram épinglé ou une bibliothèque mature équivalente; cette baseline ne devient jamais une autorité sans recertification.
 
 La tranche actuellement intégrée fournit :
 

@@ -1432,7 +1432,7 @@ Ce jalon peut être qualifié uniquement si :
 6. le backend GPU produit soit la même sortie sous une future base exacte prouvée, soit une connectivité positive incluse dans Gamma avec statut conditionnel ;
 7. les compteurs permettent d'expliquer le coût et tout abandon de budget ;
 8. le test $k=1$ coïncide avec l'EMST ;
-9. le jalon $50\,000$ points possède une mesure G4 reproductible, sans que l'étiquette `interactive` soit accordée si elle dépasse une seconde ;
+9. le jalon $50\,000$ points possède une mesure G4 reproductible, sans que l'étiquette `interactive` soit accordée si le p95 `warm_e2e` atteint 100 ms; le seuil strictement inférieur à une seconde est rapporté seulement comme objectif secondaire ;
 10. chaque campagne GCP se clôt par une preuve d'état `TERMINATED` de son instance exactement ciblée.
 
 ### 20.2 `v1-interactive-scalable`

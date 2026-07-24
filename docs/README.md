@@ -2,7 +2,7 @@
 
 Ce dossier est le corpus scientifique actif de E-HGP. Il a été recentré sur la voie 3D : reconstruire une tour hiérarchique K-NN exacte jusqu'à $K_{\max}=10$, avec une implémentation future adaptée au GPU. Les textes décrivent séparément ce qui est démontré, ce qui dépend d'une hypothèse et ce qui reste heuristique.
 
-Deux cas d'usage gouvernent toutes les décisions : p95 `warm_e2e` inférieur à une seconde autour de 50 000 points pour $K_{\max}\leq10$, et traitement transactionnel reprenable de dix millions de points ou davantage. Le chemin produit est GPU-first avec recertification exacte; Geogram ou toute bibliothèque mature équivalente reste une baseline de test versionnée, jamais une raison d'étendre un oracle maison ni une autorité scientifique sans rejeu.
+Deux cas d'usage gouvernent toutes les décisions : passage complet d'environ 50 000 points pour $K_{\max}\leq10$ avec un p95 `warm_e2e` strictement inférieur à 100 ms comme objectif principal et strictement inférieur à une seconde comme objectif secondaire, puis traitement transactionnel reprenable de dix millions de points ou davantage. Le chemin produit est GPU-first avec recertification exacte; Geogram ou toute bibliothèque mature équivalente reste une baseline de test versionnée, jamais une raison d'étendre un oracle maison ni une autorité scientifique sans rejeu.
 
 ## Parcours recommandé
 

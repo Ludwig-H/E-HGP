@@ -6,7 +6,7 @@ Le module `ordinary_diagram` fournit aussi l'oracle différentiel de Phase 8.4. 
 
 L'atlas ne doit pas être étendu en implémentation générale de Voronoï. Pour une baseline plus large, la politique du dépôt impose d'évaluer d'abord Geogram ou une bibliothèque mature équivalente via un adaptateur épinglé; la baseline reste non autoritative et séparée du chemin GPU tant qu'un rejeu exact ne l'a pas certifiée.
 
-Le chemin produit vise explicitement moins d'une seconde en p95 `warm_e2e` autour de 50 000 points avec $K_{\max}\leq10$, puis dix millions de points ou davantage en streaming transactionnel. Le catalogue exhaustif de ce paquet peut servir d'oracle bidirectionnel à 8.5, uniquement dans les tests.
+Le chemin produit vise explicitement le passage complet d'environ 50 000 points avec $K_{\max}\leq10$ et un p95 `warm_e2e` strictement inférieur à 100 ms; le seuil strictement inférieur à une seconde sur le même protocole reste secondaire. Le second régime vise dix millions de points ou davantage en streaming transactionnel. Le catalogue exhaustif de ce paquet peut servir d'oracle bidirectionnel à 8.5, uniquement dans les tests.
 
 ## Complétude sans cascade de cellules
 

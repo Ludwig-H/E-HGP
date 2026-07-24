@@ -324,7 +324,7 @@ Sur `g4-standard-48`, protocole `warm_e2e`, $K_{\max}=10$, nuages volumiques ré
 |---:|---:|
 | $1\,000$ | $25$ ms |
 | $10\,000$ | $200$ ms |
-| $50\,000$ | $<1$ s |
+| $50\,000$ | principal $<100$ ms; secondaire $<1$ s sur le même payload |
 | $100\,000$ | $3$ s |
 | $1$ million | $60$ s si le certificat reste sparse |
 | $10$ millions | $10$ min si le certificat reste sparse |

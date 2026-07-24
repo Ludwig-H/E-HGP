@@ -8,7 +8,7 @@ L'atlas 8.4 possède sa propre borne plus stricte $n\leq8$. Il décode directeme
 
 Cette implémentation est gelée comme oracle de preuve borné. Toute baseline de Voronoï plus large doit d'abord évaluer un adaptateur versionné vers Geogram ou une bibliothèque mature équivalente au lieu d'étendre ce module; aucune de ces voies de test ne remplace le chemin produit GPU ni sa recertification exacte.
 
-Cette séparation protège les deux cibles produit : p95 `warm_e2e` inférieur à une seconde autour de 50 000 points pour $K_{\max}\leq10$, puis streaming transactionnel à dix millions de points ou davantage. Le catalogue exhaustif peut contrôler l'extraction 8.5 dans les tests; il n'entre jamais dans son producteur.
+Cette séparation protège les deux cibles produit : passage complet d'environ 50 000 points pour $K_{\max}\leq10$ avec un p95 `warm_e2e` strictement inférieur à 100 ms comme objectif principal et strictement inférieur à une seconde comme objectif secondaire, puis streaming transactionnel à dix millions de points ou davantage. Le catalogue exhaustif peut contrôler l'extraction 8.5 dans les tests; il n'entre jamais dans son producteur.
 
 ## Garanties et profils
 

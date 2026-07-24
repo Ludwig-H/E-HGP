@@ -292,7 +292,7 @@ Les six CTests GCC Release fonctionnels et statiques ciblés passent en 0,99 sec
 
 La porte suivante reste un oracle spatial de première incidence qui propose tous les minimiseurs pertinents et certifie par branch-and-bound qu'aucune coface moins chère n'a été omise. Les co-minimiseurs de même niveau doivent être traités dans un lot atomique.
 
-Pour environ 50 000 points, 10.5c évite le travail top-$k$ répété sur les suffixes partagés, mais une requête LBVH, un shell ou une longue chaîne peuvent encore être linéaires. Aucun SLO inférieur à une seconde n'est revendiqué.
+Pour environ 50 000 points, 10.5c évite le travail top-$k$ répété sur les suffixes partagés, mais une requête LBVH, un shell ou une longue chaîne peuvent encore être linéaires. Ni le SLO principal strictement inférieur à 100 ms, ni l'objectif secondaire strictement inférieur à une seconde ne sont revendiqués.
 
 Pour dix millions de points ou davantage, l'absence de terme $\binom{n}{k}$ et la borne $O(R+KV)$ préservent l'architecture sparse, mais elles ne qualifient ni le débit, ni la mémoire en octets des rationnels, ni la reprise durable, ni l'absence d'OOM. Aucun SLO 10 M+ n'est revendiqué.
 
