@@ -1,5 +1,7 @@
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_batch_executor.hpp"
 
+#include "direct_sparse_facet_descent_batch_replay_internal.hpp"
+
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -1942,6 +1944,49 @@ finalize_proposal_preparation(
 }
 
 }  // namespace
+
+namespace detail {
+
+ExactDirectSparseFacetDescentBatchExecutionResult
+replay_exact_direct_sparse_facet_descent_batch_at_cursor(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    const ExactDirectSupportTerminalFacade& source_facade,
+    const ExactDirectMorseEventJournalResult& source_event_journal,
+    const ExactDirectSaddleArmSeedJournalResult& source_arm_seed_journal,
+    const ExactDirectSparseFacetDescentBatchPlanResult& source_plan,
+    const ExactDirectSparseFacetDescentBatchReplayCursor& cursor,
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparsePositiveFacetLocator& locator,
+    const ExactDirectSparseFacetDescentBatchExecutionBudget& execution_budget,
+    const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
+    const ExactDirectSparseFacetDescentClosureConfig& closure_config,
+    spatial::LbvhTraversalOrder traversal_order) {
+  return build_batch_execution(
+      index,
+      cloud,
+      source_facade,
+      source_event_journal,
+      source_arm_seed_journal,
+      source_plan,
+      BatchCursor{
+          cursor.source_batch_index,
+          cursor.source_chunk_index,
+          cursor.source_lane_index,
+          cursor.source_family_index,
+          cursor.source_arm_seed_index},
+      locator_query_witness,
+      locator,
+      execution_budget,
+      closure_budget,
+      closure_config,
+      traversal_order,
+      nullptr,
+      nullptr,
+      nullptr);
+}
+
+}  // namespace detail
 
 bool ExactDirectSparseFacetDescentBatchExecutionResult::
 complete_architecture_execution() const noexcept {

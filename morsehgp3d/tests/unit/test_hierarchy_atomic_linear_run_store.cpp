@@ -33,6 +33,7 @@ using morsehgp3d::hierarchy::AtomicLinearRunPublishStage;
 using morsehgp3d::hierarchy::AtomicLinearRunRecertification;
 using morsehgp3d::hierarchy::AtomicLinearRunRecertificationPhase;
 using morsehgp3d::hierarchy::AtomicLinearRunRecertifier;
+using morsehgp3d::hierarchy::AtomicLinearRunResourceGate;
 using morsehgp3d::hierarchy::AtomicLinearRunStore;
 using morsehgp3d::hierarchy::AtomicLinearRunStoreLimits;
 using morsehgp3d::hierarchy::AtomicLinearRunTransition;
@@ -156,6 +157,16 @@ struct RecertificationCounts {
         !marker_rejected,
         !marker_rejected,
         !marker_rejected};
+  };
+}
+
+[[nodiscard]] AtomicLinearRunResourceGate resource_gate() {
+  return [](
+             const AtomicLinearRunTransition&,
+             AtomicLinearRunRecertificationPhase,
+             morsehgp3d::hierarchy::
+                 AtomicLinearRunResourceGateBoundary) {
+    return true;
   };
 }
 
@@ -376,6 +387,14 @@ void unlink_head_before_rename(
   return directory / "linear-run-00000000000000000000.run";
 }
 
+[[nodiscard]] bool no_uncommitted_first_transition(
+    const std::filesystem::path& directory) {
+  return !std::filesystem::exists(first_final(directory)) &&
+         !std::filesystem::exists(
+             directory / ".linear-run-00000000000000000000.tmp") &&
+         !std::filesystem::exists(directory / ".HEAD.tmp");
+}
+
 void test_two_chunks_reopen_and_wire() {
   TemporaryWorkspace workspace;
   const std::filesystem::path directory =
@@ -387,7 +406,11 @@ void test_two_chunks_reopen_and_wire() {
   {
     RecertificationCounts counts;
     AtomicLinearRunStore store = AtomicLinearRunStore::create_new(
-        directory, run_contract, limits, recertifier(counts));
+        directory,
+        run_contract,
+        limits,
+        recertifier(counts),
+        resource_gate());
     check(
         store.status().writer_lock_acquired &&
             store.status().authoritative_head_certified,
@@ -407,7 +430,8 @@ void test_two_chunks_reopen_and_wire() {
                   directory,
                   run_contract,
                   limits,
-                  recertifier(locked_counts));
+                  recertifier(locked_counts),
+                  resource_gate());
           static_cast<void>(locked.status());
         },
         "a second writer must not acquire the live run");
@@ -503,6 +527,7 @@ void test_two_chunks_reopen_and_wire() {
             run_contract,
             limits,
             recertifier(replay_counts),
+            resource_gate(),
             first_anchor);
     check(
         replay_counts.publication == 0U &&
@@ -541,7 +566,8 @@ void test_corruption_contract_and_anchors() {
         corrupt_directory,
         run_contract,
         limits,
-        recertifier(counts));
+        recertifier(counts),
+        resource_gate());
     check(
         store.publish_next(proposal(store, 12U, 0x33U)).decision ==
             AtomicLinearRunPublishDecision::durably_published,
@@ -556,7 +582,8 @@ void test_corruption_contract_and_anchors() {
                 corrupt_directory,
                 run_contract,
                 limits,
-                recertifier(corrupt_counts));
+                recertifier(corrupt_counts),
+                resource_gate());
         static_cast<void>(reopened.status());
       },
       "recovery must reject a transition with a bad SHA-256");
@@ -569,7 +596,8 @@ void test_corruption_contract_and_anchors() {
         contract_directory,
         run_contract,
         limits,
-        recertifier(counts));
+        recertifier(counts),
+        resource_gate());
     static_cast<void>(store.status());
   }
   AtomicLinearRunContract wrong_contract = run_contract;
@@ -583,7 +611,8 @@ void test_corruption_contract_and_anchors() {
                 contract_directory,
                 wrong_contract,
                 limits,
-                recertifier(contract_counts));
+                recertifier(contract_counts),
+                resource_gate());
         static_cast<void>(reopened.status());
       },
       "recovery must reject a mismatched run contract digest");
@@ -598,7 +627,8 @@ void test_corruption_contract_and_anchors() {
                 contract_directory,
                 run_contract,
                 different_limits,
-                recertifier(limit_contract_counts));
+                recertifier(limit_contract_counts),
+                resource_gate());
         static_cast<void>(reopened.status());
       },
       "recovery must reject different limits bound into the run contract");
@@ -612,7 +642,8 @@ void test_corruption_contract_and_anchors() {
         anchor_directory,
         run_contract,
         limits,
-        recertifier(counts));
+        recertifier(counts),
+        resource_gate());
     const auto published =
         store.publish_next(proposal(store, 12U, 0x44U));
     check(
@@ -632,6 +663,7 @@ void test_corruption_contract_and_anchors() {
                 run_contract,
                 limits,
                 recertifier(wrong_anchor_counts),
+                resource_gate(),
                 wrong_anchor);
         static_cast<void>(reopened.status());
       },
@@ -648,6 +680,7 @@ void test_corruption_contract_and_anchors() {
                 run_contract,
                 limits,
                 recertifier(future_anchor_counts),
+                resource_gate(),
                 future_anchor);
         static_cast<void>(reopened.status());
       },
@@ -668,7 +701,11 @@ void test_limits_shapes_and_recertification() {
   RecertificationCounts counts;
   counts.reject_marker = true;
   AtomicLinearRunStore store = AtomicLinearRunStore::create_new(
-      directory, run_contract, limits, recertifier(counts));
+      directory,
+      run_contract,
+      limits,
+      recertifier(counts),
+      resource_gate());
 
   check(
       store.publish_next(proposal(store, 12U, 0x55U, 4U)).decision ==
@@ -720,7 +757,8 @@ void test_limits_shapes_and_recertification() {
                 invalid_directory,
                 run_contract,
                 invalid,
-                recertifier(invalid_counts));
+                recertifier(invalid_counts),
+                resource_gate());
         static_cast<void>(invalid_store.status());
       },
       "zero-valued store limits must fail closed");
@@ -734,10 +772,113 @@ void test_limits_shapes_and_recertification() {
                 callback_directory,
                 run_contract,
                 generous_limits(),
-                AtomicLinearRunRecertifier{});
+                AtomicLinearRunRecertifier{},
+                resource_gate());
         static_cast<void>(missing.status());
       },
       "the publication and recovery recertifier must be mandatory");
+  const std::filesystem::path gate_directory =
+      workspace.make_directory("missing-gate");
+  RecertificationCounts gate_counts;
+  check_throws(
+      [&]() {
+        AtomicLinearRunStore missing =
+            AtomicLinearRunStore::create_new(
+                gate_directory,
+                run_contract,
+                generous_limits(),
+                recertifier(gate_counts),
+                AtomicLinearRunResourceGate{});
+        static_cast<void>(missing.status());
+      },
+      "the publication and recovery resource gate must be mandatory");
+}
+
+void test_resource_gate_order_and_failure_cleanup() {
+  TemporaryWorkspace workspace;
+  const AtomicLinearRunContract run_contract = contract_fixture();
+  const AtomicLinearRunStoreLimits limits = generous_limits();
+
+  const std::filesystem::path recertifier_directory =
+      workspace.make_directory("recertifier-throw");
+  std::vector<int> recertifier_events;
+  AtomicLinearRunStore recertifier_store =
+      AtomicLinearRunStore::create_new(
+          recertifier_directory,
+          run_contract,
+          limits,
+          [&recertifier_events](
+              const AtomicLinearRunTransition&,
+              AtomicLinearRunRecertificationPhase)
+              -> AtomicLinearRunRecertification {
+            recertifier_events.push_back(2);
+            throw std::runtime_error("scripted recertifier failure");
+          },
+          [&recertifier_events](
+              const AtomicLinearRunTransition&,
+              AtomicLinearRunRecertificationPhase,
+              morsehgp3d::hierarchy::
+                  AtomicLinearRunResourceGateBoundary boundary) {
+            recertifier_events.push_back(
+                boundary ==
+                        morsehgp3d::hierarchy::
+                            AtomicLinearRunResourceGateBoundary::
+                                before_recertification
+                    ? 1
+                    : 3);
+            return true;
+          });
+  const auto recertifier_result = recertifier_store.publish_next(
+      proposal(recertifier_store, 12U, 0x31U));
+  check(
+      recertifier_events == std::vector<int>{1, 2, 3} &&
+          recertifier_result.decision ==
+              AtomicLinearRunPublishDecision::
+                  recertification_rejected &&
+          no_uncommitted_first_transition(recertifier_directory),
+      "a recertifier exception is closed by the after gate in strict before-recertify-after order without an uncommitted file");
+
+  const std::filesystem::path after_gate_directory =
+      workspace.make_directory("after-gate-throw");
+  std::vector<int> after_gate_events;
+  AtomicLinearRunStore after_gate_store =
+      AtomicLinearRunStore::create_new(
+          after_gate_directory,
+          run_contract,
+          limits,
+          [&after_gate_events](
+              const AtomicLinearRunTransition&,
+              AtomicLinearRunRecertificationPhase) {
+            after_gate_events.push_back(2);
+            return AtomicLinearRunRecertification{true, true, true};
+          },
+          [&after_gate_events](
+              const AtomicLinearRunTransition&,
+              AtomicLinearRunRecertificationPhase,
+              morsehgp3d::hierarchy::
+                  AtomicLinearRunResourceGateBoundary boundary) {
+            if (boundary ==
+                morsehgp3d::hierarchy::
+                    AtomicLinearRunResourceGateBoundary::
+                        before_recertification) {
+              after_gate_events.push_back(1);
+              return true;
+            }
+            after_gate_events.push_back(3);
+            throw std::runtime_error("scripted after-gate failure");
+          });
+  const auto after_gate_result = after_gate_store.publish_next(
+      proposal(after_gate_store, 12U, 0x32U));
+  check(
+      after_gate_events == std::vector<int>{1, 2, 3} &&
+          after_gate_result.decision ==
+              AtomicLinearRunPublishDecision::resource_gate_rejected &&
+          after_gate_store.status().resource_gate_evaluation_count ==
+              2U &&
+          after_gate_store.status().resource_gate_rejection_count ==
+              1U &&
+          no_uncommitted_first_transition(after_gate_directory),
+      "an after-gate exception after reversible writes removes the final and temporaries before HEAD replacement");
 }
 
 void test_post_head_indeterminate_requires_reopen() {
@@ -752,7 +893,8 @@ void test_post_head_indeterminate_requires_reopen() {
         pre_head_directory,
         run_contract,
         limits,
-        recertifier(counts));
+        recertifier(counts),
+        resource_gate());
     CorruptHeadTemporaryState sabotage{
         (pre_head_directory / ".HEAD.tmp").string(), false};
     const auto result = store.publish_next(
@@ -774,7 +916,8 @@ void test_post_head_indeterminate_requires_reopen() {
             pre_head_directory,
             run_contract,
             limits,
-            recertifier(replay_counts));
+            recertifier(replay_counts),
+            resource_gate());
     check(
         recovered.trusted_state().next_sequence == 0U &&
             recovered.status()
@@ -806,7 +949,8 @@ void test_post_head_indeterminate_requires_reopen() {
         lost_head_directory,
         run_contract,
         limits,
-        recertifier(counts));
+        recertifier(counts),
+        resource_gate());
     UnlinkHeadBeforeRenameState sabotage{
         (lost_head_directory / "HEAD").string(), false};
     const auto result = store.publish_next(
@@ -830,7 +974,8 @@ void test_post_head_indeterminate_requires_reopen() {
                 lost_head_directory,
                 run_contract,
                 limits,
-                recertifier(lost_head_counts));
+                recertifier(lost_head_counts),
+                resource_gate());
         static_cast<void>(reopened.status());
       },
       "reopen must expose a missing pre-rename authoritative HEAD");
@@ -840,7 +985,11 @@ void test_post_head_indeterminate_requires_reopen() {
   {
     RecertificationCounts counts;
     AtomicLinearRunStore store = AtomicLinearRunStore::create_new(
-        directory, run_contract, limits, recertifier(counts));
+        directory,
+        run_contract,
+        limits,
+        recertifier(counts),
+        resource_gate());
     UnlinkAfterHeadState sabotage{
         first_final(directory).string(), false};
     const auto result = store.publish_next(
@@ -874,7 +1023,8 @@ void test_post_head_indeterminate_requires_reopen() {
                 directory,
                 run_contract,
                 limits,
-                recertifier(replay_counts));
+                recertifier(replay_counts),
+                resource_gate());
         static_cast<void>(reopened.status());
       },
       "reopen must detect a hostile missing final referenced by HEAD");
@@ -887,6 +1037,7 @@ int main() {
     test_two_chunks_reopen_and_wire();
     test_corruption_contract_and_anchors();
     test_limits_shapes_and_recertification();
+    test_resource_gate_order_and_failure_cleanup();
     test_post_head_indeterminate_requires_reopen();
   } catch (const std::exception& error) {
     ++failures;

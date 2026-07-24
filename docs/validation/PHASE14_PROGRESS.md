@@ -34,7 +34,7 @@ Le nouvel exécuteur reconstruit et compare 14C une seule fois à l'ouverture, p
 
 La fermeture est enfermée dans une portée transitoire. Avant que le résultat ne soit publié, ses nœuds, arêtes, projections, miniballs et tables de mémoïsation sont détruits; seuls restent les $D$ couples clé--carrier--témoin et les $A$ jointures, soit un delta logique $O(KD+A)$. Le rejeu de commit reconstruit seulement le lot courant, jamais 14A ni l'ensemble du plan 14C. Il avance le curseur d'exécution si et seulement si le delta complet et le stamp sont identiques; il ne mute ni locator, ni quotient, ni forêt.
 
-Cette tranche est commune au résident 50 k et au streaming 10 M+, mais elle ne qualifie encore ni leur temps, ni leur volume. Le profil massif devra évacuer le delta compact vers un run durable avant de poursuivre. Aucune structure globale évitée par l'architecture n'a été réintroduite.
+Cette tranche est commune au résident 50 k et au streaming 10 M+, mais elle ne qualifie encore ni leur temps, ni leur volume. Phase 15B évacue désormais le delta compact par chunks 14A vers un run durable recertifié; le fold du préfixe vers locator, quotient et forêt reste ouvert. Aucune structure globale évitée par l'architecture n'a été réintroduite.
 
 ## Incrément 14E livré — couture canonique et incumbent exact
 
@@ -137,7 +137,7 @@ Les tests hôte stricts comparent l'import au builder CPU et falsifient schéma,
 1. fournir l'adaptateur réel entre les contextes CUDA 14M et 14J/14K et les callbacks 14L;
 2. étudier un réemploi recertifiable du centre exact par 10.5c au lieu de la seconde construction actuellement explicite;
 3. réutiliser les capacités restantes de scratch sans conserver de graphe entre lots;
-4. exploiter l'instrumentation `warm_e2e`, puis rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
+4. exploiter l'instrumentation `warm_e2e`, puis raccorder les chunks durables 15B au reducer hiérarchique avant toute campagne massive.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

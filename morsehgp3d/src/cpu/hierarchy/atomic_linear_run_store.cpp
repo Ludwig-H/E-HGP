@@ -914,6 +914,14 @@ void validate_callback(
   }
 }
 
+void validate_callback(
+    const AtomicLinearRunResourceGate& resource_gate) {
+  if (!resource_gate) {
+    throw std::invalid_argument(
+        "an atomic linear run requires a resource gate");
+  }
+}
+
 [[nodiscard]] HeadRecord head_from_state(
     const contract::CanonicalId& run_contract_digest,
     std::size_t committed_count,
@@ -949,13 +957,16 @@ struct AtomicLinearRunStore::Impl {
       AtomicLinearRunContract supplied_contract,
       AtomicLinearRunStoreLimits supplied_limits,
       AtomicLinearRunRecertifier supplied_recertifier,
-      std::optional<AtomicLinearRunExternalAnchor> supplied_anchor)
+      std::optional<AtomicLinearRunExternalAnchor> supplied_anchor,
+      AtomicLinearRunResourceGate supplied_resource_gate)
       : contract_value(std::move(supplied_contract)),
         limits(std::move(supplied_limits)),
         recertifier(std::move(supplied_recertifier)),
-        expected_anchor(std::move(supplied_anchor)) {
+        expected_anchor(std::move(supplied_anchor)),
+        resource_gate(std::move(supplied_resource_gate)) {
     validate_limits(limits);
     validate_callback(recertifier);
+    validate_callback(resource_gate);
     run_digest = compute_contract_digest(contract_value, limits);
     reset_trusted_state();
     durable_status.external_anchor_supplied = expected_anchor.has_value();
@@ -1252,6 +1263,24 @@ struct AtomicLinearRunStore::Impl {
     return result;
   }
 
+  [[nodiscard]] bool authorize_resources(
+      const AtomicLinearRunTransition& transition,
+      AtomicLinearRunRecertificationPhase phase,
+      AtomicLinearRunResourceGateBoundary boundary) noexcept {
+    if (!resource_gate) {
+      return true;
+    }
+    ++durable_status.resource_gate_evaluation_count;
+    try {
+      if (resource_gate(transition, phase, boundary)) {
+        return true;
+      }
+    } catch (...) {
+    }
+    ++durable_status.resource_gate_rejection_count;
+    return false;
+  }
+
   void verify_expected_anchor_at_current_prefix() {
     if (!expected_anchor.has_value() ||
         durable_status.external_anchor_verified) {
@@ -1286,11 +1315,39 @@ struct AtomicLinearRunStore::Impl {
       throw std::runtime_error(
           "an atomic linear transition breaks the trusted chain");
     }
+    if (!authorize_resources(
+            transition,
+            phase,
+            AtomicLinearRunResourceGateBoundary::
+                before_recertification)) {
+      throw AtomicLinearRunRecoveryError{
+          AtomicLinearRunRecoveryFailureReason::
+              resource_gate_before_recertification_rejected,
+          phase,
+          sequence,
+          "an atomic linear transition failed its recovery resource gate"};
+    }
     const AtomicLinearRunRecertification replay =
         recertify(transition, phase);
+    const bool resources_completed = authorize_resources(
+        transition,
+        phase,
+        AtomicLinearRunResourceGateBoundary::after_recertification);
+    if (!resources_completed) {
+      throw AtomicLinearRunRecoveryError{
+          AtomicLinearRunRecoveryFailureReason::
+              resource_gate_after_recertification_rejected,
+          phase,
+          sequence,
+          "an atomic linear transition exceeded its recovery resource gate"};
+    }
     if (!replay.accepted()) {
-      throw std::runtime_error(
-          "an atomic linear transition failed recovery recertification");
+      throw AtomicLinearRunRecoveryError{
+          AtomicLinearRunRecoveryFailureReason::
+              scientific_recertification_rejected,
+          phase,
+          sequence,
+          "an atomic linear transition failed recovery recertification"};
     }
     encoded_byte_count = read.bytes.size();
     durable_status.maximum_observed_payload_byte_count = std::max(
@@ -1710,32 +1767,42 @@ struct AtomicLinearRunStore::Impl {
       return result;
     }
     result.encoded_transition_byte_count = encoded.size();
+    bool resource_gate_active = false;
+    if (!authorize_resources(
+            transition,
+            AtomicLinearRunRecertificationPhase::publication,
+            AtomicLinearRunResourceGateBoundary::
+                before_recertification)) {
+      result.decision =
+          AtomicLinearRunPublishDecision::resource_gate_rejected;
+      return result;
+    }
+    resource_gate_active = true;
     result.recertification = recertify(
         transition, AtomicLinearRunRecertificationPhase::publication);
     if (!result.recertification.accepted()) {
-      result.decision =
-          AtomicLinearRunPublishDecision::recertification_rejected;
+      resource_gate_active = false;
+      result.decision = authorize_resources(
+                            transition,
+                            AtomicLinearRunRecertificationPhase::
+                                publication,
+                            AtomicLinearRunResourceGateBoundary::
+                                after_recertification)
+                            ? AtomicLinearRunPublishDecision::
+                                  recertification_rejected
+                            : AtomicLinearRunPublishDecision::
+                                  resource_gate_rejected;
       return result;
     }
 
-    const AtomicLinearRunTrustedState next_state =
-        successor_state(transition);
-    const std::size_t next_count = checked_add(
-        committed_count,
-        1U,
-        "the atomic linear committed count overflows");
-    const std::size_t next_total = checked_add(
-        total_bytes,
-        encoded.size(),
-        "the atomic linear total byte count overflows");
-    const HeadRecord next_head = head_from_state(
-        run_digest, next_count, next_total, next_state);
-    const auto encoded_head = encode_head(next_head);
-    const std::string temporary_name =
-        sequence_file_name(transition.sequence, true);
-    const std::string final_name =
-        sequence_file_name(transition.sequence, false);
-
+    AtomicLinearRunTrustedState next_state;
+    std::size_t next_count = 0U;
+    std::size_t next_total = 0U;
+    HeadRecord next_head;
+    std::array<std::uint8_t, atomic_linear_run_head_wire_byte_count>
+        encoded_head{};
+    std::string temporary_name;
+    std::string final_name;
     UniqueFileDescriptor transition_temporary;
     UniqueFileDescriptor head_temporary;
     bool transition_temporary_present = false;
@@ -1743,6 +1810,23 @@ struct AtomicLinearRunStore::Impl {
     bool head_temporary_present = false;
     bool head_replaced = false;
     try {
+      next_state = successor_state(transition);
+      next_count = checked_add(
+          committed_count,
+          1U,
+          "the atomic linear committed count overflows");
+      next_total = checked_add(
+          total_bytes,
+          encoded.size(),
+          "the atomic linear total byte count overflows");
+      next_head = head_from_state(
+          run_digest, next_count, next_total, next_state);
+      encoded_head = encode_head(next_head);
+      temporary_name =
+          sequence_file_name(transition.sequence, true);
+      final_name =
+          sequence_file_name(transition.sequence, false);
+
       transition_temporary = create_temporary_file(
           directory.get(),
           temporary_name,
@@ -1874,6 +1958,35 @@ struct AtomicLinearRunStore::Impl {
       const struct stat verified_head_descriptor = descriptor_metadata(
           head_temporary.get(),
           "the verified atomic linear HEAD descriptor");
+      resource_gate_active = false;
+      if (!authorize_resources(
+              transition,
+              AtomicLinearRunRecertificationPhase::publication,
+              AtomicLinearRunResourceGateBoundary::
+                  after_recertification)) {
+        transition_temporary = UniqueFileDescriptor{};
+        head_temporary = UniqueFileDescriptor{};
+        int cleanup_error_number = 0;
+        if (cleanup_pre_head_publication(
+                temporary_name,
+                final_name,
+                transition_temporary_present,
+                transition_final_present,
+                head_temporary_present,
+                cleanup_error_number) &&
+            authoritative_head_still_certified()) {
+          result.decision =
+              AtomicLinearRunPublishDecision::resource_gate_rejected;
+          return result;
+        }
+        failed_closed = true;
+        durable_status.authoritative_head_certified = false;
+        refresh_status();
+        result.system_error_number = cleanup_error_number;
+        result.decision = AtomicLinearRunPublishDecision::
+            indeterminate_io_failure_reopen_required;
+        return result;
+      }
       if (::renameat(
               directory.get(),
               std::string{head_temporary_file_name}.c_str(),
@@ -1916,6 +2029,14 @@ struct AtomicLinearRunStore::Impl {
               head_directory_synchronized);
       verify_publication();
     } catch (const std::system_error& error) {
+      if (resource_gate_active) {
+        resource_gate_active = false;
+        static_cast<void>(authorize_resources(
+            transition,
+            AtomicLinearRunRecertificationPhase::publication,
+            AtomicLinearRunResourceGateBoundary::
+                after_recertification));
+      }
       result.system_error_number = error.code().value();
       transition_temporary = UniqueFileDescriptor{};
       head_temporary = UniqueFileDescriptor{};
@@ -1940,6 +2061,14 @@ struct AtomicLinearRunStore::Impl {
           indeterminate_io_failure_reopen_required;
       return result;
     } catch (...) {
+      if (resource_gate_active) {
+        resource_gate_active = false;
+        static_cast<void>(authorize_resources(
+            transition,
+            AtomicLinearRunRecertificationPhase::publication,
+            AtomicLinearRunResourceGateBoundary::
+                after_recertification));
+      }
       transition_temporary = UniqueFileDescriptor{};
       head_temporary = UniqueFileDescriptor{};
       failed_closed = true;
@@ -1975,6 +2104,7 @@ struct AtomicLinearRunStore::Impl {
   AtomicLinearRunStoreLimits limits;
   AtomicLinearRunRecertifier recertifier;
   std::optional<AtomicLinearRunExternalAnchor> expected_anchor;
+  AtomicLinearRunResourceGate resource_gate;
   contract::CanonicalId run_digest{};
   AtomicLinearRunTrustedState trusted{};
   HeadRecord authoritative_head{};
@@ -1992,27 +2122,31 @@ AtomicLinearRunStore::AtomicLinearRunStore(
     AtomicLinearRunContract contract_value,
     AtomicLinearRunStoreLimits limits,
     AtomicLinearRunRecertifier recertifier,
-    std::optional<AtomicLinearRunExternalAnchor> expected_anchor)
+    std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
+    AtomicLinearRunResourceGate resource_gate)
     : impl_(std::make_unique<Impl>(
           mode,
           dedicated_directory,
           std::move(contract_value),
           std::move(limits),
           std::move(recertifier),
-          std::move(expected_anchor))) {}
+          std::move(expected_anchor),
+          std::move(resource_gate))) {}
 
 AtomicLinearRunStore AtomicLinearRunStore::create_new(
     const std::filesystem::path& dedicated_directory,
     AtomicLinearRunContract contract_value,
     AtomicLinearRunStoreLimits limits,
-    AtomicLinearRunRecertifier recertifier) {
+    AtomicLinearRunRecertifier recertifier,
+    AtomicLinearRunResourceGate resource_gate) {
   return AtomicLinearRunStore{
       OpenMode::create_new,
       dedicated_directory,
       std::move(contract_value),
       std::move(limits),
       std::move(recertifier),
-      std::nullopt};
+      std::nullopt,
+      std::move(resource_gate)};
 }
 
 AtomicLinearRunStore AtomicLinearRunStore::open_existing(
@@ -2020,6 +2154,7 @@ AtomicLinearRunStore AtomicLinearRunStore::open_existing(
     AtomicLinearRunContract contract_value,
     AtomicLinearRunStoreLimits limits,
     AtomicLinearRunRecertifier recertifier,
+    AtomicLinearRunResourceGate resource_gate,
     std::optional<AtomicLinearRunExternalAnchor> expected_anchor) {
   return AtomicLinearRunStore{
       OpenMode::open_existing,
@@ -2027,8 +2162,19 @@ AtomicLinearRunStore AtomicLinearRunStore::open_existing(
       std::move(contract_value),
       std::move(limits),
       std::move(recertifier),
-      std::move(expected_anchor)};
+      std::move(expected_anchor),
+      std::move(resource_gate)};
 }
+
+AtomicLinearRunRecoveryError::AtomicLinearRunRecoveryError(
+    AtomicLinearRunRecoveryFailureReason reason,
+    AtomicLinearRunRecertificationPhase phase,
+    std::uint64_t sequence,
+    std::string message)
+    : std::runtime_error(std::move(message)),
+      reason_(reason),
+      phase_(phase),
+      sequence_(sequence) {}
 
 AtomicLinearRunStore::~AtomicLinearRunStore() = default;
 

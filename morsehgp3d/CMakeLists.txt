@@ -1413,6 +1413,47 @@ else()
   )
 endif()
 
+if(UNIX)
+  add_library(
+    morsehgp3d_direct_morse_chunk_run
+    STATIC
+      src/cpu/hierarchy/direct_morse_chunk_run.cpp
+  )
+  add_library(
+    morsehgp3d::direct_morse_chunk_run
+    ALIAS morsehgp3d_direct_morse_chunk_run
+  )
+  set_target_properties(
+    morsehgp3d_direct_morse_chunk_run
+    PROPERTIES
+      EXPORT_NAME direct_morse_chunk_run
+      POSITION_INDEPENDENT_CODE ON
+  )
+  target_compile_features(
+    morsehgp3d_direct_morse_chunk_run PUBLIC cxx_std_20
+  )
+  target_include_directories(
+    morsehgp3d_direct_morse_chunk_run
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:include>
+  )
+  target_link_libraries(
+    morsehgp3d_direct_morse_chunk_run
+    PUBLIC
+      morsehgp3d::atomic_linear_run_store
+      morsehgp3d::direct_morse_budget
+      morsehgp3d::direct_sparse_facet_descent_batch_executor
+    PRIVATE
+      morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
+      morsehgp3d::sanitizers
+  )
+  target_compile_options(
+    morsehgp3d_direct_morse_chunk_run
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 add_library(
   morsehgp3d_pair_support_codec
   STATIC
@@ -2260,6 +2301,7 @@ if(UNIX)
     TARGETS
       morsehgp3d_pair_support_durable
       morsehgp3d_atomic_linear_run_store
+      morsehgp3d_direct_morse_chunk_run
     EXPORT MorseHGP3DTargets
   )
 endif()

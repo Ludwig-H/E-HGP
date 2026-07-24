@@ -8,6 +8,8 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 namespace morsehgp3d::hierarchy {
@@ -106,14 +108,67 @@ struct AtomicLinearRunRecertification {
       const AtomicLinearRunRecertification&) = default;
 };
 
-// A recertifier is a pure, idempotent authority: invocation is not a commit
-// signal and must not mutate external state.  Publication can still fail
-// after acceptance, and recovery also recertifies a valid uncommitted suffix
-// before deleting it under recovery_uncommitted_cleanup.
+// A recertifier is decision-pure and scientifically idempotent under the same
+// immutable authorities: invocation is not a commit signal and must not
+// mutate scientific or durable state.  Observational counters and
+// non-authoritative reconstruction caches may change.  Publication can still
+// fail after acceptance, and recovery also recertifies a valid uncommitted
+// suffix before deleting it under recovery_uncommitted_cleanup.
 using AtomicLinearRunRecertifier = std::function<
     AtomicLinearRunRecertification(
         const AtomicLinearRunTransition&,
         AtomicLinearRunRecertificationPhase)>;
+
+enum class AtomicLinearRunResourceGateBoundary : std::uint8_t {
+  before_recertification,
+  after_recertification,
+};
+
+// Unlike the scientific recertifier, this session-local resource gate is
+// deliberately stateful.  The store invokes it immediately before each
+// decision-pure recertification.  Recovery closes it immediately after replay;
+// publication keeps it through all reversible writes and closes it just
+// before replacing HEAD, serially under the single-writer contract.  A false
+// result or exception fails before any durable publication.
+using AtomicLinearRunResourceGate = std::function<
+    bool(
+        const AtomicLinearRunTransition&,
+        AtomicLinearRunRecertificationPhase,
+        AtomicLinearRunResourceGateBoundary)>;
+
+enum class AtomicLinearRunRecoveryFailureReason : std::uint8_t {
+  resource_gate_before_recertification_rejected,
+  resource_gate_after_recertification_rejected,
+  scientific_recertification_rejected,
+};
+
+class AtomicLinearRunRecoveryError : public std::runtime_error {
+ public:
+  AtomicLinearRunRecoveryError(
+      AtomicLinearRunRecoveryFailureReason reason,
+      AtomicLinearRunRecertificationPhase phase,
+      std::uint64_t sequence,
+      std::string message);
+
+  [[nodiscard]] AtomicLinearRunRecoveryFailureReason reason()
+      const noexcept {
+    return reason_;
+  }
+
+  [[nodiscard]] AtomicLinearRunRecertificationPhase phase()
+      const noexcept {
+    return phase_;
+  }
+
+  [[nodiscard]] std::uint64_t sequence() const noexcept {
+    return sequence_;
+  }
+
+ private:
+  AtomicLinearRunRecoveryFailureReason reason_;
+  AtomicLinearRunRecertificationPhase phase_;
+  std::uint64_t sequence_;
+};
 
 struct AtomicLinearRunTrustedState {
   std::uint64_t next_sequence{};
@@ -165,6 +220,7 @@ struct AtomicLinearRunPublishOptions {
 enum class AtomicLinearRunPublishDecision : std::uint8_t {
   durably_published,
   transition_shape_rejected,
+  resource_gate_rejected,
   recertification_rejected,
   store_limit_rejected,
   retryable_io_failure,
@@ -192,6 +248,8 @@ struct AtomicLinearRunStoreStatus {
   std::size_t publication_recertification_count{};
   std::size_t recovery_recertification_count{};
   std::size_t uncommitted_cleanup_recertification_count{};
+  std::size_t resource_gate_evaluation_count{};
+  std::size_t resource_gate_rejection_count{};
   std::size_t removed_uncommitted_temporary_file_count{};
   std::size_t removed_uncommitted_final_file_count{};
   AtomicLinearRunExternalAnchor current_anchor{};
@@ -220,13 +278,15 @@ class AtomicLinearRunStore {
       const std::filesystem::path& dedicated_directory,
       AtomicLinearRunContract contract,
       AtomicLinearRunStoreLimits limits,
-      AtomicLinearRunRecertifier recertifier);
+      AtomicLinearRunRecertifier recertifier,
+      AtomicLinearRunResourceGate resource_gate);
 
   [[nodiscard]] static AtomicLinearRunStore open_existing(
       const std::filesystem::path& dedicated_directory,
       AtomicLinearRunContract contract,
       AtomicLinearRunStoreLimits limits,
       AtomicLinearRunRecertifier recertifier,
+      AtomicLinearRunResourceGate resource_gate,
       std::optional<AtomicLinearRunExternalAnchor> expected_anchor =
           std::nullopt);
 
@@ -259,7 +319,8 @@ class AtomicLinearRunStore {
       AtomicLinearRunContract contract,
       AtomicLinearRunStoreLimits limits,
       AtomicLinearRunRecertifier recertifier,
-      std::optional<AtomicLinearRunExternalAnchor> expected_anchor);
+      std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
+      AtomicLinearRunResourceGate resource_gate);
 
   struct Impl;
   std::unique_ptr<Impl> impl_;
