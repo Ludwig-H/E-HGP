@@ -886,8 +886,7 @@ __global__ void build_morton_topology_level_kernel(
   const std::uint64_t leaf_count =
       range.leaf_end - range.leaf_begin;
   if (leaf_count - UINT64_C(1) >
-          std::numeric_limits<std::uint64_t>::max() /
-              UINT64_C(2)) {
+          UINT64_MAX / UINT64_C(2)) {
     report_device_failure(
         failure_code,
         Phase14MortonLbvhDeviceFailure::postorder_index_overflow);
@@ -896,7 +895,7 @@ __global__ void build_morton_topology_level_kernel(
   const std::uint64_t root_offset =
       UINT64_C(2) * (leaf_count - UINT64_C(1));
   if (range.postorder_begin >
-      std::numeric_limits<std::uint64_t>::max() - root_offset) {
+      UINT64_MAX - root_offset) {
     report_device_failure(
         failure_code,
         Phase14MortonLbvhDeviceFailure::postorder_index_overflow);

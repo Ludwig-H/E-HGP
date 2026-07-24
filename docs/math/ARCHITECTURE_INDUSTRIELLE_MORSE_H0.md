@@ -36,7 +36,7 @@ Il est projeté vers les seules liaisons bras--racine avant le lot suivant. Ces 
 
 Pour un nuage d'environ 50 000 points et $K\leq10$, l'objectif est de conserver nuage, LBVH, flux compact, carriers, racines réduites optionnelles, scratch de descentes et forêt dans les arènes résidentes. Tous les lots exacts doivent tenir dans un unique plan d'exécution; aucun niveau égal ne peut être coupé. La cible future utilise des lots de bras par classes de cardinal, des traversées top-$K$ groupées, des CUDA Graphs et un fallback exact explicitement compté.
 
-Le protocole `warm_e2e` inclura le transfert du nuage, le LBVH, les décisions certifiées, la réduction et la matérialisation. Un plan résident accepté signifie seulement que les capacités déclarées suffisent; il ne signifie jamais que le p95 est inférieur à une seconde.
+Le protocole `warm_e2e` inclura le transfert du nuage, le LBVH, les décisions certifiées, la réduction et la matérialisation. L'objectif principal à 50 k est un p95 strictement inférieur à 100 ms; l'objectif strictement inférieur à une seconde est secondaire. Un plan résident accepté signifie seulement que les capacités déclarées suffisent et ne qualifie aucun de ces deux seuils.
 
 ## Profil streaming massif
 

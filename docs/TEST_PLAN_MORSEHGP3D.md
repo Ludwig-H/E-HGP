@@ -548,7 +548,7 @@ Les caps 8.4 sont exercés par le test unitaire de l'oracle : valeurs exactes, c
 
 La réussite valide uniquement `bounded_n8_independent_affine_subset_oracle_only` et l'accord sémantique de 8.3. Elle ne valide pas les rondes, amorces, compteurs de travail ou budgets de 8.3, CUDA, $n>8$, les supports Morse, `RelevantGP`, le catalogue, `closed_parent_orders[1]` ou un statut public.
 
-L'atlas `Fraction` est gelé à cette portée. Avant d'ajouter un autre oracle de Voronoï ou d'étendre cette baseline au-delà de huit sites, le plan de test doit comparer explicitement l'option d'un adaptateur Geogram épinglé : version et licence fixées, configuration reproductible, canonisation des identifiants, cas dégénérés et projection exacte à recertifier. Une baseline externe peut détecter des désaccords et mesurer le coût, mais ne décide jamais seule un statut exact. Aucun test de cet oracle CPU ne compte comme mesure du chemin chaud; les portes produit restent le p95 inférieur à une seconde à 50 000 points et $K_{\max}\leq10$, puis l'absence d'OOM et la reprise transactionnelle à dix millions de points ou davantage.
+L'atlas `Fraction` est gelé à cette portée. Avant d'ajouter un autre oracle de Voronoï ou d'étendre cette baseline au-delà de huit sites, le plan de test doit comparer explicitement l'option d'un adaptateur Geogram épinglé : version et licence fixées, configuration reproductible, canonisation des identifiants, cas dégénérés et projection exacte à recertifier. Une baseline externe peut détecter des désaccords et mesurer le coût, mais ne décide jamais seule un statut exact. Aucun test de cet oracle CPU ne compte comme mesure du chemin chaud; les portes produit restent le passage complet à 50 000 points et $K_{\max}\leq10$ avec un p95 `warm_e2e` strictement inférieur à 100 ms, puis l'absence d'OOM et la reprise transactionnelle à dix millions de points ou davantage. Un p95 strictement inférieur à une seconde est suivi séparément comme objectif secondaire.
 
 Le jalon 8.5 teste `morsehgp3d.phase8.exact_bounded_depth_zero_natural_supports.v1` sans campagne longue. Le singleton doit fermer une extraction vide. Le tétraèdre régulier doit produire six supports de taille deux, quatre de taille trois et un de taille quatre; avec `K_max=1`, seuls les six couples sont acceptés et les cinq strates supérieures restent classées au-dessus de la fenêtre, sans être supprimées du transcript candidat.
 
@@ -1158,6 +1158,8 @@ Le rapport publie $p50$, $p95$, maximum, écart absolu médian et chaque valeur 
 
 Les seuils suivants concernent `warm_e2e`, $K_{\max}=10$, un seul GPU G4, sur une famille volumique favorable dont le certificat reste sparse. Ils incluent la matérialisation de la hiérarchie demandée.
 
+À 50 000 points, le seuil principal est strict : $p95<100$ ms. Le seuil $p95<1$ s est seulement secondaire et utilise exactement les mêmes données, le même payload et les mêmes bornes du chronomètre. Une série comprise entre 100 ms inclus et une seconde exclue réussit l'objectif secondaire mais échoue la porte principale; aucun temps de kernel, `resident_core` ou snapshot déjà construit ne peut lui être substitué.
+
 Une porte structurelle précède tout chronométrage : le rapport doit montrer zéro allocation indexée par les univers de facettes ou cofaces, zéro cellule top-$m$ persistée et zéro construction Gamma dans le target produit. Il publie points, nœuds LBVH, pic de frontière, produits prunés, supports feuilles, événements, attaches et octets de runs. Échouer cette porte invalide l'architecture même si le temps mesuré est faible.
 
 Avant la campagne finale, un smoke unique sur 12 500, 25 000 et 50 000 points calcule les deux exposants successifs de chaque compteur de travail. Deux exposants supérieurs à 1,35 pour les tests de boîtes, la frontière ou les supports feuilles suspendent les micro-optimisations et imposent une revue de l'algorithme. Ce smoke ne remplace ni les 30 répétitions finales, ni une preuve asymptotique.
@@ -1168,7 +1170,7 @@ Avant la campagne finale, un smoke unique sur 12 500, 25 000 et 50 000 points ca
 |---:|---:|---|
 | $1\,000$ | $\leq25$ ms | exécution certifiée |
 | $10\,000$ | $\leq200$ ms | exécution certifiée |
-| $50\,000$ | $\leq1$ s | exécution certifiée ; objectif interactif principal |
+| $50\,000$ | $<100$ ms | passage complet certifié ; objectif interactif principal, avec $<1$ s seulement secondaire |
 | $100\,000$ | $\leq3$ s | exécution certifiée |
 | $1\,000\,000$ | $\leq60$ s | seulement si le catalogue et les runs restent sparse |
 | $10\,000\,000$ | $\leq600$ s | seulement si le catalogue reste sparse ; streaming autorisé |
@@ -1408,7 +1410,7 @@ Une campagne n'est pas « terminée » tant que cette condition n'est pas satisf
 | G3 — hiérarchie | référence exacte égale à Gamma; voie Gabriel incluse positivement et marquée partielle | ordre de threads modifiant la hiérarchie, connexion inventée ou Gabriel brut annoncé exact |
 | G4 — verticalité | unicité et commutation à tous les seuils | flèche absente, multiple ou non commutative |
 | G5 — GPU | zéro différence canonique seulement pour une future base exacte prouvée; sinon toutes les connexions GPU sont incluses dans Gamma et le statut reste conditionnel | approximation silencieuse, connexion absente de Gamma, repli non signalé ou faux statut exact |
-| G6 — 50k interactif | objectif $p95\leq1$ s atteint sur les deux familles favorables | dépassement : pas de revendication interactive, profilage requis |
+| G6 — 50k interactif | objectif principal `warm_e2e` $p95<100$ ms atteint sur les deux familles favorables; le résultat du seuil secondaire $p95<1$ s est aussi publié | $p95\geq100$ ms : pas de revendication du SLO principal; $p95\geq1$ s : objectif secondaire également manqué; profilage requis |
 | G7 — million | fin sous budget sur cas sparse avec statut conforme à la base disponible, sans dépassement mémoire | OOM non contrôlé, perte de run/checkpoint ou faux statut exact |
 | G7b — trois millions | trois graines sparse avec `forest_semantics=exact`, `public_status=exact`, streaming transactionnel et reprise vérifiée | statut limité, OOM, support non fermé, état durable incohérent ou faux statut exact |
 | G8 — adversarial | sortie exacte, ou statut limité honnête et exploitable | catalogue tronqué annoncé `exact` |

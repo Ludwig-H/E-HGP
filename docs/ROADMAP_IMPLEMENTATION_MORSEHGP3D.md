@@ -1,6 +1,6 @@
 # Feuille de route d'implémentation de MorseHGP3D
 
-> **Mission.** Construire un backend 3D hiérarchique, certifiable et GPU-first pour $1\leq k\leq10$, beaucoup plus léger que `HGP-old` : la hiérarchie utile doit être obtenue sans matérialiser, ni reconstituer sous forme de cellules top-$m$, la mosaïque de Delaunay d'ordre $K$. Deux régimes produit sont non négociables : p95 `warm_e2e` strictement inférieur à une seconde autour de 50 000 points pour $K_{\max}\leq10$ sur les familles favorables enregistrées; puis streaming transactionnel, reprenable et honnêtement budgeté à dix millions de points ou davantage. Cette feuille de route est écrite comme un protocole exécutable par de futurs agents ChatGPT.
+> **Mission.** Construire un backend 3D hiérarchique, certifiable et GPU-first pour $1\leq k\leq10$, beaucoup plus léger que `HGP-old` : la hiérarchie utile doit être obtenue sans matérialiser, ni reconstituer sous forme de cellules top-$m$, la mosaïque de Delaunay d'ordre $K$. Deux régimes produit sont non négociables : passage complet d'environ 50 000 points à $K_{\max}\leq10$ avec un p95 `warm_e2e` strictement inférieur à 100 ms sur les familles favorables enregistrées, l'objectif strictement inférieur à une seconde n'étant que secondaire; puis streaming transactionnel, reprenable et honnêtement budgeté à dix millions de points ou davantage. Cette feuille de route est écrite comme un protocole exécutable par de futurs agents ChatGPT.
 
 ## 1. Règles de conduite pour tout agent
 
@@ -764,7 +764,7 @@ Ce jalon ne produit aucun singleton de rayon nul dans le catalogue H0, lot H0, �
 
 L'atlas `Fraction` de 8.4 est désormais gelé comme oracle de preuve `n<=8`; il ne doit pas devenir une bibliothèque de Voronoï générale ni entrer dans le chemin utilisateur. Avant toute nouvelle baseline de Voronoï, extension de domaine de test ou primitive CPU spécialisée, l'agent doit d'abord évaluer un adaptateur épinglé vers Geogram ou une bibliothèque mature équivalente, avec version, licence, options numériques et projection sémantique documentées. Une telle bibliothèque reste une baseline ou une source de propositions tant que ses sorties ne sont pas recertifiées par les contrats exacts du dépôt.
 
-Le chemin produit reste GPU-first : génération et filtrage massifs sur `cuda_g4`, décisions combinatoires ambiguës rejouées exactement sur l'hôte, transferts et matérialisation strictement budgetés. Les choix des Phases 8 à 13 doivent préserver les deux cibles de produit : p95 `warm_e2e` inférieur à une seconde pour environ 50 000 points et $K_{\max}\leq10$ sur les familles favorables préenregistrées, puis streaming transactionnel pour dix millions de points ou davantage avec sortie exacte lorsque le certificat reste sparse et arrêt budgétaire honnête sinon. Aucun élargissement d'un oracle de test CPU ne doit retarder ou remplacer cette voie.
+Le chemin produit reste GPU-first : génération et filtrage massifs sur `cuda_g4`, décisions combinatoires ambiguës rejouées exactement sur l'hôte, transferts et matérialisation strictement budgetés. Les choix des Phases 8 à 13 doivent préserver les deux cibles de produit : p95 `warm_e2e` strictement inférieur à 100 ms pour le passage complet d'environ 50 000 points et $K_{\max}\leq10$ sur les familles favorables préenregistrées, avec un seuil secondaire strictement inférieur à une seconde, puis streaming transactionnel pour dix millions de points ou davantage avec sortie exacte lorsque le certificat reste sparse et arrêt budgétaire honnête sinon. Aucun élargissement d'un oracle de test CPU ne doit retarder ou remplacer cette voie.
 
 ### Travaux
 
@@ -1138,7 +1138,7 @@ Chaque sous-phase possède son théorème, son oracle et ses tests. Une sous-pha
 
 ### But
 
-Atteindre ou réfuter proprement la cible de moins d'une seconde en protocole `warm_e2e`.
+Atteindre ou réfuter proprement la cible principale de moins de 100 ms pour le passage complet du nuage en protocole `warm_e2e`; moins d'une seconde est seulement l'objectif secondaire.
 
 ### Préconditions
 
@@ -1306,7 +1306,7 @@ Le faux launcher hôte et l'import certifié sont validés. La source CUDA doit 
 
 ### Porte de sortie
 
-Objectif principal : $n=50\,000$, $K_{\max}=10$, p95 `warm_e2e` inférieur à une seconde sur famille volumique préenregistrée, portée entièrement certifiée et pic inférieur à 80 % de VRAM. Cette mesure inclut validation, transfert, LBVH, calcul et matérialisation du résultat; `resident_core` reste diagnostique. Elle ne peut porter le statut public `exact` qu'après la migration contractuelle versionnée prévue à la sortie des Phases 9--11 et de M.1; un benchmark ne réalise jamais cette promotion. Si la cible échoue, publier la phase dominante et la courbe de croissance; ne pas modifier le contrat.
+Objectif principal : $n=50\,000$, $K_{\max}=10$, p95 `warm_e2e` strictement inférieur à 100 ms sur famille volumique préenregistrée, portée entièrement certifiée et pic inférieur à 80 % de VRAM. L'objectif secondaire est un p95 strictement inférieur à une seconde sur exactement le même protocole et le même payload; l'atteindre ne ferme pas la porte principale. Cette mesure inclut validation, transfert, LBVH, calcul et matérialisation du résultat; `resident_core` reste diagnostique. Elle ne peut porter le statut public `exact` qu'après la migration contractuelle versionnée prévue à la sortie des Phases 9--11 et de M.1; un benchmark ne réalise jamais cette promotion. Si la cible échoue, publier la phase dominante et la courbe de croissance; ne pas modifier le contrat.
 
 ## Phase 15 — Streaming à dix millions et davantage
 
@@ -1537,7 +1537,8 @@ Il dépend de `v1-correctness`, de la Phase 12 fermant M.1 et d'une migration co
 | budget scratch insuffisant pour la transaction suivante | checkpoint durable puis `budget_exhausted` avant écriture |
 | pic supérieur à 80 % de VRAM | activer le streaming avant d'agrandir |
 | croissance intermédiaire forte en régime volumique | ouvrir la phase 17 |
-| p95 50k supérieur à une seconde | ne pas revendiquer le SLO |
+| p95 50k supérieur ou égal à 100 ms | ne pas revendiquer le SLO principal; publier séparément si le seuil secondaire sous une seconde est atteint |
+| p95 50k supérieur ou égal à une seconde | ne revendiquer ni le SLO principal ni l'objectif secondaire |
 | checkpoint non reproductible | aucune campagne Spot massive |
 | instance exactement ciblée non confirmée `TERMINATED` | incident opérationnel bloquant |
 
