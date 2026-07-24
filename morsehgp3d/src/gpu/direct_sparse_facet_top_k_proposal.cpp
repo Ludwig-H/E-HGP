@@ -323,10 +323,21 @@ struct ValidatedPayload {
     const PackedQueries& packed,
     DirectSparseFacetTopKProposalPolicy policy,
     std::uint64_t previous_buffer_epoch) {
+  const std::size_t expected_query_bytes = checked_size_product(
+      packed.gpu_queries.size(),
+      sizeof(InputRecord),
+      "the Phase 14 expected active query byte count overflowed");
+  const std::size_t expected_output_bytes = checked_size_product(
+      packed.gpu_queries.size(),
+      sizeof(DeviceRecord),
+      "the Phase 14 expected active output byte count overflowed");
   if (previous_buffer_epoch ==
           std::numeric_limits<std::uint64_t>::max() ||
       batch.records.size() != packed.gpu_queries.size() ||
       batch.record_count != packed.gpu_queries.size() ||
+      batch.host_to_device_query_byte_count != expected_query_bytes ||
+      batch.initialized_output_byte_count != expected_output_bytes ||
+      batch.device_to_host_record_byte_count != expected_output_bytes ||
       batch.kernel_launch_count != 1U ||
       batch.synchronization_count != 1U ||
       batch.buffer_epoch != previous_buffer_epoch + UINT64_C(1)) {
@@ -336,6 +347,18 @@ struct ValidatedPayload {
   ValidatedPayload payload;
   DirectSparseFacetTopKProposalAudit& audit = payload.audit;
   audit.gpu_output_record_count = batch.record_count;
+  audit.active_host_to_device_query_record_count =
+      batch.record_count;
+  audit.active_host_to_device_query_byte_count =
+      batch.host_to_device_query_byte_count;
+  audit.initialized_device_output_record_count =
+      batch.record_count;
+  audit.initialized_device_output_byte_count =
+      batch.initialized_output_byte_count;
+  audit.copied_device_to_host_record_count =
+      batch.record_count;
+  audit.copied_device_to_host_byte_count =
+      batch.device_to_host_record_byte_count;
   audit.gpu_kernel_launch_count = batch.kernel_launch_count;
   audit.gpu_synchronization_count = batch.synchronization_count;
   audit.buffer_epoch = batch.buffer_epoch;
@@ -544,24 +567,6 @@ void initialize_common_audit(
           "the Phase 14 device query byte capacity overflowed");
   audit.host_record_copy_byte_capacity =
       audit.static_device_record_buffer_byte_capacity;
-  audit.active_host_to_device_query_record_count =
-      packed.gpu_queries.size();
-  audit.active_host_to_device_query_byte_count =
-      checked_size_product(
-          packed.gpu_queries.size(),
-          sizeof(InputRecord),
-          "the Phase 14 active query byte count overflowed");
-  audit.initialized_device_output_record_count =
-      packed.gpu_queries.size();
-  audit.initialized_device_output_byte_count =
-      checked_size_product(
-          packed.gpu_queries.size(),
-          sizeof(DeviceRecord),
-          "the Phase 14 active output initialization byte count overflowed");
-  audit.copied_device_to_host_record_count =
-      packed.gpu_queries.size();
-  audit.copied_device_to_host_byte_count =
-      audit.initialized_device_output_byte_count;
   audit.canonical_query_count = queries.size();
   audit.gpu_supported_center_query_count =
       packed.gpu_queries.size();

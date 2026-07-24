@@ -94,7 +94,7 @@ La sortie n'a aucune autorité scientifique. 14F revalide clés, namespace, excl
 
 Les buffers device persistants conservent la capacité $208C+144C=352C$ octets. Pour $D\leq C$ requêtes effectivement supportées, un appel copie désormais exactement $208D$ octets d'entrée, initialise $144D$ octets de sortie et rapatrie $144D$ octets dans un vecteur de $D$ records. L'audit publie séparément les capacités et les trois volumes actifs.
 
-La queue device $[D,C)$ n'est pas lue et n'a aucune autorité; toute partie qui devient active lors d'un appel suivant est réinitialisée. La sentinelle validée porte sur les candidats inutilisés à l'intérieur de chaque record actif. La fixture injecte une valeur résiduelle à cet endroit et vérifie le rejet avant publication.
+La queue device $[D,C)$ n'est pas lue et n'a aucune autorité; toute partie qui devient active lors d'un appel suivant est réinitialisée. La sentinelle validée porte sur les candidats inutilisés à l'intérieur de chaque record actif. La fixture injecte une valeur résiduelle à cet endroit et vérifie le rejet avant publication. Les extents employés par H2D, `memset` et D2H sont aussi retournés par le launcher et fermés par l'hôte; un extent D2H falsifié empoisonne le contexte.
 
 14J ne change ni la sélection flottante, ni le digest des records actifs, ni la revalidation exacte 14F, ni le commit scellé 14H. Il supprime le trafic proportionnel à la capacité inutilisée sans introduire de facette, coface, incidence globale, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur. Le jalon reste `cuda_g4 / hgp_reduced / proposal_only`, `architecture_only` et `public_status=not_claimed`; sa recertification G4 courte reste à effectuer.
 
@@ -127,7 +127,7 @@ Pour 14I, les deux CTests hôte ciblés passent sous GCC Release strict en 0,03 
 
 Sur la G4 réelle, le smoke initial puis le rejeu optimisé passent. La qualification vérifie deux epochs, les candidats attendus d'un hint exact $1/3$, dix candidats à $k=10$ sur une fixture où les trois axes sont discriminants, puis l'égalité des partitions CPU exactes avec et sans amorce. Le JSON donne 16 inspections pour le lot $k=2$, 230 pour $k=10$, quatre puis dix candidats, aucun objet global interdit et le digest `18249493464636075901` sur les deux versions. Le memcheck rejoue le binaire optimisé avec zéro erreur.
 
-Pour 14J, le CTest hôte ciblé passe en 0,02 seconde. Il couvre les lots $D=2$, $D=1$ et $D=0$, les volumes actifs exacts $208D$, $144D$ et $144D$, la taille hôte $D$ et la corruption de la queue de candidats d'un record actif. Aucun benchmark, test massif ou oracle combinatoire n'a été ajouté.
+Pour 14J, le CTest hôte ciblé passe en 0,02 seconde. Il couvre un contexte $C=6$, $D=2$, puis des contextes $C=4$ avec $D=1$ et $D=0$, les volumes actifs exacts $208D$, $144D$ et $144D$, la taille hôte $D$, un extent rapporté falsifié et la corruption de la queue de candidats d'un record actif. La qualification G4 ajoute sur un même contexte $C=6$ la transition $D=4$, $D=1$, $D=5$. Aucun benchmark, test massif ou oracle combinatoire n'a été ajouté.
 
 Une falsification coordonnée pourrait encore redistribuer des compteurs entre chunks 14A ou lanes 14C tout en conservant leurs agrégats. Les payloads compacts ne contiennent volontairement ni détail ni digest par lot; un vérificateur frais contre 10.1--10.2 est donc requis avant persistance ou exécution industrielle. Cette dette P2 est compatible avec `architecture_only`, mais devra être fermée avant toute qualification.
 

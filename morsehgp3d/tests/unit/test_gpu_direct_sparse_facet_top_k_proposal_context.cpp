@@ -566,6 +566,10 @@ void test_corruption_matrix_and_poisoning() {
       "a skipped device epoch");
   check_corruption_poisoning(
       fixture,
+      Corruption::wrong_active_transfer_extent,
+      "a mismatched active transfer extent");
+  check_corruption_poisoning(
+      fixture,
       Corruption::stale_active_candidate_tail,
       "a stale candidate in an active record tail");
   check_corruption_poisoning(

@@ -121,6 +121,9 @@ struct Phase14FacetTopKProposalDeviceBatch {
   // authority and cannot be consumed by host validation.
   std::vector<Phase14FacetTopKProposalDeviceRecord> records;
   std::size_t record_count{};
+  std::size_t host_to_device_query_byte_count{};
+  std::size_t initialized_output_byte_count{};
+  std::size_t device_to_host_record_byte_count{};
   std::size_t kernel_launch_count{};
   std::size_t synchronization_count{};
   std::uint64_t buffer_epoch{};

@@ -834,6 +834,10 @@ propose_phase14_facet_top_k_candidates_on_gpu(
   }
   const std::uint64_t expected_epoch =
       context.current_epoch() + UINT64_C(1);
+  const std::size_t active_query_bytes = queries.size_bytes();
+  const std::size_t active_output_bytes =
+      queries.size() *
+      sizeof(Phase14FacetTopKProposalDeviceRecord);
 
   Phase14FacetTopKProposalCudaResources& cuda = resources(context);
   DeviceGuard device_guard{cuda.device()};
@@ -847,7 +851,7 @@ propose_phase14_facet_top_k_candidates_on_gpu(
         cudaMemcpyAsync(
             cuda.queries(),
             queries.data(),
-            queries.size_bytes(),
+            active_query_bytes,
             cudaMemcpyHostToDevice,
             cuda.stream()),
         "cudaMemcpyAsync Phase 14 facet top-k queries host-to-device");
@@ -855,8 +859,7 @@ propose_phase14_facet_top_k_candidates_on_gpu(
         cudaMemsetAsync(
             cuda.records(),
             0xff,
-            queries.size() *
-                sizeof(Phase14FacetTopKProposalDeviceRecord),
+            active_output_bytes,
             cuda.stream()),
         "cudaMemsetAsync Phase 14 active facet top-k proposal sentinels");
 
@@ -893,13 +896,15 @@ propose_phase14_facet_top_k_candidates_on_gpu(
         cudaMemcpyAsync(
             batch.records.data(),
             cuda.records(),
-            queries.size() *
-                sizeof(Phase14FacetTopKProposalDeviceRecord),
+            active_output_bytes,
             cudaMemcpyDeviceToHost,
             cuda.stream()),
         "cudaMemcpyAsync Phase 14 active facet top-k proposals device-to-host");
     cuda.synchronize();
     batch.record_count = queries.size();
+    batch.host_to_device_query_byte_count = active_query_bytes;
+    batch.initialized_output_byte_count = active_output_bytes;
+    batch.device_to_host_record_byte_count = active_output_bytes;
     batch.kernel_launch_count = 1U;
     batch.synchronization_count = 1U;
     batch.buffer_epoch = context.advance_epoch();

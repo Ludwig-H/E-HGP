@@ -236,6 +236,11 @@ propose_phase14_facet_top_k_candidates_on_gpu(
   Phase14FacetTopKProposalDeviceBatch batch;
   batch.records.resize(queries.size());
   batch.record_count = queries.size();
+  batch.host_to_device_query_byte_count = queries.size_bytes();
+  batch.initialized_output_byte_count =
+      queries.size() * sizeof(DeviceRecord);
+  batch.device_to_host_record_byte_count =
+      batch.initialized_output_byte_count;
   batch.kernel_launch_count = 1U;
   batch.synchronization_count = 1U;
   if (corruption == Corruption::stale_epoch_without_advance) {
@@ -317,6 +322,9 @@ propose_phase14_facet_top_k_candidates_on_gpu(
     case Corruption::stale_epoch_without_advance:
     case Corruption::jumped_epoch:
     case Corruption::simulated_async_failure:
+      break;
+    case Corruption::wrong_active_transfer_extent:
+      ++batch.device_to_host_record_byte_count;
       break;
     case Corruption::duplicate_query_index:
       if (batch.record_count < 2U) {

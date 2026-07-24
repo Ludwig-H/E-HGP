@@ -128,6 +128,37 @@ require_record(
   return *found;
 }
 
+void require_active_traffic(
+    const DirectSparseFacetTopKProposalBatchResult& result,
+    std::size_t active_query_count,
+    std::size_t maximum_query_count) {
+  constexpr std::size_t kQueryBytes = 208U;
+  constexpr std::size_t kRecordBytes = 144U;
+  const auto& audit = result.audit;
+  if (audit.maximum_query_count != maximum_query_count ||
+      audit.static_device_query_buffer_byte_capacity !=
+          kQueryBytes * maximum_query_count ||
+      audit.static_device_record_buffer_byte_capacity !=
+          kRecordBytes * maximum_query_count ||
+      audit.host_record_copy_byte_capacity !=
+          kRecordBytes * maximum_query_count ||
+      audit.active_host_to_device_query_record_count !=
+          active_query_count ||
+      audit.active_host_to_device_query_byte_count !=
+          kQueryBytes * active_query_count ||
+      audit.initialized_device_output_record_count !=
+          active_query_count ||
+      audit.initialized_device_output_byte_count !=
+          kRecordBytes * active_query_count ||
+      audit.copied_device_to_host_record_count !=
+          active_query_count ||
+      audit.copied_device_to_host_byte_count !=
+          kRecordBytes * active_query_count) {
+    throw std::runtime_error(
+        "the Phase 14J GPU qualification observed invalid active traffic");
+  }
+}
+
 }  // namespace
 
 int main() {
@@ -193,6 +224,8 @@ int main() {
     const auto& inner_record = require_record(first, inner_key);
     const std::array<PointId, 2U> expected_outer{2U, 3U};
     const std::array<PointId, 2U> expected_inner{0U, 2U};
+    require_active_traffic(first, 2U, 4U);
+    require_active_traffic(second, 2U, 4U);
     if (!first.complete_proposal_batch() ||
         !second.complete_proposal_batch() ||
         first.audit.buffer_epoch != 1U ||
@@ -327,9 +360,62 @@ int main() {
       throw std::runtime_error(
           "the Phase 14 GPU qualification did not close its K=10 proposal");
     }
+    require_active_traffic(rank_ten_result, 1U, 1U);
+
+    const std::array transition_queries{
+        DirectSparseFacetTopKProposalQuery{
+            key({0U, 1U}), rational_hint_center},
+        DirectSparseFacetTopKProposalQuery{
+            key({0U, 2U}), rational_hint_center},
+        DirectSparseFacetTopKProposalQuery{
+            key({0U, 3U}), rational_hint_center},
+        DirectSparseFacetTopKProposalQuery{
+            key({0U, 4U}), rational_hint_center},
+        DirectSparseFacetTopKProposalQuery{
+            key({1U, 2U}), rational_hint_center}};
+    DirectSparseFacetTopKProposalContext transition_context{
+        index, cloud, 6U};
+    const std::span transition_span{transition_queries};
+    const auto transition_four = transition_context.build(
+        cloud,
+        transcript_metadata,
+        transition_span.first(4U),
+        policy,
+        transcript_budget);
+    const auto transition_one = transition_context.build(
+        cloud,
+        transcript_metadata,
+        transition_span.first(1U),
+        policy,
+        transcript_budget);
+    const auto transition_five = transition_context.build(
+        cloud,
+        transcript_metadata,
+        transition_span,
+        policy,
+        transcript_budget);
+    require_active_traffic(transition_four, 4U, 6U);
+    require_active_traffic(transition_one, 1U, 6U);
+    require_active_traffic(transition_five, 5U, 6U);
+    if (!transition_four.complete_proposal_batch() ||
+        !transition_one.complete_proposal_batch() ||
+        !transition_five.complete_proposal_batch() ||
+        transition_four.audit.buffer_epoch != 1U ||
+        transition_one.audit.buffer_epoch != 2U ||
+        transition_five.audit.buffer_epoch != 3U) {
+      throw std::runtime_error(
+          "the Phase 14J active-prefix transition did not close");
+    }
 
     std::cout
-        << "{\"backend\":\"cuda_g4\","
+        << "{\"active_device_to_host_byte_count\":"
+        << first.audit.copied_device_to_host_byte_count << ','
+        << "\"active_host_to_device_query_byte_count\":"
+        << first.audit.active_host_to_device_query_byte_count << ','
+        << "\"active_output_initialization_byte_count\":"
+        << first.audit.initialized_device_output_byte_count << ','
+        << "\"active_prefix_transition_4_1_5_validated\":true,"
+        << "\"backend\":\"cuda_g4\","
         << "\"buffer_epoch\":2,"
         << "\"candidate_count\":"
         << first.audit.proposed_candidate_count << ','
@@ -342,7 +428,7 @@ int main() {
         << first.audit.inspected_neighbor_count << ','
         << "\"mode\":\"proposal_only\","
         << "\"non_dyadic_hint_candidate_ids_validated\":true,"
-        << "\"phase\":\"14I\","
+        << "\"phase\":\"14J\","
         << "\"profile\":\"hgp_reduced\","
         << "\"proposal_digest_fnv1a\":"
         << first.audit.proposal_digest_fnv1a << ','
@@ -359,12 +445,12 @@ int main() {
         << first.audit.static_device_query_buffer_byte_capacity << ','
         << "\"static_device_record_buffer_byte_capacity\":"
         << first.audit.static_device_record_buffer_byte_capacity << ','
-        << "\"schema\":\"morsehgp3d.phase14i.facet_top_k_cuda_qualification.v1\"}"
+        << "\"schema\":\"morsehgp3d.phase14j.facet_top_k_cuda_qualification.v2\"}"
         << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr
-        << "Phase 14I GPU facet top-k qualification failed: "
+        << "Phase 14J GPU facet top-k qualification failed: "
         << error.what() << '\n';
     return 1;
   }
