@@ -880,7 +880,12 @@ class ExactDirectMorseForestReducer::Impl {
       throw std::invalid_argument(
           "a reducer closure budget exceeds its confidence cap");
     }
-    if (source_journal.role_records.size() >
+    std::size_t logical_source_role_count = 0U;
+    if (!try_add(
+            cloud.size(),
+            source_journal.materialized_direct_role_records.size(),
+            logical_source_role_count) ||
+        logical_source_role_count >
             budget.maximum_source_role_scan_count ||
         source_journal.batches.size() >
             budget.maximum_source_batch_scan_count ||
@@ -913,12 +918,19 @@ class ExactDirectMorseForestReducer::Impl {
           "a reducer requires freshly verified source journals");
     }
 
-    birth_count = static_cast<std::size_t>(std::count_if(
-        source_journal.role_records.begin(),
-        source_journal.role_records.end(),
-        [](const ExactDirectMorseH0RoleRecord& role) {
-          return role.role == ExactDirectMorseH0Role::birth;
-        }));
+    const ExactDirectMorseEventJournalView source_view{source_journal};
+    const auto direct_roles =
+        source_view.materialized_direct_role_records();
+    const std::size_t direct_birth_count =
+        static_cast<std::size_t>(std::count_if(
+            direct_roles.begin(),
+            direct_roles.end(),
+            [](const ExactDirectMorseH0RoleRecord& role) {
+              return role.role == ExactDirectMorseH0Role::birth;
+            }));
+    if (!try_add(cloud.size(), direct_birth_count, birth_count)) {
+      throw std::length_error("a reducer birth count overflowed");
+    }
     const std::size_t required_final_root_count =
         source_journal.effective_maximum_order == 0U
             ? 0U
@@ -997,6 +1009,8 @@ class ExactDirectMorseForestReducer::Impl {
     }
     const ExactDirectMorseH0Batch& source_batch =
         source_journal_->batches[batch.source_batch_index];
+    const ExactDirectMorseEventJournalView source_view{
+        *source_journal_};
     if (batch.source_batch_index >
         std::numeric_limits<std::uint64_t>::max() / 3U - 1U) {
       return reject(
@@ -1074,8 +1088,9 @@ class ExactDirectMorseForestReducer::Impl {
         batch.shared_closure_build_count == 0U;
     if (canonical_singleton_bulk_shape) {
       if (singleton_count == 0U ||
-          source_journal_->role_records.size() < singleton_count ||
-          source_journal_->event_projections.size() < singleton_count ||
+          source_view.role_record_count() < singleton_count ||
+          source_view.event_projection_count() < singleton_count ||
+          !source_journal_->canonical_singletons_implicit_and_unmaterialized ||
           singleton_count - 1U >
               spatial::CanonicalPointCloud::max_point_id ||
           singleton_count - 1U >
@@ -1083,34 +1098,8 @@ class ExactDirectMorseForestReducer::Impl {
                   ExactDirectMorseForestNodeId>::max()) {
         return reject(
             std::move(folded),
-            ExactDirectMorseForestReducerFoldDecision::
-                no_reducer_batch_inconsistent);
-      }
-      for (std::size_t index = 0U; index < singleton_count; ++index) {
-        const ExactDirectMorseH0RoleRecord expected_role{
-            index,
-            0U,
-            index,
-            ExactDirectMorseH0Role::birth};
-        ExactDirectMorseEventProjection expected_projection;
-        expected_projection.event_projection_index = index;
-        expected_projection.source =
-            ExactDirectMorseEventSource::canonical_singleton;
-        expected_projection.source_index = index;
-        expected_projection.support_size = 1U;
-        expected_projection.support_ids[0U] =
-            static_cast<PointId>(index);
-        expected_projection.squared_level = exact::ExactLevel{};
-        expected_projection.closed_rank = 1U;
-        expected_projection.birth_order = 1U;
-        if (source_journal_->role_records[index] != expected_role ||
-            source_journal_->event_projections[index] !=
-                expected_projection) {
-          return reject(
-              std::move(folded),
-              ExactDirectMorseForestReducerFoldDecision::
-                  no_reducer_batch_inconsistent);
-        }
+                ExactDirectMorseForestReducerFoldDecision::
+                    no_reducer_batch_inconsistent);
       }
 
       const PayloadSizes before = payload_sizes(result_);
@@ -1753,9 +1742,9 @@ class ExactDirectMorseForestReducer::Impl {
     std::vector<ExactDirectMorseForestNode> pending_birth_nodes;
     std::vector<ExactDirectSparseFacetBinding> locator_bindings;
     const std::size_t role_begin = source_batch.role_record_offset;
-    if (role_begin > source_journal_->role_records.size() ||
+    if (role_begin > source_view.role_record_count() ||
         source_batch.role_record_count >
-            source_journal_->role_records.size() - role_begin) {
+            source_view.role_record_count() - role_begin) {
       return reject(
           std::move(folded),
           ExactDirectMorseForestReducerFoldDecision::
@@ -1767,10 +1756,20 @@ class ExactDirectMorseForestReducer::Impl {
     for (std::size_t local = 0U;
          local < source_batch.role_record_count;
          ++local) {
-      const auto& role = source_journal_->role_records[role_begin + local];
+      const std::size_t logical_role_index = role_begin + local;
+      if (logical_role_index < singleton_count) {
+        return reject(
+            std::move(folded),
+            ExactDirectMorseForestReducerFoldDecision::
+                no_reducer_batch_inconsistent);
+      }
+      const auto& role =
+          source_view.materialized_direct_role_record_at(
+              logical_role_index);
       if (role.batch_index != batch.source_batch_index ||
           role.event_projection_index >=
-              source_journal_->event_projections.size()) {
+              source_view.event_projection_count() ||
+          role.event_projection_index < singleton_count) {
         return reject(
             std::move(folded),
             ExactDirectMorseForestReducerFoldDecision::
@@ -1780,8 +1779,8 @@ class ExactDirectMorseForestReducer::Impl {
         continue;
       }
       const auto& projection =
-          source_journal_->event_projections[
-              role.event_projection_index];
+          source_view.materialized_direct_event_projection_at(
+              role.event_projection_index);
       const auto key = birth_key(
           projection,
           *source_facade_,

@@ -1111,7 +1111,9 @@ add_executable(
   morsehgp3d_gpu_direct_sparse_facet_top_k_proposal_context_tests
   test_gpu_direct_sparse_facet_top_k_proposal_context.cpp
   fake_gpu_phase14_facet_top_k_proposal_launchers.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
   "${PROJECT_SOURCE_DIR}/src/gpu/direct_sparse_facet_top_k_proposal.cpp"
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
 )
 add_executable(
   morsehgp3d_gpu_morton_lbvh_build_context_tests

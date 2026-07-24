@@ -123,6 +123,8 @@ void test_exact_roles_and_batches() {
   const auto verification =
       morsehgp3d::hierarchy::verify_exact_direct_morse_event_journal(
           cloud, facade, journal);
+  const morsehgp3d::hierarchy::ExactDirectMorseEventJournalView
+      journal_view{journal};
 
   check(
       journal.certified_partial_refinement() &&
@@ -130,12 +132,16 @@ void test_exact_roles_and_batches() {
           journal.source_direct_event_count == 11U &&
           journal.event_projection_count == 15U &&
           journal.role_record_count == 26U &&
-          journal.batch_count == 7U,
+          journal.batch_count == 7U &&
+          journal.materialized_direct_event_projections.size() == 11U &&
+          journal.materialized_direct_role_records.size() == 22U &&
+          journal.canonical_singletons_implicit_and_unmaterialized,
       "a regular tetrahedron yields four singleton births and all exact direct-support H0 roles in seven equality batches");
 
   bool singleton_prefix_is_canonical = true;
   for (std::size_t index = 0U; index < cloud.size(); ++index) {
-    const auto& projection = journal.event_projections[index];
+    const auto projection = journal_view.event_projection_at(index);
+    const auto role = journal_view.role_record_at(index);
     singleton_prefix_is_canonical =
         singleton_prefix_is_canonical &&
         projection.event_projection_index == index &&
@@ -146,7 +152,10 @@ void test_exact_roles_and_batches() {
         projection.squared_level == ExactLevel{} &&
         projection.closed_rank == 1U &&
         projection.birth_order == 1U &&
-        !projection.saddle_order.has_value();
+        !projection.saddle_order.has_value() &&
+        role.role_record_index == index && role.batch_index == 0U &&
+        role.event_projection_index == index &&
+        role.role == ExactDirectMorseH0Role::birth;
   }
   check(
       singleton_prefix_is_canonical,
@@ -182,18 +191,20 @@ void test_exact_roles_and_batches() {
         batch.role_record_offset == expected_offset;
     for (std::size_t local = 0U; local < batch.role_record_count; ++local) {
       const std::size_t role_index = batch.role_record_offset + local;
-      const auto& role = journal.role_records[role_index];
+      const auto role = journal_view.role_record_at(role_index);
       role_partition_is_exact =
           role_partition_is_exact && role.role_record_index == role_index &&
           role.batch_index == batch.batch_index &&
-          role.event_projection_index < journal.event_projections.size() &&
+          role.event_projection_index <
+              journal_view.event_projection_count() &&
           (role.role == ExactDirectMorseH0Role::birth ||
            role.role == ExactDirectMorseH0Role::saddle);
     }
     expected_offset += batch.role_record_count;
   }
   role_partition_is_exact =
-      role_partition_is_exact && expected_offset == journal.role_records.size();
+      role_partition_is_exact &&
+      expected_offset == journal_view.role_record_count();
   check(
       batches_are_strictly_sorted && role_partition_is_exact,
       "batches are strictly sorted by (order, exact level) and partition the canonical role journal");
@@ -231,8 +242,9 @@ void test_source_authority_and_payload_fail_closed() {
       authority_mismatch.decision ==
               ExactDirectMorseEventJournalDecision::
                   no_journal_source_authority_mismatch &&
-          authority_mismatch.event_projections.empty() &&
-          authority_mismatch.role_records.empty() &&
+          authority_mismatch
+              .materialized_direct_event_projections.empty() &&
+          authority_mismatch.materialized_direct_role_records.empty() &&
           authority_mismatch.batches.empty(),
       "a same-cardinality but different canonical cloud fails closed through both Phase-9 cloud digests");
 
@@ -248,8 +260,9 @@ void test_source_authority_and_payload_fail_closed() {
       rejected_payload.decision ==
               ExactDirectMorseEventJournalDecision::
                   no_journal_source_facade_payload_inconsistent &&
-          rejected_payload.event_projections.empty() &&
-          rejected_payload.role_records.empty() &&
+          rejected_payload
+              .materialized_direct_event_projections.empty() &&
+          rejected_payload.materialized_direct_role_records.empty() &&
           rejected_payload.batches.empty(),
       "a locally inconsistent terminal facade produces no Phase-10 payload");
 }
@@ -269,8 +282,8 @@ void test_nonterminal_and_extra_shell_sources_fail_closed() {
       no_terminal_journal.decision ==
               ExactDirectMorseEventJournalDecision::
                   no_journal_source_facade_not_terminal &&
-          no_terminal_journal.event_projections.empty() &&
-          no_terminal_journal.role_records.empty() &&
+          no_terminal_journal.materialized_direct_event_projections.empty() &&
+          no_terminal_journal.materialized_direct_role_records.empty() &&
           no_terminal_journal.batches.empty(),
       "a residual Phase-9 frontier cannot publish a Phase-10 journal");
 
@@ -288,8 +301,10 @@ void test_nonterminal_and_extra_shell_sources_fail_closed() {
           no_degenerate_journal.decision ==
               ExactDirectMorseEventJournalDecision::
                   no_journal_relevant_extra_shell_diagnostics &&
-          no_degenerate_journal.event_projections.empty() &&
-          no_degenerate_journal.role_records.empty() &&
+          no_degenerate_journal
+              .materialized_direct_event_projections.empty() &&
+          no_degenerate_journal
+              .materialized_direct_role_records.empty() &&
           no_degenerate_journal.batches.empty(),
       "a relevant cocircular extra shell is retained by Phase 9 and fails closed before any Phase-10 payload");
 }

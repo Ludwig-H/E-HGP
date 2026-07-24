@@ -360,21 +360,23 @@ build_exact_direct_saddle_arm_seed_journal(
   result.families.reserve(required_families);
   result.arm_seeds.reserve(required_arms);
   try {
+    const ExactDirectMorseEventJournalView source_view{source_journal};
     for (const ExactDirectMorseH0RoleRecord& role :
-         source_journal.role_records) {
+         source_view.materialized_direct_role_records()) {
       if (role.role != ExactDirectMorseH0Role::saddle) {
         continue;
       }
       if (role.batch_index >= source_journal.batches.size() ||
           role.event_projection_index >=
-              source_journal.event_projections.size()) {
+              source_view.event_projection_count()) {
         throw std::invalid_argument(
             "a direct saddle role references an absent journal record");
       }
       const ExactDirectMorseH0Batch& batch =
           source_journal.batches[role.batch_index];
       const ExactDirectMorseEventProjection& projection =
-          source_journal.event_projections[role.event_projection_index];
+          source_view.materialized_direct_event_projection_at(
+              role.event_projection_index);
       if (projection.source_index >= source_facade.events.size()) {
         throw std::invalid_argument(
             "a direct saddle projection references an absent source event");
@@ -730,14 +732,15 @@ verify_exact_direct_saddle_arm_seed_journal_streaming(
   bool seeds_match = true;
   bool facets_match = true;
   try {
+    const ExactDirectMorseEventJournalView source_view{source_journal};
     for (const ExactDirectMorseH0RoleRecord& role :
-         source_journal.role_records) {
+         source_view.materialized_direct_role_records()) {
       if (role.role != ExactDirectMorseH0Role::saddle) {
         continue;
       }
       if (role.batch_index >= source_journal.batches.size() ||
           role.event_projection_index >=
-              source_journal.event_projections.size()) {
+              source_view.event_projection_count()) {
         families_match = false;
         seeds_match = false;
         facets_match = false;
@@ -746,7 +749,8 @@ verify_exact_direct_saddle_arm_seed_journal_streaming(
       const ExactDirectMorseH0Batch& batch =
           source_journal.batches[role.batch_index];
       const ExactDirectMorseEventProjection& projection =
-          source_journal.event_projections[role.event_projection_index];
+          source_view.materialized_direct_event_projection_at(
+              role.event_projection_index);
       if (projection.source_index >= source_facade.events.size()) {
         families_match = false;
         seeds_match = false;

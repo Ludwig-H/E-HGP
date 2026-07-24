@@ -12,6 +12,8 @@
 
 namespace morsehgp3d::gpu {
 
+class DirectSparseFacetTopKProposalContext;
+
 namespace detail {
 class Phase14MortonLbvhBuildContextState;
 }
@@ -195,12 +197,24 @@ class MortonLbvhDeviceLease final {
  private:
   MortonLbvhDeviceLease(
       MortonLbvhDeviceLeaseAudit audit,
-      std::shared_ptr<void> retained_resources);
+      std::shared_ptr<void> retained_resources,
+      std::shared_ptr<const void> source_cloud_identity,
+      const std::uint64_t* device_coordinate_bits,
+      const std::uint64_t* device_morton_point_ids,
+      int cuda_device);
 
   std::uint32_t schema_version_{morton_lbvh_device_lease_schema_version};
   MortonLbvhDeviceLeaseAudit audit_{};
   std::shared_ptr<void> retained_resources_;
+  // The raw addresses are an opaque cross-translation-unit CUDA view.  They
+  // are never exposed without transferring retained_resources_, which owns
+  // both allocations and therefore dominates their lifetime.
+  std::shared_ptr<const void> source_cloud_identity_;
+  const std::uint64_t* device_coordinate_bits_{};
+  const std::uint64_t* device_morton_point_ids_{};
+  int cuda_device_{-1};
 
+  friend class DirectSparseFacetTopKProposalContext;
   friend class MortonLbvhBuildContext;
 };
 
@@ -302,6 +316,7 @@ class MortonLbvhBuildContext final {
   std::size_t maximum_node_count_{};
   std::uint64_t last_buffer_epoch_{};
   std::size_t last_completed_point_count_{};
+  std::shared_ptr<const void> last_cloud_identity_;
   bool latest_device_build_available_for_lease_{false};
 };
 

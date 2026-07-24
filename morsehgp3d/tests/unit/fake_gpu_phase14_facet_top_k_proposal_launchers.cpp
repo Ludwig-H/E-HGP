@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <span>
 #include <stdexcept>
 #include <utility>
@@ -76,6 +77,58 @@ using Corruption =
 using DeviceRecord = Phase14FacetTopKProposalDeviceRecord;
 using InputRecord = Phase14FacetTopKProposalQueryInputRecord;
 
+class MortonOrderView final {
+ public:
+  MortonOrderView(
+      std::span<const std::uint64_t> direct,
+      std::span<const std::size_t> inverse)
+      : direct_(direct), inverse_(inverse) {}
+
+  [[nodiscard]] std::size_t size() const noexcept {
+    return inverse_.size();
+  }
+
+  [[nodiscard]] std::uint64_t point_at(
+      std::size_t position) const {
+    if (position >= inverse_.size()) {
+      throw std::logic_error(
+          "a fake Phase 14 Morton position is out of range");
+    }
+    if (!direct_.empty()) {
+      return direct_[position];
+    }
+    const auto found = std::find(
+        inverse_.begin(), inverse_.end(), position);
+    if (found == inverse_.end()) {
+      throw std::logic_error(
+          "the fake Phase 14 inverse Morton order is incomplete");
+    }
+    return static_cast<std::uint64_t>(
+        std::distance(inverse_.begin(), found));
+  }
+
+  [[nodiscard]] std::size_t position_of(
+      std::uint64_t point_id) const {
+    if (point_id >= static_cast<std::uint64_t>(inverse_.size())) {
+      throw std::logic_error(
+          "a fake Phase 14 PointId is out of range");
+    }
+    return inverse_[static_cast<std::size_t>(point_id)];
+  }
+
+ private:
+  std::span<const std::uint64_t> direct_;
+  std::span<const std::size_t> inverse_;
+};
+
+struct FakePhase14FacetTopKProposalResidentState {
+  std::shared_ptr<void> adopted_owner;
+  std::size_t point_count{};
+  std::size_t maximum_query_count{};
+  std::uint64_t source_snapshot_epoch{};
+  bool adopted{};
+};
+
 [[nodiscard]] std::size_t checked_size(
     std::uint64_t value, const char* message) {
   if (!std::in_range<std::size_t>(value)) {
@@ -115,10 +168,10 @@ using InputRecord = Phase14FacetTopKProposalQueryInputRecord;
     std::uint64_t candidate,
     const InputRecord& query,
     std::size_t source_count,
-    std::span<const std::size_t> inverse_morton,
+    const MortonOrderView& morton_order,
     std::size_t window_radius) {
   const std::size_t candidate_position =
-      inverse_morton[static_cast<std::size_t>(candidate)];
+      morton_order.position_of(candidate);
   for (std::size_t source = 0U; source < source_count; ++source) {
     const std::size_t source_position =
         checked_size(
@@ -138,7 +191,7 @@ using InputRecord = Phase14FacetTopKProposalQueryInputRecord;
 [[nodiscard]] std::vector<std::uint64_t> deterministic_candidates(
     const InputRecord& query,
     std::size_t source_count,
-    std::span<const std::uint64_t> morton_point_ids,
+    const MortonOrderView& morton_order,
     std::size_t window_radius) {
   std::vector<std::uint64_t> candidates;
   for (std::size_t source = 0U; source < source_count; ++source) {
@@ -148,12 +201,13 @@ using InputRecord = Phase14FacetTopKProposalQueryInputRecord;
     const std::size_t begin =
         position > window_radius ? position - window_radius : 0U;
     const std::size_t end = std::min(
-        morton_point_ids.size() - 1U, position + window_radius);
+        morton_order.size() - 1U, position + window_radius);
     for (std::size_t neighbor = begin; neighbor <= end; ++neighbor) {
       if (neighbor == position) {
         continue;
       }
-      const std::uint64_t point_id = morton_point_ids[neighbor];
+      const std::uint64_t point_id =
+          morton_order.point_at(neighbor);
       if (!source_contains(query, source_count, point_id)) {
         candidates.push_back(point_id);
       }
@@ -186,25 +240,17 @@ void require_inputs(
   }
 }
 
-}  // namespace
-
-Phase14FacetTopKProposalDeviceBatch
-propose_phase14_facet_top_k_candidates_on_gpu(
+[[nodiscard]] Phase14FacetTopKProposalDeviceBatch
+run_fake_phase14_facet_top_k_proposal(
     Phase14FacetTopKProposalContextState& context,
-    std::span<const std::uint64_t> coordinate_bits,
     std::size_t point_count,
-    std::span<const std::uint64_t> morton_point_ids,
+    const MortonOrderView& morton_order,
     std::span<const Phase14FacetTopKProposalQueryInputRecord> queries,
     std::size_t maximum_query_count,
-    std::size_t morton_window_radius) {
-  require_inputs(
-      coordinate_bits,
-      point_count,
-      morton_point_ids,
-      queries,
-      maximum_query_count,
-      morton_window_radius);
-
+    std::size_t morton_window_radius,
+    bool adopted,
+    std::shared_ptr<void> adopted_owner,
+    std::uint64_t source_snapshot_epoch) {
   const Corruption corruption =
       test_support::proposal_corruption.load(std::memory_order_relaxed);
   test_support::proposal_launch_count.fetch_add(
@@ -220,17 +266,36 @@ propose_phase14_facet_top_k_candidates_on_gpu(
         "simulated asynchronous Phase 14 GPU failure");
   }
 
-  std::vector<std::size_t> inverse_morton(point_count, point_count);
-  for (std::size_t position = 0U;
-       position < morton_point_ids.size();
-       ++position) {
-    const std::uint64_t point_id = morton_point_ids[position];
-    if (point_id >= static_cast<std::uint64_t>(point_count) ||
-        inverse_morton[static_cast<std::size_t>(point_id)] != point_count) {
-      throw std::logic_error(
-          "the fake Phase 14 Morton order is not a permutation");
+  std::shared_ptr<void>& opaque = context.cuda_resources();
+  std::size_t snapshot_host_to_device_byte_count = 0U;
+  if (!opaque) {
+    auto resident =
+        std::make_shared<FakePhase14FacetTopKProposalResidentState>();
+    resident->adopted_owner = std::move(adopted_owner);
+    resident->point_count = point_count;
+    resident->maximum_query_count = maximum_query_count;
+    resident->source_snapshot_epoch = source_snapshot_epoch;
+    resident->adopted = adopted;
+    opaque = std::move(resident);
+    if (!adopted) {
+      snapshot_host_to_device_byte_count =
+          4U * point_count * sizeof(std::uint64_t);
     }
-    inverse_morton[static_cast<std::size_t>(point_id)] = position;
+  } else {
+    const auto resident =
+        std::static_pointer_cast<
+            FakePhase14FacetTopKProposalResidentState>(opaque);
+    if (resident->adopted != adopted ||
+        resident->point_count != point_count ||
+        resident->maximum_query_count != maximum_query_count ||
+        resident->source_snapshot_epoch != source_snapshot_epoch ||
+        (adopted &&
+         (!adopted_owner ||
+          resident->adopted_owner.get() != adopted_owner.get()))) {
+      throw std::logic_error(
+          "the fake Phase 14 proposal context changed its resident "
+          "snapshot owner or capacity");
+    }
   }
 
   Phase14FacetTopKProposalDeviceBatch batch;
@@ -241,6 +306,8 @@ propose_phase14_facet_top_k_candidates_on_gpu(
       queries.size() * sizeof(DeviceRecord);
   batch.device_to_host_record_byte_count =
       batch.initialized_output_byte_count;
+  batch.snapshot_host_to_device_byte_count =
+      snapshot_host_to_device_byte_count;
   batch.kernel_launch_count = 1U;
   batch.synchronization_count = 1U;
   if (corruption == Corruption::stale_epoch_without_advance) {
@@ -285,7 +352,8 @@ propose_phase14_facet_top_k_candidates_on_gpu(
           query.morton_positions[source],
           "a fake Phase 14 source Morton position does not fit size_t");
       if (position >= point_count ||
-          query.point_ids[source] != morton_point_ids[position]) {
+          query.point_ids[source] !=
+              morton_order.point_at(position)) {
         throw std::logic_error(
             "the fake Phase 14 source is not at its declared Morton position");
       }
@@ -302,7 +370,7 @@ propose_phase14_facet_top_k_candidates_on_gpu(
         deterministic_candidates(
             query,
             source_count,
-            morton_point_ids,
+            morton_order,
             morton_window_radius);
     record.candidate_count =
         static_cast<std::uint64_t>(candidates.size());
@@ -325,6 +393,13 @@ propose_phase14_facet_top_k_candidates_on_gpu(
       break;
     case Corruption::wrong_active_transfer_extent:
       ++batch.device_to_host_record_byte_count;
+      break;
+    case Corruption::missing_initial_snapshot_transfer:
+      batch.snapshot_host_to_device_byte_count = 0U;
+      break;
+    case Corruption::repeated_snapshot_transfer:
+      batch.snapshot_host_to_device_byte_count =
+          4U * point_count * sizeof(std::uint64_t);
       break;
     case Corruption::duplicate_query_index:
       if (batch.record_count < 2U) {
@@ -382,7 +457,7 @@ propose_phase14_facet_top_k_candidates_on_gpu(
                 candidate,
                 query,
                 source_count,
-                inverse_morton,
+                morton_order,
                 morton_window_radius)) {
           invalid_candidate = candidate;
           break;
@@ -410,6 +485,93 @@ propose_phase14_facet_top_k_candidates_on_gpu(
       break;
   }
   return batch;
+}
+
+}  // namespace
+
+Phase14FacetTopKProposalDeviceBatch
+propose_phase14_facet_top_k_candidates_on_gpu(
+    Phase14FacetTopKProposalContextState& context,
+    std::span<const std::uint64_t> coordinate_bits,
+    std::size_t point_count,
+    std::span<const std::uint64_t> morton_point_ids,
+    std::span<const Phase14FacetTopKProposalQueryInputRecord> queries,
+    std::size_t maximum_query_count,
+    std::size_t morton_window_radius) {
+  require_inputs(
+      coordinate_bits,
+      point_count,
+      morton_point_ids,
+      queries,
+      maximum_query_count,
+      morton_window_radius);
+  std::vector<std::size_t> inverse_morton(point_count, point_count);
+  for (std::size_t position = 0U;
+       position < morton_point_ids.size();
+       ++position) {
+    const std::uint64_t point_id = morton_point_ids[position];
+    if (point_id >= static_cast<std::uint64_t>(point_count) ||
+        inverse_morton[static_cast<std::size_t>(point_id)] != point_count) {
+      throw std::logic_error(
+          "the fake Phase 14 Morton order is not a permutation");
+    }
+    inverse_morton[static_cast<std::size_t>(point_id)] = position;
+  }
+  return run_fake_phase14_facet_top_k_proposal(
+      context,
+      point_count,
+      MortonOrderView{morton_point_ids, inverse_morton},
+      queries,
+      maximum_query_count,
+      morton_window_radius,
+      false,
+      nullptr,
+      0U);
+}
+
+Phase14FacetTopKProposalDeviceBatch
+propose_phase14_facet_top_k_candidates_with_adopted_snapshot_on_gpu(
+    Phase14FacetTopKProposalContextState& context,
+    const Phase14FacetTopKProposalAdoptedSnapshot& snapshot,
+    std::size_t point_count,
+    std::span<const Phase14FacetTopKProposalQueryInputRecord> queries,
+    std::size_t maximum_query_count,
+    std::size_t morton_window_radius) {
+  if (!snapshot.owner || snapshot.cuda_resident ||
+      !snapshot.host_fake ||
+      snapshot.device_coordinate_bits != nullptr ||
+      snapshot.device_morton_point_ids != nullptr ||
+      snapshot.cuda_device != -1 ||
+      point_count == 0U ||
+      snapshot.coordinate_word_capacity != 3U * point_count ||
+      snapshot.morton_point_id_capacity != point_count ||
+      snapshot.fake_inverse_morton.size() != point_count ||
+      snapshot.source_snapshot_epoch == 0U ||
+      queries.empty() ||
+      queries.size() > maximum_query_count ||
+      morton_window_radius == 0U) {
+    throw std::logic_error(
+        "the fake Phase 14O adopted launcher received malformed "
+        "ownership or extents");
+  }
+  std::vector<unsigned char> position_seen(point_count, 0U);
+  for (const std::size_t position : snapshot.fake_inverse_morton) {
+    if (position >= point_count || position_seen[position] != 0U) {
+      throw std::logic_error(
+          "the fake Phase 14O inverse Morton order is not a permutation");
+    }
+    position_seen[position] = 1U;
+  }
+  return run_fake_phase14_facet_top_k_proposal(
+      context,
+      point_count,
+      MortonOrderView{{}, snapshot.fake_inverse_morton},
+      queries,
+      maximum_query_count,
+      morton_window_radius,
+      true,
+      snapshot.owner,
+      snapshot.source_snapshot_epoch);
 }
 
 }  // namespace morsehgp3d::gpu::detail

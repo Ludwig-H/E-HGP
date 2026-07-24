@@ -23,6 +23,50 @@ class Phase14FacetTopKProposalHostState final {
   std::vector<std::uint64_t> coordinate_bits;
   std::vector<std::uint64_t> morton_point_ids;
   std::vector<std::size_t> morton_position_by_point_id;
+  std::shared_ptr<void> adopted_snapshot_owner;
+  const std::uint64_t* adopted_device_coordinate_bits{};
+  const std::uint64_t* adopted_device_morton_point_ids{};
+  std::size_t adopted_coordinate_word_capacity{};
+  std::size_t adopted_morton_point_id_capacity{};
+  std::uint64_t adopted_source_snapshot_epoch{};
+  int adopted_cuda_device{-1};
+  bool adopted_cuda_resident{false};
+  bool adopted_host_fake{false};
+
+  [[nodiscard]] bool snapshot_adopted() const noexcept {
+    return adopted_snapshot_owner != nullptr;
+  }
+
+  [[nodiscard]] std::size_t coordinate_word_capacity() const noexcept {
+    return snapshot_adopted()
+               ? adopted_coordinate_word_capacity
+               : coordinate_bits.size();
+  }
+
+  [[nodiscard]] std::size_t morton_point_id_capacity() const noexcept {
+    return snapshot_adopted()
+               ? adopted_morton_point_id_capacity
+               : morton_point_ids.size();
+  }
+
+  [[nodiscard]] Phase14FacetTopKProposalAdoptedSnapshot
+  adopted_snapshot() const {
+    if (!snapshot_adopted()) {
+      throw std::logic_error(
+          "the Phase 14O proposal context has no adopted snapshot owner");
+    }
+    return Phase14FacetTopKProposalAdoptedSnapshot{
+        adopted_snapshot_owner,
+        adopted_device_coordinate_bits,
+        adopted_device_morton_point_ids,
+        morton_position_by_point_id,
+        adopted_coordinate_word_capacity,
+        adopted_morton_point_id_capacity,
+        adopted_source_snapshot_epoch,
+        adopted_cuda_device,
+        adopted_cuda_resident,
+        adopted_host_fake};
+  }
 };
 
 }  // namespace morsehgp3d::gpu::detail
@@ -332,6 +376,17 @@ struct ValidatedPayload {
       packed.gpu_queries.size(),
       sizeof(DeviceRecord),
       "the Phase 14 expected active output byte count overflowed");
+  const std::size_t expected_snapshot_bytes = checked_size_product(
+      checked_size_sum(
+          host.coordinate_word_capacity(),
+          host.morton_point_id_capacity(),
+          "the Phase 14 expected resident word count overflowed"),
+      sizeof(std::uint64_t),
+      "the Phase 14 expected resident byte count overflowed");
+  const std::size_t expected_snapshot_transfer_bytes =
+      host.snapshot_adopted() || previous_buffer_epoch != 0U
+          ? 0U
+          : expected_snapshot_bytes;
   if (previous_buffer_epoch ==
           std::numeric_limits<std::uint64_t>::max() ||
       batch.records.size() != packed.gpu_queries.size() ||
@@ -341,6 +396,8 @@ struct ValidatedPayload {
       batch.device_to_host_record_byte_count != expected_output_bytes ||
       batch.kernel_launch_count != 1U ||
       batch.synchronization_count != 1U ||
+      batch.snapshot_host_to_device_byte_count !=
+          expected_snapshot_transfer_bytes ||
       batch.buffer_epoch != previous_buffer_epoch + UINT64_C(1)) {
     throw std::runtime_error(
         "the Phase 14 GPU proposal batch returned invalid extent or epoch metadata");
@@ -360,6 +417,8 @@ struct ValidatedPayload {
       batch.record_count;
   audit.copied_device_to_host_byte_count =
       batch.device_to_host_record_byte_count;
+  audit.snapshot_host_to_device_byte_count =
+      batch.snapshot_host_to_device_byte_count;
   audit.gpu_kernel_launch_count = batch.kernel_launch_count;
   audit.gpu_synchronization_count = batch.synchronization_count;
   audit.buffer_epoch = batch.buffer_epoch;
@@ -533,26 +592,38 @@ void initialize_common_audit(
     DirectSparseFacetTopKProposalPolicy policy) {
   audit.snapshot_point_count = host.point_count;
   audit.static_device_coordinate_word_capacity =
-      host.coordinate_bits.size();
+      host.coordinate_word_capacity();
   audit.static_device_morton_point_id_capacity =
-      host.morton_point_ids.size();
+      host.morton_point_id_capacity();
   audit.static_device_snapshot_byte_capacity = checked_size_product(
       checked_size_sum(
-          host.coordinate_bits.size(),
-          host.morton_point_ids.size(),
+          host.coordinate_word_capacity(),
+          host.morton_point_id_capacity(),
           "the Phase 14 resident word count overflowed"),
       sizeof(std::uint64_t),
       "the Phase 14 resident byte count overflowed");
   audit.host_inverse_morton_entry_count =
       host.morton_position_by_point_id.size();
+  audit.host_coordinate_snapshot_word_count =
+      host.coordinate_bits.size();
+  audit.host_morton_order_snapshot_entry_count =
+      host.morton_point_ids.size();
   audit.host_snapshot_byte_capacity = checked_size_product(
       host.morton_position_by_point_id.size(),
       sizeof(std::size_t),
       "the Phase 14 host inverse Morton byte count overflowed");
   audit.host_snapshot_byte_capacity = checked_size_sum(
       audit.host_snapshot_byte_capacity,
-      audit.static_device_snapshot_byte_capacity,
+      checked_size_product(
+          checked_size_sum(
+              host.coordinate_bits.size(),
+              host.morton_point_ids.size(),
+              "the Phase 14 host resident word count overflowed"),
+          sizeof(std::uint64_t),
+          "the Phase 14 host resident byte count overflowed"),
       "the Phase 14 host snapshot byte count overflowed");
+  audit.source_morton_lbvh_lease_epoch =
+      host.adopted_source_snapshot_epoch;
   audit.maximum_query_count = maximum_query_count;
   audit.physical_device_record_capacity = maximum_query_count;
   audit.physical_device_query_capacity = maximum_query_count;
@@ -587,6 +658,10 @@ void initialize_common_audit(
   audit.aggregate_inspection_count_upper_bound =
       packed.aggregate_inspection_bound;
   audit.matching_immutable_point_namespace_validated = true;
+  audit.device_snapshot_adopted_from_morton_lbvh_lease =
+      host.snapshot_adopted();
+  audit.adopted_device_snapshot_owner_retained =
+      host.snapshot_adopted();
   audit.canonical_query_order_validated = true;
   audit.homogeneous_facet_cardinality_validated = true;
   audit.fixed_capacity_preflight_satisfied = true;
@@ -696,7 +771,32 @@ void finalize_digest(
                 audit.gpu_kernel_launch_count == 0U &&
                 audit.gpu_synchronization_count == 0U &&
                 audit.buffer_epoch == 0U;
-  return counts_close && gpu_shape &&
+  const bool adopted_snapshot_shape =
+      audit.device_snapshot_adopted_from_morton_lbvh_lease
+          ? audit.adopted_device_snapshot_owner_retained &&
+                audit.source_morton_lbvh_lease_epoch != 0U &&
+                audit.host_coordinate_snapshot_word_count == 0U &&
+                audit.host_morton_order_snapshot_entry_count == 0U &&
+                audit.host_snapshot_byte_capacity ==
+                    sizeof(std::size_t) *
+                        audit.snapshot_point_count &&
+                audit.snapshot_host_to_device_byte_count == 0U
+          : !audit.adopted_device_snapshot_owner_retained &&
+                audit.source_morton_lbvh_lease_epoch == 0U &&
+                audit.host_coordinate_snapshot_word_count ==
+                    audit.static_device_coordinate_word_capacity &&
+                audit.host_morton_order_snapshot_entry_count ==
+                    audit.static_device_morton_point_id_capacity &&
+                audit.host_snapshot_byte_capacity ==
+                    audit.static_device_snapshot_byte_capacity +
+                        sizeof(std::size_t) *
+                            audit.snapshot_point_count &&
+                audit.snapshot_host_to_device_byte_count ==
+                    (audit.gpu_execution_performed &&
+                             audit.buffer_epoch == UINT64_C(1)
+                         ? audit.static_device_snapshot_byte_capacity
+                         : 0U);
+  return counts_close && gpu_shape && adopted_snapshot_shape &&
          audit.snapshot_point_count != 0U &&
          audit.static_device_coordinate_word_capacity ==
              3U * audit.snapshot_point_count &&
@@ -708,9 +808,6 @@ void finalize_digest(
                   audit.static_device_morton_point_id_capacity) &&
          audit.host_inverse_morton_entry_count ==
              audit.snapshot_point_count &&
-         audit.host_snapshot_byte_capacity ==
-             audit.static_device_snapshot_byte_capacity +
-                 sizeof(std::size_t) * audit.snapshot_point_count &&
          audit.physical_device_record_capacity ==
              audit.maximum_query_count &&
          audit.physical_device_query_capacity ==
@@ -887,6 +984,141 @@ DirectSparseFacetTopKProposalContext::
 }
 
 DirectSparseFacetTopKProposalContext::
+    DirectSparseFacetTopKProposalContext(
+        const spatial::MortonLbvhIndex& index,
+        const spatial::CanonicalPointCloud& cloud,
+        MortonLbvhDeviceLease&& device_lease,
+        std::size_t maximum_query_count)
+    : state_(
+          std::make_shared<
+              detail::Phase14FacetTopKProposalContextState>()),
+      host_(
+          std::make_unique<
+              detail::Phase14FacetTopKProposalHostState>()),
+      maximum_query_count_(maximum_query_count) {
+  if (!index.validated_for(cloud)) {
+    throw std::invalid_argument(
+        "the Phase 14O adopted proposal context requires a matching "
+        "certified LBVH");
+  }
+  if (maximum_query_count == 0U) {
+    throw std::invalid_argument(
+        "the Phase 14O adopted proposal context requires nonzero query "
+        "capacity");
+  }
+  (void)checked_size_product(
+      maximum_query_count,
+      sizeof(InputRecord),
+      "the Phase 14O adopted proposal query capacity overflows size_t");
+  (void)checked_size_product(
+      maximum_query_count,
+      sizeof(DeviceRecord),
+      "the Phase 14O adopted proposal output capacity overflows size_t");
+
+  host_->cloud_identity = cloud.identity_;
+  host_->point_count = cloud.size();
+  if (host_->point_count == 0U ||
+      host_->point_count >
+          static_cast<std::size_t>(
+              spatial::CanonicalPointCloud::max_point_count)) {
+    throw std::invalid_argument(
+        "the Phase 14O adopted proposal context requires a nonempty "
+        "PointId-sized cloud");
+  }
+  if (!device_lease.ready()) {
+    throw std::invalid_argument(
+        "the Phase 14O proposal context requires a ready Phase 14N lease");
+  }
+  const MortonLbvhDeviceLeaseAudit& lease_audit =
+      device_lease.audit();
+  if (device_lease.source_cloud_identity_ == nullptr ||
+      device_lease.source_cloud_identity_.get() !=
+          cloud.identity_.get()) {
+    throw std::invalid_argument(
+        "the Phase 14O lease belongs to another immutable PointId "
+        "namespace");
+  }
+  if (lease_audit.maximum_point_count != host_->point_count ||
+      lease_audit.point_count != host_->point_count ||
+      lease_audit.retained_coordinate_word_capacity !=
+          checked_size_product(
+              host_->point_count,
+              3U,
+              "the Phase 14O adopted coordinate extent overflows size_t") ||
+      lease_audit.retained_morton_point_id_capacity !=
+          host_->point_count ||
+      lease_audit.source_snapshot_epoch == 0U) {
+    throw std::invalid_argument(
+        "the Phase 14O lease must have exact point and capacity extents");
+  }
+  const bool host_fake =
+      lease_audit.host_fake_lifecycle_exercised;
+  const bool cuda_resident = device_lease.cuda_resident();
+  if (cuda_resident == host_fake) {
+    throw std::invalid_argument(
+        "the Phase 14O lease has ambiguous execution storage");
+  }
+
+  const std::span<const spatial::MortonLeafRecord> leaves =
+      index.leaves();
+  if (leaves.size() != host_->point_count) {
+    throw std::logic_error(
+        "the Phase 14O certified LBVH has an incomplete Morton order");
+  }
+  host_->morton_position_by_point_id.assign(
+      host_->point_count, host_->point_count);
+  for (std::size_t morton_position = 0U;
+       morton_position < leaves.size();
+       ++morton_position) {
+    const spatial::PointId point_id = leaves[morton_position].point_id;
+    if (point_id >= host_->point_count) {
+      throw std::logic_error(
+          "the Phase 14O certified Morton order has an invalid PointId");
+    }
+    const std::size_t point_index =
+        static_cast<std::size_t>(point_id);
+    if (host_->morton_position_by_point_id[point_index] !=
+        host_->point_count) {
+      throw std::logic_error(
+          "the Phase 14O certified Morton order repeats a PointId");
+    }
+    host_->morton_position_by_point_id[point_index] =
+        morton_position;
+  }
+  if (std::find(
+          host_->morton_position_by_point_id.begin(),
+          host_->morton_position_by_point_id.end(),
+          host_->point_count) !=
+      host_->morton_position_by_point_id.end()) {
+    throw std::logic_error(
+        "the Phase 14O certified Morton order is not a permutation");
+  }
+
+  // All potentially throwing checks and the sole 8*n host allocation have
+  // completed.  Transfer the owner last so every rejection is atomic with
+  // respect to the move-only lease.
+  host_->adopted_coordinate_word_capacity =
+      lease_audit.retained_coordinate_word_capacity;
+  host_->adopted_morton_point_id_capacity =
+      lease_audit.retained_morton_point_id_capacity;
+  host_->adopted_source_snapshot_epoch =
+      lease_audit.source_snapshot_epoch;
+  host_->adopted_cuda_resident = cuda_resident;
+  host_->adopted_host_fake = host_fake;
+  host_->adopted_device_coordinate_bits =
+      device_lease.device_coordinate_bits_;
+  host_->adopted_device_morton_point_ids =
+      device_lease.device_morton_point_ids_;
+  host_->adopted_cuda_device = device_lease.cuda_device_;
+  host_->adopted_snapshot_owner =
+      std::move(device_lease.retained_resources_);
+  device_lease.source_cloud_identity_.reset();
+  device_lease.device_coordinate_bits_ = nullptr;
+  device_lease.device_morton_point_ids_ = nullptr;
+  device_lease.cuda_device_ = -1;
+}
+
+DirectSparseFacetTopKProposalContext::
     ~DirectSparseFacetTopKProposalContext() noexcept = default;
 
 DirectSparseFacetTopKProposalContext::
@@ -943,15 +1175,28 @@ DirectSparseFacetTopKProposalContext::build(
       validated.audit.bounded_work_validated = true;
       return validated;
     }
-    const DeviceBatch batch =
-        detail::propose_phase14_facet_top_k_candidates_on_gpu(
-            *state_,
-            host_->coordinate_bits,
-            host_->point_count,
-            host_->morton_point_ids,
-            packed.gpu_queries,
-            maximum_query_count_,
-            policy.morton_window_radius);
+    DeviceBatch batch;
+    if (host_->snapshot_adopted()) {
+      const detail::Phase14FacetTopKProposalAdoptedSnapshot snapshot =
+          host_->adopted_snapshot();
+      batch = detail::
+          propose_phase14_facet_top_k_candidates_with_adopted_snapshot_on_gpu(
+              *state_,
+              snapshot,
+              host_->point_count,
+              packed.gpu_queries,
+              maximum_query_count_,
+              policy.morton_window_radius);
+    } else {
+      batch = detail::propose_phase14_facet_top_k_candidates_on_gpu(
+          *state_,
+          host_->coordinate_bits,
+          host_->point_count,
+          host_->morton_point_ids,
+          packed.gpu_queries,
+          maximum_query_count_,
+          policy.morton_window_radius);
+    }
     ValidatedPayload gpu_payload = validate_gpu_batch(
         batch,
         *host_,

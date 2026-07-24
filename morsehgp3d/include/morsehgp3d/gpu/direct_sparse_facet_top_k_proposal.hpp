@@ -1,6 +1,7 @@
 #pragma once
 
 #include "morsehgp3d/exact/center.hpp"
+#include "morsehgp3d/gpu/morton_lbvh_build.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_facet_top_k_proposal_transcript.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
@@ -19,7 +20,7 @@ class Phase14FacetTopKProposalHostState;
 }  // namespace detail
 
 inline constexpr std::uint32_t
-    direct_sparse_facet_top_k_gpu_proposal_schema_version = 3U;
+    direct_sparse_facet_top_k_gpu_proposal_schema_version = 4U;
 inline constexpr std::string_view
     direct_sparse_facet_top_k_gpu_proposal_backend = "cuda_g4";
 inline constexpr std::string_view
@@ -37,7 +38,8 @@ inline constexpr std::string_view
         "fixed_k_candidate_output_host_domain_exclusion_window_epoch_"
         "active_prefix_candidate_tail_sentinel_and_digest_validation_then_"
         "direct_integer_binary64_center_projection_reference_cpu_exact_"
-        "point_of_use_recertification_v3";
+        "point_of_use_recertification_optional_phase14n_device_snapshot_"
+        "adoption_v4";
 
 // The center is an operational search hint only.  It normally comes from the
 // already certified local facet miniball.  Even a mismatched center cannot
@@ -73,8 +75,15 @@ struct DirectSparseFacetTopKProposalAudit {
   std::size_t static_device_coordinate_word_capacity{};
   std::size_t static_device_morton_point_id_capacity{};
   std::size_t static_device_snapshot_byte_capacity{};
+  std::size_t host_coordinate_snapshot_word_count{};
+  std::size_t host_morton_order_snapshot_entry_count{};
   std::size_t host_inverse_morton_entry_count{};
   std::size_t host_snapshot_byte_capacity{};
+  // This is per-call traffic.  The legacy path reports 32*n on its first
+  // supported batch and zero after initialization; the adopted 14N path
+  // reports zero for every batch.
+  std::size_t snapshot_host_to_device_byte_count{};
+  std::uint64_t source_morton_lbvh_lease_epoch{};
   std::size_t maximum_query_count{};
   std::size_t physical_device_record_capacity{};
   std::size_t physical_device_query_capacity{};
@@ -115,6 +124,8 @@ struct DirectSparseFacetTopKProposalAudit {
   // authority and is deliberately ignored by exact 14F/14H decisions.
   std::uint64_t proposal_digest_fnv1a{};
   bool matching_immutable_point_namespace_validated{false};
+  bool device_snapshot_adopted_from_morton_lbvh_lease{false};
+  bool adopted_device_snapshot_owner_retained{false};
   bool canonical_query_order_validated{false};
   bool homogeneous_facet_cardinality_validated{false};
   bool fixed_capacity_preflight_satisfied{false};
@@ -178,6 +189,14 @@ class DirectSparseFacetTopKProposalContext final {
   DirectSparseFacetTopKProposalContext(
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
+      std::size_t maximum_query_count);
+  // The lease path consumes one exact-capacity Phase 14N owner.  The supplied
+  // certified index is used only during construction; the sole newly
+  // allocated O(n) host snapshot is the inverse Morton permutation.
+  DirectSparseFacetTopKProposalContext(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      MortonLbvhDeviceLease&& device_lease,
       std::size_t maximum_query_count);
   ~DirectSparseFacetTopKProposalContext() noexcept;
 

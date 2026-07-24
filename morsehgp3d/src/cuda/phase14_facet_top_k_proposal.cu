@@ -199,22 +199,12 @@ void validate_resident_snapshot(
   }
 }
 
-void validate_launch_inputs(
-    std::span<const std::uint64_t> coordinate_bits,
+void validate_query_inputs(
     std::size_t point_count,
-    std::span<const std::uint64_t> morton_point_ids,
+    const std::uint64_t* host_morton_point_ids,
     std::span<const Phase14FacetTopKProposalQueryInputRecord> queries,
     std::size_t maximum_query_count,
     std::size_t morton_window_radius) {
-  if (point_count == 0U ||
-      point_count >
-          std::numeric_limits<std::size_t>::max() / kAxisCount ||
-      coordinate_bits.size() != point_count * kAxisCount ||
-      morton_point_ids.size() != point_count) {
-    throw std::invalid_argument(
-        "the Phase 14 facet top-k launch has inconsistent resident "
-        "extents");
-  }
   if (queries.empty() || maximum_query_count == 0U ||
       queries.size() > maximum_query_count) {
     throw std::invalid_argument(
@@ -269,8 +259,9 @@ void validate_launch_inputs(
         throw std::invalid_argument(
             "a Phase 14 facet top-k query key is not strictly increasing");
       }
-      if (morton_point_ids[static_cast<std::size_t>(morton_position)] !=
-          point_id) {
+      if (host_morton_point_ids != nullptr &&
+          host_morton_point_ids[
+              static_cast<std::size_t>(morton_position)] != point_id) {
         throw std::invalid_argument(
             "a Phase 14 facet top-k source does not match its Morton "
             "position");
@@ -286,6 +277,60 @@ void validate_launch_inputs(
           "fingerprint");
     }
   }
+}
+
+void validate_launch_inputs(
+    std::span<const std::uint64_t> coordinate_bits,
+    std::size_t point_count,
+    std::span<const std::uint64_t> morton_point_ids,
+    std::span<const Phase14FacetTopKProposalQueryInputRecord> queries,
+    std::size_t maximum_query_count,
+    std::size_t morton_window_radius) {
+  if (point_count == 0U ||
+      point_count >
+          std::numeric_limits<std::size_t>::max() / kAxisCount ||
+      coordinate_bits.size() != point_count * kAxisCount ||
+      morton_point_ids.size() != point_count) {
+    throw std::invalid_argument(
+        "the Phase 14 facet top-k launch has inconsistent resident "
+        "extents");
+  }
+  validate_query_inputs(
+      point_count,
+      morton_point_ids.data(),
+      queries,
+      maximum_query_count,
+      morton_window_radius);
+}
+
+void validate_adopted_launch_inputs(
+    const Phase14FacetTopKProposalAdoptedSnapshot& snapshot,
+    std::size_t point_count,
+    std::span<const Phase14FacetTopKProposalQueryInputRecord> queries,
+    std::size_t maximum_query_count,
+    std::size_t morton_window_radius) {
+  if (!snapshot.owner || !snapshot.cuda_resident ||
+      snapshot.host_fake ||
+      snapshot.device_coordinate_bits == nullptr ||
+      snapshot.device_morton_point_ids == nullptr ||
+      snapshot.cuda_device < 0 ||
+      point_count == 0U ||
+      point_count >
+          std::numeric_limits<std::size_t>::max() / kAxisCount ||
+      snapshot.coordinate_word_capacity !=
+          point_count * kAxisCount ||
+      snapshot.morton_point_id_capacity != point_count ||
+      snapshot.source_snapshot_epoch == 0U) {
+    throw std::invalid_argument(
+        "the Phase 14O adopted CUDA snapshot has invalid ownership or "
+        "exact-capacity extents");
+  }
+  validate_query_inputs(
+      point_count,
+      nullptr,
+      queries,
+      maximum_query_count,
+      morton_window_radius);
 }
 
 class Phase14FacetTopKProposalCudaResources final {
@@ -329,6 +374,9 @@ class Phase14FacetTopKProposalCudaResources final {
       queries_.abandon();
       morton_point_ids_.abandon();
       coordinate_bits_.abandon();
+      adopted_device_coordinate_bits_ = nullptr;
+      adopted_device_morton_point_ids_ = nullptr;
+      adopted_snapshot_owner_.reset();
       stream_ = nullptr;
       return;
     }
@@ -339,6 +387,9 @@ class Phase14FacetTopKProposalCudaResources final {
     queries_.reset();
     morton_point_ids_.reset();
     coordinate_bits_.reset();
+    adopted_device_coordinate_bits_ = nullptr;
+    adopted_device_morton_point_ids_ = nullptr;
+    adopted_snapshot_owner_.reset();
     if (stream_ != nullptr) {
       static_cast<void>(cudaStreamDestroy(stream_));
       stream_ = nullptr;
@@ -348,13 +399,14 @@ class Phase14FacetTopKProposalCudaResources final {
     }
   }
 
-  void initialize(
+  [[nodiscard]] std::size_t initialize(
       std::span<const std::uint64_t> coordinate_bits,
       std::size_t point_count,
       std::span<const std::uint64_t> morton_point_ids,
       std::size_t maximum_query_count) {
     if (initialized_) {
-      if (point_count_ != point_count ||
+      if (adopted_snapshot_ ||
+          point_count_ != point_count ||
           coordinate_bits_.count() != coordinate_bits.size() ||
           morton_point_ids_.count() != morton_point_ids.size() ||
           maximum_query_count_ != maximum_query_count ||
@@ -364,7 +416,7 @@ class Phase14FacetTopKProposalCudaResources final {
             "a Phase 14 facet top-k context changed its resident snapshot "
             "or fixed query capacity");
       }
-      return;
+      return 0U;
     }
 
     validate_resident_snapshot(
@@ -402,6 +454,59 @@ class Phase14FacetTopKProposalCudaResources final {
     point_count_ = point_count;
     maximum_query_count_ = maximum_query_count;
     initialized_ = true;
+    return coordinate_bits.size_bytes() +
+           morton_point_ids.size_bytes();
+  }
+
+  void initialize_adopted(
+      const Phase14FacetTopKProposalAdoptedSnapshot& snapshot,
+      std::size_t point_count,
+      std::size_t maximum_query_count) {
+    if (initialized_) {
+      if (!adopted_snapshot_ ||
+          point_count_ != point_count ||
+          maximum_query_count_ != maximum_query_count ||
+          queries_.count() != maximum_query_count ||
+          records_.count() != maximum_query_count ||
+          adopted_snapshot_owner_.get() != snapshot.owner.get() ||
+          adopted_device_coordinate_bits_ !=
+              snapshot.device_coordinate_bits ||
+          adopted_device_morton_point_ids_ !=
+              snapshot.device_morton_point_ids ||
+          snapshot.cuda_device != device_) {
+        throw std::logic_error(
+            "a Phase 14O facet top-k context changed its adopted snapshot "
+            "or fixed query capacity");
+      }
+      return;
+    }
+    if (!snapshot.owner || !snapshot.cuda_resident ||
+        snapshot.host_fake ||
+        snapshot.device_coordinate_bits == nullptr ||
+        snapshot.device_morton_point_ids == nullptr ||
+        snapshot.cuda_device != device_ ||
+        snapshot.coordinate_word_capacity !=
+            point_count * kAxisCount ||
+        snapshot.morton_point_id_capacity != point_count) {
+      throw std::invalid_argument(
+          "the Phase 14O facet top-k context received an invalid adopted "
+          "CUDA view");
+    }
+    queries_.allocate(
+        maximum_query_count,
+        "cudaMalloc Phase 14O facet top-k fixed query buffer");
+    records_.allocate(
+        maximum_query_count,
+        "cudaMalloc Phase 14O facet top-k fixed proposal buffer");
+    adopted_snapshot_owner_ = snapshot.owner;
+    adopted_device_coordinate_bits_ =
+        snapshot.device_coordinate_bits;
+    adopted_device_morton_point_ids_ =
+        snapshot.device_morton_point_ids;
+    point_count_ = point_count;
+    maximum_query_count_ = maximum_query_count;
+    adopted_snapshot_ = true;
+    initialized_ = true;
   }
 
   [[nodiscard]] int device() const noexcept { return device_; }
@@ -410,10 +515,14 @@ class Phase14FacetTopKProposalCudaResources final {
     return maximum_grid_x_;
   }
   [[nodiscard]] const std::uint64_t* coordinate_bits() const noexcept {
-    return coordinate_bits_.get();
+    return adopted_snapshot_
+               ? adopted_device_coordinate_bits_
+               : coordinate_bits_.get();
   }
   [[nodiscard]] const std::uint64_t* morton_point_ids() const noexcept {
-    return morton_point_ids_.get();
+    return adopted_snapshot_
+               ? adopted_device_morton_point_ids_
+               : morton_point_ids_.get();
   }
   [[nodiscard]] Phase14FacetTopKProposalQueryInputRecord* queries() noexcept {
     return queries_.get();
@@ -441,6 +550,10 @@ class Phase14FacetTopKProposalCudaResources final {
   std::size_t point_count_{};
   std::size_t maximum_query_count_{};
   bool initialized_{false};
+  bool adopted_snapshot_{false};
+  std::shared_ptr<void> adopted_snapshot_owner_;
+  const std::uint64_t* adopted_device_coordinate_bits_{};
+  const std::uint64_t* adopted_device_morton_point_ids_{};
   DeviceBuffer<std::uint64_t> coordinate_bits_;
   DeviceBuffer<std::uint64_t> morton_point_ids_;
   DeviceBuffer<Phase14FacetTopKProposalQueryInputRecord> queries_;
@@ -809,6 +922,96 @@ __global__ void morsehgp3d_phase14_facet_top_k_proposal_kernel(
   }
 }
 
+[[nodiscard]] Phase14FacetTopKProposalDeviceBatch launch_prepared_batch(
+    Phase14FacetTopKProposalContextState& context,
+    Phase14FacetTopKProposalCudaResources& cuda,
+    std::size_t point_count,
+    std::span<const Phase14FacetTopKProposalQueryInputRecord> queries,
+    std::size_t morton_window_radius,
+    std::size_t snapshot_host_to_device_byte_count,
+    DeviceGuard& device_guard) {
+  if (context.current_epoch() ==
+      std::numeric_limits<std::uint64_t>::max()) {
+    throw std::overflow_error(
+        "the Phase 14 facet top-k proposal epoch cannot advance");
+  }
+  const std::uint64_t expected_epoch =
+      context.current_epoch() + UINT64_C(1);
+  const std::size_t active_query_bytes = queries.size_bytes();
+  const std::size_t active_output_bytes =
+      queries.size() *
+      sizeof(Phase14FacetTopKProposalDeviceRecord);
+  check_cuda(
+      cudaMemcpyAsync(
+          cuda.queries(),
+          queries.data(),
+          active_query_bytes,
+          cudaMemcpyHostToDevice,
+          cuda.stream()),
+      "cudaMemcpyAsync Phase 14 facet top-k queries host-to-device");
+  check_cuda(
+      cudaMemsetAsync(
+          cuda.records(),
+          0xff,
+          active_output_bytes,
+          cuda.stream()),
+      "cudaMemsetAsync Phase 14 active facet top-k proposal sentinels");
+
+  const std::size_t requested_blocks =
+      (queries.size() - 1U) / kThreadsPerBlock + 1U;
+  const std::size_t bounded_blocks = std::min(
+      requested_blocks,
+      static_cast<std::size_t>(cuda.maximum_grid_x()));
+  if (bounded_blocks == 0U ||
+      bounded_blocks > std::numeric_limits<unsigned int>::max()) {
+    throw std::length_error(
+        "the Phase 14 facet top-k CUDA grid is not representable");
+  }
+  morsehgp3d_phase14_facet_top_k_proposal_kernel
+      <<<static_cast<unsigned int>(bounded_blocks),
+         kThreadsPerBlock,
+         0U,
+         cuda.stream()>>>(
+          cuda.coordinate_bits(),
+          point_count,
+          cuda.morton_point_ids(),
+          cuda.queries(),
+          queries.size(),
+          morton_window_radius,
+          expected_epoch,
+          cuda.records());
+  check_cuda(
+      cudaGetLastError(),
+      "Phase 14 facet top-k proposal kernel launch");
+
+  Phase14FacetTopKProposalDeviceBatch batch;
+  batch.records.resize(queries.size());
+  check_cuda(
+      cudaMemcpyAsync(
+          batch.records.data(),
+          cuda.records(),
+          active_output_bytes,
+          cudaMemcpyDeviceToHost,
+          cuda.stream()),
+      "cudaMemcpyAsync Phase 14 active facet top-k proposals device-to-host");
+  cuda.synchronize();
+  batch.record_count = queries.size();
+  batch.host_to_device_query_byte_count = active_query_bytes;
+  batch.initialized_output_byte_count = active_output_bytes;
+  batch.device_to_host_record_byte_count = active_output_bytes;
+  batch.snapshot_host_to_device_byte_count =
+      snapshot_host_to_device_byte_count;
+  batch.kernel_launch_count = 1U;
+  batch.synchronization_count = 1U;
+  batch.buffer_epoch = context.advance_epoch();
+  if (batch.buffer_epoch != expected_epoch) {
+    throw std::logic_error(
+        "the Phase 14 facet top-k CUDA epoch advanced unexpectedly");
+  }
+  device_guard.restore();
+  return batch;
+}
+
 }  // namespace
 
 Phase14FacetTopKProposalDeviceBatch
@@ -827,93 +1030,56 @@ propose_phase14_facet_top_k_candidates_on_gpu(
       queries,
       maximum_query_count,
       morton_window_radius);
-  if (context.current_epoch() ==
-      std::numeric_limits<std::uint64_t>::max()) {
-    throw std::overflow_error(
-        "the Phase 14 facet top-k proposal epoch cannot advance");
-  }
-  const std::uint64_t expected_epoch =
-      context.current_epoch() + UINT64_C(1);
-  const std::size_t active_query_bytes = queries.size_bytes();
-  const std::size_t active_output_bytes =
-      queries.size() *
-      sizeof(Phase14FacetTopKProposalDeviceRecord);
 
   Phase14FacetTopKProposalCudaResources& cuda = resources(context);
   DeviceGuard device_guard{cuda.device()};
   try {
-    cuda.initialize(
+    const std::size_t snapshot_bytes = cuda.initialize(
         coordinate_bits,
         point_count,
         morton_point_ids,
         maximum_query_count);
-    check_cuda(
-        cudaMemcpyAsync(
-            cuda.queries(),
-            queries.data(),
-            active_query_bytes,
-            cudaMemcpyHostToDevice,
-            cuda.stream()),
-        "cudaMemcpyAsync Phase 14 facet top-k queries host-to-device");
-    check_cuda(
-        cudaMemsetAsync(
-            cuda.records(),
-            0xff,
-            active_output_bytes,
-            cuda.stream()),
-        "cudaMemsetAsync Phase 14 active facet top-k proposal sentinels");
+    return launch_prepared_batch(
+        context,
+        cuda,
+        point_count,
+        queries,
+        morton_window_radius,
+        snapshot_bytes,
+        device_guard);
+  } catch (...) {
+    cuda.synchronize_after_failure();
+    throw;
+  }
+}
 
-    const std::size_t requested_blocks =
-        (queries.size() - 1U) / kThreadsPerBlock + 1U;
-    const std::size_t bounded_blocks = std::min(
-        requested_blocks,
-        static_cast<std::size_t>(cuda.maximum_grid_x()));
-    if (bounded_blocks == 0U ||
-        bounded_blocks > std::numeric_limits<unsigned int>::max()) {
-      throw std::length_error(
-          "the Phase 14 facet top-k CUDA grid is not representable");
-    }
-    morsehgp3d_phase14_facet_top_k_proposal_kernel
-        <<<static_cast<unsigned int>(bounded_blocks),
-           kThreadsPerBlock,
-           0U,
-           cuda.stream()>>>(
-            cuda.coordinate_bits(),
-            point_count,
-            cuda.morton_point_ids(),
-            cuda.queries(),
-            queries.size(),
-            morton_window_radius,
-            expected_epoch,
-            cuda.records());
-    check_cuda(
-        cudaGetLastError(),
-        "Phase 14 facet top-k proposal kernel launch");
-
-    Phase14FacetTopKProposalDeviceBatch batch;
-    batch.records.resize(queries.size());
-    check_cuda(
-        cudaMemcpyAsync(
-            batch.records.data(),
-            cuda.records(),
-            active_output_bytes,
-            cudaMemcpyDeviceToHost,
-            cuda.stream()),
-        "cudaMemcpyAsync Phase 14 active facet top-k proposals device-to-host");
-    cuda.synchronize();
-    batch.record_count = queries.size();
-    batch.host_to_device_query_byte_count = active_query_bytes;
-    batch.initialized_output_byte_count = active_output_bytes;
-    batch.device_to_host_record_byte_count = active_output_bytes;
-    batch.kernel_launch_count = 1U;
-    batch.synchronization_count = 1U;
-    batch.buffer_epoch = context.advance_epoch();
-    if (batch.buffer_epoch != expected_epoch) {
-      throw std::logic_error(
-          "the Phase 14 facet top-k CUDA epoch advanced unexpectedly");
-    }
-    device_guard.restore();
-    return batch;
+Phase14FacetTopKProposalDeviceBatch
+propose_phase14_facet_top_k_candidates_with_adopted_snapshot_on_gpu(
+    Phase14FacetTopKProposalContextState& context,
+    const Phase14FacetTopKProposalAdoptedSnapshot& snapshot,
+    std::size_t point_count,
+    std::span<const Phase14FacetTopKProposalQueryInputRecord> queries,
+    std::size_t maximum_query_count,
+    std::size_t morton_window_radius) {
+  validate_adopted_launch_inputs(
+      snapshot,
+      point_count,
+      queries,
+      maximum_query_count,
+      morton_window_radius);
+  DeviceGuard device_guard{snapshot.cuda_device};
+  Phase14FacetTopKProposalCudaResources& cuda = resources(context);
+  try {
+    cuda.initialize_adopted(
+        snapshot, point_count, maximum_query_count);
+    return launch_prepared_batch(
+        context,
+        cuda,
+        point_count,
+        queries,
+        morton_window_radius,
+        0U,
+        device_guard);
   } catch (...) {
     cuda.synchronize_after_failure();
     throw;

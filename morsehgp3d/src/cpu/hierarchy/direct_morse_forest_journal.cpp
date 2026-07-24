@@ -511,10 +511,16 @@ void clear_payload(ExactDirectMorseForestJournalResult& result) noexcept {
 }
 
 [[nodiscard]] bool source_sizes_within_budget(
+    std::size_t point_count,
     const ExactDirectMorseEventJournalResult& journal,
     const ExactDirectSaddleArmSeedJournalResult& seeds,
     const ExactDirectMorseForestBudget& budget) noexcept {
-  return journal.role_records.size() <=
+  std::size_t logical_role_count = 0U;
+  return try_add(
+             point_count,
+             journal.materialized_direct_role_records.size(),
+             logical_role_count) &&
+         logical_role_count <=
              budget.maximum_source_role_scan_count &&
          journal.batches.size() <= budget.maximum_source_batch_scan_count &&
          seeds.families.size() <=
@@ -1069,7 +1075,10 @@ build_exact_direct_morse_forest_journal(
   initialize_scope(result);
 
   if (!source_sizes_within_budget(
-          source_journal, source_seed_journal, budget)) {
+          cloud.size(),
+          source_journal,
+          source_seed_journal,
+          budget)) {
     return fail(std::move(result), BuildFailure::budget_exhausted);
   }
 
@@ -1091,8 +1100,10 @@ build_exact_direct_morse_forest_journal(
     result.source_event_journal_freshly_replayed = true;
     result.source_strict_arm_journal_freshly_replayed = true;
 
-    std::size_t birth_count = 0U;
-    for (const auto& role : source_journal.role_records) {
+    const ExactDirectMorseEventJournalView source_view{source_journal};
+    std::size_t birth_count = cloud.size();
+    for (const auto& role :
+         source_view.materialized_direct_role_records()) {
       if (role.role == ExactDirectMorseH0Role::birth &&
           !checked_increment(birth_count)) {
         return fail(std::move(result), BuildFailure::capacity_overflow);
@@ -1786,9 +1797,9 @@ build_exact_direct_morse_forest_journal(
       std::vector<ExactDirectMorseForestNode> pending_birth_nodes;
       std::vector<ExactDirectSparseFacetBinding> locator_bindings;
       const std::size_t role_begin = source_batch.role_record_offset;
-      if (role_begin > source_journal.role_records.size() ||
+      if (role_begin > source_view.role_record_count() ||
           source_batch.role_record_count >
-              source_journal.role_records.size() - role_begin) {
+              source_view.role_record_count() - role_begin) {
         return fail(
             std::move(result),
             BuildFailure::source_batch_inconsistent);
@@ -1796,11 +1807,11 @@ build_exact_direct_morse_forest_journal(
       for (std::size_t local = 0U;
            local < source_batch.role_record_count;
            ++local) {
-        const auto& role =
-            source_journal.role_records[role_begin + local];
+        const ExactDirectMorseH0RoleRecord role =
+            source_view.role_record_at(role_begin + local);
         if (role.batch_index != source_batch_index ||
             role.event_projection_index >=
-                source_journal.event_projections.size()) {
+                source_view.event_projection_count()) {
           return fail(
               std::move(result),
               BuildFailure::source_batch_inconsistent);
@@ -1808,9 +1819,9 @@ build_exact_direct_morse_forest_journal(
         if (role.role != ExactDirectMorseH0Role::birth) {
           continue;
         }
-        const auto& projection =
-            source_journal.event_projections[
-                role.event_projection_index];
+        const ExactDirectMorseEventProjection projection =
+            source_view.event_projection_at(
+                role.event_projection_index);
         const auto key = birth_key(
             projection,
             source_facade,

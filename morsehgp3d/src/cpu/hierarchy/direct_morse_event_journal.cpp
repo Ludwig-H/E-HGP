@@ -305,41 +305,25 @@ void build_payload(
       cloud.size(),
       source_facade.events.size(),
       "the direct Morse event projection count overflows size_t");
+  const std::size_t maximum_direct_role_count = checked_multiply(
+      2U,
+      source_facade.events.size(),
+      "the direct Morse role count overflows size_t");
   const std::size_t maximum_role_count = checked_add(
       cloud.size(),
-      checked_multiply(
-          2U,
-          source_facade.events.size(),
-          "the direct Morse role count overflows size_t"),
+      maximum_direct_role_count,
       "the direct Morse role count overflows size_t");
-  result.event_projections.reserve(expected_projection_count);
+  result.materialized_direct_event_projections.reserve(
+      source_facade.events.size());
   std::vector<RoleSeed> role_seeds;
-  role_seeds.reserve(maximum_role_count);
-
-  for (std::size_t point_index = 0U; point_index < cloud.size();
-       ++point_index) {
-    ExactDirectMorseEventProjection projection;
-    projection.event_projection_index = result.event_projections.size();
-    projection.source = ExactDirectMorseEventSource::canonical_singleton;
-    projection.source_index = point_index;
-    projection.support_size = 1U;
-    projection.support_ids[0] =
-        static_cast<spatial::PointId>(point_index);
-    projection.squared_level = exact::ExactLevel{};
-    projection.closed_rank = 1U;
-    projection.birth_order = 1U;
-    result.event_projections.push_back(projection);
-    append_role_seed(
-        role_seeds,
-        projection.event_projection_index,
-        projection.squared_level,
-        projection.birth_order,
-        ExactDirectMorseH0Role::birth);
-  }
+  role_seeds.reserve(maximum_direct_role_count);
 
   for (const ExactDirectSupportEvent& source : source_facade.events) {
     ExactDirectMorseEventProjection projection;
-    projection.event_projection_index = result.event_projections.size();
+    projection.event_projection_index = checked_add(
+        cloud.size(),
+        result.materialized_direct_event_projections.size(),
+        "the direct Morse event projection index overflows size_t");
     projection.source =
         ExactDirectMorseEventSource::direct_support_terminal_event;
     projection.source_index = source.event_index;
@@ -349,7 +333,7 @@ void build_payload(
     projection.closed_rank = source.closed_rank;
     projection.birth_order = source.birth_order;
     projection.saddle_order = source.saddle_order;
-    result.event_projections.push_back(projection);
+    result.materialized_direct_event_projections.push_back(projection);
     append_role_seed(
         role_seeds,
         projection.event_projection_index,
@@ -365,8 +349,19 @@ void build_payload(
   }
 
   std::sort(role_seeds.begin(), role_seeds.end(), role_seed_less);
-  result.role_records.reserve(role_seeds.size());
-  result.batches.reserve(role_seeds.size());
+  result.materialized_direct_role_records.reserve(role_seeds.size());
+  result.batches.reserve(checked_add(
+      role_seeds.size(),
+      1U,
+      "the direct Morse batch capacity overflows size_t"));
+  result.batches.push_back(ExactDirectMorseH0Batch{
+      0U,
+      1U,
+      exact::ExactLevel{},
+      0U,
+      cloud.size(),
+      cloud.size(),
+      0U});
   std::size_t seed_index = 0U;
   while (seed_index < role_seeds.size()) {
     const std::size_t batch_begin = seed_index;
@@ -379,7 +374,10 @@ void build_payload(
     batch.batch_index = result.batches.size();
     batch.order = role_seeds[batch_begin].order;
     batch.squared_level = role_seeds[batch_begin].squared_level;
-    batch.role_record_offset = result.role_records.size();
+    batch.role_record_offset = checked_add(
+        cloud.size(),
+        result.materialized_direct_role_records.size(),
+        "the direct Morse role offset overflows size_t");
     batch.role_record_count = seed_index - batch_begin;
     for (std::size_t index = batch_begin; index < seed_index; ++index) {
       const RoleSeed& seed = role_seeds[index];
@@ -388,18 +386,25 @@ void build_payload(
       } else {
         ++batch.saddle_role_count;
       }
-      result.role_records.push_back(ExactDirectMorseH0RoleRecord{
-          result.role_records.size(),
-          batch.batch_index,
-          seed.event_projection_index,
-          seed.role});
+      result.materialized_direct_role_records.push_back(
+          ExactDirectMorseH0RoleRecord{
+              checked_add(
+                  cloud.size(),
+                  result.materialized_direct_role_records.size(),
+                  "the direct Morse role index overflows size_t"),
+              batch.batch_index,
+              seed.event_projection_index,
+              seed.role});
     }
     result.batches.push_back(std::move(batch));
   }
 
   result.singleton_event_count = cloud.size();
-  result.event_projection_count = result.event_projections.size();
-  result.role_record_count = result.role_records.size();
+  result.event_projection_count = expected_projection_count;
+  result.role_record_count = checked_add(
+      cloud.size(),
+      result.materialized_direct_role_records.size(),
+      "the direct Morse role count overflows size_t");
   result.batch_count = result.batches.size();
   result.logical_linear_storage_entry_count = checked_add(
       checked_add(
@@ -420,8 +425,10 @@ void build_payload(
       "the direct Morse logical storage bound overflows size_t");
   result.canonical_singleton_births_complete =
       result.singleton_event_count == cloud.size();
+  result.canonical_singletons_implicit_and_unmaterialized = true;
   result.direct_h0_roles_projected_exactly_once =
-      result.role_record_count == role_seeds.size() &&
+      result.materialized_direct_role_records.size() ==
+          role_seeds.size() &&
       result.role_record_count <= maximum_role_count;
   result.batch_keys_strictly_increasing = true;
   result.role_records_canonical_and_partitioned = true;
@@ -437,11 +444,11 @@ void build_payload(
     const ExactDirectMorseEventJournalResult& right) {
   ExactDirectMorseEventJournalResult left_copy = left;
   ExactDirectMorseEventJournalResult right_copy = right;
-  left_copy.event_projections.clear();
-  left_copy.role_records.clear();
+  left_copy.materialized_direct_event_projections.clear();
+  left_copy.materialized_direct_role_records.clear();
   left_copy.batches.clear();
-  right_copy.event_projections.clear();
-  right_copy.role_records.clear();
+  right_copy.materialized_direct_event_projections.clear();
+  right_copy.materialized_direct_role_records.clear();
   right_copy.batches.clear();
   return left_copy == right_copy;
 }
@@ -478,19 +485,32 @@ void build_payload(
   return false;
 }
 
-[[nodiscard]] bool singleton_projection_matches(
-    const ExactDirectMorseEventProjection& observed,
+[[nodiscard]] ExactDirectMorseEventProjection
+canonical_singleton_projection(std::size_t point_index) {
+  if (point_index > spatial::CanonicalPointCloud::max_point_id) {
+    throw std::out_of_range(
+        "a singleton projection index exceeds the PointId domain");
+  }
+  ExactDirectMorseEventProjection projection;
+  projection.event_projection_index = point_index;
+  projection.source = ExactDirectMorseEventSource::canonical_singleton;
+  projection.source_index = point_index;
+  projection.support_size = 1U;
+  projection.support_ids[0] =
+      static_cast<spatial::PointId>(point_index);
+  projection.squared_level = exact::ExactLevel{};
+  projection.closed_rank = 1U;
+  projection.birth_order = 1U;
+  return projection;
+}
+
+[[nodiscard]] ExactDirectMorseH0RoleRecord canonical_singleton_role(
     std::size_t point_index) {
-  ExactDirectMorseEventProjection expected;
-  expected.event_projection_index = point_index;
-  expected.source = ExactDirectMorseEventSource::canonical_singleton;
-  expected.source_index = point_index;
-  expected.support_size = 1U;
-  expected.support_ids[0] = static_cast<spatial::PointId>(point_index);
-  expected.squared_level = exact::ExactLevel{};
-  expected.closed_rank = 1U;
-  expected.birth_order = 1U;
-  return observed == expected;
+  return ExactDirectMorseH0RoleRecord{
+      point_index,
+      0U,
+      point_index,
+      ExactDirectMorseH0Role::birth};
 }
 
 [[nodiscard]] bool direct_projection_matches(
@@ -513,6 +533,92 @@ void build_payload(
 
 }  // namespace
 
+ExactDirectMorseEventJournalView::ExactDirectMorseEventJournalView(
+    const ExactDirectMorseEventJournalResult& source) noexcept
+    : source_(&source) {}
+
+std::size_t ExactDirectMorseEventJournalView::event_projection_count()
+    const noexcept {
+  return source_->event_projection_count;
+}
+
+std::size_t ExactDirectMorseEventJournalView::role_record_count()
+    const noexcept {
+  return source_->role_record_count;
+}
+
+ExactDirectMorseEventProjection
+ExactDirectMorseEventJournalView::event_projection_at(
+    std::size_t logical_index) const {
+  if (logical_index >= source_->event_projection_count) {
+    throw std::out_of_range(
+        "a direct Morse event projection index is out of range");
+  }
+  if (logical_index < source_->singleton_event_count) {
+    return canonical_singleton_projection(logical_index);
+  }
+  return materialized_direct_event_projection_at(logical_index);
+}
+
+ExactDirectMorseH0RoleRecord
+ExactDirectMorseEventJournalView::role_record_at(
+    std::size_t logical_index) const {
+  if (logical_index >= source_->role_record_count) {
+    throw std::out_of_range(
+        "a direct Morse role record index is out of range");
+  }
+  if (logical_index < source_->singleton_event_count) {
+    return canonical_singleton_role(logical_index);
+  }
+  return materialized_direct_role_record_at(logical_index);
+}
+
+std::span<const ExactDirectMorseEventProjection>
+ExactDirectMorseEventJournalView::materialized_direct_event_projections()
+    const noexcept {
+  return source_->materialized_direct_event_projections;
+}
+
+std::span<const ExactDirectMorseH0RoleRecord>
+ExactDirectMorseEventJournalView::materialized_direct_role_records()
+    const noexcept {
+  return source_->materialized_direct_role_records;
+}
+
+const ExactDirectMorseEventProjection&
+ExactDirectMorseEventJournalView::materialized_direct_event_projection_at(
+    std::size_t logical_index) const {
+  if (logical_index < source_->singleton_event_count) {
+    throw std::out_of_range(
+        "a singleton projection has no materialized direct record");
+  }
+  const std::size_t physical_index =
+      logical_index - source_->singleton_event_count;
+  if (physical_index >=
+      source_->materialized_direct_event_projections.size()) {
+    throw std::out_of_range(
+        "a materialized direct event projection index is out of range");
+  }
+  return source_->materialized_direct_event_projections[physical_index];
+}
+
+const ExactDirectMorseH0RoleRecord&
+ExactDirectMorseEventJournalView::materialized_direct_role_record_at(
+    std::size_t logical_index) const {
+  if (logical_index < source_->singleton_event_count) {
+    throw std::out_of_range(
+        "a singleton role has no materialized direct record");
+  }
+  const std::size_t physical_index =
+      logical_index - source_->singleton_event_count;
+  if (physical_index >=
+      source_->materialized_direct_role_records.size()) {
+    throw std::out_of_range(
+        "a materialized direct role record index is out of range");
+  }
+  return source_->materialized_direct_role_records[physical_index];
+}
+
 bool ExactDirectMorseEventJournalResult::certified_partial_refinement()
     const {
   return schema_version == direct_morse_event_journal_schema_version &&
@@ -525,6 +631,7 @@ bool ExactDirectMorseEventJournalResult::certified_partial_refinement()
          source_facade_payload_locally_consistent &&
          no_relevant_extra_shell_diagnostics &&
          canonical_singleton_births_complete &&
+         canonical_singletons_implicit_and_unmaterialized &&
          direct_h0_roles_projected_exactly_once &&
          batch_keys_strictly_increasing &&
          role_records_canonical_and_partitioned &&
@@ -536,9 +643,21 @@ bool ExactDirectMorseEventJournalResult::certified_partial_refinement()
          source_direct_event_count <= event_projection_count &&
          singleton_event_count ==
              event_projection_count - source_direct_event_count &&
-         event_projection_count == event_projections.size() &&
-         role_record_count == role_records.size() &&
+         materialized_direct_event_projections.size() ==
+             source_direct_event_count &&
+         materialized_direct_role_records.size() <= role_record_count &&
+         singleton_event_count ==
+             role_record_count -
+                 materialized_direct_role_records.size() &&
          batch_count == batches.size() &&
+         !batches.empty() && point_count != 0U &&
+         batches.front().batch_index == 0U &&
+         batches.front().order == 1U &&
+         batches.front().squared_level == exact::ExactLevel{} &&
+         batches.front().role_record_offset == 0U &&
+         batches.front().role_record_count == singleton_event_count &&
+         batches.front().birth_role_count == singleton_event_count &&
+         batches.front().saddle_role_count == 0U &&
          logical_linear_storage_entry_count <=
              logical_linear_storage_entry_limit;
 }
@@ -617,9 +736,11 @@ verify_exact_direct_morse_event_journal(
       expected.source_facade_payload_locally_consistent &&
       expected.no_relevant_extra_shell_diagnostics;
   verification.event_projections_certified =
-      observed.event_projections == expected.event_projections;
+      observed.materialized_direct_event_projections ==
+      expected.materialized_direct_event_projections;
   verification.role_records_certified =
-      observed.role_records == expected.role_records;
+      observed.materialized_direct_role_records ==
+      expected.materialized_direct_role_records;
   verification.batches_certified = observed.batches == expected.batches;
   verification.result_facts_certified =
       non_payload_facts_equal(observed, expected);
@@ -673,19 +794,10 @@ verify_exact_direct_morse_event_journal_streaming(
         source_facade.events.size(),
         "the streaming direct Morse projection count overflows size_t");
     bool projections_match =
-        observed.event_projections.size() == expected_projection_count;
+        observed.materialized_direct_event_projections.size() ==
+        source_facade.events.size();
     if (projections_match) {
-      for (std::size_t point_index = 0U; point_index < cloud.size();
-           ++point_index) {
-        ++verification.event_projection_scan_count;
-        if (!singleton_projection_matches(
-                observed.event_projections[point_index], point_index)) {
-          projections_match = false;
-          break;
-        }
-      }
-    }
-    if (projections_match) {
+      verification.generated_singleton_projection_count = cloud.size();
       for (std::size_t event_index = 0U;
            event_index < source_facade.events.size();
            ++event_index) {
@@ -696,7 +808,7 @@ verify_exact_direct_morse_event_journal_streaming(
                 event_index,
                 "the streaming direct Morse projection index overflows size_t");
         if (!direct_projection_matches(
-                observed.event_projections[projection_index],
+                observed.materialized_direct_event_projections[event_index],
                 source_facade.events[event_index],
                 projection_index)) {
           projections_match = false;
@@ -710,24 +822,34 @@ verify_exact_direct_morse_event_journal_streaming(
     }
 
     std::size_t expected_role_count = cloud.size();
+    std::size_t expected_direct_role_count = 0U;
     for (const ExactDirectSupportEvent& event : source_facade.events) {
       if (event.birth_order.has_value()) {
         expected_role_count = checked_add(
             expected_role_count,
             1U,
             "the streaming direct Morse role count overflows size_t");
+        expected_direct_role_count = checked_add(
+            expected_direct_role_count,
+            1U,
+            "the streaming direct Morse direct-role count overflows size_t");
       }
       if (event.saddle_order.has_value()) {
         expected_role_count = checked_add(
             expected_role_count,
             1U,
             "the streaming direct Morse role count overflows size_t");
+        expected_direct_role_count = checked_add(
+            expected_direct_role_count,
+            1U,
+            "the streaming direct Morse direct-role count overflows size_t");
       }
     }
 
     bool batches_match = !observed.batches.empty();
     bool roles_match =
-        observed.role_records.size() == expected_role_count;
+        observed.materialized_direct_role_records.size() ==
+        expected_direct_role_count;
     std::size_t expected_role_offset = 0U;
     for (std::size_t batch_index = 0U;
          batches_match && roles_match &&
@@ -736,13 +858,29 @@ verify_exact_direct_morse_event_journal_streaming(
       ++verification.batch_scan_count;
       const ExactDirectMorseH0Batch& batch =
           observed.batches[batch_index];
+      if (batch_index == 0U) {
+        const bool canonical_singleton_batch =
+            batch.batch_index == 0U && batch.order == 1U &&
+            batch.squared_level == exact::ExactLevel{} &&
+            batch.role_record_offset == 0U &&
+            batch.role_record_count == cloud.size() &&
+            batch.birth_role_count == cloud.size() &&
+            batch.saddle_role_count == 0U;
+        if (!canonical_singleton_batch) {
+          batches_match = false;
+          break;
+        }
+        verification.generated_singleton_role_record_count =
+            cloud.size();
+        expected_role_offset = cloud.size();
+        continue;
+      }
       if (batch.batch_index != batch_index ||
           batch.role_record_offset != expected_role_offset ||
           batch.role_record_count == 0U ||
           batch.role_record_count >
-              observed.role_records.size() - expected_role_offset ||
-          (batch_index != 0U &&
-           !batch_key_less(observed.batches[batch_index - 1U], batch))) {
+              expected_role_count - expected_role_offset ||
+          !batch_key_less(observed.batches[batch_index - 1U], batch)) {
         batches_match = false;
         break;
       }
@@ -756,21 +894,42 @@ verify_exact_direct_morse_event_journal_streaming(
             expected_role_offset,
             local_index,
             "the streaming direct Morse role index overflows size_t");
+        if (role_index < cloud.size()) {
+          roles_match = false;
+          break;
+        }
+        const std::size_t physical_role_index =
+            role_index - cloud.size();
+        if (physical_role_index >=
+            observed.materialized_direct_role_records.size()) {
+          roles_match = false;
+          break;
+        }
         ++verification.role_record_scan_count;
         const ExactDirectMorseH0RoleRecord& role =
-            observed.role_records[role_index];
+            observed.materialized_direct_role_records[
+                physical_role_index];
         if (role.role_record_index != role_index ||
             role.batch_index != batch_index ||
-            role.event_projection_index >=
-                observed.event_projections.size() ||
+            role.event_projection_index < cloud.size() ||
+            role.event_projection_index >= expected_projection_count ||
             (local_index != 0U &&
              !projection_role_less(
-                 observed.role_records[role_index - 1U], role)) ||
+                 observed.materialized_direct_role_records[
+                     physical_role_index - 1U],
+                 role))) {
+          roles_match = false;
+          break;
+        }
+        const std::size_t physical_projection_index =
+            role.event_projection_index - cloud.size();
+        if (physical_projection_index >=
+                observed.materialized_direct_event_projections.size() ||
             !role_matches_projection_and_batch(
                 role,
                 batch,
-                observed.event_projections[
-                    role.event_projection_index])) {
+                observed.materialized_direct_event_projections[
+                    physical_projection_index])) {
           roles_match = false;
           break;
         }
@@ -795,7 +954,9 @@ verify_exact_direct_morse_event_journal_streaming(
           "the streaming direct Morse role offset overflows size_t");
     }
     roles_match = roles_match &&
-                  expected_role_offset == observed.role_records.size();
+                  expected_role_offset == expected_role_count &&
+                  verification.role_record_scan_count ==
+                      expected_direct_role_count;
     batches_match = batches_match && roles_match;
     verification.role_records_certified = roles_match;
     verification.batches_certified = batches_match;
@@ -845,11 +1006,16 @@ verify_exact_direct_morse_event_journal_streaming(
             source_facade.certificate.pair_semantic_digest &&
         observed.source_higher_semantic_digest ==
             source_facade.certificate.higher_semantic_digest &&
+        observed.materialized_direct_event_projections.size() ==
+            source_facade.events.size() &&
+        observed.materialized_direct_role_records.size() ==
+            expected_direct_role_count &&
         observed.source_facade_terminal_certified &&
         observed.source_cloud_authorities_match &&
         observed.source_facade_payload_locally_consistent &&
         observed.no_relevant_extra_shell_diagnostics &&
         observed.canonical_singleton_births_complete &&
+        observed.canonical_singletons_implicit_and_unmaterialized &&
         observed.direct_h0_roles_projected_exactly_once &&
         observed.batch_keys_strictly_increasing &&
         observed.role_records_canonical_and_partitioned &&
@@ -867,9 +1033,14 @@ verify_exact_direct_morse_event_journal_streaming(
                               canonical_singletons_and_terminal_direct_supports_h0_roles_only;
     verification.constant_auxiliary_record_storage_certified = true;
     verification.fresh_streaming_replay_certified =
+        verification.generated_singleton_projection_count ==
+            cloud.size() &&
+        verification.generated_singleton_role_record_count ==
+            cloud.size() &&
         verification.event_projection_scan_count ==
-            expected_projection_count &&
-        verification.role_record_scan_count == expected_role_count &&
+            source_facade.events.size() &&
+        verification.role_record_scan_count ==
+            expected_direct_role_count &&
         verification.batch_scan_count == observed.batches.size();
     verification.result_certified =
         verification.source_facade_terminal_certified &&

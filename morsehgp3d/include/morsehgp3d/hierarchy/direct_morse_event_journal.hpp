@@ -7,13 +7,14 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <string_view>
 #include <vector>
 
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t direct_morse_event_journal_schema_version =
-    1U;
+    2U;
 inline constexpr std::string_view direct_morse_event_journal_backend =
     "reference_cpu";
 inline constexpr std::string_view direct_morse_event_journal_profile =
@@ -25,14 +26,15 @@ inline constexpr std::string_view
 inline constexpr std::string_view direct_morse_event_journal_public_status =
     "not_claimed";
 inline constexpr std::string_view direct_morse_event_journal_proof_basis =
-    "terminal_direct_supports_plus_canonical_singletons_exact_h0_role_"
-    "projection_grouped_by_order_and_exact_level_v1";
+    "terminal_direct_supports_plus_implicit_canonical_singleton_prefix_"
+    "exact_h0_role_projection_grouped_by_order_and_exact_level_v2";
 
 // This first Phase-10 layer is a role journal, not a hierarchy.  It retains
-// one constant-size projection per singleton or accepted direct support, one
-// record per relevant H0 role and one descriptor per non-empty (order, level)
-// batch.  Direct centers and interior sets remain authoritative in the source
-// facade and are deliberately not copied here.
+// one constant-size projection per accepted direct support, one physical
+// record per direct H0 role and one descriptor per non-empty (order, level)
+// batch.  The canonical singleton projection and role prefixes are generated
+// from PointId and never materialized.  Direct centers and interior sets
+// remain authoritative in the source facade and are deliberately not copied.
 enum class ExactDirectMorseEventSource : std::uint8_t {
   canonical_singleton,
   direct_support_terminal_event,
@@ -129,14 +131,19 @@ struct ExactDirectMorseEventJournalResult {
   std::size_t logical_linear_storage_entry_limit{};
   contract::CanonicalId source_pair_semantic_digest{};
   contract::CanonicalId source_higher_semantic_digest{};
-  std::vector<ExactDirectMorseEventProjection> event_projections;
-  std::vector<ExactDirectMorseH0RoleRecord> role_records;
+  // These two arenas contain only the direct suffix.  Their records retain
+  // their logical indices after the implicit singleton prefix.
+  std::vector<ExactDirectMorseEventProjection>
+      materialized_direct_event_projections;
+  std::vector<ExactDirectMorseH0RoleRecord>
+      materialized_direct_role_records;
   std::vector<ExactDirectMorseH0Batch> batches;
   bool source_facade_terminal_certified{false};
   bool source_cloud_authorities_match{false};
   bool source_facade_payload_locally_consistent{false};
   bool no_relevant_extra_shell_diagnostics{false};
   bool canonical_singleton_births_complete{false};
+  bool canonical_singletons_implicit_and_unmaterialized{false};
   bool direct_h0_roles_projected_exactly_once{false};
   bool batch_keys_strictly_increasing{false};
   bool role_records_canonical_and_partitioned{false};
@@ -156,6 +163,42 @@ struct ExactDirectMorseEventJournalResult {
   friend bool operator==(
       const ExactDirectMorseEventJournalResult&,
       const ExactDirectMorseEventJournalResult&) = default;
+};
+
+// A synchronous logical view over the physically sparse journal.  Generated
+// singleton records are returned by value; direct records can be borrowed by
+// reference.  The source result must remain alive, unmoved and immutable for
+// the complete lifetime of the view.
+class ExactDirectMorseEventJournalView {
+ public:
+  explicit ExactDirectMorseEventJournalView(
+      const ExactDirectMorseEventJournalResult& source) noexcept;
+  ExactDirectMorseEventJournalView(
+      ExactDirectMorseEventJournalResult&&) = delete;
+  ExactDirectMorseEventJournalView(
+      const ExactDirectMorseEventJournalResult&&) = delete;
+
+  [[nodiscard]] std::size_t event_projection_count() const noexcept;
+  [[nodiscard]] std::size_t role_record_count() const noexcept;
+
+  [[nodiscard]] ExactDirectMorseEventProjection event_projection_at(
+      std::size_t logical_index) const;
+  [[nodiscard]] ExactDirectMorseH0RoleRecord role_record_at(
+      std::size_t logical_index) const;
+
+  [[nodiscard]] std::span<const ExactDirectMorseEventProjection>
+  materialized_direct_event_projections() const noexcept;
+  [[nodiscard]] std::span<const ExactDirectMorseH0RoleRecord>
+  materialized_direct_role_records() const noexcept;
+  [[nodiscard]] const ExactDirectMorseEventProjection&
+  materialized_direct_event_projection_at(
+      std::size_t logical_index) const;
+  [[nodiscard]] const ExactDirectMorseH0RoleRecord&
+  materialized_direct_role_record_at(
+      std::size_t logical_index) const;
+
+ private:
+  const ExactDirectMorseEventJournalResult* source_{};
 };
 
 // The cloud is external singleton authority.  The terminal facade remains
@@ -196,6 +239,8 @@ verify_exact_direct_morse_event_journal(
 // place.  The input journal remains the only O(n+E) journal allocation.
 struct ExactDirectMorseEventJournalStreamingVerification {
   std::size_t canonical_cloud_digest_pass_count{};
+  std::size_t generated_singleton_projection_count{};
+  std::size_t generated_singleton_role_record_count{};
   std::size_t event_projection_scan_count{};
   std::size_t role_record_scan_count{};
   std::size_t batch_scan_count{};

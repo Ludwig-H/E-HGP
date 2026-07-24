@@ -85,6 +85,11 @@ struct Phase14MortonLbvhSnapshotBatch {
 
 struct Phase14MortonLbvhDeviceLeaseBatch {
   std::shared_ptr<void> retained_resources;
+  // CUDA addresses are valid exactly while retained_resources is alive.
+  // Host fakes leave them null and use their per-context lifecycle marker.
+  const std::uint64_t* device_coordinate_bits{};
+  const std::uint64_t* device_morton_point_ids{};
+  int cuda_device{-1};
   std::size_t point_count{};
   std::size_t maximum_point_count{};
   std::size_t retained_coordinate_word_capacity{};

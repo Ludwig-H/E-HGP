@@ -10,14 +10,18 @@
 #include <limits>
 #include <span>
 #include <stdexcept>
+#include <utility>
 
 namespace {
 
 using morsehgp3d::gpu::DirectSparseFacetTopKProposalBatchResult;
 using morsehgp3d::gpu::DirectSparseFacetTopKProposalQuery;
+using morsehgp3d::gpu::MortonLbvhDeviceBuildResult;
+using morsehgp3d::gpu::MortonLbvhDeviceLease;
 using morsehgp3d::hierarchy::ExactDirectSparseFacetKey;
 using morsehgp3d::hierarchy::
     ExactDirectSparseFacetTopKProposalRecord;
+using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::PointId;
 
 [[nodiscard]] ExactDirectSparseFacetKey key(
@@ -166,6 +170,96 @@ void require_active_traffic(
   }
 }
 
+void require_cuda_morton_lease(
+    const MortonLbvhDeviceBuildResult& build,
+    const MortonLbvhDeviceLease& lease,
+    const CanonicalPointCloud& cloud) {
+  const std::size_t point_count = cloud.size();
+  const std::size_t expected_persistent_device_bytes =
+      32U * point_count;
+  const auto& build_audit = build.audit();
+  const auto& lease_audit = lease.audit();
+  if (!build.cuda_qualified_build() ||
+      !build.certified_index().validated_for(cloud) ||
+      !lease.ready() || !lease.cuda_resident() ||
+      lease_audit.maximum_point_count != point_count ||
+      lease_audit.point_count != point_count ||
+      lease_audit.persistent_device_byte_capacity !=
+          expected_persistent_device_bytes ||
+      lease_audit.retained_host_snapshot_byte_count != 0U ||
+      lease_audit.source_snapshot_epoch !=
+          build_audit.snapshot_buffer_epoch ||
+      !lease_audit.source_snapshot_import_certified ||
+      !lease_audit.canonical_coordinate_words_retained ||
+      !lease_audit.active_morton_point_ids_retained ||
+      !lease_audit.builder_transients_released ||
+      !lease_audit.cuda_device_storage_retained ||
+      lease_audit.host_fake_lifecycle_exercised ||
+      lease_audit.second_host_snapshot_retained) {
+    throw std::runtime_error(
+        "the Phase 14M/14N CUDA qualification did not produce one compact resident lease");
+  }
+}
+
+void require_legacy_snapshot(
+    const DirectSparseFacetTopKProposalBatchResult& first,
+    const DirectSparseFacetTopKProposalBatchResult& second,
+    std::size_t point_count) {
+  const std::size_t expected_device_snapshot_bytes =
+      32U * point_count;
+  const std::size_t expected_host_snapshot_bytes =
+      40U * point_count;
+  if (sizeof(std::size_t) != 8U ||
+      first.audit.device_snapshot_adopted_from_morton_lbvh_lease ||
+      first.audit.adopted_device_snapshot_owner_retained ||
+      first.audit.source_morton_lbvh_lease_epoch != 0U ||
+      first.audit.host_coordinate_snapshot_word_count !=
+          3U * point_count ||
+      first.audit.host_morton_order_snapshot_entry_count !=
+          point_count ||
+      first.audit.host_inverse_morton_entry_count != point_count ||
+      first.audit.host_snapshot_byte_capacity !=
+          expected_host_snapshot_bytes ||
+      first.audit.snapshot_host_to_device_byte_count !=
+          expected_device_snapshot_bytes ||
+      second.audit.snapshot_host_to_device_byte_count != 0U) {
+    throw std::runtime_error(
+        "the Phase 14J legacy snapshot witness did not retain 40n host bytes and one 32n upload");
+  }
+}
+
+void require_adopted_snapshot(
+    const DirectSparseFacetTopKProposalBatchResult& result,
+    std::size_t point_count,
+    std::size_t active_query_count,
+    std::size_t maximum_query_count,
+    std::uint64_t source_snapshot_epoch) {
+  require_active_traffic(
+      result, active_query_count, maximum_query_count);
+  const std::size_t expected_host_snapshot_bytes =
+      8U * point_count;
+  if (sizeof(std::size_t) != 8U ||
+      !result.complete_proposal_batch() ||
+      result.audit.snapshot_point_count != point_count ||
+      result.audit.static_device_snapshot_byte_capacity !=
+          32U * point_count ||
+      result.audit.host_coordinate_snapshot_word_count != 0U ||
+      result.audit.host_morton_order_snapshot_entry_count != 0U ||
+      result.audit.host_inverse_morton_entry_count != point_count ||
+      result.audit.host_snapshot_byte_capacity !=
+          expected_host_snapshot_bytes ||
+      result.audit.snapshot_host_to_device_byte_count != 0U ||
+      result.audit.source_morton_lbvh_lease_epoch !=
+          source_snapshot_epoch ||
+      !result.audit
+           .device_snapshot_adopted_from_morton_lbvh_lease ||
+      !result.audit.adopted_device_snapshot_owner_retained ||
+      !result.audit.gpu_execution_performed) {
+    throw std::runtime_error(
+        "the Phase 14O qualification did not retain its adopted owner with an 8n host inverse and zero snapshot upload");
+  }
+}
+
 }  // namespace
 
 int main() {
@@ -173,8 +267,8 @@ int main() {
     using morsehgp3d::exact::CertifiedPoint3;
     using morsehgp3d::gpu::DirectSparseFacetTopKProposalContext;
     using morsehgp3d::gpu::DirectSparseFacetTopKProposalPolicy;
+    using morsehgp3d::gpu::MortonLbvhBuildContext;
     using morsehgp3d::hierarchy::build_exact_facet_miniball;
-    using morsehgp3d::spatial::CanonicalPointCloud;
     using morsehgp3d::spatial::ExclusionSet;
     using morsehgp3d::spatial::MortonLbvhIndex;
 
@@ -233,6 +327,7 @@ int main() {
     const std::array<PointId, 2U> expected_inner{0U, 2U};
     require_active_traffic(first, 2U, 4U);
     require_active_traffic(second, 2U, 4U);
+    require_legacy_snapshot(first, second, cloud.size());
     if (!first.complete_proposal_batch() ||
         !second.complete_proposal_batch() ||
         first.audit.buffer_epoch != 1U ||
@@ -257,6 +352,61 @@ int main() {
         first.audit.public_status_claimed) {
       throw std::runtime_error(
           "the Phase 14 GPU qualification audit did not close");
+    }
+
+    MortonLbvhBuildContext adoption_builder{cloud.size()};
+    MortonLbvhDeviceBuildResult adoption_build =
+        adoption_builder.build(cloud);
+    MortonLbvhDeviceLease adoption_lease =
+        adoption_builder.release_device_lease(adoption_build);
+    require_cuda_morton_lease(
+        adoption_build, adoption_lease, cloud);
+    const auto adoption_lease_audit = adoption_lease.audit();
+    DirectSparseFacetTopKProposalContext adopted_context{
+        adoption_build.certified_index(),
+        cloud,
+        std::move(adoption_lease),
+        4U};
+    if (adoption_lease.ready()) {
+      throw std::runtime_error(
+          "the Phase 14O context did not consume the move-only device lease");
+    }
+    const DirectSparseFacetTopKProposalBatchResult adopted_first =
+        adopted_context.build(
+            cloud,
+            transcript_metadata,
+            queries,
+            policy,
+            transcript_budget);
+    const DirectSparseFacetTopKProposalBatchResult adopted_second =
+        adopted_context.build(
+            cloud,
+            transcript_metadata,
+            queries,
+            policy,
+            transcript_budget);
+    require_adopted_snapshot(
+        adopted_first,
+        cloud.size(),
+        queries.size(),
+        4U,
+        adoption_lease_audit.source_snapshot_epoch);
+    require_adopted_snapshot(
+        adopted_second,
+        cloud.size(),
+        queries.size(),
+        4U,
+        adoption_lease_audit.source_snapshot_epoch);
+    if (adopted_first.audit.buffer_epoch != 1U ||
+        adopted_second.audit.buffer_epoch != 2U ||
+        adopted_first.transcript != first.transcript ||
+        adopted_second.transcript != adopted_first.transcript ||
+        adopted_first.audit.proposal_digest_fnv1a !=
+            first.audit.proposal_digest_fnv1a ||
+        adopted_second.audit.proposal_digest_fnv1a !=
+            adopted_first.audit.proposal_digest_fnv1a) {
+      throw std::runtime_error(
+          "the Phase 14O adopted CUDA path changed the legacy transcript, digest, or repeated-batch identity");
     }
 
     const std::array<PointId, 0U> none{};
@@ -325,17 +475,57 @@ int main() {
     const std::array rank_ten_queries{
         DirectSparseFacetTopKProposalQuery{
             rank_ten_key, rank_ten_miniball.center}};
+    const DirectSparseFacetTopKProposalPolicy rank_ten_policy{
+        rank_ten_cloud.size() - 1U};
     DirectSparseFacetTopKProposalContext rank_ten_context{
         rank_ten_index, rank_ten_cloud, 1U};
     const auto rank_ten_result = rank_ten_context.build(
         rank_ten_cloud,
         transcript_metadata,
         rank_ten_queries,
-        DirectSparseFacetTopKProposalPolicy{
-            rank_ten_cloud.size() - 1U},
+        rank_ten_policy,
         transcript_budget);
     const auto& rank_ten_record =
         require_record(rank_ten_result, rank_ten_key);
+
+    MortonLbvhBuildContext rank_ten_adoption_builder{
+        rank_ten_cloud.size()};
+    MortonLbvhDeviceBuildResult rank_ten_adoption_build =
+        rank_ten_adoption_builder.build(rank_ten_cloud);
+    MortonLbvhDeviceLease rank_ten_adoption_lease =
+        rank_ten_adoption_builder.release_device_lease(
+            rank_ten_adoption_build);
+    require_cuda_morton_lease(
+        rank_ten_adoption_build,
+        rank_ten_adoption_lease,
+        rank_ten_cloud);
+    const auto rank_ten_adoption_lease_audit =
+        rank_ten_adoption_lease.audit();
+    DirectSparseFacetTopKProposalContext
+        rank_ten_adopted_context{
+            rank_ten_adoption_build.certified_index(),
+            rank_ten_cloud,
+            std::move(rank_ten_adoption_lease),
+            1U};
+    if (rank_ten_adoption_lease.ready()) {
+      throw std::runtime_error(
+          "the Phase 14O K=10 context did not consume its device lease");
+    }
+    const auto rank_ten_adopted_result =
+        rank_ten_adopted_context.build(
+            rank_ten_cloud,
+            transcript_metadata,
+            rank_ten_queries,
+            rank_ten_policy,
+            transcript_budget);
+    require_adopted_snapshot(
+        rank_ten_adopted_result,
+        rank_ten_cloud.size(),
+        rank_ten_queries.size(),
+        1U,
+        rank_ten_adoption_lease_audit.source_snapshot_epoch);
+    const auto& rank_ten_adopted_record =
+        require_record(rank_ten_adopted_result, rank_ten_key);
     const std::array<PointId, 10U> expected_rank_ten{
         10U, 11U, 12U, 13U, 14U, 15U, 16U, 17U, 18U, 20U};
     const auto rank_ten_unseeded = morsehgp3d::spatial::lbvh_top_k(
@@ -360,7 +550,16 @@ int main() {
             generous_top_k_budget());
     if (!rank_ten_result.complete_proposal_batch() ||
         !has_candidate_ids(rank_ten_record, expected_rank_ten) ||
+        !has_candidate_ids(
+            rank_ten_adopted_record, expected_rank_ten) ||
         rank_ten_result.audit.inspected_neighbor_count != 230U ||
+        rank_ten_adopted_result.audit.inspected_neighbor_count !=
+            230U ||
+        rank_ten_adopted_result.audit.buffer_epoch != 1U ||
+        rank_ten_adopted_result.transcript !=
+            rank_ten_result.transcript ||
+        rank_ten_adopted_result.audit.proposal_digest_fnv1a !=
+            rank_ten_result.audit.proposal_digest_fnv1a ||
         !rank_ten_seeded.complete() ||
         !same_partition(
             rank_ten_unseeded, rank_ten_seeded.partition())) {
@@ -422,10 +621,12 @@ int main() {
         << "\"active_output_initialization_byte_count\":"
         << first.audit.initialized_device_output_byte_count << ','
         << "\"active_prefix_transition_4_1_5_validated\":true,"
+        << "\"adopted_device_snapshot_owner_retained\":true,"
         << "\"backend\":\"cuda_g4\","
         << "\"buffer_epoch\":2,"
         << "\"candidate_count\":"
         << first.audit.proposed_candidate_count << ','
+        << "\"device_snapshot_adopted_from_morton_lbvh_lease\":true,"
         << "\"exact_cpu_partition_equal\":true,"
         << "\"exact_center_projection_axis_count\":"
         << first.audit.exact_center_projection_axis_count << ','
@@ -446,13 +647,52 @@ int main() {
         << first.audit.host_snapshot_byte_capacity << ','
         << "\"inspected_neighbor_count\":"
         << first.audit.inspected_neighbor_count << ','
+        << "\"legacy_14j_first_snapshot_h2d_byte_count\":"
+        << first.audit.snapshot_host_to_device_byte_count << ','
+        << "\"legacy_14j_second_snapshot_h2d_byte_count\":"
+        << second.audit.snapshot_host_to_device_byte_count << ','
         << "\"mode\":\"proposal_only\","
         << "\"non_dyadic_hint_candidate_ids_validated\":true,"
         << "\"phase\":\"14K\","
+        << "\"phase14m_cuda_builder_qualified\":true,"
+        << "\"phase14n_cuda_resident_lease_qualified\":true,"
+        << "\"phase14n_persistent_device_byte_capacity\":"
+        << adoption_lease_audit.persistent_device_byte_capacity << ','
+        << "\"phase14o_first_buffer_epoch\":"
+        << adopted_first.audit.buffer_epoch << ','
+        << "\"phase14o_first_snapshot_h2d_byte_count\":"
+        << adopted_first.audit.snapshot_host_to_device_byte_count << ','
+        << "\"phase14o_host_coordinate_snapshot_word_count\":"
+        << adopted_first.audit.host_coordinate_snapshot_word_count << ','
+        << "\"phase14o_host_inverse_morton_entry_count\":"
+        << adopted_first.audit.host_inverse_morton_entry_count << ','
+        << "\"phase14o_host_morton_order_snapshot_entry_count\":"
+        << adopted_first.audit
+               .host_morton_order_snapshot_entry_count
+        << ','
+        << "\"phase14o_host_snapshot_byte_capacity\":"
+        << adopted_first.audit.host_snapshot_byte_capacity << ','
+        << "\"phase14o_k10_adoption_qualified\":true,"
+        << "\"phase14o_k10_snapshot_h2d_byte_count\":"
+        << rank_ten_adopted_result.audit
+               .snapshot_host_to_device_byte_count
+        << ','
+        << "\"phase14o_legacy_digest_equal\":true,"
+        << "\"phase14o_legacy_transcript_equal\":true,"
+        << "\"phase14o_mode\":\"device_morton_lbvh_lease_adoption\","
+        << "\"phase14o_repeated_batch_equal\":true,"
+        << "\"phase14o_second_buffer_epoch\":"
+        << adopted_second.audit.buffer_epoch << ','
+        << "\"phase14o_second_snapshot_h2d_byte_count\":"
+        << adopted_second.audit.snapshot_host_to_device_byte_count << ','
+        << "\"phase14o_source_snapshot_epoch\":"
+        << adopted_first.audit.source_morton_lbvh_lease_epoch << ','
+        << "\"phase14o_validated\":true,"
         << "\"profile\":\"hgp_reduced\","
         << "\"proposal_digest_fnv1a\":"
-        << first.audit.proposal_digest_fnv1a << ','
+        << adopted_first.audit.proposal_digest_fnv1a << ','
         << "\"public_status\":null,"
+        << "\"public_status_claimed\":false,"
         << "\"rank_ten_candidate_count\":"
         << rank_ten_record.candidate_point_count << ','
         << "\"rank_ten_three_axis_candidate_ids_validated\":true,"
@@ -464,13 +704,14 @@ int main() {
         << "\"static_device_query_buffer_byte_capacity\":"
         << first.audit.static_device_query_buffer_byte_capacity << ','
         << "\"static_device_record_buffer_byte_capacity\":"
-        << first.audit.static_device_record_buffer_byte_capacity << ','
-        << "\"schema\":\"morsehgp3d.phase14k.facet_top_k_cuda_qualification.v3\"}"
+        << adopted_first.audit.static_device_record_buffer_byte_capacity
+        << ','
+        << "\"schema\":\"morsehgp3d.phase14k.facet_top_k_cuda_qualification.v4\"}"
         << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr
-        << "Phase 14K GPU facet top-k qualification failed: "
+        << "Phase 14O GPU facet top-k qualification failed: "
         << error.what() << '\n';
     return 1;
   }

@@ -124,9 +124,26 @@ struct Phase14FacetTopKProposalDeviceBatch {
   std::size_t host_to_device_query_byte_count{};
   std::size_t initialized_output_byte_count{};
   std::size_t device_to_host_record_byte_count{};
+  std::size_t snapshot_host_to_device_byte_count{};
   std::size_t kernel_launch_count{};
   std::size_t synchronization_count{};
   std::uint64_t buffer_epoch{};
+};
+
+// A view is usable only while owner is retained.  CUDA launchers consume the
+// two device addresses; the host fake consumes only fake_inverse_morton and
+// verifies owner identity per proposal context.
+struct Phase14FacetTopKProposalAdoptedSnapshot {
+  std::shared_ptr<void> owner;
+  const std::uint64_t* device_coordinate_bits{};
+  const std::uint64_t* device_morton_point_ids{};
+  std::span<const std::size_t> fake_inverse_morton;
+  std::size_t coordinate_word_capacity{};
+  std::size_t morton_point_id_capacity{};
+  std::uint64_t source_snapshot_epoch{};
+  int cuda_device{-1};
+  bool cuda_resident{false};
+  bool host_fake{false};
 };
 
 class Phase14FacetTopKProposalContextState final {
@@ -185,6 +202,15 @@ propose_phase14_facet_top_k_candidates_on_gpu(
     std::span<const std::uint64_t> coordinate_bits,
     std::size_t point_count,
     std::span<const std::uint64_t> morton_point_ids,
+    std::span<const Phase14FacetTopKProposalQueryInputRecord> queries,
+    std::size_t maximum_query_count,
+    std::size_t morton_window_radius);
+
+[[nodiscard]] Phase14FacetTopKProposalDeviceBatch
+propose_phase14_facet_top_k_candidates_with_adopted_snapshot_on_gpu(
+    Phase14FacetTopKProposalContextState& context,
+    const Phase14FacetTopKProposalAdoptedSnapshot& snapshot,
+    std::size_t point_count,
     std::span<const Phase14FacetTopKProposalQueryInputRecord> queries,
     std::size_t maximum_query_count,
     std::size_t morton_window_radius);

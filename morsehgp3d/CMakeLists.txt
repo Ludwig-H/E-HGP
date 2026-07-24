@@ -2199,6 +2199,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
     morsehgp3d_gpu_direct_sparse_facet_top_k_proposal
     PUBLIC
       morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
+      morsehgp3d::gpu_morton_lbvh_build
       morsehgp3d::spatial
     PRIVATE Threads::Threads
   )

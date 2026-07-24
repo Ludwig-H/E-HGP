@@ -289,6 +289,18 @@ La qualification réelle est enregistrée au SHA `2a03f4ad55b2e369891de2081f67a5
 
 L'artefact [phase14n_g4_component_2a03f4a.json](validation/phase14n_g4_component_2a03f4a.json) conserve les gardes, la cible et les sorties brutes. Le verdict reste limité à la propriété et aux capacités de la lease; trois répétitions de construction de composant ne forment pas un p95 et n'incluent ni adaptateur consommateur 14I/14J/14K/14L, ni lots Morse, ni dix ordres, ni matérialisation hiérarchique. Il ne qualifie donc ni `warm_e2e`, ni 50 k sous 100 ms, ni 10 M+, ni statut public.
 
+#### Lot `14O-LEASE-ADOPTION`
+
+Le lot hôte court compare, sur les mêmes requêtes canoniques, le contexte 14I historique et le contexte qui adopte directement une `MortonLbvhDeviceLease` 14N. Le transcript et `proposal_digest_fnv1a` doivent être identiques; deux batches successifs du contexte adopté doivent aussi être identiques. Le schéma d'audit v4 exige, pour $n$ points sur LP64, zéro mot de coordonnées hôte, zéro entrée d'ordre Morton hôte, $n$ positions Morton inverses, exactement $8n$ octets de snapshot hôte, l'époque source de la lease, `device_snapshot_adopted_from_morton_lbvh_lease=true`, `adopted_device_snapshot_owner_retained=true` et zéro octet de snapshot H2D sur chacun des deux batches.
+
+Le témoin historique reste obligatoire et inchangé : $3n$ mots de coordonnées, $n$ entrées Morton directes, $n$ positions inverses, soit $40n$ octets hôte sur LP64; son premier batch supporté transfère $32n$ octets de snapshot, puis les suivants zéro. Le certificat lie cette valeur à l'epoch d'exécution. Deux falsifications permanentes imposent les deux sens : zéro au premier batch et $32n$ au second doivent chacun empoisonner le contexte. L'adoption doit conserver la lease device existante de $32n$ octets sans seconde allocation de snapshot device. Les capacités et trafics propres aux requêtes et aux sorties restent ceux de 14I.
+
+Les rejets sont atomiques. Une identité immuable de nuage étrangère, une capacité de lease strictement supérieure à $n$ ou une lease déjà déplacée doivent être refusées; les deux premiers rejets doivent laisser une lease valide consommable. Une adoption acceptée la consomme exactement une fois. Un contexte accepté doit rester utilisable après destruction du builder et de l'index 14M dont il a copié l'inverse, parce qu'il retient lui-même le propriétaire du snapshot device.
+
+La qualification hôte est acquise sous GCC Release strict : les cibles proposition et Morton compilent, puis les deux CTests passent 2/2 en 0,05 seconde. Après ajout des deux falsifications d'audit, le CTest proposition repasse 1/1 en 0,01 seconde. Le statut devient `validated_host_software_real_cuda_pending`.
+
+L'outil CUDA 14O v4 est étendu dans le source pour comparer deux lots legacy et adoptés, leur transcript et leur digest, puis exercer $K=10$. Il n'est pas compilé localement faute de `nvcc`. Une qualification ultérieure courte sur G4 doit encore vérifier le chemin CUDA adopté, les deux batches sans transfert de snapshot et un memcheck; elle ne devient ni une campagne longue ni un benchmark de hiérarchie. Cette couture de propriété seule ne qualifie ni le chemin 14L complet, ni `warm_e2e`, ni le SLO primaire 50 k sous 100 ms, ni 10 M+, ni un statut public.
+
 Les tailles de support trois et quatre obéissent au même contrat : une proposition GPU ambiguë descend, et tout prune exact est rejoué par déterminants et comptage global indépendants. La complétude est suivie séparément pour chaque taille. Un run ne peut annoncer un catalogue complet tant que l'une des trois frontières reste non vide.
 
 Le lot court `9.2a-RCPU` vérifie séparément la primitive de produit et le flux. Pour la primitive : triangle aigu, obtus et collinéaire; tétraèdre régulier et centre extérieur; requête strictement intérieure et égalité shell; puis la famille $p_0(t)=(t,2,0)$, $p_1=(-1,0,0)$, $p_2=(1,0,0)$. Sur $t\in[-2,2]$, les deux extrémités non aiguës ne doivent pas masquer le triangle aigu intérieur. Sur $t\in[-1/2,1/2]$ et $x=(0,33/16,0)$, les puissances négatives aux extrémités ne doivent pas masquer la puissance positive au centre. L'oracle Python rationnel recalcule ces valeurs indépendamment.
@@ -1278,7 +1290,17 @@ Le test reducer traverse les voies projetée et vivante. Sur leur premier fold, 
 
 La validation rapporte séparément le gain transitoire calculé sur l'ABI testée; elle ne l'assimile ni à une mesure RSS, ni à une capacité massive. Elle ne couvre pas encore le journal singleton résident, les arènes finales segmentées, l'archive d'autorités, un million, 10 M+, CUDA, GCP, le SLO 50 k, la sortie de Phase 15 ou l'entrée en Phase 16.
 
-### 14.13 Échelle conditionnelle au-delà de 10 M
+### 14.13 Validation courte de Phase 15G
+
+Le test du journal exige le schéma v2, `singleton_event_count=n`, exactement $E$ projections physiques directes, exactement $R$ rôles physiques directs et les comptes logiques antérieurs $n+E$ et $n+R$. La vue génère les projections et rôles singleton aux deux extrémités du préfixe, rejette les indices hors domaine et prête les suffixes directs sans copie. Le batch zéro doit rester `(ordre=1, niveau=0, offset=0, rôles=n, naissances=n, selles=0)`; tous les batches suivants conservent leurs indices et offsets logiques.
+
+Le rejeu streaming calcule $n$, $E$ et $R$ depuis les autorités avant de consulter le layout. Ses audits doivent compter $n$ projections et $n$ rôles générés, mais seulement $E$ projections et $R$ rôles effectivement scannés. Une mutation du batch singleton, d'une projection directe, d'un rôle direct ou de leurs compteurs physiques/logiques échoue fermée. Le seed journal doit conserver exactement les indices logiques de familles, projections et rôles, reconstruire les mêmes facettes et produire les mêmes digests.
+
+Le test reducer vérifie que le premier fold reste le bulk 15F, que ses trois populations de staging valent zéro, que les lots directs utilisent les références physiques du suffixe et que la forêt finale reste identique au builder résident. Les budgets de scan sont reconstruits depuis la taille fiable du nuage plus la taille physique; une valeur scalaire observée ne doit pas permettre de contourner le préflight.
+
+Les trois CTests `morsehgp3d.hierarchy_direct_morse_event_journal`, `morsehgp3d.hierarchy_direct_saddle_arm_seed_journal` et `morsehgp3d.hierarchy_direct_morse_forest_reducer` passent 3/3 en 0,08 seconde sous GCC Release strict. Cette validation courte hôte ne mesure pas le RSS et n'exécute ni benchmark massif, CUDA ou GCP. Elle atteste la suppression du coefficient singleton dans le journal, pas l'externalisation des sorties, des autorités, du locator ou du DSU. Le jalon un million, 10 000 001 points, 50 M, 100 M, le SLO 50 k, la sortie de Phase 15 et l'entrée de Phase 16 restent ouverts.
+
+### 14.14 Échelle conditionnelle au-delà de 10 M
 
 La première qualification massive porte sur 10 000 001 points et doit traverser le pipeline scientifique complet retenu pour le produit, jusqu'à la matérialisation et au checkpoint vérifiable. Un smoke de constructeur Morton/LBVH, une mesure de composant ou un préfixe scientifique n'est pas un succès de ce jalon.
 

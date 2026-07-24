@@ -600,6 +600,16 @@ void test_live_transaction_rejects_a_distinct_reducer_locator() {
 
 void test_incremental_identity_and_chunk_independence() {
   const Scenario scenario = tetrahedron();
+  check(
+      scenario.event_journal
+                  .materialized_direct_event_projections.size() ==
+              scenario.event_journal.source_direct_event_count &&
+          scenario.event_journal.materialized_direct_role_records.size() +
+                  scenario.cloud.size() ==
+              scenario.event_journal.role_record_count &&
+          scenario.event_journal
+              .canonical_singletons_implicit_and_unmaterialized,
+      "the reducer source retains only the direct journal suffix");
   const auto resident = build_exact_direct_morse_forest_journal(
       scenario.index,
       scenario.cloud,

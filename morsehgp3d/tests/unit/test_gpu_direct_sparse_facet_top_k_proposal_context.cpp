@@ -1,4 +1,5 @@
 #include "fake_gpu_phase14_facet_top_k_proposal_launchers.hpp"
+#include "fake_gpu_phase14_morton_lbvh_build_launchers.hpp"
 
 #include "exact_center_binary64_projection.hpp"
 #include "rational_binary64_enclosure.hpp"
@@ -13,6 +14,7 @@
 #include <exception>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <span>
 #include <string>
 #include <type_traits>
@@ -28,6 +30,8 @@ using morsehgp3d::gpu::DirectSparseFacetTopKProposalBatchResult;
 using morsehgp3d::gpu::DirectSparseFacetTopKProposalContext;
 using morsehgp3d::gpu::DirectSparseFacetTopKProposalPolicy;
 using morsehgp3d::gpu::DirectSparseFacetTopKProposalQuery;
+using morsehgp3d::gpu::MortonLbvhBuildContext;
+using morsehgp3d::gpu::MortonLbvhDeviceLease;
 using morsehgp3d::gpu::test_support::
     FakePhase14FacetTopKProposalConfiguration;
 using morsehgp3d::gpu::test_support::
@@ -46,6 +50,8 @@ using morsehgp3d::gpu::test_support::
     fake_gpu_phase14_facet_top_k_proposal_launch_count;
 using morsehgp3d::gpu::test_support::
     reset_fake_gpu_phase14_facet_top_k_proposal;
+using morsehgp3d::gpu::test_support::
+    reset_fake_gpu_phase14_morton_lbvh_build;
 using morsehgp3d::hierarchy::ExactDirectSparseFacetKey;
 using morsehgp3d::hierarchy::
     ExactDirectSparseFacetTopKProposalTranscriptBudget;
@@ -239,7 +245,7 @@ void test_direct_integer_binary64_projection() {
   check(
       morsehgp3d::gpu::
               direct_sparse_facet_top_k_gpu_proposal_schema_version ==
-          3U,
+          4U,
       "the direct integer projector advances the proposal schema");
 }
 
@@ -378,6 +384,9 @@ void test_result_epochs_and_digest() {
               fixture.cloud.size() &&
           first.audit.static_device_snapshot_byte_capacity ==
               4U * fixture.cloud.size() * sizeof(std::uint64_t) &&
+          first.audit.snapshot_host_to_device_byte_count ==
+              first.audit.static_device_snapshot_byte_capacity &&
+          second.audit.snapshot_host_to_device_byte_count == 0U &&
           first.audit.host_snapshot_byte_capacity ==
               (4U * sizeof(std::uint64_t) + sizeof(std::size_t)) *
                   fixture.cloud.size() &&
@@ -473,6 +482,186 @@ void test_result_epochs_and_digest() {
           fake_gpu_phase14_facet_top_k_proposal_last_window_radius() ==
               1U,
       "the fake launcher observes one bounded physical transaction per epoch");
+}
+
+void test_phase14n_snapshot_adoption() {
+  reset_fake_gpu_phase14_facet_top_k_proposal();
+  reset_fake_gpu_phase14_morton_lbvh_build();
+  Fixture fixture;
+  const auto queries = canonical_queries(fixture);
+
+  MortonLbvhBuildContext builder{fixture.cloud.size()};
+  auto built = builder.build(fixture.cloud);
+  check(
+      built.complete_certified_build(),
+      "the fake 14M builder certifies the adoption fixture");
+  MortonLbvhDeviceLease lease =
+      builder.release_device_lease(built);
+  check(
+      lease.ready() && !lease.cuda_resident(),
+      "the host fake exposes a ready non-CUDA lifecycle lease");
+
+  DirectSparseFacetTopKProposalContext legacy{
+      built.certified_index(), fixture.cloud, 6U};
+  DirectSparseFacetTopKProposalContext adopted{
+      built.certified_index(),
+      fixture.cloud,
+      std::move(lease),
+      6U};
+  check(
+      !lease.ready(),
+      "constructing the adopted context consumes the move-only lease once");
+  auto rebuilt = builder.build(fixture.cloud);
+  auto rebuilt_lease = builder.release_device_lease(rebuilt);
+  check(
+      rebuilt.complete_certified_build() && rebuilt_lease.ready() &&
+          rebuilt.audit().snapshot_buffer_epoch >
+              built.audit().snapshot_buffer_epoch,
+      "the detached 14M builder lazily rebuilds after lease adoption");
+
+  const auto legacy_first =
+      build(legacy, fixture.cloud, queries);
+  const auto adopted_first =
+      build(adopted, fixture.cloud, queries);
+  const auto adopted_second =
+      build(adopted, fixture.cloud, queries);
+  check(
+      legacy_first.transcript == adopted_first.transcript &&
+          adopted_second.transcript == adopted_first.transcript &&
+          legacy_first.audit.proposal_digest_fnv1a ==
+              adopted_first.audit.proposal_digest_fnv1a,
+      "legacy copy and 14N adoption produce the same proposal transcript");
+  const std::size_t point_count = fixture.cloud.size();
+  const std::size_t device_snapshot_bytes =
+      4U * point_count * sizeof(std::uint64_t);
+  check(
+      !legacy_first.audit
+           .device_snapshot_adopted_from_morton_lbvh_lease &&
+          !legacy_first.audit.adopted_device_snapshot_owner_retained &&
+          legacy_first.audit.host_coordinate_snapshot_word_count ==
+              3U * point_count &&
+          legacy_first.audit.host_morton_order_snapshot_entry_count ==
+              point_count &&
+          legacy_first.audit.host_snapshot_byte_capacity ==
+              device_snapshot_bytes +
+                  point_count * sizeof(std::size_t) &&
+          legacy_first.audit.snapshot_host_to_device_byte_count ==
+              device_snapshot_bytes,
+      "the legacy path keeps and uploads its explicit 40n host snapshot");
+  check(
+      adopted_first.audit
+              .device_snapshot_adopted_from_morton_lbvh_lease &&
+          adopted_first.audit.adopted_device_snapshot_owner_retained &&
+          adopted_first.audit.source_morton_lbvh_lease_epoch ==
+              built.audit().snapshot_buffer_epoch &&
+          adopted_first.audit.host_coordinate_snapshot_word_count == 0U &&
+          adopted_first.audit.host_morton_order_snapshot_entry_count ==
+              0U &&
+          adopted_first.audit.host_inverse_morton_entry_count ==
+              point_count &&
+          adopted_first.audit.host_snapshot_byte_capacity ==
+              point_count * sizeof(std::size_t) &&
+          adopted_first.audit.snapshot_host_to_device_byte_count == 0U &&
+          adopted_second.audit.snapshot_host_to_device_byte_count == 0U,
+      "the adopted path retains only the 8n inverse and performs zero "
+      "snapshot H2D traffic");
+
+  std::unique_ptr<DirectSparseFacetTopKProposalContext>
+      context_outliving_index;
+  {
+    MortonLbvhBuildContext short_builder{point_count};
+    auto short_build = short_builder.build(fixture.cloud);
+    auto short_lease =
+        short_builder.release_device_lease(short_build);
+    context_outliving_index =
+        std::make_unique<DirectSparseFacetTopKProposalContext>(
+            short_build.certified_index(),
+            fixture.cloud,
+            std::move(short_lease),
+            4U);
+  }
+  const auto after_index_destruction =
+      build(*context_outliving_index, fixture.cloud, queries);
+  check(
+      after_index_destruction.complete_proposal_batch() &&
+          after_index_destruction.audit
+              .device_snapshot_adopted_from_morton_lbvh_lease,
+      "the adopted context owns its inverse and does not borrow the 14M "
+      "index lifetime");
+}
+
+void test_phase14n_adoption_rejections_are_atomic() {
+  reset_fake_gpu_phase14_facet_top_k_proposal();
+  reset_fake_gpu_phase14_morton_lbvh_build();
+  Fixture fixture;
+
+  {
+    MortonLbvhBuildContext builder{fixture.cloud.size()};
+    auto built = builder.build(fixture.cloud);
+    auto lease = builder.release_device_lease(built);
+    const CanonicalPointCloud foreign_cloud = make_cloud();
+    const MortonLbvhIndex foreign_index =
+        MortonLbvhIndex::build(foreign_cloud);
+    check_throws<std::invalid_argument>(
+        [&] {
+          DirectSparseFacetTopKProposalContext rejected{
+              foreign_index,
+              foreign_cloud,
+              std::move(lease),
+              2U};
+        },
+        "an adopted lease rejects a foreign immutable PointId namespace");
+    check(
+        lease.ready(),
+        "a foreign-namespace rejection does not consume the lease");
+  }
+
+  {
+    MortonLbvhBuildContext oversized{
+        fixture.cloud.size() + 1U};
+    auto built = oversized.build(fixture.cloud);
+    auto lease = oversized.release_device_lease(built);
+    check_throws<std::invalid_argument>(
+        [&] {
+          DirectSparseFacetTopKProposalContext rejected{
+              built.certified_index(),
+              fixture.cloud,
+              std::move(lease),
+              2U};
+        },
+        "14O rejects a lease whose maximum capacity exceeds point_count");
+    check(
+        lease.ready(),
+        "an exact-capacity rejection does not consume the lease");
+  }
+
+  {
+    MortonLbvhBuildContext builder{fixture.cloud.size()};
+    auto built = builder.build(fixture.cloud);
+    auto source = builder.release_device_lease(built);
+    MortonLbvhDeviceLease moved{std::move(source)};
+    check(
+        !source.ready() && moved.ready(),
+        "moving a 14N lease transfers its one-shot adoption capability");
+    check_throws<std::invalid_argument>(
+        [&] {
+          DirectSparseFacetTopKProposalContext rejected{
+              built.certified_index(),
+              fixture.cloud,
+              std::move(source),
+              2U};
+        },
+        "14O rejects a moved-from lease");
+    DirectSparseFacetTopKProposalContext accepted{
+        built.certified_index(),
+        fixture.cloud,
+        std::move(moved),
+        2U};
+    check(
+        !moved.ready() &&
+            accepted.point_count() == fixture.cloud.size(),
+        "the moved-to lease is consumed by exactly one context");
+  }
 }
 
 void test_empty_batch_has_no_launch_or_epoch() {
@@ -736,6 +925,15 @@ void test_corruption_matrix_and_poisoning() {
       "a mismatched active transfer extent");
   check_corruption_poisoning(
       fixture,
+      Corruption::missing_initial_snapshot_transfer,
+      "a missing initial resident-snapshot transfer");
+  check_corruption_poisoning(
+      fixture,
+      Corruption::repeated_snapshot_transfer,
+      "a repeated resident-snapshot transfer",
+      true);
+  check_corruption_poisoning(
+      fixture,
       Corruption::stale_active_candidate_tail,
       "a stale candidate in an active record tail");
   check_corruption_poisoning(
@@ -769,6 +967,8 @@ void test_corruption_matrix_and_poisoning() {
 int main() {
   test_direct_integer_binary64_projection();
   test_result_epochs_and_digest();
+  test_phase14n_snapshot_adoption();
+  test_phase14n_adoption_rejections_are_atomic();
   test_empty_batch_has_no_launch_or_epoch();
   test_unsupported_centers_keep_the_supported_subset_sparse();
   test_preflight_identity_and_move_contracts();

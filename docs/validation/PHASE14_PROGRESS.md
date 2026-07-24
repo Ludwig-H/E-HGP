@@ -144,11 +144,23 @@ La voie réelle passe au SHA `2a03f4ad55b2e369891de2081f67a5108a4de8ad`. NVCC 12
 
 La génération gardée `2026-07-24T07:55:00.862-07:00` dans `europe-west4-ai1a` a fermé les coupe-circuits GCE et invité, exécuté la qualification, puis a été arrêtée à `2026-07-24T08:01:11.440-07:00` et recertifiée `TERMINATED`; aucune autre VM `project=e-hgp` n'était active et la clé de session a été révoquée. La tentative antérieure `europe-west4-a`, génération `2026-07-24T07:49:31.001-07:00`, a échoué fermée avant tout calcul car `terminationTimestamp` n'était pas exposé; elle a été arrêtée à `2026-07-24T07:54:09.612-07:00` et recertifiée `TERMINATED`.
 
-Aucun adaptateur ne donne encore les ressources opaques de la lease à 14I, 14J, 14K ou 14L. Aucune facette ou coface globale, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est matérialisée. Le temps de construction du composant sur trois répétitions n'est pas le p95 du nuage complet : aucun protocole `warm_e2e`, SLO principal 100 ms, objectif secondaire une seconde, capacité produit 10 M+ ou statut exact n'est revendiqué.
+La qualification 14N isolée ne mesure encore aucun consommateur de la lease; 14O ajoute ci-dessous la couture source vers 14I. Aucune facette ou coface globale, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est matérialisée. Le temps de construction du composant sur trois répétitions n'est pas le p95 du nuage complet : aucun protocole `warm_e2e`, SLO principal 100 ms, objectif secondaire une seconde, capacité produit 10 M+ ou statut exact n'est revendiqué.
+
+## Incrément 14O validé hôte — adoption de la lease 14N par 14I
+
+La porte 14N est documentée comme satisfaite. 14O est implémenté dans le source sous `cuda_g4_plus_reference_cpu / hgp_reduced / device_morton_lbvh_lease_adoption / architecture_only`, avec `public_status=not_claimed`. Le constructeur adopté exige le même index certifié, le même namespace immuable de nuage, une lease prête dont la capacité maximale égale exactement $n$, des extents $3n$ et $n$, une epoch source et une capacité de requêtes non nulle.
+
+Le contexte construit et possède seulement l'inverse Morton hôte. Sur LP64, son snapshot hôte passe donc de $40n$ à $8n$ octets : zéro mot de coordonnées, zéro copie de l'ordre direct et $n$ mots `size_t`. Tous les contrôles et cette allocation précèdent le move irréversible. Le propriétaire 14N est ensuite retenu avec ses deux allocations device $32n$; aucun second snapshot device n'est alloué et chaque lot adopté annonce zéro octet H2D de snapshot.
+
+`DirectSparseFacetTopKProposalAudit` passe au schéma v4 et distingue explicitement adoption, propriétaire retenu, epoch, trois comptes hôte et trafic du snapshot. La voie legacy demeure disponible et conserve $40n$ octets hôte, une copie initiale $32n$ puis zéro. La fixture source compare les transcripts et digests legacy/adopté, exerce deux lots adoptés, la survie à la destruction de l'index et les rejets atomiques d'un namespace étranger, d'une capacité non exacte et d'une lease déplacée.
+
+Sous GCC Release strict, les deux cibles proposition et Morton compilent. Leurs CTests ciblés passent 2/2 en 0,05 seconde et couvrent adoption, parité legacy/adoptée, deux lots adoptés, rejets atomiques et contexte survivant au builder et à l'index. Après fermeture du défaut P2, le CTest proposition repasse 1/1 en 0,01 seconde : le premier lot legacy doit annoncer $32n$ octets H2D, le second zéro, et les corruptions permanentes « transfert initial absent » puis « transfert répété » sont rejetées. 14O atteint donc `validated_host_software_real_cuda_pending`.
+
+L'outil CUDA de qualification est étendu au schéma v4 dans le source. Il compare deux lots legacy et adoptés, leur transcript et leur digest, et ajoute le cas $K=10$. Il n'est pas compilé localement car `nvcc` est absent; aucun SHA propre G4 14O, smoke, memcheck, temps ou RSS n'est revendiqué et GCP n'est pas utilisé. Le contexte n'est pas encore raccordé aux callbacks 14L et aucune hiérarchie complète n'est mesurée. La porte Phase 14, le p95 `warm_e2e` 50 k et 10 M+ restent ouverts.
 
 ## Priorités de développement
 
-1. fournir l'adaptateur réel qui fait adopter la lease 14N par les contextes CUDA 14I/14J/14K et les callbacks 14L;
+1. qualifier courtement la couture 14O sur G4, puis raccorder ce contexte adopté aux callbacks 14L sans créer un second chemin produit;
 2. étudier un réemploi recertifiable du centre exact par 10.5c au lieu de la seconde construction actuellement explicite;
 3. réutiliser les capacités restantes de scratch sans conserver de graphe entre lots;
 4. exploiter l'instrumentation `warm_e2e`, puis raccorder les chunks durables 15B au reducer hiérarchique avant toute campagne massive.

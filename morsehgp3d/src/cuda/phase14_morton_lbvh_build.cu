@@ -424,6 +424,14 @@ class Phase14MortonLbvhCudaLeaseResources final {
            source_snapshot_epoch_ != 0U;
   }
 
+  [[nodiscard]] int device() const noexcept { return device_; }
+  [[nodiscard]] const std::uint64_t* coordinate_bits() const noexcept {
+    return coordinate_bits_.get();
+  }
+  [[nodiscard]] const std::uint64_t* morton_point_ids() const noexcept {
+    return morton_point_ids_.get();
+  }
+
  private:
   int device_{};
   std::size_t maximum_point_count_{};
@@ -660,7 +668,9 @@ class Phase14MortonLbvhCudaResources final {
     builder_initialized_ = true;
   }
 
-  [[nodiscard]] std::shared_ptr<void> release_device_lease(
+  [[nodiscard]]
+  std::shared_ptr<Phase14MortonLbvhCudaLeaseResources>
+  release_device_lease(
       std::size_t point_count,
       std::uint64_t source_snapshot_epoch) {
     if (!builder_initialized_ ||
@@ -1862,7 +1872,7 @@ release_phase14_morton_lbvh_device_lease(
         "the Phase 14N lease has stale CUDA builder extents");
   }
   DeviceGuard guard{resources->device()};
-  std::shared_ptr<void> retained =
+  std::shared_ptr<Phase14MortonLbvhCudaLeaseResources> retained =
       resources->release_device_lease(
           point_count, source_snapshot_epoch);
   opaque.reset();
@@ -1879,6 +1889,9 @@ release_phase14_morton_lbvh_device_lease(
       "the Phase 14N retained PointId bytes overflow");
 
   Phase14MortonLbvhDeviceLeaseBatch batch;
+  batch.device_coordinate_bits = retained->coordinate_bits();
+  batch.device_morton_point_ids = retained->morton_point_ids();
+  batch.cuda_device = retained->device();
   batch.retained_resources = std::move(retained);
   batch.point_count = point_count;
   batch.maximum_point_count = maximum_point_count;

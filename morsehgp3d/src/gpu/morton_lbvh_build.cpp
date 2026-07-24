@@ -488,7 +488,15 @@ void validate_device_lease_batch(
       !batch.active_morton_point_ids_retained ||
       !batch.builder_transients_released ||
       (!cuda_execution && !host_fake_execution) ||
-      cuda_execution != batch.cuda_path_qualified) {
+      cuda_execution != batch.cuda_path_qualified ||
+      (cuda_execution &&
+       (batch.device_coordinate_bits == nullptr ||
+        batch.device_morton_point_ids == nullptr ||
+        batch.cuda_device < 0)) ||
+      (host_fake_execution &&
+       (batch.device_coordinate_bits != nullptr ||
+        batch.device_morton_point_ids != nullptr ||
+        batch.cuda_device != -1))) {
     throw std::runtime_error(
         "the Phase 14N device lease returned invalid retained extents or "
         "lifecycle facts");
@@ -499,13 +507,22 @@ void validate_device_lease_batch(
 
 MortonLbvhDeviceLease::MortonLbvhDeviceLease(
     MortonLbvhDeviceLeaseAudit audit,
-    std::shared_ptr<void> retained_resources)
+    std::shared_ptr<void> retained_resources,
+    std::shared_ptr<const void> source_cloud_identity,
+    const std::uint64_t* device_coordinate_bits,
+    const std::uint64_t* device_morton_point_ids,
+    int cuda_device)
     : audit_(std::move(audit)),
-      retained_resources_(std::move(retained_resources)) {}
+      retained_resources_(std::move(retained_resources)),
+      source_cloud_identity_(std::move(source_cloud_identity)),
+      device_coordinate_bits_(device_coordinate_bits),
+      device_morton_point_ids_(device_morton_point_ids),
+      cuda_device_(cuda_device) {}
 
 bool MortonLbvhDeviceLease::ready() const noexcept {
   if (schema_version_ != morton_lbvh_device_lease_schema_version ||
       !retained_resources_ ||
+      !source_cloud_identity_ ||
       audit_.maximum_point_count == 0U ||
       audit_.point_count == 0U ||
       audit_.point_count > audit_.maximum_point_count ||
@@ -539,6 +556,16 @@ bool MortonLbvhDeviceLease::ready() const noexcept {
       audit_.higher_order_delaunay_mosaic_materialized ||
       audit_.global_cell_or_coface_arena_materialized ||
       audit_.public_status_claimed) {
+    return false;
+  }
+  if (audit_.cuda_device_storage_retained) {
+    return device_coordinate_bits_ != nullptr &&
+           device_morton_point_ids_ != nullptr &&
+           cuda_device_ >= 0;
+  }
+  if (device_coordinate_bits_ != nullptr ||
+      device_morton_point_ids_ != nullptr ||
+      cuda_device_ != -1) {
     return false;
   }
   return true;
@@ -897,6 +924,7 @@ MortonLbvhDeviceBuildResult MortonLbvhBuildContext::build(
         "snapshot-import contract");
   }
   last_completed_point_count_ = point_count;
+  last_cloud_identity_ = cloud.identity_;
   latest_device_build_available_for_lease_ = true;
   return result;
 }
@@ -1010,7 +1038,11 @@ MortonLbvhDeviceLease MortonLbvhBuildContext::release_device_lease(
 
   MortonLbvhDeviceLease lease{
       std::move(audit),
-      std::move(retained.retained_resources)};
+      std::move(retained.retained_resources),
+      std::move(last_cloud_identity_),
+      retained.device_coordinate_bits,
+      retained.device_morton_point_ids,
+      retained.cuda_device};
   if (!lease.ready()) {
     throw std::logic_error(
         "the Phase 14N device lease did not close its compact lifecycle "

@@ -165,8 +165,12 @@ void test_regular_tetrahedron_factorization_and_bounds() {
               .constant_auxiliary_record_storage_certified &&
           streaming_source_verification.canonical_cloud_digest_pass_count ==
               2U &&
-          streaming_source_verification.event_projection_scan_count == 15U &&
-          streaming_source_verification.role_record_scan_count == 26U &&
+          streaming_source_verification
+                  .generated_singleton_projection_count == 4U &&
+          streaming_source_verification
+                  .generated_singleton_role_record_count == 4U &&
+          streaming_source_verification.event_projection_scan_count == 11U &&
+          streaming_source_verification.role_record_scan_count == 22U &&
           streaming_source_verification.batch_scan_count == 7U &&
           result.families.size() == 11U &&
           result.arm_seeds.size() == 28U,
@@ -371,7 +375,8 @@ void test_budget_and_mutation_fail_closed() {
       "fresh replay rejects a mutated removed-support identity");
 
   auto broken_source = source.journal;
-  broken_source.role_records.back().event_projection_index = 0U;
+  broken_source.materialized_direct_role_records.back()
+      .event_projection_index = 0U;
   const auto rejected =
       morsehgp3d::hierarchy::
           build_exact_direct_saddle_arm_seed_journal(
