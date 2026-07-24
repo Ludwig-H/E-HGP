@@ -1910,6 +1910,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
     STATIC
       src/cuda/phase14_facet_top_k_proposal_internal.hpp
       src/cuda/phase14_facet_top_k_proposal.cu
+      src/gpu/exact_center_binary64_projection.hpp
       src/gpu/rational_binary64_enclosure.hpp
       src/gpu/direct_sparse_facet_top_k_proposal.cpp
   )

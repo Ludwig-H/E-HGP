@@ -1028,7 +1028,9 @@ add_executable(
 )
 target_include_directories(
   morsehgp3d_gpu_direct_sparse_facet_top_k_proposal_context_tests
-  PRIVATE "${PROJECT_SOURCE_DIR}/src/cuda"
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/cuda"
+    "${PROJECT_SOURCE_DIR}/src/gpu"
 )
 target_link_libraries(
   morsehgp3d_gpu_direct_sparse_facet_top_k_proposal_context_tests

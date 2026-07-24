@@ -1,5 +1,8 @@
 #include "fake_gpu_phase14_facet_top_k_proposal_launchers.hpp"
 
+#include "exact_center_binary64_projection.hpp"
+#include "rational_binary64_enclosure.hpp"
+
 #include "morsehgp3d/exact/point.hpp"
 #include "morsehgp3d/gpu/direct_sparse_facet_top_k_proposal.hpp"
 
@@ -20,6 +23,7 @@ namespace {
 
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactCenter3;
+using morsehgp3d::exact::ExactRational;
 using morsehgp3d::gpu::DirectSparseFacetTopKProposalBatchResult;
 using morsehgp3d::gpu::DirectSparseFacetTopKProposalContext;
 using morsehgp3d::gpu::DirectSparseFacetTopKProposalPolicy;
@@ -89,6 +93,154 @@ void check_throws(Function&& function, const std::string& message) {
   }
   ++failures;
   std::cerr << "FAIL: " << message << " (no exception)\n";
+}
+
+struct LegacyNearestProjection {
+  std::uint64_t bits{};
+  bool supported{true};
+};
+
+[[nodiscard]] LegacyNearestProjection legacy_nearest_binary64(
+    const ExactRational& value) {
+  const auto enclosure =
+      morsehgp3d::gpu::detail::enclose_rational(value);
+  if (enclosure.status ==
+      morsehgp3d::gpu::DirectedEnclosureStatus::unsupported_range) {
+    return LegacyNearestProjection{0U, false};
+  }
+  if (enclosure.lower_bits == enclosure.upper_bits) {
+    return LegacyNearestProjection{enclosure.lower_bits, true};
+  }
+  const ExactRational lower =
+      ExactRational::from_binary64_bits(enclosure.lower_bits);
+  const ExactRational upper =
+      ExactRational::from_binary64_bits(enclosure.upper_bits);
+  return LegacyNearestProjection{
+      value - lower <= upper - value
+          ? enclosure.lower_bits
+          : enclosure.upper_bits,
+      true};
+}
+
+void check_direct_projection(
+    const ExactRational& value,
+    const std::string& label) {
+  const ExactCenter3 center{
+      value.numerator(),
+      morsehgp3d::exact::BigInt{0},
+      morsehgp3d::exact::BigInt{0},
+      value.denominator()};
+  const auto direct =
+      morsehgp3d::gpu::detail::
+          project_exact_center_to_nearest_binary64(center);
+  const LegacyNearestProjection legacy =
+      legacy_nearest_binary64(value);
+  check(
+      direct.supported == legacy.supported,
+      label + " preserves the legacy supported-range decision");
+  if (legacy.supported) {
+    check(
+        direct.coordinate_bits[0U] == legacy.bits,
+        label + " preserves the legacy nearest binary64 word");
+  }
+  check(
+      direct.coordinate_bits[1U] == 0U &&
+          direct.coordinate_bits[2U] == 0U,
+      label + " keeps exact zero coordinates canonical");
+  check(
+      direct.integer_division_count <= 1U,
+      label + " uses at most one integer division for one nonzero axis");
+}
+
+void test_direct_integer_binary64_projection() {
+  using morsehgp3d::exact::BigInt;
+  using morsehgp3d::exact::power_of_two;
+
+  const ExactRational zero{};
+  const ExactRational one{BigInt{1}};
+  const ExactRational one_third{BigInt{1}, BigInt{3}};
+  const ExactRational minimum_subnormal{
+      BigInt{1}, power_of_two(1074U)};
+  const ExactRational half_minimum_subnormal{
+      BigInt{1}, power_of_two(1075U)};
+  const ExactRational minimum_normal{
+      BigInt{1}, power_of_two(1022U)};
+  const ExactRational maximum_finite =
+      ExactRational::from_binary64_bits(
+          UINT64_C(0x7fefffffffffffff));
+  const ExactRational above_maximum =
+      maximum_finite + one;
+
+  const std::array boundaries{
+      zero,
+      one_third,
+      minimum_subnormal,
+      half_minimum_subnormal,
+      minimum_normal,
+      one,
+      maximum_finite,
+      above_maximum};
+  for (std::size_t index = 0U;
+       index < boundaries.size();
+       ++index) {
+    check_direct_projection(
+        boundaries[index],
+        "direct projection boundary " + std::to_string(index));
+    if (!boundaries[index].is_zero()) {
+      check_direct_projection(
+          -boundaries[index],
+          "negative direct projection boundary " +
+              std::to_string(index));
+    }
+  }
+
+  const std::array adjacent_lower_bits{
+      UINT64_C(0x0000000000000000),
+      UINT64_C(0x000fffffffffffff),
+      UINT64_C(0x3fefffffffffffff),
+      UINT64_C(0x3ff0000000000000),
+      UINT64_C(0x400fffffffffffff),
+      UINT64_C(0x7feffffffffffffe)};
+  for (const std::uint64_t lower_bits : adjacent_lower_bits) {
+    const ExactRational lower =
+        ExactRational::from_binary64_bits(lower_bits);
+    const ExactRational upper =
+        ExactRational::from_binary64_bits(lower_bits + 1U);
+    const ExactRational midpoint =
+        (lower + upper) / ExactRational{BigInt{2}};
+    check_direct_projection(
+        midpoint,
+        "positive adjacent midpoint " + std::to_string(lower_bits));
+    if (!midpoint.is_zero()) {
+      check_direct_projection(
+          -midpoint,
+          "negative adjacent midpoint " +
+              std::to_string(lower_bits));
+    }
+  }
+
+  for (std::uint64_t sample = 1U; sample <= 64U; ++sample) {
+    BigInt numerator =
+        BigInt{sample * sample * UINT64_C(7919)} -
+        BigInt{sample * UINT64_C(104729)};
+    if (numerator == 0) {
+      numerator = 1;
+    }
+    const BigInt denominator =
+        power_of_two(
+            static_cast<unsigned int>(sample % 80U)) +
+        BigInt{2U * sample + 1U};
+    check_direct_projection(
+        ExactRational{std::move(numerator), denominator},
+        "deterministic direct projection sample " +
+            std::to_string(sample));
+  }
+
+  check(
+      morsehgp3d::gpu::
+              direct_sparse_facet_top_k_gpu_proposal_schema_version ==
+          3U,
+      "the direct integer projector advances the proposal schema");
 }
 
 [[nodiscard]] CertifiedPoint3 point(double x) {
@@ -246,7 +398,12 @@ void test_result_epochs_and_digest() {
               2U * 18U * sizeof(std::uint64_t) &&
           first.audit.copied_device_to_host_record_count == 2U &&
           first.audit.copied_device_to_host_byte_count ==
-              2U * 18U * sizeof(std::uint64_t),
+              2U * 18U * sizeof(std::uint64_t) &&
+          first.audit.exact_center_projection_axis_count == 6U &&
+          first.audit.exact_center_projection_integer_division_count ==
+              2U &&
+          first.audit
+              .exact_center_projection_division_bound_validated,
       "the audit exposes the lazy 32n device snapshot, full host snapshot and fixed batch capacities");
   check(
       first.audit.canonical_query_count == 2U &&
@@ -601,6 +758,7 @@ void test_corruption_matrix_and_poisoning() {
 }  // namespace
 
 int main() {
+  test_direct_integer_binary64_projection();
   test_result_epochs_and_digest();
   test_empty_batch_has_no_launch_or_epoch();
   test_unsupported_centers_keep_the_supported_subset_sparse();

@@ -153,9 +153,14 @@ void require_active_traffic(
       audit.copied_device_to_host_record_count !=
           active_query_count ||
       audit.copied_device_to_host_byte_count !=
-          kRecordBytes * active_query_count) {
+          kRecordBytes * active_query_count ||
+      audit.exact_center_projection_axis_count !=
+          3U * audit.canonical_query_count ||
+      audit.exact_center_projection_integer_division_count >
+          audit.exact_center_projection_axis_count ||
+      !audit.exact_center_projection_division_bound_validated) {
     throw std::runtime_error(
-        "the Phase 14J GPU qualification observed invalid active traffic");
+        "the Phase 14K GPU qualification observed invalid active traffic or center projection work");
   }
 }
 
@@ -420,6 +425,12 @@ int main() {
         << "\"candidate_count\":"
         << first.audit.proposed_candidate_count << ','
         << "\"exact_cpu_partition_equal\":true,"
+        << "\"exact_center_projection_axis_count\":"
+        << first.audit.exact_center_projection_axis_count << ','
+        << "\"exact_center_projection_integer_division_count\":"
+        << first.audit
+               .exact_center_projection_integer_division_count
+        << ','
         << "\"forbidden_global_structure_materialized\":false,"
         << "\"gpu_kernel_launch_count\":1,"
         << "\"host_snapshot_byte_capacity\":"
@@ -428,7 +439,7 @@ int main() {
         << first.audit.inspected_neighbor_count << ','
         << "\"mode\":\"proposal_only\","
         << "\"non_dyadic_hint_candidate_ids_validated\":true,"
-        << "\"phase\":\"14J\","
+        << "\"phase\":\"14K\","
         << "\"profile\":\"hgp_reduced\","
         << "\"proposal_digest_fnv1a\":"
         << first.audit.proposal_digest_fnv1a << ','
@@ -445,12 +456,12 @@ int main() {
         << first.audit.static_device_query_buffer_byte_capacity << ','
         << "\"static_device_record_buffer_byte_capacity\":"
         << first.audit.static_device_record_buffer_byte_capacity << ','
-        << "\"schema\":\"morsehgp3d.phase14j.facet_top_k_cuda_qualification.v2\"}"
+        << "\"schema\":\"morsehgp3d.phase14k.facet_top_k_cuda_qualification.v3\"}"
         << '\n';
     return 0;
   } catch (const std::exception& error) {
     std::cerr
-        << "Phase 14J GPU facet top-k qualification failed: "
+        << "Phase 14K GPU facet top-k qualification failed: "
         << error.what() << '\n';
     return 1;
   }

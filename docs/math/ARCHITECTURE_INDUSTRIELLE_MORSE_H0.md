@@ -140,15 +140,25 @@ La queue device $[D,C)$ n'est ni lue, ni initialisée, ni transférée et ne por
 
 Ce changement ne touche ni la sélection flottante, ni la recertification CPU 14F, ni le commit 14H. Il ne construit aucune facette ou coface absente, incidence globale, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur. 14J reste `architecture_only`, `proposal_only` et `public_status=not_claimed`; il ne qualifie encore ni 50 k, ni 10 M+.
 
-## Goulots restant à traiter après 14J
+## Incrément 14K — projecteur entier direct
+
+Pour chaque coordonnée $x=N/Q$, le projecteur compare d'abord $A=\lvert N\rvert$ au maximum fini mis au même dénominateur. Sous le minimum normal, il divise $A2^{1074}$ par $Q$. Sinon, les bits de poids fort déterminent le binade exact avec au plus une correction, puis une division euclidienne produit le significand sur la grille de ce binade.
+
+Le reste ferme l'arrondi historique sans reconstruire les deux rationnels adjacents. Une valeur positive au midpoint garde la magnitude inférieure; une valeur négative au midpoint prend la magnitude supérieure, donc la borne numérique inférieure. Les transitions subnormal--normal et de binade sont absorbées par la normalisation du significand. La plage au-delà du maximum fini reste non supportée et le zéro négatif est canonicalisé.
+
+Les trois axes partagent $Q$, son bit de poids fort et le seuil maximal. Le travail par requête est au plus trois `divide_qr`, au lieu d'environ 189 comparaisons rationnelles et trois constructions de coordonnées réduites. L'audit ferme le nombre d'axes et la borne de divisions. Le scratch reste local aux entiers temporaires et aucun cache n'est conservé entre les lots.
+
+L'ancien encadrement subsiste uniquement comme oracle différentiel court. Le chemin produit n'en dépend plus. 14K ne modifie ni la proposition flottante, ni la recertification 14F, ni le ticket 14H, ne construit aucune structure globale interdite et reste `architecture_only` avec `public_status=not_claimed`.
+
+## Goulots restant à traiter après 14K
 
 Trois coûts dominants restent visibles :
 
 - les traversées exactes top-$K$ par clé distincte, encore linéaires au pire cas puisque 14I ne garantit aucun rappel;
 - les constructions exactes de miniballs jusqu'à 385 supports, potentiellement répétées entre la préparation du centre et 10.5c, ainsi que les fallbacks rationnels;
-- les snapshots $32n$ device et $40n$ hôte sur G4, les buffers persistants $352C$ device et la capacité hôte $144C$, le scratch top-$k$ local restant de 160 octets par thread, la projection rationnelle non cachée, les capacités réutilisables et le pic des tickets détenus par l'appelant, qui exigent chunks et plafonds sans dupliquer durablement les grandes arènes.
+- les snapshots $32n$ device et $40n$ hôte sur G4, les buffers persistants $352C$ device et la capacité hôte $144C$, le scratch top-$k$ local restant de 160 octets par thread, les capacités réutilisables et le pic des tickets détenus par l'appelant, qui exigent chunks et plafonds sans dupliquer durablement les grandes arènes.
 
-La priorité de développement devient donc : intégrer ce smoke dans un worker GCP gardé reproductible et réduire le coût de projection, puis raccorder le chunking à la préparation scellée sans transférer l'autorité de l'audit. Les centres ou capacités exactes ne peuvent être réutilisés qu'avec une provenance recertifiable; l'instrumentation `warm_e2e`, puis les runs et checkpoints compacts, viennent ensuite pour les profils 50 k et 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
+La priorité de développement devient donc : intégrer ce smoke dans un worker GCP gardé reproductible, puis raccorder le chunking à la préparation scellée sans transférer l'autorité de l'audit. Les centres ou capacités exactes ne peuvent être réutilisés qu'avec une provenance recertifiable; l'instrumentation `warm_e2e`, puis les runs et checkpoints compacts, viennent ensuite pour les profils 50 k et 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
 
 ## Planification sans promotion
 

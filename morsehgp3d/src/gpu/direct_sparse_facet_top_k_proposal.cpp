@@ -1,7 +1,7 @@
 #include "morsehgp3d/gpu/direct_sparse_facet_top_k_proposal.hpp"
 
 #include "../cuda/phase14_facet_top_k_proposal_internal.hpp"
-#include "rational_binary64_enclosure.hpp"
+#include "exact_center_binary64_projection.hpp"
 
 #include <algorithm>
 #include <array>
@@ -135,28 +135,6 @@ void validate_key(
   }
 }
 
-[[nodiscard]] std::uint64_t nearest_binary64_bits(
-    const exact::ExactRational& value,
-    bool& supported) {
-  const detail::DirectedEnclosure enclosure =
-      detail::enclose_rational(value);
-  if (enclosure.status ==
-      DirectedEnclosureStatus::unsupported_range) {
-    supported = false;
-    return 0U;
-  }
-  if (enclosure.lower_bits == enclosure.upper_bits) {
-    return enclosure.lower_bits;
-  }
-  const exact::ExactRational lower =
-      exact::ExactRational::from_binary64_bits(enclosure.lower_bits);
-  const exact::ExactRational upper =
-      exact::ExactRational::from_binary64_bits(enclosure.upper_bits);
-  return value - lower <= upper - value
-             ? enclosure.lower_bits
-             : enclosure.upper_bits;
-}
-
 [[nodiscard]] std::size_t source_window_inspection_bound(
     std::size_t morton_position,
     std::size_t point_count,
@@ -200,6 +178,8 @@ struct PackedQueries {
   std::vector<unsigned char> center_supported;
   std::vector<std::size_t> inspection_bounds;
   std::size_t facet_cardinality{};
+  std::size_t exact_center_projection_axis_count{};
+  std::size_t exact_center_projection_integer_division_count{};
   std::size_t unsupported_center_count{};
   std::size_t aggregate_inspection_bound{};
   std::size_t maximum_inspection_bound{};
@@ -247,12 +227,19 @@ struct PackedQueries {
           "Phase 14 GPU proposal queries must have one cardinality and strictly increasing full keys");
     }
 
-    bool center_supported = true;
-    std::array<std::uint64_t, 3U> center_bits{};
-    for (std::size_t axis = 0U; axis < center_bits.size(); ++axis) {
-      center_bits[axis] = nearest_binary64_bits(
-          query.query_center.coordinate(axis), center_supported);
-    }
+    const detail::ExactCenterBinary64Projection projection =
+        detail::project_exact_center_to_nearest_binary64(
+            query.query_center);
+    packed.exact_center_projection_axis_count = checked_size_sum(
+        packed.exact_center_projection_axis_count,
+        projection.coordinate_bits.size(),
+        "the Phase 14 center projection axis count overflowed");
+    packed.exact_center_projection_integer_division_count =
+        checked_size_sum(
+            packed.exact_center_projection_integer_division_count,
+            projection.integer_division_count,
+            "the Phase 14 center projection division count overflowed");
+    const bool center_supported = projection.supported;
     if (!center_supported) {
       ++packed.unsupported_center_count;
       continue;
@@ -266,7 +253,9 @@ struct PackedQueries {
     input.point_count = static_cast<std::uint64_t>(
         query.source_facet_key.point_count);
     std::copy(
-        center_bits.begin(), center_bits.end(), input.center_bits);
+        projection.coordinate_bits.begin(),
+        projection.coordinate_bits.end(),
+        input.center_bits);
     std::fill(
         std::begin(input.point_ids),
         std::end(input.point_ids),
@@ -567,6 +556,10 @@ void initialize_common_audit(
           "the Phase 14 device query byte capacity overflowed");
   audit.host_record_copy_byte_capacity =
       audit.static_device_record_buffer_byte_capacity;
+  audit.exact_center_projection_axis_count =
+      packed.exact_center_projection_axis_count;
+  audit.exact_center_projection_integer_division_count =
+      packed.exact_center_projection_integer_division_count;
   audit.canonical_query_count = queries.size();
   audit.gpu_supported_center_query_count =
       packed.gpu_queries.size();
@@ -581,6 +574,12 @@ void initialize_common_audit(
   audit.canonical_query_order_validated = true;
   audit.homogeneous_facet_cardinality_validated = true;
   audit.fixed_capacity_preflight_satisfied = true;
+  audit.exact_center_projection_division_bound_validated =
+      audit.exact_center_projection_axis_count % 3U == 0U &&
+      audit.exact_center_projection_axis_count / 3U ==
+          audit.canonical_query_count &&
+      audit.exact_center_projection_integer_division_count <=
+          audit.exact_center_projection_axis_count;
 }
 
 void finalize_digest(
@@ -718,6 +717,12 @@ void finalize_digest(
          audit.canonical_query_order_validated &&
          audit.homogeneous_facet_cardinality_validated &&
          audit.fixed_capacity_preflight_satisfied &&
+         audit.exact_center_projection_division_bound_validated &&
+         audit.exact_center_projection_axis_count % 3U == 0U &&
+         audit.exact_center_projection_axis_count / 3U ==
+             audit.canonical_query_count &&
+         audit.exact_center_projection_integer_division_count <=
+             audit.exact_center_projection_axis_count &&
          audit.supported_query_permutation_validated &&
          audit.active_record_candidate_tail_sentinel_validated &&
          audit.every_candidate_domain_validated &&

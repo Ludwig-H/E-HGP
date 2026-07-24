@@ -1231,6 +1231,16 @@ La mémoire de capacité reste $O(C)$ et le snapshot reste $O(n)$, mais le trafi
 
 Le rejeu court du SHA `8c76feb4c28dd1360d71075b1d3e15c7af0a3c95` sur une G4 `SPOT` réelle passe. Les deux CTests ciblés terminent en 0,28 seconde, la transition $C=6$ et $D=4$, $D=1$, $D=5$ ferme les extents réinitialisés, ptxas conserve 62 registres, 160 octets de pile et zéro spill, `cuobjdump` trouve un seul cubin `sm_120` sans PTX, et memcheck annonce zéro erreur et zéro fuite. Cette recertification ne constitue ni un benchmark de débit, ni un protocole `warm_e2e`.
 
+### Projecteur entier direct 14K
+
+14K remplace le projecteur par recherche binaire rationnelle par une quantification entière exacte, sans changer le mot binary64 choisi. Pour $x=N/Q$, le contrôle de plage compare $A=\lvert N\rvert$ à $Q(2^{53}-1)2^{971}$. Le régime subnormal divise $A2^{1074}$ par $Q$. Le régime normal détermine $e=\lfloor\log_2(A/Q)\rfloor$ à partir des bits de poids fort et d'au plus une comparaison décalée, puis divise sur la grille $2^{e-52}$.
+
+Le quotient et le reste ferment directement l'arrondi historique vers la borne numérique inférieure en cas d'égalité : incrément strict au-delà du demi-pas pour une coordonnée positive, incrément dès le demi-pas pour une coordonnée négative. Cette asymétrie conserve notamment les midpoints, le demi-minimum subnormal et les changements de binade bit à bit. La normalisation du significand ne publie ni infini, ni zéro négatif.
+
+Comme les trois numérateurs partagent $Q$, son bit de poids fort et le seuil maximal sont préparés une seule fois. Chaque axe non nul supporté exécute une `divide_qr`; une requête en exécute donc au plus trois, contre environ 189 comparaisons rationnelles et trois constructions de `ExactRational` auparavant. L'audit compte exactement trois axes par requête et au plus autant de divisions. Aucun cache ou état persistant n'est ajouté.
+
+Le différentiel court conserve l'ancien encadrement uniquement comme oracle de test. Il couvre zéro, $1/3$, minimum subnormal, demi-minimum subnormal, minimum normal, midpoints adjacents positifs et négatifs, changements de binade, maximum fini, hors plage et 64 rationnels déterministes. Le chemin produit ne dépend plus de cet encadrement. La sélection GPU reste une proposition sans rappel garanti; 14F et 14H conservent seuls l'autorité déjà décrite.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;

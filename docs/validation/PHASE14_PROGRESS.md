@@ -98,9 +98,17 @@ La queue device $[D,C)$ n'est pas lue et n'a aucune autorité; toute partie qui 
 
 14J ne change ni la sélection flottante, ni le digest des records actifs, ni la revalidation exacte 14F, ni le commit scellé 14H. Il supprime le trafic proportionnel à la capacité inutilisée sans introduire de facette, coface, incidence globale, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur. Le jalon reste `cuda_g4 / hgp_reduced / proposal_only`, `architecture_only` et `public_status=not_claimed`; sa recertification G4 courte passe.
 
+## Incrément 14K implémenté — projection binary64 entière directe
+
+Pour une coordonnée $x=N/Q$, le nouveau projecteur ferme d'abord la plage finie par une comparaison entière. Il choisit ensuite la grille subnormale ou détermine exactement le binade par les bits de poids fort et une comparaison décalée, puis une unique `divide_qr` fournit le significand et son reste. L'arrondi conserve la règle historique vers la borne numérique inférieure au midpoint, donc un seuil strict pour $N>0$ et large pour $N<0$.
+
+Les trois coordonnées utilisent directement leurs numérateurs et le dénominateur commun; aucune construction de `ExactRational` ou recherche sur 63 mots par axe ne subsiste dans le chemin produit. Une requête exécute au plus trois divisions, publiées dans l'audit. Le projecteur ne possède aucun cache et ne transmet aucune autorité à 14F ou 14H.
+
+Le différentiel court contre l'ancien encadrement couvre les frontières binary64 et 64 rationnels déterministes avec les deux signes. Il conserve exactement les décisions de plage et les bits projetés. 14K reste `cuda_g4 / hgp_reduced / proposal_only`, `architecture_only` et `public_status=not_claimed`, sans qualification 50 k ou 10 M+.
+
 ## Priorités de développement
 
-1. rendre le smoke 14J reproductible dans un worker GCP gardé et remplacer ou cacher la projection rationnelle;
+1. rendre le smoke 14K reproductible dans un worker GCP gardé;
 2. raccorder le chunking obligatoire du producteur à la préparation scellée, dimensionner $C$ près de $D$ et étudier le réemploi recertifiable des centres exacts;
 3. réutiliser les capacités restantes de scratch et plafonner les tickets appelant sans conserver de graphe entre lots;
 4. ajouter l'instrumentation `warm_e2e`, puis rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
@@ -130,6 +138,8 @@ Sur la G4 réelle, le smoke initial puis le rejeu optimisé passent. La qualific
 Pour 14J, le CTest hôte ciblé passe en 0,02 seconde. Il couvre un contexte $C=6$, $D=2$, puis des contextes $C=4$ avec $D=1$ et $D=0$, les volumes actifs exacts $208D$, $144D$ et $144D$, la taille hôte $D$, un extent rapporté falsifié et la corruption de la queue de candidats d'un record actif. La qualification G4 ajoute sur un même contexte $C=6$ la transition $D=4$, $D=1$, $D=5$. Aucun benchmark, test massif ou oracle combinatoire n'a été ajouté.
 
 Sur la G4 réelle, le SHA exact `8c76feb4c28dd1360d71075b1d3e15c7af0a3c95` compile avec NVCC 12.9.86 en audit AOT. Les CTests contexte et qualification passent 2/2 en 0,28 seconde. Le JSON 14J/v2 publie 416 octets H2D et 288 octets pour l'initialisation puis D2H du lot $D=2$, ferme la transition $D=4$, $D=1$, $D=5$, conserve 16 inspections, quatre candidats et le digest `18249493464636075901`; le cas $K=10$ conserve dix candidats, 230 inspections et l'égalité de la partition CPU exacte. Ptxas publie 62 registres, 160 octets de pile et zéro spill. `cuobjdump` trouve un seul cubin `sm_120` et aucun PTX; `compute-sanitizer` termine avec zéro erreur et zéro octet fui.
+
+Pour 14K, le même CTest hôte ciblé passe en 0,03 seconde après ajout du différentiel. Il couvre zéro, $1/3$, minimum et demi-minimum subnormal, minimum normal, six paires de mots adjacents et leurs midpoints signés, maximum fini, hors plage et 64 rationnels déterministes. L'audit des deux requêtes ordinaires publie six axes et deux divisions. La source de qualification 14K/v3 compile aussi syntaxiquement sous les avertissements stricts; la recertification G4 reste à effectuer.
 
 Une falsification coordonnée pourrait encore redistribuer des compteurs entre chunks 14A ou lanes 14C tout en conservant leurs agrégats. Les payloads compacts ne contiennent volontairement ni détail ni digest par lot; un vérificateur frais contre 10.1--10.2 est donc requis avant persistance ou exécution industrielle. Cette dette P2 est compatible avec `architecture_only`, mais devra être fermée avant toute qualification.
 

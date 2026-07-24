@@ -691,6 +691,16 @@ La queue device d'indices $[D,C)$ n'est ni initialisée, ni transférée, ni con
 
 La recertification courte sur G4 réelle passe au SHA `8c76feb4c28dd1360d71075b1d3e15c7af0a3c95`. Elle ferme les volumes actifs, la transition de préfixe $D=4$, $D=1$, $D=5$ sous $C=6$, l'unique cubin AOT `sm_120` sans PTX et le memcheck sans erreur ni fuite. Le digest opérationnel reste `18249493464636075901`; ce succès matériel ne change aucun statut scientifique ou public.
 
+### 9.25 Projection binary64 entière directe
+
+Pour une coordonnée exacte $x=N/Q$ avec $Q>0$ et $A=\lvert N\rvert$, 14K remplace la recherche binaire sur les mots binary64 par une quantification entière. La plage est refusée exactement lorsque $A>Q(2^{53}-1)2^{971}$. Si $A2^{1022}<Q$, une unique division euclidienne de $A2^{1074}$ par $Q$ donne le significand subnormal et son reste. Sinon, les bits de poids fort de $A$ et $Q$, suivis d'au plus une comparaison décalée, déterminent $e=\lfloor\log_2(A/Q)\rfloor$; une unique division sur la grille $2^{e-52}$ donne le significand normal et son reste.
+
+L'ancien projecteur choisissait la borne numérique inférieure en cas de midpoint exact. Le nouveau conserve cette règle bit à bit : pour $N>0$, le quotient est incrémenté seulement si deux fois le reste est strictement supérieur au diviseur; pour $N<0$, il est incrémenté dès l'égalité. Le zéro négatif n'est jamais publié. Le minimum subnormal, la transition normal--subnormal, les changements de binade et le maximum fini suivent la même règle.
+
+Les trois coordonnées partagent le même dénominateur et le même seuil de plage. Une requête effectue donc au plus trois divisions entières exactes, au plus trois décisions de demi-reste et des décalages bornés par 1074, sans construire trois `ExactRational` et sans boucle de quelque 63 comparaisons rationnelles par axe. L'audit publie le nombre d'axes et de divisions, puis exige que le second ne dépasse pas le premier. Le scratch est borné par la taille des entiers de la requête augmentée de 1074 bits; aucune mémoire persistante ou cache n'est ajouté.
+
+Ce projecteur reste un calcul opérationnel flottant : son résultat ne devient ni centre certifié, ni cutoff, ni preuve de rappel. La sortie continue d'être recertifiée par 14F et ignorée par le commit 14H. 14K ne construit aucune facette ou coface absente, incidence globale, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur et ne qualifie encore ni le SLO 50 k, ni 10 M+.
+
 ## 10. Événements simultanés
 
 Des centres distincts peuvent avoir exactement le même niveau. Une exécution séquentielle créerait des bifurcations binaires artificielles et pourrait changer les morphismes verticaux.
