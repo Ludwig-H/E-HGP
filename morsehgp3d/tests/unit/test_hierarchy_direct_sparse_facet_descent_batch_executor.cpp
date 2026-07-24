@@ -1709,6 +1709,280 @@ void test_sealed_ticket_closes_proposal_to_commit_budget_liveness() {
       "14H permanently exercises one proposal-success versus unseeded-exhaustion liveness gap");
 }
 
+void test_integrated_chunked_proposal_seal_and_immediate_commit() {
+  const Scenario scenario = regular_tetrahedron_order_one_scenario();
+  const auto observed_plan = build_plan(scenario);
+  ExactDirectSparsePositiveFacetLocator locator =
+      make_locator(scenario.cloud.size());
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      source_seed_budget(),
+      scenario.seed_journal,
+      plan_config(),
+      plan_budget(),
+      observed_plan,
+      locator);
+
+  const ExactDirectSparseFacetDescentBatchIntegratedRunBudget run_budget{
+      2U,
+      2U,
+      ExactDirectSparseFacetTopKProposalTranscriptBudget{
+          1U,
+          1U,
+          1U,
+          sizeof(ExactDirectSparseFacetTopKProposalRecord),
+          3U}};
+  std::uint64_t clock_tick = 0U;
+  const ExactDirectSparseFacetDescentBatchNanosecondClock clock =
+      [&clock_tick]() {
+        clock_tick += UINT64_C(10);
+        return clock_tick;
+      };
+
+  const ExactDirectSparseFacetDescentBatchPrepareInputsCallback
+      valid_prepare =
+          [&scenario](
+              const ExactDirectSparseFacetDescentBatchRunNextPrepareInputs&
+                  inputs)
+          -> std::optional<
+              ExactDirectSparseFacetDescentBatchRunNextPreparedChunk> {
+    check(
+        inputs.cpu_batch_preflights_certified &&
+            inputs.query_capacity == 2U &&
+            inputs.distinct_source_facet_key_count >=
+                inputs.canonical_queries.size(),
+        "14L calls prepare_inputs only after the CPU batch and canonical-key preflights");
+    bool compact_centers_certified = true;
+    for (const auto& query : inputs.canonical_queries) {
+      compact_centers_certified =
+          compact_centers_certified &&
+          query.exact_facet_miniball_certified &&
+          query.source_facet_key.point_count != 0U &&
+          query.enumerated_support_count != 0U;
+    }
+    check(
+        compact_centers_certified,
+        "14L exposes only compact certified exact centers, not retained miniball arenas");
+
+    ExactDirectSparseFacetDescentBatchRunNextPreparedChunk prepared;
+    const std::size_t query_count = inputs.canonical_queries.size();
+    prepared.gpu_supported_query_count = query_count;
+    prepared.active_host_to_device_query_record_count = query_count;
+    prepared.active_host_to_device_query_byte_count =
+        208U * query_count;
+    prepared.initialized_device_output_record_count = query_count;
+    prepared.initialized_device_output_byte_count =
+        144U * query_count;
+    prepared.copied_device_to_host_record_count = query_count;
+    prepared.copied_device_to_host_byte_count =
+        144U * query_count;
+    prepared.gpu_execution_performed = query_count != 0U;
+    if (inputs.query_begin_index == 0U &&
+        !inputs.canonical_queries.empty()) {
+      const ExactDirectSparseFacetKey& key =
+          inputs.canonical_queries.front().source_facet_key;
+      const PointId source = key.point_ids[0U];
+      const PointId candidate =
+          source == 0U ? PointId{1U} : PointId{0U};
+      prepared.proposal_records.push_back(
+          proposal_record(key, {candidate}));
+    }
+    return prepared;
+  };
+  const ExactDirectSparseFacetDescentBatchSealInputsCallback
+      valid_seal =
+          [](const ExactDirectSparseFacetDescentBatchRunNextSealInputs&
+                 inputs)
+          -> std::optional<
+              ExactDirectSparseFacetTopKProposalTranscriptResult> {
+    check(
+        inputs.every_prepare_inputs_chunk_certified &&
+            inputs.proposal_chunk_count <= 2U &&
+            inputs.canonical_proposal_records.size() <= 1U,
+        "14L seals one bounded aggregate only after every proposal chunk");
+    return build_exact_direct_sparse_facet_top_k_proposal_transcript(
+        inputs.metadata,
+        inputs.canonical_proposal_records,
+        inputs.transcript_budget);
+  };
+
+  const auto empty_birth_run = executor.run_next(
+      query_witness(UINT64_C(14001)),
+      execution_budget(),
+      closure_budget(),
+      run_budget,
+      valid_prepare,
+      valid_seal,
+      clock);
+  check(
+      empty_birth_run.complete_architecture_run() &&
+          empty_birth_run.audit.selected_arm_seed_count == 0U &&
+          empty_birth_run.audit.distinct_source_facet_key_count == 0U &&
+          empty_birth_run.audit.proposal_query_count == 0U &&
+          empty_birth_run.audit.proposal_query_capacity == 2U &&
+          empty_birth_run.audit.proposal_chunk_count == 0U &&
+          empty_birth_run.audit.sealed_proposal_record_count == 0U &&
+          empty_birth_run.audit.prepare_inputs_callback_count == 0U &&
+          empty_birth_run.audit.seal_inputs_callback_count == 1U &&
+          empty_birth_run.audit.maximum_live_ticket_count == 1U &&
+          empty_birth_run.audit.live_ticket_count_at_return == 0U &&
+          executor.next_source_batch_index() == 1U,
+      "14L seals and commits an empty birth lot without inventing a proposal chunk");
+
+  const auto positive_singletons = singleton_keys(scenario.cloud.size());
+  bind_positive_keys(locator, positive_singletons);
+  const std::size_t source_batch_index =
+      executor.next_source_batch_index();
+  const std::size_t issued_before_failures =
+      executor.audit().sealed_ticket_issued_count;
+
+  const ExactDirectSparseFacetDescentBatchPrepareInputsCallback
+      bad_traffic_prepare =
+          [&valid_prepare](
+              const ExactDirectSparseFacetDescentBatchRunNextPrepareInputs&
+                  inputs)
+          -> std::optional<
+              ExactDirectSparseFacetDescentBatchRunNextPreparedChunk> {
+    auto prepared = valid_prepare(inputs);
+    if (prepared.has_value() &&
+        prepared->copied_device_to_host_byte_count != 0U) {
+      --prepared->copied_device_to_host_byte_count;
+    }
+    return prepared;
+  };
+  const auto bad_traffic = executor.run_next(
+      query_witness(UINT64_C(14002)),
+      execution_budget(),
+      closure_budget(),
+      run_budget,
+      bad_traffic_prepare,
+      valid_seal,
+      clock);
+  check(
+      bad_traffic.decision ==
+              ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+                  no_run_prepare_inputs_rejected &&
+          bad_traffic.cursor_unchanged_on_rejection &&
+          bad_traffic.audit.prepare_inputs_callback_count == 1U &&
+          bad_traffic.audit.seal_inputs_callback_count == 0U &&
+          bad_traffic.audit.maximum_live_ticket_count == 0U &&
+          bad_traffic.audit.live_ticket_count_at_return == 0U &&
+          executor.next_source_batch_index() == source_batch_index &&
+          executor.audit().sealed_ticket_issued_count ==
+              issued_before_failures,
+      "14L rejects a one-byte 14J active-traffic lie before sealing or minting a ticket");
+
+  const ExactDirectSparseFacetDescentBatchPrepareInputsCallback
+      throwing_prepare =
+          [](const ExactDirectSparseFacetDescentBatchRunNextPrepareInputs&)
+          -> std::optional<
+              ExactDirectSparseFacetDescentBatchRunNextPreparedChunk> {
+    throw std::runtime_error("synthetic prepare_inputs failure");
+  };
+  bool callback_exception_observed = false;
+  try {
+    static_cast<void>(executor.run_next(
+        query_witness(UINT64_C(14003)),
+        execution_budget(),
+        closure_budget(),
+        run_budget,
+        throwing_prepare,
+        valid_seal,
+        clock));
+  } catch (const std::runtime_error&) {
+    callback_exception_observed = true;
+  }
+  check(
+      callback_exception_observed &&
+          executor.next_source_batch_index() == source_batch_index &&
+          executor.audit().sealed_ticket_issued_count ==
+              issued_before_failures,
+      "an exception from prepare_inputs propagates before any ticket and leaves the full cursor unchanged");
+
+  const ExactDirectSparseFacetDescentBatchSealInputsCallback
+      rejecting_seal =
+          [](const ExactDirectSparseFacetDescentBatchRunNextSealInputs&)
+          -> std::optional<
+              ExactDirectSparseFacetTopKProposalTranscriptResult> {
+    return std::nullopt;
+  };
+  const auto seal_rejection = executor.run_next(
+      query_witness(UINT64_C(14004)),
+      execution_budget(),
+      closure_budget(),
+      run_budget,
+      valid_prepare,
+      rejecting_seal,
+      clock);
+  check(
+      seal_rejection.decision ==
+              ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+                  no_run_seal_inputs_rejected &&
+          seal_rejection.cursor_unchanged_on_rejection &&
+          seal_rejection.audit.proposal_query_count == 4U &&
+          seal_rejection.audit.proposal_chunk_count == 2U &&
+          seal_rejection.audit.prepare_inputs_callback_count == 2U &&
+          seal_rejection.audit.seal_inputs_callback_count == 1U &&
+          seal_rejection.audit.maximum_live_ticket_count == 0U &&
+          executor.next_source_batch_index() == source_batch_index &&
+          executor.audit().sealed_ticket_issued_count ==
+              issued_before_failures,
+      "a seal_inputs rejection follows all bounded chunks but still leaves no ticket or cursor advance");
+
+  const auto committed = executor.run_next(
+      query_witness(UINT64_C(14005)),
+      execution_budget(),
+      closure_budget(),
+      run_budget,
+      valid_prepare,
+      valid_seal,
+      clock);
+  const auto& run_audit = committed.audit;
+  check(
+      committed.complete_architecture_run() &&
+          committed.sealed_commit.has_value() &&
+          committed.sealed_commit->certified_cursor_advance() &&
+          run_audit.selected_arm_seed_count == 12U &&
+          run_audit.distinct_source_facet_key_count == 4U &&
+          run_audit.proposal_query_count == 4U &&
+          run_audit.proposal_query_capacity == 2U &&
+          run_audit.proposal_chunk_count == 2U &&
+          run_audit.sealed_proposal_record_count == 1U &&
+          run_audit.gpu_supported_query_count == 4U &&
+          run_audit.active_host_to_device_query_byte_count ==
+              4U * 208U &&
+          run_audit.initialized_device_output_byte_count ==
+              4U * 144U &&
+          run_audit.copied_device_to_host_byte_count ==
+              4U * 144U &&
+          run_audit.exact_proposal_center_count == 4U &&
+          run_audit.exact_proposal_miniball_build_count == 4U &&
+          run_audit.exact_centers_prepared_once_for_proposal &&
+          !run_audit.exact_center_reused_by_closure &&
+          run_audit.prepare_inputs_callback_count == 2U &&
+          run_audit.seal_inputs_callback_count == 1U &&
+          run_audit.cpu_preflight_duration_ns != 0U &&
+          run_audit.exact_center_preparation_duration_ns != 0U &&
+          run_audit.prepare_inputs_duration_ns != 0U &&
+          run_audit.seal_inputs_duration_ns != 0U &&
+          run_audit.exact_preparation_duration_ns != 0U &&
+          run_audit.sealed_commit_duration_ns != 0U &&
+          run_audit.total_run_duration_ns != 0U &&
+          run_audit.maximum_live_ticket_count == 1U &&
+          run_audit.live_ticket_count_at_return == 0U &&
+          !run_audit.independent_commit_replay_performed &&
+          !run_audit.warm_e2e_measured_or_claimed &&
+          !run_audit.sub_second_latency_claimed &&
+          !run_audit.ten_million_point_capacity_claimed &&
+          executor.complete() &&
+          executor.audit().sealed_ticket_exact_replay_avoided_count ==
+              2U,
+      "14L closes A=12 D=4 Q=4 C=2 chunks=2 R=1 with exact active traffic, one private ticket and zero commit replay");
+}
+
 void test_falsified_plan_is_rejected_at_session_open() {
   const Scenario scenario = regular_tetrahedron_order_one_scenario();
   auto falsified_plan = build_plan(scenario);
@@ -1753,6 +2027,7 @@ int main() {
   test_canonical_key_view_executes_nonzero_strict_edge();
   test_sealed_ticket_identity_stamp_epoch_and_single_use();
   test_sealed_ticket_closes_proposal_to_commit_budget_liveness();
+  test_integrated_chunked_proposal_seal_and_immediate_commit();
   test_falsified_plan_is_rejected_at_session_open();
 
   if (failures != 0) {

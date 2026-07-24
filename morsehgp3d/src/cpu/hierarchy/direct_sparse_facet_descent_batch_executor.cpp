@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
+#include <iterator>
 #include <limits>
 #include <new>
 #include <optional>
@@ -17,6 +19,8 @@ constexpr std::size_t maximum_lane_count_per_exact_batch = 3U;
 constexpr std::size_t maximum_selected_key_point_reference_count =
     direct_sparse_facet_descent_closure_maximum_seed_count *
     direct_sparse_positive_facet_maximum_point_count;
+constexpr std::size_t phase14_active_query_record_byte_count = 208U;
+constexpr std::size_t phase14_active_output_record_byte_count = 144U;
 
 enum class BuildFailure : std::uint8_t {
   source_join_inconsistent,
@@ -132,6 +136,46 @@ struct ProposalPreparationEvidence {
   bool no_transcript_or_top_k_payload_persisted_in_closure{false};
 };
 
+enum class IntegratedRunHookFailure : std::uint8_t {
+  none,
+  run_budget_rejected,
+  prepare_inputs_rejected,
+  seal_inputs_rejected,
+};
+
+class NanosecondClockReader {
+ public:
+  explicit NanosecondClockReader(
+      const ExactDirectSparseFacetDescentBatchNanosecondClock& clock)
+      : clock_(&clock) {}
+
+  [[nodiscard]] std::uint64_t read() {
+    std::uint64_t value = 0U;
+    if (*clock_) {
+      value = (*clock_)();
+    } else {
+      const auto elapsed =
+          std::chrono::duration_cast<std::chrono::nanoseconds>(
+              std::chrono::steady_clock::now().time_since_epoch());
+      if (elapsed.count() < 0) {
+        throw std::runtime_error(
+            "the steady nanosecond clock returned a negative value");
+      }
+      value = static_cast<std::uint64_t>(elapsed.count());
+    }
+    if (last_.has_value() && value < *last_) {
+      throw std::invalid_argument(
+          "an integrated batch-run clock must be monotonic");
+    }
+    last_ = value;
+    return value;
+  }
+
+ private:
+  const ExactDirectSparseFacetDescentBatchNanosecondClock* clock_{};
+  std::optional<std::uint64_t> last_;
+};
+
 [[nodiscard]] std::optional<std::size_t> checked_add(
     std::size_t left,
     std::size_t right) noexcept {
@@ -149,6 +193,15 @@ struct ProposalPreparationEvidence {
     return std::nullopt;
   }
   return left * right;
+}
+
+[[nodiscard]] std::optional<std::uint64_t> checked_add_duration(
+    std::uint64_t left,
+    std::uint64_t right) noexcept {
+  if (right > std::numeric_limits<std::uint64_t>::max() - left) {
+    return std::nullopt;
+  }
+  return left + right;
 }
 
 [[nodiscard]] bool known_atomic_transcript_rejection_decision(
@@ -381,6 +434,440 @@ struct ProposalPreparationEvidence {
   }
   return key;
 }
+
+[[nodiscard]] bool prepared_chunk_shape_is_consistent(
+    const ExactDirectSparseFacetDescentBatchRunNextPreparedChunk& chunk,
+    std::span<
+        const ExactDirectSparseFacetDescentBatchPreparedProposalQuery>
+        canonical_queries) noexcept {
+  const std::optional<std::size_t> expected_h2d_byte_count =
+      checked_multiply(
+          chunk.gpu_supported_query_count,
+          phase14_active_query_record_byte_count);
+  const std::optional<std::size_t> expected_output_byte_count =
+      checked_multiply(
+          chunk.gpu_supported_query_count,
+          phase14_active_output_record_byte_count);
+  if (!expected_h2d_byte_count.has_value() ||
+      !expected_output_byte_count.has_value() ||
+      chunk.gpu_supported_query_count > canonical_queries.size() ||
+      chunk.proposal_records.size() >
+          chunk.gpu_supported_query_count ||
+      chunk.active_host_to_device_query_record_count !=
+          chunk.gpu_supported_query_count ||
+      chunk.initialized_device_output_record_count !=
+          chunk.gpu_supported_query_count ||
+      chunk.copied_device_to_host_record_count !=
+          chunk.gpu_supported_query_count ||
+      chunk.active_host_to_device_query_byte_count !=
+          *expected_h2d_byte_count ||
+      chunk.initialized_device_output_byte_count !=
+          *expected_output_byte_count ||
+      chunk.copied_device_to_host_byte_count !=
+          *expected_output_byte_count ||
+      chunk.gpu_execution_performed !=
+          (chunk.gpu_supported_query_count != 0U) ||
+      !chunk.proposal_only ||
+      chunk.exact_or_scientific_decision_published ||
+      chunk.forbidden_global_structure_materialized ||
+      chunk.public_status_claimed) {
+    return false;
+  }
+  for (std::size_t record_index = 0U;
+       record_index < chunk.proposal_records.size();
+       ++record_index) {
+    const ExactDirectSparseFacetTopKProposalRecord& record =
+        chunk.proposal_records[record_index];
+    const auto found = std::lower_bound(
+        canonical_queries.begin(),
+        canonical_queries.end(),
+        record.source_facet_key,
+        [](const ExactDirectSparseFacetDescentBatchPreparedProposalQuery&
+               query,
+           const ExactDirectSparseFacetKey& key) {
+          return key_less(query.source_facet_key, key);
+        });
+    if (found == canonical_queries.end() ||
+        found->source_facet_key != record.source_facet_key ||
+        (record_index != 0U &&
+         !key_less(
+             chunk.proposal_records[record_index - 1U]
+                 .source_facet_key,
+             record.source_facet_key))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+[[nodiscard]] bool sealed_transcript_matches_inputs(
+    const ExactDirectSparseFacetTopKProposalTranscriptResult& transcript,
+    const ExactDirectSparseFacetTopKProposalTranscriptMetadata& metadata,
+    const ExactDirectSparseFacetTopKProposalTranscriptBudget& budget,
+    std::span<const ExactDirectSparseFacetTopKProposalRecord>
+        records) noexcept {
+  return transcript.complete_proposal_transcript() &&
+         transcript.metadata == metadata &&
+         transcript.requested_budget == budget &&
+         transcript.input_proposal_record_count == records.size() &&
+         transcript.proposal_records.size() == records.size() &&
+         std::equal(
+             transcript.proposal_records.begin(),
+             transcript.proposal_records.end(),
+             records.begin(),
+             records.end()) &&
+         !transcript.exact_top_k_partition_certified &&
+         !transcript.scientific_decision_published &&
+         !transcript.locator_state_mutated &&
+         !transcript.hierarchy_reduction_or_attachment_published &&
+         !transcript.forbidden_global_structure_materialized &&
+         !transcript.public_status_claimed &&
+         transcript.proposal_only;
+}
+
+void increment_audit_counter(std::size_t& counter);
+
+struct IntegratedRunHook {
+  const ExactDirectSparseFacetDescentBatchIntegratedRunBudget* budget{};
+  const ExactDirectSparseFacetDescentBatchPrepareInputsCallback*
+      prepare_inputs{};
+  const ExactDirectSparseFacetDescentBatchSealInputsCallback*
+      seal_inputs{};
+  NanosecondClockReader* clock{};
+  ExactDirectSparseFacetDescentBatchIntegratedRunAudit* audit{};
+  std::uint64_t run_started_ns{};
+  std::uint64_t seal_completed_ns{};
+  IntegratedRunHookFailure failure{IntegratedRunHookFailure::none};
+  std::optional<ExactDirectSparseFacetTopKProposalTranscriptResult>
+      sealed_transcript;
+
+  [[nodiscard]] const ExactDirectSparseFacetTopKProposalTranscriptResult*
+  prepare_and_seal(
+      const ExactDirectSparseFacetDescentBatchExecutionResult& batch,
+      const spatial::CanonicalPointCloud& cloud,
+      const ExactDirectSparsePositiveFacetLocatorSnapshotStamp&
+          live_preclosure_locator_stamp,
+      std::span<const ExactDirectSparseFacetKey> canonical_keys) {
+    const std::uint64_t preflight_completed_ns = clock->read();
+    audit->cpu_preflight_duration_ns =
+        preflight_completed_ns - run_started_ns;
+    audit->selected_arm_seed_count =
+        batch.required_selected_arm_seed_count;
+    audit->distinct_source_facet_key_count = canonical_keys.size();
+    audit->proposal_query_count = canonical_keys.size();
+    audit->proposal_query_capacity =
+        budget->maximum_query_count_per_chunk;
+    audit->cpu_batch_preflights_completed_before_callbacks =
+        batch.source_exact_batch_and_chunk_joined &&
+        batch.source_lanes_share_one_exact_batch &&
+        batch.batch_budget_preflight_completed &&
+        batch.batch_budget_preflight_satisfied &&
+        batch.selected_families_scanned_once &&
+        batch.every_arm_seed_selected_once_in_source_order &&
+        batch.facets_reconstructed_on_demand_only &&
+        batch.distinct_full_keys_canonicalized &&
+        batch.locator_snapshot_stamp ==
+            live_preclosure_locator_stamp;
+    if (!audit->cpu_batch_preflights_completed_before_callbacks ||
+        budget->maximum_query_count_per_chunk == 0U ||
+        budget->maximum_chunk_count == 0U) {
+      failure = IntegratedRunHookFailure::run_budget_rejected;
+      return nullptr;
+    }
+
+    const std::optional<std::size_t> maximum_partitioned_query_count =
+        checked_multiply(
+            budget->maximum_query_count_per_chunk,
+            budget->maximum_chunk_count);
+    const std::optional<std::size_t> rounded_query_count = checked_add(
+        canonical_keys.size(),
+        budget->maximum_query_count_per_chunk - 1U);
+    if (!maximum_partitioned_query_count.has_value() ||
+        canonical_keys.size() >
+            *maximum_partitioned_query_count ||
+        !rounded_query_count.has_value()) {
+      failure = IntegratedRunHookFailure::run_budget_rejected;
+      return nullptr;
+    }
+    const std::size_t chunk_count =
+        canonical_keys.empty()
+            ? 0U
+            : *rounded_query_count /
+                  budget->maximum_query_count_per_chunk;
+    audit->proposal_chunk_count = chunk_count;
+    if (chunk_count > budget->maximum_chunk_count) {
+      failure = IntegratedRunHookFailure::run_budget_rejected;
+      return nullptr;
+    }
+
+    const std::uint64_t center_preparation_started_ns =
+        clock->read();
+    std::vector<
+        ExactDirectSparseFacetDescentBatchPreparedProposalQuery>
+        prepared_queries;
+    prepared_queries.reserve(canonical_keys.size());
+    for (const ExactDirectSparseFacetKey& key : canonical_keys) {
+      ExactFacetMiniballResult miniball = build_exact_facet_miniball(
+          cloud,
+          std::span<const spatial::PointId>{
+              key.point_ids.data(), key.point_count});
+      const bool matching_facet =
+          miniball.facet_point_ids.size() == key.point_count &&
+          std::equal(
+              miniball.facet_point_ids.begin(),
+              miniball.facet_point_ids.end(),
+              key.point_ids.begin());
+      const std::optional<std::size_t> next_support_count =
+          checked_add(
+              audit->exact_proposal_enumerated_support_count,
+              miniball.counters.enumerated_support_count);
+      if (!matching_facet ||
+          miniball.status !=
+              ExactFacetMiniballStatus::
+                  exact_facet_miniball_certified ||
+          miniball.scope !=
+              ExactFacetMiniballScope::local_facet_miniball_only ||
+          !next_support_count.has_value()) {
+        failure = IntegratedRunHookFailure::run_budget_rejected;
+        return nullptr;
+      }
+      audit->exact_proposal_enumerated_support_count =
+          *next_support_count;
+      increment_audit_counter(
+          audit->exact_proposal_miniball_build_count);
+      prepared_queries.push_back(
+          {key,
+           std::move(miniball.center),
+           std::move(miniball.squared_radius),
+           miniball.counters.enumerated_support_count,
+           true});
+    }
+    const std::uint64_t center_preparation_completed_ns =
+        clock->read();
+    audit->exact_center_preparation_duration_ns =
+        center_preparation_completed_ns -
+        center_preparation_started_ns;
+    audit->exact_proposal_center_count =
+        prepared_queries.size();
+    audit->exact_centers_prepared_once_for_proposal =
+        prepared_queries.size() == canonical_keys.size() &&
+        audit->exact_proposal_miniball_build_count ==
+            canonical_keys.size();
+    audit->exact_center_reused_by_closure = false;
+
+    std::vector<ExactDirectSparseFacetTopKProposalRecord>
+        aggregate_records;
+    aggregate_records.reserve(std::min(
+        canonical_keys.size(),
+        budget->transcript_budget
+            .maximum_proposal_record_count));
+    const ExactDirectSparseFacetTopKProposalTranscriptMetadata metadata{
+        batch.source_batch_index,
+        batch.closed_batch_squared_level,
+        live_preclosure_locator_stamp};
+    for (std::size_t chunk_index = 0U;
+         chunk_index < chunk_count;
+         ++chunk_index) {
+      const std::optional<std::size_t> query_begin = checked_multiply(
+          chunk_index, budget->maximum_query_count_per_chunk);
+      if (!query_begin.has_value() ||
+          *query_begin >= canonical_keys.size()) {
+        failure = IntegratedRunHookFailure::run_budget_rejected;
+        return nullptr;
+      }
+      const std::size_t query_count = std::min(
+          budget->maximum_query_count_per_chunk,
+          prepared_queries.size() - *query_begin);
+      const auto chunk_queries =
+          std::span<
+              const ExactDirectSparseFacetDescentBatchPreparedProposalQuery>{
+              prepared_queries}
+              .subspan(
+          *query_begin, query_count);
+      const ExactDirectSparseFacetDescentBatchRunNextPrepareInputs
+          inputs{
+              metadata,
+              chunk_queries,
+              batch.required_selected_arm_seed_count,
+              canonical_keys.size(),
+              *query_begin,
+              chunk_index,
+              chunk_count,
+              budget->maximum_query_count_per_chunk,
+              true};
+      const std::uint64_t callback_started_ns = clock->read();
+      std::optional<
+          ExactDirectSparseFacetDescentBatchRunNextPreparedChunk>
+          prepared = (*prepare_inputs)(inputs);
+      const std::uint64_t callback_completed_ns = clock->read();
+      const std::optional<std::uint64_t> next_prepare_duration =
+          checked_add_duration(
+              audit->prepare_inputs_duration_ns,
+              callback_completed_ns - callback_started_ns);
+      if (!next_prepare_duration.has_value()) {
+        failure = IntegratedRunHookFailure::prepare_inputs_rejected;
+        return nullptr;
+      }
+      audit->prepare_inputs_duration_ns = *next_prepare_duration;
+      increment_audit_counter(audit->prepare_inputs_callback_count);
+      if (!prepared.has_value() ||
+          !prepared_chunk_shape_is_consistent(
+              *prepared, chunk_queries)) {
+        failure = IntegratedRunHookFailure::prepare_inputs_rejected;
+        return nullptr;
+      }
+
+      const std::optional<std::size_t> next_record_count =
+          checked_add(
+              aggregate_records.size(),
+              prepared->proposal_records.size());
+      const std::optional<std::size_t>
+          next_supported_query_count = checked_add(
+              audit->gpu_supported_query_count,
+              prepared->gpu_supported_query_count);
+      const std::optional<std::size_t> next_h2d_record_count =
+          checked_add(
+              audit->active_host_to_device_query_record_count,
+              prepared
+                  ->active_host_to_device_query_record_count);
+      const std::optional<std::size_t> next_h2d_byte_count =
+          checked_add(
+              audit->active_host_to_device_query_byte_count,
+              prepared->active_host_to_device_query_byte_count);
+      const std::optional<std::size_t>
+          next_initialized_record_count = checked_add(
+              audit->initialized_device_output_record_count,
+              prepared->initialized_device_output_record_count);
+      const std::optional<std::size_t>
+          next_initialized_byte_count = checked_add(
+              audit->initialized_device_output_byte_count,
+              prepared->initialized_device_output_byte_count);
+      const std::optional<std::size_t> next_d2h_record_count =
+          checked_add(
+              audit->copied_device_to_host_record_count,
+              prepared->copied_device_to_host_record_count);
+      const std::optional<std::size_t> next_d2h_byte_count =
+          checked_add(
+              audit->copied_device_to_host_byte_count,
+              prepared->copied_device_to_host_byte_count);
+      if (!next_record_count.has_value() ||
+          *next_record_count >
+              budget->transcript_budget
+                  .maximum_proposal_record_count ||
+          !next_supported_query_count.has_value() ||
+          !next_h2d_record_count.has_value() ||
+          !next_h2d_byte_count.has_value() ||
+          !next_initialized_record_count.has_value() ||
+          !next_initialized_byte_count.has_value() ||
+          !next_d2h_record_count.has_value() ||
+          !next_d2h_byte_count.has_value()) {
+        failure = IntegratedRunHookFailure::prepare_inputs_rejected;
+        return nullptr;
+      }
+      audit->gpu_supported_query_count =
+          *next_supported_query_count;
+      audit->active_host_to_device_query_record_count =
+          *next_h2d_record_count;
+      audit->active_host_to_device_query_byte_count =
+          *next_h2d_byte_count;
+      audit->initialized_device_output_record_count =
+          *next_initialized_record_count;
+      audit->initialized_device_output_byte_count =
+          *next_initialized_byte_count;
+      audit->copied_device_to_host_record_count =
+          *next_d2h_record_count;
+      audit->copied_device_to_host_byte_count =
+          *next_d2h_byte_count;
+      aggregate_records.insert(
+          aggregate_records.end(),
+          std::make_move_iterator(
+              prepared->proposal_records.begin()),
+          std::make_move_iterator(
+              prepared->proposal_records.end()));
+    }
+    audit->canonical_queries_partitioned_once =
+        audit->proposal_query_count ==
+            audit->distinct_source_facet_key_count &&
+        audit->prepare_inputs_callback_count == chunk_count;
+    audit->every_prepare_inputs_chunk_certified =
+        audit->canonical_queries_partitioned_once;
+    const std::optional<std::size_t> expected_total_h2d_bytes =
+        checked_multiply(
+            audit->gpu_supported_query_count,
+            phase14_active_query_record_byte_count);
+    const std::optional<std::size_t> expected_total_output_bytes =
+        checked_multiply(
+            audit->gpu_supported_query_count,
+            phase14_active_output_record_byte_count);
+    audit->active_traffic_only_reported =
+        expected_total_h2d_bytes.has_value() &&
+        expected_total_output_bytes.has_value() &&
+        audit->active_host_to_device_query_record_count ==
+            audit->gpu_supported_query_count &&
+        audit->initialized_device_output_record_count ==
+            audit->gpu_supported_query_count &&
+        audit->copied_device_to_host_record_count ==
+            audit->gpu_supported_query_count &&
+        audit->active_host_to_device_query_byte_count ==
+            *expected_total_h2d_bytes &&
+        audit->initialized_device_output_byte_count ==
+            *expected_total_output_bytes &&
+        audit->copied_device_to_host_byte_count ==
+            *expected_total_output_bytes;
+    audit->aggregate_records_canonical_and_bounded =
+        aggregate_records.size() <= canonical_keys.size() &&
+        aggregate_records.size() <=
+            budget->transcript_budget
+                .maximum_proposal_record_count &&
+        std::is_sorted(
+            aggregate_records.begin(),
+            aggregate_records.end(),
+            [](const ExactDirectSparseFacetTopKProposalRecord& left,
+               const ExactDirectSparseFacetTopKProposalRecord& right) {
+              return key_less(
+                  left.source_facet_key,
+                  right.source_facet_key);
+            });
+    if (!audit->aggregate_records_canonical_and_bounded) {
+      failure = IntegratedRunHookFailure::prepare_inputs_rejected;
+      return nullptr;
+    }
+
+    const ExactDirectSparseFacetDescentBatchRunNextSealInputs
+        seal_input{
+            metadata,
+            std::span<
+                const ExactDirectSparseFacetTopKProposalRecord>{
+                aggregate_records},
+            budget->transcript_budget,
+            batch.required_selected_arm_seed_count,
+            canonical_keys.size(),
+            audit->proposal_query_count,
+            chunk_count,
+            true};
+    const std::uint64_t seal_started_ns = clock->read();
+    std::optional<ExactDirectSparseFacetTopKProposalTranscriptResult>
+        transcript = (*seal_inputs)(seal_input);
+    seal_completed_ns = clock->read();
+    audit->seal_inputs_duration_ns =
+        seal_completed_ns - seal_started_ns;
+    increment_audit_counter(audit->seal_inputs_callback_count);
+    if (!transcript.has_value() ||
+        !sealed_transcript_matches_inputs(
+            *transcript,
+            metadata,
+            budget->transcript_budget,
+            aggregate_records)) {
+      failure = IntegratedRunHookFailure::seal_inputs_rejected;
+      return nullptr;
+    }
+    audit->sealed_proposal_record_count =
+        transcript->proposal_records.size();
+    audit->transcript_sealed_once = true;
+    sealed_transcript.emplace(std::move(*transcript));
+    return &*sealed_transcript;
+  }
+};
 
 void require_valid_traversal_order(
     spatial::LbvhTraversalOrder traversal_order) {
@@ -886,11 +1373,24 @@ build_batch_execution(
     spatial::LbvhTraversalOrder traversal_order,
     const ExactDirectSparseFacetTopKProposalTranscriptResult*
         proposal_transcript,
-    ProposalPreparationEvidence* proposal_evidence) {
-  if ((proposal_transcript == nullptr) !=
-      (proposal_evidence == nullptr)) {
+    ProposalPreparationEvidence* proposal_evidence,
+    IntegratedRunHook* integrated_run_hook) {
+  const bool no_proposal_path =
+      proposal_transcript == nullptr &&
+      proposal_evidence == nullptr &&
+      integrated_run_hook == nullptr;
+  const bool supplied_transcript_path =
+      proposal_transcript != nullptr &&
+      proposal_evidence != nullptr &&
+      integrated_run_hook == nullptr;
+  const bool integrated_run_path =
+      proposal_transcript == nullptr &&
+      proposal_evidence != nullptr &&
+      integrated_run_hook != nullptr;
+  if (!no_proposal_path && !supplied_transcript_path &&
+      !integrated_run_path) {
     throw std::invalid_argument(
-        "a proposal transcript and its separate audit sink must be supplied together");
+        "a batch execution requires exactly one coherent proposal path");
   }
   if (proposal_evidence != nullptr) {
     *proposal_evidence = ProposalPreparationEvidence{};
@@ -1155,6 +1655,26 @@ build_batch_execution(
     }
     result.batch_budget_preflight_satisfied = true;
 
+    if (integrated_run_hook != nullptr) {
+      const ExactDirectSparsePositiveFacetLocatorSnapshotStamp
+          live_preclosure_locator_stamp = locator.snapshot_stamp();
+      if (live_preclosure_locator_stamp !=
+          result.locator_snapshot_stamp) {
+        return fail(
+            std::move(result), BuildFailure::shared_closure_rejected);
+      }
+      proposal_transcript =
+          integrated_run_hook->prepare_and_seal(
+              result,
+              cloud,
+              live_preclosure_locator_stamp,
+              distinct_keys);
+      if (proposal_transcript == nullptr) {
+        return fail(
+            std::move(result), BuildFailure::shared_closure_rejected);
+      }
+    }
+
     if (distinct_keys.empty()) {
       if (proposal_transcript != nullptr) {
         CompactClosureProjection closure_projection =
@@ -1306,6 +1826,119 @@ void increment_audit_counter(std::size_t& counter) {
         "an anchored batch-execution audit counter overflows size_t");
   }
   counter = *next;
+}
+
+[[nodiscard]]
+ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult
+finalize_proposal_preparation(
+    const BatchCursor& source_cursor,
+    const BatchCursor& live_cursor,
+    ExactDirectSparseFacetDescentBatchExecutionResult batch_execution,
+    ProposalPreparationEvidence proposal_evidence,
+    ExactDirectSparseFacetDescentBatchExecutionSessionAudit& audit) {
+  increment_audit_counter(audit.prepare_attempt_count);
+  increment_audit_counter(audit.proposal_prepare_attempt_count);
+  account_transient_work(batch_execution, audit);
+
+  ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult result;
+  result.source_batch_index = source_cursor.source_batch_index;
+  result.closed_batch_squared_level =
+      batch_execution.closed_batch_squared_level;
+  result.locator_snapshot_stamp =
+      batch_execution.locator_snapshot_stamp;
+  result.batch_execution_decision = batch_execution.decision;
+  result.transcript_consumption_requested = true;
+  result.batch_preflight_completed_before_proposal_consumption =
+      proposal_evidence.consumption_attempted &&
+      batch_execution.batch_budget_preflight_completed &&
+      batch_execution.batch_budget_preflight_satisfied;
+  result.transcript_validation_completed_synchronously =
+      proposal_evidence.validation_completed_before_closure;
+  result.exact_proposal_consumption_certified =
+      proposal_evidence.exact_consumption_certified;
+  result.atomic_transcript_rejection_certified =
+      proposal_evidence.atomic_rejection_certified;
+  result.no_closure_constructed_on_transcript_rejection =
+      proposal_evidence.no_closure_constructed_on_rejection;
+  result.scientific_delta_separated_from_proposal_audit =
+      proposal_evidence
+          .scientific_closure_separated_from_consumption_audit;
+  result.no_transcript_record_candidate_partition_or_shell_persisted =
+      proposal_evidence
+          .no_transcript_or_top_k_payload_persisted_in_closure &&
+      (!proposal_evidence.consumption_audit.has_value() ||
+       (!proposal_evidence.consumption_audit
+             ->transcript_payload_persisted &&
+        !proposal_evidence.consumption_audit
+             ->top_k_partition_or_shell_persisted));
+  result.no_proposal_payload_or_audit_retained_by_session = true;
+  result.standard_commit_replays_unseeded_exact_path = true;
+  result.operational_audit_has_no_scientific_authority = true;
+  result.unseeded_commit_readiness_claimed = false;
+  result.scientific_commit_performed = false;
+  result.locator_state_mutated = false;
+  result.hierarchy_reduction_or_attachment_published = false;
+  result.gpu_execution_qualified = false;
+  result.sub_second_latency_claimed = false;
+  result.ten_million_point_capacity_claimed = false;
+  result.public_status_claimed = false;
+  result.scope =
+      ExactDirectSparseFacetDescentBatchTopKProposalPreparationScope::
+          one_synchronous_non_authoritative_proposal_preparation_before_unseeded_exact_commit_replay_only;
+
+  if (proposal_evidence.consumption_attempted) {
+    increment_audit_counter(audit.proposal_consumption_attempt_count);
+    if (proposal_evidence.consumption_audit.has_value()) {
+      const std::optional<std::size_t>
+          next_proposal_closure_call_count = checked_add(
+              audit.proposal_exact_closure_call_count,
+              proposal_evidence.consumption_audit
+                  ->closure_build_count);
+      if (!next_proposal_closure_call_count.has_value()) {
+        throw std::overflow_error(
+            "an anchored proposal-closure audit counter overflows size_t");
+      }
+      audit.proposal_exact_closure_call_count =
+          *next_proposal_closure_call_count;
+    }
+    result.proposal_consumption_decision =
+        proposal_evidence.consumption_decision;
+    result.proposal_consumption_audit =
+        std::move(proposal_evidence.consumption_audit);
+    if (proposal_evidence.atomic_rejection_certified) {
+      increment_audit_counter(audit.proposal_transcript_rejection_count);
+      result.decision =
+          ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+              no_preparation_transcript_rejected_before_closure;
+    } else if (proposal_evidence.exact_consumption_certified &&
+               batch_execution.complete_architecture_execution()) {
+      result.scientific_delta.emplace(std::move(batch_execution));
+      result.decision =
+          ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+              complete_architecture_only_scientific_delta_with_separate_proposal_audit;
+    } else if (proposal_evidence.exact_consumption_certified) {
+      result.batch_diagnostic.emplace(std::move(batch_execution));
+      result.decision =
+          ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+              no_preparation_batch_diagnostic_after_exact_proposal_consumption;
+    } else {
+      result.batch_diagnostic.emplace(std::move(batch_execution));
+      result.decision =
+          ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+              no_preparation_batch_diagnostic_during_proposal_consumption;
+    }
+  } else {
+    result.batch_diagnostic.emplace(std::move(batch_execution));
+    result.decision =
+        ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
+            no_preparation_batch_diagnostic_before_proposal_consumption;
+  }
+
+  audit.retained_proposal_record_count = 0U;
+  audit.proposal_payload_or_audit_retained_between_calls = false;
+  result.preparation_left_session_cursor_unchanged =
+      same_cursor(source_cursor, live_cursor);
+  return result;
 }
 
 }  // namespace
@@ -1548,6 +2181,143 @@ bool ExactDirectSparseFacetDescentBatchSealedCommitVerification::
                  one_in_process_exact_preparation_provenance_cursor_advance_before_hierarchy_commit_only;
 }
 
+bool ExactDirectSparseFacetDescentBatchIntegratedRunResult::
+    complete_architecture_run() const noexcept {
+  if (!sealed_commit.has_value() ||
+      preparation_diagnostic.has_value() ||
+      !sealed_commit->certified_cursor_advance() ||
+      !sealed_commit->scientific_delta.has_value() ||
+      !sealed_commit->operational_audit.has_value() ||
+      requested_budget.maximum_query_count_per_chunk == 0U ||
+      requested_budget.maximum_chunk_count == 0U) {
+    return false;
+  }
+  const ExactDirectSparseFacetDescentBatchExecutionResult& delta =
+      *sealed_commit->scientific_delta;
+  const ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit&
+      consumption_audit = *sealed_commit->operational_audit;
+  const std::optional<std::size_t> maximum_partitioned_queries =
+      checked_multiply(
+          requested_budget.maximum_query_count_per_chunk,
+          requested_budget.maximum_chunk_count);
+  const std::optional<std::size_t> rounded_query_count = checked_add(
+      audit.proposal_query_count,
+      requested_budget.maximum_query_count_per_chunk - 1U);
+  const std::optional<std::size_t> expected_h2d_bytes =
+      checked_multiply(
+          audit.gpu_supported_query_count,
+          phase14_active_query_record_byte_count);
+  const std::optional<std::size_t> expected_output_bytes =
+      checked_multiply(
+          audit.gpu_supported_query_count,
+          phase14_active_output_record_byte_count);
+  if (!maximum_partitioned_queries.has_value() ||
+      !rounded_query_count.has_value() ||
+      !expected_h2d_bytes.has_value() ||
+      !expected_output_bytes.has_value()) {
+    return false;
+  }
+  const std::size_t expected_chunk_count =
+      audit.proposal_query_count == 0U
+          ? 0U
+          : *rounded_query_count /
+                requested_budget.maximum_query_count_per_chunk;
+
+  std::optional<std::uint64_t> accounted_duration =
+      checked_add_duration(
+          audit.cpu_preflight_duration_ns,
+          audit.exact_center_preparation_duration_ns);
+  if (accounted_duration.has_value()) {
+    accounted_duration = checked_add_duration(
+        *accounted_duration,
+        audit.prepare_inputs_duration_ns);
+  }
+  if (accounted_duration.has_value()) {
+    accounted_duration = checked_add_duration(
+        *accounted_duration, audit.seal_inputs_duration_ns);
+  }
+  if (accounted_duration.has_value()) {
+    accounted_duration = checked_add_duration(
+        *accounted_duration,
+        audit.exact_preparation_duration_ns);
+  }
+  if (accounted_duration.has_value()) {
+    accounted_duration = checked_add_duration(
+        *accounted_duration, audit.sealed_commit_duration_ns);
+  }
+
+  return schema_version ==
+             direct_sparse_facet_descent_batch_integrated_run_schema_version &&
+         source_batch_index == delta.source_batch_index &&
+         audit.selected_arm_seed_count ==
+             delta.required_selected_arm_seed_count &&
+         audit.distinct_source_facet_key_count ==
+             delta.required_resolved_key_count &&
+         audit.proposal_query_count ==
+             audit.distinct_source_facet_key_count &&
+         audit.proposal_query_capacity ==
+             requested_budget.maximum_query_count_per_chunk &&
+         audit.proposal_query_count <=
+             *maximum_partitioned_queries &&
+         audit.proposal_chunk_count == expected_chunk_count &&
+         audit.proposal_chunk_count <=
+             requested_budget.maximum_chunk_count &&
+         audit.sealed_proposal_record_count ==
+             consumption_audit.transcript_record_count &&
+         audit.sealed_proposal_record_count <=
+             audit.distinct_source_facet_key_count &&
+         audit.gpu_supported_query_count <=
+             audit.proposal_query_count &&
+         audit.exact_top_k_query_count ==
+             consumption_audit.top_k_query_count &&
+         audit.exact_proposal_center_count ==
+             audit.distinct_source_facet_key_count &&
+         audit.exact_proposal_miniball_build_count ==
+             audit.distinct_source_facet_key_count &&
+         audit.prepare_inputs_callback_count ==
+             audit.proposal_chunk_count &&
+         audit.seal_inputs_callback_count == 1U &&
+         audit.active_host_to_device_query_record_count ==
+             audit.gpu_supported_query_count &&
+         audit.initialized_device_output_record_count ==
+             audit.gpu_supported_query_count &&
+         audit.copied_device_to_host_record_count ==
+             audit.gpu_supported_query_count &&
+         audit.active_host_to_device_query_byte_count ==
+             *expected_h2d_bytes &&
+         audit.initialized_device_output_byte_count ==
+             *expected_output_bytes &&
+         audit.copied_device_to_host_byte_count ==
+             *expected_output_bytes &&
+         accounted_duration.has_value() &&
+         audit.total_run_duration_ns >= *accounted_duration &&
+         audit.maximum_live_ticket_count == 1U &&
+         audit.live_ticket_count_at_return == 0U &&
+         audit.cpu_batch_preflights_completed_before_callbacks &&
+         audit.canonical_queries_partitioned_once &&
+         audit.every_prepare_inputs_chunk_certified &&
+         audit.aggregate_records_canonical_and_bounded &&
+         audit.transcript_sealed_once &&
+         audit.exact_preparation_consumed_sealed_transcript &&
+         audit.exact_centers_prepared_once_for_proposal &&
+         !audit.exact_center_reused_by_closure &&
+         audit.private_ticket_never_exposed_to_caller &&
+         audit.at_most_one_live_ticket &&
+         audit.immediate_sealed_commit_attempted &&
+         !audit.independent_commit_replay_performed &&
+         audit.active_traffic_only_reported &&
+         !audit.warm_e2e_measured_or_claimed &&
+         !audit.sub_second_latency_claimed &&
+         !audit.ten_million_point_capacity_claimed &&
+         !audit.forbidden_global_structure_materialized &&
+         !audit.public_status_claimed &&
+         !cursor_unchanged_on_rejection &&
+         no_ticket_live_at_return &&
+         decision ==
+             ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+                 complete_architecture_only_integrated_proposal_sealed_commit;
+}
+
 ExactDirectSparseFacetDescentAnchoredBatchExecutor::PreparedTopKProposalBatch::
     PreparedTopKProposalBatch(
         std::shared_ptr<const std::byte> session_seal,
@@ -1747,6 +2517,7 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::prepare_next(
           closure_config_,
           traversal_order_,
           nullptr,
+          nullptr,
           nullptr);
   increment_audit_counter(audit_.prepare_attempt_count);
   account_transient_work(result, audit_);
@@ -1789,114 +2560,20 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::
           closure_config_,
           traversal_order_,
           &transcript,
-          &proposal_evidence);
-  increment_audit_counter(audit_.prepare_attempt_count);
-  increment_audit_counter(audit_.proposal_prepare_attempt_count);
-  account_transient_work(batch_execution, audit_);
-
-  ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult result;
-  result.source_batch_index = cursor.source_batch_index;
-  result.closed_batch_squared_level =
-      batch_execution.closed_batch_squared_level;
-  result.locator_snapshot_stamp =
-      batch_execution.locator_snapshot_stamp;
-  result.batch_execution_decision = batch_execution.decision;
-  result.transcript_consumption_requested = true;
-  result.batch_preflight_completed_before_proposal_consumption =
-      proposal_evidence.consumption_attempted &&
-      batch_execution.batch_budget_preflight_completed &&
-      batch_execution.batch_budget_preflight_satisfied;
-  result.transcript_validation_completed_synchronously =
-      proposal_evidence.validation_completed_before_closure;
-  result.exact_proposal_consumption_certified =
-      proposal_evidence.exact_consumption_certified;
-  result.atomic_transcript_rejection_certified =
-      proposal_evidence.atomic_rejection_certified;
-  result.no_closure_constructed_on_transcript_rejection =
-      proposal_evidence.no_closure_constructed_on_rejection;
-  result.scientific_delta_separated_from_proposal_audit =
-      proposal_evidence
-          .scientific_closure_separated_from_consumption_audit;
-  result.no_transcript_record_candidate_partition_or_shell_persisted =
-      proposal_evidence
-          .no_transcript_or_top_k_payload_persisted_in_closure &&
-      (!proposal_evidence.consumption_audit.has_value() ||
-       (!proposal_evidence.consumption_audit
-             ->transcript_payload_persisted &&
-        !proposal_evidence.consumption_audit
-             ->top_k_partition_or_shell_persisted));
-  result.no_proposal_payload_or_audit_retained_by_session = true;
-  result.standard_commit_replays_unseeded_exact_path = true;
-  result.operational_audit_has_no_scientific_authority = true;
-  result.unseeded_commit_readiness_claimed = false;
-  result.scientific_commit_performed = false;
-  result.locator_state_mutated = false;
-  result.hierarchy_reduction_or_attachment_published = false;
-  result.gpu_execution_qualified = false;
-  result.sub_second_latency_claimed = false;
-  result.ten_million_point_capacity_claimed = false;
-  result.public_status_claimed = false;
-  result.scope =
-      ExactDirectSparseFacetDescentBatchTopKProposalPreparationScope::
-          one_synchronous_non_authoritative_proposal_preparation_before_unseeded_exact_commit_replay_only;
-
-  if (proposal_evidence.consumption_attempted) {
-    increment_audit_counter(audit_.proposal_consumption_attempt_count);
-    if (proposal_evidence.consumption_audit.has_value()) {
-      const std::optional<std::size_t> next_proposal_closure_call_count =
-          checked_add(
-              audit_.proposal_exact_closure_call_count,
-              proposal_evidence.consumption_audit
-                  ->closure_build_count);
-      if (!next_proposal_closure_call_count.has_value()) {
-        throw std::overflow_error(
-            "an anchored proposal-closure audit counter overflows size_t");
-      }
-      audit_.proposal_exact_closure_call_count =
-          *next_proposal_closure_call_count;
-    }
-    result.proposal_consumption_decision =
-        proposal_evidence.consumption_decision;
-    result.proposal_consumption_audit =
-        std::move(proposal_evidence.consumption_audit);
-    if (proposal_evidence.atomic_rejection_certified) {
-      increment_audit_counter(audit_.proposal_transcript_rejection_count);
-      result.decision =
-          ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
-              no_preparation_transcript_rejected_before_closure;
-    } else if (proposal_evidence.exact_consumption_certified &&
-               batch_execution.complete_architecture_execution()) {
-      result.scientific_delta.emplace(std::move(batch_execution));
-      result.decision =
-          ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
-              complete_architecture_only_scientific_delta_with_separate_proposal_audit;
-    } else if (proposal_evidence.exact_consumption_certified) {
-      result.batch_diagnostic.emplace(std::move(batch_execution));
-      result.decision =
-          ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
-              no_preparation_batch_diagnostic_after_exact_proposal_consumption;
-    } else {
-      result.batch_diagnostic.emplace(std::move(batch_execution));
-      result.decision =
-          ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
-              no_preparation_batch_diagnostic_during_proposal_consumption;
-    }
-  } else {
-    result.batch_diagnostic.emplace(std::move(batch_execution));
-    result.decision =
-        ExactDirectSparseFacetDescentBatchTopKProposalPreparationDecision::
-            no_preparation_batch_diagnostic_before_proposal_consumption;
-  }
-
-  audit_.retained_proposal_record_count = 0U;
-  audit_.proposal_payload_or_audit_retained_between_calls = false;
-  result.preparation_left_session_cursor_unchanged =
-      next_source_batch_index_ == cursor.source_batch_index &&
-      next_source_chunk_index_ == cursor.source_chunk_index &&
-      next_source_lane_index_ == cursor.source_lane_index &&
-      next_source_family_index_ == cursor.source_family_index &&
-      next_source_arm_seed_index_ == cursor.source_arm_seed_index;
-  return result;
+          &proposal_evidence,
+          nullptr);
+  const BatchCursor live_cursor{
+      next_source_batch_index_,
+      next_source_chunk_index_,
+      next_source_lane_index_,
+      next_source_family_index_,
+      next_source_arm_seed_index_};
+  return finalize_proposal_preparation(
+      cursor,
+      live_cursor,
+      std::move(batch_execution),
+      std::move(proposal_evidence),
+      audit_);
 }
 
 ExactDirectSparseFacetDescentAnchoredBatchExecutor::
@@ -2129,6 +2806,235 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::
   return result;
 }
 
+ExactDirectSparseFacetDescentBatchIntegratedRunResult
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparseFacetDescentBatchExecutionBudget&
+        execution_budget,
+    const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
+    const ExactDirectSparseFacetDescentBatchIntegratedRunBudget&
+        run_budget,
+    const ExactDirectSparseFacetDescentBatchPrepareInputsCallback&
+        prepare_inputs,
+    const ExactDirectSparseFacetDescentBatchSealInputsCallback&
+        seal_inputs,
+    const ExactDirectSparseFacetDescentBatchNanosecondClock& clock) {
+  if (complete()) {
+    throw std::logic_error(
+        "a complete anchored batch executor has no next integrated run");
+  }
+  if (!prepare_inputs || !seal_inputs) {
+    throw std::invalid_argument(
+        "an integrated batch run requires prepare-inputs and seal-inputs callbacks");
+  }
+
+  require_execution_budget_within_confidence(execution_budget);
+  require_closure_budget_within_confidence(closure_budget);
+  NanosecondClockReader clock_reader{clock};
+  const std::uint64_t run_started_ns = clock_reader.read();
+  const BatchCursor source_cursor{
+      next_source_batch_index_,
+      next_source_chunk_index_,
+      next_source_lane_index_,
+      next_source_family_index_,
+      next_source_arm_seed_index_};
+
+  ExactDirectSparseFacetDescentBatchIntegratedRunResult result;
+  result.source_batch_index = source_cursor.source_batch_index;
+  result.requested_budget = run_budget;
+  IntegratedRunHook hook{
+      &run_budget,
+      &prepare_inputs,
+      &seal_inputs,
+      &clock_reader,
+      &result.audit,
+      run_started_ns,
+      0U,
+      IntegratedRunHookFailure::none,
+      std::nullopt};
+  ProposalPreparationEvidence proposal_evidence;
+  ExactDirectSparseFacetDescentBatchExecutionResult batch_execution =
+      build_batch_execution(
+          *index_,
+          *cloud_,
+          *source_facade_,
+          *source_event_journal_,
+          *source_arm_seed_journal_,
+          source_plan_,
+          source_cursor,
+          locator_query_witness,
+          *locator_,
+          execution_budget,
+          closure_budget,
+          closure_config_,
+          traversal_order_,
+          nullptr,
+          &proposal_evidence,
+          &hook);
+  const BatchCursor live_after_preparation{
+      next_source_batch_index_,
+      next_source_chunk_index_,
+      next_source_lane_index_,
+      next_source_family_index_,
+      next_source_arm_seed_index_};
+  ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult
+      preparation = finalize_proposal_preparation(
+          source_cursor,
+          live_after_preparation,
+          std::move(batch_execution),
+          std::move(proposal_evidence),
+          audit_);
+  const std::uint64_t preparation_completed_ns =
+      clock_reader.read();
+  if (result.audit.transcript_sealed_once) {
+    result.audit.exact_preparation_duration_ns =
+        preparation_completed_ns - hook.seal_completed_ns;
+  }
+  if (preparation.proposal_consumption_audit.has_value()) {
+    result.audit.exact_top_k_query_count =
+        preparation.proposal_consumption_audit
+            ->top_k_query_count;
+  }
+  result.audit.exact_preparation_consumed_sealed_transcript =
+      result.audit.transcript_sealed_once &&
+      preparation.transcript_validation_completed_synchronously;
+  increment_audit_counter(audit_.sealed_ticket_prepare_attempt_count);
+  audit_.sealed_ticket_or_delta_retained_by_session = false;
+
+  const auto finish_rejection =
+      [&]() {
+        const BatchCursor live_cursor{
+            next_source_batch_index_,
+            next_source_chunk_index_,
+            next_source_lane_index_,
+            next_source_family_index_,
+            next_source_arm_seed_index_};
+        result.cursor_unchanged_on_rejection =
+            same_cursor(source_cursor, live_cursor);
+        result.audit.live_ticket_count_at_return = 0U;
+        result.no_ticket_live_at_return = true;
+        const std::uint64_t run_completed_ns =
+            clock_reader.read();
+        result.audit.total_run_duration_ns =
+            run_completed_ns - run_started_ns;
+      };
+
+  switch (hook.failure) {
+    case IntegratedRunHookFailure::run_budget_rejected:
+      result.decision =
+          ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+              no_run_cpu_batch_preflight_rejected;
+      result.preparation_diagnostic.emplace(
+          std::move(preparation));
+      finish_rejection();
+      return result;
+    case IntegratedRunHookFailure::prepare_inputs_rejected:
+      result.decision =
+          ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+              no_run_prepare_inputs_rejected;
+      result.preparation_diagnostic.emplace(
+          std::move(preparation));
+      finish_rejection();
+      return result;
+    case IntegratedRunHookFailure::seal_inputs_rejected:
+      result.decision =
+          ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+              no_run_seal_inputs_rejected;
+      result.preparation_diagnostic.emplace(
+          std::move(preparation));
+      finish_rejection();
+      return result;
+    case IntegratedRunHookFailure::none:
+      break;
+  }
+  if (!result.audit.transcript_sealed_once) {
+    result.decision =
+        ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+            no_run_cpu_batch_preflight_rejected;
+    result.preparation_diagnostic.emplace(std::move(preparation));
+    finish_rejection();
+    return result;
+  }
+  if (!preparation.complete_architecture_preparation() ||
+      !preparation.scientific_delta.has_value()) {
+    result.decision =
+        ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+            no_run_exact_preparation_rejected;
+    result.preparation_diagnostic.emplace(std::move(preparation));
+    finish_rejection();
+    return result;
+  }
+
+  const std::optional<BatchCursor> successor_cursor =
+      prevalidated_successor_cursor(
+          *source_event_journal_,
+          *source_arm_seed_journal_,
+          source_plan_,
+          source_cursor,
+          *preparation.scientific_delta);
+  if (!successor_cursor.has_value()) {
+    result.decision =
+        ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+            no_run_ticket_not_issued;
+    result.preparation_diagnostic.emplace(std::move(preparation));
+    finish_rejection();
+    return result;
+  }
+
+  increment_audit_counter(audit_.sealed_ticket_issued_count);
+  PreparedTopKProposalBatch ticket{
+      session_seal_,
+      source_epoch_,
+      source_cursor.source_batch_index,
+      source_cursor.source_chunk_index,
+      source_cursor.source_lane_index,
+      source_cursor.source_family_index,
+      source_cursor.source_arm_seed_index,
+      successor_cursor->source_batch_index,
+      successor_cursor->source_chunk_index,
+      successor_cursor->source_lane_index,
+      successor_cursor->source_family_index,
+      successor_cursor->source_arm_seed_index,
+      preparation.scientific_delta->locator_snapshot_stamp,
+      std::move(preparation)};
+  result.audit.maximum_live_ticket_count = 1U;
+  result.audit.immediate_sealed_commit_attempted = true;
+  const std::uint64_t commit_started_ns = clock_reader.read();
+  ExactDirectSparseFacetDescentBatchSealedCommitResult commit =
+      commit_prepared_ticket(std::move(ticket));
+  const std::uint64_t commit_completed_ns = clock_reader.read();
+  result.audit.sealed_commit_duration_ns =
+      commit_completed_ns - commit_started_ns;
+  result.audit.live_ticket_count_at_return = 0U;
+  result.audit.independent_commit_replay_performed =
+      commit.verification.independent_geometry_replay_performed;
+  result.no_ticket_live_at_return = true;
+  result.sealed_commit.emplace(std::move(commit));
+  const std::uint64_t run_completed_ns = clock_reader.read();
+  result.audit.total_run_duration_ns =
+      run_completed_ns - run_started_ns;
+
+  if (result.sealed_commit->certified_cursor_advance()) {
+    result.cursor_unchanged_on_rejection = false;
+    result.decision =
+        ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+            complete_architecture_only_integrated_proposal_sealed_commit;
+  } else {
+    const BatchCursor live_cursor{
+        next_source_batch_index_,
+        next_source_chunk_index_,
+        next_source_lane_index_,
+        next_source_family_index_,
+        next_source_arm_seed_index_};
+    result.cursor_unchanged_on_rejection =
+        same_cursor(source_cursor, live_cursor);
+    result.decision =
+        ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+            no_run_sealed_commit_rejected;
+  }
+  return result;
+}
+
 ExactDirectSparseFacetDescentBatchExecutionVerification
 ExactDirectSparseFacetDescentAnchoredBatchExecutor::commit_prepared(
     const ExactDirectSparseFacetWitness& locator_query_witness,
@@ -2171,6 +3077,7 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::commit_prepared(
           closure_budget,
           closure_config_,
           traversal_order_,
+          nullptr,
           nullptr,
           nullptr);
   increment_audit_counter(audit_.fresh_batch_replay_count);

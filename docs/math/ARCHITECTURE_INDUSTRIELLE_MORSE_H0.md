@@ -152,15 +152,29 @@ L'ancien encadrement subsiste uniquement comme oracle différentiel court. Le ch
 
 La recertification courte au SHA `5e7e8449d7f4de2875ad0d9db8674d7664a30e4d` passe sur une G4 `SPOT` réelle : deux CTests sur deux en 0,29 seconde, six axes partitionnés en une division, cinq zéros et zéro hors plage, digest inchangé, un cubin AOT `sm_120` sans PTX et memcheck nul. Elle certifie ce rejeu matériel, pas un débit ou une échelle produit.
 
-## Goulots restant à traiter après 14K
+## Incrément 14L — runner chunké, scellement unique et ticket privé
+
+14L raccorde l'exécuteur ancré à un producteur externe borné par deux callbacks synchrones, sans lier la bibliothèque CPU à CUDA. Son backend est `external_bounded_proposal_plus_reference_cpu`, son profil `hgp_reduced`, son mode `proposal_only_then_certified`, son déploiement `architecture_only` et son statut public `not_claimed`. Cette couture ne donne aucune autorité scientifique au callback : 14F revalide le transcript au point d'usage, 10.5c décide sur CPU exact et 14H avance seulement à partir de la préparation exacte.
+
+`run_next` termine d'abord les jointures, caps et tris-déduplications 14D. Les $A$ bras donnent alors $D$ clés canoniques et exactement $Q=D$ requêtes de proposition. Pour chaque clé, l'exécuteur construit une miniball exacte, projette immédiatement clé, centre, rayon et bit de certification dans un record compact, puis détruit le résultat riche avant la clé suivante; un seul résultat à vecteurs est donc vivant à la fois et le tableau conservé vaut $O(D)$. Ce centre n'est pas réutilisé par 10.5c, qui reconstruit encore la miniball lors de sa recertification exacte.
+
+Les requêtes compactes sont découpées sous la borne $D\leq C N_{\mathrm{chunks}}$. Le budget du transcript porte séparément sur les $R$ records effectivement proposés : $R\leq D$, mais un cap $R_{\max}$ plus petit que $D$ reste valide si le producteur émet assez peu de records. Ainsi la fixture ferme $D=4$ avec $R_{\max}=1$ et $R=1$; aucune capacité de records sparse n'est réinterprétée comme capacité de requêtes.
+
+Pour les $Q_s$ centres supportés d'un chunk, l'enveloppe accepte exactement $208Q_s$ octets H2D, $144Q_s$ octets d'initialisation de sortie et $144Q_s$ octets D2H, avec contrôles d'overflow; toute divergence ferme l'appel avant scellement. L'agrégat canonique est scellé une seule fois par 14F. Une horloge nanoseconde monotone injectable sépare préflight CPU, centres exacts, callbacks de préparation, scellement, préparation exacte, commit et durée totale, mais ces mesures locales ne constituent pas un protocole `warm_e2e`.
+
+Une préparation complète frappe un unique ticket 14H privé, le commit immédiatement et ne l'expose jamais à l'appelant. Il existe donc au plus un ticket vivant dans `run_next` et zéro au retour, y compris après rejet; une exception de callback intervient avant toute frappe. Le CTest GCC Release ciblé passe un sur un en 6,33 secondes avec $A=12$, $D=4$, $Q=4$, $C=2$, deux chunks et $R=1$; il falsifie aussi un octet de trafic, lève dans le callback de préparation et refuse le scellement sans avancer le curseur.
+
+Cette validation utilise un callback hôte générique. Elle ne branche pas encore le contexte CUDA 14J/14K, n'exécute aucun CUDA réel, ne mesure aucun benchmark et ne qualifie ni SLO 50 k, ni capacité 10 M+, ni fidélité globale des carriers, ni M.1, ni statut public exact. 14L ne construit aucune facette ou coface globale, incidence, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur.
+
+## Goulots restant à traiter après 14L
 
 Trois coûts dominants restent visibles :
 
 - les traversées exactes top-$K$ par clé distincte, encore linéaires au pire cas puisque 14I ne garantit aucun rappel;
 - les constructions exactes de miniballs jusqu'à 385 supports, potentiellement répétées entre la préparation du centre et 10.5c, ainsi que les fallbacks rationnels;
-- les snapshots $32n$ device et $40n$ hôte sur G4, les buffers persistants $352C$ device et la capacité hôte $144C$, le scratch top-$k$ local restant de 160 octets par thread, les capacités réutilisables et le pic des tickets détenus par l'appelant, qui exigent chunks et plafonds sans dupliquer durablement les grandes arènes.
+- les snapshots $32n$ device et $40n$ hôte sur G4, les buffers persistants $352C$ device et la capacité hôte $144C$, le scratch top-$k$ local restant de 160 octets par thread, les capacités réutilisables et les tickets encore exposés par les API historiques hors `run_next`, qui exigent chunks et plafonds sans dupliquer durablement les grandes arènes.
 
-La priorité de développement devient donc : formaliser le smoke dans un worker GCP gardé reproductible, puis raccorder le chunking à la préparation scellée sans transférer l'autorité de l'audit. Les centres ou capacités exactes ne peuvent être réutilisés qu'avec une provenance recertifiable; l'instrumentation `warm_e2e`, puis les runs et checkpoints compacts, viennent ensuite pour les profils 50 k et 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
+La priorité de développement devient donc : raccorder le callback générique au contexte CUDA 14J/14K sans transférer l'autorité de l'audit, puis supprimer le second calcul de centre avec une provenance recertifiable. L'instrumentation `warm_e2e`, puis les runs et checkpoints compacts, viennent ensuite pour les profils 50 k et 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
 
 ## Planification sans promotion
 

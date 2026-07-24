@@ -1253,6 +1253,16 @@ Le différentiel court conserve l'ancien encadrement uniquement comme oracle de 
 
 Le rejeu court du SHA `5e7e8449d7f4de2875ad0d9db8674d7664a30e4d` sur une G4 `SPOT` réelle passe 2/2 en 0,29 seconde. La partition de six axes vaut une division, cinq zéros et zéro hors plage; le digest `18249493464636075901`, l'unique cubin `sm_120` sans PTX, les 62 registres, les 160 octets de pile, l'absence de spill et le memcheck nul sont conservés. Ce rejeu n'est ni une mesure de débit, ni une qualification 50 k ou 10 M+.
 
+### Couture intégrée générique 14L
+
+`ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next` ferme la couture synchrone entre 14D, un producteur borné externe, 14F, 14G et 14H. L'exécuteur termine d'abord tous les préflights CPU du lot, sélectionne les $A$ bras et canonise leurs $D$ clés distinctes. Il construit ensuite exactement une miniball locale par clé pour fournir au producteur une requête compacte : clé source, centre exact, rayon carré exact, nombre de supports examinés et fait de certification. Aucune arène de miniball ou structure globale n'est retenue.
+
+Sous une capacité $C>0$ et un plafond de chunks, les $Q=D$ requêtes sont partitionnées une seule fois en tranches d'au plus $C$. Le callback de préparation retourne uniquement des records `proposal_only` et son trafic opérationnel. Pour $G\leq Q$ requêtes effectivement supportées, l'exécuteur exige exactement $208G$ octets H2D, $144G$ octets d'initialisation device et $144G$ octets D2H; il rejette toute discordance avant le scellement. Un callback unique agrège ensuite au plus $R\leq D$ records canoniques et scelle le transcript 14F sous son budget complet.
+
+La préparation exacte 14G consomme immédiatement ce transcript. Si elle est complète, `run_next` forge en privé un unique ticket 14H, l'engage sans rejeu géométrique et ne rend jamais la capacité à l'appelant. Le succès avance exactement une fois et retourne zéro ticket vivant; tout rejet antérieur à l'émission conserve les cinq composantes du curseur. L'audit sépare les compteurs $A,D,Q,C,G,R$, le nombre de chunks, les centres, miniballs et supports exacts, les trois trafics actifs et les durées de chaque étape. Le CTest court ferme $A=12$, $D=Q=G=4$, $C=2$, deux chunks et $R=1$, soit 832 octets H2D, 576 octets d'initialisation device et 576 octets D2H.
+
+Cette couture est `external_bounded_proposal_plus_reference_cpu / hgp_reduced / proposal_only_then_certified`, `architecture_only`, avec `public_status=not_claimed`. Elle n'instancie encore aucun adaptateur vers le vrai contexte CUDA 14J/14K. Les centres exacts préparés pour le producteur ne sont pas transmis à 10.5c, qui reconstruit sa miniball au point d'usage. Aucun protocole `warm_e2e`, SLO 50 k, run 10 M+, résultat public, facette ou coface globale, incidence, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur n'est ajouté.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;

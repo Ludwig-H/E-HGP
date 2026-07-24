@@ -106,12 +106,24 @@ Les trois coordonnées utilisent directement leurs numérateurs et le dénominat
 
 Le différentiel court contre l'ancien encadrement couvre les frontières binary64 et 64 rationnels déterministes avec les deux signes. Il conserve exactement les décisions de plage et les bits projetés. La recertification courte sur G4 réelle passe au SHA exact `5e7e8449d7f4de2875ad0d9db8674d7664a30e4d`. 14K reste `cuda_g4 / hgp_reduced / proposal_only`, `architecture_only` et `public_status=not_claimed`, sans qualification 50 k ou 10 M+.
 
+## Incrément 14L implémenté — couture intégrée générique bornée
+
+`ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next` relie désormais, dans un seul appel synchrone, la préparation 14D, un producteur externe borné, le scellement 14F, la préparation exacte 14G et le commit immédiat 14H. Le backend déclaré est `external_bounded_proposal_plus_reference_cpu`, le profil `hgp_reduced`, le mode `proposal_only_then_certified`, le déploiement `architecture_only` et le statut public `not_claimed`. Toutes les jointures du lot, les caps CPU, la sélection stable des bras et la canonisation des $D$ clés distinctes sont fermés avant le premier callback. Un rejet ou une exception antérieure à l'émission du ticket laisse le curseur complet inchangé.
+
+Pour chacune des $D$ clés, l'exécuteur construit une miniball exacte locale et expose seulement une requête compacte contenant la clé, le centre exact, le rayon carré exact, le nombre de supports examinés et le fait de certification. Les arènes de miniballs ne sont pas retenues. Les requêtes sont partitionnées une seule fois en chunks d'au plus $C$, sous un plafond explicite de chunks; le callback de préparation est appelé une fois par chunk non vide, puis un callback unique scelle l'agrégat canonique de $R\leq D$ records avec 14F. Si $G\leq D$ requêtes sont déclarées supportées par l'adaptateur, l'audit exige exactement $208G$ octets H2D, $144G$ octets d'initialisation device et $144G$ octets D2H. Une discordance d'un seul octet rejette avant scellement et avant création d'un ticket.
+
+Après recertification exacte 14F et préparation 14G, `run_next` crée en privé au plus un ticket 14H, le commit immédiatement et ne l'expose jamais à l'appelant. Le succès publie le delta exact et l'audit opérationnel, avance une fois, retourne zéro ticket vivant et confirme qu'aucun rejeu géométrique indépendant n'a eu lieu au commit. L'audit sépare $A$, $D$, $Q$, $C$, le nombre de chunks, $R$, les requêtes supportées, les requêtes top-$K$ exactes, les centres et miniballs exacts, le total de supports, les trois trafics actifs et les durées de préflight CPU, préparation des centres, callbacks de préparation, scellement, préparation exacte, commit scellé et appel total.
+
+La fixture active ferme exactement $A=12$, $D=Q=G=4$, $C=2$, deux chunks et $R=1$, donc 832 octets H2D, 576 octets initialisés et 576 octets D2H. Elle construit quatre centres et quatre miniballs exactes pour le producteur, puis publie explicitement `exact_center_reused_by_closure=false` : 10.5c reconstruit encore sa miniball au point d'usage. La fixture vide scelle sans callback de chunk et avance également par un ticket privé immédiat.
+
+14L n'est pas encore le raccord CUDA 14J/14K : ses deux callbacks sont une frontière générique et le test fournit un faux producteur hôte borné. Il ne mesure pas `warm_e2e`, ne qualifie ni la latence sous la seconde à 50 k points, ni la capacité 10 M+, et ne modifie aucun statut public. Il ne construit ni facette ou coface globale, ni incidence, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur.
+
 ## Priorités de développement
 
-1. formaliser le smoke 14K dans un worker GCP gardé reproductible;
-2. raccorder le chunking obligatoire du producteur à la préparation scellée, dimensionner $C$ près de $D$ et étudier le réemploi recertifiable des centres exacts;
-3. réutiliser les capacités restantes de scratch et plafonner les tickets appelant sans conserver de graphe entre lots;
-4. ajouter l'instrumentation `warm_e2e`, puis rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
+1. fournir l'adaptateur réel entre le contexte CUDA 14J/14K et les callbacks 14L, puis formaliser son smoke dans un worker GCP gardé reproductible;
+2. étudier un réemploi recertifiable du centre exact par 10.5c au lieu de la seconde construction actuellement explicite;
+3. réutiliser les capacités restantes de scratch sans conserver de graphe entre lots;
+4. exploiter l'instrumentation `warm_e2e`, puis rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 
@@ -142,6 +154,8 @@ Sur la G4 réelle, le SHA exact `8c76feb4c28dd1360d71075b1d3e15c7af0a3c95` compi
 Pour 14K, le même CTest hôte ciblé passe en 0,03 seconde après ajout du différentiel. Il couvre zéro, $1/3$, minimum et demi-minimum subnormal, minimum normal, six paires de mots adjacents et leurs midpoints signés, maximum fini, hors plage et 64 rationnels déterministes. L'audit des deux requêtes ordinaires publie six axes, deux divisions, quatre zéros et zéro axe hors plage. La source de qualification 14K/v3 compile aussi syntaxiquement sous les avertissements stricts.
 
 Sur la G4 réelle, le SHA exact `5e7e8449d7f4de2875ad0d9db8674d7664a30e4d` compile avec NVCC 12.9.86 en audit AOT. Les CTests contexte et qualification passent 2/2 en 0,29 seconde. Le JSON 14K/v3 ferme six axes comme une division, cinq zéros et zéro hors plage, conserve la transition $D=4$, $D=1$, $D=5$, les 16 puis 230 inspections, les quatre puis dix candidats, l'égalité de la partition CPU exacte et le digest `18249493464636075901`. Ptxas publie 62 registres, 160 octets de pile et zéro spill; `cuobjdump` trouve un seul cubin `sm_120` sans PTX et `compute-sanitizer` termine sans erreur ni fuite.
+
+Pour 14L, le CTest partagé de l'exécuteur passe sous GCC Release strict en 6,33 secondes. La fixture courte couvre le lot vide, puis $A=12$, $D=Q=G=4$, $C=2$, deux chunks, $R=1$, les trafics actifs 832, 576 et 576 octets, quatre centres exacts préparés une fois pour le producteur et aucun réemploi par 10.5c. Elle rejette un sous-compte D2H d'un octet avant scellement, propage une exception du callback sans ticket ni avancement, rejette le scellement après deux chunks sans avancer, puis ferme le ticket privé immédiat avec zéro rejeu de commit et zéro ticket vivant au retour. Les durées instrumentées utilisent une horloge monotone déterministe injectée et prouvent seulement la partition des étapes, pas une performance. Aucun adaptateur CUDA, benchmark, test massif ou GCP n'est exécuté pour 14L.
 
 Une falsification coordonnée pourrait encore redistribuer des compteurs entre chunks 14A ou lanes 14C tout en conservant leurs agrégats. Les payloads compacts ne contiennent volontairement ni détail ni digest par lot; un vérificateur frais contre 10.1--10.2 est donc requis avant persistance ou exécution industrielle. Cette dette P2 est compatible avec `architecture_only`, mais devra être fermée avant toute qualification.
 

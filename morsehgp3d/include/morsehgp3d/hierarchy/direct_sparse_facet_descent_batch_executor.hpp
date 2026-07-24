@@ -2,11 +2,14 @@
 
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_batch_plan.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_closure.hpp"
+#include "morsehgp3d/hierarchy/facet_miniball.hpp"
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -74,6 +77,28 @@ inline constexpr std::string_view
         "private_move_only_exact_delta_provenance_shared_session_seal_epoch_"
         "full_source_and_successor_cursor_frozen_locator_stamp_single_use_"
         "advance_without_transcript_audit_or_second_geometry_replay_v1";
+inline constexpr std::uint32_t
+    direct_sparse_facet_descent_batch_integrated_run_schema_version = 1U;
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_integrated_run_backend =
+        "external_bounded_proposal_plus_reference_cpu";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_integrated_run_profile =
+        "hgp_reduced";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_integrated_run_mode =
+        "proposal_only_then_certified";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_integrated_run_deployment_status =
+        "architecture_only";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_integrated_run_public_status =
+        "not_claimed";
+inline constexpr std::string_view
+    direct_sparse_facet_descent_batch_integrated_run_proof_basis =
+        "cpu_batch_preflight_then_bounded_canonical_query_chunks_external_"
+        "proposal_records_single_14f_seal_exact_14g_preparation_private_14h_"
+        "ticket_and_immediate_no_replay_commit_v1";
 
 // The closure owns a separate budget.  These caps cover every population
 // retained while selecting one exact batch and every record that survives in
@@ -454,6 +479,189 @@ struct ExactDirectSparseFacetDescentBatchSealedCommitResult {
   }
 };
 
+// One run partitions the D canonical source keys into chunks of at most C
+// queries.  The transcript budget bounds their aggregate R proposal records.
+// The callback is invoked only after all 14D source joins, execution caps and
+// key canonicalization have completed successfully.
+struct ExactDirectSparseFacetDescentBatchIntegratedRunBudget {
+  std::size_t maximum_query_count_per_chunk{};
+  std::size_t maximum_chunk_count{};
+  ExactDirectSparseFacetTopKProposalTranscriptBudget transcript_budget{};
+
+  friend bool operator==(
+      const ExactDirectSparseFacetDescentBatchIntegratedRunBudget&,
+      const ExactDirectSparseFacetDescentBatchIntegratedRunBudget&) =
+      default;
+};
+
+// The proposal adapter receives one certified local exact center per distinct
+// source key, so it never needs to reconstruct a facet miniball itself.
+// Phase 14L still does not feed this object into 10.5c: the exact closure
+// independently reconstructs the miniball at point of use.
+struct ExactDirectSparseFacetDescentBatchPreparedProposalQuery {
+  ExactDirectSparseFacetKey source_facet_key{};
+  exact::ExactCenter3 exact_query_center{};
+  exact::ExactLevel exact_squared_radius{};
+  std::size_t enumerated_support_count{};
+  bool exact_facet_miniball_certified{false};
+};
+
+struct ExactDirectSparseFacetDescentBatchRunNextPrepareInputs {
+  ExactDirectSparseFacetTopKProposalTranscriptMetadata metadata{};
+  std::span<
+      const ExactDirectSparseFacetDescentBatchPreparedProposalQuery>
+      canonical_queries;
+  std::size_t selected_arm_seed_count{};
+  std::size_t distinct_source_facet_key_count{};
+  std::size_t query_begin_index{};
+  std::size_t chunk_index{};
+  std::size_t chunk_count{};
+  std::size_t query_capacity{};
+  bool cpu_batch_preflights_certified{false};
+};
+
+// This deliberately carries only proposal payload and operational traffic.
+// A CUDA 14J/14K adapter can copy these fields from its batch audit, while
+// host tests can provide a bounded fake without linking a CUDA target.
+struct ExactDirectSparseFacetDescentBatchRunNextPreparedChunk {
+  std::vector<ExactDirectSparseFacetTopKProposalRecord> proposal_records;
+  std::size_t gpu_supported_query_count{};
+  std::size_t active_host_to_device_query_record_count{};
+  std::size_t active_host_to_device_query_byte_count{};
+  std::size_t initialized_device_output_record_count{};
+  std::size_t initialized_device_output_byte_count{};
+  std::size_t copied_device_to_host_record_count{};
+  std::size_t copied_device_to_host_byte_count{};
+  bool gpu_execution_performed{false};
+  bool proposal_only{true};
+  bool exact_or_scientific_decision_published{false};
+  bool forbidden_global_structure_materialized{false};
+  bool public_status_claimed{false};
+};
+
+struct ExactDirectSparseFacetDescentBatchRunNextSealInputs {
+  ExactDirectSparseFacetTopKProposalTranscriptMetadata metadata{};
+  std::span<const ExactDirectSparseFacetTopKProposalRecord>
+      canonical_proposal_records;
+  ExactDirectSparseFacetTopKProposalTranscriptBudget transcript_budget{};
+  std::size_t selected_arm_seed_count{};
+  std::size_t distinct_source_facet_key_count{};
+  std::size_t proposal_query_count{};
+  std::size_t proposal_chunk_count{};
+  bool every_prepare_inputs_chunk_certified{false};
+};
+
+using ExactDirectSparseFacetDescentBatchPrepareInputsCallback =
+    std::function<std::optional<
+        ExactDirectSparseFacetDescentBatchRunNextPreparedChunk>(
+        const ExactDirectSparseFacetDescentBatchRunNextPrepareInputs&)>;
+using ExactDirectSparseFacetDescentBatchSealInputsCallback =
+    std::function<std::optional<
+        ExactDirectSparseFacetTopKProposalTranscriptResult>(
+        const ExactDirectSparseFacetDescentBatchRunNextSealInputs&)>;
+using ExactDirectSparseFacetDescentBatchNanosecondClock =
+    std::function<std::uint64_t()>;
+
+enum class ExactDirectSparseFacetDescentBatchIntegratedRunDecision
+    : std::uint8_t {
+  not_run,
+  no_run_cpu_batch_preflight_rejected,
+  no_run_prepare_inputs_rejected,
+  no_run_seal_inputs_rejected,
+  no_run_exact_preparation_rejected,
+  no_run_ticket_not_issued,
+  no_run_sealed_commit_rejected,
+  complete_architecture_only_integrated_proposal_sealed_commit,
+};
+
+struct ExactDirectSparseFacetDescentBatchIntegratedRunAudit {
+  // Stable Phase-14 notation: A arms, D distinct keys, Q submitted proposal
+  // queries, C per-chunk query capacity, chunks, and R sealed records.
+  std::size_t selected_arm_seed_count{};
+  std::size_t distinct_source_facet_key_count{};
+  std::size_t proposal_query_count{};
+  std::size_t proposal_query_capacity{};
+  std::size_t proposal_chunk_count{};
+  std::size_t sealed_proposal_record_count{};
+  std::size_t gpu_supported_query_count{};
+  std::size_t exact_top_k_query_count{};
+  std::size_t exact_proposal_center_count{};
+  std::size_t exact_proposal_miniball_build_count{};
+  std::size_t exact_proposal_enumerated_support_count{};
+  std::size_t prepare_inputs_callback_count{};
+  std::size_t seal_inputs_callback_count{};
+  std::size_t active_host_to_device_query_record_count{};
+  std::size_t active_host_to_device_query_byte_count{};
+  std::size_t initialized_device_output_record_count{};
+  std::size_t initialized_device_output_byte_count{};
+  std::size_t copied_device_to_host_record_count{};
+  std::size_t copied_device_to_host_byte_count{};
+  std::uint64_t cpu_preflight_duration_ns{};
+  std::uint64_t exact_center_preparation_duration_ns{};
+  std::uint64_t prepare_inputs_duration_ns{};
+  std::uint64_t seal_inputs_duration_ns{};
+  std::uint64_t exact_preparation_duration_ns{};
+  std::uint64_t sealed_commit_duration_ns{};
+  std::uint64_t total_run_duration_ns{};
+  std::size_t maximum_live_ticket_count{};
+  std::size_t live_ticket_count_at_return{};
+  bool cpu_batch_preflights_completed_before_callbacks{false};
+  bool canonical_queries_partitioned_once{false};
+  bool every_prepare_inputs_chunk_certified{false};
+  bool aggregate_records_canonical_and_bounded{false};
+  bool transcript_sealed_once{false};
+  bool exact_preparation_consumed_sealed_transcript{false};
+  bool exact_centers_prepared_once_for_proposal{false};
+  bool exact_center_reused_by_closure{false};
+  bool private_ticket_never_exposed_to_caller{true};
+  bool at_most_one_live_ticket{true};
+  bool immediate_sealed_commit_attempted{false};
+  bool independent_commit_replay_performed{false};
+  bool active_traffic_only_reported{false};
+  bool warm_e2e_measured_or_claimed{false};
+  bool sub_second_latency_claimed{false};
+  bool ten_million_point_capacity_claimed{false};
+  bool forbidden_global_structure_materialized{false};
+  bool public_status_claimed{false};
+
+  friend bool operator==(
+      const ExactDirectSparseFacetDescentBatchIntegratedRunAudit&,
+      const ExactDirectSparseFacetDescentBatchIntegratedRunAudit&) =
+      default;
+};
+
+struct ExactDirectSparseFacetDescentBatchIntegratedRunResult {
+  static constexpr std::string_view backend =
+      direct_sparse_facet_descent_batch_integrated_run_backend;
+  static constexpr std::string_view profile =
+      direct_sparse_facet_descent_batch_integrated_run_profile;
+  static constexpr std::string_view mode =
+      direct_sparse_facet_descent_batch_integrated_run_mode;
+  static constexpr std::string_view deployment_status =
+      direct_sparse_facet_descent_batch_integrated_run_deployment_status;
+  static constexpr std::string_view public_status =
+      direct_sparse_facet_descent_batch_integrated_run_public_status;
+  static constexpr std::string_view proof_basis =
+      direct_sparse_facet_descent_batch_integrated_run_proof_basis;
+
+  std::uint32_t schema_version{
+      direct_sparse_facet_descent_batch_integrated_run_schema_version};
+  std::size_t source_batch_index{};
+  ExactDirectSparseFacetDescentBatchIntegratedRunBudget requested_budget{};
+  ExactDirectSparseFacetDescentBatchIntegratedRunAudit audit{};
+  std::optional<
+      ExactDirectSparseFacetDescentBatchTopKProposalPreparationResult>
+      preparation_diagnostic;
+  std::optional<ExactDirectSparseFacetDescentBatchSealedCommitResult>
+      sealed_commit;
+  bool cursor_unchanged_on_rejection{false};
+  bool no_ticket_live_at_return{true};
+  ExactDirectSparseFacetDescentBatchIntegratedRunDecision decision{
+      ExactDirectSparseFacetDescentBatchIntegratedRunDecision::not_run};
+
+  [[nodiscard]] bool complete_architecture_run() const noexcept;
+};
+
 struct ExactDirectSparseFacetDescentBatchExecutionSessionAudit {
   std::size_t source_plan_verification_count{};
   std::size_t prepare_attempt_count{};
@@ -659,6 +867,26 @@ class ExactDirectSparseFacetDescentAnchoredBatchExecutor {
   // proposal-audit authority, closure budget or independent geometry replay.
   [[nodiscard]] ExactDirectSparseFacetDescentBatchSealedCommitResult
   commit_prepared_ticket(PreparedTopKProposalBatch&& prepared) noexcept;
+
+  // Executes the missing 14J/14K -> 14F -> 14H seam synchronously.  The
+  // callbacks are called only after the current CPU batch and D canonical
+  // keys have passed every 14D preflight.  run_next owns at most one private
+  // ticket, commits it immediately, and never returns a ticket capability.
+  // An empty clock uses std::chrono::steady_clock; tests may inject a
+  // deterministic monotonic nanosecond clock without sleeping.
+  [[nodiscard]] ExactDirectSparseFacetDescentBatchIntegratedRunResult
+  run_next(
+      const ExactDirectSparseFacetWitness& locator_query_witness,
+      const ExactDirectSparseFacetDescentBatchExecutionBudget&
+          execution_budget,
+      const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
+      const ExactDirectSparseFacetDescentBatchIntegratedRunBudget&
+          run_budget,
+      const ExactDirectSparseFacetDescentBatchPrepareInputsCallback&
+          prepare_inputs,
+      const ExactDirectSparseFacetDescentBatchSealInputsCallback&
+          seal_inputs,
+      const ExactDirectSparseFacetDescentBatchNanosecondClock& clock = {});
 
   // Replays only the current exact batch.  A complete equal delta advances
   // the execution cursor; it does not claim or perform the later quotient,
