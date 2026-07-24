@@ -234,7 +234,7 @@ propose_phase14_facet_top_k_candidates_on_gpu(
   }
 
   Phase14FacetTopKProposalDeviceBatch batch;
-  batch.records.resize(maximum_query_count);
+  batch.records.resize(queries.size());
   batch.record_count = queries.size();
   batch.kernel_launch_count = 1U;
   batch.synchronization_count = 1U;
@@ -328,13 +328,19 @@ propose_phase14_facet_top_k_candidates_on_gpu(
     case Corruption::wrong_key_fingerprint:
       batch.records[0U].key_fingerprint ^= UINT64_C(1);
       break;
-    case Corruption::tail_write:
-      if (batch.record_count >= batch.records.size()) {
+    case Corruption::stale_active_candidate_tail: {
+      DeviceRecord& record = batch.records[0U];
+      const std::size_t candidate_count = checked_size(
+          record.candidate_count,
+          "a fake Phase 14 candidate count does not fit size_t");
+      if (candidate_count >=
+          phase14_facet_top_k_proposal_maximum_point_count) {
         throw std::logic_error(
-            "tail-write corruption requires spare physical capacity");
+            "active-tail corruption requires one unused candidate slot");
       }
-      batch.records[batch.record_count].query_index = 0U;
+      record.candidates[candidate_count] = 0U;
       break;
+    }
     case Corruption::duplicate_candidate: {
       DeviceRecord& record = batch.records[0U];
       if (queries[0U].point_count < 2U ||

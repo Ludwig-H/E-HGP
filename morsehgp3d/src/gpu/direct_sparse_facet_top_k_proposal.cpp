@@ -195,35 +195,6 @@ void validate_key(
   return false;
 }
 
-[[nodiscard]] bool sentinel_record(
-    const DeviceRecord& record) noexcept {
-  if (record.query_index !=
-          detail::phase14_facet_top_k_proposal_sentinel ||
-      record.key_fingerprint !=
-          detail::phase14_facet_top_k_proposal_sentinel ||
-      record.buffer_epoch !=
-          detail::phase14_facet_top_k_proposal_sentinel ||
-      record.candidate_count !=
-          detail::phase14_facet_top_k_proposal_sentinel ||
-      record.inspected_neighbor_count !=
-          detail::phase14_facet_top_k_proposal_sentinel ||
-      record.floating_distance_evaluation_count !=
-          detail::phase14_facet_top_k_proposal_sentinel ||
-      record.floating_rejection_count !=
-          detail::phase14_facet_top_k_proposal_sentinel ||
-      record.failure_code !=
-          detail::phase14_facet_top_k_proposal_sentinel) {
-    return false;
-  }
-  return std::all_of(
-      std::begin(record.candidates),
-      std::end(record.candidates),
-      [](std::uint64_t value) {
-        return value ==
-            detail::phase14_facet_top_k_proposal_sentinel;
-      });
-}
-
 struct PackedQueries {
   std::vector<InputRecord> gpu_queries;
   std::vector<unsigned char> center_supported;
@@ -350,12 +321,11 @@ struct ValidatedPayload {
     const detail::Phase14FacetTopKProposalHostState& host,
     std::span<const DirectSparseFacetTopKProposalQuery> queries,
     const PackedQueries& packed,
-    std::size_t maximum_query_count,
     DirectSparseFacetTopKProposalPolicy policy,
     std::uint64_t previous_buffer_epoch) {
   if (previous_buffer_epoch ==
           std::numeric_limits<std::uint64_t>::max() ||
-      batch.records.size() != maximum_query_count ||
+      batch.records.size() != packed.gpu_queries.size() ||
       batch.record_count != packed.gpu_queries.size() ||
       batch.kernel_launch_count != 1U ||
       batch.synchronization_count != 1U ||
@@ -363,15 +333,6 @@ struct ValidatedPayload {
     throw std::runtime_error(
         "the Phase 14 GPU proposal batch returned invalid extent or epoch metadata");
   }
-  for (std::size_t record_index = batch.record_count;
-       record_index < batch.records.size();
-       ++record_index) {
-    if (!sentinel_record(batch.records[record_index])) {
-      throw std::runtime_error(
-          "the Phase 14 GPU proposal batch exposed a stale tail record");
-    }
-  }
-
   ValidatedPayload payload;
   DirectSparseFacetTopKProposalAudit& audit = payload.audit;
   audit.gpu_output_record_count = batch.record_count;
@@ -524,7 +485,7 @@ struct ValidatedPayload {
   audit.nonempty_proposal_record_count =
       payload.proposal_records.size();
   audit.supported_query_permutation_validated = true;
-  audit.untouched_tail_sentinel_validated = true;
+  audit.active_record_candidate_tail_sentinel_validated = true;
   audit.every_candidate_domain_validated = true;
   audit.every_candidate_source_facet_exclusion_validated = true;
   audit.every_candidate_morton_window_validated = true;
@@ -583,6 +544,24 @@ void initialize_common_audit(
           "the Phase 14 device query byte capacity overflowed");
   audit.host_record_copy_byte_capacity =
       audit.static_device_record_buffer_byte_capacity;
+  audit.active_host_to_device_query_record_count =
+      packed.gpu_queries.size();
+  audit.active_host_to_device_query_byte_count =
+      checked_size_product(
+          packed.gpu_queries.size(),
+          sizeof(InputRecord),
+          "the Phase 14 active query byte count overflowed");
+  audit.initialized_device_output_record_count =
+      packed.gpu_queries.size();
+  audit.initialized_device_output_byte_count =
+      checked_size_product(
+          packed.gpu_queries.size(),
+          sizeof(DeviceRecord),
+          "the Phase 14 active output initialization byte count overflowed");
+  audit.copied_device_to_host_record_count =
+      packed.gpu_queries.size();
+  audit.copied_device_to_host_byte_count =
+      audit.initialized_device_output_byte_count;
   audit.canonical_query_count = queries.size();
   audit.gpu_supported_center_query_count =
       packed.gpu_queries.size();
@@ -715,12 +694,27 @@ void finalize_digest(
              sizeof(InputRecord) * audit.maximum_query_count &&
          audit.host_record_copy_byte_capacity ==
              audit.static_device_record_buffer_byte_capacity &&
+         audit.active_host_to_device_query_record_count ==
+             audit.gpu_supported_center_query_count &&
+         audit.active_host_to_device_query_byte_count ==
+             sizeof(InputRecord) *
+                 audit.active_host_to_device_query_record_count &&
+         audit.initialized_device_output_record_count ==
+             audit.gpu_supported_center_query_count &&
+         audit.initialized_device_output_byte_count ==
+             sizeof(DeviceRecord) *
+                 audit.initialized_device_output_record_count &&
+         audit.copied_device_to_host_record_count ==
+             audit.gpu_supported_center_query_count &&
+         audit.copied_device_to_host_byte_count ==
+             sizeof(DeviceRecord) *
+                 audit.copied_device_to_host_record_count &&
          audit.matching_immutable_point_namespace_validated &&
          audit.canonical_query_order_validated &&
          audit.homogeneous_facet_cardinality_validated &&
          audit.fixed_capacity_preflight_satisfied &&
          audit.supported_query_permutation_validated &&
-         audit.untouched_tail_sentinel_validated &&
+         audit.active_record_candidate_tail_sentinel_validated &&
          audit.every_candidate_domain_validated &&
          audit.every_candidate_source_facet_exclusion_validated &&
          audit.every_candidate_morton_window_validated &&
@@ -899,7 +893,8 @@ DirectSparseFacetTopKProposalContext::build(
     ValidatedPayload validated;
     if (packed.gpu_queries.empty()) {
       validated.audit.supported_query_permutation_validated = true;
-      validated.audit.untouched_tail_sentinel_validated = true;
+      validated.audit.active_record_candidate_tail_sentinel_validated =
+          true;
       validated.audit.every_candidate_domain_validated = true;
       validated.audit.every_candidate_source_facet_exclusion_validated =
           true;
@@ -922,7 +917,6 @@ DirectSparseFacetTopKProposalContext::build(
         *host_,
         canonical_queries,
         packed,
-        maximum_query_count_,
         policy,
         last_buffer_epoch_);
     last_buffer_epoch_ = batch.buffer_epoch;

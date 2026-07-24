@@ -855,10 +855,10 @@ propose_phase14_facet_top_k_candidates_on_gpu(
         cudaMemsetAsync(
             cuda.records(),
             0xff,
-            maximum_query_count *
+            queries.size() *
                 sizeof(Phase14FacetTopKProposalDeviceRecord),
             cuda.stream()),
-        "cudaMemsetAsync Phase 14 facet top-k proposal sentinels");
+        "cudaMemsetAsync Phase 14 active facet top-k proposal sentinels");
 
     const std::size_t requested_blocks =
         (queries.size() - 1U) / kThreadsPerBlock + 1U;
@@ -888,16 +888,16 @@ propose_phase14_facet_top_k_candidates_on_gpu(
         "Phase 14 facet top-k proposal kernel launch");
 
     Phase14FacetTopKProposalDeviceBatch batch;
-    batch.records.resize(maximum_query_count);
+    batch.records.resize(queries.size());
     check_cuda(
         cudaMemcpyAsync(
             batch.records.data(),
             cuda.records(),
-            maximum_query_count *
+            queries.size() *
                 sizeof(Phase14FacetTopKProposalDeviceRecord),
             cudaMemcpyDeviceToHost,
             cuda.stream()),
-        "cudaMemcpyAsync Phase 14 facet top-k proposals device-to-host");
+        "cudaMemcpyAsync Phase 14 active facet top-k proposals device-to-host");
     cuda.synchronize();
     batch.record_count = queries.size();
     batch.kernel_launch_count = 1U;

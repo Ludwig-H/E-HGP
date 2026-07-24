@@ -116,8 +116,9 @@ static_assert(
     18U * sizeof(std::uint64_t));
 
 struct Phase14FacetTopKProposalDeviceBatch {
-  // The whole fixed-capacity buffer is copied back.  record_count identifies
-  // the initialized prefix; the remaining records stay bytewise all-ones.
+  // Only the active prefix is initialized and copied back.  This keeps memset
+  // and D2H traffic O(D) rather than O(C).  The inactive suffix has no
+  // authority and cannot be consumed by host validation.
   std::vector<Phase14FacetTopKProposalDeviceRecord> records;
   std::size_t record_count{};
   std::size_t kernel_launch_count{};

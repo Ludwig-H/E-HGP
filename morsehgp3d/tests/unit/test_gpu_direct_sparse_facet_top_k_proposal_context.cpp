@@ -237,7 +237,16 @@ void test_result_epochs_and_digest() {
           first.audit.static_device_record_buffer_byte_capacity ==
               6U * 18U * sizeof(std::uint64_t) &&
           first.audit.host_record_copy_byte_capacity ==
-              first.audit.static_device_record_buffer_byte_capacity,
+              first.audit.static_device_record_buffer_byte_capacity &&
+          first.audit.active_host_to_device_query_record_count == 2U &&
+          first.audit.active_host_to_device_query_byte_count ==
+              2U * 26U * sizeof(std::uint64_t) &&
+          first.audit.initialized_device_output_record_count == 2U &&
+          first.audit.initialized_device_output_byte_count ==
+              2U * 18U * sizeof(std::uint64_t) &&
+          first.audit.copied_device_to_host_record_count == 2U &&
+          first.audit.copied_device_to_host_byte_count ==
+              2U * 18U * sizeof(std::uint64_t),
       "the audit exposes the lazy 32n device snapshot, full host snapshot and fixed batch capacities");
   check(
       first.audit.canonical_query_count == 2U &&
@@ -254,7 +263,8 @@ void test_result_epochs_and_digest() {
       "the two-sided radius-one windows close their exact bounded work");
   check(
       first.audit.supported_query_permutation_validated &&
-          first.audit.untouched_tail_sentinel_validated &&
+          first.audit
+              .active_record_candidate_tail_sentinel_validated &&
           first.audit.every_candidate_domain_validated &&
           first.audit
               .every_candidate_source_facet_exclusion_validated &&
@@ -318,6 +328,12 @@ void test_empty_batch_has_no_launch_or_epoch() {
       result.audit.canonical_query_count == 0U &&
           result.audit.gpu_supported_center_query_count == 0U &&
           result.audit.gpu_output_record_count == 0U &&
+          result.audit.active_host_to_device_query_record_count == 0U &&
+          result.audit.active_host_to_device_query_byte_count == 0U &&
+          result.audit.initialized_device_output_record_count == 0U &&
+          result.audit.initialized_device_output_byte_count == 0U &&
+          result.audit.copied_device_to_host_record_count == 0U &&
+          result.audit.copied_device_to_host_byte_count == 0U &&
           result.audit.inspected_neighbor_count == 0U &&
           result.audit.gpu_kernel_launch_count == 0U &&
           result.audit.gpu_synchronization_count == 0U &&
@@ -371,6 +387,15 @@ void test_unsupported_centers_keep_the_supported_subset_sparse() {
           sparse.audit.gpu_supported_center_query_count == 1U &&
           sparse.audit.unsupported_center_query_count == 1U &&
           sparse.audit.gpu_output_record_count == 1U &&
+          sparse.audit.active_host_to_device_query_record_count == 1U &&
+          sparse.audit.active_host_to_device_query_byte_count ==
+              26U * sizeof(std::uint64_t) &&
+          sparse.audit.initialized_device_output_record_count == 1U &&
+          sparse.audit.initialized_device_output_byte_count ==
+              18U * sizeof(std::uint64_t) &&
+          sparse.audit.copied_device_to_host_record_count == 1U &&
+          sparse.audit.copied_device_to_host_byte_count ==
+              18U * sizeof(std::uint64_t) &&
           sparse.audit.buffer_epoch == 1U &&
           sparse.transcript.proposal_records.size() == 1U &&
           sparse.transcript.proposal_records[0U].source_facet_key ==
@@ -541,8 +566,8 @@ void test_corruption_matrix_and_poisoning() {
       "a skipped device epoch");
   check_corruption_poisoning(
       fixture,
-      Corruption::tail_write,
-      "a write into the untouched physical tail");
+      Corruption::stale_active_candidate_tail,
+      "a stale candidate in an active record tail");
   check_corruption_poisoning(
       fixture,
       Corruption::duplicate_candidate,

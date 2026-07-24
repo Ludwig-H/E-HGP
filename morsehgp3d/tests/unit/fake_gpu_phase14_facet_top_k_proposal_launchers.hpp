@@ -12,7 +12,7 @@ enum class FakePhase14FacetTopKProposalCorruption : std::uint8_t {
   zero_epoch,
   stale_epoch_without_advance,
   jumped_epoch,
-  tail_write,
+  stale_active_candidate_tail,
   duplicate_candidate,
   out_of_domain_candidate,
   out_of_window_candidate,

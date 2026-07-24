@@ -19,7 +19,7 @@ class Phase14FacetTopKProposalHostState;
 }  // namespace detail
 
 inline constexpr std::uint32_t
-    direct_sparse_facet_top_k_gpu_proposal_schema_version = 1U;
+    direct_sparse_facet_top_k_gpu_proposal_schema_version = 2U;
 inline constexpr std::string_view
     direct_sparse_facet_top_k_gpu_proposal_backend = "cuda_g4";
 inline constexpr std::string_view
@@ -35,8 +35,8 @@ inline constexpr std::string_view
     direct_sparse_facet_top_k_gpu_proposal_proof_basis =
         "bounded_two_sided_morton_windows_per_source_facet_vertex_"
         "fixed_k_candidate_output_host_domain_exclusion_window_epoch_"
-        "sentinel_and_digest_validation_then_reference_cpu_exact_"
-        "point_of_use_recertification_v1";
+        "active_prefix_candidate_tail_sentinel_and_digest_validation_then_"
+        "reference_cpu_exact_point_of_use_recertification_v2";
 
 // The center is an operational search hint only.  It normally comes from the
 // already certified local facet miniball.  Even a mismatched center cannot
@@ -80,6 +80,17 @@ struct DirectSparseFacetTopKProposalAudit {
   std::size_t static_device_record_buffer_byte_capacity{};
   std::size_t static_device_query_buffer_byte_capacity{};
   std::size_t host_record_copy_byte_capacity{};
+  // Per-call traffic is proportional to the supported query count D.  Only
+  // active output records are initialized and copied.  Inactive physical
+  // storage is never consumed, and every later active prefix is initialized
+  // before launch.  The unused candidate tail of every active record remains
+  // an all-ones sentinel and is authenticated on the host.
+  std::size_t active_host_to_device_query_record_count{};
+  std::size_t active_host_to_device_query_byte_count{};
+  std::size_t initialized_device_output_record_count{};
+  std::size_t initialized_device_output_byte_count{};
+  std::size_t copied_device_to_host_record_count{};
+  std::size_t copied_device_to_host_byte_count{};
   std::size_t canonical_query_count{};
   std::size_t gpu_supported_center_query_count{};
   std::size_t unsupported_center_query_count{};
@@ -103,7 +114,7 @@ struct DirectSparseFacetTopKProposalAudit {
   bool homogeneous_facet_cardinality_validated{false};
   bool fixed_capacity_preflight_satisfied{false};
   bool supported_query_permutation_validated{false};
-  bool untouched_tail_sentinel_validated{false};
+  bool active_record_candidate_tail_sentinel_validated{false};
   bool every_candidate_domain_validated{false};
   bool every_candidate_source_facet_exclusion_validated{false};
   bool every_candidate_morton_window_validated{false};

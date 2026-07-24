@@ -90,9 +90,17 @@ La sortie n'a aucune autorité scientifique. 14F revalide clés, namespace, excl
 
 14I reste `architecture_only` et `public_status=not_claimed`. Les fenêtres n'offrent aucune garantie de rappel ou d'accélération, et aucune qualification de latence 50 k, volume 10 M+ ou `warm_e2e` n'est publiée. La validation ciblée hôte et le smoke G4 réel passent; les statuts de phase et les gates restent inchangés.
 
+## Incrément 14J implémenté — trafic CUDA actif
+
+Les buffers device persistants conservent la capacité $208C+144C=352C$ octets. Pour $D\leq C$ requêtes effectivement supportées, un appel copie désormais exactement $208D$ octets d'entrée, initialise $144D$ octets de sortie et rapatrie $144D$ octets dans un vecteur de $D$ records. L'audit publie séparément les capacités et les trois volumes actifs.
+
+La queue device $[D,C)$ n'est pas lue et n'a aucune autorité; toute partie qui devient active lors d'un appel suivant est réinitialisée. La sentinelle validée porte sur les candidats inutilisés à l'intérieur de chaque record actif. La fixture injecte une valeur résiduelle à cet endroit et vérifie le rejet avant publication.
+
+14J ne change ni la sélection flottante, ni le digest des records actifs, ni la revalidation exacte 14F, ni le commit scellé 14H. Il supprime le trafic proportionnel à la capacité inutilisée sans introduire de facette, coface, incidence globale, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur. Le jalon reste `cuda_g4 / hgp_reduced / proposal_only`, `architecture_only` et `public_status=not_claimed`; sa recertification G4 courte reste à effectuer.
+
 ## Priorités de développement
 
-1. rendre le smoke 14I reproductible dans un worker GCP gardé, réduire le trafic de sortie en $C$ et remplacer ou cacher la projection rationnelle;
+1. rendre le smoke 14J reproductible dans un worker GCP gardé et remplacer ou cacher la projection rationnelle;
 2. raccorder le chunking obligatoire du producteur à la préparation scellée, dimensionner $C$ près de $D$ et étudier le réemploi recertifiable des centres exacts;
 3. réutiliser les capacités restantes de scratch et plafonner les tickets appelant sans conserver de graphe entre lots;
 4. ajouter l'instrumentation `warm_e2e`, puis rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
@@ -118,6 +126,8 @@ Pour 14H, le même CTest ciblé passe sous GCC Release strict en 2,82 secondes e
 Pour 14I, les deux CTests hôte ciblés passent sous GCC Release strict en 0,03 seconde et sous Clang 18 Release strict en 0,02 seconde. Ils couvrent les capacités $32n$, $40n$, $352C$ et $144C$, la borne $2kW$, les lots vide, hors plage et mixte, les sentinelles, epochs strictement consécutifs, cardinalités mélangées et corruptions de permutation, clé, candidat et compteurs. La source de qualification passe aussi la compilation syntaxique GCC stricte.
 
 Sur la G4 réelle, le smoke initial puis le rejeu optimisé passent. La qualification vérifie deux epochs, les candidats attendus d'un hint exact $1/3$, dix candidats à $k=10$ sur une fixture où les trois axes sont discriminants, puis l'égalité des partitions CPU exactes avec et sans amorce. Le JSON donne 16 inspections pour le lot $k=2$, 230 pour $k=10$, quatre puis dix candidats, aucun objet global interdit et le digest `18249493464636075901` sur les deux versions. Le memcheck rejoue le binaire optimisé avec zéro erreur.
+
+Pour 14J, le CTest hôte ciblé passe en 0,02 seconde. Il couvre les lots $D=2$, $D=1$ et $D=0$, les volumes actifs exacts $208D$, $144D$ et $144D$, la taille hôte $D$ et la corruption de la queue de candidats d'un record actif. Aucun benchmark, test massif ou oracle combinatoire n'a été ajouté.
 
 Une falsification coordonnée pourrait encore redistribuer des compteurs entre chunks 14A ou lanes 14C tout en conservant leurs agrégats. Les payloads compacts ne contiennent volontairement ni détail ni digest par lot; un vérificateur frais contre 10.1--10.2 est donc requis avant persistance ou exécution industrielle. Cette dette P2 est compatible avec `architecture_only`, mais devra être fermée avant toute qualification.
 

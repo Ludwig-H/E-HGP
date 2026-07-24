@@ -1221,6 +1221,14 @@ La frontière scientifique ne change pas. La sortie GPU alimente seulement le tr
 
 Ce jalon est implémenté et son smoke ciblé passe sur l'hôte puis sur une vraie G4. Le premier SHA `136a4c3c72fb97087d9555bca270b25cca5b8d83` a mesuré 672 octets de pile locale par thread; le SHA optimisé `3aeb62019252c785d94cfb91de331bb74b6572e2` conserve la requête, les sources et le record dans les buffers globaux et ramène cette pile à 160 octets, soit une réduction de 76 %, avec toujours 62 registres et zéro spill. NVCC 12.9.86 produit uniquement un cubin `sm_120`; les deux CTests, le digest, les candidats $k=2$ et $k=10$, les partitions CPU exactes et le memcheck restent identiques. La projection rationnelle et le trafic en $C$ restent à traiter avant tout SLO. Le smoke ne revendique aucune garantie de rappel, accélération mesurée, p95 `warm_e2e`, latence sous la seconde à 50 k points, capacité 10 M+ ou statut public; la phase, ses gates, `architecture_only` et `public_status=not_claimed` restent inchangés.
 
+### Trafic actif 14J
+
+14J garde les buffers device persistants de $208C+144C=352C$ octets pour éviter les allocations par lot, tout en supprimant le trafic proportionnel à la capacité inutilisée. Pour $D\leq C$ requêtes supportées, l'appel copie exactement $208D$ octets d'entrée, initialise exactement $144D$ octets de sortie et rapatrie exactement $144D$ octets dans un vecteur de $D$ records. L'audit conserve séparément la capacité physique et ces trois volumes actifs.
+
+La queue physique $[D,C)$ n'est pas une autorité : elle n'est ni initialisée, ni copiée, ni lue, et toute partie qui devient active lors d'un appel ultérieur est réinitialisée avant le kernel. La queue des candidats inutilisés de chaque record actif reste sentinellée; sa corruption invalide le lot. Ce contrat ferme la dette de trafic en $C$ sans changer le digest des records actifs, les propositions flottantes, la recertification CPU 14F ou le commit scellé 14H.
+
+La mémoire de capacité reste $O(C)$ et le snapshot reste $O(n)$, mais le trafic propre à un appel devient $O(D)$. 14J ne construit ni facette ou coface absente, ni incidence globale, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur. Il reste `cuda_g4 / hgp_reduced / proposal_only`, déploiement `architecture_only`, avec décision scientifique `reference_cpu / hgp_reduced / certified` et `public_status=not_claimed`. Le raccord complet à l'exécuteur, la projection rationnelle, le protocole `warm_e2e`, le SLO 50 k et la capacité 10 M+ restent ouverts.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;

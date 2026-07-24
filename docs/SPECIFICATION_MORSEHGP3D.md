@@ -681,6 +681,14 @@ Pour une capacité maximale fixe $C$ et $D\leq C$ requêtes, un record d'entrée
 
 Le transcript produit reste soumis au contrat 14F : le CPU contrôle clés, namespace, exclusions et candidats, recalcule les distances au centre exact, conserve $F$ comme baseline, puis termine la traversée LBVH avec prune strict et descente à égalité. Si cette préparation émet un ticket 14H, le commit scellé ignore entièrement transcript, digest et audit. Les fenêtres Morton ne portent aucune garantie de rappel, d'accélération ou même de proposition non vide; 14I ne qualifie ni latence sous la seconde à 50 k points, ni capacité 10 M+, ni `warm_e2e`, ni statut public. La validation ciblée hôte et le smoke G4 réel passent au SHA optimisé `3aeb62019252c785d94cfb91de331bb74b6572e2`, avec AOT `sm_120` sans PTX, memcheck nul et pile ptxas réduite de 672 à 160 octets par thread sans modifier le digest; ils ne constituent pas encore un worker industriel reproductible.
 
+### 9.24 Trafic proportionnel au préfixe actif
+
+L'incrément 14J conserve les allocations persistantes de capacité $208C+144C=352C$ octets, mais borne le trafic de chaque appel par son nombre réel $D\leq C$ de requêtes supportées. Il transfère exactement $208D$ octets d'entrée, initialise exactement $144D$ octets de sortie et recopie exactement $144D$ octets vers un vecteur hôte de $D$ records. La capacité maximale de copie hôte reste $144C$ octets dans le modèle d'admission, sans matérialisation de cette queue à chaque appel.
+
+La queue device d'indices $[D,C)$ n'est ni initialisée, ni transférée, ni consultée pendant l'appel. Elle ne porte donc aucune sentinelle et aucune autorité. Tout indice qui rejoint ultérieurement un préfixe actif est réinitialisé avant le kernel. Dans chaque record actif, la queue de candidats d'indices allant de `candidate_count` à $K-1$ reste au contraire sentinellée et validée; une valeur résiduelle dans cette queue active ferme l'appel avant publication du transcript. Les compteurs d'audit séparent capacités physiques et octets actifs afin qu'une régression vers un trafic en $C$ soit observable.
+
+14J ne modifie ni la sélection flottante, ni le digest des records actifs, ni la recertification CPU 14F, ni le ticket 14H. Le coût additionnel demeure $O(n+C+kD)$ à cause des allocations persistantes, mais le trafic par appel devient $O(D)$. Aucun univers de facettes, cofaces ou incidences, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur n'est construit. Ce jalon reste `architecture_only`, `proposal_only` et `public_status=not_claimed`; il ne qualifie ni le SLO 50 k, ni 10 M+, ni un raccord exécuteur industriel.
+
 ## 10. Événements simultanés
 
 Des centres distincts peuvent avoir exactement le même niveau. Une exécution séquentielle créerait des bifurcations binaires artificielles et pourrait changer les morphismes verticaux.

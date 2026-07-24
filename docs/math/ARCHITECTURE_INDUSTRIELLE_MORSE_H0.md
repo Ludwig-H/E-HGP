@@ -132,15 +132,23 @@ Le centre exact n'est pas construit sur le device. Son calcul amont peut examine
 
 Le jalon reste `architecture_only`, mais la validation ciblée hôte et le smoke G4 réel passent. Le premier profil ptxas au SHA `136a4c3c72fb97087d9555bca270b25cca5b8d83` mesurait 672 octets de pile locale par thread. Le SHA `3aeb62019252c785d94cfb91de331bb74b6572e2` laisse le POD de requête, les deux tableaux sources et le record dans les buffers globaux, ne conserve localement que le scratch top-$k$ et réduit la pile à 160 octets, sans changer les 62 registres ni créer de spill. Le code AOT contient toujours un seul cubin `sm_120` sans PTX; digest, candidats, partitions exactes et memcheck restent identiques. Ce résultat valide l'exécution, pas le débit. Aucun rappel, gain de temps, SLO 50 k, capacité 10 M+, `warm_e2e` ou statut public n'est qualifié.
 
-## Goulots restant à traiter après 14I
+## Incrément 14J — trafic CUDA limité au préfixe actif
+
+Les allocations persistantes restent exactement $208C+144C=352C$ octets pour une capacité $C$, mais un appel de $D\leq C$ requêtes ne transfère plus la queue inactive. Il copie $208D$ octets de requêtes, initialise $144D$ octets de sorties et recopie $144D$ octets dans un vecteur hôte de $D$ records. Les capacités maximales restent publiées séparément des compteurs actifs.
+
+La queue device $[D,C)$ n'est ni lue, ni initialisée, ni transférée et ne porte aucune autorité. Tout préfixe futur est réinitialisé avant le kernel. La sentinelle utile est désormais la queue de candidats de chaque record actif : une valeur résiduelle après `candidate_count` invalide le lot. Le trafic par appel devient ainsi $O(D)$ tout en conservant les capacités $O(C)$ et le snapshot $O(n)$.
+
+Ce changement ne touche ni la sélection flottante, ni la recertification CPU 14F, ni le commit 14H. Il ne construit aucune facette ou coface absente, incidence globale, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur. 14J reste `architecture_only`, `proposal_only` et `public_status=not_claimed`; il ne qualifie encore ni 50 k, ni 10 M+.
+
+## Goulots restant à traiter après 14J
 
 Trois coûts dominants restent visibles :
 
 - les traversées exactes top-$K$ par clé distincte, encore linéaires au pire cas puisque 14I ne garantit aucun rappel;
 - les constructions exactes de miniballs jusqu'à 385 supports, potentiellement répétées entre la préparation du centre et 10.5c, ainsi que les fallbacks rationnels;
-- les snapshots $32n$ device et $40n$ hôte sur G4, les buffers $352C$ device et $144C$ hôte par lot, le scratch top-$k$ local restant de 160 octets par thread, la projection rationnelle non cachée, les capacités réutilisables et le pic des tickets détenus par l'appelant, qui exigent chunks et plafonds sans dupliquer durablement les grandes arènes.
+- les snapshots $32n$ device et $40n$ hôte sur G4, les buffers persistants $352C$ device et la capacité hôte $144C$, le scratch top-$k$ local restant de 160 octets par thread, la projection rationnelle non cachée, les capacités réutilisables et le pic des tickets détenus par l'appelant, qui exigent chunks et plafonds sans dupliquer durablement les grandes arènes.
 
-La priorité de développement devient donc : intégrer ce smoke dans un worker GCP gardé reproductible, supprimer le trafic de capacité inutile et réduire le coût de projection, puis raccorder le chunking à la préparation scellée sans transférer l'autorité de l'audit. Les centres ou capacités exactes ne peuvent être réutilisés qu'avec une provenance recertifiable; l'instrumentation `warm_e2e`, puis les runs et checkpoints compacts, viennent ensuite pour les profils 50 k et 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
+La priorité de développement devient donc : intégrer ce smoke dans un worker GCP gardé reproductible et réduire le coût de projection, puis raccorder le chunking à la préparation scellée sans transférer l'autorité de l'audit. Les centres ou capacités exactes ne peuvent être réutilisés qu'avec une provenance recertifiable; l'instrumentation `warm_e2e`, puis les runs et checkpoints compacts, viennent ensuite pour les profils 50 k et 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
 
 ## Planification sans promotion
 
