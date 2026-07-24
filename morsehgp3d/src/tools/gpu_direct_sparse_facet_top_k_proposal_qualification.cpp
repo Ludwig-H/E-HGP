@@ -156,7 +156,9 @@ void require_active_traffic(
           kRecordBytes * active_query_count ||
       audit.exact_center_projection_axis_count !=
           3U * audit.canonical_query_count ||
-      audit.exact_center_projection_integer_division_count >
+      audit.exact_center_projection_integer_division_count +
+              audit.exact_center_projection_zero_axis_count +
+              audit.exact_center_projection_unsupported_axis_count !=
           audit.exact_center_projection_axis_count ||
       !audit.exact_center_projection_division_bound_validated) {
     throw std::runtime_error(
@@ -430,6 +432,13 @@ int main() {
         << "\"exact_center_projection_integer_division_count\":"
         << first.audit
                .exact_center_projection_integer_division_count
+        << ','
+        << "\"exact_center_projection_unsupported_axis_count\":"
+        << first.audit
+               .exact_center_projection_unsupported_axis_count
+        << ','
+        << "\"exact_center_projection_zero_axis_count\":"
+        << first.audit.exact_center_projection_zero_axis_count
         << ','
         << "\"forbidden_global_structure_materialized\":false,"
         << "\"gpu_kernel_launch_count\":1,"

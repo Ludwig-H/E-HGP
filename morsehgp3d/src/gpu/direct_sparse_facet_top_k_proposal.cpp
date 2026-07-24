@@ -180,6 +180,8 @@ struct PackedQueries {
   std::size_t facet_cardinality{};
   std::size_t exact_center_projection_axis_count{};
   std::size_t exact_center_projection_integer_division_count{};
+  std::size_t exact_center_projection_zero_axis_count{};
+  std::size_t exact_center_projection_unsupported_axis_count{};
   std::size_t unsupported_center_count{};
   std::size_t aggregate_inspection_bound{};
   std::size_t maximum_inspection_bound{};
@@ -239,6 +241,16 @@ struct PackedQueries {
             packed.exact_center_projection_integer_division_count,
             projection.integer_division_count,
             "the Phase 14 center projection division count overflowed");
+    packed.exact_center_projection_zero_axis_count =
+        checked_size_sum(
+            packed.exact_center_projection_zero_axis_count,
+            projection.zero_coordinate_count,
+            "the Phase 14 zero center projection axis count overflowed");
+    packed.exact_center_projection_unsupported_axis_count =
+        checked_size_sum(
+            packed.exact_center_projection_unsupported_axis_count,
+            projection.unsupported_coordinate_count,
+            "the Phase 14 unsupported center projection axis count overflowed");
     const bool center_supported = projection.supported;
     if (!center_supported) {
       ++packed.unsupported_center_count;
@@ -560,6 +572,10 @@ void initialize_common_audit(
       packed.exact_center_projection_axis_count;
   audit.exact_center_projection_integer_division_count =
       packed.exact_center_projection_integer_division_count;
+  audit.exact_center_projection_zero_axis_count =
+      packed.exact_center_projection_zero_axis_count;
+  audit.exact_center_projection_unsupported_axis_count =
+      packed.exact_center_projection_unsupported_axis_count;
   audit.canonical_query_count = queries.size();
   audit.gpu_supported_center_query_count =
       packed.gpu_queries.size();
@@ -579,7 +595,14 @@ void initialize_common_audit(
       audit.exact_center_projection_axis_count / 3U ==
           audit.canonical_query_count &&
       audit.exact_center_projection_integer_division_count <=
-          audit.exact_center_projection_axis_count;
+          audit.exact_center_projection_axis_count &&
+      audit.exact_center_projection_zero_axis_count <=
+          audit.exact_center_projection_axis_count -
+              audit.exact_center_projection_integer_division_count &&
+      audit.exact_center_projection_unsupported_axis_count ==
+          audit.exact_center_projection_axis_count -
+              audit.exact_center_projection_integer_division_count -
+              audit.exact_center_projection_zero_axis_count;
 }
 
 void finalize_digest(
@@ -723,6 +746,13 @@ void finalize_digest(
              audit.canonical_query_count &&
          audit.exact_center_projection_integer_division_count <=
              audit.exact_center_projection_axis_count &&
+         audit.exact_center_projection_zero_axis_count <=
+             audit.exact_center_projection_axis_count -
+                 audit.exact_center_projection_integer_division_count &&
+         audit.exact_center_projection_unsupported_axis_count ==
+             audit.exact_center_projection_axis_count -
+                 audit.exact_center_projection_integer_division_count -
+                 audit.exact_center_projection_zero_axis_count &&
          audit.supported_query_permutation_validated &&
          audit.active_record_candidate_tail_sentinel_validated &&
          audit.every_candidate_domain_validated &&

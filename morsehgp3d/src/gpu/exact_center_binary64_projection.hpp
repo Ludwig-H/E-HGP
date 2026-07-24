@@ -21,9 +21,14 @@ inline constexpr std::uint64_t nearest_binary64_significand_limit =
 struct ExactCenterBinary64Projection {
   std::array<std::uint64_t, 3U> coordinate_bits{};
   std::size_t integer_division_count{};
+  std::size_t zero_coordinate_count{};
+  std::size_t unsupported_coordinate_count{};
   bool supported{true};
 };
 
+// "Nearest" deliberately preserves the historical lower-numeric-endpoint
+// midpoint rule.  It is not IEEE round-to-nearest-ties-to-even: positive ties
+// keep the lower magnitude, while negative ties take the higher magnitude.
 [[nodiscard]] inline int floor_binary_exponent(
     const exact::BigInt& positive_numerator,
     const exact::BigInt& positive_denominator,
@@ -213,7 +218,20 @@ project_exact_center_to_nearest_binary64(
     result.coordinate_bits[axis] = coordinate.bits;
     result.integer_division_count +=
         coordinate.integer_division_count;
+    result.zero_coordinate_count +=
+        center.numerator(axis) == 0 ? 1U : 0U;
+    result.unsupported_coordinate_count +=
+        center.numerator(axis) != 0 && !coordinate.supported
+            ? 1U
+            : 0U;
     result.supported = result.supported && coordinate.supported;
+  }
+  if (result.integer_division_count +
+          result.zero_coordinate_count +
+          result.unsupported_coordinate_count !=
+      result.coordinate_bits.size()) {
+    throw std::logic_error(
+        "an exact-center projection axis partition did not close");
   }
   return result;
 }

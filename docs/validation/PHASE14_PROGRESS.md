@@ -102,7 +102,7 @@ La queue device $[D,C)$ n'est pas lue et n'a aucune autorité; toute partie qui 
 
 Pour une coordonnée $x=N/Q$, le nouveau projecteur ferme d'abord la plage finie par une comparaison entière. Il choisit ensuite la grille subnormale ou détermine exactement le binade par les bits de poids fort et une comparaison décalée, puis une unique `divide_qr` fournit le significand et son reste. L'arrondi conserve la règle historique vers la borne numérique inférieure au midpoint, donc un seuil strict pour $N>0$ et large pour $N<0$.
 
-Les trois coordonnées utilisent directement leurs numérateurs et le dénominateur commun; aucune construction de `ExactRational` ou recherche sur 63 mots par axe ne subsiste dans le chemin produit. Une requête exécute au plus trois divisions, publiées dans l'audit. Le projecteur ne possède aucun cache et ne transmet aucune autorité à 14F ou 14H.
+Les trois coordonnées utilisent directement leurs numérateurs et le dénominateur commun; aucune construction de `ExactRational` ou recherche sur 63 mots par axe ne subsiste dans le chemin produit. Une requête exécute au plus trois divisions. L'audit partitionne exactement ses axes entre zéro, hors plage et une division, et la fixture rejette un sous-compte isolé. Le projecteur ne possède aucun cache et ne transmet aucune autorité à 14F ou 14H.
 
 Le différentiel court contre l'ancien encadrement couvre les frontières binary64 et 64 rationnels déterministes avec les deux signes. Il conserve exactement les décisions de plage et les bits projetés. 14K reste `cuda_g4 / hgp_reduced / proposal_only`, `architecture_only` et `public_status=not_claimed`, sans qualification 50 k ou 10 M+.
 

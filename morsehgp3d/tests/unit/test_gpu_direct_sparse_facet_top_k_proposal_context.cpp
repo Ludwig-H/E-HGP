@@ -402,9 +402,18 @@ void test_result_epochs_and_digest() {
           first.audit.exact_center_projection_axis_count == 6U &&
           first.audit.exact_center_projection_integer_division_count ==
               2U &&
+          first.audit.exact_center_projection_zero_axis_count == 4U &&
+          first.audit.exact_center_projection_unsupported_axis_count ==
+              0U &&
           first.audit
               .exact_center_projection_division_bound_validated,
       "the audit exposes the lazy 32n device snapshot, full host snapshot and fixed batch capacities");
+  auto undercounted_projection = first;
+  --undercounted_projection.audit
+        .exact_center_projection_integer_division_count;
+  check(
+      !undercounted_projection.certified_outcome(),
+      "an undercounted integer projection partition is rejected");
   check(
       first.audit.canonical_query_count == 2U &&
           first.audit.gpu_supported_center_query_count == 2U &&

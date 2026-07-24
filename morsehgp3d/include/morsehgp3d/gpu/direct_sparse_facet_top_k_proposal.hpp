@@ -94,6 +94,8 @@ struct DirectSparseFacetTopKProposalAudit {
   std::size_t copied_device_to_host_byte_count{};
   std::size_t exact_center_projection_axis_count{};
   std::size_t exact_center_projection_integer_division_count{};
+  std::size_t exact_center_projection_zero_axis_count{};
+  std::size_t exact_center_projection_unsupported_axis_count{};
   std::size_t canonical_query_count{};
   std::size_t gpu_supported_center_query_count{};
   std::size_t unsupported_center_query_count{};
