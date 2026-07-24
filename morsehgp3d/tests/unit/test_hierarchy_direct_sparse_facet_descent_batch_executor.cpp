@@ -2021,6 +2021,165 @@ void test_falsified_plan_is_rejected_at_session_open() {
       "one falsified lane count is rejected by the single fresh session anchor");
 }
 
+void test_certified_prefix_resume_derives_the_full_live_cursor() {
+  const Scenario scenario = regular_tetrahedron_order_one_scenario();
+  const auto observed_plan = build_plan(scenario);
+  ExactDirectSparsePositiveFacetLocator locator =
+      make_locator(scenario.cloud.size());
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor uninterrupted(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      source_seed_budget(),
+      scenario.seed_journal,
+      plan_config(),
+      plan_budget(),
+      observed_plan,
+      locator);
+  if (scenario.event_journal.batches.size() != 2U) {
+    check(
+        false,
+        "the certified-prefix fixture exposes the expected two source batches");
+    return;
+  }
+
+  const auto witness = query_witness(UINT64_C(15'001));
+  const auto first =
+      uninterrupted.prepare_next(
+          witness, execution_budget(), closure_budget());
+  const auto accepted = uninterrupted.commit_prepared(
+      witness, execution_budget(), closure_budget(), first);
+  const auto durable_locator_commit = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      std::span<const ExactDirectSparseFacetBinding>{});
+  check(
+      accepted.result_certified && accepted.session_advanced &&
+          durable_locator_commit.certified_committed_batch() &&
+          uninterrupted.next_source_batch_index() == 1U &&
+          locator.snapshot_stamp().committed_batch_count == 1U,
+      "the resume fixture advances one exact cursor and its empty durable locator transaction");
+
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor resumed(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      source_seed_budget(),
+      scenario.seed_journal,
+      plan_config(),
+      plan_budget(),
+      observed_plan,
+      locator,
+      ExactDirectSparseFacetDescentCertifiedPrefixResume{1U});
+  const auto& resume_audit = resumed.audit();
+  check(
+      resumed.next_source_batch_index() ==
+              uninterrupted.next_source_batch_index() &&
+          resumed.next_source_chunk_index() ==
+              uninterrupted.next_source_chunk_index() &&
+          resumed.next_source_lane_index() ==
+              uninterrupted.next_source_lane_index() &&
+          resumed.next_source_family_index() ==
+              uninterrupted.next_source_family_index() &&
+          resumed.next_source_arm_seed_index() ==
+              uninterrupted.next_source_arm_seed_index() &&
+          !resumed.complete() &&
+          resume_audit.source_plan_verification_count == 1U &&
+          resume_audit.resumed_source_batch_count == 1U &&
+          resume_audit.session_resumed_from_certified_prefix,
+      "a certified nonzero prefix reconstructs every subordinate cursor of the uninterrupted executor");
+
+  const auto resumed_next =
+      resumed.prepare_next(
+          query_witness(UINT64_C(15'002)),
+          execution_budget(),
+          closure_budget());
+  check(
+      resumed_next.source_batch_index == 1U &&
+          resumed.next_source_batch_index() == 1U,
+      "the resumed executor prepares the exact successor without replaying or advancing the certified prefix");
+}
+
+void test_certified_prefix_resume_rejects_mismatch_and_range_atomically() {
+  const Scenario scenario = regular_tetrahedron_order_one_scenario();
+  const auto observed_plan = build_plan(scenario);
+  ExactDirectSparsePositiveFacetLocator mismatched_locator =
+      make_locator(scenario.cloud.size());
+  const auto one_durable_batch = mismatched_locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      std::span<const ExactDirectSparseFacetBinding>{});
+  const auto mismatch_entry_stamp = mismatched_locator.snapshot_stamp();
+  bool mismatch_rejected = false;
+  try {
+    ExactDirectSparseFacetDescentAnchoredBatchExecutor rejected(
+        scenario.index,
+        scenario.cloud,
+        scenario.facade,
+        scenario.event_journal,
+        source_seed_budget(),
+        scenario.seed_journal,
+        plan_config(),
+        plan_budget(),
+        observed_plan,
+        mismatched_locator,
+        ExactDirectSparseFacetDescentCertifiedPrefixResume{0U});
+    static_cast<void>(rejected);
+  } catch (const std::invalid_argument&) {
+    mismatch_rejected = true;
+  }
+  check(
+      one_durable_batch.certified_committed_batch() &&
+          mismatch_rejected &&
+          mismatched_locator.snapshot_stamp() == mismatch_entry_stamp,
+      "a prefix disagreeing with durable locator HEAD is rejected without mutating the locator");
+
+  ExactDirectSparsePositiveFacetLocator out_of_range_locator =
+      make_locator(scenario.cloud.size());
+  const std::size_t out_of_range_prefix =
+      scenario.event_journal.batches.size() + 1U;
+  bool range_fixture_committed = true;
+  for (std::size_t batch_index = 0U;
+       batch_index < out_of_range_prefix;
+       ++batch_index) {
+    const auto committed = out_of_range_locator.apply_batch(
+        std::span<const ExactDirectSparseFacetQuery>{},
+        std::span<const ExactDirectSparseComponentUnion>{},
+        std::span<const ExactDirectSparseFacetBinding>{});
+    range_fixture_committed =
+        range_fixture_committed &&
+        committed.certified_committed_batch();
+  }
+  const auto range_entry_stamp =
+      out_of_range_locator.snapshot_stamp();
+  bool range_rejected = false;
+  try {
+    ExactDirectSparseFacetDescentAnchoredBatchExecutor rejected(
+        scenario.index,
+        scenario.cloud,
+        scenario.facade,
+        scenario.event_journal,
+        source_seed_budget(),
+        scenario.seed_journal,
+        plan_config(),
+        plan_budget(),
+        observed_plan,
+        out_of_range_locator,
+        ExactDirectSparseFacetDescentCertifiedPrefixResume{
+            out_of_range_prefix});
+    static_cast<void>(rejected);
+  } catch (const std::invalid_argument&) {
+    range_rejected = true;
+  }
+  check(
+      range_fixture_committed && range_rejected &&
+          out_of_range_locator.snapshot_stamp() ==
+              range_entry_stamp,
+      "an out-of-range prefix is rejected even when its count matches locator HEAD, without external mutation");
+}
+
 }  // namespace
 
 int main() {
@@ -2032,6 +2191,8 @@ int main() {
   test_sealed_ticket_closes_proposal_to_commit_budget_liveness();
   test_integrated_chunked_proposal_seal_and_immediate_commit();
   test_falsified_plan_is_rejected_at_session_open();
+  test_certified_prefix_resume_derives_the_full_live_cursor();
+  test_certified_prefix_resume_rejects_mismatch_and_range_atomically();
 
   if (failures != 0) {
     std::cerr << failures

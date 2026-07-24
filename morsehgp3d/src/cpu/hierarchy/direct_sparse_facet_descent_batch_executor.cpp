@@ -2529,6 +2529,118 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::
   audit_.sealed_ticket_or_delta_retained_by_session = false;
 }
 
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::
+    ExactDirectSparseFacetDescentAnchoredBatchExecutor(
+        const spatial::MortonLbvhIndex& index,
+        const spatial::CanonicalPointCloud& cloud,
+        const ExactDirectSupportTerminalFacade& source_facade,
+        const ExactDirectMorseEventJournalResult& source_event_journal,
+        const ExactDirectSaddleArmSeedBudget& trusted_arm_seed_budget,
+        const ExactDirectSaddleArmSeedJournalResult&
+            source_arm_seed_journal,
+        const ExactDirectMorseIndustrialPlanConfig& industrial_config,
+        const ExactDirectSparseFacetDescentBatchPlanBudget& plan_budget,
+        const ExactDirectSparseFacetDescentBatchPlanResult& observed_plan,
+        const ExactDirectSparsePositiveFacetLocator& locator,
+        ExactDirectSparseFacetDescentCertifiedPrefixResume resume,
+        const ExactDirectSparseFacetDescentClosureConfig& closure_config,
+        spatial::LbvhTraversalOrder traversal_order)
+    : ExactDirectSparseFacetDescentAnchoredBatchExecutor(
+          index,
+          cloud,
+          source_facade,
+          source_event_journal,
+          trusted_arm_seed_budget,
+          source_arm_seed_journal,
+          industrial_config,
+          plan_budget,
+          observed_plan,
+          locator,
+          closure_config,
+          traversal_order) {
+  resume_at_certified_prefix(resume.next_source_batch_index);
+}
+
+void ExactDirectSparseFacetDescentAnchoredBatchExecutor::
+    resume_at_certified_prefix(std::size_t next_batch_index) {
+  if (next_batch_index > source_event_journal_->batches.size() ||
+      locator_->snapshot_stamp().committed_batch_count !=
+          next_batch_index) {
+    throw std::invalid_argument(
+        "an anchored batch executor resume prefix disagrees with its locator");
+  }
+
+  const auto lane = std::lower_bound(
+      source_plan_.lanes.begin(),
+      source_plan_.lanes.end(),
+      next_batch_index,
+      [](const ExactDirectSparseFacetDescentBatchLane& candidate,
+         std::size_t batch_index) {
+        return candidate.source_batch_index < batch_index;
+      });
+  const auto family = std::lower_bound(
+      source_arm_seed_journal_->families.begin(),
+      source_arm_seed_journal_->families.end(),
+      next_batch_index,
+      [](const ExactDirectSaddleArmFamilyRecord& candidate,
+         std::size_t batch_index) {
+        return candidate.journal_batch_index < batch_index;
+      });
+
+  std::size_t chunk_index =
+      source_plan_.source_industrial_plan.chunks.size();
+  if (next_batch_index < source_event_journal_->batches.size()) {
+    const auto chunk = std::lower_bound(
+        source_plan_.source_industrial_plan.chunks.begin(),
+        source_plan_.source_industrial_plan.chunks.end(),
+        next_batch_index,
+        [](const ExactDirectMorseIndustrialChunk& candidate,
+           std::size_t batch_index) {
+          return candidate.source_batch_end_index <= batch_index;
+        });
+    if (chunk ==
+            source_plan_.source_industrial_plan.chunks.end() ||
+        next_batch_index < chunk->source_batch_begin_index ||
+        next_batch_index >= chunk->source_batch_end_index ||
+        chunk->chunk_index != static_cast<std::size_t>(
+                                  std::distance(
+                                      source_plan_.source_industrial_plan
+                                          .chunks.begin(),
+                                      chunk))) {
+      throw std::invalid_argument(
+          "an anchored batch executor resume prefix has no source chunk");
+    }
+    chunk_index = chunk->chunk_index;
+  }
+
+  const std::size_t lane_index = static_cast<std::size_t>(
+      std::distance(source_plan_.lanes.begin(), lane));
+  const std::size_t family_index = static_cast<std::size_t>(
+      std::distance(
+          source_arm_seed_journal_->families.begin(), family));
+  const std::size_t arm_seed_index =
+      family == source_arm_seed_journal_->families.end()
+          ? source_arm_seed_journal_->arm_seeds.size()
+          : family->arm_seed_offset;
+  if (arm_seed_index > source_arm_seed_journal_->arm_seeds.size() ||
+      (family != source_arm_seed_journal_->families.end() &&
+       family->family_index != family_index) ||
+      (lane != source_plan_.lanes.end() &&
+       lane->lane_index != lane_index)) {
+    throw std::invalid_argument(
+        "an anchored batch executor resume prefix has inconsistent subordinate cursors");
+  }
+
+  next_source_batch_index_ = next_batch_index;
+  next_source_chunk_index_ = chunk_index;
+  next_source_lane_index_ = lane_index;
+  next_source_family_index_ = family_index;
+  next_source_arm_seed_index_ = arm_seed_index;
+  audit_.resumed_source_batch_count = next_batch_index;
+  audit_.session_resumed_from_certified_prefix =
+      next_batch_index != 0U;
+}
+
 bool ExactDirectSparseFacetDescentAnchoredBatchExecutor::complete()
     const noexcept {
   return next_source_batch_index_ ==

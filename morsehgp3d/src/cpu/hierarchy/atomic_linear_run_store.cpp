@@ -1857,6 +1857,7 @@ struct AtomicLinearRunStore::Impl {
     bool transition_final_present = false;
     bool head_temporary_present = false;
     bool head_replaced = false;
+    bool process_local_commit_succeeded = false;
     try {
       next_state = successor_state(transition);
       next_count = checked_add(
@@ -2006,6 +2007,67 @@ struct AtomicLinearRunStore::Impl {
       const struct stat verified_head_descriptor = descriptor_metadata(
           head_temporary.get(),
           "the verified atomic linear HEAD descriptor");
+
+      if (options.pre_head_commit != nullptr) {
+        result.process_local_commit_attempted = true;
+        ++durable_status.process_local_commit_attempt_count;
+        const AtomicLinearRunPreHeadCommitOutcome local_outcome =
+            options.pre_head_commit(
+                transition,
+                result.recertification.accepted_projection.get(),
+                options.pre_head_commit_state);
+        if (local_outcome !=
+            AtomicLinearRunPreHeadCommitOutcome::committed) {
+          const bool rejected_atomically =
+              local_outcome ==
+              AtomicLinearRunPreHeadCommitOutcome::
+                  rejected_atomically;
+          if (rejected_atomically) {
+            ++durable_status.process_local_commit_rejection_count;
+          } else {
+            result.process_local_commit_indeterminate = true;
+            ++durable_status
+                  .process_local_commit_indeterminate_count;
+          }
+          resource_gate_active = false;
+          const bool after_gate_accepted = authorize_resources(
+              transition,
+              AtomicLinearRunRecertificationPhase::publication,
+              AtomicLinearRunResourceGateBoundary::
+                  after_recertification);
+          transition_temporary = UniqueFileDescriptor{};
+          head_temporary = UniqueFileDescriptor{};
+          int cleanup_error_number = 0;
+          if (cleanup_pre_head_publication(
+                  temporary_name,
+                  final_name,
+                  transition_temporary_present,
+                  transition_final_present,
+                  head_temporary_present,
+                  cleanup_error_number) &&
+              authoritative_head_still_certified() &&
+              rejected_atomically) {
+            result.decision =
+                after_gate_accepted
+                    ? AtomicLinearRunPublishDecision::
+                          process_local_commit_rejected
+                    : AtomicLinearRunPublishDecision::
+                          resource_gate_rejected;
+            return result;
+          }
+          failed_closed = true;
+          durable_status.authoritative_head_certified = false;
+          refresh_status();
+          result.system_error_number = cleanup_error_number;
+          result.decision = AtomicLinearRunPublishDecision::
+              indeterminate_io_failure_reopen_required;
+          return result;
+        }
+        process_local_commit_succeeded = true;
+        result.process_local_commit_succeeded = true;
+        ++durable_status.process_local_commit_success_count;
+      }
+
       resource_gate_active = false;
       if (!authorize_resources(
               transition,
@@ -2015,13 +2077,14 @@ struct AtomicLinearRunStore::Impl {
         transition_temporary = UniqueFileDescriptor{};
         head_temporary = UniqueFileDescriptor{};
         int cleanup_error_number = 0;
-        if (cleanup_pre_head_publication(
+        const bool cleaned = cleanup_pre_head_publication(
                 temporary_name,
                 final_name,
                 transition_temporary_present,
                 transition_final_present,
                 head_temporary_present,
-                cleanup_error_number) &&
+                cleanup_error_number);
+        if (!process_local_commit_succeeded && cleaned &&
             authoritative_head_still_certified()) {
           result.decision =
               AtomicLinearRunPublishDecision::resource_gate_rejected;
@@ -2088,7 +2151,7 @@ struct AtomicLinearRunStore::Impl {
       result.system_error_number = error.code().value();
       transition_temporary = UniqueFileDescriptor{};
       head_temporary = UniqueFileDescriptor{};
-      if (!head_replaced &&
+      if (!process_local_commit_succeeded && !head_replaced &&
           result.system_error_number != EEXIST &&
           cleanup_pre_head_publication(
               temporary_name,

@@ -1246,7 +1246,17 @@ Sur succès, l'audit doit attester que toute opération faillible du reducer a p
 
 Le test inspecte enfin les compteurs négatifs : aucune facette ou coface globale, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est matérialisée. Il reste court et hôte. Il ne couvre ni publication `HEAD`, ni liaison au store, ni crash de processus, merge externe, mmap, jalon un million, 10 M+, CUDA, GCP, SLO 50 k, M.1, sortie de Phase 15 ou entrée en Phase 16.
 
-### 14.11 Échelle conditionnelle au-delà de 10 M
+### 14.11 Validation courte de Phase 15E
+
+Le contrat de couture accepte seulement un chunk 14A contenant exactement un lot. Avant toute écriture, `prepare_single_batch_chunk_bound_to_live_delta` doit comparer le résultat 14H scellé au rejeu 14D frais complet; un chunk multi-lot ou un delta différent échoue sans publication ni mutation scientifique. Le participant pre-`HEAD` appartient exclusivement au coordinateur et l'appelant ne peut pas en substituer un.
+
+Sur le tétraèdre, le premier commit doit aligner `HEAD`, executor, reducer et stamp locator au préfixe un. Après destruction, la reprise recertifie ce seul chunk, reconstruit le reducer, crée une nouvelle session 14H avec `ExactDirectSparseFacetDescentCertifiedPrefixResume{1}` et vérifie les cinq curseurs : lot, chunk, lane, famille et bras. Le second commit termine les deux lots et la forêt doit être récursivement identique au builder résident.
+
+Les rejets de reprise couvrent un compteur locator différent du préfixe demandé et un préfixe hors de l'intervalle du plan, sans mutation du locator. Le store générique couvre séparément les trois issues du participant : rejet atomique nettoyable, commit, et issue indéterminée qui ferme l'instance. Une fixture supprime `.HEAD.tmp` après sa synchronisation; le participant vivant committe ensuite, le renommage échoue, `HEAD` reste à l'ancien préfixe et le coordinateur doit rendre `certified_reopen_required`, être empoisonné et refuser tout nouvel appel.
+
+Ces tests restent hôte et courts. Ils certifient la sérialisation process-local de la couture mono-lot et la reconstruction depuis `HEAD`, pas une transaction physique RAM--disque, un débit industriel, des chunks multi-lots, un checkpoint de locator ou de forêt, un million, 10 M+, CUDA, GCP, le SLO 50 k, la sortie de Phase 15 ou l'entrée en Phase 16.
+
+### 14.12 Échelle conditionnelle au-delà de 10 M
 
 La première qualification massive porte sur 10 000 001 points et doit traverser le pipeline scientifique complet retenu pour le produit, jusqu'à la matérialisation et au checkpoint vérifiable. Un smoke de constructeur Morton/LBVH, une mesure de composant ou un préfixe scientifique n'est pas un succès de ce jalon.
 

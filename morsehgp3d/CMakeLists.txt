@@ -1461,6 +1461,7 @@ if(UNIX)
     morsehgp3d_direct_morse_chunk_run
     STATIC
       src/cpu/hierarchy/direct_morse_chunk_run.cpp
+      src/cpu/hierarchy/direct_morse_durable_live_commit.cpp
   )
   add_library(
     morsehgp3d::direct_morse_chunk_run
@@ -1486,6 +1487,7 @@ if(UNIX)
     PUBLIC
       morsehgp3d::atomic_linear_run_store
       morsehgp3d::direct_morse_budget
+      morsehgp3d::direct_morse_forest_reducer
       morsehgp3d::direct_sparse_facet_descent_batch_executor
     PRIVATE
       morsehgp3d::direct_sparse_facet_top_k_proposal_transcript

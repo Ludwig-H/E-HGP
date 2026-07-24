@@ -2,9 +2,9 @@
 
 ## État
 
-Phase `15`, incréments `15A`, `15B`, `15C` et `15D` implémentés, backend `reference_cpu`, profil `hgp_reduced`, mode `budgeted`, déploiement `architecture_only`, `public_status=not_claimed`.
+Phase `15`, incréments `15A`, `15B`, `15C`, `15D` et `15E` implémentés, backend `reference_cpu`, profil `hgp_reduced`, mode `budgeted`, déploiement `architecture_only`, `public_status=not_claimed`.
 
-La porte d'entrée est satisfaite par les revues de sortie des Phases 9, 10 et 11. `ExactDirectMorseBudgetTracker` livre la comptabilité interne des cinq budgets, `AtomicLinearRunStore` livre la publication atomique sur filesystem Unix local, `ExactDirectMorseChunkRunContext` raccorde ce store à de vrais chunks 14A et à leurs deltas 14D fraîchement rejoués, puis `ExactDirectMorseForestReducer` replie leur préfixe dans la même forêt que le builder résident. 15D ferme séparément, en mémoire, la progression conjointe d'un ticket 14H prévalidé, du locator et du reducer. Cette transaction vivante n'est pas reliée au remplacement durable de `HEAD`; elle ne qualifie donc ni la reprise après crash du commit composite, ni le volume 10 M+, ni un SLO, ni un résultat scientifique public.
+La porte d'entrée est satisfaite par les revues de sortie des Phases 9, 10 et 11. `ExactDirectMorseBudgetTracker` livre la comptabilité interne des cinq budgets, `AtomicLinearRunStore` livre la publication atomique sur filesystem Unix local, `ExactDirectMorseChunkRunContext` raccorde ce store à de vrais chunks 14A et à leurs deltas 14D fraîchement rejoués, puis `ExactDirectMorseForestReducer` replie leur préfixe dans la même forêt que le builder résident. 15D ferme en mémoire la progression conjointe d'un ticket 14H prévalidé, du locator et du reducer. 15E sérialise cette transaction vivante avec le remplacement durable de `HEAD` pour des chunks d'exactement un lot et impose une reconstruction complète depuis `HEAD` après toute issue post-commit incertaine. Cette couture de correction ne qualifie encore ni le débit massif, ni 10 M+, ni un SLO, ni un résultat scientifique public.
 
 ## Raccord scientifique 15B
 
@@ -37,6 +37,16 @@ Les décisions distinguent ticket invalide, déplacé ou consommé, sceau de ses
 Le coût supplémentaire persistant de 15D est nul au-delà des états sparse déjà détenus par 14H et 15C; le résultat déplace le delta compact existant. Aucune structure globale évitée par l'architecture n'est réintroduite : aucun catalogue de facettes, aucune coface ou incidence globale, aucune cellule, aucun Gamma et aucune mosaïque de Delaunay d'ordre supérieur.
 
 Cette fermeture est strictement in-process. Le ticket 14H n'est toujours pas sérialisé et aucun protocole ne joint encore cette linéarisation au remplacement de `HEAD` du store. Une perte de processus exige donc la reconstruction 15C depuis le préfixe recertifié; 15D ne revendique ni commit distribué ou durable, ni reprise en place, ni validation à un million ou 10 M+, ni SLO 50 k, ni sortie de Phase 15, ni entrée en Phase 16.
+
+## Couture durable--vivante mono-lot 15E
+
+`ExactDirectMorseDurableLiveCommitCoordinator` exige l'alignement initial du `HEAD`, du curseur 14H et du reducer. Le contexte n'accepte que le prochain chunk 14A d'exactement un lot et compare le delta de la capability scellée à un rejeu 14D frais complet. Cette comparaison précède la publication et ne retient aucune nouvelle population scientifique.
+
+Après recertification, écriture, synchronisation et relecture de toutes les images réversibles, `AtomicLinearRunStore` appelle le participant process-local avant le remplacement de `HEAD`. Le résultat `rejected_atomically` nettoie les images candidates et conserve l'ancien préfixe; `committed` atteste le succès 15D; `indeterminate` ferme immédiatement l'instance. Après un résultat `committed`, toute erreur de gate ou d'I/O impose aussi `failed_closed`: store, executor et reducer doivent être détruits puis reconstruits depuis `HEAD`. Le coordinateur interdit qu'un participant concurrent soit fourni par l'appelant et doit rester l'unique voie d'accès pendant l'appel.
+
+Il existe nécessairement une fenêtre d'instructions entre le commit RAM et le renommage filesystem. 15E ne prétend donc pas fournir une primitive atomique commune aux deux supports. Le théorème conditionnel est qu'aucune divergence n'est observable ou réutilisable sous l'exclusion du coordinateur. Un acquittement valide impose l'égalité des trois curseurs. Après perte de processus, 15C reconstruit locator, DSU et forêt depuis le préfixe recertifié; le constructeur de reprise 14H exige le même compteur de lots du locator, dérive les curseurs chunk, lane, famille et bras, puis crée un nouveau sceau de session.
+
+Le coût persistant ajouté est constant et aucune facette absente, coface, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est créée. En revanche, le cap mono-lot entraîne une publication filesystem par lot. C'est une fermeture de correction, pas le chemin de débit final à dix millions.
 
 ## Unité durable
 
@@ -80,20 +90,21 @@ Le premier protocole pris en charge est un namespace coopérativement verrouill�
 2. former l'image canonique complète et appeler le callback de recertification avant toute écriture;
 3. écrire le run sous un nom temporaire exclusif dans le même répertoire, exécuter `fdatasync`, puis relire et comparer ses octets;
 4. créer par hard-link son nom final immuable, contrôler l'inode et le nombre de liens, retirer le nom temporaire et synchroniser le répertoire;
-5. écrire un manifeste temporaire qui chaîne le précédent digest, le synchroniser, le renommer atomiquement vers `HEAD`, puis synchroniser encore le répertoire;
-6. acquitter seulement après cette dernière synchronisation.
+5. écrire et synchroniser un manifeste temporaire qui chaîne le précédent digest, puis appeler l'éventuel participant process-local 15E;
+6. renommer atomiquement le manifeste vers `HEAD`, puis synchroniser encore le répertoire;
+7. acquitter seulement après cette dernière synchronisation et l'alignement des curseurs vivants.
 
 Le remplacement de `HEAD` est le point de linéarisation. Un temporaire ou un run final non référencé après crash reste non committé et ne peut jamais être choisi comme « plus long préfixe » implicite. La reprise lit uniquement la chaîne annoncée par `HEAD`, vérifie sa contiguïté et recertifie chaque unité avant usage.
 
-Toute erreur observée après le remplacement de `HEAD` rend l'issue indéterminée dans l'instance courante : aucun retry local n'est autorisé avant fermeture et réouverture du store.
+Toute erreur observée après un commit process-local 15E ou après le remplacement de `HEAD` rend l'issue indéterminée dans l'instance courante : aucun retry local n'est autorisé avant fermeture et réouverture du store.
 
 Ce contrat ne couvre pas les filesystems réseau, l'anti-rollback sans ancre monotone externe, ni la durabilité d'un support dont les garanties sont plus faibles que les appels Unix supposés.
 
 ## Limites et prochaine porte
 
-15A--15D n'ajoutent aucune cellule, coface ou incidence globale, aucun Gamma et aucune mosaïque de Delaunay d'ordre supérieur. Ils ne checkpointent ni locator, ni DSU, ni forêt : 15C les reconstruit linéairement depuis le préfixe recertifié, tandis que 15D synchronise seulement leur progression vivante avec le curseur 14H. Ils n'établissent ni fonctionnement à 10 000 000 de points, ni latence 50 k, ni SLO, ni `public_status=exact`. La borne hôte porte sur les octets logiques transitoires de l'application, l'occupation sessionnelle fournie et l'enveloppe déclarée du résolveur et du consumer. L'appelant doit inclure dans cette occupation la résidence antérieure du nuage, du LBVH, du plan 14C, de la table de curseurs, des autorités et des arènes persistantes du reducer; elle n'est pas mesurée automatiquement. La borne ne couvre pas le slack de l'allocateur, plusieurs propositions basses retenues simultanément, les copies internes du store, l'espace libre réel et la synchronisation finale postérieure au remplacement de `HEAD`. Un dépassement physique après ce point de linéarisation ne peut pas être annulé. De plus, `committed_elapsed_ns` n'est ni extrait de `HEAD`, ni authentifié par lui : une reprise doit recevoir cette ancre temporelle d'une autorité monotone externe, faute de quoi le temps total inter-processus peut repartir à zéro. La qualification industrielle reste donc ouverte.
+15A--15E n'ajoutent aucune cellule, coface ou incidence globale, aucun Gamma et aucune mosaïque de Delaunay d'ordre supérieur. Ils ne checkpointent ni locator, ni DSU, ni forêt : 15C les reconstruit linéairement depuis le préfixe recertifié, 15D synchronise leur progression vivante avec le curseur 14H et 15E compose cette progression avec `HEAD` sous exclusion process-local. Ils n'établissent ni fonctionnement à 10 000 000 de points, ni latence 50 k, ni SLO, ni `public_status=exact`. La borne hôte porte sur les octets logiques transitoires de l'application, l'occupation sessionnelle fournie et l'enveloppe déclarée du résolveur et du consumer. L'appelant doit inclure dans cette occupation la résidence antérieure du nuage, du LBVH, du plan 14C, de la table de curseurs, des autorités et des arènes persistantes du reducer; elle n'est pas mesurée automatiquement. La borne ne couvre pas le slack de l'allocateur, plusieurs propositions basses retenues simultanément, les copies internes du store, l'espace libre réel et la synchronisation finale postérieure au remplacement de `HEAD`. Un dépassement physique après ce point de linéarisation ne peut pas être annulé. De plus, `committed_elapsed_ns` n'est ni extrait de `HEAD`, ni authentifié par lui : une reprise doit recevoir cette ancre temporelle d'une autorité monotone externe, faute de quoi le temps total inter-processus peut repartir à zéro. La qualification industrielle reste donc ouverte.
 
-La prochaine tranche doit joindre la transaction vivante 15D à l'unité durable sans faire de `HEAD` une autorité scientifique et sans créer une fenêtre où le store, 14H ou le reducer avance seul. Les snapshots DSU optimisés, merges externes, mmap, jalon un million et campagne 10 M+ restent ultérieurs.
+La prochaine tranche doit supprimer les populations singleton mathématiquement implicites et initialiser en bulk leurs bindings, naissances et nœuds afin d'éviter plusieurs copies linéaires au premier lot. L'archive d'autorités, les sorties segmentées, merges externes, mmap, jalon un million et campagne 10 M+ restent ultérieurs.
 
 L'échelle massive reste séquentielle et conditionnelle. Un run réel à 10 000 001 points doit d'abord traverser le pipeline scientifique complet et sa reprise; un résultat limité au LBVH ou à un autre composant ne suffit pas. Après ce succès seulement, 50 000 000 points peuvent être tentés, puis 100 000 000 après succès du rang précédent. Chaque rang doit fermer avant lancement les gates de mémoire simultanée device--hôte--scratch--sortie, de temps borné et de reprise depuis un `HEAD` recertifié. Si l'un manque ou si le pipeline complet ne termine pas, le rang n'est pas qualifié et aucune capacité produit correspondante n'est revendiquée.
 
@@ -130,3 +141,13 @@ Une fixture séparée construit deux reducers dont les locators vides ont le mê
 Une troisième branche conserve un ticket 14H valide, le même locator et les mêmes curseurs, mais prépare `closure_budget.maximum_node_count=255` face au budget 256 du reducer. Le fold refuse par `no_live_commit_reducer_fold_rejected`; le ticket est consommé, les curseurs et le stamp restent inchangés. Elle vérifie ainsi le rejet faillible le plus tardif avant l'irréversibilité.
 
 Les quatre CTests ciblés reducer, store, chunk-run et executor passent 4/4 en 2,15 secondes sous GCC Release strict, respectivement 0,02, 0,03, 0,04 et 2,06 secondes. Cette validation est hôte, ciblée et `architecture_only`. Elle ferme le trou en mémoire où 14H pouvait avancer avant un fold externe, mais ne teste ni liaison avec `AtomicLinearRunStore` ou `HEAD`, ni crash au milieu d'un commit composite, ni merge externe, mmap, un million, 10 M+, CUDA, GCP, SLO 50 k, M.1, sortie de Phase 15 ou entrée en Phase 16.
+
+## Validation courte de 15E
+
+Le test générique du store couvre les trois issues du participant pre-`HEAD`: rejet atomique avec nettoyage et réutilisation, commit suivi d'une publication normale, puis issue explicitement indéterminée qui ferme le store. Une seconde fixture committe le participant, supprime le candidat `HEAD` et vérifie qu'un échec de renommage ne peut jamais redevenir un refus retryable.
+
+Le test executor avance un lot du tétraèdre, construit un nouvel executor au préfixe un et compare ses cinq curseurs à la session non interrompue. Il prépare ensuite le lot suivant. Un préfixe différent du compteur locator et un préfixe hors plan sont rejetés sans mutation.
+
+Le test chunk-run committe durablement et en mémoire le lot zéro, détruit les objets vivants, rouvre le seul `HEAD`, recertifie son préfixe et reconstruit le reducer. Une session 14H neuve reprend au préfixe un, committe le second lot et produit une forêt identique au builder résident. Une fixture de panne supprime `.HEAD.tmp` avant le participant : le commit vivant réussit, le renommage échoue ensuite, le coordinateur est empoisonné et sa réutilisation est refusée jusqu'à reconstruction.
+
+Les quatre CTests ciblés passent 4/4 en 2,82 secondes sous GCC Release strict : reducer 0,03, store 0,03, chunk-run 0,03 et executor 2,72 secondes. Cette validation reste hôte et ferme la couture mono-lot sous sérialisation process-local; elle ne ferme ni chunks multi-lots efficaces, checkpoint scientifique en place, populations singleton implicites, externalisation, un million, 10 M+, CUDA, GCP, SLO 50 k, M.1, sortie de Phase 15 ou entrée en Phase 16.

@@ -689,7 +689,9 @@ struct ExactDirectSparseFacetDescentBatchExecutionSessionAudit {
   std::size_t sealed_ticket_accepted_commit_count{};
   std::size_t sealed_ticket_rejected_commit_count{};
   std::size_t sealed_ticket_exact_replay_avoided_count{};
+  std::size_t resumed_source_batch_count{};
   bool source_plan_owned_by_session{false};
+  bool session_resumed_from_certified_prefix{false};
   bool full_source_plan_replayed_per_batch{false};
   bool closure_graph_retained_between_batches{false};
   bool proposal_payload_or_audit_retained_between_calls{false};
@@ -699,6 +701,15 @@ struct ExactDirectSparseFacetDescentBatchExecutionSessionAudit {
       const ExactDirectSparseFacetDescentBatchExecutionSessionAudit&,
       const ExactDirectSparseFacetDescentBatchExecutionSessionAudit&) =
       default;
+};
+
+// Process-local recovery request.  The constructor still rebuilds and
+// verifies the complete 14C plan once, then derives every subordinate cursor
+// from this batch prefix and requires the supplied strict locator to have
+// committed exactly the same number of batches.  A fresh session seal is
+// always minted; no historical 14H capability is resumed.
+struct ExactDirectSparseFacetDescentCertifiedPrefixResume {
+  std::size_t next_source_batch_index{};
 };
 
 // In-memory execution authority for one complete 14C plan.  Construction
@@ -810,6 +821,22 @@ class ExactDirectSparseFacetDescentAnchoredBatchExecutor {
           spatial::LbvhTraversalOrder::near_first);
 
   ExactDirectSparseFacetDescentAnchoredBatchExecutor(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      const ExactDirectSupportTerminalFacade& source_facade,
+      const ExactDirectMorseEventJournalResult& source_event_journal,
+      const ExactDirectSaddleArmSeedBudget& trusted_arm_seed_budget,
+      const ExactDirectSaddleArmSeedJournalResult& source_arm_seed_journal,
+      const ExactDirectMorseIndustrialPlanConfig& industrial_config,
+      const ExactDirectSparseFacetDescentBatchPlanBudget& plan_budget,
+      const ExactDirectSparseFacetDescentBatchPlanResult& observed_plan,
+      const ExactDirectSparsePositiveFacetLocator& locator,
+      ExactDirectSparseFacetDescentCertifiedPrefixResume resume,
+      const ExactDirectSparseFacetDescentClosureConfig& closure_config = {},
+      spatial::LbvhTraversalOrder traversal_order =
+          spatial::LbvhTraversalOrder::near_first);
+
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor(
       const ExactDirectSparseFacetDescentAnchoredBatchExecutor&) = delete;
   ExactDirectSparseFacetDescentAnchoredBatchExecutor& operator=(
       const ExactDirectSparseFacetDescentAnchoredBatchExecutor&) = delete;
@@ -821,6 +848,18 @@ class ExactDirectSparseFacetDescentAnchoredBatchExecutor {
   [[nodiscard]] bool complete() const noexcept;
   [[nodiscard]] std::size_t next_source_batch_index() const noexcept {
     return next_source_batch_index_;
+  }
+  [[nodiscard]] std::size_t next_source_chunk_index() const noexcept {
+    return next_source_chunk_index_;
+  }
+  [[nodiscard]] std::size_t next_source_lane_index() const noexcept {
+    return next_source_lane_index_;
+  }
+  [[nodiscard]] std::size_t next_source_family_index() const noexcept {
+    return next_source_family_index_;
+  }
+  [[nodiscard]] std::size_t next_source_arm_seed_index() const noexcept {
+    return next_source_arm_seed_index_;
   }
   [[nodiscard]] const ExactDirectSparseFacetDescentBatchPlanResult&
   source_plan() const noexcept {
@@ -905,6 +944,8 @@ class ExactDirectSparseFacetDescentAnchoredBatchExecutor {
       const ExactDirectSparseFacetDescentBatchExecutionResult& observed);
 
  private:
+  void resume_at_certified_prefix(std::size_t next_batch_index);
+
   const spatial::MortonLbvhIndex* index_{};
   const spatial::CanonicalPointCloud* cloud_{};
   const ExactDirectSupportTerminalFacade* source_facade_{};

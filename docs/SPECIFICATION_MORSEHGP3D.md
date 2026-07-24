@@ -1021,7 +1021,17 @@ Pendant que 14H est gelé, le reducer effectue toute opération faillible : proj
 
 Le chemin conserve le delta compact, locator sparse, DSU et arènes de forêt de 15C. Il ne construit aucun catalogue global de facettes ou cofaces, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Ce contrat est exclusivement in-process : il ne sérialise pas le ticket, ne checkpointte pas les états scientifiques et ne joint pas encore sa linéarisation au remplacement de `HEAD`. Il ne revendique donc ni reprise atomique après crash, ni jalon 1 M ou 10 M+, ni SLO, ni sortie de Phase 15, ni statut public.
 
-### 14.5 Snapshot Morton/LBVH device recertifié
+### 14.5 Couture durable--vivante 15E
+
+La couture 15E est `reference_cpu / hgp_reduced / budgeted / architecture_only`. `ExactDirectMorseDurableLiveCommitCoordinator` possède exclusivement le participant pre-`HEAD` et requiert un chunk 14A contenant exactement un lot. Le delta scientifique de la capability 14H est comparé au rejeu 14D frais complet avant publication; ticket, locator, DSU et forêt restent absents du payload.
+
+`AtomicLinearRunStore` appelle le participant après recertification et après écriture, synchronisation et relecture du run et du candidat `HEAD`, mais avant le remplacement de `HEAD`. Son résultat est tri-valué. `rejected_atomically` affirme qu'aucune autorité process-local n'a avancé et permet le nettoyage; `committed` affirme que 15D a avancé locator, reducer et executor; `indeterminate` interdit toute conclusion locale. Après `committed`, toute erreur ultérieure rend l'instance courante inutilisable même si l'ancien `HEAD` reste lisible. L'appelant doit jeter les trois objets et rouvrir exclusivement depuis `HEAD`.
+
+Le protocole certifie sous sérialisation externe qu'aucune divergence intermédiaire n'est observable ou réutilisable; il ne revendique pas une primitive atomique commune à la RAM et au filesystem. Un succès exige l'égalité des curseurs durable, executor et reducer. Une reprise reconstruit le reducer par rejeu du préfixe durable, vérifie le compteur du locator, dérive les curseurs 14H depuis le plan et crée une nouvelle session; aucune capability antérieure ne survit.
+
+La granularité mono-lot engage un `fsync` par lot et reste un incrément de correction. Elle ne qualifie ni débit massif, ni un million, ni 10 M+, ni SLO, ni statut public. Aucun catalogue global de facettes ou cofaces, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est ajouté.
+
+### 14.6 Snapshot Morton/LBVH device recertifié
 
 Le constructeur 14M a pour contrat `cuda_g4 / hgp_reduced / device_morton_lbvh_snapshot_import / architecture_only`. Il accepte un nuage canonique non vide et une capacité fixe $C\leq\mathrm{INT\_MAX}$. Les propositions device ne sont jamais scientifiques : chaque bin ambigu est recalculé exactement avant le code Morton, puis l'import CPU recertifie toutes les coordonnées même si le GPU les avait déclarées non ambiguës.
 

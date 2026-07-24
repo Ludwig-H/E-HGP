@@ -325,6 +325,17 @@ class ExactDirectMorseChunkRunContext {
       const AtomicLinearRunTrustedState& trusted_state,
       std::size_t chunk_index) const;
 
+  // Phase-15E binding seam.  The next durable 14A chunk must contain exactly
+  // one complete source batch.  Its one fresh 14D replay is compared field for
+  // field with the live sealed-ticket delta before the proposal can reach the
+  // store; the observed delta is never retained or serialized.
+  [[nodiscard]] AtomicLinearRunChunkProposal
+  prepare_single_batch_chunk_bound_to_live_delta(
+      const AtomicLinearRunTrustedState& trusted_state,
+      std::size_t chunk_index,
+      const ExactDirectSparseFacetDescentBatchExecutionResult&
+          live_delta) const;
+
   [[nodiscard]] AtomicLinearRunPublishResult publish_next_chunk(
       AtomicLinearRunStore& store,
       AtomicLinearRunPublishOptions options = {}) const;
@@ -332,6 +343,12 @@ class ExactDirectMorseChunkRunContext {
   [[nodiscard]] ExactDirectMorseChunkRunAudit audit() const noexcept;
 
  private:
+  [[nodiscard]] AtomicLinearRunChunkProposal prepare_chunk_impl(
+      const AtomicLinearRunTrustedState& trusted_state,
+      std::size_t chunk_index,
+      const ExactDirectSparseFacetDescentBatchExecutionResult*
+          live_delta) const;
+
   struct Impl;
   std::shared_ptr<Impl> impl_;
 };

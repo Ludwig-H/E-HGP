@@ -272,9 +272,31 @@ using AtomicLinearRunPublishObserver = void (*)(
     AtomicLinearRunPublishStage,
     void*) noexcept;
 
+// Optional single-use process-local participant in the publication
+// transaction.  It is called exactly once after scientific recertification
+// and every reversible file write, while the resource gate is still active,
+// but before HEAD is replaced.  An atomic rejection certifies no external or
+// scientific mutation.  A commit declares an irreversible in-process change:
+// any later gate or I/O failure forces reconstruction from authoritative
+// HEAD.  An indeterminate outcome also fails closed and requires that same
+// reconstruction.  Neither the callback nor its state is serialized or
+// retained.
+enum class AtomicLinearRunPreHeadCommitOutcome : std::uint8_t {
+  rejected_atomically,
+  committed,
+  indeterminate,
+};
+
+using AtomicLinearRunPreHeadCommit = AtomicLinearRunPreHeadCommitOutcome (*)(
+    const AtomicLinearRunTransition&,
+    const AtomicLinearRunAcceptedProjection*,
+    void*) noexcept;
+
 struct AtomicLinearRunPublishOptions {
   AtomicLinearRunPublishObserver observer{};
   void* observer_state{};
+  AtomicLinearRunPreHeadCommit pre_head_commit{};
+  void* pre_head_commit_state{};
 };
 
 enum class AtomicLinearRunPublishDecision : std::uint8_t {
@@ -283,6 +305,7 @@ enum class AtomicLinearRunPublishDecision : std::uint8_t {
   resource_gate_rejected,
   recertification_resource_exhausted,
   recertification_rejected,
+  process_local_commit_rejected,
   store_limit_rejected,
   retryable_io_failure,
   indeterminate_io_failure_reopen_required,
@@ -297,6 +320,9 @@ struct AtomicLinearRunPublishResult {
   std::size_t total_encoded_transition_byte_count{};
   std::size_t encoded_transition_byte_count{};
   int system_error_number{};
+  bool process_local_commit_attempted{false};
+  bool process_local_commit_succeeded{false};
+  bool process_local_commit_indeterminate{false};
   bool trusted_state_advanced{false};
 };
 
@@ -311,6 +337,10 @@ struct AtomicLinearRunStoreStatus {
   std::size_t uncommitted_cleanup_recertification_count{};
   std::size_t resource_gate_evaluation_count{};
   std::size_t resource_gate_rejection_count{};
+  std::size_t process_local_commit_attempt_count{};
+  std::size_t process_local_commit_success_count{};
+  std::size_t process_local_commit_rejection_count{};
+  std::size_t process_local_commit_indeterminate_count{};
   std::size_t removed_uncommitted_temporary_file_count{};
   std::size_t removed_uncommitted_final_file_count{};
   AtomicLinearRunExternalAnchor current_anchor{};

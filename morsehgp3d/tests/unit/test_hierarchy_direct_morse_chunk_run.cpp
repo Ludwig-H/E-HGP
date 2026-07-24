@@ -1,5 +1,6 @@
 #include "morsehgp3d/hierarchy/direct_morse_chunk_run.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_chunk_forest_recovery.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_durable_live_commit.hpp"
 
 #include <array>
 #include <cerrno>
@@ -19,6 +20,8 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+#include <unistd.h>
 
 namespace {
 
@@ -218,6 +221,20 @@ execution_budget() {
       120U,
       4U,
   };
+}
+
+[[nodiscard]] ExactDirectSparseFacetTopKProposalTranscriptResult
+empty_proposal_transcript(
+    std::size_t source_batch_index,
+    const morsehgp3d::exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparsePositiveFacetLocator& locator) {
+  const std::array<ExactDirectSparseFacetTopKProposalRecord, 0U> records{};
+  return build_exact_direct_sparse_facet_top_k_proposal_transcript(
+      {source_batch_index,
+       closed_batch_squared_level,
+       locator.snapshot_stamp()},
+      records,
+      {0U, 0U, 0U, 0U, 0U});
 }
 
 [[nodiscard]] ExactDirectSparseFacetDescentStepBudget step_budget() {
@@ -487,6 +504,24 @@ budget_tracker(
          audit.context_owned_cell_gamma_or_delaunay_count == 0U &&
          !audit.external_locator_resolver_residency_audited &&
          !audit.external_locator_resolver_cache_absence_claimed;
+}
+
+struct UnlinkDurableLiveHeadState {
+  std::string head_temporary_path;
+  bool unlink_succeeded{false};
+};
+
+void unlink_durable_live_head_before_commit(
+    AtomicLinearRunPublishStage stage,
+    void* opaque) noexcept {
+  if (stage != AtomicLinearRunPublishStage::
+                   head_temporary_file_synchronized_and_reread) {
+    return;
+  }
+  auto* const state =
+      static_cast<UnlinkDurableLiveHeadState*>(opaque);
+  state->unlink_succeeded =
+      ::unlink(state->head_temporary_path.c_str()) == 0;
 }
 
 void test_two_real_chunks_resume_with_fresh_context() {
@@ -1361,6 +1396,310 @@ void test_public_payload_mutations_fail_closed() {
       "one payload mutation and one trailing byte are rejected through the public recertifier without durable cursor movement");
 }
 
+void test_durable_live_commit_reopens_at_certified_prefix() {
+  TemporaryWorkspace workspace;
+  const std::filesystem::path directory = workspace.make_directory();
+  const CanonicalId initial_checkpoint =
+      digest("durable-live-initial-checkpoint");
+  const CanonicalId initial_output_chain =
+      digest("durable-live-initial-output-chain");
+  Scenario scenario = regular_tetrahedron_order_one_scenario();
+  const auto seed_budget = source_seed_budget();
+  const auto industrial_config = plan_config();
+  const auto batch_plan_budget = plan_budget();
+  const auto observed_plan = build_plan(
+      scenario,
+      seed_budget,
+      industrial_config,
+      batch_plan_budget);
+  LocatorPrefixes locators = locator_prefixes();
+  const auto authorities = batch_authorities(locators);
+  auto resolver = locator_resolver(locators);
+  ExactDirectMorseChunkRunContext context{
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget,
+      scenario.seed_journal,
+      industrial_config,
+      batch_plan_budget,
+      observed_plan,
+      ExactDirectMorseChunkBatchLocatorResolverView{resolver},
+      authorities,
+      chunk_run_limits(),
+      budget_tracker()};
+  check(
+      observed_plan.complete_architecture_plan() &&
+          scenario.event_journal.batches.size() == 2U &&
+          observed_plan.source_industrial_plan.chunks.size() == 2U,
+      "the durable/live fixture exposes exactly two one-batch chunks");
+  if (!observed_plan.complete_architecture_plan() ||
+      scenario.event_journal.batches.size() != 2U ||
+      observed_plan.source_industrial_plan.chunks.size() != 2U) {
+    return;
+  }
+
+  const auto resident_forest =
+      build_exact_direct_morse_forest_journal(
+          scenario.index,
+          scenario.cloud,
+          scenario.facade,
+          scenario.event_journal,
+          seed_budget,
+          scenario.seed_journal,
+          forest_budget(),
+          forest_config());
+  AtomicLinearRunExternalAnchor first_anchor;
+  {
+    AtomicLinearRunStore store = context.create_new_store(
+        directory,
+        initial_checkpoint,
+        initial_output_chain,
+        store_limits());
+    ExactDirectMorseForestReducer reducer{
+        scenario.cloud,
+        scenario.facade,
+        scenario.event_journal,
+        seed_budget,
+        scenario.seed_journal,
+        forest_budget(),
+        forest_config()};
+    ExactDirectSparseFacetDescentAnchoredBatchExecutor executor{
+        scenario.index,
+        scenario.cloud,
+        scenario.facade,
+        scenario.event_journal,
+        seed_budget,
+        scenario.seed_journal,
+        industrial_config,
+        batch_plan_budget,
+        observed_plan,
+        reducer.strict_locator()};
+    const auto transcript = empty_proposal_transcript(
+        0U,
+        scenario.event_journal.batches[0U].squared_level,
+        reducer.strict_locator());
+    auto ticket =
+        executor.prepare_next_sealed_with_top_k_proposal_transcript(
+            authorities[0U].locator_query_witness,
+            authorities[0U].execution_budget,
+            authorities[0U].closure_budget,
+            transcript);
+    ExactDirectMorseDurableLiveCommitCoordinator coordinator{
+        context, store, executor, reducer};
+    const auto first =
+        coordinator.commit_next_single_batch_chunk(ticket);
+    check(
+        first.certified_complete_commit() &&
+            !coordinator.poisoned() &&
+            store.trusted_state().next_chunk_index == 1U &&
+            store.trusted_state().next_batch_index == 1U &&
+            executor.next_source_batch_index() == 1U &&
+            reducer.next_source_batch_index() == 1U &&
+            reducer.strict_locator().snapshot_stamp() ==
+                locators.before_batch_one.snapshot_stamp(),
+        "one 15E transaction aligns durable HEAD, the 14H cursor, and the live reducer after committing batch zero");
+    if (!first.certified_complete_commit()) {
+      return;
+    }
+    first_anchor = first.publication.current_anchor;
+  }
+
+  ExactDirectMorseForestReducer resumed_reducer{
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget,
+      scenario.seed_journal,
+      forest_budget(),
+      forest_config()};
+  bool recovered_prefix_folded = true;
+  AtomicLinearRunStore resumed_store = context.open_existing_store(
+      directory,
+      initial_checkpoint,
+      initial_output_chain,
+      store_limits(),
+      first_anchor,
+      [&resumed_reducer, &recovered_prefix_folded](
+          const ExactDirectMorseRecertifiedChunkProjection&
+              projection) {
+        for (const auto& batch : projection.batches) {
+          recovered_prefix_folded =
+              resumed_reducer
+                  .fold(
+                      project_exact_direct_morse_recertified_forest_reducer_batch(
+                          batch))
+                  .certified_committed_batch() &&
+              recovered_prefix_folded;
+        }
+      });
+  check(
+      recovered_prefix_folded &&
+          resumed_store.trusted_state().next_chunk_index == 1U &&
+          resumed_store.trusted_state().next_batch_index == 1U &&
+          resumed_reducer.next_source_batch_index() == 1U,
+      "reopen recertifies HEAD batch zero and rebuilds the reducer before any live continuation");
+  if (!recovered_prefix_folded ||
+      resumed_reducer.next_source_batch_index() != 1U) {
+    return;
+  }
+
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor resumed_executor{
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget,
+      scenario.seed_journal,
+      industrial_config,
+      batch_plan_budget,
+      observed_plan,
+      resumed_reducer.strict_locator(),
+      ExactDirectSparseFacetDescentCertifiedPrefixResume{1U}};
+  check(
+      resumed_executor.next_source_batch_index() == 1U &&
+          resumed_executor.next_source_chunk_index() == 1U &&
+          resumed_executor.audit()
+                  .session_resumed_from_certified_prefix &&
+          resumed_executor.audit().resumed_source_batch_count == 1U,
+      "the fresh 14H session derives its full cursor from the certified one-batch prefix");
+  const auto resumed_transcript = empty_proposal_transcript(
+      1U,
+      scenario.event_journal.batches[1U].squared_level,
+      resumed_reducer.strict_locator());
+  auto resumed_ticket =
+      resumed_executor
+          .prepare_next_sealed_with_top_k_proposal_transcript(
+              authorities[1U].locator_query_witness,
+              authorities[1U].execution_budget,
+              authorities[1U].closure_budget,
+              resumed_transcript);
+  ExactDirectMorseDurableLiveCommitCoordinator resumed_coordinator{
+      context,
+      resumed_store,
+      resumed_executor,
+      resumed_reducer};
+  const auto second =
+      resumed_coordinator.commit_next_single_batch_chunk(
+          resumed_ticket);
+  check(
+      second.certified_complete_commit() &&
+          resumed_store.trusted_state().next_chunk_index == 2U &&
+          resumed_store.trusted_state().next_batch_index == 2U &&
+          resumed_executor.complete() &&
+          resumed_reducer.complete(),
+      "the fresh prefix-bound session commits batch one without replaying a process-local ticket");
+  if (!second.certified_complete_commit() ||
+      !resumed_reducer.complete()) {
+    return;
+  }
+  const auto resumed_forest = resumed_reducer.finish();
+  check(
+      resumed_forest == resident_forest,
+      "durable/live prefix recovery followed by one live commit reproduces the resident exact forest");
+}
+
+void test_durable_live_post_commit_io_failure_poisons() {
+  TemporaryWorkspace workspace;
+  const std::filesystem::path directory = workspace.make_directory();
+  Scenario scenario = regular_tetrahedron_order_one_scenario();
+  const auto seed_budget = source_seed_budget();
+  const auto industrial_config = plan_config();
+  const auto batch_plan_budget = plan_budget();
+  const auto observed_plan = build_plan(
+      scenario,
+      seed_budget,
+      industrial_config,
+      batch_plan_budget);
+  LocatorPrefixes locators = locator_prefixes();
+  const auto authorities = batch_authorities(locators);
+  auto resolver = locator_resolver(locators);
+  ExactDirectMorseChunkRunContext context{
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget,
+      scenario.seed_journal,
+      industrial_config,
+      batch_plan_budget,
+      observed_plan,
+      ExactDirectMorseChunkBatchLocatorResolverView{resolver},
+      authorities,
+      chunk_run_limits(),
+      budget_tracker()};
+  AtomicLinearRunStore store = context.create_new_store(
+      directory,
+      digest("durable-live-poison-initial-checkpoint"),
+      digest("durable-live-poison-initial-output-chain"),
+      store_limits());
+  ExactDirectMorseForestReducer reducer{
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget,
+      scenario.seed_journal,
+      forest_budget(),
+      forest_config()};
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor executor{
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget,
+      scenario.seed_journal,
+      industrial_config,
+      batch_plan_budget,
+      observed_plan,
+      reducer.strict_locator()};
+  const auto transcript = empty_proposal_transcript(
+      0U,
+      scenario.event_journal.batches[0U].squared_level,
+      reducer.strict_locator());
+  auto ticket =
+      executor.prepare_next_sealed_with_top_k_proposal_transcript(
+          authorities[0U].locator_query_witness,
+          authorities[0U].execution_budget,
+          authorities[0U].closure_budget,
+          transcript);
+  ExactDirectMorseDurableLiveCommitCoordinator coordinator{
+      context, store, executor, reducer};
+  UnlinkDurableLiveHeadState sabotage{
+      (directory / ".HEAD.tmp").string(), false};
+  const auto result =
+      coordinator.commit_next_single_batch_chunk(
+          ticket,
+          AtomicLinearRunPublishOptions{
+              unlink_durable_live_head_before_commit,
+              &sabotage});
+  check(
+      sabotage.unlink_succeeded &&
+          result.certified_reopen_required() &&
+          result.publication.process_local_commit_succeeded &&
+          result.publication.decision ==
+              AtomicLinearRunPublishDecision::
+                  indeterminate_io_failure_reopen_required &&
+          coordinator.poisoned() &&
+          store.status().failed_closed_reopen_required &&
+          executor.next_source_batch_index() == 1U &&
+          reducer.next_source_batch_index() == 1U &&
+          store.trusted_state().next_batch_index == 0U,
+      "an I/O failure after the live commit but before HEAD replacement poisons every live authority and requires reopen from durable batch zero");
+
+  bool poisoned_call_rejected = false;
+  try {
+    static_cast<void>(
+        coordinator.commit_next_single_batch_chunk(
+            ticket));
+  } catch (const std::logic_error&) {
+    poisoned_call_rejected = true;
+  }
+  check(
+      poisoned_call_rejected,
+      "a poisoned 15E coordinator cannot be reused before reconstruction from HEAD");
+}
+
 }  // namespace
 
 int main() {
@@ -1369,6 +1708,8 @@ int main() {
   test_budget_policy_digest_and_cumulative_output();
   test_resource_gate_keeps_recertification_pure_and_bounds_time();
   test_public_payload_mutations_fail_closed();
+  test_durable_live_commit_reopens_at_certified_prefix();
+  test_durable_live_post_commit_io_failure_poisons();
 
   if (failures != 0) {
     std::cerr << failures

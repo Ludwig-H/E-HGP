@@ -32,6 +32,7 @@ using morsehgp3d::hierarchy::AtomicLinearRunExternalAnchor;
 using morsehgp3d::hierarchy::AtomicLinearRunPublishDecision;
 using morsehgp3d::hierarchy::AtomicLinearRunPublishOptions;
 using morsehgp3d::hierarchy::AtomicLinearRunPublishStage;
+using morsehgp3d::hierarchy::AtomicLinearRunPreHeadCommitOutcome;
 using morsehgp3d::hierarchy::AtomicLinearRunRecertification;
 using morsehgp3d::hierarchy::AtomicLinearRunRecertificationPhase;
 using morsehgp3d::hierarchy::AtomicLinearRunRecertifier;
@@ -140,6 +141,29 @@ struct RecertificationCounts {
   std::size_t uncommitted_cleanup{};
   bool reject_marker{false};
 };
+
+struct PreHeadCommitState {
+  std::size_t call_count{};
+  AtomicLinearRunPreHeadCommitOutcome outcome{
+      AtomicLinearRunPreHeadCommitOutcome::rejected_atomically};
+  bool saw_projection{false};
+  std::string unlink_before_head_rename;
+  bool unlink_succeeded{false};
+};
+
+AtomicLinearRunPreHeadCommitOutcome pre_head_commit(
+    const AtomicLinearRunTransition&,
+    const AtomicLinearRunAcceptedProjection* projection,
+    void* opaque) noexcept {
+  auto& state = *static_cast<PreHeadCommitState*>(opaque);
+  ++state.call_count;
+  state.saw_projection = projection != nullptr;
+  if (!state.unlink_before_head_rename.empty()) {
+    state.unlink_succeeded =
+        ::unlink(state.unlink_before_head_rename.c_str()) == 0;
+  }
+  return state.outcome;
+}
 
 [[nodiscard]] AtomicLinearRunRecertifier recertifier(
     RecertificationCounts& counts) {
@@ -1116,6 +1140,132 @@ void test_committed_prefix_visitor_order_payload_and_throw() {
   }
 }
 
+void test_pre_head_process_local_commit_protocol() {
+  TemporaryWorkspace workspace;
+  const AtomicLinearRunContract run_contract = contract_fixture();
+  const AtomicLinearRunStoreLimits limits = generous_limits();
+  const std::filesystem::path rejection_directory =
+      workspace.make_directory("pre-head-local-rejection");
+  {
+    RecertificationCounts counts;
+    AtomicLinearRunStore store = AtomicLinearRunStore::create_new(
+        rejection_directory,
+        run_contract,
+        limits,
+        recertifier(counts),
+        resource_gate());
+    PreHeadCommitState rejection;
+    const auto rejected = store.publish_next(
+        proposal(store, 12U, 0x91U),
+        AtomicLinearRunPublishOptions{
+            nullptr, nullptr, pre_head_commit, &rejection});
+    check(
+        rejected.decision ==
+                AtomicLinearRunPublishDecision::
+                    process_local_commit_rejected &&
+            rejected.process_local_commit_attempted &&
+            !rejected.process_local_commit_succeeded &&
+            !rejected.trusted_state_advanced &&
+            rejection.call_count == 1U &&
+            !rejection.saw_projection &&
+            store.trusted_state().next_sequence == 0U &&
+            store.status().process_local_commit_attempt_count == 1U &&
+            store.status().process_local_commit_rejection_count == 1U &&
+            store.status().process_local_commit_success_count == 0U &&
+            no_uncommitted_first_transition(rejection_directory),
+        "an atomic process-local rejection must clean every pre-HEAD file and preserve the live store");
+
+    PreHeadCommitState acceptance;
+    acceptance.outcome =
+        AtomicLinearRunPreHeadCommitOutcome::committed;
+    const auto accepted = store.publish_next(
+        proposal(store, 12U, 0x92U),
+        AtomicLinearRunPublishOptions{
+            nullptr, nullptr, pre_head_commit, &acceptance});
+    check(
+        accepted.decision ==
+                AtomicLinearRunPublishDecision::durably_published &&
+            accepted.process_local_commit_attempted &&
+            accepted.process_local_commit_succeeded &&
+            accepted.trusted_state_advanced &&
+            acceptance.call_count == 1U &&
+            store.trusted_state().next_sequence == 1U &&
+            store.status().process_local_commit_attempt_count == 2U &&
+            store.status().process_local_commit_rejection_count == 1U &&
+            store.status().process_local_commit_success_count == 1U,
+        "one accepted process-local participant must precede the durable HEAD advance exactly once");
+  }
+
+  const std::filesystem::path indeterminate_directory =
+      workspace.make_directory("pre-head-local-indeterminate");
+  {
+    RecertificationCounts counts;
+    AtomicLinearRunStore store = AtomicLinearRunStore::create_new(
+        indeterminate_directory,
+        run_contract,
+        limits,
+        recertifier(counts),
+        resource_gate());
+    PreHeadCommitState participant_indeterminate;
+    participant_indeterminate.outcome =
+        AtomicLinearRunPreHeadCommitOutcome::indeterminate;
+    const auto rejected_as_indeterminate = store.publish_next(
+        proposal(store, 12U, 0x93U),
+        AtomicLinearRunPublishOptions{
+            nullptr,
+            nullptr,
+            pre_head_commit,
+            &participant_indeterminate});
+    check(
+        participant_indeterminate.call_count == 1U &&
+            rejected_as_indeterminate.process_local_commit_attempted &&
+            rejected_as_indeterminate.process_local_commit_indeterminate &&
+            rejected_as_indeterminate.decision ==
+                AtomicLinearRunPublishDecision::
+                    indeterminate_io_failure_reopen_required &&
+            store.status().process_local_commit_indeterminate_count == 1U &&
+            store.status().failed_closed_reopen_required &&
+            !store.status().authoritative_head_certified,
+        "an indeterminate process-local participant must fail the writer closed before HEAD");
+  }
+
+  const std::filesystem::path post_commit_io_directory =
+      workspace.make_directory("pre-head-local-post-commit-io");
+  {
+    RecertificationCounts counts;
+    AtomicLinearRunStore store = AtomicLinearRunStore::create_new(
+        post_commit_io_directory,
+        run_contract,
+        limits,
+        recertifier(counts),
+        resource_gate());
+    PreHeadCommitState acceptance_then_io_failure;
+    acceptance_then_io_failure.outcome =
+        AtomicLinearRunPreHeadCommitOutcome::committed;
+    acceptance_then_io_failure.unlink_before_head_rename =
+        (post_commit_io_directory / ".HEAD.tmp").string();
+    const auto indeterminate = store.publish_next(
+        proposal(store, 12U, 0x93U),
+        AtomicLinearRunPublishOptions{
+            nullptr,
+            nullptr,
+            pre_head_commit,
+            &acceptance_then_io_failure});
+    check(
+        acceptance_then_io_failure.call_count == 1U &&
+            acceptance_then_io_failure.unlink_succeeded &&
+            indeterminate.process_local_commit_attempted &&
+            indeterminate.process_local_commit_succeeded &&
+            indeterminate.decision ==
+                AtomicLinearRunPublishDecision::
+                    indeterminate_io_failure_reopen_required &&
+            !indeterminate.trusted_state_advanced &&
+            store.status().failed_closed_reopen_required &&
+            !store.status().authoritative_head_certified,
+        "any I/O failure after an irreversible process-local commit must fail the writer closed even before HEAD rename");
+  }
+}
+
 void test_post_head_indeterminate_requires_reopen() {
   TemporaryWorkspace workspace;
   const std::filesystem::path pre_head_directory =
@@ -1274,6 +1424,7 @@ int main() {
     test_limits_shapes_and_recertification();
     test_resource_gate_order_and_failure_cleanup();
     test_committed_prefix_visitor_order_payload_and_throw();
+    test_pre_head_process_local_commit_protocol();
     test_post_head_indeterminate_requires_reopen();
   } catch (const std::exception& error) {
     ++failures;

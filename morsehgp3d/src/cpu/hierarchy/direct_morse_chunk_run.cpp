@@ -2269,6 +2269,26 @@ AtomicLinearRunChunkProposal
 ExactDirectMorseChunkRunContext::prepare_chunk(
     const AtomicLinearRunTrustedState& trusted_state,
     std::size_t chunk_index) const {
+  return prepare_chunk_impl(trusted_state, chunk_index, nullptr);
+}
+
+AtomicLinearRunChunkProposal
+ExactDirectMorseChunkRunContext::
+    prepare_single_batch_chunk_bound_to_live_delta(
+        const AtomicLinearRunTrustedState& trusted_state,
+        std::size_t chunk_index,
+        const ExactDirectSparseFacetDescentBatchExecutionResult&
+            live_delta) const {
+  return prepare_chunk_impl(
+      trusted_state, chunk_index, &live_delta);
+}
+
+AtomicLinearRunChunkProposal
+ExactDirectMorseChunkRunContext::prepare_chunk_impl(
+    const AtomicLinearRunTrustedState& trusted_state,
+    std::size_t chunk_index,
+    const ExactDirectSparseFacetDescentBatchExecutionResult*
+        live_delta) const {
   if (chunk_index >=
           impl_->source_plan.source_industrial_plan.chunks.size() ||
       trusted_state.next_chunk_index != wire_size(chunk_index)) {
@@ -2300,6 +2320,10 @@ ExactDirectMorseChunkRunContext::prepare_chunk(
   const std::size_t batch_count =
       chunk.source_batch_end_index -
       chunk.source_batch_begin_index;
+  if (live_delta != nullptr && batch_count != 1U) {
+    throw std::invalid_argument(
+        "a live-bound durable chunk must contain exactly one complete batch");
+  }
   std::size_t projected_payload_byte_count = 0U;
   try {
     projected_payload_byte_count =
@@ -2336,6 +2360,10 @@ ExactDirectMorseChunkRunContext::prepare_chunk(
        batch_index < chunk.source_batch_end_index;
        ++batch_index) {
     const auto fresh = impl_->replay_batch(batch_index);
+    if (live_delta != nullptr && fresh != *live_delta) {
+      throw std::invalid_argument(
+          "a live 14H delta disagrees with the fresh durable chunk replay");
+    }
     ParsedBatch batch;
     const std::size_t remaining_payload_byte_count =
         impl_->limits.maximum_payload_byte_count -

@@ -1352,6 +1352,16 @@ Les tickets déplacés, consommés, étrangers ou devenus stale sont rejetés at
 
 Cette transaction est exclusivement vivante et en mémoire. Elle ne lie pas encore le commit composite au remplacement durable de `HEAD`, ne checkpointte pas locator, DSU ou forêt et ne ferme ni la reprise après crash de cette progression, ni le jalon un million, ni 10 M+, ni le SLO 50 k, M.1, la Phase 15 ou l'entrée de la Phase 16.
 
+### Tranche 15E — publication durable et commit vivant sérialisés
+
+15E ajoute `ExactDirectMorseDurableLiveCommitCoordinator` sous `reference_cpu / hgp_reduced / budgeted / architecture_only`. Pour cette première couture de correction, le plan effectif doit contenir exactement un lot complet par chunk durable. La préparation recertifie par rejeu 14D frais que le delta du ticket 14H est exactement celui du chunk; elle n'en sérialise ni la capability, ni le locator, ni le DSU, ni la forêt.
+
+Le store écrit, synchronise et relit le run et le candidat `HEAD`, puis appelle un participant process-local avant le remplacement de `HEAD`. Ce participant distingue obligatoirement `rejected_atomically`, `committed` et `indeterminate`. Il exécute le commit 15D pendant que l'ancien `HEAD` reste autoritatif. Un rejet atomique nettoie les fichiers pré-`HEAD` et autorise une nouvelle préparation. Après un commit vivant, toute erreur de gate, de renommage, de synchronisation ou toute issue indéterminée empoisonne le coordinateur et impose de jeter store, executor et reducer puis de les reconstruire depuis le seul `HEAD` recertifié; aucun retry local n'est permis.
+
+Le théorème est une absence de divergence observable ou réutilisable sous sérialisation exclusive, et non une atomicité physique entre RAM et filesystem qu'Unix ne fournit pas. Sur succès acquitté, les trois autorités satisfont `HEAD.next_batch_index == reducer.next_source_batch_index() == executor.next_source_batch_index()`. Après réouverture, le reducer est reconstruit par 15C, puis un nouvel executor vérifie le compteur du locator et dérive tous ses curseurs chunk, lane, famille et bras depuis le préfixe certifié; un nouveau sceau de session est créé et aucun ancien ticket n'est repris.
+
+La fixture courte committe le premier lot du tétraèdre, ferme le processus logique, rouvre et recertifie `HEAD`, reconstruit le reducer, reprend 14H au préfixe un, committe le second lot et retrouve exactement la forêt résidente. Une suppression de `.HEAD.tmp` provoque ensuite un échec de renommage après le commit vivant : store et coordinateur deviennent inutilisables jusqu'à réouverture. Cette tranche ferme la couture de correction mono-lot, mais un `fsync` par lot n'est pas une architecture de débit pour 10 M+. Le bootstrap singleton implicite et bulk, l'externalisation des autorités et les sorties segmentées restent requis avant le jalon un million, 10 M+, le SLO 50 k, la sortie de Phase 15 ou l'entrée de Phase 16.
+
 ### Travaux
 
 - planificateur de lots selon cinq budgets typés : device, RAM hôte, scratch et sortie en octets, temps interne en nanosecondes monotones avec réserve non prêtable;
