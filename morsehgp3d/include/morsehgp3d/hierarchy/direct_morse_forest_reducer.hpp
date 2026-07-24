@@ -105,6 +105,14 @@ struct ExactDirectMorseForestReducerFoldResult {
   std::size_t source_batch_index{};
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp pre_fold_locator_stamp{};
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp post_fold_locator_stamp{};
+  // Phase-15F allocation audit.  The freshly certified canonical singleton
+  // batch reports its dense bulk length and bypasses all three per-birth
+  // staging arenas.  Ordinary batches keep bulk_count at zero and report the
+  // actual temporary arena sizes used by the general reducer path.
+  std::size_t canonical_singleton_bulk_count{};
+  std::size_t staged_birth_record_count{};
+  std::size_t staged_birth_node_count{};
+  std::size_t staged_locator_binding_count{};
   bool complete_batch_staged_before_mutation{false};
   bool full_equal_level_quotient_resolved_before_mutation{false};
   bool locator_committed_before_scientific_state{false};

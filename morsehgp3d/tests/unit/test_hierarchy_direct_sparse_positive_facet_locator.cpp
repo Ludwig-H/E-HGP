@@ -282,6 +282,158 @@ void check_initialization_budget_and_external_scope() {
       "a locator without an external replay authority is rejected");
 }
 
+void check_canonical_singleton_identity_bulk_commit() {
+  auto bulk = make_locator();
+  auto ordinary = make_locator();
+
+  const auto bulk_commit =
+      bulk.apply_canonical_singleton_identity_batch(5U);
+  std::array<ExactDirectSparseFacetBinding, 5U> ordinary_bindings{};
+  for (std::size_t index = 0U;
+       index < ordinary_bindings.size();
+       ++index) {
+    ordinary_bindings[index] = {
+        index,
+        key({static_cast<PointId>(index)}),
+        index,
+        witness(3U * index + 1U)};
+  }
+  const auto ordinary_commit = ordinary.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      std::span<const ExactDirectSparseComponentUnion>{},
+      ordinary_bindings);
+
+  check(
+      bulk_commit.certified_committed_identity_batch() &&
+          bulk_commit.audit.bulk_count == 5U &&
+          bulk_commit.audit.last_replay_token == 13U &&
+          bulk_commit.audit.external_binding_input_entry_count == 0U &&
+          bulk_commit.audit.pending_binding_staging_entry_count == 0U &&
+          bulk_commit.audit.batch_scratch_slot_staging_entry_count == 0U &&
+          bulk_commit.audit.bulk_dynamic_scratch_byte_count == 0U,
+      "the initial singleton identity transaction streams only the requested canonical prefix without input, PendingBinding or hash-scratch staging");
+  check(
+      ordinary_commit.certified_committed_batch() && bulk == ordinary,
+      "the default-fingerprint bulk transaction is scientifically and durably identical to the ordinary canonical binding batch");
+  check(
+      bulk.counters() ==
+              ExactDirectSparsePositiveFacetLocatorCounters{
+                  1U,
+                  0U,
+                  0U,
+                  0U,
+                  0U,
+                  5U,
+                  5U,
+                  0U,
+                  5U,
+                  0U,
+                  0U} &&
+          bulk.key_point_arena() ==
+              std::vector<PointId>({0U, 1U, 2U, 3U, 4U}) &&
+          bulk.component_parents().size() == 8U &&
+          bulk.committed_batches().size() == 1U &&
+          bulk.committed_unions().empty(),
+      "the bulk transaction leaves later dense handles available while publishing the standard counters, flat key arena and one durable batch record");
+
+  bool every_probe_matches_identity = true;
+  for (std::size_t index = 0U; index < 5U; ++index) {
+    const auto probe = bulk.probe_positive_facet(
+        key({static_cast<PointId>(index)}),
+        witness(1000U + index),
+        {65U, 8U});
+    every_probe_matches_identity =
+        every_probe_matches_identity &&
+        probe.certified_positive_hit() &&
+        probe.component_handle == index &&
+        probe.source_binding_witness == witness(3U * index + 1U);
+  }
+  check(
+      every_probe_matches_identity,
+      "every streamed singleton resolves to its dense identity component and deterministic 3*i+1 witness");
+
+  const auto structure = verify_structure(bulk, bulk.state_view());
+  check(
+      structure.result_certified &&
+          structure
+              .fresh_durable_structure_verification_certified,
+      "the unchanged structural verifier freshly certifies the bulk-populated locator");
+
+  auto collided = make_locator(0U);
+  const auto collided_commit =
+      collided.apply_canonical_singleton_identity_batch(8U);
+  const auto collided_structure =
+      verify_structure(collided, collided.state_view());
+  check(
+      collided_commit.certified_committed_identity_batch() &&
+          collided_commit.batch_result.counters
+                  .full_key_comparison_count == 0U &&
+          collided_commit.batch_result.counters
+                  .equal_fingerprint_distinct_key_count == 0U &&
+          collided_structure.result_certified,
+      "canonical interval uniqueness avoids operational comparisons even under forced fingerprints while durable full-key verification remains valid");
+}
+
+void check_canonical_singleton_identity_bulk_rejections_are_atomic() {
+  auto non_initial = make_locator();
+  check(
+      non_initial
+          .apply_batch(
+              std::span<const ExactDirectSparseFacetQuery>{},
+              std::span<const ExactDirectSparseComponentUnion>{},
+              std::span<const ExactDirectSparseFacetBinding>{})
+          .certified_committed_batch(),
+      "the singleton rejection fixture first commits an empty batch");
+  const auto non_initial_stamp = non_initial.snapshot_stamp();
+  const auto non_initial_result =
+      non_initial.apply_canonical_singleton_identity_batch(8U);
+  check(
+      non_initial_result.batch_result.decision ==
+              ExactDirectSparsePositiveFacetBatchDecision::
+                  no_positive_locator_input_shape_rejected &&
+          !non_initial_result.batch_result.locator_state_mutated &&
+          non_initial.snapshot_stamp() == non_initial_stamp,
+      "a locator past batch zero rejects the specialized initial transaction atomically");
+
+  auto partial = make_locator();
+  const auto partial_stamp = partial.snapshot_stamp();
+  const auto zero = partial.apply_canonical_singleton_identity_batch(0U);
+  const auto beyond_handles =
+      partial.apply_canonical_singleton_identity_batch(9U);
+  check(
+      zero.batch_result.decision ==
+              ExactDirectSparsePositiveFacetBatchDecision::
+                  no_positive_locator_input_shape_rejected &&
+          beyond_handles.batch_result.decision ==
+              ExactDirectSparsePositiveFacetBatchDecision::
+                  no_positive_locator_input_shape_rejected &&
+          partial.snapshot_stamp() == partial_stamp &&
+          partial.key_point_arena().empty(),
+      "zero or beyond-handle singleton intervals are rejected before mutation");
+
+  auto insufficient_budget = generous_budget();
+  insufficient_budget.maximum_batch_binding_count = 7U;
+  const auto budget_limited =
+      build_exact_direct_sparse_positive_facet_locator(
+          8U,
+          insufficient_budget,
+          {authority_id, ~std::uint64_t{0U}});
+  auto rejected = budget_limited;
+  const auto rejected_stamp = rejected.snapshot_stamp();
+  const auto rejected_commit =
+      rejected.apply_canonical_singleton_identity_batch(8U);
+  check(
+      rejected.certified_positive_locator() &&
+          rejected_commit.batch_result.decision ==
+              ExactDirectSparsePositiveFacetBatchDecision::
+                  no_positive_locator_budget_exhausted &&
+          !rejected_commit.batch_result.locator_state_mutated &&
+          rejected.snapshot_stamp() == rejected_stamp &&
+          rejected.key_point_arena().empty() &&
+          rejected.committed_batches().empty(),
+      "all batch and durable budgets are rejected before the first singleton slot mutation");
+}
+
 void check_snapshot_stamp_tracks_only_committed_state() {
   static_assert(
       std::is_trivially_copyable_v<
@@ -2089,6 +2241,8 @@ void check_fresh_durable_structure_verifier_and_mutations() {
 
 int main() {
   check_initialization_budget_and_external_scope();
+  check_canonical_singleton_identity_bulk_commit();
+  check_canonical_singleton_identity_bulk_rejections_are_atomic();
   check_snapshot_stamp_tracks_only_committed_state();
   check_snapshot_digest_determinism_and_state_divergence();
   check_snapshot_digest_golden_vectors();

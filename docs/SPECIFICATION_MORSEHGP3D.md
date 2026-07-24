@@ -1031,7 +1031,17 @@ Le protocole certifie sous sérialisation externe qu'aucune divergence interméd
 
 La granularité mono-lot engage un `fsync` par lot et reste un incrément de correction. Elle ne qualifie ni débit massif, ni un million, ni 10 M+, ni SLO, ni statut public. Aucun catalogue global de facettes ou cofaces, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est ajouté.
 
-### 14.6 Snapshot Morton/LBVH device recertifié
+### 14.6 Bootstrap singleton bulk 15F
+
+15F est `reference_cpu / hgp_reduced / budgeted / architecture_only`. Le chemin spécialisé est admissible seulement pour le batch source zéro certifié, d'ordre un et de niveau carré nul, contenant exactement les `n` naissances singleton canoniques et aucune autre population scientifique. Chaque rôle et projection est vérifié; une forme différente revient au chemin général ou échoue avant mutation.
+
+Le locator initial reçoit le compte `n`, jamais un tableau de bindings. Il exige un état entièrement vide, des parents denses identitaires et des capacités couvrant le préfixe. Il préflight le dernier `PointId`, le dernier token `3i+1`, tous les caps, le record de batch, le digest et les réserves d'arènes. Il publie ensuite les mêmes clés, handles, témoins, slots et points de clé que le protocole standard, avec zéro population d'entrée, `PendingBinding` ou scratch de lot. Toute erreur avant le suffixe garde l'ancien stamp; une contradiction après la première mutation est fail-stop.
+
+Le reducer possède déjà les capacités finales calculées au constructeur. Sous `PayloadRollback`, il remplit directement les records de naissance et les nœuds, committe le locator bulk puis active les handles `0..n-1` sans allocation. Le résultat de fold publie le compte bulk et les trois comptes de staging, qui doivent être nuls. L'égalité de la forêt avec le chemin résident reste obligatoire.
+
+Le gain `560n+8` octets est celui des types et de la table de probing sur l'ABI GCC 64 bits qualifiée, pas une promesse RSS portable. Le journal singleton, le locator et la forêt finale restent résidents. Le probing conserve son pire cas quadratique sous collisions artificielles. Cette tranche ne qualifie ni un million, ni 10 M+, ni SLO, ni statut public.
+
+### 14.7 Snapshot Morton/LBVH device recertifié
 
 Le constructeur 14M a pour contrat `cuda_g4 / hgp_reduced / device_morton_lbvh_snapshot_import / architecture_only`. Il accepte un nuage canonique non vide et une capacité fixe $C\leq\mathrm{INT\_MAX}$. Les propositions device ne sont jamais scientifiques : chaque bin ambigu est recalculé exactement avant le code Morton, puis l'import CPU recertifie toutes les coordonnées même si le GPU les avait déclarées non ambiguës.
 

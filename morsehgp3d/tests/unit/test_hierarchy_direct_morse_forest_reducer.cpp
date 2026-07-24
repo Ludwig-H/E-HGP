@@ -198,6 +198,19 @@ empty_proposal_transcript(
       {0U, 0U, 0U, 0U, 0U});
 }
 
+void check_initial_singleton_bulk_audit(
+    const ExactDirectMorseForestReducerFoldResult& folded,
+    std::size_t point_count,
+    const std::string& path) {
+  check(
+      folded.canonical_singleton_bulk_count == point_count &&
+          folded.staged_birth_record_count == 0U &&
+          folded.staged_birth_node_count == 0U &&
+          folded.staged_locator_binding_count == 0U,
+      "the " + path +
+          " first fold streams canonical singletons directly with zero per-birth staging");
+}
+
 struct Scenario {
   CanonicalPointCloud cloud;
   MortonLbvhIndex index;
@@ -376,6 +389,10 @@ struct Scenario {
               executor.next_source_batch_index() == batch_index + 1U &&
               reducer.next_source_batch_index() == batch_index + 1U,
           "the live transaction folds the reducer before one allocation-free 14H cursor advance");
+      if (batch_index == 0U) {
+        check_initial_singleton_bulk_audit(
+            committed.reducer_fold, scenario.cloud.size(), "live");
+      }
       if (!stale_sibling_exercised) {
         const auto stamp_before =
             reducer.strict_locator().snapshot_stamp();
@@ -465,6 +482,10 @@ struct Scenario {
         committed.certified_committed_batch() &&
             reducer.next_source_batch_index() == batch_index + 1U,
         "one projected batch commits locator then scientific state");
+    if (batch_index == 0U) {
+      check_initial_singleton_bulk_audit(
+          committed, scenario.cloud.size(), "projected");
+    }
   }
   check(
       reducer.complete(),

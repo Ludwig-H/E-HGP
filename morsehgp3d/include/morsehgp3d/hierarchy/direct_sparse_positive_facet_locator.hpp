@@ -479,6 +479,44 @@ struct ExactDirectSparsePositiveFacetBatchResult {
       const ExactDirectSparsePositiveFacetBatchResult&) = default;
 };
 
+// Specialized first transaction for the canonical singleton interval
+// {PointId i} -> component i.  The caller supplies only its length; witnesses
+// are generated as 3*i+1 under the locator's external authority.  In
+// particular, the implementation never materializes an input binding array,
+// PendingBinding array, or batch hash-scratch array.
+struct ExactDirectSparseCanonicalSingletonIdentityBatchAudit {
+  std::size_t bulk_count{};
+  std::uint64_t last_replay_token{};
+  std::size_t external_binding_input_entry_count{};
+  std::size_t pending_binding_staging_entry_count{};
+  std::size_t batch_scratch_slot_staging_entry_count{};
+  std::size_t bulk_dynamic_scratch_byte_count{};
+  bool certified_empty_batch_zero_locator_at_entry{false};
+  bool dense_canonical_singleton_interval_certified{false};
+  bool last_point_id_preflight_certified{false};
+  bool last_replay_token_preflight_certified{false};
+  bool budget_and_capacity_preflight_certified{false};
+  bool all_fallible_allocations_completed_before_first_slot_mutation{false};
+  bool mutation_suffix_nonthrow_or_fail_stop{false};
+  bool standard_fingerprint_key_arena_and_history_path_preserved{false};
+
+  friend bool operator==(
+      const ExactDirectSparseCanonicalSingletonIdentityBatchAudit&,
+      const ExactDirectSparseCanonicalSingletonIdentityBatchAudit&) = default;
+};
+
+struct ExactDirectSparseCanonicalSingletonIdentityBatchResult {
+  ExactDirectSparsePositiveFacetBatchResult batch_result{};
+  ExactDirectSparseCanonicalSingletonIdentityBatchAudit audit{};
+
+  [[nodiscard]] bool certified_committed_identity_batch() const noexcept;
+
+  friend bool operator==(
+      const ExactDirectSparseCanonicalSingletonIdentityBatchResult&,
+      const ExactDirectSparseCanonicalSingletonIdentityBatchResult&) =
+      default;
+};
+
 // A probe has its own strict work budget and never enters the transactional
 // batch path.  A slot visit is one inspected durable hash-table slot.  A
 // component-parent hop is one traversed DSU parent edge after a complete key
@@ -730,6 +768,14 @@ class ExactDirectSparsePositiveFacetLocator {
       std::span<const ExactDirectSparseFacetQuery> queries,
       std::span<const ExactDirectSparseComponentUnion> unions,
       std::span<const ExactDirectSparseFacetBinding> bindings);
+
+  // Accepts only the certified initial locator at committed batch zero and
+  // 0 < singleton_count <= dense component-handle count.  It commits exactly
+  // one ordinary batch while streaming canonical singleton bindings directly
+  // into the already allocated durable table.
+  [[nodiscard]]
+  ExactDirectSparseCanonicalSingletonIdentityBatchResult
+  apply_canonical_singleton_identity_batch(std::size_t singleton_count);
 
   // Read-only, allocation-free lookup of one durable positive binding.  It
   // neither updates aggregate counters nor appends a committed batch record.

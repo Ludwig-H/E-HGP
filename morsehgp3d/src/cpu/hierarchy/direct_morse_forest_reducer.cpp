@@ -336,6 +336,16 @@ class CarrierDsu {
     }
   }
 
+  void activate_initial_canonical_singletons(
+      std::size_t singleton_count) noexcept {
+    for (std::size_t handle = 0U; handle < singleton_count; ++handle) {
+      activate(
+          handle,
+          1U,
+          static_cast<ExactDirectMorseForestNodeId>(handle));
+    }
+  }
+
  private:
   [[nodiscard]] std::size_t root_compress(std::size_t handle) noexcept {
     const std::size_t result = root(handle);
@@ -475,7 +485,13 @@ project_exact_direct_morse_forest_reducer_batch(
 
 bool ExactDirectMorseForestReducerFoldResult::certified_committed_batch()
     const noexcept {
+  const bool staging_audit_consistent =
+      canonical_singleton_bulk_count == 0U ||
+      (staged_birth_record_count == 0U &&
+       staged_birth_node_count == 0U &&
+       staged_locator_binding_count == 0U);
   return schema_version == direct_morse_forest_reducer_schema_version &&
+         staging_audit_consistent &&
          complete_batch_staged_before_mutation &&
          full_equal_level_quotient_resolved_before_mutation &&
          locator_committed_before_scientific_state &&
@@ -1037,6 +1053,175 @@ class ExactDirectMorseForestReducer::Impl {
           std::move(folded),
           ExactDirectMorseForestReducerFoldDecision::
               no_reducer_budget_exhausted);
+    }
+
+    const std::size_t singleton_count = cloud_->size();
+    const bool canonical_singleton_bulk_shape =
+        batch.source_batch_index == 0U &&
+        source_batch.order == 1U &&
+        source_batch.squared_level == exact::ExactLevel{} &&
+        source_batch.role_record_offset == 0U &&
+        source_batch.role_record_count == singleton_count &&
+        source_batch.birth_role_count == singleton_count &&
+        source_batch.saddle_role_count == 0U &&
+        batch.source_family_begin_index == 0U &&
+        batch.source_family_end_index == 0U &&
+        batch.source_arm_seed_begin_index == 0U &&
+        batch.source_arm_seed_end_index == 0U &&
+        batch.resolved_keys.empty() && batch.arm_joins.empty() &&
+        batch.transient_closure_node_count == 0U &&
+        batch.transient_closure_step_call_count == 0U &&
+        batch.shared_closure_build_count == 0U;
+    if (canonical_singleton_bulk_shape) {
+      if (singleton_count == 0U ||
+          source_journal_->role_records.size() < singleton_count ||
+          source_journal_->event_projections.size() < singleton_count ||
+          singleton_count - 1U >
+              spatial::CanonicalPointCloud::max_point_id ||
+          singleton_count - 1U >
+              std::numeric_limits<
+                  ExactDirectMorseForestNodeId>::max()) {
+        return reject(
+            std::move(folded),
+            ExactDirectMorseForestReducerFoldDecision::
+                no_reducer_batch_inconsistent);
+      }
+      for (std::size_t index = 0U; index < singleton_count; ++index) {
+        const ExactDirectMorseH0RoleRecord expected_role{
+            index,
+            0U,
+            index,
+            ExactDirectMorseH0Role::birth};
+        ExactDirectMorseEventProjection expected_projection;
+        expected_projection.event_projection_index = index;
+        expected_projection.source =
+            ExactDirectMorseEventSource::canonical_singleton;
+        expected_projection.source_index = index;
+        expected_projection.support_size = 1U;
+        expected_projection.support_ids[0U] =
+            static_cast<PointId>(index);
+        expected_projection.squared_level = exact::ExactLevel{};
+        expected_projection.closed_rank = 1U;
+        expected_projection.birth_order = 1U;
+        if (source_journal_->role_records[index] != expected_role ||
+            source_journal_->event_projections[index] !=
+                expected_projection) {
+          return reject(
+              std::move(folded),
+              ExactDirectMorseForestReducerFoldDecision::
+                  no_reducer_batch_inconsistent);
+        }
+      }
+
+      const PayloadSizes before = payload_sizes(result_);
+      if (before.birth_records != 0U ||
+          before.arm_root_bindings != 0U ||
+          before.saddle_records != 0U ||
+          before.atomic_groups != 0U ||
+          before.child_node_ids != 0U ||
+          before.batches != 0U || before.nodes != 0U ||
+          result_.birth_records.capacity() < singleton_count ||
+          result_.nodes.capacity() < singleton_count ||
+          result_.batches.capacity() == 0U) {
+        return reject(
+            std::move(folded),
+            ExactDirectMorseForestReducerFoldDecision::
+                no_reducer_batch_inconsistent);
+      }
+
+      PayloadRollback rollback(result_, before);
+      for (std::size_t index = 0U; index < singleton_count; ++index) {
+        ExactDirectSparseFacetKey key;
+        key.point_count = 1U;
+        key.point_ids[0U] = static_cast<PointId>(index);
+        const auto token = replay_token(index, 1U);
+        if (!token.has_value()) {
+          return reject(
+              std::move(folded),
+              ExactDirectMorseForestReducerFoldDecision::
+                  no_reducer_batch_inconsistent);
+        }
+        const ExactDirectSparseFacetWitness witness{
+            config_.locator_config.external_authority_id, *token};
+        const auto node_id =
+            static_cast<ExactDirectMorseForestNodeId>(index);
+        result_.birth_records.push_back(
+            {index,
+             index,
+             0U,
+             1U,
+             key,
+             index,
+             node_id,
+             witness});
+        result_.nodes.push_back(
+            {node_id,
+             1U,
+             exact::ExactLevel{},
+             ExactDirectMorseForestNodeKind::order_one_birth,
+             0U,
+             0U,
+             index,
+             std::nullopt});
+      }
+      result_.batches.push_back(
+          {0U,
+           0U,
+           1U,
+           exact::ExactLevel{},
+           0U,
+           singleton_count,
+           0U,
+           0U,
+           0U,
+           0U,
+           0U,
+           0U,
+           0U,
+           0U,
+           folded.pre_fold_locator_stamp,
+           {},
+           true,
+           true,
+           false});
+      folded.canonical_singleton_bulk_count = singleton_count;
+      folded.complete_batch_staged_before_mutation = true;
+      folded.full_equal_level_quotient_resolved_before_mutation = true;
+
+      const auto locator_commit =
+          locator_.apply_canonical_singleton_identity_batch(
+              singleton_count);
+      if (!locator_commit.certified_committed_identity_batch()) {
+        return reject(
+            std::move(folded),
+            ExactDirectMorseForestReducerFoldDecision::
+                no_reducer_locator_commit_rejected);
+      }
+      if (locator_commit.audit.bulk_count != singleton_count) {
+        // The specialized locator transaction is already irreversible.
+        // A mismatched bulk length would be an internal contract breach.
+        std::terminate();
+      }
+
+      // No allocating operation follows the certified locator commit.
+      components_.activate_initial_canonical_singletons(singleton_count);
+      auto& committed_batch = result_.batches.back();
+      committed_batch.closed_post_batch_carrier_count =
+          components_.carrier_count(1U);
+      committed_batch.closed_post_batch_reduced_root_count =
+          components_.reduced_count(1U);
+      committed_batch.committed_batch_stamp = locator_.snapshot_stamp();
+      committed_batch.unions_then_births_committed_atomically = true;
+      ++next_batch_index_;
+      rollback.release();
+
+      folded.locator_committed_before_scientific_state = true;
+      folded.scientific_state_committed = true;
+      folded.reducer_state_mutated = true;
+      folded.post_fold_locator_stamp = locator_.snapshot_stamp();
+      folded.decision = ExactDirectMorseForestReducerFoldDecision::
+          complete_reducer_batch_commit;
+      return folded;
     }
 
     std::vector<ResolvedState> resolved_states;
@@ -1674,6 +1859,9 @@ class ExactDirectMorseForestReducer::Impl {
           ExactDirectMorseForestReducerFoldDecision::
               no_reducer_batch_inconsistent);
     }
+    folded.staged_birth_record_count = pending_births.size();
+    folded.staged_birth_node_count = pending_birth_nodes.size();
+    folded.staged_locator_binding_count = locator_bindings.size();
 
     const std::size_t strict_carrier_count =
         components_.carrier_count(source_batch.order);

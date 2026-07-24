@@ -1362,6 +1362,16 @@ Le théorème est une absence de divergence observable ou réutilisable sous sé
 
 La fixture courte committe le premier lot du tétraèdre, ferme le processus logique, rouvre et recertifie `HEAD`, reconstruit le reducer, reprend 14H au préfixe un, committe le second lot et retrouve exactement la forêt résidente. Une suppression de `.HEAD.tmp` provoque ensuite un échec de renommage après le commit vivant : store et coordinateur deviennent inutilisables jusqu'à réouverture. Cette tranche ferme la couture de correction mono-lot, mais un `fsync` par lot n'est pas une architecture de débit pour 10 M+. Le bootstrap singleton implicite et bulk, l'externalisation des autorités et les sorties segmentées restent requis avant le jalon un million, 10 M+, le SLO 50 k, la sortie de Phase 15 ou l'entrée de Phase 16.
 
+### Tranche 15F — bootstrap singleton bulk sans staging linéaire
+
+15F spécialise uniquement le premier lot certifié `(ordre=1, niveau carré=0)` sous `reference_cpu / hgp_reduced / budgeted / architecture_only`. Le nuage canonique refuse les doublons et une boule portée par au moins deux points distincts a un rayon strictement positif; le journal fraîchement vérifié doit en outre présenter exactement les `n` rôles singleton canoniques, sans selle, bras, clé résolue ni travail de fermeture. Si cette forme complète n'est pas satisfaite, le reducer conserve le chemin général.
+
+`ExactDirectSparsePositiveFacetLocator::apply_canonical_singleton_identity_batch` reçoit seulement `n`. Il préflighte l'état vide, les handles, `PointId`, témoins `3i+1`, budgets, capacités, digest et allocations, puis remplit directement la table persistante et l'arène plate avec la clé `{i}` liée au composant `i`. Aucun tableau d'entrée `FacetBinding`, aucun `PendingBinding` et aucune table scratch de `2n+1` slots n'est formé. Le suffixe après la première mutation est `noexcept` ou fail-stop; les rejets antérieurs gardent le stamp initial.
+
+Le reducer valide chaque rôle et projection, écrit directement dans ses arènes finales déjà réservées sous rollback, appelle ce commit bulk, puis active le préfixe DSU canonique sans allocation. Sur l'ABI GCC 64 bits courante, il supprime `160n+144n+120n` octets de staging reducer, puis `120n+(2n+1)8` octets dans le locator, soit `560n+8` octets transitoires : environ 5,6 Go à 10 M, 28 Go à 50 M et 56 Go à 100 M. La sortie persistante, le journal événementiel et les autres autorités restent inchangés; cette réduction de pic ne constitue donc pas encore l'externalisation.
+
+Les tests courts comparent le locator bulk au lot ordinaire, recertifient sa structure, couvrent collisions forcées et rejets atomiques, puis attestent dans les voies projetée et vivante que les trois populations de staging valent zéro. La forêt finale reste identique au builder résident. Le probing sous un masque de fingerprint artificiellement nul demeure quadratique; ce cas de collision teste la correction et n'est pas un profil industriel. Le jalon un million, 10 M+, les sorties segmentées, le SLO 50 k, la sortie de Phase 15 et l'entrée de Phase 16 restent ouverts.
+
 ### Travaux
 
 - planificateur de lots selon cinq budgets typés : device, RAM hôte, scratch et sortie en octets, temps interne en nanosecondes monotones avec réserve non prêtable;

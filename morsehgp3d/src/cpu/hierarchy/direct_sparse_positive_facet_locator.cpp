@@ -2,11 +2,13 @@
 
 #include <algorithm>
 #include <array>
+#include <exception>
 #include <limits>
 #include <numeric>
 #include <optional>
 #include <stdexcept>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 
 namespace morsehgp3d::hierarchy {
@@ -1038,6 +1040,46 @@ bool ExactDirectSparsePositiveFacetBatchResult::certified_committed_batch()
                          complete_certified_sparse_positive_batch_commit &&
          scope == ExactDirectSparsePositiveFacetLocatorScope::
                       positive_bindings_relative_to_caller_asserted_external_authority_only;
+}
+
+bool ExactDirectSparseCanonicalSingletonIdentityBatchResult::
+    certified_committed_identity_batch() const noexcept {
+  const bool last_token_matches =
+      audit.bulk_count != 0U &&
+      audit.bulk_count - 1U <=
+          (std::numeric_limits<std::uint64_t>::max() - 1U) / 3U &&
+      audit.last_replay_token ==
+          3U * static_cast<std::uint64_t>(audit.bulk_count - 1U) + 1U;
+  return batch_result.certified_committed_batch() &&
+         batch_result.candidate_batch_index == 0U &&
+         batch_result.lookups.empty() &&
+         batch_result.counters.query_count == 0U &&
+         batch_result.counters.positive_lookup_count == 0U &&
+         batch_result.counters.unresolved_lookup_count == 0U &&
+         batch_result.counters.union_request_count == 0U &&
+         batch_result.counters.binding_request_count == audit.bulk_count &&
+         batch_result.counters.inserted_binding_count == audit.bulk_count &&
+         batch_result.counters.compatible_duplicate_binding_count == 0U &&
+         batch_result.counters.batch_input_key_point_count ==
+             audit.bulk_count &&
+         batch_result.counters.inserted_key_point_count ==
+             audit.bulk_count &&
+         batch_result.counters.full_key_comparison_count == 0U &&
+         batch_result.counters.equal_fingerprint_distinct_key_count == 0U &&
+         last_token_matches &&
+         audit.external_binding_input_entry_count == 0U &&
+         audit.pending_binding_staging_entry_count == 0U &&
+         audit.batch_scratch_slot_staging_entry_count == 0U &&
+         audit.bulk_dynamic_scratch_byte_count == 0U &&
+         audit.certified_empty_batch_zero_locator_at_entry &&
+         audit.dense_canonical_singleton_interval_certified &&
+         audit.last_point_id_preflight_certified &&
+         audit.last_replay_token_preflight_certified &&
+         audit.budget_and_capacity_preflight_certified &&
+         audit
+             .all_fallible_allocations_completed_before_first_slot_mutation &&
+         audit.mutation_suffix_nonthrow_or_fail_stop &&
+         audit.standard_fingerprint_key_arena_and_history_path_preserved;
 }
 
 bool ExactDirectSparsePositiveFacetProbeResult::certified_positive_hit()
@@ -2237,6 +2279,219 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
             no_verification_durable_structure_rejected;
   }
   return verification;
+}
+
+ExactDirectSparseCanonicalSingletonIdentityBatchResult
+ExactDirectSparsePositiveFacetLocator::
+    apply_canonical_singleton_identity_batch(
+        std::size_t singleton_count) {
+  static_assert(sizeof(std::size_t) <= sizeof(std::uint64_t));
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          ExactDirectSparseCanonicalSingletonIdentityBatchResult>);
+
+  ExactDirectSparseCanonicalSingletonIdentityBatchResult result;
+  ExactDirectSparsePositiveFacetBatchResult& batch = result.batch_result;
+  ExactDirectSparseCanonicalSingletonIdentityBatchAudit& audit =
+      result.audit;
+  batch.candidate_batch_index = counters_.committed_batch_count;
+  batch.scope = scope_;
+  audit.bulk_count = singleton_count;
+
+  if (!certified_positive_locator()) {
+    batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
+        no_positive_locator_not_initialized;
+    return result;
+  }
+
+  const bool zero_counters =
+      counters_ == ExactDirectSparsePositiveFacetLocatorCounters{};
+  const bool empty_slots = std::all_of(
+      slots_.begin(),
+      slots_.end(),
+      [](const ExactDirectSparsePositiveFacetSlot& slot) {
+        return !slot.occupied;
+      });
+  bool dense_identity_components = true;
+  for (std::size_t index = 0U;
+       index < component_parents_.size();
+       ++index) {
+    if (component_parents_[index] != index) {
+      dense_identity_components = false;
+      break;
+    }
+  }
+  audit.certified_empty_batch_zero_locator_at_entry =
+      zero_counters && key_point_arena_.empty() &&
+      committed_unions_.empty() && committed_batches_.empty() &&
+      empty_slots && dense_identity_components &&
+      committed_history_digest_ == initial_locator_snapshot_digest(
+          component_parents_.size(), budget_, config_);
+  if (!audit.certified_empty_batch_zero_locator_at_entry) {
+    batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
+        no_positive_locator_input_shape_rejected;
+    return result;
+  }
+
+  if (singleton_count == 0U ||
+      singleton_count > component_parents_.size()) {
+    batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
+        no_positive_locator_input_shape_rejected;
+    return result;
+  }
+  audit.dense_canonical_singleton_interval_certified = true;
+
+  const std::size_t last_index = singleton_count - 1U;
+  if (singleton_count >
+          spatial::CanonicalPointCloud::max_point_count ||
+      last_index > spatial::CanonicalPointCloud::max_point_id) {
+    batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
+        no_positive_locator_capacity_overflow;
+    return result;
+  }
+  audit.last_point_id_preflight_certified = true;
+
+  constexpr std::uint64_t singleton_token_stride = 3U;
+  constexpr std::uint64_t singleton_token_residue = 1U;
+  if (last_index >
+      (std::numeric_limits<std::uint64_t>::max() -
+       singleton_token_residue) /
+          singleton_token_stride) {
+    batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
+        no_positive_locator_capacity_overflow;
+    return result;
+  }
+  audit.last_replay_token =
+      singleton_token_stride * static_cast<std::uint64_t>(last_index) +
+      singleton_token_residue;
+  audit.last_replay_token_preflight_certified = true;
+
+  const auto committed_binding_total = checked_add(
+      counters_.inserted_binding_count, singleton_count);
+  const auto committed_key_point_total = checked_add(
+      key_point_arena_.size(), singleton_count);
+  const auto committed_batch_total = checked_add(
+      committed_batches_.size(), 1U);
+  if (!committed_binding_total.has_value() ||
+      !committed_key_point_total.has_value() ||
+      !committed_batch_total.has_value()) {
+    batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
+        no_positive_locator_capacity_overflow;
+    return result;
+  }
+  if (singleton_count > budget_.maximum_batch_binding_count ||
+      singleton_count > budget_.maximum_batch_key_point_count ||
+      *committed_binding_total >
+          budget_.maximum_committed_binding_count ||
+      *committed_key_point_total >
+          budget_.maximum_committed_key_point_count ||
+      *committed_batch_total >
+          budget_.maximum_committed_batch_count ||
+      singleton_count > slots_.size() ||
+      *committed_key_point_total > key_point_arena_.max_size() ||
+      *committed_batch_total > committed_batches_.max_size()) {
+    batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
+        no_positive_locator_budget_exhausted;
+    return result;
+  }
+
+  batch.counters.binding_request_count = singleton_count;
+  batch.counters.inserted_binding_count = singleton_count;
+  batch.counters.batch_input_key_point_count = singleton_count;
+  batch.counters.inserted_key_point_count = singleton_count;
+  const auto next_counters = updated_counters(counters_, batch.counters);
+  if (!next_counters.has_value()) {
+    batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
+        no_positive_locator_capacity_overflow;
+    return result;
+  }
+  audit.budget_and_capacity_preflight_certified = true;
+
+  batch.budget_preflight_certified = true;
+  batch.input_shape_certified = true;
+  batch.every_input_witness_non_null_and_authority_matched = true;
+  batch.lookups_use_strict_pre_batch_snapshot = true;
+  batch.current_batch_bindings_hidden_from_lookups = true;
+  batch.every_positive_lookup_has_non_null_external_witness_tokens = true;
+  // No complete-key comparison is needed: the certified interval supplies
+  // every singleton key exactly once.  The standard fingerprint function is
+  // still used to choose the durable linear-probing slot.
+  batch.every_fingerprint_candidate_compared_by_full_key = true;
+  batch.explicit_unions_applied_before_binding_compatibility = true;
+  batch.exact_duplicate_bindings_compatible_after_explicit_unions = true;
+
+  const ExactDirectSparseCommittedBatchRecord candidate_batch_record{
+      0U,
+      batch.counters,
+      true,
+      true,
+      true,
+      true};
+  LocatorSnapshotChainDigestBuilder snapshot_digest_builder(
+      committed_history_digest_, candidate_batch_record);
+  for (std::size_t index = 0U; index < singleton_count; ++index) {
+    ExactDirectSparseFacetKey singleton_key;
+    singleton_key.point_count = 1U;
+    singleton_key.point_ids[0U] =
+        static_cast<spatial::PointId>(index);
+    const ExactDirectSparseFacetWitness singleton_witness{
+        config_.external_authority_id,
+        singleton_token_stride * static_cast<std::uint64_t>(index) +
+            singleton_token_residue};
+    snapshot_digest_builder.binding(
+        singleton_key, index, singleton_witness);
+  }
+  const contract::CanonicalId next_snapshot_digest =
+      snapshot_digest_builder.finalize();
+
+  // These are the only potentially allocating operations in the specialized
+  // path.  Both finish before the first durable slot is touched.
+  key_point_arena_.reserve(*committed_key_point_total);
+  committed_batches_.reserve(*committed_batch_total);
+  audit
+      .all_fallible_allocations_completed_before_first_slot_mutation = true;
+  audit.mutation_suffix_nonthrow_or_fail_stop = true;
+  audit.standard_fingerprint_key_arena_and_history_path_preserved = true;
+
+  // Capacity is fixed above.  Marking this suffix noexcept turns any violation
+  // of that preflight into fail-stop instead of exposing a partially committed
+  // live locator to the caller.
+  const auto commit_suffix = [&]() noexcept {
+    for (std::size_t index = 0U; index < singleton_count; ++index) {
+      ExactDirectSparseFacetKey singleton_key;
+      singleton_key.point_count = 1U;
+      singleton_key.point_ids[0U] =
+          static_cast<spatial::PointId>(index);
+      const std::uint64_t fingerprint =
+          fingerprint_exact_direct_sparse_facet_key(
+              singleton_key, config_.fingerprint_mask);
+      const ExactDirectSparseFacetWitness singleton_witness{
+          config_.external_authority_id,
+          singleton_token_stride * static_cast<std::uint64_t>(index) +
+              singleton_token_residue};
+      const std::size_t slot_index =
+          first_empty_committed_slot(slots_, fingerprint);
+      ExactDirectSparsePositiveFacetSlot& slot = slots_[slot_index];
+      slot.fingerprint = fingerprint;
+      slot.committed_binding_index = index;
+      slot.key_point_offset = index;
+      slot.key_point_count = 1U;
+      slot.component_handle = index;
+      slot.binding_witness = singleton_witness;
+      slot.occupied = true;
+      key_point_arena_.push_back(
+          static_cast<spatial::PointId>(index));
+    }
+    committed_batches_.push_back(candidate_batch_record);
+    counters_ = *next_counters;
+    committed_history_digest_ = next_snapshot_digest;
+    batch.atomic_commit_performed = true;
+    batch.locator_state_mutated = true;
+    batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
+        complete_certified_sparse_positive_batch_commit;
+  };
+  commit_suffix();
+  return result;
 }
 
 ExactDirectSparsePositiveFacetBatchResult

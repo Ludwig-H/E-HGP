@@ -1256,7 +1256,17 @@ Les rejets de reprise couvrent un compteur locator différent du préfixe demand
 
 Ces tests restent hôte et courts. Ils certifient la sérialisation process-local de la couture mono-lot et la reconstruction depuis `HEAD`, pas une transaction physique RAM--disque, un débit industriel, des chunks multi-lots, un checkpoint de locator ou de forêt, un million, 10 M+, CUDA, GCP, le SLO 50 k, la sortie de Phase 15 ou l'entrée en Phase 16.
 
-### 14.12 Échelle conditionnelle au-delà de 10 M
+### 14.12 Validation courte de Phase 15F
+
+Le test locator construit plus de handles que de singletons afin de vérifier que le bulk ne consomme que le préfixe canonique et laisse les naissances directes futures disponibles. Pour chaque `i<n`, la clé `{i}` doit retrouver le composant `i` et le témoin `3i+1`. Sous le fingerprint normal, l'état durable complet doit être égal à celui d'un `apply_batch` ordinaire portant les mêmes bindings. L'audit exige zéro entrée externe, zéro `PendingBinding`, zéro slot scratch et zéro octet de scratch dynamique.
+
+Le même état doit passer le vérificateur structurel existant. Un masque de fingerprint nul force toutes les collisions : le bulk reste correct, ses compteurs opérationnels de comparaison restent nuls puisque l'unicité provient de l'intervalle canonique, et le vérificateur recertifie toutes les clés physiques. Un second appel, un compte nul, un compte supérieur aux handles et un budget inférieur d'une entrée sont refusés avec stamp, arène de clés et historique inchangés.
+
+Le test reducer traverse les voies projetée et vivante. Sur leur premier fold, `canonical_singleton_bulk_count=n` et les trois compteurs `staged_birth_record_count`, `staged_birth_node_count`, `staged_locator_binding_count` valent zéro. Les lots suivants utilisent toujours le chemin général et l'égalité récursive avec la forêt résidente doit rester vraie. Les tests restent hôte et courts; ils ne matérialisent aucune facette globale, coface, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur.
+
+La validation rapporte séparément le gain transitoire calculé sur l'ABI testée; elle ne l'assimile ni à une mesure RSS, ni à une capacité massive. Elle ne couvre pas encore le journal singleton résident, les arènes finales segmentées, l'archive d'autorités, un million, 10 M+, CUDA, GCP, le SLO 50 k, la sortie de Phase 15 ou l'entrée en Phase 16.
+
+### 14.13 Échelle conditionnelle au-delà de 10 M
 
 La première qualification massive porte sur 10 000 001 points et doit traverser le pipeline scientifique complet retenu pour le produit, jusqu'à la matérialisation et au checkpoint vérifiable. Un smoke de constructeur Morton/LBVH, une mesure de composant ou un préfixe scientifique n'est pas un succès de ce jalon.
 
