@@ -130,7 +130,7 @@ Le centre exact n'est pas construit sur le device. Son calcul amont peut examine
 
 14F revalide le transcript au CPU, recalcule les distances exactes, garde $F$ comme baseline et ferme le LBVH par prune strict avec descente à égalité. 14H scelle le delta exact ainsi obtenu et son commit ne lit ni transcript, ni digest, ni audit. Le producteur ne modifie donc jamais la sémantique scientifique et peut légalement retourner une proposition vide ou inutile.
 
-Le jalon reste `architecture_only`, mais la validation ciblée hôte et le smoke G4 réel passent au SHA exact `136a4c3c72fb97087d9555bca270b25cca5b8d83`. Le code AOT contient un seul cubin `sm_120` sans PTX, les deux CTests terminent en 0,30 seconde et memcheck ne trouve aucune erreur. Ptxas mesure 62 registres, 672 octets de pile locale par thread et zéro spill; ce résultat valide l'exécution, pas le débit. Aucun rappel, gain de temps, SLO 50 k, capacité 10 M+, `warm_e2e` ou statut public n'est qualifié.
+Le jalon reste `architecture_only`, mais la validation ciblée hôte et le smoke G4 réel passent. Le premier profil ptxas au SHA `136a4c3c72fb97087d9555bca270b25cca5b8d83` mesurait 672 octets de pile locale par thread. Le SHA `3aeb62019252c785d94cfb91de331bb74b6572e2` laisse le POD de requête, les deux tableaux sources et le record dans les buffers globaux, ne conserve localement que le scratch top-$k$ et réduit la pile à 160 octets, sans changer les 62 registres ni créer de spill. Le code AOT contient toujours un seul cubin `sm_120` sans PTX; digest, candidats, partitions exactes et memcheck restent identiques. Ce résultat valide l'exécution, pas le débit. Aucun rappel, gain de temps, SLO 50 k, capacité 10 M+, `warm_e2e` ou statut public n'est qualifié.
 
 ## Goulots restant à traiter après 14I
 
@@ -138,9 +138,9 @@ Trois coûts dominants restent visibles :
 
 - les traversées exactes top-$K$ par clé distincte, encore linéaires au pire cas puisque 14I ne garantit aucun rappel;
 - les constructions exactes de miniballs jusqu'à 385 supports, potentiellement répétées entre la préparation du centre et 10.5c, ainsi que les fallbacks rationnels;
-- les snapshots $32n$ device et $40n$ hôte sur G4, les buffers $352C$ device et $144C$ hôte par lot, la pile locale mesurée à 672 octets par thread, la projection rationnelle non cachée, les capacités réutilisables et le pic des tickets détenus par l'appelant, qui exigent chunks et plafonds sans dupliquer durablement les grandes arènes.
+- les snapshots $32n$ device et $40n$ hôte sur G4, les buffers $352C$ device et $144C$ hôte par lot, le scratch top-$k$ local restant de 160 octets par thread, la projection rationnelle non cachée, les capacités réutilisables et le pic des tickets détenus par l'appelant, qui exigent chunks et plafonds sans dupliquer durablement les grandes arènes.
 
-La priorité de développement devient donc : intégrer ce smoke dans un worker GCP gardé reproductible, réduire la pile locale CUDA, puis raccorder le chunking à la préparation scellée sans transférer l'autorité de l'audit. Les centres ou capacités exactes ne peuvent être réutilisés qu'avec une provenance recertifiable; l'instrumentation `warm_e2e`, puis les runs et checkpoints compacts, viennent ensuite pour les profils 50 k et 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
+La priorité de développement devient donc : intégrer ce smoke dans un worker GCP gardé reproductible, supprimer le trafic de capacité inutile et réduire le coût de projection, puis raccorder le chunking à la préparation scellée sans transférer l'autorité de l'audit. Les centres ou capacités exactes ne peuvent être réutilisés qu'avec une provenance recertifiable; l'instrumentation `warm_e2e`, puis les runs et checkpoints compacts, viennent ensuite pour les profils 50 k et 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
 
 ## Planification sans promotion
 

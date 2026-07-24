@@ -92,7 +92,7 @@ La sortie n'a aucune autorité scientifique. 14F revalide clés, namespace, excl
 
 ## Priorités de développement
 
-1. rendre le smoke 14I reproductible dans un worker GCP gardé et réduire la pile locale CUDA sans changer le transcript;
+1. rendre le smoke 14I reproductible dans un worker GCP gardé, réduire le trafic de sortie en $C$ et remplacer ou cacher la projection rationnelle;
 2. raccorder le chunking obligatoire du producteur à la préparation scellée, dimensionner $C$ près de $D$ et étudier le réemploi recertifiable des centres exacts;
 3. réutiliser les capacités restantes de scratch et plafonner les tickets appelant sans conserver de graphe entre lots;
 4. ajouter l'instrumentation `warm_e2e`, puis rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
@@ -117,7 +117,7 @@ Pour 14H, le même CTest ciblé passe sous GCC Release strict en 2,82 secondes e
 
 Pour 14I, les deux CTests hôte ciblés passent sous GCC Release strict en 0,03 seconde et sous Clang 18 Release strict en 0,02 seconde. Ils couvrent les capacités $32n$, $40n$, $352C$ et $144C$, la borne $2kW$, les lots vide, hors plage et mixte, les sentinelles, epochs strictement consécutifs, cardinalités mélangées et corruptions de permutation, clé, candidat et compteurs. La source de qualification passe aussi la compilation syntaxique GCC stricte.
 
-Sur la G4 réelle, deux CTests passent en 0,30 seconde : le contexte hôte en 0,01 et la qualification CUDA en 0,28. Cette dernière vérifie deux epochs, les candidats attendus d'un hint exact $1/3$, dix candidats à $k=10$ sur une fixture où les trois axes sont discriminants, puis l'égalité des partitions CPU exactes avec et sans amorce. Le JSON donne 16 inspections pour le lot $k=2$, 230 pour $k=10$, quatre puis dix candidats et aucun objet global interdit. Le memcheck rejoue ce binaire avec zéro erreur.
+Sur la G4 réelle, le smoke initial puis le rejeu optimisé passent. La qualification vérifie deux epochs, les candidats attendus d'un hint exact $1/3$, dix candidats à $k=10$ sur une fixture où les trois axes sont discriminants, puis l'égalité des partitions CPU exactes avec et sans amorce. Le JSON donne 16 inspections pour le lot $k=2$, 230 pour $k=10$, quatre puis dix candidats, aucun objet global interdit et le digest `18249493464636075901` sur les deux versions. Le memcheck rejoue le binaire optimisé avec zéro erreur.
 
 Une falsification coordonnée pourrait encore redistribuer des compteurs entre chunks 14A ou lanes 14C tout en conservant leurs agrégats. Les payloads compacts ne contiennent volontairement ni détail ni digest par lot; un vérificateur frais contre 10.1--10.2 est donc requis avant persistance ou exécution industrielle. Cette dette P2 est compatible avec `architecture_only`, mais devra être fermée avant toute qualification.
 
@@ -136,3 +136,7 @@ Les deux coupe-circuits de la génération `2026-07-23T16:55:30.850-07:00` étai
 Pour 14I, la session gardée a extrait exactement `main` au SHA `136a4c3c72fb97087d9555bca270b25cca5b8d83` sur `europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, G4 `SPOT`. Le conteneur CUDA 12.9.2 a détecté le driver 580.159.03, NVCC 12.9.86 et la capacité 12.0, puis compilé avec audit ptxas. Le binaire contient un seul ELF `phase14_facet_top_k_proposal.sm_120.cubin` et aucun PTX; le kernel utilise 62 registres, une pile de 672 octets par thread, zéro spill et zéro barrière. Cette pile et le worker GCP 14I encore manuel restent des dettes de performance et de reproductibilité, pas des défauts scientifiques.
 
 Les deux coupe-circuits de la génération `2026-07-23T18:06:54.047-07:00` étaient certifiés avant compilation : `instanceTerminationAction=STOP`, `maxRunDuration=3600` secondes et arrêt invité à 25 minutes. Après le résultat utile, `stop_and_verify.sh` a arrêté exactement cette génération, confirmé `TERMINATED` et inventorié zéro autre VM `project=e-hgp` active.
+
+Une seconde génération gardée a extrait exactement le SHA optimisé `3aeb62019252c785d94cfb91de331bb74b6572e2`. Ptxas conserve 62 registres, zéro spill et zéro barrière mais ramène la pile locale de 672 à 160 octets par thread, soit 76 % de moins. Les deux CTests passent en 0,46 seconde sur ce rejeu froid; le JSON, le digest, l'unique cubin `sm_120`, l'absence de PTX et le memcheck nul restent inchangés. Ce temps isolé n'est pas une mesure de performance.
+
+Les coupe-circuits de la génération `2026-07-23T18:28:55.261-07:00` étaient certifiés avec `instanceTerminationAction=STOP`, `maxRunDuration=3600` secondes et arrêt invité à 20 minutes. `stop_and_verify.sh` a ensuite arrêté exactement cette génération, confirmé `TERMINATED` et inventorié zéro autre VM `project=e-hgp` active.
