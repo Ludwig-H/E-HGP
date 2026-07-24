@@ -277,7 +277,7 @@ Le CTest court au faux launcher vérifie les traits move-only, les capacités $2
 
 ### Jalon 14O — adoption privée du snapshot propositionnel
 
-14O a le statut `validated_host_software_real_cuda_pending`, sous `cuda_g4_plus_reference_cpu / hgp_reduced / device_morton_lbvh_lease_adoption / architecture_only`; `public_status=not_claimed`. Il n'ajoute aucun théorème géométrique. Les faits arithmétiques du contrat sont les suivants : la lease exacte conserve $32n$ octets device, l'inverse Morton hôte LP64 vaut $8n$ octets, et l'adoption évite les $32n$ octets hôte supplémentaires ainsi que leur unique copie H2D de la voie legacy.
+14O a le statut `validated_real_G4_component_adoption_architecture_only`, sous `cuda_g4_plus_reference_cpu / hgp_reduced / device_morton_lbvh_lease_adoption / architecture_only`; `public_status=not_claimed`. Il n'ajoute aucun théorème géométrique. Les faits arithmétiques du contrat sont les suivants : la lease exacte conserve $32n$ octets device, l'inverse Morton hôte LP64 vaut $8n$ octets, et l'adoption évite les $32n$ octets hôte supplémentaires ainsi que leur unique copie H2D de la voie legacy.
 
 Le fait de propriété est conditionnel aux gardes du constructeur : index certifié du même nuage, identité immuable partagée, extents exacts, epoch non nulle, permutation Morton et mode d'exécution non ambigu. L'inverse et tous les rejets potentiels sont construits avant le déplacement du propriétaire. Après succès, le contexte garde le propriétaire dont dépendent les deux adresses device; après rejet, la lease reste possédée par l'appelant. Ces invariants sont des obligations logicielles de durée de vie, pas des certificats scientifiques.
 
@@ -285,7 +285,9 @@ Le schéma d'audit v4 permet de falsifier une copie hôte ou un trafic snapshot 
 
 Sous GCC Release strict, les deux cibles proposition et Morton compilent et les deux CTests passent 2/2 en 0,05 seconde; le test proposition repasse 1/1 en 0,01 seconde après fermeture du défaut P2. Les fixtures valident la parité, les rejets atomiques, la durée de vie, les deux lots adoptés et la règle legacy $32n$ à l'epoch un puis zéro, avec falsifications permanentes de l'absence initiale et de la répétition. Cela valide les obligations logicielles hôte, sans élever l'audit opérationnel en preuve géométrique.
 
-L'outil CUDA v4 exerce dans le source deux lots legacy/adoptés et $K=10$, mais l'absence locale de `nvcc` empêche sa compilation et aucune qualification G4 14O n'est lancée. Aucun raccord 14L, aucune hiérarchie complète, aucun p95 50 k, volume 10 M+, théorème de carriers ou statut public ne découle de ce jalon.
+La voie réelle est qualifiée au SHA main `f44d77e7401b16fc0818fa151348d6588b7e9618`. Le build propre sous GCC 13.3 et NVCC 12.9.86 produit exactement deux cubins ELF `sm_120`, sans PTX. À $n=5$, le témoin legacy annonce $160$ puis zéro octet H2D; l'adopté retient son propriétaire, $40$ octets hôte et une lease de $160$ octets, avec zéro snapshot H2D aux epochs un et deux. Transcript et digest `18249493464636075901` coïncident. À $K=10$, dix candidats et 230 inspections conduisent à la partition exacte validée, toujours sans snapshot H2D. Memcheck donne zéro erreur et zéro fuite.
+
+Cette exécution recertifie une couture logicielle et son arithmétique de capacité; elle ne démontre aucun nouveau fait géométrique. Sans temps, RSS, raccord 14L, hiérarchie complète, p95 50 k ou volume 10 M+, aucun SLO, théorème de carriers ou statut public n'en découle.
 
 ### Jalon 15A — contrat durable à recertification externe
 

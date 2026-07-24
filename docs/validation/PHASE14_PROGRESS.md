@@ -146,7 +146,7 @@ La génération gardée `2026-07-24T07:55:00.862-07:00` dans `europe-west4-ai1a`
 
 La qualification 14N isolée ne mesure encore aucun consommateur de la lease; 14O ajoute ci-dessous la couture source vers 14I. Aucune facette ou coface globale, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est matérialisée. Le temps de construction du composant sur trois répétitions n'est pas le p95 du nuage complet : aucun protocole `warm_e2e`, SLO principal 100 ms, objectif secondaire une seconde, capacité produit 10 M+ ou statut exact n'est revendiqué.
 
-## Incrément 14O validé hôte — adoption de la lease 14N par 14I
+## Incrément 14O qualifié composant G4 — adoption de la lease 14N par 14I
 
 La porte 14N est documentée comme satisfaite. 14O est implémenté dans le source sous `cuda_g4_plus_reference_cpu / hgp_reduced / device_morton_lbvh_lease_adoption / architecture_only`, avec `public_status=not_claimed`. Le constructeur adopté exige le même index certifié, le même namespace immuable de nuage, une lease prête dont la capacité maximale égale exactement $n$, des extents $3n$ et $n$, une epoch source et une capacité de requêtes non nulle.
 
@@ -154,13 +154,17 @@ Le contexte construit et possède seulement l'inverse Morton hôte. Sur LP64, so
 
 `DirectSparseFacetTopKProposalAudit` passe au schéma v4 et distingue explicitement adoption, propriétaire retenu, epoch, trois comptes hôte et trafic du snapshot. La voie legacy demeure disponible et conserve $40n$ octets hôte, une copie initiale $32n$ puis zéro. La fixture source compare les transcripts et digests legacy/adopté, exerce deux lots adoptés, la survie à la destruction de l'index et les rejets atomiques d'un namespace étranger, d'une capacité non exacte et d'une lease déplacée.
 
-Sous GCC Release strict, les deux cibles proposition et Morton compilent. Leurs CTests ciblés passent 2/2 en 0,05 seconde et couvrent adoption, parité legacy/adoptée, deux lots adoptés, rejets atomiques et contexte survivant au builder et à l'index. Après fermeture du défaut P2, le CTest proposition repasse 1/1 en 0,01 seconde : le premier lot legacy doit annoncer $32n$ octets H2D, le second zéro, et les corruptions permanentes « transfert initial absent » puis « transfert répété » sont rejetées. 14O atteint donc `validated_host_software_real_cuda_pending`.
+Sous GCC Release strict, les deux cibles proposition et Morton compilent. Leurs CTests ciblés passent 2/2 en 0,05 seconde et couvrent adoption, parité legacy/adoptée, deux lots adoptés, rejets atomiques et contexte survivant au builder et à l'index. Après fermeture du défaut P2, le CTest proposition repasse 1/1 en 0,01 seconde : le premier lot legacy doit annoncer $32n$ octets H2D, le second zéro, et les corruptions permanentes « transfert initial absent » puis « transfert répété » sont rejetées. Ce passage ferme le palier de validation hôte préalable à la qualification réelle ci-dessous.
 
-L'outil CUDA de qualification est étendu au schéma v4 dans le source. Il compare deux lots legacy et adoptés, leur transcript et leur digest, et ajoute le cas $K=10$. Il n'est pas compilé localement car `nvcc` est absent; aucun SHA propre G4 14O, smoke, memcheck, temps ou RSS n'est revendiqué et GCP n'est pas utilisé. Le contexte n'est pas encore raccordé aux callbacks 14L et aucune hiérarchie complète n'est mesurée. La porte Phase 14, le p95 `warm_e2e` 50 k et 10 M+ restent ouverts.
+La voie G4 réelle passe au SHA main `f44d77e7401b16fc0818fa151348d6588b7e9618`. Le build propre de la cible exacte réussit avec GCC 13.3 et NVCC 12.9.86. `cuobjdump` trouve exactement `phase14_facet_top_k_proposal.sm_120.cubin` et `phase14_morton_lbvh_build.sm_120.cubin`, sans PTX. Sur la RTX PRO 6000 Blackwell Server Edition, pilote 580.159.03, 97 887 Mio et capacité 12.0, l'outil `morsehgp3d.phase14k.facet_top_k_cuda_qualification.v4` confirme le témoin legacy $160/0$ octets à $n=5$, l'adoption $8n=40$ octets hôte, le propriétaire retenu, la lease $32n=160$ octets et zéro snapshot H2D aux epochs un et deux. Transcript et digest `18249493464636075901` sont identiques. Le cas $K=10$ adopté retourne dix candidats après 230 inspections et une partition exacte validée. Le rejeu memcheck rapporte zéro erreur et zéro fuite.
+
+La génération gardée `2026-07-24T08:49:33.736-07:00` de `ehgp-blackwell-spot-ai1a` dans `devpod-gpu-exploration/europe-west4-ai1a` utilise `g4-standard-48`, `SPOT`, `STOP`, 3 600 secondes GCE et 20 minutes invitées. Elle est arrêtée à `2026-07-24T08:55:45.757-07:00`, certifiée `TERMINATED`, avec zéro autre VM active; la clé est révoquée et son matériel local supprimé. L'artefact [phase14o_g4_adoption_f44d77e.json](phase14o_g4_adoption_f44d77e.json) conserve la preuve.
+
+14O atteint `validated_real_G4_component_adoption_architecture_only`. Aucun temps ni RSS n'est mesuré. Le contexte n'est pas encore raccordé aux callbacks 14L et aucune hiérarchie complète n'est exécutée. La porte Phase 14, le p95 `warm_e2e` 50 k, le SLO, 10 M+ et le statut public exact restent ouverts.
 
 ## Priorités de développement
 
-1. qualifier courtement la couture 14O sur G4, puis raccorder ce contexte adopté aux callbacks 14L sans créer un second chemin produit;
+1. raccorder le contexte 14O qualifié aux callbacks 14L sans créer un second chemin produit;
 2. étudier un réemploi recertifiable du centre exact par 10.5c au lieu de la seconde construction actuellement explicite;
 3. réutiliser les capacités restantes de scratch sans conserver de graphe entre lots;
 4. exploiter l'instrumentation `warm_e2e`, puis raccorder les chunks durables 15B au reducer hiérarchique avant toute campagne massive.

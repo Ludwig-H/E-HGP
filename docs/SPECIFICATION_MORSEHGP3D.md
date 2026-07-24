@@ -1083,9 +1083,11 @@ Avant de consommer la lease, le constructeur termine tous les contrôles et cons
 
 Le schéma v4 de `DirectSparseFacetTopKProposalAudit` engage séparément la capacité device $32n$, les trois populations hôte, l'epoch 14N, le trafic du snapshot et les deux faits d'adoption. La voie legacy conserve son contrat : snapshot hôte $40n$ sur LP64, copie initiale $32n$ puis zéro, sans adoption ni epoch de lease. Aucune de ces différences opérationnelles n'entre dans l'autorité scientifique; 14F recalcule encore les distances exactes et achève la traversée LBVH, tandis que 14H ignore l'audit au commit.
 
-14O ne construit aucune facette ou coface globale, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Son statut est `validated_host_software_real_cuda_pending` : sous GCC Release strict, les deux cibles proposition et Morton compilent et leurs CTests passent 2/2 en 0,05 seconde; le test proposition repasse 1/1 en 0,01 seconde après fermeture du défaut P2. La matrice hôte couvre adoption, parité, rejets, durée de vie, premier transfert legacy $32n$, second transfert nul et les deux falsifications opposées.
+14O ne construit aucune facette ou coface globale, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Son statut est `validated_real_G4_component_adoption_architecture_only`. La validation hôte sous GCC Release strict conserve ses deux cibles, ses CTests 2/2 en 0,05 seconde et le rejeu proposition 1/1 en 0,01 seconde après fermeture du défaut P2.
 
-L'outil CUDA v4 contient désormais la parité legacy/adoptée sur deux lots et le cas $K=10$, mais il n'est pas compilé localement car `nvcc` est absent et aucune session G4 14O n'est lancée. Cette validation hôte ne ferme ni l'intégration 14L, ni `warm_e2e`, ni le SLO 50 k, ni la voie 10 M+, ni la Phase 14.
+Au SHA main `f44d77e7401b16fc0818fa151348d6588b7e9618`, le build propre exact réussit avec GCC 13.3 et NVCC 12.9.86. Les deux seuls ELF device sont les cubins `sm_120` de la proposition et du builder Morton; aucun PTX n'est présent. L'outil v4 confirme le contrat legacy $160/0$ octets à $n=5$, le propriétaire adopté, les $40$ octets hôte, les comptes directs hôte nuls, les deux epochs adoptées sans snapshot H2D, la lease de $160$ octets et la parité transcript/digest. Le cas adopté $K=10$ produit dix candidats après 230 inspections et valide la partition exacte. Memcheck repasse avec zéro erreur et zéro fuite.
+
+Cette qualification de composant ne contient aucune mesure de temps ou RSS. Elle ne ferme ni l'intégration 14L, ni la hiérarchie complète, ni `warm_e2e`, ni le SLO 50 k, ni la voie 10 M+, ni la Phase 14, et ne publie aucun statut exact.
 
 ## 15. Limites de complexité
 

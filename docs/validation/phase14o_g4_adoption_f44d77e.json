@@ -1,0 +1,99 @@
+{
+  "schema": "morsehgp3d.phase14o.g4_adoption_qualification.v1",
+  "git_sha": "f44d77e7401b16fc0818fa151348d6588b7e9618",
+  "git_ref": "main",
+  "git_sha_pushed": true,
+  "backend": "cuda_g4_plus_reference_cpu",
+  "profile": "hgp_reduced",
+  "mode": "device_morton_lbvh_lease_adoption",
+  "deployment_status": "architecture_only",
+  "qualification_tool_schema": "morsehgp3d.phase14k.facet_top_k_cuda_qualification.v4",
+  "image_id": "sha256:66219ad53f21473605e01057f997bbc5fe7a00243d015d9be885b967a5403591",
+  "host_compiler": "GCC 13.3",
+  "cuda_compiler": "12.9.86",
+  "cuda_architecture": "sm_120",
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "driver": "580.159.03",
+  "gpu_memory_mib": 97887,
+  "compute_capability": "12.0",
+  "build": {
+    "clean": true,
+    "target": "morsehgp3d_gpu_direct_sparse_facet_top_k_proposal_qualification",
+    "successful": true
+  },
+  "cuda_binary": {
+    "elf_cubin_count": 2,
+    "elf_cubins": [
+      "phase14_facet_top_k_proposal.sm_120.cubin",
+      "phase14_morton_lbvh_build.sm_120.cubin"
+    ],
+    "ptx_present": false
+  },
+  "qualification": {
+    "successful": true,
+    "point_count": 5,
+    "legacy_first_snapshot_host_to_device_byte_count": 160,
+    "legacy_second_snapshot_host_to_device_byte_count": 0,
+    "adopted_device_snapshot_owner_retained": true,
+    "adopted_host_snapshot_byte_capacity": 40,
+    "adopted_host_coordinate_snapshot_word_count": 0,
+    "adopted_host_morton_order_snapshot_entry_count": 0,
+    "adopted_first_buffer_epoch": 1,
+    "adopted_first_snapshot_host_to_device_byte_count": 0,
+    "adopted_second_buffer_epoch": 2,
+    "adopted_second_snapshot_host_to_device_byte_count": 0,
+    "lease_persistent_device_capacity_bytes": 160,
+    "legacy_adopted_transcript_parity": true,
+    "legacy_adopted_digest_parity": true,
+    "proposal_digest_fnv1a": 18249493464636075901,
+    "k10": {
+      "adoption_qualified": true,
+      "snapshot_host_to_device_byte_count": 0,
+      "candidate_count": 10,
+      "inspected_neighbor_count": 230,
+      "exact_partition_validated": true
+    },
+    "forbidden_global_structure_materialized": false,
+    "public_status_claimed": false
+  },
+  "compute_sanitizer": {
+    "tool": "memcheck",
+    "rerun": true,
+    "error_count": 0,
+    "leaked_bytes": 0
+  },
+  "gcp": {
+    "project": "devpod-gpu-exploration",
+    "zone": "europe-west4-ai1a",
+    "instance": "ehgp-blackwell-spot-ai1a",
+    "machine_type": "g4-standard-48",
+    "provisioning_model": "SPOT",
+    "instance_termination_action": "STOP",
+    "max_run_duration_seconds": 3600,
+    "guest_shutdown_minutes": 20,
+    "last_start_timestamp": "2026-07-24T08:49:33.736-07:00",
+    "last_stop_timestamp": "2026-07-24T08:55:45.757-07:00",
+    "final_status": "TERMINATED",
+    "other_active_e_hgp_vm_count": 0,
+    "session_key_revoked": true,
+    "local_session_key_material_removed": true
+  },
+  "timing_measured": false,
+  "peak_host_rss_measured": false,
+  "phase14l_bound": false,
+  "full_hierarchy_executed": false,
+  "warm_e2e_primary_slo": {
+    "point_count": 50000,
+    "k_max": 10,
+    "p95_strictly_less_than_ns": 100000000,
+    "claimed": false
+  },
+  "warm_e2e_secondary_objective": {
+    "p95_strictly_less_than_ns": 1000000000,
+    "claimed": false
+  },
+  "massive_product_path_claimed": false,
+  "ten_million_or_larger_claimed": false,
+  "public_status_claimed": false,
+  "scope_note": "This artifact qualifies only the Phase 14O real-G4 component adoption seam. It records no timing or RSS measurement and does not include 14L, a full Morse hierarchy, warm_e2e, the 50000-point SLO, or a 10M-plus product run."
+}
