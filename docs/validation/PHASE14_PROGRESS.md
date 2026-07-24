@@ -88,12 +88,12 @@ La préparation de ce centre exact est extérieure au kernel et peut coûter jus
 
 La sortie n'a aucune autorité scientifique. 14F revalide clés, namespace, exclusions et candidats au CPU, recalcule les distances exactes, conserve $F$ comme baseline et termine le LBVH avec prune strict et descente à égalité. Un ticket 14H scelle seulement le delta exact; son commit ignore transcript, digest et audit. Aucune facette ou coface globale, incidence, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur n'est matérialisée.
 
-14I reste `architecture_only` et `public_status=not_claimed`. Les fenêtres n'offrent aucune garantie de rappel ou d'accélération, et aucune qualification de latence 50 k, volume 10 M+ ou `warm_e2e` n'est publiée. Sa validation est `pending_targeted_host_and_real_g4_replay`; son état GCP propre est `pending`. Les statuts de phase et les gates restent inchangés.
+14I reste `architecture_only` et `public_status=not_claimed`. Les fenêtres n'offrent aucune garantie de rappel ou d'accélération, et aucune qualification de latence 50 k, volume 10 M+ ou `warm_e2e` n'est publiée. La validation ciblée hôte et le smoke G4 réel passent; les statuts de phase et les gates restent inchangés.
 
 ## Priorités de développement
 
-1. fermer la validation hôte ciblée de 14I puis son replay sur une G4 réelle gardée;
-2. raccorder le chunking obligatoire du producteur à la préparation scellée et étudier le réemploi recertifiable des centres exacts;
+1. rendre le smoke 14I reproductible dans un worker GCP gardé et réduire la pile locale CUDA sans changer le transcript;
+2. raccorder le chunking obligatoire du producteur à la préparation scellée, dimensionner $C$ près de $D$ et étudier le réemploi recertifiable des centres exacts;
 3. réutiliser les capacités restantes de scratch et plafonner les tickets appelant sans conserver de graphe entre lots;
 4. ajouter l'instrumentation `warm_e2e`, puis rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
 
@@ -115,7 +115,9 @@ Pour 14G, l'unique CTest ciblé passe sous GCC Release strict en 0,05 seconde et
 
 Pour 14H, le même CTest ciblé passe sous GCC Release strict en 2,82 secondes et sous Clang 18 Release strict en 2,29 secondes sur le rejeu séquentiel final. Il couvre les traits non forgeables et move-only, les rejets invalide, étranger, périmé, déplacé, réutilisé et stamp muté, l'invalidation par un commit historique, le détachement puis la destruction de l'audit et le témoin discriminant sous cap serré. Ce témoin fait réussir la préparation proposée, échouer la voie non amorcée et son commit historique, puis réussir le commit scellé sans nouveau rejeu ou appel de fermeture. Le garde statique 10.5c, le checker des statuts et l'installation/export avec consumer externe passent; aucun benchmark long, sanitizer, oracle combinatoire ou test massif n'est lancé.
 
-Pour 14I, aucune validation n'est encore consignée : `pending_targeted_host_and_real_g4_replay`. La prochaine passe doit rester courte et couvrir les capacités $32n$, $40n$, $352C$ et $144C$, la borne $2kW$, les lots vide, hors plage et mixte, les sentinelles, epochs et corruptions hôte, puis exécuter le vrai code AOT sur des requêtes $k=2$ dont un centre exact $1/3$ et une requête réellement 3D à $k=10$. Les identifiants flottants attendus et l'égalité de la partition CPU exacte avec et sans amorce doivent être contrôlés sans transformer ce succès en garantie de rappel, accélération, SLO 50 k ou capacité 10 M+.
+Pour 14I, les deux CTests hôte ciblés passent sous GCC Release strict en 0,03 seconde et sous Clang 18 Release strict en 0,02 seconde. Ils couvrent les capacités $32n$, $40n$, $352C$ et $144C$, la borne $2kW$, les lots vide, hors plage et mixte, les sentinelles, epochs strictement consécutifs, cardinalités mélangées et corruptions de permutation, clé, candidat et compteurs. La source de qualification passe aussi la compilation syntaxique GCC stricte.
+
+Sur la G4 réelle, deux CTests passent en 0,30 seconde : le contexte hôte en 0,01 et la qualification CUDA en 0,28. Cette dernière vérifie deux epochs, les candidats attendus d'un hint exact $1/3$, dix candidats à $k=10$ sur une fixture où les trois axes sont discriminants, puis l'égalité des partitions CPU exactes avec et sans amorce. Le JSON donne 16 inspections pour le lot $k=2$, 230 pour $k=10$, quatre puis dix candidats et aucun objet global interdit. Le memcheck rejoue ce binaire avec zéro erreur.
 
 Une falsification coordonnée pourrait encore redistribuer des compteurs entre chunks 14A ou lanes 14C tout en conservant leurs agrégats. Les payloads compacts ne contiennent volontairement ni détail ni digest par lot; un vérificateur frais contre 10.1--10.2 est donc requis avant persistance ou exécution industrielle. Cette dette P2 est compatible avec `architecture_only`, mais devra être fermée avant toute qualification.
 
@@ -131,4 +133,6 @@ Après publication de 14H, une seconde session gardée a extrait exactement `mai
 
 Les deux coupe-circuits de la génération `2026-07-23T16:55:30.850-07:00` étaient certifiés avant compilation : `instanceTerminationAction=STOP`, `maxRunDuration=3600` secondes et arrêt invité à 25 minutes. `stop_and_verify.sh` a ensuite arrêté exactement cette génération, confirmé l'état GCE `TERMINATED` et inventorié zéro autre VM `project=e-hgp` active.
 
-Pour 14I, GCP est `pending` : aucune session de ce jalon n'est déclarée dans ce document et les replays historiques 14G--14H ci-dessus ne qualifient pas son producteur GPU.
+Pour 14I, la session gardée a extrait exactement `main` au SHA `136a4c3c72fb97087d9555bca270b25cca5b8d83` sur `europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, G4 `SPOT`. Le conteneur CUDA 12.9.2 a détecté le driver 580.159.03, NVCC 12.9.86 et la capacité 12.0, puis compilé avec audit ptxas. Le binaire contient un seul ELF `phase14_facet_top_k_proposal.sm_120.cubin` et aucun PTX; le kernel utilise 62 registres, une pile de 672 octets par thread, zéro spill et zéro barrière. Cette pile et le worker GCP 14I encore manuel restent des dettes de performance et de reproductibilité, pas des défauts scientifiques.
+
+Les deux coupe-circuits de la génération `2026-07-23T18:06:54.047-07:00` étaient certifiés avant compilation : `instanceTerminationAction=STOP`, `maxRunDuration=3600` secondes et arrêt invité à 25 minutes. Après le résultat utile, `stop_and_verify.sh` a arrêté exactement cette génération, confirmé `TERMINATED` et inventorié zéro autre VM `project=e-hgp` active.

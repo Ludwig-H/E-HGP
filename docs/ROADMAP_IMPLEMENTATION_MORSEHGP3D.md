@@ -1219,7 +1219,7 @@ La construction du centre exact reste hors kernel. À $k\leq10$, elle peut exami
 
 La frontière scientifique ne change pas. La sortie GPU alimente seulement le transcript 14F; le CPU exact revalide clés, namespace, exclusions et `PointId`, recalcule les distances au centre exact, utilise toujours $F$ comme baseline et achève la traversée LBVH avec prune strict et descente à égalité. Si la préparation est scellée par 14H, son commit ignore transcript, digest et audit. Une fenêtre Morton vide, pauvre ou adversariale doit donc changer au plus le travail exact, jamais le résultat.
 
-Ce jalon est implémenté mais sa validation reste `pending_targeted_host_and_real_g4_replay` et GCP reste `pending`. Il ne revendique aucune garantie de rappel, accélération mesurée, p95 `warm_e2e`, latence sous la seconde à 50 k points, capacité 10 M+ ou statut public; la phase, ses gates, `architecture_only` et `public_status=not_claimed` restent inchangés.
+Ce jalon est implémenté et son smoke ciblé passe sur l'hôte puis sur une vraie G4 au SHA exact `136a4c3c72fb97087d9555bca270b25cca5b8d83`. NVCC 12.9.86 produit uniquement un cubin `sm_120`; deux CTests terminent en 0,30 seconde et le memcheck de la qualification signale zéro erreur. Ptxas expose néanmoins 62 registres et une pile locale de 672 octets par thread, sans spill : cette pression ainsi que la projection rationnelle et le trafic en $C$ restent à réduire avant tout SLO. Le smoke ne revendique aucune garantie de rappel, accélération mesurée, p95 `warm_e2e`, latence sous la seconde à 50 k points, capacité 10 M+ ou statut public; la phase, ses gates, `architecture_only` et `public_status=not_claimed` restent inchangés.
 
 ### Optimisations autorisées
 
