@@ -989,6 +989,18 @@ Tout run durable doit être recertifié par un callback explicite avant publicat
 
 Le seul protocole 15A admis est un namespace verrouillé sur filesystem Unix local : recertification de l'image canonique avant écriture, temporaire dans le même répertoire, `fdatasync`, relecture et comparaison des octets, hard-link atomique vers un nom final immuable avec contrôle d'inode, `fsync` du répertoire, puis remplacement atomique et synchronisé de `HEAD`. `HEAD` est le point de linéarisation; un final non référencé ne fait pas partie du préfixe et une faute postérieure au remplacement impose une réouverture avant toute nouvelle action. Aucun ticket 14H, locator, DSU ou forêt n'est checkpointé. Le contrat ne revendique ni reprise en place, ni capacité 10 M+, ni SLO, ni `public_status=exact`.
 
+### 14.2 Snapshot Morton/LBVH device recertifié
+
+Le constructeur 14M a pour contrat `cuda_g4 / hgp_reduced / device_morton_lbvh_snapshot_import / architecture_only`. Il accepte un nuage canonique non vide et une capacité fixe $C\leq\mathrm{INT\_MAX}$. Les propositions device ne sont jamais scientifiques : chaque bin ambigu est recalculé exactement avant le code Morton, puis l'import CPU recertifie toutes les coordonnées même si le GPU les avait déclarées non ambiguës.
+
+Pour $l\leq x<u$, un bin proposé $q$ est accepté par l'import si et seulement si $q(u-l)\leq2^{21}(x-l)<(q+1)(u-l)$; $l=u$ impose zéro et $x=u$ impose $2^{21}-1$. Les binary64 finis sont décodés comme entiers signés multipliés par une puissance de deux. Lorsque l'écart d'exposants est au plus 50, tous les produits tiennent dans 128 bits signés; sinon le même test emploie `BigInt`.
+
+Le tri device est stable sur les 63 bits Morton avec les `PointId` initialement croissants. La règle de split est celle de la référence CPU : bit discriminant le plus haut, ou midpoint si les codes extrêmes sont égaux. Chaque sous-arbre occupe un intervalle postordre déterminé uniquement par sa plage; les atomiques de scheduling ne peuvent donc changer ni enfants ni indices. Les témoins AABB comparent l'ordre exact des mots binary64 canoniques et choisissent le plus petit `PointId` en cas d'égalité.
+
+Les seules arènes device sont coordonnées, bins, doubles buffers de codes et d'identifiants, feuilles, nœuds, doubles frontières, schedule de niveaux, contrôles et workspace CUB. Leur capacité totale est $308C-56+T_{\mathrm{CUB}}(C)$ octets; le snapshot actif vaut $176n-80$ octets. Aucun terme ne dépend de $\binom{n}{k}$ et aucun catalogue global de facettes ou cofaces, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est construit.
+
+Un résultat ne porte `cuda_builder_qualified=true` qu'après validation des extents, époques, capacités, nombres déterministes de kernels projet, soumissions de bibliothèque et synchronisations, puis succès de l'import certifié. Le `component_smoke` ne constitue ni le protocole p95 de Phase 14, ni une preuve de hiérarchie complète à $K=10$, ni une qualification du streaming 10 M+.
+
 ## 15. Limites de complexité
 
 Une liste fixe de voisins par observation n'est pas complète : une paire de Gabriel peut avoir une boule diamétrale vide tout en étant absente d'une liste $L$-NN arbitrairement longue, en plaçant de nombreux points juste à l'extérieur de cette boule près d'une extrémité.

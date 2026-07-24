@@ -4,7 +4,7 @@ updated_at = "2026-07-24"
 [project]
 name = "MorseHGP3D"
 implementation_started = true
-current_phase = "15"
+current_phase = "14"
 current_track = "performance"
 status_authority = "This file is operational; mathematical authority remains in the specification and proof-status register."
 
@@ -904,7 +904,7 @@ blocking_reason = "La phase 12 n'est pas fermee."
 id = "14"
 title = "Latence 50 000 points"
 track = "performance"
-status = "ready"
+status = "in_progress"
 entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["10"]
@@ -1009,12 +1009,27 @@ twelfth_increment_scope = "shared_interactive_resident_50k_and_massive_external_
 twelfth_increment_validation = "passed_one_targeted_strict_GCC_release_CTest_one_of_one_in_6_33_seconds_covering_empty_birth_then_A12_D4_Q4_C2_two_chunks_R1_under_an_independent_R_cap_of_one_exact_208_144_144_active_traffic_injected_monotonic_clock_compact_certified_centers_one_private_ticket_immediate_no_replay_commit_one_byte_traffic_falsification_prepare_callback_exception_and_seal_rejection_all_without_cursor_advance_or_live_ticket_no_CUDA_GCP_benchmark_long_or_massive_test"
 twelfth_increment_known_limit = "proposal_callback_is_generic_and_not_yet_bound_to_the_real_14J_14K_CUDA_context_exact_center_miniball_is_prepared_once_for_the_proposal_but_10_5c_reconstructs_it_again_no_center_cache_device_LBVH_reusable_cross_batch_arenas_durable_runs_checkpoints_crash_recovery_warm_e2e_50k_SLO_10M_capacity_global_carrier_faithfulness_M_1_or_public_status_qualification"
 twelfth_increment_evidence = ["morsehgp3d/include/morsehgp3d/hierarchy/direct_sparse_facet_descent_batch_executor.hpp", "morsehgp3d/src/cpu/hierarchy/direct_sparse_facet_descent_batch_executor.cpp", "morsehgp3d/tests/unit/test_hierarchy_direct_sparse_facet_descent_batch_executor.cpp", "docs/implementation_status.toml", "docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md", "docs/math/ARCHITECTURE_INDUSTRIELLE_MORSE_H0.md"]
+thirteenth_increment = "implemented_directed_binary64_device_Morton_bins_stable_CUB_sort_exact_find_split_deterministic_postorder_device_LBVH_and_single_pass_CPU_certified_snapshot_import"
+thirteenth_increment_status = "validated_host_software_cuda_source_pending_real_guarded_G4_component_qualification_architecture_only"
+thirteenth_increment_entry_gate_satisfied = true
+thirteenth_increment_backend = "cuda_g4_plus_reference_cpu"
+thirteenth_increment_profile = "hgp_reduced"
+thirteenth_increment_mode = "proposal_only_then_certified"
+thirteenth_increment_semantics = "device_linear_Morton_LBVH_proposal_snapshot_with_exact_CPU_recertification_before_index_publication"
+thirteenth_increment_proof_basis = "directed_binary64_interval_certification_exact_dyadic_bin_inequality_stable_Morton_then_PointId_order_exact_find_split_midpoint_collision_recursion_and_deterministic_postorder_range_layout_v1"
+thirteenth_increment_theorem_status = "proved_here_for_quantization_topology_layout_and_linear_capacity_bounds_validated_host_software_real_CUDA_execution_pending"
+thirteenth_increment_bounds = "C_at_most_INT_MAX_fixed_device_capacity_exactly_308C_minus_56_plus_T_CUB_C_bytes_snapshot_exactly_176n_minus_80_bytes_depth_at_most_63_plus_ceil_log2_C_host_import_peak_about_406n_bytes_outside_canonical_cloud_current_topology_work_conservatively_O_n_log_n"
+thirteenth_increment_scope = "shared_interactive_resident_50k_and_massive_external_streaming_spatial_index_construction_only_no_global_facet_coface_incidence_gamma_cell_or_higher_order_Delaunay_materialization_no_14M_to_14J_14K_14L_product_adapter_no_warm_e2e_50k_SLO_10M_product_path_hierarchy_or_public_status_claim"
+thirteenth_increment_validation = "passed_targeted_strict_GCC_and_Clang_host_snapshot_import_CPU_equivalence_and_hostile_fake_launcher_tests_plus_strict_component_smoke_host_syntax_no_NVCC_or_real_G4_execution_yet"
+thirteenth_increment_gcp = "pending_real_guarded_G4_SPOT_component_compile_and_smoke"
+thirteenth_increment_known_limit = "real_NVCC_G4_execution_pending_current_import_keeps_snapshot_while_copying_leaf_and_node_arrays_14M_to_14J_14K_14L_product_adapter_and_warm_e2e_hierarchy_measurement_missing"
+thirteenth_increment_evidence = ["morsehgp3d/include/morsehgp3d/gpu/morton_lbvh_build.hpp", "morsehgp3d/src/gpu/morton_lbvh_build.cpp", "morsehgp3d/src/cuda/phase14_morton_lbvh_build_internal.hpp", "morsehgp3d/src/cuda/phase14_morton_lbvh_build.cu", "morsehgp3d/src/tools/gpu_morton_lbvh_build_component_smoke.cpp", "morsehgp3d/tests/unit/fake_gpu_phase14_morton_lbvh_build_launchers.hpp", "morsehgp3d/tests/unit/fake_gpu_phase14_morton_lbvh_build_launchers.cpp", "morsehgp3d/tests/unit/test_gpu_morton_lbvh_build_context.cpp", "morsehgp3d/include/morsehgp3d/spatial/lbvh.hpp", "morsehgp3d/src/cpu/spatial/lbvh.cpp", "morsehgp3d/tests/unit/test_spatial_lbvh.cpp", "docs/SPECIFICATION_MORSEHGP3D.md", "docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md", "docs/ROADMAP_IMPLEMENTATION_MORSEHGP3D.md", "docs/TEST_PLAN_MORSEHGP3D.md", "docs/math/ARCHITECTURE_INDUSTRIELLE_MORSE_H0.md", "docs/validation/PHASE14_PROGRESS.md"]
 
 [[phases]]
 id = "15"
 title = "Streaming a dix millions et davantage"
 track = "performance"
-status = "in_progress"
+status = "ready"
 entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["9", "10", "11"]

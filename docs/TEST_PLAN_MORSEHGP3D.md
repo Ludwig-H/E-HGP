@@ -261,6 +261,22 @@ Trois chemins fail-closed suffisent. Une sous-déclaration D2H d'un octet doit r
 
 Ce CTest ciblé partagé passe sous GCC Release strict en 6,33 secondes. Il utilise un faux producteur hôte borné : aucun adaptateur CUDA 14J/14K, smoke G4, test massif, benchmark ou GCP n'est requis. Il ne qualifie ni `warm_e2e`, ni le SLO 50 k, ni 10 M+, ni un statut public.
 
+#### Lot `14M-MORTON-LBVH`
+
+Le lot hôte court compare l'import d'un snapshot 14M au builder LBVH CPU sur singleton, collisions et binary64 finis extrêmes. Il exige la même permutation `(Morton, PointId)`, les mêmes compteurs, la même AABB et les mêmes résultats top-$k$ et boule fermée. Les fixtures hostiles falsifient séparément schéma, grille Morton, nombre de points, feuille, nœud, bin exact, `PointId`, ordre, plage, enfant, cycle, postordre, témoin, racine et compteurs. Le faux launcher force aussi une ambiguïté, un dépassement de capacité et de faux nombres de soumissions; tout rejet empoisonne le contexte sans autoriser `cuda_builder_qualified`.
+
+Les tests de quantification couvrent zéro signé canonisé, axes dégénérés, extrêmes finis et sous-normaux, borne supérieure clipsée et les deux chemins entier signé 128 bits puis `BigInt`. Ils vérifient l'inégalité exacte $q(u-l)\leq2^{21}(x-l)<(q+1)(u-l)$ et ses deux cas limites. Les audits exigent le snapshot $176n-80$ et la capacité device $308C-56+T_{\mathrm{CUB}}(C)$; le smoke rapporte séparément le pic RSS hôte, dont l'estimation actuelle hors nuage est d'environ $406n$ octets, soit environ 3,78 Gio à dix millions de points.
+
+Après compilation propre CUDA 12.9 AOT `sm_120`, une seule session G4 `SPOT` gardée exécute le binaire `morsehgp3d_gpu_morton_lbvh_build_component_smoke` avec la même graine :
+
+| cas | points | répétitions | portée du verdict |
+|---|---:|---:|---|
+| amorçage | 4 096 | 1 | chemin CUDA réel, import certifié et compteurs cohérents |
+| taille interactive | 50 000 | 3 | répétabilité courte et diagnostic de temps, sans calcul de p95 |
+| capacité massive | 10 000 001 | 1 | absence d'OOM non contrôlé et index certifié au-delà de dix millions |
+
+Chaque JSON conserve au minimum SHA Git, graine, backend, profil, mode, durées de génération et canonicalisation, médiane et maximum des constructions, ambiguïtés, kernels projet, soumissions CUB, synchronisations, octets du snapshot, workspace et capacité device, pic RSS hôte et `cuda_qualified=true`. Il doit aussi conserver `warm_e2e_slo_claimed=false`, `massive_product_path_claimed=false` et `public_status_claimed=false`. Une erreur, une préemption, un OOM ou un import refusé échoue seulement ce smoke de composant. Ces trois passages ne matérialisent ni hiérarchie Morse, ni dix ordres à $K=10$ et ne satisfont aucune porte SLO, produit, streaming ou publication. La cible G4 démarrée pour ce lot est finalement arrêtée et certifiée `TERMINATED` par les scripts gardés.
+
 Les tailles de support trois et quatre obéissent au même contrat : une proposition GPU ambiguë descend, et tout prune exact est rejoué par déterminants et comptage global indépendants. La complétude est suivie séparément pour chaque taille. Un run ne peut annoncer un catalogue complet tant que l'une des trois frontières reste non vide.
 
 Le lot court `9.2a-RCPU` vérifie séparément la primitive de produit et le flux. Pour la primitive : triangle aigu, obtus et collinéaire; tétraèdre régulier et centre extérieur; requête strictement intérieure et égalité shell; puis la famille $p_0(t)=(t,2,0)$, $p_1=(-1,0,0)$, $p_2=(1,0,0)$. Sur $t\in[-2,2]$, les deux extrémités non aiguës ne doivent pas masquer le triangle aigu intérieur. Sur $t\in[-1/2,1/2]$ et $x=(0,33/16,0)$, les puissances négatives aux extrémités ne doivent pas masquer la puissance positive au centre. L'oracle Python rationnel recalcule ces valeurs indépendamment.

@@ -10,6 +10,7 @@
 #include <optional>
 #include <span>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
 
 namespace morsehgp3d::gpu {
@@ -45,6 +46,78 @@ struct MortonLeafRecord {
   PointId point_id;
 
   friend bool operator==(const MortonLeafRecord&, const MortonLeafRecord&) = default;
+};
+
+// Phase 14M host/device snapshot records use only fixed-width fields.  The
+// existing leaf name remains the ABI type; the snapshot alias makes its role
+// explicit without changing that ABI.
+using MortonLbvhSnapshotLeaf = MortonLeafRecord;
+
+inline constexpr std::uint32_t morton_lbvh_snapshot_schema_version = 1U;
+inline constexpr std::uint32_t morton_lbvh_snapshot_morton_bits_per_axis =
+    21U;
+inline constexpr std::uint64_t morton_lbvh_snapshot_invalid_node_index =
+    ~std::uint64_t{0};
+
+struct MortonLbvhSnapshotNode {
+  std::array<PointId, 3> lower_point_ids{};
+  std::array<PointId, 3> upper_point_ids{};
+  std::uint64_t left_child{morton_lbvh_snapshot_invalid_node_index};
+  std::uint64_t right_child{morton_lbvh_snapshot_invalid_node_index};
+  std::uint64_t leaf_begin{};
+  std::uint64_t leaf_end{};
+
+  [[nodiscard]] bool is_leaf() const noexcept {
+    return left_child == morton_lbvh_snapshot_invalid_node_index &&
+           right_child == morton_lbvh_snapshot_invalid_node_index;
+  }
+
+  friend bool operator==(
+      const MortonLbvhSnapshotNode&,
+      const MortonLbvhSnapshotNode&) = default;
+};
+
+struct MortonLbvhSnapshotCounters {
+  std::uint64_t point_count{};
+  std::uint64_t node_count{};
+  std::uint64_t maximum_depth{};
+  std::uint64_t morton_collision_group_count{};
+  std::uint64_t maximum_morton_collision_size{};
+
+  friend bool operator==(
+      const MortonLbvhSnapshotCounters&,
+      const MortonLbvhSnapshotCounters&) = default;
+};
+
+static_assert(
+    std::is_standard_layout_v<MortonLbvhSnapshotLeaf> &&
+    std::is_trivially_copyable_v<MortonLbvhSnapshotLeaf> &&
+    sizeof(MortonLbvhSnapshotLeaf) == 16U);
+static_assert(
+    std::is_standard_layout_v<MortonLbvhSnapshotNode> &&
+    std::is_trivially_copyable_v<MortonLbvhSnapshotNode> &&
+    sizeof(MortonLbvhSnapshotNode) == 80U);
+static_assert(
+    std::is_standard_layout_v<MortonLbvhSnapshotCounters> &&
+    std::is_trivially_copyable_v<MortonLbvhSnapshotCounters> &&
+    sizeof(MortonLbvhSnapshotCounters) == 40U);
+
+// The owning envelope is process-local proposal storage; the fixed-width
+// leaf, node, counter and scalar fields are the versioned producer ABI.
+// Nodes are required in strict left/right postorder and root_node_index must
+// name the final node.  No field is trusted until CPU import completes.
+struct MortonLbvhSnapshot {
+  std::uint32_t schema_version{
+      morton_lbvh_snapshot_schema_version};
+  std::uint32_t morton_bits_per_axis{
+      morton_lbvh_snapshot_morton_bits_per_axis};
+  std::uint64_t point_count{};
+  std::uint64_t root_node_index{
+      morton_lbvh_snapshot_invalid_node_index};
+  ExactDyadicAabb3 root_aabb{};
+  MortonLbvhSnapshotCounters proposed_counters{};
+  std::vector<MortonLbvhSnapshotLeaf> leaves;
+  std::vector<MortonLbvhSnapshotNode> nodes;
 };
 
 struct MortonLbvhBuildCounters {
@@ -210,10 +283,14 @@ class ExactBudgetedLbvhTopKResult {
 
 class MortonLbvhIndex {
  public:
-  static constexpr std::size_t morton_bits_per_axis = 21U;
+  static constexpr std::size_t morton_bits_per_axis =
+      morton_lbvh_snapshot_morton_bits_per_axis;
 
   [[nodiscard]] static MortonLbvhIndex build(
       const CanonicalPointCloud& cloud);
+  [[nodiscard]] static MortonLbvhIndex import_certified_snapshot(
+      const CanonicalPointCloud& cloud,
+      const MortonLbvhSnapshot& snapshot);
 
   MortonLbvhIndex(const MortonLbvhIndex&) = delete;
   MortonLbvhIndex& operator=(const MortonLbvhIndex&) = delete;

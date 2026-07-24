@@ -166,7 +166,17 @@ Une préparation complète frappe un unique ticket 14H privé, le commit immédi
 
 Cette validation utilise un callback hôte générique. Elle ne branche pas encore le contexte CUDA 14J/14K, n'exécute aucun CUDA réel, ne mesure aucun benchmark et ne qualifie ni SLO 50 k, ni capacité 10 M+, ni fidélité globale des carriers, ni M.1, ni statut public exact. 14L ne construit aucune facette ou coface globale, incidence, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur.
 
-## Goulots restant à traiter après 14L
+## Incrément 14M — snapshot Morton/LBVH device sans mosaïque
+
+14M construit uniquement l'index spatial utile. Une passe device propose les bins Morton; une ambiguity est résolue axe par axe sur CPU exact, puis un radix sort stable ordonne les couples `(Morton, PointId)`. La topologie parallèle conserve exactement la règle récursive historique, mais calcule directement les offsets postordre. Les témoins de boîtes sont réduits par niveaux inverses. Le CPU importe ensuite le snapshot comme donnée hostile et recertifie toutes les feuilles, tous les splits, tous les nœuds et tous les témoins.
+
+Pour une capacité $C$, les arènes device persistantes valent $308C-56+T_{\mathrm{CUB}}(C)$ octets. Le payload actif rapatrié vaut $176n-80$ octets. Le pic hôte actuel conserve encore ce snapshot pendant la construction des vecteurs de l'index; avec coordonnées, bins, codes et scratch de validation, la composante hors nuage est d'environ $406n$ octets, soit environ 3,78 Gio à dix millions de points. Ce pic est compatible avec les 180 Gio de la G4 mais devra être réduit par un import consommant puis, si l'ABI le permet, adoptant les arènes.
+
+Il n'existe aucun tableau requête--point, univers de facettes, cofaces, incidences, cellules, Gamma ou mosaïque de Delaunay d'ordre supérieur. Les populations sont strictement $O(n)$; la topologie a un travail conservatif $O(n\log n)$ et au plus $63+\lceil\log_2 C\rceil$ niveaux. La limite active est $C\leq\mathrm{INT\_MAX}$ à cause de l'API CUB.
+
+Cette couche n'est qu'une brique de la voie produit. Son `component_smoke` peut établir qu'un index certifié se construit à 50 k et au-delà de 10 M, mais il n'inclut ni les lots Morse, ni les dix ordres, ni la sortie hiérarchique et ne qualifie donc jamais `warm_e2e` ou le statut public.
+
+## Goulots restant à traiter après 14M
 
 Trois coûts dominants restent visibles :
 

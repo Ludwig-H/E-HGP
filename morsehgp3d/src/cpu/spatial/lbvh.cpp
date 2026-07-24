@@ -14,6 +14,8 @@
 #include <utility>
 #include <vector>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 namespace morsehgp3d::spatial {
 namespace {
 
@@ -28,17 +30,30 @@ constexpr std::uint64_t maximum_morton_coordinate = morton_grid_size - 1U;
   return cloud.point(point_id).exact().coordinate(axis);
 }
 
+[[nodiscard]] std::uint64_t point_coordinate_bits(
+    const CanonicalPointCloud& cloud,
+    PointId point_id,
+    std::size_t axis) {
+  return cloud.point(point_id).canonical_input_bits()[axis];
+}
+
+[[nodiscard]] std::uint64_t binary64_order_key(
+    std::uint64_t bits) noexcept {
+  constexpr std::uint64_t sign_bit = std::uint64_t{1} << 63U;
+  return (bits & sign_bit) != 0U ? ~bits : bits ^ sign_bit;
+}
+
 [[nodiscard]] PointId lower_witness(
     const CanonicalPointCloud& cloud,
     PointId left,
     PointId right,
     std::size_t axis) {
-  const exact::ExactRational left_coordinate =
-      point_coordinate(cloud, left, axis);
-  const exact::ExactRational right_coordinate =
-      point_coordinate(cloud, right, axis);
-  if (right_coordinate < left_coordinate ||
-      (right_coordinate == left_coordinate && right < left)) {
+  const std::uint64_t left_key = binary64_order_key(
+      point_coordinate_bits(cloud, left, axis));
+  const std::uint64_t right_key = binary64_order_key(
+      point_coordinate_bits(cloud, right, axis));
+  if (right_key < left_key ||
+      (right_key == left_key && right < left)) {
     return right;
   }
   return left;
@@ -49,39 +64,15 @@ constexpr std::uint64_t maximum_morton_coordinate = morton_grid_size - 1U;
     PointId left,
     PointId right,
     std::size_t axis) {
-  const exact::ExactRational left_coordinate =
-      point_coordinate(cloud, left, axis);
-  const exact::ExactRational right_coordinate =
-      point_coordinate(cloud, right, axis);
-  if (right_coordinate > left_coordinate ||
-      (right_coordinate == left_coordinate && right < left)) {
+  const std::uint64_t left_key = binary64_order_key(
+      point_coordinate_bits(cloud, left, axis));
+  const std::uint64_t right_key = binary64_order_key(
+      point_coordinate_bits(cloud, right, axis));
+  if (right_key > left_key ||
+      (right_key == left_key && right < left)) {
     return right;
   }
   return left;
-}
-
-[[nodiscard]] std::uint64_t quantized_coordinate(
-    const exact::ExactRational& coordinate,
-    const exact::ExactRational& lower,
-    const exact::ExactRational& upper) {
-  if (lower == upper) {
-    return 0U;
-  }
-  if (coordinate < lower || coordinate > upper) {
-    throw std::logic_error("a Morton coordinate lies outside the global AABB");
-  }
-  const exact::ExactRational ratio =
-      (coordinate - lower) / (upper - lower);
-  const exact::BigInt scaled_numerator =
-      ratio.numerator() * morton_grid_size;
-  const exact::BigInt bin = scaled_numerator / ratio.denominator();
-  if (bin < 0 || bin > morton_grid_size) {
-    throw std::logic_error("an exact Morton bin lies outside its grid");
-  }
-  if (bin == morton_grid_size) {
-    return maximum_morton_coordinate;
-  }
-  return bin.convert_to<std::uint64_t>();
 }
 
 [[nodiscard]] std::uint64_t interleaved_morton_code(
@@ -105,6 +96,339 @@ constexpr std::uint64_t maximum_morton_coordinate = morton_grid_size - 1U;
     return left.morton_code < right.morton_code;
   }
   return left.point_id < right.point_id;
+}
+
+struct ExactMortonFrame {
+  ExactPointCloudAabb3 point_bounds;
+};
+
+[[nodiscard]] ExactMortonFrame exact_morton_frame(
+    const CanonicalPointCloud& cloud) {
+  if (cloud.size() == 0U) {
+    throw std::invalid_argument(
+        "an exact Morton frame requires a nonempty point cloud");
+  }
+  ExactMortonFrame frame;
+  frame.point_bounds.audit.point_count = cloud.size();
+  frame.point_bounds.audit.exact_coordinate_evaluation_count =
+      static_cast<std::uint64_t>(cloud.size()) * 3U;
+  frame.point_bounds.audit.exact_extremum_comparison_count =
+      static_cast<std::uint64_t>(cloud.size() - 1U) * 6U;
+  const std::array<std::uint64_t, 3> first_bits =
+      cloud.point(PointId{0}).canonical_input_bits();
+  frame.point_bounds.bounds.lower_binary64_bits = first_bits;
+  frame.point_bounds.bounds.upper_binary64_bits = first_bits;
+  frame.point_bounds.lower_witness_point_ids.fill(PointId{0});
+  frame.point_bounds.upper_witness_point_ids.fill(PointId{0});
+  for (std::size_t point_index = 1U;
+       point_index < cloud.size();
+       ++point_index) {
+    const PointId point_id = static_cast<PointId>(point_index);
+    const std::array<std::uint64_t, 3> bits =
+        cloud.point(point_id).canonical_input_bits();
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      if (binary64_order_key(bits[axis]) <
+          binary64_order_key(
+              frame.point_bounds.bounds
+                  .lower_binary64_bits[axis])) {
+        frame.point_bounds.bounds.lower_binary64_bits[axis] =
+            bits[axis];
+        frame.point_bounds.lower_witness_point_ids[axis] =
+            point_id;
+      }
+      if (binary64_order_key(bits[axis]) >
+          binary64_order_key(
+              frame.point_bounds.bounds
+                  .upper_binary64_bits[axis])) {
+        frame.point_bounds.bounds.upper_binary64_bits[axis] =
+            bits[axis];
+        frame.point_bounds.upper_witness_point_ids[axis] =
+            point_id;
+      }
+    }
+  }
+  return frame;
+}
+
+struct SignedBinary64Dyadic {
+  std::int64_t significand{};
+  int exponent{};
+};
+
+[[nodiscard]] SignedBinary64Dyadic decode_binary64_dyadic(
+    std::uint64_t bits) {
+  constexpr std::uint64_t fraction_mask =
+      (std::uint64_t{1} << 52U) - 1U;
+  constexpr std::uint64_t exponent_mask = 0x7ffU;
+  const std::uint64_t exponent_bits =
+      (bits >> 52U) & exponent_mask;
+  const std::uint64_t fraction = bits & fraction_mask;
+  std::uint64_t magnitude = fraction;
+  int exponent = -1074;
+  if (exponent_bits != 0U) {
+    if (exponent_bits == exponent_mask) {
+      throw std::invalid_argument(
+          "a Morton snapshot coordinate is not finite");
+    }
+    magnitude |= std::uint64_t{1} << 52U;
+    exponent = static_cast<int>(exponent_bits) - 1075;
+  }
+  std::int64_t significand =
+      static_cast<std::int64_t>(magnitude);
+  if ((bits >> 63U) != 0U) {
+    significand = -significand;
+  }
+  return {significand, exponent};
+}
+
+template <typename Integer>
+[[nodiscard]] Integer aligned_significand(
+    const SignedBinary64Dyadic& value,
+    int minimum_exponent) {
+  Integer aligned{value.significand};
+  if (value.significand != 0) {
+    aligned <<= static_cast<unsigned int>(
+        value.exponent - minimum_exponent);
+  }
+  return aligned;
+}
+
+template <typename Integer>
+[[nodiscard]] bool certify_quantized_inequality(
+    const SignedBinary64Dyadic& lower,
+    const SignedBinary64Dyadic& coordinate,
+    const SignedBinary64Dyadic& upper,
+    int minimum_exponent,
+    std::uint64_t quantized) {
+  const Integer lower_integer =
+      aligned_significand<Integer>(lower, minimum_exponent);
+  const Integer coordinate_integer =
+      aligned_significand<Integer>(coordinate, minimum_exponent);
+  const Integer upper_integer =
+      aligned_significand<Integer>(upper, minimum_exponent);
+  const Integer extent = upper_integer - lower_integer;
+  const Integer delta = coordinate_integer - lower_integer;
+  const Integer scaled_delta =
+      Integer{morton_grid_size} * delta;
+  return Integer{quantized} * extent <= scaled_delta &&
+         scaled_delta <
+             Integer{quantized + 1U} * extent;
+}
+
+template <typename Integer>
+[[nodiscard]] std::uint64_t quantized_floor(
+    const SignedBinary64Dyadic& lower,
+    const SignedBinary64Dyadic& coordinate,
+    const SignedBinary64Dyadic& upper,
+    int minimum_exponent) {
+  const Integer lower_integer =
+      aligned_significand<Integer>(lower, minimum_exponent);
+  const Integer coordinate_integer =
+      aligned_significand<Integer>(coordinate, minimum_exponent);
+  const Integer upper_integer =
+      aligned_significand<Integer>(upper, minimum_exponent);
+  const Integer extent = upper_integer - lower_integer;
+  const Integer delta = coordinate_integer - lower_integer;
+  const Integer quotient =
+      (Integer{morton_grid_size} * delta) / extent;
+  return quotient.template convert_to<std::uint64_t>();
+}
+
+[[nodiscard]] std::uint64_t quantized_coordinate_from_bits(
+    std::uint64_t coordinate_bits,
+    std::uint64_t lower_bits,
+    std::uint64_t upper_bits) {
+  if (binary64_order_key(coordinate_bits) <
+          binary64_order_key(lower_bits) ||
+      binary64_order_key(coordinate_bits) >
+          binary64_order_key(upper_bits)) {
+    throw std::logic_error(
+        "a Morton coordinate lies outside the exact global AABB");
+  }
+  if (lower_bits == upper_bits) {
+    return 0U;
+  }
+  if (coordinate_bits == upper_bits) {
+    return maximum_morton_coordinate;
+  }
+
+  const SignedBinary64Dyadic lower =
+      decode_binary64_dyadic(lower_bits);
+  const SignedBinary64Dyadic coordinate =
+      decode_binary64_dyadic(coordinate_bits);
+  const SignedBinary64Dyadic upper =
+      decode_binary64_dyadic(upper_bits);
+  int minimum_exponent = 0;
+  int maximum_exponent = 0;
+  bool exponent_initialized = false;
+  for (const SignedBinary64Dyadic value :
+       {lower, coordinate, upper}) {
+    if (value.significand == 0) {
+      continue;
+    }
+    if (!exponent_initialized) {
+      minimum_exponent = value.exponent;
+      maximum_exponent = value.exponent;
+      exponent_initialized = true;
+    } else {
+      minimum_exponent =
+          std::min(minimum_exponent, value.exponent);
+      maximum_exponent =
+          std::max(maximum_exponent, value.exponent);
+    }
+  }
+  if (!exponent_initialized) {
+    throw std::logic_error(
+        "a nondegenerate Morton interval has no dyadic exponent");
+  }
+  std::uint64_t quantized = 0U;
+  if (maximum_exponent - minimum_exponent <= 50) {
+    quantized = quantized_floor<
+        boost::multiprecision::int128_t>(
+        lower, coordinate, upper, minimum_exponent);
+  } else {
+    quantized = quantized_floor<exact::BigInt>(
+        lower, coordinate, upper, minimum_exponent);
+  }
+  if (quantized > maximum_morton_coordinate) {
+    throw std::logic_error(
+        "an exact Morton bin lies outside its grid");
+  }
+  return quantized;
+}
+
+[[nodiscard]] std::uint64_t exact_morton_code(
+    const CanonicalPointCloud& cloud,
+    PointId point_id,
+    const ExactMortonFrame& frame) {
+  const std::array<std::uint64_t, 3> coordinate_bits =
+      cloud.point(point_id).canonical_input_bits();
+  std::array<std::uint64_t, 3> quantized{};
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    quantized[axis] = quantized_coordinate_from_bits(
+        coordinate_bits[axis],
+        frame.point_bounds.bounds.lower_binary64_bits[axis],
+        frame.point_bounds.bounds.upper_binary64_bits[axis]);
+  }
+  return interleaved_morton_code(quantized);
+}
+
+[[nodiscard]] bool certify_quantized_coordinate(
+    std::uint64_t coordinate_bits,
+    std::uint64_t lower_bits,
+    std::uint64_t upper_bits,
+    std::uint64_t quantized) {
+  if (quantized > maximum_morton_coordinate ||
+      binary64_order_key(coordinate_bits) <
+          binary64_order_key(lower_bits) ||
+      binary64_order_key(coordinate_bits) >
+          binary64_order_key(upper_bits)) {
+    return false;
+  }
+  if (lower_bits == upper_bits) {
+    return coordinate_bits == lower_bits && quantized == 0U;
+  }
+  if (coordinate_bits == upper_bits) {
+    return quantized == maximum_morton_coordinate;
+  }
+
+  const SignedBinary64Dyadic lower =
+      decode_binary64_dyadic(lower_bits);
+  const SignedBinary64Dyadic coordinate =
+      decode_binary64_dyadic(coordinate_bits);
+  const SignedBinary64Dyadic upper =
+      decode_binary64_dyadic(upper_bits);
+  int minimum_exponent = 0;
+  int maximum_exponent = 0;
+  bool exponent_initialized = false;
+  for (const SignedBinary64Dyadic value :
+       {lower, coordinate, upper}) {
+    if (value.significand == 0) {
+      continue;
+    }
+    if (!exponent_initialized) {
+      minimum_exponent = value.exponent;
+      maximum_exponent = value.exponent;
+      exponent_initialized = true;
+    } else {
+      minimum_exponent =
+          std::min(minimum_exponent, value.exponent);
+      maximum_exponent =
+          std::max(maximum_exponent, value.exponent);
+    }
+  }
+  if (!exponent_initialized) {
+    return false;
+  }
+  if (maximum_exponent - minimum_exponent <= 50) {
+    return certify_quantized_inequality<
+        boost::multiprecision::int128_t>(
+        lower,
+        coordinate,
+        upper,
+        minimum_exponent,
+        quantized);
+  }
+  return certify_quantized_inequality<exact::BigInt>(
+      lower,
+      coordinate,
+      upper,
+      minimum_exponent,
+      quantized);
+}
+
+[[nodiscard]] std::array<std::uint64_t, 3>
+deinterleaved_morton_coordinates(std::uint64_t code) {
+  std::array<std::uint64_t, 3> coordinates{};
+  for (std::size_t bit = 0U;
+       bit < MortonLbvhIndex::morton_bits_per_axis;
+       ++bit) {
+    const std::size_t input_bit = 3U * bit;
+    coordinates[0] |=
+        ((code >> (input_bit + 2U)) & 1U) << bit;
+    coordinates[1] |=
+        ((code >> (input_bit + 1U)) & 1U) << bit;
+    coordinates[2] |=
+        ((code >> input_bit) & 1U) << bit;
+  }
+  return coordinates;
+}
+
+[[nodiscard]] bool certify_morton_code(
+    const CanonicalPointCloud& cloud,
+    PointId point_id,
+    std::uint64_t code,
+    const ExactMortonFrame& frame) {
+  if ((code >> 63U) != 0U) {
+    return false;
+  }
+  const std::array<std::uint64_t, 3> quantized =
+      deinterleaved_morton_coordinates(code);
+  const std::array<std::uint64_t, 3> coordinate_bits =
+      cloud.point(point_id).canonical_input_bits();
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    if (!certify_quantized_coordinate(
+            coordinate_bits[axis],
+            frame.point_bounds.bounds.lower_binary64_bits[axis],
+            frame.point_bounds.bounds.upper_binary64_bits[axis],
+            quantized[axis])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+[[nodiscard]] std::size_t checked_snapshot_index(
+    std::uint64_t value,
+    const char* role) {
+  if constexpr (
+      std::numeric_limits<std::uint64_t>::max() >
+      std::numeric_limits<std::size_t>::max()) {
+    if (value > std::numeric_limits<std::size_t>::max()) {
+      throw std::invalid_argument(role);
+    }
+  }
+  return static_cast<std::size_t>(value);
 }
 
 struct NodeQueueEntry {
@@ -174,33 +498,16 @@ MortonLbvhIndex MortonLbvhIndex::build(const CanonicalPointCloud& cloud) {
   index.leaves_.reserve(point_count);
   index.leaf_position_by_point_id_.assign(point_count, invalid_node_index);
 
-  const ExactPointCloudAabb3 exact_point_bounds =
-      build_exact_point_cloud_aabb(cloud);
-  const std::array<PointId, 3>& lower_point_ids =
-      exact_point_bounds.lower_witness_point_ids;
-  const std::array<PointId, 3>& upper_point_ids =
-      exact_point_bounds.upper_witness_point_ids;
-
-  std::array<exact::ExactRational, 3> lower_coordinates{};
-  std::array<exact::ExactRational, 3> upper_coordinates{};
-  for (std::size_t axis = 0U; axis < 3U; ++axis) {
-    lower_coordinates[axis] =
-        point_coordinate(cloud, lower_point_ids[axis], axis);
-    upper_coordinates[axis] =
-        point_coordinate(cloud, upper_point_ids[axis], axis);
-  }
+  const ExactMortonFrame frame = exact_morton_frame(cloud);
+  const ExactPointCloudAabb3& exact_point_bounds =
+      frame.point_bounds;
 
   for (std::size_t point_index = 0U; point_index < point_count; ++point_index) {
     const PointId point_id = static_cast<PointId>(point_index);
-    std::array<std::uint64_t, 3> quantized{};
-    for (std::size_t axis = 0U; axis < 3U; ++axis) {
-      quantized[axis] = quantized_coordinate(
-          point_coordinate(cloud, point_id, axis),
-          lower_coordinates[axis],
-          upper_coordinates[axis]);
-    }
     index.leaves_.push_back(
-        MortonLeafRecord{interleaved_morton_code(quantized), point_id});
+        MortonLeafRecord{
+            exact_morton_code(cloud, point_id, frame),
+            point_id});
   }
   std::sort(index.leaves_.begin(), index.leaves_.end(), morton_leaf_less);
 
@@ -248,6 +555,275 @@ MortonLbvhIndex MortonLbvhIndex::build(const CanonicalPointCloud& cloud) {
   }
   index.root_aabb_ = exact_point_bounds.bounds;
   index.validate_structure(cloud);
+  index.structure_complete_ = true;
+  return index;
+}
+
+MortonLbvhIndex MortonLbvhIndex::import_certified_snapshot(
+    const CanonicalPointCloud& cloud,
+    const MortonLbvhSnapshot& snapshot) {
+  const std::size_t point_count = cloud.size();
+  if (point_count == 0U) {
+    throw std::invalid_argument(
+        "a Morton LBVH snapshot requires a nonempty point cloud");
+  }
+  constexpr std::size_t maximum_size =
+      std::numeric_limits<std::size_t>::max();
+  if (point_count > maximum_size / 2U + 1U) {
+    throw std::length_error(
+        "the Morton LBVH snapshot node count overflows size_t");
+  }
+  const std::size_t expected_node_count = point_count * 2U - 1U;
+  const std::uint64_t expected_point_count =
+      static_cast<std::uint64_t>(point_count);
+  const std::uint64_t expected_root_index =
+      static_cast<std::uint64_t>(expected_node_count - 1U);
+  if (snapshot.schema_version !=
+          morton_lbvh_snapshot_schema_version ||
+      snapshot.morton_bits_per_axis !=
+          morton_lbvh_snapshot_morton_bits_per_axis ||
+      snapshot.point_count != expected_point_count ||
+      snapshot.leaves.size() != point_count ||
+      snapshot.nodes.size() != expected_node_count ||
+      snapshot.root_node_index != expected_root_index) {
+    throw std::invalid_argument(
+        "a Morton LBVH snapshot has an invalid identity or size");
+  }
+
+  const ExactMortonFrame frame = exact_morton_frame(cloud);
+  if (snapshot.root_aabb != frame.point_bounds.bounds) {
+    throw std::invalid_argument(
+        "a Morton LBVH snapshot has a wrong exact root AABB");
+  }
+
+  MortonLbvhIndex index;
+  index.point_count_ = point_count;
+  index.leaves_ = snapshot.leaves;
+  index.leaf_position_by_point_id_.assign(
+      point_count, invalid_node_index);
+  for (std::size_t position = 0U;
+       position < point_count;
+       ++position) {
+    const MortonLeafRecord& leaf = index.leaves_[position];
+    const std::size_t point_index =
+        checked_snapshot_index(
+            leaf.point_id,
+            "a Morton LBVH snapshot PointId is not addressable");
+    if (point_index >= point_count ||
+        index.leaf_position_by_point_id_[point_index] !=
+            invalid_node_index) {
+      throw std::invalid_argument(
+          "a Morton LBVH snapshot is not a PointId permutation");
+    }
+    if (!certify_morton_code(
+            cloud, leaf.point_id, leaf.morton_code, frame)) {
+      throw std::invalid_argument(
+          "a Morton LBVH snapshot has an uncertified Morton code");
+    }
+    if (position != 0U &&
+        !morton_leaf_less(index.leaves_[position - 1U], leaf)) {
+      throw std::invalid_argument(
+          "a Morton LBVH snapshot is not ordered by Morton code and PointId");
+    }
+    index.leaf_position_by_point_id_[point_index] = position;
+  }
+
+  std::size_t collision_group_count = 0U;
+  std::size_t maximum_collision_size = 0U;
+  std::size_t group_begin = 0U;
+  while (group_begin < point_count) {
+    std::size_t group_end = group_begin + 1U;
+    while (group_end < point_count &&
+           index.leaves_[group_end].morton_code ==
+               index.leaves_[group_begin].morton_code) {
+      ++group_end;
+    }
+    const std::size_t group_size = group_end - group_begin;
+    if (group_size > 1U) {
+      ++collision_group_count;
+      maximum_collision_size =
+          std::max(maximum_collision_size, group_size);
+    }
+    group_begin = group_end;
+  }
+
+  index.nodes_.resize(expected_node_count);
+  std::vector<unsigned char> node_seen(expected_node_count, 0U);
+  std::size_t next_postorder_index = 0U;
+  std::size_t observed_maximum_depth = 0U;
+  const auto certify_node =
+      [&cloud,
+       &snapshot,
+       &node_seen,
+       &next_postorder_index,
+       &observed_maximum_depth,
+       &index](
+          auto&& self,
+          std::size_t node_index,
+          std::size_t expected_begin,
+          std::size_t expected_end,
+          std::size_t depth) -> void {
+    if (node_index >= snapshot.nodes.size() ||
+        node_seen[node_index] != 0U) {
+      throw std::invalid_argument(
+          "a Morton LBVH snapshot has a repeated or cyclic node");
+    }
+    node_seen[node_index] = 1U;
+    observed_maximum_depth =
+        std::max(observed_maximum_depth, depth);
+    const MortonLbvhSnapshotNode& proposed =
+        snapshot.nodes[node_index];
+    const std::size_t begin = checked_snapshot_index(
+        proposed.leaf_begin,
+        "a Morton LBVH snapshot range is not addressable");
+    const std::size_t end = checked_snapshot_index(
+        proposed.leaf_end,
+        "a Morton LBVH snapshot range is not addressable");
+    if (begin != expected_begin || end != expected_end ||
+        begin >= end || end > index.leaves_.size()) {
+      throw std::invalid_argument(
+          "a Morton LBVH snapshot node has a wrong leaf range");
+    }
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      if (proposed.lower_point_ids[axis] >= index.point_count_ ||
+          proposed.upper_point_ids[axis] >= index.point_count_) {
+        throw std::invalid_argument(
+            "a Morton LBVH snapshot AABB witness is outside the cloud");
+      }
+    }
+
+    Node& node = index.nodes_[node_index];
+    node.lower_point_ids = proposed.lower_point_ids;
+    node.upper_point_ids = proposed.upper_point_ids;
+    node.leaf_begin = begin;
+    node.leaf_end = end;
+    if (end - begin == 1U) {
+      if (proposed.left_child !=
+              morton_lbvh_snapshot_invalid_node_index ||
+          proposed.right_child !=
+              morton_lbvh_snapshot_invalid_node_index) {
+        throw std::invalid_argument(
+            "a Morton LBVH snapshot leaf has child indices");
+      }
+      const PointId point_id = index.leaves_[begin].point_id;
+      for (std::size_t axis = 0U; axis < 3U; ++axis) {
+        if (proposed.lower_point_ids[axis] != point_id ||
+            proposed.upper_point_ids[axis] != point_id) {
+          throw std::invalid_argument(
+              "a Morton LBVH snapshot leaf has a wrong AABB witness");
+        }
+      }
+    } else {
+      if (proposed.left_child ==
+              morton_lbvh_snapshot_invalid_node_index ||
+          proposed.right_child ==
+              morton_lbvh_snapshot_invalid_node_index) {
+        throw std::invalid_argument(
+            "a Morton LBVH snapshot internal node lacks topology");
+      }
+      const std::size_t left_child = checked_snapshot_index(
+          proposed.left_child,
+          "a Morton LBVH snapshot left child is not addressable");
+      const std::size_t right_child = checked_snapshot_index(
+          proposed.right_child,
+          "a Morton LBVH snapshot right child is not addressable");
+      const std::size_t exact_split =
+          index.find_split(begin, end);
+      if (left_child >= node_index ||
+          right_child >= node_index) {
+        throw std::invalid_argument(
+            "a Morton LBVH snapshot has a wrong CPU radix split");
+      }
+      self(
+          self,
+          left_child,
+          begin,
+          exact_split,
+          depth + 1U);
+      self(
+          self,
+          right_child,
+          exact_split,
+          end,
+          depth + 1U);
+      const Node& left = index.nodes_[left_child];
+      const Node& right = index.nodes_[right_child];
+      node.left_child = left_child;
+      node.right_child = right_child;
+      for (std::size_t axis = 0U; axis < 3U; ++axis) {
+        const PointId expected_lower = lower_witness(
+            cloud,
+            left.lower_point_ids[axis],
+            right.lower_point_ids[axis],
+            axis);
+        const PointId expected_upper = upper_witness(
+            cloud,
+            left.upper_point_ids[axis],
+            right.upper_point_ids[axis],
+            axis);
+        if (proposed.lower_point_ids[axis] != expected_lower ||
+            proposed.upper_point_ids[axis] != expected_upper) {
+          throw std::invalid_argument(
+              "a Morton LBVH snapshot has a wrong exact AABB witness");
+        }
+      }
+    }
+    if (node_index != next_postorder_index) {
+      throw std::invalid_argument(
+          "a Morton LBVH snapshot is not in strict postorder");
+    }
+    ++next_postorder_index;
+  };
+
+  const std::size_t root_index =
+      checked_snapshot_index(
+          snapshot.root_node_index,
+          "a Morton LBVH snapshot root is not addressable");
+  certify_node(
+      certify_node,
+      root_index,
+      0U,
+      point_count,
+      0U);
+  if (next_postorder_index != expected_node_count ||
+      std::find(node_seen.begin(), node_seen.end(), 0U) !=
+          node_seen.end()) {
+    throw std::invalid_argument(
+        "a Morton LBVH snapshot has unreachable nodes");
+  }
+  const Node& root = index.nodes_[root_index];
+  if (root.lower_point_ids !=
+          frame.point_bounds.lower_witness_point_ids ||
+      root.upper_point_ids !=
+          frame.point_bounds.upper_witness_point_ids) {
+    throw std::invalid_argument(
+        "a Morton LBVH snapshot root has wrong extremum witnesses");
+  }
+
+  const MortonLbvhSnapshotCounters expected_counters{
+      expected_point_count,
+      static_cast<std::uint64_t>(expected_node_count),
+      static_cast<std::uint64_t>(observed_maximum_depth),
+      static_cast<std::uint64_t>(collision_group_count),
+      static_cast<std::uint64_t>(maximum_collision_size)};
+  if (snapshot.proposed_counters != expected_counters) {
+    throw std::invalid_argument(
+        "a Morton LBVH snapshot has wrong proposed counters");
+  }
+
+  index.cloud_identity_ = cloud.identity_;
+  index.root_index_ = root_index;
+  index.build_counters_ = {
+      point_count,
+      expected_node_count,
+      observed_maximum_depth,
+      collision_group_count,
+      maximum_collision_size};
+  index.root_aabb_ = snapshot.root_aabb;
+  // The import traversal above is the single exhaustive validator: it
+  // certifies every leaf, node, range, split, witness, counter and postorder
+  // index before the ready bit is published.  Calling validate_structure
+  // here would repeat the complete O(n) traversal.
   index.structure_complete_ = true;
   return index;
 }

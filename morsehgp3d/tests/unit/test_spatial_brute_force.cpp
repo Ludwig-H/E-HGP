@@ -287,7 +287,7 @@ void test_signed_zero_duplicate_rejection() {
       point(-0.0, 1.0, 2.0)};
   const CanonicalPointCloud canonical_zero = canonical_cloud(negative_zero_input);
   check(
-      canonical_zero.point(PointId{0}).canonical_input_bits()[0] == 0U,
+      canonical_zero.point(PointId{0}).input_bits()[0] == 0U,
       "a retained negative zero is stored as canonical positive zero");
 
   const std::array<CertifiedPoint3, 0> empty_input{};
@@ -329,6 +329,38 @@ void test_permutation_invariant_canonicalization_and_provenance() {
           second.source_index(PointId{1}) == 0U &&
           second.source_index(PointId{2}) == 1U,
       "the second permutation preserves exact source provenance");
+}
+
+void test_canonicalization_preserves_extreme_exact_values() {
+  const double finite_max = std::numeric_limits<double>::max();
+  const double denormal_min = std::numeric_limits<double>::denorm_min();
+  const std::array<CertifiedPoint3, 5> input{
+      point(finite_max, 1.0, 2.0),
+      point(-0.0, 1.0, 2.0),
+      point(-denormal_min, 1.0, 2.0),
+      point(-finite_max, 1.0, 2.0),
+      point(denormal_min, 1.0, 2.0)};
+  const std::array<std::size_t, 5> expected_source_indices{3U, 2U, 1U, 4U, 0U};
+  const std::array<double, 5> expected_x{
+      -finite_max, -denormal_min, 0.0, denormal_min, finite_max};
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+
+  for (PointId id = 0U; id < PointId{5}; ++id) {
+    const std::size_t index = static_cast<std::size_t>(id);
+    const std::size_t source_index = expected_source_indices[index];
+    check(
+        cloud.source_index(id) == source_index,
+        "canonical total order preserves extreme-value provenance");
+    check(
+        cloud.point(id).binary64_coordinate(0U) == expected_x[index],
+        "canonical total order spans both sign branches and finite extremes");
+    check(
+        cloud.point(id).exact() == input[source_index].exact(),
+        "canonicalization preserves the already-certified exact coordinate");
+    check(
+        cloud.point(id).input_bits() == cloud.point(id).canonical_input_bits(),
+        "canonicalization stores canonical binary64 words");
+  }
 }
 
 void test_one_ulp_distance_order() {
@@ -752,6 +784,7 @@ int main() {
   test_all_six_axis_cominimizers();
   test_signed_zero_duplicate_rejection();
   test_permutation_invariant_canonicalization_and_provenance();
+  test_canonicalization_preserves_extreme_exact_values();
   test_one_ulp_distance_order();
   test_extreme_finite_distances();
   test_exclusion_contract_and_global_ball_invariant();

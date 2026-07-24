@@ -1263,6 +1263,16 @@ La préparation exacte 14G consomme immédiatement ce transcript. Si elle est co
 
 Cette couture est `external_bounded_proposal_plus_reference_cpu / hgp_reduced / proposal_only_then_certified`, `architecture_only`, avec `public_status=not_claimed`. Elle n'instancie encore aucun adaptateur vers le vrai contexte CUDA 14J/14K. Les centres exacts préparés pour le producteur ne sont pas transmis à 10.5c, qui reconstruit sa miniball au point d'usage. Aucun protocole `warm_e2e`, SLO 50 k, run 10 M+, résultat public, facette ou coface globale, incidence, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur n'est ajouté.
 
+### Constructeur Morton/LBVH device 14M
+
+14M implémente la construction spatiale linéaire qui manquait au chemin `warm_e2e`. Le GPU propose les $3n$ bins Morton avec arrondis dirigés; seul un axe ambigu revient au quotient dyadique exact CPU. Un tri CUB stable des codes, initialisé par les `PointId` croissants, produit exactement l'ordre `(Morton, PointId)`. La topologie emploie le même `find_split` que le CPU, y compris la division au milieu de toute plage de collisions, et place directement la racine d'une plage de $m$ feuilles à $B+2m-2$ dans le postordre. Une réduction par niveaux inverses calcule les témoins AABB avec départage au plus petit `PointId`.
+
+Le snapshot de feuilles et nœuds ne devient jamais une autorité par transfert. L'import CPU recertifie en un passage la permutation, les $3n$ inégalités dyadiques, chaque split, le postordre, les AABB, la racine et les compteurs. Pour une capacité $C\leq\mathrm{INT\_MAX}$, la capacité device exacte vaut $308C-56+T_{\mathrm{CUB}}(C)$ octets et le snapshot actif $176n-80$ octets. La profondeur est au plus $63+\lceil\log_2 C\rceil$ et le coût conservatif de topologie est $O(n\log n)$.
+
+La voie commune de canonicalisation réduit en parallèle son record de tri de 56 à 32 octets et évite les constructions rationnelles pour les extrema et pour la majorité des bins dyadiques; le repli `BigInt` demeure exact. Ces changements ne matérialisent que des tableaux linéaires. Ils ne créent aucune facette, coface, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur.
+
+Le faux launcher hôte et l'import certifié sont validés. La source CUDA doit encore être compilée par NVCC 12.9 et exécutée sur G4 avant de recevoir `cuda_builder_qualified=true` dans un artefact de validation. Le binaire associé est nommé `component_smoke` : une répétition à 50 k ou 10 M+ qualifie seulement ce constructeur spatial, jamais le p95 `warm_e2e`, les dix ordres, la hiérarchie matérialisée ou la porte de Phase 14.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;

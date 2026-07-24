@@ -2018,6 +2018,81 @@ if(MORSEHGP3D_ENABLE_CUDA)
   endif()
 
   add_library(
+    morsehgp3d_gpu_morton_lbvh_build
+    STATIC
+      src/cuda/phase14_morton_lbvh_build_internal.hpp
+      src/cuda/phase14_morton_lbvh_build.cu
+      src/gpu/morton_lbvh_build.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_morton_lbvh_build
+    ALIAS morsehgp3d_gpu_morton_lbvh_build
+  )
+  target_include_directories(
+    morsehgp3d_gpu_morton_lbvh_build
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_morton_lbvh_build
+    PUBLIC morsehgp3d::spatial
+    PRIVATE Threads::Threads
+  )
+  target_compile_features(
+    morsehgp3d_gpu_morton_lbvh_build PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(
+    morsehgp3d_gpu_morton_lbvh_build
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_morton_lbvh_build
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_morton_lbvh_build
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_morton_lbvh_build_component_smoke
+    src/tools/gpu_morton_lbvh_build_component_smoke.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_morton_lbvh_build_component_smoke
+    PRIVATE morsehgp3d::gpu_morton_lbvh_build
+  )
+  target_compile_definitions(
+    morsehgp3d_gpu_morton_lbvh_build_component_smoke
+    PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_morton_lbvh_build_component_smoke PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_morton_lbvh_build_component_smoke
+      PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wconversion
+        -Wsign-conversion
+        -Werror
+    )
+  endif()
+
+  add_library(
     morsehgp3d_gpu_direct_sparse_facet_top_k_proposal
     STATIC
       src/cuda/phase14_facet_top_k_proposal_internal.hpp

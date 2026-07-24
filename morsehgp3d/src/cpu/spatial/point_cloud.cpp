@@ -19,7 +19,6 @@ static_assert(
     exact::CanonicalSupportIds::maximum_point_id);
 
 struct CanonicalPointCandidate {
-  std::array<std::uint64_t, 3> bits;
   std::array<std::uint64_t, 3> order_keys;
   std::size_t source_index;
 };
@@ -28,7 +27,6 @@ struct CanonicalPointCandidate {
     const exact::CertifiedPoint3& point, std::size_t source_index) {
   const std::array<std::uint64_t, 3> bits = point.canonical_input_bits();
   return CanonicalPointCandidate{
-      bits,
       {
           exact::binary64_total_order_key(bits[0]),
           exact::binary64_total_order_key(bits[1]),
@@ -65,7 +63,9 @@ CanonicalPointCloud CanonicalPointCloud::rejecting_duplicates(
       });
 
   for (std::size_t index = 1; index < candidates.size(); ++index) {
-    if (candidates[index - 1U].bits == candidates[index].bits) {
+    // The total-order transform is injective on canonical finite binary64
+    // words, so equal key triples are exactly duplicate geometric points.
+    if (candidates[index - 1U].order_keys == candidates[index].order_keys) {
       throw std::invalid_argument(
           "a canonical point cloud cannot contain duplicate geometric points");
     }
@@ -76,7 +76,18 @@ CanonicalPointCloud CanonicalPointCloud::rejecting_duplicates(
   points.reserve(candidates.size());
   source_indices.reserve(candidates.size());
   for (const CanonicalPointCandidate& candidate : candidates) {
-    points.push_back(exact::CertifiedPoint3::from_binary64_bits(candidate.bits));
+    const exact::CertifiedPoint3& source_point =
+        input_points[candidate.source_index];
+    const std::array<std::uint64_t, 3> canonical_bits =
+        source_point.canonical_input_bits();
+    // Reuse the exact rationals already certified by the caller. Only a
+    // signed-zero input needs rebuilding so that the stored words become +0.
+    if (source_point.input_bits() == canonical_bits) {
+      points.push_back(source_point);
+    } else {
+      points.push_back(
+          exact::CertifiedPoint3::from_binary64_bits(canonical_bits));
+    }
     source_indices.push_back(candidate.source_index);
   }
 

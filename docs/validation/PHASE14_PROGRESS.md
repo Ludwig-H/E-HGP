@@ -118,9 +118,23 @@ La fixture active ferme exactement $A=12$, $D=Q=G=4$, $C=2$, deux chunks et $R=1
 
 14L n'est pas encore le raccord CUDA 14J/14K : ses deux callbacks sont une frontière générique et le test fournit un faux producteur hôte borné. Il ne mesure pas `warm_e2e`, ne qualifie ni la latence sous la seconde à 50 k points, ni la capacité 10 M+, et ne modifie aucun statut public. Il ne construit ni facette ou coface globale, ni incidence, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur.
 
+## Incrément 14M implémenté — constructeur Morton/LBVH device à import certifié
+
+14M remplace la dette du snapshot spatial construit récursivement sur CPU par une frontière `cuda_g4 / hgp_reduced / device_morton_lbvh_snapshot_import`. Une première passe propose les $3n$ coordonnées Morton par intervalles binary64 à arrondis dirigés; une borne inférieure et une borne supérieure de même partie entière certifient le bin, sinon ce seul axe est recalculé exactement sur l'hôte. L'import final ne croit aucune proposition : pour chaque axe et chaque feuille il recertifie directement l'inégalité dyadique $q(u-l)\leq2^{21}(x-l)<(q+1)(u-l)$, avec le cas $x=u$ fixé au bin $2^{21}-1$.
+
+Le device initialise les `PointId` dans leur ordre canonique, applique un radix sort CUB stable sur les 63 bits Morton, puis construit par frontières de niveaux le même `find_split` que la référence. Une collision complète est toujours divisée au milieu; le root d'une plage de $m$ feuilles commençant à l'offset postordre $B$ vaut $B+2m-2$. Cette formule rend le layout indépendant de l'ordre des atomiques de frontière. Les AABB sont réduites des niveaux profonds vers la racine par comparaison exacte des mots binary64 finis et départage au plus petit `PointId`. L'import CPU parcourt ensuite une seule fois toutes les feuilles et les $2n-1$ nœuds, recertifie permutation, codes, splits, postordre, témoins, racine et compteurs, puis seulement publie l'index.
+
+Pour une capacité fixe $C$, les arènes device hors workspace CUB occupent exactement $308C-56$ octets; le total audité est donc $308C-56+T_{\mathrm{CUB}}(C)$. Le snapshot actif vaut $16n+80(2n-1)=176n-80$ octets, soit 1 759 999 920 octets à dix millions de points. La profondeur est au plus $63+\lceil\log_2 C\rceil$, et le travail de topologie reste conservativement $O(n\log n)$. La limite actuelle de CUB impose $C\leq\mathrm{INT\_MAX}$.
+
+Le chemin CPU commun a également été allégé : la canonicalisation trie des records de 32 octets au lieu de 56, l'AABB compare les clés d'ordre binary64 sans construire de rationnels et la quantification dyadique utilise un entier signé de 128 bits lorsque l'écart d'exposants est au plus 50, avec repli `BigInt` exact sinon. La réduction fixe du record de tri économise $24n$ octets, soit 240 Mo à dix millions de points, sans changer les `PointId`, les bits, les rationnels ou les provenances.
+
+Les tests hôte stricts comparent l'import au builder CPU et falsifient schéma, grille, permutation, bins, plages, enfants, postordre, témoins, profondeur et compteurs. Le faux launcher ne peut revendiquer CUDA; les capacités, soumissions de bibliothèque, kernels projet et synchronisations sont audités séparément. La source CUDA et le smoke de composant sont implémentés mais restent non qualifiés tant que NVCC 12.9 et une G4 réelle ne les ont pas compilés et exécutés. Ce smoke s'arrête à l'index certifié : il ne mesure ni les dix forêts à $K=10$, ni `warm_e2e`, et ne peut fermer le SLO ou la voie produit 10 M+.
+
+14M ne construit aucun catalogue global de facettes ou cofaces, aucune incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Ses seules populations sont des tableaux $O(n)$ de coordonnées, bins, couples Morton--`PointId`, frontières, nœuds et témoins. Le déploiement reste `architecture_only` et `public_status=not_claimed`.
+
 ## Priorités de développement
 
-1. fournir l'adaptateur réel entre le contexte CUDA 14J/14K et les callbacks 14L, puis formaliser son smoke dans un worker GCP gardé reproductible;
+1. qualifier 14M sur G4, puis fournir l'adaptateur réel entre les contextes CUDA 14M et 14J/14K et les callbacks 14L;
 2. étudier un réemploi recertifiable du centre exact par 10.5c au lieu de la seconde construction actuellement explicite;
 3. réutiliser les capacités restantes de scratch sans conserver de graphe entre lots;
 4. exploiter l'instrumentation `warm_e2e`, puis rendre les deltas, chunks et checkpoints durables avant toute campagne massive.

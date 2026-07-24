@@ -161,8 +161,12 @@ ExactPointCloudAabb3 build_exact_point_cloud_aabb(
       std::uint64_t{6},
       "the exact point-cloud extremum comparison count overflows uint64");
 
-  std::array<exact::ExactRational, 3> lower_coordinates{};
-  std::array<exact::ExactRational, 3> upper_coordinates{};
+  // On canonical finite binary64 words, binary64_total_order_key is an
+  // order embedding of the represented dyadic rationals.  The integer scan
+  // therefore certifies the same extrema without constructing 3n temporary
+  // rationals or performing multiprecision extremum comparisons.
+  std::array<std::uint64_t, 3> lower_order_keys{};
+  std::array<std::uint64_t, 3> upper_order_keys{};
   for (std::size_t point_index = 0U;
        point_index < point_count;
        ++point_index) {
@@ -170,23 +174,24 @@ ExactPointCloudAabb3 build_exact_point_cloud_aabb(
     const std::array<std::uint64_t, 3> bits =
         cloud.point(point_id).canonical_input_bits();
     for (std::size_t axis = 0U; axis < 3U; ++axis) {
-      const exact::ExactRational coordinate = exact_word(bits[axis]);
+      const std::uint64_t order_key =
+          exact::binary64_total_order_key(bits[axis]);
       if (point_index == 0U) {
-        lower_coordinates[axis] = coordinate;
-        upper_coordinates[axis] = coordinate;
+        lower_order_keys[axis] = order_key;
+        upper_order_keys[axis] = order_key;
         result.bounds.lower_binary64_bits[axis] = bits[axis];
         result.bounds.upper_binary64_bits[axis] = bits[axis];
         result.lower_witness_point_ids[axis] = point_id;
         result.upper_witness_point_ids[axis] = point_id;
         continue;
       }
-      if (coordinate < lower_coordinates[axis]) {
-        lower_coordinates[axis] = coordinate;
+      if (order_key < lower_order_keys[axis]) {
+        lower_order_keys[axis] = order_key;
         result.bounds.lower_binary64_bits[axis] = bits[axis];
         result.lower_witness_point_ids[axis] = point_id;
       }
-      if (coordinate > upper_coordinates[axis]) {
-        upper_coordinates[axis] = coordinate;
+      if (order_key > upper_order_keys[axis]) {
+        upper_order_keys[axis] = order_key;
         result.bounds.upper_binary64_bits[axis] = bits[axis];
         result.upper_witness_point_ids[axis] = point_id;
       }

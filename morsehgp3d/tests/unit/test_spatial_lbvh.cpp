@@ -34,6 +34,8 @@ using morsehgp3d::spatial::ExactLbvhTopKStopReason;
 using morsehgp3d::spatial::ExclusionSet;
 using morsehgp3d::spatial::LbvhTraversalOrder;
 using morsehgp3d::spatial::MortonLbvhIndex;
+using morsehgp3d::spatial::MortonLbvhSnapshot;
+using morsehgp3d::spatial::MortonLbvhSnapshotNode;
 using morsehgp3d::spatial::MortonLeafRecord;
 using morsehgp3d::spatial::PointId;
 using morsehgp3d::spatial::SpatialQueryMethod;
@@ -126,6 +128,134 @@ template <typename Range>
     const MortonLbvhIndex& index) {
   return std::vector<MortonLeafRecord>{
       index.leaves().begin(), index.leaves().end()};
+}
+
+[[nodiscard]] PointId snapshot_lower_witness(
+    const CanonicalPointCloud& cloud,
+    PointId left,
+    PointId right,
+    std::size_t axis) {
+  const auto left_coordinate =
+      cloud.point(left).exact().coordinate(axis);
+  const auto right_coordinate =
+      cloud.point(right).exact().coordinate(axis);
+  if (right_coordinate < left_coordinate ||
+      (right_coordinate == left_coordinate && right < left)) {
+    return right;
+  }
+  return left;
+}
+
+[[nodiscard]] PointId snapshot_upper_witness(
+    const CanonicalPointCloud& cloud,
+    PointId left,
+    PointId right,
+    std::size_t axis) {
+  const auto left_coordinate =
+      cloud.point(left).exact().coordinate(axis);
+  const auto right_coordinate =
+      cloud.point(right).exact().coordinate(axis);
+  if (right_coordinate > left_coordinate ||
+      (right_coordinate == left_coordinate && right < left)) {
+    return right;
+  }
+  return left;
+}
+
+[[nodiscard]] std::size_t snapshot_find_split(
+    std::span<const MortonLeafRecord> leaves,
+    std::size_t begin,
+    std::size_t end) {
+  if (begin + 1U >= end || end > leaves.size()) {
+    throw std::logic_error(
+        "a snapshot test split requires at least two leaves");
+  }
+  const std::uint64_t first_code = leaves[begin].morton_code;
+  const std::uint64_t last_code = leaves[end - 1U].morton_code;
+  if (first_code == last_code) {
+    return begin + (end - begin) / 2U;
+  }
+  const std::uint64_t difference = first_code ^ last_code;
+  const unsigned int highest_bit =
+      static_cast<unsigned int>(std::bit_width(difference) - 1);
+  const std::uint64_t mask = std::uint64_t{1} << highest_bit;
+  std::size_t low = begin + 1U;
+  std::size_t high = end;
+  while (low < high) {
+    const std::size_t middle = low + (high - low) / 2U;
+    if ((leaves[middle].morton_code & mask) == 0U) {
+      low = middle + 1U;
+    } else {
+      high = middle;
+    }
+  }
+  return low;
+}
+
+[[nodiscard]] std::size_t append_snapshot_node(
+    const CanonicalPointCloud& cloud,
+    std::span<const MortonLeafRecord> leaves,
+    std::size_t begin,
+    std::size_t end,
+    std::vector<MortonLbvhSnapshotNode>& nodes) {
+  MortonLbvhSnapshotNode node;
+  node.leaf_begin = static_cast<std::uint64_t>(begin);
+  node.leaf_end = static_cast<std::uint64_t>(end);
+  if (end - begin == 1U) {
+    node.lower_point_ids.fill(leaves[begin].point_id);
+    node.upper_point_ids.fill(leaves[begin].point_id);
+    nodes.push_back(node);
+    return nodes.size() - 1U;
+  }
+  const std::size_t split =
+      snapshot_find_split(leaves, begin, end);
+  const std::size_t left_child = append_snapshot_node(
+      cloud, leaves, begin, split, nodes);
+  const std::size_t right_child = append_snapshot_node(
+      cloud, leaves, split, end, nodes);
+  node.left_child = static_cast<std::uint64_t>(left_child);
+  node.right_child = static_cast<std::uint64_t>(right_child);
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    node.lower_point_ids[axis] = snapshot_lower_witness(
+        cloud,
+        nodes[left_child].lower_point_ids[axis],
+        nodes[right_child].lower_point_ids[axis],
+        axis);
+    node.upper_point_ids[axis] = snapshot_upper_witness(
+        cloud,
+        nodes[left_child].upper_point_ids[axis],
+        nodes[right_child].upper_point_ids[axis],
+        axis);
+  }
+  nodes.push_back(node);
+  return nodes.size() - 1U;
+}
+
+[[nodiscard]] MortonLbvhSnapshot snapshot_from_index(
+    const CanonicalPointCloud& cloud,
+    const MortonLbvhIndex& index) {
+  MortonLbvhSnapshot snapshot;
+  snapshot.point_count = static_cast<std::uint64_t>(cloud.size());
+  snapshot.root_aabb = index.root_aabb();
+  const auto& counters = index.build_counters();
+  snapshot.proposed_counters = {
+      static_cast<std::uint64_t>(counters.point_count),
+      static_cast<std::uint64_t>(counters.node_count),
+      static_cast<std::uint64_t>(counters.maximum_depth),
+      static_cast<std::uint64_t>(
+          counters.morton_collision_group_count),
+      static_cast<std::uint64_t>(
+          counters.maximum_morton_collision_size)};
+  snapshot.leaves = materialize_leaves(index);
+  snapshot.nodes.reserve(counters.node_count);
+  snapshot.root_node_index = static_cast<std::uint64_t>(
+      append_snapshot_node(
+          cloud,
+          snapshot.leaves,
+          0U,
+          snapshot.leaves.size(),
+          snapshot.nodes));
+  return snapshot;
 }
 
 [[nodiscard]] bool same_neighbors(
@@ -355,6 +485,65 @@ void check_ball_counters(
         *counters.minimum_strict_pruning_margin > ExactLevel{BigInt{0}},
         message + " records a strictly positive classification margin");
   }
+}
+
+void check_import_matches_build(
+    const CanonicalPointCloud& cloud,
+    const std::string& message) {
+  const MortonLbvhIndex built = MortonLbvhIndex::build(cloud);
+  const MortonLbvhSnapshot snapshot =
+      snapshot_from_index(cloud, built);
+  const MortonLbvhIndex imported =
+      MortonLbvhIndex::import_certified_snapshot(cloud, snapshot);
+  check(
+      imported.ready() && imported.validated_for(cloud),
+      message + " publishes a namespace-bound imported index");
+  check(
+      materialize_leaves(imported) == materialize_leaves(built) &&
+          imported.build_counters() == built.build_counters() &&
+          imported.root_aabb() == built.root_aabb(),
+      message + " exactly matches every public build artifact");
+
+  const ExclusionSet exclusions = empty_exclusions(cloud);
+  const std::size_t rank = std::min<std::size_t>(3U, cloud.size());
+  const TopKPartition built_top = lbvh_top_k(
+      built,
+      cloud,
+      origin(),
+      rank,
+      exclusions,
+      LbvhTraversalOrder::near_first);
+  const TopKPartition imported_top = lbvh_top_k(
+      imported,
+      cloud,
+      origin(),
+      rank,
+      exclusions,
+      LbvhTraversalOrder::near_first);
+  check_top_matches(
+      imported_top, built_top, message + " top-k");
+  check(
+      imported_top.query_counters() ==
+          built_top.query_counters(),
+      message + " reproduces the complete build traversal");
+  const ClosedBallPartition built_ball = lbvh_closed_ball(
+      built,
+      cloud,
+      origin(),
+      built_top.cutoff_squared_distance(),
+      LbvhTraversalOrder::far_first);
+  const ClosedBallPartition imported_ball = lbvh_closed_ball(
+      imported,
+      cloud,
+      origin(),
+      built_top.cutoff_squared_distance(),
+      LbvhTraversalOrder::far_first);
+  check_ball_matches(
+      imported_ball, built_ball, message + " closed ball");
+  check(
+      imported_ball.query_counters() ==
+          built_ball.query_counters(),
+      message + " reproduces the complete ball traversal");
 }
 
 void check_leaf_permutation_and_order(
@@ -1687,6 +1876,209 @@ void test_budgeted_top_k_baseline_proposal_union() {
       "the initial F-union-P heap retains every member of its exact cutoff shell");
 }
 
+void test_certified_snapshot_import_and_hostile_rejections() {
+  static_assert(sizeof(MortonLeafRecord) == 16U);
+  static_assert(sizeof(MortonLbvhSnapshotNode) == 80U);
+
+  const std::array<CertifiedPoint3, 1> singleton_input{
+      point(-0.0, 2.0, -3.0)};
+  const CanonicalPointCloud singleton =
+      canonical_cloud(singleton_input);
+  check_import_matches_build(
+      singleton, "the singleton snapshot import");
+
+  const double tiny = std::numeric_limits<double>::denorm_min();
+  const double maximum = std::numeric_limits<double>::max();
+  const std::array<CertifiedPoint3, 6> extreme_input{
+      point(-maximum, 2.0, -3.0),
+      point(-1.0, 2.0, -3.0),
+      point(-tiny, 2.0, -3.0),
+      point(0.0, 2.0, -3.0),
+      point(tiny, 2.0, -3.0),
+      point(maximum, 2.0, -3.0)};
+  const CanonicalPointCloud cloud = canonical_cloud(extreme_input);
+  check_import_matches_build(
+      cloud, "the extreme collision snapshot import");
+
+  const MortonLbvhIndex reference = MortonLbvhIndex::build(cloud);
+  const MortonLbvhSnapshot valid =
+      snapshot_from_index(cloud, reference);
+  const auto reject =
+      [&cloud](
+          MortonLbvhSnapshot corrupted,
+          const std::string& message) {
+        check_throws<std::invalid_argument>(
+            [&cloud, &corrupted] {
+              static_cast<void>(
+                  MortonLbvhIndex::import_certified_snapshot(
+                      cloud, corrupted));
+            },
+            message);
+      };
+
+  MortonLbvhSnapshot corrupted = valid;
+  ++corrupted.schema_version;
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects another schema");
+
+  corrupted = valid;
+  --corrupted.morton_bits_per_axis;
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects another Morton grid");
+
+  corrupted = valid;
+  --corrupted.point_count;
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects a wrong point count");
+
+  corrupted = valid;
+  corrupted.leaves.pop_back();
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects a missing leaf");
+
+  corrupted = valid;
+  corrupted.nodes.pop_back();
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects a missing node");
+
+  corrupted = valid;
+  corrupted.leaves.front().morton_code ^= 1U;
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects one corrupt exact Morton bin");
+
+  corrupted = valid;
+  corrupted.leaves[1U].point_id =
+      corrupted.leaves.front().point_id;
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects a repeated PointId");
+
+  corrupted = valid;
+  std::swap(corrupted.leaves[0U], corrupted.leaves[1U]);
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects noncanonical leaf order");
+
+  const std::size_t root_index =
+      static_cast<std::size_t>(valid.root_node_index);
+  const std::size_t root_left = static_cast<std::size_t>(
+      valid.nodes[root_index].left_child);
+
+  corrupted = valid;
+  ++corrupted.nodes[root_left].leaf_end;
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects a corrupt derived split range");
+
+  corrupted = valid;
+  corrupted.nodes[root_index].left_child =
+      corrupted.nodes[root_index].right_child;
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects a repeated child");
+
+  corrupted = valid;
+  corrupted.nodes[root_index].left_child =
+      corrupted.root_node_index;
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects a cyclic child");
+
+  corrupted = valid;
+  corrupted.nodes[root_index].lower_point_ids[0U] =
+      corrupted.nodes[root_index].upper_point_ids[0U];
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects a corrupt exact AABB witness");
+
+  const auto leaf_position = std::find_if(
+      valid.nodes.begin(),
+      valid.nodes.end(),
+      [](const MortonLbvhSnapshotNode& node) {
+        return node.is_leaf();
+      });
+  check(
+      leaf_position != valid.nodes.end(),
+      "the hostile snapshot fixture contains a leaf node");
+  if (leaf_position != valid.nodes.end()) {
+    corrupted = valid;
+    const std::size_t leaf_index = static_cast<std::size_t>(
+        leaf_position - valid.nodes.begin());
+    corrupted.nodes[leaf_index].left_child = 0U;
+    reject(
+        std::move(corrupted),
+        "snapshot import rejects a child on a leaf");
+  }
+
+  corrupted = valid;
+  std::swap(corrupted.nodes[0U], corrupted.nodes[1U]);
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects non-postorder node numbering");
+
+  corrupted = valid;
+  --corrupted.root_node_index;
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects a nonterminal root");
+
+  corrupted = valid;
+  corrupted.root_aabb.lower_binary64_bits[0U] ^= 1U;
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects a corrupt root AABB");
+
+  corrupted = valid;
+  ++corrupted.proposed_counters.maximum_depth;
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects a corrupt proposed depth");
+
+  corrupted = valid;
+  ++corrupted.proposed_counters.morton_collision_group_count;
+  reject(
+      std::move(corrupted),
+      "snapshot import rejects corrupt collision counters");
+
+  std::array<CertifiedPoint3, 6> changed_input = extreme_input;
+  changed_input[5U] = point(maximum / 2.0, 2.0, -3.0);
+  const CanonicalPointCloud changed_cloud =
+      canonical_cloud(changed_input);
+  check_throws<std::invalid_argument>(
+      [&changed_cloud, &valid] {
+        static_cast<void>(
+            MortonLbvhIndex::import_certified_snapshot(
+                changed_cloud, valid));
+      },
+      "snapshot import rejects another same-size cloud identity");
+
+  const ExclusionSet exclusions = empty_exclusions(cloud);
+  const TopKPartition after_rejections = lbvh_top_k(
+      reference,
+      cloud,
+      origin(),
+      3U,
+      exclusions,
+      LbvhTraversalOrder::near_first);
+  const TopKPartition fresh = lbvh_top_k(
+      MortonLbvhIndex::import_certified_snapshot(cloud, valid),
+      cloud,
+      origin(),
+      3U,
+      exclusions,
+      LbvhTraversalOrder::near_first);
+  check_top_matches(
+      after_rejections,
+      fresh,
+      "hostile imports leave the reference index atomic");
+}
+
 void test_namespace_binding_and_move_fail_closed() {
   const std::array<CertifiedPoint3, 4> input{
       point(-2.0, 0.0, 1.0),
@@ -1791,6 +2183,7 @@ int main() {
   test_budgeted_top_k_exactness_and_fail_closed_limits();
   test_budgeted_top_k_exact_incumbent_seeding();
   test_budgeted_top_k_baseline_proposal_union();
+  test_certified_snapshot_import_and_hostile_rejections();
   test_namespace_binding_and_move_fail_closed();
 
   if (failures != 0) {
