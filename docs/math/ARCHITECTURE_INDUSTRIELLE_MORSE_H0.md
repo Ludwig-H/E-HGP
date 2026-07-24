@@ -174,7 +174,7 @@ Pour une capacité $C$, les arènes device persistantes valent $308C-56+T_{\math
 
 Il n'existe aucun tableau requête--point, univers de facettes, cofaces, incidences, cellules, Gamma ou mosaïque de Delaunay d'ordre supérieur. Les populations sont strictement $O(n)$; la topologie a un travail conservatif $O(n\log n)$ et au plus $63+\lceil\log_2 C\rceil$ niveaux. La limite active est $C\leq\mathrm{INT\_MAX}$ à cause de l'API CUB.
 
-Cette couche n'est qu'une brique de la voie produit. Son `component_smoke` peut établir qu'un index certifié se construit à 50 k et au-delà de 10 M, mais il n'inclut ni les lots Morse, ni les dix ordres, ni la sortie hiérarchique et ne qualifie donc jamais `warm_e2e` ou le statut public.
+Cette couche n'est qu'une brique de la voie produit. Son `component_smoke` G4 au SHA `20b6d60e62941a096cb81dc1005e7f5ed5017533` établit effectivement qu'un index certifié se construit à 50 k et à 10 000 001 points, avec respectivement une médiane chaude de 17 084 679 ns et un passage massif de 6 324 126 601 ns. Il n'inclut ni les lots Morse, ni les dix ordres, ni la sortie hiérarchique et ne qualifie donc jamais `warm_e2e`, le streaming produit ou le statut public.
 
 ## Goulots restant à traiter après 14M
 

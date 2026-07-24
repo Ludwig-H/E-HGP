@@ -1271,7 +1271,7 @@ Le snapshot de feuilles et nœuds ne devient jamais une autorité par transfert.
 
 La voie commune de canonicalisation réduit en parallèle son record de tri de 56 à 32 octets et évite les constructions rationnelles pour les extrema et pour la majorité des bins dyadiques; le repli `BigInt` demeure exact. Ces changements ne matérialisent que des tableaux linéaires. Ils ne créent aucune facette, coface, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur.
 
-Le faux launcher hôte et l'import certifié sont validés. La source CUDA doit encore être compilée par NVCC 12.9 et exécutée sur G4 avant de recevoir `cuda_builder_qualified=true` dans un artefact de validation. Le binaire associé est nommé `component_smoke` : une répétition à 50 k ou 10 M+ qualifie seulement ce constructeur spatial, jamais le p95 `warm_e2e`, les dix ordres, la hiérarchie matérialisée ou la porte de Phase 14.
+Le faux launcher hôte, l'import certifié et la source CUDA sont validés. Au SHA `20b6d60e62941a096cb81dc1005e7f5ed5017533`, NVCC 12.9.86 produit un unique cubin AOT `sm_120` sans PTX et le memcheck court ferme zéro erreur et zéro fuite. Le `component_smoke` certifie 50 000 points avec une médiane chaude de construction de 17 084 679 ns sur trois répétitions, puis 10 000 001 points en 6 324 126 601 ns avec 3 082 232 059 octets device et un pic RSS hôte de 5 850 509 312 octets. Cet artefact qualifie seulement le constructeur spatial, jamais le p95 `warm_e2e`, les dix ordres, la hiérarchie matérialisée, le streaming produit ou la porte de Phase 14.
 
 ### Optimisations autorisées
 
