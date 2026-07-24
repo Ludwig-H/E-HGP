@@ -83,6 +83,22 @@ struct Phase14MortonLbvhSnapshotBatch {
   bool cuda_path_qualified{false};
 };
 
+struct Phase14MortonLbvhDeviceLeaseBatch {
+  std::shared_ptr<void> retained_resources;
+  std::size_t point_count{};
+  std::size_t maximum_point_count{};
+  std::size_t retained_coordinate_word_capacity{};
+  std::size_t retained_morton_point_id_capacity{};
+  std::size_t persistent_device_byte_capacity{};
+  std::uint64_t source_snapshot_epoch{};
+  Phase14MortonLbvhExecutionKind execution_kind{
+      Phase14MortonLbvhExecutionKind::host_fake};
+  bool canonical_coordinate_words_retained{false};
+  bool active_morton_point_ids_retained{false};
+  bool builder_transients_released{false};
+  bool cuda_path_qualified{false};
+};
+
 class Phase14MortonLbvhBuildContextState final {
  public:
   Phase14MortonLbvhBuildContextState() = default;
@@ -152,5 +168,16 @@ build_phase14_morton_lbvh_snapshot_on_gpu(
     std::size_t point_count,
     std::span<const std::uint64_t> certified_morton_codes,
     std::size_t maximum_point_count);
+
+// Called only after the CPU has certified and imported the complete 14M
+// snapshot.  It transfers ownership of the canonical coordinate words and
+// the active Morton-ordered PointIds, releases all builder-only allocations
+// and detaches the resulting compact state from the build context.
+[[nodiscard]] Phase14MortonLbvhDeviceLeaseBatch
+release_phase14_morton_lbvh_device_lease(
+    Phase14MortonLbvhBuildContextState& context,
+    std::size_t point_count,
+    std::size_t maximum_point_count,
+    std::uint64_t source_snapshot_epoch);
 
 }  // namespace morsehgp3d::gpu::detail

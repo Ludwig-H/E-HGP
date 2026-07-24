@@ -13,6 +13,7 @@
 #include <iostream>
 #include <limits>
 #include <numeric>
+#include <optional>
 #include <stdexcept>
 #include <string_view>
 #include <system_error>
@@ -219,27 +220,57 @@ int main(int argc, char** argv) {
     input.clear();
     input.shrink_to_fit();
 
-    morsehgp3d::gpu::MortonLbvhBuildContext context{
-        options.point_count};
     std::vector<std::uint64_t> build_nanoseconds;
     build_nanoseconds.reserve(options.repetition_count);
     morsehgp3d::gpu::MortonLbvhDeviceBuildAudit last_audit;
-    for (std::size_t repetition = 0U;
-         repetition < options.repetition_count;
-         ++repetition) {
-      const auto build_start = Clock::now();
-      morsehgp3d::gpu::MortonLbvhDeviceBuildResult result =
-          context.build(cloud);
-      const auto build_end = Clock::now();
-      if (!result.cuda_qualified_build() ||
-          !result.certified_index().validated_for(cloud)) {
-        throw std::runtime_error(
-            "the Phase 14M qualification did not return a CUDA-qualified "
-            "certified index");
+    morsehgp3d::gpu::MortonLbvhDeviceLeaseAudit lease_audit;
+    std::optional<morsehgp3d::gpu::MortonLbvhDeviceLease>
+        detached_lease;
+    std::uint64_t lease_release_nanoseconds = 0U;
+    {
+      morsehgp3d::gpu::MortonLbvhBuildContext context{
+          options.point_count};
+      for (std::size_t repetition = 0U;
+           repetition < options.repetition_count;
+           ++repetition) {
+        const auto build_start = Clock::now();
+        morsehgp3d::gpu::MortonLbvhDeviceBuildResult result =
+            context.build(cloud);
+        const auto build_end = Clock::now();
+        if (!result.cuda_qualified_build() ||
+            !result.certified_index().validated_for(cloud)) {
+          throw std::runtime_error(
+              "the Phase 14M qualification did not return a CUDA-qualified "
+              "certified index");
+        }
+        build_nanoseconds.push_back(
+            nanoseconds(build_end - build_start));
+        last_audit = result.audit();
+        if (repetition + 1U == options.repetition_count) {
+          const auto lease_start = Clock::now();
+          detached_lease.emplace(
+              context.release_device_lease(result));
+          const auto lease_end = Clock::now();
+          lease_release_nanoseconds =
+              nanoseconds(lease_end - lease_start);
+          lease_audit = detached_lease->audit();
+        }
       }
-      build_nanoseconds.push_back(
-          nanoseconds(build_end - build_start));
-      last_audit = result.audit();
+    }
+    const std::size_t expected_persistent_device_bytes =
+        32U * options.point_count;
+    if (!detached_lease.has_value() ||
+        !detached_lease->ready() ||
+        !detached_lease->cuda_resident() ||
+        lease_audit.point_count != options.point_count ||
+        lease_audit.maximum_point_count != options.point_count ||
+        lease_audit.persistent_device_byte_capacity !=
+            expected_persistent_device_bytes ||
+        lease_audit.retained_host_snapshot_byte_count != 0U ||
+        !lease_audit.builder_transients_released) {
+      throw std::runtime_error(
+          "the Phase 14N qualification did not return the compact "
+          "CUDA-resident device lease");
     }
 
     std::vector<std::uint64_t> ordered = build_nanoseconds;
@@ -248,11 +279,11 @@ int main(int argc, char** argv) {
         ordered[(ordered.size() - 1U) / 2U];
     const std::uint64_t maximum = ordered.back();
     std::cout
-        << "{\"schema\":\"morsehgp3d.phase14m.component_smoke.v1\","
+        << "{\"schema\":\"morsehgp3d.phase14n.component_smoke.v1\","
         << "\"git_sha\":\"" << MORSEHGP3D_GIT_SHA << "\","
         << "\"backend\":\"cuda_g4\","
         << "\"profile\":\"hgp_reduced\","
-        << "\"mode\":\"device_morton_lbvh_snapshot_import\","
+        << "\"mode\":\"device_morton_lbvh_lease\","
         << "\"family\":\"affine_uniform_binary64\","
         << "\"seed\":" << options.seed << ','
         << "\"point_count\":" << options.point_count << ','
@@ -265,6 +296,8 @@ int main(int argc, char** argv) {
         << ','
         << "\"build_median_ns\":" << median << ','
         << "\"build_max_ns\":" << maximum << ','
+        << "\"lease_release_ns\":"
+        << lease_release_nanoseconds << ','
         << "\"ambiguous_axis_count\":"
         << last_audit.device_ambiguous_axis_count << ','
         << "\"project_kernel_launch_count\":"
@@ -279,8 +312,15 @@ int main(int argc, char** argv) {
         << last_audit.device_sort_temporary_byte_capacity << ','
         << "\"total_fixed_device_capacity_bytes\":"
         << last_audit.total_fixed_device_byte_capacity << ','
+        << "\"persistent_device_capacity_bytes\":"
+        << lease_audit.persistent_device_byte_capacity << ','
+        << "\"released_transient_device_capacity_bytes\":"
+        << lease_audit.released_transient_device_byte_capacity << ','
+        << "\"retained_host_snapshot_bytes\":"
+        << lease_audit.retained_host_snapshot_byte_count << ','
         << "\"peak_host_rss_bytes\":" << peak_host_rss_bytes() << ','
         << "\"cuda_qualified\":true,"
+        << "\"compact_device_lease_qualified\":true,"
         << "\"warm_e2e_slo_claimed\":false,"
         << "\"massive_product_path_claimed\":false,"
         << "\"public_status_claimed\":false}"

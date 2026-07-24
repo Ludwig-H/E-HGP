@@ -1273,6 +1273,14 @@ La voie commune de canonicalisation réduit en parallèle son record de tri de 5
 
 Le faux launcher hôte, l'import certifié et la source CUDA sont validés. Au SHA `20b6d60e62941a096cb81dc1005e7f5ed5017533`, NVCC 12.9.86 produit un unique cubin AOT `sm_120` sans PTX et le memcheck court ferme zéro erreur et zéro fuite. Le `component_smoke` certifie 50 000 points avec une médiane chaude de construction de 17 084 679 ns sur trois répétitions, puis 10 000 001 points en 6 324 126 601 ns avec 3 082 232 059 octets device et un pic RSS hôte de 5 850 509 312 octets. Cet artefact qualifie seulement le constructeur spatial, jamais le p95 `warm_e2e`, les dix ordres, la hiérarchie matérialisée, le streaming produit ou la porte de Phase 14.
 
+### Lease device compacte 14N
+
+La porte d'entrée 14M étant satisfaite, 14N ouvre sous `cuda_g4_plus_reference_cpu / hgp_reduced / device_morton_lbvh_lease / architecture_only`. `MortonLbvhBuildContext::release_device_lease` accepte uniquement le dernier résultat 14M complet et certifié provenant de cette instance, avec la même epoch et les mêmes extents. Un résultat étranger ou périmé et une seconde extraction sont refusés avant transfert. La lease est mobile, non copiable, neutralise sa source et possède ses ressources au-delà de la durée de vie du contexte.
+
+Pour une capacité $C$, la lease retient exactement les $3C$ mots binary64 canoniques de coordonnées et les $C$ `PointId` du buffer actif trié Morton, soit $24C+8C=32C$ octets device. Elle libère bins, deux buffers de codes Morton, buffer d'identifiants inactif, feuilles, nœuds, frontières, indices de niveaux, contrôles et workspace CUB. À partir de la capacité 14M $308C-56+T_{\mathrm{CUB}}(C)$, le relâchement audité vaut donc $276C-56+T_{\mathrm{CUB}}(C)$ octets. La lease ne conserve aucun snapshot hôte; l'index CPU déjà recertifié reste l'unique LBVH hôte et demeure valide indépendamment d'elle.
+
+Ce transfert de durée de vie ne donne aucune autorité scientifique au device. Aucun adaptateur consommateur vers 14I, 14J, 14K ou 14L n'est encore implémenté, et aucune facette, coface, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est construite. Le faux launcher et le CTest hôte court valident l'unicité du transfert, les rejets et les comptes $24C$, $8C$ et $32C$. Le `component_smoke` révisé prévoit le schéma `morsehgp3d.phase14n.component_smoke.v1`, l'extraction du dernier build, zéro snapshot hôte et la survie de la lease après destruction du contexte; cette version n'a encore été compilée ni exécutée avec NVCC sur G4. La qualification G4 historique de 14M ne se transfère pas à 14N. Aucun p95 `warm_e2e`, SLO 50 k, pipeline complet 10 M+, résultat exact public ou porte de Phase 14 n'est revendiqué.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;

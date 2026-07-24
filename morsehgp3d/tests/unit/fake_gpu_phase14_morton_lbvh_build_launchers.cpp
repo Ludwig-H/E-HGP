@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <span>
 #include <stdexcept>
 #include <utility>
@@ -25,6 +26,7 @@ std::atomic<std::size_t> fake_forced_ambiguous_axis_index{
     std::numeric_limits<std::size_t>::max()};
 std::atomic<std::size_t> fake_proposal_count{0U};
 std::atomic<std::size_t> fake_snapshot_count{0U};
+std::atomic<std::size_t> fake_lease_release_count{0U};
 std::atomic<std::size_t> fake_last_point_count{0U};
 std::atomic<std::size_t> fake_last_point_capacity{0U};
 
@@ -44,6 +46,7 @@ void reset_fake_gpu_phase14_morton_lbvh_build() noexcept {
       FakePhase14MortonLbvhBuildConfiguration{});
   fake_proposal_count.store(0U, std::memory_order_relaxed);
   fake_snapshot_count.store(0U, std::memory_order_relaxed);
+  fake_lease_release_count.store(0U, std::memory_order_relaxed);
   fake_last_point_count.store(0U, std::memory_order_relaxed);
   fake_last_point_capacity.store(0U, std::memory_order_relaxed);
 }
@@ -55,6 +58,11 @@ std::size_t fake_gpu_phase14_morton_bin_proposal_count() noexcept {
 std::size_t
 fake_gpu_phase14_morton_lbvh_snapshot_count() noexcept {
   return fake_snapshot_count.load(std::memory_order_relaxed);
+}
+
+std::size_t
+fake_gpu_phase14_morton_lbvh_lease_release_count() noexcept {
+  return fake_lease_release_count.load(std::memory_order_relaxed);
 }
 
 std::size_t
@@ -85,6 +93,12 @@ constexpr std::uint64_t kMortonGridSize =
     << spatial::morton_lbvh_snapshot_morton_bits_per_axis;
 constexpr std::uint64_t kMaximumMortonCoordinate =
     kMortonGridSize - UINT64_C(1);
+
+struct FakePhase14MortonLbvhResidentState {
+  std::size_t point_count{};
+  std::size_t maximum_point_count{};
+  std::uint64_t snapshot_epoch{};
+};
 
 [[nodiscard]] std::size_t checked_product(
     std::size_t left,
@@ -581,6 +595,12 @@ build_phase14_morton_lbvh_snapshot_on_gpu(
   add_device_capacity(batch.device_level_schedule_byte_capacity);
   add_device_capacity(batch.device_control_byte_capacity);
   batch.buffer_epoch = context.advance_epoch();
+  context.cuda_resources() =
+      std::make_shared<FakePhase14MortonLbvhResidentState>(
+          FakePhase14MortonLbvhResidentState{
+              point_count,
+              maximum_point_count,
+              batch.buffer_epoch});
   batch.execution_kind =
       Phase14MortonLbvhExecutionKind::host_fake;
   batch.cuda_path_qualified = false;
@@ -625,6 +645,67 @@ build_phase14_morton_lbvh_snapshot_on_gpu(
       --batch.buffer_epoch;
       break;
   }
+  return batch;
+}
+
+Phase14MortonLbvhDeviceLeaseBatch
+release_phase14_morton_lbvh_device_lease(
+    Phase14MortonLbvhBuildContextState& context,
+    std::size_t point_count,
+    std::size_t maximum_point_count,
+    std::uint64_t source_snapshot_epoch) {
+  std::shared_ptr<void>& opaque = context.cuda_resources();
+  const auto resident =
+      std::static_pointer_cast<FakePhase14MortonLbvhResidentState>(
+          opaque);
+  if (!resident ||
+      point_count == 0U ||
+      point_count > maximum_point_count ||
+      point_count != resident->point_count ||
+      maximum_point_count != resident->maximum_point_count ||
+      source_snapshot_epoch != resident->snapshot_epoch ||
+      source_snapshot_epoch != context.current_epoch()) {
+    throw std::invalid_argument(
+        "the fake Phase 14N lease does not match the latest snapshot");
+  }
+  test_support::fake_lease_release_count.fetch_add(
+      1U, std::memory_order_relaxed);
+
+  const std::size_t coordinate_word_capacity = checked_product(
+      maximum_point_count,
+      kAxisCount,
+      "the fake Phase 14N coordinate capacity overflows");
+  const std::size_t coordinate_bytes = checked_product(
+      coordinate_word_capacity,
+      sizeof(std::uint64_t),
+      "the fake Phase 14N coordinate bytes overflow");
+  const std::size_t point_id_bytes = checked_product(
+      maximum_point_count,
+      sizeof(spatial::PointId),
+      "the fake Phase 14N PointId bytes overflow");
+
+  Phase14MortonLbvhDeviceLeaseBatch batch;
+  // The per-context marker models ownership transfer only.  The host fake
+  // intentionally retains neither the snapshot nor a synthetic
+  // coordinate/PointId copy.
+  batch.retained_resources = std::move(opaque);
+  batch.point_count = point_count;
+  batch.maximum_point_count = maximum_point_count;
+  batch.retained_coordinate_word_capacity =
+      coordinate_word_capacity;
+  batch.retained_morton_point_id_capacity =
+      maximum_point_count;
+  batch.persistent_device_byte_capacity = checked_sum(
+      coordinate_bytes,
+      point_id_bytes,
+      "the fake Phase 14N persistent bytes overflow");
+  batch.source_snapshot_epoch = source_snapshot_epoch;
+  batch.execution_kind =
+      Phase14MortonLbvhExecutionKind::host_fake;
+  batch.canonical_coordinate_words_retained = true;
+  batch.active_morton_point_ids_retained = true;
+  batch.builder_transients_released = true;
+  batch.cuda_path_qualified = false;
   return batch;
 }
 

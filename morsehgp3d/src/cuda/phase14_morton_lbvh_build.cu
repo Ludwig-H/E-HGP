@@ -274,6 +274,17 @@ class DeviceBuffer final {
   DeviceBuffer() = default;
   DeviceBuffer(const DeviceBuffer&) = delete;
   DeviceBuffer& operator=(const DeviceBuffer&) = delete;
+  DeviceBuffer(DeviceBuffer&& other) noexcept
+      : data_(std::exchange(other.data_, nullptr)),
+        count_(std::exchange(other.count_, 0U)) {}
+  DeviceBuffer& operator=(DeviceBuffer&& other) noexcept {
+    if (this != &other) {
+      reset();
+      data_ = std::exchange(other.data_, nullptr);
+      count_ = std::exchange(other.count_, 0U);
+    }
+    return *this;
+  }
   ~DeviceBuffer() { reset(); }
 
   void allocate(std::size_t count, const char* operation) {
@@ -294,6 +305,14 @@ class DeviceBuffer final {
   void reset() noexcept {
     if (data_ != nullptr) {
       static_cast<void>(cudaFree(data_));
+      data_ = nullptr;
+      count_ = 0U;
+    }
+  }
+
+  void reset_checked(const char* operation) {
+    if (data_ != nullptr) {
+      check_cuda(cudaFree(data_), operation);
       data_ = nullptr;
       count_ = 0U;
     }
@@ -350,6 +369,68 @@ class DeviceGuard final {
 
   int previous_device_{};
   bool restore_required_{false};
+};
+
+class Phase14MortonLbvhCudaLeaseResources final {
+ public:
+  Phase14MortonLbvhCudaLeaseResources(
+      int device,
+      std::size_t maximum_point_count,
+      std::size_t point_count,
+      std::uint64_t source_snapshot_epoch)
+      : device_(device),
+        maximum_point_count_(maximum_point_count),
+        point_count_(point_count),
+        source_snapshot_epoch_(source_snapshot_epoch) {}
+
+  Phase14MortonLbvhCudaLeaseResources(
+      const Phase14MortonLbvhCudaLeaseResources&) = delete;
+  Phase14MortonLbvhCudaLeaseResources& operator=(
+      const Phase14MortonLbvhCudaLeaseResources&) = delete;
+
+  ~Phase14MortonLbvhCudaLeaseResources() {
+    int previous_device = 0;
+    const cudaError_t query_status = cudaGetDevice(&previous_device);
+    bool restore_device = false;
+    if (query_status == cudaSuccess && previous_device != device_) {
+      restore_device = cudaSetDevice(device_) == cudaSuccess;
+    }
+    if (query_status != cudaSuccess ||
+        (previous_device != device_ && !restore_device)) {
+      coordinate_bits_.abandon();
+      morton_point_ids_.abandon();
+      return;
+    }
+    coordinate_bits_.reset();
+    morton_point_ids_.reset();
+    if (restore_device) {
+      static_cast<void>(cudaSetDevice(previous_device));
+    }
+  }
+
+  void adopt(
+      DeviceBuffer<std::uint64_t>&& coordinate_bits,
+      DeviceBuffer<std::uint64_t>&& morton_point_ids) noexcept {
+    coordinate_bits_ = std::move(coordinate_bits);
+    morton_point_ids_ = std::move(morton_point_ids);
+  }
+
+  [[nodiscard]] bool ready() const noexcept {
+    return maximum_point_count_ != 0U &&
+           point_count_ != 0U &&
+           point_count_ <= maximum_point_count_ &&
+           coordinate_bits_.count() == 3U * maximum_point_count_ &&
+           morton_point_ids_.count() == maximum_point_count_ &&
+           source_snapshot_epoch_ != 0U;
+  }
+
+ private:
+  int device_{};
+  std::size_t maximum_point_count_{};
+  std::size_t point_count_{};
+  std::uint64_t source_snapshot_epoch_{};
+  DeviceBuffer<std::uint64_t> coordinate_bits_;
+  DeviceBuffer<std::uint64_t> morton_point_ids_;
 };
 
 class Phase14MortonLbvhCudaResources final {
@@ -492,6 +573,15 @@ class Phase14MortonLbvhCudaResources final {
   [[nodiscard]] std::byte* sort_temporary_storage() noexcept {
     return sort_temporary_storage_.get();
   }
+  void set_active_sorted_point_ids(
+      const std::uint64_t* point_ids) {
+    if (point_ids != point_ids_a_.get() &&
+        point_ids != point_ids_b_.get()) {
+      throw std::logic_error(
+          "the Phase 14 Morton sort returned a foreign PointId buffer");
+    }
+    active_sorted_point_ids_ = point_ids;
+  }
 
   void initialize_builder_buffers() {
     if (builder_initialized_) {
@@ -570,6 +660,50 @@ class Phase14MortonLbvhCudaResources final {
     builder_initialized_ = true;
   }
 
+  [[nodiscard]] std::shared_ptr<void> release_device_lease(
+      std::size_t point_count,
+      std::uint64_t source_snapshot_epoch) {
+    if (!builder_initialized_ ||
+        resident_point_count_ != point_count ||
+        active_sorted_point_ids_ == nullptr ||
+        source_snapshot_epoch == 0U) {
+      throw std::logic_error(
+          "the Phase 14N lease requires a completed resident builder");
+    }
+    auto retained =
+        std::make_shared<Phase14MortonLbvhCudaLeaseResources>(
+            device_,
+            maximum_point_count_,
+            point_count,
+            source_snapshot_epoch);
+    if (active_sorted_point_ids_ == point_ids_a_.get()) {
+      retained->adopt(
+          std::move(coordinate_bits_),
+          std::move(point_ids_a_));
+    } else if (active_sorted_point_ids_ == point_ids_b_.get()) {
+      retained->adopt(
+          std::move(coordinate_bits_),
+          std::move(point_ids_b_));
+    } else {
+      throw std::logic_error(
+          "the Phase 14N active PointId buffer changed before release");
+    }
+    if (!retained->ready()) {
+      throw std::logic_error(
+          "the Phase 14N retained CUDA buffers have wrong capacities");
+    }
+
+    // The snapshot import has already synchronized the stream.  These resets
+    // therefore release only builder-transient allocations; the two moved
+    // buffers are owned exclusively by the returned lease resource.
+    reset_all_checked();
+    resident_point_count_ = 0U;
+    sort_temporary_byte_capacity_ = 0U;
+    builder_initialized_ = false;
+    active_sorted_point_ids_ = nullptr;
+    return retained;
+  }
+
  private:
   void abandon_all() noexcept {
     sort_temporary_storage_.abandon();
@@ -609,6 +743,41 @@ class Phase14MortonLbvhCudaResources final {
     coordinate_bits_.reset();
   }
 
+  void reset_all_checked() {
+    sort_temporary_storage_.reset_checked(
+        "cudaFree Phase 14 Morton radix-sort workspace");
+    maximum_collision_size_.reset_checked(
+        "cudaFree Phase 14 Morton maximum-collision counter");
+    collision_group_count_.reset_checked(
+        "cudaFree Phase 14 Morton collision-group counter");
+    failure_code_.reset_checked(
+        "cudaFree Phase 14 Morton failure code");
+    frontier_count_.reset_checked(
+        "cudaFree Phase 14 Morton frontier counter");
+    level_node_indices_.reset_checked(
+        "cudaFree Phase 14 Morton level-index capacity");
+    frontier_b_.reset_checked(
+        "cudaFree Phase 14 Morton frontier-B capacity");
+    frontier_a_.reset_checked(
+        "cudaFree Phase 14 Morton frontier-A capacity");
+    nodes_.reset_checked(
+        "cudaFree Phase 14 Morton node capacity");
+    leaves_.reset_checked(
+        "cudaFree Phase 14 Morton leaf capacity");
+    point_ids_b_.reset_checked(
+        "cudaFree Phase 14 Morton PointId-B capacity");
+    point_ids_a_.reset_checked(
+        "cudaFree Phase 14 Morton PointId-A capacity");
+    morton_keys_b_.reset_checked(
+        "cudaFree Phase 14 Morton key-B capacity");
+    morton_keys_a_.reset_checked(
+        "cudaFree Phase 14 Morton key-A capacity");
+    encoded_bins_.reset_checked(
+        "cudaFree Phase 14 Morton encoded-bin capacity");
+    coordinate_bits_.reset_checked(
+        "cudaFree Phase 14 Morton coordinate capacity");
+  }
+
   int device_{};
   unsigned int maximum_grid_x_{};
   cudaStream_t stream_{nullptr};
@@ -618,6 +787,7 @@ class Phase14MortonLbvhCudaResources final {
   std::size_t resident_point_count_{};
   std::size_t sort_temporary_byte_capacity_{};
   bool builder_initialized_{false};
+  const std::uint64_t* active_sorted_point_ids_{nullptr};
   DeviceBuffer<std::uint64_t> coordinate_bits_;
   DeviceBuffer<std::uint32_t> encoded_bins_;
   DeviceBuffer<std::uint64_t> morton_keys_a_;
@@ -1324,6 +1494,7 @@ build_phase14_morton_lbvh_snapshot_on_gpu(
   const std::uint64_t* const sorted_codes = keys.Current();
   const std::uint64_t* const sorted_point_ids =
       point_ids.Current();
+  resources->set_active_sorted_point_ids(sorted_point_ids);
 
   emit_morton_leaves_kernel<<<
       point_blocks,
@@ -1661,6 +1832,69 @@ build_phase14_morton_lbvh_snapshot_on_gpu(
   batch.buffer_epoch = context.advance_epoch();
   batch.execution_kind =
       Phase14MortonLbvhExecutionKind::cuda;
+  batch.cuda_path_qualified = true;
+  guard.restore();
+  return batch;
+}
+
+Phase14MortonLbvhDeviceLeaseBatch
+release_phase14_morton_lbvh_device_lease(
+    Phase14MortonLbvhBuildContextState& context,
+    std::size_t point_count,
+    std::size_t maximum_point_count,
+    std::uint64_t source_snapshot_epoch) {
+  if (point_count == 0U || point_count > maximum_point_count ||
+      source_snapshot_epoch != context.current_epoch()) {
+    throw std::invalid_argument(
+        "the Phase 14N lease does not match the latest CUDA snapshot");
+  }
+  std::shared_ptr<void>& opaque = context.cuda_resources();
+  if (!opaque) {
+    throw std::logic_error(
+        "the Phase 14N lease has no resident CUDA builder resources");
+  }
+  auto resources =
+      std::static_pointer_cast<Phase14MortonLbvhCudaResources>(
+          opaque);
+  if (resources->maximum_point_count() != maximum_point_count ||
+      resources->resident_point_count() != point_count) {
+    throw std::logic_error(
+        "the Phase 14N lease has stale CUDA builder extents");
+  }
+  DeviceGuard guard{resources->device()};
+  std::shared_ptr<void> retained =
+      resources->release_device_lease(
+          point_count, source_snapshot_epoch);
+  opaque.reset();
+
+  const std::size_t coordinate_word_capacity =
+      checked_axis_count(maximum_point_count);
+  const std::size_t coordinate_bytes = checked_byte_product(
+      coordinate_word_capacity,
+      sizeof(std::uint64_t),
+      "the Phase 14N retained coordinate bytes overflow");
+  const std::size_t point_id_bytes = checked_byte_product(
+      maximum_point_count,
+      sizeof(std::uint64_t),
+      "the Phase 14N retained PointId bytes overflow");
+
+  Phase14MortonLbvhDeviceLeaseBatch batch;
+  batch.retained_resources = std::move(retained);
+  batch.point_count = point_count;
+  batch.maximum_point_count = maximum_point_count;
+  batch.retained_coordinate_word_capacity =
+      coordinate_word_capacity;
+  batch.retained_morton_point_id_capacity =
+      maximum_point_count;
+  batch.persistent_device_byte_capacity = checked_byte_sum(
+      coordinate_bytes,
+      point_id_bytes,
+      "the Phase 14N persistent device bytes overflow");
+  batch.source_snapshot_epoch = source_snapshot_epoch;
+  batch.execution_kind = Phase14MortonLbvhExecutionKind::cuda;
+  batch.canonical_coordinate_words_retained = true;
+  batch.active_morton_point_ids_retained = true;
+  batch.builder_transients_released = true;
   batch.cuda_path_qualified = true;
   guard.restore();
   return batch;

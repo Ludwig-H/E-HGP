@@ -1053,6 +1053,14 @@ Les seules arènes device sont coordonnées, bins, doubles buffers de codes et d
 
 Un résultat ne porte `cuda_builder_qualified=true` qu'après validation des extents, époques, capacités, nombres déterministes de kernels projet, soumissions de bibliothèque et synchronisations, puis succès de l'import certifié. Le `component_smoke` ne constitue ni le protocole p95 de Phase 14, ni une preuve de hiérarchie complète à $K=10$, ni une qualification du streaming 10 M+.
 
+### 14.8 Lease Morton/LBVH device compacte
+
+14N a pour contrat `cuda_g4_plus_reference_cpu / hgp_reduced / device_morton_lbvh_lease / architecture_only`. L'entrée est un résultat 14M complet et certifié, produit par le même contexte, correspondant à sa dernière epoch device et non encore consommé. L'extraction est unique : une provenance étrangère, un résultat périmé ou une seconde extraction échoue avant transfert. `MortonLbvhDeviceLease` est non copiable, mobile sans exception et garde les ressources transférées après destruction du builder.
+
+Pour une capacité $C$, le payload persistant de la lease contient exactement $3C$ mots `uint64_t` de coordonnées canoniques et $C$ `PointId` actifs dans l'ordre Morton, soit $24C+8C=32C$ octets device. Les bins, clés Morton, identifiants inactifs, feuilles, nœuds, frontières, indices de niveau, compteurs, contrôles et workspace de tri sont libérés. L'audit exige zéro octet de snapshot hôte retenu, distingue le faux cycle de vie hôte d'une résidence CUDA réelle et conserve l'epoch 14M source. L'index CPU importé et recertifié reste valide mais n'est pas possédé par la lease.
+
+La lease ne publie encore aucune vue device à un consommateur 14I, 14J, 14K ou 14L. Elle prépare cette couture sans recopier ni le snapshot de feuilles et nœuds, ni une mosaïque globale. Elle ne construit aucune facette ou coface globale, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Son audit de durée de vie n'est ni un certificat de rappel, ni une décision géométrique, ni une qualification de latence ou de volume. Le faux launcher hôte est validé; le smoke CUDA 14N et sa compilation NVCC/G4 restent à qualifier.
+
 ## 15. Limites de complexité
 
 Une liste fixe de voisins par observation n'est pas complète : une paire de Gabriel peut avoir une boule diamétrale vide tout en étant absente d'une liste $L$-NN arbitrairement longue, en plaçant de nombreux points juste à l'extérieur de cette boule près d'une extrémité.

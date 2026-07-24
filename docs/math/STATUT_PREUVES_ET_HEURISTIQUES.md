@@ -267,6 +267,14 @@ Pour $C\leq\mathrm{INT\_MAX}$, les arènes device occupent exactement $308C-56+T
 
 Les tests hôte courts valident l'import contre le builder CPU, l'ambiguïté exacte, les capacités et epochs, puis rejettent bins, permutation, postordre, témoins et compteurs falsifiés; le faux launcher ne peut jamais revendiquer CUDA. Le `component_smoke` G4 borné passe au SHA `20b6d60e62941a096cb81dc1005e7f5ed5017533` : CUDA 12.9 AOT `sm_120` sans PTX, memcheck nul, médiane de construction 17 084 679 ns sur trois passages à 50 000 points, puis index recertifié de 10 000 001 points en 6 324 126 601 ns avec 3 082 232 059 octets device et 5 850 509 312 octets de pic RSS hôte. Il établit seulement que ce constructeur spatial s'exécute et importe un index certifié sous ses capacités mesurées; il ne qualifie ni `warm_e2e`, ni le SLO interactif, ni les dix ordres à $K=10$, ni la voie produit massive, ni un statut public.
 
+### Jalon 14N — propriété compacte des autorités device
+
+14N a le statut `validated_host_software` pour son cycle de vie simulé, sous `cuda_g4_plus_reference_cpu / hgp_reduced / device_morton_lbvh_lease / architecture_only`; la voie CUDA réelle reste `not_yet_qualified`. Il n'ajoute aucun théorème géométrique. Son seul fait arithmétique est `proved_here` sous l'ABI contractée : trois mots de coordonnées de huit octets et un `PointId` de huit octets par entrée de capacité donnent $3C\cdot8+C\cdot8=32C$ octets.
+
+La provenance certifiée 14M, l'identité du contexte, l'epoch et le caractère dernier/non consommé sont des préconditions logicielles. Après transfert, la lease mobile possède les coordonnées canoniques et le buffer actif d'identifiants triés; tous les autres buffers du builder sont libérés et aucun snapshot hôte n'est conservé par cette lease. Ces faits de propriété ne rendent pas les propositions device scientifiques : l'index CPU déjà recertifié demeure la seule autorité spatiale publiée.
+
+Le CTest court au faux launcher vérifie les traits move-only, les capacités $24C$, $8C$ et $32C$, les rejets étranger, périmé et double, la survie hors contexte et la validité persistante de l'index CPU. Le faux launcher affirme explicitement ne pas être CUDA. Le smoke révisé encode le protocole attendu mais aucune compilation NVCC, exécution G4, mesure 50 k ou capacité 10 M+ n'a encore recertifié 14N. Aucun adaptateur consommateur, théorème de carriers, SLO ou statut public ne découle de ce jalon.
+
 ### Jalon 15A — contrat durable à recertification externe
 
 15A a le statut `validated_host_software`, sous `reference_cpu / hgp_reduced / budgeted / architecture_only`; il n'ajoute aucun théorème scientifique. L'unité choisie est un chunk 14A complet, et non un chunk de transport 14L. Sa publication exige un callback qui reconstruit 14A et rejoue tous ses deltas; un checksum établit seulement l'intégrité des octets et ne remplace jamais cette recertification.

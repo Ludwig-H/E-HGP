@@ -132,9 +132,19 @@ Les tests hôte stricts comparent l'import au builder CPU et falsifient schéma,
 
 14M ne construit aucun catalogue global de facettes ou cofaces, aucune incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Ses seules populations sont des tableaux $O(n)$ de coordonnées, bins, couples Morton--`PointId`, frontières, nœuds et témoins. Le déploiement reste `architecture_only` et `public_status=not_claimed`.
 
+## Incrément 14N implémenté — lease device compacte après import
+
+La porte 14M documentée est satisfaite. 14N s'exécute sous `cuda_g4_plus_reference_cpu / hgp_reduced / device_morton_lbvh_lease / architecture_only`, avec `public_status=not_claimed`. Après le dernier build complet et recertifié d'un contexte, `release_device_lease` vérifie la provenance de l'instance, l'epoch, les extents et le caractère non consommé avant de transférer l'état utile. Une build étrangère ou périmée et une seconde extraction sont rejetées.
+
+`MortonLbvhDeviceLease` est non copiable et mobile sans exception. Elle possède exactement les $3C$ mots binary64 de coordonnées et le buffer actif de $C$ `PointId` triés Morton, soit $24C+8C=32C$ octets device. Elle survit à la destruction du contexte. L'extraction libère les bins, les deux buffers de clés Morton, le buffer d'identifiants inactif, les feuilles et nœuds device, les frontières, les indices de niveaux, les compteurs, les contrôles et le workspace CUB. L'audit expose $276C-56+T_{\mathrm{CUB}}(C)$ octets transitoires libérés et zéro octet de snapshot hôte retenu; l'index CPU déjà certifié reste valide et séparé.
+
+Le CTest hôte court et son faux launcher ferment les traits move-only, les comptes $24C$, $8C$ et $32C$, les trois rejets, l'unique transition de relâchement, la survie hors contexte et l'absence de revendication CUDA. Le binaire de composant a été étendu : au dernier build il extrait la lease, exige `cuda_resident`, $32C$ octets, zéro snapshot hôte et une durée de vie supérieure à celle du contexte, puis publie le schéma `morsehgp3d.phase14n.component_smoke.v1` et le mode `device_morton_lbvh_lease`.
+
+Cette nouvelle version du smoke n'a pas encore été compilée avec NVCC ni exécutée sur G4. Les résultats historiques 14M à 50 000 et 10 000 001 points concernent l'ancien binaire et ne qualifient pas ce cycle de vie. Aucun adaptateur ne donne encore les ressources opaques de la lease à 14I, 14J, 14K ou 14L. Aucune facette ou coface globale, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est matérialisée; aucun p95 `warm_e2e`, SLO principal 100 ms, objectif secondaire une seconde, capacité produit 10 M+ ou statut exact n'est revendiqué.
+
 ## Priorités de développement
 
-1. fournir l'adaptateur réel entre les contextes CUDA 14M et 14J/14K et les callbacks 14L;
+1. fournir l'adaptateur réel qui fait adopter la lease 14N par les contextes CUDA 14I/14J/14K et les callbacks 14L;
 2. étudier un réemploi recertifiable du centre exact par 10.5c au lieu de la seconde construction actuellement explicite;
 3. réutiliser les capacités restantes de scratch sans conserver de graphe entre lots;
 4. exploiter l'instrumentation `warm_e2e`, puis raccorder les chunks durables 15B au reducer hiérarchique avant toute campagne massive.

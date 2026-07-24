@@ -26,6 +26,7 @@ constexpr std::size_t kDeviceRangeByteSize =
     3U * sizeof(std::uint64_t);
 constexpr std::size_t kDeviceControlByteSize =
     4U * sizeof(std::uint64_t);
+static_assert(sizeof(spatial::PointId) == 8U);
 constexpr std::uint64_t kMortonGridSize =
     std::uint64_t{1}
     << spatial::morton_lbvh_snapshot_morton_bits_per_axis;
@@ -442,17 +443,123 @@ void validate_snapshot_batch(
   }
 }
 
+void validate_device_lease_batch(
+    const detail::Phase14MortonLbvhDeviceLeaseBatch& batch,
+    std::size_t point_count,
+    std::size_t maximum_point_count,
+    std::uint64_t source_snapshot_epoch) {
+  const std::size_t expected_coordinate_word_capacity =
+      checked_product(
+          maximum_point_count,
+          kAxisCount,
+          "the Phase 14N coordinate-word capacity overflows size_t");
+  const std::size_t expected_coordinate_byte_capacity =
+      checked_product(
+          expected_coordinate_word_capacity,
+          sizeof(std::uint64_t),
+          "the Phase 14N coordinate byte capacity overflows size_t");
+  const std::size_t expected_point_id_byte_capacity =
+      checked_product(
+          maximum_point_count,
+          sizeof(spatial::PointId),
+          "the Phase 14N PointId byte capacity overflows size_t");
+  const std::size_t expected_persistent_device_bytes =
+      checked_sum(
+          expected_coordinate_byte_capacity,
+          expected_point_id_byte_capacity,
+          "the Phase 14N persistent device capacity overflows size_t");
+  const bool cuda_execution =
+      batch.execution_kind ==
+      detail::Phase14MortonLbvhExecutionKind::cuda;
+  const bool host_fake_execution =
+      batch.execution_kind ==
+      detail::Phase14MortonLbvhExecutionKind::host_fake;
+  if (!batch.retained_resources ||
+      batch.point_count != point_count ||
+      batch.maximum_point_count != maximum_point_count ||
+      batch.retained_coordinate_word_capacity !=
+          expected_coordinate_word_capacity ||
+      batch.retained_morton_point_id_capacity !=
+          maximum_point_count ||
+      batch.persistent_device_byte_capacity !=
+          expected_persistent_device_bytes ||
+      batch.source_snapshot_epoch != source_snapshot_epoch ||
+      !batch.canonical_coordinate_words_retained ||
+      !batch.active_morton_point_ids_retained ||
+      !batch.builder_transients_released ||
+      (!cuda_execution && !host_fake_execution) ||
+      cuda_execution != batch.cuda_path_qualified) {
+    throw std::runtime_error(
+        "the Phase 14N device lease returned invalid retained extents or "
+        "lifecycle facts");
+  }
+}
+
 }  // namespace
+
+MortonLbvhDeviceLease::MortonLbvhDeviceLease(
+    MortonLbvhDeviceLeaseAudit audit,
+    std::shared_ptr<void> retained_resources)
+    : audit_(std::move(audit)),
+      retained_resources_(std::move(retained_resources)) {}
+
+bool MortonLbvhDeviceLease::ready() const noexcept {
+  if (schema_version_ != morton_lbvh_device_lease_schema_version ||
+      !retained_resources_ ||
+      audit_.maximum_point_count == 0U ||
+      audit_.point_count == 0U ||
+      audit_.point_count > audit_.maximum_point_count ||
+      audit_.retained_coordinate_word_capacity !=
+          3U * audit_.maximum_point_count ||
+      audit_.retained_morton_point_id_capacity !=
+          audit_.maximum_point_count ||
+      audit_.retained_coordinate_byte_capacity !=
+          sizeof(std::uint64_t) *
+              audit_.retained_coordinate_word_capacity ||
+      audit_.retained_morton_point_id_byte_capacity !=
+          sizeof(spatial::PointId) *
+              audit_.retained_morton_point_id_capacity ||
+      audit_.persistent_device_byte_capacity !=
+          audit_.retained_coordinate_byte_capacity +
+              audit_.retained_morton_point_id_byte_capacity ||
+      audit_.source_fixed_device_byte_capacity <
+          audit_.persistent_device_byte_capacity ||
+      audit_.released_transient_device_byte_capacity !=
+          audit_.source_fixed_device_byte_capacity -
+              audit_.persistent_device_byte_capacity ||
+      audit_.retained_host_snapshot_byte_count != 0U ||
+      audit_.source_snapshot_epoch == 0U ||
+      !audit_.source_snapshot_import_certified ||
+      !audit_.canonical_coordinate_words_retained ||
+      !audit_.active_morton_point_ids_retained ||
+      !audit_.builder_transients_released ||
+      audit_.cuda_device_storage_retained ==
+          audit_.host_fake_lifecycle_exercised ||
+      audit_.second_host_snapshot_retained ||
+      audit_.higher_order_delaunay_mosaic_materialized ||
+      audit_.global_cell_or_coface_arena_materialized ||
+      audit_.public_status_claimed) {
+    return false;
+  }
+  return true;
+}
+
+bool MortonLbvhDeviceLease::cuda_resident() const noexcept {
+  return ready() && audit_.cuda_device_storage_retained;
+}
 
 MortonLbvhDeviceBuildResult::MortonLbvhDeviceBuildResult(
     MortonLbvhDeviceBuildDecision decision,
     MortonLbvhDeviceBuildStopReason stop_reason,
     MortonLbvhDeviceBuildAudit audit,
-    std::optional<spatial::MortonLbvhIndex> certified_index)
+    std::optional<spatial::MortonLbvhIndex> certified_index,
+    std::weak_ptr<detail::Phase14MortonLbvhBuildContextState>
+        source_context_state)
     : decision_(decision),
       stop_reason_(stop_reason),
       audit_(std::move(audit)),
-      certified_index_(std::move(certified_index)) {}
+      certified_index_(std::move(certified_index)),
+      source_context_state_(std::move(source_context_state)) {}
 
 bool MortonLbvhDeviceBuildResult::complete_certified_build() const noexcept {
   return schema_version_ == morton_lbvh_device_build_schema_version &&
@@ -552,7 +659,8 @@ MortonLbvhDeviceBuildResult MortonLbvhBuildContext::build(
         MortonLbvhDeviceBuildDecision::capacity_exhausted,
         MortonLbvhDeviceBuildStopReason::point_capacity,
         std::move(audit),
-        std::nullopt};
+        std::nullopt,
+        state_};
   }
   audit.fixed_capacity_preflight_satisfied = true;
 
@@ -781,13 +889,134 @@ MortonLbvhDeviceBuildResult MortonLbvhBuildContext::build(
       MortonLbvhDeviceBuildDecision::complete,
       MortonLbvhDeviceBuildStopReason::none,
       std::move(audit),
-      std::move(certified_index)};
+      std::move(certified_index),
+      state_};
   if (!result.complete_certified_build()) {
     throw std::logic_error(
         "the Phase 14 Morton LBVH result did not close its certified "
         "snapshot-import contract");
   }
+  last_completed_point_count_ = point_count;
+  latest_device_build_available_for_lease_ = true;
   return result;
+}
+
+MortonLbvhDeviceLease MortonLbvhBuildContext::release_device_lease(
+    const MortonLbvhDeviceBuildResult& certified_build) {
+  if (!state_) {
+    throw std::logic_error(
+        "a moved-from Phase 14 Morton LBVH context cannot release a lease");
+  }
+  if (!certified_build.complete_certified_build()) {
+    throw std::invalid_argument(
+        "a Phase 14N device lease requires a complete certified 14M build");
+  }
+  const std::shared_ptr<detail::Phase14MortonLbvhBuildContextState>
+      source_context = certified_build.source_context_state_.lock();
+  if (!source_context || source_context.get() != state_.get()) {
+    throw std::invalid_argument(
+        "a Phase 14N device lease cannot be extracted from a foreign "
+        "build context");
+  }
+  const MortonLbvhDeviceBuildAudit& source_audit =
+      certified_build.audit();
+  if (!latest_device_build_available_for_lease_ ||
+      last_completed_point_count_ != source_audit.point_count ||
+      last_buffer_epoch_ != source_audit.snapshot_buffer_epoch ||
+      source_audit.maximum_point_count != maximum_point_count_) {
+    throw std::logic_error(
+        "a Phase 14N device lease requires the latest unreleased 14M "
+        "snapshot");
+  }
+  const std::size_t expected_coordinate_word_capacity =
+      checked_product(
+          maximum_point_count_,
+          kAxisCount,
+          "the Phase 14N coordinate-word capacity overflows size_t");
+  const std::size_t expected_coordinate_byte_capacity =
+      checked_product(
+          expected_coordinate_word_capacity,
+          sizeof(std::uint64_t),
+          "the Phase 14N coordinate byte capacity overflows size_t");
+  const std::size_t expected_point_id_byte_capacity =
+      checked_product(
+          maximum_point_count_,
+          sizeof(spatial::PointId),
+          "the Phase 14N PointId byte capacity overflows size_t");
+  const std::size_t expected_persistent_device_bytes =
+      checked_sum(
+          expected_coordinate_byte_capacity,
+          expected_point_id_byte_capacity,
+          "the Phase 14N persistent device capacity overflows size_t");
+  if (source_audit.total_fixed_device_byte_capacity <
+      expected_persistent_device_bytes) {
+    throw std::logic_error(
+        "the Phase 14N persistent lease exceeds its source device "
+        "capacity");
+  }
+
+  detail::Phase14MortonLbvhDeviceLeaseBatch retained =
+      state_->with_gpu_section([&]() {
+        detail::Phase14MortonLbvhDeviceLeaseBatch candidate =
+            detail::release_phase14_morton_lbvh_device_lease(
+            *state_,
+            source_audit.point_count,
+            maximum_point_count_,
+            source_audit.snapshot_buffer_epoch);
+        validate_device_lease_batch(
+            candidate,
+            source_audit.point_count,
+            maximum_point_count_,
+            source_audit.snapshot_buffer_epoch);
+        return candidate;
+      });
+  // The launcher has now transferred or destroyed the source resources.
+  // Consume the release capability before any remaining local bookkeeping.
+  latest_device_build_available_for_lease_ = false;
+
+  MortonLbvhDeviceLeaseAudit audit;
+  audit.maximum_point_count = maximum_point_count_;
+  audit.point_count = source_audit.point_count;
+  audit.retained_coordinate_word_capacity =
+      retained.retained_coordinate_word_capacity;
+  audit.retained_morton_point_id_capacity =
+      retained.retained_morton_point_id_capacity;
+  audit.retained_coordinate_byte_capacity =
+      expected_coordinate_byte_capacity;
+  audit.retained_morton_point_id_byte_capacity =
+      expected_point_id_byte_capacity;
+  audit.persistent_device_byte_capacity =
+      retained.persistent_device_byte_capacity;
+  audit.source_fixed_device_byte_capacity =
+      source_audit.total_fixed_device_byte_capacity;
+  audit.released_transient_device_byte_capacity =
+      source_audit.total_fixed_device_byte_capacity -
+      retained.persistent_device_byte_capacity;
+  audit.source_snapshot_epoch = retained.source_snapshot_epoch;
+  audit.source_snapshot_import_certified =
+      source_audit.snapshot_import_certified;
+  audit.canonical_coordinate_words_retained =
+      retained.canonical_coordinate_words_retained;
+  audit.active_morton_point_ids_retained =
+      retained.active_morton_point_ids_retained;
+  audit.builder_transients_released =
+      retained.builder_transients_released;
+  audit.cuda_device_storage_retained =
+      retained.execution_kind ==
+      detail::Phase14MortonLbvhExecutionKind::cuda;
+  audit.host_fake_lifecycle_exercised =
+      retained.execution_kind ==
+      detail::Phase14MortonLbvhExecutionKind::host_fake;
+
+  MortonLbvhDeviceLease lease{
+      std::move(audit),
+      std::move(retained.retained_resources)};
+  if (!lease.ready()) {
+    throw std::logic_error(
+        "the Phase 14N device lease did not close its compact lifecycle "
+        "contract");
+  }
+  return lease;
 }
 
 std::size_t MortonLbvhBuildContext::maximum_point_count() const noexcept {

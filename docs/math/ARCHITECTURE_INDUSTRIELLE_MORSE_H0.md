@@ -176,15 +176,23 @@ Il n'existe aucun tableau requête--point, univers de facettes, cofaces, inciden
 
 Cette couche n'est qu'une brique de la voie produit. Son `component_smoke` G4 au SHA `20b6d60e62941a096cb81dc1005e7f5ed5017533` établit effectivement qu'un index certifié se construit à 50 k et à 10 000 001 points, avec respectivement une médiane chaude de 17 084 679 ns et un passage massif de 6 324 126 601 ns. Il n'inclut ni les lots Morse, ni les dix ordres, ni la sortie hiérarchique et ne qualifie donc jamais `warm_e2e`, le streaming produit ou le statut public.
 
-## Goulots restant à traiter après 14M
+## Incrément 14N — lease device compacte sans second snapshot
+
+14N traite la durée de vie device post-import sans changer la décision 14M. Après un dernier build certifié, une lease non copiable adopte les $3C$ mots de coordonnées canoniques et le buffer actif de $C$ `PointId` triés Morton. Elle retient exactement $32C$ octets device et libère $276C-56+T_{\mathrm{CUB}}(C)$ octets parmi la capacité 14M. Elle ne retient aucun snapshot hôte; le LBVH CPU déjà importé reste séparé et valide.
+
+Les buffers libérés comprennent bins, double buffer de clés Morton, buffer d'identifiants inactif, feuilles et nœuds device, frontières, indices de niveaux, compteurs, contrôles et workspace CUB. La lease ne crée aucune copie de ces populations, aucun tableau requête--point et aucune facette, coface, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Son coût persistant est linéaire en la capacité, pas dans un univers combinatoire.
+
+Cette économie est actuellement une couture de propriété, pas encore la voie produit. Aucun adaptateur 14I/14J/14K/14L ne consomme les pointeurs opaques de la lease; le staging hôte historique de 14I et ses éventuelles copies ne sont donc pas encore retirés du pipeline complet. Le faux cycle de vie hôte est validé, tandis que la nouvelle source CUDA et le smoke `morsehgp3d.phase14n.component_smoke.v1` ne sont pas encore qualifiés par NVCC/G4. Aucun gain RSS, débit, SLO 50 k ou volume 10 M+ n'est déduit de la seule arithmétique des capacités.
+
+## Goulots restant à traiter après 14N
 
 Trois coûts dominants restent visibles :
 
 - les traversées exactes top-$K$ par clé distincte, encore linéaires au pire cas puisque 14I ne garantit aucun rappel;
 - les constructions exactes de miniballs jusqu'à 385 supports, potentiellement répétées entre la préparation du centre et 10.5c, ainsi que les fallbacks rationnels;
-- les snapshots $32n$ device et $40n$ hôte sur G4, les buffers persistants $352C$ device et la capacité hôte $144C$, le scratch top-$k$ local restant de 160 octets par thread, les capacités réutilisables et les tickets encore exposés par les API historiques hors `run_next`, qui exigent chunks et plafonds sans dupliquer durablement les grandes arènes.
+- l'adoption effective de la lease $32C$ par 14I afin de supprimer sa reconstruction et son staging $40n$ hôte, les buffers persistants $352C$ device et la capacité hôte $144C$, le scratch top-$k$ local restant de 160 octets par thread, les capacités réutilisables et les tickets encore exposés par les API historiques hors `run_next`, qui exigent chunks et plafonds sans dupliquer durablement les grandes arènes.
 
-La priorité de développement devient donc : raccorder le callback générique au contexte CUDA 14J/14K sans transférer l'autorité de l'audit, puis supprimer le second calcul de centre avec une provenance recertifiable. En parallèle, 15B fournit désormais les runs et checkpoints compacts; leur fold hiérarchique et l'instrumentation `warm_e2e` restent à fermer pour les profils 50 k et 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
+La priorité de développement devient donc : fournir l'adaptateur qui consomme la lease 14N dans le contexte CUDA 14I/14J/14K puis raccorder le callback 14L sans transférer l'autorité de l'audit, avant de supprimer le second calcul de centre avec une provenance recertifiable. En parallèle, 15B fournit désormais les runs et checkpoints compacts; leur fold hiérarchique et l'instrumentation `warm_e2e` restent à fermer pour les profils 50 k et 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
 
 ## Planification sans promotion
 
