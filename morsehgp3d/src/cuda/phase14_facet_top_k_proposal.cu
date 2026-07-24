@@ -484,11 +484,12 @@ class Phase14FacetTopKProposalCudaResources final {
 
 [[nodiscard]] inline __device__ bool covered_by_an_earlier_window(
     std::size_t neighbor_position,
-    const std::size_t* source_morton_positions,
+    const std::uint64_t* source_morton_positions,
     std::size_t source_ordinal,
     std::size_t window_radius) noexcept {
   for (std::size_t prior = 0U; prior < source_ordinal; ++prior) {
-    const std::size_t prior_position = source_morton_positions[prior];
+    const std::size_t prior_position =
+        static_cast<std::size_t>(source_morton_positions[prior]);
     const std::size_t difference =
         prior_position > neighbor_position
             ? prior_position - neighbor_position
@@ -510,26 +511,29 @@ class Phase14FacetTopKProposalCudaResources final {
           first_point_id < second_point_id);
 }
 
-[[nodiscard]] inline __device__ bool inspect_neighbor(
+[[nodiscard]] __forceinline__ __device__ bool inspect_neighbor(
     const std::uint64_t* coordinate_bits,
     std::size_t point_count,
     const std::uint64_t* morton_point_ids,
     std::size_t neighbor_position,
     const double* center,
     const std::uint64_t* source_point_ids,
-    const std::size_t* source_morton_positions,
+    const std::uint64_t* source_morton_positions,
     std::size_t source_point_count,
     std::size_t source_ordinal,
     std::size_t window_radius,
     std::uint64_t* candidate_point_ids,
     double* candidate_squared_distances,
     std::size_t& candidate_count,
-    Phase14FacetTopKProposalDeviceRecord& record) noexcept {
-  ++record.inspected_neighbor_count;
+    std::uint64_t& inspected_neighbor_count,
+    std::uint64_t& floating_distance_evaluation_count,
+    std::uint64_t& floating_rejection_count,
+    std::uint64_t& failure_code) noexcept {
+  ++inspected_neighbor_count;
   const std::uint64_t target_point_id =
       morton_point_ids[neighbor_position];
   if (target_point_id >= static_cast<std::uint64_t>(point_count)) {
-    record.failure_code = static_cast<std::uint64_t>(
+    failure_code = static_cast<std::uint64_t>(
         Phase14FacetTopKProposalFailureCode::neighbor_point_out_of_range);
     return false;
   }
@@ -543,7 +547,7 @@ class Phase14FacetTopKProposalCudaResources final {
     return true;
   }
 
-  ++record.floating_distance_evaluation_count;
+  ++floating_distance_evaluation_count;
   double squared_distance = 0.0;
   for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
     const double target_coordinate = value_from_bits(
@@ -556,12 +560,12 @@ class Phase14FacetTopKProposalCudaResources final {
         squared_distance, squared_difference);
   }
   if (squared_distance != squared_distance || squared_distance < 0.0) {
-    record.failure_code = static_cast<std::uint64_t>(
+    failure_code = static_cast<std::uint64_t>(
         Phase14FacetTopKProposalFailureCode::non_orderable_distance);
     return false;
   }
   if (!finite_value(squared_distance)) {
-    ++record.floating_rejection_count;
+    ++floating_rejection_count;
     return true;
   }
 
@@ -592,7 +596,7 @@ class Phase14FacetTopKProposalCudaResources final {
     candidate_point_ids[worst] = target_point_id;
     candidate_squared_distances[worst] = squared_distance;
   }
-  ++record.floating_rejection_count;
+  ++floating_rejection_count;
   return true;
 }
 
@@ -611,47 +615,38 @@ __global__ void morsehgp3d_phase14_facet_top_k_proposal_kernel(
       static_cast<std::size_t>(gridDim.x) * blockDim.x;
   std::size_t query_offset = first_query;
   while (query_offset < query_count) {
-    const Phase14FacetTopKProposalQueryInputRecord query =
-        queries[query_offset];
-    Phase14FacetTopKProposalDeviceRecord record{};
-    record.query_index = query.query_index;
-    record.key_fingerprint = query.key_fingerprint;
-    record.buffer_epoch = buffer_epoch;
-    record.candidate_count = 0U;
-    record.inspected_neighbor_count = 0U;
-    record.floating_distance_evaluation_count = 0U;
-    record.floating_rejection_count = 0U;
-    record.failure_code = static_cast<std::uint64_t>(
+    // Keep the 208-byte query and 144-byte output record in resident global
+    // storage.  Only the fixed-k selection scratch is thread-local; copying
+    // either POD here materially inflates the Blackwell per-thread stack.
+    const Phase14FacetTopKProposalQueryInputRecord* query =
+        queries + query_offset;
+    std::uint64_t inspected_neighbor_count = 0U;
+    std::uint64_t floating_distance_evaluation_count = 0U;
+    std::uint64_t floating_rejection_count = 0U;
+    std::uint64_t failure_code = static_cast<std::uint64_t>(
         Phase14FacetTopKProposalFailureCode::none);
-
-    if (query.point_count == 0U ||
-        query.point_count >
-            phase14_facet_top_k_proposal_maximum_point_count) {
-      record.failure_code = static_cast<std::uint64_t>(
-          Phase14FacetTopKProposalFailureCode::invalid_point_count);
-      records[query_offset] = record;
-      if (query_count - query_offset <= stride) {
-        break;
-      }
-      query_offset += stride;
-      continue;
-    }
-
+    const bool point_count_valid =
+        query->point_count != 0U &&
+        query->point_count <=
+            phase14_facet_top_k_proposal_maximum_point_count;
     const std::size_t source_point_count =
-        static_cast<std::size_t>(query.point_count);
-    std::uint64_t source_point_ids[
-        phase14_facet_top_k_proposal_maximum_point_count]{};
-    std::size_t source_morton_positions[
-        phase14_facet_top_k_proposal_maximum_point_count]{};
-    bool source_valid = true;
+        point_count_valid
+            ? static_cast<std::size_t>(query->point_count)
+            : 0U;
+    bool source_valid = point_count_valid;
+    if (!point_count_valid) {
+      failure_code = static_cast<std::uint64_t>(
+          Phase14FacetTopKProposalFailureCode::invalid_point_count);
+    }
     for (std::size_t source = 0U;
          source < source_point_count;
          ++source) {
-      const std::uint64_t source_point_id = query.point_ids[source];
+      const std::uint64_t source_point_id =
+          query->point_ids[source];
       const std::uint64_t source_morton_position =
-          query.morton_positions[source];
+          query->morton_positions[source];
       if (source_point_id >= static_cast<std::uint64_t>(point_count)) {
-        record.failure_code = static_cast<std::uint64_t>(
+        failure_code = static_cast<std::uint64_t>(
             Phase14FacetTopKProposalFailureCode::
                 source_point_out_of_range);
         source_valid = false;
@@ -659,7 +654,7 @@ __global__ void morsehgp3d_phase14_facet_top_k_proposal_kernel(
       }
       if (source_morton_position >=
           static_cast<std::uint64_t>(point_count)) {
-        record.failure_code = static_cast<std::uint64_t>(
+        failure_code = static_cast<std::uint64_t>(
             Phase14FacetTopKProposalFailureCode::
                 source_morton_position_out_of_range);
         source_valid = false;
@@ -668,31 +663,28 @@ __global__ void morsehgp3d_phase14_facet_top_k_proposal_kernel(
       if (morton_point_ids[
               static_cast<std::size_t>(source_morton_position)] !=
           source_point_id) {
-        record.failure_code = static_cast<std::uint64_t>(
+        failure_code = static_cast<std::uint64_t>(
             Phase14FacetTopKProposalFailureCode::
                 source_morton_position_mismatch);
         source_valid = false;
         break;
       }
       if (source != 0U &&
-          query.point_ids[source - 1U] >= source_point_id) {
-        record.failure_code = static_cast<std::uint64_t>(
+          query->point_ids[source - 1U] >= source_point_id) {
+        failure_code = static_cast<std::uint64_t>(
             Phase14FacetTopKProposalFailureCode::
                 non_canonical_source_key);
         source_valid = false;
         break;
       }
-      source_point_ids[source] = source_point_id;
-      source_morton_positions[source] =
-          static_cast<std::size_t>(source_morton_position);
     }
 
-    double center[kAxisCount]{};
+    double center[kAxisCount];
     if (source_valid) {
       for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
-        center[axis] = value_from_bits(query.center_bits[axis]);
+        center[axis] = value_from_bits(query->center_bits[axis]);
         if (!finite_value(center[axis])) {
-          record.failure_code = static_cast<std::uint64_t>(
+          failure_code = static_cast<std::uint64_t>(
               Phase14FacetTopKProposalFailureCode::
                   non_orderable_distance);
           source_valid = false;
@@ -702,16 +694,17 @@ __global__ void morsehgp3d_phase14_facet_top_k_proposal_kernel(
     }
 
     std::uint64_t candidate_point_ids[
-        phase14_facet_top_k_proposal_maximum_point_count]{};
+        phase14_facet_top_k_proposal_maximum_point_count];
     double candidate_squared_distances[
-        phase14_facet_top_k_proposal_maximum_point_count]{};
+        phase14_facet_top_k_proposal_maximum_point_count];
     std::size_t candidate_count = 0U;
     if (source_valid) {
       for (std::size_t source = 0U;
            source < source_point_count && source_valid;
            ++source) {
         const std::size_t source_position =
-            source_morton_positions[source];
+            static_cast<std::size_t>(
+                query->morton_positions[source]);
         const std::size_t left_count =
             window_radius < source_position
                 ? window_radius
@@ -725,15 +718,18 @@ __global__ void morsehgp3d_phase14_facet_top_k_proposal_kernel(
                   morton_point_ids,
                   source_position - offset,
                   center,
-                  source_point_ids,
-                  source_morton_positions,
+                  query->point_ids,
+                  query->morton_positions,
                   source_point_count,
                   source,
                   window_radius,
                   candidate_point_ids,
                   candidate_squared_distances,
                   candidate_count,
-                  record)) {
+                  inspected_neighbor_count,
+                  floating_distance_evaluation_count,
+                  floating_rejection_count,
+                  failure_code)) {
             source_valid = false;
             break;
           }
@@ -756,15 +752,18 @@ __global__ void morsehgp3d_phase14_facet_top_k_proposal_kernel(
                   morton_point_ids,
                   source_position + offset,
                   center,
-                  source_point_ids,
-                  source_morton_positions,
+                  query->point_ids,
+                  query->morton_positions,
                   source_point_count,
                   source,
                   window_radius,
                   candidate_point_ids,
                   candidate_squared_distances,
                   candidate_count,
-                  record)) {
+                  inspected_neighbor_count,
+                  floating_distance_evaluation_count,
+                  floating_rejection_count,
+                  failure_code)) {
             source_valid = false;
             break;
           }
@@ -772,8 +771,6 @@ __global__ void morsehgp3d_phase14_facet_top_k_proposal_kernel(
       }
     }
 
-    record.candidate_count =
-        static_cast<std::uint64_t>(candidate_count);
     for (std::size_t candidate = 1U;
          candidate < candidate_count;
          ++candidate) {
@@ -787,12 +784,23 @@ __global__ void morsehgp3d_phase14_facet_top_k_proposal_kernel(
       }
       candidate_point_ids[insertion] = point_id;
     }
+    Phase14FacetTopKProposalDeviceRecord* record =
+        records + query_offset;
+    record->query_index = query->query_index;
+    record->key_fingerprint = query->key_fingerprint;
+    record->buffer_epoch = buffer_epoch;
+    record->candidate_count =
+        static_cast<std::uint64_t>(candidate_count);
+    record->inspected_neighbor_count = inspected_neighbor_count;
+    record->floating_distance_evaluation_count =
+        floating_distance_evaluation_count;
+    record->floating_rejection_count = floating_rejection_count;
+    record->failure_code = failure_code;
     for (std::size_t candidate = 0U;
          candidate < candidate_count;
          ++candidate) {
-      record.candidates[candidate] = candidate_point_ids[candidate];
+      record->candidates[candidate] = candidate_point_ids[candidate];
     }
-    records[query_offset] = record;
 
     if (query_count - query_offset <= stride) {
       break;
