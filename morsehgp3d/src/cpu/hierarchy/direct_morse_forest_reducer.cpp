@@ -9,6 +9,7 @@
 #include <numeric>
 #include <span>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -500,6 +501,68 @@ bool ExactDirectMorseForestReducerFoldResult::certified_atomic_rejection()
          !forbidden_global_structure_materialized &&
          !public_status_claimed &&
          pre_fold_locator_stamp == post_fold_locator_stamp;
+}
+
+bool ExactDirectMorseForestLiveCommitResult::certified_live_commit()
+    const noexcept {
+  return schema_version == direct_morse_forest_live_commit_schema_version &&
+         scientific_delta.has_value() &&
+         source_batch_index == scientific_delta->source_batch_index &&
+         pre_commit_executor_batch_index == source_batch_index &&
+         post_commit_executor_batch_index == successor_batch_index &&
+         ticket_was_valid_and_unconsumed &&
+         shared_session_seal_matches &&
+         source_epoch_and_full_cursor_match &&
+         exact_scientific_delta_provenance_minted &&
+         reducer_and_executor_share_locator_instance &&
+         reducer_and_executor_batch_cursors_match &&
+         executor_commit_capacity_preflighted &&
+         all_fallible_scientific_work_precedes_irreversible_mutation &&
+         reducer_fold_attempted &&
+         reducer_fold.certified_committed_batch() &&
+         reducer_fold.source_batch_index == source_batch_index &&
+         reducer_fold.pre_fold_locator_stamp ==
+             pre_commit_locator_stamp &&
+         reducer_fold.post_fold_locator_stamp ==
+             post_commit_locator_stamp &&
+         reducer_committed_before_executor_cursor &&
+         no_fallible_operation_after_reducer_commit &&
+         executor_cursor_advanced &&
+         scientific_delta_moved_to_result && ticket_consumed &&
+         !executor_cursor_unchanged_on_rejection &&
+         !locator_unchanged_on_rejection &&
+         !independent_geometry_replay_performed &&
+         !forbidden_global_structure_materialized &&
+         !public_status_claimed &&
+         decision == ExactDirectMorseForestLiveCommitDecision::
+                         complete_live_reducer_then_cursor_commit;
+}
+
+bool ExactDirectMorseForestLiveCommitResult::certified_atomic_rejection()
+    const noexcept {
+  const bool fold_is_atomic =
+      reducer_fold_attempted
+          ? reducer_fold.certified_atomic_rejection()
+          : reducer_fold.decision ==
+                ExactDirectMorseForestReducerFoldDecision::not_folded;
+  return schema_version == direct_morse_forest_live_commit_schema_version &&
+         decision !=
+             ExactDirectMorseForestLiveCommitDecision::not_committed &&
+         decision != ExactDirectMorseForestLiveCommitDecision::
+                         complete_live_reducer_then_cursor_commit &&
+         fold_is_atomic &&
+         !reducer_committed_before_executor_cursor &&
+         !executor_cursor_advanced &&
+         !scientific_delta_moved_to_result &&
+         !scientific_delta.has_value() && ticket_consumed &&
+         executor_cursor_unchanged_on_rejection &&
+         locator_unchanged_on_rejection &&
+         pre_commit_executor_batch_index ==
+             post_commit_executor_batch_index &&
+         pre_commit_locator_stamp == post_commit_locator_stamp &&
+         !independent_geometry_replay_performed &&
+         !forbidden_global_structure_materialized &&
+         !public_status_claimed;
 }
 
 class ExactDirectMorseForestReducer::Impl {
@@ -1791,6 +1854,270 @@ ExactDirectMorseForestReducer::fold(
     throw std::logic_error("a moved forest reducer cannot fold");
   }
   return impl_->fold(batch);
+}
+
+ExactDirectMorseForestLiveCommitResult
+ExactDirectMorseForestReducer::fold_prepared_ticket(
+    ExactDirectSparseFacetDescentAnchoredBatchExecutor& executor,
+    ExactDirectSparseFacetDescentAnchoredBatchExecutor::
+        PreparedTopKProposalBatch&& prepared) {
+  if (!impl_) {
+    throw std::logic_error(
+        "a moved forest reducer cannot commit a live batch");
+  }
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          ExactDirectSparseFacetDescentBatchExecutionResult>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          ExactDirectSparseFacetDescentClosureTopKProposalConsumptionAudit>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          ExactDirectMorseForestLiveCommitResult>);
+  static_assert(
+      std::is_nothrow_move_assignable_v<
+          ExactDirectMorseForestReducerFoldResult>);
+
+  ExactDirectMorseForestLiveCommitResult result;
+  result.source_batch_index = prepared.source_batch_index_;
+  result.successor_batch_index = prepared.successor_batch_index_;
+  result.pre_commit_executor_batch_index =
+      executor.next_source_batch_index_;
+  result.post_commit_executor_batch_index =
+      result.pre_commit_executor_batch_index;
+  result.pre_commit_locator_stamp = impl_->locator().snapshot_stamp();
+  result.post_commit_locator_stamp = result.pre_commit_locator_stamp;
+
+  const std::size_t pre_epoch = executor.source_epoch_;
+  const std::size_t pre_batch_index =
+      executor.next_source_batch_index_;
+  const std::size_t pre_chunk_index =
+      executor.next_source_chunk_index_;
+  const std::size_t pre_lane_index =
+      executor.next_source_lane_index_;
+  const std::size_t pre_family_index =
+      executor.next_source_family_index_;
+  const std::size_t pre_arm_seed_index =
+      executor.next_source_arm_seed_index_;
+
+  const auto executor_cursor_unchanged = [&]() noexcept {
+    return executor.source_epoch_ == pre_epoch &&
+           executor.next_source_batch_index_ == pre_batch_index &&
+           executor.next_source_chunk_index_ == pre_chunk_index &&
+           executor.next_source_lane_index_ == pre_lane_index &&
+           executor.next_source_family_index_ == pre_family_index &&
+           executor.next_source_arm_seed_index_ == pre_arm_seed_index;
+  };
+  const auto consume_ticket = [&]() noexcept {
+    prepared.session_seal_.reset();
+    prepared.exact_scientific_delta_provenance_minted_ = false;
+    prepared.valid_ = false;
+    prepared.consumed_ = true;
+    result.ticket_consumed = true;
+  };
+  const auto reject =
+      [&](ExactDirectMorseForestLiveCommitDecision decision,
+          bool account_rejection) {
+        if (account_rejection) {
+          if (executor.audit_.sealed_ticket_rejected_commit_count !=
+              std::numeric_limits<std::size_t>::max()) {
+            ++executor.audit_.sealed_ticket_rejected_commit_count;
+          } else {
+            decision = ExactDirectMorseForestLiveCommitDecision::
+                no_live_commit_executor_audit_capacity_exhausted;
+          }
+        }
+        consume_ticket();
+        result.post_commit_executor_batch_index =
+            executor.next_source_batch_index_;
+        result.post_commit_locator_stamp =
+            impl_->locator().snapshot_stamp();
+        result.executor_cursor_unchanged_on_rejection =
+            executor_cursor_unchanged();
+        result.locator_unchanged_on_rejection =
+            result.post_commit_locator_stamp ==
+            result.pre_commit_locator_stamp;
+        result.decision = decision;
+        return result;
+      };
+
+  if (executor.audit_.sealed_ticket_commit_attempt_count ==
+      std::numeric_limits<std::size_t>::max()) {
+    return reject(
+        ExactDirectMorseForestLiveCommitDecision::
+            no_live_commit_executor_audit_capacity_exhausted,
+        false);
+  }
+  ++executor.audit_.sealed_ticket_commit_attempt_count;
+
+  result.ticket_was_valid_and_unconsumed =
+      prepared.valid_ && !prepared.consumed_;
+  if (!result.ticket_was_valid_and_unconsumed) {
+    return reject(
+        ExactDirectMorseForestLiveCommitDecision::
+            no_live_commit_invalid_moved_or_consumed_ticket,
+        true);
+  }
+
+  result.shared_session_seal_matches =
+      prepared.session_seal_ &&
+      prepared.session_seal_ == executor.session_seal_;
+  if (!result.shared_session_seal_matches) {
+    return reject(
+        ExactDirectMorseForestLiveCommitDecision::
+            no_live_commit_foreign_session,
+        true);
+  }
+
+  result.source_epoch_and_full_cursor_match =
+      prepared.source_epoch_ == executor.source_epoch_ &&
+      prepared.source_batch_index_ ==
+          executor.next_source_batch_index_ &&
+      prepared.source_chunk_index_ ==
+          executor.next_source_chunk_index_ &&
+      prepared.source_lane_index_ ==
+          executor.next_source_lane_index_ &&
+      prepared.source_family_index_ ==
+          executor.next_source_family_index_ &&
+      prepared.source_arm_seed_index_ ==
+          executor.next_source_arm_seed_index_ &&
+      !executor.complete();
+  if (!result.source_epoch_and_full_cursor_match) {
+    return reject(
+        ExactDirectMorseForestLiveCommitDecision::
+            no_live_commit_stale_epoch_or_cursor,
+        true);
+  }
+
+  result.exact_scientific_delta_provenance_minted =
+      prepared.exact_scientific_delta_provenance_minted_ &&
+      prepared.preparation_.scientific_delta.has_value();
+  result.reducer_and_executor_share_locator_instance =
+      executor.locator_ == &impl_->locator();
+  const bool locator_snapshot_matches =
+      result.reducer_and_executor_share_locator_instance &&
+      prepared.locator_snapshot_stamp_ ==
+          result.pre_commit_locator_stamp &&
+      executor.locator_->snapshot_stamp() ==
+          result.pre_commit_locator_stamp;
+  if (!result.exact_scientific_delta_provenance_minted ||
+      !locator_snapshot_matches) {
+    return reject(
+        result.exact_scientific_delta_provenance_minted
+            ? ExactDirectMorseForestLiveCommitDecision::
+                  no_live_commit_distinct_locator_or_snapshot
+            : ExactDirectMorseForestLiveCommitDecision::
+                  no_live_commit_invalid_moved_or_consumed_ticket,
+        true);
+  }
+
+  result.reducer_and_executor_batch_cursors_match =
+      impl_->next_batch_index() ==
+          executor.next_source_batch_index_;
+  if (!result.reducer_and_executor_batch_cursors_match) {
+    return reject(
+        ExactDirectMorseForestLiveCommitDecision::
+            no_live_commit_reducer_cursor_mismatch,
+        true);
+  }
+
+  if (executor.audit_.sealed_ticket_rejected_commit_count ==
+          std::numeric_limits<std::size_t>::max() ||
+      executor.audit_.accepted_batch_count ==
+          std::numeric_limits<std::size_t>::max() ||
+      executor.audit_.sealed_ticket_accepted_commit_count ==
+          std::numeric_limits<std::size_t>::max() ||
+      executor.audit_.sealed_ticket_exact_replay_avoided_count ==
+          std::numeric_limits<std::size_t>::max() ||
+      executor.source_epoch_ ==
+          std::numeric_limits<std::size_t>::max()) {
+    return reject(
+        ExactDirectMorseForestLiveCommitDecision::
+            no_live_commit_executor_audit_capacity_exhausted,
+        false);
+  }
+  result.executor_commit_capacity_preflighted = true;
+
+  ExactDirectMorseForestReducerBatch projected;
+  try {
+    projected = project_exact_direct_morse_forest_reducer_batch(
+        *prepared.preparation_.scientific_delta);
+  } catch (const std::invalid_argument&) {
+    return reject(
+        ExactDirectMorseForestLiveCommitDecision::
+            no_live_commit_invalid_moved_or_consumed_ticket,
+        true);
+  }
+  result.all_fallible_scientific_work_precedes_irreversible_mutation = true;
+  result.reducer_fold_attempted = true;
+  result.reducer_fold = impl_->fold(projected);
+  if (!result.reducer_fold.certified_committed_batch()) {
+    if (!result.reducer_fold.certified_atomic_rejection() ||
+        !executor_cursor_unchanged() ||
+        impl_->locator().snapshot_stamp() !=
+            result.pre_commit_locator_stamp) {
+      std::terminate();
+    }
+    return reject(
+        ExactDirectMorseForestLiveCommitDecision::
+            no_live_commit_reducer_fold_rejected,
+        true);
+  }
+
+  // From here to the synchronized successor cursor there is no allocation,
+  // hash, probe, quotient, replay or budget decision.  Any contradiction is
+  // therefore an internal fail-stop contract breach, not a recoverable
+  // rejection after an irreversible locator commit.
+  if (result.reducer_fold.source_batch_index !=
+          result.source_batch_index ||
+      result.reducer_fold.pre_fold_locator_stamp !=
+          result.pre_commit_locator_stamp ||
+      result.reducer_fold.post_fold_locator_stamp !=
+          impl_->locator().snapshot_stamp() ||
+      !executor_cursor_unchanged()) {
+    std::terminate();
+  }
+  result.reducer_committed_before_executor_cursor = true;
+  result.no_fallible_operation_after_reducer_commit = true;
+
+  result.scientific_delta.emplace(
+      std::move(*prepared.preparation_.scientific_delta));
+  prepared.preparation_.scientific_delta.reset();
+  if (prepared.preparation_.proposal_consumption_audit.has_value()) {
+    result.operational_audit.emplace(std::move(
+        *prepared.preparation_.proposal_consumption_audit));
+    prepared.preparation_.proposal_consumption_audit.reset();
+  }
+
+  executor.next_source_batch_index_ =
+      prepared.successor_batch_index_;
+  executor.next_source_chunk_index_ =
+      prepared.successor_chunk_index_;
+  executor.next_source_lane_index_ =
+      prepared.successor_lane_index_;
+  executor.next_source_family_index_ =
+      prepared.successor_family_index_;
+  executor.next_source_arm_seed_index_ =
+      prepared.successor_arm_seed_index_;
+  ++executor.source_epoch_;
+  ++executor.audit_.accepted_batch_count;
+  ++executor.audit_.sealed_ticket_accepted_commit_count;
+  ++executor.audit_.sealed_ticket_exact_replay_avoided_count;
+  executor.audit_.sealed_ticket_or_delta_retained_by_session = false;
+
+  result.executor_cursor_advanced = true;
+  result.scientific_delta_moved_to_result = true;
+  consume_ticket();
+  result.post_commit_executor_batch_index =
+      executor.next_source_batch_index_;
+  result.post_commit_locator_stamp =
+      impl_->locator().snapshot_stamp();
+  result.decision = ExactDirectMorseForestLiveCommitDecision::
+      complete_live_reducer_then_cursor_commit;
+  if (!result.certified_live_commit()) {
+    std::terminate();
+  }
+  return result;
 }
 
 const ExactDirectSparsePositiveFacetLocator&

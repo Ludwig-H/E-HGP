@@ -184,6 +184,20 @@ execution_budget() {
   return {3U, 256U, 256U, 2560U, 256U};
 }
 
+[[nodiscard]] ExactDirectSparseFacetTopKProposalTranscriptResult
+empty_proposal_transcript(
+    std::size_t source_batch_index,
+    const morsehgp3d::exact::ExactLevel& closed_batch_squared_level,
+    const ExactDirectSparsePositiveFacetLocator& locator) {
+  const std::array<ExactDirectSparseFacetTopKProposalRecord, 0U> records{};
+  return build_exact_direct_sparse_facet_top_k_proposal_transcript(
+      {source_batch_index,
+       closed_batch_squared_level,
+       locator.snapshot_stamp()},
+      records,
+      {0U, 0U, 0U, 0U, 0U});
+}
+
 struct Scenario {
   CanonicalPointCloud cloud;
   MortonLbvhIndex index;
@@ -259,7 +273,8 @@ struct Scenario {
 [[nodiscard]] ExactDirectMorseForestJournalResult run_stream(
     const Scenario& scenario,
     std::uint64_t maximum_batch_count,
-    bool exercise_atomic_rejection) {
+    bool exercise_atomic_rejection,
+    bool use_live_transaction) {
   const auto industrial_config = plan_config(maximum_batch_count);
   const auto observed_plan =
       build_exact_direct_sparse_facet_descent_batch_plan(
@@ -294,12 +309,93 @@ struct Scenario {
       observed_plan,
       reducer.strict_locator());
   bool terminal_substitution_exercised = false;
+  bool stale_sibling_exercised = false;
+  bool live_fold_rejection_exercised = false;
 
   while (!executor.complete()) {
     const std::size_t batch_index = executor.next_source_batch_index();
     const ExactDirectSparseFacetWitness witness{
         authority_id,
         (static_cast<std::uint64_t>(batch_index) + 1U) * 3U};
+    if (use_live_transaction) {
+      const auto transcript = empty_proposal_transcript(
+          batch_index,
+          scenario.event_journal.batches[batch_index].squared_level,
+          reducer.strict_locator());
+      if (!live_fold_rejection_exercised) {
+        auto mismatched_closure_budget =
+            forest_budget().closure_budget;
+        --mismatched_closure_budget.maximum_node_count;
+        auto mismatched_ticket =
+            executor.prepare_next_sealed_with_top_k_proposal_transcript(
+                witness,
+                execution_budget(),
+                mismatched_closure_budget,
+                transcript);
+        check(
+            mismatched_ticket.prepared(),
+            "14H prepares a valid ticket whose closure budget differs from the reducer contract");
+        const auto stamp_before =
+            reducer.strict_locator().snapshot_stamp();
+        const auto rejected =
+            reducer.fold_prepared_ticket(
+                executor, std::move(mismatched_ticket));
+        check(
+            rejected.certified_atomic_rejection() &&
+                rejected.reducer_fold_attempted &&
+                rejected.decision ==
+                    ExactDirectMorseForestLiveCommitDecision::
+                        no_live_commit_reducer_fold_rejected &&
+                executor.next_source_batch_index() == batch_index &&
+                reducer.next_source_batch_index() == batch_index &&
+                reducer.strict_locator().snapshot_stamp() == stamp_before,
+            "a valid shared ticket rejected by the reducer leaves locator and both cursors unchanged");
+        live_fold_rejection_exercised = true;
+      }
+      auto ticket =
+          executor.prepare_next_sealed_with_top_k_proposal_transcript(
+              witness,
+              execution_budget(),
+              forest_budget().closure_budget,
+              transcript);
+      check(
+          ticket.prepared(),
+          "14H mints one sealed live reducer ticket");
+      auto sibling =
+          executor.prepare_next_sealed_with_top_k_proposal_transcript(
+              witness,
+              execution_budget(),
+              forest_budget().closure_budget,
+              transcript);
+      const auto committed =
+          reducer.fold_prepared_ticket(executor, std::move(ticket));
+      check(
+          committed.certified_live_commit() &&
+              committed.scientific_delta.has_value() &&
+              committed.reducer_fold.certified_committed_batch() &&
+              executor.next_source_batch_index() == batch_index + 1U &&
+              reducer.next_source_batch_index() == batch_index + 1U,
+          "the live transaction folds the reducer before one allocation-free 14H cursor advance");
+      if (!stale_sibling_exercised) {
+        const auto stamp_before =
+            reducer.strict_locator().snapshot_stamp();
+        const auto stale =
+            reducer.fold_prepared_ticket(
+                executor, std::move(sibling));
+        check(
+            stale.certified_atomic_rejection() &&
+                stale.decision ==
+                    ExactDirectMorseForestLiveCommitDecision::
+                        no_live_commit_stale_epoch_or_cursor &&
+                executor.next_source_batch_index() == batch_index + 1U &&
+                reducer.next_source_batch_index() == batch_index + 1U &&
+                reducer.strict_locator().snapshot_stamp() == stamp_before,
+            "a stale sibling ticket is consumed without a second cursor or reducer mutation");
+        stale_sibling_exercised = true;
+      }
+      continue;
+    }
+
     const auto delta = executor.prepare_next(
         witness, execution_budget(), forest_budget().closure_budget);
     check(
@@ -378,6 +474,11 @@ struct Scenario {
         terminal_substitution_exercised,
         "the fixture exercised a distinct terminal-carrier substitution");
   }
+  if (use_live_transaction) {
+    check(
+        stale_sibling_exercised && live_fold_rejection_exercised,
+        "the live fixture exercised stale-capability and reducer-fold rejection paths");
+  }
   return reducer.finish();
 }
 
@@ -404,6 +505,78 @@ void test_final_root_budget_is_rejected_at_open() {
       "an insufficient derivable final-root budget is rejected at open");
 }
 
+void test_live_transaction_rejects_a_distinct_reducer_locator() {
+  const Scenario scenario = tetrahedron();
+  const auto industrial_config = plan_config(2U);
+  const auto observed_plan =
+      build_exact_direct_sparse_facet_descent_batch_plan(
+          scenario.cloud,
+          scenario.facade,
+          scenario.event_journal,
+          seed_budget(),
+          scenario.seed_journal,
+          industrial_config,
+          plan_budget());
+  ExactDirectMorseForestReducer bound_reducer(
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      forest_budget(),
+      forest_config());
+  ExactDirectMorseForestReducer foreign_reducer(
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      forest_budget(),
+      forest_config());
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      industrial_config,
+      plan_budget(),
+      observed_plan,
+      bound_reducer.strict_locator());
+  const ExactDirectSparseFacetWitness witness{authority_id, 3U};
+  const auto transcript = empty_proposal_transcript(
+      0U,
+      scenario.event_journal.batches[0U].squared_level,
+      bound_reducer.strict_locator());
+  auto ticket =
+      executor.prepare_next_sealed_with_top_k_proposal_transcript(
+          witness,
+          execution_budget(),
+          forest_budget().closure_budget,
+          transcript);
+  const auto bound_stamp =
+      bound_reducer.strict_locator().snapshot_stamp();
+  const auto foreign_stamp =
+      foreign_reducer.strict_locator().snapshot_stamp();
+  const auto rejected =
+      foreign_reducer.fold_prepared_ticket(
+          executor, std::move(ticket));
+  check(
+      rejected.certified_atomic_rejection() &&
+          rejected.decision ==
+              ExactDirectMorseForestLiveCommitDecision::
+                  no_live_commit_distinct_locator_or_snapshot &&
+          executor.next_source_batch_index() == 0U &&
+          bound_reducer.next_source_batch_index() == 0U &&
+          foreign_reducer.next_source_batch_index() == 0U &&
+          bound_reducer.strict_locator().snapshot_stamp() ==
+              bound_stamp &&
+          foreign_reducer.strict_locator().snapshot_stamp() ==
+              foreign_stamp,
+      "a live ticket cannot be folded through an equal-looking but distinct reducer locator");
+}
+
 void test_incremental_identity_and_chunk_independence() {
   const Scenario scenario = tetrahedron();
   const auto resident = build_exact_direct_morse_forest_journal(
@@ -415,8 +588,10 @@ void test_incremental_identity_and_chunk_independence() {
       scenario.seed_journal,
       forest_budget(),
       forest_config());
-  const auto one_batch_chunks = run_stream(scenario, 1U, true);
-  const auto two_batch_chunks = run_stream(scenario, 2U, false);
+  const auto one_batch_chunks =
+      run_stream(scenario, 1U, true, false);
+  const auto two_batch_chunks =
+      run_stream(scenario, 2U, false, true);
 
   check(
       resident.certified_conditional_h0_candidate() &&
@@ -439,7 +614,7 @@ void test_gabriel_arm_may_descend_to_a_different_terminal_key() {
       scenario.seed_journal,
       forest_budget(),
       forest_config());
-  const auto streaming = run_stream(scenario, 2U, false);
+  const auto streaming = run_stream(scenario, 2U, false, true);
   check(
       streaming == resident &&
           streaming.certified_conditional_h0_candidate(),
@@ -450,6 +625,7 @@ void test_gabriel_arm_may_descend_to_a_different_terminal_key() {
 
 int main() {
   test_final_root_budget_is_rejected_at_open();
+  test_live_transaction_rejects_a_distinct_reducer_locator();
   test_incremental_identity_and_chunk_independence();
   test_gabriel_arm_may_descend_to_a_different_terminal_key();
   if (failures != 0) {

@@ -1011,7 +1011,17 @@ Pour un lot égal, tous les carriers $R$ et toutes les selles $L$ sont gelés. L
 
 L'état persistant contient seulement les naissances réellement fermées, le locator sparse, un parent DSU dense par carrier, les records de forêt et des compteurs par ordre. Les entrées du lot sont des spans synchrones et ne sont pas gardées. Le scratch est borné par les clés, bras, selles, hyperarêtes et groupes du lot courant. Aucun atlas global de facettes, cofaces, incidences, cellules, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est matérialisé. La reprise locale reconstruit linéairement cet état depuis le préfixe de chunks et produit une sortie récursivement identique au builder résident sur les fixtures couvertes; la transaction de publication vivante 14H--locator--reducer, les jalons 1 M et 10 M+, M.1, le SLO et le statut public restent ouverts.
 
-### 14.4 Snapshot Morton/LBVH device recertifié
+### 14.4 Transaction vivante 15D
+
+Le commit vivant 15D est `reference_cpu / hgp_reduced / budgeted / architecture_only`. `ExactDirectMorseForestReducer::fold_prepared_ticket` reçoit une capability 14H mobile et à usage unique préparée sans avance du curseur. Elle engage le sceau de session, l'epoch et le curseur source complets, leur successeur prévalidé, le stamp locator strictement pré-lot et la provenance exacte du delta compact.
+
+L'executor doit référencer l'instance exacte du locator possédé par le reducer, et leurs indices du prochain lot doivent coïncider. Une égalité de contenu ou de stamp entre deux locators distincts ne transfère aucune autorité. Ticket invalide, déplacé, consommé, étranger ou stale, substitution de snapshot, curseur désaligné et capacité d'audit épuisée sont refusés avant mutation; le ticket est consommé et locator, DSU, forêt et curseur 14H restent inchangés.
+
+Pendant que 14H est gelé, le reducer effectue toute opération faillible : projection, allocations, probes, budgets, quotient complet, staging et fold atomique. Après succès du locator et de l'état scientifique, le contrat n'autorise plus que des moves `noexcept`, affectations scalaires et incréments préflightés vers le successeur déjà engagé. Aucun hash, lookup, budget, allocation, quotient ou rejeu géométrique indépendant ne peut survenir dans cette zone; toute contradiction y est fail-stop.
+
+Le chemin conserve le delta compact, locator sparse, DSU et arènes de forêt de 15C. Il ne construit aucun catalogue global de facettes ou cofaces, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Ce contrat est exclusivement in-process : il ne sérialise pas le ticket, ne checkpointte pas les états scientifiques et ne joint pas encore sa linéarisation au remplacement de `HEAD`. Il ne revendique donc ni reprise atomique après crash, ni jalon 1 M ou 10 M+, ni SLO, ni sortie de Phase 15, ni statut public.
+
+### 14.5 Snapshot Morton/LBVH device recertifié
 
 Le constructeur 14M a pour contrat `cuda_g4 / hgp_reduced / device_morton_lbvh_snapshot_import / architecture_only`. Il accepte un nuage canonique non vide et une capacité fixe $C\leq\mathrm{INT\_MAX}$. Les propositions device ne sont jamais scientifiques : chaque bin ambigu est recalculé exactement avant le code Morton, puis l'import CPU recertifie toutes les coordonnées même si le GPU les avait déclarées non ambiguës.
 

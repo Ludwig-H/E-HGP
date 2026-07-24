@@ -1342,6 +1342,16 @@ Le reducer garde uniquement locator sparse, DSU union-rank à identité canoniqu
 
 La validation courte emploie les vrais stamps successifs du tétraèdre, rouvre deux chunks, replie chacun exactement une fois et obtient une forêt récursivement identique au builder résident. Les découpages un et deux lots donnent la même sortie. La fixture permanente Gabriel conserve la descente `AC` vers le terminal `DE`; une substitution de terminal échoue par probe sans mutation. Les quatre CTests ciblés passent en environ trois secondes, dont l'executor 14D domine. Cette tranche ferme le noyau de réduction résident--streaming et sa reconstruction depuis le préfixe durable, mais pas la transaction vivante 14H--locator--reducer, le jalon un million, 10 M+, le SLO 50 k, M.1 ou un statut public.
 
+### Tranche 15D — commit vivant composite en mémoire
+
+15D ajoute `ExactDirectMorseForestReducer::fold_prepared_ticket` sous `reference_cpu / hgp_reduced / budgeted / architecture_only`. L'entrée est la capability 14H mobile et à usage unique déjà préparée par l'executor, avec provenance exacte du delta, sceau de session, epoch, curseur source et successeur complets et stamp du locator strictement pré-lot. Le reducer exige que l'executor référence exactement son instance de locator, et non un état seulement égal en valeur, puis vérifie que leurs curseurs de lots coïncident.
+
+Tant que le curseur 14H est gelé, le reducer effectue la projection, toutes les allocations, probes, décisions de budget, construction du quotient, préparation du payload et tentative atomique de fold. Un refus du reducer consomme le ticket mais laisse inchangés locator, DSU, forêt et curseur 14H. Après le commit du locator et de l'état scientifique, les seules opérations restantes sont des moves `noexcept`, des affectations scalaires et des incréments préflightés; le curseur 14H rejoint alors le même successeur sans rejeu géométrique indépendant. Une contradiction dans cette zone irréversible est fail-stop et ne peut pas être reclassée en rejet.
+
+Les tickets déplacés, consommés, étrangers ou devenus stale sont rejetés atomiquement. Un locator distinct, même porteur du même stamp, et un désalignement entre curseurs reducer et executor le sont aussi. Le chemin conserve seulement le delta compact et les états sparse de 15C; il ne construit aucune facette ou coface globale, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur.
+
+Cette transaction est exclusivement vivante et en mémoire. Elle ne lie pas encore le commit composite au remplacement durable de `HEAD`, ne checkpointte pas locator, DSU ou forêt et ne ferme ni la reprise après crash de cette progression, ni le jalon un million, ni 10 M+, ni le SLO 50 k, M.1, la Phase 15 ou l'entrée de la Phase 16.
+
 ### Travaux
 
 - planificateur de lots selon cinq budgets typés : device, RAM hôte, scratch et sortie en octets, temps interne en nanosecondes monotones avec réserve non prêtable;
@@ -1369,6 +1379,8 @@ La validation courte emploie les vrais stamps successifs du tétraèdre, rouvre 
 - kill entre écriture, `fsync`, renommage et publication du manifeste;
 - reprise avec version incompatible refusée;
 - dix millions de points sans OOM lorsque le certificat reste sparse, avec arrêt budgétaire transactionnel sinon.
+
+Après un succès réel à 10 000 001 points, une extension conditionnelle peut tenter 50 000 000 puis 100 000 000 points, strictement dans cet ordre. Chaque échelon exige avant lancement une borne mémoire device--hôte--scratch--sortie admissible, une enveloppe de temps bornée et une frontière de reprise vérifiée; après interruption contrôlée, la reprise doit reproduire le même préfixe. Une construction LBVH seule, un composant isolé ou un pipeline scientifique interrompu ne qualifie pas l'échelon et n'autorise aucune revendication produit.
 
 ### Porte de sortie
 

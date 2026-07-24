@@ -16,6 +16,8 @@
 
 namespace morsehgp3d::hierarchy {
 
+class ExactDirectMorseForestReducer;
+
 inline constexpr std::uint32_t
     direct_sparse_facet_descent_batch_executor_schema_version = 2U;
 inline constexpr std::string_view
@@ -789,6 +791,7 @@ class ExactDirectSparseFacetDescentAnchoredBatchExecutor {
     bool consumed_{false};
 
     friend class ExactDirectSparseFacetDescentAnchoredBatchExecutor;
+    friend class ExactDirectMorseForestReducer;
   };
 
   ExactDirectSparseFacetDescentAnchoredBatchExecutor(
@@ -923,6 +926,8 @@ class ExactDirectSparseFacetDescentAnchoredBatchExecutor {
   std::size_t next_source_family_index_{};
   std::size_t next_source_arm_seed_index_{};
   ExactDirectSparseFacetDescentBatchExecutionSessionAudit audit_{};
+
+  friend class ExactDirectMorseForestReducer;
 };
 
 }  // namespace morsehgp3d::hierarchy

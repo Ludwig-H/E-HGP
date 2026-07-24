@@ -1234,6 +1234,26 @@ Le test propre au reducer exécute le même flot avec caps de chunks un et deux,
 
 Ces tests restent hôte et courts. Ils n'ouvrent ni le commit vivant conjoint 14H--locator--reducer, ni les merges externes, le jalon un million, 10 M+, CUDA, GCP, le SLO 50 k, M.1 ou un statut public.
 
+### 14.10 Validation courte de Phase 15D
+
+La voie vivante prépare deux tickets 14H sœurs sur le même lot sans avancer l'executor. Le premier appel à `fold_prepared_ticket` doit terminer le fold du reducer, puis avancer exactement une fois le curseur 14H au successeur déjà prévalidé. Le second ticket est alors stale : il doit être consommé sans second fold, sans avance supplémentaire et sans modification du stamp locator.
+
+Une fixture à deux reducers égaux en apparence lie l'executor au locator du premier et tente le commit avec le second. L'identité d'instance doit être exigée : décision `no_live_commit_distinct_locator_or_snapshot`, curseurs inchangés, stamps inchangés et aucune mutation scientifique. Les branches ticket déplacé ou consommé, sceau étranger, epoch ou curseur stale, curseur reducer désaligné et capacité d'audit insuffisante doivent toutes précéder l'irréversibilité.
+
+Une capability autrement valide est préparée avec `closure_budget.maximum_node_count=255` face au budget 256 du reducer. Le contrôle doit atteindre le fold, produire `no_live_commit_reducer_fold_rejected`, consommer le ticket et conserver les deux curseurs ainsi que le stamp locator. Cette fixture établit qu'un rejet faillible du reducer demeure à gauche du commit 14H même lorsque sceau, locator, epoch et curseur sont tous valides.
+
+Sur succès, l'audit doit attester que toute opération faillible du reducer a précédé son commit, que le reducer a committé avant l'avance 14H, que la zone suivante n'a effectué ni allocation, ni lookup, ni hash, ni décision de budget, ni quotient ou rejeu géométrique indépendant, et que le delta compact existant a seulement été déplacé. Le résultat final du tétraèdre et de la fixture Gabriel reste récursivement identique au builder résident.
+
+Le test inspecte enfin les compteurs négatifs : aucune facette ou coface globale, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est matérialisée. Il reste court et hôte. Il ne couvre ni publication `HEAD`, ni liaison au store, ni crash de processus, merge externe, mmap, jalon un million, 10 M+, CUDA, GCP, SLO 50 k, M.1, sortie de Phase 15 ou entrée en Phase 16.
+
+### 14.11 Échelle conditionnelle au-delà de 10 M
+
+La première qualification massive porte sur 10 000 001 points et doit traverser le pipeline scientifique complet retenu pour le produit, jusqu'à la matérialisation et au checkpoint vérifiable. Un smoke de constructeur Morton/LBVH, une mesure de composant ou un préfixe scientifique n'est pas un succès de ce jalon.
+
+Seulement après ce succès, la même famille et le même contrat peuvent être tentés à 50 000 000 points, puis à 100 000 000 points seulement après succès du rang 50 M. Avant chaque lancement, le rapport doit fermer trois gates : borne mémoire pessimiste simultanée pour device, hôte, scratch et sortie sous les capacités disponibles; enveloppe de temps bornée avec arrêt transactionnel; dernier checkpoint lisible et espace suffisant pour ancien état, temporaire, merge, nouveau checkpoint et marge.
+
+Chaque rang force au moins une interruption à une frontière de chunk, rouvre uniquement le préfixe annoncé par `HEAD`, recertifie ce préfixe et compare la reprise à une exécution non interrompue sur les digests, compteurs et sorties couverts. OOM, dépassement de temps, checkpoint non certifié, budget insuffisant ou pipeline scientifique incomplet arrête l'échelle sans promotion. Les résultats doivent alors être rapportés comme borne de composant ou échec budgétaire, jamais comme capacité produit à 50 M ou 100 M.
+
 ## 15. Compteurs obligatoires
 
 Chaque exécution émet un enregistrement structuré, versionné, comprenant au minimum :
