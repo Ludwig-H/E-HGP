@@ -636,6 +636,14 @@ $$v^k_{t'}\circ h^{k+1}_{t,t'}=h^k_{t,t'}\circ v^k_t.$$
 
 Elle est vérifiée à tous les couples de seuils consécutifs de l'oracle, ainsi qu'autour de chaque niveau partagé par plusieurs ordres.
 
+Le lot court `11A-DIRECT-VERTICAL` teste séparément la couture directe conditionnelle. Il reconstruit les requêtes depuis toutes les clés de bras strictes de chaque groupe, impose un unique indice de binding représentatif par clé et refuse un indice étranger ou non représentatif. Il couvre une naissance $q_R=0$, une continuation $q_R=1$ sans nouveau nœud, un checkpoint tardif qui ne rétro-certifie pas le passé, et une multifusion $q_R\geq2$ avec comparaison de tous les enfants.
+
+Chaque graine résolue doit appartenir à l'ordre inférieur adjacent et être née au plus au niveau exact du groupe; le sweep la normalise dans l'état fermé. Une cible future, un mauvais ordre ou deux cibles présentes contradictoires imposent un échec atomique. Un label manquant ou explicitement non résolu produit une issue partielle; les cas $q_R=0$, $q_R=1$ et $q_R\geq2$ possèdent chacun une issue complète et une issue partielle distinctes. Les compteurs doivent fermer exactement les partitions des labels et des contrôles élémentaires.
+
+Le test impose aussi le niveau partagé traité post-lot par `<=a`, l'ordre canonique et les doublons de propositions, une famille adjacente vide, le compte exact des naissances sources isolées d'ordre supérieur omises, l'impossibilité de classer une cible manquante comme isolée, un trace compact $3\to2\to1$, les budgets de niveaux et de sauts exacts puis moins-un, et le rejet d'une forêt à double parent, ordre incohérent ou racine finale divergente. Le vérificateur reconstruit les requêtes, résolutions, groupes et checkpoints avant de rejeter une mutation de chaque arène.
+
+Ce CTest ne compare pas toutes les coupes Gamma et ne peut donc pas annoncer `all_naturality_squares_replayed=true`. Deux tests Python ciblés conservent séparément l'oracle de Phase 1 : unicité et naturalité Gamma à toutes les coupes exactes, puis totalité et naturalité des projections `full_pi0` et `hgp_reduced`. Aucun test long, benchmark, CUDA ou GCP n'est requis pour 11A. La porte G4 produit reste `no-go` si une flèche nécessaire est absente ou non recertifiée.
+
 ### 7.3 Cohérence des préfixes en ordre
 
 Une exécution avec $K_{\max}=10$ doit donner, après restriction, exactement le même résultat que des exécutions indépendantes avec $K_{\max}=1,2,\ldots,9$. Ce test détecte les caches inter-ordres mal invalidés et les heuristiques dont le budget dépend involontairement de l'ordre maximal.

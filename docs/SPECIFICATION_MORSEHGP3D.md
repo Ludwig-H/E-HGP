@@ -733,6 +733,10 @@ Pour $2\leq s\leq K_{\mathrm{eff}}$, une sphère de rang $s$ fournit dans `full_
 
 Les autres images sont obtenues par propagation le long des forêts. Le certificat vérifie, pour chaque événement horizontal et chaque ordre adjacent, que les deux chemins ordre–échelle donnent la même composante. Ces carrés de naturalité sont des invariants de correction, pas des métadonnées facultatives.
 
+La couture directe compacte de Phase 11A conserve une séparation plus faible et explicite. Pour chaque groupe atomique du journal direct, elle déduplique toutes les clés de bras strictes et adresse chacune par son `arm_root_binding_index` représentatif, sans recopier sa clé. Une graine externe est normalisée vers la racine active de l'ordre inférieur dans l'état fermé du niveau du groupe. Les groupes $q_R=0$, $q_R=1$ et $q_R\geq2$ appliquent respectivement ancrage, propagation avec checkpoint tardif possible, et comparaison simultanée des enfants avant ancrage du parent.
+
+Les absences et non-résolutions restent dans le payload; deux cibles présentes distinctes sont une contradiction atomique. Le périmètre réduit compte séparément, pour chaque famille adjacente, les naissances sources isolées d'ordre supérieur qui demeurent des carriers latents sans nœud source. Une cible absente n'est jamais interprétée comme isolée. Les contrôles élémentaires du journal direct ne remplacent pas les carrés entre toutes les coupes de l'oracle Gamma. Tant que l'autorité externe de localisation, la couverture des continuations et la fidélité horizontale globale ne sont pas fraîchement rejouées, cette couture garde `conditional_vertical_candidate`, `all_naturality_squares_replayed=false`, `vertical_maps_complete=false` et `public_status=not_claimed`. Ses identifiants de nœuds locaux ne sont jamais publiés comme identifiants `VerticalMap` v2.
+
 ## 12. Domaine exact et dégénérescences
 
 La première cible exacte suppose :

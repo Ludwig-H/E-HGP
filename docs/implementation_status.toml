@@ -859,11 +859,23 @@ blocking_reason = ""
 id = "11"
 title = "Tour verticale reduite"
 track = "generic_core"
-status = "ready"
+status = "completed"
 entry_gate_satisfied = true
-exit_gate_satisfied = false
+exit_gate_satisfied = true
 depends_on = ["10"]
-evidence = []
+backend = "reference_cpu"
+profile = "hgp_reduced"
+mode = "certified"
+deployment_status = "architecture_only"
+refinement_status = "conditional_vertical_candidate"
+public_status = "not_claimed"
+closure_status = "completed_administratively_from_exact_phase1_gamma_vertical_reference_plus_conditional_direct_compact_vertical_candidate"
+closure_scope = "phase1_gamma_reference_images_unique_and_natural_direct_arrows_absent_missing_unresolved_or_relatively_checked_higher_order_isolated_sources_explicitly_omitted"
+closure_bounds = "one_adjacent_order_pair_at_a_time_group_local_key_index_sort_target_forest_DSU_sweep_compact_label_group_checkpoint_arenas_no_gamma_facet_coface_incidence_cell_or_higher_order_delaunay_materialization"
+closure_validation = "passed_strict_GCC_release_targeted_CTest_one_of_one_in_0_01_seconds_covering_qR0_qR1_qR_at_least_2_reversed_key_binding_order_missing_and_unresolved_labels_partial_elementary_squares_late_checkpoint_empty_adjacent_family_omitted_isolated_births_compact_3_to_2_to_1_trace_atomic_rejections_and_budgets_plus_two_phase1_python_gamma_vertical_tests_in_0_128_seconds"
+closure_known_limits = "external_target_authority_global_morse_obligation_and_direct_horizontal_carrier_faithfulness_not_replayed_all_naturality_squares_false_vertical_maps_complete_false_G4_product_no_go_no_public_status"
+closure_gcp = "not_used_cpu_only"
+evidence = ["docs/validation/PHASE1_GATE_REVIEW.md", "docs/validation/PHASE10_GATE_REVIEW.md", "docs/validation/PHASE11_GATE_REVIEW.md", "docs/math/TOUR_VERTICALE_DIRECTE_PHASE11.md", "morsehgp3d/include/morsehgp3d/hierarchy/direct_morse_vertical_journal.hpp", "morsehgp3d/src/cpu/hierarchy/direct_morse_vertical_journal.cpp", "morsehgp3d/tests/unit/test_hierarchy_direct_morse_vertical_journal.cpp", "morsehgp3d/CMakeLists.txt", "morsehgp3d/tests/unit/CMakeLists.txt"]
 blocking_reason = ""
 
 [[phases]]
@@ -994,12 +1006,12 @@ eleventh_increment_evidence = ["morsehgp3d/src/gpu/exact_center_binary64_project
 id = "15"
 title = "Streaming a dix millions et davantage"
 track = "performance"
-status = "blocked"
-entry_gate_satisfied = false
+status = "ready"
+entry_gate_satisfied = true
 exit_gate_satisfied = false
 depends_on = ["9", "10", "11"]
-evidence = []
-blocking_reason = "Tour reduite et flux reprenable durable non fermes."
+evidence = ["docs/validation/PHASE9_GATE_REVIEW.md", "docs/validation/PHASE10_GATE_REVIEW.md", "docs/validation/PHASE11_GATE_REVIEW.md"]
+blocking_reason = ""
 
 [[phases]]
 id = "16"

@@ -1026,6 +1026,16 @@ Transformer dix forêts en une hiérarchie ordre–échelle cohérente.
 - vérifier tous les carrés de naturalité;
 - exposer une requête de suivi d'une composante en $k$ et $a$.
 
+### Journal direct compact 11A
+
+La branche exacte de référence reste celle de Phase 1 : Gamma exhaustif fournit les cibles uniques et vérifie les carrés entre toutes les coupes ouvertes et fermées consécutives. 11A ne duplique pas cet oracle dans le produit. Il construit une couture `reference_cpu / hgp_reduced / certified`, `architecture_only`, depuis le journal horizontal direct conditionnel.
+
+L'unité de requête est chaque `strict_arm_key` distincte de chaque groupe atomique, y compris les continuations $q_R=1$. Après tri et déduplication locale, la requête conserve seulement le plus petit `arm_root_binding_index` représentant la clé; aucun `PointId` n'est recopié. Une proposition externe peut être résolue, non résolue ou absente. Le journal normalise toute graine valide vers la racine active de l'ordre inférieur dans l'état fermé du même niveau exact; une cible future, de mauvais ordre ou contradictoire ferme atomiquement la construction.
+
+Les groupes $q_R=0$ ancrent leur nœud lorsque tous les labels sont résolus et concordants. Les continuations propagent le dernier checkpoint et peuvent créer un checkpoint tardif sans rétro-certifier le passé. Les groupes $q_R\geq2$ comparent les images propagées de tous leurs enfants et de tous leurs labels avant d'ancrer le parent. Les familles vides restent explicites. Chaque famille compte aussi les naissances sources isolées d'ordre supérieur omises du profil réduit; une cible absente reste non résolue et n'est jamais reclassée comme isolée. Les compteurs séparent labels manquants, non résolus et résolus, contrôles élémentaires vérifiés et non vérifiables, et contradictions.
+
+Cette structure ne sérialise aucun `VerticalMap` v2 : ses identifiants de nœuds sont locaux et l'autorité des graines n'est pas rejouée. Même un journal conditionnellement complet garde `all_naturality_squares_replayed=false`, `vertical_maps_complete=false` et `public_status=not_claimed`. Il ferme une architecture conditionnelle de Phase 11, pas la porte G4 produit, qui reste `no-go` tant qu'une flèche nécessaire est absente ou non recertifiée. Voir [TOUR_VERTICALE_DIRECTE_PHASE11.md](math/TOUR_VERTICALE_DIRECTE_PHASE11.md).
+
 ### Tests
 
 - oracle vertical exhaustif;

@@ -643,6 +643,25 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_direct_morse_vertical_journal_tests
+  test_hierarchy_direct_morse_vertical_journal.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_direct_morse_vertical_journal_tests
+  PRIVATE morsehgp3d::direct_morse_vertical_journal
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_vertical_journal_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_direct_morse_vertical_journal_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_plan_tests
   test_hierarchy_direct_sparse_facet_descent_batch_plan.cpp
 )
@@ -1266,6 +1285,7 @@ set(
   morsehgp3d_hierarchy_direct_frozen_root_quotient_tests
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_journal_tests
+  morsehgp3d_hierarchy_direct_morse_vertical_journal_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_plan_tests
   morsehgp3d_hierarchy_direct_sparse_facet_descent_batch_executor_tests
   morsehgp3d_hierarchy_direct_sparse_facet_top_k_proposal_transcript_tests
@@ -2092,6 +2112,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_morse_forest_journal
   COMMAND morsehgp3d_hierarchy_direct_morse_forest_journal_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_direct_morse_vertical_journal
+  COMMAND morsehgp3d_hierarchy_direct_morse_vertical_journal_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_sparse_facet_descent_batch_plan
