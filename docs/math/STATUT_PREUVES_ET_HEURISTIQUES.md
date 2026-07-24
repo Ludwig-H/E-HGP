@@ -269,11 +269,11 @@ Les tests hôte courts valident l'import contre le builder CPU, l'ambiguïté ex
 
 ### Jalon 14N — propriété compacte des autorités device
 
-14N a le statut `validated_host_software` pour son cycle de vie simulé, sous `cuda_g4_plus_reference_cpu / hgp_reduced / device_morton_lbvh_lease / architecture_only`; la voie CUDA réelle reste `not_yet_qualified`. Il n'ajoute aucun théorème géométrique. Son seul fait arithmétique est `proved_here` sous l'ABI contractée : trois mots de coordonnées de huit octets et un `PointId` de huit octets par entrée de capacité donnent $3C\cdot8+C\cdot8=32C$ octets.
+14N a le statut `validated_host_software_and_real_guarded_G4_component_lifecycle`, sous `cuda_g4_plus_reference_cpu / hgp_reduced / device_morton_lbvh_lease / architecture_only`. Il n'ajoute aucun théorème géométrique. Son seul fait arithmétique est `proved_here` sous l'ABI contractée : trois mots de coordonnées de huit octets et un `PointId` de huit octets par entrée de capacité donnent $3C\cdot8+C\cdot8=32C$ octets.
 
 La provenance certifiée 14M, l'identité du contexte, l'epoch et le caractère dernier/non consommé sont des préconditions logicielles. Après transfert, la lease mobile possède les coordonnées canoniques et le buffer actif d'identifiants triés; tous les autres buffers du builder sont libérés et aucun snapshot hôte n'est conservé par cette lease. Ces faits de propriété ne rendent pas les propositions device scientifiques : l'index CPU déjà recertifié demeure la seule autorité spatiale publiée.
 
-Le CTest court au faux launcher vérifie les traits move-only, les capacités $24C$, $8C$ et $32C$, les rejets étranger, périmé et double, la survie hors contexte et la validité persistante de l'index CPU. Le faux launcher affirme explicitement ne pas être CUDA. Le smoke révisé encode le protocole attendu mais aucune compilation NVCC, exécution G4, mesure 50 k ou capacité 10 M+ n'a encore recertifié 14N. Aucun adaptateur consommateur, théorème de carriers, SLO ou statut public ne découle de ce jalon.
+Le CTest court au faux launcher vérifie les traits move-only, les capacités $24C$, $8C$ et $32C$, les rejets étranger, périmé et double, la survie hors contexte et la validité persistante de l'index CPU. Le faux launcher affirme explicitement ne pas être CUDA. La voie réelle est recertifiée au SHA `2a03f4ad55b2e369891de2081f67a5108a4de8ad` avec NVCC 12.9.86, un seul cubin AOT `sm_120`, aucun PTX, un smoke et memcheck 4 096 sans erreur ni fuite, puis une lease 50 000 à 1 600 000 octets persistants, 13 819 911 octets libérés et zéro snapshot hôte. Aucun adaptateur consommateur, théorème de carriers, p95 `warm_e2e`, capacité 10 M+, SLO ou statut public ne découle de ce jalon.
 
 ### Jalon 15A — contrat durable à recertification externe
 
