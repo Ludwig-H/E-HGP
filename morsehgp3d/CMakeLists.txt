@@ -1904,6 +1904,83 @@ if(MORSEHGP3D_ENABLE_CUDA)
       PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()
+
+  add_library(
+    morsehgp3d_gpu_direct_sparse_facet_top_k_proposal
+    STATIC
+      src/cuda/phase14_facet_top_k_proposal_internal.hpp
+      src/cuda/phase14_facet_top_k_proposal.cu
+      src/gpu/rational_binary64_enclosure.hpp
+      src/gpu/direct_sparse_facet_top_k_proposal.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_direct_sparse_facet_top_k_proposal
+    ALIAS morsehgp3d_gpu_direct_sparse_facet_top_k_proposal
+  )
+  target_include_directories(
+    morsehgp3d_gpu_direct_sparse_facet_top_k_proposal
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_direct_sparse_facet_top_k_proposal
+    PUBLIC
+      morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
+      morsehgp3d::spatial
+    PRIVATE Threads::Threads
+  )
+  target_compile_features(
+    morsehgp3d_gpu_direct_sparse_facet_top_k_proposal PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(
+    morsehgp3d_gpu_direct_sparse_facet_top_k_proposal
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_direct_sparse_facet_top_k_proposal
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_direct_sparse_facet_top_k_proposal
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
+  add_executable(
+    morsehgp3d_gpu_direct_sparse_facet_top_k_proposal_qualification
+    src/tools/gpu_direct_sparse_facet_top_k_proposal_qualification.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_direct_sparse_facet_top_k_proposal_qualification
+    PRIVATE
+      morsehgp3d::gpu_direct_sparse_facet_top_k_proposal
+      morsehgp3d::facet_miniball
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_direct_sparse_facet_top_k_proposal_qualification
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_direct_sparse_facet_top_k_proposal_qualification
+      PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wconversion
+        -Wsign-conversion
+        -Werror
+    )
+  endif()
 endif()
 
 if(MORSEHGP3D_BUILD_TOOLS)

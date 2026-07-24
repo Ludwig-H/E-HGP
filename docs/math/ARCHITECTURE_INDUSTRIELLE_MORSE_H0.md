@@ -120,15 +120,27 @@ Le commit compare seulement le sceau, l'epoch, cinq indices source et le stamp v
 
 Le ticket est une preuve de provenance exacte locale au processus, pas un certificat durable ni un replay indépendant. Son bénéfice précis est la vivacité : après émission d'un ticket courant, aucun second budget géométrique ne peut bloquer son avancement. Le scheduler devra limiter le nombre de tickets simultanément détenus par l'appelant; 14H ne qualifie pas ce pic. Il ne réalise toujours ni transaction locator, ni quotient, ni réduction hiérarchique, et ne construit aucune structure globale interdite.
 
-## Goulots restant à traiter après 14H
+## Incrément 14I — producteur GPU borné par fenêtres Morton
 
-Trois coûts dominants restent visibles après 14D :
+Le contexte 14I est un producteur `cuda_g4 / hgp_reduced / proposal_only`; l'autorité scientifique demeure `reference_cpu / hgp_reduced / certified`. Sa capacité de snapshot device immuable, allouée paresseusement, coûte exactement $32n$ octets : $24n$ pour les trois mots binary64 de coordonnées indexés par `PointId` et $8n$ pour les identifiants dans l'ordre Morton. L'hôte conserve ces mêmes $32n$ octets et la table inverse de $n$ entrées `size_t`, soit $40n$ octets sur G4 64 bits en plus du nuage et du LBVH, puis injecte les positions Morton des sommets sources dans les records du lot.
 
-- les traversées exactes top-$K$ par clé distincte, encore linéaires au pire cas;
-- les constructions de miniballs et les fallbacks rationnels, à regrouper par cardinal et difficulté;
-- la capacité réutilisable des scratchs et le pic des tickets détenus par l'appelant, qui ne doivent pas dupliquer durablement les grandes arènes dans le protocole `warm_e2e`.
+Une clé de cardinal $k\leq10$ lance des scans de rayon $W$ sur les deux côtés de chacun de ses sommets. Ils peuvent relire les recouvrements mais inspectent au plus $2kW$ occurrences. Le kernel exclut la source, déduplique les survivants, sélectionne au plus $k$ identifiants par distance carrée flottante au projeté binary64 du centre exact fourni, puis les émet en ordre croissant des `PointId`. Cette sélection est une amorce seulement : aucune propriété de localité Morton ne donne ici une borne de rappel. Sa préparation hôte paie actuellement jusqu'à environ 189 comparaisons rationnelles par centre pour la projection binary64, sans cache.
 
-La priorité de développement devient donc : brancher un producteur GPU borné sur la frontière désormais scellée, réutiliser des capacités de scratch sans conserver d'objet scientifique et instrumenter `warm_e2e`. Les runs et checkpoints compacts viennent ensuite pour le profil 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
+Le centre exact n'est pas construit sur le device. Son calcul amont peut examiner jusqu'à $\sum_{j=1}^{4}\binom{k}{j}\leq385$ supports par clé, coût hors kernel susceptible d'être répété lorsque 10.5c recertifie la miniball. Pour une capacité $C$ et $D\leq C$ clés, les buffers device de requêtes et sorties occupent $208C+144C=352C$ octets; chaque appel copie $208D$ octets d'entrée, initialise toute la sortie et recopie $144C$ octets vers l'hôte pour contrôler la queue sentinelle. Avec le transcript $O(kD)$, la frontière coûte donc $O(n+C+kD)$ et exige un $C$ borné proche de $D$. Il n'existe ni table $D\times n$, ni univers de facettes, cofaces ou incidences, ni Gamma, cellule ou Delaunay d'ordre supérieur.
+
+14F revalide le transcript au CPU, recalcule les distances exactes, garde $F$ comme baseline et ferme le LBVH par prune strict avec descente à égalité. 14H scelle le delta exact ainsi obtenu et son commit ne lit ni transcript, ni digest, ni audit. Le producteur ne modifie donc jamais la sémantique scientifique et peut légalement retourner une proposition vide ou inutile.
+
+Le jalon est implémenté sous `architecture_only`, mais la validation ciblée hôte et le replay G4 réel restent `pending_targeted_host_and_real_g4_replay`; GCP est `pending`. Aucun rappel, gain de temps, SLO 50 k, capacité 10 M+, `warm_e2e` ou statut public n'est qualifié.
+
+## Goulots restant à traiter après 14I
+
+Trois coûts dominants restent visibles :
+
+- les traversées exactes top-$K$ par clé distincte, encore linéaires au pire cas puisque 14I ne garantit aucun rappel;
+- les constructions exactes de miniballs jusqu'à 385 supports, potentiellement répétées entre la préparation du centre et 10.5c, ainsi que les fallbacks rationnels;
+- les snapshots $32n$ device et $40n$ hôte sur G4, les buffers $352C$ device et $144C$ hôte par lot, la projection rationnelle non cachée, les capacités réutilisables et le pic des tickets détenus par l'appelant, qui exigent chunks et plafonds sans dupliquer durablement les grandes arènes.
+
+La priorité de développement devient donc : valider 14I sur l'hôte puis sur une G4 réelle, raccorder son chunking à la préparation scellée sans transférer l'autorité de l'audit, réutiliser les centres ou capacités exactes seulement avec une provenance recertifiable, puis instrumenter `warm_e2e`. Les runs et checkpoints compacts viennent ensuite pour le profil 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
 
 ## Planification sans promotion
 

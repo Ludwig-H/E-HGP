@@ -78,12 +78,24 @@ La fixture de vivacité prolonge E5 par une petite coquille élagable. Elle choi
 
 14H ferme cette dette de vivacité seulement dans le processus vivant et sous gel sérialisé des autorités. Il n'est pas un rejeu indépendant, ne survit pas à un crash et n'engage ni locator, ni quotient, ni hiérarchie. Il reste `reference_cpu`, `hgp_reduced`, scientifique `certified`, déploiement `architecture_only` et `public_status=not_claimed`, sans qualification 50 k ou 10 M+.
 
+## Incrément 14I implémenté — producteur GPU borné par fenêtres Morton
+
+Le nouveau contexte `cuda_g4 / hgp_reduced / proposal_only` déclare une capacité de snapshot device immuable de $32n$ octets, allouée paresseusement au premier lot GPU supporté et constituée des trois mots binary64 de coordonnées par `PointId` et de l'ordre Morton des identifiants. L'hôte conserve ces $32n$ octets et l'inverse Morton de $n$ entrées `size_t`, soit $40n$ octets sur G4 64 bits en plus du nuage et du LBVH; les positions utiles sont copiées dans les records de requêtes. Il n'existe donc ni inverse device supplémentaire, ni table $D\times n$.
+
+Pour une clé de cardinal $k\leq10$ et un rayon $W$, le kernel inspecte au plus $W$ positions de chaque côté de chacun des $k$ sommets. Les fenêtres recouvrantes peuvent relire une occurrence, mais l'audit reste borné par $2kW$ inspections par clé. Après contrôle, exclusion de la facette et déduplication, au plus $k$ candidats sont sélectionnés par distance carrée flottante au projeté binary64 du centre exact fourni, puis émis en ordre croissant des `PointId`. La projection hôte non cachée utilise actuellement jusqu'à environ 189 comparaisons rationnelles par requête et reste une dette avant le SLO interactif.
+
+La préparation de ce centre exact est extérieure au kernel et peut coûter jusqu'à $\sum_{j=1}^{4}\binom{k}{j}\leq385$ examens de supports par clé. 10.5c peut reconstruire ensuite la même miniball et doubler ce coût. Pour une capacité $C$ et $D\leq C$, les buffers device occupent $352C$ octets; un appel copie $208D$ octets d'entrée, initialise toute la sortie et recopie $144C$ octets vers l'hôte, tandis que le transcript vaut $O(kD)$. Le coût additionnel est donc $O(n+C+kD)$ et le découpage doit garder $C$ borné et proche de $D$.
+
+La sortie n'a aucune autorité scientifique. 14F revalide clés, namespace, exclusions et candidats au CPU, recalcule les distances exactes, conserve $F$ comme baseline et termine le LBVH avec prune strict et descente à égalité. Un ticket 14H scelle seulement le delta exact; son commit ignore transcript, digest et audit. Aucune facette ou coface globale, incidence, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur n'est matérialisée.
+
+14I reste `architecture_only` et `public_status=not_claimed`. Les fenêtres n'offrent aucune garantie de rappel ou d'accélération, et aucune qualification de latence 50 k, volume 10 M+ ou `warm_e2e` n'est publiée. Sa validation est `pending_targeted_host_and_real_g4_replay`; son état GCP propre est `pending`. Les statuts de phase et les gates restent inchangés.
+
 ## Priorités de développement
 
-1. brancher un producteur GPU borné sur la frontière scellée;
-2. réutiliser les capacités restantes de scratch et plafonner les tickets appelant sans conserver de graphe entre lots;
-3. ajouter l'instrumentation `warm_e2e`;
-4. rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
+1. fermer la validation hôte ciblée de 14I puis son replay sur une G4 réelle gardée;
+2. raccorder le chunking obligatoire du producteur à la préparation scellée et étudier le réemploi recertifiable des centres exacts;
+3. réutiliser les capacités restantes de scratch et plafonner les tickets appelant sans conserver de graphe entre lots;
+4. ajouter l'instrumentation `warm_e2e`, puis rendre les deltas, chunks et checkpoints durables avant toute campagne massive.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 
@@ -103,6 +115,8 @@ Pour 14G, l'unique CTest ciblé passe sous GCC Release strict en 0,05 seconde et
 
 Pour 14H, le même CTest ciblé passe sous GCC Release strict en 2,82 secondes et sous Clang 18 Release strict en 2,29 secondes sur le rejeu séquentiel final. Il couvre les traits non forgeables et move-only, les rejets invalide, étranger, périmé, déplacé, réutilisé et stamp muté, l'invalidation par un commit historique, le détachement puis la destruction de l'audit et le témoin discriminant sous cap serré. Ce témoin fait réussir la préparation proposée, échouer la voie non amorcée et son commit historique, puis réussir le commit scellé sans nouveau rejeu ou appel de fermeture. Le garde statique 10.5c, le checker des statuts et l'installation/export avec consumer externe passent; aucun benchmark long, sanitizer, oracle combinatoire ou test massif n'est lancé.
 
+Pour 14I, aucune validation n'est encore consignée : `pending_targeted_host_and_real_g4_replay`. La prochaine passe doit rester courte et couvrir les capacités $32n$, $40n$, $352C$ et $144C$, la borne $2kW$, les lots vide, hors plage et mixte, les sentinelles, epochs et corruptions hôte, puis exécuter le vrai code AOT sur des requêtes $k=2$ dont un centre exact $1/3$ et une requête réellement 3D à $k=10$. Les identifiants flottants attendus et l'égalité de la partition CPU exacte avec et sans amorce doivent être contrôlés sans transformer ce succès en garantie de rappel, accélération, SLO 50 k ou capacité 10 M+.
+
 Une falsification coordonnée pourrait encore redistribuer des compteurs entre chunks 14A ou lanes 14C tout en conservant leurs agrégats. Les payloads compacts ne contiennent volontairement ni détail ni digest par lot; un vérificateur frais contre 10.1--10.2 est donc requis avant persistance ou exécution industrielle. Cette dette P2 est compatible avec `architecture_only`, mais devra être fermée avant toute qualification.
 
 La dette d'intégration à arête stricte non nulle de 14D est fermée par la fixture `AC` vers `DE`. La dette P2 restante est l'API qui documente mais n'interdit pas encore statiquement les autorités temporaires dont les pointeurs deviendraient pendants.
@@ -116,3 +130,5 @@ La tentative initiale `europe-west4-a/ehgp-blackwell-spot` a échoué fermée av
 Après publication de 14H, une seconde session gardée a extrait exactement `main` au SHA `cbbf7e29d9903a95108b24c90efaf30ede5620b6` sur la même G4 `SPOT`. Dans le conteneur CUDA 12.9.2, CMake a détecté NVCC 12.9.86, configuré `CMAKE_CUDA_ARCHITECTURES=120-real`, compilé le probe d'environnement CUDA et le chemin 14H, puis le CTest `morsehgp3d.hierarchy_direct_sparse_facet_descent_batch_executor` a passé en 1,16 seconde. Cette exécution ne qualifie toujours ni le producteur de propositions, ni le SLO ou le volume.
 
 Les deux coupe-circuits de la génération `2026-07-23T16:55:30.850-07:00` étaient certifiés avant compilation : `instanceTerminationAction=STOP`, `maxRunDuration=3600` secondes et arrêt invité à 25 minutes. `stop_and_verify.sh` a ensuite arrêté exactement cette génération, confirmé l'état GCE `TERMINATED` et inventorié zéro autre VM `project=e-hgp` active.
+
+Pour 14I, GCP est `pending` : aucune session de ce jalon n'est déclarée dans ce document et les replays historiques 14G--14H ci-dessus ne qualifient pas son producteur GPU.
