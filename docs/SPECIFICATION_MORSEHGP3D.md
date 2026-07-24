@@ -689,6 +689,8 @@ La queue device d'indices $[D,C)$ n'est ni initialisée, ni transférée, ni con
 
 14J ne modifie ni la sélection flottante, ni le digest des records actifs, ni la recertification CPU 14F, ni le ticket 14H. Le stockage additionnel demeure $O(n+C+kD)$ à cause des allocations persistantes, le trafic par appel devient $O(D)$ et le travail des fenêtres reste borné par $O(kWD)$. Aucun univers de facettes, cofaces ou incidences, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur n'est construit. Ce jalon reste `architecture_only`, `proposal_only` et `public_status=not_claimed`; il ne qualifie ni le SLO 50 k, ni 10 M+, ni un raccord exécuteur industriel.
 
+La recertification courte sur G4 réelle passe au SHA `8c76feb4c28dd1360d71075b1d3e15c7af0a3c95`. Elle ferme les volumes actifs, la transition de préfixe $D=4$, $D=1$, $D=5$ sous $C=6$, l'unique cubin AOT `sm_120` sans PTX et le memcheck sans erreur ni fuite. Le digest opérationnel reste `18249493464636075901`; ce succès matériel ne change aucun statut scientifique ou public.
+
 ## 10. Événements simultanés
 
 Des centres distincts peuvent avoir exactement le même niveau. Une exécution séquentielle créerait des bifurcations binaires artificielles et pourrait changer les morphismes verticaux.

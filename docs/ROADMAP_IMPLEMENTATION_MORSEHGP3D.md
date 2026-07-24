@@ -1229,6 +1229,8 @@ La queue physique $[D,C)$ n'est pas une autorité : elle n'est ni initialisée, 
 
 La mémoire de capacité reste $O(C)$ et le snapshot reste $O(n)$, mais le trafic propre à un appel devient $O(D)$. 14J ne construit ni facette ou coface absente, ni incidence globale, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur. Il reste `cuda_g4 / hgp_reduced / proposal_only`, déploiement `architecture_only`, avec décision scientifique `reference_cpu / hgp_reduced / certified` et `public_status=not_claimed`. Le raccord complet à l'exécuteur, la projection rationnelle, le protocole `warm_e2e`, le SLO 50 k et la capacité 10 M+ restent ouverts.
 
+Le rejeu court du SHA `8c76feb4c28dd1360d71075b1d3e15c7af0a3c95` sur une G4 `SPOT` réelle passe. Les deux CTests ciblés terminent en 0,28 seconde, la transition $C=6$ et $D=4$, $D=1$, $D=5$ ferme les extents réinitialisés, ptxas conserve 62 registres, 160 octets de pile et zéro spill, `cuobjdump` trouve un seul cubin `sm_120` sans PTX, et memcheck annonce zéro erreur et zéro fuite. Cette recertification ne constitue ni un benchmark de débit, ni un protocole `warm_e2e`.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;
