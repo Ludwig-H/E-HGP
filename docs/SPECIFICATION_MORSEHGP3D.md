@@ -701,6 +701,8 @@ Les trois coordonnées partagent le même dénominateur et le même seuil de pla
 
 Ce projecteur reste un calcul opérationnel flottant : son résultat ne devient ni centre certifié, ni cutoff, ni preuve de rappel. La sortie continue d'être recertifiée par 14F et ignorée par le commit 14H. 14K ne construit aucune facette ou coface absente, incidence globale, Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur et ne qualifie encore ni le SLO 50 k, ni 10 M+.
 
+La recertification courte sur G4 réelle passe au SHA `5e7e8449d7f4de2875ad0d9db8674d7664a30e4d`. Les deux CTests ciblés terminent en 0,29 seconde; l'audit ferme six axes comme une division, cinq zéros et zéro hors plage, le digest opérationnel reste `18249493464636075901`, le binaire contient un seul cubin AOT `sm_120` sans PTX et memcheck ne relève ni erreur ni fuite. Ce smoke ne qualifie ni débit, ni `warm_e2e`, ni volume.
+
 ## 10. Événements simultanés
 
 Des centres distincts peuvent avoir exactement le même niveau. Une exécution séquentielle créerait des bifurcations binaires artificielles et pourrait changer les morphismes verticaux.

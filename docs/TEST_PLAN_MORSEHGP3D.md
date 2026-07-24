@@ -251,6 +251,8 @@ Le lot court `14K-DIRECT-PROJ` compare le projecteur entier au projecteur par en
 
 L'audit doit compter exactement trois axes par requête et au plus trois divisions entières. Le source produit ne doit plus inclure l'encadrement rationnel ni appeler `ExactCenter3::coordinate`; il lit directement les trois numérateurs et le dénominateur commun. La qualification G4 courte rejoue $1/3$, $K=10$, la transition $D=4$, $D=1$, $D=5$, le digest et memcheck. Elle ne mesure pas un débit et ne qualifie ni 50 k, ni 10 M+.
 
+Au SHA `5e7e8449d7f4de2875ad0d9db8674d7664a30e4d`, cette qualification passe 2/2 en 0,29 seconde sur G4 `SPOT`; six axes sont fermés comme une division, cinq zéros et zéro hors plage, avec digest inchangé, code AOT `sm_120` sans PTX et memcheck nul.
+
 Les tailles de support trois et quatre obéissent au même contrat : une proposition GPU ambiguë descend, et tout prune exact est rejoué par déterminants et comptage global indépendants. La complétude est suivie séparément pour chaque taille. Un run ne peut annoncer un catalogue complet tant que l'une des trois frontières reste non vide.
 
 Le lot court `9.2a-RCPU` vérifie séparément la primitive de produit et le flux. Pour la primitive : triangle aigu, obtus et collinéaire; tétraèdre régulier et centre extérieur; requête strictement intérieure et égalité shell; puis la famille $p_0(t)=(t,2,0)$, $p_1=(-1,0,0)$, $p_2=(1,0,0)$. Sur $t\in[-2,2]$, les deux extrémités non aiguës ne doivent pas masquer le triangle aigu intérieur. Sur $t\in[-1/2,1/2]$ et $x=(0,33/16,0)$, les puissances négatives aux extrémités ne doivent pas masquer la puissance positive au centre. L'oracle Python rationnel recalcule ces valeurs indépendamment.

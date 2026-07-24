@@ -150,6 +150,8 @@ Les trois axes partagent $Q$, son bit de poids fort et le seuil maximal. Le trav
 
 L'ancien encadrement subsiste uniquement comme oracle différentiel court. Le chemin produit n'en dépend plus. 14K ne modifie ni la proposition flottante, ni la recertification 14F, ni le ticket 14H, ne construit aucune structure globale interdite et reste `architecture_only` avec `public_status=not_claimed`.
 
+La recertification courte au SHA `5e7e8449d7f4de2875ad0d9db8674d7664a30e4d` passe sur une G4 `SPOT` réelle : deux CTests sur deux en 0,29 seconde, six axes partitionnés en une division, cinq zéros et zéro hors plage, digest inchangé, un cubin AOT `sm_120` sans PTX et memcheck nul. Elle certifie ce rejeu matériel, pas un débit ou une échelle produit.
+
 ## Goulots restant à traiter après 14K
 
 Trois coûts dominants restent visibles :
@@ -158,7 +160,7 @@ Trois coûts dominants restent visibles :
 - les constructions exactes de miniballs jusqu'à 385 supports, potentiellement répétées entre la préparation du centre et 10.5c, ainsi que les fallbacks rationnels;
 - les snapshots $32n$ device et $40n$ hôte sur G4, les buffers persistants $352C$ device et la capacité hôte $144C$, le scratch top-$k$ local restant de 160 octets par thread, les capacités réutilisables et le pic des tickets détenus par l'appelant, qui exigent chunks et plafonds sans dupliquer durablement les grandes arènes.
 
-La priorité de développement devient donc : intégrer ce smoke dans un worker GCP gardé reproductible, puis raccorder le chunking à la préparation scellée sans transférer l'autorité de l'audit. Les centres ou capacités exactes ne peuvent être réutilisés qu'avec une provenance recertifiable; l'instrumentation `warm_e2e`, puis les runs et checkpoints compacts, viennent ensuite pour les profils 50 k et 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
+La priorité de développement devient donc : formaliser le smoke dans un worker GCP gardé reproductible, puis raccorder le chunking à la préparation scellée sans transférer l'autorité de l'audit. Les centres ou capacités exactes ne peuvent être réutilisés qu'avec une provenance recertifiable; l'instrumentation `warm_e2e`, puis les runs et checkpoints compacts, viennent ensuite pour les profils 50 k et 10 M+. Multiplier les oracles combinatoires ou réintroduire les gateways historiques ne réduit aucun de ces coûts.
 
 ## Planification sans promotion
 

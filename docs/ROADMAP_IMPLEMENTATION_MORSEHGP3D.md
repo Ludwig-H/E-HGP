@@ -1241,6 +1241,8 @@ Comme les trois numérateurs partagent $Q$, son bit de poids fort et le seuil ma
 
 Le différentiel court conserve l'ancien encadrement uniquement comme oracle de test. Il couvre zéro, $1/3$, minimum subnormal, demi-minimum subnormal, minimum normal, midpoints adjacents positifs et négatifs, changements de binade, maximum fini, hors plage et 64 rationnels déterministes. Le chemin produit ne dépend plus de cet encadrement. La sélection GPU reste une proposition sans rappel garanti; 14F et 14H conservent seuls l'autorité déjà décrite.
 
+Le rejeu court du SHA `5e7e8449d7f4de2875ad0d9db8674d7664a30e4d` sur une G4 `SPOT` réelle passe 2/2 en 0,29 seconde. La partition de six axes vaut une division, cinq zéros et zéro hors plage; le digest `18249493464636075901`, l'unique cubin `sm_120` sans PTX, les 62 registres, les 160 octets de pile, l'absence de spill et le memcheck nul sont conservés. Ce rejeu n'est ni une mesure de débit, ni une qualification 50 k ou 10 M+.
+
 ### Optimisations autorisées
 
 - fusion de kernels sans fusionner proposition et certification;
