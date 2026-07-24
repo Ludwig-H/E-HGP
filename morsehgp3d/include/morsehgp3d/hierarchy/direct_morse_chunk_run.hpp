@@ -11,6 +11,7 @@
 #include <span>
 #include <string_view>
 #include <type_traits>
+#include <vector>
 
 namespace morsehgp3d::hierarchy {
 
@@ -33,9 +34,11 @@ inline constexpr std::string_view direct_morse_chunk_run_public_status =
 struct ExactDirectMorseChunkBatchReplayAuthority {
   struct ResourceEnvelope {
     // Trusted upper bounds for reconstructing the external locator prefix
-    // and replaying this one batch.  Batches are replayed sequentially, so
-    // byte reservations are maximized across a chunk while time
-    // reservations are summed.
+    // replaying this one batch and synchronously consuming its accepted
+    // projection during recovery.  Batches are replayed and consumed
+    // sequentially, so byte reservations are maximized across a chunk while
+    // time reservations are summed.  A reducer's persistent arenas belong in
+    // session usage; its per-fold scratch belongs in this envelope.
     std::uint64_t device_reserved_bytes{};
     std::uint64_t host_reserved_bytes{};
     std::uint64_t scratch_reserved_bytes{};
@@ -184,6 +187,55 @@ struct ExactDirectMorseChunkRunAudit {
   bool external_locator_resolver_cache_absence_claimed{false};
 };
 
+// One immutable, non-authoritative reducer input projected directly from the
+// fresh 14D result that accepted a recovered transition.  It is never decoded
+// a second time from the wire and retains no locator, DSU or forest state.
+struct ExactDirectMorseRecertifiedBatchProjection {
+  std::size_t source_batch_index{};
+  std::size_t source_chunk_index{};
+  std::size_t source_family_begin_index{};
+  std::size_t source_family_end_index{};
+  std::size_t source_arm_seed_begin_index{};
+  std::size_t source_arm_seed_end_index{};
+  std::size_t order{};
+  exact::ExactLevel closed_batch_squared_level{};
+  spatial::LbvhTraversalOrder traversal_order{
+      spatial::LbvhTraversalOrder::near_first};
+  ExactDirectSparseFacetDescentClosureBudget requested_closure_budget{};
+  ExactDirectSparseFacetWitness locator_query_witness{};
+  ExactDirectSparsePositiveFacetLocatorSnapshotStamp
+      strict_pre_batch_locator_stamp{};
+  std::vector<ExactDirectSparseFacetDescentBatchResolvedKey>
+      resolved_keys;
+  std::vector<ExactDirectSparseFacetDescentBatchArmJoin> arm_joins;
+  ExactDirectSparseFacetDescentBatchClosureSummary closure_summary{};
+  ExactDirectSparseFacetDescentBatchExecutionCounters
+      execution_counters{};
+
+  friend bool operator==(
+      const ExactDirectMorseRecertifiedBatchProjection&,
+      const ExactDirectMorseRecertifiedBatchProjection&) = default;
+};
+
+// Lifetime is one synchronous committed-prefix visitor call.  The store sees
+// only the polymorphic base and does not cache this one-chunk projection.
+struct ExactDirectMorseRecertifiedChunkProjection final
+    : AtomicLinearRunAcceptedProjection {
+  ExactDirectMorseIndustrialChunk source_chunk{};
+  std::vector<ExactDirectMorseRecertifiedBatchProjection> batches;
+
+  friend bool operator==(
+      const ExactDirectMorseRecertifiedChunkProjection& left,
+      const ExactDirectMorseRecertifiedChunkProjection& right) {
+    return left.source_chunk == right.source_chunk &&
+           left.batches == right.batches;
+  }
+};
+
+using ExactDirectMorseRecertifiedChunkVisitor =
+    std::function<void(
+        const ExactDirectMorseRecertifiedChunkProjection&)>;
+
 // Immutable replay authority for one complete freshly reconstructed 14C plan.
 // It preindexes one cursor per exact source batch in a single pass.  Calls may
 // replay batches or complete 14A chunks in any order and never advance a
@@ -248,6 +300,15 @@ class ExactDirectMorseChunkRunContext {
       AtomicLinearRunStoreLimits store_limits,
       std::optional<AtomicLinearRunExternalAnchor> expected_anchor =
           std::nullopt) const;
+
+  [[nodiscard]] AtomicLinearRunStore open_existing_store(
+      const std::filesystem::path& dedicated_directory,
+      contract::CanonicalId initial_checkpoint_digest,
+      contract::CanonicalId initial_output_chain_digest,
+      AtomicLinearRunStoreLimits store_limits,
+      std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
+      ExactDirectMorseRecertifiedChunkVisitor
+          committed_prefix_visitor) const;
 
   // Read-only validation seam for deterministic scientific replay tests.  It
   // is not a store factory and performs no resource authorization.

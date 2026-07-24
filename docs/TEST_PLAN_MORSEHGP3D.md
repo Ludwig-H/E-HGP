@@ -1224,6 +1224,16 @@ Un second plan place les deux lots dans un même chunk. Le payload produit sous 
 
 Le target compile sous GCC 13 Release avec les avertissements stricts et le CTest ciblé passe 1/1 en 0,03 seconde. Aucun sanitizer, benchmark, CUDA, GCP ou nuage massif n'est requis. Ce test ferme le raccord durable aux vrais chunks 14A et deltas 14D ainsi que son gate de budget applicatif; le slack d'allocateur, les propositions basses retenues, les copies du store et la synchronisation finale post-`HEAD` restent ouverts. Il ne valide ni reducer hiérarchique, ni identité résident--streaming, ni un million, ni 10 M+, ni le SLO 50 k, ni un statut public.
 
+### 14.9 Validation courte de Phase 15C
+
+Le visitor du store doit recevoir un pointeur de projection emprunté, jamais un `shared_ptr` copiable. Sur chaque transition committée, le test impose l'ordre `gate-before`--recertification--visitor--`gate-after`; un visitor qui lève doit fermer le gate, libérer le verrou et obliger l'appelant à jeter son reducer partiel. Aucun visitor ne s'exécute sur un orphelin non committé. Un `bad_alloc` du recertificateur doit produire la raison opérationnelle dédiée et ne doit pas incrémenter une preuve de rejet scientifique.
+
+La fixture d'intégration reprend les deux chunks du tétraèdre avec deux locators réellement historiques : locator vide avant le lot zéro, puis locator portant les quatre bindings de naissance avant le lot un. Chaque projection 14D fraîche est consommée exactement une fois, sous forme de spans synchrones, par `ExactDirectMorseForestReducer`. Après le second lot, `finish()` doit rendre un `ExactDirectMorseForestJournalResult` récursivement identique au builder résident.
+
+Le test propre au reducer exécute le même flot avec caps de chunks un et deux, puis compare les deux résultats au résident. Il rejette sans mutation un batch réordonné, une clé terminale substituée, un handle ou témoin incompatible et un budget agrégé dépassé. Le constructeur refuse immédiatement un `maximum_final_root_count` insuffisant. Une surcharge supprimée interdit de projeter un résultat 14D rvalue vers des spans. La régression Gabriel doit montrer explicitement une clé source `AC` différente de la clé terminale `DE`, tout en conservant l'identité résident--streaming.
+
+Ces tests restent hôte et courts. Ils n'ouvrent ni le commit vivant conjoint 14H--locator--reducer, ni les merges externes, le jalon un million, 10 M+, CUDA, GCP, le SLO 50 k, M.1 ou un statut public.
+
 ## 15. Compteurs obligatoires
 
 Chaque exécution émet un enregistrement structuré, versionné, comprenant au minimum :

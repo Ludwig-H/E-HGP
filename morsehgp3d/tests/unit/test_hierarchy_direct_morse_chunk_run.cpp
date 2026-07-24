@@ -1,4 +1,5 @@
 #include "morsehgp3d/hierarchy/direct_morse_chunk_run.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_chunk_forest_recovery.hpp"
 
 #include <array>
 #include <cerrno>
@@ -9,6 +10,7 @@
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -253,6 +255,37 @@ execution_budget() {
   };
 }
 
+[[nodiscard]] ExactDirectMorseForestBudget forest_budget() {
+  constexpr std::size_t capacity = 4096U;
+  ExactDirectMorseForestBudget budget;
+  budget.maximum_source_role_scan_count = capacity;
+  budget.maximum_source_batch_scan_count = capacity;
+  budget.maximum_source_family_scan_count = capacity;
+  budget.maximum_source_arm_seed_scan_count = capacity;
+  budget.maximum_birth_record_count = capacity;
+  budget.maximum_arm_root_binding_count = capacity;
+  budget.maximum_saddle_record_count = capacity;
+  budget.maximum_atomic_group_count = capacity;
+  budget.maximum_child_reference_count = capacity;
+  budget.maximum_batch_record_count = capacity;
+  budget.maximum_node_count = capacity;
+  budget.maximum_final_root_count = capacity;
+  budget.maximum_batch_distinct_arm_count = 256U;
+  budget.maximum_logical_output_entry_count = capacity;
+  budget.maximum_aggregate_closure_node_count = capacity;
+  budget.maximum_aggregate_closure_step_call_count = capacity;
+  budget.locator_budget = locator_budget();
+  budget.closure_budget = closure_budget();
+  budget.quotient_budget = {256U, 256U, 256U, 256U, 1024U};
+  return budget;
+}
+
+[[nodiscard]] ExactDirectMorseForestConfig forest_config() {
+  ExactDirectMorseForestConfig config;
+  config.locator_config.external_authority_id = authority_id;
+  return config;
+}
+
 [[nodiscard]] ExactDirectSparseFacetWitness query_witness(
     std::uint64_t replay_token) {
   return {authority_id, replay_token};
@@ -292,6 +325,24 @@ execution_budget() {
   return locator;
 }
 
+[[nodiscard]] ExactDirectSparsePositiveFacetLocator empty_locator() {
+  return build_exact_direct_sparse_positive_facet_locator(
+      4U,
+      locator_budget(),
+      ExactDirectSparsePositiveFacetLocatorConfig{
+          authority_id,
+          std::numeric_limits<std::uint64_t>::max()});
+}
+
+struct LocatorPrefixes {
+  ExactDirectSparsePositiveFacetLocator before_batch_zero;
+  ExactDirectSparsePositiveFacetLocator before_batch_one;
+};
+
+[[nodiscard]] LocatorPrefixes locator_prefixes() {
+  return {empty_locator(), positive_locator()};
+}
+
 [[nodiscard]] ExactDirectSparseFacetDescentBatchPlanResult build_plan(
     const Scenario& scenario,
     const ExactDirectSaddleArmSeedBudget& seed_budget,
@@ -310,8 +361,7 @@ execution_budget() {
 [[nodiscard]]
 std::array<ExactDirectMorseChunkBatchReplayAuthority, 2U>
 batch_authorities(
-    const ExactDirectSparsePositiveFacetLocator& locator) {
-  const auto stamp = locator.snapshot_stamp();
+    const LocatorPrefixes& locators) {
   const ExactDirectMorseChunkBatchReplayAuthority::ResourceEnvelope
       resources{
           0U,
@@ -319,12 +369,12 @@ batch_authorities(
           16U * 1024U,
           UINT64_C(1'000'000)};
   return {{
-      {stamp,
+      {locators.before_batch_zero.snapshot_stamp(),
        query_witness(UINT64_C(3)),
        execution_budget(),
        closure_budget(),
        resources},
-      {stamp,
+      {locators.before_batch_one.snapshot_stamp(),
        query_witness(UINT64_C(6)),
        execution_budget(),
        closure_budget(),
@@ -334,18 +384,25 @@ batch_authorities(
 
 [[nodiscard]] ExactDirectMorseChunkBatchLocatorResolverFunction
 locator_resolver(
-    const ExactDirectSparsePositiveFacetLocator& locator) {
-  return [&locator](
-             std::size_t,
+    const LocatorPrefixes& locators) {
+  return [&locators](
+             std::size_t batch_index,
              const ExactDirectSparsePositiveFacetLocatorSnapshotStamp&
                  requested_stamp)
              -> std::shared_ptr<
                  const ExactDirectSparsePositiveFacetLocator> {
-    if (!(requested_stamp == locator.snapshot_stamp())) {
+    const ExactDirectSparsePositiveFacetLocator* locator = nullptr;
+    if (batch_index == 0U) {
+      locator = &locators.before_batch_zero;
+    } else if (batch_index == 1U) {
+      locator = &locators.before_batch_one;
+    }
+    if (locator == nullptr ||
+        requested_stamp != locator->snapshot_stamp()) {
       return {};
     }
     return {
-        &locator,
+        locator,
         [](const ExactDirectSparsePositiveFacetLocator*) noexcept {}};
   };
 }
@@ -452,10 +509,9 @@ void test_two_real_chunks_resume_with_fresh_context() {
       first_seed_budget,
       first_industrial_config,
       first_plan_budget);
-  ExactDirectSparsePositiveFacetLocator first_locator =
-      positive_locator();
-  const auto first_authorities = batch_authorities(first_locator);
-  auto first_locator_resolver = locator_resolver(first_locator);
+  LocatorPrefixes first_locators = locator_prefixes();
+  const auto first_authorities = batch_authorities(first_locators);
+  auto first_locator_resolver = locator_resolver(first_locators);
   check(
       first_plan.complete_architecture_plan() &&
           first_scenario.event_journal.batches.size() == 2U &&
@@ -551,11 +607,10 @@ void test_two_real_chunks_resume_with_fresh_context() {
       resumed_seed_budget,
       resumed_industrial_config,
       resumed_plan_budget);
-  ExactDirectSparsePositiveFacetLocator resumed_locator =
-      positive_locator();
+  LocatorPrefixes resumed_locators = locator_prefixes();
   const auto resumed_authorities =
-      batch_authorities(resumed_locator);
-  auto resumed_locator_resolver = locator_resolver(resumed_locator);
+      batch_authorities(resumed_locators);
+  auto resumed_locator_resolver = locator_resolver(resumed_locators);
   ExactDirectMorseChunkRunContext resumed_context{
       resumed_scenario.index,
       resumed_scenario.cloud,
@@ -623,6 +678,7 @@ void test_two_real_chunks_resume_with_fresh_context() {
         "recovery uses a fresh session budget and rejects before locator resolution even though the durable snapshot was accepted earlier");
   }
 
+  AtomicLinearRunExternalAnchor completed_anchor;
   {
     AtomicLinearRunStore store = resumed_context.open_existing_store(
         directory,
@@ -639,6 +695,7 @@ void test_two_real_chunks_resume_with_fresh_context() {
 
     const auto second_published =
         resumed_context.publish_next_chunk(store);
+    completed_anchor = second_published.current_anchor;
     check(
         second_published.decision ==
                 AtomicLinearRunPublishDecision::durably_published &&
@@ -671,6 +728,202 @@ void test_two_real_chunks_resume_with_fresh_context() {
           resumed_audit.rejected_budget_evaluation_count == 0U &&
           no_forbidden_context_ownership(resumed_audit),
       "the fresh context reconstructs once, replays once for recovery and twice for publication under fresh session budgets, never advances a live cursor, and owns no forbidden structure");
+
+  bool projected_science_matches = true;
+  std::vector<std::size_t> projected_chunk_indices;
+  const auto consume_projection =
+      [&](const ExactDirectMorseRecertifiedChunkProjection&
+              projection) {
+        const std::size_t expected_chunk_index =
+            projected_chunk_indices.size();
+        if (expected_chunk_index >=
+                resumed_plan.source_industrial_plan.chunks.size() ||
+            projection.source_chunk !=
+                resumed_plan.source_industrial_plan
+                    .chunks[expected_chunk_index] ||
+            projection.batches.size() != 1U) {
+          projected_science_matches = false;
+          projected_chunk_indices.push_back(
+              projection.source_chunk.chunk_index);
+          return;
+        }
+        const auto& batch = projection.batches.front();
+        const std::size_t expected_batch_index =
+            projection.source_chunk.source_batch_begin_index;
+        const auto& source_batch =
+            resumed_scenario.event_journal
+                .batches[expected_batch_index];
+        const auto& authority =
+            resumed_authorities[expected_batch_index];
+        projected_science_matches =
+            projected_science_matches &&
+            projection.source_chunk.chunk_index ==
+                expected_chunk_index &&
+            batch.source_batch_index == expected_batch_index &&
+            batch.source_chunk_index == expected_chunk_index &&
+            batch.order == source_batch.order &&
+            batch.closed_batch_squared_level ==
+                source_batch.squared_level &&
+            batch.traversal_order ==
+                morsehgp3d::spatial::LbvhTraversalOrder::near_first &&
+            batch.requested_closure_budget ==
+                authority.closure_budget &&
+            batch.locator_query_witness ==
+                authority.locator_query_witness &&
+            batch.strict_pre_batch_locator_stamp ==
+                authority.strict_pre_batch_locator_stamp &&
+            batch.source_family_begin_index <=
+                batch.source_family_end_index &&
+            batch.source_arm_seed_begin_index <=
+                batch.source_arm_seed_end_index &&
+            batch.closure_summary.complete_relative_positive &&
+            batch.execution_counters.resolved_key_projection_count ==
+                batch.resolved_keys.size() &&
+            batch.execution_counters.arm_join_count ==
+                batch.arm_joins.size() &&
+            (expected_batch_index != 0U ||
+             (batch.resolved_keys.empty() &&
+              batch.arm_joins.empty())) &&
+            (expected_batch_index != 1U ||
+             (batch.resolved_keys.size() == 4U &&
+              batch.arm_joins.size() == 12U));
+        projected_chunk_indices.push_back(
+            projection.source_chunk.chunk_index);
+      };
+  const auto before_projection = resumed_context.audit();
+  {
+    AtomicLinearRunStore projected =
+        resumed_context.open_existing_store(
+            directory,
+            initial_checkpoint,
+            initial_output_chain,
+            linear_limits,
+            completed_anchor,
+            consume_projection);
+    check(
+        projected.status().recovered_transition_count == 2U &&
+            projected.status().recovery_recertification_count == 2U,
+        "typed recovery still performs one generic recertification per committed chunk");
+  }
+  const auto after_projection = resumed_context.audit();
+  check(
+      projected_science_matches &&
+          projected_chunk_indices ==
+              std::vector<std::size_t>{0U, 1U} &&
+          after_projection.recovery_recertification_count -
+                  before_projection.recovery_recertification_count ==
+              2U &&
+          after_projection.arbitrary_batch_replay_count -
+                  before_projection.arbitrary_batch_replay_count ==
+              2U,
+      "the real two-chunk prefix hands off each fresh 14D batch exactly once in order without a second decode or scientific replay");
+
+  std::vector<std::size_t> disposable_projection_prefix;
+  bool projection_throw_observed = false;
+  try {
+    AtomicLinearRunStore rejected =
+        resumed_context.open_existing_store(
+            directory,
+            initial_checkpoint,
+            initial_output_chain,
+            linear_limits,
+            completed_anchor,
+            [&disposable_projection_prefix](
+                const ExactDirectMorseRecertifiedChunkProjection&
+                    projection) {
+              disposable_projection_prefix.push_back(
+                  projection.source_chunk.chunk_index);
+              if (projection.source_chunk.chunk_index == 1U) {
+                throw std::runtime_error(
+                    "scripted typed projection failure");
+              }
+            });
+    static_cast<void>(rejected.status());
+  } catch (const std::runtime_error& error) {
+    projection_throw_observed =
+        std::string_view{error.what()} ==
+        "scripted typed projection failure";
+  }
+  const bool failed_projection_was_disposable =
+      disposable_projection_prefix ==
+      std::vector<std::size_t>{0U, 1U};
+  disposable_projection_prefix.clear();
+  {
+    AtomicLinearRunStore rebuilt =
+        resumed_context.open_existing_store(
+            directory,
+            initial_checkpoint,
+            initial_output_chain,
+            linear_limits,
+            completed_anchor,
+            [&disposable_projection_prefix](
+                const ExactDirectMorseRecertifiedChunkProjection&
+                    projection) {
+              disposable_projection_prefix.push_back(
+                  projection.source_chunk.chunk_index);
+            });
+    check(
+        projection_throw_observed &&
+            failed_projection_was_disposable &&
+            disposable_projection_prefix ==
+                std::vector<std::size_t>{0U, 1U} &&
+            rebuilt.status().committed_transition_count == 2U,
+        "a typed visitor failure aborts recovery and releases the store for one fresh linear derived rebuild");
+  }
+
+  const auto resident_forest =
+      build_exact_direct_morse_forest_journal(
+          resumed_scenario.index,
+          resumed_scenario.cloud,
+          resumed_scenario.facade,
+          resumed_scenario.event_journal,
+          resumed_seed_budget,
+          resumed_scenario.seed_journal,
+          forest_budget(),
+          forest_config());
+  ExactDirectMorseForestReducer recovered_reducer{
+      resumed_scenario.cloud,
+      resumed_scenario.facade,
+      resumed_scenario.event_journal,
+      resumed_seed_budget,
+      resumed_scenario.seed_journal,
+      forest_budget(),
+      forest_config()};
+  bool every_recovered_batch_folded = true;
+  {
+    AtomicLinearRunStore recovered =
+        resumed_context.open_existing_store(
+            directory,
+            initial_checkpoint,
+            initial_output_chain,
+            linear_limits,
+            completed_anchor,
+            [&recovered_reducer, &every_recovered_batch_folded](
+                const ExactDirectMorseRecertifiedChunkProjection&
+                    projection) {
+              for (const auto& batch : projection.batches) {
+                const auto borrowed =
+                    project_exact_direct_morse_recertified_forest_reducer_batch(
+                        batch);
+                every_recovered_batch_folded =
+                    recovered_reducer.fold(borrowed)
+                        .certified_committed_batch() &&
+                    every_recovered_batch_folded;
+              }
+            });
+    every_recovered_batch_folded =
+        recovered.status().recovered_transition_count == 2U &&
+        every_recovered_batch_folded;
+  }
+  std::optional<ExactDirectMorseForestJournalResult>
+      recovered_forest;
+  if (every_recovered_batch_folded && recovered_reducer.complete()) {
+    recovered_forest.emplace(recovered_reducer.finish());
+  }
+  check(
+      recovered_forest.has_value() &&
+          *recovered_forest == resident_forest,
+      "the authoritative two-chunk prefix rebuilds the exact resident forest through one zero-copy fold per freshly recertified 14D batch");
 }
 
 void test_two_batch_payload_cap_is_preflighted_before_retention() {
@@ -683,9 +936,9 @@ void test_two_batch_payload_cap_is_preflighted_before_retention() {
       seed_budget,
       industrial_config,
       batch_plan_budget);
-  ExactDirectSparsePositiveFacetLocator locator = positive_locator();
-  const auto authorities = batch_authorities(locator);
-  auto resolver = locator_resolver(locator);
+  LocatorPrefixes locators = locator_prefixes();
+  const auto authorities = batch_authorities(locators);
+  auto resolver = locator_resolver(locators);
   check(
       observed_plan.source_industrial_plan.chunks.size() == 1U &&
           observed_plan.source_industrial_plan.chunks[0U]
@@ -789,9 +1042,9 @@ void test_budget_policy_digest_and_cumulative_output() {
       seed_budget,
       industrial_config,
       batch_plan_budget);
-  ExactDirectSparsePositiveFacetLocator locator = positive_locator();
-  const auto authorities = batch_authorities(locator);
-  auto resolver = locator_resolver(locator);
+  LocatorPrefixes locators = locator_prefixes();
+  const auto authorities = batch_authorities(locators);
+  auto resolver = locator_resolver(locators);
   constexpr std::uint64_t generous = UINT64_C(1) << 40U;
   constexpr std::uint64_t payload = 64U * 1024U;
   constexpr std::uint64_t transition =
@@ -926,9 +1179,9 @@ void test_resource_gate_keeps_recertification_pure_and_bounds_time() {
       seed_budget,
       industrial_config,
       batch_plan_budget);
-  ExactDirectSparsePositiveFacetLocator locator = positive_locator();
-  const auto authorities = batch_authorities(locator);
-  auto resolver = locator_resolver(locator);
+  LocatorPrefixes locators = locator_prefixes();
+  const auto authorities = batch_authorities(locators);
+  auto resolver = locator_resolver(locators);
   auto times = std::make_shared<std::vector<std::uint64_t>>(
       std::initializer_list<std::uint64_t>{
           0U, 1U, 2U, 3U, 4U, UINT64_C(3'000'005)});
@@ -1024,9 +1277,9 @@ void test_public_payload_mutations_fail_closed() {
       seed_budget,
       industrial_config,
       batch_plan_budget);
-  ExactDirectSparsePositiveFacetLocator locator = positive_locator();
-  const auto authorities = batch_authorities(locator);
-  auto resolver = locator_resolver(locator);
+  LocatorPrefixes locators = locator_prefixes();
+  const auto authorities = batch_authorities(locators);
+  auto resolver = locator_resolver(locators);
   ExactDirectMorseChunkRunContext context{
       scenario.index,
       scenario.cloud,

@@ -10,6 +10,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace morsehgp3d::hierarchy {
@@ -93,19 +94,62 @@ enum class AtomicLinearRunRecertificationPhase : std::uint8_t {
   recovery_uncommitted_cleanup,
 };
 
+// A synchronous, derived handoff produced while recertifying one transition.
+// It carries no durable or scientific authority.  The generic store neither
+// interprets nor retains it; application code may derive a bounded projection
+// type and consume it through the committed-prefix visitor below.
+struct AtomicLinearRunAcceptedProjection {
+  virtual ~AtomicLinearRunAcceptedProjection() = default;
+};
+
 struct AtomicLinearRunRecertification {
+  AtomicLinearRunRecertification() = default;
+
+  AtomicLinearRunRecertification(
+      bool supplied_transition_recertified,
+      bool supplied_payload_is_canonical,
+      bool supplied_process_local_capability_absent,
+      std::shared_ptr<const AtomicLinearRunAcceptedProjection>
+          supplied_accepted_projection = {},
+      bool supplied_operational_resource_failure = false)
+      : transition_recertified(supplied_transition_recertified),
+        payload_is_canonical(supplied_payload_is_canonical),
+        process_local_capability_absent(
+            supplied_process_local_capability_absent),
+        accepted_projection(
+            std::move(supplied_accepted_projection)),
+        operational_resource_failure(
+            supplied_operational_resource_failure) {}
+
   bool transition_recertified{false};
   bool payload_is_canonical{false};
   bool process_local_capability_absent{false};
+  std::shared_ptr<const AtomicLinearRunAcceptedProjection>
+      accepted_projection;
+  // This is an operational refusal, never a negative scientific
+  // certificate.  In particular, projection/replay allocation failures set
+  // this bit and leave every scientific acceptance bit false.
+  bool operational_resource_failure{false};
 
   [[nodiscard]] bool accepted() const noexcept {
     return transition_recertified && payload_is_canonical &&
-           process_local_capability_absent;
+           process_local_capability_absent &&
+           !operational_resource_failure;
   }
 
+  // Projection object identity is observational and deliberately absent from
+  // equality.  Resource exhaustion remains part of the public decision.
   friend bool operator==(
-      const AtomicLinearRunRecertification&,
-      const AtomicLinearRunRecertification&) = default;
+      const AtomicLinearRunRecertification& left,
+      const AtomicLinearRunRecertification& right) noexcept {
+    return left.transition_recertified ==
+               right.transition_recertified &&
+           left.payload_is_canonical == right.payload_is_canonical &&
+           left.process_local_capability_absent ==
+               right.process_local_capability_absent &&
+           left.operational_resource_failure ==
+               right.operational_resource_failure;
+  }
 };
 
 // A recertifier is decision-pure and scientifically idempotent under the same
@@ -118,6 +162,21 @@ using AtomicLinearRunRecertifier = std::function<
     AtomicLinearRunRecertification(
         const AtomicLinearRunTransition&,
         AtomicLinearRunRecertificationPhase)>;
+
+// Optional, derived replay sink for an already committed prefix.  Recovery
+// invokes it once, in sequence order, after scientific recertification and
+// before the transition's after-resource-gate boundary.  Its work is
+// therefore included in the same measured recovery envelope.  It is never an
+// authority and is not retained by the store; the transition reference and
+// borrowed projection pointer are valid only for that invocation.  If it
+// throws, the after gate is still closed and open_existing fails; callers must
+// discard any partial derived state accumulated by the visitor after this or
+// any later open failure.  The projection pointer may be null and must not be
+// retained.
+using AtomicLinearRunCommittedPrefixVisitor =
+    std::function<void(
+        const AtomicLinearRunTransition&,
+        const AtomicLinearRunAcceptedProjection*)>;
 
 enum class AtomicLinearRunResourceGateBoundary : std::uint8_t {
   before_recertification,
@@ -139,6 +198,7 @@ using AtomicLinearRunResourceGate = std::function<
 enum class AtomicLinearRunRecoveryFailureReason : std::uint8_t {
   resource_gate_before_recertification_rejected,
   resource_gate_after_recertification_rejected,
+  recertification_resource_exhausted,
   scientific_recertification_rejected,
 };
 
@@ -221,6 +281,7 @@ enum class AtomicLinearRunPublishDecision : std::uint8_t {
   durably_published,
   transition_shape_rejected,
   resource_gate_rejected,
+  recertification_resource_exhausted,
   recertification_rejected,
   store_limit_rejected,
   retryable_io_failure,
@@ -290,6 +351,15 @@ class AtomicLinearRunStore {
       std::optional<AtomicLinearRunExternalAnchor> expected_anchor =
           std::nullopt);
 
+  [[nodiscard]] static AtomicLinearRunStore open_existing(
+      const std::filesystem::path& dedicated_directory,
+      AtomicLinearRunContract contract,
+      AtomicLinearRunStoreLimits limits,
+      AtomicLinearRunRecertifier recertifier,
+      AtomicLinearRunResourceGate resource_gate,
+      std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
+      AtomicLinearRunCommittedPrefixVisitor committed_prefix_visitor);
+
   ~AtomicLinearRunStore();
 
   AtomicLinearRunStore(const AtomicLinearRunStore&) = delete;
@@ -320,7 +390,8 @@ class AtomicLinearRunStore {
       AtomicLinearRunStoreLimits limits,
       AtomicLinearRunRecertifier recertifier,
       std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
-      AtomicLinearRunResourceGate resource_gate);
+      AtomicLinearRunResourceGate resource_gate,
+      AtomicLinearRunCommittedPrefixVisitor committed_prefix_visitor);
 
   struct Impl;
   std::unique_ptr<Impl> impl_;

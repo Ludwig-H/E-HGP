@@ -1241,6 +1241,18 @@ void hash_industrial_counters(
   hash_u64(builder, limits.checkpoint_reserved_ns);
   hash_u64(builder, limits.safety_margin_reserved_bytes);
   hash_size(builder, sizeof(ParsedBatch));
+  hash_text(
+      builder,
+      "accepted-recovery-projection-budget/v1");
+  hash_size(
+      builder,
+      sizeof(ExactDirectMorseRecertifiedBatchProjection));
+  hash_size(
+      builder,
+      sizeof(ExactDirectSparseFacetDescentBatchResolvedKey));
+  hash_size(
+      builder,
+      sizeof(ExactDirectSparseFacetDescentBatchArmJoin));
   hash_size(
       builder, atomic_linear_run_transition_fixed_wire_byte_count);
   hash_size(builder, atomic_linear_run_head_wire_byte_count);
@@ -1507,15 +1519,47 @@ build_batch_cursors(
       chunk.source_batch_begin_index);
   const std::uint64_t batch_metadata_bytes = checked_mul_u64(
       batch_count, wire_size(sizeof(ParsedBatch)));
+  const std::uint64_t projection_batch_metadata_bytes =
+      checked_mul_u64(
+          batch_count,
+          wire_size(
+              sizeof(
+                  ExactDirectMorseRecertifiedBatchProjection)));
+  const std::uint64_t projection_resolved_key_bytes =
+      checked_mul_u64(
+          wire_size(
+              limits
+                  .maximum_total_resolved_key_count_per_chunk),
+          wire_size(
+              sizeof(
+                  ExactDirectSparseFacetDescentBatchResolvedKey)));
+  const std::uint64_t projection_arm_join_bytes =
+      checked_mul_u64(
+          wire_size(
+              limits.maximum_total_arm_join_count_per_chunk),
+          wire_size(
+              sizeof(
+                  ExactDirectSparseFacetDescentBatchArmJoin)));
 
   // Logical peak of the application layer: retained science, one bounded
   // current science segment, the canonical output image, batch metadata and
-  // the largest sequential resolver/replay envelope.  Allocator slack and
-  // the generic store's own transition copy remain outside this bound.
+  // the largest sequential resolver/replay envelope.  One further payload
+  // cap plus typed population bounds cover the optional accepted recovery
+  // projection retained through one synchronous visitor call.  This reserve
+  // is always present so publication and recovery bind the same five-axis
+  // demand.  Allocator slack and the generic store's own transition copy
+  // remain outside this bound.
   std::uint64_t host_bytes = checked_mul_u64(payload_cap, 2U);
   host_bytes = checked_add_u64(host_bytes, science_cap);
   host_bytes = checked_add_u64(host_bytes, batch_metadata_bytes);
   host_bytes = checked_add_u64(host_bytes, maximum_host_bytes);
+  host_bytes = checked_add_u64(host_bytes, payload_cap);
+  host_bytes = checked_add_u64(
+      host_bytes, projection_batch_metadata_bytes);
+  host_bytes = checked_add_u64(
+      host_bytes, projection_resolved_key_bytes);
+  host_bytes = checked_add_u64(
+      host_bytes, projection_arm_join_bytes);
 
   const std::uint64_t transition_bytes = checked_add_u64(
       wire_size(atomic_linear_run_transition_fixed_wire_byte_count),
@@ -1821,7 +1865,8 @@ struct ExactDirectMorseChunkRunContext::Impl {
 
   [[nodiscard]] AtomicLinearRunRecertification recertify(
       const AtomicLinearRunTransition& transition,
-      AtomicLinearRunRecertificationPhase phase) {
+      AtomicLinearRunRecertificationPhase phase,
+      bool project_accepted_recovery = false) {
     switch (phase) {
       case AtomicLinearRunRecertificationPhase::publication:
         publication_recertification_count.fetch_add(
@@ -1865,6 +1910,15 @@ struct ExactDirectMorseChunkRunContext::Impl {
               transition.sequence);
       const ParsedPayload parsed =
           decode_payload(transition.payload, limits);
+      std::shared_ptr<ExactDirectMorseRecertifiedChunkProjection>
+          accepted_projection;
+      if (project_accepted_recovery &&
+          phase == AtomicLinearRunRecertificationPhase::recovery) {
+        accepted_projection = std::make_shared<
+            ExactDirectMorseRecertifiedChunkProjection>();
+        accepted_projection->source_chunk = parsed.chunk;
+        accepted_projection->batches.reserve(parsed.batches.size());
+      }
       if (parsed.budget_snapshot.requested_demand.output.used_bytes <
           persisted_demand.output.used_bytes) {
         throw std::invalid_argument(
@@ -1916,12 +1970,42 @@ struct ExactDirectMorseChunkRunContext::Impl {
            ++index) {
         const std::size_t batch_index =
             parsed.chunk.source_batch_begin_index + index;
-        const auto fresh = replay_batch(batch_index);
+        auto fresh = replay_batch(batch_index);
         const auto fresh_science = encode_science(
             fresh, limits.maximum_science_byte_count_per_batch);
         if (fresh_science != parsed.batches[index].science) {
           throw std::invalid_argument(
               "a Phase-15 transition science differs from fresh 14D");
+        }
+        if (accepted_projection) {
+          ExactDirectMorseRecertifiedBatchProjection projection;
+          projection.source_batch_index = fresh.source_batch_index;
+          projection.source_chunk_index =
+              fresh.source_chunk_index.value();
+          projection.source_family_begin_index =
+              fresh.source_family_begin_index;
+          projection.source_family_end_index =
+              fresh.source_family_end_index;
+          projection.source_arm_seed_begin_index =
+              fresh.source_arm_seed_begin_index;
+          projection.source_arm_seed_end_index =
+              fresh.source_arm_seed_end_index;
+          projection.order = fresh.source_facet_cardinality;
+          projection.closed_batch_squared_level =
+              fresh.closed_batch_squared_level;
+          projection.traversal_order = fresh.traversal_order;
+          projection.requested_closure_budget =
+              fresh.requested_closure_budget;
+          projection.locator_query_witness =
+              fresh.locator_query_witness;
+          projection.strict_pre_batch_locator_stamp =
+              fresh.locator_snapshot_stamp;
+          projection.resolved_keys = std::move(fresh.resolved_keys);
+          projection.arm_joins = std::move(fresh.arm_joins);
+          projection.closure_summary = fresh.closure_summary;
+          projection.execution_counters = fresh.counters;
+          accepted_projection->batches.push_back(
+              std::move(projection));
         }
       }
       const auto canonical_payload = encode_payload(
@@ -1943,6 +2027,12 @@ struct ExactDirectMorseChunkRunContext::Impl {
       certification.transition_recertified = true;
       certification.payload_is_canonical = true;
       certification.process_local_capability_absent = true;
+      certification.accepted_projection =
+          std::move(accepted_projection);
+    } catch (const std::bad_alloc&) {
+      certification.operational_resource_failure = true;
+      rejected_recertification_count.fetch_add(
+          1U, std::memory_order_relaxed);
     } catch (...) {
       rejected_recertification_count.fetch_add(
           1U, std::memory_order_relaxed);
@@ -2107,17 +2197,55 @@ ExactDirectMorseChunkRunContext::open_existing_store(
     contract::CanonicalId initial_output_chain_digest,
     AtomicLinearRunStoreLimits store_limits,
     std::optional<AtomicLinearRunExternalAnchor> expected_anchor) const {
+  return open_existing_store(
+      dedicated_directory,
+      std::move(initial_checkpoint_digest),
+      std::move(initial_output_chain_digest),
+      std::move(store_limits),
+      std::move(expected_anchor),
+      {});
+}
+
+AtomicLinearRunStore
+ExactDirectMorseChunkRunContext::open_existing_store(
+    const std::filesystem::path& dedicated_directory,
+    contract::CanonicalId initial_checkpoint_digest,
+    contract::CanonicalId initial_output_chain_digest,
+    AtomicLinearRunStoreLimits store_limits,
+    std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
+    ExactDirectMorseRecertifiedChunkVisitor
+        committed_prefix_visitor) const {
   const std::shared_ptr<Impl> shared = impl_;
+  const bool project_accepted_recovery =
+      static_cast<bool>(committed_prefix_visitor);
+  AtomicLinearRunCommittedPrefixVisitor projection_handoff;
+  if (committed_prefix_visitor) {
+    projection_handoff =
+        [visitor = std::move(committed_prefix_visitor)](
+            const AtomicLinearRunTransition&,
+            const AtomicLinearRunAcceptedProjection* projection) {
+          const auto* typed = dynamic_cast<
+              const ExactDirectMorseRecertifiedChunkProjection*>(
+              projection);
+          if (!typed) {
+            throw std::logic_error(
+                "a Phase-15 accepted recovery has no typed chunk "
+                "projection");
+          }
+          visitor(*typed);
+        };
+  }
   return AtomicLinearRunStore::open_existing(
       dedicated_directory,
       run_contract(
           std::move(initial_checkpoint_digest),
           std::move(initial_output_chain_digest)),
       std::move(store_limits),
-      [shared](
+      [shared, project_accepted_recovery](
           const AtomicLinearRunTransition& transition,
           AtomicLinearRunRecertificationPhase phase) {
-        return shared->recertify(transition, phase);
+        return shared->recertify(
+            transition, phase, project_accepted_recovery);
       },
       [shared](
           const AtomicLinearRunTransition& transition,
@@ -2126,7 +2254,8 @@ ExactDirectMorseChunkRunContext::open_existing_store(
         return shared->gate_resources(
             transition, phase, boundary);
       },
-      std::move(expected_anchor));
+      std::move(expected_anchor),
+      std::move(projection_handoff));
 }
 
 AtomicLinearRunRecertification

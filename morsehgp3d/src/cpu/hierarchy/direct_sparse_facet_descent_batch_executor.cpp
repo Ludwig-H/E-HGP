@@ -1147,6 +1147,7 @@ summarize_closure(
       projection.resolved_keys.push_back(
           {key_index,
            distinct_keys[key_index],
+           terminal.facet_key,
            *terminal.resolved_component_handle,
            *terminal.resolved_binding_witness,
            seed_projection.closure_disposition,
@@ -1256,6 +1257,10 @@ summarize_closure(
     if (resolved.resolved_key_index != resolved_index ||
         !valid_key(
             resolved.source_facet_key,
+            std::numeric_limits<std::size_t>::max(),
+            result.source_facet_cardinality) ||
+        !valid_key(
+            resolved.resolved_terminal_facet_key,
             std::numeric_limits<std::size_t>::max(),
             result.source_facet_cardinality) ||
         resolved.resolved_binding_witness.external_authority_id !=

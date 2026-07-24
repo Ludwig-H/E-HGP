@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <dirent.h>
+#include <exception>
 #include <fcntl.h>
 #include <limits>
 #include <new>
@@ -958,7 +959,9 @@ struct AtomicLinearRunStore::Impl {
       AtomicLinearRunStoreLimits supplied_limits,
       AtomicLinearRunRecertifier supplied_recertifier,
       std::optional<AtomicLinearRunExternalAnchor> supplied_anchor,
-      AtomicLinearRunResourceGate supplied_resource_gate)
+      AtomicLinearRunResourceGate supplied_resource_gate,
+      AtomicLinearRunCommittedPrefixVisitor
+          supplied_committed_prefix_visitor)
       : contract_value(std::move(supplied_contract)),
         limits(std::move(supplied_limits)),
         recertifier(std::move(supplied_recertifier)),
@@ -1018,7 +1021,7 @@ struct AtomicLinearRunStore::Impl {
       }
       initialize_new();
     } else {
-      recover_existing();
+      recover_existing(supplied_committed_prefix_visitor);
     }
   }
 
@@ -1249,8 +1252,9 @@ struct AtomicLinearRunStore::Impl {
     AtomicLinearRunRecertification result;
     try {
       result = recertifier(transition, phase);
+    } catch (const std::bad_alloc&) {
+      result.operational_resource_failure = true;
     } catch (...) {
-      return {};
     }
     if (phase == AtomicLinearRunRecertificationPhase::publication) {
       ++durable_status.publication_recertification_count;
@@ -1302,7 +1306,9 @@ struct AtomicLinearRunStore::Impl {
       const AtomicLinearRunTrustedState& source_state,
       std::size_t maximum_encoded_byte_count,
       AtomicLinearRunRecertificationPhase phase,
-      std::size_t& encoded_byte_count) {
+      std::size_t& encoded_byte_count,
+      const AtomicLinearRunCommittedPrefixVisitor&
+          committed_prefix_visitor) {
     const ReadFile read = read_named_file(
         directory.get(),
         sequence_file_name(sequence, false),
@@ -1329,6 +1335,15 @@ struct AtomicLinearRunStore::Impl {
     }
     const AtomicLinearRunRecertification replay =
         recertify(transition, phase);
+    std::exception_ptr visitor_failure;
+    if (replay.accepted() && committed_prefix_visitor) {
+      try {
+        committed_prefix_visitor(
+            transition, replay.accepted_projection.get());
+      } catch (...) {
+        visitor_failure = std::current_exception();
+      }
+    }
     const bool resources_completed = authorize_resources(
         transition,
         phase,
@@ -1341,6 +1356,15 @@ struct AtomicLinearRunStore::Impl {
           sequence,
           "an atomic linear transition exceeded its recovery resource gate"};
     }
+    if (replay.operational_resource_failure) {
+      throw AtomicLinearRunRecoveryError{
+          AtomicLinearRunRecoveryFailureReason::
+              recertification_resource_exhausted,
+          phase,
+          sequence,
+          "an atomic linear transition exhausted recertification "
+          "resources"};
+    }
     if (!replay.accepted()) {
       throw AtomicLinearRunRecoveryError{
           AtomicLinearRunRecoveryFailureReason::
@@ -1348,6 +1372,9 @@ struct AtomicLinearRunStore::Impl {
           phase,
           sequence,
           "an atomic linear transition failed recovery recertification"};
+    }
+    if (visitor_failure) {
+      std::rethrow_exception(visitor_failure);
     }
     encoded_byte_count = read.bytes.size();
     durable_status.maximum_observed_payload_byte_count = std::max(
@@ -1393,7 +1420,9 @@ struct AtomicLinearRunStore::Impl {
     inventory.head_temporary_present = false;
   }
 
-  void recover_existing() {
+  void recover_existing(
+      const AtomicLinearRunCommittedPrefixVisitor&
+          committed_prefix_visitor) {
     DirectoryInventory inventory = inventory_directory(
         directory.get(),
         checked_add(
@@ -1465,17 +1494,21 @@ struct AtomicLinearRunStore::Impl {
               limits.maximum_encoded_transition_byte_count,
               remaining_head_bytes),
           AtomicLinearRunRecertificationPhase::recovery,
-          encoded_byte_count);
-      total_bytes = checked_add(
+          encoded_byte_count,
+          committed_prefix_visitor);
+      const std::size_t next_total_bytes = checked_add(
           total_bytes,
           encoded_byte_count,
           "the recovered atomic linear byte count overflows");
-      if (total_bytes >
+      if (next_total_bytes >
           limits.maximum_total_encoded_transition_byte_count) {
         throw std::runtime_error(
             "the recovered atomic linear prefix exceeds its byte cap");
       }
-      trusted = successor_state(transition);
+      const AtomicLinearRunTrustedState next_trusted =
+          successor_state(transition);
+      total_bytes = next_total_bytes;
+      trusted = next_trusted;
       ++committed_count;
       ++durable_status.recovered_transition_count;
       verify_expected_anchor_at_current_prefix();
@@ -1526,7 +1559,8 @@ struct AtomicLinearRunStore::Impl {
                   total_bytes),
           AtomicLinearRunRecertificationPhase::
               recovery_uncommitted_cleanup,
-          orphan_bytes);
+          orphan_bytes,
+          {});
       const AtomicLinearRunTrustedState orphan_successor =
           successor_state(orphan);
       const HeadRecord expected_next_head = head_from_state(
@@ -1780,6 +1814,20 @@ struct AtomicLinearRunStore::Impl {
     resource_gate_active = true;
     result.recertification = recertify(
         transition, AtomicLinearRunRecertificationPhase::publication);
+    if (result.recertification.operational_resource_failure) {
+      resource_gate_active = false;
+      result.decision = authorize_resources(
+                            transition,
+                            AtomicLinearRunRecertificationPhase::
+                                publication,
+                            AtomicLinearRunResourceGateBoundary::
+                                after_recertification)
+                            ? AtomicLinearRunPublishDecision::
+                                  recertification_resource_exhausted
+                            : AtomicLinearRunPublishDecision::
+                                  resource_gate_rejected;
+      return result;
+    }
     if (!result.recertification.accepted()) {
       resource_gate_active = false;
       result.decision = authorize_resources(
@@ -2123,7 +2171,8 @@ AtomicLinearRunStore::AtomicLinearRunStore(
     AtomicLinearRunStoreLimits limits,
     AtomicLinearRunRecertifier recertifier,
     std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
-    AtomicLinearRunResourceGate resource_gate)
+    AtomicLinearRunResourceGate resource_gate,
+    AtomicLinearRunCommittedPrefixVisitor committed_prefix_visitor)
     : impl_(std::make_unique<Impl>(
           mode,
           dedicated_directory,
@@ -2131,7 +2180,8 @@ AtomicLinearRunStore::AtomicLinearRunStore(
           std::move(limits),
           std::move(recertifier),
           std::move(expected_anchor),
-          std::move(resource_gate))) {}
+          std::move(resource_gate),
+          std::move(committed_prefix_visitor))) {}
 
 AtomicLinearRunStore AtomicLinearRunStore::create_new(
     const std::filesystem::path& dedicated_directory,
@@ -2146,7 +2196,8 @@ AtomicLinearRunStore AtomicLinearRunStore::create_new(
       std::move(limits),
       std::move(recertifier),
       std::nullopt,
-      std::move(resource_gate)};
+      std::move(resource_gate),
+      {}};
 }
 
 AtomicLinearRunStore AtomicLinearRunStore::open_existing(
@@ -2156,6 +2207,24 @@ AtomicLinearRunStore AtomicLinearRunStore::open_existing(
     AtomicLinearRunRecertifier recertifier,
     AtomicLinearRunResourceGate resource_gate,
     std::optional<AtomicLinearRunExternalAnchor> expected_anchor) {
+  return open_existing(
+      dedicated_directory,
+      std::move(contract_value),
+      std::move(limits),
+      std::move(recertifier),
+      std::move(resource_gate),
+      std::move(expected_anchor),
+      {});
+}
+
+AtomicLinearRunStore AtomicLinearRunStore::open_existing(
+    const std::filesystem::path& dedicated_directory,
+    AtomicLinearRunContract contract_value,
+    AtomicLinearRunStoreLimits limits,
+    AtomicLinearRunRecertifier recertifier,
+    AtomicLinearRunResourceGate resource_gate,
+    std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
+    AtomicLinearRunCommittedPrefixVisitor committed_prefix_visitor) {
   return AtomicLinearRunStore{
       OpenMode::open_existing,
       dedicated_directory,
@@ -2163,7 +2232,8 @@ AtomicLinearRunStore AtomicLinearRunStore::open_existing(
       std::move(limits),
       std::move(recertifier),
       std::move(expected_anchor),
-      std::move(resource_gate)};
+      std::move(resource_gate),
+      std::move(committed_prefix_visitor)};
 }
 
 AtomicLinearRunRecoveryError::AtomicLinearRunRecoveryError(

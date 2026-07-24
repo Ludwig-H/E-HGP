@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <iostream>
 #include <limits>
+#include <new>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -26,6 +27,7 @@ using morsehgp3d::contract::CanonicalId;
 using morsehgp3d::contract::CanonicalSha256Builder;
 using morsehgp3d::hierarchy::AtomicLinearRunChunkProposal;
 using morsehgp3d::hierarchy::AtomicLinearRunContract;
+using morsehgp3d::hierarchy::AtomicLinearRunAcceptedProjection;
 using morsehgp3d::hierarchy::AtomicLinearRunExternalAnchor;
 using morsehgp3d::hierarchy::AtomicLinearRunPublishDecision;
 using morsehgp3d::hierarchy::AtomicLinearRunPublishOptions;
@@ -33,7 +35,10 @@ using morsehgp3d::hierarchy::AtomicLinearRunPublishStage;
 using morsehgp3d::hierarchy::AtomicLinearRunRecertification;
 using morsehgp3d::hierarchy::AtomicLinearRunRecertificationPhase;
 using morsehgp3d::hierarchy::AtomicLinearRunRecertifier;
+using morsehgp3d::hierarchy::AtomicLinearRunRecoveryError;
+using morsehgp3d::hierarchy::AtomicLinearRunRecoveryFailureReason;
 using morsehgp3d::hierarchy::AtomicLinearRunResourceGate;
+using morsehgp3d::hierarchy::AtomicLinearRunResourceGateBoundary;
 using morsehgp3d::hierarchy::AtomicLinearRunStore;
 using morsehgp3d::hierarchy::AtomicLinearRunStoreLimits;
 using morsehgp3d::hierarchy::AtomicLinearRunTransition;
@@ -879,6 +884,236 @@ void test_resource_gate_order_and_failure_cleanup() {
               1U &&
           no_uncommitted_first_transition(after_gate_directory),
       "an after-gate exception after reversible writes removes the final and temporaries before HEAD replacement");
+
+  const std::filesystem::path resource_directory =
+      workspace.make_directory("recertifier-resource-exhaustion");
+  {
+    RecertificationCounts publication_counts;
+    AtomicLinearRunStore resource_store =
+        AtomicLinearRunStore::create_new(
+            resource_directory,
+            run_contract,
+            limits,
+            recertifier(publication_counts),
+            resource_gate());
+    check(
+        resource_store
+                .publish_next(
+                    proposal(resource_store, 12U, 0x33U))
+                .decision ==
+            AtomicLinearRunPublishDecision::durably_published,
+        "the resource-classification fixture publishes one transition");
+  }
+  std::vector<int> resource_events;
+  bool recovery_resource_failure_observed = false;
+  try {
+    AtomicLinearRunStore rejected =
+        AtomicLinearRunStore::open_existing(
+            resource_directory,
+            run_contract,
+            limits,
+            [&resource_events](
+                const AtomicLinearRunTransition&,
+                AtomicLinearRunRecertificationPhase)
+                -> AtomicLinearRunRecertification {
+              resource_events.push_back(2);
+              throw std::bad_alloc{};
+            },
+            [&resource_events](
+                const AtomicLinearRunTransition&,
+                AtomicLinearRunRecertificationPhase,
+                AtomicLinearRunResourceGateBoundary boundary) {
+              resource_events.push_back(
+                  boundary ==
+                          AtomicLinearRunResourceGateBoundary::
+                              before_recertification
+                      ? 1
+                      : 3);
+              return true;
+            });
+    static_cast<void>(rejected.status());
+  } catch (const AtomicLinearRunRecoveryError& error) {
+    recovery_resource_failure_observed =
+        error.reason() ==
+            AtomicLinearRunRecoveryFailureReason::
+                recertification_resource_exhausted &&
+        error.phase() ==
+            AtomicLinearRunRecertificationPhase::recovery &&
+        error.sequence() == 0U;
+  }
+  check(
+      recovery_resource_failure_observed &&
+          resource_events == std::vector<int>{1, 2, 3},
+      "a recovery bad_alloc closes the resource gate and is classified as operational exhaustion rather than scientific rejection");
+}
+
+void test_committed_prefix_visitor_order_payload_and_throw() {
+  struct MarkerProjection final
+      : AtomicLinearRunAcceptedProjection {
+    explicit MarkerProjection(std::uint8_t supplied_marker)
+        : marker(supplied_marker) {}
+
+    std::uint8_t marker{};
+  };
+
+  check(
+      AtomicLinearRunRecertification{
+          true,
+          true,
+          true,
+          std::make_shared<const MarkerProjection>(UINT8_C(0x7A))} ==
+          AtomicLinearRunRecertification{true, true, true},
+      "scientific recertification equality ignores the derived projection identity");
+
+  TemporaryWorkspace workspace;
+  const std::filesystem::path directory =
+      workspace.make_directory("committed-prefix-visitor");
+  const AtomicLinearRunContract run_contract = contract_fixture();
+  const AtomicLinearRunStoreLimits limits = generous_limits();
+  {
+    RecertificationCounts publication_counts;
+    AtomicLinearRunStore store = AtomicLinearRunStore::create_new(
+        directory,
+        run_contract,
+        limits,
+        recertifier(publication_counts),
+        resource_gate());
+    check(
+        store.publish_next(proposal(store, 12U, 0x41U)).decision ==
+                AtomicLinearRunPublishDecision::durably_published &&
+            store.publish_next(proposal(store, 14U, 0x42U)).decision ==
+                AtomicLinearRunPublishDecision::durably_published,
+        "the committed-prefix visitor fixture publishes two transitions");
+  }
+
+  std::vector<int> ordered_events;
+  std::vector<std::uint8_t> visited_payload_markers;
+  {
+    AtomicLinearRunStore reopened =
+        AtomicLinearRunStore::open_existing(
+            directory,
+            run_contract,
+            limits,
+            [&ordered_events](
+                const AtomicLinearRunTransition& transition,
+                AtomicLinearRunRecertificationPhase phase) {
+              if (phase ==
+                  AtomicLinearRunRecertificationPhase::recovery) {
+                ordered_events.push_back(
+                    100 + static_cast<int>(transition.sequence));
+              }
+              return AtomicLinearRunRecertification{
+                  true,
+                  true,
+                  true,
+                  std::make_shared<const MarkerProjection>(
+                      transition.payload.front())};
+            },
+            [&ordered_events](
+                const AtomicLinearRunTransition& transition,
+                AtomicLinearRunRecertificationPhase phase,
+                AtomicLinearRunResourceGateBoundary boundary) {
+              if (phase ==
+                  AtomicLinearRunRecertificationPhase::recovery) {
+                ordered_events.push_back(
+                    (boundary ==
+                             AtomicLinearRunResourceGateBoundary::
+                                 before_recertification
+                         ? 0
+                         : 300) +
+                    static_cast<int>(transition.sequence));
+              }
+              return true;
+            },
+            std::nullopt,
+            [&ordered_events, &visited_payload_markers](
+                const AtomicLinearRunTransition& transition,
+                const AtomicLinearRunAcceptedProjection* projection) {
+              ordered_events.push_back(
+                  200 + static_cast<int>(transition.sequence));
+              const auto* marker =
+                  dynamic_cast<const MarkerProjection*>(projection);
+              visited_payload_markers.push_back(
+                  marker ? marker->marker : UINT8_C(0));
+            });
+    check(
+        ordered_events ==
+                std::vector<int>{
+                    0, 100, 200, 300, 1, 101, 201, 301} &&
+            visited_payload_markers ==
+                std::vector<std::uint8_t>{0x41U, 0x42U} &&
+            reopened.status().recovery_recertification_count == 2U &&
+            reopened.status().resource_gate_evaluation_count == 4U &&
+            reopened.status().retained_transition_history_count == 0U,
+        "the derived visitor follows each single authoritative recovery replay in sequence order without retained history");
+  }
+
+  std::vector<std::uint64_t> disposable_prefix;
+  bool visitor_failure_observed = false;
+  try {
+    AtomicLinearRunStore rejected =
+        AtomicLinearRunStore::open_existing(
+            directory,
+            run_contract,
+            limits,
+            [](const AtomicLinearRunTransition&,
+               AtomicLinearRunRecertificationPhase) {
+              return AtomicLinearRunRecertification{true, true, true};
+            },
+            resource_gate(),
+            std::nullopt,
+            [&disposable_prefix](
+                const AtomicLinearRunTransition& transition,
+                const AtomicLinearRunAcceptedProjection* projection) {
+              if (projection) {
+                throw std::logic_error(
+                    "an aggregate three-bool recertification unexpectedly "
+                    "produced a projection");
+              }
+              disposable_prefix.push_back(transition.sequence);
+              if (transition.sequence == 1U) {
+                throw std::runtime_error(
+                    "scripted committed-prefix visitor failure");
+              }
+            });
+    static_cast<void>(rejected.status());
+  } catch (const std::runtime_error& error) {
+    visitor_failure_observed =
+        std::string_view{error.what()} ==
+        "scripted committed-prefix visitor failure";
+  }
+  const bool partial_prefix_was_disposable =
+      disposable_prefix == std::vector<std::uint64_t>{0U, 1U};
+  disposable_prefix.clear();
+  {
+    AtomicLinearRunStore reopened =
+        AtomicLinearRunStore::open_existing(
+            directory,
+            run_contract,
+            limits,
+            [](const AtomicLinearRunTransition&,
+               AtomicLinearRunRecertificationPhase) {
+              return AtomicLinearRunRecertification{true, true, true};
+            },
+            resource_gate(),
+            std::nullopt,
+            [&disposable_prefix](
+                const AtomicLinearRunTransition& transition,
+                const AtomicLinearRunAcceptedProjection* projection) {
+              if (projection) {
+                throw std::logic_error(
+                    "a null generic projection became non-null");
+              }
+              disposable_prefix.push_back(transition.sequence);
+            });
+    check(
+        visitor_failure_observed &&
+            partial_prefix_was_disposable &&
+            disposable_prefix ==
+                std::vector<std::uint64_t>{0U, 1U} &&
+            reopened.status().committed_transition_count == 2U,
+        "a visitor exception aborts open, releases the writer lock, and permits a fresh disposable derived rebuild");
+  }
 }
 
 void test_post_head_indeterminate_requires_reopen() {
@@ -1038,6 +1273,7 @@ int main() {
     test_corruption_contract_and_anchors();
     test_limits_shapes_and_recertification();
     test_resource_gate_order_and_failure_cleanup();
+    test_committed_prefix_visitor_order_payload_and_throw();
     test_post_head_indeterminate_requires_reopen();
   } catch (const std::exception& error) {
     ++failures;

@@ -1413,6 +1413,49 @@ else()
   )
 endif()
 
+add_library(
+  morsehgp3d_direct_morse_forest_reducer
+  STATIC
+    src/cpu/hierarchy/direct_morse_forest_reducer.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_forest_reducer
+  ALIAS morsehgp3d_direct_morse_forest_reducer
+)
+set_target_properties(
+  morsehgp3d_direct_morse_forest_reducer
+  PROPERTIES
+    EXPORT_NAME direct_morse_forest_reducer
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_forest_reducer PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_forest_reducer
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_forest_reducer
+  PUBLIC
+    morsehgp3d::direct_morse_forest_journal
+    morsehgp3d::direct_sparse_facet_descent_batch_executor
+    morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_reducer PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_reducer
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
 if(UNIX)
   add_library(
     morsehgp3d_direct_morse_chunk_run
@@ -2285,6 +2328,7 @@ install(
     morsehgp3d_direct_frozen_root_quotient
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_direct_morse_forest_journal
+    morsehgp3d_direct_morse_forest_reducer
     morsehgp3d_direct_morse_vertical_journal
     morsehgp3d_direct_morse_industrial_plan
     morsehgp3d_direct_morse_budget

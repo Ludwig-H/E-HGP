@@ -975,6 +975,9 @@ void test_canonical_key_view_executes_nonzero_strict_edge() {
            prepared.closure_summary.counters
                    .successor_positive_hit_count != 0U &&
            ac_resolution->resolved_component_handle == de_handle &&
+           ac_resolution->resolved_terminal_facet_key == de &&
+           ac_resolution->source_facet_key !=
+               ac_resolution->resolved_terminal_facet_key &&
            prepared.transient_closure_released_before_delta_publication &&
            !prepared.closure_graph_persisted);
 

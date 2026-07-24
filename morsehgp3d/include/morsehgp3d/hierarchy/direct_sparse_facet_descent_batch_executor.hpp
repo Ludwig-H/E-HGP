@@ -17,7 +17,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t
-    direct_sparse_facet_descent_batch_executor_schema_version = 1U;
+    direct_sparse_facet_descent_batch_executor_schema_version = 2U;
 inline constexpr std::string_view
     direct_sparse_facet_descent_batch_executor_backend = "reference_cpu";
 inline constexpr std::string_view
@@ -116,12 +116,14 @@ struct ExactDirectSparseFacetDescentBatchExecutionBudget {
       const ExactDirectSparseFacetDescentBatchExecutionBudget&) = default;
 };
 
-// One source key is retained exactly once.  The component and witness come
-// from its positive 10.5c terminal.  No closure-node index escapes the local
-// arena because that arena is destroyed before the delta is returned.
+// One source key and its possibly different terminal key are retained exactly
+// once.  The component and witness come from that positive 10.5c terminal.
+// No closure-node index escapes the local arena because that arena is destroyed
+// before the delta is returned.
 struct ExactDirectSparseFacetDescentBatchResolvedKey {
   std::size_t resolved_key_index{};
   ExactDirectSparseFacetKey source_facet_key{};
+  ExactDirectSparseFacetKey resolved_terminal_facet_key{};
   ExactDirectSparseComponentHandle resolved_component_handle{};
   ExactDirectSparseFacetWitness resolved_binding_witness{};
   ExactDirectSparseFacetDescentClosureDisposition closure_disposition{
