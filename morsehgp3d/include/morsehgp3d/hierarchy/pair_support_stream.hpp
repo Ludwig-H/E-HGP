@@ -8,6 +8,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <optional>
 #include <span>
@@ -132,6 +133,55 @@ struct ExactPairSupportWitnessNodeEntry {
 
 static_assert(std::is_standard_layout_v<ExactPairSupportWitnessNodeEntry>);
 static_assert(std::is_trivially_copyable_v<ExactPairSupportWitnessNodeEntry>);
+
+// Phase 14Q/P2 untrusted, ephemeral rank-prune hint.  The CPU remains the
+// authority: every receipt is checked against the immutable LBVH interval and
+// exact strict-phi AABB predicate before the proposal can affect traversal.
+struct ExactPairSupportRankPruneProposal {
+  ExactPairSupportFrontierEntry product{};
+  std::vector<ExactPairSupportWitnessNodeEntry> strict_witness_receipts;
+
+  friend bool operator==(
+      const ExactPairSupportRankPruneProposal&,
+      const ExactPairSupportRankPruneProposal&) = default;
+};
+
+struct ExactPairSupportRankPruneBatchRequest {
+  // Borrowed only for the duration of the synchronous callback.
+  std::span<const ExactPairSupportFrontierEntry> canonical_products;
+  std::size_t required_strict_interior_point_count{};
+};
+
+struct ExactPairSupportRankPruneBatchProposal {
+  // A canonical subset of the request.  Omitted products are inconclusive and
+  // deterministically fall back to the historical CPU witness traversal.
+  std::vector<ExactPairSupportRankPruneProposal> proposals;
+};
+
+using ExactPairSupportRankPruneBatchCallback =
+    std::function<ExactPairSupportRankPruneBatchProposal(
+        const ExactPairSupportRankPruneBatchRequest&)>;
+
+struct ExactPairSupportRankPruneProposalAudit {
+  std::size_t maximum_products_per_batch{};
+  std::size_t batch_request_count{};
+  std::size_t requested_product_count{};
+  std::size_t maximum_requested_batch_product_count{};
+  std::size_t cache_replacement_count{};
+  std::size_t cpu_fallback_product_count{};
+  std::size_t consumed_proposal_count{};
+  std::size_t exact_receipt_recertification_count{};
+  std::size_t consumed_receipt_count{};
+  std::size_t consumed_witness_point_count{};
+  std::size_t proposal_pruned_pair_count{};
+  bool transcript_ephemeral{true};
+  bool durable_wire_v1_claimed{false};
+  bool no_forbidden_global_structure_materialized{true};
+
+  friend bool operator==(
+      const ExactPairSupportRankPruneProposalAudit&,
+      const ExactPairSupportRankPruneProposalAudit&) = default;
+};
 
 enum class ExactPairSupportPendingStage : std::uint8_t {
   rank_search,
@@ -560,6 +610,63 @@ struct ExactPairSupportStreamChunkVerification {
   // provenance is established only by the anchored run verifier below.
   bool chunk_transition_verified{false};
 };
+
+// The proposal transcript is deliberately outside ExactPairSupportStreamChunk:
+// it is neither encoded by durable wire/checkpoint v1 nor accepted by the
+// historical fresh-CPU replay verifier.
+struct ExactPairSupportRankPruneProposedChunk {
+  ExactPairSupportStreamChunk candidate_chunk;
+  std::vector<ExactPairSupportRankPruneProposal> consumed_proposals;
+  ExactPairSupportRankPruneProposalAudit audit{};
+
+  friend bool operator==(
+      const ExactPairSupportRankPruneProposedChunk&,
+      const ExactPairSupportRankPruneProposedChunk&) = default;
+};
+
+struct ExactPairSupportRankPruneProposedChunkVerification {
+  ExactPairSupportStreamChunkVerification candidate_chunk_verification{};
+  bool every_consumed_proposal_replayed_once{false};
+  bool no_unconsumed_proposal_retained{false};
+  bool proposed_transition_verified{false};
+  bool durable_wire_v1_claimed{false};
+};
+
+[[nodiscard]] ExactPairSupportRankPruneProposedChunk
+build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& checkpoint,
+    std::size_t maximum_products_per_batch,
+    const ExactPairSupportRankPruneBatchCallback& callback);
+
+[[nodiscard]] ExactPairSupportRankPruneProposedChunk
+build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+    const ExactPairSupportAuthorityContext& authority,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& checkpoint,
+    std::size_t maximum_products_per_batch,
+    const ExactPairSupportRankPruneBatchCallback& callback);
+
+[[nodiscard]] ExactPairSupportRankPruneProposedChunkVerification
+verify_exact_pair_support_stream_proposed_chunk(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& source_checkpoint,
+    std::size_t maximum_products_per_batch,
+    const ExactPairSupportRankPruneProposedChunk& observed);
+
+[[nodiscard]] ExactPairSupportRankPruneProposedChunkVerification
+verify_exact_pair_support_stream_proposed_chunk(
+    const ExactPairSupportAuthorityContext& authority,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& source_checkpoint,
+    std::size_t maximum_products_per_batch,
+    const ExactPairSupportRankPruneProposedChunk& observed);
 
 [[nodiscard]] ExactPairSupportStreamChunkVerification
 verify_exact_pair_support_stream_chunk(

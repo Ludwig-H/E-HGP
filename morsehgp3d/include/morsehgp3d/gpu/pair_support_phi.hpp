@@ -135,16 +135,129 @@ struct PairSupportPhiNodeDescriptor {
       const PairSupportPhiNodeDescriptor&) = default;
 };
 
-// Phase 9.1-CUDA-P1: owns one immutable exact AABB/range snapshot of an LBVH.
-// The snapshot is uploaded once on the first nonempty batch.  Per-batch device
-// storage is bounded by maximum_query_count; there is no pair arena, Gamma,
-// higher-order cell, coface or global incidence storage.
+// Fixed resident capacities for the bounded Phase 9.1-CUDA-P2 traversal.
+// maximum_work_item_count bounds each of the two device frontiers, not their
+// sum.  maximum_receipt_count bounds the complete variable-length transcript
+// returned by one call.  Zero capacities leave P2 disabled while preserving
+// the P1-only constructor.
+struct PairSupportRankPruneCapacity {
+  std::size_t maximum_product_count{};
+  std::size_t maximum_work_item_count{};
+  std::size_t maximum_receipt_count{};
+
+  friend bool operator==(
+      const PairSupportRankPruneCapacity&,
+      const PairSupportRankPruneCapacity&) = default;
+};
+
+struct PairSupportRankPruneBudget {
+  // One epoch is one stable count -> exclusive-scan -> emit transition over
+  // the current device frontier.  A product unfinished at this cap is omitted
+  // from proposals and remains a CPU fallback.
+  std::size_t maximum_epoch_count{};
+
+  friend bool operator==(
+      const PairSupportRankPruneBudget&,
+      const PairSupportRankPruneBudget&) = default;
+};
+
+struct PairSupportRankPruneProductProposal {
+  std::size_t product_index{};
+  hierarchy::ExactPairSupportFrontierEntry product{};
+  // A disjoint LBVH antichain sorted by Morton range then node identity and
+  // truncated to the first prefix reaching the threshold.  Every entry has
+  // been independently replayed with exact dyadic arithmetic on the CPU
+  // before it appears here.
+  std::vector<hierarchy::ExactPairSupportWitnessNodeEntry>
+      strict_witness_receipts;
+  std::size_t strict_interior_point_count{};
+
+  friend bool operator==(
+      const PairSupportRankPruneProductProposal&,
+      const PairSupportRankPruneProductProposal&) = default;
+};
+
+struct PairSupportRankPruneAudit {
+  static constexpr const char* proposal_semantics =
+      "cuda_bounded_two_frontier_rank_prune_proposal_only";
+  static constexpr const char* receipt_semantics =
+      "cpu_exact_dyadic_disjoint_witness_antichain_recertified";
+
+  PairSupportRankPruneCapacity capacity{};
+  PairSupportRankPruneBudget budget{};
+  std::size_t input_product_count{};
+  std::size_t required_strict_interior_point_count{};
+  std::size_t gpu_traversal_epoch_count{};
+  std::size_t gpu_count_kernel_launch_count{};
+  std::size_t gpu_exclusive_scan_count{};
+  std::size_t gpu_emit_kernel_launch_count{};
+  std::size_t gpu_visited_work_item_count{};
+  std::size_t gpu_peak_frontier_count{};
+  std::size_t gpu_output_receipt_count{};
+  std::size_t cpu_exact_phi_recertification_count{};
+  std::size_t proposed_product_count{};
+  std::size_t fallback_product_count{};
+  std::size_t snapshot_h2d_byte_count{};
+  std::size_t active_product_h2d_byte_count{};
+  std::size_t initial_frontier_h2d_byte_count{};
+  std::size_t traversal_metadata_d2h_byte_count{};
+  std::size_t physical_receipt_d2h_byte_count{};
+  std::size_t active_receipt_d2h_byte_count{};
+  std::size_t device_frontier_double_buffer_byte_capacity{};
+  std::size_t device_receipt_byte_capacity{};
+  std::size_t device_scan_workspace_byte_capacity{};
+  // Exact P2-only resident total outside the shared LBVH snapshot and any P1
+  // query buffers: 24P + 80W + 48R + 8 + scan_workspace bytes.
+  std::size_t device_fixed_workspace_byte_capacity{};
+  std::uint64_t buffer_epoch{};
+  std::uint64_t receipt_digest_fnv1a{};
+  bool work_item_capacity_exhausted{false};
+  bool receipt_capacity_exhausted{false};
+  bool epoch_budget_exhausted{false};
+  bool device_frontier_exhausted{false};
+  bool immutable_lbvh_snapshot_validated{false};
+  bool product_records_validated{false};
+  bool stable_receipt_transcript_validated{false};
+  bool disjoint_receipt_antichains_validated{false};
+  bool cpu_exact_recertification_complete{false};
+  // P2 only proposes a replayable local rank argument.  The CPU stream remains
+  // the authority that decides whether a support product is globally pruned.
+  bool global_support_product_prune_published{false};
+  bool public_status_published{false};
+
+  friend bool operator==(
+      const PairSupportRankPruneAudit&,
+      const PairSupportRankPruneAudit&) = default;
+};
+
+struct PairSupportRankPruneBatchResult {
+  // Only products whose recertified receipt cardinality reaches the requested
+  // threshold occur here.  Every other input product is an explicit fallback;
+  // absence is never a negative scientific decision.
+  std::vector<PairSupportRankPruneProductProposal> proposals;
+  PairSupportRankPruneAudit audit;
+
+  friend bool operator==(
+      const PairSupportRankPruneBatchResult&,
+      const PairSupportRankPruneBatchResult&) = default;
+};
+
+// Phase 9.1-CUDA-P1/P2: owns one immutable exact AABB/range/topology snapshot
+// of an LBVH.  The snapshot is uploaded once on the first nonempty GPU batch.
+// P1 storage is bounded by maximum_query_count and optional P2 storage by its
+// explicit capacity; there is no pair arena, Gamma, higher-order cell, coface
+// or global incidence storage.
 class PairSupportPhiContext final {
  public:
   PairSupportPhiContext(
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
       std::size_t maximum_query_count);
+  PairSupportPhiContext(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::size_t maximum_query_count,
+      PairSupportRankPruneCapacity rank_prune_capacity);
   ~PairSupportPhiContext() noexcept;
 
   PairSupportPhiContext(PairSupportPhiContext&&) noexcept;
@@ -155,6 +268,15 @@ class PairSupportPhiContext final {
 
   [[nodiscard]] PairSupportPhiBatchResult classify_witnesses(
       std::span<const PairSupportPhiWitnessQuery> canonical_queries);
+
+  // Phase 9.1-CUDA-P2: traverses the witness LBVH for a bounded batch of
+  // already authenticated support products.  Device output is proposal-only;
+  // all returned receipts are recertified exactly here, while products not
+  // reaching the threshold within the fixed capacities/budget are omitted.
+  [[nodiscard]] PairSupportRankPruneBatchResult propose_rank_prunes(
+      std::span<const hierarchy::ExactPairSupportFrontierEntry> products,
+      std::size_t required_strict_interior_point_count,
+      PairSupportRankPruneBudget budget);
 
   // Convenience seam for leaf fixtures and leaf-stage batching.  PointIds
   // must be distinct.  The two supports are reordered by Morton range, so the
@@ -173,6 +295,10 @@ class PairSupportPhiContext final {
   [[nodiscard]] std::size_t maximum_query_count() const noexcept {
     return maximum_query_count_;
   }
+  [[nodiscard]] PairSupportRankPruneCapacity rank_prune_capacity()
+      const noexcept {
+    return rank_prune_capacity_;
+  }
 
  private:
   std::shared_ptr<detail::PairSupportPhiContextState> state_;
@@ -180,6 +306,9 @@ class PairSupportPhiContext final {
   std::vector<std::uint64_t> leaf_node_index_by_point_id_;
   std::size_t maximum_query_count_{};
   std::uint64_t last_buffer_epoch_{};
+  PairSupportRankPruneCapacity rank_prune_capacity_{};
+  std::uint64_t root_node_index_{};
+  std::uint64_t last_rank_prune_buffer_epoch_{};
 };
 
 }  // namespace morsehgp3d::gpu

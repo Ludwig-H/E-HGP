@@ -1320,7 +1320,19 @@ Sur le tétraèdre, un lot vide suivant un lot non vide est scellé sans chunk a
 
 La forêt finale est comparée récursivement aux voies résidente, projetée et vivante sans adapter. Les CTests restent hôte avec lanceurs simulés : ils ne requalifient pas la source CUDA, ne mesurent ni `warm_e2e` ni RSS et ne ferment ni le p95 50 k, ni le pipeline complet 10 M+, ni un statut public.
 
-### 14.16 Échelle conditionnelle au-delà de 10 M
+### 14.16 Diagnostic court du pruneur de rang pair 14Q
+
+La validation hôte comporte deux lots ciblés. Le lot CPU injecte des propositions par batches bornés, recertifie exactement chaque reçu $\max\phi<0$, vérifie l'antichaîne de plages et compare la sortie scientifique complète au stream historique. Il impose aussi le repli bit à bit quand le callback est vide ou inconclusif, l'absence de travail exact caché sous un budget insuffisant, le rejeu frais de chaque seule proposition consommée et le refus avant allocation d'un transcript hostile qui dépasse le cap. Une mutation de reçu, une intersection avec un support, une proposition étrangère ou une proposition jamais consommée doit échouer sans modifier le checkpoint source.
+
+Le lot P2 au lanceur GPU simulé vérifie les deux frontières, les deux scans par epoch, l'émission stable, l'ordre canonique des produits et le préfixe minimal de reçus atteignant le seuil. Pour $P$ produits, une capacité de frontière $W$ et une capacité de reçus $R$, il exige un snapshot de $80(2n-1)$ octets et un workspace device P2 de $24P+80W+48R+8+T_{\mathrm{scan}}$ octets, hors snapshot et P1. Le premier appel annonce le transfert du snapshot, les rejeux résidents zéro; les arrêts de capacité ou d'epoch omettent le produit pour repli CPU. Les métadonnées, queues sentinelles, reçus, epochs et échecs asynchrones falsifiés empoisonnent uniquement le contexte concerné.
+
+La campagne G4 suivante reste courte et séquentielle. Elle commence par un cas de 4 096 points sous `compute-sanitizer --tool memcheck`. Seulement après zéro erreur et zéro fuite, le même binaire propre est exécuté avec $K_{\max}=10$, un budget de 20 000 unités de travail et des capacités explicites à 12 500, 25 000 puis 50 000 points, dans cet ordre, pour `uniform_latin` puis `eight_clusters`. Un premier passage et au moins un rejeu résident suffisent; ce diagnostic n'emploie ni les 30 répétitions du protocole p95, ni une matrice longue.
+
+Chaque sortie doit publier séparément génération, canonicalisation, construction LBVH CPU diagnostique, chunk CPU historique, premier chunk assisté, rejeu résident, vérification fraîche, propositions consommées, produits réellement prunés, fallbacks, epochs, pics de frontières, tous les trafics et les capacités exactes. Elle doit montrer au moins une proposition consommée, un prune effectif, zéro épuisement de capacité ou d'epoch, une transition déterministe et une vérification fraîche complète. L'objectif d'intégration à 50 000 points est que le rejeu assisté soit strictement plus rapide que le chunk CPU historique sur les deux familles; le rapport donne aussi sa distance à 100 ms. Un échec sur ce critère oriente directement l'implémentation vers le terme audité dominant au lieu de multiplier les répétitions.
+
+L'artefact porte obligatoirement `artifact_role=pair_rank_prune_component_smoke` et affirme faux la hiérarchie complète, les supports trois--quatre, la façade terminale, la réduction Morse, la matérialisation du résultat, le wire durable v1, le protocole `warm_e2e`, le SLO produit et toute capacité 10 M+. Ce composant ne peut donc jamais autoriser le test massif suivant à lui seul.
+
+### 14.17 Échelle conditionnelle au-delà de 10 M
 
 La première qualification massive porte sur 10 000 001 points et doit traverser le pipeline scientifique complet retenu pour le produit, jusqu'à la matérialisation et au checkpoint vérifiable. Un smoke de constructeur Morton/LBVH, une mesure de composant ou un préfixe scientifique n'est pas un succès de ce jalon.
 

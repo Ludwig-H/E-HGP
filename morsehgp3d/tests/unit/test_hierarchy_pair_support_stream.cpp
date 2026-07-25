@@ -32,6 +32,14 @@ using morsehgp3d::hierarchy::ExactPairSupportCheckpointVerification;
 using morsehgp3d::hierarchy::ExactPairSupportIncrementalVerifier;
 using morsehgp3d::hierarchy::ExactPairSupportPendingStage;
 using morsehgp3d::hierarchy::ExactPairSupportPendingProduct;
+using morsehgp3d::hierarchy::ExactPairSupportFrontierEntry;
+using morsehgp3d::hierarchy::ExactPairSupportRankPruneBatchCallback;
+using morsehgp3d::hierarchy::ExactPairSupportRankPruneBatchProposal;
+using morsehgp3d::hierarchy::ExactPairSupportRankPruneBatchRequest;
+using morsehgp3d::hierarchy::ExactPairSupportRankPruneProposal;
+using morsehgp3d::hierarchy::ExactPairSupportRankPruneProposedChunk;
+using morsehgp3d::hierarchy::
+    ExactPairSupportRankPruneProposedChunkVerification;
 using morsehgp3d::hierarchy::ExactPairSupportWitnessNodeEntry;
 using morsehgp3d::hierarchy::ExactPairSupportStopReason;
 using morsehgp3d::hierarchy::ExactPairSupportStreamBudget;
@@ -43,12 +51,16 @@ using morsehgp3d::hierarchy::ExactPairSupportStreamStatus;
 using morsehgp3d::hierarchy::ExactPairSupportStreamVerification;
 using morsehgp3d::hierarchy::build_exact_pair_support_stream;
 using morsehgp3d::hierarchy::build_exact_pair_support_stream_chunk;
+using morsehgp3d::hierarchy::
+    build_exact_pair_support_stream_chunk_with_rank_prune_proposals;
 using morsehgp3d::hierarchy::compute_exact_pair_support_checkpoint_digest;
 using morsehgp3d::hierarchy::exact_diametral_phi_aabb_maximum;
 using morsehgp3d::hierarchy::make_initial_exact_pair_support_checkpoint;
 using morsehgp3d::hierarchy::verify_exact_pair_support_checkpoint;
 using morsehgp3d::hierarchy::verify_exact_pair_support_stream;
 using morsehgp3d::hierarchy::verify_exact_pair_support_stream_chunk;
+using morsehgp3d::hierarchy::
+    verify_exact_pair_support_stream_proposed_chunk;
 using morsehgp3d::hierarchy::verify_exact_pair_support_stream_run;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ExactDyadicAabb3;
@@ -159,6 +171,17 @@ void check_throws(Function&& function, const std::string& message) {
          verification.next_checkpoint_integrity_verified &&
          verification.fresh_replay_certified &&
          verification.chunk_transition_verified;
+}
+
+[[nodiscard]] bool proposed_chunk_verification_closes(
+    const ExactPairSupportRankPruneProposedChunkVerification&
+        verification) {
+  return chunk_verification_closes(
+             verification.candidate_chunk_verification) &&
+         verification.every_consumed_proposal_replayed_once &&
+         verification.no_unconsumed_proposal_retained &&
+         verification.proposed_transition_verified &&
+         !verification.durable_wire_v1_claimed;
 }
 
 void check_quasi_linear_checkpoint_validation(
@@ -1838,6 +1861,418 @@ void test_checkpoint_manifest_and_prepared_retry() {
       "a locally valid terminal checkpoint without descent from the reconstructed initial state is not an anchored run");
 }
 
+struct RankPruneProposalFixture {
+  std::vector<std::optional<ExactPairSupportWitnessNodeEntry>>
+      leaf_receipts_by_morton_position;
+  std::optional<ExactPairSupportCheckpoint>
+      fresh_gapped_product_source;
+};
+
+void remember_leaf_receipt(
+    RankPruneProposalFixture& fixture,
+    std::uint64_t node_index,
+    std::uint64_t leaf_begin,
+    std::uint64_t leaf_end) {
+  if (leaf_end != leaf_begin + 1U ||
+      leaf_begin >=
+          fixture.leaf_receipts_by_morton_position.size()) {
+    return;
+  }
+  const ExactPairSupportWitnessNodeEntry receipt{
+      node_index, leaf_begin, leaf_end};
+  std::optional<ExactPairSupportWitnessNodeEntry>& slot =
+      fixture.leaf_receipts_by_morton_position[
+          static_cast<std::size_t>(leaf_begin)];
+  if (slot.has_value() && *slot != receipt) {
+    throw std::logic_error(
+        "one Morton leaf position acquired two LBVH leaf nodes");
+  }
+  slot = receipt;
+}
+
+void observe_proposal_fixture_checkpoint(
+    RankPruneProposalFixture& fixture,
+    const ExactPairSupportCheckpoint& checkpoint,
+    std::size_t point_count) {
+  for (const ExactPairSupportFrontierEntry& entry :
+       checkpoint.frontier) {
+    remember_leaf_receipt(
+        fixture,
+        entry.first_node_index,
+        entry.first_leaf_begin,
+        entry.first_leaf_end);
+    remember_leaf_receipt(
+        fixture,
+        entry.second_node_index,
+        entry.second_leaf_begin,
+        entry.second_leaf_end);
+  }
+  if (checkpoint.pending_product.has_value()) {
+    const ExactPairSupportPendingProduct& pending =
+        *checkpoint.pending_product;
+    for (const ExactPairSupportWitnessNodeEntry& receipt :
+         pending.witness_frontier) {
+      remember_leaf_receipt(
+          fixture,
+          receipt.node_index,
+          receipt.leaf_begin,
+          receipt.leaf_end);
+    }
+    for (const ExactPairSupportWitnessNodeEntry& receipt :
+         pending.strict_witness_receipts) {
+      remember_leaf_receipt(
+          fixture,
+          receipt.node_index,
+          receipt.leaf_begin,
+          receipt.leaf_end);
+    }
+    if (pending.deferred_expansion_node.has_value()) {
+      const ExactPairSupportWitnessNodeEntry& receipt =
+          *pending.deferred_expansion_node;
+      remember_leaf_receipt(
+          fixture,
+          receipt.node_index,
+          receipt.leaf_begin,
+          receipt.leaf_end);
+    }
+  }
+  if (!fixture.fresh_gapped_product_source.has_value() &&
+      !checkpoint.pending_product.has_value() &&
+      !checkpoint.frontier.empty()) {
+    const ExactPairSupportFrontierEntry& product =
+        checkpoint.frontier.back();
+    const std::size_t first_size = static_cast<std::size_t>(
+        product.first_leaf_end - product.first_leaf_begin);
+    const std::size_t second_size = static_cast<std::size_t>(
+        product.second_leaf_end - product.second_leaf_begin);
+    const std::size_t excluded_count = first_size + second_size;
+    if (product.self_product == 0U &&
+        (first_size != 1U || second_size != 1U) &&
+        product.first_leaf_end < product.second_leaf_begin &&
+        excluded_count < point_count) {
+      fixture.fresh_gapped_product_source = checkpoint;
+    }
+  }
+}
+
+[[nodiscard]] RankPruneProposalFixture
+make_rank_prune_proposal_fixture(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud) {
+  RankPruneProposalFixture fixture;
+  fixture.leaf_receipts_by_morton_position.resize(cloud.size());
+  ExactPairSupportCheckpoint checkpoint =
+      make_initial_exact_pair_support_checkpoint(
+          index, cloud, 1U);
+  ExactPairSupportStreamBudget unit_work = unlimited_budget();
+  unit_work.maximum_work_unit_count = 1U;
+  std::size_t chunk_count = 0U;
+  while (!checkpoint.complete()) {
+    if (++chunk_count > 100000U) {
+      throw std::logic_error(
+          "the proposal fixture exceeded its bounded CPU replay");
+    }
+    observe_proposal_fixture_checkpoint(
+        fixture, checkpoint, cloud.size());
+    checkpoint = build_exact_pair_support_stream_chunk(
+                     index,
+                     cloud,
+                     1U,
+                     unit_work,
+                     checkpoint)
+                     .next_checkpoint;
+  }
+  observe_proposal_fixture_checkpoint(
+      fixture, checkpoint, cloud.size());
+  for (const auto& receipt :
+       fixture.leaf_receipts_by_morton_position) {
+    if (!receipt.has_value()) {
+      throw std::logic_error(
+          "the proposal fixture did not observe every LBVH leaf");
+    }
+  }
+  return fixture;
+}
+
+[[nodiscard]] std::optional<ExactPairSupportRankPruneProposal>
+strict_between_leaf_proposal(
+    const ExactPairSupportFrontierEntry& product,
+    const RankPruneProposalFixture& fixture) {
+  if (product.self_product != 0U ||
+      product.first_leaf_end >= product.second_leaf_begin) {
+    return std::nullopt;
+  }
+  const std::size_t witness_position =
+      static_cast<std::size_t>(product.first_leaf_end);
+  if (witness_position >=
+          fixture.leaf_receipts_by_morton_position.size() ||
+      !fixture.leaf_receipts_by_morton_position[witness_position]
+           .has_value()) {
+    return std::nullopt;
+  }
+  return ExactPairSupportRankPruneProposal{
+      product,
+      {*fixture.leaf_receipts_by_morton_position[
+          witness_position]}};
+}
+
+void test_ephemeral_batched_rank_prune_proposals() {
+  std::vector<CertifiedPoint3> points;
+  points.reserve(14U);
+  for (std::size_t point_index = 0U;
+       point_index < 14U;
+       ++point_index) {
+    points.push_back(
+        point(static_cast<double>(point_index) - 7.0));
+  }
+  const CanonicalPointCloud cloud = cloud_from(points);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactPairSupportAuthorityContext authority{
+      index, cloud, 1U};
+  const ExactPairSupportCheckpoint initial =
+      make_initial_exact_pair_support_checkpoint(authority);
+  const RankPruneProposalFixture fixture =
+      make_rank_prune_proposal_fixture(index, cloud);
+  const ExactPairSupportStreamBudget budget = unlimited_budget();
+  const ExactPairSupportStreamChunk historical =
+      build_exact_pair_support_stream_chunk(
+          authority, budget, initial);
+
+  std::size_t callback_count = 0U;
+  std::size_t largest_batch = 0U;
+  const ExactPairSupportRankPruneBatchCallback provider =
+      [&fixture, &callback_count, &largest_batch](
+          const ExactPairSupportRankPruneBatchRequest& request) {
+        ++callback_count;
+        largest_batch = std::max(
+            largest_batch,
+            request.canonical_products.size());
+        ExactPairSupportRankPruneBatchProposal response;
+        for (const ExactPairSupportFrontierEntry& product :
+             request.canonical_products) {
+          std::optional<ExactPairSupportRankPruneProposal> proposal =
+              strict_between_leaf_proposal(product, fixture);
+          if (proposal.has_value()) {
+            response.proposals.push_back(std::move(*proposal));
+          }
+        }
+        return response;
+      };
+  const ExactPairSupportRankPruneProposedChunk accelerated =
+      build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+          authority,
+          budget,
+          initial,
+          8U,
+          provider);
+  check(
+      accelerated.candidate_chunk.relative_stream_complete() &&
+          !accelerated.consumed_proposals.empty() &&
+          accelerated.candidate_chunk.events == historical.events &&
+          accelerated.candidate_chunk
+                  .relevant_extra_shell_diagnostics ==
+              historical.relevant_extra_shell_diagnostics &&
+          accelerated.candidate_chunk.record_order ==
+              historical.record_order &&
+          accelerated.candidate_chunk.output_chain_digest ==
+              historical.output_chain_digest,
+      "exactly recertified proposal prunes preserve the complete scientific pair-support output");
+  check(
+      callback_count == accelerated.audit.batch_request_count &&
+          largest_batch > 1U &&
+          accelerated.audit.maximum_requested_batch_product_count ==
+              largest_batch &&
+          accelerated.audit.requested_product_count >
+              accelerated.audit.batch_request_count &&
+          accelerated.audit.consumed_proposal_count ==
+              accelerated.consumed_proposals.size() &&
+          accelerated.audit.exact_receipt_recertification_count ==
+              accelerated.audit.consumed_receipt_count &&
+          accelerated.audit.consumed_receipt_count > 0U &&
+          accelerated.audit.consumed_witness_point_count > 0U &&
+          accelerated.audit.proposal_pruned_pair_count > 0U &&
+          accelerated.audit.transcript_ephemeral &&
+          !accelerated.audit.durable_wire_v1_claimed &&
+          accelerated.audit.no_forbidden_global_structure_materialized,
+      "the proposal lane performs real bounded batching and accounts only exactly consumed receipts");
+  check(
+      proposed_chunk_verification_closes(
+          verify_exact_pair_support_stream_proposed_chunk(
+              authority,
+              budget,
+              initial,
+              8U,
+              accelerated)),
+      "the separate ephemeral verifier replays every consumed proposal exactly once");
+  if (accelerated.candidate_chunk != historical) {
+    check(
+        !chunk_verification_closes(
+            verify_exact_pair_support_stream_chunk(
+                authority,
+                budget,
+                initial,
+                accelerated.candidate_chunk)),
+        "the historical durable-v1 verifier does not mistake an accelerated transition for historical CPU replay");
+  }
+
+  const ExactPairSupportRankPruneBatchCallback empty_provider =
+      [](const ExactPairSupportRankPruneBatchRequest&) {
+        return ExactPairSupportRankPruneBatchProposal{};
+      };
+  const ExactPairSupportRankPruneProposedChunk fallback =
+      build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+          authority,
+          budget,
+          initial,
+          8U,
+          empty_provider);
+  check(
+      fallback.candidate_chunk == historical &&
+          fallback.consumed_proposals.empty() &&
+          fallback.audit.cpu_fallback_product_count > 0U &&
+          fallback.audit.consumed_proposal_count == 0U &&
+          proposed_chunk_verification_closes(
+              verify_exact_pair_support_stream_proposed_chunk(
+                  authority,
+                  budget,
+                  initial,
+                  8U,
+                  fallback)),
+      "missing and inconclusive batch results fall back bit-for-bit to the historical CPU transition");
+
+  check(
+      fixture.fresh_gapped_product_source.has_value(),
+      "the rank-proposal fixture exposes a fresh gapped cross product");
+  if (fixture.fresh_gapped_product_source.has_value()) {
+    ExactPairSupportStreamBudget one_work = unlimited_budget();
+    one_work.maximum_work_unit_count = 1U;
+    const ExactPairSupportCheckpoint& source =
+        *fixture.fresh_gapped_product_source;
+    const ExactPairSupportStreamChunk one_work_historical =
+        build_exact_pair_support_stream_chunk(
+            authority, one_work, source);
+    const ExactPairSupportRankPruneProposedChunk unaffordable =
+        build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+            authority,
+            one_work,
+            source,
+            8U,
+            provider);
+    check(
+        unaffordable.candidate_chunk == one_work_historical &&
+            unaffordable.consumed_proposals.empty() &&
+            unaffordable.audit.cpu_fallback_product_count == 1U &&
+            unaffordable.audit.exact_receipt_recertification_count ==
+                0U &&
+            proposed_chunk_verification_closes(
+                verify_exact_pair_support_stream_proposed_chunk(
+                    authority,
+                    one_work,
+                    source,
+                    8U,
+                unaffordable)),
+        "an unaffordable hint performs no hidden exact work and resumes through historical CPU fallback");
+    ExactPairSupportRankPruneProposedChunk over_cap =
+        unaffordable;
+    over_cap.consumed_proposals.push_back(
+        accelerated.consumed_proposals.front());
+    over_cap.consumed_proposals.push_back(
+        accelerated.consumed_proposals.front());
+    check(
+        !verify_exact_pair_support_stream_proposed_chunk(
+             authority,
+             one_work,
+             source,
+             8U,
+             over_cap)
+             .proposed_transition_verified,
+        "the ephemeral verifier rejects an over-cap hostile transcript before allocating its replay index");
+  }
+
+  const ExactPairSupportRankPruneProposal valid =
+      accelerated.consumed_proposals.front();
+  ExactPairSupportRankPruneProposal intersecting = valid;
+  intersecting.strict_witness_receipts.front() =
+      ExactPairSupportWitnessNodeEntry{
+          valid.product.first_node_index,
+          valid.product.first_leaf_begin,
+          valid.product.first_leaf_end};
+  const ExactPairSupportRankPruneBatchCallback false_provider =
+      [intersecting](
+          const ExactPairSupportRankPruneBatchRequest& request) {
+        ExactPairSupportRankPruneBatchProposal response;
+        if (std::find(
+                request.canonical_products.begin(),
+                request.canonical_products.end(),
+                intersecting.product) !=
+            request.canonical_products.end()) {
+          response.proposals.push_back(intersecting);
+        }
+        return response;
+      };
+  const ExactPairSupportCheckpoint immutable_source = initial;
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(
+            build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+                authority,
+                budget,
+                initial,
+                8U,
+                false_provider));
+      },
+      "a false proposal whose receipt intersects its support is rejected atomically");
+  check(
+      initial == immutable_source,
+      "a rejected false proposal leaves the trusted source checkpoint unchanged");
+
+  ExactPairSupportRankPruneProposal foreign = valid;
+  foreign.product = initial.frontier.front();
+  const ExactPairSupportRankPruneBatchCallback malformed_provider =
+      [foreign](const ExactPairSupportRankPruneBatchRequest&) {
+        return ExactPairSupportRankPruneBatchProposal{{foreign}};
+      };
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(
+            build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+                authority,
+                budget,
+                initial,
+                8U,
+                malformed_provider));
+      },
+      "a proposal for a product outside the canonical batch is rejected atomically");
+
+  ExactPairSupportRankPruneProposedChunk mutated = accelerated;
+  mutated.consumed_proposals.front()
+      .strict_witness_receipts.front()
+      .node_index = std::numeric_limits<std::uint64_t>::max();
+  check(
+      !verify_exact_pair_support_stream_proposed_chunk(
+           authority,
+           budget,
+           initial,
+           8U,
+           mutated)
+           .proposed_transition_verified,
+      "fresh ephemeral replay rejects a mutated consumed receipt");
+
+  mutated = accelerated;
+  ExactPairSupportRankPruneProposal unused = valid;
+  unused.product = initial.frontier.front();
+  mutated.consumed_proposals.push_back(std::move(unused));
+  check(
+      !verify_exact_pair_support_stream_proposed_chunk(
+           authority,
+           budget,
+           initial,
+           8U,
+           mutated)
+           .proposed_transition_verified,
+      "fresh ephemeral replay rejects an appended proposal that traversal never consumes");
+}
+
 void test_terminal_checkpoint_is_idempotent() {
   const CanonicalPointCloud cloud = cloud_from({point(0.0)});
   const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
@@ -2014,6 +2449,7 @@ int main() {
   test_resume_inside_rank_witness_search();
   test_pending_witness_checkpoint_invariants();
   test_checkpoint_manifest_and_prepared_retry();
+  test_ephemeral_batched_rank_prune_proposals();
   test_terminal_checkpoint_is_idempotent();
   test_bounded_exhaustive_oracle_agreement();
   test_hostile_replay_mutations();

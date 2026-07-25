@@ -9,12 +9,14 @@
 #include <cstdint>
 #include <exception>
 #include <iostream>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
 #include <tuple>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace {
 
@@ -27,6 +29,9 @@ using morsehgp3d::gpu::PairSupportPhiDecisionRecord;
 using morsehgp3d::gpu::PairSupportPhiProposalKind;
 using morsehgp3d::gpu::PairSupportPhiProposalRecord;
 using morsehgp3d::gpu::PairSupportPhiWitnessQuery;
+using morsehgp3d::gpu::PairSupportRankPruneBatchResult;
+using morsehgp3d::gpu::PairSupportRankPruneBudget;
+using morsehgp3d::gpu::PairSupportRankPruneCapacity;
 using morsehgp3d::gpu::test_support::
     FakePairSupportPhiCorruption;
 using morsehgp3d::gpu::test_support::
@@ -39,6 +44,15 @@ using morsehgp3d::gpu::test_support::
     fake_gpu_pair_support_phi_last_record_capacity;
 using morsehgp3d::gpu::test_support::
     fake_gpu_pair_support_phi_launch_count;
+using morsehgp3d::gpu::test_support::
+    fake_gpu_pair_support_rank_last_product_count;
+using morsehgp3d::gpu::test_support::
+    fake_gpu_pair_support_rank_last_receipt_capacity;
+using morsehgp3d::gpu::test_support::
+    fake_gpu_pair_support_rank_last_work_item_capacity;
+using morsehgp3d::gpu::test_support::
+    fake_gpu_pair_support_rank_launch_count;
+using morsehgp3d::hierarchy::ExactPairSupportFrontierEntry;
 using morsehgp3d::gpu::test_support::reset_fake_gpu_pair_support_phi;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
@@ -81,6 +95,16 @@ void check_throws(Function&& function, const std::string& message) {
   return CanonicalPointCloud::rejecting_duplicates(points);
 }
 
+[[nodiscard]] CanonicalPointCloud five_point_line_cloud() {
+  const std::array points{
+      CertifiedPoint3::from_binary64(-2.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(-1.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(0.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(1.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(2.0, 0.0, 0.0)};
+  return CanonicalPointCloud::rejecting_duplicates(points);
+}
+
 struct Fixture {
   Fixture() : cloud(line_cloud()), index(MortonLbvhIndex::build(cloud)) {}
 
@@ -93,6 +117,35 @@ struct Fixture {
       query.first_support_node_index,
       query.second_support_node_index,
       query.witness_node_index};
+}
+
+[[nodiscard]] auto product_key(
+    const ExactPairSupportFrontierEntry& product) {
+  return std::tuple{
+      product.first_leaf_begin,
+      product.first_leaf_end,
+      product.second_leaf_begin,
+      product.second_leaf_end,
+      product.first_node_index,
+      product.second_node_index,
+      product.self_product};
+}
+
+[[nodiscard]] ExactPairSupportFrontierEntry product_from_query(
+    const PairSupportPhiContext& context,
+    const PairSupportPhiWitnessQuery& query) {
+  const auto first = context.node_descriptor(
+      static_cast<std::size_t>(query.first_support_node_index));
+  const auto second = context.node_descriptor(
+      static_cast<std::size_t>(query.second_support_node_index));
+  return ExactPairSupportFrontierEntry{
+      first.node_index,
+      second.node_index,
+      first.leaf_begin,
+      first.leaf_end,
+      second.leaf_begin,
+      second.leaf_end,
+      0U};
 }
 
 struct FixtureQueries {
@@ -419,6 +472,434 @@ void test_corruption_matrix_and_poisoning() {
       "the poisoned stale-epoch context cannot launch a third batch");
 }
 
+void test_rank_prune_exact_receipts_and_traffic() {
+  reset_fake_gpu_pair_support_phi();
+  Fixture fixture;
+  constexpr PairSupportRankPruneCapacity capacity{2U, 8U, 4U};
+  PairSupportPhiContext context{
+      fixture.index, fixture.cloud, 2U, capacity};
+  const FixtureQueries queries = fixture_queries(context);
+  const std::array products{
+      product_from_query(context, queries.strict)};
+  const PairSupportRankPruneBudget budget{8U};
+
+  const PairSupportRankPruneBatchResult first =
+      context.propose_rank_prunes(products, 1U, budget);
+  const PairSupportRankPruneBatchResult second =
+      context.propose_rank_prunes(products, 1U, budget);
+  check(
+      first.proposals.size() == 1U &&
+          first.proposals[0U].product_index == 0U &&
+          first.proposals[0U].product == products[0U] &&
+          first.proposals[0U].strict_interior_point_count == 1U &&
+          first.proposals[0U].strict_witness_receipts.size() == 1U &&
+          first.proposals[0U].strict_witness_receipts[0U].node_index ==
+              queries.strict.witness_node_index,
+      "P2 returns one stable exact receipt for the strict middle witness");
+  check(
+      first.proposals == second.proposals &&
+          first.audit.receipt_digest_fnv1a ==
+              second.audit.receipt_digest_fnv1a,
+      "two P2 calls preserve proposal and stable receipt digest");
+
+  const auto& audit = first.audit;
+  check(
+      audit.capacity == capacity && audit.budget == budget &&
+          audit.input_product_count == 1U &&
+          audit.required_strict_interior_point_count == 1U &&
+          audit.gpu_traversal_epoch_count > 0U &&
+          audit.gpu_traversal_epoch_count <= 8U &&
+          audit.gpu_count_kernel_launch_count ==
+              audit.gpu_traversal_epoch_count &&
+          audit.gpu_exclusive_scan_count ==
+              2U * audit.gpu_traversal_epoch_count &&
+          audit.gpu_emit_kernel_launch_count ==
+              audit.gpu_traversal_epoch_count &&
+          audit.gpu_output_receipt_count == 1U &&
+          audit.cpu_exact_phi_recertification_count == 1U &&
+          audit.proposed_product_count == 1U &&
+          audit.fallback_product_count == 0U &&
+          audit.buffer_epoch == 1U,
+      "P2 closes bounded count-scan-emit and exact replay counters");
+  check(
+      audit.snapshot_h2d_byte_count == 5U * 80U &&
+          audit.active_product_h2d_byte_count == 16U &&
+          audit.initial_frontier_h2d_byte_count == 16U &&
+          audit.traversal_metadata_d2h_byte_count ==
+              audit.gpu_traversal_epoch_count * 5U * 8U + 8U &&
+          audit.physical_receipt_d2h_byte_count == 4U * 48U &&
+          audit.active_receipt_d2h_byte_count == 48U &&
+          audit.device_frontier_double_buffer_byte_capacity ==
+              2U * 8U * 16U &&
+          audit.device_receipt_byte_capacity == 4U * 48U &&
+          audit.device_scan_workspace_byte_capacity == 8U * 8U &&
+          audit.device_fixed_workspace_byte_capacity ==
+              24U * 2U + 80U * 8U + 48U * 4U + 8U + 8U * 8U &&
+          second.audit.snapshot_h2d_byte_count == 0U &&
+          second.audit.buffer_epoch == 2U,
+      "P2 audits first-upload, active traffic, physical D2H, and exact fixed workspace");
+  check(
+      audit.device_frontier_exhausted &&
+          !audit.work_item_capacity_exhausted &&
+          !audit.receipt_capacity_exhausted &&
+          !audit.epoch_budget_exhausted &&
+          audit.immutable_lbvh_snapshot_validated &&
+          audit.product_records_validated &&
+          audit.stable_receipt_transcript_validated &&
+          audit.disjoint_receipt_antichains_validated &&
+          audit.cpu_exact_recertification_complete &&
+          !audit.global_support_product_prune_published &&
+          !audit.public_status_published,
+      "P2 separates a recertified local proposal from scientific publication");
+  check(
+      fake_gpu_pair_support_rank_launch_count() == 2U &&
+          fake_gpu_pair_support_rank_last_product_count() == 1U &&
+          fake_gpu_pair_support_rank_last_work_item_capacity() == 8U &&
+          fake_gpu_pair_support_rank_last_receipt_capacity() == 4U,
+      "the fake P2 launcher sees only active products and fixed capacities");
+}
+
+void test_rank_prune_preflight_and_fallbacks() {
+  reset_fake_gpu_pair_support_phi();
+  Fixture fixture;
+  PairSupportPhiContext context{
+      fixture.index,
+      fixture.cloud,
+      2U,
+      PairSupportRankPruneCapacity{3U, 8U, 4U}};
+  const FixtureQueries queries = fixture_queries(context);
+  std::array products{
+      product_from_query(context, queries.strict),
+      product_from_query(context, queries.descend)};
+  std::sort(
+      products.begin(),
+      products.end(),
+      [](const auto& left, const auto& right) {
+        return product_key(left) < product_key(right);
+      });
+  const std::array<ExactPairSupportFrontierEntry, 0U> empty{};
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(context.propose_rank_prunes(
+            empty, 1U, PairSupportRankPruneBudget{8U}));
+      },
+      "P2 rejects an empty product batch before launch");
+  const std::array duplicate{products[0U], products[0U]};
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(context.propose_rank_prunes(
+            duplicate, 1U, PairSupportRankPruneBudget{8U}));
+      },
+      "P2 rejects duplicate products before launch");
+  std::reverse(products.begin(), products.end());
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(context.propose_rank_prunes(
+            products, 1U, PairSupportRankPruneBudget{8U}));
+      },
+      "P2 rejects a noncanonical product order before launch");
+  std::reverse(products.begin(), products.end());
+  auto changed_range = products[0U];
+  ++changed_range.first_leaf_end;
+  const std::array changed{changed_range};
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(context.propose_rank_prunes(
+            changed, 1U, PairSupportRankPruneBudget{8U}));
+      },
+      "P2 rejects a product range that contradicts the resident LBVH");
+  const std::array one_product{products[0U]};
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(context.propose_rank_prunes(
+            one_product, 0U, PairSupportRankPruneBudget{8U}));
+      },
+      "P2 rejects a zero rank threshold before launch");
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(context.propose_rank_prunes(
+            one_product, 1U, PairSupportRankPruneBudget{0U}));
+      },
+      "P2 rejects a zero epoch budget before launch");
+  check(
+      fake_gpu_pair_support_rank_launch_count() == 0U,
+      "all P2 preflight failures avoid a fake GPU launch");
+
+  PairSupportPhiContext p1_only{fixture.index, fixture.cloud, 2U};
+  const FixtureQueries p1_queries = fixture_queries(p1_only);
+  const std::array disabled_product{
+      product_from_query(p1_only, p1_queries.strict)};
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(p1_only.propose_rank_prunes(
+            disabled_product, 1U, PairSupportRankPruneBudget{8U}));
+      },
+      "the legacy P1 constructor leaves P2 explicitly disabled");
+
+  reset_fake_gpu_pair_support_phi();
+  PairSupportPhiContext epoch_limited{
+      fixture.index,
+      fixture.cloud,
+      2U,
+      PairSupportRankPruneCapacity{1U, 8U, 4U}};
+  const FixtureQueries epoch_queries = fixture_queries(epoch_limited);
+  const std::array epoch_product{
+      product_from_query(epoch_limited, epoch_queries.strict)};
+  const auto incomplete = epoch_limited.propose_rank_prunes(
+      epoch_product, 1U, PairSupportRankPruneBudget{1U});
+  check(
+      incomplete.proposals.empty() &&
+          incomplete.audit.fallback_product_count == 1U &&
+          incomplete.audit.epoch_budget_exhausted &&
+          !incomplete.audit.device_frontier_exhausted &&
+          !incomplete.audit.global_support_product_prune_published,
+      "an epoch-limited P2 product is omitted for CPU fallback");
+  const auto recovered = epoch_limited.propose_rank_prunes(
+      epoch_product, 1U, PairSupportRankPruneBudget{8U});
+  check(
+      recovered.proposals.size() == 1U &&
+          recovered.audit.buffer_epoch == 2U &&
+          recovered.audit.snapshot_h2d_byte_count == 0U,
+      "ordinary epoch exhaustion does not poison the resident P2 context");
+
+  reset_fake_gpu_pair_support_phi();
+  PairSupportPhiContext work_limited{
+      fixture.index,
+      fixture.cloud,
+      2U,
+      PairSupportRankPruneCapacity{1U, 1U, 4U}};
+  const FixtureQueries work_queries = fixture_queries(work_limited);
+  const std::array work_product{
+      product_from_query(work_limited, work_queries.strict)};
+  const auto capacity_fallback = work_limited.propose_rank_prunes(
+      work_product, 1U, PairSupportRankPruneBudget{8U});
+  check(
+      capacity_fallback.proposals.empty() &&
+          capacity_fallback.audit.fallback_product_count == 1U &&
+          capacity_fallback.audit.work_item_capacity_exhausted &&
+          capacity_fallback.audit.gpu_count_kernel_launch_count == 1U &&
+          capacity_fallback.audit.gpu_emit_kernel_launch_count == 0U,
+      "P2 checks scanned frontier capacity before stable emit and falls back");
+}
+
+void test_rank_prune_canonical_minimal_prefix() {
+  reset_fake_gpu_pair_support_phi();
+  CanonicalPointCloud cloud = five_point_line_cloud();
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  PairSupportPhiContext context{
+      index,
+      cloud,
+      2U,
+      PairSupportRankPruneCapacity{1U, 16U, 8U}};
+  const PairSupportPhiWitnessQuery query =
+      context.make_leaf_witness_query(0U, 4U, 2U);
+  const std::array product{product_from_query(context, query)};
+  const auto result = context.propose_rank_prunes(
+      product, 2U, PairSupportRankPruneBudget{16U});
+  check(
+      result.proposals.size() == 1U &&
+          !result.proposals[0U].strict_witness_receipts.empty() &&
+          result.proposals[0U].strict_witness_receipts.size() <= 2U &&
+          result.proposals[0U].strict_interior_point_count >= 2U &&
+          result.audit.gpu_output_receipt_count >=
+              result.proposals[0U].strict_witness_receipts.size(),
+      "P2 projects the full GPU receipt transcript to a threshold-minimal prefix");
+  if (!result.proposals.empty()) {
+    const auto& receipts =
+        result.proposals[0U].strict_witness_receipts;
+    std::size_t prefix_count = 0U;
+    bool canonical = true;
+    for (std::size_t index_position = 0U;
+         index_position < receipts.size();
+         ++index_position) {
+      canonical =
+          canonical && prefix_count < 2U &&
+          (index_position == 0U ||
+           std::tuple{
+               receipts[index_position - 1U].leaf_begin,
+               receipts[index_position - 1U].leaf_end,
+               receipts[index_position - 1U].node_index} <
+               std::tuple{
+                   receipts[index_position].leaf_begin,
+                   receipts[index_position].leaf_end,
+                   receipts[index_position].node_index});
+      prefix_count += static_cast<std::size_t>(
+          receipts[index_position].leaf_end -
+          receipts[index_position].leaf_begin);
+    }
+    check(
+        canonical && prefix_count ==
+            result.proposals[0U].strict_interior_point_count,
+        "P2 receipts are strictly Morton-canonical and minimal before CPU adaptation");
+  }
+}
+
+void test_rank_prune_uses_cpu_range_first_product_order() {
+  reset_fake_gpu_pair_support_phi();
+  CanonicalPointCloud cloud = five_point_line_cloud();
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  PairSupportPhiContext context{
+      index,
+      cloud,
+      2U,
+      PairSupportRankPruneCapacity{2U, 16U, 8U}};
+  std::vector<ExactPairSupportFrontierEntry> candidates;
+  for (std::size_t first_index = 0U;
+       first_index < context.node_count();
+       ++first_index) {
+    const auto first = context.node_descriptor(first_index);
+    for (std::size_t second_index = 0U;
+         second_index < context.node_count();
+         ++second_index) {
+      const auto second = context.node_descriptor(second_index);
+      if (first.leaf_end <= second.leaf_begin) {
+        candidates.push_back(ExactPairSupportFrontierEntry{
+            first.node_index,
+            second.node_index,
+            first.leaf_begin,
+            first.leaf_end,
+            second.leaf_begin,
+            second.leaf_end,
+            0U});
+      }
+    }
+  }
+  std::sort(
+      candidates.begin(),
+      candidates.end(),
+      [](const auto& left, const auto& right) {
+        return product_key(left) < product_key(right);
+      });
+  std::optional<std::array<ExactPairSupportFrontierEntry, 2U>>
+      divergent;
+  const auto node_first_key = [](const auto& product) {
+    return std::tuple{
+        product.first_node_index,
+        product.second_node_index,
+        product.first_leaf_begin,
+        product.first_leaf_end,
+        product.second_leaf_begin,
+        product.second_leaf_end,
+        product.self_product};
+  };
+  for (std::size_t left = 0U;
+       left < candidates.size() && !divergent.has_value();
+       ++left) {
+    for (std::size_t right = left + 1U;
+         right < candidates.size();
+         ++right) {
+      if (node_first_key(candidates[left]) >
+          node_first_key(candidates[right])) {
+        divergent = std::array{
+            candidates[left], candidates[right]};
+        break;
+      }
+    }
+  }
+  check(
+      divergent.has_value(),
+      "the ordering fixture distinguishes CPU range-first order from node-first order");
+  if (divergent.has_value()) {
+    const auto result = context.propose_rank_prunes(
+        *divergent, 1U, PairSupportRankPruneBudget{1U});
+    check(
+        result.audit.product_records_validated &&
+            result.audit.input_product_count == 2U &&
+            fake_gpu_pair_support_rank_launch_count() == 1U,
+        "P2 accepts the exact range-first canonical order emitted by the CPU stream");
+  }
+}
+
+void check_rank_corruption_and_poisoning(
+    FakePairSupportPhiCorruption corruption,
+    const std::string& label) {
+  reset_fake_gpu_pair_support_phi();
+  Fixture fixture;
+  PairSupportPhiContext context{
+      fixture.index,
+      fixture.cloud,
+      2U,
+      PairSupportRankPruneCapacity{1U, 8U, 4U}};
+  const FixtureQueries queries = fixture_queries(context);
+  const std::array product{
+      product_from_query(context, queries.strict)};
+  configure_fake_gpu_pair_support_phi(corruption);
+  check_throws<std::runtime_error>(
+      [&] {
+        static_cast<void>(context.propose_rank_prunes(
+            product, 1U, PairSupportRankPruneBudget{8U}));
+      },
+      label + " is rejected fail-closed");
+  configure_fake_gpu_pair_support_phi(
+      FakePairSupportPhiCorruption::none);
+  check_throws<std::runtime_error>(
+      [&] {
+        static_cast<void>(context.propose_rank_prunes(
+            product, 1U, PairSupportRankPruneBudget{8U}));
+      },
+      label + " poisons only its resident context");
+  check(
+      fake_gpu_pair_support_rank_launch_count() == 1U,
+      label + " prevents a second P2 launch");
+}
+
+void test_rank_prune_corruption_matrix() {
+  const std::array cases{
+      std::pair{FakePairSupportPhiCorruption::rank_capacity_metadata,
+                "corrupted P2 capacity metadata"},
+      std::pair{FakePairSupportPhiCorruption::rank_zero_epoch,
+                "an unauthenticated P2 zero epoch"},
+      std::pair{FakePairSupportPhiCorruption::rank_changed_receipt,
+                "a changed P2 receipt identity"},
+      std::pair{FakePairSupportPhiCorruption::rank_false_strict_receipt,
+                "a false P2 strict upper enclosure"},
+      std::pair{FakePairSupportPhiCorruption::rank_stale_tail,
+                "a write into the P2 fixed-capacity tail"},
+      std::pair{FakePairSupportPhiCorruption::rank_epoch_count_over_budget,
+                "a P2 traversal beyond its epoch budget"},
+      std::pair{
+          FakePairSupportPhiCorruption::rank_simulated_async_failure,
+          "an asynchronous P2 device failure"}};
+  for (const auto& [corruption, label] : cases) {
+    check_rank_corruption_and_poisoning(corruption, label);
+  }
+
+  reset_fake_gpu_pair_support_phi();
+  Fixture fixture;
+  PairSupportPhiContext stale{
+      fixture.index,
+      fixture.cloud,
+      2U,
+      PairSupportRankPruneCapacity{1U, 8U, 4U}};
+  const FixtureQueries queries = fixture_queries(stale);
+  const std::array product{
+      product_from_query(stale, queries.strict)};
+  const auto first = stale.propose_rank_prunes(
+      product, 1U, PairSupportRankPruneBudget{8U});
+  check(
+      first.audit.buffer_epoch == 1U,
+      "the P2 stale-epoch fixture first establishes a healthy epoch");
+  configure_fake_gpu_pair_support_phi(
+      FakePairSupportPhiCorruption::rank_stale_epoch_without_advance);
+  check_throws<std::runtime_error>(
+      [&] {
+        static_cast<void>(stale.propose_rank_prunes(
+            product, 1U, PairSupportRankPruneBudget{8U}));
+      },
+      "a repeated P2 buffer epoch is rejected");
+  configure_fake_gpu_pair_support_phi(
+      FakePairSupportPhiCorruption::none);
+  check_throws<std::runtime_error>(
+      [&] {
+        static_cast<void>(stale.propose_rank_prunes(
+            product, 1U, PairSupportRankPruneBudget{8U}));
+      },
+      "a repeated P2 epoch poisons the resident context");
+  check(
+      fake_gpu_pair_support_rank_launch_count() == 2U,
+      "the poisoned stale-P2 context cannot launch a third batch");
+}
+
 void test_move_only_context() {
   reset_fake_gpu_pair_support_phi();
   Fixture fixture;
@@ -442,6 +923,11 @@ int main() {
   test_exact_fixture_and_two_epochs();
   test_preflight_validation_and_capacity();
   test_corruption_matrix_and_poisoning();
+  test_rank_prune_exact_receipts_and_traffic();
+  test_rank_prune_preflight_and_fallbacks();
+  test_rank_prune_canonical_minimal_prefix();
+  test_rank_prune_uses_cpu_range_first_product_order();
+  test_rank_prune_corruption_matrix();
   test_move_only_context();
 
   if (failures != 0) {

@@ -154,6 +154,16 @@ L'index construit une fois sert à :
 
 Pour les paires, une requête warp-coopérative borne $\phi(x,u,v)=(x-u)\mathbin{\cdot}(x-v)$ sur trois AABB. Une borne supérieure strictement négative compte le sous-arbre témoin entier; zéro impose une descente. Les témoins comptés forment une antichaîne de plages Morton deux à deux disjointes et disjointes des supports, afin qu'aucun point ne soit compté deux fois. Pour les triplets et quadruplets, les filtres de dépendance, barycentriques et d'in-sphère obéissent au même contrat proposition--rejeu exact.
 
+### 6.1 Pruneur P2 de rang pair borné
+
+14Q réalise le parcours de rang pair sans catalogue de paires. Le contexte partagé P1/P2 conserve pour chacun des $2n-1$ nœuds ses six bornes dyadiques, sa plage Morton et ses deux enfants, soit exactement $80(2n-1)$ octets. Un lot contient au plus $P$ produits déjà canoniques. Deux frontières de capacité $W$ alternent; chaque epoch compte les sorties, exécute deux scans exclusifs puis émet stablement les descendants et reçus dans des buffers bornés.
+
+Une capacité $R$ borne le transcript complet. Hors snapshot LBVH et buffers P1, la réservation device P2 est exactement $24P+80W+48R+8+T_{\mathrm{scan}}$ octets. Le terme $80W$ inclut les deux frontières et leurs métadonnées de count/scan, et $48R$ les reçus physiques. L'implémentation actuelle rapatrie ces $48R$ octets à chaque appel même lorsque le préfixe actif est plus court; l'audit distingue donc D2H physique et actif pour guider l'optimisation suivante.
+
+Le device ne publie pas de prune. L'hôte recalcule exactement $\max\phi<0$ sur chaque nœud proposé, authentifie ses plages, vérifie leur antichaîne et leur disjonction des supports, puis retient le préfixe canonique minimal qui atteint le seuil. Les produits absents ou inachevés retombent sur le parcours CPU historique. Le chunk accéléré conserve ses seuls reçus consommés dans une enveloppe éphémère et possède un vérificateur frais distinct; checkpoint, wire et vérificateur durable v1 restent inchangés.
+
+Cette structure ajoute $O(n+P+W+R)$ et aucun terme en nombre global de paires. Elle ne matérialise ni facette, coface, incidence globale, cellule, structure Gamma ou mosaïque de Delaunay d'ordre supérieur. Sa qualification actuelle est hôte seulement; le runner CUDA 14Q est un diagnostic de composant, jamais le protocole `warm_e2e` ou une preuve de capacité produit.
+
 Une recherche approchée ou une petite liste locale peut prioriser la frontière; le parcours global et la fermeture de sa frontière restent obligatoires en mode exact.
 
 ## 7. Voronoï et puissance : propositions et tests seulement

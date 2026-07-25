@@ -3,6 +3,8 @@
 #include "morsehgp3d/spatial/lbvh.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
 
+#include "pair_support_smoke_clouds.hpp"
+
 #include <array>
 #include <chrono>
 #include <cstddef>
@@ -24,6 +26,7 @@ using morsehgp3d::hierarchy::ExactPairSupportStreamBudget;
 using morsehgp3d::hierarchy::ExactPairSupportStreamStatus;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
+namespace smoke_clouds = morsehgp3d::tools::pair_support_smoke;
 
 [[nodiscard]] double milliseconds(Clock::duration duration) {
   return std::chrono::duration<double, std::milli>{duration}.count();
@@ -61,51 +64,6 @@ using morsehgp3d::spatial::MortonLbvhIndex;
       return "point_classification_limit";
   }
   throw std::logic_error("invalid pair-support stop reason");
-}
-
-[[nodiscard]] std::vector<CertifiedPoint3> uniform_points(
-    std::size_t point_count) {
-  constexpr std::size_t modulus = 65537U;
-  std::vector<CertifiedPoint3> points;
-  points.reserve(point_count);
-  for (std::size_t index = 0U; index < point_count; ++index) {
-    const std::size_t value = index + 1U;
-    const std::size_t permuted_y =
-        (value * 25173U + 13849U) % modulus;
-    const std::size_t permuted_z =
-        (value * 13849U + 25173U) % modulus;
-    points.push_back(CertifiedPoint3::from_binary64(
-        static_cast<double>(value) / static_cast<double>(modulus),
-        static_cast<double>(permuted_y) /
-            static_cast<double>(modulus),
-        static_cast<double>(permuted_z) /
-            static_cast<double>(modulus)));
-  }
-  return points;
-}
-
-[[nodiscard]] std::vector<CertifiedPoint3> clustered_points(
-    std::size_t point_count) {
-  constexpr double local_scale = 1.0 / 1048576.0;
-  constexpr double transverse_scale = 1.0 / 4194304.0;
-  std::vector<CertifiedPoint3> points;
-  points.reserve(point_count);
-  for (std::size_t index = 0U; index < point_count; ++index) {
-    const std::size_t cluster = index % 8U;
-    const std::size_t local = index / 8U + 1U;
-    const double center_x = (cluster & 1U) == 0U ? 0.25 : 0.75;
-    const double center_y = (cluster & 2U) == 0U ? 0.25 : 0.75;
-    const double center_z = (cluster & 4U) == 0U ? 0.25 : 0.75;
-    const std::size_t permuted_y =
-        (local * 40503U + cluster * 7919U) % 65536U;
-    const std::size_t permuted_z =
-        (local * 25717U + cluster * 104729U) % 65536U;
-    points.push_back(CertifiedPoint3::from_binary64(
-        center_x + static_cast<double>(local) * local_scale,
-        center_y + static_cast<double>(permuted_y) * transverse_scale,
-        center_z + static_cast<double>(permuted_z) * transverse_scale));
-  }
-  return points;
 }
 
 [[nodiscard]] ExactPairSupportStreamBudget smoke_budget(
@@ -203,11 +161,19 @@ int main() {
            "\n  \"runs\":[\n";
     bool first = true;
     for (const std::size_t size : sizes) {
-      emit_run("uniform_latin", size, uniform_points, first);
+      emit_run(
+          "uniform_latin",
+          size,
+          smoke_clouds::uniform_latin_points,
+          first);
       first = false;
     }
     for (const std::size_t size : sizes) {
-      emit_run("eight_clusters", size, clustered_points, first);
+      emit_run(
+          "eight_clusters",
+          size,
+          smoke_clouds::eight_clusters_points,
+          first);
       first = false;
     }
     std::cout << "\n  ]\n}\n";

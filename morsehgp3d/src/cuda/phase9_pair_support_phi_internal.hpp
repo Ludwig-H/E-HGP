@@ -25,11 +25,13 @@ struct PairSupportPhiNodeInputRecord {
   std::uint64_t upper_bits[3]{};
   std::uint64_t leaf_begin{};
   std::uint64_t leaf_end{};
+  std::uint64_t left_child{pair_support_phi_sentinel};
+  std::uint64_t right_child{pair_support_phi_sentinel};
 };
 static_assert(std::is_standard_layout_v<PairSupportPhiNodeInputRecord>);
 static_assert(std::is_trivially_copyable_v<PairSupportPhiNodeInputRecord>);
 static_assert(
-    sizeof(PairSupportPhiNodeInputRecord) == 8U * sizeof(std::uint64_t));
+    sizeof(PairSupportPhiNodeInputRecord) == 10U * sizeof(std::uint64_t));
 
 struct PairSupportPhiQueryInputRecord {
   std::uint64_t first_support_node_index{};
@@ -61,6 +63,76 @@ struct PairSupportPhiDeviceBatch {
   std::size_t record_count{};
   std::size_t kernel_launch_count{};
   std::uint64_t buffer_epoch{};
+};
+
+struct PairSupportRankProductInputRecord {
+  std::uint64_t first_support_node_index{};
+  std::uint64_t second_support_node_index{};
+};
+static_assert(std::is_standard_layout_v<PairSupportRankProductInputRecord>);
+static_assert(std::is_trivially_copyable_v<PairSupportRankProductInputRecord>);
+static_assert(
+    sizeof(PairSupportRankProductInputRecord) ==
+    2U * sizeof(std::uint64_t));
+
+struct PairSupportRankWorkItem {
+  std::uint64_t product_slot{pair_support_phi_sentinel};
+  std::uint64_t witness_node_index{pair_support_phi_sentinel};
+};
+static_assert(std::is_standard_layout_v<PairSupportRankWorkItem>);
+static_assert(std::is_trivially_copyable_v<PairSupportRankWorkItem>);
+static_assert(
+    sizeof(PairSupportRankWorkItem) == 2U * sizeof(std::uint64_t));
+
+struct PairSupportRankDeviceReceipt {
+  std::uint64_t receipt_index{pair_support_phi_sentinel};
+  std::uint64_t product_slot{pair_support_phi_sentinel};
+  std::uint64_t witness_node_index{pair_support_phi_sentinel};
+  std::uint64_t leaf_begin{pair_support_phi_sentinel};
+  std::uint64_t leaf_end{pair_support_phi_sentinel};
+  std::uint64_t upper_phi_bits{pair_support_phi_sentinel};
+};
+static_assert(std::is_standard_layout_v<PairSupportRankDeviceReceipt>);
+static_assert(std::is_trivially_copyable_v<PairSupportRankDeviceReceipt>);
+static_assert(
+    sizeof(PairSupportRankDeviceReceipt) == 6U * sizeof(std::uint64_t));
+
+enum class PairSupportRankCapacityStop : std::uint8_t {
+  none,
+  work_item_capacity,
+  receipt_capacity,
+};
+
+struct PairSupportRankDeviceBatch {
+  // As for P1, the entire fixed-capacity transcript is returned and the tail
+  // must remain sentinel-filled.  No device completion flag is a scientific
+  // authority; the host derives proposals solely from exact receipt replay.
+  std::vector<PairSupportRankDeviceReceipt> receipts;
+  std::size_t receipt_count{};
+  std::size_t input_product_count{};
+  std::size_t product_capacity{};
+  std::size_t work_item_capacity{};
+  std::size_t receipt_capacity{};
+  std::size_t traversal_epoch_count{};
+  std::size_t count_kernel_launch_count{};
+  std::size_t exclusive_scan_count{};
+  std::size_t emit_kernel_launch_count{};
+  std::size_t visited_work_item_count{};
+  std::size_t peak_frontier_count{};
+  std::size_t snapshot_h2d_byte_count{};
+  std::size_t active_product_h2d_byte_count{};
+  std::size_t initial_frontier_h2d_byte_count{};
+  std::size_t traversal_metadata_d2h_byte_count{};
+  std::size_t physical_receipt_d2h_byte_count{};
+  std::size_t active_receipt_d2h_byte_count{};
+  std::size_t device_frontier_double_buffer_byte_capacity{};
+  std::size_t device_receipt_byte_capacity{};
+  std::size_t device_scan_workspace_byte_capacity{};
+  std::size_t device_fixed_workspace_byte_capacity{};
+  std::uint64_t buffer_epoch{};
+  PairSupportRankCapacityStop capacity_stop{
+      PairSupportRankCapacityStop::none};
+  bool frontier_exhausted{false};
 };
 
 class PairSupportPhiContextState final {
@@ -112,5 +184,17 @@ class PairSupportPhiContextState final {
     std::span<const PairSupportPhiNodeInputRecord> nodes,
     std::span<const PairSupportPhiQueryInputRecord> queries,
     std::size_t maximum_query_count);
+
+[[nodiscard]] PairSupportRankDeviceBatch
+propose_pair_support_rank_prunes_on_gpu(
+    PairSupportPhiContextState& context,
+    std::span<const PairSupportPhiNodeInputRecord> nodes,
+    std::uint64_t root_node_index,
+    std::span<const PairSupportRankProductInputRecord> products,
+    std::size_t required_strict_interior_point_count,
+    std::size_t maximum_product_count,
+    std::size_t maximum_work_item_count,
+    std::size_t maximum_receipt_count,
+    std::size_t maximum_epoch_count);
 
 }  // namespace morsehgp3d::gpu::detail

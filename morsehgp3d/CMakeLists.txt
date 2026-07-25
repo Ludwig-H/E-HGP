@@ -1976,6 +1976,32 @@ if(MORSEHGP3D_ENABLE_CUDA)
     )
   endif()
 
+  add_executable(
+    morsehgp3d_gpu_pair_support_rank_search_component_smoke
+    src/tools/gpu_pair_support_rank_search_component_smoke.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_pair_support_rank_search_component_smoke
+    PRIVATE
+      morsehgp3d::gpu_pair_support_phi
+      morsehgp3d::pair_support
+  )
+  target_compile_definitions(
+    morsehgp3d_gpu_pair_support_rank_search_component_smoke
+    PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_pair_support_rank_search_component_smoke
+      PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_pair_support_rank_search_component_smoke
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
   add_library(
     morsehgp3d_gpu_k1_boruvka
     STATIC

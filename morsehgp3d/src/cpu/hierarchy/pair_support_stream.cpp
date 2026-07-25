@@ -129,6 +129,42 @@ struct ExactBoxCoordinates {
   return left.support_ids < right.support_ids;
 }
 
+[[nodiscard]] bool frontier_entry_less(
+    const ExactPairSupportFrontierEntry& left,
+    const ExactPairSupportFrontierEntry& right) noexcept {
+  if (left.first_leaf_begin != right.first_leaf_begin) {
+    return left.first_leaf_begin < right.first_leaf_begin;
+  }
+  if (left.first_leaf_end != right.first_leaf_end) {
+    return left.first_leaf_end < right.first_leaf_end;
+  }
+  if (left.second_leaf_begin != right.second_leaf_begin) {
+    return left.second_leaf_begin < right.second_leaf_begin;
+  }
+  if (left.second_leaf_end != right.second_leaf_end) {
+    return left.second_leaf_end < right.second_leaf_end;
+  }
+  if (left.first_node_index != right.first_node_index) {
+    return left.first_node_index < right.first_node_index;
+  }
+  if (left.second_node_index != right.second_node_index) {
+    return left.second_node_index < right.second_node_index;
+  }
+  return left.self_product < right.self_product;
+}
+
+[[nodiscard]] bool witness_entry_less(
+    const ExactPairSupportWitnessNodeEntry& left,
+    const ExactPairSupportWitnessNodeEntry& right) noexcept {
+  if (left.leaf_begin != right.leaf_begin) {
+    return left.leaf_begin < right.leaf_begin;
+  }
+  if (left.leaf_end != right.leaf_end) {
+    return left.leaf_end < right.leaf_end;
+  }
+  return left.node_index < right.node_index;
+}
+
 class DigestWriter {
  public:
   explicit DigestWriter(std::string_view domain) {
@@ -488,6 +524,36 @@ class ExactPairSupportStreamBuilder {
     result_.audit.pair_partition_accounting_certified = false;
   }
 
+  ExactPairSupportStreamBuilder(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::size_t requested_maximum_order,
+      ExactPairSupportStreamBudget budget,
+      const ExactPairSupportCheckpoint& checkpoint,
+      IntegrityVerifiedCheckpointTag integrity_verified,
+      std::size_t maximum_products_per_batch,
+      const ExactPairSupportRankPruneBatchCallback& proposal_callback)
+      : ExactPairSupportStreamBuilder(
+            index,
+            cloud,
+            requested_maximum_order,
+            budget,
+            checkpoint,
+            integrity_verified) {
+    if (maximum_products_per_batch == 0U) {
+      throw std::invalid_argument(
+          "a pair-support proposal batch must contain at least one product");
+    }
+    if (!proposal_callback) {
+      throw std::invalid_argument(
+          "a pair-support proposal build requires a batch callback");
+    }
+    maximum_products_per_batch_ = maximum_products_per_batch;
+    proposal_callback_ = &proposal_callback;
+    proposal_audit_.maximum_products_per_batch =
+        maximum_products_per_batch;
+  }
+
   void execute() {
     while ((!frontier_.empty() || pending_product_.has_value()) && !stopped_) {
       if (pending_product_.has_value()) {
@@ -511,6 +577,19 @@ class ExactPairSupportStreamBuilder {
   [[nodiscard]] std::vector<ExactPairSupportStreamChunk::RecordKind>
   take_record_order() {
     return std::move(record_order_);
+  }
+
+  [[nodiscard]] std::vector<ExactPairSupportRankPruneProposal>
+  take_consumed_rank_prune_proposals() {
+    proposal_batch_products_.clear();
+    proposal_cache_.clear();
+    proposal_batch_active_ = false;
+    return std::move(consumed_rank_prune_proposals_);
+  }
+
+  [[nodiscard]] ExactPairSupportRankPruneProposalAudit
+  rank_prune_proposal_audit() const noexcept {
+    return proposal_audit_;
   }
 
   [[nodiscard]] ExactPairSupportCheckpoint snapshot_checkpoint(
@@ -1484,20 +1563,30 @@ class ExactPairSupportStreamBuilder {
     return current - origin;
   }
 
-  [[nodiscard]] bool consume_work_unit() {
-    if (consumed_since(
-            result_.audit.work_unit_count,
-            chunk_audit_origin_.work_unit_count,
-            "the pair-support work audit moved backwards") >=
-        result_.budget.maximum_work_unit_count) {
+  [[nodiscard]] bool can_consume_work_units(
+      std::size_t count) const {
+    const std::size_t consumed = consumed_since(
+        result_.audit.work_unit_count,
+        chunk_audit_origin_.work_unit_count,
+        "the pair-support work audit moved backwards");
+    return can_add_within(
+        consumed, count, result_.budget.maximum_work_unit_count);
+  }
+
+  [[nodiscard]] bool consume_work_units(std::size_t count) {
+    if (!can_consume_work_units(count)) {
       stop(ExactPairSupportStopReason::work_unit_limit);
       return false;
     }
     result_.audit.work_unit_count = checked_add(
         result_.audit.work_unit_count,
-        1U,
+        count,
         "the pair-support work count overflows size_t");
     return true;
+  }
+
+  [[nodiscard]] bool consume_work_unit() {
+    return consume_work_units(1U);
   }
 
   void stop(ExactPairSupportStopReason reason) {
@@ -1513,6 +1602,287 @@ class ExactPairSupportStreamBuilder {
       const Node& support_node) const noexcept {
     return query_node.leaf_begin < support_node.leaf_end &&
            support_node.leaf_begin < query_node.leaf_end;
+  }
+
+  [[nodiscard]] bool proposal_product_is_eligible(
+      const ExactPairSupportFrontierEntry& product,
+      std::size_t witness_threshold) const {
+    const auto [first_node_index, second_node_index] =
+        entry_nodes(product);
+    if (first_node_index == second_node_index) {
+      return false;
+    }
+    const Node& first = node(first_node_index);
+    const Node& second = node(second_node_index);
+    if (first.is_leaf() && second.is_leaf()) {
+      return false;
+    }
+    const std::size_t excluded_count = checked_add(
+        first.leaf_end - first.leaf_begin,
+        second.leaf_end - second.leaf_begin,
+        "pair-support proposal exclusion count overflows size_t");
+    return excluded_count <= cloud_.size() &&
+           cloud_.size() - excluded_count >= witness_threshold;
+  }
+
+  void request_rank_prune_proposal_batch(
+      const ExactPairSupportFrontierEntry& active_product,
+      std::size_t witness_threshold) {
+    if (proposal_callback_ == nullptr ||
+        maximum_products_per_batch_ == 0U) {
+      throw std::logic_error(
+          "a pair-support proposal batch has no callback contract");
+    }
+    if (proposal_batch_active_) {
+      proposal_audit_.cache_replacement_count = checked_add(
+          proposal_audit_.cache_replacement_count,
+          1U,
+          "the pair-support proposal cache replacement count overflows size_t");
+    }
+    proposal_batch_products_.clear();
+    proposal_cache_.clear();
+
+    std::size_t inspected_count = 0U;
+    for (auto iterator = frontier_.rbegin();
+         iterator != frontier_.rend() &&
+         inspected_count < maximum_products_per_batch_;
+         ++iterator, ++inspected_count) {
+      if (proposal_product_is_eligible(*iterator, witness_threshold)) {
+        proposal_batch_products_.push_back(*iterator);
+      }
+    }
+    std::sort(
+        proposal_batch_products_.begin(),
+        proposal_batch_products_.end(),
+        frontier_entry_less);
+    if (proposal_batch_products_.empty() ||
+        !std::binary_search(
+            proposal_batch_products_.begin(),
+            proposal_batch_products_.end(),
+            active_product,
+            frontier_entry_less)) {
+      throw std::logic_error(
+          "a pair-support proposal batch omitted its active product");
+    }
+    for (std::size_t index = 1U;
+         index < proposal_batch_products_.size();
+         ++index) {
+      if (!frontier_entry_less(
+              proposal_batch_products_[index - 1U],
+              proposal_batch_products_[index])) {
+        throw std::logic_error(
+            "a pair-support proposal request contains duplicate products");
+      }
+    }
+
+    proposal_audit_.batch_request_count = checked_add(
+        proposal_audit_.batch_request_count,
+        1U,
+        "the pair-support proposal batch-request count overflows size_t");
+    proposal_audit_.requested_product_count = checked_add(
+        proposal_audit_.requested_product_count,
+        proposal_batch_products_.size(),
+        "the pair-support proposal requested-product count overflows size_t");
+    proposal_audit_.maximum_requested_batch_product_count = std::max(
+        proposal_audit_.maximum_requested_batch_product_count,
+        proposal_batch_products_.size());
+
+    ExactPairSupportRankPruneBatchProposal response =
+        (*proposal_callback_)(ExactPairSupportRankPruneBatchRequest{
+            std::span<const ExactPairSupportFrontierEntry>{
+                proposal_batch_products_},
+            witness_threshold});
+    if (response.proposals.size() > proposal_batch_products_.size()) {
+      throw std::invalid_argument(
+          "a pair-support proposal batch exceeds its request");
+    }
+    for (std::size_t index = 0U;
+         index < response.proposals.size();
+         ++index) {
+      const ExactPairSupportRankPruneProposal& proposal =
+          response.proposals[index];
+      if (index != 0U &&
+          !frontier_entry_less(
+              response.proposals[index - 1U].product,
+              proposal.product)) {
+        throw std::invalid_argument(
+            "pair-support proposals must be strictly canonical");
+      }
+      const auto requested = std::lower_bound(
+          proposal_batch_products_.begin(),
+          proposal_batch_products_.end(),
+          proposal.product,
+          frontier_entry_less);
+      if (requested == proposal_batch_products_.end() ||
+          *requested != proposal.product) {
+        throw std::invalid_argument(
+            "a pair-support proposal references an unrequested product");
+      }
+      if (proposal.strict_witness_receipts.empty() ||
+          proposal.strict_witness_receipts.size() > witness_threshold) {
+        throw std::invalid_argument(
+            "a pair-support proposal has an invalid receipt count");
+      }
+    }
+    proposal_cache_ = std::move(response.proposals);
+    proposal_batch_active_ = true;
+  }
+
+  [[nodiscard]] std::optional<RankSearchOutcome>
+  try_rank_prune_proposal(
+      const ExactPairSupportFrontierEntry& active_product,
+      std::size_t witness_threshold) {
+    if (proposal_callback_ == nullptr) {
+      return std::nullopt;
+    }
+    if (!proposal_batch_active_ ||
+        !std::binary_search(
+            proposal_batch_products_.begin(),
+            proposal_batch_products_.end(),
+            active_product,
+            frontier_entry_less)) {
+      request_rank_prune_proposal_batch(
+          active_product, witness_threshold);
+    }
+    auto found = std::lower_bound(
+        proposal_cache_.begin(),
+        proposal_cache_.end(),
+        active_product,
+        [](const ExactPairSupportRankPruneProposal& proposal,
+           const ExactPairSupportFrontierEntry& product) {
+          return frontier_entry_less(proposal.product, product);
+        });
+    if (found == proposal_cache_.end() ||
+        found->product != active_product) {
+      proposal_audit_.cpu_fallback_product_count = checked_add(
+          proposal_audit_.cpu_fallback_product_count,
+          1U,
+          "the pair-support proposal fallback count overflows size_t");
+      return std::nullopt;
+    }
+
+    ExactPairSupportRankPruneProposal proposal = std::move(*found);
+    proposal_cache_.erase(found);
+    const std::size_t receipt_count =
+        proposal.strict_witness_receipts.size();
+    if (!can_consume_work_units(receipt_count)) {
+      // An unaffordable hint is never consumed or geometrically replayed.
+      // Historical CPU fallback preserves both the chunk cursor and a
+      // consumed-only transcript without hidden exact work.
+      proposal_audit_.cpu_fallback_product_count = checked_add(
+          proposal_audit_.cpu_fallback_product_count,
+          1U,
+          "the pair-support proposal fallback count overflows size_t");
+      return std::nullopt;
+    }
+    const auto [first_node_index, second_node_index] =
+        entry_nodes(active_product);
+    const Node& first = node(first_node_index);
+    const Node& second = node(second_node_index);
+    const spatial::ExactDyadicAabb3 first_box =
+        node_box(first_node_index);
+    const spatial::ExactDyadicAabb3 second_box =
+        node_box(second_node_index);
+    std::size_t strict_witness_point_count = 0U;
+    for (std::size_t receipt_index = 0U;
+         receipt_index < proposal.strict_witness_receipts.size();
+         ++receipt_index) {
+      const ExactPairSupportWitnessNodeEntry& receipt =
+          proposal.strict_witness_receipts[receipt_index];
+      if (receipt_index != 0U &&
+          (!witness_entry_less(
+               proposal.strict_witness_receipts[receipt_index - 1U],
+               receipt) ||
+           proposal.strict_witness_receipts[receipt_index - 1U].leaf_end >
+               receipt.leaf_begin)) {
+        throw std::invalid_argument(
+            "pair-support proposal receipts are not a canonical antichain");
+      }
+      std::size_t witness_node = 0U;
+      try {
+        witness_node = witness_node_index(receipt);
+      } catch (const std::exception&) {
+        throw std::invalid_argument(
+            "a pair-support proposal receipt contradicts the LBVH");
+      }
+      const Node& witness = node(witness_node);
+      if (node_range_intersects(witness, first) ||
+          node_range_intersects(witness, second)) {
+        throw std::invalid_argument(
+            "a pair-support proposal receipt intersects its support");
+      }
+      const ExactDiametralPhiAabbMaximum maximum =
+          exact_diametral_phi_aabb_maximum(
+              first_box, second_box, node_box(witness_node));
+      if (maximum.maximum_phi.sign() >= 0) {
+        throw std::invalid_argument(
+            "a pair-support proposal receipt is not strictly interior");
+      }
+      if (strict_witness_point_count >= witness_threshold) {
+        throw std::invalid_argument(
+            "a pair-support proposal contains a nonminimal receipt suffix");
+      }
+      strict_witness_point_count = checked_add(
+          strict_witness_point_count,
+          witness.leaf_end - witness.leaf_begin,
+          "the pair-support proposal witness count overflows size_t");
+    }
+    if (strict_witness_point_count < witness_threshold) {
+      throw std::invalid_argument(
+          "a pair-support proposal does not certify the rank threshold");
+    }
+
+    if (!consume_work_units(receipt_count)) {
+      throw std::logic_error(
+          "an affordable pair-support proposal failed its work preflight");
+    }
+
+    result_.audit.rank_prune_search_count = checked_add(
+        result_.audit.rank_prune_search_count,
+        1U,
+        "the pair-support proposal rank-search count overflows size_t");
+    result_.audit.witness_node_visit_count = checked_add(
+        result_.audit.witness_node_visit_count,
+        receipt_count,
+        "the pair-support proposal witness-node count overflows size_t");
+    result_.audit.exact_phi_aabb_bound_count = checked_add(
+        result_.audit.exact_phi_aabb_bound_count,
+        receipt_count,
+        "the pair-support proposal phi-bound count overflows size_t");
+    result_.audit.strict_interior_witness_subtree_count = checked_add(
+        result_.audit.strict_interior_witness_subtree_count,
+        receipt_count,
+        "the pair-support proposal witness-subtree count overflows size_t");
+    result_.audit.strict_interior_witness_point_count = checked_add(
+        result_.audit.strict_interior_witness_point_count,
+        strict_witness_point_count,
+        "the pair-support proposal witness-point count overflows size_t");
+    result_.audit.maximum_witness_frontier_entry_count = std::max(
+        result_.audit.maximum_witness_frontier_entry_count,
+        receipt_count);
+
+    proposal_audit_.consumed_proposal_count = checked_add(
+        proposal_audit_.consumed_proposal_count,
+        1U,
+        "the pair-support consumed-proposal count overflows size_t");
+    proposal_audit_.exact_receipt_recertification_count = checked_add(
+        proposal_audit_.exact_receipt_recertification_count,
+        receipt_count,
+        "the pair-support exact-recertification count overflows size_t");
+    proposal_audit_.consumed_receipt_count = checked_add(
+        proposal_audit_.consumed_receipt_count,
+        receipt_count,
+        "the pair-support consumed-receipt count overflows size_t");
+    proposal_audit_.consumed_witness_point_count = checked_add(
+        proposal_audit_.consumed_witness_point_count,
+        strict_witness_point_count,
+        "the pair-support consumed-witness point count overflows size_t");
+    proposal_audit_.proposal_pruned_pair_count = checked_add(
+        proposal_audit_.proposal_pruned_pair_count,
+        entry_pair_count(active_product),
+        "the pair-support proposal-pruned pair count overflows size_t");
+    consumed_rank_prune_proposals_.push_back(std::move(proposal));
+    return RankSearchOutcome::prune;
   }
 
   [[nodiscard]] RankSearchOutcome continue_rank_prune_search() {
@@ -1543,6 +1913,12 @@ class ExactPairSupportStreamBuilder {
       return RankSearchOutcome::keep;
     }
     if (!pending.rank_search_started) {
+      const std::optional<RankSearchOutcome> proposed =
+          try_rank_prune_proposal(
+              pending.product, witness_threshold);
+      if (proposed.has_value()) {
+        return *proposed;
+      }
       if (result_.budget.maximum_auxiliary_frontier_entry_count == 0U) {
         stop(ExactPairSupportStopReason::auxiliary_frontier_entry_limit);
         return RankSearchOutcome::budget_exhausted;
@@ -2365,6 +2741,14 @@ class ExactPairSupportStreamBuilder {
   contract::CanonicalId output_chain_digest_{};
   std::size_t output_record_count_{0U};
   std::vector<ExactPairSupportStreamChunk::RecordKind> record_order_;
+  std::size_t maximum_products_per_batch_{0U};
+  const ExactPairSupportRankPruneBatchCallback* proposal_callback_{nullptr};
+  std::vector<ExactPairSupportFrontierEntry> proposal_batch_products_;
+  std::vector<ExactPairSupportRankPruneProposal> proposal_cache_;
+  std::vector<ExactPairSupportRankPruneProposal>
+      consumed_rank_prune_proposals_;
+  ExactPairSupportRankPruneProposalAudit proposal_audit_{};
+  bool proposal_batch_active_{false};
   bool canonical_sort_records_{false};
   bool stopped_{false};
 };
@@ -2511,6 +2895,72 @@ build_exact_pair_support_stream_chunk_after_source_verification(
   return chunk;
 }
 
+[[nodiscard]] ExactPairSupportRankPruneProposedChunk
+build_exact_pair_support_stream_proposed_chunk_after_source_verification(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& checkpoint,
+    std::size_t maximum_products_per_batch,
+    const ExactPairSupportRankPruneBatchCallback& callback) {
+  ExactPairSupportRankPruneProposedChunk proposed;
+  ExactPairSupportStreamChunk& chunk = proposed.candidate_chunk;
+  proposed.audit.maximum_products_per_batch =
+      maximum_products_per_batch;
+  chunk.manifest = checkpoint.manifest;
+  chunk.budget = chunk_budget;
+  chunk.chunk_sequence = checkpoint.next_chunk_sequence;
+  chunk.first_output_record_index = checkpoint.output_record_count;
+  chunk.source_checkpoint_digest = checkpoint.checkpoint_digest;
+  chunk.previous_output_chain_digest =
+      checkpoint.output_chain_digest;
+  chunk.cumulative_audit_before = checkpoint.cumulative_audit;
+  chunk.no_forbidden_global_structure_materialized = true;
+  chunk.hierarchy_reduction_performed = false;
+  if (checkpoint.complete()) {
+    chunk.output_chain_digest = checkpoint.output_chain_digest;
+    chunk.status = ExactPairSupportStreamStatus::complete;
+    chunk.stop_reason = ExactPairSupportStopReason::none;
+    chunk.cumulative_audit_after = checkpoint.cumulative_audit;
+    chunk.next_checkpoint = checkpoint;
+    chunk.candidate_prepared = true;
+    return proposed;
+  }
+  if (checkpoint.next_chunk_sequence ==
+      std::numeric_limits<std::uint64_t>::max()) {
+    throw std::overflow_error(
+        "the pair-support chunk sequence overflows uint64");
+  }
+
+  ExactPairSupportStreamBuilder builder{
+      index,
+      cloud,
+      requested_maximum_order,
+      chunk_budget,
+      checkpoint,
+      IntegrityVerifiedCheckpointTag{},
+      maximum_products_per_batch,
+      callback};
+  builder.execute();
+  chunk.next_checkpoint = builder.take_checkpoint(
+      checkpoint.manifest, checkpoint.next_chunk_sequence + 1U);
+  ExactPairSupportStreamResult result = builder.take_result();
+  chunk.output_chain_digest = builder.output_chain_digest();
+  chunk.status = result.status;
+  chunk.stop_reason = result.stop_reason;
+  chunk.events = std::move(result.events);
+  chunk.relevant_extra_shell_diagnostics =
+      std::move(result.relevant_extra_shell_diagnostics);
+  chunk.record_order = builder.take_record_order();
+  chunk.cumulative_audit_after = result.audit;
+  chunk.candidate_prepared = true;
+  proposed.audit = builder.rank_prune_proposal_audit();
+  proposed.consumed_proposals =
+      builder.take_consumed_rank_prune_proposals();
+  return proposed;
+}
+
 }  // namespace
 
 ExactPairSupportStreamChunk build_exact_pair_support_stream_chunk(
@@ -2541,6 +2991,57 @@ ExactPairSupportStreamChunk build_exact_pair_support_stream_chunk(
       authority.requested_maximum_order(),
       chunk_budget,
       checkpoint);
+}
+
+ExactPairSupportRankPruneProposedChunk
+build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& checkpoint,
+    std::size_t maximum_products_per_batch,
+    const ExactPairSupportRankPruneBatchCallback& callback) {
+  const ExactPairSupportAuthorityContext authority{
+      index, cloud, requested_maximum_order};
+  return build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+      authority,
+      chunk_budget,
+      checkpoint,
+      maximum_products_per_batch,
+      callback);
+}
+
+ExactPairSupportRankPruneProposedChunk
+build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+    const ExactPairSupportAuthorityContext& authority,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& checkpoint,
+    std::size_t maximum_products_per_batch,
+    const ExactPairSupportRankPruneBatchCallback& callback) {
+  if (maximum_products_per_batch == 0U) {
+    throw std::invalid_argument(
+        "a pair-support proposal batch must contain at least one product");
+  }
+  if (!callback) {
+    throw std::invalid_argument(
+        "a pair-support proposal build requires a batch callback");
+  }
+  const ExactPairSupportCheckpointVerification source_verification =
+      verify_exact_pair_support_checkpoint(authority, checkpoint);
+  if (!source_verification.integrity_verified) {
+    throw std::invalid_argument(
+        "a pair-support proposal chunk requires an integrity-verified source checkpoint");
+  }
+  return
+      build_exact_pair_support_stream_proposed_chunk_after_source_verification(
+          authority.index(),
+          authority.cloud(),
+          authority.requested_maximum_order(),
+          chunk_budget,
+          checkpoint,
+          maximum_products_per_batch,
+          callback);
 }
 
 ExactPairSupportStreamChunkVerification verify_exact_pair_support_stream_chunk(
@@ -2636,6 +3137,185 @@ ExactPairSupportStreamChunkVerification verify_exact_pair_support_stream_chunk(
       observed,
       false,
       nullptr);
+}
+
+ExactPairSupportRankPruneProposedChunkVerification
+verify_exact_pair_support_stream_proposed_chunk(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& source_checkpoint,
+    std::size_t maximum_products_per_batch,
+    const ExactPairSupportRankPruneProposedChunk& observed) {
+  const ExactPairSupportAuthorityContext authority{
+      index, cloud, requested_maximum_order};
+  return verify_exact_pair_support_stream_proposed_chunk(
+      authority,
+      chunk_budget,
+      source_checkpoint,
+      maximum_products_per_batch,
+      observed);
+}
+
+ExactPairSupportRankPruneProposedChunkVerification
+verify_exact_pair_support_stream_proposed_chunk(
+    const ExactPairSupportAuthorityContext& authority,
+    const ExactPairSupportStreamBudget& chunk_budget,
+    const ExactPairSupportCheckpoint& source_checkpoint,
+    std::size_t maximum_products_per_batch,
+    const ExactPairSupportRankPruneProposedChunk& observed) {
+  ExactPairSupportRankPruneProposedChunkVerification verification;
+  verification.durable_wire_v1_claimed = false;
+  ExactPairSupportStreamChunkVerification& chunk_verification =
+      verification.candidate_chunk_verification;
+  chunk_verification.source_checkpoint_integrity_verified =
+      verify_exact_pair_support_checkpoint(authority, source_checkpoint)
+          .integrity_verified;
+  chunk_verification.requested_budget_certified =
+      observed.candidate_chunk.budget == chunk_budget;
+  if (!chunk_verification.source_checkpoint_integrity_verified ||
+      maximum_products_per_batch == 0U) {
+    return verification;
+  }
+
+  if (observed.consumed_proposals.size() >
+      chunk_budget.maximum_work_unit_count) {
+    return verification;
+  }
+  std::size_t transcript_receipt_count = 0U;
+  for (const ExactPairSupportRankPruneProposal& proposal :
+       observed.consumed_proposals) {
+    if (!can_add_within(
+            transcript_receipt_count,
+            proposal.strict_witness_receipts.size(),
+            chunk_budget.maximum_work_unit_count)) {
+      return verification;
+    }
+    transcript_receipt_count +=
+        proposal.strict_witness_receipts.size();
+  }
+
+  std::vector<const ExactPairSupportRankPruneProposal*>
+      transcript_by_product;
+  transcript_by_product.reserve(observed.consumed_proposals.size());
+  for (const ExactPairSupportRankPruneProposal& proposal :
+       observed.consumed_proposals) {
+    transcript_by_product.push_back(&proposal);
+  }
+  std::sort(
+      transcript_by_product.begin(),
+      transcript_by_product.end(),
+      [](const ExactPairSupportRankPruneProposal* left,
+         const ExactPairSupportRankPruneProposal* right) {
+        return frontier_entry_less(
+            left->product, right->product);
+      });
+  for (std::size_t index = 1U;
+       index < transcript_by_product.size();
+       ++index) {
+    if (!frontier_entry_less(
+            transcript_by_product[index - 1U]->product,
+            transcript_by_product[index]->product)) {
+      return verification;
+    }
+  }
+
+  const ExactPairSupportRankPruneBatchCallback replay_callback =
+      [&transcript_by_product](
+          const ExactPairSupportRankPruneBatchRequest& request) {
+        ExactPairSupportRankPruneBatchProposal response;
+        response.proposals.reserve(
+            request.canonical_products.size());
+        for (const ExactPairSupportFrontierEntry& product :
+             request.canonical_products) {
+          const auto found = std::lower_bound(
+              transcript_by_product.begin(),
+              transcript_by_product.end(),
+              product,
+              [](const ExactPairSupportRankPruneProposal* proposal,
+                 const ExactPairSupportFrontierEntry& requested) {
+                return frontier_entry_less(
+                    proposal->product, requested);
+              });
+          if (found != transcript_by_product.end() &&
+              (*found)->product == product) {
+            response.proposals.push_back(**found);
+          }
+        }
+        return response;
+      };
+
+  ExactPairSupportRankPruneProposedChunk expected;
+  try {
+    expected =
+        build_exact_pair_support_stream_proposed_chunk_after_source_verification(
+            authority.index(),
+            authority.cloud(),
+            authority.requested_maximum_order(),
+            chunk_budget,
+            source_checkpoint,
+            maximum_products_per_batch,
+            replay_callback);
+  } catch (const std::exception&) {
+    return verification;
+  }
+
+  const ExactPairSupportStreamChunk& observed_chunk =
+      observed.candidate_chunk;
+  const ExactPairSupportStreamChunk& expected_chunk =
+      expected.candidate_chunk;
+  chunk_verification.prepared_transition_chain_matches =
+      observed_chunk.manifest == expected_chunk.manifest &&
+      observed_chunk.chunk_sequence == expected_chunk.chunk_sequence &&
+      observed_chunk.first_output_record_index ==
+          expected_chunk.first_output_record_index &&
+      observed_chunk.source_checkpoint_digest ==
+          expected_chunk.source_checkpoint_digest &&
+      observed_chunk.previous_output_chain_digest ==
+          expected_chunk.previous_output_chain_digest &&
+      observed_chunk.output_chain_digest ==
+          expected_chunk.output_chain_digest &&
+      observed_chunk.candidate_prepared ==
+          expected_chunk.candidate_prepared;
+  chunk_verification.records_individually_exact =
+      observed_chunk.events == expected_chunk.events &&
+      observed_chunk.relevant_extra_shell_diagnostics ==
+          expected_chunk.relevant_extra_shell_diagnostics &&
+      observed_chunk.record_order == expected_chunk.record_order;
+  chunk_verification.next_checkpoint_integrity_verified =
+      observed_chunk.next_checkpoint == expected_chunk.next_checkpoint &&
+      verify_exact_pair_support_checkpoint(
+          authority, observed_chunk.next_checkpoint)
+          .integrity_verified;
+  chunk_verification.fresh_replay_certified =
+      observed_chunk == expected_chunk;
+  chunk_verification.chunk_transition_verified =
+      chunk_verification.source_checkpoint_integrity_verified &&
+      chunk_verification.requested_budget_certified &&
+      chunk_verification.prepared_transition_chain_matches &&
+      chunk_verification.records_individually_exact &&
+      chunk_verification.next_checkpoint_integrity_verified &&
+      chunk_verification.fresh_replay_certified;
+
+  verification.every_consumed_proposal_replayed_once =
+      expected.consumed_proposals == observed.consumed_proposals &&
+      expected.audit.consumed_proposal_count ==
+          observed.consumed_proposals.size() &&
+      expected.audit.exact_receipt_recertification_count ==
+          expected.audit.consumed_receipt_count;
+  verification.no_unconsumed_proposal_retained =
+      expected.consumed_proposals.size() ==
+          transcript_by_product.size();
+  verification.proposed_transition_verified =
+      chunk_verification.chunk_transition_verified &&
+      verification.every_consumed_proposal_replayed_once &&
+      verification.no_unconsumed_proposal_retained &&
+      observed == expected &&
+      !observed.audit.durable_wire_v1_claimed &&
+      observed.audit.transcript_ephemeral &&
+      observed.audit.no_forbidden_global_structure_materialized;
+  return verification;
 }
 
 ExactPairSupportIncrementalVerifier::ExactPairSupportIncrementalVerifier(

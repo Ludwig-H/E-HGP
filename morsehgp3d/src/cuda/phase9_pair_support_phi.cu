@@ -3,6 +3,7 @@
 #include "phase2b_interval.cuh"
 
 #include <cuda_runtime.h>
+#include <cub/device/device_scan.cuh>
 
 #include <algorithm>
 #include <cstddef>
@@ -42,6 +43,15 @@ constexpr unsigned int kThreadsPerBlock = 256U;
 constexpr std::size_t kAxisCount = 3U;
 constexpr std::uint64_t kPositiveInfinityBits =
     UINT64_C(0x7ff0000000000000);
+constexpr std::uint64_t kRankDecisionDiscard = 1U;
+constexpr std::uint64_t kRankDecisionExpand = 2U;
+constexpr std::uint64_t kRankDecisionReceipt = 3U;
+constexpr std::uint64_t kRankDecisionInvalid = 4U;
+
+struct PairSupportRankDeviceDecision {
+  std::uint64_t upper_phi_bits{kPositiveInfinityBits};
+  std::uint64_t code{kRankDecisionInvalid};
+};
 
 class PairSupportPhiCudaFailure final : public std::runtime_error {
  public:
@@ -62,6 +72,27 @@ void check_cuda(cudaError_t code, std::string operation) {
   if (code != cudaSuccess) {
     throw PairSupportPhiCudaFailure(code, std::move(operation));
   }
+}
+
+[[nodiscard]] std::size_t checked_bytes(
+    std::size_t count,
+    std::size_t width,
+    const char* message) {
+  if (count != 0U &&
+      width > std::numeric_limits<std::size_t>::max() / count) {
+    throw std::length_error(message);
+  }
+  return count * width;
+}
+
+[[nodiscard]] std::size_t checked_add_bytes(
+    std::size_t left,
+    std::size_t right,
+    const char* message) {
+  if (left > std::numeric_limits<std::size_t>::max() - right) {
+    throw std::length_error(message);
+  }
+  return left + right;
 }
 
 template <typename Value>
@@ -178,18 +209,14 @@ class PairSupportPhiCudaResources final {
     }
     if (query_status != cudaSuccess ||
         (previous_device != device_ && !restore_device)) {
-      records_.abandon();
-      queries_.abandon();
-      nodes_.abandon();
+      abandon_all();
       stream_ = nullptr;
       return;
     }
     if (stream_ != nullptr) {
       static_cast<void>(cudaStreamSynchronize(stream_));
     }
-    records_.reset();
-    queries_.reset();
-    nodes_.reset();
+    reset_all();
     if (stream_ != nullptr) {
       static_cast<void>(cudaStreamDestroy(stream_));
       stream_ = nullptr;
@@ -199,30 +226,20 @@ class PairSupportPhiCudaResources final {
     }
   }
 
-  void initialize(
-      std::span<const PairSupportPhiNodeInputRecord> nodes,
-      std::size_t maximum_query_count) {
+  [[nodiscard]] bool initialize_snapshot(
+      std::span<const PairSupportPhiNodeInputRecord> nodes) {
     if (node_count_ != 0U) {
-      if (node_count_ != nodes.size() || nodes_.count() != nodes.size() ||
-          maximum_query_count_ != maximum_query_count ||
-          queries_.count() != maximum_query_count ||
-          records_.count() != maximum_query_count) {
+      if (node_count_ != nodes.size() || nodes_.count() != nodes.size()) {
         throw std::logic_error(
             "a Phase 9 pair-support phi context changed its resident snapshot");
       }
-      return;
+      return false;
     }
-    if (nodes.empty() || maximum_query_count == 0U) {
+    if (nodes.empty()) {
       throw std::invalid_argument(
           "a Phase 9 pair-support phi resident snapshot is empty");
     }
     nodes_.allocate(nodes.size(), "cudaMalloc Phase 9 pair-support LBVH nodes");
-    queries_.allocate(
-        maximum_query_count,
-        "cudaMalloc Phase 9 pair-support phi query buffer");
-    records_.allocate(
-        maximum_query_count,
-        "cudaMalloc Phase 9 pair-support phi proposal buffer");
     check_cuda(
         cudaMemcpyAsync(
             nodes_.get(),
@@ -233,7 +250,113 @@ class PairSupportPhiCudaResources final {
         "cudaMemcpyAsync Phase 9 pair-support LBVH snapshot host-to-device");
     synchronize();
     node_count_ = nodes.size();
+    return true;
+  }
+
+  void initialize_phi(std::size_t maximum_query_count) {
+    if (maximum_query_count_ != 0U) {
+      if (maximum_query_count_ != maximum_query_count ||
+          queries_.count() != maximum_query_count ||
+          records_.count() != maximum_query_count) {
+        throw std::logic_error(
+            "a Phase 9 pair-support phi context changed its P1 capacity");
+      }
+      return;
+    }
+    if (maximum_query_count == 0U) {
+      throw std::invalid_argument(
+          "a Phase 9 pair-support phi capacity is empty");
+    }
+    queries_.allocate(
+        maximum_query_count,
+        "cudaMalloc Phase 9 pair-support phi query buffer");
+    records_.allocate(
+        maximum_query_count,
+        "cudaMalloc Phase 9 pair-support phi proposal buffer");
     maximum_query_count_ = maximum_query_count;
+  }
+
+  void initialize_rank(
+      std::size_t maximum_product_count,
+      std::size_t maximum_work_item_count,
+      std::size_t maximum_receipt_count) {
+    if (rank_product_capacity_ != 0U) {
+      if (rank_product_capacity_ != maximum_product_count ||
+          rank_work_item_capacity_ != maximum_work_item_count ||
+          rank_receipt_capacity_ != maximum_receipt_count) {
+        throw std::logic_error(
+            "a Phase 9 rank-prune context changed its fixed capacities");
+      }
+      return;
+    }
+    if (maximum_product_count == 0U ||
+        maximum_work_item_count == 0U ||
+        maximum_receipt_count == 0U) {
+      throw std::invalid_argument(
+          "a Phase 9 rank-prune capacity is empty");
+    }
+    rank_products_.allocate(
+        maximum_product_count,
+        "cudaMalloc Phase 9 rank-prune product buffer");
+    rank_product_point_counts_.allocate(
+        maximum_product_count,
+        "cudaMalloc Phase 9 rank-prune product counters");
+    rank_frontier_a_.allocate(
+        maximum_work_item_count,
+        "cudaMalloc Phase 9 rank-prune frontier A");
+    rank_frontier_b_.allocate(
+        maximum_work_item_count,
+        "cudaMalloc Phase 9 rank-prune frontier B");
+    rank_next_counts_.allocate(
+        maximum_work_item_count,
+        "cudaMalloc Phase 9 rank-prune next counts");
+    rank_receipt_counts_.allocate(
+        maximum_work_item_count,
+        "cudaMalloc Phase 9 rank-prune receipt counts");
+    rank_next_offsets_.allocate(
+        maximum_work_item_count,
+        "cudaMalloc Phase 9 rank-prune next offsets");
+    rank_receipt_offsets_.allocate(
+        maximum_work_item_count,
+        "cudaMalloc Phase 9 rank-prune receipt offsets");
+    rank_decisions_.allocate(
+        maximum_work_item_count,
+        "cudaMalloc Phase 9 rank-prune decisions");
+    rank_receipts_.allocate(
+        maximum_receipt_count,
+        "cudaMalloc Phase 9 rank-prune receipts");
+    rank_failure_.allocate(
+        1U, "cudaMalloc Phase 9 rank-prune failure word");
+
+    std::size_t next_scan_bytes = 0U;
+    check_cuda(
+        cub::DeviceScan::ExclusiveSum(
+            nullptr,
+            next_scan_bytes,
+            rank_next_counts_.get(),
+            rank_next_offsets_.get(),
+            maximum_work_item_count,
+            stream_),
+        "CUB Phase 9 rank-prune next-count scan sizing");
+    std::size_t receipt_scan_bytes = 0U;
+    check_cuda(
+        cub::DeviceScan::ExclusiveSum(
+            nullptr,
+            receipt_scan_bytes,
+            rank_receipt_counts_.get(),
+            rank_receipt_offsets_.get(),
+            maximum_work_item_count,
+            stream_),
+        "CUB Phase 9 rank-prune receipt-count scan sizing");
+    rank_scan_workspace_byte_capacity_ =
+        std::max<std::size_t>(
+            1U, std::max(next_scan_bytes, receipt_scan_bytes));
+    rank_scan_workspace_.allocate(
+        rank_scan_workspace_byte_capacity_,
+        "cudaMalloc Phase 9 rank-prune scan workspace");
+    rank_product_capacity_ = maximum_product_count;
+    rank_work_item_capacity_ = maximum_work_item_count;
+    rank_receipt_capacity_ = maximum_receipt_count;
   }
 
   [[nodiscard]] int device() const noexcept { return device_; }
@@ -250,6 +373,46 @@ class PairSupportPhiCudaResources final {
   [[nodiscard]] PairSupportPhiDeviceRecord* records() noexcept {
     return records_.get();
   }
+  [[nodiscard]] PairSupportRankProductInputRecord* rank_products() noexcept {
+    return rank_products_.get();
+  }
+  [[nodiscard]] std::uint64_t* rank_product_point_counts() noexcept {
+    return rank_product_point_counts_.get();
+  }
+  [[nodiscard]] PairSupportRankWorkItem* rank_frontier_a() noexcept {
+    return rank_frontier_a_.get();
+  }
+  [[nodiscard]] PairSupportRankWorkItem* rank_frontier_b() noexcept {
+    return rank_frontier_b_.get();
+  }
+  [[nodiscard]] std::uint64_t* rank_next_counts() noexcept {
+    return rank_next_counts_.get();
+  }
+  [[nodiscard]] std::uint64_t* rank_receipt_counts() noexcept {
+    return rank_receipt_counts_.get();
+  }
+  [[nodiscard]] std::uint64_t* rank_next_offsets() noexcept {
+    return rank_next_offsets_.get();
+  }
+  [[nodiscard]] std::uint64_t* rank_receipt_offsets() noexcept {
+    return rank_receipt_offsets_.get();
+  }
+  [[nodiscard]] PairSupportRankDeviceDecision* rank_decisions() noexcept {
+    return rank_decisions_.get();
+  }
+  [[nodiscard]] PairSupportRankDeviceReceipt* rank_receipts() noexcept {
+    return rank_receipts_.get();
+  }
+  [[nodiscard]] std::uint64_t* rank_failure() noexcept {
+    return rank_failure_.get();
+  }
+  [[nodiscard]] unsigned char* rank_scan_workspace() noexcept {
+    return rank_scan_workspace_.get();
+  }
+  [[nodiscard]] std::size_t rank_scan_workspace_byte_capacity()
+      const noexcept {
+    return rank_scan_workspace_byte_capacity_;
+  }
 
   void synchronize() {
     check_cuda(
@@ -264,14 +427,66 @@ class PairSupportPhiCudaResources final {
   }
 
  private:
+  void abandon_all() noexcept {
+    rank_scan_workspace_.abandon();
+    rank_failure_.abandon();
+    rank_receipts_.abandon();
+    rank_decisions_.abandon();
+    rank_receipt_offsets_.abandon();
+    rank_next_offsets_.abandon();
+    rank_receipt_counts_.abandon();
+    rank_next_counts_.abandon();
+    rank_frontier_b_.abandon();
+    rank_frontier_a_.abandon();
+    rank_product_point_counts_.abandon();
+    rank_products_.abandon();
+    records_.abandon();
+    queries_.abandon();
+    nodes_.abandon();
+  }
+
+  void reset_all() noexcept {
+    rank_scan_workspace_.reset();
+    rank_failure_.reset();
+    rank_receipts_.reset();
+    rank_decisions_.reset();
+    rank_receipt_offsets_.reset();
+    rank_next_offsets_.reset();
+    rank_receipt_counts_.reset();
+    rank_next_counts_.reset();
+    rank_frontier_b_.reset();
+    rank_frontier_a_.reset();
+    rank_product_point_counts_.reset();
+    rank_products_.reset();
+    records_.reset();
+    queries_.reset();
+    nodes_.reset();
+  }
+
   int device_{-1};
   cudaStream_t stream_{nullptr};
   unsigned int maximum_grid_x_{};
   std::size_t node_count_{};
   std::size_t maximum_query_count_{};
+  std::size_t rank_product_capacity_{};
+  std::size_t rank_work_item_capacity_{};
+  std::size_t rank_receipt_capacity_{};
+  std::size_t rank_scan_workspace_byte_capacity_{};
   DeviceBuffer<PairSupportPhiNodeInputRecord> nodes_;
   DeviceBuffer<PairSupportPhiQueryInputRecord> queries_;
   DeviceBuffer<PairSupportPhiDeviceRecord> records_;
+  DeviceBuffer<PairSupportRankProductInputRecord> rank_products_;
+  DeviceBuffer<std::uint64_t> rank_product_point_counts_;
+  DeviceBuffer<PairSupportRankWorkItem> rank_frontier_a_;
+  DeviceBuffer<PairSupportRankWorkItem> rank_frontier_b_;
+  DeviceBuffer<std::uint64_t> rank_next_counts_;
+  DeviceBuffer<std::uint64_t> rank_receipt_counts_;
+  DeviceBuffer<std::uint64_t> rank_next_offsets_;
+  DeviceBuffer<std::uint64_t> rank_receipt_offsets_;
+  DeviceBuffer<PairSupportRankDeviceDecision> rank_decisions_;
+  DeviceBuffer<PairSupportRankDeviceReceipt> rank_receipts_;
+  DeviceBuffer<std::uint64_t> rank_failure_;
+  DeviceBuffer<unsigned char> rank_scan_workspace_;
 };
 
 [[nodiscard]] PairSupportPhiCudaResources& resources(
@@ -393,6 +608,208 @@ __global__ void morsehgp3d_phase9_pair_support_phi_kernel(
   }
 }
 
+[[nodiscard]] inline __device__ bool rank_ranges_intersect(
+    const PairSupportPhiNodeInputRecord& left,
+    const PairSupportPhiNodeInputRecord& right) noexcept {
+  return left.leaf_begin < right.leaf_end &&
+         right.leaf_begin < left.leaf_end;
+}
+
+inline __device__ void record_rank_failure(
+    std::uint64_t* failure_word,
+    std::uint64_t code) noexcept {
+  atomicCAS(
+      reinterpret_cast<unsigned long long*>(failure_word),
+      0ULL,
+      static_cast<unsigned long long>(code));
+}
+
+__global__ void morsehgp3d_phase9_pair_support_rank_count_kernel(
+    const PairSupportPhiNodeInputRecord* nodes,
+    std::size_t node_count,
+    const PairSupportRankProductInputRecord* products,
+    std::size_t product_count,
+    const PairSupportRankWorkItem* current_frontier,
+    std::size_t current_frontier_count,
+    const std::uint64_t* product_point_counts,
+    std::uint64_t required_strict_interior_point_count,
+    std::uint64_t* next_counts,
+    std::uint64_t* receipt_counts,
+    PairSupportRankDeviceDecision* decisions,
+    std::uint64_t* failure_word) {
+  const std::size_t first_index =
+      static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  const std::size_t stride =
+      static_cast<std::size_t>(gridDim.x) * blockDim.x;
+  std::size_t item_index = first_index;
+  while (item_index < current_frontier_count) {
+    next_counts[item_index] = 0U;
+    receipt_counts[item_index] = 0U;
+    PairSupportRankDeviceDecision decision{};
+    const PairSupportRankWorkItem item = current_frontier[item_index];
+    if (item.product_slot >= product_count ||
+        item.witness_node_index >= node_count) {
+      record_rank_failure(failure_word, 1U);
+      decisions[item_index] = decision;
+      if (current_frontier_count - item_index <= stride) {
+        break;
+      }
+      item_index += stride;
+      continue;
+    }
+    if (product_point_counts[item.product_slot] >=
+        required_strict_interior_point_count) {
+      decision.code = kRankDecisionDiscard;
+      decisions[item_index] = decision;
+      if (current_frontier_count - item_index <= stride) {
+        break;
+      }
+      item_index += stride;
+      continue;
+    }
+
+    const PairSupportRankProductInputRecord product =
+        products[item.product_slot];
+    if (product.first_support_node_index >= node_count ||
+        product.second_support_node_index >= node_count) {
+      record_rank_failure(failure_word, 2U);
+      decisions[item_index] = decision;
+      if (current_frontier_count - item_index <= stride) {
+        break;
+      }
+      item_index += stride;
+      continue;
+    }
+    const PairSupportPhiNodeInputRecord witness =
+        nodes[item.witness_node_index];
+    const PairSupportPhiNodeInputRecord first =
+        nodes[product.first_support_node_index];
+    const PairSupportPhiNodeInputRecord second =
+        nodes[product.second_support_node_index];
+    if (witness.leaf_begin >= witness.leaf_end) {
+      record_rank_failure(failure_word, 3U);
+      decisions[item_index] = decision;
+      if (current_frontier_count - item_index <= stride) {
+        break;
+      }
+      item_index += stride;
+      continue;
+    }
+
+    const bool overlaps =
+        rank_ranges_intersect(witness, first) ||
+        rank_ranges_intersect(witness, second);
+    if (!overlaps) {
+      double upper = 0.0;
+      if (phi_upper_bound(first, second, witness, upper) && upper < 0.0) {
+        decision.upper_phi_bits = canonical_bits(upper);
+        decision.code = kRankDecisionReceipt;
+        receipt_counts[item_index] = 1U;
+        decisions[item_index] = decision;
+        if (current_frontier_count - item_index <= stride) {
+          break;
+        }
+        item_index += stride;
+        continue;
+      }
+    }
+
+    const bool left_missing =
+        witness.left_child == pair_support_phi_sentinel;
+    const bool right_missing =
+        witness.right_child == pair_support_phi_sentinel;
+    if (left_missing != right_missing ||
+        (!left_missing &&
+         (witness.left_child >= node_count ||
+          witness.right_child >= node_count ||
+          witness.left_child == witness.right_child))) {
+      record_rank_failure(failure_word, 4U);
+    } else if (left_missing) {
+      decision.code = kRankDecisionDiscard;
+    } else {
+      decision.code = kRankDecisionExpand;
+      next_counts[item_index] = 2U;
+    }
+    decisions[item_index] = decision;
+    if (current_frontier_count - item_index <= stride) {
+      break;
+    }
+    item_index += stride;
+  }
+}
+
+__global__ void morsehgp3d_phase9_pair_support_rank_emit_kernel(
+    const PairSupportPhiNodeInputRecord* nodes,
+    std::size_t node_count,
+    const PairSupportRankWorkItem* current_frontier,
+    std::size_t current_frontier_count,
+    const std::uint64_t* next_offsets,
+    const std::uint64_t* receipt_offsets,
+    const PairSupportRankDeviceDecision* decisions,
+    std::uint64_t next_frontier_capacity,
+    std::uint64_t receipt_base,
+    std::uint64_t receipt_capacity,
+    PairSupportRankWorkItem* next_frontier,
+    PairSupportRankDeviceReceipt* receipts,
+    std::uint64_t* product_point_counts,
+    std::uint64_t* failure_word) {
+  const std::size_t first_index =
+      static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  const std::size_t stride =
+      static_cast<std::size_t>(gridDim.x) * blockDim.x;
+  std::size_t item_index = first_index;
+  while (item_index < current_frontier_count) {
+    const PairSupportRankWorkItem item = current_frontier[item_index];
+    if (item.witness_node_index >= node_count) {
+      record_rank_failure(failure_word, 5U);
+    } else {
+      const PairSupportPhiNodeInputRecord witness =
+          nodes[item.witness_node_index];
+      const PairSupportRankDeviceDecision decision =
+          decisions[item_index];
+      if (decision.code == kRankDecisionExpand) {
+        const std::uint64_t output = next_offsets[item_index];
+        if (output >= next_frontier_capacity ||
+            output + 1U >= next_frontier_capacity) {
+          record_rank_failure(failure_word, 6U);
+        } else {
+          next_frontier[output] = PairSupportRankWorkItem{
+              item.product_slot, witness.left_child};
+          next_frontier[output + 1U] = PairSupportRankWorkItem{
+              item.product_slot, witness.right_child};
+        }
+      } else if (decision.code == kRankDecisionReceipt) {
+        const std::uint64_t relative_output =
+            receipt_offsets[item_index];
+        if (receipt_base > receipt_capacity ||
+            relative_output >= receipt_capacity - receipt_base) {
+          record_rank_failure(failure_word, 7U);
+        } else {
+          const std::uint64_t output = receipt_base + relative_output;
+          receipts[output] = PairSupportRankDeviceReceipt{
+              output,
+              item.product_slot,
+              item.witness_node_index,
+              witness.leaf_begin,
+              witness.leaf_end,
+              decision.upper_phi_bits};
+          atomicAdd(
+              reinterpret_cast<unsigned long long*>(
+                  &product_point_counts[item.product_slot]),
+              static_cast<unsigned long long>(
+                  witness.leaf_end - witness.leaf_begin));
+        }
+      } else if (decision.code != kRankDecisionDiscard) {
+        record_rank_failure(failure_word, 8U);
+      }
+    }
+    if (current_frontier_count - item_index <= stride) {
+      break;
+    }
+    item_index += stride;
+  }
+}
+
 }  // namespace
 
 PairSupportPhiDeviceBatch propose_pair_support_phi_on_gpu(
@@ -408,7 +825,8 @@ PairSupportPhiDeviceBatch propose_pair_support_phi_on_gpu(
   PairSupportPhiCudaResources& cuda = resources(context);
   DeviceGuard guard{cuda.device()};
   try {
-    cuda.initialize(nodes, maximum_query_count);
+    static_cast<void>(cuda.initialize_snapshot(nodes));
+    cuda.initialize_phi(maximum_query_count);
     check_cuda(
         cudaMemcpyAsync(
             cuda.queries(),
@@ -458,6 +876,375 @@ PairSupportPhiDeviceBatch propose_pair_support_phi_on_gpu(
     cuda.synchronize();
     batch.record_count = queries.size();
     batch.kernel_launch_count = 1U;
+    batch.buffer_epoch = context.advance_epoch();
+    guard.restore();
+    return batch;
+  } catch (...) {
+    cuda.synchronize_after_failure();
+    throw;
+  }
+}
+
+PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
+    PairSupportPhiContextState& context,
+    std::span<const PairSupportPhiNodeInputRecord> nodes,
+    std::uint64_t root_node_index,
+    std::span<const PairSupportRankProductInputRecord> products,
+    std::size_t required_strict_interior_point_count,
+    std::size_t maximum_product_count,
+    std::size_t maximum_work_item_count,
+    std::size_t maximum_receipt_count,
+    std::size_t maximum_epoch_count) {
+  if (nodes.empty() || products.empty() ||
+      root_node_index >= nodes.size() ||
+      required_strict_interior_point_count == 0U ||
+      products.size() > maximum_product_count ||
+      products.size() > maximum_work_item_count ||
+      maximum_receipt_count == 0U || maximum_epoch_count == 0U) {
+    throw std::invalid_argument(
+        "invalid Phase 9 rank-prune launch extent");
+  }
+  const std::size_t snapshot_bytes = checked_bytes(
+      nodes.size(),
+      sizeof(PairSupportPhiNodeInputRecord),
+      "the Phase 9 rank-prune snapshot byte count overflows");
+  const std::size_t product_bytes = checked_bytes(
+      products.size(),
+      sizeof(PairSupportRankProductInputRecord),
+      "the Phase 9 rank-prune product byte count overflows");
+  const std::size_t initial_frontier_bytes = checked_bytes(
+      products.size(),
+      sizeof(PairSupportRankWorkItem),
+      "the Phase 9 rank-prune initial-frontier byte count overflows");
+  const std::size_t receipt_capacity_bytes = checked_bytes(
+      maximum_receipt_count,
+      sizeof(PairSupportRankDeviceReceipt),
+      "the Phase 9 rank-prune receipt byte capacity overflows");
+  const std::size_t one_frontier_capacity_bytes = checked_bytes(
+      maximum_work_item_count,
+      sizeof(PairSupportRankWorkItem),
+      "the Phase 9 rank-prune frontier byte capacity overflows");
+  if (one_frontier_capacity_bytes >
+      std::numeric_limits<std::size_t>::max() / 2U) {
+    throw std::length_error(
+        "the Phase 9 rank-prune double-frontier byte capacity overflows");
+  }
+
+  PairSupportPhiCudaResources& cuda = resources(context);
+  DeviceGuard guard{cuda.device()};
+  try {
+    const bool snapshot_uploaded = cuda.initialize_snapshot(nodes);
+    cuda.initialize_rank(
+        maximum_product_count,
+        maximum_work_item_count,
+        maximum_receipt_count);
+
+    check_cuda(
+        cudaMemcpyAsync(
+            cuda.rank_products(),
+            products.data(),
+            product_bytes,
+            cudaMemcpyHostToDevice,
+            cuda.stream()),
+        "cudaMemcpyAsync Phase 9 rank-prune products host-to-device");
+    check_cuda(
+        cudaMemsetAsync(
+            cuda.rank_product_point_counts(),
+            0,
+            checked_bytes(
+                maximum_product_count,
+                sizeof(std::uint64_t),
+                "the Phase 9 rank-prune point-counter bytes overflow"),
+            cuda.stream()),
+        "cudaMemsetAsync Phase 9 rank-prune product counters");
+    check_cuda(
+        cudaMemsetAsync(
+            cuda.rank_receipts(),
+            0xff,
+            receipt_capacity_bytes,
+            cuda.stream()),
+        "cudaMemsetAsync Phase 9 rank-prune receipt sentinels");
+    check_cuda(
+        cudaMemsetAsync(
+            cuda.rank_failure(),
+            0,
+            sizeof(std::uint64_t),
+            cuda.stream()),
+        "cudaMemsetAsync Phase 9 rank-prune failure word");
+
+    std::vector<PairSupportRankWorkItem> initial_frontier;
+    initial_frontier.reserve(products.size());
+    for (std::size_t product_slot = 0U;
+         product_slot < products.size();
+         ++product_slot) {
+      initial_frontier.push_back(PairSupportRankWorkItem{
+          static_cast<std::uint64_t>(product_slot), root_node_index});
+    }
+    check_cuda(
+        cudaMemcpyAsync(
+            cuda.rank_frontier_a(),
+            initial_frontier.data(),
+            initial_frontier_bytes,
+            cudaMemcpyHostToDevice,
+            cuda.stream()),
+        "cudaMemcpyAsync Phase 9 rank-prune initial frontier host-to-device");
+
+    PairSupportRankDeviceBatch batch;
+    batch.receipts.resize(maximum_receipt_count);
+    batch.input_product_count = products.size();
+    batch.product_capacity = maximum_product_count;
+    batch.work_item_capacity = maximum_work_item_count;
+    batch.receipt_capacity = maximum_receipt_count;
+    batch.snapshot_h2d_byte_count =
+        snapshot_uploaded ? snapshot_bytes : 0U;
+    batch.active_product_h2d_byte_count = product_bytes;
+    batch.initial_frontier_h2d_byte_count = initial_frontier_bytes;
+    batch.physical_receipt_d2h_byte_count = receipt_capacity_bytes;
+    batch.device_frontier_double_buffer_byte_capacity =
+        2U * one_frontier_capacity_bytes;
+    batch.device_receipt_byte_capacity = receipt_capacity_bytes;
+    batch.device_scan_workspace_byte_capacity =
+        cuda.rank_scan_workspace_byte_capacity();
+    const std::size_t fixed_product_bytes = checked_bytes(
+        maximum_product_count,
+        sizeof(PairSupportRankProductInputRecord) +
+            sizeof(std::uint64_t),
+        "the Phase 9 rank-prune fixed product bytes overflow");
+    const std::size_t fixed_work_bytes = checked_bytes(
+        maximum_work_item_count,
+        2U * sizeof(PairSupportRankWorkItem) +
+            6U * sizeof(std::uint64_t),
+        "the Phase 9 rank-prune fixed work bytes overflow");
+    batch.device_fixed_workspace_byte_capacity = checked_add_bytes(
+        fixed_product_bytes,
+        fixed_work_bytes,
+        "the Phase 9 rank-prune fixed workspace bytes overflow");
+    batch.device_fixed_workspace_byte_capacity = checked_add_bytes(
+        batch.device_fixed_workspace_byte_capacity,
+        receipt_capacity_bytes,
+        "the Phase 9 rank-prune fixed workspace bytes overflow");
+    batch.device_fixed_workspace_byte_capacity = checked_add_bytes(
+        batch.device_fixed_workspace_byte_capacity,
+        sizeof(std::uint64_t),
+        "the Phase 9 rank-prune fixed workspace bytes overflow");
+    batch.device_fixed_workspace_byte_capacity = checked_add_bytes(
+        batch.device_fixed_workspace_byte_capacity,
+        batch.device_scan_workspace_byte_capacity,
+        "the Phase 9 rank-prune fixed workspace bytes overflow");
+
+    PairSupportRankWorkItem* current_frontier =
+        cuda.rank_frontier_a();
+    PairSupportRankWorkItem* next_frontier =
+        cuda.rank_frontier_b();
+    std::size_t current_frontier_count = products.size();
+    std::size_t receipt_count = 0U;
+    while (current_frontier_count != 0U &&
+           batch.traversal_epoch_count < maximum_epoch_count) {
+      if (batch.visited_work_item_count >
+          std::numeric_limits<std::size_t>::max() -
+              current_frontier_count) {
+        throw std::overflow_error(
+            "the Phase 9 rank-prune visited-work counter overflowed");
+      }
+      batch.visited_work_item_count += current_frontier_count;
+      batch.peak_frontier_count = std::max(
+          batch.peak_frontier_count, current_frontier_count);
+      ++batch.traversal_epoch_count;
+
+      const std::size_t requested_blocks =
+          (current_frontier_count + kThreadsPerBlock - 1U) /
+          kThreadsPerBlock;
+      const unsigned int blocks = static_cast<unsigned int>(std::min(
+          requested_blocks,
+          static_cast<std::size_t>(cuda.maximum_grid_x())));
+      if (blocks == 0U) {
+        throw std::runtime_error(
+            "the Phase 9 rank-prune launch grid is empty");
+      }
+      morsehgp3d_phase9_pair_support_rank_count_kernel
+          <<<blocks, kThreadsPerBlock, 0U, cuda.stream()>>>(
+              cuda.nodes(),
+              nodes.size(),
+              cuda.rank_products(),
+              products.size(),
+              current_frontier,
+              current_frontier_count,
+              cuda.rank_product_point_counts(),
+              static_cast<std::uint64_t>(
+                  required_strict_interior_point_count),
+              cuda.rank_next_counts(),
+              cuda.rank_receipt_counts(),
+              cuda.rank_decisions(),
+              cuda.rank_failure());
+      check_cuda(
+          cudaPeekAtLastError(),
+          "Phase 9 rank-prune count kernel launch");
+      ++batch.count_kernel_launch_count;
+
+      std::size_t scan_bytes =
+          cuda.rank_scan_workspace_byte_capacity();
+      check_cuda(
+          cub::DeviceScan::ExclusiveSum(
+              cuda.rank_scan_workspace(),
+              scan_bytes,
+              cuda.rank_next_counts(),
+              cuda.rank_next_offsets(),
+              current_frontier_count,
+              cuda.stream()),
+          "CUB Phase 9 rank-prune next-count exclusive scan");
+      scan_bytes = cuda.rank_scan_workspace_byte_capacity();
+      check_cuda(
+          cub::DeviceScan::ExclusiveSum(
+              cuda.rank_scan_workspace(),
+              scan_bytes,
+              cuda.rank_receipt_counts(),
+              cuda.rank_receipt_offsets(),
+              current_frontier_count,
+              cuda.stream()),
+          "CUB Phase 9 rank-prune receipt-count exclusive scan");
+      batch.exclusive_scan_count += 2U;
+
+      std::uint64_t last_next_offset = 0U;
+      std::uint64_t last_next_count = 0U;
+      std::uint64_t last_receipt_offset = 0U;
+      std::uint64_t last_receipt_count = 0U;
+      std::uint64_t failure_word = 0U;
+      const std::size_t last = current_frontier_count - 1U;
+      check_cuda(
+          cudaMemcpyAsync(
+              &last_next_offset,
+              cuda.rank_next_offsets() + last,
+              sizeof(last_next_offset),
+              cudaMemcpyDeviceToHost,
+              cuda.stream()),
+          "cudaMemcpyAsync Phase 9 rank-prune last next offset");
+      check_cuda(
+          cudaMemcpyAsync(
+              &last_next_count,
+              cuda.rank_next_counts() + last,
+              sizeof(last_next_count),
+              cudaMemcpyDeviceToHost,
+              cuda.stream()),
+          "cudaMemcpyAsync Phase 9 rank-prune last next count");
+      check_cuda(
+          cudaMemcpyAsync(
+              &last_receipt_offset,
+              cuda.rank_receipt_offsets() + last,
+              sizeof(last_receipt_offset),
+              cudaMemcpyDeviceToHost,
+              cuda.stream()),
+          "cudaMemcpyAsync Phase 9 rank-prune last receipt offset");
+      check_cuda(
+          cudaMemcpyAsync(
+              &last_receipt_count,
+              cuda.rank_receipt_counts() + last,
+              sizeof(last_receipt_count),
+              cudaMemcpyDeviceToHost,
+              cuda.stream()),
+          "cudaMemcpyAsync Phase 9 rank-prune last receipt count");
+      check_cuda(
+          cudaMemcpyAsync(
+              &failure_word,
+              cuda.rank_failure(),
+              sizeof(failure_word),
+              cudaMemcpyDeviceToHost,
+              cuda.stream()),
+          "cudaMemcpyAsync Phase 9 rank-prune failure word");
+      cuda.synchronize();
+      if (failure_word != 0U) {
+        throw std::runtime_error(
+            "the Phase 9 rank-prune count/emit path failed closed with code " +
+            std::to_string(failure_word));
+      }
+      if (last_next_offset >
+              std::numeric_limits<std::uint64_t>::max() -
+                  last_next_count ||
+          last_receipt_offset >
+              std::numeric_limits<std::uint64_t>::max() -
+                  last_receipt_count) {
+        throw std::runtime_error(
+            "the Phase 9 rank-prune scan total overflowed uint64");
+      }
+      const std::uint64_t next_count_word =
+          last_next_offset + last_next_count;
+      const std::uint64_t epoch_receipt_count_word =
+          last_receipt_offset + last_receipt_count;
+      if (next_count_word > maximum_work_item_count) {
+        batch.capacity_stop =
+            PairSupportRankCapacityStop::work_item_capacity;
+        break;
+      }
+      if (epoch_receipt_count_word >
+          maximum_receipt_count - receipt_count) {
+        batch.capacity_stop =
+            PairSupportRankCapacityStop::receipt_capacity;
+        break;
+      }
+
+      morsehgp3d_phase9_pair_support_rank_emit_kernel
+          <<<blocks, kThreadsPerBlock, 0U, cuda.stream()>>>(
+              cuda.nodes(),
+              nodes.size(),
+              current_frontier,
+              current_frontier_count,
+              cuda.rank_next_offsets(),
+              cuda.rank_receipt_offsets(),
+              cuda.rank_decisions(),
+              static_cast<std::uint64_t>(maximum_work_item_count),
+              static_cast<std::uint64_t>(receipt_count),
+              static_cast<std::uint64_t>(maximum_receipt_count),
+              next_frontier,
+              cuda.rank_receipts(),
+              cuda.rank_product_point_counts(),
+              cuda.rank_failure());
+      check_cuda(
+          cudaPeekAtLastError(),
+          "Phase 9 rank-prune emit kernel launch");
+      ++batch.emit_kernel_launch_count;
+
+      receipt_count +=
+          static_cast<std::size_t>(epoch_receipt_count_word);
+      current_frontier_count =
+          static_cast<std::size_t>(next_count_word);
+      std::swap(current_frontier, next_frontier);
+    }
+    batch.frontier_exhausted = current_frontier_count == 0U;
+    batch.receipt_count = receipt_count;
+    batch.traversal_metadata_d2h_byte_count = checked_add_bytes(
+        checked_bytes(
+            batch.traversal_epoch_count,
+            5U * sizeof(std::uint64_t),
+            "the Phase 9 rank-prune metadata D2H bytes overflow"),
+        sizeof(std::uint64_t),
+        "the Phase 9 rank-prune metadata D2H bytes overflow");
+    batch.active_receipt_d2h_byte_count = checked_bytes(
+        receipt_count,
+        sizeof(PairSupportRankDeviceReceipt),
+        "the Phase 9 active rank-prune receipt bytes overflow");
+
+    std::uint64_t final_failure_word = 0U;
+    check_cuda(
+        cudaMemcpyAsync(
+            batch.receipts.data(),
+            cuda.rank_receipts(),
+            receipt_capacity_bytes,
+            cudaMemcpyDeviceToHost,
+            cuda.stream()),
+        "cudaMemcpyAsync Phase 9 rank-prune receipts device-to-host");
+    check_cuda(
+        cudaMemcpyAsync(
+            &final_failure_word,
+            cuda.rank_failure(),
+            sizeof(final_failure_word),
+            cudaMemcpyDeviceToHost,
+            cuda.stream()),
+        "cudaMemcpyAsync Phase 9 rank-prune final failure word");
+    cuda.synchronize();
+    if (final_failure_word != 0U) {
+      throw std::runtime_error(
+          "the Phase 9 rank-prune emit path failed closed with code " +
+          std::to_string(final_failure_word));
+    }
     batch.buffer_epoch = context.advance_epoch();
     guard.restore();
     return batch;
