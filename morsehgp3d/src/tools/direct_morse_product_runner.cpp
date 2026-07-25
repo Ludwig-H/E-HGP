@@ -87,7 +87,17 @@ struct Report {
   std::string pair_stop_reason{"none"};
   std::size_t pair_work_units{};
   std::size_t pair_product_visits{};
+  std::size_t pair_resolved_pairs{};
+  std::size_t pair_remaining_pairs{};
   std::size_t pair_closed_ball_queries{};
+  std::size_t pair_closed_ball_node_visits{};
+  std::size_t pair_logical_point_classifications{};
+  std::size_t pair_rank_strict_witness_subtrees{};
+  std::size_t pair_rank_strict_witness_points{};
+  std::size_t pair_center_cover_preflight_skips{};
+  std::size_t pair_center_cover_attempts{};
+  std::size_t pair_center_cover_pruned_products{};
+  std::size_t pair_center_cover_work_units{};
   std::size_t pair_accepted_events{};
   std::size_t pair_extra_shell_diagnostics{};
 
@@ -300,8 +310,8 @@ void parse_options(int argc, char** argv, Options& options) {
       return "emitted_point_id_reference_limit";
     case ExactPairSupportStopReason::global_closed_ball_query_limit:
       return "global_closed_ball_query_limit";
-    case ExactPairSupportStopReason::point_classification_limit:
-      return "point_classification_limit";
+    case ExactPairSupportStopReason::closed_ball_node_visit_limit:
+      return "closed_ball_node_visit_limit";
   }
   return "invalid";
 }
@@ -397,11 +407,6 @@ empty_proposal_transcript(
           4U,
           "support point-reference factor overflow"),
       "support point-reference capacity overflow");
-  const std::size_t point_classification_capacity =
-      checked_multiply(
-          options.support_work_budget,
-          options.point_count,
-          "support point-classification capacity overflow");
   return {
       options.support_work_budget,
       frontier_capacity,
@@ -409,7 +414,7 @@ empty_proposal_transcript(
       options.support_record_budget,
       point_reference_capacity,
       options.support_work_budget,
-      point_classification_capacity,
+      options.support_work_budget,
   };
 }
 
@@ -417,6 +422,11 @@ empty_proposal_transcript(
     const Options& options) {
   const ExactPairSupportStreamBudget pair_budget =
       make_pair_budget(options);
+  const std::size_t higher_point_classification_capacity =
+      checked_multiply(
+          options.support_work_budget,
+          options.point_count,
+          "higher-support point-classification capacity overflow");
   return {
       options.support_work_budget,
       pair_budget.maximum_frontier_entry_count,
@@ -425,7 +435,7 @@ empty_proposal_transcript(
       pair_budget.maximum_emitted_point_id_reference_count,
       options.support_work_budget,
       options.support_work_budget,
-      pair_budget.maximum_point_classification_count,
+      higher_point_classification_capacity,
   };
 }
 
@@ -793,8 +803,28 @@ void emit_report(const Report& report) {
       << report.pair_stop_reason << "\",\"work_units\":"
       << report.pair_work_units << ",\"product_visits\":"
       << report.pair_product_visits
+      << ",\"resolved_pairs\":"
+      << report.pair_resolved_pairs
+      << ",\"remaining_pairs\":"
+      << report.pair_remaining_pairs
       << ",\"closed_ball_queries\":"
       << report.pair_closed_ball_queries
+      << ",\"closed_ball_node_visits\":"
+      << report.pair_closed_ball_node_visits
+      << ",\"logical_point_classifications\":"
+      << report.pair_logical_point_classifications
+      << ",\"rank_strict_witness_subtrees\":"
+      << report.pair_rank_strict_witness_subtrees
+      << ",\"rank_strict_witness_points\":"
+      << report.pair_rank_strict_witness_points
+      << ",\"center_cover_preflight_skips\":"
+      << report.pair_center_cover_preflight_skips
+      << ",\"center_cover_attempts\":"
+      << report.pair_center_cover_attempts
+      << ",\"center_cover_pruned_products\":"
+      << report.pair_center_cover_pruned_products
+      << ",\"center_cover_work_units\":"
+      << report.pair_center_cover_work_units
       << ",\"accepted_events\":"
       << report.pair_accepted_events
       << ",\"extra_shell_diagnostics\":"
@@ -942,8 +972,28 @@ void emit_report(const Report& report) {
   report.pair_work_units = pair.audit.work_unit_count;
   report.pair_product_visits =
       pair.audit.support_product_visit_count;
+  report.pair_resolved_pairs =
+      pair.audit.resolved_pair_count;
+  report.pair_remaining_pairs =
+      pair.audit.remaining_frontier_pair_count;
   report.pair_closed_ball_queries =
       pair.audit.global_closed_ball_query_count;
+  report.pair_closed_ball_node_visits =
+      pair.audit.closed_ball_node_visit_count;
+  report.pair_logical_point_classifications =
+      pair.audit.point_classification_count;
+  report.pair_rank_strict_witness_subtrees =
+      pair.audit.strict_interior_witness_subtree_count;
+  report.pair_rank_strict_witness_points =
+      pair.audit.strict_interior_witness_point_count;
+  report.pair_center_cover_preflight_skips =
+      pair.audit.center_cover_work_preflight_skip_count;
+  report.pair_center_cover_attempts =
+      pair.audit.center_cover_attempt_count;
+  report.pair_center_cover_pruned_products =
+      pair.audit.center_cover_pruned_product_count;
+  report.pair_center_cover_work_units =
+      pair.audit.center_cover_work_unit_count;
   report.pair_accepted_events = pair.audit.accepted_event_count;
   report.pair_extra_shell_diagnostics =
       pair.audit.relevant_extra_shell_diagnostic_count;

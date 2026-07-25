@@ -10,7 +10,7 @@
 
 namespace morsehgp3d::hierarchy {
 
-inline constexpr std::uint32_t pair_support_stream_chunk_codec_version = 1U;
+inline constexpr std::uint32_t pair_support_stream_chunk_codec_version = 2U;
 inline constexpr std::size_t pair_support_stream_fd_buffer_byte_count =
     64U * 1024U;
 // A pair-supported 3D event uses rational centers and squared levels derived
@@ -25,12 +25,13 @@ inline constexpr std::size_t
 struct ExactPairSupportStreamCodecLimits {
   std::size_t maximum_encoded_byte_count{64U * 1024U * 1024U};
   std::size_t maximum_frontier_entry_count{1'000'000U};
-  // Sum of witness-frontier entries, strict receipts and a deferred node.
+  // Sum of rank-witness and closed-ball frontier entries, strict receipts
+  // and a deferred node.
   std::size_t maximum_auxiliary_entry_count{1'000'000U};
   // Sum of events and relevant extra-shell diagnostics.  record_order is
   // independently required not to exceed this same cap.
   std::size_t maximum_record_count{1'000'000U};
-  // Support ids, interior ids and canonical extra-shell witnesses.
+  // Emitted and pending interior ids plus canonical extra-shell witnesses.
   std::size_t maximum_point_id_reference_count{16'000'000U};
   std::size_t maximum_exact_text_byte_count{
       pair_support_stream_default_maximum_exact_text_byte_count};
@@ -80,7 +81,7 @@ struct ExactPairSupportStreamDecodeResult {
 
 #if defined(__unix__) || defined(__APPLE__)
 
-// Receipt for an immutable v1 wire image.  The descriptor itself is borrowed;
+// Receipt for an immutable v2 wire image.  The descriptor itself is borrowed;
 // none of the fd entry points changes its current file position.
 struct ExactPairSupportStreamFdWireReceipt {
   std::size_t encoded_byte_count{};

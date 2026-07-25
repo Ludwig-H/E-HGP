@@ -37,7 +37,7 @@ constexpr std::size_t chunk_header_byte_count =
 constexpr std::size_t chunk_checksum_byte_count =
     contract::CanonicalId::byte_count;
 constexpr std::string_view chunk_checksum_domain =
-    "MorseHGP3D/phase9/pair-support/chunk-wire/v1/sha256/";
+    "MorseHGP3D/phase14q/pair-support/chunk-wire/v2/sha256/";
 
 #define MORSEHGP3D_FOR_EACH_PAIR_SUPPORT_AUDIT_FIELD(APPLY) \
   APPLY(total_pair_count);                                      \
@@ -58,6 +58,17 @@ constexpr std::string_view chunk_checksum_domain =
   APPLY(equality_or_positive_bound_descent_count);              \
   APPLY(strict_interior_witness_subtree_count);                 \
   APPLY(strict_interior_witness_point_count);                   \
+  APPLY(center_cover_work_preflight_skip_count);                \
+  APPLY(center_cover_attempt_count);                            \
+  APPLY(center_cover_inconclusive_count);                       \
+  APPLY(center_cover_pruned_product_count);                     \
+  APPLY(center_cover_work_unit_count);                          \
+  APPLY(center_cover_cell_visit_count);                         \
+  APPLY(center_cover_cell_split_count);                         \
+  APPLY(center_cover_certified_cell_count);                     \
+  APPLY(center_cover_witness_node_visit_count);                 \
+  APPLY(center_cover_strict_witness_subtree_count);             \
+  APPLY(center_cover_strict_witness_point_count);               \
   APPLY(rank_pruned_product_count);                             \
   APPLY(rank_pruned_pair_count);                                \
   APPLY(leaf_pair_classification_count);                        \
@@ -279,10 +290,22 @@ class VectorWriter final : public ByteWriter {
       return 5U;
     case ExactPairSupportStopReason::global_closed_ball_query_limit:
       return 6U;
-    case ExactPairSupportStopReason::point_classification_limit:
+    case ExactPairSupportStopReason::closed_ball_node_visit_limit:
       return 7U;
   }
   throw std::invalid_argument("invalid pair-support stop reason");
+}
+
+[[nodiscard]] std::uint8_t encode_pending_closed_ball_stage(
+    ExactPairSupportPendingClosedBallStage stage) {
+  switch (stage) {
+    case ExactPairSupportPendingClosedBallStage::traversing:
+      return 1U;
+    case ExactPairSupportPendingClosedBallStage::ready_to_emit:
+      return 2U;
+  }
+  throw std::invalid_argument(
+      "invalid pair-support pending closed-ball stage");
 }
 
 [[nodiscard]] std::uint8_t encode_pending_stage(
@@ -520,7 +543,7 @@ class PayloadEncoder {
     writer_.size(budget.maximum_emitted_record_count);
     writer_.size(budget.maximum_emitted_point_id_reference_count);
     writer_.size(budget.maximum_global_closed_ball_query_count);
-    writer_.size(budget.maximum_point_classification_count);
+    writer_.size(budget.maximum_closed_ball_node_visit_count);
   }
 
   void encode_frontier_entry(
@@ -649,6 +672,43 @@ class PayloadEncoder {
       encode_witness_entry(*pending.deferred_expansion_node);
     }
     writer_.size(pending.strict_witness_point_count);
+    writer_.boolean(pending.closed_ball.has_value());
+    if (pending.closed_ball.has_value()) {
+      const ExactPairSupportPendingClosedBall& closed_ball =
+          *pending.closed_ball;
+      writer_.byte(
+          encode_pending_closed_ball_stage(closed_ball.stage));
+      writer_.size(closed_ball.node_visit_count);
+      charge_auxiliary_entries(closed_ball.frontier.size());
+      writer_.size(closed_ball.frontier.size());
+      for (const ExactPairSupportWitnessNodeEntry& entry :
+           closed_ball.frontier) {
+        encode_witness_entry(entry);
+      }
+      charge_point_id_references(
+          checked_add_for_encode(
+              closed_ball.interior_ids.size(),
+              closed_ball
+                      .canonical_extra_shell_witness_id
+                      .has_value()
+                  ? 1U
+                  : 0U,
+              "the pending closed-ball point-id count overflows size_t"));
+      writer_.size(closed_ball.interior_ids.size());
+      for (const spatial::PointId point_id :
+           closed_ball.interior_ids) {
+        writer_.u64(point_id);
+      }
+      writer_.size(closed_ball.shell_count);
+      writer_.boolean(
+          closed_ball.canonical_extra_shell_witness_id.has_value());
+      if (closed_ball.canonical_extra_shell_witness_id.has_value()) {
+        writer_.u64(
+            *closed_ball.canonical_extra_shell_witness_id);
+      }
+      writer_.size(closed_ball.exterior_count);
+      writer_.byte(closed_ball.support_seen_mask);
+    }
   }
 
   const ExactPairSupportStreamCodecLimits& limits_;
@@ -779,7 +839,19 @@ class SpanByteReader {
     case 6U:
       return ExactPairSupportStopReason::global_closed_ball_query_limit;
     case 7U:
-      return ExactPairSupportStopReason::point_classification_limit;
+      return ExactPairSupportStopReason::closed_ball_node_visit_limit;
+    default:
+      fail_decode(DecodeDecision::invalid_enumeration);
+  }
+}
+
+[[nodiscard]] ExactPairSupportPendingClosedBallStage
+decode_pending_closed_ball_stage(std::uint8_t value) {
+  switch (value) {
+    case 1U:
+      return ExactPairSupportPendingClosedBallStage::traversing;
+    case 2U:
+      return ExactPairSupportPendingClosedBallStage::ready_to_emit;
     default:
       fail_decode(DecodeDecision::invalid_enumeration);
   }
@@ -990,7 +1062,7 @@ class PayloadDecoder {
     budget.maximum_emitted_record_count = reader_.size();
     budget.maximum_emitted_point_id_reference_count = reader_.size();
     budget.maximum_global_closed_ball_query_count = reader_.size();
-    budget.maximum_point_classification_count = reader_.size();
+    budget.maximum_closed_ball_node_visit_count = reader_.size();
     return budget;
   }
 
@@ -1143,6 +1215,51 @@ class PayloadDecoder {
       pending.deferred_expansion_node = decode_witness_entry();
     }
     pending.strict_witness_point_count = reader_.size();
+    if (reader_.boolean()) {
+      ExactPairSupportPendingClosedBall closed_ball;
+      closed_ball.stage =
+          decode_pending_closed_ball_stage(reader_.byte());
+      closed_ball.node_visit_count = reader_.size();
+      const std::size_t frontier_count = reader_.size();
+      charge_bounded_count(
+          auxiliary_entry_count_,
+          frontier_count,
+          limits_.maximum_auxiliary_entry_count,
+          DecodeDecision::auxiliary_entry_limit_exceeded);
+      require_feasible_count(frontier_count, 24U);
+      closed_ball.frontier.reserve(frontier_count);
+      for (std::size_t index = 0U;
+           index < frontier_count;
+           ++index) {
+        closed_ball.frontier.push_back(decode_witness_entry());
+      }
+      const std::size_t interior_count = reader_.size();
+      charge_bounded_count(
+          point_id_reference_count_,
+          interior_count,
+          limits_.maximum_point_id_reference_count,
+          DecodeDecision::point_id_reference_limit_exceeded);
+      require_feasible_count(interior_count, 8U);
+      closed_ball.interior_ids.reserve(interior_count);
+      for (std::size_t index = 0U;
+           index < interior_count;
+           ++index) {
+        closed_ball.interior_ids.push_back(reader_.u64());
+      }
+      closed_ball.shell_count = reader_.size();
+      if (reader_.boolean()) {
+        charge_bounded_count(
+            point_id_reference_count_,
+            1U,
+            limits_.maximum_point_id_reference_count,
+            DecodeDecision::point_id_reference_limit_exceeded);
+        closed_ball.canonical_extra_shell_witness_id =
+            reader_.u64();
+      }
+      closed_ball.exterior_count = reader_.size();
+      closed_ball.support_seen_mask = reader_.byte();
+      pending.closed_ball = std::move(closed_ball);
+    }
     return pending;
   }
 

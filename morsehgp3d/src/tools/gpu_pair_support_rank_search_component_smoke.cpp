@@ -1103,8 +1103,8 @@ void require_exact_keep_coverage(
       return "emitted_point_id_reference_limit";
     case ExactPairSupportStopReason::global_closed_ball_query_limit:
       return "global_closed_ball_query_limit";
-    case ExactPairSupportStopReason::point_classification_limit:
-      return "point_classification_limit";
+    case ExactPairSupportStopReason::closed_ball_node_visit_limit:
+      return "closed_ball_node_visit_limit";
   }
   fail("an invalid pair-support stop reason escaped");
 }
@@ -1650,8 +1650,8 @@ int main(int argument_count, char** argument_values) {
         << stream_budget.maximum_emitted_record_count
         << ",\"maximum_frontier_entry_count\":"
         << stream_budget.maximum_frontier_entry_count
-        << ",\"maximum_point_classification_count\":"
-        << stream_budget.maximum_point_classification_count
+        << ",\"maximum_closed_ball_node_visit_count\":"
+        << stream_budget.maximum_closed_ball_node_visit_count
         << ",\"maximum_work_unit_count\":"
         << stream_budget.maximum_work_unit_count
         << ",\"product_capacity\":"

@@ -31,6 +31,7 @@ using morsehgp3d::hierarchy::ExactPairSupportAuthorityContext;
 using morsehgp3d::hierarchy::ExactPairSupportCheckpoint;
 using morsehgp3d::hierarchy::ExactPairSupportCheckpointVerification;
 using morsehgp3d::hierarchy::ExactPairSupportIncrementalVerifier;
+using morsehgp3d::hierarchy::ExactPairSupportPendingClosedBallStage;
 using morsehgp3d::hierarchy::ExactPairSupportPendingStage;
 using morsehgp3d::hierarchy::ExactPairSupportPendingProduct;
 using morsehgp3d::hierarchy::ExactPairSupportFrontierEntry;
@@ -131,6 +132,22 @@ void check_throws(Function&& function, const std::string& message) {
   return CertifiedPoint3::from_binary64(x, y, z);
 }
 
+[[nodiscard]] ExactRational diametral_point_phi(
+    const CanonicalPointCloud& cloud,
+    PointId query_id,
+    PointId first_support_id,
+    PointId second_support_id) {
+  ExactRational phi;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    phi = phi +
+        (cloud.point(query_id).coordinate(axis) -
+         cloud.point(first_support_id).coordinate(axis)) *
+            (cloud.point(query_id).coordinate(axis) -
+             cloud.point(second_support_id).coordinate(axis));
+  }
+  return phi;
+}
+
 [[nodiscard]] CanonicalPointCloud cloud_from(
     std::initializer_list<CertifiedPoint3> points) {
   const std::vector<CertifiedPoint3> storage{points};
@@ -205,6 +222,8 @@ void check_quasi_linear_checkpoint_validation(
   }
   std::size_t active_witness_count = 0U;
   std::size_t strict_receipt_count = 0U;
+  std::size_t closed_ball_interior_count = 0U;
+  std::size_t closed_ball_node_count = 0U;
   if (checkpoint.pending_product.has_value() &&
       checkpoint.pending_product->stage ==
           ExactPairSupportPendingStage::rank_search) {
@@ -215,6 +234,14 @@ void check_quasi_linear_checkpoint_validation(
              : 0U);
     strict_receipt_count =
         checkpoint.pending_product->strict_witness_receipts.size();
+  }
+  if (checkpoint.pending_product.has_value() &&
+      checkpoint.pending_product->closed_ball.has_value()) {
+    const auto& closed_ball =
+        *checkpoint.pending_product->closed_ball;
+    closed_ball_interior_count =
+        closed_ball.interior_ids.size();
+    closed_ball_node_count = closed_ball.node_visit_count;
   }
   const std::size_t witness_interval_count =
       active_witness_count + strict_receipt_count;
@@ -239,7 +266,11 @@ void check_quasi_linear_checkpoint_validation(
                    ? 0U
                    : witness_interval_count - 1U) &&
           audit.strict_receipt_geometry_recertification_count ==
-              strict_receipt_count,
+              strict_receipt_count &&
+          audit.closed_ball_interior_id_recertification_count ==
+              closed_ball_interior_count &&
+          audit.closed_ball_node_recertification_count ==
+              closed_ball_node_count,
       message);
 }
 
@@ -1144,13 +1175,13 @@ void test_transactional_budgets() {
       "zero closed-ball capacity leaves the leaf pair atomic");
 
   budget = unlimited_budget();
-  budget.maximum_point_classification_count = cloud.size() - 1U;
+  budget.maximum_closed_ball_node_visit_count = 0U;
   check_budget_stop(
       index,
       cloud,
       budget,
-      ExactPairSupportStopReason::point_classification_limit,
-      "a leaf query refuses to start without a full-cloud logical classification budget");
+      ExactPairSupportStopReason::closed_ball_node_visit_limit,
+      "a leaf query preserves its root before an unbudgeted physical node visit");
 
   budget = unlimited_budget();
   budget.maximum_auxiliary_frontier_entry_count = 1U;
@@ -1413,11 +1444,17 @@ void test_persistent_authority_and_incremental_verifier() {
       events == resident.events &&
           diagnostics == resident.relevant_extra_shell_diagnostics &&
           record_order == resident.record_order &&
-          verifier.trusted_checkpoint().cumulative_audit ==
-              resident.next_checkpoint.cumulative_audit &&
+          verifier.trusted_checkpoint()
+              .cumulative_audit.pair_partition_accounting_certified &&
+          resident.next_checkpoint
+              .cumulative_audit.pair_partition_accounting_certified &&
+          verifier.trusted_checkpoint()
+                  .cumulative_audit.resolved_pair_count ==
+              resident.next_checkpoint
+                  .cumulative_audit.resolved_pair_count &&
           verifier.trusted_checkpoint().output_chain_digest ==
               resident.next_checkpoint.output_chain_digest,
-      "the incremental stream reproduces the resident records, audit, and output digest");
+      "the incremental stream reproduces the resident scientific records and output digest across performance-only center-cover skips");
   check(
       authority.audit().manifest_build_count == 1U,
       "all incremental production and verification calls reuse one authority manifest");
@@ -1531,9 +1568,10 @@ void test_every_prepared_stop_resumes_without_recount() {
       limited,
       ExactPairSupportStopReason::global_closed_ball_query_limit);
   limited = unlimited_budget();
-  limited.maximum_point_classification_count = cloud.size() - 1U;
+  limited.maximum_closed_ball_node_visit_count = 0U;
   cases.emplace_back(
-      limited, ExactPairSupportStopReason::point_classification_limit);
+      limited,
+      ExactPairSupportStopReason::closed_ball_node_visit_limit);
 
   for (const auto& [first_budget, expected_reason] : cases) {
     const ExactPairSupportStreamChunk partial =
@@ -1594,14 +1632,384 @@ void test_resume_inside_rank_witness_search() {
           chunked.diagnostics ==
               resident.relevant_extra_shell_diagnostics &&
           chunked.record_order == resident.record_order &&
-          chunked.checkpoint.cumulative_audit ==
-              resident.next_checkpoint.cumulative_audit &&
+          chunked.checkpoint
+              .cumulative_audit.pair_partition_accounting_certified &&
+          resident.next_checkpoint
+              .cumulative_audit.pair_partition_accounting_certified &&
+          chunked.checkpoint.cumulative_audit.resolved_pair_count ==
+              resident.next_checkpoint
+                  .cumulative_audit.resolved_pair_count &&
           chunked.checkpoint.output_chain_digest ==
               resident.next_checkpoint.output_chain_digest &&
           chunked.checkpoint.cumulative_audit.total_pair_count == 91U &&
           chunked.checkpoint.cumulative_audit.rank_pruned_product_count > 0U &&
           chunked.checkpoint.cumulative_audit.rank_pruned_pair_count > 0U,
-      "a serialized mid-search witness cursor resumes without double-counting products, witnesses, or rank prunes");
+      "a serialized mid-search witness cursor preserves the scientific output while atomic center-cover availability remains chunk-local");
+}
+
+void test_resume_inside_closed_ball_one_node_per_chunk() {
+  const CanonicalPointCloud cloud = cloud_from({
+      point(-3.0, 0.0, 0.0),
+      point(-1.0, 2.0, 1.0),
+      point(0.0, -2.0, 3.0),
+      point(2.0, 1.0, -1.0),
+      point(4.0, -1.0, 2.0),
+  });
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactPairSupportCheckpoint initial =
+      make_initial_exact_pair_support_checkpoint(index, cloud, 10U);
+  const ExactPairSupportStreamChunk resident =
+      build_exact_pair_support_stream_chunk(
+          index, cloud, 10U, unlimited_budget(), initial);
+
+  ExactPairSupportStreamBudget one_node = unlimited_budget();
+  one_node.maximum_closed_ball_node_visit_count = 1U;
+  const ChunkedPairRun chunked =
+      run_chunked(index, cloud, 10U, one_node, 10000U);
+
+  ExactPairSupportCheckpoint source = initial;
+  bool observed_traversing_cursor = false;
+  bool observed_same_product_resume = false;
+  bool bounded_physical_work = true;
+  bool no_repeated_query_on_same_product = true;
+  std::optional<ExactPairSupportCheckpoint> mutation_fixture;
+  std::optional<ExactPairSupportCheckpoint>
+      interior_exterior_fixture;
+  for (const ExactPairSupportStreamChunk& chunk : chunked.chunks) {
+    const std::size_t node_visit_delta =
+        chunk.cumulative_audit_after.closed_ball_node_visit_count -
+        chunk.cumulative_audit_before.closed_ball_node_visit_count;
+    bounded_physical_work =
+        bounded_physical_work && node_visit_delta <= 1U;
+    const bool source_has_closed_ball =
+        source.pending_product.has_value() &&
+        source.pending_product->closed_ball.has_value();
+    const bool next_has_traversing_closed_ball =
+        chunk.next_checkpoint.pending_product.has_value() &&
+        chunk.next_checkpoint.pending_product->closed_ball.has_value() &&
+        chunk.next_checkpoint.pending_product->closed_ball->stage ==
+            ExactPairSupportPendingClosedBallStage::traversing;
+    if (next_has_traversing_closed_ball) {
+      observed_traversing_cursor = true;
+      if (!mutation_fixture.has_value()) {
+        mutation_fixture = chunk.next_checkpoint;
+      }
+      const auto& closed_ball =
+          *chunk.next_checkpoint.pending_product->closed_ball;
+      if (!interior_exterior_fixture.has_value() &&
+          !closed_ball.interior_ids.empty() &&
+          closed_ball.exterior_count > 0U) {
+        interior_exterior_fixture = chunk.next_checkpoint;
+      }
+    }
+    if (source_has_closed_ball &&
+        next_has_traversing_closed_ball &&
+        source.pending_product->product ==
+            chunk.next_checkpoint.pending_product->product) {
+      observed_same_product_resume = true;
+      no_repeated_query_on_same_product =
+          no_repeated_query_on_same_product &&
+          chunk.cumulative_audit_after.global_closed_ball_query_count ==
+              chunk.cumulative_audit_before
+                  .global_closed_ball_query_count;
+    }
+    source = chunk.next_checkpoint;
+  }
+
+  const ExactPairSupportStreamResult partial =
+      build_exact_pair_support_stream(index, cloud, 10U, one_node);
+  check(
+      observed_traversing_cursor &&
+          observed_same_product_resume &&
+          bounded_physical_work &&
+          no_repeated_query_on_same_product &&
+          !partial.all_rank_relevant_shells_complete &&
+          chunked.all_chunks_freshly_verified &&
+          chunked.anchored_run_certified &&
+          chunked.checkpoint.complete() &&
+          chunked.events == resident.events &&
+          chunked.diagnostics ==
+              resident.relevant_extra_shell_diagnostics &&
+          chunked.record_order == resident.record_order &&
+          chunked.checkpoint.cumulative_audit ==
+              resident.next_checkpoint.cumulative_audit &&
+          chunked.checkpoint.output_chain_digest ==
+              resident.next_checkpoint.output_chain_digest,
+      "one physical closed-ball LBVH visit per chunk resumes the same query exactly once and reaches the resident stream");
+
+  check(
+      mutation_fixture.has_value(),
+      "the one-node fixture persists a traversing closed-ball cursor");
+  if (mutation_fixture.has_value()) {
+    const ExactPairSupportCheckpoint& valid = *mutation_fixture;
+    check(
+        verify_exact_pair_support_checkpoint(
+            index, cloud, 10U, valid)
+            .integrity_verified,
+        "a naturally persisted closed-ball cursor verifies locally");
+
+    ExactPairSupportCheckpoint forged_mask = valid;
+    forged_mask.pending_product->closed_ball->support_seen_mask ^=
+        std::uint8_t{1U};
+    forged_mask.checkpoint_digest =
+        compute_exact_pair_support_checkpoint_digest(forged_mask);
+    const ExactPairSupportCheckpointVerification mask_verification =
+        verify_exact_pair_support_checkpoint(
+            index, cloud, 10U, forged_mask);
+    check(
+        mask_verification.checksum_matches_payload &&
+            !mask_verification.pending_product_locally_valid &&
+            !mask_verification.integrity_verified,
+        "a self-rehashed closed-ball cursor cannot forge its processed support mask");
+
+    ExactPairSupportCheckpoint forged_partition = valid;
+    ++forged_partition.pending_product->closed_ball->exterior_count;
+    forged_partition.checkpoint_digest =
+        compute_exact_pair_support_checkpoint_digest(
+            forged_partition);
+    const ExactPairSupportCheckpointVerification partition_verification =
+        verify_exact_pair_support_checkpoint(
+            index, cloud, 10U, forged_partition);
+    check(
+        partition_verification.checksum_matches_payload &&
+            !partition_verification.pending_product_locally_valid &&
+            !partition_verification.integrity_verified,
+        "a self-rehashed closed-ball cursor cannot detach its counters from the Morton suffix");
+  }
+
+  check(
+      interior_exterior_fixture.has_value(),
+      "the one-node traversal exposes a cursor with both retained interior and exterior classifications");
+  if (interior_exterior_fixture.has_value()) {
+    ExactPairSupportCheckpoint compensated =
+        *interior_exterior_fixture;
+    compensated.pending_product->closed_ball
+        ->interior_ids.erase(
+            compensated.pending_product->closed_ball
+                ->interior_ids.begin());
+    ++compensated.pending_product->closed_ball->exterior_count;
+    compensated.checkpoint_digest =
+        compute_exact_pair_support_checkpoint_digest(compensated);
+    const ExactPairSupportCheckpointVerification verification =
+        verify_exact_pair_support_checkpoint(
+            index, cloud, 10U, compensated);
+    check(
+        verification.checksum_matches_payload &&
+            !verification.pending_product_locally_valid &&
+            !verification.integrity_verified,
+        "canonical closed-ball replay rejects an interior-to-exterior compensated forgery");
+  }
+
+  ExactPairSupportStreamBudget refused_query_budget =
+      unlimited_budget();
+  refused_query_budget.maximum_global_closed_ball_query_count = 0U;
+  const ExactPairSupportStreamResult refused_query =
+      build_exact_pair_support_stream(
+          index, cloud, 10U, refused_query_budget);
+  check(
+      refused_query.status ==
+              ExactPairSupportStreamStatus::budget_exhausted &&
+          refused_query.stop_reason ==
+              ExactPairSupportStopReason::
+                  global_closed_ball_query_limit &&
+          !refused_query.all_rank_relevant_shells_complete,
+      "a classify-leaf product stopped before query creation cannot claim a complete relevant shell");
+
+  ExactPairSupportStreamBudget zero_node = unlimited_budget();
+  zero_node.maximum_closed_ball_node_visit_count = 0U;
+  const ExactPairSupportStreamChunk root_cursor =
+      build_exact_pair_support_stream_chunk(
+          index, cloud, 10U, zero_node, initial);
+  const bool has_unvisited_root_cursor =
+      root_cursor.next_checkpoint.pending_product.has_value() &&
+      root_cursor.next_checkpoint.pending_product->closed_ball.has_value() &&
+      root_cursor.next_checkpoint.pending_product->closed_ball
+              ->node_visit_count ==
+          0U &&
+      root_cursor.next_checkpoint.pending_product->closed_ball
+              ->frontier.size() ==
+          1U;
+  check(
+      has_unvisited_root_cursor &&
+          chunk_verification_closes(
+              verify_exact_pair_support_stream_chunk(
+                  index,
+                  cloud,
+                  10U,
+                  zero_node,
+                  initial,
+                  root_cursor)),
+      "a zero-node chunk persists one freshly verified unvisited root cursor");
+  if (has_unvisited_root_cursor) {
+    ExactPairSupportStreamBudget one_physical_node =
+        unlimited_budget();
+    one_physical_node.maximum_closed_ball_node_visit_count = 1U;
+    const ExactPairSupportStreamChunk expanded =
+        build_exact_pair_support_stream_chunk(
+            index,
+            cloud,
+            10U,
+            one_physical_node,
+            root_cursor.next_checkpoint);
+    check(
+        expanded.next_checkpoint.pending_product.has_value() &&
+            expanded.next_checkpoint.pending_product->closed_ball
+                .has_value() &&
+            expanded.next_checkpoint.pending_product->closed_ball
+                    ->node_visit_count ==
+                1U,
+        "one physical visit advances the canonical root cursor once");
+    if (expanded.next_checkpoint.pending_product.has_value() &&
+        expanded.next_checkpoint.pending_product->closed_ball
+            .has_value()) {
+      ExactPairSupportCheckpoint forged_split =
+          root_cursor.next_checkpoint;
+      forged_split.pending_product->closed_ball->frontier =
+          expanded.next_checkpoint.pending_product->closed_ball
+              ->frontier;
+      forged_split.checkpoint_digest =
+          compute_exact_pair_support_checkpoint_digest(
+              forged_split);
+      const ExactPairSupportCheckpointVerification verification =
+          verify_exact_pair_support_checkpoint(
+              index, cloud, 10U, forged_split);
+      check(
+          verification.checksum_matches_payload &&
+              !verification.pending_product_locally_valid &&
+              !verification.integrity_verified,
+          "canonical DFS replay rejects a self-rehashed pre-expanded root frontier with no parent visit");
+    }
+
+    ExactPairSupportStreamBudget lowered_auxiliary =
+        unlimited_budget();
+    lowered_auxiliary.maximum_auxiliary_frontier_entry_count = 1U;
+    const ExactPairSupportStreamChunk refused_auxiliary =
+        build_exact_pair_support_stream_chunk(
+            index,
+            cloud,
+            10U,
+            lowered_auxiliary,
+            root_cursor.next_checkpoint);
+    const bool auxiliary_refusal_is_transactional =
+        refused_auxiliary.stop_reason ==
+            ExactPairSupportStopReason::
+                auxiliary_frontier_entry_limit &&
+        refused_auxiliary.cumulative_audit_after ==
+            refused_auxiliary.cumulative_audit_before &&
+        refused_auxiliary.next_checkpoint.pending_product ==
+            root_cursor.next_checkpoint.pending_product &&
+        refused_auxiliary.next_checkpoint.output_record_count ==
+            root_cursor.next_checkpoint.output_record_count &&
+        refused_auxiliary.next_checkpoint.output_chain_digest ==
+            root_cursor.next_checkpoint.output_chain_digest;
+    check(
+        auxiliary_refusal_is_transactional &&
+            chunk_verification_closes(
+                verify_exact_pair_support_stream_chunk(
+                    index,
+                    cloud,
+                    10U,
+                    lowered_auxiliary,
+                    root_cursor.next_checkpoint,
+                    refused_auxiliary)),
+        "a resumed root under auxiliary cap one refuses before visit or scientific mutation and fresh replay certifies it");
+
+    const ExactPairSupportStreamChunk resumed =
+        build_exact_pair_support_stream_chunk(
+            index,
+            cloud,
+            10U,
+            unlimited_budget(),
+            refused_auxiliary.next_checkpoint);
+    check(
+        resumed.relative_stream_complete() &&
+            chunk_verification_closes(
+                verify_exact_pair_support_stream_chunk(
+                    index,
+                    cloud,
+                    10U,
+                    unlimited_budget(),
+                    refused_auxiliary.next_checkpoint,
+                    resumed)) &&
+            resumed.events == resident.events &&
+            resumed.relevant_extra_shell_diagnostics ==
+                resident.relevant_extra_shell_diagnostics &&
+            resumed.next_checkpoint.cumulative_audit ==
+                resident.next_checkpoint.cumulative_audit &&
+            resumed.next_checkpoint.output_chain_digest ==
+                resident.next_checkpoint.output_chain_digest,
+        "a sufficient later auxiliary cap resumes the untouched root cursor to the resident result");
+  }
+
+  const CanonicalPointCloud ordered_cloud = cloud_from({
+      point(-4.0),
+      point(-2.0),
+      point(0.0),
+      point(2.0),
+      point(4.0),
+  });
+  const MortonLbvhIndex ordered_index =
+      MortonLbvhIndex::build(ordered_cloud);
+  ExactPairSupportStreamBudget one_record =
+      unlimited_budget();
+  one_record.maximum_emitted_record_count = 1U;
+  const ChunkedPairRun ordered_chunks =
+      run_chunked(
+          ordered_index,
+          ordered_cloud,
+          10U,
+          one_record,
+          1000U);
+  std::optional<ExactPairSupportCheckpoint>
+      ready_multiple_interior_fixture;
+  for (const ExactPairSupportStreamChunk& chunk :
+       ordered_chunks.chunks) {
+    if (chunk.next_checkpoint.pending_product.has_value() &&
+        chunk.next_checkpoint.pending_product->closed_ball
+            .has_value() &&
+        chunk.next_checkpoint.pending_product->closed_ball->stage ==
+            ExactPairSupportPendingClosedBallStage::
+                ready_to_emit &&
+        chunk.next_checkpoint.pending_product->closed_ball
+                ->interior_ids.size() >=
+            2U) {
+      ready_multiple_interior_fixture =
+          chunk.next_checkpoint;
+      break;
+    }
+  }
+  check(
+      ready_multiple_interior_fixture.has_value(),
+      "a record-bounded collinear run persists a ready cursor with multiple canonical interior ids");
+  if (ready_multiple_interior_fixture.has_value()) {
+    const auto& valid_ids =
+        ready_multiple_interior_fixture->pending_product
+            ->closed_ball->interior_ids;
+    check(
+        std::adjacent_find(
+            valid_ids.begin(),
+            valid_ids.end(),
+            [](PointId left, PointId right) {
+              return !(left < right);
+            }) == valid_ids.end(),
+        "the product canonicalizes ready-to-emit interior ids strictly");
+
+    ExactPairSupportCheckpoint swapped =
+        *ready_multiple_interior_fixture;
+    std::swap(
+        swapped.pending_product->closed_ball->interior_ids[0],
+        swapped.pending_product->closed_ball->interior_ids[1]);
+    swapped.checkpoint_digest =
+        compute_exact_pair_support_checkpoint_digest(swapped);
+    const ExactPairSupportCheckpointVerification verification =
+        verify_exact_pair_support_checkpoint(
+            ordered_index, ordered_cloud, 10U, swapped);
+    check(
+        verification.checksum_matches_payload &&
+            !verification.pending_product_locally_valid &&
+            !verification.integrity_verified,
+        "a self-rehashed ready cursor cannot permute its canonical interior-id order");
+  }
 }
 
 void test_pending_witness_checkpoint_invariants() {
@@ -1753,8 +2161,9 @@ void test_pending_witness_checkpoint_invariants() {
     const ExactPairSupportCheckpoint& valid = *receipt_checkpoint;
     check(
         valid.checkpoint_digest.to_lower_hex() ==
-            "91ee653c988b4de2037921a9cde35539c15c726d82ba909515c72c748a2b482b",
-        "checkpoint schema v1 preserves its golden mid-witness cursor digest");
+            "7f0a35981c16df28d61942e424fd4ff47f84d47155e946ecf3af5b626158189c",
+        "checkpoint schema v2 preserves its golden mid-witness cursor digest (observed " +
+            valid.checkpoint_digest.to_lower_hex() + ")");
     const auto valid_verification = verify_exact_pair_support_checkpoint(
         index, cloud, 10U, valid);
     check(
@@ -1966,10 +2375,14 @@ void test_checkpoint_manifest_and_prepared_retry() {
           initial.manifest.lbvh_digest.to_lower_hex() ==
               "c70d65a1a04f78d1310ca78d1fe931901fa17a3cae8d9369343bb58904a9acb1" &&
           initial.manifest.semantic_digest.to_lower_hex() ==
-              "829aabde192f6ab20bbb769810805f7ee3fc25dbe6de2ae038c01c6d0909ae14" &&
+              "101e54775193b56a99bc2a6067243fe936b3b28feb9b437faab4e0fc4f97384f" &&
           initial.checkpoint_digest.to_lower_hex() ==
-              "bbfedd6b2aae19bcfc66e507715785e63a1497a48bc82485cf3ae5230ca653dd",
-      "checkpoint schema v1 preserves its golden cloud, LBVH, semantic, and initial-state digests");
+              "9ceff219f56c04aa82c93571294a4591b6325afc7f96c382783d1473af9081b2",
+      "checkpoint schema v2 preserves its golden cloud, LBVH, semantic, and initial-state digests (observed " +
+          initial.manifest.canonical_cloud_digest.to_lower_hex() + ", " +
+          initial.manifest.lbvh_digest.to_lower_hex() + ", " +
+          initial.manifest.semantic_digest.to_lower_hex() + ", " +
+          initial.checkpoint_digest.to_lower_hex() + ")");
   ExactPairSupportCheckpoint forged_initial_audit = initial;
   forged_initial_audit.cumulative_audit.rank_prune_search_count = 1U;
   forged_initial_audit.checkpoint_digest =
@@ -1983,6 +2396,20 @@ void test_checkpoint_manifest_and_prepared_retry() {
                .required_audit_identities_hold &&
           !forged_initial_audit_verification.integrity_verified,
       "a self-rehashed initial checkpoint cannot invent a rank search without witness work");
+
+  ExactPairSupportCheckpoint legacy_v1 = initial;
+  legacy_v1.manifest.schema_version = 1U;
+  legacy_v1.manifest.traversal_version = 1U;
+  legacy_v1.checkpoint_digest =
+      compute_exact_pair_support_checkpoint_digest(legacy_v1);
+  const auto legacy_v1_verification =
+      verify_exact_pair_support_checkpoint(
+          index, cloud, 1U, legacy_v1);
+  check(
+      legacy_v1_verification.checksum_matches_payload &&
+          !legacy_v1_verification.manifest_matches_authorities &&
+          !legacy_v1_verification.integrity_verified,
+      "the P7a authority explicitly rejects a self-consistent schema/traversal-v1 checkpoint");
 
   std::vector<CertifiedPoint3> reversed = points;
   std::reverse(reversed.begin(), reversed.end());
@@ -2076,11 +2503,13 @@ void test_checkpoint_manifest_and_prepared_retry() {
   const ChunkedPairRun chunked =
       run_chunked(index, cloud, 1U, one_record_budget);
   check(
-      chunked.checkpoint.output_chain_digest.to_lower_hex() ==
+          chunked.checkpoint.output_chain_digest.to_lower_hex() ==
               "8658c2f4ab4d3e560d9abaeee1ea433aa55e57f72d4c10a6fc7f9b6f11077fc8" &&
           chunked.checkpoint.checkpoint_digest.to_lower_hex() ==
-              "1b2e20782ed262e0daa886aa5856ab5e86a56f2fe1126dd57c93ac023e717be3",
-      "checkpoint schema v1 preserves its golden mixed-record output chain and terminal digest");
+              "5a5bf68fe86bc32b041c404c14c041d005f786c05d83685bbaec133bb0f0ad08",
+      "checkpoint schema v2 preserves its golden mixed-record output chain and terminal digest (observed " +
+          chunked.checkpoint.output_chain_digest.to_lower_hex() + ", " +
+          chunked.checkpoint.checkpoint_digest.to_lower_hex() + ")");
   const ExactPairSupportStreamChunk resident =
       build_exact_pair_support_stream_chunk(
           index, cloud, 1U, unlimited_budget(), initial);
@@ -3037,6 +3466,778 @@ void test_bounded_exhaustive_oracle_agreement() {
   }
 }
 
+void test_cospheres_fail_open_under_strict_center_cover() {
+  const CanonicalPointCloud cloud = cloud_from({
+      point(-1.0, 0.0, 0.0),
+      point(0.0, -1.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(1.0, 0.0, 0.0),
+  });
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactPairSupportStreamBudget resident_budget =
+      unlimited_budget();
+  const ExactPairSupportStreamResult resident =
+      build_exact_pair_support_stream(
+          index, cloud, 1U, resident_budget);
+  const OraclePairRecords oracle =
+      brute_force_pair_records(cloud, 1U);
+  const bool diagnostics_are_diametral_cospheres =
+      resident.relevant_extra_shell_diagnostics.size() == 2U &&
+      std::all_of(
+          resident.relevant_extra_shell_diagnostics.begin(),
+          resident.relevant_extra_shell_diagnostics.end(),
+          [](const ExactPairSupportExtraShellDiagnostic& diagnostic) {
+            return diagnostic.interior_ids.empty() &&
+                   diagnostic.shell_count == 4U &&
+                   diagnostic.minimum_possible_closed_rank == 2U &&
+                   diagnostic.observed_closed_rank == 4U;
+          });
+  check(
+      resident.stream_complete() &&
+          verification_closes(verify_exact_pair_support_stream(
+              index, cloud, 1U, resident_budget, resident)) &&
+          resident.events == oracle.events &&
+          resident.relevant_extra_shell_diagnostics ==
+              oracle.diagnostics &&
+          resident.audit.center_cover_attempt_count > 0U &&
+          resident.audit.center_cover_pruned_product_count == 0U &&
+          diagnostics_are_diametral_cospheres,
+      "cospherical equality is fail-open: no strict center-cover prune removes either relevant four-point shell");
+
+  ExactPairSupportStreamBudget one_node = unlimited_budget();
+  one_node.maximum_closed_ball_node_visit_count = 1U;
+  ExactPairSupportCheckpoint cursor =
+      make_initial_exact_pair_support_checkpoint(index, cloud, 10U);
+  std::optional<ExactPairSupportCheckpoint> future_shell_fixture;
+  std::optional<PointId> future_shell_id;
+  for (std::size_t step = 0U;
+       step < 1000U && !cursor.complete() &&
+       !future_shell_fixture.has_value();
+       ++step) {
+    const ExactPairSupportStreamChunk chunk =
+        build_exact_pair_support_stream_chunk(
+            index, cloud, 10U, one_node, cursor);
+    cursor = chunk.next_checkpoint;
+    if (!cursor.pending_product.has_value() ||
+        !cursor.pending_product->closed_ball.has_value() ||
+        cursor.pending_product->closed_ball->stage !=
+            ExactPairSupportPendingClosedBallStage::traversing ||
+        !cursor.pending_product->closed_ball
+             ->canonical_extra_shell_witness_id.has_value()) {
+      continue;
+    }
+    const ExactPairSupportPendingProduct& pending =
+        *cursor.pending_product;
+    const PointId first_support_id =
+        index.leaves()[pending.product.first_leaf_begin].point_id;
+    const PointId second_support_id =
+        index.leaves()[pending.product.second_leaf_begin].point_id;
+    const auto& closed_ball = *pending.closed_ball;
+    const std::size_t classified_count =
+        closed_ball.interior_ids.size() +
+        closed_ball.shell_count +
+        closed_ball.exterior_count;
+    for (std::size_t position = classified_count;
+         position < cloud.size();
+         ++position) {
+      const PointId candidate = index.leaves()[position].point_id;
+      if (candidate != first_support_id &&
+          candidate != second_support_id &&
+          candidate !=
+              *closed_ball.canonical_extra_shell_witness_id &&
+          diametral_point_phi(
+              cloud,
+              candidate,
+              first_support_id,
+              second_support_id) == ExactRational{}) {
+        future_shell_fixture = cursor;
+        future_shell_id = candidate;
+        break;
+      }
+    }
+  }
+  check(
+      future_shell_fixture.has_value() &&
+          future_shell_id.has_value(),
+      "the cospherical one-node traversal exposes a retained shell witness and a geometrically valid unvisited shell point");
+  if (future_shell_fixture.has_value() &&
+      future_shell_id.has_value()) {
+    ExactPairSupportCheckpoint forged = *future_shell_fixture;
+    forged.pending_product->closed_ball
+        ->canonical_extra_shell_witness_id = *future_shell_id;
+    forged.checkpoint_digest =
+        compute_exact_pair_support_checkpoint_digest(forged);
+    const ExactPairSupportCheckpointVerification verification =
+        verify_exact_pair_support_checkpoint(
+            index, cloud, 10U, forged);
+    check(
+        verification.checksum_matches_payload &&
+            !verification.pending_product_locally_valid &&
+            !verification.integrity_verified,
+        "a self-rehashed cursor cannot retain a geometrically valid shell id from the unvisited Morton suffix");
+  }
+
+  const CanonicalPointCloud forgery_cloud = cloud_from({
+      point(-1.0, 0.0, 0.0),
+      point(0.0, -1.0, 0.0),
+      point(0.0, 1.0, 0.0),
+      point(1.0, 0.0, 0.0),
+      point(3.0, 3.0, 0.0),
+  });
+  const MortonLbvhIndex forgery_index =
+      MortonLbvhIndex::build(forgery_cloud);
+  ExactPairSupportStreamBudget one_record =
+      unlimited_budget();
+  one_record.maximum_emitted_record_count = 1U;
+  const ChunkedPairRun record_chunks =
+      run_chunked(
+          forgery_index,
+          forgery_cloud,
+          10U,
+          one_record,
+          1000U);
+  std::optional<ExactPairSupportCheckpoint>
+      visited_cosphere_fixture;
+  std::optional<PointId> visited_noncanonical_shell_id;
+  for (const ExactPairSupportStreamChunk& chunk :
+       record_chunks.chunks) {
+    if (!chunk.next_checkpoint.pending_product.has_value() ||
+        !chunk.next_checkpoint.pending_product->closed_ball
+             .has_value()) {
+      continue;
+    }
+    const ExactPairSupportPendingProduct& pending =
+        *chunk.next_checkpoint.pending_product;
+    const auto& closed_ball = *pending.closed_ball;
+    if (closed_ball.stage !=
+            ExactPairSupportPendingClosedBallStage::ready_to_emit ||
+        closed_ball.shell_count < 4U ||
+        closed_ball.exterior_count == 0U ||
+        !closed_ball.canonical_extra_shell_witness_id.has_value()) {
+      continue;
+    }
+    const PointId first_support_id =
+        forgery_index
+            .leaves()[pending.product.first_leaf_begin]
+            .point_id;
+    const PointId second_support_id =
+        forgery_index
+            .leaves()[pending.product.second_leaf_begin]
+            .point_id;
+    for (PointId candidate = 0U;
+         candidate < forgery_cloud.size();
+         ++candidate) {
+      if (candidate != first_support_id &&
+          candidate != second_support_id &&
+          candidate !=
+              *closed_ball.canonical_extra_shell_witness_id &&
+          diametral_point_phi(
+              forgery_cloud,
+              candidate,
+              first_support_id,
+              second_support_id) == ExactRational{}) {
+        visited_cosphere_fixture =
+            chunk.next_checkpoint;
+        visited_noncanonical_shell_id = candidate;
+        break;
+      }
+    }
+    if (visited_cosphere_fixture.has_value()) {
+      break;
+    }
+  }
+  check(
+      visited_cosphere_fixture.has_value() &&
+          visited_noncanonical_shell_id.has_value(),
+      "a ready five-point cursor exposes two visited extra-shell ids plus one exterior point");
+  if (visited_cosphere_fixture.has_value() &&
+      visited_noncanonical_shell_id.has_value()) {
+    ExactPairSupportCheckpoint forged_noncanonical =
+        *visited_cosphere_fixture;
+    forged_noncanonical.pending_product->closed_ball
+        ->canonical_extra_shell_witness_id =
+        *visited_noncanonical_shell_id;
+    forged_noncanonical.checkpoint_digest =
+        compute_exact_pair_support_checkpoint_digest(
+            forged_noncanonical);
+    const ExactPairSupportCheckpointVerification
+        noncanonical_verification =
+            verify_exact_pair_support_checkpoint(
+                forgery_index,
+                forgery_cloud,
+                10U,
+                forged_noncanonical);
+    check(
+        noncanonical_verification.checksum_matches_payload &&
+            !noncanonical_verification
+                 .pending_product_locally_valid &&
+            !noncanonical_verification.integrity_verified,
+        "canonical DFS replay rejects a visited but nonminimal extra-shell witness");
+
+    ExactPairSupportCheckpoint compensated_shell =
+        *visited_cosphere_fixture;
+    ++compensated_shell.pending_product->closed_ball
+          ->shell_count;
+    --compensated_shell.pending_product->closed_ball
+          ->exterior_count;
+    compensated_shell.checkpoint_digest =
+        compute_exact_pair_support_checkpoint_digest(
+            compensated_shell);
+    const ExactPairSupportCheckpointVerification
+        compensated_verification =
+            verify_exact_pair_support_checkpoint(
+                forgery_index,
+                forgery_cloud,
+                10U,
+                compensated_shell);
+    check(
+        compensated_verification.checksum_matches_payload &&
+            !compensated_verification
+                 .pending_product_locally_valid &&
+            !compensated_verification.integrity_verified,
+        "canonical DFS replay rejects a shell-to-exterior compensated forgery");
+  }
+}
+
+void test_amortized_center_cover_token_bucket() {
+  const CanonicalPointCloud cloud = cloud_from({
+      point(3.0, 4.0, 0.0),
+      point(3.0, -4.0, 0.0),
+      point(-3.0, 4.0, 0.0),
+      point(-3.0, -4.0, 0.0),
+      point(3.0, 0.0, 4.0),
+      point(3.0, 0.0, -4.0),
+      point(-3.0, 0.0, 4.0),
+      point(-3.0, 0.0, -4.0),
+      point(0.0, 3.0, 4.0),
+      point(0.0, 3.0, -4.0),
+      point(0.0, -3.0, 4.0),
+      point(0.0, -3.0, -4.0),
+  });
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactPairSupportStreamBudget resident_budget =
+      unlimited_budget();
+  const ExactPairSupportStreamResult resident =
+      build_exact_pair_support_stream(
+          index, cloud, 10U, resident_budget);
+  const OraclePairRecords oracle =
+      brute_force_pair_records(cloud, 10U);
+  const std::size_t historical_non_center_work =
+      resident.audit.work_unit_count -
+      resident.audit.center_cover_work_unit_count;
+  const std::size_t maximum_center_cover_work =
+      2U *
+          morsehgp3d::hierarchy::
+              pair_support_center_cover_atomic_work_unit_count +
+      historical_non_center_work /
+          morsehgp3d::hierarchy::
+              pair_support_center_cover_historical_work_denominator;
+  check(
+      resident.stream_complete() &&
+          verification_closes(verify_exact_pair_support_stream(
+              index, cloud, 10U, resident_budget, resident)) &&
+          resident.events == oracle.events &&
+          resident.relevant_extra_shell_diagnostics ==
+              oracle.diagnostics &&
+          resident.audit.center_cover_attempt_count > 0U &&
+          resident.audit.center_cover_inconclusive_count ==
+              resident.audit.center_cover_attempt_count &&
+          resident.audit.center_cover_pruned_product_count == 0U &&
+          resident.audit.center_cover_work_preflight_skip_count > 0U &&
+          resident.audit.center_cover_work_unit_count <=
+              maximum_center_cover_work &&
+          resident.audit.center_cover_attempt_count +
+                  resident.audit
+                      .center_cover_work_preflight_skip_count <=
+              resident.audit.support_product_visit_count,
+      "the sterile twelve-point cosphere exercises the persistent 1/16 center-cover token bucket without changing its exact pair catalogue (attempts=" +
+          std::to_string(
+              resident.audit.center_cover_attempt_count) +
+          ", skips=" +
+          std::to_string(
+              resident.audit
+                  .center_cover_work_preflight_skip_count) +
+          ", center_work=" +
+          std::to_string(
+              resident.audit.center_cover_work_unit_count) +
+          ", limit=" +
+          std::to_string(maximum_center_cover_work) +
+          ")");
+
+  ExactPairSupportStreamBudget disabled_budget =
+      unlimited_budget();
+  disabled_budget.maximum_work_unit_count =
+      morsehgp3d::hierarchy::
+          pair_support_center_cover_atomic_work_unit_count -
+      1U;
+  const ChunkedPairRun disabled =
+      run_chunked(
+          index, cloud, 10U, disabled_budget, 10000U);
+  std::vector<ExactPairSupportEvent> resident_events =
+      resident.events;
+  std::vector<ExactPairSupportEvent> disabled_events =
+      disabled.events;
+  std::vector<ExactPairSupportExtraShellDiagnostic>
+      resident_diagnostics =
+          resident.relevant_extra_shell_diagnostics;
+  std::vector<ExactPairSupportExtraShellDiagnostic>
+      disabled_diagnostics = disabled.diagnostics;
+  const auto event_order = [](
+                               const ExactPairSupportEvent& left,
+                               const ExactPairSupportEvent& right) {
+    return left.support_ids < right.support_ids;
+  };
+  std::sort(
+      resident_events.begin(), resident_events.end(), event_order);
+  std::sort(
+      disabled_events.begin(), disabled_events.end(), event_order);
+  const auto diagnostic_order = [](
+                                    const ExactPairSupportExtraShellDiagnostic&
+                                        left,
+                                    const ExactPairSupportExtraShellDiagnostic&
+                                        right) {
+    return left.support_ids < right.support_ids;
+  };
+  std::sort(
+      resident_diagnostics.begin(),
+      resident_diagnostics.end(),
+      diagnostic_order);
+  std::sort(
+      disabled_diagnostics.begin(),
+      disabled_diagnostics.end(),
+      diagnostic_order);
+  check(
+      disabled.anchored_run_certified &&
+          disabled.checkpoint.complete() &&
+          disabled.checkpoint.cumulative_audit
+                  .center_cover_attempt_count ==
+              0U &&
+          disabled.checkpoint.cumulative_audit
+                  .center_cover_work_preflight_skip_count >
+              0U &&
+          disabled_events == resident_events &&
+          disabled_diagnostics == resident_diagnostics &&
+          disabled.checkpoint.output_chain_digest ==
+              build_exact_pair_support_stream_chunk(
+                  index,
+                  cloud,
+                  10U,
+                  resident_budget,
+                  make_initial_exact_pair_support_checkpoint(
+                      index, cloud, 10U))
+                  .next_checkpoint.output_chain_digest,
+      "disabling every atomic center-cover launch preserves the sterile fixture's scientific output chain (anchored=" +
+          std::to_string(disabled.anchored_run_certified) +
+          ", complete=" +
+          std::to_string(disabled.checkpoint.complete()) +
+          ", attempts=" +
+          std::to_string(
+              disabled.checkpoint.cumulative_audit
+                  .center_cover_attempt_count) +
+          ", skips=" +
+          std::to_string(
+              disabled.checkpoint.cumulative_audit
+                  .center_cover_work_preflight_skip_count) +
+          ", events_equal=" +
+          std::to_string(disabled_events == resident_events) +
+          ", diagnostics_equal=" +
+          std::to_string(
+              disabled_diagnostics == resident_diagnostics) +
+          ")");
+
+  // Start from the naturally throttled resident checkpoint because it has
+  // real attempts and therefore enough per-attempt witness capacity for a
+  // self-consistent one-unit overflow of the amortized envelope.
+  ExactPairSupportCheckpoint forged =
+      build_exact_pair_support_stream_chunk(
+          index,
+          cloud,
+          10U,
+          resident_budget,
+          make_initial_exact_pair_support_checkpoint(
+              index, cloud, 10U))
+          .next_checkpoint;
+  const std::size_t resident_historical_non_center_work =
+      forged.cumulative_audit.work_unit_count -
+      forged.cumulative_audit.center_cover_work_unit_count;
+  const std::size_t resident_forged_limit =
+      2U *
+          morsehgp3d::hierarchy::
+              pair_support_center_cover_atomic_work_unit_count +
+      resident_historical_non_center_work /
+          morsehgp3d::hierarchy::
+              pair_support_center_cover_historical_work_denominator;
+  const std::size_t forged_increment =
+      resident_forged_limit + 1U -
+      forged.cumulative_audit.center_cover_work_unit_count;
+  const std::size_t maximum_forged_witness_node_count =
+      forged.cumulative_audit.center_cover_attempt_count *
+      morsehgp3d::hierarchy::
+          pair_support_center_cover_maximum_witness_node_visit_count;
+  const std::size_t forged_witness_node_count =
+      forged.cumulative_audit
+          .center_cover_witness_node_visit_count;
+  const bool forge_has_capacity =
+      forged_witness_node_count <=
+          maximum_forged_witness_node_count &&
+      forged_increment <=
+          maximum_forged_witness_node_count -
+              forged_witness_node_count;
+  check(
+      forge_has_capacity,
+      "the token-bucket forgery fixture has aggregate witness capacity");
+  if (forge_has_capacity) {
+    forged.cumulative_audit.center_cover_work_unit_count +=
+        forged_increment;
+    forged.cumulative_audit.center_cover_witness_node_visit_count +=
+        forged_increment;
+    forged.cumulative_audit.work_unit_count +=
+        forged_increment;
+    forged.checkpoint_digest =
+        compute_exact_pair_support_checkpoint_digest(forged);
+    const ExactPairSupportCheckpointVerification verification =
+        verify_exact_pair_support_checkpoint(
+            index, cloud, 10U, forged);
+    check(
+        verification.checksum_matches_payload &&
+            !verification.required_audit_identities_hold &&
+            !verification.integrity_verified,
+        "a self-rehashed checkpoint cannot inflate center-cover witness work beyond the persistent 1/16 envelope");
+  }
+}
+
+void test_atomic_doubled_center_cover_prune_and_skip() {
+  const CanonicalPointCloud cloud = cloud_from({
+      point(7.0, 12.0, -9.0),
+      point(11.0, -1.0, -11.0),
+      point(11.0, -6.0, 0.0),
+      point(13.0, -11.0, -2.0),
+      point(-8.0, -5.0, -7.0),
+      point(9.0, -10.0, 0.0),
+      point(-6.0, -1.0, -2.0),
+      point(-14.0, -1.0, 6.0),
+      point(5.0, -7.0, -1.0),
+      point(-8.0, -3.0, -1.0),
+  });
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactPairSupportStreamBudget resident_budget =
+      unlimited_budget();
+  const ExactPairSupportStreamResult resident =
+      build_exact_pair_support_stream(
+          index, cloud, 2U, resident_budget);
+  check(
+      resident.stream_complete() &&
+          verification_closes(verify_exact_pair_support_stream(
+              index, cloud, 2U, resident_budget, resident)) &&
+          resident.audit.center_cover_pruned_product_count == 1U &&
+          resident.audit.center_cover_cell_split_count > 0U &&
+          resident.audit.center_cover_certified_cell_count >= 2U &&
+          resident.audit.center_cover_attempt_count ==
+              resident.audit.center_cover_inconclusive_count +
+                  resident.audit.center_cover_pruned_product_count &&
+          resident.audit.center_cover_work_unit_count ==
+              resident.audit.center_cover_cell_visit_count +
+                  resident.audit
+                      .center_cover_witness_node_visit_count &&
+          resident.audit.center_cover_work_unit_count <=
+              resident.audit.center_cover_attempt_count *
+                  morsehgp3d::hierarchy::
+                      pair_support_center_cover_atomic_work_unit_count &&
+          resident.audit.center_cover_strict_witness_subtree_count <=
+              resident.audit.center_cover_witness_node_visit_count &&
+          resident.audit.center_cover_strict_witness_point_count >=
+              resident.audit.center_cover_strict_witness_subtree_count &&
+          resident.audit.center_cover_certified_cell_count +
+                  resident.audit.center_cover_cell_split_count <=
+              resident.audit.center_cover_cell_visit_count &&
+          resident.audit.center_cover_strict_witness_point_count >=
+              2U *
+                  resident.audit
+                      .center_cover_certified_cell_count,
+      "the atomic doubled-center cover prunes one product only after a multi-cell exact strict-interior certificate (attempts=" +
+          std::to_string(
+              resident.audit.center_cover_attempt_count) +
+          ", skips=" +
+          std::to_string(
+              resident.audit
+                  .center_cover_work_preflight_skip_count) +
+          ", prunes=" +
+          std::to_string(
+              resident.audit.center_cover_pruned_product_count) +
+          ", center_work=" +
+          std::to_string(
+              resident.audit.center_cover_work_unit_count) +
+          ", total_work=" +
+          std::to_string(resident.audit.work_unit_count) +
+          ", cells=" +
+          std::to_string(
+              resident.audit.center_cover_cell_visit_count) +
+          ", witness_nodes=" +
+          std::to_string(
+              resident.audit
+                  .center_cover_witness_node_visit_count) +
+          ")");
+
+  ExactPairSupportStreamBudget skip_budget = unlimited_budget();
+  skip_budget.maximum_work_unit_count =
+      morsehgp3d::hierarchy::
+          pair_support_center_cover_atomic_work_unit_count -
+      1U;
+  const ChunkedPairRun skipped =
+      run_chunked(index, cloud, 2U, skip_budget, 1000U);
+  std::vector<ExactPairSupportEvent> skipped_events = skipped.events;
+  std::sort(
+      skipped_events.begin(),
+      skipped_events.end(),
+      [](const ExactPairSupportEvent& left,
+         const ExactPairSupportEvent& right) {
+        return left.support_ids < right.support_ids;
+      });
+  check(
+      skipped.anchored_run_certified &&
+          skipped.checkpoint.complete() &&
+          skipped.checkpoint.cumulative_audit
+                  .center_cover_work_preflight_skip_count >
+              0U &&
+          skipped.checkpoint.cumulative_audit
+                  .center_cover_attempt_count ==
+              0U &&
+          skipped.checkpoint.cumulative_audit
+                  .center_cover_work_unit_count ==
+              0U &&
+          skipped_events == resident.events &&
+          skipped.diagnostics ==
+              resident.relevant_extra_shell_diagnostics,
+      "an insufficient atomic remainder skips center-cover work and preserves the exact scientific stream without retrying the skipped product (chunks=" +
+          std::to_string(skipped.chunk_count) +
+          ", skips=" +
+          std::to_string(
+              skipped.checkpoint.cumulative_audit
+                  .center_cover_work_preflight_skip_count) +
+          ", attempts=" +
+          std::to_string(
+              skipped.checkpoint.cumulative_audit
+                  .center_cover_attempt_count) +
+          ", work=" +
+          std::to_string(
+              skipped.checkpoint.cumulative_audit
+                  .center_cover_work_unit_count) +
+          ", events_equal=" +
+          std::to_string(skipped_events == resident.events) +
+          ", diagnostics_equal=" +
+          std::to_string(
+              skipped.diagnostics ==
+              resident.relevant_extra_shell_diagnostics) +
+          ")");
+  check(
+      skipped.checkpoint.output_chain_digest ==
+              build_exact_pair_support_stream_chunk(
+                  index,
+                  cloud,
+                  2U,
+                  resident_budget,
+                  make_initial_exact_pair_support_checkpoint(
+                      index, cloud, 2U))
+                  .next_checkpoint.output_chain_digest &&
+          skipped.checkpoint.cumulative_audit
+              .pair_partition_accounting_certified,
+      "the performance-only center-cover skip preserves the terminal scientific digest and exact pair partition");
+
+  ExactPairSupportStreamBudget boundary_budget =
+      unlimited_budget();
+  boundary_budget.maximum_work_unit_count =
+      morsehgp3d::hierarchy::
+          pair_support_center_cover_atomic_work_unit_count;
+  const ChunkedPairRun boundary =
+      run_chunked(index, cloud, 2U, boundary_budget, 10000U);
+  bool observed_atomic_wait = false;
+  for (const ExactPairSupportStreamChunk& chunk :
+       boundary.chunks) {
+    const bool pending_completed_rank_search =
+        chunk.next_checkpoint.pending_product.has_value() &&
+        chunk.next_checkpoint.pending_product->stage ==
+            ExactPairSupportPendingStage::rank_search &&
+        chunk.next_checkpoint.pending_product->rank_search_started &&
+        chunk.next_checkpoint.pending_product
+            ->witness_frontier.empty() &&
+        !chunk.next_checkpoint.pending_product
+             ->deferred_expansion_node.has_value();
+    const bool no_center_decision_in_chunk =
+        chunk.cumulative_audit_after.center_cover_attempt_count ==
+            chunk.cumulative_audit_before.center_cover_attempt_count &&
+        chunk.cumulative_audit_after
+                .center_cover_work_preflight_skip_count ==
+            chunk.cumulative_audit_before
+                .center_cover_work_preflight_skip_count;
+    observed_atomic_wait =
+        observed_atomic_wait ||
+        (chunk.stop_reason ==
+             ExactPairSupportStopReason::work_unit_limit &&
+         pending_completed_rank_search &&
+        no_center_decision_in_chunk);
+  }
+  std::vector<ExactPairSupportEvent> boundary_events =
+      boundary.events;
+  std::sort(
+      boundary_events.begin(),
+      boundary_events.end(),
+      [](const ExactPairSupportEvent& left,
+         const ExactPairSupportEvent& right) {
+        return left.support_ids < right.support_ids;
+      });
+  check(
+      observed_atomic_wait &&
+          boundary.anchored_run_certified &&
+          boundary.checkpoint.complete() &&
+          boundary.checkpoint.cumulative_audit ==
+              resident.audit &&
+          boundary_events == resident.events &&
+          boundary.diagnostics ==
+              resident.relevant_extra_shell_diagnostics &&
+          boundary.checkpoint.output_chain_digest ==
+              build_exact_pair_support_stream_chunk(
+                  index,
+                  cloud,
+                  2U,
+                  resident_budget,
+                  make_initial_exact_pair_support_checkpoint(
+                      index, cloud, 2U))
+                  .next_checkpoint.output_chain_digest,
+      "a total atomic envelope with an insufficient current remainder stops and retries the same pending product without a permanent center-cover skip (wait=" +
+          std::to_string(observed_atomic_wait) +
+          ", anchored=" +
+          std::to_string(boundary.anchored_run_certified) +
+          ", complete=" +
+          std::to_string(boundary.checkpoint.complete()) +
+          ", audit_equal=" +
+          std::to_string(
+              boundary.checkpoint.cumulative_audit ==
+              resident.audit) +
+          ", events_equal=" +
+          std::to_string(boundary_events == resident.events) +
+          ", diagnostics_equal=" +
+          std::to_string(
+              boundary.diagnostics ==
+              resident.relevant_extra_shell_diagnostics) +
+          ", attempts=" +
+          std::to_string(
+              boundary.checkpoint.cumulative_audit
+                  .center_cover_attempt_count) +
+          "/" +
+          std::to_string(
+              resident.audit.center_cover_attempt_count) +
+          ", skips=" +
+          std::to_string(
+              boundary.checkpoint.cumulative_audit
+                  .center_cover_work_preflight_skip_count) +
+          "/" +
+          std::to_string(
+              resident.audit
+                  .center_cover_work_preflight_skip_count) +
+          ")");
+
+  ExactPairSupportCheckpoint forged_attempt =
+      make_initial_exact_pair_support_checkpoint(index, cloud, 2U);
+  forged_attempt.cumulative_audit.center_cover_attempt_count = 1U;
+  forged_attempt.cumulative_audit
+      .center_cover_inconclusive_count = 1U;
+  forged_attempt.checkpoint_digest =
+      compute_exact_pair_support_checkpoint_digest(forged_attempt);
+  const ExactPairSupportCheckpointVerification forged_verification =
+      verify_exact_pair_support_checkpoint(
+          index, cloud, 2U, forged_attempt);
+  check(
+      forged_verification.checksum_matches_payload &&
+          !forged_verification.required_audit_identities_hold &&
+          !forged_verification.integrity_verified,
+      "a self-rehashed checkpoint cannot claim a center-cover attempt without its mandatory cell and work audit");
+
+  const ExactPairSupportStreamChunk resident_chunk =
+      build_exact_pair_support_stream_chunk(
+          index,
+          cloud,
+          2U,
+          resident_budget,
+          make_initial_exact_pair_support_checkpoint(
+              index, cloud, 2U));
+  ExactPairSupportCheckpoint forged_cell_partition =
+      resident_chunk.next_checkpoint;
+  forged_cell_partition.cumulative_audit
+      .center_cover_cell_split_count =
+      forged_cell_partition.cumulative_audit
+          .center_cover_cell_visit_count;
+  forged_cell_partition.checkpoint_digest =
+      compute_exact_pair_support_checkpoint_digest(
+          forged_cell_partition);
+  const ExactPairSupportCheckpointVerification
+      cell_partition_verification =
+          verify_exact_pair_support_checkpoint(
+              index, cloud, 2U, forged_cell_partition);
+  check(
+      cell_partition_verification.checksum_matches_payload &&
+          !cell_partition_verification
+               .required_audit_identities_hold &&
+          !cell_partition_verification.integrity_verified,
+      "a self-rehashed checkpoint cannot count certified and split center cells beyond visited cells");
+
+  ExactPairSupportCheckpoint forged_witness_mass =
+      resident_chunk.next_checkpoint;
+  forged_witness_mass.cumulative_audit
+      .center_cover_strict_witness_subtree_count =
+      forged_witness_mass.cumulative_audit
+          .center_cover_certified_cell_count;
+  forged_witness_mass.cumulative_audit
+      .center_cover_strict_witness_point_count =
+      forged_witness_mass.cumulative_audit
+          .center_cover_certified_cell_count;
+  forged_witness_mass.checkpoint_digest =
+      compute_exact_pair_support_checkpoint_digest(
+          forged_witness_mass);
+  const ExactPairSupportCheckpointVerification
+      witness_mass_verification =
+          verify_exact_pair_support_checkpoint(
+              index, cloud, 2U, forged_witness_mass);
+  check(
+      witness_mass_verification.checksum_matches_payload &&
+          !witness_mass_verification
+               .required_audit_identities_hold &&
+          !witness_mass_verification.integrity_verified,
+      "a self-rehashed checkpoint cannot understate the strict witness mass required by its certified center cells");
+
+  ExactPairSupportCheckpoint forged_impossible_tree =
+      resident_chunk.next_checkpoint;
+  auto& forged_tree_audit =
+      forged_impossible_tree.cumulative_audit;
+  forged_tree_audit.work_unit_count -=
+      forged_tree_audit.center_cover_work_unit_count;
+  forged_tree_audit.center_cover_work_preflight_skip_count = 0U;
+  forged_tree_audit.center_cover_attempt_count = 1U;
+  forged_tree_audit.center_cover_inconclusive_count = 0U;
+  forged_tree_audit.center_cover_pruned_product_count = 1U;
+  forged_tree_audit.center_cover_work_unit_count = 4U;
+  forged_tree_audit.center_cover_cell_visit_count = 2U;
+  forged_tree_audit.center_cover_cell_split_count = 0U;
+  forged_tree_audit.center_cover_certified_cell_count = 1U;
+  forged_tree_audit.center_cover_witness_node_visit_count = 2U;
+  forged_tree_audit.center_cover_strict_witness_subtree_count = 1U;
+  forged_tree_audit.center_cover_strict_witness_point_count = 2U;
+  forged_tree_audit.work_unit_count +=
+      forged_tree_audit.center_cover_work_unit_count;
+  forged_impossible_tree.checkpoint_digest =
+      compute_exact_pair_support_checkpoint_digest(
+          forged_impossible_tree);
+  const ExactPairSupportCheckpointVerification
+      impossible_tree_verification =
+          verify_exact_pair_support_checkpoint(
+              index, cloud, 2U, forged_impossible_tree);
+  check(
+      impossible_tree_verification.checksum_matches_payload &&
+          !impossible_tree_verification
+               .required_audit_identities_hold &&
+          !impossible_tree_verification.integrity_verified,
+      "a compensated self-rehashed center-cover audit cannot claim two visited cells from one unsplit attempt");
+}
+
 void test_hostile_replay_mutations() {
   const CanonicalPointCloud cloud = cloud_from(
       {point(-1.0, 0.0), point(0.0, 1.0), point(1.0, 0.0)});
@@ -3129,12 +4330,16 @@ int main() {
   test_persistent_authority_and_incremental_verifier();
   test_every_prepared_stop_resumes_without_recount();
   test_resume_inside_rank_witness_search();
+  test_resume_inside_closed_ball_one_node_per_chunk();
   test_pending_witness_checkpoint_invariants();
   test_checkpoint_manifest_and_prepared_retry();
   test_ephemeral_batched_rank_prune_proposals();
   test_ephemeral_rank_keep_certificates();
   test_terminal_checkpoint_is_idempotent();
   test_bounded_exhaustive_oracle_agreement();
+  test_cospheres_fail_open_under_strict_center_cover();
+  test_amortized_center_cover_token_bucket();
+  test_atomic_doubled_center_cover_prune_and_skip();
   test_hostile_replay_mutations();
   if (failures != 0) {
     std::cerr << failures << " test(s) failed\n";

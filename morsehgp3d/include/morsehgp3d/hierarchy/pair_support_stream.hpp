@@ -19,12 +19,26 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::size_t pair_support_maximum_requested_order = 10U;
-inline constexpr std::uint32_t pair_support_checkpoint_schema_version = 1U;
-inline constexpr std::uint32_t pair_support_traversal_version = 1U;
+inline constexpr std::uint32_t pair_support_checkpoint_schema_version = 2U;
+inline constexpr std::uint32_t pair_support_traversal_version = 2U;
 inline constexpr std::string_view pair_support_checkpoint_proof_basis =
     "exact_self_dual_unordered_pair_partition_strict_phi_"
     "safe_real_anchor_noninterior_exclusion_resumable_witness_cursor_"
-    "sparse_closed_ball_v1";
+    "atomic_bounded_doubled_center_strict_rank_cover_"
+    "amortized_center_cover_1_over_16_"
+    "sparse_closed_ball_v2";
+inline constexpr std::size_t
+    pair_support_center_cover_maximum_cell_visit_count = 7U;
+inline constexpr std::size_t
+    pair_support_center_cover_maximum_witness_node_visit_count = 256U;
+inline constexpr std::size_t
+    pair_support_center_cover_maximum_auxiliary_entry_count = 64U;
+inline constexpr std::size_t
+    pair_support_center_cover_atomic_work_unit_count =
+        pair_support_center_cover_maximum_cell_visit_count +
+        pair_support_center_cover_maximum_witness_node_visit_count;
+inline constexpr std::size_t
+    pair_support_center_cover_historical_work_denominator = 16U;
 
 // Exact maximum of (x-u).(x-v) over query_box x first_support_box x
 // second_support_box.  Endpoint selectors are 0 for lower and 1 for upper;
@@ -73,13 +87,12 @@ enum class ExactPairSupportStopReason : std::uint8_t {
   emitted_record_limit,
   emitted_point_id_reference_limit,
   global_closed_ball_query_limit,
-  point_classification_limit,
+  closed_ball_node_visit_limit,
 };
 
 struct ExactPairSupportStreamBudget {
-  // A work unit is either one support-product visit or one witness-node visit.
-  // A global closed-ball query is an indivisible exact leaf operation and is
-  // accounted separately in the audit.
+  // A work unit is one support-product visit, rank-witness node visit,
+  // center-cover unit or closed-ball LBVH node visit.
   std::size_t maximum_work_unit_count{};
   std::size_t maximum_frontier_entry_count{1U};
   // Bounds either one witness search or one sparse closed-ball DFS.  These
@@ -90,10 +103,9 @@ struct ExactPairSupportStreamBudget {
   // Exterior ids and complete degenerate shells are never materialized.
   std::size_t maximum_emitted_point_id_reference_count{};
   std::size_t maximum_global_closed_ball_query_count{};
-  // Checked conservatively before a leaf query: one complete global shell
-  // classifies point_count sites, even when LBVH bulk decisions avoid an
-  // exact point-distance evaluation.
-  std::size_t maximum_point_classification_count{};
+  // Physical work cap.  The logical point mass classified by bulk LBVH
+  // decisions remains an unbounded audit counter and is never charged here.
+  std::size_t maximum_closed_ball_node_visit_count{};
 
   friend bool operator==(
       const ExactPairSupportStreamBudget&,
@@ -228,6 +240,34 @@ enum class ExactPairSupportPendingStage : std::uint8_t {
   classify_leaf,
 };
 
+enum class ExactPairSupportPendingClosedBallStage : std::uint8_t {
+  traversing,
+  ready_to_emit,
+};
+
+// Resumable exact closed-ball classification for one charged leaf product.
+// The support pair, exact anchor, center and radius are all derived from the
+// pending product and immutable authorities.  Only bounded relevant interior
+// ids and one canonical extra-shell witness are retained.
+struct ExactPairSupportPendingClosedBall {
+  ExactPairSupportPendingClosedBallStage stage{
+      ExactPairSupportPendingClosedBallStage::traversing};
+  // Physical LBVH visits already committed for this one query.  It lets the
+  // local validator replay the canonical DFS frontier without borrowing
+  // historical visits from earlier completed queries.
+  std::size_t node_visit_count{};
+  std::vector<ExactPairSupportWitnessNodeEntry> frontier;
+  std::vector<spatial::PointId> interior_ids;
+  std::size_t shell_count{};
+  std::optional<spatial::PointId> canonical_extra_shell_witness_id;
+  std::size_t exterior_count{};
+  std::uint8_t support_seen_mask{};
+
+  friend bool operator==(
+      const ExactPairSupportPendingClosedBall&,
+      const ExactPairSupportPendingClosedBall&) = default;
+};
+
 // Cursor for the only support product whose product visit has been charged but
 // whose transition has not yet finished.  Strict-witness receipts form a
 // disjoint antichain; deferred_expansion_node records a node already decided
@@ -241,6 +281,7 @@ struct ExactPairSupportPendingProduct {
   std::vector<ExactPairSupportWitnessNodeEntry> strict_witness_receipts;
   std::optional<ExactPairSupportWitnessNodeEntry> deferred_expansion_node;
   std::size_t strict_witness_point_count{};
+  std::optional<ExactPairSupportPendingClosedBall> closed_ball;
 
   friend bool operator==(
       const ExactPairSupportPendingProduct&,
@@ -396,10 +437,29 @@ struct ExactPairSupportStreamAudit {
   std::size_t equality_or_positive_bound_descent_count{};
   std::size_t strict_interior_witness_subtree_count{};
   std::size_t strict_interior_witness_point_count{};
+  // P7a runs only after the historical strict-phi search returned keep.
+  // Before doing any search work it rejects a provably sterile zero-radius
+  // bound and reserves the fixed atomic envelope above; a sterile bound or
+  // insufficient remainder is a performance skip and changes no scientific
+  // decision.  A completed attempt either certifies every cell of its
+  // doubled-centre cover or falls open to the historical expansion.
+  std::size_t center_cover_work_preflight_skip_count{};
+  std::size_t center_cover_attempt_count{};
+  std::size_t center_cover_inconclusive_count{};
+  std::size_t center_cover_pruned_product_count{};
+  std::size_t center_cover_work_unit_count{};
+  std::size_t center_cover_cell_visit_count{};
+  std::size_t center_cover_cell_split_count{};
+  std::size_t center_cover_certified_cell_count{};
+  std::size_t center_cover_witness_node_visit_count{};
+  std::size_t center_cover_strict_witness_subtree_count{};
+  std::size_t center_cover_strict_witness_point_count{};
   std::size_t rank_pruned_product_count{};
   std::size_t rank_pruned_pair_count{};
   std::size_t leaf_pair_classification_count{};
   std::size_t global_closed_ball_query_count{};
+  // Logical point mass, including whole subtrees classified by one physical
+  // LBVH node visit.  This is an audit identity, not a work budget.
   std::size_t point_classification_count{};
   std::size_t closed_ball_node_visit_count{};
   std::size_t exact_closed_ball_minimum_aabb_bound_count{};
@@ -594,6 +654,10 @@ struct ExactPairSupportCheckpointVerification {
     std::size_t witness_interval_count{};
     std::size_t witness_adjacent_interval_test_count{};
     std::size_t strict_receipt_geometry_recertification_count{};
+    // Validation-only reconstruction; these counters never belong to
+    // product work.
+    std::size_t closed_ball_interior_id_recertification_count{};
+    std::size_t closed_ball_node_recertification_count{};
 
     friend bool operator==(
         const ValidationAudit&,

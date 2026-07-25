@@ -546,6 +546,9 @@ void test_top_k_proposal_chain_consumption_and_fallbacks() {
           same_scientific_closure_graph(
               *baseline.scientific_closure,
               *adversarial.scientific_closure) &&
+          baseline.scientific_closure->required_memo_slot_count == 31U &&
+          useful.scientific_closure->required_memo_slot_count == 31U &&
+          adversarial.scientific_closure->required_memo_slot_count == 31U &&
           baseline.scientific_closure->nodes.size() == 3U &&
           baseline.scientific_closure->edges.size() == 2U &&
           baseline.scientific_closure
@@ -958,9 +961,10 @@ void test_chain_and_shared_seed_suffix() {
           LbvhTraversalOrder::near_first);
   check(
       canonical_view_result == result &&
+          result.required_memo_slot_count == 31U &&
           canonical_view_result.counters.strict_edge_count == 2U &&
           canonical_view_result.edges.size() == 2U,
-      "the allocation-lean canonical distinct-key view exactly matches the general seed API on a nonzero strict chain");
+      "the canonical distinct-key view matches the general API and sizes its memo from C(6,4)=15");
 
   const auto canonical_view_rejected =
       [&fixture](std::span<const ExactDirectSparseFacetKey> keys) {
@@ -1732,6 +1736,7 @@ void test_k10_boundary_without_global_facet_materialization() {
       "the K=10 full-key boundary");
   check(
       result.certified_complete_with_unresolved_terminals() &&
+          result.required_memo_slot_count == 3U &&
           result.nodes.size() == 1U && result.edges.empty() &&
           result.nodes[0U].facet_key.point_count == 10U &&
           result.nodes[0U].local_step_decision ==
@@ -1742,6 +1747,53 @@ void test_k10_boundary_without_global_facet_materialization() {
           result.counters.source_miniball_build_count == 1U &&
           result.counters.successor_miniball_build_count == 0U,
       "one ten-id facet remains local scratch and closes without a global facet arena");
+}
+
+void test_fixed_cardinality_facet_universe_memo_bound() {
+  const std::array<CertifiedPoint3, 8U> input{
+      point(-4.0),
+      point(-3.0),
+      point(-2.0),
+      point(-1.0),
+      point(0.0),
+      point(1.0),
+      point(2.0),
+      point(3.0),
+  };
+  const CanonicalPointCloud cloud = canonical_cloud(input);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactDirectSparseFacetKey source =
+      key({0U, 1U, 2U, 3U, 4U, 5U, 6U});
+  ExactDirectSparsePositiveFacetLocator locator = make_locator();
+  seed_binding(locator, source, 6U, 303U);
+  const std::array<ExactDirectSparseFacetDescentClosureSeed, 1U> seeds{{
+      {0U, source},
+  }};
+  auto budget = generous_closure_budget();
+  budget.maximum_node_count =
+      direct_sparse_facet_descent_closure_maximum_node_count;
+  budget.maximum_memo_slot_count = 17U;
+
+  const auto result = build_and_verify(
+      index,
+      cloud,
+      seeds,
+      level(16),
+      witness(9206U),
+      locator,
+      budget,
+      {},
+      LbvhTraversalOrder::near_first,
+      "the exact fixed-cardinality facet-universe memo bound");
+  check(
+      result.certified_complete_relative_positive_closure() &&
+          result.requested_budget.maximum_node_count ==
+              direct_sparse_facet_descent_closure_maximum_node_count &&
+          result.required_memo_slot_count == 17U &&
+          result.nodes.size() == 1U &&
+          result.counters.source_positive_hit_count == 1U &&
+          !result.forbidden_global_structure_materialized,
+      "C_eff=min(1048576,C(8,7))=8 needs only 17 slots without materializing the facet universe");
 }
 
 void test_k10_positive_sources_with_forced_memo_collisions() {
@@ -1793,6 +1845,7 @@ void test_k10_positive_sources_with_forced_memo_collisions() {
   const auto* const right_node = find_node(result, right);
   check(
       result.certified_complete_relative_positive_closure() &&
+          result.required_memo_slot_count == 23U &&
           result.nodes.size() == 2U && result.edges.empty() &&
           result.seed_projections.size() == 2U &&
           result.counters.terminal_node_count == 2U &&
@@ -1848,7 +1901,7 @@ void test_all_closure_budget_boundaries_and_invalid_traversal() {
       "preflight exhaustion allocates no scientific graph and runs no local step");
 
   auto memo_preflight_budget = fixture.budget;
-  --memo_preflight_budget.maximum_memo_slot_count;
+  memo_preflight_budget.maximum_memo_slot_count = 30U;
   const auto memo_preflight = build_and_verify(
       fixture.index,
       fixture.cloud,
@@ -1865,8 +1918,8 @@ void test_all_closure_budget_boundaries_and_invalid_traversal() {
           memo_preflight.decision ==
               ExactDirectSparseFacetDescentClosureDecision::
                   no_closure_preflight_budget_exhausted &&
-          memo_preflight.required_memo_slot_count == 33U &&
-          memo_preflight.requested_budget.maximum_memo_slot_count == 32U &&
+          memo_preflight.required_memo_slot_count == 31U &&
+          memo_preflight.requested_budget.maximum_memo_slot_count == 30U &&
           memo_preflight.nodes.empty() && memo_preflight.edges.empty() &&
           memo_preflight.no_half_edge_published,
       "a one-short memo-table cap fails before allocating the scientific graph");
@@ -1915,6 +1968,7 @@ void test_all_closure_budget_boundaries_and_invalid_traversal() {
           node_short.decision ==
               ExactDirectSparseFacetDescentClosureDecision::
                   certified_prefix_node_budget_exhausted &&
+          node_short.required_memo_slot_count == 5U &&
           node_short.nodes.size() == 2U && node_short.edges.size() == 1U &&
           node_short.counters.terminal_node_count == 1U &&
           node_short.counters.evaluated_step_source_count == 2U &&
@@ -2255,6 +2309,7 @@ int main() {
   test_source_positive_and_non_strict_terminals();
   test_source_probe_top_k_budget_and_above_batch_terminals();
   test_k10_boundary_without_global_facet_materialization();
+  test_fixed_cardinality_facet_universe_memo_bound();
   test_k10_positive_sources_with_forced_memo_collisions();
   test_all_closure_budget_boundaries_and_invalid_traversal();
   test_snapshot_authority_and_fresh_verifier_rejections();

@@ -212,7 +212,11 @@ $$M_{\mathrm{logique}}=O(R+KV).$$
 
 Cette borne compte les enregistrements et références du résultat public, qui ne contient aucune miniball complète. Elle ne borne pas à elle seule le nombre de limbs des rationnels exacts ; les octets, limbs, frontières top-$k$ transitoires et pics d'allocation restent des compteurs obligatoires.
 
-Le scratch contient deux tables ouvertes de taille `required_memo_slot_count`, les caches factorisés de $C_{\mathrm{cache}}\leq2V$ miniballs, la frontière canonique, les couleurs de cycle, les tableaux de propagation et une seule exécution 10.5b transitoire. Les tables sont dimensionnées depuis le plafond fiable de sommets, pas depuis $\binom{n}{k}$. Il n'existe jamais une partition top-$k$ par sommet, une coface globale ou une arène indexée par $\binom{n}{k}$.
+Toutes les clés d'une fermeture valide ont la même cardinalité $k$ et sont des sous-ensembles des $n$ `PointId` canoniques. Le nombre de nœuds distincts est donc borné à la fois par le budget demandé $B$ et par le nombre de clés possibles :
+
+$$C_{\mathrm{eff}}=\min(B,\binom{n}{k}).$$
+
+Le scratch contient deux tables ouvertes de taille `required_memo_slot_count` $=2C_{\mathrm{eff}}+1$, les caches factorisés de $C_{\mathrm{cache}}\leq2V$ miniballs, la frontière canonique, les couleurs de cycle, les tableaux de propagation et une seule exécution 10.5b transitoire. Le coefficient binomial est calculé comme un scalaire saturé à $B$ : la symétrie réduit la récurrence à $\min(k,n-k)$ étapes, les facteurs du dénominateur sont annulés par PGCD avant chaque multiplication, et le calcul retourne $B$ avant toute multiplication qui dépasserait ce cap. Une entrée vide ou dont la cardinalité n'est pas encore admissible conserve le plafond fiable $B$ jusqu'à son rejet ou sa validation. Ni les sous-ensembles, ni une partition top-$k$ par sommet, ni une coface globale, ni une arène indexée par $\binom{n}{k}$ ne sont matérialisés.
 
 ## Vérificateur frais
 

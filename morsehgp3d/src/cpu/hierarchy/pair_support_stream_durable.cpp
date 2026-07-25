@@ -153,7 +153,8 @@ class UniqueFileDescriptor {
          is_unbounded(
              budget.maximum_emitted_point_id_reference_count) ||
          is_unbounded(budget.maximum_global_closed_ball_query_count) ||
-         is_unbounded(budget.maximum_point_classification_count) ||
+         is_unbounded(
+             budget.maximum_closed_ball_node_visit_count) ||
          is_unbounded(codec.maximum_encoded_byte_count) ||
          is_unbounded(codec.maximum_frontier_entry_count) ||
          is_unbounded(codec.maximum_auxiliary_entry_count) ||
@@ -167,6 +168,8 @@ void validate_config(const ExactPairSupportDurableConfig& config) {
   if (config.maximum_committed_transition_count == 0U ||
       config.maximum_total_encoded_byte_count == 0U ||
       config.fixed_chunk_budget.maximum_work_unit_count == 0U ||
+      config.fixed_chunk_budget
+              .maximum_closed_ball_node_visit_count == 0U ||
       config_has_unbounded_limit(config) ||
       static_cast<std::uintmax_t>(
           config.codec_limits.maximum_encoded_byte_count) >
@@ -294,8 +297,8 @@ void hash_u64(
       budget.maximum_global_closed_ball_query_count,
       "the durable closed-ball budget does not fit uint64"));
   hash_u64(builder, checked_u64(
-      budget.maximum_point_classification_count,
-      "the durable classification budget does not fit uint64"));
+      budget.maximum_closed_ball_node_visit_count,
+      "the durable closed-ball node budget does not fit uint64"));
   return builder.finalize();
 }
 

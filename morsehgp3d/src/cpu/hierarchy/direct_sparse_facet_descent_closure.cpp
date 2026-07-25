@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <numeric>
 #include <optional>
 #include <stdexcept>
 #include <utility>
@@ -113,6 +114,77 @@ void require_valid_traversal_order(
     throw std::overflow_error("the closure memo-table size overflows size_t");
   }
   return maximum_node_count * 2U + 1U;
+}
+
+[[nodiscard]] std::size_t capped_binomial_coefficient(
+    std::size_t point_count,
+    std::size_t facet_cardinality,
+    std::size_t cap) noexcept {
+  if (cap == 0U || facet_cardinality > point_count) {
+    return 0U;
+  }
+  facet_cardinality =
+      std::min(facet_cardinality, point_count - facet_cardinality);
+  std::size_t coefficient = 1U;
+  if (coefficient >= cap) {
+    return cap;
+  }
+
+  for (std::size_t index = 1U;
+       index <= facet_cardinality;
+       ++index) {
+    std::size_t numerator =
+        point_count - facet_cardinality + index;
+    std::size_t denominator = index;
+    const std::size_t numerator_gcd =
+        std::gcd(numerator, denominator);
+    numerator /= numerator_gcd;
+    denominator /= numerator_gcd;
+    const std::size_t coefficient_gcd =
+        std::gcd(coefficient, denominator);
+    coefficient /= coefficient_gcd;
+    denominator /= coefficient_gcd;
+
+    // The binomial recurrence is integral.  Cancelling denominator factors
+    // against both factors before multiplying makes the cap check
+    // overflow-safe even when point_count is close to size_t's limit.
+    if (denominator != 1U ||
+        coefficient > cap / numerator) {
+      return cap;
+    }
+    coefficient *= numerator;
+    if (coefficient >= cap) {
+      return cap;
+    }
+  }
+  return coefficient;
+}
+
+template <typename FacetKeyAt>
+[[nodiscard]] std::optional<std::size_t>
+candidate_common_facet_cardinality_for_memo_bound(
+    std::size_t point_count,
+    std::size_t key_count,
+    FacetKeyAt facet_key_at) noexcept {
+  if (key_count == 0U) {
+    return std::nullopt;
+  }
+  const std::size_t common_cardinality =
+      facet_key_at(0U).point_count;
+  if (common_cardinality == 0U ||
+      common_cardinality >
+          direct_sparse_positive_facet_maximum_point_count ||
+      common_cardinality > point_count) {
+    return std::nullopt;
+  }
+  for (std::size_t key_index = 1U;
+       key_index < key_count;
+       ++key_index) {
+    if (facet_key_at(key_index).point_count != common_cardinality) {
+      return std::nullopt;
+    }
+  }
+  return common_cardinality;
 }
 
 [[nodiscard]] bool try_add_size(
@@ -1748,6 +1820,8 @@ void finish_closure_preflight_budget_exhaustion(
 [[nodiscard]] ExactDirectSparseFacetDescentClosureResult
 initialize_closure_build_result(
     std::size_t input_seed_reference_count,
+    std::size_t cloud_point_count,
+    std::optional<std::size_t> facet_cardinality_for_memo_bound,
     const exact::ExactLevel& closed_batch_squared_level,
     const ExactDirectSparseFacetWitness& locator_query_witness,
     const ExactDirectSparsePositiveFacetLocator& locator,
@@ -1763,8 +1837,15 @@ initialize_closure_build_result(
   result.locator_snapshot_stamp = locator.snapshot_stamp();
   result.counters.locator_snapshot_check_count = 1U;
   result.counters.input_seed_reference_count = input_seed_reference_count;
+  const std::size_t effective_maximum_node_count =
+      facet_cardinality_for_memo_bound.has_value()
+          ? capped_binomial_coefficient(
+                cloud_point_count,
+                *facet_cardinality_for_memo_bound,
+                budget.maximum_node_count)
+          : budget.maximum_node_count;
   result.required_memo_slot_count =
-      required_memo_slot_count(budget.maximum_node_count);
+      required_memo_slot_count(effective_maximum_node_count);
   result.trusted_authorities_certified = true;
   result.budget_preflight_completed = true;
   initialize_closed_scope(result);
@@ -2370,9 +2451,20 @@ build_exact_direct_sparse_facet_descent_closure(
       locator,
       budget,
       traversal_order);
+  const std::optional<std::size_t> facet_cardinality_for_memo_bound =
+      seeds.size() <= budget.maximum_seed_count
+          ? candidate_common_facet_cardinality_for_memo_bound(
+                cloud.size(),
+                seeds.size(),
+                [&seeds](std::size_t index) -> const auto& {
+                  return seeds[index].source_facet_key;
+                })
+          : std::nullopt;
   ExactDirectSparseFacetDescentClosureResult result =
       initialize_closure_build_result(
           seeds.size(),
+          cloud.size(),
+          facet_cardinality_for_memo_bound,
           closed_batch_squared_level,
           locator_query_witness,
           locator,
@@ -2459,9 +2551,21 @@ build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys(
       locator,
       budget,
       traversal_order);
+  const std::optional<std::size_t> facet_cardinality_for_memo_bound =
+      canonical_distinct_keys.size() <= budget.maximum_seed_count
+          ? candidate_common_facet_cardinality_for_memo_bound(
+                cloud.size(),
+                canonical_distinct_keys.size(),
+                [&canonical_distinct_keys](
+                    std::size_t index) -> const auto& {
+                  return canonical_distinct_keys[index];
+                })
+          : std::nullopt;
   ExactDirectSparseFacetDescentClosureResult result =
       initialize_closure_build_result(
           canonical_distinct_keys.size(),
+          cloud.size(),
+          facet_cardinality_for_memo_bound,
           closed_batch_squared_level,
           locator_query_witness,
           locator,
@@ -2630,6 +2734,11 @@ build_exact_direct_sparse_facet_descent_closure_from_canonical_distinct_keys_wit
   ExactDirectSparseFacetDescentClosureResult closure =
       initialize_closure_build_result(
           canonical_distinct_keys.size(),
+          cloud.size(),
+          canonical_distinct_keys.empty()
+              ? std::nullopt
+              : std::optional<std::size_t>{
+                    canonical_distinct_keys.front().point_count},
           closed_batch_squared_level,
           locator_query_witness,
           locator,

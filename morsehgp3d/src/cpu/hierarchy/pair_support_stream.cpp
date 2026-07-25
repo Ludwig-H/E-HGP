@@ -66,6 +66,31 @@ struct IntegrityVerifiedCheckpointTag {};
       "the pair-support unordered pair count overflows size_t");
 }
 
+[[nodiscard]] std::size_t historical_non_center_work_unit_count(
+    const ExactPairSupportStreamAudit& audit) {
+  return checked_add(
+      checked_add(
+          audit.support_product_visit_count,
+          audit.witness_node_visit_count,
+          "the pair-support historical non-center work overflows size_t"),
+      audit.closed_ball_node_visit_count,
+      "the pair-support historical non-center work overflows size_t");
+}
+
+[[nodiscard]] std::size_t center_cover_post_attempt_work_limit(
+    std::size_t historical_non_center_work) {
+  static_assert(
+      pair_support_center_cover_historical_work_denominator > 0U);
+  return checked_add(
+      checked_multiply(
+          2U,
+          pair_support_center_cover_atomic_work_unit_count,
+          "the pair-support center-cover burst limit overflows size_t"),
+      historical_non_center_work /
+          pair_support_center_cover_historical_work_denominator,
+      "the pair-support center-cover amortized limit overflows size_t");
+}
+
 [[nodiscard]] std::uint64_t checked_u64(
     std::size_t value,
     std::string_view message) {
@@ -769,6 +794,288 @@ exact_diametral_point_phi_aabb_maximum(
       exact_diametral_point_phi_aabb_maximum(anchor, query_box));
 }
 
+// P7a works with doubled centres s=u+v.  This keeps every endpoint dyadic and
+// turns the strict-ball implication into the division-free inequality
+//
+//   ||2x-s||^2 < L(C) <= ||u-v||^2,
+//
+// where L(C) combines the support separation with the distances from C to
+// both doubled support boxes.
+//
+// Hence x is strictly interior to every diametral ball whose doubled
+// centre lies in the cell.  Cells may use different Morton antichains.
+struct ExactDoubledCenterCell {
+  std::array<UnnormalizedExactDyadic, 3U> lower{};
+  std::array<UnnormalizedExactDyadic, 3U> upper{};
+};
+
+struct ExactCenterCoverCellCertificate {
+  ExactDoubledCenterCell cell{};
+  std::vector<ExactPairSupportWitnessNodeEntry> witness_receipts;
+  std::size_t witness_point_count{};
+};
+
+struct ExactCenterCoverAttemptAudit {
+  std::size_t cell_visit_count{};
+  std::size_t cell_split_count{};
+  std::size_t certified_cell_count{};
+  std::size_t witness_node_visit_count{};
+  std::size_t strict_witness_subtree_count{};
+  std::size_t strict_witness_point_count{};
+};
+
+struct ExactCenterCoverAttemptResult {
+  bool rank_pruned{false};
+  ExactCenterCoverAttemptAudit audit{};
+  std::vector<ExactCenterCoverCellCertificate> certificate_cells;
+};
+
+[[nodiscard]] bool dyadic_equal(
+    const UnnormalizedExactDyadic& left,
+    const UnnormalizedExactDyadic& right) {
+  return !dyadic_less(left, right) && !dyadic_less(right, left);
+}
+
+[[nodiscard]] UnnormalizedExactDyadic square_dyadic(
+    const UnnormalizedExactDyadic& value) {
+  return multiply_dyadics(value, value);
+}
+
+[[nodiscard]] UnnormalizedExactDyadic doubled_dyadic(
+    const UnnormalizedExactDyadic& value) {
+  return add_dyadics(value, value);
+}
+
+[[nodiscard]] ExactDoubledCenterCell make_doubled_center_cell(
+    const spatial::ExactDyadicAabb3& first_support_box,
+    const spatial::ExactDyadicAabb3& second_support_box) {
+  const ExactDyadicBoxCoordinates first =
+      exact_dyadic_box_coordinates(first_support_box);
+  const ExactDyadicBoxCoordinates second =
+      exact_dyadic_box_coordinates(second_support_box);
+  ExactDoubledCenterCell cell;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    cell.lower[axis] =
+        add_dyadics(first.lower[axis], second.lower[axis]);
+    cell.upper[axis] =
+        add_dyadics(first.upper[axis], second.upper[axis]);
+  }
+  return cell;
+}
+
+[[nodiscard]] UnnormalizedExactDyadic
+minimum_support_squared_distance(
+    const spatial::ExactDyadicAabb3& first_support_box,
+    const spatial::ExactDyadicAabb3& second_support_box) {
+  const ExactDyadicBoxCoordinates first =
+      exact_dyadic_box_coordinates(first_support_box);
+  const ExactDyadicBoxCoordinates second =
+      exact_dyadic_box_coordinates(second_support_box);
+  UnnormalizedExactDyadic result;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    UnnormalizedExactDyadic gap;
+    if (dyadic_less(first.upper[axis], second.lower[axis])) {
+      gap = subtract_dyadics(
+          second.lower[axis], first.upper[axis]);
+    } else if (dyadic_less(second.upper[axis], first.lower[axis])) {
+      gap = subtract_dyadics(
+          first.lower[axis], second.upper[axis]);
+    }
+    result = add_dyadics(result, square_dyadic(gap));
+  }
+  return result;
+}
+
+[[nodiscard]] UnnormalizedExactDyadic
+minimum_doubled_center_support_squared_distance(
+    const ExactDoubledCenterCell& cell,
+    const spatial::ExactDyadicAabb3& support_box) {
+  const ExactDyadicBoxCoordinates support =
+      exact_dyadic_box_coordinates(support_box);
+  UnnormalizedExactDyadic result;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const UnnormalizedExactDyadic doubled_support_lower =
+        doubled_dyadic(support.lower[axis]);
+    const UnnormalizedExactDyadic doubled_support_upper =
+        doubled_dyadic(support.upper[axis]);
+    UnnormalizedExactDyadic gap;
+    if (dyadic_less(cell.upper[axis], doubled_support_lower)) {
+      gap = subtract_dyadics(
+          doubled_support_lower, cell.upper[axis]);
+    } else if (dyadic_less(
+                   doubled_support_upper, cell.lower[axis])) {
+      gap = subtract_dyadics(
+          cell.lower[axis], doubled_support_upper);
+    }
+    result = add_dyadics(result, square_dyadic(gap));
+  }
+  return result;
+}
+
+// For an actual support pair u in A, v in B whose doubled centre s=u+v
+// belongs to C,
+//
+//   ||u-v||^2 = ||s-2u||^2 = ||s-2v||^2.
+//
+// Each box distance below is therefore a lower bound for that pair's
+// squared chord.  Taking their maximum strengthens the radius without
+// weakening the strict certificate.
+[[nodiscard]] UnnormalizedExactDyadic
+doubled_center_cell_chord_squared_lower_bound(
+    const ExactDoubledCenterCell& cell,
+    const spatial::ExactDyadicAabb3& first_support_box,
+    const spatial::ExactDyadicAabb3& second_support_box,
+    const UnnormalizedExactDyadic&
+        minimum_support_pair_squared_distance) {
+  UnnormalizedExactDyadic result =
+      minimum_support_pair_squared_distance;
+  const UnnormalizedExactDyadic first_bound =
+      minimum_doubled_center_support_squared_distance(
+          cell, first_support_box);
+  if (dyadic_less(result, first_bound)) {
+    result = first_bound;
+  }
+  const UnnormalizedExactDyadic second_bound =
+      minimum_doubled_center_support_squared_distance(
+          cell, second_support_box);
+  if (dyadic_less(result, second_bound)) {
+    result = second_bound;
+  }
+  return result;
+}
+
+[[nodiscard]] UnnormalizedExactDyadic
+minimum_doubled_center_query_squared_distance(
+    const ExactDoubledCenterCell& cell,
+    const spatial::ExactDyadicAabb3& query_box) {
+  const ExactDyadicBoxCoordinates query =
+      exact_dyadic_box_coordinates(query_box);
+  UnnormalizedExactDyadic result;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const UnnormalizedExactDyadic midpoint = halve_dyadic(
+        add_dyadics(cell.lower[axis], cell.upper[axis]));
+    const UnnormalizedExactDyadic doubled_query_lower =
+        doubled_dyadic(query.lower[axis]);
+    const UnnormalizedExactDyadic doubled_query_upper =
+        doubled_dyadic(query.upper[axis]);
+    const UnnormalizedExactDyadic* minimizer = &midpoint;
+    if (dyadic_less(midpoint, doubled_query_lower)) {
+      minimizer = &doubled_query_lower;
+    } else if (dyadic_less(doubled_query_upper, midpoint)) {
+      minimizer = &doubled_query_upper;
+    }
+    const UnnormalizedExactDyadic lower_candidate = square_dyadic(
+        subtract_dyadics(*minimizer, cell.lower[axis]));
+    const UnnormalizedExactDyadic upper_candidate = square_dyadic(
+        subtract_dyadics(*minimizer, cell.upper[axis]));
+    result = add_dyadics(
+        result,
+        dyadic_less(lower_candidate, upper_candidate)
+            ? upper_candidate
+            : lower_candidate);
+  }
+  return result;
+}
+
+[[nodiscard]] UnnormalizedExactDyadic
+minimum_doubled_center_core_squared_distance(
+    const ExactDoubledCenterCell& cell) {
+  UnnormalizedExactDyadic result;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const UnnormalizedExactDyadic width =
+        subtract_dyadics(cell.upper[axis], cell.lower[axis]);
+    if (width.significand < 0) {
+      throw std::logic_error(
+          "a doubled-center cell has a reversed axis");
+    }
+    result = add_dyadics(
+        result, square_dyadic(halve_dyadic(width)));
+  }
+  return result;
+}
+
+[[nodiscard]] UnnormalizedExactDyadic
+maximum_doubled_center_query_squared_distance(
+    const ExactDoubledCenterCell& cell,
+    const spatial::ExactDyadicAabb3& query_box) {
+  const ExactDyadicBoxCoordinates query =
+      exact_dyadic_box_coordinates(query_box);
+  UnnormalizedExactDyadic result;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const std::array<const UnnormalizedExactDyadic*, 2U>
+        center_endpoints{&cell.lower[axis], &cell.upper[axis]};
+    const std::array<const UnnormalizedExactDyadic*, 2U>
+        query_endpoints{&query.lower[axis], &query.upper[axis]};
+    bool initialized = false;
+    UnnormalizedExactDyadic maximum;
+    for (const UnnormalizedExactDyadic* center : center_endpoints) {
+      for (const UnnormalizedExactDyadic* query_endpoint :
+           query_endpoints) {
+        const UnnormalizedExactDyadic delta = subtract_dyadics(
+            doubled_dyadic(*query_endpoint), *center);
+        const UnnormalizedExactDyadic candidate =
+            square_dyadic(delta);
+        if (!initialized || dyadic_less(maximum, candidate)) {
+          maximum = candidate;
+          initialized = true;
+        }
+      }
+    }
+    if (!initialized) {
+      throw std::logic_error(
+          "a doubled-center query maximum has no endpoint");
+    }
+    result = add_dyadics(result, maximum);
+  }
+  return result;
+}
+
+[[nodiscard]] bool query_box_strictly_inside_every_cell_ball(
+    const ExactDoubledCenterCell& cell,
+    const UnnormalizedExactDyadic& minimum_squared_distance,
+    const spatial::ExactDyadicAabb3& query_box) {
+  return dyadic_less(
+      maximum_doubled_center_query_squared_distance(cell, query_box),
+      minimum_squared_distance);
+}
+
+[[nodiscard]] bool split_doubled_center_cell(
+    const ExactDoubledCenterCell& parent,
+    ExactDoubledCenterCell& first,
+    ExactDoubledCenterCell& second) {
+  std::size_t split_axis = 3U;
+  UnnormalizedExactDyadic largest_width;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const UnnormalizedExactDyadic width =
+        subtract_dyadics(parent.upper[axis], parent.lower[axis]);
+    if (width.significand < 0) {
+      throw std::logic_error(
+          "a doubled-center cell has a reversed axis");
+    }
+    if (width.significand != 0 &&
+        (split_axis == 3U || dyadic_less(largest_width, width))) {
+      split_axis = axis;
+      largest_width = width;
+    }
+  }
+  if (split_axis == 3U) {
+    return false;
+  }
+  const UnnormalizedExactDyadic midpoint = halve_dyadic(
+      add_dyadics(
+          parent.lower[split_axis], parent.upper[split_axis]));
+  if (dyadic_equal(midpoint, parent.lower[split_axis]) ||
+      dyadic_equal(midpoint, parent.upper[split_axis])) {
+    throw std::logic_error(
+        "a nondegenerate exact doubled-center cell did not bisect");
+  }
+  first = parent;
+  second = parent;
+  first.upper[split_axis] = midpoint;
+  second.lower[split_axis] = midpoint;
+  return true;
+}
+
 [[nodiscard]] bool event_less(
     const ExactPairSupportEvent& left,
     const ExactPairSupportEvent& right) {
@@ -926,6 +1233,17 @@ void append_audit(
   MORSEHGP3D_APPEND_AUDIT_SIZE(equality_or_positive_bound_descent_count);
   MORSEHGP3D_APPEND_AUDIT_SIZE(strict_interior_witness_subtree_count);
   MORSEHGP3D_APPEND_AUDIT_SIZE(strict_interior_witness_point_count);
+  MORSEHGP3D_APPEND_AUDIT_SIZE(center_cover_work_preflight_skip_count);
+  MORSEHGP3D_APPEND_AUDIT_SIZE(center_cover_attempt_count);
+  MORSEHGP3D_APPEND_AUDIT_SIZE(center_cover_inconclusive_count);
+  MORSEHGP3D_APPEND_AUDIT_SIZE(center_cover_pruned_product_count);
+  MORSEHGP3D_APPEND_AUDIT_SIZE(center_cover_work_unit_count);
+  MORSEHGP3D_APPEND_AUDIT_SIZE(center_cover_cell_visit_count);
+  MORSEHGP3D_APPEND_AUDIT_SIZE(center_cover_cell_split_count);
+  MORSEHGP3D_APPEND_AUDIT_SIZE(center_cover_certified_cell_count);
+  MORSEHGP3D_APPEND_AUDIT_SIZE(center_cover_witness_node_visit_count);
+  MORSEHGP3D_APPEND_AUDIT_SIZE(center_cover_strict_witness_subtree_count);
+  MORSEHGP3D_APPEND_AUDIT_SIZE(center_cover_strict_witness_point_count);
   MORSEHGP3D_APPEND_AUDIT_SIZE(rank_pruned_product_count);
   MORSEHGP3D_APPEND_AUDIT_SIZE(rank_pruned_pair_count);
   MORSEHGP3D_APPEND_AUDIT_SIZE(leaf_pair_classification_count);
@@ -1005,7 +1323,7 @@ void append_audit(
 [[nodiscard]] contract::CanonicalId checkpoint_digest(
     const ExactPairSupportCheckpoint& checkpoint) {
   DigestWriter writer{
-      "MorseHGP3D/phase9/pair-support/checkpoint/v1"};
+      "MorseHGP3D/phase14q/pair-support/checkpoint/v2"};
   const ExactPairSupportCheckpointManifest& manifest = checkpoint.manifest;
   writer.u32(manifest.schema_version);
   writer.u32(manifest.traversal_version);
@@ -1048,6 +1366,31 @@ void append_audit(
           writer, *pending.deferred_expansion_node);
     }
     writer.size(pending.strict_witness_point_count);
+    writer.boolean(pending.closed_ball.has_value());
+    if (pending.closed_ball.has_value()) {
+      const ExactPairSupportPendingClosedBall& closed_ball =
+          *pending.closed_ball;
+      writer.byte(static_cast<std::uint8_t>(closed_ball.stage));
+      writer.size(closed_ball.node_visit_count);
+      writer.size(closed_ball.frontier.size());
+      for (const ExactPairSupportWitnessNodeEntry& entry :
+           closed_ball.frontier) {
+        append_witness_node_entry(writer, entry);
+      }
+      writer.size(closed_ball.interior_ids.size());
+      for (const PointId point_id : closed_ball.interior_ids) {
+        writer.u64(point_id);
+      }
+      writer.size(closed_ball.shell_count);
+      writer.boolean(
+          closed_ball.canonical_extra_shell_witness_id.has_value());
+      if (closed_ball.canonical_extra_shell_witness_id.has_value()) {
+        writer.u64(
+            *closed_ball.canonical_extra_shell_witness_id);
+      }
+      writer.size(closed_ball.exterior_count);
+      writer.byte(closed_ball.support_seen_mask);
+    }
   }
   append_audit(writer, checkpoint.cumulative_audit);
   return writer.finalize();
@@ -1181,10 +1524,16 @@ class ExactPairSupportStreamBuilder {
           "the chunk frontier capacity is below the persisted checkpoint frontier");
     }
     if (pending_product_.has_value()) {
-      const std::size_t persisted_auxiliary_entry_count = checked_add(
+      std::size_t persisted_auxiliary_entry_count = checked_add(
           pending_product_->witness_frontier.size(),
           pending_product_->deferred_expansion_node.has_value() ? 1U : 0U,
           "the persisted auxiliary frontier count overflows size_t");
+      if (pending_product_->closed_ball.has_value()) {
+        persisted_auxiliary_entry_count = checked_add(
+            persisted_auxiliary_entry_count,
+            pending_product_->closed_ball->frontier.size(),
+            "the persisted closed-ball frontier count overflows size_t");
+      }
       if (budget.maximum_auxiliary_frontier_entry_count <
           persisted_auxiliary_entry_count) {
         throw std::invalid_argument(
@@ -1420,7 +1769,7 @@ class ExactPairSupportStreamBuilder {
     manifest.lbvh_digest = lbvh_writer.finalize();
 
     DigestWriter semantic_writer{
-        "MorseHGP3D/phase9/pair-support/checkpoint-manifest/v1"};
+        "MorseHGP3D/phase14q/pair-support/checkpoint-manifest/v2"};
     semantic_writer.u32(manifest.schema_version);
     semantic_writer.u32(manifest.traversal_version);
     semantic_writer.text(pair_support_checkpoint_proof_basis);
@@ -1479,14 +1828,7 @@ class ExactPairSupportStreamBuilder {
   enum class SparseBallOutcome : std::uint8_t {
     complete,
     rank_exceeded,
-  };
-
-  struct SparseBallClassification {
-    SparseBallOutcome outcome{SparseBallOutcome::rank_exceeded};
-    std::vector<PointId> interior_ids;
-    std::size_t shell_count{};
-    std::optional<PointId> canonical_extra_shell_witness_id;
-    std::size_t exterior_count{};
+    budget_exhausted,
   };
 
   struct ProductRectangle {
@@ -1735,6 +2077,11 @@ class ExactPairSupportStreamBuilder {
     std::size_t pending_strict_receipt_count = 0U;
     std::size_t pending_strict_receipt_point_count = 0U;
     std::size_t pending_self_expansion_count = 0U;
+    std::size_t pending_active_closed_ball_entry_count = 0U;
+    std::size_t pending_closed_ball_classified_count = 0U;
+    std::size_t pending_closed_ball_interior_count = 0U;
+    std::size_t pending_closed_ball_node_visit_count = 0U;
+    bool pending_closed_ball_started = false;
     if (checkpoint.pending_product.has_value()) {
       if (checkpoint.frontier.empty() ||
           checkpoint.pending_product->product != checkpoint.frontier.back()) {
@@ -1757,6 +2104,7 @@ class ExactPairSupportStreamBuilder {
             case ExactPairSupportPendingStage::rank_search: {
               if (first_node_index == second_node_index ||
                   (first.is_leaf() && second.is_leaf()) ||
+                  pending.closed_ball.has_value() ||
                   (!pending.rank_search_started && !empty_rank_payload)) {
                 pending_valid = false;
                 break;
@@ -1838,8 +2186,7 @@ class ExactPairSupportStreamBuilder {
                   checkpoint.manifest.maximum_relevant_closed_rank - 1U;
               if (receipt_point_count !=
                       pending.strict_witness_point_count ||
-                  receipt_point_count >= witness_threshold ||
-                  (pending.rank_search_started && active_entries.empty())) {
+                  receipt_point_count >= witness_threshold) {
                 pending_valid = false;
               }
               pending_strict_receipt_point_count = receipt_point_count;
@@ -1847,6 +2194,7 @@ class ExactPairSupportStreamBuilder {
             }
             case ExactPairSupportPendingStage::expand_product:
               if (!empty_rank_payload ||
+                  pending.closed_ball.has_value() ||
                   (first.is_leaf() && second.is_leaf())) {
                 pending_valid = false;
               } else if (first_node_index == second_node_index) {
@@ -1857,6 +2205,266 @@ class ExactPairSupportStreamBuilder {
               if (!empty_rank_payload || first_node_index == second_node_index ||
                   !first.is_leaf() || !second.is_leaf()) {
                 pending_valid = false;
+              } else if (pending.closed_ball.has_value()) {
+                const ExactPairSupportPendingClosedBall& closed_ball =
+                    *pending.closed_ball;
+                pending_closed_ball_started = true;
+                pending_closed_ball_node_visit_count =
+                    closed_ball.node_visit_count;
+                pending_closed_ball_interior_count =
+                    closed_ball.interior_ids.size();
+                pending_active_closed_ball_entry_count =
+                    closed_ball.frontier.size();
+                if (closed_ball.support_seen_mask > 3U ||
+                    closed_ball.interior_ids.size() >
+                        checkpoint.manifest.maximum_relevant_closed_rank -
+                            2U) {
+                  pending_valid = false;
+                  break;
+                }
+                std::array<PointId, 2U> support_ids{
+                    index_.leaves_[first.leaf_begin].point_id,
+                    index_.leaves_[second.leaf_begin].point_id};
+                if (support_ids[1] < support_ids[0]) {
+                  std::swap(support_ids[0], support_ids[1]);
+                }
+                const ExactDyadicAnchorPhi anchor =
+                    exact_dyadic_anchor_phi(
+                        cloud_.point(support_ids[0]),
+                        cloud_.point(support_ids[1]));
+                pending_closed_ball_classified_count = checked_add(
+                    checked_add(
+                        closed_ball.interior_ids.size(),
+                        closed_ball.shell_count,
+                        "the pending closed-ball classified count overflows size_t"),
+                    closed_ball.exterior_count,
+                    "the pending closed-ball classified count overflows size_t");
+                if (pending_closed_ball_classified_count >
+                        cloud_.size() ||
+                    closed_ball.node_visit_count >
+                        index_.nodes_.size()) {
+                  pending_valid = false;
+                } else {
+                  // Validation-only replay of this query's committed
+                  // canonical DFS.  It mirrors the product's exact subtree
+                  // decisions, reconstructs at most the rank-bounded
+                  // interior ids, and never scans the classified point mass.
+                  // Cost is O(committed node visits + K), memory O(H + K).
+                  std::vector<ExactPairSupportWitnessNodeEntry>
+                      recertified_frontier{
+                          make_witness_entry(index_.root_index_)};
+                  std::vector<PointId> recertified_interior_ids;
+                  recertified_interior_ids.reserve(
+                      closed_ball.interior_ids.size());
+                  std::size_t recertified_shell_count = 0U;
+                  std::size_t recertified_exterior_count = 0U;
+                  std::uint8_t recertified_support_seen_mask = 0U;
+                  std::optional<PointId>
+                      recertified_canonical_extra_shell_witness_id;
+                  bool canonical_replay_valid = true;
+                  for (std::size_t visit = 0U;
+                       visit < closed_ball.node_visit_count;
+                       ++visit) {
+                    if (recertified_frontier.empty()) {
+                      canonical_replay_valid = false;
+                      break;
+                    }
+                    const ExactPairSupportWitnessNodeEntry entry =
+                        recertified_frontier.back();
+                    recertified_frontier.pop_back();
+                    const std::size_t replay_node_index =
+                        witness_node_index(entry);
+                    const Node& replay_node =
+                        node(replay_node_index);
+                    verification.validation_audit
+                            .closed_ball_node_recertification_count =
+                        checked_add(
+                            verification.validation_audit
+                                .closed_ball_node_recertification_count,
+                            1U,
+                            "the checkpoint closed-ball node validation count overflows size_t");
+                    const spatial::ExactDyadicAabb3 replay_box =
+                        node_box(replay_node_index);
+                    const int minimum_phi_sign =
+                        exact_anchor_phi_aabb_minimum_sign(
+                            anchor, replay_box);
+                    if (minimum_phi_sign > 0) {
+                      recertified_exterior_count = checked_add(
+                          recertified_exterior_count,
+                          replay_node.leaf_end -
+                              replay_node.leaf_begin,
+                          "the checkpoint recertified exterior count overflows size_t");
+                      continue;
+                    }
+                    const int maximum_phi_sign =
+                        exact_diametral_point_phi_aabb_maximum_sign(
+                            anchor, replay_box);
+                    if (maximum_phi_sign < 0) {
+                      const std::size_t interior_count = checked_add(
+                          recertified_interior_ids.size(),
+                          replay_node.leaf_end -
+                              replay_node.leaf_begin,
+                          "the checkpoint recertified interior count overflows size_t");
+                      if (interior_count >
+                          checkpoint.manifest
+                                  .maximum_relevant_closed_rank -
+                              2U) {
+                        canonical_replay_valid = false;
+                        break;
+                      }
+                      for (std::size_t position =
+                               replay_node.leaf_begin;
+                           position < replay_node.leaf_end;
+                           ++position) {
+                        recertified_interior_ids.push_back(
+                            index_.leaves_[position].point_id);
+                        verification.validation_audit
+                                .closed_ball_interior_id_recertification_count =
+                            checked_add(
+                                verification.validation_audit
+                                    .closed_ball_interior_id_recertification_count,
+                                1U,
+                                "the checkpoint closed-ball interior-id validation count overflows size_t");
+                      }
+                      continue;
+                    }
+                    if (replay_node.is_leaf()) {
+                      if (minimum_phi_sign != maximum_phi_sign) {
+                        canonical_replay_valid = false;
+                        break;
+                      }
+                      const PointId point_id =
+                          index_.leaves_[replay_node.leaf_begin]
+                              .point_id;
+                      if (maximum_phi_sign == 0) {
+                        recertified_shell_count = checked_add(
+                            recertified_shell_count,
+                            1U,
+                            "the checkpoint recertified shell count overflows size_t");
+                        if (point_id == support_ids[0]) {
+                          recertified_support_seen_mask =
+                              static_cast<std::uint8_t>(
+                                  recertified_support_seen_mask |
+                                  1U);
+                        } else if (point_id == support_ids[1]) {
+                          recertified_support_seen_mask =
+                              static_cast<std::uint8_t>(
+                                  recertified_support_seen_mask |
+                                  2U);
+                        } else if (
+                            !recertified_canonical_extra_shell_witness_id
+                                 .has_value() ||
+                            point_id <
+                                *recertified_canonical_extra_shell_witness_id) {
+                          recertified_canonical_extra_shell_witness_id =
+                              point_id;
+                        }
+                      } else {
+                        recertified_exterior_count = checked_add(
+                            recertified_exterior_count,
+                            1U,
+                            "the checkpoint recertified exterior count overflows size_t");
+                      }
+                      continue;
+                    }
+                    recertified_frontier.push_back(
+                        make_witness_entry(
+                            replay_node.right_child));
+                    recertified_frontier.push_back(
+                        make_witness_entry(
+                            replay_node.left_child));
+                  }
+                  switch (closed_ball.stage) {
+                    case ExactPairSupportPendingClosedBallStage::
+                        traversing:
+                      if (recertified_interior_ids !=
+                          closed_ball.interior_ids) {
+                        canonical_replay_valid = false;
+                      }
+                      break;
+                    case ExactPairSupportPendingClosedBallStage::
+                        ready_to_emit: {
+                      std::sort(
+                          recertified_interior_ids.begin(),
+                          recertified_interior_ids.end());
+                      const bool persisted_strictly_sorted =
+                          std::adjacent_find(
+                              closed_ball.interior_ids.begin(),
+                              closed_ball.interior_ids.end(),
+                              [](PointId left, PointId right) {
+                                return !(left < right);
+                              }) ==
+                          closed_ball.interior_ids.end();
+                      if (!persisted_strictly_sorted ||
+                          recertified_interior_ids !=
+                              closed_ball.interior_ids) {
+                        canonical_replay_valid = false;
+                      }
+                      break;
+                    }
+                    default:
+                      canonical_replay_valid = false;
+                      break;
+                  }
+                  if (!canonical_replay_valid ||
+                      recertified_shell_count !=
+                          closed_ball.shell_count ||
+                      recertified_exterior_count !=
+                          closed_ball.exterior_count ||
+                      recertified_support_seen_mask !=
+                          closed_ball.support_seen_mask ||
+                      recertified_canonical_extra_shell_witness_id !=
+                          closed_ball
+                              .canonical_extra_shell_witness_id ||
+                      recertified_frontier !=
+                          closed_ball.frontier) {
+                    pending_valid = false;
+                  }
+                }
+                std::size_t expected_leaf_begin =
+                    pending_closed_ball_classified_count;
+                for (auto iterator =
+                         closed_ball.frontier.rbegin();
+                     iterator != closed_ball.frontier.rend();
+                     ++iterator) {
+                  const std::size_t active_index =
+                      witness_node_index(*iterator);
+                  const Node& active = node(active_index);
+                  if (active.leaf_begin != expected_leaf_begin) {
+                    pending_valid = false;
+                  }
+                  expected_leaf_begin = active.leaf_end;
+                }
+                if (expected_leaf_begin != cloud_.size()) {
+                  pending_valid = false;
+                }
+                switch (closed_ball.stage) {
+                  case ExactPairSupportPendingClosedBallStage::
+                      traversing:
+                    if (closed_ball.frontier.empty() ||
+                        pending_closed_ball_classified_count >=
+                            cloud_.size()) {
+                      pending_valid = false;
+                    }
+                    break;
+                  case ExactPairSupportPendingClosedBallStage::
+                      ready_to_emit:
+                    if (!closed_ball.frontier.empty() ||
+                        pending_closed_ball_classified_count !=
+                            cloud_.size() ||
+                        closed_ball.support_seen_mask != 3U ||
+                        closed_ball.shell_count < 2U ||
+                        ((closed_ball.shell_count == 2U) !=
+                         !closed_ball
+                              .canonical_extra_shell_witness_id
+                              .has_value())) {
+                      pending_valid = false;
+                    }
+                    break;
+                  default:
+                    pending_valid = false;
+                    break;
+                }
               }
               break;
             default:
@@ -1917,6 +2525,62 @@ class ExactPairSupportStreamBuilder {
               "the checkpoint bulk point classification count overflows size_t"),
           audit.exact_point_distance_evaluation_count,
           "the checkpoint point classification count overflows size_t");
+      const std::size_t historical_non_center_work =
+          historical_non_center_work_unit_count(audit);
+      const std::size_t maximum_amortized_center_cover_work =
+          center_cover_post_attempt_work_limit(
+              historical_non_center_work);
+      const std::size_t maximum_center_cover_cell_visit_count =
+          checked_multiply(
+              audit.center_cover_attempt_count,
+              pair_support_center_cover_maximum_cell_visit_count,
+              "the checkpoint center-cover cell envelope overflows size_t");
+      const std::size_t maximum_center_cover_witness_node_visit_count =
+          checked_multiply(
+              audit.center_cover_attempt_count,
+              pair_support_center_cover_maximum_witness_node_visit_count,
+              "the checkpoint center-cover witness envelope overflows size_t");
+      const std::size_t center_cover_product_decision_count =
+          checked_add(
+              audit.center_cover_attempt_count,
+              audit.center_cover_work_preflight_skip_count,
+              "the checkpoint center-cover decision count overflows size_t");
+      const std::size_t center_cover_finished_cell_count =
+          checked_add(
+              audit.center_cover_certified_cell_count,
+              audit.center_cover_cell_split_count,
+              "the checkpoint center-cover finished-cell count overflows size_t");
+      const std::size_t center_cover_tree_cell_visit_limit =
+          checked_add(
+              audit.center_cover_attempt_count,
+              checked_multiply(
+                  audit.center_cover_cell_split_count,
+                  2U,
+                  "the checkpoint center-cover doubled split count overflows size_t"),
+              "the checkpoint center-cover tree visit limit overflows size_t");
+      const std::size_t center_cover_tree_leaf_limit =
+          checked_add(
+              audit.center_cover_attempt_count,
+              audit.center_cover_cell_split_count,
+              "the checkpoint center-cover tree leaf limit overflows size_t");
+      const std::size_t center_cover_required_strict_witness_point_count =
+          checked_multiply(
+              audit.center_cover_certified_cell_count,
+              checkpoint.manifest.maximum_relevant_closed_rank == 0U
+                  ? 0U
+                  : checkpoint.manifest.maximum_relevant_closed_rank -
+                        1U,
+              "the checkpoint center-cover required witness count overflows size_t");
+      const std::size_t minimum_closed_ball_node_visit_count =
+          checked_add(
+              audit.leaf_pair_classification_count,
+              pending_closed_ball_node_visit_count,
+              "the checkpoint completed-plus-active closed-ball node count overflows size_t");
+      const std::size_t minimum_point_classification_count =
+          checked_add(
+              audit.leaf_pair_classification_count,
+              pending_closed_ball_classified_count,
+              "the checkpoint completed-plus-active point count overflows size_t");
       audit_valid =
           audit.total_pair_count ==
               checked_unordered_pair_count(cloud_.size()) &&
@@ -1938,22 +2602,66 @@ class ExactPairSupportStreamBuilder {
               pending_self_expansion_count,
               "the checkpoint diagonal-skip count overflows size_t") &&
           audit.work_unit_count == checked_add(
-              audit.support_product_visit_count,
-              audit.witness_node_visit_count,
+              historical_non_center_work,
+              audit.center_cover_work_unit_count,
               "the checkpoint work sum overflows size_t") &&
+          audit.center_cover_work_unit_count <=
+              maximum_amortized_center_cover_work &&
+          audit.center_cover_work_unit_count == checked_add(
+              audit.center_cover_cell_visit_count,
+              audit.center_cover_witness_node_visit_count,
+              "the checkpoint center-cover work sum overflows size_t") &&
+          audit.center_cover_attempt_count == checked_add(
+              audit.center_cover_inconclusive_count,
+              audit.center_cover_pruned_product_count,
+              "the checkpoint center-cover outcome sum overflows size_t") &&
+          audit.center_cover_attempt_count <=
+              audit.center_cover_cell_visit_count &&
+          audit.center_cover_cell_visit_count <=
+              maximum_center_cover_cell_visit_count &&
+          audit.center_cover_cell_visit_count <=
+              center_cover_tree_cell_visit_limit &&
+          audit.center_cover_witness_node_visit_count <=
+              maximum_center_cover_witness_node_visit_count &&
+          center_cover_product_decision_count <=
+              audit.support_product_visit_count &&
+          audit.center_cover_pruned_product_count <=
+              audit.rank_pruned_product_count &&
+          audit.center_cover_pruned_product_count <=
+              audit.center_cover_certified_cell_count &&
+          audit.center_cover_cell_split_count <=
+              audit.center_cover_cell_visit_count &&
+          audit.center_cover_certified_cell_count <=
+              audit.center_cover_cell_visit_count &&
+          audit.center_cover_certified_cell_count <=
+              center_cover_tree_leaf_limit &&
+          center_cover_finished_cell_count <=
+              audit.center_cover_cell_visit_count &&
+          audit.center_cover_certified_cell_count <=
+              audit.center_cover_strict_witness_subtree_count &&
+          audit.center_cover_strict_witness_subtree_count <=
+              audit.center_cover_witness_node_visit_count &&
+          audit.center_cover_strict_witness_point_count >=
+              audit.center_cover_strict_witness_subtree_count &&
+          audit.center_cover_strict_witness_point_count >=
+              center_cover_required_strict_witness_point_count &&
           audit.exact_phi_aabb_bound_count == expected_phi_bound_count &&
           audit.exact_anchor_ball_minimum_aabb_bound_count ==
               expected_anchor_bound_count &&
           audit.certified_anchor_shell_tangent_subtree_count <=
               audit.certified_anchor_noninterior_subtree_count &&
-          audit.rank_pruned_product_count <=
-              audit.rank_prune_search_count &&
+          audit.rank_pruned_product_count <= checked_add(
+              audit.rank_prune_search_count,
+              audit.center_cover_pruned_product_count,
+              "the checkpoint rank-prune source count overflows size_t") &&
           audit.rank_prune_search_count <= checked_add(
               audit.witness_node_visit_count,
               pending_rank_search_started ? 1U : 0U,
               "the checkpoint rank-search lower work bound overflows size_t") &&
-          audit.global_closed_ball_query_count ==
-              audit.leaf_pair_classification_count &&
+          audit.global_closed_ball_query_count == checked_add(
+              audit.leaf_pair_classification_count,
+              pending_closed_ball_started ? 1U : 0U,
+              "the checkpoint active closed-ball query count overflows size_t") &&
           audit.closed_ball_node_visit_count ==
               audit.exact_closed_ball_minimum_aabb_bound_count &&
           audit.closed_ball_node_visit_count ==
@@ -1963,12 +2671,16 @@ class ExactPairSupportStreamBuilder {
           audit.early_closed_rank_rejection_count <=
               audit.global_closed_ball_query_count &&
           audit.closed_ball_node_visit_count >=
-              audit.global_closed_ball_query_count &&
+              minimum_closed_ball_node_visit_count &&
           (audit.global_closed_ball_query_count == 0U ||
            audit.maximum_closed_ball_frontier_entry_count > 0U) &&
           audit.maximum_frontier_entry_count >= checkpoint.frontier.size() &&
           audit.maximum_witness_frontier_entry_count >=
               pending_active_witness_entry_count &&
+          audit.maximum_closed_ball_frontier_entry_count >=
+              pending_active_closed_ball_entry_count &&
+          audit.point_classification_count >=
+              minimum_point_classification_count &&
           audit.strict_interior_witness_subtree_count >=
               pending_strict_receipt_count &&
           audit.strict_interior_witness_point_count >=
@@ -2027,7 +2739,13 @@ class ExactPairSupportStreamBuilder {
         verification.validation_audit
                 .strict_receipt_geometry_recertification_count ==
             verification.validation_audit
-                .strict_witness_receipt_validation_count;
+                .strict_witness_receipt_validation_count &&
+        verification.validation_audit
+                .closed_ball_interior_id_recertification_count ==
+            pending_closed_ball_interior_count &&
+        verification.validation_audit
+                .closed_ball_node_recertification_count ==
+            pending_closed_ball_node_visit_count;
     verification.integrity_verified =
         verification.manifest_matches_authorities &&
         verification.checksum_matches_payload &&
@@ -2093,6 +2811,22 @@ class ExactPairSupportStreamBuilder {
       box.upper_binary64_bits[axis] =
           cloud_.point(current.upper_point_ids[axis])
               .canonical_input_bits()[axis];
+    }
+    return box;
+  }
+
+  [[nodiscard]] spatial::ExactDyadicAabb3 point_box(
+      PointId point_id) const {
+    if (point_id >= cloud_.size()) {
+      throw std::logic_error(
+          "a pair-support cursor references an invalid point id");
+    }
+    spatial::ExactDyadicAabb3 box{};
+    const auto& bits =
+        cloud_.point(point_id).canonical_input_bits();
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      box.lower_binary64_bits[axis] = bits[axis];
+      box.upper_binary64_bits[axis] = bits[axis];
     }
     return box;
   }
@@ -2279,6 +3013,356 @@ class ExactPairSupportStreamBuilder {
       const Node& support_node) const noexcept {
     return query_node.leaf_begin < support_node.leaf_end &&
            support_node.leaf_begin < query_node.leaf_end;
+  }
+
+  [[nodiscard]] static std::size_t node_range_intersection_size(
+      const Node& left,
+      const Node& right) noexcept {
+    const std::size_t begin =
+        std::max(left.leaf_begin, right.leaf_begin);
+    const std::size_t end =
+        std::min(left.leaf_end, right.leaf_end);
+    return begin < end ? end - begin : 0U;
+  }
+
+  enum class CenterCoverCellSearchOutcome : std::uint8_t {
+    certified,
+    insufficient_closed_rank,
+    resource_cap_reached,
+  };
+
+  enum class CenterCoverRankPruneOutcome : std::uint8_t {
+    not_pruned,
+    pruned,
+    budget_exhausted,
+  };
+
+  struct CenterCoverCellSearchResult {
+    CenterCoverCellSearchOutcome outcome{
+        CenterCoverCellSearchOutcome::insufficient_closed_rank};
+    ExactCenterCoverCellCertificate certificate{};
+  };
+
+  [[nodiscard]] CenterCoverCellSearchResult
+  search_center_cover_cell(
+      const ExactDoubledCenterCell& cell,
+      const UnnormalizedExactDyadic& minimum_squared_distance,
+      const Node& first_support,
+      const Node& second_support,
+      std::size_t required_strict_witness_count,
+      std::size_t maximum_attempt_work_unit_count,
+      ExactCenterCoverAttemptAudit& audit) const {
+    CenterCoverCellSearchResult result;
+    result.certificate.cell = cell;
+    const std::size_t auxiliary_cap = std::min(
+        pair_support_center_cover_maximum_auxiliary_entry_count,
+        result_.budget.maximum_auxiliary_frontier_entry_count);
+    if (auxiliary_cap == 0U) {
+      result.outcome =
+          CenterCoverCellSearchOutcome::resource_cap_reached;
+      return result;
+    }
+    std::vector<std::size_t> frontier;
+    frontier.reserve(auxiliary_cap);
+    frontier.push_back(index_.root_index_);
+    while (!frontier.empty()) {
+      const std::size_t attempt_work_unit_count = checked_add(
+          audit.cell_visit_count,
+          audit.witness_node_visit_count,
+          "the pair-support center-cover attempt work overflows size_t");
+      if (audit.witness_node_visit_count >=
+              pair_support_center_cover_maximum_witness_node_visit_count ||
+          attempt_work_unit_count >=
+              maximum_attempt_work_unit_count) {
+        result.outcome =
+            CenterCoverCellSearchOutcome::resource_cap_reached;
+        return result;
+      }
+      const std::size_t query_node_index = frontier.back();
+      frontier.pop_back();
+      const Node& query = node(query_node_index);
+      const spatial::ExactDyadicAabb3 query_box =
+          node_box(query_node_index);
+      audit.witness_node_visit_count = checked_add(
+          audit.witness_node_visit_count,
+          1U,
+          "the pair-support center-cover witness visit count overflows size_t");
+      // mu(C,Q) is the exact minimum, over doubled query points y in 2Q,
+      // of max_{s in C} ||y-s||^2.  The Cartesian maximum separates by
+      // axis and its minimizer is the cell midpoint clamped to 2Q.
+      // Equality cannot satisfy the retained strict predicate.
+      if (!dyadic_less(
+              minimum_doubled_center_query_squared_distance(
+                  cell, query_box),
+              minimum_squared_distance)) {
+        continue;
+      }
+      const bool overlaps_support =
+          node_range_intersection_size(query, first_support) != 0U ||
+          node_range_intersection_size(query, second_support) != 0U;
+      if (!overlaps_support &&
+          query_box_strictly_inside_every_cell_ball(
+              cell,
+              minimum_squared_distance,
+              query_box)) {
+        const std::size_t point_count =
+            query.leaf_end - query.leaf_begin;
+        result.certificate.witness_point_count = checked_add(
+            result.certificate.witness_point_count,
+            point_count,
+            "the pair-support center-cover witness count overflows size_t");
+        result.certificate.witness_receipts.push_back(
+            make_witness_entry(query_node_index));
+        audit.strict_witness_subtree_count = checked_add(
+            audit.strict_witness_subtree_count,
+            1U,
+            "the pair-support center-cover strict-subtree count overflows size_t");
+        audit.strict_witness_point_count = checked_add(
+            audit.strict_witness_point_count,
+            point_count,
+            "the pair-support center-cover strict-point count overflows size_t");
+        if (result.certificate.witness_point_count >=
+            required_strict_witness_count) {
+          result.outcome = CenterCoverCellSearchOutcome::certified;
+          return result;
+        }
+        continue;
+      }
+      if (query.is_leaf()) {
+        continue;
+      }
+      if (!can_add_within(frontier.size(), 2U, auxiliary_cap)) {
+        result.outcome =
+            CenterCoverCellSearchOutcome::resource_cap_reached;
+        return result;
+      }
+      frontier.push_back(query.right_child);
+      frontier.push_back(query.left_child);
+    }
+    result.outcome =
+        CenterCoverCellSearchOutcome::insufficient_closed_rank;
+    return result;
+  }
+
+  [[nodiscard]] ExactCenterCoverAttemptResult
+  build_center_cover_rank_certificate(
+      const ExactPairSupportFrontierEntry& product,
+      std::size_t maximum_attempt_work_unit_count) const {
+    ExactCenterCoverAttemptResult result;
+    if (maximum_attempt_work_unit_count == 0U ||
+        maximum_attempt_work_unit_count >
+            pair_support_center_cover_atomic_work_unit_count) {
+      throw std::logic_error(
+          "a pair-support center cover has an invalid local work cap");
+    }
+    const auto [first_node_index, second_node_index] =
+        entry_nodes(product);
+    if (first_node_index == second_node_index) {
+      throw std::logic_error(
+          "a pair-support center cover requires a cross product");
+    }
+    const Node& first = node(first_node_index);
+    const Node& second = node(second_node_index);
+    if (node_range_intersection_size(first, second) != 0U) {
+      throw std::logic_error(
+          "a pair-support center cover requires disjoint Morton supports");
+    }
+    const spatial::ExactDyadicAabb3 first_box =
+        node_box(first_node_index);
+    const spatial::ExactDyadicAabb3 second_box =
+        node_box(second_node_index);
+    const UnnormalizedExactDyadic
+        minimum_support_pair_squared_distance =
+            minimum_support_squared_distance(first_box, second_box);
+    std::vector<ExactDoubledCenterCell> frontier;
+    frontier.reserve(
+        pair_support_center_cover_maximum_cell_visit_count);
+    frontier.push_back(
+        make_doubled_center_cell(first_box, second_box));
+    result.certificate_cells.reserve(
+        pair_support_center_cover_maximum_cell_visit_count);
+    const std::size_t required_strict_witness_count =
+        result_.requirements.maximum_relevant_closed_rank - 1U;
+    while (!frontier.empty()) {
+      const std::size_t attempt_work_unit_count = checked_add(
+          result.audit.cell_visit_count,
+          result.audit.witness_node_visit_count,
+          "the pair-support center-cover attempt work overflows size_t");
+      if (result.audit.cell_visit_count >=
+              pair_support_center_cover_maximum_cell_visit_count ||
+          attempt_work_unit_count >=
+              maximum_attempt_work_unit_count) {
+        result.certificate_cells.clear();
+        return result;
+      }
+      ExactDoubledCenterCell cell = std::move(frontier.back());
+      frontier.pop_back();
+      result.audit.cell_visit_count = checked_add(
+          result.audit.cell_visit_count,
+          1U,
+          "the pair-support center-cover cell count overflows size_t");
+      const UnnormalizedExactDyadic minimum_squared_distance =
+          doubled_center_cell_chord_squared_lower_bound(
+              cell,
+              first_box,
+              second_box,
+              minimum_support_pair_squared_distance);
+      // rho(C)=sum_i ((upper_i-lower_i)/2)^2 is the unconstrained
+      // minimum of max_{s in C} ||y-s||^2.  If rho >= L(C), the strict
+      // common core is empty and no LBVH traversal can certify this cell.
+      if (dyadic_less(
+              minimum_doubled_center_core_squared_distance(cell),
+              minimum_squared_distance)) {
+        CenterCoverCellSearchResult cell_result =
+            search_center_cover_cell(
+                cell,
+                minimum_squared_distance,
+                first,
+                second,
+                required_strict_witness_count,
+                maximum_attempt_work_unit_count,
+                result.audit);
+        if (cell_result.outcome ==
+            CenterCoverCellSearchOutcome::certified) {
+          result.audit.certified_cell_count = checked_add(
+              result.audit.certified_cell_count,
+              1U,
+              "the pair-support certified center-cell count overflows size_t");
+          result.certificate_cells.push_back(
+              std::move(cell_result.certificate));
+          continue;
+        }
+        if (cell_result.outcome ==
+            CenterCoverCellSearchOutcome::resource_cap_reached) {
+          result.certificate_cells.clear();
+          return result;
+        }
+      }
+      ExactDoubledCenterCell left;
+      ExactDoubledCenterCell right;
+      if (!split_doubled_center_cell(cell, left, right) ||
+          !can_add_within(
+              checked_add(
+                  result.audit.cell_visit_count,
+                  frontier.size(),
+                  "the pair-support center-cover live-cell count overflows size_t"),
+              2U,
+              pair_support_center_cover_maximum_cell_visit_count)) {
+        result.certificate_cells.clear();
+        return result;
+      }
+      result.audit.cell_split_count = checked_add(
+          result.audit.cell_split_count,
+          1U,
+          "the pair-support center-cover split count overflows size_t");
+      frontier.push_back(std::move(right));
+      frontier.push_back(std::move(left));
+    }
+    if (result.certificate_cells.empty() ||
+        result.audit.certified_cell_count !=
+            result.certificate_cells.size()) {
+      throw std::logic_error(
+          "a pair-support center cover omitted its certified cells");
+    }
+    result.rank_pruned = true;
+    return result;
+  }
+
+  [[nodiscard]] CenterCoverRankPruneOutcome
+  try_atomic_center_cover_rank_prune(
+      const ExactPairSupportFrontierEntry& product) {
+    // No closed rank can exceed n.  Avoid both an overflowing n+1 threshold
+    // and a geometrically impossible attempt at the terminal requested rank.
+    if (result_.requirements.maximum_relevant_closed_rank >=
+        cloud_.size()) {
+      return CenterCoverRankPruneOutcome::not_pruned;
+    }
+    // The center-cover is fail-open and performance-only.  Its persistent
+    // token bucket grants two initial atomic envelopes, then refills at one
+    // work unit per 16 historical non-center units.  The local cap is the
+    // smaller of one atomic envelope and the exact remaining credit.
+    // Deriving both values exclusively from cumulative audited work makes
+    // the decision invariant under chunking and checkpoint resume.
+    const std::size_t historical_non_center_work =
+        historical_non_center_work_unit_count(result_.audit);
+    const std::size_t maximum_cumulative_center_cover_work =
+        center_cover_post_attempt_work_limit(
+            historical_non_center_work);
+    if (result_.audit.center_cover_work_unit_count >=
+        maximum_cumulative_center_cover_work) {
+      result_.audit.center_cover_work_preflight_skip_count = checked_add(
+          result_.audit.center_cover_work_preflight_skip_count,
+          1U,
+          "the pair-support center-cover token-bucket skip count overflows size_t");
+      return CenterCoverRankPruneOutcome::not_pruned;
+    }
+    const std::size_t remaining_center_cover_work =
+        maximum_cumulative_center_cover_work -
+        result_.audit.center_cover_work_unit_count;
+    const std::size_t local_attempt_work_unit_count =
+        std::min(
+            pair_support_center_cover_atomic_work_unit_count,
+            remaining_center_cover_work);
+    if (result_.budget.maximum_work_unit_count <
+        pair_support_center_cover_atomic_work_unit_count) {
+      result_.audit.center_cover_work_preflight_skip_count = checked_add(
+          result_.audit.center_cover_work_preflight_skip_count,
+          1U,
+          "the pair-support center-cover preflight skip count overflows size_t");
+      return CenterCoverRankPruneOutcome::not_pruned;
+    }
+    if (!can_consume_work_units(
+            local_attempt_work_unit_count)) {
+      stop(ExactPairSupportStopReason::work_unit_limit);
+      return CenterCoverRankPruneOutcome::budget_exhausted;
+    }
+
+    ExactCenterCoverAttemptResult attempt =
+        build_center_cover_rank_certificate(
+            product, local_attempt_work_unit_count);
+    const std::size_t exact_work_unit_count = checked_add(
+        attempt.audit.cell_visit_count,
+        attempt.audit.witness_node_visit_count,
+        "the pair-support center-cover work count overflows size_t");
+    if (exact_work_unit_count == 0U ||
+        exact_work_unit_count >
+            local_attempt_work_unit_count ||
+        !consume_work_units(exact_work_unit_count)) {
+      throw std::logic_error(
+          "a preflighted pair-support center cover escaped its atomic work envelope");
+    }
+    result_.audit.center_cover_attempt_count = checked_add(
+        result_.audit.center_cover_attempt_count,
+        1U,
+        "the pair-support center-cover attempt count overflows size_t");
+    result_.audit.center_cover_work_unit_count = checked_add(
+        result_.audit.center_cover_work_unit_count,
+        exact_work_unit_count,
+        "the pair-support center-cover cumulative work count overflows size_t");
+#define MORSEHGP3D_ADD_CENTER_COVER_AUDIT(field) \
+    result_.audit.center_cover_##field = checked_add( \
+        result_.audit.center_cover_##field, \
+        attempt.audit.field, \
+        "the pair-support center-cover audit count overflows size_t")
+    MORSEHGP3D_ADD_CENTER_COVER_AUDIT(cell_visit_count);
+    MORSEHGP3D_ADD_CENTER_COVER_AUDIT(cell_split_count);
+    MORSEHGP3D_ADD_CENTER_COVER_AUDIT(certified_cell_count);
+    MORSEHGP3D_ADD_CENTER_COVER_AUDIT(witness_node_visit_count);
+    MORSEHGP3D_ADD_CENTER_COVER_AUDIT(strict_witness_subtree_count);
+    MORSEHGP3D_ADD_CENTER_COVER_AUDIT(strict_witness_point_count);
+#undef MORSEHGP3D_ADD_CENTER_COVER_AUDIT
+    if (attempt.rank_pruned) {
+      result_.audit.center_cover_pruned_product_count = checked_add(
+          result_.audit.center_cover_pruned_product_count,
+          1U,
+          "the pair-support center-cover prune count overflows size_t");
+      return CenterCoverRankPruneOutcome::pruned;
+    }
+    result_.audit.center_cover_inconclusive_count = checked_add(
+        result_.audit.center_cover_inconclusive_count,
+        1U,
+        "the pair-support inconclusive center-cover count overflows size_t");
+    return CenterCoverRankPruneOutcome::not_pruned;
   }
 
   [[nodiscard]] bool proposal_product_is_eligible(
@@ -3082,7 +4166,28 @@ class ExactPairSupportStreamBuilder {
     return RankSearchOutcome::keep;
   }
 
-  [[nodiscard]] bool leaf_preflight() {
+  [[nodiscard]] bool leaf_query_preflight() {
+    if (consumed_since(
+            result_.audit.global_closed_ball_query_count,
+            chunk_audit_origin_.global_closed_ball_query_count,
+            "the pair-support query audit moved backwards") >=
+        result_.budget.maximum_global_closed_ball_query_count) {
+      stop(ExactPairSupportStopReason::global_closed_ball_query_limit);
+      return false;
+    }
+    const std::size_t required_closed_ball_frontier = checked_add(
+        index_.build_counters().maximum_depth,
+        1U,
+        "the sparse closed-ball frontier bound overflows size_t");
+    if (required_closed_ball_frontier >
+        result_.budget.maximum_auxiliary_frontier_entry_count) {
+      stop(ExactPairSupportStopReason::auxiliary_frontier_entry_limit);
+      return false;
+    }
+    return true;
+  }
+
+  [[nodiscard]] bool leaf_emission_preflight() {
     const std::size_t emitted_record_count = checked_add(
         result_.events.size(),
         result_.relevant_extra_shell_diagnostics.size(),
@@ -3106,33 +4211,6 @@ class ExactPairSupportStreamBuilder {
       stop(ExactPairSupportStopReason::emitted_point_id_reference_limit);
       return false;
     }
-    if (consumed_since(
-            result_.audit.global_closed_ball_query_count,
-            chunk_audit_origin_.global_closed_ball_query_count,
-            "the pair-support query audit moved backwards") >=
-        result_.budget.maximum_global_closed_ball_query_count) {
-      stop(ExactPairSupportStopReason::global_closed_ball_query_limit);
-      return false;
-    }
-    if (!can_add_within(
-            consumed_since(
-                result_.audit.point_classification_count,
-                chunk_audit_origin_.point_classification_count,
-                "the pair-support classification audit moved backwards"),
-            cloud_.size(),
-            result_.budget.maximum_point_classification_count)) {
-      stop(ExactPairSupportStopReason::point_classification_limit);
-      return false;
-    }
-    const std::size_t required_closed_ball_frontier = checked_add(
-        index_.build_counters().maximum_depth,
-        1U,
-        "the sparse closed-ball frontier bound overflows size_t");
-    if (required_closed_ball_frontier >
-        result_.budget.maximum_auxiliary_frontier_entry_count) {
-      stop(ExactPairSupportStopReason::auxiliary_frontier_entry_limit);
-      return false;
-    }
     return true;
   }
 
@@ -3141,44 +4219,103 @@ class ExactPairSupportStreamBuilder {
         result_.audit.point_classification_count,
         count,
         "the sparse closed-ball classification count overflows size_t");
-    if (consumed_since(
-            result_.audit.point_classification_count,
-            chunk_audit_origin_.point_classification_count,
-            "the pair-support classification audit moved backwards") >
-        result_.budget.maximum_point_classification_count) {
-      throw std::logic_error(
-          "a sparse closed-ball query exceeded its atomic classification budget");
-    }
   }
 
-  [[nodiscard]] SparseBallClassification classify_sparse_closed_ball(
+  [[nodiscard]] bool consume_closed_ball_node_visit() {
+    if (!can_consume_work_units(1U)) {
+      stop(ExactPairSupportStopReason::work_unit_limit);
+      return false;
+    }
+    const std::size_t consumed_node_visits = consumed_since(
+        result_.audit.closed_ball_node_visit_count,
+        chunk_audit_origin_.closed_ball_node_visit_count,
+        "the closed-ball node-visit audit moved backwards");
+    if (consumed_node_visits >=
+        result_.budget.maximum_closed_ball_node_visit_count) {
+      stop(ExactPairSupportStopReason::closed_ball_node_visit_limit);
+      return false;
+    }
+    if (!consume_work_unit()) {
+      return false;
+    }
+    result_.audit.closed_ball_node_visit_count = checked_add(
+        result_.audit.closed_ball_node_visit_count,
+        1U,
+        "the sparse closed-ball node count overflows size_t");
+    return true;
+  }
+
+  [[nodiscard]] SparseBallOutcome continue_sparse_closed_ball(
       const std::array<PointId, 2>& support_ids) {
-    SparseBallClassification classification;
+    if (!pending_product_.has_value() ||
+        pending_product_->stage !=
+            ExactPairSupportPendingStage::classify_leaf) {
+      throw std::logic_error(
+          "a sparse closed-ball continuation has no leaf product");
+    }
+    ExactPairSupportPendingProduct& pending = *pending_product_;
     const std::size_t interior_cap =
         result_.requirements.maximum_relevant_closed_rank - 2U;
-    classification.interior_ids.reserve(interior_cap);
-    result_.audit.global_closed_ball_query_count = checked_add(
-        result_.audit.global_closed_ball_query_count,
-        1U,
-        "the sparse closed-ball query count overflows size_t");
-    std::vector<std::size_t> frontier{index_.root_index_};
-    result_.audit.maximum_closed_ball_frontier_entry_count = std::max(
-        result_.audit.maximum_closed_ball_frontier_entry_count,
-        frontier.size());
+    if (!pending.closed_ball.has_value()) {
+      if (!leaf_query_preflight()) {
+        return SparseBallOutcome::budget_exhausted;
+      }
+      pending.closed_ball.emplace();
+      pending.closed_ball->interior_ids.reserve(interior_cap);
+      pending.closed_ball->frontier.push_back(
+          make_witness_entry(index_.root_index_));
+      result_.audit.global_closed_ball_query_count = checked_add(
+          result_.audit.global_closed_ball_query_count,
+          1U,
+          "the sparse closed-ball query count overflows size_t");
+      result_.audit.maximum_closed_ball_frontier_entry_count = std::max(
+          result_.audit.maximum_closed_ball_frontier_entry_count,
+          pending.closed_ball->frontier.size());
+    }
+    ExactPairSupportPendingClosedBall& classification =
+        *pending.closed_ball;
+    if (classification.stage ==
+        ExactPairSupportPendingClosedBallStage::ready_to_emit) {
+      return SparseBallOutcome::complete;
+    }
+    if (classification.stage !=
+        ExactPairSupportPendingClosedBallStage::traversing) {
+      throw std::logic_error(
+          "a sparse closed-ball cursor has an invalid stage");
+    }
     const ExactDyadicAnchorPhi anchor = exact_dyadic_anchor_phi(
         cloud_.point(support_ids[0]), cloud_.point(support_ids[1]));
-    std::array<bool, 2> support_seen{false, false};
-    std::size_t interior_count = 0U;
-    while (!frontier.empty()) {
-      const std::size_t node_index = frontier.back();
-      frontier.pop_back();
+    while (!classification.frontier.empty()) {
+      const ExactPairSupportWitnessNodeEntry query_entry =
+          classification.frontier.back();
+      const std::size_t node_index = witness_node_index(query_entry);
       const Node& current = node(node_index);
+      // A split pops one entry and pushes two, hence needs one net slot.
+      // Conservatively reserve it before charging or mutating the cursor.
+      // This makes a resume under a lower auxiliary cap a clean refusal with
+      // no repeated physical visit.  A later larger-budget chunk sees the
+      // byte-identical scientific cursor.
+      if (!current.is_leaf() &&
+          !can_add_within(
+              classification.frontier.size(),
+              1U,
+              result_.budget
+                  .maximum_auxiliary_frontier_entry_count)) {
+        stop(
+            ExactPairSupportStopReason::
+                auxiliary_frontier_entry_limit);
+        return SparseBallOutcome::budget_exhausted;
+      }
+      if (!consume_closed_ball_node_visit()) {
+        return SparseBallOutcome::budget_exhausted;
+      }
+      classification.node_visit_count = checked_add(
+          classification.node_visit_count,
+          1U,
+          "the pending closed-ball node count overflows size_t");
+      classification.frontier.pop_back();
       const std::size_t subtree_size =
           current.leaf_end - current.leaf_begin;
-      result_.audit.closed_ball_node_visit_count = checked_add(
-          result_.audit.closed_ball_node_visit_count,
-          1U,
-          "the sparse closed-ball node count overflows size_t");
       const spatial::ExactDyadicAabb3 query_box = node_box(node_index);
       const int minimum_phi_sign =
           exact_anchor_phi_aabb_minimum_sign(anchor, query_box);
@@ -3210,8 +4347,8 @@ class ExactPairSupportStreamBuilder {
           1U,
           "the sparse closed-ball maximum-bound count overflows size_t");
       if (maximum_phi_sign < 0) {
-        interior_count = checked_add(
-            interior_count,
+        const std::size_t interior_count = checked_add(
+            classification.interior_ids.size(),
             subtree_size,
             "the sparse closed-ball interior count overflows size_t");
         result_.audit.closed_ball_bulk_interior_subtree_count = checked_add(
@@ -3228,8 +4365,7 @@ class ExactPairSupportStreamBuilder {
               result_.audit.early_closed_rank_rejection_count,
               1U,
               "the sparse closed-ball early-rejection count overflows size_t");
-          classification.outcome = SparseBallOutcome::rank_exceeded;
-          return classification;
+          return SparseBallOutcome::rank_exceeded;
         }
         for (std::size_t position = current.leaf_begin;
              position < current.leaf_end;
@@ -3253,8 +4389,8 @@ class ExactPairSupportStreamBuilder {
             "overflows size_t");
         add_point_classifications(1U);
         if (maximum_phi_sign < 0) {
-          interior_count = checked_add(
-              interior_count,
+          const std::size_t interior_count = checked_add(
+              classification.interior_ids.size(),
               1U,
               "the sparse closed-ball interior count overflows size_t");
           if (interior_count > interior_cap) {
@@ -3262,8 +4398,7 @@ class ExactPairSupportStreamBuilder {
                 result_.audit.early_closed_rank_rejection_count,
                 1U,
                 "the sparse closed-ball early-rejection count overflows size_t");
-            classification.outcome = SparseBallOutcome::rank_exceeded;
-            return classification;
+            return SparseBallOutcome::rank_exceeded;
           }
           classification.interior_ids.push_back(point_id);
         } else if (maximum_phi_sign == 0) {
@@ -3272,9 +4407,13 @@ class ExactPairSupportStreamBuilder {
               1U,
               "the sparse closed-ball shell count overflows size_t");
           if (point_id == support_ids[0]) {
-            support_seen[0] = true;
+            classification.support_seen_mask =
+                static_cast<std::uint8_t>(
+                    classification.support_seen_mask | 1U);
           } else if (point_id == support_ids[1]) {
-            support_seen[1] = true;
+            classification.support_seen_mask =
+                static_cast<std::uint8_t>(
+                    classification.support_seen_mask | 2U);
           } else if (!classification.canonical_extra_shell_witness_id.has_value() ||
                      point_id <
                          *classification.canonical_extra_shell_witness_id) {
@@ -3288,46 +4427,45 @@ class ExactPairSupportStreamBuilder {
         }
         continue;
       }
-      frontier.push_back(current.right_child);
-      frontier.push_back(current.left_child);
-      if (frontier.size() >
+      classification.frontier.push_back(
+          make_witness_entry(current.right_child));
+      classification.frontier.push_back(
+          make_witness_entry(current.left_child));
+      if (classification.frontier.size() >
           result_.budget.maximum_auxiliary_frontier_entry_count) {
         throw std::logic_error(
             "a sparse closed-ball DFS exceeded its preflight frontier bound");
       }
       result_.audit.maximum_closed_ball_frontier_entry_count = std::max(
           result_.audit.maximum_closed_ball_frontier_entry_count,
-          frontier.size());
+          classification.frontier.size());
     }
     const std::size_t classified_count = checked_add(
         checked_add(
-            interior_count,
+            classification.interior_ids.size(),
             classification.shell_count,
             "the sparse closed-ball partition count overflows size_t"),
         classification.exterior_count,
         "the sparse closed-ball partition count overflows size_t");
     if (classified_count != cloud_.size() ||
-        !support_seen[0] || !support_seen[1] ||
+        classification.support_seen_mask != 3U ||
         classification.shell_count < 2U ||
         (classification.shell_count == 2U) !=
-            !classification.canonical_extra_shell_witness_id.has_value() ||
-        interior_count != classification.interior_ids.size()) {
+            !classification.canonical_extra_shell_witness_id.has_value()) {
       throw std::logic_error(
           "a sparse closed-ball traversal did not close its exact partition");
     }
     std::sort(
         classification.interior_ids.begin(),
         classification.interior_ids.end());
-    classification.outcome = SparseBallOutcome::complete;
-    return classification;
+    classification.stage =
+        ExactPairSupportPendingClosedBallStage::ready_to_emit;
+    return SparseBallOutcome::complete;
   }
 
   [[nodiscard]] bool classify_leaf_pair(
       std::size_t first_node_index,
       std::size_t second_node_index) {
-    if (!leaf_preflight()) {
-      return false;
-    }
     const Node& first = node(first_node_index);
     const Node& second = node(second_node_index);
     if (!first.is_leaf() || !second.is_leaf() ||
@@ -3341,9 +4479,38 @@ class ExactPairSupportStreamBuilder {
     if (support_ids[1] < support_ids[0]) {
       std::swap(support_ids[0], support_ids[1]);
     }
-    SparseBallClassification classification =
-        classify_sparse_closed_ball(support_ids);
-    frontier_.pop_back();
+    const SparseBallOutcome outcome =
+        continue_sparse_closed_ball(support_ids);
+    if (outcome == SparseBallOutcome::budget_exhausted) {
+      return false;
+    }
+    if (outcome == SparseBallOutcome::rank_exceeded) {
+      frontier_.pop_back();
+      result_.audit.leaf_pair_classification_count = checked_add(
+          result_.audit.leaf_pair_classification_count,
+          1U,
+          "the pair-support leaf-classification count overflows size_t");
+      result_.audit.resolved_pair_count = checked_add(
+          result_.audit.resolved_pair_count,
+          1U,
+          "the pair-support resolved-pair count overflows size_t");
+      result_.audit.above_rank_pair_count = checked_add(
+          result_.audit.above_rank_pair_count,
+          1U,
+          "the pair-support above-rank count overflows size_t");
+      return true;
+    }
+    if (!pending_product_->closed_ball.has_value() ||
+        pending_product_->closed_ball->stage !=
+            ExactPairSupportPendingClosedBallStage::ready_to_emit) {
+      throw std::logic_error(
+          "a complete sparse closed-ball query has no emission cursor");
+    }
+    if (!leaf_emission_preflight()) {
+      return false;
+    }
+    ExactPairSupportPendingClosedBall& classification =
+        *pending_product_->closed_ball;
     result_.audit.leaf_pair_classification_count = checked_add(
         result_.audit.leaf_pair_classification_count,
         1U,
@@ -3352,13 +4519,6 @@ class ExactPairSupportStreamBuilder {
         result_.audit.resolved_pair_count,
         1U,
         "the pair-support resolved-pair count overflows size_t");
-    if (classification.outcome == SparseBallOutcome::rank_exceeded) {
-      result_.audit.above_rank_pair_count = checked_add(
-          result_.audit.above_rank_pair_count,
-          1U,
-          "the pair-support above-rank count overflows size_t");
-      return true;
-    }
 
     // The sparse decision needs only the exact diametral identity.  Construct
     // the rational level once, and only for a record that survives the rank
@@ -3463,6 +4623,7 @@ class ExactPairSupportStreamBuilder {
       throw std::logic_error(
           "a pair-support record exceeded its conservative reference preflight");
     }
+    frontier_.pop_back();
     return true;
   }
 
@@ -3629,9 +4790,21 @@ class ExactPairSupportStreamBuilder {
     }
     if (pending_product_->stage ==
         ExactPairSupportPendingStage::rank_search) {
-      const RankSearchOutcome rank_search = continue_rank_prune_search();
+      RankSearchOutcome rank_search = continue_rank_prune_search();
       if (rank_search == RankSearchOutcome::budget_exhausted) {
         return;
+      }
+      if (rank_search == RankSearchOutcome::keep) {
+        const CenterCoverRankPruneOutcome center_cover =
+            try_atomic_center_cover_rank_prune(
+                pending_product_->product);
+        if (center_cover ==
+            CenterCoverRankPruneOutcome::budget_exhausted) {
+          return;
+        }
+        if (center_cover == CenterCoverRankPruneOutcome::pruned) {
+          rank_search = RankSearchOutcome::prune;
+        }
       }
       if (rank_search == RankSearchOutcome::prune) {
         const std::size_t pair_count =
@@ -3659,6 +4832,7 @@ class ExactPairSupportStreamBuilder {
       pending_product_->strict_witness_receipts.clear();
       pending_product_->deferred_expansion_node.reset();
       pending_product_->strict_witness_point_count = 0U;
+      pending_product_->closed_ball.reset();
     }
 
     const auto [first_node_index, second_node_index] =
@@ -3715,8 +4889,17 @@ class ExactPairSupportStreamBuilder {
     result_.self_product_partition_certified = true;
     result_.witness_antichains_certified = true;
     result_.all_rank_prunes_recertified = true;
-    // Every non-rank-rejected leaf query reaches a complete global shell.
-    result_.all_rank_relevant_shells_complete = true;
+    // A stopped, resumable leaf traversal has not yet closed its global
+    // shell.  A classify-leaf product certifies completion only with an
+    // explicit ready-to-emit cursor; query/auxiliary preflight can stop before
+    // that cursor exists.
+    result_.all_rank_relevant_shells_complete =
+        !pending_product_.has_value() ||
+        pending_product_->stage !=
+            ExactPairSupportPendingStage::classify_leaf ||
+        (pending_product_->closed_ball.has_value() &&
+         pending_product_->closed_ball->stage ==
+             ExactPairSupportPendingClosedBallStage::ready_to_emit);
     result_.frontier_exhausted = frontier_.empty();
     result_.no_forbidden_global_structure_materialized = true;
     result_.hierarchy_reduction_performed = false;

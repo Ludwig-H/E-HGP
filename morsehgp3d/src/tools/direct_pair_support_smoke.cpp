@@ -60,8 +60,8 @@ namespace smoke_clouds = morsehgp3d::tools::pair_support_smoke;
       return "emitted_point_id_reference_limit";
     case ExactPairSupportStopReason::global_closed_ball_query_limit:
       return "global_closed_ball_query_limit";
-    case ExactPairSupportStopReason::point_classification_limit:
-      return "point_classification_limit";
+    case ExactPairSupportStopReason::closed_ball_node_visit_limit:
+      return "closed_ball_node_visit_limit";
   }
   throw std::logic_error("invalid pair-support stop reason");
 }
@@ -69,10 +69,7 @@ namespace smoke_clouds = morsehgp3d::tools::pair_support_smoke;
 [[nodiscard]] ExactPairSupportStreamBudget smoke_budget(
     std::size_t point_count) {
   constexpr std::size_t query_limit = 2048U;
-  if (point_count >
-      std::numeric_limits<std::size_t>::max() / query_limit) {
-    throw std::overflow_error("the smoke point-classification cap overflows");
-  }
+  static_cast<void>(point_count);
   return ExactPairSupportStreamBudget{
       20000U,
       65536U,
@@ -80,7 +77,7 @@ namespace smoke_clouds = morsehgp3d::tools::pair_support_smoke;
       2048U,
       32768U,
       query_limit,
-      query_limit * point_count};
+      20000U};
 }
 
 template <typename Generator>

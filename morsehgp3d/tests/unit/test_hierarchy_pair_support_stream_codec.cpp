@@ -39,6 +39,7 @@ using morsehgp3d::exact::circumcenter;
 using morsehgp3d::hierarchy::ExactPairSupportCheckpointManifest;
 using morsehgp3d::hierarchy::ExactPairSupportExtraShellDiagnostic;
 using morsehgp3d::hierarchy::ExactPairSupportFrontierEntry;
+using morsehgp3d::hierarchy::ExactPairSupportPendingClosedBallStage;
 using morsehgp3d::hierarchy::ExactPairSupportPendingProduct;
 using morsehgp3d::hierarchy::ExactPairSupportPendingStage;
 using morsehgp3d::hierarchy::ExactPairSupportStreamAudit;
@@ -70,7 +71,7 @@ constexpr std::size_t payload_status_offset = 320U;
 constexpr std::size_t payload_event_count_offset = 322U;
 constexpr std::size_t payload_first_exact_text_length_offset = 346U;
 constexpr std::string_view wire_checksum_domain =
-    "MorseHGP3D/phase9/pair-support/chunk-wire/v1/sha256/";
+    "MorseHGP3D/phase14q/pair-support/chunk-wire/v2/sha256/";
 
 int failures = 0;
 
@@ -231,6 +232,21 @@ void positional_write(
       &ExactPairSupportStreamAudit::
           strict_interior_witness_subtree_count,
       &ExactPairSupportStreamAudit::strict_interior_witness_point_count,
+      &ExactPairSupportStreamAudit::
+          center_cover_work_preflight_skip_count,
+      &ExactPairSupportStreamAudit::center_cover_attempt_count,
+      &ExactPairSupportStreamAudit::center_cover_inconclusive_count,
+      &ExactPairSupportStreamAudit::center_cover_pruned_product_count,
+      &ExactPairSupportStreamAudit::center_cover_work_unit_count,
+      &ExactPairSupportStreamAudit::center_cover_cell_visit_count,
+      &ExactPairSupportStreamAudit::center_cover_cell_split_count,
+      &ExactPairSupportStreamAudit::center_cover_certified_cell_count,
+      &ExactPairSupportStreamAudit::
+          center_cover_witness_node_visit_count,
+      &ExactPairSupportStreamAudit::
+          center_cover_strict_witness_subtree_count,
+      &ExactPairSupportStreamAudit::
+          center_cover_strict_witness_point_count,
       &ExactPairSupportStreamAudit::rank_pruned_product_count,
       &ExactPairSupportStreamAudit::rank_pruned_pair_count,
       &ExactPairSupportStreamAudit::leaf_pair_classification_count,
@@ -275,8 +291,8 @@ void positional_write(
 
 [[nodiscard]] ExactPairSupportCheckpointManifest manifest() {
   return ExactPairSupportCheckpointManifest{
-      1U,
-      1U,
+      morsehgp3d::hierarchy::pair_support_checkpoint_schema_version,
+      morsehgp3d::hierarchy::pair_support_traversal_version,
       19U,
       37U,
       19U,
@@ -359,6 +375,18 @@ void positional_write(
   pending.deferred_expansion_node =
       ExactPairSupportWitnessNodeEntry{28U, 29U, 30U};
   pending.strict_witness_point_count = 31U;
+  pending.closed_ball.emplace();
+  pending.closed_ball->stage =
+      ExactPairSupportPendingClosedBallStage::traversing;
+  pending.closed_ball->node_visit_count = 32U;
+  pending.closed_ball->frontier = {
+      ExactPairSupportWitnessNodeEntry{33U, 34U, 35U},
+      ExactPairSupportWitnessNodeEntry{36U, 37U, 38U}};
+  pending.closed_ball->interior_ids = {39U, 40U};
+  pending.closed_ball->shell_count = 1U;
+  pending.closed_ball->canonical_extra_shell_witness_id = 41U;
+  pending.closed_ball->exterior_count = 42U;
+  pending.closed_ball->support_seen_mask = 1U;
   chunk.next_checkpoint.pending_product = std::move(pending);
   chunk.next_checkpoint.cumulative_audit = audit_from(400U);
   chunk.next_checkpoint.checkpoint_digest = identifier(211U);
@@ -480,7 +508,7 @@ void test_roundtrip_and_determinism() {
   const std::string golden = golden_builder.finalize().to_lower_hex();
   check(
       golden ==
-          "10c0559055cb857dca14fb6a6e16f6f12fb6c8680b808421cf8af20dbe56777b",
+          "76192f3f8478da46aa2b6301f6675cd422560ea8c89aecc1aac9c8537c9da9f5",
       "the complete canonical wire has a stable golden SHA-256 (observed " +
           golden + ")");
 }
@@ -508,12 +536,20 @@ void test_hostile_envelope_and_checksum() {
       "an invalid magic fails before payload parsing");
 
   hostile = valid;
-  hostile[19] = 2U;
+  hostile[19] = 0xffU;
   check_decision(
       hostile,
       limits,
       ExactPairSupportStreamDecodeDecision::unsupported_version,
       "an unknown wire version fails closed");
+
+  hostile = valid;
+  hostile[19] = 1U;
+  check_decision(
+      hostile,
+      limits,
+      ExactPairSupportStreamDecodeDecision::unsupported_version,
+      "the v2 decoder explicitly rejects a legacy v1 wire");
 
   hostile = valid;
   hostile[20] = 2U;
@@ -941,7 +977,7 @@ void test_fd_roundtrip_receipt_and_position() {
   check(
       receipt.encoded_byte_count == vector_wire.size() &&
           positional_read(file.get(), vector_wire.size()) == vector_wire,
-      "fd and vector encoders produce the identical v1 golden wire");
+      "fd and vector encoders produce the identical v2 golden wire");
   std::array<std::uint8_t, CanonicalId::byte_count> expected_checksum{};
   std::copy_n(
       vector_wire.end() -
