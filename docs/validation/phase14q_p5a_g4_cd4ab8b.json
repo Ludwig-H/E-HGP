@@ -85,7 +85,7 @@
   },
   "gcp_session_safety": {
     "project": "devpod-gpu-exploration",
-    "zone": "europe-west4-a",
+    "zone": "europe-west4-ai1a",
     "instance": "ehgp-blackwell-spot-ai1a",
     "generation": "2026-07-25T05:52:35.118-07:00",
     "final_status": "TERMINATED",
