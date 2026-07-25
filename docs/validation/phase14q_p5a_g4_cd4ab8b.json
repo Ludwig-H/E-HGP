@@ -1,0 +1,98 @@
+{
+  "schema": "morsehgp3d.phase14q.p5a_g4_component_diagnostic.v1",
+  "artifact_role": "stackless_single_product_pair_rank_prune_component_smoke",
+  "git_sha": "cd4ab8b0a5cddf24fdb060073232186b5ba716b4",
+  "phase": "14Q",
+  "backend": "cuda_g4_plus_reference_cpu",
+  "profile": "hgp_reduced",
+  "mode": "proposal_only_then_certified",
+  "component_semantics": "stackless_terminal_proposal_then_cpu_exact_recertified",
+  "deployment_status": "architecture_only",
+  "public_status": "not_claimed",
+  "environment": {
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "driver": "580.159.03",
+    "cuda_nvcc": "12.9.86",
+    "aot_artifacts": {
+      "sm_120_cubin_count": 1,
+      "ptx_count": 0
+    },
+    "targeted_cuda_test_passed": true,
+    "compute_sanitizer": {
+      "family": "uniform_latin",
+      "point_count": 4096,
+      "error_count": 0
+    }
+  },
+  "case": {
+    "family": "uniform_latin",
+    "point_count": 12500,
+    "k_max": 10,
+    "work_budget": 20000,
+    "product_capacity": 1,
+    "frontier_capacity": 32768,
+    "terminal_capacity": 16384,
+    "epoch_budget": 64,
+    "repetitions": 1
+  },
+  "timing_ms": {
+    "historical_cpu_chunk": 320.619520,
+    "first_assisted_chunk": 1094.619752,
+    "resident_assisted_chunk": 934.076989
+  },
+  "audit": {
+    "component_success": true,
+    "fresh_ephemeral_verifier_complete": true,
+    "capacity_stop_count": 0,
+    "gpu_batch_fallback_count": 0,
+    "historical_cpu_fallback_product_count": 1,
+    "callback_count": 222,
+    "stackless_kernel_launch_count": 222,
+    "count_kernel_launch_count": 0,
+    "scan_count": 0,
+    "visited_item_count": 41243,
+    "resident_traversal_synchronization_count": 444,
+    "cpu_exact_recertified_terminal_count": 20176,
+    "gpu_prune_proposal_count": 22,
+    "gpu_keep_proposal_count": 200,
+    "consumed_prune_count": 22,
+    "consumed_keep_count": 199,
+    "active_terminal_device_to_host_byte_count": 322816,
+    "physical_terminal_device_to_host_byte_count": 322816,
+    "first_rope_snapshot_host_to_device_byte_count": 99996,
+    "resident_rope_snapshot_host_to_device_byte_count": 0,
+    "first_lbvh_snapshot_host_to_device_byte_count": 1999920,
+    "resident_lbvh_snapshot_host_to_device_byte_count": 0,
+    "fixed_workspace_byte_count": 262216
+  },
+  "qualification": {
+    "component_only": true,
+    "terminal_coverage_recertified": true,
+    "gpu_terminal_kinds_authoritative": false,
+    "small_cloud_speed_gate_passed": false,
+    "full_hierarchy_executed": false,
+    "warm_e2e_protocol_executed": false,
+    "warm_e2e_50000_slo_claimed": false,
+    "point_count_50000_executed": false,
+    "ten_million_or_larger_executed": false,
+    "public_status_claimed": false
+  },
+  "verdict": {
+    "escalation_stopped": true,
+    "reason": "The one-thread stackless specialization removes epoch frontiers and scans but remains slower than the historical exact CPU chunk; per-product serial work, two resident synchronizations for active transcripts, and CPU exact recertification dominate.",
+    "next_small_cloud_direction": "Optimize the historical exact CPU sign path with bounded fixed-width exact arithmetic and a fail-safe BigInt fallback.",
+    "next_massive_cloud_direction": "Replace single-product serial traversal with genuinely parallel product batches and amortized synchronization."
+  },
+  "gcp_session_safety": {
+    "project": "devpod-gpu-exploration",
+    "zone": "europe-west4-a",
+    "instance": "ehgp-blackwell-spot-ai1a",
+    "generation": "2026-07-25T05:52:35.118-07:00",
+    "final_status": "TERMINATED",
+    "last_stop_timestamp": "2026-07-25T05:58:28.018-07:00",
+    "provisioning_model": "SPOT",
+    "instance_termination_action": "STOP",
+    "max_run_duration_seconds": 3600
+  },
+  "scope_note": "This single 12500-point component diagnostic is a negative small-cloud speed gate. It is not a full Morse pipeline, a latency distribution, a 50000-point SLO result, or evidence of 10M-plus scalability."
+}
