@@ -284,16 +284,17 @@ Le diagnostic suivant [phase14q_p8e_g4_ba8dd15.json](phase14q_p8e_g4_ba8dd15.jso
 
 ## Incrément 14Q P8f — géométrie témoin préparée par tuile
 
-P8f est implémenté localement mais reste en attente de qualification G4. Un quatrième kernel prépare une fois par couple requête--témoin les intervalles outward de direction, les trois mots de coordonnées du témoin et le masque d'axes actifs. Les deux traversées réemploient ensuite cette géométrie; les cas invalides ou contenant zéro restent fail-open et le rejeu CPU exact demeure inchangé. Les unités hôte du contexte et du recertificateur compilent et leurs deux tests ciblés passent.
+P8f est qualifié comme diagnostic de composant au SHA exact `95314a18ecd2d8ff2d7377417f7943d20c0c2daf`. Un quatrième kernel prépare une fois par couple requête--témoin les intervalles outward de direction, les trois mots de coordonnées du témoin et le masque d'axes actifs. Les deux traversées réemploient ensuite cette géométrie; les cas invalides ou contenant zéro restent fail-open et le rejeu CPU exact demeure inchangé. L'AOT réel contient deux cubins `sm_120`.
 
-L'arène fixe ajoute exactement $5120Q_{\max}$ octets avec $Q_{\max}\leq4096$, soit au plus 20 971 520 octets. La limite exécutoire interdit qu'elle devienne un tableau $64n$; un passage toutes ancres doit segmenter ses requêtes. L'allocation persiste dans le contexte, mais chaque préfixe actif est réécrit, le suffixe inactif n'a aucune autorité et aucun octet n'est transféré. Elle n'ajoute aucune structure indexée par le nuage complet. Aucun résultat de vitesse n'est encore enregistré. La porte suivante est limitée à 4 096 puis 50 000 points; elle doit préserver l'autorité recertifiée avant que les banques device bornées soient raccordées.
+L'arène fixe ajoute exactement $5120Q_{\max}$ octets avec $Q_{\max}\leq4096$, soit au plus 20 971 520 octets. La limite exécutoire interdit qu'elle devienne un tableau $64n$; un passage toutes ancres doit segmenter ses requêtes. L'allocation persiste dans le contexte, mais chaque préfixe actif est réécrit, le suffixe inactif n'a aucune autorité et aucun octet n'est transféré. Elle n'ajoute aucune structure indexée par le nuage complet. À 4 096 points et 16 requêtes, proposition, recertification et composant prennent 7,672030, 17,015130 et 24,687310 ms, avec le digest `8808628165750322254` et tous les compteurs attendus.
+
+À 50 000 points et 64 requêtes, les trois répétitions retrouvent toutes le digest `8188146790829181083`, 147 376 visites, 28 866 candidates, 30 693 prunes et 59 559 records. Les échantillons bruts de proposition sont 361,262217, 360,130686 et 360,229307 ms; ceux de recertification 201,816259, 201,742890 et 201,754859 ms; ceux du composant 563,078746, 561,873646 et 561,984346 ms. Les médianes 360,229307, 201,754859 et 561,984346 ms donnent seulement 1,260627 fois d'accélération de proposition et 1,167500 fois de composant par rapport à `ba8dd15`. La porte interne de 100 ms échoue; ce diagnostic n'est ni un p95, ni `warm_e2e`, ni une réponse toutes ancres.
+
+L'artefact [phase14q_p8f_g4_95314a1.json](phase14q_p8f_g4_95314a1.json) conserve les sorties brutes. La session G4 `SPOT`, démarrée à `2026-07-25T14:58:31.800-07:00`, a été arrêtée à `2026-07-25T15:08:45.175-07:00` et certifiée `TERMINATED`; aucune autre VM labellisée n'était active et la clé de session a été révoquée puis supprimée localement. La piste de micro-optimisation du prédicat ancré est fermée sans promotion scientifique ou produit.
 
 ## Priorités de développement
 
-1. qualifier P8f sur G4 avec seulement 4 096 puis 50 000 points et abandonner cette piste de micro-optimisation si le terme dominant ne baisse pas structurellement;
-2. produire les banques directement par tuiles device dans l'arène de requêtes, sans tableau $64n$, et remplacer le préfixe sériel avant un grand nombre d'ancres;
-3. mutualiser le classificateur P8c avec P7b, propager seulement les supports acceptés vers le supérieur sparse et réussir `uniform_latin` puis `eight_clusters` à 50 000 points sous `warm_e2e`;
-4. externaliser autorités et sorties Phase 15, réussir 10 000 001 points, puis seulement 30 M et 50 M après succès complet du rang précédent.
+1. dériver puis implémenter, avant tout nouveau benchmark, un certificat exact groupé et streamable qui mutualise ou élimine les prédicats témoin--nœud entre requêtes d'une tuile et réduit structurellement le terme requêtes × visites × témoins, sans arène globale ni tableau $64n$; les banques device, P8c/P7b, le vrai `warm_e2e` 50 k et l'externalisation 10 M+ restent en aval de cette porte mathématique.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 
