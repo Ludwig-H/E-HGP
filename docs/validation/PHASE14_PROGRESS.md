@@ -280,6 +280,8 @@ Le diagnostic G4 versionné [phase14q_p8e_g4_626e1b3.json](phase14q_p8e_g4_626e1
 
 Le gate de composant 50 k échoue donc en vitesse. Il révèle simultanément que 4 194 304 records physiques, soit 67 108 864 octets, sont initialisés et copiés pour seulement 59 559 records utiles, et que les deux vagues de 32 témoins sont évaluées à chaque nœud. Ces observations guident l'optimisation mais n'isolent pas encore leurs coûts. Le préfixe/clamp device est sériel et les banques restent construites sur l'hôte pour 64 ancres; ni un passage toutes ancres, ni `warm_e2e`, ni les supports supérieurs, ni 10 M+ ne sont qualifiés. Les deux sessions GCP sont certifiées `TERMINATED`, sans autre VM E-HGP active, et leurs clés de session ont été révoquées.
 
+Le diagnostic suivant [phase14q_p8e_g4_ba8dd15.json](phase14q_p8e_g4_ba8dd15.json) conserve bit à bit les digests, visites et records. Il sélectionne les dix bits faibles en dix étapes au plus, évite la seconde vague lorsqu'elle ne peut plus changer le masque et distribue les petites tailles de lot sur un bloc par warp. Avec un transcript physique ramené de 67,1 à 2,1 Mo, la médiane 50 k sur trois répétitions baisse seulement de 535,046 à 454,115 ms pour la proposition et de 739,529 à 656,117 ms pour le composant. Le trafic de transcript divisé par 32 n'était donc pas dominant; le coût restant est celui des prédicats témoins par nœud. Le gate reste fermé.
+
 ## Priorités de développement
 
 1. court-circuiter exactement la seconde vague de témoins lorsqu'elle ne peut plus changer les dix premiers bits, puis réduire l'écart entre capacité physique et transcript actif;
