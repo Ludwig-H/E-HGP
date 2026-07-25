@@ -137,9 +137,9 @@ struct PairSupportPhiNodeDescriptor {
 
 // Fixed resident capacities for the bounded Phase 9.1-CUDA-P2 traversal.
 // maximum_work_item_count bounds each of the two device frontiers, not their
-// sum.  maximum_receipt_count bounds the complete variable-length transcript
-// returned by one call.  Zero capacities leave P2 disabled while preserving
-// the P1-only constructor.
+// sum.  maximum_receipt_count is retained as a source-compatible name for the
+// capacity C of the unified 16-byte terminal transcript returned by one call.
+// Zero capacities leave P2 disabled while preserving the P1-only constructor.
 struct PairSupportRankPruneCapacity {
   std::size_t maximum_product_count{};
   std::size_t maximum_work_item_count{};
@@ -152,8 +152,8 @@ struct PairSupportRankPruneCapacity {
 
 struct PairSupportRankPruneBudget {
   // One epoch is one stable count -> exclusive-scan -> emit transition over
-  // the current device frontier.  A product unfinished at this cap is omitted
-  // from proposals and remains a CPU fallback.
+  // the current device frontier.  A product whose transcript neither reaches
+  // the strict threshold nor covers the root at this cap remains a fallback.
   std::size_t maximum_epoch_count{};
 
   friend bool operator==(
@@ -177,11 +177,40 @@ struct PairSupportRankPruneProductProposal {
       const PairSupportRankPruneProductProposal&) = default;
 };
 
+enum class PairSupportRankTerminalKind : std::uint8_t {
+  strict_interior,
+  anchor_noninterior,
+  unresolved_external_leaf,
+};
+
+struct PairSupportRankTerminalCertificate {
+  hierarchy::ExactPairSupportWitnessNodeEntry terminal{};
+  PairSupportRankTerminalKind kind{
+      PairSupportRankTerminalKind::unresolved_external_leaf};
+
+  friend bool operator==(
+      const PairSupportRankTerminalCertificate&,
+      const PairSupportRankTerminalCertificate&) = default;
+};
+
+struct PairSupportRankKeepProductCertificate {
+  std::size_t product_index{};
+  hierarchy::ExactPairSupportFrontierEntry product{};
+  // The two support ranges are implicit.  Together with this Morton-canonical
+  // terminal antichain they exactly tile the resident root range.
+  std::vector<PairSupportRankTerminalCertificate> canonical_terminals;
+  std::size_t strict_interior_point_count{};
+
+  friend bool operator==(
+      const PairSupportRankKeepProductCertificate&,
+      const PairSupportRankKeepProductCertificate&) = default;
+};
+
 struct PairSupportRankPruneAudit {
   static constexpr const char* proposal_semantics =
-      "cuda_bounded_two_frontier_rank_prune_proposal_only";
+      "cuda_bounded_two_frontier_rank_prune_or_keep_certificate";
   static constexpr const char* receipt_semantics =
-      "cpu_exact_dyadic_disjoint_witness_antichain_recertified";
+      "cpu_exact_unified_terminal_antichain_and_coverage_recertified";
 
   PairSupportRankPruneCapacity capacity{};
   PairSupportRankPruneBudget budget{};
@@ -193,6 +222,15 @@ struct PairSupportRankPruneAudit {
   std::size_t gpu_emit_kernel_launch_count{};
   std::size_t gpu_visited_work_item_count{};
   std::size_t gpu_peak_frontier_count{};
+  std::size_t gpu_output_terminal_count{};
+  std::size_t cpu_exact_terminal_recertification_count{};
+  std::size_t strict_interior_terminal_count{};
+  std::size_t anchor_noninterior_terminal_count{};
+  std::size_t unresolved_external_leaf_terminal_count{};
+  std::size_t prune_product_count{};
+  std::size_t keep_certificate_product_count{};
+  // Source-compatible diagnostic aliases.  A "receipt" now denotes any
+  // recertified terminal record, not only a strict-interior terminal.
   std::size_t gpu_output_receipt_count{};
   std::size_t cpu_exact_phi_recertification_count{};
   std::size_t proposed_product_count{};
@@ -201,15 +239,21 @@ struct PairSupportRankPruneAudit {
   std::size_t active_product_h2d_byte_count{};
   std::size_t initial_frontier_h2d_byte_count{};
   std::size_t traversal_metadata_d2h_byte_count{};
+  std::size_t physical_terminal_d2h_byte_count{};
+  std::size_t active_terminal_d2h_byte_count{};
+  std::size_t device_terminal_byte_capacity{};
+  // Source-compatible aliases of the three terminal-byte counters above.
   std::size_t physical_receipt_d2h_byte_count{};
   std::size_t active_receipt_d2h_byte_count{};
   std::size_t device_frontier_double_buffer_byte_capacity{};
   std::size_t device_receipt_byte_capacity{};
   std::size_t device_scan_workspace_byte_capacity{};
   // Exact P2-only resident total outside the shared LBVH snapshot and any P1
-  // query buffers: 24P + 80W + 48R + 8 + scan_workspace bytes.
+  // query buffers: 40P + 80W + 16C + 8 + scan_workspace bytes.
   std::size_t device_fixed_workspace_byte_capacity{};
   std::uint64_t buffer_epoch{};
+  std::uint64_t terminal_digest_fnv1a{};
+  // Source-compatible alias of terminal_digest_fnv1a.
   std::uint64_t receipt_digest_fnv1a{};
   bool work_item_capacity_exhausted{false};
   bool receipt_capacity_exhausted{false};
@@ -217,9 +261,17 @@ struct PairSupportRankPruneAudit {
   bool device_frontier_exhausted{false};
   bool immutable_lbvh_snapshot_validated{false};
   bool product_records_validated{false};
+  bool stable_terminal_transcript_validated{false};
+  bool disjoint_terminal_antichains_validated{false};
+  bool keep_coverage_recertification_complete{false};
+  // Source-compatible aliases of the terminal validation flags above.
   bool stable_receipt_transcript_validated{false};
   bool disjoint_receipt_antichains_validated{false};
   bool cpu_exact_recertification_complete{false};
+  // An authenticated singleton anchor from each support enables a conservative
+  // non-witness cull.  P4 records it as a non-strict terminal for exact CPU
+  // coverage replay; it never creates a strict receipt or a prune authority.
+  bool anchor_ball_culling_enabled{false};
   // P2 only proposes a replayable local rank argument.  The CPU stream remains
   // the authority that decides whether a support product is globally pruned.
   bool global_support_product_prune_published{false};
@@ -231,10 +283,13 @@ struct PairSupportRankPruneAudit {
 };
 
 struct PairSupportRankPruneBatchResult {
-  // Only products whose recertified receipt cardinality reaches the requested
-  // threshold occur here.  Every other input product is an explicit fallback;
-  // absence is never a negative scientific decision.
+  // Only products whose recertified strict-terminal cardinality reaches the
+  // requested threshold occur here.
   std::vector<PairSupportRankPruneProductProposal> proposals;
+  // A keep certificate is a conservative exact closure of the current
+  // branch-and-bound rule, not a proof that no real support pair has any
+  // interior witness.
+  std::vector<PairSupportRankKeepProductCertificate> keep_certificates;
   PairSupportRankPruneAudit audit;
 
   friend bool operator==(
@@ -270,9 +325,9 @@ class PairSupportPhiContext final {
       std::span<const PairSupportPhiWitnessQuery> canonical_queries);
 
   // Phase 9.1-CUDA-P2: traverses the witness LBVH for a bounded batch of
-  // already authenticated support products.  Device output is proposal-only;
-  // all returned receipts are recertified exactly here, while products not
-  // reaching the threshold within the fixed capacities/budget are omitted.
+  // already authenticated support products.  The device returns only a
+  // bounded terminal transcript.  Exact CPU replay derives either a historical
+  // prune proposal, an exact conservative keep certificate, or a fallback.
   [[nodiscard]] PairSupportRankPruneBatchResult propose_rank_prunes(
       std::span<const hierarchy::ExactPairSupportFrontierEntry> products,
       std::size_t required_strict_interior_point_count,

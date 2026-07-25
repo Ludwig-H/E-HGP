@@ -362,7 +362,7 @@ exact_diametral_phi_aabb_maximum_dyadic(
   return value.significand == 0 ? 0 : 1;
 }
 
-[[nodiscard]] int exact_diametral_phi_aabb_maximum_sign(
+[[nodiscard]] int exact_diametral_phi_aabb_maximum_dyadic_sign(
     const spatial::ExactDyadicAabb3& first_support_box,
     const spatial::ExactDyadicAabb3& second_support_box,
     const spatial::ExactDyadicAabb3& query_box) {
@@ -736,6 +736,38 @@ ExactDiametralPhiAabbMaximum exact_diametral_phi_aabb_maximum(
   return result;
 }
 
+int exact_diametral_phi_aabb_maximum_sign(
+    const spatial::ExactDyadicAabb3& first_support_box,
+    const spatial::ExactDyadicAabb3& second_support_box,
+    const spatial::ExactDyadicAabb3& query_box) {
+  return exact_diametral_phi_aabb_maximum_dyadic_sign(
+      first_support_box, second_support_box, query_box);
+}
+
+int exact_diametral_anchor_phi_aabb_minimum_sign(
+    const spatial::ExactDyadicAabb3& first_support_point_box,
+    const spatial::ExactDyadicAabb3& second_support_point_box,
+    const spatial::ExactDyadicAabb3& query_box) {
+  const ExactDyadicBoxCoordinates first =
+      exact_dyadic_box_coordinates(first_support_point_box);
+  const ExactDyadicBoxCoordinates second =
+      exact_dyadic_box_coordinates(second_support_point_box);
+  ExactDyadicAnchorPhi anchor;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    if (dyadic_less(first.lower[axis], first.upper[axis]) ||
+        dyadic_less(second.lower[axis], second.upper[axis])) {
+      throw std::invalid_argument(
+          "an exact diametral anchor support box is not degenerate");
+    }
+    anchor.first[axis] = first.lower[axis];
+    anchor.second[axis] = second.lower[axis];
+    anchor.vertex[axis] = halve_dyadic(
+        add_dyadics(anchor.first[axis], anchor.second[axis]));
+  }
+  return dyadic_sign(
+      exact_anchor_phi_aabb_minimum(anchor, query_box));
+}
+
 class ExactPairSupportStreamBuilder {
  public:
   ExactPairSupportStreamBuilder(
@@ -861,8 +893,14 @@ class ExactPairSupportStreamBuilder {
   take_consumed_rank_prune_proposals() {
     proposal_batch_products_.clear();
     proposal_cache_.clear();
+    keep_certificate_cache_.clear();
     proposal_batch_active_ = false;
     return std::move(consumed_rank_prune_proposals_);
+  }
+
+  [[nodiscard]] std::vector<ExactPairSupportRankKeepCertificate>
+  take_consumed_rank_keep_certificates() {
+    return std::move(consumed_rank_keep_certificates_);
   }
 
   [[nodiscard]] ExactPairSupportRankPruneProposalAudit
@@ -1918,6 +1956,7 @@ class ExactPairSupportStreamBuilder {
     }
     proposal_batch_products_.clear();
     proposal_cache_.clear();
+    keep_certificate_cache_.clear();
 
     std::size_t inspected_count = 0U;
     for (auto iterator = frontier_.rbegin();
@@ -1969,10 +2008,28 @@ class ExactPairSupportStreamBuilder {
             std::span<const ExactPairSupportFrontierEntry>{
                 proposal_batch_products_},
             witness_threshold});
-    if (response.proposals.size() > proposal_batch_products_.size()) {
+    if (response.proposals.size() > proposal_batch_products_.size() ||
+        response.keep_certificates.size() >
+            proposal_batch_products_.size() ||
+        response.proposals.size() >
+            proposal_batch_products_.size() -
+                response.keep_certificates.size()) {
       throw std::invalid_argument(
           "a pair-support proposal batch exceeds its request");
     }
+    const auto require_requested_product =
+        [this](const ExactPairSupportFrontierEntry& product) {
+          const auto requested = std::lower_bound(
+              proposal_batch_products_.begin(),
+              proposal_batch_products_.end(),
+              product,
+              frontier_entry_less);
+          if (requested == proposal_batch_products_.end() ||
+              *requested != product) {
+            throw std::invalid_argument(
+                "a pair-support proposal references an unrequested product");
+          }
+        };
     for (std::size_t index = 0U;
          index < response.proposals.size();
          ++index) {
@@ -1985,61 +2042,56 @@ class ExactPairSupportStreamBuilder {
         throw std::invalid_argument(
             "pair-support proposals must be strictly canonical");
       }
-      const auto requested = std::lower_bound(
-          proposal_batch_products_.begin(),
-          proposal_batch_products_.end(),
-          proposal.product,
-          frontier_entry_less);
-      if (requested == proposal_batch_products_.end() ||
-          *requested != proposal.product) {
-        throw std::invalid_argument(
-            "a pair-support proposal references an unrequested product");
-      }
+      require_requested_product(proposal.product);
       if (proposal.strict_witness_receipts.empty() ||
           proposal.strict_witness_receipts.size() > witness_threshold) {
         throw std::invalid_argument(
             "a pair-support proposal has an invalid receipt count");
       }
     }
+    for (std::size_t index = 0U;
+         index < response.keep_certificates.size();
+         ++index) {
+      const ExactPairSupportRankKeepCertificate& certificate =
+          response.keep_certificates[index];
+      if (index != 0U &&
+          !frontier_entry_less(
+              response.keep_certificates[index - 1U].product,
+              certificate.product)) {
+        throw std::invalid_argument(
+            "pair-support keep certificates must be strictly canonical");
+      }
+      require_requested_product(certificate.product);
+    }
+    std::size_t prune_index = 0U;
+    std::size_t keep_index = 0U;
+    while (prune_index < response.proposals.size() &&
+           keep_index < response.keep_certificates.size()) {
+      const ExactPairSupportFrontierEntry& prune_product =
+          response.proposals[prune_index].product;
+      const ExactPairSupportFrontierEntry& keep_product =
+          response.keep_certificates[keep_index].product;
+      if (prune_product == keep_product) {
+        throw std::invalid_argument(
+            "a pair-support product occurs in both proposal caches");
+      }
+      if (frontier_entry_less(prune_product, keep_product)) {
+        ++prune_index;
+      } else {
+        ++keep_index;
+      }
+    }
     proposal_cache_ = std::move(response.proposals);
+    keep_certificate_cache_ =
+        std::move(response.keep_certificates);
     proposal_batch_active_ = true;
   }
 
   [[nodiscard]] std::optional<RankSearchOutcome>
-  try_rank_prune_proposal(
+  consume_rank_prune_proposal(
+      ExactPairSupportRankPruneProposal proposal,
       const ExactPairSupportFrontierEntry& active_product,
       std::size_t witness_threshold) {
-    if (proposal_callback_ == nullptr) {
-      return std::nullopt;
-    }
-    if (!proposal_batch_active_ ||
-        !std::binary_search(
-            proposal_batch_products_.begin(),
-            proposal_batch_products_.end(),
-            active_product,
-            frontier_entry_less)) {
-      request_rank_prune_proposal_batch(
-          active_product, witness_threshold);
-    }
-    auto found = std::lower_bound(
-        proposal_cache_.begin(),
-        proposal_cache_.end(),
-        active_product,
-        [](const ExactPairSupportRankPruneProposal& proposal,
-           const ExactPairSupportFrontierEntry& product) {
-          return frontier_entry_less(proposal.product, product);
-        });
-    if (found == proposal_cache_.end() ||
-        found->product != active_product) {
-      proposal_audit_.cpu_fallback_product_count = checked_add(
-          proposal_audit_.cpu_fallback_product_count,
-          1U,
-          "the pair-support proposal fallback count overflows size_t");
-      return std::nullopt;
-    }
-
-    ExactPairSupportRankPruneProposal proposal = std::move(*found);
-    proposal_cache_.erase(found);
     const std::size_t receipt_count =
         proposal.strict_witness_receipts.size();
     if (!can_consume_work_units(receipt_count)) {
@@ -2158,6 +2210,320 @@ class ExactPairSupportStreamBuilder {
         "the pair-support proposal-pruned pair count overflows size_t");
     consumed_rank_prune_proposals_.push_back(std::move(proposal));
     return RankSearchOutcome::prune;
+  }
+
+  [[nodiscard]] std::optional<RankSearchOutcome>
+  consume_rank_keep_certificate(
+      ExactPairSupportRankKeepCertificate certificate,
+      const ExactPairSupportFrontierEntry& active_product,
+      std::size_t witness_threshold) {
+    const std::size_t terminal_count =
+        certificate.canonical_terminals.size();
+    if (!can_consume_work_units(terminal_count)) {
+      // As for a prune hint, affordability is decided before LBVH
+      // authentication or exact geometry.  The historical path then owns the
+      // unchanged work budget.
+      proposal_audit_.cpu_fallback_product_count = checked_add(
+          proposal_audit_.cpu_fallback_product_count,
+          1U,
+          "the pair-support proposal fallback count overflows size_t");
+      return std::nullopt;
+    }
+    if (terminal_count == 0U || terminal_count > cloud_.size()) {
+      throw std::invalid_argument(
+          "a pair-support keep certificate has an invalid terminal count");
+    }
+
+    const auto [first_node_index, second_node_index] =
+        entry_nodes(active_product);
+    const Node& first = node(first_node_index);
+    const Node& second = node(second_node_index);
+    const Node& root = node(index_.root_index_);
+
+    struct CoverageInterval {
+      std::size_t leaf_begin{};
+      std::size_t leaf_end{};
+    };
+    std::vector<CoverageInterval> coverage;
+    coverage.reserve(terminal_count + 2U);
+    coverage.push_back(
+        CoverageInterval{first.leaf_begin, first.leaf_end});
+    coverage.push_back(
+        CoverageInterval{second.leaf_begin, second.leaf_end});
+    std::vector<std::size_t> terminal_node_indices;
+    terminal_node_indices.reserve(terminal_count);
+    for (std::size_t terminal_index = 0U;
+         terminal_index < terminal_count;
+         ++terminal_index) {
+      const ExactPairSupportWitnessNodeEntry& terminal =
+          certificate.canonical_terminals[terminal_index];
+      if (terminal_index != 0U &&
+          (!witness_entry_less(
+               certificate.canonical_terminals[terminal_index - 1U],
+               terminal) ||
+           certificate.canonical_terminals[terminal_index - 1U].leaf_end >
+               terminal.leaf_begin)) {
+        throw std::invalid_argument(
+            "pair-support keep terminals are not a canonical antichain");
+      }
+      std::size_t terminal_node_index = 0U;
+      try {
+        terminal_node_index = witness_node_index(terminal);
+      } catch (const std::exception&) {
+        throw std::invalid_argument(
+            "a pair-support keep terminal contradicts the LBVH");
+      }
+      const Node& terminal_node = node(terminal_node_index);
+      if (node_range_intersects(terminal_node, first) ||
+          node_range_intersects(terminal_node, second)) {
+        throw std::invalid_argument(
+            "a pair-support keep terminal intersects its support");
+      }
+      terminal_node_indices.push_back(terminal_node_index);
+      coverage.push_back(
+          CoverageInterval{
+              terminal_node.leaf_begin, terminal_node.leaf_end});
+    }
+    std::sort(
+        coverage.begin(),
+        coverage.end(),
+        [](const CoverageInterval& left,
+           const CoverageInterval& right) {
+          if (left.leaf_begin != right.leaf_begin) {
+            return left.leaf_begin < right.leaf_begin;
+          }
+          return left.leaf_end < right.leaf_end;
+        });
+    std::size_t coverage_cursor = root.leaf_begin;
+    for (const CoverageInterval& interval : coverage) {
+      if (interval.leaf_begin != coverage_cursor ||
+          interval.leaf_begin >= interval.leaf_end ||
+          interval.leaf_end > root.leaf_end) {
+        throw std::invalid_argument(
+            "a pair-support keep certificate does not exactly tile the LBVH root");
+      }
+      coverage_cursor = interval.leaf_end;
+    }
+    if (coverage_cursor != root.leaf_end) {
+      throw std::invalid_argument(
+          "a pair-support keep certificate leaves a gap in the LBVH root");
+    }
+
+    const spatial::ExactDyadicAabb3 first_box =
+        node_box(first_node_index);
+    const spatial::ExactDyadicAabb3 second_box =
+        node_box(second_node_index);
+    const PointId first_anchor_id =
+        index_.leaves_[first.leaf_begin].point_id;
+    const PointId second_anchor_id =
+        index_.leaves_[second.leaf_begin].point_id;
+    const ExactDyadicAnchorPhi anchor = exact_dyadic_anchor_phi(
+        cloud_.point(first_anchor_id), cloud_.point(second_anchor_id));
+
+    std::size_t strict_terminal_count = 0U;
+    std::size_t strict_witness_point_count = 0U;
+    std::size_t anchor_terminal_count = 0U;
+    std::size_t anchor_point_count = 0U;
+    std::size_t anchor_tangent_count = 0U;
+    std::size_t external_leaf_terminal_count = 0U;
+    for (const std::size_t terminal_node_index :
+         terminal_node_indices) {
+      const Node& terminal_node = node(terminal_node_index);
+      if (exact_diametral_phi_aabb_maximum_sign(
+              first_box,
+              second_box,
+              node_box(terminal_node_index)) < 0) {
+        strict_terminal_count = checked_add(
+            strict_terminal_count,
+            1U,
+            "the pair-support keep strict-terminal count overflows size_t");
+        strict_witness_point_count = checked_add(
+            strict_witness_point_count,
+            terminal_node.leaf_end - terminal_node.leaf_begin,
+            "the pair-support keep strict-point count overflows size_t");
+        continue;
+      }
+      const int anchor_minimum_sign = dyadic_sign(
+          exact_anchor_phi_aabb_minimum(
+              anchor, node_box(terminal_node_index)));
+      if (anchor_minimum_sign >= 0) {
+        anchor_terminal_count = checked_add(
+            anchor_terminal_count,
+            1U,
+            "the pair-support keep anchor-terminal count overflows size_t");
+        anchor_point_count = checked_add(
+            anchor_point_count,
+            terminal_node.leaf_end - terminal_node.leaf_begin,
+            "the pair-support keep anchor-point count overflows size_t");
+        if (anchor_minimum_sign == 0) {
+          anchor_tangent_count = checked_add(
+              anchor_tangent_count,
+              1U,
+              "the pair-support keep anchor-tangent count overflows size_t");
+        }
+        continue;
+      }
+      if (!terminal_node.is_leaf()) {
+        throw std::invalid_argument(
+            "a pair-support keep terminal is an unresolved internal node");
+      }
+      external_leaf_terminal_count = checked_add(
+          external_leaf_terminal_count,
+          1U,
+          "the pair-support keep external-leaf count overflows size_t");
+    }
+    if (strict_witness_point_count >= witness_threshold) {
+      throw std::invalid_argument(
+          "a pair-support keep certificate reaches the rank threshold");
+    }
+
+    if (!consume_work_units(terminal_count)) {
+      throw std::logic_error(
+          "an affordable pair-support keep certificate failed its work preflight");
+    }
+    const std::size_t nonstrict_terminal_count =
+        terminal_count - strict_terminal_count;
+
+    result_.audit.rank_prune_search_count = checked_add(
+        result_.audit.rank_prune_search_count,
+        1U,
+        "the pair-support keep rank-search count overflows size_t");
+    result_.audit.witness_node_visit_count = checked_add(
+        result_.audit.witness_node_visit_count,
+        terminal_count,
+        "the pair-support keep witness-node count overflows size_t");
+    result_.audit.exact_phi_aabb_bound_count = checked_add(
+        result_.audit.exact_phi_aabb_bound_count,
+        terminal_count,
+        "the pair-support keep phi-bound count overflows size_t");
+    result_.audit.exact_anchor_ball_minimum_aabb_bound_count = checked_add(
+        result_.audit.exact_anchor_ball_minimum_aabb_bound_count,
+        nonstrict_terminal_count,
+        "the pair-support keep anchor-bound count overflows size_t");
+    result_.audit.strict_interior_witness_subtree_count = checked_add(
+        result_.audit.strict_interior_witness_subtree_count,
+        strict_terminal_count,
+        "the pair-support keep strict-subtree count overflows size_t");
+    result_.audit.strict_interior_witness_point_count = checked_add(
+        result_.audit.strict_interior_witness_point_count,
+        strict_witness_point_count,
+        "the pair-support keep strict-point count overflows size_t");
+    result_.audit.certified_anchor_noninterior_subtree_count = checked_add(
+        result_.audit.certified_anchor_noninterior_subtree_count,
+        anchor_terminal_count,
+        "the pair-support keep anchor-subtree count overflows size_t");
+    result_.audit.certified_anchor_noninterior_point_count = checked_add(
+        result_.audit.certified_anchor_noninterior_point_count,
+        anchor_point_count,
+        "the pair-support keep anchor-point count overflows size_t");
+    result_.audit.certified_anchor_shell_tangent_subtree_count = checked_add(
+        result_.audit.certified_anchor_shell_tangent_subtree_count,
+        anchor_tangent_count,
+        "the pair-support keep anchor-tangent count overflows size_t");
+    result_.audit.equality_or_positive_bound_descent_count = checked_add(
+        result_.audit.equality_or_positive_bound_descent_count,
+        external_leaf_terminal_count,
+        "the pair-support keep leaf-classification count overflows size_t");
+    result_.audit.maximum_witness_frontier_entry_count = std::max(
+        result_.audit.maximum_witness_frontier_entry_count,
+        terminal_count);
+
+    proposal_audit_.consumed_keep_certificate_count = checked_add(
+        proposal_audit_.consumed_keep_certificate_count,
+        1U,
+        "the pair-support consumed-keep count overflows size_t");
+    proposal_audit_.exact_keep_terminal_recertification_count = checked_add(
+        proposal_audit_.exact_keep_terminal_recertification_count,
+        terminal_count,
+        "the pair-support keep recertification count overflows size_t");
+    proposal_audit_.keep_terminal_classification_count = checked_add(
+        proposal_audit_.keep_terminal_classification_count,
+        terminal_count,
+        "the pair-support keep classification count overflows size_t");
+    proposal_audit_.keep_strict_interior_terminal_count = checked_add(
+        proposal_audit_.keep_strict_interior_terminal_count,
+        strict_terminal_count,
+        "the pair-support keep strict-terminal audit overflows size_t");
+    proposal_audit_.keep_strict_interior_point_count = checked_add(
+        proposal_audit_.keep_strict_interior_point_count,
+        strict_witness_point_count,
+        "the pair-support keep strict-point audit overflows size_t");
+    proposal_audit_.keep_anchor_noninterior_terminal_count = checked_add(
+        proposal_audit_.keep_anchor_noninterior_terminal_count,
+        anchor_terminal_count,
+        "the pair-support keep anchor-terminal audit overflows size_t");
+    proposal_audit_.keep_anchor_noninterior_point_count = checked_add(
+        proposal_audit_.keep_anchor_noninterior_point_count,
+        anchor_point_count,
+        "the pair-support keep anchor-point audit overflows size_t");
+    proposal_audit_.keep_external_leaf_terminal_count = checked_add(
+        proposal_audit_.keep_external_leaf_terminal_count,
+        external_leaf_terminal_count,
+        "the pair-support keep external-leaf audit overflows size_t");
+    consumed_rank_keep_certificates_.push_back(
+        std::move(certificate));
+    return RankSearchOutcome::keep;
+  }
+
+  [[nodiscard]] std::optional<RankSearchOutcome>
+  try_rank_prune_proposal(
+      const ExactPairSupportFrontierEntry& active_product,
+      std::size_t witness_threshold) {
+    if (proposal_callback_ == nullptr) {
+      return std::nullopt;
+    }
+    if (!proposal_batch_active_ ||
+        !std::binary_search(
+            proposal_batch_products_.begin(),
+            proposal_batch_products_.end(),
+            active_product,
+            frontier_entry_less)) {
+      request_rank_prune_proposal_batch(
+          active_product, witness_threshold);
+    }
+
+    // A historical strict-rank prune remains the first accelerated
+    // transition considered.  Batch validation forbids a product from also
+    // appearing in the conservative-keep cache.
+    auto prune = std::lower_bound(
+        proposal_cache_.begin(),
+        proposal_cache_.end(),
+        active_product,
+        [](const ExactPairSupportRankPruneProposal& proposal,
+           const ExactPairSupportFrontierEntry& product) {
+          return frontier_entry_less(proposal.product, product);
+        });
+    if (prune != proposal_cache_.end() &&
+        prune->product == active_product) {
+      ExactPairSupportRankPruneProposal proposal =
+          std::move(*prune);
+      proposal_cache_.erase(prune);
+      return consume_rank_prune_proposal(
+          std::move(proposal), active_product, witness_threshold);
+    }
+
+    auto keep = std::lower_bound(
+        keep_certificate_cache_.begin(),
+        keep_certificate_cache_.end(),
+        active_product,
+        [](const ExactPairSupportRankKeepCertificate& certificate,
+           const ExactPairSupportFrontierEntry& product) {
+          return frontier_entry_less(certificate.product, product);
+        });
+    if (keep != keep_certificate_cache_.end() &&
+        keep->product == active_product) {
+      ExactPairSupportRankKeepCertificate certificate =
+          std::move(*keep);
+      keep_certificate_cache_.erase(keep);
+      return consume_rank_keep_certificate(
+          std::move(certificate), active_product, witness_threshold);
+    }
+
+    proposal_audit_.cpu_fallback_product_count = checked_add(
+        proposal_audit_.cpu_fallback_product_count,
+        1U,
+        "the pair-support proposal fallback count overflows size_t");
+    return std::nullopt;
   }
 
   [[nodiscard]] RankSearchOutcome continue_rank_prune_search() {
@@ -3015,8 +3381,12 @@ class ExactPairSupportStreamBuilder {
   const ExactPairSupportRankPruneBatchCallback* proposal_callback_{nullptr};
   std::vector<ExactPairSupportFrontierEntry> proposal_batch_products_;
   std::vector<ExactPairSupportRankPruneProposal> proposal_cache_;
+  std::vector<ExactPairSupportRankKeepCertificate>
+      keep_certificate_cache_;
   std::vector<ExactPairSupportRankPruneProposal>
       consumed_rank_prune_proposals_;
+  std::vector<ExactPairSupportRankKeepCertificate>
+      consumed_rank_keep_certificates_;
   ExactPairSupportRankPruneProposalAudit proposal_audit_{};
   bool proposal_batch_active_{false};
   bool canonical_sort_records_{false};
@@ -3228,6 +3598,8 @@ build_exact_pair_support_stream_proposed_chunk_after_source_verification(
   proposed.audit = builder.rank_prune_proposal_audit();
   proposed.consumed_proposals =
       builder.take_consumed_rank_prune_proposals();
+  proposed.consumed_keep_certificates =
+      builder.take_consumed_rank_keep_certificates();
   return proposed;
 }
 
@@ -3450,67 +3822,143 @@ verify_exact_pair_support_stream_proposed_chunk(
   }
 
   if (observed.consumed_proposals.size() >
-      chunk_budget.maximum_work_unit_count) {
+          chunk_budget.maximum_work_unit_count ||
+      observed.consumed_keep_certificates.size() >
+          chunk_budget.maximum_work_unit_count -
+              observed.consumed_proposals.size()) {
     return verification;
   }
-  std::size_t transcript_receipt_count = 0U;
+  std::size_t transcript_terminal_count = 0U;
   for (const ExactPairSupportRankPruneProposal& proposal :
        observed.consumed_proposals) {
     if (!can_add_within(
-            transcript_receipt_count,
+            transcript_terminal_count,
             proposal.strict_witness_receipts.size(),
             chunk_budget.maximum_work_unit_count)) {
       return verification;
     }
-    transcript_receipt_count +=
+    transcript_terminal_count +=
         proposal.strict_witness_receipts.size();
+  }
+  for (const ExactPairSupportRankKeepCertificate& certificate :
+       observed.consumed_keep_certificates) {
+    if (!can_add_within(
+            transcript_terminal_count,
+            certificate.canonical_terminals.size(),
+            chunk_budget.maximum_work_unit_count)) {
+      return verification;
+    }
+    transcript_terminal_count +=
+        certificate.canonical_terminals.size();
   }
 
   std::vector<const ExactPairSupportRankPruneProposal*>
-      transcript_by_product;
-  transcript_by_product.reserve(observed.consumed_proposals.size());
+      prune_transcript_by_product;
+  prune_transcript_by_product.reserve(
+      observed.consumed_proposals.size());
   for (const ExactPairSupportRankPruneProposal& proposal :
        observed.consumed_proposals) {
-    transcript_by_product.push_back(&proposal);
+    prune_transcript_by_product.push_back(&proposal);
   }
   std::sort(
-      transcript_by_product.begin(),
-      transcript_by_product.end(),
+      prune_transcript_by_product.begin(),
+      prune_transcript_by_product.end(),
       [](const ExactPairSupportRankPruneProposal* left,
          const ExactPairSupportRankPruneProposal* right) {
         return frontier_entry_less(
             left->product, right->product);
       });
   for (std::size_t index = 1U;
-       index < transcript_by_product.size();
+       index < prune_transcript_by_product.size();
        ++index) {
     if (!frontier_entry_less(
-            transcript_by_product[index - 1U]->product,
-            transcript_by_product[index]->product)) {
+            prune_transcript_by_product[index - 1U]->product,
+            prune_transcript_by_product[index]->product)) {
       return verification;
     }
   }
 
+  std::vector<const ExactPairSupportRankKeepCertificate*>
+      keep_transcript_by_product;
+  keep_transcript_by_product.reserve(
+      observed.consumed_keep_certificates.size());
+  for (const ExactPairSupportRankKeepCertificate& certificate :
+       observed.consumed_keep_certificates) {
+    keep_transcript_by_product.push_back(&certificate);
+  }
+  std::sort(
+      keep_transcript_by_product.begin(),
+      keep_transcript_by_product.end(),
+      [](const ExactPairSupportRankKeepCertificate* left,
+         const ExactPairSupportRankKeepCertificate* right) {
+        return frontier_entry_less(
+            left->product, right->product);
+      });
+  for (std::size_t index = 1U;
+       index < keep_transcript_by_product.size();
+       ++index) {
+    if (!frontier_entry_less(
+            keep_transcript_by_product[index - 1U]->product,
+            keep_transcript_by_product[index]->product)) {
+      return verification;
+    }
+  }
+  verification.no_duplicate_keep_certificate_retained = true;
+
+  std::size_t prune_index = 0U;
+  std::size_t keep_index = 0U;
+  while (prune_index < prune_transcript_by_product.size() &&
+         keep_index < keep_transcript_by_product.size()) {
+    const ExactPairSupportFrontierEntry& prune_product =
+        prune_transcript_by_product[prune_index]->product;
+    const ExactPairSupportFrontierEntry& keep_product =
+        keep_transcript_by_product[keep_index]->product;
+    if (prune_product == keep_product) {
+      return verification;
+    }
+    if (frontier_entry_less(prune_product, keep_product)) {
+      ++prune_index;
+    } else {
+      ++keep_index;
+    }
+  }
+
   const ExactPairSupportRankPruneBatchCallback replay_callback =
-      [&transcript_by_product](
+      [&prune_transcript_by_product, &keep_transcript_by_product](
           const ExactPairSupportRankPruneBatchRequest& request) {
         ExactPairSupportRankPruneBatchProposal response;
         response.proposals.reserve(
             request.canonical_products.size());
+        response.keep_certificates.reserve(
+            request.canonical_products.size());
         for (const ExactPairSupportFrontierEntry& product :
              request.canonical_products) {
-          const auto found = std::lower_bound(
-              transcript_by_product.begin(),
-              transcript_by_product.end(),
+          const auto prune = std::lower_bound(
+              prune_transcript_by_product.begin(),
+              prune_transcript_by_product.end(),
               product,
               [](const ExactPairSupportRankPruneProposal* proposal,
                  const ExactPairSupportFrontierEntry& requested) {
                 return frontier_entry_less(
                     proposal->product, requested);
               });
-          if (found != transcript_by_product.end() &&
-              (*found)->product == product) {
-            response.proposals.push_back(**found);
+          if (prune != prune_transcript_by_product.end() &&
+              (*prune)->product == product) {
+            response.proposals.push_back(**prune);
+            continue;
+          }
+          const auto keep = std::lower_bound(
+              keep_transcript_by_product.begin(),
+              keep_transcript_by_product.end(),
+              product,
+              [](const ExactPairSupportRankKeepCertificate* certificate,
+                 const ExactPairSupportFrontierEntry& requested) {
+                return frontier_entry_less(
+                    certificate->product, requested);
+              });
+          if (keep != keep_transcript_by_product.end() &&
+              (*keep)->product == product) {
+            response.keep_certificates.push_back(**keep);
           }
         }
         return response;
@@ -3576,11 +4024,30 @@ verify_exact_pair_support_stream_proposed_chunk(
           expected.audit.consumed_receipt_count;
   verification.no_unconsumed_proposal_retained =
       expected.consumed_proposals.size() ==
-          transcript_by_product.size();
+          prune_transcript_by_product.size();
+  verification.every_consumed_keep_certificate_replayed_once =
+      expected.consumed_keep_certificates ==
+          observed.consumed_keep_certificates &&
+      expected.audit.consumed_keep_certificate_count ==
+          observed.consumed_keep_certificates.size() &&
+      expected.audit.exact_keep_terminal_recertification_count ==
+          expected.audit.keep_terminal_classification_count;
+  verification.no_unconsumed_keep_certificate_retained =
+      expected.consumed_keep_certificates.size() ==
+          keep_transcript_by_product.size();
+  verification.keep_candidate_transition_consistent =
+      chunk_verification.chunk_transition_verified &&
+      verification.every_consumed_keep_certificate_replayed_once &&
+      verification.no_unconsumed_keep_certificate_retained &&
+      verification.no_duplicate_keep_certificate_retained;
   verification.proposed_transition_verified =
       chunk_verification.chunk_transition_verified &&
       verification.every_consumed_proposal_replayed_once &&
       verification.no_unconsumed_proposal_retained &&
+      verification.every_consumed_keep_certificate_replayed_once &&
+      verification.no_unconsumed_keep_certificate_retained &&
+      verification.no_duplicate_keep_certificate_retained &&
+      verification.keep_candidate_transition_consistent &&
       observed == expected &&
       !observed.audit.durable_wire_v1_claimed &&
       observed.audit.transcript_ephemeral &&

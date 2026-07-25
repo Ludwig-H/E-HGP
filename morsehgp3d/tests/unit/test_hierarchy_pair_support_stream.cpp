@@ -37,6 +37,7 @@ using morsehgp3d::hierarchy::ExactPairSupportFrontierEntry;
 using morsehgp3d::hierarchy::ExactPairSupportRankPruneBatchCallback;
 using morsehgp3d::hierarchy::ExactPairSupportRankPruneBatchProposal;
 using morsehgp3d::hierarchy::ExactPairSupportRankPruneBatchRequest;
+using morsehgp3d::hierarchy::ExactPairSupportRankKeepCertificate;
 using morsehgp3d::hierarchy::ExactPairSupportRankPruneProposal;
 using morsehgp3d::hierarchy::ExactPairSupportRankPruneProposedChunk;
 using morsehgp3d::hierarchy::
@@ -55,7 +56,10 @@ using morsehgp3d::hierarchy::build_exact_pair_support_stream_chunk;
 using morsehgp3d::hierarchy::
     build_exact_pair_support_stream_chunk_with_rank_prune_proposals;
 using morsehgp3d::hierarchy::compute_exact_pair_support_checkpoint_digest;
+using morsehgp3d::hierarchy::
+    exact_diametral_anchor_phi_aabb_minimum_sign;
 using morsehgp3d::hierarchy::exact_diametral_phi_aabb_maximum;
+using morsehgp3d::hierarchy::exact_diametral_phi_aabb_maximum_sign;
 using morsehgp3d::hierarchy::make_initial_exact_pair_support_checkpoint;
 using morsehgp3d::hierarchy::verify_exact_pair_support_checkpoint;
 using morsehgp3d::hierarchy::verify_exact_pair_support_stream;
@@ -181,6 +185,10 @@ void check_throws(Function&& function, const std::string& message) {
              verification.candidate_chunk_verification) &&
          verification.every_consumed_proposal_replayed_once &&
          verification.no_unconsumed_proposal_retained &&
+         verification.every_consumed_keep_certificate_replayed_once &&
+         verification.no_unconsumed_keep_certificate_retained &&
+         verification.no_duplicate_keep_certificate_retained &&
+         verification.keep_candidate_transition_consistent &&
          verification.proposed_transition_verified &&
          !verification.durable_wire_v1_claimed;
 }
@@ -647,8 +655,12 @@ void test_exact_phi_aabb_maximum() {
       exact_diametral_phi_aabb_maximum(
           left_point, right_point, inside_point).maximum_phi ==
           ExactRational{BigInt{-1}} &&
+          exact_diametral_phi_aabb_maximum_sign(
+              left_point, right_point, inside_point) == -1 &&
           exact_diametral_phi_aabb_maximum(
-              left_point, right_point, shell_point).maximum_phi.is_zero(),
+              left_point, right_point, shell_point).maximum_phi.is_zero() &&
+          exact_diametral_phi_aabb_maximum_sign(
+              left_point, right_point, shell_point) == 0,
       "strict negativity certifies an interior witness while equality remains non-prunable");
 
   const ExactDyadicAabb3 zero_query = box(
@@ -758,7 +770,12 @@ void test_exact_phi_aabb_maximum() {
         exact_diametral_phi_aabb_maximum(
             fixture.first, fixture.second, fixture.query) ==
             historical_rational_phi_aabb_maximum(
-                fixture.first, fixture.second, fixture.query);
+                fixture.first, fixture.second, fixture.query) &&
+        exact_diametral_phi_aabb_maximum_sign(
+            fixture.first, fixture.second, fixture.query) ==
+            exact_diametral_phi_aabb_maximum(
+                fixture.first, fixture.second, fixture.query)
+                .maximum_phi.sign();
   }
   check(
       hostile_oracle_agreement,
@@ -837,13 +854,33 @@ void test_exact_anchor_phi_minimum_identity() {
     values_and_signs_match =
         values_and_signs_match &&
         historical == direct &&
-        direct.sign() == fixture.expected_sign;
+        direct.sign() == fixture.expected_sign &&
+        exact_diametral_anchor_phi_aabb_minimum_sign(
+            box_words(fixture.first, fixture.first),
+            box_words(fixture.second, fixture.second),
+            fixture.query) == fixture.expected_sign;
   }
   check(
       values_and_signs_match,
       "the direct anchor phi minimum exactly matches the historical "
       "center/radius test for interior, tangent, exterior, subnormal, and "
       "extreme finite cases");
+
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(
+            exact_diametral_anchor_phi_aabb_minimum_sign(
+                box_words(
+                    {negative_one, zero, zero},
+                    {one, zero, zero}),
+                box_words(
+                    {one, zero, zero},
+                    {one, zero, zero}),
+                box_words(
+                    {zero, zero, zero},
+                    {zero, zero, zero})));
+      },
+      "the sign-only anchor kernel rejects a nondegenerate support box");
 }
 
 void test_complete_self_dual_partition_and_long_pair() {
@@ -2169,6 +2206,8 @@ struct RankPruneProposalFixture {
       leaf_receipts_by_morton_position;
   std::optional<ExactPairSupportCheckpoint>
       fresh_gapped_product_source;
+  std::optional<ExactPairSupportCheckpoint>
+      fresh_adjacent_product_source;
 };
 
 void remember_leaf_receipt(
@@ -2196,7 +2235,8 @@ void remember_leaf_receipt(
 void observe_proposal_fixture_checkpoint(
     RankPruneProposalFixture& fixture,
     const ExactPairSupportCheckpoint& checkpoint,
-    std::size_t point_count) {
+    std::size_t point_count,
+    std::size_t witness_threshold) {
   for (const ExactPairSupportFrontierEntry& entry :
        checkpoint.frontier) {
     remember_leaf_receipt(
@@ -2255,18 +2295,27 @@ void observe_proposal_fixture_checkpoint(
         excluded_count < point_count) {
       fixture.fresh_gapped_product_source = checkpoint;
     }
+    if (!fixture.fresh_adjacent_product_source.has_value() &&
+        product.self_product == 0U &&
+        (first_size != 1U || second_size != 1U) &&
+        product.first_leaf_end == product.second_leaf_begin &&
+        excluded_count <= point_count &&
+        point_count - excluded_count >= witness_threshold) {
+      fixture.fresh_adjacent_product_source = checkpoint;
+    }
   }
 }
 
 [[nodiscard]] RankPruneProposalFixture
 make_rank_prune_proposal_fixture(
     const MortonLbvhIndex& index,
-    const CanonicalPointCloud& cloud) {
+    const CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order = 1U) {
   RankPruneProposalFixture fixture;
   fixture.leaf_receipts_by_morton_position.resize(cloud.size());
   ExactPairSupportCheckpoint checkpoint =
       make_initial_exact_pair_support_checkpoint(
-          index, cloud, 1U);
+          index, cloud, requested_maximum_order);
   ExactPairSupportStreamBudget unit_work = unlimited_budget();
   unit_work.maximum_work_unit_count = 1U;
   std::size_t chunk_count = 0U;
@@ -2276,17 +2325,23 @@ make_rank_prune_proposal_fixture(
           "the proposal fixture exceeded its bounded CPU replay");
     }
     observe_proposal_fixture_checkpoint(
-        fixture, checkpoint, cloud.size());
+        fixture,
+        checkpoint,
+        cloud.size(),
+        requested_maximum_order);
     checkpoint = build_exact_pair_support_stream_chunk(
                      index,
                      cloud,
-                     1U,
+                     requested_maximum_order,
                      unit_work,
                      checkpoint)
                      .next_checkpoint;
   }
   observe_proposal_fixture_checkpoint(
-      fixture, checkpoint, cloud.size());
+      fixture,
+      checkpoint,
+      cloud.size(),
+      requested_maximum_order);
   for (const auto& receipt :
        fixture.leaf_receipts_by_morton_position) {
     if (!receipt.has_value()) {
@@ -2317,6 +2372,35 @@ strict_between_leaf_proposal(
       product,
       {*fixture.leaf_receipts_by_morton_position[
           witness_position]}};
+}
+
+[[nodiscard]] ExactPairSupportRankKeepCertificate
+external_leaf_cut_certificate(
+    const ExactPairSupportFrontierEntry& product,
+    const RankPruneProposalFixture& fixture) {
+  ExactPairSupportRankKeepCertificate certificate;
+  certificate.product = product;
+  for (std::size_t position = 0U;
+       position < fixture.leaf_receipts_by_morton_position.size();
+       ++position) {
+    const bool belongs_to_first =
+        position >= product.first_leaf_begin &&
+        position < product.first_leaf_end;
+    const bool belongs_to_second =
+        position >= product.second_leaf_begin &&
+        position < product.second_leaf_end;
+    if (belongs_to_first || belongs_to_second) {
+      continue;
+    }
+    if (!fixture.leaf_receipts_by_morton_position[position]
+             .has_value()) {
+      throw std::logic_error(
+          "a keep-certificate leaf was not observed");
+    }
+    certificate.canonical_terminals.push_back(
+        *fixture.leaf_receipts_by_morton_position[position]);
+  }
+  return certificate;
 }
 
 void test_ephemeral_batched_rank_prune_proposals() {
@@ -2533,7 +2617,7 @@ void test_ephemeral_batched_rank_prune_proposals() {
   foreign.product = initial.frontier.front();
   const ExactPairSupportRankPruneBatchCallback malformed_provider =
       [foreign](const ExactPairSupportRankPruneBatchRequest&) {
-        return ExactPairSupportRankPruneBatchProposal{{foreign}};
+        return ExactPairSupportRankPruneBatchProposal{{foreign}, {}};
       };
   check_throws<std::invalid_argument>(
       [&] {
@@ -2574,6 +2658,266 @@ void test_ephemeral_batched_rank_prune_proposals() {
            mutated)
            .proposed_transition_verified,
       "fresh ephemeral replay rejects an appended proposal that traversal never consumes");
+}
+
+void test_ephemeral_rank_keep_certificates() {
+  std::vector<CertifiedPoint3> points;
+  points.reserve(14U);
+  for (std::size_t point_index = 0U;
+       point_index < 14U;
+       ++point_index) {
+    points.push_back(
+        point(static_cast<double>(point_index) - 7.0));
+  }
+  const CanonicalPointCloud cloud = cloud_from(points);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactPairSupportAuthorityContext keep_authority{
+      index, cloud, 10U};
+  const RankPruneProposalFixture keep_fixture =
+      make_rank_prune_proposal_fixture(index, cloud, 10U);
+  check(
+      keep_fixture.fresh_adjacent_product_source.has_value(),
+      "the keep fixture exposes a fresh adjacent eligible cross product");
+  if (!keep_fixture.fresh_adjacent_product_source.has_value()) {
+    return;
+  }
+
+  const ExactPairSupportCheckpoint& keep_source =
+      *keep_fixture.fresh_adjacent_product_source;
+  const ExactPairSupportFrontierEntry keep_product =
+      keep_source.frontier.back();
+  const ExactPairSupportRankKeepCertificate valid_keep =
+      external_leaf_cut_certificate(
+          keep_product, keep_fixture);
+  const auto keep_provider_for =
+      [](ExactPairSupportRankKeepCertificate certificate) {
+        return ExactPairSupportRankPruneBatchCallback{
+            [certificate = std::move(certificate)](
+                const ExactPairSupportRankPruneBatchRequest& request) {
+              ExactPairSupportRankPruneBatchProposal response;
+              if (std::find(
+                      request.canonical_products.begin(),
+                      request.canonical_products.end(),
+                      certificate.product) !=
+                  request.canonical_products.end()) {
+                response.keep_certificates.push_back(certificate);
+              }
+              return response;
+            }};
+      };
+
+  const ExactPairSupportStreamBudget budget = unlimited_budget();
+  const ExactPairSupportStreamChunk historical =
+      build_exact_pair_support_stream_chunk(
+          keep_authority, budget, keep_source);
+  const ExactPairSupportRankPruneProposedChunk accelerated =
+      build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+          keep_authority,
+          budget,
+          keep_source,
+          8U,
+          keep_provider_for(valid_keep));
+  check(
+      accelerated.consumed_keep_certificates ==
+              std::vector<ExactPairSupportRankKeepCertificate>{
+                  valid_keep} &&
+          accelerated.consumed_proposals.empty() &&
+          accelerated.candidate_chunk.status == historical.status &&
+          accelerated.candidate_chunk.stop_reason ==
+              historical.stop_reason &&
+          accelerated.candidate_chunk.events == historical.events &&
+          accelerated.candidate_chunk
+                  .relevant_extra_shell_diagnostics ==
+              historical.relevant_extra_shell_diagnostics &&
+          accelerated.candidate_chunk.record_order ==
+              historical.record_order &&
+          accelerated.candidate_chunk.output_chain_digest ==
+              historical.output_chain_digest &&
+          accelerated.candidate_chunk.next_checkpoint.frontier ==
+              historical.next_checkpoint.frontier &&
+          accelerated.candidate_chunk.next_checkpoint.pending_product ==
+              historical.next_checkpoint.pending_product,
+      "an exactly tiled keep certificate preserves the historical scientific chunk and traversal state");
+  check(
+      accelerated.audit.consumed_keep_certificate_count == 1U &&
+          accelerated.audit.exact_keep_terminal_recertification_count ==
+              valid_keep.canonical_terminals.size() &&
+          accelerated.audit.keep_terminal_classification_count ==
+              valid_keep.canonical_terminals.size() &&
+          accelerated.audit.keep_strict_interior_terminal_count +
+                  accelerated.audit
+                      .keep_anchor_noninterior_terminal_count +
+                  accelerated.audit
+                      .keep_external_leaf_terminal_count ==
+              valid_keep.canonical_terminals.size() &&
+          accelerated.audit.keep_strict_interior_point_count < 10U &&
+          accelerated.audit.transcript_ephemeral &&
+          !accelerated.audit.durable_wire_v1_claimed,
+      "keep consumption separately accounts exact terminal replay and all three classifications");
+  check(
+      proposed_chunk_verification_closes(
+          verify_exact_pair_support_stream_proposed_chunk(
+              keep_authority,
+              budget,
+              keep_source,
+              8U,
+              accelerated)),
+      "fresh ephemeral replay consumes the keep population exactly once");
+
+  ExactPairSupportRankKeepCertificate gap = valid_keep;
+  gap.canonical_terminals.erase(
+      gap.canonical_terminals.begin());
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(
+            build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+                keep_authority,
+                budget,
+                keep_source,
+                8U,
+                keep_provider_for(gap)));
+      },
+      "a keep certificate with a Morton coverage gap is rejected");
+
+  ExactPairSupportRankKeepCertificate false_internal = valid_keep;
+  false_internal.canonical_terminals.front().node_index =
+      keep_product.first_node_index;
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(
+            build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+                keep_authority,
+                budget,
+                keep_source,
+                8U,
+                keep_provider_for(false_internal)));
+      },
+      "a forged internal keep terminal that contradicts its Morton range is rejected");
+
+  ExactPairSupportStreamBudget one_work = unlimited_budget();
+  one_work.maximum_work_unit_count = 1U;
+  const ExactPairSupportStreamChunk one_work_historical =
+      build_exact_pair_support_stream_chunk(
+          keep_authority, one_work, keep_source);
+  const ExactPairSupportRankPruneProposedChunk unaffordable =
+      build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+          keep_authority,
+          one_work,
+          keep_source,
+          8U,
+          keep_provider_for(valid_keep));
+  check(
+      unaffordable.candidate_chunk == one_work_historical &&
+          unaffordable.consumed_keep_certificates.empty() &&
+          unaffordable.audit.cpu_fallback_product_count == 1U &&
+          unaffordable.audit
+                  .exact_keep_terminal_recertification_count ==
+              0U &&
+          unaffordable.audit.keep_terminal_classification_count == 0U &&
+          proposed_chunk_verification_closes(
+              verify_exact_pair_support_stream_proposed_chunk(
+                  keep_authority,
+                  one_work,
+                  keep_source,
+                  8U,
+                  unaffordable)),
+      "an unaffordable keep hint falls back without hidden exact terminal work");
+
+  ExactPairSupportRankPruneProposedChunk surplus =
+      accelerated;
+  const ExactPairSupportCheckpoint keep_initial =
+      make_initial_exact_pair_support_checkpoint(keep_authority);
+  surplus.consumed_keep_certificates.push_back(
+      ExactPairSupportRankKeepCertificate{
+          keep_initial.frontier.front(), {}});
+  check(
+      !verify_exact_pair_support_stream_proposed_chunk(
+           keep_authority,
+           budget,
+           keep_source,
+           8U,
+           surplus)
+           .proposed_transition_verified,
+      "fresh replay rejects a keep certificate that traversal never consumes");
+
+  ExactPairSupportRankPruneProposedChunk duplicated =
+      accelerated;
+  duplicated.consumed_keep_certificates.push_back(valid_keep);
+  const ExactPairSupportRankPruneProposedChunkVerification
+      duplicate_verification =
+          verify_exact_pair_support_stream_proposed_chunk(
+              keep_authority,
+              budget,
+              keep_source,
+              8U,
+              duplicated);
+  check(
+      !duplicate_verification.no_duplicate_keep_certificate_retained &&
+          !duplicate_verification.proposed_transition_verified,
+      "fresh replay rejects a duplicate consumed keep certificate");
+
+  const ExactPairSupportAuthorityContext prune_authority{
+      index, cloud, 1U};
+  const RankPruneProposalFixture prune_fixture =
+      make_rank_prune_proposal_fixture(index, cloud, 1U);
+  check(
+      prune_fixture.fresh_gapped_product_source.has_value(),
+      "the keep rejection fixture exposes a strict gapped product");
+  if (!prune_fixture.fresh_gapped_product_source.has_value()) {
+    return;
+  }
+  const ExactPairSupportCheckpoint& prune_source =
+      *prune_fixture.fresh_gapped_product_source;
+  const ExactPairSupportFrontierEntry prune_product =
+      prune_source.frontier.back();
+  const ExactPairSupportRankKeepCertificate threshold_keep =
+      external_leaf_cut_certificate(
+          prune_product, prune_fixture);
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(
+            build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+                prune_authority,
+                budget,
+                prune_source,
+                8U,
+                keep_provider_for(threshold_keep)));
+      },
+      "a keep certificate whose strict terminals reach T is rejected");
+
+  const std::optional<ExactPairSupportRankPruneProposal>
+      strict_proposal = strict_between_leaf_proposal(
+          prune_product, prune_fixture);
+  check(
+      strict_proposal.has_value(),
+      "the duplicate-population fixture has a strict prune proposal");
+  if (strict_proposal.has_value()) {
+    const ExactPairSupportRankPruneBatchCallback duplicate_provider =
+        [proposal = *strict_proposal, threshold_keep](
+            const ExactPairSupportRankPruneBatchRequest& request) {
+          ExactPairSupportRankPruneBatchProposal response;
+          if (std::find(
+                  request.canonical_products.begin(),
+                  request.canonical_products.end(),
+                  proposal.product) !=
+              request.canonical_products.end()) {
+            response.proposals.push_back(proposal);
+            response.keep_certificates.push_back(threshold_keep);
+          }
+          return response;
+        };
+    check_throws<std::invalid_argument>(
+        [&] {
+          static_cast<void>(
+              build_exact_pair_support_stream_chunk_with_rank_prune_proposals(
+                  prune_authority,
+                  budget,
+                  prune_source,
+                  8U,
+                  duplicate_provider));
+        },
+        "one product cannot occur in both prune and keep caches");
+  }
 }
 
 void test_terminal_checkpoint_is_idempotent() {
@@ -2754,6 +3098,7 @@ int main() {
   test_pending_witness_checkpoint_invariants();
   test_checkpoint_manifest_and_prepared_retry();
   test_ephemeral_batched_rank_prune_proposals();
+  test_ephemeral_rank_keep_certificates();
   test_terminal_checkpoint_is_idempotent();
   test_bounded_exhaustive_oracle_agreement();
   test_hostile_replay_mutations();

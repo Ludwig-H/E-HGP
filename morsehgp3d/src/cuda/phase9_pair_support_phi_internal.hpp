@@ -68,12 +68,17 @@ struct PairSupportPhiDeviceBatch {
 struct PairSupportRankProductInputRecord {
   std::uint64_t first_support_node_index{};
   std::uint64_t second_support_node_index{};
+  // Authenticated singleton leaves at the first Morton position of each
+  // support range.  They define one necessary anchor-ball test only; they
+  // never authorize a positive rank receipt.
+  std::uint64_t first_anchor_leaf_node_index{};
+  std::uint64_t second_anchor_leaf_node_index{};
 };
 static_assert(std::is_standard_layout_v<PairSupportRankProductInputRecord>);
 static_assert(std::is_trivially_copyable_v<PairSupportRankProductInputRecord>);
 static_assert(
     sizeof(PairSupportRankProductInputRecord) ==
-    2U * sizeof(std::uint64_t));
+    4U * sizeof(std::uint64_t));
 
 struct PairSupportRankWorkItem {
   std::uint64_t product_slot{pair_support_phi_sentinel};
@@ -84,35 +89,33 @@ static_assert(std::is_trivially_copyable_v<PairSupportRankWorkItem>);
 static_assert(
     sizeof(PairSupportRankWorkItem) == 2U * sizeof(std::uint64_t));
 
-struct PairSupportRankDeviceReceipt {
-  std::uint64_t receipt_index{pair_support_phi_sentinel};
+struct PairSupportRankDeviceTerminal {
   std::uint64_t product_slot{pair_support_phi_sentinel};
   std::uint64_t witness_node_index{pair_support_phi_sentinel};
-  std::uint64_t leaf_begin{pair_support_phi_sentinel};
-  std::uint64_t leaf_end{pair_support_phi_sentinel};
-  std::uint64_t upper_phi_bits{pair_support_phi_sentinel};
 };
-static_assert(std::is_standard_layout_v<PairSupportRankDeviceReceipt>);
-static_assert(std::is_trivially_copyable_v<PairSupportRankDeviceReceipt>);
+static_assert(std::is_standard_layout_v<PairSupportRankDeviceTerminal>);
+static_assert(std::is_trivially_copyable_v<PairSupportRankDeviceTerminal>);
 static_assert(
-    sizeof(PairSupportRankDeviceReceipt) == 6U * sizeof(std::uint64_t));
+    sizeof(PairSupportRankDeviceTerminal) ==
+    2U * sizeof(std::uint64_t));
 
 enum class PairSupportRankCapacityStop : std::uint8_t {
   none,
   work_item_capacity,
+  // Source-compatible name; this now denotes unified terminal capacity C.
   receipt_capacity,
 };
 
 struct PairSupportRankDeviceBatch {
-  // As for P1, the entire fixed-capacity transcript is returned and the tail
-  // must remain sentinel-filled.  No device completion flag is a scientific
-  // authority; the host derives proposals solely from exact receipt replay.
-  std::vector<PairSupportRankDeviceReceipt> receipts;
-  std::size_t receipt_count{};
+  // The whole fixed-capacity terminal transcript is returned and its tail must
+  // remain sentinel-filled.  Position is the transcript index; ranges and
+  // classifications are reconstructed only from the immutable CPU snapshot.
+  std::vector<PairSupportRankDeviceTerminal> terminals;
+  std::size_t terminal_count{};
   std::size_t input_product_count{};
   std::size_t product_capacity{};
   std::size_t work_item_capacity{};
-  std::size_t receipt_capacity{};
+  std::size_t terminal_capacity{};
   std::size_t traversal_epoch_count{};
   std::size_t count_kernel_launch_count{};
   std::size_t exclusive_scan_count{};
@@ -123,16 +126,20 @@ struct PairSupportRankDeviceBatch {
   std::size_t active_product_h2d_byte_count{};
   std::size_t initial_frontier_h2d_byte_count{};
   std::size_t traversal_metadata_d2h_byte_count{};
-  std::size_t physical_receipt_d2h_byte_count{};
-  std::size_t active_receipt_d2h_byte_count{};
+  std::size_t physical_terminal_d2h_byte_count{};
+  std::size_t active_terminal_d2h_byte_count{};
   std::size_t device_frontier_double_buffer_byte_capacity{};
-  std::size_t device_receipt_byte_capacity{};
+  std::size_t device_terminal_byte_capacity{};
   std::size_t device_scan_workspace_byte_capacity{};
   std::size_t device_fixed_workspace_byte_capacity{};
   std::uint64_t buffer_epoch{};
   PairSupportRankCapacityStop capacity_stop{
       PairSupportRankCapacityStop::none};
   bool frontier_exhausted{false};
+  // Exact cull counts would require either another O(W) arena or a contended
+  // global atomic.  This flag instead makes the enabled proposal policy
+  // explicit without fabricating a counter.
+  bool anchor_ball_culling_enabled{false};
 };
 
 class PairSupportPhiContextState final {
@@ -194,7 +201,7 @@ propose_pair_support_rank_prunes_on_gpu(
     std::size_t required_strict_interior_point_count,
     std::size_t maximum_product_count,
     std::size_t maximum_work_item_count,
-    std::size_t maximum_receipt_count,
+    std::size_t maximum_terminal_count,
     std::size_t maximum_epoch_count);
 
 }  // namespace morsehgp3d::gpu::detail

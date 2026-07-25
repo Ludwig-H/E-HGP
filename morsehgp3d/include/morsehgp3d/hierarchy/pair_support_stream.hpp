@@ -46,6 +46,20 @@ exact_diametral_phi_aabb_maximum(
     const spatial::ExactDyadicAabb3& second_support_box,
     const spatial::ExactDyadicAabb3& query_box);
 
+// Sign-only variants keep the dyadic result unnormalized and therefore avoid
+// constructing an ExactRational.  The anchor variant requires each support
+// box to encode exactly one binary64 point (signed-zero spellings compare as
+// the same exact dyadic point).
+[[nodiscard]] int exact_diametral_phi_aabb_maximum_sign(
+    const spatial::ExactDyadicAabb3& first_support_box,
+    const spatial::ExactDyadicAabb3& second_support_box,
+    const spatial::ExactDyadicAabb3& query_box);
+
+[[nodiscard]] int exact_diametral_anchor_phi_aabb_minimum_sign(
+    const spatial::ExactDyadicAabb3& first_support_point_box,
+    const spatial::ExactDyadicAabb3& second_support_point_box,
+    const spatial::ExactDyadicAabb3& query_box);
+
 enum class ExactPairSupportStreamStatus : std::uint8_t {
   complete,
   budget_exhausted,
@@ -146,6 +160,19 @@ struct ExactPairSupportRankPruneProposal {
       const ExactPairSupportRankPruneProposal&) = default;
 };
 
+// Phase 14Q/P4 untrusted, ephemeral conservative-keep hint.  The support
+// ranges are implicit members of the cut.  The CPU authenticates and
+// reclassifies every terminal, then proves that both supports plus the
+// terminal antichain tile the immutable LBVH root exactly.
+struct ExactPairSupportRankKeepCertificate {
+  ExactPairSupportFrontierEntry product{};
+  std::vector<ExactPairSupportWitnessNodeEntry> canonical_terminals;
+
+  friend bool operator==(
+      const ExactPairSupportRankKeepCertificate&,
+      const ExactPairSupportRankKeepCertificate&) = default;
+};
+
 struct ExactPairSupportRankPruneBatchRequest {
   // Borrowed only for the duration of the synchronous callback.
   std::span<const ExactPairSupportFrontierEntry> canonical_products;
@@ -156,6 +183,10 @@ struct ExactPairSupportRankPruneBatchProposal {
   // A canonical subset of the request.  Omitted products are inconclusive and
   // deterministically fall back to the historical CPU witness traversal.
   std::vector<ExactPairSupportRankPruneProposal> proposals;
+  // A second canonical subset, disjoint from proposals.  Device terminal
+  // kinds and coverage flags are deliberately absent: exact CPU replay of
+  // canonical_terminals is the only keep authority.
+  std::vector<ExactPairSupportRankKeepCertificate> keep_certificates;
 };
 
 using ExactPairSupportRankPruneBatchCallback =
@@ -174,6 +205,14 @@ struct ExactPairSupportRankPruneProposalAudit {
   std::size_t consumed_receipt_count{};
   std::size_t consumed_witness_point_count{};
   std::size_t proposal_pruned_pair_count{};
+  std::size_t consumed_keep_certificate_count{};
+  std::size_t exact_keep_terminal_recertification_count{};
+  std::size_t keep_terminal_classification_count{};
+  std::size_t keep_strict_interior_terminal_count{};
+  std::size_t keep_strict_interior_point_count{};
+  std::size_t keep_anchor_noninterior_terminal_count{};
+  std::size_t keep_anchor_noninterior_point_count{};
+  std::size_t keep_external_leaf_terminal_count{};
   bool transcript_ephemeral{true};
   bool durable_wire_v1_claimed{false};
   bool no_forbidden_global_structure_materialized{true};
@@ -617,6 +656,8 @@ struct ExactPairSupportStreamChunkVerification {
 struct ExactPairSupportRankPruneProposedChunk {
   ExactPairSupportStreamChunk candidate_chunk;
   std::vector<ExactPairSupportRankPruneProposal> consumed_proposals;
+  std::vector<ExactPairSupportRankKeepCertificate>
+      consumed_keep_certificates;
   ExactPairSupportRankPruneProposalAudit audit{};
 
   friend bool operator==(
@@ -628,6 +669,10 @@ struct ExactPairSupportRankPruneProposedChunkVerification {
   ExactPairSupportStreamChunkVerification candidate_chunk_verification{};
   bool every_consumed_proposal_replayed_once{false};
   bool no_unconsumed_proposal_retained{false};
+  bool every_consumed_keep_certificate_replayed_once{false};
+  bool no_unconsumed_keep_certificate_retained{false};
+  bool no_duplicate_keep_certificate_retained{false};
+  bool keep_candidate_transition_consistent{false};
   bool proposed_transition_verified{false};
   bool durable_wire_v1_claimed{false};
 };

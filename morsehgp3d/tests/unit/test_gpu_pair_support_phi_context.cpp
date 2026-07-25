@@ -32,6 +32,7 @@ using morsehgp3d::gpu::PairSupportPhiWitnessQuery;
 using morsehgp3d::gpu::PairSupportRankPruneBatchResult;
 using morsehgp3d::gpu::PairSupportRankPruneBudget;
 using morsehgp3d::gpu::PairSupportRankPruneCapacity;
+using morsehgp3d::gpu::PairSupportRankTerminalKind;
 using morsehgp3d::gpu::test_support::
     FakePairSupportPhiCorruption;
 using morsehgp3d::gpu::test_support::
@@ -102,6 +103,30 @@ void check_throws(Function&& function, const std::string& message) {
       CertifiedPoint3::from_binary64(0.0, 0.0, 0.0),
       CertifiedPoint3::from_binary64(1.0, 0.0, 0.0),
       CertifiedPoint3::from_binary64(2.0, 0.0, 0.0)};
+  return CanonicalPointCloud::rejecting_duplicates(points);
+}
+
+[[nodiscard]] CanonicalPointCloud anchor_culling_line_cloud() {
+  const std::array points{
+      CertifiedPoint3::from_binary64(-1.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(1.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(32.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(33.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(34.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(35.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(36.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(37.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(38.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(39.0, 0.0, 0.0)};
+  return CanonicalPointCloud::rejecting_duplicates(points);
+}
+
+[[nodiscard]] CanonicalPointCloud anchor_shell_cloud() {
+  const std::array points{
+      CertifiedPoint3::from_binary64(-1.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(1.0, 0.0, 0.0),
+      CertifiedPoint3::from_binary64(0.0, -1.0, 0.0),
+      CertifiedPoint3::from_binary64(0.0, 1.0, 0.0)};
   return CanonicalPointCloud::rejecting_duplicates(points);
 }
 
@@ -489,6 +514,7 @@ void test_rank_prune_exact_receipts_and_traffic() {
       context.propose_rank_prunes(products, 1U, budget);
   check(
       first.proposals.size() == 1U &&
+          first.keep_certificates.empty() &&
           first.proposals[0U].product_index == 0U &&
           first.proposals[0U].product == products[0U] &&
           first.proposals[0U].strict_interior_point_count == 1U &&
@@ -498,9 +524,10 @@ void test_rank_prune_exact_receipts_and_traffic() {
       "P2 returns one stable exact receipt for the strict middle witness");
   check(
       first.proposals == second.proposals &&
-          first.audit.receipt_digest_fnv1a ==
-              second.audit.receipt_digest_fnv1a,
-      "two P2 calls preserve proposal and stable receipt digest");
+          first.keep_certificates == second.keep_certificates &&
+          first.audit.terminal_digest_fnv1a ==
+              second.audit.terminal_digest_fnv1a,
+      "two P4 calls preserve proposal and stable terminal digest");
 
   const auto& audit = first.audit;
   check(
@@ -515,29 +542,39 @@ void test_rank_prune_exact_receipts_and_traffic() {
               2U * audit.gpu_traversal_epoch_count &&
           audit.gpu_emit_kernel_launch_count ==
               audit.gpu_traversal_epoch_count &&
+          audit.gpu_output_terminal_count == 1U &&
+          audit.cpu_exact_terminal_recertification_count == 1U &&
+          audit.strict_interior_terminal_count == 1U &&
+          audit.anchor_noninterior_terminal_count == 0U &&
+          audit.unresolved_external_leaf_terminal_count == 0U &&
+          audit.prune_product_count == 1U &&
+          audit.keep_certificate_product_count == 0U &&
           audit.gpu_output_receipt_count == 1U &&
           audit.cpu_exact_phi_recertification_count == 1U &&
           audit.proposed_product_count == 1U &&
           audit.fallback_product_count == 0U &&
           audit.buffer_epoch == 1U,
-      "P2 closes bounded count-scan-emit and exact replay counters");
+      "P4 closes bounded count-scan-emit and exact terminal counters");
   check(
       audit.snapshot_h2d_byte_count == 5U * 80U &&
-          audit.active_product_h2d_byte_count == 16U &&
+          audit.active_product_h2d_byte_count == 32U &&
           audit.initial_frontier_h2d_byte_count == 16U &&
           audit.traversal_metadata_d2h_byte_count ==
               audit.gpu_traversal_epoch_count * 5U * 8U + 8U &&
-          audit.physical_receipt_d2h_byte_count == 4U * 48U &&
-          audit.active_receipt_d2h_byte_count == 48U &&
+          audit.physical_terminal_d2h_byte_count == 4U * 16U &&
+          audit.active_terminal_d2h_byte_count == 16U &&
+          audit.device_terminal_byte_capacity == 4U * 16U &&
+          audit.physical_receipt_d2h_byte_count == 4U * 16U &&
+          audit.active_receipt_d2h_byte_count == 16U &&
           audit.device_frontier_double_buffer_byte_capacity ==
               2U * 8U * 16U &&
-          audit.device_receipt_byte_capacity == 4U * 48U &&
+          audit.device_receipt_byte_capacity == 4U * 16U &&
           audit.device_scan_workspace_byte_capacity == 8U * 8U &&
           audit.device_fixed_workspace_byte_capacity ==
-              24U * 2U + 80U * 8U + 48U * 4U + 8U + 8U * 8U &&
+              40U * 2U + 80U * 8U + 16U * 4U + 8U + 8U * 8U &&
           second.audit.snapshot_h2d_byte_count == 0U &&
           second.audit.buffer_epoch == 2U,
-      "P2 audits first-upload, active traffic, physical D2H, and exact fixed workspace");
+      "P4 audits 16-byte terminals and exact fixed workspace");
   check(
       audit.device_frontier_exhausted &&
           !audit.work_item_capacity_exhausted &&
@@ -545,18 +582,112 @@ void test_rank_prune_exact_receipts_and_traffic() {
           !audit.epoch_budget_exhausted &&
           audit.immutable_lbvh_snapshot_validated &&
           audit.product_records_validated &&
+          audit.stable_terminal_transcript_validated &&
+          audit.disjoint_terminal_antichains_validated &&
+          audit.keep_coverage_recertification_complete &&
           audit.stable_receipt_transcript_validated &&
           audit.disjoint_receipt_antichains_validated &&
           audit.cpu_exact_recertification_complete &&
+          audit.anchor_ball_culling_enabled &&
           !audit.global_support_product_prune_published &&
           !audit.public_status_published,
-      "P2 separates a recertified local proposal from scientific publication");
+      "P4 separates recertified certificates from scientific publication");
   check(
       fake_gpu_pair_support_rank_launch_count() == 2U &&
           fake_gpu_pair_support_rank_last_product_count() == 1U &&
           fake_gpu_pair_support_rank_last_work_item_capacity() == 8U &&
           fake_gpu_pair_support_rank_last_receipt_capacity() == 4U,
       "the fake P2 launcher sees only active products and fixed capacities");
+}
+
+void test_rank_prune_anchor_culls_remote_subtree() {
+  reset_fake_gpu_pair_support_phi();
+  CanonicalPointCloud cloud = anchor_culling_line_cloud();
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  PairSupportPhiContext context{
+      index,
+      cloud,
+      2U,
+      PairSupportRankPruneCapacity{1U, 32U, 4U}};
+  const PairSupportPhiWitnessQuery query =
+      context.make_leaf_witness_query(0U, 1U, 2U);
+  const std::array product{product_from_query(context, query)};
+
+  const auto result = context.propose_rank_prunes(
+      product, cloud.size(), PairSupportRankPruneBudget{16U});
+  check(
+      result.proposals.empty() &&
+          result.keep_certificates.size() == 1U &&
+          result.keep_certificates[0U].product_index == 0U &&
+          result.keep_certificates[0U].product == product[0U] &&
+          result.keep_certificates[0U].strict_interior_point_count == 0U &&
+          result.keep_certificates[0U].canonical_terminals.size() == 1U &&
+          result.keep_certificates[0U].canonical_terminals[0U].kind ==
+              PairSupportRankTerminalKind::anchor_noninterior &&
+          result.keep_certificates[0U]
+                  .canonical_terminals[0U]
+                  .terminal.leaf_begin == 2U &&
+          result.keep_certificates[0U]
+                  .canonical_terminals[0U]
+                  .terminal.leaf_end == cloud.size(),
+      "P4 publishes one exact covered keep certificate for the remote subtree");
+  check(
+      result.audit.anchor_ball_culling_enabled &&
+          result.audit.gpu_output_terminal_count == 1U &&
+          result.audit.cpu_exact_terminal_recertification_count == 1U &&
+          result.audit.strict_interior_terminal_count == 0U &&
+          result.audit.anchor_noninterior_terminal_count == 1U &&
+          result.audit.unresolved_external_leaf_terminal_count == 0U &&
+          result.audit.prune_product_count == 0U &&
+          result.audit.keep_certificate_product_count == 1U &&
+          result.audit.fallback_product_count == 0U &&
+          result.audit.keep_coverage_recertification_complete &&
+          result.audit.device_frontier_exhausted &&
+          !result.audit.work_item_capacity_exhausted &&
+          !result.audit.receipt_capacity_exhausted &&
+          !result.audit.epoch_budget_exhausted &&
+          context.node_count() == 19U &&
+          result.audit.gpu_visited_work_item_count == 5U &&
+          result.audit.gpu_traversal_epoch_count == 3U,
+      "P4 closes remote coverage in five visits and three epochs instead of "
+      "traversing nineteen LBVH nodes");
+}
+
+void test_rank_keep_accepts_exact_anchor_shell_equality() {
+  reset_fake_gpu_pair_support_phi();
+  CanonicalPointCloud cloud = anchor_shell_cloud();
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  PairSupportPhiContext context{
+      index,
+      cloud,
+      2U,
+      PairSupportRankPruneCapacity{1U, 16U, 8U}};
+  const PairSupportPhiWitnessQuery query =
+      context.make_leaf_witness_query(0U, 3U, 1U);
+  const std::array product{product_from_query(context, query)};
+
+  const auto result = context.propose_rank_prunes(
+      product, 1U, PairSupportRankPruneBudget{16U});
+  check(
+      result.proposals.empty() &&
+          result.keep_certificates.size() == 1U &&
+          result.keep_certificates[0U].strict_interior_point_count == 0U &&
+          result.keep_certificates[0U].canonical_terminals.size() == 2U &&
+          std::all_of(
+              result.keep_certificates[0U].canonical_terminals.begin(),
+              result.keep_certificates[0U].canonical_terminals.end(),
+              [](const auto& terminal) {
+                return terminal.kind ==
+                           PairSupportRankTerminalKind::
+                               anchor_noninterior &&
+                       terminal.terminal.leaf_end -
+                               terminal.terminal.leaf_begin ==
+                           1U;
+              }) &&
+          result.audit.anchor_noninterior_terminal_count == 2U &&
+          result.audit.strict_interior_terminal_count == 0U &&
+          result.audit.keep_certificate_product_count == 1U,
+      "P4 recertifies exact anchor-shell equality as noninterior coverage");
 }
 
 void test_rank_prune_preflight_and_fallbacks() {
@@ -600,14 +731,15 @@ void test_rank_prune_preflight_and_fallbacks() {
       "P2 rejects a noncanonical product order before launch");
   std::reverse(products.begin(), products.end());
   auto changed_range = products[0U];
-  ++changed_range.first_leaf_end;
+  ++changed_range.first_leaf_begin;
   const std::array changed{changed_range};
   check_throws<std::invalid_argument>(
       [&] {
         static_cast<void>(context.propose_rank_prunes(
             changed, 1U, PairSupportRankPruneBudget{8U}));
       },
-      "P2 rejects a product range that contradicts the resident LBVH");
+      "P4 rejects a product range start that would substitute its "
+      "authenticated Morton anchor");
   const std::array one_product{products[0U]};
   check_throws<std::invalid_argument>(
       [&] {
@@ -649,11 +781,12 @@ void test_rank_prune_preflight_and_fallbacks() {
       epoch_product, 1U, PairSupportRankPruneBudget{1U});
   check(
       incomplete.proposals.empty() &&
+          incomplete.keep_certificates.empty() &&
           incomplete.audit.fallback_product_count == 1U &&
           incomplete.audit.epoch_budget_exhausted &&
           !incomplete.audit.device_frontier_exhausted &&
           !incomplete.audit.global_support_product_prune_published,
-      "an epoch-limited P2 product is omitted for CPU fallback");
+      "an epoch gap cannot fabricate a P4 keep certificate");
   const auto recovered = epoch_limited.propose_rank_prunes(
       epoch_product, 1U, PairSupportRankPruneBudget{8U});
   check(
@@ -675,11 +808,12 @@ void test_rank_prune_preflight_and_fallbacks() {
       work_product, 1U, PairSupportRankPruneBudget{8U});
   check(
       capacity_fallback.proposals.empty() &&
+          capacity_fallback.keep_certificates.empty() &&
           capacity_fallback.audit.fallback_product_count == 1U &&
           capacity_fallback.audit.work_item_capacity_exhausted &&
           capacity_fallback.audit.gpu_count_kernel_launch_count == 1U &&
           capacity_fallback.audit.gpu_emit_kernel_launch_count == 0U,
-      "P2 checks scanned frontier capacity before stable emit and falls back");
+      "P4 checks scanned frontier capacity before stable emit and falls back");
 }
 
 void test_rank_prune_canonical_minimal_prefix() {
@@ -850,9 +984,9 @@ void test_rank_prune_corruption_matrix() {
       std::pair{FakePairSupportPhiCorruption::rank_zero_epoch,
                 "an unauthenticated P2 zero epoch"},
       std::pair{FakePairSupportPhiCorruption::rank_changed_receipt,
-                "a changed P2 receipt identity"},
+                "a falsified internal P4 terminal"},
       std::pair{FakePairSupportPhiCorruption::rank_false_strict_receipt,
-                "a false P2 strict upper enclosure"},
+                "a duplicated P4 terminal"},
       std::pair{FakePairSupportPhiCorruption::rank_stale_tail,
                 "a write into the P2 fixed-capacity tail"},
       std::pair{FakePairSupportPhiCorruption::rank_epoch_count_over_budget,
@@ -924,6 +1058,8 @@ int main() {
   test_preflight_validation_and_capacity();
   test_corruption_matrix_and_poisoning();
   test_rank_prune_exact_receipts_and_traffic();
+  test_rank_prune_anchor_culls_remote_subtree();
+  test_rank_keep_accepts_exact_anchor_shell_equality();
   test_rank_prune_preflight_and_fallbacks();
   test_rank_prune_canonical_minimal_prefix();
   test_rank_prune_uses_cpu_range_first_product_order();

@@ -7,6 +7,7 @@
 #include "morsehgp3d/spatial/lbvh.hpp"
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <bit>
 #include <cstddef>
@@ -109,6 +110,57 @@ struct FakeRankResources {
   return spatial::ExactDyadicAabb3{
       {node.lower_bits[0U], node.lower_bits[1U], node.lower_bits[2U]},
       {node.upper_bits[0U], node.upper_bits[1U], node.upper_bits[2U]}};
+}
+
+void validate_anchor_leaf(
+    const PairSupportPhiNodeInputRecord& anchor,
+    std::uint64_t expected_leaf_begin) {
+  if (anchor.leaf_begin != expected_leaf_begin ||
+      anchor.leaf_begin >= anchor.leaf_end ||
+      anchor.leaf_end - anchor.leaf_begin != 1U ||
+      anchor.left_child != pair_support_phi_sentinel ||
+      anchor.right_child != pair_support_phi_sentinel) {
+    throw std::runtime_error(
+        "the fake Phase 9 rank-prune anchor is not its authenticated leaf");
+  }
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    if (anchor.lower_bits[axis] != anchor.upper_bits[axis]) {
+      throw std::runtime_error(
+          "the fake Phase 9 rank-prune anchor leaf is not degenerate");
+    }
+    static_cast<void>(
+        exact::ExactRational::from_binary64_bits(anchor.lower_bits[axis]));
+  }
+}
+
+[[nodiscard]] exact::ExactRational exact_anchor_interval_lower(
+    const PairSupportPhiNodeInputRecord& first_anchor,
+    const PairSupportPhiNodeInputRecord& second_anchor,
+    const PairSupportPhiNodeInputRecord& witness) {
+  exact::ExactRational sum;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const exact::ExactRational x_lower =
+        exact::ExactRational::from_binary64_bits(
+            witness.lower_bits[axis]);
+    const exact::ExactRational x_upper =
+        exact::ExactRational::from_binary64_bits(
+            witness.upper_bits[axis]);
+    const exact::ExactRational u =
+        exact::ExactRational::from_binary64_bits(
+            first_anchor.lower_bits[axis]);
+    const exact::ExactRational v =
+        exact::ExactRational::from_binary64_bits(
+            second_anchor.lower_bits[axis]);
+    const std::array<exact::ExactRational, 4U> products{
+        (x_lower - u) * (x_lower - v),
+        (x_lower - u) * (x_upper - v),
+        (x_upper - u) * (x_lower - v),
+        (x_upper - u) * (x_upper - v)};
+    const exact::ExactRational& axis_lower =
+        *std::min_element(products.begin(), products.end());
+    sum = sum + axis_lower;
+  }
+  return sum;
 }
 
 [[nodiscard]] PairSupportPhiDeviceRecord make_record(
@@ -287,14 +339,14 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
     std::size_t required_strict_interior_point_count,
     std::size_t maximum_product_count,
     std::size_t maximum_work_item_count,
-    std::size_t maximum_receipt_count,
+    std::size_t maximum_terminal_count,
     std::size_t maximum_epoch_count) {
   if (nodes.empty() || products.empty() ||
       root_node_index >= nodes.size() ||
       required_strict_interior_point_count == 0U ||
       maximum_product_count < products.size() ||
       maximum_work_item_count < products.size() ||
-      maximum_receipt_count == 0U || maximum_epoch_count == 0U) {
+      maximum_terminal_count == 0U || maximum_epoch_count == 0U) {
     throw std::invalid_argument(
         "the fake Phase 9 rank-prune launcher received invalid extents");
   }
@@ -308,7 +360,7 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
   test_support::rank_last_work_item_capacity.store(
       maximum_work_item_count, std::memory_order_relaxed);
   test_support::rank_last_receipt_capacity.store(
-      maximum_receipt_count, std::memory_order_relaxed);
+      maximum_terminal_count, std::memory_order_relaxed);
   if (corruption ==
       test_support::FakePairSupportPhiCorruption::
           rank_simulated_async_failure) {
@@ -317,11 +369,11 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
   }
 
   PairSupportRankDeviceBatch batch;
-  batch.receipts.resize(maximum_receipt_count);
+  batch.terminals.resize(maximum_terminal_count);
   batch.input_product_count = products.size();
   batch.product_capacity = maximum_product_count;
   batch.work_item_capacity = maximum_work_item_count;
-  batch.receipt_capacity = maximum_receipt_count;
+  batch.terminal_capacity = maximum_terminal_count;
   std::shared_ptr<void>& opaque = context.cuda_resources();
   if (!opaque) {
     opaque = std::make_shared<FakeRankResources>();
@@ -336,12 +388,12 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
       products.size() * sizeof(PairSupportRankProductInputRecord);
   batch.initial_frontier_h2d_byte_count =
       products.size() * sizeof(PairSupportRankWorkItem);
-  batch.physical_receipt_d2h_byte_count =
-      maximum_receipt_count * sizeof(PairSupportRankDeviceReceipt);
+  batch.physical_terminal_d2h_byte_count =
+      maximum_terminal_count * sizeof(PairSupportRankDeviceTerminal);
   batch.device_frontier_double_buffer_byte_capacity =
       2U * maximum_work_item_count * sizeof(PairSupportRankWorkItem);
-  batch.device_receipt_byte_capacity =
-      maximum_receipt_count * sizeof(PairSupportRankDeviceReceipt);
+  batch.device_terminal_byte_capacity =
+      maximum_terminal_count * sizeof(PairSupportRankDeviceTerminal);
   batch.device_scan_workspace_byte_capacity =
       maximum_work_item_count * sizeof(std::uint64_t);
   batch.device_fixed_workspace_byte_capacity =
@@ -351,9 +403,35 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
       maximum_work_item_count *
           (2U * sizeof(PairSupportRankWorkItem) +
            6U * sizeof(std::uint64_t)) +
-      maximum_receipt_count * sizeof(PairSupportRankDeviceReceipt) +
+      maximum_terminal_count * sizeof(PairSupportRankDeviceTerminal) +
       sizeof(std::uint64_t) +
       batch.device_scan_workspace_byte_capacity;
+  batch.anchor_ball_culling_enabled = true;
+
+  for (const PairSupportRankProductInputRecord& product : products) {
+    const std::size_t first_index = checked_size(
+        product.first_support_node_index,
+        "a fake Phase 9 rank-prune first index does not fit size_t");
+    const std::size_t second_index = checked_size(
+        product.second_support_node_index,
+        "a fake Phase 9 rank-prune second index does not fit size_t");
+    const std::size_t first_anchor_index = checked_size(
+        product.first_anchor_leaf_node_index,
+        "a fake Phase 9 rank-prune first anchor index does not fit size_t");
+    const std::size_t second_anchor_index = checked_size(
+        product.second_anchor_leaf_node_index,
+        "a fake Phase 9 rank-prune second anchor index does not fit size_t");
+    if (first_index >= nodes.size() || second_index >= nodes.size() ||
+        first_anchor_index >= nodes.size() ||
+        second_anchor_index >= nodes.size()) {
+      throw std::runtime_error(
+          "the fake Phase 9 rank-prune product is malformed");
+    }
+    const PairSupportPhiNodeInputRecord& first = nodes[first_index];
+    const PairSupportPhiNodeInputRecord& second = nodes[second_index];
+    validate_anchor_leaf(nodes[first_anchor_index], first.leaf_begin);
+    validate_anchor_leaf(nodes[second_anchor_index], second.leaf_begin);
+  }
 
   std::vector<PairSupportRankWorkItem> current;
   current.reserve(maximum_work_item_count);
@@ -367,8 +445,8 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
 
   struct FakeDecision {
     bool emit_children{false};
-    bool emit_receipt{false};
-    std::uint64_t upper_phi_bits{kPositiveInfinityBits};
+    bool emit_terminal{false};
+    bool strict_terminal{false};
   };
 
   while (!current.empty() &&
@@ -382,7 +460,7 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
 
     std::vector<FakeDecision> decisions(current.size());
     std::size_t next_count = 0U;
-    std::size_t epoch_receipt_count = 0U;
+    std::size_t epoch_terminal_count = 0U;
     for (std::size_t item_index = 0U;
          item_index < current.size();
          ++item_index) {
@@ -409,13 +487,35 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
       const std::size_t second_index = checked_size(
           product.second_support_node_index,
           "a fake Phase 9 rank-prune second index does not fit size_t");
-      if (first_index >= nodes.size() || second_index >= nodes.size()) {
+      const std::size_t first_anchor_index = checked_size(
+          product.first_anchor_leaf_node_index,
+          "a fake Phase 9 rank-prune first anchor index does not fit size_t");
+      const std::size_t second_anchor_index = checked_size(
+          product.second_anchor_leaf_node_index,
+          "a fake Phase 9 rank-prune second anchor index does not fit size_t");
+      if (first_index >= nodes.size() || second_index >= nodes.size() ||
+          first_anchor_index >= nodes.size() ||
+          second_anchor_index >= nodes.size()) {
         throw std::runtime_error(
             "the fake Phase 9 rank-prune product is malformed");
       }
       const PairSupportPhiNodeInputRecord& witness = nodes[witness_index];
       const PairSupportPhiNodeInputRecord& first = nodes[first_index];
       const PairSupportPhiNodeInputRecord& second = nodes[second_index];
+      const PairSupportPhiNodeInputRecord& first_anchor =
+          nodes[first_anchor_index];
+      const PairSupportPhiNodeInputRecord& second_anchor =
+          nodes[second_anchor_index];
+      validate_anchor_leaf(first_anchor, first.leaf_begin);
+      validate_anchor_leaf(second_anchor, second.leaf_begin);
+      const bool contained_in_support =
+          (first.leaf_begin <= witness.leaf_begin &&
+           witness.leaf_end <= first.leaf_end) ||
+          (second.leaf_begin <= witness.leaf_begin &&
+           witness.leaf_end <= second.leaf_end);
+      if (contained_in_support) {
+        continue;
+      }
       const bool overlaps =
           (witness.leaf_begin < first.leaf_end &&
            first.leaf_begin < witness.leaf_end) ||
@@ -432,9 +532,16 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
                 DirectedEnclosureStatus::unsupported_range &&
             std::bit_cast<double>(enclosure.upper_bits) < 0.0;
         if (finite_strict_upper) {
-          decisions[item_index].emit_receipt = true;
-          decisions[item_index].upper_phi_bits = enclosure.upper_bits;
-          ++epoch_receipt_count;
+          decisions[item_index].emit_terminal = true;
+          decisions[item_index].strict_terminal = true;
+          ++epoch_terminal_count;
+          continue;
+        }
+        if (first_index != second_index &&
+            exact_anchor_interval_lower(
+                first_anchor, second_anchor, witness).sign() >= 0) {
+          decisions[item_index].emit_terminal = true;
+          ++epoch_terminal_count;
           continue;
         }
       }
@@ -450,6 +557,12 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
         }
         decisions[item_index].emit_children = true;
         next_count += 2U;
+      } else if (overlaps) {
+        throw std::runtime_error(
+            "the fake Phase 9 rank-prune leaf partially overlaps a support");
+      } else {
+        decisions[item_index].emit_terminal = true;
+        ++epoch_terminal_count;
       }
     }
 
@@ -458,8 +571,8 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
           PairSupportRankCapacityStop::work_item_capacity;
       break;
     }
-    if (epoch_receipt_count >
-        maximum_receipt_count - batch.receipt_count) {
+    if (epoch_terminal_count >
+        maximum_terminal_count - batch.terminal_count) {
       batch.capacity_stop =
           PairSupportRankCapacityStop::receipt_capacity;
       break;
@@ -477,17 +590,15 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
           static_cast<std::size_t>(item.product_slot);
       const PairSupportPhiNodeInputRecord& witness =
           nodes[static_cast<std::size_t>(item.witness_node_index)];
-      if (decision.emit_receipt) {
-        const std::size_t output_index = batch.receipt_count++;
-        batch.receipts[output_index] = PairSupportRankDeviceReceipt{
-            static_cast<std::uint64_t>(output_index),
-            item.product_slot,
-            item.witness_node_index,
-            witness.leaf_begin,
-            witness.leaf_end,
-            decision.upper_phi_bits};
-        strict_point_counts[product_slot] +=
-            witness.leaf_end - witness.leaf_begin;
+      if (decision.emit_terminal) {
+        const std::size_t output_index = batch.terminal_count++;
+        batch.terminals[output_index] =
+            PairSupportRankDeviceTerminal{
+                item.product_slot, item.witness_node_index};
+        if (decision.strict_terminal) {
+          strict_point_counts[product_slot] +=
+              witness.leaf_end - witness.leaf_begin;
+        }
       }
       if (decision.emit_children) {
         next.push_back(PairSupportRankWorkItem{
@@ -499,8 +610,6 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
     current = std::move(next);
   }
   batch.frontier_exhausted = current.empty();
-  batch.active_receipt_d2h_byte_count =
-      batch.receipt_count * sizeof(PairSupportRankDeviceReceipt);
   batch.traversal_metadata_d2h_byte_count =
       batch.traversal_epoch_count *
           (5U * sizeof(std::uint64_t)) +
@@ -528,27 +637,28 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
       break;
     case test_support::FakePairSupportPhiCorruption::
         rank_changed_receipt:
-      if (batch.receipt_count == 0U) {
+      if (batch.terminal_count == 0U) {
         throw std::logic_error(
-            "the fake Phase 9 changed rank receipt needs one record");
+            "the fake Phase 9 changed rank terminal needs one record");
       }
-      ++batch.receipts[0U].witness_node_index;
+      batch.terminals[0U].witness_node_index = root_node_index;
       break;
     case test_support::FakePairSupportPhiCorruption::
         rank_false_strict_receipt:
-      if (batch.receipt_count == 0U) {
+      if (batch.terminal_count == 0U ||
+          batch.terminal_count >= batch.terminals.size()) {
         throw std::logic_error(
-            "the fake Phase 9 false rank receipt needs one record");
+            "the fake Phase 9 duplicate terminal needs spare capacity");
       }
-      batch.receipts[0U].upper_phi_bits =
-          std::bit_cast<std::uint64_t>(-2.0);
+      batch.terminals[batch.terminal_count] = batch.terminals[0U];
+      ++batch.terminal_count;
       break;
     case test_support::FakePairSupportPhiCorruption::rank_stale_tail:
-      if (batch.receipt_count >= batch.receipts.size()) {
+      if (batch.terminal_count >= batch.terminals.size()) {
         throw std::logic_error(
             "the fake Phase 9 stale rank tail needs spare capacity");
       }
-      batch.receipts[batch.receipt_count].receipt_index = 0U;
+      batch.terminals[batch.terminal_count].product_slot = 0U;
       break;
     case test_support::FakePairSupportPhiCorruption::
         rank_epoch_count_over_budget:
@@ -574,6 +684,8 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
         rank_simulated_async_failure:
       break;
   }
+  batch.active_terminal_d2h_byte_count =
+      batch.terminal_count * sizeof(PairSupportRankDeviceTerminal);
   return batch;
 }
 

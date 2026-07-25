@@ -170,24 +170,26 @@ La génération gardée `2026-07-24T08:49:33.736-07:00` de `ehgp-blackwell-spot-
 
 La validation est logicielle et hôte; elle ne requalifie pas CUDA. Le centre exact reste dupliqué par la fermeture 10.5c, et aucune mesure `warm_e2e`, RSS, 50 k ou 10 M+ n'est réalisée.
 
-## Incrément 14Q qualifié hôte — pruneur borné de rang pair
+## Incrément 14Q P2--P4 — pruneur borné de rang pair
 
 La porte 14P documentée est satisfaite. 14Q s'exécute sous `cuda_g4_plus_reference_cpu / hgp_reduced / proposal_only_then_certified / architecture_only`, avec `public_status=not_claimed`. Il accélère la recherche de témoins du stream de paires Phase 9 par lots de produits canoniques, sans modifier la définition scientifique, le checkpoint ou le wire durable v1.
 
-Le contexte partagé conserve un snapshot LBVH de $80(2n-1)$ octets. P2 possède au plus $P$ produits, deux frontières bornées de capacité $W$, un transcript de $R$ reçus et un nombre fini d'epochs `count`--deux scans--`emit`. Hors snapshot et buffers P1, son workspace device vaut exactement $24P+80W+48R+8+T_{\mathrm{scan}}$ octets. L'audit distingue notamment le transfert initial du snapshot, les rejeux résidents, le D2H physique de $48R$ octets, son préfixe actif, les pics et les trois causes d'arrêt.
+Le premier diagnostic réel G4 de P2 a échoué sur son objectif de vitesse. À 12 500 points `uniform_latin`, le CPU historique prend 1 395,5 ms, le premier assisté 1 804,5 ms et le résident 1 654,3 ms. L'audit compte 43,5 millions d'items, 2 352 epochs, 45 propositions sur 1 741 produits demandés et 26 propositions consommées. Cette mesure unique localise un parcours `count`--deux scans--`emit` trop coûteux et trop peu sélectif; elle ne qualifie ni le composant, ni un SLO.
 
-Chaque sortie device reste une proposition. Le CPU recalcule exactement $\max\phi<0$, authentifie nœuds et plages, vérifie l'antichaîne disjointe des supports et conserve le préfixe canonique minimal atteignant $s_{\max}-1$. Seuls ces reçus consommés peuvent pruner un produit. Une absence, une limite d'epoch ou une capacité atteinte retombe sur le parcours CPU historique; une proposition fausse échoue atomiquement.
+P3 ajoute le culling conservatif par paire-ancre : CUDA propose par borne dirigée, puis seul le minimum dyadique exact positif ou nul recertifié sur CPU classe une boîte `anchor_noninterior`. P4 remplace les seuls reçus par une coupe terminale de capacité $C$, avec supports implicites. Le snapshot LBVH reste $80(2n-1)$ octets; hors snapshot et P1, le workspace fixe, scan inclus, vaut $40P+80W+16C+8+T_{\mathrm{scan}}$ octets. Les terminaux device de 16 octets, leurs trois classes, le D2H physique et actif, prune, keep, fallback, epochs, pics et digest sont audités.
 
-Le chunk accéléré et ses reçus sont éphémères. Le vérificateur frais dédié rejoue chaque proposition consommée exactement une fois et refuse les ajouts inutilisés; il ne revendique jamais le wire v1. Les CTests ciblés `morsehgp3d.hierarchy_pair_support_stream` et `morsehgp3d.gpu_pair_support_phi_context` passent sous GCC et Clang Release en moins d'une seconde par matrice. Ils couvrent l'égalité de la sortie scientifique complète, le repli bit à bit, le budget sans travail exact caché, le préfixe minimal, l'ordre canonique commun, les capacités et trafics exacts, la résidence du snapshot et les corruptions fail-closed.
+Chaque sortie device reste une proposition. Le CPU authentifie et reclassifie exactement les terminaux. Le prune exige le préfixe strict canonique minimal atteignant $s_{\max}-1$; le keep conservatif exige une couverture exacte de la racine par les supports implicites et l'antichaîne terminale sous ce seuil. Prune, keep et fallback ferment le lot. Le chunk accéléré reste éphémère; son vérificateur frais rejoue une fois les deux familles consommées et refuse doublons et ajouts inutilisés. Il ne revendique jamais le wire v1.
 
-Cette qualification est exclusivement hôte. La source CUDA P2, le memcheck et le runner de composant n'ont pas encore été mesurés sur G4. Aucune facette ou coface globale, incidence, cellule, structure Gamma, mosaïque de Delaunay d'ordre supérieur ou arène globale de paires n'est construite. Aucun temps CUDA, `warm_e2e`, p95, SLO 50 k, hiérarchie complète ou pipeline produit 10 M+ n'est revendiqué.
+Le commit `d1e6d54` spécialise les décisions de signe avec des dyadiques exacts non normalisés. Un unique smoke local budgeté mesure `uniform_latin` à 626,180, 875,731 et 752,328 ms, puis `eight_clusters` à 299,284, 301,732 et 316,609 ms pour 12 500, 25 000 et 50 000 points. Les six chunks sont `budget_exhausted`; ils ne sont ni une hiérarchie complète, ni un protocole `warm_e2e`, ni une série statistique.
+
+P3/P4 et le rejeu CPU frais sont qualifiés hôte. Le memcheck et le diagnostic P4 sur G4 restent en attente. Aucune facette ou coface globale, incidence, cellule, structure Gamma, mosaïque de Delaunay d'ordre supérieur ou arène globale de paires n'est construite. Aucun p95, SLO 50 k, hiérarchie complète ou pipeline produit 10 M+ n'est revendiqué. La Phase 14 reste `ready`, la Phase 15 `in_progress`, `deployment_status=architecture_only` et `public_status=not_claimed`.
 
 ## Priorités de développement
 
-1. exécuter le memcheck 14Q à 4 096 points, puis le diagnostic court à 12 500, 25 000 et 50 000 points sur `uniform_latin` et `eight_clusters`;
-2. corriger uniquement le terme dominant révélé par les audits si le rejeu assisté 50 k ne bat pas le chunk CPU historique sur les deux familles;
-3. raccorder ensuite un runner produit complet et mesurer le vrai p95 `warm_e2e` 50 k;
-4. externaliser les autorités et sorties de Phase 15 avant le jalon un million puis les rangs complets 10 000 001, 30 M et 50 M.
+1. exécuter le memcheck P4 à 4 096 points, puis un diagnostic unique à 12 500 points sur `uniform_latin` et `eight_clusters`;
+2. corriger uniquement le terme dominant révélé par les audits; si les deux petits cas sont sains, passer directement au diagnostic 50 000 points;
+3. raccorder ensuite le vrai pipeline complet et mesurer son p95 `warm_e2e` 50 k avant toute revendication interactive;
+4. externaliser les autorités et sorties de Phase 15, réussir le pipeline complet à 10 000 001 points, puis seulement tenter 30 M et 50 M conditionnellement au succès du rang précédent.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

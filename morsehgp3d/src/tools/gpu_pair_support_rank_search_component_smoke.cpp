@@ -37,6 +37,7 @@ using morsehgp3d::gpu::PairSupportRankPruneBudget;
 using morsehgp3d::gpu::PairSupportRankPruneCapacity;
 using morsehgp3d::hierarchy::ExactPairSupportAuthorityContext;
 using morsehgp3d::hierarchy::ExactPairSupportCheckpoint;
+using morsehgp3d::hierarchy::ExactPairSupportRankKeepCertificate;
 using morsehgp3d::hierarchy::ExactPairSupportRankPruneBatchProposal;
 using morsehgp3d::hierarchy::ExactPairSupportRankPruneBatchRequest;
 using morsehgp3d::hierarchy::ExactPairSupportRankPruneProposal;
@@ -48,6 +49,7 @@ using morsehgp3d::hierarchy::ExactPairSupportStreamAudit;
 using morsehgp3d::hierarchy::ExactPairSupportStreamBudget;
 using morsehgp3d::hierarchy::ExactPairSupportStreamChunk;
 using morsehgp3d::hierarchy::ExactPairSupportStreamStatus;
+using morsehgp3d::hierarchy::ExactPairSupportWitnessNodeEntry;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
 namespace smoke_clouds = morsehgp3d::tools::pair_support_smoke;
@@ -92,6 +94,14 @@ struct RankPruneRunAudit {
   std::size_t emit_kernel_launch_count{};
   std::size_t visited_work_item_count{};
   std::size_t peak_frontier_count{};
+  std::size_t output_terminal_count{};
+  std::size_t cpu_exact_terminal_recertification_count{};
+  std::size_t strict_interior_terminal_count{};
+  std::size_t anchor_noninterior_terminal_count{};
+  std::size_t unresolved_external_leaf_terminal_count{};
+  std::size_t prune_product_count{};
+  std::size_t keep_certificate_product_count{};
+  // Source-compatible receipt/proposal aliases remain independently audited.
   std::size_t output_receipt_count{};
   std::size_t cpu_exact_phi_recertification_count{};
   std::size_t proposed_product_count{};
@@ -100,14 +110,18 @@ struct RankPruneRunAudit {
   std::size_t active_product_h2d_byte_count{};
   std::size_t initial_frontier_h2d_byte_count{};
   std::size_t traversal_metadata_d2h_byte_count{};
+  std::size_t physical_terminal_d2h_byte_count{};
+  std::size_t active_terminal_d2h_byte_count{};
   std::size_t physical_receipt_d2h_byte_count{};
   std::size_t active_receipt_d2h_byte_count{};
   std::size_t device_frontier_double_buffer_byte_capacity{};
+  std::size_t device_terminal_byte_capacity{};
   std::size_t device_receipt_byte_capacity{};
   std::size_t device_scan_workspace_byte_capacity{};
   std::size_t device_fixed_workspace_byte_capacity{};
   std::uint64_t first_buffer_epoch{};
   std::uint64_t last_buffer_epoch{};
+  std::uint64_t terminal_digest_fold_fnv1a{kFnvOffsetBasis};
   std::uint64_t receipt_digest_fold_fnv1a{kFnvOffsetBasis};
   bool work_item_capacity_exhausted{false};
   bool receipt_capacity_exhausted{false};
@@ -115,6 +129,11 @@ struct RankPruneRunAudit {
   bool every_device_frontier_exhausted{true};
   bool every_snapshot_validated{true};
   bool every_product_record_validated{true};
+  bool every_stable_terminal_transcript_validated{true};
+  bool every_terminal_antichain_validated{true};
+  bool every_keep_coverage_recertified{true};
+  bool every_anchor_ball_culling_enabled{true};
+  // Source-compatible validation aliases remain independently audited.
   bool every_stable_transcript_validated{true};
   bool every_antichain_validated{true};
   bool every_cpu_recertification_complete{true};
@@ -333,13 +352,40 @@ void accumulate_rank_prune_audit(
           audit.required_strict_interior_point_count > 0U,
       "a P2 callback did not exercise a positive product batch");
   require(
-      audit.proposed_product_count + audit.fallback_product_count ==
-          audit.input_product_count,
-      "the P2 proposed/fallback product accounting does not close");
+      audit.prune_product_count <= audit.input_product_count &&
+          audit.keep_certificate_product_count <=
+              audit.input_product_count - audit.prune_product_count &&
+          audit.fallback_product_count ==
+              audit.input_product_count -
+                  audit.prune_product_count -
+                  audit.keep_certificate_product_count,
+      "the P4 prune/keep/fallback product accounting does not close");
   require(
-      audit.cpu_exact_phi_recertification_count ==
-          audit.gpu_output_receipt_count,
-      "the P2 exact receipt accounting does not close");
+      audit.cpu_exact_terminal_recertification_count ==
+              audit.gpu_output_terminal_count &&
+          checked_add(
+              checked_add(
+                  audit.strict_interior_terminal_count,
+                  audit.anchor_noninterior_terminal_count,
+                  "the P4 terminal classification count overflows"),
+              audit.unresolved_external_leaf_terminal_count,
+              "the P4 terminal classification count overflows") ==
+              audit.gpu_output_terminal_count,
+      "the P4 exact terminal classification accounting does not close");
+  require(
+      audit.gpu_output_receipt_count ==
+              audit.gpu_output_terminal_count &&
+          audit.cpu_exact_phi_recertification_count ==
+              audit.cpu_exact_terminal_recertification_count &&
+          audit.proposed_product_count == audit.prune_product_count &&
+          audit.physical_receipt_d2h_byte_count ==
+              audit.physical_terminal_d2h_byte_count &&
+          audit.active_receipt_d2h_byte_count ==
+              audit.active_terminal_d2h_byte_count &&
+          audit.device_receipt_byte_capacity ==
+              audit.device_terminal_byte_capacity &&
+          audit.receipt_digest_fnv1a == audit.terminal_digest_fnv1a,
+      "the P4 source-compatible receipt aliases diverge from terminals");
   require(
       audit.gpu_count_kernel_launch_count ==
               audit.gpu_traversal_epoch_count &&
@@ -351,17 +397,23 @@ void accumulate_rank_prune_audit(
   require(
       audit.immutable_lbvh_snapshot_validated &&
           audit.product_records_validated &&
+          audit.stable_terminal_transcript_validated &&
+          audit.disjoint_terminal_antichains_validated &&
+          audit.keep_coverage_recertification_complete &&
+          audit.anchor_ball_culling_enabled &&
           audit.stable_receipt_transcript_validated &&
           audit.disjoint_receipt_antichains_validated &&
           audit.cpu_exact_recertification_complete &&
           !audit.global_support_product_prune_published &&
           !audit.public_status_published,
-      "the P2 proposal audit does not preserve proposal-only semantics");
+      "the P4 terminal audit does not preserve exact proposal-only semantics");
   require(
       !audit.work_item_capacity_exhausted &&
           !audit.receipt_capacity_exhausted &&
-          !audit.epoch_budget_exhausted,
-      "the P2 component smoke exhausted a capacity or epoch budget");
+          !audit.epoch_budget_exhausted &&
+          audit.device_frontier_exhausted,
+      "the P4 component smoke exhausted a capacity or epoch budget "
+      "before terminal coverage");
   if (aggregate.callback_count == 0U) {
     aggregate.required_strict_interior_point_count =
         audit.required_strict_interior_point_count;
@@ -398,6 +450,25 @@ void accumulate_rank_prune_audit(
   MORSEHGP3D_ACCUMULATE_AUDIT(
       visited_work_item_count, gpu_visited_work_item_count);
   MORSEHGP3D_ACCUMULATE_AUDIT(
+      output_terminal_count, gpu_output_terminal_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
+      cpu_exact_terminal_recertification_count,
+      cpu_exact_terminal_recertification_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
+      strict_interior_terminal_count,
+      strict_interior_terminal_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
+      anchor_noninterior_terminal_count,
+      anchor_noninterior_terminal_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
+      unresolved_external_leaf_terminal_count,
+      unresolved_external_leaf_terminal_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
+      prune_product_count, prune_product_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
+      keep_certificate_product_count,
+      keep_certificate_product_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
       output_receipt_count, gpu_output_receipt_count);
   MORSEHGP3D_ACCUMULATE_AUDIT(
       cpu_exact_phi_recertification_count,
@@ -418,6 +489,12 @@ void accumulate_rank_prune_audit(
       traversal_metadata_d2h_byte_count,
       traversal_metadata_d2h_byte_count);
   MORSEHGP3D_ACCUMULATE_AUDIT(
+      physical_terminal_d2h_byte_count,
+      physical_terminal_d2h_byte_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
+      active_terminal_d2h_byte_count,
+      active_terminal_d2h_byte_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
       physical_receipt_d2h_byte_count,
       physical_receipt_d2h_byte_count);
   MORSEHGP3D_ACCUMULATE_AUDIT(
@@ -430,6 +507,9 @@ void accumulate_rank_prune_audit(
   aggregate.device_frontier_double_buffer_byte_capacity = std::max(
       aggregate.device_frontier_double_buffer_byte_capacity,
       audit.device_frontier_double_buffer_byte_capacity);
+  aggregate.device_terminal_byte_capacity = std::max(
+      aggregate.device_terminal_byte_capacity,
+      audit.device_terminal_byte_capacity);
   aggregate.device_receipt_byte_capacity = std::max(
       aggregate.device_receipt_byte_capacity,
       audit.device_receipt_byte_capacity);
@@ -457,6 +537,18 @@ void accumulate_rank_prune_audit(
   aggregate.every_product_record_validated =
       aggregate.every_product_record_validated &&
       audit.product_records_validated;
+  aggregate.every_stable_terminal_transcript_validated =
+      aggregate.every_stable_terminal_transcript_validated &&
+      audit.stable_terminal_transcript_validated;
+  aggregate.every_terminal_antichain_validated =
+      aggregate.every_terminal_antichain_validated &&
+      audit.disjoint_terminal_antichains_validated;
+  aggregate.every_keep_coverage_recertified =
+      aggregate.every_keep_coverage_recertified &&
+      audit.keep_coverage_recertification_complete;
+  aggregate.every_anchor_ball_culling_enabled =
+      aggregate.every_anchor_ball_culling_enabled &&
+      audit.anchor_ball_culling_enabled;
   aggregate.every_stable_transcript_validated =
       aggregate.every_stable_transcript_validated &&
       audit.stable_receipt_transcript_validated;
@@ -466,6 +558,9 @@ void accumulate_rank_prune_audit(
   aggregate.every_cpu_recertification_complete =
       aggregate.every_cpu_recertification_complete &&
       audit.cpu_exact_recertification_complete;
+  hash_word(
+      aggregate.terminal_digest_fold_fnv1a,
+      audit.terminal_digest_fnv1a);
   hash_word(
       aggregate.receipt_digest_fold_fnv1a,
       audit.receipt_digest_fnv1a);
@@ -487,6 +582,18 @@ void accumulate_rank_prune_audit(
          left.visited_work_item_count ==
              right.visited_work_item_count &&
          left.peak_frontier_count == right.peak_frontier_count &&
+         left.output_terminal_count == right.output_terminal_count &&
+         left.cpu_exact_terminal_recertification_count ==
+             right.cpu_exact_terminal_recertification_count &&
+         left.strict_interior_terminal_count ==
+             right.strict_interior_terminal_count &&
+         left.anchor_noninterior_terminal_count ==
+             right.anchor_noninterior_terminal_count &&
+         left.unresolved_external_leaf_terminal_count ==
+             right.unresolved_external_leaf_terminal_count &&
+         left.prune_product_count == right.prune_product_count &&
+         left.keep_certificate_product_count ==
+             right.keep_certificate_product_count &&
          left.output_receipt_count == right.output_receipt_count &&
          left.cpu_exact_phi_recertification_count ==
              right.cpu_exact_phi_recertification_count &&
@@ -498,18 +605,26 @@ void accumulate_rank_prune_audit(
              right.initial_frontier_h2d_byte_count &&
          left.traversal_metadata_d2h_byte_count ==
              right.traversal_metadata_d2h_byte_count &&
+         left.physical_terminal_d2h_byte_count ==
+             right.physical_terminal_d2h_byte_count &&
+         left.active_terminal_d2h_byte_count ==
+             right.active_terminal_d2h_byte_count &&
          left.physical_receipt_d2h_byte_count ==
              right.physical_receipt_d2h_byte_count &&
          left.active_receipt_d2h_byte_count ==
              right.active_receipt_d2h_byte_count &&
          left.device_frontier_double_buffer_byte_capacity ==
              right.device_frontier_double_buffer_byte_capacity &&
+         left.device_terminal_byte_capacity ==
+             right.device_terminal_byte_capacity &&
          left.device_receipt_byte_capacity ==
              right.device_receipt_byte_capacity &&
          left.device_scan_workspace_byte_capacity ==
              right.device_scan_workspace_byte_capacity &&
          left.device_fixed_workspace_byte_capacity ==
              right.device_fixed_workspace_byte_capacity &&
+         left.terminal_digest_fold_fnv1a ==
+             right.terminal_digest_fold_fnv1a &&
          left.receipt_digest_fold_fnv1a ==
              right.receipt_digest_fold_fnv1a &&
          left.work_item_capacity_exhausted ==
@@ -524,6 +639,14 @@ void accumulate_rank_prune_audit(
              right.every_snapshot_validated &&
          left.every_product_record_validated ==
              right.every_product_record_validated &&
+         left.every_stable_terminal_transcript_validated ==
+             right.every_stable_terminal_transcript_validated &&
+         left.every_terminal_antichain_validated ==
+             right.every_terminal_antichain_validated &&
+         left.every_keep_coverage_recertified ==
+             right.every_keep_coverage_recertified &&
+         left.every_anchor_ball_culling_enabled ==
+             right.every_anchor_ball_culling_enabled &&
          left.every_stable_transcript_validated ==
              right.every_stable_transcript_validated &&
          left.every_antichain_validated ==
@@ -547,6 +670,51 @@ void accumulate_rank_prune_audit(
           "the component-smoke point-classification cap overflows")};
 }
 
+[[nodiscard]] bool canonical_terminal_less(
+    const ExactPairSupportWitnessNodeEntry& left,
+    const ExactPairSupportWitnessNodeEntry& right) noexcept {
+  return left.leaf_begin < right.leaf_begin ||
+         (left.leaf_begin == right.leaf_begin &&
+          (left.leaf_end < right.leaf_end ||
+           (left.leaf_end == right.leaf_end &&
+            left.node_index < right.node_index)));
+}
+
+void require_exact_keep_coverage(
+    const morsehgp3d::gpu::PairSupportRankKeepProductCertificate&
+        certificate,
+    std::size_t point_count) {
+  require(
+      certificate.product.self_product == 0U,
+      "a GPU P4 keep certificate targets a self product");
+  std::vector<std::pair<std::uint64_t, std::uint64_t>> coverage;
+  coverage.reserve(certificate.canonical_terminals.size() + 2U);
+  coverage.emplace_back(
+      certificate.product.first_leaf_begin,
+      certificate.product.first_leaf_end);
+  coverage.emplace_back(
+      certificate.product.second_leaf_begin,
+      certificate.product.second_leaf_end);
+  for (const auto& terminal : certificate.canonical_terminals) {
+    coverage.emplace_back(
+        terminal.terminal.leaf_begin,
+        terminal.terminal.leaf_end);
+  }
+  std::sort(coverage.begin(), coverage.end());
+  std::uint64_t cursor = 0U;
+  for (const auto& [leaf_begin, leaf_end] : coverage) {
+    require(
+        leaf_begin == cursor &&
+            leaf_begin < leaf_end &&
+            leaf_end <= static_cast<std::uint64_t>(point_count),
+        "a GPU P4 keep certificate does not form an exact root cut");
+    cursor = leaf_end;
+  }
+  require(
+      cursor == static_cast<std::uint64_t>(point_count),
+      "a GPU P4 keep certificate does not cover the LBVH root");
+}
+
 [[nodiscard]] ExactPairSupportRankPruneBatchProposal invoke_gpu_callback(
     PairSupportPhiContext& context,
     const Options& options,
@@ -564,6 +732,10 @@ void accumulate_rank_prune_audit(
 
   ExactPairSupportRankPruneBatchProposal result;
   result.proposals.reserve(gpu_result.proposals.size());
+  result.keep_certificates.reserve(
+      gpu_result.keep_certificates.size());
+  std::vector<std::uint8_t> product_disposition(
+      request.canonical_products.size(), 0U);
   std::size_t previous_product_index = 0U;
   bool first = true;
   for (auto& proposal : gpu_result.proposals) {
@@ -577,6 +749,10 @@ void accumulate_rank_prune_audit(
             proposal.strict_interior_point_count >=
                 request.required_strict_interior_point_count,
         "the GPU P2 proposal contradicts its synchronous CPU request");
+    require(
+        product_disposition[proposal.product_index] == 0U,
+        "the GPU P4 classified one product more than once");
+    product_disposition[proposal.product_index] = 1U;
     require(
         first || previous_product_index < proposal.product_index,
         "the GPU P2 proposals are not in canonical product order");
@@ -594,14 +770,9 @@ void accumulate_rank_prune_audit(
       if (receipt_index != 0U) {
         const auto& previous =
             proposal.strict_witness_receipts[receipt_index - 1U];
-        const bool strictly_ordered =
-            previous.leaf_begin < receipt.leaf_begin ||
-            (previous.leaf_begin == receipt.leaf_begin &&
-             (previous.leaf_end < receipt.leaf_end ||
-              (previous.leaf_end == receipt.leaf_end &&
-               previous.node_index < receipt.node_index)));
         require(
-            strictly_ordered,
+            canonical_terminal_less(previous, receipt) &&
+                previous.leaf_end <= receipt.leaf_begin,
             "GPU P2 receipts are not in canonical interval order");
       }
       receipt_point_count = checked_add(
@@ -624,6 +795,100 @@ void accumulate_rank_prune_audit(
         proposal.product,
         std::move(proposal.strict_witness_receipts)});
   }
+
+  previous_product_index = 0U;
+  first = true;
+  for (const auto& certificate : gpu_result.keep_certificates) {
+    require(
+        certificate.product_index <
+                request.canonical_products.size() &&
+            certificate.product ==
+                request.canonical_products[
+                    certificate.product_index] &&
+            !certificate.canonical_terminals.empty() &&
+            certificate.strict_interior_point_count <
+                request.required_strict_interior_point_count,
+        "the GPU P4 keep certificate contradicts its synchronous "
+        "CPU request");
+    require(
+        product_disposition[certificate.product_index] == 0U,
+        "the GPU P4 prune and keep subsets are not disjoint");
+    product_disposition[certificate.product_index] = 2U;
+    require(
+        first ||
+            previous_product_index < certificate.product_index,
+        "the GPU P4 keep certificates are not in canonical "
+        "product order");
+    first = false;
+    previous_product_index = certificate.product_index;
+
+    std::vector<ExactPairSupportWitnessNodeEntry>
+        canonical_terminals;
+    canonical_terminals.reserve(
+        certificate.canonical_terminals.size());
+    std::size_t diagnostic_strict_point_count = 0U;
+    for (std::size_t terminal_index = 0U;
+         terminal_index < certificate.canonical_terminals.size();
+         ++terminal_index) {
+      const auto& gpu_terminal =
+          certificate.canonical_terminals[terminal_index];
+      const ExactPairSupportWitnessNodeEntry& terminal =
+          gpu_terminal.terminal;
+      require(
+          terminal.leaf_begin < terminal.leaf_end &&
+              terminal.leaf_end <=
+                  static_cast<std::uint64_t>(
+                      options.point_count),
+          "a GPU P4 keep terminal has an invalid Morton interval");
+      if (terminal_index != 0U) {
+        const auto& previous =
+            certificate.canonical_terminals[
+                terminal_index - 1U]
+                .terminal;
+        require(
+            canonical_terminal_less(previous, terminal) &&
+                previous.leaf_end <= terminal.leaf_begin,
+            "GPU P4 keep terminals are not a canonical "
+            "disjoint antichain");
+      }
+      if (gpu_terminal.kind ==
+          morsehgp3d::gpu::
+              PairSupportRankTerminalKind::strict_interior) {
+        diagnostic_strict_point_count = checked_add(
+            diagnostic_strict_point_count,
+            static_cast<std::size_t>(
+                terminal.leaf_end - terminal.leaf_begin),
+            "the GPU P4 strict-terminal cardinality overflows "
+            "size_t");
+      }
+      // Deliberately discard the device-side kind.  The exact hierarchy
+      // reclassifies this authenticated terminal before accepting a keep.
+      canonical_terminals.push_back(terminal);
+    }
+    require(
+        diagnostic_strict_point_count ==
+            certificate.strict_interior_point_count,
+        "the GPU P4 keep strict-terminal cardinality does not close");
+    require_exact_keep_coverage(certificate, options.point_count);
+    result.keep_certificates.push_back(
+        ExactPairSupportRankKeepCertificate{
+            certificate.product, std::move(canonical_terminals)});
+  }
+
+  const std::size_t fallback_product_count =
+      static_cast<std::size_t>(std::count(
+          product_disposition.begin(),
+          product_disposition.end(),
+          static_cast<std::uint8_t>(0U)));
+  require(
+      result.proposals.size() ==
+              gpu_result.audit.prune_product_count &&
+          result.keep_certificates.size() ==
+              gpu_result.audit.keep_certificate_product_count &&
+          fallback_product_count ==
+              gpu_result.audit.fallback_product_count,
+      "the GPU P4 returned subsets disagree with its exact product "
+      "accounting");
   return result;
 }
 
@@ -652,24 +917,62 @@ void accumulate_rank_prune_audit(
   const Clock::time_point end = Clock::now();
   require(
       aggregate.callback_count > 0U,
-      "the bounded component smoke did not exercise the GPU P2 callback");
+      "the bounded component smoke did not exercise the GPU P4 callback");
+  std::size_t consumed_keep_terminal_count = 0U;
+  for (const auto& certificate :
+       proposed.consumed_keep_certificates) {
+    consumed_keep_terminal_count = checked_add(
+        consumed_keep_terminal_count,
+        certificate.canonical_terminals.size(),
+        "the consumed P4 keep-terminal count overflows size_t");
+  }
   require(
-      aggregate.proposed_product_count > 0U &&
+      aggregate.prune_product_count > 0U &&
           proposed.audit.consumed_proposal_count > 0U &&
           proposed.audit.proposal_pruned_pair_count > 0U,
       "the bounded component smoke did not consume an effective GPU "
       "rank-prune proposal");
   require(
+      aggregate.keep_certificate_product_count > 0U &&
+          proposed.audit.consumed_keep_certificate_count > 0U &&
+          !proposed.consumed_keep_certificates.empty(),
+      "the bounded component smoke did not consume an effective GPU "
+      "conservative-keep certificate");
+  require(
+      proposed.audit.consumed_proposal_count ==
+              proposed.consumed_proposals.size() &&
+          proposed.audit.consumed_keep_certificate_count ==
+              proposed.consumed_keep_certificates.size() &&
+          proposed.audit.exact_receipt_recertification_count ==
+              proposed.audit.consumed_receipt_count &&
+          proposed.audit.exact_keep_terminal_recertification_count ==
+              consumed_keep_terminal_count &&
+          proposed.audit.keep_terminal_classification_count ==
+              consumed_keep_terminal_count &&
+          checked_add(
+              checked_add(
+                  proposed.audit.keep_strict_interior_terminal_count,
+                  proposed.audit.keep_anchor_noninterior_terminal_count,
+                  "the P4 consumed terminal-class count overflows"),
+              proposed.audit.keep_external_leaf_terminal_count,
+              "the P4 consumed terminal-class count overflows") ==
+              consumed_keep_terminal_count,
+      "the exact CPU prune/keep replay accounting does not close");
+  require(
       proposed.audit.transcript_ephemeral &&
           proposed.audit.no_forbidden_global_structure_materialized &&
           !proposed.audit.durable_wire_v1_claimed,
-      "the bounded component smoke escaped its ephemeral proposal-only "
+      "the bounded component smoke escaped its ephemeral terminal-proposal "
       "contract");
   require(
       !aggregate.work_item_capacity_exhausted &&
           !aggregate.receipt_capacity_exhausted &&
-          !aggregate.epoch_budget_exhausted,
-      "the bounded component smoke exhausted a P2 capacity");
+          !aggregate.epoch_budget_exhausted &&
+          aggregate.every_device_frontier_exhausted &&
+          aggregate.every_keep_coverage_recertified &&
+          aggregate.every_anchor_ball_culling_enabled,
+      "the bounded component smoke exhausted a P4 capacity or lost "
+      "terminal coverage");
   return AssistedMeasurement{
       std::move(proposed),
       std::move(aggregate),
@@ -757,15 +1060,23 @@ void write_gpu_audit(
   output
       << "{\"active_product_h2d_byte_count\":"
       << audit.active_product_h2d_byte_count
+      << ",\"active_terminal_d2h_byte_count\":"
+      << audit.active_terminal_d2h_byte_count
       << ",\"active_receipt_d2h_byte_count\":"
       << audit.active_receipt_d2h_byte_count
+      << ",\"anchor_noninterior_terminal_count\":"
+      << audit.anchor_noninterior_terminal_count
       << ",\"callback_count\":" << audit.callback_count
       << ",\"count_kernel_launch_count\":"
       << audit.count_kernel_launch_count
+      << ",\"cpu_exact_terminal_recertification_count\":"
+      << audit.cpu_exact_terminal_recertification_count
       << ",\"cpu_exact_phi_recertification_count\":"
       << audit.cpu_exact_phi_recertification_count
       << ",\"device_frontier_double_buffer_byte_capacity\":"
       << audit.device_frontier_double_buffer_byte_capacity
+      << ",\"device_terminal_byte_capacity\":"
+      << audit.device_terminal_byte_capacity
       << ",\"device_receipt_byte_capacity\":"
       << audit.device_receipt_byte_capacity
       << ",\"device_scan_workspace_byte_capacity\":"
@@ -779,16 +1090,25 @@ void write_gpu_audit(
   output
       << ",\"every_antichain_validated\":";
   write_bool(output, audit.every_antichain_validated);
+  output << ",\"every_anchor_ball_culling_enabled\":";
+  write_bool(output, audit.every_anchor_ball_culling_enabled);
   output << ",\"every_cpu_recertification_complete\":";
   write_bool(output, audit.every_cpu_recertification_complete);
   output << ",\"every_device_frontier_exhausted\":";
   write_bool(output, audit.every_device_frontier_exhausted);
+  output << ",\"every_keep_coverage_recertified\":";
+  write_bool(output, audit.every_keep_coverage_recertified);
   output << ",\"every_product_record_validated\":";
   write_bool(output, audit.every_product_record_validated);
   output << ",\"every_snapshot_validated\":";
   write_bool(output, audit.every_snapshot_validated);
+  output << ",\"every_stable_terminal_transcript_validated\":";
+  write_bool(
+      output, audit.every_stable_terminal_transcript_validated);
   output << ",\"every_stable_transcript_validated\":";
   write_bool(output, audit.every_stable_transcript_validated);
+  output << ",\"every_terminal_antichain_validated\":";
+  write_bool(output, audit.every_terminal_antichain_validated);
   output
       << ",\"exclusive_scan_count\":" << audit.exclusive_scan_count
       << ",\"fallback_product_count\":"
@@ -797,11 +1117,19 @@ void write_gpu_audit(
       << ",\"initial_frontier_h2d_byte_count\":"
       << audit.initial_frontier_h2d_byte_count
       << ",\"input_product_count\":" << audit.input_product_count
+      << ",\"keep_certificate_product_count\":"
+      << audit.keep_certificate_product_count
       << ",\"last_buffer_epoch\":" << audit.last_buffer_epoch
+      << ",\"output_terminal_count\":"
+      << audit.output_terminal_count
       << ",\"output_receipt_count\":" << audit.output_receipt_count
       << ",\"peak_frontier_count\":" << audit.peak_frontier_count
+      << ",\"physical_terminal_d2h_byte_count\":"
+      << audit.physical_terminal_d2h_byte_count
       << ",\"physical_receipt_d2h_byte_count\":"
       << audit.physical_receipt_d2h_byte_count
+      << ",\"prune_product_count\":"
+      << audit.prune_product_count
       << ",\"proposed_product_count\":"
       << audit.proposed_product_count
       << ",\"receipt_capacity_exhausted\":";
@@ -813,10 +1141,19 @@ void write_gpu_audit(
       << audit.required_strict_interior_point_count
       << ",\"snapshot_h2d_byte_count\":"
       << audit.snapshot_h2d_byte_count
+      << ",\"strict_interior_terminal_count\":"
+      << audit.strict_interior_terminal_count
+      << ",\"terminal_capacity_exhausted\":";
+  write_bool(output, audit.receipt_capacity_exhausted);
+  output
+      << ",\"terminal_digest_fold_fnv1a\":"
+      << audit.terminal_digest_fold_fnv1a
       << ",\"traversal_epoch_count\":"
       << audit.traversal_epoch_count
       << ",\"traversal_metadata_d2h_byte_count\":"
       << audit.traversal_metadata_d2h_byte_count
+      << ",\"unresolved_external_leaf_terminal_count\":"
+      << audit.unresolved_external_leaf_terminal_count
       << ",\"visited_work_item_count\":"
       << audit.visited_work_item_count
       << ",\"work_item_capacity_exhausted\":";
@@ -832,6 +1169,8 @@ void write_proposal_audit(
       << "{\"batch_request_count\":" << audit.batch_request_count
       << ",\"cache_replacement_count\":"
       << audit.cache_replacement_count
+      << ",\"consumed_keep_certificate_count\":"
+      << audit.consumed_keep_certificate_count
       << ",\"consumed_proposal_count\":"
       << audit.consumed_proposal_count
       << ",\"consumed_receipt_count\":"
@@ -843,8 +1182,22 @@ void write_proposal_audit(
       << ",\"durable_wire_v1_claimed\":";
   write_bool(output, audit.durable_wire_v1_claimed);
   output
+      << ",\"exact_keep_terminal_recertification_count\":"
+      << audit.exact_keep_terminal_recertification_count
       << ",\"exact_receipt_recertification_count\":"
       << audit.exact_receipt_recertification_count
+      << ",\"keep_anchor_noninterior_point_count\":"
+      << audit.keep_anchor_noninterior_point_count
+      << ",\"keep_anchor_noninterior_terminal_count\":"
+      << audit.keep_anchor_noninterior_terminal_count
+      << ",\"keep_external_leaf_terminal_count\":"
+      << audit.keep_external_leaf_terminal_count
+      << ",\"keep_strict_interior_point_count\":"
+      << audit.keep_strict_interior_point_count
+      << ",\"keep_strict_interior_terminal_count\":"
+      << audit.keep_strict_interior_terminal_count
+      << ",\"keep_terminal_classification_count\":"
+      << audit.keep_terminal_classification_count
       << ",\"maximum_products_per_batch\":"
       << audit.maximum_products_per_batch
       << ",\"maximum_requested_batch_product_count\":"
@@ -918,6 +1271,21 @@ void write_verification(
   output << ",\"every_consumed_proposal_replayed_once\":";
   write_bool(
       output, verification.every_consumed_proposal_replayed_once);
+  output
+      << ",\"every_consumed_keep_certificate_replayed_once\":";
+  write_bool(
+      output,
+      verification.every_consumed_keep_certificate_replayed_once);
+  output << ",\"keep_candidate_transition_consistent\":";
+  write_bool(
+      output, verification.keep_candidate_transition_consistent);
+  output << ",\"no_duplicate_keep_certificate_retained\":";
+  write_bool(
+      output, verification.no_duplicate_keep_certificate_retained);
+  output << ",\"no_unconsumed_keep_certificate_retained\":";
+  write_bool(
+      output,
+      verification.no_unconsumed_keep_certificate_retained);
   output << ",\"no_unconsumed_proposal_retained\":";
   write_bool(
       output, verification.no_unconsumed_proposal_retained);
@@ -988,7 +1356,7 @@ int main(int argument_count, char** argument_values) {
                 gpu_context.node_count(),
                 kResidentLbvhNodeByteCount,
                 "the resident LBVH snapshot byte count overflows"),
-        "the first P2 pass did not upload exactly one immutable LBVH "
+        "the first P4 pass did not upload exactly one immutable LBVH "
         "snapshot");
     std::vector<AssistedMeasurement> resident_replays;
     resident_replays.reserve(options.resident_replay_count);
@@ -1003,14 +1371,14 @@ int main(int argument_count, char** argument_values) {
           options);
       require(
           replay.proposed == first_assisted.proposed,
-          "a resident P2 replay changed its proposed CPU transition");
+          "a resident P4 replay changed its proposed CPU transition");
       require(
           stable_gpu_audit_equal(
               replay.gpu_audit, first_assisted.gpu_audit),
-          "a resident P2 replay changed its stable GPU audit");
+          "a resident P4 replay changed its stable GPU audit");
       require(
           replay.gpu_audit.snapshot_h2d_byte_count == 0U,
-          "a resident P2 replay repeated the immutable LBVH snapshot upload");
+          "a resident P4 replay repeated the immutable LBVH snapshot upload");
       resident_replays.push_back(std::move(replay));
     }
 
@@ -1030,6 +1398,12 @@ int main(int argument_count, char** argument_values) {
         verification.proposed_transition_verified &&
             verification.every_consumed_proposal_replayed_once &&
             verification.no_unconsumed_proposal_retained &&
+            verification
+                .every_consumed_keep_certificate_replayed_once &&
+            verification
+                .no_unconsumed_keep_certificate_retained &&
+            verification.no_duplicate_keep_certificate_retained &&
+            verification.keep_candidate_transition_consistent &&
             candidate_verification.source_checkpoint_integrity_verified &&
             candidate_verification.next_checkpoint_integrity_verified &&
             candidate_verification.requested_budget_certified &&
@@ -1038,7 +1412,8 @@ int main(int argument_count, char** argument_values) {
             candidate_verification.chunk_transition_verified &&
             candidate_verification.fresh_replay_certified &&
             !verification.durable_wire_v1_claimed,
-        "the fresh ephemeral CPU verification rejected the P2 transition");
+        "the fresh ephemeral CPU verification rejected the P4 "
+        "prune/keep transition");
 
     const bool historical_chunk_equal =
         first_assisted.proposed.candidate_chunk == baseline;
@@ -1052,6 +1427,7 @@ int main(int argument_count, char** argument_values) {
            "\"pair_rank_prune_component_smoke\","
         << "\"backend\":\"cuda_g4_plus_reference_cpu\","
         << "\"benchmark_output_contract_v1_satisfied\":false,"
+        << "\"anchor_ball_culling_enabled\":true,"
         << "\"component_only\":true,"
         << "\"component_success\":true,"
         << "\"durable_checkpoint_wire_exercised\":false,"
@@ -1061,12 +1437,14 @@ int main(int argument_count, char** argument_values) {
         << "\"full_hierarchy_executed\":false,"
         << "\"full_pipeline_executed\":false,"
         << "\"git_sha\":\"" << MORSEHGP3D_GIT_SHA << "\","
+        << "\"gpu_terminal_kinds_authoritative\":false,"
         << "\"hierarchy_reduction_performed\":false,"
         << "\"higher_support_arities_3_4_executed\":false,"
         << "\"legacy_p1_query_capacity\":"
         << kLegacyP1QueryCapacity << ','
         << "\"massive_product_path_claimed\":false,"
-        << "\"mode\":\"proposal_only_then_cpu_exact_recertified\","
+        << "\"mode\":"
+           "\"prune_or_keep_terminal_proposal_then_cpu_exact_recertified\","
         << "\"morse_batches_executed\":false,"
         << "\"phase\":\"14Q\","
         << "\"point_count\":" << options.point_count << ','
@@ -1078,12 +1456,14 @@ int main(int argument_count, char** argument_values) {
         << "\"resident_replay_count\":"
         << options.resident_replay_count << ','
         << "\"result_materialized\":false,"
+        << "\"rank_prune_and_keep_exercised\":true,"
         << "\"scalability_claimed\":false,"
         << "\"schema\":"
-           "\"morsehgp3d.phase14q.pair_rank_search_component_smoke.v1\","
+           "\"morsehgp3d.phase14q.pair_rank_search_component_smoke.v2\","
         << "\"scientific_public_result_claimed\":false,"
         << "\"slo_claimed\":false,"
         << "\"support_sizes_exercised\":[2],"
+        << "\"terminal_coverage_recertified\":true,"
         << "\"ten_million_product_path_claimed\":false,"
         << "\"ten_orders_materialized\":false,"
         << "\"terminal_facade_built\":false,"
@@ -1110,6 +1490,8 @@ int main(int argument_count, char** argument_values) {
         << ",\"product_capacity\":"
         << options.capacity.maximum_product_count
         << ",\"receipt_capacity\":"
+        << options.capacity.maximum_receipt_count
+        << ",\"terminal_capacity\":"
         << options.capacity.maximum_receipt_count
         << ",\"work_item_capacity\":"
         << options.capacity.maximum_work_item_count << "},"

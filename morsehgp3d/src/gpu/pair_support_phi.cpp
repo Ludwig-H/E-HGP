@@ -6,7 +6,6 @@
 #include "morsehgp3d/exact/rational.hpp"
 
 #include <algorithm>
-#include <array>
 #include <bit>
 #include <cstddef>
 #include <cstdint>
@@ -92,14 +91,16 @@ void hash_word(std::uint64_t& digest, std::uint64_t word) noexcept {
          record.proposal_code == detail::pair_support_phi_sentinel;
 }
 
-[[nodiscard]] bool sentinel_rank_receipt(
-    const detail::PairSupportRankDeviceReceipt& receipt) noexcept {
-  return receipt.receipt_index == detail::pair_support_phi_sentinel &&
-         receipt.product_slot == detail::pair_support_phi_sentinel &&
-         receipt.witness_node_index == detail::pair_support_phi_sentinel &&
-         receipt.leaf_begin == detail::pair_support_phi_sentinel &&
-         receipt.leaf_end == detail::pair_support_phi_sentinel &&
-         receipt.upper_phi_bits == detail::pair_support_phi_sentinel;
+[[nodiscard]] bool sentinel_rank_terminal(
+    const detail::PairSupportRankDeviceTerminal& terminal) noexcept {
+  return terminal.product_slot == detail::pair_support_phi_sentinel &&
+         terminal.witness_node_index == detail::pair_support_phi_sentinel;
+}
+
+[[nodiscard]] bool leaf_node(
+    const detail::PairSupportPhiNodeInputRecord& node) noexcept {
+  return node.left_child == detail::pair_support_phi_sentinel &&
+         node.right_child == detail::pair_support_phi_sentinel;
 }
 
 [[nodiscard]] bool finite_canonical_binary64(
@@ -135,6 +136,87 @@ void hash_word(std::uint64_t& digest, std::uint64_t word) noexcept {
       product.first_node_index,
       product.second_node_index,
       product.self_product};
+}
+
+[[nodiscard]] std::uint64_t authenticated_first_leaf_node(
+    std::span<const detail::PairSupportPhiNodeInputRecord> nodes,
+    std::size_t support_node_index) {
+  if (support_node_index >= nodes.size()) {
+    throw std::invalid_argument(
+        "a Phase 9 rank-prune support node is unavailable");
+  }
+  const detail::PairSupportPhiNodeInputRecord& support =
+      nodes[support_node_index];
+  if (support.leaf_begin >= support.leaf_end) {
+    throw std::logic_error(
+        "a Phase 9 rank-prune support has an empty Morton range");
+  }
+  const std::uint64_t expected_leaf_begin = support.leaf_begin;
+  const std::uint64_t support_leaf_end = support.leaf_end;
+  std::size_t current_index = support_node_index;
+  for (std::size_t depth = 0U; depth < nodes.size(); ++depth) {
+    if (current_index >= nodes.size()) {
+      throw std::logic_error(
+          "a Phase 9 rank-prune anchor path leaves the resident LBVH");
+    }
+    const detail::PairSupportPhiNodeInputRecord& current =
+        nodes[current_index];
+    if (current.leaf_begin != expected_leaf_begin ||
+        current.leaf_begin >= current.leaf_end ||
+        current.leaf_end > support_leaf_end) {
+      throw std::logic_error(
+          "a Phase 9 rank-prune anchor path contradicts Morton ranges");
+    }
+    const bool left_missing =
+        current.left_child == detail::pair_support_phi_sentinel;
+    const bool right_missing =
+        current.right_child == detail::pair_support_phi_sentinel;
+    if (left_missing != right_missing) {
+      throw std::logic_error(
+          "a Phase 9 rank-prune anchor path has incomplete topology");
+    }
+    if (left_missing) {
+      if (current.leaf_end - current.leaf_begin != 1U) {
+        throw std::logic_error(
+            "a Phase 9 rank-prune anchor is not a singleton leaf");
+      }
+      for (std::size_t axis = 0U; axis < 3U; ++axis) {
+        if (current.lower_bits[axis] != current.upper_bits[axis]) {
+          throw std::logic_error(
+              "a Phase 9 rank-prune anchor leaf is not degenerate");
+        }
+      }
+      return checked_u64(
+          current_index,
+          "a Phase 9 rank-prune anchor node index does not fit uint64");
+    }
+
+    const std::size_t left_index = checked_size(
+        current.left_child,
+        "a Phase 9 rank-prune left child index does not fit size_t");
+    const std::size_t right_index = checked_size(
+        current.right_child,
+        "a Phase 9 rank-prune right child index does not fit size_t");
+    if (left_index >= nodes.size() || right_index >= nodes.size() ||
+        left_index == right_index || left_index == current_index ||
+        right_index == current_index) {
+      throw std::logic_error(
+          "a Phase 9 rank-prune anchor path has invalid children");
+    }
+    const detail::PairSupportPhiNodeInputRecord& left = nodes[left_index];
+    const detail::PairSupportPhiNodeInputRecord& right = nodes[right_index];
+    if (left.leaf_begin != current.leaf_begin ||
+        left.leaf_begin >= left.leaf_end ||
+        left.leaf_end != right.leaf_begin ||
+        right.leaf_begin >= right.leaf_end ||
+        right.leaf_end != current.leaf_end) {
+      throw std::logic_error(
+          "a Phase 9 rank-prune anchor path has unauthenticated child ranges");
+    }
+    current_index = left_index;
+  }
+  throw std::logic_error(
+      "a Phase 9 rank-prune anchor path contains a cycle");
 }
 
 [[nodiscard]] std::vector<detail::PairSupportPhiQueryInputRecord>
@@ -272,8 +354,15 @@ validate_and_pack_rank_products(
       throw std::invalid_argument(
           "a Phase 9 rank-prune product contradicts the resident LBVH");
     }
+    const std::uint64_t first_anchor =
+        authenticated_first_leaf_node(nodes, first);
+    const std::uint64_t second_anchor =
+        authenticated_first_leaf_node(nodes, second);
     packed.push_back(detail::PairSupportRankProductInputRecord{
-        product.first_node_index, product.second_node_index});
+        product.first_node_index,
+        product.second_node_index,
+        first_anchor,
+        second_anchor});
   }
   return packed;
 }
@@ -451,6 +540,7 @@ validate_and_recertify_rank_prunes(
     const detail::PairSupportRankDeviceBatch& batch,
     std::span<const hierarchy::ExactPairSupportFrontierEntry> products,
     std::span<const detail::PairSupportPhiNodeInputRecord> nodes,
+    std::uint64_t root_node_index,
     PairSupportRankPruneCapacity capacity,
     std::size_t required_strict_interior_point_count,
     PairSupportRankPruneBudget budget,
@@ -480,8 +570,18 @@ validate_and_recertify_rank_prunes(
       "the Phase 9 rank-prune work byte capacity overflows size_t");
   validate_allocation_product(
       capacity.maximum_receipt_count,
-      sizeof(detail::PairSupportRankDeviceReceipt),
-      "the Phase 9 rank-prune receipt byte capacity overflows size_t");
+      sizeof(detail::PairSupportRankDeviceTerminal),
+      "the Phase 9 rank-prune terminal byte capacity overflows size_t");
+  const std::size_t root_index = checked_size(
+      root_node_index,
+      "the Phase 9 rank-prune root node index does not fit size_t");
+  if (root_index >= nodes.size() ||
+      nodes[root_index].leaf_begin != 0U ||
+      nodes[root_index].leaf_begin >= nodes[root_index].leaf_end) {
+    throw std::logic_error(
+        "the Phase 9 rank-prune root authority is invalid");
+  }
+  const std::uint64_t root_leaf_end = nodes[root_index].leaf_end;
   const std::size_t snapshot_bytes =
       nodes.size() * sizeof(detail::PairSupportPhiNodeInputRecord);
   const std::size_t product_bytes =
@@ -491,9 +591,9 @@ validate_and_recertify_rank_prunes(
   const std::size_t frontier_capacity_bytes =
       capacity.maximum_work_item_count *
       (2U * sizeof(detail::PairSupportRankWorkItem));
-  const std::size_t receipt_capacity_bytes =
+  const std::size_t terminal_capacity_bytes =
       capacity.maximum_receipt_count *
-      sizeof(detail::PairSupportRankDeviceReceipt);
+      sizeof(detail::PairSupportRankDeviceTerminal);
   validate_allocation_product(
       batch.traversal_epoch_count,
       5U * sizeof(std::uint64_t),
@@ -517,7 +617,7 @@ validate_and_recertify_rank_prunes(
       "the Phase 9 rank-prune fixed workspace byte count overflows size_t");
   expected_fixed_workspace_bytes = checked_add_size(
       expected_fixed_workspace_bytes,
-      receipt_capacity_bytes,
+      terminal_capacity_bytes,
       "the Phase 9 rank-prune fixed workspace byte count overflows size_t");
   expected_fixed_workspace_bytes = checked_add_size(
       expected_fixed_workspace_bytes,
@@ -527,12 +627,12 @@ validate_and_recertify_rank_prunes(
       expected_fixed_workspace_bytes,
       batch.device_scan_workspace_byte_capacity,
       "the Phase 9 rank-prune fixed workspace byte count overflows size_t");
-  if (batch.receipts.size() != capacity.maximum_receipt_count ||
+  if (batch.terminals.size() != capacity.maximum_receipt_count ||
       batch.input_product_count != products.size() ||
       batch.product_capacity != capacity.maximum_product_count ||
       batch.work_item_capacity != capacity.maximum_work_item_count ||
-      batch.receipt_capacity != capacity.maximum_receipt_count ||
-      batch.receipt_count > capacity.maximum_receipt_count ||
+      batch.terminal_capacity != capacity.maximum_receipt_count ||
+      batch.terminal_count > capacity.maximum_receipt_count ||
       batch.traversal_epoch_count == 0U ||
       batch.traversal_epoch_count > budget.maximum_epoch_count ||
       batch.count_kernel_launch_count != batch.traversal_epoch_count ||
@@ -546,23 +646,24 @@ validate_and_recertify_rank_prunes(
       batch.peak_frontier_count < products.size() ||
       batch.peak_frontier_count > capacity.maximum_work_item_count ||
       batch.peak_frontier_count > batch.visited_work_item_count ||
-      batch.receipt_count > batch.visited_work_item_count ||
+      batch.terminal_count > batch.visited_work_item_count ||
       (batch.snapshot_h2d_byte_count != 0U &&
        batch.snapshot_h2d_byte_count != snapshot_bytes) ||
       batch.active_product_h2d_byte_count != product_bytes ||
       batch.initial_frontier_h2d_byte_count != initial_frontier_bytes ||
       batch.traversal_metadata_d2h_byte_count !=
           expected_metadata_d2h_bytes ||
-      batch.physical_receipt_d2h_byte_count != receipt_capacity_bytes ||
-      batch.active_receipt_d2h_byte_count !=
-          batch.receipt_count *
-              sizeof(detail::PairSupportRankDeviceReceipt) ||
+      batch.physical_terminal_d2h_byte_count != terminal_capacity_bytes ||
+      batch.active_terminal_d2h_byte_count !=
+          batch.terminal_count *
+              sizeof(detail::PairSupportRankDeviceTerminal) ||
       batch.device_frontier_double_buffer_byte_capacity !=
           frontier_capacity_bytes ||
-      batch.device_receipt_byte_capacity != receipt_capacity_bytes ||
+      batch.device_terminal_byte_capacity != terminal_capacity_bytes ||
       batch.device_scan_workspace_byte_capacity == 0U ||
       batch.device_fixed_workspace_byte_capacity !=
-          expected_fixed_workspace_bytes) {
+          expected_fixed_workspace_bytes ||
+      !batch.anchor_ball_culling_enabled) {
     throw std::runtime_error(
         "the GPU rank-prune proposal returned invalid extent metadata");
   }
@@ -588,12 +689,12 @@ validate_and_recertify_rank_prunes(
     throw std::runtime_error(
         "the GPU rank-prune proposal returned inconsistent traversal metadata");
   }
-  for (std::size_t index = batch.receipt_count;
-       index < batch.receipts.size();
+  for (std::size_t index = batch.terminal_count;
+       index < batch.terminals.size();
        ++index) {
-    if (!sentinel_rank_receipt(batch.receipts[index])) {
+    if (!sentinel_rank_terminal(batch.terminals[index])) {
       throw std::runtime_error(
-          "the GPU rank-prune proposal exposed a stale receipt tail");
+          "the GPU rank-prune proposal exposed a stale terminal tail");
     }
   }
 
@@ -611,7 +712,8 @@ validate_and_recertify_rank_prunes(
   audit.gpu_emit_kernel_launch_count = batch.emit_kernel_launch_count;
   audit.gpu_visited_work_item_count = batch.visited_work_item_count;
   audit.gpu_peak_frontier_count = batch.peak_frontier_count;
-  audit.gpu_output_receipt_count = batch.receipt_count;
+  audit.gpu_output_terminal_count = batch.terminal_count;
+  audit.gpu_output_receipt_count = batch.terminal_count;
   audit.buffer_epoch = batch.buffer_epoch;
   audit.work_item_capacity_exhausted =
       batch.capacity_stop ==
@@ -624,12 +726,14 @@ validate_and_recertify_rank_prunes(
       !batch.frontier_exhausted && !capacity_exhausted;
   audit.immutable_lbvh_snapshot_validated = true;
   audit.product_records_validated = true;
+  audit.anchor_ball_culling_enabled =
+      batch.anchor_ball_culling_enabled;
 
-  std::vector<std::vector<hierarchy::ExactPairSupportWitnessNodeEntry>>
-      receipts_by_product(products.size());
-  std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>>
-      ranges_by_product(products.size());
+  std::vector<std::vector<PairSupportRankTerminalCertificate>>
+      terminals_by_product(products.size());
   std::vector<std::size_t> point_counts(products.size(), 0U);
+  std::vector<std::uint64_t> first_anchor_indices(products.size());
+  std::vector<std::uint64_t> second_anchor_indices(products.size());
   std::uint64_t digest = kFnvOffsetBasis;
   hash_word(
       digest,
@@ -652,27 +756,33 @@ validate_and_recertify_rank_prunes(
     hash_word(digest, product.second_leaf_begin);
     hash_word(digest, product.second_leaf_end);
     hash_word(digest, product.self_product);
+    first_anchor_indices[product_index] =
+        authenticated_first_leaf_node(
+            nodes,
+            checked_size(
+                product.first_node_index,
+                "a Phase 9 rank-prune first support does not fit size_t"));
+    second_anchor_indices[product_index] =
+        authenticated_first_leaf_node(
+            nodes,
+            checked_size(
+                product.second_node_index,
+                "a Phase 9 rank-prune second support does not fit size_t"));
   }
   for (std::size_t position = 0U;
-       position < batch.receipt_count;
+       position < batch.terminal_count;
        ++position) {
-    const detail::PairSupportRankDeviceReceipt& receipt =
-        batch.receipts[position];
-    if (receipt.receipt_index != checked_u64(
-            position,
-            "a Phase 9 rank-prune receipt position does not fit uint64")) {
-      throw std::runtime_error(
-          "the GPU rank-prune receipt transcript is not stably indexed");
-    }
+    const detail::PairSupportRankDeviceTerminal& terminal =
+        batch.terminals[position];
     const std::size_t product_index = checked_size(
-        receipt.product_slot,
+        terminal.product_slot,
         "a GPU rank-prune product slot does not fit size_t");
     const std::size_t witness_index = checked_size(
-        receipt.witness_node_index,
+        terminal.witness_node_index,
         "a GPU rank-prune witness node index does not fit size_t");
     if (product_index >= products.size() || witness_index >= nodes.size()) {
       throw std::runtime_error(
-          "a GPU rank-prune receipt references an unknown authority");
+          "a GPU rank-prune terminal references an unknown authority");
     }
     const detail::PairSupportPhiNodeInputRecord& witness =
         nodes[witness_index];
@@ -682,119 +792,242 @@ validate_and_recertify_rank_prunes(
         nodes[static_cast<std::size_t>(product.first_node_index)];
     const detail::PairSupportPhiNodeInputRecord& second =
         nodes[static_cast<std::size_t>(product.second_node_index)];
-    if (receipt.leaf_begin != witness.leaf_begin ||
-        receipt.leaf_end != witness.leaf_end ||
+    if (witness.leaf_begin >= witness.leaf_end ||
+        witness.leaf_end > root_leaf_end ||
         intervals_intersect(witness, first) ||
-        intervals_intersect(witness, second) ||
-        !strictly_negative_binary64(receipt.upper_phi_bits)) {
+        intervals_intersect(witness, second)) {
       throw std::runtime_error(
-          "a GPU rank-prune receipt contradicts its LBVH identity");
+          "a GPU rank-prune terminal intersects its support authority");
     }
 
-    hierarchy::ExactDiametralPhiAabbMaximum exact_receipt =
-        hierarchy::exact_diametral_phi_aabb_maximum(
+    const int exact_phi_sign =
+        hierarchy::exact_diametral_phi_aabb_maximum_sign(
             node_box(first), node_box(second), node_box(witness));
+    ++audit.cpu_exact_terminal_recertification_count;
     ++audit.cpu_exact_phi_recertification_count;
-    const exact::ExactRational proposed_upper =
-        exact::ExactRational::from_binary64_bits(receipt.upper_phi_bits);
-    if (exact_receipt.maximum_phi > proposed_upper ||
-        exact_receipt.maximum_phi.sign() >= 0) {
-      throw std::runtime_error(
-          "a GPU rank-prune receipt failed exact CPU recertification");
+
+    PairSupportRankTerminalKind kind =
+        PairSupportRankTerminalKind::unresolved_external_leaf;
+    if (exact_phi_sign < 0) {
+      kind = PairSupportRankTerminalKind::strict_interior;
+      ++audit.strict_interior_terminal_count;
+    } else {
+      const bool cross_product =
+          product.first_node_index != product.second_node_index;
+      bool anchor_noninterior = false;
+      if (cross_product) {
+        const auto& first_anchor = nodes[checked_size(
+            first_anchor_indices[product_index],
+            "a Phase 9 first anchor index does not fit size_t")];
+        const auto& second_anchor = nodes[checked_size(
+            second_anchor_indices[product_index],
+            "a Phase 9 second anchor index does not fit size_t")];
+        anchor_noninterior =
+            hierarchy::exact_diametral_anchor_phi_aabb_minimum_sign(
+                node_box(first_anchor),
+                node_box(second_anchor),
+                node_box(witness)) >= 0;
+      }
+      if (anchor_noninterior) {
+        kind = PairSupportRankTerminalKind::anchor_noninterior;
+        ++audit.anchor_noninterior_terminal_count;
+      } else if (leaf_node(witness)) {
+        ++audit.unresolved_external_leaf_terminal_count;
+      } else {
+        throw std::runtime_error(
+            "a GPU rank-prune terminal is an unresolved internal node");
+      }
     }
 
     const std::size_t subtree_size = checked_size(
         witness.leaf_end - witness.leaf_begin,
-        "a GPU rank-prune witness cardinality does not fit size_t");
-    if (point_counts[product_index] >
-        std::numeric_limits<std::size_t>::max() - subtree_size) {
-      throw std::runtime_error(
-          "the GPU rank-prune receipt cardinality overflows size_t");
+        "a GPU rank-prune terminal cardinality does not fit size_t");
+    if (kind == PairSupportRankTerminalKind::strict_interior) {
+      if (point_counts[product_index] >
+          std::numeric_limits<std::size_t>::max() - subtree_size) {
+        throw std::runtime_error(
+            "the GPU rank-prune strict cardinality overflows size_t");
+      }
+      point_counts[product_index] += subtree_size;
     }
-    point_counts[product_index] += subtree_size;
-    receipts_by_product[product_index].push_back(
-        hierarchy::ExactPairSupportWitnessNodeEntry{
-            receipt.witness_node_index,
-            receipt.leaf_begin,
-            receipt.leaf_end});
-    ranges_by_product[product_index].push_back(
-        {receipt.leaf_begin, receipt.leaf_end});
+    terminals_by_product[product_index].push_back(
+        PairSupportRankTerminalCertificate{
+            hierarchy::ExactPairSupportWitnessNodeEntry{
+                terminal.witness_node_index,
+                witness.leaf_begin,
+                witness.leaf_end},
+            kind});
 
-    hash_word(digest, receipt.receipt_index);
-    hash_word(digest, receipt.product_slot);
-    hash_word(digest, receipt.witness_node_index);
-    hash_word(digest, receipt.leaf_begin);
-    hash_word(digest, receipt.leaf_end);
-    hash_word(digest, receipt.upper_phi_bits);
+    hash_word(
+        digest,
+        checked_u64(
+            position,
+            "a Phase 9 rank-prune terminal position does not fit uint64"));
+    hash_word(digest, terminal.product_slot);
+    hash_word(digest, terminal.witness_node_index);
+    hash_word(digest, product.first_node_index);
+    hash_word(digest, product.second_node_index);
+    hash_word(digest, product.first_leaf_begin);
+    hash_word(digest, product.first_leaf_end);
+    hash_word(digest, product.second_leaf_begin);
+    hash_word(digest, product.second_leaf_end);
+    hash_word(digest, product.self_product);
   }
+  if (audit.cpu_exact_terminal_recertification_count !=
+          batch.terminal_count ||
+      audit.strict_interior_terminal_count +
+              audit.anchor_noninterior_terminal_count +
+              audit.unresolved_external_leaf_terminal_count !=
+          batch.terminal_count) {
+    throw std::logic_error(
+        "the exact terminal classification counters do not close");
+  }
+  audit.stable_terminal_transcript_validated = true;
   audit.stable_receipt_transcript_validated = true;
 
   for (std::size_t product_index = 0U;
        product_index < products.size();
        ++product_index) {
-    auto sorted_ranges = ranges_by_product[product_index];
-    std::sort(sorted_ranges.begin(), sorted_ranges.end());
-    for (std::size_t range_index = 1U;
-         range_index < sorted_ranges.size();
-         ++range_index) {
-      if (sorted_ranges[range_index - 1U].second >
-          sorted_ranges[range_index].first) {
-        throw std::runtime_error(
-            "GPU rank-prune receipts do not form a disjoint antichain");
-      }
-    }
-    if (point_counts[product_index] <
-        required_strict_interior_point_count) {
-      continue;
-    }
-    auto& canonical_receipts = receipts_by_product[product_index];
+    auto& canonical_terminals = terminals_by_product[product_index];
     std::sort(
-        canonical_receipts.begin(),
-        canonical_receipts.end(),
+        canonical_terminals.begin(),
+        canonical_terminals.end(),
         [](const auto& left, const auto& right) {
           return std::tuple{
-                     left.leaf_begin, left.leaf_end, left.node_index} <
+                     left.terminal.leaf_begin,
+                     left.terminal.leaf_end,
+                     left.terminal.node_index} <
                  std::tuple{
-                     right.leaf_begin, right.leaf_end, right.node_index};
+                     right.terminal.leaf_begin,
+                     right.terminal.leaf_end,
+                     right.terminal.node_index};
         });
-    std::vector<hierarchy::ExactPairSupportWitnessNodeEntry>
-        minimal_prefix;
-    minimal_prefix.reserve(std::min(
-        canonical_receipts.size(),
-        required_strict_interior_point_count));
-    std::size_t prefix_point_count = 0U;
-    for (const auto& receipt : canonical_receipts) {
-      if (prefix_point_count >= required_strict_interior_point_count) {
+    for (std::size_t terminal_index = 1U;
+         terminal_index < canonical_terminals.size();
+         ++terminal_index) {
+      if (canonical_terminals[terminal_index - 1U].terminal.leaf_end >
+          canonical_terminals[terminal_index].terminal.leaf_begin) {
+        throw std::runtime_error(
+            "GPU rank-prune terminals do not form a disjoint antichain");
+      }
+    }
+
+    if (point_counts[product_index] >=
+        required_strict_interior_point_count) {
+      std::vector<hierarchy::ExactPairSupportWitnessNodeEntry>
+          minimal_prefix;
+      minimal_prefix.reserve(std::min(
+          canonical_terminals.size(),
+          required_strict_interior_point_count));
+      std::size_t prefix_point_count = 0U;
+      for (const auto& terminal : canonical_terminals) {
+        if (prefix_point_count >=
+            required_strict_interior_point_count) {
+          break;
+        }
+        if (terminal.kind !=
+            PairSupportRankTerminalKind::strict_interior) {
+          continue;
+        }
+        const std::size_t subtree_size = checked_size(
+            terminal.terminal.leaf_end -
+                terminal.terminal.leaf_begin,
+            "a canonical rank-prune terminal cardinality does not fit size_t");
+        if (prefix_point_count >
+            std::numeric_limits<std::size_t>::max() - subtree_size) {
+          throw std::runtime_error(
+              "the canonical rank-prune terminal prefix overflows size_t");
+        }
+        prefix_point_count += subtree_size;
+        minimal_prefix.push_back(terminal.terminal);
+      }
+      if (prefix_point_count <
+              required_strict_interior_point_count ||
+          minimal_prefix.size() >
+              required_strict_interior_point_count) {
+        throw std::logic_error(
+            "the canonical rank-prune terminal prefix did not close");
+      }
+      result.proposals.push_back(
+          PairSupportRankPruneProductProposal{
+              product_index,
+              products[product_index],
+              std::move(minimal_prefix),
+              prefix_point_count});
+      continue;
+    }
+
+    struct CoverageInterval {
+      std::uint64_t leaf_begin{};
+      std::uint64_t leaf_end{};
+    };
+    std::vector<CoverageInterval> coverage;
+    coverage.reserve(checked_add_size(
+        canonical_terminals.size(),
+        2U,
+        "the rank-prune coverage interval count overflows size_t"));
+    const auto& product = products[product_index];
+    coverage.push_back(
+        CoverageInterval{
+            product.first_leaf_begin, product.first_leaf_end});
+    if (product.first_leaf_begin != product.second_leaf_begin ||
+        product.first_leaf_end != product.second_leaf_end) {
+      coverage.push_back(
+          CoverageInterval{
+              product.second_leaf_begin, product.second_leaf_end});
+    }
+    for (const auto& terminal : canonical_terminals) {
+      coverage.push_back(
+          CoverageInterval{
+              terminal.terminal.leaf_begin,
+              terminal.terminal.leaf_end});
+    }
+    std::sort(
+        coverage.begin(),
+        coverage.end(),
+        [](const auto& left, const auto& right) {
+          return std::tuple{left.leaf_begin, left.leaf_end} <
+                 std::tuple{right.leaf_begin, right.leaf_end};
+        });
+    bool exact_coverage = !coverage.empty();
+    std::uint64_t cursor = 0U;
+    for (const CoverageInterval interval : coverage) {
+      if (interval.leaf_begin != cursor ||
+          interval.leaf_begin >= interval.leaf_end ||
+          interval.leaf_end > root_leaf_end) {
+        exact_coverage = false;
         break;
       }
-      const std::size_t subtree_size = checked_size(
-          receipt.leaf_end - receipt.leaf_begin,
-          "a canonical rank-prune receipt cardinality does not fit size_t");
-      if (prefix_point_count >
-          std::numeric_limits<std::size_t>::max() - subtree_size) {
-        throw std::runtime_error(
-            "the canonical rank-prune receipt prefix overflows size_t");
-      }
-      prefix_point_count += subtree_size;
-      minimal_prefix.push_back(receipt);
+      cursor = interval.leaf_end;
     }
-    if (prefix_point_count < required_strict_interior_point_count ||
-        minimal_prefix.size() >
-            required_strict_interior_point_count) {
-      throw std::logic_error(
-          "the canonical rank-prune receipt prefix did not close");
+    exact_coverage =
+        exact_coverage && cursor == root_leaf_end &&
+        product.self_product == 0U;
+    if (exact_coverage) {
+      result.keep_certificates.push_back(
+          PairSupportRankKeepProductCertificate{
+              product_index,
+              product,
+              std::move(canonical_terminals),
+              point_counts[product_index]});
     }
-    result.proposals.push_back(PairSupportRankPruneProductProposal{
-        product_index,
-        products[product_index],
-        std::move(minimal_prefix),
-        prefix_point_count});
   }
+  audit.disjoint_terminal_antichains_validated = true;
   audit.disjoint_receipt_antichains_validated = true;
+  audit.keep_coverage_recertification_complete = true;
   audit.cpu_exact_recertification_complete = true;
+  audit.prune_product_count = result.proposals.size();
+  audit.keep_certificate_product_count =
+      result.keep_certificates.size();
   audit.proposed_product_count = result.proposals.size();
-  audit.fallback_product_count =
-      products.size() - result.proposals.size();
+  if (audit.prune_product_count >
+          products.size() - audit.keep_certificate_product_count) {
+    throw std::logic_error(
+        "the rank-prune product classification counters overflow");
+  }
+  audit.fallback_product_count = products.size() -
+      audit.prune_product_count -
+      audit.keep_certificate_product_count;
   audit.snapshot_h2d_byte_count = batch.snapshot_h2d_byte_count;
   audit.active_product_h2d_byte_count =
       batch.active_product_h2d_byte_count;
@@ -802,18 +1035,25 @@ validate_and_recertify_rank_prunes(
       batch.initial_frontier_h2d_byte_count;
   audit.traversal_metadata_d2h_byte_count =
       batch.traversal_metadata_d2h_byte_count;
+  audit.physical_terminal_d2h_byte_count =
+      batch.physical_terminal_d2h_byte_count;
+  audit.active_terminal_d2h_byte_count =
+      batch.active_terminal_d2h_byte_count;
   audit.physical_receipt_d2h_byte_count =
-      batch.physical_receipt_d2h_byte_count;
+      batch.physical_terminal_d2h_byte_count;
   audit.active_receipt_d2h_byte_count =
-      batch.active_receipt_d2h_byte_count;
+      batch.active_terminal_d2h_byte_count;
   audit.device_frontier_double_buffer_byte_capacity =
       batch.device_frontier_double_buffer_byte_capacity;
+  audit.device_terminal_byte_capacity =
+      batch.device_terminal_byte_capacity;
   audit.device_receipt_byte_capacity =
-      batch.device_receipt_byte_capacity;
+      batch.device_terminal_byte_capacity;
   audit.device_scan_workspace_byte_capacity =
       batch.device_scan_workspace_byte_capacity;
   audit.device_fixed_workspace_byte_capacity =
       batch.device_fixed_workspace_byte_capacity;
+  audit.terminal_digest_fnv1a = digest;
   audit.receipt_digest_fnv1a = digest;
   audit.global_support_product_prune_published = false;
   audit.public_status_published = false;
@@ -872,8 +1112,8 @@ PairSupportPhiContext::PairSupportPhiContext(
       "the Phase 9 rank-prune work-item workspace size overflows size_t");
   validate_allocation_product(
       rank_prune_capacity_.maximum_receipt_count,
-      sizeof(detail::PairSupportRankDeviceReceipt),
-      "the Phase 9 rank-prune receipt workspace size overflows size_t");
+      sizeof(detail::PairSupportRankDeviceTerminal),
+      "the Phase 9 rank-prune terminal workspace size overflows size_t");
   if (index.nodes_.empty() || index.root_index_ >= index.nodes_.size() ||
       index.leaves_.size() != cloud.size()) {
     throw std::logic_error(
@@ -1010,6 +1250,7 @@ PairSupportRankPruneBatchResult PairSupportPhiContext::propose_rank_prunes(
             batch,
             products,
             nodes_,
+            root_node_index_,
             rank_prune_capacity_,
             required_strict_interior_point_count,
             budget,
