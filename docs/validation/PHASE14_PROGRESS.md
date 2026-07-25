@@ -292,9 +292,15 @@ L'arène fixe ajoute exactement $5120Q_{\max}$ octets avec $Q_{\max}\leq4096$, s
 
 L'artefact [phase14q_p8f_g4_95314a1.json](phase14q_p8f_g4_95314a1.json) conserve les sorties brutes. La session G4 `SPOT`, démarrée à `2026-07-25T14:58:31.800-07:00`, a été arrêtée à `2026-07-25T15:08:45.175-07:00` et certifiée `TERMINATED`; aucune autre VM labellisée n'était active et la clé de session a été révoquée puis supprimée localement. La piste de micro-optimisation du prédicat ancré est fermée sans promotion scientifique ou produit.
 
+## Incrément 14Q P8g — certificat exact groupé mono-nœud
+
+P8g ouvre sous `reference_cpu / hgp_reduced / grouped_exact_certificate` une primitive mathématique bornée. Pour au plus 32 ancres, un pool propositionnel d'au plus 64 témoins et un nœud du LBVH certifié, elle calcule exactement le maximum de $\Phi_x(a,q)=(x-a)\cdot(x-q)$ sur la boîte du groupe et celle du nœud. Un maximum strictement négatif vaut pour toutes les paires réelles. Avec $s_{\max}-1$ témoins distincts, les deux supports fournissent au moins $s_{\max}+1$ points fermés et autorisent le prune commun. Le pool n'a aucun contrat de rappel; les coins hybrides de la boîte font seulement perdre des prunes.
+
+Le certificat n'est ni agrégat ni constructible par défaut et conserve son payload scientifique privé. `certifies(...)` exige l'identité du nuage et du LBVH, le nœud, sa plage et sa boîte recalculée, le rang fermé maximal et les ancres attendues. Les trois budgets échouent sans publier de masque partiel. Le test court couvre succès collinéaire, égalité sur la coque laissée inconclusive, rejet inter-rang, provenance, entrées structurelles, pool insuffisant et contre-fixture corrélée. Ce jalon ne parcourt pas encore le LBVH, n'exécute aucun kernel et ne revendique aucun temps 50 k ou chemin 10 M+; GCP n'est pas utilisé.
+
 ## Priorités de développement
 
-1. dériver puis implémenter, avant tout nouveau benchmark, un certificat exact groupé et streamable qui mutualise ou élimine les prédicats témoin--nœud entre requêtes d'une tuile et réduit structurellement le terme requêtes × visites × témoins, sans arène globale ni tableau $64n$; les banques device, P8c/P7b, le vrai `warm_e2e` 50 k et l'externalisation 10 M+ restent en aval de cette porte mathématique.
+1. préparer la boîte et le pool une fois par groupe, puis implémenter un curseur borné qui transporte vers les enfants un masque typé non forgeable de témoins déjà stricts; un différentiel court doit précéder tout nouveau gate GCP à 4 096 puis 50 k, et les banques device, P8c/P7b, le vrai `warm_e2e` ainsi que l'externalisation 10 M+ restent en aval.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

@@ -368,6 +368,7 @@ add_library(
   morsehgp3d_anchored_pair_witness_bank
   STATIC
     src/cpu/hierarchy/anchored_pair_witness_bank.cpp
+    src/cpu/hierarchy/grouped_anchored_pair_certificate.cpp
 )
 add_library(
   morsehgp3d::anchored_pair_witness_bank
