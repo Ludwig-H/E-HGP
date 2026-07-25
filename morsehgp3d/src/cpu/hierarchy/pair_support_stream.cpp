@@ -290,8 +290,8 @@ struct BoundedExactAnchorPhi {
   return result;
 }
 
-[[nodiscard]] std::optional<int>
-try_bounded_exact_anchor_phi_aabb_minimum_sign(
+[[nodiscard]] std::optional<std::array<BoundedExactInteger, 12U>>
+try_align_bounded_exact_anchor_query(
     const BoundedExactAnchorPhi& anchor,
     const spatial::ExactDyadicAabb3& query_box) {
   validate_exact_dyadic_box(query_box);
@@ -304,8 +304,15 @@ try_bounded_exact_anchor_phi_aabb_minimum_sign(
     words[9U + axis] = decode_binary64_dyadic_word(
         query_box.upper_binary64_bits[axis]);
   }
-  const std::optional<std::array<BoundedExactInteger, 12U>>
-      aligned = try_align_bounded_exact_dyadics(words);
+  return try_align_bounded_exact_dyadics(words);
+}
+
+[[nodiscard]] std::optional<int>
+try_bounded_exact_anchor_phi_aabb_minimum_sign(
+    const BoundedExactAnchorPhi& anchor,
+    const spatial::ExactDyadicAabb3& query_box) {
+  const std::optional<std::array<BoundedExactInteger, 12U>> aligned =
+      try_align_bounded_exact_anchor_query(anchor, query_box);
   if (!aligned.has_value()) {
     return std::nullopt;
   }
@@ -335,6 +342,31 @@ try_bounded_exact_anchor_phi_aabb_minimum_sign(
     }
   }
   return bounded_exact_sign(four_times_minimum);
+}
+
+[[nodiscard]] std::optional<int>
+try_bounded_exact_diametral_point_phi_aabb_maximum_sign(
+    const BoundedExactAnchorPhi& anchor,
+    const spatial::ExactDyadicAabb3& query_box) {
+  const std::optional<std::array<BoundedExactInteger, 12U>> aligned =
+      try_align_bounded_exact_anchor_query(anchor, query_box);
+  if (!aligned.has_value()) {
+    return std::nullopt;
+  }
+
+  BoundedExactInteger total_maximum = 0;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const BoundedExactInteger& first = (*aligned)[axis];
+    const BoundedExactInteger& second = (*aligned)[3U + axis];
+    const BoundedExactInteger lower_candidate =
+        ((*aligned)[6U + axis] - first) *
+        ((*aligned)[6U + axis] - second);
+    const BoundedExactInteger upper_candidate =
+        ((*aligned)[9U + axis] - first) *
+        ((*aligned)[9U + axis] - second);
+    total_maximum += std::max(lower_candidate, upper_candidate);
+  }
+  return bounded_exact_sign(total_maximum);
 }
 
 // Binary64 endpoints are dyadic.  Keeping an unnormalized
@@ -697,6 +729,44 @@ exact_anchor_phi_aabb_minimum(
     return *bounded_sign;
   }
   return dyadic_sign(exact_anchor_phi_aabb_minimum(anchor, query_box));
+}
+
+[[nodiscard]] UnnormalizedExactDyadic
+exact_diametral_point_phi_aabb_maximum(
+    const ExactDyadicAnchorPhi& anchor,
+    const spatial::ExactDyadicAabb3& query_box) {
+  const ExactDyadicBoxCoordinates query =
+      exact_dyadic_box_coordinates(query_box);
+  UnnormalizedExactDyadic total_maximum;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const UnnormalizedExactDyadic lower_candidate =
+        multiply_dyadics(
+            subtract_dyadics(query.lower[axis], anchor.first[axis]),
+            subtract_dyadics(query.lower[axis], anchor.second[axis]));
+    const UnnormalizedExactDyadic upper_candidate =
+        multiply_dyadics(
+            subtract_dyadics(query.upper[axis], anchor.first[axis]),
+            subtract_dyadics(query.upper[axis], anchor.second[axis]));
+    total_maximum = add_dyadics(
+        total_maximum,
+        dyadic_less(lower_candidate, upper_candidate)
+            ? upper_candidate
+            : lower_candidate);
+  }
+  return total_maximum;
+}
+
+[[nodiscard]] int exact_diametral_point_phi_aabb_maximum_sign(
+    const ExactDyadicAnchorPhi& anchor,
+    const spatial::ExactDyadicAabb3& query_box) {
+  const std::optional<int> bounded_sign =
+      try_bounded_exact_diametral_point_phi_aabb_maximum_sign(
+          anchor.bounded, query_box);
+  if (bounded_sign.has_value()) {
+    return *bounded_sign;
+  }
+  return dyadic_sign(
+      exact_diametral_point_phi_aabb_maximum(anchor, query_box));
 }
 
 [[nodiscard]] bool event_less(
@@ -3082,9 +3152,7 @@ class ExactPairSupportStreamBuilder {
   }
 
   [[nodiscard]] SparseBallClassification classify_sparse_closed_ball(
-      const std::array<PointId, 2>& support_ids,
-      const exact::ExactCenter3& center,
-      const exact::ExactLevel& squared_level) {
+      const std::array<PointId, 2>& support_ids) {
     SparseBallClassification classification;
     const std::size_t interior_cap =
         result_.requirements.maximum_relevant_closed_rank - 2U;
@@ -3097,6 +3165,8 @@ class ExactPairSupportStreamBuilder {
     result_.audit.maximum_closed_ball_frontier_entry_count = std::max(
         result_.audit.maximum_closed_ball_frontier_entry_count,
         frontier.size());
+    const ExactDyadicAnchorPhi anchor = exact_dyadic_anchor_phi(
+        cloud_.point(support_ids[0]), cloud_.point(support_ids[1]));
     std::array<bool, 2> support_seen{false, false};
     std::size_t interior_count = 0U;
     while (!frontier.empty()) {
@@ -3109,13 +3179,14 @@ class ExactPairSupportStreamBuilder {
           result_.audit.closed_ball_node_visit_count,
           1U,
           "the sparse closed-ball node count overflows size_t");
-      const exact::ExactLevel minimum_distance =
-          index_.minimum_squared_distance_to_node(cloud_, node_index, center);
+      const spatial::ExactDyadicAabb3 query_box = node_box(node_index);
+      const int minimum_phi_sign =
+          exact_anchor_phi_aabb_minimum_sign(anchor, query_box);
       result_.audit.exact_closed_ball_minimum_aabb_bound_count = checked_add(
           result_.audit.exact_closed_ball_minimum_aabb_bound_count,
           1U,
           "the sparse closed-ball minimum-bound count overflows size_t");
-      if (minimum_distance > squared_level) {
+      if (minimum_phi_sign > 0) {
         classification.exterior_count = checked_add(
             classification.exterior_count,
             subtree_size,
@@ -3131,13 +3202,14 @@ class ExactPairSupportStreamBuilder {
         add_point_classifications(subtree_size);
         continue;
       }
-      const exact::ExactLevel maximum_distance =
-          index_.maximum_squared_distance_to_node(cloud_, node_index, center);
+      const int maximum_phi_sign =
+          exact_diametral_point_phi_aabb_maximum_sign(
+              anchor, query_box);
       result_.audit.exact_closed_ball_maximum_aabb_bound_count = checked_add(
           result_.audit.exact_closed_ball_maximum_aabb_bound_count,
           1U,
           "the sparse closed-ball maximum-bound count overflows size_t");
-      if (maximum_distance < squared_level) {
+      if (maximum_phi_sign < 0) {
         interior_count = checked_add(
             interior_count,
             subtree_size,
@@ -3170,53 +3242,48 @@ class ExactPairSupportStreamBuilder {
       if (current.is_leaf()) {
         const PointId point_id =
             index_.leaves_[current.leaf_begin].point_id;
-        const exact::SpherePointClassification point_classification =
-            exact::classify_sphere_point(
-                center,
-                squared_level,
-                cloud_.point(point_id));
+        if (minimum_phi_sign != maximum_phi_sign) {
+          throw std::logic_error(
+              "a degenerate exact AABB has inconsistent diametral extrema");
+        }
         result_.audit.exact_point_distance_evaluation_count = checked_add(
             result_.audit.exact_point_distance_evaluation_count,
             1U,
             "the sparse closed-ball exact-distance count overflows size_t");
         add_point_classifications(1U);
-        switch (point_classification.location()) {
-          case exact::SpherePointLocation::strictly_inside:
-            interior_count = checked_add(
-                interior_count,
+        if (maximum_phi_sign < 0) {
+          interior_count = checked_add(
+              interior_count,
+              1U,
+              "the sparse closed-ball interior count overflows size_t");
+          if (interior_count > interior_cap) {
+            result_.audit.early_closed_rank_rejection_count = checked_add(
+                result_.audit.early_closed_rank_rejection_count,
                 1U,
-                "the sparse closed-ball interior count overflows size_t");
-            if (interior_count > interior_cap) {
-              result_.audit.early_closed_rank_rejection_count = checked_add(
-                  result_.audit.early_closed_rank_rejection_count,
-                  1U,
-                  "the sparse closed-ball early-rejection count overflows size_t");
-              classification.outcome = SparseBallOutcome::rank_exceeded;
-              return classification;
-            }
-            classification.interior_ids.push_back(point_id);
-            break;
-          case exact::SpherePointLocation::boundary:
-            classification.shell_count = checked_add(
-                classification.shell_count,
-                1U,
-                "the sparse closed-ball shell count overflows size_t");
-            if (point_id == support_ids[0]) {
-              support_seen[0] = true;
-            } else if (point_id == support_ids[1]) {
-              support_seen[1] = true;
-            } else if (!classification.canonical_extra_shell_witness_id.has_value() ||
-                       point_id <
-                           *classification.canonical_extra_shell_witness_id) {
-              classification.canonical_extra_shell_witness_id = point_id;
-            }
-            break;
-          case exact::SpherePointLocation::outside:
-            classification.exterior_count = checked_add(
-                classification.exterior_count,
-                1U,
-                "the sparse closed-ball exterior count overflows size_t");
-            break;
+                "the sparse closed-ball early-rejection count overflows size_t");
+            classification.outcome = SparseBallOutcome::rank_exceeded;
+            return classification;
+          }
+          classification.interior_ids.push_back(point_id);
+        } else if (maximum_phi_sign == 0) {
+          classification.shell_count = checked_add(
+              classification.shell_count,
+              1U,
+              "the sparse closed-ball shell count overflows size_t");
+          if (point_id == support_ids[0]) {
+            support_seen[0] = true;
+          } else if (point_id == support_ids[1]) {
+            support_seen[1] = true;
+          } else if (!classification.canonical_extra_shell_witness_id.has_value() ||
+                     point_id <
+                         *classification.canonical_extra_shell_witness_id) {
+            classification.canonical_extra_shell_witness_id = point_id;
+          }
+        } else {
+          classification.exterior_count = checked_add(
+              classification.exterior_count,
+              1U,
+              "the sparse closed-ball exterior count overflows size_t");
         }
         continue;
       }
@@ -3273,19 +3340,8 @@ class ExactPairSupportStreamBuilder {
     if (support_ids[1] < support_ids[0]) {
       std::swap(support_ids[0], support_ids[1]);
     }
-    const exact::CircumcenterResult sphere = exact::circumcenter(
-        cloud_.point(support_ids[0]),
-        cloud_.point(support_ids[1]));
-    if (sphere.kind() != exact::CircumcenterKind::unique ||
-        !sphere.center().has_value() ||
-        !sphere.squared_level().has_value()) {
-      throw std::logic_error(
-          "two canonical distinct points did not define a unique sphere");
-    }
-    SparseBallClassification classification = classify_sparse_closed_ball(
-        support_ids,
-        *sphere.center(),
-        *sphere.squared_level());
+    SparseBallClassification classification =
+        classify_sparse_closed_ball(support_ids);
     frontier_.pop_back();
     result_.audit.leaf_pair_classification_count = checked_add(
         result_.audit.leaf_pair_classification_count,
@@ -3301,6 +3357,19 @@ class ExactPairSupportStreamBuilder {
           1U,
           "the pair-support above-rank count overflows size_t");
       return true;
+    }
+
+    // The sparse decision needs only the exact diametral identity.  Construct
+    // the rational level once, and only for a record that survives the rank
+    // cap.
+    const exact::CircumcenterResult sphere = exact::circumcenter(
+        cloud_.point(support_ids[0]),
+        cloud_.point(support_ids[1]));
+    if (sphere.kind() != exact::CircumcenterKind::unique ||
+        !sphere.center().has_value() ||
+        !sphere.squared_level().has_value()) {
+      throw std::logic_error(
+          "two canonical distinct points did not define a unique sphere");
     }
     const std::size_t observed_closed_rank = checked_add(
         classification.interior_ids.size(),
