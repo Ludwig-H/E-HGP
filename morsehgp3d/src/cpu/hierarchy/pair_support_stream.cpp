@@ -92,29 +92,346 @@ struct IntegrityVerifiedCheckpointTag {};
   return current <= maximum && increment <= maximum - current;
 }
 
-struct ExactBoxCoordinates {
-  std::array<exact::ExactRational, 3> lower{};
-  std::array<exact::ExactRational, 3> upper{};
+// Binary64 endpoints are dyadic.  Keeping an unnormalized
+// significand * 2^exponent form avoids constructing and reducing a rational
+// at every difference, product, comparison, and axis sum.  Zero alone has a
+// canonical internal exponent; nonzero values deliberately retain their
+// operation exponent until the single final ExactRational conversion.
+struct UnnormalizedExactDyadic {
+  exact::BigInt significand{};
+  int exponent{};
 };
 
-[[nodiscard]] ExactBoxCoordinates exact_box_coordinates(
+[[nodiscard]] UnnormalizedExactDyadic make_dyadic(
+    exact::BigInt significand,
+    int exponent) {
+  if (significand == 0) {
+    return {};
+  }
+  return UnnormalizedExactDyadic{std::move(significand), exponent};
+}
+
+[[nodiscard]] UnnormalizedExactDyadic dyadic_from_binary64_bits(
+    std::uint64_t input_bits) {
+  constexpr std::uint64_t fraction_mask =
+      (std::uint64_t{1} << 52U) - 1U;
+  constexpr std::uint64_t exponent_mask = UINT64_C(0x7ff);
+  constexpr int exponent_bias = 1023;
+  constexpr int fraction_bit_count = 52;
+  constexpr int subnormal_exponent = -1074;
+
+  const std::uint64_t bits =
+      exact::canonicalize_binary64_bits(input_bits);
+  const bool negative =
+      (bits & exact::binary64_sign_mask) != 0U;
+  const std::uint64_t exponent_bits =
+      (bits >> 52U) & exponent_mask;
+  const std::uint64_t fraction_bits = bits & fraction_mask;
+  if (exponent_bits == 0U && fraction_bits == 0U) {
+    return {};
+  }
+
+  exact::BigInt significand = exponent_bits == 0U
+      ? exact::BigInt{fraction_bits}
+      : exact::BigInt{
+            (std::uint64_t{1} << 52U) | fraction_bits};
+  if (negative) {
+    significand = -significand;
+  }
+  const int exponent = exponent_bits == 0U
+      ? subnormal_exponent
+      : static_cast<int>(exponent_bits) -
+            exponent_bias - fraction_bit_count;
+  return make_dyadic(std::move(significand), exponent);
+}
+
+[[nodiscard]] unsigned int checked_dyadic_shift(
+    int exponent,
+    int common_exponent) {
+  const std::int64_t shift =
+      static_cast<std::int64_t>(exponent) -
+      static_cast<std::int64_t>(common_exponent);
+  if (shift < 0 ||
+      static_cast<std::uint64_t>(shift) >
+          std::numeric_limits<unsigned int>::max()) {
+    throw std::overflow_error(
+        "an exact dyadic alignment shift overflows unsigned int");
+  }
+  return static_cast<unsigned int>(shift);
+}
+
+[[nodiscard]] int checked_dyadic_exponent_add(
+    int left,
+    int right) {
+  const std::int64_t sum =
+      static_cast<std::int64_t>(left) +
+      static_cast<std::int64_t>(right);
+  if (sum < std::numeric_limits<int>::min() ||
+      sum > std::numeric_limits<int>::max()) {
+    throw std::overflow_error(
+        "an exact dyadic exponent addition overflows int");
+  }
+  return static_cast<int>(sum);
+}
+
+[[nodiscard]] exact::BigInt dyadic_significand_at(
+    const UnnormalizedExactDyadic& value,
+    int common_exponent) {
+  exact::BigInt scaled = value.significand;
+  scaled <<= checked_dyadic_shift(value.exponent, common_exponent);
+  return scaled;
+}
+
+[[nodiscard]] bool dyadic_less(
+    const UnnormalizedExactDyadic& left,
+    const UnnormalizedExactDyadic& right) {
+  if (left.significand == 0) {
+    return right.significand > 0;
+  }
+  if (right.significand == 0) {
+    return left.significand < 0;
+  }
+  if ((left.significand < 0) != (right.significand < 0)) {
+    return left.significand < 0;
+  }
+  const int common_exponent =
+      std::min(left.exponent, right.exponent);
+  return dyadic_significand_at(left, common_exponent) <
+      dyadic_significand_at(right, common_exponent);
+}
+
+[[nodiscard]] UnnormalizedExactDyadic subtract_dyadics(
+    const UnnormalizedExactDyadic& left,
+    const UnnormalizedExactDyadic& right) {
+  if (right.significand == 0) {
+    return left;
+  }
+  if (left.significand == 0) {
+    return make_dyadic(-right.significand, right.exponent);
+  }
+  const int common_exponent =
+      std::min(left.exponent, right.exponent);
+  return make_dyadic(
+      dyadic_significand_at(left, common_exponent) -
+          dyadic_significand_at(right, common_exponent),
+      common_exponent);
+}
+
+[[nodiscard]] UnnormalizedExactDyadic multiply_dyadics(
+    const UnnormalizedExactDyadic& left,
+    const UnnormalizedExactDyadic& right) {
+  if (left.significand == 0 || right.significand == 0) {
+    return {};
+  }
+  return make_dyadic(
+      left.significand * right.significand,
+      checked_dyadic_exponent_add(left.exponent, right.exponent));
+}
+
+[[nodiscard]] UnnormalizedExactDyadic add_dyadics(
+    const UnnormalizedExactDyadic& left,
+    const UnnormalizedExactDyadic& right) {
+  if (left.significand == 0) {
+    return right;
+  }
+  if (right.significand == 0) {
+    return left;
+  }
+  const int common_exponent =
+      std::min(left.exponent, right.exponent);
+  return make_dyadic(
+      dyadic_significand_at(left, common_exponent) +
+          dyadic_significand_at(right, common_exponent),
+      common_exponent);
+}
+
+[[nodiscard]] exact::ExactRational exact_rational_from_dyadic(
+    UnnormalizedExactDyadic value) {
+  if (value.significand == 0) {
+    return {};
+  }
+  if (value.exponent >= 0) {
+    value.significand <<= checked_dyadic_shift(value.exponent, 0);
+    return exact::ExactRational{std::move(value.significand)};
+  }
+  const std::int64_t denominator_exponent =
+      -static_cast<std::int64_t>(value.exponent);
+  if (static_cast<std::uint64_t>(denominator_exponent) >
+      std::numeric_limits<unsigned int>::max()) {
+    throw std::overflow_error(
+        "an exact dyadic denominator exponent overflows unsigned int");
+  }
+  return exact::ExactRational{
+      std::move(value.significand),
+      exact::power_of_two(
+          static_cast<unsigned int>(denominator_exponent))};
+}
+
+struct ExactDyadicBoxCoordinates {
+  std::array<UnnormalizedExactDyadic, 3> lower{};
+  std::array<UnnormalizedExactDyadic, 3> upper{};
+};
+
+[[nodiscard]] ExactDyadicBoxCoordinates exact_dyadic_box_coordinates(
     const spatial::ExactDyadicAabb3& box) {
-  ExactBoxCoordinates coordinates;
+  ExactDyadicBoxCoordinates coordinates;
   for (std::size_t axis = 0U; axis < 3U; ++axis) {
-    const std::uint64_t lower_bits =
-        exact::canonicalize_binary64_bits(box.lower_binary64_bits[axis]);
-    const std::uint64_t upper_bits =
-        exact::canonicalize_binary64_bits(box.upper_binary64_bits[axis]);
     coordinates.lower[axis] =
-        exact::ExactRational::from_binary64_bits(lower_bits);
+        dyadic_from_binary64_bits(box.lower_binary64_bits[axis]);
     coordinates.upper[axis] =
-        exact::ExactRational::from_binary64_bits(upper_bits);
-    if (coordinates.upper[axis] < coordinates.lower[axis]) {
+        dyadic_from_binary64_bits(box.upper_binary64_bits[axis]);
+    if (dyadic_less(coordinates.upper[axis], coordinates.lower[axis])) {
       throw std::invalid_argument(
           "an exact dyadic AABB has a reversed axis");
     }
   }
   return coordinates;
+}
+
+struct UnnormalizedExactDiametralPhiAabbMaximum {
+  UnnormalizedExactDyadic maximum;
+  std::array<std::uint8_t, 3> query_endpoint{};
+  std::array<std::uint8_t, 3> first_support_endpoint{};
+  std::array<std::uint8_t, 3> second_support_endpoint{};
+};
+
+[[nodiscard]] UnnormalizedExactDiametralPhiAabbMaximum
+exact_diametral_phi_aabb_maximum_dyadic(
+    const spatial::ExactDyadicAabb3& first_support_box,
+    const spatial::ExactDyadicAabb3& second_support_box,
+    const spatial::ExactDyadicAabb3& query_box) {
+  const ExactDyadicBoxCoordinates first =
+      exact_dyadic_box_coordinates(first_support_box);
+  const ExactDyadicBoxCoordinates second =
+      exact_dyadic_box_coordinates(second_support_box);
+  const ExactDyadicBoxCoordinates query =
+      exact_dyadic_box_coordinates(query_box);
+  UnnormalizedExactDiametralPhiAabbMaximum result;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const std::array<const UnnormalizedExactDyadic*, 2>
+        first_endpoints{&first.lower[axis], &first.upper[axis]};
+    const std::array<const UnnormalizedExactDyadic*, 2>
+        second_endpoints{&second.lower[axis], &second.upper[axis]};
+    const std::array<const UnnormalizedExactDyadic*, 2>
+        query_endpoints{&query.lower[axis], &query.upper[axis]};
+    bool initialized = false;
+    UnnormalizedExactDyadic axis_maximum;
+    for (std::size_t query_selector = 0U;
+         query_selector < query_endpoints.size();
+         ++query_selector) {
+      for (std::size_t first_selector = 0U;
+           first_selector < first_endpoints.size();
+           ++first_selector) {
+        for (std::size_t second_selector = 0U;
+             second_selector < second_endpoints.size();
+             ++second_selector) {
+          UnnormalizedExactDyadic candidate = multiply_dyadics(
+              subtract_dyadics(
+                  *query_endpoints[query_selector],
+                  *first_endpoints[first_selector]),
+              subtract_dyadics(
+                  *query_endpoints[query_selector],
+                  *second_endpoints[second_selector]));
+          if (!initialized || dyadic_less(axis_maximum, candidate)) {
+            initialized = true;
+            axis_maximum = std::move(candidate);
+            result.query_endpoint[axis] =
+                static_cast<std::uint8_t>(query_selector);
+            result.first_support_endpoint[axis] =
+                static_cast<std::uint8_t>(first_selector);
+            result.second_support_endpoint[axis] =
+                static_cast<std::uint8_t>(second_selector);
+          }
+        }
+      }
+    }
+    if (!initialized) {
+      throw std::logic_error(
+          "the exact diametral AABB maximum has no endpoint candidate");
+    }
+    result.maximum = add_dyadics(result.maximum, axis_maximum);
+  }
+  return result;
+}
+
+[[nodiscard]] int dyadic_sign(
+    const UnnormalizedExactDyadic& value) noexcept {
+  if (value.significand < 0) {
+    return -1;
+  }
+  return value.significand == 0 ? 0 : 1;
+}
+
+[[nodiscard]] int exact_diametral_phi_aabb_maximum_sign(
+    const spatial::ExactDyadicAabb3& first_support_box,
+    const spatial::ExactDyadicAabb3& second_support_box,
+    const spatial::ExactDyadicAabb3& query_box) {
+  return dyadic_sign(
+      exact_diametral_phi_aabb_maximum_dyadic(
+          first_support_box, second_support_box, query_box)
+          .maximum);
+}
+
+[[nodiscard]] UnnormalizedExactDyadic halve_dyadic(
+    const UnnormalizedExactDyadic& value) {
+  if (value.significand == 0) {
+    return {};
+  }
+  return make_dyadic(
+      value.significand,
+      checked_dyadic_exponent_add(value.exponent, -1));
+}
+
+struct ExactDyadicAnchorPhi {
+  std::array<UnnormalizedExactDyadic, 3> first{};
+  std::array<UnnormalizedExactDyadic, 3> second{};
+  std::array<UnnormalizedExactDyadic, 3> vertex{};
+};
+
+[[nodiscard]] ExactDyadicAnchorPhi exact_dyadic_anchor_phi(
+    const exact::CertifiedPoint3& first,
+    const exact::CertifiedPoint3& second) {
+  const std::array<std::uint64_t, 3> first_bits =
+      first.canonical_input_bits();
+  const std::array<std::uint64_t, 3> second_bits =
+      second.canonical_input_bits();
+  ExactDyadicAnchorPhi result;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    result.first[axis] =
+        dyadic_from_binary64_bits(first_bits[axis]);
+    result.second[axis] =
+        dyadic_from_binary64_bits(second_bits[axis]);
+    result.vertex[axis] = halve_dyadic(
+        add_dyadics(result.first[axis], result.second[axis]));
+  }
+  return result;
+}
+
+// The squared-distance identity is exact:
+// ||x-(u+v)/2||^2 - ||u-v||^2/4 = (x-u).(x-v).
+// Each axis is a convex quadratic, so clamping its vertex to the AABB gives
+// the exact global minimum without constructing a rational center or radius.
+[[nodiscard]] UnnormalizedExactDyadic
+exact_anchor_phi_aabb_minimum(
+    const ExactDyadicAnchorPhi& anchor,
+    const spatial::ExactDyadicAabb3& query_box) {
+  const ExactDyadicBoxCoordinates query =
+      exact_dyadic_box_coordinates(query_box);
+  UnnormalizedExactDyadic total_minimum;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const UnnormalizedExactDyadic* minimizer = &anchor.vertex[axis];
+    if (dyadic_less(anchor.vertex[axis], query.lower[axis])) {
+      minimizer = &query.lower[axis];
+    } else if (dyadic_less(query.upper[axis], anchor.vertex[axis])) {
+      minimizer = &query.upper[axis];
+    }
+    total_minimum = add_dyadics(
+        total_minimum,
+        multiply_dyadics(
+            subtract_dyadics(*minimizer, anchor.first[axis]),
+            subtract_dyadics(*minimizer, anchor.second[axis])));
+  }
+  return total_minimum;
 }
 
 [[nodiscard]] bool event_less(
@@ -407,54 +724,15 @@ ExactDiametralPhiAabbMaximum exact_diametral_phi_aabb_maximum(
     const spatial::ExactDyadicAabb3& first_support_box,
     const spatial::ExactDyadicAabb3& second_support_box,
     const spatial::ExactDyadicAabb3& query_box) {
-  const ExactBoxCoordinates first =
-      exact_box_coordinates(first_support_box);
-  const ExactBoxCoordinates second =
-      exact_box_coordinates(second_support_box);
-  const ExactBoxCoordinates query = exact_box_coordinates(query_box);
+  UnnormalizedExactDiametralPhiAabbMaximum dyadic =
+      exact_diametral_phi_aabb_maximum_dyadic(
+          first_support_box, second_support_box, query_box);
   ExactDiametralPhiAabbMaximum result;
-  for (std::size_t axis = 0U; axis < 3U; ++axis) {
-    const std::array<exact::ExactRational, 2> first_endpoints{
-        first.lower[axis], first.upper[axis]};
-    const std::array<exact::ExactRational, 2> second_endpoints{
-        second.lower[axis], second.upper[axis]};
-    const std::array<exact::ExactRational, 2> query_endpoints{
-        query.lower[axis], query.upper[axis]};
-    bool initialized = false;
-    exact::ExactRational axis_maximum;
-    for (std::size_t query_selector = 0U;
-         query_selector < query_endpoints.size();
-         ++query_selector) {
-      for (std::size_t first_selector = 0U;
-           first_selector < first_endpoints.size();
-           ++first_selector) {
-        for (std::size_t second_selector = 0U;
-             second_selector < second_endpoints.size();
-             ++second_selector) {
-          const exact::ExactRational candidate =
-              (query_endpoints[query_selector] -
-               first_endpoints[first_selector]) *
-              (query_endpoints[query_selector] -
-               second_endpoints[second_selector]);
-          if (!initialized || candidate > axis_maximum) {
-            initialized = true;
-            axis_maximum = candidate;
-            result.query_endpoint[axis] =
-                static_cast<std::uint8_t>(query_selector);
-            result.first_support_endpoint[axis] =
-                static_cast<std::uint8_t>(first_selector);
-            result.second_support_endpoint[axis] =
-                static_cast<std::uint8_t>(second_selector);
-          }
-        }
-      }
-    }
-    if (!initialized) {
-      throw std::logic_error(
-          "the exact diametral AABB maximum has no endpoint candidate");
-    }
-    result.maximum_phi = result.maximum_phi + axis_maximum;
-  }
+  result.query_endpoint = dyadic.query_endpoint;
+  result.first_support_endpoint = dyadic.first_support_endpoint;
+  result.second_support_endpoint = dyadic.second_support_endpoint;
+  result.maximum_phi =
+      exact_rational_from_dyadic(std::move(dyadic.maximum));
   return result;
 }
 
@@ -1130,11 +1408,10 @@ class ExactPairSupportStreamBuilder {
                         "the checkpoint receipt recertification count overflows size_t");
                 if (node_range_intersects(receipt_node, first) ||
                     node_range_intersects(receipt_node, second) ||
-                    exact_diametral_phi_aabb_maximum(
+                    exact_diametral_phi_aabb_maximum_sign(
                         first_box,
                         second_box,
-                        node_box(receipt_node_index))
-                            .maximum_phi.sign() >= 0) {
+                        node_box(receipt_node_index)) >= 0) {
                   pending_valid = false;
                 }
                 receipt_point_count = checked_add(
@@ -1811,10 +2088,8 @@ class ExactPairSupportStreamBuilder {
         throw std::invalid_argument(
             "a pair-support proposal receipt intersects its support");
       }
-      const ExactDiametralPhiAabbMaximum maximum =
-          exact_diametral_phi_aabb_maximum(
-              first_box, second_box, node_box(witness_node));
-      if (maximum.maximum_phi.sign() >= 0) {
+      if (exact_diametral_phi_aabb_maximum_sign(
+              first_box, second_box, node_box(witness_node)) >= 0) {
         throw std::invalid_argument(
             "a pair-support proposal receipt is not strictly interior");
       }
@@ -1940,14 +2215,8 @@ class ExactPairSupportStreamBuilder {
         index_.leaves_[first.leaf_begin].point_id;
     const PointId second_anchor_id =
         index_.leaves_[second.leaf_begin].point_id;
-    const exact::CircumcenterResult anchor_sphere = exact::circumcenter(
+    const ExactDyadicAnchorPhi anchor = exact_dyadic_anchor_phi(
         cloud_.point(first_anchor_id), cloud_.point(second_anchor_id));
-    if (anchor_sphere.kind() != exact::CircumcenterKind::unique ||
-        !anchor_sphere.center().has_value() ||
-        !anchor_sphere.squared_level().has_value()) {
-      throw std::logic_error(
-          "two support-product anchor points did not define a unique sphere");
-    }
     while (!pending.witness_frontier.empty() ||
            pending.deferred_expansion_node.has_value()) {
       if (pending.deferred_expansion_node.has_value()) {
@@ -1992,8 +2261,8 @@ class ExactPairSupportStreamBuilder {
           (first_node_index != second_node_index &&
            node_range_intersects(query_node, second));
       if (!overlaps_support) {
-        const ExactDiametralPhiAabbMaximum maximum =
-            exact_diametral_phi_aabb_maximum(
+        const int maximum_sign =
+            exact_diametral_phi_aabb_maximum_sign(
                 first_box,
                 second_box,
                 node_box(query_node_index));
@@ -2001,7 +2270,7 @@ class ExactPairSupportStreamBuilder {
             result_.audit.exact_phi_aabb_bound_count,
             1U,
             "the pair-support phi-bound count overflows size_t");
-        if (maximum.maximum_phi.sign() < 0) {
+        if (maximum_sign < 0) {
           const std::size_t subtree_size =
               query_node.leaf_end - query_node.leaf_begin;
           pending.strict_witness_point_count = checked_add(
@@ -2022,17 +2291,18 @@ class ExactPairSupportStreamBuilder {
           }
           continue;
         }
-        const exact::ExactLevel anchor_minimum_distance =
-            index_.minimum_squared_distance_to_node(
-                cloud_, query_node_index, *anchor_sphere.center());
+        const UnnormalizedExactDyadic anchor_minimum =
+            exact_anchor_phi_aabb_minimum(
+                anchor, node_box(query_node_index));
         result_.audit.exact_anchor_ball_minimum_aabb_bound_count = checked_add(
             result_.audit.exact_anchor_ball_minimum_aabb_bound_count,
             1U,
             "the pair-support anchor-bound count overflows size_t");
-        if (anchor_minimum_distance >= *anchor_sphere.squared_level()) {
+        const int anchor_minimum_sign = dyadic_sign(anchor_minimum);
+        if (anchor_minimum_sign >= 0) {
           const std::size_t subtree_size =
               query_node.leaf_end - query_node.leaf_begin;
-          if (anchor_minimum_distance == *anchor_sphere.squared_level()) {
+          if (anchor_minimum_sign == 0) {
             result_.audit.certified_anchor_shell_tangent_subtree_count =
                 checked_add(
                     result_.audit

@@ -24,6 +24,7 @@ using morsehgp3d::exact::BigInt;
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::exact::ExactRational;
 using morsehgp3d::exact::ExactRational3;
+using morsehgp3d::hierarchy::ExactDiametralPhiAabbMaximum;
 using morsehgp3d::hierarchy::ExactPairSupportEvent;
 using morsehgp3d::hierarchy::ExactPairSupportExtraShellDiagnostic;
 using morsehgp3d::hierarchy::ExactPairSupportAuthorityContext;
@@ -360,6 +361,153 @@ void check_fresh_replay(
   return result;
 }
 
+[[nodiscard]] ExactDyadicAabb3 box_words(
+    std::array<std::uint64_t, 3> lower,
+    std::array<std::uint64_t, 3> upper) {
+  return ExactDyadicAabb3{lower, upper};
+}
+
+[[nodiscard]] ExactDiametralPhiAabbMaximum
+historical_rational_phi_aabb_maximum(
+    const ExactDyadicAabb3& first_box,
+    const ExactDyadicAabb3& second_box,
+    const ExactDyadicAabb3& query_box) {
+  struct RationalBox {
+    std::array<ExactRational, 3> lower{};
+    std::array<ExactRational, 3> upper{};
+  };
+  const auto convert = [](const ExactDyadicAabb3& source) {
+    RationalBox result;
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      result.lower[axis] = ExactRational::from_binary64_bits(
+          morsehgp3d::exact::canonicalize_binary64_bits(
+              source.lower_binary64_bits[axis]));
+      result.upper[axis] = ExactRational::from_binary64_bits(
+          morsehgp3d::exact::canonicalize_binary64_bits(
+              source.upper_binary64_bits[axis]));
+      if (result.upper[axis] < result.lower[axis]) {
+        throw std::invalid_argument(
+            "the historical rational oracle received a reversed box");
+      }
+    }
+    return result;
+  };
+
+  const RationalBox first = convert(first_box);
+  const RationalBox second = convert(second_box);
+  const RationalBox query = convert(query_box);
+  ExactDiametralPhiAabbMaximum result;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const std::array<ExactRational, 2> first_endpoints{
+        first.lower[axis], first.upper[axis]};
+    const std::array<ExactRational, 2> second_endpoints{
+        second.lower[axis], second.upper[axis]};
+    const std::array<ExactRational, 2> query_endpoints{
+        query.lower[axis], query.upper[axis]};
+    bool initialized = false;
+    ExactRational axis_maximum;
+    for (std::size_t query_selector = 0U;
+         query_selector < query_endpoints.size();
+         ++query_selector) {
+      for (std::size_t first_selector = 0U;
+           first_selector < first_endpoints.size();
+           ++first_selector) {
+        for (std::size_t second_selector = 0U;
+             second_selector < second_endpoints.size();
+             ++second_selector) {
+          const ExactRational candidate =
+              (query_endpoints[query_selector] -
+               first_endpoints[first_selector]) *
+              (query_endpoints[query_selector] -
+               second_endpoints[second_selector]);
+          if (!initialized || candidate > axis_maximum) {
+            initialized = true;
+            axis_maximum = candidate;
+            result.query_endpoint[axis] =
+                static_cast<std::uint8_t>(query_selector);
+            result.first_support_endpoint[axis] =
+                static_cast<std::uint8_t>(first_selector);
+            result.second_support_endpoint[axis] =
+                static_cast<std::uint8_t>(second_selector);
+          }
+        }
+      }
+    }
+    result.maximum_phi = result.maximum_phi + axis_maximum;
+  }
+  return result;
+}
+
+[[nodiscard]] ExactRational historical_anchor_sphere_aabb_offset(
+    const std::array<std::uint64_t, 3>& first_anchor_bits,
+    const std::array<std::uint64_t, 3>& second_anchor_bits,
+    const ExactDyadicAabb3& query_box) {
+  const auto sphere = morsehgp3d::exact::circumcenter(
+      CertifiedPoint3::from_binary64_bits(first_anchor_bits),
+      CertifiedPoint3::from_binary64_bits(second_anchor_bits));
+  if (!sphere.center().has_value() ||
+      !sphere.squared_level().has_value()) {
+    throw std::logic_error(
+        "the historical anchor oracle requires two distinct points");
+  }
+  ExactRational minimum_squared_distance;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const ExactRational lower = ExactRational::from_binary64_bits(
+        morsehgp3d::exact::canonicalize_binary64_bits(
+            query_box.lower_binary64_bits[axis]));
+    const ExactRational upper = ExactRational::from_binary64_bits(
+        morsehgp3d::exact::canonicalize_binary64_bits(
+            query_box.upper_binary64_bits[axis]));
+    const ExactRational center = sphere.center()->coordinate(axis);
+    if (upper < lower) {
+      throw std::invalid_argument(
+          "the historical anchor oracle received a reversed box");
+    }
+    ExactRational delta;
+    if (center < lower) {
+      delta = lower - center;
+    } else if (upper < center) {
+      delta = center - upper;
+    }
+    minimum_squared_distance =
+        minimum_squared_distance + delta * delta;
+  }
+  return minimum_squared_distance -
+      sphere.squared_level()->rational();
+}
+
+[[nodiscard]] ExactRational direct_anchor_phi_aabb_minimum(
+    const std::array<std::uint64_t, 3>& first_anchor_bits,
+    const std::array<std::uint64_t, 3>& second_anchor_bits,
+    const ExactDyadicAabb3& query_box) {
+  const ExactRational two{BigInt{2}};
+  ExactRational minimum;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const ExactRational first = ExactRational::from_binary64_bits(
+        morsehgp3d::exact::canonicalize_binary64_bits(
+            first_anchor_bits[axis]));
+    const ExactRational second = ExactRational::from_binary64_bits(
+        morsehgp3d::exact::canonicalize_binary64_bits(
+            second_anchor_bits[axis]));
+    const ExactRational lower = ExactRational::from_binary64_bits(
+        morsehgp3d::exact::canonicalize_binary64_bits(
+            query_box.lower_binary64_bits[axis]));
+    const ExactRational upper = ExactRational::from_binary64_bits(
+        morsehgp3d::exact::canonicalize_binary64_bits(
+            query_box.upper_binary64_bits[axis]));
+    if (upper < lower) {
+      throw std::invalid_argument(
+          "the direct anchor oracle received a reversed box");
+    }
+    const ExactRational vertex = (first + second) / two;
+    const ExactRational& minimizer =
+        vertex < lower ? lower : (upper < vertex ? upper : vertex);
+    minimum = minimum +
+        (minimizer - first) * (minimizer - second);
+  }
+  return minimum;
+}
+
 struct OraclePairRecords {
   std::vector<ExactPairSupportEvent> events;
   std::vector<ExactPairSupportExtraShellDiagnostic> diagnostics;
@@ -532,6 +680,92 @@ void test_exact_phi_aabb_maximum() {
               zero_query).maximum_phi == ExactRational{BigInt{4}},
       "artificial AABB corners cannot certify the absence of a universal witness for correlated real sites");
 
+  constexpr std::uint64_t positive_zero = UINT64_C(0x0000000000000000);
+  constexpr std::uint64_t negative_zero = UINT64_C(0x8000000000000000);
+  constexpr std::uint64_t minimum_subnormal =
+      UINT64_C(0x0000000000000001);
+  constexpr std::uint64_t negative_minimum_subnormal =
+      UINT64_C(0x8000000000000001);
+  constexpr std::uint64_t maximum_subnormal =
+      UINT64_C(0x000fffffffffffff);
+  constexpr std::uint64_t negative_maximum_subnormal =
+      UINT64_C(0x800fffffffffffff);
+  constexpr std::uint64_t minimum_normal =
+      UINT64_C(0x0010000000000000);
+  constexpr std::uint64_t negative_minimum_normal =
+      UINT64_C(0x8010000000000000);
+  constexpr std::uint64_t maximum_finite =
+      UINT64_C(0x7fefffffffffffff);
+  constexpr std::uint64_t negative_maximum_finite =
+      UINT64_C(0xffefffffffffffff);
+  constexpr std::uint64_t one = UINT64_C(0x3ff0000000000000);
+  constexpr std::uint64_t negative_one = UINT64_C(0xbff0000000000000);
+  constexpr std::uint64_t one_successor =
+      UINT64_C(0x3ff0000000000001);
+  constexpr std::uint64_t one_predecessor =
+      UINT64_C(0x3fefffffffffffff);
+
+  struct HostilePhiFixture {
+    ExactDyadicAabb3 first;
+    ExactDyadicAabb3 second;
+    ExactDyadicAabb3 query;
+  };
+  const std::array hostile_fixtures{
+      HostilePhiFixture{
+          box_words(
+              {negative_zero, negative_zero, negative_zero},
+              {positive_zero, positive_zero, positive_zero}),
+          box_words(
+              {positive_zero, negative_zero, positive_zero},
+              {positive_zero, positive_zero, positive_zero}),
+          box_words(
+              {negative_zero, positive_zero, negative_zero},
+              {positive_zero, positive_zero, positive_zero})},
+      HostilePhiFixture{
+          box_words(
+              {negative_minimum_normal,
+               negative_maximum_subnormal,
+               negative_minimum_subnormal},
+              {negative_maximum_subnormal,
+               negative_minimum_subnormal,
+               positive_zero}),
+          box_words(
+              {positive_zero, minimum_subnormal, maximum_subnormal},
+              {minimum_subnormal, maximum_subnormal, minimum_normal}),
+          box_words(
+              {negative_minimum_subnormal,
+               positive_zero,
+               maximum_subnormal},
+              {positive_zero, minimum_subnormal, minimum_normal})},
+      HostilePhiFixture{
+          box_words(
+              {negative_maximum_finite,
+               negative_maximum_finite,
+               negative_one},
+              {negative_one, negative_minimum_normal, positive_zero}),
+          box_words(
+              {positive_zero, minimum_normal, one},
+              {one, maximum_finite, maximum_finite}),
+          box_words(
+              {negative_maximum_finite,
+               negative_one,
+               one_predecessor},
+              {maximum_finite, one_successor, maximum_finite})}};
+  bool hostile_oracle_agreement = true;
+  for (const HostilePhiFixture& fixture : hostile_fixtures) {
+    hostile_oracle_agreement =
+        hostile_oracle_agreement &&
+        exact_diametral_phi_aabb_maximum(
+            fixture.first, fixture.second, fixture.query) ==
+            historical_rational_phi_aabb_maximum(
+                fixture.first, fixture.second, fixture.query);
+  }
+  check(
+      hostile_oracle_agreement,
+      "the dyadic phi kernel preserves the historical rational value and tie "
+      "selectors for signed zero, subnormal, adjacent, and extreme finite "
+      "endpoints");
+
   ExactDyadicAabb3 reversed = inside_point;
   reversed.lower_binary64_bits[0] = bits(2.0);
   reversed.upper_binary64_bits[0] = bits(1.0);
@@ -541,6 +775,75 @@ void test_exact_phi_aabb_maximum() {
             left_point, right_point, reversed));
       },
       "the exact phi bound rejects a reversed AABB");
+}
+
+void test_exact_anchor_phi_minimum_identity() {
+  constexpr std::uint64_t zero = UINT64_C(0x0000000000000000);
+  constexpr std::uint64_t one = UINT64_C(0x3ff0000000000000);
+  constexpr std::uint64_t negative_one = UINT64_C(0xbff0000000000000);
+  constexpr std::uint64_t two = UINT64_C(0x4000000000000000);
+  constexpr std::uint64_t three = UINT64_C(0x4008000000000000);
+  constexpr std::uint64_t minimum_subnormal =
+      UINT64_C(0x0000000000000001);
+  constexpr std::uint64_t negative_minimum_subnormal =
+      UINT64_C(0x8000000000000001);
+  constexpr std::uint64_t maximum_finite =
+      UINT64_C(0x7fefffffffffffff);
+  constexpr std::uint64_t negative_maximum_finite =
+      UINT64_C(0xffefffffffffffff);
+
+  struct AnchorFixture {
+    std::array<std::uint64_t, 3> first;
+    std::array<std::uint64_t, 3> second;
+    ExactDyadicAabb3 query;
+    int expected_sign{};
+  };
+  const std::array fixtures{
+      AnchorFixture{
+          {negative_one, zero, zero},
+          {one, zero, zero},
+          box_words({zero, zero, zero}, {zero, zero, zero}),
+          -1},
+      AnchorFixture{
+          {negative_one, zero, zero},
+          {one, zero, zero},
+          box_words({one, zero, zero}, {one, zero, zero}),
+          0},
+      AnchorFixture{
+          {negative_one, zero, zero},
+          {one, zero, zero},
+          box_words({two, zero, zero}, {three, zero, zero}),
+          1},
+      AnchorFixture{
+          {negative_minimum_subnormal, zero, zero},
+          {minimum_subnormal, zero, zero},
+          box_words({zero, zero, zero}, {zero, zero, zero}),
+          -1},
+      AnchorFixture{
+          {negative_maximum_finite, zero, zero},
+          {maximum_finite, zero, zero},
+          box_words(
+              {maximum_finite, zero, zero},
+              {maximum_finite, zero, zero}),
+          0}};
+
+  bool values_and_signs_match = true;
+  for (const AnchorFixture& fixture : fixtures) {
+    const ExactRational historical =
+        historical_anchor_sphere_aabb_offset(
+            fixture.first, fixture.second, fixture.query);
+    const ExactRational direct = direct_anchor_phi_aabb_minimum(
+        fixture.first, fixture.second, fixture.query);
+    values_and_signs_match =
+        values_and_signs_match &&
+        historical == direct &&
+        direct.sign() == fixture.expected_sign;
+  }
+  check(
+      values_and_signs_match,
+      "the direct anchor phi minimum exactly matches the historical "
+      "center/radius test for interior, tangent, exterior, subnormal, and "
+      "extreme finite cases");
 }
 
 void test_complete_self_dual_partition_and_long_pair() {
@@ -2438,6 +2741,7 @@ void test_hostile_replay_mutations() {
 
 int main() {
   test_exact_phi_aabb_maximum();
+  test_exact_anchor_phi_minimum_identity();
   test_complete_self_dual_partition_and_long_pair();
   test_leaf_rank_cap_and_sparse_queries();
   test_extra_shell_and_equality_descent();
