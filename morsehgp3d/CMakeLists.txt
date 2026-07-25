@@ -2186,6 +2186,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
       src/gpu/exact_center_binary64_projection.hpp
       src/gpu/rational_binary64_enclosure.hpp
       src/gpu/direct_sparse_facet_top_k_proposal.cpp
+      src/gpu/direct_sparse_facet_top_k_integrated_adapter.cpp
   )
   add_library(
     morsehgp3d::gpu_direct_sparse_facet_top_k_proposal

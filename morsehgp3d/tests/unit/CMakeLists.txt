@@ -645,10 +645,25 @@ endif()
 add_executable(
   morsehgp3d_hierarchy_direct_morse_forest_reducer_tests
   test_hierarchy_direct_morse_forest_reducer.cpp
+  fake_gpu_phase14_facet_top_k_proposal_launchers.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/direct_sparse_facet_top_k_proposal.cpp"
+  "${PROJECT_SOURCE_DIR}/src/gpu/direct_sparse_facet_top_k_integrated_adapter.cpp"
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+)
+target_include_directories(
+  morsehgp3d_hierarchy_direct_morse_forest_reducer_tests
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/cuda"
+    "${PROJECT_SOURCE_DIR}/src/gpu"
 )
 target_link_libraries(
   morsehgp3d_hierarchy_direct_morse_forest_reducer_tests
-  PRIVATE morsehgp3d::direct_morse_forest_reducer
+  PRIVATE
+    morsehgp3d::direct_morse_forest_reducer
+    morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
+    morsehgp3d::spatial
+    Threads::Threads
 )
 if(MSVC)
   target_compile_options(
@@ -1113,6 +1128,7 @@ add_executable(
   fake_gpu_phase14_facet_top_k_proposal_launchers.cpp
   fake_gpu_phase14_morton_lbvh_build_launchers.cpp
   "${PROJECT_SOURCE_DIR}/src/gpu/direct_sparse_facet_top_k_proposal.cpp"
+  "${PROJECT_SOURCE_DIR}/src/gpu/direct_sparse_facet_top_k_integrated_adapter.cpp"
   "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
 )
 add_executable(

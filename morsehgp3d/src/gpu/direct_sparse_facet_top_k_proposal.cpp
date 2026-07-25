@@ -1248,4 +1248,9 @@ DirectSparseFacetTopKProposalContext::maximum_query_count()
   return state_ == nullptr ? 0U : maximum_query_count_;
 }
 
+bool DirectSparseFacetTopKProposalContext::
+    device_snapshot_adopted_from_morton_lbvh_lease() const noexcept {
+  return host_ != nullptr && host_->snapshot_adopted();
+}
+
 }  // namespace morsehgp3d::gpu

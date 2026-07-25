@@ -153,40 +153,24 @@ void check(bool condition, const std::string& message) {
   ExactDirectMorseForestJournalResult forest;
   forest.point_count = 4U;
   forest.effective_maximum_order = 4U;
+  forest.implicit_order_one_prefix_count = 4U;
+  forest.order_one_birth_and_node_prefix_implicit_and_unmaterialized = true;
   forest.decision = ExactDirectMorseForestDecision::
       complete_conditional_exact_direct_morse_forest;
 
-  forest.child_node_ids = {0U, 1U, 3U, 4U};
+  forest.child_node_ids = {0U, 1U, 2U, 3U, 5U, 6U};
   forest.nodes = {
       node(
-          0U,
-          1U,
-          0,
-          ExactDirectMorseForestNodeKind::order_one_birth,
-          0U,
-          0U,
-          0U,
-          std::nullopt),
-      node(
-          1U,
-          1U,
-          0,
-          ExactDirectMorseForestNodeKind::order_one_birth,
-          0U,
-          0U,
-          1U,
-          std::nullopt),
-      node(
-          2U,
+          4U,
           1U,
           1,
           ExactDirectMorseForestNodeKind::multifusion,
           0U,
-          2U,
+          4U,
           std::nullopt,
           std::nullopt),
       node(
-          3U,
+          5U,
           2U,
           1,
           ExactDirectMorseForestNodeKind::reduced_birth,
@@ -195,7 +179,7 @@ void check(bool condition, const std::string& message) {
           std::nullopt,
           0U),
       node(
-          4U,
+          6U,
           2U,
           2,
           ExactDirectMorseForestNodeKind::reduced_birth,
@@ -204,16 +188,16 @@ void check(bool condition, const std::string& message) {
           std::nullopt,
           2U),
       node(
-          5U,
+          7U,
           2U,
           3,
           ExactDirectMorseForestNodeKind::multifusion,
-          2U,
+          4U,
           2U,
           std::nullopt,
           3U),
       node(
-          6U,
+          8U,
           3U,
           3,
           ExactDirectMorseForestNodeKind::reduced_birth,
@@ -223,20 +207,18 @@ void check(bool condition, const std::string& message) {
           4U),
   };
   forest.birth_records = {
-      birth(0U, 1U, key({0U}), 0U),
-      birth(1U, 1U, key({1U}), 1U),
-      birth(2U, 2U, key({0U, 1U}), std::nullopt),
-      birth(3U, 2U, key({2U, 3U}), std::nullopt),
-      birth(4U, 3U, key({0U, 1U, 2U}), std::nullopt),
-      birth(5U, 4U, key({0U, 1U, 2U, 3U}), std::nullopt),
+      birth(4U, 2U, key({0U, 1U}), std::nullopt),
+      birth(5U, 2U, key({2U, 3U}), std::nullopt),
+      birth(6U, 3U, key({0U, 1U, 2U}), std::nullopt),
+      birth(7U, 4U, key({0U, 1U, 2U, 3U}), std::nullopt),
   };
   forest.arm_root_bindings = {
       binding(0U, key({0U, 1U}), std::nullopt),
-      binding(1U, key({0U, 2U}), 3U),
+      binding(1U, key({0U, 2U}), 5U),
       binding(2U, key({2U, 3U}), std::nullopt),
-      binding(3U, key({1U, 3U}), 4U),
-      binding(4U, key({1U, 3U}), 4U),
-      binding(5U, key({0U, 3U}), 3U),
+      binding(3U, key({1U, 3U}), 6U),
+      binding(4U, key({1U, 3U}), 6U),
+      binding(5U, key({0U, 3U}), 5U),
       binding(6U, key({0U, 1U, 2U}), std::nullopt),
   };
   forest.saddle_records = {
@@ -254,8 +236,8 @@ void check(bool condition, const std::string& message) {
           0U,
           0U,
           0U,
-          3U,
-          3U,
+          5U,
+          5U,
           ExactDirectMorseForestAtomicGroupKind::reduced_birth),
       group(
           1U,
@@ -265,7 +247,7 @@ void check(bool condition, const std::string& message) {
           0U,
           0U,
           std::nullopt,
-          3U,
+          5U,
           ExactDirectMorseForestAtomicGroupKind::continuation),
       group(
           2U,
@@ -274,18 +256,18 @@ void check(bool condition, const std::string& message) {
           0U,
           0U,
           0U,
-          4U,
-          4U,
+          6U,
+          6U,
           ExactDirectMorseForestAtomicGroupKind::reduced_birth),
       group(
           3U,
           2U,
           3U,
           2U,
+          4U,
           2U,
-          2U,
-          5U,
-          5U,
+          7U,
+          7U,
           ExactDirectMorseForestAtomicGroupKind::multifusion),
       group(
           4U,
@@ -294,8 +276,8 @@ void check(bool condition, const std::string& message) {
           0U,
           0U,
           0U,
-          6U,
-          6U,
+          8U,
+          8U,
           ExactDirectMorseForestAtomicGroupKind::reduced_birth),
   };
   forest.batches = {
@@ -305,9 +287,9 @@ void check(bool condition, const std::string& message) {
       batch(3U, 3U, 3, 4U, 1U),
   };
   forest.final_roots = {
-      final_root(0U, 1U, 2U),
-      final_root(1U, 2U, 5U),
-      final_root(2U, 3U, 6U),
+      final_root(0U, 1U, 4U),
+      final_root(1U, 2U, 7U),
+      final_root(2U, 3U, 8U),
   };
   return forest;
 }
@@ -355,7 +337,7 @@ void check(bool condition, const std::string& message) {
 [[nodiscard]] std::vector<ExactDirectMorseVerticalTargetProposal>
 total_proposals() {
   return {
-      resolved(6U, 3U, 106U),
+      resolved(6U, 5U, 106U),
       resolved(5U, 0U, 105U),
       resolved(3U, 1U, 103U),
       resolved(2U, 1U, 102U),
@@ -378,6 +360,7 @@ total_proposals() {
 
 void test_total_relative_and_trace() {
   const auto forest = forest_fixture();
+  const ExactDirectMorseForestJournalView forest_view{forest};
   const auto proposals = total_proposals();
   const auto budget = generous_budget();
   const auto result = build_exact_direct_morse_vertical_journal(
@@ -391,6 +374,19 @@ void test_total_relative_and_trace() {
   check(
       result.certified_conditional_vertical_candidate(),
       "complete relative journal satisfies its conditional certificate");
+  check(
+      forest.birth_records.size() == 4U &&
+          forest.nodes.size() == 5U &&
+          forest_view.birth_record_count() == 8U &&
+          forest_view.node_count() == 9U &&
+          forest_view.birth_record_at(0U).facet_key == key({0U}) &&
+          forest_view.node_at(3U).kind ==
+              ExactDirectMorseForestNodeKind::order_one_birth &&
+          forest_view.birth_record_at(4U) ==
+              forest_view.materialized_birth_record_at(4U) &&
+          forest_view.node_at(4U) ==
+              forest_view.materialized_node_at(4U),
+      "the vertical replay consumes the sparse forest through its complete logical view");
   check(
       result.adjacent_families.size() == 3U &&
           result.adjacent_families[2].group_check_count == 0U &&
@@ -439,7 +435,7 @@ void test_total_relative_and_trace() {
   const auto trace = trace_exact_direct_morse_vertical_component(
       forest,
       result,
-      6U,
+      8U,
       level(3),
       1U,
       ExactDirectMorseVerticalTraceBudget{2U, 16U, 32U});
@@ -448,10 +444,10 @@ void test_total_relative_and_trace() {
               ExactDirectMorseVerticalTraceDisposition::
                   complete_relative_trace &&
           trace.steps.size() == 2U &&
-          trace.steps[0].source_root_node_id == 6U &&
-          trace.steps[0].target_root_node_id == 5U &&
-          trace.steps[1].source_root_node_id == 5U &&
-          trace.steps[1].target_root_node_id == 2U &&
+          trace.steps[0].source_root_node_id == 8U &&
+          trace.steps[0].target_root_node_id == 7U &&
+          trace.steps[1].source_root_node_id == 7U &&
+          trace.steps[1].target_root_node_id == 4U &&
           !trace.public_vertical_map_claimed,
       "the compact trace composes order three to order one");
 }
@@ -495,7 +491,7 @@ void test_partial_labels_late_checkpoint_and_square_partition() {
   const auto trace = trace_exact_direct_morse_vertical_component(
       forest,
       result,
-      6U,
+      8U,
       level(3),
       1U,
       ExactDirectMorseVerticalTraceBudget{2U, 16U, 32U});
@@ -526,7 +522,7 @@ void test_atomic_rejections_and_budgets() {
   const auto proposals = total_proposals();
 
   auto conflict_forest = forest;
-  conflict_forest.nodes[2].squared_level = level(4);
+  conflict_forest.nodes[0].squared_level = level(4);
   const auto conflict = build_exact_direct_morse_vertical_journal(
       conflict_forest, proposals, generous_budget(), config());
   check(
@@ -539,7 +535,7 @@ void test_atomic_rejections_and_budgets() {
   auto future_proposals = proposals;
   for (auto& proposal : future_proposals) {
     if (proposal.representative_arm_root_binding_index == 0U) {
-      proposal.target_seed_node_id = 2U;
+      proposal.target_seed_node_id = 4U;
     }
   }
   const auto future = build_exact_direct_morse_vertical_journal(
@@ -554,7 +550,7 @@ void test_atomic_rejections_and_budgets() {
   auto wrong_order_proposals = proposals;
   for (auto& proposal : wrong_order_proposals) {
     if (proposal.representative_arm_root_binding_index == 0U) {
-      proposal.target_seed_node_id = 3U;
+      proposal.target_seed_node_id = 5U;
     }
   }
   const auto wrong_order = build_exact_direct_morse_vertical_journal(
@@ -589,7 +585,7 @@ void test_atomic_rejections_and_budgets() {
       "a duplicate-key nonrepresentative binding is rejected");
 
   auto bad_birth = forest;
-  bad_birth.birth_records[2].order_one_birth_node_id = 0U;
+  bad_birth.birth_records[0].order_one_birth_node_id = 0U;
   const auto bad_birth_result =
       build_exact_direct_morse_vertical_journal(
           bad_birth, proposals, generous_budget(), config());
@@ -611,7 +607,7 @@ void test_atomic_rejections_and_budgets() {
       "a node cannot have two horizontal parents");
 
   auto divergent_final_root = forest;
-  divergent_final_root.final_roots[1].root_node_id = 4U;
+  divergent_final_root.final_roots[1].root_node_id = 6U;
   const auto divergent_final_root_result =
       build_exact_direct_morse_vertical_journal(
           divergent_final_root,
@@ -623,6 +619,20 @@ void test_atomic_rejections_and_budgets() {
           ExactDirectMorseVerticalDecision::
               no_vertical_forest_shape_rejected,
       "declared final roots must equal the structural roots");
+
+  auto missing_final_root = forest;
+  missing_final_root.final_roots.pop_back();
+  const auto missing_final_root_result =
+      build_exact_direct_morse_vertical_journal(
+          missing_final_root,
+          proposals,
+          generous_budget(),
+          config());
+  check(
+      missing_final_root_result.decision ==
+          ExactDirectMorseVerticalDecision::
+              no_vertical_forest_shape_rejected,
+      "too many structural roots are rejected before root scratch can exceed the declared K-sized bound");
 
   auto noncanonical_group_partition = forest;
   noncanonical_group_partition.batches[1].atomic_group_offset = 2U;
@@ -639,8 +649,9 @@ void test_atomic_rejections_and_budgets() {
       "batch-to-group slices must form one exhaustive partition");
 
   auto budget = generous_budget();
+  const ExactDirectMorseForestJournalView forest_view{forest};
   budget.maximum_birth_record_scan_count =
-      forest.birth_records.size() - 1U;
+      forest_view.birth_record_count() - 1U;
   const auto birth_budget = build_exact_direct_morse_vertical_journal(
       forest, proposals, budget, config());
   check(
@@ -731,7 +742,7 @@ void test_atomic_rejections_and_budgets() {
   const auto trace_budget = trace_exact_direct_morse_vertical_component(
       forest,
       total,
-      6U,
+      8U,
       level(3),
       1U,
       ExactDirectMorseVerticalTraceBudget{2U, 16U, 0U});

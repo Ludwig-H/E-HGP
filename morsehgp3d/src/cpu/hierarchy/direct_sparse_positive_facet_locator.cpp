@@ -92,6 +92,28 @@ structural_verification_scratch_byte_count(
       [](spatial::PointId point_id) { return point_id == 0U; });
 }
 
+[[nodiscard]] std::optional<std::size_t>
+implicit_canonical_singleton_index(
+    const ExactDirectSparseFacetKey& key,
+    std::size_t implicit_singleton_count) noexcept {
+  if (key.point_count != 1U ||
+      key.point_ids[0U] >= implicit_singleton_count) {
+    return std::nullopt;
+  }
+  return static_cast<std::size_t>(key.point_ids[0U]);
+}
+
+[[nodiscard]] ExactDirectSparseFacetWitness
+canonical_singleton_witness(
+    std::uint64_t external_authority_id,
+    std::size_t singleton_index) noexcept {
+  return {
+      external_authority_id,
+      direct_sparse_canonical_singleton_replay_token_stride *
+              static_cast<std::uint64_t>(singleton_index) +
+          direct_sparse_canonical_singleton_replay_token_residue};
+}
+
 [[nodiscard]] bool witness_matches_authority(
     const ExactDirectSparseFacetWitness& witness,
     std::uint64_t external_authority_id) {
@@ -756,6 +778,7 @@ replay_locator_history_digest_transition(
     std::span<const ExactDirectSparseCommittedUnionRecord> committed_unions,
     std::span<const ExactDirectSparsePositiveFacetSlot> slots,
     std::span<const spatial::PointId> key_point_arena,
+    std::size_t implicit_canonical_singleton_count,
     std::span<const std::size_t> binding_slot_indices_by_index,
     LocatorHistoryReplayCursor& cursor) {
   const auto query_partition = checked_add(
@@ -783,12 +806,16 @@ replay_locator_history_digest_transition(
       cursor.binding_prefix, record.counters.inserted_binding_count);
   const auto next_union_prefix = checked_add(
       cursor.union_prefix, record.counters.union_request_count);
+  const auto available_binding_record_count = checked_add(
+      implicit_canonical_singleton_count,
+      binding_slot_indices_by_index.size());
   if (!query_partition.has_value() || !binding_partition.has_value() ||
       !minimum_full_key_comparison_count.has_value() ||
       !keyed_input_count.has_value() ||
       !maximum_input_key_point_count.has_value() ||
       !maximum_inserted_key_point_count.has_value() ||
-      !next_binding_prefix.has_value() || !next_union_prefix.has_value()) {
+      !next_binding_prefix.has_value() || !next_union_prefix.has_value() ||
+      !available_binding_record_count.has_value()) {
     return LocatorHistoryTransitionStatus::capacity_overflow;
   }
   if (record.committed_batch_index != expected_batch_index ||
@@ -817,7 +844,7 @@ replay_locator_history_digest_transition(
       (record.counters.compatible_duplicate_binding_count != 0U &&
        cursor.binding_prefix == 0U &&
        record.counters.inserted_binding_count == 0U) ||
-      *next_binding_prefix > binding_slot_indices_by_index.size() ||
+      *next_binding_prefix > *available_binding_record_count ||
       *next_union_prefix > committed_unions.size() ||
       record.counters.equal_fingerprint_distinct_key_count >
           record.counters.full_key_comparison_count ||
@@ -826,6 +853,31 @@ replay_locator_history_digest_transition(
       !record.strict_pre_batch_snapshot_certified ||
       !record.sequential_atomic_commit_certified) {
     return LocatorHistoryTransitionStatus::malformed_history;
+  }
+  if (implicit_canonical_singleton_count != 0U) {
+    const bool canonical_batch_zero =
+        expected_batch_index == 0U &&
+        cursor.binding_prefix == 0U &&
+        record.counters.query_count == 0U &&
+        record.counters.positive_lookup_count == 0U &&
+        record.counters.unresolved_lookup_count == 0U &&
+        record.counters.union_request_count == 0U &&
+        record.counters.binding_request_count ==
+            implicit_canonical_singleton_count &&
+        record.counters.inserted_binding_count ==
+            implicit_canonical_singleton_count &&
+        record.counters.compatible_duplicate_binding_count == 0U &&
+        record.counters.batch_input_key_point_count ==
+            implicit_canonical_singleton_count &&
+        record.counters.inserted_key_point_count ==
+            implicit_canonical_singleton_count &&
+        record.counters.full_key_comparison_count == 0U &&
+        record.counters.equal_fingerprint_distinct_key_count == 0U;
+    if ((expected_batch_index == 0U && !canonical_batch_zero) ||
+        (expected_batch_index != 0U &&
+         cursor.binding_prefix < implicit_canonical_singleton_count)) {
+      return LocatorHistoryTransitionStatus::malformed_history;
+    }
   }
 
   const auto next_counters = updated_counters(cursor.counters, record.counters);
@@ -857,44 +909,63 @@ replay_locator_history_digest_transition(
   for (std::size_t binding_index = cursor.binding_prefix;
        binding_index < *next_binding_prefix;
        ++binding_index) {
-    const std::size_t slot_index =
-        binding_slot_indices_by_index[binding_index];
-    if (slot_index >= slots.size()) {
-      return LocatorHistoryTransitionStatus::malformed_history;
-    }
-    const ExactDirectSparsePositiveFacetSlot& slot = slots[slot_index];
-    if (!slot.occupied || slot.committed_binding_index != binding_index ||
-        slot.component_handle >= trusted_component_handle_count ||
-        !witness_matches_authority(
-            slot.binding_witness, trusted_external_authority_id) ||
-        slot.key_point_count == 0U ||
-        slot.key_point_count >
-            direct_sparse_positive_facet_maximum_point_count ||
-        slot.key_point_offset > key_point_arena.size() ||
-        slot.key_point_count >
-            key_point_arena.size() - slot.key_point_offset) {
-      return LocatorHistoryTransitionStatus::malformed_history;
-    }
-    const auto next_key_point_count = checked_add(
-        observed_inserted_key_point_count, slot.key_point_count);
-    if (!next_key_point_count.has_value()) {
-      return LocatorHistoryTransitionStatus::capacity_overflow;
-    }
-    observed_inserted_key_point_count = *next_key_point_count;
+    if (binding_index < implicit_canonical_singleton_count) {
+      ExactDirectSparseFacetKey key;
+      key.point_count = 1U;
+      key.point_ids[0U] =
+          static_cast<spatial::PointId>(binding_index);
+      snapshot_digest_builder.binding(
+          key,
+          binding_index,
+          canonical_singleton_witness(
+              trusted_external_authority_id, binding_index));
+      ++observed_inserted_key_point_count;
+    } else {
+      const std::size_t physical_binding_index =
+          binding_index - implicit_canonical_singleton_count;
+      if (physical_binding_index >=
+          binding_slot_indices_by_index.size()) {
+        return LocatorHistoryTransitionStatus::malformed_history;
+      }
+      const std::size_t slot_index =
+          binding_slot_indices_by_index[physical_binding_index];
+      if (slot_index >= slots.size()) {
+        return LocatorHistoryTransitionStatus::malformed_history;
+      }
+      const ExactDirectSparsePositiveFacetSlot& slot = slots[slot_index];
+      if (!slot.occupied || slot.committed_binding_index != binding_index ||
+          slot.component_handle >= trusted_component_handle_count ||
+          !witness_matches_authority(
+              slot.binding_witness, trusted_external_authority_id) ||
+          slot.key_point_count == 0U ||
+          slot.key_point_count >
+              direct_sparse_positive_facet_maximum_point_count ||
+          slot.key_point_offset > key_point_arena.size() ||
+          slot.key_point_count >
+              key_point_arena.size() - slot.key_point_offset) {
+        return LocatorHistoryTransitionStatus::malformed_history;
+      }
+      const auto next_key_point_count = checked_add(
+          observed_inserted_key_point_count, slot.key_point_count);
+      if (!next_key_point_count.has_value()) {
+        return LocatorHistoryTransitionStatus::capacity_overflow;
+      }
+      observed_inserted_key_point_count = *next_key_point_count;
 
-    ExactDirectSparseFacetKey key;
-    key.point_count = slot.key_point_count;
-    for (std::size_t point_index = 0U;
-         point_index < slot.key_point_count;
-         ++point_index) {
-      key.point_ids[point_index] =
-          key_point_arena[slot.key_point_offset + point_index];
+      ExactDirectSparseFacetKey key;
+      key.point_count = slot.key_point_count;
+      for (std::size_t point_index = 0U;
+           point_index < slot.key_point_count;
+           ++point_index) {
+        key.point_ids[point_index] =
+            key_point_arena[slot.key_point_offset + point_index];
+      }
+      if (!canonical_key_shape(key)) {
+        return LocatorHistoryTransitionStatus::malformed_history;
+      }
+      snapshot_digest_builder.binding(
+          key, slot.component_handle, slot.binding_witness);
     }
-    if (!canonical_key_shape(key)) {
-      return LocatorHistoryTransitionStatus::malformed_history;
-    }
-    snapshot_digest_builder.binding(
-        key, slot.component_handle, slot.binding_witness);
   }
   if (observed_inserted_key_point_count !=
       record.counters.inserted_key_point_count) {
@@ -931,7 +1002,7 @@ bool ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult::
   const auto expected_batch_record_scan_count = checked_multiply(
       2U, required_committed_batch_prefix_count);
   const auto expected_scratch_bytes = checked_multiply(
-      required_active_binding_prefix_count, sizeof(std::size_t));
+      required_physical_binding_slot_index_count, sizeof(std::size_t));
   return schema_version ==
              direct_sparse_positive_facet_locator_prefix_stamp_sweep_schema_version &&
          expected_batch_record_scan_count.has_value() &&
@@ -947,8 +1018,10 @@ bool ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult::
              requested_budget.maximum_batch_record_scan_count &&
          required_table_slot_scan_count <=
              requested_budget.maximum_table_slot_scan_count &&
-         required_active_binding_prefix_count <=
+         required_physical_binding_slot_index_count <=
              requested_budget.maximum_binding_slot_index_scratch_count &&
+         required_physical_binding_slot_index_count <=
+             required_active_binding_prefix_count &&
          required_union_record_replay_count <=
              requested_budget.maximum_union_record_replay_count &&
          required_active_binding_prefix_count <=
@@ -1047,9 +1120,13 @@ bool ExactDirectSparseCanonicalSingletonIdentityBatchResult::
   const bool last_token_matches =
       audit.bulk_count != 0U &&
       audit.bulk_count - 1U <=
-          (std::numeric_limits<std::uint64_t>::max() - 1U) / 3U &&
+          (std::numeric_limits<std::uint64_t>::max() -
+           direct_sparse_canonical_singleton_replay_token_residue) /
+              direct_sparse_canonical_singleton_replay_token_stride &&
       audit.last_replay_token ==
-          3U * static_cast<std::uint64_t>(audit.bulk_count - 1U) + 1U;
+          direct_sparse_canonical_singleton_replay_token_stride *
+                  static_cast<std::uint64_t>(audit.bulk_count - 1U) +
+              direct_sparse_canonical_singleton_replay_token_residue;
   return batch_result.certified_committed_batch() &&
          batch_result.candidate_batch_index == 0U &&
          batch_result.lookups.empty() &&
@@ -1079,20 +1156,42 @@ bool ExactDirectSparseCanonicalSingletonIdentityBatchResult::
          audit
              .all_fallible_allocations_completed_before_first_slot_mutation &&
          audit.mutation_suffix_nonthrow_or_fail_stop &&
-         audit.standard_fingerprint_key_arena_and_history_path_preserved;
+         audit.canonical_logical_history_path_preserved &&
+         audit.implicit_singleton_binding_count == audit.bulk_count &&
+         audit.physical_table_slot_count ==
+             2U * audit.physical_suffix_binding_capacity + 1U &&
+         audit.physical_occupied_slot_count == 0U &&
+         audit.physical_key_point_count == 0U &&
+         audit.canonical_singleton_base_is_implicit &&
+         audit.no_singleton_slot_materialized &&
+         audit.no_singleton_key_point_materialized &&
+         audit.exact_physical_suffix_table_capacity_certified;
 }
 
 bool ExactDirectSparsePositiveFacetProbeResult::certified_positive_hit()
     const noexcept {
+  const bool physical_hit =
+      !implicit_canonical_singleton_binding_resolved &&
+      slot_visit_count > 0U &&
+      full_key_comparison_count > 0U &&
+      equal_fingerprint_distinct_key_count ==
+          full_key_comparison_count - 1U;
+  const bool implicit_hit =
+      implicit_canonical_singleton_binding_resolved &&
+      query_key.point_count == 1U &&
+      source_binding_witness.replay_token ==
+          direct_sparse_canonical_singleton_replay_token_stride *
+                  query_key.point_ids[0U] +
+              direct_sparse_canonical_singleton_replay_token_residue &&
+      slot_visit_count == 0U && full_key_comparison_count == 1U &&
+      equal_fingerprint_distinct_key_count == 0U;
   return schema_version ==
-             direct_sparse_positive_facet_locator_schema_version &&
-         canonical_key_shape(query_key) && slot_visit_count > 0U &&
+             direct_sparse_positive_facet_probe_schema_version &&
+         canonical_key_shape(query_key) &&
          slot_visit_count <= budget.maximum_slot_visit_count &&
          component_parent_hop_count <=
              budget.maximum_component_parent_hop_count &&
-         full_key_comparison_count > 0U &&
-         equal_fingerprint_distinct_key_count ==
-             full_key_comparison_count - 1U &&
+         (physical_hit || implicit_hit) &&
          locator_certified_at_entry && input_shape_certified &&
          query_witness_non_null_and_authority_matched &&
          query_witness.external_authority_id != 0U &&
@@ -1119,7 +1218,7 @@ bool ExactDirectSparsePositiveFacetProbeResult::certified_positive_hit()
 bool ExactDirectSparsePositiveFacetProbeResult::certified_unresolved_miss()
     const noexcept {
   return schema_version ==
-             direct_sparse_positive_facet_locator_schema_version &&
+             direct_sparse_positive_facet_probe_schema_version &&
          canonical_key_shape(query_key) && slot_visit_count > 0U &&
          slot_visit_count <= budget.maximum_slot_visit_count &&
          component_parent_hop_count == 0U &&
@@ -1131,6 +1230,7 @@ bool ExactDirectSparsePositiveFacetProbeResult::certified_unresolved_miss()
          query_witness.replay_token != 0U &&
          every_fingerprint_candidate_compared_by_full_key &&
          slot_search_completed && !component_find_completed &&
+         !implicit_canonical_singleton_binding_resolved &&
          !component_handle_present && !source_binding_witness_present &&
          component_handle == ExactDirectSparseComponentHandle{} &&
          source_binding_witness == ExactDirectSparseFacetWitness{} &&
@@ -1152,6 +1252,7 @@ bool ExactDirectSparsePositiveFacetProbeResult::certified_budget_exhaustion()
   const bool slot_budget_exhausted =
       slot_visit_budget_exhausted &&
       !component_parent_hop_budget_exhausted &&
+      !implicit_canonical_singleton_binding_resolved &&
       !slot_search_completed && !component_find_completed &&
       slot_visit_count == budget.maximum_slot_visit_count &&
       component_parent_hop_count == 0U &&
@@ -1163,7 +1264,9 @@ bool ExactDirectSparsePositiveFacetProbeResult::certified_budget_exhaustion()
       !slot_visit_budget_exhausted &&
       component_parent_hop_budget_exhausted &&
       slot_search_completed && !component_find_completed &&
-      slot_visit_count > 0U && full_key_comparison_count > 0U &&
+      (slot_visit_count > 0U ||
+       implicit_canonical_singleton_binding_resolved) &&
+      full_key_comparison_count > 0U &&
       equal_fingerprint_distinct_key_count ==
           full_key_comparison_count - 1U &&
       component_parent_hop_count ==
@@ -1171,7 +1274,7 @@ bool ExactDirectSparsePositiveFacetProbeResult::certified_budget_exhaustion()
       decision == ExactDirectSparsePositiveFacetProbeDecision::
                       no_positive_locator_component_parent_hop_budget_exhausted;
   return schema_version ==
-             direct_sparse_positive_facet_locator_schema_version &&
+             direct_sparse_positive_facet_probe_schema_version &&
          canonical_key_shape(query_key) &&
          slot_visit_count <= budget.maximum_slot_visit_count &&
          component_parent_hop_count <=
@@ -1196,13 +1299,42 @@ bool ExactDirectSparsePositiveFacetProbeResult::certified_budget_exhaustion()
 
 bool ExactDirectSparsePositiveFacetLocator::certified_positive_locator()
     const noexcept {
+  const auto physical_table_slot_capacity =
+      probing_slot_capacity(physical_suffix_binding_capacity_);
+  const bool implicit_storage_contract =
+      implicit_canonical_singleton_count_ <=
+          component_parents_.size() &&
+      implicit_canonical_singleton_count_ <=
+          budget_.maximum_committed_binding_count &&
+      canonical_singleton_base_implicit_ ==
+          (implicit_canonical_singleton_count_ != 0U);
+  const bool materialized_table_contract =
+      physical_table_capacity_materialized_ &&
+      physical_table_slot_capacity.has_value() &&
+      slots_.size() == *physical_table_slot_capacity &&
+      physical_suffix_binding_capacity_ ==
+          budget_.maximum_committed_binding_count -
+              implicit_canonical_singleton_count_;
+  const bool deferred_empty_table_contract =
+      !physical_table_capacity_materialized_ &&
+      implicit_canonical_singleton_count_ == 0U &&
+      physical_suffix_binding_capacity_ == 0U && slots_.size() == 1U &&
+      counters_.inserted_binding_count == 0U &&
+      key_point_arena_.empty();
   return schema_version_ ==
              direct_sparse_positive_facet_locator_schema_version &&
          required_component_handle_capacity_ == component_parents_.size() &&
-         required_table_slot_capacity_ == slots_.size() &&
+         implicit_storage_contract &&
+         (materialized_table_contract || deferred_empty_table_contract) &&
          counters_.inserted_binding_count <=
              budget_.maximum_committed_binding_count &&
-         counters_.committed_key_point_count == key_point_arena_.size() &&
+         counters_.inserted_binding_count >=
+             implicit_canonical_singleton_count_ &&
+         counters_.committed_key_point_count >=
+             implicit_canonical_singleton_count_ &&
+         counters_.committed_key_point_count -
+                 implicit_canonical_singleton_count_ ==
+             key_point_arena_.size() &&
          counters_.committed_key_point_count <=
              budget_.maximum_committed_key_point_count &&
          counters_.union_request_count == committed_unions_.size() &&
@@ -1264,6 +1396,40 @@ ExactDirectSparsePositiveFacetLocator::probe_positive_facet(
   }
   result.query_witness_non_null_and_authority_matched = true;
   result.every_fingerprint_candidate_compared_by_full_key = true;
+
+  const auto implicit_singleton = implicit_canonical_singleton_index(
+      key, implicit_canonical_singleton_count_);
+  if (implicit_singleton.has_value()) {
+    result.implicit_canonical_singleton_binding_resolved = true;
+    result.full_key_comparison_count = 1U;
+    result.slot_search_completed = true;
+    ExactDirectSparseComponentHandle component_handle =
+        *implicit_singleton;
+    while (component_parents_[component_handle] != component_handle) {
+      if (result.component_parent_hop_count >=
+          budget.maximum_component_parent_hop_count) {
+        result.component_parent_hop_budget_exhausted = true;
+        result.disposition =
+            ExactDirectSparsePositiveFacetProbeDisposition::budget_exhausted;
+        result.decision = ExactDirectSparsePositiveFacetProbeDecision::
+            no_positive_locator_component_parent_hop_budget_exhausted;
+        return result;
+      }
+      component_handle = component_parents_[component_handle];
+      ++result.component_parent_hop_count;
+    }
+    result.component_find_completed = true;
+    result.component_handle = component_handle;
+    result.source_binding_witness = canonical_singleton_witness(
+        config_.external_authority_id, *implicit_singleton);
+    result.component_handle_present = true;
+    result.source_binding_witness_present = true;
+    result.disposition =
+        ExactDirectSparsePositiveFacetProbeDisposition::positive;
+    result.decision = ExactDirectSparsePositiveFacetProbeDecision::
+        complete_certified_positive_hit;
+    return result;
+  }
 
   const std::uint64_t fingerprint =
       fingerprint_exact_direct_sparse_facet_key(
@@ -1432,7 +1598,10 @@ build_exact_direct_sparse_positive_facet_locator(
   }
   locator.budget_preflight_certified_ = true;
 
-  locator.slots_.resize(*table_slot_capacity);
+  // The empty locator needs only one terminator slot.  The generic full table
+  // or the singleton-specialized suffix table is allocated atomically with
+  // the first physical binding transaction.
+  locator.slots_.resize(1U);
   locator.component_parents_.resize(component_handle_count);
   std::iota(
       locator.component_parents_.begin(),
@@ -1455,11 +1624,14 @@ ExactDirectSparsePositiveFacetLocatorStateView
 ExactDirectSparsePositiveFacetLocator::state_view() const noexcept {
   return {
       schema_version_,
+      direct_sparse_positive_facet_locator_storage_schema_version,
       budget_,
       config_,
       required_component_handle_capacity_,
       required_table_slot_capacity_,
       required_batch_scratch_slot_capacity_,
+      implicit_canonical_singleton_count_,
+      physical_suffix_binding_capacity_,
       slots_,
       key_point_arena_,
       component_parents_,
@@ -1471,6 +1643,8 @@ ExactDirectSparsePositiveFacetLocator::state_view() const noexcept {
       empty_table_initialized_,
       dense_component_handles_initialized_,
       flat_durable_key_arena_initialized_,
+      physical_table_capacity_materialized_,
+      canonical_singleton_base_implicit_,
       positive_bindings_only_,
       full_key_comparison_required_,
       missing_facet_means_isolated_,
@@ -1591,10 +1765,23 @@ build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
   result.required_active_binding_prefix_count = active_binding_prefix_count;
   result.required_union_record_replay_count = union_record_replay_count;
   result.required_key_point_replay_count = key_point_replay_count;
+  const std::size_t active_implicit_singleton_count =
+      result.required_committed_batch_prefix_count == 0U
+          ? 0U
+          : state.implicit_canonical_singleton_count;
+  if (active_binding_prefix_count <
+      active_implicit_singleton_count) {
+    return fail(Decision::no_prefix_stamp_locator_history_rejected);
+  }
+  result.required_physical_binding_slot_index_count =
+      active_binding_prefix_count - active_implicit_singleton_count;
   result.required_table_slot_scan_count =
-      active_binding_prefix_count == 0U ? 0U : state.slots.size();
+      result.required_physical_binding_slot_index_count == 0U
+          ? 0U
+          : state.slots.size();
   const auto required_temporary_scratch_byte_count = checked_multiply(
-      active_binding_prefix_count, sizeof(std::size_t));
+      result.required_physical_binding_slot_index_count,
+      sizeof(std::size_t));
   if (!required_temporary_scratch_byte_count.has_value()) {
     return fail(Decision::no_prefix_stamp_capacity_overflow);
   }
@@ -1603,9 +1790,15 @@ build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
   const bool replaying_final_history =
       result.required_committed_batch_prefix_count ==
       state.committed_batches.size();
+  const auto available_key_point_replay_count = checked_add(
+      active_implicit_singleton_count,
+      state.key_point_arena.size());
+  if (!available_key_point_replay_count.has_value()) {
+    return fail(Decision::no_prefix_stamp_capacity_overflow);
+  }
   if (active_binding_prefix_count > state.counters.inserted_binding_count ||
       union_record_replay_count > state.committed_unions.size() ||
-      key_point_replay_count > state.key_point_arena.size()) {
+      key_point_replay_count > *available_key_point_replay_count) {
     return fail(Decision::no_prefix_stamp_locator_history_rejected);
   }
   if (replaying_final_history &&
@@ -1618,7 +1811,7 @@ build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
   }
   if (result.required_table_slot_scan_count >
           budget.maximum_table_slot_scan_count ||
-      active_binding_prefix_count >
+      result.required_physical_binding_slot_index_count >
           budget.maximum_binding_slot_index_scratch_count ||
       union_record_replay_count >
           budget.maximum_union_record_replay_count ||
@@ -1633,8 +1826,8 @@ build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
 
   const std::size_t missing_slot = state.slots.size();
   std::vector<std::size_t> binding_slot_indices_by_index(
-      active_binding_prefix_count, missing_slot);
-  if (active_binding_prefix_count != 0U) {
+      result.required_physical_binding_slot_index_count, missing_slot);
+  if (result.required_physical_binding_slot_index_count != 0U) {
     for (std::size_t slot_index = 0U;
          slot_index < state.slots.size();
          ++slot_index) {
@@ -1644,13 +1837,22 @@ build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
       if (!slot.occupied) {
         continue;
       }
+      if (slot.committed_binding_index <
+          state.implicit_canonical_singleton_count) {
+        return fail(Decision::no_prefix_stamp_locator_history_rejected);
+      }
       if (slot.committed_binding_index >= active_binding_prefix_count) {
         if (replaying_final_history) {
           return fail(Decision::no_prefix_stamp_locator_history_rejected);
         }
         continue;
       }
-      if (binding_slot_indices_by_index[slot.committed_binding_index] !=
+      const std::size_t physical_binding_index =
+          slot.committed_binding_index -
+          state.implicit_canonical_singleton_count;
+      if (physical_binding_index >=
+              binding_slot_indices_by_index.size() ||
+          binding_slot_indices_by_index[physical_binding_index] !=
               missing_slot ||
           slot.key_point_count == 0U ||
           slot.key_point_count >
@@ -1660,7 +1862,7 @@ build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
               state.key_point_arena.size() - slot.key_point_offset) {
         return fail(Decision::no_prefix_stamp_locator_history_rejected);
       }
-      binding_slot_indices_by_index[slot.committed_binding_index] =
+      binding_slot_indices_by_index[physical_binding_index] =
           slot_index;
     }
     if (!std::all_of(
@@ -1713,6 +1915,7 @@ build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
             state.committed_unions,
             state.slots,
             state.key_point_arena,
+            state.implicit_canonical_singleton_count,
             binding_slot_indices_by_index,
             history_cursor);
     if (transition == LocatorHistoryTransitionStatus::capacity_overflow) {
@@ -1836,8 +2039,18 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
       observed.committed_unions.size();
   verification.required_batch_record_count =
       observed.committed_batches.size();
+  verification.implicit_canonical_singleton_count =
+      observed.implicit_canonical_singleton_count;
+  verification.physical_suffix_binding_capacity =
+      observed.physical_suffix_binding_capacity;
+  const bool logical_binding_partition_valid =
+      observed.counters.inserted_binding_count >=
+      observed.implicit_canonical_singleton_count;
   verification.required_binding_scratch_entry_count =
-      observed.counters.inserted_binding_count;
+      logical_binding_partition_valid
+          ? observed.counters.inserted_binding_count -
+                observed.implicit_canonical_singleton_count
+          : 0U;
   verification.required_key_point_scratch_entry_count =
       observed.key_point_arena.size();
   verification.required_table_slot_scratch_entry_count =
@@ -1849,6 +2062,8 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
   verification.trusted_construction_parameters_certified =
       observed.schema_version ==
           direct_sparse_positive_facet_locator_schema_version &&
+      observed.storage_schema_version ==
+          direct_sparse_positive_facet_locator_storage_schema_version &&
       observed.budget == trusted_budget &&
       observed.config == trusted_config &&
       trusted_config.external_authority_id != 0U;
@@ -1857,9 +2072,34 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
       probing_slot_capacity(trusted_budget.maximum_committed_binding_count);
   const auto batch_scratch_slot_capacity =
       probing_slot_capacity(trusted_budget.maximum_batch_binding_count);
+  const bool implicit_count_within_capacity =
+      observed.implicit_canonical_singleton_count <=
+          trusted_component_handle_count &&
+      observed.implicit_canonical_singleton_count <=
+          trusted_budget.maximum_committed_binding_count;
+  const auto physical_table_slot_capacity =
+      probing_slot_capacity(observed.physical_suffix_binding_capacity);
+  const bool materialized_capacity_valid =
+      observed.physical_table_capacity_materialized &&
+      implicit_count_within_capacity &&
+      physical_table_slot_capacity.has_value() &&
+      observed.physical_suffix_binding_capacity ==
+          trusted_budget.maximum_committed_binding_count -
+              observed.implicit_canonical_singleton_count &&
+      observed.slots.size() == *physical_table_slot_capacity;
+  const bool deferred_capacity_valid =
+      !observed.physical_table_capacity_materialized &&
+      observed.implicit_canonical_singleton_count == 0U &&
+      observed.physical_suffix_binding_capacity == 0U &&
+      observed.slots.size() == 1U &&
+      observed.counters.inserted_binding_count == 0U &&
+      observed.key_point_arena.empty();
   verification.capacity_requirements_certified =
       table_slot_capacity.has_value() &&
       batch_scratch_slot_capacity.has_value() &&
+      physical_table_slot_capacity.has_value() &&
+      logical_binding_partition_valid &&
+      implicit_count_within_capacity &&
       trusted_component_handle_count <=
           trusted_budget.maximum_component_handle_count &&
       *table_slot_capacity <= trusted_budget.maximum_table_slot_count &&
@@ -1870,7 +2110,10 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
       observed.required_table_slot_capacity == *table_slot_capacity &&
       observed.required_batch_scratch_slot_capacity ==
           *batch_scratch_slot_capacity &&
-      observed.slots.size() == *table_slot_capacity &&
+      observed.canonical_singleton_base_implicit ==
+          (observed.implicit_canonical_singleton_count != 0U) &&
+      (materialized_capacity_valid || deferred_capacity_valid) &&
+      observed.slots.size() <= trusted_budget.maximum_table_slot_count &&
       observed.component_parents.size() == trusted_component_handle_count &&
       observed.counters.inserted_binding_count <=
           trusted_budget.maximum_committed_binding_count &&
@@ -1894,6 +2137,8 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
             no_verification_capacity_requirements_rejected;
     return verification;
   }
+  verification.exact_physical_suffix_capacity_certified =
+      materialized_capacity_valid || deferred_capacity_valid;
 
   const auto required_scratch_bytes =
       structural_verification_scratch_byte_count(
@@ -1968,9 +2213,10 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
       continue;
     }
     ++occupied_slot_count;
-    if (slot.committed_binding_index >=
-            verification.required_binding_scratch_entry_count ||
-        seen_binding_indices[slot.committed_binding_index] != 0U ||
+    if (slot.committed_binding_index <
+            observed.implicit_canonical_singleton_count ||
+        slot.committed_binding_index >=
+            observed.counters.inserted_binding_count ||
         slot.component_handle >= trusted_component_handle_count ||
         !witness_matches_authority(
             slot.binding_witness,
@@ -1985,10 +2231,19 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
       fingerprints_and_locations_valid = false;
       continue;
     }
-    seen_binding_indices[slot.committed_binding_index] = 1U;
-    binding_key_point_counts[slot.committed_binding_index] =
+    const std::size_t physical_binding_index =
+        slot.committed_binding_index -
+        observed.implicit_canonical_singleton_count;
+    if (physical_binding_index >= seen_binding_indices.size() ||
+        seen_binding_indices[physical_binding_index] != 0U) {
+      table_and_arena_valid = false;
+      fingerprints_and_locations_valid = false;
+      continue;
+    }
+    seen_binding_indices[physical_binding_index] = 1U;
+    binding_key_point_counts[physical_binding_index] =
         slot.key_point_count;
-    binding_slot_indices_by_index[slot.committed_binding_index] =
+    binding_slot_indices_by_index[physical_binding_index] =
         slot_index;
 
     ExactDirectSparseFacetKey reconstructed_key;
@@ -2005,7 +2260,11 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
       reconstructed_key.point_ids[point_index] =
           observed.key_point_arena[arena_index];
     }
-    if (!canonical_key_shape(reconstructed_key)) {
+    if (!canonical_key_shape(reconstructed_key) ||
+        implicit_canonical_singleton_index(
+            reconstructed_key,
+            observed.implicit_canonical_singleton_count)
+            .has_value()) {
       table_and_arena_valid = false;
       fingerprints_and_locations_valid = false;
       continue;
@@ -2049,9 +2308,16 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
           seen_key_points.begin(),
           seen_key_points.end(),
           [](std::uint8_t seen) { return seen == 1U; }) &&
-      occupied_slot_count == observed.counters.inserted_binding_count &&
+      occupied_slot_count ==
+          verification.required_binding_scratch_entry_count &&
+      observed.counters.committed_key_point_count >=
+          observed.implicit_canonical_singleton_count &&
       observed.key_point_arena.size() ==
-          observed.counters.committed_key_point_count;
+          observed.counters.committed_key_point_count -
+              observed.implicit_canonical_singleton_count;
+  verification.physical_occupied_slot_count = occupied_slot_count;
+  verification.physical_key_point_count =
+      observed.key_point_arena.size();
   verification.flat_table_and_key_arena_certified = table_and_arena_valid;
   verification.every_fingerprint_recomputed_and_full_key_located =
       table_and_arena_valid && fingerprints_and_locations_valid;
@@ -2203,6 +2469,7 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
             observed.committed_unions,
             observed.slots,
             observed.key_point_arena,
+            observed.implicit_canonical_singleton_count,
             binding_slot_indices_by_index,
             history_cursor);
     if (transition != LocatorHistoryTransitionStatus::complete) {
@@ -2215,18 +2482,33 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
       observed.counters.union_request_count ==
           observed.committed_unions.size() &&
       history_cursor.union_prefix == observed.committed_unions.size() &&
-      observed.counters.inserted_binding_count == occupied_slot_count &&
-      history_cursor.binding_prefix == occupied_slot_count &&
+      observed.counters.inserted_binding_count ==
+          observed.implicit_canonical_singleton_count +
+              occupied_slot_count &&
+      history_cursor.binding_prefix ==
+          observed.counters.inserted_binding_count &&
       observed.counters.committed_key_point_count ==
-          observed.key_point_arena.size();
+          observed.implicit_canonical_singleton_count +
+              observed.key_point_arena.size();
   verification.committed_history_digest_freshly_replayed =
       history_cursor.history_digest == observed.committed_history_digest;
+  verification.implicit_canonical_singleton_base_certified =
+      observed.canonical_singleton_base_implicit ==
+          (observed.implicit_canonical_singleton_count != 0U) &&
+      verification.flat_table_and_key_arena_certified &&
+      (observed.implicit_canonical_singleton_count == 0U ||
+       (observed.physical_table_capacity_materialized &&
+        !observed.committed_batches.empty() &&
+        observed.counters.inserted_binding_count >=
+            observed.implicit_canonical_singleton_count));
 
   verification.internal_fact_fields_match_contract =
       observed.budget_preflight_certified &&
       observed.empty_table_initialized &&
       observed.dense_component_handles_initialized &&
       observed.flat_durable_key_arena_initialized &&
+      verification.implicit_canonical_singleton_base_certified &&
+      verification.exact_physical_suffix_capacity_certified &&
       observed.positive_bindings_only &&
       observed.full_key_comparison_required &&
       !observed.missing_facet_means_isolated &&
@@ -2254,6 +2536,8 @@ verify_exact_direct_sparse_positive_facet_locator_structure(
       verification.union_parent_hop_count <=
           verification_budget.maximum_union_parent_hop_count &&
       verification.flat_table_and_key_arena_certified &&
+      verification.implicit_canonical_singleton_base_certified &&
+      verification.exact_physical_suffix_capacity_certified &&
       verification.every_fingerprint_recomputed_and_full_key_located &&
       verification
           .committed_slot_insertion_chronology_freshly_replayed &&
@@ -2351,30 +2635,39 @@ ExactDirectSparsePositiveFacetLocator::
   }
   audit.last_point_id_preflight_certified = true;
 
-  constexpr std::uint64_t singleton_token_stride = 3U;
-  constexpr std::uint64_t singleton_token_residue = 1U;
   if (last_index >
       (std::numeric_limits<std::uint64_t>::max() -
-       singleton_token_residue) /
-          singleton_token_stride) {
+       direct_sparse_canonical_singleton_replay_token_residue) /
+          direct_sparse_canonical_singleton_replay_token_stride) {
     batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
         no_positive_locator_capacity_overflow;
     return result;
   }
   audit.last_replay_token =
-      singleton_token_stride * static_cast<std::uint64_t>(last_index) +
-      singleton_token_residue;
+      direct_sparse_canonical_singleton_replay_token_stride *
+              static_cast<std::uint64_t>(last_index) +
+          direct_sparse_canonical_singleton_replay_token_residue;
   audit.last_replay_token_preflight_certified = true;
 
+  if (singleton_count > budget_.maximum_committed_binding_count) {
+    batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
+        no_positive_locator_budget_exhausted;
+    return result;
+  }
   const auto committed_binding_total = checked_add(
       counters_.inserted_binding_count, singleton_count);
   const auto committed_key_point_total = checked_add(
-      key_point_arena_.size(), singleton_count);
+      counters_.committed_key_point_count, singleton_count);
   const auto committed_batch_total = checked_add(
       committed_batches_.size(), 1U);
+  const std::size_t physical_suffix_binding_capacity =
+      budget_.maximum_committed_binding_count - singleton_count;
+  const auto physical_table_slot_capacity =
+      probing_slot_capacity(physical_suffix_binding_capacity);
   if (!committed_binding_total.has_value() ||
       !committed_key_point_total.has_value() ||
-      !committed_batch_total.has_value()) {
+      !committed_batch_total.has_value() ||
+      !physical_table_slot_capacity.has_value()) {
     batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
         no_positive_locator_capacity_overflow;
     return result;
@@ -2387,8 +2680,9 @@ ExactDirectSparsePositiveFacetLocator::
           budget_.maximum_committed_key_point_count ||
       *committed_batch_total >
           budget_.maximum_committed_batch_count ||
-      singleton_count > slots_.size() ||
-      *committed_key_point_total > key_point_arena_.max_size() ||
+      *physical_table_slot_capacity >
+          budget_.maximum_table_slot_count ||
+      *physical_table_slot_capacity > slots_.max_size() ||
       *committed_batch_total > committed_batches_.max_size()) {
     batch.decision = ExactDirectSparsePositiveFacetBatchDecision::
         no_positive_locator_budget_exhausted;
@@ -2413,9 +2707,9 @@ ExactDirectSparsePositiveFacetLocator::
   batch.lookups_use_strict_pre_batch_snapshot = true;
   batch.current_batch_bindings_hidden_from_lookups = true;
   batch.every_positive_lookup_has_non_null_external_witness_tokens = true;
-  // No complete-key comparison is needed: the certified interval supplies
-  // every singleton key exactly once.  The standard fingerprint function is
-  // still used to choose the durable linear-probing slot.
+  // No complete-key comparison, fingerprint, physical slot or key-arena
+  // entry is needed: the certified interval supplies every singleton key
+  // exactly once.  Only its canonical logical history transition is replayed.
   batch.every_fingerprint_candidate_compared_by_full_key = true;
   batch.explicit_unions_applied_before_binding_compatibility = true;
   batch.exact_duplicate_bindings_compatible_after_explicit_unions = true;
@@ -2434,10 +2728,9 @@ ExactDirectSparsePositiveFacetLocator::
     singleton_key.point_count = 1U;
     singleton_key.point_ids[0U] =
         static_cast<spatial::PointId>(index);
-    const ExactDirectSparseFacetWitness singleton_witness{
-        config_.external_authority_id,
-        singleton_token_stride * static_cast<std::uint64_t>(index) +
-            singleton_token_residue};
+    const ExactDirectSparseFacetWitness singleton_witness =
+        canonical_singleton_witness(
+            config_.external_authority_id, index);
     snapshot_digest_builder.binding(
         singleton_key, index, singleton_witness);
   }
@@ -2445,43 +2738,34 @@ ExactDirectSparsePositiveFacetLocator::
       snapshot_digest_builder.finalize();
 
   // These are the only potentially allocating operations in the specialized
-  // path.  Both finish before the first durable slot is touched.
-  key_point_arena_.reserve(*committed_key_point_total);
+  // path.  The new table represents only the remaining physical suffix.
+  std::vector<ExactDirectSparsePositiveFacetSlot> physical_suffix_slots(
+      *physical_table_slot_capacity);
   committed_batches_.reserve(*committed_batch_total);
   audit
       .all_fallible_allocations_completed_before_first_slot_mutation = true;
   audit.mutation_suffix_nonthrow_or_fail_stop = true;
-  audit.standard_fingerprint_key_arena_and_history_path_preserved = true;
+  audit.canonical_logical_history_path_preserved = true;
+  audit.implicit_singleton_binding_count = singleton_count;
+  audit.physical_suffix_binding_capacity =
+      physical_suffix_binding_capacity;
+  audit.physical_table_slot_count = *physical_table_slot_capacity;
+  audit.physical_occupied_slot_count = 0U;
+  audit.physical_key_point_count = 0U;
+  audit.canonical_singleton_base_is_implicit = true;
+  audit.no_singleton_slot_materialized = true;
+  audit.no_singleton_key_point_materialized = true;
+  audit.exact_physical_suffix_table_capacity_certified = true;
 
-  // Capacity is fixed above.  Marking this suffix noexcept turns any violation
-  // of that preflight into fail-stop instead of exposing a partially committed
-  // live locator to the caller.
+  // Capacity is fixed above.  The noexcept suffix only swaps the already
+  // allocated table and publishes the logical base metadata and history.
   const auto commit_suffix = [&]() noexcept {
-    for (std::size_t index = 0U; index < singleton_count; ++index) {
-      ExactDirectSparseFacetKey singleton_key;
-      singleton_key.point_count = 1U;
-      singleton_key.point_ids[0U] =
-          static_cast<spatial::PointId>(index);
-      const std::uint64_t fingerprint =
-          fingerprint_exact_direct_sparse_facet_key(
-              singleton_key, config_.fingerprint_mask);
-      const ExactDirectSparseFacetWitness singleton_witness{
-          config_.external_authority_id,
-          singleton_token_stride * static_cast<std::uint64_t>(index) +
-              singleton_token_residue};
-      const std::size_t slot_index =
-          first_empty_committed_slot(slots_, fingerprint);
-      ExactDirectSparsePositiveFacetSlot& slot = slots_[slot_index];
-      slot.fingerprint = fingerprint;
-      slot.committed_binding_index = index;
-      slot.key_point_offset = index;
-      slot.key_point_count = 1U;
-      slot.component_handle = index;
-      slot.binding_witness = singleton_witness;
-      slot.occupied = true;
-      key_point_arena_.push_back(
-          static_cast<spatial::PointId>(index));
-    }
+    slots_.swap(physical_suffix_slots);
+    implicit_canonical_singleton_count_ = singleton_count;
+    physical_suffix_binding_capacity_ =
+        physical_suffix_binding_capacity;
+    physical_table_capacity_materialized_ = true;
+    canonical_singleton_base_implicit_ = true;
     committed_batches_.push_back(candidate_batch_record);
     counters_ = *next_counters;
     committed_history_digest_ = next_snapshot_digest;
@@ -2556,6 +2840,26 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
     ExactDirectSparseFacetLookupResult lookup;
     lookup.query_index = query.query_index;
     lookup.query_witness = query.witness;
+    const auto implicit_singleton = implicit_canonical_singleton_index(
+        query.key, implicit_canonical_singleton_count_);
+    if (implicit_singleton.has_value()) {
+      if (!accumulate_search_counters(result.counters, 1U, 0U)) {
+        result.decision = ExactDirectSparsePositiveFacetBatchDecision::
+            no_positive_locator_capacity_overflow;
+        return result;
+      }
+      lookup.disposition =
+          ExactDirectSparseFacetLookupDisposition::positive;
+      lookup.pre_batch_component_handle =
+          find_component(component_parents_, *implicit_singleton);
+      lookup.source_binding_witness = canonical_singleton_witness(
+          config_.external_authority_id, *implicit_singleton);
+      lookup.component_handle_present = true;
+      lookup.source_binding_witness_present = true;
+      ++result.counters.positive_lookup_count;
+      result.lookups.push_back(lookup);
+      continue;
+    }
     const std::uint64_t fingerprint =
         fingerprint_exact_direct_sparse_facet_key(
             query.key, config_.fingerprint_mask);
@@ -2639,6 +2943,26 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
   pending.reserve(bindings.size());
 
   for (const ExactDirectSparseFacetBinding& binding : bindings) {
+    const auto implicit_singleton = implicit_canonical_singleton_index(
+        binding.key, implicit_canonical_singleton_count_);
+    if (implicit_singleton.has_value()) {
+      if (!accumulate_search_counters(result.counters, 1U, 0U)) {
+        result.decision = ExactDirectSparsePositiveFacetBatchDecision::
+            no_positive_locator_capacity_overflow;
+        rollback_candidate_components();
+        return result;
+      }
+      if (candidate_components.find(*implicit_singleton) !=
+          candidate_components.find(binding.component_handle)) {
+        result.contradiction_detected = true;
+        result.decision = ExactDirectSparsePositiveFacetBatchDecision::
+            contradiction_incompatible_exact_facet_binding;
+        rollback_candidate_components();
+        return result;
+      }
+      ++result.counters.compatible_duplicate_binding_count;
+      continue;
+    }
     const std::uint64_t fingerprint =
         fingerprint_exact_direct_sparse_facet_key(
             binding.key, config_.fingerprint_mask);
@@ -2718,14 +3042,14 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
 
   const auto committed_binding_total = checked_add(
       counters_.inserted_binding_count, pending.size());
-  const auto committed_key_point_total = checked_add(
+  const auto physical_key_point_total = checked_add(
       key_point_arena_.size(), result.counters.inserted_key_point_count);
   const auto committed_union_total = checked_add(
       committed_unions_.size(), unions.size());
   const auto committed_batch_total = checked_add(
       committed_batches_.size(), 1U);
   if (!committed_binding_total.has_value() ||
-      !committed_key_point_total.has_value() ||
+      !physical_key_point_total.has_value() ||
       !committed_union_total.has_value() ||
       !committed_batch_total.has_value()) {
     result.decision = ExactDirectSparsePositiveFacetBatchDecision::
@@ -2735,7 +3059,7 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
   }
   if (*committed_binding_total >
           budget_.maximum_committed_binding_count ||
-      *committed_key_point_total >
+      *physical_key_point_total >
           budget_.maximum_committed_key_point_count) {
     result.decision = ExactDirectSparsePositiveFacetBatchDecision::
         no_positive_locator_budget_exhausted;
@@ -2747,6 +3071,13 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
   if (!next_counters.has_value()) {
     result.decision = ExactDirectSparsePositiveFacetBatchDecision::
         no_positive_locator_capacity_overflow;
+    rollback_candidate_components();
+    return result;
+  }
+  if (next_counters->committed_key_point_count >
+      budget_.maximum_committed_key_point_count) {
+    result.decision = ExactDirectSparsePositiveFacetBatchDecision::
+        no_positive_locator_budget_exhausted;
     rollback_candidate_components();
     return result;
   }
@@ -2775,9 +3106,20 @@ ExactDirectSparsePositiveFacetLocator::apply_batch(
 
   // Candidate parent writes remain guarded by the rollback journal.  Every
   // fallible durable allocation happens before the first irreversible change.
-  key_point_arena_.reserve(*committed_key_point_total);
+  std::vector<ExactDirectSparsePositiveFacetSlot>
+      newly_materialized_table;
+  if (!physical_table_capacity_materialized_ && !pending.empty()) {
+    newly_materialized_table.resize(required_table_slot_capacity_);
+  }
+  key_point_arena_.reserve(*physical_key_point_total);
   committed_unions_.reserve(*committed_union_total);
   committed_batches_.reserve(*committed_batch_total);
+  if (!newly_materialized_table.empty()) {
+    slots_.swap(newly_materialized_table);
+    physical_suffix_binding_capacity_ =
+        budget_.maximum_committed_binding_count;
+    physical_table_capacity_materialized_ = true;
+  }
   for (const ExactDirectSparseComponentUnion& component_union : unions) {
     committed_unions_.push_back(ExactDirectSparseCommittedUnionRecord{
         committed_unions_.size(),

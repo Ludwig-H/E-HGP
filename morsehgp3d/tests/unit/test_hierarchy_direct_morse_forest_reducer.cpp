@@ -1,3 +1,7 @@
+#include "fake_gpu_phase14_facet_top_k_proposal_launchers.hpp"
+#include "fake_gpu_phase14_morton_lbvh_build_launchers.hpp"
+
+#include "morsehgp3d/gpu/direct_sparse_facet_top_k_integrated_adapter.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_forest_reducer.hpp"
 
 #include <array>
@@ -19,6 +23,14 @@ using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ExactLbvhTopKBudget;
 using morsehgp3d::spatial::LbvhTraversalOrder;
 using morsehgp3d::spatial::MortonLbvhIndex;
+using morsehgp3d::gpu::DirectSparseFacetTopKIntegratedAdapter;
+using morsehgp3d::gpu::DirectSparseFacetTopKProposalContext;
+using morsehgp3d::gpu::DirectSparseFacetTopKProposalPolicy;
+using morsehgp3d::gpu::MortonLbvhBuildContext;
+using morsehgp3d::gpu::test_support::
+    reset_fake_gpu_phase14_facet_top_k_proposal;
+using morsehgp3d::gpu::test_support::
+    reset_fake_gpu_phase14_morton_lbvh_build;
 
 constexpr std::uint64_t authority_id = UINT64_C(0x15C);
 int failures = 0;
@@ -184,6 +196,12 @@ execution_budget() {
   return {3U, 256U, 256U, 2560U, 256U};
 }
 
+[[nodiscard]] ExactDirectSparseFacetTopKProposalTranscriptBudget
+proposal_budget() {
+  constexpr std::size_t capacity = 4096U;
+  return {capacity, capacity, capacity, capacity * capacity, capacity};
+}
+
 [[nodiscard]] ExactDirectSparseFacetTopKProposalTranscriptResult
 empty_proposal_transcript(
     std::size_t source_batch_index,
@@ -206,9 +224,71 @@ void check_initial_singleton_bulk_audit(
       folded.canonical_singleton_bulk_count == point_count &&
           folded.staged_birth_record_count == 0U &&
           folded.staged_birth_node_count == 0U &&
-          folded.staged_locator_binding_count == 0U,
+          folded.staged_locator_binding_count == 0U &&
+          folded.implicit_singleton_carrier_count == point_count &&
+          folded.total_carrier_handle_count >= point_count &&
+          folded.materialized_direct_carrier_state_count ==
+              folded.total_carrier_handle_count - point_count &&
+          folded.root_override_slot_capacity ==
+              2U * folded.maximum_atomic_group_count + 1U &&
+          folded.locator_parent_authority_reused_by_carrier_state &&
+          folded.no_dense_singleton_carrier_state_materialized,
       "the " + path +
-          " first fold streams canonical singletons directly with zero per-birth staging");
+          " first fold keeps singleton output and carrier state implicit with zero per-birth staging");
+  const std::size_t trusted_total_carrier_handle_count =
+      folded.total_carrier_handle_count;
+  const std::size_t trusted_maximum_atomic_group_count =
+      folded.maximum_atomic_group_count;
+  check(
+      verify_exact_direct_morse_forest_reducer_fold_layout(
+          folded,
+          trusted_total_carrier_handle_count,
+          point_count,
+          trusted_maximum_atomic_group_count),
+      "the " + path +
+          " fold layout is freshly bound to trusted source and budget counts");
+  auto mutated = folded;
+  ++mutated.materialized_direct_carrier_state_count;
+  check(
+      !mutated.certified_committed_batch(),
+      "the " + path +
+          " fold certificate rejects a forged direct carrier-state count");
+  mutated = folded;
+  ++mutated.total_carrier_handle_count;
+  check(
+      !mutated.certified_committed_batch(),
+      "the " + path +
+          " fold certificate rejects a forged total carrier count");
+  mutated = folded;
+  ++mutated.root_override_slot_capacity;
+  check(
+      !mutated.certified_committed_batch(),
+      "the " + path +
+          " fold certificate rejects a non-2G+1 override capacity");
+  mutated = folded;
+  ++mutated.total_carrier_handle_count;
+  ++mutated.materialized_direct_carrier_state_count;
+  check(
+      mutated.certified_committed_batch() &&
+          !verify_exact_direct_morse_forest_reducer_fold_layout(
+              mutated,
+              trusted_total_carrier_handle_count,
+              point_count,
+              trusted_maximum_atomic_group_count),
+      "the " + path +
+          " fresh verifier rejects coordinated forged carrier counts");
+  mutated = folded;
+  ++mutated.maximum_atomic_group_count;
+  mutated.root_override_slot_capacity += 2U;
+  check(
+      mutated.certified_committed_batch() &&
+          !verify_exact_direct_morse_forest_reducer_fold_layout(
+              mutated,
+              trusted_total_carrier_handle_count,
+              point_count,
+              trusted_maximum_atomic_group_count),
+      "the " + path +
+          " fresh verifier rejects a coordinated forged override budget");
 }
 
 struct Scenario {
@@ -503,6 +583,135 @@ struct Scenario {
   return reducer.finish();
 }
 
+[[nodiscard]] ExactDirectMorseForestJournalResult
+run_integrated_adapter_stream(const Scenario& scenario) {
+  reset_fake_gpu_phase14_facet_top_k_proposal();
+  reset_fake_gpu_phase14_morton_lbvh_build();
+
+  const auto industrial_config = plan_config(1U);
+  const auto observed_plan =
+      build_exact_direct_sparse_facet_descent_batch_plan(
+          scenario.cloud,
+          scenario.facade,
+          scenario.event_journal,
+          seed_budget(),
+          scenario.seed_journal,
+          industrial_config,
+          plan_budget());
+  check(
+      observed_plan.complete_architecture_plan(),
+      "the composed 14O-to-15D fixture has one complete industrial plan");
+
+  ExactDirectMorseForestReducer reducer(
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      forest_budget(),
+      forest_config());
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      industrial_config,
+      plan_budget(),
+      observed_plan,
+      reducer.strict_locator());
+
+  MortonLbvhBuildContext device_builder{scenario.cloud.size()};
+  auto device_build = device_builder.build(scenario.cloud);
+  auto device_lease =
+      device_builder.release_device_lease(device_build);
+  DirectSparseFacetTopKProposalContext proposal_context{
+      device_build.certified_index(),
+      scenario.cloud,
+      std::move(device_lease),
+      2U};
+  DirectSparseFacetTopKIntegratedAdapter adapter{
+      proposal_context,
+      scenario.cloud,
+      DirectSparseFacetTopKProposalPolicy{1U},
+      proposal_budget()};
+  const ExactDirectSparseFacetDescentBatchIntegratedRunBudget run_budget{
+      2U, 8U, proposal_budget()};
+  const auto prepare_inputs = adapter.prepare_inputs_callback();
+  const auto seal_inputs = adapter.seal_inputs_callback();
+  std::uint64_t clock_tick = 0U;
+  const ExactDirectSparseFacetDescentBatchNanosecondClock clock =
+      [&clock_tick]() {
+        clock_tick += UINT64_C(10);
+        return clock_tick;
+      };
+
+  std::size_t prepared_ticket_count = 0U;
+  while (!executor.complete()) {
+    const std::size_t batch_index =
+        executor.next_source_batch_index();
+    const ExactDirectSparseFacetWitness witness{
+        authority_id,
+        (static_cast<std::uint64_t>(batch_index) + 1U) * 3U};
+    auto prepared = executor.prepare_next_integrated(
+        witness,
+        execution_budget(),
+        forest_budget().closure_budget,
+        run_budget,
+        prepare_inputs,
+        seal_inputs,
+        clock);
+    check(
+        prepared.complete_architecture_preparation() &&
+            prepared.prepared_ticket.has_value() &&
+            executor.next_source_batch_index() == batch_index &&
+            reducer.next_source_batch_index() == batch_index,
+        "the real 14O adapter seals one 14L preparation without advancing either live cursor");
+    if (!prepared.prepared_ticket.has_value()) {
+      break;
+    }
+    ++prepared_ticket_count;
+    const auto committed = reducer.fold_prepared_ticket(
+        executor, std::move(*prepared.prepared_ticket));
+    const bool live_commit_certified =
+        committed.certified_live_commit() &&
+        committed.reducer_fold.certified_committed_batch() &&
+        executor.next_source_batch_index() == batch_index + 1U &&
+        reducer.next_source_batch_index() == batch_index + 1U;
+    check(
+        live_commit_certified,
+        "the adapter-backed 14H ticket folds through 15D before one cursor advance");
+    if (!live_commit_certified) {
+      std::cerr << "integrated live decision="
+                << static_cast<unsigned>(committed.decision)
+                << ", reducer decision="
+                << static_cast<unsigned>(
+                       committed.reducer_fold.decision)
+                << '\n';
+      break;
+    }
+  }
+
+  const auto& adapter_audit = adapter.audit();
+  check(
+      prepared_ticket_count == scenario.event_journal.batches.size() &&
+          adapter_audit.prepared_chunk_count == 2U &&
+          adapter_audit.supported_query_count == 4U &&
+          adapter_audit.snapshot_host_to_device_byte_count == 0U &&
+          adapter_audit.every_chunk_used_adopted_device_snapshot &&
+          adapter_audit.every_chunk_retained_snapshot_owner &&
+          adapter_audit.every_chunk_was_proposal_only &&
+          adapter_audit.aggregate_transcript_sealed &&
+          !adapter_audit.forbidden_global_structure_materialized &&
+          !adapter_audit.public_status_claimed,
+      "the composed seam preserves adopted-snapshot, active-traffic-only and proposal-only evidence");
+  check(
+      executor.complete() && reducer.complete(),
+      "the composed 14O-to-15D path consumes every scientific batch");
+  return reducer.finish();
+}
+
 void test_final_root_budget_is_rejected_at_open() {
   const Scenario scenario = tetrahedron();
   auto insufficient = forest_budget();
@@ -623,15 +832,31 @@ void test_incremental_identity_and_chunk_independence() {
       run_stream(scenario, 1U, true, false);
   const auto two_batch_chunks =
       run_stream(scenario, 2U, false, true);
+  const auto integrated_adapter =
+      run_integrated_adapter_stream(scenario);
 
   check(
       resident.certified_conditional_h0_candidate() &&
           one_batch_chunks.certified_conditional_h0_candidate() &&
-          two_batch_chunks.certified_conditional_h0_candidate(),
+          two_batch_chunks.certified_conditional_h0_candidate() &&
+          integrated_adapter.certified_conditional_h0_candidate(),
       "resident and streaming reductions certify the same conditional scope");
   check(
-      one_batch_chunks == resident && two_batch_chunks == resident,
-      "streaming output is recursively identical to resident output and independent of chunk cap");
+      one_batch_chunks.implicit_order_one_prefix_count ==
+              scenario.cloud.size() &&
+          one_batch_chunks
+              .order_one_birth_and_node_prefix_implicit_and_unmaterialized &&
+          one_batch_chunks.birth_records.size() +
+                  scenario.cloud.size() ==
+              one_batch_chunks.counters.birth_record_count &&
+          one_batch_chunks.nodes.size() + scenario.cloud.size() ==
+              one_batch_chunks.counters.node_count,
+      "the streaming reducer stores only the direct birth and node suffix");
+  check(
+      one_batch_chunks == resident &&
+          two_batch_chunks == resident &&
+          integrated_adapter == resident,
+      "projected, live and real-adapter streaming outputs are recursively identical to resident output");
 }
 
 void test_gabriel_arm_may_descend_to_a_different_terminal_key() {

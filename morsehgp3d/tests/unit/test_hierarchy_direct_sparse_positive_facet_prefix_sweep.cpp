@@ -910,6 +910,86 @@ void check_verifier_mutations_and_stale_stamp() {
       "an otherwise unchanged historical prefix result is stale after a later empty commit");
 }
 
+void check_implicit_singleton_prefix_boundaries() {
+  auto locator = make_empty_locator();
+  const auto singleton_commit =
+      locator.apply_canonical_singleton_identity_batch(5U);
+  const std::array<ExactDirectSparseComponentUnion, 1U> redirect{{
+      {0U, 4U, 1U, witness(940U)},
+  }};
+  const auto redirect_commit = locator.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      redirect,
+      std::span<const ExactDirectSparseFacetBinding>{});
+  check(
+      singleton_commit.certified_committed_identity_batch() &&
+          redirect_commit.certified_committed_batch(),
+      "the implicit-prefix fixture commits batch zero and one later root redirect");
+
+  const std::array<ExactDirectSparsePositiveFacetPrefixQuery, 5U> queries{{
+      {0U, 0U, key({4U})},
+      {1U, 1U, key({4U})},
+      {2U, 1U, key({5U})},
+      {3U, 2U, key({4U})},
+      {4U, 2U, key({4U, 5U})},
+  }};
+  const auto result = build_exact_direct_sparse_positive_facet_prefix_sweep(
+      queries, witness(941U), locator, generous_sweep_budget());
+  check(
+      result.certified_partial_refinement() &&
+          result.required_active_binding_prefix_count == 5U &&
+          result.counters.slot_visit_count == 2U &&
+          result.counters.full_key_comparison_count == 2U &&
+          result.counters.future_binding_terminator_count == 1U,
+      "implicit singleton prefixes avoid physical slot work while ordinary misses still inspect the suffix terminator");
+  check_latent(
+      result,
+      0U,
+      0U,
+      "the implicit singleton is latent before the only batch-zero activation");
+  check_positive(
+      result,
+      1U,
+      1U,
+      4U,
+      witness(13U),
+      "the same singleton appears with its canonical witness immediately after batch zero");
+  check_latent(
+      result,
+      2U,
+      1U,
+      "the exact upper bound i=n is not an implicit singleton");
+  check_positive(
+      result,
+      3U,
+      2U,
+      1U,
+      witness(13U),
+      "historical singleton resolution follows the parent current at the requested prefix");
+  check_latent(
+      result,
+      4U,
+      2U,
+      "a non-singleton miss remains unresolved after implicit activation");
+
+  const auto verification =
+      verify_exact_direct_sparse_positive_facet_prefix_sweep(
+          queries,
+          witness(941U),
+          locator,
+          generous_sweep_budget(),
+          exact_locator_verification_budget(locator),
+          result);
+  check(
+      verification.result_certified &&
+          verification.historical_slot_probes_freshly_replayed &&
+          verification.locator_structural_verification
+              .implicit_canonical_singleton_base_certified &&
+          verification.locator_structural_verification
+              .physical_occupied_slot_count == 0U,
+      "fresh prefix verification synthesizes the implicit base and audits an empty physical suffix");
+}
+
 }  // namespace
 
 int main() {
@@ -919,6 +999,7 @@ int main() {
   check_every_budget_exact_and_minus_one();
   check_fresh_verifier_has_distinct_bounded_accounting();
   check_verifier_mutations_and_stale_stamp();
+  check_implicit_singleton_prefix_boundaries();
 
   if (failures != 0) {
     std::cerr << failures

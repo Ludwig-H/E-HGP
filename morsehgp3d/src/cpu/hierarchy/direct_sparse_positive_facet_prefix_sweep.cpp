@@ -97,6 +97,18 @@ struct PrefixProbeResult {
   return true;
 }
 
+[[nodiscard]] bool implicit_canonical_singleton_index(
+    const ExactDirectSparseFacetKey& key,
+    std::size_t implicit_singleton_count,
+    std::size_t& singleton_index) noexcept {
+  if (key.point_count != 1U ||
+      key.point_ids[0U] >= implicit_singleton_count) {
+    return false;
+  }
+  singleton_index = static_cast<std::size_t>(key.point_ids[0U]);
+  return true;
+}
+
 [[nodiscard]] bool witness_matches_locator(
     const ExactDirectSparseFacetWitness& witness,
     const ExactDirectSparsePositiveFacetLocator& locator) noexcept {
@@ -336,6 +348,40 @@ enum class UnionReplayStatus : std::uint8_t {
     const ExactDirectSparsePositiveFacetLocator& locator,
     const ExactDirectSparsePositiveFacetProbeBudget& budget) noexcept {
   PrefixProbeResult result;
+  std::size_t singleton_index = 0U;
+  if (implicit_canonical_singleton_index(
+          key,
+          locator.implicit_canonical_singleton_count(),
+          singleton_index)) {
+    if (singleton_index >= active_binding_prefix_count) {
+      result.status = PrefixProbeStatus::latent_unresolved;
+      result.future_binding_terminator = true;
+      return result;
+    }
+    result.full_key_comparison_count = 1U;
+    ExactDirectSparseComponentHandle root = 0U;
+    const RootFindStatus root_status = find_root_with_budget(
+        parents,
+        singleton_index,
+        budget.maximum_component_parent_hop_count,
+        result.query_parent_hop_count,
+        root);
+    if (root_status != RootFindStatus::complete) {
+      if (root_status == RootFindStatus::budget_exhausted) {
+        result.status = PrefixProbeStatus::budget_exhausted;
+        result.query_parent_hop_budget_exhausted = true;
+      }
+      return result;
+    }
+    result.status = PrefixProbeStatus::relative_positive;
+    result.component_handle = root;
+    result.source_binding_witness = {
+        locator.config().external_authority_id,
+        direct_sparse_canonical_singleton_replay_token_stride *
+                static_cast<std::uint64_t>(singleton_index) +
+            direct_sparse_canonical_singleton_replay_token_residue};
+    return result;
+  }
   const auto& slots = locator.slots();
   const auto& key_point_arena = locator.key_point_arena();
   if (slots.empty()) {

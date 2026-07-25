@@ -461,6 +461,11 @@ def validate_implementation(source: str) -> None:
             "locator.committed_unions()[union_index]",
             "replayed_binding_prefix_count",
             "replayed_union_prefix_count",
+            "implicit_canonical_singleton_index(",
+            "locator.implicit_canonical_singleton_count()",
+            "singleton_index >= active_binding_prefix_count",
+            "direct_sparse_canonical_singleton_replay_token_stride",
+            "direct_sparse_canonical_singleton_replay_token_residue",
             "result.each_batch_and_union_prefix_replayed_once =",
             "fingerprint_exact_direct_sparse_facet_key(",
             "verify_exact_direct_sparse_positive_facet_locator_structure(",
@@ -599,6 +604,28 @@ def validate_implementation(source: str) -> None:
         ),
     )
     prefix_probe = re.sub(r"\s*\.\s*", ".", prefix_probe)
+    implicit_probe_position = prefix_probe.find(
+        "if (implicit_canonical_singleton_index("
+    )
+    physical_slot_position = prefix_probe.find(
+        "const auto& slots = locator.slots()"
+    )
+    require(
+        0 <= implicit_probe_position < physical_slot_position,
+        "the historical implicit singleton base must be resolved before "
+        "touching any physical suffix slot",
+    )
+    require_all(
+        prefix_probe,
+        (
+            "if (singleton_index >= active_binding_prefix_count)",
+            "result.future_binding_terminator = true",
+            "result.full_key_comparison_count = 1U",
+            "find_root_with_budget(",
+            "result.source_binding_witness = {",
+        ),
+        "the latent/active implicit singleton prefix path",
+    )
     require_all(
         prefix_probe,
         (

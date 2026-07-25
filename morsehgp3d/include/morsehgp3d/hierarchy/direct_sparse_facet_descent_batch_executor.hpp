@@ -99,8 +99,9 @@ inline constexpr std::string_view
 inline constexpr std::string_view
     direct_sparse_facet_descent_batch_integrated_run_proof_basis =
         "cpu_batch_preflight_then_bounded_canonical_query_chunks_external_"
-        "proposal_records_single_14f_seal_exact_14g_preparation_private_14h_"
-        "ticket_and_immediate_no_replay_commit_v1";
+        "proposal_records_single_14f_seal_exact_14g_preparation_move_only_14h_"
+        "ticket_returned_without_cursor_advance_or_immediate_no_replay_commit_"
+        "v1";
 
 // The closure owns a separate budget.  These caps cover every population
 // retained while selecting one exact batch and every record that survives in
@@ -576,6 +577,8 @@ enum class ExactDirectSparseFacetDescentBatchIntegratedRunDecision
   no_run_ticket_not_issued,
   no_run_sealed_commit_rejected,
   complete_architecture_only_integrated_proposal_sealed_commit,
+  // Appended to preserve every numeric value already published by schema v1.
+  complete_architecture_only_integrated_proposal_sealed_preparation,
 };
 
 struct ExactDirectSparseFacetDescentBatchIntegratedRunAudit {
@@ -805,6 +808,42 @@ class ExactDirectSparseFacetDescentAnchoredBatchExecutor {
     friend class ExactDirectMorseForestReducer;
   };
 
+  // Public 14L preparation result for the 15D live reducer seam.  Success
+  // carries exactly one move-only 14H ticket and leaves every executor cursor
+  // component unchanged.  Rejection carries the same integrated diagnostic as
+  // run_next and no ticket.  The operational audit remains separate from the
+  // capability and has no scientific authority.
+  class IntegratedPreparationResult {
+   public:
+    ExactDirectSparseFacetDescentBatchIntegratedRunResult run_result{};
+    std::optional<PreparedTopKProposalBatch> prepared_ticket;
+    bool cursor_unchanged_after_preparation{false};
+
+    [[nodiscard]] bool complete_architecture_preparation() const noexcept {
+      return prepared_ticket.has_value() &&
+             prepared_ticket->prepared() &&
+             cursor_unchanged_after_preparation &&
+             !run_result.preparation_diagnostic.has_value() &&
+             !run_result.sealed_commit.has_value() &&
+             run_result.audit.maximum_live_ticket_count == 1U &&
+             run_result.audit.live_ticket_count_at_return == 1U &&
+             !run_result.audit.private_ticket_never_exposed_to_caller &&
+             run_result.audit.at_most_one_live_ticket &&
+             !run_result.audit.immediate_sealed_commit_attempted &&
+             !run_result.audit.independent_commit_replay_performed &&
+             !run_result.no_ticket_live_at_return &&
+             run_result.decision ==
+                 ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+                     complete_architecture_only_integrated_proposal_sealed_preparation;
+    }
+
+   private:
+    std::uint64_t run_started_ns_{};
+    std::uint64_t last_clock_ns_{};
+
+    friend class ExactDirectSparseFacetDescentAnchoredBatchExecutor;
+  };
+
   ExactDirectSparseFacetDescentAnchoredBatchExecutor(
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
@@ -912,10 +951,28 @@ class ExactDirectSparseFacetDescentAnchoredBatchExecutor {
   [[nodiscard]] ExactDirectSparseFacetDescentBatchSealedCommitResult
   commit_prepared_ticket(PreparedTopKProposalBatch&& prepared) noexcept;
 
-  // Executes the missing 14J/14K -> 14F -> 14H seam synchronously.  The
+  // Executes the 14J/14K -> 14F -> 14H preparation seam synchronously.  The
   // callbacks are called only after the current CPU batch and D canonical
-  // keys have passed every 14D preflight.  run_next owns at most one private
-  // ticket, commits it immediately, and never returns a ticket capability.
+  // keys have passed every 14D preflight.  Success returns exactly one mobile
+  // ticket for commit_prepared_ticket or 15D fold_prepared_ticket and does not
+  // advance the executor cursor.  Every rejection returns no ticket and also
+  // leaves the cursor unchanged.
+  [[nodiscard]] IntegratedPreparationResult prepare_next_integrated(
+      const ExactDirectSparseFacetWitness& locator_query_witness,
+      const ExactDirectSparseFacetDescentBatchExecutionBudget&
+          execution_budget,
+      const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
+      const ExactDirectSparseFacetDescentBatchIntegratedRunBudget&
+          run_budget,
+      const ExactDirectSparseFacetDescentBatchPrepareInputsCallback&
+          prepare_inputs,
+      const ExactDirectSparseFacetDescentBatchSealInputsCallback&
+          seal_inputs,
+      const ExactDirectSparseFacetDescentBatchNanosecondClock& clock = {});
+
+  // Compatibility wrapper over prepare_next_integrated.  It commits the one
+  // returned ticket immediately without another scientific loop and preserves
+  // the historical run result and audit contract.
   // An empty clock uses std::chrono::steady_clock; tests may inject a
   // deterministic monotonic nanosecond clock without sleeping.
   [[nodiscard]] ExactDirectSparseFacetDescentBatchIntegratedRunResult

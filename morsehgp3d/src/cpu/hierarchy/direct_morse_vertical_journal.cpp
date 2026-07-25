@@ -176,9 +176,12 @@ class LevelAccounting {
     const ExactDirectMorseForestJournalResult& forest,
     const std::vector<ExactDirectMorseForestNodeId>& parent_by_node) {
   std::vector<ExactDirectMorseForestNodeId> structural;
-  structural.reserve(forest.nodes.size());
+  structural.reserve(forest.final_roots.size());
   for (std::size_t index = 0U; index < parent_by_node.size(); ++index) {
     if (parent_by_node[index] == no_node) {
+      if (structural.size() == forest.final_roots.size()) {
+        return false;
+      }
       structural.push_back(
           static_cast<ExactDirectMorseForestNodeId>(index));
     }
@@ -212,13 +215,26 @@ enum class ShapeStatus : std::uint8_t {
       forest.effective_maximum_order == 0U ||
       forest.effective_maximum_order >
           direct_sparse_positive_facet_maximum_point_count ||
-      forest.effective_maximum_order > forest.point_count) {
+      forest.effective_maximum_order > forest.point_count ||
+      forest.implicit_order_one_prefix_count != forest.point_count ||
+      !forest
+           .order_one_birth_and_node_prefix_implicit_and_unmaterialized ||
+      forest.implicit_order_one_prefix_count >
+          std::numeric_limits<std::size_t>::max() -
+              forest.birth_records.size() ||
+      forest.implicit_order_one_prefix_count >
+          std::numeric_limits<std::size_t>::max() -
+              forest.nodes.size()) {
     return ShapeStatus::rejected;
   }
-  if (forest.nodes.size() > budget.maximum_forest_node_scan_count ||
+  const ExactDirectMorseForestJournalView forest_view{forest};
+  const std::size_t forest_node_count = forest_view.node_count();
+  const std::size_t forest_birth_record_count =
+      forest_view.birth_record_count();
+  if (forest_node_count > budget.maximum_forest_node_scan_count ||
       forest.child_node_ids.size() >
           budget.maximum_child_reference_scan_count ||
-      forest.birth_records.size() >
+      forest_birth_record_count >
           budget.maximum_birth_record_scan_count ||
       forest.batches.size() > budget.maximum_batch_scan_count ||
       forest.atomic_groups.size() >
@@ -230,7 +246,11 @@ enum class ShapeStatus : std::uint8_t {
   }
 
   LevelAccounting levels{budget, counters};
-  for (const auto& node : forest.nodes) {
+  for (std::size_t index = 0U;
+       index < forest_node_count;
+       ++index) {
+    const auto node = forest_view.node_at(
+        static_cast<ExactDirectMorseForestNodeId>(index));
     if (!levels.measure(node.squared_level)) {
       return ShapeStatus::budget_exhausted;
     }
@@ -241,11 +261,12 @@ enum class ShapeStatus : std::uint8_t {
     }
   }
 
-  shape.parent_by_node.assign(forest.nodes.size(), no_node);
+  shape.parent_by_node.assign(forest_node_count, no_node);
   shape.nodes_by_order.assign(
       forest.effective_maximum_order + 1U, {});
-  for (std::size_t index = 0U; index < forest.nodes.size(); ++index) {
-    const auto& node = forest.nodes[index];
+  for (std::size_t index = 0U; index < forest_node_count; ++index) {
+    const auto node = forest_view.node_at(
+        static_cast<ExactDirectMorseForestNodeId>(index));
     if (node.node_id !=
             static_cast<ExactDirectMorseForestNodeId>(index) ||
         node.order == 0U ||
@@ -257,7 +278,7 @@ enum class ShapeStatus : std::uint8_t {
     }
     auto& order_nodes = shape.nodes_by_order[node.order];
     if (!order_nodes.empty()) {
-      const auto& prior = forest.nodes[order_nodes.back()];
+      const auto prior = forest_view.node_at(order_nodes.back());
       if (!levels.less_equal(
               prior.squared_level, node.squared_level)) {
         return ShapeStatus::budget_exhausted;
@@ -270,13 +291,13 @@ enum class ShapeStatus : std::uint8_t {
     for (std::size_t local = 0U; local < node.child_count; ++local) {
       const ExactDirectMorseForestNodeId child =
           forest.child_node_ids[node.child_offset + local];
-      if (child >= forest.nodes.size() ||
-          forest.nodes[child].order != node.order ||
+      if (child >= forest_node_count ||
+          forest_view.node_at(child).order != node.order ||
           shape.parent_by_node[child] != no_node) {
         return ShapeStatus::rejected;
       }
       if (!levels.less(
-              forest.nodes[child].squared_level,
+              forest_view.node_at(child).squared_level,
               node.squared_level)) {
         return ShapeStatus::budget_exhausted;
       }
@@ -293,11 +314,11 @@ enum class ShapeStatus : std::uint8_t {
   shape.omitted_births_by_order.assign(
       forest.effective_maximum_order + 1U, 0U);
   std::vector<bool> order_one_birth_node_seen(
-      forest.nodes.size(), false);
+      forest_node_count, false);
   for (std::size_t index = 0U;
-       index < forest.birth_records.size();
+       index < forest_birth_record_count;
        ++index) {
-    const auto& birth = forest.birth_records[index];
+    const auto birth = forest_view.birth_record_at(index);
     if (birth.birth_record_index != index ||
         birth.order == 0U ||
         birth.order > forest.effective_maximum_order ||
@@ -307,11 +328,11 @@ enum class ShapeStatus : std::uint8_t {
     }
     if (birth.order == 1U) {
       if (!birth.order_one_birth_node_id.has_value() ||
-          *birth.order_one_birth_node_id >= forest.nodes.size()) {
+          *birth.order_one_birth_node_id >= forest_node_count) {
         return ShapeStatus::rejected;
       }
       const auto node_id = *birth.order_one_birth_node_id;
-      const auto& node = forest.nodes[node_id];
+      const auto node = forest_view.node_at(node_id);
       if (order_one_birth_node_seen[node_id] ||
           node.order != 1U ||
           node.kind != ExactDirectMorseForestNodeKind::order_one_birth ||
@@ -387,11 +408,12 @@ enum class ShapeStatus : std::uint8_t {
             forest.saddle_records.size() -
                 group.saddle_record_offset ||
         group.saddle_record_count == 0U ||
-        group.resulting_root_node_id >= forest.nodes.size()) {
+        group.resulting_root_node_id >= forest_node_count) {
       return ShapeStatus::rejected;
     }
     const auto& batch = forest.batches[group.batch_index];
-    if (forest.nodes[group.resulting_root_node_id].order != batch.order) {
+    if (forest_view.node_at(group.resulting_root_node_id).order !=
+        batch.order) {
       return ShapeStatus::rejected;
     }
     switch (group.kind) {
@@ -528,17 +550,19 @@ class TargetSweep {
       const ExactDirectMorseVerticalBudget& budget,
       ExactDirectMorseVerticalCounters& counters)
       : forest_(forest),
+        forest_view_(forest),
         nodes_(shape.nodes_by_order[order]),
         budget_(budget),
         counters_(counters),
-        parent_(forest.nodes.size(), no_node),
-        active_(forest.nodes.size(), false) {}
+        parent_(forest_view_.node_count(), no_node),
+        active_(forest_view_.node_count(), false) {}
 
   [[nodiscard]] bool advance(const exact::ExactLevel& level) {
     while (cursor_ < nodes_.size()) {
       const auto node_id = nodes_[cursor_];
+      const auto node = forest_view_.node_at(node_id);
       if (!compare_less_equal(
-              forest_.nodes[node_id].squared_level, level)) {
+              node.squared_level, level)) {
         return false;
       }
       if (last_relation_ > 0) {
@@ -546,7 +570,6 @@ class TargetSweep {
       }
       active_[node_id] = true;
       parent_[node_id] = node_id;
-      const auto& node = forest_.nodes[node_id];
       for (std::size_t local = 0U; local < node.child_count; ++local) {
         const auto child =
             forest_.child_node_ids[node.child_offset + local];
@@ -622,6 +645,7 @@ class TargetSweep {
   }
 
   const ExactDirectMorseForestJournalResult& forest_;
+  ExactDirectMorseForestJournalView forest_view_;
   const std::vector<ExactDirectMorseForestNodeId>& nodes_;
   const ExactDirectMorseVerticalBudget& budget_;
   ExactDirectMorseVerticalCounters& counters_;
@@ -843,6 +867,7 @@ build_exact_direct_morse_vertical_journal(
   }
 
   try {
+    const ExactDirectMorseForestJournalView forest_view{source_forest};
     ForestShape shape;
     const ShapeStatus shape_status = reconstruct_shape(
         source_forest, budget, result.counters, shape);
@@ -943,7 +968,7 @@ build_exact_direct_morse_vertical_journal(
         source_forest.atomic_groups.size()));
 
     std::vector<std::optional<std::size_t>> latest_checkpoint(
-        source_forest.nodes.size());
+        forest_view.node_count());
     std::vector<bool> consumed_proposals(
         sorted_proposals.size(), false);
     for (std::size_t source_order = 2U;
@@ -1046,8 +1071,14 @@ build_exact_direct_morse_vertical_journal(
               all_labels_resolved = false;
             } else {
               const auto seed = *proposal.target_seed_node_id;
-              if (seed >= source_forest.nodes.size() ||
-                  source_forest.nodes[seed].order != source_order - 1U) {
+              if (seed >= forest_view.node_count()) {
+                return fail(
+                    std::move(result),
+                    ExactDirectMorseVerticalDecision::
+                        no_vertical_target_rejected);
+              }
+              const auto seed_node = forest_view.node_at(seed);
+              if (seed_node.order != source_order - 1U) {
                 return fail(
                     std::move(result),
                     ExactDirectMorseVerticalDecision::
@@ -1061,8 +1092,7 @@ build_exact_direct_morse_vertical_journal(
                         no_vertical_budget_exhausted);
               }
               ++result.counters.exact_level_comparison_count;
-              if (source_forest.nodes[seed].squared_level >
-                  batch.squared_level) {
+              if (seed_node.squared_level > batch.squared_level) {
                 return fail(
                     std::move(result),
                     ExactDirectMorseVerticalDecision::
@@ -1317,14 +1347,14 @@ namespace {
 
 [[nodiscard]] std::optional<ExactDirectMorseForestNodeId>
 root_at_level_with_budget(
-    const ExactDirectMorseForestJournalResult& forest,
+    const ExactDirectMorseForestJournalView& forest_view,
     const std::vector<ExactDirectMorseForestNodeId>& parent_by_node,
     ExactDirectMorseForestNodeId node,
     const exact::ExactLevel& level,
     const ExactDirectMorseVerticalTraceBudget& budget,
     ExactDirectMorseVerticalTraceResult& result) {
-  if (node >= forest.nodes.size() ||
-      forest.nodes[node].squared_level > level) {
+  if (node >= forest_view.node_count() ||
+      forest_view.node_at(node).squared_level > level) {
     return std::nullopt;
   }
   while (parent_by_node[node] != no_node) {
@@ -1335,7 +1365,7 @@ root_at_level_with_budget(
       return std::nullopt;
     }
     const auto parent = parent_by_node[node];
-    if (forest.nodes[parent].squared_level > level) {
+    if (forest_view.node_at(parent).squared_level > level) {
       break;
     }
     ++result.parent_hop_count;
@@ -1358,13 +1388,27 @@ trace_exact_direct_morse_vertical_component(
   result.at_squared_level = at_squared_level;
   result.requested_target_order = target_order;
   if (!vertical_journal.certified_conditional_vertical_candidate() ||
-      source_node_id >= source_forest.nodes.size()) {
+      source_forest.schema_version !=
+          direct_morse_forest_journal_schema_version ||
+      source_forest.implicit_order_one_prefix_count !=
+          source_forest.point_count ||
+      !source_forest
+           .order_one_birth_and_node_prefix_implicit_and_unmaterialized ||
+      source_forest.implicit_order_one_prefix_count >
+          std::numeric_limits<std::size_t>::max() -
+              source_forest.nodes.size()) {
+    result.disposition =
+        ExactDirectMorseVerticalTraceDisposition::invalid_query;
+    return result;
+  }
+  const ExactDirectMorseForestJournalView forest_view{source_forest};
+  if (source_node_id >= forest_view.node_count()) {
     result.disposition =
         ExactDirectMorseVerticalTraceDisposition::invalid_query;
     return result;
   }
   result.requested_source_order =
-      source_forest.nodes[source_node_id].order;
+      forest_view.node_at(source_node_id).order;
   if (target_order == 0U ||
       target_order >= result.requested_source_order ||
       result.requested_source_order - target_order >
@@ -1375,8 +1419,12 @@ trace_exact_direct_morse_vertical_component(
   }
 
   std::vector<ExactDirectMorseForestNodeId> parent(
-      source_forest.nodes.size(), no_node);
-  for (const auto& node : source_forest.nodes) {
+      forest_view.node_count(), no_node);
+  for (std::size_t logical_node_id = 0U;
+       logical_node_id < forest_view.node_count();
+       ++logical_node_id) {
+    const auto node = forest_view.node_at(
+        static_cast<ExactDirectMorseForestNodeId>(logical_node_id));
     if (node.child_offset > source_forest.child_node_ids.size() ||
         node.child_count >
             source_forest.child_node_ids.size() - node.child_offset) {
@@ -1402,7 +1450,7 @@ trace_exact_direct_morse_vertical_component(
        order > target_order;
        --order) {
     const auto source_root = root_at_level_with_budget(
-        source_forest,
+        forest_view,
         parent,
         current,
         at_squared_level,
@@ -1449,14 +1497,14 @@ trace_exact_direct_morse_vertical_component(
     const auto& checkpoint =
         vertical_journal.checkpoints[*checkpoint_index];
     const auto target_root = root_at_level_with_budget(
-        source_forest,
+        forest_view,
         parent,
         checkpoint.closed_target_root_node_id,
         at_squared_level,
         budget,
         result);
     if (!target_root.has_value() ||
-        source_forest.nodes[*target_root].order != order - 1U) {
+        forest_view.node_at(*target_root).order != order - 1U) {
       if (result.disposition !=
           ExactDirectMorseVerticalTraceDisposition::budget_exhausted) {
         result.disposition =

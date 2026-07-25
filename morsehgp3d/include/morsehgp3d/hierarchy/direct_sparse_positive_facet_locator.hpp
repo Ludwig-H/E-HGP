@@ -13,7 +13,18 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t
-    direct_sparse_positive_facet_locator_schema_version = 1U;
+    direct_sparse_positive_facet_locator_logical_snapshot_schema_version =
+        1U;
+inline constexpr std::uint32_t
+    direct_sparse_positive_facet_locator_storage_schema_version = 2U;
+inline constexpr std::uint32_t
+    direct_sparse_positive_facet_probe_schema_version = 2U;
+// Batch results and snapshot stamps intentionally retain the v1 logical
+// schema: Phase 15H changes only physical storage and replays the exact same
+// canonical singleton bindings into the history digest.
+inline constexpr std::uint32_t
+    direct_sparse_positive_facet_locator_schema_version =
+        direct_sparse_positive_facet_locator_logical_snapshot_schema_version;
 inline constexpr std::string_view
     direct_sparse_positive_facet_locator_backend = "reference_cpu";
 inline constexpr std::string_view
@@ -33,7 +44,7 @@ inline constexpr std::string_view
 
 inline constexpr std::uint32_t
     direct_sparse_positive_facet_locator_prefix_stamp_sweep_schema_version =
-        1U;
+        2U;
 inline constexpr std::string_view
     direct_sparse_positive_facet_locator_prefix_stamp_sweep_backend =
         "reference_cpu";
@@ -52,10 +63,15 @@ inline constexpr std::string_view
 inline constexpr std::string_view
     direct_sparse_positive_facet_locator_prefix_stamp_sweep_proof_basis =
         "shared_canonical_digest_transition_two_pass_monotone_committed_"
-        "batch_prefix_stamp_sweep_v1";
+        "batch_prefix_stamp_sweep_with_implicit_logical_singleton_prefix_"
+        "and_physical_suffix_index_scratch_v2";
 
 inline constexpr std::size_t
     direct_sparse_positive_facet_maximum_point_count = 10U;
+inline constexpr std::uint64_t
+    direct_sparse_canonical_singleton_replay_token_stride = 3U;
+inline constexpr std::uint64_t
+    direct_sparse_canonical_singleton_replay_token_residue = 1U;
 
 // Canonical facet identity.  The used PointIds are strictly increasing, the
 // point count is in [1, 10], and every unused tail entry is zero.  The fixed
@@ -327,6 +343,7 @@ struct ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult {
   std::size_t required_batch_record_scan_count{};
   std::size_t required_table_slot_scan_count{};
   std::size_t required_active_binding_prefix_count{};
+  std::size_t required_physical_binding_slot_index_count{};
   std::size_t required_union_record_replay_count{};
   std::size_t required_key_point_replay_count{};
   std::size_t required_temporary_scratch_byte_count{};
@@ -483,10 +500,17 @@ struct ExactDirectSparsePositiveFacetBatchResult {
 // {PointId i} -> component i.  The caller supplies only its length; witnesses
 // are generated as 3*i+1 under the locator's external authority.  In
 // particular, the implementation never materializes an input binding array,
-// PendingBinding array, or batch hash-scratch array.
+// PendingBinding array, batch hash-scratch array, singleton slot, or singleton
+// key-arena entry.  Only the capacity-bounded non-singleton suffix table is
+// physical.
 struct ExactDirectSparseCanonicalSingletonIdentityBatchAudit {
   std::size_t bulk_count{};
   std::uint64_t last_replay_token{};
+  std::size_t implicit_singleton_binding_count{};
+  std::size_t physical_suffix_binding_capacity{};
+  std::size_t physical_table_slot_count{};
+  std::size_t physical_occupied_slot_count{};
+  std::size_t physical_key_point_count{};
   std::size_t external_binding_input_entry_count{};
   std::size_t pending_binding_staging_entry_count{};
   std::size_t batch_scratch_slot_staging_entry_count{};
@@ -498,7 +522,11 @@ struct ExactDirectSparseCanonicalSingletonIdentityBatchAudit {
   bool budget_and_capacity_preflight_certified{false};
   bool all_fallible_allocations_completed_before_first_slot_mutation{false};
   bool mutation_suffix_nonthrow_or_fail_stop{false};
-  bool standard_fingerprint_key_arena_and_history_path_preserved{false};
+  bool canonical_logical_history_path_preserved{false};
+  bool canonical_singleton_base_is_implicit{false};
+  bool no_singleton_slot_materialized{false};
+  bool no_singleton_key_point_materialized{false};
+  bool exact_physical_suffix_table_capacity_certified{false};
 
   friend bool operator==(
       const ExactDirectSparseCanonicalSingletonIdentityBatchAudit&,
@@ -550,12 +578,13 @@ enum class ExactDirectSparsePositiveFacetProbeDecision : std::uint8_t {
 };
 
 // A budget exhaustion is deliberately not an unresolved miss: unresolved is
-// returned only after an empty terminator (or the entire table) has been
-// inspected.  Likewise, positive is returned only after both the full facet
-// key comparison and the parent-chain traversal have completed.
+// returned only after an empty terminator (or the entire suffix table) has
+// been inspected.  An implicit canonical singleton uses one logical full-key
+// comparison and zero physical slot visits.  Positive is returned only after
+// the complete-key decision and parent-chain traversal have completed.
 struct ExactDirectSparsePositiveFacetProbeResult {
   std::uint32_t schema_version{
-      direct_sparse_positive_facet_locator_schema_version};
+      direct_sparse_positive_facet_probe_schema_version};
   ExactDirectSparsePositiveFacetProbeBudget budget{};
   ExactDirectSparseFacetKey query_key{};
   std::size_t slot_visit_count{};
@@ -571,6 +600,7 @@ struct ExactDirectSparsePositiveFacetProbeResult {
   bool every_fingerprint_candidate_compared_by_full_key{false};
   bool slot_search_completed{false};
   bool component_find_completed{false};
+  bool implicit_canonical_singleton_binding_resolved{false};
   bool component_handle_present{false};
   bool source_binding_witness_present{false};
   bool slot_visit_budget_exhausted{false};
@@ -620,11 +650,14 @@ struct ExactDirectSparsePositiveFacetProbeVerification {
 // decoded durable image; verification does not trust the producer object.
 struct ExactDirectSparsePositiveFacetLocatorStateView {
   std::uint32_t schema_version{};
+  std::uint32_t storage_schema_version{};
   ExactDirectSparsePositiveFacetLocatorBudget budget{};
   ExactDirectSparsePositiveFacetLocatorConfig config{};
   std::size_t required_component_handle_capacity{};
   std::size_t required_table_slot_capacity{};
   std::size_t required_batch_scratch_slot_capacity{};
+  std::size_t implicit_canonical_singleton_count{};
+  std::size_t physical_suffix_binding_capacity{};
   std::span<const ExactDirectSparsePositiveFacetSlot> slots;
   std::span<const spatial::PointId> key_point_arena;
   std::span<const ExactDirectSparseComponentHandle> component_parents;
@@ -636,6 +669,8 @@ struct ExactDirectSparsePositiveFacetLocatorStateView {
   bool empty_table_initialized{false};
   bool dense_component_handles_initialized{false};
   bool flat_durable_key_arena_initialized{false};
+  bool physical_table_capacity_materialized{false};
+  bool canonical_singleton_base_implicit{false};
   bool positive_bindings_only{false};
   bool full_key_comparison_required{false};
   bool missing_facet_means_isolated{false};
@@ -704,6 +739,10 @@ struct ExactDirectSparsePositiveFacetLocatorStructuralVerification {
   std::size_t required_table_slot_scratch_entry_count{};
   std::size_t required_component_parent_scratch_entry_count{};
   std::size_t required_temporary_scratch_byte_count{};
+  std::size_t implicit_canonical_singleton_count{};
+  std::size_t physical_suffix_binding_capacity{};
+  std::size_t physical_occupied_slot_count{};
+  std::size_t physical_key_point_count{};
   std::size_t table_slot_scan_count{};
   std::size_t key_point_scan_count{};
   std::size_t union_record_scan_count{};
@@ -721,6 +760,8 @@ struct ExactDirectSparsePositiveFacetLocatorStructuralVerification {
   bool budget_exhausted{false};
   bool structure_contract_rejected{false};
   bool flat_table_and_key_arena_certified{false};
+  bool implicit_canonical_singleton_base_certified{false};
+  bool exact_physical_suffix_capacity_certified{false};
   bool every_fingerprint_recomputed_and_full_key_located{false};
   bool committed_slot_insertion_chronology_freshly_replayed{false};
   bool dense_handle_dsu_replay_certified{false};
@@ -771,8 +812,9 @@ class ExactDirectSparsePositiveFacetLocator {
 
   // Accepts only the certified initial locator at committed batch zero and
   // 0 < singleton_count <= dense component-handle count.  It commits exactly
-  // one ordinary batch while streaming canonical singleton bindings directly
-  // into the already allocated durable table.
+  // one logically ordinary batch, retains the canonical singleton base
+  // implicitly, and materializes only the exact 2D+1 suffix table where
+  // D=maximum_committed_binding_count-singleton_count.
   [[nodiscard]]
   ExactDirectSparseCanonicalSingletonIdentityBatchResult
   apply_canonical_singleton_identity_batch(std::size_t singleton_count);
@@ -824,6 +866,18 @@ class ExactDirectSparsePositiveFacetLocator {
       const noexcept {
     return required_batch_scratch_slot_capacity_;
   }
+  [[nodiscard]] std::size_t implicit_canonical_singleton_count()
+      const noexcept {
+    return implicit_canonical_singleton_count_;
+  }
+  [[nodiscard]] std::size_t physical_suffix_binding_capacity()
+      const noexcept {
+    return physical_suffix_binding_capacity_;
+  }
+  [[nodiscard]] bool physical_table_capacity_materialized()
+      const noexcept {
+    return physical_table_capacity_materialized_;
+  }
   [[nodiscard]] ExactDirectSparsePositiveFacetLocatorInitializationDecision
   initialization_decision() const noexcept {
     return initialization_decision_;
@@ -857,6 +911,8 @@ class ExactDirectSparsePositiveFacetLocator {
   std::size_t required_component_handle_capacity_{};
   std::size_t required_table_slot_capacity_{};
   std::size_t required_batch_scratch_slot_capacity_{};
+  std::size_t implicit_canonical_singleton_count_{};
+  std::size_t physical_suffix_binding_capacity_{};
   std::vector<ExactDirectSparsePositiveFacetSlot> slots_;
   std::vector<spatial::PointId> key_point_arena_;
   std::vector<ExactDirectSparseComponentHandle> component_parents_;
@@ -868,6 +924,8 @@ class ExactDirectSparsePositiveFacetLocator {
   bool empty_table_initialized_{false};
   bool dense_component_handles_initialized_{false};
   bool flat_durable_key_arena_initialized_{false};
+  bool physical_table_capacity_materialized_{false};
+  bool canonical_singleton_base_implicit_{false};
   bool positive_bindings_only_{false};
   bool full_key_comparison_required_{false};
   bool missing_facet_means_isolated_{false};

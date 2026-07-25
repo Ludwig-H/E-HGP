@@ -6,7 +6,6 @@
 #include <exception>
 #include <limits>
 #include <new>
-#include <numeric>
 #include <span>
 #include <stdexcept>
 #include <type_traits>
@@ -244,6 +243,7 @@ struct GroupPlan {
   std::vector<std::size_t> saddle_indices;
   std::vector<ExactDirectSparseComponentHandle> carrier_handles;
   std::vector<ExactDirectMorseForestNodeId> prior_reduced_root_node_ids;
+  ExactDirectSparseComponentHandle canonical_root_after_union{};
   std::optional<ExactDirectMorseForestNodeId> created_node_id;
   ExactDirectMorseForestNodeId resulting_root_node_id{};
   ExactDirectMorseForestAtomicGroupKind kind{
@@ -253,46 +253,91 @@ struct GroupPlan {
 
 class CarrierDsu {
  public:
-  CarrierDsu(std::size_t handle_count, std::size_t maximum_order)
-      : parent_(handle_count),
-        rank_(handle_count, 0U),
-        canonical_(handle_count),
-        order_(handle_count, 0U),
-        active_(handle_count, false),
-        reduced_root_(handle_count),
+  CarrierDsu(
+      const ExactDirectSparsePositiveFacetLocator& locator,
+      std::size_t handle_count,
+      std::size_t canonical_singleton_count,
+      std::size_t maximum_order,
+      std::size_t maximum_atomic_group_count)
+      : locator_(&locator),
+        handle_count_(handle_count),
+        canonical_singleton_count_(canonical_singleton_count),
+        direct_states_(
+            handle_count >= canonical_singleton_count
+                ? handle_count - canonical_singleton_count
+                : 0U),
+        reduced_root_overrides_(
+            override_slot_capacity(maximum_atomic_group_count)),
         carrier_count_by_order_(maximum_order + 1U, 0U),
-        reduced_count_by_order_(maximum_order + 1U, 0U) {
-    std::iota(parent_.begin(), parent_.end(), std::size_t{0U});
-    std::iota(canonical_.begin(), canonical_.end(), std::size_t{0U});
+        reduced_count_by_order_(maximum_order + 1U, 0U),
+        representative_handle_by_order_(maximum_order + 1U) {
+    if (handle_count == 0U ||
+        canonical_singleton_count == 0U ||
+        canonical_singleton_count > handle_count ||
+        locator.component_parents().size() != handle_count) {
+      throw std::invalid_argument(
+          "a reducer carrier authority has inconsistent handle intervals");
+    }
   }
 
   [[nodiscard]] std::size_t root(std::size_t handle) const noexcept {
-    while (parent_[handle] != handle) {
-      handle = parent_[handle];
+    const auto& parents = locator_->component_parents();
+    while (parents[handle] != handle) {
+      handle = parents[handle];
     }
     return handle;
   }
 
   [[nodiscard]] bool active(std::size_t handle) const noexcept {
-    return handle < parent_.size() && active_[root(handle)];
+    return handle < handle_count_ && root_active(root(handle));
   }
 
   [[nodiscard]] std::size_t canonical(
       std::size_t handle) const noexcept {
-    return canonical_[root(handle)];
+    return root(handle);
   }
 
   [[nodiscard]] std::size_t order(std::size_t handle) const noexcept {
-    return order_[root(handle)];
+    const std::size_t canonical_root = root(handle);
+    if (canonical_root < canonical_singleton_count_) {
+      return singletons_active_ ? 1U : 0U;
+    }
+    return direct_state(canonical_root).order;
   }
 
   [[nodiscard]] std::optional<ExactDirectMorseForestNodeId> reduced_root(
       std::size_t handle) const noexcept {
-    return reduced_root_[root(handle)];
+    const std::size_t canonical_root = root(handle);
+    if (const auto overridden =
+            find_reduced_root_override(canonical_root);
+        overridden.has_value()) {
+      return overridden;
+    }
+    if (canonical_root < canonical_singleton_count_) {
+      return singletons_active_
+                 ? std::optional<ExactDirectMorseForestNodeId>{
+                       static_cast<ExactDirectMorseForestNodeId>(
+                           canonical_root)}
+                 : std::nullopt;
+    }
+    return direct_state(canonical_root).reduced_root;
   }
 
   [[nodiscard]] std::size_t handle_count() const noexcept {
-    return parent_.size();
+    return handle_count_;
+  }
+
+  [[nodiscard]] std::size_t implicit_singleton_count() const noexcept {
+    return canonical_singleton_count_;
+  }
+
+  [[nodiscard]] std::size_t materialized_direct_state_count()
+      const noexcept {
+    return direct_states_.size();
+  }
+
+  [[nodiscard]] std::size_t root_override_slot_capacity() const noexcept {
+    return reduced_root_overrides_.size();
   }
 
   [[nodiscard]] std::size_t carrier_count(std::size_t order) const noexcept {
@@ -304,33 +349,40 @@ class CarrierDsu {
   }
 
   [[nodiscard]] bool active_root(std::size_t handle) const noexcept {
-    return handle < parent_.size() && active_[handle] &&
-           parent_[handle] == handle;
+    return handle < handle_count_ && root(handle) == handle &&
+           root_active(handle);
   }
 
   void commit_group(
-      std::span<const ExactDirectSparseComponentHandle> carriers,
+      ExactDirectSparseComponentHandle canonical_root,
+      std::size_t carrier_count,
       std::size_t group_order,
       std::size_t prior_reduced_count,
       ExactDirectMorseForestNodeId resulting_root) noexcept {
-    std::size_t physical_root = root_compress(carriers.front());
-    for (std::size_t index = 1U; index < carriers.size(); ++index) {
-      physical_root = unite(physical_root, carriers[index]);
-    }
-    reduced_root_[physical_root] = resulting_root;
-    carrier_count_by_order_[group_order] -= carriers.size() - 1U;
+    set_reduced_root_override(canonical_root, resulting_root);
+    carrier_count_by_order_[group_order] -= carrier_count - 1U;
     reduced_count_by_order_[group_order] -= prior_reduced_count;
     ++reduced_count_by_order_[group_order];
+    representative_handle_by_order_[group_order] = canonical_root;
   }
 
   void activate(
       std::size_t handle,
       std::size_t birth_order,
       std::optional<ExactDirectMorseForestNodeId> root_node) noexcept {
-    active_[handle] = true;
-    order_[handle] = birth_order;
-    reduced_root_[handle] = root_node;
+    if (handle < canonical_singleton_count_ ||
+        handle >= handle_count_) {
+      std::terminate();
+    }
+    DirectCarrierState& state = direct_state(handle);
+    if (state.active) {
+      std::terminate();
+    }
+    state.active = true;
+    state.order = birth_order;
+    state.reduced_root = root_node;
     ++carrier_count_by_order_[birth_order];
+    representative_handle_by_order_[birth_order] = handle;
     if (root_node.has_value()) {
       ++reduced_count_by_order_[birth_order];
     }
@@ -338,53 +390,133 @@ class CarrierDsu {
 
   void activate_initial_canonical_singletons(
       std::size_t singleton_count) noexcept {
-    for (std::size_t handle = 0U; handle < singleton_count; ++handle) {
-      activate(
-          handle,
-          1U,
-          static_cast<ExactDirectMorseForestNodeId>(handle));
+    if (singletons_active_ ||
+        singleton_count != canonical_singleton_count_) {
+      std::terminate();
     }
+    singletons_active_ = true;
+    carrier_count_by_order_[1U] = singleton_count;
+    reduced_count_by_order_[1U] = singleton_count;
+    representative_handle_by_order_[1U] = 0U;
+  }
+
+  [[nodiscard]] std::optional<std::size_t> representative_handle(
+      std::size_t order) const noexcept {
+    return representative_handle_by_order_[order];
   }
 
  private:
-  [[nodiscard]] std::size_t root_compress(std::size_t handle) noexcept {
-    const std::size_t result = root(handle);
-    while (parent_[handle] != handle) {
-      const std::size_t next = parent_[handle];
-      parent_[handle] = result;
-      handle = next;
+  struct DirectCarrierState {
+    std::size_t order{};
+    std::optional<ExactDirectMorseForestNodeId> reduced_root;
+    bool active{false};
+  };
+
+  struct ReducedRootOverrideSlot {
+    std::size_t canonical_root{};
+    ExactDirectMorseForestNodeId reduced_root{};
+    bool occupied{false};
+  };
+
+  [[nodiscard]] static std::size_t override_slot_capacity(
+      std::size_t maximum_atomic_group_count) {
+    std::size_t doubled = 0U;
+    std::size_t capacity = 0U;
+    if (!try_multiply(
+            maximum_atomic_group_count, 2U, doubled) ||
+        !try_add(doubled, 1U, capacity)) {
+      throw std::length_error(
+          "a reducer root-override table capacity overflowed");
     }
-    return result;
+    return capacity;
   }
 
-  [[nodiscard]] std::size_t unite(
-      std::size_t left,
-      std::size_t right) noexcept {
-    left = root_compress(left);
-    right = root_compress(right);
-    if (left == right) {
-      return left;
-    }
-    if (rank_[left] < rank_[right]) {
-      std::swap(left, right);
-    }
-    parent_[right] = left;
-    if (rank_[left] == rank_[right]) {
-      ++rank_[left];
-    }
-    canonical_[left] = std::min(canonical_[left], canonical_[right]);
-    active_[left] = true;
-    return left;
+  [[nodiscard]] static std::size_t override_hash(
+      std::size_t value) noexcept {
+    std::uint64_t word = static_cast<std::uint64_t>(value);
+    word ^= word >> 30U;
+    word *= UINT64_C(0xbf58476d1ce4e5b9);
+    word ^= word >> 27U;
+    word *= UINT64_C(0x94d049bb133111eb);
+    word ^= word >> 31U;
+    return static_cast<std::size_t>(word);
   }
 
-  std::vector<std::size_t> parent_;
-  std::vector<std::uint8_t> rank_;
-  std::vector<std::size_t> canonical_;
-  std::vector<std::size_t> order_;
-  std::vector<bool> active_;
-  std::vector<std::optional<ExactDirectMorseForestNodeId>> reduced_root_;
+  [[nodiscard]] const DirectCarrierState& direct_state(
+      std::size_t handle) const noexcept {
+    return direct_states_[handle - canonical_singleton_count_];
+  }
+
+  [[nodiscard]] DirectCarrierState& direct_state(
+      std::size_t handle) noexcept {
+    return direct_states_[handle - canonical_singleton_count_];
+  }
+
+  [[nodiscard]] bool root_active(std::size_t canonical_root) const noexcept {
+    if (canonical_root < canonical_singleton_count_) {
+      return singletons_active_;
+    }
+    return direct_state(canonical_root).active;
+  }
+
+  [[nodiscard]] std::optional<ExactDirectMorseForestNodeId>
+  find_reduced_root_override(
+      std::size_t canonical_root) const noexcept {
+    const std::size_t capacity = reduced_root_overrides_.size();
+    std::size_t slot_index =
+        override_hash(canonical_root) % capacity;
+    for (std::size_t visit = 0U; visit < capacity; ++visit) {
+      const ReducedRootOverrideSlot& slot =
+          reduced_root_overrides_[slot_index];
+      if (!slot.occupied) {
+        return std::nullopt;
+      }
+      if (slot.canonical_root == canonical_root) {
+        return slot.reduced_root;
+      }
+      slot_index = slot_index + 1U == capacity
+                       ? 0U
+                       : slot_index + 1U;
+    }
+    return std::nullopt;
+  }
+
+  void set_reduced_root_override(
+      std::size_t canonical_root,
+      ExactDirectMorseForestNodeId reduced_root) noexcept {
+    const std::size_t capacity = reduced_root_overrides_.size();
+    std::size_t slot_index =
+        override_hash(canonical_root) % capacity;
+    for (std::size_t visit = 0U; visit < capacity; ++visit) {
+      ReducedRootOverrideSlot& slot =
+          reduced_root_overrides_[slot_index];
+      if (!slot.occupied) {
+        slot.canonical_root = canonical_root;
+        slot.reduced_root = reduced_root;
+        slot.occupied = true;
+        return;
+      }
+      if (slot.canonical_root == canonical_root) {
+        slot.reduced_root = reduced_root;
+        return;
+      }
+      slot_index = slot_index + 1U == capacity
+                       ? 0U
+                       : slot_index + 1U;
+    }
+    std::terminate();
+  }
+
+  const ExactDirectSparsePositiveFacetLocator* locator_{};
+  std::size_t handle_count_{};
+  std::size_t canonical_singleton_count_{};
+  std::vector<DirectCarrierState> direct_states_;
+  std::vector<ReducedRootOverrideSlot> reduced_root_overrides_;
   std::vector<std::size_t> carrier_count_by_order_;
   std::vector<std::size_t> reduced_count_by_order_;
+  std::vector<std::optional<std::size_t>>
+      representative_handle_by_order_;
+  bool singletons_active_{false};
 };
 
 struct PayloadSizes {
@@ -396,6 +528,18 @@ struct PayloadSizes {
   std::size_t batches{};
   std::size_t nodes{};
 };
+
+[[nodiscard]] std::size_t logical_birth_record_count(
+    const ExactDirectMorseForestJournalResult& result) noexcept {
+  return result.implicit_order_one_prefix_count +
+         result.birth_records.size();
+}
+
+[[nodiscard]] std::size_t logical_node_count(
+    const ExactDirectMorseForestJournalResult& result) noexcept {
+  return result.implicit_order_one_prefix_count +
+         result.nodes.size();
+}
 
 [[nodiscard]] PayloadSizes payload_sizes(
     const ExactDirectMorseForestJournalResult& result) noexcept {
@@ -448,6 +592,23 @@ void append_moved(std::vector<Value>& destination, std::vector<Value>& source) {
       std::make_move_iterator(source.end()));
 }
 
+[[nodiscard]] bool certified_carrier_layout(
+    const ExactDirectMorseForestReducerFoldResult& result) noexcept {
+  const std::size_t maximum_safe_group_count =
+      (std::numeric_limits<std::size_t>::max() - 1U) / 2U;
+  return result.implicit_singleton_carrier_count != 0U &&
+         result.total_carrier_handle_count >=
+             result.implicit_singleton_carrier_count &&
+         result.materialized_direct_carrier_state_count ==
+             result.total_carrier_handle_count -
+                 result.implicit_singleton_carrier_count &&
+         result.maximum_atomic_group_count <= maximum_safe_group_count &&
+         result.root_override_slot_capacity ==
+             2U * result.maximum_atomic_group_count + 1U &&
+         result.locator_parent_authority_reused_by_carrier_state &&
+         result.no_dense_singleton_carrier_state_materialized;
+}
+
 }  // namespace
 
 ExactDirectMorseForestReducerBatch
@@ -483,6 +644,22 @@ project_exact_direct_morse_forest_reducer_batch(
   return projected;
 }
 
+bool verify_exact_direct_morse_forest_reducer_fold_layout(
+    const ExactDirectMorseForestReducerFoldResult& observed,
+    std::size_t trusted_total_carrier_handle_count,
+    std::size_t trusted_implicit_singleton_carrier_count,
+    std::size_t trusted_maximum_atomic_group_count) noexcept {
+  return observed.schema_version ==
+             direct_morse_forest_reducer_schema_version &&
+         certified_carrier_layout(observed) &&
+         observed.total_carrier_handle_count ==
+             trusted_total_carrier_handle_count &&
+         observed.implicit_singleton_carrier_count ==
+             trusted_implicit_singleton_carrier_count &&
+         observed.maximum_atomic_group_count ==
+             trusted_maximum_atomic_group_count;
+}
+
 bool ExactDirectMorseForestReducerFoldResult::certified_committed_batch()
     const noexcept {
   const bool staging_audit_consistent =
@@ -491,7 +668,7 @@ bool ExactDirectMorseForestReducerFoldResult::certified_committed_batch()
        staged_birth_node_count == 0U &&
        staged_locator_binding_count == 0U);
   return schema_version == direct_morse_forest_reducer_schema_version &&
-         staging_audit_consistent &&
+         staging_audit_consistent && certified_carrier_layout(*this) &&
          complete_batch_staged_before_mutation &&
          full_equal_level_quotient_resolved_before_mutation &&
          locator_committed_before_scientific_state &&
@@ -508,6 +685,7 @@ bool ExactDirectMorseForestReducerFoldResult::certified_committed_batch()
 bool ExactDirectMorseForestReducerFoldResult::certified_atomic_rejection()
     const noexcept {
   return schema_version == direct_morse_forest_reducer_schema_version &&
+         certified_carrier_layout(*this) &&
          decision != ExactDirectMorseForestReducerFoldDecision::not_folded &&
          decision != ExactDirectMorseForestReducerFoldDecision::
                          complete_reducer_batch_commit &&
@@ -610,8 +788,11 @@ class ExactDirectMorseForestReducer::Impl {
             traversal_order,
             birth_count_)),
         components_(
+            locator_,
             birth_count_,
-            source_journal.effective_maximum_order) {
+            cloud.size(),
+            source_journal.effective_maximum_order,
+            budget.maximum_atomic_group_count) {
     result_.requested_budget = budget_;
     result_.config = config_;
     result_.traversal_order = traversal_order_;
@@ -630,7 +811,7 @@ class ExactDirectMorseForestReducer::Impl {
     if (!try_add(birth_count_, family_count, node_capacity)) {
       throw std::length_error("a reducer node capacity overflowed");
     }
-    result_.birth_records.reserve(birth_count_);
+    result_.birth_records.reserve(birth_count_ - cloud_->size());
     result_.arm_root_bindings.reserve(arm_count);
     result_.saddle_records.reserve(family_count);
     result_.atomic_groups.reserve(
@@ -638,7 +819,7 @@ class ExactDirectMorseForestReducer::Impl {
     result_.child_node_ids.reserve(
         std::min(arm_count, budget_.maximum_child_reference_count));
     result_.batches.reserve(batch_count);
-    result_.nodes.reserve(node_capacity);
+    result_.nodes.reserve(node_capacity - cloud_->size());
     result_.final_roots.reserve(std::min(
         result_.effective_maximum_order,
         budget_.maximum_final_root_count));
@@ -650,6 +831,17 @@ class ExactDirectMorseForestReducer::Impl {
     folded.source_batch_index = batch.source_batch_index;
     folded.pre_fold_locator_stamp = locator_.snapshot_stamp();
     folded.post_fold_locator_stamp = folded.pre_fold_locator_stamp;
+    folded.implicit_singleton_carrier_count =
+        components_.implicit_singleton_count();
+    folded.materialized_direct_carrier_state_count =
+        components_.materialized_direct_state_count();
+    folded.total_carrier_handle_count = components_.handle_count();
+    folded.maximum_atomic_group_count =
+        budget_.maximum_atomic_group_count;
+    folded.root_override_slot_capacity =
+        components_.root_override_slot_capacity();
+    folded.locator_parent_authority_reused_by_carrier_state = true;
+    folded.no_dense_singleton_carrier_state_materialized = true;
 
     if (finished_) {
       folded.decision =
@@ -700,7 +892,7 @@ class ExactDirectMorseForestReducer::Impl {
     if (finished_ || !complete() ||
         next_family_index_ != source_seed_journal_->families.size() ||
         next_arm_seed_index_ != source_seed_journal_->arm_seeds.size() ||
-        result_.birth_records.size() != birth_count_ ||
+        logical_birth_record_count(result_) != birth_count_ ||
         result_.saddle_records.size() !=
             source_seed_journal_->families.size() ||
         result_.arm_root_bindings.size() !=
@@ -713,15 +905,30 @@ class ExactDirectMorseForestReducer::Impl {
     pending_final_roots.reserve(std::min(
         result_.effective_maximum_order,
         budget_.maximum_final_root_count));
-    for (std::size_t handle = 0U;
-         handle < components_.handle_count();
-         ++handle) {
-      if (!components_.active_root(handle)) {
+    for (std::size_t order = 1U;
+         order <= result_.effective_maximum_order;
+         ++order) {
+      const bool expected = order == 1U || order < result_.point_count;
+      if (components_.carrier_count(order) != (expected ? 1U : 0U)) {
+        throw std::logic_error(
+            "a reducer final carrier partition is incomplete");
+      }
+      if (!expected) {
         continue;
       }
-      const auto reduced_root = components_.reduced_root(handle);
+      const auto representative =
+          components_.representative_handle(order);
+      if (!representative.has_value() ||
+          !components_.active_root(*representative) ||
+          components_.order(*representative) != order) {
+        throw std::logic_error(
+            "a reducer final carrier representative is invalid");
+      }
+      const auto reduced_root =
+          components_.reduced_root(*representative);
       if (!reduced_root.has_value()) {
-        continue;
+        throw std::logic_error(
+            "a reducer final carrier has no reduced root");
       }
       if (pending_final_roots.size() >=
           budget_.maximum_final_root_count) {
@@ -730,8 +937,8 @@ class ExactDirectMorseForestReducer::Impl {
       }
       pending_final_roots.push_back(
           {pending_final_roots.size(),
-           components_.order(handle),
-           components_.canonical(handle),
+           order,
+           components_.canonical(*representative),
            *reduced_root});
     }
     std::sort(
@@ -768,7 +975,7 @@ class ExactDirectMorseForestReducer::Impl {
       }
     }
 
-    std::size_t logical = 0U;
+    std::size_t logical = result_.implicit_order_one_prefix_count;
     for (const auto& birth : result_.birth_records) {
       if (!try_add(logical, birth.facet_key.point_count, logical)) {
         throw std::length_error("a reducer output count overflowed");
@@ -780,14 +987,14 @@ class ExactDirectMorseForestReducer::Impl {
       }
     }
     for (const std::size_t increment : {
-             result_.birth_records.size(),
+             logical_birth_record_count(result_),
              result_.arm_root_bindings.size(),
              result_.saddle_records.size(),
              result_.atomic_groups.size(),
              result_.child_node_ids.size(),
              result_.batches.size(),
              pending_final_roots.size(),
-             result_.nodes.size()}) {
+             logical_node_count(result_)}) {
       if (!try_add(logical, increment, logical)) {
         throw std::length_error("a reducer output count overflowed");
       }
@@ -799,17 +1006,12 @@ class ExactDirectMorseForestReducer::Impl {
     result_.final_roots.swap(pending_final_roots);
     result_.logical_output_entry_count = logical;
     result_.final_locator_stamp = locator_.snapshot_stamp();
-    result_.counters.birth_record_count = result_.birth_records.size();
+    result_.counters.birth_record_count =
+        logical_birth_record_count(result_);
     result_.counters.order_one_birth_node_count =
-        static_cast<std::size_t>(std::count_if(
-            result_.birth_records.begin(),
-            result_.birth_records.end(),
-            [](const ExactDirectMorseForestBirthRecord& birth) {
-              return birth.order == 1U;
-            }));
+        result_.implicit_order_one_prefix_count;
     result_.counters.latent_higher_order_birth_count =
-        result_.birth_records.size() -
-        result_.counters.order_one_birth_node_count;
+        result_.birth_records.size();
     result_.counters.arm_root_binding_count =
         result_.arm_root_bindings.size();
     result_.counters.saddle_record_count = result_.saddle_records.size();
@@ -817,7 +1019,7 @@ class ExactDirectMorseForestReducer::Impl {
     result_.counters.child_reference_count =
         result_.child_node_ids.size();
     result_.counters.batch_record_count = result_.batches.size();
-    result_.counters.node_count = result_.nodes.size();
+    result_.counters.node_count = logical_node_count(result_);
     result_.counters.final_root_count = result_.final_roots.size();
 
     result_.every_birth_key_reconstructed_from_closed_direct_event = true;
@@ -1109,8 +1311,9 @@ class ExactDirectMorseForestReducer::Impl {
           before.atomic_groups != 0U ||
           before.child_node_ids != 0U ||
           before.batches != 0U || before.nodes != 0U ||
-          result_.birth_records.capacity() < singleton_count ||
-          result_.nodes.capacity() < singleton_count ||
+          result_.implicit_order_one_prefix_count != 0U ||
+          result_
+              .order_one_birth_and_node_prefix_implicit_and_unmaterialized ||
           result_.batches.capacity() == 0U) {
         return reject(
             std::move(folded),
@@ -1119,40 +1322,6 @@ class ExactDirectMorseForestReducer::Impl {
       }
 
       PayloadRollback rollback(result_, before);
-      for (std::size_t index = 0U; index < singleton_count; ++index) {
-        ExactDirectSparseFacetKey key;
-        key.point_count = 1U;
-        key.point_ids[0U] = static_cast<PointId>(index);
-        const auto token = replay_token(index, 1U);
-        if (!token.has_value()) {
-          return reject(
-              std::move(folded),
-              ExactDirectMorseForestReducerFoldDecision::
-                  no_reducer_batch_inconsistent);
-        }
-        const ExactDirectSparseFacetWitness witness{
-            config_.locator_config.external_authority_id, *token};
-        const auto node_id =
-            static_cast<ExactDirectMorseForestNodeId>(index);
-        result_.birth_records.push_back(
-            {index,
-             index,
-             0U,
-             1U,
-             key,
-             index,
-             node_id,
-             witness});
-        result_.nodes.push_back(
-            {node_id,
-             1U,
-             exact::ExactLevel{},
-             ExactDirectMorseForestNodeKind::order_one_birth,
-             0U,
-             0U,
-             index,
-             std::nullopt});
-      }
       result_.batches.push_back(
           {0U,
            0U,
@@ -1193,6 +1362,10 @@ class ExactDirectMorseForestReducer::Impl {
       }
 
       // No allocating operation follows the certified locator commit.
+      result_.implicit_order_one_prefix_count = singleton_count;
+      result_
+          .order_one_birth_and_node_prefix_implicit_and_unmaterialized =
+          true;
       components_.activate_initial_canonical_singletons(singleton_count);
       auto& committed_batch = result_.batches.back();
       committed_batch.closed_post_batch_carrier_count =
@@ -1252,7 +1425,7 @@ class ExactDirectMorseForestReducer::Impl {
       }
       const std::size_t birth_index =
           static_cast<std::size_t>(birth_index_u64);
-      if (birth_index >= result_.birth_records.size() ||
+      if (birth_index >= logical_birth_record_count(result_) ||
           resolved.resolved_component_handle >=
               components_.handle_count() ||
           !components_.active(resolved.resolved_component_handle) ||
@@ -1265,8 +1438,9 @@ class ExactDirectMorseForestReducer::Impl {
             ExactDirectMorseForestReducerFoldDecision::
                 no_reducer_batch_inconsistent);
       }
-      const ExactDirectMorseForestBirthRecord& source_birth =
-          result_.birth_records[birth_index];
+      const ExactDirectMorseForestBirthRecord source_birth =
+          ExactDirectMorseForestJournalView{result_}.birth_record_at(
+              birth_index);
       if (resolved.resolved_terminal_facet_key !=
               source_birth.facet_key ||
           source_birth.binding_witness !=
@@ -1480,6 +1654,10 @@ class ExactDirectMorseForestReducer::Impl {
           }
           plan.carrier_handles.push_back(carrier);
         }
+        plan.canonical_root_after_union =
+            *std::min_element(
+                plan.carrier_handles.begin(),
+                plan.carrier_handles.end());
       }
       for (const auto& binding : quotient->hyperedge_bindings) {
         if (binding.source_hyperedge_index >=
@@ -1541,7 +1719,7 @@ class ExactDirectMorseForestReducer::Impl {
                 ExactDirectMorseForestAtomicGroupKind::multifusion;
           }
           const std::size_t node_index =
-              result_.nodes.size() + created_node_count;
+              logical_node_count(result_) + created_node_count;
           if (node_index >= budget_.maximum_node_count ||
               node_index >
                   std::numeric_limits<
@@ -1788,9 +1966,9 @@ class ExactDirectMorseForestReducer::Impl {
           source_batch.order,
           source_batch.squared_level);
       const std::size_t birth_index =
-          result_.birth_records.size() + pending_births.size();
+          logical_birth_record_count(result_) + pending_births.size();
       const std::size_t node_index =
-          result_.nodes.size() + pending_group_nodes.size() +
+          logical_node_count(result_) + pending_group_nodes.size() +
           pending_birth_nodes.size();
       if (birth_index >= birth_count_) {
         return reject(
@@ -1846,11 +2024,11 @@ class ExactDirectMorseForestReducer::Impl {
     }
     if (pending_births.size() != source_batch.birth_role_count ||
         !append_count_within(
-            result_.birth_records.size(),
+            logical_birth_record_count(result_),
             pending_births.size(),
             budget_.maximum_birth_record_count) ||
         !append_count_within(
-            result_.nodes.size(),
+            logical_node_count(result_),
             pending_group_nodes.size() + pending_birth_nodes.size(),
             budget_.maximum_node_count)) {
       return reject(
@@ -1880,7 +2058,7 @@ class ExactDirectMorseForestReducer::Impl {
          batch.source_batch_index,
          source_batch.order,
          source_batch.squared_level,
-         before.birth_records,
+         result_.implicit_order_one_prefix_count + before.birth_records,
          result_.birth_records.size() - before.birth_records,
          before.saddle_records,
          result_.saddle_records.size() - before.saddle_records,
@@ -1922,12 +2100,14 @@ class ExactDirectMorseForestReducer::Impl {
       std::terminate();
     }
 
-    // No allocating operation follows this point.  Union-by-rank owns a
-    // canonical-minimum attribute, so physical DSU roots never leak into the
-    // hierarchy identity or the sparse locator protocol.
+    // No allocating operation follows this point.  The carrier state reuses
+    // the locator's deterministic canonical-minimum parent authority, so no
+    // second dense singleton DSU or physical root identity can leak into the
+    // hierarchy protocol.
     for (const GroupPlan& plan : plans) {
       components_.commit_group(
-          plan.carrier_handles,
+          plan.canonical_root_after_union,
+          plan.carrier_handles.size(),
           source_batch.order,
           plan.prior_reduced_root_node_ids.size(),
           plan.resulting_root_node_id);

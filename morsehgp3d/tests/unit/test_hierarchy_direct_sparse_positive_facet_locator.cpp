@@ -248,16 +248,23 @@ void check_initialization_budget_and_external_scope() {
   const auto locator = make_locator();
   check(
       locator.certified_positive_locator() &&
+          locator.state_view().schema_version ==
+              direct_sparse_positive_facet_locator_logical_snapshot_schema_version &&
+          locator.state_view().storage_schema_version ==
+              direct_sparse_positive_facet_locator_storage_schema_version &&
           locator.required_table_slot_capacity() == 65U &&
           locator.required_batch_scratch_slot_capacity() == 65U &&
-          locator.slots().size() == 65U &&
+          locator.slots().size() == 1U &&
+          locator.implicit_canonical_singleton_count() == 0U &&
+          locator.physical_suffix_binding_capacity() == 0U &&
+          !locator.physical_table_capacity_materialized() &&
           locator.key_point_arena().empty() &&
           locator.component_parents() ==
               std::vector<ExactDirectSparseComponentHandle>(
                   {0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U}) &&
           locator.scope() == ExactDirectSparsePositiveFacetLocatorScope::
                                  positive_bindings_relative_to_caller_asserted_external_authority_only,
-      "initialization creates only dense handles, a flat empty table and an explicit external-authority scope");
+      "initialization creates dense handles and one deferred-table terminator without allocating the full logical hash capacity");
 
   auto insufficient = generous_budget();
   insufficient.maximum_table_slot_count = 64U;
@@ -307,14 +314,29 @@ void check_canonical_singleton_identity_bulk_commit() {
       bulk_commit.certified_committed_identity_batch() &&
           bulk_commit.audit.bulk_count == 5U &&
           bulk_commit.audit.last_replay_token == 13U &&
+          bulk_commit.audit.implicit_singleton_binding_count == 5U &&
+          bulk_commit.audit.physical_suffix_binding_capacity == 27U &&
+          bulk_commit.audit.physical_table_slot_count == 55U &&
+          bulk_commit.audit.physical_occupied_slot_count == 0U &&
+          bulk_commit.audit.physical_key_point_count == 0U &&
           bulk_commit.audit.external_binding_input_entry_count == 0U &&
           bulk_commit.audit.pending_binding_staging_entry_count == 0U &&
           bulk_commit.audit.batch_scratch_slot_staging_entry_count == 0U &&
-          bulk_commit.audit.bulk_dynamic_scratch_byte_count == 0U,
-      "the initial singleton identity transaction streams only the requested canonical prefix without input, PendingBinding or hash-scratch staging");
+          bulk_commit.audit.bulk_dynamic_scratch_byte_count == 0U &&
+          bulk_commit.audit.canonical_singleton_base_is_implicit &&
+          bulk_commit.audit.no_singleton_slot_materialized &&
+          bulk_commit.audit.no_singleton_key_point_materialized &&
+          bulk_commit.audit
+              .exact_physical_suffix_table_capacity_certified,
+      "the initial singleton identity transaction publishes an implicit base and allocates only the exact 2D+1 physical suffix table");
   check(
-      ordinary_commit.certified_committed_batch() && bulk == ordinary,
-      "the default-fingerprint bulk transaction is scientifically and durably identical to the ordinary canonical binding batch");
+      ordinary_commit.certified_committed_batch() &&
+          bulk.snapshot_stamp() == ordinary.snapshot_stamp() &&
+          bulk.counters() == ordinary.counters() &&
+          bulk.component_parents() == ordinary.component_parents() &&
+          bulk.committed_batches() == ordinary.committed_batches() &&
+          bulk.committed_unions() == ordinary.committed_unions(),
+      "the implicit base preserves the ordinary construction's logical counters, batch history, stamp and canonical digest");
   check(
       bulk.counters() ==
               ExactDirectSparsePositiveFacetLocatorCounters{
@@ -329,12 +351,21 @@ void check_canonical_singleton_identity_bulk_commit() {
                   5U,
                   0U,
                   0U} &&
-          bulk.key_point_arena() ==
-              std::vector<PointId>({0U, 1U, 2U, 3U, 4U}) &&
+          bulk.implicit_canonical_singleton_count() == 5U &&
+          bulk.physical_suffix_binding_capacity() == 27U &&
+          bulk.physical_table_capacity_materialized() &&
+          bulk.slots().size() == 55U &&
+          std::none_of(
+              bulk.slots().begin(),
+              bulk.slots().end(),
+              [](const ExactDirectSparsePositiveFacetSlot& slot) {
+                return slot.occupied;
+              }) &&
+          bulk.key_point_arena().empty() &&
           bulk.component_parents().size() == 8U &&
           bulk.committed_batches().size() == 1U &&
           bulk.committed_unions().empty(),
-      "the bulk transaction leaves later dense handles available while publishing the standard counters, flat key arena and one durable batch record");
+      "no singleton slot or singleton PointId is materialized while all logical counters and later handles remain available");
 
   bool every_probe_matches_identity = true;
   for (std::size_t index = 0U; index < 5U; ++index) {
@@ -344,20 +375,66 @@ void check_canonical_singleton_identity_bulk_commit() {
         {65U, 8U});
     every_probe_matches_identity =
         every_probe_matches_identity &&
+        probe.schema_version ==
+            direct_sparse_positive_facet_probe_schema_version &&
         probe.certified_positive_hit() &&
         probe.component_handle == index &&
         probe.source_binding_witness == witness(3U * index + 1U);
   }
   check(
       every_probe_matches_identity,
-      "every streamed singleton resolves to its dense identity component and deterministic 3*i+1 witness");
+      "every implicit singleton resolves to its dense identity component and deterministic 3*i+1 witness");
+
+  const auto just_outside = bulk.probe_positive_facet(
+      key({5U}), witness(2000U), {55U, 8U});
+  const auto non_singleton_miss = bulk.probe_positive_facet(
+      key({0U, 1U}), witness(2001U), {55U, 8U});
+  check(
+      just_outside.certified_unresolved_miss() &&
+          non_singleton_miss.certified_unresolved_miss() &&
+          !just_outside.implicit_canonical_singleton_binding_resolved &&
+          !non_singleton_miss.implicit_canonical_singleton_binding_resolved,
+      "only exact one-point keys inside [0,n) use the implicit base; the bound and every non-singleton miss remain unresolved");
 
   const auto structure = verify_structure(bulk, bulk.state_view());
   check(
       structure.result_certified &&
           structure
               .fresh_durable_structure_verification_certified,
-      "the unchanged structural verifier freshly certifies the bulk-populated locator");
+      "the structural verifier freshly certifies the implicit singleton base");
+
+  const std::array<std::size_t, 2U> singleton_prefixes{{0U, 1U}};
+  const ExactDirectSparsePositiveFacetLocatorPrefixStampSweepBudget
+      singleton_prefix_budget{
+          2U,
+          2U,
+          0U,
+          0U,
+          0U,
+          5U,
+          5U,
+          0U,
+      };
+  const auto singleton_prefix_stamps =
+      build_exact_direct_sparse_positive_facet_locator_prefix_stamp_sweep(
+          singleton_prefixes, bulk, singleton_prefix_budget);
+  check(
+      singleton_prefix_stamps.certified_partial_refinement() &&
+          singleton_prefix_stamps.schema_version ==
+              direct_sparse_positive_facet_locator_prefix_stamp_sweep_schema_version &&
+          singleton_prefix_stamps.prefix_stamps.size() == 2U &&
+          singleton_prefix_stamps.prefix_stamps[0U] ==
+              make_locator().snapshot_stamp() &&
+          singleton_prefix_stamps.prefix_stamps[1U] ==
+              bulk.snapshot_stamp() &&
+          singleton_prefix_stamps.required_active_binding_prefix_count ==
+              5U &&
+          singleton_prefix_stamps
+                  .required_physical_binding_slot_index_count == 0U &&
+          singleton_prefix_stamps.required_table_slot_scan_count == 0U &&
+          singleton_prefix_stamps.required_temporary_scratch_byte_count ==
+              0U,
+      "prefix zero remains latent and prefix one replays the ordinary singleton digest without any physical binding-index scratch");
 
   auto collided = make_locator(0U);
   const auto collided_commit =
@@ -371,7 +448,49 @@ void check_canonical_singleton_identity_bulk_commit() {
           collided_commit.batch_result.counters
                   .equal_fingerprint_distinct_key_count == 0U &&
           collided_structure.result_certified,
-      "canonical interval uniqueness avoids operational comparisons even under forced fingerprints while durable full-key verification remains valid");
+      "canonical interval uniqueness avoids operational comparisons even under forced fingerprints while synthesized history remains structurally certified");
+
+  const std::array<ExactDirectSparseComponentUnion, 1U> redirect{{
+      {0U, 4U, 1U, witness(500U)},
+  }};
+  const std::array<ExactDirectSparseFacetBinding, 1U> suffix_binding{{
+      {0U, key({20U, 21U}), 6U, witness(501U)},
+  }};
+  const auto suffix_commit = bulk.apply_batch(
+      std::span<const ExactDirectSparseFacetQuery>{},
+      redirect,
+      suffix_binding);
+  const auto redirected = bulk.probe_positive_facet(
+      key({4U}), witness(502U), {0U, 8U});
+  std::size_t suffix_slot_count = 0U;
+  bool suffix_index_is_logical = false;
+  for (const auto& slot : bulk.slots()) {
+    if (slot.occupied) {
+      ++suffix_slot_count;
+      suffix_index_is_logical =
+          suffix_index_is_logical ||
+          slot.committed_binding_index == 5U;
+    }
+  }
+  const auto suffix_structure = verify_structure(bulk, bulk.state_view());
+  check(
+      suffix_commit.certified_committed_batch() &&
+          redirected.certified_positive_hit() &&
+          redirected.implicit_canonical_singleton_binding_resolved &&
+          redirected.slot_visit_count == 0U &&
+          redirected.component_handle == 1U &&
+          redirected.source_binding_witness == witness(13U) &&
+          suffix_slot_count == 1U && suffix_index_is_logical &&
+          bulk.key_point_arena() ==
+              std::vector<PointId>({20U, 21U}) &&
+          suffix_structure.result_certified &&
+          suffix_structure.implicit_canonical_singleton_count == 5U &&
+          suffix_structure.physical_suffix_binding_capacity == 27U &&
+          suffix_structure.physical_occupied_slot_count == 1U &&
+          suffix_structure.physical_key_point_count == 2U &&
+          suffix_structure.implicit_canonical_singleton_base_certified &&
+          suffix_structure.exact_physical_suffix_capacity_certified,
+      "the implicit probe follows the current DSU parent while suffix bindings retain logical indices n+j and explicit physical audits");
 }
 
 void check_canonical_singleton_identity_bulk_rejections_are_atomic() {
@@ -1957,6 +2076,16 @@ void check_fresh_durable_structure_verifier_and_mutations() {
               ExactDirectSparsePositiveFacetLocatorStructuralVerificationDecision::
                   no_verification_budget_preflight_exhausted,
       "one fewer exact scratch payload byte rejects before allocation");
+
+  auto wrong_storage_schema = locator.state_view();
+  --wrong_storage_schema.storage_schema_version;
+  const auto wrong_storage_schema_rejected =
+      verify_structure(locator, wrong_storage_schema);
+  check(
+      !wrong_storage_schema_rejected
+           .trusted_construction_parameters_certified &&
+          !wrong_storage_schema_rejected.result_certified,
+      "the fresh verifier distinguishes the v2 physical state view from the unchanged v1 logical snapshot schema");
 
   auto chronology_locator = make_locator(0U);
   const ExactDirectSparseFacetKey chronology_first = key({20U, 21U, 22U});

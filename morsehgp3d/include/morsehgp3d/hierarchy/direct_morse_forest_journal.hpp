@@ -7,13 +7,14 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <string_view>
 #include <vector>
 
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t direct_morse_forest_journal_schema_version =
-    2U;
+    3U;
 inline constexpr std::string_view direct_morse_forest_journal_backend =
     "reference_cpu";
 inline constexpr std::string_view direct_morse_forest_journal_profile =
@@ -32,7 +33,7 @@ inline constexpr std::string_view direct_morse_forest_journal_proof_basis =
     "typed_frozen_r_root_or_l_latent_carrier_hyperedges_deduplicated_"
     "before_transitive_full_component_quotient_qr_counts_only_r_"
     "then_atomic_all_carrier_union_and_minimum_binding_commits_"
-    "conditional_on_lazy_carrier_component_faithfulness_v3";
+    "conditional_on_lazy_carrier_component_faithfulness_v4";
 
 using ExactDirectMorseForestNodeId = std::uint64_t;
 
@@ -295,6 +296,11 @@ struct ExactDirectMorseForestJournalResult {
   std::size_t effective_maximum_order{};
   ExactDirectSparsePositiveFacetLocatorSnapshotStamp final_locator_stamp{};
 
+  // On success this is exactly point_count.  Logical birth records and nodes
+  // [0, implicit_order_one_prefix_count) are the canonical singleton prefix;
+  // the two vectors below contain only their physical suffixes.  Every
+  // logical index, node ID, offset, counter and budget remains unchanged.
+  std::size_t implicit_order_one_prefix_count{};
   std::vector<ExactDirectMorseForestBirthRecord> birth_records;
   std::vector<ExactDirectMorseForestArmRootBinding> arm_root_bindings;
   std::vector<ExactDirectMorseForestSaddleRecord> saddle_records;
@@ -333,6 +339,7 @@ struct ExactDirectMorseForestJournalResult {
   bool all_group_carriers_attached_to_resulting_root_atomically{false};
   bool locator_commits_unions_before_current_birth_bindings{false};
   bool final_roots_cover_exactly_nonterminal_reduced_orders{false};
+  bool order_one_birth_and_node_prefix_implicit_and_unmaterialized{false};
   bool no_partial_scientific_payload_published{false};
   bool external_locator_authority_replayed{true};
   bool conditional_on_caller_external_locator_authority_replay{false};
@@ -364,6 +371,41 @@ struct ExactDirectMorseForestJournalResult {
   friend bool operator==(
       const ExactDirectMorseForestJournalResult&,
       const ExactDirectMorseForestJournalResult&) = default;
+};
+
+// A synchronous logical view over the physically sparse forest journal.
+// Canonical singleton BirthRecord/Node values are generated on demand;
+// suffix records can be borrowed explicitly.  The source result must remain
+// alive, unmoved and immutable for the complete lifetime of the view.
+class ExactDirectMorseForestJournalView {
+ public:
+  explicit ExactDirectMorseForestJournalView(
+      const ExactDirectMorseForestJournalResult& source) noexcept;
+  ExactDirectMorseForestJournalView(
+      ExactDirectMorseForestJournalResult&&) = delete;
+  ExactDirectMorseForestJournalView(
+      const ExactDirectMorseForestJournalResult&&) = delete;
+
+  [[nodiscard]] std::size_t birth_record_count() const noexcept;
+  [[nodiscard]] std::size_t node_count() const noexcept;
+
+  [[nodiscard]] ExactDirectMorseForestBirthRecord birth_record_at(
+      std::size_t logical_index) const;
+  [[nodiscard]] ExactDirectMorseForestNode node_at(
+      ExactDirectMorseForestNodeId logical_node_id) const;
+
+  [[nodiscard]] std::span<const ExactDirectMorseForestBirthRecord>
+  materialized_birth_records() const noexcept;
+  [[nodiscard]] std::span<const ExactDirectMorseForestNode>
+  materialized_nodes() const noexcept;
+  [[nodiscard]] const ExactDirectMorseForestBirthRecord&
+  materialized_birth_record_at(std::size_t logical_index) const;
+  [[nodiscard]] const ExactDirectMorseForestNode&
+  materialized_node_at(
+      ExactDirectMorseForestNodeId logical_node_id) const;
+
+ private:
+  const ExactDirectMorseForestJournalResult* source_{};
 };
 
 struct ExactDirectMorseForestVerification {

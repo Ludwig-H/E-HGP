@@ -14,7 +14,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t direct_morse_forest_reducer_schema_version =
-    1U;
+    2U;
 inline constexpr std::string_view direct_morse_forest_reducer_backend =
     "reference_cpu";
 inline constexpr std::string_view direct_morse_forest_reducer_profile =
@@ -27,7 +27,9 @@ inline constexpr std::string_view direct_morse_forest_reducer_public_status =
     "not_claimed";
 inline constexpr std::string_view direct_morse_forest_reducer_proof_basis =
     "strict_batch_stream_frozen_r_or_l_carrier_hypergraph_complete_"
-    "transitive_quotient_qr_then_atomic_locator_and_scientific_commit_v1";
+    "transitive_quotient_qr_then_atomic_locator_and_scientific_commit_"
+    "shared_locator_canonical_parent_authority_implicit_singleton_carrier_"
+    "base_and_direct_only_state_suffix_v2";
 inline constexpr std::uint32_t
     direct_morse_forest_live_commit_schema_version = 1U;
 inline constexpr std::string_view direct_morse_forest_live_commit_backend =
@@ -113,6 +115,13 @@ struct ExactDirectMorseForestReducerFoldResult {
   std::size_t staged_birth_record_count{};
   std::size_t staged_birth_node_count{};
   std::size_t staged_locator_binding_count{};
+  std::size_t implicit_singleton_carrier_count{};
+  std::size_t materialized_direct_carrier_state_count{};
+  std::size_t total_carrier_handle_count{};
+  std::size_t maximum_atomic_group_count{};
+  std::size_t root_override_slot_capacity{};
+  bool locator_parent_authority_reused_by_carrier_state{false};
+  bool no_dense_singleton_carrier_state_materialized{false};
   bool complete_batch_staged_before_mutation{false};
   bool full_equal_level_quotient_resolved_before_mutation{false};
   bool locator_committed_before_scientific_state{false};
@@ -131,6 +140,16 @@ struct ExactDirectMorseForestReducerFoldResult {
       const ExactDirectMorseForestReducerFoldResult&,
       const ExactDirectMorseForestReducerFoldResult&) = default;
 };
+
+// Freshly binds the fold's representation audit to caller-trusted source
+// authority and budget values.  certified_* checks the result's internal
+// consistency; persistence or cross-boundary consumers must additionally use
+// this verifier instead of trusting the result's echoed counts.
+[[nodiscard]] bool verify_exact_direct_morse_forest_reducer_fold_layout(
+    const ExactDirectMorseForestReducerFoldResult& observed,
+    std::size_t trusted_total_carrier_handle_count,
+    std::size_t trusted_implicit_singleton_carrier_count,
+    std::size_t trusted_maximum_atomic_group_count) noexcept;
 
 enum class ExactDirectMorseForestLiveCommitDecision : std::uint8_t {
   not_committed,
@@ -207,9 +226,12 @@ struct ExactDirectMorseForestLiveCommitResult {
 
 // Incremental Phase-15C reduction.  The source authorities must outlive the
 // reducer.  Its persistent scientific state is one sparse positive locator,
-// one dense carrier DSU with a canonical-minimum attribute, per-order scalar
-// counts and the final forest output arenas.  It retains no input batch
-// deltas, closure graph, cells, cofaces, Gamma structure or Delaunay mosaic.
+// carrier attributes that reuse the locator's canonical-minimum parent
+// authority, per-order scalar counts and the final forest output arenas.
+// Canonical singleton carrier attributes are implicit; only the direct suffix
+// and an output-proportional reduced-root override table are materialized.  It
+// retains no input batch deltas, closure graph, cells, cofaces, Gamma
+// structure or Delaunay mosaic.
 class ExactDirectMorseForestReducer {
  public:
   ExactDirectMorseForestReducer(

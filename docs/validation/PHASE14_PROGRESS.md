@@ -160,14 +160,22 @@ La voie G4 réelle passe au SHA main `f44d77e7401b16fc0818fa151348d6588b7e9618`.
 
 La génération gardée `2026-07-24T08:49:33.736-07:00` de `ehgp-blackwell-spot-ai1a` dans `devpod-gpu-exploration/europe-west4-ai1a` utilise `g4-standard-48`, `SPOT`, `STOP`, 3 600 secondes GCE et 20 minutes invitées. Elle est arrêtée à `2026-07-24T08:55:45.757-07:00`, certifiée `TERMINATED`, avec zéro autre VM active; la clé est révoquée et son matériel local supprimé. L'artefact [phase14o_g4_adoption_f44d77e.json](phase14o_g4_adoption_f44d77e.json) conserve la preuve.
 
-14O atteint `validated_real_G4_component_adoption_architecture_only`. Aucun temps ni RSS n'est mesuré. Le contexte n'est pas encore raccordé aux callbacks 14L et aucune hiérarchie complète n'est exécutée. La porte Phase 14, le p95 `warm_e2e` 50 k, le SLO, 10 M+ et le statut public exact restent ouverts.
+14O atteint `validated_real_G4_component_adoption_architecture_only`. Aucun temps ni RSS n'est mesuré. La porte Phase 14, le p95 `warm_e2e` 50 k, le SLO, 10 M+ et le statut public exact restent ouverts.
+
+## Incrément 14P validé hôte — raccord 14O vers 14L, 14H et 15D
+
+14P s'exécute sous `cuda_g4_plus_reference_cpu / hgp_reduced / proposal_only_then_certified / architecture_only`, avec `public_status=not_claimed`. `DirectSparseFacetTopKIntegratedAdapter` transforme les vues de centres exacts 14L en appels propositionnels sur le contexte adopté 14O, agrège uniquement les trafics actifs et délègue le scellement scientifique au builder CPU 14F.
+
+`prepare_next_integrated` rend un ticket 14H mobile et laisse les cinq composantes du curseur inchangées. La voie historique `run_next` est désormais un wrapper qui committe immédiatement ce même ticket; aucun second chemin scientifique n'est ajouté. L'adapter refuse un contexte legacy, interdit un nuage temporaire et traite transactionnellement la transition d'un lot non vide vers un lot vide, y compris après un seal invalide retenté. La fixture composée emploie le vrai lease/context/adapteur avec les lanceurs hôte, prépare quatre clés en deux chunks, garde zéro snapshot H2D et replie chaque ticket par 15D avant l'avance. La forêt finale est récursivement identique aux trois voies de référence.
+
+La validation est logicielle et hôte; elle ne requalifie pas CUDA. Le centre exact reste dupliqué par la fermeture 10.5c, et aucune mesure `warm_e2e`, RSS, 50 k ou 10 M+ n'est réalisée.
 
 ## Priorités de développement
 
-1. raccorder le contexte 14O qualifié aux callbacks 14L sans créer un second chemin produit;
-2. étudier un réemploi recertifiable du centre exact par 10.5c au lieu de la seconde construction actuellement explicite;
-3. réutiliser les capacités restantes de scratch sans conserver de graphe entre lots;
-4. exploiter l'instrumentation `warm_e2e`, puis raccorder les chunks durables 15B au reducer hiérarchique avant toute campagne massive.
+1. accélérer le `rank_search` Phase 9 par propositions bornées puis recertification CPU exacte, sans modifier son format durable;
+2. instrumenter ce composant à 12 500, 25 000 et 50 000 points sans le présenter comme `warm_e2e`;
+3. raccorder ensuite un runner produit complet et mesurer le vrai p95 `warm_e2e` 50 k;
+4. externaliser les autorités et sorties de Phase 15 avant le jalon un million puis les rangs complets 10 000 001, 30 M et 50 M.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

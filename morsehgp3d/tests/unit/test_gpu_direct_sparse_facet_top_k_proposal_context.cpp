@@ -5,6 +5,7 @@
 #include "rational_binary64_enclosure.hpp"
 
 #include "morsehgp3d/exact/point.hpp"
+#include "morsehgp3d/gpu/direct_sparse_facet_top_k_integrated_adapter.hpp"
 #include "morsehgp3d/gpu/direct_sparse_facet_top_k_proposal.hpp"
 
 #include <algorithm>
@@ -28,6 +29,7 @@ using morsehgp3d::exact::ExactCenter3;
 using morsehgp3d::exact::ExactRational;
 using morsehgp3d::gpu::DirectSparseFacetTopKProposalBatchResult;
 using morsehgp3d::gpu::DirectSparseFacetTopKProposalContext;
+using morsehgp3d::gpu::DirectSparseFacetTopKIntegratedAdapter;
 using morsehgp3d::gpu::DirectSparseFacetTopKProposalPolicy;
 using morsehgp3d::gpu::DirectSparseFacetTopKProposalQuery;
 using morsehgp3d::gpu::MortonLbvhBuildContext;
@@ -75,6 +77,13 @@ static_assert(
 static_assert(
     std::is_nothrow_move_assignable_v<
         DirectSparseFacetTopKProposalContext>);
+static_assert(
+    !std::is_constructible_v<
+        DirectSparseFacetTopKIntegratedAdapter,
+        DirectSparseFacetTopKProposalContext&,
+        CanonicalPointCloud&&,
+        DirectSparseFacetTopKProposalPolicy,
+        ExactDirectSparseFacetTopKProposalTranscriptBudget>);
 
 int failures = 0;
 
@@ -590,6 +599,165 @@ void test_phase14n_snapshot_adoption() {
       "index lifetime");
 }
 
+void test_phase14o_integrated_callback_adapter() {
+  reset_fake_gpu_phase14_facet_top_k_proposal();
+  reset_fake_gpu_phase14_morton_lbvh_build();
+  Fixture fixture;
+  const auto source_queries = canonical_queries(fixture);
+
+  MortonLbvhBuildContext builder{fixture.cloud.size()};
+  auto built = builder.build(fixture.cloud);
+  auto lease = builder.release_device_lease(built);
+  DirectSparseFacetTopKProposalContext context{
+      built.certified_index(),
+      fixture.cloud,
+      std::move(lease),
+      2U};
+  DirectSparseFacetTopKIntegratedAdapter adapter{
+      context,
+      fixture.cloud,
+      DirectSparseFacetTopKProposalPolicy{1U},
+      generous_budget()};
+
+  std::vector<morsehgp3d::hierarchy::
+                  ExactDirectSparseFacetDescentBatchPreparedProposalQuery>
+      prepared_queries;
+  prepared_queries.reserve(source_queries.size());
+  for (const auto& source : source_queries) {
+    prepared_queries.push_back(
+        {source.source_facet_key,
+         source.query_center,
+         morsehgp3d::exact::ExactLevel{},
+         1U,
+         true});
+  }
+  const morsehgp3d::hierarchy::
+      ExactDirectSparseFacetDescentBatchRunNextPrepareInputs inputs{
+          metadata(),
+          prepared_queries,
+          2U,
+          prepared_queries.size(),
+          0U,
+          0U,
+          1U,
+          2U,
+          true};
+  auto prepared = adapter.prepare_inputs(inputs);
+  check(
+      prepared.has_value() &&
+          prepared->proposal_records.size() ==
+              source_queries.size() &&
+          prepared->gpu_supported_query_count ==
+              source_queries.size() &&
+          prepared->active_host_to_device_query_byte_count ==
+              source_queries.size() * 26U *
+                  sizeof(std::uint64_t) &&
+          prepared->copied_device_to_host_byte_count ==
+              source_queries.size() * 18U *
+                  sizeof(std::uint64_t) &&
+          prepared->gpu_execution_performed &&
+          prepared->proposal_only &&
+          !prepared->exact_or_scientific_decision_published,
+      "the 14O adapter maps one certified 14L chunk to active CUDA "
+      "proposal traffic only");
+
+  if (prepared.has_value()) {
+    const morsehgp3d::hierarchy::
+        ExactDirectSparseFacetDescentBatchRunNextSealInputs seal{
+            inputs.metadata,
+            prepared->proposal_records,
+            generous_budget(),
+            inputs.selected_arm_seed_count,
+            inputs.distinct_source_facet_key_count,
+            prepared_queries.size(),
+            1U,
+            true};
+    const auto transcript = adapter.seal_inputs(seal);
+    check(
+        transcript.has_value() &&
+            transcript->complete_proposal_transcript() &&
+            transcript->proposal_records ==
+                prepared->proposal_records,
+        "the adapter delegates aggregate sealing to the unchanged 14F "
+        "transcript builder");
+  }
+
+  const auto& audit = adapter.audit();
+  check(
+      audit.prepared_chunk_count == 1U &&
+          audit.supported_query_count == source_queries.size() &&
+          audit.snapshot_host_to_device_byte_count == 0U &&
+          audit.host_snapshot_byte_capacity ==
+              fixture.cloud.size() * sizeof(std::size_t) &&
+          audit.persistent_device_snapshot_byte_capacity ==
+              4U * fixture.cloud.size() *
+                  sizeof(std::uint64_t) &&
+          audit.source_morton_lbvh_lease_epoch ==
+              built.audit().snapshot_buffer_epoch &&
+          audit.every_chunk_used_adopted_device_snapshot &&
+          audit.every_chunk_retained_snapshot_owner &&
+          audit.every_chunk_was_proposal_only &&
+          audit.aggregate_transcript_sealed &&
+          !audit.forbidden_global_structure_materialized &&
+          !audit.public_status_claimed,
+      "the integrated adapter preserves the 14O adopted-owner and zero "
+      "snapshot-H2D evidence across 14L callbacks");
+
+  auto empty_metadata = metadata();
+  ++empty_metadata.source_batch_index;
+  using ProposalRecord =
+      morsehgp3d::hierarchy::
+          ExactDirectSparseFacetTopKProposalRecord;
+  using SealInputs =
+      morsehgp3d::hierarchy::
+          ExactDirectSparseFacetDescentBatchRunNextSealInputs;
+  const SealInputs rejected_empty{
+      empty_metadata,
+      std::span<const ProposalRecord>{},
+      generous_budget(),
+      0U,
+      0U,
+      0U,
+      0U,
+      false};
+  check(
+      !adapter.seal_inputs(rejected_empty).has_value() &&
+          adapter.audit().prepared_chunk_count == 1U,
+      "an invalid empty-batch seal is rejected without destroying the "
+      "previous completed audit");
+  SealInputs retried_empty = rejected_empty;
+  retried_empty.every_prepare_inputs_chunk_certified = true;
+  const auto empty_transcript =
+      adapter.seal_inputs(retried_empty);
+  check(
+      empty_transcript.has_value() &&
+          empty_transcript->complete_proposal_transcript() &&
+          empty_transcript->proposal_records.empty() &&
+          adapter.audit().prepared_chunk_count == 0U &&
+          adapter.audit().supported_query_count == 0U &&
+          adapter.audit().aggregate_transcript_sealed,
+      "a valid empty batch after a nonempty batch resets stale chunk audit "
+      "state and succeeds on retry");
+
+  DirectSparseFacetTopKProposalContext legacy_context{
+      fixture.index, fixture.cloud, 2U};
+  check(
+      context.device_snapshot_adopted_from_morton_lbvh_lease() &&
+          !legacy_context
+               .device_snapshot_adopted_from_morton_lbvh_lease(),
+      "the proposal context exposes only the immutable 14O adoption fact");
+  check_throws<std::invalid_argument>(
+      [&] {
+        DirectSparseFacetTopKIntegratedAdapter rejected{
+            legacy_context,
+            fixture.cloud,
+            DirectSparseFacetTopKProposalPolicy{1U},
+            generous_budget()};
+      },
+      "the 14P adapter rejects a legacy snapshot context before callbacks "
+      "or ticket issuance");
+}
+
 void test_phase14n_adoption_rejections_are_atomic() {
   reset_fake_gpu_phase14_facet_top_k_proposal();
   reset_fake_gpu_phase14_morton_lbvh_build();
@@ -968,6 +1136,7 @@ int main() {
   test_direct_integer_binary64_projection();
   test_result_epochs_and_digest();
   test_phase14n_snapshot_adoption();
+  test_phase14o_integrated_callback_adapter();
   test_phase14n_adoption_rejections_are_atomic();
   test_empty_batch_has_no_launch_or_epoch();
   test_unsupported_centers_keep_the_supported_subset_sparse();

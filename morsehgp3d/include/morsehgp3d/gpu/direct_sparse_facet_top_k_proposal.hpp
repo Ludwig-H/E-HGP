@@ -224,6 +224,8 @@ class DirectSparseFacetTopKProposalContext final {
 
   [[nodiscard]] std::size_t point_count() const noexcept;
   [[nodiscard]] std::size_t maximum_query_count() const noexcept;
+  [[nodiscard]] bool
+  device_snapshot_adopted_from_morton_lbvh_lease() const noexcept;
 
  private:
   void require_matching_cloud(

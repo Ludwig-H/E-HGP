@@ -10,6 +10,7 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -27,6 +28,16 @@ using morsehgp3d::spatial::PointId;
 
 constexpr std::uint64_t authority_id = UINT64_C(0x10F0);
 int failures = 0;
+
+static_assert(std::is_constructible_v<
+              ExactDirectMorseForestJournalView,
+              const ExactDirectMorseForestJournalResult&>);
+static_assert(!std::is_constructible_v<
+              ExactDirectMorseForestJournalView,
+              ExactDirectMorseForestJournalResult&&>);
+static_assert(!std::is_constructible_v<
+              ExactDirectMorseForestJournalView,
+              const ExactDirectMorseForestJournalResult&&>);
 
 void check(bool condition, const std::string& message) {
   if (!condition) {
@@ -242,12 +253,13 @@ component_root_before_group(
     const ExactDirectMorseForestJournalResult& result,
     ExactDirectSparseComponentHandle component_handle,
     std::size_t stopped_atomic_group_index) {
-  if (component_handle >= result.birth_records.size() ||
+  const ExactDirectMorseForestJournalView view{result};
+  if (component_handle >= view.birth_record_count() ||
       stopped_atomic_group_index > result.atomic_groups.size()) {
     return std::nullopt;
   }
   std::vector<ExactDirectSparseComponentHandle> parents(
-      result.birth_records.size());
+      view.birth_record_count());
   for (std::size_t index = 0U; index < parents.size(); ++index) {
     parents[index] = index;
   }
@@ -319,6 +331,7 @@ void test_acute_triangle_creates_one_reduced_birth_from_latent_edges() {
   };
   const Scenario scenario = make_scenario(canonical_cloud(points));
   const auto result = build_forest(scenario);
+  const ExactDirectMorseForestJournalView view{result};
   const auto* triangle = group_at(result, 2U, level(5));
 
   check(
@@ -332,6 +345,76 @@ void test_acute_triangle_creates_one_reduced_birth_from_latent_edges() {
           triangle->child_count == 0U &&
           triangle->created_node_id.has_value(),
       "an acute K=2 triangle turns three latent edge minima into one q_R=0 reduced birth");
+  check(
+      result.implicit_order_one_prefix_count == scenario.cloud.size() &&
+          result
+              .order_one_birth_and_node_prefix_implicit_and_unmaterialized &&
+          result.birth_records.size() + scenario.cloud.size() ==
+              view.birth_record_count() &&
+          result.nodes.size() + scenario.cloud.size() ==
+              view.node_count() &&
+          view.birth_record_count() ==
+              result.counters.birth_record_count &&
+          view.node_count() == result.counters.node_count &&
+          std::none_of(
+              result.birth_records.begin(),
+              result.birth_records.end(),
+              [](const auto& birth_record) {
+                return birth_record.order == 1U;
+              }) &&
+          std::none_of(
+              result.nodes.begin(),
+              result.nodes.end(),
+              [](const auto& forest_node) {
+                return forest_node.kind ==
+                    ExactDirectMorseForestNodeKind::order_one_birth;
+              }),
+      "the resident forest omits exactly the canonical singleton birth/node prefix while preserving logical counts");
+  bool implicit_prefix_is_canonical = true;
+  for (std::size_t index = 0U;
+       index < scenario.cloud.size();
+       ++index) {
+    const auto birth_record = view.birth_record_at(index);
+    const auto forest_node = view.node_at(
+        static_cast<ExactDirectMorseForestNodeId>(index));
+    implicit_prefix_is_canonical =
+        implicit_prefix_is_canonical &&
+        birth_record.birth_record_index == index &&
+        birth_record.source_event_projection_index == index &&
+        birth_record.source_journal_batch_index == 0U &&
+        birth_record.order == 1U &&
+        birth_record.facet_key.point_count == 1U &&
+        birth_record.facet_key.point_ids[0U] == index &&
+        birth_record.component_handle == index &&
+        birth_record.order_one_birth_node_id ==
+            std::optional<ExactDirectMorseForestNodeId>{index} &&
+        forest_node.node_id == index && forest_node.order == 1U &&
+        forest_node.squared_level == ExactLevel{} &&
+        forest_node.kind ==
+            ExactDirectMorseForestNodeKind::order_one_birth &&
+        forest_node.birth_record_index ==
+            std::optional<std::size_t>{index};
+  }
+  check(
+      implicit_prefix_is_canonical,
+      "the non-owning view regenerates the complete canonical singleton prefix");
+  if (!result.birth_records.empty()) {
+    const std::size_t first_suffix =
+        result.implicit_order_one_prefix_count;
+    check(
+        view.birth_record_at(first_suffix) ==
+            view.materialized_birth_record_at(first_suffix),
+        "generic and borrowed suffix birth access agree");
+  }
+  if (!result.nodes.empty()) {
+    const auto first_suffix =
+        static_cast<ExactDirectMorseForestNodeId>(
+            result.implicit_order_one_prefix_count);
+    check(
+        view.node_at(first_suffix) ==
+            view.materialized_node_at(first_suffix),
+        "generic and borrowed suffix node access agree");
+  }
 }
 
 void test_mirror_closes_shared_latent_carrier_before_q_r() {
@@ -493,9 +576,13 @@ void test_true_gabriel_counterexample_descends_ac_to_de_end_to_end() {
   };
   const Scenario scenario = make_scenario(canonical_cloud(points));
   const auto result = build_forest(scenario);
+  const ExactDirectMorseForestJournalView view{result};
 
   std::optional<ExactDirectSparseComponentHandle> de_carrier;
-  for (const auto& birth : result.birth_records) {
+  for (std::size_t index = 0U;
+       index < view.birth_record_count();
+       ++index) {
+    const auto birth = view.birth_record_at(index);
     if (birth.order == 2U &&
         two_point_key_is(birth.facet_key, 0U, 4U)) {
       de_carrier = birth.component_handle;

@@ -180,6 +180,7 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "maximum_key_point_replay_count",
         "ExactDirectSparsePositiveFacetLocatorPrefixStampSweepResult",
         "required_table_slot_scan_count",
+        "required_physical_binding_slot_index_count",
         "required_temporary_scratch_byte_count",
         "prefix_request_count",
         "no_prefix_stamp_budget_exhausted",
@@ -267,7 +268,14 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "make_locator_snapshot_stamp(",
         "replay_locator_history_digest_transition(",
         "std::vector<std::size_t> binding_slot_indices_by_index(",
-        "active_binding_prefix_count == 0U ? 0U : state.slots.size()",
+        "implicit_canonical_singleton_count_",
+        "physical_suffix_binding_capacity_",
+        "physical_table_capacity_materialized_",
+        "canonical_singleton_base_implicit_",
+        "implicit_canonical_singleton_index(",
+        "canonical_singleton_witness(",
+        "std::vector<ExactDirectSparsePositiveFacetSlot> physical_suffix_slots(",
+        "result.required_physical_binding_slot_index_count == 0U",
         "result.required_temporary_scratch_byte_count",
         "prefix_stamps.back() != result.locator_snapshot_stamp",
         "locator.snapshot_stamp() == result.locator_snapshot_stamp",
@@ -389,7 +397,7 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "trusted_budget.maximum_batch_binding_count",
         "record.counters.batch_input_key_point_count >",
         "trusted_budget.maximum_batch_key_point_count",
-        "*next_binding_prefix > binding_slot_indices_by_index.size()",
+        "*next_binding_prefix > *available_binding_record_count",
         "*next_union_prefix > committed_unions.size()",
         "!record.input_shape_certified",
         "!record.input_witness_structure_certified",
@@ -442,6 +450,40 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "ExactDirectSparsePositiveFacetLocator::apply_batch(",
         "locator batch transaction",
     )
+    singleton_batch = braced_block(
+        code,
+        "ExactDirectSparseCanonicalSingletonIdentityBatchResult\n"
+        "ExactDirectSparsePositiveFacetLocator::\n"
+        "    apply_canonical_singleton_identity_batch(",
+        "implicit singleton identity transaction",
+    )
+    for required_implicit_contract in (
+        "budget_.maximum_committed_binding_count - singleton_count",
+        "probing_slot_capacity(physical_suffix_binding_capacity)",
+        "slots_.swap(physical_suffix_slots)",
+        "implicit_canonical_singleton_count_ = singleton_count",
+        "physical_suffix_binding_capacity_",
+        "physical_suffix_binding_capacity;",
+        "physical_table_capacity_materialized_ = true",
+        "canonical_singleton_base_implicit_ = true",
+        "audit.no_singleton_slot_materialized = true",
+        "audit.no_singleton_key_point_materialized = true",
+    ):
+        require(
+            required_implicit_contract in singleton_batch,
+            "the singleton transaction is missing "
+            f"{required_implicit_contract!r}",
+        )
+    for forbidden_singleton_materialization in (
+        "key_point_arena_.push_back",
+        "slot.occupied = true",
+        "first_empty_committed_slot",
+    ):
+        require(
+            forbidden_singleton_materialization not in singleton_batch,
+            "the singleton transaction physically materializes "
+            f"{forbidden_singleton_materialization!r}",
+        )
     reserve_position = sparse_parent_transaction.find(
         "changed_roots_.reserve(maximum_union_request_count)"
     )
@@ -517,8 +559,8 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
             f"the {cap} cap must be checked atomically before allocation",
         )
     for exact_cost_contract in (
-        "active_binding_prefix_count == 0U ? 0U : state.slots.size()",
-        "active_binding_prefix_count, sizeof(std::size_t)",
+        "result.required_physical_binding_slot_index_count == 0U",
+        "sizeof(std::size_t)",
         "replaying_final_history",
         "state.counters.inserted_binding_count",
         "state.counters.union_request_count",
@@ -531,13 +573,15 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
             exact_cost_contract in prefix_sweep,
             "the exact prefix sweep is missing " f"{exact_cost_contract!r}",
         )
-    table_guard_position = prefix_sweep.find("if (active_binding_prefix_count != 0U)")
+    table_guard_position = prefix_sweep.find(
+        "if (result.required_physical_binding_slot_index_count != 0U)"
+    )
     table_scan_position = prefix_sweep.find(
         "for (std::size_t slot_index = 0U;", table_guard_position
     )
     require(
         0 <= table_guard_position < table_scan_position,
-        "the table may be scanned only when the active binding prefix is nonempty",
+        "the table may be scanned only when the active physical suffix is nonempty",
     )
     lowered_prefix_sweep = prefix_sweep.lower()
     for forbidden_prefix_path in (
@@ -726,6 +770,13 @@ def validate(project: Path, binary: Path | None, nm: Path | None) -> None:
         "component_parent_rollback_write_count == 1U",
         "component_parent_rollback_write_count == 0U",
         "peak_component_parent_journal_entry_count == 1U",
+        "required_physical_binding_slot_index_count == 0U",
+        "no_singleton_slot_materialized",
+        "no_singleton_key_point_materialized",
+        "bulk.snapshot_stamp() == ordinary.snapshot_stamp()",
+        "bulk.key_point_arena().empty()",
+        "slot.committed_binding_index == 5U",
+        "implicit_canonical_singleton_binding_resolved",
     ):
         require(
             required_test_contract in unit_test,

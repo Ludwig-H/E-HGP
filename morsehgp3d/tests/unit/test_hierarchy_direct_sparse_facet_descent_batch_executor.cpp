@@ -31,11 +31,30 @@ int failures = 0;
 using SealedPreparedBatch =
     ExactDirectSparseFacetDescentAnchoredBatchExecutor::
         PreparedTopKProposalBatch;
+using IntegratedPreparedBatch =
+    ExactDirectSparseFacetDescentAnchoredBatchExecutor::
+        IntegratedPreparationResult;
 static_assert(!std::is_default_constructible_v<SealedPreparedBatch>);
 static_assert(!std::is_copy_constructible_v<SealedPreparedBatch>);
 static_assert(!std::is_copy_assignable_v<SealedPreparedBatch>);
 static_assert(std::is_nothrow_move_constructible_v<SealedPreparedBatch>);
 static_assert(std::is_nothrow_move_assignable_v<SealedPreparedBatch>);
+static_assert(!std::is_copy_constructible_v<IntegratedPreparedBatch>);
+static_assert(std::is_move_constructible_v<IntegratedPreparedBatch>);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+            no_run_sealed_commit_rejected) == 6U);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+            complete_architecture_only_integrated_proposal_sealed_commit) ==
+    7U);
+static_assert(
+    static_cast<std::uint8_t>(
+        ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+            complete_architecture_only_integrated_proposal_sealed_preparation) ==
+    8U);
 
 void check(bool condition, const std::string& message) {
   if (!condition) {
@@ -1747,7 +1766,7 @@ void test_integrated_chunked_proposal_seal_and_immediate_commit() {
 
   const ExactDirectSparseFacetDescentBatchPrepareInputsCallback
       valid_prepare =
-          [&scenario](
+          [](
               const ExactDirectSparseFacetDescentBatchRunNextPrepareInputs&
                   inputs)
           -> std::optional<
@@ -1811,6 +1830,77 @@ void test_integrated_chunked_proposal_seal_and_immediate_commit() {
         inputs.canonical_proposal_records,
         inputs.transcript_budget);
   };
+
+  ExactDirectSparsePositiveFacetLocator preparation_locator =
+      make_locator(scenario.cloud.size());
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor
+      preparation_executor(
+          scenario.index,
+          scenario.cloud,
+          scenario.facade,
+          scenario.event_journal,
+          source_seed_budget(),
+          scenario.seed_journal,
+          plan_config(),
+          plan_budget(),
+          observed_plan,
+          preparation_locator);
+  const std::array<std::size_t, 5U> cursor_before_integrated_preparation{
+      preparation_executor.next_source_batch_index(),
+      preparation_executor.next_source_chunk_index(),
+      preparation_executor.next_source_lane_index(),
+      preparation_executor.next_source_family_index(),
+      preparation_executor.next_source_arm_seed_index()};
+  auto integrated_preparation =
+      preparation_executor.prepare_next_integrated(
+          query_witness(UINT64_C(14000)),
+          execution_budget(),
+          closure_budget(),
+          run_budget,
+          valid_prepare,
+          valid_seal,
+          clock);
+  const std::array<std::size_t, 5U> cursor_after_integrated_preparation{
+      preparation_executor.next_source_batch_index(),
+      preparation_executor.next_source_chunk_index(),
+      preparation_executor.next_source_lane_index(),
+      preparation_executor.next_source_family_index(),
+      preparation_executor.next_source_arm_seed_index()};
+  check(
+      integrated_preparation.complete_architecture_preparation() &&
+          cursor_after_integrated_preparation ==
+              cursor_before_integrated_preparation &&
+          integrated_preparation.prepared_ticket.has_value() &&
+          integrated_preparation.prepared_ticket->prepared() &&
+          !integrated_preparation.run_result.sealed_commit.has_value() &&
+          integrated_preparation.run_result.audit
+                  .maximum_live_ticket_count == 1U &&
+          integrated_preparation.run_result.audit
+                  .live_ticket_count_at_return == 1U &&
+          !integrated_preparation.run_result.audit
+                   .private_ticket_never_exposed_to_caller &&
+          !integrated_preparation.run_result.audit
+                   .immediate_sealed_commit_attempted &&
+          preparation_executor.audit()
+                  .sealed_ticket_prepare_attempt_count == 1U &&
+          preparation_executor.audit().sealed_ticket_issued_count == 1U &&
+          preparation_executor.audit()
+                  .sealed_ticket_commit_attempt_count == 0U,
+      "the public integrated 14L preparation returns one mobile 14H ticket and audit without moving any cursor");
+  if (integrated_preparation.prepared_ticket.has_value()) {
+    const auto integrated_commit =
+        preparation_executor.commit_prepared_ticket(
+            std::move(*integrated_preparation.prepared_ticket));
+    check(
+        integrated_commit.certified_cursor_advance() &&
+            integrated_preparation.prepared_ticket->consumed() &&
+            preparation_executor.next_source_batch_index() == 1U &&
+            preparation_executor.audit()
+                    .sealed_ticket_commit_attempt_count == 1U &&
+            preparation_executor.audit()
+                    .sealed_ticket_accepted_commit_count == 1U,
+        "the public integrated ticket commits directly through the existing no-replay 14H capability");
+  }
 
   const auto empty_birth_run = executor.run_next(
       query_witness(UINT64_C(14001)),

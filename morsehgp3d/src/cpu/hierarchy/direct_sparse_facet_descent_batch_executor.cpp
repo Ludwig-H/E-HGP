@@ -148,8 +148,9 @@ enum class IntegratedRunHookFailure : std::uint8_t {
 class NanosecondClockReader {
  public:
   explicit NanosecondClockReader(
-      const ExactDirectSparseFacetDescentBatchNanosecondClock& clock)
-      : clock_(&clock) {}
+      const ExactDirectSparseFacetDescentBatchNanosecondClock& clock,
+      std::optional<std::uint64_t> last = std::nullopt)
+      : clock_(&clock), last_(last) {}
 
   [[nodiscard]] std::uint64_t read() {
     std::uint64_t value = 0U;
@@ -2968,8 +2969,10 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::
   return result;
 }
 
-ExactDirectSparseFacetDescentBatchIntegratedRunResult
-ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::
+    IntegratedPreparationResult
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::
+    prepare_next_integrated(
     const ExactDirectSparseFacetWitness& locator_query_witness,
     const ExactDirectSparseFacetDescentBatchExecutionBudget&
         execution_budget,
@@ -3001,7 +3004,9 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
       next_source_family_index_,
       next_source_arm_seed_index_};
 
-  ExactDirectSparseFacetDescentBatchIntegratedRunResult result;
+  IntegratedPreparationResult integrated;
+  ExactDirectSparseFacetDescentBatchIntegratedRunResult& result =
+      integrated.run_result;
   result.source_batch_index = source_cursor.source_batch_index;
   result.requested_budget = run_budget;
   IntegratedRunHook hook{
@@ -3073,12 +3078,16 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
             next_source_arm_seed_index_};
         result.cursor_unchanged_on_rejection =
             same_cursor(source_cursor, live_cursor);
+        integrated.cursor_unchanged_after_preparation =
+            same_cursor(source_cursor, live_cursor);
         result.audit.live_ticket_count_at_return = 0U;
         result.no_ticket_live_at_return = true;
         const std::uint64_t run_completed_ns =
             clock_reader.read();
         result.audit.total_run_duration_ns =
             run_completed_ns - run_started_ns;
+        integrated.run_started_ns_ = run_started_ns;
+        integrated.last_clock_ns_ = run_completed_ns;
       };
 
   switch (hook.failure) {
@@ -3089,7 +3098,7 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
       result.preparation_diagnostic.emplace(
           std::move(preparation));
       finish_rejection();
-      return result;
+      return integrated;
     case IntegratedRunHookFailure::prepare_inputs_rejected:
       result.decision =
           ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
@@ -3097,7 +3106,7 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
       result.preparation_diagnostic.emplace(
           std::move(preparation));
       finish_rejection();
-      return result;
+      return integrated;
     case IntegratedRunHookFailure::seal_inputs_rejected:
       result.decision =
           ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
@@ -3105,7 +3114,7 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
       result.preparation_diagnostic.emplace(
           std::move(preparation));
       finish_rejection();
-      return result;
+      return integrated;
     case IntegratedRunHookFailure::none:
       break;
   }
@@ -3115,7 +3124,7 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
             no_run_cpu_batch_preflight_rejected;
     result.preparation_diagnostic.emplace(std::move(preparation));
     finish_rejection();
-    return result;
+    return integrated;
   }
   if (!preparation.complete_architecture_preparation() ||
       !preparation.scientific_delta.has_value()) {
@@ -3124,7 +3133,7 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
             no_run_exact_preparation_rejected;
     result.preparation_diagnostic.emplace(std::move(preparation));
     finish_rejection();
-    return result;
+    return integrated;
   }
 
   const std::optional<BatchCursor> successor_cursor =
@@ -3140,7 +3149,7 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
             no_run_ticket_not_issued;
     result.preparation_diagnostic.emplace(std::move(preparation));
     finish_rejection();
-    return result;
+    return integrated;
   }
 
   increment_audit_counter(audit_.sealed_ticket_issued_count);
@@ -3159,11 +3168,71 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
       successor_cursor->source_arm_seed_index,
       preparation.scientific_delta->locator_snapshot_stamp,
       std::move(preparation)};
+  integrated.prepared_ticket.emplace(std::move(ticket));
+  const BatchCursor live_cursor{
+      next_source_batch_index_,
+      next_source_chunk_index_,
+      next_source_lane_index_,
+      next_source_family_index_,
+      next_source_arm_seed_index_};
+  integrated.cursor_unchanged_after_preparation =
+      same_cursor(source_cursor, live_cursor);
+  integrated.run_started_ns_ = run_started_ns;
+  integrated.last_clock_ns_ = preparation_completed_ns;
   result.audit.maximum_live_ticket_count = 1U;
+  result.audit.live_ticket_count_at_return = 1U;
+  result.audit.private_ticket_never_exposed_to_caller = false;
+  result.audit.immediate_sealed_commit_attempted = false;
+  result.no_ticket_live_at_return = false;
+  result.audit.total_run_duration_ns =
+      preparation_completed_ns - run_started_ns;
+  result.decision =
+      ExactDirectSparseFacetDescentBatchIntegratedRunDecision::
+          complete_architecture_only_integrated_proposal_sealed_preparation;
+  return integrated;
+}
+
+ExactDirectSparseFacetDescentBatchIntegratedRunResult
+ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
+    const ExactDirectSparseFacetWitness& locator_query_witness,
+    const ExactDirectSparseFacetDescentBatchExecutionBudget&
+        execution_budget,
+    const ExactDirectSparseFacetDescentClosureBudget& closure_budget,
+    const ExactDirectSparseFacetDescentBatchIntegratedRunBudget&
+        run_budget,
+    const ExactDirectSparseFacetDescentBatchPrepareInputsCallback&
+        prepare_inputs,
+    const ExactDirectSparseFacetDescentBatchSealInputsCallback&
+        seal_inputs,
+    const ExactDirectSparseFacetDescentBatchNanosecondClock& clock) {
+  const BatchCursor source_cursor{
+      next_source_batch_index_,
+      next_source_chunk_index_,
+      next_source_lane_index_,
+      next_source_family_index_,
+      next_source_arm_seed_index_};
+  IntegratedPreparationResult integrated =
+      prepare_next_integrated(
+          locator_query_witness,
+          execution_budget,
+          closure_budget,
+          run_budget,
+          prepare_inputs,
+          seal_inputs,
+          clock);
+  ExactDirectSparseFacetDescentBatchIntegratedRunResult result =
+      std::move(integrated.run_result);
+  if (!integrated.prepared_ticket.has_value()) {
+    return result;
+  }
+
+  result.audit.private_ticket_never_exposed_to_caller = true;
   result.audit.immediate_sealed_commit_attempted = true;
+  NanosecondClockReader clock_reader{clock, integrated.last_clock_ns_};
   const std::uint64_t commit_started_ns = clock_reader.read();
   ExactDirectSparseFacetDescentBatchSealedCommitResult commit =
-      commit_prepared_ticket(std::move(ticket));
+      commit_prepared_ticket(
+          std::move(*integrated.prepared_ticket));
   const std::uint64_t commit_completed_ns = clock_reader.read();
   result.audit.sealed_commit_duration_ns =
       commit_completed_ns - commit_started_ns;
@@ -3174,7 +3243,7 @@ ExactDirectSparseFacetDescentAnchoredBatchExecutor::run_next(
   result.sealed_commit.emplace(std::move(commit));
   const std::uint64_t run_completed_ns = clock_reader.read();
   result.audit.total_run_duration_ns =
-      run_completed_ns - run_started_ns;
+      run_completed_ns - integrated.run_started_ns_;
 
   if (result.sealed_commit->certified_cursor_advance()) {
     result.cursor_unchanged_on_rejection = false;
