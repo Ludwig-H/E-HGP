@@ -20,10 +20,11 @@ namespace morsehgp3d::hierarchy {
 
 inline constexpr std::size_t pair_support_maximum_requested_order = 10U;
 inline constexpr std::uint32_t pair_support_checkpoint_schema_version = 2U;
-inline constexpr std::uint32_t pair_support_traversal_version = 2U;
+inline constexpr std::uint32_t pair_support_traversal_version = 3U;
 inline constexpr std::string_view pair_support_checkpoint_proof_basis =
     "exact_self_dual_unordered_pair_partition_strict_phi_"
     "safe_real_anchor_noninterior_exclusion_resumable_witness_cursor_"
+    "exact_continuous_common_strict_core_preflight_"
     "atomic_bounded_doubled_center_strict_rank_cover_"
     "amortized_center_cover_1_over_16_"
     "sparse_closed_ball_v2";
@@ -73,6 +74,20 @@ exact_diametral_phi_aabb_maximum(
     const spatial::ExactDyadicAabb3& first_support_point_box,
     const spatial::ExactDyadicAabb3& second_support_point_box,
     const spatial::ExactDyadicAabb3& query_box);
+
+// Exact sign of
+//
+//   min_x max_{u in first_support_box, v in second_support_box}
+//       (x-u).(x-v).
+//
+// A nonnegative result proves that no point of R^3 satisfies the strict
+// common-interior predicate for the continuous AABB relaxation.  It does not
+// decide the correlated discrete support product.  The stream uses this only
+// as a fail-open traversal preflight: it skips a futile AABB-certificate
+// search and expands the product exhaustively, never pruning from this sign.
+[[nodiscard]] int exact_diametral_phi_continuous_core_minimum_sign(
+    const spatial::ExactDyadicAabb3& first_support_box,
+    const spatial::ExactDyadicAabb3& second_support_box);
 
 enum class ExactPairSupportStreamStatus : std::uint8_t {
   complete,

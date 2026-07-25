@@ -230,6 +230,14 @@ Cette étape ne construit aucun catalogue global de paires, facette, coface, inc
 
 Le gate local unique final `uniform_latin`, $n=12\,500$, $K=10$, plafonné à 20 000 unités pair, s'arrête proprement sur `work_unit_limit` en 81,741 ms au total, dont 30,852 ms pour le flux pair. Il visite 286 produits, résout 149 paires, conserve 78 118 601 paires dans la frontière exacte, exécute 120 boules fermées et 7 213 visites physiques pour 1 189 333 classifications logiques. Les 124 tentatives center-cover ne prunent encore aucun produit, mais leur crédit borne leur coût à 1 660 unités au lieu des 10 083 unités observées avant throttle sur le même gate; 95 événements sont produits. Cette exécution est un préfixe fail-fast, pas une réponse, pas un pipeline complet et pas un SLO. Elle interdit de passer à 50 000 ou au massif avant une réduction plus forte du nombre de produits, puis du supérieur implicite.
 
+## Incrément 14Q P8a — préflight exact du cœur continu pair
+
+P8a reste sous `reference_cpu / hgp_reduced / exact_sparsification_design / architecture_only`, avec `public_status=not_claimed`. Il calcule exactement le minimum continu du prédicat universel sur les deux AABB supports. Les trois axes se séparent; chaque minimum unidimensionnel utilise soit le négatif du quart du carré de l'écart, soit la fraction positive exacte des quatre recouvrements d'extrémités. Un signe positif ou nul répond uniquement que le parcours universel de témoins ne peut produire son certificat AABB. La couverture P7a à témoins variables est encore tentée et l'expansion historique reste l'unique fallback.
+
+La spécialisation `int1024` est gardée par le même alignement exact à 124 bits et une borne stricte de 1006 bits; les autres entrées reviennent à `BigInt`. Les fixtures couvrent disjonction, tangence, recouvrement, emboîtement, annulation entre axes et étendue binary64 complète. La fixture corrélée conserve un témoin discret commun malgré un cœur continu relâché vide et interdit donc toute promotion du préflight en prune scientifique.
+
+L'unique gate final `uniform_latin`, $n=12\,500$, $K=10$, `work=20000`, visite 319 produits, résout 165 paires et en conserve 78 118 585. Il exécute 137 requêtes fermées, 8 249 visites physiques et 1 352 209 classifications logiques; les 134 tentatives P7a consomment 1 667 unités et ne prunent aucun produit. Le temps observé sur l'hôte partagé n'est pas retenu comme mesure de vitesse. Le gain d'environ 10 % sur les paires restantes du préfixe P7 ne change pas le terme dominant : ce jalon n'autorise ni 50 000, ni GCP, ni 10 M+.
+
 ## Priorités de développement
 
 1. utiliser le runner v2 seulement sur de petites portes pour attribuer séparément supérieur, façade et reducer;

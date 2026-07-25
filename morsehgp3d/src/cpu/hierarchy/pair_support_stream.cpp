@@ -297,6 +297,127 @@ try_bounded_exact_diametral_phi_aabb_maximum_sign(
   return bounded_exact_sign(total_maximum);
 }
 
+// For one coordinate, let A=[a0,a1], B=[b0,b1] and
+//
+//   g(x) = max_{a in A,b in B} (x-a)(x-b).
+//
+// When the intervals are disjoint, the nearest endpoint pair dominates in
+// their gap and min g is minus one quarter of the squared gap.  When they
+// overlap strictly, the two crossed endpoint products are dominated and the
+// lower/lower and upper/upper parabolas meet at the minimum.  Writing
+// wa=a1-a0 and wb=b1-b0 gives
+//
+//   min g = wa wb (b1-a0)(a1-b0) / (wa+wb)^2.
+//
+// Support coordinates are independent between axes, so the three-dimensional
+// minimax is the sum of these three one-dimensional minima.  Under the
+// 124-bit aligned-coordinate envelope, a numerator accumulated over all three
+// axes needs fewer than 1006 magnitude bits: an overlapping-axis numerator
+// needs fewer than 500, its denominator fewer than 252, and a common
+// denominator for three axes contributes at most another 504 bits.
+using ContinuousCoreExactInteger = boost::multiprecision::int1024_t;
+static_assert(
+    std::numeric_limits<ContinuousCoreExactInteger>::digits >= 1006,
+    "the continuous diametral-core kernel needs at least 1006 magnitude bits");
+
+template <typename Integer>
+struct ExactUnreducedFraction {
+  Integer numerator{};
+  Integer denominator{1};
+};
+
+template <typename Integer>
+[[nodiscard]] int continuous_core_minimum_sign_from_aligned_endpoints(
+    const std::array<Integer, 12U>& endpoints) {
+  ExactUnreducedFraction<Integer> total;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const Integer& first_lower = endpoints[axis];
+    const Integer& first_upper = endpoints[3U + axis];
+    const Integer& second_lower = endpoints[6U + axis];
+    const Integer& second_upper = endpoints[9U + axis];
+    if (first_upper < first_lower ||
+        second_upper < second_lower) {
+      throw std::logic_error(
+          "aligned continuous-core endpoints form a reversed box");
+    }
+
+    ExactUnreducedFraction<Integer> coordinate;
+    if (first_upper <= second_lower) {
+      const Integer gap = second_lower - first_upper;
+      coordinate.numerator = -(gap * gap);
+      coordinate.denominator = 4;
+    } else if (second_upper <= first_lower) {
+      const Integer gap = first_lower - second_upper;
+      coordinate.numerator = -(gap * gap);
+      coordinate.denominator = 4;
+    } else {
+      const Integer first_width = first_upper - first_lower;
+      const Integer second_width = second_upper - second_lower;
+      const Integer width_sum = first_width + second_width;
+      if (width_sum <= 0) {
+        throw std::logic_error(
+            "strictly overlapping intervals have zero total width");
+      }
+      coordinate.numerator =
+          first_width * second_width *
+          (second_upper - first_lower) *
+          (first_upper - second_lower);
+      coordinate.denominator = width_sum * width_sum;
+    }
+    total.numerator =
+        total.numerator * coordinate.denominator +
+        coordinate.numerator * total.denominator;
+    total.denominator *= coordinate.denominator;
+  }
+  if (total.denominator <= 0) {
+    throw std::logic_error(
+        "the continuous-core denominator is not positive");
+  }
+  if (total.numerator < 0) {
+    return -1;
+  }
+  return total.numerator == 0 ? 0 : 1;
+}
+
+[[nodiscard]] std::array<Binary64DyadicWord, 12U>
+continuous_core_endpoint_words(
+    const spatial::ExactDyadicAabb3& first_support_box,
+    const spatial::ExactDyadicAabb3& second_support_box) {
+  validate_exact_dyadic_box(first_support_box);
+  validate_exact_dyadic_box(second_support_box);
+  std::array<Binary64DyadicWord, 12U> words{};
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    words[axis] = decode_binary64_dyadic_word(
+        first_support_box.lower_binary64_bits[axis]);
+    words[3U + axis] = decode_binary64_dyadic_word(
+        first_support_box.upper_binary64_bits[axis]);
+    words[6U + axis] = decode_binary64_dyadic_word(
+        second_support_box.lower_binary64_bits[axis]);
+    words[9U + axis] = decode_binary64_dyadic_word(
+        second_support_box.upper_binary64_bits[axis]);
+  }
+  return words;
+}
+
+[[nodiscard]] std::optional<int>
+try_bounded_exact_diametral_phi_continuous_core_minimum_sign(
+    const spatial::ExactDyadicAabb3& first_support_box,
+    const spatial::ExactDyadicAabb3& second_support_box) {
+  const std::array<Binary64DyadicWord, 12U> words =
+      continuous_core_endpoint_words(
+          first_support_box, second_support_box);
+  const std::optional<std::array<BoundedExactInteger, 12U>> aligned =
+      try_align_bounded_exact_dyadics(words);
+  if (!aligned.has_value()) {
+    return std::nullopt;
+  }
+  std::array<ContinuousCoreExactInteger, 12U> widened{};
+  for (std::size_t index = 0U; index < widened.size(); ++index) {
+    widened[index] = (*aligned)[index];
+  }
+  return continuous_core_minimum_sign_from_aligned_endpoints(widened);
+}
+
 struct BoundedExactAnchorPhi {
   std::array<Binary64DyadicWord, 3U> first{};
   std::array<Binary64DyadicWord, 3U> second{};
@@ -460,6 +581,36 @@ struct UnnormalizedExactDyadic {
         "an exact dyadic alignment shift overflows unsigned int");
   }
   return static_cast<unsigned int>(shift);
+}
+
+[[nodiscard]] std::array<exact::BigInt, 12U>
+exactly_align_continuous_core_endpoint_words(
+    const std::array<Binary64DyadicWord, 12U>& words) {
+  int minimum_exponent = 0;
+  bool exponent_initialized = false;
+  for (const Binary64DyadicWord& word : words) {
+    if (word.magnitude != 0U &&
+        (!exponent_initialized ||
+         word.exponent < minimum_exponent)) {
+      minimum_exponent = word.exponent;
+      exponent_initialized = true;
+    }
+  }
+  std::array<exact::BigInt, 12U> aligned{};
+  if (!exponent_initialized) {
+    return aligned;
+  }
+  for (std::size_t index = 0U; index < words.size(); ++index) {
+    const Binary64DyadicWord& word = words[index];
+    if (word.magnitude == 0U) {
+      continue;
+    }
+    exact::BigInt value{word.magnitude};
+    value <<= checked_dyadic_shift(
+        word.exponent, minimum_exponent);
+    aligned[index] = word.negative ? -value : value;
+  }
+  return aligned;
 }
 
 [[nodiscard]] int checked_dyadic_exponent_add(
@@ -1420,6 +1571,22 @@ int exact_diametral_phi_aabb_maximum_sign(
     const spatial::ExactDyadicAabb3& query_box) {
   return exact_diametral_phi_aabb_maximum_dyadic_sign(
       first_support_box, second_support_box, query_box);
+}
+
+int exact_diametral_phi_continuous_core_minimum_sign(
+    const spatial::ExactDyadicAabb3& first_support_box,
+    const spatial::ExactDyadicAabb3& second_support_box) {
+  const std::optional<int> bounded_sign =
+      try_bounded_exact_diametral_phi_continuous_core_minimum_sign(
+          first_support_box, second_support_box);
+  if (bounded_sign.has_value()) {
+    return *bounded_sign;
+  }
+  const std::array<Binary64DyadicWord, 12U> words =
+      continuous_core_endpoint_words(
+          first_support_box, second_support_box);
+  return continuous_core_minimum_sign_from_aligned_endpoints(
+      exactly_align_continuous_core_endpoint_words(words));
 }
 
 int exact_diametral_anchor_phi_aabb_minimum_sign(
@@ -3997,6 +4164,18 @@ class ExactPairSupportStreamBuilder {
     const std::size_t witness_threshold =
         result_.requirements.maximum_relevant_closed_rank - 1U;
     if (cloud_.size() - excluded_count < witness_threshold) {
+      return RankSearchOutcome::keep;
+    }
+    // A strict universal-rank certificate needs actual cloud points inside
+    // every diametral ball represented by this product.  If even the
+    // continuous AABB relaxation has an empty common strict core, its global
+    // witness traversal is provably futile.  Returning keep here is
+    // deliberately fail-open: the independent center-cover proof is still
+    // attempted by the caller before exhaustive product expansion.
+    if (!pending.rank_search_started &&
+        exact_diametral_phi_continuous_core_minimum_sign(
+            node_box(first_node_index),
+            node_box(second_node_index)) >= 0) {
       return RankSearchOutcome::keep;
     }
     if (!pending.rank_search_started) {

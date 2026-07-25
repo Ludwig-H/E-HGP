@@ -61,6 +61,8 @@ using morsehgp3d::hierarchy::
     exact_diametral_anchor_phi_aabb_minimum_sign;
 using morsehgp3d::hierarchy::exact_diametral_phi_aabb_maximum;
 using morsehgp3d::hierarchy::exact_diametral_phi_aabb_maximum_sign;
+using morsehgp3d::hierarchy::
+    exact_diametral_phi_continuous_core_minimum_sign;
 using morsehgp3d::hierarchy::make_initial_exact_pair_support_checkpoint;
 using morsehgp3d::hierarchy::verify_exact_pair_support_checkpoint;
 using morsehgp3d::hierarchy::verify_exact_pair_support_stream;
@@ -848,6 +850,110 @@ void test_exact_phi_aabb_maximum() {
             left_point, right_point, reversed));
       },
       "the exact phi bound rejects a reversed AABB");
+}
+
+void test_exact_phi_continuous_core_minimum() {
+  const ExactDyadicAabb3 separated_first = box(
+      {0.0, 0.0, 0.0}, {1.0, 0.0, 0.0});
+  const ExactDyadicAabb3 separated_second = box(
+      {3.0, 0.0, 0.0}, {4.0, 0.0, 0.0});
+  const ExactDyadicAabb3 touching_second = box(
+      {1.0, 0.0, 0.0}, {2.0, 0.0, 0.0});
+  const ExactDyadicAabb3 overlapping_first = box(
+      {0.0, 0.0, 0.0}, {2.0, 0.0, 0.0});
+  const ExactDyadicAabb3 overlapping_second = box(
+      {1.0, 0.0, 0.0}, {3.0, 0.0, 0.0});
+  const ExactDyadicAabb3 nested_first = box(
+      {0.0, 0.0, 0.0}, {10.0, 0.0, 0.0});
+  const ExactDyadicAabb3 nested_second = box(
+      {4.0, 0.0, 0.0}, {6.0, 0.0, 0.0});
+  check(
+      exact_diametral_phi_continuous_core_minimum_sign(
+          separated_first, separated_second) == -1 &&
+          exact_diametral_phi_continuous_core_minimum_sign(
+              separated_first, touching_second) == 0 &&
+          exact_diametral_phi_continuous_core_minimum_sign(
+              overlapping_first, overlapping_second) == 1 &&
+          exact_diametral_phi_continuous_core_minimum_sign(
+              nested_first, nested_second) == 1,
+      "the continuous diametral core distinguishes separated, touching, overlapping, and nested support intervals");
+
+  const ExactDyadicAabb3 cancellation_first = box(
+      {0.0, 0.0, 0.0}, {1.0, 2.0, 0.0});
+  const ExactDyadicAabb3 cancellation_second = box(
+      {3.0, 0.0, 0.0}, {4.0, 2.0, 0.0});
+  const ExactDyadicAabb3 positive_first = box(
+      {0.0, 0.0, 0.0}, {1.0, 2.0, 2.0});
+  const ExactDyadicAabb3 positive_second = box(
+      {3.0, 0.0, 0.0}, {4.0, 2.0, 2.0});
+  check(
+      exact_diametral_phi_continuous_core_minimum_sign(
+          cancellation_first, cancellation_second) == 0 &&
+          exact_diametral_phi_continuous_core_minimum_sign(
+              positive_first, positive_second) == 1,
+      "the continuous diametral core sums exact per-axis minima, including equality");
+
+  const std::array<ExactDyadicAabb3, 2U> correlated_first{
+      box({-100.0, -10.0, 0.0}, {-100.0, -10.0, 0.0}),
+      box({-1.0, 10.0, 0.0}, {-1.0, 10.0, 0.0})};
+  const std::array<ExactDyadicAabb3, 2U> correlated_second{
+      box({1.0, -1.0, 0.0}, {1.0, -1.0, 0.0}),
+      box({100.0, 1.0, 0.0}, {100.0, 1.0, 0.0})};
+  const ExactDyadicAabb3 origin = box(
+      {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0});
+  bool origin_inside_every_discrete_ball = true;
+  for (const ExactDyadicAabb3& first : correlated_first) {
+    for (const ExactDyadicAabb3& second : correlated_second) {
+      origin_inside_every_discrete_ball =
+          origin_inside_every_discrete_ball &&
+          exact_diametral_phi_aabb_maximum_sign(
+              first, second, origin) < 0;
+    }
+  }
+  const ExactDyadicAabb3 correlated_first_relaxation = box(
+      {-100.0, -10.0, 0.0}, {-1.0, 10.0, 0.0});
+  const ExactDyadicAabb3 correlated_second_relaxation = box(
+      {1.0, -1.0, 0.0}, {100.0, 1.0, 0.0});
+  check(
+      origin_inside_every_discrete_ball &&
+          exact_diametral_phi_continuous_core_minimum_sign(
+              correlated_first_relaxation,
+              correlated_second_relaxation) == 1,
+      "an empty continuous AABB core skips only the relaxed certificate and never prunes a correlated discrete product");
+
+  constexpr std::uint64_t zero = UINT64_C(0x0000000000000000);
+  constexpr std::uint64_t minimum_subnormal =
+      UINT64_C(0x0000000000000001);
+  constexpr std::uint64_t maximum_finite =
+      UINT64_C(0x7fefffffffffffff);
+  const ExactDyadicAabb3 wide_positive_first = box_words(
+      {zero, zero, minimum_subnormal},
+      {maximum_finite, zero, minimum_subnormal});
+  const ExactDyadicAabb3 wide_positive_second =
+      wide_positive_first;
+  const ExactDyadicAabb3 wide_negative_first = box_words(
+      {zero, zero, minimum_subnormal},
+      {zero, zero, minimum_subnormal});
+  const ExactDyadicAabb3 wide_negative_second = box_words(
+      {maximum_finite, zero, minimum_subnormal},
+      {maximum_finite, zero, minimum_subnormal});
+  check(
+      exact_diametral_phi_continuous_core_minimum_sign(
+          wide_positive_first, wide_positive_second) == 1 &&
+          exact_diametral_phi_continuous_core_minimum_sign(
+              wide_negative_first, wide_negative_second) == -1,
+      "the arbitrary-precision continuous-core fallback preserves signs across the full binary64 exponent range");
+
+  ExactDyadicAabb3 reversed = separated_first;
+  reversed.lower_binary64_bits[0] = bits(2.0);
+  reversed.upper_binary64_bits[0] = bits(1.0);
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(
+            exact_diametral_phi_continuous_core_minimum_sign(
+                reversed, separated_second));
+      },
+      "the continuous diametral core rejects a reversed support box");
 }
 
 void test_exact_anchor_phi_minimum_identity() {
@@ -2161,7 +2267,7 @@ void test_pending_witness_checkpoint_invariants() {
     const ExactPairSupportCheckpoint& valid = *receipt_checkpoint;
     check(
         valid.checkpoint_digest.to_lower_hex() ==
-            "7f0a35981c16df28d61942e424fd4ff47f84d47155e946ecf3af5b626158189c",
+            "ac0e85401f1de351c814cd35c2ffd2f2a8a6b8ad04ed42d7cb377f2e4f454e61",
         "checkpoint schema v2 preserves its golden mid-witness cursor digest (observed " +
             valid.checkpoint_digest.to_lower_hex() + ")");
     const auto valid_verification = verify_exact_pair_support_checkpoint(
@@ -2375,9 +2481,9 @@ void test_checkpoint_manifest_and_prepared_retry() {
           initial.manifest.lbvh_digest.to_lower_hex() ==
               "c70d65a1a04f78d1310ca78d1fe931901fa17a3cae8d9369343bb58904a9acb1" &&
           initial.manifest.semantic_digest.to_lower_hex() ==
-              "101e54775193b56a99bc2a6067243fe936b3b28feb9b437faab4e0fc4f97384f" &&
+              "7af6cbae09daea02ddaea0eebd15ec45e7ac64d9d1a4c4357774b2d0d9c71100" &&
           initial.checkpoint_digest.to_lower_hex() ==
-              "9ceff219f56c04aa82c93571294a4591b6325afc7f96c382783d1473af9081b2",
+              "7ac07da46880b628bd141ce531d4c352734ca4c9efee1f1beb2ecc0dc359a244",
       "checkpoint schema v2 preserves its golden cloud, LBVH, semantic, and initial-state digests (observed " +
           initial.manifest.canonical_cloud_digest.to_lower_hex() + ", " +
           initial.manifest.lbvh_digest.to_lower_hex() + ", " +
@@ -2506,7 +2612,7 @@ void test_checkpoint_manifest_and_prepared_retry() {
           chunked.checkpoint.output_chain_digest.to_lower_hex() ==
               "8658c2f4ab4d3e560d9abaeee1ea433aa55e57f72d4c10a6fc7f9b6f11077fc8" &&
           chunked.checkpoint.checkpoint_digest.to_lower_hex() ==
-              "5a5bf68fe86bc32b041c404c14c041d005f786c05d83685bbaec133bb0f0ad08",
+              "9e85fa598c73df651c4d537c33721d0f04cbf931dde4afc064e79620e8571a16",
       "checkpoint schema v2 preserves its golden mixed-record output chain and terminal digest (observed " +
           chunked.checkpoint.output_chain_digest.to_lower_hex() + ", " +
           chunked.checkpoint.checkpoint_digest.to_lower_hex() + ")");
@@ -4320,6 +4426,7 @@ void test_hostile_replay_mutations() {
 
 int main() {
   test_exact_phi_aabb_maximum();
+  test_exact_phi_continuous_core_minimum();
   test_exact_anchor_phi_minimum_identity();
   test_complete_self_dual_partition_and_long_pair();
   test_leaf_rank_cap_and_sparse_queries();

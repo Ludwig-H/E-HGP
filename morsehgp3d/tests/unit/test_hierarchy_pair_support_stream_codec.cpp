@@ -508,7 +508,7 @@ void test_roundtrip_and_determinism() {
   const std::string golden = golden_builder.finalize().to_lower_hex();
   check(
       golden ==
-          "76192f3f8478da46aa2b6301f6675cd422560ea8c89aecc1aac9c8537c9da9f5",
+          "ed9d25b7e549dd15610425b2cf3ee223fdd3c577c5b4c48801d3c72b197f9bae",
       "the complete canonical wire has a stable golden SHA-256 (observed " +
           golden + ")");
 }
