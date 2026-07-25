@@ -107,9 +107,11 @@ enum class PairSupportRankCapacityStop : std::uint8_t {
 };
 
 struct PairSupportRankDeviceBatch {
-  // The whole fixed-capacity terminal transcript is returned and its tail must
-  // remain sentinel-filled.  Position is the transcript index; ranges and
-  // classifications are reconstructed only from the immutable CPU snapshot.
+  // Only the active terminal prefix is returned: terminals.size() must equal
+  // terminal_count.  The device still reserves terminal_capacity records, but
+  // no host decision may inspect or trust the inactive device tail.  Position
+  // is the transcript index; ranges and classifications are reconstructed only
+  // from the immutable CPU snapshot.
   std::vector<PairSupportRankDeviceTerminal> terminals;
   std::size_t terminal_count{};
   std::size_t input_product_count{};

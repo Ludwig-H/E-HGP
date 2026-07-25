@@ -561,10 +561,10 @@ void test_rank_prune_exact_receipts_and_traffic() {
           audit.initial_frontier_h2d_byte_count == 16U &&
           audit.traversal_metadata_d2h_byte_count ==
               audit.gpu_traversal_epoch_count * 5U * 8U + 8U &&
-          audit.physical_terminal_d2h_byte_count == 4U * 16U &&
+          audit.physical_terminal_d2h_byte_count == 16U &&
           audit.active_terminal_d2h_byte_count == 16U &&
           audit.device_terminal_byte_capacity == 4U * 16U &&
-          audit.physical_receipt_d2h_byte_count == 4U * 16U &&
+          audit.physical_receipt_d2h_byte_count == 16U &&
           audit.active_receipt_d2h_byte_count == 16U &&
           audit.device_frontier_double_buffer_byte_capacity ==
               2U * 8U * 16U &&
@@ -812,8 +812,15 @@ void test_rank_prune_preflight_and_fallbacks() {
           capacity_fallback.audit.fallback_product_count == 1U &&
           capacity_fallback.audit.work_item_capacity_exhausted &&
           capacity_fallback.audit.gpu_count_kernel_launch_count == 1U &&
-          capacity_fallback.audit.gpu_emit_kernel_launch_count == 0U,
-      "P4 checks scanned frontier capacity before stable emit and falls back");
+          capacity_fallback.audit.gpu_emit_kernel_launch_count == 0U &&
+          capacity_fallback.audit.gpu_output_terminal_count == 0U &&
+          capacity_fallback.audit.physical_terminal_d2h_byte_count == 0U &&
+          capacity_fallback.audit.active_terminal_d2h_byte_count == 0U &&
+          capacity_fallback.audit.physical_receipt_d2h_byte_count == 0U &&
+          capacity_fallback.audit.active_receipt_d2h_byte_count == 0U &&
+          capacity_fallback.audit.device_terminal_byte_capacity == 4U * 16U,
+      "P5 copies no terminal bytes for an empty active prefix while retaining "
+      "the bounded device capacity");
 }
 
 void test_rank_prune_canonical_minimal_prefix() {
@@ -988,7 +995,7 @@ void test_rank_prune_corruption_matrix() {
       std::pair{FakePairSupportPhiCorruption::rank_false_strict_receipt,
                 "a duplicated P4 terminal"},
       std::pair{FakePairSupportPhiCorruption::rank_stale_tail,
-                "a write into the P2 fixed-capacity tail"},
+                "a surplus terminal beyond the P5 active prefix"},
       std::pair{FakePairSupportPhiCorruption::rank_epoch_count_over_budget,
                 "a P2 traversal beyond its epoch budget"},
       std::pair{

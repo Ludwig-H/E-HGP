@@ -369,7 +369,7 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
   }
 
   PairSupportRankDeviceBatch batch;
-  batch.terminals.resize(maximum_terminal_count);
+  batch.terminals.reserve(maximum_terminal_count);
   batch.input_product_count = products.size();
   batch.product_capacity = maximum_product_count;
   batch.work_item_capacity = maximum_work_item_count;
@@ -388,8 +388,6 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
       products.size() * sizeof(PairSupportRankProductInputRecord);
   batch.initial_frontier_h2d_byte_count =
       products.size() * sizeof(PairSupportRankWorkItem);
-  batch.physical_terminal_d2h_byte_count =
-      maximum_terminal_count * sizeof(PairSupportRankDeviceTerminal);
   batch.device_frontier_double_buffer_byte_capacity =
       2U * maximum_work_item_count * sizeof(PairSupportRankWorkItem);
   batch.device_terminal_byte_capacity =
@@ -591,10 +589,9 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
       const PairSupportPhiNodeInputRecord& witness =
           nodes[static_cast<std::size_t>(item.witness_node_index)];
       if (decision.emit_terminal) {
-        const std::size_t output_index = batch.terminal_count++;
-        batch.terminals[output_index] =
-            PairSupportRankDeviceTerminal{
-                item.product_slot, item.witness_node_index};
+        batch.terminals.push_back(PairSupportRankDeviceTerminal{
+            item.product_slot, item.witness_node_index});
+        ++batch.terminal_count;
         if (decision.strict_terminal) {
           strict_point_counts[product_slot] +=
               witness.leaf_end - witness.leaf_begin;
@@ -646,19 +643,20 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
     case test_support::FakePairSupportPhiCorruption::
         rank_false_strict_receipt:
       if (batch.terminal_count == 0U ||
-          batch.terminal_count >= batch.terminals.size()) {
+          batch.terminal_count >= maximum_terminal_count) {
         throw std::logic_error(
             "the fake Phase 9 duplicate terminal needs spare capacity");
       }
-      batch.terminals[batch.terminal_count] = batch.terminals[0U];
+      batch.terminals.push_back(batch.terminals[0U]);
       ++batch.terminal_count;
       break;
     case test_support::FakePairSupportPhiCorruption::rank_stale_tail:
-      if (batch.terminal_count >= batch.terminals.size()) {
+      if (batch.terminal_count >= maximum_terminal_count) {
         throw std::logic_error(
-            "the fake Phase 9 stale rank tail needs spare capacity");
+            "the fake Phase 9 surplus rank terminal needs spare capacity");
       }
-      batch.terminals[batch.terminal_count].product_slot = 0U;
+      batch.terminals.push_back(PairSupportRankDeviceTerminal{
+          0U, root_node_index});
       break;
     case test_support::FakePairSupportPhiCorruption::
         rank_epoch_count_over_budget:
@@ -686,6 +684,8 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
   }
   batch.active_terminal_d2h_byte_count =
       batch.terminal_count * sizeof(PairSupportRankDeviceTerminal);
+  batch.physical_terminal_d2h_byte_count =
+      batch.active_terminal_d2h_byte_count;
   return batch;
 }
 

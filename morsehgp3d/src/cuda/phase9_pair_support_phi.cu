@@ -1079,13 +1079,6 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
         "cudaMemsetAsync Phase 9 rank-prune product counters");
     check_cuda(
         cudaMemsetAsync(
-            cuda.rank_terminals(),
-            0xff,
-            terminal_capacity_bytes,
-            cuda.stream()),
-        "cudaMemsetAsync Phase 9 rank-prune terminal sentinels");
-    check_cuda(
-        cudaMemsetAsync(
             cuda.rank_failure(),
             0,
             sizeof(std::uint64_t),
@@ -1110,7 +1103,6 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
         "cudaMemcpyAsync Phase 9 rank-prune initial frontier host-to-device");
 
     PairSupportRankDeviceBatch batch;
-    batch.terminals.resize(maximum_terminal_count);
     batch.input_product_count = products.size();
     batch.product_capacity = maximum_product_count;
     batch.work_item_capacity = maximum_work_item_count;
@@ -1119,7 +1111,6 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
         snapshot_uploaded ? snapshot_bytes : 0U;
     batch.active_product_h2d_byte_count = product_bytes;
     batch.initial_frontier_h2d_byte_count = initial_frontier_bytes;
-    batch.physical_terminal_d2h_byte_count = terminal_capacity_bytes;
     batch.device_frontier_double_buffer_byte_capacity =
         2U * one_frontier_capacity_bytes;
     batch.device_terminal_byte_capacity = terminal_capacity_bytes;
@@ -1342,16 +1333,22 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
         terminal_count,
         sizeof(PairSupportRankDeviceTerminal),
         "the Phase 9 active rank-prune terminal bytes overflow");
+    batch.physical_terminal_d2h_byte_count =
+        batch.active_terminal_d2h_byte_count;
+    batch.terminals.resize(terminal_count);
 
     std::uint64_t final_failure_word = 0U;
-    check_cuda(
-        cudaMemcpyAsync(
-            batch.terminals.data(),
-            cuda.rank_terminals(),
-            terminal_capacity_bytes,
-            cudaMemcpyDeviceToHost,
-            cuda.stream()),
-        "cudaMemcpyAsync Phase 9 rank-prune terminals device-to-host");
+    if (batch.active_terminal_d2h_byte_count != 0U) {
+      check_cuda(
+          cudaMemcpyAsync(
+              batch.terminals.data(),
+              cuda.rank_terminals(),
+              batch.active_terminal_d2h_byte_count,
+              cudaMemcpyDeviceToHost,
+              cuda.stream()),
+          "cudaMemcpyAsync Phase 9 active rank-prune terminals "
+          "device-to-host");
+    }
     check_cuda(
         cudaMemcpyAsync(
             &final_failure_word,

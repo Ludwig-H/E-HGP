@@ -91,12 +91,6 @@ void hash_word(std::uint64_t& digest, std::uint64_t word) noexcept {
          record.proposal_code == detail::pair_support_phi_sentinel;
 }
 
-[[nodiscard]] bool sentinel_rank_terminal(
-    const detail::PairSupportRankDeviceTerminal& terminal) noexcept {
-  return terminal.product_slot == detail::pair_support_phi_sentinel &&
-         terminal.witness_node_index == detail::pair_support_phi_sentinel;
-}
-
 [[nodiscard]] bool leaf_node(
     const detail::PairSupportPhiNodeInputRecord& node) noexcept {
   return node.left_child == detail::pair_support_phi_sentinel &&
@@ -627,7 +621,7 @@ validate_and_recertify_rank_prunes(
       expected_fixed_workspace_bytes,
       batch.device_scan_workspace_byte_capacity,
       "the Phase 9 rank-prune fixed workspace byte count overflows size_t");
-  if (batch.terminals.size() != capacity.maximum_receipt_count ||
+  if (batch.terminals.size() != batch.terminal_count ||
       batch.input_product_count != products.size() ||
       batch.product_capacity != capacity.maximum_product_count ||
       batch.work_item_capacity != capacity.maximum_work_item_count ||
@@ -653,10 +647,11 @@ validate_and_recertify_rank_prunes(
       batch.initial_frontier_h2d_byte_count != initial_frontier_bytes ||
       batch.traversal_metadata_d2h_byte_count !=
           expected_metadata_d2h_bytes ||
-      batch.physical_terminal_d2h_byte_count != terminal_capacity_bytes ||
       batch.active_terminal_d2h_byte_count !=
           batch.terminal_count *
               sizeof(detail::PairSupportRankDeviceTerminal) ||
+      batch.physical_terminal_d2h_byte_count !=
+          batch.active_terminal_d2h_byte_count ||
       batch.device_frontier_double_buffer_byte_capacity !=
           frontier_capacity_bytes ||
       batch.device_terminal_byte_capacity != terminal_capacity_bytes ||
@@ -689,15 +684,6 @@ validate_and_recertify_rank_prunes(
     throw std::runtime_error(
         "the GPU rank-prune proposal returned inconsistent traversal metadata");
   }
-  for (std::size_t index = batch.terminal_count;
-       index < batch.terminals.size();
-       ++index) {
-    if (!sentinel_rank_terminal(batch.terminals[index])) {
-      throw std::runtime_error(
-          "the GPU rank-prune proposal exposed a stale terminal tail");
-    }
-  }
-
   PairSupportRankPruneBatchResult result;
   PairSupportRankPruneAudit& audit = result.audit;
   audit.capacity = capacity;

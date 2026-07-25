@@ -239,6 +239,8 @@ struct PairSupportRankPruneAudit {
   std::size_t active_product_h2d_byte_count{};
   std::size_t initial_frontier_h2d_byte_count{};
   std::size_t traversal_metadata_d2h_byte_count{};
+  // The host receives only the compact active prefix, so physical and active
+  // terminal D2H bytes are equal.  Device capacity remains audited separately.
   std::size_t physical_terminal_d2h_byte_count{};
   std::size_t active_terminal_d2h_byte_count{};
   std::size_t device_terminal_byte_capacity{};
