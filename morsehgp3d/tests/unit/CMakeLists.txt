@@ -327,6 +327,30 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_anchored_pair_candidate_recertifier_tests
+  test_anchored_pair_candidate_recertifier.cpp
+  "${PROJECT_SOURCE_DIR}/src/cpu/hierarchy/anchored_pair_candidate_recertifier.cpp"
+)
+target_link_libraries(
+  morsehgp3d_anchored_pair_candidate_recertifier_tests
+  PRIVATE morsehgp3d::anchored_pair_witness_bank
+)
+target_compile_features(
+  morsehgp3d_anchored_pair_candidate_recertifier_tests
+  PRIVATE cxx_std_20
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_anchored_pair_candidate_recertifier_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_anchored_pair_candidate_recertifier_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_higher_support_product_tests
   test_higher_support_product.cpp
 )
@@ -1529,6 +1553,7 @@ set(
   morsehgp3d_gpu_k1_boruvka_replay_host
   morsehgp3d_gpu_k1_boruvka_full_replay_host
   morsehgp3d_gpu_k1_boruvka_morton_work_profile_host
+  morsehgp3d_anchored_pair_candidate_recertifier_tests
   morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
   morsehgp3d_gpu_morton_lbvh_build_context_tests
 )
@@ -2482,6 +2507,10 @@ add_test(
   NAME morsehgp3d.gpu_anchored_pair_candidate_proposal_context
   COMMAND
     morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
+)
+add_test(
+  NAME morsehgp3d.anchored_pair_candidate_recertifier
+  COMMAND morsehgp3d_anchored_pair_candidate_recertifier_tests
 )
 add_test(
   NAME morsehgp3d.gpu_k1_boruvka_exact_search_work_profile_host

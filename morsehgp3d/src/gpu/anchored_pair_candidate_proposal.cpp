@@ -468,7 +468,7 @@ void validate_execution_metadata(
           batch.synchronization_count != 1U ||
           batch.compaction_kind !=
               detail::Phase14AnchoredPairCandidateCompactionKind::
-                  device_scan) {
+                  device_serial_prefix_clamp) {
         throw std::runtime_error(
             "the anchored-pair CUDA launcher returned invalid execution "
             "metadata");
@@ -582,9 +582,10 @@ void validate_execution_metadata(
   result.audit.gpu_execution_performed =
       batch.execution_kind ==
       detail::Phase14AnchoredPairCandidateExecutionKind::cuda;
-  result.audit.device_scan_compaction_performed =
+  result.audit.device_serial_prefix_clamp_performed =
       batch.compaction_kind ==
-      detail::Phase14AnchoredPairCandidateCompactionKind::device_scan;
+      detail::Phase14AnchoredPairCandidateCompactionKind::
+          device_serial_prefix_clamp;
 
   std::size_t expected_record_begin = 0U;
   for (std::size_t query_index = 0U;

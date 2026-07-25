@@ -2280,7 +2280,56 @@ if(MORSEHGP3D_ENABLE_CUDA)
         -Wpedantic
         -Wconversion
         -Wsign-conversion
-        -Werror
+      -Werror
+    )
+  endif()
+
+  add_library(
+    morsehgp3d_gpu_anchored_pair_candidate_proposal
+    STATIC
+      src/cuda/phase14_anchored_pair_candidate_proposal_internal.hpp
+      src/cuda/phase14_anchored_pair_candidate_proposal.cu
+      src/gpu/anchored_pair_candidate_proposal.cpp
+      src/cpu/hierarchy/anchored_pair_candidate_recertifier.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_anchored_pair_candidate_proposal
+    ALIAS morsehgp3d_gpu_anchored_pair_candidate_proposal
+  )
+  target_include_directories(
+    morsehgp3d_gpu_anchored_pair_candidate_proposal
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_anchored_pair_candidate_proposal
+    PUBLIC morsehgp3d::gpu_morton_lbvh_build
+    PRIVATE
+      morsehgp3d::anchored_pair_witness_bank
+      Threads::Threads
+  )
+  target_compile_features(
+    morsehgp3d_gpu_anchored_pair_candidate_proposal PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(
+    morsehgp3d_gpu_anchored_pair_candidate_proposal
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_anchored_pair_candidate_proposal
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_anchored_pair_candidate_proposal
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
     )
   endif()
 

@@ -55,12 +55,12 @@ enum class Phase14AnchoredPairCandidateExecutionKind : std::uint64_t {
   cuda = 1U,
 };
 
-// CUDA may discover records in warp/atomic order, but it must publish them in
-// query order.  A bounded scan/compaction pipeline avoids requiring one
-// globally ordered traversal kernel and keeps the resident arena fixed.
+// CUDA discovers records independently per query but publishes them in query
+// order.  P8e first uses a bounded serial prefix/clamp on the device; it is
+// intentionally not labelled as the parallel DeviceScan required at 10 M+.
 enum class Phase14AnchoredPairCandidateCompactionKind : std::uint64_t {
   host_fake = 0U,
-  device_scan = 1U,
+  device_serial_prefix_clamp = 1U,
 };
 
 struct Phase14AnchoredPairCandidateQueryInputRecord {

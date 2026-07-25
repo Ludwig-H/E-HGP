@@ -197,7 +197,10 @@ struct AnchoredPairCandidateProposalAudit {
   bool prune_mask_cardinalities_validated{false};
   bool transcript_digest_validated{false};
   bool gpu_execution_performed{false};
-  bool device_scan_compaction_performed{false};
+  // P8e initially uses one deterministic device-side serial prefix/clamp.
+  // This is deliberately distinct from the future parallel DeviceScan path
+  // required before a massive-query qualification.
+  bool device_serial_prefix_clamp_performed{false};
   bool candidate_leaf_status_recertified{false};
   bool strict_witness_masks_recertified{false};
   bool exact_closed_ball_partition_published{false};
