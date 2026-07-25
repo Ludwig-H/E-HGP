@@ -783,6 +783,31 @@ void test_exact_phi_aabb_maximum() {
       "selectors for signed zero, subnormal, adjacent, and extreme finite "
       "endpoints");
 
+  constexpr std::uint64_t two_to_minus_eighty =
+      UINT64_C(0x3af0000000000000);
+  const ExactDyadicAabb3 wide_cancellation_first = box_words(
+      {negative_one, negative_one, two_to_minus_eighty},
+      {negative_one, negative_one, two_to_minus_eighty});
+  const ExactDyadicAabb3 wide_cancellation_second = box_words(
+      {one, negative_one, two_to_minus_eighty},
+      {one, negative_one, two_to_minus_eighty});
+  const ExactDyadicAabb3 wide_cancellation_query = box_words(
+      {positive_zero, positive_zero, two_to_minus_eighty},
+      {positive_zero, positive_zero, two_to_minus_eighty});
+  const auto wide_cancellation_oracle =
+      historical_rational_phi_aabb_maximum(
+          wide_cancellation_first,
+          wide_cancellation_second,
+          wide_cancellation_query);
+  check(
+      wide_cancellation_oracle.maximum_phi.is_zero() &&
+          exact_diametral_phi_aabb_maximum_sign(
+              wide_cancellation_first,
+              wide_cancellation_second,
+              wide_cancellation_query) == 0,
+      "the bounded exact phi sign preserves a 160-bit product envelope and "
+      "an exact cross-axis cancellation");
+
   ExactDyadicAabb3 reversed = inside_point;
   reversed.lower_binary64_bits[0] = bits(2.0);
   reversed.upper_binary64_bits[0] = bits(1.0);
@@ -808,6 +833,8 @@ void test_exact_anchor_phi_minimum_identity() {
       UINT64_C(0x7fefffffffffffff);
   constexpr std::uint64_t negative_maximum_finite =
       UINT64_C(0xffefffffffffffff);
+  constexpr std::uint64_t two_to_minus_eighty =
+      UINT64_C(0x3af0000000000000);
 
   struct AnchorFixture {
     std::array<std::uint64_t, 3> first;
@@ -842,6 +869,13 @@ void test_exact_anchor_phi_minimum_identity() {
           box_words(
               {maximum_finite, zero, zero},
               {maximum_finite, zero, zero}),
+          0},
+      AnchorFixture{
+          {negative_one, negative_one, two_to_minus_eighty},
+          {one, negative_one, two_to_minus_eighty},
+          box_words(
+              {zero, zero, two_to_minus_eighty},
+              {zero, zero, two_to_minus_eighty}),
           0}};
 
   bool values_and_signs_match = true;

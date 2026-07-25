@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -90,6 +91,250 @@ struct IntegrityVerifiedCheckpointTag {};
     std::size_t increment,
     std::size_t maximum) noexcept {
   return current <= maximum && increment <= maximum - current;
+}
+
+// A common dyadic exponent turns every sign-only predicate below into integer
+// arithmetic.  The conservative 124-bit coordinate cap proves all subsequent
+// int256_t operations safe before any unchecked fixed-width operation occurs:
+// coordinate differences use at most 125 bits, their products at most
+// 250 bits, the three-axis maximum sum fewer than 252 bits, and the anchor
+// identity multiplied by four fewer than 254 bits.  Inputs outside this
+// envelope fall back to the arbitrary-precision path before a scientific
+// decision is made.
+using BoundedExactInteger = boost::multiprecision::int256_t;
+constexpr std::uint64_t bounded_exact_coordinate_bit_limit = 124U;
+static_assert(
+    std::numeric_limits<BoundedExactInteger>::digits >= 254,
+    "the bounded exact sign kernel needs at least 254 magnitude bits");
+
+struct Binary64DyadicWord {
+  std::uint64_t magnitude{};
+  int exponent{};
+  bool negative{};
+};
+
+[[nodiscard]] Binary64DyadicWord decode_binary64_dyadic_word(
+    std::uint64_t input_bits) {
+  constexpr std::uint64_t fraction_mask =
+      (std::uint64_t{1} << 52U) - 1U;
+  constexpr std::uint64_t exponent_mask = UINT64_C(0x7ff);
+  constexpr int exponent_bias = 1023;
+  constexpr int fraction_bit_count = 52;
+  constexpr int subnormal_exponent = -1074;
+
+  const std::uint64_t bits =
+      exact::canonicalize_binary64_bits(input_bits);
+  const bool negative =
+      (bits & exact::binary64_sign_mask) != 0U;
+  const std::uint64_t exponent_bits =
+      (bits >> 52U) & exponent_mask;
+  std::uint64_t magnitude = bits & fraction_mask;
+  if (exponent_bits != 0U) {
+    magnitude |= std::uint64_t{1} << 52U;
+  }
+  if (magnitude == 0U) {
+    return {};
+  }
+  int exponent = exponent_bits == 0U
+      ? subnormal_exponent
+      : static_cast<int>(exponent_bits) -
+            exponent_bias - fraction_bit_count;
+  const unsigned int trailing_zero_count =
+      static_cast<unsigned int>(std::countr_zero(magnitude));
+  magnitude >>= trailing_zero_count;
+  exponent += static_cast<int>(trailing_zero_count);
+  return Binary64DyadicWord{magnitude, exponent, negative};
+}
+
+template <std::size_t WordCount>
+[[nodiscard]] std::optional<std::array<BoundedExactInteger, WordCount>>
+try_align_bounded_exact_dyadics(
+    const std::array<Binary64DyadicWord, WordCount>& words) {
+  int minimum_exponent = 0;
+  bool exponent_initialized = false;
+  for (const Binary64DyadicWord& word : words) {
+    if (word.magnitude == 0U) {
+      continue;
+    }
+    if (!exponent_initialized || word.exponent < minimum_exponent) {
+      minimum_exponent = word.exponent;
+      exponent_initialized = true;
+    }
+  }
+
+  std::array<BoundedExactInteger, WordCount> aligned{};
+  if (!exponent_initialized) {
+    return aligned;
+  }
+  for (std::size_t index = 0U; index < words.size(); ++index) {
+    const Binary64DyadicWord& word = words[index];
+    if (word.magnitude == 0U) {
+      continue;
+    }
+    const std::int64_t shift =
+        static_cast<std::int64_t>(word.exponent) -
+        static_cast<std::int64_t>(minimum_exponent);
+    const std::uint64_t magnitude_bit_count =
+        static_cast<std::uint64_t>(std::bit_width(word.magnitude));
+    if (shift < 0 ||
+        static_cast<std::uint64_t>(shift) >
+            bounded_exact_coordinate_bit_limit - magnitude_bit_count) {
+      return std::nullopt;
+    }
+    BoundedExactInteger value{word.magnitude};
+    value <<= static_cast<unsigned int>(shift);
+    aligned[index] = word.negative ? -value : value;
+  }
+  return aligned;
+}
+
+void validate_exact_dyadic_box(
+    const spatial::ExactDyadicAabb3& box) {
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    if (exact::binary64_total_order_key(
+            box.upper_binary64_bits[axis]) <
+        exact::binary64_total_order_key(
+            box.lower_binary64_bits[axis])) {
+      throw std::invalid_argument(
+          "an exact dyadic AABB has a reversed axis");
+    }
+  }
+}
+
+[[nodiscard]] int bounded_exact_sign(
+    const BoundedExactInteger& value) noexcept {
+  if (value < 0) {
+    return -1;
+  }
+  return value == 0 ? 0 : 1;
+}
+
+[[nodiscard]] std::optional<int>
+try_bounded_exact_diametral_phi_aabb_maximum_sign(
+    const spatial::ExactDyadicAabb3& first_support_box,
+    const spatial::ExactDyadicAabb3& second_support_box,
+    const spatial::ExactDyadicAabb3& query_box) {
+  validate_exact_dyadic_box(first_support_box);
+  validate_exact_dyadic_box(second_support_box);
+  validate_exact_dyadic_box(query_box);
+
+  std::array<Binary64DyadicWord, 18U> words{};
+  const std::array<const spatial::ExactDyadicAabb3*, 3U> boxes{
+      &first_support_box, &second_support_box, &query_box};
+  for (std::size_t box_index = 0U;
+       box_index < boxes.size();
+       ++box_index) {
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      words[box_index * 6U + axis] =
+          decode_binary64_dyadic_word(
+              boxes[box_index]->lower_binary64_bits[axis]);
+      words[box_index * 6U + 3U + axis] =
+          decode_binary64_dyadic_word(
+              boxes[box_index]->upper_binary64_bits[axis]);
+    }
+  }
+  const std::optional<std::array<BoundedExactInteger, 18U>>
+      aligned = try_align_bounded_exact_dyadics(words);
+  if (!aligned.has_value()) {
+    return std::nullopt;
+  }
+
+  BoundedExactInteger total_maximum = 0;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    bool initialized = false;
+    BoundedExactInteger axis_maximum = 0;
+    for (std::size_t query_selector = 0U;
+         query_selector < 2U;
+         ++query_selector) {
+      const BoundedExactInteger& query =
+          (*aligned)[12U + query_selector * 3U + axis];
+      for (std::size_t first_selector = 0U;
+           first_selector < 2U;
+           ++first_selector) {
+        const BoundedExactInteger& first =
+            (*aligned)[first_selector * 3U + axis];
+        for (std::size_t second_selector = 0U;
+             second_selector < 2U;
+             ++second_selector) {
+          const BoundedExactInteger& second =
+              (*aligned)[6U + second_selector * 3U + axis];
+          const BoundedExactInteger candidate =
+              (query - first) * (query - second);
+          if (!initialized || axis_maximum < candidate) {
+            initialized = true;
+            axis_maximum = candidate;
+          }
+        }
+      }
+    }
+    total_maximum += axis_maximum;
+  }
+  return bounded_exact_sign(total_maximum);
+}
+
+struct BoundedExactAnchorPhi {
+  std::array<Binary64DyadicWord, 3U> first{};
+  std::array<Binary64DyadicWord, 3U> second{};
+};
+
+[[nodiscard]] BoundedExactAnchorPhi bounded_exact_anchor_phi(
+    const std::array<std::uint64_t, 3U>& first_bits,
+    const std::array<std::uint64_t, 3U>& second_bits) {
+  BoundedExactAnchorPhi result;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    result.first[axis] =
+        decode_binary64_dyadic_word(first_bits[axis]);
+    result.second[axis] =
+        decode_binary64_dyadic_word(second_bits[axis]);
+  }
+  return result;
+}
+
+[[nodiscard]] std::optional<int>
+try_bounded_exact_anchor_phi_aabb_minimum_sign(
+    const BoundedExactAnchorPhi& anchor,
+    const spatial::ExactDyadicAabb3& query_box) {
+  validate_exact_dyadic_box(query_box);
+  std::array<Binary64DyadicWord, 12U> words{};
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    words[axis] = anchor.first[axis];
+    words[3U + axis] = anchor.second[axis];
+    words[6U + axis] = decode_binary64_dyadic_word(
+        query_box.lower_binary64_bits[axis]);
+    words[9U + axis] = decode_binary64_dyadic_word(
+        query_box.upper_binary64_bits[axis]);
+  }
+  const std::optional<std::array<BoundedExactInteger, 12U>>
+      aligned = try_align_bounded_exact_dyadics(words);
+  if (!aligned.has_value()) {
+    return std::nullopt;
+  }
+
+  // Four times the exact identity has the same sign and remains integral:
+  // outside the midpoint interval it is 4(x-u)(x-v), while at the midpoint
+  // it is -(u-v)^2.  This avoids materializing either a rational midpoint or
+  // a rational radius.
+  BoundedExactInteger four_times_minimum = 0;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const BoundedExactInteger& first = (*aligned)[axis];
+    const BoundedExactInteger& second = (*aligned)[3U + axis];
+    const BoundedExactInteger& lower = (*aligned)[6U + axis];
+    const BoundedExactInteger& upper = (*aligned)[9U + axis];
+    const BoundedExactInteger midpoint_numerator = first + second;
+    const BoundedExactInteger twice_lower = 2 * lower;
+    const BoundedExactInteger twice_upper = 2 * upper;
+    if (midpoint_numerator < twice_lower) {
+      four_times_minimum +=
+          4 * (lower - first) * (lower - second);
+    } else if (twice_upper < midpoint_numerator) {
+      four_times_minimum +=
+          4 * (upper - first) * (upper - second);
+    } else {
+      const BoundedExactInteger difference = first - second;
+      four_times_minimum -= difference * difference;
+    }
+  }
+  return bounded_exact_sign(four_times_minimum);
 }
 
 // Binary64 endpoints are dyadic.  Keeping an unnormalized
@@ -366,6 +611,12 @@ exact_diametral_phi_aabb_maximum_dyadic(
     const spatial::ExactDyadicAabb3& first_support_box,
     const spatial::ExactDyadicAabb3& second_support_box,
     const spatial::ExactDyadicAabb3& query_box) {
+  const std::optional<int> bounded_sign =
+      try_bounded_exact_diametral_phi_aabb_maximum_sign(
+          first_support_box, second_support_box, query_box);
+  if (bounded_sign.has_value()) {
+    return *bounded_sign;
+  }
   return dyadic_sign(
       exact_diametral_phi_aabb_maximum_dyadic(
           first_support_box, second_support_box, query_box)
@@ -386,6 +637,7 @@ struct ExactDyadicAnchorPhi {
   std::array<UnnormalizedExactDyadic, 3> first{};
   std::array<UnnormalizedExactDyadic, 3> second{};
   std::array<UnnormalizedExactDyadic, 3> vertex{};
+  BoundedExactAnchorPhi bounded{};
 };
 
 [[nodiscard]] ExactDyadicAnchorPhi exact_dyadic_anchor_phi(
@@ -396,6 +648,7 @@ struct ExactDyadicAnchorPhi {
   const std::array<std::uint64_t, 3> second_bits =
       second.canonical_input_bits();
   ExactDyadicAnchorPhi result;
+  result.bounded = bounded_exact_anchor_phi(first_bits, second_bits);
   for (std::size_t axis = 0U; axis < 3U; ++axis) {
     result.first[axis] =
         dyadic_from_binary64_bits(first_bits[axis]);
@@ -432,6 +685,18 @@ exact_anchor_phi_aabb_minimum(
             subtract_dyadics(*minimizer, anchor.second[axis])));
   }
   return total_minimum;
+}
+
+[[nodiscard]] int exact_anchor_phi_aabb_minimum_sign(
+    const ExactDyadicAnchorPhi& anchor,
+    const spatial::ExactDyadicAabb3& query_box) {
+  const std::optional<int> bounded_sign =
+      try_bounded_exact_anchor_phi_aabb_minimum_sign(
+          anchor.bounded, query_box);
+  if (bounded_sign.has_value()) {
+    return *bounded_sign;
+  }
+  return dyadic_sign(exact_anchor_phi_aabb_minimum(anchor, query_box));
 }
 
 [[nodiscard]] bool event_less(
@@ -748,6 +1013,33 @@ int exact_diametral_anchor_phi_aabb_minimum_sign(
     const spatial::ExactDyadicAabb3& first_support_point_box,
     const spatial::ExactDyadicAabb3& second_support_point_box,
     const spatial::ExactDyadicAabb3& query_box) {
+  validate_exact_dyadic_box(first_support_point_box);
+  validate_exact_dyadic_box(second_support_point_box);
+  validate_exact_dyadic_box(query_box);
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    if (exact::canonicalize_binary64_bits(
+            first_support_point_box.lower_binary64_bits[axis]) !=
+            exact::canonicalize_binary64_bits(
+                first_support_point_box.upper_binary64_bits[axis]) ||
+        exact::canonicalize_binary64_bits(
+            second_support_point_box.lower_binary64_bits[axis]) !=
+            exact::canonicalize_binary64_bits(
+                second_support_point_box.upper_binary64_bits[axis])) {
+      throw std::invalid_argument(
+          "an exact diametral anchor support box is not degenerate");
+    }
+  }
+  const BoundedExactAnchorPhi bounded_anchor =
+      bounded_exact_anchor_phi(
+          first_support_point_box.lower_binary64_bits,
+          second_support_point_box.lower_binary64_bits);
+  const std::optional<int> bounded_sign =
+      try_bounded_exact_anchor_phi_aabb_minimum_sign(
+          bounded_anchor, query_box);
+  if (bounded_sign.has_value()) {
+    return *bounded_sign;
+  }
+
   const ExactDyadicBoxCoordinates first =
       exact_dyadic_box_coordinates(first_support_point_box);
   const ExactDyadicBoxCoordinates second =
@@ -2343,9 +2635,9 @@ class ExactPairSupportStreamBuilder {
             "the pair-support keep strict-point count overflows size_t");
         continue;
       }
-      const int anchor_minimum_sign = dyadic_sign(
-          exact_anchor_phi_aabb_minimum(
-              anchor, node_box(terminal_node_index)));
+      const int anchor_minimum_sign =
+          exact_anchor_phi_aabb_minimum_sign(
+              anchor, node_box(terminal_node_index));
       if (anchor_minimum_sign >= 0) {
         anchor_terminal_count = checked_add(
             anchor_terminal_count,
@@ -2657,14 +2949,13 @@ class ExactPairSupportStreamBuilder {
           }
           continue;
         }
-        const UnnormalizedExactDyadic anchor_minimum =
-            exact_anchor_phi_aabb_minimum(
-                anchor, node_box(query_node_index));
         result_.audit.exact_anchor_ball_minimum_aabb_bound_count = checked_add(
             result_.audit.exact_anchor_ball_minimum_aabb_bound_count,
             1U,
             "the pair-support anchor-bound count overflows size_t");
-        const int anchor_minimum_sign = dyadic_sign(anchor_minimum);
+        const int anchor_minimum_sign =
+            exact_anchor_phi_aabb_minimum_sign(
+                anchor, node_box(query_node_index));
         if (anchor_minimum_sign >= 0) {
           const std::size_t subtree_size =
               query_node.leaf_end - query_node.leaf_begin;
