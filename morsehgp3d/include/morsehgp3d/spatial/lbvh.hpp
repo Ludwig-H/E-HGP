@@ -25,6 +25,7 @@ class MortonLbvhIndex;
 }
 
 namespace morsehgp3d::hierarchy {
+class ExactAnchoredPairCandidateClassifier;
 class ExactAnchoredPairWitnessBankBuilder;
 class ExactHigherSupportAuthorityContext;
 class ExactHigherSupportTerminalAuthority;
@@ -419,6 +420,7 @@ class MortonLbvhIndex {
       const spatial::CanonicalPointCloud& cloud,
       const hierarchy::K1ExactBoruvkaResult& result);
   friend class hierarchy::ExactPairSupportStreamBuilder;
+  friend class hierarchy::ExactAnchoredPairCandidateClassifier;
   friend class hierarchy::ExactAnchoredPairWitnessBankBuilder;
   friend class hierarchy::ExactHigherSupportAuthorityContext;
   friend class hierarchy::ExactHigherSupportTerminalAuthority;

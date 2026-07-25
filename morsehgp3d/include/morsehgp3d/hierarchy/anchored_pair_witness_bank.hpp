@@ -32,13 +32,25 @@ enum class ExactAnchoredPairCandidateStopReason : std::uint8_t {
   candidate_entry_limit,
 };
 
-// The top-k query proposes a bounded witness bank.  Failure of that query is
-// deliberately nonterminal: traversal continues with an empty bank and emits
-// every q > anchor.  Predicate and prune-record caps are fail-open for the same
-// reason.  Only traversal/output caps can make the candidate stream incomplete.
+enum class ExactAnchoredPairWitnessBankProposalPolicy : std::uint8_t {
+  exact_top_k,
+  bounded_morton_window,
+};
+
+// The proposal supplies only possible witnesses; the exact strict predicates
+// make every distinct non-anchor bank safe independently of proposal recall.
+// exact_top_k remains the default.  bounded_morton_window is a binary64
+// distance heuristic over a bounded local Morton window and makes no nearest-
+// neighbor or recall claim.  An incomplete or undersized proposal is
+// deliberately nonterminal: traversal simply descends fail-open.  Only
+// traversal/output caps can make the candidate stream incomplete.
 struct ExactAnchoredPairWitnessBankBudget {
   std::size_t proposed_witness_bank_size{};
+  ExactAnchoredPairWitnessBankProposalPolicy proposal_policy{
+      ExactAnchoredPairWitnessBankProposalPolicy::exact_top_k};
   spatial::ExactLbvhTopKBudget witness_search_budget{};
+  std::size_t morton_window_radius{};
+  std::size_t maximum_morton_window_inspection_count{};
   std::size_t maximum_node_visit_count{};
   std::size_t maximum_internal_node_expansion_count{};
   std::size_t maximum_traversal_stack_entry_count{};
@@ -69,6 +81,16 @@ struct ExactAnchoredPairWitnessBankPruneRecord {
 struct ExactAnchoredPairWitnessBankAudit {
   std::size_t requested_witness_bank_size{};
   std::size_t effective_witness_bank_size{};
+  ExactAnchoredPairWitnessBankProposalPolicy proposal_policy{
+      ExactAnchoredPairWitnessBankProposalPolicy::exact_top_k};
+  std::size_t published_witness_bank_size{};
+  std::size_t morton_window_radius{};
+  std::size_t morton_window_available_leaf_count{};
+  std::size_t morton_window_inspection_count{};
+  std::size_t morton_window_candidate_count{};
+  std::size_t morton_window_distance_evaluation_count{};
+  bool morton_window_complete{false};
+  bool morton_window_inspection_budget_exhausted{false};
   bool witness_search_attempted{false};
   bool witness_search_complete{false};
   spatial::ExactLbvhTopKStatus witness_search_status{

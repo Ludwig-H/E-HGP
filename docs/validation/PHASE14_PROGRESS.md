@@ -248,11 +248,29 @@ Les tests différentiels courts vérifient chaque omission contre le rang fermé
 
 Les 1 174,782 ms observées pour ces 64 ancres sur l'hôte partagé ne constituent ni un `warm_e2e`, ni un p95, ni une réponse complète. P8b valide la réduction combinatoire, pas l'objectif de vitesse. GCP n'est pas utilisé. La prochaine porte raccorde le classificateur fermé exact aux candidates, puis mesure un chemin complet court avant toute vectorisation, qualification 50 k ou montée massive.
 
+## Incrément 14Q P8c — classification fermée des candidates
+
+P8c reste sous `reference_cpu / hgp_reduced / exact_sparsification_design / architecture_only`, avec `public_status=not_claimed`. Pour une paire candidate fournie, la partition LBVH certifie en bloc les sous-arbres strictement intérieurs ou extérieurs et descend à toute égalité. Puisque les deux supports appartiennent déjà à la coque, neuf intérieurs restent admissibles lorsque $K=10$ et $s_{\max}=11$; le dixième termine par `above_rank`. Une paire pertinente ferme toute sa coque avant de produire soit un événement régulier, soit un diagnostic extra-shell borné à un témoin canonique. Les extérieurs sont seulement comptés et centre/niveau ne sont construits qu'après succès complet.
+
+Le filtre binary64 emploie la forme centrée $\phi(q)=\left\Vert q-m\right\Vert^2-\left\Vert d\right\Vert^2$ sous environnement strict. Il décide seulement si son intervalle outward exclut zéro; les autres nœuds utilisent les bornes dyadiques exactes. Les tests différentiels courts, la cosphère, les budgets zéro/un, la frontière neuf/dix de $K=10$, la fixture discriminant forme naturelle et centrée et l'identité d'audit passent sous GCC et Clang stricts.
+
+Le smoke intégré unique répète `uniform_latin`, $n=12\,500$, $K=10$, banque 64 et 64 ancres. Les 2 266 candidates donnent 2 200 événements réguliers, 66 rejets de rang et zéro extra-shell, sans épuisement. La classification visite 228 123 nœuds : 101 753 décisions d'intervalle extérieures, 8 684 intérieures et 117 686 fallbacks exacts; seulement 4 527 feuilles exigent une classification ponctuelle. La banque reste le terme dominant de cette mono-mesure.
+
+Les 2 005,811 ms totales observées sur l'hôte partagé, dont 1 310,256 ms de banque et 577,469 ms de classification, ne sont ni un p95, ni un `warm_e2e`, ni une réponse complète : seules 64 ancres sont traitées et aucun support supérieur ou reducer n'est raccordé. Le classificateur est en outre non reprenable après épuisement; il doit être mutualisé avec P7b avant industrialisation. La réservation initiale des vecteurs de P8b est ramenée à 256 entrées au lieu d'une capacité proportionnelle à $n$, sans changer leurs caps ni leur croissance. GCP n'est pas utilisé et 50 k demeure fermé.
+
+## Incrément 14Q P8d — banque Morton bornée propositionnelle
+
+P8d sépare la sûreté de la banque de sa qualité. La politique historique `exact_top_k` reste le défaut. La nouvelle politique `bounded_morton_window` inspecte alternativement un voisin Morton gauche puis droit, sous rayon et cap, classe ces seules feuilles par distance binary64 puis `PointId` et conserve au plus 64 points. Aucun rappel n'est requis : chaque prune est toujours certifié par dix demi-espaces stricts et tout échec descend. Une banque sous le seuil désactive les prunes. La sélection utilise $O(L)$ mémoire et aucun scan global.
+
+Les fixtures ciblées vérifient le défaut exact, l'absence d'appel top-$L$, l'ordre déterministe, les audits, le rejeu identique, le rang exhaustif de chaque omission et le fail-open sous un cap de deux inspections. GCC et Clang stricts passent. Les réserves initiales de candidates et reçus sont simultanément plafonnées à 256 entrées au lieu d'être proportionnelles à $n$; les caps et la croissance restent inchangés.
+
+Deux mono-mesures sur les mêmes 64 ancres bornent la qualité. Une fenêtre de 512 inspections laisse 17 881 candidates, dont 15 681 sont rejetées au rang : elle est refusée pour le profil rapide. Une fenêtre de 4 096 inspections laisse 7 565 candidates, dont 5 365 sont rejetées; elle retrouve les mêmes 2 200 événements sur cet échantillon, sans que cela prouve un rappel général. Les temps observés, respectivement 3 173,626 ms et 1 546,015 ms au total, sont du bruit diagnostique et non un SLO. La banque exacte reste combinatoirement meilleure avec 2 266 candidates; la fenêtre 4 096 est seulement un premier producteur GPU borné à comparer.
+
 ## Priorités de développement
 
-1. raccorder le classificateur fermé exact au sur-ensemble P8b et vérifier la couture sur une seule porte courte;
-2. propager uniquement les supports acceptés vers le supérieur sparse, sans reconstruire les produits cubiques ou quartiques, puis fermer un cas $K=10$ de quelques dizaines de milliers de points;
-3. vectoriser ou porter sur GPU la proposition recertifiée si le profil complet l'exige, puis réussir `uniform_latin` et `eight_clusters` à 50 000 points sous `warm_e2e`;
+1. mutualiser le classificateur P8c avec le curseur fermé reprenable P7b et consommer les candidates sans arène globale;
+2. porter la banque et les demi-espaces en lots résidents, puis fermer un cas $K=10$ de quelques dizaines de milliers de points;
+3. propager uniquement les supports acceptés vers le supérieur sparse, sans reconstruire les produits cubiques ou quartiques, puis réussir `uniform_latin` et `eight_clusters` à 50 000 points sous `warm_e2e`;
 4. externaliser autorités et sorties Phase 15, réussir 10 000 001 points, puis seulement 30 M et 50 M après succès complet du rang précédent.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.

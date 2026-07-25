@@ -22,6 +22,8 @@ using morsehgp3d::exact::ExactRational;
 using morsehgp3d::hierarchy::ExactAnchoredPairCandidateStatus;
 using morsehgp3d::hierarchy::ExactAnchoredPairCandidateStopReason;
 using morsehgp3d::hierarchy::ExactAnchoredPairWitnessBankBudget;
+using morsehgp3d::hierarchy::
+    ExactAnchoredPairWitnessBankProposalPolicy;
 using morsehgp3d::hierarchy::ExactAnchoredPairWitnessBankResult;
 using morsehgp3d::hierarchy::
     build_exact_anchored_pair_witness_bank_candidates;
@@ -30,6 +32,7 @@ using morsehgp3d::hierarchy::
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ExactDyadicAabb3;
 using morsehgp3d::spatial::ExactLbvhTopKBudget;
+using morsehgp3d::spatial::ExactLbvhTopKAudit;
 using morsehgp3d::spatial::MortonLbvhIndex;
 using morsehgp3d::spatial::PointId;
 
@@ -131,6 +134,100 @@ void require(bool condition, const std::string& message) {
     const std::vector<PointId>& ids,
     PointId point_id) {
   return std::find(ids.begin(), ids.end(), point_id) != ids.end();
+}
+
+struct OrdinaryMortonCandidate {
+  double squared_distance{};
+  PointId point_id{};
+};
+
+struct ExpectedMortonWindowProposal {
+  std::vector<PointId> point_ids;
+  std::size_t available_leaf_count{};
+  std::size_t inspection_count{};
+};
+
+[[nodiscard]] double ordinary_squared_distance(
+    const CanonicalPointCloud& cloud,
+    PointId first_point_id,
+    PointId second_point_id) {
+  double squared_distance = 0.0;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const double difference =
+        cloud.point(first_point_id).binary64_coordinate(axis) -
+        cloud.point(second_point_id).binary64_coordinate(axis);
+    squared_distance += difference * difference;
+  }
+  return squared_distance;
+}
+
+[[nodiscard]] ExpectedMortonWindowProposal expected_morton_window_proposal(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    PointId anchor_point_id,
+    std::size_t radius,
+    std::size_t inspection_cap,
+    std::size_t retained_count) {
+  const std::span<const morsehgp3d::spatial::MortonLeafRecord> leaves =
+      index.leaves();
+  const auto anchor_leaf = std::find_if(
+      leaves.begin(),
+      leaves.end(),
+      [anchor_point_id](const auto& leaf) {
+        return leaf.point_id == anchor_point_id;
+      });
+  require(anchor_leaf != leaves.end(), "the fixture anchor has no Morton leaf");
+  const std::size_t anchor_position =
+      static_cast<std::size_t>(anchor_leaf - leaves.begin());
+  const std::size_t left_window_size =
+      std::min(radius, anchor_position);
+  const std::size_t right_window_size = std::min(
+      radius, leaves.size() - anchor_position - 1U);
+
+  std::vector<OrdinaryMortonCandidate> candidates;
+  candidates.reserve(std::min(
+      inspection_cap, left_window_size + right_window_size));
+  const auto inspect = [&](std::size_t position) {
+    const PointId point_id = leaves[position].point_id;
+    candidates.push_back(OrdinaryMortonCandidate{
+        ordinary_squared_distance(cloud, anchor_point_id, point_id),
+        point_id});
+  };
+  const std::size_t maximum_offset =
+      std::max(left_window_size, right_window_size);
+  for (std::size_t offset = 1U;
+       offset <= maximum_offset && candidates.size() < inspection_cap;
+       ++offset) {
+    if (offset <= left_window_size) {
+      inspect(anchor_position - offset);
+    }
+    if (offset <= right_window_size && candidates.size() < inspection_cap) {
+      inspect(anchor_position + offset);
+    }
+  }
+  std::sort(
+      candidates.begin(),
+      candidates.end(),
+      [](const OrdinaryMortonCandidate& left,
+         const OrdinaryMortonCandidate& right) {
+        if (left.squared_distance != right.squared_distance) {
+          return left.squared_distance < right.squared_distance;
+        }
+        return left.point_id < right.point_id;
+      });
+  if (candidates.size() > retained_count) {
+    candidates.resize(retained_count);
+  }
+
+  ExpectedMortonWindowProposal expected;
+  expected.available_leaf_count = left_window_size + right_window_size;
+  expected.inspection_count = std::min(
+      inspection_cap, expected.available_leaf_count);
+  expected.point_ids.reserve(candidates.size());
+  for (const OrdinaryMortonCandidate& candidate : candidates) {
+    expected.point_ids.push_back(candidate.point_id);
+  }
+  return expected;
 }
 
 void test_exhaustive_relevant_pair_differential() {
@@ -259,6 +356,14 @@ void test_strict_equality_is_fail_open() {
   require(
       result.witness_bank_point_ids == std::vector<PointId>{PointId{1}},
       "the equality fixture selected the wrong exact witness bank");
+  require(
+      budget.proposal_policy ==
+              ExactAnchoredPairWitnessBankProposalPolicy::exact_top_k &&
+          result.audit.proposal_policy ==
+              ExactAnchoredPairWitnessBankProposalPolicy::exact_top_k &&
+          result.audit.witness_search_attempted &&
+          result.audit.published_witness_bank_size == 1U,
+      "the default exact-top-k proposal policy changed");
   require(
       contains_id(result.candidate_point_ids, PointId{2}),
       "a shell equality incorrectly pruned the diametral pair");
@@ -403,6 +508,171 @@ void test_bounded_outputs_and_fail_open_prune_records() {
       "the traversal-stack cap was not enforced before expansion");
 }
 
+void test_bounded_morton_window_is_safe_and_deterministic() {
+  constexpr std::size_t point_count = 12U;
+  constexpr std::size_t maximum_closed_rank = 4U;
+  constexpr PointId anchor_point_id{5};
+  CanonicalPointCloud cloud = make_line_cloud(point_count);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+
+  ExactAnchoredPairWitnessBankBudget budget =
+      complete_budget(point_count, 6U);
+  budget.proposal_policy =
+      ExactAnchoredPairWitnessBankProposalPolicy::bounded_morton_window;
+  budget.witness_search_budget = ExactLbvhTopKBudget{};
+  budget.morton_window_radius = 3U;
+  budget.maximum_morton_window_inspection_count = 6U;
+  const ExpectedMortonWindowProposal expected =
+      expected_morton_window_proposal(
+          index,
+          cloud,
+          anchor_point_id,
+          budget.morton_window_radius,
+          budget.maximum_morton_window_inspection_count,
+          budget.proposed_witness_bank_size);
+
+  const ExactAnchoredPairWitnessBankResult first =
+      build_exact_anchored_pair_witness_bank_candidates(
+          index,
+          cloud,
+          anchor_point_id,
+          maximum_closed_rank,
+          budget);
+  const ExactAnchoredPairWitnessBankResult replay =
+      build_exact_anchored_pair_witness_bank_candidates(
+          index,
+          cloud,
+          anchor_point_id,
+          maximum_closed_rank,
+          budget);
+  require(first.complete(), "the bounded Morton traversal stopped");
+  require(
+      first.witness_bank_point_ids == expected.point_ids,
+      "the bounded Morton bank ignored binary64 distance and PointId order");
+  require(
+      first.audit.proposal_policy ==
+              ExactAnchoredPairWitnessBankProposalPolicy::
+                  bounded_morton_window &&
+          !first.audit.witness_search_attempted &&
+          first.audit.witness_search_complete &&
+          first.audit.witness_search_audit == ExactLbvhTopKAudit{},
+      "the Morton proposal unexpectedly invoked exact top-k");
+  require(
+      first.audit.morton_window_radius == budget.morton_window_radius &&
+          first.audit.morton_window_available_leaf_count ==
+              expected.available_leaf_count &&
+          first.audit.morton_window_inspection_count ==
+              expected.inspection_count &&
+          first.audit.morton_window_candidate_count ==
+              expected.inspection_count &&
+          first.audit.morton_window_distance_evaluation_count ==
+              expected.inspection_count &&
+          first.audit.morton_window_complete &&
+          !first.audit.morton_window_inspection_budget_exhausted &&
+          first.audit.published_witness_bank_size ==
+              expected.point_ids.size(),
+      "the complete Morton-window audit is inconsistent");
+  require(
+      first.audit == replay.audit &&
+          first.witness_bank_point_ids == replay.witness_bank_point_ids &&
+          first.candidate_point_ids == replay.candidate_point_ids &&
+          first.prune_records == replay.prune_records,
+      "the bounded Morton proposal is not deterministic");
+
+  bool saw_certified_omission = false;
+  for (std::size_t other_index =
+           static_cast<std::size_t>(anchor_point_id) + 1U;
+       other_index < point_count;
+       ++other_index) {
+    const PointId other_point_id = static_cast<PointId>(other_index);
+    if (!contains_id(first.candidate_point_ids, other_point_id)) {
+      saw_certified_omission = true;
+      require(
+          exhaustive_closed_rank(
+              cloud, anchor_point_id, other_point_id) >
+              maximum_closed_rank,
+          "an arbitrary Morton witness bank pruned a rank-relevant pair");
+    }
+  }
+  for (const auto& record : first.prune_records) {
+    for (std::size_t position = record.leaf_begin;
+         position < record.leaf_end;
+         ++position) {
+      const PointId omitted_id = index.leaves()[position].point_id;
+      for (std::size_t witness_index = 0U;
+           witness_index < record.witness_count;
+           ++witness_index) {
+        require(
+            diametral_phi(
+                cloud,
+                record.witness_point_ids[witness_index],
+                anchor_point_id,
+                omitted_id)
+                    .sign() < 0,
+            "a Morton-bank prune record contains a non-strict witness");
+      }
+    }
+  }
+  require(
+      saw_certified_omission,
+      "the Morton safety fixture exercised no certified omission");
+}
+
+void test_bounded_morton_window_cap_fails_open() {
+  constexpr std::size_t point_count = 12U;
+  constexpr PointId anchor_point_id{5};
+  CanonicalPointCloud cloud = make_line_cloud(point_count);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+
+  ExactAnchoredPairWitnessBankBudget budget =
+      complete_budget(point_count, 6U);
+  budget.proposal_policy =
+      ExactAnchoredPairWitnessBankProposalPolicy::bounded_morton_window;
+  budget.witness_search_budget = ExactLbvhTopKBudget{};
+  budget.morton_window_radius = 4U;
+  budget.maximum_morton_window_inspection_count = 2U;
+  const ExpectedMortonWindowProposal expected =
+      expected_morton_window_proposal(
+          index,
+          cloud,
+          anchor_point_id,
+          budget.morton_window_radius,
+          budget.maximum_morton_window_inspection_count,
+          budget.proposed_witness_bank_size);
+  const ExactAnchoredPairWitnessBankResult result =
+      build_exact_anchored_pair_witness_bank_candidates(
+          index, cloud, anchor_point_id, 4U, budget);
+
+  require(result.complete(), "the capped Morton traversal stopped");
+  require(
+      result.witness_bank_point_ids == expected.point_ids &&
+          result.audit.morton_window_available_leaf_count ==
+              expected.available_leaf_count &&
+          result.audit.morton_window_inspection_count == 2U &&
+          result.audit.morton_window_candidate_count == 2U &&
+          result.audit.morton_window_distance_evaluation_count ==
+              2U &&
+          !result.audit.morton_window_complete &&
+          result.audit.morton_window_inspection_budget_exhausted,
+      "the Morton inspection cap was not enforced exactly");
+  require(
+      !result.audit.witness_bank_sufficient_for_rank_pruning &&
+          result.prune_records.empty() &&
+          result.candidate_point_ids.size() ==
+              point_count - static_cast<std::size_t>(anchor_point_id) - 1U,
+      "an undersized capped Morton bank did not fail open");
+  for (std::size_t other_index =
+           static_cast<std::size_t>(anchor_point_id) + 1U;
+       other_index < point_count;
+       ++other_index) {
+    require(
+        contains_id(
+            result.candidate_point_ids,
+            static_cast<PointId>(other_index)),
+        "the capped Morton fallback omitted an oriented pair");
+  }
+}
+
 }  // namespace
 
 int main() {
@@ -412,6 +682,8 @@ int main() {
     test_incomplete_and_small_banks_are_fail_open();
     test_k10_requires_ten_strict_witnesses();
     test_bounded_outputs_and_fail_open_prune_records();
+    test_bounded_morton_window_is_safe_and_deterministic();
+    test_bounded_morton_window_cap_fails_open();
   } catch (const std::exception& error) {
     std::cerr << error.what() << '\n';
     return 1;

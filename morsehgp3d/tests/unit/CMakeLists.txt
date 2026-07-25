@@ -308,6 +308,25 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_anchored_pair_candidate_classifier_tests
+  test_anchored_pair_candidate_classifier.cpp
+)
+target_link_libraries(
+  morsehgp3d_anchored_pair_candidate_classifier_tests
+  PRIVATE morsehgp3d::anchored_pair_candidate_classifier
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_anchored_pair_candidate_classifier_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_anchored_pair_candidate_classifier_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_higher_support_product_tests
   test_higher_support_product.cpp
 )
@@ -1412,6 +1431,7 @@ set(
   morsehgp3d_depth_zero_natural_support_tests
   morsehgp3d_hierarchy_pair_support_stream_tests
   morsehgp3d_anchored_pair_witness_bank_tests
+  morsehgp3d_anchored_pair_candidate_classifier_tests
   morsehgp3d_hierarchy_higher_support_product_tests
   morsehgp3d_hierarchy_higher_support_stream_tests
   morsehgp3d_hierarchy_direct_support_differential_tests
@@ -2192,6 +2212,10 @@ add_test(
 add_test(
   NAME morsehgp3d.anchored_pair_witness_bank
   COMMAND morsehgp3d_anchored_pair_witness_bank_tests
+)
+add_test(
+  NAME morsehgp3d.anchored_pair_candidate_classifier
+  COMMAND morsehgp3d_anchored_pair_candidate_classifier_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_higher_support_product

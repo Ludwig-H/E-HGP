@@ -36,6 +36,34 @@ struct TraversalEntry {
   std::uint64_t certified_witness_mask{};
 };
 
+struct MortonWindowWitnessCandidate {
+  double squared_distance{};
+  PointId point_id{};
+};
+
+[[nodiscard]] double ordinary_binary64_squared_distance(
+    const CanonicalPointCloud& cloud,
+    PointId first_point_id,
+    PointId second_point_id) {
+  double squared_distance = 0.0;
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const double difference =
+        cloud.point(first_point_id).binary64_coordinate(axis) -
+        cloud.point(second_point_id).binary64_coordinate(axis);
+    squared_distance += difference * difference;
+  }
+  return squared_distance;
+}
+
+[[nodiscard]] bool morton_window_candidate_less(
+    const MortonWindowWitnessCandidate& left,
+    const MortonWindowWitnessCandidate& right) {
+  if (left.squared_distance != right.squared_distance) {
+    return left.squared_distance < right.squared_distance;
+  }
+  return left.point_id < right.point_id;
+}
+
 [[nodiscard]] double binary64_value(std::uint64_t bits) {
   return std::bit_cast<double>(
       exact::canonicalize_binary64_bits(bits));
@@ -199,6 +227,15 @@ class ExactAnchoredPairWitnessBankBuilder {
       throw std::out_of_range(
           "an anchored pair witness bank cannot exceed 64 points");
     }
+    switch (budget.proposal_policy) {
+      case ExactAnchoredPairWitnessBankProposalPolicy::exact_top_k:
+      case ExactAnchoredPairWitnessBankProposalPolicy::
+          bounded_morton_window:
+        break;
+      default:
+        throw std::invalid_argument(
+            "unknown anchored pair witness-bank proposal policy");
+    }
 
     ExactAnchoredPairWitnessBankResult result;
     result.anchor_point_id = anchor_point_id;
@@ -206,18 +243,29 @@ class ExactAnchoredPairWitnessBankBuilder {
     result.requested_budget = budget;
     result.audit.requested_witness_bank_size =
         budget.proposed_witness_bank_size;
+    result.audit.proposal_policy = budget.proposal_policy;
+    result.audit.morton_window_radius = budget.morton_window_radius;
 
     const std::size_t anchor_index =
         static_cast<std::size_t>(anchor_point_id);
     const std::size_t candidate_upper_bound =
         cloud.size() - anchor_index - 1U;
+    constexpr std::size_t initial_candidate_reserve = 256U;
+    constexpr std::size_t initial_prune_record_reserve = 256U;
     result.candidate_point_ids.reserve(std::min(
-        candidate_upper_bound,
-        budget.maximum_candidate_entry_count));
+        {candidate_upper_bound,
+         budget.maximum_candidate_entry_count,
+         initial_candidate_reserve}));
     result.prune_records.reserve(std::min(
-        index.nodes_.size(), budget.maximum_prune_record_count));
+        {index.nodes_.size(),
+         budget.maximum_prune_record_count,
+         initial_prune_record_reserve}));
 
     if (candidate_upper_bound == 0U) {
+      result.audit.morton_window_complete =
+          budget.proposal_policy ==
+          ExactAnchoredPairWitnessBankProposalPolicy::
+              bounded_morton_window;
       result.audit.witness_search_complete = true;
       result.audit.traversal_complete = true;
       result.status = ExactAnchoredPairCandidateStatus::complete;
@@ -233,33 +281,121 @@ class ExactAnchoredPairWitnessBankBuilder {
         effective_witness_bank_size;
     if (effective_witness_bank_size == 0U) {
       result.audit.witness_search_complete = true;
+      result.audit.morton_window_complete =
+          budget.proposal_policy ==
+          ExactAnchoredPairWitnessBankProposalPolicy::
+              bounded_morton_window;
     } else {
-      result.audit.witness_search_attempted = true;
-      const std::array<PointId, 1> excluded_ids{anchor_point_id};
-      const spatial::ExclusionSet exclusions =
-          spatial::ExclusionSet::from_ids(
-              excluded_ids, cloud, excluded_ids.size());
-      spatial::ExactBudgetedLbvhTopKResult witness_search =
-          spatial::lbvh_top_k_budgeted(
-              index,
-              cloud,
-              cloud.point(anchor_point_id).exact(),
-              effective_witness_bank_size,
-              exclusions,
-              budget.witness_search_budget,
-              spatial::LbvhTraversalOrder::near_first);
-      result.audit.witness_search_status = witness_search.status();
-      result.audit.witness_search_stop_reason =
-          witness_search.stop_reason();
-      result.audit.witness_search_audit = witness_search.audit();
-      result.audit.witness_search_complete = witness_search.complete();
-      if (witness_search.complete()) {
-        const std::span<const PointId> chosen_ids =
-            witness_search.partition().canonical_choice_ids();
-        result.witness_bank_point_ids.assign(
-            chosen_ids.begin(), chosen_ids.end());
+      switch (budget.proposal_policy) {
+        case ExactAnchoredPairWitnessBankProposalPolicy::exact_top_k: {
+          result.audit.witness_search_attempted = true;
+          const std::array<PointId, 1> excluded_ids{anchor_point_id};
+          const spatial::ExclusionSet exclusions =
+              spatial::ExclusionSet::from_ids(
+                  excluded_ids, cloud, excluded_ids.size());
+          spatial::ExactBudgetedLbvhTopKResult witness_search =
+              spatial::lbvh_top_k_budgeted(
+                  index,
+                  cloud,
+                  cloud.point(anchor_point_id).exact(),
+                  effective_witness_bank_size,
+                  exclusions,
+                  budget.witness_search_budget,
+                  spatial::LbvhTraversalOrder::near_first);
+          result.audit.witness_search_status = witness_search.status();
+          result.audit.witness_search_stop_reason =
+              witness_search.stop_reason();
+          result.audit.witness_search_audit = witness_search.audit();
+          result.audit.witness_search_complete = witness_search.complete();
+          if (witness_search.complete()) {
+            const std::span<const PointId> chosen_ids =
+                witness_search.partition().canonical_choice_ids();
+            result.witness_bank_point_ids.assign(
+                chosen_ids.begin(), chosen_ids.end());
+          }
+          break;
+        }
+        case ExactAnchoredPairWitnessBankProposalPolicy::
+            bounded_morton_window: {
+          // This proposal is intentionally heuristic.  Only the exact strict
+          // witness predicates below can prune; no property of Morton order or
+          // of these ordinary binary64 distances enters the certificate.
+          result.audit.witness_search_complete = true;
+          const std::size_t anchor_leaf_position =
+              index.leaf_position_by_point_id_[anchor_index];
+          if (anchor_leaf_position >= index.leaves_.size()) {
+            throw std::logic_error(
+                "the anchor has no valid Morton leaf position");
+          }
+          const std::size_t left_window_size = std::min(
+              budget.morton_window_radius, anchor_leaf_position);
+          const std::size_t right_window_size = std::min(
+              budget.morton_window_radius,
+              index.leaves_.size() - anchor_leaf_position - 1U);
+          result.audit.morton_window_available_leaf_count =
+              left_window_size + right_window_size;
+
+          std::vector<MortonWindowWitnessCandidate> shortlist;
+          shortlist.reserve(effective_witness_bank_size + 1U);
+          const auto inspect_leaf =
+              [&](std::size_t leaf_position) {
+                ++result.audit.morton_window_inspection_count;
+                ++result.audit.morton_window_candidate_count;
+                ++result.audit.morton_window_distance_evaluation_count;
+                const PointId point_id =
+                    index.leaves_[leaf_position].point_id;
+                if (point_id == anchor_point_id) {
+                  throw std::logic_error(
+                      "a Morton witness window revisited its anchor");
+                }
+                const MortonWindowWitnessCandidate candidate{
+                    ordinary_binary64_squared_distance(
+                        cloud, anchor_point_id, point_id),
+                    point_id};
+                const auto insertion = std::lower_bound(
+                    shortlist.begin(),
+                    shortlist.end(),
+                    candidate,
+                    morton_window_candidate_less);
+                if (shortlist.size() < effective_witness_bank_size) {
+                  shortlist.insert(insertion, candidate);
+                } else if (insertion != shortlist.end()) {
+                  shortlist.insert(insertion, candidate);
+                  shortlist.pop_back();
+                }
+              };
+
+          const std::size_t maximum_offset =
+              std::max(left_window_size, right_window_size);
+          for (std::size_t offset = 1U;
+               offset <= maximum_offset &&
+               result.audit.morton_window_inspection_count <
+                   budget.maximum_morton_window_inspection_count;
+               ++offset) {
+            if (offset <= left_window_size) {
+              inspect_leaf(anchor_leaf_position - offset);
+            }
+            if (offset <= right_window_size &&
+                result.audit.morton_window_inspection_count <
+                    budget.maximum_morton_window_inspection_count) {
+              inspect_leaf(anchor_leaf_position + offset);
+            }
+          }
+          result.audit.morton_window_complete =
+              result.audit.morton_window_inspection_count ==
+              result.audit.morton_window_available_leaf_count;
+          result.audit.morton_window_inspection_budget_exhausted =
+              !result.audit.morton_window_complete;
+          result.witness_bank_point_ids.reserve(shortlist.size());
+          for (const MortonWindowWitnessCandidate& candidate : shortlist) {
+            result.witness_bank_point_ids.push_back(candidate.point_id);
+          }
+          break;
+        }
       }
     }
+    result.audit.published_witness_bank_size =
+        result.witness_bank_point_ids.size();
 
     const std::size_t required_witness_count =
         maximum_closed_rank - 1U;
