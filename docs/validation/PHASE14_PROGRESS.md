@@ -170,7 +170,7 @@ La génération gardée `2026-07-24T08:49:33.736-07:00` de `ehgp-blackwell-spot-
 
 La validation est logicielle et hôte; elle ne requalifie pas CUDA. Le centre exact reste dupliqué par la fermeture 10.5c, et aucune mesure `warm_e2e`, RSS, 50 k ou 10 M+ n'est réalisée.
 
-## Incrément 14Q P2--P4 — pruneur borné de rang pair
+## Incrément 14Q P2--P5 — pruneur borné de rang pair
 
 La porte 14P documentée est satisfaite. 14Q s'exécute sous `cuda_g4_plus_reference_cpu / hgp_reduced / proposal_only_then_certified / architecture_only`, avec `public_status=not_claimed`. Il accélère la recherche de témoins du stream de paires Phase 9 par lots de produits canoniques, sans modifier la définition scientifique, le checkpoint ou le wire durable v1.
 
@@ -182,12 +182,18 @@ Chaque sortie device reste une proposition. Le CPU authentifie et reclassifie ex
 
 Le commit `d1e6d54` spécialise les décisions de signe avec des dyadiques exacts non normalisés. Un unique smoke local budgeté mesure `uniform_latin` à 626,180, 875,731 et 752,328 ms, puis `eight_clusters` à 299,284, 301,732 et 316,609 ms pour 12 500, 25 000 et 50 000 points. Les six chunks sont `budget_exhausted`; ils ne sont ni une hiérarchie complète, ni un protocole `warm_e2e`, ni une série statistique.
 
-P3/P4 et le rejeu CPU frais sont qualifiés hôte. Le memcheck et le diagnostic P4 sur G4 restent en attente. Aucune facette ou coface globale, incidence, cellule, structure Gamma, mosaïque de Delaunay d'ordre supérieur ou arène globale de paires n'est construite. Aucun p95, SLO 50 k, hiérarchie complète ou pipeline produit 10 M+ n'est revendiqué. La Phase 14 reste `ready`, la Phase 15 `in_progress`, `deployment_status=architecture_only` et `public_status=not_claimed`.
+P4 passe le test CUDA réel ciblé. P5 au SHA `a012af982e1e75ec5f9ba9c5a17d16178b795f90` ne rapatrie plus les $16C$ octets réservés, mais uniquement les $16T$ octets du préfixe terminal actif. Sur une RTX PRO 6000 Blackwell avec CUDA 12.9, l'unique diagnostic `uniform_latin` à 12 500 points, $K=10$, `work=20000`, $P=1$, $W=32768$, $C=16384$ et $E=64$ réussit scientifiquement : composant et vérificateur frais complets, aucun cap ni fallback GPU, 23 prune et 200 keep proposés, 22 et 199 consommés, puis deux produits repliés sur le CPU historique. Il parcourt 46 145 items en 3 404 epochs et recertifie exactement 22 381 terminaux.
+
+Le trafic terminal D2H physique devient égal à l'actif, 358 096 octets, contre 58 458 112 octets physiques avant P5, soit une baisse de 99,39 %. Le snapshot H2D vaut 1 999 920 octets au premier passage puis zéro résident. Pourtant le CPU historique prend 325,031 ms, le premier assisté 808,867 ms et le résident 646,858 ms. Le résident P4 comparable mesurait 665,206 ms dans une exécution distincte : le gain inter-run d'environ 2,76 % n'est pas un benchmark apparié et montre seulement que les synchronisations et lancements par epoch dominent désormais les copies terminales. L'artefact [phase14q_p5_g4_a012af9.json](phase14q_p5_g4_a012af9.json) conserve ces faits et leurs limites.
+
+Le petit gate de vitesse reste donc échoué et interdit 50 k comme 10 M pour cette version. P5a doit d'abord traiter le cas observé $P=1$ par un parcours LBVH stackless muni d'une corde de 4 octets par nœud, avec une cible d'un kernel et d'une synchronisation par callback. Les bornes de visites et de terminaux restent explicites; leur dépassement replie le produit entier sur le parcours CPU historique. Les terminaux device demeurent propositionnels et l'autorité de signe, couverture, prune et keep reste le rejeu CPU exact.
+
+P3--P5 et le rejeu CPU frais sont qualifiés au niveau composant, sur hôte puis sur la voie CUDA réelle ciblée. Aucune facette ou coface globale, incidence, cellule, structure Gamma, mosaïque de Delaunay d'ordre supérieur ou arène globale de paires n'est construite; P5a n'ajoute qu'une corde linéaire au LBVH existant. Aucun p95, SLO 50 k, hiérarchie complète ou pipeline produit 10 M+ n'est revendiqué. La Phase 14 reste `ready`, la Phase 15 `in_progress`, `deployment_status=architecture_only` et `public_status=not_claimed`.
 
 ## Priorités de développement
 
-1. exécuter le memcheck P4 à 4 096 points, puis un diagnostic unique à 12 500 points sur `uniform_latin` et `eight_clusters`;
-2. corriger uniquement le terme dominant révélé par les audits; si les deux petits cas sont sains, passer directement au diagnostic 50 000 points;
+1. implémenter P5a stackless pour $P=1$, sans boucle hôte par epoch, puis rejouer une seule fois `uniform_latin` à 12 500 points;
+2. n'essayer `eight_clusters` à 12 500 points puis 50 000 points que si l'assistance résidente franchit le gate de vitesse et conserve la fermeture exacte sans cap;
 3. raccorder ensuite le vrai pipeline complet et mesurer son p95 `warm_e2e` 50 k avant toute revendication interactive;
 4. externaliser les autorités et sorties de Phase 15, réussir le pipeline complet à 10 000 001 points, puis seulement tenter 30 M et 50 M conditionnellement au succès du rang précédent.
 

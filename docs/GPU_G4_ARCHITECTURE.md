@@ -154,7 +154,7 @@ L'index construit une fois sert à :
 
 Pour les paires, une requête warp-coopérative borne $\phi(x,u,v)=(x-u)\mathbin{\cdot}(x-v)$ sur trois AABB. Une borne supérieure strictement négative compte le sous-arbre témoin entier; zéro impose une descente. Les témoins comptés forment une antichaîne de plages Morton deux à deux disjointes et disjointes des supports, afin qu'aucun point ne soit compté deux fois. Pour les triplets et quadruplets, les filtres de dépendance, barycentriques et d'in-sphère obéissent au même contrat proposition--rejeu exact.
 
-### 6.1 Pruneur P2--P4 de rang pair borné
+### 6.1 Pruneur P2--P5 de rang pair borné
 
 14Q réalise le parcours de rang pair sans catalogue de paires. Le contexte partagé P1/P2 conserve pour chacun des $2n-1$ nœuds ses six bornes dyadiques, sa plage Morton et ses deux enfants, soit exactement $80(2n-1)$ octets. Un lot contient au plus $P$ produits déjà canoniques. Deux frontières de capacité $W$ alternent; chaque epoch compte les sorties, exécute deux scans exclusifs puis émet stablement descendants et terminaux.
 
@@ -166,7 +166,13 @@ Le device ne publie pas de décision. L'hôte authentifie et reclassifie exactem
 
 Le commit `d1e6d54` évite la construction et la réduction de rationnels pour les seules décisions de signe en gardant des dyadiques exacts non normalisés. Un passage local budgeté par famille et taille mesure `uniform_latin` à 626,180, 875,731 et 752,328 ms, puis `eight_clusters` à 299,284, 301,732 et 316,609 ms pour 12 500, 25 000 et 50 000 points. Tous les chunks finissent `budget_exhausted`; ces valeurs ne décrivent ni un pipeline complet, ni un p95.
 
-Cette structure ajoute $O(n+P+W+C)$ et aucun terme en nombre global de paires. Elle ne matérialise ni facette, coface, incidence globale, cellule, structure Gamma ou mosaïque de Delaunay d'ordre supérieur. P4 est qualifié hôte; son diagnostic G4 reste en attente à 12 500 puis, sous condition, 50 000 points. Le runner CUDA 14Q reste un diagnostic de composant, jamais le protocole `warm_e2e`, un SLO ou une preuve de capacité produit à 10 M.
+P5 conserve la capacité device $16C$, mais dimensionne le vecteur hôte au nombre actif $T$ et ne copie que $16T$ octets. Le test CUDA réel ciblé passe au SHA `a012af982e1e75ec5f9ba9c5a17d16178b795f90`. Sur `uniform_latin` à 12 500 points, $K=10$, `work=20000`, $P=1$, $W=32768$, $C=16384$ et $E=64$, le composant et son vérificateur frais réussissent sans cap ni fallback GPU. Les 223 callbacks exécutent 3 404 epochs, visitent 46 145 items et font recertifier exactement 22 381 terminaux par le CPU. Les 23 prune et 200 keep proposés donnent 22 prune et 199 keep consommés, avec deux replis CPU historiques.
+
+Le D2H terminal physique vaut désormais l'actif, 358 096 octets, au lieu de 58 458 112 octets avant P5, soit 99,39 % de moins. Ce gain de trafic ne franchit pas le gate de vitesse : le CPU historique prend 325,031 ms, l'assistance 808,867 ms au premier passage et 646,858 ms résidente. Le résident précédent à 665,206 ms n'autorise qu'un constat inter-run d'environ 2,76 %, pas une distribution de performance. La boucle synchronisée `count`--scans--`emit`, répétée par epoch, est donc le coût dominant observé.
+
+P5a cible d'abord $P=1$. Un mot de corde de 4 octets par nœud donne le successeur stackless left-first : un nœud développé avance vers son fils gauche, un nœud terminal saute vers sa corde. Un unique kernel borné doit parcourir le produit et écrire sa coupe, puis une unique synchronisation rend le compte actif; toute borne de visites ou de terminaux dépassée invalide la proposition entière et déclenche le parcours CPU historique. La recertification dyadique exacte, l'authentification des intervalles, la couverture de racine et les décisions prune ou keep restent exclusivement sur CPU.
+
+Cette structure ajoute $O(n+P+W+C)$ et aucun terme en nombre global de paires; P5a ajoute seulement 4 octets par nœud du LBVH déjà construit. Elle ne matérialise ni facette, coface, incidence globale, cellule, structure Gamma, arène globale de paires ou mosaïque de Delaunay d'ordre supérieur. Le petit gate 12 500 échoue encore : le runner CUDA 14Q reste un diagnostic de composant, jamais le protocole `warm_e2e`, un SLO 50 k ou une preuve de capacité produit à 10 M.
 
 Une recherche approchée ou une petite liste locale peut prioriser la frontière; le parcours global et la fermeture de sa frontière restent obligatoires en mode exact.
 

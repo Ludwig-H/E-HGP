@@ -1,0 +1,82 @@
+{
+  "schema": "morsehgp3d.phase14q.p5_g4_component_diagnostic.v1",
+  "artifact_role": "pair_rank_prune_component_smoke",
+  "git_sha": "a012af982e1e75ec5f9ba9c5a17d16178b795f90",
+  "backend": "cuda_g4_plus_reference_cpu",
+  "profile": "hgp_reduced",
+  "mode": "prune_or_keep_terminal_proposal_then_cpu_exact_recertified",
+  "deployment_status": "architecture_only",
+  "public_status": "not_claimed",
+  "environment": {
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "cuda": "12.9",
+    "real_cuda_targeted_test_passed": true
+  },
+  "case": {
+    "family": "uniform_latin",
+    "point_count": 12500,
+    "k_max": 10,
+    "work_budget": 20000,
+    "product_capacity": 1,
+    "frontier_capacity": 32768,
+    "terminal_capacity": 16384,
+    "epoch_budget": 64,
+    "repetitions": 1
+  },
+  "timing_ms": {
+    "historical_cpu_chunk": 325.030576,
+    "first_assisted_chunk": 808.867145,
+    "resident_assisted_chunk": 646.858343
+  },
+  "audit": {
+    "component_success": true,
+    "fresh_ephemeral_verifier_complete": true,
+    "capacity_stop_count": 0,
+    "gpu_batch_fallback_count": 0,
+    "historical_cpu_fallback_product_count": 2,
+    "callback_count": 223,
+    "epoch_count": 3404,
+    "visited_item_count": 46145,
+    "cpu_exact_recertified_terminal_count": 22381,
+    "gpu_prune_proposal_count": 23,
+    "gpu_keep_proposal_count": 200,
+    "consumed_prune_count": 22,
+    "consumed_keep_count": 199,
+    "first_snapshot_host_to_device_byte_count": 1999920,
+    "resident_snapshot_host_to_device_byte_count": 0,
+    "active_terminal_device_to_host_byte_count": 358096,
+    "physical_terminal_device_to_host_byte_count": 358096
+  },
+  "p5_active_prefix_comparison": {
+    "comparison_kind": "separate_single_runs_not_a_paired_benchmark",
+    "pre_p5_git_sha": "98d2dc887922d257d4915a5309aa9f5b4e9b677e",
+    "pre_p5_physical_terminal_device_to_host_byte_count": 58458112,
+    "pre_p5_resident_assisted_chunk_ms": 665.206,
+    "physical_terminal_transfer_reduction_percent": 99.387431,
+    "resident_time_reduction_percent": 2.758192,
+    "interpretation": "The active-prefix copy removes almost all terminal transfer bytes, but the small inter-run timing change shows that epoch synchronization and launch multiplicity remain dominant."
+  },
+  "p5a_next_design": {
+    "scope": "P_equals_1_stackless_lbvh_traversal",
+    "rope_bytes_per_lbvh_node": 4,
+    "kernel_launches_per_callback_target": 1,
+    "host_synchronizations_per_callback_target": 1,
+    "cpu_exact_terminal_authority_preserved": true,
+    "fallback_on_visit_terminal_or_operational_bound": true,
+    "global_pair_facet_coface_incidence_cell_gamma_or_higher_order_delaunay_structure": false
+  },
+  "qualification": {
+    "component_only": true,
+    "terminal_coverage_recertified": true,
+    "gpu_terminal_kinds_authoritative": false,
+    "small_cloud_speed_gate_passed": false,
+    "full_hierarchy_executed": false,
+    "warm_e2e_protocol_executed": false,
+    "warm_e2e_50000_slo_claimed": false,
+    "point_count_50000_executed": false,
+    "massive_product_path_claimed": false,
+    "ten_million_or_larger_executed": false,
+    "public_status_claimed": false
+  },
+  "scope_note": "This single 12500-point component diagnostic validates the active-prefix terminal transfer on real G4. It is not a full Morse pipeline, a latency distribution, a 50000-point SLO result, or evidence of 10M-plus scalability."
+}

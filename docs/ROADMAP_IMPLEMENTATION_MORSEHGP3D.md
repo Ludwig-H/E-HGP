@@ -1321,14 +1321,20 @@ L'accélération reste une transition éphémère séparée du checkpoint, du bu
 
 Le commit `d1e6d54` spécialise les prédicats de signe en dyadiques exacts non normalisés. Un unique smoke local budgeté a donné, pour `uniform_latin`, 626,180 ms à 12 500 points, 875,731 ms à 25 000 et 752,328 ms à 50 000; pour `eight_clusters`, 299,284 ms, 301,732 ms et 316,609 ms. Tous les chunks ont le statut `budget_exhausted`. Ces mono-mesures ne sont ni le pipeline complet, ni `warm_e2e`, ni un p95, ni un SLO.
 
+P5 au SHA `a012af982e1e75ec5f9ba9c5a17d16178b795f90` ferme la copie de la capacité terminale entière : les $16C$ octets restent réservés sur device, tandis que l'hôte alloue et rapatrie uniquement les $16T$ octets actifs. Le test CUDA réel ciblé passe sur RTX PRO 6000 Blackwell et CUDA 12.9. L'unique diagnostic `uniform_latin` à 12 500 points, $K=10$, `work=20000`, $P=1$, $W=32768$, $C=16384$ et $E=64$ réussit le composant et son vérificateur frais sans cap ni fallback GPU. Il compte 223 callbacks, 3 404 epochs, 46 145 items visités et 22 381 terminaux recertifiés exactement; 23 prune et 200 keep sont proposés, 22 et 199 consommés, et deux produits se replient sur le CPU historique.
+
+Le D2H terminal physique et actif vaut 358 096 octets, contre 58 458 112 octets physiques avant P5, soit une réduction de 99,39 %. Cette correction n'est toutefois pas la correction de latence principale : le CPU historique mesure 325,031 ms, le premier assisté 808,867 ms et le résident 646,858 ms. Le résident antérieur à 665,206 ms provient d'une exécution distincte; son écart d'environ 2,76 % est seulement diagnostique. Les synchronisations et lancements répétés des 3 404 epochs dominent désormais.
+
+P5a remplace donc, pour $P=1$, la boucle hôte par un parcours LBVH stackless left-first. Une corde de 4 octets par nœud encode le prochain nœud après rejet ou terminal; un kernel borné produit la coupe et une synchronisation unique expose son compte actif. Si la borne de visites, de terminaux ou d'opérations est atteinte, la proposition entière est abandonnée et le produit suit le parcours CPU historique. Tous les terminaux restent propositionnels : l'authentification, les signes dyadiques, la couverture et les décisions prune ou keep restent recertifiés exactement par le CPU.
+
 L'ordre de travail reste volontairement court :
 
-1. terminer les CTests hôte P3/P4 et le memcheck G4 court;
-2. exécuter un seul diagnostic P4 à 12 500 points par famille, analyser les audits et corriger seulement le terme dominant si nécessaire;
-3. seulement si ce petit cas est sain, exécuter 50 000 points par famille, puis raccorder et mesurer le vrai pipeline certifié 50 k;
+1. implémenter P5a pour $P=1$ et rejouer une seule fois `uniform_latin` à 12 500 points;
+2. seulement si l'assistance résidente franchit le gate de vitesse sans cap et avec vérification fraîche complète, rejouer `eight_clusters` à 12 500 points puis 50 000 points par famille;
+3. raccorder ensuite et mesurer le vrai pipeline certifié 50 k avec sortie matérialisée;
 4. ne lancer 10 000 001 points qu'après succès du pipeline complet et fermeture des budgets Phase 15; 30 M puis 50 M sont conditionnels au succès complet du rang précédent.
 
-Le diagnostic G4 P4 reste en attente. La Phase 14 demeure `ready`, la Phase 15 `in_progress`, `deployment_status=architecture_only` et `public_status=not_claimed`; aucun succès produit à 10 M n'est enregistré.
+P5 reste un composant éphémère $O(n+P+W+C)$; P5a n'ajoute qu'une corde linéaire au LBVH et ne construit aucun catalogue global de paires, facettes, cofaces, incidences, cellules, structure Gamma ou mosaïque de Delaunay d'ordre supérieur. Le petit gate de vitesse échoue, donc 50 k et 10 M ne sont pas lancés pour cette version. La Phase 14 demeure `ready`, la Phase 15 `in_progress`, `deployment_status=architecture_only` et `public_status=not_claimed`; aucun SLO ni succès produit à 10 M n'est enregistré. L'artefact [phase14q_p5_g4_a012af9.json](validation/phase14q_p5_g4_a012af9.json) est strictement un diagnostic de composant.
 
 ### Optimisations autorisées
 
