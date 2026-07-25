@@ -170,7 +170,7 @@ La génération gardée `2026-07-24T08:49:33.736-07:00` de `ehgp-blackwell-spot-
 
 La validation est logicielle et hôte; elle ne requalifie pas CUDA. Le centre exact reste dupliqué par la fermeture 10.5c, et aucune mesure `warm_e2e`, RSS, 50 k ou 10 M+ n'est réalisée.
 
-## Incrément 14Q P2--P5c — pruneur borné de rang pair
+## Incrément 14Q P2--P5d — pruneur borné de rang pair
 
 La porte 14P documentée est satisfaite. 14Q s'exécute sous `cuda_g4_plus_reference_cpu / hgp_reduced / proposal_only_then_certified / architecture_only`, avec `public_status=not_claimed`. Il accélère la recherche de témoins du stream de paires Phase 9 par lots de produits canoniques, sans modifier la définition scientifique, le checkpoint ou le wire durable v1.
 
@@ -206,13 +206,24 @@ P3--P5d et le rejeu CPU frais sont ainsi qualifiés au niveau composant sur la v
 
 La cible GCP `devpod-gpu-exploration/europe-west4-ai1a/ehgp-blackwell-spot-ai1a`, génération P5d `2026-07-25T07:26:10.013-07:00`, a été arrêtée à `2026-07-25T07:31:37.092-07:00` et certifiée `TERMINATED`, sans autre VM active; la clé de session a été révoquée et supprimée localement. L'artefact [phase14q_p5d_g4_3500fea.json](phase14q_p5d_g4_3500fea.json) conserve le diagnostic et ses coupe-circuits. La génération P5c précédente reste consignée séparément dans [phase14q_p5c_g4_a578031.json](phase14q_p5c_g4_a578031.json).
 
+## Incrément 14Q P6 — filtre supérieur exact et autorité terminale scellée
+
+P6 reste sous `reference_cpu / hgp_reduced / resident_timed / architecture_only`, avec `public_status=not_claimed`. P6a remplace les décisions booléennes rationnelles chaudes du flux supérieur par une spécialisation `int1024` seulement sous une enveloppe prouvée de 124 bits par coordonnée alignée. Les largeurs intermédiaires 125, 252, 759, 762 et 1013 bits sont bornées; égalités et signes sont conservés par un facteur dyadique positif. Tout cas hors enveloppe revient au rationnel arbitraire avant décision, et les certificats de prune émis restent rationnels riches.
+
+P6b introduit une session supérieure interne ancrée aux racines, à budget fixe et cap de chunks. Elle n'accepte ni chunk ni checkpoint appelant. Les chunks committés sont capturés sans rejeu frais; événements et diagnostics restent par segments, les payloads de prune sont détruits après engagement dans la chaîne et la capacité croît géométriquement avant le calcul. Seule une session terminale produit une autorité move-only. Des tokens stables nuage et LBVH ferment la substitution aux mêmes adresses; move et libération révoquent aussi la racine à zéro segment.
+
+La façade terminale passe à v2. La paire est toujours fraîchement rejouée; la voie supérieure choisit exclusivement le rejeu historique ou la consommation de l'autorité scellée. Le runner JSON v2 raccorde ensuite façade, journaux, tickets vivants, reducer 15D et forêt matérialisée en un seul processus. Les trois tests ciblés `higher_support_product`, `higher_support_stream` et `direct_support_terminal` passent directement sous GCC et Clang stricts. Ils couvrent parité et fallback entier, égalités, cap et progrès de chunks, scellement, révocation, substitution de sources et équivalence de payload avec la façade historique.
+
+Deux exécutions locales seulement sont consignées. `uniform_latin`, $n=5$, $K=4$ ferme `resident_conditional_pipeline_complete=true` en 81,086 ms : paire 1,824 ms, supérieur 56,098 ms, façade 0,855 ms, reducer 21,596 ms. À $n=8$, $K=7$, le total est 1 163,335 ms : paire 2,977 ms, supérieur 401,609 ms, façade 2,252 ms, reducer 754,801 ms. Les deux gardent faux `global_morse_obligation_replayed`, `warm_e2e_protocol_executed`, `warm_e2e_slo_claimed` et `qualification_claimed`. Ce ne sont ni un gate $K=10$, ni un p95, ni une qualification 50 k.
+
+P6 évite le second parcours supérieur et ne matérialise aucune mosaïque de Delaunay d'ordre supérieur, facette, coface, incidence, cellule ou structure Gamma globale. Le premier parcours conserve cependant le pire cas implicite $\binom{n}{3}+\binom{n}{4}$; la croissance entre cinq et huit points montre que la prochaine étape doit changer ce terme mathématique avant toute montée d'échelle. Aucun test GCP, 50 k ou 10 M n'est lancé pour P6.
+
 ## Priorités de développement
 
-1. conserver P5c comme candidat CPU exact du petit nuage et le mesurer dans la porte produit interactive, sans assimiler les 28,093 ms de composant à 12 500 points au p95 `warm_e2e` complet à 50 000 points;
-2. pour le massif, placer le lot au-dessus de la dépendance d'expansion ou introduire un cache borné utile, puis revenir au même gate court sans multiplier les variantes de paramètres P5d;
-3. n'essayer `eight_clusters` à 12 500 points puis 50 000 points que lorsqu'un chemin franchit sa porte de vitesse et conserve la fermeture exacte sans cap;
-4. raccorder ensuite le vrai pipeline complet et mesurer son p95 `warm_e2e` 50 k avant toute revendication interactive;
-5. externaliser les autorités et sorties de Phase 15, réussir le pipeline complet à 10 000 001 points, puis seulement tenter 30 M et 50 M conditionnellement au succès du rang précédent.
+1. utiliser le runner v2 seulement sur de petites portes pour attribuer séparément supérieur, façade et reducer;
+2. réduire le pire cas cubique/quartique du flux supérieur par un certificat de produit ou un producteur sparse exact, sans arène de supports;
+3. réussir alors un cas $K=10$ de quelques dizaines de milliers de points, puis les deux familles à 50 000 sous `warm_e2e`;
+4. externaliser autorités et sorties Phase 15, réussir 10 000 001 points, puis seulement 30 M et 50 M après succès complet du rang précédent.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

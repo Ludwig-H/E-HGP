@@ -28,6 +28,8 @@ using morsehgp3d::hierarchy::ExactHigherSupportStreamChunk;
 using morsehgp3d::hierarchy::ExactHigherSupportStopReason;
 using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
 using morsehgp3d::hierarchy::ExactHigherSupportStreamStatus;
+using morsehgp3d::hierarchy::ExactHigherSupportTerminalRunStatus;
+using morsehgp3d::hierarchy::ExactHigherSupportTerminalSession;
 using morsehgp3d::hierarchy::build_exact_higher_support_stream;
 using morsehgp3d::hierarchy::compute_exact_higher_support_checkpoint_digest;
 using morsehgp3d::hierarchy::exact_higher_support_candidate_universe_size;
@@ -442,6 +444,11 @@ void test_reinjectable_chunks_and_hostile_mutations() {
 
   ExactHigherSupportStreamBudget unit_budget = unlimited_budget();
   unit_budget.maximum_work_unit_count = 1U;
+  unit_budget.maximum_emitted_record_count = 8U;
+  unit_budget.maximum_emitted_point_id_reference_count = 64U;
+  unit_budget.maximum_prune_receipt_count = 8U;
+  unit_budget.maximum_global_closed_ball_query_count = 8U;
+  unit_budget.maximum_point_classification_count = 64U;
   std::vector<ExactHigherSupportStreamBudget> budgets;
   std::vector<ExactHigherSupportStreamChunk> chunks;
   for (std::size_t step = 0U;
@@ -693,6 +700,128 @@ void test_reinjectable_chunks_and_hostile_mutations() {
       "the session owns its immutable authority cache rather than its wrapper lifetime");
 }
 
+void test_internal_terminal_authority_and_clean_chunk_cap() {
+  CanonicalPointCloud cloud = cloud_from({
+      point(1.0, 1.0, 1.0),
+      point(1.0, -1.0, -1.0),
+      point(-1.0, 1.0, -1.0),
+      point(-1.0, -1.0, 1.0)});
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  ExactHigherSupportStreamBudget unit_budget = unlimited_budget();
+  unit_budget.maximum_work_unit_count = 1U;
+
+  ExactHigherSupportTerminalSession session{
+      index, cloud, 10U, unit_budget, 256U};
+  check(
+      session.run_to_terminal() ==
+              ExactHigherSupportTerminalRunStatus::terminal &&
+          session.trusted_checkpoint().locally_complete() &&
+          session.chunk_count() > 1U,
+      "the internal producer reaches a terminal checkpoint through fixed-budget chunks");
+  auto authority = std::move(session).seal();
+  const bool observed_empty_segment = std::any_of(
+      authority.segments().begin(),
+      authority.segments().end(),
+      [](const auto& segment) {
+        return segment.emitted_record_count() == 0U;
+      });
+  check(
+      authority.sealed_in_process_terminal_authority() &&
+          authority.bound_to(index, cloud, 10U) &&
+          authority.event_count() == 5U &&
+          authority.relevant_extra_shell_diagnostic_count() == 0U &&
+          authority.destroyed_prune_certificate_count() == 0U &&
+          authority.output_record_count() == 5U &&
+          authority.chunk_count() == authority.segments().size() &&
+          observed_empty_segment &&
+          !authority.fresh_replay_performed() &&
+          !authority.durable_authority_claimed() &&
+          !authority.public_status_claimed(),
+      "the move-only authority retains every bounded segment without overstating its scope");
+  const std::size_t sealed_chunk_count = authority.chunk_count();
+  auto released_segments = std::move(authority).release_segments();
+  check(
+      released_segments.size() == sealed_chunk_count &&
+          !authority.sealed_in_process_terminal_authority(),
+      "terminal segments are released only through an rvalue authority");
+
+  ExactHigherSupportTerminalSession capped{
+      index, cloud, 10U, unit_budget, 1U};
+  check(
+      capped.run_to_terminal() ==
+              ExactHigherSupportTerminalRunStatus::
+                  maximum_chunk_count_reached &&
+          capped.chunk_count() == 1U &&
+          !capped.trusted_checkpoint().locally_complete(),
+      "the internal producer reports its chunk cap without forging completion");
+  check_throws<std::logic_error>(
+      [&]() {
+        static_cast<void>(std::move(capped).seal());
+      },
+      "a capped nonterminal session cannot mint an authority");
+}
+
+void test_terminal_root_needs_no_chunk() {
+  CanonicalPointCloud cloud = cloud_from({
+      point(0.0, 0.0, 0.0),
+      point(1.0, 0.0, 0.0)});
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  ExactHigherSupportTerminalSession session{
+      index, cloud, 10U, unlimited_budget(), 0U};
+  check(
+      session.run_to_terminal() ==
+              ExactHigherSupportTerminalRunStatus::terminal &&
+          session.chunk_count() == 0U,
+      "a canonical root below support arity three is already terminal");
+  auto authority = std::move(session).seal();
+  auto moved_authority = std::move(authority);
+  check(
+      !authority.sealed_in_process_terminal_authority() &&
+          moved_authority.sealed_in_process_terminal_authority() &&
+          moved_authority.segments().empty() &&
+          moved_authority.output_record_count() == 0U,
+      "a terminal root seals without manufacturing an empty chunk and moving its zero-segment authority revokes the source");
+
+  CanonicalPointCloud replacement_cloud = cloud_from({
+      point(2.0, 0.0, 0.0),
+      point(3.0, 0.0, 0.0)});
+  MortonLbvhIndex replacement_index =
+      MortonLbvhIndex::build(replacement_cloud);
+  cloud = std::move(replacement_cloud);
+  index = std::move(replacement_index);
+  check(
+      !moved_authority.bound_to(index, cloud, 10U) &&
+          !moved_authority.sealed_in_process_terminal_authority(),
+      "reassigning cloud and LBVH at the same addresses revokes the sealed source identity");
+  static_cast<void>(
+      std::move(moved_authority).release_segments());
+  check(
+      !moved_authority.sealed_in_process_terminal_authority(),
+      "releasing a zero-segment terminal authority consumes it");
+
+  CanonicalPointCloud seal_cloud = cloud_from({
+      point(4.0, 0.0, 0.0),
+      point(5.0, 0.0, 0.0)});
+  MortonLbvhIndex seal_index = MortonLbvhIndex::build(seal_cloud);
+  ExactHigherSupportTerminalSession changed_before_seal{
+      seal_index, seal_cloud, 10U, unlimited_budget(), 0U};
+  check(
+      changed_before_seal.run_to_terminal() ==
+          ExactHigherSupportTerminalRunStatus::terminal,
+      "the source identity is intact while the terminal root executes");
+  CanonicalPointCloud final_cloud = cloud_from({
+      point(6.0, 0.0, 0.0),
+      point(7.0, 0.0, 0.0)});
+  MortonLbvhIndex final_index = MortonLbvhIndex::build(final_cloud);
+  seal_cloud = std::move(final_cloud);
+  seal_index = std::move(final_index);
+  check_throws<std::logic_error>(
+      [&]() {
+        static_cast<void>(std::move(changed_before_seal).seal());
+      },
+      "a source identity change between execution and seal fails closed");
+}
+
 }  // namespace
 
 int main() {
@@ -703,6 +832,8 @@ int main() {
   test_nonzero_universal_rank_receipts();
   test_input_contract();
   test_reinjectable_chunks_and_hostile_mutations();
+  test_internal_terminal_authority_and_clean_chunk_cap();
+  test_terminal_root_needs_no_chunk();
   if (failures != 0) {
     std::cerr << failures << " test(s) failed\n";
     return 1;

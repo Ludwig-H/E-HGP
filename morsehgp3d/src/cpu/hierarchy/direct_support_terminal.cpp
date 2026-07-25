@@ -65,6 +65,26 @@ namespace {
              authority.maximum_relevant_closed_rank;
 }
 
+[[nodiscard]] bool source_requirements_match(
+    const ExactPairSupportRequirements& pair,
+    const ExactHigherSupportCheckpointManifest& higher,
+    const ExactPairSupportCheckpointManifest& authority) {
+  return pair.point_count == authority.point_count &&
+         pair.requested_maximum_order ==
+             authority.requested_maximum_order &&
+         pair.effective_maximum_order ==
+             authority.effective_maximum_order &&
+         pair.maximum_relevant_closed_rank ==
+             authority.maximum_relevant_closed_rank &&
+         higher.point_count == authority.point_count &&
+         higher.requested_maximum_order ==
+             authority.requested_maximum_order &&
+         higher.effective_maximum_order ==
+             authority.effective_maximum_order &&
+         higher.maximum_relevant_closed_rank ==
+             authority.maximum_relevant_closed_rank;
+}
+
 void attach_h0_orders(
     ExactDirectSupportEvent& event,
     std::size_t effective_maximum_order) {
@@ -121,6 +141,25 @@ void attach_h0_orders(
   return event;
 }
 
+[[nodiscard]] ExactDirectSupportEvent normalize_event(
+    ExactHigherSupportEvent&& source,
+    std::size_t effective_maximum_order) {
+  if (source.support_size < 3U || source.support_size > 4U) {
+    throw std::logic_error(
+        "a sealed higher-support event has an invalid arity");
+  }
+  ExactDirectSupportEvent event;
+  event.support_size = source.support_size;
+  event.support_ids = source.support_ids;
+  event.center = std::move(source.center);
+  event.squared_level = std::move(source.squared_level);
+  event.interior_ids = std::move(source.interior_ids);
+  event.closed_rank = source.closed_rank;
+  event.exterior_count = source.exterior_count;
+  attach_h0_orders(event, effective_maximum_order);
+  return event;
+}
+
 [[nodiscard]] ExactDirectSupportExtraShellDiagnostic normalize_diagnostic(
     const ExactPairSupportExtraShellDiagnostic& source) {
   ExactDirectSupportExtraShellDiagnostic diagnostic;
@@ -152,6 +191,28 @@ void attach_h0_orders(
   diagnostic.center = source.center;
   diagnostic.squared_level = source.squared_level;
   diagnostic.interior_ids = source.interior_ids;
+  diagnostic.shell_count = source.shell_count;
+  diagnostic.canonical_extra_shell_witness_id =
+      source.canonical_extra_shell_witness_id;
+  diagnostic.minimum_possible_closed_rank =
+      source.minimum_possible_closed_rank;
+  diagnostic.observed_closed_rank = source.observed_closed_rank;
+  diagnostic.exterior_count = source.exterior_count;
+  return diagnostic;
+}
+
+[[nodiscard]] ExactDirectSupportExtraShellDiagnostic normalize_diagnostic(
+    ExactHigherSupportExtraShellDiagnostic&& source) {
+  if (source.support_size < 3U || source.support_size > 4U) {
+    throw std::logic_error(
+        "a sealed higher-support diagnostic has an invalid arity");
+  }
+  ExactDirectSupportExtraShellDiagnostic diagnostic;
+  diagnostic.support_size = source.support_size;
+  diagnostic.support_ids = source.support_ids;
+  diagnostic.center = std::move(source.center);
+  diagnostic.squared_level = std::move(source.squared_level);
+  diagnostic.interior_ids = std::move(source.interior_ids);
   diagnostic.shell_count = source.shell_count;
   diagnostic.canonical_extra_shell_witness_id =
       source.canonical_extra_shell_witness_id;
@@ -221,42 +282,7 @@ template <class Record>
   return static_cast<std::size_t>(support_size - 2U);
 }
 
-void normalize_terminal_records(
-    const ExactPairSupportStreamResult& pair_result,
-    const ExactHigherSupportStreamResult& higher_result,
-    ExactDirectSupportTerminalFacade& facade) {
-  const std::size_t event_count = checked_add(
-      pair_result.events.size(),
-      higher_result.events.size(),
-      "the normalized direct event count overflows size_t");
-  const std::size_t diagnostic_count = checked_add(
-      pair_result.relevant_extra_shell_diagnostics.size(),
-      higher_result.relevant_extra_shell_diagnostics.size(),
-      "the normalized direct diagnostic count overflows size_t");
-  facade.events.reserve(event_count);
-  facade.relevant_extra_shell_diagnostics.reserve(diagnostic_count);
-
-  const std::size_t effective_maximum_order =
-      facade.certificate.requirements.effective_maximum_order;
-  for (const ExactPairSupportEvent& event : pair_result.events) {
-    facade.events.push_back(
-        normalize_event(event, effective_maximum_order));
-  }
-  for (const ExactHigherSupportEvent& event : higher_result.events) {
-    facade.events.push_back(
-        normalize_event(event, effective_maximum_order));
-  }
-  for (const ExactPairSupportExtraShellDiagnostic& diagnostic :
-       pair_result.relevant_extra_shell_diagnostics) {
-    facade.relevant_extra_shell_diagnostics.push_back(
-        normalize_diagnostic(diagnostic));
-  }
-  for (const ExactHigherSupportExtraShellDiagnostic& diagnostic :
-       higher_result.relevant_extra_shell_diagnostics) {
-    facade.relevant_extra_shell_diagnostics.push_back(
-        normalize_diagnostic(diagnostic));
-  }
-
+void finalize_terminal_records(ExactDirectSupportTerminalFacade& facade) {
   std::sort(facade.events.begin(), facade.events.end(), event_less);
   for (std::size_t index = 1U; index < facade.events.size(); ++index) {
     if (!event_less(facade.events[index - 1U], facade.events[index])) {
@@ -304,6 +330,102 @@ void normalize_terminal_records(
   facade.certificate.output_only_normalization_certified = true;
 }
 
+void normalize_terminal_records(
+    const ExactPairSupportStreamResult& pair_result,
+    const ExactHigherSupportStreamResult& higher_result,
+    ExactDirectSupportTerminalFacade& facade) {
+  const std::size_t event_count = checked_add(
+      pair_result.events.size(),
+      higher_result.events.size(),
+      "the normalized direct event count overflows size_t");
+  const std::size_t diagnostic_count = checked_add(
+      pair_result.relevant_extra_shell_diagnostics.size(),
+      higher_result.relevant_extra_shell_diagnostics.size(),
+      "the normalized direct diagnostic count overflows size_t");
+  facade.events.reserve(event_count);
+  facade.relevant_extra_shell_diagnostics.reserve(diagnostic_count);
+
+  const std::size_t effective_maximum_order =
+      facade.certificate.requirements.effective_maximum_order;
+  for (const ExactPairSupportEvent& event : pair_result.events) {
+    facade.events.push_back(
+        normalize_event(event, effective_maximum_order));
+  }
+  for (const ExactHigherSupportEvent& event : higher_result.events) {
+    facade.events.push_back(
+        normalize_event(event, effective_maximum_order));
+  }
+  for (const ExactPairSupportExtraShellDiagnostic& diagnostic :
+       pair_result.relevant_extra_shell_diagnostics) {
+    facade.relevant_extra_shell_diagnostics.push_back(
+        normalize_diagnostic(diagnostic));
+  }
+  for (const ExactHigherSupportExtraShellDiagnostic& diagnostic :
+       higher_result.relevant_extra_shell_diagnostics) {
+    facade.relevant_extra_shell_diagnostics.push_back(
+        normalize_diagnostic(diagnostic));
+  }
+  finalize_terminal_records(facade);
+}
+
+void normalize_terminal_records(
+    const ExactPairSupportStreamResult& pair_result,
+    std::vector<ExactHigherSupportTerminalSegment>&& higher_segments,
+    std::size_t higher_event_count,
+    std::size_t higher_diagnostic_count,
+    ExactDirectSupportTerminalFacade& facade) {
+  const std::size_t event_count = checked_add(
+      pair_result.events.size(),
+      higher_event_count,
+      "the sealed normalized direct event count overflows size_t");
+  const std::size_t diagnostic_count = checked_add(
+      pair_result.relevant_extra_shell_diagnostics.size(),
+      higher_diagnostic_count,
+      "the sealed normalized direct diagnostic count overflows size_t");
+  facade.events.reserve(event_count);
+  facade.relevant_extra_shell_diagnostics.reserve(diagnostic_count);
+
+  const std::size_t effective_maximum_order =
+      facade.certificate.requirements.effective_maximum_order;
+  for (const ExactPairSupportEvent& event : pair_result.events) {
+    facade.events.push_back(
+        normalize_event(event, effective_maximum_order));
+  }
+  for (const ExactPairSupportExtraShellDiagnostic& diagnostic :
+       pair_result.relevant_extra_shell_diagnostics) {
+    facade.relevant_extra_shell_diagnostics.push_back(
+        normalize_diagnostic(diagnostic));
+  }
+  std::size_t observed_higher_event_count = 0U;
+  std::size_t observed_higher_diagnostic_count = 0U;
+  for (ExactHigherSupportTerminalSegment& segment : higher_segments) {
+    observed_higher_event_count = checked_add(
+        observed_higher_event_count,
+        segment.events.size(),
+        "the sealed higher-support event count overflows size_t");
+    observed_higher_diagnostic_count = checked_add(
+        observed_higher_diagnostic_count,
+        segment.relevant_extra_shell_diagnostics.size(),
+        "the sealed higher-support diagnostic count overflows size_t");
+    for (ExactHigherSupportEvent& event : segment.events) {
+      facade.events.push_back(
+          normalize_event(
+              std::move(event), effective_maximum_order));
+    }
+    for (ExactHigherSupportExtraShellDiagnostic& diagnostic :
+         segment.relevant_extra_shell_diagnostics) {
+      facade.relevant_extra_shell_diagnostics.push_back(
+          normalize_diagnostic(std::move(diagnostic)));
+    }
+  }
+  if (observed_higher_event_count != higher_event_count ||
+      observed_higher_diagnostic_count != higher_diagnostic_count) {
+    throw std::logic_error(
+        "the sealed higher-support segment counts are inconsistent");
+  }
+  finalize_terminal_records(facade);
+}
+
 }  // namespace
 
 bool ExactDirectSupportTerminalCertificate::terminal_catalog_certified()
@@ -313,6 +435,28 @@ bool ExactDirectSupportTerminalCertificate::terminal_catalog_certified()
                       complete_direct_support_catalog ||
       decision == ExactDirectSupportTerminalDecision::
                       complete_direct_support_catalog_with_relevant_extra_shell_diagnostics;
+  const bool fresh_higher_source =
+      higher_source_kind ==
+          ExactDirectSupportHigherSourceKind::fresh_resident_replay &&
+      higher_result_freshly_replayed &&
+      higher_maximum_chunk_count == 0U &&
+      higher_anchored_chunk_count == 0U &&
+      !higher_root_anchored_run_certified &&
+      !higher_terminal_authority_consumed &&
+      !higher_terminal_records_captured_once &&
+      higher_output_chain_digest == contract::CanonicalId{} &&
+      higher_terminal_checkpoint_digest == contract::CanonicalId{};
+  const bool sealed_higher_source =
+      higher_source_kind ==
+          ExactDirectSupportHigherSourceKind::
+              sealed_anchored_fixed_chunk_run &&
+      !higher_result_freshly_replayed &&
+      higher_anchored_chunk_count <= higher_maximum_chunk_count &&
+      higher_root_anchored_run_certified &&
+      higher_terminal_authority_consumed &&
+      higher_terminal_records_captured_once &&
+      higher_output_chain_digest != contract::CanonicalId{} &&
+      higher_terminal_checkpoint_digest != contract::CanonicalId{};
   exact::BigInt universe_sum{0};
   exact::BigInt event_count_sum{0};
   exact::BigInt diagnostic_count_sum{0};
@@ -336,7 +480,8 @@ bool ExactDirectSupportTerminalCertificate::terminal_catalog_certified()
                       direct_support_catalog_arities_two_through_four_only &&
          source_authorities_match && source_requirements_match &&
          pair_result_freshly_replayed &&
-         higher_result_freshly_replayed && pair_stream_terminal &&
+         (fresh_higher_source != sealed_higher_source) &&
+         pair_stream_terminal &&
          higher_stream_terminal && all_arities_terminal &&
          arities_certified && exact_candidate_universe_size_certified &&
          exact_candidate_universe_size == universe_sum &&
@@ -412,6 +557,8 @@ ExactDirectSupportTerminalFacade build_exact_direct_support_terminal_facade(
       pair_verification.result_certified;
   certificate.higher_result_freshly_replayed =
       higher_verification.result_certified;
+  certificate.higher_source_kind =
+      ExactDirectSupportHigherSourceKind::fresh_resident_replay;
   certificate.pair_stream_terminal =
       certificate.pair_result_freshly_replayed &&
       pair_result.stream_complete() &&
@@ -495,6 +642,175 @@ ExactDirectSupportTerminalFacade build_exact_direct_support_terminal_facade(
   if (!facade.terminal_catalog_certified()) {
     throw std::logic_error(
         "the composed direct support terminal certificate is inconsistent");
+  }
+  return facade;
+}
+
+ExactDirectSupportTerminalFacade build_exact_direct_support_terminal_facade(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactDirectSupportTerminalBudget& budget,
+    const ExactPairSupportStreamResult& pair_result,
+    ExactHigherSupportTerminalAuthority higher_authority) {
+  const ExactPairSupportCheckpointManifest pair_manifest =
+      make_exact_pair_support_checkpoint_manifest(
+          index, cloud, requested_maximum_order);
+  const ExactHigherSupportCheckpointManifest higher_manifest =
+      higher_authority.manifest();
+  const ExactPairSupportStreamVerification pair_verification =
+      verify_exact_pair_support_stream(
+          index,
+          cloud,
+          requested_maximum_order,
+          budget.pair,
+          pair_result);
+  const bool higher_authority_certified =
+      higher_authority.sealed_in_process_terminal_authority() &&
+      higher_authority.bound_to(
+          index, cloud, requested_maximum_order) &&
+      higher_authority.chunk_budget() == budget.higher &&
+      !higher_authority.fresh_replay_performed() &&
+      !higher_authority.durable_authority_claimed() &&
+      !higher_authority.hierarchy_reduction_performed() &&
+      !higher_authority.public_status_claimed();
+
+  ExactDirectSupportTerminalFacade facade;
+  ExactDirectSupportTerminalCertificate& certificate = facade.certificate;
+  certificate.requested_budget = budget;
+  certificate.requirements = ExactDirectSupportTerminalRequirements{
+      pair_manifest.point_count,
+      pair_manifest.requested_maximum_order,
+      pair_manifest.effective_maximum_order,
+      pair_manifest.maximum_relevant_closed_rank};
+  certificate.pair_canonical_cloud_digest =
+      pair_manifest.canonical_cloud_digest;
+  certificate.higher_canonical_cloud_digest =
+      higher_manifest.canonical_cloud_digest;
+  certificate.pair_lbvh_digest = pair_manifest.lbvh_digest;
+  certificate.higher_lbvh_digest = higher_manifest.lbvh_digest;
+  certificate.pair_semantic_digest = pair_manifest.semantic_digest;
+  certificate.higher_semantic_digest = higher_manifest.semantic_digest;
+  certificate.source_authorities_match =
+      higher_authority.bound_to(
+          index, cloud, requested_maximum_order) &&
+      source_manifest_contracts_match(pair_manifest, higher_manifest);
+  certificate.source_requirements_match = source_requirements_match(
+      pair_result.requirements, higher_manifest, pair_manifest);
+  certificate.pair_result_freshly_replayed =
+      pair_verification.result_certified;
+  certificate.higher_result_freshly_replayed = false;
+  certificate.higher_source_kind =
+      ExactDirectSupportHigherSourceKind::
+          sealed_anchored_fixed_chunk_run;
+  certificate.higher_maximum_chunk_count =
+      higher_authority.maximum_chunk_count();
+  certificate.higher_anchored_chunk_count =
+      higher_authority.chunk_count();
+  certificate.higher_root_anchored_run_certified =
+      higher_authority.canonical_root_anchored_internal_production() &&
+      higher_authority.terminal_checkpoint_local_integrity_verified();
+  certificate.higher_terminal_authority_consumed = true;
+  certificate.higher_terminal_records_captured_once =
+      higher_authority
+          .committed_chunks_captured_once_without_fresh_replay();
+  certificate.higher_output_chain_digest =
+      higher_authority.output_chain_digest();
+  certificate.higher_terminal_checkpoint_digest =
+      higher_authority.checkpoint_digest();
+  certificate.pair_stream_terminal =
+      certificate.pair_result_freshly_replayed &&
+      pair_result.stream_complete() &&
+      pair_result.absence_of_additional_pair_supports_certified();
+  certificate.higher_stream_terminal = higher_authority_certified;
+  certificate.no_forbidden_global_structure_materialized =
+      pair_result.no_forbidden_global_structure_materialized &&
+      higher_authority.no_forbidden_global_structure_materialized();
+  certificate.hierarchy_reduction_performed =
+      pair_result.hierarchy_reduction_performed ||
+      higher_authority.hierarchy_reduction_performed();
+  certificate.scope = ExactDirectSupportTerminalScope::
+      direct_support_catalog_arities_two_through_four_only;
+
+  for (std::size_t index_value = 0U; index_value < 3U; ++index_value) {
+    ExactDirectSupportArityTerminalCertificate& arity =
+        certificate.arity_certificates[index_value];
+    arity.support_size =
+        static_cast<std::uint8_t>(index_value + 2U);
+    arity.exact_candidate_universe_size = exact_binomial(
+        cloud.size(), static_cast<std::size_t>(arity.support_size));
+    certificate.exact_candidate_universe_size +=
+        arity.exact_candidate_universe_size;
+  }
+
+  const bool pair_universe_certified =
+      certificate.pair_result_freshly_replayed &&
+      exact::BigInt{pair_result.audit.total_pair_count} ==
+          certificate.arity_certificates[0].exact_candidate_universe_size;
+  const ExactHigherSupportStreamAudit& higher_audit =
+      higher_authority.terminal_audit();
+  const bool higher_universe_certified =
+      higher_authority_certified &&
+      higher_audit.exact_bigint_universe_certified &&
+      higher_audit.total_support_count ==
+          certificate.arity_certificates[1].exact_candidate_universe_size +
+              certificate.arity_certificates[2]
+                  .exact_candidate_universe_size;
+  certificate.arity_certificates[0]
+      .candidate_universe_size_certified = pair_universe_certified;
+  certificate.arity_certificates[1]
+      .candidate_universe_size_certified = higher_universe_certified;
+  certificate.arity_certificates[2]
+      .candidate_universe_size_certified = higher_universe_certified;
+  certificate.exact_candidate_universe_size_certified =
+      pair_universe_certified && higher_universe_certified;
+
+  if (!certificate.pair_result_freshly_replayed ||
+      !higher_authority_certified ||
+      !certificate.source_authorities_match ||
+      !certificate.source_requirements_match) {
+    certificate.decision =
+        ExactDirectSupportTerminalDecision::source_result_not_certified;
+    return facade;
+  }
+
+  certificate.all_arities_terminal =
+      certificate.pair_stream_terminal &&
+      certificate.higher_stream_terminal &&
+      certificate.exact_candidate_universe_size_certified &&
+      certificate.no_forbidden_global_structure_materialized &&
+      !certificate.hierarchy_reduction_performed;
+  if (!certificate.all_arities_terminal) {
+    certificate.decision =
+        ExactDirectSupportTerminalDecision::source_stream_not_terminal;
+    return facade;
+  }
+
+  for (ExactDirectSupportArityTerminalCertificate& arity :
+       certificate.arity_certificates) {
+    arity.terminal_absence_of_additional_supports_certified = true;
+  }
+  const std::size_t higher_event_count =
+      higher_authority.event_count();
+  const std::size_t higher_diagnostic_count =
+      higher_authority.relevant_extra_shell_diagnostic_count();
+  std::vector<ExactHigherSupportTerminalSegment> higher_segments =
+      std::move(higher_authority).release_segments();
+  normalize_terminal_records(
+      pair_result,
+      std::move(higher_segments),
+      higher_event_count,
+      higher_diagnostic_count,
+      facade);
+  certificate.decision =
+      facade.relevant_extra_shell_diagnostics.empty()
+          ? ExactDirectSupportTerminalDecision::
+                complete_direct_support_catalog
+          : ExactDirectSupportTerminalDecision::
+                complete_direct_support_catalog_with_relevant_extra_shell_diagnostics;
+  if (!facade.terminal_catalog_certified()) {
+    throw std::logic_error(
+        "the sealed direct support terminal certificate is inconsistent");
   }
   return facade;
 }

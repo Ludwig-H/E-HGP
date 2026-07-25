@@ -8,15 +8,19 @@
 #include <span>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 namespace {
 
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::hierarchy::ExactDirectSupportTerminalBudget;
 using morsehgp3d::hierarchy::ExactDirectSupportTerminalDecision;
+using morsehgp3d::hierarchy::ExactDirectSupportHigherSourceKind;
 using morsehgp3d::hierarchy::ExactHigherSupportAnchoredSession;
 using morsehgp3d::hierarchy::ExactHigherSupportAuthorityContext;
 using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
+using morsehgp3d::hierarchy::ExactHigherSupportTerminalRunStatus;
+using morsehgp3d::hierarchy::ExactHigherSupportTerminalSession;
 using morsehgp3d::hierarchy::ExactPairSupportAuthorityContext;
 using morsehgp3d::hierarchy::ExactPairSupportIncrementalVerifier;
 using morsehgp3d::hierarchy::ExactPairSupportStreamBudget;
@@ -102,6 +106,9 @@ void test_terminal_facade_and_fresh_composition() {
                   .accepted_event_count == 4U &&
           facade.certificate.arity_certificates[2]
                   .accepted_event_count == 1U &&
+          facade.certificate.higher_source_kind ==
+              ExactDirectSupportHigherSourceKind::
+                  fresh_resident_replay &&
           !facade.certificate.common_durable_checkpoint_certified &&
           !facade.certificate.hierarchy_or_forest_certified &&
           !facade.certificate.public_status_claimed,
@@ -114,6 +121,83 @@ void test_terminal_facade_and_fresh_composition() {
            index, cloud, 10U, budget, pair, higher, mutated)
            .result_certified,
       "a mutated common terminal count fails the fresh composition replay");
+}
+
+void test_sealed_higher_authority_avoids_fresh_higher_replay() {
+  const CanonicalPointCloud cloud = regular_tetrahedron();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  ExactHigherSupportStreamBudget higher_budget =
+      unlimited_higher_budget();
+  higher_budget.maximum_work_unit_count = 1U;
+  higher_budget.maximum_emitted_record_count = 8U;
+  higher_budget.maximum_emitted_point_id_reference_count = 64U;
+  higher_budget.maximum_prune_receipt_count = 8U;
+  higher_budget.maximum_global_closed_ball_query_count = 8U;
+  higher_budget.maximum_point_classification_count = 64U;
+  const ExactDirectSupportTerminalBudget budget{
+      unlimited_pair_budget(), higher_budget};
+  const auto pair =
+      morsehgp3d::hierarchy::build_exact_pair_support_stream(
+          index, cloud, 10U, budget.pair);
+  const auto legacy_higher =
+      morsehgp3d::hierarchy::build_exact_higher_support_stream(
+          index, cloud, 10U, unlimited_higher_budget());
+  const ExactDirectSupportTerminalBudget legacy_budget{
+      budget.pair, unlimited_higher_budget()};
+  const auto legacy_facade =
+      morsehgp3d::hierarchy::build_exact_direct_support_terminal_facade(
+          index,
+          cloud,
+          10U,
+          legacy_budget,
+          pair,
+          legacy_higher);
+
+  ExactHigherSupportTerminalSession session{
+      index, cloud, 10U, budget.higher, 256U};
+  check(
+      session.run_to_terminal() ==
+          ExactHigherSupportTerminalRunStatus::terminal,
+      "the fixed-budget higher-support producer reaches its terminal root");
+  const std::size_t produced_chunk_count = session.chunk_count();
+  auto authority = std::move(session).seal();
+  const auto facade =
+      morsehgp3d::hierarchy::build_exact_direct_support_terminal_facade(
+          index,
+          cloud,
+          10U,
+          budget,
+          pair,
+          std::move(authority));
+
+  check(
+      facade.terminal_catalog_certified() &&
+          facade.events == legacy_facade.events &&
+          facade.relevant_extra_shell_diagnostics ==
+              legacy_facade.relevant_extra_shell_diagnostics &&
+          facade.certificate.higher_source_kind ==
+              ExactDirectSupportHigherSourceKind::
+                  sealed_anchored_fixed_chunk_run &&
+          !facade.certificate.higher_result_freshly_replayed &&
+          facade.certificate.higher_root_anchored_run_certified &&
+          facade.certificate.higher_terminal_authority_consumed &&
+          facade.certificate.higher_terminal_records_captured_once &&
+          facade.certificate.higher_anchored_chunk_count ==
+              produced_chunk_count &&
+          facade.certificate.higher_maximum_chunk_count == 256U,
+      "the sealed higher authority yields the same terminal catalogue without claiming a fresh higher replay");
+
+  auto erased_sealed_anchor = facade;
+  erased_sealed_anchor.certificate.higher_output_chain_digest = {};
+  check(
+      !erased_sealed_anchor.terminal_catalog_certified(),
+      "a sealed facade rejects an erased higher output-chain anchor");
+  auto polluted_fresh_provenance = legacy_facade;
+  polluted_fresh_provenance.certificate.higher_output_chain_digest =
+      facade.certificate.higher_output_chain_digest;
+  check(
+      !polluted_fresh_provenance.terminal_catalog_certified(),
+      "a fresh facade rejects sealed-only higher provenance");
 }
 
 void test_budgeted_source_never_publishes_terminal_payload() {
@@ -204,6 +288,7 @@ void test_one_record_chunks_exceed_resident_output_capacity() {
 
 int main() {
   test_terminal_facade_and_fresh_composition();
+  test_sealed_higher_authority_avoids_fresh_higher_replay();
   test_budgeted_source_never_publishes_terminal_payload();
   test_one_record_chunks_exceed_resident_output_capacity();
   if (failures != 0) {

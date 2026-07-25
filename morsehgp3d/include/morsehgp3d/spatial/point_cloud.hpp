@@ -16,6 +16,11 @@ class SpatialLbvhContext;
 class SpatialReferenceContext;
 }
 
+namespace morsehgp3d::hierarchy {
+class ExactHigherSupportAuthorityContext;
+class ExactHigherSupportTerminalAuthority;
+}
+
 namespace morsehgp3d::spatial {
 
 using PointId = std::uint64_t;
@@ -66,6 +71,8 @@ class CanonicalPointCloud {
   friend class gpu::MortonLbvhBuildContext;
   friend class gpu::SpatialLbvhContext;
   friend class gpu::SpatialReferenceContext;
+  friend class hierarchy::ExactHigherSupportAuthorityContext;
+  friend class hierarchy::ExactHigherSupportTerminalAuthority;
 };
 
 }  // namespace morsehgp3d::spatial

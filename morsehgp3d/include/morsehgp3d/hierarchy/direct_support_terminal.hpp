@@ -16,7 +16,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t
-    direct_support_terminal_certificate_schema_version = 1U;
+    direct_support_terminal_certificate_schema_version = 2U;
 inline constexpr std::string_view direct_support_terminal_backend =
     "reference_cpu";
 inline constexpr std::string_view direct_support_terminal_profile =
@@ -26,8 +26,9 @@ inline constexpr std::string_view direct_support_terminal_mode =
 inline constexpr std::string_view direct_support_terminal_public_status =
     "not_claimed";
 inline constexpr std::string_view direct_support_terminal_proof_basis =
-    "fresh_exact_pair_v1_and_grouped_higher_v2_replay_terminal_"
-    "support_catalog_arities_two_through_four_v1";
+    "fresh_exact_pair_v1_and_either_fresh_grouped_higher_v2_replay_"
+    "or_sealed_root_anchored_fixed_chunk_higher_run_terminal_support_"
+    "catalog_arities_two_through_four_v2";
 
 // This is a certificate for the direct support catalogue only.  It does not
 // construct a hierarchy, publish forest semantics, or promote a public exact
@@ -120,6 +121,12 @@ enum class ExactDirectSupportTerminalScope : std::uint8_t {
   direct_support_catalog_arities_two_through_four_only,
 };
 
+enum class ExactDirectSupportHigherSourceKind : std::uint8_t {
+  unspecified,
+  fresh_resident_replay,
+  sealed_anchored_fixed_chunk_run,
+};
+
 struct ExactDirectSupportTerminalCertificate {
   static constexpr std::string_view backend =
       direct_support_terminal_backend;
@@ -135,9 +142,11 @@ struct ExactDirectSupportTerminalCertificate {
       direct_support_terminal_certificate_schema_version};
   ExactDirectSupportTerminalRequirements requirements{};
   ExactDirectSupportTerminalBudget requested_budget{};
-  // The two source streams domain-separate their provenance digests.  Both
-  // values are retained and freshly replayed; equality between lanes would be
-  // a protocol error rather than evidence of a shared authority.
+  // The two source streams domain-separate their provenance digests.  Pair
+  // results are freshly replayed.  The higher lane is either freshly replayed
+  // or consumed from one root-anchored, move-only in-process authority;
+  // equality between lane digests would be a protocol error rather than
+  // evidence of a shared authority.
   contract::CanonicalId pair_canonical_cloud_digest{};
   contract::CanonicalId higher_canonical_cloud_digest{};
   contract::CanonicalId pair_lbvh_digest{};
@@ -153,6 +162,15 @@ struct ExactDirectSupportTerminalCertificate {
   bool source_requirements_match{false};
   bool pair_result_freshly_replayed{false};
   bool higher_result_freshly_replayed{false};
+  ExactDirectSupportHigherSourceKind higher_source_kind{
+      ExactDirectSupportHigherSourceKind::unspecified};
+  std::size_t higher_maximum_chunk_count{};
+  std::size_t higher_anchored_chunk_count{};
+  bool higher_root_anchored_run_certified{false};
+  bool higher_terminal_authority_consumed{false};
+  bool higher_terminal_records_captured_once{false};
+  contract::CanonicalId higher_output_chain_digest{};
+  contract::CanonicalId higher_terminal_checkpoint_digest{};
   bool pair_stream_terminal{false};
   bool higher_stream_terminal{false};
   bool all_arities_terminal{false};
@@ -200,6 +218,19 @@ build_exact_direct_support_terminal_facade(
     const ExactDirectSupportTerminalBudget& budget,
     const ExactPairSupportStreamResult& pair_result,
     const ExactHigherSupportStreamResult& higher_result);
+
+// Consumes a process-local root-anchored higher-support authority.  Its fixed
+// per-chunk budget must equal budget.higher.  This avoids a second complete
+// higher-support traversal but does not claim fresh replay, durability,
+// hierarchy reduction or public exact status.
+[[nodiscard]] ExactDirectSupportTerminalFacade
+build_exact_direct_support_terminal_facade(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactDirectSupportTerminalBudget& budget,
+    const ExactPairSupportStreamResult& pair_result,
+    ExactHigherSupportTerminalAuthority higher_authority);
 
 struct ExactDirectSupportTerminalVerification {
   bool pair_source_result_freshly_replayed{false};

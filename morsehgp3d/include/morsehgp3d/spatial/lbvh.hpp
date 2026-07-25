@@ -25,6 +25,8 @@ class MortonLbvhIndex;
 }
 
 namespace morsehgp3d::hierarchy {
+class ExactHigherSupportAuthorityContext;
+class ExactHigherSupportTerminalAuthority;
 class ExactHigherSupportStreamBuilder;
 class ExactPairSupportStreamBuilder;
 class ExactDirectSparseFirstIncidenceBuilder;
@@ -298,7 +300,8 @@ class MortonLbvhIndex {
   MortonLbvhIndex& operator=(MortonLbvhIndex&& other) noexcept;
 
   [[nodiscard]] bool ready() const noexcept {
-    return structure_complete_ && cloud_identity_ != nullptr;
+    return structure_complete_ && cloud_identity_ != nullptr &&
+           identity_ != nullptr;
   }
   [[nodiscard]] bool validated_for(
       const CanonicalPointCloud& cloud) const noexcept {
@@ -363,6 +366,8 @@ class MortonLbvhIndex {
       const CanonicalPointCloud& cloud,
       std::size_t node_index,
       const exact::ExactRational3& query) const;
+  struct IdentityToken {};
+  std::shared_ptr<const IdentityToken> identity_;
   std::shared_ptr<const CanonicalPointCloud::IdentityToken> cloud_identity_;
   std::size_t point_count_{0U};
   std::vector<MortonLeafRecord> leaves_;
@@ -413,6 +418,8 @@ class MortonLbvhIndex {
       const spatial::CanonicalPointCloud& cloud,
       const hierarchy::K1ExactBoruvkaResult& result);
   friend class hierarchy::ExactPairSupportStreamBuilder;
+  friend class hierarchy::ExactHigherSupportAuthorityContext;
+  friend class hierarchy::ExactHigherSupportTerminalAuthority;
   friend class hierarchy::ExactHigherSupportStreamBuilder;
   friend class hierarchy::ExactDirectSparseFirstIncidenceBuilder;
   friend class ExactBudgetedLbvhTopKResult;

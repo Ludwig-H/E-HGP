@@ -5,6 +5,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <span>
 
@@ -72,6 +73,35 @@ struct ExactHigherSupportProductAabbAnalysis {
 exact_higher_support_product_aabb_analysis(
     std::span<const spatial::ExactDyadicAabb3> support_boxes,
     std::optional<spatial::ExactDyadicAabb3> query_box = std::nullopt);
+
+// Operational arithmetic selected by the decision-only wrappers below.  Both
+// backends evaluate the same exact interval DAG and therefore have identical
+// scientific semantics; this tag is diagnostic only.
+enum class ExactHigherSupportProductAabbDecisionBackend : std::uint8_t {
+  bounded_dyadic_int1024 = 0U,
+  arbitrary_precision_rational = 1U,
+};
+
+// Decision-only fast path for traversal sites that do not need to persist the
+// rich rational interval analysis.  backend, when non-null, reports whether
+// the exact fixed-width dyadic kernel fitted or the arbitrary-precision
+// rational implementation was used as an integral fallback.
+[[nodiscard]] bool
+exact_higher_support_product_no_well_centered_certified(
+    std::span<const spatial::ExactDyadicAabb3> support_boxes,
+    ExactHigherSupportProductAabbDecisionBackend* backend = nullptr);
+
+[[nodiscard]] bool
+exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
+    std::span<const spatial::ExactDyadicAabb3> support_boxes,
+    const spatial::ExactDyadicAabb3& query_box,
+    ExactHigherSupportProductAabbDecisionBackend* backend = nullptr);
+
+inline constexpr const char*
+    higher_support_product_bounded_decision_proof_basis =
+        "common_dyadic_exponent_exact_int1024_interval_gram_cramer_"
+        "barycentric_and_scaled_power_with_124_bit_coordinate_envelope_"
+        "and_integral_arbitrary_precision_rational_fallback_v1";
 
 inline constexpr const char* higher_support_product_aabb_proof_basis =
     "exact_rational_interval_gram_cramer_barycentric_and_scaled_"

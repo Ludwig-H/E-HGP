@@ -493,6 +493,7 @@ MortonLbvhIndex MortonLbvhIndex::build(const CanonicalPointCloud& cloud) {
   }
 
   MortonLbvhIndex index;
+  index.identity_ = std::make_shared<const IdentityToken>();
   index.cloud_identity_ = cloud.identity_;
   index.point_count_ = point_count;
   index.leaves_.reserve(point_count);
@@ -597,6 +598,7 @@ MortonLbvhIndex MortonLbvhIndex::import_certified_snapshot(
   }
 
   MortonLbvhIndex index;
+  index.identity_ = std::make_shared<const IdentityToken>();
   index.point_count_ = point_count;
   index.leaves_ = snapshot.leaves;
   index.leaf_position_by_point_id_.assign(
@@ -1065,7 +1067,8 @@ exact::ExactLevel MortonLbvhIndex::maximum_squared_distance_to_node(
 }
 
 MortonLbvhIndex::MortonLbvhIndex(MortonLbvhIndex&& other) noexcept
-    : cloud_identity_(std::move(other.cloud_identity_)),
+    : identity_(std::move(other.identity_)),
+      cloud_identity_(std::move(other.cloud_identity_)),
       point_count_(std::exchange(other.point_count_, 0U)),
       leaves_(std::move(other.leaves_)),
       leaf_position_by_point_id_(std::move(other.leaf_position_by_point_id_)),
@@ -1080,6 +1083,7 @@ MortonLbvhIndex& MortonLbvhIndex::operator=(
     MortonLbvhIndex&& other) noexcept {
   if (this != &other) {
     structure_complete_ = false;
+    identity_ = std::move(other.identity_);
     cloud_identity_ = std::move(other.cloud_identity_);
     point_count_ = std::exchange(other.point_count_, 0U);
     leaves_ = std::move(other.leaves_);

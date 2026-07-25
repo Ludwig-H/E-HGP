@@ -47,6 +47,7 @@ struct Options {
   std::size_t maximum_order{10U};
   std::size_t support_work_budget{20'000U};
   std::size_t support_record_budget{4'096U};
+  std::size_t higher_chunk_limit{1U};
   std::size_t downstream_record_budget{1'000'000U};
   std::size_t descent_work_budget{65'536U};
   std::uint64_t chunk_byte_budget{UINT64_C(1) << 30U};
@@ -98,6 +99,8 @@ struct Report {
   std::size_t higher_accepted_events{};
   std::size_t higher_extra_shell_diagnostics{};
   std::size_t higher_prune_certificates{};
+  std::size_t higher_chunk_count{};
+  std::string higher_authority_kind{"not_run"};
 
   bool terminal_catalog_certified{false};
   std::size_t canonical_point_count{};
@@ -193,6 +196,7 @@ void print_usage(std::ostream& output) {
       << "  --maximum-order K (alias: --K; 1 <= K <= 10)\n"
       << "  --support-work-budget N\n"
       << "  --support-record-budget N\n"
+      << "  --higher-chunk-limit N\n"
       << "  --downstream-record-budget N\n"
       << "  --descent-work-budget N\n"
       << "  --chunk-byte-budget N\n"
@@ -225,6 +229,8 @@ void parse_options(int argc, char** argv, Options& options) {
       options.support_work_budget = parse_size(value, option);
     } else if (option == "--support-record-budget") {
       options.support_record_budget = parse_size(value, option);
+    } else if (option == "--higher-chunk-limit") {
+      options.higher_chunk_limit = parse_size(value, option);
     } else if (option == "--downstream-record-budget") {
       options.downstream_record_budget = parse_size(value, option);
     } else if (option == "--descent-work-budget") {
@@ -257,6 +263,7 @@ void parse_options(int argc, char** argv, Options& options) {
   }
   if (options.support_work_budget == 0U ||
       options.support_record_budget == 0U ||
+      options.higher_chunk_limit == 0U ||
       options.downstream_record_budget == 0U ||
       options.descent_work_budget == 0U ||
       options.chunk_byte_budget == 0U) {
@@ -294,42 +301,6 @@ void parse_options(int argc, char** argv, Options& options) {
     case ExactPairSupportStopReason::global_closed_ball_query_limit:
       return "global_closed_ball_query_limit";
     case ExactPairSupportStopReason::point_classification_limit:
-      return "point_classification_limit";
-  }
-  return "invalid";
-}
-
-[[nodiscard]] std::string_view higher_status_text(
-    ExactHigherSupportStreamStatus status) {
-  switch (status) {
-    case ExactHigherSupportStreamStatus::complete:
-      return "complete";
-    case ExactHigherSupportStreamStatus::budget_exhausted:
-      return "budget_exhausted";
-  }
-  return "invalid";
-}
-
-[[nodiscard]] std::string_view higher_stop_reason_text(
-    ExactHigherSupportStopReason reason) {
-  switch (reason) {
-    case ExactHigherSupportStopReason::none:
-      return "none";
-    case ExactHigherSupportStopReason::work_unit_limit:
-      return "work_unit_limit";
-    case ExactHigherSupportStopReason::frontier_entry_limit:
-      return "frontier_entry_limit";
-    case ExactHigherSupportStopReason::auxiliary_frontier_entry_limit:
-      return "auxiliary_frontier_entry_limit";
-    case ExactHigherSupportStopReason::emitted_record_limit:
-      return "emitted_record_limit";
-    case ExactHigherSupportStopReason::emitted_point_id_reference_limit:
-      return "emitted_point_id_reference_limit";
-    case ExactHigherSupportStopReason::prune_receipt_limit:
-      return "prune_receipt_limit";
-    case ExactHigherSupportStopReason::global_closed_ball_query_limit:
-      return "global_closed_ball_query_limit";
-    case ExactHigherSupportStopReason::point_classification_limit:
       return "point_classification_limit";
   }
   return "invalid";
@@ -737,7 +708,7 @@ void emit_report(const Report& report) {
   };
   std::cout
       << "{\n"
-      << "  \"schema\":\"morsehgp3d.direct-morse-product-run.v1\",\n"
+      << "  \"schema\":\"morsehgp3d.direct-morse-product-run.v2\",\n"
       << "  \"phase\":\"14Q_to_15D\",\n"
       << "  \"backend\":\"reference_cpu\",\n"
       << "  \"profile\":\"hgp_reduced\",\n"
@@ -761,6 +732,8 @@ void emit_report(const Report& report) {
       << json_escape(report.stop_detail) << "\",\n"
       << "  \"pipeline_complete\":"
       << boolean(report.pipeline_complete) << ",\n"
+      << "  \"resident_conditional_pipeline_complete\":"
+      << boolean(report.pipeline_complete) << ",\n"
       << "  \"budget_exhausted\":"
       << boolean(report.budget_exhausted) << ",\n"
       << "  \"scientific_result_materialized\":"
@@ -772,7 +745,7 @@ void emit_report(const Report& report) {
       << "  \"warm_e2e_slo_claimed\":false,\n"
       << "  \"qualification_claimed\":false,\n"
       << "  \"timing_scope\":"
-         "\"single_process_cpu_generation_to_materialized_forest\",\n"
+         "\"attempted_single_process_cpu_generation_to_materialized_forest\",\n"
       << "  \"architecture_audit_complete\":"
       << boolean(report.architecture_audit_complete) << ",\n"
       << "  \"no_forbidden_global_structure_materialized\":"
@@ -783,6 +756,8 @@ void emit_report(const Report& report) {
       << report.options.support_work_budget
       << ",\"support_records\":"
       << report.options.support_record_budget
+      << ",\"higher_chunks\":"
+      << report.options.higher_chunk_limit
       << ",\"downstream_records\":"
       << report.options.downstream_record_budget
       << ",\"descent_work\":"
@@ -836,7 +811,15 @@ void emit_report(const Report& report) {
       << ",\"extra_shell_diagnostics\":"
       << report.higher_extra_shell_diagnostics
       << ",\"prune_certificates\":"
-      << report.higher_prune_certificates << "},\n"
+      << report.higher_prune_certificates
+      << ",\"chunks\":" << report.higher_chunk_count
+      << ",\"authority_kind\":\""
+      << report.higher_authority_kind
+      << "\",\"full_geometry_replay_avoided\":"
+      << boolean(
+             report.higher_authority_kind ==
+             "sealed_anchored_fixed_chunk_run")
+      << "},\n"
       << "  \"pipeline_counts\":{\"terminal_catalog_certified\":"
       << boolean(report.terminal_catalog_certified)
       << ",\"terminal_events\":"
@@ -983,45 +966,56 @@ void emit_report(const Report& report) {
     return report.budget_exhausted ? 2 : 3;
   }
 
-  const ExactHigherSupportStreamResult higher =
-      build_exact_higher_support_stream(
-          index, cloud, options.maximum_order, higher_budget);
+  ExactHigherSupportTerminalSession higher_session{
+      index,
+      cloud,
+      options.maximum_order,
+      higher_budget,
+      options.higher_chunk_limit};
+  const ExactHigherSupportTerminalRunStatus higher_run_status =
+      higher_session.run_to_terminal();
   const Clock::time_point higher_end = Clock::now();
   report.timings.higher_support_ms =
       milliseconds(higher_end - pair_end);
-  report.higher_status = higher_status_text(higher.status);
-  report.higher_stop_reason =
-      higher_stop_reason_text(higher.stop_reason);
-  report.higher_work_units = higher.audit.work_unit_count;
+  const ExactHigherSupportStreamAudit& higher_audit =
+      higher_session.trusted_checkpoint().cumulative_audit;
+  report.higher_work_units = higher_audit.work_unit_count;
   report.higher_product_visits =
-      higher.audit.support_product_visit_count;
+      higher_audit.support_product_visit_count;
   report.higher_closed_ball_queries =
-      higher.audit.global_closed_ball_query_count;
+      higher_audit.global_closed_ball_query_count;
   report.higher_accepted_events =
-      higher.audit.accepted_event_count;
+      higher_audit.accepted_event_count;
   report.higher_extra_shell_diagnostics =
-      higher.audit.relevant_extra_shell_diagnostic_count;
+      higher_audit.relevant_extra_shell_diagnostic_count;
   report.higher_prune_certificates =
-      higher.prune_certificates.size();
-  report.no_forbidden_global_structure_materialized =
-      report.no_forbidden_global_structure_materialized &&
-      higher.no_forbidden_global_structure_materialized;
+      higher_audit.emitted_prune_certificate_count;
+  report.higher_chunk_count = higher_session.chunk_count();
 
-  if (!higher.stream_complete()) {
+  if (higher_run_status !=
+      ExactHigherSupportTerminalRunStatus::terminal) {
+    report.higher_status = "budget_exhausted";
+    report.higher_stop_reason = "maximum_chunk_count_reached";
+    report.higher_authority_kind =
+        "unsealed_root_anchored_fixed_chunk_session";
     report.terminal_stage = "higher_support";
-    report.stop_detail = "higher_support_not_terminal";
-    report.budget_exhausted =
-        higher.status ==
-        ExactHigherSupportStreamStatus::budget_exhausted;
-    report.stop_category =
-        report.budget_exhausted
-            ? "budget_exhausted"
-            : "certification_failure";
+    report.stop_detail = "higher_support_chunk_limit_reached";
+    report.budget_exhausted = true;
+    report.stop_category = "budget_exhausted";
     report.timings.total_ms =
         milliseconds(Clock::now() - total_start);
     emit_report(report);
-    return report.budget_exhausted ? 2 : 3;
+    return 2;
   }
+  ExactHigherSupportTerminalAuthority higher_authority =
+      std::move(higher_session).seal();
+  report.higher_status = "complete";
+  report.higher_stop_reason = "none";
+  report.higher_authority_kind =
+      "sealed_anchored_fixed_chunk_run";
+  report.no_forbidden_global_structure_materialized =
+      report.no_forbidden_global_structure_materialized &&
+      higher_authority.no_forbidden_global_structure_materialized();
 
   const ExactDirectSupportTerminalFacade facade =
       build_exact_direct_support_terminal_facade(
@@ -1030,7 +1024,7 @@ void emit_report(const Report& report) {
           options.maximum_order,
           terminal_budget,
           pair,
-          higher);
+          std::move(higher_authority));
   const Clock::time_point facade_end = Clock::now();
   report.timings.terminal_facade_ms =
       milliseconds(facade_end - higher_end);

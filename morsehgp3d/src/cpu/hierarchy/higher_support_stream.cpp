@@ -1047,8 +1047,7 @@ class ExactHigherSupportStreamBuilder {
                     (is_terminal(entry) &&
                      required_strict_interior_count(entry.support_size) !=
                          0U) ||
-                    !recompute_support_analysis(entry)
-                         .no_well_centered_support_certified()) {
+                    !no_well_centered_support_certified(entry)) {
                   pending_valid = false;
                 }
                 break;
@@ -1067,8 +1066,7 @@ class ExactHigherSupportStreamBuilder {
                     pending.certified_strict_interior_point_count <
                         exact::BigInt{required_strict_interior_count(
                             entry.support_size)} ||
-                    recompute_support_analysis(entry)
-                        .no_well_centered_support_certified()) {
+                    no_well_centered_support_certified(entry)) {
                   pending_valid = false;
                 }
                 break;
@@ -1135,9 +1133,9 @@ class ExactHigherSupportStreamBuilder {
                   receipt_node_index(receipt);
               const Node& query = node(query_node_index);
               if (node_range_intersects_support_domain(query, entry) ||
-                  !exact_higher_support_product_aabb_analysis(
-                       support_box_span, node_box(query_node_index))
-                       .query_strictly_inside_every_independent_sphere_certified()) {
+                  !exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
+                      support_box_span,
+                      node_box(query_node_index))) {
                 receipts_valid = false;
               }
               recomputed_receipt_count +=
@@ -1468,14 +1466,14 @@ class ExactHigherSupportStreamBuilder {
         continue;
       }
 
-      ExactHigherSupportProductAabbAnalysis analysis =
-          exact_higher_support_product_aabb_analysis(
-              support_box_span, node_box(query_node_index));
+      const bool query_strictly_inside =
+          exact_higher_support_product_query_strictly_inside_every_independent_sphere_certified(
+              support_box_span,
+              node_box(query_node_index));
       increment(
           result_.audit.exact_product_analysis_count,
           "the higher-support product-analysis count overflows size_t");
-      if (analysis
-              .query_strictly_inside_every_independent_sphere_certified()) {
+      if (query_strictly_inside) {
         const std::size_t point_count =
             query.leaf_end - query.leaf_begin;
         pending.certified_strict_interior_point_count += point_count;
@@ -2208,6 +2206,15 @@ class ExactHigherSupportStreamBuilder {
             boxes.data(), entry.support_size});
   }
 
+  [[nodiscard]] bool no_well_centered_support_certified(
+      const ExactHigherSupportFrontierEntry& entry) const {
+    const std::array<spatial::ExactDyadicAabb3, 4> boxes =
+        support_boxes(entry);
+    return exact_higher_support_product_no_well_centered_certified(
+        std::span<const spatial::ExactDyadicAabb3>{
+            boxes.data(), entry.support_size});
+  }
+
   void clear_pending_rank_state() {
     if (!pending_product_.has_value()) {
       throw std::logic_error(
@@ -2230,12 +2237,12 @@ class ExactHigherSupportStreamBuilder {
           pending_product_->product;
       switch (pending_product_->stage) {
         case ExactHigherSupportPendingStage::analyze_product: {
-          ExactHigherSupportProductAabbAnalysis support_analysis =
-              recompute_support_analysis(entry);
+          const bool no_well_centered =
+              no_well_centered_support_certified(entry);
           increment(
               result_.audit.exact_product_analysis_count,
               "the higher-support product-analysis count overflows size_t");
-          if (support_analysis.no_well_centered_support_certified()) {
+          if (no_well_centered) {
             pending_product_->stage =
                 ExactHigherSupportPendingStage::emit_well_prune;
           } else if (
@@ -2420,7 +2427,9 @@ ExactHigherSupportAuthorityContext::ExactHigherSupportAuthorityContext(
     std::size_t requested_maximum_order)
     : index_(&index),
       cloud_(&cloud),
-      requested_maximum_order_(requested_maximum_order) {
+      requested_maximum_order_(requested_maximum_order),
+      index_identity_(index.identity_),
+      cloud_identity_(cloud.identity_) {
   manifest_ = ExactHigherSupportStreamBuilder::manifest_for(
       index, cloud, requested_maximum_order, &audit_);
 }
@@ -2484,6 +2493,162 @@ verify_exact_higher_support_checkpoint(
       checkpoint);
 }
 
+bool ExactHigherSupportStreamChunk::builder_invariants_hold() const {
+  if (!candidate_prepared ||
+      !no_forbidden_global_structure_materialized ||
+      hierarchy_reduction_performed ||
+      manifest != next_checkpoint.manifest ||
+      cumulative_audit_after != next_checkpoint.cumulative_audit ||
+      output_chain_digest != next_checkpoint.output_chain_digest ||
+      source_checkpoint_digest == contract::CanonicalId{} ||
+      chunk_sequence == std::numeric_limits<std::uint64_t>::max() ||
+      next_checkpoint.next_chunk_sequence != chunk_sequence + 1U ||
+      next_checkpoint.output_record_count < first_output_record_index ||
+      next_checkpoint.output_record_count - first_output_record_index !=
+          record_order.size() ||
+      compute_exact_higher_support_checkpoint_digest(next_checkpoint) !=
+          next_checkpoint.checkpoint_digest) {
+    return false;
+  }
+
+  const auto audit_delta = [](
+                               std::size_t after,
+                               std::size_t before,
+                               std::size_t* delta) {
+    if (after < before) {
+      return false;
+    }
+    *delta = after - before;
+    return true;
+  };
+  std::size_t emitted_record_delta = 0U;
+  std::size_t event_delta = 0U;
+  std::size_t diagnostic_delta = 0U;
+  std::size_t prune_delta = 0U;
+  std::size_t rank_receipt_delta = 0U;
+  std::size_t point_reference_delta = 0U;
+  std::size_t work_delta = 0U;
+  std::size_t global_query_delta = 0U;
+  std::size_t point_classification_delta = 0U;
+  if (!audit_delta(
+          cumulative_audit_after.emitted_record_count,
+          cumulative_audit_before.emitted_record_count,
+          &emitted_record_delta) ||
+      !audit_delta(
+          cumulative_audit_after.accepted_event_count,
+          cumulative_audit_before.accepted_event_count,
+          &event_delta) ||
+      !audit_delta(
+          cumulative_audit_after.relevant_extra_shell_diagnostic_count,
+          cumulative_audit_before.relevant_extra_shell_diagnostic_count,
+          &diagnostic_delta) ||
+      !audit_delta(
+          cumulative_audit_after.emitted_prune_certificate_count,
+          cumulative_audit_before.emitted_prune_certificate_count,
+          &prune_delta) ||
+      !audit_delta(
+          cumulative_audit_after.emitted_rank_receipt_count,
+          cumulative_audit_before.emitted_rank_receipt_count,
+          &rank_receipt_delta) ||
+      !audit_delta(
+          cumulative_audit_after.emitted_point_id_reference_count,
+          cumulative_audit_before.emitted_point_id_reference_count,
+          &point_reference_delta) ||
+      !audit_delta(
+          cumulative_audit_after.work_unit_count,
+          cumulative_audit_before.work_unit_count,
+          &work_delta) ||
+      !audit_delta(
+          cumulative_audit_after.global_closed_ball_query_count,
+          cumulative_audit_before.global_closed_ball_query_count,
+          &global_query_delta) ||
+      !audit_delta(
+          cumulative_audit_after.point_classification_count,
+          cumulative_audit_before.point_classification_count,
+          &point_classification_delta) ||
+      emitted_record_delta != record_order.size() ||
+      event_delta != events.size() ||
+      diagnostic_delta != relevant_extra_shell_diagnostics.size() ||
+      prune_delta != prune_certificates.size() ||
+      work_delta > budget.maximum_work_unit_count ||
+      emitted_record_delta > budget.maximum_emitted_record_count ||
+      point_reference_delta >
+          budget.maximum_emitted_point_id_reference_count ||
+      rank_receipt_delta > budget.maximum_prune_receipt_count ||
+      global_query_delta >
+          budget.maximum_global_closed_ball_query_count ||
+      point_classification_delta >
+          budget.maximum_point_classification_count ||
+      next_checkpoint.frontier.size() >
+          budget.maximum_frontier_entry_count ||
+      (next_checkpoint.pending_product.has_value() &&
+       next_checkpoint.pending_product->rank_frontier.size() >
+           budget.maximum_auxiliary_frontier_entry_count)) {
+    return false;
+  }
+
+  std::size_t event_index = 0U;
+  std::size_t diagnostic_index = 0U;
+  std::size_t prune_index = 0U;
+  std::size_t rank_receipt_count = 0U;
+  contract::CanonicalId rebuilt_output_chain =
+      previous_output_chain_digest;
+  for (const RecordKind kind : record_order) {
+    switch (kind) {
+      case RecordKind::event:
+        if (event_index >= events.size()) {
+          return false;
+        }
+        rebuilt_output_chain =
+            extend_output_chain(rebuilt_output_chain, events[event_index]);
+        ++event_index;
+        break;
+      case RecordKind::relevant_extra_shell_diagnostic:
+        if (diagnostic_index >=
+            relevant_extra_shell_diagnostics.size()) {
+          return false;
+        }
+        rebuilt_output_chain = extend_output_chain(
+            rebuilt_output_chain,
+            relevant_extra_shell_diagnostics[diagnostic_index]);
+        ++diagnostic_index;
+        break;
+      case RecordKind::prune_certificate:
+        if (prune_index >= prune_certificates.size()) {
+          return false;
+        }
+        if (prune_certificates[prune_index].rank_receipts.size() >
+            std::numeric_limits<std::size_t>::max() -
+                rank_receipt_count) {
+          return false;
+        }
+        rank_receipt_count +=
+            prune_certificates[prune_index].rank_receipts.size();
+        rebuilt_output_chain = extend_output_chain(
+            rebuilt_output_chain, prune_certificates[prune_index]);
+        ++prune_index;
+        break;
+      default:
+        return false;
+    }
+  }
+  if (event_index != events.size() ||
+      diagnostic_index != relevant_extra_shell_diagnostics.size() ||
+      prune_index != prune_certificates.size() ||
+      rank_receipt_count != rank_receipt_delta ||
+      rebuilt_output_chain != output_chain_digest) {
+    return false;
+  }
+
+  if (status == ExactHigherSupportStreamStatus::complete) {
+    return stop_reason == ExactHigherSupportStopReason::none &&
+           next_checkpoint.locally_complete();
+  }
+  return status == ExactHigherSupportStreamStatus::budget_exhausted &&
+         stop_reason != ExactHigherSupportStopReason::none &&
+         !next_checkpoint.locally_complete();
+}
+
 namespace {
 
 [[nodiscard]] ExactHigherSupportStreamChunk
@@ -2539,6 +2704,10 @@ build_exact_higher_support_stream_chunk_after_source_verification(
   chunk.record_order = builder.take_record_order();
   chunk.cumulative_audit_after = result.audit;
   chunk.candidate_prepared = true;
+  if (!chunk.builder_invariants_hold()) {
+    throw std::logic_error(
+        "the exact higher-support builder emitted an inconsistent chunk");
+  }
   return chunk;
 }
 
@@ -2670,6 +2839,448 @@ ExactHigherSupportAnchoredSession::commit_prepared(
     trusted_checkpoint_ = std::move(freshly_replayed_next);
   }
   return verification;
+}
+
+static_assert(
+    std::is_nothrow_move_constructible_v<
+        ExactHigherSupportTerminalSegment>,
+    "terminal higher-support append requires a nothrow segment move");
+static_assert(
+    std::is_nothrow_move_constructible_v<ExactHigherSupportCheckpoint>,
+    "terminal higher-support seal requires a nothrow checkpoint move");
+
+ExactHigherSupportTerminalAuthority::
+    ExactHigherSupportTerminalAuthority(
+        ExactHigherSupportTerminalAuthority&& other) noexcept
+    : ExactHigherSupportTerminalAuthority() {
+  *this = std::move(other);
+}
+
+ExactHigherSupportTerminalAuthority&
+ExactHigherSupportTerminalAuthority::operator=(
+    ExactHigherSupportTerminalAuthority&& other) noexcept {
+  if (this == &other) {
+    return *this;
+  }
+  index_ = other.index_;
+  cloud_ = other.cloud_;
+  chunk_budget_ = other.chunk_budget_;
+  maximum_chunk_count_ = other.maximum_chunk_count_;
+  chunk_count_ = other.chunk_count_;
+  event_count_ = other.event_count_;
+  relevant_extra_shell_diagnostic_count_ =
+      other.relevant_extra_shell_diagnostic_count_;
+  destroyed_prune_certificate_count_ =
+      other.destroyed_prune_certificate_count_;
+  destroyed_rank_receipt_count_ =
+      other.destroyed_rank_receipt_count_;
+  index_identity_ = std::move(other.index_identity_);
+  cloud_identity_ = std::move(other.cloud_identity_);
+  terminal_checkpoint_ = std::move(other.terminal_checkpoint_);
+  segments_ = std::move(other.segments_);
+  terminal_checkpoint_local_integrity_verified_ =
+      other.terminal_checkpoint_local_integrity_verified_;
+  canonical_root_anchored_internal_production_ =
+      other.canonical_root_anchored_internal_production_;
+  committed_chunks_captured_once_without_fresh_replay_ =
+      other.committed_chunks_captured_once_without_fresh_replay_;
+  no_forbidden_global_structure_materialized_ =
+      other.no_forbidden_global_structure_materialized_;
+  consumed_ = other.consumed_;
+  other.invalidate();
+  return *this;
+}
+
+void ExactHigherSupportTerminalAuthority::invalidate() noexcept {
+  index_ = nullptr;
+  cloud_ = nullptr;
+  index_identity_.reset();
+  cloud_identity_.reset();
+  consumed_ = true;
+}
+
+ExactHigherSupportTerminalAuthority::
+    ExactHigherSupportTerminalAuthority(
+        const spatial::MortonLbvhIndex& index,
+        const spatial::CanonicalPointCloud& cloud,
+        ExactHigherSupportStreamBudget chunk_budget,
+        std::size_t maximum_chunk_count,
+        std::size_t event_count,
+        std::size_t relevant_extra_shell_diagnostic_count,
+        std::size_t destroyed_prune_certificate_count,
+        std::size_t destroyed_rank_receipt_count,
+        ExactHigherSupportCheckpoint&& terminal_checkpoint,
+        std::vector<ExactHigherSupportTerminalSegment>&& segments) noexcept
+    : index_(&index),
+      cloud_(&cloud),
+      chunk_budget_(chunk_budget),
+      maximum_chunk_count_(maximum_chunk_count),
+      chunk_count_(segments.size()),
+      event_count_(event_count),
+      relevant_extra_shell_diagnostic_count_(
+          relevant_extra_shell_diagnostic_count),
+      destroyed_prune_certificate_count_(
+          destroyed_prune_certificate_count),
+      destroyed_rank_receipt_count_(destroyed_rank_receipt_count),
+      index_identity_(index.identity_),
+      cloud_identity_(cloud.identity_),
+      terminal_checkpoint_(std::move(terminal_checkpoint)),
+      segments_(std::move(segments)),
+      terminal_checkpoint_local_integrity_verified_(true),
+      canonical_root_anchored_internal_production_(true),
+      committed_chunks_captured_once_without_fresh_replay_(true),
+      no_forbidden_global_structure_materialized_(true),
+      consumed_(false) {}
+
+bool ExactHigherSupportTerminalAuthority::
+    sealed_in_process_terminal_authority() const noexcept {
+  const bool first_sum_fits =
+      relevant_extra_shell_diagnostic_count_ <=
+      std::numeric_limits<std::size_t>::max() - event_count_;
+  const std::size_t retained_record_count =
+      first_sum_fits
+          ? event_count_ + relevant_extra_shell_diagnostic_count_
+          : 0U;
+  const bool complete_sum_fits =
+      first_sum_fits &&
+      destroyed_prune_certificate_count_ <=
+          std::numeric_limits<std::size_t>::max() -
+              retained_record_count;
+  const std::size_t total_record_count =
+      complete_sum_fits
+          ? retained_record_count +
+                destroyed_prune_certificate_count_
+          : 0U;
+  return !consumed_ && index_ != nullptr && cloud_ != nullptr &&
+         terminal_checkpoint_local_integrity_verified_ &&
+         canonical_root_anchored_internal_production_ &&
+         committed_chunks_captured_once_without_fresh_replay_ &&
+         no_forbidden_global_structure_materialized_ &&
+         index_identity_ != nullptr && cloud_identity_ != nullptr &&
+         index_->identity_ == index_identity_ &&
+         cloud_->identity_ == cloud_identity_ &&
+         index_->validated_for(*cloud_) &&
+         terminal_checkpoint_.locally_complete() &&
+         terminal_checkpoint_.next_chunk_sequence == chunk_count_ &&
+         chunk_count_ <= maximum_chunk_count_ &&
+         segments_.size() == chunk_count_ &&
+         terminal_checkpoint_.cumulative_audit.accepted_event_count ==
+             event_count_ &&
+         terminal_checkpoint_.cumulative_audit
+                 .relevant_extra_shell_diagnostic_count ==
+             relevant_extra_shell_diagnostic_count_ &&
+         terminal_checkpoint_.cumulative_audit
+                 .emitted_prune_certificate_count ==
+             destroyed_prune_certificate_count_ &&
+         terminal_checkpoint_.cumulative_audit
+                 .emitted_rank_receipt_count ==
+             destroyed_rank_receipt_count_ &&
+         complete_sum_fits &&
+         terminal_checkpoint_.output_record_count ==
+             total_record_count &&
+         terminal_checkpoint_.cumulative_audit.emitted_record_count ==
+             total_record_count &&
+         terminal_checkpoint_.cumulative_audit
+             .exact_bigint_universe_certified &&
+         !fresh_replay_performed() && !durable_authority_claimed() &&
+         !public_status_claimed();
+}
+
+ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    ExactHigherSupportStreamBudget chunk_budget,
+    std::size_t maximum_chunk_count)
+    : authority_(index, cloud, requested_maximum_order),
+      chunk_budget_(chunk_budget),
+      maximum_chunk_count_(maximum_chunk_count),
+      trusted_checkpoint_(
+          make_initial_exact_higher_support_checkpoint(authority_)) {
+  if (!verify_exact_higher_support_checkpoint(
+           authority_, trusted_checkpoint_)
+           .local_integrity_verified) {
+    throw std::logic_error(
+        "the terminal higher-support session canonical roots failed local verification");
+  }
+  if (trusted_checkpoint_.frontier.size() >
+      chunk_budget_.maximum_frontier_entry_count) {
+    throw std::invalid_argument(
+        "the terminal higher-support chunk budget cannot hold the canonical roots");
+  }
+}
+
+void ExactHigherSupportTerminalSession::append_next_internal_chunk() {
+  if (sealed_) {
+    throw std::logic_error(
+        "a sealed terminal higher-support session cannot execute a chunk");
+  }
+  if (trusted_checkpoint_.locally_complete()) {
+    throw std::logic_error(
+        "a terminal higher-support checkpoint has no successor chunk");
+  }
+  if (segments_.size() >= maximum_chunk_count_) {
+    throw std::logic_error(
+        "the terminal higher-support chunk cap has already been reached");
+  }
+  if (!authority_.bound_to_original_sources()) {
+    throw std::logic_error(
+        "the terminal higher-support source identity changed before a chunk");
+  }
+  if (segments_.size() == segments_.capacity()) {
+    std::size_t next_capacity =
+        segments_.capacity() == 0U ? 1U : segments_.capacity();
+    if (next_capacity < maximum_chunk_count_) {
+      next_capacity = checked_add(
+          next_capacity,
+          std::min(
+              next_capacity,
+              maximum_chunk_count_ - next_capacity),
+          "the terminal higher-support geometric segment capacity overflows size_t");
+    }
+    // Allocation happens before any exact traversal.  A failure therefore
+    // cannot make a retry execute the same scientific chunk twice.
+    segments_.reserve(next_capacity);
+  }
+
+  // This is the only exact traversal execution for this sequence.  Unlike the
+  // externally supplied anchored protocol, no candidate is replayed.
+  ExactHigherSupportStreamChunk chunk =
+      build_exact_higher_support_stream_chunk_after_source_verification(
+          authority_.index(),
+          authority_.cloud(),
+          authority_.requested_maximum_order(),
+          chunk_budget_,
+          trusted_checkpoint_);
+  if (!chunk.builder_invariants_hold() ||
+      chunk.manifest != authority_.manifest() ||
+      chunk.budget != chunk_budget_ ||
+      chunk.chunk_sequence != trusted_checkpoint_.next_chunk_sequence ||
+      chunk.chunk_sequence != segments_.size() ||
+      chunk.first_output_record_index !=
+          trusted_checkpoint_.output_record_count ||
+      chunk.source_checkpoint_digest !=
+          trusted_checkpoint_.checkpoint_digest ||
+      chunk.previous_output_chain_digest !=
+          trusted_checkpoint_.output_chain_digest ||
+      chunk.cumulative_audit_before !=
+          trusted_checkpoint_.cumulative_audit) {
+    throw std::logic_error(
+        "the internally produced higher-support chunk broke its root-anchored chain");
+  }
+  const bool scientific_progress =
+      chunk.cumulative_audit_after.work_unit_count >
+          chunk.cumulative_audit_before.work_unit_count ||
+      chunk.cumulative_audit_after.emitted_record_count >
+          chunk.cumulative_audit_before.emitted_record_count ||
+      chunk.next_checkpoint.locally_complete();
+  if (!scientific_progress) {
+    throw std::length_error(
+        "the fixed higher-support chunk budget made no scientific progress");
+  }
+  if (!verify_exact_higher_support_checkpoint(
+           authority_, chunk.next_checkpoint)
+           .local_integrity_verified) {
+    throw std::logic_error(
+        "the internally produced higher-support successor failed local verification");
+  }
+
+  const std::size_t next_event_count = checked_add(
+      event_count_,
+      chunk.events.size(),
+      "the terminal higher-support event count overflows size_t");
+  const std::size_t next_diagnostic_count = checked_add(
+      relevant_extra_shell_diagnostic_count_,
+      chunk.relevant_extra_shell_diagnostics.size(),
+      "the terminal higher-support diagnostic count overflows size_t");
+  const std::size_t next_prune_certificate_count = checked_add(
+      destroyed_prune_certificate_count_,
+      chunk.prune_certificates.size(),
+      "the terminal higher-support prune count overflows size_t");
+  std::size_t chunk_rank_receipt_count = 0U;
+  for (const ExactHigherSupportPruneCertificate& certificate :
+       chunk.prune_certificates) {
+    chunk_rank_receipt_count = checked_add(
+        chunk_rank_receipt_count,
+        certificate.rank_receipts.size(),
+        "the terminal higher-support rank-receipt count overflows size_t");
+  }
+  const std::size_t next_rank_receipt_count = checked_add(
+      destroyed_rank_receipt_count_,
+      chunk_rank_receipt_count,
+      "the terminal higher-support rank-receipt count overflows size_t");
+  if (chunk.cumulative_audit_after.emitted_rank_receipt_count <
+          chunk.cumulative_audit_before.emitted_rank_receipt_count ||
+      chunk.cumulative_audit_after.emitted_rank_receipt_count -
+              chunk.cumulative_audit_before.emitted_rank_receipt_count !=
+          chunk_rank_receipt_count) {
+    throw std::logic_error(
+        "the terminal higher-support rank-receipt audit is inconsistent");
+  }
+  if (chunk.cumulative_audit_after.emitted_point_id_reference_count <
+      chunk.cumulative_audit_before.emitted_point_id_reference_count) {
+    throw std::logic_error(
+        "the terminal higher-support point-reference audit moved backwards");
+  }
+
+  ExactHigherSupportTerminalSegment segment;
+  segment.chunk_sequence = chunk.chunk_sequence;
+  segment.first_output_record_index =
+      chunk.first_output_record_index;
+  segment.source_checkpoint_digest =
+      chunk.source_checkpoint_digest;
+  segment.next_checkpoint_digest =
+      chunk.next_checkpoint.checkpoint_digest;
+  segment.previous_output_chain_digest =
+      chunk.previous_output_chain_digest;
+  segment.output_chain_digest = chunk.output_chain_digest;
+  segment.status = chunk.status;
+  segment.stop_reason = chunk.stop_reason;
+  segment.events = std::move(chunk.events);
+  segment.relevant_extra_shell_diagnostics =
+      std::move(chunk.relevant_extra_shell_diagnostics);
+  segment.emitted_record_count_value = chunk.record_order.size();
+  segment.destroyed_prune_certificate_count =
+      chunk.prune_certificates.size();
+  segment.destroyed_rank_receipt_count = chunk_rank_receipt_count;
+  segment.emitted_point_id_reference_count =
+      chunk.cumulative_audit_after.emitted_point_id_reference_count -
+      chunk.cumulative_audit_before.emitted_point_id_reference_count;
+
+  // Certificate payloads have already contributed to the chain and counters.
+  // Destroy them before the session retains anything from this chunk.
+  chunk.prune_certificates.clear();
+  ExactHigherSupportCheckpoint next_checkpoint =
+      std::move(chunk.next_checkpoint);
+
+  // Geometric capacity was secured before traversal and the segment move is
+  // nothrow, so the append and all following commits cannot throw.
+  segments_.push_back(std::move(segment));
+  trusted_checkpoint_ = std::move(next_checkpoint);
+  event_count_ = next_event_count;
+  relevant_extra_shell_diagnostic_count_ =
+      next_diagnostic_count;
+  destroyed_prune_certificate_count_ =
+      next_prune_certificate_count;
+  destroyed_rank_receipt_count_ = next_rank_receipt_count;
+}
+
+ExactHigherSupportTerminalRunStatus
+ExactHigherSupportTerminalSession::run_to_terminal() {
+  if (sealed_) {
+    throw std::logic_error(
+        "a sealed terminal higher-support session cannot run");
+  }
+  if (!authority_.bound_to_original_sources()) {
+    throw std::logic_error(
+        "the terminal higher-support source identity changed before execution");
+  }
+  while (!trusted_checkpoint_.locally_complete()) {
+    if (segments_.size() >= maximum_chunk_count_) {
+      return ExactHigherSupportTerminalRunStatus::
+          maximum_chunk_count_reached;
+    }
+    append_next_internal_chunk();
+  }
+  return ExactHigherSupportTerminalRunStatus::terminal;
+}
+
+ExactHigherSupportTerminalAuthority
+ExactHigherSupportTerminalSession::seal() && {
+  if (sealed_) {
+    throw std::logic_error(
+        "a terminal higher-support session can be sealed only once");
+  }
+  if (!trusted_checkpoint_.locally_complete()) {
+    throw std::logic_error(
+        "a nonterminal higher-support session cannot mint an authority");
+  }
+  if (!authority_.bound_to_original_sources()) {
+    throw std::logic_error(
+        "the terminal higher-support source identity changed before sealing");
+  }
+  const ExactHigherSupportCheckpointVerification verification =
+      verify_exact_higher_support_checkpoint(
+          authority_, trusted_checkpoint_);
+  if (!verification.local_integrity_verified) {
+    throw std::logic_error(
+        "a terminal higher-support authority requires a locally verified checkpoint");
+  }
+  if (trusted_checkpoint_.next_chunk_sequence != segments_.size() ||
+      trusted_checkpoint_.cumulative_audit.accepted_event_count !=
+          event_count_ ||
+      trusted_checkpoint_.cumulative_audit
+              .relevant_extra_shell_diagnostic_count !=
+          relevant_extra_shell_diagnostic_count_ ||
+      trusted_checkpoint_.cumulative_audit
+              .emitted_prune_certificate_count !=
+          destroyed_prune_certificate_count_ ||
+      trusted_checkpoint_.cumulative_audit.emitted_rank_receipt_count !=
+          destroyed_rank_receipt_count_) {
+    throw std::logic_error(
+        "the terminal higher-support retained-segment accounting is inconsistent");
+  }
+
+  std::size_t expected_first_output_record_index = 0U;
+  contract::CanonicalId expected_previous_output_chain =
+      initial_output_chain_digest();
+  contract::CanonicalId expected_source_checkpoint_digest =
+      make_initial_exact_higher_support_checkpoint(authority_)
+          .checkpoint_digest;
+  for (std::size_t segment_index = 0U;
+       segment_index < segments_.size();
+       ++segment_index) {
+    const ExactHigherSupportTerminalSegment& segment =
+        segments_[segment_index];
+    const std::size_t retained_and_destroyed_record_count = checked_add(
+        checked_add(
+            segment.events.size(),
+            segment.relevant_extra_shell_diagnostics.size(),
+            "the terminal higher-support segment record count overflows size_t"),
+        segment.destroyed_prune_certificate_count,
+        "the terminal higher-support segment record count overflows size_t");
+    if (segment.chunk_sequence != segment_index ||
+        segment.first_output_record_index !=
+            expected_first_output_record_index ||
+        segment.emitted_record_count() !=
+            retained_and_destroyed_record_count ||
+        segment.source_checkpoint_digest !=
+            expected_source_checkpoint_digest ||
+        segment.previous_output_chain_digest !=
+            expected_previous_output_chain) {
+      throw std::logic_error(
+          "the terminal higher-support segment chain is not dense");
+    }
+    expected_first_output_record_index = checked_add(
+        expected_first_output_record_index,
+        segment.emitted_record_count(),
+        "the terminal higher-support output-record count overflows size_t");
+    expected_previous_output_chain = segment.output_chain_digest;
+    expected_source_checkpoint_digest =
+        segment.next_checkpoint_digest;
+  }
+  if (expected_first_output_record_index !=
+          trusted_checkpoint_.output_record_count ||
+      expected_previous_output_chain !=
+          trusted_checkpoint_.output_chain_digest ||
+      expected_source_checkpoint_digest !=
+          trusted_checkpoint_.checkpoint_digest) {
+    throw std::logic_error(
+        "the terminal higher-support segment chain does not reach its checkpoint");
+  }
+
+  sealed_ = true;
+  return ExactHigherSupportTerminalAuthority{
+      authority_.index(),
+      authority_.cloud(),
+      chunk_budget_,
+      maximum_chunk_count_,
+      event_count_,
+      relevant_extra_shell_diagnostic_count_,
+      destroyed_prune_certificate_count_,
+      destroyed_rank_receipt_count_,
+      std::move(trusted_checkpoint_),
+      std::move(segments_)};
 }
 
 ExactHigherSupportStreamRunVerification

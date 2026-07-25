@@ -9,10 +9,12 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace morsehgp3d::hierarchy {
@@ -271,6 +273,13 @@ class ExactHigherSupportAuthorityContext {
       const noexcept {
     return audit_;
   }
+  [[nodiscard]] bool bound_to_original_sources() const noexcept {
+    return index_ != nullptr && cloud_ != nullptr &&
+           index_identity_ != nullptr && cloud_identity_ != nullptr &&
+           index_->identity_ == index_identity_ &&
+           cloud_->identity_ == cloud_identity_ &&
+           index_->validated_for(*cloud_);
+  }
 
  private:
   const spatial::MortonLbvhIndex* index_{};
@@ -278,6 +287,8 @@ class ExactHigherSupportAuthorityContext {
   std::size_t requested_maximum_order_{};
   ExactHigherSupportCheckpointManifest manifest_{};
   ExactHigherSupportAuthorityContextAudit audit_{};
+  std::shared_ptr<const void> index_identity_;
+  std::shared_ptr<const void> cloud_identity_;
 };
 
 struct ExactHigherSupportEvent {
@@ -463,6 +474,11 @@ struct ExactHigherSupportStreamChunk {
            !hierarchy_reduction_performed;
   }
 
+  // These are construction-path invariants, not a fresh scientific replay.
+  // They bind the typed records, audit deltas, chain cursor and successor
+  // checkpoint emitted by one ExactHigherSupportStreamBuilder execution.
+  [[nodiscard]] bool builder_invariants_hold() const;
+
   friend bool operator==(
       const ExactHigherSupportStreamChunk&,
       const ExactHigherSupportStreamChunk&) = default;
@@ -526,6 +542,291 @@ class ExactHigherSupportAnchoredSession {
  private:
   ExactHigherSupportAuthorityContext authority_;
   ExactHigherSupportCheckpoint trusted_checkpoint_{};
+};
+
+// One bounded in-memory segment produced by exactly one internally constructed
+// chunk.  Prune certificates are deliberately absent: their count and their
+// contribution to the authenticated output chain remain, but their potentially
+// large payload is destroyed immediately after the transactional append.
+struct ExactHigherSupportTerminalSegment {
+  std::uint64_t chunk_sequence{};
+  std::size_t first_output_record_index{};
+  contract::CanonicalId source_checkpoint_digest{};
+  contract::CanonicalId next_checkpoint_digest{};
+  contract::CanonicalId previous_output_chain_digest{};
+  contract::CanonicalId output_chain_digest{};
+  ExactHigherSupportStreamStatus status{
+      ExactHigherSupportStreamStatus::budget_exhausted};
+  ExactHigherSupportStopReason stop_reason{
+      ExactHigherSupportStopReason::work_unit_limit};
+  std::vector<ExactHigherSupportEvent> events;
+  std::vector<ExactHigherSupportExtraShellDiagnostic>
+      relevant_extra_shell_diagnostics;
+  // The authenticated chain already commits the discarded interleaving.
+  // Retaining one marker per prune would recreate an unbounded global history,
+  // so only its exact scalar length survives.
+  std::size_t emitted_record_count_value{};
+  std::size_t destroyed_prune_certificate_count{};
+  std::size_t destroyed_rank_receipt_count{};
+  std::size_t emitted_point_id_reference_count{};
+
+  [[nodiscard]] std::size_t emitted_record_count() const noexcept {
+    return emitted_record_count_value;
+  }
+
+  friend bool operator==(
+      const ExactHigherSupportTerminalSegment&,
+      const ExactHigherSupportTerminalSegment&) = default;
+};
+
+enum class ExactHigherSupportTerminalRunStatus : std::uint8_t {
+  terminal,
+  maximum_chunk_count_reached,
+};
+
+class ExactHigherSupportTerminalSession;
+
+// Move-only, process-local authority over a terminal stream constructed from
+// canonical roots.  It authenticates no durable recovery and performs no
+// fresh replay.  The referenced cloud and LBVH must outlive this authority.
+class ExactHigherSupportTerminalAuthority {
+ public:
+  ExactHigherSupportTerminalAuthority(
+      const ExactHigherSupportTerminalAuthority&) = delete;
+  ExactHigherSupportTerminalAuthority& operator=(
+      const ExactHigherSupportTerminalAuthority&) = delete;
+  ExactHigherSupportTerminalAuthority(
+      ExactHigherSupportTerminalAuthority&& other) noexcept;
+  ExactHigherSupportTerminalAuthority& operator=(
+      ExactHigherSupportTerminalAuthority&& other) noexcept;
+
+  // The source accessors require an unconsumed authority.  A moved-from or
+  // released authority is intentionally revoked and must only be queried
+  // through its boolean scope predicates.
+  [[nodiscard]] const spatial::MortonLbvhIndex& index() const noexcept {
+    return *index_;
+  }
+  [[nodiscard]] const spatial::CanonicalPointCloud& cloud() const noexcept {
+    return *cloud_;
+  }
+  [[nodiscard]] std::size_t requested_maximum_order() const noexcept {
+    return terminal_checkpoint_.manifest.requested_maximum_order;
+  }
+  [[nodiscard]] const ExactHigherSupportCheckpointManifest& manifest()
+      const noexcept {
+    return terminal_checkpoint_.manifest;
+  }
+  [[nodiscard]] const contract::CanonicalId& canonical_cloud_digest()
+      const noexcept {
+    return terminal_checkpoint_.manifest.canonical_cloud_digest;
+  }
+  [[nodiscard]] const contract::CanonicalId& lbvh_digest() const noexcept {
+    return terminal_checkpoint_.manifest.lbvh_digest;
+  }
+  [[nodiscard]] const ExactHigherSupportStreamBudget& chunk_budget()
+      const noexcept {
+    return chunk_budget_;
+  }
+  [[nodiscard]] std::size_t maximum_chunk_count() const noexcept {
+    return maximum_chunk_count_;
+  }
+  [[nodiscard]] std::size_t chunk_count() const noexcept {
+    return chunk_count_;
+  }
+  [[nodiscard]] std::size_t event_count() const noexcept {
+    return event_count_;
+  }
+  [[nodiscard]] std::size_t relevant_extra_shell_diagnostic_count()
+      const noexcept {
+    return relevant_extra_shell_diagnostic_count_;
+  }
+  [[nodiscard]] std::size_t destroyed_prune_certificate_count()
+      const noexcept {
+    return destroyed_prune_certificate_count_;
+  }
+  [[nodiscard]] std::size_t destroyed_rank_receipt_count() const noexcept {
+    return destroyed_rank_receipt_count_;
+  }
+  [[nodiscard]] const ExactHigherSupportStreamAudit& terminal_audit()
+      const noexcept {
+    return terminal_checkpoint_.cumulative_audit;
+  }
+  [[nodiscard]] const ExactHigherSupportCheckpoint& terminal_checkpoint()
+      const noexcept {
+    return terminal_checkpoint_;
+  }
+  [[nodiscard]] const contract::CanonicalId& output_chain_digest()
+      const noexcept {
+    return terminal_checkpoint_.output_chain_digest;
+  }
+  [[nodiscard]] const contract::CanonicalId& checkpoint_digest()
+      const noexcept {
+    return terminal_checkpoint_.checkpoint_digest;
+  }
+  [[nodiscard]] std::size_t output_record_count() const noexcept {
+    return terminal_checkpoint_.output_record_count;
+  }
+  [[nodiscard]] std::span<const ExactHigherSupportTerminalSegment> segments()
+      const noexcept {
+    return segments_;
+  }
+
+  [[nodiscard]] bool bound_to(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::size_t requested_maximum_order) const noexcept {
+    return index_ == &index && cloud_ == &cloud &&
+           index_identity_ != nullptr && cloud_identity_ != nullptr &&
+           index.identity_ == index_identity_ &&
+           cloud.identity_ == cloud_identity_ &&
+           index.validated_for(cloud) &&
+           terminal_checkpoint_.manifest.requested_maximum_order ==
+               requested_maximum_order;
+  }
+  [[nodiscard]] bool terminal_checkpoint_local_integrity_verified()
+      const noexcept {
+    return terminal_checkpoint_local_integrity_verified_;
+  }
+  [[nodiscard]] bool canonical_root_anchored_internal_production()
+      const noexcept {
+    return canonical_root_anchored_internal_production_;
+  }
+  [[nodiscard]] bool
+  committed_chunks_captured_once_without_fresh_replay() const noexcept {
+    return committed_chunks_captured_once_without_fresh_replay_;
+  }
+  [[nodiscard]] bool no_forbidden_global_structure_materialized()
+      const noexcept {
+    return no_forbidden_global_structure_materialized_;
+  }
+  [[nodiscard]] bool fresh_replay_performed() const noexcept {
+    return false;
+  }
+  [[nodiscard]] bool durable_authority_claimed() const noexcept {
+    return false;
+  }
+  [[nodiscard]] bool hierarchy_reduction_performed() const noexcept {
+    return false;
+  }
+  [[nodiscard]] bool public_status_claimed() const noexcept {
+    return false;
+  }
+  [[nodiscard]] bool sealed_in_process_terminal_authority() const noexcept;
+
+  [[nodiscard]] std::vector<ExactHigherSupportTerminalSegment>
+  release_segments() && noexcept {
+    std::vector<ExactHigherSupportTerminalSegment> released =
+        std::move(segments_);
+    invalidate();
+    return released;
+  }
+  std::vector<ExactHigherSupportTerminalSegment> release_segments() & =
+      delete;
+  std::vector<ExactHigherSupportTerminalSegment> release_segments()
+      const& = delete;
+
+ private:
+  friend class ExactHigherSupportTerminalSession;
+
+  ExactHigherSupportTerminalAuthority() noexcept = default;
+  ExactHigherSupportTerminalAuthority(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      ExactHigherSupportStreamBudget chunk_budget,
+      std::size_t maximum_chunk_count,
+      std::size_t event_count,
+      std::size_t relevant_extra_shell_diagnostic_count,
+      std::size_t destroyed_prune_certificate_count,
+      std::size_t destroyed_rank_receipt_count,
+      ExactHigherSupportCheckpoint&& terminal_checkpoint,
+      std::vector<ExactHigherSupportTerminalSegment>&& segments) noexcept;
+  void invalidate() noexcept;
+
+  const spatial::MortonLbvhIndex* index_{};
+  const spatial::CanonicalPointCloud* cloud_{};
+  ExactHigherSupportStreamBudget chunk_budget_{};
+  std::size_t maximum_chunk_count_{};
+  std::size_t chunk_count_{};
+  std::size_t event_count_{};
+  std::size_t relevant_extra_shell_diagnostic_count_{};
+  std::size_t destroyed_prune_certificate_count_{};
+  std::size_t destroyed_rank_receipt_count_{};
+  std::shared_ptr<const void> index_identity_;
+  std::shared_ptr<const void> cloud_identity_;
+  ExactHigherSupportCheckpoint terminal_checkpoint_{};
+  std::vector<ExactHigherSupportTerminalSegment> segments_;
+  bool terminal_checkpoint_local_integrity_verified_{false};
+  bool canonical_root_anchored_internal_production_{false};
+  bool committed_chunks_captured_once_without_fresh_replay_{false};
+  bool no_forbidden_global_structure_materialized_{false};
+  bool consumed_{true};
+};
+
+// Internal producer: it starts from canonical roots, owns the only live
+// checkpoint, never accepts a checkpoint or chunk from its caller, and uses
+// one fixed budget for every exact chunk execution.
+class ExactHigherSupportTerminalSession {
+ public:
+  ExactHigherSupportTerminalSession(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::size_t requested_maximum_order,
+      ExactHigherSupportStreamBudget chunk_budget,
+      std::size_t maximum_chunk_count);
+  ExactHigherSupportTerminalSession(
+      spatial::MortonLbvhIndex&&,
+      const spatial::CanonicalPointCloud&,
+      std::size_t,
+      ExactHigherSupportStreamBudget,
+      std::size_t) = delete;
+  ExactHigherSupportTerminalSession(
+      const spatial::MortonLbvhIndex&,
+      spatial::CanonicalPointCloud&&,
+      std::size_t,
+      ExactHigherSupportStreamBudget,
+      std::size_t) = delete;
+
+  ExactHigherSupportTerminalSession(
+      const ExactHigherSupportTerminalSession&) = delete;
+  ExactHigherSupportTerminalSession& operator=(
+      const ExactHigherSupportTerminalSession&) = delete;
+  ExactHigherSupportTerminalSession(
+      ExactHigherSupportTerminalSession&&) = delete;
+  ExactHigherSupportTerminalSession& operator=(
+      ExactHigherSupportTerminalSession&&) = delete;
+
+  [[nodiscard]] ExactHigherSupportTerminalRunStatus run_to_terminal();
+  [[nodiscard]] ExactHigherSupportTerminalAuthority seal() &&;
+  ExactHigherSupportTerminalAuthority seal() & = delete;
+
+  [[nodiscard]] const ExactHigherSupportCheckpoint& trusted_checkpoint()
+      const noexcept {
+    return trusted_checkpoint_;
+  }
+  [[nodiscard]] const ExactHigherSupportStreamBudget& chunk_budget()
+      const noexcept {
+    return chunk_budget_;
+  }
+  [[nodiscard]] std::size_t maximum_chunk_count() const noexcept {
+    return maximum_chunk_count_;
+  }
+  [[nodiscard]] std::size_t chunk_count() const noexcept {
+    return segments_.size();
+  }
+
+ private:
+  void append_next_internal_chunk();
+
+  ExactHigherSupportAuthorityContext authority_;
+  ExactHigherSupportStreamBudget chunk_budget_{};
+  std::size_t maximum_chunk_count_{};
+  ExactHigherSupportCheckpoint trusted_checkpoint_{};
+  std::vector<ExactHigherSupportTerminalSegment> segments_;
+  std::size_t event_count_{};
+  std::size_t relevant_extra_shell_diagnostic_count_{};
+  std::size_t destroyed_prune_certificate_count_{};
+  std::size_t destroyed_rank_receipt_count_{};
+  bool sealed_{false};
 };
 
 struct ExactHigherSupportStreamRunVerification {
