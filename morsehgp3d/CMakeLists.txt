@@ -2320,6 +2320,30 @@ if(MORSEHGP3D_BUILD_TOOLS)
       PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()
+
+  add_executable(
+    morsehgp3d_direct_morse_product_runner
+    src/tools/direct_morse_product_runner.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_direct_morse_product_runner
+    PRIVATE
+      morsehgp3d::pair_support
+      morsehgp3d::higher_support
+      morsehgp3d::direct_support_terminal
+      morsehgp3d::direct_morse_forest_reducer
+  )
+  morsehgp3d_apply_sanitizers(morsehgp3d_direct_morse_product_runner)
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_direct_morse_product_runner PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_direct_morse_product_runner
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
 endif()
 
 if(MORSEHGP3D_BUILD_TESTS)
@@ -2384,6 +2408,7 @@ if(MORSEHGP3D_BUILD_TOOLS)
     TARGETS
       morsehgp3d_replay_predicate
       morsehgp3d_direct_pair_support_smoke
+      morsehgp3d_direct_morse_product_runner
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
   )
   install(
