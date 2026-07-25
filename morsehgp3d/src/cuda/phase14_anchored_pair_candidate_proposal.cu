@@ -39,10 +39,8 @@
 namespace morsehgp3d::gpu::detail {
 namespace {
 
-constexpr unsigned int kThreadsPerBlock = 256U;
 constexpr unsigned int kWarpSize = 32U;
-constexpr unsigned int kWarpsPerBlock =
-    kThreadsPerBlock / kWarpSize;
+constexpr unsigned int kMaximumWarpsPerBlock = 8U;
 constexpr unsigned int kFullWarpMask = 0xffffffffU;
 constexpr std::size_t kAxisCount = 3U;
 constexpr std::uint64_t kProposalSchemaVersion = UINT64_C(1);
@@ -338,13 +336,18 @@ class Phase14AnchoredPairCandidateCudaResources final {
         "cudaGetDeviceProperties for Phase 14 anchored-pair context");
     if (properties.major != 12 || properties.minor != 0 ||
         properties.warpSize != static_cast<int>(kWarpSize) ||
-        properties.maxGridSize[0] <= 0) {
+        properties.maxGridSize[0] <= 0 ||
+        properties.multiProcessorCount <= 0 ||
+        properties.maxThreadsPerBlock <
+            static_cast<int>(kMaximumWarpsPerBlock * kWarpSize)) {
       throw std::runtime_error(
           "the Phase 14 anchored-pair proposal requires an sm_120 CUDA "
           "device with 32-lane warps");
     }
     maximum_grid_x_ =
         static_cast<unsigned int>(properties.maxGridSize[0]);
+    multiprocessor_count_ =
+        static_cast<unsigned int>(properties.multiProcessorCount);
     cudaStream_t created_stream = nullptr;
     check_cuda(
         cudaStreamCreateWithFlags(&created_stream, cudaStreamNonBlocking),
@@ -430,6 +433,9 @@ class Phase14AnchoredPairCandidateCudaResources final {
   [[nodiscard]] unsigned int maximum_grid_x() const noexcept {
     return maximum_grid_x_;
   }
+  [[nodiscard]] unsigned int multiprocessor_count() const noexcept {
+    return multiprocessor_count_;
+  }
   [[nodiscard]] Phase14AnchoredPairCandidateQueryInputRecord* queries()
       noexcept {
     return queries_.get();
@@ -476,6 +482,7 @@ class Phase14AnchoredPairCandidateCudaResources final {
   int device_{-1};
   cudaStream_t stream_{nullptr};
   unsigned int maximum_grid_x_{};
+  unsigned int multiprocessor_count_{};
   const std::size_t maximum_query_count_{};
   const std::size_t physical_transcript_record_capacity_{};
   std::shared_ptr<void> traversal_owner_;
@@ -772,18 +779,22 @@ void validate_launch(
     std::uint64_t mask,
     std::uint64_t count) noexcept {
   std::uint64_t selected = 0U;
-  std::uint64_t selected_count = 0U;
-#pragma unroll 1
-  for (unsigned int bit = 0U;
-       bit < 64U && selected_count < count;
-       ++bit) {
-    const std::uint64_t candidate = UINT64_C(1) << bit;
-    if ((mask & candidate) != 0U) {
-      selected |= candidate;
-      ++selected_count;
+  std::uint64_t remaining = mask;
+  // count is maximum_closed_rank-1 and has already been validated in [1, 10].
+  // Extracting the least set bit preserves exactly the former increasing-bit
+  // order while bounding this loop by ten iterations instead of scanning 64.
+  for (std::uint64_t selected_count = 0U;
+       selected_count < count;
+       ++selected_count) {
+    if (remaining == 0U) {
+      return UINT64_C(0);
     }
+    const std::uint64_t least_bit =
+        remaining & (~remaining + UINT64_C(1));
+    selected |= least_bit;
+    remaining ^= least_bit;
   }
-  return selected_count == count ? selected : UINT64_C(0);
+  return selected;
 }
 
 [[nodiscard]] __device__ std::uint64_t proposed_prune_mask_warp(
@@ -801,6 +812,16 @@ void validate_launch(
       static_cast<std::uint64_t>(lane) < query.witness_count &&
       witness_strictly_separates_node(
           query, lane, node, coordinate_bits, point_count);
+  const std::uint64_t first_mask = static_cast<std::uint64_t>(
+      __ballot_sync(kFullWarpMask, first_positive));
+  // Bank bits 0..31 precede every bit in the second wave.  Once the first
+  // wave contains the required cardinality, selecting its lowest required
+  // bits is therefore exactly the same canonical mask as selecting from the
+  // former combined 64-bit ballot.  The branch is warp-uniform.
+  if (static_cast<std::uint64_t>(__popc(
+          static_cast<unsigned int>(first_mask))) >= required) {
+    return lowest_bits(first_mask, required);
+  }
   const std::uint64_t second_index =
       static_cast<std::uint64_t>(lane) + UINT64_C(32);
   const bool second_positive =
@@ -808,8 +829,7 @@ void validate_launch(
       witness_strictly_separates_node(
           query, second_index, node, coordinate_bits, point_count);
   const std::uint64_t mask =
-      static_cast<std::uint64_t>(
-          __ballot_sync(kFullWarpMask, first_positive)) |
+      first_mask |
       (static_cast<std::uint64_t>(
            __ballot_sync(kFullWarpMask, second_positive))
        << 32U);
@@ -961,10 +981,12 @@ __global__ void count_anchored_pair_candidate_records_kernel(
     Phase14AnchoredPairCandidateQueryPlan* plans) {
   const unsigned int lane = threadIdx.x & (kWarpSize - 1U);
   const std::uint64_t block_warp = threadIdx.x / kWarpSize;
+  const std::uint64_t block_warp_count = blockDim.x / kWarpSize;
   std::uint64_t query_slot =
-      static_cast<std::uint64_t>(blockIdx.x) * kWarpsPerBlock + block_warp;
+      static_cast<std::uint64_t>(blockIdx.x) * block_warp_count +
+      block_warp;
   const std::uint64_t query_stride =
-      static_cast<std::uint64_t>(gridDim.x) * kWarpsPerBlock;
+      static_cast<std::uint64_t>(gridDim.x) * block_warp_count;
   while (query_slot < query_count) {
     const Phase14AnchoredPairCandidateQueryInputRecord& query =
         queries[query_slot];
@@ -1044,10 +1066,12 @@ __global__ void replay_anchored_pair_candidate_records_kernel(
     Phase14AnchoredPairCandidateTranscriptRecord* records) {
   const unsigned int lane = threadIdx.x & (kWarpSize - 1U);
   const std::uint64_t block_warp = threadIdx.x / kWarpSize;
+  const std::uint64_t block_warp_count = blockDim.x / kWarpSize;
   std::uint64_t query_slot =
-      static_cast<std::uint64_t>(blockIdx.x) * kWarpsPerBlock + block_warp;
+      static_cast<std::uint64_t>(blockIdx.x) * block_warp_count +
+      block_warp;
   const std::uint64_t query_stride =
-      static_cast<std::uint64_t>(gridDim.x) * kWarpsPerBlock;
+      static_cast<std::uint64_t>(gridDim.x) * block_warp_count;
   while (query_slot < query_count) {
     const Phase14AnchoredPairCandidateQueryInputRecord& query =
         queries[query_slot];
@@ -1116,11 +1140,32 @@ __global__ void replay_anchored_pair_candidate_records_kernel(
   }
 }
 
-[[nodiscard]] unsigned int warp_block_count(
+struct Phase14AnchoredPairCandidateLaunchShape {
+  unsigned int block_count{};
+  unsigned int thread_count{};
+};
+
+[[nodiscard]] Phase14AnchoredPairCandidateLaunchShape launch_shape(
     std::size_t query_count,
-    unsigned int maximum_grid_x) {
+    unsigned int maximum_grid_x,
+    unsigned int multiprocessor_count) {
+  if (multiprocessor_count == 0U) {
+    throw std::runtime_error(
+        "the Phase 14 anchored-pair multiprocessor count is zero");
+  }
+  const std::size_t queries_per_multiprocessor =
+      query_count / static_cast<std::size_t>(multiprocessor_count);
+  unsigned int warps_per_block = 1U;
+  if (queries_per_multiprocessor >= 8U) {
+    warps_per_block = 8U;
+  } else if (queries_per_multiprocessor >= 4U) {
+    warps_per_block = 4U;
+  } else if (queries_per_multiprocessor >= 2U) {
+    warps_per_block = 2U;
+  }
   const std::size_t requested =
-      (query_count + kWarpsPerBlock - 1U) / kWarpsPerBlock;
+      query_count / warps_per_block +
+      (query_count % warps_per_block == 0U ? 0U : 1U);
   const std::size_t bounded = std::min(
       requested, static_cast<std::size_t>(maximum_grid_x));
   if (bounded == 0U ||
@@ -1130,7 +1175,9 @@ __global__ void replay_anchored_pair_candidate_records_kernel(
     throw std::runtime_error(
         "the Phase 14 anchored-pair warp grid is invalid");
   }
-  return static_cast<unsigned int>(bounded);
+  return Phase14AnchoredPairCandidateLaunchShape{
+      static_cast<unsigned int>(bounded),
+      warps_per_block * kWarpSize};
 }
 
 void validate_returned_segments(
@@ -1242,8 +1289,10 @@ propose_phase14_anchored_pair_candidates_on_gpu(
   const auto* nodes =
       static_cast<const Phase14AnchoredPairCandidateDeviceNode*>(
           traversal.device_nodes);
-  const unsigned int blocks =
-      warp_block_count(queries.size(), cuda.maximum_grid_x());
+  const Phase14AnchoredPairCandidateLaunchShape shape = launch_shape(
+      queries.size(),
+      cuda.maximum_grid_x(),
+      cuda.multiprocessor_count());
 
   try {
     check_cuda(
@@ -1264,7 +1313,7 @@ propose_phase14_anchored_pair_candidates_on_gpu(
         "cudaMemsetAsync Phase 14 anchored-pair active transcript");
 
     count_anchored_pair_candidate_records_kernel<<<
-        blocks, kThreadsPerBlock, 0U, cuda.stream()>>>(
+        shape.block_count, shape.thread_count, 0U, cuda.stream()>>>(
         cuda.queries(),
         query_count,
         traversal.device_coordinate_bits,
@@ -1287,7 +1336,7 @@ propose_phase14_anchored_pair_candidates_on_gpu(
         "Phase 14 anchored-pair prefix/clamp kernel launch");
 
     replay_anchored_pair_candidate_records_kernel<<<
-        blocks, kThreadsPerBlock, 0U, cuda.stream()>>>(
+        shape.block_count, shape.thread_count, 0U, cuda.stream()>>>(
         cuda.queries(),
         query_count,
         traversal.device_coordinate_bits,
