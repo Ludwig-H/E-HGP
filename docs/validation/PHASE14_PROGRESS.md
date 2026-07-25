@@ -238,11 +238,21 @@ La spécialisation `int1024` est gardée par le même alignement exact à 124 bi
 
 L'unique gate final `uniform_latin`, $n=12\,500$, $K=10$, `work=20000`, visite 319 produits, résout 165 paires et en conserve 78 118 585. Il exécute 137 requêtes fermées, 8 249 visites physiques et 1 352 209 classifications logiques; les 134 tentatives P7a consomment 1 667 unités et ne prunent aucun produit. Le temps observé sur l'hôte partagé n'est pas retenu comme mesure de vitesse. Le gain d'environ 10 % sur les paires restantes du préfixe P7 ne change pas le terme dominant : ce jalon n'autorise ni 50 000, ni GCP, ni 10 M+.
 
+## Incrément 14Q P8b — sur-ensemble exact de paires par ancre
+
+P8b reste sous `reference_cpu / hgp_reduced / exact_sparsification_design / architecture_only`, avec `public_status=not_claimed`. Pour une ancre $p$, un témoin $x$ et $r=x-p$, l'identité $x\in B(p,q)^\circ\Longleftrightarrow r\cdot(q-p)>\left\Vert r\right\Vert^2$ remplace l'énumération de toutes les paires par une traversée AABB. Sur une boîte $Q$, le minimum affine est exact et séparable. Un nœud n'est omis que lorsque $s_{\max}-1$ témoins distincts ont une marge strictement positive sur toute la boîte; pour $K=10$ et $s_{\max}=11$, il en faut donc dix. Neuf témoins ou une égalité restent inconclusifs.
+
+La banque proposée par top-$L$ exact contient au plus 64 `PointId`. Elle n'est pas une hypothèse de complétude : une recherche inachevée ou une banque trop petite force la descente. Les certificats stricts du parent sont hérités dans un masque borné; un filtre d'intervalles binary64 décide les marges séparées de zéro et revient au signe dyadique exact dans tous les cas ambigus. Les caps de prédicats et de reçus sont fail-open; seuls les caps de pile, de visites, d'expansions et de candidates rendent le résultat incomplet et typé. Le prototype matérialise uniquement les candidates et reçus bornés de l'ancre active. Il ne construit aucune arène globale de paires, cellule, facette, coface, incidence, structure Gamma ou mosaïque de Delaunay d'ordre supérieur.
+
+Les tests différentiels courts vérifient chaque omission contre le rang fermé exhaustif, les reçus de dix témoins, l'égalité, la distinction neuf/dix, les banques incomplètes et les caps. Les cibles strictes GCC et Clang passent. Sur `uniform_latin`, $n=12\,500$, $K=10$, $L=64$, 64 ancres échantillonnées laissent 2 266 candidates, soit 35,406 par ancre en moyenne et 49 au maximum. L'extrapolation diagnostique est d'environ 442 578 paires contre 78 118 750 sans réduction. Les 38 292 visites de nœuds exécutent 1 869 289 prédicats : 99 629 décisions d'intervalle positives, 1 765 231 négatives et seulement 4 429 fallbacks exacts. Une banque de 32 laisse déjà 97,625 candidates par ancre et est rejetée.
+
+Les 1 174,782 ms observées pour ces 64 ancres sur l'hôte partagé ne constituent ni un `warm_e2e`, ni un p95, ni une réponse complète. P8b valide la réduction combinatoire, pas l'objectif de vitesse. GCP n'est pas utilisé. La prochaine porte raccorde le classificateur fermé exact aux candidates, puis mesure un chemin complet court avant toute vectorisation, qualification 50 k ou montée massive.
+
 ## Priorités de développement
 
-1. utiliser le runner v2 seulement sur de petites portes pour attribuer séparément supérieur, façade et reducer;
-2. réduire le pire cas cubique/quartique du flux supérieur par un certificat de produit ou un producteur sparse exact, sans arène de supports;
-3. réussir alors un cas $K=10$ de quelques dizaines de milliers de points, puis les deux familles à 50 000 sous `warm_e2e`;
+1. raccorder le classificateur fermé exact au sur-ensemble P8b et vérifier la couture sur une seule porte courte;
+2. propager uniquement les supports acceptés vers le supérieur sparse, sans reconstruire les produits cubiques ou quartiques, puis fermer un cas $K=10$ de quelques dizaines de milliers de points;
+3. vectoriser ou porter sur GPU la proposition recertifiée si le profil complet l'exige, puis réussir `uniform_latin` et `eight_clusters` à 50 000 points sous `warm_e2e`;
 4. externaliser autorités et sorties Phase 15, réussir 10 000 001 points, puis seulement 30 M et 50 M après succès complet du rang précédent.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.

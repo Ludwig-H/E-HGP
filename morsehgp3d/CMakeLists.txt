@@ -365,6 +365,46 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_anchored_pair_witness_bank
+  STATIC
+    src/cpu/hierarchy/anchored_pair_witness_bank.cpp
+)
+add_library(
+  morsehgp3d::anchored_pair_witness_bank
+  ALIAS morsehgp3d_anchored_pair_witness_bank
+)
+set_target_properties(
+  morsehgp3d_anchored_pair_witness_bank
+  PROPERTIES
+    EXPORT_NAME anchored_pair_witness_bank
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_anchored_pair_witness_bank PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_anchored_pair_witness_bank
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_anchored_pair_witness_bank
+  PUBLIC morsehgp3d::pair_support
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_anchored_pair_witness_bank PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_anchored_pair_witness_bank
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_higher_support
   STATIC
     src/cpu/hierarchy/higher_support_product.cpp
@@ -2322,6 +2362,28 @@ if(MORSEHGP3D_BUILD_TOOLS)
   endif()
 
   add_executable(
+    morsehgp3d_anchored_pair_witness_bank_smoke
+    src/tools/anchored_pair_witness_bank_smoke.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_anchored_pair_witness_bank_smoke
+    PRIVATE morsehgp3d::anchored_pair_witness_bank
+  )
+  morsehgp3d_apply_sanitizers(
+    morsehgp3d_anchored_pair_witness_bank_smoke
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_anchored_pair_witness_bank_smoke PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_anchored_pair_witness_bank_smoke
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
+  add_executable(
     morsehgp3d_direct_morse_product_runner
     src/tools/direct_morse_product_runner.cpp
   )
@@ -2363,6 +2425,7 @@ install(
     morsehgp3d_spatial
     morsehgp3d_facet_miniball
     morsehgp3d_pair_support
+    morsehgp3d_anchored_pair_witness_bank
     morsehgp3d_higher_support
     morsehgp3d_direct_support_terminal
     morsehgp3d_direct_morse_event_journal
@@ -2408,6 +2471,7 @@ if(MORSEHGP3D_BUILD_TOOLS)
     TARGETS
       morsehgp3d_replay_predicate
       morsehgp3d_direct_pair_support_smoke
+      morsehgp3d_anchored_pair_witness_bank_smoke
       morsehgp3d_direct_morse_product_runner
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
   )
