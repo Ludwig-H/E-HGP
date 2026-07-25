@@ -266,11 +266,21 @@ Les fixtures ciblées vérifient le défaut exact, l'absence d'appel top-$L$, l'
 
 Deux mono-mesures sur les mêmes 64 ancres bornent la qualité. Une fenêtre de 512 inspections laisse 17 881 candidates, dont 15 681 sont rejetées au rang : elle est refusée pour le profil rapide. Une fenêtre de 4 096 inspections laisse 7 565 candidates, dont 5 365 sont rejetées; elle retrouve les mêmes 2 200 événements sur cet échantillon, sans que cela prouve un rappel général. Les temps observés, respectivement 3 173,626 ms et 1 546,015 ms au total, sont du bruit diagnostique et non un SLO. La banque exacte reste combinatoirement meilleure avec 2 266 candidates; la fenêtre 4 096 est seulement un premier producteur GPU borné à comparer.
 
+## Incrément 14Q P8e — lease de traversée et contrat GPU borné
+
+Le commit `71abe01` ajoute une extraction move-only sœur de 14N. Elle transfère les coordonnées canoniques, les `PointId` triés Morton et l'arène de nœuds de 80 octets déjà importée par le CPU, puis détruit tout le scratch constructeur. Sa capacité persistante est exactement $192C-80$ octets et son audit conserve zéro octet de snapshot hôte. Les deux extractions partagent la même capacité à usage unique. Le test ciblé fake ferme ownership, capacités actives et maximales, déplacement, contexte étranger, extraction croisée et durée de vie au-delà du builder en 0,02 seconde; la revue statique indépendante ne trouve aucun défaut bloquant.
+
+Le postordre strict donne un parcours inverse sans corde : le successeur ordinaire de l'indice $i$ est $i-1$ et un sous-arbre de $m$ feuilles se saute par $i-(2m-1)$. À 50 000 points la lease vaut 9 599 920 octets; à 10 000 000, 30 000 000 et 50 000 000 points elle vaut respectivement environ 1,92, 5,76 et 9,60 Go décimaux. Ces tailles sont des enveloppes de composant, pas une preuve que les autres buffers, la sortie ou le checkpoint tiennent simultanément.
+
+Le commit `b0f0cb0` ajoute le contrat `AnchoredPairCandidateProposalContext`. Les capacités de requêtes et de transcript sont immuables, le plafond actif est distinct, les records font 16 octets, les banques gardent leur ordre amont et les nœuds d'un segment sont strictement décroissants. Le fake couvre résultats complets, reprise, limites de visites et de records, moves, namespace étranger, digests, epochs, domaines, cardinalités et empoisonnement. GCC et Clang stricts compilent; le CTest GCC passe en 0,03 seconde.
+
+Ce jalon reste strictement hôte et `proposal_only`. Aucun kernel ancré réel n'est encore compilé, aucun masque n'est recertifié rationnellement, aucune candidate n'est classifiée par P8c et aucune mesure de vitesse n'est prise. GCP n'est pas utilisé. Il ne qualifie donc ni quelques dizaines de milliers de points, ni 50 k, ni 10 M+. La porte suivante implémente le filtre outward et le parcours CUDA, puis exige un rejeu CPU complet avant la première mono-mesure de composant.
+
 ## Priorités de développement
 
-1. mutualiser le classificateur P8c avec le curseur fermé reprenable P7b et consommer les candidates sans arène globale;
-2. porter la banque et les demi-espaces en lots résidents, puis fermer un cas $K=10$ de quelques dizaines de milliers de points;
-3. propager uniquement les supports acceptés vers le supérieur sparse, sans reconstruire les produits cubiques ou quartiques, puis réussir `uniform_latin` et `eight_clusters` à 50 000 points sous `warm_e2e`;
+1. fermer le kernel CUDA P8e et son rejeu CPU exact sur un différentiel court;
+2. produire les banques par un chemin batch réellement borné, puis fermer un cas $K=10$ de quelques dizaines de milliers de points avant 50 000;
+3. mutualiser le classificateur P8c avec P7b, propager seulement les supports acceptés vers le supérieur sparse et réussir `uniform_latin` puis `eight_clusters` à 50 000 points sous `warm_e2e`;
 4. externaliser autorités et sorties Phase 15, réussir 10 000 001 points, puis seulement 30 M et 50 M après succès complet du rang précédent.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
