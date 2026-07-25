@@ -1175,6 +1175,47 @@ add_executable(
   fake_gpu_phase14_morton_lbvh_build_launchers.cpp
   "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
 )
+add_executable(
+  morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
+  test_gpu_anchored_pair_candidate_proposal_context.cpp
+  fake_gpu_phase14_morton_lbvh_build_launchers.cpp
+  "${PROJECT_SOURCE_DIR}/src/gpu/anchored_pair_candidate_proposal.cpp"
+  "${PROJECT_SOURCE_DIR}/src/gpu/morton_lbvh_build.cpp"
+)
+target_include_directories(
+  morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/cuda"
+    "${PROJECT_SOURCE_DIR}/src/gpu"
+)
+target_link_libraries(
+  morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
+  PRIVATE morsehgp3d::spatial Threads::Threads
+)
+target_compile_features(
+  morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
+  PRIVATE cxx_std_20
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
+    PRIVATE
+      -Wall
+      -Wextra
+      -Wpedantic
+      -Wconversion
+      -Wsign-conversion
+      -Werror
+  )
+endif()
 target_include_directories(
   morsehgp3d_gpu_morton_lbvh_build_context_tests
   PRIVATE
@@ -1488,6 +1529,7 @@ set(
   morsehgp3d_gpu_k1_boruvka_replay_host
   morsehgp3d_gpu_k1_boruvka_full_replay_host
   morsehgp3d_gpu_k1_boruvka_morton_work_profile_host
+  morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
   morsehgp3d_gpu_morton_lbvh_build_context_tests
 )
 if(UNIX)
@@ -2435,6 +2477,11 @@ add_test(
 add_test(
   NAME morsehgp3d.gpu_morton_lbvh_build_context
   COMMAND morsehgp3d_gpu_morton_lbvh_build_context_tests
+)
+add_test(
+  NAME morsehgp3d.gpu_anchored_pair_candidate_proposal_context
+  COMMAND
+    morsehgp3d_gpu_anchored_pair_candidate_proposal_context_tests
 )
 add_test(
   NAME morsehgp3d.gpu_k1_boruvka_exact_search_work_profile_host
