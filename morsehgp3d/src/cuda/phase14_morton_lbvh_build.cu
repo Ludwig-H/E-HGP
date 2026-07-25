@@ -441,6 +441,90 @@ class Phase14MortonLbvhCudaLeaseResources final {
   DeviceBuffer<std::uint64_t> morton_point_ids_;
 };
 
+class Phase14MortonLbvhCudaTraversalLeaseResources final {
+ public:
+  Phase14MortonLbvhCudaTraversalLeaseResources(
+      int device,
+      std::size_t maximum_point_count,
+      std::size_t maximum_node_count,
+      std::size_t point_count,
+      std::uint64_t source_snapshot_epoch)
+      : device_(device),
+        maximum_point_count_(maximum_point_count),
+        maximum_node_count_(maximum_node_count),
+        point_count_(point_count),
+        source_snapshot_epoch_(source_snapshot_epoch) {}
+
+  Phase14MortonLbvhCudaTraversalLeaseResources(
+      const Phase14MortonLbvhCudaTraversalLeaseResources&) = delete;
+  Phase14MortonLbvhCudaTraversalLeaseResources& operator=(
+      const Phase14MortonLbvhCudaTraversalLeaseResources&) = delete;
+
+  ~Phase14MortonLbvhCudaTraversalLeaseResources() {
+    int previous_device = 0;
+    const cudaError_t query_status = cudaGetDevice(&previous_device);
+    bool restore_device = false;
+    if (query_status == cudaSuccess && previous_device != device_) {
+      restore_device = cudaSetDevice(device_) == cudaSuccess;
+    }
+    if (query_status != cudaSuccess ||
+        (previous_device != device_ && !restore_device)) {
+      coordinate_bits_.abandon();
+      morton_point_ids_.abandon();
+      nodes_.abandon();
+      return;
+    }
+    coordinate_bits_.reset();
+    morton_point_ids_.reset();
+    nodes_.reset();
+    if (restore_device) {
+      static_cast<void>(cudaSetDevice(previous_device));
+    }
+  }
+
+  void adopt(
+      DeviceBuffer<std::uint64_t>&& coordinate_bits,
+      DeviceBuffer<std::uint64_t>&& morton_point_ids,
+      DeviceBuffer<Phase14MortonLbvhDeviceNode>&& nodes) noexcept {
+    coordinate_bits_ = std::move(coordinate_bits);
+    morton_point_ids_ = std::move(morton_point_ids);
+    nodes_ = std::move(nodes);
+  }
+
+  [[nodiscard]] bool ready() const noexcept {
+    return maximum_point_count_ != 0U &&
+           maximum_node_count_ == 2U * maximum_point_count_ - 1U &&
+           point_count_ != 0U &&
+           point_count_ <= maximum_point_count_ &&
+           coordinate_bits_.count() == 3U * maximum_point_count_ &&
+           morton_point_ids_.count() == maximum_point_count_ &&
+           nodes_.count() == maximum_node_count_ &&
+           source_snapshot_epoch_ != 0U;
+  }
+
+  [[nodiscard]] int device() const noexcept { return device_; }
+  [[nodiscard]] const std::uint64_t* coordinate_bits() const noexcept {
+    return coordinate_bits_.get();
+  }
+  [[nodiscard]] const std::uint64_t* morton_point_ids() const noexcept {
+    return morton_point_ids_.get();
+  }
+  [[nodiscard]] const Phase14MortonLbvhDeviceNode* nodes()
+      const noexcept {
+    return nodes_.get();
+  }
+
+ private:
+  int device_{};
+  std::size_t maximum_point_count_{};
+  std::size_t maximum_node_count_{};
+  std::size_t point_count_{};
+  std::uint64_t source_snapshot_epoch_{};
+  DeviceBuffer<std::uint64_t> coordinate_bits_;
+  DeviceBuffer<std::uint64_t> morton_point_ids_;
+  DeviceBuffer<Phase14MortonLbvhDeviceNode> nodes_;
+};
+
 class Phase14MortonLbvhCudaResources final {
  public:
   explicit Phase14MortonLbvhCudaResources(
@@ -706,6 +790,58 @@ class Phase14MortonLbvhCudaResources final {
     // The snapshot import has already synchronized the stream.  These resets
     // therefore release only builder-transient allocations; the two moved
     // buffers are owned exclusively by the returned lease resource.
+    reset_all_checked();
+    resident_point_count_ = 0U;
+    sort_temporary_byte_capacity_ = 0U;
+    builder_initialized_ = false;
+    active_sorted_point_ids_ = nullptr;
+    return retained;
+  }
+
+  [[nodiscard]]
+  std::shared_ptr<Phase14MortonLbvhCudaTraversalLeaseResources>
+  release_device_traversal_lease(
+      std::size_t point_count,
+      std::uint64_t source_snapshot_epoch) {
+    if (!builder_initialized_ ||
+        resident_point_count_ != point_count ||
+        active_sorted_point_ids_ == nullptr ||
+        source_snapshot_epoch == 0U) {
+      throw std::logic_error(
+          "the Phase 14 traversal lease requires a completed resident "
+          "builder");
+    }
+    auto retained = std::make_shared<
+        Phase14MortonLbvhCudaTraversalLeaseResources>(
+            device_,
+            maximum_point_count_,
+            maximum_node_count_,
+            point_count,
+            source_snapshot_epoch);
+    if (active_sorted_point_ids_ == point_ids_a_.get()) {
+      retained->adopt(
+          std::move(coordinate_bits_),
+          std::move(point_ids_a_),
+          std::move(nodes_));
+    } else if (active_sorted_point_ids_ == point_ids_b_.get()) {
+      retained->adopt(
+          std::move(coordinate_bits_),
+          std::move(point_ids_b_),
+          std::move(nodes_));
+    } else {
+      throw std::logic_error(
+          "the Phase 14 traversal active PointId buffer changed before "
+          "release");
+    }
+    if (!retained->ready()) {
+      throw std::logic_error(
+          "the Phase 14 traversal retained CUDA buffers have wrong "
+          "capacities");
+    }
+
+    // The imported snapshot certified these exact node bytes after the
+    // stream synchronization.  Move their arena with the two 14N
+    // authorities, then release every remaining builder-only allocation.
     reset_all_checked();
     resident_point_count_ = 0U;
     sort_temporary_byte_capacity_ = 0U;
@@ -1907,6 +2043,90 @@ release_phase14_morton_lbvh_device_lease(
   batch.execution_kind = Phase14MortonLbvhExecutionKind::cuda;
   batch.canonical_coordinate_words_retained = true;
   batch.active_morton_point_ids_retained = true;
+  batch.builder_transients_released = true;
+  batch.cuda_path_qualified = true;
+  guard.restore();
+  return batch;
+}
+
+Phase14MortonLbvhDeviceTraversalLeaseBatch
+release_phase14_morton_lbvh_device_traversal_lease(
+    Phase14MortonLbvhBuildContextState& context,
+    std::size_t point_count,
+    std::size_t maximum_point_count,
+    std::uint64_t source_snapshot_epoch) {
+  if (point_count == 0U || point_count > maximum_point_count ||
+      source_snapshot_epoch != context.current_epoch()) {
+    throw std::invalid_argument(
+        "the Phase 14 traversal lease does not match the latest CUDA "
+        "snapshot");
+  }
+  std::shared_ptr<void>& opaque = context.cuda_resources();
+  if (!opaque) {
+    throw std::logic_error(
+        "the Phase 14 traversal lease has no resident CUDA builder "
+        "resources");
+  }
+  auto resources =
+      std::static_pointer_cast<Phase14MortonLbvhCudaResources>(
+          opaque);
+  if (resources->maximum_point_count() != maximum_point_count ||
+      resources->resident_point_count() != point_count) {
+    throw std::logic_error(
+        "the Phase 14 traversal lease has stale CUDA builder extents");
+  }
+  DeviceGuard guard{resources->device()};
+  std::shared_ptr<Phase14MortonLbvhCudaTraversalLeaseResources>
+      retained = resources->release_device_traversal_lease(
+          point_count, source_snapshot_epoch);
+  opaque.reset();
+
+  const std::size_t coordinate_word_capacity =
+      checked_axis_count(maximum_point_count);
+  const std::size_t maximum_node_count =
+      checked_node_count(maximum_point_count);
+  const std::size_t certified_node_count =
+      checked_node_count(point_count);
+  const std::size_t coordinate_bytes = checked_byte_product(
+      coordinate_word_capacity,
+      sizeof(std::uint64_t),
+      "the Phase 14 traversal retained coordinate bytes overflow");
+  const std::size_t point_id_bytes = checked_byte_product(
+      maximum_point_count,
+      sizeof(std::uint64_t),
+      "the Phase 14 traversal retained PointId bytes overflow");
+  const std::size_t node_bytes = checked_byte_product(
+      maximum_node_count,
+      sizeof(Phase14MortonLbvhDeviceNode),
+      "the Phase 14 traversal retained node bytes overflow");
+
+  Phase14MortonLbvhDeviceTraversalLeaseBatch batch;
+  batch.device_coordinate_bits = retained->coordinate_bits();
+  batch.device_morton_point_ids = retained->morton_point_ids();
+  batch.device_nodes = retained->nodes();
+  batch.cuda_device = retained->device();
+  batch.retained_resources = std::move(retained);
+  batch.point_count = point_count;
+  batch.certified_node_count = certified_node_count;
+  batch.maximum_point_count = maximum_point_count;
+  batch.maximum_node_count = maximum_node_count;
+  batch.retained_coordinate_word_capacity =
+      coordinate_word_capacity;
+  batch.retained_morton_point_id_capacity =
+      maximum_point_count;
+  batch.retained_node_capacity = maximum_node_count;
+  batch.persistent_device_byte_capacity = checked_byte_sum(
+      checked_byte_sum(
+          coordinate_bytes,
+          point_id_bytes,
+          "the Phase 14 traversal coordinate/PointId bytes overflow"),
+      node_bytes,
+      "the Phase 14 traversal persistent device bytes overflow");
+  batch.source_snapshot_epoch = source_snapshot_epoch;
+  batch.execution_kind = Phase14MortonLbvhExecutionKind::cuda;
+  batch.canonical_coordinate_words_retained = true;
+  batch.active_morton_point_ids_retained = true;
+  batch.certified_device_nodes_retained = true;
   batch.builder_transients_released = true;
   batch.cuda_path_qualified = true;
   guard.restore();

@@ -13,6 +13,7 @@
 namespace morsehgp3d::gpu {
 
 class DirectSparseFacetTopKProposalContext;
+class AnchoredPairCandidateProposalContext;
 
 namespace detail {
 class Phase14MortonLbvhBuildContextState;
@@ -20,6 +21,8 @@ class Phase14MortonLbvhBuildContextState;
 
 inline constexpr std::uint32_t morton_lbvh_device_build_schema_version = 1U;
 inline constexpr std::uint32_t morton_lbvh_device_lease_schema_version = 1U;
+inline constexpr std::uint32_t
+    morton_lbvh_device_traversal_lease_schema_version = 1U;
 inline constexpr std::string_view morton_lbvh_device_build_backend =
     "cuda_g4";
 inline constexpr std::string_view morton_lbvh_device_build_profile =
@@ -44,6 +47,19 @@ inline constexpr std::string_view
     morton_lbvh_device_lease_deployment_status = "architecture_only";
 inline constexpr std::string_view morton_lbvh_device_lease_public_status =
     "not_claimed";
+inline constexpr std::string_view
+    morton_lbvh_device_traversal_lease_backend =
+        "cuda_g4_plus_reference_cpu";
+inline constexpr std::string_view
+    morton_lbvh_device_traversal_lease_profile = "hgp_reduced";
+inline constexpr std::string_view
+    morton_lbvh_device_traversal_lease_mode =
+        "device_morton_lbvh_traversal_lease";
+inline constexpr std::string_view
+    morton_lbvh_device_traversal_lease_deployment_status =
+        "architecture_only";
+inline constexpr std::string_view
+    morton_lbvh_device_traversal_lease_public_status = "not_claimed";
 
 enum class MortonLbvhDeviceBuildDecision : std::uint8_t {
   complete,
@@ -218,6 +234,102 @@ class MortonLbvhDeviceLease final {
   friend class MortonLbvhBuildContext;
 };
 
+// Traversal consumers additionally retain the certified 80-byte device-node
+// arena.  Coordinates, Morton-ordered PointIds and nodes remain private,
+// opaque device views whose lifetime is dominated by retained_resources_.
+// The sole CPU index remains in MortonLbvhDeviceBuildResult; no second host
+// snapshot is retained by this lease.
+struct MortonLbvhDeviceTraversalLeaseAudit {
+  std::size_t maximum_point_count{};
+  std::size_t maximum_node_count{};
+  std::size_t point_count{};
+  std::size_t certified_node_count{};
+  std::size_t retained_coordinate_word_capacity{};
+  std::size_t retained_morton_point_id_capacity{};
+  std::size_t retained_node_capacity{};
+  std::size_t retained_coordinate_byte_capacity{};
+  std::size_t retained_morton_point_id_byte_capacity{};
+  std::size_t retained_node_byte_capacity{};
+  std::size_t persistent_device_byte_capacity{};
+  std::size_t source_fixed_device_byte_capacity{};
+  std::size_t released_transient_device_byte_capacity{};
+  std::size_t retained_host_snapshot_byte_count{};
+  std::uint64_t source_snapshot_epoch{};
+
+  bool source_snapshot_import_certified{false};
+  bool canonical_coordinate_words_retained{false};
+  bool active_morton_point_ids_retained{false};
+  bool certified_device_nodes_retained{false};
+  bool builder_transients_released{false};
+  bool cuda_device_storage_retained{false};
+  bool host_fake_lifecycle_exercised{false};
+  bool second_host_snapshot_retained{false};
+  bool higher_order_delaunay_mosaic_materialized{false};
+  bool global_cell_or_coface_arena_materialized{false};
+  bool public_status_claimed{false};
+
+  friend bool operator==(
+      const MortonLbvhDeviceTraversalLeaseAudit&,
+      const MortonLbvhDeviceTraversalLeaseAudit&) = default;
+};
+
+class MortonLbvhDeviceTraversalLease final {
+ public:
+  static constexpr std::string_view backend =
+      morton_lbvh_device_traversal_lease_backend;
+  static constexpr std::string_view profile =
+      morton_lbvh_device_traversal_lease_profile;
+  static constexpr std::string_view mode =
+      morton_lbvh_device_traversal_lease_mode;
+  static constexpr std::string_view deployment_status =
+      morton_lbvh_device_traversal_lease_deployment_status;
+  static constexpr std::string_view public_status =
+      morton_lbvh_device_traversal_lease_public_status;
+
+  ~MortonLbvhDeviceTraversalLease() noexcept = default;
+  MortonLbvhDeviceTraversalLease(
+      MortonLbvhDeviceTraversalLease&&) noexcept = default;
+  MortonLbvhDeviceTraversalLease& operator=(
+      MortonLbvhDeviceTraversalLease&&) noexcept = default;
+  MortonLbvhDeviceTraversalLease(
+      const MortonLbvhDeviceTraversalLease&) = delete;
+  MortonLbvhDeviceTraversalLease& operator=(
+      const MortonLbvhDeviceTraversalLease&) = delete;
+
+  [[nodiscard]] std::uint32_t schema_version() const noexcept {
+    return schema_version_;
+  }
+  [[nodiscard]] bool ready() const noexcept;
+  [[nodiscard]] bool cuda_resident() const noexcept;
+  [[nodiscard]] const MortonLbvhDeviceTraversalLeaseAudit& audit()
+      const noexcept {
+    return audit_;
+  }
+
+ private:
+  MortonLbvhDeviceTraversalLease(
+      MortonLbvhDeviceTraversalLeaseAudit audit,
+      std::shared_ptr<void> retained_resources,
+      std::shared_ptr<const void> source_cloud_identity,
+      const std::uint64_t* device_coordinate_bits,
+      const std::uint64_t* device_morton_point_ids,
+      const void* device_nodes,
+      int cuda_device);
+
+  std::uint32_t schema_version_{
+      morton_lbvh_device_traversal_lease_schema_version};
+  MortonLbvhDeviceTraversalLeaseAudit audit_{};
+  std::shared_ptr<void> retained_resources_;
+  std::shared_ptr<const void> source_cloud_identity_;
+  const std::uint64_t* device_coordinate_bits_{};
+  const std::uint64_t* device_morton_point_ids_{};
+  const void* device_nodes_{};
+  int cuda_device_{-1};
+
+  friend class AnchoredPairCandidateProposalContext;
+  friend class MortonLbvhBuildContext;
+};
+
 class MortonLbvhDeviceBuildResult final {
  public:
   static constexpr std::string_view backend =
@@ -304,6 +416,13 @@ class MortonLbvhBuildContext final {
   // this exact context.  On success the builder's transient device arenas are
   // released and the returned move-only lease owns the compact 32*C state.
   [[nodiscard]] MortonLbvhDeviceLease release_device_lease(
+      const MortonLbvhDeviceBuildResult& certified_build);
+
+  // Sibling extraction for device-side tree traversal.  It has the same
+  // single-use latest-build capability as the compact 14N lease, but also
+  // retains the certified 80-byte node arena (192*C-80 bytes in total).
+  [[nodiscard]] MortonLbvhDeviceTraversalLease
+  release_device_traversal_lease(
       const MortonLbvhDeviceBuildResult& certified_build);
 
   [[nodiscard]] std::size_t maximum_point_count() const noexcept;

@@ -40,6 +40,8 @@ fake_gpu_phase14_morton_lbvh_snapshot_count() noexcept;
 [[nodiscard]] std::size_t
 fake_gpu_phase14_morton_lbvh_lease_release_count() noexcept;
 [[nodiscard]] std::size_t
+fake_gpu_phase14_morton_lbvh_traversal_lease_release_count() noexcept;
+[[nodiscard]] std::size_t
 fake_gpu_phase14_morton_lbvh_last_point_count() noexcept;
 [[nodiscard]] std::size_t
 fake_gpu_phase14_morton_lbvh_last_point_capacity() noexcept;

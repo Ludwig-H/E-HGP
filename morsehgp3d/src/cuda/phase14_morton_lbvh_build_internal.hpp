@@ -104,6 +104,33 @@ struct Phase14MortonLbvhDeviceLeaseBatch {
   bool cuda_path_qualified{false};
 };
 
+struct Phase14MortonLbvhDeviceTraversalLeaseBatch {
+  std::shared_ptr<void> retained_resources;
+  // CUDA addresses are valid exactly while retained_resources is alive.
+  // Nodes use the private fixed 80-byte Phase 14 device ABI.  Host fakes
+  // retain only a lifecycle marker and leave all three addresses null.
+  const std::uint64_t* device_coordinate_bits{};
+  const std::uint64_t* device_morton_point_ids{};
+  const void* device_nodes{};
+  int cuda_device{-1};
+  std::size_t point_count{};
+  std::size_t certified_node_count{};
+  std::size_t maximum_point_count{};
+  std::size_t maximum_node_count{};
+  std::size_t retained_coordinate_word_capacity{};
+  std::size_t retained_morton_point_id_capacity{};
+  std::size_t retained_node_capacity{};
+  std::size_t persistent_device_byte_capacity{};
+  std::uint64_t source_snapshot_epoch{};
+  Phase14MortonLbvhExecutionKind execution_kind{
+      Phase14MortonLbvhExecutionKind::host_fake};
+  bool canonical_coordinate_words_retained{false};
+  bool active_morton_point_ids_retained{false};
+  bool certified_device_nodes_retained{false};
+  bool builder_transients_released{false};
+  bool cuda_path_qualified{false};
+};
+
 class Phase14MortonLbvhBuildContextState final {
  public:
   Phase14MortonLbvhBuildContextState() = default;
@@ -180,6 +207,16 @@ build_phase14_morton_lbvh_snapshot_on_gpu(
 // and detaches the resulting compact state from the build context.
 [[nodiscard]] Phase14MortonLbvhDeviceLeaseBatch
 release_phase14_morton_lbvh_device_lease(
+    Phase14MortonLbvhBuildContextState& context,
+    std::size_t point_count,
+    std::size_t maximum_point_count,
+    std::uint64_t source_snapshot_epoch);
+
+// Sibling of the compact lease transition for traversal consumers.  It also
+// transfers the already certified 80-byte device-node arena; all remaining
+// builder-only allocations are destroyed before this function returns.
+[[nodiscard]] Phase14MortonLbvhDeviceTraversalLeaseBatch
+release_phase14_morton_lbvh_device_traversal_lease(
     Phase14MortonLbvhBuildContextState& context,
     std::size_t point_count,
     std::size_t maximum_point_count,
