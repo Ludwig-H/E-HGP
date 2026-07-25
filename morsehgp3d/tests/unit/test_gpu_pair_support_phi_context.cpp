@@ -534,22 +534,19 @@ void test_rank_prune_exact_receipts_and_traffic() {
   check(
       audit.capacity == capacity && audit.budget == budget &&
           audit.traversal_backend ==
-              PairSupportRankTraversalBackend::two_frontier &&
+              PairSupportRankTraversalBackend::
+                  stackless_product_batch &&
           !audit.stackless_single_product_traversal_used &&
+          audit.stackless_product_batch_traversal_used &&
           audit.input_product_count == 1U &&
           audit.required_strict_interior_point_count == 1U &&
-          audit.gpu_traversal_epoch_count > 0U &&
-          audit.gpu_traversal_epoch_count <= 8U &&
-          audit.gpu_count_kernel_launch_count ==
-              audit.gpu_traversal_epoch_count &&
-          audit.gpu_exclusive_scan_count ==
-              2U * audit.gpu_traversal_epoch_count &&
-          audit.gpu_emit_kernel_launch_count ==
-              audit.gpu_traversal_epoch_count &&
-          audit.gpu_stackless_kernel_launch_count == 0U &&
-          audit.gpu_host_synchronization_count ==
-              audit.gpu_traversal_epoch_count + 1U &&
-          audit.gpu_visit_budget_count == 0U &&
+          audit.gpu_traversal_epoch_count == 1U &&
+          audit.gpu_count_kernel_launch_count == 0U &&
+          audit.gpu_exclusive_scan_count == 0U &&
+          audit.gpu_emit_kernel_launch_count == 1U &&
+          audit.gpu_stackless_kernel_launch_count == 1U &&
+          audit.gpu_host_synchronization_count == 2U &&
+          audit.gpu_visit_budget_count == 5U &&
           audit.gpu_output_terminal_count == 1U &&
           audit.cpu_exact_terminal_recertification_count == 1U &&
           audit.strict_interior_terminal_count == 1U &&
@@ -562,29 +559,28 @@ void test_rank_prune_exact_receipts_and_traffic() {
           audit.proposed_product_count == 1U &&
           audit.fallback_product_count == 0U &&
           audit.buffer_epoch == 1U,
-      "P4 closes bounded count-scan-emit and exact terminal counters");
+      "P5d closes one stackless batch launch and exact terminal counters");
   check(
       audit.snapshot_h2d_byte_count == 5U * 80U &&
-          audit.escape_snapshot_h2d_byte_count == 0U &&
+          audit.escape_snapshot_h2d_byte_count == 5U * 4U &&
           audit.active_product_h2d_byte_count == 32U &&
-          audit.initial_frontier_h2d_byte_count == 16U &&
-          audit.traversal_metadata_d2h_byte_count ==
-              audit.gpu_traversal_epoch_count * 5U * 8U + 8U &&
+          audit.initial_frontier_h2d_byte_count == 0U &&
+          audit.traversal_metadata_d2h_byte_count == 5U * 8U &&
           audit.physical_terminal_d2h_byte_count == 16U &&
           audit.active_terminal_d2h_byte_count == 16U &&
           audit.device_terminal_byte_capacity == 4U * 16U &&
           audit.physical_receipt_d2h_byte_count == 16U &&
           audit.active_receipt_d2h_byte_count == 16U &&
-          audit.device_frontier_double_buffer_byte_capacity ==
-              2U * 8U * 16U &&
-          audit.device_escape_snapshot_byte_capacity == 0U &&
+          audit.device_frontier_double_buffer_byte_capacity == 0U &&
+          audit.device_escape_snapshot_byte_capacity == 5U * 4U &&
           audit.device_receipt_byte_capacity == 4U * 16U &&
-          audit.device_scan_workspace_byte_capacity == 8U * 8U &&
+          audit.device_scan_workspace_byte_capacity == 0U &&
           audit.device_fixed_workspace_byte_capacity ==
-              40U * 2U + 80U * 8U + 16U * 4U + 8U + 8U * 8U &&
+              32U * 2U + 16U * 4U + 5U * 8U * 2U &&
           second.audit.snapshot_h2d_byte_count == 0U &&
+          second.audit.escape_snapshot_h2d_byte_count == 0U &&
           second.audit.buffer_epoch == 2U,
-      "P4 audits 16-byte terminals and exact fixed workspace");
+      "P5d audits segmented 16-byte terminals and exact fixed workspace");
   check(
       audit.device_frontier_exhausted &&
           !audit.visit_budget_exhausted &&
@@ -609,6 +605,84 @@ void test_rank_prune_exact_receipts_and_traffic() {
           fake_gpu_pair_support_rank_last_work_item_capacity() == 8U &&
           fake_gpu_pair_support_rank_last_receipt_capacity() == 4U,
       "the fake P2 launcher sees only active products and fixed capacities");
+}
+
+void test_stackless_two_product_batch_and_segment_fallback() {
+  reset_fake_gpu_pair_support_phi();
+  Fixture fixture;
+  PairSupportPhiContext context{
+      fixture.index,
+      fixture.cloud,
+      2U,
+      PairSupportRankPruneCapacity{2U, 8U, 4U}};
+  const FixtureQueries queries = fixture_queries(context);
+  std::array products{
+      product_from_query(context, queries.strict),
+      product_from_query(context, queries.descend)};
+  std::sort(
+      products.begin(),
+      products.end(),
+      [](const auto& left, const auto& right) {
+        return product_key(left) < product_key(right);
+      });
+
+  const auto complete = context.propose_rank_prunes(
+      products, 1U, PairSupportRankPruneBudget{8U});
+  check(
+      complete.proposals.size() == 1U &&
+          complete.keep_certificates.size() == 1U &&
+          complete.audit.prune_product_count == 1U &&
+          complete.audit.keep_certificate_product_count == 1U &&
+          complete.audit.fallback_product_count == 0U &&
+          complete.audit.traversal_backend ==
+              PairSupportRankTraversalBackend::
+                  stackless_product_batch &&
+          complete.audit.stackless_product_batch_traversal_used &&
+          !complete.audit.stackless_single_product_traversal_used &&
+          complete.audit.input_product_count == 2U &&
+          complete.audit.gpu_traversal_epoch_count == 1U &&
+          complete.audit.gpu_count_kernel_launch_count == 0U &&
+          complete.audit.gpu_exclusive_scan_count == 0U &&
+          complete.audit.gpu_emit_kernel_launch_count == 1U &&
+          complete.audit.gpu_stackless_kernel_launch_count == 1U &&
+          complete.audit.gpu_host_synchronization_count == 2U &&
+          complete.audit.device_frontier_exhausted &&
+          !complete.audit.visit_budget_exhausted &&
+          !complete.audit.receipt_capacity_exhausted,
+      "P5d concludes two products in one kernel and two host "
+      "synchronizations");
+
+  reset_fake_gpu_pair_support_phi();
+  PairSupportPhiContext segmented{
+      fixture.index,
+      fixture.cloud,
+      2U,
+      PairSupportRankPruneCapacity{2U, 8U, 1U}};
+  const FixtureQueries segmented_queries = fixture_queries(segmented);
+  std::array segmented_products{
+      product_from_query(segmented, segmented_queries.strict),
+      product_from_query(segmented, segmented_queries.descend)};
+  std::sort(
+      segmented_products.begin(),
+      segmented_products.end(),
+      [](const auto& left, const auto& right) {
+        return product_key(left) < product_key(right);
+      });
+  const auto partial = segmented.propose_rank_prunes(
+      segmented_products, 1U, PairSupportRankPruneBudget{8U});
+  check(
+      partial.proposals.empty() &&
+          partial.keep_certificates.size() == 1U &&
+          partial.audit.prune_product_count == 0U &&
+          partial.audit.keep_certificate_product_count == 1U &&
+          partial.audit.fallback_product_count == 1U &&
+          partial.audit.gpu_output_terminal_count == 1U &&
+          partial.audit.cpu_exact_terminal_recertification_count == 1U &&
+          partial.audit.receipt_capacity_exhausted &&
+          !partial.audit.device_frontier_exhausted &&
+          partial.audit.stackless_product_batch_traversal_used,
+      "a full terminal segment falls back independently while a concluded "
+      "neighbor remains exactly consumable");
 }
 
 void test_rank_prune_anchor_culls_remote_subtree() {
@@ -844,23 +918,27 @@ void test_rank_prune_preflight_and_fallbacks() {
   const std::array work_product{
       product_from_query(work_limited, work_queries.strict)};
   const auto capacity_fallback = work_limited.propose_rank_prunes(
-      work_product, 1U, PairSupportRankPruneBudget{8U});
+      work_product, 1U, PairSupportRankPruneBudget{1U});
   check(
       capacity_fallback.proposals.empty() &&
           capacity_fallback.keep_certificates.empty() &&
           capacity_fallback.audit.fallback_product_count == 1U &&
-          capacity_fallback.audit.work_item_capacity_exhausted &&
+          !capacity_fallback.audit.work_item_capacity_exhausted &&
           !capacity_fallback.audit.stackless_single_product_traversal_used &&
-          capacity_fallback.audit.gpu_count_kernel_launch_count == 1U &&
-          capacity_fallback.audit.gpu_emit_kernel_launch_count == 0U &&
+          capacity_fallback.audit
+              .stackless_product_batch_traversal_used &&
+          capacity_fallback.audit.visit_budget_exhausted &&
+          capacity_fallback.audit.epoch_budget_exhausted &&
+          capacity_fallback.audit.gpu_count_kernel_launch_count == 0U &&
+          capacity_fallback.audit.gpu_emit_kernel_launch_count == 1U &&
           capacity_fallback.audit.gpu_output_terminal_count == 0U &&
           capacity_fallback.audit.physical_terminal_d2h_byte_count == 0U &&
           capacity_fallback.audit.active_terminal_d2h_byte_count == 0U &&
           capacity_fallback.audit.physical_receipt_d2h_byte_count == 0U &&
           capacity_fallback.audit.active_receipt_d2h_byte_count == 0U &&
           capacity_fallback.audit.device_terminal_byte_capacity == 4U * 16U,
-      "P5 copies no terminal bytes for an empty active prefix while retaining "
-      "the bounded legacy device capacity");
+      "P5d copies no terminal bytes for a visit-bounded product while "
+      "retaining the bounded segmented device capacity");
 }
 
 void test_stackless_terminal_capacity_fallback_and_replay() {
@@ -1153,6 +1231,7 @@ int main() {
   test_preflight_validation_and_capacity();
   test_corruption_matrix_and_poisoning();
   test_rank_prune_exact_receipts_and_traffic();
+  test_stackless_two_product_batch_and_segment_fallback();
   test_rank_prune_anchor_culls_remote_subtree();
   test_rank_keep_accepts_exact_anchor_shell_equality();
   test_rank_prune_preflight_and_fallbacks();

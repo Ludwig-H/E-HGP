@@ -409,6 +409,8 @@ struct ExactPairSupportStreamAudit {
   std::size_t closed_ball_bulk_exterior_subtree_count{};
   std::size_t closed_ball_bulk_exterior_point_count{};
   std::size_t early_closed_rank_rejection_count{};
+  // Wire-v1 legacy name: since P5c this counts exact leaf classifications by
+  // the signed diametral power Phi, without materializing a point distance.
   std::size_t exact_point_distance_evaluation_count{};
   std::size_t accepted_event_count{};
   std::size_t relevant_extra_shell_diagnostic_count{};

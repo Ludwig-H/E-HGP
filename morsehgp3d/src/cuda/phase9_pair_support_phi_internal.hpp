@@ -113,6 +113,13 @@ enum class PairSupportRankCapacityStop : std::uint8_t {
 enum class PairSupportRankTraversalBackend : std::uint8_t {
   two_frontier,
   stackless_single_product,
+  stackless_product_batch,
+};
+
+enum class PairSupportRankProductStop : std::uint8_t {
+  conclusive,
+  visit_budget,
+  terminal_capacity,
 };
 
 struct PairSupportRankDeviceBatch {
@@ -147,6 +154,11 @@ struct PairSupportRankDeviceBatch {
   std::size_t device_scan_workspace_byte_capacity{};
   std::size_t device_fixed_workspace_byte_capacity{};
   std::size_t visit_budget_count{};
+  std::vector<PairSupportRankProductStop> product_stops;
+  std::vector<std::size_t> product_visit_budget_counts;
+  std::vector<std::size_t> product_visited_work_item_counts;
+  std::vector<std::size_t> product_terminal_capacities;
+  std::vector<std::size_t> product_terminal_counts;
   std::uint64_t buffer_epoch{};
   PairSupportRankTraversalBackend traversal_backend{
       PairSupportRankTraversalBackend::two_frontier};

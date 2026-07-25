@@ -459,7 +459,6 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
         "the fake Phase 9 rank-prune launcher received invalid extents");
   }
   const bool stackless =
-      maximum_product_count == 1U &&
       escape_node_indices.size() == nodes.size();
   if (!escape_node_indices.empty() &&
       escape_node_indices.size() != nodes.size()) {
@@ -492,7 +491,11 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
   batch.terminal_capacity = maximum_terminal_count;
   batch.traversal_backend =
       stackless
-          ? PairSupportRankTraversalBackend::stackless_single_product
+          ? (maximum_product_count == 1U
+                 ? PairSupportRankTraversalBackend::
+                       stackless_single_product
+                 : PairSupportRankTraversalBackend::
+                       stackless_product_batch)
           : PairSupportRankTraversalBackend::two_frontier;
   std::shared_ptr<void>& opaque = context.cuda_resources();
   if (!opaque) {
@@ -523,7 +526,8 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
             sizeof(PairSupportRankProductInputRecord) +
         maximum_terminal_count *
             sizeof(PairSupportRankDeviceTerminal) +
-        pair_support_rank_stackless_control_byte_count;
+        maximum_product_count *
+            pair_support_rank_stackless_control_byte_count;
   } else {
     batch.initial_frontier_h2d_byte_count =
         products.size() * sizeof(PairSupportRankWorkItem);
@@ -572,79 +576,120 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
 
   std::vector<std::uint64_t> strict_point_counts(products.size(), 0U);
   if (stackless) {
-    if (maximum_work_item_count >
-        std::numeric_limits<std::size_t>::max() /
-            maximum_epoch_count) {
-      throw std::length_error(
-          "the fake Phase 14Q stackless visit budget overflows");
-    }
-    const std::size_t multiplied_visit_budget =
-        maximum_work_item_count * maximum_epoch_count;
-    batch.visit_budget_count =
-        std::min(nodes.size(), multiplied_visit_budget);
+    const auto saturating_multiply =
+        [](std::size_t left, std::size_t right) {
+          if (left != 0U &&
+              right >
+                  std::numeric_limits<std::size_t>::max() / left) {
+            return std::numeric_limits<std::size_t>::max();
+          }
+          return left * right;
+        };
+    const auto segment_capacity =
+        [](std::size_t total,
+           std::size_t segment_count,
+           std::size_t segment_index) {
+          return total / segment_count +
+                 static_cast<std::size_t>(
+                     segment_index < total % segment_count);
+        };
+    batch.visit_budget_count = std::min(
+        saturating_multiply(products.size(), nodes.size()),
+        saturating_multiply(
+            maximum_work_item_count, maximum_epoch_count));
     batch.traversal_epoch_count = 1U;
     batch.emit_kernel_launch_count = 1U;
-    batch.peak_frontier_count = 1U;
-    std::uint32_t current =
-        static_cast<std::uint32_t>(root_node_index);
-    while (current != pair_support_rank_escape_sentinel &&
-           batch.visited_work_item_count <
-               batch.visit_budget_count) {
-      if (current >= nodes.size()) {
-        throw std::runtime_error(
-            "the fake Phase 14Q rope references an unknown node");
-      }
-      ++batch.visited_work_item_count;
-      const PairSupportRankWorkItem item{0U, current};
-      const FakeRankDecision decision = classify_rank_work_item(
-          item,
-          nodes,
-          products,
-          strict_point_counts,
-          required_strict_interior_point_count);
-      const PairSupportPhiNodeInputRecord& witness = nodes[current];
-      if (decision.emit_terminal) {
-        if (batch.terminal_count == maximum_terminal_count) {
-          batch.capacity_stop =
-              PairSupportRankCapacityStop::receipt_capacity;
-          break;
+    batch.peak_frontier_count =
+        std::min(products.size(), batch.visit_budget_count);
+    bool all_products_conclusive = true;
+    for (std::size_t product_slot = 0U;
+         product_slot < products.size();
+         ++product_slot) {
+      const std::size_t visit_budget = segment_capacity(
+          batch.visit_budget_count, products.size(), product_slot);
+      const std::size_t terminal_capacity = segment_capacity(
+          maximum_terminal_count, products.size(), product_slot);
+      std::size_t visited = 0U;
+      std::size_t terminal_count = 0U;
+      std::uint32_t current =
+          static_cast<std::uint32_t>(root_node_index);
+      PairSupportRankProductStop stop =
+          PairSupportRankProductStop::conclusive;
+      while (current != pair_support_rank_escape_sentinel &&
+             visited < visit_budget) {
+        if (current >= nodes.size()) {
+          throw std::runtime_error(
+              "the fake Phase 14Q rope references an unknown node");
         }
-        batch.terminals.push_back(
-            PairSupportRankDeviceTerminal{0U, current});
-        ++batch.terminal_count;
-        if (decision.strict_terminal) {
-          strict_point_counts[0U] +=
-              witness.leaf_end - witness.leaf_begin;
-          if (strict_point_counts[0U] >=
-              required_strict_interior_point_count) {
-            current = pair_support_rank_escape_sentinel;
+        ++visited;
+        const PairSupportRankWorkItem item{
+            static_cast<std::uint64_t>(product_slot), current};
+        const FakeRankDecision decision = classify_rank_work_item(
+            item,
+            nodes,
+            products,
+            strict_point_counts,
+            required_strict_interior_point_count);
+        const PairSupportPhiNodeInputRecord& witness = nodes[current];
+        if (decision.emit_terminal) {
+          if (terminal_count == terminal_capacity) {
+            stop = PairSupportRankProductStop::terminal_capacity;
+            all_products_conclusive = false;
             break;
+          }
+          batch.terminals.push_back(PairSupportRankDeviceTerminal{
+              static_cast<std::uint64_t>(product_slot), current});
+          ++terminal_count;
+          if (decision.strict_terminal) {
+            strict_point_counts[product_slot] +=
+                witness.leaf_end - witness.leaf_begin;
+            if (strict_point_counts[product_slot] >=
+                required_strict_interior_point_count) {
+              current = pair_support_rank_escape_sentinel;
+              break;
+            }
+          }
+        }
+        if (decision.emit_children) {
+          if (witness.left_child >= nodes.size()) {
+            throw std::runtime_error(
+                "the fake Phase 14Q left child is unavailable");
+          }
+          current = static_cast<std::uint32_t>(
+              witness.left_child);
+        } else {
+          current = escape_node_indices[current];
+          if (current != pair_support_rank_escape_sentinel &&
+              current >= nodes.size()) {
+            throw std::runtime_error(
+                "the fake Phase 14Q escape index is unavailable");
           }
         }
       }
-      if (decision.emit_children) {
-        if (witness.left_child >= nodes.size()) {
-          throw std::runtime_error(
-              "the fake Phase 14Q left child is unavailable");
-        }
-        current = static_cast<std::uint32_t>(
-            witness.left_child);
-      } else {
-        current = escape_node_indices[current];
-        if (current != pair_support_rank_escape_sentinel &&
-            current >= nodes.size()) {
-          throw std::runtime_error(
-              "the fake Phase 14Q escape index is unavailable");
-        }
+      if (stop == PairSupportRankProductStop::conclusive &&
+          current != pair_support_rank_escape_sentinel) {
+        stop = PairSupportRankProductStop::visit_budget;
+        all_products_conclusive = false;
+      }
+      batch.product_stops.push_back(stop);
+      batch.product_visit_budget_counts.push_back(visit_budget);
+      batch.product_visited_work_item_counts.push_back(visited);
+      batch.product_terminal_capacities.push_back(
+          terminal_capacity);
+      batch.product_terminal_counts.push_back(terminal_count);
+      batch.visited_work_item_count += visited;
+      batch.terminal_count += terminal_count;
+      batch.visit_budget_exhausted =
+          batch.visit_budget_exhausted ||
+          stop == PairSupportRankProductStop::visit_budget;
+      if (stop == PairSupportRankProductStop::terminal_capacity) {
+        batch.capacity_stop =
+            PairSupportRankCapacityStop::receipt_capacity;
       }
     }
-    batch.frontier_exhausted =
-        current == pair_support_rank_escape_sentinel;
-    batch.visit_budget_exhausted =
-        !batch.frontier_exhausted &&
-        batch.capacity_stop == PairSupportRankCapacityStop::none &&
-        batch.visited_work_item_count == batch.visit_budget_count;
+    batch.frontier_exhausted = all_products_conclusive;
     batch.traversal_metadata_d2h_byte_count =
+        products.size() *
         pair_support_rank_stackless_control_byte_count;
     batch.host_synchronization_count =
         1U + static_cast<std::size_t>(batch.terminal_count != 0U);

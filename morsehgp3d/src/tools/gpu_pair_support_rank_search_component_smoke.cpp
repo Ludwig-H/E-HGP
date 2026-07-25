@@ -136,6 +136,7 @@ struct RankPruneRunAudit {
   bool visit_budget_exhausted{false};
   bool epoch_budget_exhausted{false};
   bool stackless_single_product_traversal_used{false};
+  bool stackless_product_batch_traversal_used{false};
   bool every_device_frontier_exhausted{true};
   bool every_snapshot_validated{true};
   bool every_product_record_validated{true};
@@ -396,13 +397,23 @@ void accumulate_rank_prune_audit(
               audit.device_terminal_byte_capacity &&
           audit.receipt_digest_fnv1a == audit.terminal_digest_fnv1a,
       "the P4 source-compatible receipt aliases diverge from terminals");
-  if (audit.stackless_single_product_traversal_used) {
+  if (audit.stackless_single_product_traversal_used ||
+      audit.stackless_product_batch_traversal_used) {
     require(
-        audit.traversal_backend ==
-                PairSupportRankTraversalBackend::
-                    stackless_single_product &&
-            audit.capacity.maximum_product_count == 1U &&
-            audit.input_product_count == 1U &&
+        audit.stackless_single_product_traversal_used !=
+                audit.stackless_product_batch_traversal_used &&
+            audit.traversal_backend ==
+                (audit.stackless_single_product_traversal_used
+                     ? PairSupportRankTraversalBackend::
+                           stackless_single_product
+                     : PairSupportRankTraversalBackend::
+                           stackless_product_batch) &&
+            (audit.stackless_single_product_traversal_used
+                 ? audit.capacity.maximum_product_count == 1U
+                 : audit.capacity.maximum_product_count > 1U) &&
+            audit.input_product_count > 0U &&
+            audit.input_product_count <=
+                audit.capacity.maximum_product_count &&
             audit.gpu_traversal_epoch_count == 1U &&
             audit.gpu_count_kernel_launch_count == 0U &&
             audit.gpu_exclusive_scan_count == 0U &&
@@ -416,7 +427,7 @@ void accumulate_rank_prune_audit(
             audit.initial_frontier_h2d_byte_count == 0U &&
             audit.device_frontier_double_buffer_byte_capacity == 0U &&
             audit.device_scan_workspace_byte_capacity == 0U,
-        "the P5a stackless launch/visit accounting does not close");
+        "the stackless launch/visit accounting does not close");
   } else {
     require(
         audit.traversal_backend ==
@@ -461,6 +472,8 @@ void accumulate_rank_prune_audit(
     aggregate.traversal_backend = audit.traversal_backend;
     aggregate.stackless_single_product_traversal_used =
         audit.stackless_single_product_traversal_used;
+    aggregate.stackless_product_batch_traversal_used =
+        audit.stackless_product_batch_traversal_used;
     aggregate.required_strict_interior_point_count =
         audit.required_strict_interior_point_count;
     aggregate.first_buffer_epoch = audit.buffer_epoch;
@@ -470,7 +483,9 @@ void accumulate_rank_prune_audit(
                 aggregate.required_strict_interior_point_count &&
             audit.traversal_backend == aggregate.traversal_backend &&
             audit.stackless_single_product_traversal_used ==
-                aggregate.stackless_single_product_traversal_used,
+                aggregate.stackless_single_product_traversal_used &&
+            audit.stackless_product_batch_traversal_used ==
+                aggregate.stackless_product_batch_traversal_used,
         "a P2 callback changed its rank threshold or traversal backend "
         "within one run");
     require(
@@ -640,6 +655,8 @@ void accumulate_rank_prune_audit(
          left.traversal_backend == right.traversal_backend &&
          left.stackless_single_product_traversal_used ==
              right.stackless_single_product_traversal_used &&
+         left.stackless_product_batch_traversal_used ==
+             right.stackless_product_batch_traversal_used &&
          left.input_product_count == right.input_product_count &&
          left.required_strict_interior_point_count ==
              right.required_strict_interior_point_count &&
@@ -1103,6 +1120,8 @@ void write_bool(std::ostream& output, bool value) {
       return "two_frontier";
     case PairSupportRankTraversalBackend::stackless_single_product:
       return "stackless_single_product";
+    case PairSupportRankTraversalBackend::stackless_product_batch:
+      return "stackless_product_batch";
   }
   fail("an invalid pair-rank traversal backend escaped");
 }
@@ -1242,6 +1261,10 @@ void write_gpu_audit(
       << ",\"stackless_single_product_traversal_used\":";
   write_bool(
       output, audit.stackless_single_product_traversal_used);
+  output
+      << ",\"stackless_product_batch_traversal_used\":";
+  write_bool(
+      output, audit.stackless_product_batch_traversal_used);
   output
       << ",\"strict_interior_terminal_count\":"
       << audit.strict_interior_terminal_count
@@ -1467,10 +1490,15 @@ int main(int argument_count, char** argument_values) {
         "the first P4 pass did not upload exactly one immutable LBVH "
         "snapshot");
     const bool stackless_expected =
-        options.capacity.maximum_product_count == 1U &&
         gpu_context.node_count() <=
             static_cast<std::size_t>(
                 std::numeric_limits<std::uint32_t>::max());
+    const bool stackless_single_expected =
+        stackless_expected &&
+        options.capacity.maximum_product_count == 1U;
+    const bool stackless_batch_expected =
+        stackless_expected &&
+        options.capacity.maximum_product_count > 1U;
     const std::size_t expected_escape_snapshot_bytes =
         stackless_expected
             ? checked_multiply(
@@ -1487,8 +1515,11 @@ int main(int argument_count, char** argument_values) {
                 expected_escape_snapshot_bytes &&
             first_assisted.gpu_audit
                     .stackless_single_product_traversal_used ==
-                stackless_expected,
-        "the first P5a pass did not separate the 4N escape snapshot from "
+                stackless_single_expected &&
+            first_assisted.gpu_audit
+                    .stackless_product_batch_traversal_used ==
+                stackless_batch_expected,
+        "the first stackless pass did not separate the 4N escape snapshot from "
         "the shared 80N LBVH snapshot");
     std::vector<AssistedMeasurement> resident_replays;
     resident_replays.reserve(options.resident_replay_count);

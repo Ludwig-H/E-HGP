@@ -3249,7 +3249,8 @@ class ExactPairSupportStreamBuilder {
         result_.audit.exact_point_distance_evaluation_count = checked_add(
             result_.audit.exact_point_distance_evaluation_count,
             1U,
-            "the sparse closed-ball exact-distance count overflows size_t");
+            "the sparse closed-ball exact leaf-classification count "
+            "overflows size_t");
         add_point_classifications(1U);
         if (maximum_phi_sign < 0) {
           interior_count = checked_add(

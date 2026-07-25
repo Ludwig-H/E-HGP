@@ -137,10 +137,10 @@ struct PairSupportPhiNodeDescriptor {
 
 // Fixed resident capacities for the bounded Phase 9.1-CUDA-P2 traversal.
 // On the legacy backend, maximum_work_item_count bounds each of the two device
-// frontiers, not their sum.  On stackless P=1 it contributes W to the visit
-// bound Q=min(N,W*E) without allocating either frontier.  The receipt name is
-// retained as a source-compatible name for capacity C of the unified 16-byte
-// terminal transcript.  Zero capacities leave P2 disabled.
+// frontiers, not their sum.  On the stackless backend, W*E bounds the visits
+// of the whole active product batch and C is split into deterministic product
+// segments.  Neither path allocates scientific state beyond the bounded
+// transcript workspace.  Zero capacities leave P2 disabled.
 struct PairSupportRankPruneCapacity {
   std::size_t maximum_product_count{};
   std::size_t maximum_work_item_count{};
@@ -153,10 +153,10 @@ struct PairSupportRankPruneCapacity {
 
 struct PairSupportRankPruneBudget {
   // One epoch is one stable count -> exclusive-scan -> emit transition over
-  // the current legacy device frontier.  For the stackless P=1 backend, W*E
-  // instead bounds node visits by Q=min(N,W*E).  A product whose transcript
-  // neither reaches the strict threshold nor covers the root at the selected
-  // cap remains a fallback.
+  // the current legacy device frontier.  For stackless products, W*E instead
+  // bounds aggregate node visits.  A product whose transcript neither reaches
+  // the strict threshold nor covers the root in its deterministic segment
+  // remains a fallback.
   std::size_t maximum_epoch_count{};
 
   friend bool operator==(
@@ -209,12 +209,13 @@ struct PairSupportRankKeepProductCertificate {
       const PairSupportRankKeepProductCertificate&) = default;
 };
 
-// The bounded multi-product path retains its historical two-frontier
-// traversal.  A context whose fixed product capacity is exactly one may use
-// the stackless path backed by one immutable O(N) escape-index snapshot.
+// Both stackless backends share one immutable O(N) escape-index snapshot.
+// The batch backend assigns one independent traversal to each active product;
+// the historical two-frontier value remains available for compatibility.
 enum class PairSupportRankTraversalBackend : std::uint8_t {
   two_frontier,
   stackless_single_product,
+  stackless_product_batch,
 };
 
 struct PairSupportRankPruneAudit {
@@ -222,6 +223,8 @@ struct PairSupportRankPruneAudit {
       "cuda_bounded_two_frontier_rank_prune_or_keep_certificate";
   static constexpr const char* stackless_proposal_semantics =
       "cuda_bounded_stackless_single_product_rank_prune_or_keep_certificate";
+  static constexpr const char* stackless_batch_proposal_semantics =
+      "cuda_bounded_stackless_product_batch_rank_prune_or_keep_certificate";
   static constexpr const char* receipt_semantics =
       "cpu_exact_unified_terminal_antichain_and_coverage_recertified";
 
@@ -274,7 +277,7 @@ struct PairSupportRankPruneAudit {
   std::size_t device_scan_workspace_byte_capacity{};
   // Exact backend-specific resident total outside the shared LBVH/escape
   // snapshots and any P1 query buffers.  Legacy is
-  // 40P + 80W + 16C + 8 + scan_workspace; stackless P=1 is 32P + 16C + 40.
+  // 40P + 80W + 16C + 8 + scan_workspace; stackless is 72P + 16C.
   std::size_t device_fixed_workspace_byte_capacity{};
   std::uint64_t buffer_epoch{};
   std::uint64_t terminal_digest_fnv1a{};
@@ -284,9 +287,9 @@ struct PairSupportRankPruneAudit {
   bool receipt_capacity_exhausted{false};
   bool visit_budget_exhausted{false};
   bool epoch_budget_exhausted{false};
-  // Literal frontier exhaustion for the legacy backend.  For stackless P=1,
-  // true also covers the conclusive strict-threshold short circuit: no
-  // unresolved work remains relevant to this product.
+  // Literal frontier exhaustion for the legacy backend.  For stackless
+  // products, true means every active product concluded, including by its
+  // strict-threshold short circuit.
   bool device_frontier_exhausted{false};
   bool immutable_lbvh_snapshot_validated{false};
   bool product_records_validated{false};
@@ -302,6 +305,7 @@ struct PairSupportRankPruneAudit {
   // coverage replay; it never creates a strict receipt or a prune authority.
   bool anchor_ball_culling_enabled{false};
   bool stackless_single_product_traversal_used{false};
+  bool stackless_product_batch_traversal_used{false};
   // P2 only proposes a replayable local rank argument.  The CPU stream remains
   // the authority that decides whether a support product is globally pruned.
   bool global_support_product_prune_published{false};

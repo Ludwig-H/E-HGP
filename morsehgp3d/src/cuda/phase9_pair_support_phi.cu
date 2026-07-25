@@ -344,14 +344,14 @@ class PairSupportPhiCudaResources final {
           rank_stackless_terminal_capacity_ != maximum_terminal_count ||
           rank_stackless_products_.count() != maximum_product_count ||
           rank_stackless_terminals_.count() != maximum_terminal_count ||
-          rank_stackless_control_.count() != 1U) {
+          rank_stackless_control_.count() != maximum_product_count) {
         throw std::logic_error(
             "a Phase 9 stackless rank-prune context changed its fixed "
             "capacities");
       }
       return;
     }
-    if (maximum_product_count != 1U ||
+    if (maximum_product_count == 0U ||
         maximum_terminal_count == 0U) {
       throw std::invalid_argument(
           "a Phase 9 stackless rank-prune capacity is invalid");
@@ -363,7 +363,8 @@ class PairSupportPhiCudaResources final {
         maximum_terminal_count,
         "cudaMalloc Phase 9 stackless rank-prune terminal buffer");
     rank_stackless_control_.allocate(
-        1U, "cudaMalloc Phase 9 stackless rank-prune control");
+        maximum_product_count,
+        "cudaMalloc Phase 9 stackless rank-prune controls");
     rank_stackless_product_capacity_ = maximum_product_count;
     rank_stackless_terminal_capacity_ = maximum_terminal_count;
   }
@@ -811,7 +812,9 @@ inline __device__ void record_stackless_rank_failure(
 }
 
 [[nodiscard]] inline __device__ bool append_stackless_rank_terminal(
+    std::uint64_t product_slot,
     std::uint32_t witness_node_index,
+    std::uint64_t terminal_offset,
     std::uint64_t terminal_capacity,
     PairSupportRankDeviceTerminal* terminals,
     PairSupportRankStacklessControl* control) noexcept {
@@ -819,36 +822,61 @@ inline __device__ void record_stackless_rank_failure(
     control->status = kRankStacklessTerminalCapacity;
     return false;
   }
-  terminals[control->terminal_count] = PairSupportRankDeviceTerminal{
-      0U, static_cast<std::uint64_t>(witness_node_index)};
+  terminals[terminal_offset + control->terminal_count] =
+      PairSupportRankDeviceTerminal{
+          product_slot, static_cast<std::uint64_t>(witness_node_index)};
   ++control->terminal_count;
   return true;
 }
 
-__global__ void morsehgp3d_phase9_pair_support_rank_stackless_kernel(
+[[nodiscard]] inline __host__ __device__ std::uint64_t
+stackless_segment_capacity(
+    std::uint64_t total,
+    std::uint64_t product_count,
+    std::uint64_t product_slot) noexcept {
+  const std::uint64_t quotient = total / product_count;
+  const std::uint64_t remainder = total % product_count;
+  return quotient + static_cast<std::uint64_t>(product_slot < remainder);
+}
+
+[[nodiscard]] inline __host__ __device__ std::uint64_t
+stackless_segment_offset(
+    std::uint64_t total,
+    std::uint64_t product_count,
+    std::uint64_t product_slot) noexcept {
+  const std::uint64_t quotient = total / product_count;
+  const std::uint64_t remainder = total % product_count;
+  return product_slot * quotient +
+         (product_slot < remainder ? product_slot : remainder);
+}
+
+inline __device__ void traverse_stackless_rank_product(
     const PairSupportPhiNodeInputRecord* nodes,
     std::size_t node_count,
     const std::uint32_t* escape_node_indices,
     std::uint32_t root_node_index,
-    const PairSupportRankProductInputRecord* products,
+    const PairSupportRankProductInputRecord& product,
+    std::uint64_t product_slot,
     std::uint64_t required_strict_interior_point_count,
     std::uint64_t visit_budget,
+    std::uint64_t terminal_offset,
     std::uint64_t terminal_capacity,
     PairSupportRankDeviceTerminal* terminals,
     PairSupportRankStacklessControl* control) {
-  if (blockIdx.x != 0U || threadIdx.x != 0U) {
-    return;
-  }
   if (node_count == 0U || root_node_index >= node_count ||
       escape_node_indices[root_node_index] !=
           pair_support_rank_escape_sentinel ||
       required_strict_interior_point_count == 0U ||
-      visit_budget == 0U || terminal_capacity == 0U) {
+      terminal_offset > std::numeric_limits<std::uint64_t>::max() -
+                            terminal_capacity) {
     record_stackless_rank_failure(control, 101U);
     return;
   }
+  if (visit_budget == 0U) {
+    control->status = kRankStacklessVisitBudget;
+    return;
+  }
 
-  const PairSupportRankProductInputRecord product = products[0];
   if (product.first_support_node_index >= node_count ||
       product.second_support_node_index >= node_count ||
       product.first_anchor_leaf_node_index >= node_count ||
@@ -933,7 +961,12 @@ __global__ void morsehgp3d_phase9_pair_support_rank_stackless_kernel(
       if (phi_upper_bound(first, second, witness, upper) &&
           upper < 0.0) {
         if (!append_stackless_rank_terminal(
-                current, terminal_capacity, terminals, control)) {
+                product_slot,
+                current,
+                terminal_offset,
+                terminal_capacity,
+                terminals,
+                control)) {
           return;
         }
         const std::uint64_t point_count =
@@ -958,7 +991,12 @@ __global__ void morsehgp3d_phase9_pair_support_rank_stackless_kernel(
               first_anchor, second_anchor, witness, anchor_lower) &&
           anchor_lower >= 0.0) {
         if (!append_stackless_rank_terminal(
-                current, terminal_capacity, terminals, control)) {
+                product_slot,
+                current,
+                terminal_offset,
+                terminal_capacity,
+                terminals,
+                control)) {
           return;
         }
         current = escape;
@@ -972,7 +1010,12 @@ __global__ void morsehgp3d_phase9_pair_support_rank_stackless_kernel(
         return;
       }
       if (!append_stackless_rank_terminal(
-              current, terminal_capacity, terminals, control)) {
+              product_slot,
+              current,
+              terminal_offset,
+              terminal_capacity,
+              terminals,
+              control)) {
         return;
       }
       current = escape;
@@ -981,6 +1024,50 @@ __global__ void morsehgp3d_phase9_pair_support_rank_stackless_kernel(
     current = static_cast<std::uint32_t>(witness.left_child);
   }
   control->status = kRankStacklessKeepComplete;
+}
+
+__global__ void morsehgp3d_phase9_pair_support_rank_stackless_kernel(
+    const PairSupportPhiNodeInputRecord* nodes,
+    std::size_t node_count,
+    const std::uint32_t* escape_node_indices,
+    std::uint32_t root_node_index,
+    const PairSupportRankProductInputRecord* products,
+    std::uint64_t product_count,
+    std::uint64_t required_strict_interior_point_count,
+    std::uint64_t total_visit_budget,
+    std::uint64_t total_terminal_capacity,
+    PairSupportRankDeviceTerminal* terminals,
+    PairSupportRankStacklessControl* controls) {
+  const std::uint64_t first_product_slot =
+      static_cast<std::uint64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  const std::uint64_t stride =
+      static_cast<std::uint64_t>(gridDim.x) * blockDim.x;
+  std::uint64_t product_slot = first_product_slot;
+  while (product_slot < product_count) {
+    const std::uint64_t visit_budget = stackless_segment_capacity(
+        total_visit_budget, product_count, product_slot);
+    const std::uint64_t terminal_capacity = stackless_segment_capacity(
+        total_terminal_capacity, product_count, product_slot);
+    const std::uint64_t terminal_offset = stackless_segment_offset(
+        total_terminal_capacity, product_count, product_slot);
+    traverse_stackless_rank_product(
+        nodes,
+        node_count,
+        escape_node_indices,
+        root_node_index,
+        products[product_slot],
+        product_slot,
+        required_strict_interior_point_count,
+        visit_budget,
+        terminal_offset,
+        terminal_capacity,
+        terminals,
+        controls + product_slot);
+    if (product_count - product_slot <= stride) {
+      break;
+    }
+    product_slot += stride;
+  }
 }
 
 inline __device__ void record_rank_failure(
@@ -1255,6 +1342,10 @@ propose_pair_support_rank_stackless_on_gpu(
       maximum_terminal_count,
       sizeof(PairSupportRankDeviceTerminal),
       "the Phase 9 stackless rank-prune terminal capacity overflows");
+  const std::size_t active_control_bytes = checked_bytes(
+      products.size(),
+      sizeof(PairSupportRankStacklessControl),
+      "the Phase 9 stackless rank-prune control bytes overflow");
 
   const bool escape_snapshot_uploaded =
       cuda.initialize_rank_escape_snapshot(escape_node_indices);
@@ -1273,17 +1364,27 @@ propose_pair_support_rank_stackless_on_gpu(
       cudaMemsetAsync(
           cuda.rank_stackless_control(),
           0,
-          sizeof(PairSupportRankStacklessControl),
+          active_control_bytes,
           cuda.stream()),
-      "cudaMemsetAsync Phase 9 stackless rank-prune control");
+      "cudaMemsetAsync Phase 9 stackless rank-prune controls");
 
+  const std::size_t requested_blocks =
+      (products.size() + kThreadsPerBlock - 1U) / kThreadsPerBlock;
+  const unsigned int blocks = static_cast<unsigned int>(std::min(
+      requested_blocks,
+      static_cast<std::size_t>(cuda.maximum_grid_x())));
+  if (blocks == 0U) {
+    throw std::runtime_error(
+        "the Phase 9 stackless rank-prune launch grid is empty");
+  }
   morsehgp3d_phase9_pair_support_rank_stackless_kernel
-      <<<1U, 1U, 0U, cuda.stream()>>>(
+      <<<blocks, kThreadsPerBlock, 0U, cuda.stream()>>>(
           cuda.nodes(),
           nodes.size(),
           cuda.rank_escape_node_indices(),
           static_cast<std::uint32_t>(root_node_index),
           cuda.rank_stackless_products(),
+          static_cast<std::uint64_t>(products.size()),
           static_cast<std::uint64_t>(
               required_strict_interior_point_count),
           static_cast<std::uint64_t>(visit_budget_count),
@@ -1294,41 +1395,20 @@ propose_pair_support_rank_stackless_on_gpu(
       cudaPeekAtLastError(),
       "Phase 9 stackless rank-prune kernel launch");
 
-  PairSupportRankStacklessControl control;
+  std::vector<PairSupportRankStacklessControl> controls(
+      products.size());
   check_cuda(
       cudaMemcpyAsync(
-          &control,
+          controls.data(),
           cuda.rank_stackless_control(),
-          sizeof(control),
+          active_control_bytes,
           cudaMemcpyDeviceToHost,
           cuda.stream()),
-      "cudaMemcpyAsync Phase 9 stackless rank-prune control "
+      "cudaMemcpyAsync Phase 9 stackless rank-prune controls "
       "device-to-host");
   cuda.synchronize();
-  if (control.status == kRankStacklessFailure) {
-    throw std::runtime_error(
-        "the Phase 9 stackless rank-prune traversal failed closed with "
-        "code " +
-        std::to_string(control.failure_code));
-  }
-  if (control.status != kRankStacklessKeepComplete &&
-      control.status != kRankStacklessPruneComplete &&
-      control.status != kRankStacklessVisitBudget &&
-      control.status != kRankStacklessTerminalCapacity) {
-    throw std::runtime_error(
-        "the Phase 9 stackless rank-prune traversal returned an invalid "
-        "completion status");
-  }
-  if (control.visited_node_count > visit_budget_count ||
-      control.terminal_count > maximum_terminal_count) {
-    throw std::runtime_error(
-        "the Phase 9 stackless rank-prune control exceeds its fixed "
-        "capacity");
-  }
 
   PairSupportRankDeviceBatch batch;
-  batch.terminal_count =
-      static_cast<std::size_t>(control.terminal_count);
   batch.input_product_count = products.size();
   batch.product_capacity = maximum_product_count;
   batch.work_item_capacity = maximum_work_item_count;
@@ -1336,17 +1416,90 @@ propose_pair_support_rank_stackless_on_gpu(
   batch.traversal_epoch_count = 1U;
   batch.emit_kernel_launch_count = 1U;
   batch.host_synchronization_count = 1U;
-  batch.visited_work_item_count =
-      static_cast<std::size_t>(control.visited_node_count);
-  batch.peak_frontier_count = 1U;
+  batch.visit_budget_count = visit_budget_count;
+  batch.product_stops.reserve(products.size());
+  batch.product_visit_budget_counts.reserve(products.size());
+  batch.product_visited_work_item_counts.reserve(products.size());
+  batch.product_terminal_capacities.reserve(products.size());
+  batch.product_terminal_counts.reserve(products.size());
+  bool all_products_conclusive = true;
+  bool any_visit_budget_exhausted = false;
+  bool any_terminal_capacity_exhausted = false;
+  for (std::size_t product_slot = 0U;
+       product_slot < products.size();
+       ++product_slot) {
+    const PairSupportRankStacklessControl& control =
+        controls[product_slot];
+    const std::size_t product_visit_budget =
+        static_cast<std::size_t>(stackless_segment_capacity(
+            static_cast<std::uint64_t>(visit_budget_count),
+            static_cast<std::uint64_t>(products.size()),
+            static_cast<std::uint64_t>(product_slot)));
+    const std::size_t product_terminal_capacity =
+        static_cast<std::size_t>(stackless_segment_capacity(
+            static_cast<std::uint64_t>(maximum_terminal_count),
+            static_cast<std::uint64_t>(products.size()),
+            static_cast<std::uint64_t>(product_slot)));
+    if (control.status == kRankStacklessFailure) {
+      throw std::runtime_error(
+          "the Phase 9 stackless rank-prune traversal failed closed for "
+          "product " +
+          std::to_string(product_slot) + " with code " +
+          std::to_string(control.failure_code));
+    }
+    PairSupportRankProductStop stop =
+        PairSupportRankProductStop::conclusive;
+    if (control.status == kRankStacklessVisitBudget) {
+      stop = PairSupportRankProductStop::visit_budget;
+      all_products_conclusive = false;
+      any_visit_budget_exhausted = true;
+    } else if (control.status == kRankStacklessTerminalCapacity) {
+      stop = PairSupportRankProductStop::terminal_capacity;
+      all_products_conclusive = false;
+      any_terminal_capacity_exhausted = true;
+    } else if (
+        control.status != kRankStacklessKeepComplete &&
+        control.status != kRankStacklessPruneComplete) {
+      throw std::runtime_error(
+          "the Phase 9 stackless rank-prune traversal returned an invalid "
+          "completion status for product " +
+          std::to_string(product_slot));
+    }
+    if (control.visited_node_count > product_visit_budget ||
+        control.terminal_count > product_terminal_capacity) {
+      throw std::runtime_error(
+          "a Phase 9 stackless rank-prune product exceeds its fixed "
+          "segment");
+    }
+    const std::size_t visited =
+        static_cast<std::size_t>(control.visited_node_count);
+    const std::size_t terminal_count =
+        static_cast<std::size_t>(control.terminal_count);
+    if (batch.visited_work_item_count >
+            std::numeric_limits<std::size_t>::max() - visited ||
+        batch.terminal_count >
+            std::numeric_limits<std::size_t>::max() - terminal_count) {
+      throw std::overflow_error(
+          "the Phase 9 stackless rank-prune aggregate counters overflow");
+    }
+    batch.visited_work_item_count += visited;
+    batch.terminal_count += terminal_count;
+    batch.product_stops.push_back(stop);
+    batch.product_visit_budget_counts.push_back(product_visit_budget);
+    batch.product_visited_work_item_counts.push_back(visited);
+    batch.product_terminal_capacities.push_back(
+        product_terminal_capacity);
+    batch.product_terminal_counts.push_back(terminal_count);
+  }
+  batch.peak_frontier_count = std::min(
+      products.size(), visit_budget_count);
   batch.snapshot_h2d_byte_count =
       snapshot_uploaded ? snapshot_bytes : 0U;
   batch.escape_snapshot_h2d_byte_count =
       escape_snapshot_uploaded ? escape_snapshot_bytes : 0U;
   batch.active_product_h2d_byte_count = product_bytes;
   batch.initial_frontier_h2d_byte_count = 0U;
-  batch.traversal_metadata_d2h_byte_count =
-      sizeof(PairSupportRankStacklessControl);
+  batch.traversal_metadata_d2h_byte_count = active_control_bytes;
   batch.active_terminal_d2h_byte_count = checked_bytes(
       batch.terminal_count,
       sizeof(PairSupportRankDeviceTerminal),
@@ -1367,32 +1520,56 @@ propose_pair_support_rank_stackless_on_gpu(
       "the Phase 9 stackless fixed workspace bytes overflow");
   batch.device_fixed_workspace_byte_capacity = checked_add_bytes(
       batch.device_fixed_workspace_byte_capacity,
-      sizeof(PairSupportRankStacklessControl),
+      checked_bytes(
+          maximum_product_count,
+          sizeof(PairSupportRankStacklessControl),
+          "the Phase 9 stackless fixed control bytes overflow"),
       "the Phase 9 stackless fixed workspace bytes overflow");
-  batch.visit_budget_count = visit_budget_count;
   batch.traversal_backend =
-      PairSupportRankTraversalBackend::stackless_single_product;
+      maximum_product_count == 1U
+          ? PairSupportRankTraversalBackend::stackless_single_product
+          : PairSupportRankTraversalBackend::stackless_product_batch;
   batch.capacity_stop =
-      control.status == kRankStacklessTerminalCapacity
+      any_terminal_capacity_exhausted
           ? PairSupportRankCapacityStop::receipt_capacity
           : PairSupportRankCapacityStop::none;
-  batch.frontier_exhausted =
-      control.status == kRankStacklessKeepComplete ||
-      control.status == kRankStacklessPruneComplete;
-  batch.visit_budget_exhausted =
-      control.status == kRankStacklessVisitBudget;
+  batch.frontier_exhausted = all_products_conclusive;
+  batch.visit_budget_exhausted = any_visit_budget_exhausted;
   batch.anchor_ball_culling_enabled = true;
   batch.terminals.resize(batch.terminal_count);
-  if (batch.active_terminal_d2h_byte_count != 0U) {
+  std::size_t host_terminal_offset = 0U;
+  for (std::size_t product_slot = 0U;
+       product_slot < products.size();
+       ++product_slot) {
+    const std::size_t count =
+        batch.product_terminal_counts[product_slot];
+    if (count == 0U) {
+      continue;
+    }
+    const std::size_t device_terminal_offset =
+        static_cast<std::size_t>(stackless_segment_offset(
+            static_cast<std::uint64_t>(maximum_terminal_count),
+            static_cast<std::uint64_t>(products.size()),
+            static_cast<std::uint64_t>(product_slot)));
     check_cuda(
         cudaMemcpyAsync(
-            batch.terminals.data(),
-            cuda.rank_stackless_terminals(),
-            batch.active_terminal_d2h_byte_count,
+            batch.terminals.data() + host_terminal_offset,
+            cuda.rank_stackless_terminals() + device_terminal_offset,
+            checked_bytes(
+                count,
+                sizeof(PairSupportRankDeviceTerminal),
+                "the Phase 9 stackless terminal copy bytes overflow"),
             cudaMemcpyDeviceToHost,
             cuda.stream()),
-        "cudaMemcpyAsync Phase 9 stackless active terminals "
+        "cudaMemcpyAsync Phase 9 stackless active terminal segment "
         "device-to-host");
+    host_terminal_offset += count;
+  }
+  if (host_terminal_offset != batch.terminal_count) {
+    throw std::logic_error(
+        "the Phase 9 stackless terminal segment counts do not close");
+  }
+  if (batch.terminal_count != 0U) {
     cuda.synchronize();
     ++batch.host_synchronization_count;
   }
@@ -1497,20 +1674,25 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
     throw std::invalid_argument(
         "invalid Phase 9 rank-prune launch extent");
   }
-  const bool use_stackless_single_product =
-      maximum_product_count == 1U && products.size() == 1U &&
+  const bool use_stackless_products =
       escape_node_indices.size() == nodes.size() &&
       nodes.size() <= pair_support_rank_escape_sentinel;
   std::size_t stackless_visit_budget_count = 0U;
-  if (use_stackless_single_product) {
+  if (use_stackless_products) {
     const std::size_t multiplied_visit_budget =
         maximum_work_item_count >
                 std::numeric_limits<std::size_t>::max() /
                     maximum_epoch_count
             ? std::numeric_limits<std::size_t>::max()
             : maximum_work_item_count * maximum_epoch_count;
+    const std::size_t product_node_count =
+        products.size() >
+                std::numeric_limits<std::size_t>::max() /
+                    nodes.size()
+            ? std::numeric_limits<std::size_t>::max()
+            : products.size() * nodes.size();
     stackless_visit_budget_count = std::min(
-        nodes.size(), multiplied_visit_budget);
+        product_node_count, multiplied_visit_budget);
   }
   const std::size_t snapshot_bytes = checked_bytes(
       nodes.size(),
@@ -1529,7 +1711,7 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
   DeviceGuard guard{cuda.device()};
   try {
     const bool snapshot_uploaded = cuda.initialize_snapshot(nodes);
-    if (use_stackless_single_product) {
+    if (use_stackless_products) {
       PairSupportRankDeviceBatch batch =
           propose_pair_support_rank_stackless_on_gpu(
               context,
