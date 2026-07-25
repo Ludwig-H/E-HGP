@@ -1,0 +1,106 @@
+{
+  "schema": "morsehgp3d.phase14q.p5c_g4_component_diagnostic.v1",
+  "artifact_role": "exact_diametral_phi_closed_ball_component_smoke",
+  "git_sha": "a5780312906230e92065e008ee7ac3d362a09bdc",
+  "implementation_git_sha": "58eecec215cf5d703ae17eee6817766084564de4",
+  "phase": "14Q",
+  "backend": "cuda_g4_plus_reference_cpu",
+  "profile": "hgp_reduced",
+  "mode": "proposal_only_then_certified",
+  "component_semantics": "exact_diametral_phi_ball_aabb_sign_with_exact_level_deferred_until_surviving_output",
+  "deployment_status": "architecture_only",
+  "public_status": "not_claimed",
+  "environment": {
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "timed_build_type": "Release"
+  },
+  "case": {
+    "family": "uniform_latin",
+    "point_count": 12500,
+    "k_max": 10,
+    "work_budget": 20000,
+    "product_capacity": 1,
+    "frontier_capacity": 32768,
+    "terminal_capacity": 16384,
+    "epoch_budget": 64,
+    "resident_repetitions": 1
+  },
+  "timing_ms": {
+    "historical_cpu_chunk": 28.093323,
+    "first_assisted_chunk": 796.881291,
+    "resident_assisted_chunk": 607.506205,
+    "fresh_ephemeral_verifier": 31.924621,
+    "previous_p5b_historical_cpu_chunk": 298.695588,
+    "previous_p5b_first_assisted_chunk": 1035.830225,
+    "previous_p5b_resident_assisted_chunk": 846.445824,
+    "previous_p5b_fresh_ephemeral_verifier": 277.460101
+  },
+  "diagnostic_comparison": {
+    "historical_cpu_reduction_from_separate_p5b_run_percent": 90.594664,
+    "first_assisted_reduction_from_separate_p5b_run_percent": 23.068349,
+    "resident_assisted_reduction_from_separate_p5b_run_percent": 28.228578,
+    "fresh_ephemeral_verifier_reduction_from_separate_p5b_run_percent": 88.493978,
+    "resident_assisted_over_historical_cpu_ratio": 21.624576,
+    "paired_statistical_claim": false
+  },
+  "audit": {
+    "component_success": true,
+    "fresh_ephemeral_verifier_complete": true,
+    "capacity_stop_count": 0,
+    "gpu_batch_fallback_count": 0,
+    "historical_cpu_fallback_product_count": 1,
+    "callback_count": 222,
+    "stackless_kernel_launch_count": 222,
+    "visited_item_count": 41243,
+    "resident_traversal_synchronization_count": 444,
+    "cpu_exact_recertified_terminal_count": 20176,
+    "gpu_prune_proposal_count": 22,
+    "gpu_keep_proposal_count": 200,
+    "consumed_prune_count": 22,
+    "consumed_keep_count": 199
+  },
+  "exact_phi_closed_ball_path": {
+    "identity": "squared_distance_to_midpoint_minus_squared_diameter_over_four_equals_dot_x_minus_u_x_minus_v",
+    "bulk_exterior_rule": "exact_aabb_minimum_phi_strictly_positive",
+    "bulk_interior_rule": "exact_aabb_maximum_phi_strictly_negative",
+    "equality_descends": true,
+    "leaf_decision_exact": true,
+    "exact_level_constructed_only_after_rank_rejection_survival": true,
+    "scientific_decision_changed": false,
+    "counter_compatibility_note": "The legacy exact_point_distance_evaluation_count field now counts exact leaf classifications left unresolved by the strict bulk tests; in this path they use the exact diametral-phi extrema, with equality at a degenerate leaf, rather than a newly constructed rational point-to-center distance. Its persisted name is retained for schema compatibility."
+  },
+  "qualification": {
+    "component_only": true,
+    "terminal_coverage_recertified": true,
+    "gpu_terminal_kinds_authoritative": false,
+    "small_cloud_speed_gate_passed": false,
+    "full_hierarchy_executed": false,
+    "warm_e2e_protocol_executed": false,
+    "warm_e2e_50000_slo_claimed": false,
+    "point_count_50000_executed": false,
+    "eight_clusters_executed": false,
+    "ten_million_or_larger_executed": false,
+    "public_status_claimed": false
+  },
+  "verdict": {
+    "escalation_stopped": true,
+    "reason": "Direct exact phi removes the dominant rational closed-ball cost and reduces the exact historical CPU component to 28.09 ms, but the serial single-product GPU path with 444 resident synchronizations remains 21.62 times slower than that CPU reference.",
+    "next_small_cloud_direction": "Treat the exact CPU component as the interactive candidate while measuring only the next short gate justified by the protocol; do not interpret this component timing as the complete 50000-point warm-end-to-end SLO.",
+    "next_massive_cloud_direction": "Replace single-product serial traversal with genuinely parallel product batches and amortized synchronization before any massive product qualification."
+  },
+  "gcp_session_safety": {
+    "project": "devpod-gpu-exploration",
+    "zone": "europe-west4-ai1a",
+    "instance": "ehgp-blackwell-spot-ai1a",
+    "generation": "2026-07-25T06:48:46.328-07:00",
+    "final_status": "TERMINATED",
+    "last_stop_timestamp": "2026-07-25T06:55:03.897-07:00",
+    "provisioning_model": "SPOT",
+    "instance_termination_action": "STOP",
+    "max_run_duration_seconds": 3600,
+    "other_active_labelled_instance_count_at_shutdown": 0,
+    "session_key_revoked": true,
+    "local_session_key_deleted": true
+  },
+  "scope_note": "This single 12500-point component diagnostic is a negative assisted-path speed gate. It is not a full Morse pipeline, a latency distribution, a 50000-point SLO result, or evidence of 10M-plus scalability."
+}
