@@ -20,6 +20,7 @@ class SpatialReferenceContext;
 namespace morsehgp3d::hierarchy {
 class ExactGroupedAnchoredPairPruneCertificate;
 class ExactGroupedAnchoredPairPruneCertifier;
+class ExactGroupedAnchoredPairTraversalContext;
 class ExactHigherSupportAuthorityContext;
 class ExactHigherSupportTerminalAuthority;
 }
@@ -77,6 +78,7 @@ class CanonicalPointCloud {
   friend class gpu::SpatialReferenceContext;
   friend class hierarchy::ExactGroupedAnchoredPairPruneCertificate;
   friend class hierarchy::ExactGroupedAnchoredPairPruneCertifier;
+  friend class hierarchy::ExactGroupedAnchoredPairTraversalContext;
   friend class hierarchy::ExactHigherSupportAuthorityContext;
   friend class hierarchy::ExactHigherSupportTerminalAuthority;
 };

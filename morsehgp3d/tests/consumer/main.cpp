@@ -10,6 +10,7 @@
 #include "morsehgp3d/hierarchy/direct_sparse_facet_top_k_proposal_transcript.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_gateway_historical_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
+#include "morsehgp3d/hierarchy/grouped_anchored_pair_certificate.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
 
@@ -21,6 +22,17 @@
 #include <vector>
 
 int main() {
+  using GroupedTraversalContext = morsehgp3d::hierarchy::
+      ExactGroupedAnchoredPairTraversalContext;
+  using GroupedTraversalStep = morsehgp3d::hierarchy::
+      ExactGroupedAnchoredPairTraversalStep;
+  static_assert(!std::is_aggregate_v<GroupedTraversalContext>);
+  static_assert(!std::is_default_constructible_v<GroupedTraversalContext>);
+  static_assert(!std::is_copy_constructible_v<GroupedTraversalContext>);
+  static_assert(std::is_nothrow_move_constructible_v<GroupedTraversalContext>);
+  static_assert(!std::is_move_assignable_v<GroupedTraversalContext>);
+  static_assert(!std::is_default_constructible_v<GroupedTraversalStep>);
+
   static_assert(
       morsehgp3d::hierarchy::
           direct_sparse_gateway_historical_quotient_schema_version == 1U);
@@ -29,7 +41,7 @@ int main() {
           direct_sparse_facet_descent_batch_plan_schema_version == 1U);
   static_assert(
       morsehgp3d::hierarchy::
-          direct_sparse_facet_descent_batch_executor_schema_version == 1U);
+          direct_sparse_facet_descent_batch_executor_schema_version == 2U);
   static_assert(
       morsehgp3d::hierarchy::
           direct_sparse_facet_descent_batch_top_k_proposal_preparation_schema_version ==
@@ -337,6 +349,30 @@ int main() {
           std::span<const PointId>{installed_incumbent_ids},
           std::span<const PointId>{installed_proposal_ids},
           installed_top_k_budget);
+  const std::array<PointId, 1U> installed_grouped_anchors{PointId{0U}};
+  const std::array<PointId, 0U> installed_grouped_empty_pool{};
+  auto installed_grouped_traversal = GroupedTraversalContext::start_at_root(
+      spatial_index,
+      cloud,
+      installed_grouped_anchors,
+      installed_grouped_empty_pool,
+      2U);
+  const GroupedTraversalStep installed_grouped_fallback =
+      installed_grouped_traversal.advance(
+          spatial_index,
+          cloud,
+          morsehgp3d::hierarchy::
+              ExactGroupedAnchoredPairTraversalWorkBudget{1U, 0U});
+  if (installed_grouped_fallback.kind() !=
+          morsehgp3d::hierarchy::
+              ExactGroupedAnchoredPairTraversalStepKind::fallback_subtree ||
+      !installed_grouped_fallback.traversal_complete_after_step() ||
+      !installed_grouped_traversal.complete() ||
+      installed_grouped_traversal.audit().fallback_subtree_count != 1U ||
+      installed_grouped_traversal.audit().exact_predicate_count != 0U) {
+    std::cerr << "installed grouped traversal changed semantics\n";
+    return 1;
+  }
   if (!nearest.shell_complete() || nearest.strict_below().size() != 0U ||
       nearest.cutoff_shell_ids().size() != 2U ||
       nearest.canonical_choice_ids().size() != 1U ||

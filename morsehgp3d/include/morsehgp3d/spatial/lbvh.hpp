@@ -28,6 +28,7 @@ class MortonLbvhIndex;
 namespace morsehgp3d::hierarchy {
 class ExactGroupedAnchoredPairPruneCertificate;
 class ExactGroupedAnchoredPairPruneCertifier;
+class ExactGroupedAnchoredPairTraversalContext;
 class ExactAnchoredPairCandidateClassifier;
 class ExactAnchoredPairWitnessBankBuilder;
 class ExactHigherSupportAuthorityContext;
@@ -427,6 +428,7 @@ class MortonLbvhIndex {
   friend class hierarchy::ExactAnchoredPairWitnessBankBuilder;
   friend class hierarchy::ExactGroupedAnchoredPairPruneCertificate;
   friend class hierarchy::ExactGroupedAnchoredPairPruneCertifier;
+  friend class hierarchy::ExactGroupedAnchoredPairTraversalContext;
   friend class hierarchy::ExactHigherSupportAuthorityContext;
   friend class hierarchy::ExactHigherSupportTerminalAuthority;
   friend class hierarchy::ExactHigherSupportStreamBuilder;

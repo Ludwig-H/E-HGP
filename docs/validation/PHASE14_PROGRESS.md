@@ -298,9 +298,17 @@ P8g ouvre sous `reference_cpu / hgp_reduced / grouped_exact_certificate` une pri
 
 Le certificat n'est ni agrégat ni constructible par défaut et conserve son payload scientifique privé. `certifies(...)` exige l'identité du nuage et du LBVH, le nœud, sa plage et sa boîte recalculée, le rang fermé maximal et les ancres attendues. Les trois budgets échouent sans publier de masque partiel. Le test court couvre succès collinéaire, égalité sur la coque laissée inconclusive, rejet inter-rang, provenance, entrées structurelles, pool insuffisant et contre-fixture corrélée. Ce jalon ne parcourt pas encore le LBVH, n'exécute aucun kernel et ne revendique aucun temps 50 k ou chemin 10 M+; GCP n'est pas utilisé.
 
+## Incrément 14Q P8h — parcours groupé préparé et héritage privé
+
+P8h implémente localement `reference_cpu / hgp_reduced / prepared_grouped_exact_traversal`. Un contexte move-only prépare une fois la boîte exacte des au plus 32 ancres et les bornes ponctuelles des au plus 64 témoins. Une DFS droite d'abord utilise une pile fixe et au plus un nœud actif reprenable; ses plages et masques parent--enfant sont privés. Pour un enfant certifié $Q'\subseteq Q$, tout succès $M_x(A,Q)<0$ reste strict parce que $M_x(A,Q')\leq M_x(A,Q)$. Un prune terminal transporte le certificat P8g complet et doit toujours satisfaire `certifies(...)`; une feuille inconclusive ne transporte qu'un `PointId`.
+
+Les fixtures permanentes exigent l'identité de la partition terminale avec des appels P8g frais. Le cas préfixe conserve un prune et deux feuilles non résolues et ferme $19=15+4$. Le cas non préfixe utilise un parent à deux feuilles et un seul témoin tardif hérité : huit prédicats frais deviennent sept prédicats exacts et un réemploi, soit $8=7+1$. La sortie canonique prune `q1`, `PointId{5}`, avec les témoins `PointId{1}` et `PointId{2}`, puis laisse `q0`, `PointId{4}`, non résolu. Les bits hérités ne sont comptés comme réutilisés qu'au passage effectif du curseur canonique; un bit tardif que le rang ferme avant son slot n'est ni compté ni publié. La reprise segmentée ne refacture pas une visite de nœud actif, un pool insuffisant produit un fallback borné, une source déplacée est révoquée et une autorité étrangère est rejetée avant mutation.
+
+Le statut devient `validated_short_host_software_and_installed_consumer_architecture_only`. Les deux CTests ciblés P8g/P8h passent sous GCC Release en 0,20 seconde. L'installation/export et le consumer externe passent 1/1 en 0,01 seconde; le consumer lie la cible installée, vérifie les traits publics et appelle réellement `start_at_root` puis `advance`. Aucun benchmark, sanitizer, kernel, test massif ou GCP n'est lancé; aucun SLO 50 k ou chemin 10 M+ n'est revendiqué. Le curseur reste process-local, sans checkpoint durable, ordonnanceur toutes ancres, raccord P8c/P7b ou sortie Morse publique.
+
 ## Priorités de développement
 
-1. préparer la boîte et le pool une fois par groupe, puis implémenter un curseur borné qui transporte vers les enfants un masque typé non forgeable de témoins déjà stricts; un différentiel court doit précéder tout nouveau gate GCP à 4 096 puis 50 k, et les banques device, P8c/P7b, le vrai `warm_e2e` ainsi que l'externalisation 10 M+ restent en aval.
+1. raccorder un ordonnanceur borné et Morton-cohérent de groupes au parcours P8h, puis exécuter un différentiel CPU court contre les certificats P8g frais et le chemin candidat ancré exact; aucun nouveau gate GCP à 4 096 ou 50 k ne précède cette identité, et les banques device, P8c/P7b, le vrai `warm_e2e` ainsi que l'externalisation 10 M+ restent en aval.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

@@ -26,8 +26,14 @@ namespace {
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::hierarchy::ExactGroupedAnchoredPairPruneBudget;
 using morsehgp3d::hierarchy::ExactGroupedAnchoredPairPruneCertificate;
+using morsehgp3d::hierarchy::ExactGroupedAnchoredPairPruneCertificateOrigin;
 using morsehgp3d::hierarchy::ExactGroupedAnchoredPairPruneDecision;
 using morsehgp3d::hierarchy::ExactGroupedAnchoredPairPruneStopReason;
+using morsehgp3d::hierarchy::ExactGroupedAnchoredPairTraversalContext;
+using morsehgp3d::hierarchy::ExactGroupedAnchoredPairTraversalStep;
+using morsehgp3d::hierarchy::ExactGroupedAnchoredPairTraversalStepKind;
+using morsehgp3d::hierarchy::ExactGroupedAnchoredPairTraversalStopReason;
+using morsehgp3d::hierarchy::ExactGroupedAnchoredPairTraversalWorkBudget;
 using morsehgp3d::hierarchy::certify_exact_grouped_anchored_pair_prune;
 using morsehgp3d::hierarchy::exact_diametral_phi_aabb_maximum_sign;
 using morsehgp3d::spatial::CanonicalPointCloud;
@@ -51,10 +57,80 @@ concept ExposesRvalueWitnessSpan = requires(Certificate&& certificate) {
   std::move(certificate).certified_witness_point_ids();
 };
 
+template <class Index, class Cloud>
+concept StartsGroupedTraversalAtRoot =
+    requires(Index&& index, Cloud&& cloud) {
+      ExactGroupedAnchoredPairTraversalContext::start_at_root(
+          std::forward<Index>(index),
+          std::forward<Cloud>(cloud),
+          std::span<const PointId>{},
+          std::span<const PointId>{},
+          2U);
+    };
+
+template <class Index, class Cloud>
+concept StartsGroupedTraversalAtNode =
+    requires(Index&& index, Cloud&& cloud) {
+      ExactGroupedAnchoredPairTraversalContext::start_at_node(
+          std::forward<Index>(index),
+          std::forward<Cloud>(cloud),
+          std::span<const PointId>{},
+          std::span<const PointId>{},
+          0U,
+          2U);
+    };
+
 static_assert(
     !ExposesRvalueAudit<ExactGroupedAnchoredPairPruneCertificate>);
 static_assert(
     !ExposesRvalueWitnessSpan<ExactGroupedAnchoredPairPruneCertificate>);
+static_assert(
+    !std::is_aggregate_v<ExactGroupedAnchoredPairTraversalContext>);
+static_assert(
+    !std::is_default_constructible_v<
+        ExactGroupedAnchoredPairTraversalContext>);
+static_assert(
+    !std::is_copy_constructible_v<
+        ExactGroupedAnchoredPairTraversalContext>);
+static_assert(
+    std::is_nothrow_move_constructible_v<
+        ExactGroupedAnchoredPairTraversalContext>);
+static_assert(
+    !std::is_move_assignable_v<
+        ExactGroupedAnchoredPairTraversalContext>);
+static_assert(
+    !std::is_constructible_v<
+        ExactGroupedAnchoredPairTraversalContext,
+        std::uint64_t>);
+static_assert(
+    !std::is_aggregate_v<ExactGroupedAnchoredPairTraversalStep>);
+static_assert(
+    !std::is_default_constructible_v<
+        ExactGroupedAnchoredPairTraversalStep>);
+static_assert(
+    StartsGroupedTraversalAtRoot<
+        MortonLbvhIndex&,
+        CanonicalPointCloud&>);
+static_assert(
+    StartsGroupedTraversalAtNode<
+        const MortonLbvhIndex&,
+        const CanonicalPointCloud&>);
+static_assert(
+    !StartsGroupedTraversalAtRoot<
+        MortonLbvhIndex,
+        CanonicalPointCloud&>);
+static_assert(
+    !StartsGroupedTraversalAtRoot<
+        MortonLbvhIndex&,
+        CanonicalPointCloud>);
+static_assert(
+    !StartsGroupedTraversalAtNode<
+        MortonLbvhIndex,
+        CanonicalPointCloud&>);
+static_assert(
+    !StartsGroupedTraversalAtNode<
+        MortonLbvhIndex&,
+        CanonicalPointCloud>);
 
 void require(bool condition, const std::string& message) {
   if (!condition) {
@@ -114,6 +190,17 @@ void require_throws(Callable&& callable, const std::string& message) {
   return make_cloud(coordinates);
 }
 
+[[nodiscard]] CanonicalPointCloud make_nonprefix_witness_cloud() {
+  const std::array<std::array<double, 3>, 6> coordinates{
+      std::array<double, 3>{0.0, 0.0, 0.0},
+      std::array<double, 3>{1.0, 3.0, 0.0},
+      std::array<double, 3>{2.0, 4.0, 0.0},
+      std::array<double, 3>{3.0, 0.0, 0.0},
+      std::array<double, 3>{10.0, 0.0, 0.0},
+      std::array<double, 3>{10.0, 1.0, 0.0}};
+  return make_cloud(coordinates);
+}
+
 [[nodiscard]] ExactGroupedAnchoredPairPruneBudget roomy_budget() {
   ExactGroupedAnchoredPairPruneBudget budget;
   budget.maximum_anchor_count = 32U;
@@ -127,6 +214,13 @@ struct LineFixture {
   MortonLbvhIndex index{MortonLbvhIndex::build(cloud)};
   std::array<PointId, 2> anchors{0U, 1U};
   std::array<PointId, 4> witness_pool{2U, 3U, 4U, 5U};
+};
+
+struct NonPrefixWitnessFixture {
+  CanonicalPointCloud cloud{make_nonprefix_witness_cloud()};
+  MortonLbvhIndex index{MortonLbvhIndex::build(cloud)};
+  std::array<PointId, 1> anchors{0U};
+  std::array<PointId, 3> witness_pool{1U, 2U, 3U};
 };
 
 [[nodiscard]] ExactGroupedAnchoredPairPruneCertificate certify_node(
@@ -170,6 +264,29 @@ struct LineFixture {
   throw std::runtime_error("a fixture point has no certified LBVH leaf node");
 }
 
+[[nodiscard]] std::size_t find_node_by_range_and_bounds(
+    const LineFixture& fixture,
+    std::size_t leaf_begin,
+    std::size_t leaf_end,
+    const ExactDyadicAabb3& expected_bounds) {
+  for (std::size_t node_index = 0U;
+       node_index < fixture.index.build_counters().node_count;
+       ++node_index) {
+    const ExactGroupedAnchoredPairPruneCertificate result = certify_node(
+        fixture,
+        fixture.witness_pool,
+        node_index,
+        4U,
+        roomy_budget());
+    if (result.leaf_begin() == leaf_begin &&
+        result.leaf_end() == leaf_end &&
+        result.query_bounds() == expected_bounds) {
+      return node_index;
+    }
+  }
+  throw std::runtime_error("the requested LBVH fixture node was not found");
+}
+
 void test_shared_certificate_and_provenance() {
   const LineFixture fixture;
   const ExactGroupedAnchoredPairPruneCertificate result =
@@ -184,7 +301,9 @@ void test_shared_certificate_and_provenance() {
 
   require(result.certified(), "three group witnesses were not certified");
   require(
-      result.maximum_closed_rank() == 4U &&
+      result.origin() ==
+              ExactGroupedAnchoredPairPruneCertificateOrigin::single_node &&
+          result.maximum_closed_rank() == 4U &&
           result.required_witness_count() == 3U &&
           witnesses.size() == 3U && witnesses[0] == 2U &&
           witnesses[1] == 3U && witnesses[2] == 4U &&
@@ -195,7 +314,8 @@ void test_shared_certificate_and_provenance() {
           audit.witness_pool_entry_count == 4U &&
           audit.exact_predicate_count == 3U &&
           audit.strict_group_witness_count == 3U &&
-          audit.input_canonical && audit.anchor_bounds_constructed &&
+          audit.requested_budget_applies && audit.input_canonical &&
+          audit.anchor_bounds_constructed &&
           audit.lbvh_node_authority_verified && audit.complete,
       "the grouped certificate audit is incomplete");
   require(
@@ -501,6 +621,522 @@ void test_structural_validation() {
       "a witness pool containing an anchor was accepted");
 }
 
+void test_prepared_inherited_traversal_differential() {
+  const LineFixture fixture;
+  const ExactDyadicAabb3 target_bounds =
+      box({3.0, 0.0, 0.0}, {5.0, 0.0, 0.0});
+  const std::size_t target_node_index = find_node_by_range_and_bounds(
+      fixture, 3U, 6U, target_bounds);
+
+  std::size_t fresh_node_count = 0U;
+  std::size_t fresh_predicate_count = 0U;
+  std::size_t fresh_prune_count = 0U;
+  std::optional<std::size_t> fresh_pruned_node_index;
+  for (std::size_t node_index = 0U;
+       node_index < fixture.index.build_counters().node_count;
+       ++node_index) {
+    const ExactGroupedAnchoredPairPruneCertificate fresh = certify_node(
+        fixture,
+        fixture.witness_pool,
+        node_index,
+        4U,
+        roomy_budget());
+    if (fresh.leaf_begin() < 3U || fresh.leaf_end() > 6U) {
+      continue;
+    }
+    ++fresh_node_count;
+    fresh_predicate_count += fresh.audit().exact_predicate_count;
+    if (fresh.certified()) {
+      ++fresh_prune_count;
+      fresh_pruned_node_index = node_index;
+    }
+  }
+  require(
+      fresh_node_count == 5U && fresh_predicate_count == 19U &&
+          fresh_prune_count == 1U &&
+          fresh_pruned_node_index.has_value(),
+      "the fresh P8g subtree oracle lost its discriminating work profile");
+
+  ExactGroupedAnchoredPairTraversalContext traversal =
+      ExactGroupedAnchoredPairTraversalContext::start_at_node(
+          fixture.index,
+          fixture.cloud,
+          fixture.anchors,
+          fixture.witness_pool,
+          target_node_index,
+          4U);
+  require(
+      traversal.ready() && !traversal.complete() &&
+          traversal.validated_for(fixture.index, fixture.cloud) &&
+          traversal.start_node_index() == target_node_index &&
+          traversal.maximum_closed_rank() == 4U &&
+          std::equal(
+              traversal.anchor_point_ids().begin(),
+              traversal.anchor_point_ids().end(),
+              fixture.anchors.begin(),
+              fixture.anchors.end()) &&
+          std::equal(
+              traversal.witness_pool_point_ids().begin(),
+              traversal.witness_pool_point_ids().end(),
+              fixture.witness_pool.begin(),
+              fixture.witness_pool.end()),
+      "the prepared grouped traversal lost its fixed authority");
+
+  const ExactGroupedAnchoredPairTraversalWorkBudget roomy{64U, 64U};
+  std::array<ExactGroupedAnchoredPairTraversalStepKind, 3> kinds{};
+  std::array<PointId, 2> unresolved_points{};
+  std::size_t step_count = 0U;
+  std::size_t unresolved_count = 0U;
+  std::optional<std::size_t> inherited_pruned_node_index;
+  while (!traversal.complete()) {
+    const ExactGroupedAnchoredPairTraversalStep step =
+        traversal.advance(fixture.index, fixture.cloud, roomy);
+    require(
+        step.kind() !=
+            ExactGroupedAnchoredPairTraversalStepKind::budget_exhausted,
+        "a roomy prepared traversal exhausted its work budget");
+    require(step_count < kinds.size(), "the traversal emitted extra records");
+    kinds[step_count] = step.kind();
+    ++step_count;
+    if (step.kind() ==
+        ExactGroupedAnchoredPairTraversalStepKind::certified_prune) {
+      const ExactGroupedAnchoredPairPruneCertificate* certificate =
+          step.prune_certificate();
+      require(
+          certificate != nullptr && step.lbvh_node_index().has_value() &&
+              certificate->origin() ==
+                  ExactGroupedAnchoredPairPruneCertificateOrigin::
+                      prepared_inherited_traversal &&
+              !certificate->audit().requested_budget_applies &&
+              certificate->audit().inherited_strict_group_witness_count ==
+                  1U &&
+              certificate->audit().exact_predicate_count == 2U &&
+              certificate->certifies(
+                  fixture.index,
+                  fixture.cloud,
+                  *step.lbvh_node_index(),
+                  4U,
+                  fixture.anchors),
+          "the inherited traversal emitted a nonauthoritative prune");
+      inherited_pruned_node_index = step.lbvh_node_index();
+    } else if (
+        step.kind() ==
+        ExactGroupedAnchoredPairTraversalStepKind::unresolved_leaf) {
+      require(
+          step.unresolved_point_id().has_value() &&
+              unresolved_count < unresolved_points.size(),
+          "an unresolved leaf lost its bounded point payload");
+      unresolved_points[unresolved_count] = *step.unresolved_point_id();
+      ++unresolved_count;
+    }
+  }
+
+  require(
+      kinds ==
+              std::array<ExactGroupedAnchoredPairTraversalStepKind, 3>{
+                  ExactGroupedAnchoredPairTraversalStepKind::certified_prune,
+                  ExactGroupedAnchoredPairTraversalStepKind::unresolved_leaf,
+                  ExactGroupedAnchoredPairTraversalStepKind::unresolved_leaf} &&
+          unresolved_points == std::array<PointId, 2>{4U, 3U} &&
+          inherited_pruned_node_index == fresh_pruned_node_index,
+      "the inherited traversal changed the fresh oracle terminal partition");
+
+  const auto& audit = traversal.audit();
+  require(
+      audit.anchor_bounds_construction_count == 1U &&
+          audit.prepared_witness_point_count == 4U &&
+          audit.node_visit_count == 5U &&
+          audit.exact_predicate_count == 15U &&
+          audit.inherited_witness_reuse_count == 4U &&
+          audit.witness_slot_scan_count == 19U &&
+          audit.witness_slot_scan_count ==
+              audit.exact_predicate_count +
+                  audit.inherited_witness_reuse_count &&
+          fresh_predicate_count ==
+              audit.exact_predicate_count +
+                  audit.inherited_witness_reuse_count &&
+          audit.strict_witness_discovery_count == 4U &&
+          audit.internal_node_expansion_count == 2U &&
+          audit.certified_prune_count == 1U &&
+          audit.unresolved_leaf_count == 2U &&
+          audit.maximum_pending_node_count == 2U && audit.complete &&
+          audit.no_dynamic_traversal_or_output_arena,
+      "the inherited traversal audit does not close 19 = 15 + 4");
+
+  const ExactGroupedAnchoredPairTraversalStep complete =
+      traversal.advance(fixture.index, fixture.cloud, roomy);
+  require(
+      complete.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::complete &&
+          complete.work() ==
+              morsehgp3d::hierarchy::
+                  ExactGroupedAnchoredPairTraversalStepWork{} &&
+          complete.traversal_complete_after_step(),
+      "a terminal grouped traversal did not remain terminal");
+}
+
+void test_prepared_inheritance_preserves_nonprefix_canonical_order() {
+  const NonPrefixWitnessFixture fixture;
+  const ExactDyadicAabb3 target_bounds =
+      box({10.0, 0.0, 0.0}, {10.0, 1.0, 0.0});
+  std::optional<std::size_t> target_node_index;
+  std::size_t target_leaf_begin = 0U;
+  std::size_t target_leaf_end = 0U;
+  for (std::size_t node_index = 0U;
+       node_index < fixture.index.build_counters().node_count;
+       ++node_index) {
+    const ExactGroupedAnchoredPairPruneCertificate fresh =
+        certify_exact_grouped_anchored_pair_prune(
+            fixture.index,
+            fixture.cloud,
+            fixture.anchors,
+            fixture.witness_pool,
+            node_index,
+            3U,
+            roomy_budget());
+    if (fresh.leaf_end() == fresh.leaf_begin() + 2U &&
+        fresh.query_bounds() == target_bounds) {
+      target_node_index = node_index;
+      target_leaf_begin = fresh.leaf_begin();
+      target_leaf_end = fresh.leaf_end();
+      break;
+    }
+  }
+  require(
+      target_node_index.has_value(),
+      "the nonprefix inheritance fixture lost its target subtree");
+
+  std::size_t fresh_node_count = 0U;
+  std::size_t fresh_predicate_count = 0U;
+  std::size_t fresh_prune_count = 0U;
+  bool saw_fresh_q1_prune = false;
+  for (std::size_t node_index = 0U;
+       node_index < fixture.index.build_counters().node_count;
+       ++node_index) {
+    const ExactGroupedAnchoredPairPruneCertificate fresh =
+        certify_exact_grouped_anchored_pair_prune(
+            fixture.index,
+            fixture.cloud,
+            fixture.anchors,
+            fixture.witness_pool,
+            node_index,
+            3U,
+            roomy_budget());
+    if (fresh.leaf_begin() < target_leaf_begin ||
+        fresh.leaf_end() > target_leaf_end) {
+      continue;
+    }
+    ++fresh_node_count;
+    fresh_predicate_count += fresh.audit().exact_predicate_count;
+    if (node_index == *target_node_index) {
+      require(
+          fresh.decision() ==
+                  ExactGroupedAnchoredPairPruneDecision::inconclusive &&
+              fresh.audit().exact_predicate_count == 3U &&
+              fresh.audit().strict_group_witness_count == 1U &&
+              exact_diametral_phi_aabb_maximum_sign(
+                  fresh.anchor_bounds(),
+                  fresh.query_bounds(),
+                  point_box(fixture.cloud, PointId{1U})) == 0 &&
+              exact_diametral_phi_aabb_maximum_sign(
+                  fresh.anchor_bounds(),
+                  fresh.query_bounds(),
+                  point_box(fixture.cloud, PointId{2U})) == 0 &&
+              exact_diametral_phi_aabb_maximum_sign(
+                  fresh.anchor_bounds(),
+                  fresh.query_bounds(),
+                  point_box(fixture.cloud, PointId{3U})) < 0,
+          "the nonprefix parent lost its strict-late and exact-shell profile");
+    }
+    if (!fresh.certified()) {
+      continue;
+    }
+
+    ++fresh_prune_count;
+    require(
+        fresh.leaf_end() == fresh.leaf_begin() + 1U,
+        "the nonprefix fresh oracle unexpectedly pruned an internal node");
+    const PointId pruned_point =
+        fixture.index.leaves()[fresh.leaf_begin()].point_id;
+    const auto witnesses = fresh.certified_witness_point_ids();
+    require(
+        witnesses.size() == 2U,
+        "the rank-three fresh oracle did not publish two witnesses");
+    if (pruned_point == PointId{5U}) {
+      const std::array<PointId, 2> expected{1U, 2U};
+      require(
+          std::equal(
+              witnesses.begin(), witnesses.end(), expected.begin()),
+          "the fresh q1 prune lost its canonical witness prefix");
+      saw_fresh_q1_prune = true;
+    } else {
+      require(false, "the nonprefix fresh oracle pruned an unexpected leaf");
+    }
+  }
+  require(
+      fresh_node_count == 3U && fresh_predicate_count == 8U &&
+          fresh_prune_count == 1U && saw_fresh_q1_prune,
+      "the nonprefix fresh oracle lost its 8-predicate terminal partition");
+
+  ExactGroupedAnchoredPairTraversalContext traversal =
+      ExactGroupedAnchoredPairTraversalContext::start_at_node(
+          fixture.index,
+          fixture.cloud,
+          fixture.anchors,
+          fixture.witness_pool,
+          *target_node_index,
+          3U);
+  const ExactGroupedAnchoredPairTraversalWorkBudget roomy{64U, 64U};
+  std::array<ExactGroupedAnchoredPairTraversalStepKind, 2> kinds{};
+  std::optional<PointId> pruned_point;
+  std::array<PointId, 2> inherited_witnesses{};
+  std::optional<PointId> unresolved_point;
+  std::size_t step_count = 0U;
+  std::size_t prune_count = 0U;
+  while (!traversal.complete()) {
+    const ExactGroupedAnchoredPairTraversalStep step =
+        traversal.advance(fixture.index, fixture.cloud, roomy);
+    require(
+        step.kind() !=
+            ExactGroupedAnchoredPairTraversalStepKind::budget_exhausted,
+        "the roomy nonprefix traversal exhausted its work budget");
+    require(
+        step_count < kinds.size(),
+        "the nonprefix traversal emitted extra terminal records");
+    kinds[step_count] = step.kind();
+    ++step_count;
+
+    if (step.kind() ==
+        ExactGroupedAnchoredPairTraversalStepKind::certified_prune) {
+      require(
+          prune_count == 0U &&
+              step.lbvh_node_index().has_value() &&
+              step.leaf_begin().has_value() && step.leaf_end().has_value() &&
+              *step.leaf_end() == *step.leaf_begin() + 1U,
+          "a nonprefix prune lost its authenticated singleton range");
+      const ExactGroupedAnchoredPairPruneCertificate* certificate =
+          step.prune_certificate();
+      require(
+          certificate != nullptr &&
+              certificate->certifies(
+                  fixture.index,
+                  fixture.cloud,
+                  *step.lbvh_node_index(),
+                  3U,
+                  fixture.anchors),
+          "a nonprefix inherited prune lost its rank or group provenance");
+      const auto witnesses = certificate->certified_witness_point_ids();
+      require(
+          witnesses.size() == 2U,
+          "a nonprefix inherited prune did not publish two witnesses");
+      require(
+          certificate->audit().inherited_strict_group_witness_count == 0U &&
+              certificate->audit().exact_predicate_count == 2U,
+          "an unseen late parent witness shortened the canonical q1 prefix");
+      pruned_point =
+          fixture.index.leaves()[*step.leaf_begin()].point_id;
+      inherited_witnesses = {witnesses[0], witnesses[1]};
+      ++prune_count;
+    } else if (
+        step.kind() ==
+        ExactGroupedAnchoredPairTraversalStepKind::unresolved_leaf) {
+      require(
+          step.unresolved_point_id().has_value(),
+          "the nonprefix traversal lost its unresolved leaf");
+      unresolved_point = step.unresolved_point_id();
+    } else {
+      require(false, "the nonprefix traversal emitted an unexpected record");
+    }
+  }
+
+  require(
+      kinds ==
+              std::array<ExactGroupedAnchoredPairTraversalStepKind, 2>{
+                  ExactGroupedAnchoredPairTraversalStepKind::certified_prune,
+                  ExactGroupedAnchoredPairTraversalStepKind::unresolved_leaf} &&
+          prune_count == 1U && pruned_point == std::optional<PointId>{5U} &&
+          inherited_witnesses == std::array<PointId, 2>{1U, 2U} &&
+          unresolved_point == std::optional<PointId>{4U},
+      "nonprefix inheritance changed the inverse-postorder oracle records");
+
+  const auto& audit = traversal.audit();
+  require(
+      audit.anchor_bounds_construction_count == 1U &&
+          audit.prepared_witness_point_count == 3U &&
+          audit.node_visit_count == 3U &&
+          audit.exact_predicate_count == 7U &&
+          audit.inherited_witness_reuse_count == 1U &&
+          audit.witness_slot_scan_count == 8U &&
+          fresh_predicate_count ==
+              audit.exact_predicate_count +
+                  audit.inherited_witness_reuse_count &&
+          audit.strict_witness_discovery_count == 3U &&
+          audit.internal_node_expansion_count == 1U &&
+          audit.certified_prune_count == 1U &&
+          audit.unresolved_leaf_count == 1U && audit.complete,
+      "nonprefix inheritance does not close the exact identity 8 = 7 + 1");
+}
+
+void test_prepared_traversal_resumes_atomically() {
+  const LineFixture fixture;
+  const std::size_t target_node_index = find_node_by_range_and_bounds(
+      fixture,
+      3U,
+      6U,
+      box({3.0, 0.0, 0.0}, {5.0, 0.0, 0.0}));
+  ExactGroupedAnchoredPairTraversalContext traversal =
+      ExactGroupedAnchoredPairTraversalContext::start_at_node(
+          fixture.index,
+          fixture.cloud,
+          fixture.anchors,
+          fixture.witness_pool,
+          target_node_index,
+          4U);
+
+  const ExactGroupedAnchoredPairTraversalStep first = traversal.advance(
+      fixture.index,
+      fixture.cloud,
+      ExactGroupedAnchoredPairTraversalWorkBudget{1U, 4U});
+  require(
+      first.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::budget_exhausted &&
+          first.stop_reason() ==
+              ExactGroupedAnchoredPairTraversalStopReason::node_visit_limit &&
+          first.work().node_visit_count == 1U &&
+          first.work().exact_predicate_count == 4U &&
+          first.prune_certificate() == nullptr,
+      "the first traversal chunk did not stop between authenticated nodes");
+
+  const ExactGroupedAnchoredPairTraversalStep second = traversal.advance(
+      fixture.index,
+      fixture.cloud,
+      ExactGroupedAnchoredPairTraversalWorkBudget{1U, 1U});
+  require(
+      second.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::budget_exhausted &&
+          second.stop_reason() ==
+              ExactGroupedAnchoredPairTraversalStopReason::
+                  exact_predicate_limit &&
+          second.work().node_visit_count == 1U &&
+          second.work().exact_predicate_count == 1U &&
+          second.work().inherited_witness_reuse_count == 1U &&
+          second.prune_certificate() == nullptr,
+      "the second traversal chunk leaked a partial leaf certificate");
+
+  const ExactGroupedAnchoredPairTraversalStep third = traversal.advance(
+      fixture.index,
+      fixture.cloud,
+      ExactGroupedAnchoredPairTraversalWorkBudget{0U, 1U});
+  require(
+      third.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::certified_prune &&
+          third.work().node_visit_count == 0U &&
+          third.work().exact_predicate_count == 1U &&
+          third.prune_certificate() != nullptr,
+      "a resumed active node was recharged or lost its strict prefix");
+
+  const ExactGroupedAnchoredPairTraversalStep fourth = traversal.advance(
+      fixture.index,
+      fixture.cloud,
+      ExactGroupedAnchoredPairTraversalWorkBudget{3U, 6U});
+  require(
+      fourth.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::unresolved_leaf &&
+          fourth.unresolved_point_id() == std::optional<PointId>{4U} &&
+          fourth.work().node_visit_count == 2U &&
+          fourth.work().exact_predicate_count == 6U &&
+          fourth.work().inherited_witness_reuse_count == 2U,
+      "the resumed traversal changed its right-first sibling order");
+
+  const ExactGroupedAnchoredPairTraversalStep fifth = traversal.advance(
+      fixture.index,
+      fixture.cloud,
+      ExactGroupedAnchoredPairTraversalWorkBudget{1U, 3U});
+  require(
+      fifth.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::unresolved_leaf &&
+          fifth.unresolved_point_id() == std::optional<PointId>{3U} &&
+          fifth.work().node_visit_count == 1U &&
+          fifth.work().exact_predicate_count == 3U &&
+          fifth.work().inherited_witness_reuse_count == 1U &&
+          fifth.traversal_complete_after_step() && traversal.complete(),
+      "the final resumed traversal chunk did not close its subtree");
+
+  const auto& audit = traversal.audit();
+  require(
+      audit.node_visit_count == 5U &&
+          audit.exact_predicate_count == 15U &&
+          audit.inherited_witness_reuse_count == 4U &&
+          audit.certified_prune_count == 1U &&
+          audit.unresolved_leaf_count == 2U &&
+          audit.budget_exhaustion_count == 2U && audit.complete,
+      "segmentation changed the grouped traversal totals");
+}
+
+void test_prepared_traversal_fallback_and_provenance() {
+  const LineFixture fixture;
+  const std::array<PointId, 2> undersized_pool{2U, 3U};
+  ExactGroupedAnchoredPairTraversalContext fallback =
+      ExactGroupedAnchoredPairTraversalContext::start_at_root(
+          fixture.index,
+          fixture.cloud,
+          fixture.anchors,
+          undersized_pool,
+          4U);
+  const ExactGroupedAnchoredPairTraversalStep fallback_step =
+      fallback.advance(
+          fixture.index,
+          fixture.cloud,
+          ExactGroupedAnchoredPairTraversalWorkBudget{1U, 0U});
+  require(
+      fallback_step.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::fallback_subtree &&
+          fallback_step.work().node_visit_count == 1U &&
+          fallback_step.work().exact_predicate_count == 0U &&
+          fallback_step.prune_certificate() == nullptr &&
+          fallback_step.lbvh_node_index().has_value() &&
+          fallback_step.traversal_complete_after_step() &&
+          fallback.audit().fallback_subtree_count == 1U &&
+          fallback.complete(),
+      "an undersized grouped pool traversed leaves instead of falling back");
+
+  ExactGroupedAnchoredPairTraversalContext original =
+      ExactGroupedAnchoredPairTraversalContext::start_at_root(
+          fixture.index,
+          fixture.cloud,
+          fixture.anchors,
+          fixture.witness_pool,
+          4U);
+  ExactGroupedAnchoredPairTraversalContext moved{std::move(original)};
+  require(
+      !original.ready() && moved.ready(),
+      "moving a grouped traversal did not revoke its source");
+  require_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(original.advance(
+            fixture.index,
+            fixture.cloud,
+            ExactGroupedAnchoredPairTraversalWorkBudget{1U, 1U}));
+      },
+      "a moved-from grouped traversal remained usable");
+
+  CanonicalPointCloud other_cloud = make_line_cloud(12U);
+  MortonLbvhIndex other_index = MortonLbvhIndex::build(other_cloud);
+  const std::size_t calls_before = moved.audit().advance_call_count;
+  require_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(moved.advance(
+            other_index,
+            other_cloud,
+            ExactGroupedAnchoredPairTraversalWorkBudget{1U, 1U}));
+      },
+      "a grouped traversal accepted a geometrically equal foreign authority");
+  require(
+      moved.audit().advance_call_count == calls_before &&
+          !moved.validated_for(other_index, other_cloud),
+      "a foreign authority mutated the grouped traversal cursor");
+}
+
 }  // namespace
 
 int main() {
@@ -511,6 +1147,10 @@ int main() {
     test_correlated_boxes_fail_open();
     test_budgets_fail_atomically();
     test_structural_validation();
+    test_prepared_inherited_traversal_differential();
+    test_prepared_inheritance_preserves_nonprefix_canonical_order();
+    test_prepared_traversal_resumes_atomically();
+    test_prepared_traversal_fallback_and_provenance();
   } catch (const std::exception& error) {
     std::cerr << "grouped anchored-pair certificate test failure: "
               << error.what() << '\n';

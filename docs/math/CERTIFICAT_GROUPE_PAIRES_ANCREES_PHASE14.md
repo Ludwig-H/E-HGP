@@ -1,10 +1,10 @@
-# Certificat groupé exact pour les paires ancrées — Phase 14Q P8g
+# Certificat groupé exact et parcours préparé pour les paires ancrées — Phase 14Q P8g--P8h
 
 ## Statut et portée
 
-Ce document fixe un lemme de prune exact pour un groupe borné d'ancres et un nœud certifié du LBVH. Il s'agit d'une primitive `reference_cpu / hgp_reduced / grouped_exact_certificate`, sous `deployment_status=architecture_only` et `public_status=not_claimed`. Elle ne classe aucun support supérieur, ne réduit aucune hiérarchie et ne qualifie ni `warm_e2e`, ni 50 k, ni 10 M+.
+Ce document fixe un lemme de prune exact pour un groupe borné d'ancres et un nœud certifié du LBVH, puis son parcours préparé parent--enfant. P8g fournit la primitive `reference_cpu / hgp_reduced / grouped_exact_certificate`; P8h ajoute le mode `reference_cpu / hgp_reduced / prepared_grouped_exact_traversal`. Les deux restent sous `deployment_status=architecture_only` et `public_status=not_claimed`. Ils ne classent aucun support supérieur, ne réduisent aucune hiérarchie et ne qualifient ni `warm_e2e`, ni 50 k, ni 10 M+.
 
-Pour un couple groupe--nœud, la primitive mutualise les évaluations de $G$ ancres contre $W$ témoins en au plus $W$ prédicats universels sur la boîte du groupe. Elle conserve encore le produit nœuds × témoins et refait sa préparation à chaque appel. Le pool commun n'a aucune obligation de rappel : sa seule fonction est de présenter au prédicat exact des candidats susceptibles de fournir une preuve commune.
+Pour un couple groupe--nœud, la primitive mutualise les évaluations de $G$ ancres contre $W$ témoins en au plus $W$ prédicats universels sur la boîte du groupe. P8h prépare la boîte des ancres et les bornes ponctuelles du pool une seule fois par contexte, puis évite de recalculer chez un enfant tout succès strict effectivement rencontré dans l'ordre canonique. Le pire cas conserve le produit nœuds × témoins. Le pool commun n'a aucune obligation de rappel : sa seule fonction est de présenter au prédicat exact des candidats susceptibles de fournir une preuve commune.
 
 ## Identité diamétrale
 
@@ -70,8 +70,26 @@ Pour $G\leq32$ ancres et $W\leq64$ témoins, la construction de la boîte coûte
 
 Cette primitive ne construit ni corde par nœud, ni allocator global de records, ni tableau par ancre du nuage complet, ni catalogue de paires, facettes, cofaces ou incidences, ni cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Le LBVH certifié existant reste la seule structure globale géométrique.
 
-## Limite de l'incrément hôte
+## Parcours préparé et monotonie parent--enfant — P8h
 
-P8g ouvre seulement le certificat exact d'un nœud authentifié. Il ne prépare pas encore $A$ et le pool une seule fois pour tout un parcours et ne transporte pas encore vers les enfants un masque typé de témoins déjà stricts. Or la monotonie $Q'\subseteq Q$ permet de conserver tout succès strict du parent. Le prochain incrément d'implémentation devra encapsuler cette préparation et cet héritage dans un curseur non forgeable; accepter un masque brut fourni par l'appelant serait interdit.
+Soit $Q'$ la boîte certifiée d'un enfant d'un nœud de boîte $Q$. Puisque $Q'\subseteq Q$, la monotonie du maximum sur son domaine donne, pour tout témoin $x$ :
 
-Aucun benchmark GCP n'est autorisé sur ce seul oracle hôte. Le premier gate futur restera 4 096 points, puis le même 50 k seulement si l'autorité recertifiée reste identique et si le parcours groupé réduit effectivement le nombre de prédicats.
+$$M_x(A,Q')\leq M_x(A,Q).$$
+
+Ainsi, tout succès strict du parent reste strict chez l'enfant :
+
+$$M_x(A,Q)<0\quad\Longrightarrow\quad M_x(A,Q')<0.$$
+
+P8h encapsule cette implication dans un contexte non agrégat, non constructible par défaut, non copiable et déplaçable avec révocation de la source. Il prépare $A$ et les bornes ponctuelles des au plus 64 témoins une seule fois, conserve une pile DFS de capacité fixe et au plus un nœud actif reprenable, puis émet au plus un événement par appel. Les plages de feuilles et les masques hérités restent privés; l'appelant ne peut ni fournir un masque brut, ni extraire le masque intermédiaire d'un nœud inconclusif. Un prune positif transporte encore le certificat P8g et doit être rejoué par `certifies(...)` avec le nuage, le LBVH, le nœud, le rang et les ancres attendus.
+
+L'héritage ne change jamais l'ordre canonique du pool. À chaque nœud, le curseur parcourt les slots dans l'ordre croissant; lorsqu'il atteint un bit hérité, il évite le prédicat exact et incrémente alors seulement le compteur de réutilisation. Si les slots antérieurs ferment déjà le rang, un bit hérité plus tardif n'est ni parcouru, ni compté, ni publié dans le certificat terminal. La fixture permanente non préfixe part d'un parent à deux feuilles et d'un seul témoin tardif hérité. L'oracle frais effectue huit prédicats; P8h en effectue sept et compte un réemploi au passage effectif de ce slot. La sortie canonique est d'abord le prune `q1` de `PointId{5}` avec les témoins `PointId{1}` et `PointId{2}`, puis `q0`, `PointId{4}`, non résolu; l'identité exacte est $8=7+1$. La fixture préfixe indépendante conserve la même partition terminale que cinq appels P8g frais et ferme $19=15+4$.
+
+Un épuisement du budget de visites ou de prédicats conserve le nœud actif privé sans publier de certificat partiel. Une feuille inconclusive émet un seul `PointId` à classifier ultérieurement, jamais $G$ paires acceptées. Un pool trop petit émet un fallback de sous-arbre et termine le contexte. Une autorité étrangère est rejetée avant toute mutation d'audit; déplacer le contexte révoque sa source.
+
+La validation courte GCC Release passe les deux CTests P8g/P8h en 0,20 seconde. L'installation et l'export, puis le consumer externe qui lie la cible installée et appelle réellement `start_at_root` et `advance`, passent 1/1 en 0,01 seconde. Aucun benchmark, sanitizer, kernel, test massif ou GCP n'est lancé pour P8h.
+
+## Limites restantes
+
+Le curseur est reprenable seulement entre appels dans le même processus. Il ne possède ni codec, ni digest, ni epoch persistante et ne constitue pas un checkpoint durable ou une reprise après crash. Il n'ordonnance pas encore les groupes sur toutes les ancres, ne raccorde ni le chemin ancré exact, ni P8c/P7b, ni CUDA, et ne prouve aucune accélération à 50 k ou capacité produit à 10 M+.
+
+La prochaine porte est un ordonnanceur borné et Morton-cohérent, suivi d'un différentiel CPU court contre des certificats P8g frais et le chemin candidat ancré exact. Aucun nouveau gate GCP à 4 096 ou 50 k ne précède cette identité.
