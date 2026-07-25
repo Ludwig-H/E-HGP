@@ -35,6 +35,7 @@ using morsehgp3d::gpu::PairSupportRankPruneAudit;
 using morsehgp3d::gpu::PairSupportRankPruneBatchResult;
 using morsehgp3d::gpu::PairSupportRankPruneBudget;
 using morsehgp3d::gpu::PairSupportRankPruneCapacity;
+using morsehgp3d::gpu::PairSupportRankTraversalBackend;
 using morsehgp3d::hierarchy::ExactPairSupportAuthorityContext;
 using morsehgp3d::hierarchy::ExactPairSupportCheckpoint;
 using morsehgp3d::hierarchy::ExactPairSupportRankKeepCertificate;
@@ -85,6 +86,8 @@ struct Options {
 };
 
 struct RankPruneRunAudit {
+  PairSupportRankTraversalBackend traversal_backend{
+      PairSupportRankTraversalBackend::two_frontier};
   std::size_t callback_count{};
   std::size_t input_product_count{};
   std::size_t required_strict_interior_point_count{};
@@ -92,7 +95,10 @@ struct RankPruneRunAudit {
   std::size_t count_kernel_launch_count{};
   std::size_t exclusive_scan_count{};
   std::size_t emit_kernel_launch_count{};
+  std::size_t stackless_kernel_launch_count{};
+  std::size_t host_synchronization_count{};
   std::size_t visited_work_item_count{};
+  std::size_t visit_budget_count{};
   std::size_t peak_frontier_count{};
   std::size_t output_terminal_count{};
   std::size_t cpu_exact_terminal_recertification_count{};
@@ -107,6 +113,7 @@ struct RankPruneRunAudit {
   std::size_t proposed_product_count{};
   std::size_t fallback_product_count{};
   std::size_t snapshot_h2d_byte_count{};
+  std::size_t escape_snapshot_h2d_byte_count{};
   std::size_t active_product_h2d_byte_count{};
   std::size_t initial_frontier_h2d_byte_count{};
   std::size_t traversal_metadata_d2h_byte_count{};
@@ -115,6 +122,7 @@ struct RankPruneRunAudit {
   std::size_t physical_receipt_d2h_byte_count{};
   std::size_t active_receipt_d2h_byte_count{};
   std::size_t device_frontier_double_buffer_byte_capacity{};
+  std::size_t device_escape_snapshot_byte_capacity{};
   std::size_t device_terminal_byte_capacity{};
   std::size_t device_receipt_byte_capacity{};
   std::size_t device_scan_workspace_byte_capacity{};
@@ -125,7 +133,9 @@ struct RankPruneRunAudit {
   std::uint64_t receipt_digest_fold_fnv1a{kFnvOffsetBasis};
   bool work_item_capacity_exhausted{false};
   bool receipt_capacity_exhausted{false};
+  bool visit_budget_exhausted{false};
   bool epoch_budget_exhausted{false};
+  bool stackless_single_product_traversal_used{false};
   bool every_device_frontier_exhausted{true};
   bool every_snapshot_validated{true};
   bool every_product_record_validated{true};
@@ -386,14 +396,46 @@ void accumulate_rank_prune_audit(
               audit.device_terminal_byte_capacity &&
           audit.receipt_digest_fnv1a == audit.terminal_digest_fnv1a,
       "the P4 source-compatible receipt aliases diverge from terminals");
-  require(
-      audit.gpu_count_kernel_launch_count ==
-              audit.gpu_traversal_epoch_count &&
-          audit.gpu_exclusive_scan_count ==
-              2U * audit.gpu_traversal_epoch_count &&
-          audit.gpu_emit_kernel_launch_count <=
-              audit.gpu_traversal_epoch_count,
-      "the P2 count/scan/emit accounting does not close");
+  if (audit.stackless_single_product_traversal_used) {
+    require(
+        audit.traversal_backend ==
+                PairSupportRankTraversalBackend::
+                    stackless_single_product &&
+            audit.capacity.maximum_product_count == 1U &&
+            audit.input_product_count == 1U &&
+            audit.gpu_traversal_epoch_count == 1U &&
+            audit.gpu_count_kernel_launch_count == 0U &&
+            audit.gpu_exclusive_scan_count == 0U &&
+            audit.gpu_emit_kernel_launch_count == 1U &&
+            audit.gpu_stackless_kernel_launch_count == 1U &&
+            audit.gpu_host_synchronization_count ==
+                1U + static_cast<std::size_t>(
+                         audit.gpu_output_terminal_count != 0U) &&
+            audit.gpu_visited_work_item_count <=
+                audit.gpu_visit_budget_count &&
+            audit.initial_frontier_h2d_byte_count == 0U &&
+            audit.device_frontier_double_buffer_byte_capacity == 0U &&
+            audit.device_scan_workspace_byte_capacity == 0U,
+        "the P5a stackless launch/visit accounting does not close");
+  } else {
+    require(
+        audit.traversal_backend ==
+                PairSupportRankTraversalBackend::two_frontier &&
+            audit.gpu_count_kernel_launch_count ==
+                audit.gpu_traversal_epoch_count &&
+            audit.gpu_exclusive_scan_count ==
+                2U * audit.gpu_traversal_epoch_count &&
+            audit.gpu_emit_kernel_launch_count <=
+                audit.gpu_traversal_epoch_count &&
+            audit.gpu_stackless_kernel_launch_count == 0U &&
+            audit.gpu_host_synchronization_count ==
+                audit.gpu_traversal_epoch_count + 1U &&
+            audit.gpu_visit_budget_count == 0U &&
+            audit.escape_snapshot_h2d_byte_count == 0U &&
+            audit.device_escape_snapshot_byte_capacity == 0U &&
+            !audit.visit_budget_exhausted,
+        "the P2 two-frontier count/scan/emit accounting does not close");
+  }
   require(
       audit.immutable_lbvh_snapshot_validated &&
           audit.product_records_validated &&
@@ -410,19 +452,27 @@ void accumulate_rank_prune_audit(
   require(
       !audit.work_item_capacity_exhausted &&
           !audit.receipt_capacity_exhausted &&
+          !audit.visit_budget_exhausted &&
           !audit.epoch_budget_exhausted &&
           audit.device_frontier_exhausted,
       "the P4 component smoke exhausted a capacity or epoch budget "
       "before terminal coverage");
   if (aggregate.callback_count == 0U) {
+    aggregate.traversal_backend = audit.traversal_backend;
+    aggregate.stackless_single_product_traversal_used =
+        audit.stackless_single_product_traversal_used;
     aggregate.required_strict_interior_point_count =
         audit.required_strict_interior_point_count;
     aggregate.first_buffer_epoch = audit.buffer_epoch;
   } else {
     require(
         audit.required_strict_interior_point_count ==
-            aggregate.required_strict_interior_point_count,
-        "the P2 callback changed its rank threshold within one run");
+                aggregate.required_strict_interior_point_count &&
+            audit.traversal_backend == aggregate.traversal_backend &&
+            audit.stackless_single_product_traversal_used ==
+                aggregate.stackless_single_product_traversal_used,
+        "a P2 callback changed its rank threshold or traversal backend "
+        "within one run");
     require(
         audit.buffer_epoch > aggregate.last_buffer_epoch,
         "the P2 callback buffer epoch did not advance");
@@ -448,7 +498,15 @@ void accumulate_rank_prune_audit(
   MORSEHGP3D_ACCUMULATE_AUDIT(
       emit_kernel_launch_count, gpu_emit_kernel_launch_count);
   MORSEHGP3D_ACCUMULATE_AUDIT(
+      stackless_kernel_launch_count,
+      gpu_stackless_kernel_launch_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
+      host_synchronization_count,
+      gpu_host_synchronization_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
       visited_work_item_count, gpu_visited_work_item_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
+      visit_budget_count, gpu_visit_budget_count);
   MORSEHGP3D_ACCUMULATE_AUDIT(
       output_terminal_count, gpu_output_terminal_count);
   MORSEHGP3D_ACCUMULATE_AUDIT(
@@ -480,6 +538,9 @@ void accumulate_rank_prune_audit(
   MORSEHGP3D_ACCUMULATE_AUDIT(
       snapshot_h2d_byte_count, snapshot_h2d_byte_count);
   MORSEHGP3D_ACCUMULATE_AUDIT(
+      escape_snapshot_h2d_byte_count,
+      escape_snapshot_h2d_byte_count);
+  MORSEHGP3D_ACCUMULATE_AUDIT(
       active_product_h2d_byte_count,
       active_product_h2d_byte_count);
   MORSEHGP3D_ACCUMULATE_AUDIT(
@@ -507,6 +568,9 @@ void accumulate_rank_prune_audit(
   aggregate.device_frontier_double_buffer_byte_capacity = std::max(
       aggregate.device_frontier_double_buffer_byte_capacity,
       audit.device_frontier_double_buffer_byte_capacity);
+  aggregate.device_escape_snapshot_byte_capacity = std::max(
+      aggregate.device_escape_snapshot_byte_capacity,
+      audit.device_escape_snapshot_byte_capacity);
   aggregate.device_terminal_byte_capacity = std::max(
       aggregate.device_terminal_byte_capacity,
       audit.device_terminal_byte_capacity);
@@ -525,6 +589,9 @@ void accumulate_rank_prune_audit(
   aggregate.receipt_capacity_exhausted =
       aggregate.receipt_capacity_exhausted ||
       audit.receipt_capacity_exhausted;
+  aggregate.visit_budget_exhausted =
+      aggregate.visit_budget_exhausted ||
+      audit.visit_budget_exhausted;
   aggregate.epoch_budget_exhausted =
       aggregate.epoch_budget_exhausted ||
       audit.epoch_budget_exhausted;
@@ -570,6 +637,9 @@ void accumulate_rank_prune_audit(
     const RankPruneRunAudit& left,
     const RankPruneRunAudit& right) {
   return left.callback_count == right.callback_count &&
+         left.traversal_backend == right.traversal_backend &&
+         left.stackless_single_product_traversal_used ==
+             right.stackless_single_product_traversal_used &&
          left.input_product_count == right.input_product_count &&
          left.required_strict_interior_point_count ==
              right.required_strict_interior_point_count &&
@@ -579,8 +649,13 @@ void accumulate_rank_prune_audit(
          left.exclusive_scan_count == right.exclusive_scan_count &&
          left.emit_kernel_launch_count ==
              right.emit_kernel_launch_count &&
+         left.stackless_kernel_launch_count ==
+             right.stackless_kernel_launch_count &&
+         left.host_synchronization_count ==
+             right.host_synchronization_count &&
          left.visited_work_item_count ==
              right.visited_work_item_count &&
+         left.visit_budget_count == right.visit_budget_count &&
          left.peak_frontier_count == right.peak_frontier_count &&
          left.output_terminal_count == right.output_terminal_count &&
          left.cpu_exact_terminal_recertification_count ==
@@ -615,6 +690,8 @@ void accumulate_rank_prune_audit(
              right.active_receipt_d2h_byte_count &&
          left.device_frontier_double_buffer_byte_capacity ==
              right.device_frontier_double_buffer_byte_capacity &&
+         left.device_escape_snapshot_byte_capacity ==
+             right.device_escape_snapshot_byte_capacity &&
          left.device_terminal_byte_capacity ==
              right.device_terminal_byte_capacity &&
          left.device_receipt_byte_capacity ==
@@ -631,6 +708,8 @@ void accumulate_rank_prune_audit(
              right.work_item_capacity_exhausted &&
          left.receipt_capacity_exhausted ==
              right.receipt_capacity_exhausted &&
+         left.visit_budget_exhausted ==
+             right.visit_budget_exhausted &&
          left.epoch_budget_exhausted ==
              right.epoch_budget_exhausted &&
          left.every_device_frontier_exhausted ==
@@ -1017,6 +1096,17 @@ void write_bool(std::ostream& output, bool value) {
   output << (value ? "true" : "false");
 }
 
+[[nodiscard]] std::string_view traversal_backend_text(
+    PairSupportRankTraversalBackend backend) {
+  switch (backend) {
+    case PairSupportRankTraversalBackend::two_frontier:
+      return "two_frontier";
+    case PairSupportRankTraversalBackend::stackless_single_product:
+      return "stackless_single_product";
+  }
+  fail("an invalid pair-rank traversal backend escaped");
+}
+
 void write_stream_audit(
     std::ostream& output,
     const ExactPairSupportStreamAudit& audit) {
@@ -1075,6 +1165,8 @@ void write_gpu_audit(
       << audit.cpu_exact_phi_recertification_count
       << ",\"device_frontier_double_buffer_byte_capacity\":"
       << audit.device_frontier_double_buffer_byte_capacity
+      << ",\"device_escape_snapshot_byte_capacity\":"
+      << audit.device_escape_snapshot_byte_capacity
       << ",\"device_terminal_byte_capacity\":"
       << audit.device_terminal_byte_capacity
       << ",\"device_receipt_byte_capacity\":"
@@ -1085,6 +1177,8 @@ void write_gpu_audit(
       << audit.device_fixed_workspace_byte_capacity
       << ",\"emit_kernel_launch_count\":"
       << audit.emit_kernel_launch_count
+      << ",\"escape_snapshot_h2d_byte_count\":"
+      << audit.escape_snapshot_h2d_byte_count
       << ",\"epoch_budget_exhausted\":";
   write_bool(output, audit.epoch_budget_exhausted);
   output
@@ -1114,6 +1208,8 @@ void write_gpu_audit(
       << ",\"fallback_product_count\":"
       << audit.fallback_product_count
       << ",\"first_buffer_epoch\":" << audit.first_buffer_epoch
+      << ",\"resident_traversal_host_synchronization_count\":"
+      << audit.host_synchronization_count
       << ",\"initial_frontier_h2d_byte_count\":"
       << audit.initial_frontier_h2d_byte_count
       << ",\"input_product_count\":" << audit.input_product_count
@@ -1141,6 +1237,12 @@ void write_gpu_audit(
       << audit.required_strict_interior_point_count
       << ",\"snapshot_h2d_byte_count\":"
       << audit.snapshot_h2d_byte_count
+      << ",\"stackless_kernel_launch_count\":"
+      << audit.stackless_kernel_launch_count
+      << ",\"stackless_single_product_traversal_used\":";
+  write_bool(
+      output, audit.stackless_single_product_traversal_used);
+  output
       << ",\"strict_interior_terminal_count\":"
       << audit.strict_interior_terminal_count
       << ",\"terminal_capacity_exhausted\":";
@@ -1152,10 +1254,16 @@ void write_gpu_audit(
       << audit.traversal_epoch_count
       << ",\"traversal_metadata_d2h_byte_count\":"
       << audit.traversal_metadata_d2h_byte_count
+      << ",\"traversal_backend\":\""
+      << traversal_backend_text(audit.traversal_backend) << '"'
       << ",\"unresolved_external_leaf_terminal_count\":"
       << audit.unresolved_external_leaf_terminal_count
       << ",\"visited_work_item_count\":"
       << audit.visited_work_item_count
+      << ",\"visit_budget_count\":" << audit.visit_budget_count
+      << ",\"visit_budget_exhausted\":";
+  write_bool(output, audit.visit_budget_exhausted);
+  output
       << ",\"work_item_capacity_exhausted\":";
   write_bool(output, audit.work_item_capacity_exhausted);
   output << '}';
@@ -1358,6 +1466,30 @@ int main(int argument_count, char** argument_values) {
                 "the resident LBVH snapshot byte count overflows"),
         "the first P4 pass did not upload exactly one immutable LBVH "
         "snapshot");
+    const bool stackless_expected =
+        options.capacity.maximum_product_count == 1U &&
+        gpu_context.node_count() <=
+            static_cast<std::size_t>(
+                std::numeric_limits<std::uint32_t>::max());
+    const std::size_t expected_escape_snapshot_bytes =
+        stackless_expected
+            ? checked_multiply(
+                  gpu_context.node_count(),
+                  sizeof(std::uint32_t),
+                  "the resident stackless escape snapshot byte count "
+                  "overflows")
+            : 0U;
+    require(
+        first_assisted.gpu_audit.escape_snapshot_h2d_byte_count ==
+                expected_escape_snapshot_bytes &&
+            first_assisted.gpu_audit
+                    .device_escape_snapshot_byte_capacity ==
+                expected_escape_snapshot_bytes &&
+            first_assisted.gpu_audit
+                    .stackless_single_product_traversal_used ==
+                stackless_expected,
+        "the first P5a pass did not separate the 4N escape snapshot from "
+        "the shared 80N LBVH snapshot");
     std::vector<AssistedMeasurement> resident_replays;
     resident_replays.reserve(options.resident_replay_count);
     for (std::size_t replay_index = 0U;
@@ -1379,6 +1511,10 @@ int main(int argument_count, char** argument_values) {
       require(
           replay.gpu_audit.snapshot_h2d_byte_count == 0U,
           "a resident P4 replay repeated the immutable LBVH snapshot upload");
+      require(
+          replay.gpu_audit.escape_snapshot_h2d_byte_count == 0U,
+          "a resident P5a replay repeated the immutable escape snapshot "
+          "upload");
       resident_replays.push_back(std::move(replay));
     }
 
@@ -1459,7 +1595,7 @@ int main(int argument_count, char** argument_values) {
         << "\"rank_prune_and_keep_exercised\":true,"
         << "\"scalability_claimed\":false,"
         << "\"schema\":"
-           "\"morsehgp3d.phase14q.pair_rank_search_component_smoke.v2\","
+           "\"morsehgp3d.phase14q.pair_rank_search_component_smoke.v3\","
         << "\"scientific_public_result_claimed\":false,"
         << "\"slo_claimed\":false,"
         << "\"support_sizes_exercised\":[2],"

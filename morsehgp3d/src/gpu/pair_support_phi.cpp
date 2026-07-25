@@ -97,6 +97,75 @@ void hash_word(std::uint64_t& digest, std::uint64_t word) noexcept {
          node.right_child == detail::pair_support_phi_sentinel;
 }
 
+[[nodiscard]] std::vector<std::uint32_t> build_escape_node_indices(
+    std::span<const detail::PairSupportPhiNodeInputRecord> nodes,
+    std::uint64_t root_node_index) {
+  if (nodes.size() >
+      static_cast<std::size_t>(
+          std::numeric_limits<std::uint32_t>::max())) {
+    // The rope is an optional optimization.  Keeping it empty selects the
+    // historical bounded traversal without invalidating the context.
+    return {};
+  }
+  const std::size_t root_index = checked_size(
+      root_node_index,
+      "the Phase 14Q stackless root index does not fit size_t");
+  if (nodes.empty() || root_index != nodes.size() - 1U) {
+    throw std::logic_error(
+        "the Phase 14Q stackless LBVH is not strict postorder");
+  }
+
+  std::vector<std::uint32_t> escape(
+      nodes.size(), detail::pair_support_rank_escape_sentinel);
+
+  for (std::size_t parent_plus_one = nodes.size();
+       parent_plus_one != 0U;
+       --parent_plus_one) {
+    const std::size_t parent_index = parent_plus_one - 1U;
+    const detail::PairSupportPhiNodeInputRecord& parent =
+        nodes[parent_index];
+    const bool left_missing =
+        parent.left_child == detail::pair_support_phi_sentinel;
+    const bool right_missing =
+        parent.right_child == detail::pair_support_phi_sentinel;
+    if (left_missing != right_missing) {
+      throw std::logic_error(
+          "the Phase 14Q stackless LBVH has incomplete topology");
+    }
+    if (left_missing) {
+      continue;
+    }
+
+    const std::size_t left_index = checked_size(
+        parent.left_child,
+        "a Phase 14Q stackless left child does not fit size_t");
+    const std::size_t right_index = checked_size(
+        parent.right_child,
+        "a Phase 14Q stackless right child does not fit size_t");
+    if (left_index >= parent_index || right_index >= parent_index ||
+        left_index == right_index) {
+      throw std::logic_error(
+          "the Phase 14Q stackless LBVH is not a strict postorder tree");
+    }
+    const detail::PairSupportPhiNodeInputRecord& left =
+        nodes[left_index];
+    const detail::PairSupportPhiNodeInputRecord& right =
+        nodes[right_index];
+    if (left.leaf_begin != parent.leaf_begin ||
+        left.leaf_begin >= left.leaf_end ||
+        left.leaf_end != right.leaf_begin ||
+        right.leaf_begin >= right.leaf_end ||
+        right.leaf_end != parent.leaf_end) {
+      throw std::logic_error(
+          "the Phase 14Q stackless LBVH child ranges do not tile their parent");
+    }
+
+    escape[left_index] = static_cast<std::uint32_t>(right_index);
+    escape[right_index] = escape[parent_index];
+  }
+  return escape;
+}
+
 [[nodiscard]] bool finite_canonical_binary64(
     std::uint64_t bits) noexcept {
   try {
@@ -589,75 +658,41 @@ validate_and_recertify_rank_prunes(
       capacity.maximum_receipt_count *
       sizeof(detail::PairSupportRankDeviceTerminal);
   validate_allocation_product(
-      batch.traversal_epoch_count,
-      5U * sizeof(std::uint64_t),
-      "the Phase 9 rank-prune metadata D2H byte count overflows size_t");
-  const std::size_t expected_metadata_d2h_bytes = checked_add_size(
-      batch.traversal_epoch_count * (5U * sizeof(std::uint64_t)),
-      sizeof(std::uint64_t),
-      "the Phase 9 rank-prune metadata D2H byte count overflows size_t");
-  const std::size_t fixed_product_bytes =
-      capacity.maximum_product_count *
-      (sizeof(detail::PairSupportRankProductInputRecord) +
-       sizeof(std::uint64_t));
-  const std::size_t fixed_work_bytes =
-      capacity.maximum_work_item_count *
-      (2U * sizeof(detail::PairSupportRankWorkItem) +
-       4U * sizeof(std::uint64_t) +
-       2U * sizeof(std::uint64_t));
-  std::size_t expected_fixed_workspace_bytes = checked_add_size(
-      fixed_product_bytes,
-      fixed_work_bytes,
-      "the Phase 9 rank-prune fixed workspace byte count overflows size_t");
-  expected_fixed_workspace_bytes = checked_add_size(
-      expected_fixed_workspace_bytes,
-      terminal_capacity_bytes,
-      "the Phase 9 rank-prune fixed workspace byte count overflows size_t");
-  expected_fixed_workspace_bytes = checked_add_size(
-      expected_fixed_workspace_bytes,
-      sizeof(std::uint64_t),
-      "the Phase 9 rank-prune fixed workspace byte count overflows size_t");
-  expected_fixed_workspace_bytes = checked_add_size(
-      expected_fixed_workspace_bytes,
-      batch.device_scan_workspace_byte_capacity,
-      "the Phase 9 rank-prune fixed workspace byte count overflows size_t");
+      nodes.size(),
+      sizeof(std::uint32_t),
+      "the Phase 14Q rank-prune escape snapshot overflows size_t");
+  const std::size_t escape_snapshot_bytes =
+      nodes.size() * sizeof(std::uint32_t);
+  const bool legacy =
+      batch.traversal_backend ==
+      detail::PairSupportRankTraversalBackend::two_frontier;
+  const bool stackless =
+      batch.traversal_backend ==
+      detail::PairSupportRankTraversalBackend::stackless_single_product;
+  if (!legacy && !stackless) {
+    throw std::runtime_error(
+        "the GPU rank-prune proposal returned an invalid traversal backend");
+  }
   if (batch.terminals.size() != batch.terminal_count ||
       batch.input_product_count != products.size() ||
       batch.product_capacity != capacity.maximum_product_count ||
       batch.work_item_capacity != capacity.maximum_work_item_count ||
       batch.terminal_capacity != capacity.maximum_receipt_count ||
       batch.terminal_count > capacity.maximum_receipt_count ||
-      batch.traversal_epoch_count == 0U ||
-      batch.traversal_epoch_count > budget.maximum_epoch_count ||
-      batch.count_kernel_launch_count != batch.traversal_epoch_count ||
-      batch.traversal_epoch_count >
-          std::numeric_limits<std::size_t>::max() / 2U ||
-      batch.exclusive_scan_count !=
-          2U * batch.traversal_epoch_count ||
       batch.buffer_epoch == 0U ||
       batch.buffer_epoch <= previous_buffer_epoch ||
       batch.peak_frontier_count == 0U ||
-      batch.peak_frontier_count < products.size() ||
-      batch.peak_frontier_count > capacity.maximum_work_item_count ||
       batch.peak_frontier_count > batch.visited_work_item_count ||
       batch.terminal_count > batch.visited_work_item_count ||
       (batch.snapshot_h2d_byte_count != 0U &&
        batch.snapshot_h2d_byte_count != snapshot_bytes) ||
       batch.active_product_h2d_byte_count != product_bytes ||
-      batch.initial_frontier_h2d_byte_count != initial_frontier_bytes ||
-      batch.traversal_metadata_d2h_byte_count !=
-          expected_metadata_d2h_bytes ||
       batch.active_terminal_d2h_byte_count !=
           batch.terminal_count *
               sizeof(detail::PairSupportRankDeviceTerminal) ||
       batch.physical_terminal_d2h_byte_count !=
           batch.active_terminal_d2h_byte_count ||
-      batch.device_frontier_double_buffer_byte_capacity !=
-          frontier_capacity_bytes ||
       batch.device_terminal_byte_capacity != terminal_capacity_bytes ||
-      batch.device_scan_workspace_byte_capacity == 0U ||
-      batch.device_fixed_workspace_byte_capacity !=
-          expected_fixed_workspace_bytes ||
       !batch.anchor_ball_culling_enabled) {
     throw std::runtime_error(
         "the GPU rank-prune proposal returned invalid extent metadata");
@@ -673,21 +708,146 @@ validate_and_recertify_rank_prunes(
   }
   const bool capacity_exhausted =
       batch.capacity_stop != detail::PairSupportRankCapacityStop::none;
-  if ((capacity_exhausted &&
-       (batch.emit_kernel_launch_count + 1U !=
-            batch.traversal_epoch_count ||
-        batch.frontier_exhausted)) ||
-      (!capacity_exhausted &&
-       batch.emit_kernel_launch_count != batch.traversal_epoch_count) ||
-      (!batch.frontier_exhausted && !capacity_exhausted &&
-       batch.traversal_epoch_count != budget.maximum_epoch_count)) {
-    throw std::runtime_error(
-        "the GPU rank-prune proposal returned inconsistent traversal metadata");
+
+  if (legacy) {
+    validate_allocation_product(
+        batch.traversal_epoch_count,
+        5U * sizeof(std::uint64_t),
+        "the Phase 9 rank-prune metadata D2H byte count overflows size_t");
+    const std::size_t expected_metadata_d2h_bytes = checked_add_size(
+        batch.traversal_epoch_count * (5U * sizeof(std::uint64_t)),
+        sizeof(std::uint64_t),
+        "the Phase 9 rank-prune metadata D2H byte count overflows size_t");
+    const std::size_t fixed_product_bytes =
+        capacity.maximum_product_count *
+        (sizeof(detail::PairSupportRankProductInputRecord) +
+         sizeof(std::uint64_t));
+    const std::size_t fixed_work_bytes =
+        capacity.maximum_work_item_count *
+        (2U * sizeof(detail::PairSupportRankWorkItem) +
+         6U * sizeof(std::uint64_t));
+    std::size_t expected_fixed_workspace_bytes = checked_add_size(
+        fixed_product_bytes,
+        fixed_work_bytes,
+        "the Phase 9 rank-prune fixed workspace byte count overflows size_t");
+    expected_fixed_workspace_bytes = checked_add_size(
+        expected_fixed_workspace_bytes,
+        terminal_capacity_bytes,
+        "the Phase 9 rank-prune fixed workspace byte count overflows size_t");
+    expected_fixed_workspace_bytes = checked_add_size(
+        expected_fixed_workspace_bytes,
+        sizeof(std::uint64_t),
+        "the Phase 9 rank-prune fixed workspace byte count overflows size_t");
+    expected_fixed_workspace_bytes = checked_add_size(
+        expected_fixed_workspace_bytes,
+        batch.device_scan_workspace_byte_capacity,
+        "the Phase 9 rank-prune fixed workspace byte count overflows size_t");
+    if (batch.traversal_epoch_count == 0U ||
+        batch.traversal_epoch_count > budget.maximum_epoch_count ||
+        batch.count_kernel_launch_count != batch.traversal_epoch_count ||
+        batch.traversal_epoch_count >
+            std::numeric_limits<std::size_t>::max() / 2U ||
+        batch.exclusive_scan_count !=
+            2U * batch.traversal_epoch_count ||
+        batch.host_synchronization_count !=
+            batch.traversal_epoch_count + 1U ||
+        batch.peak_frontier_count < products.size() ||
+        batch.peak_frontier_count > capacity.maximum_work_item_count ||
+        batch.initial_frontier_h2d_byte_count != initial_frontier_bytes ||
+        batch.traversal_metadata_d2h_byte_count !=
+            expected_metadata_d2h_bytes ||
+        batch.device_frontier_double_buffer_byte_capacity !=
+            frontier_capacity_bytes ||
+        batch.escape_snapshot_h2d_byte_count != 0U ||
+        batch.device_escape_snapshot_byte_capacity != 0U ||
+        batch.device_scan_workspace_byte_capacity == 0U ||
+        batch.device_fixed_workspace_byte_capacity !=
+            expected_fixed_workspace_bytes ||
+        batch.visit_budget_count != 0U ||
+        batch.visit_budget_exhausted ||
+        (capacity_exhausted &&
+         (batch.emit_kernel_launch_count + 1U !=
+              batch.traversal_epoch_count ||
+          batch.frontier_exhausted)) ||
+        (!capacity_exhausted &&
+         batch.emit_kernel_launch_count !=
+             batch.traversal_epoch_count) ||
+        (!batch.frontier_exhausted && !capacity_exhausted &&
+         batch.traversal_epoch_count != budget.maximum_epoch_count)) {
+      throw std::runtime_error(
+          "the GPU two-frontier rank-prune metadata is inconsistent");
+    }
+  } else {
+    validate_allocation_product(
+        capacity.maximum_work_item_count,
+        budget.maximum_epoch_count,
+        "the Phase 14Q stackless visit budget overflows size_t");
+    const std::size_t multiplied_visit_budget =
+        capacity.maximum_work_item_count *
+        budget.maximum_epoch_count;
+    const std::size_t expected_visit_budget =
+        std::min(nodes.size(), multiplied_visit_budget);
+    const std::size_t expected_fixed_workspace_bytes =
+        checked_add_size(
+            checked_add_size(
+                capacity.maximum_product_count *
+                    sizeof(detail::PairSupportRankProductInputRecord),
+                terminal_capacity_bytes,
+                "the Phase 14Q stackless workspace overflows size_t"),
+            detail::pair_support_rank_stackless_control_byte_count,
+            "the Phase 14Q stackless workspace overflows size_t");
+    if (products.size() != 1U ||
+        capacity.maximum_product_count != 1U ||
+        batch.traversal_epoch_count != 1U ||
+        batch.count_kernel_launch_count != 0U ||
+        batch.exclusive_scan_count != 0U ||
+        batch.emit_kernel_launch_count != 1U ||
+        batch.host_synchronization_count !=
+            1U + static_cast<std::size_t>(
+                     batch.terminal_count != 0U) ||
+        batch.peak_frontier_count != 1U ||
+        batch.initial_frontier_h2d_byte_count != 0U ||
+        batch.traversal_metadata_d2h_byte_count !=
+            detail::pair_support_rank_stackless_control_byte_count ||
+        batch.device_frontier_double_buffer_byte_capacity != 0U ||
+        (batch.escape_snapshot_h2d_byte_count != 0U &&
+         batch.escape_snapshot_h2d_byte_count !=
+             escape_snapshot_bytes) ||
+        batch.device_escape_snapshot_byte_capacity !=
+            escape_snapshot_bytes ||
+        batch.device_scan_workspace_byte_capacity != 0U ||
+        batch.device_fixed_workspace_byte_capacity !=
+            expected_fixed_workspace_bytes ||
+        batch.visit_budget_count != expected_visit_budget ||
+        batch.visited_work_item_count > batch.visit_budget_count ||
+        batch.capacity_stop ==
+            detail::PairSupportRankCapacityStop::work_item_capacity ||
+        (capacity_exhausted &&
+         (batch.capacity_stop !=
+              detail::PairSupportRankCapacityStop::receipt_capacity ||
+          batch.terminal_count != capacity.maximum_receipt_count ||
+          batch.frontier_exhausted ||
+          batch.visit_budget_exhausted)) ||
+        (batch.visit_budget_exhausted &&
+         (batch.frontier_exhausted || capacity_exhausted ||
+          batch.visited_work_item_count !=
+              batch.visit_budget_count)) ||
+        (!batch.frontier_exhausted && !capacity_exhausted &&
+         !batch.visit_budget_exhausted) ||
+        (batch.frontier_exhausted &&
+         (capacity_exhausted || batch.visit_budget_exhausted))) {
+      throw std::runtime_error(
+          "the GPU stackless rank-prune metadata is inconsistent");
+    }
   }
   PairSupportRankPruneBatchResult result;
   PairSupportRankPruneAudit& audit = result.audit;
   audit.capacity = capacity;
   audit.budget = budget;
+  audit.traversal_backend =
+      stackless
+          ? PairSupportRankTraversalBackend::stackless_single_product
+          : PairSupportRankTraversalBackend::two_frontier;
   audit.input_product_count = products.size();
   audit.required_strict_interior_point_count =
       required_strict_interior_point_count;
@@ -696,7 +856,12 @@ validate_and_recertify_rank_prunes(
       batch.count_kernel_launch_count;
   audit.gpu_exclusive_scan_count = batch.exclusive_scan_count;
   audit.gpu_emit_kernel_launch_count = batch.emit_kernel_launch_count;
+  audit.gpu_stackless_kernel_launch_count =
+      stackless ? batch.emit_kernel_launch_count : 0U;
+  audit.gpu_host_synchronization_count =
+      batch.host_synchronization_count;
   audit.gpu_visited_work_item_count = batch.visited_work_item_count;
+  audit.gpu_visit_budget_count = batch.visit_budget_count;
   audit.gpu_peak_frontier_count = batch.peak_frontier_count;
   audit.gpu_output_terminal_count = batch.terminal_count;
   audit.gpu_output_receipt_count = batch.terminal_count;
@@ -709,11 +874,15 @@ validate_and_recertify_rank_prunes(
       detail::PairSupportRankCapacityStop::receipt_capacity;
   audit.device_frontier_exhausted = batch.frontier_exhausted;
   audit.epoch_budget_exhausted =
-      !batch.frontier_exhausted && !capacity_exhausted;
+      legacy
+          ? !batch.frontier_exhausted && !capacity_exhausted
+          : batch.visit_budget_exhausted;
+  audit.visit_budget_exhausted = batch.visit_budget_exhausted;
   audit.immutable_lbvh_snapshot_validated = true;
   audit.product_records_validated = true;
   audit.anchor_ball_culling_enabled =
       batch.anchor_ball_culling_enabled;
+  audit.stackless_single_product_traversal_used = stackless;
 
   std::vector<std::vector<PairSupportRankTerminalCertificate>>
       terminals_by_product(products.size());
@@ -898,6 +1067,14 @@ validate_and_recertify_rank_prunes(
       }
     }
 
+    // A stackless Q/C stop authenticates its returned active prefix for
+    // diagnostics only.  No partial transcript may become a prune proposal
+    // or a keep certificate, even if that prefix happens to contain K exact
+    // strict witnesses.
+    if (stackless && !batch.frontier_exhausted) {
+      continue;
+    }
+
     if (point_counts[product_index] >=
         required_strict_interior_point_count) {
       std::vector<hierarchy::ExactPairSupportWitnessNodeEntry>
@@ -1015,6 +1192,8 @@ validate_and_recertify_rank_prunes(
       audit.prune_product_count -
       audit.keep_certificate_product_count;
   audit.snapshot_h2d_byte_count = batch.snapshot_h2d_byte_count;
+  audit.escape_snapshot_h2d_byte_count =
+      batch.escape_snapshot_h2d_byte_count;
   audit.active_product_h2d_byte_count =
       batch.active_product_h2d_byte_count;
   audit.initial_frontier_h2d_byte_count =
@@ -1031,6 +1210,8 @@ validate_and_recertify_rank_prunes(
       batch.active_terminal_d2h_byte_count;
   audit.device_frontier_double_buffer_byte_capacity =
       batch.device_frontier_double_buffer_byte_capacity;
+  audit.device_escape_snapshot_byte_capacity =
+      batch.device_escape_snapshot_byte_capacity;
   audit.device_terminal_byte_capacity =
       batch.device_terminal_byte_capacity;
   audit.device_receipt_byte_capacity =
@@ -1172,6 +1353,10 @@ PairSupportPhiContext::PairSupportPhiContext(
     throw std::logic_error(
         "the Phase 9 pair-support phi leaf map loses a PointId");
   }
+  if (rank_prune_capacity_.maximum_product_count == 1U) {
+    escape_node_indices_ =
+        build_escape_node_indices(nodes_, root_node_index_);
+  }
 }
 
 PairSupportPhiContext::~PairSupportPhiContext() noexcept = default;
@@ -1224,6 +1409,7 @@ PairSupportRankPruneBatchResult PairSupportPhiContext::propose_rank_prunes(
         detail::propose_pair_support_rank_prunes_on_gpu(
             *state_,
             nodes_,
+            escape_node_indices_,
             root_node_index_,
             packed_products,
             required_strict_interior_point_count,

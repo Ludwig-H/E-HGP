@@ -94,6 +94,7 @@ namespace {
 
 struct FakeRankResources {
   bool snapshot_uploaded{false};
+  bool escape_snapshot_uploaded{false};
 };
 
 [[nodiscard]] std::size_t checked_size(
@@ -161,6 +162,112 @@ void validate_anchor_leaf(
     sum = sum + axis_lower;
   }
   return sum;
+}
+
+struct FakeRankDecision {
+  bool emit_children{false};
+  bool emit_terminal{false};
+  bool strict_terminal{false};
+};
+
+[[nodiscard]] FakeRankDecision classify_rank_work_item(
+    const PairSupportRankWorkItem& item,
+    std::span<const PairSupportPhiNodeInputRecord> nodes,
+    std::span<const PairSupportRankProductInputRecord> products,
+    std::span<const std::uint64_t> strict_point_counts,
+    std::size_t required_strict_interior_point_count) {
+  const std::size_t product_slot = checked_size(
+      item.product_slot,
+      "a fake Phase 9 rank-prune product slot does not fit size_t");
+  const std::size_t witness_index = checked_size(
+      item.witness_node_index,
+      "a fake Phase 9 rank-prune witness index does not fit size_t");
+  if (product_slot >= products.size() || witness_index >= nodes.size()) {
+    throw std::runtime_error(
+        "the fake Phase 9 rank-prune frontier is malformed");
+  }
+  if (strict_point_counts[product_slot] >=
+      required_strict_interior_point_count) {
+    return {};
+  }
+  const PairSupportRankProductInputRecord& product =
+      products[product_slot];
+  const std::size_t first_index = checked_size(
+      product.first_support_node_index,
+      "a fake Phase 9 rank-prune first index does not fit size_t");
+  const std::size_t second_index = checked_size(
+      product.second_support_node_index,
+      "a fake Phase 9 rank-prune second index does not fit size_t");
+  const std::size_t first_anchor_index = checked_size(
+      product.first_anchor_leaf_node_index,
+      "a fake Phase 9 rank-prune first anchor index does not fit size_t");
+  const std::size_t second_anchor_index = checked_size(
+      product.second_anchor_leaf_node_index,
+      "a fake Phase 9 rank-prune second anchor index does not fit size_t");
+  if (first_index >= nodes.size() || second_index >= nodes.size() ||
+      first_anchor_index >= nodes.size() ||
+      second_anchor_index >= nodes.size()) {
+    throw std::runtime_error(
+        "the fake Phase 9 rank-prune product is malformed");
+  }
+  const PairSupportPhiNodeInputRecord& witness = nodes[witness_index];
+  const PairSupportPhiNodeInputRecord& first = nodes[first_index];
+  const PairSupportPhiNodeInputRecord& second = nodes[second_index];
+  const PairSupportPhiNodeInputRecord& first_anchor =
+      nodes[first_anchor_index];
+  const PairSupportPhiNodeInputRecord& second_anchor =
+      nodes[second_anchor_index];
+  validate_anchor_leaf(first_anchor, first.leaf_begin);
+  validate_anchor_leaf(second_anchor, second.leaf_begin);
+  const bool contained_in_support =
+      (first.leaf_begin <= witness.leaf_begin &&
+       witness.leaf_end <= first.leaf_end) ||
+      (second.leaf_begin <= witness.leaf_begin &&
+       witness.leaf_end <= second.leaf_end);
+  if (contained_in_support) {
+    return {};
+  }
+  const bool overlaps =
+      (witness.leaf_begin < first.leaf_end &&
+       first.leaf_begin < witness.leaf_end) ||
+      (witness.leaf_begin < second.leaf_end &&
+       second.leaf_begin < witness.leaf_end);
+  if (!overlaps) {
+    const hierarchy::ExactDiametralPhiAabbMaximum maximum =
+        hierarchy::exact_diametral_phi_aabb_maximum(
+            node_box(first), node_box(second), node_box(witness));
+    const DirectedEnclosure enclosure =
+        enclose_rational(maximum.maximum_phi);
+    const bool finite_strict_upper =
+        enclosure.status !=
+            DirectedEnclosureStatus::unsupported_range &&
+        std::bit_cast<double>(enclosure.upper_bits) < 0.0;
+    if (finite_strict_upper) {
+      return FakeRankDecision{false, true, true};
+    }
+    if (first_index != second_index &&
+        exact_anchor_interval_lower(
+            first_anchor, second_anchor, witness).sign() >= 0) {
+      return FakeRankDecision{false, true, false};
+    }
+  }
+  const bool leaf =
+      witness.left_child == pair_support_phi_sentinel &&
+      witness.right_child == pair_support_phi_sentinel;
+  if (!leaf) {
+    if (witness.left_child >= nodes.size() ||
+        witness.right_child >= nodes.size() ||
+        witness.left_child == witness.right_child) {
+      throw std::runtime_error(
+          "the fake Phase 9 rank-prune node topology is malformed");
+    }
+    return FakeRankDecision{true, false, false};
+  }
+  if (overlaps) {
+    throw std::runtime_error(
+        "the fake Phase 9 rank-prune leaf partially overlaps a support");
+  }
+  return FakeRankDecision{false, true, false};
 }
 
 [[nodiscard]] PairSupportPhiDeviceRecord make_record(
@@ -334,6 +441,7 @@ PairSupportPhiDeviceBatch propose_pair_support_phi_on_gpu(
 PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
     PairSupportPhiContextState& context,
     std::span<const PairSupportPhiNodeInputRecord> nodes,
+    std::span<const std::uint32_t> escape_node_indices,
     std::uint64_t root_node_index,
     std::span<const PairSupportRankProductInputRecord> products,
     std::size_t required_strict_interior_point_count,
@@ -349,6 +457,14 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
       maximum_terminal_count == 0U || maximum_epoch_count == 0U) {
     throw std::invalid_argument(
         "the fake Phase 9 rank-prune launcher received invalid extents");
+  }
+  const bool stackless =
+      maximum_product_count == 1U &&
+      escape_node_indices.size() == nodes.size();
+  if (!escape_node_indices.empty() &&
+      escape_node_indices.size() != nodes.size()) {
+    throw std::invalid_argument(
+        "the fake Phase 14Q launcher received a partial escape snapshot");
   }
 
   const test_support::FakePairSupportPhiCorruption corruption =
@@ -374,6 +490,10 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
   batch.product_capacity = maximum_product_count;
   batch.work_item_capacity = maximum_work_item_count;
   batch.terminal_capacity = maximum_terminal_count;
+  batch.traversal_backend =
+      stackless
+          ? PairSupportRankTraversalBackend::stackless_single_product
+          : PairSupportRankTraversalBackend::two_frontier;
   std::shared_ptr<void>& opaque = context.cuda_resources();
   if (!opaque) {
     opaque = std::make_shared<FakeRankResources>();
@@ -384,26 +504,45 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
         nodes.size() * sizeof(PairSupportPhiNodeInputRecord);
     fake_resources.snapshot_uploaded = true;
   }
+  if (stackless) {
+    batch.device_escape_snapshot_byte_capacity =
+        nodes.size() * sizeof(std::uint32_t);
+    if (!fake_resources.escape_snapshot_uploaded) {
+      batch.escape_snapshot_h2d_byte_count =
+          batch.device_escape_snapshot_byte_capacity;
+      fake_resources.escape_snapshot_uploaded = true;
+    }
+  }
   batch.active_product_h2d_byte_count =
       products.size() * sizeof(PairSupportRankProductInputRecord);
-  batch.initial_frontier_h2d_byte_count =
-      products.size() * sizeof(PairSupportRankWorkItem);
-  batch.device_frontier_double_buffer_byte_capacity =
-      2U * maximum_work_item_count * sizeof(PairSupportRankWorkItem);
   batch.device_terminal_byte_capacity =
       maximum_terminal_count * sizeof(PairSupportRankDeviceTerminal);
-  batch.device_scan_workspace_byte_capacity =
-      maximum_work_item_count * sizeof(std::uint64_t);
-  batch.device_fixed_workspace_byte_capacity =
-      maximum_product_count *
-          (sizeof(PairSupportRankProductInputRecord) +
-           sizeof(std::uint64_t)) +
-      maximum_work_item_count *
-          (2U * sizeof(PairSupportRankWorkItem) +
-           6U * sizeof(std::uint64_t)) +
-      maximum_terminal_count * sizeof(PairSupportRankDeviceTerminal) +
-      sizeof(std::uint64_t) +
-      batch.device_scan_workspace_byte_capacity;
+  if (stackless) {
+    batch.device_fixed_workspace_byte_capacity =
+        maximum_product_count *
+            sizeof(PairSupportRankProductInputRecord) +
+        maximum_terminal_count *
+            sizeof(PairSupportRankDeviceTerminal) +
+        pair_support_rank_stackless_control_byte_count;
+  } else {
+    batch.initial_frontier_h2d_byte_count =
+        products.size() * sizeof(PairSupportRankWorkItem);
+    batch.device_frontier_double_buffer_byte_capacity =
+        2U * maximum_work_item_count * sizeof(PairSupportRankWorkItem);
+    batch.device_scan_workspace_byte_capacity =
+        maximum_work_item_count * sizeof(std::uint64_t);
+    batch.device_fixed_workspace_byte_capacity =
+        maximum_product_count *
+            (sizeof(PairSupportRankProductInputRecord) +
+             sizeof(std::uint64_t)) +
+        maximum_work_item_count *
+            (2U * sizeof(PairSupportRankWorkItem) +
+             6U * sizeof(std::uint64_t)) +
+        maximum_terminal_count *
+            sizeof(PairSupportRankDeviceTerminal) +
+        sizeof(std::uint64_t) +
+        batch.device_scan_workspace_byte_capacity;
+  }
   batch.anchor_ball_culling_enabled = true;
 
   for (const PairSupportRankProductInputRecord& product : products) {
@@ -431,186 +570,174 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
     validate_anchor_leaf(nodes[second_anchor_index], second.leaf_begin);
   }
 
-  std::vector<PairSupportRankWorkItem> current;
-  current.reserve(maximum_work_item_count);
-  for (std::size_t product_slot = 0U;
-       product_slot < products.size();
-       ++product_slot) {
-    current.push_back(PairSupportRankWorkItem{
-        static_cast<std::uint64_t>(product_slot), root_node_index});
-  }
   std::vector<std::uint64_t> strict_point_counts(products.size(), 0U);
-
-  struct FakeDecision {
-    bool emit_children{false};
-    bool emit_terminal{false};
-    bool strict_terminal{false};
-  };
-
-  while (!current.empty() &&
-         batch.traversal_epoch_count < maximum_epoch_count) {
-    ++batch.traversal_epoch_count;
-    ++batch.count_kernel_launch_count;
-    batch.exclusive_scan_count += 2U;
-    batch.visited_work_item_count += current.size();
-    batch.peak_frontier_count =
-        std::max(batch.peak_frontier_count, current.size());
-
-    std::vector<FakeDecision> decisions(current.size());
-    std::size_t next_count = 0U;
-    std::size_t epoch_terminal_count = 0U;
-    for (std::size_t item_index = 0U;
-         item_index < current.size();
-         ++item_index) {
-      const PairSupportRankWorkItem item = current[item_index];
-      const std::size_t product_slot = checked_size(
-          item.product_slot,
-          "a fake Phase 9 rank-prune product slot does not fit size_t");
-      const std::size_t witness_index = checked_size(
-          item.witness_node_index,
-          "a fake Phase 9 rank-prune witness index does not fit size_t");
-      if (product_slot >= products.size() || witness_index >= nodes.size()) {
-        throw std::runtime_error(
-            "the fake Phase 9 rank-prune frontier is malformed");
-      }
-      if (strict_point_counts[product_slot] >=
-          required_strict_interior_point_count) {
-        continue;
-      }
-      const PairSupportRankProductInputRecord& product =
-          products[product_slot];
-      const std::size_t first_index = checked_size(
-          product.first_support_node_index,
-          "a fake Phase 9 rank-prune first index does not fit size_t");
-      const std::size_t second_index = checked_size(
-          product.second_support_node_index,
-          "a fake Phase 9 rank-prune second index does not fit size_t");
-      const std::size_t first_anchor_index = checked_size(
-          product.first_anchor_leaf_node_index,
-          "a fake Phase 9 rank-prune first anchor index does not fit size_t");
-      const std::size_t second_anchor_index = checked_size(
-          product.second_anchor_leaf_node_index,
-          "a fake Phase 9 rank-prune second anchor index does not fit size_t");
-      if (first_index >= nodes.size() || second_index >= nodes.size() ||
-          first_anchor_index >= nodes.size() ||
-          second_anchor_index >= nodes.size()) {
-        throw std::runtime_error(
-            "the fake Phase 9 rank-prune product is malformed");
-      }
-      const PairSupportPhiNodeInputRecord& witness = nodes[witness_index];
-      const PairSupportPhiNodeInputRecord& first = nodes[first_index];
-      const PairSupportPhiNodeInputRecord& second = nodes[second_index];
-      const PairSupportPhiNodeInputRecord& first_anchor =
-          nodes[first_anchor_index];
-      const PairSupportPhiNodeInputRecord& second_anchor =
-          nodes[second_anchor_index];
-      validate_anchor_leaf(first_anchor, first.leaf_begin);
-      validate_anchor_leaf(second_anchor, second.leaf_begin);
-      const bool contained_in_support =
-          (first.leaf_begin <= witness.leaf_begin &&
-           witness.leaf_end <= first.leaf_end) ||
-          (second.leaf_begin <= witness.leaf_begin &&
-           witness.leaf_end <= second.leaf_end);
-      if (contained_in_support) {
-        continue;
-      }
-      const bool overlaps =
-          (witness.leaf_begin < first.leaf_end &&
-           first.leaf_begin < witness.leaf_end) ||
-          (witness.leaf_begin < second.leaf_end &&
-           second.leaf_begin < witness.leaf_end);
-      if (!overlaps) {
-        const hierarchy::ExactDiametralPhiAabbMaximum maximum =
-            hierarchy::exact_diametral_phi_aabb_maximum(
-                node_box(first), node_box(second), node_box(witness));
-        const DirectedEnclosure enclosure =
-            enclose_rational(maximum.maximum_phi);
-        const bool finite_strict_upper =
-            enclosure.status !=
-                DirectedEnclosureStatus::unsupported_range &&
-            std::bit_cast<double>(enclosure.upper_bits) < 0.0;
-        if (finite_strict_upper) {
-          decisions[item_index].emit_terminal = true;
-          decisions[item_index].strict_terminal = true;
-          ++epoch_terminal_count;
-          continue;
-        }
-        if (first_index != second_index &&
-            exact_anchor_interval_lower(
-                first_anchor, second_anchor, witness).sign() >= 0) {
-          decisions[item_index].emit_terminal = true;
-          ++epoch_terminal_count;
-          continue;
-        }
-      }
-      const bool leaf =
-          witness.left_child == pair_support_phi_sentinel &&
-          witness.right_child == pair_support_phi_sentinel;
-      if (!leaf) {
-        if (witness.left_child >= nodes.size() ||
-            witness.right_child >= nodes.size() ||
-            witness.left_child == witness.right_child) {
-          throw std::runtime_error(
-              "the fake Phase 9 rank-prune node topology is malformed");
-        }
-        decisions[item_index].emit_children = true;
-        next_count += 2U;
-      } else if (overlaps) {
-        throw std::runtime_error(
-            "the fake Phase 9 rank-prune leaf partially overlaps a support");
-      } else {
-        decisions[item_index].emit_terminal = true;
-        ++epoch_terminal_count;
-      }
+  if (stackless) {
+    if (maximum_work_item_count >
+        std::numeric_limits<std::size_t>::max() /
+            maximum_epoch_count) {
+      throw std::length_error(
+          "the fake Phase 14Q stackless visit budget overflows");
     }
-
-    if (next_count > maximum_work_item_count) {
-      batch.capacity_stop =
-          PairSupportRankCapacityStop::work_item_capacity;
-      break;
-    }
-    if (epoch_terminal_count >
-        maximum_terminal_count - batch.terminal_count) {
-      batch.capacity_stop =
-          PairSupportRankCapacityStop::receipt_capacity;
-      break;
-    }
-
-    ++batch.emit_kernel_launch_count;
-    std::vector<PairSupportRankWorkItem> next;
-    next.reserve(next_count);
-    for (std::size_t item_index = 0U;
-         item_index < current.size();
-         ++item_index) {
-      const PairSupportRankWorkItem item = current[item_index];
-      const FakeDecision decision = decisions[item_index];
-      const std::size_t product_slot =
-          static_cast<std::size_t>(item.product_slot);
-      const PairSupportPhiNodeInputRecord& witness =
-          nodes[static_cast<std::size_t>(item.witness_node_index)];
+    const std::size_t multiplied_visit_budget =
+        maximum_work_item_count * maximum_epoch_count;
+    batch.visit_budget_count =
+        std::min(nodes.size(), multiplied_visit_budget);
+    batch.traversal_epoch_count = 1U;
+    batch.emit_kernel_launch_count = 1U;
+    batch.peak_frontier_count = 1U;
+    std::uint32_t current =
+        static_cast<std::uint32_t>(root_node_index);
+    while (current != pair_support_rank_escape_sentinel &&
+           batch.visited_work_item_count <
+               batch.visit_budget_count) {
+      if (current >= nodes.size()) {
+        throw std::runtime_error(
+            "the fake Phase 14Q rope references an unknown node");
+      }
+      ++batch.visited_work_item_count;
+      const PairSupportRankWorkItem item{0U, current};
+      const FakeRankDecision decision = classify_rank_work_item(
+          item,
+          nodes,
+          products,
+          strict_point_counts,
+          required_strict_interior_point_count);
+      const PairSupportPhiNodeInputRecord& witness = nodes[current];
       if (decision.emit_terminal) {
-        batch.terminals.push_back(PairSupportRankDeviceTerminal{
-            item.product_slot, item.witness_node_index});
+        if (batch.terminal_count == maximum_terminal_count) {
+          batch.capacity_stop =
+              PairSupportRankCapacityStop::receipt_capacity;
+          break;
+        }
+        batch.terminals.push_back(
+            PairSupportRankDeviceTerminal{0U, current});
         ++batch.terminal_count;
         if (decision.strict_terminal) {
-          strict_point_counts[product_slot] +=
+          strict_point_counts[0U] +=
               witness.leaf_end - witness.leaf_begin;
+          if (strict_point_counts[0U] >=
+              required_strict_interior_point_count) {
+            current = pair_support_rank_escape_sentinel;
+            break;
+          }
         }
       }
       if (decision.emit_children) {
-        next.push_back(PairSupportRankWorkItem{
-            item.product_slot, witness.left_child});
-        next.push_back(PairSupportRankWorkItem{
-            item.product_slot, witness.right_child});
+        if (witness.left_child >= nodes.size()) {
+          throw std::runtime_error(
+              "the fake Phase 14Q left child is unavailable");
+        }
+        current = static_cast<std::uint32_t>(
+            witness.left_child);
+      } else {
+        current = escape_node_indices[current];
+        if (current != pair_support_rank_escape_sentinel &&
+            current >= nodes.size()) {
+          throw std::runtime_error(
+              "the fake Phase 14Q escape index is unavailable");
+        }
       }
     }
-    current = std::move(next);
+    batch.frontier_exhausted =
+        current == pair_support_rank_escape_sentinel;
+    batch.visit_budget_exhausted =
+        !batch.frontier_exhausted &&
+        batch.capacity_stop == PairSupportRankCapacityStop::none &&
+        batch.visited_work_item_count == batch.visit_budget_count;
+    batch.traversal_metadata_d2h_byte_count =
+        pair_support_rank_stackless_control_byte_count;
+    batch.host_synchronization_count =
+        1U + static_cast<std::size_t>(batch.terminal_count != 0U);
+  } else {
+    std::vector<PairSupportRankWorkItem> current;
+    current.reserve(maximum_work_item_count);
+    for (std::size_t product_slot = 0U;
+         product_slot < products.size();
+         ++product_slot) {
+      current.push_back(PairSupportRankWorkItem{
+          static_cast<std::uint64_t>(product_slot),
+          root_node_index});
+    }
+    while (!current.empty() &&
+           batch.traversal_epoch_count < maximum_epoch_count) {
+      ++batch.traversal_epoch_count;
+      ++batch.count_kernel_launch_count;
+      batch.exclusive_scan_count += 2U;
+      batch.visited_work_item_count += current.size();
+      batch.peak_frontier_count =
+          std::max(batch.peak_frontier_count, current.size());
+
+      std::vector<FakeRankDecision> decisions(current.size());
+      std::size_t next_count = 0U;
+      std::size_t epoch_terminal_count = 0U;
+      for (std::size_t item_index = 0U;
+           item_index < current.size();
+           ++item_index) {
+        decisions[item_index] = classify_rank_work_item(
+            current[item_index],
+            nodes,
+            products,
+            strict_point_counts,
+            required_strict_interior_point_count);
+        if (decisions[item_index].emit_children) {
+          next_count += 2U;
+        }
+        if (decisions[item_index].emit_terminal) {
+          ++epoch_terminal_count;
+        }
+      }
+
+      if (next_count > maximum_work_item_count) {
+        batch.capacity_stop =
+            PairSupportRankCapacityStop::work_item_capacity;
+        break;
+      }
+      if (epoch_terminal_count >
+          maximum_terminal_count - batch.terminal_count) {
+        batch.capacity_stop =
+            PairSupportRankCapacityStop::receipt_capacity;
+        break;
+      }
+
+      ++batch.emit_kernel_launch_count;
+      std::vector<PairSupportRankWorkItem> next;
+      next.reserve(next_count);
+      for (std::size_t item_index = 0U;
+           item_index < current.size();
+           ++item_index) {
+        const PairSupportRankWorkItem item = current[item_index];
+        const FakeRankDecision decision = decisions[item_index];
+        const std::size_t product_slot =
+            static_cast<std::size_t>(item.product_slot);
+        const PairSupportPhiNodeInputRecord& witness =
+            nodes[static_cast<std::size_t>(
+                item.witness_node_index)];
+        if (decision.emit_terminal) {
+          batch.terminals.push_back(PairSupportRankDeviceTerminal{
+              item.product_slot, item.witness_node_index});
+          ++batch.terminal_count;
+          if (decision.strict_terminal) {
+            strict_point_counts[product_slot] +=
+                witness.leaf_end - witness.leaf_begin;
+          }
+        }
+        if (decision.emit_children) {
+          next.push_back(PairSupportRankWorkItem{
+              item.product_slot, witness.left_child});
+          next.push_back(PairSupportRankWorkItem{
+              item.product_slot, witness.right_child});
+        }
+      }
+      current = std::move(next);
+    }
+    batch.frontier_exhausted = current.empty();
+    batch.traversal_metadata_d2h_byte_count =
+        batch.traversal_epoch_count *
+            (5U * sizeof(std::uint64_t)) +
+        sizeof(std::uint64_t);
+    batch.host_synchronization_count =
+        batch.traversal_epoch_count + 1U;
   }
-  batch.frontier_exhausted = current.empty();
-  batch.traversal_metadata_d2h_byte_count =
-      batch.traversal_epoch_count *
-          (5U * sizeof(std::uint64_t)) +
-      sizeof(std::uint64_t);
 
   if (corruption ==
       test_support::FakePairSupportPhiCorruption::rank_zero_epoch) {

@@ -136,10 +136,11 @@ struct PairSupportPhiNodeDescriptor {
 };
 
 // Fixed resident capacities for the bounded Phase 9.1-CUDA-P2 traversal.
-// maximum_work_item_count bounds each of the two device frontiers, not their
-// sum.  maximum_receipt_count is retained as a source-compatible name for the
-// capacity C of the unified 16-byte terminal transcript returned by one call.
-// Zero capacities leave P2 disabled while preserving the P1-only constructor.
+// On the legacy backend, maximum_work_item_count bounds each of the two device
+// frontiers, not their sum.  On stackless P=1 it contributes W to the visit
+// bound Q=min(N,W*E) without allocating either frontier.  The receipt name is
+// retained as a source-compatible name for capacity C of the unified 16-byte
+// terminal transcript.  Zero capacities leave P2 disabled.
 struct PairSupportRankPruneCapacity {
   std::size_t maximum_product_count{};
   std::size_t maximum_work_item_count{};
@@ -152,8 +153,10 @@ struct PairSupportRankPruneCapacity {
 
 struct PairSupportRankPruneBudget {
   // One epoch is one stable count -> exclusive-scan -> emit transition over
-  // the current device frontier.  A product whose transcript neither reaches
-  // the strict threshold nor covers the root at this cap remains a fallback.
+  // the current legacy device frontier.  For the stackless P=1 backend, W*E
+  // instead bounds node visits by Q=min(N,W*E).  A product whose transcript
+  // neither reaches the strict threshold nor covers the root at the selected
+  // cap remains a fallback.
   std::size_t maximum_epoch_count{};
 
   friend bool operator==(
@@ -206,21 +209,38 @@ struct PairSupportRankKeepProductCertificate {
       const PairSupportRankKeepProductCertificate&) = default;
 };
 
+// The bounded multi-product path retains its historical two-frontier
+// traversal.  A context whose fixed product capacity is exactly one may use
+// the stackless path backed by one immutable O(N) escape-index snapshot.
+enum class PairSupportRankTraversalBackend : std::uint8_t {
+  two_frontier,
+  stackless_single_product,
+};
+
 struct PairSupportRankPruneAudit {
   static constexpr const char* proposal_semantics =
       "cuda_bounded_two_frontier_rank_prune_or_keep_certificate";
+  static constexpr const char* stackless_proposal_semantics =
+      "cuda_bounded_stackless_single_product_rank_prune_or_keep_certificate";
   static constexpr const char* receipt_semantics =
       "cpu_exact_unified_terminal_antichain_and_coverage_recertified";
 
   PairSupportRankPruneCapacity capacity{};
   PairSupportRankPruneBudget budget{};
+  PairSupportRankTraversalBackend traversal_backend{
+      PairSupportRankTraversalBackend::two_frontier};
   std::size_t input_product_count{};
   std::size_t required_strict_interior_point_count{};
   std::size_t gpu_traversal_epoch_count{};
   std::size_t gpu_count_kernel_launch_count{};
   std::size_t gpu_exclusive_scan_count{};
   std::size_t gpu_emit_kernel_launch_count{};
+  std::size_t gpu_stackless_kernel_launch_count{};
+  // Synchronizations after the immutable snapshots are resident.  Cold
+  // LBVH/escape uploads are accounted by their byte counters, not here.
+  std::size_t gpu_host_synchronization_count{};
   std::size_t gpu_visited_work_item_count{};
+  std::size_t gpu_visit_budget_count{};
   std::size_t gpu_peak_frontier_count{};
   std::size_t gpu_output_terminal_count{};
   std::size_t cpu_exact_terminal_recertification_count{};
@@ -236,6 +256,7 @@ struct PairSupportRankPruneAudit {
   std::size_t proposed_product_count{};
   std::size_t fallback_product_count{};
   std::size_t snapshot_h2d_byte_count{};
+  std::size_t escape_snapshot_h2d_byte_count{};
   std::size_t active_product_h2d_byte_count{};
   std::size_t initial_frontier_h2d_byte_count{};
   std::size_t traversal_metadata_d2h_byte_count{};
@@ -244,14 +265,16 @@ struct PairSupportRankPruneAudit {
   std::size_t physical_terminal_d2h_byte_count{};
   std::size_t active_terminal_d2h_byte_count{};
   std::size_t device_terminal_byte_capacity{};
+  std::size_t device_escape_snapshot_byte_capacity{};
   // Source-compatible aliases of the three terminal-byte counters above.
   std::size_t physical_receipt_d2h_byte_count{};
   std::size_t active_receipt_d2h_byte_count{};
   std::size_t device_frontier_double_buffer_byte_capacity{};
   std::size_t device_receipt_byte_capacity{};
   std::size_t device_scan_workspace_byte_capacity{};
-  // Exact P2-only resident total outside the shared LBVH snapshot and any P1
-  // query buffers: 40P + 80W + 16C + 8 + scan_workspace bytes.
+  // Exact backend-specific resident total outside the shared LBVH/escape
+  // snapshots and any P1 query buffers.  Legacy is
+  // 40P + 80W + 16C + 8 + scan_workspace; stackless P=1 is 32P + 16C + 40.
   std::size_t device_fixed_workspace_byte_capacity{};
   std::uint64_t buffer_epoch{};
   std::uint64_t terminal_digest_fnv1a{};
@@ -259,7 +282,11 @@ struct PairSupportRankPruneAudit {
   std::uint64_t receipt_digest_fnv1a{};
   bool work_item_capacity_exhausted{false};
   bool receipt_capacity_exhausted{false};
+  bool visit_budget_exhausted{false};
   bool epoch_budget_exhausted{false};
+  // Literal frontier exhaustion for the legacy backend.  For stackless P=1,
+  // true also covers the conclusive strict-threshold short circuit: no
+  // unresolved work remains relevant to this product.
   bool device_frontier_exhausted{false};
   bool immutable_lbvh_snapshot_validated{false};
   bool product_records_validated{false};
@@ -274,6 +301,7 @@ struct PairSupportRankPruneAudit {
   // non-witness cull.  P4 records it as a non-strict terminal for exact CPU
   // coverage replay; it never creates a strict receipt or a prune authority.
   bool anchor_ball_culling_enabled{false};
+  bool stackless_single_product_traversal_used{false};
   // P2 only proposes a replayable local rank argument.  The CPU stream remains
   // the authority that decides whether a support product is globally pruned.
   bool global_support_product_prune_published{false};
@@ -360,6 +388,10 @@ class PairSupportPhiContext final {
  private:
   std::shared_ptr<detail::PairSupportPhiContextState> state_;
   std::vector<detail::PairSupportPhiNodeInputRecord> nodes_;
+  // O(N) topology only: escape[i] is the next node after subtree i in the
+  // deterministic left/right depth-first walk.  It never indexes a support
+  // pair, cell, coface, Gamma entry or incidence.
+  std::vector<std::uint32_t> escape_node_indices_;
   std::vector<std::uint64_t> leaf_node_index_by_point_id_;
   std::size_t maximum_query_count_{};
   std::uint64_t last_buffer_epoch_{};

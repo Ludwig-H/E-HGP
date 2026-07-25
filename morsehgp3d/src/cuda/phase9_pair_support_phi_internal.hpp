@@ -19,6 +19,10 @@ inline constexpr std::uint64_t pair_support_phi_requires_descent_code = 2U;
 inline constexpr std::uint64_t pair_support_phi_invalid_code = 3U;
 inline constexpr std::uint64_t pair_support_phi_sentinel =
     std::numeric_limits<std::uint64_t>::max();
+inline constexpr std::uint32_t pair_support_rank_escape_sentinel =
+    std::numeric_limits<std::uint32_t>::max();
+inline constexpr std::size_t pair_support_rank_stackless_control_byte_count =
+    5U * sizeof(std::uint64_t);
 
 struct PairSupportPhiNodeInputRecord {
   std::uint64_t lower_bits[3]{};
@@ -106,6 +110,11 @@ enum class PairSupportRankCapacityStop : std::uint8_t {
   receipt_capacity,
 };
 
+enum class PairSupportRankTraversalBackend : std::uint8_t {
+  two_frontier,
+  stackless_single_product,
+};
+
 struct PairSupportRankDeviceBatch {
   // Only the active terminal prefix is returned: terminals.size() must equal
   // terminal_count.  The device still reserves terminal_capacity records, but
@@ -122,22 +131,29 @@ struct PairSupportRankDeviceBatch {
   std::size_t count_kernel_launch_count{};
   std::size_t exclusive_scan_count{};
   std::size_t emit_kernel_launch_count{};
+  std::size_t host_synchronization_count{};
   std::size_t visited_work_item_count{};
   std::size_t peak_frontier_count{};
   std::size_t snapshot_h2d_byte_count{};
+  std::size_t escape_snapshot_h2d_byte_count{};
   std::size_t active_product_h2d_byte_count{};
   std::size_t initial_frontier_h2d_byte_count{};
   std::size_t traversal_metadata_d2h_byte_count{};
   std::size_t physical_terminal_d2h_byte_count{};
   std::size_t active_terminal_d2h_byte_count{};
   std::size_t device_frontier_double_buffer_byte_capacity{};
+  std::size_t device_escape_snapshot_byte_capacity{};
   std::size_t device_terminal_byte_capacity{};
   std::size_t device_scan_workspace_byte_capacity{};
   std::size_t device_fixed_workspace_byte_capacity{};
+  std::size_t visit_budget_count{};
   std::uint64_t buffer_epoch{};
+  PairSupportRankTraversalBackend traversal_backend{
+      PairSupportRankTraversalBackend::two_frontier};
   PairSupportRankCapacityStop capacity_stop{
       PairSupportRankCapacityStop::none};
   bool frontier_exhausted{false};
+  bool visit_budget_exhausted{false};
   // Exact cull counts would require either another O(W) arena or a contended
   // global atomic.  This flag instead makes the enabled proposal policy
   // explicit without fabricating a counter.
@@ -198,6 +214,7 @@ class PairSupportPhiContextState final {
 propose_pair_support_rank_prunes_on_gpu(
     PairSupportPhiContextState& context,
     std::span<const PairSupportPhiNodeInputRecord> nodes,
+    std::span<const std::uint32_t> escape_node_indices,
     std::uint64_t root_node_index,
     std::span<const PairSupportRankProductInputRecord> products,
     std::size_t required_strict_interior_point_count,
