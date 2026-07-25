@@ -867,8 +867,8 @@ inline __device__ void traverse_stackless_rank_product(
       escape_node_indices[root_node_index] !=
           pair_support_rank_escape_sentinel ||
       required_strict_interior_point_count == 0U ||
-      terminal_offset > std::numeric_limits<std::uint64_t>::max() -
-                            terminal_capacity) {
+      terminal_offset >
+          ~static_cast<std::uint64_t>(0) - terminal_capacity) {
     record_stackless_rank_failure(control, 101U);
     return;
   }
