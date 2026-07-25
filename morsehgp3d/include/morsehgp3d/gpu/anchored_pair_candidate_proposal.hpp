@@ -24,6 +24,11 @@ inline constexpr std::uint32_t
 inline constexpr std::size_t
     anchored_pair_candidate_gpu_maximum_witness_bank_size = 64U;
 inline constexpr std::size_t
+    anchored_pair_candidate_gpu_maximum_query_tile_size = 4'096U;
+inline constexpr std::size_t
+    anchored_pair_candidate_gpu_precomputed_witness_geometry_bytes_per_entry =
+        80U;
+inline constexpr std::size_t
     anchored_pair_candidate_gpu_maximum_closed_rank = 11U;
 inline constexpr std::uint64_t
     anchored_pair_candidate_gpu_invalid_node_index = ~UINT64_C(0);
@@ -169,6 +174,7 @@ struct AnchoredPairCandidateProposalAudit {
   std::size_t initialized_device_transcript_byte_count{};
   std::size_t copied_device_to_host_segment_byte_count{};
   std::size_t copied_device_to_host_transcript_byte_count{};
+  std::size_t precomputed_witness_geometry_byte_capacity{};
   std::size_t node_visit_count{};
   std::size_t candidate_leaf_proposal_count{};
   std::size_t prune_proposal_count{};
@@ -177,6 +183,7 @@ struct AnchoredPairCandidateProposalAudit {
   std::size_t capacity_exhausted_segment_count{};
   std::size_t gpu_kernel_launch_count{};
   std::size_t gpu_compaction_kernel_launch_count{};
+  std::size_t gpu_witness_geometry_precomputation_kernel_launch_count{};
   std::size_t gpu_synchronization_count{};
   int cuda_device{-1};
   std::uint64_t buffer_epoch{};
@@ -197,7 +204,12 @@ struct AnchoredPairCandidateProposalAudit {
   bool prune_mask_cardinalities_validated{false};
   bool transcript_digest_validated{false};
   bool gpu_execution_performed{false};
-  // P8e initially uses one deterministic device-side serial prefix/clamp.
+  // P8f caches one 80-byte, axis-major geometry entry for each member of the
+  // fixed 64Q query tile.  This arena is device-only; every active prefix is
+  // rewritten per call and an inactive suffix has no authority.  It must never
+  // be sized as an all-anchor 64n product structure.
+  bool query_witness_geometry_precomputed{false};
+  // P8e/P8f use one deterministic device-side serial prefix/clamp.
   // This is deliberately distinct from the future parallel DeviceScan path
   // required before a massive-query qualification.
   bool device_serial_prefix_clamp_performed{false};

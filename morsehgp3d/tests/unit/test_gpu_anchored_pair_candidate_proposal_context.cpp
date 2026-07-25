@@ -34,6 +34,7 @@ enum class FakeAnchoredPairProposalCorruption : std::uint8_t {
   out_of_domain_node,
   wrong_prune_cardinality,
   cuda_metadata_from_host_fake,
+  witness_geometry_metadata_from_host_fake,
   wrong_capacity_echo,
 };
 
@@ -326,6 +327,15 @@ propose_phase14_anchored_pair_candidates_on_gpu(
       batch.kernel_launch_count = 1U;
       batch.synchronization_count = 1U;
       break;
+    case FakeAnchoredPairProposalCorruption::
+        witness_geometry_metadata_from_host_fake:
+      batch.witness_geometry_precomputed = true;
+      batch.witness_geometry_precomputation_kernel_launch_count = 1U;
+      batch.precomputed_witness_geometry_byte_capacity =
+          maximum_query_count *
+          phase14_anchored_pair_candidate_maximum_witness_count *
+          phase14_anchored_pair_candidate_witness_geometry_bytes_per_entry;
+      break;
     case FakeAnchoredPairProposalCorruption::wrong_capacity_echo:
       ++batch.physical_transcript_record_capacity;
       break;
@@ -466,6 +476,11 @@ void check_non_scientific_audit(
       label + " is a validated proposal batch, not a scientific outcome");
   check(
       !result.audit.candidate_leaf_status_recertified &&
+          !result.audit.query_witness_geometry_precomputed &&
+          result.audit
+                  .gpu_witness_geometry_precomputation_kernel_launch_count ==
+              0U &&
+          result.audit.precomputed_witness_geometry_byte_capacity == 0U &&
           !result.audit.strict_witness_masks_recertified &&
           !result.audit.exact_closed_ball_partition_published &&
           !result.audit.scientific_decision_published &&
@@ -609,6 +624,23 @@ void test_input_namespace_and_move_guards() {
   reset_fake_gpu_phase14_morton_lbvh_build();
   reset_fake_anchored_pair_proposal();
   const CanonicalPointCloud cloud = proposal_cloud();
+  {
+    MortonLbvhBuildContext oversized_builder{cloud.size() + 2U};
+    auto oversized_build = oversized_builder.build(cloud);
+    MortonLbvhDeviceTraversalLease oversized_lease =
+        oversized_builder.release_device_traversal_lease(oversized_build);
+    check_throws<std::invalid_argument>(
+        [&cloud, &oversized_lease]() {
+          static_cast<void>(AnchoredPairCandidateProposalContext{
+              cloud,
+              std::move(oversized_lease),
+              morsehgp3d::gpu::
+                      anchored_pair_candidate_gpu_maximum_query_tile_size +
+                  1U,
+              1U});
+        },
+        "the fixed query tile cannot become a cloud-sized 64n arena");
+  }
   const CanonicalPointCloud foreign_cloud = proposal_cloud();
   AnchoredPairCandidateProposalContext context = make_context(cloud);
   const std::vector<PointId> witnesses = prefix_witnesses(10U);
@@ -691,13 +723,15 @@ void test_hostile_transcripts_poison_contexts() {
           std::span<const PointId>{witnesses},
           {}}};
 
-  const std::array<FakeAnchoredPairProposalCorruption, 7U> corruptions{
+  const std::array<FakeAnchoredPairProposalCorruption, 8U> corruptions{
       FakeAnchoredPairProposalCorruption::wrong_digest,
       FakeAnchoredPairProposalCorruption::wrong_source_epoch,
       FakeAnchoredPairProposalCorruption::broken_segment_partition,
       FakeAnchoredPairProposalCorruption::out_of_domain_node,
       FakeAnchoredPairProposalCorruption::wrong_prune_cardinality,
       FakeAnchoredPairProposalCorruption::cuda_metadata_from_host_fake,
+      FakeAnchoredPairProposalCorruption::
+          witness_geometry_metadata_from_host_fake,
       FakeAnchoredPairProposalCorruption::wrong_capacity_echo};
   for (const FakeAnchoredPairProposalCorruption corruption : corruptions) {
     reset_fake_gpu_phase14_morton_lbvh_build();

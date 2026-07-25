@@ -282,9 +282,15 @@ Le gate de composant 50 k échoue donc en vitesse. Il révèle simultanément qu
 
 Le diagnostic suivant [phase14q_p8e_g4_ba8dd15.json](phase14q_p8e_g4_ba8dd15.json) conserve bit à bit les digests, visites et records. Il sélectionne les dix bits faibles en dix étapes au plus, évite la seconde vague lorsqu'elle ne peut plus changer le masque et distribue les petites tailles de lot sur un bloc par warp. Avec un transcript physique ramené de 67,1 à 2,1 Mo, la médiane 50 k sur trois répétitions baisse seulement de 535,046 à 454,115 ms pour la proposition et de 739,529 à 656,117 ms pour le composant. Le trafic de transcript divisé par 32 n'était donc pas dominant; le coût restant est celui des prédicats témoins par nœud. Le gate reste fermé.
 
+## Incrément 14Q P8f — géométrie témoin préparée par tuile
+
+P8f est implémenté localement mais reste en attente de qualification G4. Un quatrième kernel prépare une fois par couple requête--témoin les intervalles outward de direction, les trois mots de coordonnées du témoin et le masque d'axes actifs. Les deux traversées réemploient ensuite cette géométrie; les cas invalides ou contenant zéro restent fail-open et le rejeu CPU exact demeure inchangé. Les unités hôte du contexte et du recertificateur compilent et leurs deux tests ciblés passent.
+
+L'arène fixe ajoute exactement $5120Q_{\max}$ octets avec $Q_{\max}\leq4096$, soit au plus 20 971 520 octets. La limite exécutoire interdit qu'elle devienne un tableau $64n$; un passage toutes ancres doit segmenter ses requêtes. L'allocation persiste dans le contexte, mais chaque préfixe actif est réécrit, le suffixe inactif n'a aucune autorité et aucun octet n'est transféré. Elle n'ajoute aucune structure indexée par le nuage complet. Aucun résultat de vitesse n'est encore enregistré. La porte suivante est limitée à 4 096 puis 50 000 points; elle doit préserver l'autorité recertifiée avant que les banques device bornées soient raccordées.
+
 ## Priorités de développement
 
-1. court-circuiter exactement la seconde vague de témoins lorsqu'elle ne peut plus changer les dix premiers bits, puis réduire l'écart entre capacité physique et transcript actif;
+1. qualifier P8f sur G4 avec seulement 4 096 puis 50 000 points et abandonner cette piste de micro-optimisation si le terme dominant ne baisse pas structurellement;
 2. produire les banques directement par tuiles device dans l'arène de requêtes, sans tableau $64n$, et remplacer le préfixe sériel avant un grand nombre d'ancres;
 3. mutualiser le classificateur P8c avec P7b, propager seulement les supports acceptés vers le supérieur sparse et réussir `uniform_latin` puis `eight_clusters` à 50 000 points sous `warm_e2e`;
 4. externaliser autorités et sorties Phase 15, réussir 10 000 001 points, puis seulement 30 M et 50 M après succès complet du rang précédent.

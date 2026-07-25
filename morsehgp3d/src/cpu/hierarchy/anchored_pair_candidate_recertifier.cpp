@@ -154,6 +154,18 @@ constexpr std::uint64_t kFnvPrime = UINT64_C(1099511628211);
          batch.audit.candidate_leaf_masks_validated &&
          batch.audit.prune_mask_cardinalities_validated &&
          batch.audit.transcript_digest_validated &&
+         ((batch.audit.gpu_execution_performed &&
+           batch.audit.query_witness_geometry_precomputed &&
+           batch.audit
+                   .gpu_witness_geometry_precomputation_kernel_launch_count ==
+               1U &&
+           batch.audit.precomputed_witness_geometry_byte_capacity != 0U) ||
+          (!batch.audit.gpu_execution_performed &&
+           !batch.audit.query_witness_geometry_precomputed &&
+           batch.audit
+                   .gpu_witness_geometry_precomputation_kernel_launch_count ==
+               0U &&
+           batch.audit.precomputed_witness_geometry_byte_capacity == 0U)) &&
          !batch.audit.candidate_leaf_status_recertified &&
          !batch.audit.strict_witness_masks_recertified &&
          !batch.audit.exact_closed_ball_partition_published &&

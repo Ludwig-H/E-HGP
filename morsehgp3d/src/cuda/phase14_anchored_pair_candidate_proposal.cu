@@ -43,6 +43,7 @@ constexpr unsigned int kWarpSize = 32U;
 constexpr unsigned int kMaximumWarpsPerBlock = 8U;
 constexpr unsigned int kFullWarpMask = 0xffffffffU;
 constexpr std::size_t kAxisCount = 3U;
+constexpr std::uint64_t kWitnessGeometryValidBit = UINT64_C(1) << 63U;
 constexpr std::uint64_t kProposalSchemaVersion = UINT64_C(1);
 constexpr std::uint64_t kQueryDigestDomain =
     UINT64_C(0x5038645155455259);
@@ -173,6 +174,39 @@ void check_cuda(cudaError_t code, std::string operation) {
   }
   return count * width;
 }
+
+[[nodiscard]] std::size_t checked_witness_geometry_count(
+    std::size_t maximum_query_count) {
+  return checked_bytes(
+      maximum_query_count,
+      phase14_anchored_pair_candidate_maximum_witness_count,
+      "the Phase 14 anchored-pair witness-geometry count overflows size_t");
+}
+
+[[nodiscard]] std::size_t checked_witness_geometry_axis_count(
+    std::size_t maximum_query_count) {
+  return checked_bytes(
+      checked_witness_geometry_count(maximum_query_count),
+      kAxisCount,
+      "the Phase 14 anchored-pair axis-geometry count overflows size_t");
+}
+
+[[nodiscard]] std::size_t checked_witness_geometry_bytes(
+    std::size_t maximum_query_count) {
+  return checked_bytes(
+      checked_witness_geometry_count(maximum_query_count),
+      phase14_anchored_pair_candidate_witness_geometry_bytes_per_entry,
+      "the Phase 14 anchored-pair witness-geometry bytes overflow size_t");
+}
+
+static_assert(
+    phase14_anchored_pair_candidate_witness_geometry_bytes_per_entry ==
+    kAxisCount * (sizeof(double2) + sizeof(std::uint64_t)) +
+        sizeof(std::uint64_t));
+static_assert(kAxisCount < 63U);
+static_assert(
+    (kWitnessGeometryValidBit &
+     ((UINT64_C(1) << kAxisCount) - UINT64_C(1))) == 0U);
 
 [[nodiscard]] std::size_t checked_node_count(std::size_t point_count) {
   if (point_count == 0U ||
@@ -365,6 +399,19 @@ class Phase14AnchoredPairCandidateCudaResources final {
       records_.allocate(
           physical_transcript_record_capacity,
           "cudaMalloc Phase 14 anchored-pair fixed transcript arena");
+      const std::size_t witness_geometry_count =
+          checked_witness_geometry_count(maximum_query_count);
+      const std::size_t witness_geometry_axis_count =
+          checked_witness_geometry_axis_count(maximum_query_count);
+      witness_directions_.allocate(
+          witness_geometry_axis_count,
+          "cudaMalloc Phase 14 anchored-pair fixed witness-direction arena");
+      witness_coordinate_bits_.allocate(
+          witness_geometry_axis_count,
+          "cudaMalloc Phase 14 anchored-pair fixed witness-coordinate arena");
+      witness_active_axis_masks_.allocate(
+          witness_geometry_count,
+          "cudaMalloc Phase 14 anchored-pair fixed witness-axis-mask arena");
     } catch (...) {
       static_cast<void>(cudaStreamDestroy(created_stream));
       throw;
@@ -422,7 +469,13 @@ class Phase14AnchoredPairCandidateCudaResources final {
         queries_.count() != maximum_query_count_ ||
         plans_.count() != maximum_query_count_ ||
         segments_.count() != maximum_query_count_ ||
-        records_.count() != physical_transcript_record_capacity_) {
+        records_.count() != physical_transcript_record_capacity_ ||
+        witness_directions_.count() !=
+            checked_witness_geometry_axis_count(maximum_query_count_) ||
+        witness_coordinate_bits_.count() !=
+            checked_witness_geometry_axis_count(maximum_query_count_) ||
+        witness_active_axis_masks_.count() !=
+            checked_witness_geometry_count(maximum_query_count_)) {
       throw std::logic_error(
           "the Phase 14 anchored-pair context changed its immutable "
           "traversal binding or fixed capacities");
@@ -451,6 +504,15 @@ class Phase14AnchoredPairCandidateCudaResources final {
       noexcept {
     return records_.get();
   }
+  [[nodiscard]] double2* witness_directions() noexcept {
+    return witness_directions_.get();
+  }
+  [[nodiscard]] std::uint64_t* witness_coordinate_bits() noexcept {
+    return witness_coordinate_bits_.get();
+  }
+  [[nodiscard]] std::uint64_t* witness_active_axis_masks() noexcept {
+    return witness_active_axis_masks_.get();
+  }
 
   void synchronize() {
     check_cuda(
@@ -466,6 +528,9 @@ class Phase14AnchoredPairCandidateCudaResources final {
 
  private:
   void abandon_all() noexcept {
+    witness_active_axis_masks_.abandon();
+    witness_coordinate_bits_.abandon();
+    witness_directions_.abandon();
     records_.abandon();
     segments_.abandon();
     plans_.abandon();
@@ -473,6 +538,9 @@ class Phase14AnchoredPairCandidateCudaResources final {
   }
 
   void reset_all() noexcept {
+    witness_active_axis_masks_.reset();
+    witness_coordinate_bits_.reset();
+    witness_directions_.reset();
     records_.reset();
     segments_.reset();
     plans_.reset();
@@ -496,6 +564,9 @@ class Phase14AnchoredPairCandidateCudaResources final {
   DeviceBuffer<Phase14AnchoredPairCandidateQueryPlan> plans_;
   DeviceBuffer<Phase14AnchoredPairCandidateSegmentRecord> segments_;
   DeviceBuffer<Phase14AnchoredPairCandidateTranscriptRecord> records_;
+  DeviceBuffer<double2> witness_directions_;
+  DeviceBuffer<std::uint64_t> witness_coordinate_bits_;
+  DeviceBuffer<std::uint64_t> witness_active_axis_masks_;
 };
 
 [[nodiscard]] Phase14AnchoredPairCandidateCudaResources& require_resources(
@@ -545,6 +616,8 @@ void validate_launch(
       traversal.node_capacity < traversal.node_count ||
       traversal.source_snapshot_epoch == 0U ||
       maximum_query_count == 0U ||
+      maximum_query_count >
+          phase14_anchored_pair_candidate_maximum_query_tile_size ||
       physical_transcript_record_capacity == 0U || queries.empty() ||
       queries.size() > maximum_query_count ||
       active_total_transcript_record_limit == 0U ||
@@ -558,6 +631,7 @@ void validate_launch(
       maximum_query_count,
       sizeof(Phase14AnchoredPairCandidateQueryInputRecord),
       "the Phase 14 anchored-pair fixed query bytes overflow size_t"));
+  static_cast<void>(checked_witness_geometry_bytes(maximum_query_count));
   static_cast<void>(checked_bytes(
       maximum_query_count,
       sizeof(Phase14AnchoredPairCandidateQueryPlan),
@@ -729,37 +803,117 @@ void validate_launch(
   return __shfl_sync(kFullWarpMask, valid ? 1U : 0U, 0) != 0U;
 }
 
+__global__ void prepare_anchored_pair_witness_geometry_kernel(
+    const Phase14AnchoredPairCandidateQueryInputRecord* queries,
+    std::uint64_t query_count,
+    const std::uint64_t* coordinate_bits,
+    std::uint64_t point_count,
+    std::uint64_t witness_geometry_capacity,
+    double2* witness_directions,
+    std::uint64_t* witness_coordinate_bits,
+    std::uint64_t* witness_active_axis_masks) {
+  const unsigned int lane = threadIdx.x & (kWarpSize - 1U);
+  const std::uint64_t block_warp = threadIdx.x / kWarpSize;
+  const std::uint64_t block_warp_count = blockDim.x / kWarpSize;
+  std::uint64_t query_slot =
+      static_cast<std::uint64_t>(blockIdx.x) * block_warp_count +
+      block_warp;
+  const std::uint64_t query_stride =
+      static_cast<std::uint64_t>(gridDim.x) * block_warp_count;
+  while (query_slot < query_count) {
+    const Phase14AnchoredPairCandidateQueryInputRecord& query =
+        queries[query_slot];
+    for (std::uint64_t witness_index = lane;
+         witness_index < UINT64_C(64);
+         witness_index += kWarpSize) {
+      const std::uint64_t geometry_index =
+          query_slot * UINT64_C(64) + witness_index;
+      const std::uint64_t witness_point_id = query.witnesses[witness_index];
+      const bool identifiers_valid =
+          query.anchor_point_id < point_count &&
+          witness_index < query.witness_count &&
+          witness_point_id < point_count &&
+          witness_point_id != query.anchor_point_id;
+      bool geometry_valid = identifiers_valid;
+      std::uint64_t active_axis_mask = 0U;
+      for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
+        const std::uint64_t axis_geometry_index =
+            static_cast<std::uint64_t>(axis) * witness_geometry_capacity +
+            geometry_index;
+        std::uint64_t witness_bits = 0U;
+        double2 direction_bits = make_double2(0.0, 0.0);
+        if (identifiers_valid) {
+          const std::uint64_t anchor_bits = coordinate_bits[
+              static_cast<std::uint64_t>(axis) * point_count +
+              query.anchor_point_id];
+          witness_bits = coordinate_bits[
+              static_cast<std::uint64_t>(axis) * point_count +
+              witness_point_id];
+          if (anchor_bits != witness_bits) {
+            const device::DeviceInterval direction =
+                device::subtract_intervals(
+                    device::point_interval(witness_bits),
+                    device::point_interval(anchor_bits));
+            if (!direction.valid ||
+                (direction.lower <= 0.0 && direction.upper >= 0.0)) {
+              geometry_valid = false;
+            } else {
+              direction_bits =
+                  make_double2(direction.lower, direction.upper);
+              active_axis_mask |= UINT64_C(1) << axis;
+            }
+          }
+        }
+        witness_coordinate_bits[axis_geometry_index] = witness_bits;
+        witness_directions[axis_geometry_index] = direction_bits;
+      }
+      witness_active_axis_masks[geometry_index] =
+          geometry_valid
+              ? active_axis_mask | kWitnessGeometryValidBit
+              : UINT64_C(0);
+    }
+    query_slot += query_stride;
+  }
+}
+
 [[nodiscard]] __device__ bool witness_strictly_separates_node(
-    const Phase14AnchoredPairCandidateQueryInputRecord& query,
+    std::uint64_t query_slot,
     std::uint64_t witness_index,
     const Phase14AnchoredPairCandidateDeviceNode& node,
     const std::uint64_t* coordinate_bits,
-    std::uint64_t point_count) noexcept {
+    std::uint64_t point_count,
+    std::uint64_t witness_geometry_capacity,
+    const double2* witness_directions,
+    const std::uint64_t* witness_coordinate_bits,
+    const std::uint64_t* witness_active_axis_masks) noexcept {
   using device::DeviceInterval;
+  const std::uint64_t geometry_index =
+      query_slot * UINT64_C(64) + witness_index;
+  const std::uint64_t active_axis_mask =
+      witness_active_axis_masks[geometry_index];
+  if ((active_axis_mask & kWitnessGeometryValidBit) == 0U) {
+    return false;
+  }
   DeviceInterval sum = device::point_interval(UINT64_C(0));
-  const std::uint64_t witness_point_id = query.witnesses[witness_index];
   for (std::size_t axis = 0U; axis < kAxisCount; ++axis) {
-    const std::uint64_t anchor_bits = coordinate_bits[
-        static_cast<std::uint64_t>(axis) * point_count +
-        query.anchor_point_id];
-    const std::uint64_t witness_bits = coordinate_bits[
-        static_cast<std::uint64_t>(axis) * point_count + witness_point_id];
-    if (anchor_bits == witness_bits) {
+    if ((active_axis_mask & (UINT64_C(1) << axis)) == 0U) {
       continue;
     }
-    const DeviceInterval direction = device::subtract_intervals(
-        device::point_interval(witness_bits),
-        device::point_interval(anchor_bits));
-    if (!direction.valid ||
-        (direction.lower <= 0.0 && direction.upper >= 0.0)) {
-      return false;
-    }
+    const std::uint64_t axis_geometry_index =
+        static_cast<std::uint64_t>(axis) * witness_geometry_capacity +
+        geometry_index;
+    const double2 cached_direction =
+        witness_directions[axis_geometry_index];
+    const DeviceInterval direction{
+        cached_direction.x, cached_direction.y, true};
     const bool positive_direction = direction.lower > 0.0;
     const std::uint64_t bound_point_id =
         positive_direction ? node.lower_point_ids[axis]
                            : node.upper_point_ids[axis];
     const std::uint64_t bound_bits = coordinate_bits[
         static_cast<std::uint64_t>(axis) * point_count + bound_point_id];
+    const std::uint64_t witness_bits =
+        witness_coordinate_bits[axis_geometry_index];
     const DeviceInterval delta = device::subtract_intervals(
         device::point_interval(bound_bits),
         device::point_interval(witness_bits));
@@ -799,9 +953,14 @@ void validate_launch(
 
 [[nodiscard]] __device__ std::uint64_t proposed_prune_mask_warp(
     const Phase14AnchoredPairCandidateQueryInputRecord& query,
+    std::uint64_t query_slot,
     const Phase14AnchoredPairCandidateDeviceNode& node,
     const std::uint64_t* coordinate_bits,
     std::uint64_t point_count,
+    std::uint64_t witness_geometry_capacity,
+    const double2* witness_directions,
+    const std::uint64_t* witness_coordinate_bits,
+    const std::uint64_t* witness_active_axis_masks,
     unsigned int lane) noexcept {
   const std::uint64_t required =
       query.maximum_closed_rank - UINT64_C(1);
@@ -811,7 +970,15 @@ void validate_launch(
   const bool first_positive =
       static_cast<std::uint64_t>(lane) < query.witness_count &&
       witness_strictly_separates_node(
-          query, lane, node, coordinate_bits, point_count);
+          query_slot,
+          lane,
+          node,
+          coordinate_bits,
+          point_count,
+          witness_geometry_capacity,
+          witness_directions,
+          witness_coordinate_bits,
+          witness_active_axis_masks);
   const std::uint64_t first_mask = static_cast<std::uint64_t>(
       __ballot_sync(kFullWarpMask, first_positive));
   // Bank bits 0..31 precede every bit in the second wave.  Once the first
@@ -827,7 +994,15 @@ void validate_launch(
   const bool second_positive =
       second_index < query.witness_count &&
       witness_strictly_separates_node(
-          query, second_index, node, coordinate_bits, point_count);
+          query_slot,
+          second_index,
+          node,
+          coordinate_bits,
+          point_count,
+          witness_geometry_capacity,
+          witness_directions,
+          witness_coordinate_bits,
+          witness_active_axis_masks);
   const std::uint64_t mask =
       first_mask |
       (static_cast<std::uint64_t>(
@@ -840,11 +1015,16 @@ template <bool WriteRecords>
 [[nodiscard]] __device__ Phase14AnchoredPairCandidateTraversalOutcome
 traverse_query_warp(
     const Phase14AnchoredPairCandidateQueryInputRecord& query,
+    std::uint64_t query_slot,
     const std::uint64_t* coordinate_bits,
     const std::uint64_t* morton_point_ids,
     const Phase14AnchoredPairCandidateDeviceNode* nodes,
     std::uint64_t point_count,
     std::uint64_t node_count,
+    std::uint64_t witness_geometry_capacity,
+    const double2* witness_directions,
+    const std::uint64_t* witness_coordinate_bits,
+    const std::uint64_t* witness_active_axis_masks,
     std::uint64_t record_limit,
     bool globally_truncated,
     std::uint64_t record_begin,
@@ -875,7 +1055,16 @@ traverse_query_warp(
     }
     const Phase14AnchoredPairCandidateDeviceNode& node = nodes[cursor];
     const std::uint64_t witness_mask = proposed_prune_mask_warp(
-        query, node, coordinate_bits, point_count, lane);
+        query,
+        query_slot,
+        node,
+        coordinate_bits,
+        point_count,
+        witness_geometry_capacity,
+        witness_directions,
+        witness_coordinate_bits,
+        witness_active_axis_masks,
+        lane);
     const bool prune = witness_mask != 0U;
     const std::uint64_t leaf_count = node.leaf_end - node.leaf_begin;
     bool candidate = false;
@@ -978,6 +1167,10 @@ __global__ void count_anchored_pair_candidate_records_kernel(
     std::uint64_t node_count,
     std::uint64_t source_snapshot_epoch,
     std::uint64_t physical_transcript_record_capacity,
+    std::uint64_t witness_geometry_capacity,
+    const double2* witness_directions,
+    const std::uint64_t* witness_coordinate_bits,
+    const std::uint64_t* witness_active_axis_masks,
     Phase14AnchoredPairCandidateQueryPlan* plans) {
   const unsigned int lane = threadIdx.x & (kWarpSize - 1U);
   const std::uint64_t block_warp = threadIdx.x / kWarpSize;
@@ -1008,11 +1201,16 @@ __global__ void count_anchored_pair_candidate_records_kernel(
     } else {
       outcome = traverse_query_warp<false>(
           query,
+          query_slot,
           coordinate_bits,
           morton_point_ids,
           nodes,
           point_count,
           node_count,
+          witness_geometry_capacity,
+          witness_directions,
+          witness_coordinate_bits,
+          witness_active_axis_masks,
           query.maximum_transcript_record_count,
           false,
           0U,
@@ -1061,6 +1259,10 @@ __global__ void replay_anchored_pair_candidate_records_kernel(
     std::uint64_t buffer_epoch,
     std::uint64_t physical_transcript_record_capacity,
     std::uint64_t active_total_record_limit,
+    std::uint64_t witness_geometry_capacity,
+    const double2* witness_directions,
+    const std::uint64_t* witness_coordinate_bits,
+    const std::uint64_t* witness_active_axis_masks,
     const Phase14AnchoredPairCandidateQueryPlan* plans,
     Phase14AnchoredPairCandidateSegmentRecord* segments,
     Phase14AnchoredPairCandidateTranscriptRecord* records) {
@@ -1102,11 +1304,16 @@ __global__ void replay_anchored_pair_candidate_records_kernel(
           plan.allocated_record_count < plan.raw_record_count;
       outcome = traverse_query_warp<true>(
           query,
+          query_slot,
           coordinate_bits,
           morton_point_ids,
           nodes,
           point_count,
           node_count,
+          witness_geometry_capacity,
+          witness_directions,
+          witness_coordinate_bits,
+          witness_active_axis_masks,
           globally_truncated ? plan.allocated_record_count
                              : query.maximum_transcript_record_count,
           globally_truncated,
@@ -1269,6 +1476,8 @@ propose_phase14_anchored_pair_candidates_on_gpu(
       active_total_transcript_record_limit,
       sizeof(Phase14AnchoredPairCandidateTranscriptRecord),
       "the Phase 14 anchored-pair active transcript bytes overflow size_t");
+  const std::size_t witness_geometry_bytes =
+      checked_witness_geometry_bytes(maximum_query_count);
   const std::uint64_t query_count = checked_u64(
       queries.size(),
       "the Phase 14 anchored-pair query count does not fit uint64");
@@ -1284,6 +1493,10 @@ propose_phase14_anchored_pair_candidates_on_gpu(
   const std::uint64_t active_record_limit = checked_u64(
       active_total_transcript_record_limit,
       "the Phase 14 anchored-pair active transcript limit does not fit "
+      "uint64");
+  const std::uint64_t witness_geometry_capacity = checked_u64(
+      checked_witness_geometry_count(maximum_query_count),
+      "the Phase 14 anchored-pair witness-geometry capacity does not fit "
       "uint64");
   const std::uint64_t buffer_epoch = context.advance_epoch();
   const auto* nodes =
@@ -1312,6 +1525,20 @@ propose_phase14_anchored_pair_candidates_on_gpu(
             cuda.records(), 0xff, transcript_bytes, cuda.stream()),
         "cudaMemsetAsync Phase 14 anchored-pair active transcript");
 
+    prepare_anchored_pair_witness_geometry_kernel<<<
+        shape.block_count, shape.thread_count, 0U, cuda.stream()>>>(
+        cuda.queries(),
+        query_count,
+        traversal.device_coordinate_bits,
+        point_count,
+        witness_geometry_capacity,
+        cuda.witness_directions(),
+        cuda.witness_coordinate_bits(),
+        cuda.witness_active_axis_masks());
+    check_cuda(
+        cudaPeekAtLastError(),
+        "Phase 14 anchored-pair witness-geometry kernel launch");
+
     count_anchored_pair_candidate_records_kernel<<<
         shape.block_count, shape.thread_count, 0U, cuda.stream()>>>(
         cuda.queries(),
@@ -1323,6 +1550,10 @@ propose_phase14_anchored_pair_candidates_on_gpu(
         node_count,
         traversal.source_snapshot_epoch,
         physical_record_capacity,
+        witness_geometry_capacity,
+        cuda.witness_directions(),
+        cuda.witness_coordinate_bits(),
+        cuda.witness_active_axis_masks(),
         cuda.plans());
     check_cuda(
         cudaPeekAtLastError(),
@@ -1348,6 +1579,10 @@ propose_phase14_anchored_pair_candidates_on_gpu(
         buffer_epoch,
         physical_record_capacity,
         active_record_limit,
+        witness_geometry_capacity,
+        cuda.witness_directions(),
+        cuda.witness_coordinate_bits(),
+        cuda.witness_active_axis_masks(),
         cuda.plans(),
         cuda.segments(),
         cuda.records());
@@ -1389,18 +1624,22 @@ propose_phase14_anchored_pair_candidates_on_gpu(
     batch.initialized_transcript_byte_count = transcript_bytes;
     batch.device_to_host_segment_byte_count = segment_bytes;
     batch.device_to_host_transcript_byte_count = transcript_bytes;
-    batch.kernel_launch_count = 3U;
+    batch.kernel_launch_count = 4U;
     batch.synchronization_count = 1U;
     batch.compaction_kernel_launch_count = 1U;
+    batch.witness_geometry_precomputation_kernel_launch_count = 1U;
     batch.physical_query_capacity = maximum_query_count;
     batch.physical_transcript_record_capacity =
         physical_transcript_record_capacity;
     batch.active_total_transcript_record_limit =
         active_total_transcript_record_limit;
+    batch.precomputed_witness_geometry_byte_capacity =
+        witness_geometry_bytes;
     batch.buffer_epoch = buffer_epoch;
     batch.source_snapshot_epoch = traversal.source_snapshot_epoch;
     batch.cuda_device = traversal.cuda_device;
     batch.cuda_path_qualified = true;
+    batch.witness_geometry_precomputed = true;
     batch.execution_kind =
         Phase14AnchoredPairCandidateExecutionKind::cuda;
     batch.compaction_kind =

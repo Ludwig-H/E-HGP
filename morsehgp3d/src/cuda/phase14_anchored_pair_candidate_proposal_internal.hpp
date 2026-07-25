@@ -16,6 +16,10 @@ namespace morsehgp3d::gpu::detail {
 
 inline constexpr std::size_t
     phase14_anchored_pair_candidate_maximum_witness_count = 64U;
+inline constexpr std::size_t
+    phase14_anchored_pair_candidate_maximum_query_tile_size = 4'096U;
+inline constexpr std::size_t
+    phase14_anchored_pair_candidate_witness_geometry_bytes_per_entry = 80U;
 inline constexpr std::uint64_t
     phase14_anchored_pair_candidate_invalid_node_index =
         std::numeric_limits<std::uint64_t>::max();
@@ -175,14 +179,17 @@ struct Phase14AnchoredPairCandidateDeviceBatch {
   std::size_t kernel_launch_count{};
   std::size_t synchronization_count{};
   std::size_t compaction_kernel_launch_count{};
+  std::size_t witness_geometry_precomputation_kernel_launch_count{};
   std::size_t physical_query_capacity{};
   std::size_t physical_transcript_record_capacity{};
   std::size_t active_total_transcript_record_limit{};
+  std::size_t precomputed_witness_geometry_byte_capacity{};
   std::uint64_t buffer_epoch{};
   std::uint64_t source_snapshot_epoch{};
   std::uint64_t proposal_digest_fnv1a{};
   int cuda_device{-1};
   bool cuda_path_qualified{false};
+  bool witness_geometry_precomputed{false};
   Phase14AnchoredPairCandidateExecutionKind execution_kind{
       Phase14AnchoredPairCandidateExecutionKind::host_fake};
   Phase14AnchoredPairCandidateCompactionKind compaction_kind{
@@ -222,15 +229,25 @@ phase14_anchored_pair_candidate_batch_digest(
       static_cast<std::uint64_t>(
           batch.active_total_transcript_record_limit));
   digest = phase14_anchored_pair_candidate_digest_word(
+      digest,
+      static_cast<std::uint64_t>(
+          batch.precomputed_witness_geometry_byte_capacity));
+  digest = phase14_anchored_pair_candidate_digest_word(
       digest, static_cast<std::uint64_t>(batch.kernel_launch_count));
   digest = phase14_anchored_pair_candidate_digest_word(
       digest,
       static_cast<std::uint64_t>(
           batch.compaction_kernel_launch_count));
   digest = phase14_anchored_pair_candidate_digest_word(
+      digest,
+      static_cast<std::uint64_t>(
+          batch.witness_geometry_precomputation_kernel_launch_count));
+  digest = phase14_anchored_pair_candidate_digest_word(
       digest, static_cast<std::uint64_t>(batch.execution_kind));
   digest = phase14_anchored_pair_candidate_digest_word(
       digest, static_cast<std::uint64_t>(batch.compaction_kind));
+  digest = phase14_anchored_pair_candidate_digest_word(
+      digest, batch.witness_geometry_precomputed ? UINT64_C(1) : UINT64_C(0));
   digest = phase14_anchored_pair_candidate_digest_word(
       digest, static_cast<std::uint64_t>(batch.segments.size()));
   digest = phase14_anchored_pair_candidate_digest_word(

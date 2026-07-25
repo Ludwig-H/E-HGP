@@ -71,8 +71,18 @@ using DeviceSegment =
 using InputRecord =
     detail::Phase14AnchoredPairCandidateQueryInputRecord;
 
+static_assert(
+    anchored_pair_candidate_gpu_precomputed_witness_geometry_bytes_per_entry ==
+    detail::
+        phase14_anchored_pair_candidate_witness_geometry_bytes_per_entry);
+static_assert(
+    anchored_pair_candidate_gpu_maximum_query_tile_size ==
+    detail::phase14_anchored_pair_candidate_maximum_query_tile_size);
+
 constexpr std::uint64_t kFnvOffsetBasis =
     UINT64_C(14695981039346656037);
+constexpr std::size_t kWitnessGeometryBytesPerEntry =
+    anchored_pair_candidate_gpu_precomputed_witness_geometry_bytes_per_entry;
 
 [[nodiscard]] std::size_t checked_sum(
     std::size_t left,
@@ -446,6 +456,9 @@ void validate_execution_metadata(
           batch.cuda_path_qualified || batch.cuda_device != -1 ||
           batch.kernel_launch_count != 0U ||
           batch.compaction_kernel_launch_count != 0U ||
+          batch.witness_geometry_precomputation_kernel_launch_count != 0U ||
+          batch.precomputed_witness_geometry_byte_capacity != 0U ||
+          batch.witness_geometry_precomputed ||
           batch.synchronization_count != 0U ||
           batch.compaction_kind !=
               detail::Phase14AnchoredPairCandidateCompactionKind::
@@ -458,13 +471,10 @@ void validate_execution_metadata(
       if (!host.cuda_resident || host.host_fake ||
           !batch.cuda_path_qualified ||
           batch.cuda_device != host.cuda_device ||
-          batch.kernel_launch_count < 2U ||
-          batch.kernel_launch_count >
-              detail::
-                  phase14_anchored_pair_candidate_maximum_cuda_kernel_launch_count ||
-          batch.compaction_kernel_launch_count == 0U ||
-          batch.compaction_kernel_launch_count >=
-              batch.kernel_launch_count ||
+          batch.kernel_launch_count != 4U ||
+          batch.compaction_kernel_launch_count != 1U ||
+          batch.witness_geometry_precomputation_kernel_launch_count != 1U ||
+          !batch.witness_geometry_precomputed ||
           batch.synchronization_count != 1U ||
           batch.compaction_kind !=
               detail::Phase14AnchoredPairCandidateCompactionKind::
@@ -532,6 +542,18 @@ void validate_execution_metadata(
       budget.maximum_total_transcript_record_count,
       sizeof(DeviceRecord),
       "the anchored-pair active transcript extent overflows size_t");
+  const std::size_t expected_witness_geometry_bytes =
+      host.cuda_resident
+          ? checked_product(
+                checked_product(
+                    maximum_query_count,
+                    anchored_pair_candidate_gpu_maximum_witness_bank_size,
+                    "the anchored-pair witness-geometry count overflows "
+                    "size_t"),
+                kWitnessGeometryBytesPerEntry,
+                "the anchored-pair witness-geometry byte capacity overflows "
+                "size_t")
+          : 0U;
   if (batch.host_to_device_query_byte_count != expected_query_bytes ||
       batch.initialized_segment_byte_count != expected_segment_bytes ||
       batch.initialized_transcript_byte_count !=
@@ -539,6 +561,8 @@ void validate_execution_metadata(
       batch.device_to_host_segment_byte_count != expected_segment_bytes ||
       batch.device_to_host_transcript_byte_count !=
           expected_active_transcript_bytes ||
+      batch.precomputed_witness_geometry_byte_capacity !=
+          expected_witness_geometry_bytes ||
       batch.device_to_host_transcript_byte_count < returned_record_bytes) {
     throw std::runtime_error(
         "the anchored-pair launcher returned invalid active transfer "
@@ -571,9 +595,13 @@ void validate_execution_metadata(
       batch.device_to_host_segment_byte_count;
   result.audit.copied_device_to_host_transcript_byte_count =
       batch.device_to_host_transcript_byte_count;
+  result.audit.precomputed_witness_geometry_byte_capacity =
+      batch.precomputed_witness_geometry_byte_capacity;
   result.audit.gpu_kernel_launch_count = batch.kernel_launch_count;
   result.audit.gpu_compaction_kernel_launch_count =
       batch.compaction_kernel_launch_count;
+  result.audit.gpu_witness_geometry_precomputation_kernel_launch_count =
+      batch.witness_geometry_precomputation_kernel_launch_count;
   result.audit.compacted_host_transcript_record_count =
       batch.records.size();
   result.audit.gpu_synchronization_count = batch.synchronization_count;
@@ -581,7 +609,9 @@ void validate_execution_metadata(
   result.audit.proposal_digest_fnv1a = batch.proposal_digest_fnv1a;
   result.audit.gpu_execution_performed =
       batch.execution_kind ==
-      detail::Phase14AnchoredPairCandidateExecutionKind::cuda;
+          detail::Phase14AnchoredPairCandidateExecutionKind::cuda;
+  result.audit.query_witness_geometry_precomputed =
+      batch.witness_geometry_precomputed;
   result.audit.device_serial_prefix_clamp_performed =
       batch.compaction_kind ==
       detail::Phase14AnchoredPairCandidateCompactionKind::
@@ -792,6 +822,16 @@ bool AnchoredPairCandidateProposalBatchResult::validated_proposal_batch()
          audit.candidate_leaf_masks_validated &&
          audit.prune_mask_cardinalities_validated &&
          audit.transcript_digest_validated &&
+         ((audit.gpu_execution_performed &&
+           audit.query_witness_geometry_precomputed &&
+           audit.gpu_witness_geometry_precomputation_kernel_launch_count ==
+               1U &&
+           audit.precomputed_witness_geometry_byte_capacity != 0U) ||
+          (!audit.gpu_execution_performed &&
+           !audit.query_witness_geometry_precomputed &&
+           audit.gpu_witness_geometry_precomputation_kernel_launch_count ==
+               0U &&
+           audit.precomputed_witness_geometry_byte_capacity == 0U)) &&
          !audit.candidate_leaf_status_recertified &&
          !audit.strict_witness_masks_recertified &&
          !audit.exact_closed_ball_partition_published &&
@@ -825,10 +865,12 @@ AnchoredPairCandidateProposalContext::
       maximum_transcript_record_count_(
           maximum_transcript_record_count) {
   if (maximum_query_count == 0U ||
+      maximum_query_count >
+          anchored_pair_candidate_gpu_maximum_query_tile_size ||
       maximum_transcript_record_count == 0U) {
     throw std::invalid_argument(
-        "an anchored-pair proposal context requires nonzero fixed "
-        "capacities");
+        "an anchored-pair proposal context requires nonzero fixed capacities "
+        "and a query tile of at most 4096 entries");
   }
   static_cast<void>(checked_product(
       maximum_query_count,
@@ -838,6 +880,13 @@ AnchoredPairCandidateProposalContext::
       maximum_query_count,
       sizeof(DeviceSegment),
       "the anchored-pair fixed segment capacity overflows size_t"));
+  static_cast<void>(checked_product(
+      checked_product(
+          maximum_query_count,
+          anchored_pair_candidate_gpu_maximum_witness_bank_size,
+          "the anchored-pair fixed witness-geometry count overflows size_t"),
+      kWitnessGeometryBytesPerEntry,
+      "the anchored-pair fixed witness-geometry bytes overflow size_t"));
   static_cast<void>(checked_product(
       maximum_transcript_record_count,
       sizeof(DeviceRecord),

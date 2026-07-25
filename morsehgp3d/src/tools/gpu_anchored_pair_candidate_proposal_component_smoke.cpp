@@ -30,7 +30,7 @@
 #endif
 
 #if !defined(MORSEHGP3D_GIT_SHA)
-#error "The Phase 14Q P8e component smoke requires a canonical Git SHA"
+#error "The Phase 14Q P8f component smoke requires a canonical Git SHA"
 #endif
 
 namespace {
@@ -57,6 +57,9 @@ using morsehgp3d::spatial::PointId;
 namespace smoke_clouds = morsehgp3d::tools::pair_support_smoke;
 
 constexpr std::size_t kMaximumWitnessBankSize = 64U;
+constexpr std::size_t kWitnessGeometryBytesPerEntry =
+    morsehgp3d::gpu::
+        anchored_pair_candidate_gpu_precomputed_witness_geometry_bytes_per_entry;
 constexpr std::size_t kTranscriptRecordBytes = 16U;
 constexpr std::size_t kTraversalNodeBytes = 80U;
 constexpr std::uint64_t kFnvOffsetBasis =
@@ -161,7 +164,7 @@ void print_usage() {
          "component_smoke [options]\n"
       << "  --family uniform_latin|eight_clusters\n"
       << "  --point-count N\n"
-      << "  --query-count Q\n"
+      << "  --query-count Q           (1 <= Q <= 4096)\n"
       << "  --K K                     (1 <= K <= 10)\n"
       << "  --bank-window W           (at most W Morton neighbors per anchor)\n"
       << "  --record-capacity T       (physical 16-byte transcript records)\n"
@@ -223,6 +226,11 @@ void print_usage() {
   if (options.query_count >= options.point_count) {
     throw std::invalid_argument(
         "--query-count must leave at least one larger oriented PointId");
+  }
+  if (options.query_count >
+      morsehgp3d::gpu::anchored_pair_candidate_gpu_maximum_query_tile_size) {
+    throw std::invalid_argument(
+        "--query-count exceeds the fixed 4096-query device tile");
   }
   if (options.maximum_order == 0U || options.maximum_order > 10U) {
     throw std::invalid_argument("--K must be in [1, 10]");
@@ -573,6 +581,19 @@ void build_sampled_witness_banks(
       ordered.back()};
 }
 
+void print_duration_samples(
+    std::string_view field,
+    const std::vector<std::uint64_t>& durations) {
+  std::cout << '"' << field << "\":[";
+  for (std::size_t index = 0U; index < durations.size(); ++index) {
+    if (index != 0U) {
+      std::cout << ',';
+    }
+    std::cout << durations[index];
+  }
+  std::cout << "],";
+}
+
 [[nodiscard]] std::uint64_t peak_host_rss_bytes() {
 #if defined(__linux__)
   rusage usage{};
@@ -639,12 +660,26 @@ void require_complete_cuda_proposal(
     const AnchoredPairCandidateProposalBatchResult& proposal,
     std::size_t query_count) {
   const AnchoredPairCandidateProposalAudit& audit = proposal.audit;
+  const std::size_t expected_witness_geometry_bytes = checked_product(
+      checked_product(
+          query_count,
+          kMaximumWitnessBankSize,
+          "the sampled witness-geometry count overflows size_t"),
+      kWitnessGeometryBytesPerEntry,
+      "the sampled witness-geometry bytes overflow size_t");
   if (!proposal.validated_proposal_batch() || proposal.scientific_outcome() ||
       audit.canonical_query_count != query_count ||
       audit.complete_segment_count != query_count ||
       audit.budget_exhausted_segment_count != 0U ||
       audit.capacity_exhausted_segment_count != 0U ||
       !audit.gpu_execution_performed ||
+      !audit.query_witness_geometry_precomputed ||
+      audit.precomputed_witness_geometry_byte_capacity !=
+          expected_witness_geometry_bytes ||
+      audit.gpu_witness_geometry_precomputation_kernel_launch_count != 1U ||
+      audit.gpu_kernel_launch_count != 4U ||
+      audit.gpu_compaction_kernel_launch_count != 1U ||
+      audit.gpu_synchronization_count != 1U ||
       !audit.device_serial_prefix_clamp_performed ||
       audit.candidate_leaf_status_recertified ||
       audit.strict_witness_masks_recertified ||
@@ -693,6 +728,11 @@ int main(int argc, char** argv) {
         sampled_bank_point_id_capacity,
         sizeof(PointId),
         "the sampled bank byte capacity overflows size_t");
+    const std::size_t precomputed_witness_geometry_byte_capacity =
+        checked_product(
+            sampled_bank_point_id_capacity,
+            kWitnessGeometryBytesPerEntry,
+            "the sampled witness-geometry byte capacity overflows size_t");
     const std::size_t bounded_window_work_envelope = checked_product(
         options.query_count,
         options.bank_window,
@@ -908,6 +948,8 @@ int main(int argc, char** argv) {
             options.transcript_record_capacity ||
         last_proposal_audit.active_total_transcript_record_limit !=
             options.transcript_record_capacity ||
+        last_proposal_audit.precomputed_witness_geometry_byte_capacity !=
+            precomputed_witness_geometry_byte_capacity ||
         last_recertification_audit.input_transcript_record_count !=
             last_proposal_audit.compacted_host_transcript_record_count) {
       throw std::runtime_error(
@@ -922,10 +964,10 @@ int main(int argc, char** argv) {
         summarize_durations(component_durations);
 
     std::cout
-        << "{\"schema\":\"morsehgp3d.phase14q.p8e_anchored_pair_"
+        << "{\"schema\":\"morsehgp3d.phase14q.p8f_anchored_pair_"
            "candidate_component_smoke.v1\","
         << "\"git_sha\":\"" << kGitSha << "\","
-        << "\"phase\":\"14Q-P8e\","
+        << "\"phase\":\"14Q-P8f\","
         << "\"backend\":\"cuda_g4_plus_reference_cpu\","
         << "\"profile\":\"hgp_reduced\","
         << "\"mode\":\"sampled_cuda_proposal_exact_cpu_"
@@ -943,7 +985,12 @@ int main(int argc, char** argv) {
         << "\"witness_point_id_reference_count\":"
         << witness_reference_count << ','
         << "\"sampled_bank_digest_fnv1a\":" << bank_digest << ','
-        << "\"repetitions\":" << options.repetition_count << ','
+        << "\"repetitions\":" << options.repetition_count << ',';
+    print_duration_samples("proposal_samples_ns", proposal_durations);
+    print_duration_samples(
+        "exact_recertification_samples_ns", recertification_durations);
+    print_duration_samples("sampled_component_samples_ns", component_durations);
+    std::cout
         << "\"generation_ns\":"
         << nanoseconds(generation_end - generation_start) << ','
         << "\"canonicalization_ns\":"
@@ -1018,6 +1065,8 @@ int main(int argc, char** argv) {
         << last_proposal_audit.compacted_host_transcript_record_count << ','
         << "\"sampled_bank_point_id_capacity_bytes\":"
         << sampled_bank_byte_capacity << ','
+        << "\"precomputed_witness_geometry_capacity_bytes\":"
+        << precomputed_witness_geometry_byte_capacity << ','
         << "\"active_query_h2d_bytes\":"
         << last_proposal_audit.active_host_to_device_query_byte_count << ','
         << "\"initialized_device_segment_bytes\":"
@@ -1050,10 +1099,15 @@ int main(int argc, char** argv) {
         << last_proposal_audit.gpu_kernel_launch_count << ','
         << "\"proposal_prefix_clamp_kernel_launch_count\":"
         << last_proposal_audit.gpu_compaction_kernel_launch_count << ','
+        << "\"proposal_witness_geometry_kernel_launch_count\":"
+        << last_proposal_audit
+               .gpu_witness_geometry_precomputation_kernel_launch_count
+        << ','
         << "\"proposal_synchronization_count\":"
         << last_proposal_audit.gpu_synchronization_count << ','
         << "\"cuda_device\":" << last_proposal_audit.cuda_device << ','
         << "\"device_serial_prefix_clamp_performed\":true,"
+        << "\"query_witness_geometry_precomputed\":true,"
         << "\"sampled_anchor_locator_is_o_n_inverse\":false,"
         << "\"sampled_anchor_locator_entry_count\":"
         << options.query_count << ','
