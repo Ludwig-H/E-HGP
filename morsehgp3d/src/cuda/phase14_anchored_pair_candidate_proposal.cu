@@ -426,7 +426,6 @@ class Phase14AnchoredPairCandidateCudaResources final {
     }
   }
 
-  [[nodiscard]] int device() const noexcept { return device_; }
   [[nodiscard]] cudaStream_t stream() const noexcept { return stream_; }
   [[nodiscard]] unsigned int maximum_grid_x() const noexcept {
     return maximum_grid_x_;
