@@ -2614,6 +2614,15 @@ if(MORSEHGP3D_BUILD_TOOLS)
       morsehgp3d_massive_sparse_pair_prefix_smoke
       PRIVATE morsehgp3d::gpu_morton_lbvh_build
     )
+    target_compile_definitions(
+      morsehgp3d_massive_sparse_pair_prefix_smoke
+      PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+    )
+  else()
+    target_compile_definitions(
+      morsehgp3d_massive_sparse_pair_prefix_smoke
+      PRIVATE MORSEHGP3D_GIT_SHA="unavailable"
+    )
   endif()
   morsehgp3d_apply_sanitizers(
     morsehgp3d_massive_sparse_pair_prefix_smoke

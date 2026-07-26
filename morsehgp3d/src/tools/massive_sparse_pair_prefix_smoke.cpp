@@ -29,6 +29,10 @@
 #include <sys/resource.h>
 #endif
 
+#if !defined(MORSEHGP3D_GIT_SHA)
+#error "The Phase 14R massive prefix smoke requires build provenance"
+#endif
+
 namespace {
 
 using Clock = std::chrono::steady_clock;
@@ -452,6 +456,7 @@ struct SpatialIndexOwner {
   std::cout << std::fixed << std::setprecision(3) << std::boolalpha
             << "{\"schema\":\"morsehgp3d.phase14."
                "massive_sparse_pair_prefix_smoke.v1\","
+            << "\"git_sha\":\"" << MORSEHGP3D_GIT_SHA << "\","
             << "\"backend\":\"cuda_g4_plus_reference_cpu\","
             << "\"profile\":\"hgp_reduced\","
             << "\"mode\":\"massive_sparse_pair_prefix_smoke\","

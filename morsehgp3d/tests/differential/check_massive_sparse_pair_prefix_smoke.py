@@ -48,6 +48,8 @@ def main() -> None:
         "morsehgp3d.phase14.massive_sparse_pair_prefix_smoke.v1"
     ):
         fail("unexpected schema")
+    if report.get("git_sha") != "unavailable":
+        fail("the host fixture has unexpected build provenance")
     if report.get("spatial_backend_used") != "reference_cpu":
         fail("the host fixture did not use the requested backend")
     for key in (
