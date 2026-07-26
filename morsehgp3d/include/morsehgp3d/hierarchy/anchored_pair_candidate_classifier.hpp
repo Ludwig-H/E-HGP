@@ -140,6 +140,23 @@ struct ExactAnchoredPairCandidateClassificationStep {
       const ExactAnchoredPairCandidateClassificationStep&) = default;
 };
 
+enum class ExactAnchoredPairPendingRecordKind : std::uint8_t {
+  event,
+  relevant_extra_shell_diagnostic,
+};
+
+// Exact scalar capacity needed by the one record that can be emitted from a
+// record_ready context.  It exposes no record payload and cannot authorize
+// consumption; callers can therefore reserve atomically before take_result().
+struct ExactAnchoredPairPendingRecordRequirements {
+  ExactAnchoredPairPendingRecordKind kind{};
+  std::size_t point_id_reference_count{};
+
+  friend bool operator==(
+      const ExactAnchoredPairPendingRecordRequirements&,
+      const ExactAnchoredPairPendingRecordRequirements&) = default;
+};
+
 // One active exact closed-ball classification.  The context keeps a fixed DFS
 // frontier, at most maximum_closed_rank - 2 relevant interior ids, exact
 // partition counters, one prepared interval anchor and the two exact support
@@ -225,6 +242,9 @@ class ExactAnchoredPairCandidateClassificationContext {
   }
   [[nodiscard]] const ExactAnchoredPairCandidateClassificationAudit& audit()
       const && = delete;
+
+  [[nodiscard]] std::optional<ExactAnchoredPairPendingRecordRequirements>
+  pending_record_requirements() const noexcept;
 
   [[nodiscard]] ExactAnchoredPairCandidateClassificationStep advance(
       const spatial::MortonLbvhIndex& index,

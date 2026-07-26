@@ -448,6 +448,48 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_sparse_anchored_pair_session
+  STATIC
+    src/cpu/hierarchy/sparse_anchored_pair_session.cpp
+)
+add_library(
+  morsehgp3d::sparse_anchored_pair_session
+  ALIAS morsehgp3d_sparse_anchored_pair_session
+)
+set_target_properties(
+  morsehgp3d_sparse_anchored_pair_session
+  PROPERTIES
+    EXPORT_NAME sparse_anchored_pair_session
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_sparse_anchored_pair_session PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_sparse_anchored_pair_session
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_sparse_anchored_pair_session
+  PUBLIC
+    morsehgp3d::anchored_pair_candidate_classifier
+    morsehgp3d::anchored_pair_witness_bank
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_sparse_anchored_pair_session PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_sparse_anchored_pair_session
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_higher_support
   STATIC
     src/cpu/hierarchy/higher_support_product.cpp
@@ -2573,6 +2615,7 @@ install(
     morsehgp3d_pair_support
     morsehgp3d_anchored_pair_witness_bank
     morsehgp3d_anchored_pair_candidate_classifier
+    morsehgp3d_sparse_anchored_pair_session
     morsehgp3d_higher_support
     morsehgp3d_direct_support_terminal
     morsehgp3d_direct_morse_event_journal

@@ -248,6 +248,21 @@ ExactAnchoredPairCandidateClassificationContext::make_result(
   return result;
 }
 
+std::optional<ExactAnchoredPairPendingRecordRequirements>
+ExactAnchoredPairCandidateClassificationContext::
+    pending_record_requirements() const noexcept {
+  if (!record_ready()) {
+    return std::nullopt;
+  }
+  const bool event = shell_count_ == 2U;
+  return ExactAnchoredPairPendingRecordRequirements{
+      event
+          ? ExactAnchoredPairPendingRecordKind::event
+          : ExactAnchoredPairPendingRecordKind::
+                relevant_extra_shell_diagnostic,
+      interior_count_ + (event ? 2U : 3U)};
+}
+
 ExactAnchoredPairCandidateClassificationStep
 ExactAnchoredPairCandidateClassificationContext::advance(
     const MortonLbvhIndex& index,

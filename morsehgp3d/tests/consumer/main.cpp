@@ -14,6 +14,7 @@
 #include "morsehgp3d/hierarchy/grouped_anchored_pair_certificate.hpp"
 #include "morsehgp3d/hierarchy/morton_grouped_anchored_pair_candidate_cursor.hpp"
 #include "morsehgp3d/hierarchy/morton_grouped_anchored_pair_schedule.hpp"
+#include "morsehgp3d/hierarchy/sparse_anchored_pair_session.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
 
@@ -39,6 +40,10 @@ int main() {
       ExactMortonGroupedAnchoredPairCandidateStep;
   using AnchoredPairClassificationContext = morsehgp3d::hierarchy::
       ExactAnchoredPairCandidateClassificationContext;
+  using SparseAnchoredPairSession =
+      morsehgp3d::hierarchy::ExactSparseAnchoredPairSession;
+  using SparseAnchoredPairTerminalAuthority =
+      morsehgp3d::hierarchy::ExactSparseAnchoredPairTerminalAuthority;
   static_assert(!std::is_aggregate_v<GroupedTraversalContext>);
   static_assert(!std::is_default_constructible_v<GroupedTraversalContext>);
   static_assert(!std::is_copy_constructible_v<GroupedTraversalContext>);
@@ -72,6 +77,18 @@ int main() {
           AnchoredPairClassificationContext>);
   static_assert(
       !std::is_move_assignable_v<AnchoredPairClassificationContext>);
+  static_assert(!std::is_default_constructible_v<SparseAnchoredPairSession>);
+  static_assert(!std::is_copy_constructible_v<SparseAnchoredPairSession>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<SparseAnchoredPairSession>);
+  static_assert(
+      !std::is_default_constructible_v<
+          SparseAnchoredPairTerminalAuthority>);
+  static_assert(
+      !std::is_copy_constructible_v<SparseAnchoredPairTerminalAuthority>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          SparseAnchoredPairTerminalAuthority>);
 
   static_assert(
       morsehgp3d::hierarchy::
@@ -502,6 +519,55 @@ int main() {
        !installed_pair_record.relevant_extra_shell_diagnostic.has_value()) ||
       !installed_anchored_pair_classification.complete()) {
     std::cerr << "installed resumable anchored classifier changed emission\n";
+    return 1;
+  }
+  const morsehgp3d::hierarchy::
+      ExactSparseAnchoredPairSessionTotalCapacity installed_session_capacity{
+          1024U, 1024U, 1024U, 1024U, 16U, 1024U, 8U, 32U};
+  const morsehgp3d::hierarchy::ExactMortonGroupedAnchoredPairScheduleConfig
+      installed_session_config{3U, 0U};
+  auto installed_sparse_session = SparseAnchoredPairSession::start(
+      spatial_index,
+      cloud,
+      3U,
+      installed_session_config,
+      installed_session_capacity);
+  for (std::size_t call = 0U;
+       call < 1024U && !installed_sparse_session.complete();
+       ++call) {
+    const auto step = installed_sparse_session.advance(
+        spatial_index,
+        cloud,
+        morsehgp3d::hierarchy::
+            ExactSparseAnchoredPairSessionAdvanceBudget{
+                {64U, 64U, 64U, 64U}, {64U}, 1U, 4U});
+    if (step.kind() == morsehgp3d::hierarchy::
+            ExactSparseAnchoredPairSessionStepKind::
+                total_capacity_exhausted) {
+      std::cerr << "installed sparse anchored session exhausted capacity\n";
+      return 1;
+    }
+  }
+  if (!installed_sparse_session.complete()) {
+    std::cerr << "installed sparse anchored session did not terminate\n";
+    return 1;
+  }
+  auto installed_sparse_authority =
+      std::move(installed_sparse_session).seal();
+  if (!installed_sparse_authority.sealed_in_process_terminal_authority() ||
+      !installed_sparse_authority.bound_to(
+          spatial_index,
+          cloud,
+          3U,
+          installed_session_config,
+          installed_session_capacity) ||
+      installed_sparse_authority.records().size() != 3U ||
+      installed_sparse_authority.audit()
+                  .authenticated_pruned_directed_pair_count +
+              installed_sparse_authority.candidate_audit()
+                  .orientation_check_count !=
+          9U) {
+    std::cerr << "installed sparse anchored authority changed semantics\n";
     return 1;
   }
   if (!nearest.shell_complete() || nearest.strict_below().size() != 0U ||
