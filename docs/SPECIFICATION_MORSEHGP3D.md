@@ -1187,6 +1187,14 @@ Les quatre CTests ciblés certificat, ordonnanceur, session et runner passent 4/
 
 Le gate suivant est une seule exécution complète à chaud `uniform_latin`, $n=50\,000$, $K=10$. Si son temps total est strictement inférieur à 0,5 seconde, l'optimisation 50 k est considérée suffisante pour ce jalon et le travail passe au sink externe ainsi qu'au chemin gardé 10 M+; les trois raffinements de pool restent documentés sans bloquer ce passage. Un arrêt de capacité, une sortie incomplète ou un temps de composant ne peut satisfaire ce gate ni promouvoir `public_status`.
 
+### 14.11 Cœur dynamique borné et smoke massif 14R
+
+P8r fixe le mode `cuda_g4_plus_reference_cpu / hgp_reduced / dynamic_bounded_witness_subtree_core_plus_massive_sparse_pair_prefix_smoke`, sous `architecture_only` et `public_status=not_claimed`. Pour chaque nœud requête du fallback, il visite au plus 64 nœuds témoins LBVH après un préflight exact. Un reçu exige une plage disjointe de la requête et des ancres et un maximum dyadique exact strictement négatif pour chaque ancre réelle. Les points sélectionnés sont ensuite rejoués par P8g avant tout prune. L'ordre de visite n'est qu'une proposition; tout échec restaure le halo et continue fail-open.
+
+L'état reste borné par une DFS de 64 visites, dix reçus et dix `PointId`, en plus des tableaux P8q existants. Il n'existe ni arbre dual global, ni arène de paires, ni structure globale de cellules, cofaces, incidences, Gamma ou Delaunay d'ordre supérieur. Les cinq CTests GCC Release ciblés passent en 0,43 seconde. L'unique run final 50 k/$K=10$ s'arrête incomplet avec le code 2 après 177,470 ms malgré 120 prunes couvrant 1 509 560 paires dirigées; le gate inférieur à 0,5 seconde est donc non satisfait.
+
+Le smoke massif local sur 257 points exécute un seul préfixe P8l sans record et garde faux les champs de pipeline complet, autorité scellée, résultat scientifique, capacité 10 M et statut public. Il ne qualifie aucun volume. La porte suivante est une partition exacte bornée bloc LBVH contre bloc LBVH, suivie d'un gate 50 k complet, du sink et du checkpoint de Phase 15, puis du run GCP gardé à 10 000 001 points.
+
 ## 15. Limites de complexité
 
 Une liste fixe de voisins par observation n'est pas complète : une paire de Gabriel peut avoir une boule diamétrale vide tout en étant absente d'une liste $L$-NN arbitrairement longue, en plaçant de nombreux points juste à l'extérieur de cette boule près d'une extrémité.

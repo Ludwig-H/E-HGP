@@ -23,6 +23,9 @@ inline constexpr std::size_t
     exact_grouped_anchored_pair_maximum_witness_pool_size = 64U;
 inline constexpr std::size_t
     exact_grouped_anchored_pair_maximum_closed_rank = 11U;
+inline constexpr std::size_t
+    exact_grouped_anchored_pair_maximum_witness_subtree_node_visit_count =
+        64U;
 static_assert(
     exact_grouped_anchored_pair_maximum_witness_pool_size <=
     std::numeric_limits<std::uint64_t>::digits);
@@ -306,12 +309,14 @@ struct ExactGroupedAnchoredPairTraversalWorkBudget {
 
 struct ExactGroupedAnchoredPairTraversalStepWork {
   std::size_t node_visit_count{};
+  std::size_t witness_subtree_node_visit_count{};
   // A witness slot is charged once when it is rejected by one actual anchor,
   // proved strict for every actual anchor, or reused from a strict parent.
   std::size_t witness_slot_scan_count{};
   std::size_t inherited_witness_reuse_count{};
   // Physical actual-anchor/witness exact signs, excluding inherited slots.
   std::size_t exact_predicate_count{};
+  std::size_t witness_subtree_exact_predicate_count{};
   std::size_t strict_witness_discovery_count{};
 
   friend bool operator==(
@@ -324,9 +329,14 @@ struct ExactGroupedAnchoredPairTraversalAudit {
   std::size_t anchor_bounds_construction_count{};
   std::size_t prepared_witness_point_count{};
   std::size_t node_visit_count{};
+  std::size_t witness_subtree_node_visit_count{};
   std::size_t witness_slot_scan_count{};
   std::size_t inherited_witness_reuse_count{};
   std::size_t exact_predicate_count{};
+  std::size_t witness_subtree_exact_predicate_count{};
+  std::size_t witness_subtree_receipt_count{};
+  std::size_t witness_subtree_success_count{};
+  std::size_t witness_subtree_fail_open_count{};
   std::size_t strict_witness_discovery_count{};
   std::size_t internal_node_expansion_count{};
   std::size_t diagonal_node_descent_count{};
@@ -510,6 +520,28 @@ class ExactGroupedAnchoredPairTraversalContext {
       std::span<const spatial::PointId> witness_pool_point_ids,
       std::size_t lbvh_node_index,
       std::size_t maximum_closed_rank);
+
+  // P8r first searches at most 64 authenticated LBVH nodes for disjoint
+  // common-witness subtrees.  The subtree bounds are only a bounded proposal:
+  // selected point ids are replayed through the ordinary exact P8g scan before
+  // any positive certificate is emitted.  Failure leaves the supplied halo
+  // untouched and falls open to the existing traversal.
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_witness_subtree_first_frontier_at_node(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const spatial::PointId> anchor_point_ids,
+      std::span<const spatial::PointId> witness_pool_point_ids,
+      std::size_t lbvh_node_index,
+      std::size_t maximum_closed_rank);
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_witness_subtree_first_at_node(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const spatial::PointId> anchor_point_ids,
+      std::span<const spatial::PointId> witness_pool_point_ids,
+      std::size_t lbvh_node_index,
+      std::size_t maximum_closed_rank);
   [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
   start_frontier_at_node(
       const spatial::MortonLbvhIndex&&,
@@ -631,6 +663,19 @@ class ExactGroupedAnchoredPairTraversalContext {
     std::size_t node_exact_predicate_count{};
     std::size_t inherited_strict_witness_count{};
     std::uint64_t strict_witness_mask{};
+    bool uses_witness_subtree_pool{false};
+  };
+
+  struct WitnessSubtreeNodeAuthority {
+    std::size_t node_index{};
+    std::size_t leaf_begin{};
+    std::size_t leaf_end{};
+  };
+
+  struct ActiveWitnessSubtreeNode {
+    WitnessSubtreeNodeAuthority authority{};
+    spatial::ExactDyadicAabb3 witness_bounds{};
+    std::size_t next_anchor_offset{};
   };
 
   struct PrivateConstructionTag {};
@@ -643,6 +688,7 @@ class ExactGroupedAnchoredPairTraversalContext {
       std::size_t lbvh_node_index,
       std::size_t maximum_closed_rank,
       bool emit_off_diagonal_inconclusive_subtree,
+      bool search_witness_subtrees_first,
       PrivateConstructionTag);
 
   [[nodiscard]] ExactGroupedAnchoredPairPruneCertificate mint_certificate(
@@ -662,19 +708,46 @@ class ExactGroupedAnchoredPairTraversalContext {
              exact_grouped_anchored_pair_maximum_witness_pool_size>
       witness_point_bounds_{};
   std::size_t witness_pool_entry_count_{};
+  std::array<spatial::PointId,
+             exact_grouped_anchored_pair_maximum_witness_pool_size>
+      halo_witness_pool_point_ids_{};
+  std::array<spatial::ExactDyadicAabb3,
+             exact_grouped_anchored_pair_maximum_witness_pool_size>
+      halo_witness_point_bounds_{};
+  std::size_t halo_witness_pool_entry_count_{};
   spatial::ExactDyadicAabb3 anchor_bounds_{};
   std::size_t maximum_closed_rank_{};
   std::size_t required_witness_count_{};
   std::size_t start_node_index_{};
+  std::array<std::size_t,
+             exact_grouped_anchored_pair_maximum_anchor_count>
+      anchor_leaf_positions_{};
   std::array<NodeAuthority,
              exact_grouped_anchored_pair_maximum_traversal_stack_entry_count>
       pending_nodes_{};
   std::size_t pending_node_count_{};
   std::optional<ActiveNode> active_node_;
+  std::array<WitnessSubtreeNodeAuthority,
+             exact_grouped_anchored_pair_maximum_traversal_stack_entry_count>
+      pending_witness_subtree_nodes_{};
+  std::size_t pending_witness_subtree_node_count_{};
+  std::optional<ActiveWitnessSubtreeNode> active_witness_subtree_node_;
+  std::array<WitnessSubtreeNodeAuthority,
+             exact_grouped_anchored_pair_maximum_closed_rank - 1U>
+      witness_subtree_receipts_{};
+  std::size_t witness_subtree_receipt_count_{};
+  std::array<spatial::PointId,
+             exact_grouped_anchored_pair_maximum_closed_rank - 1U>
+      witness_subtree_point_ids_{};
+  std::size_t witness_subtree_point_count_{};
+  std::size_t witness_subtree_node_visit_count_{};
   std::shared_ptr<const void> cloud_identity_;
   std::shared_ptr<const void> lbvh_identity_;
   ExactGroupedAnchoredPairTraversalAudit audit_{};
   bool emit_off_diagonal_inconclusive_subtree_{false};
+  bool search_witness_subtrees_first_{false};
+  bool witness_subtree_preflight_complete_{true};
+  bool witness_subtree_search_complete_{true};
   bool complete_{false};
 };
 

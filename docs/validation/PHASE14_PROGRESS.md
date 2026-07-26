@@ -400,9 +400,27 @@ La recertification finale ciblée passe 4/4 sous GCC Release en 0,33 seconde : c
 
 P8q reste `architecture_only` et `public_status=not_claimed`. L'exclusion des témoins appartenant au sous-arbre $Q$, l'héritage des relations strictes entre sondes et le ciblage continu milieu/projection sont des dettes non bloquantes. Dès qu'un test complet à chaud sur 50 000 points et $K=10$ termine en moins de 0,5 seconde, l'optimisation 50 k s'arrête pour ce jalon et le travail passe au sink externe puis au chemin gardé 10 M+.
 
+## Incrément 14R P8r — cœur dynamique borné de sous-arbres témoins
+
+La porte d'entrée 14R est satisfaite par l'unique diagnostic post-P8q sur `uniform_latin`, $n=50\,000$, $K=10$. Il s'arrête avec le code 2 à `total_grouped_traversal_exact_predicate_capacity`, en 201,648 ms au total dont 24,225 ms pour la voie paire. Les singletons consomment 19 662 des 20 000 signes exacts et 390 des 396 visites; les quatre sondes de sous-groupes se partagent sans produire un prune. Ce run incomplet refuse le gate produit malgré son temps inférieur à 0,5 seconde et localise la prochaine réduction dans la recherche de témoins, pas dans une hausse de capacité.
+
+14R s'exécute sous `cuda_g4_plus_reference_cpu / hgp_reduced / dynamic_bounded_witness_subtree_core_plus_massive_sparse_pair_prefix_smoke / architecture_only`, avec `public_status=not_claimed`. Pour chaque nœud requête atteint par le fallback P8q, P8r effectue un préflight exact du cœur continu puis visite au plus 64 nœuds témoins authentifiés du LBVH. L'ordre selon le milieu des intervalles les plus proches est seulement propositionnel. Un nœud qui recouvre la requête ou contient une ancre est développé; un reçu n'est conservé que si sa boîte témoin satisfait le maximum dyadique exact strictement négatif pour chaque ancre réelle. Les reçus sont disjoints, fournissent le nombre de points requis borné par le rang, puis ces `PointId` sont rejoués par le certificat P8g existant avant tout prune. Échec du préflight, cap, insuffisance ou changement de branche restaure le halo immuable et retombe fail-open sur P8q.
+
+L'état supplémentaire contient une DFS témoin de 64 visites au plus, au plus dix reçus et dix `PointId`, le halo existant de 64 entrées et les 32 boîtes d'ancres. Il reste $O(G+W+H+K)$ au-delà du nuage et du LBVH et ne construit ni arbre dual global, ni arène de paires, ni catalogue de témoins, facette, coface, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Pour un nœud requête, la proposition ajoute un préflight puis au plus $64G+KG$ signes exacts; elle ne resserre pas le pire cas quadratique du parcours extérieur.
+
+Les cinq CTests GCC Release ciblés passent 5/5 en 0,43 seconde. Ils couvrent le succès d'un sous-arbre et son rejeu P8g, la reprise sous budgets unitaires, le cap de 64 et le fail-open atomique, le redémarrage par nœud requête avec restauration du halo entre frères, les identités P8l et runner, puis le smoke de cycle de vie. Aucun test long, sanitizer, CUDA ou GCP n'est inclus.
+
+L'unique gate final P8r sur `uniform_latin`, $n=50\,000$, $K=10$, s'arrête encore avec le code 2 au même cap après 177,470 ms au total, dont 18,158 ms pour la voie paire. Il compte 10 607 visites, dont 10 363 dans le cœur dynamique, 20 000 signes exacts, dont 10 167 dans ce cœur, 993 reçus, 120 succès et 114 fail-open. Les 12 prunes de sous-groupes couvrent 96 ancres; les 38 fallbacks singleton sont terminés et produisent 108 autres prunes. Les 120 prunes authentifiées ferment une masse dirigée de 1 509 560 sans ouvrir de candidate. Le premier groupe de 32 ancres reste néanmoins actif : le pipeline et son autorité terminale ne sont pas scellés. Le seuil de 0,5 seconde n'est donc pas satisfait comme gate produit.
+
+Le smoke `morsehgp3d.phase14.massive_sparse_pair_prefix_smoke.v1` passe localement sur 257 points en 0,05 seconde. Il détruit les propriétaires de l'entrée et du builder avant un unique préfixe P8l borné, ne retient aucun record et rapporte zéro structure globale ou aval interdite. Les champs `pipeline_complete`, `pair_authority_sealed`, `scientific_result_materialized`, `massive_product_path_claimed`, `ten_million_point_capacity_claimed` et `public_status_claimed` restent tous faux. Ce smoke n'est ni un run à 10 M, ni une qualification de capacité; GCP n'est pas utilisé.
+
+14R est ainsi fermé comme incrément mathématique et logiciel borné `architecture_only`; le gate 50 k reste explicitement non satisfait. Les raffinements du halo ne sont plus la prochaine porte.
+
 ## Priorités de développement
 
-1. exécuter une seule passe complète à chaud P8q sur `uniform_latin`, 50 000 points, $K=10$; si son total est strictement inférieur à 0,5 seconde, passer immédiatement au sink externe, à la levée gardée du chemin 10 M+ et à la stratégie scalable des supports trois--quatre. Une sortie incomplète ne vaut ni SLO ni qualification massive, et aucun raffinement des trois dettes P8q n'est requis avant ce passage si le seuil est franchi.
+1. remplacer la décomposition « un groupe d'ancres contre tout l'arbre requête » par un parcours exact borné bloc LBVH contre bloc LBVH. Un bloc positif réutilise le certificat P8r; un bloc inconclusif est partagé sans matérialiser d'arbre dual ni d'arène de paires. Une seule passe complète à chaud sur 50 000 points et $K=10$ précède tout nouveau réglage de halo.
+
+Le sink et le checkpoint externes de Phase 15 restent nécessaires à la voie 10 M+; le smoke P8l non scellé ne les remplace pas et ne les qualifie pas.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

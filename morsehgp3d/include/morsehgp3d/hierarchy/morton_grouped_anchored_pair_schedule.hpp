@@ -46,9 +46,11 @@ enum class ExactMortonGroupedAnchoredPairScheduleStopReason : std::uint8_t {
 
 struct ExactMortonGroupedAnchoredPairScheduleStepWork {
   std::size_t traversal_node_visit_count{};
+  std::size_t witness_subtree_node_visit_count{};
   std::size_t witness_slot_scan_count{};
   std::size_t inherited_witness_reuse_count{};
   std::size_t exact_predicate_count{};
+  std::size_t witness_subtree_exact_predicate_count{};
   std::size_t strict_witness_discovery_count{};
 
   friend bool operator==(
@@ -67,12 +69,17 @@ struct ExactMortonGroupedAnchoredPairScheduleAudit {
   std::size_t common_traversal_node_visit_count{};
   std::size_t anchor_subgroup_node_visit_count{};
   std::size_t singleton_node_visit_count{};
+  std::size_t witness_subtree_node_visit_count{};
   std::size_t witness_slot_scan_count{};
   std::size_t inherited_witness_reuse_count{};
   std::size_t exact_predicate_count{};
   std::size_t common_exact_predicate_count{};
   std::size_t anchor_subgroup_exact_predicate_count{};
   std::size_t singleton_exact_predicate_count{};
+  std::size_t witness_subtree_exact_predicate_count{};
+  std::size_t witness_subtree_receipt_count{};
+  std::size_t witness_subtree_success_count{};
+  std::size_t witness_subtree_fail_open_count{};
   std::size_t strict_witness_discovery_count{};
   std::size_t diagonal_node_descent_count{};
   std::size_t certified_prune_count{};

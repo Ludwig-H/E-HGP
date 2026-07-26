@@ -1,5 +1,7 @@
 # E-HGP — MorseHGP3D
 
+> État industriel : Phase 14R valide le cœur dynamique P8r au niveau `architecture_only`, mais le run 50 k/$K=10$ reste incomplet après 177,470 ms; le gate inférieur à 0,5 seconde et toute capacité 10 M restent non revendiqués. La prochaine porte est le parcours exact bloc LBVH contre bloc LBVH, puis le sink/checkpoint et un run GCP gardé à 10 000 001 points.
+
 E-HGP est désormais centré sur **MorseHGP3D**, le backend 3D destiné à reconstruire la hiérarchie des amas de forte densité K-NN pour tous les ordres $1\leq k\leq K_{\max}$, avec $K_{\max}=10$ comme première cible. Le dépôt fixe l'objet mathématique, conserve des oracles CPU exhaustifs bornés et développe maintenant la Phase 9 : un flux direct de supports critiques sensible à $H_0$, branch-and-bound sur LBVH et GPU-first. Les travaux cellulaires de Phase 8 restent des différentiels jusqu'à huit sites; ils ne sont plus le chemin produit.
 
 L'objet continu est la tour de multicovertures

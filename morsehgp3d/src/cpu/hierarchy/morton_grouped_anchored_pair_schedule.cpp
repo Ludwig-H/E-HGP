@@ -355,14 +355,16 @@ void ExactMortonGroupedAnchoredPairScheduleContext::
       active_singleton_witness_pool_entry_count_};
   ExactGroupedAnchoredPairTraversalContext fallback_traversal =
       active_fallback_is_singleton_
-      ? ExactGroupedAnchoredPairTraversalContext::start_at_node(
+      ? ExactGroupedAnchoredPairTraversalContext::
+            start_witness_subtree_first_at_node(
             index,
             cloud,
             anchors,
             witnesses,
             singleton_frontier_node_index_,
             maximum_closed_rank_)
-      : ExactGroupedAnchoredPairTraversalContext::start_frontier_at_node(
+      : ExactGroupedAnchoredPairTraversalContext::
+            start_witness_subtree_first_frontier_at_node(
             index,
             cloud,
             anchors,
@@ -414,10 +416,13 @@ ExactMortonGroupedAnchoredPairScheduleContext::snapshot_step(
     }
     if (kind ==
         ExactMortonGroupedAnchoredPairScheduleStepKind::certified_prune) {
-      step.witness_pool_point_ids_ =
-          active_singleton_witness_pool_point_ids_;
-      step.witness_pool_entry_count_ =
-          active_singleton_witness_pool_entry_count_;
+      const std::span<const PointId> certified_pool =
+          active_singleton_traversal_->witness_pool_point_ids();
+      step.witness_pool_entry_count_ = certified_pool.size();
+      std::copy(
+          certified_pool.begin(),
+          certified_pool.end(),
+          step.witness_pool_point_ids_.begin());
     }
   } else if (active_traversal_.has_value()) {
     step.group_ordinal_ = active_group_ordinal_;
@@ -544,6 +549,12 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
       : *active_traversal_;
   const std::size_t diagonal_node_descent_count_before =
       selected_traversal.audit().diagonal_node_descent_count;
+  const std::size_t witness_subtree_receipt_count_before =
+      selected_traversal.audit().witness_subtree_receipt_count;
+  const std::size_t witness_subtree_success_count_before =
+      selected_traversal.audit().witness_subtree_success_count;
+  const std::size_t witness_subtree_fail_open_count_before =
+      selected_traversal.audit().witness_subtree_fail_open_count;
   ExactGroupedAnchoredPairTraversalStep traversal_step =
       selected_traversal.advance(index, cloud, traversal_budget);
   const std::size_t diagonal_node_descent_count_after =
@@ -558,6 +569,35 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
       diagonal_node_descent_count_after -
           diagonal_node_descent_count_before,
       "the Morton grouped diagonal-descent count overflows size_t");
+  const auto accumulate_monotone_counter = [](
+                                               std::size_t before,
+                                               std::size_t after,
+                                               std::size_t& destination,
+                                               const char* regression_message,
+                                               const char* overflow_message) {
+    if (after < before) {
+      throw std::logic_error(regression_message);
+    }
+    checked_add_to(destination, after - before, overflow_message);
+  };
+  accumulate_monotone_counter(
+      witness_subtree_receipt_count_before,
+      selected_traversal.audit().witness_subtree_receipt_count,
+      audit_.witness_subtree_receipt_count,
+      "a grouped traversal witness-subtree receipt audit regressed",
+      "the Morton grouped witness-subtree receipt count overflows size_t");
+  accumulate_monotone_counter(
+      witness_subtree_success_count_before,
+      selected_traversal.audit().witness_subtree_success_count,
+      audit_.witness_subtree_success_count,
+      "a grouped traversal witness-subtree success audit regressed",
+      "the Morton grouped witness-subtree success count overflows size_t");
+  accumulate_monotone_counter(
+      witness_subtree_fail_open_count_before,
+      selected_traversal.audit().witness_subtree_fail_open_count,
+      audit_.witness_subtree_fail_open_count,
+      "a grouped traversal witness-subtree fail-open audit regressed",
+      "the Morton grouped witness-subtree fail-open count overflows size_t");
   checked_increment(
       audit_.traversal_advance_count,
       "the Morton grouped traversal-advance count overflows size_t");
@@ -567,6 +607,10 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
       audit_.traversal_node_visit_count,
       traversal_work.node_visit_count,
       "the Morton grouped node-visit count overflows size_t");
+  checked_add_to(
+      audit_.witness_subtree_node_visit_count,
+      traversal_work.witness_subtree_node_visit_count,
+      "the Morton grouped witness-subtree node count overflows size_t");
   if (!active_singleton_traversal_.has_value()) {
     checked_add_to(
         audit_.common_traversal_node_visit_count,
@@ -595,6 +639,10 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
       audit_.exact_predicate_count,
       traversal_work.exact_predicate_count,
       "the Morton grouped exact-predicate count overflows size_t");
+  checked_add_to(
+      audit_.witness_subtree_exact_predicate_count,
+      traversal_work.witness_subtree_exact_predicate_count,
+      "the Morton grouped witness-subtree predicate count overflows size_t");
   if (!active_singleton_traversal_.has_value()) {
     checked_add_to(
         audit_.common_exact_predicate_count,
@@ -776,9 +824,11 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
       snapshot_step(kind, stop_reason, traversal_budget);
   step.work_ = ExactMortonGroupedAnchoredPairScheduleStepWork{
       traversal_work.node_visit_count,
+      traversal_work.witness_subtree_node_visit_count,
       traversal_work.witness_slot_scan_count,
       traversal_work.inherited_witness_reuse_count,
       traversal_work.exact_predicate_count,
+      traversal_work.witness_subtree_exact_predicate_count,
       traversal_work.strict_witness_discovery_count};
   if (traversal_step.traversal_complete_after_step() &&
       !singleton_frontier_active_ &&

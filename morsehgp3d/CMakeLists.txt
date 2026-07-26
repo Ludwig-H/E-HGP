@@ -2595,6 +2595,39 @@ if(MORSEHGP3D_BUILD_TOOLS)
       PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
     )
   endif()
+
+  add_executable(
+    morsehgp3d_massive_sparse_pair_prefix_smoke
+    src/tools/massive_sparse_pair_prefix_smoke.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_massive_sparse_pair_prefix_smoke
+    PRIVATE morsehgp3d::sparse_anchored_pair_session
+  )
+  target_compile_definitions(
+    morsehgp3d_massive_sparse_pair_prefix_smoke
+    PRIVATE
+      MORSEHGP3D_MASSIVE_PREFIX_HAS_CUDA=$<BOOL:${MORSEHGP3D_ENABLE_CUDA}>
+  )
+  if(MORSEHGP3D_ENABLE_CUDA)
+    target_link_libraries(
+      morsehgp3d_massive_sparse_pair_prefix_smoke
+      PRIVATE morsehgp3d::gpu_morton_lbvh_build
+    )
+  endif()
+  morsehgp3d_apply_sanitizers(
+    morsehgp3d_massive_sparse_pair_prefix_smoke
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_massive_sparse_pair_prefix_smoke PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_massive_sparse_pair_prefix_smoke
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
 endif()
 
 if(MORSEHGP3D_BUILD_TESTS)
@@ -2665,6 +2698,7 @@ if(MORSEHGP3D_BUILD_TOOLS)
       morsehgp3d_anchored_pair_witness_bank_smoke
       morsehgp3d_anchored_pair_candidate_pipeline_smoke
       morsehgp3d_direct_morse_product_runner
+      morsehgp3d_massive_sparse_pair_prefix_smoke
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
   )
   install(

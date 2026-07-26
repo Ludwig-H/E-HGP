@@ -92,6 +92,76 @@ void checked_increment(std::size_t& value, const char* message) {
   ++value;
 }
 
+[[nodiscard]] bool half_open_ranges_overlap(
+    std::size_t first_begin,
+    std::size_t first_end,
+    std::size_t second_begin,
+    std::size_t second_end) noexcept {
+  return first_begin < second_end && second_begin < first_end;
+}
+
+// Proposal-only guide for the exact subtree search.  In one dimension, when
+// the anchor interval lies before the query interval, every common diametral
+// witness lies between the closest endpoints; their midpoint maximizes the
+// symmetric margin.  The product of the three one-dimensional projections is
+// only a traversal order.  Every accepted subtree and selected point is still
+// decided by the exact predicates below.
+[[nodiscard]] std::array<long double, 3> closest_interval_midpoint(
+    const ExactDyadicAabb3& anchors,
+    const ExactDyadicAabb3& query) {
+  std::array<long double, 3> target{};
+  for (std::size_t axis = 0U; axis < target.size(); ++axis) {
+    const long double anchor_lower = static_cast<long double>(
+        std::bit_cast<double>(anchors.lower_binary64_bits[axis]));
+    const long double anchor_upper = static_cast<long double>(
+        std::bit_cast<double>(anchors.upper_binary64_bits[axis]));
+    const long double query_lower = static_cast<long double>(
+        std::bit_cast<double>(query.lower_binary64_bits[axis]));
+    const long double query_upper = static_cast<long double>(
+        std::bit_cast<double>(query.upper_binary64_bits[axis]));
+    long double anchor_projection{};
+    long double query_projection{};
+    if (anchor_upper < query_lower) {
+      anchor_projection = anchor_upper;
+      query_projection = query_lower;
+    } else if (query_upper < anchor_lower) {
+      anchor_projection = anchor_lower;
+      query_projection = query_upper;
+    } else {
+      const long double overlap_lower =
+          std::max(anchor_lower, query_lower);
+      const long double overlap_upper =
+          std::min(anchor_upper, query_upper);
+      anchor_projection =
+          overlap_lower + (overlap_upper - overlap_lower) / 2.0L;
+      query_projection = anchor_projection;
+    }
+    target[axis] = anchor_projection +
+        (query_projection - anchor_projection) / 2.0L;
+  }
+  return target;
+}
+
+[[nodiscard]] long double proposal_minimum_squared_distance(
+    const std::array<long double, 3>& target,
+    const ExactDyadicAabb3& bounds) {
+  long double squared_distance = 0.0L;
+  for (std::size_t axis = 0U; axis < target.size(); ++axis) {
+    const long double lower = static_cast<long double>(
+        std::bit_cast<double>(bounds.lower_binary64_bits[axis]));
+    const long double upper = static_cast<long double>(
+        std::bit_cast<double>(bounds.upper_binary64_bits[axis]));
+    long double delta = 0.0L;
+    if (target[axis] < lower) {
+      delta = lower - target[axis];
+    } else if (target[axis] > upper) {
+      delta = target[axis] - upper;
+    }
+    squared_distance += delta * delta;
+  }
+  return squared_distance;
+}
+
 }  // namespace
 
 class ExactGroupedAnchoredPairPruneCertifier {
@@ -357,6 +427,7 @@ ExactGroupedAnchoredPairTraversalContext::start_at_root(
       index.root_index_,
       maximum_closed_rank,
       false,
+      false,
       PrivateConstructionTag{});
 }
 
@@ -379,6 +450,7 @@ ExactGroupedAnchoredPairTraversalContext::start_frontier_at_root(
       index.root_index_,
       maximum_closed_rank,
       true,
+      false,
       PrivateConstructionTag{});
 }
 
@@ -397,6 +469,7 @@ ExactGroupedAnchoredPairTraversalContext::start_at_node(
       witness_pool_point_ids,
       lbvh_node_index,
       maximum_closed_rank,
+      false,
       false,
       PrivateConstructionTag{});
 }
@@ -417,6 +490,49 @@ ExactGroupedAnchoredPairTraversalContext::start_frontier_at_node(
       lbvh_node_index,
       maximum_closed_rank,
       true,
+      false,
+      PrivateConstructionTag{});
+}
+
+ExactGroupedAnchoredPairTraversalContext
+ExactGroupedAnchoredPairTraversalContext::
+    start_witness_subtree_first_at_node(
+        const MortonLbvhIndex& index,
+        const CanonicalPointCloud& cloud,
+        std::span<const PointId> anchor_point_ids,
+        std::span<const PointId> witness_pool_point_ids,
+        std::size_t lbvh_node_index,
+        std::size_t maximum_closed_rank) {
+  return ExactGroupedAnchoredPairTraversalContext(
+      index,
+      cloud,
+      anchor_point_ids,
+      witness_pool_point_ids,
+      lbvh_node_index,
+      maximum_closed_rank,
+      false,
+      true,
+      PrivateConstructionTag{});
+}
+
+ExactGroupedAnchoredPairTraversalContext
+ExactGroupedAnchoredPairTraversalContext::
+    start_witness_subtree_first_frontier_at_node(
+        const MortonLbvhIndex& index,
+        const CanonicalPointCloud& cloud,
+        std::span<const PointId> anchor_point_ids,
+        std::span<const PointId> witness_pool_point_ids,
+        std::size_t lbvh_node_index,
+        std::size_t maximum_closed_rank) {
+  return ExactGroupedAnchoredPairTraversalContext(
+      index,
+      cloud,
+      anchor_point_ids,
+      witness_pool_point_ids,
+      lbvh_node_index,
+      maximum_closed_rank,
+      true,
+      true,
       PrivateConstructionTag{});
 }
 
@@ -429,6 +545,7 @@ ExactGroupedAnchoredPairTraversalContext::
         std::size_t lbvh_node_index,
         std::size_t maximum_closed_rank,
         bool emit_off_diagonal_inconclusive_subtree,
+        bool search_witness_subtrees_first,
         PrivateConstructionTag) {
   if (!index.validated_for(cloud)) {
     throw std::invalid_argument(
@@ -475,6 +592,8 @@ ExactGroupedAnchoredPairTraversalContext::
     anchor_point_ids_[anchor_offset] = anchor_point_id;
     anchor_point_bounds_[anchor_offset] =
         point_bounds(cloud, anchor_point_id);
+    anchor_leaf_positions_[anchor_offset] =
+        index.leaf_position_by_point_id_[anchor_point_id];
   }
 
   witness_pool_entry_count_ = witness_pool_point_ids.size();
@@ -501,6 +620,9 @@ ExactGroupedAnchoredPairTraversalContext::
     witness_point_bounds_[witness_offset] =
         point_bounds(cloud, witness_point_id);
   }
+  halo_witness_pool_point_ids_ = witness_pool_point_ids_;
+  halo_witness_point_bounds_ = witness_point_bounds_;
+  halo_witness_pool_entry_count_ = witness_pool_entry_count_;
 
   anchor_bounds_ = build_anchor_bounds(cloud, anchor_point_ids);
   maximum_closed_rank_ = maximum_closed_rank;
@@ -510,6 +632,9 @@ ExactGroupedAnchoredPairTraversalContext::
   lbvh_identity_ = index.identity_;
   emit_off_diagonal_inconclusive_subtree_ =
       emit_off_diagonal_inconclusive_subtree;
+  search_witness_subtrees_first_ = search_witness_subtrees_first;
+  witness_subtree_preflight_complete_ = true;
+  witness_subtree_search_complete_ = true;
 
   const MortonLbvhIndex::Node& start_node =
       index.nodes_[lbvh_node_index];
@@ -691,6 +816,34 @@ ExactGroupedAnchoredPairTraversalContext::advance(
       }
 
       --pending_node_count_;
+      // A subtree proposal is local to one query node.  Restore the immutable
+      // query-facing halo before binding the next authenticated authority so
+      // its inherited mask keeps the same bit meaning as its parent.
+      witness_pool_point_ids_ = halo_witness_pool_point_ids_;
+      witness_point_bounds_ = halo_witness_point_bounds_;
+      witness_pool_entry_count_ = halo_witness_pool_entry_count_;
+      pending_witness_subtree_nodes_ = {};
+      pending_witness_subtree_node_count_ = 0U;
+      active_witness_subtree_node_.reset();
+      witness_subtree_receipts_ = {};
+      witness_subtree_receipt_count_ = 0U;
+      witness_subtree_point_ids_ = {};
+      witness_subtree_point_count_ = 0U;
+      witness_subtree_node_visit_count_ = 0U;
+      witness_subtree_preflight_complete_ =
+          !search_witness_subtrees_first_;
+      witness_subtree_search_complete_ =
+          !search_witness_subtrees_first_;
+      if (search_witness_subtrees_first_ &&
+          witness_pool_entry_count_ >= required_witness_count_) {
+        const MortonLbvhIndex::Node& witness_root =
+            index.nodes_[index.root_index_];
+        pending_witness_subtree_nodes_[0] = WitnessSubtreeNodeAuthority{
+            index.root_index_,
+            witness_root.leaf_begin,
+            witness_root.leaf_end};
+        pending_witness_subtree_node_count_ = 1U;
+      }
       active_node_.emplace(ActiveNode{
           authority,
           query_bounds,
@@ -752,7 +905,9 @@ ExactGroupedAnchoredPairTraversalContext::advance(
       const MortonLbvhIndex::Node& left = index.nodes_[node.left_child];
       const MortonLbvhIndex::Node& right = index.nodes_[node.right_child];
       const std::uint64_t inherited_mask =
-          active_node.strict_witness_mask;
+          active_node.uses_witness_subtree_pool
+          ? active_node.authority.inherited_strict_witness_mask
+          : active_node.strict_witness_mask;
       const NodeAuthority left_authority{
           node.left_child,
           left.leaf_begin,
@@ -813,6 +968,297 @@ ExactGroupedAnchoredPairTraversalContext::advance(
       continue;
     }
 
+    if (search_witness_subtrees_first_ &&
+        !witness_subtree_search_complete_ &&
+        witness_pool_entry_count_ >= required_witness_count_ &&
+        active_node.next_witness_offset == 0U &&
+        active_node.next_anchor_offset == 0U &&
+        active_node.strict_witness_mask == 0U) {
+      const auto fail_open_witness_subtree_search = [&]() {
+        checked_increment(
+            audit_.witness_subtree_fail_open_count,
+            "the grouped witness-subtree fail-open count overflows size_t");
+        witness_subtree_search_complete_ = true;
+        pending_witness_subtree_node_count_ = 0U;
+        active_witness_subtree_node_.reset();
+        witness_subtree_receipt_count_ = 0U;
+        witness_subtree_point_count_ = 0U;
+      };
+
+      const auto witness_node_contains_anchor = [this](
+                                                     std::size_t leaf_begin,
+                                                     std::size_t leaf_end) {
+        for (std::size_t anchor_offset = 0U;
+             anchor_offset < anchor_count_;
+             ++anchor_offset) {
+          if (anchor_leaf_positions_[anchor_offset] >= leaf_begin &&
+              anchor_leaf_positions_[anchor_offset] < leaf_end) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      const auto expand_active_witness_subtree_node = [&]() {
+        if (!active_witness_subtree_node_.has_value()) {
+          throw std::logic_error(
+              "a grouped witness-subtree expansion lost its active node");
+        }
+        const WitnessSubtreeNodeAuthority authority =
+            active_witness_subtree_node_->authority;
+        const MortonLbvhIndex::Node& witness_node =
+            index.nodes_[authority.node_index];
+        if (witness_node.is_leaf()) {
+          active_witness_subtree_node_.reset();
+          return;
+        }
+        if (pending_witness_subtree_node_count_ >
+            pending_witness_subtree_nodes_.size() - 2U) {
+          throw std::logic_error(
+              "the certified LBVH exceeded the fixed witness-subtree stack");
+        }
+        if (witness_node.left_child >= index.nodes_.size() ||
+            witness_node.right_child >= index.nodes_.size()) {
+          throw std::logic_error(
+              "a grouped witness-subtree node has an invalid child");
+        }
+        const MortonLbvhIndex::Node& left =
+            index.nodes_[witness_node.left_child];
+        const MortonLbvhIndex::Node& right =
+            index.nodes_[witness_node.right_child];
+        const WitnessSubtreeNodeAuthority left_authority{
+            witness_node.left_child, left.leaf_begin, left.leaf_end};
+        const WitnessSubtreeNodeAuthority right_authority{
+            witness_node.right_child, right.leaf_begin, right.leaf_end};
+        const std::array<long double, 3> target =
+            closest_interval_midpoint(anchor_bounds_, active_node.query_bounds);
+        const ExactDyadicAabb3 left_bounds =
+            ExactGroupedAnchoredPairPruneCertifier::node_bounds(
+                index, cloud, left_authority.node_index);
+        const ExactDyadicAabb3 right_bounds =
+            ExactGroupedAnchoredPairPruneCertifier::node_bounds(
+                index, cloud, right_authority.node_index);
+        const bool left_first = proposal_minimum_squared_distance(
+                                    target, left_bounds) <=
+            proposal_minimum_squared_distance(target, right_bounds);
+        // The stack pops its last entry: keep the midpoint-facing child last.
+        pending_witness_subtree_nodes_[
+            pending_witness_subtree_node_count_] =
+            left_first ? right_authority : left_authority;
+        pending_witness_subtree_nodes_[
+            pending_witness_subtree_node_count_ + 1U] =
+            left_first ? left_authority : right_authority;
+        pending_witness_subtree_node_count_ += 2U;
+        active_witness_subtree_node_.reset();
+      };
+
+      if (!witness_subtree_preflight_complete_) {
+        if (work.exact_predicate_count >=
+            budget.maximum_exact_predicate_count) {
+          return budget_exhausted_step(
+              ExactGroupedAnchoredPairTraversalStopReason::
+                  exact_predicate_limit);
+        }
+        require_incrementable(
+            work.exact_predicate_count,
+            "the grouped witness-core preflight step count overflows size_t");
+        require_incrementable(
+            work.witness_subtree_exact_predicate_count,
+            "the grouped witness-core specific step count overflows size_t");
+        require_incrementable(
+            audit_.exact_predicate_count,
+            "the grouped witness-core preflight audit overflows size_t");
+        require_incrementable(
+            audit_.witness_subtree_exact_predicate_count,
+            "the grouped witness-core specific audit overflows size_t");
+        const int continuous_core_minimum_sign =
+            exact_diametral_phi_continuous_core_minimum_sign(
+                anchor_bounds_, active_node.query_bounds);
+        ++work.exact_predicate_count;
+        ++work.witness_subtree_exact_predicate_count;
+        ++audit_.exact_predicate_count;
+        ++audit_.witness_subtree_exact_predicate_count;
+        witness_subtree_preflight_complete_ = true;
+        if (continuous_core_minimum_sign >= 0) {
+          fail_open_witness_subtree_search();
+        }
+      }
+
+      while (!witness_subtree_search_complete_) {
+        if (!active_witness_subtree_node_.has_value()) {
+          if (pending_witness_subtree_node_count_ == 0U ||
+              witness_subtree_node_visit_count_ >=
+                  exact_grouped_anchored_pair_maximum_witness_subtree_node_visit_count) {
+            fail_open_witness_subtree_search();
+            break;
+          }
+          if (work.node_visit_count >= budget.maximum_node_visit_count) {
+            return budget_exhausted_step(
+                ExactGroupedAnchoredPairTraversalStopReason::node_visit_limit);
+          }
+          require_incrementable(
+              work.node_visit_count,
+              "the grouped witness-subtree step node count overflows size_t");
+          require_incrementable(
+              work.witness_subtree_node_visit_count,
+              "the grouped witness-subtree specific step node count overflows size_t");
+          require_incrementable(
+              audit_.node_visit_count,
+              "the grouped witness-subtree total node count overflows size_t");
+          require_incrementable(
+              audit_.witness_subtree_node_visit_count,
+              "the grouped witness-subtree audit node count overflows size_t");
+          require_incrementable(
+              witness_subtree_node_visit_count_,
+              "the grouped witness-subtree bounded node count overflows size_t");
+
+          const WitnessSubtreeNodeAuthority authority =
+              pending_witness_subtree_nodes_[
+                  pending_witness_subtree_node_count_ - 1U];
+          --pending_witness_subtree_node_count_;
+          if (authority.node_index >= index.nodes_.size()) {
+            throw std::logic_error(
+                "a grouped witness-subtree authority names an invalid node");
+          }
+          const MortonLbvhIndex::Node& witness_node =
+              index.nodes_[authority.node_index];
+          if (witness_node.leaf_begin != authority.leaf_begin ||
+              witness_node.leaf_end != authority.leaf_end) {
+            throw std::logic_error(
+                "a grouped witness-subtree authority lost its leaf range");
+          }
+          active_witness_subtree_node_.emplace(
+              ActiveWitnessSubtreeNode{
+                  authority,
+                  ExactGroupedAnchoredPairPruneCertifier::node_bounds(
+                      index, cloud, authority.node_index),
+                  0U});
+          ++work.node_visit_count;
+          ++work.witness_subtree_node_visit_count;
+          ++audit_.node_visit_count;
+          ++audit_.witness_subtree_node_visit_count;
+          ++witness_subtree_node_visit_count_;
+        }
+
+        ActiveWitnessSubtreeNode& witness_active =
+            *active_witness_subtree_node_;
+        const bool overlaps_query = half_open_ranges_overlap(
+            witness_active.authority.leaf_begin,
+            witness_active.authority.leaf_end,
+            active_node.authority.leaf_begin,
+            active_node.authority.leaf_end);
+        if (overlaps_query || witness_node_contains_anchor(
+                                  witness_active.authority.leaf_begin,
+                                  witness_active.authority.leaf_end)) {
+          expand_active_witness_subtree_node();
+          continue;
+        }
+
+        bool rejected = false;
+        while (witness_active.next_anchor_offset < anchor_count_) {
+          if (work.exact_predicate_count >=
+              budget.maximum_exact_predicate_count) {
+            return budget_exhausted_step(
+                ExactGroupedAnchoredPairTraversalStopReason::
+                    exact_predicate_limit);
+          }
+          require_incrementable(
+              work.exact_predicate_count,
+              "the grouped witness-subtree total step predicate count overflows size_t");
+          require_incrementable(
+              work.witness_subtree_exact_predicate_count,
+              "the grouped witness-subtree specific step predicate count overflows size_t");
+          require_incrementable(
+              audit_.exact_predicate_count,
+              "the grouped witness-subtree total predicate count overflows size_t");
+          require_incrementable(
+              audit_.witness_subtree_exact_predicate_count,
+              "the grouped witness-subtree audit predicate count overflows size_t");
+          const int maximum_sign =
+              exact_diametral_phi_aabb_maximum_sign(
+                  anchor_point_bounds_[witness_active.next_anchor_offset],
+                  active_node.query_bounds,
+                  witness_active.witness_bounds);
+          ++witness_active.next_anchor_offset;
+          ++work.exact_predicate_count;
+          ++work.witness_subtree_exact_predicate_count;
+          ++audit_.exact_predicate_count;
+          ++audit_.witness_subtree_exact_predicate_count;
+          if (maximum_sign >= 0) {
+            rejected = true;
+            break;
+          }
+        }
+        if (rejected) {
+          expand_active_witness_subtree_node();
+          continue;
+        }
+        if (witness_active.next_anchor_offset != anchor_count_) {
+          throw std::logic_error(
+              "a grouped witness-subtree receipt lost its anchor cursor");
+        }
+        if (witness_subtree_receipt_count_ >=
+            witness_subtree_receipts_.size()) {
+          throw std::logic_error(
+              "a grouped witness-subtree receipt exceeded the rank bound");
+        }
+        for (std::size_t receipt_offset = 0U;
+             receipt_offset < witness_subtree_receipt_count_;
+             ++receipt_offset) {
+          const WitnessSubtreeNodeAuthority& receipt =
+              witness_subtree_receipts_[receipt_offset];
+          if (half_open_ranges_overlap(
+                  receipt.leaf_begin,
+                  receipt.leaf_end,
+                  witness_active.authority.leaf_begin,
+                  witness_active.authority.leaf_end)) {
+            throw std::logic_error(
+                "grouped witness-subtree receipts are not an antichain");
+          }
+        }
+        witness_subtree_receipts_[witness_subtree_receipt_count_] =
+            witness_active.authority;
+        ++witness_subtree_receipt_count_;
+        checked_increment(
+            audit_.witness_subtree_receipt_count,
+            "the grouped witness-subtree receipt audit overflows size_t");
+        for (std::size_t leaf_offset =
+                 witness_active.authority.leaf_begin;
+             leaf_offset < witness_active.authority.leaf_end &&
+             witness_subtree_point_count_ < required_witness_count_;
+             ++leaf_offset) {
+          witness_subtree_point_ids_[witness_subtree_point_count_] =
+              index.leaves_[leaf_offset].point_id;
+          ++witness_subtree_point_count_;
+        }
+        active_witness_subtree_node_.reset();
+
+        if (witness_subtree_point_count_ == required_witness_count_) {
+          std::sort(
+              witness_subtree_point_ids_.begin(),
+              witness_subtree_point_ids_.begin() +
+                  static_cast<std::ptrdiff_t>(required_witness_count_));
+          witness_pool_point_ids_ = {};
+          witness_point_bounds_ = {};
+          witness_pool_entry_count_ = required_witness_count_;
+          for (std::size_t witness_offset = 0U;
+               witness_offset < required_witness_count_;
+               ++witness_offset) {
+            witness_pool_point_ids_[witness_offset] =
+                witness_subtree_point_ids_[witness_offset];
+            witness_point_bounds_[witness_offset] = point_bounds(
+                cloud, witness_subtree_point_ids_[witness_offset]);
+          }
+          pending_witness_subtree_node_count_ = 0U;
+          witness_subtree_search_complete_ = true;
+          active_node.uses_witness_subtree_pool = true;
+          checked_increment(
+              audit_.witness_subtree_success_count,
+              "the grouped witness-subtree success count overflows size_t");
+        }
+      }
+    }
+
     std::size_t strict_witness_count =
         static_cast<std::size_t>(
             std::popcount(active_node.strict_witness_mask));
@@ -823,7 +1269,8 @@ ExactGroupedAnchoredPairTraversalContext::advance(
           active_node.next_witness_offset;
       const std::uint64_t witness_bit =
           std::uint64_t{1} << witness_offset;
-      if ((active_node.authority.inherited_strict_witness_mask &
+      if (!active_node.uses_witness_subtree_pool &&
+          (active_node.authority.inherited_strict_witness_mask &
            witness_bit) != 0U) {
         if (active_node.next_anchor_offset != 0U) {
           throw std::logic_error(

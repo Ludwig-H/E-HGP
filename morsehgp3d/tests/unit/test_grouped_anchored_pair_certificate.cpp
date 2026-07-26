@@ -1389,6 +1389,241 @@ void test_frontier_inconclusive_subtree_resumes_stably() {
       "unit-budget resumption changed the grouped frontier cumulative audit");
 }
 
+void test_bounded_witness_subtree_proposal_replays_through_p8g() {
+  CanonicalPointCloud cloud = make_line_cloud(32U);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<PointId, 1> anchors{0U};
+  const std::array<PointId, 3> nonstrict_halo{29U, 30U, 31U};
+
+  ExactGroupedAnchoredPairTraversalContext frontier =
+      ExactGroupedAnchoredPairTraversalContext::start_frontier_at_root(
+          index, cloud, anchors, nonstrict_halo, 4U);
+  const ExactGroupedAnchoredPairTraversalStep frontier_step =
+      frontier.advance(
+          index,
+          cloud,
+          ExactGroupedAnchoredPairTraversalWorkBudget{128U, 128U});
+  require(
+      frontier_step.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::
+                  inconclusive_subtree &&
+          frontier_step.lbvh_node_index().has_value(),
+      "the witness-subtree fixture did not expose an off-diagonal frontier");
+
+  ExactGroupedAnchoredPairTraversalContext roomy =
+      ExactGroupedAnchoredPairTraversalContext::
+          start_witness_subtree_first_frontier_at_node(
+              index,
+              cloud,
+              anchors,
+              nonstrict_halo,
+              *frontier_step.lbvh_node_index(),
+              4U);
+  const ExactGroupedAnchoredPairTraversalStep roomy_step = roomy.advance(
+      index,
+      cloud,
+      ExactGroupedAnchoredPairTraversalWorkBudget{256U, 256U});
+  const ExactGroupedAnchoredPairPruneCertificate* roomy_certificate =
+      roomy_step.prune_certificate();
+  require(
+      roomy_step.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::certified_prune &&
+          roomy_certificate != nullptr && roomy_certificate->certifies(
+              index,
+              cloud,
+              *frontier_step.lbvh_node_index(),
+              4U,
+              anchors) &&
+          roomy_certificate->certified_witness_point_ids().size() == 3U &&
+          roomy.audit().witness_subtree_success_count == 1U &&
+          roomy.audit().witness_subtree_fail_open_count == 0U &&
+          roomy.audit().witness_subtree_receipt_count > 0U &&
+          roomy.audit().witness_subtree_receipt_count <= 3U &&
+          roomy.audit().witness_subtree_node_visit_count > 0U &&
+          roomy.audit().witness_subtree_node_visit_count <=
+              morsehgp3d::hierarchy::
+                  exact_grouped_anchored_pair_maximum_witness_subtree_node_visit_count &&
+          roomy_step.work().witness_subtree_node_visit_count ==
+              roomy.audit().witness_subtree_node_visit_count &&
+          roomy_step.work().witness_subtree_exact_predicate_count ==
+              roomy.audit().witness_subtree_exact_predicate_count &&
+          roomy_step.work().exact_predicate_count >
+              roomy_step.work().witness_subtree_exact_predicate_count,
+      "the bounded witness-subtree proposal bypassed exact P8g replay");
+
+  const ExactGroupedAnchoredPairPruneCertificate replay =
+      certify_exact_grouped_anchored_pair_prune(
+          index,
+          cloud,
+          anchors,
+          roomy_certificate->witness_pool_point_ids(),
+          *frontier_step.lbvh_node_index(),
+          4U,
+          ExactGroupedAnchoredPairPruneBudget{1U, 3U, 3U});
+  require(
+      replay.certifies(
+          index,
+          cloud,
+          *frontier_step.lbvh_node_index(),
+          4U,
+          anchors),
+      "the witness-subtree proposal could not be replayed by P8g");
+
+  ExactGroupedAnchoredPairTraversalContext segmented =
+      ExactGroupedAnchoredPairTraversalContext::
+          start_witness_subtree_first_frontier_at_node(
+              index,
+              cloud,
+              anchors,
+              nonstrict_halo,
+              *frontier_step.lbvh_node_index(),
+              4U);
+  std::vector<PointId> segmented_witnesses;
+  std::size_t exhaustion_count = 0U;
+  for (std::size_t call = 0U; call < 256U; ++call) {
+    const ExactGroupedAnchoredPairTraversalStep step = segmented.advance(
+        index,
+        cloud,
+        ExactGroupedAnchoredPairTraversalWorkBudget{1U, 1U});
+    if (step.kind() ==
+        ExactGroupedAnchoredPairTraversalStepKind::budget_exhausted) {
+      ++exhaustion_count;
+      continue;
+    }
+    require(
+        step.kind() ==
+                ExactGroupedAnchoredPairTraversalStepKind::certified_prune &&
+            step.prune_certificate() != nullptr,
+        "unit budgets changed the witness-subtree terminal decision");
+    segmented_witnesses.assign(
+        step.prune_certificate()->certified_witness_point_ids().begin(),
+        step.prune_certificate()->certified_witness_point_ids().end());
+    break;
+  }
+  require(
+      exhaustion_count > 0U &&
+          segmented_witnesses ==
+              std::vector<PointId>{
+                  roomy_certificate->certified_witness_point_ids().begin(),
+                  roomy_certificate->certified_witness_point_ids().end()} &&
+          segmented.audit().witness_subtree_node_visit_count ==
+              roomy.audit().witness_subtree_node_visit_count &&
+          segmented.audit().witness_subtree_exact_predicate_count ==
+              roomy.audit().witness_subtree_exact_predicate_count,
+      "unit budgets changed the bounded witness-subtree proposal");
+}
+
+void test_bounded_witness_subtree_cap_fails_open() {
+  CanonicalPointCloud cloud = make_line_cloud(128U);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<PointId, 1> anchors{0U};
+  const std::array<PointId, 1> nonstrict_halo{127U};
+  const ExactGroupedAnchoredPairPruneCertificate query_leaf =
+      certificate_for_leaf(
+          index,
+          cloud,
+          anchors,
+          nonstrict_halo,
+          1U,
+          2U,
+          ExactGroupedAnchoredPairPruneBudget{1U, 1U, 1U});
+  ExactGroupedAnchoredPairTraversalContext traversal =
+      ExactGroupedAnchoredPairTraversalContext::
+          start_witness_subtree_first_at_node(
+              index,
+              cloud,
+              anchors,
+              nonstrict_halo,
+              query_leaf.lbvh_node_index(),
+              2U);
+  const ExactGroupedAnchoredPairTraversalStep step = traversal.advance(
+      index,
+      cloud,
+      ExactGroupedAnchoredPairTraversalWorkBudget{256U, 256U});
+  require(
+      step.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::unresolved_leaf &&
+          step.prune_certificate() == nullptr &&
+          traversal.audit().witness_subtree_success_count == 0U &&
+          traversal.audit().witness_subtree_fail_open_count == 1U &&
+          traversal.audit().witness_subtree_receipt_count == 0U &&
+          traversal.audit().witness_subtree_node_visit_count ==
+              morsehgp3d::hierarchy::
+                  exact_grouped_anchored_pair_maximum_witness_subtree_node_visit_count &&
+          traversal.complete(),
+      "the bounded witness-subtree cap published partial authority");
+}
+
+void test_witness_subtree_search_restarts_and_restores_halo_per_query_node() {
+  CanonicalPointCloud cloud = make_line_cloud(32U);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<PointId, 1> anchors{0U};
+  const std::array<PointId, 3> halo{29U, 30U, 31U};
+  std::size_t root_node_index = index.build_counters().node_count;
+  for (std::size_t node_index = 0U;
+       node_index < index.build_counters().node_count;
+       ++node_index) {
+    const ExactGroupedAnchoredPairPruneCertificate probe =
+        certify_exact_grouped_anchored_pair_prune(
+            index,
+            cloud,
+            anchors,
+            halo,
+            node_index,
+            4U,
+            ExactGroupedAnchoredPairPruneBudget{1U, 3U, 3U});
+    if (probe.leaf_begin() == 0U &&
+        probe.leaf_end() == cloud.size()) {
+      root_node_index = node_index;
+      break;
+    }
+  }
+  require(
+      root_node_index < index.build_counters().node_count,
+      "the per-query witness-subtree fixture lost its LBVH root");
+
+  ExactGroupedAnchoredPairTraversalContext traversal =
+      ExactGroupedAnchoredPairTraversalContext::
+          start_witness_subtree_first_at_node(
+              index, cloud, anchors, halo, root_node_index, 4U);
+  const auto active_pool_equals_halo = [&]() {
+    const std::span<const PointId> active_pool =
+        traversal.witness_pool_point_ids();
+    return active_pool.size() == halo.size() && std::equal(
+        active_pool.begin(), active_pool.end(), halo.begin());
+  };
+  const ExactGroupedAnchoredPairTraversalStep child_prune = traversal.advance(
+      index,
+      cloud,
+      ExactGroupedAnchoredPairTraversalWorkBudget{256U, 256U});
+  require(
+      child_prune.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::certified_prune &&
+          child_prune.lbvh_node_index().has_value() &&
+          *child_prune.lbvh_node_index() != root_node_index &&
+          child_prune.prune_certificate() != nullptr &&
+          traversal.audit().witness_subtree_fail_open_count == 1U &&
+          traversal.audit().witness_subtree_success_count == 1U &&
+          !active_pool_equals_halo(),
+      "the witness-subtree search did not restart below a failed root core");
+
+  const ExactGroupedAnchoredPairTraversalStep sibling_preflight =
+      traversal.advance(
+          index,
+          cloud,
+          ExactGroupedAnchoredPairTraversalWorkBudget{1U, 0U});
+  require(
+      sibling_preflight.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::budget_exhausted &&
+          sibling_preflight.stop_reason() ==
+              ExactGroupedAnchoredPairTraversalStopReason::
+                  exact_predicate_limit &&
+          sibling_preflight.work().node_visit_count == 1U &&
+          sibling_preflight.work().exact_predicate_count == 0U &&
+          active_pool_equals_halo(),
+      "a child core pool or its bit meaning leaked into the sibling query");
+}
+
 }  // namespace
 
 int main() {
@@ -1405,6 +1640,9 @@ int main() {
     test_prepared_traversal_fallback_and_provenance();
     test_frontier_descends_diagonal_without_signs();
     test_frontier_inconclusive_subtree_resumes_stably();
+    test_bounded_witness_subtree_proposal_replays_through_p8g();
+    test_bounded_witness_subtree_cap_fails_open();
+    test_witness_subtree_search_restarts_and_restores_halo_per_query_node();
   } catch (const std::exception& error) {
     std::cerr << "grouped anchored-pair certificate test failure: "
               << error.what() << '\n';

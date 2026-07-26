@@ -2791,6 +2791,19 @@ if(TARGET morsehgp3d_direct_morse_product_runner)
     PROPERTIES TIMEOUT 30
   )
 endif()
+if(TARGET morsehgp3d_massive_sparse_pair_prefix_smoke)
+  add_test(
+    NAME morsehgp3d.massive_sparse_pair_prefix_smoke
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_massive_sparse_pair_prefix_smoke.py"
+      "$<TARGET_FILE:morsehgp3d_massive_sparse_pair_prefix_smoke>"
+  )
+  set_tests_properties(
+    morsehgp3d.massive_sparse_pair_prefix_smoke
+    PROPERTIES TIMEOUT 15
+  )
+endif()
 set(
   _morsehgp3d_phase10_direct_saddle_arm_seed_configuration_command
   "${Python3_EXECUTABLE}"

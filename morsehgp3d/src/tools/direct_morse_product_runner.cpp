@@ -98,12 +98,17 @@ struct Report {
   std::size_t pair_prepared_groups{};
   std::size_t pair_completed_groups{};
   std::size_t pair_grouped_traversal_node_visits{};
+  std::size_t pair_witness_subtree_node_visits{};
   std::size_t pair_grouped_common_node_visits{};
   std::size_t pair_anchor_subgroup_node_visits{};
   std::size_t pair_singleton_node_visits{};
   std::size_t pair_grouped_witness_slots{};
   std::size_t pair_grouped_inherited_witness_reuses{};
   std::size_t pair_grouped_traversal_exact_predicates{};
+  std::size_t pair_witness_subtree_exact_predicates{};
+  std::size_t pair_witness_subtree_receipts{};
+  std::size_t pair_witness_subtree_successes{};
+  std::size_t pair_witness_subtree_fail_opens{};
   std::size_t pair_grouped_common_exact_predicates{};
   std::size_t pair_anchor_subgroup_exact_predicates{};
   std::size_t pair_singleton_exact_predicates{};
@@ -968,6 +973,8 @@ void emit_report(const Report& report) {
       << report.pair_completed_groups
       << ",\"grouped_node_visits\":"
       << report.pair_grouped_traversal_node_visits
+      << ",\"witness_subtree_node_visits\":"
+      << report.pair_witness_subtree_node_visits
       << ",\"grouped_common_node_visits\":"
       << report.pair_grouped_common_node_visits
       << ",\"anchor_subgroup_node_visits\":"
@@ -980,6 +987,14 @@ void emit_report(const Report& report) {
       << report.pair_grouped_inherited_witness_reuses
       << ",\"grouped_exact_predicates\":"
       << report.pair_grouped_traversal_exact_predicates
+      << ",\"witness_subtree_exact_predicates\":"
+      << report.pair_witness_subtree_exact_predicates
+      << ",\"witness_subtree_receipts\":"
+      << report.pair_witness_subtree_receipts
+      << ",\"witness_subtree_successes\":"
+      << report.pair_witness_subtree_successes
+      << ",\"witness_subtree_fail_opens\":"
+      << report.pair_witness_subtree_fail_opens
       << ",\"grouped_common_exact_predicates\":"
       << report.pair_grouped_common_exact_predicates
       << ",\"anchor_subgroup_exact_predicates\":"
@@ -1232,6 +1247,8 @@ void emit_report(const Report& report) {
   report.pair_completed_groups = pair_schedule_audit.completed_group_count;
   report.pair_grouped_traversal_node_visits =
       pair_candidate_audit.grouped_traversal_node_visit_count;
+  report.pair_witness_subtree_node_visits =
+      pair_schedule_audit.witness_subtree_node_visit_count;
   report.pair_grouped_common_node_visits =
       pair_schedule_audit.common_traversal_node_visit_count;
   report.pair_anchor_subgroup_node_visits =
@@ -1244,6 +1261,14 @@ void emit_report(const Report& report) {
       pair_schedule_audit.inherited_witness_reuse_count;
   report.pair_grouped_traversal_exact_predicates =
       pair_candidate_audit.grouped_traversal_exact_predicate_count;
+  report.pair_witness_subtree_exact_predicates =
+      pair_schedule_audit.witness_subtree_exact_predicate_count;
+  report.pair_witness_subtree_receipts =
+      pair_schedule_audit.witness_subtree_receipt_count;
+  report.pair_witness_subtree_successes =
+      pair_schedule_audit.witness_subtree_success_count;
+  report.pair_witness_subtree_fail_opens =
+      pair_schedule_audit.witness_subtree_fail_open_count;
   report.pair_grouped_common_exact_predicates =
       pair_schedule_audit.common_exact_predicate_count;
   report.pair_anchor_subgroup_exact_predicates =
