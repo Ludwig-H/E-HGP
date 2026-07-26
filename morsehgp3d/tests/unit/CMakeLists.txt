@@ -2777,6 +2777,20 @@ add_test(
   COMMAND ${_morsehgp3d_phase9_pair_support_configuration_command}
 )
 unset(_morsehgp3d_phase9_pair_support_configuration_command)
+if(TARGET morsehgp3d_direct_morse_product_runner)
+  add_test(
+    NAME morsehgp3d.direct_morse_sparse_pair_runner
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../differential/check_direct_morse_sparse_pair_runner.py"
+      "${PROJECT_SOURCE_DIR}"
+      "$<TARGET_FILE:morsehgp3d_direct_morse_product_runner>"
+  )
+  set_tests_properties(
+    morsehgp3d.direct_morse_sparse_pair_runner
+    PROPERTIES TIMEOUT 30
+  )
+endif()
 set(
   _morsehgp3d_phase10_direct_saddle_arm_seed_configuration_command
   "${Python3_EXECUTABLE}"

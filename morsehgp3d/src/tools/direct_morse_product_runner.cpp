@@ -2,7 +2,7 @@
 #include "morsehgp3d/hierarchy/direct_saddle_arm_seed_journal.hpp"
 #include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
-#include "morsehgp3d/hierarchy/pair_support_stream.hpp"
+#include "morsehgp3d/hierarchy/sparse_anchored_pair_session.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
 
@@ -85,21 +85,38 @@ struct Report {
 
   std::string pair_status{"not_run"};
   std::string pair_stop_reason{"none"};
-  std::size_t pair_work_units{};
-  std::size_t pair_product_visits{};
-  std::size_t pair_resolved_pairs{};
-  std::size_t pair_remaining_pairs{};
-  std::size_t pair_closed_ball_queries{};
-  std::size_t pair_closed_ball_node_visits{};
-  std::size_t pair_logical_point_classifications{};
-  std::size_t pair_rank_strict_witness_subtrees{};
-  std::size_t pair_rank_strict_witness_points{};
-  std::size_t pair_center_cover_preflight_skips{};
-  std::size_t pair_center_cover_attempts{};
-  std::size_t pair_center_cover_pruned_products{};
-  std::size_t pair_center_cover_work_units{};
+  std::string pair_source_kind{"not_run"};
+  std::string pair_authority_kind{"not_run"};
+  std::size_t pair_maximum_closed_rank{};
+  ExactMortonGroupedAnchoredPairScheduleConfig pair_schedule_config{};
+  ExactSparseAnchoredPairSessionAdvanceBudget pair_advance_budget{};
+  ExactSparseAnchoredPairSessionTotalCapacity pair_total_capacity{};
+  std::size_t pair_advance_calls{};
+  std::size_t pair_schedule_advances{};
+  std::size_t pair_orientation_checks{};
+  std::size_t pair_reverse_or_self_orientation_skips{};
+  std::size_t pair_grouped_traversal_node_visits{};
+  std::size_t pair_grouped_traversal_exact_predicates{};
+  std::size_t pair_authenticated_prunes{};
+  std::size_t pair_authenticated_pruned_directed_pairs{};
+  std::size_t pair_directed_pair_universe{};
+  std::size_t pair_admitted_candidates{};
+  std::size_t pair_classification_advances{};
+  std::size_t pair_classification_node_visits{};
+  std::size_t pair_classification_terminals{};
+  std::size_t pair_above_rank{};
+  std::size_t pair_output_records{};
+  std::size_t pair_output_point_id_references{};
+  std::size_t pair_local_budget_exhaustions{};
+  std::size_t pair_total_capacity_exhaustions{};
+  std::size_t pair_maximum_live_candidates{};
   std::size_t pair_accepted_events{};
   std::size_t pair_extra_shell_diagnostics{};
+  bool pair_directed_coverage_certified{false};
+  bool pair_orientation_partition_certified{false};
+  bool pair_classification_partition_certified{false};
+  bool pair_output_partition_certified{false};
+  bool pair_records_certified{false};
 
   std::string higher_status{"not_run"};
   std::string higher_stop_reason{"none"};
@@ -204,8 +221,8 @@ void print_usage(std::ostream& output) {
       << "  --mode resident_timed\n"
       << "  --family uniform_latin|eight_clusters\n"
       << "  --maximum-order K (alias: --K; 1 <= K <= 10)\n"
-      << "  --support-work-budget N\n"
-      << "  --support-record-budget N\n"
+      << "  --support-work-budget N (cap for each P8l work axis)\n"
+      << "  --support-record-budget N (P8l output-record cap)\n"
       << "  --higher-chunk-limit N\n"
       << "  --downstream-record-budget N\n"
       << "  --descent-work-budget N\n"
@@ -267,7 +284,7 @@ void parse_options(int argc, char** argv, Options& options) {
   }
   if (options.maximum_order == 0U ||
       options.maximum_order >
-          pair_support_maximum_requested_order) {
+          higher_support_maximum_requested_order) {
     throw std::invalid_argument(
         "--maximum-order must be in [1, 10]");
   }
@@ -282,36 +299,53 @@ void parse_options(int argc, char** argv, Options& options) {
   }
 }
 
-[[nodiscard]] std::string_view pair_status_text(
-    ExactPairSupportStreamStatus status) {
-  switch (status) {
-    case ExactPairSupportStreamStatus::complete:
-      return "complete";
-    case ExactPairSupportStreamStatus::budget_exhausted:
-      return "budget_exhausted";
-  }
-  return "invalid";
-}
-
 [[nodiscard]] std::string_view pair_stop_reason_text(
-    ExactPairSupportStopReason reason) {
+    ExactSparseAnchoredPairSessionStopReason reason) {
   switch (reason) {
-    case ExactPairSupportStopReason::none:
+    case ExactSparseAnchoredPairSessionStopReason::none:
       return "none";
-    case ExactPairSupportStopReason::work_unit_limit:
-      return "work_unit_limit";
-    case ExactPairSupportStopReason::frontier_entry_limit:
-      return "frontier_entry_limit";
-    case ExactPairSupportStopReason::auxiliary_frontier_entry_limit:
-      return "auxiliary_frontier_entry_limit";
-    case ExactPairSupportStopReason::emitted_record_limit:
+    case ExactSparseAnchoredPairSessionStopReason::schedule_advance_limit:
+      return "schedule_advance_limit";
+    case ExactSparseAnchoredPairSessionStopReason::orientation_check_limit:
+      return "orientation_check_limit";
+    case ExactSparseAnchoredPairSessionStopReason::
+        grouped_traversal_node_visit_limit:
+      return "grouped_traversal_node_visit_limit";
+    case ExactSparseAnchoredPairSessionStopReason::
+        grouped_traversal_exact_predicate_limit:
+      return "grouped_traversal_exact_predicate_limit";
+    case ExactSparseAnchoredPairSessionStopReason::
+        classification_node_visit_limit:
+      return "classification_node_visit_limit";
+    case ExactSparseAnchoredPairSessionStopReason::emitted_record_limit:
       return "emitted_record_limit";
-    case ExactPairSupportStopReason::emitted_point_id_reference_limit:
+    case ExactSparseAnchoredPairSessionStopReason::
+        emitted_point_id_reference_limit:
       return "emitted_point_id_reference_limit";
-    case ExactPairSupportStopReason::global_closed_ball_query_limit:
-      return "global_closed_ball_query_limit";
-    case ExactPairSupportStopReason::closed_ball_node_visit_limit:
-      return "closed_ball_node_visit_limit";
+    case ExactSparseAnchoredPairSessionStopReason::
+        total_schedule_advance_capacity:
+      return "total_schedule_advance_capacity";
+    case ExactSparseAnchoredPairSessionStopReason::
+        total_orientation_check_capacity:
+      return "total_orientation_check_capacity";
+    case ExactSparseAnchoredPairSessionStopReason::
+        total_grouped_traversal_node_visit_capacity:
+      return "total_grouped_traversal_node_visit_capacity";
+    case ExactSparseAnchoredPairSessionStopReason::
+        total_grouped_traversal_exact_predicate_capacity:
+      return "total_grouped_traversal_exact_predicate_capacity";
+    case ExactSparseAnchoredPairSessionStopReason::
+        total_admitted_candidate_capacity:
+      return "total_admitted_candidate_capacity";
+    case ExactSparseAnchoredPairSessionStopReason::
+        total_classification_node_visit_capacity:
+      return "total_classification_node_visit_capacity";
+    case ExactSparseAnchoredPairSessionStopReason::
+        total_output_record_capacity:
+      return "total_output_record_capacity";
+    case ExactSparseAnchoredPairSessionStopReason::
+        total_output_point_id_reference_capacity:
+      return "total_output_point_id_reference_capacity";
   }
   return "invalid";
 }
@@ -391,37 +425,86 @@ empty_proposal_transcript(
   return {replay_bound, role_count, family_count, arm_count};
 }
 
-[[nodiscard]] ExactPairSupportStreamBudget make_pair_budget(
+[[nodiscard]] std::size_t make_support_frontier_capacity(
     const Options& options) {
-  const std::size_t frontier_capacity = checked_add(
+  return checked_add(
       checked_multiply(
           8U,
           options.support_work_budget,
           "support frontier capacity overflow"),
       2U,
       "support frontier capacity overflow");
-  const std::size_t point_reference_capacity = checked_multiply(
+}
+
+[[nodiscard]] std::size_t make_higher_point_reference_capacity(
+    const Options& options) {
+  return checked_multiply(
       options.support_record_budget,
       checked_add(
           options.maximum_order,
           4U,
           "support point-reference factor overflow"),
       "support point-reference capacity overflow");
+}
+
+[[nodiscard]] ExactMortonGroupedAnchoredPairScheduleConfig
+make_sparse_pair_schedule_config() {
+  return {32U, 64U};
+}
+
+[[nodiscard]] std::size_t make_sparse_pair_maximum_closed_rank(
+    const Options& options) {
+  return checked_add(
+      options.maximum_order,
+      1U,
+      "sparse pair maximum closed rank overflow");
+}
+
+[[nodiscard]] std::size_t make_sparse_pair_point_reference_capacity(
+    const Options& options) {
+  return checked_multiply(
+      options.support_record_budget,
+      checked_add(
+          options.maximum_order,
+          2U,
+          "sparse pair point-reference factor overflow"),
+      "sparse pair point-reference capacity overflow");
+}
+
+[[nodiscard]] ExactSparseAnchoredPairSessionAdvanceBudget
+make_sparse_pair_advance_budget(const Options& options) {
+  return {
+      {options.support_work_budget,
+       options.support_work_budget,
+       options.support_work_budget,
+       options.support_work_budget},
+      {options.support_work_budget},
+      1U,
+      checked_add(
+          options.maximum_order,
+          2U,
+          "sparse pair per-advance reference capacity overflow"),
+  };
+}
+
+[[nodiscard]] ExactSparseAnchoredPairSessionTotalCapacity
+make_sparse_pair_total_capacity(const Options& options) {
   return {
       options.support_work_budget,
-      frontier_capacity,
-      frontier_capacity,
+      options.support_work_budget,
+      options.support_work_budget,
+      options.support_work_budget,
+      options.support_work_budget,
+      options.support_work_budget,
       options.support_record_budget,
-      point_reference_capacity,
-      options.support_work_budget,
-      options.support_work_budget,
+      make_sparse_pair_point_reference_capacity(options),
   };
 }
 
 [[nodiscard]] ExactHigherSupportStreamBudget make_higher_budget(
     const Options& options) {
-  const ExactPairSupportStreamBudget pair_budget =
-      make_pair_budget(options);
+  const std::size_t frontier_capacity =
+      make_support_frontier_capacity(options);
   const std::size_t higher_point_classification_capacity =
       checked_multiply(
           options.support_work_budget,
@@ -429,10 +512,10 @@ empty_proposal_transcript(
           "higher-support point-classification capacity overflow");
   return {
       options.support_work_budget,
-      pair_budget.maximum_frontier_entry_count,
-      pair_budget.maximum_auxiliary_frontier_entry_count,
+      frontier_capacity,
+      frontier_capacity,
       options.support_record_budget,
-      pair_budget.maximum_emitted_point_id_reference_count,
+      make_higher_point_reference_capacity(options),
       options.support_work_budget,
       options.support_work_budget,
       higher_point_classification_capacity,
@@ -718,7 +801,7 @@ void emit_report(const Report& report) {
   };
   std::cout
       << "{\n"
-      << "  \"schema\":\"morsehgp3d.direct-morse-product-run.v2\",\n"
+      << "  \"schema\":\"morsehgp3d.direct-morse-product-run.v3\",\n"
       << "  \"phase\":\"14Q_to_15D\",\n"
       << "  \"backend\":\"reference_cpu\",\n"
       << "  \"profile\":\"hgp_reduced\",\n"
@@ -798,37 +881,104 @@ void emit_report(const Report& report) {
       << ",\"forest_finish\":"
       << report.timings.forest_finish_ms
       << ",\"total\":" << report.timings.total_ms << "},\n"
-      << "  \"pair_support\":{\"status\":\""
+      << "  \"pair_support\":{\"source_kind\":\""
+      << report.pair_source_kind << "\",\"authority_kind\":\""
+      << report.pair_authority_kind
+      << "\",\"p7b_replay_performed\":false,\"status\":\""
       << report.pair_status << "\",\"stop_reason\":\""
-      << report.pair_stop_reason << "\",\"work_units\":"
-      << report.pair_work_units << ",\"product_visits\":"
-      << report.pair_product_visits
-      << ",\"resolved_pairs\":"
-      << report.pair_resolved_pairs
-      << ",\"remaining_pairs\":"
-      << report.pair_remaining_pairs
-      << ",\"closed_ball_queries\":"
-      << report.pair_closed_ball_queries
-      << ",\"closed_ball_node_visits\":"
-      << report.pair_closed_ball_node_visits
-      << ",\"logical_point_classifications\":"
-      << report.pair_logical_point_classifications
-      << ",\"rank_strict_witness_subtrees\":"
-      << report.pair_rank_strict_witness_subtrees
-      << ",\"rank_strict_witness_points\":"
-      << report.pair_rank_strict_witness_points
-      << ",\"center_cover_preflight_skips\":"
-      << report.pair_center_cover_preflight_skips
-      << ",\"center_cover_attempts\":"
-      << report.pair_center_cover_attempts
-      << ",\"center_cover_pruned_products\":"
-      << report.pair_center_cover_pruned_products
-      << ",\"center_cover_work_units\":"
-      << report.pair_center_cover_work_units
+      << report.pair_stop_reason << "\",\"maximum_closed_rank\":"
+      << report.pair_maximum_closed_rank
+      << ",\"schedule_config\":{\"maximum_anchors_per_group\":"
+      << report.pair_schedule_config.maximum_anchor_count_per_group
+      << ",\"proposed_witness_pool_size\":"
+      << report.pair_schedule_config.proposed_witness_pool_size
+      << "},\"advance_budget\":{\"schedule_advances\":"
+      << report.pair_advance_budget.candidate_cursor
+             .maximum_schedule_advance_count
+      << ",\"orientation_checks\":"
+      << report.pair_advance_budget.candidate_cursor
+             .maximum_orientation_check_count
+      << ",\"grouped_node_visits\":"
+      << report.pair_advance_budget.candidate_cursor
+             .maximum_grouped_traversal_node_visit_count
+      << ",\"grouped_exact_predicates\":"
+      << report.pair_advance_budget.candidate_cursor
+             .maximum_grouped_traversal_exact_predicate_count
+      << ",\"classification_node_visits\":"
+      << report.pair_advance_budget.classifier.maximum_node_visit_count
+      << ",\"emitted_records\":"
+      << report.pair_advance_budget.maximum_emitted_record_count
+      << ",\"emitted_point_id_references\":"
+      << report.pair_advance_budget
+             .maximum_emitted_point_id_reference_count
+      << "},\"total_capacity\":{\"schedule_advances\":"
+      << report.pair_total_capacity.maximum_schedule_advance_count
+      << ",\"orientation_checks\":"
+      << report.pair_total_capacity.maximum_orientation_check_count
+      << ",\"grouped_node_visits\":"
+      << report.pair_total_capacity
+             .maximum_grouped_traversal_node_visit_count
+      << ",\"grouped_exact_predicates\":"
+      << report.pair_total_capacity
+             .maximum_grouped_traversal_exact_predicate_count
+      << ",\"admitted_candidates\":"
+      << report.pair_total_capacity.maximum_admitted_candidate_count
+      << ",\"classification_node_visits\":"
+      << report.pair_total_capacity
+             .maximum_classification_node_visit_count
+      << ",\"output_records\":"
+      << report.pair_total_capacity.maximum_output_record_count
+      << ",\"output_point_id_references\":"
+      << report.pair_total_capacity
+             .maximum_output_point_id_reference_count
+      << "},\"audit\":{\"advance_calls\":"
+      << report.pair_advance_calls << ",\"schedule_advances\":"
+      << report.pair_schedule_advances << ",\"orientation_checks\":"
+      << report.pair_orientation_checks
+      << ",\"reverse_or_self_orientation_skips\":"
+      << report.pair_reverse_or_self_orientation_skips
+      << ",\"grouped_node_visits\":"
+      << report.pair_grouped_traversal_node_visits
+      << ",\"grouped_exact_predicates\":"
+      << report.pair_grouped_traversal_exact_predicates
+      << ",\"authenticated_prunes\":"
+      << report.pair_authenticated_prunes
+      << ",\"authenticated_pruned_directed_pairs\":"
+      << report.pair_authenticated_pruned_directed_pairs
+      << ",\"directed_pair_universe\":"
+      << report.pair_directed_pair_universe
+      << ",\"admitted_candidates\":"
+      << report.pair_admitted_candidates
+      << ",\"classification_advances\":"
+      << report.pair_classification_advances
+      << ",\"classification_node_visits\":"
+      << report.pair_classification_node_visits
+      << ",\"classification_terminals\":"
+      << report.pair_classification_terminals
+      << ",\"above_rank\":" << report.pair_above_rank
+      << ",\"output_records\":" << report.pair_output_records
+      << ",\"output_point_id_references\":"
+      << report.pair_output_point_id_references
+      << ",\"local_budget_exhaustions\":"
+      << report.pair_local_budget_exhaustions
+      << ",\"total_capacity_exhaustions\":"
+      << report.pair_total_capacity_exhaustions
+      << ",\"maximum_live_candidates\":"
+      << report.pair_maximum_live_candidates
       << ",\"accepted_events\":"
       << report.pair_accepted_events
       << ",\"extra_shell_diagnostics\":"
-      << report.pair_extra_shell_diagnostics << "},\n"
+      << report.pair_extra_shell_diagnostics
+      << ",\"directed_coverage_certified\":"
+      << boolean(report.pair_directed_coverage_certified)
+      << ",\"orientation_partition_certified\":"
+      << boolean(report.pair_orientation_partition_certified)
+      << ",\"classification_partition_certified\":"
+      << boolean(report.pair_classification_partition_certified)
+      << ",\"output_partition_certified\":"
+      << boolean(report.pair_output_partition_certified)
+      << ",\"records_certified\":"
+      << boolean(report.pair_records_certified) << "}},\n"
       << "  \"higher_support\":{\"status\":\""
       << report.higher_status << "\",\"stop_reason\":\""
       << report.higher_stop_reason << "\",\"work_units\":"
@@ -951,70 +1101,203 @@ void emit_report(const Report& report) {
   report.timings.lbvh_ms =
       milliseconds(lbvh_end - canonicalization_end);
 
-  const ExactPairSupportStreamBudget pair_budget =
-      make_pair_budget(options);
+  const ExactMortonGroupedAnchoredPairScheduleConfig pair_schedule_config =
+      make_sparse_pair_schedule_config();
+  const std::size_t pair_maximum_closed_rank =
+      make_sparse_pair_maximum_closed_rank(options);
+  const ExactSparseAnchoredPairSessionAdvanceBudget pair_advance_budget =
+      make_sparse_pair_advance_budget(options);
+  const ExactSparseAnchoredPairSessionTotalCapacity pair_total_capacity =
+      make_sparse_pair_total_capacity(options);
   const ExactHigherSupportStreamBudget higher_budget =
       make_higher_budget(options);
-  const ExactDirectSupportTerminalBudget terminal_budget{
-      pair_budget, higher_budget};
+  report.pair_maximum_closed_rank = pair_maximum_closed_rank;
+  report.pair_schedule_config = pair_schedule_config;
+  report.pair_advance_budget = pair_advance_budget;
+  report.pair_total_capacity = pair_total_capacity;
+  report.pair_source_kind = "sparse_anchored_session";
+  report.pair_authority_kind = "unsealed_sparse_anchored_session";
+  report.effective_maximum_order = options.maximum_order;
 
-  const ExactPairSupportStreamResult pair =
-      build_exact_pair_support_stream(
-          index, cloud, options.maximum_order, pair_budget);
+  ExactSparseAnchoredPairSession pair_session =
+      ExactSparseAnchoredPairSession::start(
+          index,
+          cloud,
+          pair_maximum_closed_rank,
+          pair_schedule_config,
+          pair_total_capacity);
+  ExactSparseAnchoredPairSessionStopReason pair_terminal_stop_reason =
+      ExactSparseAnchoredPairSessionStopReason::none;
+  while (!pair_session.complete() &&
+         !pair_session.total_capacity_exhausted() &&
+         !pair_session.poisoned()) {
+    const ExactSparseAnchoredPairSessionStep step = pair_session.advance(
+        index, cloud, pair_advance_budget);
+    pair_terminal_stop_reason = step.stop_reason();
+  }
   const Clock::time_point pair_end = Clock::now();
   report.timings.pair_support_ms =
       milliseconds(pair_end - lbvh_end);
-  report.pair_status = pair_status_text(pair.status);
-  report.effective_maximum_order =
-      pair.requirements.effective_maximum_order;
   report.pair_stop_reason =
-      pair_stop_reason_text(pair.stop_reason);
-  report.pair_work_units = pair.audit.work_unit_count;
-  report.pair_product_visits =
-      pair.audit.support_product_visit_count;
-  report.pair_resolved_pairs =
-      pair.audit.resolved_pair_count;
-  report.pair_remaining_pairs =
-      pair.audit.remaining_frontier_pair_count;
-  report.pair_closed_ball_queries =
-      pair.audit.global_closed_ball_query_count;
-  report.pair_closed_ball_node_visits =
-      pair.audit.closed_ball_node_visit_count;
-  report.pair_logical_point_classifications =
-      pair.audit.point_classification_count;
-  report.pair_rank_strict_witness_subtrees =
-      pair.audit.strict_interior_witness_subtree_count;
-  report.pair_rank_strict_witness_points =
-      pair.audit.strict_interior_witness_point_count;
-  report.pair_center_cover_preflight_skips =
-      pair.audit.center_cover_work_preflight_skip_count;
-  report.pair_center_cover_attempts =
-      pair.audit.center_cover_attempt_count;
-  report.pair_center_cover_pruned_products =
-      pair.audit.center_cover_pruned_product_count;
-  report.pair_center_cover_work_units =
-      pair.audit.center_cover_work_unit_count;
-  report.pair_accepted_events = pair.audit.accepted_event_count;
+      pair_stop_reason_text(pair_terminal_stop_reason);
+  const ExactSparseAnchoredPairSessionAudit pair_audit =
+      pair_session.audit();
+  const ExactMortonGroupedAnchoredPairCandidateAudit pair_candidate_audit =
+      pair_session.candidate_audit();
+  const ExactMortonGroupedAnchoredPairScheduleAudit pair_schedule_audit =
+      pair_session.schedule_audit();
+  report.pair_advance_calls = pair_audit.advance_call_count;
+  report.pair_schedule_advances =
+      pair_candidate_audit.schedule_advance_count;
+  report.pair_orientation_checks =
+      pair_candidate_audit.orientation_check_count;
+  report.pair_reverse_or_self_orientation_skips =
+      pair_candidate_audit.reverse_or_self_orientation_skip_count;
+  report.pair_grouped_traversal_node_visits =
+      pair_candidate_audit.grouped_traversal_node_visit_count;
+  report.pair_grouped_traversal_exact_predicates =
+      pair_candidate_audit.grouped_traversal_exact_predicate_count;
+  report.pair_authenticated_prunes =
+      pair_audit.authenticated_prune_count;
+  report.pair_authenticated_pruned_directed_pairs =
+      pair_audit.authenticated_pruned_directed_pair_count;
+  report.pair_directed_pair_universe =
+      pair_audit.directed_pair_universe_size;
+  report.pair_admitted_candidates =
+      pair_audit.admitted_candidate_count;
+  report.pair_classification_advances =
+      pair_audit.classification_advance_count;
+  report.pair_classification_node_visits =
+      pair_audit.classification_node_visit_count;
+  report.pair_classification_terminals =
+      pair_audit.classification_terminal_count;
+  report.pair_above_rank = pair_audit.above_rank_count;
+  report.pair_output_records = pair_audit.emitted_record_count;
+  report.pair_output_point_id_references =
+      pair_audit.emitted_point_id_reference_count;
+  report.pair_local_budget_exhaustions =
+      pair_audit.budget_exhaustion_count;
+  report.pair_total_capacity_exhaustions =
+      pair_audit.total_capacity_exhaustion_count;
+  report.pair_maximum_live_candidates =
+      pair_audit.maximum_live_candidate_count;
+  report.pair_accepted_events = pair_audit.accepted_event_count;
   report.pair_extra_shell_diagnostics =
-      pair.audit.relevant_extra_shell_diagnostic_count;
+      pair_audit.relevant_extra_shell_diagnostic_count;
+  report.pair_directed_coverage_certified =
+      pair_audit.directed_coverage_certified;
+  report.pair_orientation_partition_certified =
+      pair_audit.orientation_partition_certified;
+  report.pair_classification_partition_certified =
+      pair_audit.candidate_classification_partition_certified;
+  report.pair_output_partition_certified =
+      pair_audit.output_partition_certified;
+  report.pair_records_certified =
+      pair_audit.retained_records_certified;
   report.no_forbidden_global_structure_materialized =
       report.no_forbidden_global_structure_materialized &&
-      pair.no_forbidden_global_structure_materialized;
-  if (!pair.stream_complete()) {
-    report.terminal_stage = "pair_support";
-    report.stop_detail = "pair_support_not_terminal";
-    report.budget_exhausted =
-        pair.status ==
-        ExactPairSupportStreamStatus::budget_exhausted;
-    report.stop_category =
-        report.budget_exhausted
-            ? "budget_exhausted"
-            : "certification_failure";
+      pair_audit.no_forbidden_global_structure_materialized &&
+      pair_candidate_audit.no_dynamic_candidate_or_output_arena_materialized &&
+      pair_schedule_audit
+          .no_global_anchor_pair_or_output_arena_materialized;
+  if (!pair_session.complete()) {
+    const bool capacity_exhausted =
+        pair_session.total_capacity_exhausted();
+    report.pair_status = capacity_exhausted
+        ? "total_capacity_exhausted"
+        : "not_certified";
+    report.terminal_stage = "sparse_pair_session";
+    report.stop_detail = capacity_exhausted
+        ? report.pair_stop_reason
+        : "sparse_pair_session_not_terminal";
+    report.budget_exhausted = capacity_exhausted;
+    report.stop_category = capacity_exhausted
+        ? "budget_exhausted"
+        : "certification_failure";
     report.timings.total_ms =
         milliseconds(Clock::now() - total_start);
     emit_report(report);
-    return report.budget_exhausted ? 2 : 3;
+    return capacity_exhausted ? 2 : 3;
   }
+  const bool pair_session_certified =
+      !pair_session.poisoned() &&
+      !pair_session.total_capacity_exhausted() &&
+      pair_session.validated_for(index, cloud) &&
+      pair_audit.every_prune_recertified &&
+      pair_audit.directed_coverage_certified &&
+      pair_audit.orientation_partition_certified &&
+      pair_audit.candidate_classification_partition_certified &&
+      pair_audit.output_partition_certified &&
+      pair_audit.retained_records_certified &&
+      pair_audit.no_forbidden_global_structure_materialized &&
+      pair_candidate_audit.complete &&
+      pair_candidate_audit.no_dynamic_candidate_or_output_arena_materialized &&
+      pair_schedule_audit.complete &&
+      pair_schedule_audit.morton_anchor_partition_complete &&
+      pair_schedule_audit
+          .no_global_anchor_pair_or_output_arena_materialized &&
+      checked_add(
+          pair_audit.authenticated_pruned_directed_pair_count,
+          pair_candidate_audit.orientation_check_count,
+          "sparse pair directed partition overflow") ==
+          pair_audit.directed_pair_universe_size &&
+      checked_add(
+          pair_audit.admitted_candidate_count,
+          pair_candidate_audit.reverse_or_self_orientation_skip_count,
+          "sparse pair orientation partition overflow") ==
+          pair_candidate_audit.orientation_check_count &&
+      pair_audit.admitted_candidate_count ==
+          pair_audit.classification_terminal_count &&
+      checked_add(
+          pair_audit.above_rank_count,
+          pair_audit.emitted_record_count,
+          "sparse pair output partition overflow") ==
+          pair_audit.classification_terminal_count &&
+      checked_add(
+          pair_audit.accepted_event_count,
+          pair_audit.relevant_extra_shell_diagnostic_count,
+          "sparse pair record partition overflow") ==
+          pair_audit.emitted_record_count;
+  if (!pair_session_certified) {
+    report.pair_status = "session_not_certified";
+    report.terminal_stage = "sparse_pair_session";
+    report.stop_category = "certification_failure";
+    report.stop_detail = "sparse_pair_session_invariants_failed";
+    report.timings.total_ms =
+        milliseconds(Clock::now() - total_start);
+    emit_report(report);
+    return 3;
+  }
+  report.pair_status = "complete";
+  report.pair_stop_reason = "none";
+  ExactSparseAnchoredPairTerminalAuthority pair_authority =
+      std::move(pair_session).seal();
+  const bool pair_authority_certified =
+      pair_authority.sealed_in_process_terminal_authority() &&
+      pair_authority.bound_to(
+          index,
+          cloud,
+          pair_maximum_closed_rank,
+          pair_schedule_config,
+          pair_total_capacity) &&
+      pair_authority.maximum_closed_rank() == pair_maximum_closed_rank &&
+      pair_authority.schedule_config() == pair_schedule_config &&
+      pair_authority.total_capacity() == pair_total_capacity;
+  if (!pair_authority_certified) {
+    report.pair_status = "authority_not_certified";
+    report.terminal_stage = "sparse_pair_session";
+    report.stop_category = "certification_failure";
+    report.stop_detail = "sparse_pair_authority_not_certified";
+    report.timings.total_ms =
+        milliseconds(Clock::now() - total_start);
+    emit_report(report);
+    return 3;
+  }
+  report.pair_source_kind = "sealed_sparse_anchored_session";
+  report.pair_authority_kind = "sealed_in_process_terminal_authority";
+  report.no_forbidden_global_structure_materialized =
+      report.no_forbidden_global_structure_materialized &&
+      pair_authority.audit().no_forbidden_global_structure_materialized;
 
   ExactHigherSupportTerminalSession higher_session{
       index,
@@ -1072,8 +1355,8 @@ void emit_report(const Report& report) {
           index,
           cloud,
           options.maximum_order,
-          terminal_budget,
-          pair,
+          higher_budget,
+          std::move(pair_authority),
           std::move(higher_authority));
   const Clock::time_point facade_end = Clock::now();
   report.timings.terminal_facade_ms =

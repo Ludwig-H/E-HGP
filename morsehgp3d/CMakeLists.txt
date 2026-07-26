@@ -2579,7 +2579,7 @@ if(MORSEHGP3D_BUILD_TOOLS)
   target_link_libraries(
     morsehgp3d_direct_morse_product_runner
     PRIVATE
-      morsehgp3d::pair_support
+      morsehgp3d::sparse_anchored_pair_session
       morsehgp3d::higher_support
       morsehgp3d::direct_support_terminal
       morsehgp3d::direct_morse_forest_reducer

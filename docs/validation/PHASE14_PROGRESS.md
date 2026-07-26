@@ -348,11 +348,19 @@ P8m implémente `reference_cpu / hgp_reduced / sparse_pair_terminal_facade`. Le 
 
 Le digest de sortie paire encode canoniquement les champs scientifiques après normalisation et reste séparé par domaine. Le digest sémantique P8l l'engage avec les digests cloud/LBVH, les exigences et la base de preuve P8l; il exclut caps et compteurs de segmentation et n'emprunte jamais le digest sémantique P7b. Sur le tétraèdre, la façade P8l reproduit les 11 événements historiques, dont six paires et $\binom{4}{2}=6$, avec une couverture dirigée de taille 16. Le budget ample et la segmentation à une unité conservent payload et digests. Les tokens étrangers à coordonnées égales, les autorités déjà libérées et les mutations des champs normalisés échouent sans payload. Les CTests P8l et façade passent 2/2 sous GCC Release en 0,14 seconde et sous Clang Release en 0,16 seconde; le checker statique Phase 9 v9 passe. Aucun benchmark, CUDA ou GCP n'est lancé.
 
-Le runner utilise encore P7b et garde son rejet résident au-delà de 50 000 points; lever cette garde avant sa substitution, un sink externe et une voie supports trois--quatre scalable serait mensonger. Le fallback P8j reste quadratique et sa composition avec P8k cubique au pire. Aucun SLO 50 k ou fonctionnement 10 M+ n'est donc revendiqué.
+## Incrément 14Q P8n — runner produit sur la session paire sparse
+
+P8n implémente `reference_cpu / hgp_reduced / sparse_pair_product_runner`. Le runner ne construit plus de budget, résultat ou rejeu P7b. Il démarre P8l au rang fermé $K+1$ sous la précondition $n>K$, poursuit les épuisements locaux, arrête toute capacité totale avec une raison typée, recroise la couverture dirigée et les partitions scientifiques, scelle l'autorité puis la déplace avec l'autorité P6b inchangée dans P8m. Les supports trois--quatre et tous les étages aval sont restés identiques.
+
+Le budget `support_work` est désormais un cap indépendant pour chacun des six axes physiques P8l. Les sorties sont bornées par $R$ records et $R(K+2)$ références; P6b garde séparément $R(K+4)$. Le JSON v3 publie la configuration 32/64, le budget d'avance, les huit capacités, l'audit et `p7b_replay_performed=false`; il retire les métriques physiques P7b plutôt que de les remplir de zéros trompeurs. Aucun univers de candidates ou de paires rejetées, cellule, facette, coface, incidence, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est introduit.
+
+Sur `uniform_latin`, $n=5$, $K=4$, le chemin P8l reproduit la projection P7b v2 figée : 13 événements terminaux, 26 batches, 30 rôles, 13 familles, 29 bras, les mêmes décisions et 12 nœuds de forêt. Un cap de sortie égal à un produit le code 2 et `total_output_record_capacity` avant P6b; 50 001 points produisent le code 4 avant génération. Le CTest unique passe en 0,13 seconde sous GCC Release et Clang Release. Il s'agit d'un différentiel logiciel court, pas d'une mesure de performance.
+
+Le runner garde son rejet résident au-delà de 50 000 points; lever cette garde avant un sink externe et une voie supports trois--quatre scalable serait mensonger. Le fallback P8j reste quadratique et sa composition avec P8k cubique au pire. Aucun SLO 50 k ou fonctionnement 10 M+ n'est donc revendiqué.
 
 ## Priorités de développement
 
-1. remplacer uniquement la source des supports deux du runner par P8l et la surcharge P8m, exécuter un différentiel CPU court jusqu'à la forêt et laisser les supports trois--quatre inchangés; aucun gate GCP ne précède cette substitution. Le gate 50 k vient ensuite, puis seulement la voie massive avec sink externe et supports supérieurs scalables.
+1. exécuter un unique diagnostic borné à 50 000 points sur P8n, identifier son axe dominant et implémenter l'amélioration correspondante avant toute série de mesures. La voie massive vient ensuite seulement avec un sink externe et des supports supérieurs scalables.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 
