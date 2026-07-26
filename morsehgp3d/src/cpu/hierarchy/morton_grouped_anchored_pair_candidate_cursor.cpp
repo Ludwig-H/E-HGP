@@ -142,7 +142,7 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
   for (;;) {
     if (pending_leaf_range_) {
       const std::span<const PointId> anchors =
-          schedule_.active_anchor_point_ids();
+          {pending_anchor_point_ids_.data(), pending_anchor_count_};
       if (anchors.empty() ||
           !schedule_.active_group_ordinal().has_value() ||
           !schedule_.active_anchor_leaf_begin().has_value() ||
@@ -195,11 +195,19 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
             ExactMortonGroupedAnchoredPairCandidateStopReason::none,
             budget,
             work);
+        step.group_ordinal_ = pending_group_ordinal_;
+        step.anchor_leaf_begin_ = pending_anchor_leaf_begin_;
+        step.anchor_leaf_end_ = pending_anchor_leaf_end_;
         step.support_ids_ =
             std::array<PointId, 2>{anchor_point_id, query_point_id};
         return step;
       }
       pending_leaf_range_ = false;
+      pending_anchor_point_ids_ = {};
+      pending_anchor_count_ = 0U;
+      pending_group_ordinal_ = 0U;
+      pending_anchor_leaf_begin_ = 0U;
+      pending_anchor_leaf_end_ = 0U;
       pending_leaf_cursor_ = 0U;
       pending_leaf_end_ = 0U;
       pending_anchor_offset_ = 0U;
@@ -261,6 +269,23 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
         attach_schedule_step(step, std::move(schedule_step));
         return step;
       }
+      case ExactMortonGroupedAnchoredPairScheduleStepKind::
+          singleton_fallback_started: {
+        const ExactGroupedAnchoredPairTraversalStep* traversal_step =
+            schedule_step.traversal_step();
+        if (traversal_step == nullptr ||
+            traversal_step->kind() !=
+                ExactGroupedAnchoredPairTraversalStepKind::
+                    inconclusive_subtree ||
+            !traversal_step->lbvh_node_index().has_value() ||
+            !traversal_step->leaf_begin().has_value() ||
+            !traversal_step->leaf_end().has_value() ||
+            schedule_step.anchor_point_ids().empty()) {
+          throw std::logic_error(
+              "an oriented grouped cursor received an invalid singleton frontier");
+        }
+        continue;
+      }
       case ExactMortonGroupedAnchoredPairScheduleStepKind::unresolved_leaf:
       case ExactMortonGroupedAnchoredPairScheduleStepKind::fallback_subtree: {
         const ExactGroupedAnchoredPairTraversalStep* traversal_step =
@@ -268,17 +293,40 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
         if (traversal_step == nullptr ||
             !traversal_step->leaf_begin().has_value() ||
             !traversal_step->leaf_end().has_value() ||
+            !schedule_step.group_ordinal().has_value() ||
+            !schedule_step.anchor_leaf_begin().has_value() ||
+            !schedule_step.anchor_leaf_end().has_value() ||
+            !schedule_.active_anchor_leaf_begin().has_value() ||
+            !schedule_.active_anchor_leaf_end().has_value() ||
+            *schedule_step.anchor_leaf_begin() >=
+                *schedule_step.anchor_leaf_end() ||
+            *schedule_step.anchor_leaf_begin() <
+                *schedule_.active_anchor_leaf_begin() ||
+            *schedule_step.anchor_leaf_end() >
+                *schedule_.active_anchor_leaf_end() ||
+            schedule_step.anchor_point_ids().size() !=
+                *schedule_step.anchor_leaf_end() -
+                    *schedule_step.anchor_leaf_begin() ||
             *traversal_step->leaf_begin() >=
                 *traversal_step->leaf_end() ||
             *traversal_step->leaf_end() > index.leaves().size() ||
-            !std::equal(
-                schedule_step.anchor_point_ids().begin(),
-                schedule_step.anchor_point_ids().end(),
+            schedule_step.anchor_point_ids().empty() ||
+            !std::includes(
                 schedule_.active_anchor_point_ids().begin(),
-                schedule_.active_anchor_point_ids().end())) {
+                schedule_.active_anchor_point_ids().end(),
+                schedule_step.anchor_point_ids().begin(),
+                schedule_step.anchor_point_ids().end())) {
           throw std::logic_error(
               "an oriented grouped terminal lost its authenticated range or anchors");
         }
+        std::copy(
+            schedule_step.anchor_point_ids().begin(),
+            schedule_step.anchor_point_ids().end(),
+            pending_anchor_point_ids_.begin());
+        pending_anchor_count_ = schedule_step.anchor_point_ids().size();
+        pending_group_ordinal_ = *schedule_step.group_ordinal();
+        pending_anchor_leaf_begin_ = *schedule_step.anchor_leaf_begin();
+        pending_anchor_leaf_end_ = *schedule_step.anchor_leaf_end();
         pending_leaf_cursor_ = *traversal_step->leaf_begin();
         pending_leaf_end_ = *traversal_step->leaf_end();
         pending_anchor_offset_ = 0U;

@@ -178,7 +178,7 @@ class ExactMortonGroupedAnchoredPairCandidateContext {
   static constexpr std::string_view public_status = "not_claimed";
   static constexpr std::string_view proof_basis =
       "unique_lower_PointId_anchor_group_owner_and_exhaustive_fail_open_"
-      "terminal_range_orientation_v1";
+      "common_first_singleton_subpartition_terminal_range_orientation_v2";
 
   [[nodiscard]] static ExactMortonGroupedAnchoredPairCandidateContext start(
       const spatial::MortonLbvhIndex& index,
@@ -271,6 +271,13 @@ class ExactMortonGroupedAnchoredPairCandidateContext {
       ExactMortonGroupedAnchoredPairCandidateStepWork work) const;
 
   ExactMortonGroupedAnchoredPairScheduleContext schedule_;
+  std::array<spatial::PointId,
+             exact_grouped_anchored_pair_maximum_anchor_count>
+      pending_anchor_point_ids_{};
+  std::size_t pending_anchor_count_{};
+  std::size_t pending_group_ordinal_{};
+  std::size_t pending_anchor_leaf_begin_{};
+  std::size_t pending_anchor_leaf_end_{};
   std::size_t pending_leaf_cursor_{};
   std::size_t pending_leaf_end_{};
   std::size_t pending_anchor_offset_{};

@@ -145,9 +145,11 @@ void require_throws(Function&& function, const std::string& message) {
 
 struct TerminalRecord {
   ExactMortonGroupedAnchoredPairScheduleStepKind kind{};
+  std::size_t event_index{};
   std::size_t group_ordinal{};
   std::size_t anchor_leaf_begin{};
   std::size_t anchor_leaf_end{};
+  std::vector<PointId> anchor_point_ids;
   std::optional<std::size_t> node_index;
   std::optional<std::size_t> leaf_begin;
   std::optional<std::size_t> leaf_end;
@@ -156,6 +158,21 @@ struct TerminalRecord {
 
   friend bool operator==(const TerminalRecord&, const TerminalRecord&) =
       default;
+};
+
+struct CommonFrontierRecord {
+  std::size_t event_index{};
+  std::size_t group_ordinal{};
+  std::size_t anchor_leaf_begin{};
+  std::size_t anchor_leaf_end{};
+  std::size_t node_index{};
+  std::size_t leaf_begin{};
+  std::size_t leaf_end{};
+  std::vector<PointId> anchor_point_ids;
+
+  friend bool operator==(
+      const CommonFrontierRecord&,
+      const CommonFrontierRecord&) = default;
 };
 
 struct GroupRecord {
@@ -172,6 +189,7 @@ using CandidatePair = std::array<PointId, 2>;
 
 struct ScheduleRun {
   std::vector<TerminalRecord> terminals;
+  std::vector<CommonFrontierRecord> common_frontiers;
   std::vector<GroupRecord> groups;
   std::set<CandidatePair> candidates;
   ExactMortonGroupedAnchoredPairScheduleAudit audit;
@@ -219,6 +237,7 @@ void insert_oriented_candidates(
   const std::size_t maximum_advance_count =
       256U * cloud.size() * cloud.size();
   std::size_t advance_count = 0U;
+  std::size_t event_index = 0U;
   while (!schedule.complete()) {
     require(
         advance_count < maximum_advance_count,
@@ -235,6 +254,8 @@ void insert_oriented_candidates(
           "a schedule exhaustion lost its P8h cursor or copied group arrays");
       continue;
     }
+    const std::size_t current_event_index = event_index;
+    ++event_index;
     if (step.kind() ==
         ExactMortonGroupedAnchoredPairScheduleStepKind::group_complete) {
       require(
@@ -249,6 +270,39 @@ void insert_oriented_candidates(
           *step.anchor_leaf_end(),
           copied_ids(step.anchor_point_ids()),
           copied_ids(step.witness_pool_point_ids())});
+      continue;
+    }
+    if (step.kind() ==
+        ExactMortonGroupedAnchoredPairScheduleStepKind::
+            singleton_fallback_started) {
+      const auto* traversal_step = step.traversal_step();
+      require(
+          traversal_step != nullptr &&
+              traversal_step->kind() ==
+                  ExactGroupedAnchoredPairTraversalStepKind::
+                      inconclusive_subtree &&
+              traversal_step->lbvh_node_index().has_value() &&
+              traversal_step->leaf_begin().has_value() &&
+              traversal_step->leaf_end().has_value() &&
+              *traversal_step->leaf_begin() <
+                  *traversal_step->leaf_end() &&
+              traversal_step->prune_certificate() == nullptr &&
+              !traversal_step->unresolved_point_id().has_value() &&
+              step.group_ordinal().has_value() &&
+              step.anchor_leaf_begin().has_value() &&
+              step.anchor_leaf_end().has_value() &&
+              !step.anchor_point_ids().empty() &&
+              step.witness_pool_point_ids().empty(),
+          "a singleton fallback frontier gained authority or lost its exact range");
+      run.common_frontiers.push_back(CommonFrontierRecord{
+          current_event_index,
+          *step.group_ordinal(),
+          *step.anchor_leaf_begin(),
+          *step.anchor_leaf_end(),
+          *traversal_step->lbvh_node_index(),
+          *traversal_step->leaf_begin(),
+          *traversal_step->leaf_end(),
+          copied_ids(step.anchor_point_ids())});
       continue;
     }
     require(
@@ -267,9 +321,11 @@ void insert_oriented_candidates(
 
     TerminalRecord terminal{
         step.kind(),
+        current_event_index,
         *step.group_ordinal(),
         *step.anchor_leaf_begin(),
         *step.anchor_leaf_end(),
+        copied_ids(step.anchor_point_ids()),
         traversal_step->lbvh_node_index(),
         traversal_step->leaf_begin(),
         traversal_step->leaf_end(),
@@ -462,6 +518,87 @@ void validate_group_partition(
           run.audit.morton_anchor_partition_complete &&
           run.audit.no_global_anchor_pair_or_output_arena_materialized,
       "the scheduler did not close its exact anchor partition audit");
+
+  std::size_t expected_singleton_fallback_count = 0U;
+  for (const CommonFrontierRecord& frontier : run.common_frontiers) {
+    require(
+        frontier.group_ordinal < run.groups.size(),
+        "a common frontier names an invalid Morton group");
+    const GroupRecord& group = run.groups[frontier.group_ordinal];
+    require(
+        frontier.anchor_leaf_begin == group.anchor_leaf_begin &&
+            frontier.anchor_leaf_end == group.anchor_leaf_end &&
+            frontier.anchor_point_ids == group.anchor_point_ids &&
+            frontier.leaf_begin < frontier.leaf_end &&
+            frontier.leaf_end <= point_count,
+        "a common frontier lost its full-group or LBVH provenance");
+    expected_singleton_fallback_count +=
+        frontier.anchor_point_ids.size();
+  }
+  const std::size_t expected_singleton_pool_size =
+      point_count == 0U
+      ? 0U
+      : std::min(
+            config.proposed_witness_pool_size,
+            point_count - 1U);
+  require(
+      run.audit.common_frontier_count == run.common_frontiers.size() &&
+          run.audit.prepared_singleton_fallback_count ==
+              expected_singleton_fallback_count &&
+          run.audit.proposed_singleton_witness_pool_entry_count ==
+              expected_singleton_fallback_count *
+                  expected_singleton_pool_size &&
+          run.audit.singleton_certified_prune_count <=
+              run.audit.certified_prune_count,
+      "the scheduler audit lost its bounded common-to-singleton partition");
+}
+
+void validate_common_frontiers_start_singleton_traversals(
+    const ScheduleRun& run) {
+  require(
+      !run.common_frontiers.empty(),
+      "the P8p fixture did not open a common frontier");
+  for (const CommonFrontierRecord& frontier : run.common_frontiers) {
+    std::size_t next_frontier_event =
+        std::numeric_limits<std::size_t>::max();
+    for (const CommonFrontierRecord& candidate : run.common_frontiers) {
+      if (candidate.group_ordinal == frontier.group_ordinal &&
+          candidate.event_index > frontier.event_index) {
+        next_frontier_event =
+            std::min(next_frontier_event, candidate.event_index);
+      }
+    }
+
+    std::set<PointId> observed_singleton_anchors;
+    for (const TerminalRecord& terminal : run.terminals) {
+      if (terminal.group_ordinal != frontier.group_ordinal ||
+          terminal.event_index <= frontier.event_index ||
+          terminal.event_index >= next_frontier_event) {
+        continue;
+      }
+      if (terminal.anchor_point_ids.size() != 1U) {
+        break;
+      }
+      require(
+          terminal.node_index.has_value() &&
+              terminal.leaf_begin.has_value() &&
+              terminal.leaf_end.has_value() &&
+              frontier.leaf_begin <= *terminal.leaf_begin &&
+              *terminal.leaf_end <= frontier.leaf_end &&
+              std::binary_search(
+                  frontier.anchor_point_ids.begin(),
+                  frontier.anchor_point_ids.end(),
+                  terminal.anchor_point_ids.front()),
+          "a singleton fallback escaped its common frontier or anchor group");
+      observed_singleton_anchors.insert(
+          terminal.anchor_point_ids.front());
+    }
+    require(
+        observed_singleton_anchors == std::set<PointId>{
+            frontier.anchor_point_ids.begin(),
+            frontier.anchor_point_ids.end()},
+        "a common frontier was not followed by every unit-anchor traversal");
+  }
 }
 
 struct ScientificRecord {
@@ -531,6 +668,7 @@ struct ScientificRecord {
 
 struct CandidateAuthorityRecord {
   std::size_t group_ordinal{};
+  std::vector<PointId> anchor_point_ids;
   std::size_t node_index{};
   std::size_t leaf_begin{};
   std::size_t leaf_end{};
@@ -664,6 +802,7 @@ struct CandidateCursorRun {
           "an oriented cursor prune lost its P8g authority");
       run.prune_records.push_back(CandidateAuthorityRecord{
           *schedule_step->group_ordinal(),
+          copied_ids(schedule_step->anchor_point_ids()),
           *traversal_step->lbvh_node_index(),
           *traversal_step->leaf_begin(),
           *traversal_step->leaf_end(),
@@ -751,7 +890,19 @@ void test_oriented_candidate_cursor_identity_and_budgets() {
       roomy.audit.grouped_traversal_node_visit_count ==
               segmented.audit.grouped_traversal_node_visit_count &&
           roomy.audit.grouped_traversal_exact_predicate_count ==
-              segmented.audit.grouped_traversal_exact_predicate_count,
+              segmented.audit.grouped_traversal_exact_predicate_count &&
+          roomy.schedule_audit.diagonal_node_descent_count ==
+              segmented.schedule_audit.diagonal_node_descent_count &&
+          roomy.schedule_audit.common_frontier_count ==
+              segmented.schedule_audit.common_frontier_count &&
+          roomy.schedule_audit.prepared_singleton_fallback_count ==
+              segmented.schedule_audit.prepared_singleton_fallback_count &&
+          roomy.schedule_audit
+                  .proposed_singleton_witness_pool_entry_count ==
+              segmented.schedule_audit
+                  .proposed_singleton_witness_pool_entry_count &&
+          roomy.schedule_audit.singleton_certified_prune_count ==
+              segmented.schedule_audit.singleton_certified_prune_count,
       "candidate-cursor segmentation changed the exact traversal work");
   require(
       roomy.audit.schedule_advance_budget_exhaustion_count == 0U &&
@@ -915,8 +1066,11 @@ void test_morton_partition_fresh_p8g_and_segmented_identity() {
 
   validate_group_partition(index, roomy, config);
   validate_group_partition(index, segmented, config);
+  validate_common_frontiers_start_singleton_traversals(roomy);
+  validate_common_frontiers_start_singleton_traversals(segmented);
   require(
       roomy.terminals == segmented.terminals &&
+          roomy.common_frontiers == segmented.common_frontiers &&
           roomy.groups == segmented.groups &&
           roomy.candidates == segmented.candidates,
       "budget segmentation changed the grouped scientific stream");
@@ -931,7 +1085,17 @@ void test_morton_partition_fresh_p8g_and_segmented_identity() {
           roomy.audit.inherited_witness_reuse_count ==
               segmented.audit.inherited_witness_reuse_count &&
           roomy.audit.exact_predicate_count ==
-              segmented.audit.exact_predicate_count,
+              segmented.audit.exact_predicate_count &&
+          roomy.audit.diagonal_node_descent_count ==
+              segmented.audit.diagonal_node_descent_count &&
+          roomy.audit.common_frontier_count ==
+              segmented.audit.common_frontier_count &&
+          roomy.audit.prepared_singleton_fallback_count ==
+              segmented.audit.prepared_singleton_fallback_count &&
+          roomy.audit.proposed_singleton_witness_pool_entry_count ==
+              segmented.audit.proposed_singleton_witness_pool_entry_count &&
+          roomy.audit.singleton_certified_prune_count ==
+              segmented.audit.singleton_certified_prune_count,
       "segmentation changed P8h work or failed to exercise fresh P8g prunes");
 }
 
@@ -958,10 +1122,12 @@ void test_exact_anchored_candidate_path_identity_and_fallback() {
       grouped_config,
       ExactGroupedAnchoredPairTraversalWorkBudget{4096U, 4096U});
   validate_group_partition(index, grouped, grouped_config);
+  validate_common_frontiers_start_singleton_traversals(grouped);
   require(
       !grouped.groups.empty() &&
-          grouped.groups.back().anchor_point_ids.size() == 4U,
-      "the scheduler did not exercise its short final group");
+          grouped.groups.back().anchor_point_ids.size() == 4U &&
+          grouped.audit.prepared_singleton_fallback_count > 0U,
+      "the scheduler did not exercise its short group and singleton fallback");
 
   const std::set<CandidatePair> anchored_candidates =
       anchored_path_candidates(index, cloud, maximum_closed_rank);

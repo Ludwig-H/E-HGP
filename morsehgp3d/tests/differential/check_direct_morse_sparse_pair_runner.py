@@ -221,16 +221,40 @@ def require_success_projection(report: dict[str, object]) -> None:
         "P8l exceeded its single-candidate state or exhausted capacity",
     )
     for physical_counter in (
+        "prepared_groups",
+        "completed_groups",
         "grouped_witness_slots",
         "grouped_inherited_witness_reuses",
         "grouped_exact_predicates",
         "grouped_strict_witness_discoveries",
+        "grouped_diagonal_node_descents",
+        "grouped_common_frontiers",
+        "prepared_singleton_fallbacks",
+        "singleton_witness_pool_entries",
+        "singleton_certified_prunes",
     ):
         require(
             isinstance(audit.get(physical_counter), int)
             and audit.get(physical_counter, -1) >= 0,
-            f"P8o audit lost physical counter {physical_counter}",
+            f"P8p audit lost physical counter {physical_counter}",
         )
+    require(
+        audit.get("prepared_groups", 0) == audit.get("completed_groups", -1)
+        and audit.get("completed_groups", 0) >= 1,
+        "P8p did not close its prepared Morton groups",
+    )
+    require(
+        audit.get("grouped_common_frontiers", 0)
+        <= audit.get("prepared_singleton_fallbacks", 0)
+        and audit.get("singleton_witness_pool_entries", 0)
+        <= 64 * audit.get("prepared_singleton_fallbacks", 0),
+        "P8p singleton fallback accounting is impossible",
+    )
+    require(
+        audit.get("singleton_certified_prunes", 0)
+        <= audit.get("authenticated_prunes", 0),
+        "P8p authenticated fewer prunes than its singleton traversals minted",
+    )
     require(
         audit.get("grouped_inherited_witness_reuses", 1)
         <= audit.get("grouped_witness_slots", 0)

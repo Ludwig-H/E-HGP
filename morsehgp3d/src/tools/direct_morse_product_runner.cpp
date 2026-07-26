@@ -95,11 +95,18 @@ struct Report {
   std::size_t pair_schedule_advances{};
   std::size_t pair_orientation_checks{};
   std::size_t pair_reverse_or_self_orientation_skips{};
+  std::size_t pair_prepared_groups{};
+  std::size_t pair_completed_groups{};
   std::size_t pair_grouped_traversal_node_visits{};
   std::size_t pair_grouped_witness_slots{};
   std::size_t pair_grouped_inherited_witness_reuses{};
   std::size_t pair_grouped_traversal_exact_predicates{};
   std::size_t pair_grouped_strict_witness_discoveries{};
+  std::size_t pair_grouped_diagonal_node_descents{};
+  std::size_t pair_grouped_common_frontiers{};
+  std::size_t pair_prepared_singleton_fallbacks{};
+  std::size_t pair_singleton_witness_pool_entries{};
+  std::size_t pair_singleton_certified_prunes{};
   std::size_t pair_authenticated_prunes{};
   std::size_t pair_authenticated_pruned_directed_pairs{};
   std::size_t pair_directed_pair_universe{};
@@ -940,6 +947,10 @@ void emit_report(const Report& report) {
       << report.pair_orientation_checks
       << ",\"reverse_or_self_orientation_skips\":"
       << report.pair_reverse_or_self_orientation_skips
+      << ",\"prepared_groups\":"
+      << report.pair_prepared_groups
+      << ",\"completed_groups\":"
+      << report.pair_completed_groups
       << ",\"grouped_node_visits\":"
       << report.pair_grouped_traversal_node_visits
       << ",\"grouped_witness_slots\":"
@@ -950,6 +961,16 @@ void emit_report(const Report& report) {
       << report.pair_grouped_traversal_exact_predicates
       << ",\"grouped_strict_witness_discoveries\":"
       << report.pair_grouped_strict_witness_discoveries
+      << ",\"grouped_diagonal_node_descents\":"
+      << report.pair_grouped_diagonal_node_descents
+      << ",\"grouped_common_frontiers\":"
+      << report.pair_grouped_common_frontiers
+      << ",\"prepared_singleton_fallbacks\":"
+      << report.pair_prepared_singleton_fallbacks
+      << ",\"singleton_witness_pool_entries\":"
+      << report.pair_singleton_witness_pool_entries
+      << ",\"singleton_certified_prunes\":"
+      << report.pair_singleton_certified_prunes
       << ",\"authenticated_prunes\":"
       << report.pair_authenticated_prunes
       << ",\"authenticated_pruned_directed_pairs\":"
@@ -1162,6 +1183,8 @@ void emit_report(const Report& report) {
       pair_candidate_audit.orientation_check_count;
   report.pair_reverse_or_self_orientation_skips =
       pair_candidate_audit.reverse_or_self_orientation_skip_count;
+  report.pair_prepared_groups = pair_schedule_audit.prepared_group_count;
+  report.pair_completed_groups = pair_schedule_audit.completed_group_count;
   report.pair_grouped_traversal_node_visits =
       pair_candidate_audit.grouped_traversal_node_visit_count;
   report.pair_grouped_witness_slots =
@@ -1172,6 +1195,16 @@ void emit_report(const Report& report) {
       pair_candidate_audit.grouped_traversal_exact_predicate_count;
   report.pair_grouped_strict_witness_discoveries =
       pair_schedule_audit.strict_witness_discovery_count;
+  report.pair_grouped_diagonal_node_descents =
+      pair_schedule_audit.diagonal_node_descent_count;
+  report.pair_grouped_common_frontiers =
+      pair_schedule_audit.common_frontier_count;
+  report.pair_prepared_singleton_fallbacks =
+      pair_schedule_audit.prepared_singleton_fallback_count;
+  report.pair_singleton_witness_pool_entries =
+      pair_schedule_audit.proposed_singleton_witness_pool_entry_count;
+  report.pair_singleton_certified_prunes =
+      pair_schedule_audit.singleton_certified_prune_count;
   report.pair_authenticated_prunes =
       pair_audit.authenticated_prune_count;
   report.pair_authenticated_pruned_directed_pairs =

@@ -279,6 +279,10 @@ class ExactGroupedAnchoredPairPruneCertificate {
 
 enum class ExactGroupedAnchoredPairTraversalStepKind : std::uint8_t {
   certified_prune,
+  // The common certificate is inconclusive for this whole authenticated
+  // subtree.  Frontier mode delegates the exact product to a finer bounded
+  // consumer instead of silently expanding it with the same anchor group.
+  inconclusive_subtree,
   unresolved_leaf,
   fallback_subtree,
   budget_exhausted,
@@ -325,7 +329,9 @@ struct ExactGroupedAnchoredPairTraversalAudit {
   std::size_t exact_predicate_count{};
   std::size_t strict_witness_discovery_count{};
   std::size_t internal_node_expansion_count{};
+  std::size_t diagonal_node_descent_count{};
   std::size_t certified_prune_count{};
+  std::size_t inconclusive_subtree_count{};
   std::size_t unresolved_leaf_count{};
   std::size_t fallback_subtree_count{};
   std::size_t budget_exhaustion_count{};
@@ -466,6 +472,32 @@ class ExactGroupedAnchoredPairTraversalContext {
       std::span<const spatial::PointId>,
       std::span<const spatial::PointId>,
       std::size_t) = delete;
+
+  // P8p keeps the P8o common certificate as a first line.  It descends nodes
+  // whose AABB contains an actual anchor without spending witness signs, then
+  // emits the first off-diagonal inconclusive subtree so a bounded singleton
+  // fallback can use a different witness halo for each anchor.
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_frontier_at_root(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const spatial::PointId> anchor_point_ids,
+      std::span<const spatial::PointId> witness_pool_point_ids,
+      std::size_t maximum_closed_rank);
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_frontier_at_root(
+      const spatial::MortonLbvhIndex&&,
+      const spatial::CanonicalPointCloud&,
+      std::span<const spatial::PointId>,
+      std::span<const spatial::PointId>,
+      std::size_t) = delete;
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_frontier_at_root(
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&&,
+      std::span<const spatial::PointId>,
+      std::span<const spatial::PointId>,
+      std::size_t) = delete;
   [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext start_at_root(
       const spatial::MortonLbvhIndex&,
       const spatial::CanonicalPointCloud&&,
@@ -582,6 +614,7 @@ class ExactGroupedAnchoredPairTraversalContext {
       std::span<const spatial::PointId> witness_pool_point_ids,
       std::size_t lbvh_node_index,
       std::size_t maximum_closed_rank,
+      bool emit_off_diagonal_inconclusive_subtree,
       PrivateConstructionTag);
 
   [[nodiscard]] ExactGroupedAnchoredPairPruneCertificate mint_certificate(
@@ -613,6 +646,7 @@ class ExactGroupedAnchoredPairTraversalContext {
   std::shared_ptr<const void> cloud_identity_;
   std::shared_ptr<const void> lbvh_identity_;
   ExactGroupedAnchoredPairTraversalAudit audit_{};
+  bool emit_off_diagonal_inconclusive_subtree_{false};
   bool complete_{false};
 };
 

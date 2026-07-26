@@ -370,9 +370,23 @@ La validation courte ferme la contre-fixture AABB hybride, le certificat discret
 
 P8o est `architecture_only` et `public_status=not_claimed`. Il ne prouve ni complexité sous-quadratique, ni SLO 50 k, ni sink externe, ni voie scalable des supports trois--quatre, ni fonctionnement 10 M+.
 
+## Incrément 14Q P8p — frontière commune puis partition singleton exacte
+
+Le diagnostic post-P8o autorisé sur `uniform_latin`, $n=50\,000$, $K=10$ épuise le cap total après exactement 20 000 signes physiques. Son audit observe 6 576 slots témoins, 756 réemplois hérités, 138 découvertes strictes, 38 prunes certifiés de masse dirigée totale 330 368, 352 candidates toutes `above_rank` et 12 808 visites P8k. Les 50 avancées structurelles observées sont 38 prunes, 11 feuilles non résolues et un épuisement.
+
+Les 11 feuilles ouvrent chacune les 32 ancres et expliquent donc exactement $11\times32=352$ candidates. Avec les 38 masses de prune disjointes, leur partition couvre 10 335 feuilles requêtes sur 50 000. On en infère que l'épuisement est survenu avant la fin du premier groupe Morton. L'incomplétude du groupe est une inférence recroisée depuis la partition et non un champ directement émis; elle ne démontre ni complexité asymptotique, ni durée extrapolée, ni futur SLO.
+
+P8p implémente `reference_cpu / hgp_reduced / common_first_per_anchor_singleton_fallback_partition_v2`. Le parcours commun descend sans prédicat les nœuds diagonaux contenant une ancre, car pour $q=p$ on a $\Phi_x(p,p)=\left\Vert x-p\right\Vert^2\geq0$ et aucun témoin ne peut y certifier une stricte négativité commune. Au premier sous-arbre hors diagonale encore inconclusif, il émet une frontière interne authentifiée. L'ordonnanceur la consomme sans candidate ni autorité scientifique, puis lance sur ce même sous-arbre une traversée P8o singleton pour chaque ancre du groupe.
+
+Cette séparation est exacte parce que $A\times L(Q)=\bigsqcup_{p\in A}\lbrace p\rbrace\times L(Q)$. Chaque prune singleton est donc un certificat P8o avec $P=\lbrace p\rbrace$, tandis que les chemins non certifiés restent ouverts vers P8j--P8k. Les prunes communes déjà acquises sont conservées. Chaque singleton peut proposer son propre halo Morton d'au plus 64 témoins, mais un seul contexte et un seul pool singleton sont actifs; aucun produit $G\times W$, tableau par ancre du nuage, univers de paires, cellule, facette, coface, incidence, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est matérialisé.
+
+Les tests permanents authentifient la frontière et son absence d'autorité directe, égalisent le passage ample et la segmentation `(1,1)`, exigent exactement une traversée singleton par ancre de chaque frontière et recertifient chaque prune avec P8g frais. Sur la fixture tridimensionnelle, la projection scientifique finale égale l'oracle ancré indépendant. La recertification finale des quatre CTests ciblés P8g/P8h, P8i/P8j, P8l et runner passe 4/4 sous GCC Release en 0,54 seconde et sous Clang Release en 0,49 seconde. Aucun benchmark long, sanitizer, CUDA, test massif ou GCP n'est inclus dans cette fermeture.
+
+P8p reste `architecture_only` et `public_status=not_claimed`. Cette preuve logicielle ne qualifie ni le SLO 50 k, ni une capacité 10 M+, ni la levée du garde 50 001; elle ne fournit pas encore le sink externe ou la voie non combinatoire des supports trois--quatre.
+
 ## Priorités de développement
 
-1. exécuter une seule nouvelle passe bornée à 50 000 points après P8o, lire séparément slots, signes, prunes et P8k, puis corriger le nouveau plafond avant toute série de mesures. La voie massive vient ensuite seulement avec un sink externe et des supports supérieurs scalables.
+1. exécuter exactement une passe P8p bornée `uniform_latin`, 50 000 points, $K=10$; lire séparément descentes diagonales, frontières communes, fallbacks et pools singleton, prunes communes et singleton, slots, réemplois, signes, candidates, visites P8k, couverture du premier groupe et raison d'arrêt, puis analyser le nouvel axe dominant avant toute répétition. Cette passe ne vaut ni SLO ni qualification 10 M+; la voie massive vient ensuite seulement avec un sink externe et des supports supérieurs scalables.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

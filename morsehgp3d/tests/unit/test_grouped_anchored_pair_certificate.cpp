@@ -223,6 +223,13 @@ struct NonPrefixWitnessFixture {
   std::array<PointId, 3> witness_pool{1U, 2U, 3U};
 };
 
+struct FrontierFixture {
+  CanonicalPointCloud cloud{make_line_cloud(4U)};
+  MortonLbvhIndex index{MortonLbvhIndex::build(cloud)};
+  std::array<PointId, 2> anchors{0U, 1U};
+  std::array<PointId, 1> witness_pool{3U};
+};
+
 [[nodiscard]] ExactGroupedAnchoredPairPruneCertificate certify_node(
     const LineFixture& fixture,
     std::span<const PointId> witness_pool,
@@ -1229,6 +1236,133 @@ void test_prepared_traversal_fallback_and_provenance() {
       "a foreign authority mutated the grouped traversal cursor");
 }
 
+void test_frontier_descends_diagonal_without_signs() {
+  const FrontierFixture fixture;
+  ExactGroupedAnchoredPairTraversalContext traversal =
+      ExactGroupedAnchoredPairTraversalContext::start_frontier_at_root(
+          fixture.index,
+          fixture.cloud,
+          fixture.anchors,
+          fixture.witness_pool,
+          2U);
+
+  const ExactGroupedAnchoredPairTraversalStep at_frontier = traversal.advance(
+      fixture.index,
+      fixture.cloud,
+      ExactGroupedAnchoredPairTraversalWorkBudget{64U, 0U});
+  const auto& diagonal_audit = traversal.audit();
+  require(
+      at_frontier.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::budget_exhausted &&
+          at_frontier.stop_reason() ==
+              ExactGroupedAnchoredPairTraversalStopReason::
+                  exact_predicate_limit &&
+          at_frontier.work().node_visit_count > 1U &&
+          at_frontier.work().witness_slot_scan_count == 0U &&
+          at_frontier.work().exact_predicate_count == 0U &&
+          at_frontier.work().strict_witness_discovery_count == 0U &&
+          at_frontier.prune_certificate() == nullptr &&
+          diagonal_audit.diagonal_node_descent_count > 0U &&
+          diagonal_audit.node_visit_count ==
+              diagonal_audit.diagonal_node_descent_count + 1U &&
+          diagonal_audit.internal_node_expansion_count ==
+              diagonal_audit.diagonal_node_descent_count &&
+          diagonal_audit.exact_predicate_count == 0U &&
+          diagonal_audit.inconclusive_subtree_count == 0U &&
+          !traversal.complete(),
+      "the grouped frontier charged a sign before leaving the diagonal");
+}
+
+void test_frontier_inconclusive_subtree_resumes_stably() {
+  const FrontierFixture fixture;
+  ExactGroupedAnchoredPairTraversalContext roomy =
+      ExactGroupedAnchoredPairTraversalContext::start_frontier_at_root(
+          fixture.index,
+          fixture.cloud,
+          fixture.anchors,
+          fixture.witness_pool,
+          2U);
+  const ExactGroupedAnchoredPairTraversalStep roomy_frontier = roomy.advance(
+      fixture.index,
+      fixture.cloud,
+      ExactGroupedAnchoredPairTraversalWorkBudget{64U, 64U});
+  require(
+      roomy_frontier.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::
+                  inconclusive_subtree &&
+          roomy_frontier.prune_certificate() == nullptr &&
+          !roomy_frontier.unresolved_point_id().has_value() &&
+          roomy_frontier.lbvh_node_index().has_value() &&
+          roomy_frontier.leaf_begin().has_value() &&
+          roomy_frontier.leaf_end().has_value() &&
+          roomy_frontier.work().exact_predicate_count == 1U &&
+          roomy.audit().certified_prune_count == 0U &&
+          roomy.audit().inconclusive_subtree_count == 1U,
+      "the roomy grouped frontier published authority for an inconclusive subtree");
+
+  ExactGroupedAnchoredPairTraversalContext segmented =
+      ExactGroupedAnchoredPairTraversalContext::start_frontier_at_root(
+          fixture.index,
+          fixture.cloud,
+          fixture.anchors,
+          fixture.witness_pool,
+          2U);
+  std::size_t budget_stop_count = 0U;
+  std::optional<std::size_t> terminal_node_index;
+  std::optional<std::size_t> terminal_leaf_begin;
+  std::optional<std::size_t> terminal_leaf_end;
+  for (std::size_t call = 0U; call < 16U; ++call) {
+    const ExactGroupedAnchoredPairTraversalStep step = segmented.advance(
+        fixture.index,
+        fixture.cloud,
+        ExactGroupedAnchoredPairTraversalWorkBudget{1U, 1U});
+    require(
+        step.prune_certificate() == nullptr,
+        "a segmented grouped frontier leaked a prune certificate");
+    if (step.kind() ==
+        ExactGroupedAnchoredPairTraversalStepKind::budget_exhausted) {
+      ++budget_stop_count;
+      continue;
+    }
+    require(
+        step.kind() ==
+                ExactGroupedAnchoredPairTraversalStepKind::
+                    inconclusive_subtree &&
+            !step.unresolved_point_id().has_value(),
+        "the segmented grouped frontier changed its terminal kind");
+    terminal_node_index = step.lbvh_node_index();
+    terminal_leaf_begin = step.leaf_begin();
+    terminal_leaf_end = step.leaf_end();
+    break;
+  }
+
+  require(
+      budget_stop_count > 0U &&
+          terminal_node_index == roomy_frontier.lbvh_node_index() &&
+          terminal_leaf_begin == roomy_frontier.leaf_begin() &&
+          terminal_leaf_end == roomy_frontier.leaf_end(),
+      "unit budgets changed the grouped frontier work or terminal authority");
+
+  const auto& roomy_audit = roomy.audit();
+  const auto& segmented_audit = segmented.audit();
+  require(
+      segmented_audit.node_visit_count == roomy_audit.node_visit_count &&
+          segmented_audit.witness_slot_scan_count ==
+              roomy_audit.witness_slot_scan_count &&
+          segmented_audit.inherited_witness_reuse_count ==
+              roomy_audit.inherited_witness_reuse_count &&
+          segmented_audit.exact_predicate_count ==
+              roomy_audit.exact_predicate_count &&
+          segmented_audit.internal_node_expansion_count ==
+              roomy_audit.internal_node_expansion_count &&
+          segmented_audit.diagonal_node_descent_count ==
+              roomy_audit.diagonal_node_descent_count &&
+          segmented_audit.certified_prune_count == 0U &&
+          segmented_audit.inconclusive_subtree_count == 1U &&
+          segmented_audit.budget_exhaustion_count == budget_stop_count,
+      "unit-budget resumption changed the grouped frontier cumulative audit");
+}
+
 }  // namespace
 
 int main() {
@@ -1243,6 +1377,8 @@ int main() {
     test_prepared_inheritance_preserves_nonprefix_canonical_order();
     test_prepared_traversal_resumes_atomically();
     test_prepared_traversal_fallback_and_provenance();
+    test_frontier_descends_diagonal_without_signs();
+    test_frontier_inconclusive_subtree_resumes_stably();
   } catch (const std::exception& error) {
     std::cerr << "grouped anchored-pair certificate test failure: "
               << error.what() << '\n';

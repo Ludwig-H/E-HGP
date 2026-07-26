@@ -163,7 +163,7 @@ void ExactMortonGroupedAnchoredPairScheduleContext::prepare_group(
   const std::span<const PointId> witness_span{
       witness_pool_point_ids.data(), witness_pool_entry_count};
   ExactGroupedAnchoredPairTraversalContext prepared_traversal =
-      ExactGroupedAnchoredPairTraversalContext::start_at_root(
+      ExactGroupedAnchoredPairTraversalContext::start_frontier_at_root(
           index,
           cloud,
           anchor_span,
@@ -180,6 +180,10 @@ void ExactMortonGroupedAnchoredPairScheduleContext::prepare_group(
   active_witness_pool_entry_count_ = witness_pool_entry_count;
   active_traversal_.reset();
   active_traversal_.emplace(std::move(prepared_traversal));
+  active_singleton_traversal_.reset();
+  active_singleton_witness_pool_point_ids_ = {};
+  active_singleton_witness_pool_entry_count_ = 0U;
+  singleton_frontier_active_ = false;
   group_completion_pending_ = false;
 
   checked_increment(
@@ -200,6 +204,90 @@ void ExactMortonGroupedAnchoredPairScheduleContext::prepare_group(
       witness_pool_entry_count);
 }
 
+void ExactMortonGroupedAnchoredPairScheduleContext::
+    prepare_next_singleton_fallback(
+        const MortonLbvhIndex& index,
+        const CanonicalPointCloud& cloud) {
+  if (!validated_for(index, cloud) || !singleton_frontier_active_ ||
+      active_singleton_traversal_.has_value() ||
+      next_singleton_anchor_offset_ >= active_anchor_count_) {
+    throw std::logic_error(
+        "a Morton grouped schedule cannot prepare an invalid singleton fallback");
+  }
+
+  active_singleton_anchor_offset_ = next_singleton_anchor_offset_;
+  ++next_singleton_anchor_offset_;
+  const PointId anchor_point_id =
+      active_anchor_point_ids_[active_singleton_anchor_offset_];
+  const std::span<const spatial::MortonLeafRecord> leaves = index.leaves();
+  bool found_anchor_leaf = false;
+  for (std::size_t leaf_index = active_anchor_leaf_begin_;
+       leaf_index < active_anchor_leaf_end_;
+       ++leaf_index) {
+    if (leaves[leaf_index].point_id == anchor_point_id) {
+      active_singleton_anchor_leaf_index_ = leaf_index;
+      found_anchor_leaf = true;
+      break;
+    }
+  }
+  if (!found_anchor_leaf) {
+    throw std::logic_error(
+        "a Morton grouped singleton fallback lost its anchor leaf");
+  }
+
+  active_singleton_witness_pool_point_ids_ = {};
+  active_singleton_witness_pool_entry_count_ = 0U;
+  const std::size_t left_available = active_singleton_anchor_leaf_index_;
+  const std::size_t right_available =
+      point_count_ - active_singleton_anchor_leaf_index_ - 1U;
+  const std::size_t maximum_halo_offset =
+      std::max(left_available, right_available);
+  for (std::size_t halo_offset = 1U;
+       halo_offset <= maximum_halo_offset &&
+       active_singleton_witness_pool_entry_count_ <
+           config_.proposed_witness_pool_size;
+       ++halo_offset) {
+    if (halo_offset <= left_available) {
+      active_singleton_witness_pool_point_ids_[
+          active_singleton_witness_pool_entry_count_] =
+          leaves[active_singleton_anchor_leaf_index_ - halo_offset].point_id;
+      ++active_singleton_witness_pool_entry_count_;
+    }
+    if (halo_offset <= right_available &&
+        active_singleton_witness_pool_entry_count_ <
+            config_.proposed_witness_pool_size) {
+      active_singleton_witness_pool_point_ids_[
+          active_singleton_witness_pool_entry_count_] =
+          leaves[active_singleton_anchor_leaf_index_ + halo_offset].point_id;
+      ++active_singleton_witness_pool_entry_count_;
+    }
+  }
+  std::sort(
+      active_singleton_witness_pool_point_ids_.begin(),
+      active_singleton_witness_pool_point_ids_.begin() +
+          static_cast<std::ptrdiff_t>(
+              active_singleton_witness_pool_entry_count_));
+
+  ExactGroupedAnchoredPairTraversalContext singleton_traversal =
+      ExactGroupedAnchoredPairTraversalContext::start_at_node(
+          index,
+          cloud,
+          std::span<const PointId>{&anchor_point_id, 1U},
+          std::span<const PointId>{
+              active_singleton_witness_pool_point_ids_.data(),
+              active_singleton_witness_pool_entry_count_},
+          singleton_frontier_node_index_,
+          maximum_closed_rank_);
+  active_singleton_traversal_.emplace(std::move(singleton_traversal));
+  checked_increment(
+      audit_.prepared_singleton_fallback_count,
+      "the Morton grouped singleton-fallback count overflows size_t");
+  checked_add_to(
+      audit_.proposed_singleton_witness_pool_entry_count,
+      active_singleton_witness_pool_entry_count_,
+      "the Morton grouped singleton witness-pool count overflows size_t");
+}
+
 ExactMortonGroupedAnchoredPairScheduleStep
 ExactMortonGroupedAnchoredPairScheduleContext::snapshot_step(
     ExactMortonGroupedAnchoredPairScheduleStepKind kind,
@@ -209,7 +297,24 @@ ExactMortonGroupedAnchoredPairScheduleContext::snapshot_step(
   step.kind_ = kind;
   step.stop_reason_ = stop_reason;
   step.requested_traversal_budget_ = traversal_budget;
-  if (active_traversal_.has_value()) {
+  if (active_singleton_traversal_.has_value()) {
+    step.group_ordinal_ = active_group_ordinal_;
+    step.anchor_leaf_begin_ = active_singleton_anchor_leaf_index_;
+    step.anchor_leaf_end_ = active_singleton_anchor_leaf_index_ + 1U;
+    if (kind !=
+        ExactMortonGroupedAnchoredPairScheduleStepKind::budget_exhausted) {
+      step.anchor_point_ids_[0] =
+          active_anchor_point_ids_[active_singleton_anchor_offset_];
+      step.anchor_count_ = 1U;
+    }
+    if (kind ==
+        ExactMortonGroupedAnchoredPairScheduleStepKind::certified_prune) {
+      step.witness_pool_point_ids_ =
+          active_singleton_witness_pool_point_ids_;
+      step.witness_pool_entry_count_ =
+          active_singleton_witness_pool_entry_count_;
+    }
+  } else if (active_traversal_.has_value()) {
     step.group_ordinal_ = active_group_ordinal_;
     step.anchor_leaf_begin_ = active_anchor_leaf_begin_;
     step.anchor_leaf_end_ = active_anchor_leaf_end_;
@@ -254,7 +359,30 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
         "an incomplete Morton grouped schedule has no active traversal");
   }
 
-  if (group_completion_pending_ || active_traversal_->complete()) {
+  if (singleton_frontier_active_ &&
+      active_singleton_traversal_.has_value() &&
+      active_singleton_traversal_->complete()) {
+    active_singleton_traversal_.reset();
+    active_singleton_witness_pool_point_ids_ = {};
+    active_singleton_witness_pool_entry_count_ = 0U;
+  }
+  if (singleton_frontier_active_ &&
+      !active_singleton_traversal_.has_value()) {
+    if (next_singleton_anchor_offset_ < active_anchor_count_) {
+      prepare_next_singleton_fallback(index, cloud);
+    } else {
+      singleton_frontier_active_ = false;
+      singleton_frontier_node_index_ = 0U;
+      singleton_frontier_leaf_begin_ = 0U;
+      singleton_frontier_leaf_end_ = 0U;
+      next_singleton_anchor_offset_ = 0U;
+      active_singleton_anchor_offset_ = 0U;
+      active_singleton_anchor_leaf_index_ = 0U;
+    }
+  }
+
+  if (!singleton_frontier_active_ &&
+      (group_completion_pending_ || active_traversal_->complete())) {
     ExactMortonGroupedAnchoredPairScheduleStep step = snapshot_step(
         ExactMortonGroupedAnchoredPairScheduleStepKind::group_complete,
         ExactMortonGroupedAnchoredPairScheduleStopReason::none,
@@ -266,6 +394,10 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
       active_anchor_count_ = 0U;
       active_witness_pool_point_ids_ = {};
       active_witness_pool_entry_count_ = 0U;
+      active_singleton_traversal_.reset();
+      active_singleton_witness_pool_point_ids_ = {};
+      active_singleton_witness_pool_entry_count_ = 0U;
+      singleton_frontier_active_ = false;
       group_completion_pending_ = false;
       complete_ = true;
       audit_.complete = true;
@@ -280,8 +412,26 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
     return step;
   }
 
+  ExactGroupedAnchoredPairTraversalContext& selected_traversal =
+      active_singleton_traversal_.has_value()
+      ? *active_singleton_traversal_
+      : *active_traversal_;
+  const std::size_t diagonal_node_descent_count_before =
+      selected_traversal.audit().diagonal_node_descent_count;
   ExactGroupedAnchoredPairTraversalStep traversal_step =
-      active_traversal_->advance(index, cloud, traversal_budget);
+      selected_traversal.advance(index, cloud, traversal_budget);
+  const std::size_t diagonal_node_descent_count_after =
+      selected_traversal.audit().diagonal_node_descent_count;
+  if (diagonal_node_descent_count_after <
+      diagonal_node_descent_count_before) {
+    throw std::logic_error(
+        "a grouped traversal diagonal-descent audit regressed");
+  }
+  checked_add_to(
+      audit_.diagonal_node_descent_count,
+      diagonal_node_descent_count_after -
+          diagonal_node_descent_count_before,
+      "the Morton grouped diagonal-descent count overflows size_t");
   checked_increment(
       audit_.traversal_advance_count,
       "the Morton grouped traversal-advance count overflows size_t");
@@ -317,6 +467,12 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
       kind = ExactMortonGroupedAnchoredPairScheduleStepKind::certified_prune;
       const ExactGroupedAnchoredPairPruneCertificate* certificate =
           traversal_step.prune_certificate();
+      const std::span<const PointId> expected_anchors =
+          active_singleton_traversal_.has_value()
+          ? std::span<const PointId>{
+                &active_anchor_point_ids_[active_singleton_anchor_offset_], 1U}
+          : std::span<const PointId>{
+                active_anchor_point_ids_.data(), active_anchor_count_};
       if (certificate == nullptr ||
           !traversal_step.lbvh_node_index().has_value() ||
           !certificate->certifies(
@@ -324,14 +480,41 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
               cloud,
               *traversal_step.lbvh_node_index(),
               maximum_closed_rank_,
-              std::span<const PointId>{
-                  active_anchor_point_ids_.data(), active_anchor_count_})) {
+              expected_anchors)) {
         throw std::logic_error(
             "a Morton grouped schedule received an unauthenticated prune");
       }
       checked_increment(
           audit_.certified_prune_count,
           "the Morton grouped prune count overflows size_t");
+      if (active_singleton_traversal_.has_value()) {
+        checked_increment(
+            audit_.singleton_certified_prune_count,
+            "the Morton grouped singleton prune count overflows size_t");
+      }
+      break;
+    }
+    case ExactGroupedAnchoredPairTraversalStepKind::inconclusive_subtree: {
+      if (active_singleton_traversal_.has_value() ||
+          singleton_frontier_active_ ||
+          !traversal_step.lbvh_node_index().has_value() ||
+          !traversal_step.leaf_begin().has_value() ||
+          !traversal_step.leaf_end().has_value() ||
+          *traversal_step.leaf_begin() >= *traversal_step.leaf_end()) {
+        throw std::logic_error(
+            "a Morton grouped schedule received an invalid common frontier");
+      }
+      singleton_frontier_node_index_ =
+          *traversal_step.lbvh_node_index();
+      singleton_frontier_leaf_begin_ = *traversal_step.leaf_begin();
+      singleton_frontier_leaf_end_ = *traversal_step.leaf_end();
+      next_singleton_anchor_offset_ = 0U;
+      singleton_frontier_active_ = true;
+      kind = ExactMortonGroupedAnchoredPairScheduleStepKind::
+          singleton_fallback_started;
+      checked_increment(
+          audit_.common_frontier_count,
+          "the Morton grouped common-frontier count overflows size_t");
       break;
     }
     case ExactGroupedAnchoredPairTraversalStepKind::unresolved_leaf:
@@ -379,7 +562,9 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
       traversal_work.inherited_witness_reuse_count,
       traversal_work.exact_predicate_count,
       traversal_work.strict_witness_discovery_count};
-  if (traversal_step.traversal_complete_after_step()) {
+  if (traversal_step.traversal_complete_after_step() &&
+      !singleton_frontier_active_ &&
+      !active_singleton_traversal_.has_value()) {
     group_completion_pending_ = true;
   }
   step.traversal_step_.emplace(std::move(traversal_step));

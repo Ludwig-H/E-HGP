@@ -54,6 +54,33 @@ using spatial::PointId;
   return bounds;
 }
 
+[[nodiscard]] bool contains_any_actual_anchor(
+    const ExactDyadicAabb3& query_bounds,
+    std::span<const ExactDyadicAabb3> anchor_point_bounds) noexcept {
+  for (const ExactDyadicAabb3& anchor_bounds : anchor_point_bounds) {
+    bool contained = true;
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      const std::uint64_t query_lower_key =
+          exact::binary64_total_order_key(
+              query_bounds.lower_binary64_bits[axis]);
+      const std::uint64_t query_upper_key =
+          exact::binary64_total_order_key(
+              query_bounds.upper_binary64_bits[axis]);
+      const std::uint64_t anchor_key =
+          exact::binary64_total_order_key(
+              anchor_bounds.lower_binary64_bits[axis]);
+      if (anchor_key < query_lower_key || anchor_key > query_upper_key) {
+        contained = false;
+        break;
+      }
+    }
+    if (contained) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void require_incrementable(std::size_t value, const char* message) {
   if (value == std::numeric_limits<std::size_t>::max()) {
     throw std::overflow_error(message);
@@ -329,6 +356,29 @@ ExactGroupedAnchoredPairTraversalContext::start_at_root(
       witness_pool_point_ids,
       index.root_index_,
       maximum_closed_rank,
+      false,
+      PrivateConstructionTag{});
+}
+
+ExactGroupedAnchoredPairTraversalContext
+ExactGroupedAnchoredPairTraversalContext::start_frontier_at_root(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::span<const PointId> anchor_point_ids,
+    std::span<const PointId> witness_pool_point_ids,
+    std::size_t maximum_closed_rank) {
+  if (!index.validated_for(cloud)) {
+    throw std::invalid_argument(
+        "a grouped frontier traversal requires its cloud's exact LBVH");
+  }
+  return ExactGroupedAnchoredPairTraversalContext(
+      index,
+      cloud,
+      anchor_point_ids,
+      witness_pool_point_ids,
+      index.root_index_,
+      maximum_closed_rank,
+      true,
       PrivateConstructionTag{});
 }
 
@@ -347,6 +397,7 @@ ExactGroupedAnchoredPairTraversalContext::start_at_node(
       witness_pool_point_ids,
       lbvh_node_index,
       maximum_closed_rank,
+      false,
       PrivateConstructionTag{});
 }
 
@@ -358,6 +409,7 @@ ExactGroupedAnchoredPairTraversalContext::
         std::span<const PointId> witness_pool_point_ids,
         std::size_t lbvh_node_index,
         std::size_t maximum_closed_rank,
+        bool emit_off_diagonal_inconclusive_subtree,
         PrivateConstructionTag) {
   if (!index.validated_for(cloud)) {
     throw std::invalid_argument(
@@ -437,6 +489,8 @@ ExactGroupedAnchoredPairTraversalContext::
   start_node_index_ = lbvh_node_index;
   cloud_identity_ = cloud.identity_;
   lbvh_identity_ = index.identity_;
+  emit_off_diagonal_inconclusive_subtree_ =
+      emit_off_diagonal_inconclusive_subtree;
 
   const MortonLbvhIndex::Node& start_node =
       index.nodes_[lbvh_node_index];
@@ -642,6 +696,67 @@ ExactGroupedAnchoredPairTraversalContext::advance(
           "a grouped traversal active authority lost its certified node");
     }
 
+    const auto emit_inconclusive_subtree = [&]() {
+      require_incrementable(
+          audit_.inconclusive_subtree_count,
+          "the grouped traversal inconclusive-subtree count overflows size_t");
+      ExactGroupedAnchoredPairTraversalStep step = make_step(
+          ExactGroupedAnchoredPairTraversalStepKind::inconclusive_subtree,
+          ExactGroupedAnchoredPairTraversalStopReason::none);
+      step.lbvh_node_index_ = active_node.authority.node_index;
+      step.leaf_begin_ = active_node.authority.leaf_begin;
+      step.leaf_end_ = active_node.authority.leaf_end;
+      active_node_.reset();
+      ++audit_.inconclusive_subtree_count;
+      if (pending_node_count_ == 0U) {
+        complete_ = true;
+        audit_.complete = true;
+        step.traversal_complete_after_step_ = true;
+      }
+      return step;
+    };
+
+    const auto expand_active_internal_node = [&]() {
+      if (node.is_leaf()) {
+        throw std::logic_error(
+            "a grouped traversal cannot expand a leaf node");
+      }
+      if (pending_node_count_ > pending_nodes_.size() - 2U) {
+        throw std::logic_error(
+            "the certified LBVH exceeded the fixed grouped traversal stack");
+      }
+      if (node.left_child >= index.nodes_.size() ||
+          node.right_child >= index.nodes_.size()) {
+        throw std::logic_error(
+            "a grouped traversal internal node has an invalid child");
+      }
+      const MortonLbvhIndex::Node& left = index.nodes_[node.left_child];
+      const MortonLbvhIndex::Node& right = index.nodes_[node.right_child];
+      const std::uint64_t inherited_mask =
+          active_node.strict_witness_mask;
+      const NodeAuthority left_authority{
+          node.left_child,
+          left.leaf_begin,
+          left.leaf_end,
+          inherited_mask};
+      const NodeAuthority right_authority{
+          node.right_child,
+          right.leaf_begin,
+          right.leaf_end,
+          inherited_mask};
+      require_incrementable(
+          audit_.internal_node_expansion_count,
+          "the grouped traversal expansion count overflows size_t");
+      pending_nodes_[pending_node_count_] = left_authority;
+      pending_nodes_[pending_node_count_ + 1U] = right_authority;
+      pending_node_count_ += 2U;
+      active_node_.reset();
+      ++audit_.internal_node_expansion_count;
+      audit_.maximum_pending_node_count = std::max(
+          audit_.maximum_pending_node_count,
+          pending_node_count_);
+    };
+
     if (witness_pool_entry_count_ < required_witness_count_) {
       require_incrementable(
           audit_.fallback_subtree_count,
@@ -659,6 +774,24 @@ ExactGroupedAnchoredPairTraversalContext::advance(
       ++audit_.fallback_subtree_count;
       step.traversal_complete_after_step_ = true;
       return step;
+    }
+
+    if (emit_off_diagonal_inconclusive_subtree_ &&
+        contains_any_actual_anchor(
+            active_node.query_bounds,
+            std::span<const ExactDyadicAabb3>{
+                anchor_point_bounds_.data(), anchor_count_})) {
+      if (node.is_leaf()) {
+        return emit_inconclusive_subtree();
+      }
+      require_incrementable(
+          audit_.diagonal_node_descent_count,
+          "the grouped traversal diagonal-descent count overflows size_t");
+      active_node.strict_witness_mask =
+          active_node.authority.inherited_strict_witness_mask;
+      ++audit_.diagonal_node_descent_count;
+      expand_active_internal_node();
+      continue;
     }
 
     std::size_t strict_witness_count =
@@ -788,6 +921,10 @@ ExactGroupedAnchoredPairTraversalContext::advance(
           "a grouped traversal stopped its witness scan without a reason");
     }
 
+    if (emit_off_diagonal_inconclusive_subtree_) {
+      return emit_inconclusive_subtree();
+    }
+
     if (node.is_leaf()) {
       if (node.leaf_end != node.leaf_begin + 1U ||
           node.leaf_begin >= index.leaves_.size()) {
@@ -814,41 +951,7 @@ ExactGroupedAnchoredPairTraversalContext::advance(
       }
       return step;
     }
-
-    if (pending_node_count_ > pending_nodes_.size() - 2U) {
-      throw std::logic_error(
-          "the certified LBVH exceeded the fixed grouped traversal stack");
-    }
-    if (node.left_child >= index.nodes_.size() ||
-        node.right_child >= index.nodes_.size()) {
-      throw std::logic_error(
-          "a grouped traversal internal node has an invalid child");
-    }
-    const MortonLbvhIndex::Node& left = index.nodes_[node.left_child];
-    const MortonLbvhIndex::Node& right = index.nodes_[node.right_child];
-    const std::uint64_t inherited_mask =
-        active_node.strict_witness_mask;
-    const NodeAuthority left_authority{
-        node.left_child,
-        left.leaf_begin,
-        left.leaf_end,
-        inherited_mask};
-    const NodeAuthority right_authority{
-        node.right_child,
-        right.leaf_begin,
-        right.leaf_end,
-        inherited_mask};
-    require_incrementable(
-        audit_.internal_node_expansion_count,
-        "the grouped traversal expansion count overflows size_t");
-    pending_nodes_[pending_node_count_] = left_authority;
-    pending_nodes_[pending_node_count_ + 1U] = right_authority;
-    pending_node_count_ += 2U;
-    active_node_.reset();
-    ++audit_.internal_node_expansion_count;
-    audit_.maximum_pending_node_count = std::max(
-        audit_.maximum_pending_node_count,
-        pending_node_count_);
+    expand_active_internal_node();
   }
 }
 
