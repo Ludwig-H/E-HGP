@@ -47,8 +47,8 @@ inline constexpr std::string_view
     exact_grouped_anchored_pair_certificate_public_status = "not_claimed";
 inline constexpr std::string_view
     exact_grouped_anchored_pair_certificate_proof_basis =
-        "bounded_group_witness_pool_and_exact_anchor_aabb_query_aabb_"
-        "strict_diametral_phi_maximum_v1";
+        "bounded_group_witness_pool_and_exact_discrete_anchor_query_aabb_"
+        "strict_diametral_phi_maximum_v2";
 
 enum class ExactGroupedAnchoredPairPruneDecision : std::uint8_t {
   certified,
@@ -84,6 +84,9 @@ struct ExactGroupedAnchoredPairPruneBudget {
 struct ExactGroupedAnchoredPairPruneAudit {
   std::size_t anchor_count{};
   std::size_t witness_pool_entry_count{};
+  // One physical predicate is one exact (actual anchor, witness, query AABB)
+  // sign evaluation.  A proposed witness can therefore charge from one to G
+  // predicates before it fails or is proved strict for all G actual anchors.
   std::size_t exact_predicate_count{};
   std::size_t strict_group_witness_count{};
   std::size_t inherited_strict_group_witness_count{};
@@ -299,8 +302,11 @@ struct ExactGroupedAnchoredPairTraversalWorkBudget {
 
 struct ExactGroupedAnchoredPairTraversalStepWork {
   std::size_t node_visit_count{};
+  // A witness slot is charged once when it is rejected by one actual anchor,
+  // proved strict for every actual anchor, or reused from a strict parent.
   std::size_t witness_slot_scan_count{};
   std::size_t inherited_witness_reuse_count{};
+  // Physical actual-anchor/witness exact signs, excluding inherited slots.
   std::size_t exact_predicate_count{};
   std::size_t strict_witness_discovery_count{};
 
@@ -445,8 +451,8 @@ class ExactGroupedAnchoredPairTraversalContext {
       "architecture_only";
   static constexpr std::string_view public_status = "not_claimed";
   static constexpr std::string_view proof_basis =
-      "prepared_anchor_aabb_exact_child_aabb_monotone_inherited_strict_"
-      "mask_v1";
+      "prepared_discrete_actual_anchor_bounds_exact_child_aabb_monotone_"
+      "inherited_common_strict_witness_mask_v2";
 
   [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext start_at_root(
       const spatial::MortonLbvhIndex& index,
@@ -561,6 +567,7 @@ class ExactGroupedAnchoredPairTraversalContext {
     NodeAuthority authority{};
     spatial::ExactDyadicAabb3 query_bounds{};
     std::size_t next_witness_offset{};
+    std::size_t next_anchor_offset{};
     std::size_t node_exact_predicate_count{};
     std::size_t inherited_strict_witness_count{};
     std::uint64_t strict_witness_mask{};
@@ -583,6 +590,9 @@ class ExactGroupedAnchoredPairTraversalContext {
   std::array<spatial::PointId,
              exact_grouped_anchored_pair_maximum_anchor_count>
       anchor_point_ids_{};
+  std::array<spatial::ExactDyadicAabb3,
+             exact_grouped_anchored_pair_maximum_anchor_count>
+      anchor_point_bounds_{};
   std::size_t anchor_count_{};
   std::array<spatial::PointId,
              exact_grouped_anchored_pair_maximum_witness_pool_size>
@@ -610,16 +620,18 @@ class ExactGroupedAnchoredPairTraversalContext {
 // Every pool point must differ from every anchor.  The pool is only a bounded
 // proposal and needs no recall guarantee or per-anchor bank membership.
 //
-// For anchor box A, the certified LBVH node box Q and a pool witness x, the
-// exact predicate is
+// For the actual finite anchor set P, the certified LBVH node box Q and a pool
+// witness x, the exact predicate is
 //
-//   max_{a in A, q in Q} (x-a).(x-q) < 0.
+//   max_{p in P} max_{q in Q} (x-p).(x-q) < 0.
 //
 // If maximum_closed_rank - 1 distinct witnesses pass, every actual pair has
 // more than maximum_closed_rank closed-ball points.  No cloud-sized witness
 // table, pair catalogue, cell, coface or higher-order Delaunay mosaic is
-// built.  The existing exact dyadic predicate may use bounded transient BigInt
-// fallback, but this primitive owns no dynamic arena proportional to n.
+// built.  A witness costs between one and |P| physical exact signs because the
+// first non-strict actual anchor rejects it.  The existing exact dyadic
+// predicate may use bounded transient BigInt fallback, but this primitive owns
+// no dynamic arena proportional to n.
 [[nodiscard]] ExactGroupedAnchoredPairPruneCertificate
 certify_exact_grouped_anchored_pair_prune(
     const spatial::MortonLbvhIndex& index,

@@ -160,6 +160,9 @@ class ExactGroupedAnchoredPairPruneCertifier {
 
     result.anchor_count_ = anchor_point_ids.size();
     result.witness_pool_entry_count_ = witness_pool_point_ids.size();
+    std::array<ExactDyadicAabb3,
+               exact_grouped_anchored_pair_maximum_anchor_count>
+        actual_anchor_bounds{};
 
     for (std::size_t anchor_offset = 0U;
          anchor_offset < anchor_point_ids.size();
@@ -172,6 +175,8 @@ class ExactGroupedAnchoredPairPruneCertifier {
             "grouped anchored-pair anchors must be strictly increasing");
       }
       result.anchor_point_ids_[anchor_offset] = anchor_point_id;
+      actual_anchor_bounds[anchor_offset] =
+          point_bounds(cloud, anchor_point_id);
     }
 
     for (std::size_t witness_offset = 0U;
@@ -220,20 +225,31 @@ class ExactGroupedAnchoredPairPruneCertifier {
     for (std::size_t witness_offset = 0U;
          witness_offset < witness_pool_point_ids.size();
          ++witness_offset) {
-      if (result.audit_.exact_predicate_count >=
-          budget.maximum_exact_predicate_count) {
-        return exhausted_result(
-            std::move(result),
-            ExactGroupedAnchoredPairPruneStopReason::exact_predicate_limit);
-      }
-      ++result.audit_.exact_predicate_count;
       const PointId witness_point_id =
           witness_pool_point_ids[witness_offset];
-      const int maximum_sign = exact_diametral_phi_aabb_maximum_sign(
-          result.anchor_bounds_,
-          result.query_bounds_,
-          point_bounds(cloud, witness_point_id));
-      if (maximum_sign >= 0) {
+      const ExactDyadicAabb3 witness_bounds =
+          point_bounds(cloud, witness_point_id);
+      bool strict_for_every_actual_anchor = true;
+      for (std::size_t anchor_offset = 0U;
+           anchor_offset < anchor_point_ids.size();
+           ++anchor_offset) {
+        if (result.audit_.exact_predicate_count >=
+            budget.maximum_exact_predicate_count) {
+          return exhausted_result(
+              std::move(result),
+              ExactGroupedAnchoredPairPruneStopReason::exact_predicate_limit);
+        }
+        ++result.audit_.exact_predicate_count;
+        const int maximum_sign = exact_diametral_phi_aabb_maximum_sign(
+            actual_anchor_bounds[anchor_offset],
+            result.query_bounds_,
+            witness_bounds);
+        if (maximum_sign >= 0) {
+          strict_for_every_actual_anchor = false;
+          break;
+        }
+      }
+      if (!strict_for_every_actual_anchor) {
         continue;
       }
 
@@ -386,6 +402,8 @@ ExactGroupedAnchoredPairTraversalContext::
           "grouped traversal anchors must be strictly increasing");
     }
     anchor_point_ids_[anchor_offset] = anchor_point_id;
+    anchor_point_bounds_[anchor_offset] =
+        point_bounds(cloud, anchor_point_id);
   }
 
   witness_pool_entry_count_ = witness_pool_point_ids.size();
@@ -606,6 +624,7 @@ ExactGroupedAnchoredPairTraversalContext::advance(
           0U,
           0U,
           0U,
+          0U,
           0U});
       ++work.node_visit_count;
       ++audit_.node_visit_count;
@@ -654,6 +673,10 @@ ExactGroupedAnchoredPairTraversalContext::advance(
           std::uint64_t{1} << witness_offset;
       if ((active_node.authority.inherited_strict_witness_mask &
            witness_bit) != 0U) {
+        if (active_node.next_anchor_offset != 0U) {
+          throw std::logic_error(
+              "a grouped traversal inherited a partially tested witness");
+        }
         require_incrementable(
             work.witness_slot_scan_count,
             "the grouped traversal step slot count overflows size_t");
@@ -680,6 +703,10 @@ ExactGroupedAnchoredPairTraversalContext::advance(
         continue;
       }
 
+      if (active_node.next_anchor_offset >= anchor_count_) {
+        throw std::logic_error(
+            "a grouped traversal has an invalid actual-anchor cursor");
+      }
       if (work.exact_predicate_count >=
           budget.maximum_exact_predicate_count) {
         return budget_exhausted_step(
@@ -687,44 +714,49 @@ ExactGroupedAnchoredPairTraversalContext::advance(
                 exact_predicate_limit);
       }
       require_incrementable(
-          work.witness_slot_scan_count,
-          "the grouped traversal step slot count overflows size_t");
-      require_incrementable(
           work.exact_predicate_count,
           "the grouped traversal step predicate count overflows size_t");
       require_incrementable(
-          work.strict_witness_discovery_count,
-          "the grouped traversal step strict count overflows size_t");
-      require_incrementable(
-          audit_.witness_slot_scan_count,
-          "the grouped traversal slot count overflows size_t");
-      require_incrementable(
           audit_.exact_predicate_count,
           "the grouped traversal predicate count overflows size_t");
-      require_incrementable(
-          audit_.strict_witness_discovery_count,
-          "the grouped traversal strict count overflows size_t");
       require_incrementable(
           active_node.node_exact_predicate_count,
           "a grouped traversal node predicate count overflows size_t");
 
       const int maximum_sign =
           exact_diametral_phi_aabb_maximum_sign(
-              anchor_bounds_,
+              anchor_point_bounds_[active_node.next_anchor_offset],
               active_node.query_bounds,
               witness_point_bounds_[witness_offset]);
 
-      ++active_node.next_witness_offset;
+      ++active_node.next_anchor_offset;
       ++active_node.node_exact_predicate_count;
-      ++work.witness_slot_scan_count;
       ++work.exact_predicate_count;
-      ++audit_.witness_slot_scan_count;
       ++audit_.exact_predicate_count;
-      if (maximum_sign < 0) {
-        active_node.strict_witness_mask |= witness_bit;
-        ++strict_witness_count;
-        ++work.strict_witness_discovery_count;
-        ++audit_.strict_witness_discovery_count;
+      if (maximum_sign >= 0 ||
+          active_node.next_anchor_offset == anchor_count_) {
+        require_incrementable(
+            work.witness_slot_scan_count,
+            "the grouped traversal step slot count overflows size_t");
+        require_incrementable(
+            audit_.witness_slot_scan_count,
+            "the grouped traversal slot count overflows size_t");
+        ++active_node.next_witness_offset;
+        active_node.next_anchor_offset = 0U;
+        ++work.witness_slot_scan_count;
+        ++audit_.witness_slot_scan_count;
+        if (maximum_sign < 0) {
+          require_incrementable(
+              work.strict_witness_discovery_count,
+              "the grouped traversal step strict count overflows size_t");
+          require_incrementable(
+              audit_.strict_witness_discovery_count,
+              "the grouped traversal strict count overflows size_t");
+          active_node.strict_witness_mask |= witness_bit;
+          ++strict_witness_count;
+          ++work.strict_witness_discovery_count;
+          ++audit_.strict_witness_discovery_count;
+        }
       }
     }
 
@@ -750,7 +782,8 @@ ExactGroupedAnchoredPairTraversalContext::advance(
     }
 
     if (active_node.next_witness_offset !=
-        witness_pool_entry_count_) {
+            witness_pool_entry_count_ ||
+        active_node.next_anchor_offset != 0U) {
       throw std::logic_error(
           "a grouped traversal stopped its witness scan without a reason");
     }

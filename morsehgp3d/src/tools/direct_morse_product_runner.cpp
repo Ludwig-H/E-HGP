@@ -96,7 +96,10 @@ struct Report {
   std::size_t pair_orientation_checks{};
   std::size_t pair_reverse_or_self_orientation_skips{};
   std::size_t pair_grouped_traversal_node_visits{};
+  std::size_t pair_grouped_witness_slots{};
+  std::size_t pair_grouped_inherited_witness_reuses{};
   std::size_t pair_grouped_traversal_exact_predicates{};
+  std::size_t pair_grouped_strict_witness_discoveries{};
   std::size_t pair_authenticated_prunes{};
   std::size_t pair_authenticated_pruned_directed_pairs{};
   std::size_t pair_directed_pair_universe{};
@@ -939,8 +942,14 @@ void emit_report(const Report& report) {
       << report.pair_reverse_or_self_orientation_skips
       << ",\"grouped_node_visits\":"
       << report.pair_grouped_traversal_node_visits
+      << ",\"grouped_witness_slots\":"
+      << report.pair_grouped_witness_slots
+      << ",\"grouped_inherited_witness_reuses\":"
+      << report.pair_grouped_inherited_witness_reuses
       << ",\"grouped_exact_predicates\":"
       << report.pair_grouped_traversal_exact_predicates
+      << ",\"grouped_strict_witness_discoveries\":"
+      << report.pair_grouped_strict_witness_discoveries
       << ",\"authenticated_prunes\":"
       << report.pair_authenticated_prunes
       << ",\"authenticated_pruned_directed_pairs\":"
@@ -1155,8 +1164,14 @@ void emit_report(const Report& report) {
       pair_candidate_audit.reverse_or_self_orientation_skip_count;
   report.pair_grouped_traversal_node_visits =
       pair_candidate_audit.grouped_traversal_node_visit_count;
+  report.pair_grouped_witness_slots =
+      pair_schedule_audit.witness_slot_scan_count;
+  report.pair_grouped_inherited_witness_reuses =
+      pair_schedule_audit.inherited_witness_reuse_count;
   report.pair_grouped_traversal_exact_predicates =
       pair_candidate_audit.grouped_traversal_exact_predicate_count;
+  report.pair_grouped_strict_witness_discoveries =
+      pair_schedule_audit.strict_witness_discovery_count;
   report.pair_authenticated_prunes =
       pair_audit.authenticated_prune_count;
   report.pair_authenticated_pruned_directed_pairs =

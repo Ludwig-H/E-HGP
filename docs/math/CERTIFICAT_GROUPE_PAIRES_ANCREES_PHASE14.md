@@ -1,10 +1,10 @@
-# Certificat groupé exact, parcours préparé et curseur Morton — Phase 14Q P8g--P8k
+# Certificat groupé exact discret, parcours préparé et curseur Morton — Phase 14Q P8g--P8k et P8o
 
 ## Statut et portée
 
-Ce document fixe un lemme de prune exact pour un groupe borné d'ancres et un nœud certifié du LBVH, son parcours préparé parent--enfant, l'ordonnancement borné de tous les groupes, l'expansion orientée et reprenable de leurs seuls terminaux ouverts, puis la classification reprenable de chaque candidate. P8g fournit la primitive `reference_cpu / hgp_reduced / grouped_exact_certificate`; P8h ajoute le mode `reference_cpu / hgp_reduced / prepared_grouped_exact_traversal`; P8i ajoute `reference_cpu / hgp_reduced / bounded_morton_group_schedule`; P8j ajoute `reference_cpu / hgp_reduced / bounded_morton_oriented_candidate_cursor`; P8k ajoute `reference_cpu / hgp_reduced / resumable_exact_anchored_pair_closed_ball_classifier`. Les cinq restent sous `deployment_status=architecture_only` et `public_status=not_claimed`. Ils ne réduisent aucune hiérarchie et ne qualifient ni `warm_e2e`, ni 50 k, ni 10 M+.
+Ce document fixe un lemme de prune exact pour un groupe borné d'ancres et un nœud certifié du LBVH, son parcours préparé parent--enfant, l'ordonnancement borné de tous les groupes, l'expansion orientée et reprenable de leurs seuls terminaux ouverts, puis la classification reprenable de chaque candidate. P8g fournit la première primitive `reference_cpu / hgp_reduced / grouped_exact_certificate`; P8h ajoute le mode `reference_cpu / hgp_reduced / prepared_grouped_exact_traversal`; P8i ajoute `reference_cpu / hgp_reduced / bounded_morton_group_schedule`; P8j ajoute `reference_cpu / hgp_reduced / bounded_morton_oriented_candidate_cursor`; P8k ajoute `reference_cpu / hgp_reduced / resumable_exact_anchored_pair_closed_ball_classifier`. P8o resserre exclusivement le certificat commun de P8g--P8h en remplaçant la boîte englobante des ancres par leur ensemble discret réel. Ces composants restent sous `deployment_status=architecture_only` et `public_status=not_claimed`. Ils ne réduisent aucune hiérarchie et ne qualifient ni `warm_e2e`, ni 50 k, ni 10 M+.
 
-Pour un couple groupe--nœud, la primitive mutualise les évaluations de $G$ ancres contre $W$ témoins en au plus $W$ prédicats universels sur la boîte du groupe. P8h prépare la boîte des ancres et les bornes ponctuelles du pool une seule fois par contexte, puis évite de recalculer chez un enfant tout succès strict effectivement rencontré dans l'ordre canonique. P8i prépare un seul groupe Morton à la fois et ne conserve aucun catalogue global. Le pire cas conserve le produit groupes × nœuds × témoins. Le pool commun n'a aucune obligation de rappel : sa seule fonction est de présenter au prédicat exact des candidats susceptibles de fournir une preuve commune.
+Pour un couple groupe--nœud, la primitive mutualise les évaluations de $G$ ancres contre $W$ témoins sans relâcher les ancres vers les coins hybrides de leur boîte. Un slot témoin inspecté coûte entre une et $G$ évaluations ancre--nœud : la première ancre non strictement négative rend ce slot inconclusif, tandis qu'un succès commun exige les $G$ évaluations. P8h prépare les bornes ponctuelles des ancres réelles et du pool une seule fois par contexte, puis évite de recalculer chez un enfant tout succès commun strict effectivement rencontré dans l'ordre canonique. P8i prépare un seul groupe Morton à la fois et ne conserve aucun catalogue global. Le pire cas conserve le produit groupes × nœuds × ancres × témoins. Le pool commun n'a aucune obligation de rappel : sa seule fonction est de présenter au prédicat exact des candidats susceptibles de fournir une preuve commune.
 
 ## Identité diamétrale
 
@@ -18,15 +18,15 @@ $$\Phi_x(p,q)=\left\Vert x-p\right\Vert^2-(x-p)\cdot(q-p)=-H_x(p,q).$$
 
 ## Théorème de groupe
 
-Soit $P$ un ensemble fini non vide d'ancres, $A$ sa boîte englobante exacte, $Q$ la boîte exacte d'un nœud LBVH et $W$ un pool borné de `PointId` distincts, disjoint de $P$. Pour chaque $x\in W$, on définit :
+Soit $P$ un ensemble fini non vide d'ancres réelles, $Q$ la boîte exacte d'un nœud LBVH et $W$ un pool borné de `PointId` distincts, disjoint de $P$. Pour chaque $x\in W$, on définit le maximum discret commun :
 
-$$M_x(A,Q)=\max_{a\in A,\;q\in Q}(x-a)\cdot(x-q).$$
+$$M_x(P,Q)=\max_{p\in P,\;q\in Q}(x-p)\cdot(x-q).$$
 
-Soit $s_{\max}\in\lbrace 2,\ldots,11\rbrace$ et $m=s_{\max}-1$. S'il existe $m$ témoins distincts $x_1,\ldots,x_m\in W$ tels que $M_{x_j}(A,Q)<0$ pour tout $j$, alors, pour toute ancre réelle $p\in P$ et tout point réel $y$ couvert par le nœud $Q$, les $m$ témoins sont strictement intérieurs à la boule de diamètre $[p,y]$.
+Soit $s_{\max}\in\lbrace 2,\ldots,11\rbrace$ et $m=s_{\max}-1$. S'il existe $m$ témoins distincts $x_1,\ldots,x_m\in W$ tels que $M_{x_j}(P,Q)<0$ pour tout $j$, alors, pour toute ancre réelle $p\in P$ et tout point réel $y$ couvert par le nœud $Q$, les $m$ témoins sont strictement intérieurs à la boule de diamètre $[p,y]$.
 
-En effet, $p\in A$ et $y\in Q$, donc, pour chaque témoin certifié :
+En effet, $p\in P$ et $y\in Q$, donc, pour chaque témoin certifié :
 
-$$\Phi_{x_j}(p,y)\leq M_{x_j}(A,Q)<0.$$
+$$\Phi_{x_j}(p,y)\leq M_{x_j}(P,Q)<0.$$
 
 La stricte négativité exclut automatiquement $x_j=p$, $x_j=y$ et $p=y$. Avec les deux supports, la boule fermée contient donc au moins :
 
@@ -36,37 +36,47 @@ $$m+2=(s_{\max}-1)+2=s_{\max}+1$$
 
 ## Calcul exact de la borne
 
-Le témoin $x$ est ponctuel. Pour chaque axe, $(x_i-a_i)(x_i-q_i)$ est bilinéaire sur le rectangle indépendant formé par les deux intervalles de $A$ et $Q$; son maximum est atteint sur l'une des quatre paires d'extrémités. La somme des trois maxima axiaux donne donc exactement $M_x(A,Q)$.
+Le témoin $x$ et chaque ancre $p$ sont ponctuels. Pour une ancre fixée, la dépendance en $q$ est affine sur chaque axe de $Q$; le maximum est donc atteint à une extrémité. En dimension trois :
 
-L'implémentation réutilise `exact_diametral_phi_aabb_maximum_sign(A, Q, {x})`. Le chemin dyadique borné décide la plage binary64 ordinaire; si cette enveloppe est insuffisante, le fallback `BigInt` exact intervient avant toute décision. La primitive n'alloue aucune arène persistante ou proportionnelle à $n$, mais elle ne revendique pas une absence littérale d'allocation transitoire.
+$$M_x(\lbrace p\rbrace,Q)=\sum_{i=1}^{3}\max_{q_i\in[Q_i^-,Q_i^+]}(x_i-p_i)(x_i-q_i).$$
+
+Le maximum commun est ensuite le maximum fini sur les seules ancres réelles :
+
+$$M_x(P,Q)=\max_{p\in P}M_x(\lbrace p\rbrace,Q).$$
+
+L'implémentation peut donc réutiliser `exact_diametral_phi_aabb_maximum_sign` avec la boîte ponctuelle de chaque ancre et la boîte $Q$. Le chemin dyadique borné décide la plage binary64 ordinaire; si cette enveloppe est insuffisante, le fallback `BigInt` exact intervient avant toute décision. Le slot est un succès commun si et seulement si les $G$ signes sont strictement négatifs. Une valeur positive ou nulle permet d'arrêter immédiatement ce slot comme inconclusif, sans inspecter les ancres suivantes. La primitive n'alloue aucune arène persistante ou proportionnelle à $n$, mais elle ne revendique pas une absence littérale d'allocation transitoire.
 
 ## Le pool est propositionnel
 
-Un témoin n'a pas besoin d'appartenir à la banque de chaque ancre. Dès que $M_x(A,Q)<0$, la quantification universelle sur $A\times Q$ fournit toute l'autorité nécessaire. Le pool peut donc provenir d'une banque graine, d'un voisin représentatif ou d'un producteur device borné. Une omission ne crée qu'un résultat inconclusif et ne peut supprimer une paire pertinente.
+Un témoin n'a pas besoin d'appartenir à la banque de chaque ancre. Dès que $M_x(P,Q)<0$, la quantification universelle sur $P\times Q$ fournit toute l'autorité nécessaire. Le pool peut donc provenir d'une banque graine, d'un voisin représentatif ou d'un producteur device borné. Une omission ne crée qu'un résultat inconclusif et ne peut supprimer une paire pertinente.
 
 Le contrat courant impose seulement un pool strictement croissant, sans doublon, de taille au plus 64 et disjoint du groupe d'au plus 32 ancres. Aucun tableau $64n$ n'est construit.
 
-## Perte de rappel de la relaxation AABB
+## Élimination des coins hybrides de la boîte d'ancres
 
-La boîte du groupe contient des coins hybrides qui ne sont pas nécessairement des ancres réelles. Cette relaxation est donc suffisante, jamais nécessaire. Considérons :
+Le certificat v1 remplaçait $P$ par sa boîte englobante $A$. Celle-ci contient des coins hybrides qui ne sont pas nécessairement des ancres réelles et pouvait donc perdre un prune pourtant commun. Considérons :
 
 $$P=\lbrace (1,-2,0),(-2,1,0)\rbrace,\qquad q=(1,1,0),\qquad x=(0,0,0).$$
 
-Pour chacune des deux ancres réelles, $\Phi_x(p,q)=-1$. Pourtant, la boîte $A=[-2,1]\times[-2,1]\times\lbrace 0\rbrace$ contient le coin hybride $a=(1,1,0)$ et :
+Pour chacune des deux ancres réelles, $\Phi_x(p,q)=-1$, donc le nouveau maximum discret vaut :
+
+$$M_x(P,\lbrace q\rbrace)=-1<0.$$
+
+Pourtant, la boîte $A=[-2,1]\times[-2,1]\times\lbrace 0\rbrace$ contient le coin hybride $a=(1,1,0)$ et le certificat v1 observait :
 
 $$\Phi_x(a,q)=2.$$
 
-Le certificat groupé répond donc correctement « inconclusif ». Les groupes devront être spatialement cohérents et un échec devra se diviser ou retomber sur le parcours individuel; il ne pourra jamais être interprété comme une absence de témoin.
+Le maximum discret élimine exactement cette contre-relaxation : le point $a$ n'appartient pas à $P$ et ne participe plus au maximum. Il reste une condition suffisante, jamais une condition nécessaire : le pool peut omettre les témoins utiles et la boîte $Q$ peut encore contenir des points qui ne sont pas des feuilles réelles. Un échec reste donc inconclusif et retombe sur la descente ou le parcours individuel; il ne peut jamais être interprété comme une absence de témoin.
 
 ## Provenance et atomicité
 
 Un reçu positif est lié simultanément à l'identité process-local du nuage et du LBVH, à l'indice du nœud, à sa plage de feuilles, à sa boîte exacte, au rang fermé maximal demandé et à la liste canonique des ancres. Tout ce payload scientifique est privé après construction. Son rejeu doit appeler `certifies(...)` avec le nœud, le rang et les ancres attendus; un simple test de `certified()` ne suffit pas à l'appliquer à un autre contexte.
 
-Les caps d'ancres, de témoins et de prédicats exacts sont vérifiés avant l'opération correspondante. Si un cap manque après quelques succès stricts, aucun masque ni témoin partiel n'est publié. Un résultat inconclusif ou épuisé n'a aucune autorité de prune.
+Les caps d'ancres, de témoins et de prédicats exacts sont vérifiés avant l'opération correspondante. Pour un slot actif, le contexte conserve l'offset de la prochaine ancre réelle à évaluer. Une interruption après l'ancre d'offset $a$ reprend à l'offset $a+1$, sans répéter les signes déjà strictement négatifs et sans avancer au témoin suivant. Si un cap manque après quelques succès stricts, aucun succès commun ni témoin partiel n'est publié. Un résultat inconclusif ou épuisé n'a aucune autorité de prune.
 
 ## Bornes et structures évitées
 
-Pour $G\leq32$ ancres et $W\leq64$ témoins, la construction de la boîte coûte $O(G)$ et un nœud coûte au plus $O(W)$ prédicats exacts, avec arrêt dès $m\leq10$ succès. Le payload fixe d'identifiants occupe au plus $8(32+64+10)=848$ octets, hors métadonnées et jetons process-local.
+Pour $G\leq32$ ancres et $W\leq64$ témoins, la préparation des bornes ponctuelles coûte $O(G+W)$ et un nœud coûte au plus $O(GW)$ prédicats exacts, avec arrêt dès $m\leq10$ succès communs. Chaque slot effectivement ouvert coûte entre une et $G$ évaluations; un slot hérité d'un parent coûte zéro nouvelle évaluation. Le contexte ajoute seulement l'offset scalaire de l'ancre active : il ne conserve ni matrice ni masque par ancre de taille $G\times W$. Le payload fixe d'identifiants occupe au plus $8(32+64+10)=848$ octets, hors métadonnées, offset et jetons process-local.
 
 Cette primitive ne construit ni corde par nœud, ni allocator global de records, ni tableau par ancre du nuage complet, ni catalogue de paires, facettes, cofaces ou incidences, ni cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Le LBVH certifié existant reste la seule structure globale géométrique.
 
@@ -74,15 +84,15 @@ Cette primitive ne construit ni corde par nœud, ni allocator global de records,
 
 Soit $Q'$ la boîte certifiée d'un enfant d'un nœud de boîte $Q$. Puisque $Q'\subseteq Q$, la monotonie du maximum sur son domaine donne, pour tout témoin $x$ :
 
-$$M_x(A,Q')\leq M_x(A,Q).$$
+$$M_x(P,Q')\leq M_x(P,Q).$$
 
 Ainsi, tout succès strict du parent reste strict chez l'enfant :
 
-$$M_x(A,Q)<0\quad\Longrightarrow\quad M_x(A,Q')<0.$$
+$$M_x(P,Q)<0\quad\Longrightarrow\quad M_x(P,Q')<0.$$
 
-P8h encapsule cette implication dans un contexte non agrégat, non constructible par défaut, non copiable et déplaçable avec révocation de la source. Il prépare $A$ et les bornes ponctuelles des au plus 64 témoins une seule fois, conserve une pile DFS de capacité fixe et au plus un nœud actif reprenable, puis émet au plus un événement par appel. Les plages de feuilles et les masques hérités restent privés; l'appelant ne peut ni fournir un masque brut, ni extraire le masque intermédiaire d'un nœud inconclusif. Un prune positif transporte encore le certificat P8g et doit être rejoué par `certifies(...)` avec le nuage, le LBVH, le nœud, le rang et les ancres attendus.
+P8h encapsule cette implication dans un contexte non agrégat, non constructible par défaut, non copiable et déplaçable avec révocation de la source. P8o y prépare les bornes ponctuelles des ancres réelles et des au plus 64 témoins une seule fois, conserve une pile DFS de capacité fixe, au plus un nœud actif reprenable, le slot témoin actif et son offset d'ancre, puis émet au plus un événement par appel. Les plages de feuilles et les succès communs hérités restent privés; l'appelant ne peut ni fournir un masque brut, ni extraire l'état intermédiaire d'un nœud inconclusif. Il n'existe aucun masque par ancre : un bit témoin n'est héritable qu'après négativité stricte sur les $G$ ancres. Un prune positif transporte encore le certificat commun et doit être rejoué par `certifies(...)` avec le nuage, le LBVH, le nœud, le rang et les ancres attendus.
 
-L'héritage ne change jamais l'ordre canonique du pool. À chaque nœud, le curseur parcourt les slots dans l'ordre croissant; lorsqu'il atteint un bit hérité, il évite le prédicat exact et incrémente alors seulement le compteur de réutilisation. Si les slots antérieurs ferment déjà le rang, un bit hérité plus tardif n'est ni parcouru, ni compté, ni publié dans le certificat terminal. La fixture permanente non préfixe part d'un parent à deux feuilles et d'un seul témoin tardif hérité. L'oracle frais effectue huit prédicats; P8h en effectue sept et compte un réemploi au passage effectif de ce slot. La sortie canonique est d'abord le prune `q1` de `PointId{5}` avec les témoins `PointId{1}` et `PointId{2}`, puis `q0`, `PointId{4}`, non résolu; l'identité exacte est $8=7+1$. La fixture préfixe indépendante conserve la même partition terminale que cinq appels P8g frais et ferme $19=15+4$.
+L'héritage ne change jamais l'ordre canonique du pool. À chaque nœud, le curseur parcourt les slots dans l'ordre croissant; lorsqu'il atteint un succès commun hérité, il évite les $G$ évaluations ancre--nœud et incrémente alors seulement le compteur de réutilisation. Pour un slot neuf, il parcourt les ancres dans l'ordre canonique et facture chaque évaluation avant d'avancer l'offset. Si les slots antérieurs ferment déjà le rang, un succès hérité plus tardif n'est ni parcouru, ni compté, ni publié dans le certificat terminal. La reprise au milieu d'un slot conserve exactement le même ordre, les mêmes décisions et le même travail physique qu'un passage monolithique, à l'exception du nombre d'appels et d'épuisements.
 
 Un épuisement du budget de visites ou de prédicats conserve le nœud actif privé sans publier de certificat partiel. Une feuille inconclusive émet un seul `PointId` à classifier ultérieurement, jamais $G$ paires acceptées. Un pool trop petit émet un fallback de sous-arbre et termine le contexte. Une autorité étrangère est rejetée avant toute mutation d'audit; déplacer le contexte révoque sa source.
 
@@ -118,7 +128,7 @@ Chaque visite physique d'un nœud est facturée avant le retrait de la frontièr
 
 Le filtre d'intervalles binary64 centré ne décide que lorsque son enveloppe outward exclut strictement zéro. Toute incertitude, y compris l'égalité, retombe sur les bornes AABB exactes; la partition des visites entre intérieur intervalle, extérieur intervalle et fallback exact est vérifiée à chaque arrêt. Le mode du filtre est figé au démarrage. Une modification incompatible de l'environnement flottant pendant un parcours actif échoue avant l'audit; après certification de `record_ready`, `above_rank` ou `complete`, la remise à disposition du terminal n'exécute plus de filtre et reste indépendante du thread ou du mode d'arrondi ultérieur.
 
-L'automate public distingue `budget_exhausted`, `record_ready`, `above_rank` et `complete`. Une paire est fermée dès que plus de $s_{\max}-2$ points strictement intérieurs sont certifiés; aucun centre n'est alors construit. Pour une paire pertinente, le centre, le niveau et le vecteur borné d'intérieurs ne sont matérialisés que par `take_result`, après que la future session aura pu préflighter sa capacité de sortie. Le record utilise exactement les types historiques `ExactPairSupportEvent` ou `ExactPairSupportExtraShellDiagnostic` et ne peut être consommé qu'une fois. Le contexte constitue l'autorité de progression; l'agrégat de résultat historique demeure forgeable et ne devra pas devenir, seul, une autorité terminale de session.
+L'automate public distingue `budget_exhausted`, `record_ready`, `above_rank` et `complete`. Une paire est fermée dès que plus de $s_{\max}-2$ points strictement intérieurs sont certifiés; aucun centre n'est alors construit. Pour une paire pertinente, le centre, le niveau et le vecteur borné d'intérieurs ne sont matérialisés que par `take_result`, après que P8l a préflighté sa capacité de sortie. Le record utilise exactement les types historiques `ExactPairSupportEvent` ou `ExactPairSupportExtraShellDiagnostic` et ne peut être consommé qu'une fois. Le contexte constitue l'autorité de progression; l'agrégat de résultat historique demeure forgeable et ne devient jamais, seul, une autorité terminale de session.
 
 Les fixtures permanentes comparent une avance ample à une segmentation d'une visite sur toutes les paires d'un nuage tridimensionnel et pour chaque rang fermé de 2 à 6. Elles exigent les mêmes décisions, événements, diagnostics, compteurs de visites, décisions d'intervalles, fallbacks exacts et agrégations de sous-arbres; seuls les nombres d'appels et d'épuisements peuvent différer. Pour chacun de ces cinq rangs, les records sont ensuite identiques au flux P7b exhaustif et complet. Les frontières $K=10$ conservent exactement neuf intérieurs et rejettent dès le dixième; la cosphère conserve le témoin supplémentaire canonique. Les changements d'autorité, déplacements, doubles consommations, budgets nuls et changements d'environnement flottant avant et après terminal sont également fermés.
 
@@ -126,8 +136,8 @@ Le test d'intégration P8j--P8k impose déjà, dans son adaptateur borné, qu'au
 
 ## Limites restantes
 
-Tous les curseurs P8i--P8k sont reprenables seulement entre appels du même processus. Ils ne possèdent ni codec, ni digest, ni epoch persistante et ne constituent pas un checkpoint durable ou une reprise après crash. P7b conserve volontairement son ancien format exact-only et sa seconde implémentation; l'identité de records ne signifie pas l'identité de travail, de digest ou de checkpoint.
+Tous les curseurs P8i--P8l sont reprenables seulement entre appels du même processus. Ils ne possèdent ni codec, ni digest, ni epoch persistante et ne constituent pas un checkpoint durable ou une reprise après crash. P7b conserve volontairement son ancien format exact-only et sa seconde implémentation; l'identité de records ne signifie pas l'identité de travail, de digest ou de checkpoint.
 
-Le runner conserve sa partition implicite des $n(n-1)/2$ paires et son rejet résident au-delà de 50 k. Une classification P8k coûte jusqu'à $O(n)$ visites; combinée au fallback P8j $\Theta(n^2)$, la session naïve conserve un pire cas $O(n^3)$. Aucun plafond total de candidates, visites ou sorties, aucune autorité de couverture terminale et aucune politique de refus massif ne protègent encore le chemin 10 M+. Les supports d'arité trois et quatre restent un univers implicite séparé.
+P8l donne la priorité au P8k actif, préflight la sortie, impose des caps totaux typés et scelle une autorité terminale process-local après vérification des masses prunées et des orientations. P8m consomme cette autorité dans la façade et P8n installe exclusivement cette voie paire dans le runner. Ces garde-fous ferment honnêtement une session bornée, mais ne réduisent pas le pire cas : une classification P8k coûte jusqu'à $O(n)$ visites et, combinée au fallback P8j $\Theta(n^2)$, conserve un pire cas $O(n^3)$. Le runner reste résident et refuse plus de 50 k points; les sorties restent résidentes et les supports d'arité trois et quatre restent des univers implicites séparés. Le chemin 10 M+ n'est donc ni ouvert ni revendiqué.
 
-La prochaine porte assemble une session sparse qui donne priorité au contexte P8k actif avant toute candidate P8j suivante, préflight la sortie avant `take_result`, ajoute des capacités totales typées et prouve la couverture orientée par les masses prunées plus les orientations facturées. Elle fournit alors une autorité terminale non forgeable avant de remplacer exclusivement la source paire exhaustive du runner. L'ancien flux P7b reste un oracle borné; aucun nouveau gate GCP ne précède cette substitution CPU.
+La prochaine porte est exactement une passe bornée `uniform_latin`, 50 000 points, $K=10$, sur P8o. Elle doit lire séparément les slots témoins, les réemplois hérités, les signes physiques, les prunes, les candidates et le travail P8k, puis faire corriger le nouvel axe dominant avant toute campagne de latence. Un sink externe et une stratégie non combinatoire scalable pour les supports trois--quatre restent obligatoires avant de lever la garde résidente pour 10 M+. L'ancien flux P7b reste un oracle borné; aucun nouveau gate GCP ne précède ce diagnostic CPU.

@@ -264,6 +264,36 @@ struct NonPrefixWitnessFixture {
   throw std::runtime_error("a fixture point has no certified LBVH leaf node");
 }
 
+[[nodiscard]] ExactGroupedAnchoredPairPruneCertificate certificate_for_leaf(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::span<const PointId> anchors,
+    std::span<const PointId> witness_pool,
+    PointId leaf_point_id,
+    std::size_t maximum_closed_rank,
+    ExactGroupedAnchoredPairPruneBudget budget) {
+  const ExactDyadicAabb3 expected_bounds =
+      point_box(cloud, leaf_point_id);
+  for (std::size_t node_index = 0U;
+       node_index < index.build_counters().node_count;
+       ++node_index) {
+    ExactGroupedAnchoredPairPruneCertificate result =
+        certify_exact_grouped_anchored_pair_prune(
+            index,
+            cloud,
+            anchors,
+            witness_pool,
+            node_index,
+            maximum_closed_rank,
+            budget);
+    if (result.query_bounds() == expected_bounds &&
+        result.leaf_end() - result.leaf_begin() == 1U) {
+      return result;
+    }
+  }
+  throw std::runtime_error("a fixture point has no certified LBVH leaf node");
+}
+
 [[nodiscard]] std::size_t find_node_by_range_and_bounds(
     const LineFixture& fixture,
     std::size_t leaf_begin,
@@ -312,7 +342,7 @@ void test_shared_certificate_and_provenance() {
   require(
       audit.anchor_count == 2U &&
           audit.witness_pool_entry_count == 4U &&
-          audit.exact_predicate_count == 3U &&
+          audit.exact_predicate_count == 6U &&
           audit.strict_group_witness_count == 3U &&
           audit.requested_budget_applies && audit.input_canonical &&
           audit.anchor_bounds_constructed &&
@@ -398,7 +428,7 @@ void test_inconclusive_results_publish_no_partial_authority() {
       partial.decision() ==
               ExactGroupedAnchoredPairPruneDecision::inconclusive &&
           partial_audit.complete &&
-          partial_audit.exact_predicate_count == 3U &&
+          partial_audit.exact_predicate_count == 5U &&
           partial_audit.strict_group_witness_count == 2U &&
           partial.certified_witness_point_ids().empty() &&
           partial.certified_witness_pool_mask() == 0U,
@@ -442,7 +472,7 @@ void test_shell_equality_fails_open() {
       "a distinct witness on the diametral shell certified a strict prune");
 }
 
-void test_correlated_boxes_fail_open() {
+void test_discrete_common_certificate_closes_hybrid_corner_gap() {
   const ExactDyadicAabb3 anchor_bounds =
       box({-2.0, -2.0, 0.0}, {1.0, 1.0, 0.0});
   const ExactDyadicAabb3 query_point =
@@ -462,6 +492,66 @@ void test_correlated_boxes_fail_open() {
       exact_diametral_phi_aabb_maximum_sign(
           anchor_bounds, query_point, witness_point) >= 0,
       "the grouped AABB relaxation did not preserve its fail-open gap");
+
+  const std::array<std::array<double, 3>, 4> coordinates{
+      std::array<double, 3>{1.0, -2.0, 0.0},
+      std::array<double, 3>{-2.0, 1.0, 0.0},
+      std::array<double, 3>{0.0, 0.0, 0.0},
+      std::array<double, 3>{1.0, 1.0, 0.0}};
+  const CanonicalPointCloud cloud = make_cloud(coordinates);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<PointId, 2> anchors{0U, 2U};
+  const std::array<PointId, 1> witnesses{1U};
+  const PointId query_point_id = 3U;
+
+  const ExactGroupedAnchoredPairPruneCertificate discrete =
+      certificate_for_leaf(
+          index,
+          cloud,
+          anchors,
+          witnesses,
+          query_point_id,
+          2U,
+          roomy_budget());
+  require(
+      discrete.certified() &&
+          discrete.required_witness_count() == 1U &&
+          discrete.certified_witness_point_ids().size() == 1U &&
+          discrete.certified_witness_point_ids().front() == witnesses.front() &&
+          discrete.certified_witness_pool_mask() == UINT64_C(0x1) &&
+          discrete.audit().exact_predicate_count == 2U &&
+          discrete.audit().strict_group_witness_count == 1U &&
+          discrete.audit().complete &&
+          discrete.certifies(
+              index,
+              cloud,
+              discrete.lbvh_node_index(),
+              2U,
+              anchors),
+      "the finite-anchor certificate did not close the hybrid-corner gap");
+
+  ExactGroupedAnchoredPairPruneBudget one_predicate_budget = roomy_budget();
+  one_predicate_budget.maximum_exact_predicate_count = 1U;
+  const ExactGroupedAnchoredPairPruneCertificate exhausted =
+      certificate_for_leaf(
+          index,
+          cloud,
+          anchors,
+          witnesses,
+          query_point_id,
+          2U,
+          one_predicate_budget);
+  require(
+      exhausted.decision() ==
+              ExactGroupedAnchoredPairPruneDecision::budget_exhausted &&
+          exhausted.stop_reason() ==
+              ExactGroupedAnchoredPairPruneStopReason::exact_predicate_limit &&
+          exhausted.audit().exact_predicate_count == 1U &&
+          exhausted.audit().strict_group_witness_count == 0U &&
+          !exhausted.audit().complete &&
+          exhausted.certified_witness_point_ids().empty() &&
+          exhausted.certified_witness_pool_mask() == 0U,
+      "the anchor-witness predicate cap leaked partial common authority");
 }
 
 void test_budgets_fail_atomically() {
@@ -528,7 +618,8 @@ void test_budgets_fail_atomically() {
       predicate_exhausted.stop_reason() ==
               ExactGroupedAnchoredPairPruneStopReason::
                   exact_predicate_limit &&
-          predicate_exhausted.audit().strict_group_witness_count == 2U &&
+          predicate_exhausted.audit().exact_predicate_count == 2U &&
+          predicate_exhausted.audit().strict_group_witness_count == 1U &&
           predicate_exhausted.certified_witness_point_ids().empty() &&
           predicate_exhausted.certified_witness_pool_mask() == 0U,
       "the exact-predicate cap leaked a partial certificate");
@@ -652,7 +743,7 @@ void test_prepared_inherited_traversal_differential() {
     }
   }
   require(
-      fresh_node_count == 5U && fresh_predicate_count == 19U &&
+      fresh_node_count == 5U && fresh_predicate_count == 27U &&
           fresh_prune_count == 1U &&
           fresh_pruned_node_index.has_value(),
       "the fresh P8g subtree oracle lost its discriminating work profile");
@@ -710,7 +801,7 @@ void test_prepared_inherited_traversal_differential() {
               !certificate->audit().requested_budget_applies &&
               certificate->audit().inherited_strict_group_witness_count ==
                   1U &&
-              certificate->audit().exact_predicate_count == 2U &&
+              certificate->audit().exact_predicate_count == 4U &&
               certificate->certifies(
                   fixture.index,
                   fixture.cloud,
@@ -746,22 +837,20 @@ void test_prepared_inherited_traversal_differential() {
       audit.anchor_bounds_construction_count == 1U &&
           audit.prepared_witness_point_count == 4U &&
           audit.node_visit_count == 5U &&
-          audit.exact_predicate_count == 15U &&
+          audit.exact_predicate_count == 19U &&
           audit.inherited_witness_reuse_count == 4U &&
           audit.witness_slot_scan_count == 19U &&
-          audit.witness_slot_scan_count ==
-              audit.exact_predicate_count +
-                  audit.inherited_witness_reuse_count &&
           fresh_predicate_count ==
               audit.exact_predicate_count +
-                  audit.inherited_witness_reuse_count &&
+                  fixture.anchors.size() *
+                      audit.inherited_witness_reuse_count &&
           audit.strict_witness_discovery_count == 4U &&
           audit.internal_node_expansion_count == 2U &&
           audit.certified_prune_count == 1U &&
           audit.unresolved_leaf_count == 2U &&
           audit.maximum_pending_node_count == 2U && audit.complete &&
           audit.no_dynamic_traversal_or_output_arena,
-      "the inherited traversal audit does not close 19 = 15 + 4");
+      "the inherited traversal audit does not close 27 = 19 + 2*4");
 
   const ExactGroupedAnchoredPairTraversalStep complete =
       traversal.advance(fixture.index, fixture.cloud, roomy);
@@ -996,55 +1085,58 @@ void test_prepared_traversal_resumes_atomically() {
   const ExactGroupedAnchoredPairTraversalStep first = traversal.advance(
       fixture.index,
       fixture.cloud,
-      ExactGroupedAnchoredPairTraversalWorkBudget{1U, 4U});
+      ExactGroupedAnchoredPairTraversalWorkBudget{1U, 1U});
   require(
       first.kind() ==
               ExactGroupedAnchoredPairTraversalStepKind::budget_exhausted &&
           first.stop_reason() ==
-              ExactGroupedAnchoredPairTraversalStopReason::node_visit_limit &&
+              ExactGroupedAnchoredPairTraversalStopReason::
+                  exact_predicate_limit &&
           first.work().node_visit_count == 1U &&
-          first.work().exact_predicate_count == 4U &&
+          first.work().witness_slot_scan_count == 0U &&
+          first.work().exact_predicate_count == 1U &&
           first.prune_certificate() == nullptr,
-      "the first traversal chunk did not stop between authenticated nodes");
+      "the first traversal chunk did not stop within one physical witness test");
 
   const ExactGroupedAnchoredPairTraversalStep second = traversal.advance(
       fixture.index,
       fixture.cloud,
-      ExactGroupedAnchoredPairTraversalWorkBudget{1U, 1U});
+      ExactGroupedAnchoredPairTraversalWorkBudget{0U, 4U});
   require(
       second.kind() ==
               ExactGroupedAnchoredPairTraversalStepKind::budget_exhausted &&
           second.stop_reason() ==
-              ExactGroupedAnchoredPairTraversalStopReason::
-                  exact_predicate_limit &&
-          second.work().node_visit_count == 1U &&
-          second.work().exact_predicate_count == 1U &&
-          second.work().inherited_witness_reuse_count == 1U &&
+              ExactGroupedAnchoredPairTraversalStopReason::node_visit_limit &&
+          second.work().node_visit_count == 0U &&
+          second.work().witness_slot_scan_count == 4U &&
+          second.work().exact_predicate_count == 4U &&
+          second.work().inherited_witness_reuse_count == 0U &&
           second.prune_certificate() == nullptr,
-      "the second traversal chunk leaked a partial leaf certificate");
+      "the second traversal chunk did not finish the active node atomically");
 
   const ExactGroupedAnchoredPairTraversalStep third = traversal.advance(
       fixture.index,
       fixture.cloud,
-      ExactGroupedAnchoredPairTraversalWorkBudget{0U, 1U});
+      ExactGroupedAnchoredPairTraversalWorkBudget{1U, 4U});
   require(
       third.kind() ==
               ExactGroupedAnchoredPairTraversalStepKind::certified_prune &&
-          third.work().node_visit_count == 0U &&
-          third.work().exact_predicate_count == 1U &&
+          third.work().node_visit_count == 1U &&
+          third.work().exact_predicate_count == 4U &&
+          third.work().inherited_witness_reuse_count == 1U &&
           third.prune_certificate() != nullptr,
       "a resumed active node was recharged or lost its strict prefix");
 
   const ExactGroupedAnchoredPairTraversalStep fourth = traversal.advance(
       fixture.index,
       fixture.cloud,
-      ExactGroupedAnchoredPairTraversalWorkBudget{3U, 6U});
+      ExactGroupedAnchoredPairTraversalWorkBudget{3U, 7U});
   require(
       fourth.kind() ==
               ExactGroupedAnchoredPairTraversalStepKind::unresolved_leaf &&
           fourth.unresolved_point_id() == std::optional<PointId>{4U} &&
           fourth.work().node_visit_count == 2U &&
-          fourth.work().exact_predicate_count == 6U &&
+          fourth.work().exact_predicate_count == 7U &&
           fourth.work().inherited_witness_reuse_count == 2U,
       "the resumed traversal changed its right-first sibling order");
 
@@ -1065,7 +1157,7 @@ void test_prepared_traversal_resumes_atomically() {
   const auto& audit = traversal.audit();
   require(
       audit.node_visit_count == 5U &&
-          audit.exact_predicate_count == 15U &&
+          audit.exact_predicate_count == 19U &&
           audit.inherited_witness_reuse_count == 4U &&
           audit.certified_prune_count == 1U &&
           audit.unresolved_leaf_count == 2U &&
@@ -1144,7 +1236,7 @@ int main() {
     test_shared_certificate_and_provenance();
     test_inconclusive_results_publish_no_partial_authority();
     test_shell_equality_fails_open();
-    test_correlated_boxes_fail_open();
+    test_discrete_common_certificate_closes_hybrid_corner_gap();
     test_budgets_fail_atomically();
     test_structural_validation();
     test_prepared_inherited_traversal_differential();

@@ -220,6 +220,24 @@ def require_success_projection(report: dict[str, object]) -> None:
         and audit.get("total_capacity_exhaustions") == 0,
         "P8l exceeded its single-candidate state or exhausted capacity",
     )
+    for physical_counter in (
+        "grouped_witness_slots",
+        "grouped_inherited_witness_reuses",
+        "grouped_exact_predicates",
+        "grouped_strict_witness_discoveries",
+    ):
+        require(
+            isinstance(audit.get(physical_counter), int)
+            and audit.get(physical_counter, -1) >= 0,
+            f"P8o audit lost physical counter {physical_counter}",
+        )
+    require(
+        audit.get("grouped_inherited_witness_reuses", 1)
+        <= audit.get("grouped_witness_slots", 0)
+        and audit.get("grouped_strict_witness_discoveries", 1)
+        <= audit.get("grouped_witness_slots", 0),
+        "P8o witness-slot partition is impossible",
+    )
     for certificate in (
         "directed_coverage_certified",
         "orientation_partition_certified",

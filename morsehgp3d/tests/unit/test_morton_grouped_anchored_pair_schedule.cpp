@@ -287,7 +287,8 @@ void insert_oriented_candidates(
       const ExactGroupedAnchoredPairPruneBudget fresh_budget{
           step.anchor_point_ids().size(),
           step.witness_pool_point_ids().size(),
-          step.witness_pool_point_ids().size()};
+          step.anchor_point_ids().size() *
+              step.witness_pool_point_ids().size()};
       const auto fresh = certify_exact_grouped_anchored_pair_prune(
           index,
           cloud,
