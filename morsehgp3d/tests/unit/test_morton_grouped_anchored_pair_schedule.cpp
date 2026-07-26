@@ -26,6 +26,12 @@ namespace {
 
 using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::hierarchy::ExactAnchoredPairCandidateClassificationBudget;
+using morsehgp3d::hierarchy::
+    ExactAnchoredPairCandidateClassificationContext;
+using morsehgp3d::hierarchy::
+    ExactAnchoredPairCandidateClassificationResult;
+using morsehgp3d::hierarchy::
+    ExactAnchoredPairCandidateClassificationStepKind;
 using morsehgp3d::hierarchy::ExactAnchoredPairCandidateClassificationStatus;
 using morsehgp3d::hierarchy::ExactAnchoredPairWitnessBankBudget;
 using morsehgp3d::hierarchy::ExactGroupedAnchoredPairPruneBudget;
@@ -541,6 +547,8 @@ struct CandidateCursorRun {
   std::vector<GroupRecord> groups;
   ExactMortonGroupedAnchoredPairCandidateAudit audit;
   ExactMortonGroupedAnchoredPairScheduleAudit schedule_audit;
+  std::size_t classification_node_visit_count{};
+  std::size_t classification_budget_exhaustion_count{};
 };
 
 [[nodiscard]] CandidateCursorRun run_candidate_cursor(
@@ -554,8 +562,6 @@ struct CandidateCursorRun {
           index, cloud, maximum_closed_rank, config);
   CandidateCursorRun run;
   std::set<CandidatePair> seen_candidates;
-  const ExactAnchoredPairCandidateClassificationBudget classifier_budget{
-      4U * cloud.size() + 8U};
   const std::size_t maximum_advance_count =
       512U * cloud.size() * cloud.size();
   std::size_t advance_count = 0U;
@@ -586,23 +592,47 @@ struct CandidateCursorRun {
           seen_candidates.insert(support_ids).second,
           "the oriented candidate cursor emitted a duplicate pair");
       run.candidate_pairs.push_back(support_ids);
-      const auto classification = classify_exact_anchored_pair_candidate(
-          index,
-          cloud,
-          support_ids,
-          maximum_closed_rank,
-          classifier_budget);
+      ExactAnchoredPairCandidateClassificationContext classifier =
+          ExactAnchoredPairCandidateClassificationContext::start(
+              index, cloud, support_ids, maximum_closed_rank);
+      std::optional<ExactAnchoredPairCandidateClassificationResult>
+          classification;
+      for (std::size_t classifier_advance = 0U;
+           classifier_advance < 4096U && !classifier.complete();
+           ++classifier_advance) {
+        const auto classifier_step = classifier.advance(
+            index,
+            cloud,
+            ExactAnchoredPairCandidateClassificationBudget{1U});
+        if (classifier_step.kind ==
+            ExactAnchoredPairCandidateClassificationStepKind::
+                budget_exhausted) {
+          continue;
+        }
+        if (classifier_step.kind ==
+            ExactAnchoredPairCandidateClassificationStepKind::record_ready) {
+          classification.emplace(classifier.take_result(index, cloud));
+        } else {
+          require(
+              classifier_step.kind ==
+                      ExactAnchoredPairCandidateClassificationStepKind::
+                          above_rank &&
+                  classifier.complete(),
+              "P8k returned a nonterminal while consuming a P8j candidate");
+        }
+      }
       require(
-          classification.status !=
-              ExactAnchoredPairCandidateClassificationStatus::
-                  budget_exhausted,
-          "P8c exhausted while consuming an oriented cursor candidate");
-      if (classification.status ==
-          ExactAnchoredPairCandidateClassificationStatus::complete) {
+          classifier.complete(),
+          "P8k did not finish before the next P8j candidate");
+      run.classification_node_visit_count +=
+          classifier.audit().node_visit_count;
+      run.classification_budget_exhaustion_count +=
+          classifier.audit().budget_exhaustion_count;
+      if (classification.has_value()) {
         run.scientific_records.push_back(ScientificRecord{
             support_ids,
-            classification.event,
-            classification.relevant_extra_shell_diagnostic});
+            classification->event,
+            classification->relevant_extra_shell_diagnostic});
       }
       continue;
     }
@@ -703,8 +733,13 @@ void test_oriented_candidate_cursor_identity_and_budgets() {
           roomy.scientific_records == segmented.scientific_records &&
           roomy.prune_records == segmented.prune_records &&
           roomy.groups == segmented.groups &&
+          roomy.classification_node_visit_count ==
+              segmented.classification_node_visit_count &&
+          roomy.classification_budget_exhaustion_count ==
+              segmented.classification_budget_exhaustion_count &&
+          roomy.classification_budget_exhaustion_count > 0U &&
           roomy.scientific_records == anchored_science,
-      "candidate-cursor segmentation or P8c consumption changed the scientific stream");
+      "candidate-cursor segmentation or resumable P8k consumption changed the scientific stream");
   require(
       roomy.audit.candidate_pair_count == roomy.candidate_pairs.size() &&
           roomy.audit.orientation_check_count ==

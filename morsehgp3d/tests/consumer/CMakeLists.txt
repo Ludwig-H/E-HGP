@@ -12,6 +12,7 @@ target_link_libraries(
   PRIVATE
     morsehgp3d::contract
     morsehgp3d::spatial
+    morsehgp3d::anchored_pair_candidate_classifier
     morsehgp3d::anchored_pair_witness_bank
     morsehgp3d::direct_sparse_facet_descent_batch_executor
     morsehgp3d::direct_sparse_facet_descent_batch_plan

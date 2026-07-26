@@ -1,10 +1,13 @@
 #pragma once
 
+#include "morsehgp3d/exact/fp64_interval.hpp"
 #include "morsehgp3d/hierarchy/pair_support_stream.hpp"
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
+#include <memory>
 #include <optional>
 #include <string_view>
 
@@ -12,9 +15,16 @@ namespace morsehgp3d::hierarchy {
 
 inline constexpr std::size_t
     exact_anchored_pair_candidate_maximum_closed_rank = 11U;
+inline constexpr std::size_t
+    exact_anchored_pair_candidate_maximum_interior_count =
+        exact_anchored_pair_candidate_maximum_closed_rank - 2U;
+inline constexpr std::size_t
+    exact_anchored_pair_candidate_maximum_frontier_entry_count =
+        3U * spatial::MortonLbvhIndex::morton_bits_per_axis +
+        std::numeric_limits<std::size_t>::digits + 1U;
 inline constexpr std::string_view
     exact_anchored_pair_candidate_classifier_proof_basis =
-        "exact_sparse_diametral_closed_ball_lbvh_partition_v1";
+        "exact_sparse_diametral_closed_ball_fixed_DFS_resume_v2";
 
 enum class ExactAnchoredPairCandidateClassificationStatus : std::uint8_t {
   complete,
@@ -27,10 +37,11 @@ enum class ExactAnchoredPairCandidateClassificationStopReason : std::uint8_t {
   node_visit_limit,
 };
 
-// One physical LBVH-node visit is charged before the node is read or the
-// traversal cursor is mutated.  There is deliberately no independent stack
-// budget: a non-resumable call retains at most one DFS path plus siblings, and
-// its growth is already bounded by the number of charged visits.
+// This cap applies to one resumable advance.  One physical LBVH-node visit is
+// charged before the frontier is popped or any scientific cursor is mutated.
+// There is deliberately no independent stack budget: the fixed array is
+// bounded by the certified Morton-radix depth plus the repeated-code split
+// depth and cannot grow with the number of candidates.
 struct ExactAnchoredPairCandidateClassificationBudget {
   std::size_t maximum_node_visit_count{};
 
@@ -40,6 +51,8 @@ struct ExactAnchoredPairCandidateClassificationBudget {
 };
 
 struct ExactAnchoredPairCandidateClassificationAudit {
+  std::size_t advance_call_count{};
+  std::size_t budget_exhaustion_count{};
   std::size_t node_visit_count{};
   // Exact partition of node_visit_count.  Strict interval decisions are
   // authoritative because their outward bounds exclude zero; every uncertain
@@ -69,11 +82,11 @@ struct ExactAnchoredPairCandidateClassificationAudit {
       const ExactAnchoredPairCandidateClassificationAudit&) = default;
 };
 
-// A complete result owns exactly one regular event or one relevant
-// extra-shell diagnostic.  above_rank and budget_exhausted own neither.  The
-// exterior is represented only by its exact count; the equality shell is
-// traversed completely, but only its cardinality and canonical least extra
-// witness are retained by the reused pair-support record types.
+// A complete result owns exactly one regular event or one relevant extra-shell
+// diagnostic.  above_rank and budget_exhausted own neither.  The exterior is
+// represented only by its exact count; the equality shell is traversed
+// completely, but only its cardinality and canonical least extra witness are
+// retained by the reused pair-support record types.
 struct ExactAnchoredPairCandidateClassificationResult {
   ExactAnchoredPairCandidateClassificationStatus status{
       ExactAnchoredPairCandidateClassificationStatus::budget_exhausted};
@@ -98,9 +111,208 @@ struct ExactAnchoredPairCandidateClassificationResult {
   }
 };
 
-// This class name is the narrow private-access seam required in
-// spatial::MortonLbvhIndex.  The public free function below is the intended
-// call site for a future anchored candidate stream.
+enum class ExactAnchoredPairCandidateClassificationStepKind : std::uint8_t {
+  record_ready,
+  above_rank,
+  budget_exhausted,
+  complete,
+};
+
+struct ExactAnchoredPairCandidateClassificationStepWork {
+  std::size_t node_visit_count{};
+
+  friend bool operator==(
+      const ExactAnchoredPairCandidateClassificationStepWork&,
+      const ExactAnchoredPairCandidateClassificationStepWork&) = default;
+};
+
+struct ExactAnchoredPairCandidateClassificationStep {
+  ExactAnchoredPairCandidateClassificationStepKind kind{
+      ExactAnchoredPairCandidateClassificationStepKind::budget_exhausted};
+  ExactAnchoredPairCandidateClassificationStopReason stop_reason{
+      ExactAnchoredPairCandidateClassificationStopReason::none};
+  ExactAnchoredPairCandidateClassificationBudget requested_budget{};
+  ExactAnchoredPairCandidateClassificationStepWork work{};
+  bool terminal_after_step{false};
+
+  friend bool operator==(
+      const ExactAnchoredPairCandidateClassificationStep&,
+      const ExactAnchoredPairCandidateClassificationStep&) = default;
+};
+
+// One active exact closed-ball classification.  The context keeps a fixed DFS
+// frontier, at most maximum_closed_rank - 2 relevant interior ids, exact
+// partition counters, one prepared interval anchor and the two exact support
+// bounds.  It materializes no cloud-sized output or pair universe and can
+// resume after any node-visit cap.
+class ExactAnchoredPairCandidateClassificationContext {
+ public:
+  static constexpr std::string_view backend = "reference_cpu";
+  static constexpr std::string_view profile = "hgp_reduced";
+  static constexpr std::string_view mode =
+      "resumable_exact_anchored_pair_closed_ball_classifier";
+  static constexpr std::string_view deployment_status =
+      "architecture_only";
+  static constexpr std::string_view public_status = "not_claimed";
+  static constexpr std::string_view proof_basis =
+      exact_anchored_pair_candidate_classifier_proof_basis;
+
+  [[nodiscard]] static ExactAnchoredPairCandidateClassificationContext start(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::array<spatial::PointId, 2> support_ids,
+      std::size_t maximum_closed_rank);
+  [[nodiscard]] static ExactAnchoredPairCandidateClassificationContext start(
+      const spatial::MortonLbvhIndex&&,
+      const spatial::CanonicalPointCloud&,
+      std::array<spatial::PointId, 2>,
+      std::size_t) = delete;
+  [[nodiscard]] static ExactAnchoredPairCandidateClassificationContext start(
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&&,
+      std::array<spatial::PointId, 2>,
+      std::size_t) = delete;
+
+  ExactAnchoredPairCandidateClassificationContext(
+      const ExactAnchoredPairCandidateClassificationContext&) = delete;
+  ExactAnchoredPairCandidateClassificationContext& operator=(
+      const ExactAnchoredPairCandidateClassificationContext&) = delete;
+  ExactAnchoredPairCandidateClassificationContext(
+      ExactAnchoredPairCandidateClassificationContext&&) noexcept = default;
+  ExactAnchoredPairCandidateClassificationContext& operator=(
+      ExactAnchoredPairCandidateClassificationContext&&) = delete;
+  ~ExactAnchoredPairCandidateClassificationContext() = default;
+
+  [[nodiscard]] bool ready() const noexcept {
+    return cloud_identity_ != nullptr && lbvh_identity_ != nullptr;
+  }
+
+  [[nodiscard]] bool terminal() const noexcept {
+    return ready() && terminal_status_.has_value();
+  }
+
+  [[nodiscard]] bool complete() const noexcept {
+    return terminal() && terminal_consumed_;
+  }
+
+  [[nodiscard]] bool record_ready() const noexcept {
+    return terminal() && !terminal_consumed_ &&
+        *terminal_status_ ==
+            ExactAnchoredPairCandidateClassificationStatus::complete;
+  }
+
+  [[nodiscard]] bool above_rank() const noexcept {
+    return terminal() &&
+        *terminal_status_ ==
+            ExactAnchoredPairCandidateClassificationStatus::above_rank;
+  }
+
+  [[nodiscard]] bool validated_for(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud) const noexcept;
+
+  [[nodiscard]] std::array<spatial::PointId, 2> support_ids() const noexcept {
+    return support_ids_;
+  }
+
+  [[nodiscard]] std::size_t maximum_closed_rank() const noexcept {
+    return maximum_closed_rank_;
+  }
+
+  [[nodiscard]] const ExactAnchoredPairCandidateClassificationAudit& audit()
+      const & noexcept {
+    return audit_;
+  }
+  [[nodiscard]] const ExactAnchoredPairCandidateClassificationAudit& audit()
+      const && = delete;
+
+  [[nodiscard]] ExactAnchoredPairCandidateClassificationStep advance(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      ExactAnchoredPairCandidateClassificationBudget budget) &;
+  [[nodiscard]] ExactAnchoredPairCandidateClassificationStep advance(
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&,
+      ExactAnchoredPairCandidateClassificationBudget) && = delete;
+
+  // Construct center and level only after the caller has reserved its output
+  // capacity.  The exact pair-support ABI is moved out once, then the context
+  // becomes complete.
+  [[nodiscard]] ExactAnchoredPairCandidateClassificationResult take_result(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud) &;
+  [[nodiscard]] ExactAnchoredPairCandidateClassificationResult take_result(
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&) && = delete;
+
+ private:
+  struct PrivateConstructionTag {};
+
+  struct PreparedPhiIntervalAnchor {
+    std::array<exact::detail::Binary64Interval, 3> midpoint{};
+    std::array<exact::detail::Binary64Interval, 3> half_difference{};
+    std::array<exact::detail::Binary64Interval, 3>
+        squared_half_difference{};
+  };
+
+  ExactAnchoredPairCandidateClassificationContext(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::array<spatial::PointId, 2> support_ids,
+      std::size_t maximum_closed_rank,
+      PrivateConstructionTag);
+
+  [[nodiscard]] static PreparedPhiIntervalAnchor prepare_interval_anchor(
+      const spatial::CanonicalPointCloud& cloud,
+      const std::array<spatial::PointId, 2>& support_ids);
+  [[nodiscard]] static std::optional<int> filtered_phi_aabb_sign(
+      const PreparedPhiIntervalAnchor& anchor,
+      const spatial::ExactDyadicAabb3& query_bounds);
+  [[nodiscard]] spatial::ExactDyadicAabb3 node_bounds(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::size_t node_index) const;
+  [[nodiscard]] ExactAnchoredPairCandidateClassificationResult make_result(
+      ExactAnchoredPairCandidateClassificationStatus status,
+      ExactAnchoredPairCandidateClassificationStopReason stop_reason,
+      ExactAnchoredPairCandidateClassificationBudget budget) const;
+  [[nodiscard]] ExactAnchoredPairCandidateClassificationStep make_step(
+      ExactAnchoredPairCandidateClassificationStepKind kind,
+      ExactAnchoredPairCandidateClassificationStopReason stop_reason,
+      ExactAnchoredPairCandidateClassificationBudget budget,
+      ExactAnchoredPairCandidateClassificationStepWork work) const;
+
+  std::array<spatial::PointId, 2> support_ids_{};
+  std::size_t maximum_closed_rank_{};
+  spatial::ExactDyadicAabb3 first_support_bounds_{};
+  spatial::ExactDyadicAabb3 second_support_bounds_{};
+  PreparedPhiIntervalAnchor interval_anchor_{};
+  std::array<std::size_t,
+             exact_anchored_pair_candidate_maximum_frontier_entry_count>
+      frontier_{};
+  std::size_t frontier_entry_count_{};
+  std::array<spatial::PointId,
+             exact_anchored_pair_candidate_maximum_interior_count>
+      interior_ids_{};
+  std::size_t interior_count_{};
+  std::size_t shell_count_{};
+  std::optional<spatial::PointId> canonical_extra_shell_witness_id_;
+  std::size_t exterior_count_{};
+  std::uint8_t support_seen_mask_{};
+  std::shared_ptr<const void> cloud_identity_;
+  std::shared_ptr<const void> lbvh_identity_;
+  ExactAnchoredPairCandidateClassificationAudit audit_{};
+  ExactAnchoredPairCandidateClassificationBudget terminal_requested_budget_{};
+  std::optional<ExactAnchoredPairCandidateClassificationStatus>
+      terminal_status_;
+  bool terminal_consumed_{false};
+
+  friend class ExactAnchoredPairCandidateClassifier;
+};
+
+// Historical one-shot wrapper.  Its public free function preserves the P8c
+// API by starting the resumable context, advancing once and discarding the
+// cursor on exhaustion; sparse production should own the context directly.
 class ExactAnchoredPairCandidateClassifier {
  public:
   [[nodiscard]] static ExactAnchoredPairCandidateClassificationResult

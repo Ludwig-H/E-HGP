@@ -10,6 +10,7 @@
 #include "morsehgp3d/hierarchy/direct_sparse_facet_top_k_proposal_transcript.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_gateway_historical_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
+#include "morsehgp3d/hierarchy/anchored_pair_candidate_classifier.hpp"
 #include "morsehgp3d/hierarchy/grouped_anchored_pair_certificate.hpp"
 #include "morsehgp3d/hierarchy/morton_grouped_anchored_pair_candidate_cursor.hpp"
 #include "morsehgp3d/hierarchy/morton_grouped_anchored_pair_schedule.hpp"
@@ -36,6 +37,8 @@ int main() {
       ExactMortonGroupedAnchoredPairCandidateContext;
   using MortonGroupedCandidateStep = morsehgp3d::hierarchy::
       ExactMortonGroupedAnchoredPairCandidateStep;
+  using AnchoredPairClassificationContext = morsehgp3d::hierarchy::
+      ExactAnchoredPairCandidateClassificationContext;
   static_assert(!std::is_aggregate_v<GroupedTraversalContext>);
   static_assert(!std::is_default_constructible_v<GroupedTraversalContext>);
   static_assert(!std::is_copy_constructible_v<GroupedTraversalContext>);
@@ -60,6 +63,15 @@ int main() {
   static_assert(!std::is_copy_constructible_v<MortonGroupedCandidateStep>);
   static_assert(
       std::is_nothrow_move_constructible_v<MortonGroupedCandidateStep>);
+  static_assert(
+      !std::is_default_constructible_v<AnchoredPairClassificationContext>);
+  static_assert(
+      !std::is_copy_constructible_v<AnchoredPairClassificationContext>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          AnchoredPairClassificationContext>);
+  static_assert(
+      !std::is_move_assignable_v<AnchoredPairClassificationContext>);
 
   static_assert(
       morsehgp3d::hierarchy::
@@ -461,6 +473,35 @@ int main() {
       !installed_morton_grouped_candidate_cursor.audit()
            .no_dynamic_candidate_or_output_arena_materialized) {
     std::cerr << "installed Morton grouped candidate cursor changed semantics\n";
+    return 1;
+  }
+  auto installed_anchored_pair_classification =
+      AnchoredPairClassificationContext::start(
+          spatial_index,
+          cloud,
+          *installed_oriented_candidate.support_ids(),
+          3U);
+  const auto installed_classification_ready =
+      installed_anchored_pair_classification.advance(
+          spatial_index,
+          cloud,
+          morsehgp3d::hierarchy::
+              ExactAnchoredPairCandidateClassificationBudget{32U});
+  if (installed_classification_ready.kind !=
+          morsehgp3d::hierarchy::
+              ExactAnchoredPairCandidateClassificationStepKind::record_ready ||
+      !installed_anchored_pair_classification.record_ready()) {
+    std::cerr << "installed resumable anchored classifier changed traversal\n";
+    return 1;
+  }
+  const auto installed_pair_record =
+      installed_anchored_pair_classification.take_result(
+          spatial_index, cloud);
+  if (!installed_pair_record.complete() ||
+      (!installed_pair_record.event.has_value() &&
+       !installed_pair_record.relevant_extra_shell_diagnostic.has_value()) ||
+      !installed_anchored_pair_classification.complete()) {
+    std::cerr << "installed resumable anchored classifier changed emission\n";
     return 1;
   }
   if (!nearest.shell_complete() || nearest.strict_below().size() != 0U ||

@@ -322,11 +322,21 @@ La preuve de complétude P8i est désormais exécutée sans ensemble produit : c
 
 Le différentiel budget ample contre `(1,1,1,1)` conserve exactement ordre des candidates, prunes, groupes, visites, prédicats et projection scientifique P8c contre P8b--P8c. Le fallback intégral facture $576=276+300$ orientations, candidates et rejets ou auto-couples. Les budgets nuls reprennent la plage sans avance prématurée, le déplacement révoque la source et l'autorité étrangère échoue avant l'audit. Le CTest passe sous GCC Release en 0,18 seconde et Clang 18 Release en 0,08 seconde; installation/export et consumer réel passent 1/1 en 0,01 seconde. Aucun benchmark, sanitizer, CUDA, test massif ou GCP n'est lancé.
 
-Ce jalon ne classe pas encore une candidate de manière reprenable, ne fournit aucune autorité terminale et ne remplace pas le runner. Son fallback reste $\Theta(n^2)$ et aucun plafond total de session ne protège encore le chemin 10 M+. `deployment_status=architecture_only` et `public_status=not_claimed` restent inchangés.
+P8j seul ne classe pas encore une candidate, ne fournit aucune autorité terminale et ne remplace pas le runner. Son fallback reste $\Theta(n^2)$ et aucun plafond total de session ne protège encore le chemin 10 M+. `deployment_status=architecture_only` et `public_status=not_claimed` restent inchangés.
+
+## Incrément 14Q P8k — classifieur exact reprenable de boule fermée
+
+P8k implémente `reference_cpu / hgp_reduced / resumable_exact_anchored_pair_closed_ball_classifier`. Le contexte move-only lié au nuage et au LBVH conserve une paire active, une frontière DFS fixe, au plus neuf intérieurs pour $K\leq10$, une coque et un témoin supplémentaire canoniques et les compteurs d'extérieur. Une visite est facturée avant dépilement; un arrêt reprend donc sans perdre ou répéter le prochain nœud. Le filtre binary64 centré ne décide que sur un intervalle strict et tout cas incertain retombe sur les bornes AABB exactes.
+
+Les transitions séparent `record_ready`, `above_rank`, `budget_exhausted` et `complete`. Le centre et le niveau sont différés jusqu'à `take_result`, qui consomme le record une fois; ils ne sont jamais construits pour une paire hors rang. Le terminal certifié n'est plus dépendant d'un changement ultérieur d'environnement FP, tandis qu'un parcours actif échoue avant l'audit si son mode figé n'est plus disponible. L'agrégat historique reste forgeable : seule la future session propriétaire du contexte pourra en tirer une autorité terminale.
+
+Le test compare, pour toutes les paires et les rangs fermés 2 à 6, le passage ample, la reprise d'une visite et la force brute, puis égalise à chaque rang les records avec le flux P7b complet. P7b reste une implémentation durable indépendante et n'est pas modifié. Les frontières à neuf et dix intérieurs pour $K=10$, la cosphère, les budgets nuls, déplacements, autorités étrangères et transitions FP sont permanents. L'adaptateur P8j--P8k termine chaque contexte avant la candidate suivante et garde $576=276+300$. Les deux CTests ciblés passent sous GCC Release en 0,15 seconde au total et Clang 18 Release en 0,10 seconde; installation/export et consumer réel passent 1/1 en 0,01 seconde. Aucun benchmark, sanitizer, CUDA, test massif ou GCP n'est lancé.
+
+P8k n'est pas encore raccordé à une session ou au runner. Le pire cas combiné reste $O(n^3)$, aucune capacité totale ni autorité de couverture orientée ne protège 10 M+, et les fallbacks exacts reconstruisent encore leur ancre par nœud incertain. `deployment_status=architecture_only` et `public_status=not_claimed` restent inchangés.
 
 ## Priorités de développement
 
-1. extraire l'automate P7b de boule fermée dans un classifieur exact reprenable, terminer cette décision avant de demander la candidate P8j suivante, ajouter un plafond total de session et une autorité terminale sparse, puis substituer ce flux à la partition implicite des $n(n-1)/2$ paires du runner après un différentiel CPU court; aucun gate GCP ne précède cette substitution, et l'ancien flux reste un oracle borné.
+1. assembler une session sparse qui termine le contexte P8k actif avant de demander la candidate P8j suivante, préflight la sortie avant `take_result`, ajoute des plafonds totaux et une autorité terminale prouvant la couverture orientée, puis substituer ce flux à la partition implicite des $n(n-1)/2$ paires du runner après un différentiel CPU court; aucun gate GCP ne précède cette substitution, et l'ancien flux P7b reste un oracle borné.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cfenv>
 #include <cstddef>
 #include <exception>
 #include <initializer_list>
@@ -16,6 +17,7 @@
 #include <span>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -26,11 +28,17 @@ using morsehgp3d::exact::ExactRational;
 using morsehgp3d::hierarchy::
     ExactAnchoredPairCandidateClassificationBudget;
 using morsehgp3d::hierarchy::
+    ExactAnchoredPairCandidateClassificationContext;
+using morsehgp3d::hierarchy::
     ExactAnchoredPairCandidateClassificationResult;
+using morsehgp3d::hierarchy::
+    ExactAnchoredPairCandidateClassificationStepKind;
 using morsehgp3d::hierarchy::
     ExactAnchoredPairCandidateClassificationStatus;
 using morsehgp3d::hierarchy::ExactPairSupportEvent;
 using morsehgp3d::hierarchy::ExactPairSupportExtraShellDiagnostic;
+using morsehgp3d::hierarchy::ExactPairSupportStreamBudget;
+using morsehgp3d::hierarchy::build_exact_pair_support_stream;
 using morsehgp3d::hierarchy::classify_exact_anchored_pair_candidate;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
@@ -181,6 +189,98 @@ brute_classify(
           right.relevant_extra_shell_diagnostic;
 }
 
+[[nodiscard]] bool same_classification_work(
+    morsehgp3d::hierarchy::ExactAnchoredPairCandidateClassificationAudit left,
+    morsehgp3d::hierarchy::ExactAnchoredPairCandidateClassificationAudit right) {
+  left.advance_call_count = 0U;
+  right.advance_call_count = 0U;
+  left.budget_exhaustion_count = 0U;
+  right.budget_exhaustion_count = 0U;
+  return left == right;
+}
+
+[[nodiscard]] ExactAnchoredPairCandidateClassificationResult
+classify_resumably_one_node_at_a_time(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::array<PointId, 2> support_ids,
+    std::size_t maximum_closed_rank) {
+  ExactAnchoredPairCandidateClassificationContext context =
+      ExactAnchoredPairCandidateClassificationContext::start(
+          index, cloud, support_ids, maximum_closed_rank);
+  std::size_t summed_step_node_visits = 0U;
+  for (std::size_t advance = 0U; advance < 1024U; ++advance) {
+    const auto step = context.advance(index, cloud, {1U});
+    summed_step_node_visits += step.work.node_visit_count;
+    if (step.kind ==
+        ExactAnchoredPairCandidateClassificationStepKind::budget_exhausted) {
+      check(
+          step.stop_reason ==
+                  morsehgp3d::hierarchy::
+                      ExactAnchoredPairCandidateClassificationStopReason::
+                          node_visit_limit &&
+              step.work.node_visit_count == 1U &&
+              !step.terminal_after_step,
+          "a one-node resumable stop must preserve a nonterminal cursor");
+      continue;
+    }
+    check(
+        summed_step_node_visits == context.audit().node_visit_count,
+        "segmented step work must equal committed physical visits");
+    if (step.kind ==
+        ExactAnchoredPairCandidateClassificationStepKind::above_rank) {
+      check(
+          context.above_rank() && context.complete() &&
+              step.terminal_after_step,
+          "an above-rank terminal must close without a record");
+      const auto completed = context.advance(index, cloud, {0U});
+      check(
+          completed.kind ==
+                  ExactAnchoredPairCandidateClassificationStepKind::complete &&
+              completed.work.node_visit_count == 0U,
+          "an above-rank context must remain terminal without more work");
+      ExactAnchoredPairCandidateClassificationResult result;
+      result.status =
+          ExactAnchoredPairCandidateClassificationStatus::above_rank;
+      result.support_ids = context.support_ids();
+      result.maximum_closed_rank = context.maximum_closed_rank();
+      result.requested_budget = step.requested_budget;
+      result.audit = context.audit();
+      return result;
+    }
+    check(
+        step.kind ==
+                ExactAnchoredPairCandidateClassificationStepKind::record_ready &&
+            context.record_ready() && !context.complete() &&
+            step.terminal_after_step,
+        "a rank-relevant terminal must await explicit record consumption");
+    const std::size_t visits_before_repeated_ready =
+        context.audit().node_visit_count;
+    const auto repeated_ready = context.advance(index, cloud, {0U});
+    check(
+        repeated_ready.kind ==
+                ExactAnchoredPairCandidateClassificationStepKind::record_ready &&
+            repeated_ready.work.node_visit_count == 0U &&
+            context.audit().node_visit_count == visits_before_repeated_ready,
+        "a ready record must survive a zero-budget retry without replay");
+    ExactAnchoredPairCandidateClassificationResult result =
+        context.take_result(index, cloud);
+    check(
+        context.complete() && !context.record_ready() &&
+            result.audit.center_and_level_constructed,
+        "taking a ready record must construct its sphere exactly once");
+    const auto completed = context.advance(index, cloud, {0U});
+    check(
+        completed.kind ==
+                ExactAnchoredPairCandidateClassificationStepKind::complete &&
+            completed.work.node_visit_count == 0U,
+        "a consumed classifier must remain complete without more work");
+    return result;
+  }
+  throw std::logic_error(
+      "the one-node anchored classifier exceeded its progress bound");
+}
+
 void check_filter_audit(
     const ExactAnchoredPairCandidateClassificationResult& result,
     const std::string& message) {
@@ -249,6 +349,222 @@ void test_small_differential() {
   }
 }
 
+void test_resumable_segmentation_and_p7b_identity() {
+  const CanonicalPointCloud cloud = cloud_from({
+      point(-4.0, 0.0, 0.0),
+      point(-1.0, 2.0, 0.0),
+      point(0.0, 0.0, 0.0),
+      point(1.0, -2.0, 1.0),
+      point(2.0, 1.0, -1.0),
+      point(5.0, 0.0, 2.0),
+  });
+  const MortonLbvhIndex lbvh = MortonLbvhIndex::build(cloud);
+  const ExactAnchoredPairCandidateClassificationBudget unlimited{
+      std::numeric_limits<std::size_t>::max()};
+  std::array<std::vector<ExactPairSupportEvent>, 7U> resumed_events_by_rank;
+  std::array<std::vector<ExactPairSupportExtraShellDiagnostic>, 7U>
+      resumed_diagnostics_by_rank;
+
+  for (std::size_t first = 0U; first < cloud.size(); ++first) {
+    for (std::size_t second = first + 1U;
+         second < cloud.size();
+         ++second) {
+      for (std::size_t maximum_closed_rank = 2U;
+           maximum_closed_rank <= 6U;
+           ++maximum_closed_rank) {
+        const std::array<PointId, 2> support_ids{
+            static_cast<PointId>(second),
+            static_cast<PointId>(first)};
+        const auto roomy = classify_exact_anchored_pair_candidate(
+            lbvh,
+            cloud,
+            support_ids,
+            maximum_closed_rank,
+            unlimited);
+        const auto segmented = classify_resumably_one_node_at_a_time(
+            lbvh, cloud, support_ids, maximum_closed_rank);
+        check(
+            same_scientific_result(roomy, segmented),
+            "one-node resumes must preserve every anchored scientific result");
+        check(
+            same_classification_work(roomy.audit, segmented.audit),
+            "one-node resumes must preserve the exact classifier work");
+        if (segmented.complete()) {
+          if (segmented.event.has_value()) {
+            resumed_events_by_rank[maximum_closed_rank].push_back(
+                *segmented.event);
+          } else if (segmented.relevant_extra_shell_diagnostic.has_value()) {
+            resumed_diagnostics_by_rank[maximum_closed_rank].push_back(
+                *segmented.relevant_extra_shell_diagnostic);
+          }
+        }
+      }
+    }
+  }
+
+  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
+  const auto by_support = [](const auto& left, const auto& right) {
+    return left.support_ids < right.support_ids;
+  };
+  for (std::size_t maximum_closed_rank = 2U;
+       maximum_closed_rank <= 6U;
+       ++maximum_closed_rank) {
+    const auto historical = build_exact_pair_support_stream(
+        lbvh,
+        cloud,
+        maximum_closed_rank - 1U,
+        ExactPairSupportStreamBudget{
+            maximum,
+            maximum,
+            maximum,
+            maximum,
+            maximum,
+            maximum,
+            maximum});
+    auto& resumed_events = resumed_events_by_rank[maximum_closed_rank];
+    auto& resumed_diagnostics =
+        resumed_diagnostics_by_rank[maximum_closed_rank];
+    std::sort(resumed_events.begin(), resumed_events.end(), by_support);
+    std::sort(
+        resumed_diagnostics.begin(), resumed_diagnostics.end(), by_support);
+    auto historical_events = historical.events;
+    auto historical_diagnostics =
+        historical.relevant_extra_shell_diagnostics;
+    std::sort(historical_events.begin(), historical_events.end(), by_support);
+    std::sort(
+        historical_diagnostics.begin(),
+        historical_diagnostics.end(),
+        by_support);
+    check(
+        historical.stream_complete() &&
+            resumed_events == historical_events &&
+            resumed_diagnostics == historical_diagnostics,
+        "every resumable anchored rank must equal the historical P7b stream");
+  }
+}
+
+void test_resumable_zero_move_and_foreign_authority() {
+  CanonicalPointCloud cloud = cloud_from({
+      point(-1.0), point(1.0), point(0.0), point(10.0)});
+  MortonLbvhIndex lbvh = MortonLbvhIndex::build(cloud);
+  const PointId first_support_id = canonical_id_from_source(cloud, 0U);
+  const PointId second_support_id = canonical_id_from_source(cloud, 1U);
+  ExactAnchoredPairCandidateClassificationContext original =
+      ExactAnchoredPairCandidateClassificationContext::start(
+          lbvh,
+          cloud,
+          {second_support_id, first_support_id},
+          3U);
+  if (original.audit().fp64_interval_filter_enabled) {
+    const std::size_t calls_before_environment_change =
+        original.audit().advance_call_count;
+    check(
+        std::fesetround(FE_DOWNWARD) == 0,
+        "the FP environment fixture must select downward rounding");
+    check_throws<std::runtime_error>(
+        [&] {
+          static_cast<void>(original.advance(lbvh, cloud, {1U}));
+        },
+        "a changed FP environment must fail closed before a resume");
+    check(
+        original.audit().advance_call_count ==
+            calls_before_environment_change,
+        "an FP environment rejection must precede audit mutation");
+    check(
+        std::fesetround(FE_TONEAREST) == 0,
+        "the FP environment fixture must restore nearest rounding");
+  }
+  const auto zero = original.advance(lbvh, cloud, {0U});
+  check(
+      zero.kind ==
+              ExactAnchoredPairCandidateClassificationStepKind::
+                  budget_exhausted &&
+          zero.work.node_visit_count == 0U &&
+          original.audit().node_visit_count == 0U &&
+          original.audit().budget_exhaustion_count == 1U,
+      "a zero visit budget must leave the fixed DFS scientifically untouched");
+
+  ExactAnchoredPairCandidateClassificationContext moved{std::move(original)};
+  check(
+      !original.ready() && moved.ready(),
+      "moving a resumable anchored classifier must revoke its source");
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(original.advance(lbvh, cloud, {1U}));
+      },
+      "a moved-from anchored classifier must reject advances");
+
+  CanonicalPointCloud foreign_cloud = cloud_from({
+      point(-1.0), point(1.0), point(0.0), point(10.0)});
+  MortonLbvhIndex foreign_lbvh = MortonLbvhIndex::build(foreign_cloud);
+  const std::size_t calls_before_foreign = moved.audit().advance_call_count;
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(moved.advance(foreign_lbvh, foreign_cloud, {1U}));
+      },
+      "a geometrically equal foreign authority must not resume a classifier");
+  check(
+      moved.audit().advance_call_count == calls_before_foreign,
+      "foreign resume rejection must precede audit mutation");
+
+  const auto ready = moved.advance(
+      lbvh,
+      cloud,
+      {std::numeric_limits<std::size_t>::max()});
+  check(
+      ready.kind ==
+              ExactAnchoredPairCandidateClassificationStepKind::record_ready &&
+          moved.record_ready(),
+      "the authentic classifier must reach a pending exact record");
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(moved.take_result(foreign_lbvh, foreign_cloud));
+      },
+      "a foreign authority must not consume a ready record");
+  check(
+      moved.record_ready(),
+      "foreign record rejection must preserve the pending terminal");
+  if (moved.audit().fp64_interval_filter_enabled) {
+    check(
+        std::fesetround(FE_DOWNWARD) == 0,
+        "the ready-record FP fixture must select downward rounding");
+    const auto ready_under_changed_environment =
+        moved.advance(lbvh, cloud, {0U});
+    check(
+        ready_under_changed_environment.kind ==
+                ExactAnchoredPairCandidateClassificationStepKind::record_ready &&
+            ready_under_changed_environment.work.node_visit_count == 0U,
+        "a ready exact record must not depend on a later FP environment");
+    check(
+        std::fesetround(FE_TONEAREST) == 0,
+        "the ready-record FP fixture must restore nearest rounding");
+  }
+  const auto result = moved.take_result(lbvh, cloud);
+  check(
+      result.complete() && result.event.has_value() && moved.complete(),
+      "the authentic authority must consume the pending record exactly once");
+  if (moved.audit().fp64_interval_filter_enabled) {
+    check(
+        std::fesetround(FE_DOWNWARD) == 0,
+        "the terminal FP fixture must select downward rounding");
+    const auto complete_under_changed_environment =
+        moved.advance(lbvh, cloud, {0U});
+    check(
+        complete_under_changed_environment.kind ==
+                ExactAnchoredPairCandidateClassificationStepKind::complete &&
+            complete_under_changed_environment.work.node_visit_count == 0U,
+        "a certified terminal must not depend on a later FP environment");
+    check(
+        std::fesetround(FE_TONEAREST) == 0,
+        "the terminal FP fixture must restore nearest rounding");
+  }
+  check_throws<std::logic_error>(
+      [&] {
+        static_cast<void>(moved.take_result(lbvh, cloud));
+      },
+      "a consumed exact record must not be emitted twice");
+}
+
 void test_complete_cosphere_shell() {
   const CanonicalPointCloud cloud = cloud_from({
       point(-1.0, 0.0),
@@ -272,7 +588,15 @@ void test_complete_cosphere_shell() {
       {first_support_id, second_support_id},
       3U,
       {std::numeric_limits<std::size_t>::max()});
-  check(result.complete(), "a relevant cospherical pair must complete");
+  const auto resumed = classify_resumably_one_node_at_a_time(
+      lbvh,
+      cloud,
+      {first_support_id, second_support_id},
+      3U);
+  check(
+      result.complete() && same_scientific_result(result, resumed) &&
+          same_classification_work(result.audit, resumed.audit),
+      "a relevant cospherical pair must complete identically after resumes");
   check(!result.event.has_value(), "an extra shell is not a regular event");
   check(
       result.relevant_extra_shell_diagnostic.has_value(),
@@ -496,8 +820,15 @@ void test_k10_exact_interior_boundary() {
       {first_nine_support, second_nine_support},
       11U,
       {std::numeric_limits<std::size_t>::max()});
+  const auto accepted_resumed = classify_resumably_one_node_at_a_time(
+      nine_interior_lbvh,
+      nine_interior_cloud,
+      {first_nine_support, second_nine_support},
+      11U);
   check(
-      accepted.complete() && accepted.event.has_value(),
+      accepted.complete() && accepted.event.has_value() &&
+          same_scientific_result(accepted, accepted_resumed) &&
+          same_classification_work(accepted.audit, accepted_resumed.audit),
       "K=10 must retain a pair with exactly nine strict interiors");
   if (accepted.event.has_value()) {
     check(
@@ -533,9 +864,16 @@ void test_k10_exact_interior_boundary() {
       {first_ten_support, second_ten_support},
       11U,
       {std::numeric_limits<std::size_t>::max()});
+  const auto rejected_resumed = classify_resumably_one_node_at_a_time(
+      ten_interior_lbvh,
+      ten_interior_cloud,
+      {first_ten_support, second_ten_support},
+      11U);
   check(
       rejected.above_rank() &&
-          rejected.audit.early_above_rank_certificate,
+          rejected.audit.early_above_rank_certificate &&
+          same_scientific_result(rejected, rejected_resumed) &&
+          same_classification_work(rejected.audit, rejected_resumed.audit),
       "K=10 must reject a pair as soon as ten strict interiors are certified");
   check(
       !rejected.event.has_value() &&
@@ -565,7 +903,22 @@ void test_contract_rejections() {
 }  // namespace
 
 int main() {
+  static_assert(
+      !std::is_default_constructible_v<
+          ExactAnchoredPairCandidateClassificationContext>);
+  static_assert(
+      !std::is_copy_constructible_v<
+          ExactAnchoredPairCandidateClassificationContext>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          ExactAnchoredPairCandidateClassificationContext>);
+  static_assert(
+      !std::is_move_assignable_v<
+          ExactAnchoredPairCandidateClassificationContext>);
+
   test_small_differential();
+  test_resumable_segmentation_and_p7b_identity();
+  test_resumable_zero_move_and_foreign_authority();
   test_complete_cosphere_shell();
   test_interval_filter_strict_decisions();
   test_centered_interval_resolves_natural_dependency();
