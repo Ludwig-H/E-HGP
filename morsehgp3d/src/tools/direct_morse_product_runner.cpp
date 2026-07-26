@@ -105,6 +105,16 @@ struct Report {
   std::size_t pair_grouped_witness_slots{};
   std::size_t pair_grouped_inherited_witness_reuses{};
   std::size_t pair_grouped_traversal_exact_predicates{};
+  std::size_t pair_fp64_filtered_negative_predicates{};
+  std::size_t pair_fp64_filtered_positive_predicates{};
+  std::size_t pair_exact_fallback_predicates{};
+  std::size_t pair_floating_witness_order_preparations{};
+  std::size_t pair_floating_witness_score_evaluations{};
+  std::size_t pair_floating_witness_nonfinite_scores{};
+  bool pair_floating_witness_order_requested{false};
+  bool pair_floating_witness_order_effective_for_every_prepared_traversal{
+      true};
+  bool pair_fp64_filter_partition_certified{false};
   std::size_t pair_witness_subtree_exact_predicates{};
   std::size_t pair_witness_subtree_receipts{};
   std::size_t pair_witness_subtree_successes{};
@@ -120,6 +130,7 @@ struct Report {
   std::size_t pair_anchor_subgroup_witness_pool_entries{};
   std::size_t pair_query_facing_fallback_witness_pool_entries{};
   std::size_t pair_anchor_subgroup_splits{};
+  std::size_t pair_query_subtree_splits{};
   std::size_t pair_anchor_subgroup_certified_prunes{};
   std::size_t pair_anchor_subgroup_certified_anchors{};
   std::size_t pair_prepared_singleton_fallbacks{};
@@ -130,6 +141,7 @@ struct Report {
   std::size_t pair_triangular_block_pair_visits{};
   std::size_t pair_triangular_diagonal_splits{};
   std::size_t pair_triangular_oversized_anchor_splits{};
+  std::size_t pair_triangular_consumer_query_splits{};
   std::size_t pair_triangular_self_pairs{};
   std::size_t pair_triangular_cross_blocks{};
   std::size_t pair_triangular_certified_cross_blocks{};
@@ -215,6 +227,16 @@ struct Report {
     throw std::overflow_error(std::string{description});
   }
   return left + right;
+}
+
+[[nodiscard]] bool three_sum_matches(
+    std::size_t first,
+    std::size_t second,
+    std::size_t third,
+    std::size_t expected) noexcept {
+  return second <= std::numeric_limits<std::size_t>::max() - first &&
+      third <= std::numeric_limits<std::size_t>::max() - first - second &&
+      first + second + third == expected;
 }
 
 [[nodiscard]] std::size_t checked_multiply(
@@ -491,7 +513,7 @@ empty_proposal_transcript(
 
 [[nodiscard]] ExactMortonGroupedAnchoredPairScheduleConfig
 make_sparse_pair_schedule_config() {
-  return {32U, 64U, true};
+  return {32U, 64U, true, false, true, false, true};
 }
 
 [[nodiscard]] std::size_t make_sparse_pair_maximum_closed_rank(
@@ -938,6 +960,25 @@ void emit_report(const Report& report) {
       << (report.pair_schedule_config.use_triangular_block_pair_schedule
               ? "true"
               : "false")
+      << ",\"symmetric_inconclusive_cross_block_splitting\":"
+      << (report.pair_schedule_config
+                  .use_symmetric_inconclusive_cross_block_splitting
+              ? "true"
+              : "false")
+      << ",\"prioritize_cross_blocks\":"
+      << (report.pair_schedule_config.prioritize_cross_blocks
+              ? "true"
+              : "false")
+      << ",\"witness_subtree_first_for_triangular_blocks\":"
+      << (report.pair_schedule_config
+                  .use_witness_subtree_first_for_triangular_blocks
+              ? "true"
+              : "false")
+      << ",\"floating_witness_order_for_triangular_blocks\":"
+      << (report.pair_schedule_config
+                  .use_floating_witness_order_for_triangular_blocks
+              ? "true"
+              : "false")
       << "},\"advance_budget\":{\"schedule_advances\":"
       << report.pair_advance_budget.candidate_cursor
              .maximum_schedule_advance_count
@@ -948,6 +989,9 @@ void emit_report(const Report& report) {
       << report.pair_advance_budget.candidate_cursor
              .maximum_grouped_traversal_node_visit_count
       << ",\"grouped_exact_predicates\":"
+      << report.pair_advance_budget.candidate_cursor
+             .maximum_grouped_traversal_exact_predicate_count
+      << ",\"grouped_logical_signs\":"
       << report.pair_advance_budget.candidate_cursor
              .maximum_grouped_traversal_exact_predicate_count
       << ",\"classification_node_visits\":"
@@ -965,6 +1009,9 @@ void emit_report(const Report& report) {
       << report.pair_total_capacity
              .maximum_grouped_traversal_node_visit_count
       << ",\"grouped_exact_predicates\":"
+      << report.pair_total_capacity
+             .maximum_grouped_traversal_exact_predicate_count
+      << ",\"grouped_logical_signs\":"
       << report.pair_total_capacity
              .maximum_grouped_traversal_exact_predicate_count
       << ",\"admitted_candidates\":"
@@ -1003,6 +1050,29 @@ void emit_report(const Report& report) {
       << report.pair_grouped_inherited_witness_reuses
       << ",\"grouped_exact_predicates\":"
       << report.pair_grouped_traversal_exact_predicates
+      << ",\"grouped_logical_signs\":"
+      << report.pair_grouped_traversal_exact_predicates
+      << ",\"fp64_filtered_negative_predicates\":"
+      << report.pair_fp64_filtered_negative_predicates
+      << ",\"fp64_filtered_positive_predicates\":"
+      << report.pair_fp64_filtered_positive_predicates
+      << ",\"exact_fallback_predicates\":"
+      << report.pair_exact_fallback_predicates
+      << ",\"floating_witness_order_preparations\":"
+      << report.pair_floating_witness_order_preparations
+      << ",\"floating_witness_score_evaluations\":"
+      << report.pair_floating_witness_score_evaluations
+      << ",\"floating_witness_nonfinite_scores\":"
+      << report.pair_floating_witness_nonfinite_scores
+      << ",\"floating_witness_order_requested\":"
+      << (report.pair_floating_witness_order_requested ? "true" : "false")
+      << ",\"floating_witness_order_effective_for_every_prepared_traversal\":"
+      << (report
+                  .pair_floating_witness_order_effective_for_every_prepared_traversal
+              ? "true"
+              : "false")
+      << ",\"fp64_filter_partition_certified\":"
+      << (report.pair_fp64_filter_partition_certified ? "true" : "false")
       << ",\"witness_subtree_exact_predicates\":"
       << report.pair_witness_subtree_exact_predicates
       << ",\"witness_subtree_receipts\":"
@@ -1033,6 +1103,8 @@ void emit_report(const Report& report) {
       << report.pair_query_facing_fallback_witness_pool_entries
       << ",\"anchor_subgroup_splits\":"
       << report.pair_anchor_subgroup_splits
+      << ",\"query_subtree_splits\":"
+      << report.pair_query_subtree_splits
       << ",\"anchor_subgroup_certified_prunes\":"
       << report.pair_anchor_subgroup_certified_prunes
       << ",\"anchor_subgroup_certified_anchors\":"
@@ -1053,6 +1125,8 @@ void emit_report(const Report& report) {
       << report.pair_triangular_diagonal_splits
       << ",\"triangular_oversized_anchor_splits\":"
       << report.pair_triangular_oversized_anchor_splits
+      << ",\"triangular_consumer_query_splits\":"
+      << report.pair_triangular_consumer_query_splits
       << ",\"triangular_self_pairs\":"
       << report.pair_triangular_self_pairs
       << ",\"triangular_cross_blocks\":"
@@ -1301,6 +1375,28 @@ void emit_report(const Report& report) {
       pair_schedule_audit.inherited_witness_reuse_count;
   report.pair_grouped_traversal_exact_predicates =
       pair_candidate_audit.grouped_traversal_exact_predicate_count;
+  report.pair_fp64_filtered_negative_predicates =
+      pair_schedule_audit.fp64_filtered_negative_predicate_count;
+  report.pair_fp64_filtered_positive_predicates =
+      pair_schedule_audit.fp64_filtered_positive_predicate_count;
+  report.pair_exact_fallback_predicates =
+      pair_schedule_audit.exact_fallback_predicate_count;
+  report.pair_floating_witness_order_preparations =
+      pair_schedule_audit.floating_witness_order_preparation_count;
+  report.pair_floating_witness_score_evaluations =
+      pair_schedule_audit.floating_witness_score_evaluation_count;
+  report.pair_floating_witness_nonfinite_scores =
+      pair_schedule_audit.floating_witness_nonfinite_score_count;
+  report.pair_floating_witness_order_requested =
+      pair_schedule_audit.floating_witness_order_requested;
+  report.pair_floating_witness_order_effective_for_every_prepared_traversal =
+      pair_schedule_audit
+          .floating_witness_order_effective_for_every_prepared_traversal;
+  report.pair_fp64_filter_partition_certified = three_sum_matches(
+      report.pair_fp64_filtered_negative_predicates,
+      report.pair_fp64_filtered_positive_predicates,
+      report.pair_exact_fallback_predicates,
+      report.pair_grouped_traversal_exact_predicates);
   report.pair_witness_subtree_exact_predicates =
       pair_schedule_audit.witness_subtree_exact_predicate_count;
   report.pair_witness_subtree_receipts =
@@ -1331,6 +1427,8 @@ void emit_report(const Report& report) {
       pair_schedule_audit.query_facing_fallback_witness_pool_entry_count;
   report.pair_anchor_subgroup_splits =
       pair_schedule_audit.anchor_subgroup_split_count;
+  report.pair_query_subtree_splits =
+      pair_schedule_audit.query_subtree_split_count;
   report.pair_anchor_subgroup_certified_prunes =
       pair_schedule_audit.anchor_subgroup_certified_prune_count;
   report.pair_anchor_subgroup_certified_anchors =
@@ -1351,6 +1449,8 @@ void emit_report(const Report& report) {
       pair_schedule_audit.triangular_diagonal_split_count;
   report.pair_triangular_oversized_anchor_splits =
       pair_schedule_audit.triangular_oversized_anchor_split_count;
+  report.pair_triangular_consumer_query_splits =
+      pair_schedule_audit.triangular_consumer_query_split_count;
   report.pair_triangular_self_pairs =
       pair_schedule_audit.triangular_self_pair_count;
   report.pair_triangular_cross_blocks =

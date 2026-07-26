@@ -23,6 +23,10 @@ struct ExactMortonGroupedAnchoredPairScheduleConfig {
   std::size_t maximum_anchor_count_per_group{};
   std::size_t proposed_witness_pool_size{};
   bool use_triangular_block_pair_schedule{false};
+  bool use_symmetric_inconclusive_cross_block_splitting{false};
+  bool prioritize_cross_blocks{false};
+  bool use_witness_subtree_first_for_triangular_blocks{true};
+  bool use_floating_witness_order_for_triangular_blocks{false};
 
   friend bool operator==(
       const ExactMortonGroupedAnchoredPairScheduleConfig&,
@@ -34,6 +38,7 @@ enum class ExactMortonGroupedAnchoredPairScheduleStepKind : std::uint8_t {
   diagonal_self,
   singleton_fallback_started,
   anchor_subgroup_split,
+  query_subtree_split,
   unresolved_leaf,
   fallback_subtree,
   budget_exhausted,
@@ -53,6 +58,9 @@ struct ExactMortonGroupedAnchoredPairScheduleStepWork {
   std::size_t witness_slot_scan_count{};
   std::size_t inherited_witness_reuse_count{};
   std::size_t exact_predicate_count{};
+  std::size_t fp64_filtered_negative_predicate_count{};
+  std::size_t fp64_filtered_positive_predicate_count{};
+  std::size_t exact_fallback_predicate_count{};
   std::size_t witness_subtree_exact_predicate_count{};
   std::size_t strict_witness_discovery_count{};
 
@@ -76,6 +84,12 @@ struct ExactMortonGroupedAnchoredPairScheduleAudit {
   std::size_t witness_slot_scan_count{};
   std::size_t inherited_witness_reuse_count{};
   std::size_t exact_predicate_count{};
+  std::size_t fp64_filtered_negative_predicate_count{};
+  std::size_t fp64_filtered_positive_predicate_count{};
+  std::size_t exact_fallback_predicate_count{};
+  std::size_t floating_witness_order_preparation_count{};
+  std::size_t floating_witness_score_evaluation_count{};
+  std::size_t floating_witness_nonfinite_score_count{};
   std::size_t common_exact_predicate_count{};
   std::size_t anchor_subgroup_exact_predicate_count{};
   std::size_t singleton_exact_predicate_count{};
@@ -92,6 +106,7 @@ struct ExactMortonGroupedAnchoredPairScheduleAudit {
   std::size_t proposed_anchor_subgroup_witness_pool_entry_count{};
   std::size_t query_facing_fallback_witness_pool_entry_count{};
   std::size_t anchor_subgroup_split_count{};
+  std::size_t query_subtree_split_count{};
   std::size_t anchor_subgroup_certified_prune_count{};
   std::size_t anchor_subgroup_certified_anchor_count{};
   std::size_t prepared_singleton_fallback_count{};
@@ -107,6 +122,7 @@ struct ExactMortonGroupedAnchoredPairScheduleAudit {
   std::size_t triangular_block_pair_visit_count{};
   std::size_t triangular_diagonal_split_count{};
   std::size_t triangular_oversized_anchor_split_count{};
+  std::size_t triangular_consumer_query_split_count{};
   std::size_t triangular_self_pair_count{};
   std::size_t triangular_cross_block_count{};
   std::size_t triangular_certified_cross_block_count{};
@@ -117,6 +133,8 @@ struct ExactMortonGroupedAnchoredPairScheduleAudit {
   bool complete{false};
   bool morton_anchor_partition_complete{false};
   bool triangular_partition_complete{false};
+  bool floating_witness_order_requested{false};
+  bool floating_witness_order_effective_for_every_prepared_traversal{true};
   bool no_global_anchor_pair_or_output_arena_materialized{true};
   bool no_dynamic_dual_tree_or_pair_arena_materialized{true};
 
@@ -410,6 +428,9 @@ class ExactMortonGroupedAnchoredPairScheduleContext {
              exact_grouped_anchored_pair_maximum_witness_pool_size>
       active_witness_pool_point_ids_{};
   std::size_t active_witness_pool_entry_count_{};
+  std::size_t active_floating_order_preparation_count_accounted_{};
+  std::size_t active_floating_score_evaluation_count_accounted_{};
+  std::size_t active_floating_nonfinite_score_count_accounted_{};
   std::optional<ExactGroupedAnchoredPairTraversalContext> active_traversal_;
   std::optional<ExactGroupedAnchoredPairTraversalContext>
       active_singleton_traversal_;

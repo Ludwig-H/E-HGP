@@ -1565,6 +1565,21 @@ void test_schedule_validation_move_and_foreign_authority() {
       "foreign authority rejection mutated the schedule audit");
 }
 
+void test_triangular_witness_proposal_modes_are_unambiguous() {
+  const CanonicalPointCloud cloud = make_line_cloud(4U);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  require_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(ExactMortonGroupedAnchoredPairScheduleContext::start(
+            index,
+            cloud,
+            2U,
+            ExactMortonGroupedAnchoredPairScheduleConfig{
+                4U, 4U, true, false, true, true, true}));
+      },
+      "a triangular schedule accepted two competing witness proposal modes");
+}
+
 }  // namespace
 
 int main() {
@@ -1609,6 +1624,7 @@ int main() {
     test_morton_partition_fresh_p8g_and_segmented_identity();
     test_exact_anchored_candidate_path_identity_and_fallback();
     test_schedule_validation_move_and_foreign_authority();
+    test_triangular_witness_proposal_modes_are_unambiguous();
     test_oriented_candidate_cursor_identity_and_budgets();
     test_oriented_candidate_cursor_atomic_local_budgets();
   } catch (const std::exception& error) {

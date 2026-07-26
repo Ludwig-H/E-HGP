@@ -80,18 +80,27 @@ ExactMortonGroupedAnchoredPairScheduleContext::
     throw std::out_of_range(
         "a Morton grouped schedule maximum closed rank must be in [2, 11]");
   }
+  if (config.use_witness_subtree_first_for_triangular_blocks &&
+      config.use_floating_witness_order_for_triangular_blocks) {
+    throw std::invalid_argument(
+        "a triangular grouped schedule requires one unambiguous witness proposal mode");
+  }
   if (index.leaves().size() != point_count_) {
     throw std::logic_error(
         "a Morton grouped schedule received an incomplete LBVH leaf order");
   }
 
   if (config_.use_triangular_block_pair_schedule) {
+    audit_.floating_witness_order_requested =
+        config_.use_floating_witness_order_for_triangular_blocks;
     triangular_schedule_.emplace(
         ExactMortonTriangularBlockPairScheduleContext::start(
             index,
             cloud,
             ExactMortonTriangularBlockPairScheduleConfig{
-                config_.maximum_anchor_count_per_group}));
+                config_.maximum_anchor_count_per_group,
+                config_.use_symmetric_inconclusive_cross_block_splitting,
+                config_.prioritize_cross_blocks}));
     synchronize_triangular_audit();
   } else {
     prepare_group(index, cloud, 0U);
@@ -188,6 +197,9 @@ void ExactMortonGroupedAnchoredPairScheduleContext::prepare_group(
   active_anchor_count_ = anchor_count;
   active_witness_pool_point_ids_ = witness_pool_point_ids;
   active_witness_pool_entry_count_ = witness_pool_entry_count;
+  active_floating_order_preparation_count_accounted_ = 0U;
+  active_floating_score_evaluation_count_accounted_ = 0U;
+  active_floating_nonfinite_score_count_accounted_ = 0U;
   active_traversal_.reset();
   active_traversal_.emplace(std::move(prepared_traversal));
   active_singleton_traversal_.reset();
@@ -233,6 +245,8 @@ void ExactMortonGroupedAnchoredPairScheduleContext::
   audit_.triangular_diagonal_split_count = source.diagonal_split_count;
   audit_.triangular_oversized_anchor_split_count =
       source.oversized_anchor_split_count;
+  audit_.triangular_consumer_query_split_count =
+      source.consumer_query_split_count;
   audit_.triangular_self_pair_count = source.emitted_diagonal_self_count;
   audit_.triangular_cross_block_count = source.emitted_cross_block_count;
   audit_.triangular_certified_cross_block_count =
@@ -389,23 +403,69 @@ void ExactMortonGroupedAnchoredPairScheduleContext::
   const std::span<const PointId> witnesses{
       active_witness_pool_point_ids_.data(),
       active_witness_pool_entry_count_};
-  ExactGroupedAnchoredPairTraversalContext traversal = terminal_singleton
-      ? ExactGroupedAnchoredPairTraversalContext::
-            start_witness_subtree_first_at_node(
-                index,
-                cloud,
-                anchors,
-                witnesses,
-                singleton_frontier_node_index_,
-                maximum_closed_rank_)
-      : ExactGroupedAnchoredPairTraversalContext::
-            start_witness_subtree_first_frontier_at_node(
-                index,
-                cloud,
-                anchors,
-                witnesses,
-                singleton_frontier_node_index_,
-                maximum_closed_rank_);
+  ExactGroupedAnchoredPairTraversalContext traversal = [&] {
+    if (config_.use_witness_subtree_first_for_triangular_blocks) {
+      return terminal_singleton
+          ? ExactGroupedAnchoredPairTraversalContext::
+                start_witness_subtree_first_at_node(
+                    index,
+                    cloud,
+                    anchors,
+                    witnesses,
+                    singleton_frontier_node_index_,
+                    maximum_closed_rank_)
+          : ExactGroupedAnchoredPairTraversalContext::
+                start_witness_subtree_first_frontier_at_node(
+                    index,
+                    cloud,
+                    anchors,
+                    witnesses,
+                    singleton_frontier_node_index_,
+                    maximum_closed_rank_);
+    }
+    if (config_.use_floating_witness_order_for_triangular_blocks) {
+      return terminal_singleton
+          ? ExactGroupedAnchoredPairTraversalContext::
+                start_floating_witness_order_at_node(
+                    index,
+                    cloud,
+                    anchors,
+                    witnesses,
+                    singleton_frontier_node_index_,
+                    maximum_closed_rank_)
+          : ExactGroupedAnchoredPairTraversalContext::
+                start_floating_witness_order_frontier_at_node(
+                    index,
+                    cloud,
+                    anchors,
+                    witnesses,
+                    singleton_frontier_node_index_,
+                    maximum_closed_rank_);
+    }
+    return terminal_singleton
+        ? ExactGroupedAnchoredPairTraversalContext::start_at_node(
+              index,
+              cloud,
+              anchors,
+              witnesses,
+              singleton_frontier_node_index_,
+              maximum_closed_rank_)
+        : ExactGroupedAnchoredPairTraversalContext::start_frontier_at_node(
+              index,
+              cloud,
+              anchors,
+              witnesses,
+              singleton_frontier_node_index_,
+              maximum_closed_rank_);
+  }();
+  if (traversal.audit().floating_witness_order_requested &&
+      !traversal.audit().floating_witness_order_enabled) {
+    audit_.floating_witness_order_effective_for_every_prepared_traversal =
+        false;
+  }
+  active_floating_order_preparation_count_accounted_ = 0U;
+  active_floating_score_evaluation_count_accounted_ = 0U;
+  active_floating_nonfinite_score_count_accounted_ = 0U;
   active_traversal_.reset();
   active_traversal_.emplace(std::move(traversal));
   triangular_probe_active_ = !terminal_singleton;
@@ -734,6 +794,38 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance_triangular(
       active_traversal_->advance(index, cloud, traversal_budget);
   const ExactGroupedAnchoredPairTraversalStepWork traversal_work =
       traversal_step.work();
+  const ExactGroupedAnchoredPairTraversalAudit& current_traversal_audit =
+      active_traversal_->audit();
+  if (current_traversal_audit.floating_witness_order_preparation_count <
+          active_floating_order_preparation_count_accounted_ ||
+      current_traversal_audit.floating_witness_score_evaluation_count <
+          active_floating_score_evaluation_count_accounted_ ||
+      current_traversal_audit.floating_witness_nonfinite_score_count <
+          active_floating_nonfinite_score_count_accounted_) {
+    throw std::logic_error(
+        "a triangular grouped floating-order audit regressed");
+  }
+  checked_add_to(
+      audit_.floating_witness_order_preparation_count,
+      current_traversal_audit.floating_witness_order_preparation_count -
+          active_floating_order_preparation_count_accounted_,
+      "the triangular grouped floating-order preparation count overflows size_t");
+  checked_add_to(
+      audit_.floating_witness_score_evaluation_count,
+      current_traversal_audit.floating_witness_score_evaluation_count -
+          active_floating_score_evaluation_count_accounted_,
+      "the triangular grouped floating-score count overflows size_t");
+  checked_add_to(
+      audit_.floating_witness_nonfinite_score_count,
+      current_traversal_audit.floating_witness_nonfinite_score_count -
+          active_floating_nonfinite_score_count_accounted_,
+      "the triangular grouped non-finite floating-score count overflows size_t");
+  active_floating_order_preparation_count_accounted_ =
+      current_traversal_audit.floating_witness_order_preparation_count;
+  active_floating_score_evaluation_count_accounted_ =
+      current_traversal_audit.floating_witness_score_evaluation_count;
+  active_floating_nonfinite_score_count_accounted_ =
+      current_traversal_audit.floating_witness_nonfinite_score_count;
   checked_increment(
       audit_.traversal_advance_count,
       "the triangular grouped traversal-advance count overflows size_t");
@@ -757,6 +849,18 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance_triangular(
       audit_.exact_predicate_count,
       traversal_work.exact_predicate_count,
       "the triangular grouped exact-predicate count overflows size_t");
+  checked_add_to(
+      audit_.fp64_filtered_negative_predicate_count,
+      traversal_work.fp64_filtered_negative_predicate_count,
+      "the triangular grouped filtered-negative count overflows size_t");
+  checked_add_to(
+      audit_.fp64_filtered_positive_predicate_count,
+      traversal_work.fp64_filtered_positive_predicate_count,
+      "the triangular grouped filtered-positive count overflows size_t");
+  checked_add_to(
+      audit_.exact_fallback_predicate_count,
+      traversal_work.exact_fallback_predicate_count,
+      "the triangular grouped exact-fallback count overflows size_t");
   checked_add_to(
       audit_.witness_subtree_exact_predicate_count,
       traversal_work.witness_subtree_exact_predicate_count,
@@ -860,6 +964,18 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance_triangular(
         clear_probe_after_snapshot = true;
       } else if (
           response.kind() ==
+          ExactMortonTriangularBlockPairResponseKind::query_split) {
+        kind = ExactMortonGroupedAnchoredPairScheduleStepKind::
+            query_subtree_split;
+        checked_increment(
+            audit_.query_subtree_split_count,
+            "the triangular grouped query-split count overflows size_t");
+        checked_increment(
+            audit_.completed_group_count,
+            "the triangular grouped completed-cross count overflows size_t");
+        clear_probe_after_snapshot = true;
+      } else if (
+          response.kind() ==
           ExactMortonTriangularBlockPairResponseKind::
               terminal_singleton_cross_block) {
         kind = ExactMortonGroupedAnchoredPairScheduleStepKind::
@@ -911,6 +1027,18 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance_triangular(
           clear_probe_after_snapshot = true;
         } else if (
             response.kind() ==
+            ExactMortonTriangularBlockPairResponseKind::query_split) {
+          kind = ExactMortonGroupedAnchoredPairScheduleStepKind::
+              query_subtree_split;
+          checked_increment(
+              audit_.query_subtree_split_count,
+              "the triangular grouped leaf query-split count overflows size_t");
+          checked_increment(
+              audit_.completed_group_count,
+              "the triangular grouped completed-cross count overflows size_t");
+          clear_probe_after_snapshot = true;
+        } else if (
+            response.kind() ==
             ExactMortonTriangularBlockPairResponseKind::
                 terminal_singleton_cross_block) {
           kind = ExactMortonGroupedAnchoredPairScheduleStepKind::
@@ -955,6 +1083,9 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance_triangular(
       traversal_work.witness_slot_scan_count,
       traversal_work.inherited_witness_reuse_count,
       traversal_work.exact_predicate_count,
+      traversal_work.fp64_filtered_negative_predicate_count,
+      traversal_work.fp64_filtered_positive_predicate_count,
+      traversal_work.exact_fallback_predicate_count,
       traversal_work.witness_subtree_exact_predicate_count,
       traversal_work.strict_witness_discovery_count};
   step.traversal_step_.emplace(std::move(traversal_step));
@@ -1164,6 +1295,18 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
       traversal_work.exact_predicate_count,
       "the Morton grouped exact-predicate count overflows size_t");
   checked_add_to(
+      audit_.fp64_filtered_negative_predicate_count,
+      traversal_work.fp64_filtered_negative_predicate_count,
+      "the Morton grouped filtered-negative count overflows size_t");
+  checked_add_to(
+      audit_.fp64_filtered_positive_predicate_count,
+      traversal_work.fp64_filtered_positive_predicate_count,
+      "the Morton grouped filtered-positive count overflows size_t");
+  checked_add_to(
+      audit_.exact_fallback_predicate_count,
+      traversal_work.exact_fallback_predicate_count,
+      "the Morton grouped exact-fallback count overflows size_t");
+  checked_add_to(
       audit_.witness_subtree_exact_predicate_count,
       traversal_work.witness_subtree_exact_predicate_count,
       "the Morton grouped witness-subtree predicate count overflows size_t");
@@ -1352,6 +1495,9 @@ ExactMortonGroupedAnchoredPairScheduleContext::advance(
       traversal_work.witness_slot_scan_count,
       traversal_work.inherited_witness_reuse_count,
       traversal_work.exact_predicate_count,
+      traversal_work.fp64_filtered_negative_predicate_count,
+      traversal_work.fp64_filtered_positive_predicate_count,
+      traversal_work.exact_fallback_predicate_count,
       traversal_work.witness_subtree_exact_predicate_count,
       traversal_work.strict_witness_discovery_count};
   if (traversal_step.traversal_complete_after_step() &&

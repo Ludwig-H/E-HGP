@@ -291,6 +291,13 @@ candidate_total_capacity_reason(
           schedule.anchor_subgroup_exact_predicate_count,
           schedule.singleton_exact_predicate_count,
           schedule.exact_predicate_count) ||
+      (cursor.schedule_config()
+               .use_floating_witness_order_for_triangular_blocks &&
+       !three_sum_equals(
+           schedule.fp64_filtered_negative_predicate_count,
+           schedule.fp64_filtered_positive_predicate_count,
+           schedule.exact_fallback_predicate_count,
+           schedule.exact_predicate_count)) ||
       schedule.completed_singleton_fallback_count !=
           schedule.prepared_singleton_fallback_count ||
       !bounded_multiple(
@@ -317,6 +324,10 @@ candidate_total_capacity_reason(
         !schedule.triangular_partition_complete ||
         !schedule.no_dynamic_dual_tree_or_pair_arena_materialized ||
         schedule.prepared_group_count != schedule.completed_group_count ||
+        schedule.query_subtree_split_count !=
+            schedule.triangular_consumer_query_split_count ||
+        schedule.query_subtree_split_count >
+            schedule.prepared_anchor_subgroup_probe_count ||
         !sum_equals(
             schedule.triangular_certified_unordered_pair_count,
             schedule.triangular_opened_unordered_pair_count,

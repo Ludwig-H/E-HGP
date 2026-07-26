@@ -199,9 +199,15 @@ void ExactMortonTriangularBlockPairScheduleContext::push_diagonal_partition(
   validate_authority(index, left_diagonal);
   validate_authority(index, cross);
   validate_authority(index, right_diagonal);
-  push_authority(right_diagonal);
-  push_authority(cross);
-  push_authority(left_diagonal);
+  if (config_.prioritize_cross_blocks) {
+    push_authority(right_diagonal);
+    push_authority(left_diagonal);
+    push_authority(cross);
+  } else {
+    push_authority(right_diagonal);
+    push_authority(cross);
+    push_authority(left_diagonal);
+  }
 }
 
 void ExactMortonTriangularBlockPairScheduleContext::push_anchor_partition(
@@ -239,6 +245,47 @@ void ExactMortonTriangularBlockPairScheduleContext::push_anchor_partition(
       authority.query_node_index,
       authority.query_leaf_begin,
       authority.query_leaf_end};
+  validate_authority(index, left_cross);
+  validate_authority(index, right_cross);
+  push_authority(right_cross);
+  push_authority(left_cross);
+}
+
+void ExactMortonTriangularBlockPairScheduleContext::push_query_partition(
+    const spatial::MortonLbvhIndex& index,
+    const PendingBlockPair& authority) {
+  const auto& query = index.nodes_[authority.query_node_index];
+  if (query.is_leaf() || query.left_child >= index.nodes_.size() ||
+      query.right_child >= index.nodes_.size() ||
+      query.left_child == query.right_child ||
+      2U > pending_block_pairs_.size() - pending_block_pair_count_) {
+    throw std::logic_error(
+        "a triangular cross authority cannot split its native query");
+  }
+  const auto& left = index.nodes_[query.left_child];
+  const auto& right = index.nodes_[query.right_child];
+  if (left.leaf_begin != query.leaf_begin ||
+      left.leaf_end != right.leaf_begin ||
+      right.leaf_end != query.leaf_end) {
+    throw std::logic_error(
+        "a triangular query split lost native child ranges");
+  }
+  const PendingBlockPair left_cross{
+      PendingKind::cross,
+      authority.anchor_node_index,
+      authority.anchor_leaf_begin,
+      authority.anchor_leaf_end,
+      query.left_child,
+      left.leaf_begin,
+      left.leaf_end};
+  const PendingBlockPair right_cross{
+      PendingKind::cross,
+      authority.anchor_node_index,
+      authority.anchor_leaf_begin,
+      authority.anchor_leaf_end,
+      query.right_child,
+      right.leaf_begin,
+      right.leaf_end};
   validate_authority(index, left_cross);
   validate_authority(index, right_cross);
   push_authority(right_cross);
@@ -446,7 +493,34 @@ ExactMortonTriangularBlockPairScheduleContext::respond_to_cross_block(
   checked_increment(
       audit_.inconclusive_cross_block_count,
       "the triangular inconclusive-block count overflows size_t");
-  if (anchor_count > 1U) {
+  if (config_.use_symmetric_inconclusive_cross_block_splitting) {
+    const auto& anchor = index.nodes_[authority.anchor_node_index];
+    const auto& query = index.nodes_[authority.query_node_index];
+    if (!query.is_leaf() && query_count >= anchor_count) {
+      push_query_partition(index, authority);
+      checked_increment(
+          audit_.consumer_query_split_count,
+          "the triangular consumer query-split count overflows size_t");
+      awaiting_cross_block_.reset();
+      response.kind_ =
+          ExactMortonTriangularBlockPairResponseKind::query_split;
+      return response;
+    }
+    if (!anchor.is_leaf()) {
+      push_anchor_partition(index, authority);
+      checked_increment(
+          audit_.consumer_anchor_split_count,
+          "the triangular consumer anchor-split count overflows size_t");
+      awaiting_cross_block_.reset();
+      response.kind_ =
+          ExactMortonTriangularBlockPairResponseKind::anchor_split;
+      return response;
+    }
+    if (!query.is_leaf() || anchor_count != 1U || query_count != 1U) {
+      throw std::logic_error(
+          "a symmetric triangular terminal is not singleton x singleton");
+    }
+  } else if (anchor_count > 1U) {
     push_anchor_partition(index, authority);
     checked_increment(
         audit_.consumer_anchor_split_count,

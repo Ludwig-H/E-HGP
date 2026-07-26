@@ -426,11 +426,25 @@ L'unique gate 14S `uniform_latin`, 50 000 points et $K=10$, sous les caps par d�
 
 Le diagnostic montre que l'ordre diagonal-first dépense le cap sur de petits blocs locaux avant de valoriser les produits croisés massifs. 14S reste `architecture_only`; GCP n'est pas utilisé.
 
+## Incrément 14T — priorité cross-first et partage symétrique opt-in
+
+14T conserve `reference_cpu / hgp_reduced / architecture_only`, avec `public_status=not_claimed`. L'ordre LIFO visite désormais chaque produit croisé avant ses deux diagonales suspendues. Le partage symétrique optionnel choisit le plus grand côté LBVH non feuille, avec priorité au bloc requête sur égalité; chaque réponse désigne exclusivement les deux enfants natifs disjoints du côté choisi. Les identités de couverture et la masse triangulaire restent inchangées.
+
+La fixture structurelle $n=8$ ferme encore les 28 paires et force un partage de requête. Le chemin produit active `cross-first`, garde le partage ancre seulement et désactive P8r; le mode symétrique ne reçoit donc pas de revendication produit bout en bout. Les tests ciblés de certificat, ordonnanceurs triangulaire et groupé, session sparse, terminal direct, runner différentiel et smoke massif court passent. Aucun gate long, CUDA ou GCP n'est ajouté pour 14T.
+
+## Incrément 14U — ordre flottant propositionnel et filtre exact
+
+14U fixe le score $s_Q(x)=\max_{a\in A}\sum_i(x_i-a_i)(x_i-q_i^\star)$, où $q_i^\star$ est la borne de $Q$ qui maximise le facteur sur chaque axe. Le score `long double` ne décide rien; le pool et son masque restent canoniques. Le filtre binary64 ne décide que les intervalles de signe strict et délègue zéro, invalidité ou environnement non supporté au prédicat dyadique exact. Un environnement initial non supporté désactive l'ordre flottant, conserve l'ordre canonique et compte tous les signes comme fallbacks exacts; un changement après certification échoue fermé. Les modes P8r et 14U sont rejetés s'ils sont demandés ensemble.
+
+Le runner distingue désormais `grouped_logical_signs` de l'alias historique `grouped_exact_predicates`, expose si l'ordre demandé fut effectif pour chaque traversal préparé et publie `fp64_filter_partition_certified`. La même égalité entre signes logiques, signes filtrés et fallbacks appartient aux invariants terminaux de la session; elle ne dépend plus du seul checker Python. Les tests courts reconstruits couvrent également FE_DOWNWARD, la restauration des exceptions flottantes, l'appel terminal sous un autre arrondi et le rejet de deux modes propositionnels concurrents.
+
+La fixture courte du runner compte 78 signes logiques, dont 7 filtrés négatifs, 37 positifs et 34 fallbacks exacts; 22 préparations évaluent 86 scores, tous finis. L'unique gate `uniform_latin`, $n=50\,000$, $K=10$, s'arrête avec le code 2 à `total_grouped_traversal_exact_predicate_capacity`. Ses 20 000 signes logiques se partagent en 797 négatifs, 15 451 positifs et 3 752 fallbacks; 491 préparations évaluent 31 424 scores. Il visite 26 blocs croisés, en certifie trois, partage 14 fois le côté ancre et ne produit aucun record. Le pipeline, l'autorité terminale et le résultat scientifique restent absents; aucun temps incomplet ne constitue un SLO et aucun second gate 50 k n'est exécuté.
+
 ## Priorités de développement
 
-1. prioriser les blocs croisés de plus grande masse certifiable avant les petits blocs diagonaux, tout en conservant la partition triangulaire, la pile fixe et le rejeu P8g; relancer ensuite un seul gate 50 k complet sous les mêmes caps.
+1. externaliser immédiatement les records P8l en chunks bornés et les lier au `AtomicLinearRunStore`, avec rejeu authentifié depuis les autorités nuage/LBVH et reprise depuis `HEAD`; le mode résident doit rester bit à bit comparable.
 
-2. fusionner le flux local ainsi ordonné avec le sink et le checkpoint bornés de Phase 15. Aucun micro-réglage du halo ne précède ces deux étapes.
+2. après cette couture, isoler le flux de minima de Morse réellement utile à $K\leq10$ afin de réduire avant de cataloguer; un flot Gabriel brut ne devient pas l'architecture massive. Aucun micro-réglage du halo ni nouveau gate 50 k ne précède ces étapes.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

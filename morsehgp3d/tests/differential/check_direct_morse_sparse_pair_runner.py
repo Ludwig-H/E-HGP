@@ -149,6 +149,10 @@ def require_success_projection(report: dict[str, object]) -> None:
             "maximum_anchors_per_group": 32,
             "proposed_witness_pool_size": 64,
             "triangular_block_pair_schedule": True,
+            "symmetric_inconclusive_cross_block_splitting": False,
+            "prioritize_cross_blocks": True,
+            "witness_subtree_first_for_triangular_blocks": False,
+            "floating_witness_order_for_triangular_blocks": True,
         },
         "runner changed the bounded P8l schedule",
     )
@@ -168,6 +172,7 @@ def require_success_projection(report: dict[str, object]) -> None:
         "orientation_checks",
         "grouped_node_visits",
         "grouped_exact_predicates",
+        "grouped_logical_signs",
         "classification_node_visits",
     ):
         require(
@@ -179,6 +184,7 @@ def require_success_projection(report: dict[str, object]) -> None:
         "orientation_checks",
         "grouped_node_visits",
         "grouped_exact_predicates",
+        "grouped_logical_signs",
         "admitted_candidates",
         "classification_node_visits",
     ):
@@ -233,6 +239,12 @@ def require_success_projection(report: dict[str, object]) -> None:
         "grouped_witness_slots",
         "grouped_inherited_witness_reuses",
         "grouped_exact_predicates",
+        "fp64_filtered_negative_predicates",
+        "fp64_filtered_positive_predicates",
+        "exact_fallback_predicates",
+        "floating_witness_order_preparations",
+        "floating_witness_score_evaluations",
+        "floating_witness_nonfinite_scores",
         "grouped_common_exact_predicates",
         "anchor_subgroup_exact_predicates",
         "singleton_exact_predicates",
@@ -244,6 +256,7 @@ def require_success_projection(report: dict[str, object]) -> None:
         "anchor_subgroup_witness_pool_entries",
         "query_facing_fallback_witness_pool_entries",
         "anchor_subgroup_splits",
+        "query_subtree_splits",
         "anchor_subgroup_certified_prunes",
         "anchor_subgroup_certified_anchors",
         "prepared_singleton_fallbacks",
@@ -254,6 +267,7 @@ def require_success_projection(report: dict[str, object]) -> None:
         "triangular_block_pair_visits",
         "triangular_diagonal_splits",
         "triangular_oversized_anchor_splits",
+        "triangular_consumer_query_splits",
         "triangular_self_pairs",
         "triangular_cross_blocks",
         "triangular_certified_cross_blocks",
@@ -278,10 +292,33 @@ def require_success_projection(report: dict[str, object]) -> None:
         + audit.get("anchor_subgroup_node_visits", 0)
         + audit.get("singleton_node_visits", 0)
         and audit.get("grouped_exact_predicates", -1)
+        == audit.get("grouped_logical_signs", -2)
+        and audit.get("grouped_logical_signs", -1)
         == audit.get("grouped_common_exact_predicates", 0)
         + audit.get("anchor_subgroup_exact_predicates", 0)
         + audit.get("singleton_exact_predicates", 0),
         "P8q physical work lanes do not sum to the grouped totals",
+    )
+    require(
+        audit.get("grouped_logical_signs", -1)
+        == audit.get("fp64_filtered_negative_predicates", 0)
+        + audit.get("fp64_filtered_positive_predicates", 0)
+        + audit.get("exact_fallback_predicates", 0),
+        "P8u filtered/exact predicate partition does not close",
+    )
+    require(
+        audit.get("floating_witness_order_requested") is True
+        and audit.get(
+            "floating_witness_order_effective_for_every_prepared_traversal"
+        )
+        is True
+        and audit.get("fp64_filter_partition_certified") is True
+        and audit.get("floating_witness_order_preparations", 0) > 0
+        and audit.get("floating_witness_score_evaluations", 0)
+        >= audit.get("floating_witness_order_preparations", 0)
+        and audit.get("floating_witness_nonfinite_scores", 0)
+        <= audit.get("floating_witness_score_evaluations", 0),
+        "P8u floating proposal work was not reported after traversal",
     )
     require(
         audit.get("triangular_partition_complete") is True

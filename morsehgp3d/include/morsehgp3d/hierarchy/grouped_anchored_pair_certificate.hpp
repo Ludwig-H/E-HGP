@@ -91,6 +91,9 @@ struct ExactGroupedAnchoredPairPruneAudit {
   // sign evaluation.  A proposed witness can therefore charge from one to G
   // predicates before it fails or is proved strict for all G actual anchors.
   std::size_t exact_predicate_count{};
+  std::size_t fp64_filtered_negative_predicate_count{};
+  std::size_t fp64_filtered_positive_predicate_count{};
+  std::size_t exact_fallback_predicate_count{};
   std::size_t strict_group_witness_count{};
   std::size_t inherited_strict_group_witness_count{};
   bool requested_budget_applies{false};
@@ -300,6 +303,9 @@ enum class ExactGroupedAnchoredPairTraversalStopReason : std::uint8_t {
 
 struct ExactGroupedAnchoredPairTraversalWorkBudget {
   std::size_t maximum_node_visit_count{};
+  // Historical API name.  With the 14U interval filter this caps logical
+  // anchor/witness sign decisions; exact_fallback_predicate_count measures
+  // the subset that actually reaches the dyadic predicate.
   std::size_t maximum_exact_predicate_count{};
 
   friend bool operator==(
@@ -314,8 +320,13 @@ struct ExactGroupedAnchoredPairTraversalStepWork {
   // proved strict for every actual anchor, or reused from a strict parent.
   std::size_t witness_slot_scan_count{};
   std::size_t inherited_witness_reuse_count{};
-  // Physical actual-anchor/witness exact signs, excluding inherited slots.
+  // Logical actual-anchor/witness signs, excluding inherited slots.  An
+  // opt-in outward FP64 interval may decide one sign authoritatively; only an
+  // interval containing zero reaches the exact dyadic fallback.
   std::size_t exact_predicate_count{};
+  std::size_t fp64_filtered_negative_predicate_count{};
+  std::size_t fp64_filtered_positive_predicate_count{};
+  std::size_t exact_fallback_predicate_count{};
   std::size_t witness_subtree_exact_predicate_count{};
   std::size_t strict_witness_discovery_count{};
 
@@ -333,6 +344,12 @@ struct ExactGroupedAnchoredPairTraversalAudit {
   std::size_t witness_slot_scan_count{};
   std::size_t inherited_witness_reuse_count{};
   std::size_t exact_predicate_count{};
+  std::size_t fp64_filtered_negative_predicate_count{};
+  std::size_t fp64_filtered_positive_predicate_count{};
+  std::size_t exact_fallback_predicate_count{};
+  std::size_t floating_witness_order_preparation_count{};
+  std::size_t floating_witness_score_evaluation_count{};
+  std::size_t floating_witness_nonfinite_score_count{};
   std::size_t witness_subtree_exact_predicate_count{};
   std::size_t witness_subtree_receipt_count{};
   std::size_t witness_subtree_success_count{};
@@ -346,6 +363,11 @@ struct ExactGroupedAnchoredPairTraversalAudit {
   std::size_t fallback_subtree_count{};
   std::size_t budget_exhaustion_count{};
   std::size_t maximum_pending_node_count{};
+  bool floating_witness_order_requested{false};
+  bool floating_witness_order_enabled{false};
+  bool floating_witness_order_is_proposal_only{true};
+  bool canonical_witness_pool_mask_authority_preserved{true};
+  bool fp64_interval_filter_enabled{false};
   bool complete{false};
   bool no_dynamic_traversal_or_output_arena{true};
 
@@ -521,6 +543,35 @@ class ExactGroupedAnchoredPairTraversalContext {
       std::size_t lbvh_node_index,
       std::size_t maximum_closed_rank);
 
+  // P8u keeps the supplied PointId-sorted witness pool and its canonical mask
+  // bits, but visits its offsets in a per-query floating proposal order.  The
+  // ordering has no authority; every sign is still decided by an outward
+  // interval or the existing exact dyadic P8g predicate.
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_floating_witness_order_frontier_at_node(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const spatial::PointId> anchor_point_ids,
+      std::span<const spatial::PointId> witness_pool_point_ids,
+      std::size_t lbvh_node_index,
+      std::size_t maximum_closed_rank);
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_floating_witness_order_frontier_at_node(
+      const spatial::MortonLbvhIndex&&,
+      const spatial::CanonicalPointCloud&,
+      std::span<const spatial::PointId>,
+      std::span<const spatial::PointId>,
+      std::size_t,
+      std::size_t) = delete;
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_floating_witness_order_frontier_at_node(
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&&,
+      std::span<const spatial::PointId>,
+      std::span<const spatial::PointId>,
+      std::size_t,
+      std::size_t) = delete;
+
   // P8r first searches at most 64 authenticated LBVH nodes for disjoint
   // common-witness subtrees.  The subtree bounds are only a bounded proposal:
   // selected point ids are replayed through the ordinary exact P8g scan before
@@ -572,6 +623,30 @@ class ExactGroupedAnchoredPairTraversalContext {
       std::span<const spatial::PointId> witness_pool_point_ids,
       std::size_t lbvh_node_index,
       std::size_t maximum_closed_rank);
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_floating_witness_order_at_node(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const spatial::PointId> anchor_point_ids,
+      std::span<const spatial::PointId> witness_pool_point_ids,
+      std::size_t lbvh_node_index,
+      std::size_t maximum_closed_rank);
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_floating_witness_order_at_node(
+      const spatial::MortonLbvhIndex&&,
+      const spatial::CanonicalPointCloud&,
+      std::span<const spatial::PointId>,
+      std::span<const spatial::PointId>,
+      std::size_t,
+      std::size_t) = delete;
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_floating_witness_order_at_node(
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&&,
+      std::span<const spatial::PointId>,
+      std::span<const spatial::PointId>,
+      std::size_t,
+      std::size_t) = delete;
   [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext start_at_node(
       const spatial::MortonLbvhIndex&&,
       const spatial::CanonicalPointCloud&,
@@ -655,14 +730,25 @@ class ExactGroupedAnchoredPairTraversalContext {
     std::uint64_t inherited_strict_witness_mask{};
   };
 
+  struct FloatingWitnessProposal {
+    std::size_t canonical_offset{};
+    long double score{};
+  };
+
   struct ActiveNode {
     NodeAuthority authority{};
     spatial::ExactDyadicAabb3 query_bounds{};
     std::size_t next_witness_offset{};
     std::size_t next_anchor_offset{};
     std::size_t node_exact_predicate_count{};
+    std::size_t node_fp64_filtered_negative_predicate_count{};
+    std::size_t node_fp64_filtered_positive_predicate_count{};
+    std::size_t node_exact_fallback_predicate_count{};
     std::size_t inherited_strict_witness_count{};
     std::uint64_t strict_witness_mask{};
+    std::array<FloatingWitnessProposal,
+               exact_grouped_anchored_pair_maximum_witness_pool_size>
+        floating_witness_proposals{};
     bool uses_witness_subtree_pool{false};
   };
 
@@ -689,10 +775,13 @@ class ExactGroupedAnchoredPairTraversalContext {
       std::size_t maximum_closed_rank,
       bool emit_off_diagonal_inconclusive_subtree,
       bool search_witness_subtrees_first,
+      bool order_witnesses_by_floating_score,
       PrivateConstructionTag);
 
   [[nodiscard]] ExactGroupedAnchoredPairPruneCertificate mint_certificate(
       const ActiveNode& active_node) const;
+
+  void prepare_floating_witness_order(ActiveNode& active_node);
 
   std::array<spatial::PointId,
              exact_grouped_anchored_pair_maximum_anchor_count>
@@ -746,6 +835,7 @@ class ExactGroupedAnchoredPairTraversalContext {
   ExactGroupedAnchoredPairTraversalAudit audit_{};
   bool emit_off_diagonal_inconclusive_subtree_{false};
   bool search_witness_subtrees_first_{false};
+  bool order_witnesses_by_floating_score_{false};
   bool witness_subtree_preflight_complete_{true};
   bool witness_subtree_search_complete_{true};
   bool complete_{false};

@@ -1,12 +1,14 @@
 #include "morsehgp3d/hierarchy/grouped_anchored_pair_certificate.hpp"
 
 #include "morsehgp3d/exact/binary64.hpp"
+#include "morsehgp3d/exact/fp64_interval.hpp"
 #include "morsehgp3d/hierarchy/pair_support_stream.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
 
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <cmath>
 #include <cstddef>
 #include <limits>
 #include <span>
@@ -20,6 +22,10 @@ using spatial::CanonicalPointCloud;
 using spatial::ExactDyadicAabb3;
 using spatial::MortonLbvhIndex;
 using spatial::PointId;
+
+[[nodiscard]] double binary64_value(std::uint64_t bits) {
+  return std::bit_cast<double>(exact::canonicalize_binary64_bits(bits));
+}
 
 [[nodiscard]] ExactDyadicAabb3 point_bounds(
     const CanonicalPointCloud& cloud,
@@ -98,6 +104,87 @@ void checked_increment(std::size_t& value, const char* message) {
     std::size_t second_begin,
     std::size_t second_end) noexcept {
   return first_begin < second_end && second_begin < first_end;
+}
+
+// Proposal-only long-double score of the same maximum used by P8g:
+//
+//   max_a max_{q in Q} (x-a).(x-q).
+//
+// The query maximum is separable by axis.  This value never authorizes a
+// decision; non-finite results are simply ordered after every finite score.
+[[nodiscard]] long double floating_grouped_phi_aabb_maximum_score(
+    std::span<const ExactDyadicAabb3> anchor_point_bounds,
+    const ExactDyadicAabb3& query_bounds,
+    const ExactDyadicAabb3& witness_point_bounds) {
+  long double maximum = -std::numeric_limits<long double>::infinity();
+  for (const ExactDyadicAabb3& anchor_bounds : anchor_point_bounds) {
+    long double value = 0.0L;
+    for (std::size_t axis = 0U; axis < 3U; ++axis) {
+      const long double anchor = static_cast<long double>(
+          binary64_value(anchor_bounds.lower_binary64_bits[axis]));
+      const long double witness = static_cast<long double>(
+          binary64_value(witness_point_bounds.lower_binary64_bits[axis]));
+      const long double lower = static_cast<long double>(
+          binary64_value(query_bounds.lower_binary64_bits[axis]));
+      const long double upper = static_cast<long double>(
+          binary64_value(query_bounds.upper_binary64_bits[axis]));
+      const long double first_factor = witness - anchor;
+      const long double query_endpoint =
+          first_factor < 0.0L ? upper : lower;
+      value += first_factor * (witness - query_endpoint);
+    }
+    if (!std::isfinite(value)) {
+      return std::numeric_limits<long double>::quiet_NaN();
+    }
+    maximum = std::max(maximum, value);
+  }
+  return maximum;
+}
+
+// Small outward FP64 filter for the exact P8g expression.  Unlike the
+// centered candidate-classifier form, the witness is the query point of phi
+// and Q is its second support, so the direct interval product preserves the
+// required (x-a).(x-Q) semantics.  A strict interval sign is authoritative;
+// an invalid interval or one containing zero deliberately falls back.
+[[nodiscard]] std::optional<int> filtered_grouped_phi_aabb_sign(
+    const ExactDyadicAabb3& anchor_point_bounds,
+    const ExactDyadicAabb3& query_bounds,
+    const ExactDyadicAabb3& witness_point_bounds) {
+  exact::detail::Binary64Interval sum =
+      exact::detail::point_binary64_interval(0.0);
+  for (std::size_t axis = 0U; axis < 3U; ++axis) {
+    const double anchor =
+        binary64_value(anchor_point_bounds.lower_binary64_bits[axis]);
+    const double witness =
+        binary64_value(witness_point_bounds.lower_binary64_bits[axis]);
+    const double lower =
+        binary64_value(query_bounds.lower_binary64_bits[axis]);
+    const double upper =
+        binary64_value(query_bounds.upper_binary64_bits[axis]);
+    if (lower > upper) {
+      throw std::logic_error(
+          "a grouped pair interval filter received reversed bounds");
+    }
+    const exact::detail::Binary64Interval anchor_interval =
+        exact::detail::point_binary64_interval(anchor);
+    const exact::detail::Binary64Interval witness_interval =
+        exact::detail::point_binary64_interval(witness);
+    const exact::detail::Binary64Interval query_interval{
+        lower, upper, true};
+    sum = exact::detail::add_binary64_intervals(
+        sum,
+        exact::detail::multiply_binary64_intervals(
+            exact::detail::subtract_binary64_intervals(
+                witness_interval, anchor_interval),
+            exact::detail::subtract_binary64_intervals(
+                witness_interval, query_interval)));
+  }
+  const exact::FilterResult sign =
+      exact::detail::sign_of_binary64_interval(sum);
+  if (!sign.sign().has_value()) {
+    return std::nullopt;
+  }
+  return *sign.sign() == exact::PredicateSign::positive ? 1 : -1;
 }
 
 // Proposal-only guide for the exact subtree search.  In one dimension, when
@@ -428,6 +515,7 @@ ExactGroupedAnchoredPairTraversalContext::start_at_root(
       maximum_closed_rank,
       false,
       false,
+      false,
       PrivateConstructionTag{});
 }
 
@@ -451,6 +539,7 @@ ExactGroupedAnchoredPairTraversalContext::start_frontier_at_root(
       maximum_closed_rank,
       true,
       false,
+      false,
       PrivateConstructionTag{});
 }
 
@@ -471,6 +560,29 @@ ExactGroupedAnchoredPairTraversalContext::start_at_node(
       maximum_closed_rank,
       false,
       false,
+      false,
+      PrivateConstructionTag{});
+}
+
+ExactGroupedAnchoredPairTraversalContext
+ExactGroupedAnchoredPairTraversalContext::
+    start_floating_witness_order_at_node(
+        const MortonLbvhIndex& index,
+        const CanonicalPointCloud& cloud,
+        std::span<const PointId> anchor_point_ids,
+        std::span<const PointId> witness_pool_point_ids,
+        std::size_t lbvh_node_index,
+        std::size_t maximum_closed_rank) {
+  return ExactGroupedAnchoredPairTraversalContext(
+      index,
+      cloud,
+      anchor_point_ids,
+      witness_pool_point_ids,
+      lbvh_node_index,
+      maximum_closed_rank,
+      false,
+      false,
+      true,
       PrivateConstructionTag{});
 }
 
@@ -491,6 +603,29 @@ ExactGroupedAnchoredPairTraversalContext::start_frontier_at_node(
       maximum_closed_rank,
       true,
       false,
+      false,
+      PrivateConstructionTag{});
+}
+
+ExactGroupedAnchoredPairTraversalContext
+ExactGroupedAnchoredPairTraversalContext::
+    start_floating_witness_order_frontier_at_node(
+        const MortonLbvhIndex& index,
+        const CanonicalPointCloud& cloud,
+        std::span<const PointId> anchor_point_ids,
+        std::span<const PointId> witness_pool_point_ids,
+        std::size_t lbvh_node_index,
+        std::size_t maximum_closed_rank) {
+  return ExactGroupedAnchoredPairTraversalContext(
+      index,
+      cloud,
+      anchor_point_ids,
+      witness_pool_point_ids,
+      lbvh_node_index,
+      maximum_closed_rank,
+      true,
+      false,
+      true,
       PrivateConstructionTag{});
 }
 
@@ -512,6 +647,7 @@ ExactGroupedAnchoredPairTraversalContext::
       maximum_closed_rank,
       false,
       true,
+      false,
       PrivateConstructionTag{});
 }
 
@@ -533,6 +669,7 @@ ExactGroupedAnchoredPairTraversalContext::
       maximum_closed_rank,
       true,
       true,
+      false,
       PrivateConstructionTag{});
 }
 
@@ -546,6 +683,7 @@ ExactGroupedAnchoredPairTraversalContext::
         std::size_t maximum_closed_rank,
         bool emit_off_diagonal_inconclusive_subtree,
         bool search_witness_subtrees_first,
+        bool order_witnesses_by_floating_score,
         PrivateConstructionTag) {
   if (!index.validated_for(cloud)) {
     throw std::invalid_argument(
@@ -633,6 +771,16 @@ ExactGroupedAnchoredPairTraversalContext::
   emit_off_diagonal_inconclusive_subtree_ =
       emit_off_diagonal_inconclusive_subtree;
   search_witness_subtrees_first_ = search_witness_subtrees_first;
+  order_witnesses_by_floating_score_ =
+      order_witnesses_by_floating_score;
+  audit_.floating_witness_order_requested =
+      order_witnesses_by_floating_score_;
+  if (order_witnesses_by_floating_score_) {
+    exact::detail::Fp64EnvironmentGuard filter_environment;
+    const bool supported = filter_environment.supported();
+    audit_.floating_witness_order_enabled = supported;
+    audit_.fp64_interval_filter_enabled = supported;
+  }
   witness_subtree_preflight_complete_ = true;
   witness_subtree_search_complete_ = true;
 
@@ -647,6 +795,79 @@ ExactGroupedAnchoredPairTraversalContext::
   audit_.anchor_bounds_construction_count = 1U;
   audit_.prepared_witness_point_count = witness_pool_entry_count_;
   audit_.maximum_pending_node_count = 1U;
+}
+
+void ExactGroupedAnchoredPairTraversalContext::
+    prepare_floating_witness_order(ActiveNode& active_node) {
+  if (!audit_.floating_witness_order_enabled) {
+    return;
+  }
+  const std::span<const ExactDyadicAabb3> anchors{
+      anchor_point_bounds_.data(), anchor_count_};
+  for (std::size_t canonical_offset = 0U;
+       canonical_offset < witness_pool_entry_count_;
+       ++canonical_offset) {
+    const long double score = floating_grouped_phi_aabb_maximum_score(
+        anchors,
+        active_node.query_bounds,
+        witness_point_bounds_[canonical_offset]);
+    active_node.floating_witness_proposals[canonical_offset] =
+        FloatingWitnessProposal{canonical_offset, score};
+    checked_increment(
+        audit_.floating_witness_score_evaluation_count,
+        "the floating witness score count overflows size_t");
+    if (!std::isfinite(score)) {
+      checked_increment(
+          audit_.floating_witness_nonfinite_score_count,
+          "the non-finite floating witness score count overflows size_t");
+    }
+  }
+
+  const auto proposal_precedes = [&](
+                                     const FloatingWitnessProposal& left,
+                                     const FloatingWitnessProposal& right) {
+    const bool left_inherited =
+        (active_node.authority.inherited_strict_witness_mask &
+         (std::uint64_t{1} << left.canonical_offset)) != 0U;
+    const bool right_inherited =
+        (active_node.authority.inherited_strict_witness_mask &
+         (std::uint64_t{1} << right.canonical_offset)) != 0U;
+    if (left_inherited != right_inherited) {
+      return left_inherited;
+    }
+    if (left_inherited) {
+      return left.canonical_offset < right.canonical_offset;
+    }
+    const bool left_finite = std::isfinite(left.score);
+    const bool right_finite = std::isfinite(right.score);
+    if (left_finite != right_finite) {
+      return left_finite;
+    }
+    if (left_finite && left.score != right.score) {
+      return left.score < right.score;
+    }
+    return left.canonical_offset < right.canonical_offset;
+  };
+
+  // Fixed-capacity insertion sort: no catalogue, allocation or unstable tie.
+  for (std::size_t proposal_offset = 1U;
+       proposal_offset < witness_pool_entry_count_;
+       ++proposal_offset) {
+    const FloatingWitnessProposal value =
+        active_node.floating_witness_proposals[proposal_offset];
+    std::size_t insertion = proposal_offset;
+    while (insertion > 0U && proposal_precedes(
+             value,
+             active_node.floating_witness_proposals[insertion - 1U])) {
+      active_node.floating_witness_proposals[insertion] =
+          active_node.floating_witness_proposals[insertion - 1U];
+      --insertion;
+    }
+    active_node.floating_witness_proposals[insertion] = value;
+  }
+  checked_increment(
+      audit_.floating_witness_order_preparation_count,
+      "the floating witness order preparation count overflows size_t");
 }
 
 bool ExactGroupedAnchoredPairTraversalContext::validated_for(
@@ -681,6 +902,12 @@ ExactGroupedAnchoredPairTraversalContext::mint_certificate(
   result.audit_.witness_pool_entry_count = witness_pool_entry_count_;
   result.audit_.exact_predicate_count =
       active_node.node_exact_predicate_count;
+  result.audit_.fp64_filtered_negative_predicate_count =
+      active_node.node_fp64_filtered_negative_predicate_count;
+  result.audit_.fp64_filtered_positive_predicate_count =
+      active_node.node_fp64_filtered_positive_predicate_count;
+  result.audit_.exact_fallback_predicate_count =
+      active_node.node_exact_fallback_predicate_count;
   result.audit_.strict_group_witness_count = required_witness_count_;
   result.audit_.inherited_strict_group_witness_count =
       active_node.inherited_strict_witness_count;
@@ -736,7 +963,6 @@ ExactGroupedAnchoredPairTraversalContext::advance(
     throw std::invalid_argument(
         "a grouped traversal advance requires its authentic cloud and LBVH");
   }
-
   checked_increment(
       audit_.advance_call_count,
       "the grouped traversal advance-call count overflows size_t");
@@ -769,6 +995,21 @@ ExactGroupedAnchoredPairTraversalContext::advance(
     return make_step(
         ExactGroupedAnchoredPairTraversalStepKind::complete,
         ExactGroupedAnchoredPairTraversalStopReason::none);
+  }
+
+  // Even when 14U was requested under an unsupported environment and has
+  // therefore fallen back to canonical order plus dyadic signs, holding the
+  // environment prevents proposal arithmetic from leaking flags.  A context
+  // that started with the certified filter fails closed if that contract is
+  // lost between resumable advances.
+  std::optional<exact::detail::Fp64EnvironmentGuard> filter_environment;
+  if (audit_.floating_witness_order_requested) {
+    filter_environment.emplace();
+    if (audit_.fp64_interval_filter_enabled &&
+        !filter_environment->supported()) {
+      throw std::runtime_error(
+          "the grouped pair interval environment changed during a resumable traversal");
+    }
   }
 
   for (;;) {
@@ -844,14 +1085,10 @@ ExactGroupedAnchoredPairTraversalContext::advance(
             witness_root.leaf_end};
         pending_witness_subtree_node_count_ = 1U;
       }
-      active_node_.emplace(ActiveNode{
-          authority,
-          query_bounds,
-          0U,
-          0U,
-          0U,
-          0U,
-          0U});
+      active_node_.emplace();
+      active_node_->authority = authority;
+      active_node_->query_bounds = query_bounds;
+      prepare_floating_witness_order(*active_node_);
       ++work.node_visit_count;
       ++audit_.node_visit_count;
     }
@@ -1265,8 +1502,14 @@ ExactGroupedAnchoredPairTraversalContext::advance(
     while (strict_witness_count < required_witness_count_ &&
            active_node.next_witness_offset <
                witness_pool_entry_count_) {
-      const std::size_t witness_offset =
+      const std::size_t proposal_offset =
           active_node.next_witness_offset;
+      const std::size_t witness_offset =
+          order_witnesses_by_floating_score_ &&
+              !active_node.uses_witness_subtree_pool
+          ? active_node.floating_witness_proposals[proposal_offset]
+                .canonical_offset
+          : proposal_offset;
       const std::uint64_t witness_bit =
           std::uint64_t{1} << witness_offset;
       if (!active_node.uses_witness_subtree_pool &&
@@ -1322,11 +1565,54 @@ ExactGroupedAnchoredPairTraversalContext::advance(
           active_node.node_exact_predicate_count,
           "a grouped traversal node predicate count overflows size_t");
 
-      const int maximum_sign =
-          exact_diametral_phi_aabb_maximum_sign(
-              anchor_point_bounds_[active_node.next_anchor_offset],
-              active_node.query_bounds,
-              witness_point_bounds_[witness_offset]);
+      std::optional<int> filtered_sign;
+      if (audit_.fp64_interval_filter_enabled) {
+        filtered_sign = filtered_grouped_phi_aabb_sign(
+            anchor_point_bounds_[active_node.next_anchor_offset],
+            active_node.query_bounds,
+            witness_point_bounds_[witness_offset]);
+      }
+      int maximum_sign = 0;
+      if (filtered_sign.has_value()) {
+        maximum_sign = *filtered_sign;
+        if (maximum_sign < 0) {
+          checked_increment(
+              work.fp64_filtered_negative_predicate_count,
+              "the grouped step filtered-negative count overflows size_t");
+          checked_increment(
+              audit_.fp64_filtered_negative_predicate_count,
+              "the grouped filtered-negative count overflows size_t");
+          checked_increment(
+              active_node.node_fp64_filtered_negative_predicate_count,
+              "the grouped node filtered-negative count overflows size_t");
+        } else {
+          checked_increment(
+              work.fp64_filtered_positive_predicate_count,
+              "the grouped step filtered-positive count overflows size_t");
+          checked_increment(
+              audit_.fp64_filtered_positive_predicate_count,
+              "the grouped filtered-positive count overflows size_t");
+          checked_increment(
+              active_node.node_fp64_filtered_positive_predicate_count,
+              "the grouped node filtered-positive count overflows size_t");
+        }
+      } else {
+        maximum_sign = exact_diametral_phi_aabb_maximum_sign(
+            anchor_point_bounds_[active_node.next_anchor_offset],
+            active_node.query_bounds,
+            witness_point_bounds_[witness_offset]);
+        if (order_witnesses_by_floating_score_) {
+          checked_increment(
+              work.exact_fallback_predicate_count,
+              "the grouped step exact-fallback count overflows size_t");
+          checked_increment(
+              audit_.exact_fallback_predicate_count,
+              "the grouped exact-fallback count overflows size_t");
+          checked_increment(
+              active_node.node_exact_fallback_predicate_count,
+              "the grouped node exact-fallback count overflows size_t");
+        }
+      }
 
       ++active_node.next_anchor_offset;
       ++active_node.node_exact_predicate_count;

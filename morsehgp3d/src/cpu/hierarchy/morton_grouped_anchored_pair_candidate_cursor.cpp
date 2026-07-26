@@ -281,11 +281,19 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
       case ExactMortonGroupedAnchoredPairScheduleStepKind::
           singleton_fallback_started:
       case ExactMortonGroupedAnchoredPairScheduleStepKind::
-          anchor_subgroup_split: {
-        const bool is_subgroup_split =
+          anchor_subgroup_split:
+      case ExactMortonGroupedAnchoredPairScheduleStepKind::
+          query_subtree_split: {
+        const bool is_anchor_split =
             schedule_step.kind() ==
             ExactMortonGroupedAnchoredPairScheduleStepKind::
                 anchor_subgroup_split;
+        const bool is_query_split =
+            schedule_step.kind() ==
+            ExactMortonGroupedAnchoredPairScheduleStepKind::
+                query_subtree_split;
+        const bool is_partition_split =
+            is_anchor_split || is_query_split;
         const ExactGroupedAnchoredPairTraversalStep* traversal_step =
             schedule_step.traversal_step();
         const bool triangular =
@@ -347,9 +355,10 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
                  schedule_step.anchor_point_ids().begin(),
                  schedule_step.anchor_point_ids().end())) ||
             (triangular && !triangular_ranges_disjoint) ||
-            (is_subgroup_split &&
+            (is_anchor_split &&
              schedule_step.anchor_point_ids().size() < 2U) ||
-            (triangular && !is_subgroup_split &&
+            (is_query_split && !triangular) ||
+            (triangular && !is_partition_split &&
              schedule_step.anchor_point_ids().size() != 1U)) {
           throw std::logic_error(
               "an oriented grouped cursor received an invalid anchor-partition frontier");

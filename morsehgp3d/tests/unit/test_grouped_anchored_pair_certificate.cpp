@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <cfenv>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
@@ -1627,6 +1628,303 @@ void test_witness_subtree_search_restarts_and_restores_halo_per_query_node() {
       "a child core pool or its bit meaning leaked into the sibling query");
 }
 
+void test_floating_witness_order_preserves_exact_transcript_and_saves_signs() {
+  const std::array<std::array<double, 3>, 7> coordinates{
+      std::array<double, 3>{-100.0, 0.0, 0.0},
+      std::array<double, 3>{-90.0, 0.0, 0.0},
+      std::array<double, 3>{-80.0, 0.0, 0.0},
+      std::array<double, 3>{0.0, 0.0, 0.0},
+      std::array<double, 3>{0.75, 0.0, 0.0},
+      std::array<double, 3>{1.25, 0.0, 0.0},
+      std::array<double, 3>{2.0, 0.0, 0.0}};
+  const CanonicalPointCloud cloud = make_cloud(coordinates);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<PointId, 1> anchors{3U};
+  const std::array<PointId, 5> canonical_witness_pool{0U, 1U, 2U, 4U, 5U};
+  const ExactGroupedAnchoredPairPruneCertificate query_leaf =
+      certificate_for_leaf(
+          index,
+          cloud,
+          anchors,
+          canonical_witness_pool,
+          6U,
+          3U,
+          ExactGroupedAnchoredPairPruneBudget{1U, 5U, 5U});
+  const std::size_t query_node_index = query_leaf.lbvh_node_index();
+  const ExactGroupedAnchoredPairTraversalWorkBudget budget{16U, 16U};
+
+  ExactGroupedAnchoredPairTraversalContext canonical =
+      ExactGroupedAnchoredPairTraversalContext::start_at_node(
+          index,
+          cloud,
+          anchors,
+          canonical_witness_pool,
+          query_node_index,
+          3U);
+  ExactGroupedAnchoredPairTraversalContext ordered =
+      ExactGroupedAnchoredPairTraversalContext::
+          start_floating_witness_order_at_node(
+              index,
+              cloud,
+              anchors,
+              canonical_witness_pool,
+              query_node_index,
+              3U);
+  ExactGroupedAnchoredPairTraversalContext ordered_frontier =
+      ExactGroupedAnchoredPairTraversalContext::
+          start_floating_witness_order_frontier_at_node(
+              index,
+              cloud,
+              anchors,
+              canonical_witness_pool,
+              query_node_index,
+              3U);
+
+  const ExactGroupedAnchoredPairTraversalStep canonical_step =
+      canonical.advance(index, cloud, budget);
+  const ExactGroupedAnchoredPairTraversalStep ordered_step =
+      ordered.advance(index, cloud, budget);
+  const ExactGroupedAnchoredPairTraversalStep ordered_frontier_step =
+      ordered_frontier.advance(index, cloud, budget);
+  const ExactGroupedAnchoredPairPruneCertificate* canonical_certificate =
+      canonical_step.prune_certificate();
+  const ExactGroupedAnchoredPairPruneCertificate* ordered_certificate =
+      ordered_step.prune_certificate();
+  const ExactGroupedAnchoredPairPruneCertificate* frontier_certificate =
+      ordered_frontier_step.prune_certificate();
+  const std::array<PointId, 2> expected_strict_witnesses{4U, 5U};
+
+  const auto same_terminal = [&](
+                                 const ExactGroupedAnchoredPairTraversalStep&
+                                     left,
+                                 const ExactGroupedAnchoredPairTraversalStep&
+                                     right) {
+    return left.kind() == right.kind() &&
+        left.lbvh_node_index() == right.lbvh_node_index() &&
+        left.leaf_begin() == right.leaf_begin() &&
+        left.leaf_end() == right.leaf_end() &&
+        left.unresolved_point_id() == right.unresolved_point_id() &&
+        left.traversal_complete_after_step() ==
+        right.traversal_complete_after_step();
+  };
+  require(
+      same_terminal(canonical_step, ordered_step) &&
+          same_terminal(canonical_step, ordered_frontier_step) &&
+          canonical_step.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::certified_prune,
+      "the floating witness proposal changed the terminal transcript");
+  require(
+      canonical_certificate != nullptr && ordered_certificate != nullptr &&
+          frontier_certificate != nullptr,
+      "the floating witness proposal lost its P8g certificate");
+  require(
+      canonical_certificate->certifies(
+              index, cloud, query_node_index, 3U, anchors) &&
+          ordered_certificate->certifies(
+              index, cloud, query_node_index, 3U, anchors) &&
+          frontier_certificate->certifies(
+              index, cloud, query_node_index, 3U, anchors),
+      "the floating witness proposal changed the P8g authority");
+  require(
+      std::equal(
+              expected_strict_witnesses.begin(),
+              expected_strict_witnesses.end(),
+              ordered_certificate->certified_witness_point_ids().begin()),
+      "the floating witness proposal changed the certified witness ids: " +
+          std::to_string(
+              ordered_certificate->certified_witness_point_ids()[0]) +
+          "," + std::to_string(
+              ordered_certificate->certified_witness_point_ids()[1]));
+  require(
+      canonical.audit().exact_predicate_count == 5U &&
+          ordered.audit().exact_predicate_count == 2U &&
+          ordered_frontier.audit().exact_predicate_count == 2U &&
+          ordered.audit().floating_witness_order_preparation_count == 1U &&
+          ordered.audit().floating_witness_score_evaluation_count == 5U &&
+          ordered.audit().floating_witness_nonfinite_score_count == 0U &&
+          ordered.audit().floating_witness_order_enabled &&
+          ordered.audit().floating_witness_order_is_proposal_only &&
+          ordered.audit().canonical_witness_pool_mask_authority_preserved &&
+          ordered.audit().exact_predicate_count ==
+              ordered.audit().fp64_filtered_negative_predicate_count +
+                  ordered.audit().fp64_filtered_positive_predicate_count +
+                  ordered.audit().exact_fallback_predicate_count &&
+          ordered_certificate->audit().exact_predicate_count == 2U &&
+          ordered_certificate->audit().exact_predicate_count ==
+              ordered_certificate->audit()
+                      .fp64_filtered_negative_predicate_count +
+                  ordered_certificate->audit()
+                      .fp64_filtered_positive_predicate_count +
+                  ordered_certificate->audit().exact_fallback_predicate_count &&
+          std::equal(
+              ordered.witness_pool_point_ids().begin(),
+              ordered.witness_pool_point_ids().end(),
+              canonical_witness_pool.begin()),
+      "the floating witness order did not preserve its bounded proposal contract");
+}
+
+void test_fp64_interval_filter_partitions_strict_and_uncertain_signs() {
+  const std::array<std::array<double, 3>, 4> coordinates{
+      std::array<double, 3>{0.0, 0.0, 0.0},
+      std::array<double, 3>{1.0, 0.0, 0.0},
+      std::array<double, 3>{2.0, 0.0, 0.0},
+      std::array<double, 3>{3.0, 0.0, 0.0}};
+  const CanonicalPointCloud cloud = make_cloud(coordinates);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<PointId, 1> anchors{0U};
+  const std::array<PointId, 3> witness_ids{1U, 3U, 2U};
+  const std::array<int, 3> expected_signs{-1, 1, 0};
+
+  for (std::size_t case_index = 0U; case_index < witness_ids.size();
+       ++case_index) {
+    const std::array<PointId, 1> witness_pool{witness_ids[case_index]};
+    const ExactGroupedAnchoredPairPruneCertificate query_leaf =
+        certificate_for_leaf(
+            index,
+            cloud,
+            anchors,
+            witness_pool,
+            2U,
+            2U,
+            ExactGroupedAnchoredPairPruneBudget{1U, 1U, 1U});
+    const std::size_t query_node_index = query_leaf.lbvh_node_index();
+    require(
+        exact_diametral_phi_aabb_maximum_sign(
+            point_box(cloud, anchors[0]),
+            point_box(cloud, 2U),
+            point_box(cloud, witness_pool[0])) == expected_signs[case_index],
+        "the interval-filter fixture lost its exact diametral sign");
+
+    ExactGroupedAnchoredPairTraversalContext exact =
+        ExactGroupedAnchoredPairTraversalContext::start_at_node(
+            index, cloud, anchors, witness_pool, query_node_index, 2U);
+    ExactGroupedAnchoredPairTraversalContext filtered =
+        ExactGroupedAnchoredPairTraversalContext::
+            start_floating_witness_order_at_node(
+                index, cloud, anchors, witness_pool, query_node_index, 2U);
+    const ExactGroupedAnchoredPairTraversalStep exact_step = exact.advance(
+        index,
+        cloud,
+        ExactGroupedAnchoredPairTraversalWorkBudget{1U, 1U});
+    const ExactGroupedAnchoredPairTraversalStep filtered_step =
+        filtered.advance(
+            index,
+            cloud,
+            ExactGroupedAnchoredPairTraversalWorkBudget{1U, 1U});
+    require(
+        exact_step.kind() == filtered_step.kind() &&
+            exact_step.lbvh_node_index() == filtered_step.lbvh_node_index() &&
+            exact_step.unresolved_point_id() ==
+                filtered_step.unresolved_point_id(),
+        "the interval filter changed an exact terminal decision");
+
+    const auto& audit = filtered.audit();
+    require(
+        audit.exact_predicate_count == 1U &&
+            audit.exact_predicate_count ==
+                audit.fp64_filtered_negative_predicate_count +
+                    audit.fp64_filtered_positive_predicate_count +
+                    audit.exact_fallback_predicate_count &&
+            audit.floating_witness_order_preparation_count == 1U &&
+            audit.floating_witness_score_evaluation_count == 1U,
+        "the interval filter did not partition its logical sign exactly once");
+    if (expected_signs[case_index] == 0 ||
+        !audit.fp64_interval_filter_enabled) {
+      require(
+          audit.exact_fallback_predicate_count == 1U &&
+              audit.fp64_filtered_negative_predicate_count == 0U &&
+              audit.fp64_filtered_positive_predicate_count == 0U,
+          "an uncertain or unsupported interval did not fall back exactly");
+    } else {
+      require(
+          audit.exact_fallback_predicate_count == 0U &&
+              audit.fp64_filtered_negative_predicate_count ==
+                  (expected_signs[case_index] < 0 ? 1U : 0U) &&
+              audit.fp64_filtered_positive_predicate_count ==
+                  (expected_signs[case_index] > 0 ? 1U : 0U),
+          "a strict outward interval did not certify its exact sign");
+    }
+  }
+}
+
+void test_floating_order_falls_back_without_leaking_fenv() {
+  const std::array<std::array<double, 3>, 3> coordinates{
+      std::array<double, 3>{0.0, 0.0, 0.0},
+      std::array<double, 3>{1.0, 0.0, 0.0},
+      std::array<double, 3>{2.0, 0.0, 0.0}};
+  const CanonicalPointCloud cloud = make_cloud(coordinates);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const std::array<PointId, 1> anchors{0U};
+  const std::array<PointId, 1> witnesses{1U};
+  const ExactGroupedAnchoredPairPruneCertificate query_leaf =
+      certificate_for_leaf(
+          index,
+          cloud,
+          anchors,
+          witnesses,
+          2U,
+          2U,
+          ExactGroupedAnchoredPairPruneBudget{1U, 1U, 1U});
+  const int saved_rounding = std::fegetround();
+  require(saved_rounding != -1, "the FENV fixture cannot read rounding mode");
+
+  try {
+    require(
+        std::fesetround(FE_DOWNWARD) == 0,
+        "the FENV fixture cannot install downward rounding");
+    static_cast<void>(std::feclearexcept(FE_ALL_EXCEPT));
+    static_cast<void>(std::feraiseexcept(FE_INVALID));
+    ExactGroupedAnchoredPairTraversalContext traversal =
+        ExactGroupedAnchoredPairTraversalContext::
+            start_floating_witness_order_at_node(
+                index,
+                cloud,
+                anchors,
+                witnesses,
+                query_leaf.lbvh_node_index(),
+                2U);
+    require(
+        traversal.audit().floating_witness_order_requested &&
+            !traversal.audit().floating_witness_order_enabled &&
+            !traversal.audit().fp64_interval_filter_enabled,
+        "an unsupported FENV did not disable only the floating proposal");
+
+    const ExactGroupedAnchoredPairTraversalStep step = traversal.advance(
+        index,
+        cloud,
+        ExactGroupedAnchoredPairTraversalWorkBudget{1U, 1U});
+    require(
+        step.traversal_complete_after_step() &&
+            traversal.audit().exact_predicate_count == 1U &&
+            traversal.audit().exact_fallback_predicate_count == 1U &&
+            traversal.audit().floating_witness_order_preparation_count == 0U &&
+            traversal.audit().floating_witness_score_evaluation_count == 0U,
+        "an unsupported FENV did not use canonical order and exact fallback");
+    require(
+        std::fegetround() == FE_DOWNWARD &&
+            (std::fetestexcept(FE_INVALID) & FE_INVALID) != 0,
+        "the floating proposal leaked its temporary FENV state");
+
+    require(
+        std::fesetround(FE_UPWARD) == 0,
+        "the FENV fixture cannot install upward rounding");
+    const ExactGroupedAnchoredPairTraversalStep terminal = traversal.advance(
+        index,
+        cloud,
+        ExactGroupedAnchoredPairTraversalWorkBudget{0U, 0U});
+    require(
+        terminal.kind() == ExactGroupedAnchoredPairTraversalStepKind::complete &&
+            std::fegetround() == FE_UPWARD,
+        "a terminal traversal unnecessarily revalidated or changed FENV");
+  } catch (...) {
+    static_cast<void>(std::fesetround(saved_rounding));
+    throw;
+  }
+  require(
+      std::fesetround(saved_rounding) == 0,
+      "the FENV fixture cannot restore rounding mode");
+}
+
 void test_symmetric_receipt_recertifies_positive_cross_block() {
   const CanonicalPointCloud cloud = make_line_cloud(4U);
   const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
@@ -1722,6 +2020,9 @@ int main() {
     test_bounded_witness_subtree_proposal_replays_through_p8g();
     test_bounded_witness_subtree_cap_fails_open();
     test_witness_subtree_search_restarts_and_restores_halo_per_query_node();
+    test_floating_witness_order_preserves_exact_transcript_and_saves_signs();
+    test_fp64_interval_filter_partitions_strict_and_uncertain_signs();
+    test_floating_order_falls_back_without_leaking_fenv();
     test_symmetric_receipt_recertifies_positive_cross_block();
   } catch (const std::exception& error) {
     std::cerr << "grouped anchored-pair certificate test failure: "

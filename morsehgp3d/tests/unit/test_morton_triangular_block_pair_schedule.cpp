@@ -104,7 +104,9 @@ void insert_range_pairs(
     const CanonicalPointCloud& cloud,
     std::size_t visit_budget) {
   auto schedule = ExactMortonTriangularBlockPairScheduleContext::start(
-      index, cloud, ExactMortonTriangularBlockPairScheduleConfig{2U});
+      index,
+      cloud,
+      ExactMortonTriangularBlockPairScheduleConfig{32U, true, true});
   Run run;
   std::size_t call_count = 0U;
   while (!schedule.complete()) {
@@ -150,7 +152,7 @@ void insert_range_pairs(
             step.query_leaf_begin().has_value() &&
             step.query_leaf_end().has_value() &&
             *step.anchor_leaf_end() <= *step.query_leaf_begin() &&
-            step.anchor_point_ids().size() <= 2U &&
+            step.anchor_point_ids().size() <= 32U &&
             std::is_sorted(
                 step.anchor_point_ids().begin(),
                 step.anchor_point_ids().end()),
@@ -164,14 +166,19 @@ void insert_range_pairs(
         : ExactMortonTriangularBlockPairDecision::inconclusive;
     const auto response =
         schedule.respond_to_cross_block(index, cloud, decision);
-    const std::size_t response_kind =
+    std::size_t response_kind = 4U;
+    if (response.kind() ==
+        ExactMortonTriangularBlockPairResponseKind::certified_closed) {
+      response_kind = 1U;
+    } else if (
         response.kind() ==
-            ExactMortonTriangularBlockPairResponseKind::certified_closed
-        ? 1U
-        : (response.kind() ==
-                   ExactMortonTriangularBlockPairResponseKind::anchor_split
-               ? 2U
-               : 3U);
+        ExactMortonTriangularBlockPairResponseKind::anchor_split) {
+      response_kind = 2U;
+    } else if (
+        response.kind() ==
+        ExactMortonTriangularBlockPairResponseKind::query_split) {
+      response_kind = 3U;
+    }
     run.records.push_back(SemanticRecord{
         response_kind,
         response.anchor_leaf_begin(),
@@ -181,8 +188,20 @@ void insert_range_pairs(
         response.terminal_anchor_point_id().value_or(PointId{}),
         response.certified_unordered_pair_count() +
             response.opened_unordered_pair_count()});
-    if (response.kind() !=
-        ExactMortonTriangularBlockPairResponseKind::anchor_split) {
+    if (response.kind() ==
+            ExactMortonTriangularBlockPairResponseKind::certified_closed ||
+        response.kind() ==
+            ExactMortonTriangularBlockPairResponseKind::
+                terminal_singleton_cross_block) {
+      if (response.kind() ==
+          ExactMortonTriangularBlockPairResponseKind::
+              terminal_singleton_cross_block) {
+        require(
+            response.anchor_leaf_end() == response.anchor_leaf_begin() + 1U &&
+                response.query_leaf_end() == response.query_leaf_begin() + 1U &&
+                response.opened_unordered_pair_count() == 1U,
+            "a symmetric terminal is not singleton x singleton");
+      }
       insert_range_pairs(
           run,
           index,
@@ -220,6 +239,23 @@ void test_permuted_eight_point_partition_and_resume() {
 
   const Run roomy = run_schedule(index, cloud, 1024U);
   const Run segmented = run_schedule(index, cloud, 1U);
+  require(
+      !roomy.records.empty() && roomy.records.front().kind != 0U &&
+          roomy.records.front().anchor_begin == 0U &&
+          roomy.records.front().anchor_end ==
+              roomy.records.front().query_begin &&
+          roomy.records.front().query_end == cloud.size(),
+      "cross-block priority did not expose the root cross before a self");
+  require(
+      std::any_of(
+          roomy.records.begin(),
+          roomy.records.end(),
+          [](const SemanticRecord& record) {
+            return record.kind == 3U &&
+                record.anchor_end - record.anchor_begin ==
+                record.query_end - record.query_begin;
+          }),
+      "an equal-mass inconclusive cross did not split query first");
   require(roomy.records == segmented.records,
           "unit budgets changed the triangular semantic schedule");
   require(roomy.self_point_ids == segmented.self_point_ids &&
@@ -244,6 +280,7 @@ void test_permuted_eight_point_partition_and_resume() {
                   28U &&
               audit.certified_cross_block_count > 0U &&
               audit.consumer_anchor_split_count > 0U &&
+              audit.consumer_query_split_count > 0U &&
               audit.opened_singleton_cross_block_count > 0U &&
               audit.maximum_pending_block_pair_count <=
                   exact_morton_triangular_block_pair_maximum_pending_count &&
@@ -258,6 +295,10 @@ void test_permuted_eight_point_partition_and_resume() {
               segmented.audit.oversized_anchor_split_count &&
           roomy.audit.certified_unordered_pair_count ==
               segmented.audit.certified_unordered_pair_count &&
+          roomy.audit.consumer_anchor_split_count ==
+              segmented.audit.consumer_anchor_split_count &&
+          roomy.audit.consumer_query_split_count ==
+              segmented.audit.consumer_query_split_count &&
           roomy.audit.opened_unordered_pair_count ==
               segmented.audit.opened_unordered_pair_count &&
           roomy.audit.budget_exhaustion_count == 0U &&

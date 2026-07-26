@@ -26,11 +26,16 @@ inline constexpr std::size_t
 
 // P8s walks the upper triangle of one certified native LBVH.  A diagonal
 // authority T(N) is partitioned as T(L), C(L,R), T(R).  A cross authority is
-// either closed by a consumer certificate or split only along its anchor
-// node.  The fixed stack is independent of the number of points and no
-// dual-tree or output-pair arena is retained.
+// either closed by a consumer certificate or split along a native LBVH node.
+// The optional symmetric policy splits the larger side (query first on a
+// tie), while the default preserves the Phase 14S anchor-only behavior.  A
+// separate opt-in changes only traversal order by visiting C(L,R) first.  The
+// fixed stack is independent of the number of points and no dual-tree or
+// output-pair arena is retained.
 struct ExactMortonTriangularBlockPairScheduleConfig {
   std::size_t maximum_anchor_count_per_cross_block{};
+  bool use_symmetric_inconclusive_cross_block_splitting{false};
+  bool prioritize_cross_blocks{false};
 
   friend bool operator==(
       const ExactMortonTriangularBlockPairScheduleConfig&,
@@ -79,6 +84,7 @@ struct ExactMortonTriangularBlockPairScheduleAudit {
   std::size_t certified_unordered_pair_count{};
   std::size_t inconclusive_cross_block_count{};
   std::size_t consumer_anchor_split_count{};
+  std::size_t consumer_query_split_count{};
   std::size_t opened_singleton_cross_block_count{};
   std::size_t opened_unordered_pair_count{};
   std::size_t maximum_pending_block_pair_count{};
@@ -198,6 +204,7 @@ enum class ExactMortonTriangularBlockPairDecision : std::uint8_t {
 enum class ExactMortonTriangularBlockPairResponseKind : std::uint8_t {
   certified_closed,
   anchor_split,
+  query_split,
   terminal_singleton_cross_block,
 };
 
@@ -272,7 +279,7 @@ class ExactMortonTriangularBlockPairScheduleContext {
   static constexpr std::string_view public_status = "not_claimed";
   static constexpr std::string_view phase_marker = "phase14S_P8s";
   static constexpr std::string_view proof_basis =
-      "native_lbvh_upper_triangle_TL_CLR_TR_fixed_stack_anchor_only_opening_v1";
+      "native_lbvh_upper_triangle_TL_CLR_TR_fixed_stack_optional_mass_balanced_opening_v2";
 
   [[nodiscard]] static ExactMortonTriangularBlockPairScheduleContext start(
       const spatial::MortonLbvhIndex& index,
@@ -336,9 +343,10 @@ class ExactMortonTriangularBlockPairScheduleContext {
       const spatial::CanonicalPointCloud&,
       ExactMortonTriangularBlockPairScheduleBudget) && = delete;
 
-  // A certified response closes |A||Q| unordered pairs.  An inconclusive
-  // response splits native A when possible; a singleton A becomes the only
-  // terminal opened shape in this first P8s tranche.
+  // A certified response closes |A||Q| unordered pairs.  By default an
+  // inconclusive response preserves Phase 14S and splits native A only.  The
+  // opt-in symmetric policy splits the larger non-leaf side, choosing Q on a
+  // tie, and opens a terminal authority only at singleton x singleton.
   [[nodiscard]] ExactMortonTriangularBlockPairResponse respond_to_cross_block(
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
@@ -380,6 +388,9 @@ class ExactMortonTriangularBlockPairScheduleContext {
       const spatial::MortonLbvhIndex& index,
       const PendingBlockPair& authority);
   void push_anchor_partition(
+      const spatial::MortonLbvhIndex& index,
+      const PendingBlockPair& authority);
+  void push_query_partition(
       const spatial::MortonLbvhIndex& index,
       const PendingBlockPair& authority);
   void finish_if_partition_complete();
