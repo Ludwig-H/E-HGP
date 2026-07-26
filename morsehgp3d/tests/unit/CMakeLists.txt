@@ -869,6 +869,19 @@ if(UNIX)
   )
 
   add_executable(
+    morsehgp3d_sparse_anchored_pair_chunk_run_tests
+    test_sparse_anchored_pair_chunk_run.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_sparse_anchored_pair_chunk_run_tests
+    PRIVATE morsehgp3d::sparse_anchored_pair_chunk_run
+  )
+  target_compile_options(
+    morsehgp3d_sparse_anchored_pair_chunk_run_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+
+  add_executable(
     morsehgp3d_hierarchy_direct_morse_chunk_run_tests
     test_hierarchy_direct_morse_chunk_run.cpp
   )
@@ -1643,6 +1656,7 @@ if(UNIX)
   list(
     APPEND _morsehgp3d_cpu_test_targets
     morsehgp3d_hierarchy_atomic_linear_run_store_tests
+    morsehgp3d_sparse_anchored_pair_chunk_run_tests
     morsehgp3d_hierarchy_direct_morse_chunk_run_tests
     morsehgp3d_hierarchy_pair_support_stream_durable_tests
   )
@@ -2472,6 +2486,10 @@ if(UNIX)
   add_test(
     NAME morsehgp3d.hierarchy_atomic_linear_run_store
     COMMAND morsehgp3d_hierarchy_atomic_linear_run_store_tests
+  )
+  add_test(
+    NAME morsehgp3d.sparse_anchored_pair_chunk_run
+    COMMAND morsehgp3d_sparse_anchored_pair_chunk_run_tests
   )
   add_test(
     NAME morsehgp3d.hierarchy_direct_morse_chunk_run

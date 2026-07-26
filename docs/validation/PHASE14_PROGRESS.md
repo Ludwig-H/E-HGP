@@ -440,6 +440,16 @@ Le runner distingue désormais `grouped_logical_signs` de l'alias historique `gr
 
 La fixture courte du runner compte 78 signes logiques, dont 7 filtrés négatifs, 37 positifs et 34 fallbacks exacts; 22 préparations évaluent 86 scores, tous finis. L'unique gate `uniform_latin`, $n=50\,000$, $K=10$, s'arrête avec le code 2 à `total_grouped_traversal_exact_predicate_capacity`. Ses 20 000 signes logiques se partagent en 797 négatifs, 15 451 positifs et 3 752 fallbacks; 491 préparations évaluent 31 424 scores. Il visite 26 blocs croisés, en certifie trois, partage 14 fois le côté ancre et ne produit aucun record. Le pipeline, l'autorité terminale et le résultat scientifique restent absents; aucun temps incomplet ne constitue un SLO et aucun second gate 50 k n'est exécuté.
 
+## Incrément 14V — flux P8l borné et reprenable
+
+14V ajoute `ExactSparseAnchoredPairRecordSegment` puis un adaptateur vers `AtomicLinearRunStore`. Les offsets de records et de références, les audits et les caps restent cumulatifs après chaque drain; la session ne peut plus sceller une autorité résidente après le premier drain. Chaque transition est reconstruite depuis les autorités nuage/LBVH, réencodée canoniquement et comparée octet par octet avant publication ou reprise.
+
+Le CTest court GCC Release publie un chunk, détruit le contexte, rouvre avec l'ancre de `HEAD`, rejoue le préfixe et termine la fixture en 0,03 seconde. La concaténation des projections est exactement celle de P8l résident et l'audit cumulatif ne diffère que par la révocation attendue de `retained_records_certified`. Le store et le contexte annoncent zéro historique résident, paire globale, facette/coface globale, cellule Gamma ou cellule de Delaunay d'ordre supérieur. Le CTest P8l séparé passe en 0,05 seconde sous GCC et 0,06 seconde sous Clang.
+
+<!-- TODO 14V perfectionné : dupliquer au niveau applicatif toute la matrice de fautes déjà couverte par le store générique, mesurer la ressource-gate, sérialiser un curseur P8l compact pour éviter le rejeu froid linéaire, puis connecter les supports 3--4. -->
+
+Cet incrément rend les sorties de paires bornées et reprenables, mais ne réduit pas le nombre de décisions de paires. Phase 14 reste `ready`, Phase 15 `in_progress`, `deployment_status=architecture_only`, `public_status=not_claimed`; aucun nouveau test 50 k, 10 M+, CUDA ou GCP n'est lancé.
+
 ## Priorités de développement
 
 1. externaliser immédiatement les records P8l en chunks bornés et les lier au `AtomicLinearRunStore`, avec rejeu authentifié depuis les autorités nuage/LBVH et reprise depuis `HEAD`; le mode résident doit rester bit à bit comparable.

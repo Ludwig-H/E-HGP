@@ -1085,7 +1085,7 @@ ExactGroupedAnchoredPairTraversalContext::advance(
             witness_root.leaf_end};
         pending_witness_subtree_node_count_ = 1U;
       }
-      active_node_.emplace();
+      active_node_.emplace(ActiveNode{});
       active_node_->authority = authority;
       active_node_->query_bounds = query_bounds;
       prepare_floating_witness_order(*active_node_);

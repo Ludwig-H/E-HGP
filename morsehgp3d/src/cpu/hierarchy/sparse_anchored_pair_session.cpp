@@ -213,11 +213,114 @@ candidate_total_capacity_reason(
   return std::get<ExactPairSupportExtraShellDiagnostic>(record).support_ids;
 }
 
+struct RecordPopulation {
+  std::size_t record_count{};
+  std::size_t event_count{};
+  std::size_t diagnostic_count{};
+  std::size_t point_id_reference_count{};
+};
+
+[[nodiscard]] bool observe_record_population(
+    std::span<const ExactSparseAnchoredPairRecord> records,
+    RecordPopulation& population) noexcept {
+  population = {};
+  population.record_count = records.size();
+  for (const ExactSparseAnchoredPairRecord& record : records) {
+    std::size_t reference_count = 0U;
+    if (const auto* event = std::get_if<ExactPairSupportEvent>(&record)) {
+      if (population.event_count ==
+              std::numeric_limits<std::size_t>::max() ||
+          event->interior_ids.size() >
+              std::numeric_limits<std::size_t>::max() - 2U) {
+        return false;
+      }
+      ++population.event_count;
+      reference_count = 2U + event->interior_ids.size();
+    } else {
+      const auto& diagnostic =
+          std::get<ExactPairSupportExtraShellDiagnostic>(record);
+      if (population.diagnostic_count ==
+              std::numeric_limits<std::size_t>::max() ||
+          diagnostic.interior_ids.size() >
+              std::numeric_limits<std::size_t>::max() - 3U) {
+        return false;
+      }
+      ++population.diagnostic_count;
+      reference_count = 3U + diagnostic.interior_ids.size();
+    }
+    if (reference_count >
+        std::numeric_limits<std::size_t>::max() -
+            population.point_id_reference_count) {
+      return false;
+    }
+    population.point_id_reference_count += reference_count;
+  }
+  return sum_equals(
+      population.event_count,
+      population.diagnostic_count,
+      population.record_count);
+}
+
+[[nodiscard]] bool cumulative_record_partition_holds(
+    const ExactSparseAnchoredPairSessionAudit& audit,
+    const RecordPopulation& released,
+    const RecordPopulation& resident) noexcept {
+  return sum_equals(
+             released.event_count,
+             released.diagnostic_count,
+             released.record_count) &&
+      sum_equals(
+          released.record_count,
+          resident.record_count,
+          audit.emitted_record_count) &&
+      sum_equals(
+          released.event_count,
+          resident.event_count,
+          audit.accepted_event_count) &&
+      sum_equals(
+          released.diagnostic_count,
+          resident.diagnostic_count,
+          audit.relevant_extra_shell_diagnostic_count) &&
+      sum_equals(
+          released.point_id_reference_count,
+          resident.point_id_reference_count,
+          audit.emitted_point_id_reference_count);
+}
+
+[[nodiscard]] bool released_prefix_matches_resident_size(
+    const ExactSparseAnchoredPairSessionAudit& audit,
+    const RecordPopulation& released,
+    std::size_t resident_record_count) noexcept {
+  return sum_equals(
+             audit.accepted_event_count,
+             audit.relevant_extra_shell_diagnostic_count,
+             audit.emitted_record_count) &&
+      sum_equals(
+          released.event_count,
+          released.diagnostic_count,
+          released.record_count) &&
+      released.event_count <= audit.accepted_event_count &&
+      released.diagnostic_count <=
+          audit.relevant_extra_shell_diagnostic_count &&
+      released.point_id_reference_count <=
+          audit.emitted_point_id_reference_count &&
+      sum_equals(
+          released.record_count,
+          resident_record_count,
+          audit.emitted_record_count);
+}
+
 [[nodiscard]] bool raw_terminal_invariants_hold(
     const ExactMortonGroupedAnchoredPairCandidateContext& cursor,
     const ExactSparseAnchoredPairSessionTotalCapacity& capacity,
     const ExactSparseAnchoredPairSessionAudit& audit,
+    const RecordPopulation& released,
     std::span<const ExactSparseAnchoredPairRecord> records) noexcept {
+  RecordPopulation resident;
+  if (!observe_record_population(records, resident) ||
+      !cumulative_record_partition_holds(audit, released, resident)) {
+    return false;
+  }
   const bool triangular =
       cursor.schedule_config().use_triangular_block_pair_schedule;
   const ExactMortonGroupedAnchoredPairScheduleAudit& schedule =
@@ -260,7 +363,6 @@ candidate_total_capacity_reason(
           audit.relevant_extra_shell_diagnostic_count,
           audit.emitted_record_count) ||
       audit.candidate_record_ready_count != audit.emitted_record_count ||
-      audit.emitted_record_count != records.size() ||
       !physical_candidate_partition_holds || !directed_coverage_holds) {
     return false;
   }
@@ -373,39 +475,7 @@ candidate_total_capacity_reason(
     return false;
   }
 
-  std::size_t observed_event_count = 0U;
-  std::size_t observed_diagnostic_count = 0U;
-  std::size_t observed_reference_count = 0U;
-  for (const ExactSparseAnchoredPairRecord& record : records) {
-    if (std::holds_alternative<ExactPairSupportEvent>(record)) {
-      if (observed_event_count == std::numeric_limits<std::size_t>::max()) {
-        return false;
-      }
-      ++observed_event_count;
-    } else {
-      if (observed_diagnostic_count ==
-          std::numeric_limits<std::size_t>::max()) {
-        return false;
-      }
-      ++observed_diagnostic_count;
-    }
-    const std::size_t references =
-        std::holds_alternative<ExactPairSupportEvent>(record)
-        ? 2U + std::get<ExactPairSupportEvent>(record).interior_ids.size()
-        : 3U +
-            std::get<ExactPairSupportExtraShellDiagnostic>(record)
-                .interior_ids.size();
-    if (references >
-        std::numeric_limits<std::size_t>::max() -
-            observed_reference_count) {
-      return false;
-    }
-    observed_reference_count += references;
-  }
-  return observed_event_count == audit.accepted_event_count &&
-      observed_diagnostic_count ==
-          audit.relevant_extra_shell_diagnostic_count &&
-      observed_reference_count == audit.emitted_point_id_reference_count;
+  return true;
 }
 
 static_assert(
@@ -470,7 +540,7 @@ bool ExactSparseAnchoredPairTerminalAuthority::
       audit_.retained_records_certified &&
       audit_.no_forbidden_global_structure_materialized &&
       raw_terminal_invariants_hold(
-          *terminal_cursor_, total_capacity_, audit_, records_);
+          *terminal_cursor_, total_capacity_, audit_, {}, records_);
 }
 
 std::size_t ExactSparseAnchoredPairTerminalAuthority::maximum_closed_rank()
@@ -568,6 +638,48 @@ bool ExactSparseAnchoredPairSession::validated_for(
   return ready() && candidate_cursor_.validated_for(index, cloud) &&
       (!active_classifier_.has_value() ||
        active_classifier_->validated_for(index, cloud));
+}
+
+ExactSparseAnchoredPairRecordSegment
+ExactSparseAnchoredPairSession::release_unsealed_record_segment() & {
+  if (!ready() || audit_.poisoned) {
+    throw std::logic_error(
+        "only a ready unpoisoned sparse anchored session can release a record segment");
+  }
+
+  const RecordPopulation released{
+      released_record_count_,
+      released_event_count_,
+      released_relevant_extra_shell_diagnostic_count_,
+      released_point_id_reference_count_};
+  RecordPopulation resident;
+  if (!observe_record_population(records_, resident) ||
+      !cumulative_record_partition_holds(audit_, released, resident)) {
+    poison();
+    throw std::logic_error(
+        "the sparse anchored resident record suffix lost its cumulative audit");
+  }
+
+  ExactSparseAnchoredPairRecordSegment segment;
+  segment.first_output_record_index = released_record_count_;
+  segment.first_output_point_id_reference_index =
+      released_point_id_reference_count_;
+  segment.event_count = resident.event_count;
+  segment.relevant_extra_shell_diagnostic_count =
+      resident.diagnostic_count;
+  segment.point_id_reference_count =
+      resident.point_id_reference_count;
+  segment.records.swap(records_);
+
+  released_record_count_ = audit_.emitted_record_count;
+  released_event_count_ = audit_.accepted_event_count;
+  released_relevant_extra_shell_diagnostic_count_ =
+      audit_.relevant_extra_shell_diagnostic_count;
+  released_point_id_reference_count_ =
+      audit_.emitted_point_id_reference_count;
+  record_segment_released_ = true;
+  audit_.retained_records_certified = false;
+  return segment;
 }
 
 ExactSparseAnchoredPairSessionStep
@@ -888,7 +1000,13 @@ ExactSparseAnchoredPairSession::commit_ready_record(
       records_.size(),
       1U,
       "the sparse anchored retained-record count overflows size_t");
-  if (records_.size() != audit_.emitted_record_count ||
+  const RecordPopulation released{
+      released_record_count_,
+      released_event_count_,
+      released_relevant_extra_shell_diagnostic_count_,
+      released_point_id_reference_count_};
+  if (!released_prefix_matches_resident_size(
+          audit_, released, records_.size()) ||
       required_record_count >
           total_capacity_.maximum_output_record_count) {
     poison();
@@ -981,7 +1099,7 @@ ExactSparseAnchoredPairSession::commit_ready_record(
         "the sparse anchored diagnostic count overflows size_t");
   }
 
-  const std::size_t output_record_index = records_.size();
+  const std::size_t output_record_index = audit_.emitted_record_count;
   records_.push_back(std::move(record));
   audit_ = next_audit;
   active_classifier_.reset();
@@ -1002,10 +1120,15 @@ ExactSparseAnchoredPairSession::commit_ready_record(
 }
 
 bool ExactSparseAnchoredPairSession::terminal_invariants_hold() const noexcept {
+  const RecordPopulation released{
+      released_record_count_,
+      released_event_count_,
+      released_relevant_extra_shell_diagnostic_count_,
+      released_point_id_reference_count_};
   return !pending_support_ids_.has_value() &&
       !active_classifier_.has_value() && !total_capacity_exhausted_ &&
       raw_terminal_invariants_hold(
-          candidate_cursor_, total_capacity_, audit_, records_);
+          candidate_cursor_, total_capacity_, audit_, released, records_);
 }
 
 ExactSparseAnchoredPairSessionStep ExactSparseAnchoredPairSession::advance(
@@ -1114,7 +1237,8 @@ ExactSparseAnchoredPairSessionStep ExactSparseAnchoredPairSession::advance(
     audit_.orientation_partition_certified = true;
     audit_.candidate_classification_partition_certified = true;
     audit_.output_partition_certified = true;
-    audit_.retained_records_certified = true;
+    audit_.retained_records_certified =
+        !record_segment_released_;
     audit_.no_forbidden_global_structure_materialized =
         candidate_cursor_.audit()
             .no_dynamic_candidate_or_output_arena_materialized &&
@@ -1332,7 +1456,8 @@ ExactSparseAnchoredPairSessionStep ExactSparseAnchoredPairSession::advance(
       audit_.orientation_partition_certified = true;
       audit_.candidate_classification_partition_certified = true;
       audit_.output_partition_certified = true;
-      audit_.retained_records_certified = true;
+      audit_.retained_records_certified =
+          !record_segment_released_;
       audit_.no_forbidden_global_structure_materialized =
           candidate_cursor_.audit()
               .no_dynamic_candidate_or_output_arena_materialized &&

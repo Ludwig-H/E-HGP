@@ -18,6 +18,28 @@ using ExactSparseAnchoredPairRecord =
     std::variant<ExactPairSupportEvent,
                  ExactPairSupportExtraShellDiagnostic>;
 
+// One non-authoritative handoff of the records retained since the
+// preceding release.  The offsets are global in the owning session, so a
+// future bounded durable sink can concatenate segments without retaining the
+// complete output vector.  Releasing even an empty segment irreversibly opts
+// the session out of the resident terminal-authority path.
+struct ExactSparseAnchoredPairRecordSegment {
+  std::size_t first_output_record_index{};
+  std::size_t first_output_point_id_reference_index{};
+  std::size_t event_count{};
+  std::size_t relevant_extra_shell_diagnostic_count{};
+  std::size_t point_id_reference_count{};
+  std::vector<ExactSparseAnchoredPairRecord> records;
+
+  [[nodiscard]] std::size_t record_count() const noexcept {
+    return records.size();
+  }
+
+  friend bool operator==(
+      const ExactSparseAnchoredPairRecordSegment&,
+      const ExactSparseAnchoredPairRecordSegment&) = default;
+};
+
 enum class ExactSparseAnchoredPairRecordKind : std::uint8_t {
   event,
   relevant_extra_shell_diagnostic,
@@ -406,6 +428,14 @@ class ExactSparseAnchoredPairSession {
   [[nodiscard]] std::span<const ExactSparseAnchoredPairRecord> records() const
       && = delete;
 
+  // Moves only the currently resident suffix.  Scientific audit counters stay
+  // cumulative, while subsequent record indices and segment offsets remain
+  // global.  This handoff is not an authority or a durable publication.
+  [[nodiscard]] ExactSparseAnchoredPairRecordSegment
+  release_unsealed_record_segment() &;
+  ExactSparseAnchoredPairRecordSegment
+  release_unsealed_record_segment() && = delete;
+
   [[nodiscard]] ExactSparseAnchoredPairSessionStep advance(
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,
@@ -471,10 +501,15 @@ class ExactSparseAnchoredPairSession {
       active_classifier_;
   std::size_t active_classifier_node_visit_count_{};
   std::vector<ExactSparseAnchoredPairRecord> records_;
+  std::size_t released_record_count_{};
+  std::size_t released_event_count_{};
+  std::size_t released_relevant_extra_shell_diagnostic_count_{};
+  std::size_t released_point_id_reference_count_{};
   ExactSparseAnchoredPairSessionAudit audit_{};
   ExactSparseAnchoredPairSessionStopReason total_capacity_stop_reason_{
       ExactSparseAnchoredPairSessionStopReason::none};
   bool total_capacity_exhausted_{false};
+  bool record_segment_released_{false};
   bool sealed_{false};
 };
 

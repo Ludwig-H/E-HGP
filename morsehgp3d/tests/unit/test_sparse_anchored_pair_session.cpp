@@ -146,6 +146,31 @@ struct CanonicalRecords {
       default;
 };
 
+struct RecordPopulation {
+  std::size_t event_count{};
+  std::size_t diagnostic_count{};
+  std::size_t point_id_reference_count{};
+};
+
+[[nodiscard]] RecordPopulation record_population(
+    std::span<const ExactSparseAnchoredPairRecord> records) {
+  RecordPopulation result;
+  for (const ExactSparseAnchoredPairRecord& record : records) {
+    if (const auto* event = std::get_if<ExactPairSupportEvent>(&record)) {
+      ++result.event_count;
+      result.point_id_reference_count +=
+          2U + event->interior_ids.size();
+    } else {
+      const auto& diagnostic =
+          std::get<ExactPairSupportExtraShellDiagnostic>(record);
+      ++result.diagnostic_count;
+      result.point_id_reference_count +=
+          3U + diagnostic.interior_ids.size();
+    }
+  }
+  return result;
+}
+
 [[nodiscard]] CanonicalRecords canonical_records(
     std::span<const ExactSparseAnchoredPairRecord> records) {
   CanonicalRecords result;
@@ -416,6 +441,303 @@ void test_atomic_output_budgets_and_total_capacity() {
       "a capacity-exhausted session minted terminal authority");
 }
 
+void test_unsealed_record_segment_release() {
+  CanonicalPointCloud cloud = make_line_cloud(4U);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  constexpr std::size_t maximum_closed_rank = 3U;
+  const ExactMortonGroupedAnchoredPairScheduleConfig config{4U, 0U};
+
+  CanonicalPointCloud singleton = make_line_cloud(1U);
+  MortonLbvhIndex singleton_index = MortonLbvhIndex::build(singleton);
+  ExactSparseAnchoredPairSession empty_only =
+      ExactSparseAnchoredPairSession::start(
+          singleton_index,
+          singleton,
+          maximum_closed_rank,
+          config,
+          roomy_capacity());
+  const auto empty_only_initial_audit = empty_only.audit();
+  auto empty_only_first = empty_only.release_unsealed_record_segment();
+  auto empty_only_second = empty_only.release_unsealed_record_segment();
+  require(
+      empty_only_first.first_output_record_index == 0U &&
+          empty_only_first.first_output_point_id_reference_index == 0U &&
+          empty_only_first.record_count() == 0U &&
+          empty_only_second.first_output_record_index == 0U &&
+          empty_only_second.first_output_point_id_reference_index == 0U &&
+          empty_only_second.record_count() == 0U &&
+          empty_only.audit() == empty_only_initial_audit,
+      "repeated empty-only sparse drains changed offsets or audit");
+  bool empty_only_complete = false;
+  for (std::size_t call = 0U; call < 128U; ++call) {
+    const auto step = empty_only.advance(
+        singleton_index,
+        singleton,
+        roomy_budget(maximum_closed_rank));
+    if (step.kind() == ExactSparseAnchoredPairSessionStepKind::complete) {
+      empty_only_complete = true;
+      break;
+    }
+  }
+  require(
+      empty_only_complete && !empty_only.audit().retained_records_certified,
+      "empty sparse drains did not irreversibly leave resident mode");
+  require_throws<std::logic_error>(
+      [&] { static_cast<void>(std::move(empty_only).seal()); },
+      "empty sparse drains still allowed resident authority sealing");
+
+  ExactSparseAnchoredPairSession session = ExactSparseAnchoredPairSession::start(
+      index, cloud, maximum_closed_rank, config, roomy_capacity());
+
+  const auto initial_audit = session.audit();
+  auto first_empty_segment = session.release_unsealed_record_segment();
+  auto second_empty_segment = session.release_unsealed_record_segment();
+  require(
+      first_empty_segment.first_output_record_index == 0U &&
+          first_empty_segment.first_output_point_id_reference_index == 0U &&
+          first_empty_segment.record_count() == 0U &&
+          first_empty_segment.event_count == 0U &&
+          first_empty_segment.relevant_extra_shell_diagnostic_count == 0U &&
+          first_empty_segment.point_id_reference_count == 0U &&
+          second_empty_segment.first_output_record_index == 0U &&
+          second_empty_segment.first_output_point_id_reference_index == 0U &&
+          second_empty_segment.record_count() == 0U &&
+          second_empty_segment.event_count == 0U &&
+          second_empty_segment.relevant_extra_shell_diagnostic_count == 0U &&
+          second_empty_segment.point_id_reference_count == 0U &&
+          session.audit() == initial_audit,
+      "repeated empty sparse segments changed offsets or scientific audit");
+
+  const auto advance_to_record = [&](std::size_t expected_record_index) {
+    for (std::size_t call = 0U; call < 4096U; ++call) {
+      const auto step =
+          session.advance(index, cloud, roomy_budget(maximum_closed_rank));
+      require(
+          step.kind() !=
+              ExactSparseAnchoredPairSessionStepKind::total_capacity_exhausted,
+          "the record-segment fixture exhausted a roomy total capacity");
+      if (step.kind() ==
+          ExactSparseAnchoredPairSessionStepKind::record_committed) {
+        require(
+            step.output_record_index().has_value() &&
+                *step.output_record_index() == expected_record_index,
+            "a released sparse record changed the global output index");
+        return;
+      }
+      require(
+          step.kind() != ExactSparseAnchoredPairSessionStepKind::complete,
+          "the record-segment fixture completed before its next record");
+    }
+    throw std::runtime_error(
+        "the record-segment fixture did not reach its next record");
+  };
+
+  advance_to_record(0U);
+  const auto audit_before_first_release = session.audit();
+  auto first_segment = session.release_unsealed_record_segment();
+  const RecordPopulation first_population =
+      record_population(first_segment.records);
+  require(
+      first_segment.first_output_record_index == 0U &&
+          first_segment.first_output_point_id_reference_index == 0U &&
+          first_segment.record_count() == 1U &&
+          first_segment.event_count == first_population.event_count &&
+          first_segment.relevant_extra_shell_diagnostic_count ==
+              first_population.diagnostic_count &&
+          first_segment.point_id_reference_count ==
+              first_population.point_id_reference_count &&
+          first_segment.event_count +
+                  first_segment.relevant_extra_shell_diagnostic_count ==
+              first_segment.record_count() &&
+          session.records().empty() &&
+          session.audit() == audit_before_first_release,
+      "the first released sparse segment lost its payload or global offsets");
+
+  advance_to_record(1U);
+  const auto audit_before_second_release = session.audit();
+  auto second_segment = session.release_unsealed_record_segment();
+  const RecordPopulation second_population =
+      record_population(second_segment.records);
+  require(
+      second_segment.first_output_record_index ==
+              first_segment.record_count() &&
+          second_segment.first_output_point_id_reference_index ==
+              first_segment.point_id_reference_count &&
+          second_segment.record_count() == 1U &&
+          second_segment.event_count == second_population.event_count &&
+          second_segment.relevant_extra_shell_diagnostic_count ==
+              second_population.diagnostic_count &&
+          second_segment.point_id_reference_count ==
+              second_population.point_id_reference_count &&
+          second_segment.event_count +
+                  second_segment.relevant_extra_shell_diagnostic_count ==
+              second_segment.record_count() &&
+          session.records().empty() &&
+          session.audit() == audit_before_second_release,
+      "the second released sparse segment lost cumulative record accounting");
+
+  bool complete = false;
+  for (std::size_t call = 0U; call < 4096U; ++call) {
+    const auto step =
+        session.advance(index, cloud, roomy_budget(maximum_closed_rank));
+    require(
+        step.kind() !=
+            ExactSparseAnchoredPairSessionStepKind::total_capacity_exhausted,
+        "the continued record-segment session exhausted a roomy capacity");
+    if (step.kind() == ExactSparseAnchoredPairSessionStepKind::complete) {
+      complete = true;
+      break;
+    }
+  }
+  require(complete, "the released record-segment session did not terminate");
+
+  const RecordPopulation resident_population =
+      record_population(session.records());
+  const auto terminal_audit = session.audit();
+  require(
+      terminal_audit.complete && terminal_audit.output_partition_certified &&
+          !terminal_audit.retained_records_certified &&
+          terminal_audit.emitted_record_count ==
+              first_segment.record_count() + second_segment.record_count() +
+                  session.records().size() &&
+          terminal_audit.accepted_event_count ==
+              first_segment.event_count + second_segment.event_count +
+                  resident_population.event_count &&
+          terminal_audit.relevant_extra_shell_diagnostic_count ==
+              first_segment.relevant_extra_shell_diagnostic_count +
+                  second_segment.relevant_extra_shell_diagnostic_count +
+                  resident_population.diagnostic_count &&
+          terminal_audit.emitted_point_id_reference_count ==
+              first_segment.point_id_reference_count +
+                  second_segment.point_id_reference_count +
+                  resident_population.point_id_reference_count,
+      "released-prefix plus resident-suffix terminal identities did not close");
+
+  const auto audit_before_terminal_release = session.audit();
+  auto terminal_segment = session.release_unsealed_record_segment();
+  const RecordPopulation terminal_population =
+      record_population(terminal_segment.records);
+  require(
+      terminal_segment.first_output_record_index ==
+              first_segment.record_count() + second_segment.record_count() &&
+          terminal_segment.first_output_point_id_reference_index ==
+              first_segment.point_id_reference_count +
+                  second_segment.point_id_reference_count &&
+          !terminal_segment.records.empty() &&
+          terminal_segment.event_count == terminal_population.event_count &&
+          terminal_segment.relevant_extra_shell_diagnostic_count ==
+              terminal_population.diagnostic_count &&
+          terminal_segment.point_id_reference_count ==
+              terminal_population.point_id_reference_count &&
+          session.records().empty() &&
+          session.audit() == audit_before_terminal_release,
+      "the terminal sparse segment lost its cumulative offsets or counts");
+
+  require_throws<std::logic_error>(
+      [&] { static_cast<void>(std::move(session).seal()); },
+      "a sparse session with a released segment minted resident authority");
+  require(
+      session.ready() && session.complete() && !session.poisoned() &&
+          !session.audit().retained_records_certified,
+      "a rejected resident seal corrupted the streamed sparse session");
+
+  ExactSparseAnchoredPairSessionTotalCapacity capped_capacity =
+      roomy_capacity();
+  capped_capacity.maximum_output_record_count = 2U;
+  ExactSparseAnchoredPairSession capped = ExactSparseAnchoredPairSession::start(
+      index, cloud, maximum_closed_rank, config, capped_capacity);
+  std::size_t committed_record_count = 0U;
+  std::size_t released_reference_count = 0U;
+  bool total_capacity_stop_seen = false;
+  for (std::size_t call = 0U; call < 4096U; ++call) {
+    const auto step =
+        capped.advance(index, cloud, roomy_budget(maximum_closed_rank));
+    if (step.kind() ==
+        ExactSparseAnchoredPairSessionStepKind::record_committed) {
+      require(
+          step.output_record_index().has_value() &&
+              *step.output_record_index() == committed_record_count,
+          "draining under a total cap reset the global record index");
+      auto segment = capped.release_unsealed_record_segment();
+      require(
+          segment.first_output_record_index == committed_record_count &&
+              segment.first_output_point_id_reference_index ==
+                  released_reference_count &&
+              segment.record_count() == 1U,
+          "a capped sparse segment lost its cumulative offsets");
+      ++committed_record_count;
+      released_reference_count += segment.point_id_reference_count;
+      continue;
+    }
+    if (step.kind() ==
+        ExactSparseAnchoredPairSessionStepKind::total_capacity_exhausted) {
+      require(
+          step.stop_reason() ==
+              ExactSparseAnchoredPairSessionStopReason::
+                  total_output_record_capacity,
+          "a drained cumulative output cap reported the wrong typed axis");
+      total_capacity_stop_seen = true;
+      break;
+    }
+  }
+  require(
+      total_capacity_stop_seen && committed_record_count == 2U &&
+          capped.audit().emitted_record_count == 2U &&
+          capped.audit().emitted_point_id_reference_count ==
+              released_reference_count &&
+          capped.records().empty(),
+      "draining the resident suffix bypassed a cumulative total output cap");
+
+  ExactSparseAnchoredPairSessionTotalCapacity reference_capped_capacity =
+      roomy_capacity();
+  reference_capped_capacity.maximum_output_point_id_reference_count =
+      first_segment.point_id_reference_count;
+  ExactSparseAnchoredPairSession reference_capped =
+      ExactSparseAnchoredPairSession::start(
+          index,
+          cloud,
+          maximum_closed_rank,
+          config,
+          reference_capped_capacity);
+  std::size_t reference_capped_record_count = 0U;
+  bool total_reference_stop_seen = false;
+  for (std::size_t call = 0U; call < 4096U; ++call) {
+    const auto step = reference_capped.advance(
+        index, cloud, roomy_budget(maximum_closed_rank));
+    if (step.kind() ==
+        ExactSparseAnchoredPairSessionStepKind::record_committed) {
+      auto segment =
+          reference_capped.release_unsealed_record_segment();
+      require(
+          segment.first_output_record_index ==
+                  reference_capped_record_count &&
+              segment.first_output_point_id_reference_index == 0U &&
+              segment.point_id_reference_count ==
+                  first_segment.point_id_reference_count,
+          "the reference-capped first segment changed deterministic output");
+      ++reference_capped_record_count;
+      continue;
+    }
+    if (step.kind() ==
+        ExactSparseAnchoredPairSessionStepKind::total_capacity_exhausted) {
+      require(
+          step.stop_reason() ==
+              ExactSparseAnchoredPairSessionStopReason::
+                  total_output_point_id_reference_capacity,
+          "a drained cumulative reference cap reported the wrong typed axis");
+      total_reference_stop_seen = true;
+      break;
+    }
+  }
+  require(
+      total_reference_stop_seen && reference_capped_record_count == 1U &&
+          reference_capped.audit().emitted_record_count == 1U &&
+          reference_capped.audit().emitted_point_id_reference_count ==
+              first_segment.point_id_reference_count &&
+          reference_capped.records().empty(),
+      "draining the resident suffix bypassed a cumulative reference cap");
+}
+
 void test_authority_binding_move_release_and_singleton() {
   CanonicalPointCloud singleton = make_line_cloud(1U);
   MortonLbvhIndex singleton_index = MortonLbvhIndex::build(singleton);
@@ -547,6 +869,7 @@ int main() {
     test_fallback_terminal_matches_p7b();
     test_pruned_segmentation_matches_p7b();
     test_atomic_output_budgets_and_total_capacity();
+    test_unsealed_record_segment_release();
     test_authority_binding_move_release_and_singleton();
   } catch (const std::exception& error) {
     std::cerr << "FAIL: " << error.what() << '\n';
