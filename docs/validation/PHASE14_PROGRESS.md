@@ -306,9 +306,17 @@ Les fixtures permanentes exigent l'identité de la partition terminale avec des 
 
 Le statut devient `validated_short_host_software_and_installed_consumer_architecture_only`. Les deux CTests ciblés P8g/P8h passent sous GCC Release en 0,20 seconde. L'installation/export et le consumer externe passent 1/1 en 0,01 seconde; le consumer lie la cible installée, vérifie les traits publics et appelle réellement `start_at_root` puis `advance`. Aucun benchmark, sanitizer, kernel, test massif ou GCP n'est lancé; aucun SLO 50 k ou chemin 10 M+ n'est revendiqué. Le curseur reste process-local, sans checkpoint durable, ordonnanceur toutes ancres, raccord P8c/P7b ou sortie Morse publique.
 
+## Incrément 14Q P8i — ordonnanceur borné de groupes Morton
+
+P8i implémente `reference_cpu / hgp_reduced / bounded_morton_group_schedule`. Le contexte move-only partitionne l'ordre des feuilles LBVH en groupes Morton contigus d'au plus 32 ancres, trie les ancres par `PointId`, propose au plus 64 témoins hors groupe par halo gauche--droite croissant, puis exécute un seul P8h racine à la fois. Le halo est purement propositionnel et un échec reste fail-open. Les pas transportent l'ordinal et la plage Morton; un terminal ouvert ne copie que les ancres, un arrêt budgétaire aucun tableau, et le pool n'est snapshoté qu'avec un prune ou une frontière de groupe. Seul le certificat P8g imbriqué autorise un prune. Les feuilles et fallbacks restent à orienter puis classifier exactement.
+
+La preuve de complétude combine la partition exhaustive des ancres et l'orientation $p<q$ : le groupe du petit `PointId` est l'unique propriétaire d'une paire; il l'ouvre vers P8c ou la supprime par un P8g commun prouvant qu'elle est hors rang. Le contexte garde seulement un groupe, un pool et une pile P8h, soit $O(G+W+H)$ au-delà du nuage et du LBVH; aucun tableau $32n$, $64n$, ensemble produit de paires, cellule, coface, incidence, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est créé.
+
+Le CTest court compare, sur 20 points, le passage monolithique et la reprise `(1,1)`, avec mêmes terminaux, candidates et travail exact; chaque prune est recertifié par P8g frais. Sur 24 points tridimensionnels dont les ordres Morton et `PointId` diffèrent, cinq groupes dont un dernier de quatre donnent après P8c les mêmes événements et diagnostics que P8b--P8c. Un pool insuffisant force cinq fallbacks, rouvre exactement 276 paires et conserve la même projection scientifique. GCC Release passe en 0,04 seconde, Clang 18 Release en 0,05 seconde, et l'installation/export avec consumer réel passe 1/1 en 0,01 seconde. Aucun benchmark, sanitizer, CUDA, test massif ou GCP n'est lancé; `deployment_status=architecture_only` et `public_status=not_claimed` restent inchangés.
+
 ## Priorités de développement
 
-1. raccorder un ordonnanceur borné et Morton-cohérent de groupes au parcours P8h, puis exécuter un différentiel CPU court contre les certificats P8g frais et le chemin candidat ancré exact; aucun nouveau gate GCP à 4 096 ou 50 k ne précède cette identité, et les banques device, P8c/P7b, le vrai `warm_e2e` ainsi que l'externalisation 10 M+ restent en aval.
+1. ajouter un curseur borné et reprenable qui développe au plus une paire orientée à la fois depuis P8i, l'alimente directement dans P8c/P7b sans ensemble global, puis substituer ce flux sparse à la partition implicite des $n(n-1)/2$ paires du runner après un différentiel CPU court; aucun gate GCP ne précède cette substitution, et l'ancien flux reste un oracle borné.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

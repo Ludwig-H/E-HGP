@@ -21,6 +21,7 @@ namespace morsehgp3d::hierarchy {
 class ExactGroupedAnchoredPairPruneCertificate;
 class ExactGroupedAnchoredPairPruneCertifier;
 class ExactGroupedAnchoredPairTraversalContext;
+class ExactMortonGroupedAnchoredPairScheduleContext;
 class ExactHigherSupportAuthorityContext;
 class ExactHigherSupportTerminalAuthority;
 }
@@ -79,6 +80,7 @@ class CanonicalPointCloud {
   friend class hierarchy::ExactGroupedAnchoredPairPruneCertificate;
   friend class hierarchy::ExactGroupedAnchoredPairPruneCertifier;
   friend class hierarchy::ExactGroupedAnchoredPairTraversalContext;
+  friend class hierarchy::ExactMortonGroupedAnchoredPairScheduleContext;
   friend class hierarchy::ExactHigherSupportAuthorityContext;
   friend class hierarchy::ExactHigherSupportTerminalAuthority;
 };
