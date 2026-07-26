@@ -314,9 +314,19 @@ La preuve de complétude combine la partition exhaustive des ancres et l'orienta
 
 Le CTest court compare, sur 20 points, le passage monolithique et la reprise `(1,1)`, avec mêmes terminaux, candidates et travail exact; chaque prune est recertifié par P8g frais. Sur 24 points tridimensionnels dont les ordres Morton et `PointId` diffèrent, cinq groupes dont un dernier de quatre donnent après P8c les mêmes événements et diagnostics que P8b--P8c. Un pool insuffisant force cinq fallbacks, rouvre exactement 276 paires et conserve la même projection scientifique. GCC Release passe en 0,04 seconde, Clang 18 Release en 0,05 seconde, et l'installation/export avec consumer réel passe 1/1 en 0,01 seconde. Aucun benchmark, sanitizer, CUDA, test massif ou GCP n'est lancé; `deployment_status=architecture_only` et `public_status=not_claimed` restent inchangés.
 
+## Incrément 14Q P8j — curseur borné de candidates orientées
+
+P8j implémente `reference_cpu / hgp_reduced / bounded_morton_oriented_candidate_cursor`. Le contexte move-only enveloppe P8i et conserve seulement une plage terminale, un offset de feuille et un offset d'ancre. Chaque comparaison est facturée, l'offset avance avant l'émission et une étape publie au plus une paire $p<q$. Une reprise ne peut donc ni dupliquer, ni perdre cette paire. Un terminal déjà ouvert se draine sans nouvelle avance P8i; les budgets d'avances, d'orientations, de visites et de prédicats sont indépendants et les deux derniers sont agrégés par appel. Les arrêts n'embarquent aucun snapshot P8i; seuls les prunes et frontières rares conservent leur provenance complète. Les étapes sont move-only.
+
+La preuve de complétude P8i est désormais exécutée sans ensemble produit : chaque paire ouverte paraît dans le groupe de son petit `PointId`, les autres orientations sont rejetées et toute omission est un prune P8g authentifié. Le contexte demeure $O(G+W+H)$, sans vecteur de candidates, tableau par paire, cellule, coface, incidence, Gamma ou mosaïque d'ordre supérieur. Le `std::set` du CTest reste un oracle de doublons de 24 points et n'appartient pas au chemin de production.
+
+Le différentiel budget ample contre `(1,1,1,1)` conserve exactement ordre des candidates, prunes, groupes, visites, prédicats et projection scientifique P8c contre P8b--P8c. Le fallback intégral facture $576=276+300$ orientations, candidates et rejets ou auto-couples. Les budgets nuls reprennent la plage sans avance prématurée, le déplacement révoque la source et l'autorité étrangère échoue avant l'audit. Le CTest passe sous GCC Release en 0,18 seconde et Clang 18 Release en 0,08 seconde; installation/export et consumer réel passent 1/1 en 0,01 seconde. Aucun benchmark, sanitizer, CUDA, test massif ou GCP n'est lancé.
+
+Ce jalon ne classe pas encore une candidate de manière reprenable, ne fournit aucune autorité terminale et ne remplace pas le runner. Son fallback reste $\Theta(n^2)$ et aucun plafond total de session ne protège encore le chemin 10 M+. `deployment_status=architecture_only` et `public_status=not_claimed` restent inchangés.
+
 ## Priorités de développement
 
-1. ajouter un curseur borné et reprenable qui développe au plus une paire orientée à la fois depuis P8i, l'alimente directement dans P8c/P7b sans ensemble global, puis substituer ce flux sparse à la partition implicite des $n(n-1)/2$ paires du runner après un différentiel CPU court; aucun gate GCP ne précède cette substitution, et l'ancien flux reste un oracle borné.
+1. extraire l'automate P7b de boule fermée dans un classifieur exact reprenable, terminer cette décision avant de demander la candidate P8j suivante, ajouter un plafond total de session et une autorité terminale sparse, puis substituer ce flux à la partition implicite des $n(n-1)/2$ paires du runner après un différentiel CPU court; aucun gate GCP ne précède cette substitution, et l'ancien flux reste un oracle borné.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

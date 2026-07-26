@@ -1,5 +1,6 @@
 #include "morsehgp3d/hierarchy/anchored_pair_candidate_classifier.hpp"
 #include "morsehgp3d/hierarchy/anchored_pair_witness_bank.hpp"
+#include "morsehgp3d/hierarchy/morton_grouped_anchored_pair_candidate_cursor.hpp"
 #include "morsehgp3d/hierarchy/morton_grouped_anchored_pair_schedule.hpp"
 
 #include "morsehgp3d/exact/point.hpp"
@@ -30,6 +31,12 @@ using morsehgp3d::hierarchy::ExactAnchoredPairWitnessBankBudget;
 using morsehgp3d::hierarchy::ExactGroupedAnchoredPairPruneBudget;
 using morsehgp3d::hierarchy::ExactGroupedAnchoredPairTraversalStepKind;
 using morsehgp3d::hierarchy::ExactGroupedAnchoredPairTraversalWorkBudget;
+using morsehgp3d::hierarchy::ExactMortonGroupedAnchoredPairCandidateAudit;
+using morsehgp3d::hierarchy::ExactMortonGroupedAnchoredPairCandidateContext;
+using morsehgp3d::hierarchy::ExactMortonGroupedAnchoredPairCandidateStep;
+using morsehgp3d::hierarchy::ExactMortonGroupedAnchoredPairCandidateStepKind;
+using morsehgp3d::hierarchy::ExactMortonGroupedAnchoredPairCandidateStopReason;
+using morsehgp3d::hierarchy::ExactMortonGroupedAnchoredPairCandidateWorkBudget;
 using morsehgp3d::hierarchy::ExactMortonGroupedAnchoredPairScheduleAudit;
 using morsehgp3d::hierarchy::ExactMortonGroupedAnchoredPairScheduleConfig;
 using morsehgp3d::hierarchy::ExactMortonGroupedAnchoredPairScheduleContext;
@@ -515,6 +522,344 @@ struct ScientificRecord {
   return candidates;
 }
 
+struct CandidateAuthorityRecord {
+  std::size_t group_ordinal{};
+  std::size_t node_index{};
+  std::size_t leaf_begin{};
+  std::size_t leaf_end{};
+  std::vector<PointId> certified_witness_point_ids;
+
+  friend bool operator==(
+      const CandidateAuthorityRecord&,
+      const CandidateAuthorityRecord&) = default;
+};
+
+struct CandidateCursorRun {
+  std::vector<CandidatePair> candidate_pairs;
+  std::vector<ScientificRecord> scientific_records;
+  std::vector<CandidateAuthorityRecord> prune_records;
+  std::vector<GroupRecord> groups;
+  ExactMortonGroupedAnchoredPairCandidateAudit audit;
+  ExactMortonGroupedAnchoredPairScheduleAudit schedule_audit;
+};
+
+[[nodiscard]] CandidateCursorRun run_candidate_cursor(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::size_t maximum_closed_rank,
+    ExactMortonGroupedAnchoredPairScheduleConfig config,
+    ExactMortonGroupedAnchoredPairCandidateWorkBudget budget) {
+  ExactMortonGroupedAnchoredPairCandidateContext cursor =
+      ExactMortonGroupedAnchoredPairCandidateContext::start(
+          index, cloud, maximum_closed_rank, config);
+  CandidateCursorRun run;
+  std::set<CandidatePair> seen_candidates;
+  const ExactAnchoredPairCandidateClassificationBudget classifier_budget{
+      4U * cloud.size() + 8U};
+  const std::size_t maximum_advance_count =
+      512U * cloud.size() * cloud.size();
+  std::size_t advance_count = 0U;
+  while (!cursor.complete()) {
+    require(
+        advance_count < maximum_advance_count,
+        "the oriented candidate cursor did not make bounded progress");
+    ++advance_count;
+    ExactMortonGroupedAnchoredPairCandidateStep step =
+        cursor.advance(index, cloud, budget);
+    if (step.kind() ==
+        ExactMortonGroupedAnchoredPairCandidateStepKind::budget_exhausted) {
+      require(
+          step.schedule_step() == nullptr,
+          "an oriented cursor budget stop copied a nested schedule payload");
+      continue;
+    }
+    if (step.kind() ==
+        ExactMortonGroupedAnchoredPairCandidateStepKind::candidate_pair) {
+      require(
+          step.support_ids().has_value() &&
+              (*step.support_ids())[0] < (*step.support_ids())[1] &&
+              step.schedule_step() == nullptr &&
+              step.group_ordinal().has_value(),
+          "an oriented cursor candidate lost its canonical provenance");
+      const CandidatePair support_ids = *step.support_ids();
+      require(
+          seen_candidates.insert(support_ids).second,
+          "the oriented candidate cursor emitted a duplicate pair");
+      run.candidate_pairs.push_back(support_ids);
+      const auto classification = classify_exact_anchored_pair_candidate(
+          index,
+          cloud,
+          support_ids,
+          maximum_closed_rank,
+          classifier_budget);
+      require(
+          classification.status !=
+              ExactAnchoredPairCandidateClassificationStatus::
+                  budget_exhausted,
+          "P8c exhausted while consuming an oriented cursor candidate");
+      if (classification.status ==
+          ExactAnchoredPairCandidateClassificationStatus::complete) {
+        run.scientific_records.push_back(ScientificRecord{
+            support_ids,
+            classification.event,
+            classification.relevant_extra_shell_diagnostic});
+      }
+      continue;
+    }
+
+    const auto* schedule_step = step.schedule_step();
+    require(
+        schedule_step != nullptr,
+        "a noncandidate cursor event lost its P8i record");
+    if (step.kind() ==
+        ExactMortonGroupedAnchoredPairCandidateStepKind::certified_prune) {
+      const auto* traversal_step = schedule_step->traversal_step();
+      require(
+          traversal_step != nullptr &&
+              traversal_step->lbvh_node_index().has_value() &&
+              traversal_step->leaf_begin().has_value() &&
+              traversal_step->leaf_end().has_value() &&
+              schedule_step->group_ordinal().has_value(),
+          "an oriented cursor prune lost its P8i/P8h provenance");
+      const auto* certificate = traversal_step->prune_certificate();
+      require(
+          certificate != nullptr &&
+              certificate->certifies(
+                  index,
+                  cloud,
+                  *traversal_step->lbvh_node_index(),
+                  maximum_closed_rank,
+                  schedule_step->anchor_point_ids()),
+          "an oriented cursor prune lost its P8g authority");
+      run.prune_records.push_back(CandidateAuthorityRecord{
+          *schedule_step->group_ordinal(),
+          *traversal_step->lbvh_node_index(),
+          *traversal_step->leaf_begin(),
+          *traversal_step->leaf_end(),
+          copied_ids(certificate->certified_witness_point_ids())});
+    } else if (
+        step.kind() ==
+        ExactMortonGroupedAnchoredPairCandidateStepKind::group_complete) {
+      require(
+          schedule_step->group_ordinal().has_value() &&
+              schedule_step->anchor_leaf_begin().has_value() &&
+              schedule_step->anchor_leaf_end().has_value(),
+          "an oriented cursor group boundary lost its P8i provenance");
+      run.groups.push_back(GroupRecord{
+          *schedule_step->group_ordinal(),
+          *schedule_step->anchor_leaf_begin(),
+          *schedule_step->anchor_leaf_end(),
+          copied_ids(schedule_step->anchor_point_ids()),
+          copied_ids(schedule_step->witness_pool_point_ids())});
+    } else {
+      throw std::logic_error(
+          "the oriented cursor completed before its final group boundary");
+    }
+  }
+  const ExactMortonGroupedAnchoredPairCandidateStep completed =
+      cursor.advance(index, cloud, budget);
+  require(
+      completed.kind() ==
+              ExactMortonGroupedAnchoredPairCandidateStepKind::complete &&
+          completed.cursor_complete_after_step() &&
+          completed.schedule_step() == nullptr,
+      "a completed oriented cursor retained a pending candidate or group");
+  std::sort(
+      run.scientific_records.begin(),
+      run.scientific_records.end(),
+      [](const ScientificRecord& left, const ScientificRecord& right) {
+        return left.support_ids < right.support_ids;
+      });
+  run.audit = cursor.audit();
+  run.schedule_audit = cursor.schedule_audit();
+  return run;
+}
+
+void test_oriented_candidate_cursor_identity_and_budgets() {
+  CanonicalPointCloud cloud = make_three_dimensional_cloud();
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  constexpr std::size_t maximum_closed_rank = 4U;
+  const ExactMortonGroupedAnchoredPairScheduleConfig config{5U, 16U};
+  const CandidateCursorRun roomy = run_candidate_cursor(
+      index,
+      cloud,
+      maximum_closed_rank,
+      config,
+      ExactMortonGroupedAnchoredPairCandidateWorkBudget{
+          4096U, 4096U, 4096U, 4096U});
+  const CandidateCursorRun segmented = run_candidate_cursor(
+      index,
+      cloud,
+      maximum_closed_rank,
+      config,
+      ExactMortonGroupedAnchoredPairCandidateWorkBudget{1U, 1U, 1U, 1U});
+
+  const std::set<CandidatePair> anchored_candidates =
+      anchored_path_candidates(index, cloud, maximum_closed_rank);
+  const std::vector<ScientificRecord> anchored_science = classify_candidates(
+      index, cloud, anchored_candidates, maximum_closed_rank);
+  require(
+      roomy.candidate_pairs == segmented.candidate_pairs &&
+          roomy.scientific_records == segmented.scientific_records &&
+          roomy.prune_records == segmented.prune_records &&
+          roomy.groups == segmented.groups &&
+          roomy.scientific_records == anchored_science,
+      "candidate-cursor segmentation or P8c consumption changed the scientific stream");
+  require(
+      roomy.audit.candidate_pair_count == roomy.candidate_pairs.size() &&
+          roomy.audit.orientation_check_count ==
+              roomy.audit.candidate_pair_count +
+                  roomy.audit.reverse_or_self_orientation_skip_count,
+      "the oriented cursor audit lost its candidate-orientation identity");
+  require(
+      roomy.audit.grouped_traversal_node_visit_count ==
+              segmented.audit.grouped_traversal_node_visit_count &&
+          roomy.audit.grouped_traversal_exact_predicate_count ==
+              segmented.audit.grouped_traversal_exact_predicate_count,
+      "candidate-cursor segmentation changed the exact traversal work");
+  require(
+      roomy.audit.schedule_advance_budget_exhaustion_count == 0U &&
+          roomy.audit.orientation_budget_exhaustion_count == 0U &&
+          roomy.audit.grouped_traversal_budget_exhaustion_count == 0U,
+      "the roomy oriented cursor unexpectedly exhausted a local budget");
+  require(
+      segmented.audit.schedule_advance_budget_exhaustion_count +
+                  segmented.audit.orientation_budget_exhaustion_count +
+                  segmented.audit.grouped_traversal_budget_exhaustion_count >
+              0U,
+      "the segmented oriented cursor did not exercise local exhaustion");
+  require(
+      roomy.audit.complete && segmented.audit.complete &&
+          roomy.audit.no_dynamic_candidate_or_output_arena_materialized &&
+          roomy.schedule_audit.morton_anchor_partition_complete &&
+          segmented.schedule_audit.morton_anchor_partition_complete,
+      "the oriented cursor audit lost its completion or bounded-state identity");
+
+  const ExactMortonGroupedAnchoredPairScheduleConfig fallback_config{5U, 2U};
+  const CandidateCursorRun fallback = run_candidate_cursor(
+      index,
+      cloud,
+      maximum_closed_rank,
+      fallback_config,
+      ExactMortonGroupedAnchoredPairCandidateWorkBudget{
+          4096U, 4096U, 4096U, 4096U});
+  const std::size_t all_pair_count =
+      cloud.size() * (cloud.size() - 1U) / 2U;
+  require(
+      fallback.candidate_pairs.size() == all_pair_count &&
+          fallback.audit.orientation_check_count ==
+              cloud.size() * cloud.size() &&
+          fallback.audit.reverse_or_self_orientation_skip_count ==
+              cloud.size() * (cloud.size() + 1U) / 2U &&
+          fallback.audit.opened_fallback_subtree_range_count ==
+              fallback.groups.size() &&
+          fallback.audit.certified_prune_count == 0U &&
+          fallback.scientific_records == anchored_science,
+      "the oriented fallback cursor lost a pair or changed P8c science");
+}
+
+void test_oriented_candidate_cursor_atomic_local_budgets() {
+  CanonicalPointCloud cloud = make_line_cloud(8U);
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  ExactMortonGroupedAnchoredPairCandidateContext cursor =
+      ExactMortonGroupedAnchoredPairCandidateContext::start(
+          index, cloud, 4U, {4U, 0U});
+  const ExactMortonGroupedAnchoredPairCandidateStep no_schedule_work =
+      cursor.advance(
+          index,
+          cloud,
+          ExactMortonGroupedAnchoredPairCandidateWorkBudget{});
+  require(
+      no_schedule_work.kind() ==
+              ExactMortonGroupedAnchoredPairCandidateStepKind::
+                  budget_exhausted &&
+          no_schedule_work.stop_reason() ==
+              ExactMortonGroupedAnchoredPairCandidateStopReason::
+                  schedule_advance_limit &&
+          no_schedule_work.work() ==
+              morsehgp3d::hierarchy::
+                  ExactMortonGroupedAnchoredPairCandidateStepWork{} &&
+          cursor.audit().schedule_advance_count == 0U,
+      "a zero schedule budget mutated the nested P8i cursor");
+
+  const ExactMortonGroupedAnchoredPairCandidateStep opened_range =
+      cursor.advance(
+          index,
+          cloud,
+          ExactMortonGroupedAnchoredPairCandidateWorkBudget{1U, 0U, 1U, 0U});
+  require(
+      opened_range.kind() ==
+              ExactMortonGroupedAnchoredPairCandidateStepKind::
+                  budget_exhausted &&
+          opened_range.stop_reason() ==
+              ExactMortonGroupedAnchoredPairCandidateStopReason::
+                  orientation_check_limit &&
+          opened_range.work().schedule_advance_count == 1U &&
+          opened_range.work().grouped_traversal_node_visit_count == 1U &&
+          cursor.audit().opened_fallback_subtree_range_count == 1U &&
+          cursor.audit().candidate_pair_count == 0U,
+      "opening a fallback range leaked a candidate through a zero orientation budget");
+
+  std::optional<CandidatePair> first_candidate;
+  for (std::size_t attempt = 0U;
+       attempt < 16U && !first_candidate.has_value();
+       ++attempt) {
+    const ExactMortonGroupedAnchoredPairCandidateStep step = cursor.advance(
+        index,
+        cloud,
+        ExactMortonGroupedAnchoredPairCandidateWorkBudget{0U, 1U, 0U, 0U});
+    require(
+        step.work().schedule_advance_count == 0U,
+        "resuming a pending range advanced P8i prematurely");
+    if (step.kind() ==
+        ExactMortonGroupedAnchoredPairCandidateStepKind::candidate_pair) {
+      first_candidate = step.support_ids();
+    } else {
+      require(
+          step.kind() ==
+                  ExactMortonGroupedAnchoredPairCandidateStepKind::
+                      budget_exhausted &&
+              step.stop_reason() ==
+                  ExactMortonGroupedAnchoredPairCandidateStopReason::
+                      orientation_check_limit,
+          "a one-check pending-range resume changed its typed stop");
+    }
+  }
+  require(
+      first_candidate.has_value() &&
+          (*first_candidate)[0] < (*first_candidate)[1] &&
+          cursor.audit().schedule_advance_count == 1U,
+      "the pending range did not resume to its first oriented candidate");
+
+  ExactMortonGroupedAnchoredPairCandidateContext moved{std::move(cursor)};
+  require(
+      !cursor.ready() && moved.ready(),
+      "moving an oriented candidate cursor did not revoke its source");
+  require_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(cursor.advance(
+            index,
+            cloud,
+            ExactMortonGroupedAnchoredPairCandidateWorkBudget{1U, 1U, 1U, 1U}));
+      },
+      "a moved-from oriented candidate cursor remained usable");
+
+  CanonicalPointCloud other_cloud = make_line_cloud(8U);
+  MortonLbvhIndex other_index = MortonLbvhIndex::build(other_cloud);
+  const std::size_t calls_before = moved.audit().advance_call_count;
+  require_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(moved.advance(
+            other_index,
+            other_cloud,
+            ExactMortonGroupedAnchoredPairCandidateWorkBudget{1U, 1U, 1U, 1U}));
+      },
+      "an oriented candidate cursor accepted a foreign authority");
+  require(
+      moved.audit().advance_call_count == calls_before,
+      "foreign cursor rejection mutated the oriented audit");
+}
+
 void test_morton_partition_fresh_p8g_and_segmented_identity() {
   CanonicalPointCloud cloud = make_line_cloud(20U);
   MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
@@ -721,11 +1066,34 @@ int main() {
   static_assert(
       !std::is_default_constructible_v<
           ExactMortonGroupedAnchoredPairScheduleStep>);
+  static_assert(
+      !std::is_default_constructible_v<
+          ExactMortonGroupedAnchoredPairCandidateContext>);
+  static_assert(
+      !std::is_copy_constructible_v<
+          ExactMortonGroupedAnchoredPairCandidateContext>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          ExactMortonGroupedAnchoredPairCandidateContext>);
+  static_assert(
+      !std::is_move_assignable_v<
+          ExactMortonGroupedAnchoredPairCandidateContext>);
+  static_assert(
+      !std::is_default_constructible_v<
+          ExactMortonGroupedAnchoredPairCandidateStep>);
+  static_assert(
+      !std::is_copy_constructible_v<
+          ExactMortonGroupedAnchoredPairCandidateStep>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          ExactMortonGroupedAnchoredPairCandidateStep>);
 
   try {
     test_morton_partition_fresh_p8g_and_segmented_identity();
     test_exact_anchored_candidate_path_identity_and_fallback();
     test_schedule_validation_move_and_foreign_authority();
+    test_oriented_candidate_cursor_identity_and_budgets();
+    test_oriented_candidate_cursor_atomic_local_budgets();
   } catch (const std::exception& error) {
     std::cerr << "Morton grouped schedule test failure: "
               << error.what() << '\n';

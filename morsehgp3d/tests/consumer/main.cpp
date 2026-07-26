@@ -11,6 +11,7 @@
 #include "morsehgp3d/hierarchy/direct_sparse_gateway_historical_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
 #include "morsehgp3d/hierarchy/grouped_anchored_pair_certificate.hpp"
+#include "morsehgp3d/hierarchy/morton_grouped_anchored_pair_candidate_cursor.hpp"
 #include "morsehgp3d/hierarchy/morton_grouped_anchored_pair_schedule.hpp"
 #include "morsehgp3d/spatial/brute_force.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
@@ -31,6 +32,10 @@ int main() {
       ExactMortonGroupedAnchoredPairScheduleContext;
   using MortonGroupedScheduleStep = morsehgp3d::hierarchy::
       ExactMortonGroupedAnchoredPairScheduleStep;
+  using MortonGroupedCandidateContext = morsehgp3d::hierarchy::
+      ExactMortonGroupedAnchoredPairCandidateContext;
+  using MortonGroupedCandidateStep = morsehgp3d::hierarchy::
+      ExactMortonGroupedAnchoredPairCandidateStep;
   static_assert(!std::is_aggregate_v<GroupedTraversalContext>);
   static_assert(!std::is_default_constructible_v<GroupedTraversalContext>);
   static_assert(!std::is_copy_constructible_v<GroupedTraversalContext>);
@@ -45,6 +50,16 @@ int main() {
       std::is_nothrow_move_constructible_v<MortonGroupedScheduleContext>);
   static_assert(!std::is_move_assignable_v<MortonGroupedScheduleContext>);
   static_assert(!std::is_default_constructible_v<MortonGroupedScheduleStep>);
+  static_assert(
+      !std::is_default_constructible_v<MortonGroupedCandidateContext>);
+  static_assert(!std::is_copy_constructible_v<MortonGroupedCandidateContext>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<MortonGroupedCandidateContext>);
+  static_assert(!std::is_move_assignable_v<MortonGroupedCandidateContext>);
+  static_assert(!std::is_default_constructible_v<MortonGroupedCandidateStep>);
+  static_assert(!std::is_copy_constructible_v<MortonGroupedCandidateStep>);
+  static_assert(
+      std::is_nothrow_move_constructible_v<MortonGroupedCandidateStep>);
 
   static_assert(
       morsehgp3d::hierarchy::
@@ -418,6 +433,34 @@ int main() {
       installed_morton_grouped_schedule.audit().scheduled_anchor_count !=
           cloud.size()) {
     std::cerr << "installed Morton grouped schedule changed semantics\n";
+    return 1;
+  }
+  auto installed_morton_grouped_candidate_cursor =
+      MortonGroupedCandidateContext::start(
+          spatial_index,
+          cloud,
+          2U,
+          morsehgp3d::hierarchy::
+              ExactMortonGroupedAnchoredPairScheduleConfig{3U, 0U});
+  const MortonGroupedCandidateStep installed_oriented_candidate =
+      installed_morton_grouped_candidate_cursor.advance(
+          spatial_index,
+          cloud,
+          morsehgp3d::hierarchy::
+              ExactMortonGroupedAnchoredPairCandidateWorkBudget{
+                  8U, 16U, 8U, 0U});
+  if (installed_oriented_candidate.kind() !=
+          morsehgp3d::hierarchy::
+              ExactMortonGroupedAnchoredPairCandidateStepKind::
+                  candidate_pair ||
+      !installed_oriented_candidate.support_ids().has_value() ||
+      (*installed_oriented_candidate.support_ids())[0] >=
+          (*installed_oriented_candidate.support_ids())[1] ||
+      installed_morton_grouped_candidate_cursor.audit().candidate_pair_count !=
+          1U ||
+      !installed_morton_grouped_candidate_cursor.audit()
+           .no_dynamic_candidate_or_output_arena_materialized) {
+    std::cerr << "installed Morton grouped candidate cursor changed semantics\n";
     return 1;
   }
   if (!nearest.shell_complete() || nearest.strict_below().size() != 0U ||

@@ -251,6 +251,20 @@ class ExactMortonGroupedAnchoredPairScheduleContext {
         : std::nullopt;
   }
 
+  [[nodiscard]] std::optional<std::size_t> active_anchor_leaf_begin() const
+      noexcept {
+    return active_traversal_.has_value()
+        ? std::optional<std::size_t>{active_anchor_leaf_begin_}
+        : std::nullopt;
+  }
+
+  [[nodiscard]] std::optional<std::size_t> active_anchor_leaf_end() const
+      noexcept {
+    return active_traversal_.has_value()
+        ? std::optional<std::size_t>{active_anchor_leaf_end_}
+        : std::nullopt;
+  }
+
   [[nodiscard]] std::span<const spatial::PointId> active_anchor_point_ids()
       const & noexcept {
     return {active_anchor_point_ids_.data(), active_anchor_count_};

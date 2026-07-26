@@ -369,6 +369,7 @@ add_library(
   STATIC
     src/cpu/hierarchy/anchored_pair_witness_bank.cpp
     src/cpu/hierarchy/grouped_anchored_pair_certificate.cpp
+    src/cpu/hierarchy/morton_grouped_anchored_pair_candidate_cursor.cpp
     src/cpu/hierarchy/morton_grouped_anchored_pair_schedule.cpp
 )
 add_library(
