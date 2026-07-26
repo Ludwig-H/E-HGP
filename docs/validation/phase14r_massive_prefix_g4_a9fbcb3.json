@@ -1,0 +1,72 @@
+{
+  "schema": "morsehgp3d.phase14.massive_sparse_pair_prefix_smoke.v1",
+  "git_sha": "a9fbcb3eab6f4472c4a5169dd8179b92051183e7",
+  "backend": "cuda_g4_plus_reference_cpu",
+  "profile": "hgp_reduced",
+  "mode": "massive_sparse_pair_prefix_smoke",
+  "deployment_status": "architecture_only",
+  "public_status": "not_claimed",
+  "point_count": 10000001,
+  "K": 10,
+  "spatial_backend_used": "cuda14m",
+  "spatial_cuda_qualified": true,
+  "input_released_before_spatial_build": true,
+  "builder_released_before_pair_prefix": true,
+  "pipeline_complete": false,
+  "pair_authority_sealed": false,
+  "scientific_result_materialized": false,
+  "massive_product_path_claimed": false,
+  "ten_million_point_capacity_claimed": false,
+  "public_status_claimed": false,
+  "point_count_exceeds_ten_million": true,
+  "prefix": {
+    "requested_advance_count": 1,
+    "executed_advance_count": 1,
+    "work_budget": 64,
+    "last_step_kind": "total_capacity_exhausted",
+    "last_stop_reason": "total_grouped_traversal_exact_predicate_capacity",
+    "session_complete": false,
+    "total_capacity_exhausted": true,
+    "retained_record_count": 0
+  },
+  "work": {
+    "session_advance_calls": 1,
+    "schedule_advances": 1,
+    "orientation_checks": 0,
+    "grouped_node_visits": 2,
+    "grouped_exact_predicates": 64,
+    "classification_node_visits": 0,
+    "maximum_pending_anchor_subgroups": 0
+  },
+  "memory": {
+    "cloud_point_payload_bytes": 1600000160,
+    "cloud_source_index_bytes": 80000008,
+    "lbvh_host_snapshot_bytes": 1840000104,
+    "spatial_fixed_device_byte_capacity": 3082232059,
+    "spatial_required_snapshot_bytes": 1760000096,
+    "peak_host_rss_bytes": 5851394048
+  },
+  "cuda_work": {
+    "kernel_launches": 64,
+    "library_submissions": 1
+  },
+  "timings_ms": {
+    "generation": 14997.149,
+    "canonicalization": 2418.723,
+    "spatial_build": 6349.896,
+    "pair_prefix": 0.052,
+    "total": 23831.153
+  },
+  "forbidden_materialization_counts": {
+    "global_pair_arena": 0,
+    "higher_support_records": 0,
+    "terminal_facade_records": 0,
+    "event_journal_records": 0,
+    "saddle_seed_records": 0,
+    "forest_nodes": 0,
+    "higher_order_delaunay_cells": 0,
+    "cofaces": 0,
+    "incidences": 0,
+    "gamma_structures": 0
+  }
+}

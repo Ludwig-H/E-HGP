@@ -1193,7 +1193,7 @@ P8r fixe le mode `cuda_g4_plus_reference_cpu / hgp_reduced / dynamic_bounded_wit
 
 L'état reste borné par une DFS de 64 visites, dix reçus et dix `PointId`, en plus des tableaux P8q existants. Il n'existe ni arbre dual global, ni arène de paires, ni structure globale de cellules, cofaces, incidences, Gamma ou Delaunay d'ordre supérieur. Les cinq CTests GCC Release ciblés passent en 0,43 seconde. L'unique run final 50 k/$K=10$ s'arrête incomplet avec le code 2 après 177,470 ms malgré 120 prunes couvrant 1 509 560 paires dirigées; le gate inférieur à 0,5 seconde est donc non satisfait.
 
-Le smoke massif local sur 257 points exécute un seul préfixe P8l sans record et garde faux les champs de pipeline complet, autorité scellée, résultat scientifique, capacité 10 M et statut public. Il ne qualifie aucun volume. La porte suivante est une partition exacte bornée bloc LBVH contre bloc LBVH, suivie d'un gate 50 k complet, du sink et du checkpoint de Phase 15, puis du run GCP gardé à 10 000 001 points.
+Le smoke massif passe aussi sur GCP gardé avec `cuda14m`, au SHA exact `a9fbcb3eab6f4472c4a5169dd8179b92051183e7`, pour 10 000 001 points et $K=10$. Il certifie en 23 831,153 ms la génération, la canonicalisation, le constructeur spatial puis un seul préfixe P8l de 0,052 ms, avec un pic RSS de 5 851 394 048 octets et une capacité device de 3 082 232 059 octets. Le préfixe sans record reste incomplet et garde faux les champs de pipeline complet, autorité scellée, résultat scientifique, capacité produit 10 M et statut public. La cible exacte est certifiée `TERMINATED`. La porte suivante demeure une partition exacte bornée bloc LBVH contre bloc LBVH, suivie d'un gate 50 k complet, du sink et du checkpoint de Phase 15.
 
 ## 15. Limites de complexité
 
