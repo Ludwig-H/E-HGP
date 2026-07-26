@@ -45,11 +45,36 @@ using spatial::PointId;
       left + right == expected;
 }
 
+[[nodiscard]] bool three_sum_equals(
+    std::size_t first,
+    std::size_t second,
+    std::size_t third,
+    std::size_t expected) noexcept {
+  return second <= std::numeric_limits<std::size_t>::max() - first &&
+      third <= std::numeric_limits<std::size_t>::max() - first - second &&
+      first + second + third == expected;
+}
+
+[[nodiscard]] bool sum_covers(
+    std::size_t first,
+    std::size_t second,
+    std::size_t value) noexcept {
+  return value <= first || value - first <= second;
+}
+
 [[nodiscard]] bool can_add_within(
     std::size_t current,
     std::size_t increment,
     std::size_t capacity) noexcept {
   return current <= capacity && increment <= capacity - current;
+}
+
+[[nodiscard]] bool bounded_multiple(
+    std::size_t value,
+    std::size_t count,
+    std::size_t bound) noexcept {
+  return count <= std::numeric_limits<std::size_t>::max() / bound &&
+      value <= count * bound;
 }
 
 [[nodiscard]] std::size_t remaining_capacity(
@@ -201,7 +226,45 @@ candidate_total_capacity_reason(
       cursor.audit().opened_unresolved_leaf_range_count !=
           schedule.unresolved_leaf_count ||
       cursor.audit().opened_fallback_subtree_range_count !=
-          schedule.fallback_subtree_count) {
+          schedule.fallback_subtree_count ||
+      !three_sum_equals(
+          schedule.common_traversal_node_visit_count,
+          schedule.anchor_subgroup_node_visit_count,
+          schedule.singleton_node_visit_count,
+          schedule.traversal_node_visit_count) ||
+      !three_sum_equals(
+          schedule.common_exact_predicate_count,
+          schedule.anchor_subgroup_exact_predicate_count,
+          schedule.singleton_exact_predicate_count,
+          schedule.exact_predicate_count) ||
+      schedule.anchor_subgroup_split_count >
+          schedule.prepared_anchor_subgroup_probe_count ||
+      schedule.anchor_subgroup_certified_prune_count >
+          schedule.prepared_anchor_subgroup_probe_count ||
+      !sum_equals(
+          schedule.anchor_subgroup_split_count,
+          schedule.anchor_subgroup_certified_prune_count,
+          schedule.prepared_anchor_subgroup_probe_count) ||
+      schedule.completed_singleton_fallback_count !=
+          schedule.prepared_singleton_fallback_count ||
+      !sum_equals(
+          schedule.anchor_subgroup_certified_anchor_count,
+          schedule.prepared_singleton_fallback_count,
+          schedule.delegated_frontier_anchor_count) ||
+      !bounded_multiple(
+          schedule.proposed_anchor_subgroup_witness_pool_entry_count,
+          schedule.prepared_anchor_subgroup_probe_count,
+          exact_grouped_anchored_pair_maximum_witness_pool_size) ||
+      !bounded_multiple(
+          schedule.proposed_singleton_witness_pool_entry_count,
+          schedule.prepared_singleton_fallback_count,
+          exact_grouped_anchored_pair_maximum_witness_pool_size) ||
+      !sum_covers(
+          schedule.proposed_anchor_subgroup_witness_pool_entry_count,
+          schedule.proposed_singleton_witness_pool_entry_count,
+          schedule.query_facing_fallback_witness_pool_entry_count) ||
+      schedule.maximum_pending_anchor_subgroup_count >
+          exact_grouped_anchored_pair_maximum_anchor_count) {
     return false;
   }
 

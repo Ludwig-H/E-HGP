@@ -223,37 +223,84 @@ def require_success_projection(report: dict[str, object]) -> None:
     for physical_counter in (
         "prepared_groups",
         "completed_groups",
+        "grouped_common_node_visits",
+        "anchor_subgroup_node_visits",
+        "singleton_node_visits",
         "grouped_witness_slots",
         "grouped_inherited_witness_reuses",
         "grouped_exact_predicates",
+        "grouped_common_exact_predicates",
+        "anchor_subgroup_exact_predicates",
+        "singleton_exact_predicates",
         "grouped_strict_witness_discoveries",
         "grouped_diagonal_node_descents",
         "grouped_common_frontiers",
+        "delegated_frontier_anchors",
+        "prepared_anchor_subgroup_probes",
+        "anchor_subgroup_witness_pool_entries",
+        "query_facing_fallback_witness_pool_entries",
+        "anchor_subgroup_splits",
+        "anchor_subgroup_certified_prunes",
+        "anchor_subgroup_certified_anchors",
         "prepared_singleton_fallbacks",
+        "completed_singleton_fallbacks",
         "singleton_witness_pool_entries",
         "singleton_certified_prunes",
+        "maximum_pending_anchor_subgroups",
     ):
         require(
             isinstance(audit.get(physical_counter), int)
             and audit.get(physical_counter, -1) >= 0,
-            f"P8p audit lost physical counter {physical_counter}",
+            f"P8q audit lost physical counter {physical_counter}",
         )
     require(
         audit.get("prepared_groups", 0) == audit.get("completed_groups", -1)
         and audit.get("completed_groups", 0) >= 1,
-        "P8p did not close its prepared Morton groups",
+        "P8q did not close its prepared Morton groups",
     )
     require(
-        audit.get("grouped_common_frontiers", 0)
-        <= audit.get("prepared_singleton_fallbacks", 0)
+        audit.get("grouped_node_visits", -1)
+        == audit.get("grouped_common_node_visits", 0)
+        + audit.get("anchor_subgroup_node_visits", 0)
+        + audit.get("singleton_node_visits", 0)
+        and audit.get("grouped_exact_predicates", -1)
+        == audit.get("grouped_common_exact_predicates", 0)
+        + audit.get("anchor_subgroup_exact_predicates", 0)
+        + audit.get("singleton_exact_predicates", 0),
+        "P8q physical work lanes do not sum to the grouped totals",
+    )
+    require(
+        audit.get("prepared_anchor_subgroup_probes", 0)
+        == audit.get("anchor_subgroup_splits", 0)
+        + audit.get("anchor_subgroup_certified_prunes", 0)
+        and audit.get("completed_singleton_fallbacks", -1)
+        == audit.get("prepared_singleton_fallbacks", 0)
+        and audit.get("delegated_frontier_anchors", 0)
+        == audit.get("anchor_subgroup_certified_anchors", 0)
+        + audit.get("prepared_singleton_fallbacks", 0),
+        "P8q anchor-subrange partition accounting is impossible",
+    )
+    require(
+        audit.get("anchor_subgroup_witness_pool_entries", 0)
+        <= 64 * audit.get("prepared_anchor_subgroup_probes", 0)
         and audit.get("singleton_witness_pool_entries", 0)
         <= 64 * audit.get("prepared_singleton_fallbacks", 0),
-        "P8p singleton fallback accounting is impossible",
+        "P8q bounded fallback-pool accounting is impossible",
+    )
+    require(
+        audit.get("query_facing_fallback_witness_pool_entries", 0)
+        <= audit.get("anchor_subgroup_witness_pool_entries", 0)
+        + audit.get("singleton_witness_pool_entries", 0),
+        "P8q query-facing pool count exceeds all fallback proposals",
+    )
+    require(
+        0 <= audit.get("maximum_pending_anchor_subgroups", -1) <= 32,
+        "P8q exceeded its fixed pending anchor-subgroup stack",
     )
     require(
         audit.get("singleton_certified_prunes", 0)
         <= audit.get("authenticated_prunes", 0),
-        "P8p authenticated fewer prunes than its singleton traversals minted",
+        "P8q authenticated fewer prunes than its singleton traversals minted",
     )
     require(
         audit.get("grouped_inherited_witness_reuses", 1)

@@ -1300,6 +1300,32 @@ void test_frontier_inconclusive_subtree_resumes_stably() {
           roomy.audit().inconclusive_subtree_count == 1U,
       "the roomy grouped frontier published authority for an inconclusive subtree");
 
+  ExactGroupedAnchoredPairTraversalContext node_probe =
+      ExactGroupedAnchoredPairTraversalContext::start_frontier_at_node(
+          fixture.index,
+          fixture.cloud,
+          fixture.anchors,
+          fixture.witness_pool,
+          *roomy_frontier.lbvh_node_index(),
+          2U);
+  const ExactGroupedAnchoredPairTraversalStep node_probe_frontier =
+      node_probe.advance(
+          fixture.index,
+          fixture.cloud,
+          ExactGroupedAnchoredPairTraversalWorkBudget{1U, 1U});
+  require(
+      node_probe_frontier.kind() ==
+              ExactGroupedAnchoredPairTraversalStepKind::
+                  inconclusive_subtree &&
+          node_probe_frontier.lbvh_node_index() ==
+              roomy_frontier.lbvh_node_index() &&
+          node_probe_frontier.leaf_begin() == roomy_frontier.leaf_begin() &&
+          node_probe_frontier.leaf_end() == roomy_frontier.leaf_end() &&
+          node_probe_frontier.work().node_visit_count == 1U &&
+          node_probe_frontier.work().exact_predicate_count == 1U &&
+          node_probe.complete(),
+      "the bounded node frontier probe expanded an inconclusive subtree");
+
   ExactGroupedAnchoredPairTraversalContext segmented =
       ExactGroupedAnchoredPairTraversalContext::start_frontier_at_root(
           fixture.index,

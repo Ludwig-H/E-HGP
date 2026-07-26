@@ -498,6 +498,34 @@ class ExactGroupedAnchoredPairTraversalContext {
       std::span<const spatial::PointId>,
       std::span<const spatial::PointId>,
       std::size_t) = delete;
+
+  // Probe one authenticated subtree with the same common-first semantics.
+  // An off-diagonal inconclusive root is emitted as one frontier instead of
+  // being expanded, which lets P8q partition only the bounded anchor range.
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_frontier_at_node(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      std::span<const spatial::PointId> anchor_point_ids,
+      std::span<const spatial::PointId> witness_pool_point_ids,
+      std::size_t lbvh_node_index,
+      std::size_t maximum_closed_rank);
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_frontier_at_node(
+      const spatial::MortonLbvhIndex&&,
+      const spatial::CanonicalPointCloud&,
+      std::span<const spatial::PointId>,
+      std::span<const spatial::PointId>,
+      std::size_t,
+      std::size_t) = delete;
+  [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext
+  start_frontier_at_node(
+      const spatial::MortonLbvhIndex&,
+      const spatial::CanonicalPointCloud&&,
+      std::span<const spatial::PointId>,
+      std::span<const spatial::PointId>,
+      std::size_t,
+      std::size_t) = delete;
   [[nodiscard]] static ExactGroupedAnchoredPairTraversalContext start_at_root(
       const spatial::MortonLbvhIndex&,
       const spatial::CanonicalPointCloud&&,

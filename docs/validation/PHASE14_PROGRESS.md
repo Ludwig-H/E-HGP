@@ -384,9 +384,25 @@ Les tests permanents authentifient la frontière et son absence d'autorité dire
 
 P8p reste `architecture_only` et `public_status=not_claimed`. Cette preuve logicielle ne qualifie ni le SLO 50 k, ni une capacité 10 M+, ni la levée du garde 50 001; elle ne fournit pas encore le sink externe ou la voie non combinatoire des supports trois--quatre.
 
+## Incrément 14Q P8q — partition récursive des sous-groupes Morton
+
+La porte d'entrée P8q est satisfaite par l'unique diagnostic post-P8p autorisé sur `uniform_latin`, $n=50\,000$, $K=10$. Il s'arrête en 174,871 ms au cap `total_grouped_traversal_exact_predicate_capacity`; la voie paire prend 24,863 ms. Les 360 visites dépensent 20 000 signes exacts et un seul fallback singleton est préparé avant l'arrêt. Comme aucune sortie terminale complète n'est scellée, ce temps reste un diagnostic borné et ne satisfait pas le gate complet à chaud.
+
+P8q implémente `reference_cpu / hgp_reduced / common_first_recursive_anchor_subrange_partition_then_singleton_fallback_v3`. Sur une frontière commune, l'intervalle Morton contigu des ancres est partagé en deux moitiés. Chaque sous-intervalle multi-ancre tente d'abord un certificat P8o au nœud frontière exact : un succès ferme son produit avec toutes les feuilles de requête; un échec produit un événement interne `anchor_subgroup_split` sans autorité et pousse les deux moitiés. Seules les feuilles singleton de cet arbre lancent le parcours P8h complet de P8p.
+
+La couverture découle par induction des unions disjointes $B=B_0\sqcup B_1$ et de la partition P8h de chaque singleton. P8j absorbe les splits sans les publier comme candidates. Chaque prune de sous-groupe ou singleton reste lié au nuage, au LBVH, à la plage d'ancres, au nœud frontière et à un reçu P8g fraîchement recertifié; aucun événement de routage ne devient une décision scientifique.
+
+Le pool de chaque sonde ou singleton reste borné à 64 entrées. Quand la frontière requête se trouve strictement d'un côté de la sous-plage d'ancres dans l'ordre Morton, jusqu'aux trois quarts des slots sont proposés d'abord de ce côté; les cas qui se chevauchent conservent le halo symétrique. Cette orientation n'est qu'une heuristique de proposal. Les audits séparent visites et signes communs, de sous-groupes et singletons; ils recroisent sondes avec splits et prunes, singletons préparés avec terminés, et ancres déléguées avec la masse certifiée plus les feuilles singleton.
+
+L'état garde un contexte commun suspendu, un seul contexte de sonde ou singleton, un pool supplémentaire et une pile fixe d'au plus 32 sous-intervalles. Il ne matérialise ni arbre dual global, matrice groupe--témoin, banque de halos, univers de paires, facette, coface, incidence, cellule, Gamma ou mosaïque de Delaunay d'ordre supérieur. Les sondes internes ajoutent au plus $O(GW\lceil\log_2 G\rceil)$ signes sur une frontière équilibrée; le pire cas singleton $O(GW\lvert T_Q\rvert)$ et les bornes globales précédentes restent ouverts.
+
+La recertification finale ciblée passe 4/4 sous GCC Release en 0,33 seconde : certificat 0,01, ordonnanceur 0,14, session 0,03 et différentiel runner 0,14 seconde. Elle passe aussi 4/4 sous Clang Release en 0,29 seconde : 0,00, 0,10, 0,03 et 0,15 seconde. Ces tests couvrent le démarrage au nœud frontière, l'arbre récursif de sous-plages, la recertification des prunes, les identités d'audit, la stabilité roomy--segmentée et la couture runner; aucun benchmark long, sanitizer, CUDA, test massif ou GCP n'est inclus.
+
+P8q reste `architecture_only` et `public_status=not_claimed`. L'exclusion des témoins appartenant au sous-arbre $Q$, l'héritage des relations strictes entre sondes et le ciblage continu milieu/projection sont des dettes non bloquantes. Dès qu'un test complet à chaud sur 50 000 points et $K=10$ termine en moins de 0,5 seconde, l'optimisation 50 k s'arrête pour ce jalon et le travail passe au sink externe puis au chemin gardé 10 M+.
+
 ## Priorités de développement
 
-1. exécuter exactement une passe P8p bornée `uniform_latin`, 50 000 points, $K=10$; lire séparément descentes diagonales, frontières communes, fallbacks et pools singleton, prunes communes et singleton, slots, réemplois, signes, candidates, visites P8k, couverture du premier groupe et raison d'arrêt, puis analyser le nouvel axe dominant avant toute répétition. Cette passe ne vaut ni SLO ni qualification 10 M+; la voie massive vient ensuite seulement avec un sink externe et des supports supérieurs scalables.
+1. exécuter une seule passe complète à chaud P8q sur `uniform_latin`, 50 000 points, $K=10$; si son total est strictement inférieur à 0,5 seconde, passer immédiatement au sink externe, à la levée gardée du chemin 10 M+ et à la stratégie scalable des supports trois--quatre. Une sortie incomplète ne vaut ni SLO ni qualification massive, et aucun raffinement des trois dettes P8q n'est requis avant ce passage si le seuil est franchi.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

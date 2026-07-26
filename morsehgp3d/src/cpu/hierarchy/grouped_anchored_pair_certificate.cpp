@@ -401,6 +401,25 @@ ExactGroupedAnchoredPairTraversalContext::start_at_node(
       PrivateConstructionTag{});
 }
 
+ExactGroupedAnchoredPairTraversalContext
+ExactGroupedAnchoredPairTraversalContext::start_frontier_at_node(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::span<const PointId> anchor_point_ids,
+    std::span<const PointId> witness_pool_point_ids,
+    std::size_t lbvh_node_index,
+    std::size_t maximum_closed_rank) {
+  return ExactGroupedAnchoredPairTraversalContext(
+      index,
+      cloud,
+      anchor_point_ids,
+      witness_pool_point_ids,
+      lbvh_node_index,
+      maximum_closed_rank,
+      true,
+      PrivateConstructionTag{});
+}
+
 ExactGroupedAnchoredPairTraversalContext::
     ExactGroupedAnchoredPairTraversalContext(
         const MortonLbvhIndex& index,

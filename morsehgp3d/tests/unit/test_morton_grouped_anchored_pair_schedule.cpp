@@ -11,6 +11,7 @@
 #include <array>
 #include <cstddef>
 #include <exception>
+#include <functional>
 #include <limits>
 #include <optional>
 #include <set>
@@ -175,6 +176,21 @@ struct CommonFrontierRecord {
       const CommonFrontierRecord&) = default;
 };
 
+struct AnchorSubgroupSplitRecord {
+  std::size_t event_index{};
+  std::size_t group_ordinal{};
+  std::size_t anchor_leaf_begin{};
+  std::size_t anchor_leaf_end{};
+  std::size_t node_index{};
+  std::size_t leaf_begin{};
+  std::size_t leaf_end{};
+  std::vector<PointId> anchor_point_ids;
+
+  friend bool operator==(
+      const AnchorSubgroupSplitRecord&,
+      const AnchorSubgroupSplitRecord&) = default;
+};
+
 struct GroupRecord {
   std::size_t ordinal{};
   std::size_t anchor_leaf_begin{};
@@ -190,6 +206,7 @@ using CandidatePair = std::array<PointId, 2>;
 struct ScheduleRun {
   std::vector<TerminalRecord> terminals;
   std::vector<CommonFrontierRecord> common_frontiers;
+  std::vector<AnchorSubgroupSplitRecord> anchor_subgroup_splits;
   std::vector<GroupRecord> groups;
   std::set<CandidatePair> candidates;
   ExactMortonGroupedAnchoredPairScheduleAudit audit;
@@ -198,6 +215,25 @@ struct ScheduleRun {
 [[nodiscard]] std::vector<PointId> copied_ids(
     std::span<const PointId> ids) {
   return {ids.begin(), ids.end()};
+}
+
+[[nodiscard]] std::vector<PointId> expected_anchor_point_ids(
+    const MortonLbvhIndex& index,
+    std::size_t anchor_leaf_begin,
+    std::size_t anchor_leaf_end) {
+  require(
+      anchor_leaf_begin < anchor_leaf_end &&
+          anchor_leaf_end <= index.leaves().size(),
+      "an anchor snapshot names an invalid Morton subrange");
+  std::vector<PointId> result;
+  result.reserve(anchor_leaf_end - anchor_leaf_begin);
+  for (std::size_t leaf = anchor_leaf_begin;
+       leaf < anchor_leaf_end;
+       ++leaf) {
+    result.push_back(index.leaves()[leaf].point_id);
+  }
+  std::sort(result.begin(), result.end());
+  return result;
 }
 
 void insert_oriented_candidates(
@@ -292,6 +328,11 @@ void insert_oriented_candidates(
               step.anchor_leaf_begin().has_value() &&
               step.anchor_leaf_end().has_value() &&
               !step.anchor_point_ids().empty() &&
+              copied_ids(step.anchor_point_ids()) ==
+                  expected_anchor_point_ids(
+                      index,
+                      *step.anchor_leaf_begin(),
+                      *step.anchor_leaf_end()) &&
               step.witness_pool_point_ids().empty(),
           "a singleton fallback frontier gained authority or lost its exact range");
       run.common_frontiers.push_back(CommonFrontierRecord{
@@ -305,14 +346,60 @@ void insert_oriented_candidates(
           copied_ids(step.anchor_point_ids())});
       continue;
     }
+    if (step.kind() ==
+        ExactMortonGroupedAnchoredPairScheduleStepKind::
+            anchor_subgroup_split) {
+      const auto* traversal_step = step.traversal_step();
+      require(
+          traversal_step != nullptr &&
+              traversal_step->kind() ==
+                  ExactGroupedAnchoredPairTraversalStepKind::
+                      inconclusive_subtree &&
+              traversal_step->lbvh_node_index().has_value() &&
+              traversal_step->leaf_begin().has_value() &&
+              traversal_step->leaf_end().has_value() &&
+              *traversal_step->leaf_begin() <
+                  *traversal_step->leaf_end() &&
+              traversal_step->prune_certificate() == nullptr &&
+              !traversal_step->unresolved_point_id().has_value() &&
+              step.group_ordinal().has_value() &&
+              step.anchor_leaf_begin().has_value() &&
+              step.anchor_leaf_end().has_value() &&
+              *step.anchor_leaf_end() - *step.anchor_leaf_begin() >= 2U &&
+              copied_ids(step.anchor_point_ids()) ==
+                  expected_anchor_point_ids(
+                      index,
+                      *step.anchor_leaf_begin(),
+                      *step.anchor_leaf_end()) &&
+              step.witness_pool_point_ids().empty(),
+          "an anchor-subgroup split gained authority or lost its exact Morton subrange");
+      run.anchor_subgroup_splits.push_back(AnchorSubgroupSplitRecord{
+          current_event_index,
+          *step.group_ordinal(),
+          *step.anchor_leaf_begin(),
+          *step.anchor_leaf_end(),
+          *traversal_step->lbvh_node_index(),
+          *traversal_step->leaf_begin(),
+          *traversal_step->leaf_end(),
+          copied_ids(step.anchor_point_ids())});
+      continue;
+    }
     require(
         step.kind() !=
             ExactMortonGroupedAnchoredPairScheduleStepKind::complete,
-        "the schedule emitted completion before closing its final group");
+        "the schedule emitted completion before closing its final group after " +
+            std::to_string(event_index) + " scientific/routing events and " +
+            std::to_string(schedule.audit().completed_group_count) +
+            " completed groups");
     require(
         step.group_ordinal().has_value() &&
             step.anchor_leaf_begin().has_value() &&
-            step.anchor_leaf_end().has_value(),
+            step.anchor_leaf_end().has_value() &&
+            copied_ids(step.anchor_point_ids()) ==
+                expected_anchor_point_ids(
+                    index,
+                    *step.anchor_leaf_begin(),
+                    *step.anchor_leaf_end()),
         "a schedule terminal lost its group provenance");
     const auto* traversal_step = step.traversal_step();
     require(
@@ -519,7 +606,7 @@ void validate_group_partition(
           run.audit.no_global_anchor_pair_or_output_arena_materialized,
       "the scheduler did not close its exact anchor partition audit");
 
-  std::size_t expected_singleton_fallback_count = 0U;
+  std::size_t delegated_frontier_anchor_count = 0U;
   for (const CommonFrontierRecord& frontier : run.common_frontiers) {
     require(
         frontier.group_ordinal < run.groups.size(),
@@ -532,32 +619,39 @@ void validate_group_partition(
             frontier.leaf_begin < frontier.leaf_end &&
             frontier.leaf_end <= point_count,
         "a common frontier lost its full-group or LBVH provenance");
-    expected_singleton_fallback_count +=
+    delegated_frontier_anchor_count +=
         frontier.anchor_point_ids.size();
   }
-  const std::size_t expected_singleton_pool_size =
-      point_count == 0U
-      ? 0U
-      : std::min(
-            config.proposed_witness_pool_size,
-            point_count - 1U);
   require(
       run.audit.common_frontier_count == run.common_frontiers.size() &&
-          run.audit.prepared_singleton_fallback_count ==
-              expected_singleton_fallback_count &&
-          run.audit.proposed_singleton_witness_pool_entry_count ==
-              expected_singleton_fallback_count *
-                  expected_singleton_pool_size &&
+          run.audit.delegated_frontier_anchor_count ==
+              delegated_frontier_anchor_count &&
+          run.audit.anchor_subgroup_split_count ==
+              run.anchor_subgroup_splits.size() &&
+          run.audit.maximum_pending_anchor_subgroup_count <=
+              config.maximum_anchor_count_per_group &&
           run.audit.singleton_certified_prune_count <=
               run.audit.certified_prune_count,
-      "the scheduler audit lost its bounded common-to-singleton partition");
+      "the scheduler audit lost its bounded recursive anchor partition");
 }
 
-void validate_common_frontiers_start_singleton_traversals(
-    const ScheduleRun& run) {
+void validate_common_frontier_recursive_anchor_partitions(
+    const MortonLbvhIndex& index,
+    const ScheduleRun& run,
+    ExactMortonGroupedAnchoredPairScheduleConfig config) {
   require(
       !run.common_frontiers.empty(),
-      "the P8p fixture did not open a common frontier");
+      "the P8q fixture did not open a common frontier");
+
+  using AnchorLeafRange = std::pair<std::size_t, std::size_t>;
+  std::size_t expected_subgroup_probe_count = 0U;
+  std::size_t expected_subgroup_pool_entry_count = 0U;
+  std::size_t expected_subgroup_prune_count = 0U;
+  std::size_t expected_subgroup_certified_anchor_count = 0U;
+  std::size_t expected_singleton_fallback_count = 0U;
+  std::size_t expected_singleton_pool_entry_count = 0U;
+  std::size_t expected_singleton_prune_count = 0U;
+
   for (const CommonFrontierRecord& frontier : run.common_frontiers) {
     std::size_t next_frontier_event =
         std::numeric_limits<std::size_t>::max();
@@ -569,36 +663,208 @@ void validate_common_frontiers_start_singleton_traversals(
       }
     }
 
-    std::set<PointId> observed_singleton_anchors;
-    for (const TerminalRecord& terminal : run.terminals) {
-      if (terminal.group_ordinal != frontier.group_ordinal ||
-          terminal.event_index <= frontier.event_index ||
-          terminal.event_index >= next_frontier_event) {
+    const auto belongs_to_frontier = [&](const TerminalRecord& terminal) {
+      return terminal.group_ordinal == frontier.group_ordinal &&
+          terminal.event_index > frontier.event_index &&
+          terminal.event_index < next_frontier_event &&
+          terminal.leaf_begin.has_value() &&
+          terminal.leaf_end.has_value() &&
+          frontier.leaf_begin <= *terminal.leaf_begin &&
+          *terminal.leaf_end <= frontier.leaf_end;
+    };
+
+    std::set<AnchorLeafRange> split_ranges;
+    std::set<AnchorLeafRange> subgroup_prune_ranges;
+    std::set<AnchorLeafRange> singleton_ranges;
+    for (const AnchorSubgroupSplitRecord& split :
+         run.anchor_subgroup_splits) {
+      if (split.group_ordinal != frontier.group_ordinal ||
+          split.event_index <= frontier.event_index ||
+          split.event_index >= next_frontier_event) {
         continue;
       }
-      if (terminal.anchor_point_ids.size() != 1U) {
-        break;
+      const AnchorLeafRange range{
+          split.anchor_leaf_begin, split.anchor_leaf_end};
+      require(
+          frontier.anchor_leaf_begin <= split.anchor_leaf_begin &&
+              split.anchor_leaf_end <= frontier.anchor_leaf_end &&
+              split.anchor_leaf_end - split.anchor_leaf_begin >= 2U &&
+              split.node_index == frontier.node_index &&
+              split.leaf_begin == frontier.leaf_begin &&
+              split.leaf_end == frontier.leaf_end &&
+              split.anchor_point_ids == expected_anchor_point_ids(
+                  index,
+                  split.anchor_leaf_begin,
+                  split.anchor_leaf_end) &&
+              split_ranges.insert(range).second,
+          "a recursive subgroup split is duplicated or escaped its common frontier");
+      ++expected_subgroup_probe_count;
+      expected_subgroup_pool_entry_count += expected_halo(
+          index,
+          split.anchor_leaf_begin,
+          split.anchor_leaf_end,
+          config.proposed_witness_pool_size).size();
+    }
+
+    for (const TerminalRecord& terminal : run.terminals) {
+      if (!belongs_to_frontier(terminal)) {
+        continue;
       }
+      const AnchorLeafRange range{
+          terminal.anchor_leaf_begin, terminal.anchor_leaf_end};
       require(
           terminal.node_index.has_value() &&
               terminal.leaf_begin.has_value() &&
               terminal.leaf_end.has_value() &&
-              frontier.leaf_begin <= *terminal.leaf_begin &&
-              *terminal.leaf_end <= frontier.leaf_end &&
-              std::binary_search(
-                  frontier.anchor_point_ids.begin(),
-                  frontier.anchor_point_ids.end(),
-                  terminal.anchor_point_ids.front()),
-          "a singleton fallback escaped its common frontier or anchor group");
-      observed_singleton_anchors.insert(
-          terminal.anchor_point_ids.front());
+              frontier.anchor_leaf_begin <= terminal.anchor_leaf_begin &&
+              terminal.anchor_leaf_end <= frontier.anchor_leaf_end &&
+              terminal.anchor_point_ids == expected_anchor_point_ids(
+                  index,
+                  terminal.anchor_leaf_begin,
+                  terminal.anchor_leaf_end),
+          "a recursive anchor fallback escaped its common frontier");
+      if (terminal.anchor_point_ids.size() == 1U) {
+        if (singleton_ranges.insert(range).second) {
+          ++expected_singleton_fallback_count;
+          expected_singleton_pool_entry_count += expected_halo(
+              index,
+              terminal.anchor_leaf_begin,
+              terminal.anchor_leaf_end,
+              config.proposed_witness_pool_size).size();
+        }
+        if (terminal.kind ==
+            ExactMortonGroupedAnchoredPairScheduleStepKind::certified_prune) {
+          ++expected_singleton_prune_count;
+        }
+      } else {
+        require(
+            terminal.kind ==
+                    ExactMortonGroupedAnchoredPairScheduleStepKind::
+                        certified_prune &&
+                *terminal.node_index == frontier.node_index &&
+                *terminal.leaf_begin == frontier.leaf_begin &&
+                *terminal.leaf_end == frontier.leaf_end &&
+                subgroup_prune_ranges.insert(range).second,
+            "a subgroup terminal is not one exact prune of its whole frontier");
+        ++expected_subgroup_probe_count;
+        ++expected_subgroup_prune_count;
+        expected_subgroup_certified_anchor_count +=
+            terminal.anchor_point_ids.size();
+        expected_subgroup_pool_entry_count += expected_halo(
+            index,
+            terminal.anchor_leaf_begin,
+            terminal.anchor_leaf_end,
+            config.proposed_witness_pool_size).size();
+      }
+    }
+
+    const auto split_for = [&](AnchorLeafRange range) {
+      return std::find_if(
+          run.anchor_subgroup_splits.begin(),
+          run.anchor_subgroup_splits.end(),
+          [&](const AnchorSubgroupSplitRecord& split) {
+            return split.group_ordinal == frontier.group_ordinal &&
+                split.event_index > frontier.event_index &&
+                split.event_index < next_frontier_event &&
+                split.anchor_leaf_begin == range.first &&
+                split.anchor_leaf_end == range.second;
+          });
+    };
+    const auto first_terminal_event_for = [&](AnchorLeafRange range) {
+      std::size_t event = std::numeric_limits<std::size_t>::max();
+      for (const TerminalRecord& terminal : run.terminals) {
+        if (belongs_to_frontier(terminal) &&
+            terminal.anchor_leaf_begin == range.first &&
+            terminal.anchor_leaf_end == range.second) {
+          event = std::min(event, terminal.event_index);
+        }
+      }
+      return event;
+    };
+
+    std::set<AnchorLeafRange> visited_splits;
+    std::set<AnchorLeafRange> visited_leaves;
+    std::function<void(AnchorLeafRange, std::size_t)> validate_subtree;
+    validate_subtree = [&](AnchorLeafRange range, std::size_t parent_event) {
+      require(
+          frontier.anchor_leaf_begin <= range.first &&
+              range.first < range.second &&
+              range.second <= frontier.anchor_leaf_end,
+          "a recursive anchor child is not a strict Morton subinterval");
+      const auto split = split_for(range);
+      if (split != run.anchor_subgroup_splits.end()) {
+        require(
+            split->event_index > parent_event &&
+                split_ranges.contains(range) &&
+                !subgroup_prune_ranges.contains(range) &&
+                !singleton_ranges.contains(range) &&
+                visited_splits.insert(range).second,
+            "an anchor subrange was both split and terminal, or appeared out of order");
+        const std::size_t midpoint =
+            range.first + (range.second - range.first) / 2U;
+        require(
+            range.first < midpoint && midpoint < range.second,
+            "an anchor-subgroup split did not create two strict children");
+        validate_subtree(
+            AnchorLeafRange{midpoint, range.second}, split->event_index);
+        validate_subtree(
+            AnchorLeafRange{range.first, midpoint}, split->event_index);
+        return;
+      }
+
+      const std::size_t terminal_event = first_terminal_event_for(range);
+      require(
+          terminal_event != std::numeric_limits<std::size_t>::max() &&
+              terminal_event > parent_event &&
+              (subgroup_prune_ranges.contains(range) !=
+               singleton_ranges.contains(range)) &&
+              visited_leaves.insert(range).second,
+          "a recursive anchor child has neither one subgroup prune nor one singleton traversal");
+    };
+
+    const AnchorLeafRange root{
+        frontier.anchor_leaf_begin, frontier.anchor_leaf_end};
+    if (root.second - root.first == 1U) {
+      validate_subtree(root, frontier.event_index);
+    } else {
+      const std::size_t midpoint =
+          root.first + (root.second - root.first) / 2U;
+      require(
+          root.first < midpoint && midpoint < root.second,
+          "a common frontier did not admit two strict initial subgroups");
+      validate_subtree(
+          AnchorLeafRange{midpoint, root.second}, frontier.event_index);
+      validate_subtree(
+          AnchorLeafRange{root.first, midpoint}, frontier.event_index);
     }
     require(
-        observed_singleton_anchors == std::set<PointId>{
-            frontier.anchor_point_ids.begin(),
-            frontier.anchor_point_ids.end()},
-        "a common frontier was not followed by every unit-anchor traversal");
+        visited_splits == split_ranges &&
+            visited_leaves.size() ==
+                subgroup_prune_ranges.size() + singleton_ranges.size(),
+        "the recursive anchor tree retained an unreachable split or terminal");
   }
+
+  require(
+      run.audit.prepared_anchor_subgroup_probe_count ==
+              expected_subgroup_probe_count &&
+          run.audit.proposed_anchor_subgroup_witness_pool_entry_count ==
+              expected_subgroup_pool_entry_count &&
+          run.audit.anchor_subgroup_split_count ==
+              run.anchor_subgroup_splits.size() &&
+          run.audit.anchor_subgroup_certified_prune_count ==
+              expected_subgroup_prune_count &&
+          run.audit.anchor_subgroup_certified_anchor_count ==
+              expected_subgroup_certified_anchor_count &&
+          run.audit.prepared_singleton_fallback_count ==
+              expected_singleton_fallback_count &&
+          run.audit.completed_singleton_fallback_count ==
+              expected_singleton_fallback_count &&
+          run.audit.proposed_singleton_witness_pool_entry_count ==
+              expected_singleton_pool_entry_count &&
+          run.audit.singleton_certified_prune_count ==
+              expected_singleton_prune_count &&
+          run.audit.maximum_pending_anchor_subgroup_count > 0U,
+      "the P8q audit differs from the observed recursive anchor partition");
 }
 
 struct ScientificRecord {
@@ -895,14 +1161,34 @@ void test_oriented_candidate_cursor_identity_and_budgets() {
               segmented.schedule_audit.diagonal_node_descent_count &&
           roomy.schedule_audit.common_frontier_count ==
               segmented.schedule_audit.common_frontier_count &&
+          roomy.schedule_audit.delegated_frontier_anchor_count ==
+              segmented.schedule_audit.delegated_frontier_anchor_count &&
+          roomy.schedule_audit.prepared_anchor_subgroup_probe_count ==
+              segmented.schedule_audit.prepared_anchor_subgroup_probe_count &&
+          roomy.schedule_audit
+                  .proposed_anchor_subgroup_witness_pool_entry_count ==
+              segmented.schedule_audit
+                  .proposed_anchor_subgroup_witness_pool_entry_count &&
+          roomy.schedule_audit.anchor_subgroup_split_count ==
+              segmented.schedule_audit.anchor_subgroup_split_count &&
+          roomy.schedule_audit.anchor_subgroup_certified_prune_count ==
+              segmented.schedule_audit
+                  .anchor_subgroup_certified_prune_count &&
+          roomy.schedule_audit.anchor_subgroup_certified_anchor_count ==
+              segmented.schedule_audit
+                  .anchor_subgroup_certified_anchor_count &&
           roomy.schedule_audit.prepared_singleton_fallback_count ==
               segmented.schedule_audit.prepared_singleton_fallback_count &&
+          roomy.schedule_audit.completed_singleton_fallback_count ==
+              segmented.schedule_audit.completed_singleton_fallback_count &&
           roomy.schedule_audit
                   .proposed_singleton_witness_pool_entry_count ==
               segmented.schedule_audit
                   .proposed_singleton_witness_pool_entry_count &&
           roomy.schedule_audit.singleton_certified_prune_count ==
-              segmented.schedule_audit.singleton_certified_prune_count,
+              segmented.schedule_audit.singleton_certified_prune_count &&
+          roomy.schedule_audit.maximum_pending_anchor_subgroup_count ==
+              segmented.schedule_audit.maximum_pending_anchor_subgroup_count,
       "candidate-cursor segmentation changed the exact traversal work");
   require(
       roomy.audit.schedule_advance_budget_exhaustion_count == 0U &&
@@ -1066,11 +1352,14 @@ void test_morton_partition_fresh_p8g_and_segmented_identity() {
 
   validate_group_partition(index, roomy, config);
   validate_group_partition(index, segmented, config);
-  validate_common_frontiers_start_singleton_traversals(roomy);
-  validate_common_frontiers_start_singleton_traversals(segmented);
+  validate_common_frontier_recursive_anchor_partitions(
+      index, roomy, config);
+  validate_common_frontier_recursive_anchor_partitions(
+      index, segmented, config);
   require(
       roomy.terminals == segmented.terminals &&
           roomy.common_frontiers == segmented.common_frontiers &&
+          roomy.anchor_subgroup_splits == segmented.anchor_subgroup_splits &&
           roomy.groups == segmented.groups &&
           roomy.candidates == segmented.candidates,
       "budget segmentation changed the grouped scientific stream");
@@ -1090,13 +1379,36 @@ void test_morton_partition_fresh_p8g_and_segmented_identity() {
               segmented.audit.diagonal_node_descent_count &&
           roomy.audit.common_frontier_count ==
               segmented.audit.common_frontier_count &&
+          roomy.audit.delegated_frontier_anchor_count ==
+              segmented.audit.delegated_frontier_anchor_count &&
+          roomy.audit.prepared_anchor_subgroup_probe_count ==
+              segmented.audit.prepared_anchor_subgroup_probe_count &&
+          roomy.audit.proposed_anchor_subgroup_witness_pool_entry_count ==
+              segmented.audit
+                  .proposed_anchor_subgroup_witness_pool_entry_count &&
+          roomy.audit.anchor_subgroup_split_count ==
+              segmented.audit.anchor_subgroup_split_count &&
+          roomy.audit.anchor_subgroup_certified_prune_count ==
+              segmented.audit.anchor_subgroup_certified_prune_count &&
+          roomy.audit.anchor_subgroup_certified_anchor_count ==
+              segmented.audit.anchor_subgroup_certified_anchor_count &&
           roomy.audit.prepared_singleton_fallback_count ==
               segmented.audit.prepared_singleton_fallback_count &&
+          roomy.audit.completed_singleton_fallback_count ==
+              segmented.audit.completed_singleton_fallback_count &&
           roomy.audit.proposed_singleton_witness_pool_entry_count ==
               segmented.audit.proposed_singleton_witness_pool_entry_count &&
           roomy.audit.singleton_certified_prune_count ==
-              segmented.audit.singleton_certified_prune_count,
+              segmented.audit.singleton_certified_prune_count &&
+          roomy.audit.maximum_pending_anchor_subgroup_count ==
+              segmented.audit.maximum_pending_anchor_subgroup_count,
       "segmentation changed P8h work or failed to exercise fresh P8g prunes");
+  const std::set<CandidatePair> anchored_candidates =
+      anchored_path_candidates(index, cloud, 4U);
+  require(
+      classify_candidates(index, cloud, roomy.candidates, 4U) ==
+          classify_candidates(index, cloud, anchored_candidates, 4U),
+      "the recursive subgroup schedule changed the final exact anchored oracle");
 }
 
 void test_exact_anchored_candidate_path_identity_and_fallback() {
@@ -1122,12 +1434,15 @@ void test_exact_anchored_candidate_path_identity_and_fallback() {
       grouped_config,
       ExactGroupedAnchoredPairTraversalWorkBudget{4096U, 4096U});
   validate_group_partition(index, grouped, grouped_config);
-  validate_common_frontiers_start_singleton_traversals(grouped);
+  validate_common_frontier_recursive_anchor_partitions(
+      index, grouped, grouped_config);
   require(
       !grouped.groups.empty() &&
           grouped.groups.back().anchor_point_ids.size() == 4U &&
+          grouped.audit.prepared_anchor_subgroup_probe_count > 0U &&
+          grouped.audit.anchor_subgroup_split_count > 0U &&
           grouped.audit.prepared_singleton_fallback_count > 0U,
-      "the scheduler did not exercise its short group and singleton fallback");
+      "the scheduler did not exercise its short group, subgroup split, and singleton fallback");
 
   const std::set<CandidatePair> anchored_candidates =
       anchored_path_candidates(index, cloud, maximum_closed_rank);

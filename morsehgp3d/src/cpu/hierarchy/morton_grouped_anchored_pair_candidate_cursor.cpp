@@ -270,7 +270,13 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
         return step;
       }
       case ExactMortonGroupedAnchoredPairScheduleStepKind::
-          singleton_fallback_started: {
+          singleton_fallback_started:
+      case ExactMortonGroupedAnchoredPairScheduleStepKind::
+          anchor_subgroup_split: {
+        const bool is_subgroup_split =
+            schedule_step.kind() ==
+            ExactMortonGroupedAnchoredPairScheduleStepKind::
+                anchor_subgroup_split;
         const ExactGroupedAnchoredPairTraversalStep* traversal_step =
             schedule_step.traversal_step();
         if (traversal_step == nullptr ||
@@ -280,9 +286,36 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
             !traversal_step->lbvh_node_index().has_value() ||
             !traversal_step->leaf_begin().has_value() ||
             !traversal_step->leaf_end().has_value() ||
-            schedule_step.anchor_point_ids().empty()) {
+            *traversal_step->leaf_begin() >=
+                *traversal_step->leaf_end() ||
+            *traversal_step->leaf_end() > index.leaves().size() ||
+            traversal_step->prune_certificate() != nullptr ||
+            traversal_step->unresolved_point_id().has_value() ||
+            !schedule_step.group_ordinal().has_value() ||
+            !schedule_step.anchor_leaf_begin().has_value() ||
+            !schedule_step.anchor_leaf_end().has_value() ||
+            !schedule_.active_anchor_leaf_begin().has_value() ||
+            !schedule_.active_anchor_leaf_end().has_value() ||
+            *schedule_step.anchor_leaf_begin() >=
+                *schedule_step.anchor_leaf_end() ||
+            *schedule_step.anchor_leaf_begin() <
+                *schedule_.active_anchor_leaf_begin() ||
+            *schedule_step.anchor_leaf_end() >
+                *schedule_.active_anchor_leaf_end() ||
+            schedule_step.anchor_point_ids().size() !=
+                *schedule_step.anchor_leaf_end() -
+                    *schedule_step.anchor_leaf_begin() ||
+            schedule_step.anchor_point_ids().empty() ||
+            !schedule_step.witness_pool_point_ids().empty() ||
+            !std::includes(
+                schedule_.active_anchor_point_ids().begin(),
+                schedule_.active_anchor_point_ids().end(),
+                schedule_step.anchor_point_ids().begin(),
+                schedule_step.anchor_point_ids().end()) ||
+            (is_subgroup_split &&
+             schedule_step.anchor_point_ids().size() < 2U)) {
           throw std::logic_error(
-              "an oriented grouped cursor received an invalid singleton frontier");
+              "an oriented grouped cursor received an invalid anchor-partition frontier");
         }
         continue;
       }

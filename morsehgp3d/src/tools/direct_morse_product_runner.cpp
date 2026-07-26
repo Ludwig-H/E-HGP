@@ -98,15 +98,30 @@ struct Report {
   std::size_t pair_prepared_groups{};
   std::size_t pair_completed_groups{};
   std::size_t pair_grouped_traversal_node_visits{};
+  std::size_t pair_grouped_common_node_visits{};
+  std::size_t pair_anchor_subgroup_node_visits{};
+  std::size_t pair_singleton_node_visits{};
   std::size_t pair_grouped_witness_slots{};
   std::size_t pair_grouped_inherited_witness_reuses{};
   std::size_t pair_grouped_traversal_exact_predicates{};
+  std::size_t pair_grouped_common_exact_predicates{};
+  std::size_t pair_anchor_subgroup_exact_predicates{};
+  std::size_t pair_singleton_exact_predicates{};
   std::size_t pair_grouped_strict_witness_discoveries{};
   std::size_t pair_grouped_diagonal_node_descents{};
   std::size_t pair_grouped_common_frontiers{};
+  std::size_t pair_delegated_frontier_anchors{};
+  std::size_t pair_prepared_anchor_subgroup_probes{};
+  std::size_t pair_anchor_subgroup_witness_pool_entries{};
+  std::size_t pair_query_facing_fallback_witness_pool_entries{};
+  std::size_t pair_anchor_subgroup_splits{};
+  std::size_t pair_anchor_subgroup_certified_prunes{};
+  std::size_t pair_anchor_subgroup_certified_anchors{};
   std::size_t pair_prepared_singleton_fallbacks{};
+  std::size_t pair_completed_singleton_fallbacks{};
   std::size_t pair_singleton_witness_pool_entries{};
   std::size_t pair_singleton_certified_prunes{};
+  std::size_t pair_maximum_pending_anchor_subgroups{};
   std::size_t pair_authenticated_prunes{};
   std::size_t pair_authenticated_pruned_directed_pairs{};
   std::size_t pair_directed_pair_universe{};
@@ -953,24 +968,54 @@ void emit_report(const Report& report) {
       << report.pair_completed_groups
       << ",\"grouped_node_visits\":"
       << report.pair_grouped_traversal_node_visits
+      << ",\"grouped_common_node_visits\":"
+      << report.pair_grouped_common_node_visits
+      << ",\"anchor_subgroup_node_visits\":"
+      << report.pair_anchor_subgroup_node_visits
+      << ",\"singleton_node_visits\":"
+      << report.pair_singleton_node_visits
       << ",\"grouped_witness_slots\":"
       << report.pair_grouped_witness_slots
       << ",\"grouped_inherited_witness_reuses\":"
       << report.pair_grouped_inherited_witness_reuses
       << ",\"grouped_exact_predicates\":"
       << report.pair_grouped_traversal_exact_predicates
+      << ",\"grouped_common_exact_predicates\":"
+      << report.pair_grouped_common_exact_predicates
+      << ",\"anchor_subgroup_exact_predicates\":"
+      << report.pair_anchor_subgroup_exact_predicates
+      << ",\"singleton_exact_predicates\":"
+      << report.pair_singleton_exact_predicates
       << ",\"grouped_strict_witness_discoveries\":"
       << report.pair_grouped_strict_witness_discoveries
       << ",\"grouped_diagonal_node_descents\":"
       << report.pair_grouped_diagonal_node_descents
       << ",\"grouped_common_frontiers\":"
       << report.pair_grouped_common_frontiers
+      << ",\"delegated_frontier_anchors\":"
+      << report.pair_delegated_frontier_anchors
+      << ",\"prepared_anchor_subgroup_probes\":"
+      << report.pair_prepared_anchor_subgroup_probes
+      << ",\"anchor_subgroup_witness_pool_entries\":"
+      << report.pair_anchor_subgroup_witness_pool_entries
+      << ",\"query_facing_fallback_witness_pool_entries\":"
+      << report.pair_query_facing_fallback_witness_pool_entries
+      << ",\"anchor_subgroup_splits\":"
+      << report.pair_anchor_subgroup_splits
+      << ",\"anchor_subgroup_certified_prunes\":"
+      << report.pair_anchor_subgroup_certified_prunes
+      << ",\"anchor_subgroup_certified_anchors\":"
+      << report.pair_anchor_subgroup_certified_anchors
       << ",\"prepared_singleton_fallbacks\":"
       << report.pair_prepared_singleton_fallbacks
+      << ",\"completed_singleton_fallbacks\":"
+      << report.pair_completed_singleton_fallbacks
       << ",\"singleton_witness_pool_entries\":"
       << report.pair_singleton_witness_pool_entries
       << ",\"singleton_certified_prunes\":"
       << report.pair_singleton_certified_prunes
+      << ",\"maximum_pending_anchor_subgroups\":"
+      << report.pair_maximum_pending_anchor_subgroups
       << ",\"authenticated_prunes\":"
       << report.pair_authenticated_prunes
       << ",\"authenticated_pruned_directed_pairs\":"
@@ -1187,24 +1232,54 @@ void emit_report(const Report& report) {
   report.pair_completed_groups = pair_schedule_audit.completed_group_count;
   report.pair_grouped_traversal_node_visits =
       pair_candidate_audit.grouped_traversal_node_visit_count;
+  report.pair_grouped_common_node_visits =
+      pair_schedule_audit.common_traversal_node_visit_count;
+  report.pair_anchor_subgroup_node_visits =
+      pair_schedule_audit.anchor_subgroup_node_visit_count;
+  report.pair_singleton_node_visits =
+      pair_schedule_audit.singleton_node_visit_count;
   report.pair_grouped_witness_slots =
       pair_schedule_audit.witness_slot_scan_count;
   report.pair_grouped_inherited_witness_reuses =
       pair_schedule_audit.inherited_witness_reuse_count;
   report.pair_grouped_traversal_exact_predicates =
       pair_candidate_audit.grouped_traversal_exact_predicate_count;
+  report.pair_grouped_common_exact_predicates =
+      pair_schedule_audit.common_exact_predicate_count;
+  report.pair_anchor_subgroup_exact_predicates =
+      pair_schedule_audit.anchor_subgroup_exact_predicate_count;
+  report.pair_singleton_exact_predicates =
+      pair_schedule_audit.singleton_exact_predicate_count;
   report.pair_grouped_strict_witness_discoveries =
       pair_schedule_audit.strict_witness_discovery_count;
   report.pair_grouped_diagonal_node_descents =
       pair_schedule_audit.diagonal_node_descent_count;
   report.pair_grouped_common_frontiers =
       pair_schedule_audit.common_frontier_count;
+  report.pair_delegated_frontier_anchors =
+      pair_schedule_audit.delegated_frontier_anchor_count;
+  report.pair_prepared_anchor_subgroup_probes =
+      pair_schedule_audit.prepared_anchor_subgroup_probe_count;
+  report.pair_anchor_subgroup_witness_pool_entries =
+      pair_schedule_audit.proposed_anchor_subgroup_witness_pool_entry_count;
+  report.pair_query_facing_fallback_witness_pool_entries =
+      pair_schedule_audit.query_facing_fallback_witness_pool_entry_count;
+  report.pair_anchor_subgroup_splits =
+      pair_schedule_audit.anchor_subgroup_split_count;
+  report.pair_anchor_subgroup_certified_prunes =
+      pair_schedule_audit.anchor_subgroup_certified_prune_count;
+  report.pair_anchor_subgroup_certified_anchors =
+      pair_schedule_audit.anchor_subgroup_certified_anchor_count;
   report.pair_prepared_singleton_fallbacks =
       pair_schedule_audit.prepared_singleton_fallback_count;
+  report.pair_completed_singleton_fallbacks =
+      pair_schedule_audit.completed_singleton_fallback_count;
   report.pair_singleton_witness_pool_entries =
       pair_schedule_audit.proposed_singleton_witness_pool_entry_count;
   report.pair_singleton_certified_prunes =
       pair_schedule_audit.singleton_certified_prune_count;
+  report.pair_maximum_pending_anchor_subgroups =
+      pair_schedule_audit.maximum_pending_anchor_subgroup_count;
   report.pair_authenticated_prunes =
       pair_audit.authenticated_prune_count;
   report.pair_authenticated_pruned_directed_pairs =

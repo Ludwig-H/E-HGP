@@ -178,7 +178,8 @@ class ExactMortonGroupedAnchoredPairCandidateContext {
   static constexpr std::string_view public_status = "not_claimed";
   static constexpr std::string_view proof_basis =
       "unique_lower_PointId_anchor_group_owner_and_exhaustive_fail_open_"
-      "common_first_singleton_subpartition_terminal_range_orientation_v2";
+      "recursive_contiguous_anchor_subrange_then_singleton_terminal_"
+      "orientation_v3";
 
   [[nodiscard]] static ExactMortonGroupedAnchoredPairCandidateContext start(
       const spatial::MortonLbvhIndex& index,
