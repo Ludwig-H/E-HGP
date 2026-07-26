@@ -299,6 +299,46 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_morton_triangular_block_pair_schedule
+  STATIC
+    src/cpu/hierarchy/morton_triangular_block_pair_schedule.cpp
+)
+add_library(
+  morsehgp3d::morton_triangular_block_pair_schedule
+  ALIAS morsehgp3d_morton_triangular_block_pair_schedule
+)
+set_target_properties(
+  morsehgp3d_morton_triangular_block_pair_schedule
+  PROPERTIES
+    EXPORT_NAME morton_triangular_block_pair_schedule
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_morton_triangular_block_pair_schedule PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_morton_triangular_block_pair_schedule
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_morton_triangular_block_pair_schedule
+  PUBLIC morsehgp3d::spatial
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_morton_triangular_block_pair_schedule PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_morton_triangular_block_pair_schedule
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_facet_miniball
   STATIC
     src/cpu/hierarchy/facet_miniball.cpp
@@ -393,7 +433,9 @@ target_include_directories(
 )
 target_link_libraries(
   morsehgp3d_anchored_pair_witness_bank
-  PUBLIC morsehgp3d::pair_support
+  PUBLIC
+    morsehgp3d::pair_support
+    morsehgp3d::morton_triangular_block_pair_schedule
   PRIVATE morsehgp3d::sanitizers
 )
 if(MSVC)
@@ -451,6 +493,7 @@ add_library(
   morsehgp3d_sparse_anchored_pair_session
   STATIC
     src/cpu/hierarchy/sparse_anchored_pair_session.cpp
+    src/cpu/hierarchy/symmetric_grouped_anchored_pair_prune_receipt.cpp
 )
 add_library(
   morsehgp3d::sparse_anchored_pair_session
@@ -2654,6 +2697,7 @@ install(
     morsehgp3d_contract
     morsehgp3d_exact
     morsehgp3d_spatial
+    morsehgp3d_morton_triangular_block_pair_schedule
     morsehgp3d_facet_miniball
     morsehgp3d_pair_support
     morsehgp3d_anchored_pair_witness_bank

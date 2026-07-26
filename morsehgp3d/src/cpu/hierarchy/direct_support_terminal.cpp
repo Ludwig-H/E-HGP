@@ -803,6 +803,22 @@ bool ExactDirectSupportTerminalCertificate::terminal_catalog_certified()
   const exact::BigInt directed_pair_universe{
       pair_directed_pair_universe_size};
   const exact::BigInt point_count{requirements.point_count};
+  const bool triangular_pair_schedule =
+      pair_sparse_schedule_config.use_triangular_block_pair_schedule;
+  const bool sealed_pair_coverage_identity = triangular_pair_schedule
+      ? exact::BigInt{pair_authenticated_pruned_directed_pair_count} +
+                exact::BigInt{2U} * pair_admitted_candidate_count +
+                point_count ==
+            directed_pair_universe
+      : exact::BigInt{pair_authenticated_pruned_directed_pair_count} +
+                pair_orientation_check_count ==
+            directed_pair_universe;
+  const bool sealed_pair_orientation_identity = triangular_pair_schedule
+      ? pair_admitted_candidate_count == pair_orientation_check_count &&
+          pair_reverse_or_self_orientation_skip_count == 0U
+      : exact::BigInt{pair_admitted_candidate_count} +
+                pair_reverse_or_self_orientation_skip_count ==
+            pair_orientation_check_count;
   const bool sealed_pair_source =
       pair_source_kind ==
           ExactDirectSupportPairSourceKind::
@@ -823,12 +839,7 @@ bool ExactDirectSupportTerminalCertificate::terminal_catalog_certified()
       pair_terminal_output_digest != contract::CanonicalId{} &&
       pair_semantic_digest != contract::CanonicalId{} &&
       directed_pair_universe == point_count * point_count &&
-      exact::BigInt{pair_authenticated_pruned_directed_pair_count} +
-              pair_orientation_check_count ==
-          directed_pair_universe &&
-      exact::BigInt{pair_admitted_candidate_count} +
-              pair_reverse_or_self_orientation_skip_count ==
-          pair_orientation_check_count &&
+      sealed_pair_coverage_identity && sealed_pair_orientation_identity &&
       pair_admitted_candidate_count ==
           pair_classification_terminal_count &&
       exact::BigInt{pair_above_rank_count} + pair_terminal_record_count ==

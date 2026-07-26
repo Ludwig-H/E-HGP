@@ -127,6 +127,18 @@ struct Report {
   std::size_t pair_singleton_witness_pool_entries{};
   std::size_t pair_singleton_certified_prunes{};
   std::size_t pair_maximum_pending_anchor_subgroups{};
+  std::size_t pair_triangular_block_pair_visits{};
+  std::size_t pair_triangular_diagonal_splits{};
+  std::size_t pair_triangular_oversized_anchor_splits{};
+  std::size_t pair_triangular_self_pairs{};
+  std::size_t pair_triangular_cross_blocks{};
+  std::size_t pair_triangular_certified_cross_blocks{};
+  std::size_t pair_triangular_certified_unordered_pairs{};
+  std::size_t pair_triangular_opened_singleton_cross_blocks{};
+  std::size_t pair_triangular_opened_unordered_pairs{};
+  std::size_t pair_triangular_maximum_pending_block_pairs{};
+  bool pair_triangular_partition_complete{false};
+  bool pair_no_dynamic_dual_tree_or_pair_arena{true};
   std::size_t pair_authenticated_prunes{};
   std::size_t pair_authenticated_pruned_directed_pairs{};
   std::size_t pair_directed_pair_universe{};
@@ -479,7 +491,7 @@ empty_proposal_transcript(
 
 [[nodiscard]] ExactMortonGroupedAnchoredPairScheduleConfig
 make_sparse_pair_schedule_config() {
-  return {32U, 64U};
+  return {32U, 64U, true};
 }
 
 [[nodiscard]] std::size_t make_sparse_pair_maximum_closed_rank(
@@ -922,6 +934,10 @@ void emit_report(const Report& report) {
       << report.pair_schedule_config.maximum_anchor_count_per_group
       << ",\"proposed_witness_pool_size\":"
       << report.pair_schedule_config.proposed_witness_pool_size
+      << ",\"triangular_block_pair_schedule\":"
+      << (report.pair_schedule_config.use_triangular_block_pair_schedule
+              ? "true"
+              : "false")
       << "},\"advance_budget\":{\"schedule_advances\":"
       << report.pair_advance_budget.candidate_cursor
              .maximum_schedule_advance_count
@@ -1031,6 +1047,30 @@ void emit_report(const Report& report) {
       << report.pair_singleton_certified_prunes
       << ",\"maximum_pending_anchor_subgroups\":"
       << report.pair_maximum_pending_anchor_subgroups
+      << ",\"triangular_block_pair_visits\":"
+      << report.pair_triangular_block_pair_visits
+      << ",\"triangular_diagonal_splits\":"
+      << report.pair_triangular_diagonal_splits
+      << ",\"triangular_oversized_anchor_splits\":"
+      << report.pair_triangular_oversized_anchor_splits
+      << ",\"triangular_self_pairs\":"
+      << report.pair_triangular_self_pairs
+      << ",\"triangular_cross_blocks\":"
+      << report.pair_triangular_cross_blocks
+      << ",\"triangular_certified_cross_blocks\":"
+      << report.pair_triangular_certified_cross_blocks
+      << ",\"triangular_certified_unordered_pairs\":"
+      << report.pair_triangular_certified_unordered_pairs
+      << ",\"triangular_opened_singleton_cross_blocks\":"
+      << report.pair_triangular_opened_singleton_cross_blocks
+      << ",\"triangular_opened_unordered_pairs\":"
+      << report.pair_triangular_opened_unordered_pairs
+      << ",\"triangular_maximum_pending_block_pairs\":"
+      << report.pair_triangular_maximum_pending_block_pairs
+      << ",\"triangular_partition_complete\":"
+      << (report.pair_triangular_partition_complete ? "true" : "false")
+      << ",\"no_dynamic_dual_tree_or_pair_arena\":"
+      << (report.pair_no_dynamic_dual_tree_or_pair_arena ? "true" : "false")
       << ",\"authenticated_prunes\":"
       << report.pair_authenticated_prunes
       << ",\"authenticated_pruned_directed_pairs\":"
@@ -1305,6 +1345,30 @@ void emit_report(const Report& report) {
       pair_schedule_audit.singleton_certified_prune_count;
   report.pair_maximum_pending_anchor_subgroups =
       pair_schedule_audit.maximum_pending_anchor_subgroup_count;
+  report.pair_triangular_block_pair_visits =
+      pair_schedule_audit.triangular_block_pair_visit_count;
+  report.pair_triangular_diagonal_splits =
+      pair_schedule_audit.triangular_diagonal_split_count;
+  report.pair_triangular_oversized_anchor_splits =
+      pair_schedule_audit.triangular_oversized_anchor_split_count;
+  report.pair_triangular_self_pairs =
+      pair_schedule_audit.triangular_self_pair_count;
+  report.pair_triangular_cross_blocks =
+      pair_schedule_audit.triangular_cross_block_count;
+  report.pair_triangular_certified_cross_blocks =
+      pair_schedule_audit.triangular_certified_cross_block_count;
+  report.pair_triangular_certified_unordered_pairs =
+      pair_schedule_audit.triangular_certified_unordered_pair_count;
+  report.pair_triangular_opened_singleton_cross_blocks =
+      pair_schedule_audit.triangular_opened_singleton_cross_block_count;
+  report.pair_triangular_opened_unordered_pairs =
+      pair_schedule_audit.triangular_opened_unordered_pair_count;
+  report.pair_triangular_maximum_pending_block_pairs =
+      pair_schedule_audit.triangular_maximum_pending_block_pair_count;
+  report.pair_triangular_partition_complete =
+      pair_schedule_audit.triangular_partition_complete;
+  report.pair_no_dynamic_dual_tree_or_pair_arena =
+      pair_schedule_audit.no_dynamic_dual_tree_or_pair_arena_materialized;
   report.pair_authenticated_prunes =
       pair_audit.authenticated_prune_count;
   report.pair_authenticated_pruned_directed_pairs =
@@ -1367,6 +1431,34 @@ void emit_report(const Report& report) {
     emit_report(report);
     return capacity_exhausted ? 2 : 3;
   }
+  const bool triangular_pair_schedule =
+      pair_schedule_config.use_triangular_block_pair_schedule;
+  const bool pair_coverage_identity = triangular_pair_schedule
+      ? checked_add(
+            checked_add(
+                pair_audit.authenticated_pruned_directed_pair_count,
+                checked_multiply(
+                    2U,
+                    pair_audit.admitted_candidate_count,
+                    "sparse triangular pair classification mass overflow"),
+                "sparse triangular pair coverage overflow"),
+            cloud.size(),
+            "sparse triangular pair self mass overflow") ==
+          pair_audit.directed_pair_universe_size
+      : checked_add(
+            pair_audit.authenticated_pruned_directed_pair_count,
+            pair_candidate_audit.orientation_check_count,
+            "sparse pair directed partition overflow") ==
+          pair_audit.directed_pair_universe_size;
+  const bool pair_orientation_identity = triangular_pair_schedule
+      ? pair_audit.admitted_candidate_count ==
+              pair_candidate_audit.orientation_check_count &&
+          pair_candidate_audit.reverse_or_self_orientation_skip_count == 0U
+      : checked_add(
+            pair_audit.admitted_candidate_count,
+            pair_candidate_audit.reverse_or_self_orientation_skip_count,
+            "sparse pair orientation partition overflow") ==
+          pair_candidate_audit.orientation_check_count;
   const bool pair_session_certified =
       !pair_session.poisoned() &&
       !pair_session.total_capacity_exhausted() &&
@@ -1384,16 +1476,7 @@ void emit_report(const Report& report) {
       pair_schedule_audit.morton_anchor_partition_complete &&
       pair_schedule_audit
           .no_global_anchor_pair_or_output_arena_materialized &&
-      checked_add(
-          pair_audit.authenticated_pruned_directed_pair_count,
-          pair_candidate_audit.orientation_check_count,
-          "sparse pair directed partition overflow") ==
-          pair_audit.directed_pair_universe_size &&
-      checked_add(
-          pair_audit.admitted_candidate_count,
-          pair_candidate_audit.reverse_or_self_orientation_skip_count,
-          "sparse pair orientation partition overflow") ==
-          pair_candidate_audit.orientation_check_count &&
+      pair_coverage_identity && pair_orientation_identity &&
       pair_audit.admitted_candidate_count ==
           pair_audit.classification_terminal_count &&
       checked_add(

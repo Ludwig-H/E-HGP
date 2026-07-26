@@ -1,4 +1,5 @@
 #include "morsehgp3d/hierarchy/grouped_anchored_pair_certificate.hpp"
+#include "morsehgp3d/hierarchy/symmetric_grouped_anchored_pair_prune_receipt.hpp"
 
 #include "morsehgp3d/exact/binary64.hpp"
 #include "morsehgp3d/exact/point.hpp"
@@ -34,8 +35,10 @@ using morsehgp3d::hierarchy::ExactGroupedAnchoredPairTraversalStep;
 using morsehgp3d::hierarchy::ExactGroupedAnchoredPairTraversalStepKind;
 using morsehgp3d::hierarchy::ExactGroupedAnchoredPairTraversalStopReason;
 using morsehgp3d::hierarchy::ExactGroupedAnchoredPairTraversalWorkBudget;
+using morsehgp3d::hierarchy::ExactSymmetricGroupedAnchoredPairPruneReceipt;
 using morsehgp3d::hierarchy::certify_exact_grouped_anchored_pair_prune;
 using morsehgp3d::hierarchy::exact_diametral_phi_aabb_maximum_sign;
+using morsehgp3d::hierarchy::recertify_exact_symmetric_grouped_anchored_pair_prune;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::ExactDyadicAabb3;
 using morsehgp3d::spatial::MortonLbvhIndex;
@@ -1624,6 +1627,82 @@ void test_witness_subtree_search_restarts_and_restores_halo_per_query_node() {
       "a child core pool or its bit meaning leaked into the sibling query");
 }
 
+void test_symmetric_receipt_recertifies_positive_cross_block() {
+  const CanonicalPointCloud cloud = make_line_cloud(4U);
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  require(
+      index.leaves().size() == 4U &&
+          index.leaves()[0].point_id == 0U &&
+          index.leaves()[1].point_id == 1U,
+      "the symmetric-receipt fixture lost its Morton prefix");
+  const std::array<PointId, 1> anchors{0U};
+  const std::array<PointId, 1> witnesses{1U};
+  const ExactGroupedAnchoredPairPruneBudget budget{1U, 1U, 1U};
+  std::size_t query_node_index = index.build_counters().node_count;
+  for (std::size_t node_index = 0U;
+       node_index < index.build_counters().node_count;
+       ++node_index) {
+    const ExactGroupedAnchoredPairPruneCertificate probe =
+        certify_exact_grouped_anchored_pair_prune(
+            index, cloud, anchors, witnesses, node_index, 2U, budget);
+    if (probe.leaf_begin() == 2U && probe.leaf_end() == 4U) {
+      require(probe.certified(),
+              "the strict line witness did not certify {0} x {2,3}");
+      query_node_index = node_index;
+      break;
+    }
+  }
+  require(
+      query_node_index < index.build_counters().node_count,
+      "the symmetric-receipt fixture lost its native query subtree");
+  const ExactGroupedAnchoredPairPruneCertificate source =
+      certify_exact_grouped_anchored_pair_prune(
+          index,
+          cloud,
+          anchors,
+          witnesses,
+          query_node_index,
+          2U,
+          budget);
+  const ExactSymmetricGroupedAnchoredPairPruneReceipt receipt =
+      recertify_exact_symmetric_grouped_anchored_pair_prune(
+          index, cloud, source, 0U, 1U, query_node_index, 2U);
+  require(
+      receipt.validated_for(index, cloud) &&
+          receipt.anchor_leaf_begin() == 0U &&
+          receipt.anchor_leaf_end() == 1U &&
+          receipt.query_leaf_begin() == 2U &&
+          receipt.query_leaf_end() == 4U &&
+          receipt.unordered_mass() == 2U &&
+          receipt.directed_mass() == 4U &&
+          receipt.audit().source_certificate_recertified,
+      "the symmetric receipt lost its recertified positive mass");
+  require_throws<std::invalid_argument>(
+      [&]() {
+        (void)recertify_exact_symmetric_grouped_anchored_pair_prune(
+            index, cloud, source, 1U, 2U, query_node_index, 2U);
+      },
+      "the symmetric receipt accepted a rebound anchor range");
+  const std::size_t foreign_query_node_index =
+      query_node_index == 0U ? 1U : 0U;
+  require_throws<std::invalid_argument>(
+      [&]() {
+        (void)recertify_exact_symmetric_grouped_anchored_pair_prune(
+            index,
+            cloud,
+            source,
+            0U,
+            1U,
+            foreign_query_node_index,
+            2U);
+      },
+      "the symmetric receipt accepted a rebound query node");
+  const MortonLbvhIndex rebuilt_index = MortonLbvhIndex::build(cloud);
+  require(
+      !receipt.validated_for(rebuilt_index, cloud),
+      "the process-local receipt accepted a rebuilt LBVH authority");
+}
+
 }  // namespace
 
 int main() {
@@ -1643,6 +1722,7 @@ int main() {
     test_bounded_witness_subtree_proposal_replays_through_p8g();
     test_bounded_witness_subtree_cap_fails_open();
     test_witness_subtree_search_restarts_and_restores_halo_per_query_node();
+    test_symmetric_receipt_recertifies_positive_cross_block();
   } catch (const std::exception& error) {
     std::cerr << "grouped anchored-pair certificate test failure: "
               << error.what() << '\n';

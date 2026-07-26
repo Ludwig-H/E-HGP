@@ -313,7 +313,7 @@ add_executable(
 )
 target_link_libraries(
   morsehgp3d_grouped_anchored_pair_certificate_tests
-  PRIVATE morsehgp3d::anchored_pair_witness_bank
+  PRIVATE morsehgp3d::sparse_anchored_pair_session
 )
 if(MSVC)
   target_compile_options(
@@ -343,6 +343,25 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_morton_grouped_anchored_pair_schedule_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_morton_triangular_block_pair_schedule_tests
+  test_morton_triangular_block_pair_schedule.cpp
+)
+target_link_libraries(
+  morsehgp3d_morton_triangular_block_pair_schedule_tests
+  PRIVATE morsehgp3d::morton_triangular_block_pair_schedule
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_morton_triangular_block_pair_schedule_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_morton_triangular_block_pair_schedule_tests
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -1557,6 +1576,7 @@ set(
   morsehgp3d_anchored_pair_witness_bank_tests
   morsehgp3d_grouped_anchored_pair_certificate_tests
   morsehgp3d_morton_grouped_anchored_pair_schedule_tests
+  morsehgp3d_morton_triangular_block_pair_schedule_tests
   morsehgp3d_anchored_pair_candidate_classifier_tests
   morsehgp3d_sparse_anchored_pair_session_tests
   morsehgp3d_hierarchy_higher_support_product_tests
@@ -2349,6 +2369,10 @@ add_test(
 add_test(
   NAME morsehgp3d.morton_grouped_anchored_pair_schedule
   COMMAND morsehgp3d_morton_grouped_anchored_pair_schedule_tests
+)
+add_test(
+  NAME morsehgp3d.morton_triangular_block_pair_schedule
+  COMMAND morsehgp3d_morton_triangular_block_pair_schedule_tests
 )
 add_test(
   NAME morsehgp3d.anchored_pair_candidate_classifier

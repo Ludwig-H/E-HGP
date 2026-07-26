@@ -416,11 +416,21 @@ Le smoke `morsehgp3d.phase14.massive_sparse_pair_prefix_smoke.v1` passe d'abord 
 
 14R est ainsi fermé comme incrément mathématique et logiciel borné `architecture_only`; le gate 50 k reste explicitement non satisfait. Les raffinements du halo ne sont plus la prochaine porte.
 
+## Incrément 14S — ordonnanceur triangulaire borné de blocs Morton
+
+14S s'exécute sous `reference_cpu / hgp_reduced / bounded_morton_triangular_block_pair_schedule`, avec `public_status=not_claimed`. Pour tout nœud LBVH interne $N$ de fils $L,R$, il applique la partition native $T(N)=T(L)\sqcup C(L,R)\sqcup T(R)$ des paires non ordonnées. Un produit croisé $A\times Q$ ne partage que $A$ jusqu'à une plage d'au plus 32 ancres, puis appelle P8r sur le bloc requête entier. Le reçu process-local lie les deux plages Morton disjointes, recertifie P8g au point d'usage et utilise la symétrie exacte de $\phi$; sa masse vaut $\lvert A\rvert\lvert Q\rvert$ paires non ordonnées et $2\lvert A\rvert\lvert Q\rvert$ orientations dirigées.
+
+Une pile fixe d'au plus $3D+1$ entrées porte la décomposition triangulaire, où $D$ est la profondeur LBVH certifiée. Aucun arbre dual, arène de paires, cellule, facette, coface, incidence, Gamma ou mosaïque de Delaunay d'ordre supérieur n'est construit. La fixture $n=8$ possède l'ordre Morton de `PointId` `[1,0,2,6,3,4,5,7]`; elle ferme exactement les 28 paires non ordonnées sous des budgets ample et unitaire. Une seconde fixture recertifie le prune positif $\left\lbrace 0\right\rbrace\times\left\lbrace 2,3\right\rbrace$, ses masses 2 et 4, puis trois liaisons négatives. La compilation avec avertissements en erreurs passe; les six CTests ciblés passent 6/6 en 0,68 seconde sous GCC Release.
+
+L'unique gate 14S `uniform_latin`, 50 000 points et $K=10$, sous les caps par défaut, s'arrête avec le code 2 à `total_grouped_traversal_exact_predicate_capacity` après 199,733 ms au total, dont 28,427 ms pour la voie paire. Il compte 146 avances, 11 993 visites dont 11 791 de sous-arbres témoins et 7 881 prédicats de cette lane. Les 76 visites structurelles se décomposent en 23 partages diagonaux, 12 blocs self et 41 blocs croisés; aucun bloc entier n'est certifié. Les 25 blocs singleton ouvrent 96 paires non ordonnées, 79 candidates, 14 prunes et une masse dirigée de 34. Le pipeline reste incomplet au cap de 20 000 signes : aucune autorité terminale ni sortie n'est matérialisée et le temps inférieur à 0,5 seconde ne satisfait aucun SLO.
+
+Le diagnostic montre que l'ordre diagonal-first dépense le cap sur de petits blocs locaux avant de valoriser les produits croisés massifs. 14S reste `architecture_only`; GCP n'est pas utilisé.
+
 ## Priorités de développement
 
-1. remplacer la décomposition « un groupe d'ancres contre tout l'arbre requête » par un parcours exact borné bloc LBVH contre bloc LBVH. Un bloc positif réutilise le certificat P8r; un bloc inconclusif est partagé sans matérialiser d'arbre dual ni d'arène de paires. Une seule passe complète à chaud sur 50 000 points et $K=10$ précède tout nouveau réglage de halo.
+1. prioriser les blocs croisés de plus grande masse certifiable avant les petits blocs diagonaux, tout en conservant la partition triangulaire, la pile fixe et le rejeu P8g; relancer ensuite un seul gate 50 k complet sous les mêmes caps.
 
-Le sink et le checkpoint externes de Phase 15 restent nécessaires à la voie 10 M+; le smoke P8l non scellé ne les remplace pas et ne les qualifie pas.
+2. fusionner le flux local ainsi ordonné avec le sink et le checkpoint bornés de Phase 15. Aucun micro-réglage du halo ne précède ces deux étapes.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

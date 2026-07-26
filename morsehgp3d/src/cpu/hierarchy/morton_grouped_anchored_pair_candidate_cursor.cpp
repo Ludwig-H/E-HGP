@@ -177,7 +177,9 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
         checked_increment(
             audit_.orientation_check_count,
             "the oriented grouped orientation count overflows size_t");
-        if (anchor_point_id >= query_point_id) {
+        const bool triangular =
+            schedule_.config().use_triangular_block_pair_schedule;
+        if (!triangular && anchor_point_id >= query_point_id) {
           checked_increment(
               work.reverse_or_self_orientation_skip_count,
               "the oriented grouped step skip count overflows size_t");
@@ -185,6 +187,10 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
               audit_.reverse_or_self_orientation_skip_count,
               "the oriented grouped skip count overflows size_t");
           continue;
+        }
+        if (triangular && anchor_point_id == query_point_id) {
+          throw std::logic_error(
+              "a triangular grouped terminal overlapped its anchor block");
         }
 
         checked_increment(
@@ -198,8 +204,11 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
         step.group_ordinal_ = pending_group_ordinal_;
         step.anchor_leaf_begin_ = pending_anchor_leaf_begin_;
         step.anchor_leaf_end_ = pending_anchor_leaf_end_;
-        step.support_ids_ =
-            std::array<PointId, 2>{anchor_point_id, query_point_id};
+        step.support_ids_ = triangular
+            ? std::array<PointId, 2>{
+                  std::min(anchor_point_id, query_point_id),
+                  std::max(anchor_point_id, query_point_id)}
+            : std::array<PointId, 2>{anchor_point_id, query_point_id};
         return step;
       }
       pending_leaf_range_ = false;
@@ -279,10 +288,31 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
                 anchor_subgroup_split;
         const ExactGroupedAnchoredPairTraversalStep* traversal_step =
             schedule_step.traversal_step();
+        const bool triangular =
+            schedule_.config().use_triangular_block_pair_schedule;
+        const bool triangular_ranges_disjoint =
+            traversal_step != nullptr &&
+            traversal_step->leaf_begin().has_value() &&
+            traversal_step->leaf_end().has_value() &&
+            schedule_step.anchor_leaf_begin().has_value() &&
+            schedule_step.anchor_leaf_end().has_value() &&
+            (*schedule_step.anchor_leaf_end() <=
+                 *traversal_step->leaf_begin() ||
+             *traversal_step->leaf_end() <=
+                 *schedule_step.anchor_leaf_begin());
+        const bool routing_kind_valid =
+            traversal_step != nullptr &&
+            (traversal_step->kind() ==
+                 ExactGroupedAnchoredPairTraversalStepKind::
+                     inconclusive_subtree ||
+             (triangular &&
+              (traversal_step->kind() ==
+                   ExactGroupedAnchoredPairTraversalStepKind::unresolved_leaf ||
+               traversal_step->kind() ==
+                   ExactGroupedAnchoredPairTraversalStepKind::
+                       fallback_subtree)));
         if (traversal_step == nullptr ||
-            traversal_step->kind() !=
-                ExactGroupedAnchoredPairTraversalStepKind::
-                    inconclusive_subtree ||
+            !routing_kind_valid ||
             !traversal_step->lbvh_node_index().has_value() ||
             !traversal_step->leaf_begin().has_value() ||
             !traversal_step->leaf_end().has_value() ||
@@ -290,30 +320,37 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
                 *traversal_step->leaf_end() ||
             *traversal_step->leaf_end() > index.leaves().size() ||
             traversal_step->prune_certificate() != nullptr ||
-            traversal_step->unresolved_point_id().has_value() ||
+            (!triangular &&
+             traversal_step->unresolved_point_id().has_value()) ||
             !schedule_step.group_ordinal().has_value() ||
             !schedule_step.anchor_leaf_begin().has_value() ||
             !schedule_step.anchor_leaf_end().has_value() ||
-            !schedule_.active_anchor_leaf_begin().has_value() ||
-            !schedule_.active_anchor_leaf_end().has_value() ||
+            (!triangular &&
+             (!schedule_.active_anchor_leaf_begin().has_value() ||
+              !schedule_.active_anchor_leaf_end().has_value())) ||
             *schedule_step.anchor_leaf_begin() >=
                 *schedule_step.anchor_leaf_end() ||
-            *schedule_step.anchor_leaf_begin() <
-                *schedule_.active_anchor_leaf_begin() ||
-            *schedule_step.anchor_leaf_end() >
-                *schedule_.active_anchor_leaf_end() ||
+            (!triangular &&
+             (*schedule_step.anchor_leaf_begin() <
+                  *schedule_.active_anchor_leaf_begin() ||
+              *schedule_step.anchor_leaf_end() >
+                  *schedule_.active_anchor_leaf_end())) ||
             schedule_step.anchor_point_ids().size() !=
                 *schedule_step.anchor_leaf_end() -
                     *schedule_step.anchor_leaf_begin() ||
             schedule_step.anchor_point_ids().empty() ||
             !schedule_step.witness_pool_point_ids().empty() ||
-            !std::includes(
-                schedule_.active_anchor_point_ids().begin(),
-                schedule_.active_anchor_point_ids().end(),
-                schedule_step.anchor_point_ids().begin(),
-                schedule_step.anchor_point_ids().end()) ||
+            (!triangular &&
+             !std::includes(
+                 schedule_.active_anchor_point_ids().begin(),
+                 schedule_.active_anchor_point_ids().end(),
+                 schedule_step.anchor_point_ids().begin(),
+                 schedule_step.anchor_point_ids().end())) ||
+            (triangular && !triangular_ranges_disjoint) ||
             (is_subgroup_split &&
-             schedule_step.anchor_point_ids().size() < 2U)) {
+             schedule_step.anchor_point_ids().size() < 2U) ||
+            (triangular && !is_subgroup_split &&
+             schedule_step.anchor_point_ids().size() != 1U)) {
           throw std::logic_error(
               "an oriented grouped cursor received an invalid anchor-partition frontier");
         }
@@ -323,20 +360,34 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
       case ExactMortonGroupedAnchoredPairScheduleStepKind::fallback_subtree: {
         const ExactGroupedAnchoredPairTraversalStep* traversal_step =
             schedule_step.traversal_step();
+        const bool triangular =
+            schedule_.config().use_triangular_block_pair_schedule;
+        const bool triangular_ranges_disjoint =
+            traversal_step != nullptr &&
+            traversal_step->leaf_begin().has_value() &&
+            traversal_step->leaf_end().has_value() &&
+            schedule_step.anchor_leaf_begin().has_value() &&
+            schedule_step.anchor_leaf_end().has_value() &&
+            (*schedule_step.anchor_leaf_end() <=
+                 *traversal_step->leaf_begin() ||
+             *traversal_step->leaf_end() <=
+                 *schedule_step.anchor_leaf_begin());
         if (traversal_step == nullptr ||
             !traversal_step->leaf_begin().has_value() ||
             !traversal_step->leaf_end().has_value() ||
             !schedule_step.group_ordinal().has_value() ||
             !schedule_step.anchor_leaf_begin().has_value() ||
             !schedule_step.anchor_leaf_end().has_value() ||
-            !schedule_.active_anchor_leaf_begin().has_value() ||
-            !schedule_.active_anchor_leaf_end().has_value() ||
+            (!triangular &&
+             (!schedule_.active_anchor_leaf_begin().has_value() ||
+              !schedule_.active_anchor_leaf_end().has_value())) ||
             *schedule_step.anchor_leaf_begin() >=
                 *schedule_step.anchor_leaf_end() ||
-            *schedule_step.anchor_leaf_begin() <
-                *schedule_.active_anchor_leaf_begin() ||
-            *schedule_step.anchor_leaf_end() >
-                *schedule_.active_anchor_leaf_end() ||
+            (!triangular &&
+             (*schedule_step.anchor_leaf_begin() <
+                  *schedule_.active_anchor_leaf_begin() ||
+              *schedule_step.anchor_leaf_end() >
+                  *schedule_.active_anchor_leaf_end())) ||
             schedule_step.anchor_point_ids().size() !=
                 *schedule_step.anchor_leaf_end() -
                     *schedule_step.anchor_leaf_begin() ||
@@ -344,11 +395,15 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
                 *traversal_step->leaf_end() ||
             *traversal_step->leaf_end() > index.leaves().size() ||
             schedule_step.anchor_point_ids().empty() ||
-            !std::includes(
-                schedule_.active_anchor_point_ids().begin(),
-                schedule_.active_anchor_point_ids().end(),
-                schedule_step.anchor_point_ids().begin(),
-                schedule_step.anchor_point_ids().end())) {
+            (!triangular &&
+             !std::includes(
+                 schedule_.active_anchor_point_ids().begin(),
+                 schedule_.active_anchor_point_ids().end(),
+                 schedule_step.anchor_point_ids().begin(),
+                 schedule_step.anchor_point_ids().end())) ||
+            (triangular &&
+             (!triangular_ranges_disjoint ||
+              schedule_step.anchor_point_ids().size() != 1U))) {
           throw std::logic_error(
               "an oriented grouped terminal lost its authenticated range or anchors");
         }
@@ -379,6 +434,18 @@ ExactMortonGroupedAnchoredPairCandidateContext::advance(
         }
         continue;
       }
+      case ExactMortonGroupedAnchoredPairScheduleStepKind::diagonal_self:
+        if (!schedule_.config().use_triangular_block_pair_schedule ||
+            !schedule_step.anchor_leaf_begin().has_value() ||
+            !schedule_step.anchor_leaf_end().has_value() ||
+            *schedule_step.anchor_leaf_end() !=
+                *schedule_step.anchor_leaf_begin() + 1U ||
+            schedule_step.anchor_point_ids().size() != 1U ||
+            schedule_step.traversal_step() != nullptr) {
+          throw std::logic_error(
+              "an oriented grouped cursor received an invalid diagonal self");
+        }
+        continue;
       case ExactMortonGroupedAnchoredPairScheduleStepKind::group_complete: {
         checked_increment(
             audit_.completed_group_count,

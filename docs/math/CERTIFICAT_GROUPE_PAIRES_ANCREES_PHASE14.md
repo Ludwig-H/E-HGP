@@ -1,4 +1,4 @@
-# Certificat groupé exact discret, parcours préparé et curseur Morton — Phases 14Q--14R P8g--P8r
+# Certificat groupé exact discret, parcours préparé et curseur Morton — Phases 14Q--14S P8g--P8s
 
 ## Statut et portée
 
@@ -166,6 +166,14 @@ L'ordre par milieu des intervalles les plus proches est `heuristic`. Le préflig
 
 Les cinq CTests GCC Release ciblés passent 5/5 en 0,43 seconde. L'unique gate final 50 k/$K=10$ s'arrête incomplet avec le code 2 après 177,470 ms; ses 120 prunes ferment 1 509 560 paires dirigées sans candidate, mais aucune autorité terminale n'est scellée. Le gate inférieur à 0,5 seconde reste donc non satisfait. Le smoke GCP gardé au SHA exact `a9fbcb3eab6f4472c4a5169dd8179b92051183e7` traverse avec `cuda14m` 10 000 001 points en 23 831,153 ms jusqu'à un préfixe P8l non scellé. Il ne retient aucun record et tous ses champs massifs ou publics restent faux : seule la capacité spatiale suivie du préfixe borné est démontrée.
 
+## Partition triangulaire native des paires — 14S
+
+Pour un nœud LBVH binaire $N$ de fils $L,R$, soit $T(N)$ l'ensemble des paires non ordonnées de feuilles de $N$ et $C(L,R)$ le produit croisé. Alors $T(N)=T(L)\sqcup C(L,R)\sqcup T(R)$. Cette union est disjointe parce qu'une paire possède soit ses deux extrémités dans le même fils, soit une extrémité dans chaque fils. Une pile DFS qui remplace chaque bloc triangulaire par ces trois enfants conserve donc exactement l'univers des paires par induction.
+
+Un bloc croisé $A\times Q$ garde deux plages Morton disjointes et ne partage que $A$ jusqu'à $\lvert A\rvert\leq32$, puis appelle P8r sur $Q$. Comme $\phi$ est symétrique dans les deux supports, ce choix d'orientation ne modifie pas le prédicat. Le reçu process-local n'est positif qu'après rejeu P8g frais; il couvre alors $\lvert A\rvert\lvert Q\rvert$ paires non ordonnées et une masse dirigée $2\lvert A\rvert\lvert Q\rvert$. Aucun reçu structurel, partage ou choix de priorité ne devient seul une autorité scientifique.
+
+La pile fixe contient au plus $3D+1$ entrées. Elle ne matérialise ni arbre dual, arène de paires, cellule, facette, coface, incidence, Gamma ou mosaïque de Delaunay d'ordre supérieur. La fixture d'ordre Morton `[1,0,2,6,3,4,5,7]` ferme exactement 28 paires avec un budget ample égal à un. Le gate 50 k/$K=10$ s'arrête toutefois au cap exact après 199,733 ms, sans certificat de bloc entier, autorité terminale ou sortie; aucun SLO n'est acquis.
+
 ## Curseur de candidates orientées — P8j
 
 P8j consomme directement les feuilles non résolues et les plages de fallback de P8i/P8q; il absorbe les événements de frontière et de partage sans les convertir en candidates. À l'ouverture d'une plage, il copie la liste bornée des ancres portée par l'étape terminale : le groupe complet pour un terminal commun ou le seul `PointId` pour un terminal singleton. Il conserve ce snapshot, la provenance du groupe et de la plage d'ancres, la plage Morton terminale courante, son offset de feuille et l'offset dans les ancres copiées. Pour une plage, l'ordre déterministe parcourt d'abord les feuilles, puis les ancres triées par `PointId`; chaque comparaison d'orientation est facturée et l'offset est avancé avant toute émission. Une étape `candidate_pair` ne paraît que si $p<q$ et contient cette unique paire. Une interruption après l'émission ne peut donc ni la répéter, ni en sauter une.
@@ -198,4 +206,4 @@ Tous les curseurs P8i--P8l sont reprenables seulement entre appels du même proc
 
 P8l donne la priorité au P8k actif, préflight la sortie, impose des caps totaux typés et scelle une autorité terminale process-local après vérification des masses prunées et des orientations. P8m consomme cette autorité dans la façade et P8n installe exclusivement cette voie paire dans le runner. Ces garde-fous ferment honnêtement une session bornée, mais ne réduisent pas le pire cas : une classification P8k coûte jusqu'à $O(n)$ visites et, combinée au fallback P8j $\Theta(n^2)$, conserve un pire cas $O(n^3)$. Le runner reste résident et refuse plus de 50 k points; les sorties restent résidentes et les supports d'arité trois et quatre restent des univers implicites séparés. Le chemin 10 M+ n'est donc ni ouvert ni revendiqué.
 
-La prochaine porte est un parcours exact borné bloc LBVH contre bloc LBVH : les blocs positifs réutilisent P8r et les blocs inconclusifs se partagent sans arbre dual global ni arène de paires. Une seule exécution complète à chaud `uniform_latin`, 50 000 points et $K=10$ doit ensuite sceller l'autorité terminale. Le sink et le checkpoint de Phase 15 restent nécessaires avant toute qualification du pipeline produit 10 M; l'ancien flux P7b demeure un oracle borné et aucun benchmark ne change le statut public.
+La prochaine porte conserve cette partition mais traite d'abord les blocs croisés de grande masse avant les petits blocs diagonaux, puis alimente le sink et le checkpoint bornés de Phase 15. Une seule exécution complète à chaud `uniform_latin`, 50 000 points et $K=10$ doit sceller l'autorité terminale avant toute qualification du pipeline produit 10 M. Aucun micro-réglage du halo n'est prioritaire; l'ancien flux P7b demeure un oracle borné et aucun benchmark ne change le statut public.

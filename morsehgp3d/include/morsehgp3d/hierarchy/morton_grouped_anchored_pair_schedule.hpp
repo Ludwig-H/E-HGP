@@ -1,6 +1,7 @@
 #pragma once
 
 #include "morsehgp3d/hierarchy/grouped_anchored_pair_certificate.hpp"
+#include "morsehgp3d/hierarchy/morton_triangular_block_pair_schedule.hpp"
 
 #include <array>
 #include <cstddef>
@@ -21,6 +22,7 @@ namespace morsehgp3d::hierarchy {
 struct ExactMortonGroupedAnchoredPairScheduleConfig {
   std::size_t maximum_anchor_count_per_group{};
   std::size_t proposed_witness_pool_size{};
+  bool use_triangular_block_pair_schedule{false};
 
   friend bool operator==(
       const ExactMortonGroupedAnchoredPairScheduleConfig&,
@@ -29,6 +31,7 @@ struct ExactMortonGroupedAnchoredPairScheduleConfig {
 
 enum class ExactMortonGroupedAnchoredPairScheduleStepKind : std::uint8_t {
   certified_prune,
+  diagonal_self,
   singleton_fallback_started,
   anchor_subgroup_split,
   unresolved_leaf,
@@ -101,9 +104,21 @@ struct ExactMortonGroupedAnchoredPairScheduleAudit {
   std::size_t maximum_active_anchor_count{};
   std::size_t maximum_active_witness_pool_entry_count{};
   std::size_t maximum_pending_anchor_subgroup_count{};
+  std::size_t triangular_block_pair_visit_count{};
+  std::size_t triangular_diagonal_split_count{};
+  std::size_t triangular_oversized_anchor_split_count{};
+  std::size_t triangular_self_pair_count{};
+  std::size_t triangular_cross_block_count{};
+  std::size_t triangular_certified_cross_block_count{};
+  std::size_t triangular_certified_unordered_pair_count{};
+  std::size_t triangular_opened_singleton_cross_block_count{};
+  std::size_t triangular_opened_unordered_pair_count{};
+  std::size_t triangular_maximum_pending_block_pair_count{};
   bool complete{false};
   bool morton_anchor_partition_complete{false};
+  bool triangular_partition_complete{false};
   bool no_global_anchor_pair_or_output_arena_materialized{true};
+  bool no_dynamic_dual_tree_or_pair_arena_materialized{true};
 
   friend bool operator==(
       const ExactMortonGroupedAnchoredPairScheduleAudit&,
@@ -354,6 +369,20 @@ class ExactMortonGroupedAnchoredPairScheduleContext {
       const spatial::CanonicalPointCloud& cloud,
       std::size_t anchor_leaf_begin);
 
+  void prepare_triangular_cross_block(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      const ExactMortonTriangularBlockPairScheduleStep* structural_step,
+      bool terminal_singleton);
+
+  void synchronize_triangular_audit();
+
+  [[nodiscard]] ExactMortonGroupedAnchoredPairScheduleStep
+  advance_triangular(
+      const spatial::MortonLbvhIndex& index,
+      const spatial::CanonicalPointCloud& cloud,
+      ExactGroupedAnchoredPairTraversalWorkBudget traversal_budget);
+
   void prepare_next_anchor_partition_fallback(
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud);
@@ -384,6 +413,8 @@ class ExactMortonGroupedAnchoredPairScheduleContext {
   std::optional<ExactGroupedAnchoredPairTraversalContext> active_traversal_;
   std::optional<ExactGroupedAnchoredPairTraversalContext>
       active_singleton_traversal_;
+  std::optional<ExactMortonTriangularBlockPairScheduleContext>
+      triangular_schedule_;
   std::size_t singleton_frontier_node_index_{};
   std::size_t singleton_frontier_leaf_begin_{};
   std::size_t singleton_frontier_leaf_end_{};
@@ -407,6 +438,8 @@ class ExactMortonGroupedAnchoredPairScheduleContext {
   bool singleton_frontier_active_{false};
   bool active_fallback_is_singleton_{false};
   bool group_completion_pending_{false};
+  bool triangular_probe_active_{false};
+  bool triangular_terminal_active_{false};
   bool complete_{false};
 };
 

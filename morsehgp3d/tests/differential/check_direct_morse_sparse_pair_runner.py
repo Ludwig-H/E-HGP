@@ -145,7 +145,11 @@ def require_success_projection(report: dict[str, object]) -> None:
     require(pair.get("maximum_closed_rank") == 5, "runner did not use K+1")
     require(
         pair.get("schedule_config")
-        == {"maximum_anchors_per_group": 32, "proposed_witness_pool_size": 64},
+        == {
+            "maximum_anchors_per_group": 32,
+            "proposed_witness_pool_size": 64,
+            "triangular_block_pair_schedule": True,
+        },
         "runner changed the bounded P8l schedule",
     )
     advance_budget = pair.get("advance_budget")
@@ -190,14 +194,14 @@ def require_success_projection(report: dict[str, object]) -> None:
     require(audit.get("directed_pair_universe") == 25, "wrong directed universe")
     require(
         audit.get("authenticated_pruned_directed_pairs", 0)
-        + audit.get("orientation_checks", 0)
+        + 2 * audit.get("admitted_candidates", 0)
+        + 5
         == 25,
         "P8l directed partition does not close",
     )
     require(
-        audit.get("admitted_candidates", 0)
-        + audit.get("reverse_or_self_orientation_skips", 0)
-        == audit.get("orientation_checks"),
+        audit.get("admitted_candidates", 0) == audit.get("orientation_checks")
+        and audit.get("reverse_or_self_orientation_skips", 0) == 0,
         "P8l orientation partition does not close",
     )
     require(
@@ -247,6 +251,16 @@ def require_success_projection(report: dict[str, object]) -> None:
         "singleton_witness_pool_entries",
         "singleton_certified_prunes",
         "maximum_pending_anchor_subgroups",
+        "triangular_block_pair_visits",
+        "triangular_diagonal_splits",
+        "triangular_oversized_anchor_splits",
+        "triangular_self_pairs",
+        "triangular_cross_blocks",
+        "triangular_certified_cross_blocks",
+        "triangular_certified_unordered_pairs",
+        "triangular_opened_singleton_cross_blocks",
+        "triangular_opened_unordered_pairs",
+        "triangular_maximum_pending_block_pairs",
     ):
         require(
             isinstance(audit.get(physical_counter), int)
@@ -270,15 +284,19 @@ def require_success_projection(report: dict[str, object]) -> None:
         "P8q physical work lanes do not sum to the grouped totals",
     )
     require(
-        audit.get("prepared_anchor_subgroup_probes", 0)
-        == audit.get("anchor_subgroup_splits", 0)
-        + audit.get("anchor_subgroup_certified_prunes", 0)
+        audit.get("triangular_partition_complete") is True
+        and audit.get("no_dynamic_dual_tree_or_pair_arena") is True
+        and audit.get("triangular_self_pairs") == 5
+        and audit.get("triangular_certified_unordered_pairs", 0)
+        + audit.get("triangular_opened_unordered_pairs", 0)
+        == 10
+        and audit.get("triangular_certified_cross_blocks", 0)
+        + audit.get("triangular_opened_singleton_cross_blocks", 0)
+        <= audit.get("triangular_cross_blocks", 0)
         and audit.get("completed_singleton_fallbacks", -1)
         == audit.get("prepared_singleton_fallbacks", 0)
-        and audit.get("delegated_frontier_anchors", 0)
-        == audit.get("anchor_subgroup_certified_anchors", 0)
-        + audit.get("prepared_singleton_fallbacks", 0),
-        "P8q anchor-subrange partition accounting is impossible",
+        and audit.get("triangular_maximum_pending_block_pairs", 0) > 0,
+        "P8s triangular partition accounting is impossible",
     )
     require(
         audit.get("anchor_subgroup_witness_pool_entries", 0)

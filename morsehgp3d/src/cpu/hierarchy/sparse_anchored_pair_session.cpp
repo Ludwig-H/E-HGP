@@ -1,4 +1,5 @@
 #include "morsehgp3d/hierarchy/sparse_anchored_pair_session.hpp"
+#include "morsehgp3d/hierarchy/symmetric_grouped_anchored_pair_prune_receipt.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -43,6 +44,48 @@ using spatial::PointId;
     std::size_t expected) noexcept {
   return right <= std::numeric_limits<std::size_t>::max() - left &&
       left + right == expected;
+}
+
+[[nodiscard]] bool symmetric_coverage_equals(
+    std::size_t pruned_directed_pair_count,
+    std::size_t classified_unordered_pair_count,
+    std::size_t self_pair_count,
+    std::size_t expected_directed_pair_count) noexcept {
+  if (classified_unordered_pair_count >
+      std::numeric_limits<std::size_t>::max() / 2U) {
+    return false;
+  }
+  const std::size_t classified_directed_pair_count =
+      2U * classified_unordered_pair_count;
+  if (classified_directed_pair_count >
+          std::numeric_limits<std::size_t>::max() -
+              pruned_directed_pair_count ||
+      self_pair_count >
+          std::numeric_limits<std::size_t>::max() -
+              pruned_directed_pair_count - classified_directed_pair_count) {
+    return false;
+  }
+  return pruned_directed_pair_count + classified_directed_pair_count +
+      self_pair_count == expected_directed_pair_count;
+}
+
+[[nodiscard]] bool triangular_unordered_universe(
+    std::size_t point_count,
+    std::size_t& unordered_pair_count) noexcept {
+  if (point_count == 0U) {
+    return false;
+  }
+  const std::size_t left =
+      point_count % 2U == 0U ? point_count / 2U : point_count;
+  const std::size_t right = point_count % 2U == 0U
+      ? point_count - 1U
+      : (point_count - 1U) / 2U;
+  if (left != 0U &&
+      right > std::numeric_limits<std::size_t>::max() / left) {
+    return false;
+  }
+  unordered_pair_count = left * right;
+  return true;
 }
 
 [[nodiscard]] bool three_sum_equals(
@@ -175,6 +218,28 @@ candidate_total_capacity_reason(
     const ExactSparseAnchoredPairSessionTotalCapacity& capacity,
     const ExactSparseAnchoredPairSessionAudit& audit,
     std::span<const ExactSparseAnchoredPairRecord> records) noexcept {
+  const bool triangular =
+      cursor.schedule_config().use_triangular_block_pair_schedule;
+  const ExactMortonGroupedAnchoredPairScheduleAudit& schedule =
+      cursor.schedule_audit();
+  const bool physical_candidate_partition_holds = triangular
+      ? cursor.audit().candidate_pair_count ==
+              cursor.audit().orientation_check_count &&
+          cursor.audit().reverse_or_self_orientation_skip_count == 0U
+      : sum_equals(
+            cursor.audit().candidate_pair_count,
+            cursor.audit().reverse_or_self_orientation_skip_count,
+            cursor.audit().orientation_check_count);
+  const bool directed_coverage_holds = triangular
+      ? symmetric_coverage_equals(
+            audit.authenticated_pruned_directed_pair_count,
+            cursor.audit().candidate_pair_count,
+            schedule.triangular_self_pair_count,
+            audit.directed_pair_universe_size)
+      : sum_equals(
+            audit.authenticated_pruned_directed_pair_count,
+            cursor.audit().orientation_check_count,
+            audit.directed_pair_universe_size);
   if (!cursor.complete() || audit.poisoned || audit.point_count == 0U ||
       audit.directed_pair_universe_size / audit.point_count !=
           audit.point_count ||
@@ -196,26 +261,15 @@ candidate_total_capacity_reason(
           audit.emitted_record_count) ||
       audit.candidate_record_ready_count != audit.emitted_record_count ||
       audit.emitted_record_count != records.size() ||
-      !sum_equals(
-          cursor.audit().candidate_pair_count,
-          cursor.audit().reverse_or_self_orientation_skip_count,
-          cursor.audit().orientation_check_count) ||
-      !sum_equals(
-          audit.authenticated_pruned_directed_pair_count,
-          cursor.audit().orientation_check_count,
-          audit.directed_pair_universe_size)) {
+      !physical_candidate_partition_holds || !directed_coverage_holds) {
     return false;
   }
 
-  const ExactMortonGroupedAnchoredPairScheduleAudit& schedule =
-      cursor.schedule_audit();
   if (!cursor.audit().complete ||
       !cursor.audit().no_dynamic_candidate_or_output_arena_materialized ||
       !schedule.complete || !schedule.morton_anchor_partition_complete ||
       !schedule.no_global_anchor_pair_or_output_arena_materialized ||
       schedule.scheduled_anchor_count != audit.point_count ||
-      schedule.prepared_group_count != schedule.completed_group_count ||
-      cursor.audit().completed_group_count != schedule.completed_group_count ||
       cursor.audit().schedule_advance_count != schedule.advance_call_count ||
       cursor.audit().grouped_traversal_node_visit_count !=
           schedule.traversal_node_visit_count ||
@@ -237,20 +291,8 @@ candidate_total_capacity_reason(
           schedule.anchor_subgroup_exact_predicate_count,
           schedule.singleton_exact_predicate_count,
           schedule.exact_predicate_count) ||
-      schedule.anchor_subgroup_split_count >
-          schedule.prepared_anchor_subgroup_probe_count ||
-      schedule.anchor_subgroup_certified_prune_count >
-          schedule.prepared_anchor_subgroup_probe_count ||
-      !sum_equals(
-          schedule.anchor_subgroup_split_count,
-          schedule.anchor_subgroup_certified_prune_count,
-          schedule.prepared_anchor_subgroup_probe_count) ||
       schedule.completed_singleton_fallback_count !=
           schedule.prepared_singleton_fallback_count ||
-      !sum_equals(
-          schedule.anchor_subgroup_certified_anchor_count,
-          schedule.prepared_singleton_fallback_count,
-          schedule.delegated_frontier_anchor_count) ||
       !bounded_multiple(
           schedule.proposed_anchor_subgroup_witness_pool_entry_count,
           schedule.prepared_anchor_subgroup_probe_count,
@@ -265,6 +307,40 @@ candidate_total_capacity_reason(
           schedule.query_facing_fallback_witness_pool_entry_count) ||
       schedule.maximum_pending_anchor_subgroup_count >
           exact_grouped_anchored_pair_maximum_anchor_count) {
+    return false;
+  }
+
+  if (triangular) {
+    std::size_t unordered_pair_universe = 0U;
+    if (!triangular_unordered_universe(
+            audit.point_count, unordered_pair_universe) ||
+        !schedule.triangular_partition_complete ||
+        !schedule.no_dynamic_dual_tree_or_pair_arena_materialized ||
+        schedule.prepared_group_count != schedule.completed_group_count ||
+        !sum_equals(
+            schedule.triangular_certified_unordered_pair_count,
+            schedule.triangular_opened_unordered_pair_count,
+            unordered_pair_universe) ||
+        schedule.triangular_certified_cross_block_count +
+                schedule.triangular_opened_singleton_cross_block_count >
+            schedule.triangular_cross_block_count) {
+      return false;
+    }
+  } else if (
+      schedule.prepared_group_count != schedule.completed_group_count ||
+      cursor.audit().completed_group_count != schedule.completed_group_count ||
+      schedule.anchor_subgroup_split_count >
+          schedule.prepared_anchor_subgroup_probe_count ||
+      schedule.anchor_subgroup_certified_prune_count >
+          schedule.prepared_anchor_subgroup_probe_count ||
+      !sum_equals(
+          schedule.anchor_subgroup_split_count,
+          schedule.anchor_subgroup_certified_prune_count,
+          schedule.prepared_anchor_subgroup_probe_count) ||
+      !sum_equals(
+          schedule.anchor_subgroup_certified_anchor_count,
+          schedule.prepared_singleton_fallback_count,
+          schedule.delegated_frontier_anchor_count)) {
     return false;
   }
 
@@ -1103,10 +1179,30 @@ ExactSparseAnchoredPairSessionStep ExactSparseAnchoredPairSession::advance(
         throw std::logic_error(
             "a sparse anchored session rejected a foreign or malformed prune");
       }
-      const std::size_t prune_mass = checked_multiply(
-          schedule_step->anchor_point_ids().size(),
-          *traversal_step->leaf_end() - *traversal_step->leaf_begin(),
-          "the sparse anchored directed prune mass overflows size_t");
+      std::size_t prune_mass = 0U;
+      if (schedule_config().use_triangular_block_pair_schedule) {
+        ExactSymmetricGroupedAnchoredPairPruneReceipt symmetric_receipt =
+            recertify_exact_symmetric_grouped_anchored_pair_prune(
+                index,
+                cloud,
+                *certificate,
+                *schedule_step->anchor_leaf_begin(),
+                *schedule_step->anchor_leaf_end(),
+                *traversal_step->lbvh_node_index(),
+                maximum_closed_rank());
+        if (!symmetric_receipt.validated_for(index, cloud)) {
+          poison();
+          audit_.every_prune_recertified = false;
+          throw std::logic_error(
+              "a sparse anchored session rejected a symmetric prune receipt");
+        }
+        prune_mass = symmetric_receipt.directed_mass();
+      } else {
+        prune_mass = checked_multiply(
+            schedule_step->anchor_point_ids().size(),
+            *traversal_step->leaf_end() - *traversal_step->leaf_begin(),
+            "the sparse anchored directed prune mass overflows size_t");
+      }
       if (!can_add_within(
               audit_.authenticated_pruned_directed_pair_count,
               prune_mass,
