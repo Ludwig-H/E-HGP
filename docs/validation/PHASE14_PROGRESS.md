@@ -450,11 +450,19 @@ Le CTest court GCC Release publie un chunk, détruit le contexte, rouvre avec l'
 
 Cet incrément rend les sorties de paires bornées et reprenables, mais ne réduit pas le nombre de décisions de paires. Phase 14 reste `ready`, Phase 15 `in_progress`, `deployment_status=architecture_only`, `public_status=not_claimed`; aucun nouveau test 50 k, 10 M+, CUDA ou GCP n'est lancé.
 
+## Incrément 14W validé hôte — run H0 pair-only borné et recertifié
+
+La porte d'entrée 14V est satisfaite. Le MVP 14W est implémenté sous `reference_cpu / hgp_reduced / bounded_pair_only_event_candidates`, en `architecture_only`. Chaque chunk P8l est recertifié depuis le nuage et le LBVH avant que sa projection acceptée ne dérive les rôles H0; l'identité et le tri reposent exclusivement sur la clé canonique de `event_less`. Les capacités propres de records source, candidats, diagnostics et références de `PointId` restent indépendantes et préflightées; le cap de payload appartient à 14V. Toute capacité insuffisante produit un refus atomique sans run projeté.
+
+Les candidats et diagnostics source conservent leur `source_output_record_index`, locator global dans P8l. Seuls `event_index` et `event_projection_index`, indices finaux de Phase 10, restent différés : un miss ne crée ni racine ni naissance. Ce run ne consomme aucun support trois--quatre, ne lance aucun reducer et ne publie ni autorité de catalogue complet, ni autorité H0 complète. La validation est logicielle et courte; aucun résultat de performance n'en découle.
+
+<!-- TODO 14W perfectionné / 14X : ajouter la fusion externe canonique pair+higher, puis un oracle global naissances--selles Morse--Borůvka. Avant toute autorité H0, prouver la complétude des coupes proposées, fermer les incidences silencieuses et démontrer M.1 avec les lots de niveaux égaux. -->
+
 ## Priorités de développement
 
-1. externaliser immédiatement les records P8l en chunks bornés et les lier au `AtomicLinearRunStore`, avec rejeu authentifié depuis les autorités nuage/LBVH et reprise depuis `HEAD`; le mode résident doit rester bit à bit comparable.
+1. intégrer le MVP 14W comme projection paire bornée, fraîchement recertifiée et triée par `event_less`, avec diagnostics et locator P8l global conservés, mais indices finaux de Phase 10 différés;
 
-2. après cette couture, isoler le flux de minima de Morse réellement utile à $K\leq10$ afin de réduire avant de cataloguer; un flot Gabriel brut ne devient pas l'architecture massive. Aucun micro-réglage du halo ni nouveau gate 50 k ne précède ces étapes.
+2. préparer ensuite la fusion externe pair+higher et l'oracle global naissance--selle 14X, sans les confondre avec l'autorité limitée du MVP. Aucun micro-réglage du halo ni nouveau gate 50 k ne précède ces preuves.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 
