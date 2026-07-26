@@ -221,6 +221,7 @@ class IndependentEMSTTests(unittest.TestCase):
                     delta.added_point_ids,
                 )
                 for delta in forest.coverage_log
+                if delta.squared_level == 0
             )
         )
         expected_coverage = tuple(
