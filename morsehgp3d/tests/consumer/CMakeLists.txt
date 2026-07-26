@@ -15,6 +15,7 @@ target_link_libraries(
     morsehgp3d::anchored_pair_candidate_classifier
     morsehgp3d::anchored_pair_witness_bank
     morsehgp3d::sparse_anchored_pair_session
+    morsehgp3d::direct_support_terminal
     morsehgp3d::direct_sparse_facet_descent_batch_executor
     morsehgp3d::direct_sparse_facet_descent_batch_plan
     morsehgp3d::direct_sparse_facet_top_k_proposal_transcript

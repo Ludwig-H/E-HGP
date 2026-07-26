@@ -16,6 +16,7 @@ using morsehgp3d::exact::CertifiedPoint3;
 using morsehgp3d::hierarchy::ExactDirectSupportTerminalBudget;
 using morsehgp3d::hierarchy::ExactDirectSupportTerminalDecision;
 using morsehgp3d::hierarchy::ExactDirectSupportHigherSourceKind;
+using morsehgp3d::hierarchy::ExactDirectSupportPairSourceKind;
 using morsehgp3d::hierarchy::ExactHigherSupportAnchoredSession;
 using morsehgp3d::hierarchy::ExactHigherSupportAuthorityContext;
 using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
@@ -24,6 +25,12 @@ using morsehgp3d::hierarchy::ExactHigherSupportTerminalSession;
 using morsehgp3d::hierarchy::ExactPairSupportAuthorityContext;
 using morsehgp3d::hierarchy::ExactPairSupportIncrementalVerifier;
 using morsehgp3d::hierarchy::ExactPairSupportStreamBudget;
+using morsehgp3d::hierarchy::ExactMortonGroupedAnchoredPairScheduleConfig;
+using morsehgp3d::hierarchy::ExactSparseAnchoredPairSession;
+using morsehgp3d::hierarchy::ExactSparseAnchoredPairSessionAdvanceBudget;
+using morsehgp3d::hierarchy::ExactSparseAnchoredPairSessionStepKind;
+using morsehgp3d::hierarchy::ExactSparseAnchoredPairSessionTotalCapacity;
+using morsehgp3d::hierarchy::ExactSparseAnchoredPairTerminalAuthority;
 using morsehgp3d::spatial::CanonicalPointCloud;
 using morsehgp3d::spatial::MortonLbvhIndex;
 
@@ -46,6 +53,15 @@ void check(bool condition, const std::string& message) {
       point(1.0, -1.0, -1.0),
       point(-1.0, 1.0, -1.0),
       point(-1.0, -1.0, 1.0)};
+  return CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{points});
+}
+
+[[nodiscard]] CanonicalPointCloud right_triangle() {
+  const std::array<CertifiedPoint3, 3U> points{
+      point(0.0, 0.0, 0.0),
+      point(2.0, 0.0, 0.0),
+      point(0.0, 2.0, 0.0)};
   return CanonicalPointCloud::rejecting_duplicates(
       std::span<const CertifiedPoint3>{points});
 }
@@ -73,6 +89,87 @@ void check(bool condition, const std::string& message) {
       maximum,
       maximum,
       maximum};
+}
+
+[[nodiscard]] ExactHigherSupportStreamBudget small_higher_chunk_budget() {
+  ExactHigherSupportStreamBudget budget = unlimited_higher_budget();
+  budget.maximum_work_unit_count = 1U;
+  budget.maximum_emitted_record_count = 8U;
+  budget.maximum_emitted_point_id_reference_count = 64U;
+  budget.maximum_prune_receipt_count = 8U;
+  budget.maximum_global_closed_ball_query_count = 8U;
+  budget.maximum_point_classification_count = 64U;
+  return budget;
+}
+
+[[nodiscard]] ExactSparseAnchoredPairSessionTotalCapacity
+unlimited_sparse_pair_capacity() {
+  const std::size_t maximum = std::numeric_limits<std::size_t>::max();
+  return ExactSparseAnchoredPairSessionTotalCapacity{
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum,
+      maximum};
+}
+
+[[nodiscard]] ExactSparseAnchoredPairSessionAdvanceBudget
+sparse_pair_advance_budget(
+    std::size_t maximum_closed_rank,
+    bool segmented) {
+  const std::size_t work = segmented ? 1U : 4096U;
+  return ExactSparseAnchoredPairSessionAdvanceBudget{
+      {work, work, work, work},
+      {work},
+      1U,
+      maximum_closed_rank + 1U};
+}
+
+[[nodiscard]] ExactSparseAnchoredPairTerminalAuthority
+build_sparse_pair_authority(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::size_t maximum_closed_rank,
+    bool segmented = false) {
+  ExactSparseAnchoredPairSession session =
+      ExactSparseAnchoredPairSession::start(
+          index,
+          cloud,
+          maximum_closed_rank,
+          ExactMortonGroupedAnchoredPairScheduleConfig{4U, 0U},
+          unlimited_sparse_pair_capacity());
+  const ExactSparseAnchoredPairSessionAdvanceBudget budget =
+      sparse_pair_advance_budget(maximum_closed_rank, segmented);
+  for (std::size_t call = 0U; call < 100000U; ++call) {
+    const auto step = session.advance(index, cloud, budget);
+    if (step.kind() ==
+        ExactSparseAnchoredPairSessionStepKind::total_capacity_exhausted) {
+      throw std::logic_error(
+          "a roomy sparse pair authority exhausted total capacity");
+    }
+    if (step.kind() == ExactSparseAnchoredPairSessionStepKind::complete) {
+      return std::move(session).seal();
+    }
+  }
+  throw std::logic_error("the sparse pair authority did not terminate");
+}
+
+[[nodiscard]] morsehgp3d::hierarchy::ExactHigherSupportTerminalAuthority
+build_higher_authority(
+    const MortonLbvhIndex& index,
+    const CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    ExactHigherSupportStreamBudget budget) {
+  ExactHigherSupportTerminalSession session{
+      index, cloud, requested_maximum_order, budget, 256U};
+  if (session.run_to_terminal() !=
+      ExactHigherSupportTerminalRunStatus::terminal) {
+    throw std::logic_error("the higher terminal authority did not close");
+  }
+  return std::move(session).seal();
 }
 
 void test_terminal_facade_and_fresh_composition() {
@@ -200,6 +297,242 @@ void test_sealed_higher_authority_avoids_fresh_higher_replay() {
       "a fresh facade rejects sealed-only higher provenance");
 }
 
+void test_sparse_pair_authority_avoids_p7b_replay() {
+  const CanonicalPointCloud cloud = regular_tetrahedron();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  constexpr std::size_t requested_maximum_order = 10U;
+  constexpr std::size_t maximum_closed_rank = 4U;
+  const ExactHigherSupportStreamBudget higher_budget =
+      small_higher_chunk_budget();
+  const ExactHigherSupportStreamBudget legacy_higher_budget =
+      unlimited_higher_budget();
+  const ExactDirectSupportTerminalBudget legacy_budget{
+      unlimited_pair_budget(), legacy_higher_budget};
+  const auto legacy_pair =
+      morsehgp3d::hierarchy::build_exact_pair_support_stream(
+          index,
+          cloud,
+          requested_maximum_order,
+          legacy_budget.pair);
+  const auto legacy_higher =
+      morsehgp3d::hierarchy::build_exact_higher_support_stream(
+          index,
+          cloud,
+          requested_maximum_order,
+          legacy_higher_budget);
+  const auto legacy_facade =
+      morsehgp3d::hierarchy::build_exact_direct_support_terminal_facade(
+          index,
+          cloud,
+          requested_maximum_order,
+          legacy_budget,
+          legacy_pair,
+          legacy_higher);
+
+  ExactSparseAnchoredPairTerminalAuthority original_pair_authority =
+      build_sparse_pair_authority(
+          index, cloud, maximum_closed_rank);
+  ExactSparseAnchoredPairTerminalAuthority transferred_pair_authority(
+      std::move(original_pair_authority));
+  check(
+      !original_pair_authority.sealed_in_process_terminal_authority() &&
+          transferred_pair_authority
+              .sealed_in_process_terminal_authority(),
+      "moving a sparse pair authority revokes exactly its source scope");
+  auto higher_authority = build_higher_authority(
+      index, cloud, requested_maximum_order, higher_budget);
+  const auto sparse_facade =
+      morsehgp3d::hierarchy::build_exact_direct_support_terminal_facade(
+          index,
+          cloud,
+          requested_maximum_order,
+          higher_budget,
+          std::move(transferred_pair_authority),
+          std::move(higher_authority));
+
+  check(
+      sparse_facade.terminal_catalog_certified() &&
+          sparse_facade.events == legacy_facade.events &&
+          sparse_facade.relevant_extra_shell_diagnostics ==
+              legacy_facade.relevant_extra_shell_diagnostics &&
+          sparse_facade.certificate.pair_source_kind ==
+              ExactDirectSupportPairSourceKind::
+                  sealed_sparse_anchored_session &&
+          !sparse_facade.certificate.pair_legacy_budget_applicable &&
+          !sparse_facade.certificate.pair_result_freshly_replayed &&
+          sparse_facade.certificate.pair_terminal_authority_consumed &&
+          sparse_facade.certificate
+              .pair_terminal_records_captured_once &&
+          sparse_facade.certificate.pair_directed_pair_universe_size ==
+              16U &&
+          sparse_facade.certificate.arity_certificates[0]
+                  .exact_candidate_universe_size == 6 &&
+          sparse_facade.certificate.arity_certificates[0]
+                  .accepted_event_count == 6U &&
+          sparse_facade.certificate.pair_terminal_output_digest !=
+              morsehgp3d::contract::CanonicalId{} &&
+          sparse_facade.certificate.pair_semantic_digest !=
+              legacy_facade.certificate.pair_semantic_digest &&
+          sparse_facade.certificate.requested_budget.pair ==
+              ExactPairSupportStreamBudget{} &&
+          !transferred_pair_authority
+               .sealed_in_process_terminal_authority(),
+      "the sealed sparse pair authority reproduces the legacy catalogue without replaying or relabelling P7b");
+
+  auto segmented_pair_authority = build_sparse_pair_authority(
+      index, cloud, maximum_closed_rank, true);
+  auto segmented_higher_authority = build_higher_authority(
+      index, cloud, requested_maximum_order, higher_budget);
+  const auto segmented_facade =
+      morsehgp3d::hierarchy::build_exact_direct_support_terminal_facade(
+          index,
+          cloud,
+          requested_maximum_order,
+          higher_budget,
+          std::move(segmented_pair_authority),
+          std::move(segmented_higher_authority));
+  check(
+      segmented_facade.terminal_catalog_certified() &&
+          segmented_facade.events == sparse_facade.events &&
+          segmented_facade.relevant_extra_shell_diagnostics ==
+              sparse_facade.relevant_extra_shell_diagnostics &&
+          segmented_facade.certificate.pair_terminal_output_digest ==
+              sparse_facade.certificate.pair_terminal_output_digest &&
+          segmented_facade.certificate.pair_semantic_digest ==
+              sparse_facade.certificate.pair_semantic_digest,
+      "different P8l segmentation preserves the normalized pair science and its digests");
+
+  const CanonicalPointCloud foreign_cloud = regular_tetrahedron();
+  const MortonLbvhIndex foreign_index = MortonLbvhIndex::build(foreign_cloud);
+  auto foreign_pair_authority = build_sparse_pair_authority(
+      foreign_index, foreign_cloud, maximum_closed_rank);
+  auto target_higher_authority = build_higher_authority(
+      index, cloud, requested_maximum_order, higher_budget);
+  const auto foreign_rejected =
+      morsehgp3d::hierarchy::build_exact_direct_support_terminal_facade(
+          index,
+          cloud,
+          requested_maximum_order,
+          higher_budget,
+          std::move(foreign_pair_authority),
+          std::move(target_higher_authority));
+  check(
+      !foreign_rejected.terminal_catalog_certified() &&
+          !foreign_rejected.certificate.source_authorities_match &&
+          foreign_rejected.events.empty() &&
+          foreign_rejected.relevant_extra_shell_diagnostics.empty() &&
+          foreign_rejected.certificate.decision ==
+              ExactDirectSupportTerminalDecision::
+                  source_result_not_certified,
+      "a sparse pair authority with equal coordinates but foreign tokens fails closed");
+
+  auto revoked_pair_authority = build_sparse_pair_authority(
+      index, cloud, maximum_closed_rank);
+  static_cast<void>(
+      std::move(revoked_pair_authority).release_records());
+  auto fail_closed_higher_authority = build_higher_authority(
+      index, cloud, requested_maximum_order, higher_budget);
+  const auto rejected =
+      morsehgp3d::hierarchy::build_exact_direct_support_terminal_facade(
+          index,
+          cloud,
+          requested_maximum_order,
+          higher_budget,
+          std::move(revoked_pair_authority),
+          std::move(fail_closed_higher_authority));
+  check(
+      !rejected.terminal_catalog_certified() && rejected.events.empty() &&
+          rejected.relevant_extra_shell_diagnostics.empty() &&
+          rejected.certificate.decision ==
+              ExactDirectSupportTerminalDecision::
+                  source_result_not_certified,
+      "a previously released sparse pair authority fails closed without payload");
+
+  auto mutated_digest = sparse_facade;
+  auto output_digest_bytes =
+      mutated_digest.certificate.pair_terminal_output_digest.bytes();
+  output_digest_bytes[0] ^= 1U;
+  mutated_digest.certificate.pair_terminal_output_digest =
+      morsehgp3d::contract::CanonicalId{output_digest_bytes};
+  check(
+      !mutated_digest.terminal_catalog_certified(),
+      "a sparse facade rejects a nonzero mutated pair output digest");
+
+  auto mutated_index = sparse_facade;
+  ++mutated_index.events.front().event_index;
+  check(
+      !mutated_index.terminal_catalog_certified(),
+      "a terminal facade rejects a mutated normalized event index");
+  auto mutated_h0_order = sparse_facade;
+  mutated_h0_order.events.front().birth_order.reset();
+  check(
+      !mutated_h0_order.terminal_catalog_certified(),
+      "a terminal facade rejects a mutated derived H0 order");
+}
+
+void test_sparse_pair_diagnostic_normalization() {
+  const CanonicalPointCloud cloud = right_triangle();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  constexpr std::size_t requested_maximum_order = 2U;
+  constexpr std::size_t maximum_closed_rank = 3U;
+  const ExactHigherSupportStreamBudget higher_budget =
+      small_higher_chunk_budget();
+  const ExactHigherSupportStreamBudget legacy_higher_budget =
+      unlimited_higher_budget();
+  const ExactDirectSupportTerminalBudget legacy_budget{
+      unlimited_pair_budget(), legacy_higher_budget};
+  const auto legacy_pair =
+      morsehgp3d::hierarchy::build_exact_pair_support_stream(
+          index,
+          cloud,
+          requested_maximum_order,
+          legacy_budget.pair);
+  const auto legacy_higher =
+      morsehgp3d::hierarchy::build_exact_higher_support_stream(
+          index,
+          cloud,
+          requested_maximum_order,
+          legacy_higher_budget);
+  const auto legacy_facade =
+      morsehgp3d::hierarchy::build_exact_direct_support_terminal_facade(
+          index,
+          cloud,
+          requested_maximum_order,
+          legacy_budget,
+          legacy_pair,
+          legacy_higher);
+
+  auto pair_authority = build_sparse_pair_authority(
+      index, cloud, maximum_closed_rank);
+  auto higher_authority = build_higher_authority(
+      index, cloud, requested_maximum_order, higher_budget);
+  const auto sparse_facade =
+      morsehgp3d::hierarchy::build_exact_direct_support_terminal_facade(
+          index,
+          cloud,
+          requested_maximum_order,
+          higher_budget,
+          std::move(pair_authority),
+          std::move(higher_authority));
+
+  check(
+      legacy_facade.terminal_catalog_certified() &&
+          sparse_facade.terminal_catalog_certified() &&
+          !legacy_facade.relevant_extra_shell_diagnostics.empty() &&
+          sparse_facade.events == legacy_facade.events &&
+          sparse_facade.relevant_extra_shell_diagnostics ==
+              legacy_facade.relevant_extra_shell_diagnostics &&
+          sparse_facade.certificate.arity_certificates[0]
+                  .relevant_extra_shell_diagnostic_count == 1U,
+      "the moved P8l variant preserves the right-triangle pair extra-shell diagnostic");
+  auto mutated_diagnostic_index = sparse_facade;
+  ++mutated_diagnostic_index.relevant_extra_shell_diagnostics.front()
+        .diagnostic_index;
+  check(
+      !mutated_diagnostic_index.terminal_catalog_certified(),
+      "a terminal facade rejects a mutated normalized diagnostic index");
+}
+
 void test_budgeted_source_never_publishes_terminal_payload() {
   const CanonicalPointCloud cloud = regular_tetrahedron();
   const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
@@ -289,6 +622,8 @@ void test_one_record_chunks_exceed_resident_output_capacity() {
 int main() {
   test_terminal_facade_and_fresh_composition();
   test_sealed_higher_authority_avoids_fresh_higher_replay();
+  test_sparse_pair_authority_avoids_p7b_replay();
+  test_sparse_pair_diagnostic_normalization();
   test_budgeted_source_never_publishes_terminal_payload();
   test_one_record_chunks_exceed_resident_output_capacity();
   if (failures != 0) {

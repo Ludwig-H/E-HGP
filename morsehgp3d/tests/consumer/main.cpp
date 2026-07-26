@@ -10,6 +10,7 @@
 #include "morsehgp3d/hierarchy/direct_sparse_facet_top_k_proposal_transcript.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_gateway_historical_quotient.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_positive_facet_prefix_sweep.hpp"
+#include "morsehgp3d/hierarchy/direct_support_terminal.hpp"
 #include "morsehgp3d/hierarchy/anchored_pair_candidate_classifier.hpp"
 #include "morsehgp3d/hierarchy/grouped_anchored_pair_certificate.hpp"
 #include "morsehgp3d/hierarchy/morton_grouped_anchored_pair_candidate_cursor.hpp"
@@ -23,6 +24,7 @@
 #include <iostream>
 #include <span>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 int main() {
@@ -89,6 +91,9 @@ int main() {
   static_assert(
       std::is_nothrow_move_constructible_v<
           SparseAnchoredPairTerminalAuthority>);
+  static_assert(
+      morsehgp3d::hierarchy::direct_support_terminal_certificate_schema_version ==
+      3U);
 
   static_assert(
       morsehgp3d::hierarchy::
@@ -568,6 +573,33 @@ int main() {
                   .orientation_check_count !=
           9U) {
     std::cerr << "installed sparse anchored authority changed semantics\n";
+    return 1;
+  }
+  const morsehgp3d::hierarchy::ExactHigherSupportStreamBudget
+      installed_higher_budget{
+          1024U, 16U, 16U, 1024U, 4096U, 1024U, 1024U, 4096U};
+  morsehgp3d::hierarchy::ExactHigherSupportTerminalSession
+      installed_higher_session{
+          spatial_index, cloud, 2U, installed_higher_budget, 64U};
+  if (installed_higher_session.run_to_terminal() !=
+      morsehgp3d::hierarchy::ExactHigherSupportTerminalRunStatus::terminal) {
+    std::cerr << "installed higher terminal session did not terminate\n";
+    return 1;
+  }
+  auto installed_direct_facade =
+      morsehgp3d::hierarchy::build_exact_direct_support_terminal_facade(
+          spatial_index,
+          cloud,
+          2U,
+          installed_higher_budget,
+          std::move(installed_sparse_authority),
+          std::move(installed_higher_session).seal());
+  if (!installed_direct_facade.terminal_catalog_certified() ||
+      installed_direct_facade.certificate.pair_source_kind !=
+          morsehgp3d::hierarchy::ExactDirectSupportPairSourceKind::
+              sealed_sparse_anchored_session ||
+      installed_direct_facade.certificate.pair_result_freshly_replayed) {
+    std::cerr << "installed P8m facade changed authority semantics\n";
     return 1;
   }
   if (!nearest.shell_complete() || nearest.strict_below().size() != 0U ||

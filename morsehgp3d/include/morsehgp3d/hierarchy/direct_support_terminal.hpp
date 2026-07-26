@@ -5,6 +5,7 @@
 #include "morsehgp3d/exact/integer.hpp"
 #include "morsehgp3d/hierarchy/higher_support_stream.hpp"
 #include "morsehgp3d/hierarchy/pair_support_stream.hpp"
+#include "morsehgp3d/hierarchy/sparse_anchored_pair_session.hpp"
 
 #include <array>
 #include <cstddef>
@@ -16,7 +17,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t
-    direct_support_terminal_certificate_schema_version = 2U;
+    direct_support_terminal_certificate_schema_version = 3U;
 inline constexpr std::string_view direct_support_terminal_backend =
     "reference_cpu";
 inline constexpr std::string_view direct_support_terminal_profile =
@@ -26,9 +27,10 @@ inline constexpr std::string_view direct_support_terminal_mode =
 inline constexpr std::string_view direct_support_terminal_public_status =
     "not_claimed";
 inline constexpr std::string_view direct_support_terminal_proof_basis =
-    "fresh_exact_pair_v1_and_either_fresh_grouped_higher_v2_replay_"
-    "or_sealed_root_anchored_fixed_chunk_higher_run_terminal_support_"
-    "catalog_arities_two_through_four_v2";
+    "either_fresh_exact_pair_v1_or_sealed_sparse_anchored_pair_session_"
+    "v1_and_either_fresh_grouped_higher_v2_replay_or_sealed_root_"
+    "anchored_fixed_chunk_higher_run_terminal_support_catalog_arities_"
+    "two_through_four_v3";
 
 // This is a certificate for the direct support catalogue only.  It does not
 // construct a hierarchy, publish forest semantics, or promote a public exact
@@ -127,6 +129,12 @@ enum class ExactDirectSupportHigherSourceKind : std::uint8_t {
   sealed_anchored_fixed_chunk_run,
 };
 
+enum class ExactDirectSupportPairSourceKind : std::uint8_t {
+  unspecified,
+  fresh_resident_replay,
+  sealed_sparse_anchored_session,
+};
+
 struct ExactDirectSupportTerminalCertificate {
   static constexpr std::string_view backend =
       direct_support_terminal_backend;
@@ -160,7 +168,30 @@ struct ExactDirectSupportTerminalCertificate {
   std::size_t normalized_extra_shell_diagnostic_count{};
   bool source_authorities_match{false};
   bool source_requirements_match{false};
+  ExactDirectSupportPairSourceKind pair_source_kind{
+      ExactDirectSupportPairSourceKind::unspecified};
+  // budget.pair is meaningful only for the legacy fresh P7b source.  A P8l
+  // source carries its own schedule and eight immutable physical caps below.
+  bool pair_legacy_budget_applicable{false};
   bool pair_result_freshly_replayed{false};
+  std::size_t pair_sparse_maximum_closed_rank{};
+  ExactMortonGroupedAnchoredPairScheduleConfig pair_sparse_schedule_config{};
+  ExactSparseAnchoredPairSessionTotalCapacity pair_sparse_total_capacity{};
+  std::size_t pair_directed_pair_universe_size{};
+  std::size_t pair_authenticated_pruned_directed_pair_count{};
+  std::size_t pair_orientation_check_count{};
+  std::size_t pair_reverse_or_self_orientation_skip_count{};
+  std::size_t pair_admitted_candidate_count{};
+  std::size_t pair_classification_terminal_count{};
+  std::size_t pair_above_rank_count{};
+  std::size_t pair_terminal_record_count{};
+  bool pair_sparse_directed_coverage_certified{false};
+  bool pair_sparse_orientation_partition_certified{false};
+  bool pair_sparse_classification_partition_certified{false};
+  bool pair_sparse_output_partition_certified{false};
+  bool pair_terminal_authority_consumed{false};
+  bool pair_terminal_records_captured_once{false};
+  contract::CanonicalId pair_terminal_output_digest{};
   bool higher_result_freshly_replayed{false};
   ExactDirectSupportHigherSourceKind higher_source_kind{
       ExactDirectSupportHigherSourceKind::unspecified};
@@ -230,6 +261,20 @@ build_exact_direct_support_terminal_facade(
     std::size_t requested_maximum_order,
     const ExactDirectSupportTerminalBudget& budget,
     const ExactPairSupportStreamResult& pair_result,
+    ExactHigherSupportTerminalAuthority higher_authority);
+
+// Consumes both process-local terminal authorities.  The pair lane is bound to
+// the externally derived relevant closed rank and carries its P8l schedule and
+// total capacities; no P7b result, budget or traversal replay is synthesized.
+// The only requested stream budget is therefore the still-unchanged higher
+// fixed-chunk budget.
+[[nodiscard]] ExactDirectSupportTerminalFacade
+build_exact_direct_support_terminal_facade(
+    const spatial::MortonLbvhIndex& index,
+    const spatial::CanonicalPointCloud& cloud,
+    std::size_t requested_maximum_order,
+    const ExactHigherSupportStreamBudget& higher_budget,
+    ExactSparseAnchoredPairTerminalAuthority pair_authority,
     ExactHigherSupportTerminalAuthority higher_authority);
 
 struct ExactDirectSupportTerminalVerification {

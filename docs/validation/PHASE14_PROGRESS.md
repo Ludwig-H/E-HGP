@@ -342,11 +342,17 @@ Les capacités totales bornent séparément avances, orientations, visites et pr
 
 Le test permanent compare le fallback 24 points à P7b avec $576=276+300$, puis une fixture collinéaire de 20 points avec prune entre passage ample et segmentation d'une visite. Il couvre les budgets de sortie atomiques, le cap total irréversible, le singleton, les tokens étrangers, le déplacement et la remise exactement une fois. GCC Release passe en 0,052 seconde, Clang 18 Release en 0,040 seconde, puis installation/export et consumer externe passent 1/1 en 0,01 seconde. Aucun benchmark, sanitizer, CUDA, test massif ou GCP n'est lancé.
 
-P8l ne remplace pas encore P7b dans la façade ou le runner. Le runner garde son rejet résident au-delà de 50 000 points; lever cette garde avant le raccord de façade, un sink externe et une voie supports trois--quatre scalable serait mensonger. Le fallback P8j reste quadratique et sa composition avec P8k cubique au pire. Aucun SLO 50 k ou fonctionnement 10 M+ n'est donc revendiqué.
+## Incrément 14Q P8m — façade terminale sans rejeu P7b
+
+P8m implémente `reference_cpu / hgp_reduced / sparse_pair_terminal_facade`. Le certificat terminal v3 distingue exclusivement la source paire P7b fraîche de l'autorité P8l scellée. La nouvelle surcharge reçoit seulement le budget supérieur, lie P8l au nuage, au LBVH et au rang fermé dérivé, recroise ses partitions dirigées et déplace ses seuls records avec les segments supérieurs P6b. Elle ne construit, ne vérifie et ne synthétise aucun résultat P7b.
+
+Le digest de sortie paire encode canoniquement les champs scientifiques après normalisation et reste séparé par domaine. Le digest sémantique P8l l'engage avec les digests cloud/LBVH, les exigences et la base de preuve P8l; il exclut caps et compteurs de segmentation et n'emprunte jamais le digest sémantique P7b. Sur le tétraèdre, la façade P8l reproduit les 11 événements historiques, dont six paires et $\binom{4}{2}=6$, avec une couverture dirigée de taille 16. Le budget ample et la segmentation à une unité conservent payload et digests. Les tokens étrangers à coordonnées égales, les autorités déjà libérées et les mutations des champs normalisés échouent sans payload. Les CTests P8l et façade passent 2/2 sous GCC Release en 0,14 seconde et sous Clang Release en 0,16 seconde; le checker statique Phase 9 v9 passe. Aucun benchmark, CUDA ou GCP n'est lancé.
+
+Le runner utilise encore P7b et garde son rejet résident au-delà de 50 000 points; lever cette garde avant sa substitution, un sink externe et une voie supports trois--quatre scalable serait mensonger. Le fallback P8j reste quadratique et sa composition avec P8k cubique au pire. Aucun SLO 50 k ou fonctionnement 10 M+ n'est donc revendiqué.
 
 ## Priorités de développement
 
-1. ajouter à la façade terminale un overload consommant l'autorité P8l, remplacer uniquement la source des supports deux du runner après un différentiel CPU court, et laisser les supports trois--quatre inchangés; aucun gate GCP ne précède cette substitution. Le gate 50 k vient ensuite, puis seulement la voie massive avec sink externe et supports supérieurs scalables.
+1. remplacer uniquement la source des supports deux du runner par P8l et la surcharge P8m, exécuter un différentiel CPU court jusqu'à la forêt et laisser les supports trois--quatre inchangés; aucun gate GCP ne précède cette substitution. Le gate 50 k vient ensuite, puis seulement la voie massive avec sink externe et supports supérieurs scalables.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

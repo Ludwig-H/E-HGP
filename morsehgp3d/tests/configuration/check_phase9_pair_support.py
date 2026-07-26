@@ -542,7 +542,9 @@ def validate(
         "pair_canonical_cloud_digest",
         "higher_canonical_cloud_digest",
         "direct_support_catalog_arities_two_through_four_only",
-        "fresh_exact_pair_v1_and_grouped_higher_v2_replay_terminal_",
+        "sealed_sparse_anchored_pair_session_",
+        "ExactDirectSupportPairSourceKind",
+        "pair_terminal_output_digest",
         "common_durable_checkpoint_certified{false}",
         "hierarchy_or_forest_certified{false}",
         "public_status_claimed{false}",
@@ -550,6 +552,35 @@ def validate(
         require(
             required in terminal_combined,
             f"missing terminal composition token {required!r}",
+        )
+    sparse_facade_start = terminal_source.find(
+        "ExactSparseAnchoredPairTerminalAuthority pair_authority"
+    )
+    sparse_facade_end = terminal_source.find(
+        "ExactDirectSupportTerminalVerification", sparse_facade_start
+    )
+    require(
+        sparse_facade_start >= 0 and sparse_facade_end > sparse_facade_start,
+        "cannot isolate the sealed sparse pair terminal facade overload",
+    )
+    sparse_facade = terminal_source[sparse_facade_start:sparse_facade_end]
+    for forbidden in (
+        "build_exact_pair_support_stream(",
+        "verify_exact_pair_support_stream(",
+        "ExactPairSupportStreamResult",
+    ):
+        require(
+            forbidden not in sparse_facade,
+            f"the sealed sparse pair facade reintroduced P7b through {forbidden!r}",
+        )
+    for required in (
+        "release_records()",
+        "sparse_pair_terminal_output_digest(facade)",
+        "sparse_pair_semantic_digest(",
+    ):
+        require(
+            required in sparse_facade,
+            f"the sealed sparse pair facade is missing {required!r}",
         )
     for required in (
         "cuda_outward_binary64_diametral_phi_upper_bound_proposal_only",
@@ -978,7 +1009,7 @@ def validate(
         binary_symbol_gate = True
 
     return {
-        "schema": "morsehgp3d.phase9.direct_support_static.v8",
+        "schema": "morsehgp3d.phase9.direct_support_static.v9",
         "targets": [
             "morsehgp3d_pair_support",
             "morsehgp3d_higher_support",
@@ -998,6 +1029,7 @@ def validate(
         "higher_support_anchored_in_memory_session": True,
         "higher_support_three_kind_output_chain": True,
         "terminal_direct_support_facade": True,
+        "sparse_pair_facade_without_p7b_replay": True,
         "cuda_phi_proposal_cpu_exact_recertification": True,
         "persistent_authority_context": True,
         "incremental_verify_next": True,

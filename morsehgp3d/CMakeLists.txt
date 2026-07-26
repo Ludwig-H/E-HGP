@@ -551,6 +551,7 @@ target_link_libraries(
   morsehgp3d_direct_support_terminal
   PUBLIC
     morsehgp3d::pair_support
+    morsehgp3d::sparse_anchored_pair_session
     morsehgp3d::higher_support
   PRIVATE morsehgp3d::sanitizers
 )
