@@ -44,6 +44,7 @@ constexpr std::size_t kMaximumSupportedOrder = 10U;
 constexpr std::size_t kAxisCount = 3U;
 constexpr std::size_t kMaximumValidationDistanceEvaluationCount =
     250'000'000U;
+constexpr std::size_t kMaximumQualityPairCount = 262'144U;
 
 struct Options {
   std::size_t point_count{50'000U};
@@ -51,6 +52,7 @@ struct Options {
   std::size_t morton_window_radius{256U};
   std::optional<std::size_t> reference_morton_window_radius;
   std::size_t validation_point_count{};
+  std::size_t quality_pair_count{};
   bool resident_replay{false};
   std::size_t requested_cpu_workers{};
   std::uint64_t seed{UINT64_C(0x14a750c0ffee)};
@@ -78,6 +80,7 @@ struct OrderSummary {
   double root_squared_level{};
   std::uint64_t digest{};
   std::uint64_t cpu_nanoseconds{};
+  std::vector<MergeRecord> retained_quality_merges;
 };
 
 struct HierarchyRun {
@@ -107,6 +110,60 @@ struct ResidentReplayResult {
   bool transcript_match{};
   std::uint64_t launcher_wall_nanoseconds{};
   std::uint64_t replay_total_nanoseconds{};
+};
+
+struct BarcodeQuality {
+  std::size_t exact_level_bit_match_count{};
+  std::size_t finite_death_count{};
+  double sorted_death_level_l1_raw{};
+  std::optional<double> sorted_death_level_l1_normalized_reference_l1;
+  double sorted_death_level_linf_raw{};
+  std::optional<double> sorted_death_level_linf_normalized_reference_root;
+};
+
+struct CopheneticQuality {
+  std::size_t exact_level_bit_match_count{};
+  std::size_t sampled_pair_count{};
+  double mean_absolute_error_raw{};
+  std::optional<double> mean_absolute_error_normalized_reference_root;
+  double maximum_absolute_error_raw{};
+  std::optional<double> maximum_absolute_error_normalized_reference_root;
+  std::optional<double> pearson;
+};
+
+struct ClusterThresholdQuality {
+  unsigned int quantile_percent{};
+  double reference_squared_level{};
+  std::size_t agreement_count{};
+  std::size_t pair_count{};
+  std::size_t both_same_cluster_count{};
+  std::size_t both_different_cluster_count{};
+  std::size_t fast_only_same_cluster_count{};
+  std::size_t reference_only_same_cluster_count{};
+};
+
+struct OrderHierarchyQuality {
+  std::size_t order{};
+  BarcodeQuality barcode;
+  CopheneticQuality cophenetic;
+  std::vector<ClusterThresholdQuality> cluster_thresholds;
+  std::size_t cluster_agreement_count{};
+  std::size_t cluster_comparison_count{};
+};
+
+struct AggregateHierarchyQuality {
+  BarcodeQuality barcode;
+  CopheneticQuality cophenetic;
+  std::size_t cluster_agreement_count{};
+  std::size_t cluster_comparison_count{};
+};
+
+struct HierarchyQuality {
+  std::uint64_t sample_seed{};
+  std::size_t sampled_pair_count{};
+  std::vector<OrderHierarchyQuality> orders;
+  AggregateHierarchyQuality aggregate;
+  std::uint64_t cpu_nanoseconds{};
 };
 
 [[nodiscard]] std::size_t parse_size(
@@ -168,6 +225,9 @@ struct ResidentReplayResult {
     } else if (argument == "--validation-points" && index + 1 < argc) {
       options.validation_point_count =
           parse_nonnegative_size(argv[++index], "invalid --validation-points");
+    } else if (argument == "--quality-pairs" && index + 1 < argc) {
+      options.quality_pair_count =
+          parse_nonnegative_size(argv[++index], "invalid --quality-pairs");
     } else if (argument == "--resident-replay") {
       options.resident_replay = true;
     } else if (argument == "--cpu-workers" && index + 1 < argc) {
@@ -180,7 +240,7 @@ struct ResidentReplayResult {
           "usage: gpu_morton_window_h0_surrogate [--point-count N] "
           "[--max-order K] [--morton-window W] [--cpu-workers N] "
           "[--reference-morton-window W2] [--validation-points N] "
-          "[--resident-replay] [--seed N]");
+          "[--quality-pairs Q] [--resident-replay] [--seed N]");
     }
   }
   if (options.maximum_order > kMaximumSupportedOrder ||
@@ -205,6 +265,15 @@ struct ResidentReplayResult {
               options.validation_point_count) {
     throw std::invalid_argument(
         "--validation-points would exceed the 250000000-distance hard cap");
+  }
+  if (options.quality_pair_count > kMaximumQualityPairCount) {
+    throw std::invalid_argument(
+        "--quality-pairs exceeds the hard cap of 262144");
+  }
+  if (options.quality_pair_count != 0U &&
+      !options.reference_morton_window_radius.has_value()) {
+    throw std::invalid_argument(
+        "--quality-pairs requires --reference-morton-window");
   }
   return options;
 }
@@ -304,6 +373,66 @@ void parallel_shards(
   }
 }
 
+void validate_knn_transcript(
+    const morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult& knn,
+    const std::vector<PointId>& point_ids_by_morton_position,
+    std::size_t point_count,
+    std::size_t maximum_order,
+    std::size_t used_cpu_workers,
+    const char* role) {
+  const std::size_t expected_neighbor_count = checked_product(
+      point_count,
+      maximum_order,
+      "the structural kNN transcript extent overflows size_t");
+  if (point_ids_by_morton_position.size() != point_count ||
+      knn.neighbor_point_ids.size() != expected_neighbor_count ||
+      knn.squared_distances.size() != expected_neighbor_count) {
+    throw std::runtime_error(
+        std::string{role} + " returned a wrong transcript extent");
+  }
+  std::atomic<bool> invalid{false};
+  parallel_shards(
+      point_count,
+      used_cpu_workers,
+      [&](std::size_t, std::size_t begin, std::size_t end) {
+        for (std::size_t position = begin; position < end; ++position) {
+          const PointId source = point_ids_by_morton_position[position];
+          const std::size_t offset = position * maximum_order;
+          for (std::size_t rank = 0U; rank < maximum_order; ++rank) {
+            const std::size_t record = offset + rank;
+            const PointId neighbor = knn.neighbor_point_ids[record];
+            const double distance = knn.squared_distances[record];
+            if (neighbor >= static_cast<PointId>(point_count) ||
+                neighbor == source || !std::isfinite(distance) ||
+                distance < 0.0) {
+              invalid.store(true, std::memory_order_relaxed);
+            }
+            if (rank != 0U) {
+              const PointId previous_id =
+                  knn.neighbor_point_ids[record - 1U];
+              const double previous_distance =
+                  knn.squared_distances[record - 1U];
+              if (distance < previous_distance ||
+                  (distance == previous_distance && neighbor <= previous_id)) {
+                invalid.store(true, std::memory_order_relaxed);
+              }
+            }
+            for (std::size_t previous_rank = 0U;
+                 previous_rank < rank;
+                 ++previous_rank) {
+              if (knn.neighbor_point_ids[offset + previous_rank] == neighbor) {
+                invalid.store(true, std::memory_order_relaxed);
+              }
+            }
+          }
+        }
+      });
+  if (invalid.load(std::memory_order_relaxed)) {
+    throw std::runtime_error(
+        std::string{role} + " failed strict structural validation");
+  }
+}
+
 [[nodiscard]] double squared_distance(
     const std::vector<double>& coordinates_by_point_id,
     PointId first,
@@ -383,7 +512,8 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
 [[nodiscard]] OrderSummary reduce_surrogate_order(
     std::size_t order_index,
     std::vector<SurrogateEdge>& edges,
-    std::size_t point_count) {
+    std::size_t point_count,
+    bool retain_quality_merges) {
   const auto begin = Clock::now();
   const std::size_t proposed_count = edges.size();
   std::sort(
@@ -459,7 +589,7 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
   }
   const double root_squared_level = materialized_merges.back().squared_level;
   const auto end = Clock::now();
-  return OrderSummary{
+  OrderSummary summary{
       order_index + 1U,
       proposed_count,
       edges.size(),
@@ -468,7 +598,12 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
       component_count,
       root_squared_level,
       digest,
-      nanoseconds(end - begin)};
+      nanoseconds(end - begin),
+      {}};
+  if (retain_quality_merges) {
+    summary.retained_quality_merges = std::move(materialized_merges);
+  }
+  return summary;
 }
 
 [[nodiscard]] HierarchyRun build_surrogate_hierarchies(
@@ -478,7 +613,8 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
     const std::vector<PointId>& point_ids_by_morton_position,
     const std::vector<std::size_t>& morton_position_by_point_id,
     const std::vector<double>& chain_squared_distances,
-    const morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult& knn) {
+    const morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult& knn,
+    bool retain_quality_merges) {
   const std::size_t edge_count_per_order =
       checked_twice_minus_one(point_count);
   const auto edge_build_begin = Clock::now();
@@ -549,7 +685,10 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
             break;
           }
           summaries[order] = reduce_surrogate_order(
-              order, order_edges[order], point_count);
+              order,
+              order_edges[order],
+              point_count,
+              retain_quality_merges);
         }
       } catch (...) {
         std::lock_guard<std::mutex> lock{hierarchy_failure_mutex};
@@ -708,10 +847,571 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
       nanoseconds(end - begin)};
 }
 
+class WeightedTreeMaximumQuery final {
+ public:
+  WeightedTreeMaximumQuery(
+      std::size_t point_count,
+      const std::vector<MergeRecord>& merges)
+      : point_count_(point_count) {
+    if (point_count_ < 2U || merges.size() != point_count_ - 1U) {
+      throw std::invalid_argument(
+          "a quality MST must contain exactly n-1 merge edges");
+    }
+    std::vector<std::size_t> degrees(point_count_);
+    for (const MergeRecord& merge : merges) {
+      if (merge.first >= static_cast<PointId>(point_count_) ||
+          merge.second >= static_cast<PointId>(point_count_) ||
+          merge.first == merge.second ||
+          !std::isfinite(merge.squared_level) ||
+          merge.squared_level < 0.0) {
+        throw std::invalid_argument(
+            "a quality MST contains an invalid merge edge");
+      }
+      ++degrees[static_cast<std::size_t>(merge.first)];
+      ++degrees[static_cast<std::size_t>(merge.second)];
+    }
+    std::vector<std::size_t> offsets(point_count_ + 1U);
+    for (std::size_t point = 0U; point < point_count_; ++point) {
+      if (degrees[point] >
+          std::numeric_limits<std::size_t>::max() - offsets[point]) {
+        throw std::length_error("the quality MST adjacency overflows size_t");
+      }
+      offsets[point + 1U] = offsets[point] + degrees[point];
+    }
+    if (offsets.back() != checked_product(
+                              merges.size(),
+                              std::size_t{2},
+                              "the quality MST edge extent overflows size_t")) {
+      throw std::logic_error("the quality MST adjacency count is inconsistent");
+    }
+    std::vector<std::size_t> neighbors(offsets.back());
+    std::vector<double> weights(offsets.back());
+    std::vector<std::size_t> cursors = offsets;
+    for (const MergeRecord& merge : merges) {
+      const std::size_t first = static_cast<std::size_t>(merge.first);
+      const std::size_t second = static_cast<std::size_t>(merge.second);
+      const std::size_t first_slot = cursors[first]++;
+      const std::size_t second_slot = cursors[second]++;
+      neighbors[first_slot] = second;
+      weights[first_slot] = merge.squared_level;
+      neighbors[second_slot] = first;
+      weights[second_slot] = merge.squared_level;
+    }
+
+    constexpr std::size_t kInvalid =
+        std::numeric_limits<std::size_t>::max();
+    depth_.assign(point_count_, 0U);
+    std::vector<std::size_t> parent(point_count_, kInvalid);
+    std::vector<double> parent_weight(point_count_, 0.0);
+    std::vector<std::size_t> stack;
+    stack.reserve(point_count_);
+    parent[0] = 0U;
+    stack.push_back(0U);
+    std::size_t visited_count = 0U;
+    while (!stack.empty()) {
+      const std::size_t point = stack.back();
+      stack.pop_back();
+      ++visited_count;
+      for (std::size_t edge = offsets[point];
+           edge < offsets[point + 1U];
+           ++edge) {
+        const std::size_t neighbor = neighbors[edge];
+        if (neighbor == parent[point]) {
+          continue;
+        }
+        if (parent[neighbor] != kInvalid) {
+          throw std::logic_error("the quality merge graph is not a tree");
+        }
+        parent[neighbor] = point;
+        parent_weight[neighbor] = weights[edge];
+        if (depth_[point] == std::numeric_limits<std::size_t>::max()) {
+          throw std::length_error("the quality MST depth overflows size_t");
+        }
+        depth_[neighbor] = depth_[point] + 1U;
+        stack.push_back(neighbor);
+      }
+    }
+    if (visited_count != point_count_) {
+      throw std::logic_error("the quality merge tree is disconnected");
+    }
+
+    level_count_ = 1U;
+    std::size_t covered_depth = 1U;
+    while (covered_depth < point_count_) {
+      if (covered_depth > std::numeric_limits<std::size_t>::max() / 2U) {
+        throw std::length_error("the quality LCA level count overflows size_t");
+      }
+      covered_depth *= 2U;
+      ++level_count_;
+    }
+    const std::size_t table_size = checked_product(
+        level_count_,
+        point_count_,
+        "the quality LCA table extent overflows size_t");
+    ancestors_.resize(table_size);
+    maximum_weights_.resize(table_size);
+    std::copy(parent.begin(), parent.end(), ancestors_.begin());
+    std::copy(
+        parent_weight.begin(), parent_weight.end(), maximum_weights_.begin());
+    for (std::size_t level = 1U; level < level_count_; ++level) {
+      const std::size_t previous_offset = (level - 1U) * point_count_;
+      const std::size_t offset = level * point_count_;
+      for (std::size_t point = 0U; point < point_count_; ++point) {
+        const std::size_t middle = ancestors_[previous_offset + point];
+        ancestors_[offset + point] = ancestors_[previous_offset + middle];
+        maximum_weights_[offset + point] = std::max(
+            maximum_weights_[previous_offset + point],
+            maximum_weights_[previous_offset + middle]);
+      }
+    }
+  }
+
+  [[nodiscard]] double maximum_on_path(
+      std::size_t first,
+      std::size_t second) const {
+    if (first >= point_count_ || second >= point_count_) {
+      throw std::out_of_range("a quality pair endpoint is outside the MST");
+    }
+    double maximum = 0.0;
+    if (depth_[first] < depth_[second]) {
+      std::swap(first, second);
+    }
+    std::size_t difference = depth_[first] - depth_[second];
+    std::size_t level = 0U;
+    while (difference != 0U) {
+      if ((difference & std::size_t{1}) != 0U) {
+        maximum = std::max(
+            maximum, maximum_weights_[level * point_count_ + first]);
+        first = ancestors_[level * point_count_ + first];
+      }
+      difference >>= 1U;
+      ++level;
+    }
+    if (first == second) {
+      return maximum;
+    }
+    for (std::size_t reverse = level_count_; reverse-- > 0U;) {
+      const std::size_t first_ancestor =
+          ancestors_[reverse * point_count_ + first];
+      const std::size_t second_ancestor =
+          ancestors_[reverse * point_count_ + second];
+      if (first_ancestor != second_ancestor) {
+        maximum = std::max(
+            maximum,
+            std::max(
+                maximum_weights_[reverse * point_count_ + first],
+                maximum_weights_[reverse * point_count_ + second]));
+        first = first_ancestor;
+        second = second_ancestor;
+      }
+    }
+    return std::max(
+        maximum,
+        std::max(
+            maximum_weights_[first],
+            maximum_weights_[second]));
+  }
+
+ private:
+  std::size_t point_count_{};
+  std::size_t level_count_{};
+  std::vector<std::size_t> depth_;
+  std::vector<std::size_t> ancestors_;
+  std::vector<double> maximum_weights_;
+};
+
+class PearsonAccumulator final {
+ public:
+  void add(double first, double second) noexcept {
+    ++count_;
+    const long double x = static_cast<long double>(first);
+    const long double y = static_cast<long double>(second);
+    const long double delta_x = x - mean_x_;
+    const long double delta_y = y - mean_y_;
+    mean_x_ += delta_x / static_cast<long double>(count_);
+    mean_y_ += delta_y / static_cast<long double>(count_);
+    covariance_ += delta_x * (y - mean_y_);
+    variance_x_ += delta_x * (x - mean_x_);
+    variance_y_ += delta_y * (y - mean_y_);
+  }
+
+  [[nodiscard]] std::optional<double> value() const {
+    if (count_ < 2U || !(variance_x_ > 0.0L) ||
+        !(variance_y_ > 0.0L)) {
+      return std::nullopt;
+    }
+    const long double denominator =
+        std::sqrt(variance_x_ * variance_y_);
+    if (!(denominator > 0.0L) || !std::isfinite(denominator)) {
+      return std::nullopt;
+    }
+    long double value = covariance_ / denominator;
+    if (!std::isfinite(value)) {
+      return std::nullopt;
+    }
+    value = std::max(-1.0L, std::min(1.0L, value));
+    return static_cast<double>(value);
+  }
+
+ private:
+  std::size_t count_{};
+  long double mean_x_{};
+  long double mean_y_{};
+  long double covariance_{};
+  long double variance_x_{};
+  long double variance_y_{};
+};
+
+[[nodiscard]] std::optional<double> normalized_ratio(
+    long double numerator,
+    long double denominator) {
+  if (denominator == 0.0L) {
+    return numerator == 0.0L ? std::optional<double>{0.0}
+                             : std::nullopt;
+  }
+  if (!(denominator > 0.0L) || !std::isfinite(numerator) ||
+      !std::isfinite(denominator)) {
+    return std::nullopt;
+  }
+  const long double ratio = numerator / denominator;
+  if (!std::isfinite(ratio)) {
+    return std::nullopt;
+  }
+  return static_cast<double>(ratio);
+}
+
+[[nodiscard]] std::vector<std::pair<std::size_t, std::size_t>>
+make_quality_pairs(
+    std::size_t point_count,
+    std::size_t pair_count,
+    std::uint64_t sample_seed) {
+  std::vector<std::pair<std::size_t, std::size_t>> pairs;
+  pairs.reserve(pair_count);
+  const std::uint64_t modulus = static_cast<std::uint64_t>(point_count);
+  const std::uint64_t second_modulus = modulus - UINT64_C(1);
+  for (std::size_t index = 0U; index < pair_count; ++index) {
+    const std::uint64_t sequence = static_cast<std::uint64_t>(index);
+    std::size_t first = static_cast<std::size_t>(
+        splitmix64(sample_seed + sequence * UINT64_C(0x9e3779b97f4a7c15)) %
+        modulus);
+    std::size_t second = static_cast<std::size_t>(
+        splitmix64(
+            sample_seed ^
+            (sequence * UINT64_C(0xd1b54a32d192ed03) +
+             UINT64_C(0x94d049bb133111eb))) %
+        second_modulus);
+    if (second >= first) {
+      ++second;
+    }
+    if (second < first) {
+      std::swap(first, second);
+    }
+    pairs.emplace_back(first, second);
+  }
+  return pairs;
+}
+
+[[nodiscard]] std::size_t quantile_floor_index(
+    std::size_t final_index,
+    unsigned int percent) {
+  const std::size_t quotient = final_index / 100U;
+  const std::size_t remainder = final_index % 100U;
+  return quotient * static_cast<std::size_t>(percent) +
+         remainder * static_cast<std::size_t>(percent) / 100U;
+}
+
+[[nodiscard]] HierarchyQuality evaluate_hierarchy_quality(
+    const HierarchyRun& fast,
+    const HierarchyRun& reference,
+    std::size_t point_count,
+    std::size_t pair_count,
+    std::uint64_t sample_seed) {
+  const auto begin = Clock::now();
+  if (fast.summaries.size() != reference.summaries.size() ||
+      fast.summaries.empty() || pair_count == 0U) {
+    throw std::invalid_argument("the hierarchy quality extents are invalid");
+  }
+  const std::vector<std::pair<std::size_t, std::size_t>> pairs =
+      make_quality_pairs(point_count, pair_count, sample_seed);
+  HierarchyQuality quality;
+  quality.sample_seed = sample_seed;
+  quality.sampled_pair_count = pair_count;
+  quality.orders.reserve(fast.summaries.size());
+
+  long double aggregate_barcode_absolute_sum = 0.0L;
+  long double aggregate_barcode_reference_l1 = 0.0L;
+  double aggregate_barcode_linf = 0.0;
+  double aggregate_barcode_normalized_linf = 0.0;
+  bool aggregate_barcode_linf_normalization_defined = true;
+  long double aggregate_cophenetic_absolute_sum = 0.0L;
+  long double aggregate_cophenetic_normalized_sum = 0.0L;
+  double aggregate_cophenetic_maximum = 0.0;
+  double aggregate_cophenetic_normalized_maximum = 0.0;
+  bool aggregate_cophenetic_normalization_defined = true;
+  PearsonAccumulator aggregate_pearson;
+
+  for (std::size_t order = 0U; order < fast.summaries.size(); ++order) {
+    const OrderSummary& fast_summary = fast.summaries[order];
+    const OrderSummary& reference_summary = reference.summaries[order];
+    const std::vector<MergeRecord>& fast_merges =
+        fast_summary.retained_quality_merges;
+    const std::vector<MergeRecord>& reference_merges =
+        reference_summary.retained_quality_merges;
+    if (fast_merges.size() != point_count - 1U ||
+        reference_merges.size() != point_count - 1U) {
+      throw std::logic_error(
+          "quality evaluation requires retained finite MST deaths");
+    }
+
+    OrderHierarchyQuality order_quality;
+    order_quality.order = order + 1U;
+    order_quality.barcode.finite_death_count = fast_merges.size();
+    long double barcode_absolute_sum = 0.0L;
+    long double barcode_reference_l1 = 0.0L;
+    double barcode_linf = 0.0;
+    for (std::size_t death = 0U; death < fast_merges.size(); ++death) {
+      const double fast_level = fast_merges[death].squared_level;
+      const double reference_level = reference_merges[death].squared_level;
+      if (death != 0U &&
+          (fast_level < fast_merges[death - 1U].squared_level ||
+           reference_level < reference_merges[death - 1U].squared_level)) {
+        throw std::logic_error("quality finite deaths are not sorted");
+      }
+      if (std::bit_cast<std::uint64_t>(fast_level) ==
+          std::bit_cast<std::uint64_t>(reference_level)) {
+        ++order_quality.barcode.exact_level_bit_match_count;
+      }
+      const double difference = std::abs(fast_level - reference_level);
+      barcode_absolute_sum += static_cast<long double>(difference);
+      barcode_reference_l1 += static_cast<long double>(
+          std::abs(reference_level));
+      barcode_linf = std::max(barcode_linf, difference);
+    }
+    const double reference_root = reference_summary.root_squared_level;
+    order_quality.barcode.sorted_death_level_l1_raw =
+        static_cast<double>(barcode_absolute_sum);
+    order_quality.barcode.sorted_death_level_l1_normalized_reference_l1 =
+        normalized_ratio(barcode_absolute_sum, barcode_reference_l1);
+    order_quality.barcode.sorted_death_level_linf_raw = barcode_linf;
+    order_quality.barcode.sorted_death_level_linf_normalized_reference_root =
+        normalized_ratio(
+            static_cast<long double>(barcode_linf),
+            static_cast<long double>(reference_root));
+
+    WeightedTreeMaximumQuery fast_tree(point_count, fast_merges);
+    WeightedTreeMaximumQuery reference_tree(point_count, reference_merges);
+    std::vector<double> fast_cophenetic(pair_count);
+    std::vector<double> reference_cophenetic(pair_count);
+    long double cophenetic_absolute_sum = 0.0L;
+    long double cophenetic_normalized_sum = 0.0L;
+    double cophenetic_maximum = 0.0;
+    double cophenetic_normalized_maximum = 0.0;
+    PearsonAccumulator order_pearson;
+    for (std::size_t pair = 0U; pair < pair_count; ++pair) {
+      const double fast_level = fast_tree.maximum_on_path(
+          pairs[pair].first, pairs[pair].second);
+      const double reference_level = reference_tree.maximum_on_path(
+          pairs[pair].first, pairs[pair].second);
+      fast_cophenetic[pair] = fast_level;
+      reference_cophenetic[pair] = reference_level;
+      if (std::bit_cast<std::uint64_t>(fast_level) ==
+          std::bit_cast<std::uint64_t>(reference_level)) {
+        ++order_quality.cophenetic.exact_level_bit_match_count;
+      }
+      const double difference = std::abs(fast_level - reference_level);
+      cophenetic_absolute_sum += static_cast<long double>(difference);
+      cophenetic_maximum = std::max(cophenetic_maximum, difference);
+      if (reference_root > 0.0) {
+        const double normalized_difference = difference / reference_root;
+        cophenetic_normalized_sum +=
+            static_cast<long double>(normalized_difference);
+        cophenetic_normalized_maximum = std::max(
+            cophenetic_normalized_maximum, normalized_difference);
+      }
+      order_pearson.add(fast_level, reference_level);
+      aggregate_pearson.add(fast_level, reference_level);
+    }
+    order_quality.cophenetic.sampled_pair_count = pair_count;
+    order_quality.cophenetic.mean_absolute_error_raw = static_cast<double>(
+        cophenetic_absolute_sum / static_cast<long double>(pair_count));
+    order_quality.cophenetic.mean_absolute_error_normalized_reference_root =
+        reference_root > 0.0
+            ? std::optional<double>{static_cast<double>(
+                  cophenetic_normalized_sum /
+                  static_cast<long double>(pair_count))}
+            : normalized_ratio(cophenetic_absolute_sum, 0.0L);
+    order_quality.cophenetic.maximum_absolute_error_raw =
+        cophenetic_maximum;
+    order_quality.cophenetic.maximum_absolute_error_normalized_reference_root =
+        normalized_ratio(
+            static_cast<long double>(cophenetic_maximum),
+            static_cast<long double>(reference_root));
+    order_quality.cophenetic.pearson = order_pearson.value();
+
+    constexpr std::array<unsigned int, 9> kQuantiles{
+        10U, 20U, 30U, 40U, 50U, 60U, 70U, 80U, 90U};
+    std::vector<double> sorted_reference_cophenetic = reference_cophenetic;
+    std::sort(
+        sorted_reference_cophenetic.begin(),
+        sorted_reference_cophenetic.end());
+    order_quality.cluster_thresholds.reserve(kQuantiles.size());
+    for (const unsigned int percent : kQuantiles) {
+      const std::size_t cophenetic_index = quantile_floor_index(
+          sorted_reference_cophenetic.size() - 1U, percent);
+      const double threshold =
+          sorted_reference_cophenetic[cophenetic_index];
+      ClusterThresholdQuality threshold_quality;
+      threshold_quality.quantile_percent = percent;
+      threshold_quality.reference_squared_level = threshold;
+      threshold_quality.pair_count = pair_count;
+      for (std::size_t pair = 0U; pair < pair_count; ++pair) {
+        const bool fast_same = fast_cophenetic[pair] <= threshold;
+        const bool reference_same = reference_cophenetic[pair] <= threshold;
+        threshold_quality.agreement_count +=
+            fast_same == reference_same ? 1U : 0U;
+        threshold_quality.both_same_cluster_count +=
+            fast_same && reference_same ? 1U : 0U;
+        threshold_quality.both_different_cluster_count +=
+            !fast_same && !reference_same ? 1U : 0U;
+        threshold_quality.fast_only_same_cluster_count +=
+            fast_same && !reference_same ? 1U : 0U;
+        threshold_quality.reference_only_same_cluster_count +=
+            !fast_same && reference_same ? 1U : 0U;
+      }
+      order_quality.cluster_agreement_count +=
+          threshold_quality.agreement_count;
+      order_quality.cluster_comparison_count += pair_count;
+      order_quality.cluster_thresholds.push_back(threshold_quality);
+    }
+
+    quality.aggregate.barcode.exact_level_bit_match_count +=
+        order_quality.barcode.exact_level_bit_match_count;
+    quality.aggregate.barcode.finite_death_count +=
+        order_quality.barcode.finite_death_count;
+    aggregate_barcode_absolute_sum += barcode_absolute_sum;
+    aggregate_barcode_reference_l1 += barcode_reference_l1;
+    aggregate_barcode_linf = std::max(
+        aggregate_barcode_linf, barcode_linf);
+    if (order_quality.barcode
+            .sorted_death_level_linf_normalized_reference_root.has_value()) {
+      aggregate_barcode_normalized_linf = std::max(
+          aggregate_barcode_normalized_linf,
+          *order_quality.barcode
+               .sorted_death_level_linf_normalized_reference_root);
+    } else {
+      aggregate_barcode_linf_normalization_defined = false;
+    }
+    quality.aggregate.cophenetic.exact_level_bit_match_count +=
+        order_quality.cophenetic.exact_level_bit_match_count;
+    quality.aggregate.cophenetic.sampled_pair_count += pair_count;
+    aggregate_cophenetic_absolute_sum += cophenetic_absolute_sum;
+    aggregate_cophenetic_normalized_sum += cophenetic_normalized_sum;
+    aggregate_cophenetic_maximum = std::max(
+        aggregate_cophenetic_maximum, cophenetic_maximum);
+    aggregate_cophenetic_normalized_maximum = std::max(
+        aggregate_cophenetic_normalized_maximum,
+        cophenetic_normalized_maximum);
+    if (reference_root == 0.0 && cophenetic_absolute_sum != 0.0L) {
+      aggregate_cophenetic_normalization_defined = false;
+    }
+    quality.aggregate.cluster_agreement_count +=
+        order_quality.cluster_agreement_count;
+    quality.aggregate.cluster_comparison_count +=
+        order_quality.cluster_comparison_count;
+    quality.orders.push_back(std::move(order_quality));
+  }
+
+  quality.aggregate.barcode.sorted_death_level_l1_raw =
+      static_cast<double>(aggregate_barcode_absolute_sum);
+  quality.aggregate.barcode.sorted_death_level_l1_normalized_reference_l1 =
+      normalized_ratio(
+          aggregate_barcode_absolute_sum,
+          aggregate_barcode_reference_l1);
+  quality.aggregate.barcode.sorted_death_level_linf_raw =
+      aggregate_barcode_linf;
+  quality.aggregate.barcode
+      .sorted_death_level_linf_normalized_reference_root =
+      aggregate_barcode_linf_normalization_defined
+          ? std::optional<double>{aggregate_barcode_normalized_linf}
+          : std::nullopt;
+  const std::size_t total_cophenetic_count =
+      quality.aggregate.cophenetic.sampled_pair_count;
+  quality.aggregate.cophenetic.mean_absolute_error_raw = static_cast<double>(
+      aggregate_cophenetic_absolute_sum /
+      static_cast<long double>(total_cophenetic_count));
+  quality.aggregate.cophenetic.mean_absolute_error_normalized_reference_root =
+      aggregate_cophenetic_normalization_defined
+          ? std::optional<double>{static_cast<double>(
+                aggregate_cophenetic_normalized_sum /
+                static_cast<long double>(total_cophenetic_count))}
+          : std::nullopt;
+  quality.aggregate.cophenetic.maximum_absolute_error_raw =
+      aggregate_cophenetic_maximum;
+  quality.aggregate.cophenetic.maximum_absolute_error_normalized_reference_root =
+      aggregate_cophenetic_normalization_defined
+          ? std::optional<double>{aggregate_cophenetic_normalized_maximum}
+          : std::nullopt;
+  quality.aggregate.cophenetic.pearson = aggregate_pearson.value();
+  quality.cpu_nanoseconds = nanoseconds(Clock::now() - begin);
+  return quality;
+}
+
 [[nodiscard]] std::string hex64(std::uint64_t value) {
   std::ostringstream output;
   output << "0x" << std::hex << std::setw(16) << std::setfill('0') << value;
   return output.str();
+}
+
+void write_optional_json_number(const std::optional<double>& value) {
+  if (value.has_value()) {
+    std::cout << *value;
+  } else {
+    std::cout << "null";
+  }
+}
+
+void write_barcode_quality_json(const BarcodeQuality& quality) {
+  std::cout
+      << "{\"finite_death_count\":" << quality.finite_death_count
+      << ",\"levels_sorted_nondecreasing\":true"
+      << ",\"comparison_model\":\"sorted_finite_death_counting_measure_without_diagonal_matching\""
+      << ",\"exact_level_bit_matches\":"
+      << quality.exact_level_bit_match_count
+      << ",\"level_comparison_total\":" << quality.finite_death_count
+      << ",\"sorted_death_level_l1_raw\":"
+      << quality.sorted_death_level_l1_raw
+      << ",\"sorted_death_level_l1_normalized_reference_l1\":";
+  write_optional_json_number(
+      quality.sorted_death_level_l1_normalized_reference_l1);
+  std::cout << ",\"sorted_death_level_linf_raw\":"
+            << quality.sorted_death_level_linf_raw
+            << ",\"sorted_death_level_linf_normalized_reference_root\":";
+  write_optional_json_number(
+      quality.sorted_death_level_linf_normalized_reference_root);
+  std::cout << '}';
+}
+
+void write_cophenetic_quality_json(const CopheneticQuality& quality) {
+  std::cout
+      << "{\"sampled_pair_count\":" << quality.sampled_pair_count
+      << ",\"exact_level_bit_matches\":"
+      << quality.exact_level_bit_match_count
+      << ",\"level_comparison_total\":" << quality.sampled_pair_count
+      << ",\"mean_absolute_error_raw\":"
+      << quality.mean_absolute_error_raw
+      << ",\"mean_absolute_error_normalized_reference_root\":";
+  write_optional_json_number(
+      quality.mean_absolute_error_normalized_reference_root);
+  std::cout << ",\"maximum_absolute_error_raw\":"
+            << quality.maximum_absolute_error_raw
+            << ",\"maximum_absolute_error_normalized_reference_root\":";
+  write_optional_json_number(
+      quality.maximum_absolute_error_normalized_reference_root);
+  std::cout << ",\"pearson_defined_finite_non_degenerate\":"
+            << (quality.pearson.has_value() ? "true" : "false")
+            << ",\"pearson\":";
+  write_optional_json_number(quality.pearson);
+  std::cout << '}';
 }
 
 }  // namespace
@@ -807,47 +1507,14 @@ int main(int argc, char** argv) {
             options.maximum_order,
             effective_window);
     const auto gpu_wall_end = Clock::now();
-    if (knn.neighbor_point_ids.size() != neighbor_count ||
-        knn.squared_distances.size() != neighbor_count) {
-      throw std::runtime_error("the GPU returned a wrong neighbor extent");
-    }
-
     const auto validation_begin = Clock::now();
-    std::atomic<bool> invalid_gpu_output{false};
-    parallel_shards(
+    validate_knn_transcript(
+        knn,
+        point_ids_by_morton_position,
         options.point_count,
+        options.maximum_order,
         used_cpu_workers,
-        [&](std::size_t, std::size_t begin, std::size_t end) {
-          for (std::size_t position = begin; position < end; ++position) {
-            const PointId source = point_ids_by_morton_position[position];
-            for (std::size_t rank = 0U; rank < options.maximum_order; ++rank) {
-              const std::size_t record =
-                  position * options.maximum_order + rank;
-              const PointId neighbor = knn.neighbor_point_ids[record];
-              const double distance = knn.squared_distances[record];
-              if (neighbor >= static_cast<PointId>(options.point_count) ||
-                  neighbor == source || !std::isfinite(distance) ||
-                  distance < 0.0) {
-                invalid_gpu_output.store(true, std::memory_order_relaxed);
-                continue;
-              }
-              if (rank != 0U) {
-                const std::size_t previous = record - 1U;
-                const double previous_distance =
-                    knn.squared_distances[previous];
-                const PointId previous_id = knn.neighbor_point_ids[previous];
-                if (distance < previous_distance ||
-                    (distance == previous_distance && neighbor <= previous_id)) {
-                  invalid_gpu_output.store(true, std::memory_order_relaxed);
-                }
-              }
-            }
-          }
-        });
-    if (invalid_gpu_output.load(std::memory_order_relaxed)) {
-      throw std::runtime_error(
-          "the GPU Morton-window result failed its structural validation");
-    }
+        "the fast-window GPU transcript");
     const auto validation_end = Clock::now();
 
     const auto chain_distance_begin = Clock::now();
@@ -872,7 +1539,8 @@ int main(int argc, char** argv) {
         point_ids_by_morton_position,
         morton_position_by_point_id,
         chain_squared_distances,
-        knn);
+        knn,
+        options.quality_pair_count != 0U);
     const auto fast_path_end = Clock::now();
 
     std::optional<ResidentReplayResult> resident_replay;
@@ -916,7 +1584,8 @@ int main(int argc, char** argv) {
           point_ids_by_morton_position,
           morton_position_by_point_id,
           chain_squared_distances,
-          replay_knn);
+          replay_knn,
+          false);
       const auto replay_end = Clock::now();
       resident_replay.emplace(ResidentReplayResult{
           std::move(replay_knn),
@@ -952,35 +1621,13 @@ int main(int argc, char** argv) {
       reference_gpu_wall_nanoseconds =
           nanoseconds(reference_gpu_end - reference_gpu_begin);
       const auto reference_validation_begin = Clock::now();
-      std::atomic<bool> invalid_reference_output{false};
-      parallel_shards(
+      validate_knn_transcript(
+          *reference_knn,
+          point_ids_by_morton_position,
           options.point_count,
+          options.maximum_order,
           used_cpu_workers,
-          [&](std::size_t, std::size_t begin, std::size_t end) {
-            for (std::size_t position = begin; position < end; ++position) {
-              const PointId source = point_ids_by_morton_position[position];
-              for (std::size_t rank = 0U;
-                   rank < options.maximum_order;
-                   ++rank) {
-                const std::size_t record =
-                    position * options.maximum_order + rank;
-                const PointId neighbor =
-                    reference_knn->neighbor_point_ids[record];
-                const double distance =
-                    reference_knn->squared_distances[record];
-                if (neighbor >= static_cast<PointId>(options.point_count) ||
-                    neighbor == source || !std::isfinite(distance) ||
-                    distance < 0.0) {
-                  invalid_reference_output.store(
-                      true, std::memory_order_relaxed);
-                }
-              }
-            }
-          });
-      if (invalid_reference_output.load(std::memory_order_relaxed)) {
-        throw std::runtime_error(
-            "the reference-window GPU result failed structural validation");
-      }
+          "the reference-window GPU transcript");
       reference_comparison.emplace(compare_neighbors(
           knn,
           reference_knn->neighbor_point_ids,
@@ -995,7 +1642,20 @@ int main(int argc, char** argv) {
           point_ids_by_morton_position,
           morton_position_by_point_id,
           chain_squared_distances,
-          *reference_knn));
+          *reference_knn,
+          options.quality_pair_count != 0U));
+    }
+
+    std::optional<HierarchyQuality> hierarchy_quality;
+    if (options.quality_pair_count != 0U) {
+      const std::uint64_t quality_seed = splitmix64(
+          options.seed ^ UINT64_C(0x51a17c0f3e2d9b47));
+      hierarchy_quality.emplace(evaluate_hierarchy_quality(
+          fast_hierarchy,
+          *reference_hierarchy,
+          options.point_count,
+          options.quality_pair_count,
+          quality_seed));
     }
 
     std::optional<ExhaustiveValidation> exhaustive_validation;
@@ -1086,7 +1746,8 @@ int main(int argc, char** argv) {
               << ",\"knn_edge_policy\":\"rank_k_only_plus_morton_chain\""
               << ",\"standard_mutual_reachability_graph\":false"
               << ",\"full_surrogate_h0_hierarchy_materialized\":true"
-              << ",\"surrogate_hierarchy_retained_after_digest\":false"
+              << ",\"surrogate_hierarchy_retained_after_digest\":"
+              << (options.quality_pair_count != 0U ? "true" : "false")
               << ",\"exact_morse_hierarchy_materialized\":false"
               << ",\"candidate_recall_certified\":false"
               << ",\"higher_order_delaunay_materialized\":false"
@@ -1322,6 +1983,107 @@ int main(int argc, char** argv) {
       std::cout << "]}";
     } else {
       std::cout << ",\"reference_window\":null";
+    }
+
+    if (hierarchy_quality.has_value()) {
+      const HierarchyQuality& quality = *hierarchy_quality;
+      const AggregateHierarchyQuality& aggregate = quality.aggregate;
+      const double aggregate_cluster_agreement =
+          static_cast<double>(aggregate.cluster_agreement_count) /
+          static_cast<double>(aggregate.cluster_comparison_count);
+      std::cout
+          << ",\"hierarchy_quality\":{"
+          << "\"executed\":true"
+          << ",\"reference_scope\":"
+          << std::quoted(
+                 effective_reference_window == options.point_count - 1U
+                     ? "exhaustive_binary64_neighbors_within_same_rank_k_plus_morton_chain_surrogate_not_exact_morse"
+                     : "wider_morton_window_binary64_neighbors_within_same_rank_k_plus_morton_chain_surrogate_not_exact_morse")
+          << ",\"reference_window_exhaustive\":"
+          << (effective_reference_window == options.point_count - 1U
+                  ? "true"
+                  : "false")
+          << ",\"arithmetic_status\":\"binary64_not_certified\""
+          << ",\"digest_only_is_sufficient_quality_metric\":false"
+          << ",\"retained_mst_merges_for_quality\":true"
+          << ",\"retained_mst_merges_outside_quality_mode\":false"
+          << ",\"level_unit\":\"squared_input_coordinate\""
+          << ",\"sample_pair_count_requested\":"
+          << options.quality_pair_count
+          << ",\"sample_pair_count_used\":" << quality.sampled_pair_count
+          << ",\"sample_pair_hard_cap\":" << kMaximumQualityPairCount
+          << ",\"sample_seed_u64\":"
+          << std::quoted(hex64(quality.sample_seed))
+          << ",\"sample_policy\":\"splitmix64_canonical_point_id_pairs_with_replacement\""
+          << ",\"cpu_nanoseconds\":" << quality.cpu_nanoseconds
+          << ",\"aggregate\":{\"barcode_h0\":";
+      write_barcode_quality_json(aggregate.barcode);
+      std::cout << ",\"cophenetic_single_linkage\":";
+      write_cophenetic_quality_json(aggregate.cophenetic);
+      std::cout
+          << ",\"cluster_co_membership\":{"
+          << "\"quantile_threshold_count_per_order\":9"
+          << ",\"agreement_count\":"
+          << aggregate.cluster_agreement_count
+          << ",\"comparison_count\":"
+          << aggregate.cluster_comparison_count
+          << ",\"agreement\":" << aggregate_cluster_agreement
+          << "}},\"per_order\":[";
+      for (std::size_t order = 0U; order < quality.orders.size(); ++order) {
+        if (order != 0U) {
+          std::cout << ',';
+        }
+        const OrderHierarchyQuality& order_quality = quality.orders[order];
+        const double cluster_agreement =
+            static_cast<double>(order_quality.cluster_agreement_count) /
+            static_cast<double>(order_quality.cluster_comparison_count);
+        std::cout << "{\"order\":" << order_quality.order
+                  << ",\"barcode_h0\":";
+        write_barcode_quality_json(order_quality.barcode);
+        std::cout << ",\"cophenetic_single_linkage\":";
+        write_cophenetic_quality_json(order_quality.cophenetic);
+        std::cout
+            << ",\"cluster_co_membership\":{"
+            << "\"quantile_source\":\"reference_sampled_pair_cophenetic_squared_levels\""
+            << ",\"quantile_rule\":\"floor(percent*(sample_pair_count-1)/100)\""
+            << ",\"agreement_count\":"
+            << order_quality.cluster_agreement_count
+            << ",\"comparison_count\":"
+            << order_quality.cluster_comparison_count
+            << ",\"agreement\":" << cluster_agreement
+            << ",\"thresholds\":[";
+        for (std::size_t threshold = 0U;
+             threshold < order_quality.cluster_thresholds.size();
+             ++threshold) {
+          if (threshold != 0U) {
+            std::cout << ',';
+          }
+          const ClusterThresholdQuality& value =
+              order_quality.cluster_thresholds[threshold];
+          const double agreement =
+              static_cast<double>(value.agreement_count) /
+              static_cast<double>(value.pair_count);
+          std::cout
+              << "{\"quantile_percent\":" << value.quantile_percent
+              << ",\"reference_squared_level\":"
+              << value.reference_squared_level
+              << ",\"agreement_count\":" << value.agreement_count
+              << ",\"pair_count\":" << value.pair_count
+              << ",\"agreement\":" << agreement
+              << ",\"both_same_cluster_count\":"
+              << value.both_same_cluster_count
+              << ",\"both_different_cluster_count\":"
+              << value.both_different_cluster_count
+              << ",\"fast_only_same_cluster_count\":"
+              << value.fast_only_same_cluster_count
+              << ",\"reference_only_same_cluster_count\":"
+              << value.reference_only_same_cluster_count << '}';
+        }
+        std::cout << "]}}";
+      }
+      std::cout << "]}";
+    } else {
+      std::cout << ",\"hierarchy_quality\":null";
     }
 
     if (exhaustive_validation.has_value()) {
