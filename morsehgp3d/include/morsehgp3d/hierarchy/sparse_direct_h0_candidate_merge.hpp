@@ -15,7 +15,7 @@
 namespace morsehgp3d::hierarchy {
 
 inline constexpr std::uint32_t sparse_direct_h0_candidate_merge_schema_version =
-    1U;
+    2U;
 inline constexpr std::string_view sparse_direct_h0_candidate_merge_backend =
     "reference_cpu";
 inline constexpr std::string_view sparse_direct_h0_candidate_merge_profile =
@@ -96,6 +96,34 @@ struct ExactSparseDirectH0CandidateRunLimits {
       const ExactSparseDirectH0CandidateRunLimits&) = default;
 };
 
+// O(1) process-local provenance retained by every support-3/4 run.  It copies
+// the canonical source contract and dense chunk position already checked at
+// projection time without minting a durable chain certificate or retaining
+// any certificate payload or global history.
+struct ExactSparseDirectH0HigherSourceContract {
+  ExactHigherSupportCheckpointManifest manifest;
+  std::uint64_t chunk_sequence{};
+  std::size_t first_output_record_index{};
+  contract::CanonicalId source_checkpoint_digest{};
+  contract::CanonicalId next_checkpoint_digest{};
+  contract::CanonicalId previous_output_chain_digest{};
+  contract::CanonicalId output_chain_digest{};
+  ExactHigherSupportStreamStatus status{
+      ExactHigherSupportStreamStatus::budget_exhausted};
+  ExactHigherSupportStopReason stop_reason{
+      ExactHigherSupportStopReason::work_unit_limit};
+  std::size_t source_event_count{};
+  std::size_t source_diagnostic_count{};
+  std::size_t emitted_record_count{};
+  std::size_t destroyed_prune_certificate_count{};
+  std::size_t destroyed_rank_receipt_count{};
+  std::size_t emitted_point_id_reference_count{};
+
+  friend bool operator==(
+      const ExactSparseDirectH0HigherSourceContract&,
+      const ExactSparseDirectH0HigherSourceContract&) = default;
+};
+
 // One bounded sorted input run.  It deliberately has neither Phase-10 event
 // indices nor terminal-facade, H0 or reduction authority.
 struct ExactSparseDirectH0CandidateRun {
@@ -104,6 +132,8 @@ struct ExactSparseDirectH0CandidateRun {
   std::size_t point_count{};
   std::size_t effective_maximum_order{};
   std::size_t source_point_id_reference_count{};
+  std::optional<ExactSparseDirectH0HigherSourceContract>
+      higher_source_contract;
   std::vector<ExactSparseDirectH0Candidate> candidates;
   std::vector<ExactSparseDirectH0Diagnostic> diagnostics;
   bool contains_pair_candidates{false};
@@ -142,6 +172,15 @@ project_exact_sparse_direct_h0_pair_candidate_run(
 project_exact_sparse_direct_h0_higher_candidate_run(
     const ExactHigherSupportTerminalAuthority& authority,
     std::size_t segment_index,
+    ExactSparseDirectH0CandidateRunLimits limits);
+
+// Consuming projection for one bounded, unsealed producer result.  The opaque
+// source binds its segment and manifest and remains retryable if any precommit
+// validation, allocation or canonical sort fails.  Neither input nor output
+// claims terminal, durable, hierarchy-reduction or public authority.
+[[nodiscard]] ExactSparseDirectH0CandidateRun
+project_exact_sparse_direct_h0_higher_candidate_run(
+    ExactHigherSupportUnsealedDrain&& source,
     ExactSparseDirectH0CandidateRunLimits limits);
 
 struct ExactSparseDirectH0MergeLimits {

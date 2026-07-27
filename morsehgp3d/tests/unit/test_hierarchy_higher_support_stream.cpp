@@ -29,7 +29,9 @@ using morsehgp3d::hierarchy::ExactHigherSupportStopReason;
 using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
 using morsehgp3d::hierarchy::ExactHigherSupportStreamStatus;
 using morsehgp3d::hierarchy::ExactHigherSupportTerminalRunStatus;
+using morsehgp3d::hierarchy::ExactHigherSupportTerminalSegment;
 using morsehgp3d::hierarchy::ExactHigherSupportTerminalSession;
+using morsehgp3d::hierarchy::ExactHigherSupportUnsealedDrainStatus;
 using morsehgp3d::hierarchy::build_exact_higher_support_stream;
 using morsehgp3d::hierarchy::compute_exact_higher_support_checkpoint_digest;
 using morsehgp3d::hierarchy::exact_higher_support_candidate_universe_size;
@@ -761,6 +763,105 @@ void test_internal_terminal_authority_and_clean_chunk_cap() {
       "a capped nonterminal session cannot mint an authority");
 }
 
+void test_unsealed_terminal_segment_drain() {
+  CanonicalPointCloud cloud = cloud_from({
+      point(1.0, 1.0, 1.0),
+      point(1.0, -1.0, -1.0),
+      point(-1.0, 1.0, -1.0),
+      point(-1.0, -1.0, 1.0)});
+  MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  ExactHigherSupportStreamBudget unit_budget = unlimited_budget();
+  unit_budget.maximum_work_unit_count = 1U;
+  ExactHigherSupportTerminalSession resident_session{
+      index, cloud, 10U, unit_budget, 256U};
+  check(
+      resident_session.run_to_terminal() ==
+          ExactHigherSupportTerminalRunStatus::terminal,
+      "the resident comparison fixture reaches terminality");
+  const auto resident = std::move(resident_session).seal();
+  ExactHigherSupportTerminalSession session{
+      index, cloud, 10U, unit_budget, 256U};
+  const auto initial_checkpoint = session.trusted_checkpoint();
+  auto drained = session.drain_next_unsealed_segment();
+  const ExactHigherSupportTerminalSegment& segment = *drained.segment();
+  check(
+      drained.status() ==
+              ExactHigherSupportUnsealedDrainStatus::segment_ready &&
+          drained.segment_available() && drained.manifest() != nullptr &&
+          *drained.manifest() ==
+              session.trusted_checkpoint().manifest &&
+          !resident.segments().empty() &&
+          segment == resident.segments().front() &&
+          segment.source_checkpoint_digest ==
+              initial_checkpoint.checkpoint_digest &&
+          session.unsealed_segment_drain_performed() &&
+          session.unconsumed_segment_outstanding() &&
+          session.chunk_count() == 1U &&
+          session.released_segment_count() == 1U &&
+          session.resident_segment_count() == 0U &&
+          segment.first_output_record_index +
+                  segment.emitted_record_count() ==
+              session.trusted_checkpoint().output_record_count,
+      "one unsealed drain transfers exactly the next provenance-bound bounded segment");
+  const auto held_checkpoint = session.trusted_checkpoint();
+  check_throws<std::logic_error>(
+      [&]() {
+        static_cast<void>(session.drain_next_unsealed_segment());
+      },
+      "an unconsumed segment cannot be skipped by a second drain");
+  auto moved = std::move(drained);
+  check(
+      drained.moved_from() && !drained.consumed() &&
+          moved.segment_available() &&
+          session.unconsumed_segment_outstanding() &&
+          session.trusted_checkpoint() == held_checkpoint,
+      "moving a drain token preserves its unique outstanding lease");
+  check_throws<std::logic_error>(
+      [&]() {
+        static_cast<void>(session.run_to_terminal());
+      },
+      "a drained producer cannot switch back to the resident run mode");
+  check_throws<std::logic_error>(
+      [&]() {
+        static_cast<void>(std::move(session).seal());
+      },
+      "the first successful unsealed drain permanently revokes resident sealing");
+
+  ExactHigherSupportTerminalSession abandoned_session{
+      index, cloud, 10U, unit_budget, 256U};
+  {
+    auto abandoned = abandoned_session.drain_next_unsealed_segment();
+    check(
+        abandoned.segment_available() &&
+            abandoned_session.unconsumed_segment_outstanding(),
+        "the abandonment fixture owns one outstanding segment");
+  }
+  check(
+      abandoned_session.unconsumed_segment_outstanding(),
+      "destroying an unconsumed drain token keeps the producer fail-closed");
+  check_throws<std::logic_error>(
+      [&]() {
+        static_cast<void>(
+            abandoned_session.drain_next_unsealed_segment());
+      },
+      "an abandoned segment cannot be skipped by a later drain");
+
+  ExactHigherSupportTerminalSession capped{
+      index, cloud, 10U, unit_budget, 0U};
+  const auto capped_checkpoint = capped.trusted_checkpoint();
+  auto cap = capped.drain_next_unsealed_segment();
+  check(
+      cap.status() == ExactHigherSupportUnsealedDrainStatus::
+              maximum_chunk_count_reached &&
+          !cap.segment_available() && cap.segment() == nullptr &&
+          cap.manifest() == nullptr &&
+          capped.trusted_checkpoint() == capped_checkpoint &&
+          capped.chunk_count() == 0U &&
+          capped.released_segment_count() == 0U &&
+          capped.resident_segment_count() == 0U,
+      "the unsealed drain reports its chunk cap without changing state");
+}
+
 void test_terminal_root_needs_no_chunk() {
   CanonicalPointCloud cloud = cloud_from({
       point(0.0, 0.0, 0.0),
@@ -768,8 +869,12 @@ void test_terminal_root_needs_no_chunk() {
   MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
   ExactHigherSupportTerminalSession session{
       index, cloud, 10U, unlimited_budget(), 0U};
+  auto terminal = session.drain_next_unsealed_segment();
   check(
-      session.run_to_terminal() ==
+      terminal.status() ==
+              ExactHigherSupportUnsealedDrainStatus::terminal &&
+          !terminal.segment_available() &&
+          session.run_to_terminal() ==
               ExactHigherSupportTerminalRunStatus::terminal &&
           session.chunk_count() == 0U,
       "a canonical root below support arity three is already terminal");
@@ -833,6 +938,7 @@ int main() {
   test_input_contract();
   test_reinjectable_chunks_and_hostile_mutations();
   test_internal_terminal_authority_and_clean_chunk_cap();
+  test_unsealed_terminal_segment_drain();
   test_terminal_root_needs_no_chunk();
   if (failures != 0) {
     std::cerr << failures << " test(s) failed\n";

@@ -6,6 +6,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <exception>
 #include <limits>
 #include <optional>
 #include <span>
@@ -2846,8 +2847,62 @@ static_assert(
         ExactHigherSupportTerminalSegment>,
     "terminal higher-support append requires a nothrow segment move");
 static_assert(
+    std::is_nothrow_move_constructible_v<
+        ExactHigherSupportCheckpointManifest>,
+    "an unsealed higher-support drain requires a nothrow manifest move");
+static_assert(
     std::is_nothrow_move_constructible_v<ExactHigherSupportCheckpoint>,
     "terminal higher-support seal requires a nothrow checkpoint move");
+static_assert(
+    std::is_nothrow_move_assignable_v<ExactHigherSupportCheckpoint>,
+    "terminal higher-support append requires a nothrow checkpoint assignment");
+
+ExactHigherSupportUnsealedDrain::ExactHigherSupportUnsealedDrain(
+    ExactHigherSupportUnsealedDrain&& other) noexcept
+    : status_(other.status_),
+      outstanding_segment_(std::move(other.outstanding_segment_)),
+      successfully_consumed_(other.successfully_consumed_),
+      moved_from_(other.moved_from_) {
+  if (other.manifest_) {
+    manifest_.emplace(std::move(*other.manifest_));
+  }
+  if (other.segment_) {
+    segment_.emplace(std::move(*other.segment_));
+  }
+  other.invalidate_moved_from();
+}
+
+ExactHigherSupportUnsealedDrain::ExactHigherSupportUnsealedDrain(
+    ExactHigherSupportUnsealedDrainStatus status) noexcept
+    : status_(status) {}
+
+ExactHigherSupportUnsealedDrain::ExactHigherSupportUnsealedDrain(
+    ExactHigherSupportTerminalSegment&& segment,
+    ExactHigherSupportCheckpointManifest&& manifest,
+    std::shared_ptr<bool> outstanding_segment) noexcept
+    : status_(ExactHigherSupportUnsealedDrainStatus::segment_ready),
+      manifest_(std::move(manifest)),
+      segment_(std::move(segment)),
+      outstanding_segment_(std::move(outstanding_segment)) {}
+
+void ExactHigherSupportUnsealedDrain::consume() noexcept {
+  if (outstanding_segment_ != nullptr) {
+    *outstanding_segment_ = false;
+  }
+  segment_.reset();
+  manifest_.reset();
+  outstanding_segment_.reset();
+  successfully_consumed_ = true;
+  moved_from_ = false;
+}
+
+void ExactHigherSupportUnsealedDrain::invalidate_moved_from() noexcept {
+  segment_.reset();
+  manifest_.reset();
+  outstanding_segment_.reset();
+  successfully_consumed_ = false;
+  moved_from_ = true;
+}
 
 ExactHigherSupportTerminalAuthority::
     ExactHigherSupportTerminalAuthority(
@@ -2996,7 +3051,8 @@ ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
       chunk_budget_(chunk_budget),
       maximum_chunk_count_(maximum_chunk_count),
       trusted_checkpoint_(
-          make_initial_exact_higher_support_checkpoint(authority_)) {
+          make_initial_exact_higher_support_checkpoint(authority_)),
+      unsealed_segment_outstanding_(std::make_shared<bool>(false)) {
   if (!verify_exact_higher_support_checkpoint(
            authority_, trusted_checkpoint_)
            .local_integrity_verified) {
@@ -3008,6 +3064,126 @@ ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
     throw std::invalid_argument(
         "the terminal higher-support chunk budget cannot hold the canonical roots");
   }
+  released_output_chain_digest_ =
+      trusted_checkpoint_.output_chain_digest;
+  released_checkpoint_digest_ =
+      trusted_checkpoint_.checkpoint_digest;
+  if (!retained_segment_accounting_holds()) {
+    throw std::logic_error(
+        "the terminal higher-support initial retained accounting is inconsistent");
+  }
+}
+
+bool ExactHigherSupportTerminalSession::
+retained_segment_accounting_holds() const noexcept {
+  if (released_segment_count_ > chunk_count_ ||
+      segments_.size() >
+          std::numeric_limits<std::size_t>::max() -
+              released_segment_count_ ||
+      released_segment_count_ + segments_.size() != chunk_count_ ||
+      chunk_count_ > maximum_chunk_count_ ||
+      trusted_checkpoint_.next_chunk_sequence != chunk_count_ ||
+      unsealed_segment_drain_performed_ !=
+          (released_segment_count_ != 0U) ||
+      (unsealed_segment_drain_performed_ && segments_.size() > 1U) ||
+      released_event_count_ > event_count_ ||
+      released_relevant_extra_shell_diagnostic_count_ >
+          relevant_extra_shell_diagnostic_count_ ||
+      released_destroyed_prune_certificate_count_ >
+          destroyed_prune_certificate_count_ ||
+      released_destroyed_rank_receipt_count_ >
+          destroyed_rank_receipt_count_ ||
+      released_output_record_count_ >
+          trusted_checkpoint_.output_record_count ||
+      released_point_id_reference_count_ >
+          trusted_checkpoint_.cumulative_audit
+              .emitted_point_id_reference_count ||
+      trusted_checkpoint_.output_record_count !=
+          trusted_checkpoint_.cumulative_audit.emitted_record_count ||
+      event_count_ !=
+          trusted_checkpoint_.cumulative_audit.accepted_event_count ||
+      relevant_extra_shell_diagnostic_count_ !=
+          trusted_checkpoint_.cumulative_audit
+              .relevant_extra_shell_diagnostic_count ||
+      destroyed_prune_certificate_count_ !=
+          trusted_checkpoint_.cumulative_audit
+              .emitted_prune_certificate_count ||
+      destroyed_rank_receipt_count_ !=
+          trusted_checkpoint_.cumulative_audit
+              .emitted_rank_receipt_count) {
+    return false;
+  }
+
+  if (segments_.empty()) {
+    return released_event_count_ == event_count_ &&
+        released_relevant_extra_shell_diagnostic_count_ ==
+            relevant_extra_shell_diagnostic_count_ &&
+        released_destroyed_prune_certificate_count_ ==
+            destroyed_prune_certificate_count_ &&
+        released_destroyed_rank_receipt_count_ ==
+            destroyed_rank_receipt_count_ &&
+        released_output_record_count_ ==
+            trusted_checkpoint_.output_record_count &&
+        released_point_id_reference_count_ ==
+            trusted_checkpoint_.cumulative_audit
+                .emitted_point_id_reference_count &&
+        released_output_chain_digest_ ==
+            trusted_checkpoint_.output_chain_digest &&
+        released_checkpoint_digest_ ==
+            trusted_checkpoint_.checkpoint_digest;
+  }
+
+  const ExactHigherSupportTerminalSegment& first = segments_.front();
+  const ExactHigherSupportTerminalSegment& last = segments_.back();
+  if (chunk_count_ == 0U ||
+      first.chunk_sequence != released_segment_count_ ||
+      last.chunk_sequence != chunk_count_ - 1U ||
+      first.first_output_record_index != released_output_record_count_ ||
+      first.source_checkpoint_digest != released_checkpoint_digest_ ||
+      first.previous_output_chain_digest !=
+          released_output_chain_digest_ ||
+      last.next_checkpoint_digest !=
+          trusted_checkpoint_.checkpoint_digest ||
+      last.output_chain_digest !=
+          trusted_checkpoint_.output_chain_digest ||
+      last.events.size() >
+          std::numeric_limits<std::size_t>::max() -
+              last.relevant_extra_shell_diagnostics.size()) {
+    return false;
+  }
+  if (segments_.size() == 1U &&
+      (last.events.size() != event_count_ - released_event_count_ ||
+       last.relevant_extra_shell_diagnostics.size() !=
+           relevant_extra_shell_diagnostic_count_ -
+               released_relevant_extra_shell_diagnostic_count_ ||
+       last.destroyed_prune_certificate_count !=
+           destroyed_prune_certificate_count_ -
+               released_destroyed_prune_certificate_count_ ||
+       last.destroyed_rank_receipt_count !=
+           destroyed_rank_receipt_count_ -
+               released_destroyed_rank_receipt_count_ ||
+       last.emitted_point_id_reference_count !=
+           trusted_checkpoint_.cumulative_audit
+                   .emitted_point_id_reference_count -
+               released_point_id_reference_count_)) {
+    return false;
+  }
+  const std::size_t retained_record_count =
+      last.events.size() +
+      last.relevant_extra_shell_diagnostics.size();
+  if (last.destroyed_prune_certificate_count >
+          std::numeric_limits<std::size_t>::max() -
+              retained_record_count ||
+      last.first_output_record_index >
+          std::numeric_limits<std::size_t>::max() -
+              last.emitted_record_count()) {
+    return false;
+  }
+  return retained_record_count +
+          last.destroyed_prune_certificate_count ==
+          last.emitted_record_count() &&
+      last.first_output_record_index + last.emitted_record_count() ==
+          trusted_checkpoint_.output_record_count;
 }
 
 void ExactHigherSupportTerminalSession::append_next_internal_chunk() {
@@ -3019,9 +3195,13 @@ void ExactHigherSupportTerminalSession::append_next_internal_chunk() {
     throw std::logic_error(
         "a terminal higher-support checkpoint has no successor chunk");
   }
-  if (segments_.size() >= maximum_chunk_count_) {
+  if (chunk_count_ >= maximum_chunk_count_) {
     throw std::logic_error(
         "the terminal higher-support chunk cap has already been reached");
+  }
+  if (!retained_segment_accounting_holds()) {
+    throw std::logic_error(
+        "the terminal higher-support retained accounting changed before a chunk");
   }
   if (!authority_.bound_to_original_sources()) {
     throw std::logic_error(
@@ -3042,6 +3222,10 @@ void ExactHigherSupportTerminalSession::append_next_internal_chunk() {
     // cannot make a retry execute the same scientific chunk twice.
     segments_.reserve(next_capacity);
   }
+  const std::size_t next_chunk_count = checked_add(
+      chunk_count_,
+      1U,
+      "the terminal higher-support chunk count overflows size_t");
 
   // This is the only exact traversal execution for this sequence.  Unlike the
   // externally supplied anchored protocol, no candidate is replayed.
@@ -3056,7 +3240,7 @@ void ExactHigherSupportTerminalSession::append_next_internal_chunk() {
       chunk.manifest != authority_.manifest() ||
       chunk.budget != chunk_budget_ ||
       chunk.chunk_sequence != trusted_checkpoint_.next_chunk_sequence ||
-      chunk.chunk_sequence != segments_.size() ||
+      chunk.chunk_sequence != chunk_count_ ||
       chunk.first_output_record_index !=
           trusted_checkpoint_.output_record_count ||
       chunk.source_checkpoint_digest !=
@@ -3163,6 +3347,11 @@ void ExactHigherSupportTerminalSession::append_next_internal_chunk() {
   destroyed_prune_certificate_count_ =
       next_prune_certificate_count;
   destroyed_rank_receipt_count_ = next_rank_receipt_count;
+  chunk_count_ = next_chunk_count;
+  if (!retained_segment_accounting_holds()) {
+    throw std::logic_error(
+        "the terminal higher-support retained accounting changed after a chunk");
+  }
 }
 
 ExactHigherSupportTerminalRunStatus
@@ -3171,12 +3360,16 @@ ExactHigherSupportTerminalSession::run_to_terminal() {
     throw std::logic_error(
         "a sealed terminal higher-support session cannot run");
   }
+  if (unsealed_segment_drain_performed_) {
+    throw std::logic_error(
+        "an unsealed-drain higher-support session must advance one segment at a time");
+  }
   if (!authority_.bound_to_original_sources()) {
     throw std::logic_error(
         "the terminal higher-support source identity changed before execution");
   }
   while (!trusted_checkpoint_.locally_complete()) {
-    if (segments_.size() >= maximum_chunk_count_) {
+    if (chunk_count_ >= maximum_chunk_count_) {
       return ExactHigherSupportTerminalRunStatus::
           maximum_chunk_count_reached;
     }
@@ -3185,11 +3378,91 @@ ExactHigherSupportTerminalSession::run_to_terminal() {
   return ExactHigherSupportTerminalRunStatus::terminal;
 }
 
+ExactHigherSupportUnsealedDrain
+ExactHigherSupportTerminalSession::drain_next_unsealed_segment() & {
+  if (sealed_) {
+    throw std::logic_error(
+        "a sealed terminal higher-support session cannot drain a segment");
+  }
+  if (!segments_.empty()) {
+    throw std::logic_error(
+        "a higher-support drain cannot skip a resident segment prefix");
+  }
+  if (unconsumed_segment_outstanding()) {
+    throw std::logic_error(
+        "a higher-support session cannot skip an unconsumed drained segment");
+  }
+  if (!retained_segment_accounting_holds()) {
+    throw std::logic_error(
+        "the terminal higher-support retained accounting changed before a drain");
+  }
+  if (!authority_.bound_to_original_sources()) {
+    throw std::logic_error(
+        "the terminal higher-support source identity changed before a drain");
+  }
+  if (trusted_checkpoint_.locally_complete()) {
+    return ExactHigherSupportUnsealedDrain{
+        ExactHigherSupportUnsealedDrainStatus::terminal};
+  }
+  if (chunk_count_ >= maximum_chunk_count_) {
+    return ExactHigherSupportUnsealedDrain{
+        ExactHigherSupportUnsealedDrainStatus::
+            maximum_chunk_count_reached};
+  }
+
+  // Copy the fixed-size source contract before the scientific transaction.
+  // Even if a future manifest representation allocates, a failed copy cannot
+  // advance the checkpoint or lose the next segment.
+  ExactHigherSupportCheckpointManifest source_manifest =
+      trusted_checkpoint_.manifest;
+
+  // append_next_internal_chunk executes exactly one traversal and retains one
+  // bounded suffix segment.  Moving that sole suffix advances the released
+  // prefix without replaying or manufacturing any durable authority.
+  append_next_internal_chunk();
+  ExactHigherSupportTerminalSegment released =
+      std::move(segments_.back());
+  segments_.clear();
+  released_segment_count_ = chunk_count_;
+  released_event_count_ = event_count_;
+  released_relevant_extra_shell_diagnostic_count_ =
+      relevant_extra_shell_diagnostic_count_;
+  released_destroyed_prune_certificate_count_ =
+      destroyed_prune_certificate_count_;
+  released_destroyed_rank_receipt_count_ =
+      destroyed_rank_receipt_count_;
+  released_output_record_count_ =
+      trusted_checkpoint_.output_record_count;
+  released_point_id_reference_count_ =
+      trusted_checkpoint_.cumulative_audit
+          .emitted_point_id_reference_count;
+  released_output_chain_digest_ =
+      trusted_checkpoint_.output_chain_digest;
+  released_checkpoint_digest_ =
+      trusted_checkpoint_.checkpoint_digest;
+  unsealed_segment_drain_performed_ = true;
+  // Every value above is a direct no-throw projection of the already checked
+  // resident suffix.  Continuing after an impossible post-commit mismatch
+  // could skip the detached scientific segment, so fail-stop instead of
+  // exposing a catchable exception with a partially released prefix.
+  if (!retained_segment_accounting_holds()) {
+    std::terminate();
+  }
+  *unsealed_segment_outstanding_ = true;
+  return ExactHigherSupportUnsealedDrain{
+      std::move(released), std::move(source_manifest),
+      unsealed_segment_outstanding_};
+}
+
 ExactHigherSupportTerminalAuthority
 ExactHigherSupportTerminalSession::seal() && {
   if (sealed_) {
     throw std::logic_error(
         "a terminal higher-support session can be sealed only once");
+  }
+  if (unsealed_segment_drain_performed_) {
+    throw std::logic_error(
+        "a drained higher-support session cannot mint a resident authority");
   }
   if (!trusted_checkpoint_.locally_complete()) {
     throw std::logic_error(
@@ -3206,7 +3479,9 @@ ExactHigherSupportTerminalSession::seal() && {
     throw std::logic_error(
         "a terminal higher-support authority requires a locally verified checkpoint");
   }
-  if (trusted_checkpoint_.next_chunk_sequence != segments_.size() ||
+  if (!retained_segment_accounting_holds() ||
+      trusted_checkpoint_.next_chunk_sequence != chunk_count_ ||
+      chunk_count_ != segments_.size() ||
       trusted_checkpoint_.cumulative_audit.accepted_event_count !=
           event_count_ ||
       trusted_checkpoint_.cumulative_audit

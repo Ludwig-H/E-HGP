@@ -585,6 +585,79 @@ enum class ExactHigherSupportTerminalRunStatus : std::uint8_t {
 };
 
 class ExactHigherSupportTerminalSession;
+struct ExactSparseDirectH0CandidateRun;
+struct ExactSparseDirectH0CandidateRunLimits;
+
+enum class ExactHigherSupportUnsealedDrainStatus : std::uint8_t {
+  segment_ready,
+  terminal,
+  maximum_chunk_count_reached,
+};
+
+// Move-only process-local result of one producer advance.  A ready result
+// binds the retained segment to the exact manifest copied from the same
+// canonical-root session.  Callers may inspect that pair, but only the common
+// H0 projection is allowed to consume it; a raw segment and an unrelated
+// manifest therefore cannot be combined at the consuming boundary.
+class ExactHigherSupportUnsealedDrain {
+ public:
+  ExactHigherSupportUnsealedDrain(
+      const ExactHigherSupportUnsealedDrain&) = delete;
+  ExactHigherSupportUnsealedDrain& operator=(
+      const ExactHigherSupportUnsealedDrain&) = delete;
+  ExactHigherSupportUnsealedDrain(
+      ExactHigherSupportUnsealedDrain&& other) noexcept;
+  ExactHigherSupportUnsealedDrain& operator=(
+      ExactHigherSupportUnsealedDrain&& other) = delete;
+
+  [[nodiscard]] ExactHigherSupportUnsealedDrainStatus status()
+      const noexcept {
+    return status_;
+  }
+  [[nodiscard]] bool segment_available() const noexcept {
+    return status_ ==
+               ExactHigherSupportUnsealedDrainStatus::segment_ready &&
+        manifest_.has_value() && segment_.has_value();
+  }
+  [[nodiscard]] bool consumed() const noexcept {
+    return successfully_consumed_;
+  }
+  [[nodiscard]] bool moved_from() const noexcept {
+    return moved_from_;
+  }
+  [[nodiscard]] const ExactHigherSupportCheckpointManifest* manifest()
+      const noexcept {
+    return manifest_ ? &*manifest_ : nullptr;
+  }
+  [[nodiscard]] const ExactHigherSupportTerminalSegment* segment()
+      const noexcept {
+    return segment_ ? &*segment_ : nullptr;
+  }
+
+ private:
+  friend class ExactHigherSupportTerminalSession;
+  friend ExactSparseDirectH0CandidateRun
+  project_exact_sparse_direct_h0_higher_candidate_run(
+      ExactHigherSupportUnsealedDrain&& source,
+      ExactSparseDirectH0CandidateRunLimits limits);
+
+  explicit ExactHigherSupportUnsealedDrain(
+      ExactHigherSupportUnsealedDrainStatus status) noexcept;
+  ExactHigherSupportUnsealedDrain(
+      ExactHigherSupportTerminalSegment&& segment,
+      ExactHigherSupportCheckpointManifest&& manifest,
+      std::shared_ptr<bool> outstanding_segment) noexcept;
+  void consume() noexcept;
+  void invalidate_moved_from() noexcept;
+
+  ExactHigherSupportUnsealedDrainStatus status_{
+      ExactHigherSupportUnsealedDrainStatus::terminal};
+  std::optional<ExactHigherSupportCheckpointManifest> manifest_;
+  std::optional<ExactHigherSupportTerminalSegment> segment_;
+  std::shared_ptr<bool> outstanding_segment_;
+  bool successfully_consumed_{false};
+  bool moved_from_{false};
+};
 
 // Move-only, process-local authority over a terminal stream constructed from
 // canonical roots.  It authenticates no durable recovery and performs no
@@ -796,6 +869,13 @@ class ExactHigherSupportTerminalSession {
       ExactHigherSupportTerminalSession&&) = delete;
 
   [[nodiscard]] ExactHigherSupportTerminalRunStatus run_to_terminal();
+  // Executes at most one scientific chunk and returns an opaque, provenance-
+  // bound retained segment, or reports terminality/chunk-cap without changing
+  // the scientific state.  No terminal or durable authority is minted.  The
+  // first ready segment permanently revokes the resident seal path.
+  [[nodiscard]] ExactHigherSupportUnsealedDrain
+  drain_next_unsealed_segment() &;
+  ExactHigherSupportUnsealedDrain drain_next_unsealed_segment() && = delete;
   [[nodiscard]] ExactHigherSupportTerminalAuthority seal() &&;
   ExactHigherSupportTerminalAuthority seal() & = delete;
 
@@ -811,21 +891,47 @@ class ExactHigherSupportTerminalSession {
     return maximum_chunk_count_;
   }
   [[nodiscard]] std::size_t chunk_count() const noexcept {
+    return chunk_count_;
+  }
+  [[nodiscard]] std::size_t released_segment_count() const noexcept {
+    return released_segment_count_;
+  }
+  [[nodiscard]] std::size_t resident_segment_count() const noexcept {
     return segments_.size();
+  }
+  [[nodiscard]] bool unsealed_segment_drain_performed() const noexcept {
+    return unsealed_segment_drain_performed_;
+  }
+  [[nodiscard]] bool unconsumed_segment_outstanding() const noexcept {
+    return unsealed_segment_outstanding_ != nullptr &&
+        *unsealed_segment_outstanding_;
   }
 
  private:
   void append_next_internal_chunk();
+  [[nodiscard]] bool retained_segment_accounting_holds() const noexcept;
 
   ExactHigherSupportAuthorityContext authority_;
   ExactHigherSupportStreamBudget chunk_budget_{};
   std::size_t maximum_chunk_count_{};
   ExactHigherSupportCheckpoint trusted_checkpoint_{};
   std::vector<ExactHigherSupportTerminalSegment> segments_;
+  std::size_t chunk_count_{};
   std::size_t event_count_{};
   std::size_t relevant_extra_shell_diagnostic_count_{};
   std::size_t destroyed_prune_certificate_count_{};
   std::size_t destroyed_rank_receipt_count_{};
+  std::size_t released_segment_count_{};
+  std::size_t released_event_count_{};
+  std::size_t released_relevant_extra_shell_diagnostic_count_{};
+  std::size_t released_destroyed_prune_certificate_count_{};
+  std::size_t released_destroyed_rank_receipt_count_{};
+  std::size_t released_output_record_count_{};
+  std::size_t released_point_id_reference_count_{};
+  contract::CanonicalId released_output_chain_digest_{};
+  contract::CanonicalId released_checkpoint_digest_{};
+  std::shared_ptr<bool> unsealed_segment_outstanding_;
+  bool unsealed_segment_drain_performed_{false};
   bool sealed_{false};
 };
 

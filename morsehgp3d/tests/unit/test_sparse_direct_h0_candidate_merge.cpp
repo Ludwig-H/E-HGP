@@ -28,6 +28,16 @@ static_assert(
 static_assert(
     !std::is_move_constructible_v<
         ExactSparseDirectH0CandidateMergeSession>);
+static_assert(
+    !std::is_copy_constructible_v<ExactHigherSupportUnsealedDrain> &&
+        std::is_nothrow_move_constructible_v<
+            ExactHigherSupportUnsealedDrain>);
+static_assert(
+    !std::is_constructible_v<
+        ExactHigherSupportUnsealedDrain,
+        ExactHigherSupportTerminalSegment&&,
+        ExactHigherSupportCheckpointManifest&&>,
+    "callers must not be able to forge a segment/manifest drain pair");
 
 void require(bool condition, std::string_view message) {
   if (!condition) {
@@ -59,11 +69,47 @@ void require_throws(Function&& function, std::string_view message) {
       std::span<const CertifiedPoint3>{points});
 }
 
+[[nodiscard]] CanonicalPointCloud shifted_tetrahedron() {
+  const std::array<CertifiedPoint3, 4U> points{
+      point(11.0, 11.0, 11.0),
+      point(11.0, 9.0, 9.0),
+      point(9.0, 11.0, 9.0),
+      point(9.0, 9.0, 11.0)};
+  return CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{points});
+}
+
 [[nodiscard]] CanonicalPointCloud right_triangle() {
   const std::array<CertifiedPoint3, 3U> points{
       point(0.0, 0.0, 0.0),
       point(2.0, 0.0, 0.0),
       point(0.0, 2.0, 0.0)};
+  return CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{points});
+}
+
+[[nodiscard]] CanonicalPointCloud five_site_shell() {
+  const std::array<CertifiedPoint3, 5U> points{
+      point(1.0, 1.0, 1.0),
+      point(1.0, -1.0, -1.0),
+      point(-1.0, 1.0, -1.0),
+      point(-1.0, -1.0, 1.0),
+      point(-1.0, -1.0, -1.0)};
+  return CanonicalPointCloud::rejecting_duplicates(
+      std::span<const CertifiedPoint3>{points});
+}
+
+[[nodiscard]] CanonicalPointCloud rank_prune_cloud() {
+  const std::array<CertifiedPoint3, 9U> points{
+      point(10.0, 10.0, 10.0),
+      point(10.125, 10.0, 10.0),
+      point(10.0, -10.0, -10.0),
+      point(10.125, -10.0, -10.0),
+      point(-10.0, 10.0, -10.0),
+      point(-9.875, 10.0, -10.0),
+      point(-10.0, -10.0, 10.0),
+      point(-9.875, -10.0, 10.0),
+      point(0.0, 0.0, 0.0)};
   return CanonicalPointCloud::rejecting_duplicates(
       std::span<const CertifiedPoint3>{points});
 }
@@ -267,12 +313,129 @@ void test_cross_arity_projection_and_session_merge() {
 
   ExactHigherSupportTerminalAuthority authority = build_higher_authority(
       index, cloud, requested_maximum_order);
+  std::vector<ExactSparseDirectH0CandidateRun> resident_higher_runs;
   for (std::size_t segment_index = 0U;
        segment_index < authority.segments().size(); ++segment_index) {
-    runs.push_back(project_exact_sparse_direct_h0_higher_candidate_run(
-        authority, segment_index, projection_limits));
+    resident_higher_runs.push_back(
+        project_exact_sparse_direct_h0_higher_candidate_run(
+            authority, segment_index, projection_limits));
   }
-  require(runs.size() > 2U, "the higher fixture was not segmented");
+
+  ExactHigherSupportTerminalSession drained_higher{
+      index,
+      cloud,
+      requested_maximum_order,
+      segmented_higher_budget(),
+      256U};
+  bool observed_consumed_payload = false;
+  bool observed_retry_after_precommit_rejection = false;
+  std::size_t drained_event_count = 0U;
+  std::size_t drained_diagnostic_count = 0U;
+  std::size_t drained_prune_count = 0U;
+  std::size_t drained_rank_receipt_count = 0U;
+  std::size_t drained_record_count = 0U;
+  std::size_t drained_reference_count = 0U;
+  while (!drained_higher.trusted_checkpoint().locally_complete()) {
+    auto drained = drained_higher.drain_next_unsealed_segment();
+    require(
+        drained.status() ==
+                ExactHigherSupportUnsealedDrainStatus::segment_ready &&
+            drained.segment_available(),
+        "the higher producer did not return one ready opaque segment");
+    const ExactHigherSupportTerminalSegment& segment = *drained.segment();
+    const std::size_t source_candidate_count = segment.events.size();
+    const std::size_t source_diagnostic_count =
+        segment.relevant_extra_shell_diagnostics.size();
+    drained_event_count += source_candidate_count;
+    drained_diagnostic_count += source_diagnostic_count;
+    drained_prune_count +=
+        segment.destroyed_prune_certificate_count;
+    drained_rank_receipt_count +=
+        segment.destroyed_rank_receipt_count;
+    drained_record_count += segment.emitted_record_count();
+    drained_reference_count +=
+        segment.emitted_point_id_reference_count;
+    if (!observed_retry_after_precommit_rejection &&
+        segment.emitted_point_id_reference_count != 0U) {
+      ExactSparseDirectH0CandidateRunLimits rejecting_limits =
+          projection_limits;
+      rejecting_limits.maximum_point_id_reference_count =
+          segment.emitted_point_id_reference_count - 1U;
+      require_throws<std::invalid_argument>(
+          [&] {
+            static_cast<void>(
+                project_exact_sparse_direct_h0_higher_candidate_run(
+                    std::move(drained), rejecting_limits));
+          },
+          "the consuming projection accepted an undersized reference cap");
+      const auto retry_checkpoint =
+          drained_higher.trusted_checkpoint();
+      require_throws<std::logic_error>(
+          [&] {
+            static_cast<void>(
+                drained_higher.drain_next_unsealed_segment());
+          },
+          "the producer skipped a rejected outstanding projection token");
+      require(
+          drained.segment_available() && !drained.consumed() &&
+              drained_higher.unconsumed_segment_outstanding() &&
+              drained_higher.trusted_checkpoint() == retry_checkpoint &&
+              drained.segment()->events.size() == source_candidate_count &&
+              drained.segment()
+                      ->relevant_extra_shell_diagnostics.size() ==
+                  source_diagnostic_count,
+          "a rejected precommit projection consumed or changed its retry token");
+      observed_retry_after_precommit_rejection = true;
+    }
+    ExactSparseDirectH0CandidateRun run =
+        project_exact_sparse_direct_h0_higher_candidate_run(
+            std::move(drained), projection_limits);
+    require(
+        drained.consumed() && !drained.segment_available() &&
+            drained.segment() == nullptr && drained.manifest() == nullptr &&
+            !drained_higher.unconsumed_segment_outstanding() &&
+            run.candidates.size() == source_candidate_count &&
+            run.diagnostics.size() == source_diagnostic_count &&
+            drained_higher.resident_segment_count() == 0U,
+        "the rvalue higher projection did not consume exactly one drained segment");
+    observed_consumed_payload = observed_consumed_payload ||
+        source_candidate_count != 0U || source_diagnostic_count != 0U;
+    runs.push_back(std::move(run));
+  }
+  const auto& drained_audit =
+      drained_higher.trusted_checkpoint().cumulative_audit;
+  require(
+      observed_consumed_payload &&
+          observed_retry_after_precommit_rejection &&
+          drained_higher.unsealed_segment_drain_performed() &&
+          drained_higher.released_segment_count() ==
+              resident_higher_runs.size() &&
+          drained_higher.chunk_count() == resident_higher_runs.size() &&
+          drained_event_count == drained_audit.accepted_event_count &&
+          drained_diagnostic_count ==
+              drained_audit.relevant_extra_shell_diagnostic_count &&
+          drained_prune_count ==
+              drained_audit.emitted_prune_certificate_count &&
+          drained_rank_receipt_count ==
+              drained_audit.emitted_rank_receipt_count &&
+          drained_record_count == drained_audit.emitted_record_count &&
+          drained_reference_count ==
+              drained_audit.emitted_point_id_reference_count &&
+          runs.size() == resident_higher_runs.size() + 1U &&
+          runs.size() > 2U,
+      "the higher fixture was not consumed as a bounded segment sequence");
+  for (std::size_t segment_index = 0U;
+       segment_index < resident_higher_runs.size(); ++segment_index) {
+    require(
+        runs[segment_index + 1U] ==
+            resident_higher_runs[segment_index],
+        "the consuming higher projection differs from the resident authority projection");
+  }
+  require_throws<std::logic_error>(
+      [&] {
+        static_cast<void>(std::move(drained_higher).seal());
+      },
+      "a consumed higher segment sequence minted a resident authority");
 
   const std::vector<ExactSparseDirectH0CandidateRun> original_runs = runs;
   ExactSparseDirectH0CandidateMergeSession session{
@@ -357,6 +520,17 @@ void test_cross_arity_projection_and_session_merge() {
         static_cast<void>(invalid);
       },
       "the merge accepted a zero page cap");
+
+  std::vector<ExactSparseDirectH0CandidateRun> old_schema = original_runs;
+  old_schema.front().schema_version = 1U;
+  require_throws<std::invalid_argument>(
+      [&] {
+        ExactSparseDirectH0CandidateMergeSession invalid{
+            std::move(old_schema),
+            ExactSparseDirectH0MergeLimits{64U, 1U}};
+        static_cast<void>(invalid);
+      },
+      "the schema-v2 merge accepted one legacy schema-v1 run");
 
   std::vector<ExactSparseDirectH0CandidateRun> unsorted = original_runs;
   std::reverse(
@@ -475,12 +649,215 @@ void test_pair_diagnostic_stays_outside_merge_pages() {
       "a preserved diagnostic entered or disappeared from merge pages");
 }
 
+void test_drained_higher_extra_shell_diagnostic() {
+  constexpr std::size_t requested_maximum_order = 10U;
+  const CanonicalPointCloud cloud = five_site_shell();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactSparseDirectH0CandidateRunLimits projection_limits{
+      128U, 128U, 2048U};
+  ExactHigherSupportTerminalAuthority resident = build_higher_authority(
+      index, cloud, requested_maximum_order);
+  ExactHigherSupportTerminalSession drained{
+      index,
+      cloud,
+      requested_maximum_order,
+      segmented_higher_budget(),
+      256U};
+
+  std::size_t segment_index = 0U;
+  std::size_t diagnostic_count = 0U;
+  bool observed_five_point_shell = false;
+  while (!drained.trusted_checkpoint().locally_complete()) {
+    auto source = drained.drain_next_unsealed_segment();
+    require(
+        source.status() ==
+                ExactHigherSupportUnsealedDrainStatus::segment_ready &&
+            source.segment_available(),
+        "the extra-shell producer did not return one ready segment");
+    const ExactHigherSupportTerminalSegment& segment = *source.segment();
+    diagnostic_count +=
+        segment.relevant_extra_shell_diagnostics.size();
+    for (const auto& diagnostic :
+         segment.relevant_extra_shell_diagnostics) {
+      observed_five_point_shell = observed_five_point_shell ||
+          (diagnostic.support_size == 4U &&
+           diagnostic.interior_ids.empty() &&
+           diagnostic.shell_count == 5U &&
+           diagnostic.observed_closed_rank == 5U);
+    }
+    const auto expected =
+        project_exact_sparse_direct_h0_higher_candidate_run(
+            resident, segment_index, projection_limits);
+    const auto consumed =
+        project_exact_sparse_direct_h0_higher_candidate_run(
+            std::move(source), projection_limits);
+    require(
+        consumed == expected && source.consumed(),
+        "the consuming higher projection changed an extra-shell diagnostic");
+    ++segment_index;
+  }
+  require(
+      segment_index == resident.segments().size() &&
+          diagnostic_count != 0U && observed_five_point_shell,
+      "the consuming higher fixture did not cover its five-site diagnostic");
+}
+
+void test_higher_source_provenance_and_chunk_cap() {
+  constexpr std::size_t requested_maximum_order = 10U;
+  const ExactSparseDirectH0CandidateRunLimits projection_limits{
+      128U, 128U, 2048U};
+  const CanonicalPointCloud first_cloud = regular_tetrahedron();
+  const CanonicalPointCloud second_cloud = shifted_tetrahedron();
+  const MortonLbvhIndex first_index =
+      MortonLbvhIndex::build(first_cloud);
+  const MortonLbvhIndex second_index =
+      MortonLbvhIndex::build(second_cloud);
+  ExactHigherSupportTerminalAuthority first_authority =
+      build_higher_authority(
+          first_index, first_cloud, requested_maximum_order);
+  ExactHigherSupportTerminalAuthority second_authority =
+      build_higher_authority(
+          second_index, second_cloud, requested_maximum_order);
+  require(
+      !first_authority.segments().empty() &&
+          !second_authority.segments().empty(),
+      "the provenance fixtures emitted no bounded higher run");
+  ExactSparseDirectH0CandidateRun first_run =
+      project_exact_sparse_direct_h0_higher_candidate_run(
+          first_authority, 0U, projection_limits);
+  ExactSparseDirectH0CandidateRun second_run =
+      project_exact_sparse_direct_h0_higher_candidate_run(
+          second_authority, 0U, projection_limits);
+  require(
+      first_run.higher_source_contract.has_value() &&
+          second_run.higher_source_contract.has_value() &&
+          first_run.higher_source_contract->manifest !=
+              second_run.higher_source_contract->manifest,
+      "distinct same-size clouds did not retain distinct higher provenance");
+  require_throws<std::invalid_argument>(
+      [&] {
+        ExactSparseDirectH0CandidateMergeSession invalid{
+            std::vector<ExactSparseDirectH0CandidateRun>{
+                std::move(first_run), std::move(second_run)},
+            ExactSparseDirectH0MergeLimits{2U, 16U}};
+        static_cast<void>(invalid);
+      },
+      "the merge accepted higher runs from distinct source manifests");
+
+  ExactHigherSupportTerminalSession capped{
+      first_index,
+      first_cloud,
+      requested_maximum_order,
+      segmented_higher_budget(),
+      1U};
+  auto first = capped.drain_next_unsealed_segment();
+  require(
+      first.status() ==
+              ExactHigherSupportUnsealedDrainStatus::segment_ready &&
+          first.segment_available() &&
+          !capped.trusted_checkpoint().locally_complete(),
+      "the one-chunk projection fixture unexpectedly reached terminality");
+  static_cast<void>(
+      project_exact_sparse_direct_h0_higher_candidate_run(
+          std::move(first), projection_limits));
+  const auto capped_checkpoint = capped.trusted_checkpoint();
+  auto cap = capped.drain_next_unsealed_segment();
+  require(
+      cap.status() == ExactHigherSupportUnsealedDrainStatus::
+              maximum_chunk_count_reached &&
+          !cap.segment_available() &&
+          capped.trusted_checkpoint() == capped_checkpoint &&
+          capped.chunk_count() == 1U &&
+          capped.released_segment_count() == 1U,
+      "the consumed one-chunk session did not report its stable cap");
+}
+
+void test_drained_higher_projection_with_destroyed_prunes() {
+  constexpr std::size_t requested_maximum_order = 3U;
+  const CanonicalPointCloud cloud = rank_prune_cloud();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  ExactHigherSupportStreamBudget budget = unlimited_higher_budget();
+  budget.maximum_work_unit_count = 4U;
+  budget.maximum_emitted_record_count = 1U;
+  budget.maximum_emitted_point_id_reference_count = 64U;
+  budget.maximum_prune_receipt_count = 16U;
+  budget.maximum_global_closed_ball_query_count = 16U;
+  budget.maximum_point_classification_count = 128U;
+  constexpr std::size_t maximum_chunk_count = 4096U;
+  const ExactSparseDirectH0CandidateRunLimits projection_limits{
+      64U, 64U, 1024U};
+
+  ExactHigherSupportTerminalSession resident_session{
+      index,
+      cloud,
+      requested_maximum_order,
+      budget,
+      maximum_chunk_count};
+  require(
+      resident_session.run_to_terminal() ==
+          ExactHigherSupportTerminalRunStatus::terminal,
+      "the rank-prune resident fixture did not reach terminality");
+  ExactHigherSupportTerminalAuthority resident =
+      std::move(resident_session).seal();
+  require(
+      resident.destroyed_prune_certificate_count() != 0U &&
+          resident.destroyed_rank_receipt_count() != 0U,
+      "the rank-prune fixture emitted no destroyed certificate payload");
+
+  ExactHigherSupportTerminalSession drained{
+      index,
+      cloud,
+      requested_maximum_order,
+      budget,
+      maximum_chunk_count};
+  std::size_t segment_index = 0U;
+  std::size_t destroyed_prune_count = 0U;
+  std::size_t destroyed_rank_receipt_count = 0U;
+  while (!drained.trusted_checkpoint().locally_complete()) {
+    auto drained_segment = drained.drain_next_unsealed_segment();
+    require(
+        drained_segment.status() ==
+                ExactHigherSupportUnsealedDrainStatus::segment_ready &&
+            drained_segment.segment_available(),
+        "the rank-prune producer did not return one ready segment");
+    const ExactHigherSupportTerminalSegment& segment =
+        *drained_segment.segment();
+    destroyed_prune_count += segment.destroyed_prune_certificate_count;
+    destroyed_rank_receipt_count += segment.destroyed_rank_receipt_count;
+    const auto expected =
+        project_exact_sparse_direct_h0_higher_candidate_run(
+            resident, segment_index, projection_limits);
+    const auto consumed =
+        project_exact_sparse_direct_h0_higher_candidate_run(
+            std::move(drained_segment), projection_limits);
+    require(
+        consumed == expected && drained_segment.consumed() &&
+            !drained_segment.segment_available() &&
+            drained.resident_segment_count() == 0U,
+        "a consumed rank-prune segment differs from its resident projection");
+    ++segment_index;
+  }
+
+  require(
+      segment_index == resident.segments().size() &&
+          destroyed_prune_count ==
+              resident.destroyed_prune_certificate_count() &&
+          destroyed_rank_receipt_count ==
+              resident.destroyed_rank_receipt_count() &&
+          drained.released_segment_count() == segment_index &&
+          drained.trusted_checkpoint().locally_complete(),
+      "draining lost destroyed prune or rank-receipt accounting");
+}
+
 }  // namespace
 
 int main() {
   try {
     test_cross_arity_projection_and_session_merge();
     test_pair_diagnostic_stays_outside_merge_pages();
+    test_drained_higher_extra_shell_diagnostic();
+    test_higher_source_provenance_and_chunk_cap();
+    test_drained_higher_projection_with_destroyed_prunes();
   } catch (const std::exception& error) {
     std::cerr << "FAIL: " << error.what() << '\n';
     return 1;

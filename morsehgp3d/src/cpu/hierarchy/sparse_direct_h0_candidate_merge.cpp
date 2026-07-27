@@ -2,11 +2,16 @@
 
 #include <algorithm>
 #include <limits>
+#include <numeric>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 namespace morsehgp3d::hierarchy {
 namespace {
+
+void validate_higher_projection_manifest(
+    const ExactHigherSupportCheckpointManifest& manifest);
 
 [[nodiscard]] std::size_t checked_add(
     std::size_t left,
@@ -190,12 +195,57 @@ void validate_run(const ExactSparseDirectH0CandidateRun& run) {
       run.point_count < 2U || run.effective_maximum_order == 0U ||
       run.effective_maximum_order > 10U ||
       run.effective_maximum_order > run.point_count ||
-      (!run.contains_pair_candidates && !run.contains_higher_candidates) ||
+      run.contains_pair_candidates == run.contains_higher_candidates ||
+      run.contains_higher_candidates !=
+          run.higher_source_contract.has_value() ||
       !run.candidates_strictly_sorted_by_terminal_facade_key ||
       !run.diagnostics_preserved || run.global_event_indices_assigned ||
       run.hierarchy_reduction_performed || run.complete_h0_authority_claimed) {
     throw std::invalid_argument(
         "a sparse direct H0 input run has an invalid scope");
+  }
+  const ExactSparseDirectH0HigherSourceContract* higher_contract =
+      run.higher_source_contract
+          ? &*run.higher_source_contract
+          : nullptr;
+  std::vector<bool> higher_candidate_locator_seen;
+  std::vector<bool> higher_diagnostic_locator_seen;
+  if (higher_contract != nullptr) {
+    validate_higher_projection_manifest(higher_contract->manifest);
+    const bool valid_status =
+        (higher_contract->status ==
+             ExactHigherSupportStreamStatus::complete &&
+         higher_contract->stop_reason ==
+             ExactHigherSupportStopReason::none) ||
+        (higher_contract->status ==
+             ExactHigherSupportStreamStatus::budget_exhausted &&
+         higher_contract->stop_reason !=
+             ExactHigherSupportStopReason::none);
+    const std::size_t retained_record_count = checked_add(
+        higher_contract->source_event_count,
+        higher_contract->source_diagnostic_count,
+        "a higher H0 source-contract record count overflows size_t");
+    const std::size_t emitted_record_count = checked_add(
+        retained_record_count,
+        higher_contract->destroyed_prune_certificate_count,
+        "a higher H0 source-contract record count overflows size_t");
+    if (!valid_status ||
+        higher_contract->manifest.point_count != run.point_count ||
+        higher_contract->manifest.effective_maximum_order !=
+            run.effective_maximum_order ||
+        higher_contract->source_event_count != run.candidates.size() ||
+        higher_contract->source_diagnostic_count !=
+            run.diagnostics.size() ||
+        higher_contract->emitted_record_count != emitted_record_count ||
+        higher_contract->emitted_point_id_reference_count !=
+            run.source_point_id_reference_count) {
+      throw std::invalid_argument(
+          "a sparse direct H0 higher source contract is inconsistent");
+    }
+    higher_candidate_locator_seen.assign(
+        higher_contract->source_event_count, false);
+    higher_diagnostic_locator_seen.assign(
+        higher_contract->source_diagnostic_count, false);
   }
   std::size_t references = 0U;
   for (std::size_t index = 0U; index < run.candidates.size(); ++index) {
@@ -206,6 +256,20 @@ void validate_run(const ExactSparseDirectH0CandidateRun& run) {
         (!pair_locator && !run.contains_higher_candidates)) {
       throw std::invalid_argument(
           "a sparse direct H0 candidate has the wrong source lane");
+    }
+    if (!pair_locator) {
+      const auto locator = std::get<
+          ExactSparseDirectH0HigherSourceLocator>(
+              run.candidates[index].source_locator);
+      if (higher_contract == nullptr ||
+          locator.chunk_sequence != higher_contract->chunk_sequence ||
+          locator.local_kind_index >=
+              higher_candidate_locator_seen.size() ||
+          higher_candidate_locator_seen[locator.local_kind_index]) {
+        throw std::invalid_argument(
+            "a sparse direct H0 higher candidate locator is invalid");
+      }
+      higher_candidate_locator_seen[locator.local_kind_index] = true;
     }
     validate_candidate(
         run.candidates[index], run.point_count,
@@ -228,6 +292,20 @@ void validate_run(const ExactSparseDirectH0CandidateRun& run) {
       throw std::invalid_argument(
           "a sparse direct H0 diagnostic has the wrong source lane");
     }
+    if (!pair_locator) {
+      const auto locator = std::get<
+          ExactSparseDirectH0HigherSourceLocator>(
+              diagnostic.source_locator);
+      if (higher_contract == nullptr ||
+          locator.chunk_sequence != higher_contract->chunk_sequence ||
+          locator.local_kind_index >=
+              higher_diagnostic_locator_seen.size() ||
+          higher_diagnostic_locator_seen[locator.local_kind_index]) {
+        throw std::invalid_argument(
+            "a sparse direct H0 higher diagnostic locator is invalid");
+      }
+      higher_diagnostic_locator_seen[locator.local_kind_index] = true;
+    }
     validate_diagnostic(diagnostic, run.point_count);
     references = checked_add(
         references, diagnostic_reference_count(diagnostic),
@@ -236,6 +314,17 @@ void validate_run(const ExactSparseDirectH0CandidateRun& run) {
   if (references != run.source_point_id_reference_count) {
     throw std::invalid_argument(
         "a sparse direct H0 input run has an invalid reference count");
+  }
+  if (std::find(
+          higher_candidate_locator_seen.begin(),
+          higher_candidate_locator_seen.end(), false) !=
+          higher_candidate_locator_seen.end() ||
+      std::find(
+          higher_diagnostic_locator_seen.begin(),
+          higher_diagnostic_locator_seen.end(), false) !=
+          higher_diagnostic_locator_seen.end()) {
+    throw std::invalid_argument(
+        "a sparse direct H0 higher run omitted a source locator");
   }
 }
 
@@ -330,6 +419,179 @@ void validate_projection_limits(
   return result;
 }
 
+void validate_higher_projection_manifest(
+    const ExactHigherSupportCheckpointManifest& manifest) {
+  const bool order_contract_holds =
+      manifest.requested_maximum_order != 0U &&
+      manifest.requested_maximum_order <=
+          higher_support_maximum_requested_order &&
+      manifest.effective_maximum_order ==
+          std::min(
+              manifest.requested_maximum_order,
+              manifest.point_count) &&
+      manifest.maximum_relevant_closed_rank ==
+          std::min(
+              manifest.effective_maximum_order + 1U,
+              manifest.point_count);
+  if (manifest.schema_version != higher_support_checkpoint_schema_version ||
+      manifest.traversal_version != higher_support_traversal_version ||
+      manifest.point_count < 3U || !order_contract_holds) {
+    throw std::invalid_argument(
+        "a higher H0 projection manifest has an invalid local contract");
+  }
+}
+
+void validate_higher_projection_segment(
+    const ExactHigherSupportTerminalSegment& segment,
+    const ExactSparseDirectH0CandidateRunLimits& limits) {
+  const std::size_t retained_record_count = checked_add(
+      segment.events.size(),
+      segment.relevant_extra_shell_diagnostics.size(),
+      "a higher H0 retained-record count overflows size_t");
+  const std::size_t emitted_record_count = checked_add(
+      retained_record_count,
+      segment.destroyed_prune_certificate_count,
+      "a higher H0 emitted-record count overflows size_t");
+  if (segment.events.size() > limits.maximum_candidate_count ||
+      segment.relevant_extra_shell_diagnostics.size() >
+          limits.maximum_diagnostic_count ||
+      segment.emitted_point_id_reference_count >
+          limits.maximum_point_id_reference_count ||
+      emitted_record_count != segment.emitted_record_count()) {
+    throw std::invalid_argument(
+        "a higher H0 segment exceeds its retained source contract");
+  }
+}
+
+[[nodiscard]] ExactSparseDirectH0HigherSourceContract
+make_higher_source_contract(
+    const ExactHigherSupportCheckpointManifest& manifest,
+    const ExactHigherSupportTerminalSegment& segment) {
+  ExactSparseDirectH0HigherSourceContract result;
+  result.manifest = manifest;
+  result.chunk_sequence = segment.chunk_sequence;
+  result.first_output_record_index = segment.first_output_record_index;
+  result.source_checkpoint_digest = segment.source_checkpoint_digest;
+  result.next_checkpoint_digest = segment.next_checkpoint_digest;
+  result.previous_output_chain_digest =
+      segment.previous_output_chain_digest;
+  result.output_chain_digest = segment.output_chain_digest;
+  result.status = segment.status;
+  result.stop_reason = segment.stop_reason;
+  result.source_event_count = segment.events.size();
+  result.source_diagnostic_count =
+      segment.relevant_extra_shell_diagnostics.size();
+  result.emitted_record_count = segment.emitted_record_count();
+  result.destroyed_prune_certificate_count =
+      segment.destroyed_prune_certificate_count;
+  result.destroyed_rank_receipt_count =
+      segment.destroyed_rank_receipt_count;
+  result.emitted_point_id_reference_count =
+      segment.emitted_point_id_reference_count;
+  return result;
+}
+
+[[nodiscard]] std::size_t validate_higher_event_source(
+    const ExactHigherSupportEvent& event,
+    std::size_t point_count,
+    std::size_t effective_maximum_order) {
+  const std::size_t support_size = event.support_size;
+  const std::size_t expected_closed_rank = checked_add(
+      support_size, event.interior_ids.size(),
+      "a higher H0 source closed rank overflows size_t");
+  const auto [birth, saddle] = expected_roles(
+      expected_closed_rank, effective_maximum_order);
+  if (event.support_size < 3U ||
+      !valid_support_and_interior_ids(
+          event.support_size, event.support_ids,
+          event.interior_ids, point_count) ||
+      event.squared_level.numerator() == 0 ||
+      event.closed_rank != expected_closed_rank ||
+      event.exterior_count != point_count - expected_closed_rank ||
+      (!birth.has_value() && !saddle.has_value())) {
+    throw std::invalid_argument(
+        "a higher H0 source event is locally inconsistent");
+  }
+  return expected_closed_rank;
+}
+
+[[nodiscard]] std::size_t validate_higher_diagnostic_source(
+    const ExactHigherSupportExtraShellDiagnostic& diagnostic,
+    std::size_t point_count) {
+  const std::size_t support_size = diagnostic.support_size;
+  const std::size_t minimum_rank = checked_add(
+      support_size, diagnostic.interior_ids.size(),
+      "a higher H0 source diagnostic rank overflows size_t");
+  const std::size_t observed_rank = checked_add(
+      diagnostic.shell_count, diagnostic.interior_ids.size(),
+      "a higher H0 source observed rank overflows size_t");
+  if (diagnostic.support_size < 3U ||
+      !valid_support_and_interior_ids(
+          diagnostic.support_size, diagnostic.support_ids,
+          diagnostic.interior_ids, point_count) ||
+      diagnostic.squared_level.numerator() == 0 ||
+      diagnostic.shell_count <= support_size ||
+      diagnostic.canonical_extra_shell_witness_id >= point_count ||
+      std::binary_search(
+          diagnostic.support_ids.begin(),
+          diagnostic.support_ids.begin() + support_size,
+          diagnostic.canonical_extra_shell_witness_id) ||
+      std::binary_search(
+          diagnostic.interior_ids.begin(), diagnostic.interior_ids.end(),
+          diagnostic.canonical_extra_shell_witness_id) ||
+      diagnostic.minimum_possible_closed_rank != minimum_rank ||
+      diagnostic.observed_closed_rank != observed_rank ||
+      observed_rank > point_count ||
+      diagnostic.exterior_count != point_count - observed_rank) {
+    throw std::invalid_argument(
+        "a higher H0 source diagnostic is locally inconsistent");
+  }
+  return checked_add(
+      minimum_rank, 1U,
+      "a higher H0 source diagnostic reference count overflows size_t");
+}
+
+[[nodiscard]] bool higher_support_less(
+    std::uint8_t left_size,
+    const std::array<spatial::PointId, 4U>& left_ids,
+    std::uint8_t right_size,
+    const std::array<spatial::PointId, 4U>& right_ids) {
+  const std::size_t common = std::min(
+      static_cast<std::size_t>(left_size),
+      static_cast<std::size_t>(right_size));
+  for (std::size_t index = 0U; index < common; ++index) {
+    if (left_ids[index] != right_ids[index]) {
+      return left_ids[index] < right_ids[index];
+    }
+  }
+  return left_size < right_size;
+}
+
+[[nodiscard]] bool higher_event_less(
+    const ExactHigherSupportEvent& left,
+    const ExactHigherSupportEvent& right) {
+  if (left.squared_level != right.squared_level) {
+    return left.squared_level < right.squared_level;
+  }
+  if (left.closed_rank != right.closed_rank) {
+    return left.closed_rank < right.closed_rank;
+  }
+  if (left.interior_ids != right.interior_ids) {
+    return left.interior_ids < right.interior_ids;
+  }
+  if (higher_support_less(
+          left.support_size, left.support_ids,
+          right.support_size, right.support_ids)) {
+    return true;
+  }
+  if (higher_support_less(
+          right.support_size, right.support_ids,
+          left.support_size, left.support_ids)) {
+    return false;
+  }
+  return center_less(left.center, right.center);
+}
+
 void validate_merge_inputs(
     std::span<const ExactSparseDirectH0CandidateRun> input_runs,
     const ExactSparseDirectH0MergeLimits& limits) {
@@ -341,12 +603,23 @@ void validate_merge_inputs(
   const std::size_t point_count = input_runs.front().point_count;
   const std::size_t effective_maximum_order =
       input_runs.front().effective_maximum_order;
+  const ExactHigherSupportCheckpointManifest* higher_manifest = nullptr;
   for (const ExactSparseDirectH0CandidateRun& run : input_runs) {
     validate_run(run);
     if (run.point_count != point_count ||
         run.effective_maximum_order != effective_maximum_order) {
       throw std::invalid_argument(
           "sparse direct H0 merge inputs have distinct contracts");
+    }
+    if (run.higher_source_contract) {
+      const ExactHigherSupportCheckpointManifest& current =
+          run.higher_source_contract->manifest;
+      if (higher_manifest == nullptr) {
+        higher_manifest = &current;
+      } else if (*higher_manifest != current) {
+        throw std::invalid_argument(
+            "sparse direct H0 higher runs have distinct source manifests");
+      }
     }
   }
 }
@@ -509,6 +782,7 @@ project_exact_sparse_direct_h0_higher_candidate_run(
         "a common higher H0 projection requires a terminal authority");
   }
   const ExactHigherSupportCheckpointManifest& manifest = authority.manifest();
+  validate_higher_projection_manifest(manifest);
   if (!authority.bound_to(
           authority.index(), authority.cloud(),
           manifest.requested_maximum_order) ||
@@ -518,24 +792,17 @@ project_exact_sparse_direct_h0_higher_candidate_run(
   }
   const ExactHigherSupportTerminalSegment& segment =
       authority.segments()[segment_index];
-  if (segment.chunk_sequence != segment_index ||
-      segment.events.size() > limits.maximum_candidate_count ||
-      segment.relevant_extra_shell_diagnostics.size() >
-          limits.maximum_diagnostic_count ||
-      segment.emitted_point_id_reference_count >
-          limits.maximum_point_id_reference_count ||
-      checked_add(
-          segment.events.size(),
-          segment.relevant_extra_shell_diagnostics.size(),
-          "a higher H0 retained-record count overflows size_t") >
-          segment.emitted_record_count()) {
+  validate_higher_projection_segment(segment, limits);
+  if (segment.chunk_sequence != segment_index) {
     throw std::invalid_argument(
-        "a higher H0 segment exceeds its retained source contract");
+        "a higher H0 resident segment has an invalid sequence");
   }
 
   ExactSparseDirectH0CandidateRun result;
   result.point_count = manifest.point_count;
   result.effective_maximum_order = manifest.effective_maximum_order;
+  result.higher_source_contract =
+      make_higher_source_contract(manifest, segment);
   result.candidates.reserve(segment.events.size());
   result.diagnostics.reserve(
       segment.relevant_extra_shell_diagnostics.size());
@@ -559,16 +826,162 @@ project_exact_sparse_direct_h0_higher_candidate_run(
         "a retained higher H0 reference count overflows size_t");
     result.diagnostics.push_back(std::move(diagnostic));
   }
-  if (retained_reference_count >
+  if (retained_reference_count !=
       segment.emitted_point_id_reference_count) {
     throw std::invalid_argument(
-        "a higher H0 segment retained more references than it emitted");
+        "a higher H0 segment retained a different reference count than it emitted");
   }
   result.source_point_id_reference_count = retained_reference_count;
   result.contains_higher_candidates = true;
   result.diagnostics_preserved = true;
   sort_and_validate_candidates(result);
   validate_run(result);
+  return result;
+}
+
+ExactSparseDirectH0CandidateRun
+project_exact_sparse_direct_h0_higher_candidate_run(
+    ExactHigherSupportUnsealedDrain&& source,
+    ExactSparseDirectH0CandidateRunLimits limits) {
+  static_assert(
+      std::is_nothrow_move_assignable_v<exact::ExactCenter3> &&
+          std::is_nothrow_move_assignable_v<exact::ExactLevel> &&
+          std::is_nothrow_move_assignable_v<
+              std::vector<spatial::PointId>>,
+      "the higher H0 projection commit requires nothrow payload moves");
+  static_assert(
+      std::is_nothrow_move_constructible_v<
+          ExactSparseDirectH0CandidateRun>,
+      "the higher H0 projection return requires a nothrow run move");
+
+  if (source.status_ !=
+          ExactHigherSupportUnsealedDrainStatus::segment_ready ||
+      !source.segment_available()) {
+    throw std::invalid_argument(
+        "a consuming higher H0 projection requires one available drained segment");
+  }
+  ExactHigherSupportTerminalSegment& segment = *source.segment_;
+  const ExactHigherSupportCheckpointManifest& manifest = *source.manifest_;
+  validate_projection_limits(limits);
+  validate_higher_projection_manifest(manifest);
+  validate_higher_projection_segment(segment, limits);
+
+  // Everything that can allocate, compare exact integers or reject the local
+  // contract is completed before the first payload move.  Consequently any
+  // exception above or below this point leaves the opaque source retryable.
+  std::size_t retained_reference_count = 0U;
+  for (const ExactHigherSupportEvent& event : segment.events) {
+    retained_reference_count = checked_add(
+        retained_reference_count,
+        validate_higher_event_source(
+            event, manifest.point_count,
+            manifest.effective_maximum_order),
+        "a retained higher H0 reference count overflows size_t");
+  }
+  for (const ExactHigherSupportExtraShellDiagnostic& diagnostic :
+       segment.relevant_extra_shell_diagnostics) {
+    retained_reference_count = checked_add(
+        retained_reference_count,
+        validate_higher_diagnostic_source(
+            diagnostic, manifest.point_count),
+        "a retained higher H0 reference count overflows size_t");
+  }
+  if (retained_reference_count !=
+      segment.emitted_point_id_reference_count) {
+    throw std::invalid_argument(
+        "a higher H0 segment retained a different reference count than it emitted");
+  }
+
+  std::vector<std::size_t> candidate_order(segment.events.size());
+  std::iota(candidate_order.begin(), candidate_order.end(), 0U);
+  std::sort(
+      candidate_order.begin(), candidate_order.end(),
+      [&segment](std::size_t left, std::size_t right) {
+        return higher_event_less(
+            segment.events[left], segment.events[right]);
+      });
+  for (std::size_t index = 1U; index < candidate_order.size(); ++index) {
+    if (!higher_event_less(
+            segment.events[candidate_order[index - 1U]],
+            segment.events[candidate_order[index]])) {
+      throw std::invalid_argument(
+          "a higher H0 segment contains duplicate canonical candidates");
+    }
+  }
+
+  ExactSparseDirectH0CandidateRun result;
+  result.point_count = manifest.point_count;
+  result.effective_maximum_order = manifest.effective_maximum_order;
+  result.source_point_id_reference_count = retained_reference_count;
+  result.higher_source_contract =
+      make_higher_source_contract(manifest, segment);
+  result.candidates.resize(segment.events.size());
+  result.diagnostics.resize(
+      segment.relevant_extra_shell_diagnostics.size());
+  for (std::size_t output_index = 0U;
+       output_index < candidate_order.size(); ++output_index) {
+    const std::size_t source_index = candidate_order[output_index];
+    const ExactHigherSupportEvent& event = segment.events[source_index];
+    ExactSparseDirectH0Candidate& candidate =
+        result.candidates[output_index];
+    candidate.source_locator = ExactSparseDirectH0HigherSourceLocator{
+        segment.chunk_sequence, source_index};
+    candidate.support_size = event.support_size;
+    candidate.support_ids = event.support_ids;
+    candidate.closed_rank = event.closed_rank;
+    candidate.exterior_count = event.exterior_count;
+    const auto [birth, saddle] = expected_roles(
+        event.closed_rank, manifest.effective_maximum_order);
+    candidate.birth_order = birth;
+    candidate.saddle_order = saddle;
+  }
+  for (std::size_t index = 0U;
+       index < segment.relevant_extra_shell_diagnostics.size(); ++index) {
+    const ExactHigherSupportExtraShellDiagnostic& source_diagnostic =
+        segment.relevant_extra_shell_diagnostics[index];
+    ExactSparseDirectH0Diagnostic& diagnostic = result.diagnostics[index];
+    diagnostic.source_locator = ExactSparseDirectH0HigherSourceLocator{
+        segment.chunk_sequence, index};
+    diagnostic.support_size = source_diagnostic.support_size;
+    diagnostic.support_ids = source_diagnostic.support_ids;
+    diagnostic.shell_count = source_diagnostic.shell_count;
+    diagnostic.canonical_extra_shell_witness_id =
+        source_diagnostic.canonical_extra_shell_witness_id;
+    diagnostic.minimum_possible_closed_rank =
+        source_diagnostic.minimum_possible_closed_rank;
+    diagnostic.observed_closed_rank =
+        source_diagnostic.observed_closed_rank;
+    diagnostic.exterior_count = source_diagnostic.exterior_count;
+  }
+
+  // Transaction commit: only statically checked nothrow moves and scalar
+  // stores remain.  The token is revoked only after every payload is owned by
+  // the destination run.
+  for (std::size_t output_index = 0U;
+       output_index < candidate_order.size(); ++output_index) {
+    ExactHigherSupportEvent& event =
+        segment.events[candidate_order[output_index]];
+    ExactSparseDirectH0Candidate& candidate =
+        result.candidates[output_index];
+    candidate.center = std::move(event.center);
+    candidate.squared_level = std::move(event.squared_level);
+    candidate.interior_ids = std::move(event.interior_ids);
+  }
+  for (std::size_t index = 0U;
+       index < segment.relevant_extra_shell_diagnostics.size(); ++index) {
+    ExactHigherSupportExtraShellDiagnostic& source_diagnostic =
+        segment.relevant_extra_shell_diagnostics[index];
+    ExactSparseDirectH0Diagnostic& diagnostic = result.diagnostics[index];
+    diagnostic.center = std::move(source_diagnostic.center);
+    diagnostic.squared_level =
+        std::move(source_diagnostic.squared_level);
+    diagnostic.interior_ids =
+        std::move(source_diagnostic.interior_ids);
+  }
+  result.contains_higher_candidates = true;
+  result.candidates_strictly_sorted_by_terminal_facade_key = true;
+  result.diagnostics_preserved = true;
+  source.consume();
   return result;
 }
 

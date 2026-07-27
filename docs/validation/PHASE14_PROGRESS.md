@@ -4,7 +4,7 @@
 
 Phase `14`, backend `reference_cpu`, profil `hgp_reduced`, mode scientifique `certified`, mode de déploiement `architecture_only`, `public_status=not_claimed`.
 
-La porte d'architecture est satisfaite par la fermeture administrative de Phase 10 comme implémentation candidate conditionnelle. Sa fidélité globale des carriers reste une obligation de preuve; la porte de qualification finale reste en outre bloquée par la Phase 11, M.1, la voie CUDA complète et le protocole p95.
+La porte d'architecture est satisfaite par la fermeture administrative de Phase 10 comme implémentation candidate conditionnelle. Phase 11 est elle aussi administrativement close comme candidate verticale conditionnelle, mais garde `all_naturality_squares_replayed=false` et `vertical_maps_complete=false`. La complétude verticale directe et la fidélité globale des carriers restent des obligations de preuve; la porte de qualification finale demeure aussi bloquée par M.1, la voie CUDA produit complète et le protocole p95.
 
 ## Incrément 14A livré — planification résidente et streaming
 
@@ -492,11 +492,23 @@ Le préfixe doit être non vide, contigu et exactement terminal. Seule sa derni�
 
 Le nouveau CTest GCC Release passe 1/1 en 0,03 seconde; la régression store--14V--14W--14X--14Z passe 5/5 en 0,13 seconde. Elle couvre l'identité des runs, les locators et diagnostics, la libération du verrou après exception, l'ancre finale, le préfixe non terminal et les quatre caps cumulatifs juste insuffisants. Aucun benchmark long, CUDA ou GCP n'est lancé. Le travail de paires, le producteur higher-support encore résident, la passe durable à fan-in fixe, les incidences silencieuses, M.1 et les objectifs complets 50 k/10 M+ restent ouverts.
 
-<!-- TODO 14Z perfectionné : drainer higher-support vers le format commun, puis définir la passe transactionnelle à fan-in fixe avec conservation des diagnostics avant tout spool multi-passe. -->
+<!-- TODO 14Z perfectionné : le drain process-local est acquis par 14AA; publier et recertifier ses chunks, fermer l'autorité source commune, puis définir la passe transactionnelle à fan-in fixe avec conservation des diagnostics avant tout spool multi-passe. -->
+
+## Incrément 14AA validé hôte — drain borné des runs H0 higher-support
+
+Le gate 14AA est fermé pour `reference_cpu / hgp_reduced / bounded_unsealed_higher_support_h0_run`, avec `deployment_status=architecture_only` et `public_status=not_claimed`. La session supérieure exécute désormais au plus un chunk par appel de drain et distingue `segment_ready`, `terminal` et `maximum_chunk_count_reached`; les deux derniers résultats sont sans mutation. Un segment prêt est transféré dans un jeton move-only opaque qui embarque le manifeste de la même session. Une lease interdit tout chunk suivant jusqu'au succès de sa projection; jeter le jeton ou rencontrer une exception échoue donc fermé au lieu de sauter le préfixe. Le premier drain révoque irréversiblement les voies résidentes `run_to_terminal` et `seal`.
+
+Chaque segment conserve séquence, premier offset de record, digests source--successeur, chaîne de sortie, événements, diagnostics et comptes exacts des payloads de prune détruits. La projection consommatrice 14X valide, alloue et trie une permutation d'indices avant tout déplacement; le commit ne contient ensuite que des mouvements `noexcept` vérifiés statiquement et consomme le jeton en dernier. Le run commun conserve en $O(1)$ le manifeste higher, la position dense, les digests, statuts et comptes détruits. Son champ `local_kind_index` encode `local_event_index` pour un candidat et `local_diagnostic_index` pour un diagnostic. Une fusion refuse des runs higher de manifestes distincts sans certifier la continuité de leur chaîne. Ce contrat reste process-local : aucun run drainé ne prétend terminalité durable, fraîcheur externe, réduction, complétude H0 ou statut public, et la liaison d'autorité commune pair--higher n'est pas encore fermée.
+
+Les deux CTests ciblés passent 2/2 en 0,94 seconde sous GCC Release et 0,34 seconde sous Clang Release; avec le lecteur 14Z aval, la régression passe 3/3 en 1,01 et 0,41 seconde respectivement. Le tétraèdre force plusieurs chunks d'une unité, dont des segments vides, compare chaque projection consommée à l'autorité résidente et couvre rejet précommit, retry sans nouveau chunk, lease anti-saut, abandon fail-closed et cap stable. La coque de cinq sites déplace un vrai diagnostic higher. La fixture de neuf points émet réellement des certificats de prune et des reçus de rang; les comptes cumulés et les runs restent identiques malgré la destruction de leurs payloads. Deux nuages distincts de même taille et même ordre prouvent le refus de mélange des manifestes, et un run v1 muté est rejeté par le schéma v2. Aucun benchmark, CUDA ou GCP n'est lancé.
+
+Sur le nouveau chemin de drain, 14AA évite la rétention cumulative des segments supports trois--quatre dans le producteur; la voie résidente `run_to_terminal` reste disponible séparément, et les runs projetés peuvent encore s'accumuler chez l'appelant et dans le merge. Il ne réduit ni leur univers implicite ni leur travail terminal. La publication/reprise durable des chunks supérieurs, l'autorité source commune pair--higher, la passe réellement bornée à fan-in fixe avec sidecar diagnostic, le spool multi-passe, les incidences silencieuses, M.1 et les objectifs complets 50 k/10 M+ restent ouverts.
+
+<!-- TODO 14AA perfectionné : recertifier et publier les chunks higher-support, lier les deux voies à une autorité source commune, puis fermer la passe transactionnelle pair+higher à fan-in fixe avant tout spool multi-passe. -->
 
 ## Priorités de développement
 
-1. connecter le producteur sparse complet : le lecteur séquentiel pair est acquis; rendre maintenant les supports supérieurs drainables vers le même contrat, puis externaliser une passe atomique à fan-in fixe qui conserve les diagnostics;
+1. connecter le producteur sparse complet : le lecteur séquentiel pair et le drain process-local des supports supérieurs sont acquis; recertifier et publier maintenant les chunks supérieurs, lier pair et higher à une autorité source commune, puis externaliser une passe atomique à fan-in fixe qui conserve les diagnostics;
 
 2. recertifier toutes les incidences silencieuses nécessaires et M.1 avant de construire la hiérarchie publique. Aucun micro-réglage du halo ni nouveau gate 50 k ne précède ces travaux.
 
