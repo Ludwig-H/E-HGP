@@ -1,0 +1,91 @@
+{
+  "schema": "morsehgp3d.phase14.surrogate-g4-session.v1",
+  "phase": 14,
+  "backend": "cuda_heuristic_knn",
+  "profile": "hgp_reduced_surrogate",
+  "mode": "morton_window_knn",
+  "artifact_kind": "curated_session_summary",
+  "approximation_status": "heuristic",
+  "morse_faithfulness": "not_certified",
+  "public_status": "not_claimed",
+  "gcp": {
+    "project": "devpod-gpu-exploration",
+    "zone": "europe-west4-ai1a",
+    "instance": "ehgp-blackwell-spot-ai1a",
+    "last_start_timestamp": "2026-07-27T07:02:42.816-07:00",
+    "machine_type": "g4-standard-48",
+    "provisioning_model": "SPOT",
+    "instance_termination_action": "STOP",
+    "max_run_duration_seconds": 3600,
+    "guest_shutdown_minutes": 45,
+    "final_status": "TERMINATED",
+    "independent_final_describe_certified": true,
+    "other_active_project_labeled_instances": 0,
+    "session_os_login_key_revoked": true,
+    "local_session_key_material_removed": true
+  },
+  "hardware": {
+    "logical_cpu_count": 48,
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "gpu_memory_mib": 97887,
+    "compute_capability": "12.0",
+    "driver_version": "580.159.03",
+    "cuda_compiler_version": "12.9.86"
+  },
+  "validation": {
+    "cuda_build_sha": "99d3779c8e606e5ec0d89acd744ce8778b70e9e2",
+    "tiny_memcheck_kernel_sha": "42ca9c6f8ca91fb730aa9913728ba5676822d6b8",
+    "tiny_memcheck_point_count": 257,
+    "tiny_memcheck_maximum_order": 10,
+    "tiny_memcheck_morton_window_radius": 32,
+    "compute_sanitizer_error_count": 0
+  },
+  "runs": {
+    "fifty_thousand": {
+      "artifact": "docs/validation/phase14_surrogate_50k_k10_g4_99d3779.json",
+      "artifact_sha256": "39b640c192c4b0754eda0a4efb1fd1a325528f04d76a3c19332466f2cc2cbfff",
+      "git_sha": "99d3779c8e606e5ec0d89acd744ce8778b70e9e2",
+      "point_count": 50000,
+      "maximum_order": 10,
+      "fast_morton_window_radius": 16384,
+      "reference_morton_window_radius": 49999,
+      "reference_binary64_neighbor_enumeration_exhaustive": true,
+      "neighbor_prefix_recall": 0.985808,
+      "same_rank_neighbor_id_matches": 483708,
+      "same_rank_neighbor_id_total": 500000,
+      "resident_replay_nanoseconds": 57490338,
+      "reconstructed_input_to_result_nanoseconds": 81326677,
+      "reconstructed_input_to_result_under_100ms": true,
+      "formal_warm_e2e_protocol_executed": false,
+      "hierarchy_digest_matches": 0,
+      "hierarchy_digest_total": 10,
+      "root_level_matches": 2,
+      "root_level_total": 10
+    },
+    "ten_million_plus": {
+      "artifact": "docs/validation/phase14_surrogate_10000001_k10_g4_42ca9c6.json",
+      "artifact_sha256": "803b02b5754ad3f20fd510657b0501b1830aa796d9289286a4fafa6c46ab760f",
+      "git_sha": "42ca9c6f8ca91fb730aa9913728ba5676822d6b8",
+      "point_count": 10000001,
+      "maximum_order": 10,
+      "morton_window_radius": 256,
+      "cold_total_nanoseconds": 28837100723,
+      "gpu_kernel_nanoseconds": 115700988,
+      "gpu_device_byte_capacity": 1920000192,
+      "materialized_surrogate_merge_count": 100000000,
+      "all_ten_surrogate_orders_connected": true,
+      "reference_executed": false
+    }
+  },
+  "claims": {
+    "surrogate_capacity_above_ten_million_observed": true,
+    "exact_morse_hierarchy_materialized": false,
+    "formal_warm_p95_claimed": false,
+    "certified_100ms_slo_claimed": false,
+    "ten_million_exact_product_path_claimed": false,
+    "higher_order_delaunay_mosaic_materialized": false,
+    "global_pair_catalog_materialized": false,
+    "gamma_graph_materialized": false,
+    "cofaces_materialized": false
+  }
+}
