@@ -51,6 +51,7 @@ struct Options {
   std::size_t morton_window_radius{256U};
   std::optional<std::size_t> reference_morton_window_radius;
   std::size_t validation_point_count{};
+  bool resident_replay{false};
   std::size_t requested_cpu_workers{};
   std::uint64_t seed{UINT64_C(0x14a750c0ffee)};
 };
@@ -98,6 +99,14 @@ struct ExhaustiveValidation {
   std::size_t distance_evaluation_count{};
   NeighborComparison comparison;
   std::uint64_t cpu_nanoseconds{};
+};
+
+struct ResidentReplayResult {
+  morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult knn;
+  HierarchyRun hierarchy;
+  bool transcript_match{};
+  std::uint64_t launcher_wall_nanoseconds{};
+  std::uint64_t replay_total_nanoseconds{};
 };
 
 [[nodiscard]] std::size_t parse_size(
@@ -159,6 +168,8 @@ struct ExhaustiveValidation {
     } else if (argument == "--validation-points" && index + 1 < argc) {
       options.validation_point_count =
           parse_nonnegative_size(argv[++index], "invalid --validation-points");
+    } else if (argument == "--resident-replay") {
+      options.resident_replay = true;
     } else if (argument == "--cpu-workers" && index + 1 < argc) {
       options.requested_cpu_workers =
           parse_size(argv[++index], "invalid --cpu-workers");
@@ -169,7 +180,7 @@ struct ExhaustiveValidation {
           "usage: gpu_morton_window_h0_surrogate [--point-count N] "
           "[--max-order K] [--morton-window W] [--cpu-workers N] "
           "[--reference-morton-window W2] [--validation-points N] "
-          "[--seed N]");
+          "[--resident-replay] [--seed N]");
     }
   }
   if (options.maximum_order > kMaximumSupportedOrder ||
@@ -215,6 +226,15 @@ struct ExhaustiveValidation {
     throw std::length_error("the heuristic edge extent overflows size_t");
   }
   return value * 2U - 1U;
+}
+
+void checked_accumulate_nanoseconds(
+    std::uint64_t& total,
+    std::uint64_t value) {
+  if (value > std::numeric_limits<std::uint64_t>::max() - total) {
+    throw std::overflow_error("the diagnostic duration sum overflows uint64");
+  }
+  total += value;
 }
 
 template <typename Duration>
@@ -855,6 +875,57 @@ int main(int argc, char** argv) {
         knn);
     const auto fast_path_end = Clock::now();
 
+    std::optional<ResidentReplayResult> resident_replay;
+    if (options.resident_replay) {
+      const auto replay_begin = Clock::now();
+      const auto replay_launcher_begin = Clock::now();
+      morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult replay_knn =
+          morsehgp3d::gpu::detail::run_phase14_morton_window_knn_on_gpu(
+              coordinates_by_morton_position,
+              point_ids_by_morton_position,
+              options.maximum_order,
+              effective_window);
+      const auto replay_launcher_end = Clock::now();
+      if (replay_knn.neighbor_point_ids.size() !=
+              knn.neighbor_point_ids.size() ||
+          replay_knn.squared_distances.size() !=
+              knn.squared_distances.size()) {
+        throw std::runtime_error(
+            "the resident replay returned a different transcript extent");
+      }
+      std::atomic<bool> transcript_mismatch{false};
+      parallel_shards(
+          neighbor_count,
+          used_cpu_workers,
+          [&](std::size_t, std::size_t begin, std::size_t end) {
+            for (std::size_t record = begin; record < end; ++record) {
+              if (replay_knn.neighbor_point_ids[record] !=
+                      knn.neighbor_point_ids[record] ||
+                  std::bit_cast<std::uint64_t>(
+                      replay_knn.squared_distances[record]) !=
+                      std::bit_cast<std::uint64_t>(
+                          knn.squared_distances[record])) {
+                transcript_mismatch.store(true, std::memory_order_relaxed);
+              }
+            }
+          });
+      HierarchyRun replay_hierarchy = build_surrogate_hierarchies(
+          options.point_count,
+          options.maximum_order,
+          used_cpu_workers,
+          point_ids_by_morton_position,
+          morton_position_by_point_id,
+          chain_squared_distances,
+          replay_knn);
+      const auto replay_end = Clock::now();
+      resident_replay.emplace(ResidentReplayResult{
+          std::move(replay_knn),
+          std::move(replay_hierarchy),
+          !transcript_mismatch.load(std::memory_order_relaxed),
+          nanoseconds(replay_launcher_end - replay_launcher_begin),
+          nanoseconds(replay_end - replay_begin)});
+    }
+
     std::optional<morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult>
         reference_knn;
     std::optional<HierarchyRun> reference_hierarchy;
@@ -976,6 +1047,28 @@ int main(int argc, char** argv) {
     const std::uint64_t fast_path_nanoseconds =
         nanoseconds(fast_path_end - total_begin);
     const std::uint64_t total_nanoseconds = nanoseconds(total_end - total_begin);
+    const std::uint64_t canonicalization_nanoseconds =
+        nanoseconds(canonicalization_end - canonicalization_begin);
+    const std::uint64_t morton_build_nanoseconds =
+        nanoseconds(morton_build_end - morton_build_begin);
+    const std::uint64_t coordinate_export_nanoseconds =
+        nanoseconds(coordinate_export_end - coordinate_export_begin);
+    const std::uint64_t morton_pack_nanoseconds =
+        nanoseconds(morton_pack_end - morton_pack_begin);
+    const std::uint64_t chain_distance_nanoseconds =
+        nanoseconds(chain_distance_end - chain_distance_begin);
+    std::optional<std::uint64_t> reconstructed_input_to_result_nanoseconds;
+    if (resident_replay.has_value()) {
+      std::uint64_t estimate = 0U;
+      checked_accumulate_nanoseconds(estimate, canonicalization_nanoseconds);
+      checked_accumulate_nanoseconds(estimate, morton_build_nanoseconds);
+      checked_accumulate_nanoseconds(estimate, coordinate_export_nanoseconds);
+      checked_accumulate_nanoseconds(estimate, morton_pack_nanoseconds);
+      checked_accumulate_nanoseconds(estimate, chain_distance_nanoseconds);
+      checked_accumulate_nanoseconds(
+          estimate, resident_replay->replay_total_nanoseconds);
+      reconstructed_input_to_result_nanoseconds = estimate;
+    }
     std::cout << std::setprecision(17)
               << "{\"schema_version\":\"morsehgp3d.phase14.morton_window_h0_surrogate.v1\""
               << ",\"git_sha\":" << std::quoted(MORSEHGP3D_GIT_SHA)
@@ -1021,20 +1114,21 @@ int main(int argc, char** argv) {
               << ",\"cuda_multiprocessor_count\":"
               << knn.multiprocessor_count
               << ",\"gpu_kernel_launch_count\":"
-              << (reference_knn.has_value() ? 2 : 1)
+              << (1 + (resident_replay.has_value() ? 1 : 0) +
+                  (reference_knn.has_value() ? 1 : 0))
               << ",\"gpu_kernel_block_count\":" << knn.kernel_block_count
               << ",\"gpu_kernel_thread_count\":" << knn.kernel_thread_count
               << ",\"gpu_device_byte_capacity\":" << knn.device_byte_capacity
               << ",\"timings_nanoseconds\":{"
               << "\"generation\":" << nanoseconds(generation_end - generation_begin)
               << ",\"canonicalization\":"
-              << nanoseconds(canonicalization_end - canonicalization_begin)
+              << canonicalization_nanoseconds
               << ",\"cpu_morton_lbvh_build\":"
-              << nanoseconds(morton_build_end - morton_build_begin)
+              << morton_build_nanoseconds
               << ",\"coordinate_export\":"
-              << nanoseconds(coordinate_export_end - coordinate_export_begin)
+              << coordinate_export_nanoseconds
               << ",\"morton_pack\":"
-              << nanoseconds(morton_pack_end - morton_pack_begin)
+              << morton_pack_nanoseconds
               << ",\"gpu_allocation\":" << knn.allocation_nanoseconds
               << ",\"gpu_h2d\":" << knn.host_to_device_nanoseconds
               << ",\"gpu_kernel\":" << knn.kernel_nanoseconds
@@ -1044,7 +1138,7 @@ int main(int argc, char** argv) {
               << ",\"gpu_output_structural_validation\":"
               << nanoseconds(validation_end - validation_begin)
               << ",\"cpu_morton_chain_distances\":"
-              << nanoseconds(chain_distance_end - chain_distance_begin)
+              << chain_distance_nanoseconds
               << ",\"cpu_parallel_edge_build\":"
               << fast_hierarchy.edge_build_nanoseconds
               << ",\"cpu_parallel_hierarchy_reduction\":"
@@ -1080,6 +1174,72 @@ int main(int argc, char** argv) {
                 << '}';
     }
     std::cout << ']';
+    if (resident_replay.has_value()) {
+      std::cout
+          << ",\"resident_replay\":{"
+          << "\"executed\":true"
+          << ",\"resident_input_prepared\":true"
+          << ",\"resident_input_scope\":\"host_coordinates_and_morton_order\""
+          << ",\"device_state_reused\":false"
+          << ",\"formal_warm_e2e_protocol\":false"
+          << ",\"transcript_comparison\":\"point_ids_and_distance_bits\""
+          << ",\"transcript_match\":"
+          << (resident_replay->transcript_match ? "true" : "false")
+          << ",\"gpu_allocation_ns\":"
+          << resident_replay->knn.allocation_nanoseconds
+          << ",\"gpu_h2d_ns\":"
+          << resident_replay->knn.host_to_device_nanoseconds
+          << ",\"gpu_kernel_ns\":"
+          << resident_replay->knn.kernel_nanoseconds
+          << ",\"gpu_d2h_ns\":"
+          << resident_replay->knn.device_to_host_nanoseconds
+          << ",\"gpu_launcher_wall_ns\":"
+          << resident_replay->launcher_wall_nanoseconds
+          << ",\"cpu_parallel_edge_build_ns\":"
+          << resident_replay->hierarchy.edge_build_nanoseconds
+          << ",\"cpu_parallel_hierarchy_reduction_ns\":"
+          << resident_replay->hierarchy.hierarchy_reduction_nanoseconds
+          << ",\"replay_total_ns\":"
+          << resident_replay->replay_total_nanoseconds
+          << ",\"reconstructed_input_to_result_ns\":"
+          << *reconstructed_input_to_result_nanoseconds
+          << ",\"reconstructed_input_to_result_status\":\"diagnostic_estimate_not_protocol\""
+          << ",\"reconstructed_input_to_result_under_100ms\":"
+          << (*reconstructed_input_to_result_nanoseconds <
+                      UINT64_C(100000000)
+                  ? "true"
+                  : "false")
+          << ",\"per_order\":[";
+      for (std::size_t order = 0U; order < options.maximum_order; ++order) {
+        if (order != 0U) {
+          std::cout << ',';
+        }
+        const OrderSummary& initial = fast_hierarchy.summaries[order];
+        const OrderSummary& replay =
+            resident_replay->hierarchy.summaries[order];
+        std::cout
+            << "{\"order\":" << order + 1U
+            << ",\"digest_match\":"
+            << (initial.digest == replay.digest ? "true" : "false")
+            << ",\"root_squared_level_match\":"
+            << (std::bit_cast<std::uint64_t>(initial.root_squared_level) ==
+                        std::bit_cast<std::uint64_t>(
+                            replay.root_squared_level)
+                    ? "true"
+                    : "false")
+            << ",\"replay_digest\":"
+            << std::quoted(hex64(replay.digest))
+            << ",\"replay_root_squared_level\":"
+            << replay.root_squared_level << '}';
+      }
+      std::cout << "]}";
+    } else {
+      std::cout
+          << ",\"resident_replay\":{\"executed\":false"
+          << ",\"formal_warm_e2e_protocol\":false"
+          << ",\"reconstructed_input_to_result_ns\":null"
+          << ",\"reconstructed_input_to_result_status\":\"diagnostic_estimate_not_protocol\"}";
+    }
     if (reference_knn.has_value()) {
       const NeighborComparison& comparison = *reference_comparison;
       const std::size_t final_prefix = options.maximum_order - 1U;
