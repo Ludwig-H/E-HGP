@@ -30,6 +30,11 @@ option(
   OFF
 )
 option(
+  MORSEHGP3D_ENABLE_GEOGRAM_LOW_ORDER_DIAGNOSTIC
+  "Build the optional Geogram plus CUDA k=1/k=2 diagnostic"
+  OFF
+)
+option(
   MORSEHGP3D_ENABLE_SANITIZERS
   "Instrument project-owned CPU targets with AddressSanitizer and UBSan"
   OFF
@@ -37,6 +42,15 @@ option(
 
 if(MORSEHGP3D_CUDA_AUDIT AND NOT MORSEHGP3D_ENABLE_CUDA)
   message(FATAL_ERROR "MORSEHGP3D_CUDA_AUDIT requires MORSEHGP3D_ENABLE_CUDA=ON")
+endif()
+if(
+  MORSEHGP3D_ENABLE_GEOGRAM_LOW_ORDER_DIAGNOSTIC
+  AND (NOT MORSEHGP3D_ENABLE_CUDA OR NOT MORSEHGP3D_BUILD_TOOLS)
+)
+  message(
+    FATAL_ERROR
+    "The Geogram low-order diagnostic requires CUDA and diagnostic tools"
+  )
 endif()
 if(MORSEHGP3D_ENABLE_SANITIZERS AND MORSEHGP3D_ENABLE_CUDA)
   message(FATAL_ERROR "The Phase 3.1 sanitizer profile is CPU-only")
@@ -2879,6 +2893,79 @@ if(MORSEHGP3D_ENABLE_CUDA)
           $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
           $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
           $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+      )
+    endif()
+
+    if(MORSEHGP3D_ENABLE_GEOGRAM_LOW_ORDER_DIAGNOSTIC)
+      if(DEFINED ENV{GEOGRAM_INSTALL_PREFIX})
+        list(PREPEND CMAKE_PREFIX_PATH "$ENV{GEOGRAM_INSTALL_PREFIX}")
+      endif()
+      find_package(Geogram QUIET)
+      set(_morsehgp3d_geogram_target "")
+      foreach(
+        _morsehgp3d_geogram_candidate
+        Geogram::geogram
+        geogram::geogram
+        geogram
+      )
+        if(TARGET "${_morsehgp3d_geogram_candidate}")
+          set(
+            _morsehgp3d_geogram_target
+            "${_morsehgp3d_geogram_candidate}"
+          )
+          break()
+        endif()
+      endforeach()
+      if(_morsehgp3d_geogram_target STREQUAL "")
+        find_path(
+          MORSEHGP3D_GEOGRAM_INCLUDE_DIR
+          NAMES geogram/basic/common.h
+          HINTS "$ENV{GEOGRAM_INSTALL_PREFIX}/include"
+          PATH_SUFFIXES geogram1
+        )
+        find_library(
+          MORSEHGP3D_GEOGRAM_LIBRARY
+          NAMES geogram
+          HINTS "$ENV{GEOGRAM_INSTALL_PREFIX}/lib"
+        )
+        if(
+          NOT MORSEHGP3D_GEOGRAM_INCLUDE_DIR
+          OR NOT MORSEHGP3D_GEOGRAM_LIBRARY
+        )
+          message(
+            FATAL_ERROR
+            "The low-order diagnostic requires a Geogram installation"
+          )
+        endif()
+        add_library(morsehgp3d_geogram_diagnostic_dependency UNKNOWN IMPORTED)
+        set_target_properties(
+          morsehgp3d_geogram_diagnostic_dependency
+          PROPERTIES
+            IMPORTED_LOCATION "${MORSEHGP3D_GEOGRAM_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${MORSEHGP3D_GEOGRAM_INCLUDE_DIR}"
+        )
+        set(
+          _morsehgp3d_geogram_target
+          morsehgp3d_geogram_diagnostic_dependency
+        )
+      endif()
+
+      add_executable(
+        morsehgp3d_gpu_geogram_low_order_diagnostic
+        src/tools/gpu_geogram_low_order_diagnostic.cu
+      )
+      target_link_libraries(
+        morsehgp3d_gpu_geogram_low_order_diagnostic
+        PRIVATE
+          "${_morsehgp3d_geogram_target}"
+          Threads::Threads
+      )
+      target_compile_definitions(
+        morsehgp3d_gpu_geogram_low_order_diagnostic
+        PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+      )
+      morsehgp3d_configure_cuda_target(
+        morsehgp3d_gpu_geogram_low_order_diagnostic
       )
     endif()
   endif()
