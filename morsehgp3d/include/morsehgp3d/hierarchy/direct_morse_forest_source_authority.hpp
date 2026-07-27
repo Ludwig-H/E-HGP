@@ -169,6 +169,9 @@ class ExactDirectMorseForestSourceBatchConsumerView {
           !std::is_same_v<
               std::remove_cvref_t<Consumer>,
               ExactDirectMorseForestSourceBatchConsumerView> &&
+              !std::is_pointer_v<std::remove_cvref_t<Consumer>> &&
+              !std::is_function_v<std::remove_reference_t<Consumer>> &&
+              !std::is_const_v<std::remove_reference_t<Consumer>> &&
               std::is_invocable_r_v<
                   bool,
                   Consumer&,
@@ -178,8 +181,10 @@ class ExactDirectMorseForestSourceBatchConsumerView {
       : state_(static_cast<void*>(std::addressof(consumer))),
         function_([](
                       void* state,
-                      const ExactDirectMorseForestSourceBatchWindow& window) {
-          return std::invoke(*static_cast<Consumer*>(state), window);
+                      const ExactDirectMorseForestSourceBatchWindow& window)
+                      -> bool {
+          return static_cast<bool>(
+              std::invoke(*static_cast<Consumer*>(state), window));
         }) {}
 
   [[nodiscard]] bool operator()(
@@ -220,6 +225,9 @@ class ExactDirectMorseForestSourceBatchProviderView {
           !std::is_same_v<
               std::remove_cvref_t<Provider>,
               ExactDirectMorseForestSourceBatchProviderView> &&
+              !std::is_pointer_v<std::remove_cvref_t<Provider>> &&
+              !std::is_function_v<std::remove_reference_t<Provider>> &&
+              !std::is_const_v<std::remove_reference_t<Provider>> &&
               std::is_invocable_r_v<
                   ExactDirectMorseForestSourceBatchVisitDecision,
                   Provider&,
@@ -231,9 +239,11 @@ class ExactDirectMorseForestSourceBatchProviderView {
         function_([](
                       void* state,
                       std::size_t batch_index,
-                      ExactDirectMorseForestSourceBatchConsumerView consumer) {
-          return std::invoke(
-              *static_cast<Provider*>(state), batch_index, consumer);
+                      ExactDirectMorseForestSourceBatchConsumerView consumer)
+                      -> ExactDirectMorseForestSourceBatchVisitDecision {
+          return static_cast<ExactDirectMorseForestSourceBatchVisitDecision>(
+              std::invoke(
+                  *static_cast<Provider*>(state), batch_index, consumer));
         }) {}
 
   [[nodiscard]] ExactDirectMorseForestSourceBatchVisitDecision operator()(

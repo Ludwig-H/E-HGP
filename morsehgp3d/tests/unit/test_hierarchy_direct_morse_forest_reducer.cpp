@@ -3,6 +3,7 @@
 
 #include "morsehgp3d/gpu/direct_sparse_facet_top_k_integrated_adapter.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_forest_reducer.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_forest_source_wire.hpp"
 
 #include <algorithm>
 #include <array>
@@ -10,6 +11,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -391,6 +393,134 @@ struct InstrumentedSourceProvider {
   }
 };
 
+struct InMemorySourceWireProvider {
+  const std::vector<std::vector<std::uint8_t>>* wires{};
+  std::size_t live_wire_count{};
+  std::size_t maximum_live_wire_count{};
+  std::size_t acquire_count{};
+  std::size_t release_count{};
+  std::size_t overlap_rejection_count{};
+  std::size_t mutation_batch_index{
+      std::numeric_limits<std::size_t>::max()};
+  std::size_t mutation_delivery_count{};
+
+  [[nodiscard]] ExactDirectMorseForestSourceBatchWireVisitDecision
+  operator()(
+      std::size_t batch_index,
+      ExactDirectMorseForestSourceBatchWireConsumerView consumer) {
+    if (wires == nullptr || batch_index >= wires->size()) {
+      return ExactDirectMorseForestSourceBatchWireVisitDecision::
+          no_batch_out_of_range;
+    }
+    if (live_wire_count != 0U) {
+      ++overlap_rejection_count;
+      return ExactDirectMorseForestSourceBatchWireVisitDecision::
+          no_wire_unavailable;
+    }
+    ++live_wire_count;
+    ++acquire_count;
+    maximum_live_wire_count =
+        std::max(maximum_live_wire_count, live_wire_count);
+    struct Release {
+      InMemorySourceWireProvider* provider{};
+      ~Release() {
+        --provider->live_wire_count;
+        ++provider->release_count;
+      }
+    } release{this};
+
+    bool accepted = false;
+    if (batch_index == mutation_batch_index &&
+        mutation_delivery_count == 0U) {
+      auto mutated = (*wires)[batch_index];
+      if (!mutated.empty()) {
+        mutated.back() ^= std::uint8_t{1U};
+      }
+      ++mutation_delivery_count;
+      accepted = consumer(mutated);
+    } else {
+      accepted = consumer((*wires)[batch_index]);
+    }
+    return accepted
+               ? ExactDirectMorseForestSourceBatchWireVisitDecision::
+                     complete_synchronous_visit
+               : ExactDirectMorseForestSourceBatchWireVisitDecision::
+                     no_consumer_rejected;
+  }
+};
+
+struct InstrumentedCanonicalWireSourceProvider {
+  ExactDirectMorseForestCanonicalWireSourceProvider* provider{};
+  const InMemorySourceWireProvider* wire_provider{};
+  std::size_t live_window_count{};
+  std::size_t maximum_live_window_count{};
+  std::size_t acquire_count{};
+  std::size_t release_count{};
+  std::size_t overlap_rejection_count{};
+  std::size_t mutation_batch_index{
+      std::numeric_limits<std::size_t>::max()};
+  std::size_t mutation_delivery_count{};
+  std::optional<ExactDirectMorseForestSourceWireDecision>
+      first_mutation_wire_decision;
+
+  [[nodiscard]] ExactDirectMorseForestSourceBatchVisitDecision operator()(
+      std::size_t batch_index,
+      ExactDirectMorseForestSourceBatchConsumerView consumer) {
+    if (provider == nullptr || wire_provider == nullptr ||
+        live_window_count != 0U) {
+      ++overlap_rejection_count;
+      return ExactDirectMorseForestSourceBatchVisitDecision::
+          no_window_inconsistent;
+    }
+    ++live_window_count;
+    ++acquire_count;
+    maximum_live_window_count =
+        std::max(maximum_live_window_count, live_window_count);
+    const std::size_t mutation_count_before =
+        wire_provider->mutation_delivery_count;
+    const auto decision = provider->visit_batch(batch_index, consumer);
+    if (mutation_count_before == 0U &&
+        wire_provider->mutation_delivery_count == 1U) {
+      first_mutation_wire_decision = provider->last_wire_decision();
+    }
+    --live_window_count;
+    ++release_count;
+    mutation_delivery_count = wire_provider->mutation_delivery_count;
+    return decision;
+  }
+};
+
+struct PaddingMutatedSourceLookups {
+  std::vector<ExactDirectMorseEventProjection> projections;
+  std::vector<ExactDirectSupportEvent> events;
+};
+
+const ExactDirectMorseEventProjection* find_padding_mutated_projection(
+    const void* state, std::size_t logical_index) noexcept {
+  const auto& lookups =
+      *static_cast<const PaddingMutatedSourceLookups*>(state);
+  const auto found = std::find_if(
+      lookups.projections.begin(),
+      lookups.projections.end(),
+      [logical_index](const auto& projection) {
+        return projection.event_projection_index == logical_index;
+      });
+  return found == lookups.projections.end() ? nullptr : &*found;
+}
+
+const ExactDirectSupportEvent* find_padding_mutated_event(
+    const void* state, std::size_t source_index) noexcept {
+  const auto& lookups =
+      *static_cast<const PaddingMutatedSourceLookups*>(state);
+  const auto found = std::find_if(
+      lookups.events.begin(),
+      lookups.events.end(),
+      [source_index](const auto& event) {
+        return event.event_index == source_index;
+      });
+  return found == lookups.events.end() ? nullptr : &*found;
+}
+
 [[nodiscard]] Scenario tetrahedron() {
   const std::array<CertifiedPoint3, 4U> points{
       point(1.0, 1.0, 1.0),
@@ -675,11 +805,12 @@ struct InstrumentedSourceProvider {
   return reducer.finish();
 }
 
+template <class Provider>
 [[nodiscard]] ExactDirectMorseForestJournalResult
 run_instrumented_source_provider_stream(
     const Scenario& scenario,
     const ExactDirectMorseForestResidentSourceAdapter& adapter,
-    InstrumentedSourceProvider& provider) {
+    Provider& provider) {
   const auto industrial_config = plan_config(2U);
   const auto observed_plan =
       build_exact_direct_sparse_facet_descent_batch_plan(
@@ -739,8 +870,19 @@ run_instrumented_source_provider_stream(
 
     if (batch_index == provider.mutation_batch_index &&
         !retry_exercised) {
+      bool expected_wire_failure = true;
+      if constexpr (requires {
+                      provider.first_mutation_wire_decision;
+                    }) {
+        expected_wire_failure =
+            provider.first_mutation_wire_decision ==
+            std::optional<ExactDirectMorseForestSourceWireDecision>{
+                ExactDirectMorseForestSourceWireDecision::
+                    wire_content_mismatch};
+      }
       check(
           provider.mutation_delivery_count == 1U &&
+              expected_wire_failure &&
               folded.certified_atomic_rejection() &&
               folded.decision ==
                   ExactDirectMorseForestReducerFoldDecision::
@@ -1366,6 +1508,238 @@ void test_source_authority_adapter_and_one_window_provider() {
       "the provider retains at most one live source window and releases the rejected mutation before retry");
 }
 
+void test_canonical_source_batch_wire_and_provider() {
+  const Scenario scenario = tetrahedron();
+  ExactDirectMorseForestResidentSourceAdapter adapter(
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal);
+  const ExactDirectMorseForestSourceWireLimits limits{};
+  check(
+      limits.finite(),
+      "the canonical source wire starts from finite per-batch limits");
+
+  std::vector<std::vector<std::uint8_t>> wires(
+      adapter.manifest().batch_count);
+  std::size_t nontrivial_batch_index =
+      std::numeric_limits<std::size_t>::max();
+  for (std::size_t batch_index = 0U;
+       batch_index < adapter.manifest().batch_count;
+       ++batch_index) {
+    auto encode = [&](const ExactDirectMorseForestSourceBatchWindow& window) {
+      const auto first =
+          encode_exact_direct_morse_forest_source_batch_wire(
+              adapter.manifest(), window, limits);
+      const auto second =
+          encode_exact_direct_morse_forest_source_batch_wire(
+              adapter.manifest(), window, limits);
+      if (batch_index == 0U) {
+        constexpr std::array<std::uint8_t, 32U> golden_header_prefix{
+            0x4dU, 0x33U, 0x44U, 0x31U, 0x35U, 0x4bU, 0x42U, 0x31U,
+            0x00U, 0x00U, 0x00U, 0x01U, 0x00U, 0x00U, 0x00U, 0x01U,
+            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+            0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x01U, 0x27U};
+        const auto golden_payload_digest =
+            morsehgp3d::contract::CanonicalId::from_lower_hex(
+                "c41d0d485c16fa0cecb94ff1dd4cadcbe826fa9f8ff0304527c5309c2175fb71");
+        check(
+            first.bytes.size() == 359U &&
+                std::equal(
+                    golden_header_prefix.begin(),
+                    golden_header_prefix.end(),
+                    first.bytes.begin()) &&
+                first.receipt.payload_digest == golden_payload_digest &&
+                std::equal(
+                    golden_payload_digest.bytes().begin(),
+                    golden_payload_digest.bytes().end(),
+                    first.bytes.begin() + 32),
+            "the singleton wire v1 header and payload digest remain golden across toolchains");
+      }
+      const auto verified =
+          verify_exact_direct_morse_forest_source_batch_wire(
+              adapter.manifest(), window, first.bytes, limits);
+      check(
+          first.bytes == second.bytes &&
+              first.receipt == second.receipt && verified.accepted() &&
+              verified.receipt ==
+                  std::optional<
+                      ExactDirectMorseForestSourceBatchWireReceipt>{
+                      first.receipt},
+          "one fresh source window has a deterministic canonical wire and receipt");
+      wires[batch_index] = first.bytes;
+      if (!window.roles.empty() &&
+          nontrivial_batch_index ==
+              std::numeric_limits<std::size_t>::max()) {
+        nontrivial_batch_index = batch_index;
+
+        PaddingMutatedSourceLookups padded_lookups;
+        padded_lookups.projections.reserve(window.roles.size());
+        padded_lookups.events.reserve(window.roles.size());
+        for (const auto& role : window.roles) {
+          auto projection =
+              *window.projections.find(role.event_projection_index);
+          auto event = *window.events.find(projection.source_index);
+          for (std::size_t index = projection.support_size;
+               index < projection.support_ids.size();
+               ++index) {
+            projection.support_ids[index] = UINT64_C(0xf000000000000000) +
+                                            index;
+            event.support_ids[index] = UINT64_C(0xe000000000000000) + index;
+          }
+          padded_lookups.projections.push_back(std::move(projection));
+          padded_lookups.events.push_back(std::move(event));
+        }
+        auto padded_window = window;
+        padded_window.projections = ExactDirectMorseForestProjectionLookupView{
+            &padded_lookups, find_padding_mutated_projection};
+        padded_window.events = ExactDirectMorseForestEventLookupView{
+            &padded_lookups, find_padding_mutated_event};
+        const auto padded =
+            encode_exact_direct_morse_forest_source_batch_wire(
+                adapter.manifest(), padded_window, limits);
+        check(
+            padded.bytes == first.bytes && padded.receipt == first.receipt,
+            "unused support padding is nonsemantic in the canonical source wire");
+
+        auto corrupted = first.bytes;
+        corrupted.back() ^= std::uint8_t{1U};
+        auto invalid_header = first.bytes;
+        invalid_header.front() ^= std::uint8_t{1U};
+        auto truncated = first.bytes;
+        truncated.pop_back();
+        auto extended = first.bytes;
+        extended.push_back(std::uint8_t{0U});
+        const auto corrupt_result =
+            verify_exact_direct_morse_forest_source_batch_wire(
+                adapter.manifest(), window, corrupted, limits);
+        const auto invalid_header_result =
+            verify_exact_direct_morse_forest_source_batch_wire(
+                adapter.manifest(), window, invalid_header, limits);
+        const auto truncated_result =
+            verify_exact_direct_morse_forest_source_batch_wire(
+                adapter.manifest(), window, truncated, limits);
+        const auto extended_result =
+            verify_exact_direct_morse_forest_source_batch_wire(
+                adapter.manifest(), window, extended, limits);
+        check(
+          corrupt_result.decision ==
+                    ExactDirectMorseForestSourceWireDecision::
+                        wire_content_mismatch &&
+                invalid_header_result.decision ==
+                    ExactDirectMorseForestSourceWireDecision::
+                        wire_content_mismatch &&
+                truncated_result.decision ==
+                    ExactDirectMorseForestSourceWireDecision::
+                        wire_size_mismatch &&
+                extended_result.decision ==
+                    ExactDirectMorseForestSourceWireDecision::
+                        wire_size_mismatch,
+            "one payload corruption, invalid header, truncation and trailing byte fail closed without decoding a scientific record");
+
+        auto byte_tight = limits;
+        byte_tight.maximum_encoded_byte_count = first.bytes.size() - 1U;
+        auto role_tight = limits;
+        role_tight.maximum_role_record_count = window.roles.size() - 1U;
+        auto exact_tight = limits;
+        exact_tight.maximum_exact_text_byte_count = 2U;
+        const auto byte_result =
+            verify_exact_direct_morse_forest_source_batch_wire(
+                adapter.manifest(), window, first.bytes, byte_tight);
+        const auto role_result =
+            verify_exact_direct_morse_forest_source_batch_wire(
+                adapter.manifest(), window, first.bytes, role_tight);
+        const auto exact_result =
+            verify_exact_direct_morse_forest_source_batch_wire(
+                adapter.manifest(), window, first.bytes, exact_tight);
+        check(
+            byte_result.decision ==
+                    ExactDirectMorseForestSourceWireDecision::
+                        encoded_byte_limit_exceeded &&
+                role_result.decision ==
+                    ExactDirectMorseForestSourceWireDecision::
+                        role_record_limit_exceeded &&
+                exact_result.decision ==
+                    ExactDirectMorseForestSourceWireDecision::
+                        exact_text_limit_exceeded,
+            "exact wire, population and rational-text caps reject the whole batch before publication");
+      }
+      return true;
+    };
+    const auto decision = adapter.visit_batch(
+        batch_index,
+        ExactDirectMorseForestSourceBatchConsumerView{encode});
+    check(
+        decision == ExactDirectMorseForestSourceBatchVisitDecision::
+                        complete_synchronous_visit,
+        "the source archive fixture encodes one borrowed batch at a time");
+  }
+  check(
+      nontrivial_batch_index !=
+          std::numeric_limits<std::size_t>::max(),
+      "the canonical wire fixture contains a nontrivial direct source batch");
+  auto unbounded = limits;
+  unbounded.maximum_event_record_count =
+      std::numeric_limits<std::size_t>::max();
+  check(
+      !unbounded.finite(),
+      "an effectively unbounded source wire configuration is rejected");
+
+  InstrumentedSourceProvider fresh_provider;
+  fresh_provider.adapter = &adapter;
+  InMemorySourceWireProvider wire_provider;
+  wire_provider.wires = &wires;
+  wire_provider.mutation_batch_index = nontrivial_batch_index;
+  ExactDirectMorseForestCanonicalWireSourceProvider canonical_provider(
+      adapter.manifest(),
+      ExactDirectMorseForestSourceBatchProviderView{fresh_provider},
+      ExactDirectMorseForestSourceBatchWireProviderView{wire_provider},
+      limits);
+  InstrumentedCanonicalWireSourceProvider instrumented;
+  instrumented.provider = &canonical_provider;
+  instrumented.wire_provider = &wire_provider;
+  instrumented.mutation_batch_index = nontrivial_batch_index;
+
+  const auto legacy = build_exact_direct_morse_forest_journal(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      forest_budget(),
+      forest_config());
+  const auto bounded = run_instrumented_source_provider_stream(
+      scenario, adapter, instrumented);
+  check(
+      bounded == legacy && bounded.certified_conditional_h0_candidate(),
+      "the canonical-wire provider produces exactly the legacy resident forest");
+  check(
+      canonical_provider.verified_visit_count() ==
+              adapter.manifest().batch_count &&
+          canonical_provider.last_wire_decision() ==
+              ExactDirectMorseForestSourceWireDecision::accepted &&
+          fresh_provider.live_window_count == 0U &&
+          fresh_provider.maximum_live_window_count == 1U &&
+          fresh_provider.acquire_count == fresh_provider.release_count &&
+          fresh_provider.acquire_count ==
+              adapter.manifest().batch_count + 1U &&
+          fresh_provider.overlap_rejection_count == 0U &&
+          wire_provider.live_wire_count == 0U &&
+          wire_provider.maximum_live_wire_count == 1U &&
+          wire_provider.acquire_count == wire_provider.release_count &&
+          wire_provider.acquire_count ==
+              adapter.manifest().batch_count + 1U &&
+          wire_provider.overlap_rejection_count == 0U &&
+          wire_provider.mutation_delivery_count == 1U &&
+          instrumented.first_mutation_wire_decision ==
+              std::optional<ExactDirectMorseForestSourceWireDecision>{
+                  ExactDirectMorseForestSourceWireDecision::
+                      wire_content_mismatch},
+      "one corrupted wire is rejected atomically, retried, and both source windows are released synchronously");
+}
+
 void test_segmented_output_identity_retry_and_no_history() {
   const Scenario scenario = tetrahedron();
   const auto resident = build_exact_direct_morse_forest_journal(
@@ -1578,6 +1952,7 @@ int main() {
   test_live_transaction_rejects_a_distinct_reducer_locator();
   test_incremental_identity_and_chunk_independence();
   test_source_authority_adapter_and_one_window_provider();
+  test_canonical_source_batch_wire_and_provider();
   test_segmented_output_identity_retry_and_no_history();
   test_segment_cap_rejects_before_locator_mutation();
   test_gabriel_arm_may_descend_to_a_different_terminal_key();

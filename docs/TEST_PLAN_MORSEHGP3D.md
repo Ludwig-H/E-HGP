@@ -1332,6 +1332,14 @@ Le CTest ciblé passe 1/1 en 0,02 seconde sous GCC Release strict et 0,04 second
 
 La validation reste hôte et ciblée. Elle ne qualifie pas un provider massif, un codec, une archive, un run header, un spool, la reprise après crash, RSS, un million, 10 000 001 points ou le SLO 50 k.
 
+### 14.14c Validation courte de Phase 15K
+
+La fixture tétraédrique réutilise l'adapter 15J. Chaque lot, y compris le singleton logique sans rôle physique, est encodé deux fois; les octets et le reçu `{taille, digest du payload}` doivent être identiques, puis la comparaison avec la fenêtre fraîche doit accepter exactement cette image. Le premier lot direct non vide couvre les rôles, projections, événements complets, centres et niveaux rationnels, familles et graines sans introduire de struct décodé.
+
+Quatre classes seulement sont testées, dans le même exécutable : déterminisme; mutation d'un octet, troncature et suffixe; caps juste insuffisants d'octets, de rôles et de texte exact plus rejet d'un sentinel `SIZE_MAX`; enfin provider canonique avec une image mutée au premier passage. Cette mutation doit rendre `no_reducer_batch_inconsistent`, laisser le locator et le curseur inchangés, puis le retry du même delta avec l'image intacte doit réussir. Les providers wire et scientifique doivent chacun observer au plus une fenêtre vivante et autant de libérations que d'acquisitions. La forêt finale doit être exactement celle du builder résident.
+
+Le CTest ciblé `morsehgp3d.hierarchy_direct_morse_forest_reducer` passe 1/1 en 0,04 seconde sous GCC Release strict et 0,03 seconde sous Clang Release strict. Il fige aussi un header--digest singleton golden et le caractère non sémantique des slots de support hors préfixe utile. Aucune matrice exhaustive, campagne massive, CUDA ou GCP n'est exécutée. Ce test qualifie l'égalité canonique relative au contrat du provider frais, pas une indépendance imposée par le type, un décodage, un provider fichier, un recertifier massif, une archive durable, un spool, une reprise crash, le gate 1 M ou 10 M+, le SLO 50 k ou un statut public.
+
 ### 14.15 Validation courte du raccord 14P
 
 Le test doit construire un snapshot 14M avec le lanceur hôte, extraire sa lease 14N, l'adopter dans 14O et fournir les deux callbacks du nouvel adapter à `prepare_next_integrated`. Pour chaque lot, la préparation doit rendre exactement un ticket 14H, conserver les cinq composantes du curseur et ne publier ni décision scientifique GPU, ni structure globale, ni statut public.

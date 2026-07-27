@@ -1392,6 +1392,7 @@ add_library(
   morsehgp3d_direct_morse_forest_source_authority
   STATIC
     src/cpu/hierarchy/direct_morse_forest_source_authority.cpp
+    src/cpu/hierarchy/direct_morse_forest_source_wire.cpp
 )
 add_library(
   morsehgp3d::direct_morse_forest_source_authority
