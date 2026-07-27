@@ -55,6 +55,13 @@ TRIANGLE_STATUSES = frozenset(
         "degenerate_or_invalid",
     }
 )
+RESTRICTED_GAMMA_STATUSES = frozenset(
+    {
+        "blocked",
+        "gabriel_binary64",
+        "ambiguous_requires_cpu_recertification",
+    }
+)
 Entity: TypeAlias = int | tuple[int, ...]
 Component: TypeAlias = tuple[Entity, ...]
 Point3: TypeAlias = tuple[Fraction, Fraction, Fraction]
@@ -245,6 +252,64 @@ def _parse_edges(
     return tuple(sorted(edges))
 
 
+def _parse_triangle_array(
+    value: object,
+    *,
+    path: str,
+    point_count: int,
+    allowed_statuses: frozenset[str] = TRIANGLE_STATUSES,
+) -> tuple[ReportedTriangle, ...]:
+    records = _require_list(value, path=path)
+    triangles = []
+    seen: set[tuple[int, int, int]] = set()
+    for index, raw_record in enumerate(records):
+        record_path = f"{path}[{index}]"
+        record = _require_mapping(raw_record, path=record_path)
+        point_ids = tuple(
+            sorted(
+                (
+                    _point_id(
+                        record.get(name),
+                        path=f"{record_path}.{name}",
+                        point_count=point_count,
+                    )
+                    for name in ("a", "b", "c")
+                )
+            )
+        )
+        if len(set(point_ids)) != 3:
+            raise DiagnosticInputError(
+                f"{record_path} must contain three distinct vertices"
+            )
+        if point_ids in seen:
+            raise DiagnosticInputError(f"{record_path} duplicates triangle {point_ids}")
+        seen.add(point_ids)
+        level = _fraction(
+            record.get("squared_level"), path=f"{record_path}.squared_level"
+        )
+        if level < 0:
+            raise DiagnosticInputError(
+                f"{record_path}.squared_level must be non-negative"
+            )
+        status = record.get("status")
+        if not isinstance(status, str) or not status.strip():
+            raise DiagnosticInputError(
+                f"{record_path}.status must be a non-empty string"
+            )
+        normalized_status = status.strip().lower().replace("-", "_")
+        if "surrogate" in normalized_status:
+            raise DiagnosticInputError(
+                f"{record_path}.status attempts to place a k=2 surrogate on the facet universe"
+            )
+        if normalized_status not in allowed_statuses:
+            raise DiagnosticInputError(
+                f"{record_path}.status={status!r} is unsupported; expected one of "
+                f"{sorted(allowed_statuses)}"
+            )
+        triangles.append(ReportedTriangle(point_ids, level, normalized_status))
+    return tuple(sorted(triangles))
+
+
 def _parse_triangles(
     payload: Mapping[str, object], point_count: int
 ) -> tuple[ReportedTriangle, ...]:
@@ -253,47 +318,29 @@ def _parse_triangles(
         raise DiagnosticInputError(
             "k2.accepted_triangles is null; rerun the producer with --emit-records"
         )
-    records = _require_list(k2.get("accepted_triangles"), path="k2.accepted_triangles")
-    triangles = []
-    seen: set[tuple[int, int, int]] = set()
-    for index, raw_record in enumerate(records):
-        path = f"k2.accepted_triangles[{index}]"
-        record = _require_mapping(raw_record, path=path)
-        point_ids = tuple(
-            sorted(
-                (
-                    _point_id(
-                        record.get(name),
-                        path=f"{path}.{name}",
-                        point_count=point_count,
-                    )
-                    for name in ("a", "b", "c")
-                )
-            )
+    return _parse_triangle_array(
+        k2.get("accepted_triangles"),
+        path="k2.accepted_triangles",
+        point_count=point_count,
+    )
+
+
+def _parse_restricted_gamma_records(
+    payload: Mapping[str, object], point_count: int
+) -> tuple[ReportedTriangle, ...] | None:
+    k2 = _require_mapping(payload.get("k2"), path="k2")
+    if "restricted_gamma_records" not in k2:
+        return None
+    if k2.get("restricted_gamma_records") is None:
+        raise DiagnosticInputError(
+            "k2.restricted_gamma_records is null; rerun the producer with --emit-records"
         )
-        if len(set(point_ids)) != 3:
-            raise DiagnosticInputError(f"{path} must contain three distinct vertices")
-        if point_ids in seen:
-            raise DiagnosticInputError(f"{path} duplicates triangle {point_ids}")
-        seen.add(point_ids)
-        level = _fraction(record.get("squared_level"), path=f"{path}.squared_level")
-        if level < 0:
-            raise DiagnosticInputError(f"{path}.squared_level must be non-negative")
-        status = record.get("status")
-        if not isinstance(status, str) or not status.strip():
-            raise DiagnosticInputError(f"{path}.status must be a non-empty string")
-        normalized_status = status.strip().lower().replace("-", "_")
-        if "surrogate" in normalized_status:
-            raise DiagnosticInputError(
-                f"{path}.status attempts to place a k=2 surrogate on the facet universe"
-            )
-        if normalized_status not in TRIANGLE_STATUSES:
-            raise DiagnosticInputError(
-                f"{path}.status={status!r} is unsupported; expected one of "
-                f"{sorted(TRIANGLE_STATUSES)}"
-            )
-        triangles.append(ReportedTriangle(point_ids, level, normalized_status))
-    return tuple(sorted(triangles))
+    return _parse_triangle_array(
+        k2.get("restricted_gamma_records"),
+        path="k2.restricted_gamma_records",
+        point_count=point_count,
+        allowed_statuses=RESTRICTED_GAMMA_STATUSES,
+    )
 
 
 def _reject_surrogate_comparability(payload: Mapping[str, object]) -> None:
@@ -947,8 +994,113 @@ def _relations_from_triangles(
     )
 
 
+def _analyze_restricted_gamma(
+    filtration: GammaFiltration,
+    records: tuple[ReportedTriangle, ...] | None,
+    *,
+    point_count: int,
+    facet_universe: tuple[Entity, ...],
+) -> dict[str, object]:
+    """Recertify the Delaunay-wedge coface subset before replaying Gamma2."""
+
+    if records is None:
+        return {
+            "available": False,
+            "comparison_performed": False,
+            "reason": "k2.restricted_gamma_records is absent from this legacy diagnostic",
+            "include_isolated": False,
+        }
+
+    exact_by_simplex = {coface.point_ids: coface for coface in filtration.cofaces}
+    restricted_ids = {record.point_ids for record in records}
+    exact_ids = set(exact_by_simplex)
+    missing_ids = sorted(exact_ids - restricted_ids)
+    level_mismatches = []
+    early_count = 0
+    for record in records:
+        exact = exact_by_simplex[record.point_ids]
+        if record.squared_level == exact.squared_level:
+            continue
+        early = record.squared_level < exact.squared_level
+        early_count += early
+        level_mismatches.append(
+            {
+                "simplex_point_ids": list(record.point_ids),
+                "status": record.status,
+                "reported_squared_level": _fraction_json(record.squared_level),
+                "exact_squared_level": _fraction_json(exact.squared_level),
+                "timing_direction": "early_unsafe" if early else "late_partial",
+            }
+        )
+
+    recertified_relations = tuple(
+        sorted(
+            (
+                (
+                    exact_by_simplex[record.point_ids].point_ids,
+                    exact_by_simplex[record.point_ids].facet_point_ids,
+                    exact_by_simplex[record.point_ids].squared_level,
+                )
+                for record in records
+            ),
+            key=lambda relation: (relation[2], relation[0]),
+        )
+    )
+    levels = set(filtration.critical_levels) | {
+        record.squared_level for record in records
+    }
+    cut_metrics = _compare_cuts(
+        predicted_name="restricted_Delaunay_wedge_Gamma2_with_exactly_recertified_levels",
+        reference_name="exhaustive_exact_Gamma2_hgp_reduced",
+        levels=levels,
+        predicted_provider=lambda level, closed: _relation_cut(
+            recertified_relations, level, closed
+        ),
+        reference_provider=_gamma_provider(filtration, "gamma"),
+        universe=facet_universe,
+        point_count=point_count,
+    )
+    coface_classification = _classification_metrics(
+        len(restricted_ids), 0, len(missing_ids), 0
+    )
+    return {
+        "available": True,
+        "comparison_performed": True,
+        "semantic_scope": "Gamma2 restricted to valid ordinary-Delaunay CSR wedges",
+        "include_isolated": False,
+        "reported_record_count": len(records),
+        "exact_exhaustive_coface_count": len(exact_ids),
+        "coface_universe_classification": coface_classification,
+        "coface_universe_complete_for_this_input": not missing_ids,
+        "missing_exact_cofaces": [list(simplex) for simplex in missing_ids],
+        "status_counts": dict(
+            sorted(Counter(record.status for record in records).items())
+        ),
+        "reported_level_exact_count": len(records) - len(level_mismatches),
+        "reported_level_mismatch_count": len(level_mismatches),
+        "reported_level_early_unsafe_count": early_count,
+        "reported_level_late_partial_count": len(level_mismatches) - early_count,
+        "reported_level_mismatches": level_mismatches,
+        "recertification": {
+            "performed": True,
+            "level_source": "exact minimum enclosing ball for each reported wedge coface",
+            "reported_binary64_levels_used_for_replay": False,
+            "exact_recertified_relation_count": len(recertified_relations),
+        },
+        "recertified_cut_metrics": cut_metrics,
+        "interpretation": (
+            "this comparison measures the combinatorial loss of the Delaunay-wedge "
+            "coface restriction after removing binary64 level error; it remains "
+            "separate from the Gabriel empty-ball proposal and is exact only for "
+            "this bounded input"
+        ),
+    }
+
+
 def _analyze_k2(
-    points: tuple[Point3, ...], triangles: tuple[ReportedTriangle, ...]
+    points: tuple[Point3, ...],
+    triangles: tuple[ReportedTriangle, ...],
+    restricted_gamma_records: tuple[ReportedTriangle, ...] | None,
 ) -> dict[str, object]:
     filtration = build_gamma_filtration(points, 2)
     gamma_forest = build_merge_forest(filtration, "hgp_reduced")
@@ -991,6 +1143,12 @@ def _analyze_k2(
     facet_universe: tuple[Entity, ...] = tuple(combinations(range(len(points)), 2))
     exact_gabriel_provider = _gamma_provider(filtration, "gabriel")
     exact_gamma_provider = _gamma_provider(filtration, "gamma")
+    restricted_gamma = _analyze_restricted_gamma(
+        filtration,
+        restricted_gamma_records,
+        point_count=len(points),
+        facet_universe=facet_universe,
+    )
     reported_cut_metrics = _compare_cuts(
         predicted_name="gabriel_binary64_at_reported_levels_plus_exactly_recertified_ambiguities",
         reference_name="exhaustive_exact_gabriel",
@@ -1035,6 +1193,7 @@ def _analyze_k2(
                 "positives so implementation incompleteness remains separate"
             ),
         },
+        "restricted_gamma_to_exact_gamma": restricted_gamma,
         "exact_gabriel_to_exact_gamma": {
             "cut_metrics": gabriel_to_gamma,
             "interpretation": (
@@ -1217,14 +1376,24 @@ def _reported_summaries(payload: Mapping[str, object]) -> object:
         result["input"] = {
             key: value for key, value in input_record.items() if key != "points"
         }
-    for order, records_key in (
-        ("k1", "selected_edges"),
-        ("k2", "accepted_triangles"),
+    for order, records_keys in (
+        ("k1", frozenset({"selected_edges"})),
+        (
+            "k2",
+            frozenset(
+                {
+                    "accepted_triangles",
+                    "retained_records",
+                    "invalid_records",
+                    "restricted_gamma_records",
+                }
+            ),
+        ),
     ):
         record = payload.get(order)
         if isinstance(record, Mapping):
             result[order] = {
-                key: value for key, value in record.items() if key != records_key
+                key: value for key, value in record.items() if key not in records_keys
             }
     return result
 
@@ -1234,6 +1403,7 @@ def _reported_summary_consistency(
     points: tuple[Point3, ...],
     edges: tuple[ReportedEdge, ...],
     triangles: tuple[ReportedTriangle, ...],
+    restricted_gamma_records: tuple[ReportedTriangle, ...] | None,
 ) -> dict[str, object]:
     checks: list[dict[str, object]] = []
 
@@ -1309,6 +1479,75 @@ def _reported_summary_consistency(
     integer_check(k2_record, "invalid_triangle_count", invalid_count, "k2")
     integer_check(
         k2_record,
+        "retained_record_count",
+        len(binary) + ambiguous_count,
+        "k2",
+    )
+
+    def split_record_check(
+        key: str,
+        expected: tuple[ReportedTriangle, ...],
+        expected_description: str,
+    ) -> None:
+        if key not in k2_record:
+            return
+        observed = _parse_triangle_array(
+            k2_record[key], path=f"k2.{key}", point_count=len(points)
+        )
+        missing = sorted(set(expected) - set(observed))
+        extra = sorted(set(observed) - set(expected))
+        checks.append(
+            {
+                "path": f"k2.{key}.content",
+                "expected": expected_description,
+                "expected_record_count": len(expected),
+                "observed_record_count": len(observed),
+                "missing_records": [
+                    {
+                        "point_ids": list(record.point_ids),
+                        "squared_level": _fraction_json(record.squared_level),
+                        "status": record.status,
+                    }
+                    for record in missing
+                ],
+                "extra_records": [
+                    {
+                        "point_ids": list(record.point_ids),
+                        "squared_level": _fraction_json(record.squared_level),
+                        "status": record.status,
+                    }
+                    for record in extra
+                ],
+                "matches": not missing and not extra,
+            }
+        )
+
+    retained = tuple(
+        sorted(
+            triangle
+            for triangle in triangles
+            if triangle.status != "degenerate_or_invalid"
+        )
+    )
+    invalid = tuple(
+        sorted(
+            triangle
+            for triangle in triangles
+            if triangle.status == "degenerate_or_invalid"
+        )
+    )
+    split_record_check(
+        "retained_records",
+        retained,
+        "binary-accepted plus ambiguous projection of k2.accepted_triangles",
+    )
+    split_record_check(
+        "invalid_records",
+        invalid,
+        "invalid-only projection of k2.accepted_triangles",
+    )
+    integer_check(
+        k2_record,
         "distinct_level_count",
         len({triangle.squared_level for triangle in binary}),
         "k2",
@@ -1342,6 +1581,93 @@ def _reported_summary_consistency(
     integer_check(k2_record, "useful_union_count", useful_union_count, "k2")
     integer_check(k2_record, "redundant_union_count", redundant_union_count, "k2")
 
+    if restricted_gamma_records is not None:
+        expected_status = "restricted_Delaunay_wedge_Gamma2_binary64"
+        if "restricted_gamma_status" in k2_record:
+            observed_status = k2_record["restricted_gamma_status"]
+            checks.append(
+                {
+                    "path": "k2.restricted_gamma_status",
+                    "expected": expected_status,
+                    "observed": observed_status,
+                    "matches": observed_status == expected_status,
+                }
+            )
+        restricted_relations = tuple(
+            sorted(
+                _relations_from_triangles(restricted_gamma_records),
+                key=lambda relation: (relation[2], relation[0]),
+            )
+        )
+        restricted_levels = {
+            record.squared_level for record in restricted_gamma_records
+        }
+        restricted_root = max(restricted_levels, default=Fraction(0))
+        restricted_first = min(restricted_levels, default=Fraction(0))
+        restricted_facets = {
+            facet
+            for _, relation_facets, _ in restricted_relations
+            for facet in relation_facets
+        }
+        restricted_final = _relation_cut(restricted_relations, restricted_root, True)
+        restricted_dsu = _DisjointSet(restricted_facets)
+        restricted_useful = 0
+        restricted_redundant = 0
+        for _, relation_facets, _ in restricted_relations:
+            for facet in relation_facets[1:]:
+                if restricted_dsu.union(relation_facets[0], facet):
+                    restricted_useful += 1
+                else:
+                    restricted_redundant += 1
+        integer_check(
+            k2_record,
+            "restricted_gamma_record_count",
+            len(restricted_gamma_records),
+            "k2",
+        )
+        integer_check(
+            k2_record,
+            "restricted_gamma_facet_count",
+            len(restricted_facets),
+            "k2",
+        )
+        integer_check(
+            k2_record,
+            "restricted_gamma_final_component_count",
+            len(restricted_final.components),
+            "k2",
+        )
+        integer_check(
+            k2_record,
+            "restricted_gamma_useful_union_count",
+            restricted_useful,
+            "k2",
+        )
+        integer_check(
+            k2_record,
+            "restricted_gamma_redundant_union_count",
+            restricted_redundant,
+            "k2",
+        )
+        integer_check(
+            k2_record,
+            "restricted_gamma_distinct_level_count",
+            len(restricted_levels),
+            "k2",
+        )
+        level_check(
+            k2_record,
+            "restricted_gamma_first_squared_level",
+            restricted_first,
+            "k2",
+        )
+        level_check(
+            k2_record,
+            "restricted_gamma_root_squared_level",
+            restricted_root,
+            "k2",
+        )
+
     mismatch_count = sum(not bool(check["matches"]) for check in checks)
     return {
         "checked_field_count": len(checks),
@@ -1359,11 +1685,12 @@ def analyze_diagnostic(payload: object) -> dict[str, object]:
     points = _parse_points(record)
     edges = _parse_edges(record, len(points))
     triangles = _parse_triangles(record, len(points))
+    restricted_gamma_records = _parse_restricted_gamma_records(record, len(points))
     summary_consistency = _reported_summary_consistency(
-        record, points, edges, triangles
+        record, points, edges, triangles, restricted_gamma_records
     )
     k1 = _analyze_k1(points, edges)
-    k2 = _analyze_k2(points, triangles)
+    k2 = _analyze_k2(points, triangles, restricted_gamma_records)
     fixtures = _fixture_audits()
     k2_catalog = k2["gpu_to_exact_gabriel"]["catalog"]  # type: ignore[index]
     k2_reported_cuts = k2["gpu_to_exact_gabriel"][  # type: ignore[index]
@@ -1375,6 +1702,18 @@ def analyze_diagnostic(payload: object) -> dict[str, object]:
     gabriel_gamma_cuts = k2["exact_gabriel_to_exact_gamma"][  # type: ignore[index]
         "cut_metrics"
     ]
+    restricted_gamma = k2["restricted_gamma_to_exact_gamma"]  # type: ignore[index]
+    restricted_available = bool(restricted_gamma["available"])  # type: ignore[index]
+    restricted_cuts_exact = (
+        restricted_gamma["recertified_cut_metrics"]["all_states_exact"]  # type: ignore[index]
+        if restricted_available
+        else None
+    )
+    restricted_recall = (
+        restricted_gamma["coface_universe_classification"]["recall"]  # type: ignore[index]
+        if restricted_available
+        else None
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "diagnostic_completed": True,
@@ -1407,6 +1746,9 @@ def analyze_diagnostic(payload: object) -> dict[str, object]:
             "k2_gpu_fully_recertified_cuts_exact": k2_recertified_cuts[
                 "all_states_exact"
             ],
+            "k2_restricted_gamma_available": restricted_available,
+            "k2_restricted_gamma_coface_universe_recall": restricted_recall,
+            "k2_restricted_gamma_recertified_cuts_exact": restricted_cuts_exact,
             "exact_gabriel_equals_exact_gamma_at_all_cuts": gabriel_gamma_cuts[
                 "all_states_exact"
             ],

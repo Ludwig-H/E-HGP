@@ -1097,6 +1097,13 @@ struct DiscardNonRetainedRecord {
   }
 };
 
+struct IsValidRestrictedGammaRecord {
+  [[nodiscard]] __host__ __device__ bool operator()(
+      const ClassifiedTriangle& triangle) const noexcept {
+    return triangle.status != TriangleStatus::degenerate_or_invalid;
+  }
+};
+
 struct ClassifiedTriangleLess {
   [[nodiscard]] __host__ __device__ bool operator()(
       const ClassifiedTriangle& left,
@@ -1130,14 +1137,19 @@ struct TestProjection {
 
 struct DevicePipelineResult {
   std::vector<ClassifiedTriangle> retained_records;
+  std::vector<ClassifiedTriangle> restricted_gamma_records;
   std::vector<ClassifiedTriangle> invalid_records;
   TriangleAudit audit;
   std::uint64_t grid_nanoseconds{};
   std::uint64_t enumeration_nanoseconds{};
   std::uint64_t classification_nanoseconds{};
+  std::uint64_t audit_nanoseconds{};
   std::uint64_t compaction_sort_nanoseconds{};
+  std::uint64_t restricted_gamma_compaction_sort_nanoseconds{};
   std::uint64_t device_to_host_nanoseconds{};
+  std::uint64_t restricted_gamma_device_to_host_nanoseconds{};
   std::uint64_t host_sort_nanoseconds{};
+  std::uint64_t restricted_gamma_host_sort_nanoseconds{};
   std::size_t grid_resolution{};
   std::size_t grid_cell_count{};
   std::size_t maximum_cell_occupancy{};
@@ -1333,7 +1345,7 @@ struct DevicePipelineResult {
         nanoseconds(Clock::now() - classification_begin),
         "triangle classification time overflows uint64");
 
-    const auto compaction_begin = Clock::now();
+    const auto audit_begin = Clock::now();
     const std::uint64_t blocked = static_cast<std::uint64_t>(thrust::count_if(
         thrust::device,
         classified.begin(),
@@ -1382,6 +1394,49 @@ struct DevicePipelineResult {
             UINT64_C(0),
             thrust::plus<std::uint64_t>{}),
         "tested point count overflows");
+    const std::uint64_t classified_count = checked_add_u64(
+        checked_add_u64(blocked, accepted, "classified count overflows"),
+        checked_add_u64(ambiguous, invalid, "classified count overflows"),
+        "classified count overflows");
+    if (classified_count != candidate_count_u64) {
+      throw std::logic_error("triangle status partition does not close");
+    }
+    result.audit_nanoseconds = checked_add_u64(
+        result.audit_nanoseconds,
+        nanoseconds(Clock::now() - audit_begin),
+        "triangle audit time overflows uint64");
+
+    const std::size_t restricted_gamma_count =
+        candidate_count - static_cast<std::size_t>(invalid);
+    const auto restricted_gamma_compaction_begin = Clock::now();
+    thrust::device_vector<ClassifiedTriangle> restricted_gamma_device_records(
+        restricted_gamma_count);
+    if (restricted_gamma_count != 0U) {
+      const auto restricted_gamma_end = thrust::copy_if(
+          thrust::device,
+          classified.begin(),
+          classified.end(),
+          restricted_gamma_device_records.begin(),
+          IsValidRestrictedGammaRecord{});
+      if (restricted_gamma_end != restricted_gamma_device_records.end()) {
+        throw std::logic_error(
+            "restricted Gamma triangle extraction count mismatch");
+      }
+      thrust::sort(
+          thrust::device,
+          restricted_gamma_device_records.begin(),
+          restricted_gamma_device_records.end(),
+          ClassifiedTriangleLess{});
+    }
+    check_cuda(
+        cudaDeviceSynchronize(),
+        "restricted Gamma triangle compaction synchronization");
+    result.restricted_gamma_compaction_sort_nanoseconds = checked_add_u64(
+        result.restricted_gamma_compaction_sort_nanoseconds,
+        nanoseconds(Clock::now() - restricted_gamma_compaction_begin),
+        "restricted Gamma compaction time overflows uint64");
+
+    const auto gabriel_compaction_begin = Clock::now();
     thrust::device_vector<ClassifiedTriangle> invalid_device_records(
         static_cast<std::size_t>(invalid));
     if (invalid != 0U) {
@@ -1409,12 +1464,14 @@ struct DevicePipelineResult {
     check_cuda(cudaDeviceSynchronize(), "triangle compaction synchronization");
     result.compaction_sort_nanoseconds = checked_add_u64(
         result.compaction_sort_nanoseconds,
-        nanoseconds(Clock::now() - compaction_begin),
+        nanoseconds(Clock::now() - gabriel_compaction_begin),
         "triangle compaction time overflows uint64");
 
     const std::size_t chunk_bytes =
         device_vector_bytes(candidate_count, sizeof(Triangle)) +
         device_vector_bytes(candidate_count, sizeof(ClassifiedTriangle)) +
+        device_vector_bytes(
+            restricted_gamma_count, sizeof(ClassifiedTriangle)) +
         device_vector_bytes(
             static_cast<std::size_t>(invalid), sizeof(ClassifiedTriangle)) +
         device_vector_bytes(center_count + 1U, 2U * sizeof(std::uint64_t));
@@ -1423,6 +1480,31 @@ struct DevicePipelineResult {
     result.maximum_accounted_live_device_bytes = std::max(
         result.maximum_accounted_live_device_bytes,
         result.persistent_device_bytes + chunk_bytes);
+
+    const auto restricted_gamma_copy_begin = Clock::now();
+    std::vector<ClassifiedTriangle> host_restricted_gamma_chunk(
+        restricted_gamma_device_records.size());
+    thrust::copy(
+        restricted_gamma_device_records.begin(),
+        restricted_gamma_device_records.end(),
+        host_restricted_gamma_chunk.begin());
+    check_cuda(
+        cudaDeviceSynchronize(),
+        "restricted Gamma triangle output synchronization");
+    result.restricted_gamma_device_to_host_nanoseconds = checked_add_u64(
+        result.restricted_gamma_device_to_host_nanoseconds,
+        nanoseconds(Clock::now() - restricted_gamma_copy_begin),
+        "restricted Gamma triangle D2H time overflows uint64");
+    if (host_restricted_gamma_chunk.size() >
+        std::numeric_limits<std::size_t>::max() -
+            result.restricted_gamma_records.size()) {
+      throw std::length_error("restricted Gamma triangle arena overflows size_t");
+    }
+    result.restricted_gamma_records.insert(
+        result.restricted_gamma_records.end(),
+        host_restricted_gamma_chunk.begin(),
+        host_restricted_gamma_chunk.end());
+
     const auto copy_begin = Clock::now();
     std::vector<ClassifiedTriangle> host_chunk(classified.size());
     thrust::copy(classified.begin(), classified.end(), host_chunk.begin());
@@ -1464,6 +1546,13 @@ struct DevicePipelineResult {
       result.retained_records.end(),
       ClassifiedTriangleLess{});
   result.host_sort_nanoseconds = nanoseconds(Clock::now() - host_sort_begin);
+  const auto restricted_gamma_host_sort_begin = Clock::now();
+  std::sort(
+      result.restricted_gamma_records.begin(),
+      result.restricted_gamma_records.end(),
+      ClassifiedTriangleLess{});
+  result.restricted_gamma_host_sort_nanoseconds =
+      nanoseconds(Clock::now() - restricted_gamma_host_sort_begin);
   return result;
 }
 
@@ -1585,12 +1674,18 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
 }
 
 [[nodiscard]] K2Summary reduce_k2(
-    std::span<const ClassifiedTriangle> retained) {
+    std::span<const ClassifiedTriangle> records,
+    bool gabriel_only) {
   std::vector<const ClassifiedTriangle*> accepted;
-  accepted.reserve(retained.size());
+  accepted.reserve(records.size());
   std::vector<Edge> facets;
-  for (const ClassifiedTriangle& triangle : retained) {
-    if (triangle.status != TriangleStatus::gabriel_binary64) {
+  for (const ClassifiedTriangle& triangle : records) {
+    if (gabriel_only &&
+        triangle.status != TriangleStatus::gabriel_binary64) {
+      continue;
+    }
+    if (!gabriel_only &&
+        triangle.status == TriangleStatus::degenerate_or_invalid) {
       continue;
     }
     accepted.push_back(&triangle);
@@ -1735,12 +1830,18 @@ int main(int argc, char** argv) {
         gpu.device_to_host_nanoseconds;
 
     const auto k2_begin = Clock::now();
-    K2Summary k2 = reduce_k2(gpu.retained_records);
+    K2Summary k2 = reduce_k2(gpu.retained_records, true);
     timings.k2_reduction_nanoseconds = nanoseconds(Clock::now() - k2_begin);
+    const auto restricted_gamma_k2_begin = Clock::now();
+    K2Summary restricted_gamma_k2 =
+        reduce_k2(gpu.restricted_gamma_records, false);
+    const std::uint64_t restricted_gamma_k2_reduction_nanoseconds =
+        nanoseconds(Clock::now() - restricted_gamma_k2_begin);
     timings.total_nanoseconds = nanoseconds(Clock::now() - total_begin);
 
     const auto write_triangle_records = [&](bool include_retained,
-                                            bool include_invalid) {
+                                            bool include_invalid,
+                                            bool include_restricted_gamma) {
       if (!options.emit_records) {
         std::cout << "null";
         return;
@@ -1761,6 +1862,9 @@ int main(int argc, char** argv) {
       }
       if (include_invalid) {
         write_range(gpu.invalid_records);
+      }
+      if (include_restricted_gamma) {
+        write_range(gpu.restricted_gamma_records);
       }
       std::cout << ']';
     };
@@ -1785,9 +1889,11 @@ int main(int argc, char** argv) {
                  "\"Delaunay_CSR_wedge_candidate_universe_proven_complete\":false,"
                  "\"candidate_canonical_ownership_and_dedup_on_gpu\":true,"
                  "\"all_candidate_miniballs_on_gpu\":true,"
-                 "\"all_candidate_empty_ball_AABB_cell_queries_on_gpu\":true,"
+                 "\"all_nonambiguous_candidate_empty_ball_AABB_cell_queries_on_gpu\":true,"
+                 "\"all_valid_Delaunay_CSR_wedge_cofaces_in_restricted_Gamma2\":true,"
                  "\"global_retained_record_sort_on_gpu\":false,"
                  "\"global_host_retained_record_arena_materialized\":true,"
+                 "\"global_host_restricted_Gamma2_record_arena_materialized\":true,"
                  "\"k2_reduction_on_gpu\":false,"
                  "\"six_Morton_orders_materialized\":false,"
                  "\"higher_order_Delaunay_mosaic_materialized\":false,"
@@ -1886,16 +1992,39 @@ int main(int argc, char** argv) {
               << ",\"distinct_level_count\":" << k2.distinct_level_count
               << ",\"first_squared_level\":" << k2.first_squared_level
               << ",\"root_squared_level\":" << k2.root_squared_level
+              << ",\"restricted_gamma_status\":\"restricted_Delaunay_wedge_Gamma2_binary64\""
+              << ",\"restricted_gamma_record_count\":"
+              << gpu.restricted_gamma_records.size()
+              << ",\"restricted_gamma_facet_count\":"
+              << restricted_gamma_k2.facet_count
+              << ",\"restricted_gamma_final_component_count\":"
+              << restricted_gamma_k2.final_component_count
+              << ",\"restricted_gamma_useful_union_count\":"
+              << restricted_gamma_k2.useful_union_count
+              << ",\"restricted_gamma_redundant_union_count\":"
+              << restricted_gamma_k2.redundant_union_count
+              << ",\"restricted_gamma_distinct_level_count\":"
+              << restricted_gamma_k2.distinct_level_count
+              << ",\"restricted_gamma_first_squared_level\":"
+              << restricted_gamma_k2.first_squared_level
+              << ",\"restricted_gamma_root_squared_level\":"
+              << restricted_gamma_k2.root_squared_level
+              << ",\"restricted_gamma_digest\":\"" << std::hex
+              << std::setw(16) << std::setfill('0')
+              << restricted_gamma_k2.accepted_triangle_digest << std::dec
+              << std::setfill(' ') << "\""
               << ",\"accepted_triangle_digest\":\"" << std::hex
               << std::setw(16) << std::setfill('0')
               << k2.accepted_triangle_digest << std::dec
               << std::setfill(' ') << "\",\"retained_records\":";
-    write_triangle_records(true, false);
+    write_triangle_records(true, false, false);
     std::cout << ",\"invalid_records\":";
-    write_triangle_records(false, true);
+    write_triangle_records(false, true, false);
     std::cout << ",\"accepted_triangles_legacy_checker_alias\":true"
               << ",\"accepted_triangles\":";
-    write_triangle_records(true, true);
+    write_triangle_records(true, true, false);
+    std::cout << ",\"restricted_gamma_records\":";
+    write_triangle_records(false, false, true);
     std::cout << "}"
               << ",\"timings_nanoseconds\":{\"input\":"
               << timings.input_nanoseconds
@@ -1908,14 +2037,24 @@ int main(int argc, char** argv) {
               << timings.triangle_enumeration_nanoseconds
               << ",\"gpu_triangle_classification\":"
               << timings.triangle_classification_nanoseconds
+              << ",\"gpu_triangle_status_audit\":"
+              << gpu.audit_nanoseconds
               << ",\"gpu_triangle_compaction_sort\":"
               << timings.triangle_compaction_sort_nanoseconds
+              << ",\"gpu_restricted_gamma_compaction_sort\":"
+              << gpu.restricted_gamma_compaction_sort_nanoseconds
               << ",\"host_global_retained_record_sort\":"
               << gpu.host_sort_nanoseconds
+              << ",\"host_global_restricted_gamma_record_sort\":"
+              << gpu.restricted_gamma_host_sort_nanoseconds
               << ",\"triangle_device_to_host\":"
               << timings.triangle_device_to_host_nanoseconds
+              << ",\"restricted_gamma_triangle_device_to_host\":"
+              << gpu.restricted_gamma_device_to_host_nanoseconds
               << ",\"k1_reduction\":" << timings.k1_reduction_nanoseconds
               << ",\"k2_reduction\":" << timings.k2_reduction_nanoseconds
+              << ",\"restricted_gamma_k2_reduction\":"
+              << restricted_gamma_k2_reduction_nanoseconds
               << ",\"cold_e2e\":" << timings.total_nanoseconds << "}}\n";
     return EXIT_SUCCESS;
   } catch (const std::exception& error) {
