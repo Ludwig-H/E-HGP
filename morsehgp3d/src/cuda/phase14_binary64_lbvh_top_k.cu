@@ -232,6 +232,10 @@ template <typename Duration>
   return (bits & kExponentMask) != kExponentMask;
 }
 
+[[nodiscard]] __device__ bool finite_value(double value) noexcept {
+  return finite_bits(cuda::std::bit_cast<std::uint64_t>(value));
+}
+
 [[nodiscard]] __device__ double value_from_bits(
     std::uint64_t bits) noexcept {
   return cuda::std::bit_cast<double>(bits);
@@ -343,8 +347,9 @@ struct DirectedAabbLowerBound {
     }
     const double squared = __dmul_rd(delta, delta);
     const double next = __dadd_rd(result.value, squared);
-    if (delta != delta || squared != squared || next != next ||
-        delta < 0.0 || squared < 0.0 || next < 0.0) {
+    if (!finite_value(delta) || !finite_value(squared) ||
+        !finite_value(next) || delta < 0.0 || squared < 0.0 ||
+        next < 0.0) {
       result.valid = false;
       return result;
     }
