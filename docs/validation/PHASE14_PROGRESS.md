@@ -484,9 +484,19 @@ Ce jalon ne certifie ni la complétude du catalogue de 14X ou de l'entrée produ
 
 <!-- TODO 14Y perfectionné : connecter une entrée sparse complète et reprenable issue de 14X, puis traiter séparément incidences silencieuses, M.1 et sérialisation de la hiérarchie. -->
 
+## Incrément 14Z validé hôte — lecteur séquentiel recertifié des runs pair
+
+Les portes 14V et 14X sont satisfaites pour `reference_cpu / hgp_reduced / certified_bounded_atomic_pair_run_reader`, avec `deployment_status=architecture_only` et `public_status=not_claimed`. Le nouvel adaptateur ne modifie pas le wire : il rouvre un `AtomicLinearRunStore` pair avec une ancre finale obligatoire, laisse 14V recertifier fraîchement chaque transition, puis applique 14W et 14X avant de prêter un seul run commun au callback synchrone.
+
+Le préfixe doit être non vide, contigu et exactement terminal. Seule sa dernière projection porte `session_complete`; un arrêt par capacité, une ancre ancienne ou divergente et une fin absente échouent fermés. Tout effet callback reste provisoire jusqu'au succès de la relecture complète. Le lecteur retient zéro historique et au plus un run commun; le payload wire borné, la projection P8l et le run intermédiaire 14W restent eux aussi locaux à une transition. Aucun catalogue global de supports, facette, coface, incidence Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur n'est construit.
+
+Le nouveau CTest GCC Release passe 1/1 en 0,03 seconde; la régression store--14V--14W--14X--14Z passe 5/5 en 0,13 seconde. Elle couvre l'identité des runs, les locators et diagnostics, la libération du verrou après exception, l'ancre finale, le préfixe non terminal et les quatre caps cumulatifs juste insuffisants. Aucun benchmark long, CUDA ou GCP n'est lancé. Le travail de paires, le producteur higher-support encore résident, la passe durable à fan-in fixe, les incidences silencieuses, M.1 et les objectifs complets 50 k/10 M+ restent ouverts.
+
+<!-- TODO 14Z perfectionné : drainer higher-support vers le format commun, puis définir la passe transactionnelle à fan-in fixe avec conservation des diagnostics avant tout spool multi-passe. -->
+
 ## Priorités de développement
 
-1. connecter le producteur sparse complet : externaliser 14X par un lecteur séquentiel certifié et une passe atomique à fan-in fixe, puis rendre les supports supérieurs drainables;
+1. connecter le producteur sparse complet : le lecteur séquentiel pair est acquis; rendre maintenant les supports supérieurs drainables vers le même contrat, puis externaliser une passe atomique à fan-in fixe qui conserve les diagnostics;
 
 2. recertifier toutes les incidences silencieuses nécessaires et M.1 avant de construire la hiérarchie publique. Aucun micro-réglage du halo ni nouveau gate 50 k ne précède ces travaux.
 

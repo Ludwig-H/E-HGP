@@ -658,6 +658,14 @@ L'implémentation corrigée 14Y est validée par le CTest strict GCC Release sur
 
 <!-- TODO preuve 14Y perfectionné : recertifier l'entrée depuis le producteur sparse complet, prouver la couverture de toutes les incidences silencieuses utiles et M.1, puis seulement convertir la base de partitions en hiérarchie publique. -->
 
+Le jalon 14Z prouve uniquement une équivalence de transport relative au store 14V finalisé et aux autorités immuables déjà recertifiées. Le `HEAD`, la chaîne SHA-256, les limites et l'ancre externe fixent un préfixe unique; l'induction sur ses transitions donne une suite contiguë de projections P8l fraîches. Les projections pures 14W puis 14X conservent chaque record, locator, rôle local et diagnostic dans un run commun borné. L'ancre doit égaler le `HEAD` final relu et seule la dernière projection peut être terminale; une ancre de préfixe, un arrêt par capacité ou une fin absente est rejeté.
+
+Pour des populations locales $C_i$, $D_i$ et $R_i$, le lecteur ne retient aucun historique et son pic additionnel vaut $O(B_{\mathrm{wire}}+C_{\max}+D_{\max}+R_{\max})$, plus les deux caches P8l existants. La concaténation des runs n'est pas triée globalement et aucun théorème de fusion n'en découle. Surtout, les callbacks précèdent nécessairement la certification finale de tout le préfixe : leurs effets sont provisoires et toute erreur tardive impose de les jeter. 14Z n'autorise donc aucun sink durable irréversible.
+
+Le CTest court vérifie l'identité des runs, la terminalité, les caps et la résidence annoncée; il ne prouve ni complétude du catalogue pair+higher, ni incidences silencieuses, ni M.1, ni hiérarchie, ni SLO. Aucun support global, facette, coface, incidence Gamma, cellule ou mosaïque de Delaunay d'ordre supérieur n'est matérialisé.
+
+<!-- TODO preuve 14Z perfectionné : établir le handoff transactionnel du drain higher-support puis une passe durable à fan-in fixe qui conserve candidats et diagnostics avant de reconnecter la base relative 14Y. -->
+
 ### V6 — tour globale de boules saturées
 
 Les théorèmes S.1–S.6 de [`TOUR_BOULES_SATUREES.md`](TOUR_BOULES_SATUREES.md) donnent une représentation combinatoire exacte de Gamma par saturés et une forêt de Kruskal commune aux ordres. Il reste à construire un oracle indépendant borné, à convertir ses coupes en `MergeForest`, `coverage_log` et applications verticales canoniques, puis à certifier la persistance et les dégénérescences. La voie brute possède jusqu'à $O(n^4)$ supports, $O(n^5)$ memberships et $O(M^2)$ paires de générateurs; elle est donc un oracle petit $n$, pas un remplacement scalable de la voie actuelle. Une sous-famille proposée puis saturée reste `partial_refinement`.
