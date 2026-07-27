@@ -14,6 +14,7 @@ RUN apt-get update --snapshot "${UBUNTU_SNAPSHOT}" \
         g++ \
         git \
         libboost-dev \
+        libtbb-dev \
         ninja-build \
         python3 \
         python3-dev \
