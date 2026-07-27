@@ -608,6 +608,8 @@ Conclusion normative : l'entropie régularise un **oracle local**, pas la défin
 | diffuser frontières, événements et attaches peut préserver l'exactitude | `conditional_theorem` | chaque unité de frontière est remplacée atomiquement par un prune exact ou tous ses enfants, les runs sont checksummés et le merge externe est exact; la complétude exige les trois frontières vides |
 | l'Unified Memory rend automatiquement le calcul scalable | `false_in_general` |
 
+Le diagnostic transversal `reference_cpu / hgp_reduced / complete_resident_diagnostic` au SHA `d250d71756e4fb8a0f28e1a2d9f1d1b274b2af95`, sur `uniform_latin`, $n=50\,000$ et $K=10$, est une mesure expérimentale censurée et non un énoncé mathématique. L'artefact [phase14_complete_resident_50k_k10_g4_d250d71.json](../validation/phase14_complete_resident_50k_k10_g4_d250d71.json), de SHA-256 `67c8a45398c73dcfcd02b7e48d5acb6ec1d153775a9c9eae3ed191e79a8a6316`, établit seulement que ce commit, ce backend CPU monothread et cette entrée n'ont pas terminé après 300 000,014 ms, alors que le GPU de la G4 est resté inutilisé. Il ne mesure pas le p95 `warm_e2e`, ne couvre ni supports trois--quatre, ni réduction, ni forêt, et ne modifie aucun statut de preuve relatif aux incidences silencieuses, à M.1 ou à la complétude du catalogue. `deployment_status=architecture_only` et `public_status=not_claimed` restent inchangés; aucun résultat partiel n'acquiert d'autorité scientifique.
+
 ## 9. Verrous ouverts prioritaires
 
 ### V0 — contre-exemple à la réduction de Gabriel
