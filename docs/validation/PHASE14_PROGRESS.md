@@ -468,11 +468,27 @@ Le CTest GCC Release ciblé passe en 0,01 seconde. Il compare champ par champ le
 
 <!-- TODO 14X perfectionné : ajouter au store atomique un lecteur séquentiel certifié borné, externaliser une passe puis le multi-passe avec reprise atomique, et rendre le producteur higher-support drainable. Le futur oracle 14Y reste soumis à la complétude des coupes, aux incidences silencieuses et à M.1. -->
 
+## Incrément 14Y validé hôte — sparsifieur Morse--Borůvka relatif
+
+La porte combinatoire bornée 6.23 est documentée comme satisfaite pour commencer ce noyau, sous `reference_cpu / hgp_reduced / certified_relative_morse_boruvka`, avec `deployment_status=architecture_only` et `public_status=not_claimed`. Cette porte n'affirme pas que 14X sait déjà produire l'entrée : l'ABI reçoit une autorité externe plate de naissances, selles et références de terminaux et certifie uniquement sa forme combinatoire.
+
+Chaque selle est développée en une étoile canonique de liens qui porte son niveau exact et sa provenance. Chaque ronde photographie les représentants des naissances, scanne tous les liens sortants co-minimiseurs exacts de chaque racine, puis choisit un unique lien par racine selon la clé canonique. Le transcript conserve uniquement leur compte exact et ce lien choisi; sa selle référence le niveau exact sans le recopier, et les identifiants des autres co-minimiseurs ne sont pas persistés. Seuls les liens choisis sont contractés dans un quotient simultané; aucune décision de la ronde ne peut observer une contraction partielle.
+
+La passe finale trie les selles de provenance par niveau exact puis identifiant dense et ne retient que celles qui relient plusieurs composantes courantes. Relativement à l'hypergraphe fourni, cette base reproduit toutes les partitions de seuil strictes et fermées et contient au plus $B-C$ selles. Pour $L\leq A\leq4S$ liens, le travail des rondes est $O((B+L)\lceil\log_2 B\rceil)$ après validation et expansion linéaires; le scratch actif et le transcript restent $O(B+L+S)$, hors coût en bits des niveaux exacts. Persister tous les co-minimiseurs aurait un pire cas $O(L\log B)$; le vérificateur frais les rescane à la place. Aucune mosaïque de Delaunay d'ordre supérieur, cellule Gamma, facette, coface ou incidence globale n'est matérialisée.
+
+Une première esquisse qui contractait toute la selle co-minimisante choisie par une seule racine était fausse. La fixture permanente `relative_boruvka_p0_whole_hyperedge_contraction` fixe cinq naissances de niveau zéro, $s_0=(1,\lbrace1,2\rbrace)$, $s_1=(1,\lbrace3,4\rbrace)$, $s_2=(2,\lbrace2,3\rbrace)$ et $s_3=(3,\lbrace0,2,3\rbrace)$. La sur-contraction de $s_3$ omet $s_2$ et casse la partition fermée au seuil deux. Le design corrigé ne contracte qu'un lien étoilé choisi pour la racine zéro, de sorte que $s_2$ reste sortante et doit appartenir à la base finale.
+
+La validation fonctionnelle ciblée emploie `q2`, le miroir simultané, le terminal partagé, E5 et P0, puis compare paire à paire les composantes de l'entrée complète et de la base retenue à chaque niveau, sous les conventions stricte et fermée. Elle falsifie aussi les caps, le CSR, les rondes, les comptes de co-minimiseurs, les choix de liens, la base, les faits, l'audit, la décision et la portée par rejeu frais. Le build strict GCC Release de `morsehgp3d_hierarchy_relative_morse_boruvka_tests` réussit et le CTest `morsehgp3d.hierarchy_relative_morse_boruvka` passe 1/1 en 15,19 secondes, temps total identique.
+
+Ce jalon ne certifie ni la complétude du catalogue de 14X ou de l'entrée produit, ni les incidences silencieuses, ni M.1, ni une hiérarchie ou forêt publique. Les drapeaux correspondants restent faux. Aucun nouveau gate 50 k, test 10 M+, benchmark long, CUDA ou GCP n'est lancé; les deux objectifs produit restent ouverts.
+
+<!-- TODO 14Y perfectionné : connecter une entrée sparse complète et reprenable issue de 14X, puis traiter séparément incidences silencieuses, M.1 et sérialisation de la hiérarchie. -->
+
 ## Priorités de développement
 
-1. externaliser le flux 14X par un lecteur séquentiel certifié et une passe atomique à fan-in fixe, sans pénaliser la voie résidente 50 k par des synchronisations disque;
+1. connecter le producteur sparse complet : externaliser 14X par un lecteur séquentiel certifié et une passe atomique à fan-in fixe, puis rendre les supports supérieurs drainables;
 
-2. spécifier puis falsifier l'oracle global naissance--selle 14Y contre le sweep Morse--Gamma 6.23 déjà borné, sans créer un second oracle exhaustif. Aucun micro-réglage du halo ni nouveau gate 50 k ne précède ces travaux.
+2. recertifier toutes les incidences silencieuses nécessaires et M.1 avant de construire la hiérarchie publique. Aucun micro-réglage du halo ni nouveau gate 50 k ne précède ces travaux.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 

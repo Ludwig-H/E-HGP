@@ -743,6 +743,27 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_relative_morse_boruvka_tests
+  test_hierarchy_relative_morse_boruvka.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_relative_morse_boruvka_tests
+  PRIVATE
+    morsehgp3d::hierarchy
+    morsehgp3d::relative_morse_boruvka
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_relative_morse_boruvka_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_relative_morse_boruvka_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
   test_hierarchy_direct_k1_forest_journal.cpp
 )
@@ -1636,6 +1657,7 @@ set(
   morsehgp3d_hierarchy_direct_sparse_gateway_candidate_localization_tests
   morsehgp3d_hierarchy_direct_sparse_gateway_clock_tests
   morsehgp3d_hierarchy_direct_frozen_root_quotient_tests
+  morsehgp3d_hierarchy_relative_morse_boruvka_tests
   morsehgp3d_hierarchy_direct_k1_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_journal_tests
   morsehgp3d_hierarchy_direct_morse_forest_reducer_tests
@@ -2491,6 +2513,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_frozen_root_quotient
   COMMAND morsehgp3d_hierarchy_direct_frozen_root_quotient_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_relative_morse_boruvka
+  COMMAND morsehgp3d_hierarchy_relative_morse_boruvka_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_k1_forest_journal

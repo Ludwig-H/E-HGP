@@ -1266,6 +1266,46 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_relative_morse_boruvka
+  STATIC
+    src/cpu/hierarchy/relative_morse_boruvka.cpp
+)
+add_library(
+  morsehgp3d::relative_morse_boruvka
+  ALIAS morsehgp3d_relative_morse_boruvka
+)
+set_target_properties(
+  morsehgp3d_relative_morse_boruvka
+  PROPERTIES
+    EXPORT_NAME relative_morse_boruvka
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_relative_morse_boruvka PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_relative_morse_boruvka
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_relative_morse_boruvka
+  PUBLIC morsehgp3d::direct_frozen_root_quotient
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_relative_morse_boruvka PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_relative_morse_boruvka
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_k1_forest_journal
   STATIC
     src/cpu/hierarchy/direct_k1_forest_journal.cpp
@@ -2826,6 +2866,7 @@ install(
     morsehgp3d_direct_sparse_gateway_temporal_resolution
     morsehgp3d_direct_sparse_gateway_historical_quotient
     morsehgp3d_direct_frozen_root_quotient
+    morsehgp3d_relative_morse_boruvka
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_direct_morse_forest_journal
     morsehgp3d_direct_morse_forest_reducer
