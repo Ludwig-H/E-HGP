@@ -4,6 +4,7 @@
 #include "morsehgp3d/gpu/direct_sparse_facet_top_k_integrated_adapter.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_forest_reducer.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -340,6 +341,56 @@ bool discard_segment(
   return true;
 }
 
+struct InstrumentedSourceProvider {
+  const ExactDirectMorseForestResidentSourceAdapter* adapter{};
+  std::size_t live_window_count{};
+  std::size_t maximum_live_window_count{};
+  std::size_t acquire_count{};
+  std::size_t release_count{};
+  std::size_t overlap_rejection_count{};
+  std::size_t mutation_batch_index{
+      std::numeric_limits<std::size_t>::max()};
+  std::size_t mutation_delivery_count{};
+
+  [[nodiscard]] ExactDirectMorseForestSourceBatchVisitDecision operator()(
+      std::size_t batch_index,
+      ExactDirectMorseForestSourceBatchConsumerView consumer) {
+    if (adapter == nullptr || live_window_count != 0U) {
+      ++overlap_rejection_count;
+      return ExactDirectMorseForestSourceBatchVisitDecision::
+          no_window_inconsistent;
+    }
+    ++live_window_count;
+    ++acquire_count;
+    maximum_live_window_count = std::max(
+        maximum_live_window_count, live_window_count);
+    struct Release {
+      InstrumentedSourceProvider* provider{};
+      ~Release() {
+        --provider->live_window_count;
+        ++provider->release_count;
+      }
+    } release{this};
+
+    auto relay = [&](const ExactDirectMorseForestSourceBatchWindow& window) {
+      if (batch_index == mutation_batch_index &&
+          mutation_delivery_count == 0U) {
+        auto mutated = window;
+        auto digest_bytes = mutated.batch_identity_digest.bytes();
+        digest_bytes[0U] ^= std::uint8_t{1U};
+        mutated.batch_identity_digest =
+            morsehgp3d::contract::CanonicalId{digest_bytes};
+        ++mutation_delivery_count;
+        return consumer(mutated);
+      }
+      return consumer(window);
+    };
+    return adapter->visit_batch(
+        batch_index,
+        ExactDirectMorseForestSourceBatchConsumerView{relay});
+  }
+};
+
 [[nodiscard]] Scenario tetrahedron() {
   const std::array<CertifiedPoint3, 4U> points{
       point(1.0, 1.0, 1.0),
@@ -621,6 +672,108 @@ bool discard_segment(
         stale_sibling_exercised && live_fold_rejection_exercised,
         "the live fixture exercised stale-capability and reducer-fold rejection paths");
   }
+  return reducer.finish();
+}
+
+[[nodiscard]] ExactDirectMorseForestJournalResult
+run_instrumented_source_provider_stream(
+    const Scenario& scenario,
+    const ExactDirectMorseForestResidentSourceAdapter& adapter,
+    InstrumentedSourceProvider& provider) {
+  const auto industrial_config = plan_config(2U);
+  const auto observed_plan =
+      build_exact_direct_sparse_facet_descent_batch_plan(
+          scenario.cloud,
+          scenario.facade,
+          scenario.event_journal,
+          seed_budget(),
+          scenario.seed_journal,
+          industrial_config,
+          plan_budget());
+  check(
+      observed_plan.complete_architecture_plan(),
+      "the bounded-source reducer fixture has one complete 14C plan");
+
+  ExactDirectMorseForestReducer reducer(
+      adapter.manifest(),
+      ExactDirectMorseForestSourceBatchProviderView{provider},
+      forest_budget(),
+      forest_config());
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      industrial_config,
+      plan_budget(),
+      observed_plan,
+      reducer.strict_locator());
+  bool retry_exercised = false;
+
+  while (!executor.complete()) {
+    const std::size_t batch_index = executor.next_source_batch_index();
+    const ExactDirectSparseFacetWitness witness{
+        authority_id,
+        (static_cast<std::uint64_t>(batch_index) + 1U) * 3U};
+    const auto delta = executor.prepare_next(
+        witness,
+        execution_budget(),
+        forest_budget().closure_budget);
+    const auto replay = executor.commit_prepared(
+        witness,
+        execution_budget(),
+        forest_budget().closure_budget,
+        delta);
+    check(
+        delta.complete_architecture_execution() &&
+            replay.result_certified && replay.session_advanced,
+        "14D produces one certified delta for the bounded-source reducer");
+    const auto projected =
+        project_exact_direct_morse_forest_reducer_batch(delta);
+    const auto stamp_before = reducer.strict_locator().snapshot_stamp();
+    const std::size_t reducer_batch_before =
+        reducer.next_source_batch_index();
+    auto folded = reducer.fold(projected);
+
+    if (batch_index == provider.mutation_batch_index &&
+        !retry_exercised) {
+      check(
+          provider.mutation_delivery_count == 1U &&
+              folded.certified_atomic_rejection() &&
+              folded.decision ==
+                  ExactDirectMorseForestReducerFoldDecision::
+                      no_reducer_batch_inconsistent &&
+              reducer.next_source_batch_index() == reducer_batch_before &&
+              reducer.strict_locator().snapshot_stamp() == stamp_before &&
+              provider.live_window_count == 0U &&
+              provider.acquire_count == provider.release_count,
+          "an incoherent source-window digest is rejected before locator or reducer cursor mutation");
+      folded = reducer.fold(projected);
+      retry_exercised = true;
+    }
+
+    if (!folded.certified_committed_batch()) {
+      std::cerr << "bounded source batch=" << batch_index
+                << ", fold decision="
+                << static_cast<unsigned>(folded.decision)
+                << ", acquired=" << provider.acquire_count
+                << ", released=" << provider.release_count << '\n';
+      break;
+    }
+
+    check(
+        folded.certified_committed_batch() &&
+            reducer.next_source_batch_index() == batch_index + 1U &&
+            provider.live_window_count == 0U &&
+            provider.acquire_count == provider.release_count,
+        "one synchronous source window is released after its reducer fold");
+  }
+
+  check(
+      retry_exercised && reducer.complete(),
+      "the bounded-source stream retries one mutated window and consumes every batch");
   return reducer.finish();
 }
 
@@ -1056,6 +1209,163 @@ void test_incremental_identity_and_chunk_independence() {
       "projected, live and real-adapter streaming outputs are recursively identical to resident output");
 }
 
+void test_source_authority_adapter_and_one_window_provider() {
+  const Scenario scenario = tetrahedron();
+  ExactDirectMorseForestResidentSourceAdapter adapter(
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal);
+  check(
+      adapter.manifest().certified() &&
+          adapter.manifest().batch_count ==
+              scenario.event_journal.batches.size(),
+      "the resident adapter exposes one certified scalar source manifest");
+
+  std::size_t visited_batch_count = 0U;
+  std::size_t borrowed_role_count = 0U;
+  std::size_t borrowed_family_count = 0U;
+  std::size_t borrowed_arm_seed_count = 0U;
+  std::size_t borrowed_projection_count = 0U;
+  std::size_t borrowed_event_count = 0U;
+  for (std::size_t batch_index = 0U;
+       batch_index < adapter.manifest().batch_count;
+       ++batch_index) {
+    auto inspect = [&](const ExactDirectMorseForestSourceBatchWindow& window) {
+      ++visited_batch_count;
+      check(
+          window.certified_relative_to(adapter.manifest()) &&
+              window.resident_records_borrowed_without_copy &&
+              window.synchronous_lifetime_only &&
+              window.batch ==
+                  &scenario.event_journal.batches[batch_index],
+          "one resident source window borrows its batch descriptor in place");
+      if (batch_index == 0U) {
+        check(
+            window.implicit_singleton_role_count ==
+                    scenario.cloud.size() &&
+                window.roles.empty(),
+            "the resident singleton source prefix stays implicit");
+      } else {
+        const std::size_t physical_role_offset =
+            window.logical_role_begin_index - scenario.cloud.size();
+        check(
+            window.implicit_singleton_role_count == 0U &&
+                window.roles.data() ==
+                    scenario.event_journal
+                            .materialized_direct_role_records.data() +
+                        physical_role_offset,
+            "one resident role slice aliases the source journal without a copy");
+      }
+      if (!window.families.empty()) {
+        check(
+            window.families.data() ==
+                scenario.seed_journal.families.data() +
+                    window.family_begin_index,
+            "one resident family slice aliases the source seed journal");
+      }
+      if (!window.arm_seeds.empty()) {
+        check(
+            window.arm_seeds.data() ==
+                scenario.seed_journal.arm_seeds.data() +
+                    window.arm_seed_begin_index,
+            "one resident arm-seed slice aliases the source seed journal");
+      }
+      borrowed_role_count += window.roles.size();
+      borrowed_family_count += window.families.size();
+      borrowed_arm_seed_count += window.arm_seeds.size();
+
+      for (const auto& role : window.roles) {
+        const auto* projection =
+            window.projections.find(role.event_projection_index);
+        const bool projection_index_valid =
+            role.event_projection_index >= scenario.cloud.size() &&
+            role.event_projection_index - scenario.cloud.size() <
+                scenario.event_journal
+                    .materialized_direct_event_projections.size();
+        check(
+            projection_index_valid && projection != nullptr &&
+                projection ==
+                    &scenario.event_journal
+                         .materialized_direct_event_projections[
+                             role.event_projection_index -
+                             scenario.cloud.size()],
+            "the resident projection lookup returns the original journal record");
+        if (projection == nullptr ||
+            projection->source_index >= scenario.facade.events.size()) {
+          continue;
+        }
+        ++borrowed_projection_count;
+        const auto* event =
+            window.events.find(projection->source_index);
+        check(
+            event == &scenario.facade.events[projection->source_index],
+            "the resident event lookup returns the original terminal event");
+        if (event != nullptr) {
+          ++borrowed_event_count;
+        }
+      }
+      for (const auto& family : window.families) {
+        const auto* event = window.events.find(family.source_event_index);
+        check(
+            family.source_event_index < scenario.facade.events.size() &&
+                event ==
+                    &scenario.facade.events[family.source_event_index],
+            "a resident saddle family borrows its original terminal event");
+        if (event != nullptr) {
+          ++borrowed_event_count;
+        }
+      }
+      return true;
+    };
+    const auto decision = adapter.visit_batch(
+        batch_index,
+        ExactDirectMorseForestSourceBatchConsumerView{inspect});
+    check(
+        decision == ExactDirectMorseForestSourceBatchVisitDecision::
+                        complete_synchronous_visit,
+        "the resident adapter completes one synchronous zero-copy visit");
+  }
+  check(
+      visited_batch_count == adapter.manifest().batch_count &&
+          borrowed_role_count ==
+              scenario.event_journal
+                  .materialized_direct_role_records.size() &&
+          borrowed_family_count == scenario.seed_journal.families.size() &&
+          borrowed_arm_seed_count ==
+              scenario.seed_journal.arm_seeds.size() &&
+          borrowed_projection_count != 0U && borrowed_event_count != 0U,
+      "the zero-copy visits cover every physical role, family and arm seed plus indexed projections and events");
+
+  const auto legacy = build_exact_direct_morse_forest_journal(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      forest_budget(),
+      forest_config());
+  InstrumentedSourceProvider provider;
+  provider.adapter = &adapter;
+  provider.mutation_batch_index = 1U;
+  const auto bounded = run_instrumented_source_provider_stream(
+      scenario, adapter, provider);
+  check(
+      bounded == legacy &&
+          bounded.certified_conditional_h0_candidate(),
+      "the one-window provider reconstructs exactly the legacy resident forest");
+  check(
+      provider.live_window_count == 0U &&
+          provider.maximum_live_window_count == 1U &&
+          provider.acquire_count == provider.release_count &&
+          provider.acquire_count == adapter.manifest().batch_count + 1U &&
+          provider.overlap_rejection_count == 0U &&
+          provider.mutation_delivery_count == 1U,
+      "the provider retains at most one live source window and releases the rejected mutation before retry");
+}
+
 void test_segmented_output_identity_retry_and_no_history() {
   const Scenario scenario = tetrahedron();
   const auto resident = build_exact_direct_morse_forest_journal(
@@ -1267,6 +1577,7 @@ int main() {
   test_final_root_budget_is_rejected_at_open();
   test_live_transaction_rejects_a_distinct_reducer_locator();
   test_incremental_identity_and_chunk_independence();
+  test_source_authority_adapter_and_one_window_provider();
   test_segmented_output_identity_retry_and_no_history();
   test_segment_cap_rejects_before_locator_mutation();
   test_gabriel_arm_may_descend_to_a_different_terminal_key();

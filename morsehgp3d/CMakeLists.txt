@@ -1389,6 +1389,46 @@ else()
 endif()
 
 add_library(
+  morsehgp3d_direct_morse_forest_source_authority
+  STATIC
+    src/cpu/hierarchy/direct_morse_forest_source_authority.cpp
+)
+add_library(
+  morsehgp3d::direct_morse_forest_source_authority
+  ALIAS morsehgp3d_direct_morse_forest_source_authority
+)
+set_target_properties(
+  morsehgp3d_direct_morse_forest_source_authority
+  PROPERTIES
+    EXPORT_NAME direct_morse_forest_source_authority
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_features(
+  morsehgp3d_direct_morse_forest_source_authority PUBLIC cxx_std_20
+)
+target_include_directories(
+  morsehgp3d_direct_morse_forest_source_authority
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(
+  morsehgp3d_direct_morse_forest_source_authority
+  PUBLIC morsehgp3d::direct_morse_forest_journal
+  PRIVATE morsehgp3d::sanitizers
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_source_authority PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_direct_morse_forest_source_authority
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_library(
   morsehgp3d_direct_morse_vertical_journal
   STATIC
     src/cpu/hierarchy/direct_morse_vertical_journal.cpp
@@ -1826,6 +1866,7 @@ target_link_libraries(
   morsehgp3d_direct_morse_forest_reducer
   PUBLIC
     morsehgp3d::direct_morse_forest_journal
+    morsehgp3d::direct_morse_forest_source_authority
     morsehgp3d::direct_sparse_facet_descent_batch_executor
     morsehgp3d::direct_sparse_facet_top_k_proposal_transcript
   PRIVATE morsehgp3d::sanitizers
@@ -2939,6 +2980,7 @@ install(
     morsehgp3d_relative_morse_boruvka
     morsehgp3d_direct_k1_forest_journal
     morsehgp3d_direct_morse_forest_journal
+    morsehgp3d_direct_morse_forest_source_authority
     morsehgp3d_direct_morse_forest_reducer
     morsehgp3d_direct_morse_vertical_journal
     morsehgp3d_direct_morse_industrial_plan

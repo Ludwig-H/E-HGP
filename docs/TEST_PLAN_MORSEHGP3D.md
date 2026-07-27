@@ -1322,6 +1322,16 @@ Un second passage donne des caps physiques nuls. Le lot singleton vide reste adm
 
 Le CTest ciblé `morsehgp3d.hierarchy_direct_morse_forest_reducer` passe 1/1 en 0,02 seconde sous GCC Release strict et 0,03 seconde sous Clang Release strict. Il n'exécute ni codec, filesystem, crash, `mmap`, nuage massif, CUDA ou GCP. Il ne ferme ni l'archive d'autorités, ni le lecteur vertical segmenté, ni un million, ni 10 000 001 points, ni le SLO 50 k.
 
+### 14.14b Validation courte de Phase 15J
+
+La fixture résidente construit le manifeste seulement après les vérifications fraîches du journal événementiel et du journal de graines, puis exige `manifest.certified()` et le compte exact de lots. L'adapter visite chaque indice dans l'ordre. Chaque callback reçoit par identité d'adresse le même batch que les journaux résidents, conserve les indices logiques globaux et expose sans copie les spans exacts de rôles, familles et graines ainsi que les lookups de projections et d'événements. Le lot singleton annonce $n$ rôles implicites et un span physique vide.
+
+Deux reducers reçoivent ensuite les mêmes autorités : le premier par le constructeur historique, le second uniquement par le manifeste copié et une vue de provider instrumentée. Celle-ci compte acquisitions, libérations et maximum de fenêtres simultanées. Un digest de fenêtre falsifié est refusé sans avancer le locator ou le curseur; le même delta est rejoué, puis la forêt finale doit être strictement identique. Après chaque callback, le provider observe zéro fenêtre vivante.
+
+Le CTest ciblé passe 1/1 en 0,02 seconde sous GCC Release strict et 0,04 seconde sous Clang Release strict sur le rejeu final. Il ne couvre pas encore séparément chaque champ du manifeste, l'accès hors ordre, chaque lookup manquant, le refus explicite du consumer ou le constructeur provider combiné à la sortie segmentée 15I; ces falsifications restent des conseils de durcissement, pas un résultat déjà acquis. Il ne mesure pas non plus séparément la construction du manifeste, les passages de hashing ou le coût des $B+1$ préfixes de chaîne conservés par l'adapter résident.
+
+La validation reste hôte et ciblée. Elle ne qualifie pas un provider massif, un codec, une archive, un run header, un spool, la reprise après crash, RSS, un million, 10 000 001 points ou le SLO 50 k.
+
 ### 14.15 Validation courte du raccord 14P
 
 Le test doit construire un snapshot 14M avec le lanceur hôte, extraire sa lease 14N, l'adopter dans 14O et fournir les deux callbacks du nouvel adapter à `prepare_next_integrated`. Pour chaque lot, la préparation doit rendre exactement un ticket 14H, conserver les cinq composantes du curseur et ne publier ni décision scientifique GPU, ni structure globale, ni statut public.

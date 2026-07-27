@@ -2,6 +2,7 @@
 
 #include "morsehgp3d/hierarchy/direct_morse_forest_journal.hpp"
 #include "morsehgp3d/hierarchy/direct_morse_forest_segment_sink.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_forest_source_authority.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_batch_executor.hpp"
 
 #include <cstddef>
@@ -249,6 +250,21 @@ class ExactDirectMorseForestReducer {
       spatial::LbvhTraversalOrder traversal_order =
           spatial::LbvhTraversalOrder::near_first);
 
+  // Phase-15J bounded-source path.  The scalar manifest is copied; the
+  // provider and its context must outlive the reducer.  The provider lends
+  // exactly the requested dense source
+  // batch for the synchronous duration of fold(); no source span or lookup
+  // is retained.  This constructor is intended for a one-window massive
+  // provider; the legacy constructors below own a resident zero-copy adapter
+  // so the interactive path performs no serialization or source copying.
+  ExactDirectMorseForestReducer(
+      const ExactDirectMorseForestSourceManifest& source_manifest,
+      ExactDirectMorseForestSourceBatchProviderView source_provider,
+      const ExactDirectMorseForestBudget& budget,
+      const ExactDirectMorseForestConfig& config,
+      spatial::LbvhTraversalOrder traversal_order =
+          spatial::LbvhTraversalOrder::near_first);
+
   // Selects the bounded segmented-output path before the first fold.  The
   // scientific locator and carrier authorities are identical to the resident
   // path, while only one committed batch segment may remain pending.
@@ -258,6 +274,20 @@ class ExactDirectMorseForestReducer {
       const ExactDirectMorseEventJournalResult& source_journal,
       const ExactDirectSaddleArmSeedBudget& trusted_seed_budget,
       const ExactDirectSaddleArmSeedJournalResult& source_seed_journal,
+      const ExactDirectMorseForestBudget& budget,
+      const ExactDirectMorseForestConfig& config,
+      const ExactDirectMorseForestSegmentLimits& segment_limits,
+      const contract::CanonicalId& initial_chain_digest,
+      spatial::LbvhTraversalOrder traversal_order =
+          spatial::LbvhTraversalOrder::near_first);
+
+  // Segmented-output counterpart of the bounded-source constructor.  Source
+  // and output windows are independent: at most one source batch is borrowed
+  // during fold(), and at most one committed output segment is retained until
+  // sink acknowledgement.
+  ExactDirectMorseForestReducer(
+      const ExactDirectMorseForestSourceManifest& source_manifest,
+      ExactDirectMorseForestSourceBatchProviderView source_provider,
       const ExactDirectMorseForestBudget& budget,
       const ExactDirectMorseForestConfig& config,
       const ExactDirectMorseForestSegmentLimits& segment_limits,

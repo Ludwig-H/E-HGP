@@ -365,12 +365,20 @@ void require_traversal_order(spatial::LbvhTraversalOrder order) {
 
 [[nodiscard]] ExactDirectSparseFacetKey birth_key(
     const ExactDirectMorseEventProjection& projection,
-    const ExactDirectSupportTerminalFacade& facade,
+    ExactDirectMorseForestEventLookupView events,
+    std::size_t direct_event_count,
     std::size_t point_count,
     std::size_t order,
     const exact::ExactLevel& level) {
-  if (projection.event_projection_index >=
-          facade.events.size() + point_count ||
+  if (order == 0U ||
+      order > direct_sparse_positive_facet_maximum_point_count ||
+      projection.support_size == 0U ||
+      static_cast<std::size_t>(projection.support_size) >
+          projection.support_ids.size() ||
+      direct_event_count >
+          std::numeric_limits<std::size_t>::max() - point_count ||
+      projection.event_projection_index >=
+          direct_event_count + point_count ||
       projection.birth_order != std::optional<std::size_t>{order} ||
       projection.squared_level != level ||
       projection.closed_rank != order) {
@@ -395,15 +403,21 @@ void require_traversal_order(spatial::LbvhTraversalOrder order) {
 
   if (projection.source !=
           ExactDirectMorseEventSource::direct_support_terminal_event ||
-      projection.source_index >= facade.events.size()) {
+      projection.source_index >= direct_event_count) {
     throw std::logic_error(
         "a reducer direct birth has no Phase-9 source event");
   }
-  const ExactDirectSupportEvent& event =
-      facade.events[projection.source_index];
+  const ExactDirectSupportEvent* event_pointer =
+      events.find(projection.source_index);
+  if (event_pointer == nullptr) {
+    throw std::logic_error(
+        "a reducer source window omitted one direct birth event");
+  }
+  const ExactDirectSupportEvent& event = *event_pointer;
   const std::size_t support_size =
       static_cast<std::size_t>(event.support_size);
-  if (event.event_index != projection.source_index ||
+  if (support_size == 0U || support_size > event.support_ids.size() ||
+      event.event_index != projection.source_index ||
       event.birth_order != std::optional<std::size_t>{order} ||
       event.squared_level != level || event.closed_rank != order ||
       event.support_size != projection.support_size ||
@@ -430,12 +444,58 @@ void require_traversal_order(spatial::LbvhTraversalOrder order) {
 }
 
 [[nodiscard]] ExactDirectSparseFacetKey arm_key(
-    const ExactDirectSaddleArmFacet& facet,
+    const ExactDirectSaddleArmFamilyRecord& family,
+    const ExactDirectSaddleArmSeedRecord& seed,
+    ExactDirectMorseForestEventLookupView events,
     std::size_t point_count,
     std::size_t order) {
+  const ExactDirectSupportEvent* event_pointer =
+      events.find(family.source_event_index);
+  if (event_pointer == nullptr) {
+    throw std::logic_error(
+        "a reducer source window omitted one saddle event");
+  }
+  const ExactDirectSupportEvent& event = *event_pointer;
+  const std::size_t support_size =
+      static_cast<std::size_t>(event.support_size);
+  if (order == 0U ||
+      order > direct_sparse_positive_facet_maximum_point_count ||
+      support_size == 0U || support_size > event.support_ids.size() ||
+      seed.family_index != family.family_index ||
+      event.event_index != family.source_event_index ||
+      event.saddle_order != std::optional<std::size_t>{order} ||
+      event.squared_level != family.critical_squared_level ||
+      support_size != family.arm_seed_count ||
+      event.interior_ids.size() + support_size - 1U != order) {
+    throw std::logic_error(
+        "a reducer saddle window changed its source identity");
+  }
   ExactDirectSparseFacetKey key;
-  key.point_ids = facet.point_ids;
-  key.point_count = facet.point_count;
+  key.point_count = order;
+  std::size_t write = 0U;
+  for (const PointId point_id : event.interior_ids) {
+    key.point_ids[write++] = point_id;
+  }
+  bool removed = false;
+  for (std::size_t index = 0U; index < support_size; ++index) {
+    const PointId point_id = event.support_ids[index];
+    if (point_id == seed.removed_support_point_id) {
+      if (removed) {
+        throw std::logic_error(
+            "a reducer saddle seed removes a repeated support point");
+      }
+      removed = true;
+      continue;
+    }
+    key.point_ids[write++] = point_id;
+  }
+  if (!removed || write != order) {
+    throw std::logic_error(
+        "a reducer saddle seed does not reconstruct one order-k arm");
+  }
+  std::sort(
+      key.point_ids.begin(),
+      key.point_ids.begin() + static_cast<std::ptrdiff_t>(write));
   if (!valid_key(key, point_count, order)) {
     throw std::logic_error(
         "a reducer strict arm is not a canonical order-k key");
@@ -1192,10 +1252,15 @@ class ExactDirectMorseForestReducer::Impl {
       std::optional<ExactDirectMorseForestSegmentLimits> segment_limits =
           std::nullopt,
       contract::CanonicalId initial_chain_digest = {})
-      : cloud_(&cloud),
-        source_facade_(&source_facade),
-        source_journal_(&source_journal),
-        source_seed_journal_(&source_seed_journal),
+      : owned_source_adapter_(
+            std::make_unique<ExactDirectMorseForestResidentSourceAdapter>(
+                cloud,
+                source_facade,
+                source_journal,
+                trusted_seed_budget,
+                source_seed_journal)),
+        source_manifest_(owned_source_adapter_->manifest()),
+        source_provider_(*owned_source_adapter_),
         budget_(budget),
         config_(config),
         traversal_order_(traversal_order),
@@ -1203,11 +1268,7 @@ class ExactDirectMorseForestReducer::Impl {
         segment_limits_(segment_limits.value_or(
             ExactDirectMorseForestSegmentLimits{})),
         locator_(build_locator(
-            cloud,
-            source_facade,
-            source_journal,
-            trusted_seed_budget,
-            source_seed_journal,
+            source_manifest_,
             budget,
             config,
             traversal_order,
@@ -1215,24 +1276,67 @@ class ExactDirectMorseForestReducer::Impl {
         components_(
             locator_,
             birth_count_,
-            cloud.size(),
-            source_journal.effective_maximum_order,
+            source_manifest_.point_count,
+            source_manifest_.effective_maximum_order,
             budget.maximum_atomic_group_count) {
+    initialize(initial_chain_digest);
+  }
+
+  Impl(
+      const ExactDirectMorseForestSourceManifest& source_manifest,
+      ExactDirectMorseForestSourceBatchProviderView source_provider,
+      const ExactDirectMorseForestBudget& budget,
+      const ExactDirectMorseForestConfig& config,
+      spatial::LbvhTraversalOrder traversal_order,
+      std::optional<ExactDirectMorseForestSegmentLimits> segment_limits =
+          std::nullopt,
+      contract::CanonicalId initial_chain_digest = {})
+      : source_manifest_(source_manifest),
+        source_provider_(std::move(source_provider)),
+        budget_(budget),
+        config_(config),
+        traversal_order_(traversal_order),
+        segmented_output_enabled_(segment_limits.has_value()),
+        segment_limits_(segment_limits.value_or(
+            ExactDirectMorseForestSegmentLimits{})),
+        locator_(build_locator(
+            source_manifest,
+            budget,
+            config,
+            traversal_order,
+            birth_count_)),
+        components_(
+            locator_,
+            birth_count_,
+            source_manifest.point_count,
+            source_manifest.effective_maximum_order,
+            budget.maximum_atomic_group_count) {
+    if (!source_provider_) {
+      throw std::invalid_argument(
+          "a forest reducer requires one synchronous source provider");
+    }
+    initialize(initial_chain_digest);
+  }
+
+ private:
+  void initialize(const contract::CanonicalId& initial_chain_digest) {
     result_.requested_budget = budget_;
     result_.config = config_;
     result_.traversal_order = traversal_order_;
-    result_.point_count = cloud_->size();
+    result_.point_count = source_manifest_.point_count;
     result_.effective_maximum_order =
-        source_journal_->effective_maximum_order;
+        source_manifest_.effective_maximum_order;
     initialize_scope(result_);
-    result_.source_event_journal_freshly_replayed = true;
-    result_.source_strict_arm_journal_freshly_replayed = true;
+    result_.source_event_journal_freshly_replayed = false;
+    result_.source_strict_arm_journal_freshly_replayed = false;
     result_.budget_preflight_certified = true;
     output_cursor_.chain_digest = initial_chain_digest;
+    expected_source_chain_digest_ =
+        source_manifest_.initial_batch_chain_digest;
 
-    const std::size_t family_count = source_seed_journal_->families.size();
-    const std::size_t arm_count = source_seed_journal_->arm_seeds.size();
-    const std::size_t batch_count = source_journal_->batches.size();
+    const std::size_t family_count = source_manifest_.family_count;
+    const std::size_t arm_count = source_manifest_.arm_seed_count;
+    const std::size_t batch_count = source_manifest_.batch_count;
     std::size_t node_capacity = 0U;
     if (!try_add(birth_count_, family_count, node_capacity)) {
       throw std::length_error("a reducer node capacity overflowed");
@@ -1266,7 +1370,8 @@ class ExactDirectMorseForestReducer::Impl {
       result_.batches.reserve(1U);
       result_.nodes.reserve(segment_limits_.maximum_node_count);
     } else {
-      result_.birth_records.reserve(birth_count_ - cloud_->size());
+      result_.birth_records.reserve(
+          birth_count_ - source_manifest_.point_count);
       result_.arm_root_bindings.reserve(arm_count);
       result_.saddle_records.reserve(family_count);
       result_.atomic_groups.reserve(
@@ -1274,12 +1379,15 @@ class ExactDirectMorseForestReducer::Impl {
       result_.child_node_ids.reserve(
           std::min(arm_count, budget_.maximum_child_reference_count));
       result_.batches.reserve(batch_count);
-      result_.nodes.reserve(node_capacity - cloud_->size());
+      result_.nodes.reserve(
+          node_capacity - source_manifest_.point_count);
     }
     result_.final_roots.reserve(std::min(
         result_.effective_maximum_order,
         budget_.maximum_final_root_count));
   }
+
+ public:
 
   [[nodiscard]] ExactDirectMorseForestReducerFoldResult fold(
       const ExactDirectMorseForestReducerBatch& batch) {
@@ -1346,7 +1454,7 @@ class ExactDirectMorseForestReducer::Impl {
 
   [[nodiscard]] bool complete() const noexcept {
     return !finished_ &&
-           next_batch_index_ == source_journal_->batches.size();
+           next_batch_index_ == source_manifest_.batch_count;
   }
 
   [[nodiscard]] bool segmented_output_enabled() const noexcept {
@@ -1430,13 +1538,15 @@ class ExactDirectMorseForestReducer::Impl {
           "a segmented forest reducer requires finish_segmented");
     }
     if (finished_ || !complete() ||
-        next_family_index_ != source_seed_journal_->families.size() ||
-        next_arm_seed_index_ != source_seed_journal_->arm_seeds.size() ||
+        expected_source_chain_digest_ !=
+            source_manifest_.final_batch_chain_digest ||
+        recertified_source_window_count_ != source_manifest_.batch_count ||
+        next_family_index_ != source_manifest_.family_count ||
+        next_arm_seed_index_ != source_manifest_.arm_seed_count ||
         logical_birth_record_count(result_) != birth_count_ ||
-        result_.saddle_records.size() !=
-            source_seed_journal_->families.size() ||
+        result_.saddle_records.size() != source_manifest_.family_count ||
         result_.arm_root_bindings.size() !=
-            source_seed_journal_->arm_seeds.size()) {
+            source_manifest_.arm_seed_count) {
       throw std::logic_error(
           "a direct Morse forest reducer cannot finish an incomplete stream");
     }
@@ -1585,6 +1695,8 @@ class ExactDirectMorseForestReducer::Impl {
     result_.locator_commits_unions_before_current_birth_bindings = true;
     result_.final_roots_cover_exactly_nonterminal_reduced_orders = true;
     result_.no_partial_scientific_payload_published = true;
+    result_.source_event_journal_freshly_replayed = true;
+    result_.source_strict_arm_journal_freshly_replayed = true;
     result_.decision = ExactDirectMorseForestDecision::
         complete_conditional_exact_direct_morse_forest;
     if (!result_.certified_conditional_h0_candidate()) {
@@ -1598,17 +1710,20 @@ class ExactDirectMorseForestReducer::Impl {
   [[nodiscard]] ExactDirectMorseForestFinalSeal finish_segmented() {
     if (!segmented_output_enabled_ || finished_ || !complete() ||
         pending_segment_.has_value() ||
-        next_family_index_ != source_seed_journal_->families.size() ||
-        next_arm_seed_index_ != source_seed_journal_->arm_seeds.size() ||
+        expected_source_chain_digest_ !=
+            source_manifest_.final_batch_chain_digest ||
+        recertified_source_window_count_ != source_manifest_.batch_count ||
+        next_family_index_ != source_manifest_.family_count ||
+        next_arm_seed_index_ != source_manifest_.arm_seed_count ||
         output_cursor_.implicit_order_one_prefix_count +
                 output_cursor_.birth_record_count !=
             birth_count_ ||
         output_cursor_.saddle_record_count !=
-            source_seed_journal_->families.size() ||
+            source_manifest_.family_count ||
         output_cursor_.arm_root_binding_count !=
-            source_seed_journal_->arm_seeds.size() ||
+            source_manifest_.arm_seed_count ||
         output_cursor_.batch_record_count !=
-            source_journal_->batches.size() ||
+            source_manifest_.batch_count ||
         output_cursor_.segment_count != next_batch_index_) {
       throw std::logic_error(
           "a segmented forest reducer cannot seal an incomplete stream");
@@ -1900,11 +2015,7 @@ class ExactDirectMorseForestReducer::Impl {
   }
 
   static ExactDirectSparsePositiveFacetLocator build_locator(
-      const spatial::CanonicalPointCloud& cloud,
-      const ExactDirectSupportTerminalFacade& source_facade,
-      const ExactDirectMorseEventJournalResult& source_journal,
-      const ExactDirectSaddleArmSeedBudget& trusted_seed_budget,
-      const ExactDirectSaddleArmSeedJournalResult& source_seed_journal,
+      const ExactDirectMorseForestSourceManifest& source_manifest,
       const ExactDirectMorseForestBudget& budget,
       const ExactDirectMorseForestConfig& config,
       spatial::LbvhTraversalOrder traversal_order,
@@ -1925,65 +2036,41 @@ class ExactDirectMorseForestReducer::Impl {
       throw std::invalid_argument(
           "a reducer closure budget exceeds its confidence cap");
     }
-    std::size_t logical_source_role_count = 0U;
-    if (!try_add(
-            cloud.size(),
-            source_journal.materialized_direct_role_records.size(),
-            logical_source_role_count) ||
-        logical_source_role_count >
+    if (!source_manifest.certified()) {
+      throw std::invalid_argument(
+          "a reducer requires one certified source manifest");
+    }
+    if (source_manifest.logical_role_record_count >
             budget.maximum_source_role_scan_count ||
-        source_journal.batches.size() >
+        source_manifest.batch_count >
             budget.maximum_source_batch_scan_count ||
-        source_seed_journal.families.size() >
+        source_manifest.family_count >
             budget.maximum_source_family_scan_count ||
-        source_seed_journal.arm_seeds.size() >
+        source_manifest.arm_seed_count >
             budget.maximum_source_arm_seed_scan_count ||
-        source_journal.batches.size() >
+        source_manifest.batch_count >
             budget.maximum_batch_record_count ||
-        source_seed_journal.families.size() >
+        source_manifest.family_count >
             budget.maximum_saddle_record_count ||
-        source_seed_journal.arm_seeds.size() >
+        source_manifest.arm_seed_count >
             budget.maximum_arm_root_binding_count) {
       throw std::invalid_argument(
           "a reducer source exceeds its global scan budget");
     }
-    const auto verification =
-        verify_exact_direct_saddle_arm_seed_journal_streaming(
-            cloud,
-            source_facade,
-            source_journal,
-            trusted_seed_budget,
-            source_seed_journal);
-    if (!verification.result_certified ||
-        !source_journal.certified_partial_refinement() ||
-        !source_seed_journal.certified_partial_refinement() ||
-        source_journal.point_count != cloud.size() ||
-        source_seed_journal.point_count != cloud.size()) {
-      throw std::invalid_argument(
-          "a reducer requires freshly verified source journals");
-    }
-
-    const ExactDirectMorseEventJournalView source_view{source_journal};
-    const auto direct_roles =
-        source_view.materialized_direct_role_records();
-    const std::size_t direct_birth_count =
-        static_cast<std::size_t>(std::count_if(
-            direct_roles.begin(),
-            direct_roles.end(),
-            [](const ExactDirectMorseH0RoleRecord& role) {
-              return role.role == ExactDirectMorseH0Role::birth;
-            }));
-    if (!try_add(cloud.size(), direct_birth_count, birth_count)) {
+    if (!try_add(
+            source_manifest.point_count,
+            source_manifest.direct_birth_count,
+            birth_count)) {
       throw std::length_error("a reducer birth count overflowed");
     }
     const std::size_t required_final_root_count =
-        source_journal.effective_maximum_order == 0U
+        source_manifest.effective_maximum_order == 0U
             ? 0U
-            : (cloud.size() <= 1U
+            : (source_manifest.point_count <= 1U
                    ? 1U
                    : std::min(
-                         source_journal.effective_maximum_order,
-                         cloud.size() - 1U));
+                         source_manifest.effective_maximum_order,
+                         source_manifest.point_count - 1U));
     std::size_t birth_plus_family = 0U;
     std::size_t safe_birth_entries = 0U;
     std::size_t safe_arm_entries = 0U;
@@ -1992,16 +2079,16 @@ class ExactDirectMorseForestReducer::Impl {
     if (birth_count == 0U ||
         !try_add(
             birth_count,
-            source_seed_journal.families.size(),
+            source_manifest.family_count,
             birth_plus_family) ||
         !try_multiply(13U, birth_count, safe_birth_entries) ||
         !try_multiply(
             12U,
-            source_seed_journal.arm_seeds.size(),
+            source_manifest.arm_seed_count,
             safe_arm_entries) ||
         !try_multiply(
             3U,
-            source_seed_journal.families.size(),
+            source_manifest.family_count,
             safe_family_entries) ||
         !try_add(
             safe_birth_entries,
@@ -2013,7 +2100,7 @@ class ExactDirectMorseForestReducer::Impl {
             safe_output_bound) ||
         !try_add(
             safe_output_bound,
-            source_journal.batches.size(),
+            source_manifest.batch_count,
             safe_output_bound)) {
       throw std::length_error("a reducer preflight capacity overflowed");
     }
@@ -2046,16 +2133,69 @@ class ExactDirectMorseForestReducer::Impl {
   [[nodiscard]] ExactDirectMorseForestReducerFoldResult fold_checked(
       const ExactDirectMorseForestReducerBatch& batch,
       ExactDirectMorseForestReducerFoldResult folded) {
-    if (batch.source_batch_index >= source_journal_->batches.size()) {
+    std::optional<ExactDirectMorseForestReducerFoldResult> observed;
+    bool callback_invoked = false;
+    auto consume = [&](const ExactDirectMorseForestSourceBatchWindow& window) {
+      if (callback_invoked ||
+          !window.certified_relative_to(source_manifest_) ||
+          window.source_chain_digest != expected_source_chain_digest_ ||
+          recertified_source_window_count_ != batch.source_batch_index) {
+        return false;
+      }
+      callback_invoked = true;
+      observed.emplace(fold_checked_window(batch, folded, window));
+      if (observed->certified_committed_batch()) {
+        expected_source_chain_digest_ = window.successor_chain_digest;
+        ++recertified_source_window_count_;
+      }
+      return true;
+    };
+    ExactDirectMorseForestSourceBatchVisitDecision visit{
+        ExactDirectMorseForestSourceBatchVisitDecision::no_provider};
+    try {
+      visit = source_provider_(
+          batch.source_batch_index,
+          ExactDirectMorseForestSourceBatchConsumerView{consume});
+    } catch (...) {
+      if (observed.has_value() && observed->reducer_state_mutated) {
+        // The source-provider contract forbids throwing after its consumer
+        // accepted an irreversible fold.  Returning an atomic rejection here
+        // would lie about the locator, so fail-stop instead.
+        std::terminate();
+      }
+      throw;
+    }
+    if (visit == ExactDirectMorseForestSourceBatchVisitDecision::
+                     complete_synchronous_visit &&
+        callback_invoked && observed.has_value()) {
+      return std::move(*observed);
+    }
+    if (observed.has_value() && observed->reducer_state_mutated) {
+      // A provider that reports failure after accepting a successful
+      // synchronous consumer has violated the authority protocol after an
+      // irreversible locator commit.  This is not a retryable source error.
+      std::terminate();
+    }
+    return reject(
+        std::move(folded),
+        ExactDirectMorseForestReducerFoldDecision::
+            no_reducer_batch_inconsistent);
+  }
+
+  [[nodiscard]] ExactDirectMorseForestReducerFoldResult fold_checked_window(
+      const ExactDirectMorseForestReducerBatch& batch,
+      ExactDirectMorseForestReducerFoldResult folded,
+      const ExactDirectMorseForestSourceBatchWindow& source_window) {
+    if (batch.source_batch_index >= source_manifest_.batch_count ||
+        source_window.batch == nullptr ||
+        source_window.source_batch_index != batch.source_batch_index) {
       return reject(
           std::move(folded),
           ExactDirectMorseForestReducerFoldDecision::
               no_reducer_batch_inconsistent);
     }
     const ExactDirectMorseH0Batch& source_batch =
-        source_journal_->batches[batch.source_batch_index];
-    const ExactDirectMorseEventJournalView source_view{
-        *source_journal_};
+        *source_window.batch;
     if (batch.source_batch_index >
         std::numeric_limits<std::uint64_t>::max() / 3U - 1U) {
       return reject(
@@ -2083,9 +2223,21 @@ class ExactDirectMorseForestReducer::Impl {
         batch.source_arm_seed_end_index <
             batch.source_arm_seed_begin_index ||
         batch.source_family_end_index >
-            source_seed_journal_->families.size() ||
+            source_manifest_.family_count ||
         batch.source_arm_seed_end_index >
-            source_seed_journal_->arm_seeds.size() ||
+            source_manifest_.arm_seed_count ||
+        source_window.logical_role_begin_index !=
+            source_batch.role_record_offset ||
+        source_window.family_begin_index !=
+            batch.source_family_begin_index ||
+        source_window.families.size() !=
+            batch.source_family_end_index -
+                batch.source_family_begin_index ||
+        source_window.arm_seed_begin_index !=
+            batch.source_arm_seed_begin_index ||
+        source_window.arm_seeds.size() !=
+            batch.source_arm_seed_end_index -
+                batch.source_arm_seed_begin_index ||
         batch.source_family_end_index -
                 batch.source_family_begin_index !=
             source_batch.saddle_role_count ||
@@ -2114,7 +2266,7 @@ class ExactDirectMorseForestReducer::Impl {
               no_reducer_budget_exhausted);
     }
 
-    const std::size_t singleton_count = cloud_->size();
+    const std::size_t singleton_count = source_manifest_.point_count;
     const bool canonical_singleton_bulk_shape =
         batch.source_batch_index == 0U &&
         source_batch.order == 1U &&
@@ -2133,9 +2285,12 @@ class ExactDirectMorseForestReducer::Impl {
         batch.shared_closure_build_count == 0U;
     if (canonical_singleton_bulk_shape) {
       if (singleton_count == 0U ||
-          source_view.role_record_count() < singleton_count ||
-          source_view.event_projection_count() < singleton_count ||
-          !source_journal_->canonical_singletons_implicit_and_unmaterialized ||
+          source_manifest_.logical_role_record_count < singleton_count ||
+          source_manifest_.logical_event_projection_count <
+              singleton_count ||
+          !source_manifest_.singleton_prefix_implicit ||
+          source_window.implicit_singleton_role_count != singleton_count ||
+          !source_window.roles.empty() ||
           singleton_count - 1U >
               spatial::CanonicalPointCloud::max_point_id ||
           singleton_count - 1U >
@@ -2245,7 +2400,7 @@ class ExactDirectMorseForestReducer::Impl {
                   relative_positive ||
           !valid_key(
               resolved.source_facet_key,
-              cloud_->size(),
+              source_manifest_.point_count,
               source_batch.order) ||
           (index != 0U &&
            !key_less(
@@ -2322,7 +2477,8 @@ class ExactDirectMorseForestReducer::Impl {
          family_index < batch.source_family_end_index;
          ++family_index) {
       const auto& family =
-          source_seed_journal_->families[family_index];
+          source_window.families[
+              family_index - batch.source_family_begin_index];
       if (family.family_index != family_index ||
           family.journal_batch_index != batch.source_batch_index ||
           family.order != source_batch.order ||
@@ -2349,7 +2505,8 @@ class ExactDirectMorseForestReducer::Impl {
                   no_reducer_batch_inconsistent);
         }
         const auto& seed =
-            source_seed_journal_->arm_seeds[arm_cursor];
+            source_window.arm_seeds[
+                arm_cursor - batch.source_arm_seed_begin_index];
         const auto& join = batch.arm_joins[join_cursor];
         if (seed.arm_seed_index != arm_cursor ||
             seed.family_index != family_index ||
@@ -2363,11 +2520,10 @@ class ExactDirectMorseForestReducer::Impl {
                   no_reducer_batch_inconsistent);
         }
         const auto reconstructed = arm_key(
-            reconstruct_exact_direct_saddle_arm_facet(
-                *source_facade_,
-                *source_seed_journal_,
-                arm_cursor),
-            cloud_->size(),
+            family,
+            seed,
+            source_window.events,
+            source_manifest_.point_count,
             source_batch.order);
         const auto& resolved =
             resolved_states[join.resolved_key_index];
@@ -2616,8 +2772,9 @@ class ExactDirectMorseForestReducer::Impl {
       for (const std::size_t saddle_index : plan.saddle_indices) {
         const auto& saddle = temporary_saddles[saddle_index];
         const auto& family =
-            source_seed_journal_->families[
-                saddle.source_family_index];
+            source_window.families[
+                saddle.source_family_index -
+                    batch.source_family_begin_index];
         const std::size_t arm_offset =
             global_arm_root_binding_count() +
             pending_arm_bindings.size();
@@ -2759,9 +2916,11 @@ class ExactDirectMorseForestReducer::Impl {
     std::vector<ExactDirectMorseForestNode> pending_birth_nodes;
     std::vector<ExactDirectSparseFacetBinding> locator_bindings;
     const std::size_t role_begin = source_batch.role_record_offset;
-    if (role_begin > source_view.role_record_count() ||
+    if (source_window.implicit_singleton_role_count != 0U ||
+        source_window.roles.size() != source_batch.role_record_count ||
+        role_begin > source_manifest_.logical_role_record_count ||
         source_batch.role_record_count >
-            source_view.role_record_count() - role_begin) {
+            source_manifest_.logical_role_record_count - role_begin) {
       return reject(
           std::move(folded),
           ExactDirectMorseForestReducerFoldDecision::
@@ -2780,12 +2939,16 @@ class ExactDirectMorseForestReducer::Impl {
             ExactDirectMorseForestReducerFoldDecision::
                 no_reducer_batch_inconsistent);
       }
-      const auto& role =
-          source_view.materialized_direct_role_record_at(
-              logical_role_index);
+      const auto& role = source_window.roles[local];
+      if (role.role_record_index != logical_role_index) {
+        return reject(
+            std::move(folded),
+            ExactDirectMorseForestReducerFoldDecision::
+                no_reducer_batch_inconsistent);
+      }
       if (role.batch_index != batch.source_batch_index ||
           role.event_projection_index >=
-              source_view.event_projection_count() ||
+              source_manifest_.logical_event_projection_count ||
           role.event_projection_index < singleton_count) {
         return reject(
             std::move(folded),
@@ -2795,13 +2958,21 @@ class ExactDirectMorseForestReducer::Impl {
       if (role.role != ExactDirectMorseH0Role::birth) {
         continue;
       }
-      const auto& projection =
-          source_view.materialized_direct_event_projection_at(
-              role.event_projection_index);
+      const ExactDirectMorseEventProjection* projection_pointer =
+          source_window.projections.find(role.event_projection_index);
+      if (projection_pointer == nullptr ||
+          projection_pointer->event_projection_index !=
+              role.event_projection_index) {
+        return reject(
+            std::move(folded),
+            ExactDirectMorseForestReducerFoldDecision::
+                no_reducer_batch_inconsistent);
+      }
       const auto key = birth_key(
-          projection,
-          *source_facade_,
-          cloud_->size(),
+          *projection_pointer,
+          source_window.events,
+          source_manifest_.direct_event_count,
+          source_manifest_.point_count,
           source_batch.order,
           source_batch.squared_level);
       const std::size_t birth_index =
@@ -3035,10 +3206,10 @@ class ExactDirectMorseForestReducer::Impl {
     return folded;
   }
 
-  const spatial::CanonicalPointCloud* cloud_{};
-  const ExactDirectSupportTerminalFacade* source_facade_{};
-  const ExactDirectMorseEventJournalResult* source_journal_{};
-  const ExactDirectSaddleArmSeedJournalResult* source_seed_journal_{};
+  std::unique_ptr<ExactDirectMorseForestResidentSourceAdapter>
+      owned_source_adapter_;
+  ExactDirectMorseForestSourceManifest source_manifest_{};
+  ExactDirectMorseForestSourceBatchProviderView source_provider_;
   ExactDirectMorseForestBudget budget_{};
   ExactDirectMorseForestConfig config_{};
   spatial::LbvhTraversalOrder traversal_order_{
@@ -3046,6 +3217,8 @@ class ExactDirectMorseForestReducer::Impl {
   bool segmented_output_enabled_{false};
   ExactDirectMorseForestSegmentLimits segment_limits_{};
   ExactDirectMorseForestSegmentCursor output_cursor_{};
+  contract::CanonicalId expected_source_chain_digest_{};
+  std::size_t recertified_source_window_count_{};
   std::optional<ExactDirectMorseForestBatchSegment> pending_segment_;
   std::size_t birth_count_{};
   ExactDirectSparsePositiveFacetLocator locator_;
@@ -3077,6 +3250,19 @@ ExactDirectMorseForestReducer::ExactDirectMorseForestReducer(
           traversal_order)) {}
 
 ExactDirectMorseForestReducer::ExactDirectMorseForestReducer(
+    const ExactDirectMorseForestSourceManifest& source_manifest,
+    ExactDirectMorseForestSourceBatchProviderView source_provider,
+    const ExactDirectMorseForestBudget& budget,
+    const ExactDirectMorseForestConfig& config,
+    spatial::LbvhTraversalOrder traversal_order)
+    : impl_(std::make_unique<Impl>(
+          source_manifest,
+          source_provider,
+          budget,
+          config,
+          traversal_order)) {}
+
+ExactDirectMorseForestReducer::ExactDirectMorseForestReducer(
     const spatial::CanonicalPointCloud& cloud,
     const ExactDirectSupportTerminalFacade& source_facade,
     const ExactDirectMorseEventJournalResult& source_journal,
@@ -3093,6 +3279,23 @@ ExactDirectMorseForestReducer::ExactDirectMorseForestReducer(
           source_journal,
           trusted_seed_budget,
           source_seed_journal,
+          budget,
+          config,
+          traversal_order,
+          segment_limits,
+          initial_chain_digest)) {}
+
+ExactDirectMorseForestReducer::ExactDirectMorseForestReducer(
+    const ExactDirectMorseForestSourceManifest& source_manifest,
+    ExactDirectMorseForestSourceBatchProviderView source_provider,
+    const ExactDirectMorseForestBudget& budget,
+    const ExactDirectMorseForestConfig& config,
+    const ExactDirectMorseForestSegmentLimits& segment_limits,
+    const contract::CanonicalId& initial_chain_digest,
+    spatial::LbvhTraversalOrder traversal_order)
+    : impl_(std::make_unique<Impl>(
+          source_manifest,
+          source_provider,
           budget,
           config,
           traversal_order,
