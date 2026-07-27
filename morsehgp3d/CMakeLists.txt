@@ -2789,6 +2789,49 @@ if(MORSEHGP3D_ENABLE_CUDA)
         -Werror
     )
   endif()
+
+  if(MORSEHGP3D_BUILD_TOOLS)
+    add_executable(
+      morsehgp3d_gpu_morton_window_h0_surrogate
+      src/cuda/phase14_morton_window_knn_internal.hpp
+      src/cuda/phase14_morton_window_knn.cu
+      src/tools/gpu_morton_window_h0_surrogate.cpp
+    )
+    target_include_directories(
+      morsehgp3d_gpu_morton_window_h0_surrogate
+      PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+    )
+    target_link_libraries(
+      morsehgp3d_gpu_morton_window_h0_surrogate
+      PRIVATE morsehgp3d::spatial Threads::Threads
+    )
+    target_compile_definitions(
+      morsehgp3d_gpu_morton_window_h0_surrogate
+      PRIVATE MORSEHGP3D_GIT_SHA="${MORSEHGP3D_PHASE3_GIT_SHA}"
+    )
+    morsehgp3d_configure_cuda_target(
+      morsehgp3d_gpu_morton_window_h0_surrogate
+    )
+    if(MSVC)
+      target_compile_options(
+        morsehgp3d_gpu_morton_window_h0_surrogate
+        PRIVATE
+          $<$<COMPILE_LANGUAGE:CXX>:/W4>
+          $<$<COMPILE_LANGUAGE:CXX>:/WX>
+      )
+    else()
+      target_compile_options(
+        morsehgp3d_gpu_morton_window_h0_surrogate
+        PRIVATE
+          $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+          $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+          $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+          $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+          $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+          $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+      )
+    endif()
+  endif()
 endif()
 
 if(MORSEHGP3D_BUILD_TOOLS)
