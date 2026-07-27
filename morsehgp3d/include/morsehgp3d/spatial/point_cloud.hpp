@@ -10,6 +10,7 @@
 
 namespace morsehgp3d::gpu {
 class AnchoredPairCandidateProposalContext;
+class Binary64LbvhTopKContext;
 class DirectSparseFacetTopKProposalContext;
 class K1BoruvkaCandidateContext;
 class MortonLbvhBuildContext;
@@ -75,6 +76,7 @@ class CanonicalPointCloud {
   friend class TopKPartition;
   friend class ClosedBallPartition;
   friend class gpu::AnchoredPairCandidateProposalContext;
+  friend class gpu::Binary64LbvhTopKContext;
   friend class gpu::DirectSparseFacetTopKProposalContext;
   friend class gpu::K1BoruvkaCandidateContext;
   friend class gpu::MortonLbvhBuildContext;

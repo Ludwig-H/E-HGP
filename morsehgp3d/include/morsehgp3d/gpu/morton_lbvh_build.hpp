@@ -327,6 +327,7 @@ class MortonLbvhDeviceTraversalLease final {
   int cuda_device_{-1};
 
   friend class AnchoredPairCandidateProposalContext;
+  friend class Binary64LbvhTopKContext;
   friend class MortonLbvhBuildContext;
 };
 

@@ -2603,6 +2603,52 @@ if(MORSEHGP3D_ENABLE_CUDA)
     )
   endif()
 
+  add_library(
+    morsehgp3d_gpu_binary64_lbvh_top_k
+    STATIC
+      include/morsehgp3d/gpu/binary64_lbvh_top_k.hpp
+      src/cuda/phase14_binary64_lbvh_top_k_internal.hpp
+      src/cuda/phase14_binary64_lbvh_top_k.cu
+      src/gpu/binary64_lbvh_top_k.cpp
+  )
+  add_library(
+    morsehgp3d::gpu_binary64_lbvh_top_k
+    ALIAS morsehgp3d_gpu_binary64_lbvh_top_k
+  )
+  target_include_directories(
+    morsehgp3d_gpu_binary64_lbvh_top_k
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cuda"
+  )
+  target_link_libraries(
+    morsehgp3d_gpu_binary64_lbvh_top_k
+    PUBLIC morsehgp3d::gpu_morton_lbvh_build
+  )
+  target_compile_features(
+    morsehgp3d_gpu_binary64_lbvh_top_k PUBLIC cxx_std_20
+  )
+  morsehgp3d_configure_cuda_target(
+    morsehgp3d_gpu_binary64_lbvh_top_k
+  )
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_gpu_binary64_lbvh_top_k
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:/W4>
+        $<$<COMPILE_LANGUAGE:CXX>:/WX>
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_gpu_binary64_lbvh_top_k
+      PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wextra>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wconversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wsign-conversion>
+        $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    )
+  endif()
+
   add_executable(
     morsehgp3d_gpu_morton_lbvh_build_component_smoke
     src/tools/gpu_morton_lbvh_build_component_smoke.cpp
@@ -2804,7 +2850,10 @@ if(MORSEHGP3D_ENABLE_CUDA)
     )
     target_link_libraries(
       morsehgp3d_gpu_morton_window_h0_surrogate
-      PRIVATE morsehgp3d::spatial Threads::Threads
+      PRIVATE
+        morsehgp3d::gpu_binary64_lbvh_top_k
+        morsehgp3d::spatial
+        Threads::Threads
     )
     target_compile_definitions(
       morsehgp3d_gpu_morton_window_h0_surrogate

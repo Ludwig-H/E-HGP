@@ -1,6 +1,8 @@
 #include "phase14_morton_window_knn_internal.hpp"
 
 #include "morsehgp3d/exact/point.hpp"
+#include "morsehgp3d/gpu/binary64_lbvh_top_k.hpp"
+#include "morsehgp3d/gpu/morton_lbvh_build.hpp"
 #include "morsehgp3d/spatial/lbvh.hpp"
 #include "morsehgp3d/spatial/point_cloud.hpp"
 
@@ -46,6 +48,11 @@ constexpr std::size_t kMaximumValidationDistanceEvaluationCount =
     250'000'000U;
 constexpr std::size_t kMaximumQualityPairCount = 262'144U;
 
+enum class KnnBackend : std::uint8_t {
+  morton_window,
+  binary64_lbvh,
+};
+
 struct Options {
   std::size_t point_count{50'000U};
   std::size_t maximum_order{10U};
@@ -56,6 +63,7 @@ struct Options {
   bool resident_replay{false};
   std::size_t requested_cpu_workers{};
   std::uint64_t seed{UINT64_C(0x14a750c0ffee)};
+  KnnBackend knn_backend{KnnBackend::morton_window};
 };
 
 struct SurrogateEdge {
@@ -106,6 +114,8 @@ struct ExhaustiveValidation {
 
 struct ResidentReplayResult {
   morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult knn;
+  std::optional<morsehgp3d::gpu::Binary64LbvhTopKAudit>
+      binary64_lbvh_audit;
   HierarchyRun hierarchy;
   bool transcript_match{};
   std::uint64_t launcher_wall_nanoseconds{};
@@ -219,6 +229,16 @@ struct HierarchyQuality {
     } else if (argument == "--morton-window" && index + 1 < argc) {
       options.morton_window_radius =
           parse_size(argv[++index], "invalid --morton-window");
+    } else if (argument == "--knn-backend" && index + 1 < argc) {
+      const std::string_view value{argv[++index]};
+      if (value == "morton-window") {
+        options.knn_backend = KnnBackend::morton_window;
+      } else if (value == "binary64-lbvh") {
+        options.knn_backend = KnnBackend::binary64_lbvh;
+      } else {
+        throw std::invalid_argument(
+            "--knn-backend must be morton-window or binary64-lbvh");
+      }
     } else if (argument == "--reference-morton-window" && index + 1 < argc) {
       options.reference_morton_window_radius =
           parse_size(argv[++index], "invalid --reference-morton-window");
@@ -238,7 +258,8 @@ struct HierarchyQuality {
     } else {
       throw std::invalid_argument(
           "usage: gpu_morton_window_h0_surrogate [--point-count N] "
-          "[--max-order K] [--morton-window W] [--cpu-workers N] "
+          "[--max-order K] [--morton-window W] "
+          "[--knn-backend morton-window|binary64-lbvh] [--cpu-workers N] "
           "[--reference-morton-window W2] [--validation-points N] "
           "[--quality-pairs Q] [--resident-replay] [--seed N]");
     }
@@ -314,6 +335,35 @@ template <typename Duration>
     throw std::runtime_error("the monotonic diagnostic clock moved backwards");
   }
   return static_cast<std::uint64_t>(value);
+}
+
+[[nodiscard]] morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult
+take_compatible_knn_transcript(
+    morsehgp3d::gpu::Binary64LbvhTopKResult&& source) {
+  const morsehgp3d::gpu::Binary64LbvhTopKAudit& audit = source.audit;
+  if (!source.validated_complete_binary64_transcript() ||
+      audit.persistent_input_device_byte_capacity >
+          std::numeric_limits<std::size_t>::max() -
+              audit.transient_output_device_byte_capacity) {
+    throw std::runtime_error(
+        "the binary64 LBVH result cannot be adapted to the hierarchy transcript");
+  }
+  morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult result;
+  result.neighbor_point_ids = std::move(source.neighbor_point_ids);
+  result.squared_distances = std::move(source.squared_distances);
+  result.allocation_nanoseconds = audit.allocation_nanoseconds;
+  result.host_to_device_nanoseconds = 0U;
+  result.kernel_nanoseconds = audit.kernel_nanoseconds;
+  result.device_to_host_nanoseconds = audit.device_to_host_nanoseconds;
+  result.device_byte_capacity =
+      audit.persistent_input_device_byte_capacity +
+      audit.transient_output_device_byte_capacity;
+  result.kernel_block_count = audit.kernel_block_count;
+  result.kernel_thread_count = audit.kernel_thread_count;
+  result.cuda_device = audit.cuda_device;
+  result.multiprocessor_count = audit.multiprocessor_count;
+  result.device_name = audit.device_name;
+  return result;
 }
 
 [[nodiscard]] std::uint64_t splitmix64(std::uint64_t value) noexcept {
@@ -1453,11 +1503,39 @@ int main(int argc, char** argv) {
     input.shrink_to_fit();
 
     const auto morton_build_begin = Clock::now();
-    morsehgp3d::spatial::MortonLbvhIndex morton_index =
-        morsehgp3d::spatial::MortonLbvhIndex::build(cloud);
+    std::optional<morsehgp3d::spatial::MortonLbvhIndex> cpu_morton_index;
+    std::optional<morsehgp3d::gpu::MortonLbvhBuildContext>
+        gpu_morton_build_context;
+    std::optional<morsehgp3d::gpu::MortonLbvhDeviceBuildResult>
+        gpu_morton_build_result;
+    std::optional<morsehgp3d::gpu::MortonLbvhDeviceBuildAudit>
+        gpu_morton_build_audit;
+    std::optional<morsehgp3d::gpu::Binary64LbvhTopKContext>
+        binary64_lbvh_context;
+    const morsehgp3d::spatial::MortonLbvhIndex* morton_index = nullptr;
+    if (options.knn_backend == KnnBackend::binary64_lbvh) {
+      gpu_morton_build_context.emplace(options.point_count);
+      gpu_morton_build_result.emplace(
+          gpu_morton_build_context->build(cloud));
+      if (!gpu_morton_build_result->complete_certified_build() ||
+          !gpu_morton_build_result->cuda_qualified_build()) {
+        throw std::runtime_error(
+            "the binary64 LBVH backend requires a certified CUDA LBVH build");
+      }
+      gpu_morton_build_audit.emplace(gpu_morton_build_result->audit());
+      morton_index = &gpu_morton_build_result->certified_index();
+      morsehgp3d::gpu::MortonLbvhDeviceTraversalLease traversal_lease =
+          gpu_morton_build_context->release_device_traversal_lease(
+              *gpu_morton_build_result);
+      binary64_lbvh_context.emplace(cloud, std::move(traversal_lease));
+    } else {
+      cpu_morton_index.emplace(
+          morsehgp3d::spatial::MortonLbvhIndex::build(cloud));
+      morton_index = &*cpu_morton_index;
+    }
     const auto morton_build_end = Clock::now();
     const std::span<const morsehgp3d::spatial::MortonLeafRecord> leaves =
-        morton_index.leaves();
+        morton_index->leaves();
     if (leaves.size() != options.point_count) {
       throw std::runtime_error("the CPU Morton index returned a wrong leaf count");
     }
@@ -1500,12 +1578,23 @@ int main(int argc, char** argv) {
     const auto morton_pack_end = Clock::now();
 
     const auto gpu_wall_begin = Clock::now();
-    morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult knn =
-        morsehgp3d::gpu::detail::run_phase14_morton_window_knn_on_gpu(
-            coordinates_by_morton_position,
-            point_ids_by_morton_position,
-            options.maximum_order,
-            effective_window);
+    morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult knn;
+    std::optional<morsehgp3d::gpu::Binary64LbvhTopKAudit>
+        binary64_lbvh_audit;
+    if (options.knn_backend == KnnBackend::binary64_lbvh) {
+      morsehgp3d::gpu::Binary64LbvhTopKResult binary64_result =
+          binary64_lbvh_context->query_all(
+              cloud, options.maximum_order, effective_window);
+      binary64_lbvh_audit.emplace(binary64_result.audit);
+      knn = take_compatible_knn_transcript(std::move(binary64_result));
+    } else {
+      knn = morsehgp3d::gpu::detail::
+          run_phase14_morton_window_knn_on_gpu(
+              coordinates_by_morton_position,
+              point_ids_by_morton_position,
+              options.maximum_order,
+              effective_window);
+    }
     const auto gpu_wall_end = Clock::now();
     const auto validation_begin = Clock::now();
     validate_knn_transcript(
@@ -1514,7 +1603,9 @@ int main(int argc, char** argv) {
         options.point_count,
         options.maximum_order,
         used_cpu_workers,
-        "the fast-window GPU transcript");
+        options.knn_backend == KnnBackend::binary64_lbvh
+            ? "the binary64 LBVH GPU transcript"
+            : "the fast-window GPU transcript");
     const auto validation_end = Clock::now();
 
     const auto chain_distance_begin = Clock::now();
@@ -1547,12 +1638,24 @@ int main(int argc, char** argv) {
     if (options.resident_replay) {
       const auto replay_begin = Clock::now();
       const auto replay_launcher_begin = Clock::now();
-      morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult replay_knn =
-          morsehgp3d::gpu::detail::run_phase14_morton_window_knn_on_gpu(
-              coordinates_by_morton_position,
-              point_ids_by_morton_position,
-              options.maximum_order,
-              effective_window);
+      morsehgp3d::gpu::detail::Phase14MortonWindowKnnResult replay_knn;
+      std::optional<morsehgp3d::gpu::Binary64LbvhTopKAudit>
+          replay_binary64_lbvh_audit;
+      if (options.knn_backend == KnnBackend::binary64_lbvh) {
+        morsehgp3d::gpu::Binary64LbvhTopKResult replay_binary64_result =
+            binary64_lbvh_context->query_all(
+                cloud, options.maximum_order, effective_window);
+        replay_binary64_lbvh_audit.emplace(replay_binary64_result.audit);
+        replay_knn = take_compatible_knn_transcript(
+            std::move(replay_binary64_result));
+      } else {
+        replay_knn = morsehgp3d::gpu::detail::
+            run_phase14_morton_window_knn_on_gpu(
+                coordinates_by_morton_position,
+                point_ids_by_morton_position,
+                options.maximum_order,
+                effective_window);
+      }
       const auto replay_launcher_end = Clock::now();
       if (replay_knn.neighbor_point_ids.size() !=
               knn.neighbor_point_ids.size() ||
@@ -1589,6 +1692,7 @@ int main(int argc, char** argv) {
       const auto replay_end = Clock::now();
       resident_replay.emplace(ResidentReplayResult{
           std::move(replay_knn),
+          std::move(replay_binary64_lbvh_audit),
           std::move(replay_hierarchy),
           !transcript_mismatch.load(std::memory_order_relaxed),
           nanoseconds(replay_launcher_end - replay_launcher_begin),
@@ -1672,17 +1776,32 @@ int main(int argc, char** argv) {
     const auto total_end = Clock::now();
 
     std::size_t gpu_candidate_distance_evaluations = 0U;
-    for (std::size_t position = 0U; position < options.point_count; ++position) {
-      const std::size_t left = std::min(position, effective_window);
-      const std::size_t right = std::min(
-          options.point_count - 1U - position, effective_window);
-      if (left > std::numeric_limits<std::size_t>::max() - right ||
-          gpu_candidate_distance_evaluations >
-              std::numeric_limits<std::size_t>::max() - left - right) {
+    if (binary64_lbvh_audit.has_value()) {
+      if (binary64_lbvh_audit->seed_distance_evaluation_count >
+          std::numeric_limits<std::size_t>::max() -
+              binary64_lbvh_audit->
+                  traversal_leaf_distance_evaluation_count) {
         throw std::length_error(
             "the GPU candidate evaluation counter overflows size_t");
       }
-      gpu_candidate_distance_evaluations += left + right;
+      gpu_candidate_distance_evaluations =
+          binary64_lbvh_audit->seed_distance_evaluation_count +
+          binary64_lbvh_audit->traversal_leaf_distance_evaluation_count;
+    } else {
+      for (std::size_t position = 0U;
+           position < options.point_count;
+           ++position) {
+        const std::size_t left = std::min(position, effective_window);
+        const std::size_t right = std::min(
+            options.point_count - 1U - position, effective_window);
+        if (left > std::numeric_limits<std::size_t>::max() - right ||
+            gpu_candidate_distance_evaluations >
+                std::numeric_limits<std::size_t>::max() - left - right) {
+          throw std::length_error(
+              "the GPU candidate evaluation counter overflows size_t");
+        }
+        gpu_candidate_distance_evaluations += left + right;
+      }
     }
     std::size_t reference_candidate_distance_evaluations = 0U;
     if (reference_knn.has_value()) {
@@ -1730,18 +1849,38 @@ int main(int argc, char** argv) {
       reconstructed_input_to_result_nanoseconds = estimate;
     }
     std::cout << std::setprecision(17)
-              << "{\"schema_version\":\"morsehgp3d.phase14.morton_window_h0_surrogate.v1\""
+              << "{\"schema_version\":"
+              << std::quoted(
+                     options.knn_backend == KnnBackend::binary64_lbvh
+                         ? "morsehgp3d.phase14.binary64_lbvh_h0_surrogate.v1"
+                         : "morsehgp3d.phase14.morton_window_h0_surrogate.v1")
               << ",\"git_sha\":" << std::quoted(MORSEHGP3D_GIT_SHA)
               << ",\"phase\":14"
-              << ",\"backend\":\"cuda_heuristic_knn\""
+              << ",\"backend\":"
+              << std::quoted(
+                     options.knn_backend == KnnBackend::binary64_lbvh
+                         ? "cuda_binary64_lbvh_top_k"
+                         : "cuda_heuristic_knn")
               << ",\"profile\":\"hgp_reduced_surrogate\""
-              << ",\"mode\":\"morton_window_knn\""
+              << ",\"mode\":"
+              << std::quoted(
+                     options.knn_backend == KnnBackend::binary64_lbvh
+                         ? "stackless_aabb_branch_and_bound"
+                         : "morton_window_knn")
               << ",\"input_family\":\"splitmix_uniform_binary64_with_injective_x\""
               << ",\"seed_u64\":" << std::quoted(hex64(options.seed))
               << ",\"public_status\":\"not_claimed\""
-              << ",\"approximation_status\":\"heuristic\""
+              << ",\"approximation_status\":"
+              << std::quoted(
+                     options.knn_backend == KnnBackend::binary64_lbvh
+                         ? "complete_binary64_neighbor_diagnostic"
+                         : "heuristic")
               << ",\"morse_faithfulness\":\"not_certified\""
-              << ",\"binary64_arithmetic_status\":\"not_certified\""
+              << ",\"binary64_arithmetic_status\":"
+              << std::quoted(
+                     options.knn_backend == KnnBackend::binary64_lbvh
+                         ? "fixed_recipe_not_yet_formally_qualified"
+                         : "not_certified")
               << ",\"hierarchy_model\":\"morton_chain_plus_rank_knn_mutual_reachability\""
               << ",\"knn_edge_policy\":\"rank_k_only_plus_morton_chain\""
               << ",\"standard_mutual_reachability_graph\":false"
@@ -1760,7 +1899,20 @@ int main(int argc, char** argv) {
               << options.morton_window_radius
               << ",\"effective_morton_window_radius\":" << effective_window
               << ",\"morton_window_exhaustive\":"
-              << (effective_window == options.point_count - 1U ? "true" : "false")
+              << (options.knn_backend == KnnBackend::morton_window &&
+                          effective_window == options.point_count - 1U
+                      ? "true"
+                      : "false")
+              << ",\"morton_window_role\":"
+              << std::quoted(
+                     options.knn_backend == KnnBackend::binary64_lbvh
+                         ? "upper_bound_seed_only"
+                         : "candidate_restriction")
+              << ",\"knn_branch_and_bound_complete\":"
+              << (binary64_lbvh_audit.has_value() &&
+                          binary64_lbvh_audit->complete_query_coverage
+                      ? "true"
+                      : "false")
               << ",\"neighbors_returned\":" << neighbor_count
               << ",\"gpu_candidate_distance_evaluation_count\":"
               << gpu_candidate_distance_evaluations
@@ -1784,7 +1936,12 @@ int main(int argc, char** argv) {
               << "\"generation\":" << nanoseconds(generation_end - generation_begin)
               << ",\"canonicalization\":"
               << canonicalization_nanoseconds
-              << ",\"cpu_morton_lbvh_build\":"
+              << ",\"morton_lbvh_build_backend\":"
+              << std::quoted(
+                     options.knn_backend == KnnBackend::binary64_lbvh
+                         ? "cuda_certified_snapshot_import"
+                         : "reference_cpu")
+              << ",\"morton_lbvh_build\":"
               << morton_build_nanoseconds
               << ",\"coordinate_export\":"
               << coordinate_export_nanoseconds
@@ -1835,13 +1992,95 @@ int main(int argc, char** argv) {
                 << '}';
     }
     std::cout << ']';
+    if (binary64_lbvh_audit.has_value()) {
+      const morsehgp3d::gpu::Binary64LbvhTopKAudit& audit =
+          *binary64_lbvh_audit;
+      std::cout
+          << ",\"binary64_lbvh_top_k\":{"
+          << "\"status\":\"complete_diagnostic_transcript\""
+          << ",\"scientific_morse_status\":\"not_certified\""
+          << ",\"seed_window_radius\":" << audit.seed_window_radius
+          << ",\"seed_distance_evaluation_count\":"
+          << audit.seed_distance_evaluation_count
+          << ",\"traversal_leaf_distance_evaluation_count\":"
+          << audit.traversal_leaf_distance_evaluation_count
+          << ",\"node_visit_count\":" << audit.node_visit_count
+          << ",\"strict_aabb_prune_count\":"
+          << audit.strict_aabb_prune_count
+          << ",\"seed_covered_subtree_skip_count\":"
+          << audit.seed_covered_subtree_skip_count
+          << ",\"invalid_aabb_bound_descent_count\":"
+          << audit.invalid_aabb_bound_descent_count
+          << ",\"maximum_node_visit_count_per_query\":"
+          << audit.maximum_node_visit_count_per_query
+          << ",\"median_node_visit_count_per_query\":"
+          << audit.median_node_visit_count_per_query
+          << ",\"p95_node_visit_count_per_query\":"
+          << audit.p95_node_visit_count_per_query
+          << ",\"p99_node_visit_count_per_query\":"
+          << audit.p99_node_visit_count_per_query
+          << ",\"full_tree_query_count\":"
+          << audit.full_tree_query_count
+          << ",\"completed_query_count\":"
+          << audit.completed_query_count
+          << ",\"failed_query_count\":" << audit.failed_query_count
+          << ",\"fixed_round_to_nearest_distance_recipe_requested\":"
+          << (audit.fixed_round_to_nearest_distance_recipe_requested
+                  ? "true"
+                  : "false")
+          << ",\"directed_round_down_aabb_recipe_requested\":"
+          << (audit.directed_round_down_aabb_recipe_requested
+                  ? "true"
+                  : "false")
+          << ",\"strict_prune_requested\":"
+          << (audit.strict_prune_requested ? "true" : "false")
+          << ",\"stackless_postorder_traversal_requested\":"
+          << (audit.stackless_postorder_traversal_requested
+                  ? "true"
+                  : "false")
+          << ",\"complete_query_coverage\":"
+          << (audit.complete_query_coverage ? "true" : "false")
+          << ",\"no_candidate_truncation\":"
+          << (audit.no_candidate_truncation ? "true" : "false")
+          << ",\"persistent_input_device_byte_capacity\":"
+          << audit.persistent_input_device_byte_capacity
+          << ",\"transient_output_device_byte_capacity\":"
+          << audit.transient_output_device_byte_capacity
+          << '}';
+    }
+    if (gpu_morton_build_audit.has_value()) {
+      std::cout
+          << ",\"cuda_morton_lbvh_build\":{"
+          << "\"snapshot_import_certified\":"
+          << (gpu_morton_build_audit->snapshot_import_certified
+                  ? "true"
+                  : "false")
+          << ",\"gpu_execution_performed\":"
+          << (gpu_morton_build_audit->gpu_execution_performed
+                  ? "true"
+                  : "false")
+          << ",\"device_kernel_launch_count\":"
+          << gpu_morton_build_audit->device_kernel_launch_count
+          << ",\"device_library_submission_count\":"
+          << gpu_morton_build_audit->device_library_submission_count
+          << ",\"total_fixed_device_byte_capacity\":"
+          << gpu_morton_build_audit->total_fixed_device_byte_capacity
+          << '}';
+    }
     if (resident_replay.has_value()) {
       std::cout
           << ",\"resident_replay\":{"
           << "\"executed\":true"
           << ",\"resident_input_prepared\":true"
-          << ",\"resident_input_scope\":\"host_coordinates_and_morton_order\""
-          << ",\"device_state_reused\":false"
+          << ",\"resident_input_scope\":"
+          << std::quoted(
+                 options.knn_backend == KnnBackend::binary64_lbvh
+                     ? "certified_device_coordinates_morton_order_and_lbvh"
+                     : "host_coordinates_and_morton_order")
+          << ",\"device_state_reused\":"
+          << (options.knn_backend == KnnBackend::binary64_lbvh
+                  ? "true"
+                  : "false")
           << ",\"formal_warm_e2e_protocol\":false"
           << ",\"transcript_comparison\":\"point_ids_and_distance_bits\""
           << ",\"transcript_match\":"
