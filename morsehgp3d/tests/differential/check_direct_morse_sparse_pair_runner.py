@@ -543,6 +543,31 @@ def require_resident_guard(report: dict[str, object]) -> None:
     require(isinstance(pair, dict) and pair.get("status") == "not_run", "resident guard ran P8l")
 
 
+def require_complete_diagnostic_contract(report: dict[str, object]) -> None:
+    require(report.get("pipeline_complete") is True, "small complete diagnostic did not close")
+    require(
+        report.get("mode") == "complete_resident_diagnostic"
+        and report.get("complete_hierarchy_attempt_requested") is True
+        and report.get("configured_pair_total_caps_disabled") is True
+        and report.get("downstream_static_confidence_caps_enabled") is True,
+        "complete diagnostic capacity scope is not explicit",
+    )
+    require(
+        report.get("operational_deadline_reached") is False
+        and report.get("completion_latency_ms") is not None,
+        "small complete diagnostic was unexpectedly censored",
+    )
+    pair = report.get("pair_support")
+    require(isinstance(pair, dict), "small complete diagnostic lost P8l report")
+    total_capacity = pair.get("total_capacity")
+    require(
+        isinstance(total_capacity, dict)
+        and isinstance(total_capacity.get("schedule_advances"), int)
+        and total_capacity["schedule_advances"] > 2**63,
+        "complete diagnostic retained the caller P8l fail-fast cap",
+    )
+
+
 def main() -> int:
     require(len(sys.argv) == 3, "usage: check_direct_morse_sparse_pair_runner.py PROJECT RUNNER")
     project = Path(sys.argv[1]).resolve()
@@ -563,6 +588,21 @@ def main() -> int:
         binary, ("--point-count", "50001", "--K", "10"), 4
     )
     require_resident_guard(resident_guard)
+    complete_diagnostic = run_case(
+        binary,
+        (
+            "--point-count",
+            "5",
+            "--K",
+            "4",
+            "--mode",
+            "complete_resident_diagnostic",
+            "--operational-deadline-ms",
+            "5000",
+        ),
+        0,
+    )
+    require_complete_diagnostic_contract(complete_diagnostic)
     print(
         json.dumps(
             {
@@ -571,6 +611,7 @@ def main() -> int:
                 "p7b_default_runner_replay_count": 0,
                 "p8l_capacity_stop_typed": True,
                 "resident_50001_fail_fast": True,
+                "complete_diagnostic_contract": True,
             },
             separators=(",", ":"),
             sort_keys=True,

@@ -584,6 +584,12 @@ enum class ExactHigherSupportTerminalRunStatus : std::uint8_t {
   maximum_chunk_count_reached,
 };
 
+enum class ExactHigherSupportResidentAdvanceStatus : std::uint8_t {
+  chunk_committed = 0U,
+  terminal = 1U,
+  maximum_chunk_count_reached = 2U,
+};
+
 class ExactHigherSupportTerminalSession;
 class ExactSparseHigherSupportH0ChunkRunContext;
 struct ExactSparseDirectH0CandidateRun;
@@ -879,6 +885,13 @@ class ExactHigherSupportTerminalSession {
       ExactHigherSupportTerminalSession&&) = delete;
 
   [[nodiscard]] ExactHigherSupportTerminalRunStatus run_to_terminal();
+  // Executes at most one scientific chunk while retaining the resident
+  // segment prefix.  This cooperative boundary lets diagnostic callers
+  // observe an operational deadline without replaying scientific work.
+  [[nodiscard]] ExactHigherSupportResidentAdvanceStatus
+  advance_one_resident_chunk() &;
+  ExactHigherSupportResidentAdvanceStatus
+  advance_one_resident_chunk() && = delete;
   // Executes at most one scientific chunk and returns an opaque, provenance-
   // bound retained segment, or reports terminality/chunk-cap without changing
   // the scientific state.  No terminal or durable authority is minted.  The

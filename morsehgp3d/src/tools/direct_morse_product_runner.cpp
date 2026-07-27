@@ -51,6 +51,7 @@ struct Options {
   std::size_t downstream_record_budget{1'000'000U};
   std::size_t descent_work_budget{65'536U};
   std::uint64_t chunk_byte_budget{UINT64_C(1) << 30U};
+  std::uint64_t operational_deadline_ms{};
   bool point_count_supplied{false};
 };
 
@@ -82,6 +83,11 @@ struct Report {
   bool conditional_h0_candidate_certified{false};
   bool architecture_audit_complete{true};
   bool no_forbidden_global_structure_materialized{true};
+  bool complete_hierarchy_attempt_requested{false};
+  bool configurable_pair_total_caps_disabled{false};
+  bool downstream_static_confidence_caps_enabled{true};
+  bool operational_deadline_reached{false};
+  std::size_t effective_higher_chunk_limit{};
 
   std::string pair_status{"not_run"};
   std::string pair_stop_reason{"none"};
@@ -250,6 +256,25 @@ struct Report {
   return left * right;
 }
 
+[[nodiscard]] bool complete_resident_diagnostic(
+    const Options& options) noexcept {
+  return options.mode == "complete_resident_diagnostic";
+}
+
+[[nodiscard]] Report make_report(const Options& options) {
+  Report report;
+  report.options = options;
+  report.complete_hierarchy_attempt_requested =
+      complete_resident_diagnostic(options);
+  report.configurable_pair_total_caps_disabled =
+      complete_resident_diagnostic(options);
+  report.effective_higher_chunk_limit =
+      complete_resident_diagnostic(options)
+          ? std::numeric_limits<std::size_t>::max()
+          : options.higher_chunk_limit;
+  return report;
+}
+
 [[nodiscard]] std::size_t parse_size(
     std::string_view text,
     std::string_view option) {
@@ -282,7 +307,7 @@ void print_usage(std::ostream& output) {
   output
       << "usage: morsehgp3d_direct_morse_product_runner "
          "--point-count N [options]\n"
-      << "  --mode resident_timed\n"
+      << "  --mode resident_timed|complete_resident_diagnostic\n"
       << "  --family uniform_latin|eight_clusters\n"
       << "  --maximum-order K (alias: --K; 1 <= K <= 10)\n"
       << "  --support-work-budget N (cap for each P8l work axis)\n"
@@ -291,6 +316,7 @@ void print_usage(std::ostream& output) {
       << "  --downstream-record-budget N\n"
       << "  --descent-work-budget N\n"
       << "  --chunk-byte-budget N\n"
+      << "  --operational-deadline-ms N (required for complete diagnostic)\n"
       << "Default caps are fail-fast diagnostics, not a 50k "
          "qualification envelope.\n";
 }
@@ -328,6 +354,8 @@ void parse_options(int argc, char** argv, Options& options) {
       options.descent_work_budget = parse_size(value, option);
     } else if (option == "--chunk-byte-budget") {
       options.chunk_byte_budget = parse_u64(value, option);
+    } else if (option == "--operational-deadline-ms") {
+      options.operational_deadline_ms = parse_u64(value, option);
     } else {
       throw std::invalid_argument(
           "unknown option: " + std::string{option});
@@ -342,9 +370,10 @@ void parse_options(int argc, char** argv, Options& options) {
     throw std::invalid_argument(
         "--family must be uniform_latin or eight_clusters");
   }
-  if (options.mode != "resident_timed") {
+  if (options.mode != "resident_timed" &&
+      options.mode != "complete_resident_diagnostic") {
     throw std::invalid_argument(
-        "this runner currently supports only --mode resident_timed");
+        "--mode must be resident_timed or complete_resident_diagnostic");
   }
   if (options.maximum_order == 0U ||
       options.maximum_order >
@@ -360,6 +389,17 @@ void parse_options(int argc, char** argv, Options& options) {
       options.chunk_byte_budget == 0U) {
     throw std::invalid_argument(
         "all operational budgets must be strictly positive");
+  }
+  if (complete_resident_diagnostic(options) &&
+      options.operational_deadline_ms == 0U) {
+    throw std::invalid_argument(
+        "complete_resident_diagnostic requires a positive operational deadline");
+  }
+  if (options.operational_deadline_ms >
+      static_cast<std::uint64_t>(
+          std::numeric_limits<std::chrono::milliseconds::rep>::max())) {
+    throw std::invalid_argument(
+        "--operational-deadline-ms exceeds the steady-clock duration range");
   }
 }
 
@@ -553,6 +593,24 @@ make_sparse_pair_advance_budget(const Options& options) {
 
 [[nodiscard]] ExactSparseAnchoredPairSessionTotalCapacity
 make_sparse_pair_total_capacity(const Options& options) {
+  if (complete_resident_diagnostic(options)) {
+    // The work axes do not yet have proved finite formulae tighter than the
+    // representation.  This value disables the caller's diagnostic stop; it
+    // is deliberately reported as a representational ceiling, never as a
+    // mathematical completion envelope.
+    const std::size_t representational_ceiling =
+        std::numeric_limits<std::size_t>::max();
+    return {
+        representational_ceiling,
+        representational_ceiling,
+        representational_ceiling,
+        representational_ceiling,
+        representational_ceiling,
+        representational_ceiling,
+        representational_ceiling,
+        representational_ceiling,
+    };
+  }
   return {
       options.support_work_budget,
       options.support_work_budget,
@@ -863,6 +921,18 @@ void emit_report(const Report& report) {
   const auto boolean = [](bool value) {
     return value ? "true" : "false";
   };
+  const bool right_censored =
+      report.complete_hierarchy_attempt_requested &&
+      !report.pipeline_complete &&
+      (report.operational_deadline_reached || report.budget_exhausted);
+  const std::string_view diagnostic_100ms_outcome =
+      report.pipeline_complete
+          ? (report.timings.total_ms < 100.0
+                 ? "complete_below_threshold"
+                 : "miss")
+          : (report.timings.total_ms >= 100.0
+                 ? "miss"
+                 : "unassessed");
   std::cout
       << "{\n"
       << "  \"schema\":\"morsehgp3d.direct-morse-product-run.v3\",\n"
@@ -900,7 +970,62 @@ void emit_report(const Report& report) {
       << "  \"global_morse_obligation_replayed\":false,\n"
       << "  \"warm_e2e_protocol_executed\":false,\n"
       << "  \"warm_e2e_slo_claimed\":false,\n"
+      << "  \"warm_e2e_slo_outcome\":\"not_executed\",\n"
+      << "  \"p95_ms\":null,\n"
       << "  \"qualification_claimed\":false,\n"
+      << "  \"complete_hierarchy_attempt_requested\":"
+      << boolean(report.complete_hierarchy_attempt_requested) << ",\n"
+      << "  \"attempt_kind\":\""
+      << (report.complete_hierarchy_attempt_requested
+              ? "right_censorable_full_pipeline_diagnostic"
+              : "fail_fast_capacity_diagnostic")
+      << "\",\n"
+      << "  \"configured_pair_total_caps_disabled\":"
+      << boolean(report.configurable_pair_total_caps_disabled) << ",\n"
+      << "  \"pair_work_capacity_policy\":\""
+      << (report.configurable_pair_total_caps_disabled
+              ? "representational_ceiling_not_completion_envelope"
+              : "caller_diagnostic_caps")
+      << "\",\n"
+      << "  \"support_budgets_are_resumable_chunk_quanta\":true,\n"
+      << "  \"downstream_static_confidence_caps_enabled\":"
+      << boolean(report.downstream_static_confidence_caps_enabled) << ",\n"
+      << "  \"operational_deadline_ms\":"
+      << report.options.operational_deadline_ms << ",\n"
+      << "  \"operational_deadline_reached\":"
+      << boolean(report.operational_deadline_reached) << ",\n"
+      << "  \"operational_deadline_semantics\":"
+         "\"cooperative_stage_pair_advance_and_higher_chunk_checkpoints\",\n"
+      << "  \"completion_latency_ms\":";
+  if (report.pipeline_complete) {
+    std::cout << std::fixed << std::setprecision(3)
+              << report.timings.total_ms;
+  } else {
+    std::cout << "null";
+  }
+  std::cout
+      << ",\n"
+      << "  \"diagnostic_100ms_outcome\":\""
+      << diagnostic_100ms_outcome << "\",\n"
+      << "  \"censoring\":{\"kind\":\""
+      << (right_censored ? "right" : "none")
+      << "\",\"cause\":\""
+      << (report.operational_deadline_reached
+              ? "operational_deadline"
+              : (report.budget_exhausted ? "capacity" : "none"))
+      << "\",\"boundary_ms\":"
+      << report.options.operational_deadline_ms
+      << ",\"terminal_stage\":\""
+      << json_escape(report.terminal_stage)
+      << "\",\"lower_bound_ms\":";
+  if (right_censored) {
+    std::cout << std::fixed << std::setprecision(3)
+              << report.timings.total_ms;
+  } else {
+    std::cout << "null";
+  }
+  std::cout
+      << "},\n"
       << "  \"timing_scope\":"
          "\"attempted_single_process_cpu_generation_to_materialized_forest\",\n"
       << "  \"architecture_audit_complete\":"
@@ -915,6 +1040,8 @@ void emit_report(const Report& report) {
       << report.options.support_record_budget
       << ",\"higher_chunks\":"
       << report.options.higher_chunk_limit
+      << ",\"effective_higher_chunks\":"
+      << report.effective_higher_chunk_limit
       << ",\"downstream_records\":"
       << report.options.downstream_record_budget
       << ",\"descent_work\":"
@@ -1260,10 +1387,34 @@ void emit_report(const Report& report) {
   return smoke_clouds::eight_clusters_points(options.point_count);
 }
 
+[[nodiscard]] bool deadline_due(
+    const Options& options,
+    Clock::time_point deadline) noexcept {
+  return complete_resident_diagnostic(options) &&
+      Clock::now() >= deadline;
+}
+
+[[nodiscard]] int emit_operational_deadline(
+    Report& report,
+    std::string_view stage,
+    Clock::time_point total_start) {
+  report.operational_deadline_reached = true;
+  report.terminal_stage = std::string{stage};
+  report.stop_category = "operational_deadline";
+  report.stop_detail =
+      "full_pipeline_diagnostic_right_censored_at_cooperative_boundary";
+  report.timings.total_ms = milliseconds(Clock::now() - total_start);
+  emit_report(report);
+  return 6;
+}
+
 [[nodiscard]] int run(const Options& options) {
-  Report report;
-  report.options = options;
+  Report report = make_report(options);
   const Clock::time_point total_start = Clock::now();
+  const Clock::time_point operational_deadline =
+      total_start + std::chrono::milliseconds{
+                        static_cast<std::chrono::milliseconds::rep>(
+                            options.operational_deadline_ms)};
   if (options.maximum_order >= options.point_count) {
     report.terminal_stage = "input_preflight";
     report.stop_category = "invalid_input";
@@ -1291,6 +1442,10 @@ void emit_report(const Report& report) {
   const Clock::time_point generation_end = Clock::now();
   report.timings.generation_ms =
       milliseconds(generation_end - generation_start);
+  if (deadline_due(options, operational_deadline)) {
+    return emit_operational_deadline(
+        report, "point_generation", total_start);
+  }
 
   const CanonicalPointCloud cloud =
       CanonicalPointCloud::rejecting_duplicates(
@@ -1299,11 +1454,19 @@ void emit_report(const Report& report) {
   const Clock::time_point canonicalization_end = Clock::now();
   report.timings.canonicalization_ms =
       milliseconds(canonicalization_end - generation_end);
+  if (deadline_due(options, operational_deadline)) {
+    return emit_operational_deadline(
+        report, "canonicalization", total_start);
+  }
 
   const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
   const Clock::time_point lbvh_end = Clock::now();
   report.timings.lbvh_ms =
       milliseconds(lbvh_end - canonicalization_end);
+  if (deadline_due(options, operational_deadline)) {
+    return emit_operational_deadline(
+        report, "lbvh", total_start);
+  }
 
   const ExactMortonGroupedAnchoredPairScheduleConfig pair_schedule_config =
       make_sparse_pair_schedule_config();
@@ -1315,6 +1478,11 @@ void emit_report(const Report& report) {
       make_sparse_pair_total_capacity(options);
   const ExactHigherSupportStreamBudget higher_budget =
       make_higher_budget(options);
+  const std::size_t effective_higher_chunk_limit =
+      complete_resident_diagnostic(options)
+          ? std::numeric_limits<std::size_t>::max()
+          : options.higher_chunk_limit;
+  report.effective_higher_chunk_limit = effective_higher_chunk_limit;
   report.pair_maximum_closed_rank = pair_maximum_closed_rank;
   report.pair_schedule_config = pair_schedule_config;
   report.pair_advance_budget = pair_advance_budget;
@@ -1335,6 +1503,11 @@ void emit_report(const Report& report) {
   while (!pair_session.complete() &&
          !pair_session.total_capacity_exhausted() &&
          !pair_session.poisoned()) {
+    if (complete_resident_diagnostic(options) &&
+        Clock::now() >= operational_deadline) {
+      report.operational_deadline_reached = true;
+      break;
+    }
     const ExactSparseAnchoredPairSessionStep step = pair_session.advance(
         index, cloud, pair_advance_budget);
     pair_terminal_stop_reason = step.stop_reason();
@@ -1343,7 +1516,9 @@ void emit_report(const Report& report) {
   report.timings.pair_support_ms =
       milliseconds(pair_end - lbvh_end);
   report.pair_stop_reason =
-      pair_stop_reason_text(pair_terminal_stop_reason);
+      report.operational_deadline_reached
+          ? "operational_deadline"
+          : pair_stop_reason_text(pair_terminal_stop_reason);
   const ExactSparseAnchoredPairSessionAudit pair_audit =
       pair_session.audit();
   const ExactMortonGroupedAnchoredPairCandidateAudit pair_candidate_audit =
@@ -1513,6 +1688,16 @@ void emit_report(const Report& report) {
       pair_schedule_audit
           .no_global_anchor_pair_or_output_arena_materialized;
   if (!pair_session.complete()) {
+    if (report.operational_deadline_reached) {
+      report.pair_status = "operational_deadline";
+      report.terminal_stage = "sparse_pair_session";
+      report.stop_detail = "complete_attempt_operational_deadline_reached";
+      report.stop_category = "operational_deadline";
+      report.timings.total_ms =
+          milliseconds(Clock::now() - total_start);
+      emit_report(report);
+      return 6;
+    }
     const bool capacity_exhausted =
         pair_session.total_capacity_exhausted();
     report.pair_status = capacity_exhausted
@@ -1629,15 +1814,41 @@ void emit_report(const Report& report) {
   report.no_forbidden_global_structure_materialized =
       report.no_forbidden_global_structure_materialized &&
       pair_authority.audit().no_forbidden_global_structure_materialized;
+  if (deadline_due(options, operational_deadline)) {
+    return emit_operational_deadline(
+        report, "sparse_pair_terminal_authority", total_start);
+  }
 
   ExactHigherSupportTerminalSession higher_session{
       index,
       cloud,
       options.maximum_order,
       higher_budget,
-      options.higher_chunk_limit};
-  const ExactHigherSupportTerminalRunStatus higher_run_status =
-      higher_session.run_to_terminal();
+      effective_higher_chunk_limit};
+  ExactHigherSupportTerminalRunStatus higher_run_status =
+      ExactHigherSupportTerminalRunStatus::maximum_chunk_count_reached;
+  if (complete_resident_diagnostic(options)) {
+    while (true) {
+      if (higher_session.trusted_checkpoint().locally_complete()) {
+        higher_run_status =
+            ExactHigherSupportTerminalRunStatus::terminal;
+        break;
+      }
+      if (deadline_due(options, operational_deadline)) {
+        report.operational_deadline_reached = true;
+        break;
+      }
+      const ExactHigherSupportResidentAdvanceStatus advance_status =
+          higher_session.advance_one_resident_chunk();
+      if (advance_status ==
+          ExactHigherSupportResidentAdvanceStatus::
+              maximum_chunk_count_reached) {
+        break;
+      }
+    }
+  } else {
+    higher_run_status = higher_session.run_to_terminal();
+  }
   const Clock::time_point higher_end = Clock::now();
   report.timings.higher_support_ms =
       milliseconds(higher_end - pair_end);
@@ -1655,6 +1866,15 @@ void emit_report(const Report& report) {
   report.higher_prune_certificates =
       higher_audit.emitted_prune_certificate_count;
   report.higher_chunk_count = higher_session.chunk_count();
+
+  if (report.operational_deadline_reached) {
+    report.higher_status = "operational_deadline";
+    report.higher_stop_reason = "operational_deadline";
+    report.higher_authority_kind =
+        "unsealed_root_anchored_fixed_chunk_session";
+    return emit_operational_deadline(
+        report, "higher_support", total_start);
+  }
 
   if (higher_run_status !=
       ExactHigherSupportTerminalRunStatus::terminal) {
@@ -1709,6 +1929,10 @@ void emit_report(const Report& report) {
     emit_report(report);
     return 3;
   }
+  if (deadline_due(options, operational_deadline)) {
+    return emit_operational_deadline(
+        report, "terminal_facade", total_start);
+  }
 
   const ExactDirectMorseEventJournalResult event_journal =
       build_exact_direct_morse_event_journal(cloud, facade);
@@ -1728,6 +1952,10 @@ void emit_report(const Report& report) {
         milliseconds(Clock::now() - total_start);
     emit_report(report);
     return 3;
+  }
+  if (deadline_due(options, operational_deadline)) {
+    return emit_operational_deadline(
+        report, "event_journal", total_start);
   }
 
   ExactDirectSaddleArmSeedBudget seed_budget;
@@ -1763,6 +1991,10 @@ void emit_report(const Report& report) {
         milliseconds(Clock::now() - total_start);
     emit_report(report);
     return 3;
+  }
+  if (deadline_due(options, operational_deadline)) {
+    return emit_operational_deadline(
+        report, "saddle_seed_journal", total_start);
   }
 
   const ExactDirectMorseIndustrialPlanConfig industrial_config =
@@ -1810,6 +2042,10 @@ void emit_report(const Report& report) {
     emit_report(report);
     return report.budget_exhausted ? 2 : 3;
   }
+  if (deadline_due(options, operational_deadline)) {
+    return emit_operational_deadline(
+        report, "batch_plan", total_start);
+  }
 
   ExactDirectMorseForestBudget forest_budget;
   try {
@@ -1856,6 +2092,12 @@ void emit_report(const Report& report) {
   report.timings.reducer_setup_ms =
       milliseconds(reducer_start - plan_end);
   while (!executor.complete()) {
+    if (deadline_due(options, operational_deadline)) {
+      report.timings.reducer_stream_ms =
+          milliseconds(Clock::now() - reducer_start);
+      return emit_operational_deadline(
+          report, "reducer_stream", total_start);
+    }
     const std::size_t batch_index =
         executor.next_source_batch_index();
     if (batch_index >= event_journal.batches.size()) {
@@ -1939,6 +2181,10 @@ void emit_report(const Report& report) {
         milliseconds(Clock::now() - total_start);
     emit_report(report);
     return 3;
+  }
+  if (deadline_due(options, operational_deadline)) {
+    return emit_operational_deadline(
+        report, "reducer_stream", total_start);
   }
 
   const Clock::time_point finish_start = Clock::now();
@@ -2024,8 +2270,7 @@ int main(int argc, char** argv) {
     options_parsed = true;
     return run(options);
   } catch (const std::exception& error) {
-    Report report;
-    report.options = options;
+    Report report = make_report(options);
     report.terminal_stage =
         options_parsed ? "operational_failure" : "input_parse";
     report.stop_category =
@@ -2038,8 +2283,7 @@ int main(int argc, char** argv) {
     emit_report(report);
     return options_parsed ? 5 : 4;
   } catch (...) {
-    Report report;
-    report.options = options;
+    Report report = make_report(options);
     report.terminal_stage =
         options_parsed ? "operational_failure" : "input_parse";
     report.stop_category =

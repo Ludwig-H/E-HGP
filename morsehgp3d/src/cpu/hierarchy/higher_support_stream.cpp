@@ -3390,6 +3390,31 @@ ExactHigherSupportTerminalSession::run_to_terminal() {
   return ExactHigherSupportTerminalRunStatus::terminal;
 }
 
+ExactHigherSupportResidentAdvanceStatus
+ExactHigherSupportTerminalSession::advance_one_resident_chunk() & {
+  if (sealed_) {
+    throw std::logic_error(
+        "a sealed terminal higher-support session cannot run");
+  }
+  if (unsealed_segment_drain_performed_) {
+    throw std::logic_error(
+        "an unsealed-drain higher-support session must advance one segment at a time");
+  }
+  if (!authority_.bound_to_original_sources()) {
+    throw std::logic_error(
+        "the terminal higher-support source identity changed before execution");
+  }
+  if (trusted_checkpoint_.locally_complete()) {
+    return ExactHigherSupportResidentAdvanceStatus::terminal;
+  }
+  if (chunk_count_ >= maximum_chunk_count_) {
+    return ExactHigherSupportResidentAdvanceStatus::
+        maximum_chunk_count_reached;
+  }
+  append_next_internal_chunk();
+  return ExactHigherSupportResidentAdvanceStatus::chunk_committed;
+}
+
 ExactHigherSupportUnsealedDrain
 ExactHigherSupportTerminalSession::drain_next_unsealed_segment() & {
   if (sealed_) {

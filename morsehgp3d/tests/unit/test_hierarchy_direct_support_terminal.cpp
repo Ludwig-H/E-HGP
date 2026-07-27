@@ -20,6 +20,7 @@ using morsehgp3d::hierarchy::ExactDirectSupportPairSourceKind;
 using morsehgp3d::hierarchy::ExactHigherSupportAnchoredSession;
 using morsehgp3d::hierarchy::ExactHigherSupportAuthorityContext;
 using morsehgp3d::hierarchy::ExactHigherSupportStreamBudget;
+using morsehgp3d::hierarchy::ExactHigherSupportResidentAdvanceStatus;
 using morsehgp3d::hierarchy::ExactHigherSupportTerminalRunStatus;
 using morsehgp3d::hierarchy::ExactHigherSupportTerminalSession;
 using morsehgp3d::hierarchy::ExactPairSupportAuthorityContext;
@@ -295,6 +296,54 @@ void test_sealed_higher_authority_avoids_fresh_higher_replay() {
   check(
       !polluted_fresh_provenance.terminal_catalog_certified(),
       "a fresh facade rejects sealed-only higher provenance");
+}
+
+void test_resident_higher_single_chunk_advance_matches_terminal_run() {
+  const CanonicalPointCloud cloud = regular_tetrahedron();
+  const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
+  const ExactHigherSupportStreamBudget budget =
+      small_higher_chunk_budget();
+
+  ExactHigherSupportTerminalSession monolithic{
+      index, cloud, 10U, budget, 256U};
+  check(
+      monolithic.run_to_terminal() ==
+          ExactHigherSupportTerminalRunStatus::terminal,
+      "the monolithic higher-support reference reaches terminality");
+  auto monolithic_authority = std::move(monolithic).seal();
+
+  ExactHigherSupportTerminalSession incremental{
+      index, cloud, 10U, budget, 256U};
+  ExactHigherSupportResidentAdvanceStatus status =
+      ExactHigherSupportResidentAdvanceStatus::chunk_committed;
+  while (status ==
+         ExactHigherSupportResidentAdvanceStatus::chunk_committed) {
+    status = incremental.advance_one_resident_chunk();
+  }
+  check(
+      status == ExactHigherSupportResidentAdvanceStatus::terminal,
+      "resident one-chunk advances observe terminality");
+  auto incremental_authority = std::move(incremental).seal();
+  check(
+      incremental_authority.terminal_checkpoint() ==
+              monolithic_authority.terminal_checkpoint() &&
+          incremental_authority.chunk_count() ==
+              monolithic_authority.chunk_count() &&
+          std::equal(
+              incremental_authority.segments().begin(),
+              incremental_authority.segments().end(),
+              monolithic_authority.segments().begin(),
+              monolithic_authority.segments().end()),
+      "resident one-chunk advances preserve the terminal checkpoint and segments");
+
+  ExactHigherSupportTerminalSession capped{
+      index, cloud, 10U, budget, 0U};
+  check(
+      capped.advance_one_resident_chunk() ==
+              ExactHigherSupportResidentAdvanceStatus::
+                  maximum_chunk_count_reached &&
+          capped.chunk_count() == 0U,
+      "resident one-chunk advance reports a nonterminal zero-chunk cap without mutation");
 }
 
 void test_sparse_pair_authority_avoids_p7b_replay() {
@@ -622,6 +671,7 @@ void test_one_record_chunks_exceed_resident_output_capacity() {
 int main() {
   test_terminal_facade_and_fresh_composition();
   test_sealed_higher_authority_avoids_fresh_higher_replay();
+  test_resident_higher_single_chunk_advance_matches_terminal_run();
   test_sparse_pair_authority_avoids_p7b_replay();
   test_sparse_pair_diagnostic_normalization();
   test_budgeted_source_never_publishes_terminal_payload();
