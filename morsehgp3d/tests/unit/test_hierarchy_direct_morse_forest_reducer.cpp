@@ -299,6 +299,47 @@ struct Scenario {
   ExactDirectSaddleArmSeedJournalResult seed_journal;
 };
 
+struct SegmentedRun {
+  std::vector<ExactDirectMorseForestBatchSegment> segments;
+  ExactDirectMorseForestFinalSeal seal;
+};
+
+[[nodiscard]] ExactDirectMorseForestSegmentLimits segment_limits() {
+  constexpr std::size_t capacity = 4096U;
+  return {
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+      capacity,
+  };
+}
+
+bool collect_segment(
+    void* state,
+    const ExactDirectMorseForestBatchSegment& segment) noexcept {
+  try {
+    static_cast<std::vector<ExactDirectMorseForestBatchSegment>*>(state)
+        ->push_back(segment);
+    return true;
+  } catch (...) {
+    return false;
+  }
+}
+
+bool reject_segment(
+    void*,
+    const ExactDirectMorseForestBatchSegment&) noexcept {
+  return false;
+}
+
+bool discard_segment(
+    void*,
+    const ExactDirectMorseForestBatchSegment&) noexcept {
+  return true;
+}
+
 [[nodiscard]] Scenario tetrahedron() {
   const std::array<CertifiedPoint3, 4U> points{
       point(1.0, 1.0, 1.0),
@@ -583,6 +624,162 @@ struct Scenario {
   return reducer.finish();
 }
 
+[[nodiscard]] SegmentedRun run_segmented_stream(
+    const Scenario& scenario) {
+  const auto industrial_config = plan_config(2U);
+  const auto observed_plan =
+      build_exact_direct_sparse_facet_descent_batch_plan(
+          scenario.cloud,
+          scenario.facade,
+          scenario.event_journal,
+          seed_budget(),
+          scenario.seed_journal,
+          industrial_config,
+          plan_budget());
+  check(
+      observed_plan.complete_architecture_plan(),
+      "the segmented reducer fixture has one complete 14C plan");
+
+  ExactDirectMorseForestReducer reducer(
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      forest_budget(),
+      forest_config(),
+      segment_limits(),
+      morsehgp3d::contract::CanonicalId{});
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      industrial_config,
+      plan_budget(),
+      observed_plan,
+      reducer.strict_locator());
+  SegmentedRun run;
+  bool retry_path_exercised = false;
+
+  check(
+      reducer.segmented_output_enabled() &&
+          !reducer.has_pending_output_segment() &&
+          reducer.pending_output_segment() == nullptr,
+      "the segmented mode is fixed before the first fold and starts without output history");
+
+  while (!executor.complete()) {
+    const std::size_t batch_index = executor.next_source_batch_index();
+    const ExactDirectSparseFacetWitness witness{
+        authority_id,
+        (static_cast<std::uint64_t>(batch_index) + 1U) * 3U};
+    const auto delta = executor.prepare_next(
+        witness,
+        execution_budget(),
+        forest_budget().closure_budget);
+    check(
+        delta.complete_architecture_execution(),
+        "14D produces one complete delta for the segmented reducer");
+    const auto replay = executor.commit_prepared(
+        witness,
+        execution_budget(),
+        forest_budget().closure_budget,
+        delta);
+    check(
+        replay.result_certified && replay.session_advanced,
+        "the anchored cursor advances before one segmented reducer fold");
+
+    const auto projected =
+        project_exact_direct_morse_forest_reducer_batch(delta);
+    const auto cursor_before = reducer.output_cursor();
+    const auto folded = reducer.fold(projected);
+    check(
+        folded.certified_committed_batch() &&
+            reducer.next_source_batch_index() == batch_index + 1U &&
+            reducer.has_pending_output_segment(),
+        "one committed fold exposes exactly one pending output segment");
+    const auto* pending = reducer.pending_output_segment();
+    check(
+        pending != nullptr && pending->certified_structure() &&
+            pending->begin_cursor == cursor_before &&
+            pending->end_cursor.segment_count ==
+                cursor_before.segment_count + 1U &&
+            pending->batch.batch_index == batch_index &&
+            pending->batch.source_journal_batch_index == batch_index,
+        "the pending segment preserves dense source order and global cursors");
+    if (pending == nullptr) {
+      break;
+    }
+    const auto pending_before_drain = *pending;
+
+    if (!retry_path_exercised) {
+      check(
+          batch_index == 0U &&
+              pending->canonical_singleton_prefix_implicit &&
+              pending->birth_records.empty() &&
+              pending->nodes.empty() &&
+              pending->batch.birth_record_count == scenario.cloud.size(),
+          "the singleton batch is one logical segment with no physical birth or node payload");
+
+      auto blocked_batch = projected;
+      ++blocked_batch.source_batch_index;
+      const auto blocked_stamp =
+          reducer.strict_locator().snapshot_stamp();
+      const auto blocked_cursor = reducer.output_cursor();
+      const auto blocked = reducer.fold(blocked_batch);
+      check(
+          blocked.certified_atomic_rejection() &&
+              blocked.decision ==
+                  ExactDirectMorseForestReducerFoldDecision::
+                      no_reducer_output_segment_pending &&
+              reducer.next_source_batch_index() == batch_index + 1U &&
+              reducer.strict_locator().snapshot_stamp() == blocked_stamp &&
+              reducer.output_cursor() == blocked_cursor &&
+              reducer.pending_output_segment() != nullptr &&
+              *reducer.pending_output_segment() == pending_before_drain,
+          "a next fold is refused without mutation while one segment awaits acknowledgement");
+
+      bool rejecting_sink_state = false;
+      const auto rejected = reducer.drain_pending_output_segment(
+          {&rejecting_sink_state, reject_segment});
+      check(
+          rejected.certified_retryable_rejection() &&
+              rejected.decision ==
+                  ExactDirectMorseForestSegmentDrainDecision::
+                      no_sink_rejected &&
+              rejected.pending_segment_retained &&
+              reducer.output_cursor() == cursor_before &&
+              reducer.pending_output_segment() != nullptr &&
+              *reducer.pending_output_segment() == pending_before_drain,
+          "a rejecting sink leaves the complete pending segment bit-for-bit retryable");
+      retry_path_exercised = true;
+    }
+
+    const auto accepted = reducer.drain_pending_output_segment(
+        {&run.segments, collect_segment});
+    check(
+        accepted.certified_acknowledged() &&
+            accepted.decision ==
+                ExactDirectMorseForestSegmentDrainDecision::
+                    complete_segment_acknowledged &&
+            accepted.reducer_output_history_released &&
+            accepted.post_drain_cursor == pending_before_drain.end_cursor &&
+            reducer.output_cursor() == pending_before_drain.end_cursor &&
+            !reducer.has_pending_output_segment() &&
+            reducer.pending_output_segment() == nullptr,
+        "a successful sink acknowledgement advances only the scalar cursor and releases reducer-owned output");
+  }
+
+  check(
+      retry_path_exercised && reducer.complete() &&
+          run.segments.size() == scenario.event_journal.batches.size(),
+      "the segmented fixture exercised retry and acknowledged every source batch once");
+  run.seal = reducer.finish_segmented();
+  return run;
+}
+
 [[nodiscard]] ExactDirectMorseForestJournalResult
 run_integrated_adapter_stream(const Scenario& scenario) {
   reset_fake_gpu_phase14_facet_top_k_proposal();
@@ -859,6 +1056,193 @@ void test_incremental_identity_and_chunk_independence() {
       "projected, live and real-adapter streaming outputs are recursively identical to resident output");
 }
 
+void test_segmented_output_identity_retry_and_no_history() {
+  const Scenario scenario = tetrahedron();
+  const auto resident = build_exact_direct_morse_forest_journal(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      forest_budget(),
+      forest_config());
+  const auto segmented = run_segmented_stream(scenario);
+
+  std::vector<ExactDirectMorseForestBirthRecord> birth_records;
+  std::vector<ExactDirectMorseForestArmRootBinding> arm_root_bindings;
+  std::vector<ExactDirectMorseForestSaddleRecord> saddle_records;
+  std::vector<ExactDirectMorseForestAtomicGroup> atomic_groups;
+  std::vector<ExactDirectMorseForestNodeId> child_node_ids;
+  std::vector<ExactDirectMorseForestBatch> batches;
+  std::vector<ExactDirectMorseForestNode> nodes;
+  ExactDirectMorseForestSegmentCursor expected_begin{};
+  expected_begin.chain_digest =
+      morsehgp3d::contract::CanonicalId{};
+
+  for (std::size_t index = 0U;
+       index < segmented.segments.size();
+       ++index) {
+    const auto& segment = segmented.segments[index];
+    check(
+        segment.certified_structure() &&
+            segment.begin_cursor == expected_begin &&
+            segment.end_cursor.segment_count == index + 1U,
+        "acknowledged forest segments form one dense cursor chain");
+    birth_records.insert(
+        birth_records.end(),
+        segment.birth_records.begin(),
+        segment.birth_records.end());
+    arm_root_bindings.insert(
+        arm_root_bindings.end(),
+        segment.arm_root_bindings.begin(),
+        segment.arm_root_bindings.end());
+    saddle_records.insert(
+        saddle_records.end(),
+        segment.saddle_records.begin(),
+        segment.saddle_records.end());
+    atomic_groups.insert(
+        atomic_groups.end(),
+        segment.atomic_groups.begin(),
+        segment.atomic_groups.end());
+    child_node_ids.insert(
+        child_node_ids.end(),
+        segment.child_node_ids.begin(),
+        segment.child_node_ids.end());
+    batches.push_back(segment.batch);
+    nodes.insert(
+        nodes.end(), segment.nodes.begin(), segment.nodes.end());
+    expected_begin = segment.end_cursor;
+  }
+
+  check(
+      birth_records == resident.birth_records &&
+          arm_root_bindings == resident.arm_root_bindings &&
+          saddle_records == resident.saddle_records &&
+          atomic_groups == resident.atomic_groups &&
+          child_node_ids == resident.child_node_ids &&
+          batches == resident.batches && nodes == resident.nodes,
+      "concatenated segment payloads preserve every resident global index, offset and node identifier");
+  check(
+      segmented.seal.certified_conditional_h0_candidate() &&
+          segmented.seal.point_count == resident.point_count &&
+          segmented.seal.effective_maximum_order ==
+              resident.effective_maximum_order &&
+          segmented.seal.final_cursor == expected_begin &&
+          segmented.seal.final_locator_stamp ==
+              resident.final_locator_stamp &&
+          segmented.seal.counters == resident.counters &&
+          segmented.seal.final_roots == resident.final_roots &&
+          segmented.seal.logical_output_entry_count ==
+              resident.logical_output_entry_count,
+      "the O(K) segmented seal closes the same counters, roots and locator stamp as the resident journal");
+  check(
+      expected_begin.segment_count == resident.batches.size() &&
+          expected_begin.implicit_order_one_prefix_count ==
+              resident.implicit_order_one_prefix_count &&
+          expected_begin.birth_record_count ==
+              resident.birth_records.size() &&
+          expected_begin.arm_root_binding_count ==
+              resident.arm_root_bindings.size() &&
+          expected_begin.saddle_record_count ==
+              resident.saddle_records.size() &&
+          expected_begin.atomic_group_count ==
+              resident.atomic_groups.size() &&
+          expected_begin.child_reference_count ==
+              resident.child_node_ids.size() &&
+          expected_begin.batch_record_count ==
+              resident.batches.size() &&
+          expected_begin.node_count == resident.nodes.size(),
+      "the final scalar cursor counts the implicit prefix and all acknowledged physical suffixes");
+}
+
+void test_segment_cap_rejects_before_locator_mutation() {
+  const Scenario scenario = tetrahedron();
+  const auto industrial_config = plan_config(2U);
+  const auto observed_plan =
+      build_exact_direct_sparse_facet_descent_batch_plan(
+          scenario.cloud,
+          scenario.facade,
+          scenario.event_journal,
+          seed_budget(),
+          scenario.seed_journal,
+          industrial_config,
+          plan_budget());
+  const ExactDirectMorseForestSegmentLimits zero_payload_limits{};
+  ExactDirectMorseForestReducer reducer(
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      forest_budget(),
+      forest_config(),
+      zero_payload_limits,
+      morsehgp3d::contract::CanonicalId{});
+  ExactDirectSparseFacetDescentAnchoredBatchExecutor executor(
+      scenario.index,
+      scenario.cloud,
+      scenario.facade,
+      scenario.event_journal,
+      seed_budget(),
+      scenario.seed_journal,
+      industrial_config,
+      plan_budget(),
+      observed_plan,
+      reducer.strict_locator());
+  std::size_t discard_state = 0U;
+  bool cap_rejection_exercised = false;
+
+  while (!executor.complete() && !cap_rejection_exercised) {
+    const std::size_t batch_index = executor.next_source_batch_index();
+    const ExactDirectSparseFacetWitness witness{
+        authority_id,
+        (static_cast<std::uint64_t>(batch_index) + 1U) * 3U};
+    const auto delta = executor.prepare_next(
+        witness,
+        execution_budget(),
+        forest_budget().closure_budget);
+    const auto replay = executor.commit_prepared(
+        witness,
+        execution_budget(),
+        forest_budget().closure_budget,
+        delta);
+    check(
+        delta.complete_architecture_execution() &&
+            replay.result_certified && replay.session_advanced,
+        "the segment-cap fixture produces one certified source delta");
+    const auto projected =
+        project_exact_direct_morse_forest_reducer_batch(delta);
+    const auto cursor_before = reducer.output_cursor();
+    const auto stamp_before = reducer.strict_locator().snapshot_stamp();
+    const std::size_t reducer_batch_before =
+        reducer.next_source_batch_index();
+    const auto folded = reducer.fold(projected);
+    if (folded.certified_committed_batch()) {
+      const auto drained = reducer.drain_pending_output_segment(
+          {&discard_state, discard_segment});
+      check(
+          drained.certified_acknowledged(),
+          "an empty segment within the zero payload caps can be acknowledged");
+      continue;
+    }
+    cap_rejection_exercised = true;
+    check(
+        folded.certified_atomic_rejection() &&
+            folded.decision ==
+                ExactDirectMorseForestReducerFoldDecision::
+                    no_reducer_budget_exhausted &&
+            reducer.next_source_batch_index() == reducer_batch_before &&
+            reducer.strict_locator().snapshot_stamp() == stamp_before &&
+            reducer.output_cursor() == cursor_before &&
+            !reducer.has_pending_output_segment(),
+        "an insufficient per-segment payload cap rejects before locator, reducer cursor or output mutation");
+  }
+  check(
+      cap_rejection_exercised,
+      "the tetrahedron fixture reaches a nonempty physical forest segment");
+}
+
 void test_gabriel_arm_may_descend_to_a_different_terminal_key() {
   const Scenario scenario = gabriel_ac_to_de();
   const auto resident = build_exact_direct_morse_forest_journal(
@@ -883,6 +1267,8 @@ int main() {
   test_final_root_budget_is_rejected_at_open();
   test_live_transaction_rejects_a_distinct_reducer_locator();
   test_incremental_identity_and_chunk_independence();
+  test_segmented_output_identity_retry_and_no_history();
+  test_segment_cap_rejects_before_locator_mutation();
   test_gabriel_arm_may_descend_to_a_different_terminal_key();
   if (failures != 0) {
     std::cerr << failures << " direct Morse forest reducer test(s) failed\n";

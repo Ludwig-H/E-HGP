@@ -1,6 +1,7 @@
 #pragma once
 
 #include "morsehgp3d/hierarchy/direct_morse_forest_journal.hpp"
+#include "morsehgp3d/hierarchy/direct_morse_forest_segment_sink.hpp"
 #include "morsehgp3d/hierarchy/direct_sparse_facet_descent_batch_executor.hpp"
 
 #include <cstddef>
@@ -100,6 +101,7 @@ enum class ExactDirectMorseForestReducerFoldDecision : std::uint8_t {
   no_reducer_frozen_carrier_quotient_rejected,
   no_reducer_locator_commit_rejected,
   complete_reducer_batch_commit,
+  no_reducer_output_segment_pending,
 };
 
 struct ExactDirectMorseForestReducerFoldResult {
@@ -227,7 +229,9 @@ struct ExactDirectMorseForestLiveCommitResult {
 // Incremental Phase-15C reduction.  The source authorities must outlive the
 // reducer.  Its persistent scientific state is one sparse positive locator,
 // carrier attributes that reuse the locator's canonical-minimum parent
-// authority, per-order scalar counts and the final forest output arenas.
+// authority and per-order scalar counts.  Resident mode also retains the
+// final forest arenas; segmented mode retains at most one committed batch
+// until its sink acknowledgement and then reuses that batch's capacities.
 // Canonical singleton carrier attributes are implicit; only the direct suffix
 // and an output-proportional reduced-root override table are materialized.  It
 // retains no input batch deltas, closure graph, cells, cofaces, Gamma
@@ -242,6 +246,22 @@ class ExactDirectMorseForestReducer {
       const ExactDirectSaddleArmSeedJournalResult& source_seed_journal,
       const ExactDirectMorseForestBudget& budget,
       const ExactDirectMorseForestConfig& config,
+      spatial::LbvhTraversalOrder traversal_order =
+          spatial::LbvhTraversalOrder::near_first);
+
+  // Selects the bounded segmented-output path before the first fold.  The
+  // scientific locator and carrier authorities are identical to the resident
+  // path, while only one committed batch segment may remain pending.
+  ExactDirectMorseForestReducer(
+      const spatial::CanonicalPointCloud& cloud,
+      const ExactDirectSupportTerminalFacade& source_facade,
+      const ExactDirectMorseEventJournalResult& source_journal,
+      const ExactDirectSaddleArmSeedBudget& trusted_seed_budget,
+      const ExactDirectSaddleArmSeedJournalResult& source_seed_journal,
+      const ExactDirectMorseForestBudget& budget,
+      const ExactDirectMorseForestConfig& config,
+      const ExactDirectMorseForestSegmentLimits& segment_limits,
+      const contract::CanonicalId& initial_chain_digest,
       spatial::LbvhTraversalOrder traversal_order =
           spatial::LbvhTraversalOrder::near_first);
   ~ExactDirectMorseForestReducer();
@@ -278,9 +298,23 @@ class ExactDirectMorseForestReducer {
   [[nodiscard]] std::size_t next_source_batch_index() const noexcept;
   [[nodiscard]] bool complete() const noexcept;
 
+  [[nodiscard]] bool segmented_output_enabled() const noexcept;
+  [[nodiscard]] bool has_pending_output_segment() const noexcept;
+  [[nodiscard]] const ExactDirectMorseForestBatchSegment*
+  pending_output_segment() const noexcept;
+  [[nodiscard]] const ExactDirectMorseForestSegmentCursor& output_cursor()
+      const noexcept;
+  [[nodiscard]] ExactDirectMorseForestSegmentDrainResult
+  drain_pending_output_segment(
+      ExactDirectMorseForestSegmentSinkView sink) noexcept;
+
   // Consumes the reducer after every source batch has committed.  Calling
   // finish early throws std::logic_error.
   [[nodiscard]] ExactDirectMorseForestJournalResult finish();
+
+  // Segmented counterpart of finish().  Every committed batch must first be
+  // acknowledged by the sink.  The returned terminal object is O(K).
+  [[nodiscard]] ExactDirectMorseForestFinalSeal finish_segmented();
 
  private:
   class Impl;
