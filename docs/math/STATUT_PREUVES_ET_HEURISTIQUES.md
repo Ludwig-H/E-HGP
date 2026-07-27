@@ -638,6 +638,12 @@ Le locator P8l global est conservé; seuls les indices finaux de Phase 10 sont d
 
 <!-- TODO preuve 14W perfectionné / 14X : certifier la fusion externe des flux pair et higher-support, puis la complétude de l'oracle global naissances--selles Morse--Borůvka. Les obligations indivisibles sont la complétude des coupes, toutes les incidences silencieuses utiles et M.1, y compris les co-minimiseurs d'un niveau exact. -->
 
+Le MVP 14X établit uniquement une équivalence de représentation mécanique. Pour des runs d'entrée déjà certifiés et strictement triés, la session en prend possession, effectue une unique validation complète, puis le merge k-way paginé émet exactement leur union disjointe dans l'ordre de la clé canonique de la façade. L'invariant des positions privées et la position source du dernier candidat suffisent à conserver cette propriété entre deux pages sans copier sa liste d'intérieurs; une collision empoisonne la session avant commit. Les rôles naissance et selle restent les projections locales du rang fermé. Aucun résultat sur les composantes, les bras ou la complétude de H0 n'en découle.
+
+Le locator higher-support est nécessairement `(chunk_sequence, local_event_index)`: le segment terminal détruit les certificats de prune après leur engagement dans la chaîne et ne conserve donc plus l'entrelacement requis pour reconstruire un index global de record. Ne pas inventer cet index est une partie du contrat 14X.
+
+<!-- TODO preuve 14X perfectionné / 14Y : certifier les passes externes et la reprise du merge, puis la complétude de l'oracle global naissances--selles Morse--Borůvka. Les obligations indivisibles sont la complétude des coupes, toutes les incidences silencieuses utiles et M.1, y compris les co-minimiseurs d'un niveau exact. -->
+
 ### V6 — tour globale de boules saturées
 
 Les théorèmes S.1–S.6 de [`TOUR_BOULES_SATUREES.md`](TOUR_BOULES_SATUREES.md) donnent une représentation combinatoire exacte de Gamma par saturés et une forêt de Kruskal commune aux ordres. Il reste à construire un oracle indépendant borné, à convertir ses coupes en `MergeForest`, `coverage_log` et applications verticales canoniques, puis à certifier la persistance et les dégénérescences. La voie brute possède jusqu'à $O(n^4)$ supports, $O(n^5)$ memberships et $O(M^2)$ paires de générateurs; elle est donc un oracle petit $n$, pas un remplacement scalable de la voie actuelle. Une sous-famille proposée puis saturée reste `partial_refinement`.

@@ -458,11 +458,21 @@ Les candidats et diagnostics source conservent leur `source_output_record_index`
 
 <!-- TODO 14W perfectionné / 14X : ajouter la fusion externe canonique pair+higher, puis un oracle global naissances--selles Morse--Borůvka. Avant toute autorité H0, prouver la complétude des coupes proposées, fermer les incidences silencieuses et démontrer M.1 avec les lots de niveaux égaux. -->
 
+## Incrément 14X validé hôte — fusion H0 sparse multi-support paginée
+
+La porte 14W est satisfaite. Le MVP 14X emploie `reference_cpu / hgp_reduced / bounded_sparse_direct_h0_candidate_merge`, en `architecture_only`. Il normalise séparément les candidats pair et higher-support vers un format commun arité deux à quatre, puis fusionne un nombre borné de runs déjà triés en pages bornées. Le comparateur est exactement celui de la façade terminale : niveau exact, rang fermé, intérieurs, support canonique préfixe-plus-taille, puis centre exact.
+
+La provenance ne prétend aucun index final. La lane paire conserve son locator P8l global; la lane higher conserve la séquence de chunk et l'index local typé. Une session non copiable et non déplaçable possède les runs et les valide exactement une fois; son curseur privé porte une position par run et la position source du dernier candidat, sans copie profonde. Une collision empoisonne la session et ne committe ni curseur ni page. La construction du heap est linéaire dans le fan-in; chaque page ajoute seulement le travail logarithmique de ses candidats. Aucun reducer, racine, lot Morse ou statut H0 complet n'est publié.
+
+Le CTest GCC Release ciblé passe en 0,01 seconde. Il compare champ par champ les onze événements du tétraèdre à la façade résidente, avec six supports deux, quatre supports trois et un support quatre; les pages unitaires et la permutation des runs conservent exactement le flux. L'audit reste à une unique validation complète, les caps invalides et contrats incohérents sont refusés, et un doublon sur la page suivante empoisonne la session sans avancer son curseur. Aucun test long, benchmark, CUDA ou GCP n'est lancé.
+
+<!-- TODO 14X perfectionné : ajouter au store atomique un lecteur séquentiel certifié borné, externaliser une passe puis le multi-passe avec reprise atomique, et rendre le producteur higher-support drainable. Le futur oracle 14Y reste soumis à la complétude des coupes, aux incidences silencieuses et à M.1. -->
+
 ## Priorités de développement
 
-1. intégrer le MVP 14W comme projection paire bornée, fraîchement recertifiée et triée par `event_less`, avec diagnostics et locator P8l global conservés, mais indices finaux de Phase 10 différés;
+1. externaliser le flux 14X par un lecteur séquentiel certifié et une passe atomique à fan-in fixe, sans pénaliser la voie résidente 50 k par des synchronisations disque;
 
-2. préparer ensuite la fusion externe pair+higher et l'oracle global naissance--selle 14X, sans les confondre avec l'autorité limitée du MVP. Aucun micro-réglage du halo ni nouveau gate 50 k ne précède ces preuves.
+2. spécifier puis falsifier l'oracle global naissance--selle 14Y contre le sweep Morse--Gamma 6.23 déjà borné, sans créer un second oracle exhaustif. Aucun micro-réglage du halo ni nouveau gate 50 k ne précède ces travaux.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 
