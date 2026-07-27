@@ -2897,58 +2897,61 @@ if(MORSEHGP3D_ENABLE_CUDA)
     endif()
 
     if(MORSEHGP3D_ENABLE_GEOGRAM_LOW_ORDER_DIAGNOSTIC)
-      if(DEFINED ENV{GEOGRAM_INSTALL_PREFIX})
-        list(PREPEND CMAKE_PREFIX_PATH "$ENV{GEOGRAM_INSTALL_PREFIX}")
-      endif()
-      find_package(Geogram QUIET)
-      set(_morsehgp3d_geogram_target "")
-      foreach(
-        _morsehgp3d_geogram_candidate
-        Geogram::geogram
-        geogram::geogram
-        geogram
+      set(_morsehgp3d_geogram_prefix "")
+      if(
+        DEFINED GEOGRAM_INSTALL_PREFIX
+        AND NOT "${GEOGRAM_INSTALL_PREFIX}" STREQUAL ""
       )
-        if(TARGET "${_morsehgp3d_geogram_candidate}")
-          set(
-            _morsehgp3d_geogram_target
-            "${_morsehgp3d_geogram_candidate}"
-          )
-          break()
-        endif()
-      endforeach()
-      if(_morsehgp3d_geogram_target STREQUAL "")
-        find_path(
-          MORSEHGP3D_GEOGRAM_INCLUDE_DIR
-          NAMES geogram/basic/common.h
-          HINTS "$ENV{GEOGRAM_INSTALL_PREFIX}/include"
-          PATH_SUFFIXES geogram1
-        )
-        find_library(
-          MORSEHGP3D_GEOGRAM_LIBRARY
-          NAMES geogram
-          HINTS "$ENV{GEOGRAM_INSTALL_PREFIX}/lib"
-        )
-        if(
-          NOT MORSEHGP3D_GEOGRAM_INCLUDE_DIR
-          OR NOT MORSEHGP3D_GEOGRAM_LIBRARY
-        )
-          message(
-            FATAL_ERROR
-            "The low-order diagnostic requires a Geogram installation"
-          )
-        endif()
-        add_library(morsehgp3d_geogram_diagnostic_dependency UNKNOWN IMPORTED)
-        set_target_properties(
-          morsehgp3d_geogram_diagnostic_dependency
-          PROPERTIES
-            IMPORTED_LOCATION "${MORSEHGP3D_GEOGRAM_LIBRARY}"
-            INTERFACE_INCLUDE_DIRECTORIES "${MORSEHGP3D_GEOGRAM_INCLUDE_DIR}"
-        )
-        set(
-          _morsehgp3d_geogram_target
-          morsehgp3d_geogram_diagnostic_dependency
+        set(_morsehgp3d_geogram_prefix "${GEOGRAM_INSTALL_PREFIX}")
+      elseif(
+        DEFINED ENV{GEOGRAM_INSTALL_PREFIX}
+        AND NOT "$ENV{GEOGRAM_INSTALL_PREFIX}" STREQUAL ""
+      )
+        set(_morsehgp3d_geogram_prefix "$ENV{GEOGRAM_INSTALL_PREFIX}")
+      endif()
+      if(_morsehgp3d_geogram_prefix STREQUAL "")
+        message(
+          FATAL_ERROR
+          "Set GEOGRAM_INSTALL_PREFIX to the pinned Phase 14 Geogram install"
         )
       endif()
+      if(NOT IS_DIRECTORY "${_morsehgp3d_geogram_prefix}")
+        message(
+          FATAL_ERROR
+          "GEOGRAM_INSTALL_PREFIX is not a directory: "
+          "${_morsehgp3d_geogram_prefix}"
+        )
+      endif()
+      file(
+        REAL_PATH "${_morsehgp3d_geogram_prefix}"
+        _morsehgp3d_geogram_prefix
+      )
+      set(
+        _morsehgp3d_geogram_module_dir
+        "${_morsehgp3d_geogram_prefix}/lib/cmake/modules"
+      )
+      if(
+        NOT EXISTS
+          "${_morsehgp3d_geogram_module_dir}/FindGeogram.cmake"
+        OR NOT EXISTS
+          "${_morsehgp3d_geogram_prefix}/include/geogram1/geogram/basic/common.h"
+        OR NOT EXISTS "${_morsehgp3d_geogram_prefix}/lib/libgeogram.so"
+      )
+        message(
+          FATAL_ERROR
+          "GEOGRAM_INSTALL_PREFIX is not a complete pinned dynamic Geogram "
+          "installation: ${_morsehgp3d_geogram_prefix}"
+        )
+      endif()
+      list(PREPEND CMAKE_MODULE_PATH "${_morsehgp3d_geogram_module_dir}")
+      set(GEOGRAM_INSTALL_PREFIX "${_morsehgp3d_geogram_prefix}")
+      unset(GEOGRAM_INCLUDE_DIR CACHE)
+      unset(GEOGRAM_LIBRARY CACHE)
+      find_package(Geogram REQUIRED MODULE)
+      if(NOT TARGET Geogram::geogram)
+        message(FATAL_ERROR "Pinned FindGeogram did not define Geogram::geogram")
+      endif()
+      set(_morsehgp3d_geogram_target Geogram::geogram)
 
       add_executable(
         morsehgp3d_gpu_geogram_low_order_diagnostic
@@ -2967,6 +2970,9 @@ if(MORSEHGP3D_ENABLE_CUDA)
       morsehgp3d_configure_cuda_target(
         morsehgp3d_gpu_geogram_low_order_diagnostic
       )
+      unset(_morsehgp3d_geogram_module_dir)
+      unset(_morsehgp3d_geogram_prefix)
+      unset(_morsehgp3d_geogram_target)
     endif()
   endif()
 endif()

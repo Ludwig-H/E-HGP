@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <bit>
 #include <charconv>
 #include <chrono>
@@ -269,6 +270,37 @@ template <typename Duration>
   return static_cast<double>(bits >> 11U) * kInverse53;
 }
 
+[[nodiscard]] bool point_lexicographic_less(
+    const Point3& left,
+    const Point3& right) noexcept {
+  if (left.x != right.x) {
+    return left.x < right.x;
+  }
+  if (left.y != right.y) {
+    return left.y < right.y;
+  }
+  return left.z < right.z;
+}
+
+void reject_duplicate_sites(std::span<const Point3> points) {
+  std::vector<std::size_t> order(points.size());
+  std::iota(order.begin(), order.end(), std::size_t{0});
+  std::sort(order.begin(), order.end(), [&](std::size_t left, std::size_t right) {
+    return point_lexicographic_less(points[left], points[right]);
+  });
+  for (std::size_t position = 1U; position < order.size(); ++position) {
+    const std::size_t left = order[position - 1U];
+    const std::size_t right = order[position];
+    if (points[left].x == points[right].x &&
+        points[left].y == points[right].y &&
+        points[left].z == points[right].z) {
+      throw std::invalid_argument(
+          "--input-xyz contains duplicate sites at point IDs " +
+          std::to_string(left) + " and " + std::to_string(right));
+    }
+  }
+}
+
 [[nodiscard]] std::vector<Point3> make_points(const Options& options) {
   if (options.fixture_e5) {
     return {{0.0, 0.0, 7.0},
@@ -297,6 +329,7 @@ template <typename Duration>
     if (points.size() < 4U) {
       throw std::invalid_argument("--input-xyz needs at least four points");
     }
+    reject_duplicate_sites(points);
     return points;
   }
   std::vector<Point3> points;
@@ -394,6 +427,7 @@ struct GeogramResult {
       std::size_t{1},
       std::min(cpu_workers, static_cast<std::size_t>(cell_count)));
   std::vector<std::vector<Edge>> local_edges(worker_count);
+  std::atomic<bool> invalid_cell_vertex{false};
   parallel_shards(
       static_cast<std::size_t>(cell_count),
       worker_count,
@@ -401,21 +435,25 @@ struct GeogramResult {
         std::vector<Edge>& output = local_edges[worker];
         output.reserve(checked_product(end - begin, 6U, "edge reserve overflow"));
         for (std::size_t cell = begin; cell < end; ++cell) {
+          if (invalid_cell_vertex.load(std::memory_order_relaxed)) {
+            break;
+          }
           std::array<PointId, 4U> vertices{};
-          bool finite = true;
+          bool valid = true;
           for (std::size_t local = 0U; local < 4U; ++local) {
             const GEO::index_t vertex = delaunay->cell_vertex(
                 static_cast<GEO::index_t>(cell),
                 static_cast<GEO::index_t>(local));
             if (vertex == GEO::NO_INDEX ||
                 static_cast<std::size_t>(vertex) >= points.size()) {
-              finite = false;
+              valid = false;
+              invalid_cell_vertex.store(true, std::memory_order_relaxed);
               break;
             }
             vertices[local] = static_cast<PointId>(vertex);
           }
-          if (!finite) {
-            continue;
+          if (!valid) {
+            break;
           }
           for (std::size_t left = 0U; left < 4U; ++left) {
             for (std::size_t right = left + 1U; right < 4U; ++right) {
@@ -432,6 +470,10 @@ struct GeogramResult {
         output.erase(
             std::unique(output.begin(), output.end()), output.end());
       });
+  if (invalid_cell_vertex.load(std::memory_order_relaxed)) {
+    throw std::runtime_error(
+        "Geogram returned an invalid vertex in a finite PDEL cell");
+  }
 
   std::size_t total_edge_occurrences{};
   for (const std::vector<Edge>& local : local_edges) {
@@ -546,6 +588,39 @@ struct Bbox {
   Point3 upper{};
 };
 
+struct CellAabb {
+  Point3 lower{};
+  Point3 upper{};
+};
+
+__device__ void atomic_min_finite_double(double* address, double value) noexcept {
+  auto* bits = reinterpret_cast<unsigned long long*>(address);
+  unsigned long long observed = atomicCAS(bits, 0ULL, 0ULL);
+  while (value < __longlong_as_double(static_cast<long long>(observed))) {
+    const unsigned long long desired = static_cast<unsigned long long>(
+        __double_as_longlong(value));
+    const unsigned long long previous = atomicCAS(bits, observed, desired);
+    if (previous == observed) {
+      return;
+    }
+    observed = previous;
+  }
+}
+
+__device__ void atomic_max_finite_double(double* address, double value) noexcept {
+  auto* bits = reinterpret_cast<unsigned long long*>(address);
+  unsigned long long observed = atomicCAS(bits, 0ULL, 0ULL);
+  while (value > __longlong_as_double(static_cast<long long>(observed))) {
+    const unsigned long long desired = static_cast<unsigned long long>(
+        __double_as_longlong(value));
+    const unsigned long long previous = atomicCAS(bits, observed, desired);
+    if (previous == observed) {
+      return;
+    }
+    observed = previous;
+  }
+}
+
 [[nodiscard]] Bbox point_bbox(std::span<const Point3> points) {
   Bbox bbox{points.front(), points.front()};
   for (const Point3& point : points.subspan(1U)) {
@@ -604,7 +679,8 @@ __global__ void build_grid_keys_kernel(
     std::uint64_t resolution,
     std::uint64_t* keys,
     PointId* point_ids,
-    std::uint64_t* counts) {
+    std::uint64_t* counts,
+    CellAabb* cell_bounds) {
   const std::size_t stride =
       static_cast<std::size_t>(blockDim.x) * gridDim.x;
   for (std::size_t index =
@@ -622,6 +698,12 @@ __global__ void build_grid_keys_kernel(
     keys[index] = key;
     point_ids[index] = static_cast<PointId>(index);
     atomicAdd(reinterpret_cast<unsigned long long*>(counts + key), 1ULL);
+    atomic_min_finite_double(&cell_bounds[key].lower.x, point.x);
+    atomic_min_finite_double(&cell_bounds[key].lower.y, point.y);
+    atomic_min_finite_double(&cell_bounds[key].lower.z, point.z);
+    atomic_max_finite_double(&cell_bounds[key].upper.x, point.x);
+    atomic_max_finite_double(&cell_bounds[key].upper.y, point.y);
+    atomic_max_finite_double(&cell_bounds[key].upper.z, point.z);
   }
 }
 
@@ -736,6 +818,7 @@ struct Miniball3 {
   double squared_radius{};
   std::uint32_t support_cardinality{};
   bool valid{};
+  bool ambiguous{};
 };
 
 [[nodiscard]] __device__ double squared_distance(
@@ -772,18 +855,48 @@ struct Miniball3 {
       !isfinite(ab2) || !isfinite(ac2) || !isfinite(bc2)) {
     return {};
   }
+  const double scale = ab2 + ac2 + bc2;
+  if (!isfinite(scale)) {
+    return {};
+  }
+  const double comparison_tolerance =
+      kPredicateToleranceMultiplier * DBL_EPSILON * fmax(scale, DBL_MIN);
+  const bool near_ab_angle = fabs(bc2 - (ab2 + ac2)) <= comparison_tolerance;
+  const bool near_ac_angle = fabs(ac2 - (ab2 + bc2)) <= comparison_tolerance;
+  const bool near_bc_angle = fabs(ab2 - (ac2 + bc2)) <= comparison_tolerance;
+  const bool near_right = near_ab_angle || near_ac_angle || near_bc_angle;
   if (bc2 >= ab2 + ac2) {
-    return Miniball3{midpoint(b, c), 0.25 * bc2, 2U, true};
+    return Miniball3{midpoint(b, c), 0.25 * bc2, 2U, true, near_right};
   }
   if (ac2 >= ab2 + bc2) {
-    return Miniball3{midpoint(a, c), 0.25 * ac2, 2U, true};
+    return Miniball3{midpoint(a, c), 0.25 * ac2, 2U, true, near_right};
   }
   if (ab2 >= ac2 + bc2) {
-    return Miniball3{midpoint(a, b), 0.25 * ab2, 2U, true};
+    return Miniball3{midpoint(a, b), 0.25 * ab2, 2U, true, near_right};
   }
   const double determinant = ab2 * ac2 - dot * dot;
-  if (!(determinant > 0.0) || !isfinite(determinant)) {
+  const double determinant_scale = fmax(ab2 * ac2, dot * dot);
+  if (!isfinite(determinant) || !isfinite(determinant_scale)) {
     return {};
+  }
+  const double determinant_tolerance =
+      kPredicateToleranceMultiplier * DBL_EPSILON *
+      fmax(determinant_scale, DBL_MIN);
+  if (!(determinant > determinant_tolerance)) {
+    Point3 left = a;
+    Point3 right = b;
+    double diameter2 = ab2;
+    if (ac2 > diameter2) {
+      right = c;
+      diameter2 = ac2;
+    }
+    if (bc2 > diameter2) {
+      left = b;
+      right = c;
+      diameter2 = bc2;
+    }
+    return Miniball3{
+        midpoint(left, right), 0.25 * diameter2, 2U, true, true};
   }
   const double denominator = 2.0 * determinant;
   const double alpha = ac2 * (ab2 - dot) / denominator;
@@ -798,7 +911,8 @@ struct Miniball3 {
       radius,
       3U,
       isfinite(center.x) && isfinite(center.y) && isfinite(center.z) &&
-          isfinite(radius) && radius > 0.0};
+          isfinite(radius) && radius > 0.0,
+      near_right};
 }
 
 [[nodiscard]] __device__ double numerical_tolerance(
@@ -814,40 +928,24 @@ struct Miniball3 {
 
 [[nodiscard]] __device__ double cell_aabb_lower_bound(
     Point3 center,
-    std::uint64_t x,
-    std::uint64_t y,
-    std::uint64_t z,
-    std::uint64_t resolution,
-    Bbox bbox) noexcept {
-  const double inverse = 1.0 / static_cast<double>(resolution);
-  const double x0 = bbox.lower.x +
-                    (bbox.upper.x - bbox.lower.x) *
-                        (static_cast<double>(x) * inverse);
-  const double x1 = bbox.lower.x +
-                    (bbox.upper.x - bbox.lower.x) *
-                        (static_cast<double>(x + 1U) * inverse);
-  const double y0 = bbox.lower.y +
-                    (bbox.upper.y - bbox.lower.y) *
-                        (static_cast<double>(y) * inverse);
-  const double y1 = bbox.lower.y +
-                    (bbox.upper.y - bbox.lower.y) *
-                        (static_cast<double>(y + 1U) * inverse);
-  const double z0 = bbox.lower.z +
-                    (bbox.upper.z - bbox.lower.z) *
-                        (static_cast<double>(z) * inverse);
-  const double z1 = bbox.lower.z +
-                    (bbox.upper.z - bbox.lower.z) *
-                        (static_cast<double>(z + 1U) * inverse);
-  const double dx = center.x < x0 ? x0 - center.x
-                    : center.x > x1 ? center.x - x1
-                                    : 0.0;
-  const double dy = center.y < y0 ? y0 - center.y
-                    : center.y > y1 ? center.y - y1
-                                    : 0.0;
-  const double dz = center.z < z0 ? z0 - center.z
-                    : center.z > z1 ? center.z - z1
-                                    : 0.0;
-  return dx * dx + dy * dy + dz * dz;
+    CellAabb bounds) noexcept {
+  const double dx = center.x < bounds.lower.x
+      ? __dsub_rd(bounds.lower.x, center.x)
+      : (center.x > bounds.upper.x
+             ? __dsub_rd(center.x, bounds.upper.x)
+             : 0.0);
+  const double dy = center.y < bounds.lower.y
+      ? __dsub_rd(bounds.lower.y, center.y)
+      : (center.y > bounds.upper.y
+             ? __dsub_rd(center.y, bounds.upper.y)
+             : 0.0);
+  const double dz = center.z < bounds.lower.z
+      ? __dsub_rd(bounds.lower.z, center.z)
+      : (center.z > bounds.upper.z
+             ? __dsub_rd(center.z, bounds.upper.z)
+             : 0.0);
+  const double xy = __dadd_rd(__dmul_rd(dx, dx), __dmul_rd(dy, dy));
+  return __dadd_rd(xy, __dmul_rd(dz, dz));
 }
 
 __global__ void classify_triangles_kernel(
@@ -857,6 +955,7 @@ __global__ void classify_triangles_kernel(
     std::size_t triangle_count,
     const PointId* sorted_point_ids,
     const std::uint64_t* cell_offsets,
+    const CellAabb* cell_bounds,
     std::uint64_t resolution,
     Bbox bbox,
     ClassifiedTriangle* output) {
@@ -878,40 +977,41 @@ __global__ void classify_triangles_kernel(
       output[index] = result;
       continue;
     }
+    if (ball.ambiguous) {
+      result.status = TriangleStatus::ambiguous;
+      output[index] = result;
+      continue;
+    }
     result.status = TriangleStatus::blocked;
 
-    const double radius = sqrt(ball.squared_radius);
-    const double padding = 64.0 * DBL_EPSILON *
-        (fabs(ball.center.x) + fabs(ball.center.y) + fabs(ball.center.z) +
-         radius + 1.0);
-    const double padded_radius = radius + padding;
+    const double radius = __dsqrt_ru(ball.squared_radius);
     const std::uint64_t x0 = grid_coordinate(
-        ball.center.x - padded_radius,
+        __dsub_rd(ball.center.x, radius),
         bbox.lower.x,
         bbox.upper.x,
         resolution);
     const std::uint64_t x1 = grid_coordinate(
-        ball.center.x + padded_radius,
+        __dadd_ru(ball.center.x, radius),
         bbox.lower.x,
         bbox.upper.x,
         resolution);
     const std::uint64_t y0 = grid_coordinate(
-        ball.center.y - padded_radius,
+        __dsub_rd(ball.center.y, radius),
         bbox.lower.y,
         bbox.upper.y,
         resolution);
     const std::uint64_t y1 = grid_coordinate(
-        ball.center.y + padded_radius,
+        __dadd_ru(ball.center.y, radius),
         bbox.lower.y,
         bbox.upper.y,
         resolution);
     const std::uint64_t z0 = grid_coordinate(
-        ball.center.z - padded_radius,
+        __dsub_rd(ball.center.z, radius),
         bbox.lower.z,
         bbox.upper.z,
         resolution);
     const std::uint64_t z1 = grid_coordinate(
-        ball.center.z + padded_radius,
+        __dadd_ru(ball.center.z, radius),
         bbox.lower.z,
         bbox.upper.z,
         resolution);
@@ -921,15 +1021,18 @@ __global__ void classify_triangles_kernel(
     for (std::uint64_t z = z0; z <= z1 && !blocked; ++z) {
       for (std::uint64_t y = y0; y <= y1 && !blocked; ++y) {
         for (std::uint64_t x = x0; x <= x1 && !blocked; ++x) {
+          const std::uint64_t cell = flatten_cell(x, y, z, resolution);
+          if (cell_offsets[cell] == cell_offsets[cell + 1U]) {
+            continue;
+          }
           ++result.visited_cell_count;
-          const double lower = cell_aabb_lower_bound(
-              ball.center, x, y, z, resolution, bbox);
+          const double lower =
+              cell_aabb_lower_bound(ball.center, cell_bounds[cell]);
           const double lower_tolerance = numerical_tolerance(
               ball.center, lower, ball.squared_radius);
           if (lower > ball.squared_radius + lower_tolerance) {
             continue;
           }
-          const std::uint64_t cell = flatten_cell(x, y, z, resolution);
           for (std::uint64_t position = cell_offsets[cell];
                position < cell_offsets[cell + 1U];
                ++position) {
@@ -986,10 +1089,11 @@ struct StatusIs {
   }
 };
 
-struct DiscardNonOutput {
+struct DiscardNonRetainedRecord {
   [[nodiscard]] __host__ __device__ bool operator()(
       const ClassifiedTriangle& triangle) const noexcept {
-    return triangle.status == TriangleStatus::blocked;
+    return triangle.status != TriangleStatus::gabriel_binary64 &&
+           triangle.status != TriangleStatus::ambiguous;
   }
 };
 
@@ -1025,17 +1129,21 @@ struct TestProjection {
 };
 
 struct DevicePipelineResult {
-  std::vector<ClassifiedTriangle> retained;
+  std::vector<ClassifiedTriangle> retained_records;
+  std::vector<ClassifiedTriangle> invalid_records;
   TriangleAudit audit;
   std::uint64_t grid_nanoseconds{};
   std::uint64_t enumeration_nanoseconds{};
   std::uint64_t classification_nanoseconds{};
   std::uint64_t compaction_sort_nanoseconds{};
   std::uint64_t device_to_host_nanoseconds{};
+  std::uint64_t host_sort_nanoseconds{};
   std::size_t grid_resolution{};
   std::size_t grid_cell_count{};
   std::size_t maximum_cell_occupancy{};
   std::size_t cuda_multiprocessor_count{};
+  std::size_t persistent_device_bytes{};
+  std::size_t maximum_accounted_live_device_bytes{};
   std::string cuda_device_name;
 };
 
@@ -1078,6 +1186,17 @@ struct DevicePipelineResult {
   thrust::device_vector<PointId> sorted_point_ids(points.size());
   thrust::device_vector<std::uint64_t> cell_counts(cell_count + 1U, 0U);
   thrust::device_vector<std::uint64_t> cell_offsets(cell_count + 1U, 0U);
+  const double infinity = std::numeric_limits<double>::infinity();
+  const CellAabb empty_cell{
+      Point3{infinity, infinity, infinity},
+      Point3{-infinity, -infinity, -infinity}};
+  thrust::device_vector<CellAabb> cell_bounds(cell_count, empty_cell);
+  result.maximum_accounted_live_device_bytes =
+      device_vector_bytes(points.size(), sizeof(Point3)) +
+      device_vector_bytes(points.size(), sizeof(std::uint64_t)) +
+      device_vector_bytes(points.size(), sizeof(PointId)) +
+      device_vector_bytes(cell_count + 1U, 2U * sizeof(std::uint64_t)) +
+      device_vector_bytes(cell_count, sizeof(CellAabb));
   const std::size_t point_blocks = std::max(
       std::size_t{1},
       std::min(
@@ -1091,7 +1210,8 @@ struct DevicePipelineResult {
       static_cast<std::uint64_t>(resolution),
       thrust::raw_pointer_cast(grid_keys.data()),
       thrust::raw_pointer_cast(sorted_point_ids.data()),
-      thrust::raw_pointer_cast(cell_counts.data()));
+      thrust::raw_pointer_cast(cell_counts.data()),
+      thrust::raw_pointer_cast(cell_bounds.data()));
   check_cuda(cudaGetLastError(), "build_grid_keys_kernel launch");
   thrust::sort_by_key(
       thrust::device,
@@ -1109,6 +1229,8 @@ struct DevicePipelineResult {
       static_cast<std::size_t>(*max_occupancy);
   check_cuda(cudaDeviceSynchronize(), "grid construction synchronization");
   result.grid_nanoseconds = nanoseconds(Clock::now() - grid_begin);
+  thrust::device_vector<std::uint64_t>{}.swap(grid_keys);
+  thrust::device_vector<std::uint64_t>{}.swap(cell_counts);
 
   thrust::device_vector<std::uint64_t> csr_offsets(
       graph.offsets.begin(), graph.offsets.end());
@@ -1117,6 +1239,13 @@ struct DevicePipelineResult {
   const std::size_t chunk_vertices = options.triangle_chunk_vertices == 0U
       ? points.size()
       : std::min(options.triangle_chunk_vertices, points.size());
+  result.persistent_device_bytes =
+      device_vector_bytes(points.size(), sizeof(Point3)) +
+      device_vector_bytes(points.size(), sizeof(PointId)) +
+      device_vector_bytes(cell_count + 1U, sizeof(std::uint64_t)) +
+      device_vector_bytes(cell_count, sizeof(CellAabb)) +
+      device_vector_bytes(graph.offsets.size(), sizeof(std::uint64_t)) +
+      device_vector_bytes(graph.neighbors.size(), sizeof(PointId));
 
   for (std::size_t center_begin = 0U;
        center_begin < points.size();
@@ -1192,6 +1321,7 @@ struct DevicePipelineResult {
           candidate_count,
           thrust::raw_pointer_cast(sorted_point_ids.data()),
           thrust::raw_pointer_cast(cell_offsets.data()),
+          thrust::raw_pointer_cast(cell_bounds.data()),
           static_cast<std::uint64_t>(resolution),
           bbox,
           thrust::raw_pointer_cast(classified.data()));
@@ -1252,11 +1382,24 @@ struct DevicePipelineResult {
             UINT64_C(0),
             thrust::plus<std::uint64_t>{}),
         "tested point count overflows");
+    thrust::device_vector<ClassifiedTriangle> invalid_device_records(
+        static_cast<std::size_t>(invalid));
+    if (invalid != 0U) {
+      const auto invalid_end = thrust::copy_if(
+          thrust::device,
+          classified.begin(),
+          classified.end(),
+          invalid_device_records.begin(),
+          StatusIs{TriangleStatus::degenerate_or_invalid});
+      if (invalid_end != invalid_device_records.end()) {
+        throw std::logic_error("invalid triangle extraction count mismatch");
+      }
+    }
     const auto retained_end = thrust::remove_if(
         thrust::device,
         classified.begin(),
         classified.end(),
-        DiscardNonOutput{});
+        DiscardNonRetainedRecord{});
     classified.erase(retained_end, classified.end());
     thrust::sort(
         thrust::device,
@@ -1272,28 +1415,55 @@ struct DevicePipelineResult {
     const std::size_t chunk_bytes =
         device_vector_bytes(candidate_count, sizeof(Triangle)) +
         device_vector_bytes(candidate_count, sizeof(ClassifiedTriangle)) +
+        device_vector_bytes(
+            static_cast<std::size_t>(invalid), sizeof(ClassifiedTriangle)) +
         device_vector_bytes(center_count + 1U, 2U * sizeof(std::uint64_t));
     result.audit.maximum_chunk_device_bytes = std::max(
         result.audit.maximum_chunk_device_bytes, chunk_bytes);
+    result.maximum_accounted_live_device_bytes = std::max(
+        result.maximum_accounted_live_device_bytes,
+        result.persistent_device_bytes + chunk_bytes);
     const auto copy_begin = Clock::now();
     std::vector<ClassifiedTriangle> host_chunk(classified.size());
     thrust::copy(classified.begin(), classified.end(), host_chunk.begin());
+    std::vector<ClassifiedTriangle> host_invalid_chunk(
+        invalid_device_records.size());
+    thrust::copy(
+        invalid_device_records.begin(),
+        invalid_device_records.end(),
+        host_invalid_chunk.begin());
     check_cuda(cudaDeviceSynchronize(), "triangle output synchronization");
     result.device_to_host_nanoseconds = checked_add_u64(
         result.device_to_host_nanoseconds,
         nanoseconds(Clock::now() - copy_begin),
         "triangle D2H time overflows uint64");
-    if (host_chunk.size() >
-        std::numeric_limits<std::size_t>::max() - result.retained.size()) {
+    if (host_chunk.size() > std::numeric_limits<std::size_t>::max() -
+                                result.retained_records.size()) {
       throw std::length_error("retained triangle arena overflows size_t");
     }
-    result.retained.insert(
-        result.retained.end(), host_chunk.begin(), host_chunk.end());
+    result.retained_records.insert(
+        result.retained_records.end(), host_chunk.begin(), host_chunk.end());
+    for (ClassifiedTriangle& invalid_record : host_invalid_chunk) {
+      invalid_record.squared_level = 0.0;
+    }
+    if (host_invalid_chunk.size() >
+        std::numeric_limits<std::size_t>::max() -
+            result.invalid_records.size()) {
+      throw std::length_error("invalid triangle arena overflows size_t");
+    }
+    result.invalid_records.insert(
+        result.invalid_records.end(),
+        host_invalid_chunk.begin(),
+        host_invalid_chunk.end());
   }
 
   result.audit.raw_wedge_count = graph.raw_wedge_count;
+  const auto host_sort_begin = Clock::now();
   std::sort(
-      result.retained.begin(), result.retained.end(), ClassifiedTriangleLess{});
+      result.retained_records.begin(),
+      result.retained_records.end(),
+      ClassifiedTriangleLess{});
+  result.host_sort_nanoseconds = nanoseconds(Clock::now() - host_sort_begin);
   return result;
 }
 
@@ -1565,28 +1735,60 @@ int main(int argc, char** argv) {
         gpu.device_to_host_nanoseconds;
 
     const auto k2_begin = Clock::now();
-    K2Summary k2 = reduce_k2(gpu.retained);
+    K2Summary k2 = reduce_k2(gpu.retained_records);
     timings.k2_reduction_nanoseconds = nanoseconds(Clock::now() - k2_begin);
     timings.total_nanoseconds = nanoseconds(Clock::now() - total_begin);
+
+    const auto write_triangle_records = [&](bool include_retained,
+                                            bool include_invalid) {
+      if (!options.emit_records) {
+        std::cout << "null";
+        return;
+      }
+      std::cout << '[';
+      bool first = true;
+      const auto write_range = [&](const auto& records) {
+        for (const ClassifiedTriangle& triangle : records) {
+          if (!first) {
+            std::cout << ',';
+          }
+          first = false;
+          write_triangle_json(triangle);
+        }
+      };
+      if (include_retained) {
+        write_range(gpu.retained_records);
+      }
+      if (include_invalid) {
+        write_range(gpu.invalid_records);
+      }
+      std::cout << ']';
+    };
 
     std::cout << "{\"schema\":\"morsehgp3d.phase14.geogram_low_order_gpu.v1\""
               << ",\"git_sha\":\"" << MORSEHGP3D_GIT_SHA << "\""
               << ",\"phase\":\"14\""
               << ",\"backend\":\"geogram_pdel_plus_cuda_g4_aabb_grid\""
               << ",\"profile\":\"hgp_reduced\""
-              << ",\"mode\":\"proposal_only_then_small_n_exact_comparison\""
+              << ",\"mode\":\"proposal_only_external_small_n_exact_comparison\""
               << ",\"deployment_status\":\"diagnostic_only\""
               << ",\"public_status\":\"not_claimed\""
               << ",\"approximations\":["
-                 "\"triangle_miniballs_and_empty_ball_predicates_are_binary64_with_an_explicit_ambiguity_band\","
+                 "\"triangle_miniballs_and_empty_ball_predicates_are_binary64_with_explicit_support_and_point_ambiguity_bands\","
+                 "\"cell_pruning_uses_observed_per_cell_AABBs_and_downward_rounded_lower_bounds\","
                  "\"ordinary_Delaunay_combinatorics_are_supplied_by_Geogram_PDEL\","
                  "\"the_raw_Gabriel_hierarchy_is_only_a_partial_refinement_of_Gamma_2\""
                  "]"
               << ",\"architecture\":{"
-                 "\"all_hypothetical_triangle_enumeration_on_gpu\":true,"
-                 "\"triangle_canonical_ownership_and_dedup_on_gpu\":true,"
-                 "\"all_triangle_miniballs_on_gpu\":true,"
-                 "\"all_triangle_empty_ball_AABB_cell_queries_on_gpu\":true,"
+                 "\"all_hypothetical_input_triangles_enumerated\":false,"
+                 "\"all_Delaunay_CSR_wedge_candidates_enumerated_on_gpu\":true,"
+                 "\"Delaunay_CSR_wedge_candidate_universe_proven_complete\":false,"
+                 "\"candidate_canonical_ownership_and_dedup_on_gpu\":true,"
+                 "\"all_candidate_miniballs_on_gpu\":true,"
+                 "\"all_candidate_empty_ball_AABB_cell_queries_on_gpu\":true,"
+                 "\"global_retained_record_sort_on_gpu\":false,"
+                 "\"global_host_retained_record_arena_materialized\":true,"
+                 "\"k2_reduction_on_gpu\":false,"
                  "\"six_Morton_orders_materialized\":false,"
                  "\"higher_order_Delaunay_mosaic_materialized\":false,"
                  "\"ordinary_Delaunay_only\":true}"
@@ -1620,7 +1822,16 @@ int main(int argc, char** argv) {
               << ",\"grid_resolution\":" << gpu.grid_resolution
               << ",\"grid_cell_count\":" << gpu.grid_cell_count
               << ",\"maximum_cell_occupancy\":"
-              << gpu.maximum_cell_occupancy << '}'
+              << gpu.maximum_cell_occupancy
+              << ",\"triangle_chunk_vertices_requested\":"
+              << options.triangle_chunk_vertices
+              << ",\"zero_chunk_vertices_means_single_uncapped_chunk\":true"
+              << ",\"chunk_candidate_hard_limit_enabled\":false"
+              << ",\"persistent_device_bytes\":"
+              << gpu.persistent_device_bytes
+              << ",\"maximum_accounted_live_device_bytes\":"
+              << gpu.maximum_accounted_live_device_bytes
+              << ",\"accounted_memory_includes_thrust_temporary_storage\":false}"
               << ",\"k1\":{\"status\":\"delaunay_emst_binary64_witness\""
               << ",\"selected_edge_count\":" << k1.selected_edges.size()
               << ",\"distinct_level_count\":" << k1.distinct_level_count
@@ -1645,7 +1856,8 @@ int main(int argc, char** argv) {
       std::cout << "null";
     }
     std::cout << "}"
-              << ",\"k2\":{\"status\":\"delaunay_wedge_Gabriel_binary64_partial_refinement\""
+              << ",\"k2\":{\"status\":\"delaunay_CSR_wedge_Gabriel_binary64_partial_refinement\""
+              << ",\"candidate_universe\":\"canonical_Delaunay_CSR_wedges_not_all_input_triangles\""
               << ",\"raw_wedge_count\":" << gpu.audit.raw_wedge_count
               << ",\"canonical_candidate_count\":"
               << gpu.audit.canonical_candidate_count
@@ -1662,6 +1874,10 @@ int main(int argc, char** argv) {
               << gpu.audit.maximum_chunk_candidate_count
               << ",\"maximum_chunk_device_bytes\":"
               << gpu.audit.maximum_chunk_device_bytes
+              << ",\"retained_record_count\":"
+              << gpu.retained_records.size()
+              << ",\"invalid_records_omitted_from_all_sorts\":true"
+              << ",\"invalid_record_squared_level_serialization\":\"zero_sentinel_not_a_geometric_level\""
               << ",\"facet_count\":" << k2.facet_count
               << ",\"final_component_count\":"
               << k2.final_component_count
@@ -1673,21 +1889,13 @@ int main(int argc, char** argv) {
               << ",\"accepted_triangle_digest\":\"" << std::hex
               << std::setw(16) << std::setfill('0')
               << k2.accepted_triangle_digest << std::dec
-              << std::setfill(' ') << "\",\"accepted_triangles\":";
-    if (options.emit_records) {
-      std::cout << '[';
-      bool first = true;
-      for (const ClassifiedTriangle& triangle : gpu.retained) {
-        if (!first) {
-          std::cout << ',';
-        }
-        first = false;
-        write_triangle_json(triangle);
-      }
-      std::cout << ']';
-    } else {
-      std::cout << "null";
-    }
+              << std::setfill(' ') << "\",\"retained_records\":";
+    write_triangle_records(true, false);
+    std::cout << ",\"invalid_records\":";
+    write_triangle_records(false, true);
+    std::cout << ",\"accepted_triangles_legacy_checker_alias\":true"
+              << ",\"accepted_triangles\":";
+    write_triangle_records(true, true);
     std::cout << "}"
               << ",\"timings_nanoseconds\":{\"input\":"
               << timings.input_nanoseconds
@@ -1702,6 +1910,8 @@ int main(int argc, char** argv) {
               << timings.triangle_classification_nanoseconds
               << ",\"gpu_triangle_compaction_sort\":"
               << timings.triangle_compaction_sort_nanoseconds
+              << ",\"host_global_retained_record_sort\":"
+              << gpu.host_sort_nanoseconds
               << ",\"triangle_device_to_host\":"
               << timings.triangle_device_to_host_nanoseconds
               << ",\"k1_reduction\":" << timings.k1_reduction_nanoseconds
