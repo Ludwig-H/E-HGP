@@ -961,17 +961,22 @@ struct AtomicLinearRunStore::Impl {
       std::optional<AtomicLinearRunExternalAnchor> supplied_anchor,
       AtomicLinearRunResourceGate supplied_resource_gate,
       AtomicLinearRunCommittedPrefixVisitor
-          supplied_committed_prefix_visitor)
+          supplied_committed_prefix_visitor,
+      std::optional<AtomicLinearRunStoreBinding>
+          supplied_application_binding)
       : contract_value(std::move(supplied_contract)),
         limits(std::move(supplied_limits)),
         recertifier(std::move(supplied_recertifier)),
         expected_anchor(std::move(supplied_anchor)),
-        resource_gate(std::move(supplied_resource_gate)) {
+        resource_gate(std::move(supplied_resource_gate)),
+        application_binding(std::move(supplied_application_binding)) {
     validate_limits(limits);
     validate_callback(recertifier);
     validate_callback(resource_gate);
     run_digest = compute_contract_digest(contract_value, limits);
     reset_trusted_state();
+    durable_status.opened_existing_run =
+        mode == OpenMode::open_existing;
     durable_status.external_anchor_supplied = expected_anchor.has_value();
 
     directory = UniqueFileDescriptor{
@@ -2216,6 +2221,7 @@ struct AtomicLinearRunStore::Impl {
   AtomicLinearRunRecertifier recertifier;
   std::optional<AtomicLinearRunExternalAnchor> expected_anchor;
   AtomicLinearRunResourceGate resource_gate;
+  std::optional<AtomicLinearRunStoreBinding> application_binding;
   contract::CanonicalId run_digest{};
   AtomicLinearRunTrustedState trusted{};
   HeadRecord authoritative_head{};
@@ -2227,6 +2233,19 @@ struct AtomicLinearRunStore::Impl {
   bool failed_closed{false};
 };
 
+AtomicLinearRunStoreBinding::AtomicLinearRunStoreBinding()
+    : identity_(std::make_shared<const std::uint8_t>(0U)) {}
+
+AtomicLinearRunStoreBinding::AtomicLinearRunStoreBinding(
+    AtomicLinearRunStoreBinding&& other) noexcept
+    : identity_(other.identity_) {}
+
+AtomicLinearRunStoreBinding& AtomicLinearRunStoreBinding::operator=(
+    AtomicLinearRunStoreBinding&& other) noexcept {
+  identity_ = other.identity_;
+  return *this;
+}
+
 AtomicLinearRunStore::AtomicLinearRunStore(
     OpenMode mode,
     const std::filesystem::path& dedicated_directory,
@@ -2235,7 +2254,8 @@ AtomicLinearRunStore::AtomicLinearRunStore(
     AtomicLinearRunRecertifier recertifier,
     std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
     AtomicLinearRunResourceGate resource_gate,
-    AtomicLinearRunCommittedPrefixVisitor committed_prefix_visitor)
+    AtomicLinearRunCommittedPrefixVisitor committed_prefix_visitor,
+    std::optional<AtomicLinearRunStoreBinding> application_binding)
     : impl_(std::make_unique<Impl>(
           mode,
           dedicated_directory,
@@ -2244,7 +2264,8 @@ AtomicLinearRunStore::AtomicLinearRunStore(
           std::move(recertifier),
           std::move(expected_anchor),
           std::move(resource_gate),
-          std::move(committed_prefix_visitor))) {}
+          std::move(committed_prefix_visitor),
+          std::move(application_binding))) {}
 
 AtomicLinearRunStore AtomicLinearRunStore::create_new(
     const std::filesystem::path& dedicated_directory,
@@ -2260,7 +2281,27 @@ AtomicLinearRunStore AtomicLinearRunStore::create_new(
       std::move(recertifier),
       std::nullopt,
       std::move(resource_gate),
-      {}};
+      {},
+      std::nullopt};
+}
+
+AtomicLinearRunStore AtomicLinearRunStore::create_new_bound(
+    const std::filesystem::path& dedicated_directory,
+    AtomicLinearRunContract contract_value,
+    AtomicLinearRunStoreLimits limits,
+    AtomicLinearRunRecertifier recertifier,
+    AtomicLinearRunResourceGate resource_gate,
+    const AtomicLinearRunStoreBinding& application_binding) {
+  return AtomicLinearRunStore{
+      OpenMode::create_new,
+      dedicated_directory,
+      std::move(contract_value),
+      std::move(limits),
+      std::move(recertifier),
+      std::nullopt,
+      std::move(resource_gate),
+      {},
+      application_binding};
 }
 
 AtomicLinearRunStore AtomicLinearRunStore::open_existing(
@@ -2277,7 +2318,7 @@ AtomicLinearRunStore AtomicLinearRunStore::open_existing(
       std::move(recertifier),
       std::move(resource_gate),
       std::move(expected_anchor),
-      {});
+      AtomicLinearRunCommittedPrefixVisitor{});
 }
 
 AtomicLinearRunStore AtomicLinearRunStore::open_existing(
@@ -2296,7 +2337,48 @@ AtomicLinearRunStore AtomicLinearRunStore::open_existing(
       std::move(recertifier),
       std::move(expected_anchor),
       std::move(resource_gate),
-      std::move(committed_prefix_visitor)};
+      std::move(committed_prefix_visitor),
+      std::nullopt};
+}
+
+AtomicLinearRunStore AtomicLinearRunStore::open_existing_bound(
+    const std::filesystem::path& dedicated_directory,
+    AtomicLinearRunContract contract_value,
+    AtomicLinearRunStoreLimits limits,
+    AtomicLinearRunRecertifier recertifier,
+    AtomicLinearRunResourceGate resource_gate,
+    std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
+    const AtomicLinearRunStoreBinding& application_binding) {
+  return open_existing_bound(
+      dedicated_directory,
+      std::move(contract_value),
+      std::move(limits),
+      std::move(recertifier),
+      std::move(resource_gate),
+      std::move(expected_anchor),
+      {},
+      application_binding);
+}
+
+AtomicLinearRunStore AtomicLinearRunStore::open_existing_bound(
+    const std::filesystem::path& dedicated_directory,
+    AtomicLinearRunContract contract_value,
+    AtomicLinearRunStoreLimits limits,
+    AtomicLinearRunRecertifier recertifier,
+    AtomicLinearRunResourceGate resource_gate,
+    std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
+    AtomicLinearRunCommittedPrefixVisitor committed_prefix_visitor,
+    const AtomicLinearRunStoreBinding& application_binding) {
+  return AtomicLinearRunStore{
+      OpenMode::open_existing,
+      dedicated_directory,
+      std::move(contract_value),
+      std::move(limits),
+      std::move(recertifier),
+      std::move(expected_anchor),
+      std::move(resource_gate),
+      std::move(committed_prefix_visitor),
+      application_binding};
 }
 
 AtomicLinearRunRecoveryError::AtomicLinearRunRecoveryError(
@@ -2330,6 +2412,16 @@ const contract::CanonicalId& AtomicLinearRunStore::run_contract_digest()
 const AtomicLinearRunStoreStatus& AtomicLinearRunStore::status()
     const noexcept {
   return impl_->durable_status;
+}
+
+bool AtomicLinearRunStore::bound_to(
+    const AtomicLinearRunStoreBinding& application_binding)
+    const noexcept {
+  return impl_->application_binding.has_value() &&
+      impl_->application_binding->identity_ &&
+      application_binding.identity_ &&
+      impl_->application_binding->identity_ ==
+          application_binding.identity_;
 }
 
 }  // namespace morsehgp3d::hierarchy

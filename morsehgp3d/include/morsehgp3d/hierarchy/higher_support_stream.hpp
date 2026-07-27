@@ -585,6 +585,7 @@ enum class ExactHigherSupportTerminalRunStatus : std::uint8_t {
 };
 
 class ExactHigherSupportTerminalSession;
+class ExactSparseHigherSupportH0ChunkRunContext;
 struct ExactSparseDirectH0CandidateRun;
 struct ExactSparseDirectH0CandidateRunLimits;
 
@@ -636,6 +637,7 @@ class ExactHigherSupportUnsealedDrain {
 
  private:
   friend class ExactHigherSupportTerminalSession;
+  friend class ExactSparseHigherSupportH0ChunkRunContext;
   friend ExactSparseDirectH0CandidateRun
   project_exact_sparse_direct_h0_higher_candidate_run(
       ExactHigherSupportUnsealedDrain&& source,
@@ -840,6 +842,14 @@ class ExactHigherSupportTerminalAuthority {
 // one fixed budget for every exact chunk execution.
 class ExactHigherSupportTerminalSession {
  public:
+  // Reuse an already hashed immutable authority when repeated fresh replay
+  // sessions must start from the same canonical roots.  The session copies
+  // the compact authority context; the referenced cloud and LBVH must still
+  // outlive it.
+  ExactHigherSupportTerminalSession(
+      const ExactHigherSupportAuthorityContext& authority,
+      ExactHigherSupportStreamBudget chunk_budget,
+      std::size_t maximum_chunk_count);
   ExactHigherSupportTerminalSession(
       const spatial::MortonLbvhIndex& index,
       const spatial::CanonicalPointCloud& cloud,

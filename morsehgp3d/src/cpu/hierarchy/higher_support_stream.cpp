@@ -3047,7 +3047,17 @@ ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
     std::size_t requested_maximum_order,
     ExactHigherSupportStreamBudget chunk_budget,
     std::size_t maximum_chunk_count)
-    : authority_(index, cloud, requested_maximum_order),
+    : ExactHigherSupportTerminalSession(
+          ExactHigherSupportAuthorityContext{
+              index, cloud, requested_maximum_order},
+          chunk_budget,
+          maximum_chunk_count) {}
+
+ExactHigherSupportTerminalSession::ExactHigherSupportTerminalSession(
+    const ExactHigherSupportAuthorityContext& authority,
+    ExactHigherSupportStreamBudget chunk_budget,
+    std::size_t maximum_chunk_count)
+    : authority_(authority),
       chunk_budget_(chunk_budget),
       maximum_chunk_count_(maximum_chunk_count),
       trusted_checkpoint_(
@@ -3348,9 +3358,11 @@ void ExactHigherSupportTerminalSession::append_next_internal_chunk() {
       next_prune_certificate_count;
   destroyed_rank_receipt_count_ = next_rank_receipt_count;
   chunk_count_ = next_chunk_count;
+  // No recovery boundary remains after the nothrow scientific commit.  An
+  // impossible invariant failure must therefore fail-stop instead of
+  // exposing a catchable exception whose retry would skip this chunk.
   if (!retained_segment_accounting_holds()) {
-    throw std::logic_error(
-        "the terminal higher-support retained accounting changed after a chunk");
+    std::terminate();
   }
 }
 

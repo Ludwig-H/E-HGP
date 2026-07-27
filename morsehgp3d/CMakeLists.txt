@@ -1646,6 +1646,42 @@ if(UNIX)
   )
 
   add_library(
+    morsehgp3d_sparse_higher_support_h0_chunk_run
+    STATIC
+      src/cpu/hierarchy/sparse_higher_support_h0_chunk_run.cpp
+  )
+  add_library(
+    morsehgp3d::sparse_higher_support_h0_chunk_run
+    ALIAS morsehgp3d_sparse_higher_support_h0_chunk_run
+  )
+  set_target_properties(
+    morsehgp3d_sparse_higher_support_h0_chunk_run
+    PROPERTIES
+      EXPORT_NAME sparse_higher_support_h0_chunk_run
+      POSITION_INDEPENDENT_CODE ON
+  )
+  target_compile_features(
+    morsehgp3d_sparse_higher_support_h0_chunk_run PUBLIC cxx_std_20
+  )
+  target_include_directories(
+    morsehgp3d_sparse_higher_support_h0_chunk_run
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:include>
+  )
+  target_link_libraries(
+    morsehgp3d_sparse_higher_support_h0_chunk_run
+    PUBLIC
+      morsehgp3d::atomic_linear_run_store
+      morsehgp3d::sparse_direct_h0_candidate_merge
+    PRIVATE morsehgp3d::sanitizers
+  )
+  target_compile_options(
+    morsehgp3d_sparse_higher_support_h0_chunk_run
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+
+  add_library(
     morsehgp3d_sparse_direct_h0_atomic_run_reader
     STATIC
       src/cpu/hierarchy/sparse_direct_h0_atomic_run_reader.cpp
@@ -2923,6 +2959,7 @@ if(UNIX)
       morsehgp3d_sparse_anchored_pair_chunk_run
       morsehgp3d_sparse_anchored_pair_h0_run
       morsehgp3d_sparse_direct_h0_candidate_merge
+      morsehgp3d_sparse_higher_support_h0_chunk_run
       morsehgp3d_sparse_direct_h0_atomic_run_reader
       morsehgp3d_direct_morse_chunk_run
     EXPORT MorseHGP3DTargets

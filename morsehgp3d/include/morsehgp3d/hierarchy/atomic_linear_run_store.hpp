@@ -345,6 +345,7 @@ struct AtomicLinearRunStoreStatus {
   std::size_t removed_uncommitted_final_file_count{};
   AtomicLinearRunExternalAnchor current_anchor{};
   bool writer_lock_acquired{false};
+  bool opened_existing_run{false};
   bool authoritative_head_certified{false};
   bool external_anchor_supplied{false};
   bool external_anchor_verified{false};
@@ -361,6 +362,23 @@ compute_atomic_linear_run_contract_digest(
     const AtomicLinearRunContract& contract,
     const AtomicLinearRunStoreLimits& limits);
 
+class AtomicLinearRunStoreBinding {
+ public:
+  AtomicLinearRunStoreBinding();
+  AtomicLinearRunStoreBinding(
+      const AtomicLinearRunStoreBinding&) noexcept = default;
+  AtomicLinearRunStoreBinding& operator=(
+      const AtomicLinearRunStoreBinding&) noexcept = default;
+  AtomicLinearRunStoreBinding(
+      AtomicLinearRunStoreBinding&& other) noexcept;
+  AtomicLinearRunStoreBinding& operator=(
+      AtomicLinearRunStoreBinding&& other) noexcept;
+
+ private:
+  friend class AtomicLinearRunStore;
+  std::shared_ptr<const std::uint8_t> identity_;
+};
+
 class AtomicLinearRunStore {
  public:
   // The directory must already exist and be dedicated to this run.  Both
@@ -371,6 +389,17 @@ class AtomicLinearRunStore {
       AtomicLinearRunStoreLimits limits,
       AtomicLinearRunRecertifier recertifier,
       AtomicLinearRunResourceGate resource_gate);
+
+  // An application binding is a process-local capability.  It is neither
+  // serialized nor derivable from the run contract, and lets a typed adapter
+  // reject a store whose callbacks were installed by another context.
+  [[nodiscard]] static AtomicLinearRunStore create_new_bound(
+      const std::filesystem::path& dedicated_directory,
+      AtomicLinearRunContract contract,
+      AtomicLinearRunStoreLimits limits,
+      AtomicLinearRunRecertifier recertifier,
+      AtomicLinearRunResourceGate resource_gate,
+      const AtomicLinearRunStoreBinding& application_binding);
 
   [[nodiscard]] static AtomicLinearRunStore open_existing(
       const std::filesystem::path& dedicated_directory,
@@ -390,6 +419,25 @@ class AtomicLinearRunStore {
       std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
       AtomicLinearRunCommittedPrefixVisitor committed_prefix_visitor);
 
+  [[nodiscard]] static AtomicLinearRunStore open_existing_bound(
+      const std::filesystem::path& dedicated_directory,
+      AtomicLinearRunContract contract,
+      AtomicLinearRunStoreLimits limits,
+      AtomicLinearRunRecertifier recertifier,
+      AtomicLinearRunResourceGate resource_gate,
+      std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
+      const AtomicLinearRunStoreBinding& application_binding);
+
+  [[nodiscard]] static AtomicLinearRunStore open_existing_bound(
+      const std::filesystem::path& dedicated_directory,
+      AtomicLinearRunContract contract,
+      AtomicLinearRunStoreLimits limits,
+      AtomicLinearRunRecertifier recertifier,
+      AtomicLinearRunResourceGate resource_gate,
+      std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
+      AtomicLinearRunCommittedPrefixVisitor committed_prefix_visitor,
+      const AtomicLinearRunStoreBinding& application_binding);
+
   ~AtomicLinearRunStore();
 
   AtomicLinearRunStore(const AtomicLinearRunStore&) = delete;
@@ -406,6 +454,9 @@ class AtomicLinearRunStore {
   [[nodiscard]] const contract::CanonicalId& run_contract_digest()
       const noexcept;
   [[nodiscard]] const AtomicLinearRunStoreStatus& status() const noexcept;
+  [[nodiscard]] bool bound_to(
+      const AtomicLinearRunStoreBinding& application_binding)
+      const noexcept;
 
  private:
   enum class OpenMode : std::uint8_t {
@@ -421,7 +472,8 @@ class AtomicLinearRunStore {
       AtomicLinearRunRecertifier recertifier,
       std::optional<AtomicLinearRunExternalAnchor> expected_anchor,
       AtomicLinearRunResourceGate resource_gate,
-      AtomicLinearRunCommittedPrefixVisitor committed_prefix_visitor);
+      AtomicLinearRunCommittedPrefixVisitor committed_prefix_visitor,
+      std::optional<AtomicLinearRunStoreBinding> application_binding);
 
   struct Impl;
   std::unique_ptr<Impl> impl_;

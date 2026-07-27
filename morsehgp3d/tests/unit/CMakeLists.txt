@@ -931,6 +931,19 @@ if(UNIX)
   )
 
   add_executable(
+    morsehgp3d_sparse_higher_support_h0_chunk_run_tests
+    test_sparse_higher_support_h0_chunk_run.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_sparse_higher_support_h0_chunk_run_tests
+    PRIVATE morsehgp3d::sparse_higher_support_h0_chunk_run
+  )
+  target_compile_options(
+    morsehgp3d_sparse_higher_support_h0_chunk_run_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+
+  add_executable(
     morsehgp3d_sparse_direct_h0_atomic_run_reader_tests
     test_sparse_direct_h0_atomic_run_reader.cpp
   )
@@ -1722,6 +1735,7 @@ if(UNIX)
     morsehgp3d_sparse_anchored_pair_chunk_run_tests
     morsehgp3d_sparse_anchored_pair_h0_run_tests
     morsehgp3d_sparse_direct_h0_candidate_merge_tests
+    morsehgp3d_sparse_higher_support_h0_chunk_run_tests
     morsehgp3d_sparse_direct_h0_atomic_run_reader_tests
     morsehgp3d_hierarchy_direct_morse_chunk_run_tests
     morsehgp3d_hierarchy_pair_support_stream_durable_tests
@@ -2568,6 +2582,10 @@ if(UNIX)
   add_test(
     NAME morsehgp3d.sparse_direct_h0_candidate_merge
     COMMAND morsehgp3d_sparse_direct_h0_candidate_merge_tests
+  )
+  add_test(
+    NAME morsehgp3d.sparse_higher_support_h0_chunk_run
+    COMMAND morsehgp3d_sparse_higher_support_h0_chunk_run_tests
   )
   add_test(
     NAME morsehgp3d.sparse_direct_h0_atomic_run_reader
