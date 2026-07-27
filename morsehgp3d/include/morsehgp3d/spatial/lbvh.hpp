@@ -26,6 +26,8 @@ class MortonLbvhIndex;
 }
 
 namespace morsehgp3d::hierarchy {
+class ExactBlockRankPruneReceipt;
+class ExactBlockRankPruneReceiptCertifier;
 class ExactAnchoredPairCandidateClassificationContext;
 class ExactGroupedAnchoredPairPruneCertificate;
 class ExactGroupedAnchoredPairPruneCertifier;
@@ -432,6 +434,8 @@ class MortonLbvhIndex {
   friend class hierarchy::ExactAnchoredPairWitnessBankBuilder;
   friend class hierarchy::ExactGroupedAnchoredPairPruneCertificate;
   friend class hierarchy::ExactGroupedAnchoredPairPruneCertifier;
+  friend class hierarchy::ExactBlockRankPruneReceipt;
+  friend class hierarchy::ExactBlockRankPruneReceiptCertifier;
   friend class hierarchy::ExactGroupedAnchoredPairTraversalContext;
   friend class hierarchy::ExactMortonGroupedAnchoredPairScheduleContext;
   friend class hierarchy::ExactMortonTriangularBlockPairScheduleContext;

@@ -327,6 +327,25 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_exact_block_rank_prune_receipt_tests
+  test_exact_block_rank_prune_receipt.cpp
+)
+target_link_libraries(
+  morsehgp3d_exact_block_rank_prune_receipt_tests
+  PRIVATE morsehgp3d::pair_support
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_exact_block_rank_prune_receipt_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_exact_block_rank_prune_receipt_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_morton_grouped_anchored_pair_schedule_tests
   test_morton_grouped_anchored_pair_schedule.cpp
 )
@@ -1663,6 +1682,7 @@ set(
   morsehgp3d_hierarchy_pair_support_stream_tests
   morsehgp3d_anchored_pair_witness_bank_tests
   morsehgp3d_grouped_anchored_pair_certificate_tests
+  morsehgp3d_exact_block_rank_prune_receipt_tests
   morsehgp3d_morton_grouped_anchored_pair_schedule_tests
   morsehgp3d_morton_triangular_block_pair_schedule_tests
   morsehgp3d_anchored_pair_candidate_classifier_tests
@@ -2459,6 +2479,10 @@ add_test(
 add_test(
   NAME morsehgp3d.grouped_anchored_pair_certificate
   COMMAND morsehgp3d_grouped_anchored_pair_certificate_tests
+)
+add_test(
+  NAME morsehgp3d.exact_block_rank_prune_receipt
+  COMMAND morsehgp3d_exact_block_rank_prune_receipt_tests
 )
 add_test(
   NAME morsehgp3d.morton_grouped_anchored_pair_schedule

@@ -374,6 +374,7 @@ endif()
 add_library(
   morsehgp3d_pair_support
   STATIC
+    src/cpu/hierarchy/exact_block_rank_prune_receipt.cpp
     src/cpu/hierarchy/pair_support_stream.cpp
 )
 add_library(morsehgp3d::pair_support ALIAS morsehgp3d_pair_support)
