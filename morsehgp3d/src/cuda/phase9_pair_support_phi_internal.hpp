@@ -117,7 +117,8 @@ enum class PairSupportRankTraversalBackend : std::uint8_t {
 };
 
 enum class PairSupportRankProductStop : std::uint8_t {
-  conclusive,
+  pruned,
+  not_pruned,
   visit_budget,
   terminal_capacity,
 };
@@ -233,6 +234,7 @@ propose_pair_support_rank_prunes_on_gpu(
     std::size_t maximum_product_count,
     std::size_t maximum_work_item_count,
     std::size_t maximum_terminal_count,
-    std::size_t maximum_epoch_count);
+    std::size_t maximum_epoch_count,
+    bool prune_only);
 
 }  // namespace morsehgp3d::gpu::detail

@@ -32,6 +32,7 @@ using morsehgp3d::gpu::PairSupportPhiWitnessQuery;
 using morsehgp3d::gpu::PairSupportRankPruneBatchResult;
 using morsehgp3d::gpu::PairSupportRankPruneBudget;
 using morsehgp3d::gpu::PairSupportRankPruneCapacity;
+using morsehgp3d::gpu::PairSupportRankProposalMode;
 using morsehgp3d::gpu::PairSupportRankTerminalKind;
 using morsehgp3d::gpu::PairSupportRankTraversalBackend;
 using morsehgp3d::gpu::test_support::
@@ -652,6 +653,26 @@ void test_stackless_two_product_batch_and_segment_fallback() {
       "P5d concludes two products in one kernel and two host "
       "synchronizations");
 
+  const auto prune_only = context.propose_rank_prunes(
+      products,
+      1U,
+      PairSupportRankPruneBudget{8U},
+      PairSupportRankProposalMode::prune_only);
+  check(
+      prune_only.proposals.size() == 1U &&
+          prune_only.keep_certificates.empty() &&
+          prune_only.audit.proposal_mode ==
+              PairSupportRankProposalMode::prune_only &&
+          prune_only.audit.prune_product_count == 1U &&
+          prune_only.audit.keep_certificate_product_count == 0U &&
+          prune_only.audit.fallback_product_count == 1U &&
+          prune_only.audit.gpu_output_terminal_count == 1U &&
+          prune_only.audit.strict_interior_terminal_count == 1U &&
+          prune_only.audit.anchor_noninterior_terminal_count == 0U &&
+          prune_only.audit.unresolved_external_leaf_terminal_count == 0U &&
+          !prune_only.audit.keep_coverage_recertification_complete,
+      "prune-only exposes one strict prune and subdivides the non-prune");
+
   reset_fake_gpu_pair_support_phi();
   PairSupportPhiContext segmented{
       fixture.index,
@@ -668,6 +689,17 @@ void test_stackless_two_product_batch_and_segment_fallback() {
       [](const auto& left, const auto& right) {
         return product_key(left) < product_key(right);
       });
+  check_throws<std::invalid_argument>(
+      [&] {
+        static_cast<void>(segmented.propose_rank_prunes(
+            segmented_products,
+            1U,
+            PairSupportRankPruneBudget{8U},
+            PairSupportRankProposalMode::prune_only));
+      },
+      "prune-only rejects floor(receipt capacity / products) below K");
+  check(fake_gpu_pair_support_rank_launch_count() == 0U,
+        "the prune-only receipt-capacity rejection happens before launch");
   const auto partial = segmented.propose_rank_prunes(
       segmented_products, 1U, PairSupportRankPruneBudget{8U});
   check(

@@ -9,6 +9,7 @@
 #include <memory>
 #include <optional>
 #include <span>
+#include <utility>
 #include <vector>
 
 namespace morsehgp3d::gpu {
@@ -218,6 +219,11 @@ enum class PairSupportRankTraversalBackend : std::uint8_t {
   stackless_product_batch,
 };
 
+enum class PairSupportRankProposalMode : std::uint8_t {
+  prune_or_keep,
+  prune_only,
+};
+
 struct PairSupportRankPruneAudit {
   static constexpr const char* proposal_semantics =
       "cuda_bounded_two_frontier_rank_prune_or_keep_certificate";
@@ -230,6 +236,8 @@ struct PairSupportRankPruneAudit {
 
   PairSupportRankPruneCapacity capacity{};
   PairSupportRankPruneBudget budget{};
+  PairSupportRankProposalMode proposal_mode{
+      PairSupportRankProposalMode::prune_or_keep};
   PairSupportRankTraversalBackend traversal_backend{
       PairSupportRankTraversalBackend::two_frontier};
   std::size_t input_product_count{};
@@ -365,7 +373,9 @@ class PairSupportPhiContext final {
   [[nodiscard]] PairSupportRankPruneBatchResult propose_rank_prunes(
       std::span<const hierarchy::ExactPairSupportFrontierEntry> products,
       std::size_t required_strict_interior_point_count,
-      PairSupportRankPruneBudget budget);
+      PairSupportRankPruneBudget budget,
+      PairSupportRankProposalMode proposal_mode =
+          PairSupportRankProposalMode::prune_or_keep);
 
   // Convenience seam for leaf fixtures and leaf-stage batching.  PointIds
   // must be distinct.  The two supports are reordered by Morton range, so the
@@ -381,6 +391,9 @@ class PairSupportPhiContext final {
   // exposing MortonLbvhIndex internals or constructing a node-pair arena.
   [[nodiscard]] PairSupportPhiNodeDescriptor node_descriptor(
       std::size_t node_index) const;
+  [[nodiscard]] std::optional<std::pair<std::uint64_t, std::uint64_t>>
+  node_children(std::size_t node_index) const;
+  [[nodiscard]] std::size_t root_node_index() const;
   [[nodiscard]] std::size_t maximum_query_count() const noexcept {
     return maximum_query_count_;
   }
