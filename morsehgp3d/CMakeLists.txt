@@ -585,6 +585,7 @@ add_library(
   morsehgp3d_direct_support_terminal
   STATIC
     src/cpu/hierarchy/direct_support_terminal.cpp
+    src/cpu/hierarchy/exact_low_order_gabriel_skeleton.cpp
 )
 add_library(
   morsehgp3d::direct_support_terminal
@@ -2026,6 +2027,7 @@ add_library(
     src/cpu/hierarchy/critical_catalog_typed_gamma_root_overlay.cpp
     src/cpu/hierarchy/critical_event_gamma_overlay.cpp
     src/cpu/hierarchy/emst.cpp
+    src/cpu/hierarchy/yao48_emst.cpp
     src/cpu/hierarchy/gamma.cpp
     src/cpu/hierarchy/gamma_transition.cpp
     src/cpu/hierarchy/morse_gamma_partition_sweep.cpp

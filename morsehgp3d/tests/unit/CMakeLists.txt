@@ -161,6 +161,26 @@ target_link_libraries(
 )
 
 add_executable(
+  morsehgp3d_hierarchy_yao48_emst_tests
+  test_hierarchy_yao48_emst.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_yao48_emst_tests
+  PRIVATE morsehgp3d::hierarchy
+)
+morsehgp3d_apply_sanitizers(morsehgp3d_hierarchy_yao48_emst_tests)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_yao48_emst_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_yao48_emst_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_k1_forest_tests
   test_hierarchy_k1_forest.cpp
 )
@@ -522,6 +542,26 @@ if(MSVC)
 else()
   target_compile_options(
     morsehgp3d_hierarchy_direct_support_terminal_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
+  morsehgp3d_hierarchy_exact_low_order_gabriel_skeleton_tests
+  test_hierarchy_exact_low_order_gabriel_skeleton.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_exact_low_order_gabriel_skeleton_tests
+  PRIVATE morsehgp3d::direct_support_terminal
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_exact_low_order_gabriel_skeleton_tests
+    PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_exact_low_order_gabriel_skeleton_tests
     PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
   )
 endif()
@@ -1691,6 +1731,7 @@ set(
   morsehgp3d_hierarchy_higher_support_stream_tests
   morsehgp3d_hierarchy_direct_support_differential_tests
   morsehgp3d_hierarchy_direct_support_terminal_tests
+  morsehgp3d_hierarchy_exact_low_order_gabriel_skeleton_tests
   morsehgp3d_hierarchy_direct_morse_event_journal_tests
   morsehgp3d_hierarchy_direct_saddle_arm_seed_journal_tests
   morsehgp3d_hierarchy_direct_closed_saddle_incidence_journal_tests
@@ -2425,6 +2466,10 @@ add_test(
 add_test(NAME morsehgp3d.spatial_lbvh COMMAND morsehgp3d_spatial_lbvh_tests)
 add_test(NAME morsehgp3d.hierarchy_emst COMMAND morsehgp3d_hierarchy_emst_tests)
 add_test(
+  NAME morsehgp3d.hierarchy_yao48_emst
+  COMMAND morsehgp3d_hierarchy_yao48_emst_tests
+)
+add_test(
   NAME morsehgp3d.hierarchy_k1_forest
   COMMAND morsehgp3d_hierarchy_k1_forest_tests
 )
@@ -2517,6 +2562,10 @@ add_test(
 add_test(
   NAME morsehgp3d.hierarchy_direct_support_terminal
   COMMAND morsehgp3d_hierarchy_direct_support_terminal_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_exact_low_order_gabriel_skeleton
+  COMMAND morsehgp3d_hierarchy_exact_low_order_gabriel_skeleton_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_direct_morse_event_journal
