@@ -181,6 +181,28 @@ else()
 endif()
 
 add_executable(
+  morsehgp3d_hierarchy_exact_lbvh_yao48_emst_tests
+  test_hierarchy_exact_lbvh_yao48_emst.cpp
+)
+target_link_libraries(
+  morsehgp3d_hierarchy_exact_lbvh_yao48_emst_tests
+  PRIVATE morsehgp3d::hierarchy
+)
+morsehgp3d_apply_sanitizers(
+  morsehgp3d_hierarchy_exact_lbvh_yao48_emst_tests
+)
+if(MSVC)
+  target_compile_options(
+    morsehgp3d_hierarchy_exact_lbvh_yao48_emst_tests PRIVATE /W4 /WX
+  )
+else()
+  target_compile_options(
+    morsehgp3d_hierarchy_exact_lbvh_yao48_emst_tests
+    PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+  )
+endif()
+
+add_executable(
   morsehgp3d_hierarchy_k1_forest_tests
   test_hierarchy_k1_forest.cpp
 )
@@ -2468,6 +2490,10 @@ add_test(NAME morsehgp3d.hierarchy_emst COMMAND morsehgp3d_hierarchy_emst_tests)
 add_test(
   NAME morsehgp3d.hierarchy_yao48_emst
   COMMAND morsehgp3d_hierarchy_yao48_emst_tests
+)
+add_test(
+  NAME morsehgp3d.hierarchy_exact_lbvh_yao48_emst
+  COMMAND morsehgp3d_hierarchy_exact_lbvh_yao48_emst_tests
 )
 add_test(
   NAME morsehgp3d.hierarchy_k1_forest

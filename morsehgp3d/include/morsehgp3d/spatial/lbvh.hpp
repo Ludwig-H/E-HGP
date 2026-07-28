@@ -41,6 +41,7 @@ class ExactHigherSupportTerminalAuthority;
 class ExactHigherSupportStreamBuilder;
 class ExactPairSupportStreamBuilder;
 class ExactDirectSparseFirstIncidenceBuilder;
+class ExactLbvhYao48EmstBuilder;
 struct K1ExactBoruvkaResult;
 struct K1BoruvkaVerification;
 [[nodiscard]] K1ExactBoruvkaResult build_exact_lbvh_boruvka(
@@ -443,6 +444,7 @@ class MortonLbvhIndex {
   friend class hierarchy::ExactHigherSupportTerminalAuthority;
   friend class hierarchy::ExactHigherSupportStreamBuilder;
   friend class hierarchy::ExactDirectSparseFirstIncidenceBuilder;
+  friend class hierarchy::ExactLbvhYao48EmstBuilder;
   friend class ExactBudgetedLbvhTopKResult;
   friend class gpu::K1BoruvkaCandidateContext;
   friend class gpu::ExactAnchoredPairCandidateRecertifier;

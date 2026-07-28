@@ -2028,6 +2028,7 @@ add_library(
     src/cpu/hierarchy/critical_event_gamma_overlay.cpp
     src/cpu/hierarchy/emst.cpp
     src/cpu/hierarchy/yao48_emst.cpp
+    src/cpu/hierarchy/exact_lbvh_yao48_emst.cpp
     src/cpu/hierarchy/gamma.cpp
     src/cpu/hierarchy/gamma_transition.cpp
     src/cpu/hierarchy/morse_gamma_partition_sweep.cpp
@@ -2982,6 +2983,26 @@ if(MORSEHGP3D_ENABLE_CUDA)
 endif()
 
 if(MORSEHGP3D_BUILD_TOOLS)
+  add_executable(
+    morsehgp3d_exact_lbvh_yao48_emst_smoke
+    src/tools/exact_lbvh_yao48_emst_smoke.cpp
+  )
+  target_link_libraries(
+    morsehgp3d_exact_lbvh_yao48_emst_smoke
+    PRIVATE morsehgp3d::hierarchy
+  )
+  morsehgp3d_apply_sanitizers(morsehgp3d_exact_lbvh_yao48_emst_smoke)
+  if(MSVC)
+    target_compile_options(
+      morsehgp3d_exact_lbvh_yao48_emst_smoke PRIVATE /W4 /WX
+    )
+  else()
+    target_compile_options(
+      morsehgp3d_exact_lbvh_yao48_emst_smoke
+      PRIVATE -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror
+    )
+  endif()
+
   add_executable(
     morsehgp3d_replay_predicate
     src/tools/predicate_replay.cpp
