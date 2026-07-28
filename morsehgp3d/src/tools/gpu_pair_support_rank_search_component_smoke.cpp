@@ -19,7 +19,6 @@
 #include <string>
 #include <string_view>
 #include <system_error>
-#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -36,7 +35,6 @@ using morsehgp3d::gpu::PairSupportRankPruneAudit;
 using morsehgp3d::gpu::PairSupportRankPruneBatchResult;
 using morsehgp3d::gpu::PairSupportRankPruneBudget;
 using morsehgp3d::gpu::PairSupportRankPruneCapacity;
-using morsehgp3d::gpu::PairSupportRankProposalMode;
 using morsehgp3d::gpu::PairSupportRankTraversalBackend;
 using morsehgp3d::hierarchy::ExactPairSupportAuthorityContext;
 using morsehgp3d::hierarchy::ExactPairSupportCheckpoint;
@@ -45,7 +43,6 @@ using morsehgp3d::hierarchy::ExactPairSupportRankPruneBatchProposal;
 using morsehgp3d::hierarchy::ExactPairSupportRankPruneBatchRequest;
 using morsehgp3d::hierarchy::ExactPairSupportRankPruneProposal;
 using morsehgp3d::hierarchy::ExactPairSupportRankPruneProposedChunk;
-using Product = morsehgp3d::hierarchy::ExactPairSupportFrontierEntry;
 using morsehgp3d::hierarchy::
     ExactPairSupportRankPruneProposedChunkVerification;
 using morsehgp3d::hierarchy::ExactPairSupportStopReason;
@@ -87,7 +84,6 @@ struct Options {
   PairSupportRankPruneCapacity capacity{};
   PairSupportRankPruneBudget epoch_budget{};
   std::size_t resident_replay_count{};
-  bool prune_only{false};
 };
 
 struct RankPruneRunAudit {
@@ -195,7 +191,6 @@ void require(bool condition, std::string_view message) {
   bool receipt_capacity_seen = false;
   bool epoch_budget_seen = false;
   bool resident_replays_seen = false;
-  bool mode_seen = false;
   for (int index = 1; index < count; ++index) {
     const std::string_view option{values[index]};
     if (option == "--help" || option == "-h") {
@@ -204,7 +199,6 @@ void require(bool condition, std::string_view message) {
              "morsehgp3d_gpu_pair_support_rank_search_component_smoke "
              "--family uniform_latin|eight_clusters --point-count N "
              "[--requested-maximum-order K] "
-             "[--mode prune-or-keep|prune-only] "
              "--work-unit-budget W --product-capacity P "
              "--work-item-capacity F --receipt-capacity R "
              "--epoch-budget E --resident-replays Q\n";
@@ -238,13 +232,6 @@ void require(bool condition, std::string_view message) {
       options.work_unit_budget =
           parse_size(value, "--work-unit-budget");
       work_budget_seen = true;
-    } else if (option == "--mode") {
-      require(!mode_seen, "--mode may be supplied only once");
-      require(
-          value == "prune-or-keep" || value == "prune-only",
-          "--mode must be prune-or-keep or prune-only");
-      options.prune_only = value == "prune-only";
-      mode_seen = true;
     } else if (option == "--product-capacity") {
       require(
           !product_capacity_seen,
@@ -336,19 +323,6 @@ void require(bool condition, std::string_view message) {
           options.resident_replay_count <=
               kMaximumRunnerResidentReplayCount,
       "--resident-replays is outside the bounded range 1..32");
-  if (options.prune_only) {
-    require(
-        options.capacity.maximum_product_count > 1U,
-        "prune-only requires stackless_product_batch capacity");
-    require(
-        options.capacity.maximum_receipt_count /
-                options.requested_maximum_order >=
-            options.capacity.maximum_product_count,
-        "prune-only requires at least K receipt slots per product");
-    require(
-        options.resident_replay_count == 1U,
-        "prune-only currently requires exactly one resident replay");
-  }
   return options;
 }
 
@@ -1466,225 +1440,6 @@ void write_verification(
   output << '}';
 }
 
-struct PruneOnlyMeasurement {
-  std::size_t waves{}, products{}, pruned_products{};
-  std::size_t pruned_mass{}, unclassified_leaf_pairs{}, residual_mass{};
-  std::size_t node_visits{}, receipt_count{}, product_h2d_bytes{};
-  std::size_t metadata_d2h_bytes{}, receipt_d2h_bytes{}, synchronizations{};
-  std::uint64_t elapsed_ns{};
-  bool complete{false};
-  bool capacity_stop{false};
-  bool work_stop{false};
-};
-
-[[nodiscard]] Product make_product(
-    const PairSupportPhiContext& context,
-    std::uint64_t first_index,
-    std::uint64_t second_index) {
-  auto first = context.node_descriptor(
-      static_cast<std::size_t>(first_index));
-  auto second = context.node_descriptor(
-      static_cast<std::size_t>(second_index));
-  if (first.node_index != second.node_index &&
-      second.leaf_begin < first.leaf_begin) {
-    std::swap(first, second);
-  }
-  require(
-      first.node_index == second.node_index ||
-          first.leaf_end <= second.leaf_begin,
-      "a prune-only product overlaps in Morton order");
-  return {first.node_index,
-          second.node_index,
-          first.leaf_begin,
-          first.leaf_end,
-          second.leaf_begin,
-          second.leaf_end,
-          static_cast<std::uint8_t>(
-              first.node_index == second.node_index ? 1U : 0U)};
-}
-
-[[nodiscard]] std::size_t product_mass(const Product& product) {
-  const std::size_t first = static_cast<std::size_t>(
-      product.first_leaf_end - product.first_leaf_begin);
-  const std::size_t second = static_cast<std::size_t>(
-      product.second_leaf_end - product.second_leaf_begin);
-  require(first != 0U && second != 0U && product.self_product <= 1U,
-          "invalid prune-only product");
-  return product.self_product == 1U ? first * (first - 1U) / 2U
-                                    : first * second;
-}
-
-[[nodiscard]] std::size_t frontier_mass(
-    std::span<const Product> frontier) {
-  std::size_t result = 0U;
-  for (const auto& product : frontier) {
-    result += product_mass(product);
-  }
-  return result;
-}
-
-[[nodiscard]] std::vector<Product> split_product(
-    const PairSupportPhiContext& context,
-    const Product& product) {
-  const auto first = context.node_children(
-      static_cast<std::size_t>(product.first_node_index));
-  const auto second = context.node_children(
-      static_cast<std::size_t>(product.second_node_index));
-  std::vector<Product> result;
-  if (product.self_product == 1U) {
-    if (!first.has_value()) {
-      return result;
-    }
-    result = {make_product(context, first->first, first->first),
-              make_product(context, first->first, first->second),
-              make_product(context, first->second, first->second)};
-  } else if (first.has_value() || second.has_value()) {
-    const std::size_t first_size = static_cast<std::size_t>(
-        product.first_leaf_end - product.first_leaf_begin);
-    const std::size_t second_size = static_cast<std::size_t>(
-        product.second_leaf_end - product.second_leaf_begin);
-    if (first.has_value() &&
-        (!second.has_value() || first_size >= second_size)) {
-      result = {make_product(
-                    context, first->first, product.second_node_index),
-                make_product(
-                    context, first->second, product.second_node_index)};
-    } else {
-      result = {make_product(
-                    context, product.first_node_index, second->first),
-                make_product(
-                    context, product.first_node_index, second->second)};
-    }
-  }
-  require(
-      result.empty() || frontier_mass(result) == product_mass(product),
-      "a prune-only split does not conserve pair mass");
-  return result;
-}
-
-[[nodiscard]] PruneOnlyMeasurement run_prune_only(
-    PairSupportPhiContext& context,
-    const Options& options) {
-  const Clock::time_point start = Clock::now();
-  PruneOnlyMeasurement audit;
-  const std::uint64_t root =
-      static_cast<std::uint64_t>(context.root_node_index());
-  std::vector<Product> frontier{make_product(context, root, root)};
-  const std::size_t total_mass = product_mass(frontier.front());
-  std::size_t resolved_mass = 0U;
-  while (!frontier.empty()) {
-    if (frontier.size() > options.capacity.maximum_product_count) {
-      audit.capacity_stop = true;
-      break;
-    }
-    if (frontier.size() > options.work_unit_budget -
-            std::min(options.work_unit_budget, audit.products)) {
-      audit.work_stop = true;
-      break;
-    }
-    PairSupportRankPruneBatchResult batch = context.propose_rank_prunes(
-        frontier,
-        options.requested_maximum_order,
-        options.epoch_budget,
-        PairSupportRankProposalMode::prune_only);
-    ++audit.waves;
-    audit.products += frontier.size();
-    require(
-        batch.audit.proposal_mode ==
-                PairSupportRankProposalMode::prune_only &&
-            batch.audit.stackless_product_batch_traversal_used &&
-            batch.keep_certificates.empty() &&
-            batch.audit.keep_certificate_product_count == 0U &&
-            batch.audit.anchor_noninterior_terminal_count == 0U &&
-            batch.audit.unresolved_external_leaf_terminal_count == 0U &&
-            batch.audit.cpu_exact_recertification_complete &&
-            batch.audit.disjoint_receipt_antichains_validated &&
-            !batch.audit.global_support_product_prune_published &&
-            !batch.audit.public_status_published,
-        "the prune-only backend escaped its diagnostic contract");
-    audit.node_visits += batch.audit.gpu_visited_work_item_count;
-    audit.receipt_count += batch.audit.gpu_output_receipt_count;
-    audit.product_h2d_bytes += batch.audit.active_product_h2d_byte_count;
-    audit.metadata_d2h_bytes +=
-        batch.audit.traversal_metadata_d2h_byte_count;
-    audit.receipt_d2h_bytes +=
-        batch.audit.active_receipt_d2h_byte_count;
-    audit.synchronizations += batch.audit.gpu_host_synchronization_count;
-    std::vector<std::uint8_t> pruned(frontier.size(), 0U);
-    for (const auto& proposal : batch.proposals) {
-      require(
-          proposal.product_index < frontier.size() &&
-              pruned[proposal.product_index] == 0U &&
-              proposal.product == frontier[proposal.product_index] &&
-              !proposal.strict_witness_receipts.empty() &&
-              proposal.strict_witness_receipts.size() <=
-                  options.requested_maximum_order &&
-              proposal.strict_interior_point_count >=
-                  options.requested_maximum_order,
-          "a prune-only exact proposal is invalid");
-      pruned[proposal.product_index] = 1U;
-    }
-    std::vector<Product> next;
-    next.reserve(frontier.size());
-    for (std::size_t index = 0U; index < frontier.size(); ++index) {
-      const std::size_t mass = product_mass(frontier[index]);
-      if (pruned[index] != 0U) {
-        ++audit.pruned_products;
-        audit.pruned_mass += mass;
-        resolved_mass += mass;
-        continue;
-      }
-      std::vector<Product> children =
-          split_product(context, frontier[index]);
-      if (children.empty()) {
-        require(mass <= 1U,
-                "a prune-only terminal product is not a leaf pair");
-        audit.unclassified_leaf_pairs += mass;
-        resolved_mass += mass;
-      } else {
-        next.insert(next.end(), children.begin(), children.end());
-      }
-    }
-    require(
-        resolved_mass + frontier_mass(next) == total_mass,
-        "a prune-only wave does not close C(n,2)");
-    std::sort(
-        next.begin(),
-        next.end(),
-        [](const Product& left, const Product& right) {
-          return std::tuple{
-                     left.first_leaf_begin,
-                     left.first_leaf_end,
-                     left.second_leaf_begin,
-                     left.second_leaf_end,
-                     left.first_node_index,
-                     left.second_node_index,
-                     left.self_product} <
-                 std::tuple{
-                     right.first_leaf_begin,
-                     right.first_leaf_end,
-                     right.second_leaf_begin,
-                     right.second_leaf_end,
-                     right.first_node_index,
-                     right.second_node_index,
-                     right.self_product};
-        });
-    require(
-        std::adjacent_find(next.begin(), next.end()) == next.end(),
-        "a prune-only wave duplicated a canonical product");
-    frontier = std::move(next);
-  }
-  audit.residual_mass = frontier_mass(frontier);
-  require(
-      audit.pruned_mass + audit.unclassified_leaf_pairs +
-              audit.residual_mass ==
-          total_mass,
-      "the prune-only final partition does not close C(n,2)");
-  audit.complete = frontier.empty();
-  audit.elapsed_ns = nanoseconds(Clock::now() - start);
-  return audit;
-}
-
 }  // namespace
 
 int main(int argument_count, char** argument_values) {
@@ -1710,64 +1465,6 @@ int main(int argument_count, char** argument_values) {
     const Clock::time_point lbvh_start = Clock::now();
     const MortonLbvhIndex index = MortonLbvhIndex::build(cloud);
     const Clock::time_point lbvh_end = Clock::now();
-
-    if (options.prune_only) {
-      PairSupportPhiContext context{
-          index,
-          cloud,
-          kLegacyP1QueryCapacity,
-          options.capacity};
-      const PruneOnlyMeasurement cold = run_prune_only(context, options);
-      const PruneOnlyMeasurement audit = run_prune_only(context, options);
-      require(
-          cold.complete == audit.complete &&
-              cold.capacity_stop == audit.capacity_stop &&
-              cold.work_stop == audit.work_stop &&
-              cold.waves == audit.waves &&
-              cold.products == audit.products &&
-              cold.pruned_products == audit.pruned_products &&
-              cold.pruned_mass == audit.pruned_mass &&
-              cold.unclassified_leaf_pairs ==
-                  audit.unclassified_leaf_pairs &&
-              cold.residual_mass == audit.residual_mass &&
-              cold.node_visits == audit.node_visits &&
-              cold.receipt_count == audit.receipt_count,
-          "the resident prune-only replay changed its exact partition");
-      std::cout
-          << "{\"artifact_role\":\"pair_rank_prune_only_falsifier\","
-          << "\"backend\":\"stackless_product_batch\","
-          << "\"component_only\":true,\"mode\":\"prune_only\","
-          << "\"point_count\":" << options.point_count << ','
-          << "\"requested_maximum_order\":"
-          << options.requested_maximum_order << ','
-          << "\"complete\":";
-      write_bool(std::cout, audit.complete);
-      std::cout << ",\"capacity_stop\":";
-      write_bool(std::cout, audit.capacity_stop);
-      std::cout << ",\"work_stop\":";
-      write_bool(std::cout, audit.work_stop);
-      std::cout
-          << ",\"waves\":" << audit.waves
-          << ",\"processed_products\":" << audit.products
-          << ",\"pruned_products\":" << audit.pruned_products
-          << ",\"pruned_pair_mass\":" << audit.pruned_mass
-          << ",\"unclassified_leaf_pairs\":"
-          << audit.unclassified_leaf_pairs
-          << ",\"residual_pair_mass\":" << audit.residual_mass
-          << ",\"node_visits\":" << audit.node_visits
-          << ",\"strict_receipts\":" << audit.receipt_count
-          << ",\"product_h2d_bytes\":" << audit.product_h2d_bytes
-          << ",\"metadata_d2h_bytes\":" << audit.metadata_d2h_bytes
-          << ",\"receipt_d2h_bytes\":" << audit.receipt_d2h_bytes
-          << ",\"host_synchronizations\":" << audit.synchronizations
-          << ",\"cold_elapsed_ns\":" << cold.elapsed_ns
-          << ",\"resident_replay_count\":1"
-          << ",\"elapsed_ns\":" << audit.elapsed_ns
-          << ",\"lbvh_ns\":" << nanoseconds(lbvh_end - lbvh_start)
-          << ",\"qualification_claimed\":false,"
-          << "\"public_status\":null,\"slo_claimed\":false}\n";
-      return audit.complete ? EXIT_SUCCESS : EXIT_FAILURE;
-    }
 
     const Clock::time_point authority_start = Clock::now();
     const ExactPairSupportAuthorityContext authority{

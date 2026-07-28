@@ -629,7 +629,6 @@ validate_and_recertify_rank_prunes(
     PairSupportRankPruneCapacity capacity,
     std::size_t required_strict_interior_point_count,
     PairSupportRankPruneBudget budget,
-    PairSupportRankProposalMode proposal_mode,
     std::uint64_t previous_buffer_epoch) {
   validate_allocation_product(
       nodes.size(),
@@ -700,15 +699,9 @@ validate_and_recertify_rank_prunes(
       batch.traversal_backend ==
       detail::PairSupportRankTraversalBackend::stackless_product_batch;
   const bool stackless = stackless_single || stackless_batch;
-  const bool prune_only =
-      proposal_mode == PairSupportRankProposalMode::prune_only;
   if (!legacy && !stackless) {
     throw std::runtime_error(
         "the GPU rank-prune proposal returned an invalid traversal backend");
-  }
-  if (prune_only && !stackless_batch) {
-    throw std::runtime_error(
-        "the prune-only diagnostic did not use stackless_product_batch");
   }
   if (batch.terminals.size() != batch.terminal_count ||
       batch.input_product_count != products.size() ||
@@ -924,16 +917,10 @@ validate_and_recertify_rank_prunes(
         }
         all_conclusive = false;
         any_terminal_capacity_stop = true;
-      } else if (stop != detail::PairSupportRankProductStop::pruned &&
-                 stop != detail::PairSupportRankProductStop::not_pruned) {
+      } else if (
+          stop != detail::PairSupportRankProductStop::conclusive) {
         throw std::runtime_error(
             "a GPU stackless product returned an invalid stop");
-      }
-      if (prune_only &&
-          ((stop == detail::PairSupportRankProductStop::pruned) !=
-           (terminal_count != 0U))) {
-        throw std::runtime_error(
-            "a prune-only product transcript contradicts its stop");
       }
       observed_visit_budget = checked_add_size(
           observed_visit_budget,
@@ -995,7 +982,6 @@ validate_and_recertify_rank_prunes(
   PairSupportRankPruneAudit& audit = result.audit;
   audit.capacity = capacity;
   audit.budget = budget;
-  audit.proposal_mode = proposal_mode;
   audit.traversal_backend =
       legacy
           ? PairSupportRankTraversalBackend::two_frontier
@@ -1194,12 +1180,6 @@ validate_and_recertify_rank_prunes(
     throw std::logic_error(
         "the exact terminal classification counters do not close");
   }
-  if (prune_only &&
-      (audit.anchor_noninterior_terminal_count != 0U ||
-       audit.unresolved_external_leaf_terminal_count != 0U)) {
-    throw std::runtime_error(
-        "the prune-only diagnostic returned a non-strict terminal");
-  }
   audit.stable_terminal_transcript_validated = true;
   audit.stable_receipt_transcript_validated = true;
 
@@ -1230,15 +1210,13 @@ validate_and_recertify_rank_prunes(
       }
     }
 
-    // Only an explicit device prune completion may publish a prune proposal;
-    // Q/C stops expose diagnostics only and a completed non-prune is never
-    // reinterpreted from its transcript.
+    // A stackless Q/C stop authenticates its returned active prefix for
+    // diagnostics only.  No partial transcript may become a prune proposal
+    // or a keep certificate, even if that prefix happens to contain K exact
+    // strict witnesses.
     if (stackless &&
         batch.product_stops[product_index] !=
-            detail::PairSupportRankProductStop::pruned &&
-        (prune_only ||
-         batch.product_stops[product_index] !=
-             detail::PairSupportRankProductStop::not_pruned)) {
+            detail::PairSupportRankProductStop::conclusive) {
       continue;
     }
 
@@ -1284,10 +1262,6 @@ validate_and_recertify_rank_prunes(
               products[product_index],
               std::move(minimal_prefix),
               prefix_point_count});
-      continue;
-    }
-
-    if (prune_only) {
       continue;
     }
 
@@ -1348,7 +1322,7 @@ validate_and_recertify_rank_prunes(
   }
   audit.disjoint_terminal_antichains_validated = true;
   audit.disjoint_receipt_antichains_validated = true;
-  audit.keep_coverage_recertification_complete = !prune_only;
+  audit.keep_coverage_recertification_complete = true;
   audit.cpu_exact_recertification_complete = true;
   audit.prune_product_count = result.proposals.size();
   audit.keep_certificate_product_count =
@@ -1567,23 +1541,10 @@ PairSupportPhiBatchResult PairSupportPhiContext::classify_witnesses(
 PairSupportRankPruneBatchResult PairSupportPhiContext::propose_rank_prunes(
     std::span<const hierarchy::ExactPairSupportFrontierEntry> products,
     std::size_t required_strict_interior_point_count,
-    PairSupportRankPruneBudget budget,
-    PairSupportRankProposalMode proposal_mode) {
+    PairSupportRankPruneBudget budget) {
   if (state_ == nullptr || nodes_.empty() || maximum_query_count_ == 0U) {
     throw std::invalid_argument(
         "a moved-from Phase 9 pair-support phi context is not queryable");
-  }
-  if (proposal_mode != PairSupportRankProposalMode::prune_or_keep &&
-      proposal_mode != PairSupportRankProposalMode::prune_only) {
-    throw std::invalid_argument(
-        "the Phase 9 rank-prune proposal mode is invalid");
-  }
-  if (proposal_mode == PairSupportRankProposalMode::prune_only &&
-      !products.empty() &&
-      rank_prune_capacity_.maximum_receipt_count / products.size() <
-          required_strict_interior_point_count) {
-    throw std::invalid_argument(
-        "prune-only requires at least K receipt slots per product");
   }
   const std::vector<detail::PairSupportRankProductInputRecord>
       packed_products = validate_and_pack_rank_products(
@@ -1604,8 +1565,7 @@ PairSupportRankPruneBatchResult PairSupportPhiContext::propose_rank_prunes(
             rank_prune_capacity_.maximum_product_count,
             rank_prune_capacity_.maximum_work_item_count,
             rank_prune_capacity_.maximum_receipt_count,
-            budget.maximum_epoch_count,
-            proposal_mode == PairSupportRankProposalMode::prune_only);
+            budget.maximum_epoch_count);
     PairSupportRankPruneBatchResult result =
         validate_and_recertify_rank_prunes(
             batch,
@@ -1615,7 +1575,6 @@ PairSupportRankPruneBatchResult PairSupportPhiContext::propose_rank_prunes(
             rank_prune_capacity_,
             required_strict_interior_point_count,
             budget,
-            proposal_mode,
             last_rank_prune_buffer_epoch_);
     last_rank_prune_buffer_epoch_ = batch.buffer_epoch;
     return result;
@@ -1678,41 +1637,6 @@ PairSupportPhiNodeDescriptor PairSupportPhiContext::node_descriptor(
       node.leaf_begin,
       node.leaf_end,
       node_box(node)};
-}
-
-std::optional<std::pair<std::uint64_t, std::uint64_t>>
-PairSupportPhiContext::node_children(std::size_t node_index) const {
-  if (state_ == nullptr || node_index >= nodes_.size()) {
-    throw std::out_of_range(
-        "a Phase 9 pair-support phi node topology is unavailable");
-  }
-  const detail::PairSupportPhiNodeInputRecord& node = nodes_[node_index];
-  const bool left_missing =
-      node.left_child == detail::pair_support_phi_sentinel;
-  const bool right_missing =
-      node.right_child == detail::pair_support_phi_sentinel;
-  if (left_missing != right_missing) {
-    throw std::logic_error(
-        "a Phase 9 pair-support phi node has partial child topology");
-  }
-  if (left_missing) {
-    return std::nullopt;
-  }
-  if (node.left_child >= nodes_.size() ||
-      node.right_child >= nodes_.size() ||
-      node.left_child == node.right_child) {
-    throw std::logic_error(
-        "a Phase 9 pair-support phi node has invalid child topology");
-  }
-  return std::pair{node.left_child, node.right_child};
-}
-
-std::size_t PairSupportPhiContext::root_node_index() const {
-  if (state_ == nullptr || root_node_index_ >= nodes_.size()) {
-    throw std::out_of_range(
-        "a Phase 9 pair-support phi root descriptor is unavailable");
-  }
-  return static_cast<std::size_t>(root_node_index_);
 }
 
 }  // namespace morsehgp3d::gpu

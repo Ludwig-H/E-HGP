@@ -448,8 +448,7 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
     std::size_t maximum_product_count,
     std::size_t maximum_work_item_count,
     std::size_t maximum_terminal_count,
-    std::size_t maximum_epoch_count,
-    bool prune_only) {
+    std::size_t maximum_epoch_count) {
   if (nodes.empty() || products.empty() ||
       root_node_index >= nodes.size() ||
       required_strict_interior_point_count == 0U ||
@@ -465,10 +464,6 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
       escape_node_indices.size() != nodes.size()) {
     throw std::invalid_argument(
         "the fake Phase 14Q launcher received a partial escape snapshot");
-  }
-  if (prune_only && !stackless) {
-    throw std::invalid_argument(
-        "the fake prune-only launcher requires stackless traversal");
   }
 
   const test_support::FakePairSupportPhiCorruption corruption =
@@ -619,7 +614,7 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
       std::uint32_t current =
           static_cast<std::uint32_t>(root_node_index);
       PairSupportRankProductStop stop =
-          PairSupportRankProductStop::not_pruned;
+          PairSupportRankProductStop::conclusive;
       while (current != pair_support_rank_escape_sentinel &&
              visited < visit_budget) {
         if (current >= nodes.size()) {
@@ -636,8 +631,7 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
             strict_point_counts,
             required_strict_interior_point_count);
         const PairSupportPhiNodeInputRecord& witness = nodes[current];
-        if (decision.emit_terminal &&
-            (!prune_only || decision.strict_terminal)) {
+        if (decision.emit_terminal) {
           if (terminal_count == terminal_capacity) {
             stop = PairSupportRankProductStop::terminal_capacity;
             all_products_conclusive = false;
@@ -672,17 +666,10 @@ PairSupportRankDeviceBatch propose_pair_support_rank_prunes_on_gpu(
           }
         }
       }
-      if (stop == PairSupportRankProductStop::not_pruned &&
+      if (stop == PairSupportRankProductStop::conclusive &&
           current != pair_support_rank_escape_sentinel) {
         stop = PairSupportRankProductStop::visit_budget;
         all_products_conclusive = false;
-      } else if (strict_point_counts[product_slot] >=
-                 required_strict_interior_point_count) {
-        stop = PairSupportRankProductStop::pruned;
-      }
-      if (prune_only && stop != PairSupportRankProductStop::pruned) {
-        batch.terminals.resize(batch.terminals.size() - terminal_count);
-        terminal_count = 0U;
       }
       batch.product_stops.push_back(stop);
       batch.product_visit_budget_counts.push_back(visit_budget);
