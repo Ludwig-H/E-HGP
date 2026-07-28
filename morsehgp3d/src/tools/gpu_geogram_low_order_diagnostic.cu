@@ -18,6 +18,10 @@
 #include <geogram/delaunay/delaunay.h>
 
 #include "morsehgp3d/contract/canonical_id.hpp"
+#include "morsehgp3d/exact/point.hpp"
+#include "morsehgp3d/gpu/binary64_lbvh_top_k.hpp"
+#include "morsehgp3d/gpu/morton_lbvh_build.hpp"
+#include "morsehgp3d/spatial/point_cloud.hpp"
 
 #include <algorithm>
 #include <array>
@@ -30,12 +34,15 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <exception>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <mutex>
 #include <numeric>
 #include <optional>
+#include <sstream>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -117,10 +124,13 @@ struct Options {
   std::size_t cpu_workers{std::numeric_limits<std::size_t>::max()};
   std::size_t grid_resolution{};
   std::size_t triangle_chunk_vertices{};
+  std::size_t surrogate_guardrail_max_order{};
+  std::size_t surrogate_seed_window_radius{32U};
   std::optional<std::string> input_xyz;
   bool fixture_e5{};
   bool emit_records{};
   bool gabriel_coverage_only{};
+  bool allow_conditional_guardrail{};
 };
 
 struct Timings {
@@ -135,6 +145,7 @@ struct Timings {
   std::uint64_t triangle_device_to_host_nanoseconds{};
   std::uint64_t k1_reduction_nanoseconds{};
   std::uint64_t k2_reduction_nanoseconds{};
+  std::uint64_t surrogate_guardrail_nanoseconds{};
   std::uint64_t total_nanoseconds{};
 };
 
@@ -190,6 +201,95 @@ struct GabrielSafetyBatchManifest {
   std::size_t total_explicit_triangle_count{};
   std::string ambiguous_triangle_sha256;
   std::string composite_batch_sha256;
+  ClassifiedTriangle first_ambiguous_triangle{};
+  bool first_ambiguous_triangle_present{};
+};
+
+struct SurrogateTreeEdge {
+  double squared_weight{};
+  PointId u{};
+  PointId v{};
+};
+
+static_assert(sizeof(SurrogateTreeEdge) == 24U);
+
+enum class CorrectedLevelEncoding : std::uint64_t {
+  raw_squared_weight_exact_dyadic_divide_by_4 = 1U,
+  direct_Gabriel_squared_level = 2U,
+};
+
+struct CorrectedSurrogateTreeEdge {
+  double encoded_binary64{};
+  PointId u{};
+  PointId v{};
+  CorrectedLevelEncoding level_encoding{
+      CorrectedLevelEncoding::direct_Gabriel_squared_level};
+};
+
+static_assert(sizeof(CorrectedSurrogateTreeEdge) == 32U);
+
+struct SurrogateFailureWitness {
+  ClassifiedTriangle source{};
+  std::string classification;
+  double observed_connection_raw_squared_weight{};
+  bool observed_connection_level_present{};
+  bool present{};
+};
+
+struct SurrogateGuardrailOrderSummary {
+  std::size_t order{};
+  std::size_t proposed_edge_count{};
+  std::size_t unique_edge_count{};
+  std::size_t tree_edge_count{};
+  std::size_t distinct_tree_level_count{};
+  double root_squared_weight{};
+  std::size_t source_triangle_count{};
+  std::size_t supported_triangle_count{};
+  std::size_t connected_before_count{};
+  std::size_t connected_at_count{};
+  std::size_t late_count{};
+  std::size_t never_count{};
+  std::size_t unsupported_count{};
+  std::size_t correction_triangle_count{};
+  std::size_t useful_correction_union_count{};
+  std::size_t corrected_postcondition_violation_count{};
+  std::size_t corrected_connected_before_count{};
+  std::size_t corrected_connected_at_count{};
+  std::size_t corrected_late_count{};
+  std::size_t corrected_never_count{};
+  std::size_t corrected_unsupported_count{};
+  std::size_t corrected_tree_edge_count{};
+  std::size_t corrected_tree_distinct_level_count{};
+  CorrectedSurrogateTreeEdge corrected_tree_root_edge{};
+  std::string tree_sha256;
+  std::string surrogate_compatible_digest;
+  std::string decision_sha256;
+  std::string correction_sha256;
+  std::string corrected_tree_sha256;
+  std::string corrected_decision_sha256;
+  SurrogateFailureWitness first_failure;
+  SurrogateFailureWitness first_late;
+  SurrogateFailureWitness first_unsupported;
+  SurrogateFailureWitness corrected_first_failure;
+  SurrogateFailureWitness corrected_first_late;
+  SurrogateFailureWitness corrected_first_unsupported;
+  std::uint64_t edge_build_nanoseconds{};
+  std::uint64_t tree_reduction_nanoseconds{};
+  std::uint64_t deadline_replay_nanoseconds{};
+  std::vector<SurrogateTreeEdge> emitted_tree_edges;
+  std::vector<CorrectedSurrogateTreeEdge> emitted_corrected_tree_edges;
+  std::vector<ClassifiedTriangle> emitted_correction_records;
+};
+
+struct SurrogateGuardrailRun {
+  std::vector<SurrogateGuardrailOrderSummary> orders;
+  morsehgp3d::gpu::Binary64LbvhTopKAudit top_k_audit;
+  std::string canonical_to_source_mapping_sha256;
+  std::string remapped_top_k_transcript_sha256;
+  std::uint64_t canonicalization_nanoseconds{};
+  std::uint64_t lbvh_build_nanoseconds{};
+  std::uint64_t top_k_query_nanoseconds{};
+  std::size_t order_worker_count{};
 };
 
 template <typename Duration>
@@ -262,6 +362,16 @@ template <typename Duration>
     } else if (argument == "--triangle-chunk-vertices" && index + 1 < argc) {
       options.triangle_chunk_vertices =
           parse_size(argv[++index], "--triangle-chunk-vertices", true);
+    } else if (
+        argument == "--surrogate-guardrail-max-order" &&
+        index + 1 < argc) {
+      options.surrogate_guardrail_max_order =
+          parse_size(argv[++index], "--surrogate-guardrail-max-order");
+    } else if (
+        argument == "--surrogate-seed-window-radius" &&
+        index + 1 < argc) {
+      options.surrogate_seed_window_radius =
+          parse_size(argv[++index], "--surrogate-seed-window-radius");
     } else if (argument == "--input-xyz" && index + 1 < argc) {
       options.input_xyz = std::string{argv[++index]};
     } else if (argument == "--fixture-e5") {
@@ -270,13 +380,18 @@ template <typename Duration>
       options.emit_records = true;
     } else if (argument == "--gabriel-coverage-only") {
       options.gabriel_coverage_only = true;
+    } else if (argument == "--allow-conditional-guardrail") {
+      options.allow_conditional_guardrail = true;
     } else {
       throw std::invalid_argument(
           "usage: gpu_geogram_low_order_diagnostic "
           "[--point-count N] [--seed N] [--cpu-workers N] "
           "[--grid-resolution R] [--triangle-chunk-vertices N] "
           "[--input-xyz PATH|--fixture-e5] [--emit-records] "
-          "[--gabriel-coverage-only]");
+          "[--gabriel-coverage-only] "
+          "[--surrogate-guardrail-max-order 2..10] "
+          "[--surrogate-seed-window-radius W] "
+          "[--allow-conditional-guardrail]");
     }
   }
   if (options.fixture_e5 && options.input_xyz.has_value()) {
@@ -287,6 +402,30 @@ template <typename Duration>
     throw std::invalid_argument(
         "--gabriel-coverage-only requires --triangle-chunk-vertices N so "
         "the GPU candidate arena is explicitly bounded");
+  }
+  if (options.surrogate_guardrail_max_order != 0U) {
+    if (!options.gabriel_coverage_only) {
+      throw std::invalid_argument(
+          "--surrogate-guardrail-max-order requires "
+          "--gabriel-coverage-only");
+    }
+    if (options.surrogate_guardrail_max_order < 2U ||
+        options.surrogate_guardrail_max_order > 10U) {
+      throw std::invalid_argument(
+          "the Gabriel guardrail requires orders 1 and 2 and supports at "
+          "most the product rank window 10");
+    }
+    if (options.surrogate_seed_window_radius <
+        options.surrogate_guardrail_max_order) {
+      throw std::invalid_argument(
+          "--surrogate-seed-window-radius must be at least the requested "
+          "guardrail order");
+    }
+  }
+  if (options.allow_conditional_guardrail &&
+      options.surrogate_guardrail_max_order == 0U) {
+    throw std::invalid_argument(
+        "--allow-conditional-guardrail requires the surrogate guardrail");
   }
   return options;
 }
@@ -1661,6 +1800,12 @@ void digest_word(std::uint64_t& digest, std::uint64_t word) noexcept {
   }
 }
 
+[[nodiscard]] std::string hex64(std::uint64_t value) {
+  std::ostringstream output;
+  output << "0x" << std::hex << std::setw(16) << std::setfill('0') << value;
+  return output.str();
+}
+
 void sha256_word(
     morsehgp3d::contract::CanonicalSha256Builder& builder,
     std::uint64_t word) {
@@ -1680,6 +1825,903 @@ void sha256_triangle(
   sha256_word(builder, record.triangle.b);
   sha256_word(builder, record.triangle.c);
   sha256_word(builder, record.support_cardinality);
+}
+
+[[nodiscard]] SurrogateTreeEdge make_surrogate_tree_edge(
+    PointId first,
+    PointId second,
+    double squared_weight) {
+  if (!std::isfinite(squared_weight) || squared_weight < 0.0 ||
+      first == second) {
+    throw std::runtime_error(
+        "the surrogate graph contains an invalid weighted edge");
+  }
+  if (second < first) {
+    std::swap(first, second);
+  }
+  return SurrogateTreeEdge{squared_weight, first, second};
+}
+
+[[nodiscard]] CorrectedSurrogateTreeEdge make_corrected_surrogate_tree_edge(
+    PointId first,
+    PointId second,
+    double encoded_binary64,
+    CorrectedLevelEncoding level_encoding) {
+  if (!std::isfinite(encoded_binary64) || encoded_binary64 < 0.0 ||
+      first == second) {
+    throw std::runtime_error(
+        "the corrected surrogate contains an invalid merge edge");
+  }
+  if (second < first) {
+    std::swap(first, second);
+  }
+  return CorrectedSurrogateTreeEdge{
+      encoded_binary64, first, second, level_encoding};
+}
+
+[[nodiscard]] bool surrogate_endpoint_less(
+    const SurrogateTreeEdge& left,
+    const SurrogateTreeEdge& right) noexcept {
+  if (left.u != right.u) {
+    return left.u < right.u;
+  }
+  if (left.v != right.v) {
+    return left.v < right.v;
+  }
+  return left.squared_weight < right.squared_weight;
+}
+
+[[nodiscard]] bool surrogate_weight_less(
+    const SurrogateTreeEdge& left,
+    const SurrogateTreeEdge& right) noexcept {
+  if (left.squared_weight != right.squared_weight) {
+    return left.squared_weight < right.squared_weight;
+  }
+  if (left.u != right.u) {
+    return left.u < right.u;
+  }
+  return left.v < right.v;
+}
+
+[[nodiscard]] bool triangle_vertices_connected(
+    DisjointSet& components,
+    const Triangle& triangle) {
+  const std::size_t first =
+      components.find(static_cast<std::size_t>(triangle.a));
+  return components.find(static_cast<std::size_t>(triangle.b)) == first &&
+         components.find(static_cast<std::size_t>(triangle.c)) == first;
+}
+
+void remember_surrogate_failure(
+    SurrogateFailureWitness& destination,
+    const ClassifiedTriangle& source,
+    std::string_view classification) {
+  if (!destination.present) {
+    destination.source = source;
+    destination.classification = classification;
+    destination.present = true;
+  }
+}
+
+[[nodiscard]] std::string surrogate_tree_sha256(
+    std::size_t point_count,
+    std::size_t order,
+    std::span<const SurrogateTreeEdge> tree) {
+  morsehgp3d::contract::CanonicalSha256Builder builder;
+  builder.update(
+      "MorseHGP3D/phase15/gabriel-fusion-guardrail/"
+      "surrogate-tree-v1/sha256/");
+  sha256_word(builder, static_cast<std::uint64_t>(point_count));
+  sha256_word(builder, static_cast<std::uint64_t>(order));
+  sha256_word(builder, static_cast<std::uint64_t>(tree.size()));
+  for (const SurrogateTreeEdge& edge : tree) {
+    sha256_word(builder, std::bit_cast<std::uint64_t>(edge.squared_weight));
+    sha256_word(builder, edge.u);
+    sha256_word(builder, edge.v);
+  }
+  return builder.finalize().to_lower_hex();
+}
+
+[[nodiscard]] std::string corrected_surrogate_tree_sha256(
+    std::size_t point_count,
+    std::size_t order,
+    std::span<const CorrectedSurrogateTreeEdge> tree) {
+  morsehgp3d::contract::CanonicalSha256Builder builder;
+  builder.update(
+      "MorseHGP3D/phase15/gabriel-fusion-guardrail/"
+      "corrected-surrogate-level-tree-v1/sha256/");
+  sha256_word(builder, static_cast<std::uint64_t>(point_count));
+  sha256_word(builder, static_cast<std::uint64_t>(order));
+  sha256_word(builder, static_cast<std::uint64_t>(tree.size()));
+  for (const CorrectedSurrogateTreeEdge& edge : tree) {
+    sha256_word(builder, static_cast<std::uint64_t>(edge.level_encoding));
+    sha256_word(builder, std::bit_cast<std::uint64_t>(edge.encoded_binary64));
+    sha256_word(builder, edge.u);
+    sha256_word(builder, edge.v);
+  }
+  return builder.finalize().to_lower_hex();
+}
+
+[[nodiscard]] std::string surrogate_decision_sha256(
+    std::size_t order,
+    std::span<const ClassifiedTriangle> sources,
+    std::span<const std::uint8_t> decisions,
+    bool corrected) {
+  if (sources.size() != decisions.size()) {
+    throw std::logic_error(
+        "the surrogate guardrail decision transcript has a wrong extent");
+  }
+  morsehgp3d::contract::CanonicalSha256Builder builder;
+  builder.update(
+      corrected
+          ? "MorseHGP3D/phase15/gabriel-fusion-guardrail/"
+            "corrected-decisions-v1/sha256/"
+          : "MorseHGP3D/phase15/gabriel-fusion-guardrail/"
+            "raw-decisions-v1/sha256/");
+  sha256_word(builder, static_cast<std::uint64_t>(order));
+  sha256_word(builder, static_cast<std::uint64_t>(sources.size()));
+  for (std::size_t index = 0U; index < sources.size(); ++index) {
+    const ClassifiedTriangle& source = sources[index];
+    const std::uint8_t decision = decisions[index];
+    sha256_word(builder, std::bit_cast<std::uint64_t>(source.squared_level));
+    sha256_word(builder, source.triangle.a);
+    sha256_word(builder, source.triangle.b);
+    sha256_word(builder, source.triangle.c);
+    sha256_word(builder, static_cast<std::uint64_t>(decision));
+  }
+  return builder.finalize().to_lower_hex();
+}
+
+struct NonnegativeBinary64Dyadic {
+  std::uint64_t significand{};
+  int exponent{};
+};
+
+[[nodiscard]] NonnegativeBinary64Dyadic decode_nonnegative_binary64_dyadic(
+    double value,
+    const char* role) {
+  if (!std::isfinite(value) || value < 0.0) {
+    throw std::runtime_error(std::string{role} + " is not finite non-negative");
+  }
+  const std::uint64_t bits = std::bit_cast<std::uint64_t>(value);
+  const std::uint64_t exponent_field = (bits >> 52U) & UINT64_C(0x7ff);
+  const std::uint64_t fraction = bits & UINT64_C(0x000fffffffffffff);
+  NonnegativeBinary64Dyadic result;
+  if (exponent_field == 0U) {
+    result.significand = fraction;
+    result.exponent = -1074;
+  } else {
+    result.significand = fraction | (UINT64_C(1) << 52U);
+    result.exponent =
+        static_cast<int>(exponent_field) - 1023 - 52;
+  }
+  if (result.significand != 0U) {
+    const int trailing = std::countr_zero(result.significand);
+    result.significand >>= trailing;
+    result.exponent += trailing;
+  }
+  return result;
+}
+
+[[nodiscard]] int compare_dyadics(
+    NonnegativeBinary64Dyadic left,
+    NonnegativeBinary64Dyadic right) noexcept {
+  if (left.significand == 0U || right.significand == 0U) {
+    if (left.significand == right.significand) {
+      return 0;
+    }
+    return left.significand == 0U ? -1 : 1;
+  }
+  const int left_width =
+      static_cast<int>(std::bit_width(left.significand));
+  const int right_width =
+      static_cast<int>(std::bit_width(right.significand));
+  const int left_top = left.exponent + left_width;
+  const int right_top = right.exponent + right_width;
+  if (left_top != right_top) {
+    return left_top < right_top ? -1 : 1;
+  }
+  if (left_width < right_width) {
+    left.significand <<= right_width - left_width;
+  } else if (right_width < left_width) {
+    right.significand <<= left_width - right_width;
+  }
+  if (left.significand == right.significand) {
+    return 0;
+  }
+  return left.significand < right.significand ? -1 : 1;
+}
+
+[[nodiscard]] int compare_surrogate_weight_to_gabriel_level(
+    double raw_squared_weight,
+    double gabriel_squared_radius) {
+  NonnegativeBinary64Dyadic converted =
+      decode_nonnegative_binary64_dyadic(
+          raw_squared_weight, "a surrogate squared weight");
+  converted.exponent -= 2;
+  return compare_dyadics(
+      converted,
+      decode_nonnegative_binary64_dyadic(
+          gabriel_squared_radius, "a Gabriel squared radius"));
+}
+
+[[nodiscard]] NonnegativeBinary64Dyadic corrected_tree_edge_level(
+    const CorrectedSurrogateTreeEdge& edge) {
+  NonnegativeBinary64Dyadic level = decode_nonnegative_binary64_dyadic(
+      edge.encoded_binary64, "a corrected surrogate encoded level");
+  switch (edge.level_encoding) {
+    case CorrectedLevelEncoding::raw_squared_weight_exact_dyadic_divide_by_4:
+      level.exponent -= 2;
+      return level;
+    case CorrectedLevelEncoding::direct_Gabriel_squared_level:
+      return level;
+  }
+  throw std::logic_error(
+      "the corrected surrogate has an invalid level encoding");
+}
+
+[[nodiscard]] int compare_corrected_tree_edge_levels(
+    const CorrectedSurrogateTreeEdge& left,
+    const CorrectedSurrogateTreeEdge& right) {
+  return compare_dyadics(
+      corrected_tree_edge_level(left), corrected_tree_edge_level(right));
+}
+
+[[nodiscard]] const char* corrected_level_encoding_name(
+    CorrectedLevelEncoding encoding) {
+  switch (encoding) {
+    case CorrectedLevelEncoding::raw_squared_weight_exact_dyadic_divide_by_4:
+      return "raw_squared_weight_exact_dyadic_divide_by_4";
+    case CorrectedLevelEncoding::direct_Gabriel_squared_level:
+      return "direct_Gabriel_squared_level";
+  }
+  throw std::logic_error(
+      "the corrected surrogate has an invalid level encoding");
+}
+
+[[nodiscard]] std::optional<double> first_surrogate_connection_raw_weight(
+    std::span<const SurrogateTreeEdge> tree,
+    const Triangle& triangle) {
+  DisjointSet components(tree.size() + 1U);
+  std::size_t plateau_begin = 0U;
+  while (plateau_begin < tree.size()) {
+    const double raw_squared_weight = tree[plateau_begin].squared_weight;
+    std::size_t plateau_end = plateau_begin + 1U;
+    while (plateau_end < tree.size() &&
+           tree[plateau_end].squared_weight == raw_squared_weight) {
+      ++plateau_end;
+    }
+    for (std::size_t index = plateau_begin; index < plateau_end; ++index) {
+      static_cast<void>(components.unite(
+          static_cast<std::size_t>(tree[index].u),
+          static_cast<std::size_t>(tree[index].v)));
+    }
+    if (triangle_vertices_connected(components, triangle)) {
+      return raw_squared_weight;
+    }
+    plateau_begin = plateau_end;
+  }
+  return std::nullopt;
+}
+
+void replay_surrogate_deadlines(
+    std::span<const ClassifiedTriangle> sources,
+    std::span<const SurrogateTreeEdge> tree,
+    SurrogateGuardrailOrderSummary& summary,
+    bool emit_records) {
+  constexpr std::uint8_t kConnectedBefore = 1U;
+  constexpr std::uint8_t kConnectedAt = 2U;
+  constexpr std::uint8_t kLate = 3U;
+  constexpr std::uint8_t kNever = 4U;
+  constexpr std::uint8_t kUnsupported = 5U;
+  const auto begin = Clock::now();
+  summary.source_triangle_count = sources.size();
+  for (std::size_t index = 1U; index < sources.size(); ++index) {
+    if (ClassifiedTriangleLess{}(sources[index], sources[index - 1U])) {
+      throw std::logic_error(
+          "the surrogate guardrail source stream is not canonical");
+    }
+  }
+  std::vector<std::uint8_t> decisions(sources.size(), 0U);
+  std::vector<std::uint8_t> corrected_decisions(sources.size(), 0U);
+  DisjointSet components(summary.tree_edge_count + 1U);
+  DisjointSet corrected_components(summary.tree_edge_count + 1U);
+  std::vector<CorrectedSurrogateTreeEdge> corrected_tree;
+  corrected_tree.reserve(summary.tree_edge_count);
+  const auto apply_raw_tree_edge = [&](const SurrogateTreeEdge& edge) {
+    const std::size_t u = static_cast<std::size_t>(edge.u);
+    const std::size_t v = static_cast<std::size_t>(edge.v);
+    if (!components.unite(u, v)) {
+      throw std::logic_error(
+          "the authenticated surrogate tree contains a cycle");
+    }
+    if (corrected_components.unite(u, v)) {
+      corrected_tree.push_back(make_corrected_surrogate_tree_edge(
+          edge.u,
+          edge.v,
+          edge.squared_weight,
+          CorrectedLevelEncoding::
+              raw_squared_weight_exact_dyadic_divide_by_4));
+    }
+  };
+  morsehgp3d::contract::CanonicalSha256Builder correction_builder;
+  correction_builder.update(
+      "MorseHGP3D/phase15/gabriel-fusion-guardrail/"
+      "canonical-greedy-overlay-v1/sha256/");
+  sha256_word(correction_builder, static_cast<std::uint64_t>(summary.order));
+  std::size_t tree_position = 0U;
+  std::size_t plateau_begin = 0U;
+  while (plateau_begin < sources.size()) {
+    const double source_level = sources[plateau_begin].squared_level;
+    if (!std::isfinite(source_level) || source_level < 0.0) {
+      throw std::runtime_error(
+          "the surrogate guardrail source contains an invalid level");
+    }
+    std::size_t plateau_end = plateau_begin + 1U;
+    while (plateau_end < sources.size() &&
+           sources[plateau_end].squared_level == source_level) {
+      ++plateau_end;
+    }
+    while (
+        tree_position < tree.size() &&
+        compare_surrogate_weight_to_gabriel_level(
+            tree[tree_position].squared_weight, source_level) < 0) {
+      apply_raw_tree_edge(tree[tree_position]);
+      ++tree_position;
+    }
+    for (std::size_t index = plateau_begin; index < plateau_end; ++index) {
+      const ClassifiedTriangle& source = sources[index];
+      if (source.status == TriangleStatus::ambiguous) {
+        decisions[index] = kUnsupported;
+        corrected_decisions[index] = kUnsupported;
+      } else if (source.status != TriangleStatus::gabriel_binary64) {
+        throw std::logic_error(
+            "the guardrail source stream contains a non-retained status");
+      } else if (triangle_vertices_connected(components, source.triangle)) {
+        decisions[index] = kConnectedBefore;
+      }
+      if (source.status == TriangleStatus::gabriel_binary64 &&
+          triangle_vertices_connected(
+              corrected_components, source.triangle)) {
+        corrected_decisions[index] = kConnectedBefore;
+      }
+    }
+    while (
+        tree_position < tree.size() &&
+        compare_surrogate_weight_to_gabriel_level(
+            tree[tree_position].squared_weight, source_level) == 0) {
+      apply_raw_tree_edge(tree[tree_position]);
+      ++tree_position;
+    }
+    for (std::size_t index = plateau_begin; index < plateau_end; ++index) {
+      if (decisions[index] != 0U) {
+        continue;
+      }
+      decisions[index] = triangle_vertices_connected(
+                             components, sources[index].triangle)
+                             ? kConnectedAt
+                             : kLate;
+    }
+    for (std::size_t index = plateau_begin; index < plateau_end; ++index) {
+      const ClassifiedTriangle& source = sources[index];
+      if (corrected_decisions[index] == kUnsupported ||
+          corrected_decisions[index] == kConnectedBefore) {
+        continue;
+      }
+      if (!triangle_vertices_connected(
+              corrected_components, source.triangle)) {
+        sha256_word(
+            correction_builder,
+            std::bit_cast<std::uint64_t>(source.squared_level));
+        sha256_word(correction_builder, source.triangle.a);
+        sha256_word(correction_builder, source.triangle.b);
+        sha256_word(correction_builder, source.triangle.c);
+        ++summary.correction_triangle_count;
+        if (emit_records) {
+          summary.emitted_correction_records.push_back(source);
+        }
+        if (corrected_components.unite(
+                static_cast<std::size_t>(source.triangle.a),
+                static_cast<std::size_t>(source.triangle.b))) {
+          ++summary.useful_correction_union_count;
+          corrected_tree.push_back(make_corrected_surrogate_tree_edge(
+              source.triangle.a,
+              source.triangle.b,
+              source.squared_level,
+              CorrectedLevelEncoding::direct_Gabriel_squared_level));
+        }
+        if (corrected_components.unite(
+                static_cast<std::size_t>(source.triangle.a),
+                static_cast<std::size_t>(source.triangle.c))) {
+          ++summary.useful_correction_union_count;
+          corrected_tree.push_back(make_corrected_surrogate_tree_edge(
+              source.triangle.a,
+              source.triangle.c,
+              source.squared_level,
+              CorrectedLevelEncoding::direct_Gabriel_squared_level));
+        }
+      }
+    }
+    for (std::size_t index = plateau_begin; index < plateau_end; ++index) {
+      if (sources[index].status != TriangleStatus::gabriel_binary64) {
+        continue;
+      }
+      if (!triangle_vertices_connected(
+              corrected_components, sources[index].triangle)) {
+        ++summary.corrected_postcondition_violation_count;
+        corrected_decisions[index] = kLate;
+      } else if (corrected_decisions[index] == 0U) {
+        corrected_decisions[index] = kConnectedAt;
+      }
+    }
+    plateau_begin = plateau_end;
+  }
+
+  while (tree_position < tree.size()) {
+    apply_raw_tree_edge(tree[tree_position]);
+    ++tree_position;
+  }
+  if (components.component_count() != 1U ||
+      corrected_components.component_count() != 1U ||
+      corrected_tree.size() != summary.tree_edge_count) {
+    throw std::logic_error(
+        "the surrogate tree or its corrected overlay did not close");
+  }
+  for (std::size_t index = 1U; index < corrected_tree.size(); ++index) {
+    if (compare_corrected_tree_edge_levels(
+            corrected_tree[index], corrected_tree[index - 1U]) < 0) {
+      throw std::logic_error(
+          "the corrected surrogate merge tree is not level ordered");
+    }
+  }
+  summary.corrected_tree_edge_count = corrected_tree.size();
+  summary.corrected_tree_root_edge = corrected_tree.back();
+  CorrectedSurrogateTreeEdge previous_corrected_level;
+  bool has_previous_corrected_level = false;
+  for (const CorrectedSurrogateTreeEdge& edge : corrected_tree) {
+    if (!has_previous_corrected_level ||
+        compare_corrected_tree_edge_levels(
+            edge, previous_corrected_level) != 0) {
+      ++summary.corrected_tree_distinct_level_count;
+      previous_corrected_level = edge;
+      has_previous_corrected_level = true;
+    }
+  }
+  summary.corrected_tree_sha256 = corrected_surrogate_tree_sha256(
+      summary.tree_edge_count + 1U, summary.order, corrected_tree);
+  if (emit_records) {
+    summary.emitted_corrected_tree_edges = corrected_tree;
+  }
+
+  for (std::size_t index = 0U; index < decisions.size(); ++index) {
+    const ClassifiedTriangle& source = sources[index];
+    switch (decisions[index]) {
+      case kConnectedBefore:
+        ++summary.connected_before_count;
+        ++summary.supported_triangle_count;
+        break;
+      case kConnectedAt:
+        ++summary.connected_at_count;
+        ++summary.supported_triangle_count;
+        break;
+      case kLate:
+        ++summary.late_count;
+        ++summary.supported_triangle_count;
+        remember_surrogate_failure(summary.first_failure, source, "late");
+        remember_surrogate_failure(summary.first_late, source, "late");
+        break;
+      case kNever:
+        ++summary.never_count;
+        ++summary.supported_triangle_count;
+        remember_surrogate_failure(summary.first_failure, source, "never");
+        break;
+      case kUnsupported:
+        ++summary.unsupported_count;
+        remember_surrogate_failure(
+            summary.first_failure, source, "unsupported");
+        remember_surrogate_failure(
+            summary.first_unsupported, source, "unsupported");
+        break;
+      default:
+        throw std::logic_error(
+          "the surrogate guardrail left a source unclassified");
+    }
+  }
+  for (std::size_t index = 0U; index < corrected_decisions.size(); ++index) {
+    const ClassifiedTriangle& source = sources[index];
+    switch (corrected_decisions[index]) {
+      case kConnectedBefore:
+        ++summary.corrected_connected_before_count;
+        break;
+      case kConnectedAt:
+        ++summary.corrected_connected_at_count;
+        break;
+      case kLate:
+        ++summary.corrected_late_count;
+        remember_surrogate_failure(
+            summary.corrected_first_failure, source, "late");
+        remember_surrogate_failure(
+            summary.corrected_first_late, source, "late");
+        break;
+      case kNever:
+        ++summary.corrected_never_count;
+        remember_surrogate_failure(
+            summary.corrected_first_failure, source, "never");
+        break;
+      case kUnsupported:
+        ++summary.corrected_unsupported_count;
+        remember_surrogate_failure(
+            summary.corrected_first_failure, source, "unsupported");
+        remember_surrogate_failure(
+            summary.corrected_first_unsupported, source, "unsupported");
+        break;
+      default:
+        throw std::logic_error(
+            "the corrected surrogate guardrail left a source unclassified");
+    }
+  }
+  const std::size_t partition_count =
+      summary.connected_before_count + summary.connected_at_count +
+      summary.late_count + summary.never_count + summary.unsupported_count;
+  const std::size_t corrected_partition_count =
+      summary.corrected_connected_before_count +
+      summary.corrected_connected_at_count + summary.corrected_late_count +
+      summary.corrected_never_count + summary.corrected_unsupported_count;
+  if (partition_count != summary.source_triangle_count ||
+      summary.supported_triangle_count + summary.unsupported_count !=
+          summary.source_triangle_count ||
+      corrected_partition_count != summary.source_triangle_count ||
+      summary.corrected_late_count + summary.corrected_never_count !=
+          summary.corrected_postcondition_violation_count) {
+    throw std::logic_error(
+        "the surrogate guardrail classifications do not close");
+  }
+  if (summary.first_late.present) {
+    const std::optional<double> connection_raw_weight =
+        first_surrogate_connection_raw_weight(
+            tree, summary.first_late.source.triangle);
+    if (!connection_raw_weight.has_value() ||
+        compare_surrogate_weight_to_gabriel_level(
+            *connection_raw_weight,
+            summary.first_late.source.squared_level) <= 0) {
+      throw std::logic_error(
+          "a late surrogate witness has no strictly later connection level");
+    }
+    summary.first_late.observed_connection_raw_squared_weight =
+        *connection_raw_weight;
+    summary.first_late.observed_connection_level_present = true;
+    if (summary.first_failure.present &&
+        summary.first_failure.classification == "late" &&
+        summary.first_failure.source.triangle.a ==
+            summary.first_late.source.triangle.a &&
+        summary.first_failure.source.triangle.b ==
+            summary.first_late.source.triangle.b &&
+        summary.first_failure.source.triangle.c ==
+            summary.first_late.source.triangle.c) {
+      summary.first_failure.observed_connection_raw_squared_weight =
+          *connection_raw_weight;
+      summary.first_failure.observed_connection_level_present = true;
+    }
+  }
+  correction_builder.update("/count/");
+  sha256_word(
+      correction_builder,
+      static_cast<std::uint64_t>(summary.correction_triangle_count));
+  summary.correction_sha256 =
+      correction_builder.finalize().to_lower_hex();
+  summary.decision_sha256 = surrogate_decision_sha256(
+      summary.order, sources, decisions, false);
+  summary.corrected_decision_sha256 = surrogate_decision_sha256(
+      summary.order, sources, corrected_decisions, true);
+  summary.deadline_replay_nanoseconds =
+      nanoseconds(Clock::now() - begin);
+}
+
+[[nodiscard]] SurrogateGuardrailOrderSummary
+build_surrogate_guardrail_order(
+    std::span<const Point3> points,
+    const morsehgp3d::gpu::Binary64LbvhTopKResult& top_k,
+    std::span<const std::size_t> morton_position_by_canonical_id,
+    std::span<const PointId> source_point_id_by_canonical_id,
+    std::span<const ClassifiedTriangle> sources,
+    std::size_t order,
+    bool emit_records) {
+  const std::size_t point_count = points.size();
+  if (point_count >
+      std::numeric_limits<std::size_t>::max() / 2U + 1U) {
+    throw std::length_error("the surrogate edge count overflows size_t");
+  }
+  const std::size_t edge_count = point_count * 2U - 1U;
+  const std::size_t order_index = order - 1U;
+  const auto edge_begin = Clock::now();
+  std::vector<SurrogateTreeEdge> edges(edge_count);
+  const auto core_distance = [&](morsehgp3d::spatial::PointId point_id) {
+    const std::size_t point = static_cast<std::size_t>(point_id);
+    const std::size_t position = morton_position_by_canonical_id[point];
+    return top_k.squared_distances[
+        position * top_k.audit.maximum_order + order_index];
+  };
+  for (std::size_t position = 0U; position < point_count; ++position) {
+    const morsehgp3d::spatial::PointId canonical_source =
+        top_k.source_point_ids_by_morton_position[position];
+    if (position != 0U) {
+      const morsehgp3d::spatial::PointId canonical_previous =
+          top_k.source_point_ids_by_morton_position[position - 1U];
+      const PointId source = source_point_id_by_canonical_id[
+          static_cast<std::size_t>(canonical_source)];
+      const PointId previous = source_point_id_by_canonical_id[
+          static_cast<std::size_t>(canonical_previous)];
+      const double distance = point_squared_distance(
+          points[static_cast<std::size_t>(source)],
+          points[static_cast<std::size_t>(previous)]);
+      const double weight = std::max(
+          distance,
+          std::max(
+              core_distance(canonical_source),
+              core_distance(canonical_previous)));
+      edges[position - 1U] = make_surrogate_tree_edge(
+          canonical_source, canonical_previous, weight);
+    }
+    const std::size_t neighbor_record =
+        position * top_k.audit.maximum_order + order_index;
+    const morsehgp3d::spatial::PointId canonical_neighbor =
+        top_k.neighbor_point_ids[neighbor_record];
+    const double weight = std::max(
+        top_k.squared_distances[neighbor_record],
+        std::max(
+            core_distance(canonical_source),
+            core_distance(canonical_neighbor)));
+    edges[point_count - 1U + position] = make_surrogate_tree_edge(
+        canonical_source, canonical_neighbor, weight);
+  }
+  const std::uint64_t edge_build_nanoseconds =
+      nanoseconds(Clock::now() - edge_begin);
+
+  const auto reduction_begin = Clock::now();
+  std::sort(edges.begin(), edges.end(), surrogate_endpoint_less);
+  std::size_t write = 0U;
+  for (const SurrogateTreeEdge& edge : edges) {
+    if (write != 0U && edges[write - 1U].u == edge.u &&
+        edges[write - 1U].v == edge.v) {
+      edges[write - 1U].squared_weight =
+          std::min(edges[write - 1U].squared_weight, edge.squared_weight);
+    } else {
+      edges[write++] = edge;
+    }
+  }
+  edges.resize(write);
+  std::sort(edges.begin(), edges.end(), surrogate_weight_less);
+
+  DisjointSet components(point_count);
+  std::vector<SurrogateTreeEdge> tree;
+  tree.reserve(point_count - 1U);
+  for (const SurrogateTreeEdge& edge : edges) {
+    if (components.unite(
+            static_cast<std::size_t>(edge.u),
+            static_cast<std::size_t>(edge.v))) {
+      tree.push_back(edge);
+      if (tree.size() == point_count - 1U) {
+        break;
+      }
+    }
+  }
+  if (tree.size() != point_count - 1U ||
+      components.component_count() != 1U) {
+    throw std::runtime_error(
+        "the Morton-chain surrogate failed to produce a spanning tree");
+  }
+  std::uint64_t compatible_digest = UINT64_C(1469598103934665603);
+  digest_word(compatible_digest, static_cast<std::uint64_t>(order));
+  for (const SurrogateTreeEdge& edge : tree) {
+    digest_word(
+        compatible_digest,
+        std::bit_cast<std::uint64_t>(edge.squared_weight));
+    digest_word(compatible_digest, edge.u);
+    digest_word(compatible_digest, edge.v);
+  }
+  for (SurrogateTreeEdge& edge : tree) {
+    edge = make_surrogate_tree_edge(
+        source_point_id_by_canonical_id[static_cast<std::size_t>(edge.u)],
+        source_point_id_by_canonical_id[static_cast<std::size_t>(edge.v)],
+        edge.squared_weight);
+  }
+  std::sort(tree.begin(), tree.end(), surrogate_weight_less);
+  std::size_t distinct_level_count = 0U;
+  std::uint64_t previous_level_bits{};
+  bool has_previous_level = false;
+  for (const SurrogateTreeEdge& edge : tree) {
+    const std::uint64_t bits =
+        std::bit_cast<std::uint64_t>(edge.squared_weight);
+    if (!has_previous_level || bits != previous_level_bits) {
+      ++distinct_level_count;
+      previous_level_bits = bits;
+      has_previous_level = true;
+    }
+  }
+
+  SurrogateGuardrailOrderSummary summary;
+  summary.order = order;
+  summary.proposed_edge_count = edge_count;
+  summary.unique_edge_count = edges.size();
+  summary.tree_edge_count = tree.size();
+  summary.distinct_tree_level_count = distinct_level_count;
+  summary.root_squared_weight = tree.back().squared_weight;
+  summary.tree_sha256 = surrogate_tree_sha256(point_count, order, tree);
+  summary.surrogate_compatible_digest = hex64(compatible_digest);
+  summary.edge_build_nanoseconds = edge_build_nanoseconds;
+  summary.tree_reduction_nanoseconds =
+      nanoseconds(Clock::now() - reduction_begin);
+  std::vector<SurrogateTreeEdge>().swap(edges);
+  replay_surrogate_deadlines(sources, tree, summary, emit_records);
+  if (emit_records) {
+    summary.emitted_tree_edges = tree;
+  }
+  return summary;
+}
+
+[[nodiscard]] SurrogateGuardrailRun run_surrogate_guardrails(
+    std::span<const Point3> points,
+    std::span<const ClassifiedTriangle> sources,
+    std::size_t maximum_order,
+    std::size_t seed_window_radius,
+    std::size_t cpu_workers,
+    bool emit_records) {
+  SurrogateGuardrailRun run;
+  morsehgp3d::gpu::Binary64LbvhTopKResult top_k;
+  std::vector<std::size_t> morton_position_by_canonical_id(points.size());
+  std::vector<PointId> source_point_id_by_canonical_id(points.size());
+  {
+    const auto canonicalization_begin = Clock::now();
+    std::vector<morsehgp3d::exact::CertifiedPoint3> certified_points;
+    certified_points.reserve(points.size());
+    for (const Point3& point : points) {
+      certified_points.push_back(
+          morsehgp3d::exact::CertifiedPoint3::from_binary64(
+              point.x, point.y, point.z));
+    }
+    morsehgp3d::spatial::CanonicalPointCloud cloud =
+        morsehgp3d::spatial::CanonicalPointCloud::rejecting_duplicates(
+            certified_points);
+    certified_points.clear();
+    certified_points.shrink_to_fit();
+    run.canonicalization_nanoseconds =
+        nanoseconds(Clock::now() - canonicalization_begin);
+
+    const auto lbvh_begin = Clock::now();
+    morsehgp3d::gpu::MortonLbvhBuildContext build_context(points.size());
+    morsehgp3d::gpu::MortonLbvhDeviceBuildResult build_result =
+        build_context.build(cloud);
+    if (!build_result.complete_certified_build() ||
+        !build_result.cuda_qualified_build()) {
+      throw std::runtime_error(
+          "the surrogate guardrail requires a certified CUDA LBVH build");
+    }
+    morsehgp3d::gpu::MortonLbvhDeviceTraversalLease traversal_lease =
+        build_context.release_device_traversal_lease(build_result);
+    morsehgp3d::gpu::Binary64LbvhTopKContext top_k_context(
+        cloud, std::move(traversal_lease));
+    run.lbvh_build_nanoseconds = nanoseconds(Clock::now() - lbvh_begin);
+
+    const auto top_k_begin = Clock::now();
+    top_k = top_k_context.query_all(
+        cloud, maximum_order, seed_window_radius);
+    run.top_k_query_nanoseconds = nanoseconds(Clock::now() - top_k_begin);
+    if (!top_k.validated_complete_binary64_transcript()) {
+      throw std::runtime_error(
+          "the surrogate guardrail received an incomplete top-k transcript");
+    }
+    run.top_k_audit = top_k.audit;
+
+    std::vector<std::uint8_t> source_seen(points.size(), 0U);
+    morsehgp3d::contract::CanonicalSha256Builder mapping_builder;
+    mapping_builder.update(
+        "MorseHGP3D/phase15/gabriel-fusion-guardrail/"
+        "canonical-to-source-v1/sha256/");
+    sha256_word(mapping_builder, static_cast<std::uint64_t>(points.size()));
+    for (std::size_t canonical_index = 0U;
+         canonical_index < points.size();
+         ++canonical_index) {
+      const auto canonical_id =
+          static_cast<morsehgp3d::spatial::PointId>(canonical_index);
+      const std::size_t source_index = cloud.source_index(canonical_id);
+      if (source_index >= points.size() || source_seen[source_index] != 0U) {
+        throw std::runtime_error(
+            "the canonical-to-source point map is not a permutation");
+      }
+      source_seen[source_index] = 1U;
+      source_point_id_by_canonical_id[canonical_index] =
+          static_cast<PointId>(source_index);
+      sha256_word(mapping_builder, static_cast<std::uint64_t>(canonical_index));
+      sha256_word(mapping_builder, static_cast<std::uint64_t>(source_index));
+      for (const std::uint64_t bits :
+           cloud.point(canonical_id).canonical_input_bits()) {
+        sha256_word(mapping_builder, bits);
+      }
+    }
+    run.canonical_to_source_mapping_sha256 =
+        mapping_builder.finalize().to_lower_hex();
+
+    morsehgp3d::contract::CanonicalSha256Builder transcript_builder;
+    transcript_builder.update(
+        "MorseHGP3D/phase15/gabriel-fusion-guardrail/"
+        "remapped-top-k-v1/sha256/");
+    sha256_word(transcript_builder, static_cast<std::uint64_t>(points.size()));
+    sha256_word(transcript_builder, static_cast<std::uint64_t>(maximum_order));
+    for (std::size_t position = 0U; position < points.size(); ++position) {
+      const auto canonical_id =
+          top_k.source_point_ids_by_morton_position[position];
+      const std::size_t canonical_index =
+          static_cast<std::size_t>(canonical_id);
+      const PointId source_id =
+          source_point_id_by_canonical_id[canonical_index];
+      morton_position_by_canonical_id[canonical_index] = position;
+      sha256_word(transcript_builder, static_cast<std::uint64_t>(position));
+      sha256_word(transcript_builder, source_id);
+      for (std::size_t rank = 0U; rank < maximum_order; ++rank) {
+        const std::size_t record = position * maximum_order + rank;
+        const auto canonical_neighbor = top_k.neighbor_point_ids[record];
+        const PointId neighbor_id = source_point_id_by_canonical_id[
+            static_cast<std::size_t>(canonical_neighbor)];
+        sha256_word(transcript_builder, static_cast<std::uint64_t>(rank));
+        sha256_word(transcript_builder, neighbor_id);
+        sha256_word(
+            transcript_builder,
+            std::bit_cast<std::uint64_t>(top_k.squared_distances[record]));
+      }
+    }
+    run.remapped_top_k_transcript_sha256 =
+        transcript_builder.finalize().to_lower_hex();
+  }
+
+  run.orders.resize(maximum_order);
+  run.order_worker_count = std::max(
+      std::size_t{1},
+      std::min(
+          maximum_order,
+          cpu_workers));
+  std::atomic<std::size_t> next_order_index{0U};
+  std::atomic<bool> stop_order_workers{false};
+  std::exception_ptr order_failure;
+  std::mutex order_failure_mutex;
+  std::vector<std::thread> order_workers;
+  order_workers.reserve(run.order_worker_count);
+  for (std::size_t worker = 0U; worker < run.order_worker_count; ++worker) {
+    order_workers.emplace_back([&] {
+      while (!stop_order_workers.load(std::memory_order_relaxed)) {
+        const std::size_t order_index =
+            next_order_index.fetch_add(1U, std::memory_order_relaxed);
+        if (order_index >= maximum_order) {
+          return;
+        }
+        try {
+          run.orders[order_index] = build_surrogate_guardrail_order(
+              points,
+              top_k,
+              morton_position_by_canonical_id,
+              source_point_id_by_canonical_id,
+              sources,
+              order_index + 1U,
+              emit_records);
+        } catch (...) {
+          {
+            std::scoped_lock lock(order_failure_mutex);
+            if (!order_failure) {
+              order_failure = std::current_exception();
+            }
+          }
+          stop_order_workers.store(true, std::memory_order_relaxed);
+          return;
+        }
+      }
+    });
+  }
+  for (std::thread& worker : order_workers) {
+    worker.join();
+  }
+  if (order_failure) {
+    std::rethrow_exception(order_failure);
+  }
+  return run;
 }
 
 [[nodiscard]] ReconstructibleInputDigests make_reconstructible_input_digests(
@@ -1935,6 +2977,88 @@ void sha256_triangle(
   return summary;
 }
 
+[[nodiscard]] K2Summary summarize_gabriel_source_inclusion(
+    std::span<const ClassifiedTriangle> records,
+    bool emit_records) {
+  for (std::size_t index = 1U; index < records.size(); ++index) {
+    if (ClassifiedTriangleLess{}(records[index], records[index - 1U])) {
+      throw std::logic_error(
+          "the Gabriel source-inclusion stream is not canonical");
+    }
+  }
+  const std::size_t accepted_count = static_cast<std::size_t>(std::count_if(
+      records.begin(),
+      records.end(),
+      [](const ClassifiedTriangle& record) {
+        return record.status == TriangleStatus::gabriel_binary64;
+      }));
+  K2Summary summary;
+  summary.accepted_triangle_digest = UINT64_C(1469598103934665603);
+  digest_word(summary.accepted_triangle_digest, UINT64_C(2));
+  morsehgp3d::contract::CanonicalSha256Builder accepted_builder;
+  accepted_builder.update(
+      "MorseHGP3D/phase15/gabriel-coverage/accepted/v1/sha256/");
+  sha256_word(
+      accepted_builder, static_cast<std::uint64_t>(accepted_count));
+  morsehgp3d::contract::CanonicalSha256Builder necessary_builder;
+  necessary_builder.update(
+      "MorseHGP3D/phase15/gabriel-coverage/necessary/v1/sha256/");
+  std::uint64_t previous_level_bits{};
+  bool has_previous_level = false;
+  for (const ClassifiedTriangle& record : records) {
+    if (record.status != TriangleStatus::gabriel_binary64) {
+      continue;
+    }
+    if (!std::isfinite(record.squared_level) || record.squared_level < 0.0) {
+      throw std::logic_error(
+          "a Gabriel source-inclusion record has an invalid level");
+    }
+    if (record.support_cardinality == 2U) {
+      ++summary.support_two_count;
+    } else if (record.support_cardinality == 3U) {
+      ++summary.support_three_count;
+    } else {
+      throw std::logic_error(
+          "a Gabriel source-inclusion record has an invalid support");
+    }
+    const std::uint64_t level_bits =
+        std::bit_cast<std::uint64_t>(record.squared_level);
+    if (!has_previous_level || level_bits != previous_level_bits) {
+      ++summary.distinct_level_count;
+      previous_level_bits = level_bits;
+      has_previous_level = true;
+    }
+    digest_word(summary.accepted_triangle_digest, level_bits);
+    digest_word(summary.accepted_triangle_digest, record.triangle.a);
+    digest_word(summary.accepted_triangle_digest, record.triangle.b);
+    digest_word(summary.accepted_triangle_digest, record.triangle.c);
+    sha256_triangle(accepted_builder, record);
+    sha256_triangle(necessary_builder, record);
+    ++summary.necessary_triangle_count;
+    if (emit_records) {
+      summary.emitted_necessary_records.push_back(record);
+    }
+    if (summary.necessary_triangle_count == 1U) {
+      summary.first_squared_level = record.squared_level;
+    }
+    summary.root_squared_level = record.squared_level;
+  }
+  if (summary.necessary_triangle_count != accepted_count ||
+      summary.support_two_count + summary.support_three_count !=
+          accepted_count) {
+    summary.coverage_violation_count = 1U;
+  }
+  summary.accepted_triangle_sha256 =
+      accepted_builder.finalize().to_lower_hex();
+  necessary_builder.update("/count/");
+  sha256_word(
+      necessary_builder,
+      static_cast<std::uint64_t>(summary.necessary_triangle_count));
+  summary.necessary_triangle_sha256 =
+      necessary_builder.finalize().to_lower_hex();
+  return summary;
+}
+
 [[nodiscard]] GabrielSafetyBatchManifest make_gabriel_safety_batch_manifest(
     std::span<const ClassifiedTriangle> retained_records,
     const K2Summary& accepted_coverage) {
@@ -1945,8 +3069,14 @@ void sha256_triangle(
   ambiguous_builder.update(
       "MorseHGP3D/phase15/gabriel-coverage/ambiguous-safety/v1/sha256/");
   std::size_t ambiguous_count{};
+  ClassifiedTriangle first_ambiguous_triangle;
+  bool first_ambiguous_triangle_present = false;
   for (const ClassifiedTriangle& record : retained_records) {
     if (record.status == TriangleStatus::ambiguous) {
+      if (!first_ambiguous_triangle_present) {
+        first_ambiguous_triangle = record;
+        first_ambiguous_triangle_present = true;
+      }
       sha256_triangle(ambiguous_builder, record);
       ++ambiguous_count;
     }
@@ -1980,7 +3110,9 @@ void sha256_triangle(
       ambiguous_count,
       accepted_coverage.necessary_triangle_count + ambiguous_count,
       ambiguous_id.to_lower_hex(),
-      composite_id.to_lower_hex()};
+      composite_id.to_lower_hex(),
+      first_ambiguous_triangle,
+      first_ambiguous_triangle_present};
 }
 
 void write_point_json(const Point3& point) {
@@ -2017,6 +3149,470 @@ void write_triangle_json(const ClassifiedTriangle& record) {
             << record.squared_level << ",\"status\":\""
             << status_name(record.status) << "\",\"support_cardinality\":"
             << record.support_cardinality << '}';
+}
+
+void write_surrogate_failure_json(
+    const SurrogateFailureWitness& witness) {
+  if (!witness.present) {
+    std::cout << "null";
+    return;
+  }
+  std::cout << "{\"classification\":" << std::quoted(witness.classification)
+            << ",\"source\":";
+  write_triangle_json(witness.source);
+  std::cout << ",\"observed_first_connection\":";
+  if (witness.observed_connection_level_present) {
+    std::cout
+        << "{\"raw_squared_weight\":" << std::setprecision(17)
+        << witness.observed_connection_raw_squared_weight
+        << ",\"level_conversion\":\"exact_dyadic_divide_by_4\"}"
+        << ",\"strictly_after_source_level\":true";
+  } else {
+    std::cout << "null";
+  }
+  std::cout << '}';
+}
+
+[[nodiscard]] std::string direct_variant_decision_sha256(
+    std::string_view variant,
+    const K2Summary& coverage,
+    const GabrielSafetyBatchManifest& safety_batch) {
+  using morsehgp3d::contract::CanonicalId;
+  morsehgp3d::contract::CanonicalSha256Builder builder;
+  builder.update(
+      "MorseHGP3D/phase15/gabriel-fusion-guardrail/"
+      "direct-source-inclusion-deadline-upper-bound-v1/sha256/");
+  builder.update(variant);
+  const CanonicalId accepted =
+      CanonicalId::from_lower_hex(coverage.accepted_triangle_sha256);
+  const CanonicalId ambiguous =
+      CanonicalId::from_lower_hex(safety_batch.ambiguous_triangle_sha256);
+  builder.update(std::span<const std::uint8_t>{accepted.bytes()});
+  builder.update(std::span<const std::uint8_t>{ambiguous.bytes()});
+  sha256_word(
+      builder,
+      static_cast<std::uint64_t>(
+          coverage.necessary_triangle_count +
+          coverage.strictly_lower_connected_triangle_count));
+  sha256_word(
+      builder,
+      static_cast<std::uint64_t>(
+          safety_batch.ambiguous_triangle_count));
+  return builder.finalize().to_lower_hex();
+}
+
+void write_variant_guardrails_json(
+    const SurrogateGuardrailRun& run,
+    const K2Summary& coverage,
+    const GabrielSafetyBatchManifest& safety_batch,
+    std::string_view point_cloud_sha256,
+    bool emit_records) {
+  const std::size_t direct_source_count =
+      coverage.necessary_triangle_count +
+      coverage.strictly_lower_connected_triangle_count +
+      safety_batch.ambiguous_triangle_count;
+  const bool raw_surrogate_regular_guardrail_passed =
+      std::all_of(
+          run.orders.begin(),
+          run.orders.end(),
+          [](const SurrogateGuardrailOrderSummary& summary) {
+            return summary.late_count == 0U && summary.never_count == 0U;
+          });
+  const bool corrected_surrogate_regular_guardrail_passed =
+      std::all_of(
+          run.orders.begin(),
+          run.orders.end(),
+          [](const SurrogateGuardrailOrderSummary& summary) {
+            return summary.corrected_late_count == 0U &&
+                   summary.corrected_never_count == 0U &&
+                   summary.corrected_tree_edge_count ==
+                       summary.tree_edge_count;
+          });
+  const bool corrected_surrogate_fail_closed_guardrail_passed =
+      corrected_surrogate_regular_guardrail_passed &&
+      safety_batch.ambiguous_triangle_count == 0U &&
+      std::all_of(
+          run.orders.begin(),
+          run.orders.end(),
+          [](const SurrogateGuardrailOrderSummary& summary) {
+            return summary.corrected_unsupported_count == 0U;
+          });
+  SurrogateFailureWitness direct_unsupported_witness;
+  if (safety_batch.first_ambiguous_triangle_present) {
+    direct_unsupported_witness.source =
+        safety_batch.first_ambiguous_triangle;
+    direct_unsupported_witness.classification = "unsupported";
+    direct_unsupported_witness.present = true;
+  }
+  std::cout
+      << "{\"schema\":\"morsehgp3d.phase15_gabriel_fusion_guardrails.v1\""
+      << ",\"criterion\":\"gabriel_fusion_deadline_v1\""
+      << ",\"boundary\":\"closed_after_complete_candidate_plateau\""
+      << ",\"early_connections_accepted\":true"
+      << ",\"scientific_scope\":\"conditional_binary64_guardrail_not_Gamma2_exactness\""
+      << ",\"raw_surrogate_regular_guardrail_passed\":"
+      << (raw_surrogate_regular_guardrail_passed ? "true" : "false")
+      << ",\"corrected_surrogate_regular_guardrail_passed\":"
+      << (corrected_surrogate_regular_guardrail_passed ? "true" : "false")
+      << ",\"corrected_surrogate_fail_closed_guardrail_passed\":"
+      << (corrected_surrogate_fail_closed_guardrail_passed
+              ? "true"
+              : "false")
+      << ",\"source\":{\"accepted_gabriel_binary64_count\":"
+      << coverage.necessary_triangle_count +
+             coverage.strictly_lower_connected_triangle_count
+      << ",\"unsupported_ambiguous_count\":"
+      << safety_batch.ambiguous_triangle_count
+      << ",\"source_triangle_count\":" << direct_source_count
+      << ",\"level_convention\":\"binary64_squared_Gabriel_radius_recipe\""
+      << ",\"point_cloud_sha256\":" << std::quoted(std::string{point_cloud_sha256})
+      << ",\"accepted_source_sha256\":\""
+      << coverage.accepted_triangle_sha256 << "\"}"
+      << ",\"direct_facet_variants\":[";
+  constexpr std::array<std::string_view, 5U> kDirectVariants{
+      "two_edge",
+      "closed_star",
+      "square_clique",
+      "link_face_fan",
+      "one_edge"};
+  for (std::size_t index = 0U; index < kDirectVariants.size(); ++index) {
+    if (index != 0U) {
+      std::cout << ',';
+    }
+    const std::string_view variant = kDirectVariants[index];
+    const bool fail_closed = safety_batch.ambiguous_triangle_count == 0U;
+    std::cout
+        << "{\"variant\":" << std::quoted(std::string{variant})
+        << ",\"representation\":\"k2_pair_facet_relation_stream\""
+        << ",\"certificate_kind\":\"source_event_inclusion_deadline_upper_bound_v1\""
+        << ",\"full_variant_first_connection_replayed\":false"
+        << ",\"source_inclusion_basis\":\"two_Delaunay_edge_source_and_declared_variant_superset_v1\""
+        << ",\"source_triangle_included_by_definition\":true"
+        << ",\"counts\":{\"source_triangle_count\":"
+        << direct_source_count
+        << ",\"accepted_source_triangle_count\":"
+        << coverage.necessary_triangle_count +
+               coverage.strictly_lower_connected_triangle_count
+        << ",\"guaranteed_no_later_than_deadline_count\":"
+        << coverage.necessary_triangle_count +
+               coverage.strictly_lower_connected_triangle_count
+        << ",\"violation_count\":0,\"unsupported_count\":"
+        << safety_batch.ambiguous_triangle_count << '}'
+        << ",\"deadline_upper_bound_partition_closed\":true"
+        << ",\"regular_binary64_guardrail_passed\":true"
+        << ",\"fail_closed_guardrail_passed\":"
+        << (fail_closed ? "true" : "false")
+        << ",\"decision_sha256\":\""
+        << direct_variant_decision_sha256(
+               variant, coverage, safety_batch)
+        << "\""
+        << ",\"first_failure_witness\":";
+    write_surrogate_failure_json(direct_unsupported_witness);
+    std::cout << ",\"first_unsupported_witness\":";
+    write_surrogate_failure_json(direct_unsupported_witness);
+    std::cout << '}';
+  }
+  std::cout
+      << "]"
+      << ",\"surrogate\":{"
+         "\"representation\":\"point_weighted_spanning_tree_binary64_v1\","
+         "\"adapter\":{"
+         "\"adapter_id\":\"point_component_clique_lift_v1\","
+         "\"component_lift\":\"one_lifted_component_per_point_component_with_all_internal_pair_facets\","
+         "\"input_level_convention\":\"binary64_mutual_reachability_squared_distance_recipe\","
+         "\"output_level_convention\":\"binary64_squared_Gabriel_radius_recipe\","
+         "\"level_conversion\":\"exact_dyadic_divide_by_4\","
+         "\"exact_dyadic_comparison_of_binary64_recipe_outputs\":true,"
+         "\"native_k2_facet_domain\":false,"
+         "\"Gamma2_exactness_claimed\":false},"
+         "\"canonical_to_source_mapping_sha256\":\""
+      << run.canonical_to_source_mapping_sha256
+      << "\",\"remapped_top_k_transcript_sha256\":\""
+      << run.remapped_top_k_transcript_sha256 << "\""
+      << ",\"top_k_audit\":{\"backend\":\"cuda_binary64_lbvh_top_k\""
+      << ",\"maximum_order\":" << run.top_k_audit.maximum_order
+      << ",\"seed_window_radius\":"
+      << run.top_k_audit.seed_window_radius
+      << ",\"neighbor_record_count\":"
+      << run.top_k_audit.neighbor_record_count
+      << ",\"point_count\":" << run.top_k_audit.point_count
+      << ",\"certified_node_count\":"
+      << run.top_k_audit.certified_node_count
+      << ",\"completed_query_count\":"
+      << run.top_k_audit.completed_query_count
+      << ",\"failed_query_count\":"
+      << run.top_k_audit.failed_query_count
+      << ",\"source_snapshot_epoch\":"
+      << run.top_k_audit.source_snapshot_epoch
+      << ",\"traversal_lease_adopted\":"
+      << (run.top_k_audit.traversal_lease_adopted ? "true" : "false")
+      << ",\"invalid_aabb_bound_descent_count\":"
+      << run.top_k_audit.invalid_aabb_bound_descent_count
+      << ",\"complete_query_coverage\":"
+      << (run.top_k_audit.complete_query_coverage ? "true" : "false")
+      << ",\"no_candidate_truncation\":"
+      << (run.top_k_audit.no_candidate_truncation ? "true" : "false")
+      << ",\"source_morton_permutation_validated\":"
+      << (run.top_k_audit.source_morton_permutation_validated
+              ? "true"
+              : "false")
+      << ",\"host_transcript_structure_validated\":"
+      << (run.top_k_audit.host_transcript_structure_validated
+              ? "true"
+              : "false")
+      << ",\"fixed_round_to_nearest_distance_recipe_requested\":"
+      << (run.top_k_audit.fixed_round_to_nearest_distance_recipe_requested
+              ? "true"
+              : "false")
+      << ",\"directed_round_down_aabb_recipe_requested\":"
+      << (run.top_k_audit.directed_round_down_aabb_recipe_requested
+              ? "true"
+              : "false")
+      << ",\"strict_prune_requested\":"
+      << (run.top_k_audit.strict_prune_requested ? "true" : "false")
+      << ",\"stackless_postorder_traversal_requested\":"
+      << (run.top_k_audit.stackless_postorder_traversal_requested
+              ? "true"
+              : "false")
+      << ",\"persistent_input_device_byte_capacity\":"
+      << run.top_k_audit.persistent_input_device_byte_capacity
+      << ",\"transient_output_device_byte_capacity\":"
+      << run.top_k_audit.transient_output_device_byte_capacity
+      << ",\"higher_order_delaunay_mosaic_materialized\":"
+      << (run.top_k_audit.higher_order_delaunay_mosaic_materialized
+              ? "true"
+              : "false")
+      << ",\"global_pair_matrix_materialized\":"
+      << (run.top_k_audit.global_pair_matrix_materialized
+              ? "true"
+              : "false")
+      << ",\"exact_morse_hierarchy_claimed\":"
+      << (run.top_k_audit.exact_morse_hierarchy_claimed ? "true" : "false")
+      << ",\"public_status_claimed\":"
+      << (run.top_k_audit.public_status_claimed ? "true" : "false")
+      << ",\"kernel_nanoseconds\":"
+      << run.top_k_audit.kernel_nanoseconds
+      << ",\"launcher_wall_nanoseconds\":"
+      << run.top_k_audit.launcher_wall_nanoseconds
+      << ",\"device_name\":" << std::quoted(run.top_k_audit.device_name)
+      << '}'
+      << ",\"orders\":[";
+  for (std::size_t order_index = 0U;
+       order_index < run.orders.size();
+       ++order_index) {
+    if (order_index != 0U) {
+      std::cout << ',';
+    }
+    const SurrogateGuardrailOrderSummary& summary =
+        run.orders[order_index];
+    const std::size_t satisfied =
+        summary.connected_before_count + summary.connected_at_count;
+    const std::size_t violation =
+        summary.late_count + summary.never_count + summary.unsupported_count;
+    const bool regular_passed =
+        summary.late_count == 0U && summary.never_count == 0U;
+    const bool fail_closed_passed =
+        regular_passed && summary.unsupported_count == 0U;
+    std::cout
+        << "{\"order\":" << summary.order
+        << ",\"tree\":{\"proposed_edge_count\":"
+        << summary.proposed_edge_count
+        << ",\"unique_edge_count\":" << summary.unique_edge_count
+        << ",\"selected_tree_edge_count\":" << summary.tree_edge_count
+        << ",\"final_component_count\":1"
+        << ",\"distinct_level_count\":"
+        << summary.distinct_tree_level_count
+        << ",\"root_raw_squared_weight\":" << std::setprecision(17)
+        << summary.root_squared_weight
+        << ",\"tree_sha256\":\"" << summary.tree_sha256 << "\""
+        << ",\"surrogate_compatible_digest\":\""
+        << summary.surrogate_compatible_digest << "\""
+        << ",\"tree_edges\":";
+    if (emit_records) {
+      std::cout << '[';
+      for (std::size_t edge_index = 0U;
+           edge_index < summary.emitted_tree_edges.size();
+           ++edge_index) {
+        if (edge_index != 0U) {
+          std::cout << ',';
+        }
+        const SurrogateTreeEdge& edge =
+            summary.emitted_tree_edges[edge_index];
+        std::cout << "{\"u\":" << edge.u << ",\"v\":" << edge.v
+                  << ",\"raw_squared_weight\":"
+                  << std::setprecision(17) << edge.squared_weight << '}';
+      }
+      std::cout << ']';
+    } else {
+      std::cout << "null";
+    }
+    std::cout
+        << '}'
+        << ",\"counts\":{\"source_triangle_count\":"
+        << summary.source_triangle_count
+        << ",\"supported_triangle_count\":"
+        << summary.supported_triangle_count
+        << ",\"connected_before_count\":"
+        << summary.connected_before_count
+        << ",\"connected_at_count\":" << summary.connected_at_count
+        << ",\"late_count\":" << summary.late_count
+        << ",\"never_count\":" << summary.never_count
+        << ",\"unsupported_count\":" << summary.unsupported_count
+        << ",\"satisfied_count\":" << satisfied
+        << ",\"violation_count\":" << violation << '}'
+        << ",\"classification_partition_closed\":"
+        << ((satisfied + violation == summary.source_triangle_count)
+                ? "true"
+                : "false")
+        << ",\"regular_binary64_guardrail_passed\":"
+        << (regular_passed ? "true" : "false")
+        << ",\"fail_closed_guardrail_passed\":"
+        << (fail_closed_passed ? "true" : "false")
+        << ",\"decision_sha256\":\"" << summary.decision_sha256 << "\""
+        << ",\"first_failure_witness\":";
+    write_surrogate_failure_json(summary.first_failure);
+    std::cout << ",\"first_late_witness\":";
+    write_surrogate_failure_json(summary.first_late);
+    std::cout << ",\"first_unsupported_witness\":";
+    write_surrogate_failure_json(summary.first_unsupported);
+    std::cout
+        << ",\"correction\":{"
+           "\"algorithm\":\"canonical_greedy_closed_plateau_Gabriel_triangle_overlay_v1\""
+        << ",\"correction_triangle_count\":"
+        << summary.correction_triangle_count
+        << ",\"useful_union_count\":"
+        << summary.useful_correction_union_count
+        << ",\"corrected_postcondition_violation_count\":"
+        << summary.corrected_postcondition_violation_count
+        << ",\"regular_binary64_guardrail_passed\":"
+        << (summary.corrected_late_count == 0U &&
+                    summary.corrected_never_count == 0U
+                ? "true"
+                : "false")
+        << ",\"fail_closed_guardrail_passed\":"
+        << (summary.corrected_late_count == 0U &&
+                    summary.corrected_never_count == 0U &&
+                    summary.corrected_unsupported_count == 0U
+                ? "true"
+                : "false")
+        << ",\"overlay_sha256\":\"" << summary.correction_sha256 << "\""
+        << ",\"corrected_decision_sha256\":\""
+        << summary.corrected_decision_sha256 << "\""
+        << ",\"counts\":{\"source_triangle_count\":"
+        << summary.source_triangle_count
+        << ",\"connected_before_count\":"
+        << summary.corrected_connected_before_count
+        << ",\"connected_at_count\":"
+        << summary.corrected_connected_at_count
+        << ",\"late_count\":" << summary.corrected_late_count
+        << ",\"never_count\":" << summary.corrected_never_count
+        << ",\"unsupported_count\":"
+        << summary.corrected_unsupported_count
+        << ",\"satisfied_count\":"
+        << summary.corrected_connected_before_count +
+               summary.corrected_connected_at_count
+        << ",\"violation_count\":"
+        << summary.corrected_late_count + summary.corrected_never_count +
+               summary.corrected_unsupported_count
+        << '}'
+        << ",\"classification_partition_closed\":"
+        << (summary.corrected_connected_before_count +
+                        summary.corrected_connected_at_count +
+                        summary.corrected_late_count +
+                        summary.corrected_never_count +
+                        summary.corrected_unsupported_count ==
+                    summary.source_triangle_count
+                ? "true"
+                : "false")
+        << ",\"correction_applied_to_transient_verified_tree\":true"
+        << ",\"corrected_tree_records_serialized\":"
+        << (emit_records ? "true" : "false")
+        << ",\"first_failure_witness\":";
+    write_surrogate_failure_json(summary.corrected_first_failure);
+    std::cout << ",\"first_late_witness\":";
+    write_surrogate_failure_json(summary.corrected_first_late);
+    std::cout << ",\"first_unsupported_witness\":";
+    write_surrogate_failure_json(summary.corrected_first_unsupported);
+    std::cout
+        << ",\"corrected_tree\":{"
+           "\"representation\":\"point_merge_tree_at_Gabriel_squared_levels_v1\","
+           "\"selected_tree_edge_count\":"
+        << summary.corrected_tree_edge_count
+        << ",\"final_component_count\":1"
+        << ",\"distinct_level_count\":"
+        << summary.corrected_tree_distinct_level_count
+        << ",\"root_level\":{\"level_encoding\":"
+        << std::quoted(corrected_level_encoding_name(
+               summary.corrected_tree_root_edge.level_encoding))
+        << ",\"encoded_binary64\":" << std::setprecision(17)
+        << summary.corrected_tree_root_edge.encoded_binary64 << '}'
+        << ",\"tree_sha256\":\"" << summary.corrected_tree_sha256 << "\""
+        << ",\"records_serialized\":"
+        << (emit_records ? "true" : "false")
+        << ",\"tree_edges\":";
+    if (emit_records) {
+      std::cout << '[';
+      for (std::size_t edge_index = 0U;
+           edge_index < summary.emitted_corrected_tree_edges.size();
+           ++edge_index) {
+        if (edge_index != 0U) {
+          std::cout << ',';
+        }
+        const CorrectedSurrogateTreeEdge& edge =
+            summary.emitted_corrected_tree_edges[edge_index];
+        std::cout << "{\"u\":" << edge.u << ",\"v\":" << edge.v
+                  << ",\"level_encoding\":"
+                  << std::quoted(
+                         corrected_level_encoding_name(edge.level_encoding))
+                  << ",\"encoded_binary64\":" << std::setprecision(17)
+                  << edge.encoded_binary64 << '}';
+      }
+      std::cout << ']';
+    } else {
+      std::cout << "null";
+    }
+    std::cout
+        << '}'
+        << ",\"overlay_records\":";
+    if (emit_records) {
+      std::cout << '[';
+      for (std::size_t record_index = 0U;
+           record_index < summary.emitted_correction_records.size();
+           ++record_index) {
+        if (record_index != 0U) {
+          std::cout << ',';
+        }
+        write_triangle_json(summary.emitted_correction_records[record_index]);
+      }
+      std::cout << ']';
+    } else {
+      std::cout << "null";
+    }
+    std::cout
+        << '}'
+        << ",\"timings_nanoseconds\":{\"edge_build\":"
+        << summary.edge_build_nanoseconds
+        << ",\"tree_reduction\":"
+        << summary.tree_reduction_nanoseconds
+        << ",\"deadline_replay_and_overlay\":"
+        << summary.deadline_replay_nanoseconds << "}}";
+  }
+  std::cout
+      << "]}"
+      << ",\"architecture\":{"
+         "\"higher_order_Delaunay_mosaic_materialized\":false,"
+         "\"global_pair_matrix_materialized\":false,"
+         "\"weighted_tree_maximum_query_materialized\":false,"
+         "\"orders_built_in_parallel\":true,"
+         "\"order_worker_count\":"
+      << run.order_worker_count
+      << ",\"corrected_merge_tree_materialized_transiently\":true,"
+         "\"massive_corrected_tree_records_serialized\":false,"
+         "\"massive_overlay_records_materialized\":false}"
+      << ",\"timings_nanoseconds\":{\"canonicalization\":"
+      << run.canonicalization_nanoseconds
+      << ",\"certified_LBVH_build\":" << run.lbvh_build_nanoseconds
+      << ",\"top_k_query\":" << run.top_k_query_nanoseconds << "}}";
 }
 
 }  // namespace
@@ -2066,7 +3662,11 @@ int main(int argc, char** argv) {
     if (options.gabriel_coverage_only) {
       const auto k2_begin = Clock::now();
       K2Summary coverage =
-          reduce_k2(gpu.retained_records, true, options.emit_records);
+          options.surrogate_guardrail_max_order == 0U
+              ? reduce_k2(
+                    gpu.retained_records, true, options.emit_records)
+              : summarize_gabriel_source_inclusion(
+                    gpu.retained_records, options.emit_records);
       timings.k2_reduction_nanoseconds = nanoseconds(Clock::now() - k2_begin);
       const ReconstructibleInputDigests input_digests =
           make_reconstructible_input_digests(
@@ -2077,6 +3677,30 @@ int main(int argc, char** argv) {
       const GabrielSafetyBatchManifest safety_batch =
           make_gabriel_safety_batch_manifest(
               gpu.retained_records, coverage);
+      const std::size_t ordinary_edge_count = geogram.edges.size();
+      const std::size_t maximum_vertex_degree = graph.maximum_degree;
+      std::optional<SurrogateGuardrailRun> surrogate_guardrails;
+      if (options.surrogate_guardrail_max_order != 0U) {
+        if (points.size() <= options.surrogate_guardrail_max_order) {
+          throw std::invalid_argument(
+              "the cloud must contain more points than the surrogate order");
+        }
+        if (!options.emit_records) {
+          std::vector<Edge>().swap(geogram.edges);
+          std::vector<std::uint64_t>().swap(graph.offsets);
+          std::vector<PointId>().swap(graph.neighbors);
+        }
+        const auto surrogate_begin = Clock::now();
+        surrogate_guardrails.emplace(run_surrogate_guardrails(
+            points,
+            gpu.retained_records,
+            options.surrogate_guardrail_max_order,
+            options.surrogate_seed_window_radius,
+            cpu_workers,
+            options.emit_records));
+        timings.surrogate_guardrail_nanoseconds =
+            nanoseconds(Clock::now() - surrogate_begin);
+      }
       const bool accepted_partition_closed =
           coverage.necessary_triangle_count +
                   coverage.strictly_lower_connected_triangle_count ==
@@ -2093,18 +3717,63 @@ int main(int argc, char** argv) {
           safety_batch.ambiguous_triangle_count ==
               gpu.audit.ambiguous_count &&
           gpu.audit.invalid_count == 0U;
+      const bool corrected_surrogate_regular_guardrail_passed =
+          !surrogate_guardrails.has_value() ||
+          std::all_of(
+              surrogate_guardrails->orders.begin(),
+              surrogate_guardrails->orders.end(),
+              [](const SurrogateGuardrailOrderSummary& summary) {
+                return summary.corrected_late_count == 0U &&
+                       summary.corrected_never_count == 0U &&
+                       summary.corrected_tree_edge_count ==
+                           summary.tree_edge_count;
+              });
+      const bool conditional_cross_variant_gate_passed =
+          binary64_gate_passed &&
+          corrected_surrogate_regular_guardrail_passed;
+      const bool fail_closed_cross_variant_gate_passed =
+          conditional_cross_variant_gate_passed &&
+          safety_batch.ambiguous_triangle_count == 0U &&
+          (!surrogate_guardrails.has_value() ||
+           std::all_of(
+               surrogate_guardrails->orders.begin(),
+               surrogate_guardrails->orders.end(),
+               [](const SurrogateGuardrailOrderSummary& summary) {
+                 return summary.corrected_unsupported_count == 0U;
+               }));
+      const bool selected_process_gate_passed =
+          options.allow_conditional_guardrail
+              ? conditional_cross_variant_gate_passed
+              : fail_closed_cross_variant_gate_passed;
       timings.total_nanoseconds = nanoseconds(Clock::now() - total_begin);
 
       std::cout
-          << "{\"schema\":\"morsehgp3d.phase15_delaunay_gabriel_coverage.v1\""
+          << "{\"schema\":"
+          << std::quoted(
+                 surrogate_guardrails.has_value()
+                     ? "morsehgp3d.phase15_delaunay_gabriel_fusion_guardrails.v1"
+                     : "morsehgp3d.phase15_delaunay_gabriel_coverage.v1")
           << ",\"git_sha\":\"" << MORSEHGP3D_GIT_SHA << "\""
           << ",\"phase\":\"15\""
-          << ",\"backend\":\"ordinary_delaunay_wedge_plus_cuda_g4_aabb_grid\""
+          << ",\"backend\":"
+          << std::quoted(
+                 surrogate_guardrails.has_value()
+                     ? "ordinary_delaunay_wedge_plus_cuda_g4_aabb_grid_plus_binary64_LBVH_surrogate"
+                     : "ordinary_delaunay_wedge_plus_cuda_g4_aabb_grid")
           << ",\"profile\":\"hgp_reduced\""
-          << ",\"mode\":\"gabriel_necessary_batch\""
+          << ",\"mode\":"
+          << std::quoted(
+                 surrogate_guardrails.has_value()
+                     ? "gabriel_necessary_batch_plus_variant_fusion_guardrails"
+                     : "gabriel_necessary_batch")
           << ",\"deployment_status\":\"diagnostic_sidecar\""
           << ",\"public_status\":\"not_claimed\""
           << ",\"criterion\":\"triangle_explicit_or_three_facets_connected_at_strictly_lower_level\""
+          << ",\"coverage_reduction_mode\":"
+          << std::quoted(
+                 surrogate_guardrails.has_value()
+                     ? "all_accepted_Gabriel_sources_explicit_no_global_facet_DSU"
+                     : "strict_lower_Gabriel_facet_DSU")
           << ",\"proof_scope\":{"
              "\"general_position_required\":true,"
              "\"complete_Voronoi_nerve_one_skeleton_required\":true,"
@@ -2129,8 +3798,8 @@ int main(int argc, char** argv) {
           << input_digests.point_cloud_sha256 << "\"}"
           << ",\"delaunay\":{\"engine\":\"PDEL\",\"cell_count\":"
           << geogram.cell_count
-          << ",\"ordinary_edge_count\":" << geogram.edges.size()
-          << ",\"maximum_vertex_degree\":" << graph.maximum_degree
+          << ",\"ordinary_edge_count\":" << ordinary_edge_count
+          << ",\"maximum_vertex_degree\":" << maximum_vertex_degree
           << ",\"ordinary_edges_sha256\":\""
           << input_digests.ordinary_delaunay_edges_sha256 << "\"}"
           << ",\"candidate_universe\":{\"generator\":\"canonical_Delaunay_CSR_wedges\""
@@ -2168,6 +3837,14 @@ int main(int argc, char** argv) {
           << (accepted_partition_closed ? "true" : "false")
           << ",\"binary64_gate_passed\":"
           << (binary64_gate_passed ? "true" : "false")
+          << ",\"conditional_cross_variant_gate_passed\":"
+          << (conditional_cross_variant_gate_passed ? "true" : "false")
+          << ",\"fail_closed_cross_variant_gate_passed\":"
+          << (fail_closed_cross_variant_gate_passed ? "true" : "false")
+          << ",\"allow_conditional_guardrail\":"
+          << (options.allow_conditional_guardrail ? "true" : "false")
+          << ",\"selected_process_gate_passed\":"
+          << (selected_process_gate_passed ? "true" : "false")
           << ",\"accepted_source_sha256\":\""
           << coverage.accepted_triangle_sha256
           << "\",\"necessary_accepted_sha256\":\""
@@ -2245,6 +3922,17 @@ int main(int argc, char** argv) {
       } else {
         std::cout << "null";
       }
+      std::cout << ",\"variant_guardrails\":";
+      if (surrogate_guardrails.has_value()) {
+        write_variant_guardrails_json(
+            *surrogate_guardrails,
+            coverage,
+            safety_batch,
+            input_digests.point_cloud_sha256,
+            options.emit_records);
+      } else {
+        std::cout << "null";
+      }
       std::cout
           << ",\"gpu\":{\"device_name\":" << std::quoted(gpu.cuda_device_name)
           << ",\"multiprocessor_count\":" << gpu.cuda_multiprocessor_count
@@ -2274,8 +3962,10 @@ int main(int argc, char** argv) {
           << ",\"triangle_device_to_host\":"
           << timings.triangle_device_to_host_nanoseconds
           << ",\"coverage_reduction\":" << timings.k2_reduction_nanoseconds
+          << ",\"surrogate_guardrail\":"
+          << timings.surrogate_guardrail_nanoseconds
           << ",\"cold_e2e\":" << timings.total_nanoseconds << "}}\n";
-      return binary64_gate_passed ? EXIT_SUCCESS : EXIT_FAILURE;
+      return selected_process_gate_passed ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
     const auto k1_begin = Clock::now();

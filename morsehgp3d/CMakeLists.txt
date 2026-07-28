@@ -2962,6 +2962,7 @@ if(MORSEHGP3D_ENABLE_CUDA)
         PRIVATE
           "${_morsehgp3d_geogram_target}"
           morsehgp3d::contract
+          morsehgp3d::gpu_binary64_lbvh_top_k
           Threads::Threads
       )
       target_compile_definitions(

@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "kind": "morsehgp3d-surrogate-gabriel-deadline-regression-v1",
+  "fixture_id": "surrogate-gabriel-deadline-raw-late-k2-v1",
+  "description": "The order-two rank-k plus Morton-chain point surrogate connects a rationally certified regular Gabriel triangle after its closed squared-radius deadline; the canonical Gabriel overlay repairs it exactly at that deadline. Membership in the Delaunay-derived wedge universe remains pending until a sealed native Geogram/PDEL artifact is attached.",
+  "generator": {
+    "kind": "python_stdlib_random_integer_search",
+    "version": 1,
+    "algorithm": "random.Random(seed).randint(-20,20), rejecting duplicate points",
+    "seed": 362987742,
+    "seed_hex": "0x15A2C0DE",
+    "trial": 7
+  },
+  "point_id_domain": "source_input_order",
+  "coordinate_convention": "exact_binary64_integers",
+  "points": [[-1, -2, 5], [0, 0, -3], [-20, -4, -5], [-7, -10, 11], [-7, -10, -19], [-11, 8, 12], [-7, 12, -10], [-9, -5, 20]],
+  "domain_checks": {
+    "point_count": 8,
+    "affine_dimension": 3,
+    "exact_regular_gabriel_triangle_count": 19
+  },
+  "ordinary_delaunay": {
+    "provider": "Geogram",
+    "engine": "PDEL",
+    "entrypoint": "GEO::Delaunay::create(3,\"PDEL\")",
+    "fallback_allowed": false,
+    "certification_status": "pending_native_sealed_artifact",
+    "native_artifact": {
+      "path": null,
+      "sha256": null,
+      "schema": "morsehgp3d.phase15_delaunay_gabriel_fusion_guardrails.v1"
+    },
+    "required_artifact_checks": [
+      "point_cloud_matches_fixture",
+      "engine_is_PDEL",
+      "target_has_at_least_two_ordinary_Delaunay_edges",
+      "every_rational_regular_Gabriel_source_has_at_least_two_ordinary_Delaunay_edges"
+    ]
+  },
+  "gabriel_triangle": {
+    "source_point_ids": [0, 1, 3],
+    "minimal_support_source_point_ids": [1, 3],
+    "support_cardinality": 2,
+    "center_exact": ["-7/2", "-5", "4"],
+    "squared_level_exact": "345/4",
+    "strict_external_power_deltas_exact": [[2, "268"], [4, "480"], [5, "203"], [6, "411"], [7, "200"]]
+  },
+  "surrogate": {
+    "order": 2,
+    "canonical_point_order": "lexicographic_binary64_total_order",
+    "canonical_to_source_point_ids": [2, 5, 7, 4, 3, 6, 0, 1],
+    "morton_bits_per_axis": 21,
+    "morton_source_point_ids": [2, 5, 4, 1, 7, 3, 0, 6],
+    "top_k_recipe": "exact_binary64_squared_distance_then_canonical_point_id",
+    "graph_recipe": "rank_k_neighbor_per_point_plus_consecutive_morton_chain",
+    "raw_edge_weight": "max(squared_distance_u_v,core_k_u,core_k_v)",
+    "tree_reduction": "canonical_kruskal",
+    "tree_edges": [["136", 0, 3], ["237", 3, 7], ["249", 5, 7], ["405", 1, 4], ["420", 1, 2], ["450", 2, 6], ["457", 0, 6]],
+    "point_to_gabriel_level_conversion": "exact_raw_squared_weight_divide_by_4",
+    "point_component_adapter": "point_component_clique_lift_v1",
+    "raw_first_connection_squared_weight_exact": "457",
+    "raw_first_connection_squared_level_exact": "457/4"
+  },
+  "correction": {
+    "source_catalog_scope": "all_rational_regular_gabriel_triangles_in_fixture",
+    "delaunay_membership_status": "pending_native_Geogram_PDEL_artifact",
+    "source_catalog_count": 19,
+    "policy": "canonical_greedy_overlay_v1",
+    "plateau_convention": "closed_apply_all_equal_level_relations_before_query",
+    "corrected_first_connection_squared_level_exact": "345/4"
+  },
+  "expected": {
+    "raw_classification": "late",
+    "corrected_classification": "at",
+    "guardrail_scope": "unilateral_gabriel_fusion_deadline_not_gamma2_or_morse_exactness"
+  }
+}
