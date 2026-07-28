@@ -2,7 +2,7 @@
   "schema_version": 1,
   "kind": "morsehgp3d-surrogate-gabriel-deadline-regression-v1",
   "fixture_id": "surrogate-gabriel-deadline-raw-late-k2-v1",
-  "description": "The order-two rank-k plus Morton-chain point surrogate connects a rationally certified regular Gabriel triangle after its closed squared-radius deadline; the canonical Gabriel overlay repairs it exactly at that deadline. Membership in the Delaunay-derived wedge universe remains pending until a sealed native Geogram/PDEL artifact is attached.",
+  "description": "The order-two rank-k plus Morton-chain point surrogate connects a rationally certified regular Gabriel triangle after its closed squared-radius deadline; the canonical Gabriel overlay repairs it exactly at that deadline. A sealed native Geogram/PDEL artifact confirms membership in the ordinary Delaunay-derived wedge universe.",
   "generator": {
     "kind": "python_stdlib_random_integer_search",
     "version": 1,
@@ -24,10 +24,10 @@
     "engine": "PDEL",
     "entrypoint": "GEO::Delaunay::create(3,\"PDEL\")",
     "fallback_allowed": false,
-    "certification_status": "pending_native_sealed_artifact",
+    "certification_status": "sealed_native_artifact",
     "native_artifact": {
-      "path": null,
-      "sha256": null,
+      "path": "docs/validation/phase15_gabriel_fusion_fixture_k2_g4.json",
+      "sha256": "b295520502b6789f299892513b89ecc0a98a751a42998fa79cd568e1761ae4db",
       "schema": "morsehgp3d.phase15_delaunay_gabriel_fusion_guardrails.v1"
     },
     "required_artifact_checks": [
@@ -63,7 +63,7 @@
   },
   "correction": {
     "source_catalog_scope": "all_rational_regular_gabriel_triangles_in_fixture",
-    "delaunay_membership_status": "pending_native_Geogram_PDEL_artifact",
+    "delaunay_membership_status": "sealed_native_Geogram_PDEL_artifact",
     "source_catalog_count": 19,
     "policy": "canonical_greedy_overlay_v1",
     "plateau_convention": "closed_apply_all_equal_level_relations_before_query",
