@@ -38,8 +38,10 @@ static_assert(sizeof(spatial::PointId) == sizeof(std::uint64_t));
 
 constexpr unsigned int kThreadsPerBlock = 256U;
 constexpr std::size_t kBlocksPerMultiprocessor = 32U;
+constexpr std::size_t kCsrRankBlocksPerMultiprocessor = 4U;
 constexpr std::size_t kAxisCount = 3U;
 constexpr std::size_t kMaximumOrder = 10U;
+constexpr std::size_t kMaximumCsrNeighborRank = 256U;
 constexpr std::uint64_t kInvalidIndex = UINT64_MAX;
 constexpr std::uint64_t kPositiveInfinityBits =
     UINT64_C(0x7ff0000000000000);
@@ -93,6 +95,18 @@ struct Binary64LbvhDeviceQueryAudit {
 };
 
 static_assert(sizeof(Binary64LbvhDeviceQueryAudit) == 40U);
+
+struct Binary64LbvhCsrRankDeviceQueryAudit {
+  std::uint64_t node_visit_count{};
+  std::uint64_t strict_aabb_prune_count{};
+  std::uint64_t aabb_equality_descent_count{};
+  std::uint64_t seed_covered_subtree_skip_count{};
+  std::uint64_t leaf_distance_evaluation_count{};
+  std::uint32_t invalid_aabb_bound_descent_count{};
+  std::uint32_t failure_code{};
+};
+
+static_assert(sizeof(Binary64LbvhCsrRankDeviceQueryAudit) == 48U);
 
 class CudaFailure final : public std::runtime_error {
  public:
@@ -532,6 +546,328 @@ __global__ void binary64_lbvh_top_k_kernel(
   }
 }
 
+[[nodiscard]] __device__ bool farther(
+    double left_distance,
+    std::uint64_t left_id,
+    double right_distance,
+    std::uint64_t right_id) noexcept {
+  return nearer(right_distance, right_id, left_distance, left_id);
+}
+
+__device__ void swap_neighbor_key(
+    double* distances,
+    std::uint64_t* ids,
+    std::size_t left,
+    std::size_t right) noexcept {
+  const double distance = distances[left];
+  distances[left] = distances[right];
+  distances[right] = distance;
+  const std::uint64_t id = ids[left];
+  ids[left] = ids[right];
+  ids[right] = id;
+}
+
+__device__ void max_heap_sift_down(
+    double* distances,
+    std::uint64_t* ids,
+    std::size_t heap_size,
+    std::size_t root) noexcept {
+  while (true) {
+    const std::size_t left = root * 2U + 1U;
+    if (left >= heap_size) {
+      return;
+    }
+    const std::size_t right = left + 1U;
+    std::size_t farther_child = left;
+    if (right < heap_size &&
+        farther(
+            distances[right], ids[right], distances[left], ids[left])) {
+      farther_child = right;
+    }
+    if (!farther(
+            distances[farther_child],
+            ids[farther_child],
+            distances[root],
+            ids[root])) {
+      return;
+    }
+    swap_neighbor_key(distances, ids, root, farther_child);
+    root = farther_child;
+  }
+}
+
+__device__ void offer_heap_candidate(
+    double candidate_distance,
+    std::uint64_t candidate_id,
+    std::size_t maximum_rank,
+    std::size_t& heap_size,
+    double* distances,
+    std::uint64_t* ids) noexcept {
+  if (heap_size < maximum_rank) {
+    std::size_t child = heap_size;
+    distances[child] = candidate_distance;
+    ids[child] = candidate_id;
+    ++heap_size;
+    while (child != 0U) {
+      const std::size_t parent = (child - 1U) / 2U;
+      if (!farther(
+              distances[child], ids[child], distances[parent], ids[parent])) {
+        break;
+      }
+      swap_neighbor_key(distances, ids, child, parent);
+      child = parent;
+    }
+    return;
+  }
+  if (!nearer(
+          candidate_distance,
+          candidate_id,
+          distances[0],
+          ids[0])) {
+    return;
+  }
+  distances[0] = candidate_distance;
+  ids[0] = candidate_id;
+  max_heap_sift_down(distances, ids, heap_size, 0U);
+}
+
+__device__ void sort_max_heap_ascending(
+    double* distances,
+    std::uint64_t* ids,
+    std::size_t heap_size) noexcept {
+  for (std::size_t remaining = heap_size; remaining > 1U; --remaining) {
+    swap_neighbor_key(distances, ids, 0U, remaining - 1U);
+    max_heap_sift_down(distances, ids, remaining - 1U, 0U);
+  }
+}
+
+[[nodiscard]] __device__ std::uint64_t csr_find_target(
+    const std::uint64_t* offsets,
+    const std::uint64_t* neighbors,
+    std::uint64_t source,
+    std::uint64_t target) noexcept {
+  std::uint64_t begin = offsets[source];
+  std::uint64_t end = offsets[source + 1U];
+  const std::uint64_t row_end = end;
+  while (begin < end) {
+    const std::uint64_t middle = begin + (end - begin) / UINT64_C(2);
+    const std::uint64_t value = neighbors[middle];
+    if (value < target) {
+      begin = middle + UINT64_C(1);
+    } else {
+      end = middle;
+    }
+  }
+  return begin < row_end && neighbors[begin] == target ? begin : kInvalidIndex;
+}
+
+__global__ void binary64_lbvh_csr_neighbor_rank_kernel(
+    const std::uint64_t* coordinate_bits,
+    const std::uint64_t* morton_point_ids,
+    const Binary64LbvhDeviceNode* nodes,
+    std::size_t point_count,
+    std::size_t node_count,
+    const std::uint64_t* csr_offsets,
+    const std::uint64_t* csr_neighbors,
+    const std::uint64_t* source_point_id_by_canonical_id,
+    std::size_t maximum_rank,
+    std::size_t seed_window_radius,
+    std::size_t query_position_begin,
+    std::size_t query_count,
+    std::uint16_t* output_csr_ranks,
+    Binary64LbvhCsrRankDeviceQueryAudit* query_audits) {
+  const std::size_t stride =
+      static_cast<std::size_t>(blockDim.x) *
+      static_cast<std::size_t>(gridDim.x);
+  std::size_t local_query =
+      static_cast<std::size_t>(blockIdx.x) *
+          static_cast<std::size_t>(blockDim.x) +
+      static_cast<std::size_t>(threadIdx.x);
+  for (; local_query < query_count; local_query += stride) {
+    Binary64LbvhCsrRankDeviceQueryAudit audit;
+    double heap_distances[kMaximumCsrNeighborRank];
+    std::uint64_t heap_ids[kMaximumCsrNeighborRank];
+    std::size_t heap_size{};
+    const std::size_t query_position = query_position_begin + local_query;
+    const std::uint64_t query_id = morton_point_ids[query_position];
+    if (query_id >= point_count) {
+      audit.failure_code = 1U;
+    }
+    const std::uint64_t source_id = audit.failure_code == 0U
+        ? source_point_id_by_canonical_id[query_id]
+        : kInvalidIndex;
+    if (audit.failure_code == 0U && source_id >= point_count) {
+      audit.failure_code = 2U;
+    }
+    const std::size_t seed_begin =
+        query_position > seed_window_radius
+            ? query_position - seed_window_radius
+            : 0U;
+    const std::size_t remaining = point_count - 1U - query_position;
+    const std::size_t seed_end =
+        query_position +
+        (seed_window_radius < remaining ? seed_window_radius : remaining) +
+        1U;
+    if (audit.failure_code == 0U) {
+      for (std::size_t candidate_position = seed_begin;
+           candidate_position < seed_end;
+           ++candidate_position) {
+        if (candidate_position == query_position) {
+          continue;
+        }
+        const std::uint64_t candidate_id =
+            morton_point_ids[candidate_position];
+        if (candidate_id >= point_count) {
+          audit.failure_code = 3U;
+          break;
+        }
+        const double distance = fixed_squared_distance(
+            coordinate_bits, point_count, query_id, candidate_id);
+        if (!finite_value(distance) || distance < 0.0) {
+          audit.failure_code = 4U;
+          break;
+        }
+        offer_heap_candidate(
+            distance,
+            candidate_id,
+            maximum_rank,
+            heap_size,
+            heap_distances,
+            heap_ids);
+      }
+    }
+    if (audit.failure_code == 0U && heap_size != maximum_rank) {
+      audit.failure_code = 5U;
+    }
+
+    std::uint64_t cursor = static_cast<std::uint64_t>(node_count - 1U);
+    bool complete = false;
+    while (audit.failure_code == 0U && !complete) {
+      if (cursor >= node_count || audit.node_visit_count >= node_count) {
+        audit.failure_code = 6U;
+        break;
+      }
+      const Binary64LbvhDeviceNode& node = nodes[cursor];
+      if (node.leaf_begin >= node.leaf_end ||
+          node.leaf_end > point_count) {
+        audit.failure_code = 7U;
+        break;
+      }
+      const std::uint64_t leaf_count = node.leaf_end - node.leaf_begin;
+      if (leaf_count > cursor / UINT64_C(2) + UINT64_C(1)) {
+        audit.failure_code = 8U;
+        break;
+      }
+      ++audit.node_visit_count;
+
+      const bool seed_covered =
+          node.leaf_begin >= seed_begin && node.leaf_end <= seed_end;
+      DirectedAabbLowerBound lower;
+      if (!seed_covered) {
+        lower = directed_aabb_lower_bound(
+            node, coordinate_bits, point_count, query_id);
+      }
+      const bool aabb_prune =
+          !seed_covered && lower.valid && lower.value > heap_distances[0];
+      if (!seed_covered && lower.valid &&
+          lower.value == heap_distances[0]) {
+        ++audit.aabb_equality_descent_count;
+      }
+      const bool prune = seed_covered || aabb_prune;
+      if (!seed_covered && !lower.valid) {
+        if (audit.invalid_aabb_bound_descent_count == UINT32_MAX) {
+          audit.failure_code = 9U;
+          break;
+        }
+        ++audit.invalid_aabb_bound_descent_count;
+      }
+
+      if (!prune && leaf_count == UINT64_C(1)) {
+        const std::size_t candidate_position =
+            static_cast<std::size_t>(node.leaf_begin);
+        if (candidate_position < seed_begin ||
+            candidate_position >= seed_end) {
+          const std::uint64_t candidate_id =
+              morton_point_ids[candidate_position];
+          if (candidate_id >= point_count) {
+            audit.failure_code = 10U;
+            break;
+          }
+          if (candidate_id != query_id) {
+            const double distance = fixed_squared_distance(
+                coordinate_bits, point_count, query_id, candidate_id);
+            if (!finite_value(distance) || distance < 0.0) {
+              audit.failure_code = 11U;
+              break;
+            }
+            offer_heap_candidate(
+                distance,
+                candidate_id,
+                maximum_rank,
+                heap_size,
+                heap_distances,
+                heap_ids);
+            ++audit.leaf_distance_evaluation_count;
+          }
+        }
+      }
+
+      if (prune) {
+        if (seed_covered) {
+          ++audit.seed_covered_subtree_skip_count;
+        } else {
+          ++audit.strict_aabb_prune_count;
+        }
+        const std::uint64_t subtree_node_count =
+            UINT64_C(2) * leaf_count - UINT64_C(1);
+        if (cursor + UINT64_C(1) < subtree_node_count) {
+          audit.failure_code = 12U;
+          break;
+        }
+        complete = cursor + UINT64_C(1) == subtree_node_count;
+        if (!complete) {
+          cursor -= subtree_node_count;
+        }
+      } else {
+        complete = cursor == 0U;
+        if (!complete) {
+          --cursor;
+        }
+      }
+    }
+
+    if (audit.failure_code == 0U) {
+      sort_max_heap_ascending(
+          heap_distances, heap_ids, maximum_rank);
+      for (std::size_t rank = 0U; rank < maximum_rank; ++rank) {
+        if (heap_ids[rank] >= point_count ||
+            (rank != 0U &&
+             !nearer(
+                 heap_distances[rank - 1U],
+                 heap_ids[rank - 1U],
+                 heap_distances[rank],
+                 heap_ids[rank]))) {
+          audit.failure_code = 13U;
+          break;
+        }
+        const std::uint64_t target_source_id =
+            source_point_id_by_canonical_id[heap_ids[rank]];
+        if (target_source_id >= point_count || target_source_id == source_id) {
+          audit.failure_code = 14U;
+          break;
+        }
+        const std::uint64_t csr_position = csr_find_target(
+            csr_offsets, csr_neighbors, source_id, target_source_id);
+        if (csr_position != kInvalidIndex) {
+          output_csr_ranks[csr_position] =
+              static_cast<std::uint16_t>(rank + 1U);
+        }
+      }
+    }
+    query_audits[local_query] = audit;
+  }
+}
+
 void checked_accumulate(
     std::size_t& total,
     std::uint64_t increment,
@@ -779,6 +1115,328 @@ Binary64LbvhTopKResult run_phase14_binary64_lbvh_top_k_on_gpu(
       audit.completed_query_count == point_count &&
       audit.failed_query_count == 0U;
   audit.no_candidate_truncation = audit.complete_query_coverage;
+  audit.higher_order_delaunay_mosaic_materialized = false;
+  audit.global_pair_matrix_materialized = false;
+  audit.exact_morse_hierarchy_claimed = false;
+  audit.public_status_claimed = false;
+  return result;
+}
+
+Binary64LbvhCsrNeighborRankResult
+run_phase15_binary64_lbvh_csr_neighbor_rank_on_gpu(
+    const std::uint64_t* device_coordinate_bits,
+    const std::uint64_t* device_morton_point_ids,
+    const void* device_nodes,
+    std::size_t point_count,
+    std::size_t certified_node_count,
+    std::size_t persistent_input_device_byte_capacity,
+    std::uint64_t source_snapshot_epoch,
+    std::span<const std::uint64_t> csr_offsets,
+    std::span<const spatial::PointId> csr_neighbors,
+    std::span<const spatial::PointId> source_point_id_by_canonical_id,
+    std::size_t maximum_rank,
+    std::size_t seed_window_radius,
+    std::size_t query_batch_size,
+    int cuda_device) {
+  using Clock = std::chrono::steady_clock;
+  const auto launcher_begin = Clock::now();
+  if (device_coordinate_bits == nullptr ||
+      device_morton_point_ids == nullptr || device_nodes == nullptr ||
+      point_count <= maximum_rank || maximum_rank < 2U ||
+      maximum_rank > kMaximumCsrNeighborRank ||
+      maximum_rank > binary64_lbvh_csr_neighbor_rank_maximum ||
+      seed_window_radius < maximum_rank ||
+      seed_window_radius >= point_count || query_batch_size == 0U ||
+      query_batch_size > point_count ||
+      point_count >
+          std::numeric_limits<std::size_t>::max() / 2U + 1U ||
+      certified_node_count != point_count * 2U - 1U ||
+      source_snapshot_epoch == 0U || csr_offsets.size() != point_count + 1U ||
+      csr_offsets.empty() || csr_offsets.front() != 0U ||
+      csr_offsets.back() != csr_neighbors.size() || csr_neighbors.empty() ||
+      source_point_id_by_canonical_id.size() != point_count ||
+      cuda_device < 0) {
+    throw std::invalid_argument(
+        "the binary64 LBVH CSR neighbor-rank launcher received invalid "
+        "extents");
+  }
+  const std::size_t offset_bytes = checked_product(
+      csr_offsets.size(),
+      sizeof(std::uint64_t),
+      "the binary64 LBVH CSR offset bytes overflow size_t");
+  const std::size_t neighbor_bytes = checked_product(
+      csr_neighbors.size(),
+      sizeof(std::uint64_t),
+      "the binary64 LBVH CSR neighbor bytes overflow size_t");
+  const std::size_t source_mapping_bytes = checked_product(
+      source_point_id_by_canonical_id.size(),
+      sizeof(std::uint64_t),
+      "the binary64 LBVH CSR source mapping bytes overflow size_t");
+  const std::size_t rank_bytes = checked_product(
+      csr_neighbors.size(),
+      sizeof(std::uint16_t),
+      "the binary64 LBVH CSR rank bytes overflow size_t");
+  const std::size_t batch_audit_bytes = checked_product(
+      query_batch_size,
+      sizeof(Binary64LbvhCsrRankDeviceQueryAudit),
+      "the binary64 LBVH CSR batch audit bytes overflow size_t");
+
+  DeviceGuard guard{cuda_device};
+  cudaDeviceProp properties{};
+  check_cuda(
+      cudaGetDeviceProperties(&properties, cuda_device),
+      "cudaGetDeviceProperties binary64 LBVH CSR neighbor ranks");
+  if (properties.multiProcessorCount <= 0) {
+    throw std::runtime_error("CUDA reported no multiprocessor");
+  }
+
+  Binary64LbvhCsrNeighborRankResult result;
+  result.directed_csr_ranks.resize(csr_neighbors.size());
+  std::vector<Binary64LbvhCsrRankDeviceQueryAudit> host_query_audits(
+      query_batch_size);
+
+  const auto allocation_begin = Clock::now();
+  DeviceBuffer<std::uint64_t> device_csr_offsets(csr_offsets.size());
+  DeviceBuffer<std::uint64_t> device_csr_neighbors(csr_neighbors.size());
+  DeviceBuffer<std::uint64_t> device_source_mapping(
+      source_point_id_by_canonical_id.size());
+  DeviceBuffer<std::uint16_t> device_csr_ranks(csr_neighbors.size());
+  DeviceBuffer<Binary64LbvhCsrRankDeviceQueryAudit> device_query_audits(
+      query_batch_size);
+  check_cuda(
+      cudaMemcpy(
+          device_csr_offsets.get(),
+          csr_offsets.data(),
+          offset_bytes,
+          cudaMemcpyHostToDevice),
+      "cudaMemcpy binary64 LBVH CSR offsets H2D");
+  check_cuda(
+      cudaMemcpy(
+          device_csr_neighbors.get(),
+          csr_neighbors.data(),
+          neighbor_bytes,
+          cudaMemcpyHostToDevice),
+      "cudaMemcpy binary64 LBVH CSR neighbors H2D");
+  check_cuda(
+      cudaMemcpy(
+          device_source_mapping.get(),
+          source_point_id_by_canonical_id.data(),
+          source_mapping_bytes,
+          cudaMemcpyHostToDevice),
+      "cudaMemcpy binary64 LBVH CSR source mapping H2D");
+  check_cuda(
+      cudaMemset(device_csr_ranks.get(), 0xff, rank_bytes),
+      "cudaMemset binary64 LBVH CSR censored ranks");
+  const auto allocation_end = Clock::now();
+
+  Binary64LbvhCsrNeighborRankAudit& audit = result.audit;
+  audit.point_count = point_count;
+  audit.certified_node_count = certified_node_count;
+  audit.directed_csr_arc_count = csr_neighbors.size();
+  audit.maximum_rank = maximum_rank;
+  audit.overflow_rank = maximum_rank + 1U;
+  audit.seed_window_radius = seed_window_radius;
+  audit.query_batch_size = query_batch_size;
+  audit.query_batch_count = 1U + (point_count - 1U) / query_batch_size;
+  cudaFuncAttributes kernel_attributes{};
+  check_cuda(
+      cudaFuncGetAttributes(
+          &kernel_attributes, binary64_lbvh_csr_neighbor_rank_kernel),
+      "cudaFuncGetAttributes binary64 LBVH CSR neighbor ranks");
+  if (kernel_attributes.localSizeBytes <
+      kMaximumCsrNeighborRank *
+          (sizeof(double) + sizeof(std::uint64_t))) {
+    throw std::runtime_error(
+        "CUDA reports less local storage than the fixed CSR rank heaps");
+  }
+  audit.kernel_local_size_bytes_per_thread =
+      kernel_attributes.localSizeBytes;
+
+  for (std::size_t query_begin = 0U; query_begin < point_count;
+       query_begin += query_batch_size) {
+    const std::size_t query_count =
+        std::min(query_batch_size, point_count - query_begin);
+    const std::size_t desired_block_count =
+        (query_count + static_cast<std::size_t>(kThreadsPerBlock) - 1U) /
+        static_cast<std::size_t>(kThreadsPerBlock);
+    const std::size_t occupancy_block_count = checked_product(
+        static_cast<std::size_t>(properties.multiProcessorCount),
+        kCsrRankBlocksPerMultiprocessor,
+        "the binary64 LBVH CSR rank occupancy extent overflows size_t");
+    const std::size_t block_count = std::max(
+        std::size_t{1},
+        std::min(desired_block_count, occupancy_block_count));
+    if (block_count >
+        static_cast<std::size_t>(std::numeric_limits<unsigned int>::max())) {
+      throw std::length_error(
+          "the binary64 LBVH CSR rank grid exceeds unsigned int");
+    }
+    audit.kernel_block_count_maximum = std::max(
+        audit.kernel_block_count_maximum, block_count);
+    audit.kernel_thread_count_maximum = std::max(
+        audit.kernel_thread_count_maximum,
+        checked_product(
+            block_count,
+            static_cast<std::size_t>(kThreadsPerBlock),
+            "the binary64 LBVH CSR rank thread extent overflows size_t"));
+
+    CudaEvent kernel_begin;
+    CudaEvent kernel_end;
+    kernel_begin.record();
+    binary64_lbvh_csr_neighbor_rank_kernel<<<
+        static_cast<unsigned int>(block_count), kThreadsPerBlock>>>(
+        device_coordinate_bits,
+        device_morton_point_ids,
+        static_cast<const Binary64LbvhDeviceNode*>(device_nodes),
+        point_count,
+        certified_node_count,
+        device_csr_offsets.get(),
+        device_csr_neighbors.get(),
+        device_source_mapping.get(),
+        maximum_rank,
+        seed_window_radius,
+        query_begin,
+        query_count,
+        device_csr_ranks.get(),
+        device_query_audits.get());
+    check_cuda(
+        cudaGetLastError(),
+        "binary64_lbvh_csr_neighbor_rank_kernel launch");
+    kernel_end.record();
+    kernel_end.synchronize();
+    const auto audit_copy_begin = Clock::now();
+    check_cuda(
+        cudaMemcpy(
+            host_query_audits.data(),
+            device_query_audits.get(),
+            query_count * sizeof(Binary64LbvhCsrRankDeviceQueryAudit),
+            cudaMemcpyDeviceToHost),
+        "cudaMemcpy binary64 LBVH CSR rank audits D2H");
+    const std::uint64_t audit_copy_nanoseconds =
+        duration_nanoseconds(Clock::now() - audit_copy_begin);
+    if (audit_copy_nanoseconds >
+        std::numeric_limits<std::uint64_t>::max() -
+            audit.device_to_host_nanoseconds) {
+      throw std::length_error(
+          "the binary64 LBVH CSR audit copy time overflows uint64");
+    }
+    audit.device_to_host_nanoseconds += audit_copy_nanoseconds;
+    const std::uint64_t batch_kernel_nanoseconds =
+        event_nanoseconds(kernel_begin, kernel_end);
+    if (batch_kernel_nanoseconds >
+        std::numeric_limits<std::uint64_t>::max() - audit.kernel_nanoseconds) {
+      throw std::length_error(
+          "the binary64 LBVH CSR kernel time overflows uint64");
+    }
+    audit.kernel_nanoseconds += batch_kernel_nanoseconds;
+
+    for (std::size_t local = 0U; local < query_count; ++local) {
+      const std::size_t query_position = query_begin + local;
+      const std::size_t left = std::min(query_position, seed_window_radius);
+      const std::size_t right = std::min(
+          point_count - 1U - query_position, seed_window_radius);
+      checked_accumulate(
+          audit.seed_distance_evaluation_count,
+          static_cast<std::uint64_t>(left + right),
+          "the binary64 LBVH CSR seed count overflows size_t");
+      const Binary64LbvhCsrRankDeviceQueryAudit& query =
+          host_query_audits[local];
+      checked_accumulate(
+          audit.node_visit_count,
+          query.node_visit_count,
+          "the binary64 LBVH CSR node-visit count overflows size_t");
+      checked_accumulate(
+          audit.strict_aabb_prune_count,
+          query.strict_aabb_prune_count,
+          "the binary64 LBVH CSR prune count overflows size_t");
+      checked_accumulate(
+          audit.aabb_equality_descent_count,
+          query.aabb_equality_descent_count,
+          "the binary64 LBVH CSR equality count overflows size_t");
+      checked_accumulate(
+          audit.seed_covered_subtree_skip_count,
+          query.seed_covered_subtree_skip_count,
+          "the binary64 LBVH CSR seed-subtree count overflows size_t");
+      checked_accumulate(
+          audit.traversal_leaf_distance_evaluation_count,
+          query.leaf_distance_evaluation_count,
+          "the binary64 LBVH CSR leaf-distance count overflows size_t");
+      checked_accumulate(
+          audit.invalid_aabb_bound_descent_count,
+          query.invalid_aabb_bound_descent_count,
+          "the binary64 LBVH CSR invalid-bound count overflows size_t");
+      audit.maximum_node_visit_count_per_query = std::max(
+          audit.maximum_node_visit_count_per_query,
+          static_cast<std::size_t>(query.node_visit_count));
+      if (query.node_visit_count == certified_node_count) {
+        ++audit.full_tree_query_count;
+      }
+      if (query.failure_code == 0U) {
+        ++audit.completed_query_count;
+      } else {
+        ++audit.failed_query_count;
+      }
+    }
+  }
+
+  const auto rank_copy_begin = Clock::now();
+  check_cuda(
+      cudaMemcpy(
+          result.directed_csr_ranks.data(),
+          device_csr_ranks.get(),
+          rank_bytes,
+          cudaMemcpyDeviceToHost),
+      "cudaMemcpy binary64 LBVH CSR ranks D2H");
+  const std::uint64_t rank_copy_nanoseconds =
+      duration_nanoseconds(Clock::now() - rank_copy_begin);
+  if (rank_copy_nanoseconds >
+      std::numeric_limits<std::uint64_t>::max() -
+          audit.device_to_host_nanoseconds) {
+    throw std::length_error(
+        "the binary64 LBVH CSR rank copy time overflows uint64");
+  }
+  audit.device_to_host_nanoseconds += rank_copy_nanoseconds;
+  const auto overflow_rank = static_cast<std::uint16_t>(maximum_rank + 1U);
+  for (std::uint16_t& rank : result.directed_csr_ranks) {
+    if (rank == std::numeric_limits<std::uint16_t>::max()) {
+      rank = overflow_rank;
+    }
+  }
+
+  audit.persistent_input_device_byte_capacity =
+      persistent_input_device_byte_capacity;
+  audit.transient_csr_device_byte_capacity = checked_sum(
+      checked_sum(
+          checked_sum(
+              offset_bytes,
+              neighbor_bytes,
+              "the binary64 LBVH CSR device bytes overflow size_t"),
+          source_mapping_bytes,
+          "the binary64 LBVH CSR device bytes overflow size_t"),
+      rank_bytes,
+      "the binary64 LBVH CSR device bytes overflow size_t");
+  audit.maximum_batch_audit_device_byte_capacity = batch_audit_bytes;
+  audit.allocation_and_input_copy_nanoseconds =
+      duration_nanoseconds(allocation_end - allocation_begin);
+  audit.launcher_wall_nanoseconds =
+      duration_nanoseconds(Clock::now() - launcher_begin);
+  audit.source_snapshot_epoch = source_snapshot_epoch;
+  audit.cuda_device = cuda_device;
+  audit.multiprocessor_count = properties.multiProcessorCount;
+  audit.device_name = properties.name;
+  audit.traversal_lease_adopted = true;
+  audit.fixed_round_to_nearest_distance_recipe_requested = true;
+  audit.directed_round_down_aabb_recipe_requested = true;
+  audit.strict_prune_requested = true;
+  audit.equality_descends_requested = true;
+  audit.stackless_postorder_traversal_requested = true;
+  audit.complete_query_coverage =
+      audit.completed_query_count == point_count &&
+      audit.failed_query_count == 0U;
+  audit.no_search_work_cap = audit.complete_query_coverage;
+  audit.exact_binary64_prefix_complete = audit.complete_query_coverage;
+  audit.ranks_above_maximum_censored = true;
+  audit.n_by_maximum_rank_table_materialized = false;
   audit.higher_order_delaunay_mosaic_materialized = false;
   audit.global_pair_matrix_materialized = false;
   audit.exact_morse_hierarchy_claimed = false;

@@ -29,6 +29,7 @@
 #include <bit>
 #include <charconv>
 #include <chrono>
+#include <cfenv>
 #include <cfloat>
 #include <cmath>
 #include <cstddef>
@@ -38,6 +39,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <mutex>
 #include <numeric>
@@ -126,6 +128,9 @@ struct Options {
   std::size_t triangle_chunk_vertices{};
   std::size_t surrogate_guardrail_max_order{};
   std::size_t surrogate_seed_window_radius{32U};
+  std::size_t gabriel_neighbor_rank_maximum{};
+  std::size_t neighbor_rank_seed_window_radius{256U};
+  std::size_t neighbor_rank_query_batch_size{1U << 20U};
   std::optional<std::string> input_xyz;
   bool fixture_e5{};
   bool emit_records{};
@@ -146,6 +151,7 @@ struct Timings {
   std::uint64_t k1_reduction_nanoseconds{};
   std::uint64_t k2_reduction_nanoseconds{};
   std::uint64_t surrogate_guardrail_nanoseconds{};
+  std::uint64_t neighbor_rank_diagnostic_nanoseconds{};
   std::uint64_t total_nanoseconds{};
 };
 
@@ -292,6 +298,62 @@ struct SurrogateGuardrailRun {
   std::size_t order_worker_count{};
 };
 
+struct NeighborRankHistogram {
+  std::vector<std::uint64_t> exact_rank_counts;
+  std::uint64_t overflow_count{};
+  std::uint64_t captured_count{};
+  std::size_t maximum_exact_rank{};
+};
+
+struct NeighborRankVariantSummary {
+  NeighborRankHistogram histogram;
+  std::uint64_t witness_triangle_count{};
+  std::uint64_t missing_witness_triangle_count{};
+  std::uint64_t considered_root_count{};
+  ClassifiedTriangle first_missing_witness_triangle{};
+  bool first_missing_witness_triangle_present{};
+};
+
+struct GabrielNeighborRankSummary {
+  std::size_t maximum_rank{};
+  std::uint64_t accepted_triangle_count{};
+  std::uint64_t complete_three_pair_triangle_count{};
+  std::uint64_t partial_two_pair_witness_triangle_count{};
+  std::uint64_t insufficient_pair_witness_triangle_count{};
+  NeighborRankVariantSummary directed_root_star;
+  NeighborRankVariantSummary symmetric_union_star;
+  NeighborRankVariantSummary mutual_star;
+};
+
+struct NeighborRankBruteforceReplay {
+  static constexpr std::size_t maximum_point_count = 4096U;
+
+  std::size_t point_count{};
+  std::size_t compared_arc_count{};
+  std::size_t mismatch_count{};
+  PointId first_mismatch_source{};
+  PointId first_mismatch_target{};
+  std::uint16_t first_mismatch_gpu_rank{};
+  std::uint16_t first_mismatch_cpu_rank{};
+  bool performed{};
+  bool passed{};
+  bool first_mismatch_present{};
+  bool canonical_source_mapping_non_identity_observed{};
+  bool binary64_distance_tie_observed{};
+  bool censored_rank_observed{};
+};
+
+struct GabrielNeighborRankRun {
+  GabrielNeighborRankSummary summary;
+  NeighborRankBruteforceReplay bruteforce_replay;
+  morsehgp3d::gpu::Binary64LbvhCsrNeighborRankAudit rank_audit;
+  std::string canonical_to_source_mapping_sha256;
+  std::uint64_t canonicalization_nanoseconds{};
+  std::uint64_t lbvh_build_nanoseconds{};
+  std::uint64_t rank_query_nanoseconds{};
+  std::uint64_t triangle_reduction_nanoseconds{};
+};
+
 template <typename Duration>
 [[nodiscard]] std::uint64_t nanoseconds(Duration duration) {
   const auto value =
@@ -372,6 +434,21 @@ template <typename Duration>
         index + 1 < argc) {
       options.surrogate_seed_window_radius =
           parse_size(argv[++index], "--surrogate-seed-window-radius");
+    } else if (
+        argument == "--gabriel-neighbor-rank-max" &&
+        index + 1 < argc) {
+      options.gabriel_neighbor_rank_maximum =
+          parse_size(argv[++index], "--gabriel-neighbor-rank-max");
+    } else if (
+        argument == "--neighbor-rank-seed-window-radius" &&
+        index + 1 < argc) {
+      options.neighbor_rank_seed_window_radius =
+          parse_size(argv[++index], "--neighbor-rank-seed-window-radius");
+    } else if (
+        argument == "--neighbor-rank-query-batch-size" &&
+        index + 1 < argc) {
+      options.neighbor_rank_query_batch_size =
+          parse_size(argv[++index], "--neighbor-rank-query-batch-size");
     } else if (argument == "--input-xyz" && index + 1 < argc) {
       options.input_xyz = std::string{argv[++index]};
     } else if (argument == "--fixture-e5") {
@@ -391,6 +468,9 @@ template <typename Duration>
           "[--gabriel-coverage-only] "
           "[--surrogate-guardrail-max-order 2..10] "
           "[--surrogate-seed-window-radius W] "
+          "[--gabriel-neighbor-rank-max 2..256] "
+          "[--neighbor-rank-seed-window-radius W] "
+          "[--neighbor-rank-query-batch-size N] "
           "[--allow-conditional-guardrail]");
     }
   }
@@ -423,9 +503,33 @@ template <typename Duration>
     }
   }
   if (options.allow_conditional_guardrail &&
-      options.surrogate_guardrail_max_order == 0U) {
+      options.surrogate_guardrail_max_order == 0U &&
+      options.gabriel_neighbor_rank_maximum == 0U) {
     throw std::invalid_argument(
-        "--allow-conditional-guardrail requires the surrogate guardrail");
+        "--allow-conditional-guardrail requires a Phase 15 guardrail or "
+        "neighbor-rank diagnostic");
+  }
+  if (options.gabriel_neighbor_rank_maximum != 0U) {
+    if (!options.gabriel_coverage_only) {
+      throw std::invalid_argument(
+          "--gabriel-neighbor-rank-max requires --gabriel-coverage-only");
+    }
+    if (options.gabriel_neighbor_rank_maximum < 2U ||
+        options.gabriel_neighbor_rank_maximum >
+            morsehgp3d::gpu::binary64_lbvh_csr_neighbor_rank_maximum) {
+      throw std::invalid_argument(
+          "the Gabriel neighbor-rank diagnostic requires 2 <= M <= 256");
+    }
+    if (options.neighbor_rank_seed_window_radius <
+        options.gabriel_neighbor_rank_maximum) {
+      throw std::invalid_argument(
+          "--neighbor-rank-seed-window-radius must be at least M");
+    }
+    if (options.surrogate_guardrail_max_order != 0U) {
+      throw std::invalid_argument(
+          "the surrogate guardrail and compact neighbor-rank diagnostic are "
+          "separate offline modes");
+    }
   }
   return options;
 }
@@ -2724,6 +2828,513 @@ build_surrogate_guardrail_order(
   return run;
 }
 
+[[nodiscard]] std::optional<std::uint16_t> find_directed_csr_rank(
+    const CsrGraph& graph,
+    std::span<const std::uint16_t> directed_ranks,
+    PointId source,
+    PointId target) {
+  if (source + 1U >= graph.offsets.size() ||
+      directed_ranks.size() != graph.neighbors.size()) {
+    throw std::logic_error("the compact CSR rank transcript is misaligned");
+  }
+  const std::size_t begin =
+      static_cast<std::size_t>(graph.offsets[static_cast<std::size_t>(source)]);
+  const std::size_t end = static_cast<std::size_t>(
+      graph.offsets[static_cast<std::size_t>(source) + 1U]);
+  const auto first =
+      graph.neighbors.begin() + static_cast<std::ptrdiff_t>(begin);
+  const auto last = graph.neighbors.begin() + static_cast<std::ptrdiff_t>(end);
+  const auto found = std::lower_bound(first, last, target);
+  if (found == last || *found != target) {
+    return std::nullopt;
+  }
+  const std::size_t position = static_cast<std::size_t>(
+      std::distance(graph.neighbors.begin(), found));
+  return directed_ranks[position];
+}
+
+void add_neighbor_rank_observation(
+    NeighborRankHistogram& histogram,
+    std::size_t maximum_rank,
+    std::uint16_t observed_rank) {
+  if (observed_rank >= 1U && observed_rank <= maximum_rank) {
+    histogram.exact_rank_counts[observed_rank] = checked_add_u64(
+        histogram.exact_rank_counts[observed_rank],
+        UINT64_C(1),
+        "the neighbor-rank histogram overflows uint64");
+    histogram.captured_count = checked_add_u64(
+        histogram.captured_count,
+        UINT64_C(1),
+        "the neighbor-rank captured count overflows uint64");
+    histogram.maximum_exact_rank = std::max(
+        histogram.maximum_exact_rank,
+        static_cast<std::size_t>(observed_rank));
+    return;
+  }
+  if (observed_rank != maximum_rank + 1U) {
+    throw std::logic_error(
+        "the compact CSR transcript contains a rank outside its schema");
+  }
+  histogram.overflow_count = checked_add_u64(
+      histogram.overflow_count,
+      UINT64_C(1),
+      "the neighbor-rank overflow count overflows uint64");
+}
+
+[[nodiscard]] GabrielNeighborRankSummary reduce_gabriel_neighbor_ranks(
+    const CsrGraph& graph,
+    std::span<const ClassifiedTriangle> records,
+    const morsehgp3d::gpu::Binary64LbvhCsrNeighborRankResult& rank_result,
+    std::uint64_t expected_accepted_triangle_count) {
+  if (!rank_result.validated_complete_binary64_rank_prefix()) {
+    throw std::invalid_argument(
+        "Gabriel neighbor ranks require a complete compact LBVH transcript");
+  }
+  GabrielNeighborRankSummary summary;
+  summary.maximum_rank = rank_result.audit.maximum_rank;
+  const std::size_t histogram_extent = summary.maximum_rank + 1U;
+  summary.directed_root_star.histogram.exact_rank_counts.assign(
+      histogram_extent, 0U);
+  summary.symmetric_union_star.histogram.exact_rank_counts.assign(
+      histogram_extent, 0U);
+  summary.mutual_star.histogram.exact_rank_counts.assign(
+      histogram_extent, 0U);
+  const auto require_rank = [&](PointId source, PointId target) {
+    const std::optional<std::uint16_t> rank = find_directed_csr_rank(
+        graph, rank_result.directed_csr_ranks, source, target);
+    if (rank.has_value() &&
+        (*rank < 1U || *rank > summary.maximum_rank + 1U)) {
+      throw std::logic_error("a directed CSR rank violates the compact schema");
+    }
+    return rank;
+  };
+  const auto reduce_variant = [&summary](
+                                  NeighborRankVariantSummary& variant,
+                                  const ClassifiedTriangle& record,
+                                  const std::array<
+                                      std::optional<std::uint16_t>,
+                                      3U>& root_ranks) {
+    std::optional<std::uint16_t> best;
+    for (const std::optional<std::uint16_t>& root_rank : root_ranks) {
+      if (!root_rank.has_value()) {
+        continue;
+      }
+      variant.considered_root_count = checked_add_u64(
+          variant.considered_root_count,
+          UINT64_C(1),
+          "the PDEL witness-root count overflows uint64");
+      best = best.has_value()
+                 ? std::optional<std::uint16_t>{std::min(*best, *root_rank)}
+                 : root_rank;
+    }
+    if (!best.has_value()) {
+      variant.missing_witness_triangle_count = checked_add_u64(
+          variant.missing_witness_triangle_count,
+          UINT64_C(1),
+          "the missing PDEL witness count overflows uint64");
+      if (!variant.first_missing_witness_triangle_present) {
+        variant.first_missing_witness_triangle = record;
+        variant.first_missing_witness_triangle_present = true;
+      }
+      return;
+    }
+    add_neighbor_rank_observation(
+        variant.histogram, summary.maximum_rank, *best);
+    variant.witness_triangle_count = checked_add_u64(
+        variant.witness_triangle_count,
+        UINT64_C(1),
+        "the PDEL witness triangle count overflows uint64");
+  };
+
+  for (const ClassifiedTriangle& record : records) {
+    if (record.status != TriangleStatus::gabriel_binary64) {
+      continue;
+    }
+    summary.accepted_triangle_count = checked_add_u64(
+        summary.accepted_triangle_count,
+        UINT64_C(1),
+        "the accepted Gabriel rank count overflows uint64");
+    const PointId a = record.triangle.a;
+    const PointId b = record.triangle.b;
+    const PointId c = record.triangle.c;
+    const std::optional<std::uint16_t> ab = require_rank(a, b);
+    const std::optional<std::uint16_t> ba = require_rank(b, a);
+    const std::optional<std::uint16_t> ac = require_rank(a, c);
+    const std::optional<std::uint16_t> ca = require_rank(c, a);
+    const std::optional<std::uint16_t> bc = require_rank(b, c);
+    const std::optional<std::uint16_t> cb = require_rank(c, b);
+    if (ab.has_value() != ba.has_value() ||
+        ac.has_value() != ca.has_value() ||
+        bc.has_value() != cb.has_value()) {
+      throw std::logic_error(
+          "the ordinary-Delaunay CSR must contain both directions of every "
+          "edge");
+    }
+
+    const std::size_t pair_count =
+        static_cast<std::size_t>(ab.has_value()) +
+        static_cast<std::size_t>(ac.has_value()) +
+        static_cast<std::size_t>(bc.has_value());
+    if (pair_count == 3U) {
+      summary.complete_three_pair_triangle_count = checked_add_u64(
+          summary.complete_three_pair_triangle_count,
+          UINT64_C(1),
+          "the complete PDEL triangle count overflows uint64");
+    } else if (pair_count == 2U) {
+      summary.partial_two_pair_witness_triangle_count = checked_add_u64(
+          summary.partial_two_pair_witness_triangle_count,
+          UINT64_C(1),
+          "the support-two PDEL triangle count overflows uint64");
+    } else {
+      summary.insufficient_pair_witness_triangle_count = checked_add_u64(
+          summary.insufficient_pair_witness_triangle_count,
+          UINT64_C(1),
+          "the insufficient PDEL witness count overflows uint64");
+    }
+
+    const auto directed_root = [](const auto& first, const auto& second) {
+      return first.has_value() && second.has_value()
+                 ? std::optional<std::uint16_t>{
+                       std::max(*first, *second)}
+                 : std::nullopt;
+    };
+    const auto union_root = [](
+                                const auto& first_out,
+                                const auto& first_in,
+                                const auto& second_out,
+                                const auto& second_in) {
+      return first_out.has_value() && first_in.has_value() &&
+                     second_out.has_value() && second_in.has_value()
+                 ? std::optional<std::uint16_t>{std::max(
+                       std::min(*first_out, *first_in),
+                       std::min(*second_out, *second_in))}
+                 : std::nullopt;
+    };
+    const auto mutual_root = [](
+                                 const auto& first_out,
+                                 const auto& first_in,
+                                 const auto& second_out,
+                                 const auto& second_in) {
+      return first_out.has_value() && first_in.has_value() &&
+                     second_out.has_value() && second_in.has_value()
+                 ? std::optional<std::uint16_t>{std::max(
+                       std::max(*first_out, *first_in),
+                       std::max(*second_out, *second_in))}
+                 : std::nullopt;
+    };
+    const std::array<std::optional<std::uint16_t>, 3U> directed_roots{
+        directed_root(ab, ac),
+        directed_root(ba, bc),
+        directed_root(ca, cb)};
+    const std::array<std::optional<std::uint16_t>, 3U> union_roots{
+        union_root(ab, ba, ac, ca),
+        union_root(ba, ab, bc, cb),
+        union_root(ca, ac, cb, bc)};
+    const std::array<std::optional<std::uint16_t>, 3U> mutual_roots{
+        mutual_root(ab, ba, ac, ca),
+        mutual_root(ba, ab, bc, cb),
+        mutual_root(ca, ac, cb, bc)};
+    reduce_variant(summary.directed_root_star, record, directed_roots);
+    reduce_variant(summary.symmetric_union_star, record, union_roots);
+    reduce_variant(summary.mutual_star, record, mutual_roots);
+
+    const auto best_rank = [](const auto& roots) {
+      std::optional<std::uint16_t> best;
+      for (const auto& rank : roots) {
+        if (rank.has_value()) {
+          best = best.has_value()
+                     ? std::optional<std::uint16_t>{std::min(*best, *rank)}
+                     : rank;
+        }
+      }
+      return best;
+    };
+    const std::optional<std::uint16_t> directed_rank =
+        best_rank(directed_roots);
+    const std::optional<std::uint16_t> union_rank = best_rank(union_roots);
+    const std::optional<std::uint16_t> mutual_rank = best_rank(mutual_roots);
+    if (directed_rank.has_value() != union_rank.has_value() ||
+        directed_rank.has_value() != mutual_rank.has_value()) {
+      throw std::logic_error(
+          "the PDEL witness-root availability differs between variants");
+    }
+    if (directed_rank.has_value() &&
+        (*union_rank > *directed_rank || *directed_rank > *mutual_rank)) {
+      throw std::logic_error(
+          "the union/directed/mutual neighbor-rank ordering is inconsistent");
+    }
+  }
+  if (summary.accepted_triangle_count != expected_accepted_triangle_count ||
+      summary.complete_three_pair_triangle_count +
+              summary.partial_two_pair_witness_triangle_count +
+              summary.insufficient_pair_witness_triangle_count !=
+          summary.accepted_triangle_count) {
+    throw std::logic_error(
+        "the Gabriel neighbor-rank triangle partition does not close");
+  }
+  const auto closes = [&](const NeighborRankVariantSummary& variant) {
+    return variant.witness_triangle_count +
+                   variant.missing_witness_triangle_count ==
+               summary.accepted_triangle_count &&
+           variant.histogram.captured_count +
+                   variant.histogram.overflow_count ==
+               variant.witness_triangle_count;
+  };
+  if (!closes(summary.directed_root_star) ||
+      !closes(summary.symmetric_union_star) ||
+      !closes(summary.mutual_star)) {
+    throw std::logic_error(
+        "a Gabriel neighbor-rank histogram does not close");
+  }
+  return summary;
+}
+
+[[nodiscard]] double fixed_binary64_squared_distance_cpu(
+    const morsehgp3d::exact::CertifiedPoint3& first,
+    const morsehgp3d::exact::CertifiedPoint3& second) noexcept {
+  // Volatile temporaries make the host replay use the same elementary
+  // round-to-nearest operations as __dsub_rn/__dmul_rn/__dadd_rn on device;
+  // in particular, neither FMA contraction nor reassociation is admissible.
+  const volatile double dx =
+      first.binary64_coordinate(0U) - second.binary64_coordinate(0U);
+  const volatile double dy =
+      first.binary64_coordinate(1U) - second.binary64_coordinate(1U);
+  const volatile double dz =
+      first.binary64_coordinate(2U) - second.binary64_coordinate(2U);
+  const volatile double xx = dx * dx;
+  const volatile double yy = dy * dy;
+  const volatile double zz = dz * dz;
+  const volatile double xy = xx + yy;
+  const volatile double squared_distance = xy + zz;
+  return squared_distance;
+}
+
+[[nodiscard]] NeighborRankBruteforceReplay
+replay_neighbor_ranks_by_bounded_bruteforce(
+    const morsehgp3d::spatial::CanonicalPointCloud& cloud,
+    const CsrGraph& graph,
+    std::span<const PointId> source_point_id_by_canonical_id,
+    const morsehgp3d::gpu::Binary64LbvhCsrNeighborRankResult& rank_result) {
+  NeighborRankBruteforceReplay replay;
+  replay.point_count = cloud.size();
+  if (cloud.size() > NeighborRankBruteforceReplay::maximum_point_count) {
+    return replay;
+  }
+  if (std::fegetround() != FE_TONEAREST) {
+    throw std::runtime_error(
+        "the bounded binary64 rank replay requires FE_TONEAREST");
+  }
+  if (graph.offsets.size() != cloud.size() + 1U ||
+      graph.neighbors.size() != rank_result.directed_csr_ranks.size() ||
+      source_point_id_by_canonical_id.size() != cloud.size()) {
+    throw std::logic_error(
+        "the bounded binary64 rank replay received misaligned extents");
+  }
+
+  std::vector<PointId> canonical_point_id_by_source_id(cloud.size());
+  std::vector<std::uint8_t> source_seen(cloud.size(), 0U);
+  for (std::size_t canonical = 0U; canonical < cloud.size(); ++canonical) {
+    const PointId source = source_point_id_by_canonical_id[canonical];
+    if (source >= cloud.size() || source_seen[source] != 0U) {
+      throw std::logic_error(
+          "the bounded binary64 rank replay mapping is not a permutation");
+    }
+    source_seen[source] = 1U;
+    canonical_point_id_by_source_id[source] =
+        static_cast<PointId>(canonical);
+    replay.canonical_source_mapping_non_identity_observed =
+        replay.canonical_source_mapping_non_identity_observed ||
+        source != canonical;
+  }
+
+  std::vector<std::pair<double, PointId>> ordered_candidates;
+  ordered_candidates.reserve(cloud.size() - 1U);
+  std::vector<std::size_t> exact_rank_by_canonical_id(cloud.size());
+  const std::uint16_t overflow_rank = static_cast<std::uint16_t>(
+      rank_result.audit.maximum_rank + 1U);
+  for (std::size_t source_canonical = 0U;
+       source_canonical < cloud.size();
+       ++source_canonical) {
+    ordered_candidates.clear();
+    const PointId source_canonical_id =
+        static_cast<PointId>(source_canonical);
+    for (std::size_t candidate = 0U; candidate < cloud.size(); ++candidate) {
+      if (candidate == source_canonical) {
+        continue;
+      }
+      const PointId candidate_id = static_cast<PointId>(candidate);
+      const double squared_distance = fixed_binary64_squared_distance_cpu(
+          cloud.point(source_canonical_id), cloud.point(candidate_id));
+      if (std::isnan(squared_distance)) {
+        throw std::runtime_error(
+            "the bounded binary64 rank replay produced NaN");
+      }
+      ordered_candidates.emplace_back(squared_distance, candidate_id);
+    }
+    std::sort(
+        ordered_candidates.begin(),
+        ordered_candidates.end(),
+        [](const auto& left, const auto& right) {
+          return left.first < right.first ||
+                 (left.first == right.first && left.second < right.second);
+        });
+    for (std::size_t index = 0U; index < ordered_candidates.size(); ++index) {
+      if (index != 0U &&
+          ordered_candidates[index - 1U].first ==
+              ordered_candidates[index].first) {
+        replay.binary64_distance_tie_observed = true;
+      }
+      exact_rank_by_canonical_id[ordered_candidates[index].second] =
+          index + 1U;
+    }
+
+    const PointId source_id =
+        source_point_id_by_canonical_id[source_canonical];
+    const std::size_t begin =
+        static_cast<std::size_t>(graph.offsets[source_id]);
+    const std::size_t end =
+        static_cast<std::size_t>(graph.offsets[source_id + 1U]);
+    for (std::size_t position = begin; position < end; ++position) {
+      const PointId target_source_id = graph.neighbors[position];
+      if (target_source_id >= cloud.size()) {
+        throw std::logic_error(
+            "the bounded binary64 rank replay found an invalid CSR target");
+      }
+      const PointId target_canonical_id =
+          canonical_point_id_by_source_id[target_source_id];
+      const std::size_t exact_rank =
+          exact_rank_by_canonical_id[target_canonical_id];
+      const std::uint16_t cpu_rank =
+          exact_rank <= rank_result.audit.maximum_rank
+              ? static_cast<std::uint16_t>(exact_rank)
+              : overflow_rank;
+      replay.censored_rank_observed =
+          replay.censored_rank_observed || cpu_rank == overflow_rank;
+      ++replay.compared_arc_count;
+      const std::uint16_t gpu_rank =
+          rank_result.directed_csr_ranks[position];
+      if (gpu_rank != cpu_rank) {
+        ++replay.mismatch_count;
+        if (!replay.first_mismatch_present) {
+          replay.first_mismatch_present = true;
+          replay.first_mismatch_source = source_id;
+          replay.first_mismatch_target = target_source_id;
+          replay.first_mismatch_gpu_rank = gpu_rank;
+          replay.first_mismatch_cpu_rank = cpu_rank;
+        }
+      }
+    }
+  }
+  replay.performed = true;
+  replay.passed = replay.mismatch_count == 0U;
+  return replay;
+}
+
+[[nodiscard]] GabrielNeighborRankRun run_gabriel_neighbor_rank_diagnostic(
+    std::span<const Point3> points,
+    const CsrGraph& graph,
+    std::span<const ClassifiedTriangle> records,
+    std::uint64_t expected_accepted_triangle_count,
+    std::size_t maximum_rank,
+    std::size_t seed_window_radius,
+    std::size_t query_batch_size) {
+  GabrielNeighborRankRun run;
+  const auto canonicalization_begin = Clock::now();
+  std::vector<morsehgp3d::exact::CertifiedPoint3> certified_points;
+  certified_points.reserve(points.size());
+  for (const Point3& point : points) {
+    certified_points.push_back(
+        morsehgp3d::exact::CertifiedPoint3::from_binary64(
+            point.x, point.y, point.z));
+  }
+  morsehgp3d::spatial::CanonicalPointCloud cloud =
+      morsehgp3d::spatial::CanonicalPointCloud::rejecting_duplicates(
+          certified_points);
+  certified_points.clear();
+  certified_points.shrink_to_fit();
+  std::vector<PointId> source_point_id_by_canonical_id(points.size());
+  std::vector<std::uint8_t> source_seen(points.size(), 0U);
+  morsehgp3d::contract::CanonicalSha256Builder mapping_builder;
+  mapping_builder.update(
+      "MorseHGP3D/phase15/gabriel-neighbor-rank/"
+      "canonical-to-source-v1/sha256/");
+  sha256_word(mapping_builder, static_cast<std::uint64_t>(points.size()));
+  for (std::size_t canonical_index = 0U;
+       canonical_index < points.size();
+       ++canonical_index) {
+    const auto canonical_id =
+        static_cast<morsehgp3d::spatial::PointId>(canonical_index);
+    const std::size_t source_index = cloud.source_index(canonical_id);
+    if (source_index >= points.size() || source_seen[source_index] != 0U) {
+      throw std::runtime_error(
+          "the neighbor-rank canonical-to-source map is not a permutation");
+    }
+    source_seen[source_index] = 1U;
+    source_point_id_by_canonical_id[canonical_index] =
+        static_cast<PointId>(source_index);
+    sha256_word(mapping_builder, static_cast<std::uint64_t>(canonical_index));
+    sha256_word(mapping_builder, static_cast<std::uint64_t>(source_index));
+    for (const std::uint64_t bits :
+         cloud.point(canonical_id).canonical_input_bits()) {
+      sha256_word(mapping_builder, bits);
+    }
+  }
+  run.canonical_to_source_mapping_sha256 =
+      mapping_builder.finalize().to_lower_hex();
+  run.canonicalization_nanoseconds =
+      nanoseconds(Clock::now() - canonicalization_begin);
+
+  const auto lbvh_begin = Clock::now();
+  morsehgp3d::gpu::MortonLbvhBuildContext build_context(points.size());
+  morsehgp3d::gpu::MortonLbvhDeviceBuildResult build_result =
+      build_context.build(cloud);
+  if (!build_result.complete_certified_build() ||
+      !build_result.cuda_qualified_build()) {
+    throw std::runtime_error(
+        "the Gabriel neighbor-rank diagnostic requires a certified CUDA "
+        "LBVH build");
+  }
+  morsehgp3d::gpu::MortonLbvhDeviceTraversalLease traversal_lease =
+      build_context.release_device_traversal_lease(build_result);
+  morsehgp3d::gpu::Binary64LbvhTopKContext rank_context(
+      cloud, std::move(traversal_lease));
+  run.lbvh_build_nanoseconds = nanoseconds(Clock::now() - lbvh_begin);
+
+  const auto rank_begin = Clock::now();
+  morsehgp3d::gpu::Binary64LbvhCsrNeighborRankResult rank_result =
+      rank_context.query_csr_neighbor_ranks(
+          cloud,
+          graph.offsets,
+          graph.neighbors,
+          source_point_id_by_canonical_id,
+          maximum_rank,
+          seed_window_radius,
+          query_batch_size);
+  run.rank_query_nanoseconds = nanoseconds(Clock::now() - rank_begin);
+  if (!rank_result.validated_complete_binary64_rank_prefix()) {
+    throw std::runtime_error(
+        "the Gabriel diagnostic received an incomplete neighbor-rank prefix");
+  }
+  run.rank_audit = rank_result.audit;
+  run.bruteforce_replay = replay_neighbor_ranks_by_bounded_bruteforce(
+      cloud, graph, source_point_id_by_canonical_id, rank_result);
+  if (run.bruteforce_replay.performed &&
+      !run.bruteforce_replay.passed) {
+    throw std::runtime_error(
+        "the bounded CPU replay contradicts the CUDA CSR neighbor ranks");
+  }
+
+  const auto reduction_begin = Clock::now();
+  run.summary = reduce_gabriel_neighbor_ranks(
+      graph,
+      records,
+      rank_result,
+      expected_accepted_triangle_count);
+  run.triangle_reduction_nanoseconds =
+      nanoseconds(Clock::now() - reduction_begin);
+  return run;
+}
+
 [[nodiscard]] ReconstructibleInputDigests make_reconstructible_input_digests(
     std::span<const Point3> points,
     std::span<const Edge> edges,
@@ -3171,6 +3782,350 @@ void write_surrogate_failure_json(
     std::cout << "null";
   }
   std::cout << '}';
+}
+
+[[nodiscard]] std::uint64_t histogram_captured_through(
+    const NeighborRankHistogram& histogram,
+    std::size_t rank) {
+  const std::size_t end = std::min(
+      rank,
+      histogram.exact_rank_counts.empty()
+          ? std::size_t{0}
+          : histogram.exact_rank_counts.size() - 1U);
+  std::uint64_t cumulative{};
+  for (std::size_t current = 1U; current <= end; ++current) {
+    cumulative = checked_add_u64(
+        cumulative,
+        histogram.exact_rank_counts[current],
+        "the neighbor-rank cumulative histogram overflows uint64");
+  }
+  return cumulative;
+}
+
+[[nodiscard]] std::optional<std::size_t> histogram_quantile(
+    const NeighborRankHistogram& histogram,
+    std::uint64_t total_count,
+    std::size_t percent) {
+  if (total_count == 0U || percent == 0U || percent > 100U) {
+    return std::nullopt;
+  }
+  const std::uint64_t quotient = total_count / UINT64_C(100);
+  const std::uint64_t remainder = total_count % UINT64_C(100);
+  const std::uint64_t remainder_product =
+      remainder * static_cast<std::uint64_t>(percent);
+  const std::uint64_t target = checked_add_u64(
+      quotient * static_cast<std::uint64_t>(percent),
+      (remainder_product + UINT64_C(99)) / UINT64_C(100),
+      "the neighbor-rank quantile target overflows uint64");
+  std::uint64_t cumulative{};
+  for (std::size_t rank = 1U;
+       rank < histogram.exact_rank_counts.size();
+       ++rank) {
+    cumulative = checked_add_u64(
+        cumulative,
+        histogram.exact_rank_counts[rank],
+        "the neighbor-rank quantile cumulative count overflows uint64");
+    if (cumulative >= target) {
+      return rank;
+    }
+  }
+  return std::nullopt;
+}
+
+void write_optional_rank_json(const std::optional<std::size_t>& rank) {
+  if (rank.has_value()) {
+    std::cout << *rank;
+  } else {
+    std::cout << "null";
+  }
+}
+
+void write_neighbor_rank_histogram_json(
+    const NeighborRankHistogram& histogram,
+    std::uint64_t total_count) {
+  std::cout << "{\"exact_rank_counts_1_through_M\":[";
+  for (std::size_t rank = 1U;
+       rank < histogram.exact_rank_counts.size();
+       ++rank) {
+    if (rank != 1U) {
+      std::cout << ',';
+    }
+    std::cout << histogram.exact_rank_counts[rank];
+  }
+  std::cout << "]"
+            << ",\"captured_count\":" << histogram.captured_count
+            << ",\"overflow_count\":" << histogram.overflow_count
+            << ",\"maximum_observed_rank\":";
+  if (histogram.overflow_count == 0U && total_count != 0U) {
+    std::cout << histogram.maximum_exact_rank;
+  } else {
+    std::cout << "null";
+  }
+  std::cout << ",\"p50_smallest_M\":";
+  write_optional_rank_json(histogram_quantile(histogram, total_count, 50U));
+  std::cout << ",\"p90_smallest_M\":";
+  write_optional_rank_json(histogram_quantile(histogram, total_count, 90U));
+  std::cout << ",\"p95_smallest_M\":";
+  write_optional_rank_json(histogram_quantile(histogram, total_count, 95U));
+  std::cout << ",\"p99_smallest_M\":";
+  write_optional_rank_json(histogram_quantile(histogram, total_count, 99U));
+  std::cout << '}';
+}
+
+void write_gabriel_neighbor_rank_json(
+    const GabrielNeighborRankRun& run,
+    std::size_t point_count) {
+  const GabrielNeighborRankSummary& summary = run.summary;
+  const morsehgp3d::gpu::Binary64LbvhCsrNeighborRankAudit& audit =
+      run.rank_audit;
+  const bool compact_rank_gate_passed =
+      audit.complete_query_coverage && audit.failed_query_count == 0U &&
+      audit.no_search_work_cap && audit.exact_binary64_prefix_complete &&
+      audit.source_mapping_permutation_validated &&
+      audit.csr_structure_validated && audit.host_rank_transcript_validated;
+  const bool all_variants_have_pdel_witness_root =
+      summary.directed_root_star.missing_witness_triangle_count == 0U &&
+      summary.symmetric_union_star.missing_witness_triangle_count == 0U &&
+      summary.mutual_star.missing_witness_triangle_count == 0U;
+  std::cout
+      << "{\"schema\":\"morsehgp3d.phase15_gabriel_neighbor_rank.v1\""
+      << ",\"status\":\"offline_proposal_diagnostic_not_a_proof\""
+      << ",\"scientific_scope\":\"PDEL_witness_root_neighbor_wedge_thresholds_on_the_accepted_Gabriel_set_not_a_Gabriel_or_Gamma2_catalogue\""
+      << ",\"distance_key\":\"fixed_binary64_squared_distance_then_canonical_PointId\""
+      << ",\"canonical_to_source_mapping_semantics\":\"canonical_PointId_remains_the_tie_key_source_PointId_only_addresses_the_PDEL_CSR\""
+      << ",\"rank_semantics\":\"exact_prefix_for_the_declared_binary64_key\""
+      << ",\"rank_overflow_semantics\":\"exact_rank_strictly_greater_than_M_value_censored\""
+      << ",\"maximum_rank_M\":" << summary.maximum_rank
+      << ",\"one_complete_LBVH_traversal_per_source_not_per_arc\":true"
+      << ",\"two_incident_edges_form_one_wedge_proposal\":true"
+      << ",\"support_two_PDEL_witnesses_allowed\":true"
+      << ",\"root_scope\":\"minimum_over_available_PDEL_witness_roots\""
+      << ",\"partial_root_threshold_relation\":\"safe_upper_bound_on_the_minimum_over_all_three_roots\""
+      << ",\"absolute_minimum_over_all_three_roots_claimed\":false"
+      << ",\"Gabriel_catalogue_claimed\":false"
+      << ",\"exact_Gamma2_claimed\":false"
+      << ",\"CSR_row_writes_race_free_by_source_permutation\":true"
+      << ",\"maximum_logical_heap_storage_bytes_per_query\":4096"
+      << ",\"CUDA_local_memory_spill_and_throughput_require_G4_qualification\":true"
+      << ",\"query_cost_model\":\"one_branch_and_bound_search_per_source_with_log_M_heap_updates_not_one_search_per_arc\""
+      << ",\"n_by_M_table_materialized\":false"
+      << ",\"additional_global_triangle_table_materialized\":false"
+      << ",\"directed_CSR_rank_bytes_per_arc\":2"
+      << ",\"compact_rank_gate_passed\":"
+      << (compact_rank_gate_passed ? "true" : "false")
+      << ",\"all_variants_have_PDEL_witness_root\":"
+      << (all_variants_have_pdel_witness_root ? "true" : "false")
+      << ",\"accepted_triangle_count\":"
+      << summary.accepted_triangle_count
+      << ",\"complete_three_pair_triangle_count\":"
+      << summary.complete_three_pair_triangle_count
+      << ",\"partial_two_pair_witness_triangle_count\":"
+      << summary.partial_two_pair_witness_triangle_count
+      << ",\"insufficient_pair_witness_triangle_count\":"
+      << summary.insufficient_pair_witness_triangle_count;
+  const auto write_variant = [&](std::string_view definition,
+                                 const NeighborRankVariantSummary& variant) {
+    std::cout
+        << "{\"definition\":" << std::quoted(definition)
+        << ",\"threshold_scope\":\"minimum_over_available_PDEL_witness_roots\""
+        << ",\"witness_triangle_count\":"
+        << variant.witness_triangle_count
+        << ",\"missing_witness_triangle_count\":"
+        << variant.missing_witness_triangle_count
+        << ",\"considered_root_count\":" << variant.considered_root_count
+        << ",\"first_missing_witness_triangle\":";
+    if (variant.first_missing_witness_triangle_present) {
+      write_triangle_json(variant.first_missing_witness_triangle);
+    } else {
+      std::cout << "null";
+    }
+    std::cout << ",\"histogram\":";
+    write_neighbor_rank_histogram_json(
+        variant.histogram, variant.witness_triangle_count);
+    std::cout << '}';
+  };
+  std::cout << ",\"variants\":{\"directed_root_star\":";
+  write_variant(
+      "min_over_available_roots_max_of_two_outgoing_neighbor_ranks",
+      summary.directed_root_star);
+  std::cout << ",\"symmetric_union_star\":";
+  write_variant(
+      "min_over_available_roots_max_of_two_incident_min_direction_ranks",
+      summary.symmetric_union_star);
+  std::cout << ",\"mutual_star\":";
+  write_variant(
+      "min_over_available_roots_max_of_two_incident_max_direction_ranks",
+      summary.mutual_star);
+  std::cout << "}"
+            << ",\"bounded_bruteforce_rank_replay_point_cap\":"
+            << NeighborRankBruteforceReplay::maximum_point_count
+            << ",\"bounded_bruteforce_rank_replay_performed\":"
+            << (run.bruteforce_replay.performed ? "true" : "false")
+            << ",\"bounded_bruteforce_rank_replay_passed\":"
+            << (run.bruteforce_replay.passed ? "true" : "false")
+            << ",\"bounded_bruteforce_rank_replay\":{"
+            << "\"point_count\":" << run.bruteforce_replay.point_count
+            << ",\"compared_arc_count\":"
+            << run.bruteforce_replay.compared_arc_count
+            << ",\"mismatch_count\":"
+            << run.bruteforce_replay.mismatch_count
+            << ",\"canonical_source_mapping_non_identity_observed\":"
+            << (run.bruteforce_replay
+                        .canonical_source_mapping_non_identity_observed
+                    ? "true"
+                    : "false")
+            << ",\"binary64_distance_tie_observed\":"
+            << (run.bruteforce_replay.binary64_distance_tie_observed
+                    ? "true"
+                    : "false")
+            << ",\"censored_rank_observed\":"
+            << (run.bruteforce_replay.censored_rank_observed
+                    ? "true"
+                    : "false")
+            << ",\"first_mismatch\":";
+  if (run.bruteforce_replay.first_mismatch_present) {
+    std::cout << "{\"source\":"
+              << run.bruteforce_replay.first_mismatch_source
+              << ",\"target\":"
+              << run.bruteforce_replay.first_mismatch_target
+              << ",\"gpu_rank\":"
+              << run.bruteforce_replay.first_mismatch_gpu_rank
+              << ",\"cpu_rank\":"
+              << run.bruteforce_replay.first_mismatch_cpu_rank << '}';
+  } else {
+    std::cout << "null";
+  }
+  std::cout << "}"
+            << ",\"proposal_policy_K_log_n\":{"
+            << "\"K\":2,\"natural_log\":true,"
+            << "\"proposal_only_not_a_completeness_proof\":true,"
+            << "\"samples\":[";
+  constexpr std::array<std::size_t, 4U> kPolicyMultipliers{1U, 2U, 4U, 8U};
+  for (std::size_t index = 0U; index < kPolicyMultipliers.size(); ++index) {
+    if (index != 0U) {
+      std::cout << ',';
+    }
+    const std::size_t multiplier = kPolicyMultipliers[index];
+    const double raw_rank =
+        static_cast<double>(2U * multiplier) *
+        std::log(static_cast<double>(point_count));
+    const std::size_t policy_rank = std::max(
+        std::size_t{2}, static_cast<std::size_t>(std::ceil(raw_rank)));
+    std::cout << "{\"c\":" << multiplier << ",\"M\":" << policy_rank
+              << ",\"within_measured_cap\":"
+              << (policy_rank <= summary.maximum_rank ? "true" : "false")
+              << ",\"directed_root_star_captured_count\":";
+    if (policy_rank <= summary.maximum_rank) {
+      std::cout << histogram_captured_through(
+          summary.directed_root_star.histogram, policy_rank);
+    } else {
+      std::cout << "null";
+    }
+    std::cout << ",\"symmetric_union_star_captured_count\":";
+    if (policy_rank <= summary.maximum_rank) {
+      std::cout << histogram_captured_through(
+          summary.symmetric_union_star.histogram, policy_rank);
+    } else {
+      std::cout << "null";
+    }
+    std::cout << ",\"mutual_star_captured_count\":";
+    if (policy_rank <= summary.maximum_rank) {
+      std::cout << histogram_captured_through(
+          summary.mutual_star.histogram, policy_rank);
+    } else {
+      std::cout << "null";
+    }
+    std::cout << '}';
+  }
+  std::cout
+      << "]}"
+      << ",\"lbvh_audit\":{\"point_count\":" << audit.point_count
+      << ",\"certified_node_count\":" << audit.certified_node_count
+      << ",\"directed_CSR_arc_count\":" << audit.directed_csr_arc_count
+      << ",\"maximum_rank\":" << audit.maximum_rank
+      << ",\"overflow_rank\":" << audit.overflow_rank
+      << ",\"ranked_arc_count\":" << audit.ranked_arc_count
+      << ",\"overflow_arc_count\":" << audit.overflow_arc_count
+      << ",\"seed_window_radius\":" << audit.seed_window_radius
+      << ",\"query_batch_size\":" << audit.query_batch_size
+      << ",\"query_batch_count\":" << audit.query_batch_count
+      << ",\"completed_query_count\":" << audit.completed_query_count
+      << ",\"failed_query_count\":" << audit.failed_query_count
+      << ",\"node_visit_count\":" << audit.node_visit_count
+      << ",\"maximum_node_visit_count_per_query\":"
+      << audit.maximum_node_visit_count_per_query
+      << ",\"full_tree_query_count\":" << audit.full_tree_query_count
+      << ",\"strict_AABB_prune_count\":"
+      << audit.strict_aabb_prune_count
+      << ",\"AABB_equality_descent_count\":"
+      << audit.aabb_equality_descent_count
+      << ",\"invalid_AABB_bound_descent_count\":"
+      << audit.invalid_aabb_bound_descent_count
+      << ",\"seed_covered_subtree_skip_count\":"
+      << audit.seed_covered_subtree_skip_count
+      << ",\"seed_distance_evaluation_count\":"
+      << audit.seed_distance_evaluation_count
+      << ",\"traversal_leaf_distance_evaluation_count\":"
+      << audit.traversal_leaf_distance_evaluation_count
+      << ",\"persistent_input_device_bytes\":"
+      << audit.persistent_input_device_byte_capacity
+      << ",\"transient_CSR_device_bytes\":"
+      << audit.transient_csr_device_byte_capacity
+      << ",\"maximum_batch_audit_device_bytes\":"
+      << audit.maximum_batch_audit_device_byte_capacity
+      << ",\"kernel_block_count_maximum\":"
+      << audit.kernel_block_count_maximum
+      << ",\"kernel_thread_count_maximum\":"
+      << audit.kernel_thread_count_maximum
+      << ",\"kernel_local_size_bytes_per_thread\":"
+      << audit.kernel_local_size_bytes_per_thread
+      << ",\"source_snapshot_epoch\":" << audit.source_snapshot_epoch
+      << ",\"fixed_round_to_nearest_distance_recipe_requested\":"
+      << (audit.fixed_round_to_nearest_distance_recipe_requested
+              ? "true"
+              : "false")
+      << ",\"directed_round_down_AABB_recipe_requested\":"
+      << (audit.directed_round_down_aabb_recipe_requested ? "true" : "false")
+      << ",\"strict_prune_requested\":"
+      << (audit.strict_prune_requested ? "true" : "false")
+      << ",\"equality_descends_requested\":"
+      << (audit.equality_descends_requested ? "true" : "false")
+      << ",\"stackless_postorder_traversal_requested\":"
+      << (audit.stackless_postorder_traversal_requested ? "true" : "false")
+      << ",\"complete_query_coverage\":"
+      << (audit.complete_query_coverage ? "true" : "false")
+      << ",\"no_search_work_cap\":"
+      << (audit.no_search_work_cap ? "true" : "false")
+      << ",\"exact_binary64_prefix_complete\":"
+      << (audit.exact_binary64_prefix_complete ? "true" : "false")
+      << ",\"ranks_above_maximum_censored\":"
+      << (audit.ranks_above_maximum_censored ? "true" : "false")
+      << ",\"source_mapping_permutation_validated\":"
+      << (audit.source_mapping_permutation_validated ? "true" : "false")
+      << ",\"csr_structure_validated\":"
+      << (audit.csr_structure_validated ? "true" : "false")
+      << ",\"host_rank_transcript_validated\":"
+      << (audit.host_rank_transcript_validated ? "true" : "false")
+      << ",\"n_by_maximum_rank_table_materialized\":"
+      << (audit.n_by_maximum_rank_table_materialized ? "true" : "false")
+      << ",\"higher_order_delaunay_mosaic_materialized\":"
+      << (audit.higher_order_delaunay_mosaic_materialized ? "true" : "false")
+      << ",\"global_pair_matrix_materialized\":"
+      << (audit.global_pair_matrix_materialized ? "true" : "false")
+      << ",\"exact_morse_hierarchy_claimed\":"
+      << (audit.exact_morse_hierarchy_claimed ? "true" : "false")
+      << ",\"public_status_claimed\":"
+      << (audit.public_status_claimed ? "true" : "false")
+      << ",\"canonical_to_source_mapping_sha256\":\""
+      << run.canonical_to_source_mapping_sha256 << "\"}"
+      << ",\"timings_nanoseconds\":{\"canonicalization\":"
+      << run.canonicalization_nanoseconds
+      << ",\"lbvh_build\":" << run.lbvh_build_nanoseconds
+      << ",\"rank_all_sources\":" << run.rank_query_nanoseconds
+      << ",\"rank_kernel\":" << audit.kernel_nanoseconds
+      << ",\"rank_device_to_host\":" << audit.device_to_host_nanoseconds
+      << ",\"triangle_histogram_reduction\":"
+      << run.triangle_reduction_nanoseconds << "}}";
 }
 
 [[nodiscard]] std::string direct_variant_decision_sha256(
@@ -3662,7 +4617,8 @@ int main(int argc, char** argv) {
     if (options.gabriel_coverage_only) {
       const auto k2_begin = Clock::now();
       K2Summary coverage =
-          options.surrogate_guardrail_max_order == 0U
+          options.surrogate_guardrail_max_order == 0U &&
+                  options.gabriel_neighbor_rank_maximum == 0U
               ? reduce_k2(
                     gpu.retained_records, true, options.emit_records)
               : summarize_gabriel_source_inclusion(
@@ -3680,6 +4636,7 @@ int main(int argc, char** argv) {
       const std::size_t ordinary_edge_count = geogram.edges.size();
       const std::size_t maximum_vertex_degree = graph.maximum_degree;
       std::optional<SurrogateGuardrailRun> surrogate_guardrails;
+      std::optional<GabrielNeighborRankRun> neighbor_rank_diagnostic;
       if (options.surrogate_guardrail_max_order != 0U) {
         if (points.size() <= options.surrogate_guardrail_max_order) {
           throw std::invalid_argument(
@@ -3700,6 +4657,27 @@ int main(int argc, char** argv) {
             options.emit_records));
         timings.surrogate_guardrail_nanoseconds =
             nanoseconds(Clock::now() - surrogate_begin);
+      }
+      if (options.gabriel_neighbor_rank_maximum != 0U) {
+        if (points.size() <= options.gabriel_neighbor_rank_maximum) {
+          throw std::invalid_argument(
+              "the cloud must contain more points than the neighbor-rank cap");
+        }
+        if (!options.emit_records) {
+          std::vector<Edge>().swap(geogram.edges);
+        }
+        const auto neighbor_rank_begin = Clock::now();
+        neighbor_rank_diagnostic.emplace(
+            run_gabriel_neighbor_rank_diagnostic(
+                points,
+                graph,
+                gpu.retained_records,
+                gpu.audit.accepted_count,
+                options.gabriel_neighbor_rank_maximum,
+                options.neighbor_rank_seed_window_radius,
+                options.neighbor_rank_query_batch_size));
+        timings.neighbor_rank_diagnostic_nanoseconds =
+            nanoseconds(Clock::now() - neighbor_rank_begin);
       }
       const bool accepted_partition_closed =
           coverage.necessary_triangle_count +
@@ -3728,9 +4706,23 @@ int main(int argc, char** argv) {
                        summary.corrected_tree_edge_count ==
                            summary.tree_edge_count;
               });
+      const bool compact_neighbor_rank_gate_passed =
+          !neighbor_rank_diagnostic.has_value() ||
+          (neighbor_rank_diagnostic->rank_audit.complete_query_coverage &&
+           neighbor_rank_diagnostic->rank_audit.failed_query_count == 0U &&
+           neighbor_rank_diagnostic->rank_audit.no_search_work_cap &&
+           neighbor_rank_diagnostic->rank_audit
+               .exact_binary64_prefix_complete &&
+           neighbor_rank_diagnostic->summary.directed_root_star
+                   .missing_witness_triangle_count == 0U &&
+           neighbor_rank_diagnostic->summary.symmetric_union_star
+                   .missing_witness_triangle_count == 0U &&
+           neighbor_rank_diagnostic->summary.mutual_star
+                   .missing_witness_triangle_count == 0U);
       const bool conditional_cross_variant_gate_passed =
           binary64_gate_passed &&
-          corrected_surrogate_regular_guardrail_passed;
+          corrected_surrogate_regular_guardrail_passed &&
+          compact_neighbor_rank_gate_passed;
       const bool fail_closed_cross_variant_gate_passed =
           conditional_cross_variant_gate_passed &&
           safety_batch.ambiguous_triangle_count == 0U &&
@@ -3750,28 +4742,39 @@ int main(int argc, char** argv) {
       std::cout
           << "{\"schema\":"
           << std::quoted(
-                 surrogate_guardrails.has_value()
+                 neighbor_rank_diagnostic.has_value()
+                     ? "morsehgp3d.phase15_delaunay_gabriel_neighbor_rank.v1"
+                 : surrogate_guardrails.has_value()
                      ? "morsehgp3d.phase15_delaunay_gabriel_fusion_guardrails.v1"
                      : "morsehgp3d.phase15_delaunay_gabriel_coverage.v1")
           << ",\"git_sha\":\"" << MORSEHGP3D_GIT_SHA << "\""
           << ",\"phase\":\"15\""
           << ",\"backend\":"
           << std::quoted(
-                 surrogate_guardrails.has_value()
+                 neighbor_rank_diagnostic.has_value()
+                     ? "geogram_PDEL_plus_cuda_Gabriel_grid_plus_binary64_Morton_LBVH_CSR_ranks"
+                 : surrogate_guardrails.has_value()
                      ? "ordinary_delaunay_wedge_plus_cuda_g4_aabb_grid_plus_binary64_LBVH_surrogate"
                      : "ordinary_delaunay_wedge_plus_cuda_g4_aabb_grid")
           << ",\"profile\":\"hgp_reduced\""
           << ",\"mode\":"
           << std::quoted(
-                 surrogate_guardrails.has_value()
+                 neighbor_rank_diagnostic.has_value()
+                     ? "offline_neighbor_rank"
+                 : surrogate_guardrails.has_value()
                      ? "gabriel_necessary_batch_plus_variant_fusion_guardrails"
                      : "gabriel_necessary_batch")
           << ",\"deployment_status\":\"diagnostic_sidecar\""
           << ",\"public_status\":\"not_claimed\""
-          << ",\"criterion\":\"triangle_explicit_or_three_facets_connected_at_strictly_lower_level\""
+          << ",\"criterion\":"
+          << std::quoted(
+                 neighbor_rank_diagnostic.has_value()
+                     ? "smallest_neighbor_budget_for_each_accepted_Gabriel_triangle"
+                     : "triangle_explicit_or_three_facets_connected_at_strictly_lower_level")
           << ",\"coverage_reduction_mode\":"
           << std::quoted(
-                 surrogate_guardrails.has_value()
+                 surrogate_guardrails.has_value() ||
+                         neighbor_rank_diagnostic.has_value()
                      ? "all_accepted_Gabriel_sources_explicit_no_global_facet_DSU"
                      : "strict_lower_Gabriel_facet_DSU")
           << ",\"proof_scope\":{"
@@ -3789,6 +4792,8 @@ int main(int argc, char** argv) {
              "\"canonical_wedges_enumerated_in_bounded_GPU_chunks\":true,"
              "\"global_restricted_Gamma2_arena_materialized\":false,"
              "\"global_Gabriel_proposal_arena_materialized_for_level_sort\":true,"
+             "\"global_n_by_M_neighbor_table_materialized\":false,"
+             "\"additional_global_triangle_rank_table_materialized\":false,"
              "\"same_level_candidates_can_certify_each_other\":false}"
           << ",\"input\":{\"point_count\":" << points.size()
           << ",\"seed\":" << options.seed
@@ -3839,6 +4844,8 @@ int main(int argc, char** argv) {
           << (binary64_gate_passed ? "true" : "false")
           << ",\"conditional_cross_variant_gate_passed\":"
           << (conditional_cross_variant_gate_passed ? "true" : "false")
+          << ",\"compact_neighbor_rank_gate_passed\":"
+          << (compact_neighbor_rank_gate_passed ? "true" : "false")
           << ",\"fail_closed_cross_variant_gate_passed\":"
           << (fail_closed_cross_variant_gate_passed ? "true" : "false")
           << ",\"allow_conditional_guardrail\":"
@@ -3933,6 +4940,13 @@ int main(int argc, char** argv) {
       } else {
         std::cout << "null";
       }
+      std::cout << ",\"neighbor_rank_diagnostic\":";
+      if (neighbor_rank_diagnostic.has_value()) {
+        write_gabriel_neighbor_rank_json(
+            *neighbor_rank_diagnostic, points.size());
+      } else {
+        std::cout << "null";
+      }
       std::cout
           << ",\"gpu\":{\"device_name\":" << std::quoted(gpu.cuda_device_name)
           << ",\"multiprocessor_count\":" << gpu.cuda_multiprocessor_count
@@ -3964,6 +4978,8 @@ int main(int argc, char** argv) {
           << ",\"coverage_reduction\":" << timings.k2_reduction_nanoseconds
           << ",\"surrogate_guardrail\":"
           << timings.surrogate_guardrail_nanoseconds
+          << ",\"neighbor_rank_diagnostic\":"
+          << timings.neighbor_rank_diagnostic_nanoseconds
           << ",\"cold_e2e\":" << timings.total_nanoseconds << "}}\n";
       return selected_process_gate_passed ? EXIT_SUCCESS : EXIT_FAILURE;
     }
