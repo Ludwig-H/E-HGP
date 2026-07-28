@@ -572,13 +572,32 @@ Le rapport [PHASE14_GEOGRAM_LOW_ORDER_GPU.md](PHASE14_GEOGRAM_LOW_ORDER_GPU.md) 
 
 <!-- TODO 14AB perfectionné : construire l'autorité source commune pair--higher puis la passe transactionnelle à fan-in fixe avec sidecar diagnostic avant tout lecteur final ou spool multi-passe. -->
 
+## Diagnostic transversal récent — rang $K=2$ contre $K=10$ sur la voie pair historique
+
+Le SHA `17f7b04` paramètre le même runner `stackless_product_batch` par ordre maximal afin de tester l'hypothèse la plus favorable à $k=2$ : deux témoins stricts suffisent alors à rejeter une paire au-dessus du rang, contre dix à $K=10$. Le gate unique emploie `uniform_latin`, $n=12\,500$, `work=20000`, 64 produits, 32 768 work-items, 262 144 reçus, 64 epochs et trois rejeux résidents. Les deux exécutions ferment leurs capacités, leur frontière terminale et leur rejeu exact.
+
+| Ordre | CPU exact | Premier GPU | Rejeux résidents | Témoins | Callbacks | Visites | Terminaux |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| $K=2$ | 18,800618 ms | 5 001,966230 ms | 3 657,193946; 3 657,747814; 3 657,006486 ms | 2 | 119 | 653 664 | 324 025 |
+| $K=10$ | 18,527669 ms | 3 602,352073 ms | 2 256,834574; 2 258,104594; 2 257,170824 ms | 10 | 73 | 407 690 | 202 386 |
+
+À $K=2$, le budget logique de visites vaut 35 523 579 pour 1 421 produits d'entrée : 149 propositions et 1 272 keep sont produits; 82 propositions et 128 keep sont consommés, avec 118 remplacements de cache. À $K=10$, il vaut 22 424 103 pour 897 produits : 22 propositions et 875 keep sont produits; 12 propositions et 106 keep sont consommés, avec 72 remplacements. Le rang plus faible réduit le nombre de témoins par décision mais ouvre davantage de callbacks, de produits et de terminaux; la répétition de ce batch stackless reste donc plus de 190 fois plus lente que le CPU même sur le cas $K=2$ visé.
+
+Le build CUDA est AOT `sm_120` seulement, sans PTX. `compute-sanitizer` sur `uniform_latin`, $n=4\,096$, $K=2$ publie zéro erreur et zéro fuite. Les artefacts sont [phase15_pair_rank_n12500_k2_q3_g4_17f7b04.json](phase15_pair_rank_n12500_k2_q3_g4_17f7b04.json), [phase15_pair_rank_n12500_k10_q3_g4_17f7b04.json](phase15_pair_rank_n12500_k10_q3_g4_17f7b04.json), [phase15_pair_rank_n4096_k2_memcheck_g4_17f7b04.json](phase15_pair_rank_n4096_k2_memcheck_g4_17f7b04.json) et [phase15_pair_rank_k2_vs_k10_g4_17f7b04.json](phase15_pair_rank_k2_vs_k10_g4_17f7b04.json).
+
+La décision est négative et définitive pour cette ordonnance : aucun run 50 k et aucune variante $Q=31$ ne sont autorisés sans changement structurel. Ce n'est pas un échec du LBVH partagé, dont les bornes et le parcours restent réutilisables; c'est la preuve expérimentale que le chemin produit ne doit plus relancer un `stackless_product_batch` par callback ni rapatrier ses terminaux. Le prochain prototype doit former une frontière GPU plate commune et produire directement le squelette utile de rang au plus trois.
+
+Le SHA `c4631d7` fournit deux ancres hôte pour ce pivot. `ExactYao48Emst` est un oracle $O(n^2)$ borné à 4 096 points qui conserve exactement l'EMST canonique par 48 cônes; il peut guider un accélérateur $k=1$ sur le LBVH commun mais n'est ni scalable en l'état ni un squelette $k=2$. `ExactLowOrderGabrielSkeleton` projette localement les flux `pair` et `higher` déjà complets en arêtes de rang deux et triangles de rang trois avec niveaux exacts et provenance. Il échoue fermé sur tout `extra_shell` et ses reçus locaux ne remplacent pas le rejeu frais des autorités sources. Les triangles droits, égalités de coque et cosphères restent donc la prochaine dette exacte.
+
+Enfin, un EMST exact suffit comme backbone d'échéance, mais pas comme catalogue $k=2$. Toute boule de rayon $R$ contenant $a,b,c$ impose des distances par paire au plus $2R$; le chemin EMST de chaque paire a un bottleneck au plus égal à cette distance, donc toutes ses arêtes ont un niveau HGP $d^2/4\leq R^2$ sous coupe fermée. Les trois sommets sont connectés au plus tard à l'échéance et `point_component_clique_lift_v1` peut porter ce témoin dans le sidecar. Ce théorème ne produit aucun triangle, aucune incidence Gamma$_2$ et n'exclut aucune fusion plus précoce.
+
 ## Priorités de développement
 
-1. pour le chemin proche de 100 ms, conserver le parcours AABB stackless comme top-$K$ binary64 complet et construire le protocole serveur persistant qui réchauffe CUDA mais rebâtit le LBVH pour chaque nouveau nuage; mesurer ensuite le p95 `warm_e2e` avant toute revendication de SLO;
+1. pour le chemin proche de 100 ms, conserver le LBVH commun et les bornes AABB strictes, mais remplacer la répétition `stackless_product_batch` rejetée par une frontière GPU plate qui produit le squelette régulier de rang au plus trois; développer séparément les diagnostics `extra_shell` exacts, puis fermer `frontier_empty` avant toute réduction;
 
-2. poursuivre dans la Phase 15 le producteur sparse complet : donner d'abord au run une identité durable et lier pair et higher à une autorité source commune; externaliser ensuite une passe atomique à fan-in fixe qui conserve les diagnostics, en gardant un bypass mémoire sous caps pour 50 k et un spool segmenté pour 10 M+;
+2. conserver Yao48 comme oracle exact $k=1$ et candidat d'accélération sur le même LBVH seulement s'il réduit effectivement le travail Borůvka; ne pas l'étendre à $k=2$ ni créer un second pipeline. Une fois le changement structurel mesuré au gate 12 500, construire le protocole serveur chaud qui rebâtit le LBVH pour chaque nouveau nuage, puis seulement tenter 50 k et mesurer le p95 `warm_e2e`;
 
-3. recertifier toutes les incidences silencieuses nécessaires et M.1 avant de construire la hiérarchie publique. Aucun score de rappel, digest surrogate ou niveau racine isolé ne promeut cette hiérarchie.
+3. poursuivre dans la Phase 15 le producteur sparse complet : lier `pair` et `higher` à une autorité source commune, externaliser une passe atomique à fan-in fixe, puis recertifier toutes les incidences silencieuses nécessaires et M.1 avant de construire la hiérarchie publique. Aucun score de rappel, digest surrogate ou niveau racine isolé ne promeut cette hiérarchie.
 
 Ces priorités optimisent le chemin démontré. Elles ne réintroduisent ni les gateways historiques, ni un oracle combinatoire dans l'architecture produit.
 
